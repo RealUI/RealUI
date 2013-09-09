@@ -64,6 +64,8 @@ C.modules["Blizzard_GuildBankUI"] = function()
 
 			bu.icon:SetTexCoord(.08, .92, .08, .92)
 			bu.bg = F.CreateBG(bu)
+
+			F.CreateBD(_G["GuildBankColumn"..i.."Button"..j])
 		end
 	end
 

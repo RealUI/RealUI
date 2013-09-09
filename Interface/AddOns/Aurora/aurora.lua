@@ -1,5 +1,8 @@
 local alpha
 
+if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
+if not REALUI_WINDOW_FRAMES then REALUI_WINDOW_FRAMES = {} end
+
 -- [[ Core ]]
 
 local addon, core = ...
@@ -34,24 +37,24 @@ C.media = {
 	["arrowRight"] = "Interface\\AddOns\\Aurora\\media\\arrow-right-active",
 	["backdrop"] = "Interface\\ChatFrame\\ChatFrameBackground",
 	["checked"] = "Interface\\AddOns\\Aurora\\media\\CheckButtonHilight",
-	["font"] = "Interface\\AddOns\\Aurora\\media\\font.ttf",
+	["font"] = "Interface\\AddOns\\nibRealUI\\Fonts\\standard.ttf",
 	["glow"] = "Interface\\AddOns\\Aurora\\media\\glow",
 	["gradient"] = "Interface\\AddOns\\Aurora\\media\\gradient",
 	["roleIcons"] = "Interface\\Addons\\Aurora\\media\\UI-LFG-ICON-ROLES",
 }
 
 C.defaults = {
-	["alpha"] = 0.5,
+	["alpha"] = 0.9,
 	["bags"] = true,
-	["buttonGradientColour"] = {.3, .3, .3, .3},
-	["buttonSolidColour"] = {.2, .2, .2, 1},
-	["useButtonGradientColour"] = true,
-	["chatBubbles"] = true,
-	["enableFont"] = true,
+	["buttonGradientColour"] = {0.09, 0.09, 0.09, 1},
+	["buttonSolidColour"] = {0.09, 0.09, 0.09, 1},
+	["useButtonGradientColour"] = false,
+	["chatBubbles"] = false,
+	["enableFont"] = false,
 	["loot"] = true,
 	["useCustomColour"] = false,
 		["customColour"] = {r = 1, g = 1, b = 1},
-	["map"] = true,
+	["map"] = false,
 	["qualityColour"] = true,
 	["tooltips"] = true,
 }
@@ -88,7 +91,7 @@ F.CreateBD = function(f, a)
 		edgeFile = C.media.backdrop,
 		edgeSize = 1,
 	})
-	f:SetBackdropColor(0, 0, 0, a or alpha)
+	f:SetBackdropColor(0.03, 0.03, 0.03, a or alpha)
 	f:SetBackdropBorderColor(0, 0, 0)
 	if not a then tinsert(C.frames, f) end
 end
@@ -101,7 +104,7 @@ F.CreateBG = function(frame)
 	bg:SetPoint("TOPLEFT", frame, -1, 1)
 	bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
 	bg:SetTexture(C.media.backdrop)
-	bg:SetVertexColor(0, 0, 0)
+	bg:SetVertexColor(0.03, 0.03, 0.03)
 
 	return bg
 end
@@ -111,13 +114,22 @@ F.CreateSD = function(parent, size, r, g, b, alpha, offset)
 	sd.size = size or 5
 	sd.offset = offset or 0
 	sd:SetBackdrop({
-		edgeFile = C.media.glow,
+		edgeFile = nil,
 		edgeSize = sd.size,
 	})
 	sd:SetPoint("TOPLEFT", parent, -sd.size - 1 - sd.offset, sd.size + 1 + sd.offset)
 	sd:SetPoint("BOTTOMRIGHT", parent, sd.size + 1 + sd.offset, -sd.size - 1 - sd.offset)
 	sd:SetBackdropBorderColor(r or 0, g or 0, b or 0)
 	sd:SetAlpha(alpha or 1)
+	tinsert(REALUI_WINDOW_FRAMES, parent)
+
+	sd.tex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
+	sd.tex:SetAllPoints()
+	sd.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+	sd.tex:SetHorizTile(true)
+	sd.tex:SetVertTile(true)
+	sd.tex:SetBlendMode("ADD")
+	tinsert(REALUI_STRIPE_TEXTURES, sd.tex)
 end
 
 -- we assign these after loading variables for caching
@@ -826,6 +838,23 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				if not backdrop.reskinned then
 					F.CreateBD(menu)
 					F.CreateBD(backdrop)
+
+					backdrop.tex = backdrop:CreateTexture(nil, "BACKGROUND", nil, 1)
+					backdrop.tex:SetAllPoints()
+					backdrop.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+					backdrop.tex:SetHorizTile(true)
+					backdrop.tex:SetVertTile(true)
+					backdrop.tex:SetBlendMode("ADD")
+					tinsert(REALUI_STRIPE_TEXTURES, backdrop.tex)
+
+					menu.tex = menu:CreateTexture(nil, "BACKGROUND", nil, 1)
+					menu.tex:SetAllPoints()
+					menu.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+					menu.tex:SetHorizTile(true)
+					menu.tex:SetVertTile(true)
+					menu.tex:SetBlendMode("ADD")
+					tinsert(REALUI_STRIPE_TEXTURES, menu.tex)
+	
 					backdrop.reskinned = true
 				end
 			end
@@ -1839,8 +1868,8 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 					ic:SetAlpha(1)
 					slot.bg:SetAlpha(1)
 				else
-					ic:SetAlpha(0)
-					slot.bg:SetAlpha(0)
+					ic:SetAlpha(1)
+					slot.bg:SetAlpha(1)
 				end
 			end
 		end)
@@ -2324,6 +2353,315 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		hooksecurefunc("UIParent_ManageFramePositions", CaptureBar)
+
+		-- Achievement popup
+
+		local function fixBg(f)
+			if f:GetObjectType() == "AnimationGroup" then
+				f = f:GetParent()
+			end
+			f.bg:SetBackdropColor(0, 0, 0, AuroraConfig.alpha)
+		end
+
+		hooksecurefunc("AlertFrame_FixAnchors", function()
+			for i = 1, MAX_ACHIEVEMENT_ALERTS do
+				local frame = _G["AchievementAlertFrame"..i]
+
+				if frame then
+					frame:SetAlpha(1)
+					frame.SetAlpha = F.dummy
+
+					local ic = _G["AchievementAlertFrame"..i.."Icon"]
+					local texture = _G["AchievementAlertFrame"..i.."IconTexture"]
+					local guildName = _G["AchievementAlertFrame"..i.."GuildName"]
+
+					ic:ClearAllPoints()
+					ic:SetPoint("LEFT", frame, "LEFT", -26, 0)
+
+					if not frame.bg then
+						frame.bg = CreateFrame("Frame", nil, frame)
+						frame.bg:SetPoint("TOPLEFT", texture, -10, 12)
+						frame.bg:SetPoint("BOTTOMRIGHT", texture, "BOTTOMRIGHT", 240, -12)
+						frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+						F.CreateBD(frame.bg)
+
+						frame:HookScript("OnEnter", fixBg)
+						frame:HookScript("OnShow", fixBg)
+						frame.animIn:HookScript("OnFinished", fixBg)
+						F.CreateBD(frame.bg)
+
+						F.CreateBG(texture)
+
+						_G["AchievementAlertFrame"..i.."Background"]:Hide()
+						_G["AchievementAlertFrame"..i.."IconOverlay"]:Hide()
+						_G["AchievementAlertFrame"..i.."GuildBanner"]:SetTexture("")
+						_G["AchievementAlertFrame"..i.."GuildBorder"]:SetTexture("")
+						_G["AchievementAlertFrame"..i.."OldAchievement"]:SetTexture("")
+
+						guildName:ClearAllPoints()
+						guildName:SetPoint("TOPLEFT", 50, -14)
+						guildName:SetPoint("TOPRIGHT", -50, -14)
+
+						_G["AchievementAlertFrame"..i.."Unlocked"]:SetTextColor(1, 1, 1)
+						_G["AchievementAlertFrame"..i.."Unlocked"]:SetShadowOffset(1, -1)
+					end
+
+					frame.glow:Hide()
+					frame.shine:Hide()
+					frame.glow.Show = F.dummy
+					frame.shine.Show = F.dummy
+
+					texture:SetTexCoord(.08, .92, .08, .92)
+
+					if guildName:IsShown() then
+						_G["AchievementAlertFrame"..i.."Shield"]:SetPoint("TOPRIGHT", -10, -22)
+					end
+				end
+			end
+		end)
+
+		-- Guild challenges
+
+		local challenge = CreateFrame("Frame", nil, GuildChallengeAlertFrame)
+		challenge:SetPoint("TOPLEFT", 8, -12)
+		challenge:SetPoint("BOTTOMRIGHT", -8, 13)
+		challenge:SetFrameLevel(GuildChallengeAlertFrame:GetFrameLevel()-1)
+		F.CreateBD(challenge)
+		F.CreateBG(GuildChallengeAlertFrameEmblemBackground)
+
+		GuildChallengeAlertFrameGlow:SetTexture("")
+		GuildChallengeAlertFrameShine:SetTexture("")
+		GuildChallengeAlertFrameEmblemBorder:SetTexture("")
+
+		-- Dungeon completion rewards
+
+		local bg = CreateFrame("Frame", nil, DungeonCompletionAlertFrame1)
+		bg:SetPoint("TOPLEFT", 6, -14)
+		bg:SetPoint("BOTTOMRIGHT", -6, 6)
+		bg:SetFrameLevel(DungeonCompletionAlertFrame1:GetFrameLevel()-1)
+		F.CreateBD(bg)
+
+		DungeonCompletionAlertFrame1DungeonTexture:SetDrawLayer("ARTWORK")
+		DungeonCompletionAlertFrame1DungeonTexture:SetTexCoord(.02, .98, .02, .98)
+		F.CreateBG(DungeonCompletionAlertFrame1DungeonTexture)
+
+		DungeonCompletionAlertFrame1.dungeonArt1:SetAlpha(0)
+		DungeonCompletionAlertFrame1.dungeonArt2:SetAlpha(0)
+		DungeonCompletionAlertFrame1.dungeonArt3:SetAlpha(0)
+		DungeonCompletionAlertFrame1.dungeonArt4:SetAlpha(0)
+		DungeonCompletionAlertFrame1.raidArt:SetAlpha(0)
+
+		DungeonCompletionAlertFrame1.dungeonTexture:SetPoint("BOTTOMLEFT", DungeonCompletionAlertFrame1, "BOTTOMLEFT", 13, 13)
+		DungeonCompletionAlertFrame1.dungeonTexture.SetPoint = F.dummy
+
+		DungeonCompletionAlertFrame1.shine:Hide()
+		DungeonCompletionAlertFrame1.shine.Show = F.dummy
+		DungeonCompletionAlertFrame1.glow:Hide()
+		DungeonCompletionAlertFrame1.glow.Show = F.dummy
+
+		hooksecurefunc("DungeonCompletionAlertFrame_ShowAlert", function()
+			local bu = DungeonCompletionAlertFrame1Reward1
+			local index = 1
+
+			while bu do
+				if not bu.styled then
+					_G["DungeonCompletionAlertFrame1Reward"..index.."Border"]:Hide()
+
+					bu.texture:SetTexCoord(.08, .92, .08, .92)
+					F.CreateBG(bu.texture)
+
+					bu.styled = true
+				end
+
+				index = index + 1
+				bu = _G["DungeonCompletionAlertFrame1Reward"..index]
+			end
+		end)
+
+		-- Challenge popup
+
+		hooksecurefunc("AlertFrame_SetChallengeModeAnchors", function()
+			local frame = ChallengeModeAlertFrame1
+
+			if frame then
+				frame:SetAlpha(1)
+				frame.SetAlpha = F.dummy
+
+				if not frame.bg then
+					frame.bg = CreateFrame("Frame", nil, frame)
+					frame.bg:SetPoint("TOPLEFT", ChallengeModeAlertFrame1DungeonTexture, -12, 12)
+					frame.bg:SetPoint("BOTTOMRIGHT", ChallengeModeAlertFrame1DungeonTexture, 243, -12)
+					frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+					F.CreateBD(frame.bg)
+
+					frame:HookScript("OnEnter", fixBg)
+					frame:HookScript("OnShow", fixBg)
+					frame.animIn:HookScript("OnFinished", fixBg)
+
+					F.CreateBG(ChallengeModeAlertFrame1DungeonTexture)
+				end
+
+				frame:GetRegions():Hide()
+
+				ChallengeModeAlertFrame1Shine:Hide()
+				ChallengeModeAlertFrame1Shine.Show = F.dummy
+				ChallengeModeAlertFrame1GlowFrame:Hide()
+				ChallengeModeAlertFrame1GlowFrame.Show = F.dummy
+				ChallengeModeAlertFrame1Border:Hide()
+				ChallengeModeAlertFrame1Border.Show = F.dummy
+
+				ChallengeModeAlertFrame1DungeonTexture:SetTexCoord(.08, .92, .08, .92)
+			end
+		end)
+
+		-- Scenario alert
+
+		hooksecurefunc("AlertFrame_SetScenarioAnchors", function()
+			local frame = ScenarioAlertFrame1
+
+			if frame then
+				frame:SetAlpha(1)
+				frame.SetAlpha = F.dummy
+
+				if not frame.bg then
+					frame.bg = CreateFrame("Frame", nil, frame)
+					frame.bg:SetPoint("TOPLEFT", ScenarioAlertFrame1DungeonTexture, -12, 12)
+					frame.bg:SetPoint("BOTTOMRIGHT", ScenarioAlertFrame1DungeonTexture, 244, -12)
+					frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+					F.CreateBD(frame.bg)
+
+					frame:HookScript("OnEnter", fixBg)
+					frame:HookScript("OnShow", fixBg)
+					frame.animIn:HookScript("OnFinished", fixBg)
+
+					F.CreateBG(ScenarioAlertFrame1DungeonTexture)
+					ScenarioAlertFrame1DungeonTexture:SetDrawLayer("OVERLAY")
+				end
+
+				frame:GetRegions():Hide()
+				select(3, frame:GetRegions()):Hide()
+
+				ScenarioAlertFrame1Shine:Hide()
+				ScenarioAlertFrame1Shine.Show = F.dummy
+				ScenarioAlertFrame1GlowFrame:Hide()
+				ScenarioAlertFrame1GlowFrame.Show = F.dummy
+
+				ScenarioAlertFrame1DungeonTexture:SetTexCoord(.08, .92, .08, .92)
+			end
+		end)
+
+		hooksecurefunc("ScenarioAlertFrame_ShowAlert", function()
+			local bu = ScenarioAlertFrame1Reward1
+			local index = 1
+
+			while bu do
+				if not bu.styled then
+					_G["ScenarioAlertFrame1Reward"..index.."Border"]:Hide()
+
+					bu.texture:SetTexCoord(.08, .92, .08, .92)
+					F.CreateBG(bu.texture)
+
+					bu.styled = true
+				end
+
+				index = index + 1
+				bu = _G["ScenarioAlertFrame1Reward"..index]
+			end
+		end)
+
+		-- Loot won alert
+
+		-- I still don't know why I can't parent bg to frame
+		local function showHideBg(self)
+			self.bg:SetShown(self:IsShown())
+		end
+
+		local function onUpdate(self)
+			self.bg:SetAlpha(self:GetAlpha())
+		end
+
+		hooksecurefunc("LootWonAlertFrame_SetUp", function(frame)
+			if not frame.bg then
+				frame.bg = CreateFrame("Frame", nil, UIParent)
+				frame.bg:SetPoint("TOPLEFT", frame, 10, -10)
+				frame.bg:SetPoint("BOTTOMRIGHT", frame, -10, 10)
+				frame.bg:SetFrameStrata("DIALOG")
+				frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+				frame.bg:SetShown(frame:IsShown())
+				F.CreateBD(frame.bg)
+
+				frame:HookScript("OnShow", showHideBg)
+				frame:HookScript("OnHide", showHideBg)
+				frame:HookScript("OnUpdate", onUpdate)
+
+				frame.Background:Hide()
+				frame.IconBorder:Hide()
+				frame.glow:SetTexture("")
+				frame.shine:SetTexture("")
+
+				frame.Icon:SetTexCoord(.08, .92, .08, .92)
+				F.CreateBG(frame.Icon)
+			end
+		end)
+
+		-- Money won alert
+
+		hooksecurefunc("MoneyWonAlertFrame_SetUp", function(frame)
+			if not frame.bg then
+				frame.bg = CreateFrame("Frame", nil, UIParent)
+				frame.bg:SetPoint("TOPLEFT", frame, 10, -10)
+				frame.bg:SetPoint("BOTTOMRIGHT", frame, -10, 10)
+				frame.bg:SetFrameStrata("DIALOG")
+				frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+				frame.bg:SetShown(frame:IsShown())
+				F.CreateBD(frame.bg)
+
+				frame:HookScript("OnShow", showHideBg)
+				frame:HookScript("OnHide", showHideBg)
+				frame:HookScript("OnUpdate", onUpdate)
+
+				frame.Background:Hide()
+				frame.IconBorder:Hide()
+
+				frame.Icon:SetTexCoord(.08, .92, .08, .92)
+				F.CreateBG(frame.Icon)
+			end
+		end)
+
+		-- Criteria alert
+
+		hooksecurefunc("CriteriaAlertFrame_ShowAlert", function()
+			for i = 1, MAX_ACHIEVEMENT_ALERTS do
+				local frame = _G["CriteriaAlertFrame"..i]
+				if frame and not frame.bg then
+					local icon = _G["CriteriaAlertFrame"..i.."IconTexture"]
+
+					frame.bg = CreateFrame("Frame", nil, UIParent)
+					frame.bg:SetPoint("TOPLEFT", icon, -6, 5)
+					frame.bg:SetPoint("BOTTOMRIGHT", icon, 236, -5)
+					frame.bg:SetFrameStrata("DIALOG")
+					frame.bg:SetFrameLevel(frame:GetFrameLevel()-1)
+					frame.bg:SetShown(frame:IsShown())
+					F.CreateBD(frame.bg)
+
+					frame:SetScript("OnShow", showHideBg)
+					frame:SetScript("OnHide", showHideBg)
+					frame:HookScript("OnUpdate", onUpdate)
+
+					_G["CriteriaAlertFrame"..i.."Background"]:Hide()
+					_G["CriteriaAlertFrame"..i.."IconOverlay"]:Hide()
+					frame.glow:Hide()
+					frame.glow.Show = F.dummy
+					frame.shine:Hide()
+					frame.shine.Show = F.dummy
+
+					_G["CriteriaAlertFrame"..i.."Unlocked"]:SetTextColor(.9, .9, .9)
+
+					icon:SetTexCoord(.08, .92, .08, .92)
+					F.CreateBG(icon)
+				end
+			end
+		end)
 
 		-- Help frame
 
@@ -3602,7 +3940,7 @@ Delay:SetScript("OnEvent", function()
 			end
 
 			local getBackdropColor = function()
-				return 0, 0, 0, .6
+				return unpack(RealUI.media.window)
 			end
 
 			local getBackdropBorderColor = function()
@@ -3617,8 +3955,9 @@ Delay:SetScript("OnEvent", function()
 				bg:SetPoint("BOTTOMRIGHT")
 				bg:SetFrameLevel(t:GetFrameLevel()-1)
 				bg:SetBackdrop(backdrop)
-				bg:SetBackdropColor(0, 0, 0, .6)
+				bg:SetBackdropColor(0.03, 0.03, 0.03, 0.9)
 				bg:SetBackdropBorderColor(0, 0, 0)
+				tinsert(REALUI_WINDOW_FRAMES, bg)
 
 				t.GetBackdrop = getBackdrop
 				t.GetBackdropColor = getBackdropColor
