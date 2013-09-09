@@ -9,6 +9,9 @@ AddOn modifications
   - Grid2\Modules\IndicatorText.lua (added code to hide Text shadow)
     - function Text_Create
       - Text:SetShadowOffset(0,0)
+  
+  - EasyMail
+    - Textures modified with EasyMail Button Skin (http://www.wowinterface.com/downloads/info22145-EasyMailButtonSkin.html)
 
 
 
