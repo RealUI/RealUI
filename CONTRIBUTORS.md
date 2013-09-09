@@ -41,3 +41,13 @@ To create a new Mini Patch:
     - add data (see code for examples)
     
   3. Log in to WoW and test changes - you should get a Mini Patch prompt
+
+
+
+Version Changes
+--------
+
+  1. nibRealUI\nibRealUI.toc
+    - ## Version
+  2. nibRealUI\Core.lua
+    - nibRealUI.verinfo
