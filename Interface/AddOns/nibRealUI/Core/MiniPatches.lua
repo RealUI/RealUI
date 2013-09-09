@@ -76,6 +76,7 @@ function nibRealUI:MiniPatch(ver)
 		end
 
 	elseif ver == "80r16" then
+		-- This will force Aurora to use the defaults that are set in Aurora.lua
 		AuroraConfig = nil
 
 	end
