@@ -1,0 +1,17 @@
+tag v1.7-beta
+24a3fc54f0dcfcdea41ee4fcf24a6e3384e7c4e9
+Adirelle <adirelle@gmail.com>
+2012-08-06 07:53:15 +0200
+
+MoP compatibility.
+
+
+--------------------
+
+Adirelle:
+	- TOC bump.
+	- Fixed ticket #6.
+	- Added compatibility code to use whatever is available: GetActiveSpecGroup (5.0+) or GetActiveTalentGroup (4.3) ; same for GetNumSpecGroups and GetNumTalentGroups. Also renamed talent* attributes to spec*.
+	- Added .gitattributes
+	- Locales updated.
+	- Update the alternate profile name before switching to the new profile so :GetDualSpecProfile() returns the proper value during the callback.

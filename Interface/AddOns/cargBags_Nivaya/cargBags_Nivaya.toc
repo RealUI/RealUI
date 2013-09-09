@@ -1,0 +1,14 @@
+## Interface: 50400
+## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
+## Author: Luzzifus (Modified by Nibelheim)
+## OptionalDeps: nibRealUI, ItemRack, Outfitter
+## SavedVariables: cBnivCfg, cB_CustomBags, cBniv_CatInfo
+## SavedVariablesPerCharacter: cB_KnownItems, cBniv
+
+config.lua
+
+cargBags\embed.xml
+localization.lua
+filters.lua
+cargBags_Nivaya.lua
+style.lua

@@ -1,0 +1,36 @@
+------------------------------------------------------------------------
+r450 | funkydude | 2013-06-02 22:43:33 +0000 (Sun, 02 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+
+Use PET_BATTLE_CLOSE for showing the windows, _OVER doesn't always fire under select conditions.
+------------------------------------------------------------------------
+r449 | oscarucb | 2013-06-02 21:03:56 +0000 (Sun, 02 Jun 2013) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+auto-hide windows in pet battles
+
+------------------------------------------------------------------------
+r447 | funkydude | 2013-05-21 15:45:57 +0000 (Tue, 21 May 2013) | 1 line
+Changed paths:
+   M /trunk/Skada.toc
+   M /trunk/modules/SkadaCC/SkadaCC.toc
+   M /trunk/modules/SkadaDamage/SkadaDamage.toc
+   M /trunk/modules/SkadaDamageTaken/SkadaDamageTaken.toc
+   M /trunk/modules/SkadaDeaths/SkadaDeaths.toc
+   M /trunk/modules/SkadaDebuffs/SkadaDebuffs.toc
+   M /trunk/modules/SkadaDispels/SkadaDispels.toc
+   M /trunk/modules/SkadaEnemies/SkadaEnemies.toc
+   M /trunk/modules/SkadaHealing/SkadaHealing.toc
+   M /trunk/modules/SkadaPower/SkadaPower.toc
+   M /trunk/modules/SkadaThreat/SkadaThreat.toc
+
+toc bumps
+------------------------------------------------------------------------
+r446 | zarnivoop | 2013-04-01 10:16:46 +0000 (Mon, 01 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/modules/SkadaDamage/Damage.lua
+
+format DPS according to chosen format
+------------------------------------------------------------------------

@@ -1,0 +1,22 @@
+## Interface: 50300
+## LoadOnDemand: 1
+## X-Curse-Packaged-Version: 5.3.0
+## X-Curse-Project-Name: LibSharedMedia-3.0
+## X-Curse-Project-ID: libsharedmedia-3-0
+## X-Curse-Repository-ID: wow/libsharedmedia-3-0/mainline
+
+## Title: Lib: SharedMedia-3.0
+## Notes: Shared handling of media data (fonts, sounds, textures, ...) between addons.
+## Author: Elkano
+## Version: 3.0-79
+## X-Website: http://www.wowace.com/projects/libsharedmedia-3-0/
+## X-Category: Library
+
+## X-Revision: 79
+## X-Date: 2013-05-21T12:36:57Z
+
+LibStub\LibStub.lua
+CallbackHandler-1.0\CallbackHandler-1.0.lua
+
+LibSharedMedia-3.0\lib.xml
+

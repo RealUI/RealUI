@@ -1,0 +1,18 @@
+﻿## Interface: 50400
+## Title: BugGrabber
+## Version: 3.0
+## Notes: Grabs bugs for the bug sack.
+## Author: Rabbit
+## X-Credits: Rowne, Ramble, kergoth, ckknight, Fritti
+## X-License: GPL v2 or later.
+## X-Category: Development Tools
+## X-Email: rabbit.magtheridon@gmail.com
+## SavedVariables: BugGrabberDB
+## X-Curse-Packaged-Version: r188
+## X-Curse-Project-Name: !BugGrabber
+## X-Curse-Project-ID: bug-grabber
+## X-Curse-Repository-ID: wow/bug-grabber/mainline
+
+BugGrabber.lua
+locales.lua
+

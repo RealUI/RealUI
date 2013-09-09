@@ -1,0 +1,11 @@
+<Bindings>
+  <Binding name="SKADA_TOGGLE" description="Toggles visibility of all Skada windows." header="Skada">
+    Skada:ToggleWindow();
+  </Binding>
+  <Binding name="SKADA_RESET" description="Resets all Skada data.">
+    Skada:Reset();
+  </Binding>
+  <Binding name="SKADA_NEWSEGMENT" description="Saves current segment and starts a new if in combat.">
+    Skada:NewSegment();
+  </Binding>
+</Bindings>

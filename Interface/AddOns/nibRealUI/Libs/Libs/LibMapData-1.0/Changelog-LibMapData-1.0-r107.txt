@@ -1,0 +1,25 @@
+------------------------------------------------------------------------
+r107 | kagaro | 2012-07-29 13:23:28 +0000 (Sun, 29 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/library.lua
+
+Updated for 15913 build of mop, added Dustwallow_terrain1 for the upcoming event and DustwallowMarsh renamed back to Dustwallow
+------------------------------------------------------------------------
+r106 | kagaro | 2012-07-23 20:04:12 +0000 (Mon, 23 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/library.lua
+
+added a conditional check for Dustwallow as blizz renamed the zone in mop and possibly the ptr DRYCODE
+------------------------------------------------------------------------
+r105 | kagaro | 2012-07-21 15:10:54 +0000 (Sat, 21 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/library.lua
+
+updated for beta 15885, no zone data changes but some auto correction of zone data when detected
+------------------------------------------------------------------------
+r103 | kagaro | 2012-07-09 14:05:00 +0000 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/library.lua
+
+Updated for MOP, compatible with live, the only exceptions are the cata starter areas for goblins and worgens will not be accurate, however since these zones are 1 way not an issue
+------------------------------------------------------------------------

@@ -1,0 +1,23 @@
+## Interface: 50400
+## Title: Grid2 |cd3ff7d0aLDB|r
+## Notes: Grid2 Databroker Launcher.
+## Notes-esES: Lanzador del Grid2 (Databroker)
+## Author: Michael
+## X-Curse-Packaged-Version: 699
+## X-Curse-Project-Name: Grid2
+## X-Curse-Project-ID: grid2
+## X-Curse-Repository-ID: wow/grid2/mainline
+
+## Dependencies: Grid2
+## OptionalDeps: LibDataBroker-1.1
+
+## Version: 699
+## X-ReleaseDate: "$Date: 2011-04-14 23:42:17 -0700 (Tue, 14 Apr 2011) $"
+## X-Category: Databroker
+## X-Website: none
+
+#@no-lib-strip@
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+#@end-no-lib-strip@
+
+Grid2LDB.lua

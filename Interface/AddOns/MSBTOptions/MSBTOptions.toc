@@ -1,0 +1,12 @@
+## Interface: 50400
+## Title: MSBT [|cffffff80Options|r]
+## Author: Mikord
+## Notes: Load on demand options for Mik's Scrolling Battle Text
+## Dependencies: MikScrollingBattleText
+## LoadOnDemand: 1
+## X-Child-Of: MikScrollingBattleText
+Localization\localization.xml
+MSBTOptionsControls.lua
+MSBTOptionsPopups.lua
+MSBTOptionsMain.lua
+MSBTOptionsTabs.lua

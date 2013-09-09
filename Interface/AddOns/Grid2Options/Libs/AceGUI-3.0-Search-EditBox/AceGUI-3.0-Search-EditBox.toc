@@ -1,0 +1,10 @@
+## Interface: 50001
+## Title: AceGUI-3.0-Search-EditBox
+## Author: Michael
+## OptionalDeps: Ace3
+## X-Curse-Packaged-Version: r3
+## X-Curse-Project-Name: AceGUI-3.0-Search-EditBox 
+## X-Curse-Project-ID: acegui-3-0-search-editbox
+## X-Curse-Repository-ID: wow/acegui-3-0-search-editbox/mainline
+
+AceGUI-3.0-Search-EditBox.xml

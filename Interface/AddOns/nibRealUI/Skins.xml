@@ -1,0 +1,22 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<!-- Skins -->
+	<Script file="Skins\Ace3.lua"/>
+	<Script file="Skins\ACP.lua"/>
+	<Script file="Skins\Bartender4.lua"/>
+	<Script file="Skins\DBM.lua"/>
+	<Script file="Skins\DXE.lua"/>
+	<Script file="Skins\GameMenu.lua"/>
+	<Script file="Skins\Grid2.lua"/>
+	<Script file="Skins\KNP.lua"/>
+	<Script file="Skins\Map.lua"/>
+	<Script file="Skins\Masque.lua"/>
+	<Script file="Skins\MiscSkins.lua"/>
+	<Script file="Skins\PaperDoll.lua"/>
+	<Script file="Skins\PetBattles.lua"/>
+	<Script file="Skins\Raven.lua"/>
+	<Script file="Skins\Skada.lua"/>
+	<Script file="Skins\TimerTrackers.lua"/>
+	<Script file="Skins\WeakAuras.lua"/>
+</Ui>

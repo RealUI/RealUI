@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+    http://wowprogramming.com/FrameXML/UI.xsd">
+
+  <Button name="ClickCastUnitTemplate" virtual="true" inherits="SecureActionButtonTemplate,SecureHandlerEnterLeaveTemplate">
+      <Attributes>
+          <Attribute name="_onenter" type="string" value="local snippet = self:GetAttribute('clickcast_onenter'); if snippet then self:Run(snippet) end"/>
+          <Attribute name="_onleave" type="string" value="local snippet = self:GetAttribute('clickcast_onleave'); if snippet then self:Run(snippet) end"/>
+      </Attributes>
+  </Button>
+</Ui>

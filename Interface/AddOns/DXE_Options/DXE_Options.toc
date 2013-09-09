@@ -1,0 +1,25 @@
+## Interface: 50400
+## Title: DXE |cff99ff33Options|r
+## Notes: Deus Vox Encounters |cff99ff33Options|r
+## Author: Kollektiv, Harleschorsch, Mäev
+## LoadOnDemand: 1
+## Dependencies: DXE
+## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
+## Title-zhTW: DXE |cff99ff33選項|r
+## Notes-zhTW: Deus Vox 首領警報 |cff99ff33選項|r
+## Title-zhCN: DXE |cff99ff33选项|r
+## Notes-zhCN: Deus Vox 首领警报 |cff99ff33选项|r
+## X-Curse-Packaged-Version: v635-59-g254e60f
+## X-Curse-Project-Name: Deus Vox Encounters
+## X-Curse-Project-ID: deus-vox-encounters
+## X-Curse-Repository-ID: wow/deus-vox-encounters/mainline
+
+#@no-lib-strip@
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+#@end-no-lib-strip@
+
+Locales.lua
+Options.lua

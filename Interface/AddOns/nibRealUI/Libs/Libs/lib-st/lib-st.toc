@@ -1,0 +1,15 @@
+## Interface: 40100
+## Title: lib-st |cff7f7fff -Ace3-|r
+## Notes: Does stuff for sachmo
+## Author: ddumont (Sachmo - Arthas {TG}) 
+## Version: v4.0 
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+## X-Category: Interface Enhancements
+## X-Curse-Packaged-Version: v4.0
+## X-Curse-Project-Name: lib-ScrollingTable
+## X-Curse-Project-ID: lib-st
+## X-Curse-Repository-ID: wow/lib-st/mainline
+
+LibStub\LibStub.lua
+lib-st.xml

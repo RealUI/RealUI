@@ -1,0 +1,31 @@
+------------------------------------------------------------------------
+r55 | nevcairiel | 2012-09-17 22:17:02 +0000 (Mon, 17 Sep 2012) | 1 line
+Changed paths:
+   A /tags/5.0-release4 (from /trunk:54)
+
+Weekly Tag - #4
+------------------------------------------------------------------------
+r54 | nevcairiel | 2012-09-17 22:05:55 +0000 (Mon, 17 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/LibBabble-TalentTree-3.0.lua
+
+Automated LibBabble re-generation from the localization system
+------------------------------------------------------------------------
+r52 | nevcairiel | 2012-09-10 15:38:56 +0000 (Mon, 10 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/LibBabble-TalentTree-3.0.lua
+
+Automated LibBabble re-generation from the localization system
+------------------------------------------------------------------------
+r50 | nevcairiel | 2012-09-04 15:10:36 +0000 (Tue, 04 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/LibBabble-TalentTree-3.0.lua
+
+Automated LibBabble re-generation from the localization system
+------------------------------------------------------------------------
+r48 | nevcairiel | 2012-08-28 05:15:07 +0000 (Tue, 28 Aug 2012) | 1 line
+Changed paths:
+   M /trunk/LibBabble-TalentTree-3.0.toc
+
+Update .toc for 5.0
+------------------------------------------------------------------------
