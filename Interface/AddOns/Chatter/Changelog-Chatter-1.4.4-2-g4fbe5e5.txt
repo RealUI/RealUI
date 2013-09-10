@@ -1,3 +1,0 @@
-Benjamin Staneck:
-	- toc bump
-	- add back spaces so /gr works properly again.
