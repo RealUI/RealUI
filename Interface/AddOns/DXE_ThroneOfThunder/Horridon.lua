@@ -8,7 +8,7 @@ do
 	local Amani		= EJ_GetSectionInfo(7084)
 
 	local data = {
-		version = 11,
+		version = 12,
 		key = "Horridon",
 		zone = L.zone["Throne of Thunder"],
 		category = L.zone["Throne of Thunder"],
@@ -528,9 +528,9 @@ do
 			},
 			-- Informs		
 			warnpuncture = {
-				varname = format(L.alert["%s: %s 10 %s!"],SN[136903],L.alert["already at"],L.alert["Stacks"]),
+				varname = format(L.alert["%s: %s 10 %s!"],SN[136767],L.alert["already at"],L.alert["Stacks"]),
 				type = "inform",
-				text = format(L.alert["%s: %s 10 %s!"],SN[136903],L.alert["already at"],L.alert["Stacks"]),
+				text = format(L.alert["%s: %s 10 %s!"],SN[136767],L.alert["already at"],L.alert["Stacks"]),
 				text2 = "<warnpuncturestext>",
 				time = 2,
 				color1 = "RED",

@@ -1,4 +1,10 @@
 Maev81:
+	- Council of Elders: Fixed Heroic Frostbite Cooldown not working after first cast (v635-61 Alpha)
+	-------------------------------------------------------------------------
+Maev:
+	- Horridon: Fixed wrong Inform message of Pucture ID on Configuration (was displaying Frigid Assault), in the actual encounter is the right one (v635-60 Alpha)
+	-----------------------------------------------------------------------
+Maev81:
 	- Iron Qon: Fixed bad call to cancel Unleashed Flame Cooldown.
 	- Dark Animus: Added Siphon Anima counter to its Cooldown.
 	- Dark Animus: Added Boss power check for better accurate Interrupting Jolt Cooldown.
