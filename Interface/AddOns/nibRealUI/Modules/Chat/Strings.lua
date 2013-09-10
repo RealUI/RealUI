@@ -43,7 +43,7 @@ function Chat_Strings:ChangeStrings()
 		ITEM_LEVEL_RANGE_CURRENT = "Requires level: %d - %d (%d)"
 		ITEM_LIMIT_CATEGORY_MULTIPLE = "BoE: %s (%d)"
 
-		if not(IsAddOnLoaded("AskMrRobot")) and not(IsAddOnLoaded("Pawn")) and not(IsAddOnLoaded("Reforgerade")) and not(REALUI_TOOLTIPSTRINGS_DISABLE) then
+		if not(IsAddOnLoaded("Pawn")) and not(IsAddOnLoaded("Reforgerade")) and not(REALUI_TOOLTIPSTRINGS_DISABLE) then
 			ITEM_MOD_AGILITY = "%c%s Agility"
 			ITEM_MOD_AGILITY_SHORT = "Agility"
 			ITEM_MOD_ARMOR_PENETRATION_RATING = "ARP +%s"

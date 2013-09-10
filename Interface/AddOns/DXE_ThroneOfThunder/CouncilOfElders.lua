@@ -2,7 +2,7 @@ local L,SN,ST,EJSN,EJST = DXE.L,DXE.SN,DXE.ST,DXE.EJSN,DXE.EJST
 --TODO:
 do
 	local data = {
-		version = 15,
+		version = 16,
 		key = "Council of Elders",
 		zone = L.zone["Throne of Thunder"],
 		category = L.zone["Throne of Thunder"],
@@ -83,7 +83,7 @@ do
 			--recklesscharge = 6,
 			--bittingcold = {15,45,loop = false, type = "series"},
 			bittingcold = 15,
-			frostbitecd = 0,
+			frostbite = 0,
 			--quicksand = {8,33,loop = false, type = "series"},
 			--blessedloaSpirit = {25,35,loop = false, type = "series"},
 			quicksand = 8,
@@ -298,6 +298,7 @@ do
 				type = "dropdown",
 				text = format(L.alert["%s Cooldown"],SN[136990]),
 				time = "<frostbite>",
+				time2 = 45,
 				color1 = "NEWBLUE",
 				icon = ST[136990],
 			},
@@ -968,10 +969,10 @@ do
 			{
 				type = "combatevent",
 				eventtype = "SPELL_AURA_APPLIED",
-				spellname = 136922,
+				spellid = {136990, 136922},
 				execute = {
 					{
-						"alert","frostbitecd",
+						"alert",{"frostbitecd", time = 2},
 						"message","warnfrostbite",
 						"raidicon","Frostbiteicon",
 					},
@@ -990,7 +991,7 @@ do
 			{
 				type = "combatevent",
 				eventtype = "SPELL_AURA_REMOVED",
-				spellname = 136922,
+				spellid = {136990, 136922},
 				execute = {
 					{
 						"removeraidicon","#5#",
