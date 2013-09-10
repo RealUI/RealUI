@@ -1,0 +1,93 @@
+## Interface: 50400
+## X-Curse-Packaged-Version: 4.5.10
+## X-Curse-Project-Name: Bartender4
+## X-Curse-Project-ID: bartender4
+## X-Curse-Repository-ID: wow/bartender4/mainline
+
+## Title: Bartender4
+## Notes: Simple and Advanced combined - Bartender4 ActionBar AddOn
+
+## Version: 4.5.10
+
+## Author: Nevcairiel
+## X-Email: h.leppkes at gmail dot com
+
+## X-Category: Action Bars
+## X-Website: http://www.wowace.com/addons/bartender4/
+## X-License: All rights reserved.
+
+## SavedVariables: Bartender4DB
+## OptionalDeps: Ace3, ButtonFacade, Masque, LibActionButton-1.0, LibKeyBound-1.0, LibDBIcon-1.0, LibWindow-1.1, LibDualSpec-1.0
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+#@end-no-lib-strip@
+
+libs\LibDataBroker-1.1.lua
+
+#@no-lib-strip@
+libs\AceAddon-3.0\AceAddon-3.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+libs\AceEvent-3.0\AceEvent-3.0.xml
+libs\AceConsole-3.0\AceConsole-3.0.xml
+libs\AceHook-3.0\AceHook-3.0.xml
+libs\AceLocale-3.0\AceLocale-3.0.xml
+libs\AceGUI-3.0\AceGUI-3.0.xml
+libs\AceConfig-3.0\AceConfig-3.0.xml
+
+libs\LibKeyBound-1.0\lib.xml
+libs\LibActionButton-1.0\LibActionButton-1.0.lua
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+libs\LibWindow-1.1\LibWindow-1.1.lua
+libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
+#@end-no-lib-strip@
+
+libs\SimpleSticky.lua
+
+locale\locale.xml
+
+## Core ##
+Bartender4.lua
+
+## Prototypes ##
+Bar.lua
+ButtonBar.lua
+StateBar.lua
+ActionBar.lua
+
+## Buttons ##
+PetButton.lua
+
+## Modules ##
+ActionBars.lua
+BagBar.lua
+PetBar.lua
+StanceBar.lua
+MicroMenu.lua
+RepXPBar.lua
+VehicleBar.lua
+BlizzardArt.lua
+ExtraActionBar.lua
+
+## Options ##
+Options\AceGUIWidget-NumberEditBox.lua
+
+Options\Options.lua
+Options\Bar.lua
+Options\ButtonBar.lua
+Options\StateBar.lua
+
+Options\ActionBar.lua
+Options\BagBar.lua
+Options\MicroMenu.lua
+Options\PetBar.lua
+Options\StanceBar.lua
+Options\RepXPBar.lua
+Options\VehicleBar.lua
+Options\BlizzardArt.lua
+Options\ExtraActionBar.lua
+
+## Presets -- needs to be the last ##
+Options\Presets.lua

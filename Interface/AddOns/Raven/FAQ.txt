@@ -1,0 +1,45 @@
+**1. Can I cancel player buffs by right-clicking?**
+
+When out of combat, you can simply right-click the icon on any player buff bar to cancel the buff (this works for shaman weapon enchants and rogue poisons too).
+
+For cancelling buffs in combat, Raven includes an "in-combat" bar that you set up while out of combat. You define a list of player buffs that you want to be able to cancel in combat. When one of these buffs becomes active in combat, its icon pulses into place on the "in-combat" bar and you can right-click it to cancel the buff. While this doesn't provide a general-purpose solution for cancelling buffs in combat (and doesn't work for temporary weapon enchants), it hopefully will help classes that often need to cancel specific buffs.
+
+**2. Does Raven work with non-English clients and what about localization?**
+
+Raven should function correctly on non-English language clients. It has been tested to work successfully on the German language client. The same internationalized code is also used on English language clients so going forward there should no longer be differences. Please report any problems.
+
+With respect to localization, options and messages are still displayed in English but the code fully supports localization into additional languages and, now that the options panel is not changing too much anymore, Raven will be registered with the CurseForge localization system soon.
+
+**3. How do I create a bar group for just the buffs, debuffs and cooldowns that I want to see in combat?**
+
+On the Bar Groups tab click on "New Custom Group" and name it "Combat Bars" or something similar. Then, on the Custom Bars tab, click "New" and you will go into bar entry mode (you will have to either click OK or Cancel to get out of this mode because it can be confusing since it remembers the mode even if you close and reopen the configuration panel). Next, under Type click on Buff or Debuff or Cooldown. You can now view lists of actions (buffs, debuffs, cooldowns) from Raven's preset tables by selecting the various classes and races as Source. Click on the any of the actions that you want to include in your "Combat Bars", select the appropriate Action On and Cast By settings (hopefully the tooltips make clear what these mean), and finally click OK. This will add a bar to the Custom Bars tab for each selected action. You can hit New repeatedly to add more buff, debuff and cooldown bars if you want.
+
+**4. You have filters that function as black lists. How about adding white lists?**
+
+Custom bar groups are basically white lists. You can merge a custom bar group into another bar group to add a white list to the destination bar group. Set up a custom bar group as described above then, in the General tab, select Merge Bar Group. This brings up a menu of eligible destination bar groups. Select a destination bar group to complete the setup. Note that when you use the Merge Bar Group option, the source bar group's settings, including "Show When" and timer options, are used to generate bars but they will be sorted and displayed using the destination bar group's layout and appearance settings.
+
+**5. Why don't I see all the buffs/debuffs/cooldowns that I expect to see in a bar group?**
+
+The most common problem reported is missing debuffs. The Debuffs standard bar group was originally set up to hide unlimited duration debuffs by default. If you don't see debuffs like "Intense Cold" (which doesn't have a specified duration) then go the the Timer Options tab for the Debuffs bar group and turn on Show If Unlimited Duration.
+
+More generally, bar groups filter the bars they show using a variety of criteria. Settings to check include: (1) Check Time Left and Show If Unlimited Duration on the Timer Options tab, (2) Action On, Cast By, and Filter List for auto bar group buffs, debuffs and cooldowns, (3) Enable, Action On, and Cast By for the bars listed in the Custom Bar tab of a custom bar group, and (4) Bar Limit on the Layout tab.
+
+**6. How come the icon/bar/text is hidden behind the bar/icon when I use insets and offset on the Layout tab to create custom bar designs?**
+
+In the Layout tab, there are different options on the pull-down menu for bar-oriented and icon-oriented configurations. The visibility order of icon, texts and textures is different between the two types. Bar-oriented configurations put the bar at the bottom of the visibility stack (icon and text move above the bar) while icon-oriented configurations put the icon at the bottom.
+
+**7. I want to show buffs and debuffs in the same bar group but is there a way to sort them so buffs are separate from debuffs?**
+
+You can get this effect by attaching separate buff and debuff bar groups, at least for bar-oriented configurations. On the Layout tab for the buff bar group use the Attachment feature to attach to the debuff bar group and select Last Bar (leave the Offset X and Offset Y fields set to 0). The buffs will then appear above the debuffs. Optionally, set an offset to separate the buffs and debuffs slightly and enable the Empty setting so the offset is ignored when there are no debuffs. Moving the anchor for the debuff bar group will move both bar groups together (moving the anchor for the buff bar group, however, will disable the attachment).
+
+**8. What is the "Class Trainer", "Mailbox", etc. buff and how do I get rid of it?**
+
+The Long Buffs standard bar group includes tracking settings by default. To disable them select the Bar Groups tab, choose the Long Buffs bar group, select the Buffs tab, and turn off the Include Tracking setting.
+
+**9. How can I make bars grow down instead of up?**
+
+First, select the bar group you want to change by opening the options panel, clicking on the Bar Groups tab, and selecting the bar group from the pull-down menu. Then go to the Layout tab and find the check box Direction in the Configuration section near the top. Read the tooltip for more info. Click on Direction to change which way bars grow. Note, there is also a shortcut to change a bar group's direction by shift-right-clicking on an unlocked bar group anchor. Also, if you are using an icon configuration, you can change the wrap direction on the Layout tab under Icon Configuration Options, so that in combination with the Direction check box you can select any of the "right and up", "right and down", "left and up", "left and down" grow alternatives.
+
+**10. Can I limit the number of bars shown in a bar group?**
+
+Yes, you can specify the maximum number of bars or icons near the top of the Layout tab using the Bar/Icon Limit option. And, for an icon configuration, you can specify how many to show before wrapping using the Wrap option in the Icon Configuration Options section of the same tab (which also lets you specify which direction to wrap). Using these options, you can, for example, set up a bar group to show three rows of eight icons if you want. Note that when you limit the number of bars or icons then the ones that are shown are those that sort closest to the anchor, so be sure to set the Sort Order on the General tab appropriately.

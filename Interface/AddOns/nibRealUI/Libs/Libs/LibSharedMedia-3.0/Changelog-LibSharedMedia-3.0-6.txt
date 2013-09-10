@@ -1,0 +1,27 @@
+------------------------------------------------------------------------
+r70 | elkano | 2012-07-09 16:56:07 +0000 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   A /tags/6 (from /trunk:69)
+
+Tagging as 6
+------------------------------------------------------------------------
+r69 | elkano | 2012-07-09 16:55:31 +0000 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/LibSharedMedia-3.0/LibSharedMedia-3.0.lua
+
+changed LSM:Fetch() to return nil instead of ""
+------------------------------------------------------------------------
+r67 | elkano | 2012-07-09 11:34:19 +0000 (Mon, 09 Jul 2012) | 3 lines
+Changed paths:
+   M /trunk/LibSharedMedia-3.0/LibSharedMedia-3.0.lua
+
+- changed minor version to include WoW version
+- added "none" for background
+- changed path for "none" in border to fix problems with MoP
+------------------------------------------------------------------------
+r66 | ananhaid | 2012-04-24 00:59:41 +0000 (Tue, 24 Apr 2012) | 1 line
+Changed paths:
+   M /trunk/LibSharedMedia-3.0/LibSharedMedia-3.0.lua
+
+- zhCN cleanup.
+------------------------------------------------------------------------

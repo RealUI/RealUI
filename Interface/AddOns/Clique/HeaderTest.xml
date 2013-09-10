@@ -1,0 +1,53 @@
+<Ui
+  xmlns="http://www.blizzard.com/wow/ui/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+  http://wowprogramming.com/FrameXML/UI.xsd">
+
+  <Button name="CliqueTest_UnitTemplate" inherits="ClickCastUnitTemplate,SecureActionButtonTemplate" virtual="true">
+      <Size x="34" y="34"/>
+      <Anchors>
+          <Anchor point="TOPLEFT">
+              <Offset x="1" y="-1"/>
+          </Anchor>
+      </Anchors>
+      <Layers>
+          <Layer level="OVERLAY">
+              <FontString name="$parent_Name" parentKey="name"
+                  inherits="GameFontHighlight" setAllPoints="true"/>
+              <Texture name="$parent_Selected" parentKey="selected" setAllPoints="true"
+                  file="Interface\Buttons\CheckButtonHilight" alphaMode="ADD" hidden="true"/>
+          </Layer>
+      </Layers>
+      <Frames>
+          <StatusBar name="$parent_HealthBar" parentKey="healthBar">
+              <Size x="34" y="30"/>
+              <Anchors>
+                  <Anchor point="TOPLEFT"/>
+              </Anchors>
+              <BarTexture file="Interface\Buttons\UI-Listbox-Highlight2"/>
+              <BarColor r="1.0" g="1.0" b="1.0" a="0.6"/>
+          </StatusBar>
+          <StatusBar name="$parent_PowerBar" parentKey="powerBar">
+              <Size x="34" y="3"/>
+              <Anchors>
+                  <Anchor point="TOPLEFT" relativeTo="$parent_HealthBar"
+                      relativePoint="BOTTOMLEFT">
+                      <Offset x="0" y="-1"/>
+                  </Anchor>
+              </Anchors>
+              <BarTexture file="Interface\TargetingFrame\UI-TargetingFrame-BarFill"/>
+              <BarColor r="1.0" g="1.0" b="1.0" a="0.6"/>
+          </StatusBar>
+      </Frames>
+      <Scripts>
+          <OnShow>
+              CliqueTest_Unit_OnShow(self)
+          </OnShow>
+          <PostClick>
+              print("post-click:", self, button)
+          </PostClick>
+      </Scripts>
+      <HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+  </Button>
+</Ui>

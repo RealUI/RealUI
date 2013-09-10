@@ -1,0 +1,36 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Script file="Modules\Buttons.lua" />
+	<Script file="Modules\ChannelNames.lua" />
+	<Script file="Modules\ChatScroll.lua" />
+	<Script file="Modules\PlayerNames.lua" />
+	<Script file="Modules\StickyChannels.lua" />
+	<Script file="Modules\UrlCopy.lua" />
+	<Script file="Modules\EditBox.lua" />
+	<Script file="Modules\ChatFont.lua" />
+	<Script file="Modules\CopyChat.lua" />
+	<Script file="Modules\Timestamps.lua" />
+	<Script file="Modules\ClickInvite.lua" />
+	<Script file="Modules\TellTarget.lua" />
+	<Script file="Modules\Highlight.lua" />
+	<Script file="Modules\ChatFading.lua" />
+	<Script file="Modules\Justify.lua" />
+	<Script file="Modules\AutoLogChat.lua" />
+	<Script file="Modules\AltNames.lua" />
+	<Script file="Modules\TinyChat.lua" />
+	<Script file="Modules\GroupSay.lua" />
+	<Script file="Modules\ChannelColors.lua" />
+	<Script file="Modules\ChatTabs.lua" />
+	<Script file="Modules\LinkHover.lua" />
+	<Script file="Modules\Scrollback.lua" />
+	<Script file="Modules\EditBoxHistory.lua" />
+	<Script file="Modules\DelayGMOTD.lua" />
+	<Script file="Modules\AutoPopup.lua" />
+	<Script file="Modules\BNet.lua" />
+	<Script file="Modules\ServerStorage.lua" />
+	<Script file="Modules\AllResize.lua" />
+	<Include file="Modules\ChatFrameBorders.xml" />
+	<!-- <Include file="Modules\SplitText.lua" /> //-->
+	<!-- <Script file="Modules\ChannelBindings.lua" /> //-->
+</Ui>

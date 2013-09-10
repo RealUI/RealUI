@@ -1,0 +1,23 @@
+## Interface: 50400
+## Version: 5.7.129
+## Title: Mik's Scrolling Battle Text
+## Author: Mikord
+## Notes: Scrolls battle information around the character model.
+## SavedVariables: MSBTProfiles_SavedVars, MSBT_SavedMedia
+## SavedVariablesPerCharacter: MSBTProfiles_SavedVarsPerChar
+## OptionalDeps: LibSharedMedia-3.0
+## X-WoWI-ID: 5153
+Libs\LibStub.lua
+Libs\CallbackHandler-1.0.lua
+Libs\LibSharedMedia-3.0.lua
+MikSBT.lua
+Localization\localization.xml
+MSBTProfiles.lua
+MSBTParser.lua
+MSBTMedia.lua
+MSBTAnimations.lua
+MSBTTriggers.lua
+MSBTCooldowns.lua
+MSBTLoot.lua
+MSBTMain.lua
+MSBTAnimationStyles.lua

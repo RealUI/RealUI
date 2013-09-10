@@ -1,0 +1,20 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="AddonData\Aurora.lua"/>
+	<Script file="AddonData\Bartender4.lua"/>
+	<Script file="AddonData\BugGrabber.lua"/>
+	<Script file="AddonData\BugSack.lua"/>
+	<Script file="AddonData\Chatter.lua"/>
+	<Script file="AddonData\DBM.lua"/>
+	<Script file="AddonData\DXE.lua"/>
+	<Script file="AddonData\FreebTip.lua"/>
+	<Script file="AddonData\Grid2.lua"/>
+	<Script file="AddonData\Kui_Nameplates.lua"/>
+	<Script file="AddonData\Masque.lua"/>
+	<Script file="AddonData\mikScrollingBattleText.lua"/>
+	<Script file="AddonData\Raven.lua"/>
+	<Script file="AddonData\Skada.lua"/>
+	
+	<Script file="AddonData\AddonData.lua"/>
+</Ui>

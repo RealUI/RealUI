@@ -1,0 +1,22 @@
+## Interface: 40000
+## Title: cargBags
+## Author: Cargor
+## Version: 2.1.2
+## X-eMail: me@xconstruct.net
+## X-Website: http://xconstruct.net
+## X-cargBags: cargBags
+## X-License: GPL 2
+## Notes: Inventory framework
+## X-Curse-Packaged-Version: 22
+## X-Curse-Project-Name: gUI™ v3.0 for MoP (beta)
+## X-Curse-Project-ID: gui-v3
+## X-Curse-Repository-ID: wow/gui-v3/mainline
+
+## For embedding purposes
+embed.xml
+
+## Test implementations
+## Normally these should be commented
+# tests\basic.lua
+# tests\minimal.lua
+# tests\list.lua

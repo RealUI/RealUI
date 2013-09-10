@@ -1,0 +1,9 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="ClassResource\BloodShield.lua"/>
+	<Script file="ClassResource\DemonicFury.lua"/>
+	<Script file="ClassResource\EclipseBar.lua"/>
+	<Script file="ClassResource\Stagger.lua"/>
+	<Script file="ClassResource\Vengeance.lua"/>
+</Ui>

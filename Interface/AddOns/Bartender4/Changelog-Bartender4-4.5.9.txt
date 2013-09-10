@@ -1,0 +1,12 @@
+tag 4.5.9
+b12fbffc688a337183947c4b408e3e76da407076
+Hendrik Leppkes <h.leppkes@gmail.com>
+2013-03-23 08:10:12 +0100
+
+Tag as 4.5.9
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Update TOC to 50200

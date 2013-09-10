@@ -1,0 +1,24 @@
+## Interface: 50400
+## Title: SharedMedia
+## Notes: Inserts some media into LibSharedMedia's storage.
+## Version: 3.0.5-183
+## Author: Elkano
+## X-Category: Miscellaneous
+## X-Curse-Packaged-Version: r183
+## X-Curse-Project-Name: SharedMedia
+## X-Curse-Project-ID: sharedmedia
+## X-Curse-Repository-ID: wow/sharedmedia/mainline
+
+## X-Revision: 179
+## X-Date: 2010-11-05T10:28:48Z
+
+## OptionalDeps: LibStub, LibSharedMedia-3.0
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibSharedMedia-3.0\lib.xml
+#@end-no-lib-strip@
+
+SharedMedia.lua
+..\SharedMedia_MyMedia\MyMedia.lua

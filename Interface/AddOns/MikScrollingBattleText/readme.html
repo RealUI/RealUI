@@ -1,0 +1,2557 @@
+<html>
+ <head>
+  <title>Mik's Scrolling Battle Text Readme</title>
+  <style type="text/css">
+   body { font-size: 10pt; font-family: verdana, arial, helvetica, sans-serif; }
+   h1   { font-weight: bold; color: #004080; }
+   
+   a:link    { color: #000060; text-decoration: none; }
+   a:visited { color: #000060; text-decoration: none; }
+   a:hover   { text-decoration: underline; }
+
+   div#HeaderBlock { background-color: #e0e0e0; border: 1px solid #000060; padding: 1ex; margin: 2em 0em 4em 0em; }
+
+   div.TOCTitle      { font-weight: bold; font-size: 14pt; color: #004080; border-bottom: 1px solid #000060; }
+   div.TOC           { margin: 2ex 1ex 4em 2ex; }
+   div.TOCSection    { margin-bottom: 2ex; }
+
+   div.SectionTitle    { margin-top: 6ex; font-weight: bold; font-size: 14pt; color: #004080; border-bottom: 1px solid #000060; }
+   div.SectionBody     { margin: 2ex 0ex 2ex 2ex; }
+   div.SectionBody ul  { margin-top: 1ex; }
+
+   div.SectionBody a:link    { color: #002080; }
+   div.SectionBody a:visited { color: #002080; }
+   div.SectionBody a:hover   { text-decoration: underline; }
+
+   div.SubsectionTitle { margin-top: 4ex; margin-bottom: 2ex; font-weight: bold; font-size: 110%; color: #004080; }
+   div.SubsectionBody  { margin: 2ex 0ex 2ex 2ex; }
+
+   div.TriggerParameter { margin-left: 2ex; }
+
+   td.ParameterName { font-size: 10pt; background-color: #e0e0e0; vertical-align: top; }
+   td.ParameterDesc { font-size: 10pt; background-color: #e0e0e0; text-align: left; }
+
+   li.FAQListItem { margin-bottom: 6ex; }
+  </style>
+ </head>
+ <body>
+  <h1>Mik's Scrolling Battle Text</h1>
+  <div id="HeaderBlock">
+   Version: 5.7<br />
+   Author: Mikord<br />
+   Updated: May 26, 2013<br />
+   Official Site: <a href="http://mikord.wowinterface.com">http://mikord.wowinterface.com</a><br /><br />
+   <a href="#Credits">See Credits</a>
+  </div>
+
+  <div class="SectionTitle"><a name="TOC"></a>Table of Contents:</div>
+  <div class="TOC">
+   <ul>
+    <li><a href="#WhatsNew">What's new?</a></li>
+    <li><a href="#Install">Installation Instructions</a></li>
+    <li><a href="#Description">Description</a></li>
+    <li><a href="#Commands">Commands</a></li>
+    <li>
+	 <a href="#TriggerGuide">Trigger Guide</a>
+     <div class="TOCSection">
+      <ul>
+       <li><a href="#TriggerBasicConcepts">Basic Concepts</a></li>
+       <li><a href="#TriggerMechanics">Trigger Mechanics</a></li>
+       <li><a href="#TriggerAdvancedConcepts">Advanced Concepts</a></li>
+       <li><a href="#ExampleTriggers">Example Triggers</a></li>
+      </ul>
+     </div>
+    </li>
+    <li>
+	 <a href="#TriggerReference">Trigger Reference</a>
+     <div class="TOCSection">
+      <ul>
+       <li><a href="#MainEvents">Trigger Main Events</a></li>
+       <li><a href="#MainEventConditions">Main Event Conditions</a></li>
+       <li><a href="#TriggerExceptions">Trigger Exceptions</a></li>
+      </ul>
+     </div>
+    </li>
+    <li><a href="#SearchPatternReference">Search Pattern Reference</a></li>
+    <li>
+	 <a href="#FAQ">Frequently Asked Questions</a></li>
+     <div class="TOCSection">
+      <ul>
+       <li><a href="#FAQFonts">I don't like any of the fonts supplied with MSBT.  How do I use my own fonts?</a></li>
+       <li><a href="#FAQFontSize">How do I increase the font size to something larger than 38?</a></li>
+       <li><a href="#FAQSounds">How do I add my own custom sounds?</a></li>
+       <li><a href="#FAQNewTrigger">How do I create a new trigger?</a></li>
+       <li><a href="#FAQMutilate">Is it possible to prevent Mutilate from being merged?</a></li>
+       <li><a href="#FAQXP">Is is possible to disable the default Blizzard XP Text?</a></li>
+       <li><a href="#FAQVE">How do I suppress Vampiric Embrace?</a></li>
+       <li><a href="#FAQExclusiveIcons">I want to see skill names even when there is an icon.  Is that possible?</a></li>	 
+       <li><a href="#FAQGameDamage">Is there a way to show the damage above the target's heads like the default damage text?</a></li>
+       <li><a href="#FAQEfficiency">Is MSBT efficient?</a></li>
+      </ul>
+     </div>
+    </li>
+    <li><a href="#VersionHistory">Version History</a></li>
+    <li><a href="#Credits">Credits</a></li>
+   </ul>
+  </div>
+
+  <div class="SectionTitle"><a name="Install"></a>Installation Instructions</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   Unzip the contents into the AddOns directory of your WoW game directory.<br /><br />
+   This is typically C:\Program Files\World of Warcraft\Interface\AddOns.<br /><br />
+   <b>If you are upgrading the mod from a previous version, make sure to delete the old version prior to installing
+   the new version.</b>
+  </div>
+
+  <div class="SectionTitle"><a name="Description"></a>Description</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   MSBT is designed to be an extremely lightweight, efficient, and highly configurable mod that makes it easier to see combat
+   information by scrolling the information on the screen in separate, dynamically creatable scroll areas. It is a replacement
+   for Blizzard's Floating Combat Text and Damage output.<br /><br />
+
+   <div class="SubsectionTitle">Features:</div>
+   <div class="SubsectionBody">
+    <ul>
+     <li>Lightweight and efficient design.</li>
+     <li>Scroll incoming damage/heals, outgoing damage/heals, and notifications in separate configurable scroll areas on the playing field.</li>
+     <li>Display cooldown completion alerts.</li>
+     <li>Display loot alerts with a total of how many are now in inventory.</li>
+     <li>Add triggers that will allow you to show notifications based on a variety of conditions.</li>
+     <li>Assign a sound file to play for events/triggers.</li>
+     <li>Dynamically create new scroll areas and assign any event/trigger to them.</li>
+     <li>Customize the position, size, animation style, enabled state, font style, font size, font outline, and opacity for each of the scroll areas.</li>
+     <li>Customize each individual event's color, font style, font size, font outline, opacity, output message, enabled state, and scroll area.</li>
+     <li>Set "Master Font" settings that will be inherited by all of the scroll areas and the events in them unless they are overridden at the scroll area or event level.</li>
+     <li>Merge AoE data into one event with cumulative damage/healing done with number of normal and crits specified.</li>
+     <li>Show overhealing amounts against yourself or party/raid members.</li>
+     <li>Color unit names according to their class (including CUSTOM_CLASS_COLORS support).</li>
+     <li>Color damage amounts according to damage type.</li>
+     <li>Show partial effects (resists, absorbs, vulnerabilities, etc) colored according to type.</li>
+     <li>Filter output information with a full suite of spam controls.</li>
+     <li>Load on demand options.</li>
+
+     <li>For mod developers:
+      <ul>
+       <li>
+        Output your own scrolling messages with the MikSBT.DisplayMessage function instead of having
+        to create your own frame and animation code.  You can also use your own font by first registering
+        it with MSBT via the MikSBT.RegisterFont function.
+       </li>
+       <li>Create custom animation styles.</li>
+       <li>See the included API.html file for reference information.</li>
+      </ul>
+     </li>
+    </ul>
+   </div>
+
+   <div class="SubsectionTitle">Supported Events:</div>
+   <div class="SubsectionBody">
+    <ul>
+     <li>Incoming:</li>
+     <ul>
+      <li>Melee Damage, Misses, Dodges, Parries, Blocks, Deflects, Absorbs, and Immunes</li>
+      <li>Skill Damage, Damage Over Time (DoTs), Misses, Dodges, Parries, Blocks, Deflects, Absorbs, Immunes, Reflects, and Interrupts</li>
+      <li>Spell Resists</li>
+      <li>Heals and Heals Over Time (HoTs)</li>
+      <li>Pet Melee Damage, Misses, Dodges, Parries, Blocks, Deflects, Absorbs, and Immunes</li>
+      <li>Pet Skill Damage, Damage Over Time (DoTs), Misses, Dodges, Parries, Blocks, Deflects, Absorbs, and Immunes</li>
+      <li>Pet Spell Resists</li>
+      <li>Pet Heals and Heals Over Time (HoTs)</li>
+      <li>Environmental Damage</li>
+     </ul>
+
+     <br />
+     <li>Outgoing:</li>
+     <ul>
+      <li>Melee Damage, Misses, Dodges, Parries, Blocks, Deflects, Absorbs, Immunes, Evades</li>
+      <li>Skill Damage, Damage Over Time (DoTs), Misses, Dodges, Parries, Blocks, Deflects, Absorbs, Immunes, Reflects, Interrupts, and Evades</li>
+      <li>Spell Resists and Buff Dispels</li>
+      <li>Heals and Heals Over Time (HoTs)</li>
+      <li>Pet Melee Damage, Misses, Dodges, Parries, Blocks, Deflects, Absorbs, Immunes, and Evades</li>
+      <li>Pet Skill Damage, Damage Over Time (DoTs), Misses, Dodges, Parries, Blocks, Deflects, Absorbs, Immunes, and Evades</li>
+      <li>Pet Spell Resists and Buff Dispels</li>
+      <li>Pet Heals and Heals Over Time (HoTs)</li>
+     </ul>
+
+     <br />
+     <li>Notification:</li>
+     <ul>
+      <li>Buffs / Buff Stacks / Buff Fades</li>
+      <li>Debuffs / Debuff Stacks / Debuff Fades</li>
+      <li>Item Buffs / Item Buff Fades</li>
+      <li>Enter/Leave Combat</li>
+      <li>Power Gains and Losses</li>
+      <li>Alternate Power Gains and Losses</li>
+      <li>Chi Gains and Chi Full</li>
+      <li>Combo Point Gains and Combo Points Full</li>
+      <li>Holy Power Changes and Holy Power Full</li>
+      <li>Honor Gains</li>
+      <li>Reputation Gains and Losses</li>
+      <li>Skill Gains</li>
+      <li>Experience Gains</li>
+      <li>Killing Blows (Player and NPC)</li>
+      <li>Extra Attacks</li>
+      <li>Soul Shard Creation</li>
+      <li>Enemy Buff Gains</li>
+      <li>Monster Emotes</li>
+      <li>Player, Pet, and Item Cooldown Completions</li>
+     </ul>
+
+     <br />
+     <li>Loot:</li>
+     <ul>
+      <li>Looted Items</li>
+      <li>Money Gains</li>
+     </ul>
+
+     <br />
+     <li>Default Triggers:</li>
+     <ul>
+      <li>All Relevant Classes - Low Health, Low Mana, Low Pet Health</li>
+      <li>Death Knight - Killing Machine, Rime, Rune Strike, Shadow Infusion x5</li>
+      <li>Druid - Berserk, Clearcasting, Eclipse (Lunar), Eclipse (Solar), Owlkin Frenzy, Predator's Swiftness, Shooting Stars</li> 
+      <li>Hunter - Kill Shot, Lock and Load</li>
+      <li>Mage - Brain Freeze, Clearcasting, Fingers of Frost, Missile Barrage</li>
+      <li>Monk- Elusive Brew x5, x10, x15, Mana Tea x20, Power Guard x3, Vital Mists x5</li>
+      <li>Paladin - Hammer of Wrath, The Art of War</li>
+      <li>Priest - Clearcasting</li>
+      <li>Rogue - Blindside</li>
+      <li>Shaman - Clearcasting, Lava Surge, Maelstrom Weapon x5, Tidal Waves</li>
+      <li>Warlock - Backlash, Decimation, Molten Core, Nightfall</li>
+      <li>Warrior - Bloodsurge, Execute, Overpower, Revenge, Sudden Death, Taste for Blood, Victory Rush</li>
+     </ul>
+    </ul>
+   </div>
+  </div>
+
+  <div class="SectionTitle"><a name="Commands"></a>Commands</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   <table cellspacing="3">
+    <tr>
+     <td class="ParameterName">/msbt</td>
+     <td class="ParameterDesc">Shows the options interface.</td>
+    </tr>
+    <tr>
+     <td class="ParameterName">/msbt reset</td>
+     <td class="ParameterDesc">Resets the current profile to the default settings.</td>
+    </tr>
+    <tr>
+     <td class="ParameterName">/msbt disable</td>
+     <td class="ParameterDesc">Disables the mod.</td>
+    </tr>
+    <tr>
+     <td class="ParameterName">/msbt enable</td>
+     <td class="ParameterDesc">Enables the mod.</td>
+    </tr>
+    <tr>
+     <td class="ParameterName">/msbt version</td>
+     <td class="ParameterDesc">Shows the current version.</td>
+    </tr>
+    <tr>
+     <td class="ParameterName">/msbt help</td>
+     <td class="ParameterDesc">Shows the command usage.</td>
+    </tr>
+   </table>
+  </div>  
+
+  <div class="SectionTitle"><a name="TriggerGuide"></a>Trigger Guide</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   The trigger system is a powerful and flexible system that allows you to specify custom events to be displayed based on
+   specific game events that are not already handled by default.  There are several mechanisms in place to ensure triggers are efficient as
+   possible so they are not needlessly wasting CPU cycles checking conditions that aren't relevant.  Due to this optimization, several common
+   triggers are included by default.
+   <div class="SubsectionTitle"><a name="TriggerBasicConcepts"></a>Basic Concepts:</div>
+   <div class="SubsectionBody">
+    Every time almost anything happens in the game, a combat log entry is generated for it.  While it is not readily visible, each of these
+    combat log entries is categorized by Blizzard according to specific event types.  It is these event types that drive triggers.  Triggers are
+    really just definitions of a specific set of circumstances that must occur before they will fire.
+    <br /><br />
+    Aside from being categorized into an event type, each event that occurs in game has several other pieces of information associated with it such as
+    who the source of the event was, how much the event hit or healed for, and whether or not the event was a crit.  Obviously this additional information
+    varies according to the type of event it is since, for example, an aura application can't crit.
+	<br /><br />
+    The trigger system refers to these event types as <a href="#MainEvents">main events</a> and the additional pieces of information as
+    <a href="#MainEventConditions">conditions</a>, since ultimately it is these additional pieces of information that define the specific
+	circumstances of interest.
+    <br /><br />
+    Let's consider an example event to better understand how the pieces fit together.  Assume that you were just hit by a fireball.  The damage caused
+    to you by the fireball generated an event of type "Skill Damage".  The event also has many of other pieces of information associated with it like
+    the name of the unit who cast the fireball, how much the fireball hit you for, whether or not it crit, whether the unit who cast the fireball is a
+	player or an NPC, etc.
+    <br /><br />
+    Putting the above fireball example in terms of the trigger system, the fireball hitting you was a <a href="#MainEvents">main event</a> of type
+    "Skill Damage", and the <a href="#MainEventConditions">conditions</a> were the name of the unit who cast the fireball, how much it hit you for, and so on.
+    <br /><br />
+	While the <a href="#MainEvents">main events</a> and their <a href="#MainEventConditions">conditions</a> offer a wealth the information, there is other non-event
+	related "state" information available such as the current zone your character is in, whether or not certain buffs are active, and whether or not certain skills are
+    available.  This "state" information forms the basis for what the trigger system refers to as <a href="#TriggerExceptions">exceptions</a>.  An
+	<a href="#TriggerExceptions">exception</a> will prevent a trigger from being displayed when it applies.
+   </div>
+
+   <div class="SubsectionTitle"><a name="TriggerMechanics"></a>Trigger Mechanics:</div>
+   <div class="SubsectionBody">
+    Now that it is clear what <a href="#MainEvents">main events</a>, <a href="#MainEventConditions">conditions</a>, and <a href="#TriggerExceptions">exceptions</a>
+    are, we can explore how triggers make use of them and consequently how they are defined.
+    <br /><br />
+	The following list summarizes the stages a trigger follows to determine whether or not it fires:
+    <ol>
+     <li>One of the <a href="#MainEvents">main events</a> that a trigger has defined occurs.</li>
+     <li>
+      The specific <a href="#MainEventConditions">conditions</a> defined for the <a href="#MainEvents">main event</a> for the trigger are tested.  If any of the
+      conditions do not apply, the trigger will not fire and all processing for the trigger stops.
+	 </li>
+     <li>
+      The <a href="#TriggerExceptions">exceptions</a> defined for the trigger are tested.  If any of the exceptions apply, the trigger will not fire and all
+      processing for the trigger stops.
+     </li>
+     <li>The trigger fires thus displaying the specified output message and event settings.</li>
+    </ol>
+	<br />
+    As mentioned in the "<a href="#TriggerBasicConcepts">Basic Concepts</a>" section above, triggers are driven by <a href="#MainEvents">main events</a>.
+    Each trigger can be based on one or more of these <a href="#MainEvents">main events</a> each with unique <a href="#MainEventConditions">conditions</a>.
+    These <a href="#MainEvents">main events</a> are treated as an "or" relationship meaning that when <b>ANY</b> one of them occurs, the trigger will move to the next
+    stage of testing the <a href="#MainEventConditions">conditions</a>.
+    <br /><br />
+    The <a href="#MainEventConditions">conditions</a> defined for a given <a href="#MainEvents">main event</a> are treated as an "and" relationship meaning that
+    <b>ALL</b> of them must be true for the trigger to move to the next stage of testing <a href="#TriggerExceptions">exceptions</a>.
+    <br /><br />
+    During the final stage, the <a href="#TriggerExceptions">exceptions</a> defined for a trigger are treated as an "or" relationship meaning that when <b>ANY</b> one
+    of them is true, the trigger will not fire.
+   </div>
+
+   <div class="SubsectionTitle"><a name="TriggerAdvancedConcepts"></a>Advanced Concepts:</div>
+   <div class="SubsectionBody">
+    Most common triggers won't need to delve into any of the concepts presented in this section, but using some of the more advanced capabilities
+    can lead to triggers for highly complex events or single triggers capable of handling multiple events.
+    <br /><br />
+    Here is an overview of the main points that will be covered:
+    <ul>
+     <li>Each <a href="#MainEvents">main event</a> can be used multiple times for a single trigger</li>
+     <li>Each <a href="#MainEventConditions">condition</a> can be used multiple times for a given <a href="#MainEvents">main event</a>.</li>
+     <li>Triggers will try to choose an appropriate icon based on the <a href="#MainEvents">main event</a> that fired it.</li>
+     <li>Substitution codes for skill names are available.</li>
+     <li>Skill IDs can be used to discern which rank of a skill was used.</li>
+    </ul>
+	<br />
+	Recall from the "<a href="#TriggerMechanics">Trigger Mechanics</a>" section that each trigger can have multiple <a href="#MainEvents">main events</a> treated
+    as an "or" relationship, and that each <a href="#MainEvents">main event</a> can have its own unique <a href="#MainEventConditions">conditions</a>.  Combining that
+    with the capability to use a <a href="#MainEvents">main event</a> multiple times for a single trigger means you can effectively cover a set of common
+    scenarios all with a single trigger.  For example, imagine you want to see when both Mace Stun and Improved Hamstring proc.  Both cases are an aura application,
+    but they have different skill names.  By adding the same <a href="#MainEvents">main event</a> twice, but specifying a different skill name
+    <a href="#MainEventConditions">condition</a> for each one, you are effectively saying when Mace Stun or Improved Hamstring proc this trigger should fire.  Naturally
+    the other <a href="#MainEventConditions">conditions</a> such as affiliation and reaction would need to also be set for each event.
+	<br /><br />
+	The astute reader will say "Wait a second!  How will I be able to tell which one procced if the output message is the same?".  This problem is solved with substitution
+    codes.  Depending on which event actually caused the trigger to fire, %s will be replaced the appropriate skill name.  Also, the correct icon would be displayed since
+    triggers attempt to choose an appropriate icon based on the <a href="#MainEvents">main event</a> that fired them.
+    <br /><br />
+	The capability of using the same condition multiple times for a given <a href="#MainEvents">main event</a> with different relationships means that things such as ranges
+    and complex pattern matching can be implemented.  For example, imagine you are trying to create a trigger that will fire when an amount is between two values.  The first
+    <a href="#MainEventConditions">condition</a> could be "Amount - Is Greater Than - X" and the second could be "Amount - Is Less Than - Y".
+	<br /><br />
+	Another advanced capability is using skill IDs to detect when specific ranks, such as rank 1, are being used.  Most online databases can be used to ascertain
+    what the skill ID is for the ranks of each skill.  By adding <a href="#MainEventConditions">conditions</a> that specify these specific skill IDs, it is possible
+    to only trigger on specific skill ranks.
+   </div>
+
+   <div class="SubsectionTitle"><a name="ExampleTriggers"></a>Example Triggers:</div>
+   <div class="SubsectionBody">
+    Since the point of the trigger system is to allow for custom events that are not already available, there is no way to cover all of the possibilities.
+    However, most commonly requested triggers fall within the following categories.  An example trigger or two for each category is provided and can be
+    used as a guide to creating your desired trigger.
+    <br /><br />
+    Please note these examples don't make use of advanced capabilities in order to keep the examples easy to
+    understand.
+    <br /><br />
+    <table cellspacing="3">
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">CC Breaks:</td>
+      <td class="ParameterDesc">
+       A common request for triggers is to be notified when crowd control skills like sheep, sap, and blind break from your focus target while in the arena.
+       Nearly all of these effects involve removing an aura and therefore the <a href="#MainEvents">main event</a> type will usually be "Aura Removal".
+       <br /><br />
+       The most common <a href="#MainEventConditions">conditions</a> used for this category of triggers are "Skill Name", "Recipient Unit Affiliation", and
+       "Recipient Unit Reaction".
+       <br /><br />
+       <b><u>Polymorph Broke</u></b>
+       <br /><br />
+	   Output Message: Poly Broke - %r!<br />
+       Main Events:
+       <div class="TriggerParameter">
+        Aura Removal
+        <div class="TriggerParameter">
+         Skill Name - Is Equal To - Polymorph<br />
+         Recipient Unit Affiliation - Is Equal To - Focus<br />
+         Recipient Unit Reaction - Is Equal To - Hostile<br />
+        </div>
+       </div>
+       <br />
+       Exceptions:
+       <div class="TriggerParameter">
+        Zone Type - Is Not Equal To - Arena<br />
+       </div>
+      </td>
+	 </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Procs:</td>
+      <td class="ParameterDesc">
+       Another common request for triggers is to be notified when certain procs such as Mace Stun, Improved Wing Clip, or item-based haste effects occur.
+       Nearly all of the effects apply an aura of some sort and as such the <a href="#MainEvents">main event</a> type will usually be "Aura Application".
+       <br /><br />
+       The most common <a href="#MainEventConditions">conditions</a> used for this category of triggers are "Skill Name", "Recipient Unit Affiliation", and
+       "Recipient Unit Reaction".
+       <br /><br />
+       <b><u>Mace Stun</u></b>
+       <br /><br />
+	   Output Message: Mace Stun!<br />
+       Main Events:
+       <div class="TriggerParameter">
+        Aura Application
+        <div class="TriggerParameter">
+         Skill Name - Is Equal To - Mace Stun Effect<br />
+         Recipient Unit Affiliation - Is Equal To - Target<br />
+         Recipient Unit Reaction - Is Equal To - Hostile<br />
+        </div>
+       </div>
+       <br />
+       Exceptions:
+       <div class="TriggerParameter">None</div>
+       <br /><br />
+       
+       <b><u>Focus</u></b> (from Mystical Skyfire Diamond)
+       <br /><br />
+	   Output Message: Focus!<br />
+       Main Events:
+       <div class="TriggerParameter">
+        Aura Application
+        <div class="TriggerParameter">
+         Skill Name - Is Equal To - Focus<br />
+         Recipient Unit Affiliation - Is Equal To - You<br />
+        </div>
+       </div>
+       <br />
+       Exceptions:
+       <div class="TriggerParameter">None</div>
+      </td>
+	 </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Key Skill Usage:</td>
+      <td class="ParameterDesc">
+       Many players find it useful to create a trigger for when certain key abilities such as Hand of Freedom or Hand of Protection are used while
+       in the arena.  Most of these effects involve successfully casting a spell and so the <a href="#MainEvents">main event</a> type will usually be "Cast Success".
+       <br /><br />
+       The most common <a href="#MainEventConditions">conditions</a> used for this category of triggers are "Skill Name" and "Source Unit Reaction".
+       <br /><br />
+       <b><u>Hand of Protection Used</u></b>
+       <br /><br />
+	   Output Message: Melee Bubble!<br />
+       Main Events:
+       <div class="TriggerParameter">
+        Cast Success
+        <div class="TriggerParameter">
+         Skill Name - Is Equal To - Hand of Protection<br />
+         Source Unit Reaction - Is Equal To - Hostile<br />
+        </div>
+       </div>
+       <br />
+       Exceptions:
+       <div class="TriggerParameter">
+        Zone Type - Is Not Equal To - Arena<br />
+       </div>
+       <br /><br />
+       <b><u>Priest Fear Used</u></b>
+       <br /><br />
+	   Output Message: Priest Fear Down!<br />
+       Main Events:
+       <div class="TriggerParameter">
+        Cast Success
+        <div class="TriggerParameter">
+         Skill Name - Is Equal To - Psychic Scream<br />
+         Source Unit Reaction - Is Equal To - Hostile<br />
+        </div>
+       </div>
+       <br />
+       Exceptions:
+       <div class="TriggerParameter">
+        Zone Type - Is Not Equal To - Arena<br />
+       </div>
+      </td>
+	 </tr>
+    </table>
+   </div>
+  </div>
+
+  <div class="SectionTitle"><a name="TriggerReference"></a>Trigger Reference</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   This section provides a reference for each of the <a href="#MainEvents">main events</a>, <a href="#MainEventConditions">conditions</a>,
+   and <a href="#TriggerExceptions">exceptions</a> that triggers may utilize.
+   <br /><br />
+   The following is a description of the fields unique to the trigger system interface:
+   <br /><br />
+   <table cellspacing="3">
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">Output Message:</td>
+     <td class="ParameterDesc">
+      This is the message that will be displayed when the trigger fires.
+      <br /><br />
+      Most <a href="#MainEvents">main events</a> allow the following substitution codes:<br />
+      <ul>
+       <li>%n - The name of the source of the event.</li>
+       <li>%r - The name of the recipient of the event.</li>
+       <li>%a - The amount associated with the event.</li>
+       <li>%s - The skill name associated with the event.</li>
+      </ul>
+      <br />
+      In addition, certain <a href="#MainEvents">main events</a> that involve two different skill names like dispels (the name of skill performing the dispel and
+      the name of the skill being dispelled) allow the following substitution code:
+      <ul>
+       <li>%e - The extra skill name associated with the event.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">Trigger Classes:</td>
+     <td class="ParameterDesc">
+      This allows you to set the classes that you want the trigger to apply to.  <b>NOTE: THIS IS YOUR
+      CLASS NOT THE TARGET CLASS.</b>  You may look at the Execute trigger for an example.  Since Warrior is
+      selected, the trigger will only apply when you are playing on a warrior.
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap"><a href="#MainEvents">Main Events</a>:</td>
+     <td class="ParameterDesc">
+      This allows you to define which <a href="#MainEvents">main events</a> should begin the process of testing the trigger.  When <b>ANY</b>
+      (or relationship) of these main events occur and their <a href="#MainEventconditions">conditions</a> are true, the trigger will then make sure
+      none of the <a href="#TriggerExceptions">exceptions</a> are true before firing.
+      <br /><br />
+      The <a href="#MainEvents">main events</a> reference table details the purpose of each event.
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap"><a href="#TriggerExceptions">Trigger Exceptions</a>:</td>
+     <td class="ParameterDesc">
+      This allows you define <a href="#TriggerExceptions">exceptions</a> to prevent the trigger from firing. 
+      <br /><br />
+      They are only checked if one of the <a href="#MainEvents">main events</a> has occurred and all its <a href="#MainEventConditions">conditions</a> are true.
+      <br /><br />
+      The <a href="#TriggerExceptions">trigger exceptions</a> reference table below details the purpose of each exception.
+     </td>
+    </tr>
+   </table>
+   
+   <div class="SubsectionTitle"><a name="MainEvents"></a>Trigger Main Events:</div>
+   <div class="SubsectionBody">
+    <table cellspacing="3">
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Application:</td>
+      <td class="ParameterDesc">Fired when an aura is applied to a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Broken:</td>
+      <td class="ParameterDesc">Fired when an aura is broken by a skill.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Dispel:</td>
+      <td class="ParameterDesc">Fired when an aura is dispelled from a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Removal:</td>
+      <td class="ParameterDesc">Fired when an aura is removed from a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Refresh:</td>
+      <td class="ParameterDesc">Fired when an aura is refreshed on a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Stolen:</td>
+      <td class="ParameterDesc">Fired when an aura is stolen from a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Cast Failure:</td>
+      <td class="ParameterDesc">Fired when a cast fails.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Cast Start:</td>
+      <td class="ParameterDesc">Fired when a cast begins.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Cast Success:</td>
+      <td class="ParameterDesc">Fired when a cast successfully completes.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Create:</td>
+      <td class="ParameterDesc">Fired when items are created.  This is typically for conjured items.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Damage Shield Damage:</td>
+      <td class="ParameterDesc">Fired when damage is done from a damage shield like thorns.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Damage Shield Miss:</td>
+      <td class="ParameterDesc">Fired when damage from a damage shield like thorns is resisted, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Dispel Failed:</td>
+      <td class="ParameterDesc">Fired when a dispel attempt fails.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Enchant Application:</td>
+      <td class="ParameterDesc">Fired when an enchant is applied to an item.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Environmental Damage:</td>
+      <td class="ParameterDesc">Fired when damage is done as the result of an environmental effect like falling and drowning.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Extra Attacks:</td>
+      <td class="ParameterDesc">Fired when extra attacks occur from abilities like Windfury.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Heal:</td>
+      <td class="ParameterDesc">Fired when a unit is healed.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Health Change:</td>
+      <td class="ParameterDesc">Fired when a health value changes for one of the supported units.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Item Cooldown Complete:</td>
+      <td class="ParameterDesc">Fired when an item cooldown completes.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Killing Blow:</td>
+      <td class="ParameterDesc">Fired when a unit gets a killing blow.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Skill Damage (DoT):</td>
+      <td class="ParameterDesc">Fired when damage from a periodic source is done.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Skill Miss:</td>
+      <td class="ParameterDesc">Fired when damage from a periodic source is resisted, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Heal (HoT):</td>
+      <td class="ParameterDesc">Fired when a unit is healed by a periodic source.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Power Drain:</td>
+      <td class="ParameterDesc">Fired when power is drained as the result of a periodic source.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Power Gain:</td>
+      <td class="ParameterDesc">Fired when power is gained from a periodic source.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Periodic Power Leech:</td>
+      <td class="ParameterDesc">Fired when power is leeched as the result of a periodic source.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Pet Cooldown Complete:</td>
+      <td class="ParameterDesc">Fired when a pet skill cooldown completes.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Player Cooldown Complete:</td>
+      <td class="ParameterDesc">Fired when a player skill cooldown completes.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Power Change:</td>
+      <td class="ParameterDesc">Fired when a power value changes for one of the supported units.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Power Drain:</td>
+      <td class="ParameterDesc">Fired when power is drained from a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Power Gain:</td>
+      <td class="ParameterDesc">Fired when power is gained by a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Power Leech:</td>
+      <td class="ParameterDesc">Fired when power is leeched from a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Range Damage:</td>
+      <td class="ParameterDesc">Fired when damage from a ranged source like wands/bows is done.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Range Miss:</td>
+      <td class="ParameterDesc">Fired when damage from a ranged source like wands/bows is dodged, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill Damage:</td>
+      <td class="ParameterDesc">Fired when damage from a skill was done to a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill Interrupt:</td>
+      <td class="ParameterDesc">Fired when a skill is interrupted (not pushed back).</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill Miss:</td>
+      <td class="ParameterDesc">Fired when damage from a skill is resisted, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Split Damage:</td>
+      <td class="ParameterDesc">Fired when damage is being split between the source and recipient units.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Swing Damage:</td>
+      <td class="ParameterDesc">Fired when damage from normal melee swings is done to a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Swing/Range/Skill Damage:</td>
+      <td class="ParameterDesc">Fired when any form of non-periodic damage is done to a unit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Swing Miss:</td>
+      <td class="ParameterDesc">Fired when damage from normal melee swings is dodged, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Swing/Range/Skill Miss:</td>
+      <td class="ParameterDesc">Fired when any form of non-periodic damage is dodged, resisted, absorbed, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Summon:</td>
+      <td class="ParameterDesc">Fired when a creature is summoned.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Unit Death:</td>
+      <td class="ParameterDesc">Fired when a unit dies.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Unit Destroy:</td>
+      <td class="ParameterDesc">Fired when a mechanical unit is destroyed.</td>
+     </tr>
+    </table>
+   </div>
+
+   <div class="SubsectionTitle"><a name="MainEventConditions"></a>Main Event Conditions:</div>
+   <div class="SubsectionBody">
+    <table cellspacing="3">
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Absorb Amount:</td>
+      <td class="ParameterDesc">The amount of damage absorbed.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Amount:</td>
+      <td class="ParameterDesc">The amount of damage, health, power, etc generated by the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Aura Type:</td>
+      <td class="ParameterDesc">The type of aura (buff, debuff) generated by the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Block Amount:</td>
+      <td class="ParameterDesc">The amount of damage blocked.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Crit:</td>
+      <td class="ParameterDesc">Whether or not the event is a critical event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Crushing Blow:</td>
+      <td class="ParameterDesc">Whether or not the hit was a crushing blow.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Damage Type:</td>
+      <td class="ParameterDesc">The type of damage (arcane, fire, holy, etc) associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Extra Amount:</td>
+      <td class="ParameterDesc">Secondary amount used for events that have more than one amount value.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Extra Skill ID:</td>
+      <td class="ParameterDesc">The ID of the secondary skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Extra Skill Name:</td>
+      <td class="ParameterDesc">The name of the secondary skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Extra Skill School:</td>
+      <td class="ParameterDesc">The school (arcane, fire, holy, etc) of the secondary skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Glancing Hit:</td>
+      <td class="ParameterDesc">Whether or not the hit was a glancing hit.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Hazard Type:</td>
+      <td class="ParameterDesc">The type of hazard (falling, drowning, etc) that caused environmental damage.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Miss Type:</td>
+      <td class="ParameterDesc">The type of miss (block, dodge, parry, resist, etc) that occurred.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Power Type:</td>
+      <td class="ParameterDesc">The type of power (energy, mana, rage, etc) that was affected.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Recipient Unit Affiliation:</td>
+      <td class="ParameterDesc">The affiliation (mine, target, focus, you, party member, etc) of the unit that was the recipient of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Recipient Unit Control:</td>
+      <td class="ParameterDesc">The controlling mechanism (server, human) of the unit that was the recipient of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Recipient Unit Name:</td>
+      <td class="ParameterDesc">The name of the unit that was the recipient of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Recipient Unit Reaction:</td>
+      <td class="ParameterDesc">The reaction (hostile, friendly, neutral) of the unit that was the recipient of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Recipient Unit Type:</td>
+      <td class="ParameterDesc">The type of the unit (player, pet, NPC, etc) that was the recipient of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Resist Amount:</td>
+      <td class="ParameterDesc">The amount of damage resisted.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill ID:</td>
+      <td class="ParameterDesc">The ID of the skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill Name:</td>
+      <td class="ParameterDesc">The name of the skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Skill School:</td>
+      <td class="ParameterDesc">The school (arcane, fire, holy etc) of the skill associated with the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Source Unit Affiliation:</td>
+      <td class="ParameterDesc">The affiliation (mine, target, focus, you, party member, etc) of the unit that was the source of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Source Unit Control:</td>
+      <td class="ParameterDesc">The controlling mechanism (server, human) of the unit that was the source of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Source Unit Name:</td>
+      <td class="ParameterDesc">The name of the unit that was the source of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Source Unit Reaction:</td>
+      <td class="ParameterDesc">The reaction (hostile, friendly, neutral) of the unit that was the source of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Source Unit Type:</td>
+      <td class="ParameterDesc">The type of the unit (player, pet, NPC, etc) that was the source of the event.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Threshold:</td>
+      <td class="ParameterDesc">Percentage value that must be crossed when dealing with changes in energy, health, mana, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Unit ID:</td>
+      <td class="ParameterDesc">The ID of the unit affected.  Use this condition to test specific units for changes in energy, health, mana, etc.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Unit Reaction:</td>
+      <td class="ParameterDesc">The reaction of the unit affected by changes in energy, health, mana, etc.</td>
+     </tr>
+    </table>
+   </div>
+
+   <div class="SubsectionTitle"><a name="TriggerExceptions"></a>Trigger Exceptions:</div>
+   <div class="SubsectionBody">
+    <table cellpacing="3">
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Active Talents:</td>
+      <td class="ParameterDesc">Examines if the specified talent group is currently active.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Buff Active:</td>
+      <td class="ParameterDesc">Examines if the specified buff is currently active on you.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Current Combo Points:</td>
+      <td class="ParameterDesc">The current number of combo points you have.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Current Power:</td>
+      <td class="ParameterDesc">The current amount of power you have.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Trigger Recently Fired:</td>
+      <td class="ParameterDesc">The number of seconds since the last time the trigger fired.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Trivial Target:</td>
+      <td class="ParameterDesc">Examines if the current target is trivial (grey).</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Unavailable Skill:</td>
+      <td class="ParameterDesc">
+       Examines if the specified skill is unknown or on cooldown. It does not cover other facets such as necessary reagents,
+       appropriate range, etc.
+      </td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Warrior Stance:</td>
+      <td class="ParameterDesc">The current stance your warrior is in.  Only works correctly if you are playing a warrior.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Zone Name:</td>
+      <td class="ParameterDesc">The zone you are currently in.</td>
+     </tr>
+     <tr>
+      <td class="ParameterName" nowrap="nowrap">Zone Type:</td>
+      <td class="ParameterDesc">The type of zone you are currently in.</td>
+     </tr>
+    </table>
+   </div>
+  </div>
+
+  <div class="SectionTitle"><a name="SearchPatternReference"></a>Search Pattern Reference</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   Here is the official lua reference for patterns:
+   <div class="SubsectionTitle">Character Class:</div>
+   <div class="SubsectionBody">
+    A <i>character class</i> is used to represent a set of characters. The following combinations are allowed in describing a character class:
+    <ul>
+     <li>x: (where x is not one of the magic characters ^$()%.[]*+-?) represents the character x itself.</li>
+     <li>.: (a dot) represents all characters.</li>
+     <li>%a: represents all letters.</li>
+     <li>%c: represents all control characters.</li>
+     <li>%d: represents all digits.</li>
+     <li>%l: represents all lowercase letters.</li>
+     <li>%p: represents all punctuation characters.</li>
+     <li>%s: represents all space characters.</li>
+     <li>%u: represents all uppercase letters.</li>
+     <li>%w: represents all alphanumeric characters.</li>
+     <li>%x: represents all hexadecimal digits.</li>
+     <li>%z: represents the character with representation 0.</li>
+     <li>
+      %x: (where x is any non-alphanumeric character) represents the character x. This is the standard way to escape the magic characters. Any punctuation character (even the non magic)
+      can be preceded by a '%' when used to represent itself in a pattern.
+     </li>
+     <li>
+      [set]: represents the class which is the union of all characters in set. A range of characters may be specified by separating the end characters of the range with a '-'. All classes
+      %x described above may also be used as components in set. All other characters in set represent themselves. For example, [%w_] (or [_%w]) represents all alphanumeric characters plus
+      the underscore, [0-7] represents the octal digits, and [0-7%l%-] represents the octal digits plus the lowercase letters plus the '-' character.
+      <br /><br />
+      The interaction between ranges and classes is not defined. Therefore, patterns like [%a-z] or [a-%%] have no meaning.
+     </li>
+     <br />
+     <li>[^set]: represents the complement of set, where set is interpreted as above.</li>
+    </ul>
+    For all classes represented by single letters (%a, %c, etc.), the corresponding uppercase letter represents the complement of the class. For instance, %S represents all non-space characters.
+    <br /><br />
+    The definitions of letter, space, and other character groups depend on the current locale. In particular, the class [a-z] may not be equivalent to %l.
+   </div>
+
+
+   <div class="SubsectionTitle">Pattern Item:</div>
+   <div class="SubsectionBody">
+    A pattern item may be:
+    <ul> 
+     <li>a single character class, which matches any single character in the class;</li>
+
+     <li>a single character class followed by '*', which matches 0 or more repetitions of characters in the class. These repetition items will always match the longest possible sequence;</li>
+     <li>a single character class followed by '+', which matches 1 or more repetitions of characters in the class. These repetition items will always match the longest possible sequence;</li>
+     <li>a single character class followed by '-', which also matches 0 or more repetitions of characters in the class. Unlike '*', these repetition items will always match the shortest possible sequence;</li>
+     <li>a single character class followed by '?', which matches 0 or 1 occurrence of a character in the class;</li>
+     <li>%n, for n between 1 and 9; such item matches a substring equal to the n-th captured string (see below);</li>
+     <li>
+
+      %bxy, where x and y are two distinct characters; such item matches strings that start with x, end with y, and where the x and y are balanced. This means that, if one reads the string from left to right,
+      counting +1 for an x and -1 for a y, the ending y is the first y where the count reaches 0. For instance, the item %b() matches expressions with balanced parentheses.
+     </li>
+    </ul>
+   </div>
+
+
+   <div class="SubsectionTitle">Pattern:</div>
+   <div class="SubsectionBody">
+    A <i>pattern</i> is a sequence of pattern items. A '^' at the beginning of a pattern anchors the match at the beginning of the subject string. A '$' at the end of a pattern anchors the match at the end of the subject string.
+    At other positions, '^' and '$' have no special meaning and represent themselves.
+   </div>
+
+
+   <div class="SubsectionTitle">Captures:</div>
+   <div class="SubsectionBody">
+    A pattern may contain sub-patterns enclosed in parentheses; they describe captures. When a match succeeds, the substrings of the subject string that match captures are stored (captured) for future use. Captures are numbered
+    according to their left parentheses. For instance, in the pattern "(a*(.)%w(%s*))", the part of the string matching "a*(.)%w(%s*)" is stored as the first capture (and therefore has number 1); the character matching "." is
+    captured with number 2, and the part matching "%s*" has number 3.
+    <br /><br />
+
+    As a special case, the empty capture () captures the current string position (a number). For instance, if we apply the pattern "()aa()" on the string "flaaap", there will be two captures: 3 and 5.
+   </div>
+  </div>
+
+  <div class="SectionTitle"><a name="FAQ"></a>Frequently Asked Questions</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   <ol>
+    <li class="FAQListItem">
+     <a name="FAQFonts"></a><b>I don't like any of the fonts supplied with MSBT.  How do I use my own fonts?</b>
+     <br /><br />
+
+     <div style="color: red;">
+      WARNING: FONT FILES MUST EXIST IN THE TARGET LOCATION <b>BEFORE</b> WORLD OF WARCRAFT IS STARTED.<br />
+      IT IS HIGHLY RECOMMENDED THAT YOU PLACE YOUR CUSTOM FONT FILES IN THE MikScrollingBattleText\Fonts DIRECTORY TO AVOID ISSUES.
+     </div>
+     <br /><br />
+     
+     NOTE: Keep in mind that if you use your own font files that you need to make sure the font
+     supports the characters that will be displayed.  For example the typical way to display buff
+     gains is [BuffName].  If the font you use does not have a character glyph for the [ or ]
+     characters you will not be able to see the unsupported characters.  This is especially important
+     with non-English clients since a lot of characters aren't supported by English fonts.
+     <br /><br />
+
+     There are a couple of ways to use custom fonts:
+     <br /><br />
+     <ul>
+      <li>
+       The first, and preferred method, is to use MSBT's new in-game media editor available under the custom media tab.  If you follow
+       the recommended guideline of placing your custom font files in the MikScrollingBattleText\Fonts directory, all you need to enter
+       for the font path in the in-game media editor is the name of the font file.
+       <br /><br />
+
+       For example, assume you have a truetype font file "MyUberFont.ttf" you want to use.
+       <br /><br />
+       <ol type="a">
+        <li>Copy the "MyUberFont.ttf" font file into the MikScrollingBattleText\Fonts directory before you start the game.</li>
+        <li>Load the game and access MSBT's custom media tab.</li>
+        <li>Click the Add Font button.</li>
+        <li>Enter the name you want the font to be called in game such as "My Custom Font" without the quotes.</li>
+        <li>Enter "MyUberFont.ttf" without the quotes for the font path.</li>
+        <li>Click the Okay button and the new font will be available.</li>
+       </ol>
+      </li>
+      <br /><br />
+      <li>
+       The second method is aimed more at mod developers that want to display information using MSBT.  You can call the MikSBT.RegisterFont
+       function to register a custom font that you may then specify in your call to MikSBT.DisplayMessage.  See the included API.html file
+       for reference information.
+      </li>
+     </ul>
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQFontSize"></a><b>How do I increase the font size to something larger than 38?</b>
+     <br /><br />
+     It is not currently possible due to a limitation within the game. Blizzard has stated that allowing larger font sizes is something they
+     would like to implement at some point, but has not provided a time frame.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQSounds"></a><b>How do I add my own custom sounds?</b>
+     <br /><br />
+
+     <div style="color: red;">
+      WARNING: SOUND FILES MUST EXIST IN THE TARGET LOCATION <b>BEFORE</b> WORLD OF WARCRAFT IS STARTED.<br />
+      IT IS HIGHLY RECOMMENDED THAT YOU PLACE YOUR CUSTOM SOUND FILES IN THE MikScrollingBattleText\Sounds DIRECTORY TO AVOID ISSUES.
+     </div>
+     <br /><br />
+
+     There are a couple of methods that can be used to add custom sounds.
+     <ul>
+      <li>
+       The first, and preferred method, is to use MSBT's new in-game media editor available under the custom media tab.  If you follow
+       the recommended guideline of placing your custom sound files in the MikScrollingBattleText\Sounds directory, all you need to enter
+       for the sound path in the in-game media editor is the name of the sound file.  The acceptable sound file types are .mp3 and .ogg.
+       <br /><br />
+
+       For example, assume you have an mp3 sound file "MyUberSound.mp3" you want to use.
+       <br /><br />
+       <ol type="a">
+        <li>Copy the "MyUberSound.mp3" sound file into the MikScrollingBattleText\Sounds directory before you start the game.</li>
+        <li>Load the game and access MSBT's custom media tab.</li>
+        <li>Click the Add Sound button.</li>
+        <li>Enter the name you want the sound to be called in game such as "My Custom Sound" without the quotes.</li>
+        <li>Enter "MyUberSound.mp3" without the quotes for the sound path.</li>
+        <li>Click the Okay button and the new sound will be available.</li>
+       </ol>
+      </li>
+      <br /><br />
+      <li>
+       The second method is aimed more at mod developers. You can call the MikSBT.RegisterSound function to register a custom
+       sound. See the included API.html file for reference information.
+      </li>
+     </ul>
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQNewTrigger"></a><b>How do I create a new trigger?</b>
+     <br /><br />
+     The first step is to <b>read</b> the <a href="#TriggerGuide">Trigger Guide</a> and <a href="#TriggerReference">Trigger Reference</a> sections above.
+     <br /><br />
+     Among other things, the guide explains how triggers work, what the various components of the trigger system are, and provides example triggers for
+     common categories.  The reference section provides specific information about the various components such as the available substitution codes, main
+     events, conditions, and exceptions.
+     <br /><br />
+     Once you've read those sections, we can continue on to the process for creating triggers.
+     <br /><br />
+     We will be creating a trigger that notifies us when Polymorph breaks from a hostile unit when we are playing on a mage in the arena.
+     <br /><br />
+     <ol type="a">
+      <li>Since a new trigger is being created, click the Add New Trigger button, enter "Poly Broke - %r!" for the output message, and click Okay.</li>
+      <li>
+       The trigger conditions configuration dialog for the new trigger will automatically be shown.  You can click the trigger conditions icon
+       button (the gear) next to a trigger to access these settings manually at a later time.
+      </li>
+      <li>
+       Click the edit Trigger Classes icon button and uncheck "All" classes.  Check Mage for the class the trigger will apply to.
+       It is better to select the specific classes the trigger applies to instead of selecting all classes since by specifying
+       classes, the mod can completely ignore the trigger and save resources for the classes to which it does not apply.
+      </li>
+      <li>Click the Add Event button next to the Main Events label to add a new main event.</li>
+      <li>Select Aura Removal for the Main Event.</li>
+      <li>Modify the first condition to "Recipient Unit Reaction - Is Equal To - Hostile" because we don't want to see when poly fades from our teammates.</li>
+      <li>Modify the second condition to "Skill Name - Is Equal To - Polymorph".  It is case-sensitive, so make sure you use a capital P.</li>
+      <li>Click the Save button to save the new main event and its conditions.</li>
+      <li>Click the Add Exception button next to the Trigger Exceptions label to add a new exception.</li>
+      <li>Select "Zone Type - Is Not Equal To - Arena" for the Exception.  This makes it so the trigger will not fire when we aren't in the arena.</li>
+      <li>Click the Save button to save the new exception.</li>
+      <li>Click the Save button on the trigger frame to save the trigger's new conditions.</li>
+     </ol>
+     <br /><br />
+     The %r used in step a is a substitution code for the name of the unit that the debuff (polymorph in this case) faded from.
+     You already knew that though because you read the <a href="#TriggerGuide">Trigger Guide</a> and <a href="#TriggerReference">Trigger Reference</a>!
+     <br /><br />
+     The color, font settings, sticky state, sound, and output scroll area for the trigger can be set like any other event.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQMutilate"></a><b>Is it possible to prevent Mutilate from being merged?</b>
+     <br /><br />
+     Yes. Add it to the merge exclusions list under the Spam Controls tab in the options interface.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQXP"></a><b>Is is possible to disable the default Blizzard XP Text?</b>
+     <br /><br />
+     No. Unfortunately that text is not a part of the UI and Blizzard has not provided the means necessary to disable it. I have requested a CVar to
+     control it several times over the years, but they have yet to add one.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQVE"></a><b>How do I suppress Vampiric Embrace?</b>
+     <br /><br />
+     This can be accomplished a couple of different ways.
+     <br /><br />
+
+     <ul>
+      <li>The preferred method is to add it to the skill suppressions list under the Spam Controls tab.</li>
+      <br /><br />
+      <li>
+       Another way is to use the heal threshold slider under the Spam Controls tab.<br />
+       The drawback to this approach is that all heals under the specified value will be suppressed and not
+       specifically Vampiric Embrace, which may or may not be your desired behavior.
+      </li>
+     </ul>
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQExclusiveIcons"></a><b>I want to see skill names even when there is an icon.  Is that possible?</b>
+     <br /><br />
+     Yes.  Uncheck "Exclusive Skill Names" under the Skill Icons tab.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQGameDamage"></a><b>Is there a way to show the damage above the target's heads like the default damage text?</b>
+     <br /><br />
+     The only way this is possible is using the built-in game damage.  It can be enabled through the game's interface options, but keep
+     in mind you will lose all customization capabilities for outgoing damage if you choose to use the game's built-in damage.
+     WoW's API does not provide a method to get the position of 3D game objects such as players and mobs.  This is intentional on their
+     part and will likely never change.
+     <br /><br />
+     I do not recommend using the built-in game damage option.  If you take the time to get used to having the damage in a consolidated area,
+     you will likely find it superior in many ways.  Aside from the obvious visual customization capabilities of using MSBT's damage display,
+     there are many other benefits such as being able to see the damage and healing being done to targets that are not in your viewport, merging
+     of AoE with cumulative amounts, throttling of DoT spam, damage thresholds, per skill suppressions for things you don't care about, icons
+     annotating which skill caused the damage or healing, and more.
+    </li>
+
+    <li class="FAQListItem">
+     <a name="FAQEfficiency"></a><b>Is MSBT efficient?</b>
+     <br /><br />
+     Absolutely.  MSBT 5.0 was completely re-designed from the ground up using Blizzard's new mod statistics
+     API tools with the #1 priority of optimization for reduced memory usage and CPU efficiency.  As a result,
+     it is both lightweight (low memory usage) and efficient (low CPU usage), which, sadly, is frequently ignored
+     in performance discussions.  Performance entails both memory usage and CPU usage. Unless you don't have enough
+     RAM available, CPU usage is almost always more of a factor on your FPS than raw memory usage is.
+     <br /><br />
+     Please don't just take my word for it though.  Test it out for yourself. Blizzard has made it simple to see
+     statistics about mod usage with the GetAddOnMemoryUsage and GetAddOnCPUUsage API calls.  Testing a mod will
+     give you a true picture of its performance.
+     <br /><br /> 
+ 
+     One thing to keep in mind during your testing is that MSBT is written to be completely dynamic.  It will only create exactly what
+     objects it needs when it needs them and then reuse them from that point forward.  This means during the first few combat cycles
+     you will see a slightly higher increasing rate than you might expect as the first set of objects is created.  The rate will quickly
+     stabilize to typically less than 1 KiB/s as the objects begin to be reused.  The main benefits to this approach are less overall memory
+     usage and very little memory churn.
+     <br /><br />
+
+     Also, don't forget to look at CPU utilization.  As I said above, it is frequently ignored, but it is also important.  Would you
+     rather have your CPU spending extra time on the game engine, or wasting cycles on an inefficient mod?
+    </li>
+   </ol>
+  </div>
+
+  <div class="SectionTitle"><a name="VersionHistory"></a>Version History</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   <table cellspacing="3">
+    <tr>
+     <td class="ParameterName" nowrap="nowrap"><a name="WhatsNew"></a>Latest</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue introduced with Patch 5.3 where dispels were showing the skill performing the dispel rather than the one being dispelled.</li>
+       <li>Increased damage and healing maximum spam thresholds to 100,000.</li>
+       <li>Added default trigger for Ultimatum.</li>
+       <li>Updated TOC for Patch 5.3</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.128</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated parser to support the new amount parameter on applied and removed auras.  Thanks to pelf for the patch.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.127</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue introduced with Patch 5.2 where dispels were showing the skill performing the dispel rather than the one being dispelled.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.126</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified skill ID for Taste For Blood to reflect the new value.</li>
+       <li>Updated TOC for Patch 5.2.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.125</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated TOC for Patch 5.1.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.124</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue introduced with Monk Chi changes in Patch 5.1.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.123</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed an issue where certain power types such as Sha Power and Alternate Power were causing errors.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.122</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added new Shadow Orbs Change and Shadow Orbs Full events that act similar to combo points.</li>
+       <li>Removed shadow orbs from standard power gains (e.g. +1 Shadow Orbs) since it is now treated similar to combo points.</li>
+       <li>Removed Shadow Orbs x3 default trigger due to the new Shadow Orbs Full event.</li>
+       <li>Fixed issue where the shorten numbers and group by thousands options were not being applied to overkill amounts.</li>
+       <li>Added default trigger for Blindside.</li>
+       <li>Removed extra exclamation point from druid berserking default trigger.</li>
+       <li>Added missing Italian localization files.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.119</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue where combo point gains and full combo points were not being displayed (reported by dondasch).</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.118</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated for Patch 5.0.4 / Mists of Pandaria Beta
+        <ul>
+         <li>Monk is now an available class for triggers and class coloring.</li>
+         <li>Added new Chi Change and Chi Full events that act similar to combo points.</li>
+         <li>Added support for dynamic max chi and holy power.</li>
+         <li>Removed chi from standard power gains (e.g. +1 Chi) since it is now treated similar to combo points.</li>
+         <li>Updated supported power types to include Alternate, Dark Force, Chi (Light Force), Shadow Orbs, Burning Embers, and Demonic Fury.</li>
+         <li>Removed the following triggers since they no longer apply: Counterattack, Eradication, Hot Streak, Impact, Riposte, Viper Sting</li>
+         <li>Removed the following skills from default suppressions and throttling since they no longer apply: Arcane Empowerment, Desecration, Ferocious Inspiration, Mana Spring</li>
+         <li>Rewrote code that deals with party and raid members to use the new Blizzard APIs.</li>
+         <li>Updated "Active Talents" trigger condition to use the new Blizzard API.</li>
+         <li>Modified remaining existing triggers to work with their new values.</li>
+         <li>Modified several skill IDs to reflect their new values.</li>
+         <li>Added default trigger for Vital Mists x5.</li>
+         <li>Added default trigger for Mana Tea x20.</li>
+         <li>Added default trigger for Elusive Brew at 5, 10, and 15 stacks.</li>
+         <li>Added default trigger for Power Guard x3.</li>
+         <li>Added new events for Alternate Power Gains and Losses so they may be customized.</li>
+         <li>Added temporary workaround for UnitGUID bug when in a group.  Triggers that involve party/raid members will not work currently due to this.</li>
+         <li>Updated environmental damage handler for environmental type changes.</li>
+         <li>Updated TOC for Patch 5.0.4.</li>
+        </ul>
+       </li>
+       <li>Added new option to shorten large numbers using si suffixes (32765 displays as 33k).</li>
+       <li>Added new option to separate large numbers into digit groups (32765 dispays as 32,765).</li>
+       <li>Fixed taint issues cause by the _ global variable.</li>
+       <li>Converted class names to use Blizzard provided localizations.</li>
+       <li>Removed old temporary workaround for raid flags added in Patch 4.2.</li>
+       <li>Added Italian localization from Kelhar@Runetotem-EU.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.117</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Money strings will now show properly on all supported languages.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.113</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Converted all sounds to .ogg from .mp3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.112</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified combat event log parser to work with the absorb changes in Patch 4.3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.111</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated German translations from mojosdojo.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+       <li>Updated TOC for Patch 4.3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.108</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Removed item cooldown tracking debug print.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.6.107</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added support for item cooldowns:
+        <ul>
+         <li>Created new event for customizable item cooldown notifications.</li>
+         <li>Added Item Cooldown Complete to the available trigger events.</li>
+         <li>Added Item ID and Item Name condition handling for the main trigger events that support them.</li>
+         <li>Cooldown exclusions now accept skill IDs, item names, and item IDs in addition to skill names.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Added monochrome, monochrome + thin, and monochrome + thick to available outline font settings for pixel font lovers.</li>
+       <li>Modified the custom font and sound validation routines to work with arbitrary case extensions.</li>
+       <li>Changed custom font validation error message to a more descriptive message when the font can't be set versus the more generic ttf message.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.106</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added option to customize color of shadowflame damage.</li>
+       <li>Added option to customize color of frostfire damage.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.105</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified combat event log parsers to work with the changes in Patch 4.2 without extra indirection.</li>
+       <li>Changed Traditional Chinese default font by yleaf.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+       <li>Updated TOC for Patch 4.2.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.100</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added logic to detect and merge off-hand strikes with main hand strikes.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.99</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Removed Happiness as an available power type since it no longer exists as of Patch 4.1.</li>
+       <li>Added logic to handle the changed combat log event format in Patch 4.2 on the PTR without breaking the current version (Blizzard is changing it again).</li>
+       <li>Updated LibStub to the latest version (14 Jan 2011, 1.0.1).</li>
+       <li>Updated CallbackHandler to the latest version (14 Jan 2011, 1.0.7).</li>
+       <li>Updated LibSharedMedia to the latest version (05 Nov 2010, 3.0-4).</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.98</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed handling for the always show quest items option that was broken by Patch 4.0.6 (reported by Judgespear).</li>
+       <li>Modified to play sounds even when game sound effects are disabled as allowed by API changes in Patch 4.0.6 (reported by Retlaw).</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.97</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified combat event log parsers to work with the changes in Patch 4.1 (committed by mojosdojo, reported by several others).</li>
+       <li>Updated Russian translations from StingerSoft.</li>
+       <li>Updated German translations from mojosdojo.</li>
+       <li>Updated TOC for Patch 4.1.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.91</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added the new pet heal events to the options interface so they may be customized and disabled as intended.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.89</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Made several updates to the cooldown tracking system:
+        <ul>
+         <li>Implemented a work around for Blizzard's cooldown bug with dismissed pets.  Pet cooldowns should no longer be shown before they are actually finished.</li>
+         <li>Created new event for customizable pet cooldown notifications.</li>
+         <li>Added an option to customize the color of the skill name in cooldown events.</li>
+         <li>Changed Skill Cooldown Complete trigger event to Player Cooldown Complete (only detects player cooldowns).</li>
+         <li>Added Pet Cooldown Complete to the available trigger events.</li>
+         <li>Added Skill ID as an available condition for player and pet cooldown triggers.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Created new events for outgoing pet heals, pet heal crits, pet periodic heals (HoTs), and pet periodic heal (HoT) crits.</li>
+       <li>Efflorescense is now detected and displayed as a pet heal.</li>
+       <li>Added default triggers for Blood Swarm and Shadow Infusion x5.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.88</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed an issue preventing pet cooldowns from being detected.</li>
+       <li>Added a default trigger for Lava Surge.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.86</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added support for pet cooldowns.</li>
+       <li>Added default triggers for Shadow Orb x3 and Berserk.</li>
+       <li>Added Power Change to the available trigger events.</li>
+       <li>Removed Mana Change, Energy Change, Rage Change, and Runic Power Change trigger events since the underlying events no longer exist (replaced with Power Change).</li>
+       <li>Modified default Low Mana trigger to use the new power change event.</li>
+       <li>Removed Hunters from mana based triggers (Viper Sting, Low Mana).</li>
+       <li>Modified hunter auto shots to be treated like standard melee damage.</li>
+       <li>Health and Power Change triggers will now work with party and raid member Unit IDs.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.83</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed an issue that caused an error when moving scroll areas with the mouse.</li>
+       <li>Modified the cooldown tracking system to further support dynamic cooldown resets.</li>
+       <li>Updated the cooldown tracking system to support abilities with the same name that have different cooldown lengths such as Feral Charge.</li>
+       <li>Added new Holy Power Change and Holy Power Full events that act similar to combo points.</li>
+       <li>Removed holy power from standard power gains (e.g. +1 Holy Power) since it is now treated similar to combo points.</li>
+       <li>Updated supported power types to include generic eclipse energy.</li>
+       <li>Added additional logic for detecting Lunar and Solar Eclipse energy gains (e.g. +13 Lunar Energy or +20 Solar Energy).</li>
+       <li>Added default trigger for Shooting Stars.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.5.79</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated for Patch 4.0.1 / Cataclysm Pre-launch:
+        <ul>
+         <li>Updated supported power types to include soul shards and holy power.</li>
+         <li>Modified power change detection logic to use new event.</li>
+         <li>Removed soul shard created notification since it is now considered a power gain.</li>
+         <li>Removed "hyper regen" option since there are no longer any skills that utilize it.</li>
+         <li>Removed the following triggers since they no longer apply: Frostbite</li>
+         <li>Modified several skill IDs to reflect their new values.</li>
+         <li>Removed .wav files from the supported sound formats in the custom media sound dialog since WoW no longer supports playing .wav files.</li> 
+         <li>Added support for .ogg files to the custom media sound dialog.</li> 
+        </ul>
+       </li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.78</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Removed default suppressions for Abominable Might and Unleashed Rage since they have been changed to passive auras.</li>
+       <li>Removed default Rampage trigger since it has been changed to a passive aura.</li>
+       <li>Updated Eclipse trigger to two separate triggers to account for Lunar and Solar Eclipse.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.77</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated IDs for Abominable Might and Unleashed Rage to new values introduced in Patch 3.3.3.</li>
+       <li>Removed aura hack since Blizzard fixed the bug with aura applications not reporting to the combat log.  This will fix the double notifications.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.75</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue with aura hack where certain aura applications (like Missile Barrage) were not being detected every time.</li>
+       <li>Fixed issue where an error could be thrown regarding a bad argument to bit_band.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.74</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Implemented a hack to work around Blizzard's bug with the combat log in Patch 3.3.  This will allow most of the default triggers to work
+        until Blizzard fixes the bug.
+       </li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.71</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed font issue that was causing lua errors regarding the :SetFont routine.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.70</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added an option to disable regular melee swings from being merged.</li>
+       <li>Added an option to hide the merge trailer that is shown when multiple events are merged.</li>
+       <li>Added Aura Refresh to the available trigger events.</li>
+       <li>Added a default trigger for Predator's Swiftness.</li>
+       <li>Optimized font validation logic to reduce CPU usage.</li>
+       <li>Updated HoT crit events to behave like crits as intended.</li>
+       <li>Changed Desecration from the skill ID removed Patch 3.3 (fixes message regarding removed skill ID 63595).</li>
+       <li>Updated Russian translations from StingerSoft.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+       <li>Updated Korean translations from chkid.</li>
+       <li>Updated TOC for Patch 3.3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.66</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Created new events for incoming and outgoing periodic heal (HoT) crits.</li>
+       <li>Lowered the minimum allowed cooldown threshold to 3 seconds.  The default value is still 5 seconds.</li>
+       <li>Tweaked the animation event initializion logic to prevent some instances where events could briefly flicker at high framerates.</li>
+       <li>Added a recently fired exception to the default Rune Strike trigger to reduce its spaminess.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.64</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added a new option under spam controls to hide full HoT overheals (enabled by default).</li>
+       <li>Modified the current hide full overheals option to only apply to direct (non periodic) heals.</li>
+       <li>Added new events for incoming and outgoing Deflects.</li>
+       <li>Added Deflect as an available miss type for trigger conditions.</li>
+       <li>Modified options module load logic to avoid issue with Blizzard's load on demand routine.</li>
+       <li>Modified TOC to provide assistance to Minion (automatic updater).</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.63</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified heal events to use the new combat log format in patch 3.2.  This fixes the issue with all heals showing as crits.</li>
+       <li>Added absorb amount as an available condition to heal based triggers.</li>
+       <li>Updated German translations from Archiv.</li>
+       <li>Updated French translations from Devfool.</li>
+       <li>Updated Korean translations from chkid.</li>
+       <li>Updated TOC for Patch 3.2.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.61</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added Aura Broken to the available trigger events.</li>
+       <li>Fixed issue with guardians being treated as the player instead of a pet.</li>
+       <li>Added logic to prevent potential errors due to load ordering.</li>
+       <li>Updated Russian translations from StingerSoft.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.59</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Changed the interaction with Blizzard's default FCT (Floating Combat Text) and damage/healing displays:
+        <ul>
+         <li>
+          The default FCT and damage/healing displays are no longer manually controlled.  The settings in the game's
+          Interface Options configuration must be used to control them instead.
+         </li>
+         <li>The Game Damage and Game Healing checkboxes have been removed from the General tab since they are no longer used.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Damage done to structures from siege vehicles (and other sources like explosives) will now display.</li>
+       <li>Vehicles are now treated as the player themselves instead of as their pet for incoming and outgoing damage.</li>
+       <li>Added default suppressions for Desecration, Abominable Might, and Unleashed Rage to prevent the spam they generate.</li>
+       <li>Made a minor optimization to the main animation logic.</li>
+       <li>Innervate will no longer activate "Hyper regen" mode since the mana gains from it are now reported in the combat log.</li>
+       <li>ALL mana gains mode will now set the mana gain skill to Unknown.</li>
+       <li>Hyper regen mode will now attribute the gains to the skill that activated it.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.58</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added support for the CUSTOM_CLASS_COLORS standard.</li>
+       <li>Implemented logic to ensure classes are always known for opponents in arenas.</li>
+       <li>Tweaked class identification code to fix an issue where classes weren't known when they should have been.</li>
+       <li>Fixed issue that caused an error when using the %r event code on health and power change events.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.55</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Implemented capability to color unit names according to their class including customization options:
+        <ul>
+         <li>Choose whether or not to enable class coloring on a global basis.</li>
+         <li>Control color and enabled state for each individual class.</li>
+         <li>Uses standard class colors defined by Blizzard by default.</li>
+         <li>Applies to class names shown in triggers as well.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Made minor optimizations to the merging system and event formatting.</li>
+       <li>Added overkill amounts to available partial effects, but they are disabled by default.</li>
+       <li>Added a default trigger for hostile player PvP trinket usage including who used it.  It is set to only show in arenas by default.</li>
+       <li>Changed the event code for killing blows to %n so it works correctly with class coloring.</li>
+       <li>Made the %n event code available for the built-in outgoing dispels event.</li>
+       <li>Fixed an issue where certain new text could briefly appear in the wrong spot when initially displayed on slower PCs.</li>
+       <li>The exclusive skill icons option will no longer be ignored when a scroll area has its icon disabled.</li>
+       <li>Font files that have been removed but are still referenced will now correctly use the default font instead of resulting in errors.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+       <li>Updated Korean translations from chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.52</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added the ability to customize the trailer message shown for partial effects.</li>
+       <li>There is now an option to disable icons for each scroll area.</li>
+       <li>Added an option to hide heals that have an effective heal amount of zero (full overheals).</li>
+       <li>
+        Modified cast success and summon trigger events to include recipient conditions.  Unfortunately cast start
+        events do not report recipient information, so it is not available for them.
+       </li>
+       <li>Increased the damage, healing, and power thresholds significantly to keep up with inflation.</li>
+       <li>Implemented internal throttling for identical enemy buff gains to reduce spam on fights like Yogg-Saron.</li>
+       <li>Added a preview icon to the scroll areas preview feature for better visual representation of icon settings.</li>
+       <li>Updated Russian translations from StingerSoft.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.49</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Reworked the cooldown tracking system with dynamic updates in mind:
+        <ul>
+         <li>Dynamically adjusted cooldowns such as glyphed Guardian Spirit will now work correctly.</li>
+         <li>Cooldowns for skills that are unlearned will be automatically removed (dual spec).</li>
+         <li>
+          Death Knight cooldowns will now consider rune cooldowns.  For example, consider Rune Tap only has 
+          4 seconds remaining, but a blood rune won't be available for 6 seconds.  The notification won't
+          display until the rune is available.
+         </li>
+         <li>The small "time drift" that could occur on long cooldowns should no longer occur.</li>
+         <li>Removed old pestilence cooldown information.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Added default trigger for Decimate.</li>
+       <li>Added default trigger for Lock and Load.</li>
+       <li>Modified item exclusions to include quest items.</li>
+       <li>Updated Korean translations from chkid.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.44</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Created new events for buff and debuff stacks.  They only apply when there are 2 or more auras stacked.</li>
+       <li>Changed default loot message to include the amount of the item looted in addition to the total in inventory.</li>
+       <li>Modified Impact trigger to use the new mechanics.</li>
+       <li>Added default trigger for Eradication.</li>
+       <li>Fixed issue with various fonts not working properly.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.4.42</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Created an in-game editor for managing custom media:
+        <ul>
+         <li>Entries will persist between game sessions and version upgrades.</li>
+         <li>Entries are not tied to profiles meaning they will persist through profile resets.</li>
+         <li>Font entries appear in the font they reference to provide a quick preview of the custom fonts that have been added.</li>
+         <li>Sound entries provide a play button to preview/test them.</li>
+         <li>Modified font handling to ensure invalid paths do not throw errors.</li>
+         <li>The old MSBTFonts.lua and MSBTSounds.lua files have been removed in favor of this new system.</li>
+         <li>Remember that the media files must already exist <b>before</b> WoW is started or they can't be used.</li>
+        </ul>
+       </li>
+       <br />
+       <li>
+        Added a new loot alerting system with several options:
+        <ul>
+         <li>Provides a total count of how many of the looted item are now in inventory and, optionally, how many items were looted (via %a event code).</li>
+         <li>Looted items are colored according to their quality (grey, green, etc)</li>
+         <li>Only display items of selected qualities.</li>
+         <li>Always display specific items by name.</li>
+         <li>Always suppress specific items by name.</li>
+         <li>Always show quest items regardless of exclusions.(subject to Blizzard having the item marked as a quest item).</li>
+        </ul>
+       </li>
+       <br />
+       <li>Created new events for incoming and outgoing periodic damage (DoT) crits.</li>
+       <li>Added an option to control whether or not the text shadowing effect introduced in version 5.3.37 is applied.</li>
+       <li>Outgoing dispels will now display debuffs cleansed from friendly units as well as buffs from enemy units.</li>
+       <li>Aura gains now show how many are stacked by default.  You can remove the %a event code from the respective events if you don't want to see this information.</li>
+       <li>Added Active Talents as an available trigger exception.</li>
+       <li>The blink buff gain and loss events are now ignored.</li>
+       <li>Disabling a scroll area will now ensure all events destined for it are suppressed regardless of their source.</li>
+       <li>Removed references to skills and triggers that are not available as of Patch 3.1.</li>
+       <li>Updated TOC for Patch 3.1.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.41</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added missing Korean localization files.</li>
+       <li>Updated Russian translations from StingerSoft.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.37</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added an option to specify on which side skill icons show per scroll area.</li>
+       <li>Implemented a shadow offset and changed the default outline to none to improve font crispness.</li>
+       <li>Set the default power throttling duration to 3 seconds to help reduce spam from power returns.</li>
+       <li>Modified reordering code to fix an issue with Korean client global strings.</li>
+       <li>Add Korean localization from Slowhand, Fenlis, and chkid.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.36</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated to work with Patch 3.1 on the PTR.  There will be some triggers and skills that will need to be removed once 3.1 goes live.</li>
+       <li>Modified the channeled AoE aura suppression feature to only ignore the aura if it was caused by the player casting it.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.33</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+         Implemented a work around for Blizzard's cooldown bug with Death Knights and runes.  Only abilities
+         with actual cooldowns should now be shown.
+       </li>
+       <li>Created a default suppression for Ferocious Inspiration to remove the spam it causes.</li>
+       <li>Added logic to ignore buff gain and loss events created by channeled AoE skills (Blizzard, Volley, etc)</li>
+       <li>Added new events for incoming and outgoing damage shields (thorns, retribution aura, etc).</li>
+       <li>Added overkill amount as an available condition to damage based triggers.</li>
+       <li>Added Buff Inactive and In Combat as available trigger exceptions.</li>
+       <li>Killing Blows should no longer be shown for Death Knight ghoul sacrifices.</li>
+       <li>Modified media registration routines to ignore erroneous parameters to prevent issues with other mods.</li>
+       <li>Tweaked internal merging and animation delays to help performance in heavy AoE situations.</li>
+       <li>Updated French translations from Devfool.</li>
+       <li>Updated Simplified and Traditional Chinese translations from yleaf.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.32</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed Rune Strike trigger.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.31</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added default trigger for Kill Shot.</li>
+       <li>Added default trigger for Rune Strike.</li>
+       <li>More Russian translation updates from StingerSoft.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.29</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added recently fired exceptions to some triggers like Fingers of Frost to cut down their spaminess during AoE.</li>
+       <li>Resisted dispel effects will now show the icon of the dispelled skill instead of the skill doing the dispelling.</li>
+       <li>Added code to prevent other mods from registering invalid media names.</li>
+       <li>Added a few default triggers for Death Knights.</li>
+       <li>Russian translation update.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.26</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified the angled animation style to maintain consistent movement speed.</li>
+       <li>The reflect event will no longer show the %a event code.</li>
+       <li>Added default trigger for The Art of War.</li>
+       <li>Fixed issue with animation speed not scaling certain styles correctly.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.25</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified the internal media handling to avoid issues induced by other mods via LibSharedMedia.</li>
+       <li>Reworked the animation system to help alleviate some "jerkiness" due to rounding.</li>
+       <li>Added an angled animation style with customizable directions and behaviors.</li>
+       <li>Made some minor optimizations in substitution code handling.</li>
+       <li>Removed Mongoose Bite and Kill Command triggers since they no longer apply.</li>
+       <li>Added default triggers for Sudden Death and Taste for Blood.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.3.24</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Updated for Patch 3.0.1 / Wrath of the Lich King Beta.
+        <ul>
+         <li>Added several default triggers for new abliities of various classes.</li>
+         <li>Updated supported power types to include runes and runic power.</li>
+         <li>Added support for new damage types.</li>
+         <li>Added coloring for frostfire damage.</li>
+         <li>Death Knight is now an available class for triggers.</li>
+         <li>Runic Power Change and Rune Cooldown are now available main events for triggers.</li>
+         <li>Added throttling for heals from Blood Presence.</li>
+         <li>Added the amount absorbed for fully absorbed events with damage color capability.</li>
+         <li>Modified all partial effects to use the same bracket style as overheals.</li>
+         <li>Updated combo point handling to work with WotLK.</li>
+         <li>Modified power gains from leeches to show the correct amount gained instead of the amount leeched.</li>
+        </ul>
+       </li>
+       <br />
+       <li>
+        Performance enhancements:
+        <ul>
+         <li>Removed delays from the animation system that should make the animations a little smoother on fast systems.</li>
+         <li>Events that are capable of being merged will now appear more quickly than previously.</li>
+         <li>Made some minor optimizations in substitution code handling.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Realm names are no longer shown as a part of name based substitutions for cross-realm players.</li>
+       <li>Rewrote media handling system to provide native Shared Media support.</li>
+       <li>Physical damage coloring is now ignored for outgoing skills that are not "auto attacks."</li>
+       <li>The temporary icon (the little face) will no longer be shown.</li>
+       <li>Zephyr font removed since it doesn't support some glyphs.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.2.14</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>The hostile condition check for health and power changes will now function properly.</li>
+       <li>
+        The damage amount of hunter autoshots will now be colored according to the physical damage color if it is
+        enabled (White by default).
+       </li>
+       <li>Added Russian localization.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.2.11</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed issue with triggers that set a unit id to all party members.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.2.10</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added a button to test the selected sound in the event settings dialog.</li>
+       <li>Dark Pact and other power leech events will now correctly display the amount of mana leeched.</li>
+       <li>Added missing Traditional Chinese localization files.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.2.9</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Rewrote the core of the event parser to reduce its CPU usage by about 60%.</li>
+       <li>
+        The trigger system was completely redesigned with the main focus on flexibility.
+        <ul>
+         <li>Triggers now make extensive use of "short-circuiting" to cut down the number of tests needed thereby increasing performance.</li>
+         <li>Anything that has a patch 2.4 style combat log entry (COMBAT_LOG_EVENT_UNFILTERED) can now be used for a trigger.</li>
+         <li>The number of available conditions per main event has been substantially increased.</li>
+         <li>Each parameter for a main event type can now specify various relationships.</li>
+         <li>Parameters involving strings like skill names and unit names can now choose between an exact match or a search pattern in most cases.</li>
+         <li>Added a new main event for skill cooldown completions.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Full paths may now be entered for sounds.  This includes path to sound files internal to WoW.</li>
+       <li>Added Traditional Chinese localization.</li>
+       <li>Moved font definitions to localization files so they can be unique per language.  MSBTFonts.lua can still be used to add custom fonts.</li>
+       <li>Updated spell dispel/stolen events to the new values implemented by Blizzard in Patch 2.4.3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.13</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>The threshold based triggers such as "Low Mana" and "Low Health" will once again display the current amount.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.12</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed the error when looting money induced in patch 2.4.2.</li>
+       <li>Fixed the erroneous "Low Mana" warnings when in druid forms.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.11</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Redesigned the trigger system to work with the new combat log mechanics and improve flexibility:
+        <ul>
+         <li>
+          The old main conditions have been replaced with main events that can have several conditions for greater control
+          over things such as affected units (target, focus, etc), applications, etc.
+         </li>
+         <li>
+          The old secondary conditions has been replaced with exceptions.  Exceptions will cause the trigger not to fire when
+          they are true.  In addition, most exceptions has a "reverse logic" option that causes them to behave as their opposite for
+          high flexibility.
+         </li>
+         <li>
+          Triggers now try to choose an appropriate icon based on the main event that fired it.  It is still possible
+          to specify an icon that will override the default.
+         </li>
+         <li>All of the default triggers will now work on non-English clients without the need for localization.</li>
+         <li>Any additional triggers you may have created in previous versions will have to be recreated under the new system.</li>
+         <li>Added a default trigger for Viper Sting.</li>
+         <li>Added the default clearcasting trigger to druids.</li>
+        </ul>
+       </li>
+       <br />
+       <li>Skills like "Mangle (Bear)()" will now be displayed as "Mangle" in the cooldown area.</li>
+       <li>Animations may now be as slow as 20% of normal instead of the previous 50%.</li>
+       <li>Scroll areas can now have a minimum height of 50 down from 100.</li>
+       <li>Increased the allowed font size range to 4-38.</li>
+       <li>Threshold triggers will no longer misfire when shapeshifting.</li>
+       <li>Soul Shard gains will now be displayed again.</li>
+       <li>The %t event type will no longer throw an error.</li>
+       <li>Added a button to the AddOns tab of Blizzard's Interface Options to launch MSBT's options.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.1</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>The optional icons module is no longer required.  This is a significant memory savings for those previously using the module.</li>
+       <li>Unfortunately, the ability to add and customize triggers is disabled for this release while the system is rewritten.</li>
+       <li>
+        Rewrote the parser to work with the new combat log mechanics implemented in Patch 2.4.  Since
+        manually parsing text strings is no longer required, things like pets with the same name as
+        party/raid members will no longer cause confusion.  There also should no longer be problems with
+        non-English clients that had strange parsing issues due to ambiguous strings.
+       </li>
+       <li>Load up memory usage is now around 221 KiB.</li>
+       <li>Damage from spell reflects will now be shown to the player who reflected it as if they did the damage.</li>
+       <li>The horizontal animation style now has an alternating direction option.</li>
+       <li>Added new events for outgoing (offensive) player and pet dispels.</li>
+       <li>Internal filtering for identical monster emotes has been added to reduce potential spam.</li>
+       <li>Only one five combo point notification will now be shown per combo point cycle.</li>
+       <li>Overhealing will now show on heals that have been excluded from merging.</li>
+       <li>Fixed an issue regarding cooldowns not being displayed for certain skills like Mangle (Bear).</li>
+       <li>Added Simplified Chinese localization.  Thanks to elafor and hscui for their work.</li>
+       <li>Updated TOC for Patch 2.4.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.03</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Updated LibStub in MSBTIcons to resolve incompatibilities with a newer library version.
+        This should clear up some issues with other mod compatibility.
+       </li>
+       <li>Made icons for triggers obey the enable/disable skill icons option.</li>
+       <li>Updated for Patch 2.3.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.02</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Modified the sound system to allow custom registrations for easier sound selection.</li>
+       <li>Triggers may now specify a skill name to use for displaying an icon.</li>
+       <li>Added suitable icons to most of the default triggers.</li>
+       <li>Added parsing for mana gains from sources like Mana Spring totems now that they can be suppressed, if desired.</li>
+       <li>Mana gains during Innervate are now shown if the "Hyper Regen" option is set.</li>
+       <li>Damage from totems and other miscellaneous "pets" will now be displayed.</li>
+       <li>Changed the minimum scroll area width to 10.</li>
+       <li>Fixed a problem that was causing all periodic enemy heals and power gains to be shown instead of only buff gains.</li>
+       <li>Fixed an issue where delayed cooldowns such as combustion were completing before they should.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.01</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>DoTs and HoTs may now have independent throttle times.</li>
+       <li>Power gains can now be throttled and there is a default Vampiric Touch throttle entry.</li>
+       <li>Power gains now have icons when possible.</li>
+       <li>Added a "Move All" button to the Events tab to allow the whole category to be moved to a new scroll area quickly.</li>
+       <li>Added some logic to counteract ill behaved mods such as Recount and SW_Stats modifying global strings.</li>
+       <li>Fixed some issues with the options interface not saving certain fields properly.</li>
+       <li>Made search pattern triggers also check secondary conditions to match the behavior of the other condition types.</li>
+       <li>Updated the MSBTIcons module .toc file to prevent certain cases where it wasn't being loaded in the correct order (Thanks dylanm).</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.0</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Complete code rewrite to further reduce memory usage and CPU utilization. Blizzard's addition
+        of memory and CPU tracking tools to the API were used to help achieve this.  The CPU utilization
+        is about 55% less, and the load up memory usage is now around 258 KiB.  
+	   </li>
+       <li>
+        Redesigned the profile system to use a full master/diff approach.  This leads to a substantial
+        memory savings when using multiple profiles.  It also adds the benefit of allowing future changes
+        to defaults to take place without having to completely reset user profiles.
+       </li>
+       <li>
+        The options interface was streamlined and rewritten using pure lua.  All the tabs and popup
+        frames are now dynamically created only when needed.  The options are still load on demand
+        and use no resources when not loaded.
+       </li>
+       <li>Created a new set of spam controls:
+        <ul>
+         <li>Show ALL power gains <span style="color:red;">WARNING: This can and will spam you!</span></li>
+         <li>Show hyper regen (mana gains during Evocation and Spirit Tap)</li>
+         <li>Thresholds for Healing, Damage, and Power Gains</li>
+         <li>Skill name substitution</li>
+         <li>Skill suppression (e.g. Vampiric Embrace)</li>
+         <li>Skill abbreviation option with new %sl event code to override at the event level</li>
+         <li>Independent throttle times per skill</li>
+         <li>Merge exclusion list (e.g. avoid merging mutilate)</li>
+        </ul>
+       </li>
+       <li>
+        New font opacity setting that follows the same inheritance mechanics as the other font
+        settings, so each individual scroll area and event can have a custom opacity.
+       </li>
+       <li>
+        Added some "high level" controls to the options interface such as a "Toggle All" button to quickly toggle
+        the enable state of all events in the selected category. This allows you to disable all incoming pet events
+        with one click for example.  Another example is a "Disable Skill Names" checkbox which quickly allows you
+        to stop all skill names from being displayed without having to modify every single event and remove the %s.
+       </li>
+       <li>Added built-in customizable cooldown notifications.</li>
+       <li>Crits are now separate events so they can be individually controlled.</li>
+       <li>Each scroll area may now have its own independent animation speed.</li>
+       <li>Scroll areas now have a customizable width that the animation styles obey when it makes sense.</li>
+       <li>New horizontal and static animation styles.</li>
+       <li>Created a new default scroll area using the new static animation style.</li>
+       <li>Implemented behaviors in the animation system which allow more customization of animation styles.</li>
+       <li>Added a new selectable behavior (Normal) to the Pow sticky animation style that will not perform the jiggle effect.</li>
+       <li>Added enemy buff gain and monster emote events (spell alert).</li>
+       <li>New money gains notification event.</li>
+       <li>There is now a full set of incoming pet events.</li>
+       <li>Added outgoing pet DoTs.</li>
+       <li>Every event can now be assigned a custom sound. (e.g. full combo points)</li>
+       <li>Several trigger conditions such as Self Buff Gains can now have multiple entries per trigger.</li>
+       <li>Added a debuff application number secondary trigger condition.</li>
+       <li>Added a spell usable secondary trigger condition.</li>
+       <li>Added several new fonts.</li>
+       <li>Added an optional skill icons module.</li>
+       <li>Made some minor tweaks to the default display and throttle settings to improve readability.</li>
+       <li>Fixed a few parsing issues.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.13</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added temporary fix for PlaySoundFile() bug in Patch 2.2.2.</li>
+       <li>Updated for Patch 2.2.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.12</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added the option to disable/enable Blizzard's new built-in healing display above the target's head.</li>
+       <li>Updated for Patch 2.1.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.11</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed the issue where crits were being improperly displayed on some non-English clients.</li>
+       <li>Modified the outgoing crit/block/dodge/parry trigger conditions to only apply to the player and not any pets.</li>
+       <li>Added a "Trigger Cooldown" secondary condition.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.1</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Rewrote the trigger system to allow for multiple conditions while maintaining efficiency. In addition several commonly requested triggers were added.</li>
+       <li>Triggers may now have a custom sound assigned to them.</li>
+       <li>Added parsing for some new TBC patterns that will fix a few issues where certain events were not showing up.</li>
+       <li>Made several parsing optimizations.</li>
+       <li>Created an event for incoming and outgoing Spell Interrupts.</li>
+       <li>Added Shadowmend to the list of throttled HoTs.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.03</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Recharacterized some damage based spells into DoTs so they will now follow the throttling mechanics.</li>
+       <li>Added damage types to environmental damage so it will now have the damage type colors applied.</li>
+       <li>Updated for Patch 2.0.3 / Burning Crusade.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.02</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Fixed parsing order error with Foreign languages which resolves a lot of issues on foreign clients with substitution codes
+        showing up instead of the actual data.
+       </li>
+       <li>The soul shard notification event should now work again.</li>
+       <li>The mana gained form the warlock Dark Pact talent will now be displayed.</li>
+       <li>
+        Recharacterized healing from some damage based spells (most notably Vampiric Embrace) into HoTs so they
+        will now follow the throttling mechanics.  Basically this means those spells should no longer spam you with healing
+        if you have HoT and DoT throttling enabled (it's on by default).
+       </li>
+       <li>Added parsing for damage taken from the tornado in the arenas.</li>
+       <li>Added French localization.</li>
+       <li>Added more German localization.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.01</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed the problem induced by the 2.0 patch where wand damage was not showing up.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">4.0</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Complete code rewrite for even better performance and features.</li>
+       <li>
+        Major Optimizations:
+        <ul>
+         <li>
+          Rewrote the combat parsing engine to significantly increase performance and lower the memory footprint.
+         </li> 
+         <li>
+          Redesigned the suppression system to use a hash table searching algorithm so that any number of suppressions may be added without any appreciable slowdown.
+         </li>
+         <li>
+          Optimized the default profile handling.  Due to the large number of options, the default
+          profile table takes up a decent chunk of memory (around 90 KiB).  In the previous versions, the
+          table was always memory resident - even when it wasn't needed.  It is now created dynamically
+          only when it's needed, which is the first time you load a new version of the mod or reset a profile
+          to its defaults.
+         </li>
+         <li>
+          Redesigned the underlying options tables such that shared information amongst the events is
+          only stored once instead of separately for each event.  This saves quite a bit of memory,
+          especially when there are multiple profiles.
+         </li>
+         <li>
+          Created a single pool of dynamically created font strings to be shared by the various scroll areas.
+          Previously a set number of font strings were created for every scroll area.
+         </li>
+         <li>Load up memory usage is now around 450 KiB.</li>
+        </ul>
+       </li>
+       <br />
+
+       <li>
+        Minor Optimizations:
+        <ul>
+         <li>
+          Trigger system will no longer listen for events that there are no triggers for. Previously it received the same events the mod was already
+          parsing and ignored the ones with no triggers.
+         </li>
+         <li>Reduced the amount of information that needs to be passed around to lower memory usage during operation.</li>
+        </ul>
+       </li>
+       <br />
+
+       <li>
+        Rewrote the animation code to work using scaled timing.  Previously the animation was created by moving the text a set
+        amount of pixels each update.  This had the effect of causing the animation speed to vary greatly depending on system performance.
+        The animations should now keep the same speed regardless of large performance hits, such as those incurred while recording a
+        video or during extreme lag.
+       </li>
+       <li>Each character will now load the last selected profile for that character by default.</li>
+       <li>
+         Changed the default font to Porky, which has glyphs for most common German, French, and Spanish special characters. In addition, most of the fonts were
+         replaced with new versions that support them as well. However, the old Adventure font is still available for those who want to use it.
+       </li>
+       <li>
+        Added an option (enabled by default) to throttle DoTs and HoTs so that only one event for each ability will be displayed within the time period
+        specified (2.5 seconds by default). Any additional DoT/HoT abilities that occur while being throttled are merged into one event to be shown once the throttle
+        period has passed.  This will reduce the spam when you have HoTs and/or DoTs on multiple targets.
+       </li>
+       <li>Made scroll areas dynamically creatable and made events/triggers assignable to them.</li>
+       <li>
+        Ability/Spell damage amounts now use a custom color according to their damage type by default.  The rest of the message will still show up with the event's selected color.
+        This behavior can be disabled.
+       </li>
+       <li>Partial effects (absorbs, resists, glancing, crushing, overheals, etc) can now be individually enabled, disabled, and color coded.</li>
+       <li>Separated Debuff and Item Buff Fades from Buff Fades into new notification events.  Totem buffs are now also handled as buff gains and fades.</li>
+       <li>Added an Extra Attacks notification event which will give notifications for Windfury, Thrash, Sword Spec, etc.</li>
+       <li>Added a Soul Shard Created notification event.</li>
+       <li>Overhauled the interface to include the new features.</li>
+       <li>Added a font registration function so other mod developers can choose to display their custom messages in their own font.</li>
+       <li>Added an animation style registration function so other mod developers can easily provide custom animation styles for MSBT.</li>
+       <li>
+        Provided an additional file named API.html that is a reference for the publicly accessible functions that
+        other mod developers can use to display messages through MSBT and register custom animation styles.
+       </li>
+      </ul>
+
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">3.11</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        Fixed the bug where in certain circumstances the trigger interface would give an error
+        when trying to setup a new search pattern trigger.
+       </li>
+       <li>Made newly created triggers inherit all font settings instead of specifying a font size by default.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">3.1</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Added support for power gains to yourself from other people.</li>
+       <li>
+        Increased the number of available event types for the trigger system to allow for greater
+        flexibility.  Due to the way the trigger system is designed this will not add much overhead since
+        triggers are only parsed against the selected event types.
+       </li>
+       <li>Alphabetized the list of available trigger events to make finding the one you want easier.</li>
+       <li>
+        Removed the default Blessing/Judgement of Wisdom suppression.  The user can choose to add one in for it
+        if they prefer.
+       </li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">3.01</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed the bug where you could only add one suppression and adding a new one was overwriting it.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">3.0</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Implemented a low overhead trigger system.  <a href="#TriggerSystem">See documentation above</a>.</li>
+       <li>Implemented a suppression system that allows you to suppress particular messages you don't want to see.</li>
+       <li>
+        Made significant changes to the scroll area settings interface.  The new interface shows all three
+        scroll areas at the same time.  Each scroll area is now titled with its coordinates and there are
+        editboxes to enter specific coordinates in addition to being able to drag the scroll areas around.
+       </li>
+       <li>
+        Changed the core animation routines to use function pointers in order to eliminate the need for a
+        ton of conditional testing.  Previously, every time the animation routine was called (typically
+        60-70 times per second for every scrolling item), the animation style and scroll direction were
+        checked to calculate how to move the text.  Now those items are only checked during the initial
+        animation object setup phase.  This should help performance on slower PCs.
+       </li>
+       <li>Added the command "/msbt search pattern" to enable an event searching mode which helps identify event types used in the trigger system. See documentation above for more info.</li>
+       <li>
+        Moved the Low Health, Low Mana, and Execute events into the trigger system.  Due to this change
+        the Low Mana and Execute triggers will no longer waste resources checking on classes that don't
+        use mana or have an execute ability.  Also moving them into the trigger system made the thresholds
+        at which to show the Low Health, and Low Mana warnings selectable.
+       </li>
+       <li>Made a few minor code performance tweaks to the animation setup "pipeline."</li>
+       <li>Added Killing Blow notification events for both players and NPCs.</li>
+       <li>Added crushing and glancing hit partial effects.</li>
+       <li>The font settings frame can now be moved.</li>
+       <li>Fixed a bug where messages added via the MikSBT.DisplayMessage function were being shown even if the scroll area was set to not show messages.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">2.11</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Disabled Blizzard's new floating text in Patch 1.12 when MSBT is enabled.</li>
+       <li>Updated for Patch 1.12.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">2.1</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Reduced memory usage a little by removing the underlying tables used to store crit information for events that can never be crits. (Down to around 477 KiB)</li>
+       <li>To go along with the above change, the font settings interface for events was reworked so that you can no longer set crit information for events that don't support them.</li>
+       <li>Added a title at the top of the font settings frame to help distinguish what is being modified.</li>
+       <li>Added an Experience Gains notification event.</li>
+       <li>Added the capability for notifications to be displayed "sticky" style.</li>
+       <li>Fixed the bug induced by patch 1.11 where reputation gains and losses weren't being displayed.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">2.0</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>
+        MAJOR optimization code rewrite:
+        <ul>
+         <li>Made options load on demand to significantly reduce memory usage and start up time.</li>
+         <li>
+          Implemented a table recycling system to reuse tables created during combat instead
+          of creating new ones and allowing them to be garbage collected.  The net effect is that a
+          ton of garbage collection churn has been eliminated.  Thanks go to kergoth and Wobin for
+          tips on how to achieve this.
+         </li>
+         <li>The combat event parser has been changed to reuse one single table for storing the results of the parsed data.</li>
+         <li>Streamlined the combat event to screen animation "pipeline."</li>
+         <li>Namespaced all code to reduce global namespace pollution.</li>
+         <li>
+          Load up KiB Usage in v1.03 was approximately 1050 KiB.  This has been reduced to around
+          488 KiB. In addition, due to the table recycling system, memory usage during operation is
+          much more consistent instead of continuously increasing until the next garbage collection
+          cycle.
+         </li>
+        </ul>
+       </li>
+       <br />
+       <li>
+        Added a function to allow messages to be easily displayed through MSBT from external sources.<br />
+        This function is MikSBT.DisplayMessage and is detailed in the included API.html file.
+       </li>
+       <li>Added the command "/msbt stats" to report statistics about the table recycling system.</li>
+       <li>Changed the functionality of AoE merges so that the name reported is "Multiple" instead of the last affected unit.</li>
+       <li>Added the option to disable "game damage" instead of just always doing it.</li>
+       <li>Added the option to disable "sticky crits."</li>
+       <li>Added Execute/Hammer of Wrath notification event.</li>
+       <li>Separated Heals over time (HoTs) and Damage over time (DoTs) into their own events.</li>
+       <li>Added the option to display overhealing.</li>
+       <li>Fixed a bug where crits were not being recognized in non-English clients.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">1.03</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed a bug where options set with a checkbox were not being properly saved on logout.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">1.02</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Fixed a bug where the global string parser wasn't appropriately accounting for the argument order of non-English clients.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">1.01</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Updated for Patch 1.11.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">1.0</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Initial version.</li>
+      </ul>
+     </td>
+    </tr>
+   </table>
+  </div>
+
+  <div class="SectionTitle"><a name="Credits"></a>Credits</div>
+  <a href="#TOC">Return to TOC</a><br /><br />
+  <div class="SectionBody">
+   Thanks to:
+   <ul>
+    <li>Grayhoof, the author of SCT, for the original mod which inspired this mod.</li>
+    <li>Kergoth and Wobin for their suggestions on optimizations via reduced GC churn and namespacing tips.</li>
+    <li>Farook, Archiv, and Mojosdojo for the German localizations.</li>
+    <li>Calthas and Devfool for the French localizations.</li>
+    <li>Hscui, Netcookies, and yleaf for the Simplified Chinese localizations.</li>
+    <li>Whitepaw and yleaf for the Traditional Chinese localizations.</li>
+    <li>StingerSoft for the Russian localizations.</li>
+    <li>Slowhand, Fenlis, and chkid for the Korean localizations.</li>
+    <li>Kelhar@Runetotem-EU for the Italian localizations.</li>
+   </ul>
+  </div>
+ </body>
+</html>

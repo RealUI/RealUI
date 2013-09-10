@@ -1,0 +1,53 @@
+﻿## Interface: 50400
+## Title: Grid2
+## Notes: A modular, lightweight and screen-estate saving grid of party/raid unit frames
+## Notes-esES: Marcos de unidades de raid compactos y ligeros.
+## Notes-ruRU: Модульный, легкий, отображающий на экране область группы/рейда в виде сетки.
+## Notes-zhCN: 小巧的轻量级模块化队伍框架
+## Notes-zhTW: 精簡的團隊框架功能
+## Author: Pastamancer & Maia, Jerry, Toadkiller
+## X-Curse-Packaged-Version: 699
+## X-Curse-Project-Name: Grid2
+## X-Curse-Project-ID: grid2
+## X-Curse-Repository-ID: wow/grid2/mainline
+
+## OptionalDeps: Ace3, Clique
+## SavedVariables: Grid2DB
+## DefaultState: enabled
+## LoadOnDemand: 0
+
+## Version: 699
+## X-ReleaseDate: "$Date: 2013-03-09 01:15:37 +0000 (Sat, 09 Mar 2013) $"
+## X-Category: UnitFrame
+
+# Ace Libraries
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua
+#@end-no-lib-strip@
+
+#Locales
+locales.xml
+
+# Grid
+GridCore.lua
+GridUtils.lua
+GridRoster.lua
+GridLayout.lua
+GridLayoutLayouts.lua
+GridFrame.lua
+GridIndicator.lua
+GridStatus.lua
+GridSetup.lua
+GridDefaults.lua
+
+modules.xml
+

@@ -1,0 +1,106 @@
+Raven API
+
+Raven provides an API that can be used by other addons, either to extend Raven itself with more features or to leverage Raven's tracking of auras and cooldowns. You can support the spell rotation for a particular class, for example, by adding custom conditions (using Raven:InitializeCondition). Or, you can call Raven to evaluate conditions (using Raven:CheckCondition) from an addon like PowerAuras.
+
+Several updates are planned for this API, including adding functions to create bar groups and to register callback functions that Raven will call during updates.
+
+---------------------------
+auraTable = Raven:CheckAura(unit, name, isBuff)
+
+CheckAura tests if an aura is active on a unit, returning a table auraTable containing descriptor tables for each active aura that matches the name and isBuff parameters (isBuff is true for buffs and false for debuffs). If auraTable is empty then no auras match the parameters. Aura descriptor tables have this structure:
+
+	b[1] = isBuff
+	b[2] = timeLeft
+	b[3] = stackCount
+	b[4] = aura type
+	b[5] = duration
+	b[6] = caster
+	b[7] = isStealable
+	b[8] = icon
+	b[9] = rank
+	b[10] = expireTime
+	b[11] = tooltip type ("buff", "debuff", "inventory", "tracking", "vehicle buff", "vehicle debuff") 
+	b[12] = tooltipArgument (for buffs and debuffs this is index from UnitAura, for other it is a type-dependent string)
+	b[13] = aura name
+	b[14] = spellID for buffs and debuffs, otherwise nil
+	
+Note that the result auraTable is a static structure and is overwritten with each call to CheckAura.
+
+---------------------------
+Raven:IterateAuras(unit, func, isBuff, p1, p2, p3)
+
+IterateAuras calls func for each active aura. The calling format is func(unit, name, b, isBuff, p1, p2, p3) where unit is the unit the aura is on, name is the name of the aura, b is an aura desciptor table (described above for CheckAura), isBuff is true for buffs and false for debuffs, and p1, p2 and p3 are the parameters passed into the IterateAuras call.
+
+---------------------------
+cdTable = Raven:CheckCooldown(name)
+
+CheckCooldown checks if a cooldown with the specified name is active, returning a descriptor table if found or nil if not found. Cooldown descriptor tables have this structure:
+
+	b[1] = timeLeft
+	b[2] = icon
+	b[3] = startTime
+	b[4] = duration
+	b[5] = tooltipType ("spell", "spell link", "inventory", "item link", "text")
+	b[6] = tooltipArgument (for inventory this is slot name, for spell it is spell name, for spell and item links it is hyperlink)
+	b[7] = unit
+	b[8] = spellID for spells, itemID for items, slotID for inventory, otherwise nil
+
+---------------------------
+Raven:IterateCooldowns(func, p1, p2, p3)
+
+IterateCooldowns calls func for each active aura. The calling format is func(name, b, p1, p2, p3) where name is the name of the cooldown, b is a cooldown desciptor table (described above for CheckCooldown), and p1, p2 and p3 are the parameters passed into the IterateCooldowns call.
+
+---------------------------
+hasBuff = Raven:UnitHasBuff(unit, type)
+
+UnitHasBuff returns true if the unit has an active buff of the specified type (e.g., "Mainhand").
+
+---------------------------
+hasDebuff = Raven:UnitHasDebuff(unit, type)
+
+UnitHasDebuff returns true if the unit has an active debuff of the specified type (e.g., "Poison").
+
+---------------------------
+value = Raven:CheckCondition(name)
+
+CheckCondition returns the current boolean value for the named condition.
+
+---------------------------
+spell = Raven:GetConditionSpell(name)
+
+GetConditionSpell returns the name of the spell associated with the named condition.
+
+---------------------------
+text = Raven:GetConditionText(name)
+
+GetConditionText returns a string containing a detailed description of the named condition.
+
+---------------------------
+Raven:InitializeCondition(name, condition, class)
+
+InitializeCondition can be called from another module during OnInitialize to add a condition (or overwrite a default condition). Changes to the condition made using the configuration panel will be tracked in Raven's profiles, allowing end users to customize the condition. Parameters: name is the name to associate with the condition, condition is a table containing test definitions (refer to the templates at the end of the Conditions.lua file or look at examples in the class files in the Presets folder), and class is optional and, if set, the condition is only added if the player is of the specified class (class can be upper or lower case and DKs can enter either "death knight" or "deathknight").
+
+One way to construct a condition is to create it in Raven using the configuration panel, reload UI to update the profile, and then cut-and-paste the condition's table entry from the Raven.lua file in the WTF folder.
+
+---------------------------
+text = Raven:FormatTime(time, index, spaces, upperCase)
+
+Convert a time value in seconds into text using Raven's time formatting function. The index specifies the time format option to use (numbered from 1 to the number of valid options). If spaces is true then spaces are preserved in the text, if false then spaces are removed. If upperCase is true then the text is converted to uppercase. This function returns nil if an invalid index is specified, otherwise it returns the converted time text string.
+
+---------------------------
+index = Raven:RegisterTimeFormat(func)
+
+Add a formatting function to Raven's table of time format options. Returns the assigned index. The function is assumed to take a single parameter which is a time value in seconds and to return a text string.
+
+---------------------------
+Raven:ResetBarGroupFilter(barGroupName, "Buff"|"Debuff"|"Cooldown")
+Raven:RegisterBarGroupFilter(barGroupName, "Buff"|"Debuff"|"Cooldown", spellNameOrID)
+
+Reset and then register new spells in the specified filter for the named bar group.
+
+---------------------------
+count = Raven:RegisterSpellList(listName, spellTable, reset)
+
+Register the spells in the spell table, which can contain either spell names or numeric identifiers, in a spell list with the specified name. If reset is true then first clear all spells from the spell list so ends up only containing the ones in the spell table. Returns the number of unique spells added to the spell table (duplicate names are removed).
+
+---------------------------

@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="GUI.lua"/>
+	<Script file="Advanced.lua"/>
+	<Script file="Other.lua"/>
+	<Script file="Appearance.lua"/>
+	<Script file="Positions.lua"/>
+	<Script file="ActionBars.lua"/>
+	<Script file="Grid.lua"/>
+	<Script file="AuraTracking.lua"/>
+</Ui>

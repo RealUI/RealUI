@@ -1,0 +1,150 @@
+<Bindings>
+	<Binding name="BTTOGGLEACTIONBARLOCK" header="Bartender4" >
+		if InCombatLockdown() then
+			print("Cannot change the button lock during combat.")
+			return
+		end
+		Bartender4.db.profile.buttonlock = not Bartender4.db.profile.buttonlock
+		Bartender4.Bar:ForAll("ForAll", "SetAttribute", "buttonlock", Bartender4.db.profile.buttonlock)
+	</Binding>
+	<Binding name="CLICK BT4Button1:LeftButton" />
+	<Binding name="CLICK BT4Button2:LeftButton" />
+	<Binding name="CLICK BT4Button3:LeftButton" />
+	<Binding name="CLICK BT4Button4:LeftButton" />
+	<Binding name="CLICK BT4Button5:LeftButton" />
+	<Binding name="CLICK BT4Button6:LeftButton" />
+	<Binding name="CLICK BT4Button7:LeftButton" />
+	<Binding name="CLICK BT4Button8:LeftButton" />
+	<Binding name="CLICK BT4Button9:LeftButton" />
+	<Binding name="CLICK BT4Button10:LeftButton" />
+	<Binding name="CLICK BT4Button11:LeftButton" />
+	<Binding name="CLICK BT4Button12:LeftButton" />
+	<Binding name="CLICK BT4Button13:LeftButton" header="BT4BLANK2" />
+	<Binding name="CLICK BT4Button14:LeftButton" />
+	<Binding name="CLICK BT4Button15:LeftButton" />
+	<Binding name="CLICK BT4Button16:LeftButton" />
+	<Binding name="CLICK BT4Button17:LeftButton" />
+	<Binding name="CLICK BT4Button18:LeftButton" />
+	<Binding name="CLICK BT4Button19:LeftButton" />
+	<Binding name="CLICK BT4Button20:LeftButton" />
+	<Binding name="CLICK BT4Button21:LeftButton" />
+	<Binding name="CLICK BT4Button22:LeftButton" />
+	<Binding name="CLICK BT4Button23:LeftButton" />
+	<Binding name="CLICK BT4Button24:LeftButton" />
+	<Binding name="CLICK BT4Button25:LeftButton" header="BT4BLANK3" />
+	<Binding name="CLICK BT4Button26:LeftButton" />
+	<Binding name="CLICK BT4Button27:LeftButton" />
+	<Binding name="CLICK BT4Button28:LeftButton" />
+	<Binding name="CLICK BT4Button29:LeftButton" />
+	<Binding name="CLICK BT4Button30:LeftButton" />
+	<Binding name="CLICK BT4Button31:LeftButton" />
+	<Binding name="CLICK BT4Button32:LeftButton" />
+	<Binding name="CLICK BT4Button33:LeftButton" />
+	<Binding name="CLICK BT4Button34:LeftButton" />
+	<Binding name="CLICK BT4Button35:LeftButton" />
+	<Binding name="CLICK BT4Button36:LeftButton" />
+	<Binding name="CLICK BT4Button37:LeftButton" header="BT4BLANK4" />
+	<Binding name="CLICK BT4Button38:LeftButton" />
+	<Binding name="CLICK BT4Button39:LeftButton" />
+	<Binding name="CLICK BT4Button40:LeftButton" />
+	<Binding name="CLICK BT4Button41:LeftButton" />
+	<Binding name="CLICK BT4Button42:LeftButton" />
+	<Binding name="CLICK BT4Button43:LeftButton" />
+	<Binding name="CLICK BT4Button44:LeftButton" />
+	<Binding name="CLICK BT4Button45:LeftButton" />
+	<Binding name="CLICK BT4Button46:LeftButton" />
+	<Binding name="CLICK BT4Button47:LeftButton" />
+	<Binding name="CLICK BT4Button48:LeftButton" />
+	<Binding name="CLICK BT4Button49:LeftButton" header="BT4BLANK5" />
+	<Binding name="CLICK BT4Button50:LeftButton" />
+	<Binding name="CLICK BT4Button51:LeftButton" />
+	<Binding name="CLICK BT4Button52:LeftButton" />
+	<Binding name="CLICK BT4Button53:LeftButton" />
+	<Binding name="CLICK BT4Button54:LeftButton" />
+	<Binding name="CLICK BT4Button55:LeftButton" />
+	<Binding name="CLICK BT4Button56:LeftButton" />
+	<Binding name="CLICK BT4Button57:LeftButton" />
+	<Binding name="CLICK BT4Button58:LeftButton" />
+	<Binding name="CLICK BT4Button59:LeftButton" />
+	<Binding name="CLICK BT4Button60:LeftButton" />
+	<Binding name="CLICK BT4Button61:LeftButton" header="BT4BLANK6" />
+	<Binding name="CLICK BT4Button62:LeftButton" />
+	<Binding name="CLICK BT4Button63:LeftButton" />
+	<Binding name="CLICK BT4Button64:LeftButton" />
+	<Binding name="CLICK BT4Button65:LeftButton" />
+	<Binding name="CLICK BT4Button66:LeftButton" />
+	<Binding name="CLICK BT4Button67:LeftButton" />
+	<Binding name="CLICK BT4Button68:LeftButton" />
+	<Binding name="CLICK BT4Button69:LeftButton" />
+	<Binding name="CLICK BT4Button70:LeftButton" />
+	<Binding name="CLICK BT4Button71:LeftButton" />
+	<Binding name="CLICK BT4Button72:LeftButton" />
+	<Binding name="CLICK BT4Button73:LeftButton" header="BT4BLANK7" />
+	<Binding name="CLICK BT4Button74:LeftButton" />
+	<Binding name="CLICK BT4Button75:LeftButton" />
+	<Binding name="CLICK BT4Button76:LeftButton" />
+	<Binding name="CLICK BT4Button77:LeftButton" />
+	<Binding name="CLICK BT4Button78:LeftButton" />
+	<Binding name="CLICK BT4Button79:LeftButton" />
+	<Binding name="CLICK BT4Button80:LeftButton" />
+	<Binding name="CLICK BT4Button81:LeftButton" />
+	<Binding name="CLICK BT4Button82:LeftButton" />
+	<Binding name="CLICK BT4Button83:LeftButton" />
+	<Binding name="CLICK BT4Button84:LeftButton" />
+	<Binding name="CLICK BT4Button85:LeftButton" header="BT4BLANK8" />
+	<Binding name="CLICK BT4Button86:LeftButton" />
+	<Binding name="CLICK BT4Button87:LeftButton" />
+	<Binding name="CLICK BT4Button88:LeftButton" />
+	<Binding name="CLICK BT4Button89:LeftButton" />
+	<Binding name="CLICK BT4Button90:LeftButton" />
+	<Binding name="CLICK BT4Button91:LeftButton" />
+	<Binding name="CLICK BT4Button92:LeftButton" />
+	<Binding name="CLICK BT4Button93:LeftButton" />
+	<Binding name="CLICK BT4Button94:LeftButton" />
+	<Binding name="CLICK BT4Button95:LeftButton" />
+	<Binding name="CLICK BT4Button96:LeftButton" />
+	<Binding name="CLICK BT4Button97:LeftButton" header="BT4BLANK9" />
+	<Binding name="CLICK BT4Button98:LeftButton" />
+	<Binding name="CLICK BT4Button99:LeftButton" />
+	<Binding name="CLICK BT4Button100:LeftButton" />
+	<Binding name="CLICK BT4Button101:LeftButton" />
+	<Binding name="CLICK BT4Button102:LeftButton" />
+	<Binding name="CLICK BT4Button103:LeftButton" />
+	<Binding name="CLICK BT4Button104:LeftButton" />
+	<Binding name="CLICK BT4Button105:LeftButton" />
+	<Binding name="CLICK BT4Button106:LeftButton" />
+	<Binding name="CLICK BT4Button107:LeftButton" />
+	<Binding name="CLICK BT4Button108:LeftButton" />
+	<Binding name="CLICK BT4Button109:LeftButton" header="BT4BLANK10" />
+	<Binding name="CLICK BT4Button110:LeftButton" />
+	<Binding name="CLICK BT4Button111:LeftButton" />
+	<Binding name="CLICK BT4Button112:LeftButton" />
+	<Binding name="CLICK BT4Button113:LeftButton" />
+	<Binding name="CLICK BT4Button114:LeftButton" />
+	<Binding name="CLICK BT4Button115:LeftButton" />
+	<Binding name="CLICK BT4Button116:LeftButton" />
+	<Binding name="CLICK BT4Button117:LeftButton" />
+	<Binding name="CLICK BT4Button118:LeftButton" />
+	<Binding name="CLICK BT4Button119:LeftButton" />
+	<Binding name="CLICK BT4Button120:LeftButton" />
+	<Binding name="CLICK BT4PetButton1:LeftButton" header="BT4PET" />
+	<Binding name="CLICK BT4PetButton2:LeftButton" />
+	<Binding name="CLICK BT4PetButton3:LeftButton" />
+	<Binding name="CLICK BT4PetButton4:LeftButton" />
+	<Binding name="CLICK BT4PetButton5:LeftButton" />
+	<Binding name="CLICK BT4PetButton6:LeftButton" />
+	<Binding name="CLICK BT4PetButton7:LeftButton" />
+	<Binding name="CLICK BT4PetButton8:LeftButton" />
+	<Binding name="CLICK BT4PetButton9:LeftButton" />
+	<Binding name="CLICK BT4PetButton10:LeftButton" />
+	<Binding name="CLICK BT4StanceButton1:LeftButton" header="BT4STANCE" />
+	<Binding name="CLICK BT4StanceButton2:LeftButton" />
+	<Binding name="CLICK BT4StanceButton3:LeftButton" />
+	<Binding name="CLICK BT4StanceButton4:LeftButton" />
+	<Binding name="CLICK BT4StanceButton5:LeftButton" />
+	<Binding name="CLICK BT4StanceButton6:LeftButton" />
+	<Binding name="CLICK BT4StanceButton7:LeftButton" />
+	<Binding name="CLICK BT4StanceButton8:LeftButton" />
+	<Binding name="CLICK BT4StanceButton9:LeftButton" />
+	<Binding name="CLICK BT4StanceButton10:LeftButton" />
+</Bindings>

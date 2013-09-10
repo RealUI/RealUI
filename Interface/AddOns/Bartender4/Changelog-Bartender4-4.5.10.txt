@@ -1,0 +1,13 @@
+tag 4.5.10
+34ce51cdcace154f0a0cc4b1de16e70d10e87e58
+Hendrik Leppkes <h.leppkes@gmail.com>
+2013-05-28 19:51:05 +0200
+
+Tag as 4.5.10
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Use restricted environment API functions instead of hacking our way around it.
+	- Bump TOC

@@ -1,0 +1,8 @@
+<Bindings>
+	<Binding name="REALUIMINIMAPTOGGLE" header="REALUIMINIMAP" >
+		RealUIMinimap:ToggleBind()
+	</Binding>
+	<Binding name="REALUIMINIMAPFARM">
+		RealUIMinimap:FarmBind()
+	</Binding>
+</Bindings>

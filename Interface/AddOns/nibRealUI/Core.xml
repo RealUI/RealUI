@@ -1,0 +1,18 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<!-- Core -->
+	<Script file="Core\Fun.lua"/>
+	<Include file="Core\AddonData.xml"/>
+	<Script file="Core\AddonControl.lua"/>
+	<Script file="Core\Fonts.lua"/>
+	<Script file="Core\RetinaDisplay.lua"/>
+	<Script file="Core\MiniPatches.lua"/>
+	<Script file="Core\Settings.lua"/>
+	<Script file="Core\Positioners.lua"/>
+	<Script file="Core\Tutorial.lua"/>
+	<Script file="Core\Notifications.lua"/>
+	<Script file="Core\SpiralBorder.lua"/>
+	<Script file="Core\AngleStatusBar.lua"/>
+	<Script file="Core\Animations.lua"/>
+</Ui>

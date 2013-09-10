@@ -1,0 +1,14 @@
+## Interface: 30000
+## X-Curse-Packaged-Version: r1094
+## X-Curse-Project-Name: Ace2
+## X-Curse-Project-ID: ace2
+## X-Curse-Repository-ID: wow/ace2/mainline
+
+## Title: Lib: AceLibrary
+## Notes: AddOn development framework
+## Author: Ace Development Team
+## X-Website: http://www.wowace.com
+## X-Category: Library
+## X-License: LGPL v2.1 + MIT for AceOO-2.0
+ 
+AceLibrary.lua

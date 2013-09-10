@@ -1,0 +1,39 @@
+<Ui>
+	<Script file="ChatFrameBorders.lua" />
+	
+	<Frame name="ChatFrameBorderTemplate" virtual="true" enableMouse="false">
+		<Backdrop bgFile="Interface\\ChatFrame\\ChatFrameBackground" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="-5" y="7"/>
+				</Offset>
+			</Anchor>
+			<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+				<Offset>
+					<AbsDimension x="5" y="10"/>
+				</Offset>
+			</Anchor>
+			<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+				<Offset>
+					<AbsDimension x="-5" y="-10"/>
+				</Offset>
+			</Anchor>
+			<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+				<Offset>
+					<AbsDimension x="5" y="-10"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Frame>
+</Ui>

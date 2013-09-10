@@ -1,0 +1,40 @@
+## Interface: 50400
+## Title: Clique
+## Author: Cladhaire
+## Version: v50001-1.0.1
+## Notes: Simply powerful click-casting interface
+## SavedVariables: CliqueDB, CliqueDB3
+
+## X-Localizations: enUS, enGB, ruRU, zhCN, zhTW
+## X-CompatibleLocales: enUS, enGB, deDE, frFR, esES, esMX, zhCN, zhTW, koKR, ruRU
+
+AddonCore.lua
+Localization.enUS.lua
+Localization.ruRU.lua
+Localization.zhCN.lua
+Localization.zhTW.lua
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\tekKonfigAboutPanel.lua
+
+DatabaseDefaults.lua
+
+ClickCastTemplate.xml
+
+Clique.xml
+
+Clique.lua
+Utils.lua
+
+BindConfig.lua
+
+OptionsPanel.lua
+FrameOptionsPanel.lua
+
+BlizzardFrames.lua
+
+# HeaderTest.xml
+# HeaderTest.lua
+# TestSuite.lua

@@ -1,0 +1,11 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="Modules\Aura.lua"/>
+	<Script file="Modules\BanditsGuile.lua"/>
+	<Script file="Modules\BurningEmbers.lua"/>
+	<Script file="Modules\SavageRoar.lua"/>
+	<Script file="Modules\SliceAndDice.lua"/>
+	<Script file="Modules\Rupture.lua"/>
+	<Script file="Modules\WildMushrooms.lua"/>
+</Ui>

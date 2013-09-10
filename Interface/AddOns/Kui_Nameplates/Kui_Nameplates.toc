@@ -1,0 +1,22 @@
+## Interface: 50400
+## Author: Kesava
+## Title: |cff9900ffKui|r Nameplates
+## Notes: Prettier, lightweight, configurable nameplates.
+## SavedVariables: KuiNameplatesGDB
+## X-Curse-Packaged-Version: 211
+## X-Curse-Project-Name: KuiNameplates
+## X-Curse-Project-ID: kuinameplates
+## X-Curse-Repository-ID: wow/kuinameplates/mainline
+
+lib\embeds.xml
+
+core.lua
+config.lua
+create.lua
+layout.lua
+
+castbar.lua
+castwarnings.lua
+combopoints.lua
+
+custom.lua
