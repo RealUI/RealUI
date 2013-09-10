@@ -14,7 +14,6 @@ The following addons have been modified to suit RealUI and should not be updated
   - EasyMail
   - FreebTip
   - Grid2
-  - Kui_Media
   - SharedMedia + SharedMedia_MyMedia
 
 
