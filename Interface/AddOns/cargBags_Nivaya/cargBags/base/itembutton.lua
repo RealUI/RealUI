@@ -79,7 +79,9 @@ function ItemButton:Create(tpl)
 	if(button.Scaffold) then button:Scaffold(tpl) end
 	if(button.OnCreate) then button:OnCreate(tpl) end
 	local btnNT = _G[button:GetName().."NormalTexture"]
+	local btnNIB = _G[button:GetName().."NewItemTexture"]
 	if btnNT then btnNT:SetTexture(nil) end
+	if btnNIB then btnNIB:SetTexture(nil) end
 	
 	button:SetSize(ns.options.itemSlotSize, ns.options.itemSlotSize)
 	bFS = _G[button:GetName().."Count"]
