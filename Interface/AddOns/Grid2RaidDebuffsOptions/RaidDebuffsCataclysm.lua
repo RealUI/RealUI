@@ -1,14 +1,14 @@
 local RDDB= Grid2Options:GetRaidDebuffsTable()
 
 RDDB["Cataclysm"] = {
-	["Blackwing Descent"] = {
-		["Magmaw"]= {
+	[754] = {
+		["[170-2]Magmaw"]= {
 		89773, -- Mangle
 		94679, -- Parasitic Infection
 		88287, -- Massive Crash
         78199, -- Sweltering Armor		
 		},
-		["Omnitron Defense System"]= {
+		["[169-1]Omnitron Defense System"]= {
 		79889, -- Lightning Conductor
 		80161, -- Chemical Cloud
 		80011, -- Soaked in Poison
@@ -19,7 +19,7 @@ RDDB["Cataclysm"] = {
         92048, -- Shadow Infusion
         92023, -- Encasing Shadows		
 		},
-		["Maloriak"]= {
+		["[173-5]Maloriak"]= {
 		92991, -- Rend
 		78225, -- Acid Nova
 		92910, -- Debilitating Slime
@@ -30,40 +30,40 @@ RDDB["Cataclysm"] = {
         92987, -- Dark Sludge
         92982, -- Engulfing Darkness		
 		},
-		["Atremedes"]= {
+		["[171-3]Atremedes"]= {
 		78092, -- Tracking
 		77840, -- Searing
 		78353, -- Roaring Flame
 		78897, -- Noisy
 		},
-		["Chimaeron"]= {
+		["[172-4]Chimaeron"]= {
 		89084, -- Low Health
 		82934, -- Mortality
 		88916, -- Caustic Slime
 		82881, -- Break
         91307, -- Mocking Shadows		
 		},
-		["Nefarian"]={
+		["[174-6]Nefarian"]={
 		94075, -- Magma
 		77827, -- Tail Lash
         79339, -- Explosive Cinders
         79318, -- Dominion		
 		},
 	},
-	["The Bastion of Twilight"] = {
-		["Halfus Wyrmbreaker"]= {
+	[758] = {
+		["[156-1]Halfus Wyrmbreaker"]= {
 		83710, -- Furious Roar		
 		83908, -- Malevolent Strike
 		83603, -- Stone Touch
 		},
-		["Valiona & Theralion"]= {
+		["[157-2]Valiona & Theralion"]= {
 		86788, -- Blackout
 		95639, -- Engulfing Magic
 		86360, -- Twilight Shift
         86014, -- Twilight Meteorite
         92886, -- Twilight Zone		
 		},
-		["Ascendant Council"]= {
+		["[158-3]Ascendant Council"]= {
 		82762, -- Waterlogged
 		83099, -- Lightning Rod
 		82285, -- Elemental Stasis
@@ -77,7 +77,7 @@ RDDB["Cataclysm"] = {
         92467, -- Static Overload
         92538, -- Gravity Core		
 		},
-		["Cho'gall"]= {
+		["[167-4]Cho'gall"]= {
         81836, -- Corruption: Accelerated
         82125, -- Corruption: Malformation
         82170, -- Corruption: Absolute		
@@ -86,13 +86,13 @@ RDDB["Cataclysm"] = {
 		82518, -- Cho's Blast
 		93134, -- Debilitating Beam
 		},
-		["Sinestra"]= {
+		["[168-5]Sinestra"]= {
 		89299, -- Twilight Spit
 		92955, -- Wrack
 		},
 	},
-	["Throne of the Four Winds"] = {
-		["Conclave of Wind"]= {
+	[773] = {
+		["[154-1]Conclave of Wind"]= {
 		84645, -- Wind Chill
 		86107, -- Ice Patch
 		86082, -- Permafrost
@@ -102,7 +102,7 @@ RDDB["Cataclysm"] = {
 		85576, -- Withering Winds
 		93057, -- Slicing Gale		
 		},
-		["Al'Akir"]= {
+		["[155-2]Al'Akir"]= {
 		88290, -- Acid Rain
 		87873, -- Static Shock
 		88427, -- Electrocute
@@ -110,30 +110,30 @@ RDDB["Cataclysm"] = {
         87856, -- Squall Line		
 		},
 	},
-    ["Baradin Hold"] = {
-        ["Argaloth"]= {
+    [752] = {
+        ["[139-1]Argaloth"]= {
         88942, -- Meteor Slash
         88954, -- Consuming Darkness
         },
-		["Occu'thar"] = {
+		["[140-2]Occu'thar"] = {
 		96913, -- Searing Shadows
 		},
-		["Alizabal"] = {
+		["[339-3]Alizabal"] = {
 		104936, -- Skewer
 		105067, -- Seething Hate
 		},		
     },	
-	["Firelands"] = {
-		["Beth'tilac"]= {
+	[800] = {
+		["[192-1]Beth'tilac"]= {
 		49026, -- Fixate
 		97079, -- Seeping Venom
 		97202, -- Fiery Web Spin
 		99506, -- Widow Kiss
 		},
-		["Lord Rhyolith"]= {
+		["[193-2]Lord Rhyolith"]= {
 		98492, -- Eruption
 		},
-		["Alysrazor"]= {
+		["[194-3]Alysrazor"]= {
 		101729, -- Blazing Claw
 		100094, -- Fireblast
 		99389,  -- Imprinted
@@ -141,27 +141,27 @@ RDDB["Cataclysm"] = {
 		100640, -- Harsh Winds
 		100555, -- Souldering Roots
 		},
-		["Shannox"]= {
+		["[195-4]Shannox"]= {
 		99936,	-- Jagged Tear
 		99837,  -- Crustal Prison
 		99840,  -- Magma Rupture
 		101208, -- Inmolation Trap
 		},
-		["Baleroc"]= {
+		["[196-5]Baleroc"]= {
 		99252,  -- Blaze of Glory
 		99256,  -- Torment
 		99403,  -- Tormented
 		99516,  -- Count Down
 		100908, -- Fiery Torment
 		},
-		["Majordomo Staghelm"]= {
+		["[197-6]Majordomo Staghelm"]= {
 		98443,  -- Fiery Cylcone
 		98450,	-- Searing Seeds
 		98535,  -- Leaping flames
 		96993,  -- Stay Withdrawn
 		100210, -- Burning Orb
 		},
-		["Ragnaros"]= {
+		["[198-7]Ragnaros"]= {
 		99399,  -- Burning Wound
 		100293, -- Lava Wave
 		100238, -- Magma Trap vulnerability
@@ -182,11 +182,11 @@ RDDB["Cataclysm"] = {
 		100767, -- Melt Armor
 		},		
 	},
-	["Dragon Soul"] = {
-		["Morchok"] = {
+	[824] = {
+		["[311-1]Morchok"] = {
 		103687, -- Crush Armor
 		},
-		["Hagara the Stormbinder"] = {
+		["[317-4]Hagara the Stormbinder"] = {
 		104451,  -- Ice Tomb
 		105285,  -- Target (next Ice Lance)
 		105316,  -- Ice Lance
@@ -195,7 +195,7 @@ RDDB["Cataclysm"] = {
 		105465,  -- Lightning Storm
 		105369,  -- Lightning Conduit
 		},
-		["Warmaster Blackhorn"] = {
+		["[332-6]Warmaster Blackhorn"] = {
 		109204, -- Twilight Barrage
 		108046, -- Shockwave
 		108043, -- Devastate
@@ -203,23 +203,23 @@ RDDB["Cataclysm"] = {
 		107558, -- Degeneration
 		110214, -- Consuming Shroud
 		},
-		["Ultraxion"] = {
+		["[331-5]Ultraxion"] = {
 		110068, -- Fading light 
 		106108, -- Heroic will
 		106415, -- Twilight burst
 		105927, -- Faded Into Twilight
 		106369, -- Twilight shift
 		},
-		["Yor'sahj the Unsleeping"] = {
+		["[325-3]Yor'sahj the Unsleeping"] = {
 		104849, -- Void bolt
 		109389, -- Deep Corruption
 		105695, -- Fixate 
 		},
-		["Warlord Zon'ozz"] = {
+		["[324-2]Warlord Zon'ozz"] = {
 		103434, -- Disrupting shadows
 		110306, -- Black Blood of Go'rath
 		},
-		["Spine of Deathwing"] = {
+		["[318-7]Spine of Deathwing"] = {
 		105563, -- Grasping Tendrils
 		105490, -- Fiery Grip
 		105479, -- Searing Plasma
@@ -227,7 +227,7 @@ RDDB["Cataclysm"] = {
 		106200, -- Blood corruption: earth
 		106005, -- Degradation
 		},
-		["Madness of Deathwing"] = {
+		["[333-8]Madness of Deathwing"] = {
 		109603, -- Tetanus
 		109632, -- Impale
 		106794, -- Shrapnel

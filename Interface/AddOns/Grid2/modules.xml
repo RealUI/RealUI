@@ -29,5 +29,8 @@
 <Script file="modules\StatusShields.lua"/>
 <Script file="modules\StatusShieldsBoss.lua"/>
 <Script file="modules\StatusSelf.lua"/>
+<Script file="modules\StatusPurgatory.lua"/>
+<Script file="modules\StatusTortosCrystalShell.lua"/>
+<Script file="modules\StatusAbsorbs.lua"/>
 
 </Ui>

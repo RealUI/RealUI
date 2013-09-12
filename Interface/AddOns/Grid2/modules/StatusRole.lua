@@ -371,6 +371,8 @@ Grid2:DbSetStatusDefaultValue( "master-looter", { type = "master-looter", color1
 -- dungeon-role status
 
 local isValidRole = { TANK = true, HEALER = true, DAMAGER = true }
+local roleTexture = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES"
+local TexCoordfunc = GetTexCoordsForRoleSmallCircle
 
 DungeonRole.UpdateAllUnits = Grid2.statusLibrary.UpdateAllUnits
 DungeonRole.UpdateActiveUnits = Grid2.statusLibrary.UpdateAllUnits
@@ -410,11 +412,11 @@ function DungeonRole:GetColor(unit)
 end
 
 function DungeonRole:GetIcon(unit)
-	return "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES"
+	return roleTexture
 end
 
 function DungeonRole:GetTexCoord(unit)
-	return GetTexCoordsForRoleSmallCircle(UnitGroupRolesAssigned(unit))
+	return TexCoordfunc(UnitGroupRolesAssigned(unit))
 end
 
 function DungeonRole:GetText(unit)
@@ -423,6 +425,8 @@ end
 
 function DungeonRole:UpdateDB()
 	isValidRole["DAMAGER"] = (not self.dbx.hideDamagers) or nil
+	roleTexture = self.dbx.useAlternateIcons and "Interface\\LFGFrame\\LFGROLE" or "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES"
+	TexCoordfunc = self.dbx.useAlternateIcons and GetTexCoordsForRoleSmall or GetTexCoordsForRoleSmallCircle
 end
 
 local function Create(baseKey, dbx)

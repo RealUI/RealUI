@@ -34,6 +34,19 @@ local function MakeStatusDungeonRoleOptions(self, status, options, optionParams)
 			status:UpdateAllUnits()
 		end,
 	}
+	options.useAlternateIcons = {
+		type = "toggle",
+		name = L["Use alternate icons"],
+		desc = L["Use alternate icons"],
+		width = "full",
+		order = 60,
+		get = function () return status.dbx.useAlternateIcons end,
+		set = function (_, v) 
+			status.dbx.useAlternateIcons = v or nil 
+			status:UpdateDB()
+			status:UpdateAllUnits()
+		end,
+	}
 end
 
 Grid2Options:RegisterStatusOptions("leader",    	 "role", MakeStatusRoleOptions, {

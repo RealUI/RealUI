@@ -1,7 +1,7 @@
 -- Raid Debuffs module, implements raid-debuffs statuses
 
 local GSRD = Grid2:NewModule("Grid2RaidDebuffs")
-local BZ = LibStub("LibBabble-Zone-3.0"):GetReverseLookupTable()
+-- local BZ = LibStub("LibBabble-Zone-3.0"):GetReverseLookupTable()
 local frame = CreateFrame("Frame")
 
 local Grid2 = Grid2
@@ -14,6 +14,41 @@ local curzone
 local statuses = {}
 local spells_order = {}
 local spells_status = {}
+
+GSRD.engMapName_to_mapID = { 
+	--this is for updating old saved settings after removing LibBabble-Zone, the names wont be used anymore
+	--users should not have to update all old settings
+	
+	--Mists of Pandaria
+	["Heart of Fear"] = 897,
+	["Mogu'shan Vaults"] = 896,
+	["Kun-Lai Summit"] = 809,
+	["Terrace of Endless Spring"] = 886,
+	["Throne of Thunder"] = 930,
+	--Cataclysm
+	["Blackwing Descent"] = 754,
+	["The Bastion of Twilight"] = 758,
+	["Throne of the Four Winds"] = 773,
+   	["Baradin Hold"] = 752,
+	["Firelands"] = 800,
+	["Dragon Soul"] = 824,
+	--Wrath of the Lich King
+	["Naxxramas"] = 535,
+	["The Eye of Eternity"] = 527,
+	["The Obsidian Sanctum"] = 531,
+	["The Ruby Sanctum"] = 609,
+	["Trial of the Crusader"] = 543,
+	["Ulduar"] = 529,
+	["Vault of Archavon"] = 532,
+	["Icecrown Citadel"] = 604,
+	--The Burning Crusade
+	["Karazhan"] = 799,
+	["Zul'Aman"] = 781,
+	["Serpentshrine Cavern"] = 780,
+	["Hyjal Summit"] = 775,
+	["Black Temple"] = 796,
+	["Sunwell Plateau"] = 789,
+}
 
 frame:SetScript("OnEvent", function (self, event, unit)
 	local index = 1
@@ -45,6 +80,7 @@ end
 function GSRD:UpdateZoneSpells(event)
 	local zone = self:GetCurrentZone()
 	if zone==curzone and event then return end
+	
 	self:ResetZoneSpells(zone)
 	for status in next,statuses do
 		status:LoadZoneSpells()
@@ -54,16 +90,13 @@ function GSRD:UpdateZoneSpells(event)
 end
 
 function GSRD:GetCurrentZone()
-	local zone, instance, realZone
-	if IsInInstance() then
-		instance = GetInstanceInfo()
-		zone = instance and BZ[instance]
+	local current_zone_on_worldmap = GetCurrentMapAreaID()
+	SetMapToCurrentZone()
+	local zone = GetCurrentMapAreaID()
+	if zone ~= current_zone_on_worldmap then 
+		SetMapByID(current_zone_on_worldmap) 
 	end
-	if not zone then
-		realZone = GetRealZoneText()
-		zone = realZone and BZ[realZone]
-	end
-	return zone or instance or realZone
+	return zone
 end
 
 function GSRD:ClearAllIndicators()
@@ -114,7 +147,16 @@ function class:ClearAllIndicators()
 end
 
 function class:LoadZoneSpells()
-	if curzone then
+	if curzone then		
+		local debuffs = self.dbx.debuffs
+		if debuffs then --updating variables after LibBabble-Zone removal
+			for k,v in pairs(debuffs) do
+				if type(k) == "string" and GSRD.engMapName_to_mapID[k] then
+					debuffs[GSRD.engMapName_to_mapID[k]]=v
+					debuffs[k]=nil
+				end
+			end
+		end
 		local count = 0
 		local db = self.dbx.debuffs[curzone]
 		if db then

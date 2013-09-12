@@ -1,0 +1,38 @@
+------------------------------------------------------------------------
+r717 | stanzilla | 2013-09-10 15:48:34 +0000 (Tue, 10 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/Grid2.toc
+   M /trunk/Options/Grid2Options.toc
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.toc
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+
+toc update
+------------------------------------------------------------------------
+r716 | gragagrogog | 2013-09-09 23:36:35 +0000 (Mon, 09 Sep 2013) | 2 lines
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusRaidIcon.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
+   M /trunk/modules/StatusRaidIcon.lua
+
+-updated RaidDebuffs for SoO and Timeless Isle
+-fixed raid icon's opacity (ticket #345)
+------------------------------------------------------------------------
+r715 | gragagrogog | 2013-06-25 04:07:55 +0000 (Tue, 25 Jun 2013) | 6 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHealsStatusOutgoing.lua
+   M /trunk/Options/modules/statuses/StatusDirection.lua
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsCataclysm.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsLichKing.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
+   M /trunk/modules/StatusDirection.lua
+
+RaidDebuffs:
+ -added EncounterJournal link to each boss/instance with an EJ section
+ -boss names are now localized(pulled from EJ)
+ -few more changes to make it more user friendly
+StatusDirection:
+ -more filtering options added
+------------------------------------------------------------------------

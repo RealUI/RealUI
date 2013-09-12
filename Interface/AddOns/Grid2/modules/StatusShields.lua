@@ -12,6 +12,7 @@ local UnitAura = UnitAura
 
 local shields_ava = {   
 	17 ,    -- Power Word: Shield (Priest)
+	123258, -- Power Word : Shield (Priest, Divine Insight)
 	47753,  -- Divine Aegis (Priest)
 	114908, -- Spirit Shell (Priest)
 	86273,  -- Illuminated Healing (Paladin)

@@ -6,7 +6,7 @@ local L
 -- MakeStatusOutgoingOptions()
 local MakeStatusOutgoingOptions
 do
-	local prev_spells = {}
+	-- local prev_spells = {}
 	function MakeStatusOutgoingOptions(self, status, options)
 		self:MakeStatusColorOptions(status, options)
 		options.activeTime = {
@@ -26,32 +26,44 @@ do
 			type = "input",
 			order = 50,
 			width = "full",
-			name = L["Spells"],
+			name = L["Spells"].." ("..UnitClass("player")..")",
 			desc = L["You can type spell IDs or spell names."],
 			multiline= 8,
 			get = function()
 					local auras = {}
-					wipe(prev_spells)
-					for _,spell in pairs(status.dbx.spells) do
+					-- wipe(prev_spells)
+					for _,spell in pairs(status.dbx.spells[AOEM.playerClass]) do
 						local name = GetSpellInfo(spell)
 						if name then 
 							auras[#auras+1] = name
-							prev_spells[name] = spell
+							-- prev_spells[name] = spell
 						end
 					end
 					return table.concat( auras, "\n" )
 			end,
 			set = function(_, v) 
-				wipe(status.dbx.spells)
+				wipe(status.dbx.spells[AOEM.playerClass])
 				local auras = { strsplit("\n,", v) }
 				for i,v in pairs(auras) do
 					local aura = strtrim(v)
-					if #aura>0 and GetSpellInfo(aura) then
-						table.insert(status.dbx.spells, tonumber(aura) or prev_spells[aura] or aura )
+					if #aura>0 then
+						local spellID = status:GetSpellID(aura)
+						if spellID > 0 then
+							table.insert(status.dbx.spells[AOEM.playerClass], spellID)
+						end
 					end
 				end	
 				status:UpdateDB()
 			end,
+		}
+		options.resetSpells = {
+			type = "execute",
+			order = 60,
+			name = L["Reset spells to default"],
+			func = function() 
+				status:ResetClassSpells() 
+				status:UpdateDB() 
+			 end,
 		}
 	end
 end

@@ -66,7 +66,7 @@ end
 
 function RaidIcon:GetColor(unit)
 	local c = self.dbx[ "color" .. self.cache[unit] ]
-	return c.r, c.g, c.b, self.dbx.opacity or 1
+	return c.r, c.g, c.b, c.a --self.dbx.opacity or 1
 end
 
 function RaidIcon:GetIcon(unit)
@@ -75,6 +75,13 @@ end
 
 function RaidIcon:GetText(unit)
 	return iconText[ self.cache[unit] ]
+end
+
+function RaidIcon:SetGlobalOpacity(opacity)
+	local dbx = self.dbx
+	for i=1, 8 do
+		dbx["color"..i].a = opacity
+	end
 end
 
 function RaidIcon:OnEnable()

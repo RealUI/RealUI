@@ -2,21 +2,15 @@
 ## Title: Grid2 |cd1ff7d0aRaidDebuffs|r
 ## Notes: Adds a Raid Boss debuff status.
 ## Notes-esES: Muestra los debuffs de Bosses de Raid en el Grid2.
-## X-Curse-Packaged-Version: 699
+## X-Curse-Packaged-Version: r717
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
 
 ## Dependencies: Grid2
-## OptionalDeps: LibBabble-Zone-3.0
 
-## Version: 699
-## X-ReleaseDate: "$Date: 2009-04-14 23:42:17 -0700 (Tue, 14 Apr 2009) $"
+## Version:r717
 ## X-Category: UnitFrame
 ## X-Website: http://wowace.com/projects/grid2/
-
-#@no-lib-strip@
-Libs\LibBabble-Zone-3.0\lib.xml
-#@end-no-lib-strip@
 
 Grid2RaidDebuffs.lua

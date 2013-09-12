@@ -3,8 +3,8 @@ Created by Michael
 --]]
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Grid2Options")
-local BZ = LibStub("LibBabble-Zone-3.0"):GetUnstrictLookupTable()
-local BB = {}
+-- local BZ = LibStub("LibBabble-Zone-3.0"):GetUnstrictLookupTable()
+-- local BB = {} -- seems like prepared table for BabbleBoss, not needed now
 
 local GSRD = Grid2:GetModule("Grid2RaidDebuffs")
 local RDDB = {}
@@ -27,6 +27,9 @@ local optionsDebuffsCache= {}
 local newSpellId
 local newDebuffName
 local fmt= string.format
+local find=string.find
+local tonumber = tonumber
+local select = select
 
 -- forward declarations
 local AddBossDebuffOptions
@@ -40,9 +43,9 @@ function Grid2Options:GetRaidDebuffsTable()
 end
 
 local function UpdateZoneSpells()
-	if IsInInstance() then
+	if curInstance == GSRD:GetCurrentZone() then
 		GSRD:UpdateZoneSpells()
-	end	
+	end
 end
 
 local function GetOptionsFromCache()
@@ -53,12 +56,23 @@ local function SetOptionsToCache(options)
 	optionsDebuffsCache[ curModule..curInstance ] = options
 end
 
-local function GetLocalizedStatusName(index)
+local function GetLocalizedStatusName(key)
 	local localizedText = L["raid-debuffs"]
+	local index = select(3, find(key, "(%d+)")) or 1
     return index==1 and localizedText or fmt( "%s(%d)",localizedText,index)
 end
 
 local function GetCustomDebuffs()
+	local debuffs = GSRD.db.profile.debuffs
+	if debuffs then --updating variables after LibBabble-Zone removal
+		for k,v in pairs(debuffs) do
+			if type(k) == "string" and GSRD.engMapName_to_mapID[k] then
+				debuffs[GSRD.engMapName_to_mapID[k]]=v
+				debuffs[k]=nil
+			end
+		end
+	end
+	
 	return GSRD.db.profile.debuffs and GSRD.db.profile.debuffs[curInstance] or {}
 end
 
@@ -78,11 +92,15 @@ local function CalculateAvailableStatuses()
 			statuses[#statuses+1] = status
 		end
 	end
-	table.sort( statuses, function(a,b) return a.name < b.name  end )
+	table.sort( statuses, function(a,b) 
+			local index_a = tonumber(select(3, find(a.name, "(%d+)")) or 1)
+			local index_b = tonumber(select(3, find(b.name, "(%d+)")) or 1)
+			return index_a < index_b  
+		end )
 	wipe(statusesList)
 	for index,status in ipairs(statuses) do
 		statuses[status] = index
-		statusesList[index] = L[ status.name ]
+		statusesList[index] = GetLocalizedStatusName( status.name )
 	end	
 end
 
@@ -106,11 +124,16 @@ end
 
 local function LoadBosses()
     wipe(curBossesOrder)
-	local order = 1
+	local order = 30
 	local bosses = RDDB[curModule][curInstance]
 	for boss in pairs(bosses) do
-		curBossesOrder[boss] = order
-		order = order + 1
+		local EJ_Order = select(3, find(boss, "%-(%d+)%]"))
+		if EJ_Order then
+			curBossesOrder[boss] = tonumber(EJ_Order)
+		else
+			curBossesOrder[boss] = order
+			order = order + 1
+		end
 	end
 end
 
@@ -153,7 +176,20 @@ do
 		local tipDebuff = Grid2Options.Tooltip
 		wipe(lines)
 		tipDebuff:ClearLines()
-		tipDebuff:SetHyperlink("spell:"..spellId)
+		local name = GetSpellInfo(spellId)
+		if GSRD.debugging then 
+			local link = GetSpellLink(spellId)
+			if not link then -- unavailible spellLink may indicate wrong spellId, thus not providing corect tooltip
+				if name then -- this may still work due to having the same name
+					GSRD:Debug("|cFF00FFFFSpellLink not Availible|r: %s  (%s)", spellId, name)
+				else -- this wont work
+					GSRD:Debug("|cFFFF0000Invalid spellId|r: %s", spellId) 
+				end
+			end
+		end
+		if not name then return "" end --invalid spellIds break the tooltip
+		tipDebuff:SetHyperlink("spell:"..spellId) 
+		
 		for i=2, min(5,tipDebuff:NumLines()) do
 			lines[i-1]= tipDebuff[i]:GetText() 
 		end
@@ -166,8 +202,8 @@ local function GetInstances(module)
 	if module and module~="" then
 		local instances= RDDB[module]
 		if instances then
-			for name,_ in pairs(instances) do
-				values[name]= BZ[name] or name
+			for mapid,_ in pairs(instances) do
+				values[mapid] = GetMapNameByID(mapid)
 			end
 		end
 	end	
@@ -185,19 +221,23 @@ local function SetEnableDebuff(boss, status, spellId, value)
 		debuffs[#debuffs+1] = spellId
 		curDebuffs[spellId] = status
 		curDebuffsOrder[spellId] = #debuffs
-		UpdateZoneSpells()
 	else
 		local debuffs = dbx.debuffs[curInstance]
 		local index   = curDebuffsOrder[spellId]
 		table.remove( debuffs,  index )
 		curDebuffs[spellId] = nil
 		curDebuffsOrder[spellId] = nil
+
 		for k,v in pairs(curDebuffs) do
 			if status==v and curDebuffsOrder[k]>index then 
 				curDebuffsOrder[k] = curDebuffsOrder[k] - 1 
 			end
 		end
+		if not next(debuffs) then
+			dbx.debuffs[curInstance] = nil
+		end
 	end
+	UpdateZoneSpells()
 	local option = optionDebuffs.args[ tostring(spellId) ]
 	option.name  = FormatDebuffName(spellId)
 	option.order = GetDebuffOrder(boss, spellId)
@@ -283,7 +323,16 @@ local function EnableDisableModule(module, state)
 	UpdateZoneSpells()
 end
 
-local function CreateStandardDebuff(bossName,spellId,spellName)
+local StripEJinfo
+do
+	local strgsub = string.gsub
+	StripEJinfo = function(boss)
+		return (strgsub(boss, "%[.-%]", ""))
+	end
+end
+
+local function CreateStandardDebuff(bossNameKey,spellId,spellName)
+	local bossName = StripEJinfo(bossNameKey)
 	local baseKey = fmt("debuff-%s>%s", string.match(bossName, "^(.-) .*$") or bossName, spellName):gsub("[ %.\"!']", "")
 	if not Grid2:DbGetValue("statuses", baseKey) then
 		-- Save status in database
@@ -299,14 +348,15 @@ end
 local function CreateNewRaidDebuff(boss)
 	local spellId = newSpellId
 	local spellName = GetSpellInfo(newSpellId)
+	local bossStrip = StripEJinfo(boss)
 	if spellId and spellName then
 		local dbx = GSRD.db.profile
 		if not dbx.debuffs then	dbx.debuffs= {}	end
 		dbx = dbx.debuffs
 		if not dbx[curInstance] then dbx[curInstance]= {}	end
 		dbx = dbx[curInstance]
-		if not dbx[boss] then dbx[boss]= {}	end
-		dbx = dbx[boss]
+		if not dbx[bossStrip] then dbx[bossStrip]= {}	end
+		dbx = dbx[bossStrip]
 		dbx[#dbx+1] = spellId
 		AddBossDebuffOptions( optionDebuffs.args, boss, spellId, true, #dbx)
 	end
@@ -415,6 +465,22 @@ local function MakeDebuffOptions(bossName, spellId, isCustom)
 			name="",
 			hidden = function() return not curDebuffs[spellId] end,
 		},
+		chatLink={
+			type = "execute",
+			order = 149,
+			name = L["Link to Chat"],
+			func = function() 
+				local link = GetSpellLink(spellId)
+				if link then
+					local ChatBox = ChatEdit_ChooseBoxForSend()
+					if not ChatBox:HasFocus() then
+						ChatFrame_OpenChat(link)
+					else
+						ChatBox:Insert(link) 
+					end
+				end
+			end,
+		},
 		createDebuff= {
 			type = "execute",
 			order = 150,
@@ -444,6 +510,11 @@ local function MakeDebuffGroup(bossName, spellId, order, isCustom)
 end
 
 local function AddInstanceOptions(options)
+	local EJ_ID
+	for k in pairs(RDDB[curModule] and RDDB[curModule][curInstance] or {}) do
+		EJ_ID = select(3, find(k, "%[(%d+)%-"))
+		if EJ_ID then break end
+	end
 	options.enableall={
 		type ="execute",
 		order= 5,
@@ -466,14 +537,46 @@ local function AddInstanceOptions(options)
 			RefreshDebuffsOptions()
 		end
 	}
+	options.spacer={
+		type = "header",
+		order = 11,
+		width = "full",
+		hidden = EJ_ID == nil,
+	}
+	options.link={
+		type = "execute",
+		order = 15,
+		width = "full",
+		name = L["Show in Encounter Journal"],
+		func = function() 
+				if not IsAddOnLoaded("Blizzard_EncounterJournal") then LoadAddOn("Blizzard_EncounterJournal") end
+				local instanceID, encounterID, sectionID = EJ_HandleLinkPath(1, EJ_ID)
+				local difficulty = select(3, GetInstanceInfo())
+				if difficulty > 2 and difficulty < 8 then 
+					difficulty = difficulty -2 
+				else 
+					difficulty = GSRD.db.profile.defaultEJ_difficulty or 4 
+				end
+				if InterfaceOptionsFrame:IsShown() then
+					InterfaceOptionsFrameOkay:Click()
+					GameMenuButtonContinue:Click()
+				end
+				EncounterJournal_OpenJournal(difficulty, instanceID)
+		end,
+		hidden = EJ_ID == nil,
+	}
 end
 
 local function AddBossOptions(options, name)
 	local order    = curBossesOrder[name] * 1000
-	local bossName = BB[name] or name
+	local EJ_ID = select(3, find(name, "%[(%d+)%-"))
+	EJ_ID = tonumber(EJ_ID)
+	local EJ_Order = select(3, find(name, "%-(%d+)%]"))
+	EJ_Order = EJ_Order and EJ_Order..") " or ""
+	local bossName = EJ_ID and EJ_GetEncounterInfo(EJ_ID) or StripEJinfo(name)
 	options[name]= {
 		type= "group",
-		name=  fmt("|T%s:0|t%s", ICON_SKULL, bossName),
+		name=  fmt("|T%s:0|t%s%s", ICON_SKULL, EJ_Order, bossName),
 		order= order,
 		args= {
 			name = {
@@ -495,6 +598,34 @@ local function AddBossOptions(options, name)
 				name = L["Create raid debuff"],
 				func = function(info) CreateNewRaidDebuff( name ) end,
 				disabled= function() return not newSpellId or optionDebuffs.args[tostring(newSpellId)] end
+			},
+			spacer = {
+				type = "header",
+				order = 10,
+				width = "full",
+				hidden = EJ_ID == nil,
+			},
+			link = {
+				type = "execute",
+				order = 15,
+				width = "full",
+				name = L["Show in Encounter Journal"],
+				func = function() 
+						if not IsAddOnLoaded("Blizzard_EncounterJournal") then LoadAddOn("Blizzard_EncounterJournal") end
+						local instanceID, encounterID, sectionID = EJ_HandleLinkPath(1, EJ_ID)
+						local difficulty = select(3, GetInstanceInfo())
+						if difficulty > 2 and difficulty < 8 then 
+							difficulty = difficulty -2 
+						else 
+							difficulty = GSRD.db.profile.defaultEJ_difficulty or 4 
+						end
+						if InterfaceOptionsFrame:IsShown() then
+							InterfaceOptionsFrameOkay:Click()
+							GameMenuButtonContinue:Click()
+						end
+						EncounterJournal_OpenJournal(difficulty, instanceID, encounterID, sectionID)
+				end,
+				hidden = EJ_ID == nil,
 			},
 		},
 	}
@@ -525,7 +656,8 @@ local function MakeDebuffsOptions()
 		for boss,values in pairs(debuffs) do
 			AddBossOptions(options, boss)
 			AddBossDebuffsOptions(options, boss, values      , false)
-			AddBossDebuffsOptions(options, boss, custom[boss], true )
+			local bossStrip = StripEJinfo(boss)
+			AddBossDebuffsOptions(options, boss, custom[bossStrip], true )
 		end
 		SetOptionsToCache(options)
 	end
@@ -561,7 +693,7 @@ local function MakeOneStatusStandardOptions(options, status, index)
 		name  = "",
 		args  = statusOptions,
 	}
-	Grid2Options:MakeStatusStandardOptions(status, statusOptions, { color1 = L[status.name], width = "full" } )
+	Grid2Options:MakeStatusStandardOptions(status, statusOptions, { color1 = GetLocalizedStatusName(status.name), width = "full" } )
 end
 
 local function MakeStandardOptions(options)
@@ -581,7 +713,7 @@ local function MakeStandardOptions(options)
 			CalculateAvailableStatuses()
 			MakeOneStatusStandardOptions( options, status, #statuses )
 		end,
-		hidden = function() return #statuses>=5 end
+		hidden = function() return #statuses>=10 end
 	}
 	options.del = {
 		type = "execute",
@@ -607,12 +739,32 @@ local function MakeStandardOptions(options)
 	options.header3 = { type = "header", order = 52, name = "" }
 end
 
+local function MakeDefaultDifficultyEJ_LinkOption(options)
+	options.difficulty = {
+		type = "select",
+		order = 200,
+		name = "Encounter Journal difficulty",
+		desc = "Default difficulty for Encounter Journal links",
+		get = function () return GSRD.db.profile.defaultEJ_difficulty or 4 end,
+		set = function (_, v) 
+			GSRD.db.profile.defaultEJ_difficulty = v
+		end,
+		values = {
+			[1] = "(10) "..PLAYER_DIFFICULTY1,
+			[2] = "(25) "..PLAYER_DIFFICULTY1,
+			[3] = "(10) "..PLAYER_DIFFICULTY2,
+			[4] = "(25) "..PLAYER_DIFFICULTY2,
+		},
+	}
+end
+
 local function MakeGeneralOptions(self)
 	local options = {}
 	CalculateAvailableStatuses()
 	self:MakeStatusTitleOptions( statuses[1], options)
 	MakeStandardOptions(options)	
 	MakeModulesListOptions(options)
+	MakeDefaultDifficultyEJ_LinkOption(options)
 	return options
 end
 
@@ -626,6 +778,23 @@ local function MakeAdvancedOptions(self)
 		desc = "",
 		get = function ()
 			if curModule=="" then
+				local curZone, curZoneModule = GSRD:GetCurrentZone()
+				local lastInst, lastInstModule = GSRD.db.profile.lastSelectedInstance
+				for module in next, moduleList do
+					if RDDB[module][curZone] then
+						curZoneModule = module
+					elseif RDDB[module][lastInst] then
+						lastInstModule = module
+					end
+				end
+				if curZoneModule or lastInstModule then
+					curModule = curZoneModule or lastInstModule
+					curInstance = curZoneModule and curZone or lastInstModule and lastInst
+					optionInstances.values = GetInstances(curModule)
+					optionDebuffs.name = GetMapNameByID(curInstance)
+					optionDebuffs.args = MakeDebuffsOptions()
+					return curModule
+				end
 				curModule = next(moduleList) or ""
 				curInstance = ""
 				optionInstances.values = GetInstances(curModule)
@@ -651,8 +820,9 @@ local function MakeAdvancedOptions(self)
 		get = function () return curInstance end,
 		set = function (_, v)
 			curInstance = v
-			optionDebuffs.name = BZ[v] or v
+			optionDebuffs.name = GetMapNameByID(v)
 			optionDebuffs.args = MakeDebuffsOptions()
+			GSRD.db.profile.lastSelectedInstance = v
 		end,
 		values= {}
 	}
@@ -673,14 +843,14 @@ end
 Grid2Options:RegisterStatusOptions("raid-debuffs", "debuff", function(self, status, options)
 	options.general= {
 			type = "group",
-			name = L["General"],
-			order = 10,
+			name = L["General Settings"],
+			order = 20,
 			args = MakeGeneralOptions(self),
 		}
 	options.advanced= {
 			type = "group",
-			name = L["Advanced"],
-			order = 20,
+			name = L["Debuff Configuration"],
+			order = 10,
 			args = MakeAdvancedOptions(self),
 		}
 
