@@ -969,6 +969,8 @@ function Skada:ReloadSettings()
 
 	self.total = self.char.total
 
+	Skada:ClearAllIndexes()
+
 	-- Minimap button.
 	if icon and not icon:IsRegistered("Skada") then
 		icon:Register("Skada", dataobj, self.db.profile.icon)
@@ -1284,6 +1286,21 @@ function Skada:find_set(s)
 	end
 end
 
+function Skada:ClearIndexes(set)
+  if set then
+     set._playeridx = nil
+  end
+end
+function Skada:ClearAllIndexes()
+  -- clear indexes used for accelerating set lookups
+  -- this is done on login/logout to prevent the in-memory aliasing from becoming redundant tables on reload
+  Skada:ClearIndexes(self.current)
+  Skada:ClearIndexes(self.char.total)
+  for _,set in pairs(self.char.sets) do
+    Skada:ClearIndexes(set)
+  end
+end
+
 -- Returns a player from the current. Safe to use to simply view a player without creating an entry.
 function Skada:find_player(set, playerid)
 	if set then
@@ -1484,7 +1501,7 @@ local function COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventtype, hideCast
 	-- Note: relies on src_is_interesting having been checked.
 	if Skada.current and src_is_interesting and not Skada.current.gotboss then
 		-- Store mob name for set name. For now, just save first unfriendly name available, or first boss available.
-		if bit.band(dstFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) ~=0 then
+		if bit.band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 			if not Skada.current.gotboss and boss.BossIDs[tonumber(dstGUID:sub(6, 10), 16)] then
 				Skada.current.mobname = dstName
 				Skada.current.gotboss = true
@@ -2072,6 +2089,7 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	-- Migrate old settings.
 	if self.db.profile.barmax then

@@ -5,13 +5,26 @@ local Skada = Skada
 local mod = Skada:NewModule(L["Deaths"])
 local deathlog = Skada:NewModule(L["Death log"])
 
-local function log_deathlog(set, playerid, playername, spellid, spellname, amount, timestamp)
+local function log_deathlog(set, playerid, playername, srcname, spellid, spellname, amount, timestamp, logoverride)
 	local player = Skada:get_player(set, playerid, playername)
+	local log = logoverride or player.deathlog
+	local pos = log.pos or 1
 
-	table.insert(player.deathlog, 1, {["spellid"] = spellid, ["spellname"] = spellname, ["amount"] = amount, ["ts"] = timestamp, hp = UnitHealth(playername)})
+        local entry = log[pos] 
+	if not entry then
+	  entry = {}
+	  log[pos] = entry
+	end
+	entry.srcname =   srcname
+	entry.spellid =   spellid
+	entry.spellname = spellname
+	entry.amount =	  amount
+	entry.ts = 	  timestamp
+	entry.hp = 	  UnitHealth(playername)
 
-	-- Trim.
-	while #player.deathlog > 15 do table.remove(player.deathlog) end
+	pos = pos + 1
+	if pos > 15 then pos = 1 end
+	log.pos = pos
 end
 
 local function log_death(set, playerid, playername, timestamp)
@@ -24,7 +37,8 @@ local function log_death(set, playerid, playername, timestamp)
 		-- Add a fake entry for the actual death.
 		local spellid = 5384 -- Feign Death.
 		local spellname = string.format(L["%s dies"], player.name)
-		log_deathlog(set, playerid, playername, spellid, spellname, 0, timestamp)
+		log_deathlog(set, playerid, playername, nil, spellid, spellname, 0, timestamp)
+		player.deathlog.pos = nil
 
 		-- Also add to set deaths.
 		set.deaths = set.deaths + 1
@@ -34,12 +48,12 @@ local function log_death(set, playerid, playername, timestamp)
 	end
 end
 
-local function log_resurrect(set, playerid, playername, spellid, spellname, timestamp)
+local function log_resurrect(set, playerid, playername, srcname, spellid, spellname, timestamp)
 	local player = Skada:get_player(set, playerid, playername)
 
 	-- Add log entry to to previous death.
 	if player and player.deaths and player.deaths[1] then
-		table.insert(player.deaths[1].log, 1, {["spellid"] = spellid, ["spellname"] = spellname, ["amount"] = 0, ["ts"] = timestamp, hp = UnitHealth(playername)})
+		log_deathlog(set, playerid, playername, srcname, spellid, spellname, 0, timestamp, player.deaths[1].log)
 	end
 end
 
@@ -54,8 +68,8 @@ local function Resurrect(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGU
 	-- Resurrection.
 	local spellId, spellName, spellSchool = ...
 
-	log_resurrect(Skada.current, dstGUID, dstName, spellId, srcName..L["'s "]..spellName, timestamp)
-	log_resurrect(Skada.total, dstGUID, dstName, spellId, srcName..L["'s "]..spellName, timestamp)
+	log_resurrect(Skada.current, dstGUID, dstName, srcName, spellId, nil, timestamp)
+	log_resurrect(Skada.total, dstGUID, dstName, srcName, spellId, nil, timestamp)
 end
 
 local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -63,29 +77,37 @@ local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	local spellId, spellName, spellSchool, samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing = ...
 
 	dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
-	if srcName then
-		log_deathlog(Skada.current, dstGUID, dstName, spellId, srcName..L["'s "]..spellName, 0-samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellId, srcName..L["'s "]..spellName, 0-samount, timestamp)
-	else
-		log_deathlog(Skada.current, dstGUID, dstName, spellId, spellName, 0-samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellId, spellName, 0-samount, timestamp)
-	end
+	log_deathlog(Skada.current, dstGUID, dstName, srcName, spellId, nil, 0-samount, timestamp)
+	log_deathlog(Skada.total, dstGUID, dstName, srcName, spellId, nil, 0-samount, timestamp)
 end
 
 local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 	-- White melee.
 	local samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing = ...
-	local spellid = 6603
-	local spellname = L["Attack"]
+	local spellid = 88163
 
 	dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
-	if srcName then
-		log_deathlog(Skada.current, dstGUID, dstName, spellid, srcName..L["'s "]..spellname, 0-samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellid, srcName..L["'s "]..spellname, 0-samount, timestamp)
-	else
-		log_deathlog(Skada.current, dstGUID, dstName, spellid, spellname, 0-samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellid, spellname, 0-samount, timestamp)
-	end
+	log_deathlog(Skada.current, dstGUID, dstName, srcName, spellid, nil, 0-samount, timestamp)
+	log_deathlog(Skada.total, dstGUID, dstName, srcName, spellid, nil, 0-samount, timestamp)
+end
+
+local function EnvironmentalDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	-- Environmental damage.
+	local environmentalType, samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing = ...
+
+	dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+	log_deathlog(Skada.current, dstGUID, dstName, srcName, nil, environmentalType, 0-samount, timestamp)
+	log_deathlog(Skada.total, dstGUID, dstName, srcName, nil, environmentalType, 0-samount, timestamp)
+end
+
+local function Instakill(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	-- Instakill events
+	local spellId, spellName, spellSchool = ...
+	spellId = spellId or 80468
+
+	dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+	log_deathlog(Skada.current, dstGUID, dstName, srcName, spellId, spellName, -1e9, timestamp)
+	log_deathlog(Skada.total, dstGUID, dstName, srcName, spellId, spellName, -1e9, timestamp)
 end
 
 local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -96,13 +118,8 @@ local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGU
 
 	srcGUID, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
 	dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
-	if srcName then
-		log_deathlog(Skada.current, dstGUID, dstName, spellId, (srcName_modified or srcName)..L["'s "]..(spellName or L["Attack"]), samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellId, srcName..L["'s "]..spellName, samount, timestamp)
-	else
-		log_deathlog(Skada.current, dstGUID, dstName, spellId, spellName, samount, timestamp)
-		log_deathlog(Skada.total, dstGUID, dstName, spellId, spellName, samount, timestamp)
-	end
+	log_deathlog(Skada.current, dstGUID, dstName, (srcName_modified or srcName), spellId, nil, samount, timestamp)
+	log_deathlog(Skada.total, dstGUID, dstName, (srcName_modified or srcName), spellId, nil, samount, timestamp)
 end
 
 -- Death meter.
@@ -173,14 +190,19 @@ function deathlog:Update(win, set)
 					win.dataset[nr] = d
 
 					d.id = nr
+					local spellname = log.spellname or GetSpellInfo(log.spellid or 88163) -- "Attack" spell
+					if log.srcname then 
+						spellname = log.srcname..L["'s "]..spellname
+					end
+					local spellid = log.spellid or 106727 -- "unknown" spell
 					if log.ts >= death.ts then
-						d.label = date("%H:%M:%S", log.ts).. ": "..log.spellname
+						d.label = date("%H:%M:%S", log.ts).. ": "..spellname
 					else
-						d.label = ("%2.2f"):format(diff) .. ": "..log.spellname
+						d.label = ("%2.2f"):format(diff) .. ": "..spellname
 					end
 					d.ts = log.ts
 					d.value = log.hp or 0
-					d.icon = select(3, GetSpellInfo(log.spellid))
+					d.icon = select(3, GetSpellInfo(spellid))
 					d.spellid = spellid
 
 					local change = Skada:FormatNumber(math.abs(log.amount))
@@ -190,7 +212,7 @@ function deathlog:Update(win, set)
 						change = "-"..change
 					end
 
-					if log.ts >= death.ts then
+					if log.ts > death.ts then
 						d.valuetext = ""
 					else
 						d.valuetext = Skada:FormatValueText(
@@ -227,6 +249,11 @@ function mod:OnEnable()
 	Skada:RegisterForCL(SpellDamage, 'RANGE_DAMAGE', {dst_is_interesting_nopets = true})
 
 	Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {dst_is_interesting_nopets = true})
+
+	Skada:RegisterForCL(EnvironmentalDamage, 'ENVIRONMENTAL_DAMAGE', {dst_is_interesting_nopets = true})
+
+	Skada:RegisterForCL(Instakill, 'SPELL_INSTAKILL', {dst_is_interesting_nopets = true})
+	Skada:RegisterForCL(Instakill, 'RANGE_INSTAKILL', {dst_is_interesting_nopets = true})
 
 	Skada:RegisterForCL(SpellHeal, 'SPELL_HEAL', {dst_is_interesting_nopets = true})
 	Skada:RegisterForCL(SpellHeal, 'SPELL_PERIODIC_HEAL', {dst_is_interesting_nopets = true})

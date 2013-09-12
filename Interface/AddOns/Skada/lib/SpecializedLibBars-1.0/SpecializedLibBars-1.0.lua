@@ -1151,28 +1151,14 @@ function barPrototype:OnSizeChanged()
 end
 
 function barPrototype:SetFont(newFont, newSize, newFlags)
-    local t, font, size, flags
-    t = self.label
-    font, size, flags = t:GetFont()
-    t:SetFont(newFont or font, newSize or size, newFlags or flags)
-    if (newFlags or flags):lower():find('outline') then
-        t:SetShadowColor(0, 0, 0, 0)
-        t:SetShadowOffset(0, 0)
-    else
-        t:SetShadowColor(0, 0, 0, 1)
-        t:SetShadowOffset(1, -1)
-    end
+	local t, font, size, flags
+	t = self.label
+	font, size, flags = t:GetFont()
+	t:SetFont(newFont or font, newSize or size, newFlags or flags)
 
-    t = self.timerLabel
-    font, size, flags = t:GetFont()
-    t:SetFont(newFont or font, newSize or size, newFlags or flags)
-    if (newFlags or flags):lower():find('outline') then
-        t:SetShadowColor(0, 0, 0, 0)
-        t:SetShadowOffset(0, 0)
-    else
-        t:SetShadowColor(0, 0, 0, 1)
-        t:SetShadowOffset(1, -1)
-    end
+	t = self.timerLabel
+	font, size, flags = t:GetFont()
+	t:SetFont(newFont or font, newSize or size, newFlags or flags)
 end
 
 function barPrototype:SetIconWithCoord(icon, coord)

@@ -252,6 +252,14 @@ function mod:Update(win)
 
 			local bar = win.bargroup:GetBar(barid)
 
+			if bar and bar.missingclass and data.class and not data.ignore then 
+			        -- fixup bar that was generated before class info was available
+				bar:Hide()
+				win.bargroup:RemoveBar(bar)
+				bar.missingclass = nil
+				bar = nil
+			end
+
 			if bar then
 				bar:SetMaxValue(win.metadata.maxvalue or 1)
 				bar:SetValue(data.value)
@@ -287,6 +295,13 @@ function mod:Update(win)
 					bar:SetScript("OnMouseDown", function(bar, button) if button == "RightButton" then win:RightClick() end end)
 				end
 				bar:SetValue(data.value)
+
+				if not data.class and 
+				   (win.db.classicons or win.db.classcolorbars or win.db.classcolortext) then
+					bar.missingclass = true
+				else
+					bar.missingclass = nil
+				end
 
 				if data.class and win.db.classicons and CLASS_ICON_TCOORDS[data.class] then
 					bar:ShowIcon()

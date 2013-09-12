@@ -1,0 +1,50 @@
+------------------------------------------------------------------------
+r455 | zarnivoop | 2013-09-10 15:45:44 +0000 (Tue, 10 Sep 2013) | 1 line
+Changed paths:
+   A /tags/1.4-13 (from /trunk:454)
+
+Tagging as 1.4-13
+------------------------------------------------------------------------
+r454 | zarnivoop | 2013-09-10 08:37:46 +0000 (Tue, 10 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+   M /trunk/Skada.toc
+   M /trunk/modules/SkadaCC/SkadaCC.toc
+   M /trunk/modules/SkadaDamage/SkadaDamage.toc
+   M /trunk/modules/SkadaDamageTaken/SkadaDamageTaken.toc
+   M /trunk/modules/SkadaDeaths/SkadaDeaths.toc
+   M /trunk/modules/SkadaDebuffs/SkadaDebuffs.toc
+   M /trunk/modules/SkadaDispels/SkadaDispels.toc
+   M /trunk/modules/SkadaEnemies/SkadaEnemies.toc
+   M /trunk/modules/SkadaHealing/SkadaHealing.toc
+   M /trunk/modules/SkadaPower/SkadaPower.toc
+   M /trunk/modules/SkadaThreat/SkadaThreat.toc
+
+fix for non-saved segments due to lack of hostile creatures - thanks oscarub, and .toc updates
+------------------------------------------------------------------------
+r453 | oscarucb | 2013-09-10 02:36:49 +0000 (Tue, 10 Sep 2013) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+fix a bug in find_player() indexing that could cause corruption of the "Total" set across UI reloads
+
+------------------------------------------------------------------------
+r452 | oscarucb | 2013-09-09 08:48:58 +0000 (Mon, 09 Sep 2013) | 7 lines
+Changed paths:
+   M /trunk/modules/SkadaDeaths/Deaths.lua
+
+Tune SkadaDeaths for better memory/cpu performance, and other general improvements
+Change the logging to recycle entries, saving a large amount of unnecessary memory churn in combat
+Log srcname explicitly and delay string processing to display time
+Log only spellid when spellname is redundant, and fetch it as needed at display time
+Add logging for ENVIRONMENTAL_DAMAGE (falling, drowning, fatigue, etc)
+Add logging for SPELL_INSTAKILL (some special boss abilities)
+
+------------------------------------------------------------------------
+r451 | oscarucb | 2013-07-26 23:47:53 +0000 (Fri, 26 Jul 2013) | 2 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+
+fix intermittent missing class color/icons on bars that were generated before class info was available
+
+------------------------------------------------------------------------
