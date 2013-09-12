@@ -193,6 +193,8 @@ L["Conquest Points"] = "CP"
 L["Justice Points"] = "JP"
 L["Valor Points"] = "VP"
 L["Mogu Runes"] = "Mogu"
+L["Timeless"] = "Timeless"
+L["Warforged"] = "Warforged"
 L["Updated"] = "Upd."
 
 L["Faction not set"] = "Faction not set"
