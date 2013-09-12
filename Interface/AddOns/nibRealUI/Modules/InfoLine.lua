@@ -123,7 +123,7 @@ local Tablets = {
 	durability = Tablet20,
 }
 
-local HPName, CPName, JPName, VPName, GoldName, MoguName
+local HPName, CPName, JPName, VPName, TCName, WFName, GoldName, MoguName
 local CurrencyStartSet
 
 local LootSpecIDs = {}
@@ -1155,7 +1155,7 @@ local CurrencyTabletDataRK = {}
 local CurrencyTabletDataStart = {}
 local CurrencyTabletDataCurrent = {}
 
-local NumCurrencies = 6
+local NumCurrencies = 8
 
 local function Currency_GetDifference(startVal, endVal, isGold)
 	startVal = startVal or 0
@@ -1254,6 +1254,8 @@ local function Currency_UpdateTablet()
 				NAME,
 				LEVEL_ABBR,
 				GoldName,
+				L["Timeless"],
+				L["Warforged"],
 				L["Justice Points"],
 				L["Valor Points"],
 				L["Honor Points"],
@@ -1262,7 +1264,7 @@ local function Currency_UpdateTablet()
 				L["Updated"]
 			}
 			RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
-			local charHeader = MakeTabletHeader(charCols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
+			local charHeader = MakeTabletHeader(charCols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
 			RealmSection[realm].charCat:AddLine(charHeader)
 			AddBlankTabLine(RealmSection[realm].charCat, 1)
 			
@@ -1457,7 +1459,9 @@ local function Currency_GetVals()
 	curr[CPName] = 0
 	curr[JPName] = 0
 	curr[VPName] = 0
+	curr[TCName] = 0
 	curr[MoguName] = 0
+	curr[WFName] = 0
 	
 	local currencySize = GetCurrencyListSize()
 	for i = 1, currencySize do
@@ -1486,6 +1490,8 @@ local function Currency_Update(self)
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].updated = curDate
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp = currVals[JPName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp = currVals[VPName] or 0
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].tc = currVals[TCName] or 0
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].wf = currVals[WFName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp = currVals[HPName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp = currVals[CPName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].mogu = currVals[MoguName] or 0
@@ -1511,12 +1517,16 @@ local function Currency_Update(self)
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
 			"",
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].mogu,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].tc,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].wf,
 			"",
 			nil,
 			-- Start session values
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].tc,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].wf,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].mogu,
 		}
@@ -1558,6 +1568,8 @@ local function Currency_Update(self)
 								nameStr,
 								dbg.currency[kr][kf][kn].level,
 								dbg.currency[kr][kf][kn].gold,
+								dbg.currency[kr][kf][kn].tc,
+								dbg.currency[kr][kf][kn].wf,
 								dbg.currency[kr][kf][kn].jp,
 								vpStr,
 								dbg.currency[kr][kf][kn].hp,
@@ -1594,18 +1606,22 @@ local function Currency_Update(self)
 			CurText = nibRealUI:ReadableNumber(rawValue, 1)
 		end
 	elseif dbc.currencystate == 2 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp or 0) .. " JP"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].tc or 0) .. " TC"
 	elseif dbc.currencystate == 3 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp or 0) .. " VP"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].wf or 0) .. " War"
 	elseif dbc.currencystate == 4 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw or 0) .. " VPw"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp or 0) .. " JP"
 	elseif dbc.currencystate == 5 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp or 0) .. " HP"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp or 0) .. " VP"
 	elseif dbc.currencystate == 6 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp or 0) .. " CP"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw or 0) .. " VPw"
 	elseif dbc.currencystate == 7 then
-		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw or 0) .. " CPw"
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp or 0) .. " HP"
 	elseif dbc.currencystate == 8 then
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp or 0) .. " CP"
+	elseif dbc.currencystate == 9 then
+		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw or 0) .. " CPw"
+	elseif dbc.currencystate == 10 then
 		CurText = tostring(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].mogu or 0) .. " Mogu"
 	end
 	self.text:SetFormattedText("%s", CurText)
@@ -1665,7 +1681,7 @@ function Currency_OnMouseDown(self)
 	elseif IsAltKeyDown() then
 		print("|cff0099ffRealUI: |r|cffffffffTo erase character data, mouse-over their entry in the Currency display and then Alt+Click.")
 	else
-		dbc.currencystate = (dbc.currencystate < 8) and (dbc.currencystate + 1) or 1
+		dbc.currencystate = (dbc.currencystate < 10) and (dbc.currencystate + 1) or 1
 		if UnitLevel("player") < MAX_PLAYER_LEVEL then
 			if dbc.currencystate == 3 or dbc.currencystate == 4 then
 				dbc.currencystate = 5
@@ -4014,10 +4030,12 @@ function InfoLine:PLAYER_LOGIN()
 	CPName = GetCurrencyInfo(390)
 	JPName = GetCurrencyInfo(395)
 	VPName = GetCurrencyInfo(396)
+	WFName = GetCurrencyInfo (776)
+	TCName = GetCurrencyInfo(777)
 
 	local moguIndex
 	for i = 1, GetCurrencyListSize(), 1 do
-		local _,_,_,_,_,_, icon = GetCurrencyListInfo(i)
+		local _,_,_,_,_,_,_,_, icon = GetCurrencyListInfo(i)
 		if icon == "Interface\\Icons\\archaeology_5_0_mogucoin" then
 			moguIndex = i
 		end
@@ -4138,6 +4156,8 @@ function InfoLine:OnInitialize()
 							jp = -1,
 							vp = -1,
 							vpw = -1,
+							tc = -1,
+							wf = -1,
 							hp = -1,
 							cp = -1,
 							cpw = -1,
