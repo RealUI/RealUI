@@ -7,6 +7,78 @@ local db
 local MODNAME = "EventNotifier"
 local EventNotifier = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
+local options
+local function GetOptions()
+	if not options then options = {
+		type = "group",
+		name = "Event Notifier",
+		desc = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
+		arg = MODNAME,
+		childGroups = "tab",
+		args = {
+			header = {
+				type = "header",
+				name = "Event Notifier",
+				order = 10,
+			},
+			desc = {
+				type = "description",
+				name = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
+				fontSize = "medium",
+				order = 20,
+			},
+			enabled = {
+				type = "toggle",
+				name = "Enabled",
+				desc = "Enable/Disable the Event Notifier module.",
+				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+				set = function(info, value) 
+					nibRealUI:SetModuleEnabled(MODNAME, value)
+					nibRealUI:ReloadUIDialog()
+				end,
+				order = 30,
+			},
+			events = {
+				type = "group",
+				name = "Events",
+				inline = true,
+				order = 40,
+				args = {
+					checkEvents = {
+						type = "toggle",
+						name = "Calender Invites",
+						get = function() return db.checkEvents end,
+						set = function(info, value) 
+							db.checkEvents = value
+						end,
+						order = 10,
+					},
+					checkGuildEvents = {
+						type = "toggle",
+						name = "Guild Events",
+						get = function() return db.checkGuildEvents end,
+						set = function(info, value) 
+							db.checkGuildEvents = value
+						end,
+						order = 20,
+					},
+					checkTIRares = {
+						type = "toggle",
+						name = "Timeless Isle rares",
+						get = function() return db.checkTIRares end,
+						set = function(info, value) 
+							db.checkTIRares = value
+						end,
+						order = 30,
+					},
+				},
+			},
+		},
+	}
+	end
+	return options
+end
+
 -- Addon itself
 local numInvites = 0 -- store amount of invites to compare later, and only show banner when invites differ; events fire multiple times
 
@@ -59,7 +131,16 @@ local function alertGuildEvents()
 end
 
 function EventNotifier:CALENDAR_UPDATE_GUILD_EVENTS()
-	alertGuildEvents()
+	if db.checkGuildEvents then
+		alertGuildEvents()
+	end
+end
+
+function EventNotifier:VIGNETTE_ADDED()
+	if db.checkTIRares then
+		PlaySoundFile("Sound\\Interface\\RaidWarning.wav")
+		nibRealUI:Notification("Rare Spotted", true, "A rare mob has appeared on the MiniMap!", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+	end
 end
 
 function EventNotifier:CALENDAR_UPDATE_PENDING_INVITES()
@@ -92,6 +173,7 @@ function EventNotifier:OnInitialize()
 		profile = {
 			checkEvents = true,
 			checkGuildEvents = true,
+			checkTIRares = true,
 		},
 	})
 	db = self.db.profile
@@ -103,6 +185,7 @@ end
 function EventNotifier:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("CALENDAR_UPDATE_GUILD_EVENTS")
+	self:RegisterEvent("VIGNETTE_ADDED")
 end
 
 function EventNotifier:OnDisable()
