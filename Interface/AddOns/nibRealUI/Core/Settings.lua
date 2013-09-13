@@ -239,7 +239,7 @@ local function CreateInstallWindow()
 
 	-- Click To Install frame + string
 	IWF.installTextFrame = CreateFrame("Frame", nil, IWF)
-		IWF.installTextFrame:SetPoint("BOTTOM", 0, 150)
+		IWF.installTextFrame:SetPoint("BOTTOM", 0, UIParent:GetHeight() / 4)
 		IWF.installTextFrame:SetSize(2,2)
 	IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup() 
 		IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
