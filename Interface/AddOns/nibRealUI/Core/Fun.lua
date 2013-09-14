@@ -474,7 +474,7 @@ local IgnoreLocales = {
 local function checkCJKlength(name, maxNameLength)
 	local lastCharLen = 0
 
-	if IgnoreLocales[GetLocale()] then
+	if IgnoreLocales[nibRealUI.locale] then
 		maxNameLength = maxNameLength / 2
 		local count = maxNameLength
 

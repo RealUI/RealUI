@@ -1160,7 +1160,16 @@ local CurrencyTabletDataCurrent = {}
 local NumCurrencies = 8
 
 local function ShortenDynamicCurrencyName(name)
-	return name ~= nil and string.sub(string.gsub(name, "%l*%s*", ""), 1, 2) or "-"
+	local IgnoreLocales = {
+		koKR = true,
+		zhCN = true,
+		zhTW = true,
+	}
+	if IgnoreLocales[nibRealUI.locale] then
+		return name ~= nil and string.gsub(name, "%l*%s*", "") or "-"
+	else
+		return name
+	end
 end
 
 local function Currency_GetDifference(startVal, endVal, isGold)
