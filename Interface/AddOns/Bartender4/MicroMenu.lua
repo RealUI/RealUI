@@ -50,23 +50,27 @@ function MicroMenuMod:OnEnable()
 		table_insert(buttons, LFDMicroButton)
 		table_insert(buttons, CompanionsMicroButton)
 		table_insert(buttons, EJMicroButton)
+		table_insert(buttons, StoreMicroButton)
 		table_insert(buttons, MainMenuMicroButton)
 		table_insert(buttons, HelpMicroButton)
 		self.bar.buttons = buttons
 
 		MicroMenuMod.button_count = #buttons
 
+		self.bar.anchors = {}
 		for i,v in pairs(buttons) do
-			v:SetParent(self.bar)
-			v:Show()
+			self.bar.anchors[i] = { v:GetPoint() }	-- Save orig button anchors.
 			v:SetFrameLevel(self.bar:GetFrameLevel() + 1)
 			v.ClearSetPoint = self.bar.ClearSetPoint
 		end
 	end
 
-	self:SecureHook("MoveMicroButtons")
-	self:RegisterEvent("UNIT_EXITED_VEHICLE", "MoveMicroButtons")
-	self:RestoreButtons()
+	self:SecureHook("UpdateMicroButtons", "MicroMenuBarShow")
+	self:SecureHookScript(OverrideActionBar, "OnShow", "BlizzardBarShow")
+	self:SecureHookScript(OverrideActionBar, "OnHide", "MicroMenuBarShow")
+	self:SecureHookScript(PetBattleFrame.BottomFrame.MicroButtonFrame, "OnShow", "BlizzardBarShow")
+	self:SecureHookScript(PetBattleFrame.BottomFrame.MicroButtonFrame, "OnHide", "MicroMenuBarShow")
+	self:MicroMenuBarShow()
 
 	self.bar:Enable()
 	self:ToggleOptions()
@@ -77,20 +81,16 @@ function MicroMenuMod:ApplyConfig()
 	self.bar:ApplyConfig(self.db.profile)
 end
 
-function MicroMenuMod:RestoreButtons()
-	if not self:IsEnabled() then return end
-	for k,v in pairs(self.bar.buttons) do
-		v:SetParent(self.bar)
-		v:Show()
+function MicroMenuMod:MicroMenuBarShow()
+	-- Only "fix" button anchors if another frame that uses the MicroButtonBar isn't active.
+	if not (OverrideActionBar:IsShown() or PetBattleFrame:IsShown()) then
+		UpdateMicroButtonsParent(self.bar)
+		self.bar:UpdateButtonLayout()
 	end
-	self.bar:UpdateButtonLayout()
 end
 
-function MicroMenuMod:MoveMicroButtons()
-	if not ((HasVehicleActionBar() and UnitVehicleSkin("player") and UnitVehicleSkin("player") ~= "")
-	or (HasOverrideActionBar() and GetOverrideBarSkin() and GetOverrideBarSkin() ~= "")) then
-		self:RestoreButtons()
-	end
+function MicroMenuMod:BlizzardBarShow()
+	for i,v in pairs(self.bar.buttons) do v:ClearSetPoint(unpack(self.bar.anchors[i])) end
 end
 
 MicroMenuBar.button_width = 28
@@ -105,4 +105,13 @@ function MicroMenuBar:ApplyConfig(config)
 	end
 
 	self:UpdateButtonLayout()
+end
+
+function MicroMenuBar:UpdateButtonLayout()
+	ButtonBar.UpdateButtonLayout(self)
+	-- If the StoreButton is hidden we want to slide the remaining buttons down.
+	if not StoreMicroButton:IsShown() then
+		HelpMicroButton:ClearSetPoint(MainMenuMicroButton:GetPoint())
+		MainMenuMicroButton:ClearSetPoint(StoreMicroButton:GetPoint())
+	end
 end

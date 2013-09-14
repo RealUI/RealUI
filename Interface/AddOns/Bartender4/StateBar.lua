@@ -141,7 +141,7 @@ function StateBar:UpdateStates(returnOnly)
 
 		-- possessing will always be the most important change, if enabled
 		if self:GetStateOption("possess") then
-			table_insert(statedriver, "[overridebar][possessbar]possess")
+			table_insert(statedriver, "[overridebar][possessbar][shapeshift]possess")
 		end
 
 		-- highest priority have our temporary quick-swap keys

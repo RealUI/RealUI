@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 50200
 ## LoadOnDemand: 1
 ## Title: Lib: DualSpec-1.0
 ## Version: v1.9

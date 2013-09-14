@@ -48,10 +48,10 @@ local function BuildSingleProfile()
 	config.actionbars[2].enabled = false
 	config.actionbars[3].padding = 5
 	config.actionbars[3].rows = 12
-	SetBarLocation( config.actionbars[3], "BOTTOMRIGHT", -82, 610 )
+	SetBarLocation( config.actionbars[3], "BOTTOMRIGHT", -42, 610 )
 	config.actionbars[4].padding = 5
 	config.actionbars[4].rows = 12
-	SetBarLocation( config.actionbars[4], "BOTTOMRIGHT", -42, 610 )
+	SetBarLocation( config.actionbars[4], "BOTTOMRIGHT", -82, 610 )
 	SetBarLocation( config.actionbars[5], "BOTTOM", -232, 94 + dy )
 	SetBarLocation( config.actionbars[6], "BOTTOM", -232, 132 + dy )
 
@@ -112,10 +112,10 @@ local function BuildSingleProfile()
 	SetBarLocation( config.actionbars[2], "BOTTOM", 3, 41.75 )
 	config.actionbars[3].padding = 5
 	config.actionbars[3].rows = 12
-	SetBarLocation( config.actionbars[3], "BOTTOMRIGHT", -82, 610 )
+	SetBarLocation( config.actionbars[3], "BOTTOMRIGHT", -42, 610 )
 	config.actionbars[4].padding = 5
 	config.actionbars[4].rows = 12
-	SetBarLocation( config.actionbars[4], "BOTTOMRIGHT", -42, 610 )
+	SetBarLocation( config.actionbars[4], "BOTTOMRIGHT", -82, 610 )
 	config.actionbars[5].padding = 6
 	SetBarLocation( config.actionbars[5], "BOTTOM", 3, 102 + dy )
 	config.actionbars[6].padding = 6
