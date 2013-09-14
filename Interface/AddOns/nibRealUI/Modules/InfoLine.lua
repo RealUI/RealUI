@@ -1166,9 +1166,9 @@ local function ShortenDynamicCurrencyName(name)
 		zhTW = true,
 	}
 	if IgnoreLocales[nibRealUI.locale] then
-		return name ~= nil and string.gsub(name, "%l*%s*", "") or "-"
-	else
 		return name
+	else
+		return name ~= nil and string.gsub(name, "%l*%s*", "") or "-"
 	end
 end
 
