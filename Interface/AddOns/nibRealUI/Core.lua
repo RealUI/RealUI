@@ -209,6 +209,10 @@ local defaults = {
 			fontStyle = 1,
 			chatFontSize = 12,
 			chatFontOutline = true,
+			chatFontCustom = {
+				enabled = false,
+				font = "Arial Narrow",
+			},
 			infoLineBackground = true,
 			stripeOpacity = 0.5,
 		},
@@ -362,15 +366,16 @@ end
 
 -- Style - Chat Font
 function nibRealUI:StyleSetChatFont()
+	local cfFont = not(db.settings.chatFontCustom.enabled) and nibRealUI.font.standard or nibRealUI:RetrieveFont(db.settings.chatFontCustom.font)
+
 	for i = 1, NUM_CHAT_WINDOWS do
 		local cf = _G["ChatFrame" .. i]
 		local cfEditBox = _G["ChatFrame" .. i .. "EditBox"]
 
-		local cfFont = nibRealUI.font.standard
-		cf:SetFont(cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-		cfEditBox:SetFont(cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-		cfEditBox.header:SetFont(cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-		cfEditBox.headerSuffix:SetFont(cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cf:SetFont(						cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox:SetFont(				cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox.header:SetFont(		cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox.headerSuffix:SetFont(	cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
 	end
 end
 
@@ -378,18 +383,19 @@ end
 function nibRealUI:StyleSetFont(style)
 	db.settings.fontStyle = style
 
-	-- Mod Update Fonts
+	-- Update Fonts throughout nibRealUI modules
 	for k, mod in self:IterateModules() do
 		if self:GetModuleEnabled(k) and mod.UpdateFonts and type(mod.UpdateFonts) == "function" then
 			mod:UpdateFonts()
 		end
 	end	
 
-	-- Other Font Strings
-	local fontTiny = nibRealUI:Font(false, "tiny")
-	local fontSmall = nibRealUI:Font(false, "small")
+	-- Update Fonts that have been stored in global font arrays
+	local fontTiny = 	nibRealUI:Font(false, "tiny")
+	local fontSmall = 	nibRealUI:Font(false, "small")
 	local fontRegular = nibRealUI:Font()
-	local fontLarge = nibRealUI:Font(false, "large")
+	local fontLarge = 	nibRealUI:Font(false, "large")
+
 	for k, fontString in pairs(nibRealUI.fontStringsTiny) do
 		fontString:SetFont(unpack(fontTiny))
 	end
@@ -406,7 +412,7 @@ function nibRealUI:StyleSetFont(style)
 	-- Stance Bar position
 	nibRealUI:GetModule("HuDConfig"):RegisterForUpdate("AB", "stance")
 
-	-- Watch Frame
+	-- Refresh Watch Frame
 	if not WatchFrame.collapsed then
 		WatchFrame_Collapse(WatchFrame)
 		WatchFrame_Expand(WatchFrame)
@@ -424,10 +430,14 @@ end
 
 -- Layout Updates
 function nibRealUI:SetLayout()
+	-- Set Current and Not-Current layout variables
 	self.cLayout = dbc.layout.current
 	self.ncLayout = self.cLayout == 1 and 2 or 1
 
+	-- Set AddOn profiles
 	self:SetProfileLayout()
+
+	-- Set Positioners
 	self:UpdatePositioners()
 
 	-- HuD Config
@@ -472,12 +482,14 @@ function nibRealUI:SetLayout()
 end
 function nibRealUI:UpdateLayout()
 	if InCombatLockdown() then
+		-- Register to update once combat ends
 		if not self.oocFunctions["SetLayout"] then
 			self:RegisterLockdownUpdate("SetLayout", function() nibRealUI:SetLayout() end)
 			dbc.layout.needchanged = true
 		end
 		self:Notification("RealUI", true, L["Layout will change after you leave combat."])
 	else
+		-- Set layout in 0.5 seconds
 		self.oocFunctions["SetLayout"] = nil
 		self:ScheduleTimer("SetLayout", 0.5)
 	end
@@ -663,11 +675,14 @@ function nibRealUI:PLAYER_LOGIN()
 	self:StyleSetStripeOpacity()
 	self:StyleSetWindowOpacity()
 	self:StyleSetChatFont()
+end
 
-	-- self:ScheduleRepeatingTimer(function()
-	-- 	RaidNotice_AddMessage(RaidWarningFrame, "This is a raid warning message!", { r = 0, g = 1, b = 0 })
-	-- 	RaidNotice_AddMessage(RaidBossEmoteFrame, "This is a boss emote message!", { r = 0, g = 1, b = 0 })
-	-- end, 5)
+-- To help position UI elements
+function RealUI_TestRaidWarnings()
+	self:ScheduleRepeatingTimer(function()
+		RaidNotice_AddMessage(RaidWarningFrame, "This is a raid warning message!", { r = 0, g = 1, b = 0 })
+		RaidNotice_AddMessage(RaidBossEmoteFrame, "This is a boss emote message!", { r = 0, g = 1, b = 0 })
+	end, 5)
 end
 
 function nibRealUI:ADDON_LOADED(event, addon)
@@ -682,6 +697,7 @@ function nibRealUI:ChatCommand_Config()
 	dbg.tags.slashRealUITyped = true
 	self:ShowConfigBar()
 end
+
 function nibRealUI:OnInitialize()
 	-- Initialize settings, options, slash commands
 	self.db = LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")

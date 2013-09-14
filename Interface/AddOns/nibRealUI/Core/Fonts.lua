@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndbc
+local db, ndb, ndbc
 
 local MODNAME = "Fonts"
 local Fonts = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
@@ -121,6 +121,44 @@ local function GetOptions()
 				type = "description",
 				order = 31,
 			},
+			chatFont = {
+				name = "Custom Chat Font",
+				type = "group",
+				inline = true,
+				order = 35,
+				args = {
+					enabled = {
+						type = "toggle",
+						name = "Use custom chat font",
+						desc = "Use a font other than Standard for the Chat window.",
+						get = function() return ndb.settings.chatFontCustom.enabled end,
+						set = function(info, value) 
+							ndb.settings.chatFontCustom.enabled = value
+							nibRealUI:StyleSetChatFont()
+						end,
+						order = 10,
+					},
+					font = {
+						type = "select",
+						name = "Font",
+						values = AceGUIWidgetLSMlists.font,
+						get = function()
+							return ndb.settings.chatFontCustom.font
+						end,
+						set = function(info, value)
+							ndb.settings.chatFontCustom.font = value
+							nibRealUI:StyleSetChatFont()
+						end,
+						dialogControl = "LSM30_Font",
+						order = 20,
+					},
+				},
+			},
+			gap3 = {
+				name = " ",
+				type = "description",
+				order = 36,
+			},
 			pixel_small = {
 				name = "Pixel (Small)",
 				type = "group",
@@ -165,6 +203,11 @@ local function GetOptions()
 						order = 30,
 					},
 				},
+			},
+			gap4 = {
+				name = " ",
+				type = "description",
+				order = 41,
 			},
 			pixel_large = {
 				name = "Pixel (Large)",
@@ -211,6 +254,11 @@ local function GetOptions()
 					},
 				},
 			},
+			gap5 = {
+				name = " ",
+				type = "description",
+				order = 51,
+			},
 			pixel_numbers = {
 				name = "Pixel (Numbers)",
 				type = "group",
@@ -255,6 +303,11 @@ local function GetOptions()
 						order = 30,
 					},
 				},
+			},
+			gap6 = {
+				name = " ",
+				type = "description",
+				order = 61,
 			},
 			pixel_cooldown = {
 				name = "Pixel (Cooldown)",
@@ -301,7 +354,7 @@ local function GetOptions()
 					},
 				},
 			},
-			gap3 = {
+			gap7 = {
 				name = " ",
 				type = "description",
 				order = 81,
@@ -553,6 +606,7 @@ function Fonts:OnInitialize()
 		}
 	})
 	db = self.db.profile
+	ndb = nibRealUI.db.profile
 	ndbc = nibRealUI.db.char
 	
 	self:SetEnabledState(true)
