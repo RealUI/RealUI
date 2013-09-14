@@ -4,7 +4,9 @@ if L then
 
 L["Enabled"] = "Enabled"
 L["Type /realui"] = "UI의 위치와 설정을 하려면 %s 를 입력하십시오."
+L["Combat Lockdown"] = "Combat Lockdown"
 L["Layout will change after you leave combat."] = "전투가 종료된 후에 레이아웃이 변경됩니다."
+L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
 
 -- Installation
 L["INSTALL"] = "클릭하여 설치합니다"
@@ -192,8 +194,8 @@ L["Honor Points"] = "HP"
 L["Conquest Points"] = "CP"
 L["Justice Points"] = "JP"
 L["Valor Points"] = "VP"
-L["Mogu Runes"] = "Mogu"
 L["Updated"] = "Upd."
+L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"] = "To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"
 
 L["Faction not set"] = "평판이 설정되지 않음"
 

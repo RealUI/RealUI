@@ -4,7 +4,9 @@ if L then
 
 L["Enabled"] = "Aktiviert"
 L["Type /realui"] = "Gib %s ein, um Stil, Positionen und Einstellungen zu konfigurieren."
+L["Combat Lockdown"] = "Combat Lockdown"
 L["Layout will change after you leave combat."] = "Das Layout ändert sich, nachdem Du den Kampf verlassen hast."
+L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
 
 -- Installation
 L["INSTALL"] = "ZUM INSTALLIEREN KLICKEN"
@@ -193,8 +195,8 @@ L["Honor Points"] = "EhP"
 L["Conquest Points"] = "ErP"
 L["Justice Points"] = "GP"
 L["Valor Points"] = "TP"
-L["Mogu Runes"] = "Mogu"
 L["Updated"] = "Akt."
+L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"] = "To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"
 
 L["Faction not set"] = "Keine Fraktion eingestellt"
 

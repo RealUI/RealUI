@@ -2,7 +2,7 @@
 -- http://www.wowinterface.com/downloads/info21365-Notifications.html
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
-local bannerWidth = 400
+local bannerWidth = 450
 local interval = 0.1
 
 local hasInitialized

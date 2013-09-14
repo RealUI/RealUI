@@ -4,7 +4,9 @@ if L then
 
 L["Enabled"] = "Activ\195\169"
 L["Type /realui"] = "Taper %s Pour configurer l'interface."
+L["Combat Lockdown"] = "Combat Lockdown"
 L["Layout will change after you leave combat."] = "La dosposition changera d\195\168s la sortie du combat."
+L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
 
 -- Installation
 L["INSTALL"] = "CLIQUEZ POUR INSTALLER"
@@ -191,8 +193,8 @@ L["Honor Points"] = "HP"
 L["Conquest Points"] = "CP"
 L["Justice Points"] = "JP"
 L["Valor Points"] = "VP"
-L["Mogu Runes"] = "Mogu"
 L["Updated"] = "Upd."
+L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"] = "To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"
 
 L["Faction not set"] = "Faction non precis\195\169e"
 

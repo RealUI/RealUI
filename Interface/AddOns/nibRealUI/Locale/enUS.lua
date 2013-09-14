@@ -4,7 +4,9 @@ if L then
 
 L["Enabled"] = "Enabled"
 L["Type /realui"] = "Type %s to configure UI style, positions and settings."
+L["Combat Lockdown"] = "Combat Lockdown"
 L["Layout will change after you leave combat."] = "Layout will change after you leave combat."
+L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
 
 -- Installation
 L["INSTALL"] = "CLICK TO INSTALL"
@@ -192,10 +194,8 @@ L["Honor Points"] = "HP"
 L["Conquest Points"] = "CP"
 L["Justice Points"] = "JP"
 L["Valor Points"] = "VP"
-L["Mogu Runes"] = "Mogu"
-L["Timeless"] = "Timeless"
-L["Warforged"] = "Warforged"
 L["Updated"] = "Upd."
+L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"] = "To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"
 
 L["Faction not set"] = "Faction not set"
 
