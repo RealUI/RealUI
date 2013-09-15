@@ -550,13 +550,6 @@ function nibRealUI:VARIABLES_LOADED()
 		end
 	end)
 
-	-- Hide the Release Spirit PopUp that shows occasionally when you're not Dead. GG Blizz :p
-	hooksecurefunc("StaticPopup_Show", function(arg)
-		if arg == "DEATH" and not UnitIsDead("PLAYER") then
-			StaticPopup_Hide("DEATH")
-		end
-	end)
-
 	-- Fix Regeant shift+clicking in TradeSkill window
 	LoadAddOn("Blizzard_TradeSkillUI")
 	local function TradeSkillReagent_OnClick(self)
