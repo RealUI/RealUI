@@ -459,7 +459,7 @@ function cbNivaya:CatDropDownInit()
 		info.text = t and t or type
 		info.value = type
 		
-		if (type == "-------------") then
+		if (type == "-------------") or (type == CANCEL) then
 			info.func = nil
 		else
 			info.func = function(self) cbNivaya:CatDropDownOnClick(self, type) end
@@ -481,7 +481,11 @@ function cbNivaya:CatDropDownInit()
 	AddInfoItem("Stuff")
 	AddInfoItem("Junk")
 	AddInfoItem("Bag")
-	for _,v in ipairs(cB_CustomBags) do if v.active then AddInfoItem(v.name) end end
+	for _,v in ipairs(cB_CustomBags) do
+		if v.active then AddInfoItem(v.name) end
+	end
+	AddInfoItem("-------------")
+	AddInfoItem(CANCEL)
 	
 	hooksecurefunc(NivayacBniv_Bag, "Hide", function() cbNivCatDropDown:Hide() end)
 end

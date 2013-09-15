@@ -823,7 +823,7 @@ function MyContainer:OnCreate(name, settings)
 		self.hint:SetPoint("BOTTOMLEFT", infoFrame, -0.5, 31.5)
 		self.hint:SetFont(unpack(font))
 		self.hint:SetTextColor(1, 1, 1, 0.4)
-		self.hint:SetText("Alt + Right Click an item to assign category")
+		self.hint:SetText("Ctrl + Alt + Right Click an item to assign category")
 		self.hintShown = true
 		
 		-- The money display
@@ -846,7 +846,7 @@ MyButton:Scaffold("Default")
 
 function MyButton:OnAdd()
 	self:SetScript('OnMouseUp', function(self, mouseButton)
-		if (mouseButton == 'RightButton') and (IsAltKeyDown()) then
+		if (mouseButton == 'RightButton') and (IsAltKeyDown()) and (IsControlKeyDown()) then
 			local tID = GetContainerItemID(self.bagID, self.slotID)
 			if tID then 
 				cbNivCatDropDown.itemName = GetItemInfo(tID)
