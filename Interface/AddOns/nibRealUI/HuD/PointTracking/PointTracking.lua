@@ -1308,11 +1308,11 @@ end
 
 -- Refresh PointTracking
 function PointTracking:Refresh()
-	PointTracking:UpdateSpec()
-	PointTracking:UpdateCombatFaderEnabled()
-	PointTracking:GetTextures()
-	PointTracking:UpdatePosition()
-	PointTracking:UpdatePoints("ENABLE")
+	self:UpdateSpec()
+	self:UpdateCombatFaderEnabled()
+	self:GetTextures()
+	self:UpdatePosition()
+	self:UpdatePoints("ENABLE")
 end
 
 -- Hide default UI frames
@@ -1352,30 +1352,31 @@ function PointTracking:UpdateSmartHideConditions()
 	else
 		SmartHideConditions = true
 	end
-	PointTracking:UpdatePoints("ENABLE")
+	self:UpdatePoints("ENABLE")
 end
 
 function PointTracking:PLAYER_TARGET_CHANGED()
 	PlayerTargetHostile = (UnitIsEnemy("player", "target") or UnitCanAttack("player", "target"))
-	PointTracking:UpdateSmartHideConditions()
+	self:UpdateSmartHideConditions()
+	self:UpdatePoints()
 end
 
 function PointTracking:PLAYER_REGEN_DISABLED()
 	PlayerInCombat = true
-	PointTracking:UpdateSmartHideConditions()
+	self:UpdateSmartHideConditions()
 end
 
 function PointTracking:PLAYER_REGEN_ENABLED()
 	PlayerInCombat = false
-	PointTracking:UpdateSmartHideConditions()
+	self:UpdateSmartHideConditions()
 end
 
 function PointTracking:PLAYER_ENTERING_WORLD()
 	-- GreenFire = IsSpellKnown(WARLOCK_GREEN_FIRE)
 	PlayerInInstance = IsInInstance()
-	PointTracking:UpdateSpec()
-	PointTracking:UpdatePosition()
-	PointTracking:UpdateSmartHideConditions()
+	self:UpdateSpec()
+	self:UpdatePosition()
+	self:UpdateSmartHideConditions()
 end
 
 function PointTracking:PLAYER_LOGIN()
@@ -1407,7 +1408,6 @@ function PointTracking:PLAYER_LOGIN()
 	-- Mage
 	-- Monk
 	-- Priest
-	SpellInfo["so"] = GetSpellInfo(77487)		-- Shadow Orb
 	-- Rogue	
 	SpellInfo["ap"] = GetSpellInfo(114015)		-- Anticipation Points
 	-- Shaman
@@ -1424,16 +1424,13 @@ function PointTracking:PLAYER_LOGIN()
 		"VEHICLE_UPDATE",
 		"UNIT_AURA",
 	}
-	if (PlayerClass == "MONK") then
+	if (PlayerClass == "MONK") or (PlayerClass == "PRIEST") or (PlayerClass == "PALADIN") then
 		tinsert(EventList, "UNIT_POWER")
-	end
-	if (PlayerClass == "PALADIN") then
-		tinsert(EventList, "UNIT_POWER")
-	end
-	if (PlayerClass == "WARLOCK") then
+	elseif (PlayerClass == "WARLOCK") then
 		tinsert(EventList, "UNIT_POWER")
 		tinsert(EventList, "UNIT_DISPLAYPOWER")
 	end	
+
 	local UpdateSpeed
 	if ndb.powerMode == 1 then		-- Normal
 		UpdateSpeed = 1/8
@@ -1442,7 +1439,7 @@ function PointTracking:PLAYER_LOGIN()
 	else 							-- Turbo
 		UpdateSpeed = 1/10
 	end
-	self:RegisterBucketEvent(EventList, UpdateSpeed, "UpdatePoints")	
+	self:RegisterBucketEvent(EventList, UpdateSpeed, "UpdatePoints")
 	
 	-- Refresh Addon
 	PointTracking:Refresh()
