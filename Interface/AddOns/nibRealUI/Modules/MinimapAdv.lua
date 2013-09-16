@@ -570,6 +570,7 @@ local MinimapNewBorder
 local InfoShown = {
 	coords = false,
 	dungeondifficulty = false,
+	lootSpec = false,
 }
 local pois = {}
 MinimapAdv.pois = pois
@@ -732,18 +733,7 @@ function MinimapAdv:UpdateInfoPosition()
 		else
 			MMFrames.info.zoneIndicator:Hide()
 		end
-		
-		-- Location
-		if db.information.location then
-			MMFrames.info.location:ClearAllPoints()
-			MMFrames.info.location:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-			MMFrames.info.location.text:SetFontObject("MinimapFont2")
-			MMFrames.info.location:Show()
-			yofs = yofs + yadj
-		else
-			MMFrames.info.location:Hide()
-		end
-		
+
 		-- Coordinates
 		if InfoShown.coords then
 			MMFrames.info.coords:ClearAllPoints()
@@ -756,6 +746,18 @@ function MinimapAdv:UpdateInfoPosition()
 			MMFrames.info.coords:Hide()
 		end
 		
+		---- Info List
+		-- Location
+		if db.information.location then
+			MMFrames.info.location:ClearAllPoints()
+			MMFrames.info.location:SetPoint(point, "Minimap", rpoint, xofs, yofs)
+			MMFrames.info.location.text:SetFontObject("MinimapFont2")
+			MMFrames.info.location:Show()
+			yofs = yofs + yadj
+		else
+			MMFrames.info.location:Hide()
+		end
+		
 		-- Dungeon Difficulty
 		if InfoShown.dungeondifficulty and not(InfoShown.coords) then
 			MMFrames.info.dungeondifficulty:ClearAllPoints()
@@ -766,6 +768,18 @@ function MinimapAdv:UpdateInfoPosition()
 			numText = numText + 1
 		else
 			MMFrames.info.dungeondifficulty:Hide()
+		end
+
+		-- Loot Spec
+		if InfoShown.lootSpec then
+			MMFrames.info.lootSpec:ClearAllPoints()
+			MMFrames.info.lootSpec:SetPoint(point, "Minimap", rpoint, xofs, yofs)
+			MMFrames.info.lootSpec.text:SetFontObject("MinimapFont2")
+			MMFrames.info.lootSpec:Show()
+			yofs = yofs + yadj
+			numText = numText + 1
+		else
+			MMFrames.info.lootSpec:Hide()
 		end
 		
 		-- Dungeon Finder Queue
@@ -820,6 +834,7 @@ function MinimapAdv:UpdateInfoPosition()
 		MMFrames.info.location:Hide()
 		MMFrames.info.coords:Hide()
 		MMFrames.info.dungeondifficulty:Hide()
+		MMFrames.info.lootSpec:Hide()
 		MMFrames.info.queue:Hide()
 		MMFrames.info.RFqueue:Hide()
 		MMFrames.info.Squeue:Hide()
@@ -1325,16 +1340,17 @@ function MinimapAdv:QueueTimeUpdate(category)
 			queueStr = strform("%s |cffc0c0c0(%s)|r", tiqStr, awtStr)
 		end
 		
+		local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
 		if category == 1 then -- Dungeon Finder
-			MMFrames.info.queue.text:SetText("|cffffa000DF:|r "..queueStr)
+			MMFrames.info.queue.text:SetText("|cff"..colorOrange.."DF:|r "..queueStr)
 			MMFrames.info.queue:SetWidth(MMFrames.info.queue.text:GetStringWidth() + 12)
 			InfoShown.queue = true
 		elseif category == 3 then -- Raid Finder
-			MMFrames.info.RFqueue.text:SetText("|cffffa000RF:|r "..queueStr)
+			MMFrames.info.RFqueue.text:SetText("|cff"..colorOrange.."RF:|r "..queueStr)
 			MMFrames.info.RFqueue:SetWidth(MMFrames.info.RFqueue.text:GetStringWidth() + 12)
 			InfoShown.RFqueue = true
 		elseif category == 4 then -- Scenarios
-			MMFrames.info.Squeue.text:SetText("|cffffa000S:|r "..queueStr)
+			MMFrames.info.Squeue.text:SetText("|cff"..colorOrange.."S:|r "..queueStr)
 			MMFrames.info.Squeue:SetWidth(MMFrames.info.Squeue.text:GetStringWidth() + 12)
 			InfoShown.Squeue = true
 		end
@@ -1356,37 +1372,39 @@ function MinimapAdv:QueueTimeFrequentCheck()
 end
 
 ---- Dungeon Difficulty ----
-local IS_GUILD_GROUP
 function MinimapAdv:DungeonDifficultyUpdate()
 	-- If in a Party/Raid then show Dungeon Difficulty text
 	MMFrames.info.dungeondifficulty.text:SetText("")
 	local _, instanceType, difficulty, _, maxPlayers = GetInstanceInfo()
-	if (IS_GUILD_GROUP or ((instanceType == "party" or instanceType == "raid") and not (difficulty == 1 and maxPlayers == 5))) then
+	if (self.IsGuildGroup or ((instanceType == "party" or instanceType == "raid") and not (difficulty == 1 and maxPlayers == 5))) then
 		-- Get Dungeon Difficulty
 		local isHeroic = false
-		--[[ difficulty values:
-		0 = None
-		1 = Normal
-		2 = Heroic
-		3 = 10 Player
-		4 = 25 Player
-		5 = 10 Player (Heroic)
-		6 = 25 Player (Heroic)
-		7 = Looking For Raid
-		8 = Challenge Mode
-		9 = 40 Player ]]--
-		if difficulty == 2 or difficulty == 8 then  -- party
-			isHeroic = true;
-		elseif difficulty == 5 or difficulty == 6 then  -- raid
-			isHeroic = true;
+		--[[ difficulty values:	
+		    1-"Normal"
+		    2-"Heroic"
+		    3-"10 Player"
+		    4-"25 Player"
+		    5-"10 Player (Heroic)"
+		    6-"25 Player (Heroic)"
+		    7-"Looking For Raid"
+		    8-"Challenge Mode"
+		    9-"40 Player"
+		    10-nil
+		    11-"Heroic Scenario"
+		    12-"Normal Scenario"
+		    13-nil
+		    14-"Flexible"
+		]]--
+		if (difficulty == 2) or (difficulty == 5) or (difficulty == 6) or (difficulty == 8) or (difficulty == 11) then 
+			isHeroic = true
 		else
-			isHeroic = false;
+			isHeroic = false
 		end
 		
 		-- Set Text
 		local DifficultyText = tostring(maxPlayers)
 		if isHeroic then DifficultyText = DifficultyText.."+" end
-		if IS_GUILD_GROUP then DifficultyText = DifficultyText.." ("..GUILD..")" end
+		if self.IsGuildGroup then DifficultyText = DifficultyText.." ("..GUILD..")" end
 		
 		MMFrames.info.dungeondifficulty.text:SetText("D: "..DifficultyText)
 		MMFrames.info.dungeondifficulty:SetWidth(MMFrames.info.dungeondifficulty.text:GetStringWidth() + 12)
@@ -1394,7 +1412,7 @@ function MinimapAdv:DungeonDifficultyUpdate()
 		-- Update Frames
 		MMFrames.info.dungeondifficulty:EnableMouse(true)
 		
-		if IS_GUILD_GROUP then
+		if self.IsGuildGroup then
 			MMFrames.info.dungeondifficulty:SetScript("OnEnter", function(self)
 				local guildName = GetGuildInfo("player")
 				local _, instanceType, _, _, maxPlayers = GetInstanceInfo()
@@ -1426,21 +1444,24 @@ function MinimapAdv:DungeonDifficultyUpdate()
 	if not UpdateProcessing then
 		self:UpdateInfoPosition()
 	end
+
+	-- Loot Spec
+	self:LootSpecUpdate()
 end
 
 function MinimapAdv:UpdateGuildPartyState(event, ...)
 	-- Update Guild info and then update Dungeon Difficulty
 	if event == "GUILD_PARTY_STATE_UPDATED" then
 		local isGuildGroup = ...
-		if isGuildGroup ~= IS_GUILD_GROUP then
-			IS_GUILD_GROUP = isGuildGroup
+		if isGuildGroup ~= self.IsGuildGroup then
+			self.IsGuildGroup = isGuildGroup
 			self:DungeonDifficultyUpdate()
 		end
 	else
 		if IsInGuild() then
 			RequestGuildPartyState()
 		else
-			IS_GUILD_GROUP = nil
+			self.IsGuildGroup = nil
 		end
 	end
 end
@@ -1448,6 +1469,25 @@ end
 function MinimapAdv:InstanceDifficultyOnEvent(event, ...)
 	self:DungeonDifficultyUpdate()
 end
+
+---- Loot Specialization ----
+function MinimapAdv:LootSpecUpdate()
+	-- If in a Party/Raid with Loot Spec functionality then show Loot Spec
+	local _, instanceType, difficulty, _, maxPlayers = GetInstanceInfo()
+	if (instanceType == "party" or instanceType == "raid") and (difficulty == 14 or difficulty == 7) and not (maxPlayers == 5) then
+		MMFrames.info.lootSpec.text:SetText("|cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)..LOOT..":|r "..nibRealUI:GetCurrentLootSpecName())
+		MMFrames.info.lootSpec:SetWidth(MMFrames.info.lootSpec.text:GetStringWidth() + 12)
+		InfoShown.lootSpec = true
+	else
+		MMFrames.info.lootSpec.text:SetText("")
+		InfoShown.lootSpec = false
+	end
+			
+	if not UpdateProcessing then
+		self:UpdateInfoPosition()
+	end
+end
+
 
 ---- Coordinates ----
 local coords_int = 0.5
@@ -1892,7 +1932,6 @@ function MinimapAdv:RegEvents()
 		"PARTY_MEMBER_DISABLE",
 	}, 1, "InstanceDifficultyOnEvent")
 	
-	
 	-- Queue
 	self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
 	self:RegisterEvent("LFG_PROPOSAL_SHOW", "GetLFGQueue")
@@ -2053,6 +2092,7 @@ local function CreateFrames()
 	MMFrames.info.coords = NewInfoFrame("MinimapAdv_Coords", Minimap)
 	MMFrames.info.coords:SetAlpha(0.75)
 	MMFrames.info.dungeondifficulty = NewInfoFrame("MinimapAdv_DungeonDifficulty", Minimap, true)	
+	MMFrames.info.lootSpec = NewInfoFrame("MinimapAdv_LootSpec", Minimap, true)	
 	MMFrames.info.queue = NewInfoFrame("MinimapAdv_Queue", Minimap, true)	
 	MMFrames.info.RFqueue = NewInfoFrame("MinimapAdv_RFQueue", Minimap, true)	
 	MMFrames.info.Squeue = NewInfoFrame("MinimapAdv_SQueue", Minimap, true)	

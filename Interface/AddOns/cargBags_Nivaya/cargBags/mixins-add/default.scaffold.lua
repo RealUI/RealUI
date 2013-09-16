@@ -124,8 +124,17 @@ end
 ]]
 local ilvlTypes = {Armor = true, Weapon = true}
 local function ItemButton_Update(self, item)
-	self.Icon:SetTexture(item.texture or self.bgTex)
-    self.Icon:SetTexCoord(.08, .92, .08, .92)
+	if item.texture then
+		self.Icon:SetTexture(item.texture or ((cBnivCfg.CompressEmpty and self.bgTex) or unpack({1,1,1,0.2})))
+		self.Icon:SetTexCoord(.08, .92, .08, .92)
+	else
+		if cBnivCfg.CompressEmpty then
+			self.Icon:SetTexture(self.bgTex)
+			self.Icon:SetTexCoord(.08, .92, .08, .92)
+		else
+			self.Icon:SetTexture(1,1,1,0.2)
+		end
+	end
 	if(item.count and item.count > 1) then
 		self.Count:SetText(item.count >= 1e3 and "*" or item.count)
 		self.Count:Show()
