@@ -1168,7 +1168,7 @@ local function ShortenDynamicCurrencyName(name)
 	if IgnoreLocales[nibRealUI.locale] then
 		return name
 	else
-		return name ~= nil and string.gsub(name, "%l*%s*", "") or "-"
+		return name ~= nil and string.gsub(name, "%l*%s*%p*", "") or "-"
 	end
 end
 
@@ -1273,9 +1273,9 @@ local function Currency_UpdateTablet()
 				L["Valor Points"],
 				L["Honor Points"],
 				L["Conquest Points"],
-				ShortenDynamicCurrencyName(BPCurr1Name),
-				ShortenDynamicCurrencyName(BPCurr2Name),
-				ShortenDynamicCurrencyName(BPCurr3Name),
+				"BP1",
+				"BP2",
+				"BP3",
 				L["Updated"]
 			}
 			RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
@@ -1289,7 +1289,8 @@ local function Currency_UpdateTablet()
 					sort(CurrencyTabletData[realm][vf], CharSort)
 					for kn, vn in pairs(CurrencyTabletData[realm][vf]) do
 						TotalRealmChars = TotalRealmChars + 1
-						local isPlayer = ((realm == nibRealUI.realm) and (vf == nibRealUI.faction) and (vn[NumCurrencies + 4] == nibRealUI.name))
+						local currentName = vn[NumCurrencies + 4]
+						local isPlayer = ((realm == nibRealUI.realm) and (vf == nibRealUI.faction) and (currentName == nibRealUI.name))
 						if not isPlayer then OnlyMe = false end
 						local NormColor = isPlayer and 1 or 0.7
 						local ZeroShade = isPlayer and 0.1 or 0.4
@@ -1306,7 +1307,7 @@ local function Currency_UpdateTablet()
 								end
 								line["text"] = vn[i]
 								line["justify"] = "LEFT"
-								line["func"] = function() Currency_TabletClickFunc(realm, vf, vn[NumCurrencies + 4]) end
+								line["func"] = function() Currency_TabletClickFunc(realm, vf, currentName) end
 								line["size"] = db.text.tablets.normalsize
 								line["customwidth"] = MaxWidth[NumCurrencies + 4]
 							elseif (i == 2) or (i == (NumCurrencies + 3)) then
@@ -1323,8 +1324,16 @@ local function Currency_UpdateTablet()
 								line["justify"..i] = "RIGHT"
 								line["customwidth"..i] = MaxWidth[i]
 								line["indentation"..i] = 12.5
+								
 							else
-								line["text"..i] = vn[i] or "0"
+								local curSuffix = ""
+								-- Backpack Currency suffix
+								if (i >= 8) and (i <= 10) then
+									if dbg.currency[realm][vf][currentName].bpCurrencies[i - 7].name then
+										curSuffix = " "..ShortenDynamicCurrencyName(dbg.currency[realm][vf][currentName].bpCurrencies[i - 7].name)
+									end
+								end
+								line["text"..i] = (vn[i] or "0")..curSuffix
 								line["justify"..i] = "RIGHT"
 								line["customwidth"..i] = MaxWidth[i]
 								line["indentation"..i] = 12.5
@@ -1492,9 +1501,6 @@ local function Currency_GetVals()
 	if(BPCurr3Name ~= nil) then
 		curr[BPCurr3Name] = 0
 	end
-	--curr[TCName] = 0
-	--curr[MoguName] = 0
-	--curr[WFName] = 0
 	-- Try Dynamics Currency End
 	
 	local currencySize = GetCurrencyListSize()
@@ -1526,9 +1532,9 @@ local function Currency_Update(self)
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp = currVals[VPName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp = currVals[HPName] or 0
 	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp = currVals[CPName] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr1 = currVals[BPCurr1Name] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr2 = currVals[BPCurr2Name] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr3 = currVals[BPCurr3Name] or 0
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt = currVals[BPCurr1Name] or 0
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt = currVals[BPCurr2Name] or 0
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt = currVals[BPCurr3Name] or 0
 	
 	if self.hasshown or self.initialized then
 		local oldVPW = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw
@@ -1550,9 +1556,9 @@ local function Currency_Update(self)
 			"",
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
 			"",
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr1,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr2,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr3,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt,
 			"",
 			-- Start session values
 			nil,
@@ -1560,9 +1566,9 @@ local function Currency_Update(self)
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
 			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr1,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr2,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr3,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt,
+			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt,
 		}
 		
 		-- Start Session
@@ -1598,6 +1604,14 @@ local function Currency_Update(self)
 							local classColor = nibRealUI:GetClassColor(dbg.currency[kr][kf][kn].class)
 							local nameStr = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, kn)
 							
+							if not dbg.currency[kr][kf][kn].bpCurrencies then
+								dbg.currency[kr][kf][kn].bpCurrencies = {
+									[1] = {amnt = 0, name = nil},
+									[2] = {amnt = 0, name = nil},
+									[3] = {amnt = 0, name = nil},
+								}
+							end
+
 							tinsert(CurrencyTabletData[kr][kf], {
 								nameStr,
 								dbg.currency[kr][kf][kn].level,
@@ -1606,9 +1620,9 @@ local function Currency_Update(self)
 								vpStr,
 								dbg.currency[kr][kf][kn].hp,
 								cpStr,
-								dbg.currency[kr][kf][kn].bpcurr1,
-								dbg.currency[kr][kf][kn].bpcurr2,
-								dbg.currency[kr][kf][kn].bpcurr3,
+								dbg.currency[kr][kf][kn].bpCurrencies[1].amnt,
+								dbg.currency[kr][kf][kn].bpCurrencies[2].amnt,
+								dbg.currency[kr][kf][kn].bpCurrencies[3].amnt,
 								dbg.currency[kr][kf][kn].updated,
 								kn,
 								dbg.currency[kr][kf][kn].jp,
@@ -1655,7 +1669,7 @@ local function Currency_Update(self)
 	elseif dbc.currencystate == 7 then
 		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw, "CPw")
 	elseif dbc.currencystate == 8 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr1, ShortenDynamicCurrencyName(BPCurr1Name))
+		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt, ShortenDynamicCurrencyName(BPCurr1Name))
 	elseif dbc.currencystate == 9 then
 		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr2, ShortenDynamicCurrencyName(BPCurr2Name))
 	elseif dbc.currencystate == 10 then
@@ -4081,6 +4095,9 @@ function InfoLine:PLAYER_LOGIN()
 	BPCurr1Name = GetBackpackCurrencyInfo(1)
 	BPCurr2Name = GetBackpackCurrencyInfo(2)
 	BPCurr3Name = GetBackpackCurrencyInfo(3)
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].name = BPCurr1Name
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].name = BPCurr2Name
+	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].name = BPCurr3Name
 	-- Try Dynamics Currency End
 	GoldName = strtrim(strsub(strform(nibRealUI.goldstr or GOLD_AMOUNT, 0), 2))
 
@@ -4196,13 +4213,15 @@ function InfoLine:OnInitialize()
 							jp = -1,
 							vp = -1,
 							vpw = -1,
-							-- Try Dynamics Currency start
 							hp = -1,
 							cp = -1,
 							cpw = -1,
-							bpcurr1 = -1,
-							bpcurr2 = -1,
-							bpcurr3 = -1,
+							-- Try Dynamics Currency start
+							bpCurrencies = {
+								[1] = {amnt = -1, name = nil},
+								[2] = {amnt = -1, name = nil},
+								[3] = {amnt = -1, name = nil},
+							},
 							-- Try Dynamics Currency end
 							updated = "",
 						},

@@ -59,13 +59,12 @@ C.modules["Blizzard_GuildBankUI"] = function()
 		_G["GuildBankColumn"..i]:GetRegions():Hide()
 		for j = 1, NUM_SLOTS_PER_GUILDBANK_GROUP do
 			local bu = _G["GuildBankColumn"..i.."Button"..j]
+			F.CreateBD(_G["GuildBankColumn"..i.."Button"..j])
 			bu:SetNormalTexture("")
 			bu:SetPushedTexture("")
 
 			bu.icon:SetTexCoord(.08, .92, .08, .92)
 			bu.bg = F.CreateBG(bu)
-
-			F.CreateBD(_G["GuildBankColumn"..i.."Button"..j])
 		end
 	end
 

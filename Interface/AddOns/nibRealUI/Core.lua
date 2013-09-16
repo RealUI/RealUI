@@ -6,7 +6,7 @@ _G.RealUI = nibRealUI
 nibRealUI.verinfo = {
 	[1] = 8,
 	[2] = 0,
-	[3] = 16,
+	[3] = 17,
 }
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end

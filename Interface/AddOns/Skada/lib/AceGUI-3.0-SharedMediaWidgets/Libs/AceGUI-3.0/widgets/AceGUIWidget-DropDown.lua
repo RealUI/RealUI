@@ -1,4 +1,4 @@
---[[ $Id: AceGUIWidget-DropDown.lua 1029 2011-06-10 23:10:58Z nevcairiel $ ]]--
+--[[ $Id: AceGUIWidget-DropDown.lua 1091 2013-09-13 14:42:34Z nevcairiel $ ]]--
 local AceGUI = LibStub("AceGUI-3.0")
 
 -- Lua APIs
@@ -356,17 +356,19 @@ end
 
 do
 	local widgetType = "Dropdown"
-	local widgetVersion = 25
+	local widgetVersion = 26
 	
 	--[[ Static data ]]--
 	
 	--[[ UI event handler ]]--
 	
 	local function Control_OnEnter(this)
+		this.obj.button:LockHighlight()
 		this.obj:Fire("OnEnter")
 	end
 	
 	local function Control_OnLeave(this)
+		this.obj.button:UnlockHighlight()
 		this.obj:Fire("OnLeave")
 	end
 
@@ -693,6 +695,14 @@ do
 		button:SetScript("OnEnter",Control_OnEnter)
 		button:SetScript("OnLeave",Control_OnLeave)
 		button:SetScript("OnClick",Dropdown_TogglePullout)
+		
+		local button_cover = CreateFrame("BUTTON",nil,self.frame)
+		button_cover.obj = self
+		button_cover:SetPoint("TOPLEFT",self.frame,"BOTTOMLEFT",0,25)
+		button_cover:SetPoint("BOTTOMRIGHT",self.frame,"BOTTOMRIGHT")
+		button_cover:SetScript("OnEnter",Control_OnEnter)
+		button_cover:SetScript("OnLeave",Control_OnLeave)
+		button_cover:SetScript("OnClick",Dropdown_TogglePullout)
 		
 		local text = _G[dropdown:GetName() .. "Text"]
 		self.text = text

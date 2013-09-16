@@ -1,6 +1,6 @@
 --[[
 Name: LibBossIDs-1.0
-Revision: $Revision: 85 $
+Revision: $Revision: 86 $
 Author: Elsia
 Website: http://www.wowace.com/addons/libbossids-1-0/
 Documentation:
@@ -10,7 +10,7 @@ Dependencies: LibStub
 License: Public Domain, Absolutely no Warranty.
 ]]
 
-local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 85 $"
+local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 86 $"
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then return end
@@ -926,6 +926,43 @@ local BossIDs = {
    -------------------------------------------------------------------------------
    [17711]	= true,	-- Doomwalker
 
+   -------------------------------------------------------------------------------
+   -- Siege of Orgrimmar
+   -------------------------------------------------------------------------------
+   -- Vale of Eternal Sorrows
+   [71543]    = true,    -- Immerseus
+   [71475]    = true,    -- Rook Stonetoe, The Fallen Protectors
+   [71479]    = true,    -- He Softfoot, The Fallen Protectors
+   [71480]    = true,    -- Sun Tenderheart, The Fallen Protectors
+   [72276]    = true,    -- Norushen, Amalgam of Corruption
+   [71734]    = true,    -- Sha of Pride
+   -- Gates of Retribution
+   [72249]    = true,    -- Galakras
+   [72311]  = true,  -- Varian (part of the Galakras encounter's trigger)
+   [72560]  = true,  -- Lor'Themar (His hair triggers the Galakras encounter)
+   [71466]    = true,    -- Iron Juggernaut
+   [71859]    = true,    -- Haromm, his Darkness exceeded only by his Shamanism
+   [71858]  = true,  -- Kardriss, his Shamanism exceeded only by his Darkness
+   [71515]    = true,    -- General Nazgrim
+   -- The Underhold
+   [71454]    = true,    -- Malkorak
+   [73720]    = true,    -- Mogu Spoils (Spoils of War)
+   [71512]  = true,  -- Mantid Spoils (Spoils of War)
+   [71529]    = true,    -- Thok the Bloodthirsty, her Thirst exceeded only by her Blood
+   -- Downfall
+   [71504]    = true,    -- Siegecrafter Blackfuse, his fuses exceeded only by his... wait...
+   [71591]  = true,  -- Automated Shredder (Part of the Siegecrafter fight... not sure if this is the trigger or just him)
+   [71152]  = true,  -- Skeer the Bloodseeker, <Paragon of the Klaxxi>
+   [71153]  = true,  -- Hisek the Swarmkeeper, <Paragon of the Klaxxi>
+   [71154]  = true,  -- Ka'roz the Locust, <Paragon of the Klaxxi>
+   [71155]  = true,  -- Korven the Prime, <Paragon of the Klaxxi>
+   [71156]  = true,  -- Kaz'tik the Manipulator, <Paragon of the Klaxxi>
+   [71157]  = true,  -- Xaril The POisoned Mind, <Paragon of the Klaxxi>
+   [71158]  = true,  -- Rik'kal the Dissector, <Paragon of the Klaxxi>
+   [71160]  = true,  -- Iyyokuk the Lucid, <Paragon of the Klaxxi> (71159 is Ghazrooki, weird isn't it?)
+   [71161]  = true,  -- Kil'ruk the Wind-Reaver, <Paragon of the Klaxxi>
+   [71865]    = true,    -- Garrosh Starscream, That's right. He was a Decepticon all this time
+   
    -------------------------------------------------------------------------------
    -- Silithus
    -------------------------------------------------------------------------------
