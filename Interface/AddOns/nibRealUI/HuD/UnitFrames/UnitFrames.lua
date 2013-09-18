@@ -18,7 +18,7 @@ local tostring = _G.tostring
 local strlen = _G.strlen
 local strsub = _G.strsub
 
-local layoutSize = 1
+local layoutSize
 
 local PLAYER_ID = "player"
 local PET_ID = "pet"
@@ -409,11 +409,6 @@ local function GetOptions()
 	return options
 end
 
--- Pet Position
-function UnitFrames:GetPetPosition()
-	return db.positions[layoutSize].pet2.x, db.positions[layoutSize].pet2.y
-end
-
 -- Readable Numbers
 function UnitFrames:ReadableNumber(num, places)
     local ret
@@ -529,6 +524,9 @@ end
 ----------------------------
 function UnitFrames:OnInitialize()
 	local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
+
+	layoutSize = nibRealUI.db.profile.settings.hudSize
+
 	self.db = nibRealUI.db:RegisterNamespace(MODNAME)
 	self.db:RegisterDefaults({
 		profile = {
@@ -568,6 +566,15 @@ function UnitFrames:OnInitialize()
 					focustarget = 	{ x = 0,	y = -11},	-- Anchored to Focus
 					target = 		{ x = 0,	y = 0},		-- Anchored to Positioner
 					targettarget = 	{ x = 70,	y = -54},	-- Anchored to Target
+					boss =			{ x = 0,	y = 0},		-- Anchored to Positioner
+				},
+				[2] = {
+					player = 		{ x = 0,	y = 0},		-- Anchored to Positioner
+					pet = 			{ x = -59, 	y = -76},	-- Anchored to Player
+					focus = 		{ x = -70,	y = -60},	-- Anchored to Player
+					focustarget = 	{ x = 0,	y = -11},	-- Anchored to Focus
+					target = 		{ x = 0,	y = 0},		-- Anchored to Positioner
+					targettarget = 	{ x = 70,	y = -60},	-- Anchored to Target
 					boss =			{ x = 0,	y = 0},		-- Anchored to Positioner
 				},
 			},

@@ -215,6 +215,7 @@ local defaults = {
 			},
 			infoLineBackground = true,
 			stripeOpacity = 0.5,
+			hudSize = 1,
 		},
 		-- Media
 		media = {

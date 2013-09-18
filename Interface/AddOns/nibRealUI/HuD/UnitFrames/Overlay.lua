@@ -24,7 +24,7 @@ local strsub = _G.strsub
 ---------------------
 ------ Overlay ------
 ---------------------
-local layoutSize = 1
+local layoutSize = 2
 
 local PLAYER_ID = "player"
 local PET_ID = "pet"
@@ -106,6 +106,76 @@ local Textures = {
 			},
 		},
 	},
+	[2] = {
+		f1 = {
+			health = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Bar]],
+				step = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]],
+				warning = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Warning]],
+			},
+			power = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Bar]],
+				step = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Step]],
+				warning = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]],
+			},
+			endbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Bar]],
+			},
+			statusbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Bar]],
+			},
+			healthbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]],
+			},
+			powerbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_PowerBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_PowerBox_Bar]],
+			},
+		},
+		f2 = {
+			health = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Bar]],
+				step = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]],
+			},
+			endbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Bar]],
+			},
+			statusbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Bar]],
+			},
+			healthbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Bar]],
+			},
+		},
+		f3 = {
+			health = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Bar]],
+				step = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]],
+			},
+			endbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Bar]],
+			},
+			statusbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Bar]],
+			},
+			healthbox = {
+				surround = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Surround]],
+				bar = [[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Bar]],
+			},
+		},
+	},
 }
 
 local UF = {
@@ -140,6 +210,56 @@ local HealthWidth = {
 		[PET_ID] = 96,
 		[TARGETTARGET_ID] = 112,
 	},
+	[2] = {
+		[PLAYER_ID] = 243,
+		[TARGET_ID] = 243,
+		[FOCUS_ID] = 132,
+		[FOCUSTARGET_ID] = 116,
+		[PET_ID] = 116,
+		[TARGETTARGET_ID] = 132,
+	},
+}
+local HealthHeight = {
+	[1] = {
+		[PLAYER_ID] = 11,
+		[TARGET_ID] = 11,
+		[FOCUS_ID] = 7,
+		[FOCUSTARGET_ID] = 7,
+		[PET_ID] = 7,
+		[TARGETTARGET_ID] = 7,
+	},
+	[2] = {
+		[PLAYER_ID] = 13,
+		[TARGET_ID] = 13,
+		[FOCUS_ID] = 8,
+		[FOCUSTARGET_ID] = 8,
+		[PET_ID] = 8,
+		[TARGETTARGET_ID] = 8,
+	},
+}
+local F1_OverlayWidth = {
+	[1] = 256,
+	[2] = 291,
+}
+local F1_OverlayHeight = {
+	[1] = 32,
+	[2] = 34,
+}
+local F1_HealthTextureWidth = {
+	[1] = 256,
+	[2] = 512,
+}
+local F1_HealthTextVertical = {
+	[1] = 15,
+	[2] = 17,
+}
+local F1_TargetRightHealthTextOffset = {
+	[1] = -44,
+	[2] = -265,
+}
+local F1_PowerTextVertical = {
+	[1] = 5,
+	[2] = 3,
 }
 
 local PowerWidth = {
@@ -147,6 +267,29 @@ local PowerWidth = {
 		[PLAYER_ID] = 188,
 		[TARGET_ID] = 188,
 	},
+	[2] = {
+		[PLAYER_ID] = 219,
+		[TARGET_ID] = 219,
+	},
+}
+local PowerHeight = {
+	[1] = {
+		[PLAYER_ID] = 6,
+		[TARGET_ID] = 6,
+	},
+	[2] = {
+		[PLAYER_ID] = 8,
+		[TARGET_ID] = 8,
+	},
+}
+local PowerXOffset = {
+	[1] = -7,
+	[2] = -9,
+}
+
+local F1_EndBoxOffset = {
+	[1] = 0,
+	[2] = -2,
 }
 
 local ReversePowers = {
@@ -166,11 +309,42 @@ local HealthStepOffsets = {
 		[TARGET_ID] = {-5, -5},
 		[TARGETTARGET_ID] = {-16, -17},
 	},
+	[2] = {
+		[PLAYER_ID] = {4, 3},
+		[FOCUS_ID] = {16, 15},
+		[FOCUSTARGET_ID] = {1, 1},
+		[PET_ID] = {5, 4},
+		[TARGET_ID] = {-3, -2},
+		[TARGETTARGET_ID] = {-15, -15},
+	},
 }
+local HealthStepVerticalOffsets = {
+	[1] = {
+		[PLAYER_ID] = -4,
+		[FOCUS_ID] = -4,
+		[FOCUSTARGET_ID] = -4,
+		[PET_ID] = -4,
+		[TARGET_ID] = -4,
+		[TARGETTARGET_ID] = -4,
+	},
+	[2] = {
+		[PLAYER_ID] = -2,
+		[FOCUS_ID] = -4,
+		[FOCUSTARGET_ID] = -4,
+		[PET_ID] = -3,
+		[TARGET_ID] = -2,
+		[TARGETTARGET_ID] = -4,
+	},
+}
+
 local HealthWarningOffsets = {
 	[1] = {
 		[PLAYER_ID] = {-7, -8},
 		[TARGET_ID] = {8, 8},
+	},
+	[2] = {
+		[PLAYER_ID] = {-13, -12},
+		[TARGET_ID] = {14, 13},
 	},
 }
 
@@ -178,6 +352,10 @@ local PowerStepOffsets = {
 	[1] = {
 		[PLAYER_ID] = {9, 8, 8},
 		[TARGET_ID] = {-8, -8, -8},
+	},
+	[2] = {
+		[PLAYER_ID] = {5, 5, 5},
+		[TARGET_ID] = {-4, -4, -4},
 	},
 }
 
@@ -606,19 +784,39 @@ function UnitFrames:UpdateUnitHealthBarInfo(UnitID, majorUpdate)
 		local HealthStepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
 		if (UFUnit == PLAYER_ID) or (UFUnit == FOCUS_ID) or (UFUnit == FOCUSTARGET_ID) or (UFUnit == PET_ID) then
 			for i = 1, 2 do
-				SetFramePosition(UF[UFUnit].health.steps[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, {"TOPRIGHT", UF[UFUnit].health.surround, "TOPRIGHT", floor(-(HealthWidth[layoutSize][UFUnit] - (HealthWidth[layoutSize][UFUnit] * PlayerStepPoints[i]))) + HealthStepOffsets[layoutSize][UFUnit][i], -4})
+				SetFramePosition(UF[UFUnit].health.steps[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, 
+					{
+						"TOPRIGHT", UF[UFUnit].health.surround, "TOPRIGHT", 
+						floor(-(HealthWidth[layoutSize][UFUnit] - (HealthWidth[layoutSize][UFUnit] * PlayerStepPoints[i]))) + HealthStepOffsets[layoutSize][UFUnit][i],  -- x
+						HealthStepVerticalOffsets[layoutSize][UFUnit] 	-- y
+					})
 				UF[UFUnit].health.steps[i]:Show()
 				if (UFUnit == PLAYER_ID) then
-					SetFramePosition(UF[UFUnit].health.warning[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, {"BOTTOMLEFT", UF[UFUnit].health.surround, "BOTTOMRIGHT", floor(-((1 - HealthStepPoints[i]) * HealthWidth[layoutSize][UFUnit]) + HealthWarningOffsets[layoutSize][UFUnit][i]), 1})
+					SetFramePosition(UF[UFUnit].health.warning[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, 
+						{
+							"BOTTOMLEFT", UF[UFUnit].health.surround, "BOTTOMRIGHT", 
+							floor(-((1 - HealthStepPoints[i]) * HealthWidth[layoutSize][UFUnit]) + HealthWarningOffsets[layoutSize][UFUnit][i]), -- x
+							1 	-- y
+						})
 					UF[UFUnit].health.warning[i]:Hide()
 				end
 			end
 		else
 			for i = 1, 2 do
-				SetFramePosition(UF[UFUnit].health.steps[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, {"BOTTOMLEFT", UF[UFUnit].health.surround, "BOTTOMLEFT", floor(HealthWidth[layoutSize][UFUnit] - (HealthWidth[layoutSize][UFUnit] * PlayerStepPoints[i])) + HealthStepOffsets[layoutSize][UFUnit][i], -4})
+				SetFramePosition(UF[UFUnit].health.steps[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, 
+					{
+						"BOTTOMLEFT", UF[UFUnit].health.surround, "BOTTOMLEFT", 
+						floor(HealthWidth[layoutSize][UFUnit] - (HealthWidth[layoutSize][UFUnit] * PlayerStepPoints[i])) + HealthStepOffsets[layoutSize][UFUnit][i], 
+						HealthStepVerticalOffsets[layoutSize][UFUnit]
+					})
 				UF[UFUnit].health.steps[i]:Show()
 				if (UFUnit == TARGET_ID) then
-					SetFramePosition(UF[UFUnit].health.warning[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, {"BOTTOMRIGHT", UF[UFUnit].health.surround, "BOTTOMLEFT", floor(((1 - HealthStepPoints[i]) * HealthWidth[layoutSize][UFUnit]) + HealthWarningOffsets[layoutSize][UFUnit][i]), 1})
+					SetFramePosition(UF[UFUnit].health.warning[i], "MEDIUM", UF[UFUnit].health.surround:GetFrameLevel() + 2, 16, 16, 
+						{
+							"BOTTOMRIGHT", UF[UFUnit].health.surround, "BOTTOMLEFT", 
+							floor(((1 - HealthStepPoints[i]) * HealthWidth[layoutSize][UFUnit]) + HealthWarningOffsets[layoutSize][UFUnit][i]),	-- x
+							1 	-- y
+						})
 					UF[UFUnit].health.warning[i]:Hide()
 				end
 			end
@@ -720,10 +918,10 @@ function UnitFrames:UpdateUnitPowerBarInfo(UnitID, majorUpdate)
 			xStepPos = floor(stepXMod * (PowerWidth[layoutSize][UFUnit] - (PowerWidth[layoutSize][UFUnit] * UF[UFUnit].power.steppoints[i]))) + PowerStepOffsets[layoutSize][UFUnit][i]
 		end
 		if UF[UFUnit].power.sinrogue and i == 1 then
-			xStepPos = xStepPos - 3
+			xStepPos = xStepPos - (layoutSize == 1 and 3 or -17)	-- Position 0.55 Sin Rogue step
 		end
-		SetFramePosition(UF[UFUnit].power.steps[i], "MEDIUM", UF[UFUnit].power.surround:GetFrameLevel() + 2, 16, 16, {stepAnchor, UF[UFUnit].power.surround, stepAnchor, xStepPos, 9})
-		SetFramePosition(UF[UFUnit].power.warning[i], "MEDIUM", UF[UFUnit].power.surround:GetFrameLevel() + 2, 16, 16, {stepAnchor, UF[UFUnit].power.surround, stepAnchor, xStepPos, 9})
+		SetFramePosition(UF[UFUnit].power.steps[i], "MEDIUM", UF[UFUnit].power.surround:GetFrameLevel() + 2, 16, 16, {stepAnchor, UF[UFUnit].power.surround, stepAnchor, xStepPos, 15 - PowerHeight[layoutSize][UFUnit]})
+		SetFramePosition(UF[UFUnit].power.warning[i], "MEDIUM", UF[UFUnit].power.surround:GetFrameLevel() + 2, 16, 16, {stepAnchor, UF[UFUnit].power.surround, stepAnchor, xStepPos, 15 - PowerHeight[layoutSize][UFUnit]})
 		if UF[UFUnit].power.hassteps and (UF[UFUnit].power.steppoints[i] > 0) then
 			UF[UFUnit].power.steps[i]:Show()
 		else
@@ -1199,12 +1397,12 @@ function UnitFrames:CreateFrames()
 	----------------
 	local Parent = _G[ParentFrames[PLAYER_ID]] or UIParent
 	UF[PLAYER_ID] = CreateFrame("Frame", ParentFrames[PLAYER_ID].."_Overlay", Parent)
-	SetFramePosition(UF[PLAYER_ID], "MEDIUM", 0, 256, 32, {"BOTTOMRIGHT", Parent, "BOTTOMRIGHT", 0, -5})
+	SetFramePosition(UF[PLAYER_ID], "MEDIUM", 0, F1_OverlayWidth[layoutSize], F1_OverlayHeight[layoutSize], {"BOTTOMRIGHT", Parent, "BOTTOMRIGHT", 0, -5})
 	
 	-- Health
 	UF[PLAYER_ID].health = CreateFrame("Frame", nil, UF[PLAYER_ID])
 	UF[PLAYER_ID].health:SetParent(UF[PLAYER_ID])
-	SetFramePosition(UF[PLAYER_ID].health, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 256, 16, {"BOTTOMRIGHT", UF[PLAYER_ID], "BOTTOMRIGHT", -4, 16})
+	SetFramePosition(UF[PLAYER_ID].health, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMRIGHT", UF[PLAYER_ID], "BOTTOMRIGHT", -4, 16})
 	UF[PLAYER_ID].health.colorID = ""
 	UF[PLAYER_ID].health.position = -1
 	UF[PLAYER_ID].health.elapsed = 0
@@ -1215,16 +1413,16 @@ function UnitFrames:CreateFrames()
 	
 		-- Surround
 		UF[PLAYER_ID].health.surround = CreateArtFrame(UF[PLAYER_ID].health)
-		SetFramePosition(UF[PLAYER_ID].health.surround, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel() + 2, 256, 16, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", 0, 0})
+		SetFramePosition(UF[PLAYER_ID].health.surround, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel() + 2, F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", 0, 0})
 		UF[PLAYER_ID].health.surround.bg:SetTexture(Textures[layoutSize].f1.health.surround)
 		
 		-- Background
 		UF[PLAYER_ID].health.background = CreateArtFrame(UF[PLAYER_ID].health)
-		SetFramePosition(UF[PLAYER_ID].health.background, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel(), 256, 16, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", 0, 0})
+		SetFramePosition(UF[PLAYER_ID].health.background, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel(), F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", layoutSize == 1 and 0 or -1, 0})
 		UF[PLAYER_ID].health.background.bg:SetTexture(Textures[layoutSize].f1.health.bar)
 		
 		-- Bar
-		UF[PLAYER_ID].health.bar = AngleStatusBar:NewBar(UF[PLAYER_ID].health.background, -2, -4, HealthWidth[layoutSize][PLAYER_ID], 11, "LEFT", "LEFT", "LEFT", true)
+		UF[PLAYER_ID].health.bar = AngleStatusBar:NewBar(UF[PLAYER_ID].health.background, layoutSize == 1 and -2 or -1, -(15 - HealthHeight[layoutSize][PLAYER_ID]), HealthWidth[layoutSize][PLAYER_ID], HealthHeight[layoutSize][PLAYER_ID], "LEFT", "LEFT", "LEFT", true)
 		
 		-- HealthBar Text
 		UF[PLAYER_ID].healthtext = CreateTextFrame(UF[PLAYER_ID].health, "BOTTOM", "LEFT", true)
@@ -1232,7 +1430,7 @@ function UnitFrames:CreateFrames()
 
 		-- Health Text
 		UF[PLAYER_ID].health.fullval = CreateTextFrame(UF[PLAYER_ID].health, "BOTTOM", "RIGHT", true)
-		SetFramePosition(UF[PLAYER_ID].health.fullval, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", 2, (layoutSize == 1) and 15 or 16})
+		SetFramePosition(UF[PLAYER_ID].health.fullval, "MEDIUM", UF[PLAYER_ID].health:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[PLAYER_ID].health, "BOTTOMRIGHT", 2, F1_HealthTextVertical[layoutSize]})
 		
 		-- Steps
 		UF[PLAYER_ID].health.steps = {}
@@ -1253,7 +1451,7 @@ function UnitFrames:CreateFrames()
 		end
 
 	-- Absorb Bar
-	UF[PLAYER_ID].absorbBar = AngleStatusBar:NewBar(UF[PLAYER_ID].health.background, -2, -4, HealthWidth[layoutSize][PLAYER_ID], 11, "LEFT", "LEFT", "LEFT", true)
+	UF[PLAYER_ID].absorbBar = AngleStatusBar:NewBar(UF[PLAYER_ID].health.background, -2, -4, HealthWidth[layoutSize][PLAYER_ID], HealthHeight[layoutSize][PLAYER_ID], "LEFT", "LEFT", "LEFT", true)
 	UF[PLAYER_ID].absorbBar:SetFrameLevel(UF[PLAYER_ID].health.surround:GetFrameLevel() + 2)
 	UF[PLAYER_ID].absorbBar:SetPoint("TOPRIGHT", UF[PLAYER_ID].health.bar, "TOPLEFT", -1, 0)
 	-- UF[PLAYER_ID].absorbBar:SetPoint("CENTER", UIParent, "CENTER")
@@ -1283,12 +1481,12 @@ function UnitFrames:CreateFrames()
 		UF[PLAYER_ID].power.background.bg:SetTexture(Textures[layoutSize].f1.power.bar)
 		
 		-- Bar
-		UF[PLAYER_ID].power.bar = AngleStatusBar:NewBar(UF[PLAYER_ID].power.background, -7, -1, PowerWidth[layoutSize][PLAYER_ID], 6, "RIGHT", "RIGHT", "LEFT", true)
+		UF[PLAYER_ID].power.bar = AngleStatusBar:NewBar(UF[PLAYER_ID].power.background, PowerXOffset[layoutSize], -1, PowerWidth[layoutSize][PLAYER_ID], PowerHeight[layoutSize][PLAYER_ID], "RIGHT", "RIGHT", "LEFT", true)
 		
 		-- Power Text
 		UF[PLAYER_ID].power.fullval = CreateTextFrame(UF[PLAYER_ID].power, "TOP", "RIGHT", true)
-		SetFramePosition(UF[PLAYER_ID].power.fullval, "MEDIUM", UF[PLAYER_ID].power:GetFrameLevel(), 12, 12, {"TOPRIGHT", UF[PLAYER_ID].power, "BOTTOMRIGHT", 2, 5})
-		tinsert(FontStringsY, {UF[PLAYER_ID].power.fullval, 2, 5})
+		SetFramePosition(UF[PLAYER_ID].power.fullval, "MEDIUM", UF[PLAYER_ID].power:GetFrameLevel(), 12, 12, {"TOPRIGHT", UF[PLAYER_ID].power, "BOTTOMRIGHT", 2, F1_PowerTextVertical[layoutSize]})
+		tinsert(FontStringsY, {UF[PLAYER_ID].power.fullval, 2, F1_PowerTextVertical[layoutSize]})
 
 		-- Steps
 		UF[PLAYER_ID].power.steps = {}
@@ -1335,7 +1533,7 @@ function UnitFrames:CreateFrames()
 	
 	-- End Box
 	UF[PLAYER_ID].endbox = CreateStatusBox(UF[PLAYER_ID])
-	SetFramePosition(UF[PLAYER_ID].endbox, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 16, 32, {"LEFT", UF[PLAYER_ID], "RIGHT", -14, 1})
+	SetFramePosition(UF[PLAYER_ID].endbox, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 32, 32, {"LEFT", UF[PLAYER_ID], "RIGHT", -14 + F1_EndBoxOffset[layoutSize], 1})
 	UF[PLAYER_ID].endbox.surround:SetTexture(Textures[layoutSize].f1.endbox.surround)
 	UF[PLAYER_ID].endbox.background:SetTexture(Textures[layoutSize].f1.endbox.bar)
 	UF[PLAYER_ID].endbox.bar:SetTexture(Textures[layoutSize].f1.endbox.bar)
@@ -1355,7 +1553,7 @@ function UnitFrames:CreateFrames()
 	-- Health Boxes
 	UF[PLAYER_ID].healthbox = {}
 	UF[PLAYER_ID].healthbox[1] = CreateStatusBox(UF[PLAYER_ID].health)
-	SetFramePosition(UF[PLAYER_ID].healthbox[1], "MEDIUM", UF[PLAYER_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPRIGHT", UF[PLAYER_ID].health, "TOPRIGHT", -8, -4})
+	SetFramePosition(UF[PLAYER_ID].healthbox[1], "MEDIUM", UF[PLAYER_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPRIGHT", UF[PLAYER_ID].health, "TOPRIGHT", -8, -(15 - HealthHeight[layoutSize][PLAYER_ID])})
 	UF[PLAYER_ID].healthbox[1].surround:SetTexture(Textures[layoutSize].f1.healthbox.surround)
 	UF[PLAYER_ID].healthbox[1].background:SetTexture(Textures[layoutSize].f1.healthbox.bar)
 	UF[PLAYER_ID].healthbox[1].bar:SetTexture(Textures[layoutSize].f1.healthbox.bar)
@@ -1378,16 +1576,16 @@ function UnitFrames:CreateFrames()
 	-- Stat Fields
 	UF[PLAYER_ID].stat1 = CreateTextFrame(UF[PLAYER_ID].endbox, "BOTTOM", "LEFT")
 	RealUIPlayerStat1 = UF[PLAYER_ID].stat1
-	SetFramePosition(UF[PLAYER_ID].stat1, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[PLAYER_ID].endbox, "BOTTOMRIGHT", 15, 18})
+	SetFramePosition(UF[PLAYER_ID].stat1, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[PLAYER_ID].endbox, "BOTTOMRIGHT", layoutSize == 1 and 0 or 2, 18})
 	tinsert(FontStringsY, {UF[PLAYER_ID].stat1, 3, 18})
 	
 	UF[PLAYER_ID].stat2 = CreateTextFrame(UF[PLAYER_ID].endbox, "TOP", "LEFT")
 	RealUIPlayerStat2 = UF[PLAYER_ID].stat2
-	SetFramePosition(UF[PLAYER_ID].stat2, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[PLAYER_ID].endbox, "BOTTOMRIGHT", 15, 1})
+	SetFramePosition(UF[PLAYER_ID].stat2, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[PLAYER_ID].endbox, "BOTTOMRIGHT", layoutSize == 1 and 0 or 2, 1})
 	
 	UF[PLAYER_ID].stat1.icon = UF[PLAYER_ID].stat1:CreateTexture(nil, "ARTWORK")
 	UF[PLAYER_ID].stat1.icon:SetSize(16, 16)
-	UF[PLAYER_ID].stat1.icon:SetPoint("TOPLEFT", UF[PLAYER_ID].endbox, "TOPRIGHT", 2, 1)
+	UF[PLAYER_ID].stat1.icon:SetPoint("BOTTOMRIGHT", UF[PLAYER_ID].stat1, "BOTTOMLEFT", 3, 0)
 	UF[PLAYER_ID].stat1.icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
 
 	UF[PLAYER_ID].stat2.icon = UF[PLAYER_ID].stat2:CreateTexture(nil, "ARTWORK")
@@ -1402,12 +1600,12 @@ function UnitFrames:CreateFrames()
 	local Parent = _G[ParentFrames[TARGET_ID]] or UIParent
 	UF[TARGET_ID] = CreateFrame("Frame", ParentFrames[TARGET_ID].."_Overlay", Parent)
 	UF[TARGET_ID]:Hide()
-	SetFramePosition(UF[TARGET_ID], "MEDIUM", 0, 256, 32, {"BOTTOMLEFT", Parent, "BOTTOMLEFT", 0, -5})
+	SetFramePosition(UF[TARGET_ID], "MEDIUM", 0, F1_OverlayWidth[layoutSize], F1_OverlayHeight[layoutSize], {"BOTTOMLEFT", Parent, "BOTTOMLEFT", 0, -5})
 	
 	-- Health
 	UF[TARGET_ID].health = CreateFrame("Frame", nil, UF[TARGET_ID])
 	UF[TARGET_ID].health:SetParent(UF[TARGET_ID])
-	SetFramePosition(UF[TARGET_ID].health, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 256, 16, {"BOTTOMLEFT", UF[TARGET_ID], "BOTTOMLEFT", 4, 16})
+	SetFramePosition(UF[TARGET_ID].health, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMLEFT", UF[TARGET_ID], "BOTTOMLEFT", 4, 16})
 	UF[TARGET_ID].health.colorID = ""
 	UF[TARGET_ID].health.position = -1
 	UF[TARGET_ID].health.elapsed = 0
@@ -1418,26 +1616,26 @@ function UnitFrames:CreateFrames()
 	
 		-- Surround
 		UF[TARGET_ID].health.surround = CreateArtFrame(UF[TARGET_ID].health)
-		SetFramePosition(UF[TARGET_ID].health.surround, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel() + 2, 256, 16, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", 0, 0})
+		SetFramePosition(UF[TARGET_ID].health.surround, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel() + 2, F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", 0, 0})
 		UF[TARGET_ID].health.surround.bg:SetTexture(Textures[layoutSize].f1.health.surround)
 		UF[TARGET_ID].health.surround.bg:SetTexCoord(1, 0, 0, 1)
 		
 		-- Background
 		UF[TARGET_ID].health.background = CreateArtFrame(UF[TARGET_ID].health)
-		SetFramePosition(UF[TARGET_ID].health.background, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel(), 256, 16, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", 0, 0})
+		SetFramePosition(UF[TARGET_ID].health.background, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel(), F1_HealthTextureWidth[layoutSize], 16, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", layoutSize == 1 and 0 or 1, 0})
 		UF[TARGET_ID].health.background.bg:SetTexture(Textures[layoutSize].f1.health.bar)
 		UF[TARGET_ID].health.background.bg:SetTexCoord(1, 0, 0, 1)
 		
 		-- Bar
-		UF[TARGET_ID].health.bar = AngleStatusBar:NewBar(UF[TARGET_ID].health.background, 2, -4, HealthWidth[layoutSize][TARGET_ID], 11, "RIGHT", "RIGHT", "RIGHT", true)
+		UF[TARGET_ID].health.bar = AngleStatusBar:NewBar(UF[TARGET_ID].health.background, layoutSize == 1 and 2 or 1, -(15 - HealthHeight[layoutSize][TARGET_ID]), HealthWidth[layoutSize][TARGET_ID], HealthHeight[layoutSize][TARGET_ID], "RIGHT", "RIGHT", "RIGHT", true)
 		
 		-- HealthBar Text
 		UF[TARGET_ID].healthtext = CreateTextFrame(UF[TARGET_ID].health, "BOTTOM", "RIGHT", true)
-		SetFramePosition(UF[TARGET_ID].healthtext, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel() + 3, 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].health, "BOTTOMRIGHT", -44, 15})
+		SetFramePosition(UF[TARGET_ID].healthtext, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel() + 3, 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].health, "BOTTOMRIGHT", F1_TargetRightHealthTextOffset[layoutSize], F1_HealthTextVertical[layoutSize]})
 
 		-- Health Text
 		UF[TARGET_ID].health.fullval = CreateTextFrame(UF[TARGET_ID].health, "BOTTOM", "LEFT", true)
-		SetFramePosition(UF[TARGET_ID].health.fullval, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", 0, (layoutSize == 1) and 15 or 16})
+		SetFramePosition(UF[TARGET_ID].health.fullval, "MEDIUM", UF[TARGET_ID].health:GetFrameLevel(), 12, 12, {"BOTTOMLEFT", UF[TARGET_ID].health, "BOTTOMLEFT", 0, F1_HealthTextVertical[layoutSize]})
 		
 		-- Steps
 		UF[TARGET_ID].health.steps = {}
@@ -1460,7 +1658,7 @@ function UnitFrames:CreateFrames()
 		end
 		
 	-- Absorb Bar
-	UF[TARGET_ID].absorbBar = AngleStatusBar:NewBar(UF[TARGET_ID].health.background, 2, -4, HealthWidth[layoutSize][TARGET_ID], 11, "RIGHT", "RIGHT", "RIGHT", false)
+	UF[TARGET_ID].absorbBar = AngleStatusBar:NewBar(UF[TARGET_ID].health.background, 2, -4, HealthWidth[layoutSize][TARGET_ID], HealthHeight[layoutSize][TARGET_ID], "RIGHT", "RIGHT", "RIGHT", false)
 	UF[TARGET_ID].absorbBar:SetFrameLevel(UF[TARGET_ID].health.surround:GetFrameLevel() + 2)
 	UF[TARGET_ID].absorbBar:SetPoint("TOPLEFT", UF[TARGET_ID].health.bar, "TOPRIGHT", 1, 0)
 
@@ -1490,12 +1688,12 @@ function UnitFrames:CreateFrames()
 		UF[TARGET_ID].power.background.bg:SetTexCoord(1, 0, 0, 1)
 		
 		-- Bar
-		UF[TARGET_ID].power.bar = AngleStatusBar:NewBar(UF[TARGET_ID].power.background, 7, -1, PowerWidth[layoutSize][TARGET_ID], 6, "LEFT", "LEFT", "RIGHT", true)
+		UF[TARGET_ID].power.bar = AngleStatusBar:NewBar(UF[TARGET_ID].power.background, -PowerXOffset[layoutSize], -1, PowerWidth[layoutSize][TARGET_ID], PowerHeight[layoutSize][TARGET_ID], "LEFT", "LEFT", "RIGHT", true)
 		
 		-- Power Text
 		UF[TARGET_ID].power.fullval = CreateTextFrame(UF[TARGET_ID].power, "TOP", "LEFT", true)
-		SetFramePosition(UF[TARGET_ID].power.fullval, "MEDIUM", UF[TARGET_ID].power:GetFrameLevel(), 12, 12, {"TOPLEFT", UF[TARGET_ID].power, "BOTTOMLEFT", 1, 5})
-		tinsert(FontStringsY, {UF[TARGET_ID].power.fullval, 2, 5})
+		SetFramePosition(UF[TARGET_ID].power.fullval, "MEDIUM", UF[TARGET_ID].power:GetFrameLevel(), 12, 12, {"TOPLEFT", UF[TARGET_ID].power, "BOTTOMLEFT", 1, F1_PowerTextVertical[layoutSize]})
+		tinsert(FontStringsY, {UF[TARGET_ID].power.fullval, 2, F1_PowerTextVertical[layoutSize]})
 
 		-- Steps
 		UF[TARGET_ID].power.steps = {}
@@ -1535,7 +1733,7 @@ function UnitFrames:CreateFrames()
 	
 	-- End Box
 	UF[TARGET_ID].endbox = CreateStatusBox(UF[TARGET_ID])
-	SetFramePosition(UF[TARGET_ID].endbox, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 16, 32, {"RIGHT", UF[TARGET_ID], "LEFT", 14, 1})
+	SetFramePosition(UF[TARGET_ID].endbox, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 32, 32, {"RIGHT", UF[TARGET_ID], "LEFT", 14 - F1_EndBoxOffset[layoutSize], 1})
 	UF[TARGET_ID].endbox.surround:SetTexture(Textures[layoutSize].f1.endbox.surround)
 	UF[TARGET_ID].endbox.surround:SetTexCoord(1, 0, 0, 1)
 	UF[TARGET_ID].endbox.background:SetTexture(Textures[layoutSize].f1.endbox.bar)
@@ -1562,7 +1760,7 @@ function UnitFrames:CreateFrames()
 	UF[TARGET_ID].healthbox = {}
 	for i = 1, 2 do
 		UF[TARGET_ID].healthbox[i] = CreateStatusBox(UF[TARGET_ID].health)
-		SetFramePosition(UF[TARGET_ID].healthbox[i], "MEDIUM", UF[TARGET_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPLEFT", UF[TARGET_ID].health, "TOPLEFT", ((i-1)*8+(i)) + 7, -4})
+		SetFramePosition(UF[TARGET_ID].healthbox[i], "MEDIUM", UF[TARGET_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPLEFT", UF[TARGET_ID].health, "TOPLEFT", ((i-1)*8+(i)) + 7, -(15 - HealthHeight[layoutSize][TARGET_ID])})
 		UF[TARGET_ID].healthbox[i].surround:SetTexture(Textures[layoutSize].f1.healthbox.surround)
 		UF[TARGET_ID].healthbox[i].surround:SetTexCoord(1, 0, 0, 1)
 		UF[TARGET_ID].healthbox[i].background:SetTexture(Textures[layoutSize].f1.healthbox.bar)
@@ -1589,15 +1787,15 @@ function UnitFrames:CreateFrames()
 	-- Stat Fields
 	UF[TARGET_ID].stat1 = CreateTextFrame(UF[TARGET_ID].endbox, "BOTTOM", "RIGHT")
 		UF[TARGET_ID].stat1.lastMinRange = -1
-	SetFramePosition(UF[TARGET_ID].stat1, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].endbox, "BOTTOMLEFT", -13, 18})
+	SetFramePosition(UF[TARGET_ID].stat1, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].endbox, "BOTTOMLEFT", layoutSize == 1 and 2 or 0, 18})
 	tinsert(FontStringsY, {UF[TARGET_ID].stat1, 3, 18})
 	
 	UF[TARGET_ID].stat2 = CreateTextFrame(UF[TARGET_ID].endbox, "TOP", "RIGHT")
-	SetFramePosition(UF[TARGET_ID].stat2, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].endbox, "BOTTOMLEFT", -13, 1})
+	SetFramePosition(UF[TARGET_ID].stat2, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 12, 12, {"BOTTOMRIGHT", UF[TARGET_ID].endbox, "BOTTOMLEFT", layoutSize == 1 and 2 or 0, 1})
 	
 	UF[TARGET_ID].stat1.icon = UF[TARGET_ID].stat1:CreateTexture(nil, "ARTWORK")
 	UF[TARGET_ID].stat1.icon:SetSize(16, 16)
-	UF[TARGET_ID].stat1.icon:SetPoint("TOPRIGHT", UF[TARGET_ID].endbox, "TOPLEFT", 3, 1)
+	UF[TARGET_ID].stat1.icon:SetPoint("BOTTOMLEFT", UF[TARGET_ID].stat1, "BOTTOMRIGHT", 0, 0)
 	UF[TARGET_ID].stat1.icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
 
 	UF[TARGET_ID].stat2.icon = UF[TARGET_ID].stat2:CreateTexture(nil, "ARTWORK")
@@ -1636,7 +1834,7 @@ function UnitFrames:CreateFrames()
 		UF[FOCUS_ID].health.background.bg:SetTexture(Textures[layoutSize].f2.health.bar)
 		
 		-- Bar
-		UF[FOCUS_ID].health.bar = AngleStatusBar:NewBar(UF[FOCUS_ID].health.background, -2, -8, HealthWidth[layoutSize][FOCUS_ID], 7, "LEFT", "RIGHT", "LEFT", true)
+		UF[FOCUS_ID].health.bar = AngleStatusBar:NewBar(UF[FOCUS_ID].health.background, -2, -(15 - HealthHeight[layoutSize][FOCUS_ID]), HealthWidth[layoutSize][FOCUS_ID], HealthHeight[layoutSize][FOCUS_ID], "LEFT", "RIGHT", "LEFT", true)
 		
 		-- HealthBar Text
 		UF[FOCUS_ID].healthtext = CreateTextFrame(UF[FOCUS_ID].health, "BOTTOM", "LEFT")
@@ -1664,7 +1862,7 @@ function UnitFrames:CreateFrames()
 	UF[FOCUS_ID].statusbox = {}
 	for i = 1, 2 do
 		UF[FOCUS_ID].statusbox[i] = CreateStatusBox(UF[FOCUS_ID].health)
-		SetFramePosition(UF[FOCUS_ID].statusbox[i], "MEDIUM", UF[FOCUS_ID].health:GetFrameLevel(), 16, 16, {"BOTTOMRIGHT", UF[FOCUS_ID].health, "BOTTOMLEFT", -((i-1)*5+(i)) + (256 - HealthWidth[layoutSize][FOCUS_ID] - 1) + 5, (layoutSize == 1) and -7 or -6})
+		SetFramePosition(UF[FOCUS_ID].statusbox[i], "MEDIUM", UF[FOCUS_ID].health:GetFrameLevel(), 16, 16, {"BOTTOMRIGHT", UF[FOCUS_ID].health, "BOTTOMLEFT", -((i-1)*5+(i)) + (256 - HealthWidth[layoutSize][FOCUS_ID] - 1) + (layoutSize == 1 and 5 or 4), (layoutSize == 1) and -7 or -6})
 		UF[FOCUS_ID].statusbox[i].surround:SetTexture(Textures[layoutSize].f2.statusbox.surround)
 		UF[FOCUS_ID].statusbox[i].background:SetTexture(Textures[layoutSize].f2.statusbox.bar)
 		UF[FOCUS_ID].statusbox[i].bar:SetTexture(Textures[layoutSize].f2.statusbox.bar)
@@ -1675,7 +1873,7 @@ function UnitFrames:CreateFrames()
 	UF[FOCUS_ID].healthbox = {}
 	for i = 1, 2 do
 		UF[FOCUS_ID].healthbox[i] = CreateStatusBox(UF[FOCUS_ID].health)
-		SetFramePosition(UF[FOCUS_ID].healthbox[i], "MEDIUM", UF[FOCUS_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPRIGHT", UF[FOCUS_ID].health, "TOPRIGHT", -((i-1)*6+(i)) - 6, -8})
+		SetFramePosition(UF[FOCUS_ID].healthbox[i], "MEDIUM", UF[FOCUS_ID].health.surround:GetFrameLevel() + 3, 16, 16, {"TOPRIGHT", UF[FOCUS_ID].health, "TOPRIGHT", -((i-1)*6+(i)) - 6, -(15 - HealthHeight[layoutSize][FOCUS_ID])})
 		UF[FOCUS_ID].healthbox[i].surround:SetTexture(Textures[layoutSize].f2.healthbox.surround)
 		UF[FOCUS_ID].healthbox[i].background:SetTexture(Textures[layoutSize].f2.healthbox.bar)
 		UF[FOCUS_ID].healthbox[i].bar:SetTexture(Textures[layoutSize].f2.healthbox.bar)
@@ -1713,7 +1911,7 @@ function UnitFrames:CreateFrames()
 		UF[FOCUSTARGET_ID].health.background.bg:SetTexture(Textures[layoutSize].f3.health.bar)
 		
 		-- Bar
-		UF[FOCUSTARGET_ID].health.bar = AngleStatusBar:NewBar(UF[FOCUSTARGET_ID].health.background, -8, -8, HealthWidth[layoutSize][FOCUSTARGET_ID], 7, "RIGHT", "RIGHT", "LEFT", true)
+		UF[FOCUSTARGET_ID].health.bar = AngleStatusBar:NewBar(UF[FOCUSTARGET_ID].health.background, layoutSize == 1 and -8 or -9, -(15 - HealthHeight[layoutSize][FOCUSTARGET_ID]), HealthWidth[layoutSize][FOCUSTARGET_ID], HealthHeight[layoutSize][FOCUSTARGET_ID], "RIGHT", "RIGHT", "LEFT", true)
 		
 		-- HealthBar Text
 		UF[FOCUSTARGET_ID].healthtext = CreateTextFrame(UF[FOCUSTARGET_ID].health, "BOTTOM", "LEFT")
@@ -1789,7 +1987,7 @@ function UnitFrames:CreateFrames()
 		UF[PET_ID].health.background.bg:SetTexture(Textures[layoutSize].f3.health.bar)
 		
 		-- Bar
-		UF[PET_ID].health.bar = AngleStatusBar:NewBar(UF[PET_ID].health.background, -8, -8, HealthWidth[layoutSize][PET_ID], 7, "RIGHT", "RIGHT", "LEFT", true)
+		UF[PET_ID].health.bar = AngleStatusBar:NewBar(UF[PET_ID].health.background, -8, -8, HealthWidth[layoutSize][PET_ID], HealthHeight[layoutSize][PET_ID], "RIGHT", "RIGHT", "LEFT", true)
 		
 		-- HealthBar Text
 		UF[PET_ID].healthtext = CreateTextFrame(UF[PET_ID].health, "BOTTOM", "LEFT")
@@ -1867,7 +2065,7 @@ function UnitFrames:CreateFrames()
 		UF[TARGETTARGET_ID].health.background.bg:SetTexCoord(1, 0, 0, 1)
 		
 		-- Bar
-		UF[TARGETTARGET_ID].health.bar = AngleStatusBar:NewBar(UF[TARGETTARGET_ID].health.background, 2, -8, HealthWidth[layoutSize][TARGETTARGET_ID], 7, "RIGHT", "LEFT", "RIGHT", true)
+		UF[TARGETTARGET_ID].health.bar = AngleStatusBar:NewBar(UF[TARGETTARGET_ID].health.background, 2, -(15 - HealthHeight[layoutSize][TARGETTARGET_ID]), HealthWidth[layoutSize][TARGETTARGET_ID], HealthHeight[layoutSize][TARGETTARGET_ID], "RIGHT", "LEFT", "RIGHT", true)
 		
 		-- HealthBar Text
 		UF[TARGETTARGET_ID].healthtext = CreateTextFrame(UF[TARGETTARGET_ID].health, "BOTTOM", "RIGHT")
@@ -1899,7 +2097,7 @@ function UnitFrames:CreateFrames()
 	UF[TARGETTARGET_ID].statusbox = {}
 	for i = 1, 2 do
 		UF[TARGETTARGET_ID].statusbox[i] = CreateStatusBox(UF[TARGETTARGET_ID].health)
-		SetFramePosition(UF[TARGETTARGET_ID].statusbox[i], "MEDIUM", UF[TARGETTARGET_ID].health:GetFrameLevel(), 16, 16, {"BOTTOMLEFT", UF[TARGETTARGET_ID].health, "BOTTOMRIGHT", ((i-1)*5+(i)) - (256 - HealthWidth[layoutSize][TARGETTARGET_ID] - 1) - 5, (layoutSize == 1) and -7 or -6})
+		SetFramePosition(UF[TARGETTARGET_ID].statusbox[i], "MEDIUM", UF[TARGETTARGET_ID].health:GetFrameLevel(), 16, 16, {"BOTTOMLEFT", UF[TARGETTARGET_ID].health, "BOTTOMRIGHT", ((i-1)*5+(i)) - (256 - HealthWidth[layoutSize][TARGETTARGET_ID] - 1) - (layoutSize == 1 and 5 or 4), (layoutSize == 1) and -7 or -6})
 		UF[TARGETTARGET_ID].statusbox[i].surround:SetTexture(Textures[layoutSize].f2.statusbox.surround)
 		UF[TARGETTARGET_ID].statusbox[i].surround:SetTexCoord(1, 0, 0, 1)
 		UF[TARGETTARGET_ID].statusbox[i].background:SetTexture(Textures[layoutSize].f2.statusbox.bar)
@@ -1913,7 +2111,7 @@ function UnitFrames:CreateFrames()
 	UF[TARGETTARGET_ID].healthbox = {}
 	for i = 1, 2 do
 		UF[TARGETTARGET_ID].healthbox[i] = CreateStatusBox(UF[TARGETTARGET_ID].health)
-		SetFramePosition(UF[TARGETTARGET_ID].healthbox[i], "MEDIUM", UF[TARGETTARGET_ID].health:GetFrameLevel() + 3, 16, 16, {"TOPLEFT", UF[TARGETTARGET_ID].health, "TOPLEFT", ((i-1)*6+(i)) + 6, -8})
+		SetFramePosition(UF[TARGETTARGET_ID].healthbox[i], "MEDIUM", UF[TARGETTARGET_ID].health:GetFrameLevel() + 3, 16, 16, {"TOPLEFT", UF[TARGETTARGET_ID].health, "TOPLEFT", ((i-1)*6+(i)) + 6, -(15 - HealthHeight[layoutSize][TARGETTARGET_ID])})
 		UF[TARGETTARGET_ID].healthbox[i].surround:SetTexture(Textures[layoutSize].f2.healthbox.surround)
 		UF[TARGETTARGET_ID].healthbox[i].surround:SetTexCoord(1, 0, 0, 1)
 		UF[TARGETTARGET_ID].healthbox[i].background:SetTexture(Textures[layoutSize].f2.healthbox.bar)
@@ -2194,6 +2392,8 @@ function UnitFrames:InitializeOverlay()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	ndbc = nibRealUI.db.char
+
+	layoutSize = ndb.settings.hudSize
 
 	RangeColors = {
 		[5] = nibRealUI.media.colors.green,

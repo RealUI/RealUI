@@ -263,7 +263,7 @@ function SpeechBubbles:OnInitialize()
 	self.db:RegisterDefaults({
 		profile = {
 			sendersize = 12,
-			hideSender = false,
+			hideSender = true,
 			messagesize = 10,
 			edgesize = 6,
 			colors = {

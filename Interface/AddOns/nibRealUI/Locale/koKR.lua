@@ -63,6 +63,9 @@ L["Bars"] = "Bars"	-- Class Color Health "Bars"
 
 L["Link Layouts"] = "레이아웃 연동"
 L["Use same settings between DPS/Tank and Healing layouts."] = "레이아웃 구성을 딜러/탱커구성과 힐러구성을 같이 사용합니다."
+L["Use Large HuD"] = "Use Large HuD"
+L["Increase size of Unit Frames and Cast Bars."] = "Increase size of Unit Frames and Cast Bars."
+
 -- 단축키
 L["RealUI Control"] = "RealUI 조정"
 L["Allow RealUI to control the action bars."] = "단축키영역을 RealUI가 조정할 수 있습니다."

@@ -13,6 +13,18 @@ local ConfigBar_Positions = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceCon
 
 local Element = {}
 
+function ConfigBar_Positions:ToggleHuDSize()
+	ndb.settings.hudSize = ndb.settings.hudSize == 1 and 2 or 1
+
+	if ndb.settings.hudSize == 1 then
+		self.positionOptions[2].check.highlight:SetAlpha(0)
+	else
+		self.positionOptions[2].check.highlight:SetAlpha(1)
+	end
+
+	nibRealUI:ReloadUIDialog()
+end
+
 function ConfigBar_Positions:ToggleLinkSettings()
 	ndb.positionsLink = not(ndb.positionsLink)
 
@@ -21,9 +33,9 @@ function ConfigBar_Positions:ToggleLinkSettings()
 
 	if ndb.positionsLink then
 		ndb.positions[nibRealUI.ncLayout] = nibRealUI:DeepCopy(ndb.positions[nibRealUI.cLayout])
-		self.linkLayouts[1].check.highlight:SetAlpha(1)
+		self.positionOptions[1].check.highlight:SetAlpha(1)
 	else
-		self.linkLayouts[1].check.highlight:SetAlpha(0)
+		self.positionOptions[1].check.highlight:SetAlpha(0)
 	end
 
 	self:UpdateHeader()
@@ -71,7 +83,7 @@ function ConfigBar_Positions:SetupWindow()
 	-- Link Settings
 	local options = {
 		{
-			label = L["Link Layouts"]..".",
+			label = L["Link Layouts"],
 			desc = L["Use same settings between DPS/Tank and Healing layouts."],
 			descGap = 116,
 			func = function()
@@ -82,9 +94,18 @@ function ConfigBar_Positions:SetupWindow()
 			height = 20,
 			x = 0,
 			y = -90,
+		},
+		{
+			label = L["Use Large HuD"],
+			desc = L["Increase size of Unit Frames and Cast Bars."],
+			descGap = 116,
+			func = function()
+				self:ToggleHuDSize()
+			end,
+			checked = ndb.settings.hudSize == 2,
 		}
 	}
-	self.linkLayouts = cbGUI:CreateOptionList(Element, "VERTICAL", options)
+	self.positionOptions = cbGUI:CreateOptionList(Element, "VERTICAL", options)
 
 	local buttons = {}
 	local button = {
@@ -94,7 +115,7 @@ function ConfigBar_Positions:SetupWindow()
 		width = 146,
 		height = 22,
 		x = 14,
-		y = -132,
+		y = -152,
 	}
 	buttons[1] = cbGUI:CreateButton(Element, button)
 
@@ -105,7 +126,7 @@ function ConfigBar_Positions:SetupWindow()
 		width = 146,
 		height = 22,
 		x = 161,
-		y = -132,
+		y = -152,
 	}
 	buttons[2] = cbGUI:CreateButton(Element, button)
 
@@ -114,7 +135,7 @@ function ConfigBar_Positions:SetupWindow()
 		width = 146,
 		height = 22,
 		x = 308,
-		y = -132,
+		y = -152,
 		func = function() HuDConfig:ResetDefaults() end,
 	}
 	buttons[3] = cbGUI:CreateButton(Element, button)
@@ -187,7 +208,7 @@ function ConfigBar_Positions:Register()
 		icon = [[Interface\AddOns\nibRealUI\Media\Config\Positions]],
 		window = {
 			width = 510,
-			height = 169,
+			height = 189,
 			xOfs = 0,
 		},
 		openFunc = function() return ConfigBar_Positions:Open() end,

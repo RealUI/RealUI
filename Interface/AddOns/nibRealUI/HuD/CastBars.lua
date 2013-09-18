@@ -8,19 +8,38 @@ local CastBars = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
+local layoutSize
+
 local Textures = {
-	player = {
-		surround = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Surround]],
-		bar = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Bar]],
-		tick = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Tick]],
+	[1] = {
+		player = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Bar]],
+			tick = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Tick]],
+		},
+		target = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Bar]],
+		},
+		focus = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Small_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Small_Bar]],
+		},
 	},
-	target = {
-		surround = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Surround]],
-		bar = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Bar]],
-	},
-	focus = {
-		surround = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Small_Surround]],
-		bar = [[Interface\AddOns\nibRealUI\Media\CastBars\CastBar_Small_Bar]],
+	[2] = {
+		player = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Bar]],
+			tick = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Tick]],
+		},
+		target = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Bar]],
+		},
+		focus = {
+			surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Small_Surround]],
+			bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Small_Bar]],
+		},
 	},
 }
 
@@ -178,7 +197,7 @@ function CastBars:ClearTicks()
 end
 
 function CastBars:SetTick(index, per)
-	self.player.tick[index]:SetPoint("TOPRIGHT", self.player, "TOPRIGHT", floor(-(db.size.width * per)), 0)
+	self.player.tick[index]:SetPoint("TOPRIGHT", self.player, "TOPRIGHT", floor(-(db.size[layoutSize].width * per)), 0)
 	self.player.tick[index]:Show()
 end
 
@@ -677,7 +696,7 @@ function CastBars:UpdateAnchors()
 	local textPointVert, textPointHoriz, textY, textX, xOfs, fontYOfs
 	if db.text.textOnBottom then
 		textPointVert = "TOP"
-		xOfs = db.size.height + 1
+		xOfs = db.size[layoutSize].height + 1
 	else
 		textPointVert = "BOTTOM"
 		xOfs = 0
@@ -686,28 +705,28 @@ function CastBars:UpdateAnchors()
 	-- Player
 	if db.text.textInside then textPointHoriz = "RIGHT" else textPointHoriz = "LEFT" end
 
-	if textPointVert == "TOP" then textY = -(db.size.height + 5) else textY = 2 end
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 5) else textY = 2 end
 	textX = textPointHoriz == "LEFT" and 25 or -35
 	if (ndb.settings.fontStyle ~= 1) and db.text.textOnBottom then fontYOfs = -1 else fontYOfs = 0 end
 	SetTextPosition(self.player.name, textPointVert, textPointHoriz)
 	self.player.name:ClearAllPoints()
 	self.player.name:SetPoint(textPointVert..textPointHoriz, self.player, "TOP"..textPointHoriz, textX + xOfs, textY + fontYOfs)
 
-	if textPointVert == "TOP" then textY = -(db.size.height + 21) else textY = 13 end
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 21) else textY = 13 end
 	textX = textPointHoriz == "LEFT" and 25 or -35
 	SetTextPosition(self.player.time, "BOTTOM", textPointHoriz)
 	self.player.time:ClearAllPoints()
 	self.player.time:SetPoint(textPointVert..textPointHoriz, self.player, "TOP"..textPointHoriz, textX + xOfs, textY)
 
-	if textPointVert == "TOP" then textY = -(db.size.height + 4) else textY = 2 end
-	textX = textPointHoriz == "LEFT" and -7 or -(db.size.height + 1)
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 4) else textY = 2 end
+	textX = textPointHoriz == "LEFT" and -7 or -(db.size[layoutSize].height + 1)
 	self.player.icon:ClearAllPoints()
 	self.player.icon:SetPoint(textPointVert..textPointHoriz, self.player, "TOP"..textPointHoriz, textX + xOfs, textY)
 
 	if db.reverse.player then
-		AngleStatusBar:SetReverseDirection(self.player.cast.bar, db.reverse.player, (251 - db.size.width), -1)
+		AngleStatusBar:SetReverseDirection(self.player.cast.bar, db.reverse.player, (251 - db.size[layoutSize].width), -1)
 		AngleStatusBar:SetReverseDirection(self.player.cast.latencyLeft, db.reverse.player, -5, -1)
-		AngleStatusBar:SetReverseDirection(self.player.cast.latencyRight, db.reverse.player, (251 - db.size.width), -1)
+		AngleStatusBar:SetReverseDirection(self.player.cast.latencyRight, db.reverse.player, (251 - db.size[layoutSize].width), -1)
 	else
 		AngleStatusBar:SetReverseDirection(self.player.cast.bar, db.reverse.player)
 		AngleStatusBar:SetReverseDirection(self.player.cast.latencyLeft, db.reverse.player)
@@ -717,25 +736,25 @@ function CastBars:UpdateAnchors()
 	-- Target
 	if db.text.textInside then textPointHoriz = "LEFT" else textPointHoriz = "RIGHT" end
 	
-	if textPointVert == "TOP" then textY = -(db.size.height + 5) else textY = 2 end
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 5) else textY = 2 end
 	textX = textPointHoriz == "LEFT" and 37 or -23
 	SetTextPosition(self.target.name, textPointVert, textPointHoriz)
 	self.target.name:ClearAllPoints()
 	self.target.name:SetPoint(textPointVert..textPointHoriz, self.target, "TOP"..textPointHoriz, textX - xOfs, textY + fontYOfs)
 
-	if textPointVert == "TOP" then textY = -(db.size.height + 21) else textY = 13 end
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 21) else textY = 13 end
 	textX = textPointHoriz == "LEFT" and 37 or -23
 	SetTextPosition(self.target.time, "BOTTOM", textPointHoriz)
 	self.target.time:ClearAllPoints()
 	self.target.time:SetPoint(textPointVert..textPointHoriz, self.target, "TOP"..textPointHoriz, textX - xOfs, textY)
 
-	if textPointVert == "TOP" then textY = -(db.size.height + 4) else textY = 2 end
-	textX = textPointHoriz == "LEFT" and 5 or (db.size.height + 2)
+	if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 4) else textY = 2 end
+	textX = textPointHoriz == "LEFT" and 5 or (db.size[layoutSize].height + 2)
 	self.target.icon:ClearAllPoints()
 	self.target.icon:SetPoint(textPointVert..textPointHoriz, self.target, "TOP"..textPointHoriz, textX - xOfs, textY)
 
 	if db.reverse.target then
-		AngleStatusBar:SetReverseDirection(self.target.cast.bar, db.reverse.target, 5 + db.size.width - 256, -1)
+		AngleStatusBar:SetReverseDirection(self.target.cast.bar, db.reverse.target, 5 + db.size[layoutSize].width - 256, -1)
 	else
 		AngleStatusBar:SetReverseDirection(self.target.cast.bar, db.reverse.target)
 	end
@@ -744,9 +763,9 @@ function CastBars:UpdateAnchors()
 	-- Focus
 	self.focus:SetParent(oUF_RealUIFocus_Overlay)
 	self.focus:ClearAllPoints()
-	self.focus:SetPoint("TOPRIGHT", oUF_RealUIFocus_Overlay, "TOPRIGHT", db.size.focus.x + 3, db.size.focus.y)
+	self.focus:SetPoint("TOPRIGHT", oUF_RealUIFocus_Overlay, "TOPRIGHT", db.size[layoutSize].focus.x + 3, db.size[layoutSize].focus.y)
 
-	-- if textPointVert == "TOP" then textY = -(db.size.height + 5) else textY = 2 end
+	-- if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 5) else textY = 2 end
 	-- textX = textPointHoriz == "LEFT" and 37 or -23
 	if (ndb.settings.fontStyle == 3) then fontYOfs = -1 else fontYOfs = 0 end
 	SetTextPosition(self.focus.name, "BOTTOM", "RIGHT")
@@ -839,12 +858,12 @@ local function CreateCastBar(parent, unit, side)
 
 	NewCB.surround = NewCB:CreateTexture(nil, "ARTWORK")
 	NewCB.surround:SetAllPoints()
-	NewCB.surround:SetTexture(Textures[unit].surround)
+	NewCB.surround:SetTexture(Textures[layoutSize][unit].surround)
 	if side == "RIGHT" then NewCB.surround:SetTexCoord(1, 0, 0, 1) end
 
 	NewCB.bg = NewCB:CreateTexture(nil, "ARTWORK")
 	NewCB.bg:SetAllPoints()
-	NewCB.bg:SetTexture(Textures[unit].bar)
+	NewCB.bg:SetTexture(Textures[layoutSize][unit].bar)
 	if side == "RIGHT" then NewCB.bg:SetTexCoord(1, 0, 0, 1) end
 
 	return NewCB
@@ -856,8 +875,8 @@ function CastBars:CreateFrames()
 	cbPlayer:Hide()
 	self.player = cbPlayer
 	self.vehicle = cbPlayer
-		cbPlayer:SetHeight(32 + db.size.height)
-		cbPlayer:SetWidth(db.size.width)
+		cbPlayer:SetHeight(32 + db.size[layoutSize].height)
+		cbPlayer:SetWidth(db.size[layoutSize].width)
 		cbPlayer:SetPoint("TOPRIGHT", RealUIPositionersCastBarPlayer, "TOPRIGHT", -1, 0)
 		cbPlayer:SetScript("OnUpdate", function(self, elapsed)
 			CastBars:OnUpdate("player", elapsed)
@@ -865,12 +884,12 @@ function CastBars:CreateFrames()
 
 		-- Cast Bar
 		cbPlayer.cast = CreateCastBar(cbPlayer, "player", "LEFT")
-			cbPlayer.cast.bar = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size.width, 4, "RIGHT", "RIGHT", "LEFT")
+			cbPlayer.cast.bar = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "LEFT")
 				cbPlayer.cast.bar:SetFrameLevel(5)
-			cbPlayer.cast.latencyLeft = AngleStatusBar:NewBar(cbPlayer.cast, (251 - db.size.width), -1, db.size.width, 4, "RIGHT", "RIGHT", "RIGHT")
+			cbPlayer.cast.latencyLeft = AngleStatusBar:NewBar(cbPlayer.cast, (251 - db.size[layoutSize].width), -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "RIGHT")
 				cbPlayer.cast.latencyLeft:SetFrameLevel(4)
 				cbPlayer.cast.latencyLeft.reverse = true
-			cbPlayer.cast.latencyRight = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size.width, 4, "RIGHT", "RIGHT", "LEFT")
+			cbPlayer.cast.latencyRight = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "LEFT")
 				cbPlayer.cast.latencyRight:SetFrameLevel(6)
 				cbPlayer.cast.latencyRight.reverse = true
 
@@ -889,7 +908,7 @@ function CastBars:CreateFrames()
 
 			tick.bg = tick:CreateTexture(nil, "OVERLAY")
 				tick.bg:SetAllPoints()
-				tick.bg:SetTexture(Textures.player.tick)
+				tick.bg:SetTexture(Textures[layoutSize].player.tick)
 				tick.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], 0.4)
 
 			tick:Hide()
@@ -899,8 +918,8 @@ function CastBars:CreateFrames()
 	local cbTarget = CreateFrame("Frame", "RealUI_CastBarsTarget", RealUIPositionersCastBarTarget)
 	cbTarget:Hide()
 	self.target = cbTarget
-		cbTarget:SetHeight(32 + db.size.height)
-		cbTarget:SetWidth(db.size.width)
+		cbTarget:SetHeight(32 + db.size[layoutSize].height)
+		cbTarget:SetWidth(db.size[layoutSize].width)
 		cbTarget:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
 		cbTarget:SetScript("OnUpdate", function(self, elapsed)
 			CastBars:OnUpdate("target", elapsed)
@@ -908,7 +927,7 @@ function CastBars:CreateFrames()
 
 		-- Cast Bar
 		cbTarget.cast = CreateCastBar(cbTarget, "target", "RIGHT")
-			cbTarget.cast.bar = AngleStatusBar:NewBar(cbTarget.cast, 5, -1, db.size.width, 4, "LEFT", "LEFT", "RIGHT")
+			cbTarget.cast.bar = AngleStatusBar:NewBar(cbTarget.cast, 5, -1, db.size[layoutSize].width, 4, "LEFT", "LEFT", "RIGHT")
 
 		-- Name / Time / Icon
 		cbTarget.name = CreateTextFrame(cbTarget)
@@ -920,15 +939,15 @@ function CastBars:CreateFrames()
 	local cbFocus = CreateFrame("Frame", "RealUI_CastBarsFocus", UIParent)
 	cbFocus:Hide()
 	self.focus = cbFocus
-		cbFocus:SetHeight(13 + db.size.focus.height)
-		cbFocus:SetWidth(db.size.focus.width)
+		cbFocus:SetHeight(13 + db.size[layoutSize].focus.height)
+		cbFocus:SetWidth(db.size[layoutSize].focus.width)
 		cbFocus:SetScript("OnUpdate", function(self, elapsed)
 			CastBars:OnUpdate("focus", elapsed)
 		end)
 
 		-- Cast Bar
 		cbFocus.cast = CreateCastBar(cbFocus, "focus", "LEFT")
-			cbFocus.cast.bar = AngleStatusBar:NewBar(cbFocus.cast, db.size.focus.x -2, -1, db.size.focus.width, db.size.focus.height, "LEFT", "RIGHT", "LEFT")
+			cbFocus.cast.bar = AngleStatusBar:NewBar(cbFocus.cast, -2, -1, db.size[layoutSize].focus.width, db.size[layoutSize].focus.height, "LEFT", "RIGHT", "LEFT")
 
 		-- Name / Time / Icon
 		cbFocus.name = CreateTextFrame(cbFocus, "small")
@@ -993,13 +1012,25 @@ function CastBars:OnInitialize()
 				target = false,
 			},
 			size = {
-				width = 200,
-				height = 4,
-				focus = {
-					width = 126,
-					height = 3,
-					x = 0,
-					y = 0,
+				[1] = {
+					width = 200,
+					height = 4,
+					focus = {
+						width = 126,
+						height = 3,
+						x = 0,
+						y = 0,
+					},
+				},
+				[2] = {
+					width = 230,
+					height = 4,
+					focus = {
+						width = 146,
+						height = 4,
+						x = 1,
+						y = 1,
+					},
 				},
 			},
 			colors = {
@@ -1019,6 +1050,8 @@ function CastBars:OnInitialize()
 	})
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
+
+	layoutSize = ndb.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)

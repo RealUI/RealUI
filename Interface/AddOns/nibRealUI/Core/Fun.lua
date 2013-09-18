@@ -105,6 +105,93 @@ function nibRealUI:DeepCopy(object)
 	return _copy(object)
 end
 
+-- Loot Spec
+function nibRealUI:GetCurrentLootSpecName()
+	local lsID = GetLootSpecialization()
+	local sID, specName = GetSpecializationInfo(GetSpecialization())
+
+	if (lsID == 0) then
+		return specName
+	else
+		local _, spName = GetSpecializationInfoByID(lsID)
+		return spName
+	end
+end
+
+function nibRealUI:GetLootSpecData()
+	local LootSpecIDs = {}
+	local LootSpecClass
+	local _, _, idClass = UnitClass("player")
+	if (idClass == 1) then
+		LootSpecIDs[1] = 71
+		LootSpecIDs[2] = 72
+		LootSpecIDs[3] = 73
+		LootSpecIDs[4] = 0
+		LootSpecClass = 1
+	elseif (idClass == 2) then
+		LootSpecIDs[1] = 65
+		LootSpecIDs[2] = 66
+		LootSpecIDs[3] = 70
+		LootSpecIDs[4] = 0
+		LootSpecClass = 2
+	elseif (idClass == 3) then
+		LootSpecIDs[1] = 253
+		LootSpecIDs[2] = 254
+		LootSpecIDs[3] = 255
+		LootSpecIDs[4] = 0
+		LootSpecClass = 3
+	elseif (idClass == 4) then
+		LootSpecIDs[1] = 259
+		LootSpecIDs[2] = 260
+		LootSpecIDs[3] = 261
+		LootSpecIDs[4] = 0
+		LootSpecClass = 4
+	elseif (idClass == 5) then
+		LootSpecIDs[1] = 256
+		LootSpecIDs[2] = 257
+		LootSpecIDs[3] = 258
+		LootSpecIDs[4] = 0
+		LootSpecClass = 5
+	elseif (idClass == 6) then
+		LootSpecIDs[1] = 250
+		LootSpecIDs[2] = 251
+		LootSpecIDs[3] = 252
+		LootSpecIDs[4] = 0
+		LootSpecClass = 6
+	elseif (idClass == 7) then
+		LootSpecIDs[1] = 262
+		LootSpecIDs[2] = 263
+		LootSpecIDs[3] = 264
+		LootSpecIDs[4] = 0
+		LootSpecClass = 7
+	elseif (idClass == 8) then
+		LootSpecIDs[1] = 62
+		LootSpecIDs[2] = 63
+		LootSpecIDs[3] = 64
+		LootSpecIDs[4] = 0
+		LootSpecClass = 8
+	elseif (idClass == 9) then
+		LootSpecIDs[1] = 265
+		LootSpecIDs[2] = 266
+		LootSpecIDs[3] = 267
+		LootSpecIDs[4] = 0
+		LootSpecClass = 9
+	elseif (idClass == 10) then
+		LootSpecIDs[1] = 268
+		LootSpecIDs[2] = 270
+		LootSpecIDs[3] = 269
+		LootSpecIDs[4] = 0
+		LootSpecClass = 10
+	elseif (idClass == 11) then
+		LootSpecIDs[1] = 102
+		LootSpecIDs[2] = 103
+		LootSpecIDs[3] = 104
+		LootSpecIDs[4] = 105
+		LootSpecClass = 11
+	end
+	return LootSpecIDs, LootSpecClass
+end
+
 -- Math
 function nibRealUI:Round(value, places)
 	return (("%%.%df"):format(places or 0)):format(value)

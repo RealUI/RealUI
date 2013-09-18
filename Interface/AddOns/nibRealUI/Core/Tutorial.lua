@@ -60,6 +60,7 @@ if loc == "deDE" then	-- Deutsch
 		moactionbars2 =		ToolTipColors[1].."Sekundäre Aktionsleisten|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Leisten:|r\n"..ToolTipColors[3].."Leiste 4, 5|r",
 		infolineright =		ToolTipColors[1].."Infozeile - Rechts|r\n\n"..ToolTipColors[2].."Elemente:|r\n"..ToolTipColors[3].."Uhr\nSchalter für Damage-Meter\nLayout-Wechsler|r\n|cff909090(DPS/Tank, Heilung, Niedr./Hohe Auflösung)|r\n"..ToolTipColors[3].."Spec-Wechsler, Ausrüst.-Manager\nFPS und Latenz|r",
 		infolineleft =		ToolTipColors[1].."Infozeile - Links|r\n\n"..ToolTipColors[2].."Elemente:|r\n"..ToolTipColors[3].."Optionsbutton / Mikromenü\nNeue Mail-Anzeige\nGilde\nFreunde\nHaltbarkeit |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Leere Inventarplätze\nWährung\nXP / Ruf|r",
+		watchFrame =		ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
 	}
 -- elseif loc == "itIT" then	-- Italiano
 	
@@ -96,6 +97,7 @@ elseif loc == "frFR" then	-- French
 		moactionbars2 =		ToolTipColors[1].."Barres d'actions secondaires|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Barres:|r\n"..ToolTipColors[3].."Barre 4, 5|r",
 		infolineright =		ToolTipColors[1].."Ligne d'information - Droite|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Horloge\nSelecteur de compteur de degats\nSelecteur de disposition|r\n|cff909090(DPS/Tank, Soigneur, Basse/Haute Resolution)|r\n"..ToolTipColors[3].."Selecteur de Spec, Gestionnaire d'equipement\nIPS et Latence|r",
 		infolineleft =		ToolTipColors[1].."Ligne d'information - Gauche|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Boutons d'Options / Micromenu\nIndicateur de nouveaux messages\nGuilde\nAmis\nDurabilite |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Sacs : Emplacements libres\nDevise\nXP / Reputation|r",
+		watchFrame =		ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
 	}
 else	-- Default
 	ButtonTexts = {
@@ -130,6 +132,7 @@ else	-- Default
 		moactionbars2 =		ToolTipColors[1].."Secondary Action Bars|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Bars:|r\n"..ToolTipColors[3].."Bar 4, 5|r",
 		infolineright =		ToolTipColors[1].."Info Line - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nDamage Meter Toggle\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nFPS and Latency|r",
 		infolineleft =		ToolTipColors[1].."Info Line - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nNew Mail Indicator\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Empty Bag Slots\nCurrency\nXP / Reputation|r",
+		watchFrame =		ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
 	}
 end
 ---- end Localizations
@@ -244,6 +247,12 @@ RealUI_HelpPlate = {
 		ButtonPos = { x = -284, y = 12 },
 		ToolTipDir = "UP",
 		ToolTipText = ToolTipTexts.stancebar,
+	},
+	[19] = {	--watch frane
+		ButtonAnchor = "TOPRIGHT",
+		ButtonPos = { x = -32, y = -180 },
+		ToolTipDir = "LEFT",
+		ToolTipText = ToolTipTexts.watchFrame,
 	},
 }
 

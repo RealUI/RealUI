@@ -63,6 +63,8 @@ L["Bars"] = "Barres"	-- Class Color Health "Bars"
 
 L["Link Layouts"] = "Lier les confs"
 L["Use same settings between DPS/Tank and Healing layouts."] = "Utilise les m\195\170mes param\195\168tres entre DPS/Tank et Soigneur."
+L["Use Large HuD"] = "Use Large HuD"
+L["Increase size of Unit Frames and Cast Bars."] = "Increase size of Unit Frames and Cast Bars."
 
 L["RealUI Control"] = "Contr\195\180le RealUI"
 L["Allow RealUI to control the action bars."] = "Autoriser RealUI a contr\195\180ler les barres d'actions."

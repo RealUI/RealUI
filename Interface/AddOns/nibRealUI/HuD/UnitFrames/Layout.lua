@@ -22,7 +22,7 @@ local strsub = _G.strsub
 --------------------
 ------ Layout ------
 --------------------
-local layoutSize = 1
+local layoutSize
 
 -- Unit Frames Sizes
 local unit_sizes = {
@@ -33,6 +33,16 @@ local unit_sizes = {
 		focustarget = 	{width = 118, height = 10},
 		target = 		{width = 226, height = 24},
 		targettarget = 	{width = 128, height = 10},
+		tank = 			{width = 158, height = 10},
+		boss = 			{width = 135, height = 22},
+	},
+	[2] = {
+		player = 		{width = 261, height = 26},
+		pet = 			{width = 138, height = 10},
+		focus = 		{width = 148, height = 10},
+		focustarget = 	{width = 138, height = 10},
+		target = 		{width = 261, height = 26},
+		targettarget = 	{width = 148, height = 10},
 		tank = 			{width = 158, height = 10},
 		boss = 			{width = 135, height = 22},
 	},
@@ -237,7 +247,8 @@ function UnitFrames:InitializeLayout()
 	ndb = nibRealUI.db.profile
 	ndbc = nibRealUI.db.char
 
-	ndbc.resolution = ndbc.resolution
+	layoutSize = ndb.settings.hudSize
+
 	oUF:RegisterStyle("RealUI", Shared)
 	
 	local UnitSpecific = {
