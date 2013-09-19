@@ -8,9 +8,22 @@ local DemonicFury = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0",
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
+local layoutSize
+
 local Textures = {
-	bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Bar]],
-	middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Middle]],
+	[1] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+	},
+	[2] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+	},
+}
+
+local BarWidth = {
+	[1] = 84,
+	[2] = 114,
 }
 
 local FontStringsRegular = {}
@@ -144,44 +157,44 @@ end
 function DemonicFury:CreateFrames()
 	self.dfBar = CreateFrame("Frame", "RealUI_DemonicFury", RealUIPositionersClassResource)
 	local dfBar = self.dfBar
-		dfBar:SetSize(169, 6)
+		dfBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
 		dfBar:SetPoint("BOTTOM")
 		-- dfBar:Hide()
 	
 	-- Lunar
 	dfBar.left = CreateFrame("Frame", nil, dfBar)
 		dfBar.left:SetPoint("BOTTOMRIGHT", dfBar, "BOTTOM", -1, 0)
-		dfBar.left:SetSize(84, 6)
+		dfBar.left:SetSize(BarWidth[layoutSize], 6)
 
 		dfBar.left.bg = dfBar.left:CreateTexture(nil, "ARTWORK")
 			dfBar.left.bg:SetPoint("BOTTOMRIGHT")
 			dfBar.left.bg:SetSize(128, 16)
-			dfBar.left.bg:SetTexture(Textures.bar)
+			dfBar.left.bg:SetTexture(Textures[layoutSize].bar)
 			dfBar.left.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		dfBar.left.bar = AngleStatusBar:NewBar(dfBar.left, 2, -1, 77, 4, "RIGHT", "RIGHT", "RIGHT")
+		dfBar.left.bar = AngleStatusBar:NewBar(dfBar.left, 2, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "RIGHT")
 			dfBar.left.bar.reverse = true
 	
 	-- Solar
 	dfBar.right = CreateFrame("Frame", nil, dfBar)
 		dfBar.right:SetPoint("BOTTOMLEFT", dfBar, "BOTTOM", 0, 0)
-		dfBar.right:SetSize(84, 6)
+		dfBar.right:SetSize(BarWidth[layoutSize], 6)
 
 		dfBar.right.bg = dfBar.right:CreateTexture(nil, "ARTWORK")
 			dfBar.right.bg:SetPoint("BOTTOMLEFT")
 			dfBar.right.bg:SetSize(128, 16)
-			dfBar.right.bg:SetTexture(Textures.bar)
+			dfBar.right.bg:SetTexture(Textures[layoutSize].bar)
 			dfBar.right.bg:SetTexCoord(1, 0, 0, 1)
 			dfBar.right.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		dfBar.right.bar = AngleStatusBar:NewBar(dfBar.right, 5, -1, 77, 4, "LEFT", "LEFT", "RIGHT")
+		dfBar.right.bar = AngleStatusBar:NewBar(dfBar.right, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
 			dfBar.right.bar.reverse = true
 
 	-- Middle
 	dfBar.middle = dfBar:CreateTexture(nil, "ARTWORK")
 		dfBar.middle:SetPoint("BOTTOM")
 		dfBar.middle:SetSize(16, 16)
-		dfBar.middle:SetTexture(Textures.middle)
+		dfBar.middle:SetTexture(Textures[layoutSize].middle)
 
 	-- Power text
 	dfBar.power = CreateTextFrame(dfBar)
@@ -205,6 +218,8 @@ function DemonicFury:OnInitialize()
 	})
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
+
+	layoutSize = ndb.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")

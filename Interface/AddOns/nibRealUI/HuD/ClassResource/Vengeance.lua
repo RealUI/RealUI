@@ -8,9 +8,22 @@ local Vengeance = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
+local layoutSize
+
 local Textures = {
-	bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Bar]],
-	middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Middle]],
+	[1] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+	},
+	[2] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+	},
+}
+
+local BarWidth = {
+	[1] = 84,
+	[2] = 114,
 }
 
 local FontStringsRegular = {}
@@ -193,44 +206,44 @@ end
 function Vengeance:CreateFrames()
 	self.vBar = CreateFrame("Frame", "RealUI_Vengeance", RealUIPositionersClassResource)
 	local vBar = self.vBar
-		vBar:SetSize(169, 6)
+		vBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
 		vBar:SetPoint("BOTTOM")
 		-- vBar:Hide()
 	
 	-- Lunar
 	vBar.left = CreateFrame("Frame", nil, vBar)
 		vBar.left:SetPoint("BOTTOMRIGHT", vBar, "BOTTOM", -1, 0)
-		vBar.left:SetSize(84, 6)
+		vBar.left:SetSize(BarWidth[layoutSize], 6)
 
 		vBar.left.bg = vBar.left:CreateTexture(nil, "ARTWORK")
 			vBar.left.bg:SetPoint("BOTTOMRIGHT")
 			vBar.left.bg:SetSize(128, 16)
-			vBar.left.bg:SetTexture(Textures.bar)
+			vBar.left.bg:SetTexture(Textures[layoutSize].bar)
 			vBar.left.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		vBar.left.bar = AngleStatusBar:NewBar(vBar.left, 2, -1, 77, 4, "RIGHT", "RIGHT", "RIGHT")
+		vBar.left.bar = AngleStatusBar:NewBar(vBar.left, 2, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "RIGHT")
 			vBar.left.bar.reverse = true
 	
 	-- Solar
 	vBar.right = CreateFrame("Frame", nil, vBar)
 		vBar.right:SetPoint("BOTTOMLEFT", vBar, "BOTTOM", 0, 0)
-		vBar.right:SetSize(84, 6)
+		vBar.right:SetSize(BarWidth[layoutSize], 6)
 
 		vBar.right.bg = vBar.right:CreateTexture(nil, "ARTWORK")
 			vBar.right.bg:SetPoint("BOTTOMLEFT")
 			vBar.right.bg:SetSize(128, 16)
-			vBar.right.bg:SetTexture(Textures.bar)
+			vBar.right.bg:SetTexture(Textures[layoutSize].bar)
 			vBar.right.bg:SetTexCoord(1, 0, 0, 1)
 			vBar.right.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		vBar.right.bar = AngleStatusBar:NewBar(vBar.right, 5, -1, 77, 4, "LEFT", "LEFT", "RIGHT")
+		vBar.right.bar = AngleStatusBar:NewBar(vBar.right, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
 			vBar.right.bar.reverse = true
 
 	-- Middle
 	vBar.middle = vBar:CreateTexture(nil, "ARTWORK")
 		vBar.middle:SetPoint("BOTTOM")
 		vBar.middle:SetSize(16, 16)
-		vBar.middle:SetTexture(Textures.middle)
+		vBar.middle:SetTexture(Textures[layoutSize].middle)
 		vBar.middle:SetVertexColor(unpack(nibRealUI.classColor))
 
 	-- Vengeance text
@@ -259,6 +272,8 @@ function Vengeance:OnInitialize()
 	})
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
+
+	layoutSize = ndb.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")

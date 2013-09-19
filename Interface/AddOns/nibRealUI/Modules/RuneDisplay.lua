@@ -18,6 +18,8 @@ local gcdEnd = 0
 
 local updateSpeed = 1/25
 
+local layoutSize
+
 -- Combat Fader
 local CombatFader = CreateFrame("Frame")
 CombatFader.Status = ""
@@ -576,7 +578,7 @@ function RuneDisplay.OnUpdate()
 						CombatFader.UpdateRuneStatus()
 					end
 					
-					RuneBar.StatusBarBG:SetHeight(db.runes.size.height + db.runes.border.size * 2)
+					RuneBar.StatusBarBG:SetHeight((db.runes.size.height + (layoutSize == 1 and 0 or 3)) + db.runes.border.size * 2)
 					RuneBar.BottomStatusBar:SetValue(1)
 					RuneBar.TopStatusBar:SetValue(1)
 				else
@@ -585,7 +587,7 @@ function RuneDisplay.OnUpdate()
 						CombatFader.UpdateRuneStatus()
 					end
 					
-					RuneBar.StatusBarBG:SetHeight(((db.runes.size.height) * ((time - start) / duration)) + db.runes.border.size * 2)
+					RuneBar.StatusBarBG:SetHeight((((db.runes.size.height + (layoutSize == 1 and 0 or 3))) * ((time - start) / duration)) + db.runes.border.size * 2)
 					RuneBar.BottomStatusBar:SetValue((time - start) / duration)
 					RuneBar.TopStatusBar:SetValue(math.max((time - (start + duration - gcdNextDuration)) / gcdNextDuration, 0.0))
 				end
@@ -664,8 +666,8 @@ function RuneDisplay:UpdateSettings()
 	RuneDisplay.Frames.Parent:SetFrameStrata(db.framelevel.strata)
 	RuneDisplay.Frames.Parent:SetFrameLevel(db.framelevel.level)
 	RuneDisplay.Frames.Parent:SetPoint(db.position.anchorfrom, RealUIPositionersRunes, db.position.anchorto, db.position.x, db.position.y)
-	RuneDisplay.Frames.Parent:SetHeight(db.runes.size.height + db.runes.size.padding * 2)
-	RuneDisplay.Frames.Parent:SetWidth(db.runes.size.width * 6 + db.runes.size.padding * 7)
+	RuneDisplay.Frames.Parent:SetHeight((db.runes.size.height + (layoutSize == 1 and 0 or 3)) + db.runes.size.padding * 2)
+	RuneDisplay.Frames.Parent:SetWidth((db.runes.size.width + (layoutSize == 1 and 0 or 1)) * 6 + db.runes.size.padding * 7)
 	
 	RuneDisplay.Frames.Main:SetAllPoints(RuneDisplay.Frames.Parent)
 	RuneDisplay.Frames.Main:SetAlpha(db.appearance.opacity)
@@ -677,9 +679,9 @@ function RuneDisplay:UpdateSettings()
 		-- Create Rune Bar
 		RuneBar.frame:SetFrameStrata(db.framelevel.strata)
 		RuneBar.frame:SetFrameLevel(db.framelevel.level + 1)
-		RuneBar.frame:SetHeight(db.runes.size.height)
-		RuneBar.frame:SetWidth(db.runes.size.width)
-		RuneBar.frame:SetPoint("TOPLEFT", RuneDisplay.Frames.Main, "TOPLEFT", db.runes.size.padding + (i - 1) * (db.runes.size.width + db.runes.size.padding), -db.runes.size.padding)
+		RuneBar.frame:SetHeight((db.runes.size.height + (layoutSize == 1 and 0 or 3)))
+		RuneBar.frame:SetWidth((db.runes.size.width + (layoutSize == 1 and 0 or 1)))
+		RuneBar.frame:SetPoint("TOPLEFT", RuneDisplay.Frames.Main, "TOPLEFT", db.runes.size.padding + (i - 1) * ((db.runes.size.width + (layoutSize == 1 and 0 or 1)) + db.runes.size.padding), -db.runes.size.padding)
 		
 		-- Status Bar BG (Border)
 		RuneBar.StatusBarBG:SetPoint("BOTTOM", RuneBar.frame, "BOTTOM", 0, -db.runes.border.size)
@@ -827,6 +829,8 @@ function RuneDisplay:OnInitialize()
 		},
 	})
 	db = self.db.profile
+
+	layoutSize = nibRealUI.db.profile.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	

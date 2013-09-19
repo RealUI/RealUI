@@ -43,6 +43,11 @@ local Textures = {
 	},
 }
 
+local CastBarXOffset = {
+	[1] = 5,
+	[2] = 6,
+}
+
 local MaxTicks = 10
 local ChannelingTicks = {
 	-- Druid
@@ -884,12 +889,12 @@ function CastBars:CreateFrames()
 
 		-- Cast Bar
 		cbPlayer.cast = CreateCastBar(cbPlayer, "player", "LEFT")
-			cbPlayer.cast.bar = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "LEFT")
+			cbPlayer.cast.bar = AngleStatusBar:NewBar(cbPlayer.cast, -CastBarXOffset[layoutSize], -1, db.size[layoutSize].width, db.size[layoutSize].height, "RIGHT", "RIGHT", "LEFT")
 				cbPlayer.cast.bar:SetFrameLevel(5)
-			cbPlayer.cast.latencyLeft = AngleStatusBar:NewBar(cbPlayer.cast, (251 - db.size[layoutSize].width), -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "RIGHT")
+			cbPlayer.cast.latencyLeft = AngleStatusBar:NewBar(cbPlayer.cast, (256 - CastBarXOffset[layoutSize] - db.size[layoutSize].width), -1, db.size[layoutSize].width, db.size[layoutSize].height, "RIGHT", "RIGHT", "RIGHT")
 				cbPlayer.cast.latencyLeft:SetFrameLevel(4)
 				cbPlayer.cast.latencyLeft.reverse = true
-			cbPlayer.cast.latencyRight = AngleStatusBar:NewBar(cbPlayer.cast, -5, -1, db.size[layoutSize].width, 4, "RIGHT", "RIGHT", "LEFT")
+			cbPlayer.cast.latencyRight = AngleStatusBar:NewBar(cbPlayer.cast, -CastBarXOffset[layoutSize], -1, db.size[layoutSize].width, db.size[layoutSize].height, "RIGHT", "RIGHT", "LEFT")
 				cbPlayer.cast.latencyRight:SetFrameLevel(6)
 				cbPlayer.cast.latencyRight.reverse = true
 
@@ -927,7 +932,7 @@ function CastBars:CreateFrames()
 
 		-- Cast Bar
 		cbTarget.cast = CreateCastBar(cbTarget, "target", "RIGHT")
-			cbTarget.cast.bar = AngleStatusBar:NewBar(cbTarget.cast, 5, -1, db.size[layoutSize].width, 4, "LEFT", "LEFT", "RIGHT")
+			cbTarget.cast.bar = AngleStatusBar:NewBar(cbTarget.cast, CastBarXOffset[layoutSize], -1, db.size[layoutSize].width, db.size[layoutSize].height, "LEFT", "LEFT", "RIGHT")
 
 		-- Name / Time / Icon
 		cbTarget.name = CreateTextFrame(cbTarget)
@@ -1024,7 +1029,7 @@ function CastBars:OnInitialize()
 				},
 				[2] = {
 					width = 230,
-					height = 4,
+					height = 5,
 					focus = {
 						width = 146,
 						height = 4,

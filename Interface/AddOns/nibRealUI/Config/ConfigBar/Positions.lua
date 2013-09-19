@@ -22,7 +22,19 @@ function ConfigBar_Positions:ToggleHuDSize()
 		self.positionOptions[2].check.highlight:SetAlpha(1)
 	end
 
-	nibRealUI:ReloadUIDialog()
+	-- Display Info Dialog
+	StaticPopupDialogs["PUDRUIHUDSIZEINFO"] = {
+		text = L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."],
+		button1 = "Okay",
+		OnAccept = function()
+			nibRealUI:ReloadUIDialog()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		notClosableByLogout = false,
+	}
+	StaticPopup_Show("PUDRUIHUDSIZEINFO")
 end
 
 function ConfigBar_Positions:ToggleLinkSettings()
@@ -97,7 +109,7 @@ function ConfigBar_Positions:SetupWindow()
 		},
 		{
 			label = L["Use Large HuD"],
-			desc = L["Increase size of Unit Frames and Cast Bars."],
+			desc = L["Increases size of key HuD elements (Unit Frames, etc)."],
 			descGap = 116,
 			func = function()
 				self:ToggleHuDSize()

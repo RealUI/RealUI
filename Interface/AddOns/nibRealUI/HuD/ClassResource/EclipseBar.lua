@@ -8,10 +8,24 @@ local EclipseBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", 
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
+local layoutSize
+
 local Textures = {
-	bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Bar]],
-	endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_End]],
-	middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Middle]],
+	[1] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
+		endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+	},
+	[2] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
+		endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+	},
+}
+
+local BarWidth = {
+	[1] = 84,
+	[2] = 114,
 }
 
 local FontStringsRegular = {}
@@ -345,57 +359,57 @@ end
 function EclipseBar:CreateFrames()
 	self.eBar = CreateFrame("Frame", "RealUI_EclipseBar", RealUIPositionersClassResource)
 	local eBar = self.eBar
-		eBar:SetSize(169, 6)
+		eBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
 		eBar:SetPoint("BOTTOM")
 		-- eBar:Hide()
 	
 	-- Lunar
 	eBar.lunar = CreateFrame("Frame", nil, eBar)
 		eBar.lunar:SetPoint("BOTTOMRIGHT", eBar, "BOTTOM", -1, 0)
-		eBar.lunar:SetSize(84, 6)
+		eBar.lunar:SetSize(BarWidth[layoutSize], 6)
 
 		eBar.lunar.bg = eBar.lunar:CreateTexture(nil, "ARTWORK")
 			eBar.lunar.bg:SetPoint("BOTTOMRIGHT")
 			eBar.lunar.bg:SetSize(128, 16)
-			eBar.lunar.bg:SetTexture(Textures.bar)
+			eBar.lunar.bg:SetTexture(Textures[layoutSize].bar)
 			eBar.lunar.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
 		eBar.lunar.endBox = eBar.lunar:CreateTexture(nil, "ARTWORK")
 			eBar.lunar.endBox:SetPoint("BOTTOMRIGHT", eBar.lunar, "BOTTOMLEFT", 4, 0)
 			eBar.lunar.endBox:SetSize(16, 16)
-			eBar.lunar.endBox:SetTexture(Textures.endBox)
+			eBar.lunar.endBox:SetTexture(Textures[layoutSize].endBox)
 			eBar.lunar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.blue))
 
-		eBar.lunar.bar = AngleStatusBar:NewBar(eBar.lunar, -5, -1, 77, 4, "RIGHT", "RIGHT", "LEFT")
+		eBar.lunar.bar = AngleStatusBar:NewBar(eBar.lunar, -5, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "LEFT")
 			eBar.lunar.bar.reverse = true
 	
 	-- Solar
 	eBar.solar = CreateFrame("Frame", nil, eBar)
 		eBar.solar:SetPoint("BOTTOMLEFT", eBar, "BOTTOM", 0, 0)
-		eBar.solar:SetSize(84, 6)
+		eBar.solar:SetSize(BarWidth[layoutSize], 6)
 
 		eBar.solar.bg = eBar.solar:CreateTexture(nil, "ARTWORK")
 			eBar.solar.bg:SetPoint("BOTTOMLEFT")
 			eBar.solar.bg:SetSize(128, 16)
-			eBar.solar.bg:SetTexture(Textures.bar)
+			eBar.solar.bg:SetTexture(Textures[layoutSize].bar)
 			eBar.solar.bg:SetTexCoord(1, 0, 0, 1)
 			eBar.solar.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
 		eBar.solar.endBox = eBar.solar:CreateTexture(nil, "ARTWORK")
 			eBar.solar.endBox:SetPoint("BOTTOMLEFT", eBar.solar, "BOTTOMRIGHT", -4, 0)
 			eBar.solar.endBox:SetSize(16, 16)
-			eBar.solar.endBox:SetTexture(Textures.endBox)
+			eBar.solar.endBox:SetTexture(Textures[layoutSize].endBox)
 			eBar.solar.endBox:SetTexCoord(1, 0, 0, 1)
 			eBar.solar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
 
-		eBar.solar.bar = AngleStatusBar:NewBar(eBar.solar, 5, -1, 77, 4, "LEFT", "LEFT", "RIGHT")
+		eBar.solar.bar = AngleStatusBar:NewBar(eBar.solar, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
 			eBar.solar.bar.reverse = true
 
 	-- Middle
 	eBar.middle = eBar:CreateTexture(nil, "ARTWORK")
 		eBar.middle:SetPoint("BOTTOM")
 		eBar.middle:SetSize(16, 16)
-		eBar.middle:SetTexture(Textures.middle)
+		eBar.middle:SetTexture(Textures[layoutSize].middle)
 
 	-- Power text
 	eBar.power = CreateTextFrame(eBar)
@@ -426,6 +440,8 @@ function EclipseBar:OnInitialize()
 	})
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
+
+	layoutSize = ndb.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")

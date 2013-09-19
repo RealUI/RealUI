@@ -6,29 +6,38 @@ local Positioners = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local PF = {}
 
+local function GetHuDSizeOffset(key)
+	if nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key] then
+		return nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key]
+	else
+		return 0
+	end
+end
+
 local function GetPositionData(pT)
 	local point, parent, rPoint, x, y, width, height, xKeyTable, yKeyTable, widthKeyTable, heightKeyTable =
 			pT[1], pT[2], pT[3], pT[4], pT[5], pT[6], pT[7], pT[8], pT[9], pT[10], pT[11]
 	
 	local xAdj, yAdj, widthAdj, heightAdj = 0, 0, 0, 0
+
 	if xKeyTable then
 		for k,v in pairs(xKeyTable) do
-			xAdj = xAdj + ndb.positions[ndbc.layout.current][v]
+			xAdj = xAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
 		end
 	end
 	if yKeyTable then
 		for k,v in pairs(yKeyTable) do
-			yAdj = yAdj + ndb.positions[ndbc.layout.current][v]
+			yAdj = yAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
 		end
 	end
 	if widthKeyTable then
 		for k,v in pairs(widthKeyTable) do
-			widthAdj = widthAdj + ndb.positions[ndbc.layout.current][v]
+			widthAdj = widthAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
 		end
 	end
 	if heightKeyTable then
 		for k,v in pairs(heightKeyTable) do
-			heightAdj = heightAdj + ndb.positions[ndbc.layout.current][v]
+			heightAdj = heightAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
 		end
 	end
 	x = floor(x + xAdj)

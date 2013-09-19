@@ -6,7 +6,7 @@ _G.RealUI = nibRealUI
 nibRealUI.verinfo = {
 	[1] = 8,
 	[2] = 0,
-	[3] = 17,
+	[3] = 18,
 }
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -63,7 +63,6 @@ nibRealUI.defaultPositions = {
 		["Nothing"] = 0,
 		["HuDX"] = 0,
 		["HuDY"] = -38,
-		["UFWidth"] = 223,		-- Used for placing frames at the ends of the Unit Frames
 		["UFHorizontal"] = 316,
 		["ActionBarsY"] = -161.5,
 		["GridTopX"] = 0,
@@ -93,7 +92,6 @@ nibRealUI.defaultPositions = {
 		["Nothing"] = 0,
 		["HuDX"] = 0,
 		["HuDY"] = -38,
-		["UFWidth"] = 223,		-- Used for placing frames at the ends of the Unit Frames
 		["UFHorizontal"] = 316,
 		["ActionBarsY"] = -161.5,
 		["GridTopX"] = 0,
@@ -118,6 +116,40 @@ nibRealUI.defaultPositions = {
 		["RunesY"] = 0,
 		["BossX"] = -32,		-- Boss anchored to RIGHT
 		["BossY"] = 314,
+	},
+}
+
+-- Offset some UI Elements for Large/Small HuD size settings
+nibRealUI.hudSizeOffsets = {
+	[1] = {
+		["UFHorizontal"] = 0,
+		["SpellAlertWidth"] = 0,
+		["ActionBarsY"] = 0,
+		["GridTopY"] = 0,
+		["CastBarPlayerY"] = 0,
+		["CastBarTargetY"] = 0,
+		["ClassResourceY"] = 0,
+		["CTPointsHeight"] = 0,
+		["CTAurasLeftX"] = 0,
+		["CTAurasLeftY"] = 0,
+		["CTAurasRightX"] = 0,
+		["CTAurasRightY"] = 0,
+		["RunesY"] = 0,
+	},
+	[2] = {
+		["UFHorizontal"] = 50,
+		["SpellAlertWidth"] = 50,
+		["ActionBarsY"] = -20,
+		["GridTopY"] = -20,
+		["CastBarPlayerY"] = -20,
+		["CastBarTargetY"] = -20,
+		["ClassResourceY"] = -20,
+		["CTPointsHeight"] = 40,
+		["CTAurasLeftX"] = -1,
+		["CTAurasLeftY"] = -20,
+		["CTAurasRightX"] = 1,
+		["CTAurasRightY"] = -20,
+		["RunesY"] = -20,
 	},
 }
 

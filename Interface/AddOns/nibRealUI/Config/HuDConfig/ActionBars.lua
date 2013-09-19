@@ -83,7 +83,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 		end
 		
 		local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
-		local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"]
+		local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
 		----
 		-- Calculate Width/Height of bars and their corresponding Left/Top points

@@ -8,10 +8,24 @@ local Stagger = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "Ac
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
+local layoutSize
+
 local Textures = {
-	bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Bar_Long]],
-	endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_End]],
-	middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\Small_Middle]],
+	[1] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar_Long]],
+		endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+	},
+	[2] = {
+		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar_Long]],
+		endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
+		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+	},
+}
+
+local BarWidth = {
+	[1] = 118,
+	[2] = 128,
 }
 
 local FontStringsRegular = {}
@@ -235,28 +249,28 @@ end
 function Stagger:CreateFrames()
 	self.sBar = CreateFrame("Frame", "RealUI_Stagger", RealUIPositionersClassResource)
 	local sBar = self.sBar
-		sBar:SetSize(237, 6)
+		sBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
 		sBar:SetPoint("BOTTOM")
 		-- sBar:Hide()
 	
 	-- Guard
 	sBar.stagger = CreateFrame("Frame", nil, sBar)
 		sBar.stagger:SetPoint("BOTTOMRIGHT", sBar, "BOTTOM", -1, 0)
-		sBar.stagger:SetSize(118, 6)
+		sBar.stagger:SetSize(BarWidth[layoutSize], 6)
 
 		sBar.stagger.bg = sBar.stagger:CreateTexture(nil, "ARTWORK")
 			sBar.stagger.bg:SetPoint("BOTTOMRIGHT")
 			sBar.stagger.bg:SetSize(128, 16)
-			sBar.stagger.bg:SetTexture(Textures.bar)
+			sBar.stagger.bg:SetTexture(Textures[layoutSize].bar)
 			sBar.stagger.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
 		sBar.stagger.endBox = sBar.stagger:CreateTexture(nil, "ARTWORK")
 			sBar.stagger.endBox:SetPoint("BOTTOMRIGHT", sBar.stagger, "BOTTOMLEFT", 4, 0)
 			sBar.stagger.endBox:SetSize(16, 16)
-			sBar.stagger.endBox:SetTexture(Textures.endBox)
+			sBar.stagger.endBox:SetTexture(Textures[layoutSize].endBox)
 			sBar.stagger.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 
-		sBar.stagger.bar = AngleStatusBar:NewBar(sBar.stagger, -5, -1, 43, 4, "RIGHT", "RIGHT", "LEFT")
+		sBar.stagger.bar = AngleStatusBar:NewBar(sBar.stagger, -5, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "LEFT")
 			sBar.stagger.bar.reverse = true
 
 		sBar.stagger.value = sBar.stagger:CreateFontString()
@@ -267,23 +281,23 @@ function Stagger:CreateFrames()
 	-- Vengeance
 	sBar.veng = CreateFrame("Frame", nil, sBar)
 		sBar.veng:SetPoint("BOTTOMLEFT", sBar, "BOTTOM", 0, 0)
-		sBar.veng:SetSize(118, 6)
+		sBar.veng:SetSize(BarWidth[layoutSize], 6)
 
 		sBar.veng.bg = sBar.veng:CreateTexture(nil, "ARTWORK")
 			sBar.veng.bg:SetPoint("BOTTOMLEFT")
 			sBar.veng.bg:SetSize(128, 16)
-			sBar.veng.bg:SetTexture(Textures.bar)
+			sBar.veng.bg:SetTexture(Textures[layoutSize].bar)
 			sBar.veng.bg:SetTexCoord(1, 0, 0, 1)
 			sBar.veng.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
 		sBar.veng.endBox = sBar.veng:CreateTexture(nil, "ARTWORK")
 			sBar.veng.endBox:SetPoint("BOTTOMLEFT", sBar.veng, "BOTTOMRIGHT", -4, 0)
 			sBar.veng.endBox:SetSize(16, 16)
-			sBar.veng.endBox:SetTexture(Textures.endBox)
+			sBar.veng.endBox:SetTexture(Textures[layoutSize].endBox)
 			sBar.veng.endBox:SetTexCoord(1, 0, 0, 1)
 			sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 
-		sBar.veng.bar = AngleStatusBar:NewBar(sBar.veng, 5, -1, 43, 4, "LEFT", "LEFT", "RIGHT")
+		sBar.veng.bar = AngleStatusBar:NewBar(sBar.veng, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
 			sBar.veng.bar.reverse = true
 
 		sBar.veng.value = sBar.veng:CreateFontString()
@@ -295,7 +309,7 @@ function Stagger:CreateFrames()
 	sBar.middle = sBar:CreateTexture(nil, "ARTWORK")
 		sBar.middle:SetPoint("BOTTOM")
 		sBar.middle:SetSize(16, 16)
-		sBar.middle:SetTexture(Textures.middle)
+		sBar.middle:SetTexture(Textures[layoutSize].middle)
 		sBar.middle:SetVertexColor(unpack(nibRealUI.classColor))
 end
 
@@ -316,6 +330,8 @@ function Stagger:OnInitialize()
 	})
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
+
+	layoutSize = ndb.settings.hudSize
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
