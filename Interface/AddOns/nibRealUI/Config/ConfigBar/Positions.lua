@@ -15,6 +15,7 @@ local Element = {}
 
 function ConfigBar_Positions:ToggleHuDSize()
 	ndb.settings.hudSize = ndb.settings.hudSize == 1 and 2 or 1
+	nibRealUI.db.global.messages.largeHuDOption = true
 
 	if ndb.settings.hudSize == 1 then
 		self.positionOptions[2].check.highlight:SetAlpha(0)
@@ -24,7 +25,7 @@ function ConfigBar_Positions:ToggleHuDSize()
 
 	-- Display Info Dialog
 	StaticPopupDialogs["PUDRUIHUDSIZEINFO"] = {
-		text = L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."],
+		text = L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."],
 		button1 = "Okay",
 		OnAccept = function()
 			nibRealUI:ReloadUIDialog()

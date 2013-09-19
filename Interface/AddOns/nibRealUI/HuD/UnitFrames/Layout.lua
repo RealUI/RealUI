@@ -67,7 +67,7 @@ hooksecurefunc("UnitPopup_OnClick",function(self)
 			StaticPopup1:Hide()
 		end
 		if db.misc.focusclick then
-			nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.")
+			nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
 		end
 	elseif button == "PET_DISMISS" then
 		if StaticPopup1 then

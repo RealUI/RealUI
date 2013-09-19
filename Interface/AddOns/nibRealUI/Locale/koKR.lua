@@ -65,7 +65,7 @@ L["Link Layouts"] = "레이아웃 연동"
 L["Use same settings between DPS/Tank and Healing layouts."] = "레이아웃 구성을 딜러/탱커구성과 힐러구성을 같이 사용합니다."
 L["Use Large HuD"] = "Use Large HuD"
 L["Increases size of key HuD elements (Unit Frames, etc)."] = "Increases size of key HuD elements (Unit Frames, etc)."
-L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."
+L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."
 
 -- 단축키
 L["RealUI Control"] = "RealUI 조정"

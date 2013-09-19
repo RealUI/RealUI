@@ -65,7 +65,7 @@ L["Link Layouts"] = "Lier les confs"
 L["Use same settings between DPS/Tank and Healing layouts."] = "Utilise les m\195\170mes param\195\168tres entre DPS/Tank et Soigneur."
 L["Use Large HuD"] = "Use Large HuD"
 L["Increases size of key HuD elements (Unit Frames, etc)."] = "Increases size of key HuD elements (Unit Frames, etc)."
-L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to adjust UI Element positions once the HuD Size changes have taken effect."
+L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."
 
 L["RealUI Control"] = "Contr\195\180le RealUI"
 L["Allow RealUI to control the action bars."] = "Autoriser RealUI a contr\195\180ler les barres d'actions."

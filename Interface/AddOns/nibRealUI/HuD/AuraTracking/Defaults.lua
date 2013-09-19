@@ -57,6 +57,7 @@ nibRealUI.auraTrackingDefaults = {
 		order = 2,
 	},
 -- Free Buffs
+	{spell = 114851},	-- Blood Charge
 	{spell = 51271},	-- Pillar of Frost
 	{spell = 49039},	-- Lichborne
 	{spell = 48792},	-- Icebound Fortitude

@@ -971,6 +971,7 @@ end
 
 function CastBars:ToggleConfigMode(val)
 	if self.configMode == val then return end
+	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 	self.configMode = val
 
 	if self.configMode then

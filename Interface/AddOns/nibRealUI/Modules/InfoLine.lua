@@ -854,11 +854,11 @@ local function UpdateElementWidth(e, ...)
 			extraWidth = 4
 			e.curwidth = db.position.xgap + e.text1:GetWidth()+ extraWidth  + e.iconwidth + extraWidth + e.text2:GetWidth() + db.position.xgap
 			e.text1:ClearAllPoints()
-			e.text1:SetPoint("BOTTOMLEFT", e, "BOTTOMLEFT", db.position.xgap, db.position.yoff + 0.5)
+			e.text1:SetPoint("BOTTOMLEFT", e, "BOTTOMLEFT", db.position.xgap, db.position.yoff + db.text.yoffset + 0.5)
 			e.icon:ClearAllPoints()
 			e.icon:SetPoint("BOTTOMLEFT", e, "BOTTOMLEFT", db.position.xgap + e.text1:GetWidth() + 2, db.position.yoff)
 			e.text2:ClearAllPoints()
-			e.text2:SetPoint("BOTTOMLEFT", e, "BOTTOMLEFT", db.position.xgap + e.text1:GetWidth() + 2 + e.iconwidth + 6, db.position.yoff + 0.5)
+			e.text2:SetPoint("BOTTOMLEFT", e, "BOTTOMLEFT", db.position.xgap + e.text1:GetWidth() + 2 + e.iconwidth + 6, db.position.yoff + db.text.yoffset + 0.5)
 		end
 		-- if e.side == "LEFT" then e.curwidth = e.curwidth - 5 else e.curwidth = e.curwidth - 2 end
 		if e.type == 3 then e.curwidth = e.curwidth - 5 else e.curwidth = e.curwidth - 2 end
@@ -3621,9 +3621,9 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
 			NewElement.text:SetFont(unpack(nibRealUI.font.pixel1))
 			NewElement.text:SetJustifyH("LEFT")
 			if type == 2 then
-				NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap, db.position.yoff + 0.5)
+				NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap, db.position.yoff + db.text.yoffset + 0.5)
 			else
-				NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap + iconInfo[2] - 1, db.position.yoff + 0.5)
+				NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap + iconInfo[2] - 1, db.position.yoff + db.text.yoffset + 0.5)
 			end
 			NewElement.curwidth = 50
 		end
@@ -4162,7 +4162,7 @@ function InfoLine:OnInitialize()
 				yoff = 6,
 			},
 			text = {
-				yoffset = 0.5,
+				yoffset = 0,
 				tablets = {
 					headersize = 13,
 					columnsize = 10,

@@ -209,6 +209,7 @@ local defaults = {
 		},
 		messages = {
 			resetNew = false,
+			largeHuDOption = false,
 		},
 		minipatches = {},
 	},
@@ -687,14 +688,20 @@ function nibRealUI:PLAYER_LOGIN()
 		end
 	end
 
-	-- cbNivaya Reset New notification
-	if not(dbg.messages.resetNew) and (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
-		if IsAddOnLoaded("cargBags_Nivaya") then
-			hooksecurefunc(Nivaya, "OnShow", function()
-				if RealUI.db.global.messages.resetNew then return end
-				nibRealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-				RealUI.db.global.messages.resetNew = true
-			end)
+	-- Helpful messages
+	if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
+		if not(dbg.messages.resetNew) then
+			if IsAddOnLoaded("cargBags_Nivaya") then
+				hooksecurefunc(Nivaya, "OnShow", function()
+					if RealUI.db.global.messages.resetNew then return end
+					nibRealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
+					RealUI.db.global.messages.resetNew = true
+				end)
+			end
+		end
+		if not(dbg.messages.largeHuDOption) then
+			local blue = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
+			print("Using a hi-res display? Check out the new |cff"..blue.."Large HuD|r option found in the Positions config panel (|cFFFF8000/realui|r > Positions)")
 		end
 	end
 

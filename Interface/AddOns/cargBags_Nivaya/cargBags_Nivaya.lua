@@ -279,7 +279,7 @@ function cargBags_Nivaya:ADDON_LOADED(event, addon)
 	cB_Bags.main		:SetMultipleFilters(true, cB_Filters.fBags, cB_Filters.fHideEmpty)
 	for _,v in pairs(cB_CustomBags) do cB_Bags[v.name]:SetExtendedFilter(cB_Filters.fItemClass, v.name) end
 
-	cB_Bags.main:SetPoint("BOTTOMRIGHT", -35, 26)
+	cB_Bags.main:SetPoint("BOTTOMRIGHT", -99, 26)
 	cB_Bags.bank:SetPoint("TOPLEFT", 20, -20)
 	
 	cbNivaya:CreateAnchors()

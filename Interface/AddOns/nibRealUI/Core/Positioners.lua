@@ -7,11 +7,7 @@ local Positioners = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local PF = {}
 
 local function GetHuDSizeOffset(key)
-	if nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key] then
-		return nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key]
-	else
-		return 0
-	end
+	return nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key] or 0
 end
 
 local function GetPositionData(pT)
