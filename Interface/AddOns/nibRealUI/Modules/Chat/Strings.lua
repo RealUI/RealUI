@@ -28,6 +28,7 @@ function Chat_Strings:MAIL_SHOW()
 end
 
 function Chat_Strings:ChangeStrings()
+	if GetLocale() == "enUS" or GetLocale() == "enGB" then
 		--[[ Loot mods ]]
 		LOOT_ITEM = "%s + %s"
 		LOOT_ITEM_MULTIPLE = "%s + % sx%d"
