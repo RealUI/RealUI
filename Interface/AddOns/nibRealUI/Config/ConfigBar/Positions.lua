@@ -23,6 +23,8 @@ function ConfigBar_Positions:ToggleHuDSize()
 		self.positionOptions[2].check.highlight:SetAlpha(1)
 	end
 
+	self:Close()
+
 	-- Display Info Dialog
 	StaticPopupDialogs["PUDRUIHUDSIZEINFO"] = {
 		text = L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."],
