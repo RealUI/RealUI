@@ -97,7 +97,6 @@ function Chat:PLAYER_LOGIN()
 	if IsAddOnLoaded("BasicChatMods") then
 		_G["InterfaceOptionsSocialPanelChatStyle"]:Hide()
 	end
-
 end
 
 function Chat:OnInitialize()

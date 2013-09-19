@@ -287,10 +287,15 @@ local PowerXOffset = {
 	[2] = -9,
 }
 
-local F1_EndBoxOffset = {
+local F1_EndBoxXOffset = {
 	[1] = 0,
 	[2] = -2,
 }
+local F1_EndBoxYOffset = {
+	[1] = 1,
+	[2] = 0,
+}
+
 
 local ReversePowers = {
 	["RAGE"] = true,
@@ -1533,7 +1538,7 @@ function UnitFrames:CreateFrames()
 	
 	-- End Box
 	UF[PLAYER_ID].endbox = CreateStatusBox(UF[PLAYER_ID])
-	SetFramePosition(UF[PLAYER_ID].endbox, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 32, 32, {"LEFT", UF[PLAYER_ID], "RIGHT", -14 + F1_EndBoxOffset[layoutSize], 1})
+	SetFramePosition(UF[PLAYER_ID].endbox, "MEDIUM", UF[PLAYER_ID]:GetFrameLevel(), 32, 32, {"LEFT", UF[PLAYER_ID], "RIGHT", -14 + F1_EndBoxXOffset[layoutSize], F1_EndBoxYOffset[layoutSize]})
 	UF[PLAYER_ID].endbox.surround:SetTexture(Textures[layoutSize].f1.endbox.surround)
 	UF[PLAYER_ID].endbox.background:SetTexture(Textures[layoutSize].f1.endbox.bar)
 	UF[PLAYER_ID].endbox.bar:SetTexture(Textures[layoutSize].f1.endbox.bar)
@@ -1733,7 +1738,7 @@ function UnitFrames:CreateFrames()
 	
 	-- End Box
 	UF[TARGET_ID].endbox = CreateStatusBox(UF[TARGET_ID])
-	SetFramePosition(UF[TARGET_ID].endbox, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 32, 32, {"RIGHT", UF[TARGET_ID], "LEFT", 14 - F1_EndBoxOffset[layoutSize], 1})
+	SetFramePosition(UF[TARGET_ID].endbox, "MEDIUM", UF[TARGET_ID]:GetFrameLevel(), 32, 32, {"RIGHT", UF[TARGET_ID], "LEFT", 14 - F1_EndBoxXOffset[layoutSize], F1_EndBoxYOffset[layoutSize]})
 	UF[TARGET_ID].endbox.surround:SetTexture(Textures[layoutSize].f1.endbox.surround)
 	UF[TARGET_ID].endbox.surround:SetTexCoord(1, 0, 0, 1)
 	UF[TARGET_ID].endbox.background:SetTexture(Textures[layoutSize].f1.endbox.bar)
