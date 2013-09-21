@@ -443,7 +443,11 @@ local function HighlightLine(self, highlight)
 				local r, g, b, prefix = GetQuestData(self)
 				local text = line.text:GetText()
 				if(text and string.sub(text, -1) ~= '\032') then
-					line.text:SetFormattedText('[%s] %s\032', prefix, text)
+					if prefix then
+						line.text:SetFormattedText('[%s] %s\032', prefix, text)
+					else
+						line.text:SetFormattedText('%s\032', text)
+					end
 				end
 
 				if(highlight) then
