@@ -209,6 +209,30 @@ function nibRealUI:Clamp(value, min, max)
 	return value
 end
 
+-- Seconds to Time
+function nibRealUI:ConvertSecondstoTime(value, onlyOne)
+	local hours, minues, seconds
+	hours = floor(value / 3600)
+	minutes = floor((value - (hours * 3600)) / 60)
+	seconds = floor(value - ((hours * 3600) + (minutes * 60)))
+
+	if ( hours > 0 ) then
+		if onlyOne then
+			return string.format("%dh", hours)
+		else
+			return string.format("%dh %dm", hours, minutes)
+		end
+	elseif ( minutes > 0 ) then
+		if ( minutes >= 10 ) or onlyOne then
+			return string.format("%dm", minutes)
+		else
+			return string.format("%dm %ds", minutes, seconds)
+		end
+	else
+		return string.format("%ds", seconds)
+	end
+end
+
 -- Draggable Window
 local function MouseDownHandler(frame, button)
 	if frame and button == "LeftButton" then

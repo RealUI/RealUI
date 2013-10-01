@@ -321,8 +321,16 @@ function CastBars:OnUpdate(unit, elapsed)
 			self:StopBar(unit)
 		end
 
-		-- local timeString = string.format("%.1f", remainingTime) or ""
-		self[unit].time.text:SetFormattedText("%.1f", remainingTime)
+		-- Time text
+		if remainingTime < 30 then
+			self[unit].time.text:SetFormattedText("%.1f", remainingTime)
+		elseif remainingTime < 300 then
+			self[unit].time.text:SetFormattedText("%.0f", remainingTime)
+		else
+			self[unit].time.text:SetText(nibRealUI:ConvertSecondstoTime(remainingTime, true))
+		end
+
+		-- Name text
 		self[unit].name.text:SetText(nibRealUI:AbbreviateName(self[unit].actionMessage, MaxNameLengths[unit]))
 
 		return
