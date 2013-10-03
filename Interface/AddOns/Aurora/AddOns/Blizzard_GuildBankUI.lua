@@ -5,6 +5,9 @@ C.modules["Blizzard_GuildBankUI"] = function()
 	GuildBankFrame:DisableDrawLayer("BORDER")
 	GuildBankFrame:DisableDrawLayer("OVERLAY")
 	GuildBankTabTitle:SetDrawLayer("ARTWORK")
+	GuildBankLimitLabel:SetDrawLayer("ARTWORK")
+	GuildBankCashFlowLabel:SetDrawLayer("ARTWORK")
+
 
 	GuildBankEmblemFrame:Hide()
 	GuildBankPopupFrameTopLeft:Hide()
