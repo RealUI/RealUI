@@ -2003,7 +2003,6 @@ local function Friends_Update(self)
 	-- Battle.net Friends
 	for t = 1, BNGetNumFriends() do
 		local BNid, BNname, battletag, isBattleTagPresence, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(t)
-		--print("BNname: "..BNname.." BNid: "..BNid)
 		-- WoW friends
 		if ( online and client=="WoW" ) then
 			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
@@ -2050,7 +2049,6 @@ local function Friends_Update(self)
 			
 			-- Add Friend to list
 			tinsert(FriendsTabletData, { cname, lvl, area, faction, client, BNname, note, name, BNid })
-			
 		-- SC2 friends
 		elseif ( online and client=="S2" ) then
 			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
@@ -2081,6 +2079,30 @@ local function Friends_Update(self)
 			
 			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
 			client = "D3"
+			curFriendsOnline = curFriendsOnline + 1
+			
+			-- Name
+			local cname
+			cname = strform(
+				"|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
+				FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
+				BNname,
+				toonname
+			)
+			if ( isafk and toonname ) then
+				cname = strform("%s %s", CHAT_FLAG_AFK, cname)
+			elseif ( isdnd and toonname ) then
+				cname = strform("%s %s", CHAT_FLAG_DND, cname)
+			end
+			
+			-- Add Friend to list
+			tinsert(FriendsTabletData, { cname, lvl, gametext, class, client, BNname, note, "", BNid })
+		-- Hearthstone friends
+		elseif ( online and client=="WTCG" ) then
+			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
+
+			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
+			client = "HS"
 			curFriendsOnline = curFriendsOnline + 1
 			
 			-- Name
