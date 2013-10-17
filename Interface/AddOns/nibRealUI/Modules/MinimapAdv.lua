@@ -1375,7 +1375,7 @@ end
 function MinimapAdv:DungeonDifficultyUpdate()
 	-- If in a Party/Raid then show Dungeon Difficulty text
 	MMFrames.info.dungeondifficulty.text:SetText("")
-	local _, instanceType, difficulty, _, maxPlayers = GetInstanceInfo()
+	local _, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
 	if (self.IsGuildGroup or ((instanceType == "party" or instanceType == "raid") and not (difficulty == 1 and maxPlayers == 5))) then
 		-- Get Dungeon Difficulty
 		local isHeroic = false
@@ -1402,7 +1402,14 @@ function MinimapAdv:DungeonDifficultyUpdate()
 		end
 		
 		-- Set Text
-		local DifficultyText = tostring(maxPlayers)
+		local DifficultyText
+
+		if (difficulty == 14) then 
+			DifficultyText = "Flex ("..currPlayers..")" 
+		else
+			DifficultyText = tostring(maxPlayers)
+		end
+
 		if isHeroic then DifficultyText = DifficultyText.."+" end
 		if self.IsGuildGroup then DifficultyText = DifficultyText.." ("..GUILD..")" end
 		
