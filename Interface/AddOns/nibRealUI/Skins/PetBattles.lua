@@ -484,6 +484,10 @@ function PetBattles:Skin()
 		bu.CooldownShadow:SetAllPoints()
 		bu.CooldownFlash:SetAllPoints()
 
+		bu.SelectedHighlight:SetDrawLayer("BACKGROUND") -- Drathal fix; http://www.wowinterface.com/forums/showpost.php?p=285939&postcount=2976
+		bu.SelectedHighlight:SetPoint("TOPLEFT", bu, -7, 7)
+		bu.SelectedHighlight:SetPoint("BOTTOMRIGHT", bu, 7, -7)
+
 		pushed:SetTexture(r, g, b)
 		pushed:SetDrawLayer("BACKGROUND")
 		pushed:SetAllPoints()
