@@ -481,10 +481,15 @@ function PetBattles:Skin()
 		icon:SetPoint("TOPLEFT", bu, 1, -1)
 		icon:SetPoint("BOTTOMRIGHT", bu, -1, 1)
 
-		bu.CooldownShadow:SetAllPoints()
-		bu.CooldownFlash:SetAllPoints()
+		bu.CooldownShadow:SetDrawLayer("BACKGROUND")
+		bu.CooldownShadow:SetPoint("TOPLEFT", bu, -7, 7)
+		bu.CooldownShadow:SetPoint("BOTTOMRIGHT", bu, 7, -7)
 
-		bu.SelectedHighlight:SetDrawLayer("BACKGROUND") -- Drathal fix; http://www.wowinterface.com/forums/showpost.php?p=285939&postcount=2976
+		bu.CooldownFlash:SetDrawLayer("BACKGROUND")
+		bu.CooldownFlash:SetPoint("TOPLEFT", bu, -7, 7)
+		bu.CooldownFlash:SetPoint("BOTTOMRIGHT", bu, 7, -7)
+
+		bu.SelectedHighlight:SetDrawLayer("BACKGROUND") -- Drathal fix
 		bu.SelectedHighlight:SetPoint("TOPLEFT", bu, -7, 7)
 		bu.SelectedHighlight:SetPoint("BOTTOMRIGHT", bu, 7, -7)
 
