@@ -52,7 +52,6 @@ Raven.classSpells.MONK = {
 	{ "Muscle Memory", BUFF, p.Brown3, id = 139598 }, 
 	{ "Nimble Brew", BUFF, p.Blue3, cooldown = true, id = 137562 }, 
 	{ "Paralysis", DEBUFF, p.Purple1, cooldown = true, school = "Nature", id = 115078 },
---	{ "Path of Blossoms", BUFF, p.Red2, school = "Nature", id = 124336 }, -- removed in 5.2
 	{ "Power Guard", BUFF, p.Brown2, id = 118636 }, 
 	{ "Provoke", DEBUFF, p.Red1, cooldown = true, id = 115546 },
 	{ "Purifying Brew", nil, p.Green1, cooldown = true, id = 119582 }, 
@@ -97,12 +96,12 @@ Raven.classSpells.MONK = {
 }
 
 Raven.classConditions.MONK = {
-	["Legacy Buff Missing"] = {
+	["Legacy of the Emperor Missing"] = { -- "Mark of the Wild", "Blessing of Kings", "Legacy of the Emperor", "Embrace of the Shale Spider"
 		tests = {
 			["Player Status"] = { enable = true, isResting = false, isMounted = false },
 			["Spell Ready"] = { enable = true, spell = 115921 }, -- "Legacy of the Emperor"
 			["Any Buffs"] = { enable = true, toggle = true, unit = "player",
-				auras = { 115921, 116781 }, }, -- "Legacy of the Emperor", "Legacy of the White Tiger"
+				auras = { 1126, 20217, 115921, 90363 }, },
 		},
 		associatedSpell = 115921, -- "Legacy of the Emperor"
 	},

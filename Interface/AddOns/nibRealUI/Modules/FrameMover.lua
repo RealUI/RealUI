@@ -727,7 +727,7 @@ local function Hook_Raven()
 		end
 	end) 
 	
-	hooksecurefunc("Nest_SetAnchorPoint", function()
+	hooksecurefunc(Raven, "Nest_SetAnchorPoint", function()
 		t:Show()
 	end)
 

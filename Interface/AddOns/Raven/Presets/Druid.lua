@@ -17,12 +17,13 @@ Raven.classSpells.DRUID = {
 	{ "Cenarion Ward", BUFF, p.Green3, cooldown = true, school = "Nature", id = 102351 },
 	{ "Charm Woodland Creature", BUFF, p.Pink, id = 127757 },
 	{ "Clearcasting", BUFF, p.Blue2, id = 16870 },
-	{ "Cyclone", DEBUFF, p.Gray, cooldown = true, school = "Nature", id = 33786 },
+	{ "Cyclone", DEBUFF, p.Gray, school = "Nature", id = 33786 }, -- no cooldown in 5.4
 	{ "Dash", BUFF, p.Green2, cooldown = true, id = 1850 },
 	{ "Disorienting Roar", DEBUFF, p.Brown3, cooldown = true, id = 99 },
 	{ "Displacer Beast", BUFF, p.Blue2, cooldown = true, id = 102280 },
 	{ "Eclipse (Lunar)", BUFF, p.Blue2, id = 48518 },
 	{ "Eclipse (Solar)", BUFF, p.Brown2, id = 48517 },
+	{ "Efflorescence", BUFF, p.Red3, school = "Nature", id = 142423 }, -- effect from Swiftmend in 5.4
 	{ "Enrage", BUFF, p.Red2, cooldown = true, id = 5229 },
 	{ "Entangling Roots", DEBUFF, p.Brown3, school = "Nature", id = 339 },
 	{ "Faerie Fire", DEBUFF, p.Pink, cooldown = true, school = "Nature", id = 770 },
@@ -111,8 +112,10 @@ Raven.classSpells.DRUID = {
 	{ "Vengeance", BUFF, p.Orange3, id = 84840 },
 	{ "Wild Charge", nil, p.Purple3, cooldown = true, id = 102401 },
 	{ "Wild Growth", BUFF, p.Blue2, cooldown = true, school = "Nature", id = 48438 },
+	{ "Wild Mushroom", BUFF, p.Orange2, cooldown = true, school = "Nature", id = 145205 },
 	{ "Wild Mushroom: Bloom", nil, p.Orange2, cooldown = true, school = "Nature", id = 102791 },
 	{ "Wild Mushroom: Detonate", nil, p.Orange2, cooldown = true, school = "Nature", id = 88751 },
+	{ "Ysera's Gift", BUFF, p.Green1, id = 145108 }, -- new in 5.4
 }
 
 Raven.classConditions.DRUID = {

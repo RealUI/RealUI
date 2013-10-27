@@ -20,7 +20,6 @@ Raven.classSpells.WARRIOR = {
 	{ "Cleave", DEBUFF, p.Green2, cooldown = true, id = 845 },
 	{ "Colossus Smash", DEBUFF, p.Brown3, cooldown = true, id = 86346 },
 	{ "Commanding Shout", BUFF, p.Orange3, cooldown = true, shared = L["Shouts"], id = 469 },
---	{ "Deadly Calm", BUFF, p.Brown1, cooldown = true, id = 85730 }, -- removed in 5.2
 	{ "Deep Wounds", DEBUFF, p.Red1, id = 115768 },
 	{ "Defensive Stance", BUFF, p.Gray, cooldown = true, shared = L["Stances"], id = 71 },
 	{ "Demoralizing Banner", DEBUFF, p.Green1, cooldown = true, id = 114203 },
@@ -38,6 +37,7 @@ Raven.classSpells.WARRIOR = {
 	{ "Heroic Leap", nil, p.Red3, cooldown = true, id = 6544 },
 	{ "Heroic Strike", nil, p.Orange2, cooldown = true, id = 78 },
 	{ "Heroic Throw", nil, p.Purple3, cooldown = true, id = 57755 },
+	{ "Impaling Throw", DEBUFF, p.Brown3, id = 147838 }, -- from glyph of impaling throws, added for 5.4
 	{ "Impending Victory", nil, p.Purple3, cooldown = true, id = 103840 },
 	{ "Incite", BUFF, p.Brown2, id = 122016 },
 	{ "Intervene", BUFF, p.Yellow1, cooldown = true, id = 3411 },
@@ -60,6 +60,7 @@ Raven.classSpells.WARRIOR = {
 	{ "Rallying Cry", BUFF, p.Blue3, cooldown = true, id = 97462 },
 	{ "Recklessness", BUFF, p.Red2, cooldown = true, id = 1719 },
 	{ "Revenge", nil, p.Brown3, cooldown = true, id = 6572 },
+	{ "Riposte", BUFF, p.Gray, id = 145672 }, -- new in 5.4
 	{ "Rude Interruption", BUFF, p.Red2, id = 86662 },
 	{ "Safeguard", BUFF, p.Yellow2, id = 114029 },
 	{ "Second Wind", BUFF, p.Pink, id = 29838 },

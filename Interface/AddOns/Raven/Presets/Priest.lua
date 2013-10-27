@@ -88,6 +88,7 @@ Raven.classSpells.PRIEST = {
 	{ "Twist of Fate", BUFF, p.Purple3, id = 109142 },
 	{ "Vampiric Embrace", BUFF, p.Blue2, cooldown = true, school = "Shadow", id = 15286 },
 	{ "Vampiric Touch", DEBUFF, p.Purple3, id = 34914 },
+	{ "Void Tendril's Grasp", DEBUFF, p.Purple1, cooldown = true, school = "Shadow", id = 114404 },
 	{ "Void Tendrils", BUFF, p.Purple1, cooldown = true, school = "Shadow", id = 108920 },
 	{ "Void Shift", nil, p.Purple1, cooldown = true, school = "Shadow", id = 108968 },
 	{ "Weakened Soul", DEBUFF, p.Orange3, id = 6788 },

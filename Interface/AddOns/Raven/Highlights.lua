@@ -1,7 +1,7 @@
 -- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
 
 -- Highlights.lua contains routines for adding colored overlays to action bar buttons when associated spells are active.
--- It also adds text overlays showing remaining cooldown time. Currently works with Bartender4, Dominos and Macaroon buttons.
+-- It also adds text overlays showing remaining cooldown time. Currently works with Bartender4 and Dominos buttons.
 -- There are no exported functions other than those called to initialize and update highlights.
 
 local MOD = Raven
@@ -22,7 +22,7 @@ local defaultBars = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBotto
 
 -- Initialization routine checks if required addons are loaded before enabling highlights and cooldown counts
 function MOD:InitializeHighlights()
-	if IsAddOnLoaded("Bartender4") or IsAddOnLoaded("Dominos") or IsAddOnLoaded("Macaroon") then
+	if IsAddOnLoaded("Bartender4") or IsAddOnLoaded("Dominos") then
 		MOD.highlights = true
 	end
 end
@@ -85,32 +85,6 @@ local function UpdateActiveButtons()
 				if b and b:IsVisible() then -- only want buttons that are visible
 					local bAction = ActionButton_GetPagedID(b)
 					if bAction then CheckButtonAction(b, bAction) end
-				end
-			end
-		end
-	end
-	if IsAddOnLoaded("Macaroon") then
-		for _, button in pairs(Macaroon.Buttons) do
-			local b = _G[button[1]:GetName()] -- look up the actual button from the name in the Macaroon table
-			if b then
-				if b.config and b.config.type == "action" then
-					local bAction = SecureButton_GetModifiedAttribute(b, "action", SecureButton_GetEffectiveButton(b))
-					if bAction then CheckButtonAction(b, bAction) end
-				else
-					local sID = nil
-					if b.macroshow then
-						sID = string.match(b.macroshow,"[^%(]+")
-					elseif b.macrospell then
-						sID = string.match(b.macrospell,"[^%(]+")
-					end
-					if sID then
-						if not buttons[b] then
-							buttons[b] = { sID, "macro", nil }
-						else
-							local t = buttons[b]
-							t[1], t[2], t[3] = sID, "macro", nil
-						end
-					end
 				end
 			end
 		end
@@ -275,7 +249,7 @@ local function UpdateButtonCooldown(button, name, alpha)
 			local f = MOD.db.global.CooldownTimeFormat
 			local s = MOD.db.global.CooldownTimeSpaces
 			local c = MOD.db.global.CooldownTimeCase
-			local t = Nest_FormatTime(cd[1], f, s, c)
+			local t = MOD.Nest_FormatTime(cd[1], f, s, c)
 			SetOverlayText(button, alpha, t)
 		end
 	end

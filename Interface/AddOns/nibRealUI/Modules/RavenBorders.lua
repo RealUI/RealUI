@@ -92,8 +92,8 @@ local function HookBars()
 	-- local Animations = nibRealUI:GetModule("Animations", true)
 	-- if Animations and not(nibRealUI:GetModuleEnabled("Animations")) then Animations = nil end
 
-	Nest_CreateBar_ = Nest_CreateBar
-	Nest_CreateBar = function(bg, name)
+	Nest_CreateBar_ = Raven.Nest_CreateBar
+	Raven.Nest_CreateBar = function(bg, name)
 		bar = Nest_CreateBar_(bg, name)
 		bar.frame:Show()
 		bar.container:Show()
@@ -121,8 +121,8 @@ local function HookBars()
 		return bar
 	end
 	
-	Nest_DeleteBar_ = Nest_DeleteBar
-	Nest_DeleteBar = function(bg, bar)
+	Nest_DeleteBar_ = Raven.Nest_DeleteBar
+	Raven.Nest_DeleteBar = function(bg, bar)
 		-- Would be nice to keep them attached, but Raven recycles frames for Icons AND Bars and intermixes them
 		if bar.frame.ssID then SpiralBorder:RemoveSpiral(bar, bar.frame.ssID, true) end
 		bar.endTime = nil

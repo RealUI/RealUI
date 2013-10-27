@@ -38,7 +38,7 @@ local function IsOff(value) return value == nil or value == Off end -- return tr
 local function IsOn(value) return value ~= nil and value ~= Off end -- return true if option is turned on
 
 -- Convert color codes from hex number to array with r, g, b, a fields (alpha set to 1.0)
-function Raven_HexColor(hex)
+function MOD.HexColor(hex)
 	local n = tonumber(hex, 16)
 	local red = math.floor(n / (256 * 256))
 	local green = math.floor(n / 256) % 256
@@ -48,13 +48,13 @@ function Raven_HexColor(hex)
 end
 
 -- Return a copy of a color, if c is nil then return white
-function Raven_CopyColor(c)
+function MOD.CopyColor(c)
 	if not c then return nil end
 	return { r = c.r, g = c.g, b = c.b, a = c.a }
 end
 
 -- Copy a table, including its metatable
-function Raven_CopyTable(object)
+function MOD.CopyTable(object)
     local lookup_table = {}
     local function _copy(object)
         if type(object) ~= "table" then
@@ -74,14 +74,14 @@ end
 
 -- Global color palette containing the standard colors for this addon
 MOD.ColorPalette = {
-	Yellow1=Raven_HexColor("fce94f"), Yellow2=Raven_HexColor("edd400"), Yellow3=Raven_HexColor("c4a000"),
-	Orange1=Raven_HexColor("fcaf3e"), Orange2=Raven_HexColor("f57900"), Orange3=Raven_HexColor("ce5c00"),
-	Brown1=Raven_HexColor("e9b96e"), Brown2=Raven_HexColor("c17d11"), Brown3=Raven_HexColor("8f5902"),
-	Green1=Raven_HexColor("8ae234"), Green2=Raven_HexColor("73d216"), Green3=Raven_HexColor("4e9a06"),
-	Blue1=Raven_HexColor("729fcf"), Blue2=Raven_HexColor("3465a4"), Blue3=Raven_HexColor("204a87"),
-	Purple1=Raven_HexColor("ad7fa8"), Purple2=Raven_HexColor("75507b"), Purple3=Raven_HexColor("5c3566"),
-	Red1=Raven_HexColor("ef2929"), Red2=Raven_HexColor("cc0000"), Red3=Raven_HexColor("a40000"),
-	Pink=Raven_HexColor("ff6eb4"), Cyan=Raven_HexColor("7adbf2"), Gray=Raven_HexColor("888a85"),
+	Yellow1=MOD.HexColor("fce94f"), Yellow2=MOD.HexColor("edd400"), Yellow3=MOD.HexColor("c4a000"),
+	Orange1=MOD.HexColor("fcaf3e"), Orange2=MOD.HexColor("f57900"), Orange3=MOD.HexColor("ce5c00"),
+	Brown1=MOD.HexColor("e9b96e"), Brown2=MOD.HexColor("c17d11"), Brown3=MOD.HexColor("8f5902"),
+	Green1=MOD.HexColor("8ae234"), Green2=MOD.HexColor("73d216"), Green3=MOD.HexColor("4e9a06"),
+	Blue1=MOD.HexColor("729fcf"), Blue2=MOD.HexColor("3465a4"), Blue3=MOD.HexColor("204a87"),
+	Purple1=MOD.HexColor("ad7fa8"), Purple2=MOD.HexColor("75507b"), Purple3=MOD.HexColor("5c3566"),
+	Red1=MOD.HexColor("ef2929"), Red2=MOD.HexColor("cc0000"), Red3=MOD.HexColor("a40000"),
+	Pink=MOD.HexColor("ff6eb4"), Cyan=MOD.HexColor("7adbf2"), Gray=MOD.HexColor("888a85"),
 }
 
 -- Remove unneeded variables from the profile before logout
@@ -242,7 +242,7 @@ function MOD:ResetColorDefault(name)
 			if t then
 				t.r, t.g, t.b, t.a = c.r, c.g, c.b, c.a
 			else
-				sct[name] = Raven_CopyColor(c)
+				sct[name] = MOD.CopyColor(c)
 			end
 		end	
 	end
@@ -257,7 +257,7 @@ function MOD:ResetColorDefaults()
 		if t then
 			t.r, t.g, t.b, t.a = c.r, c.g, c.b, c.a
 		else
-			sct[n] = Raven_CopyColor(c)
+			sct[n] = MOD.CopyColor(c)
 		end
 	end 
 	for n in pairs(sct) do if not dct[n] then sct[n] = nil end end -- remove any extras
@@ -302,7 +302,7 @@ end
 
 -- Copy dimensions, destination is always a bar group, check which configuration type and copy either bar or icon defaults
 function MOD:CopyDimensions(s, d)
-	local iconOnly = d.configuration and Nest_SupportedConfigurations[d.configuration].iconOnly or false
+	local iconOnly = d.configuration and MOD.Nest_SupportedConfigurations[d.configuration].iconOnly or false
 	if iconOnly then
 		d.barWidth = s.i_barWidth; d.barHeight = s.i_barHeight; d.iconSize = s.i_iconSize; d.scale = s.i_scale				
 		d.spacingX = s.i_spacingX; d.spacingY = s.i_spacingY; d.iconOffsetX = s.i_iconOffsetX; d.iconOffsetY = s.i_iconOffsetY
@@ -335,20 +335,20 @@ end
 -- Copy fonts and textures between tables
 function MOD:CopyFontsAndTextures(s, d)
 	if s and d and (s ~= d) then
-		d.labelFont = s.labelFont; d.labelFSize = s.labelFSize; d.labelAlpha = s.labelAlpha; d.labelColor = Raven_CopyColor(s.labelColor)
+		d.labelFont = s.labelFont; d.labelFSize = s.labelFSize; d.labelAlpha = s.labelAlpha; d.labelColor = MOD.CopyColor(s.labelColor)
 		d.labelOutline = s.labelOutline; d.labelShadow = s.labelShadow; d.labelThick = s.labelThick; d.labelMono = s.labelMono
-		d.timeFont = s.timeFont; d.timeFSize = s.timeFSize; d.timeAlpha = s.timeAlpha; d.timeColor = Raven_CopyColor(s.timeColor)
+		d.timeFont = s.timeFont; d.timeFSize = s.timeFSize; d.timeAlpha = s.timeAlpha; d.timeColor = MOD.CopyColor(s.timeColor)
 		d.timeOutline = s.timeOutline; d.timeShadow = s.timeShadow; d.timeThick = s.timeThick; d.timeMono = s.timeMono
-		d.iconFont = s.iconFont; d.iconFSize = s.iconFSize; d.iconAlpha = s.iconAlpha; d.iconColor = Raven_CopyColor(s.iconColor)
+		d.iconFont = s.iconFont; d.iconFSize = s.iconFSize; d.iconAlpha = s.iconAlpha; d.iconColor = MOD.CopyColor(s.iconColor)
 		d.iconOutline = s.iconOutline; d.iconShadow = s.iconShadow; d.iconThick = s.iconThick; d.iconMono = s.iconMono
 		d.texture = s.texture; d.bgtexture = s.bgtexture; d.alpha = s.alpha; d.combatAlpha = s.combatAlpha; d.fgAlpha = s.fgAlpha; d.bgAlpha = s.bgAlpha
 		d.fgSaturation = s.fgSaturation; d.fgBrightness = s.fgBrightness;
 		d.backdropTexture = s.backdropTexture; d.backdropWidth = s.backdropWidth; d.backdropInset = s.backdropInset
 		d.backdropPadding = s.backdropPadding; d.backdropPanel = s.backdropPanel; d.backdropEnable = s.backdropEnable
-		d.backdropColor = Raven_CopyColor(s.backdropColor); d.backdropFill = Raven_CopyColor(s.backdropFill)
+		d.backdropColor = MOD.CopyColor(s.backdropColor); d.backdropFill = MOD.CopyColor(s.backdropFill)
 		d.backdropOffsetX = s.backdropOffsetX; d.backdropOffsetY = s.backdropOffsetY; d.backdropPadW = s.backdropPadW; d.backdropPadH = s.backdropPadH
 		d.borderTexture = s.borderTexture; d.borderWidth = s.borderWidth; d.borderOffset = s.borderOffset
-		d.borderColor = Raven_CopyColor(s.borderColor); d.borderFill = Raven_CopyColor(s.borderFill)
+		d.borderColor = MOD.CopyColor(s.borderColor); d.borderFill = MOD.CopyColor(s.borderFill)
 		d.borderSaturation = s.borderSaturation; d.borderBrightness = s.borderBrightness
 	end
 end
@@ -356,10 +356,10 @@ end
 -- Copy standard colors between tables
 function MOD:CopyStandardColors(s, d)
 	if s and d and (s ~= d) then
-		d.buffColor = Raven_CopyColor(s.buffColor); d.debuffColor = Raven_CopyColor(s.debuffColor)
-		d.cooldownColor = Raven_CopyColor(s.cooldownColor); d.notificationColor = Raven_CopyColor(s.notificationColor)
-		d.poisonColor = Raven_CopyColor(s.poisonColor); d.curseColor = Raven_CopyColor(s.curseColor)
-		d.magicColor = Raven_CopyColor(s.magicColor); d.diseaseColor = Raven_CopyColor(s.diseaseColor)
+		d.buffColor = MOD.CopyColor(s.buffColor); d.debuffColor = MOD.CopyColor(s.debuffColor)
+		d.cooldownColor = MOD.CopyColor(s.cooldownColor); d.notificationColor = MOD.CopyColor(s.notificationColor)
+		d.poisonColor = MOD.CopyColor(s.poisonColor); d.curseColor = MOD.CopyColor(s.curseColor)
+		d.magicColor = MOD.CopyColor(s.magicColor); d.diseaseColor = MOD.CopyColor(s.diseaseColor)
 	end
 end
 
@@ -375,7 +375,7 @@ function MOD:GetSpellID(name)
 
 	if not id and not InCombatLockdown() then -- disallow the search when in combat due to script time limit (MoP)
 		id = 0
-		while id < 142000 do -- increased for 5.2
+		while id < 155000 do -- increased for 5.4, with a bit of headroom for good measure
 			id = id + 1
 			local n = GetSpellInfo(id)
 			if n == name then
@@ -438,7 +438,7 @@ function MOD:SetColor(name, c)
 		if t then
 			t.r, t.g, t.b, t.a = c.r, c.g, c.b, c.a
 		else
-			MOD.db.global.SpellColors[name] = Raven_CopyColor(c)
+			MOD.db.global.SpellColors[name] = MOD.CopyColor(c)
 		end
 	end
 end
@@ -463,6 +463,13 @@ function MOD:GetLabel(name, spellID)
 	local label = nil
 	if spellID then label = MOD.db.global.Labels["#" .. tostring(spellID)] end -- allow names stored as #spellid
 	if not label then label = MOD.db.global.Labels[name] end
+	if not label and name and string.find(name, "^#%d+") then
+		local id = tonumber(string.sub(name, 2))
+		if id then
+			local t = GetSpellInfo(id)
+			if t then label = t .. " (" .. name .. ")" end -- special case format: spellname (#spellid)
+		end
+	end
 	if not label then label = name end
 	return label
 end
@@ -487,15 +494,18 @@ end
 -- Reset all sounds to default values
 function MOD:ResetSoundDefaults() table.wipe(MOD.db.global.Sounds) end
 
--- Add a spell duration to the per-profile cache, always save latest value since changes with equipped haste
-function MOD:SetDuration(name, duration)
+-- Add a spell duration to the per-profile cache, always save latest value since could change with haste
+-- When the spell id is known, save duration indexed by spell id; otherwise save indexed by name
+function MOD:SetDuration(name, spellID, duration)
 	if duration == 0 then duration = nil end -- remove cache entry if duration is 0
-	MOD.db.profile.Durations[name] = duration
+	if spellID then MOD.db.profile.Durations[spellID] = duration else MOD.db.profile.Durations[name] = duration end
 end
 
 -- Get a duration from the cache, but if not in the cache then return 0
-function MOD:GetDuration(name)
-	local duration = MOD.db.profile.Durations[name]
+function MOD:GetDuration(name, spellID)
+	local duration = 0
+	if spellID then duration = MOD.db.profile.Durations[spellID] end -- first look for durations indexed by spell id
+	if not duration then duration = MOD.db.profile.Durations[name] end -- second look at durations indexed by just name
 	if not duration then duration = 0 end
 	return duration
 end
@@ -533,7 +543,7 @@ function MOD:SetSpellNameDefaults()
 end
 
 -- Check if a spell id is known and usable by the player
-function RavenCheckSpellKnown(spellID)
+local function RavenCheckSpellKnown(spellID)
 	local name = GetSpellInfo(spellID)
 	return IsUsableSpell(name)
 end
@@ -591,14 +601,14 @@ end
 
 -- Format a time value in seconds, return converted string or nil if invalid index
 function MOD:FormatTime(t, index, spaces, upperCase)
-	if (index > 0) and (index <= #Nest_TimeFormatOptions) then
-		return Nest_FormatTime(t, index, spaces, upperCase)
+	if (index > 0) and (index <= #MOD.Nest_TimeFormatOptions) then
+		return MOD.Nest_FormatTime(t, index, spaces, upperCase)
 	end
 	return nil
 end
 
 -- Register a new time format option and return its assigned index
-function MOD:RegisterTimeFormat(func) return Nest_RegisterTimeFormat(func) end
+function MOD:RegisterTimeFormat(func) return MOD.Nest_RegisterTimeFormat(func) end
 
 -- Reset the spells in a bar group list filter (should be called during OnEnable, not during OnInitialize)
 -- Particularly useful if you are changing localization and need to register spells in a new language
@@ -700,14 +710,14 @@ MOD.DefaultProfile = {
 		DetectSpellEffects = true,		-- enable detecting spell effects
 		SpellEffects = {},				-- descriptors for spell effects
 		SpellLists = {},				-- spell lists
-		DefaultBuffColor = Raven_HexColor("8ae234"), -- Green1
-		DefaultDebuffColor = Raven_HexColor("fcaf3e"), -- Orange1
-		DefaultCooldownColor = Raven_HexColor("fce94f"), -- Yellow1
-		DefaultNotificationColor = Raven_HexColor("729fcf"), -- Blue1
-		DefaultPoisonColor = Raven_CopyColor(DebuffTypeColor["Poison"]),
-		DefaultCurseColor = Raven_CopyColor(DebuffTypeColor["Curse"]),
-		DefaultMagicColor = Raven_CopyColor(DebuffTypeColor["Magic"]),
-		DefaultDiseaseColor = Raven_CopyColor(DebuffTypeColor["Disease"]),
+		DefaultBuffColor = MOD.HexColor("8ae234"), -- Green1
+		DefaultDebuffColor = MOD.HexColor("fcaf3e"), -- Orange1
+		DefaultCooldownColor = MOD.HexColor("fce94f"), -- Yellow1
+		DefaultNotificationColor = MOD.HexColor("729fcf"), -- Blue1
+		DefaultPoisonColor = MOD.CopyColor(DebuffTypeColor["Poison"]),
+		DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"]),
+		DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"]),
+		DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"]),
 		HighlightsEnabled = true,		-- enable highlight support
 		PlayerBuffHighlights = true, 	-- enable highlights for player buffs
 		PlayerDebuffHighlights = true,	-- enable highlights for player debuffs
@@ -715,12 +725,12 @@ MOD.DefaultProfile = {
 		TargetDebuffHighlights = true,	-- enable highlights for target debuffs
 		FocusBuffHighlights = true,		-- enable highlights for target buffs
 		FocusDebuffHighlights = true,	-- enable highlights for target debuffs
-		PlayerBuffColor = Raven_HexColor("8ae234"), -- Green1
-		PlayerDebuffColor = Raven_HexColor("fcaf3e"), -- Orange1
-		TargetBuffColor = Raven_HexColor("3465a4"), -- Blue2
-		TargetDebuffColor = Raven_HexColor("cc0000"), -- Red2
-		FocusBuffColor = Raven_HexColor("ad7fa8"), -- Purple1
-		FocusDebuffColor = Raven_HexColor("fce94f"), -- Yellow1
+		PlayerBuffColor = MOD.HexColor("8ae234"), -- Green1
+		PlayerDebuffColor = MOD.HexColor("fcaf3e"), -- Orange1
+		TargetBuffColor = MOD.HexColor("3465a4"), -- Blue2
+		TargetDebuffColor = MOD.HexColor("cc0000"), -- Red2
+		FocusBuffColor = MOD.HexColor("ad7fa8"), -- Purple1
+		FocusDebuffColor = MOD.HexColor("fce94f"), -- Yellow1
 		FlashExpiring = true,			-- enable flashing of expiring buffs and debuffs
 		FlashTime = 5,					-- how many seconds to flash before expiration
 		CooldownText = true,			-- enable cooldown text overlays
@@ -741,7 +751,7 @@ MOD.DefaultProfile = {
 		TukuiScale = true,				-- skin Tukui with pixel perfect size and position
 		PixelPerfect = false,			-- enable pixel perfect size and position
 		RectIcons = false,				-- enable rectangular icons
-		DefaultBorderColor = Raven_HexColor("ffffff"), -- icon border color when "None" is selected
+		DefaultBorderColor = MOD.HexColor("ffffff"), -- icon border color when "None" is selected
 		Minimap = { hide = false, minimapPos = 180, radius = 80, }, -- saved DBIcon minimap settings
 		InCombatBar = {},				-- shared settings for the in-combat bar
 	},

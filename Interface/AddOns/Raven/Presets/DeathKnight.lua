@@ -53,6 +53,7 @@ Raven.classSpells.DEATHKNIGHT = {
 	{ "Raise Ally", nil, p.Gray, cooldown = true, id = 61999 },
 	{ "Raise Dead", BUFF, p.Gray, cooldown = true, id = 46584 },
 	{ "Remorseless Winter", BUFF, p.Blue3, cooldown = true, school = "Frost", id = 108200 },
+	{ "Riposte", BUFF, p.Gray, id = 145676 }, -- new in 5.4 for DKs
 	{ "Runic Corruption", BUFF, p.Purple2, school = "Shadow", id = 51462 },
 	{ "Runic Empowerment", BUFF, p.Purple3, id = 81229 },
 	{ "Rune Tap", nil, p.Red3, cooldown = true, school = "Shadow", id = 48982 },

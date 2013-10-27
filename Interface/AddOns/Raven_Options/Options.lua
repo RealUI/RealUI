@@ -237,7 +237,7 @@ local function CreateBarGroup(name, auto, link, style, offsetX, offsetY)
 	for n, k in pairs(MOD.db.global.Defaults) do bp[n] = k end -- current default settings for layouts fonts textures
 	for n, k in pairs(MOD.BarGroupTemplate) do bp[n] = k end -- add settings in the template
 	bp.name = name
-	bp.configuration = style and 1 or (Nest_MaxBarConfiguration + 1)
+	bp.configuration = style and 1 or (MOD.Nest_MaxBarConfiguration + 1)
 	bp.growDirection = style
 	bp.auto = auto
 	bp.linkSettings = link
@@ -301,7 +301,7 @@ local function BarGroupString(name)
 	local bg = MOD.db.profile.BarGroups[name]
 	if IsOn(bg) then
 		local f, style
-		if bg.configuration and (bg.configuration > Nest_MaxBarConfiguration) then style = "Icons" else style = "Bars" end
+		if bg.configuration and (bg.configuration > MOD.Nest_MaxBarConfiguration) then style = "Icons" else style = "Bars" end
 		if bg.linkSettings then f = "\n|cFF7adbf2Exists (%s), Linked|r" else f = "\n|cFF7adbf2Exists (%s)|r" end
 		suffix = string.format(f, style)
 	end
@@ -664,7 +664,7 @@ end
 local function GetOrientationList(iconOnly)
 	if iconOnly == nil then iconOnly = false end
 	bars.config = {}
-	for i, config in pairs(Nest_SupportedConfigurations) do if config.iconOnly == iconOnly then bars.config[i] = config.name end end
+	for i, config in pairs(MOD.Nest_SupportedConfigurations) do if config.iconOnly == iconOnly then bars.config[i] = config.name end end
 	return bars.config
 end
 
@@ -711,11 +711,11 @@ local function SetBarLabel(info, newLabel, isLinked)
 		return false
 	end
 
-	local a, b = string.find(newLabel, "^%a[%a%d%b()%[%] %-%+%!%*_':]*") -- make sure new label has correct format and doesn't contain bad characters
+	local a, b = string.find(newLabel, "^%a[%a%d%b()%[%] %-%+%!%*%#_':]*") -- make sure new label has correct format and doesn't contain bad characters
 	if a ~= 1 and b ~= string.len(newLabel) then
 		print('"' .. newLabel .. '" ' .. L["does not begin with a letter or contains restricted characters"])
 		return false
-	end 
+	end
 
 	DeleteBar()
 	if isLinked and ((bar.barType == "Buff") or (bar.barType == "Debuff") or (bar.barType == "Cooldown")) then MOD:SetLabel(bar.action, newLabel) end
@@ -1151,8 +1151,8 @@ end
 local function CopyConditionSettings(name)
 	local s = MOD.db.global.SharedConditions[name]
 	local d = GetCondition()
-	d.tests = Raven_CopyTable(s.tests)
-	d.dependencies = Raven_CopyTable(s.dependencies)
+	d.tests = MOD.CopyTable(s.tests)
+	d.dependencies = MOD.CopyTable(s.dependencies)
 	d.associatedSpell = s.associatedSpell
 end
 
@@ -1584,8 +1584,8 @@ end
 -- Prepare a table of time format options showing examples to choose from with select dropdown menu
 local function GetTimeFormatList(s, c)
 	local i, menu = 1, {}
-	while i <= #Nest_TimeFormatOptions do
-		local f = Nest_FormatTime
+	while i <= #MOD.Nest_TimeFormatOptions do
+		local f = MOD.Nest_FormatTime
 		local t1, t2, t3, t4, t5 = f(8125.8, i, s, c), f(343.8, i, s, c), f(75.3, i, s, c), f(42.7, i, s, c), f(3.6, i, s, c)
 		menu[i] = t1 .. ", " .. t2 .. ", " .. t3 .. ", " .. t4 .. ", " .. t5
 		i = i + 1
@@ -1872,7 +1872,7 @@ MOD.OptionsTable = {
 									set = function(info, value) MOD.db.global.Defaults.barWidth = value; MOD:UpdateAllBarGroups() end,
 								},
 								BarHeight = {
-									type = "range", order = 15, name = L["Bar Height"], min = 5, max = 100, step = 1,
+									type = "range", order = 15, name = L["Bar Height"], min = 1, max = 100, step = 1,
 									desc = L["Set height of bars."],
 									get = function(info) return MOD.db.global.Defaults.barHeight end,
 									set = function(info, value) MOD.db.global.Defaults.barHeight = value; MOD:UpdateAllBarGroups() end,
@@ -1981,7 +1981,7 @@ MOD.OptionsTable = {
 									set = function(info, value) MOD.db.global.Defaults.i_barWidth = value; MOD:UpdateAllBarGroups() end,
 								},
 								BarHeight = {
-									type = "range", order = 15, name = L["Bar Height"], min = 5, max = 100, step = 1,
+									type = "range", order = 15, name = L["Bar Height"], min = 1, max = 100, step = 1,
 									desc = L["Set height of bars."],
 									get = function(info) return MOD.db.global.Defaults.i_barHeight end,
 									set = function(info, value) MOD.db.global.Defaults.i_barHeight = value; MOD:UpdateAllBarGroups() end,
@@ -2589,10 +2589,10 @@ MOD.OptionsTable = {
 							desc = L["Reset bar colors back to default."],
 							confirm = function(info) return (L["RESET BAR COLORS\nAre you sure you want to reset bar colors back to default?"]) end,
 							func = function(info)
-								MOD.db.global.DefaultBuffColor = Raven_HexColor("8ae234") -- Green1
-								MOD.db.global.DefaultDebuffColor = Raven_HexColor("fcaf3e") -- Orange1
-								MOD.db.global.DefaultCooldownColor = Raven_HexColor("fce94f") -- Yellow1
-								MOD.db.global.DefaultNotificationColor = Raven_HexColor("729fcf") -- Blue1								
+								MOD.db.global.DefaultBuffColor = MOD.HexColor("8ae234") -- Green1
+								MOD.db.global.DefaultDebuffColor = MOD.HexColor("fcaf3e") -- Orange1
+								MOD.db.global.DefaultCooldownColor = MOD.HexColor("fce94f") -- Yellow1
+								MOD.db.global.DefaultNotificationColor = MOD.HexColor("729fcf") -- Blue1								
 							end,
 						},
 						ResetDebuffColors = {
@@ -2600,10 +2600,10 @@ MOD.OptionsTable = {
 							desc = L["Reset debuff colors back to default."],
 							confirm = function(info) return (L["RESET DEBUFF COLORS\nAre you sure you want to reset debuff colors back to default?"]) end,
 							func = function(info)
-								MOD.db.global.DefaultPoisonColor = Raven_CopyColor(DebuffTypeColor["Poison"])
-								MOD.db.global.DefaultCurseColor = Raven_CopyColor(DebuffTypeColor["Curse"])
-								MOD.db.global.DefaultMagicColor = Raven_CopyColor(DebuffTypeColor["Magic"])
-								MOD.db.global.DefaultDiseaseColor = Raven_CopyColor(DebuffTypeColor["Disease"])						
+								MOD.db.global.DefaultPoisonColor = MOD.CopyColor(DebuffTypeColor["Poison"])
+								MOD.db.global.DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"])
+								MOD.db.global.DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"])
+								MOD.db.global.DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"])						
 							end,
 						},
 					},
@@ -2914,7 +2914,7 @@ MOD.OptionsTable = {
 							args = {
 								AddSpell = {
 									type = "input", order = 10, name = L["Enter Spell"],
-									desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id) to be added to the list."],
+									desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id)."],
 									get = function(info) return nil end,
 									set = function(info, n) n = ValidateSpellName(n, true)
 										if n and lists.list then lists.list[n] = MOD:GetSpellID(n) or true; lists.spell = n end end,
@@ -2939,8 +2939,17 @@ MOD.OptionsTable = {
 								},
 								SpellIcon = {
 									type = "description", order = 50, name = "", width = "half", 
+									hidden = function(info) return lists.enter or not lists.select or not lists.list end,
 									image = function(info) return MOD:GetIcon(lists.spell) end,
 									imageWidth = 24, imageHeight = 24,
+								},
+								SpellLabel = {
+									type = "description", order = 60, width = "half", 
+									hidden = function(info) return lists.enter or not lists.select or not lists.list end,
+									name = function(info)
+										local t = lists.spell
+										if t and string.find(t, "^#%d+") then return MOD:GetLabel(t) else return "" end
+										end,
 								},
 							},
 						},
@@ -3985,6 +3994,14 @@ MOD.OptionsTable = {
 									get = function(info) return not GetBarGroupField("noLabels") end,
 									set = function(info, value) SetBarGroupField("noLabels", not value) end,
 								},
+								HeaderSpacing = {
+									type = "toggle", order = 77, name = L["Spacing"], width = "half",
+									hidden = function(info) return not GetBarGroupField("auto") end,
+									disabled = function(info) return not GetBarGroupField("noHeaders") end,
+									desc = L["When showing all buffs or debuffs cast by player without headers, keep spacing between groups."],
+									get = function(info) return GetBarGroupField("headerGaps") end,
+									set = function(info, value) SetBarGroupField("headerGaps", value) end,
+								},
 								space4 = { type = "description", name = "", order = 80 },
 								ReverseDirection = {
 									type = "toggle", order = 82, name = L["Clock Direction"],
@@ -4961,11 +4978,11 @@ MOD.OptionsTable = {
 									type = "toggle", order = 10, name = L["Bars"], width = "half",
 									desc = L["If checked, use a bar-oriented configuration."],
 									get = function(info)
-										local config = Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										local config = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
 										return not config.iconOnly
 									end,
 									set = function(info, value)
-										local config = Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										local config = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
 										if config.iconOnly then SetBarGroupField("configuration", 1) end
 									end,
 								},
@@ -4973,11 +4990,11 @@ MOD.OptionsTable = {
 									type = "toggle", order = 15, name = L["Icons"], width = "half",
 									desc = L["If checked, use an icon-oriented configuration."],
 									get = function(info)
-										local config = Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										local config = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
 										return config.iconOnly
 									end,
 									set = function(info, value)
-										local config = Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										local config = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
 										if not config.iconOnly then SetBarGroupField("configuration", 9) end
 									end,
 								},
@@ -4987,7 +5004,7 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("configuration") end,
 									set = function(info, value) SetBarGroupField("configuration", value) end,
 									values = function(info)
-										local config = Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										local config = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
 										return GetOrientationList(config.iconOnly)
 									end,
 									style = "dropdown",
@@ -5001,7 +5018,7 @@ MOD.OptionsTable = {
 								SnapCenter = {
 									type = "toggle", order = 30, name = L["Center"], width = "half",
 									desc = L["If checked and the icon configuration bar group is locked, snap to center at the anchor position."],
-									disabled = function() local t = Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return not t.iconOnly end,
+									disabled = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return not t.iconOnly end,
 									get = function(info) return GetBarGroupField("snapCenter") end,
 									set = function(info, value) SetBarGroupField("snapCenter", value) end,
 								},
@@ -5068,16 +5085,16 @@ MOD.OptionsTable = {
 								},
 								TimelineGroup = {
 									type = "group", order = 100, name = L["Timeline"], inline = true,
-									hidden = function() local t = Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars ~= "timeline" end,
+									hidden = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars ~= "timeline" end,
 									args = {
 										BarWidth = {
-											type = "range", order = 1, name = L["Width"], min = 5, max = 500, step = 1,
+											type = "range", order = 1, name = L["Width"], min = 5, max = 2000, step = 1,
 											desc = L["Set width of timeline."],
 											get = function(info) return GetBarGroupField("timelineWidth") end,
 											set = function(info, value) SetBarGroupField("timelineWidth", value) end,
 										},
 										BarHeight = {
-											type = "range", order = 5, name = L["Height"], min = 5, max = 100, step = 1,
+											type = "range", order = 5, name = L["Height"], min = 5, max = 200, step = 1,
 											desc = L["Set height of timeline."],
 											get = function(info) return GetBarGroupField("timelineHeight") end,
 											set = function(info, value) SetBarGroupField("timelineHeight", value) end,
@@ -5120,6 +5137,12 @@ MOD.OptionsTable = {
 												MOD:UpdateAllBarGroups()
 											end,
 										},
+										HideEmpty = {
+											type = "toggle", order = 28, name = L["Hide Empty"],
+											desc = L["If checked, hide the timeline background when there are no active icons."],
+											get = function(info) return GetBarGroupField("timelineHide") end,
+											set = function(info, value) SetBarGroupField("timelineHide", value) end,
+										},
 										Space1 = { type = "description", name = "", order = 30 },
 										SplashEffect = {
 											type = "toggle", order = 45, name = L["Splash Effect"],
@@ -5127,28 +5150,54 @@ MOD.OptionsTable = {
 											get = function(info) return GetBarGroupField("timelineSplash") end,
 											set = function(info, value) SetBarGroupField("timelineSplash", value) end,
 										},
-										HideEmpty = {
-											type = "toggle", order = 50, name = L["Hide Empty"],
-											desc = L["If checked, hide the timeline background when there are no active icons."],
-											get = function(info) return GetBarGroupField("timelineHide") end,
-											set = function(info, value) SetBarGroupField("timelineHide", value) end,
+										SplashOffsetX = {
+											type = "range", order = 47, name = L["Offset X"], min = -1000, max = 1000, step = 1,
+											desc = L["Set horizontal offset for splash effect."],
+											get = function(info) return GetBarGroupField("timelineSplashX") end,
+											set = function(info, value) SetBarGroupField("timelineSplashX", value) end,
 										},
+										SplashOffsetY = {
+											type = "range", order = 49, name = L["Offset Y"], min = -1000, max = 1000, step = 1,
+											desc = L["Set vertical offset for splash effect."],
+											get = function(info) return GetBarGroupField("timelineSplashY") end,
+											set = function(info, value) SetBarGroupField("timelineSplashY", value) end,
+										},
+										Space2 = { type = "description", name = "", order = 50 },
+										IconOffset = {
+											type = "range", order = 55, name = L["Icon Offset"], min = -100, max = 100, step = 1,
+											desc = L["Set vertical offset from center of timeline for icons."],
+											get = function(info) return GetBarGroupField("timelineOffset") end,
+											set = function(info, value) SetBarGroupField("timelineOffset", value) end,
+										},
+										OverlapPercent = {
+											type = "range", order = 57, name = L["Overlap Percent"], min = 1, max = 100, step = 1,
+											desc = L["Set percent overlap that triggers extra offset and switching icons."],
+											get = function(info) return GetBarGroupField("timelinePercent") end,
+											set = function(info, value) SetBarGroupField("timelinePercent", value) end,
+										},
+										OverlapOffset = {
+											type = "range", order = 60, name = L["Overlap Offset"], min = -100, max = 100, step = 1,
+											desc = L["Set additional vertical offset for overlapping icons."],
+											get = function(info) return GetBarGroupField("timelineDelta") end,
+											set = function(info, value) SetBarGroupField("timelineDelta", value) end,
+										},
+										Space3 = { type = "description", name = "", order = 65 },
 										Switcher = {
-											type = "toggle", order = 55, name = L["Overlap Switch"],
-											desc = L["If checked, when icons mostly overlap, switch which is shown on top (otherwise always show icon with shortest time remaining on top)."],
+											type = "toggle", order = 70, name = L["Overlap Switch"],
+											desc = L["If checked, when icons overlap, switch which is shown on top (otherwise always show icon with shortest time remaining on top)."],
 											get = function(info) return GetBarGroupField("timelineAlternate") end,
 											set = function(info, value) SetBarGroupField("timelineAlternate", value) end,
 										},
 										SwitchTime = {
-											type = "range", order = 60, name = L["Switch Time"], min = 0.5, max = 10, step = 0.5,
-											desc = L["Set time between switching mostly overlapping icons."],
+											type = "range", order = 75, name = L["Switch Time"], min = 0.5, max = 10, step = 0.5,
+											desc = L["Set time between switching overlapping icons."],
 											disabled = function(info) return not GetBarGroupField("timelineAlternate") end,
 											get = function(info) return GetBarGroupField("timelineSwitch") or 2 end,
 											set = function(info, value) SetBarGroupField("timelineSwitch", value or 2) end,
 										},
-										Space2 = { type = "description", name = "", order = 70 },
+										Space4 = { type = "description", name = "", order = 85 },
 										LabelList = {
-											type = "input", order = 75, name = L["Label List"], width = "double",
+											type = "input", order = 100, name = L["Label List"], width = "double",
 											desc = L['Enter comma-separated list of times to show as labels on the timeline (times are in seconds unless you include "m", which is included in the label, or "M", which is hidden, for minutes).'],
 											get = function(info) return GetListString(GetBarGroupField("timelineLabels") or MOD:GetTimelineLabels()) end,
 											set = function(info, v) SetBarGroupField("timelineLabels", GetListTable(v, "strings")) end,
@@ -5181,7 +5230,7 @@ MOD.OptionsTable = {
 									set = function(info, value) SetBarGroupField("barWidth", value) end,
 								},
 								BarHeight = {
-									type = "range", order = 25, name = L["Bar Height"], min = 5, max = 100, step = 1,
+									type = "range", order = 25, name = L["Bar Height"], min = 1, max = 100, step = 1,
 									desc = L["Set height of bars."],
 									disabled = function(info) return GetBarGroupField("useDefaultDimensions") end,
 									get = function(info) return GetBarGroupField("barHeight") end,
@@ -5244,7 +5293,7 @@ MOD.OptionsTable = {
 										HideClockGroup = {
 											type = "toggle", order = 31, name = L["Clock"], width = "half",
 											desc = L["Show clock animation on icons for timer bars."],
-											disabled = function(info) local t = Nest_SupportedConfigurations[GetBarGroupField("configuration")];
+											disabled = function(info) local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")];
 												return GetBarGroupField("useDefaultDimensions") or t.bars == "timeline" end,
 											get = function(info) return not GetBarGroupField("hideClock") end,
 											set = function(info, value) SetBarGroupField("hideClock", not value) end,
@@ -5377,7 +5426,7 @@ MOD.OptionsTable = {
 									desc = L["If checked, time text is shown on the icon instead of the bar."],
 									disabled = function(info)
 										local config = GetBarGroupField("configuration")
-										if config then return Nest_SupportedConfigurations[config].iconOnly else return true end
+										if config then return MOD.Nest_SupportedConfigurations[config].iconOnly else return true end
 									end,
 									get = function(info) return GetBarGroupField("timeIcon") end,
 									set = function(info, value) SetBarGroupField("timeIcon", value) end,
@@ -5492,14 +5541,14 @@ MOD.OptionsTable = {
 								},
 								Space2 = { type = "description", name = "", order = 60 },
 								OffsetX = {
-									type = "range", order = 70, name = L["Offset X"], min = -500, max = 500, step = 0.01,
+									type = "range", order = 70, name = L["Offset X"], min = -1000, max = 1000, step = 0.01,
 									desc = L["Set horizontal offset from the selected bar group."],
 									disabled = function(info) return not GetBarGroupField("anchor") and not GetBarGroupField("anchorFrame") end,
 									get = function(info) return GetBarGroupField("anchorX") end,
 									set = function(info, value) SetBarGroupField("anchorX", value) end,
 								},
 								OffsetY = {
-									type = "range", order = 80, name = L["Offset Y"], min = -500, max = 500, step = 0.01,
+									type = "range", order = 80, name = L["Offset Y"], min = -1000, max = 1000, step = 0.01,
 									desc = L["Set vertical offset from the selected bar group."],
 									disabled = function(info) return not GetBarGroupField("anchor") and not GetBarGroupField("anchorFrame") end,
 									get = function(info) return GetBarGroupField("anchorY") end,
@@ -6401,7 +6450,7 @@ MOD.OptionsTable = {
 									set = function(info, value) local d = GetBarGroupField("filterTimeLeft"); SetBarGroupField("filterTimeLeft", (value * 60) + (d % 60)) end,
 								},
 								TimeLeftSeconds = {
-									type = "range", order = 5, name = L["Seconds"], min = 0, max = 59, step = 1,
+									type = "range", order = 5, name = L["Seconds"], min = 0, max = 59.9, step = 0.1,
 									desc = L["Enter seconds for time left check."],
 									disabled = function(info) return NoBarGroup() or not GetBarGroupField("checkTimeLeft") end,
 									get = function(info) local d = GetBarGroupField("filterTimeLeft"); return d % 60 end,
@@ -6414,7 +6463,7 @@ MOD.OptionsTable = {
 									set = function(info, value) if value == 1 then SetBarGroupField("minimumTimeLeft", true) else SetBarGroupField("minimumTimeLeft", false) end end,
 									values = function(info)
 										local d = GetBarGroupField("filterTimeLeft")
-										local ds = string.format("%0d:%02d", math.floor(d / 60), d % 60)
+										local ds = string.format("%0d:%02.1f", math.floor(d / 60), d % 60)
 										return { "Show if " .. ds .. " or more", "Show if less than " .. ds }
 									end,
 									style = "dropdown",
@@ -8542,7 +8591,7 @@ MOD.OptionsTable = {
 											set = function(info, value) local d = GetTestField("Buff Time Left", "timeLeft"); if not d then d = 0 end; SetTestField("Buff Time Left", "timeLeft", (value * 60) + (d % 60)) end,
 										},
 										TimeLeftSeconds = {
-											type = "range", order = 5, name = L["Seconds"], min = 0, max = 59, step = 1,
+											type = "range", order = 5, name = L["Seconds"], min = 0, max = 59.9, step = 0.1,
 											desc = L["Enter seconds for time left check."],
 											get = function(info) local d = GetTestField("Buff Time Left", "timeLeft"); if d then return d % 60 else return 0 end end,
 											set = function(info, value) local d = GetTestField("Buff Time Left", "timeLeft"); if not d then d = 0 end; SetTestField("Buff Time Left", "timeLeft", value + (60 * math.floor(d / 60))) end,
@@ -8554,7 +8603,7 @@ MOD.OptionsTable = {
 											values = function(info)
 												local d = GetTestField("Buff Time Left", "timeLeft")
 												if not d then d = 0 end
-												local ds = string.format("%0d:%02d", math.floor(d / 60), d % 60)
+												local ds = string.format("%0d:%02.1f", math.floor(d / 60), d % 60)
 												return { L["Less Than"] .. " " .. ds, ds .. " " .. L["Or More"] }
 											end,
 											style = "dropdown",
@@ -8997,7 +9046,7 @@ MOD.OptionsTable = {
 											set = function(info, value) local d = GetTestField("Debuff Time Left", "timeLeft"); if not d then d = 0 end; SetTestField("Debuff Time Left", "timeLeft", (value * 60) + (d % 60)) end,
 										},
 										TimeLeftSeconds = {
-											type = "range", order = 5, name = L["Seconds"], min = 0, max = 59, step = 1,
+											type = "range", order = 5, name = L["Seconds"], min = 0, max = 59.9, step = 0.1,
 											desc = L["Enter seconds for time left check."],
 											get = function(info) local d = GetTestField("Debuff Time Left", "timeLeft"); if d then return d % 60 else return 0 end end,
 											set = function(info, value) local d = GetTestField("Debuff Time Left", "timeLeft"); if not d then d = 0 end; SetTestField("Debuff Time Left", "timeLeft", value + (60 * math.floor(d / 60))) end,
@@ -9009,7 +9058,7 @@ MOD.OptionsTable = {
 											values = function(info)
 												local d = GetTestField("Debuff Time Left", "timeLeft")
 												if not d then d = 0 end
-												local ds = string.format("%0d:%02d", math.floor(d / 60), d % 60)
+												local ds = string.format("%0d:%02.1f", math.floor(d / 60), d % 60)
 												return { "Less Than " .. ds, ds .. " Or More" }
 											end,
 											style = "dropdown",
@@ -10239,7 +10288,7 @@ MOD.barOptions = {
 			},
 			LabelNumber = {
 				type = "toggle", order = 40, name = L["Add Tooltip Number"],
-				desc = L["If checked, the first number found in the tooltip is added to the label."],
+				desc = L["If checked, the first number found in the tooltip is added to the label. If label contains the string TT# then the number replaces the label."],
 				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
 				get = function(info) return GetBarField(info, "labelNumber") end,
 				set = function(info, value) SetBarField(info, "labelNumber", value); MOD:UpdateAllBarGroups() end,
@@ -10915,9 +10964,9 @@ MOD.barOptions = {
 				args = {
 					SpellName = {
 						type = "input", order = 10, name = L["Spell Name"],
-						desc = L["Enter spell name (or numeric identifier) to associate with a bar."],
+						desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id)."],
 						get = function(info) return conditions.name end,
-						set = function(info, n) n = ValidateSpellName(n); conditions.name = n end,
+						set = function(info, n) n = ValidateSpellName(n, true); conditions.name = n end,
 					},
 				},
 			},

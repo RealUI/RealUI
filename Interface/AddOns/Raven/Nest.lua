@@ -2,9 +2,10 @@
 -- Bar groups share layout and appearance options (dimensions, fonts, textures, configuration, special effects).
 -- Each bar has a fixed set of graphical components (icon, iconText, foreground bar, background bar, labelText, timeText, spark).
 
+local MOD = Raven
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
 
-Nest_SupportedConfigurations = { -- table of configurations can be used in dialogs to select appropriate options
+MOD.Nest_SupportedConfigurations = { -- table of configurations can be used in dialogs to select appropriate options
 	[1] = { name = L["Right-to-left bars, label left, icon left"], iconOnly = false, bars = "r2l", label = "left", icon = "left" },
 	[2] = { name = L["Left-to-right bars, label left, icon left"], iconOnly = false, bars = "l2r", label = "left", icon = "left" },
 	[3] = { name = L["Right-to-left bars, label right, icon left"], iconOnly = false, bars = "r2l", label = "right", icon = "left" },
@@ -20,7 +21,7 @@ Nest_SupportedConfigurations = { -- table of configurations can be used in dialo
 	[13] = { name = L["Icons on horizontal timeline, no mini-bars"], iconOnly = true, bars = "timeline", orientation = "horizontal" },
 	[14] = { name = L["Icons on vertical timeline, no mini-bars"], iconOnly = true, bars = "timeline", orientation = "vertical" },
 }
-Nest_MaxBarConfiguration = 8
+MOD.Nest_MaxBarConfiguration = 8
 
 local barGroups = {} -- current barGroups
 local usedBarGroups = {} -- cache of recycled barGroups
@@ -75,7 +76,7 @@ local function GetTukuiFont(font) if Raven.db.global.TukuiFont and ChatFrame1 th
 local function PS(x) if pixelPerfect then return pixelScale * math.floor(x / pixelScale + 0.5) else return x end end
 
 -- Calculate alpha for flashing bars, period is how long the total flash time should last
-function Nest_FlashAlpha(maxAlpha, period)
+function MOD.Nest_FlashAlpha(maxAlpha, period)
 	local frac = GetTime() / period
 	frac = frac - math.floor(frac) -- get fractional part of current period
 	if frac >= 0.5 then frac = 1 - frac end -- now goes from 0 to 0.5 then back to 0
@@ -96,7 +97,7 @@ local function BarAnimation(bar, anchor1, frame, anchor2, xoffset, yoffset)
 	local tex = bar.iconTexture:GetTexture(); if not tex then return end
 	local b = next(animationPool)
 	if b then animationPool[b] = nil else
-		b = {} -- initializae a new animation
+		b = {} -- initialize a new animation
 		b.frame = CreateFrame("Frame", nil, UIParent)
 		b.frame:SetFrameLevel(bar.frame:GetFrameLevel() + 10)
 		b.texture = b.frame:CreateTexture(nil, "ARTWORK") -- texture for the texture to be animated	
@@ -171,7 +172,7 @@ local function BarGroup_TimelineAnimation(bg, bar, config)
 	end
 	local delta = Timeline_Offset(bg, 0)
 	local x1 = isVertical and 0 or ((delta - w) * dir); local y1 = isVertical and ((delta - h) * dir) or 0
-	BarAnimation(bar, edge, bg.background, edge, x1, y1)
+	BarAnimation(bar, edge, bg.background, edge, x1 + (bg.tlSplashX or 0), y1 + (bg.tlSplashY or 0))
 end
 
 -- Bar sorting functions: alphabetic, time left, duration, bar's start time
@@ -229,7 +230,7 @@ local function SortAlphaUp(a, b)
 end
 
 -- Register callbacks that can be used by internal functions to communicate in special cases
-function Nest_RegisterCallbacks(cbs) if cbs then for k, v in pairs(cbs) do callbacks[k] = v end end end
+function MOD.Nest_RegisterCallbacks(cbs) if cbs then for k, v in pairs(cbs) do callbacks[k] = v end end end
 
 -- Event handling functions for bar group anchors, pass both anchor and bar group
 local function BarGroup_OnEvent(anchor, callback)
@@ -285,7 +286,7 @@ local function BarGroup_OnMouseUp(anchor, button)
 end
 
 -- Initialize and return a new bar group containing either timer bars or enhanced icons
-function Nest_CreateBarGroup(name)
+function MOD.Nest_CreateBarGroup(name)
 	if barGroups[name] then return nil end -- already have one with that name
 	local n, bg = next(usedBarGroups) -- get any available recycled bar group
 	if n then
@@ -333,14 +334,14 @@ function Nest_CreateBarGroup(name)
 end
 
 -- Return the bar group with the specified name
-function Nest_GetBarGroup(name) return barGroups[name] end
+function MOD.Nest_GetBarGroup(name) return barGroups[name] end
 
 -- Return the table of bar groups
-function Nest_GetBarGroups() return barGroups end
+function MOD.Nest_GetBarGroups() return barGroups end
 
 -- Delete a bar group and move it to the recycled bar group table
-function Nest_DeleteBarGroup(bg)
-	for _, bar in pairs(bg.bars) do Nest_DeleteBar(bg, bar) end -- empty out bars table
+function MOD.Nest_DeleteBarGroup(bg)
+	for _, bar in pairs(bg.bars) do MOD.Nest_DeleteBar(bg, bar) end -- empty out bars table
 	for n in pairs(bg.sorter) do bg.sorter[n] = nil end -- empty the sorting table
 	for n in pairs(bg.attributes) do bg.attributes[n] = nil end
 	for n in pairs(bg.callbacks) do bg.callbacks[n] = nil end
@@ -366,7 +367,7 @@ function Nest_DeleteBarGroup(bg)
 end
 
 -- Set layout options for a bar group
-function Nest_SetBarGroupBarLayout(bg, barWidth, barHeight, iconSize, scale, spacingX, spacingY, iconOffsetX, iconOffsetY,
+function MOD.Nest_SetBarGroupBarLayout(bg, barWidth, barHeight, iconSize, scale, spacingX, spacingY, iconOffsetX, iconOffsetY,
 			labelOffset, labelInset, labelWrap, labelAlign, labelCenter, timeOffset, timeInset, timeAlign, timeIcon, iconOffset, iconInset,
 			iconHide, iconAlign, configuration, reverse, wrap, wrapDirection, snapCenter, fillBars, maxBars, strata)
 	bg.barWidth = PS(barWidth); bg.barHeight = PS(barHeight); bg.iconSize = PS(iconSize); bg.scale = scale or 1
@@ -394,7 +395,7 @@ local function TextFlags(outline, thick, mono)
 end
 
 -- Set label font options for a bar group
-function Nest_SetBarGroupLabelFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
+function MOD.Nest_SetBarGroupLabelFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
 	if not color then color = { r = 1, g = 1, b = 1, a = 1 } end
 	if UseTukui() then font = GetTukuiFont(font) end
 	bg.labelFont = font; bg.labelFSize = fsize or 9; bg.labelAlpha = alpha or 1; bg.labelColor = color
@@ -403,7 +404,7 @@ function Nest_SetBarGroupLabelFont(bg, font, fsize, alpha, color, outline, shado
 end
 
 -- Set time text font options for a bar group
-function Nest_SetBarGroupTimeFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
+function MOD.Nest_SetBarGroupTimeFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
 	if not color then color = { r = 1, g = 1, b = 1, a = 1 } end
 	if UseTukui() then font = GetTukuiFont(font) end
 	bg.timeFont = font; bg.timeFSize = fsize or 9; bg.timeAlpha = alpha or 1; bg.timeColor = color
@@ -412,8 +413,8 @@ function Nest_SetBarGroupTimeFont(bg, font, fsize, alpha, color, outline, shadow
 end
 
 -- Set icon text font options for a bar group
-function Nest_SetBarGroupIconFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
-	if not color then color = defaultBackdropColor end; if not fill then fill = defaultBackdropColor end
+function MOD.Nest_SetBarGroupIconFont(bg, font, fsize, alpha, color, outline, shadow, thick, mono)
+	if not color then color = defaultBackdropColor end
 	if UseTukui() then font = GetTukuiFont(font) end
 	bg.iconFont = font; bg.iconFSize = fsize or 9; bg.iconAlpha = alpha or 1; bg.iconColor = color
 	bg.iconFlags = TextFlags(outline, thick, mono); bg.iconShadow = shadow
@@ -421,14 +422,14 @@ function Nest_SetBarGroupIconFont(bg, font, fsize, alpha, color, outline, shadow
 end
 
 -- Set bar border options for a bar group
-function Nest_SetBarGroupBorder(bg, texture, width, offset, color)
+function MOD.Nest_SetBarGroupBorder(bg, texture, width, offset, color)
 	if not color then color = defaultBackdropColor end
 	bg.borderTexture = texture; bg.borderWidth = PS(width); bg.borderOffset = PS(offset); bg.borderColor = color
 	bg.update = true
 end
 
 -- Set backdrop options for a bar group
-function Nest_SetBarGroupBackdrop(bg, panel, texture, width, inset, padding, color, fill, offsetX, offsetY, padW, padH)
+function MOD.Nest_SetBarGroupBackdrop(bg, panel, texture, width, inset, padding, color, fill, offsetX, offsetY, padW, padH)
 	if not color then color = { r = 1, g = 1, b = 1, a = 1 } end
 	if not fill then fill = { r = 1, g = 1, b = 1, a = 1 } end
 	bg.backdropPanel = panel; bg.backdropTexture = texture; bg.backdropWidth = PS(width); bg.backdropInset = PS(inset or 0)
@@ -438,28 +439,29 @@ function Nest_SetBarGroupBackdrop(bg, panel, texture, width, inset, padding, col
 end
 
 -- Set texture options for a bar group
-function Nest_SetBarGroupTextures(bg, fgTexture, fgAlpha, bgTexture, bgAlpha, fgNotTimer, fgSaturation, fgBrightness, bgSaturation, bgBrightness)
+function MOD.Nest_SetBarGroupTextures(bg, fgTexture, fgAlpha, bgTexture, bgAlpha, fgNotTimer, fgSaturation, fgBrightness, bgSaturation, bgBrightness)
 	bg.fgTexture = fgTexture; bg.fgAlpha = fgAlpha; bg.bgTexture = bgTexture; bg.bgAlpha = bgAlpha; bg.fgNotTimer = fgNotTimer
 	bg.fgSaturation = fgSaturation or 0; bg.fgBrightness = fgBrightness or 0; bg.bgSaturation = bgSaturation or 0; bg.bgBrightness = bgBrightness or 0
 	bg.update = true
 end
 
 -- Select visible components for a bar group
-function Nest_SetBarGroupVisibles(bg, icon, cooldown, bar, spark, labelText, timeText)
+function MOD.Nest_SetBarGroupVisibles(bg, icon, cooldown, bar, spark, labelText, timeText)
 	bg.showIcon = icon; bg.showCooldown = cooldown; bg.showBar = bar; bg.showSpark = spark
 	bg.showLabelText = labelText; bg.showTimeText = timeText
 	bg.update = true
 end
 
 -- Set parameters related to timeline configurations
-function Nest_SetBarGroupTimeline(bg, w, h, duration, scale, hide, alternate, switch, splash, texture, alpha, color, labels)
+function MOD.Nest_SetBarGroupTimeline(bg, w, h, duration, scale, hide, alternate, switch, percent, splash, x, y, offset, delta, texture, alpha, color, labels)
 	bg.tlWidth = PS(w); bg.tlHeight = PS(h); bg.tlDuration = duration; bg.tlScale = scale; bg.tlHide = hide; bg.tlAlternate = alternate
-	bg.tlSwitch = switch; bg.tlSplash = splash; bg.tlTexture = texture; bg.tlAlpha = alpha; bg.tlColor = color; bg.tlLabels = labels
+	bg.tlSwitch = switch; bg.tlPercent = percent; bg.tlSplash = splash; bg.tlSplashX = x; bg.tlSplashY = y; bg.tlOffset = offset; bg.tlDelta = delta
+	bg.tlTexture = texture; bg.tlAlpha = alpha; bg.tlColor = color; bg.tlLabels = labels
 	bg.update = true
 end
 
 -- Sort the bars in a bar group using the designated sort method and direction (default is sort by name alphabetically)
-function Nest_BarGroupSortFunction(bg, sortMethod, sortDirection, sortTime, sortPlayer)
+function MOD.Nest_BarGroupSortFunction(bg, sortMethod, sortDirection, sortTime, sortPlayer)
 	if sortMethod == "time" then -- sort by time left on the bar
 		if sortDirection then bg.sortFunction = SortTimeDown else bg.sortFunction = SortTimeUp end
 	elseif sortMethod == "duration" then -- sort by bar duration
@@ -476,20 +478,20 @@ function Nest_BarGroupSortFunction(bg, sortMethod, sortDirection, sortTime, sort
 end
 
 -- Set the time format function for the bar group, if not set will use default
-function Nest_SetBarGroupTimeFormat(bg, timeFormat, timeSpaces, timeCase)
+function MOD.Nest_SetBarGroupTimeFormat(bg, timeFormat, timeSpaces, timeCase)
 	bg.timeFormat = timeFormat; bg.timeSpaces = timeSpaces; bg.timeCase = timeCase
 	bg.update = true
 end
 
 -- If locked is true then lock the bar group anchor, otherwise unlock it
-function Nest_SetBarGroupLock(bg, locked)
+function MOD.Nest_SetBarGroupLock(bg, locked)
 	bg.locked = locked
 	bg.update = true
 end
 
 -- Return a bar group's display position as percentages of actual display size to edges of the anchor frame
 -- Return values are descaled to match UIParent and include left, right, bottom and top plus descaled width and height
-function Nest_GetAnchorPoint(bg)
+function MOD.Nest_GetAnchorPoint(bg)
 	local scale = bg.scale or 1
 	local dw, dh = displayWidth, displayHeight
 	local w, h = bg.frame:GetWidth() * scale, bg.frame:GetHeight() * scale
@@ -502,7 +504,7 @@ end
 
 -- Set a bar group's scaled display position from left, right, bottom, top where left and bottom should always be valid
 -- Use right, top, width and height only if valid and closer to that edge to fix position shift when UIParent dimensions change
-function Nest_SetAnchorPoint(bg, left, right, bottom, top, scale, width, height)
+function MOD.Nest_SetAnchorPoint(bg, left, right, bottom, top, scale, width, height)
 	if left and bottom and width and height then -- make sure valid settings
 		bg.scale = scale -- make sure save scale since may not have been initialized yet
 		local p = bg.position; p.left, p.right, p.bottom, p.top, p.width, p.height = left, right, bottom, top, width, height
@@ -519,9 +521,13 @@ function Nest_SetAnchorPoint(bg, left, right, bottom, top, scale, width, height)
 end
 
 -- Set a bar group's display position as relative to another bar group
-function Nest_SetRelativeAnchorPoint(bg, rTo, rFrame, rPoint, rX, rY, rLB, rEmpty, rRow, rColumn)
+function MOD.Nest_SetRelativeAnchorPoint(bg, rTo, rFrame, rPoint, rX, rY, rLB, rEmpty, rRow, rColumn)
 	if rFrame and GetClickFrame(rFrame) then -- set relative to a specific frame
-		bg.frame:ClearAllPoints(); bg.frame:SetPoint(rPoint or "CENTER", rFrame, rPoint or "CENTER", PS(rX), PS(rY))
+		bg.frame:ClearAllPoints(); bg.frame:SetPoint(rPoint or "CENTER", GetClickFrame(rFrame), rPoint or "CENTER", rX, rY)
+		if pixelPerfect then -- have to re-align relative to bottom left since we can't be sure that anchor point itself is pixel aligned
+			local xoffset, yoffset = PS(bg.frame:GetLeft()), PS(bg.frame:GetBottom())
+			bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", xoffset, yoffset)		
+		end
 		bg.relativeTo = nil -- remove relative anchor point	
 	elseif bg.relativeTo and not rTo then -- removing a relative anchor point
 		local left, bottom = bg.frame:GetLeft(), bg.frame:GetBottom()
@@ -534,28 +540,28 @@ function Nest_SetRelativeAnchorPoint(bg, rTo, rFrame, rPoint, rX, rY, rLB, rEmpt
 end
 
 -- Set callbacks for a bar group
-function Nest_SetBarGroupCallbacks(bg, onMove, onClick, onEnter, onLeave)
+function MOD.Nest_SetBarGroupCallbacks(bg, onMove, onClick, onEnter, onLeave)
 	bg.callbacks.onMove = onMove; bg.callbacks.onClick = onClick; bg.callbacks.onEnter = onEnter; bg.callbacks.onLeave = onLeave	
 end
 
 -- Set opacity for a bar group, including mouseover override
-function Nest_SetBarGroupAlpha(bg, alpha, mouseAlpha) bg.alpha = alpha or 1; bg.mouseAlpha = mouseAlpha or 1 end
+function MOD.Nest_SetBarGroupAlpha(bg, alpha, mouseAlpha) bg.alpha = alpha or 1; bg.mouseAlpha = mouseAlpha or 1 end
 
 -- Set a bar group attribute. This is the mechanism to associate application-specific data with bar groups.
-function Nest_SetBarGroupAttribute(bg, name, value) bg.attributes[name] = value end
+function MOD.Nest_SetBarGroupAttribute(bg, name, value) bg.attributes[name] = value end
 
 -- Get a bar group attribute. This is the mechanism to associate application-specific data with bar groups.
-function Nest_GetBarGroupAttribute(bg, name) return bg.attributes[name] end
+function MOD.Nest_GetBarGroupAttribute(bg, name) return bg.attributes[name] end
 
 -- Set an attribute for all bars in the bar group
-function Nest_SetAllAttributes(bg, name, value)
+function MOD.Nest_SetAllAttributes(bg, name, value)
 	for _, bar in pairs(bg.bars) do bar.attributes[name] = value end
 end
 
 -- Delete all bars in the bar group with the specifed attribute value (useful for mark/sweep garbage collection)
-function Nest_DeleteBarsWithAttribute(bg, name, value)
+function MOD.Nest_DeleteBarsWithAttribute(bg, name, value)
 	for barName, bar in pairs(bg.bars) do
-		if bar.attributes[name] == value then Nest_DeleteBar(bg, bar) end
+		if bar.attributes[name] == value then MOD.Nest_DeleteBar(bg, bar) end
 	end
 end
 
@@ -580,7 +586,7 @@ local function Bar_OnClick(frame, button) Bar_OnEvent(frame, "onClick", button) 
 local function GetButtonName() buttonName = buttonName + 1; return "RavenButton" .. tostring(buttonName) end -- unique button name
 
 -- Initialize and return a new bar
-function Nest_CreateBar(bg, name)
+function MOD.Nest_CreateBar(bg, name)
 	if bg.bars[name] then return nil end -- already have one with that name
 	local n, bar = next(usedBars) -- get any available recycled bar
 	if n then
@@ -655,14 +661,14 @@ function Nest_CreateBar(bg, name)
 end
 
 -- Return the bar with the specified name
-function Nest_GetBar(bg, name) return bg.bars[name] end
+function MOD.Nest_GetBar(bg, name) return bg.bars[name] end
 
 -- Return the bars table for a bar group
-function Nest_GetBars(bg) return bg.bars end
+function MOD.Nest_GetBars(bg) return bg.bars end
 
 -- Delete a bar from a bar group, moving it to recycled bar table
-function Nest_DeleteBar(bg, bar)
-	local config = Nest_SupportedConfigurations[bg.configuration]
+function MOD.Nest_DeleteBar(bg, bar)
+	local config = MOD.Nest_SupportedConfigurations[bg.configuration]
 	if config.bars == "timeline" and bg.tlSplash then BarGroup_TimelineAnimation(bg, bar, config) end
 	if bar.attributes.soundEnd then PlaySoundFile(bar.attributes.soundEnd, Raven.db.global.SoundChannel) end
 	for n in pairs(bar.attributes) do bar.attributes[n] = nil end
@@ -709,12 +715,12 @@ function Nest_DeleteBar(bg, bar)
 end
 
 -- Delete all bars in a bar group
-function Nest_DeleteAllBars(bg)
-	for barName, bar in pairs(bg.bars) do Nest_DeleteBar(bg, bar) end
+function MOD.Nest_DeleteAllBars(bg)
+	for barName, bar in pairs(bg.bars) do MOD.Nest_DeleteBar(bg, bar) end
 end
 
 -- Start (or restart) a timer bar, note that maxTime is the display maximum which may be less than duration
-function Nest_StartTimer(bar, timeLeft, duration, maxTime)
+function MOD.Nest_StartTimer(bar, timeLeft, duration, maxTime)
 	bar.startTime = GetTime() -- time the timer bar was started (or restarted, which counts as a new timer)
 	bar.offsetTime = duration - timeLeft -- save offset since may be sent multiple times
 	bar.timeLeft = timeLeft; bar.duration = duration; bar.maxTime = maxTime or duration
@@ -722,44 +728,44 @@ function Nest_StartTimer(bar, timeLeft, duration, maxTime)
 end
 
 -- Return true if time parameters have been set for a bar
-function Nest_IsTimer(bar) return bar.timeLeft ~= nil end
+function MOD.Nest_IsTimer(bar) return bar.timeLeft ~= nil end
 
 -- Get the time parameters for a bar, including adjusted timeLeft amount
-function Nest_GetTimes(bar) return bar.timeLeft, bar.duration, bar.maxTime, bar.startTime, bar.offsetTime end
+function MOD.Nest_GetTimes(bar) return bar.timeLeft, bar.duration, bar.maxTime, bar.startTime, bar.offsetTime end
 
 -- Set bar colors, includes foreground, background and icon border codes
-function Nest_SetColors(bar, cr, cg, cb, ca, br, bg, bb, ba, ibr, ibg, ibb, iba)
+function MOD.Nest_SetColors(bar, cr, cg, cb, ca, br, bg, bb, ba, ibr, ibg, ibb, iba)
 	bar.cr = cr; bar.cg = cg; bar.cb = cb; bar.ca = ca
 	bar.br = br; bar.bg = bg; bar.bb = bb; bar.ba = ba
 	bar.ibr = ibr; bar.ibg = ibg; bar.ibb = ibb; bar.iba = iba
 end
 
 -- Set the overall alpha for a bar, this is last alpha adjustment made before bar is displayed
-function Nest_SetAlpha(bar, alpha) bar.alpha = alpha end
+function MOD.Nest_SetAlpha(bar, alpha) bar.alpha = alpha end
 
 -- Set whether the bar should flash or not
-function Nest_SetFlash(bar, flash) bar.flash = flash end
+function MOD.Nest_SetFlash(bar, flash) bar.flash = flash end
 
 -- Set the label text for a bar
-function Nest_SetLabel(bar, label) bar.label = label end
+function MOD.Nest_SetLabel(bar, label) bar.label = label end
 
 -- Set the value and maximum value for a non-timer bar
-function Nest_SetValue(bar, value, maxValue) bar.value = value; bar.maxValue = maxValue end
+function MOD.Nest_SetValue(bar, value, maxValue) bar.value = value; bar.maxValue = maxValue end
 
 -- Set the icon texture for a bar
-function Nest_SetIcon(bar, icon) bar.iconPath = icon end
+function MOD.Nest_SetIcon(bar, icon) bar.iconPath = icon end
 
 -- Set the numeric value to display on the bar's icon
-function Nest_SetCount(bar, iconCount) bar.iconCount = iconCount end
+function MOD.Nest_SetCount(bar, iconCount) bar.iconCount = iconCount end
 
 -- Set a bar attribute. This is the mechanism to associate application-specific data with bars.
-function Nest_SetAttribute(bar, name, value) bar.attributes[name] = value end
+function MOD.Nest_SetAttribute(bar, name, value) bar.attributes[name] = value end
 
 -- Get a bar attribute. This is the mechanism to associate application-specific data with bars.
-function Nest_GetAttribute(bar, name) return bar.attributes[name] end
+function MOD.Nest_GetAttribute(bar, name) return bar.attributes[name] end
 
 -- Set callbacks for a bar
-function Nest_SetCallbacks(bar, onClick, onEnter, onLeave)
+function MOD.Nest_SetCallbacks(bar, onClick, onEnter, onLeave)
 	bar.callbacks.onClick = onClick; bar.callbacks.onEnter = onEnter; bar.callbacks.onLeave = onLeave	
 end
 
@@ -770,7 +776,7 @@ local function LevelAdjust(v, a) -- apply adjustment in range -1..+1 to either s
 	return v
 end
 
-function Nest_AdjustColor(r, g, b, saturation, brightness)
+function MOD.Nest_AdjustColor(r, g, b, saturation, brightness)
 	if not r or not g or not b then return 0.5, 0.5, 0.5 end -- avoid errors if passed in nil values
 	if not saturation then saturation = 0 end; if not brightness then brightness = 0 end -- set to default values
 	if (saturation == 0) and (brightness == 0) then return r, g, b end	
@@ -868,7 +874,7 @@ local function BarGroup_UpdateBackground(bg, config)
 			local offset, edgeSize = bg.borderOffset, bg.borderWidth; if (edgeSize < 0.1) then edgeSize = 0.1 end
 			bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = edgeSize
 			back.backdrop:SetBackdrop(bg.borderTable)
-			t = bg.borderColor; back.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
+			local t = bg.borderColor; back.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
 			back.backdrop:SetSize(w + offset, h + offset)
 		end
 		if type(bg.tlLabels) == "table" then -- table of time values for labels
@@ -1064,7 +1070,7 @@ local function Bar_UpdateLayout(bg, bar, config)
 end
 
 -- Convert a time value into a compact text string
-Nest_TimeFormatOptions = { { 1, 1, 1, 1, 1 }, { 1, 1, 1, 3, 5 }, { 1, 1, 1, 3, 4 },
+MOD.Nest_TimeFormatOptions = { { 1, 1, 1, 1, 1 }, { 1, 1, 1, 3, 5 }, { 1, 1, 1, 3, 4 },
 						{ 2, 3, 1, 2, 3 }, { 2, 3, 1, 2, 2 }, { 2, 3, 1, 3, 4 }, { 2, 3, 1, 3, 5 },
 						{ 2, 2, 2, 2, 3 }, { 2, 2, 2, 2, 2 }, { 2, 2, 2, 2, 4 }, { 2, 2, 2, 3, 4 }, { 2, 2, 2, 3, 5 },
 						{ 2, 3, 2, 2, 3 }, { 2, 3, 2, 2, 2 }, { 2, 3, 2, 2, 4 }, { 2, 3, 2, 3, 4 }, { 2, 3, 2, 3, 5 },
@@ -1074,9 +1080,9 @@ Nest_TimeFormatOptions = { { 1, 1, 1, 1, 1 }, { 1, 1, 1, 3, 5 }, { 1, 1, 1, 3, 4
 						{ 5, 1, 1, 2, 3 }, { 5, 1, 1, 2, 2 }, { 5, 1, 1, 3, 4 }, { 5, 1, 1, 3, 5 },
 }
 
-function Nest_FormatTime(t, timeFormat, timeSpaces, timeCase)
-	if not timeFormat or (timeFormat > #Nest_TimeFormatOptions) then timeFormat = 24 end -- default to most compact
-	local opt = Nest_TimeFormatOptions[timeFormat]
+function MOD.Nest_FormatTime(t, timeFormat, timeSpaces, timeCase)
+	if not timeFormat or (timeFormat > #MOD.Nest_TimeFormatOptions) then timeFormat = 24 end -- default to most compact
+	local opt = MOD.Nest_TimeFormatOptions[timeFormat]
 	local func = opt.custom
 	local h, m, hplus, mplus, s, ts, f
 	if func then -- check for custom time formatting options
@@ -1111,10 +1117,10 @@ function Nest_FormatTime(t, timeFormat, timeSpaces, timeCase)
 end
 
 -- Add a formatting function to the table of time format options.
-function Nest_RegisterTimeFormat(func)
-	local index = #Nest_TimeFormatOptions
+function MOD.Nest_RegisterTimeFormat(func)
+	local index = #MOD.Nest_TimeFormatOptions
 	index = index + 1
-	Nest_TimeFormatOptions[index] = { custom = func }
+	MOD.Nest_TimeFormatOptions[index] = { custom = func }
 	return index
 end
 
@@ -1126,12 +1132,12 @@ local function Bar_UpdateSettings(bg, bar, config)
 	local isHeader = bar.attributes.header
 	if bar.timeLeft and bar.duration and bar.maxTime and bar.offsetTime then -- only update if key parameters are set
 		local remaining = bar.duration - (GetTime() - bar.startTime + bar.offsetTime) -- remaining time in seconds
-		if remaining < 0 then remaining = 0 end -- make sure no rounding funnies
+		if (remaining < 0) or bar.attributes.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
 		if remaining > bar.duration then remaining = bar.duration end -- and no inaccurate durations!
 		bar.timeLeft = remaining -- update saved value
 		if remaining < bar.maxTime then fill = remaining / bar.maxTime end -- calculate fraction of time remaining
 		if bg.fillBars then fill = 1 - fill end -- optionally fill instead of empty bars
-		timeText = Nest_FormatTime(remaining, bg.timeFormat, bg.timeSpaces, bg.timeCase) -- set timer text
+		timeText = MOD.Nest_FormatTime(remaining, bg.timeFormat, bg.timeSpaces, bg.timeCase) -- set timer text
 	elseif bar.value and bar.maxValue then
 		if bar.value < 0 then bar.value = 0 end -- no negative values
 		if bar.value < bar.maxValue then fill = bar.value / bar.maxValue end -- adjust foreground bar width based on values
@@ -1187,13 +1193,13 @@ local function Bar_UpdateSettings(bg, bar, config)
 	if (bg.showLabelText or isHeader) and bar.label then bl:SetText(bar.label); bl:Show() else bl:Hide() end
 	local w, h = bg.width - offsetX, bg.height; if config.iconOnly then w = bg.barWidth; h = bg.barHeight end
 	if bg.showBar and config.bars ~= "timeline" and (w > 0) and (h > 0) then -- non-zero dimensions to fix the zombie bar bug
-		local ar, ag, ab = Nest_AdjustColor(bar.br, bar.bg, bar.bb, bg.bgSaturation or 0, bg.bgBrightness or 0)
+		local ar, ag, ab = MOD.Nest_AdjustColor(bar.br, bar.bg, bar.bb, bg.bgSaturation or 0, bg.bgBrightness or 0)
 		if expiring then ec = bar.attributes.expireColor; if ec and ec.a > 0 then ar = ec.r; ag = ec.g; ab = ec.b end end
 		bb:SetVertexColor(ar, ag, ab, 1); bb:SetTexture(bg.bgTexture); bb:SetAlpha(bg.bgAlpha)
 		bb:SetWidth(w); bb:SetTexCoord(0, 1, 0, 1); bb:Show()
 		if (fill > 0) and (bg.fgNotTimer or bar.timeLeft) then
 			if bg.showSpark and (fill < 1) then sparky = true end
-			if not expiring then ar, ag, ab = Nest_AdjustColor(bar.cr, bar.cg, bar.cb, bg.fgSaturation or 0, bg.fgBrightness or 0) end
+			if not expiring then ar, ag, ab = MOD.Nest_AdjustColor(bar.cr, bar.cg, bar.cb, bg.fgSaturation or 0, bg.fgBrightness or 0) end
 			bf:SetVertexColor(ar, ag, ab, 1); bf:SetTexture(bg.fgTexture); bf:SetAlpha(bg.fgAlpha); bf:SetWidth(w * fill)
 			if config.bars == "r2l" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
 			bf:Show()
@@ -1201,7 +1207,8 @@ local function Bar_UpdateSettings(bg, bar, config)
 	else bf:Hide(); bb:Hide() end
 	if sparky then bar.spark:Show() else bar.spark:Hide() end
 	local alpha = bar.alpha or 1 -- adjust by bar alpha
-	if bar.flash then alpha = Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
+	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
+	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
 	if not isHeader and (bg.attributes.noMouse or (bg.attributes.iconMouse and not bg.showIcon)) then -- non-interactive or "only icon" but icon disabled
 		bar.icon:EnableMouse(false); bar.frame:EnableMouse(false); if callbacks.deactivate then callbacks.deactivate(bar.overlay) end
@@ -1210,7 +1217,7 @@ local function Bar_UpdateSettings(bg, bar, config)
 	else -- entire bar is interactive
 		bar.icon:EnableMouse(false); bar.frame:EnableMouse(true); if callbacks.activate then callbacks.activate(bar, bar.frame) end
 	end
-	if bar.attributes.header then
+	if bar.attributes.header and not bg.attributes.headerGaps then
 		bf:SetAlpha(0); bb:SetAlpha(0)
 		local id, tag = bar.attributes.tooltipUnit, ""
 		if id == UnitGUID("mouseover") then tag = "|cFF73d216@|r" end
@@ -1225,12 +1232,12 @@ local function Bar_RefreshAnimations(bg, bar, config)
 	local fill, sparky, offsetX, now = 1, false, 0, GetTime()
 	if bar.timeLeft and bar.duration and bar.maxTime and bar.offsetTime then -- only update if key parameters are set
 		local remaining = bar.duration - (now - bar.startTime + bar.offsetTime) -- remaining time in seconds
-		if remaining < 0 then remaining = 0 end -- make sure no rounding funnies
+		if (remaining < 0) or bar.attributes.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
 		if remaining > bar.duration then remaining = bar.duration end -- and no inaccurate durations!
 		bar.timeLeft = remaining -- update saved value
 		if remaining < bar.maxTime then fill = remaining / bar.maxTime end -- calculate fraction of time remaining
 		if bg.fillBars then fill = 1 - fill end -- optionally fill instead of empty bars
-		timeText = Nest_FormatTime(remaining, bg.timeFormat, bg.timeSpaces, bg.timeCase) -- set timer text
+		local timeText = MOD.Nest_FormatTime(remaining, bg.timeFormat, bg.timeSpaces, bg.timeCase) -- get formatted timer text
 		if bg.showTimeText then bar.timeText:SetText(timeText) end
 		local expireTime, expireMinimum = bar.attributes.expireTime, bar.attributes.expireMinimum
 		if expireTime and not bar.expireDone and expireTime >= remaining and (expireTime - remaining) < 1 then
@@ -1274,7 +1281,8 @@ local function Bar_RefreshAnimations(bg, bar, config)
 	end
 	if sparky then bar.spark:Show() else bar.spark:Hide() end
 	local alpha = bar.alpha or 1 -- adjust by bar alpha
-	if bar.flash then alpha = Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
+	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
+	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
 	if bar.attributes.soundStart and (not bar.soundDone or (bar.attributes.replay and (now > (bar.soundDone + bar.attributes.replayTime)))) then
 		PlaySoundFile(bar.attributes.soundStart, Raven.db.global.SoundChannel); bar.soundDone = now
@@ -1293,31 +1301,34 @@ local function BarGroup_RefreshTimeline(bg, config)
 	else
 		w = bg.tlHeight; h = bg.tlWidth; edge = bg.reverse and "TOP" or "BOTTOM"
 	end
-	local overlapCount = 0
+	local overlapCount, switchCount = 0, 0
 	for i = 1, bg.count do
 		local bar = bg.bars[bg.sorter[i].name]
 		if i <= maxBars and bar.timeLeft then
 			local clevel = level + ((bg.count - i) * 10)
 			local delta = Timeline_Offset(bg, bar.timeLeft)
-			if bg.tlAlternate and i > 1 and lastBar and math.abs(delta - lastDelta) < (bg.iconSize / 2) then
-				overlapCount = overlapCount + 1
+			local isOverlap = i > 1 and lastBar and math.abs(delta - lastDelta) < (bg.iconSize * (1 - ((bg.tlPercent or 50) / 100)))
+			if isOverlap then overlapCount = overlapCount + 1 else overlapCount = 0 end -- number of overlapping icons
+			if bg.tlAlternate and isOverlap then
+				switchCount = switchCount + 1
 				local phase = math.floor(t / (bg.tlSwitch or 2)) -- time between alternating overlapping icons
-				if overlapCount == 1 then
+				if switchCount == 1 then
 					if (phase % 2) == 1 then SetBarFrameLevel(lastBar, clevel, true); clevel = lastLevel end
 				else
-					local seed = phase % (overlapCount + 1) -- 0, 1, ..., overLapCount
-					for k = 1, overlapCount do
+					local seed = phase % (switchCount + 1) -- 0, 1, ..., switchCount
+					for k = 1, switchCount do
 						local b = bg.bars[bg.sorter[i - k].name]
-						SetBarFrameLevel(b, clevel + (((seed + k) % (overlapCount + 1)) * 10), true)
+						SetBarFrameLevel(b, clevel + (((seed + k) % (switchCount + 1)) * 10), true)
 					end
 					clevel = clevel + (seed * 10)
 				end
 			else
-				overlapCount = 0
+				switchCount = 0
 			end
 			SetBarFrameLevel(bar, clevel, true)
 			lastDelta = delta; lastBar = bar; lastLevel = clevel
 			local x1 = isVertical and 0 or ((delta - w) * dir); local y1 = isVertical and ((delta - h) * dir) or 0
+			y1 = y1 + (bg.tlOffset or 0) + (overlapCount * (bg.tlDelta or 0))
 			bar.frame:ClearAllPoints(); bar.frame:SetPoint(edge, back, edge, PS(x1), PS(y1)); bar.frame:Show()
 		else
 			lastBar = nil; bar.frame:Hide()
@@ -1464,7 +1475,7 @@ local function BarGroup_SortBars(bg, config)
 			scale = scale / bg.scale -- compute scaling factor
 			x0 = bg.frame:GetLeft() * scale; y0 = bg.frame:GetBottom() * scale -- normalize by scale factor
 			bg.frame:SetScale(bg.scale)
-			bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", x0, y0)
+			bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", PS(x0), PS(y0))
 		end
 	end
 end
@@ -1515,24 +1526,24 @@ local function SetBarGroupEffectiveDimensions(bg, config)
 end
 
 -- Check if display dimensions have changed and update bar group locations
-function Nest_CheckDisplayDimensions()
+function MOD.Nest_CheckDisplayDimensions()
 	local dw, dh = UIParent:GetWidth(), UIParent:GetHeight()
 	if (displayWidth ~= dw) or (displayHeight ~= dh) then
 		displayWidth = dw; displayHeight = dh
 		for _, bg in pairs(barGroups) do
 			if bg.configuration then -- make sure configuration is valid
 				local p = bg.position
-				Nest_SetAnchorPoint(bg, p.left, p.right, p.bottom, p.top, bg.scale, p.width, p.height) -- restore cached position
+				MOD.Nest_SetAnchorPoint(bg, p.left, p.right, p.bottom, p.top, bg.scale, p.width, p.height) -- restore cached position
 			end
 		end
 	end
 end
 
 -- Force a global update.
-function Nest_TriggerUpdate() update = true end
+function MOD.Nest_TriggerUpdate() update = true end
 
 -- Initialize the module
-function Nest_Initialize()
+function MOD.Nest_Initialize()
 	if Raven.MSQ then
 		MSQ = Raven.MSQ
 		MSQ_ButtonData = { AutoCast = false, AutoCastable = false, Border = false, Checked = false, Cooldown = false, Count = false, Duration = false,
@@ -1544,10 +1555,10 @@ function Nest_Initialize()
 end
 
 -- Update routine does all the actual work of setting up and displaying bar groups.
-function Nest_Update()
+function MOD.Nest_Update()
 	for _, bg in pairs(barGroups) do
 		if bg.configuration then -- make sure configuration is valid
-			local config = Nest_SupportedConfigurations[bg.configuration]
+			local config = MOD.Nest_SupportedConfigurations[bg.configuration]
 			local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
 			if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
 			if not bg.moving then bg.frame:SetFrameStrata(bg.strata or "MEDIUM") end
@@ -1575,10 +1586,10 @@ function Nest_Update()
 end
 
 -- Just refresh timers and flashing bars without checking settings.
-function Nest_Refresh()
+function MOD.Nest_Refresh()
 	for _, bg in pairs(barGroups) do
 		if bg.configuration then -- make sure configuration is valid
-			local config = Nest_SupportedConfigurations[bg.configuration]
+			local config = MOD.Nest_SupportedConfigurations[bg.configuration]
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
 			for _, bar in pairs(bg.bars) do if not bar.update then Bar_RefreshAnimations(bg, bar, config) end end
 			if config.bars == "timeline" then BarGroup_RefreshTimeline(bg, config) end

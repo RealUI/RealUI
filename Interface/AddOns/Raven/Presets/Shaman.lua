@@ -50,9 +50,10 @@ Raven.classSpells.SHAMAN = {
 	{ "Grounding Totem", nil, p.Purple2, cooldown = true, school = "Nature", id = 8177 },
 	{ "Grounding Totem Effect", BUFF, p.Purple2, id = 8178 },
 	{ "Healing Rain", BUFF, p.Blue1, cooldown = true, school = "Nature", id = 73920 },
+	{ "Healing Storm", BUFF, p.Blue2, id = 58264 }, -- from glyph plus use of maelstrom weapon
 	{ "Healing Stream", BUFF, p.Blue3, id = 65994 }, -- from healing stream totem
 	{ "Healing Stream Totem", nil, p.Blue3, cooldown = true, id = 5394 },
-	{ "Healing Tide Totem", nil, p.Green2, cooldown = true, id = 108280 },
+	{ "Healing Tide Totem", nil, p.Green2, cooldown = true, id = 108280 }, -- baseline in 5.4
 	{ "Heroism", BUFF, p.Orange2, cooldown = true, school = "Nature", id = 32182 },
 	{ "Hex", DEBUFF, p.Green2, cooldown = true, school = "Nature", id = 51514 },
 	{ "Lava Burst", nil, p.Red3, cooldown = true, school = "Fire", id = 51505 },

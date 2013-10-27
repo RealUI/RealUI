@@ -49,6 +49,7 @@ Raven.classSpells.MAGE = {
 	{ "Ice Floes", BUFF, p.Blue3, cooldown = true, school = "Frost", id = 108839 }, 
 	{ "Ice Lance", nil, p.Blue2, lockout = true, school = "Frost", id = 30455 }, 
 	{ "Ice Ward", BUFF, p.Purple3, cooldown = true, school = "Frost", id = 111264 }, 
+	{ "Icicle", BUFF, p.Blue2, school = "Frost", id = 148022 }, -- added in 5.4
 	{ "Icy Veins", BUFF, p.Blue1, cooldown = true, school = "Frost", id = 12472 }, 
 	{ "Ignite", DEBUFF, p.Red2, id = 12654 }, 
 	{ "Illusion", BUFF, p.Gray, cooldown = true, id = 131784 }, 

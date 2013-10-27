@@ -8,13 +8,12 @@ local p = Raven.ColorPalette
 Raven.classSpells.WARLOCK = {
 	{ "Aftermath", DEBUFF, p.Orange1, id = 109784 },
 	{ "Agony", DEBUFF, p.Orange1, school = "Shadow", id = 980 },
-	{ "Archimonde's Vengeance", DEBUFF, p.Orange1, cooldown = true, school = "Shadow", id = 108505 },
+	{ "Archimonde's Darkness", DEBUFF, p.Orange1, cooldown = true, school = "Shadow", id = 108505 }, -- renamed in 5.4
 	{ "Aura of Enfeeblement", BUFF, p.Orange1, school = "Shadow", id = 116198 },
 	{ "Aura of the Elements", BUFF, p.Orange1, school = "Shadow", id = 116202 },
 	{ "Backdraft", BUFF, p.Yellow1, id = 117896 },
 	{ "Backlash", BUFF, p.Orange3, school = "Fire", id = 108563  },
 	{ "Banish", DEBUFF, p.Blue2, school = "Shadow", id = 710 },
---	{ "Blood Fear", DEBUFF, p.Blue3, cooldown = true, school = "Shadow", id = 111397 }, -- removed in 5.2
 	{ "Blood Horror", BUFF, p.Red1, cooldown = true, id = 111397 },
 	{ "Burning Embers", BUFF, p.Red2, id = 108647 },
 	{ "Burning Rush", BUFF, p.Red2, id = 111400 },
@@ -34,10 +33,12 @@ Raven.classSpells.WARLOCK = {
 	{ "Dark Soul: Instability", BUFF, p.Orange3, cooldown = true, school = "Fire", refer = 77801, id = 113858  },
 	{ "Dark Soul: Knowledge", BUFF, p.Orange3, cooldown = true, school = "Shadow", refer = 77801, id = 113861  },
 	{ "Dark Soul: Misery", BUFF, p.Orange3, cooldown = true, school = "Shadow", refer = 77801, id = 113860  },
+	{ "Demonic Breath", DEBUFF, p.Pink, cooldown = true, school = "Shadow", id = 47897 }, -- new in 5.4
 	{ "Demonic Calling", BUFF, p.Green3, school = "Shadow", id = 114925 },
 	{ "Demonic Circle: Summon", BUFF, p.Green3, school = "Shadow", id = 48018 },
 	{ "Demonic Circle: Teleport", nil, p.Green3, cooldown = true, school = "Shadow", id = 48020 },
 	{ "Demonic Fury", BUFF, p.Purple2, id = 104315 },
+	{ "Demonic Gateway", DEBUFF, p.Green1, cooldown = true, school = "Shadow", id = 111771 },
 	{ "Demonic Leap", nil, p.Green3, cooldown = true, school = "Shadow", id = 109151 },
 	{ "Demonic Rebirth", BUFF, p.Red3, id = 108559 },
 	{ "Disrupted Nether", DEBUFF, p.Purple1, school = "Shadow", id = 114736 },
@@ -47,7 +48,7 @@ Raven.classSpells.WARLOCK = {
 	{ "Dreadsteed", BUFF, p.Brown2, id = 23161 },
 	{ "Enslave Demon", DEBUFF, p.Cyan, school = "Shadow", id = 1098 },
 	{ "Eye of Kilrogg", BUFF, p.Brown1, school = "Shadow", id = 126 },
-	{ "Fear", DEBUFF, p.Gray, school = "Shadow", id = 5782 },
+	{ "Fear", DEBUFF, p.Gray, school = "Shadow", id = 5782 }, -- glyph no longer causes a cooldown in 5.4
 	{ "Fel Armor", BUFF, p.Green1, id = 104938 },
 	{ "Felsteed", BUFF, p.Brown2, id = 5784 },
 	{ "Fire and Brimstone", BUFF, p.Orange1, cooldown = true, school = "Fire", id = 108683 },
@@ -60,13 +61,14 @@ Raven.classSpells.WARLOCK = {
 	{ "Havoc", DEBUFF, p.Purple1, cooldown = true, school = "Shadow", id = 80240 },
 	{ "Health Funnel", BUFF, p.Red2, school = "Shadow", id = 755 },
 	{ "Hellfire", DEBUFF, p.Orange1, school = "Fire", id = 1949 },
-	{ "Howl of Terror", DEBUFF, p.Purple1, cooldown = true, school = "Shadow", id = 5484 },
+	{ "Howl of Terror", DEBUFF, p.Purple1, cooldown = true, school = "Shadow", id = 5484 }, -- becomes baseline in 5.4
 	{ "Immolate", DEBUFF, p.Orange2, school = "Fire", id = 348 },
 	{ "Imp Swarm", nil, p.Orange3, id = 104316 },
 	{ "Incinerate", nil, p.Orange3, lockout = true, school = "Fire", id = 29722 },
 	{ "Kil'jaeden's Cunning", BUFF, p.Purple1, cooldown = true, school = "Shadow", id = 119049 },
 	{ "Life Tap", DEBUFF, p.Green1, school = "Shadow", id = 1454 },
 	{ "Malefic Grasp", DEBUFF, p.Orange1, school = "Shadow", id = 103103 }, 
+	{ "Mannoroth's Fury", BUFF, p.Green3, cooldown = true, school = "Physical", id = 108508 }, -- new in 5.4
 	{ "Master Demonologist", BUFF, p.Purple3, id = 115556 },
 	{ "Metamorphosis", BUFF, p.Purple1, cooldown = true, id = 103958 },
 	{ "Molten Core", BUFF, p.Orange1, school = "Fire", id = 122351 },

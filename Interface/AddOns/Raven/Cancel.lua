@@ -104,10 +104,14 @@ local function Overlay_OnEnter(b)
 			if slot then GameTooltip:SetInventoryItem("player", slot) end
 		elseif b.aura_tt == "buff" then
 			if not UnitBuff("player", b.aura_id) then return end
-			GameTooltip:SetUnitBuff("player", b.aura_id)
+			GameTooltip:SetUnitAura("player", b.aura_id, "HELPFUL")
 		elseif b.aura_tt == "spell name" then
 			local auraList = MOD:CheckAura("player", b.aura_id, true)
-			if #auraList > 0 then local aura = auraList[1]; GameTooltip:SetUnitBuff("player", aura[12]) end
+			if #auraList > 0 then local aura = auraList[1]; GameTooltip:SetUnitAura("player", aura[12], "HELPFUL") end
+		end
+		if IsAltKeyDown() and IsControlKeyDown() then
+			if b.aura_spell then GameTooltip:AddLine("<Spell #" .. tonumber(b.aura_spell) .. ">", 0, 1, 0.2, false) end
+			if b.aura_list then GameTooltip:AddLine("<List #" .. tonumber(b.aura_list) .. ">", 0, 1, 0.2, false) end
 		end
 		if b.aura_caster and (b.aura_caster ~= "") then GameTooltip:AddLine(L["<Applied by "] .. b.aura_caster .. ">", 0, 0.8, 1, false) end
 		GameTooltip:Show()
@@ -295,7 +299,7 @@ function MOD:UpdateInCombatBarOverlays()
 					local timeLeft = expires - GetTime()
 					if g.opt.pulseEnd and (timeLeft < 0.45) and not v.anim:IsPlaying() then v.anim:Play() end
 					local flashing = g.opt.flashExpiring and g.opt.flashTime and (timeLeft < g.opt.flashTime)
-					if flashing then alpha = Nest_FlashAlpha(1, 1) end
+					if flashing then alpha = MOD.Nest_FlashAlpha(1, 1) end
 				end
 				if g.opt.mouseoverDetect and not g.mask:IsMouseOver(2, -2, -2, 2) then alpha = alpha * (g.opt.mouseoverAlpha or 0.5) end
 				v.container:SetAlpha(alpha)
@@ -322,7 +326,7 @@ function MOD:RefreshInCombatBar()
 					local timeLeft = expires - GetTime()
 					if g.opt.pulseEnd and (timeLeft < 0.45) and not v.anim:IsPlaying() then v.anim:Play() end
 					local flashing = g.opt.flashExpiring and g.opt.flashTime and (timeLeft < g.opt.flashTime)
-					if flashing then alpha = Nest_FlashAlpha(1, 1) end
+					if flashing then alpha = MOD.Nest_FlashAlpha(1, 1) end
 				end
 				if g.opt.mouseoverDetect and not g.mask:IsMouseOver(2, -2, -2, 2) then alpha = alpha * (g.opt.mouseoverAlpha or 0.5) end
 				v.container:SetAlpha(alpha)
@@ -347,7 +351,8 @@ end
 -- Activate an overlay for a bar by filling in secure attributes and placing it on top of a bar's icon
 local function ActivateOverlay(bar, frame)
 	if not InCombatLockdown() then
-		local tt, id, unit, caster = bar.attributes.tooltipType, bar.attributes.tooltipID, bar.attributes.tooltipUnit, bar.attributes.caster
+		local bat = bar.attributes
+		local tt, id, unit = bat.tooltipType, bat.tooltipID, bat.tooltipUnit
 		if ((tt == "buff") or (tt == "weapon")) and unit and UnitIsUnit(unit, "player") then
 			local b = bar.overlay
 			if not b then b = AllocateOverlay(); bar.overlay = b end -- allocate one if necessary
@@ -359,7 +364,9 @@ local function ActivateOverlay(bar, frame)
 			end
 			b.aura_id = id
 			b.aura_tt = tt
-			b.aura_caster = caster
+			b.aura_caster = bat.caster
+			b.aura_spell = bat.tooltipSpell
+			b.aura_list = bat.listID
 			b.tooltipAnchor = bar.tooltipAnchor
 			b:ClearAllPoints()
 			b:SetSize(frame:GetWidth(), frame:GetHeight())
@@ -391,19 +398,19 @@ end
 -- When enter combat deactivate all bar overlays
 local function Overlays_EnterCombat()
 	InCombatBar_OnMouseUp()
-	local bgs = Nest_GetBarGroups()
+	local bgs = MOD.Nest_GetBarGroups()
 	for _, bg in pairs(bgs) do
 		for _, bar in pairs(bg.bars) do if bar.overlay then DeactivateOverlay(bar.overlay) end end
 	end
 end
 
 -- When leave combat, trigger update so overlays get reactivated
-local function Overlays_LeaveCombat() MOD:UpdateInCombatBar(); Nest_TriggerUpdate() end
+local function Overlays_LeaveCombat() MOD:UpdateInCombatBar(); MOD.Nest_TriggerUpdate() end
 
 -- Initialize the overlays used to cancel player buffs
 function MOD:InitializeOverlays()
 	local cbs = { activate = ActivateOverlay, deactivate = DeactivateOverlay, release = ReleaseOverlay }
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", Overlays_EnterCombat)
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", Overlays_LeaveCombat)
-	Nest_RegisterCallbacks(cbs)
+	MOD.Nest_RegisterCallbacks(cbs)
 end

@@ -60,6 +60,21 @@ Raven.internalCooldowns = {
 	{ id = 59626, duration = 35, }, -- Black Magic
 	
 	-- Item internal cooldowns
+	{ id = 146296, duration = 115, item = 103989 }, -- [MOP] Alacrity of Xuen
+	{ id = 146218, duration = 115, item = 103987 }, -- [MOP] Yu'lon's Bite
+	{ id = 146312, duration = 115, item = 103986 }, -- [MOP] Discipline of Xuen
+	{ id = 148899, duration = 85, item = 104961 }, -- [MOP] Fusion-Fire Core
+	{ id = 146308, duration = 115, item = 104974 }, -- [MOP] Assurance of Consequence
+	{ id = 146314, duration = 115, item = 104976 }, -- [MOP] Prismatic Prison of Pride
+	{ id = 146245, duration = 55, item = 104993 }, -- [MOP] Evil Eye of Galakras
+	{ id = 148897, duration = 85, item = 105074 }, -- [MOP] Frenzied Crystal of Rage
+	{ id = 146046, duration = 115, item = 104924 }, -- [MOP] Purified Bindings of Immerseus
+	{ id = 148896, duration = 85, item = 105082 }, -- [MOP] Sigil of Rampage
+	{ id = 148911, duration = 115, item = 105109 }, -- [MOP] Thok's Acid-Grooved Tooth
+	{ id = 146250, duration = 115, item = 105111 }, -- [MOP] Thok's Tail Tip
+	{ id = 138702, duration = 75, item = 94508 }, -- [MOP] Brutal Talisman of the Shado-Pan Assault
+	{ id = 138703, duration = 45, item = 94510 }, -- [MOP] Volatile Talisman of the Shado-Pan Assault
+	{ id = 138699, duration = 105, item = 94511 }, -- [MOP] Vicious Talisman of the Shado-Pan Assault
 	{ id = 128985, duration = 50, item = 79331 }, -- [MOP] Relic of Yu'lon [Int DPS DMC]
 	{ id = 128987, duration = 45, item = 79330 }, -- [MOP] Relic of Chi'ji [Int HPS DMC]
 	{ id = 128984, duration = 55, item = 79328 }, -- [MOP] Relic of Xuen [Agi DMC]

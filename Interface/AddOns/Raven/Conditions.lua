@@ -119,7 +119,7 @@ function MOD:FinalizeConditions()
 				end
 			end
 			if c.shared then
-				local t = Raven_CopyTable(c)
+				local t = MOD.CopyTable(c)
 				t.shared = false
 				MOD.db.global.SharedConditions["[" .. MOD.myClass .. "] " .. c.name] = t
 			end
@@ -328,7 +328,7 @@ local function GetStance()
 end
 
 -- Return whether the specified talent (either spell name or spell id) is active in current spec
-function RavenCheckTalent(talent)
+function MOD.CheckTalent(talent)
 	local id = tonumber(talent)
 	if id then talent = GetSpellInfo(id) end -- translate spell id
 	local t = MOD.talents[talent]
@@ -489,7 +489,7 @@ local function CheckTestAND(ttype, t)
 			if not MOD:IsRuneRecharging(t.checkBlood, t.chargeBlood, t.checkFrost, t.chargeFrost, t.checkUnholy, t.chargeUnholy) then return false end
 		end
 		if IsOn(t.checkTotems) and not CheckTotems(t.air, t.airTotem, t.earth, t.earthTotem, t.fire, t.fireTotem, t.water, t.waterTotem) then return false end
-		if IsOn(t.checkTalent) and IsOn(t.talent) and not RavenCheckTalent(t.talent) then return false end
+		if IsOn(t.checkTalent) and IsOn(t.talent) and not MOD.CheckTalent(t.talent) then return false end
 		if IsOn(t.checkSpec) and IsOn(t.spec) and not CheckSpec(t.spec) then return false end
 		if IsOn(t.checkGlyph) and IsOn(t.glyph) and not CheckGlyph(t.glyph) then return false end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and not CheckSpellKnown(t.spell) then return false end
@@ -597,7 +597,7 @@ local function CheckTestOR(ttype, t)
 			if MOD:IsRuneRecharging(t.checkBlood, t.chargeBlood, t.checkFrost, t.chargeFrost, t.checkUnholy, t.chargeUnholy) then return true end
 		end
 		if IsOn(t.checkTotems) and CheckTotems(t.air, t.airTotem, t.earth, t.earthTotem, t.fire, t.fireTotem, t.water, t.waterTotem) then return true end
-		if IsOn(t.checkTalent) and IsOn(t.talent) and RavenCheckTalent(t.talent) then return true end
+		if IsOn(t.checkTalent) and IsOn(t.talent) and MOD.CheckTalent(t.talent) then return true end
 		if IsOn(t.checkSpec) and IsOn(t.spec) and CheckSpec(t.spec) then return true end
 		if IsOn(t.checkGlyph) and IsOn(t.glyph) and CheckGlyph(t.glyph) then return true end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and CheckSpellKnown(t.spell) then return true end

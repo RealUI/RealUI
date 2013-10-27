@@ -11,16 +11,6 @@
 -- Raven:UnitHasBuff(unit, type) returns true and table with detailed info if unit has an active buff of the specified type (e.g., "Mainhand")
 -- Raven:UnitHasDebuff(unit, type) returns true and table with detailed info if unit has an active debuff of the specified type (e.g., "Poison")
 
--- Mists of Pandaria (WoW 5.0) changes
--- (done) Talent changes: rewrite talent tracking, change talent condition checking
--- (done) Special cases: revisit old special cases such as serpent sting spreading
--- (done) Dispel changes: change to test for spell availability instead of talents
--- (done) Party/raid changes: rewrite code that tests if in party or raid, change party/raid-related condition checking
--- (done) Presets: update all class presets with new spell ids and cooldown info
--- (done) UI: change UIPanelButtonTemplate2 to UIPanelButtonTemplate
--- (done) Ranged slot: remove from buff and cooldown tracking, no ranged slot-related conditions
--- (done) Vehicle/possess: change action bar slots
-
 Raven = LibStub("AceAddon-3.0"):NewAddon("Raven", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
 local MOD = Raven
@@ -95,6 +85,8 @@ local petGUID = nil -- cache pet GUID so can properly remove trackers for them w
 local enteredWorld = nil -- set by PLAYER_ENTERING_WORLD event
 local trackerTag = 0 -- used for mark/sweep in AddTrackers
 local professions = {} -- temporary table for profession indices
+local knownSpells = {} -- table used to detect spells that are temporarily not in spellbook (e.g., Stormstrike during Ascendance)
+local foundSpells = {} -- temporary table for checking known spells
 
 -- This table is used to fix the "not cast by player" bug for Jade Spirit, River's Song, and Dancing Steel introduced in 5.1
 -- and the legendary meta gem procs Tempus Repit, Fortitude, Capacitance, and Lucidity added in 5.2
@@ -118,6 +110,9 @@ local function TriggerCooldownUpdate() updateCooldowns = true; doUpdate = true e
 local function TriggerActionsUpdate() MOD.updateActions = true; doUpdate = true end
 local function TriggerGlyphUpdate() updateGlyphs = true; doUpdate = true end
 function MOD:ForceUpdate() doUpdate = true; forceUpdate = true end
+
+-- Event called when the player changes talents or specialization
+local function CheckTalentSpecialization() talentsInitialized = false; unitUpdate.player = true; table.wipe(knownSpells); doUpdate = true end
 
 -- Function called to detect global cooldowns
 local function CheckGCD(event, unit, spell)
@@ -150,8 +145,9 @@ local function AddTracker(dstGUID, dstName, isBuff, name, rank, icon, count, bty
 	doUpdate = true
 	local tracker = isBuff and unitBuffs[dstGUID] or unitDebuffs[dstGUID] -- get or create the aura tracking table
 	if not tracker then tracker = AllocateTable() if isBuff then unitBuffs[dstGUID] = tracker else unitDebuffs[dstGUID] = tracker end end
-	local t = tracker[name] -- get or create a tracker entry for the spell
-	if not t then t = AllocateTable(); tracker[name] = t end -- create the tracker if necessary
+	local id = name .. tostring(spellID or "") -- append spellID if known to the tracker so can track multiple with same name (e.g., sacred shield)
+	local t = tracker[id] -- get or create a tracker entry for the spell
+	if not t then t = AllocateTable(); tracker[id] = t end -- create the tracker if necessary
 	local vehicle = UnitHasVehicleUI("player")
 	t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], t[12], t[13], t[14], t[15], t[16], t[17], t[18], t[19], t[20], t[21], t[22] =
 		true, 0, count, btype, duration, caster, isStealable, icon, rank, expire, "spell id", spellID, name, spellID, boss, UnitName("player"), apply, nil, vehicle, dstGUID, dstName, tag
@@ -184,21 +180,19 @@ function MOD:AddTrackers(unit)
 			name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply = UnitAura(unit, i, "HELPFUL|PLAYER")
 			if name and caster == "player" then
 				AddTracker(dstGUID, dstName, true, name, rank, icon, count, btype, duration, expire, caster, isStealable, spellID, nil, apply, trackerTag)
-				MOD:SetDuration(name, duration)
+				MOD:SetDuration(name, spellID, duration)
 			end
 			i = i + 1
 		until not name
-		if dstGUID ~= UnitGUID("player") then
-			i = 1
-			repeat
-				name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply, boss = UnitAura(unit, i, "HARMFUL|PLAYER")
-				if name and caster == "player" then
-					AddTracker(dstGUID, dstName, false, name, rank, icon, count, btype, duration, expire, caster, isStealable, spellID, boss, apply, trackerTag)
-					MOD:SetDuration(name, duration)
-				end
-				i = i + 1
-			until not name
-		end
+		i = 1
+		repeat
+			name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply, boss = UnitAura(unit, i, "HARMFUL|PLAYER")
+			if name and caster == "player" then
+				AddTracker(dstGUID, dstName, false, name, rank, icon, count, btype, duration, expire, caster, isStealable, spellID, boss, apply, trackerTag)
+				MOD:SetDuration(name, spellID, duration)
+			end
+			i = i + 1
+		until not name
 		MOD:RemoveTrackers(dstGUID, trackerTag) -- takes advantage of side-effect of saving current trackerTag with each tracker
 	end
 end
@@ -259,20 +253,21 @@ local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, 
 			if spellID == 33763 then e = "SPELL_AURA_APPLIED" end -- Lifebloom refreshes don't always generate aura applied events
 		end
 		if e == "SPELL_AURA_APPLIED" or e == "SPELL_AURA_APPLIED_DOSE" or e == "SPELL_AURA_REFRESH" then
-			local name, rank, icon, count, bType, duration, expire, caster, isStealable, boss, apply, _
+			local name, rank, icon, count, bType, duration, expire, caster, isStealable, boss, sid, apply, _
 			local isBuff, dst = true, GetUnitIDFromGUID(dstGUID)
 			if dst and UnitExists(dst) then
-				name, rank, icon, count, bType, duration, expire, caster, isStealable, _, _, apply = UnitAura(dst, spellName, nil, "HELPFUL|PLAYER")
+				name, rank, icon, count, bType, duration, expire, caster, isStealable, _, sid, apply = UnitAura(dst, spellName, nil, "HELPFUL|PLAYER")
 				if not name and (srcGUID ~= dstGUID) then -- don't get debuffs cast by player on self (e.g., Sated)
 					isBuff = false
-					name, rank, icon, count, bType, duration, expire, caster, isStealable, _, _, apply, boss = UnitAura(dst, spellName, nil, "HARMFUL|PLAYER")
+					name, rank, icon, count, bType, duration, expire, caster, isStealable, _, sid, apply, boss = UnitAura(dst, spellName, nil, "HARMFUL|PLAYER")
 				end
-				if name then MOD:SetDuration(name, duration) end
+				if sid and spellID and spellID ~= sid then name = nil end -- not a match so must be a duplicate name
+				if name then MOD:SetDuration(name, spellID, duration) end
 			end
 			if not spellID then spellID = MOD:GetSpellID(spellName) end
 			if spellID and not icon then icon = MOD:GetIcon(spellName, spellID) end
 			if not name then
-				name = spellName; rank = ""; count = 1; bType = nil; duration = MOD:GetDuration(name)
+				name = spellName; rank = ""; count = 1; bType = nil; duration = MOD:GetDuration(name, spellID)
 				if duration > 0 then expire = now + duration else duration = 0; expire = 0 end
 				caster = "player"; isStealable = nil; boss = nil; apply = nil; isBuff = false
 				if MOD.BuffTable[name] ~= nil then
@@ -291,14 +286,16 @@ local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, 
 		elseif e == "SPELL_AURA_REMOVED" then
 			local tracker = unitBuffs[dstGUID] -- table of buffs currently applied to this GUID
 			if tracker then
-				local t = tracker[spellName] -- get tracker entry for the spell, if one exists
-				if t then tracker[spellName] = ReleaseTable(t) end -- release the tracker entry
+				local id = spellName .. tostring(spellID or "")
+				local t = tracker[id] -- get tracker entry for the spell, if one exists
+				if t then tracker[id] = ReleaseTable(t) end -- release the tracker entry
 				if not next(tracker) then unitBuffs[dstGUID] = ReleaseTable(tracker) end -- release table when no more entries for this GUID
 			end
 			tracker = unitDebuffs[dstGUID] -- table of debuffs currently applied to this GUID
 			if tracker then
-				local t = tracker[spellName] -- get tracker entry for the spell, if one exists
-				if t then tracker[spellName] = ReleaseTable(t) end -- release the tracker entry
+				local id = spellName .. tostring(spellID or "")
+				local t = tracker[id] -- get tracker entry for the spell, if one exists
+				if t then tracker[id] = ReleaseTable(t) end -- release the tracker entry
 				if not next(tracker) then unitDebuffs[dstGUID] = ReleaseTable(tracker) end -- release table when no more entries for this GUID
 			end
 		elseif e == "SPELL_SUMMON" and MOD.myClass == "MAGE" and spellID == 99063 then -- special case for mage T12 2-piece
@@ -351,7 +348,7 @@ function MOD:OnEnable()
 	MOD:InitializeProfile() -- initialize the profile database
 	MOD:InitializeLDB() -- initialize the data broker
 	MOD:RegisterChatCommand("raven", function() MOD:OptionsPanel() end)
-	Nest_Initialize() -- initialize the graphics module
+	MOD.Nest_Initialize() -- initialize the graphics module
 
 	-- Create a frame so that updates can be registered
 	MOD.frame = CreateFrame('Frame')
@@ -367,7 +364,8 @@ function MOD:OnEnable()
 	self:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("PLAYER_FOCUS_CHANGED")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
-	self:RegisterEvent("PLAYER_TALENT_UPDATE")
+	self:RegisterEvent("PLAYER_TALENT_UPDATE", CheckTalentSpecialization)
+	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", CheckTalentSpecialization)
 	self:RegisterEvent("SPELLS_CHANGED")
 	self:RegisterEvent("VEHICLE_UPDATE")
 	self:RegisterEvent("RAID_TARGET_UPDATE", CheckRaidTargets)
@@ -392,7 +390,7 @@ function MOD:OnEnable()
 	MOD:InitializeBars() -- initialize routine that manages the bar library
 	MOD:InitializeSounds() -- add sounds to LibSharedMedia
 	MOD.LibBossIDs = LibStub("LibBossIDs-1.0", true)
-	MOD.db.global.Version = "6" -- version number for database validation
+	MOD.db.global.Version = "7" -- version number for database validation
 end
 
 -- Event called when addon is disabled but this is probably never called
@@ -426,7 +424,7 @@ local function InitializeShamanEnchants()
 end
 
 -- Set up table of mage fire spells that can be spread by Impact procs
-local function InitialzeFireSpells()
+local function InitializeFireSpells()
 	if MOD.myClass == "MAGE" then
 		fireSpells = { LSPELL["Combustion"], LSPELL["Ignite"], LSPELL["Pyroblast"], LSPELL["Living Bomb"] }
 	end
@@ -443,7 +441,7 @@ function MOD:PLAYER_ENTERING_WORLD()
 		InitializeRunes() -- death knight specific initialization
 		InitializeIcons() -- cache special purpose icons
 		InitializeShamanEnchants() -- cache names of shaman weapon enchants
-		InitialzeFireSpells() -- cache names of mage fire spells
+		InitializeFireSpells() -- cache names of mage fire spells
 		MOD:InitializeOverlays() -- initialize overlays used to cancel player buffs
 		MOD:InitializeInCombatBar() -- initialize special bar for cancelling buffs in combat
 		MOD:UpdateAllBarGroups() -- final update before starting event-based updates
@@ -453,7 +451,12 @@ function MOD:PLAYER_ENTERING_WORLD()
 end
 
 -- Event called when an aura changes on a unit, returns the unit name
-function MOD:UNIT_AURA(e, unit) if unit and (unitUpdate[unit] ~= nil) then unitUpdate[unit] = true; doUpdate = true end end
+function MOD:UNIT_AURA(e, unit)
+	if unit and (unitUpdate[unit] ~= nil) then
+		if unit == "vehicle" then unitUpdate.player = true end -- any time vehicle updates, also update player
+		unitUpdate[unit] = true; doUpdate = true
+	end
+end
 
 -- Event called when a unit's power changes
 function MOD:UNIT_POWER(e, unit) if unit == "player" then unitUpdate[unit] = true; doUpdate = true end end
@@ -473,9 +476,6 @@ function MOD:UNIT_TARGET(e, unit)
 		unitUpdate.pettarget = true; doUpdate = true
 	end
 end
-
--- Event called when the player changes talents
-function MOD:PLAYER_TALENT_UPDATE() talentsInitialized = false; unitUpdate.player = true; doUpdate = true end
 
 -- Event called when a pet changes
 function MOD:UNIT_PET() unitUpdate.pet = true; unitUpdate.pettarget = true; doUpdate = true end
@@ -629,7 +629,6 @@ end
 
 -- Update routine called before each frame is displayed, throttled to minimize CPU usage
 function MOD:Update(elapsed)
-	CheckBlizzFrames() -- make sure blizzard frames are visible or not
 	if MOD.db.profile.enabled then
 		elapsedTime = elapsedTime + elapsed; refreshTime = refreshTime + elapsed
 		if updateGlyphs then InitializeGlyphs(); updateGlyphs = false end
@@ -640,31 +639,37 @@ function MOD:Update(elapsed)
 			MOD:UpdateInternalCooldowns() -- check for expiring internal cooldowns
 			MOD:UpdateCooldownTimes() -- check for expiring normal cooldowns
 			if doUpdate or throttleCount == 0 or MOD:CheckTimeEvents() then -- only do major updates when events warrant it (or about once a second)
+				CheckBlizzFrames() -- make sure blizzard frames are visible or not
 				MOD:UpdateSpellEffects() -- update spell effect timers
 				MOD:UpdateAuras() -- update table containing current auras (actual processing is deferred until needed)
 				MOD:UpdateTrackers() -- update aura trackers for multiple targets
 				MOD:UpdateCooldowns() -- update table containing current cooldowns on action bar buttons and trinkets
 				MOD:UpdateConditions() -- update table containing currently triggered conditions
 				MOD:UpdateHighlights() -- update action bar buttons with highlights and cooldown text
-				Nest_CheckDisplayDimensions() -- check display dimensions and update anchors if they have changed
+				MOD.Nest_CheckDisplayDimensions() -- check display dimensions and update anchors if they have changed
 				MOD:UpdateBars() -- update timer bars for auras and cooldowns
 				MOD:UpdateInCombatBar() -- update the in-combat bar if necessary
-				Nest_Update() -- update the display using the Nest graphics package
+				MOD.Nest_Update() -- update the display using the Nest graphics package
 			else
 				MOD:RefreshInCombatBar() -- update in-combat bar animations only
-				Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
+				MOD.Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
 			end
 			elapsedTime = 0; refreshTime = 0; doUpdate = false
 			if (throttleCount == 0) and MOD.updateOptions then MOD:UpdateOptionsPanel() end -- update option panel once per second, if requested	
 		elseif refreshTime >= refreshThrottle then -- limit animation refesh to about 30 times per second
 			MOD:RefreshInCombatBar() -- update in-combat bar animations only
-			Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
+			MOD.Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
 			refreshTime = 0
 		end
 	else
-		MOD:HideHighlights()
-		MOD:HideBars()
-		MOD:HideInCombatBar()
+		elapsedTime = elapsedTime + elapsed
+		if elapsedTime >= 1 then -- check occasionally to make sure everything is in the right state
+			elapsedTime = 0
+			CheckBlizzFrames() -- make sure blizzard frames are visible or not
+			MOD:HideHighlights()
+			MOD:HideBars()
+			MOD:HideInCombatBar()
+		end
 	end
 end
 
@@ -735,8 +740,8 @@ function MOD:IterateAuras(unit, func, isBuff, p1, p2, p3)
 	local auraTable
 	if unit == "all" then -- special case to get auras cast by player on multiple targets
 		auraTable = isBuff and unitBuffs or unitDebuffs
-		for id, tracker in pairs(auraTable) do
-			for k, t in pairs(tracker) do
+		for _, tracker in pairs(auraTable) do
+			for _, t in pairs(tracker) do
 				SetAuraTimeLeft(t) -- update timeLeft from current time
 				func(unit, t[13], t, isBuff, p1, p2, p3)
 			end
@@ -909,18 +914,18 @@ local function GetBuffs(unit)
 		if name then
 			if not caster then if spellID and fixEnchants[spellID] then caster = "player" else caster = "unknown" end -- fix Jade Spirit, Dancing Steel, River's Song
 			elseif caster == "vehicle" then caster = "player" end -- vehicle buffs treated like player buffs
-			if caster == "player" then MOD:SetDuration(name, duration) end
+			if caster == "player" then MOD:SetDuration(name, spellID, duration) end
 			AddAura(unit, name, true, spellID, count, btype, duration, caster, isStealable, boss, apply, icon, rank, expire, "buff", i)
 		end
 		i = i + 1
 	until not name
-	if unit ~= "player" then return end -- done for all but player, players also need to add vehicle buffs
+	if unit ~= "player" or not UnitHasVehicleUI("player") then return end -- done for all but player, players also need to add vehicle buffs
 	i = 1
 	repeat
 		name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply, boss = UnitAura("vehicle", i, "HELPFUL")
 		if name then
 			if not caster then caster = "unknown" elseif caster == "vehicle" then caster = "player" end -- vehicle buffs treated like player buffs
-			if caster == "player" then MOD:SetDuration(name, duration) end
+			if caster == "player" then MOD:SetDuration(name, spellID, duration) end
 			AddAura(unit, name, true, spellID, count, btype, duration, caster, isStealable, boss, apply, icon, rank, expire, "vehicle buff", i)
 		end
 		i = i + 1
@@ -935,18 +940,18 @@ local function GetDebuffs(unit)
 		name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply, boss = UnitAura(unit, i, "HARMFUL")
 		if name then
 			if not caster then caster = "unknown" elseif caster == "vehicle" then caster = "player" end -- vehicle debuffs treated like player debuffs
-			if caster == "player" then MOD:SetDuration(name, duration) end
+			if caster == "player" then MOD:SetDuration(name, spellID, duration) end
 			AddAura(unit, name, false, spellID, count, btype, duration, caster, isStealable, boss, apply, icon, rank, expire, "debuff", i)
 		end
 		i = i + 1
 	until not name
-	if unit ~= "player" then return end -- done for all but player, players also need to add vehicle debuffs
+	if unit ~= "player" or not UnitHasVehicleUI("player") then return end -- done for all but player, players also need to add vehicle debuffs
 	i = 1
 	repeat
 		name, rank, icon, count, btype, duration, expire, caster, isStealable, _, spellID, apply, boss = UnitAura("vehicle", i, "HARMFUL")
 		if name then
 			if not caster then caster = "unknown" elseif caster == "vehicle" then caster = "player" end -- vehicle debuffs treated like player debuffs
-			if caster == "player" then MOD:SetDuration(name, duration) end
+			if caster == "player" then MOD:SetDuration(name, spellID, duration) end
 			AddAura(unit, name, false, spellID, count, btype, duration, caster, isStealable, boss, apply, icon, rank, expire, "vehicle debuff", i)
 		end
 		i = i + 1
@@ -973,7 +978,7 @@ function MOD:DetectSpellEffect(name, caster)
 	local ect = MOD.db.global.SpellEffects[name] -- check for new spell effect triggered by this spell	
 	if ect and not ect.disable and MOD:CheckCastBy(caster, ect.caster or "player") then
 		local duration = ect.duration
-		if ect.talent and not RavenCheckTalent(ect.talent) then return end -- check required talent
+		if ect.talent and not MOD.CheckTalent(ect.talent) then return end -- check required talent
 		if ect.buff then local auraList = MOD:CheckAura("player", ect.buff, true); if #auraList == 0 then return end end -- check required buff
 		if ect.optbuff then local auraList = MOD:CheckAura("player", ect.optbuff, true); if #auraList > 0 then duration = ect.optduration end end -- check optional buff
 		if ect.condition and not MOD:CheckCondition(ect.condition) then return end -- check required condition
@@ -1068,10 +1073,10 @@ end
 
 -- Check all the tracker entries and remove any that have expired
 function MOD:UpdateTrackers()
-	for id, tracker in pairs(unitBuffs) do
+	for _, tracker in pairs(unitBuffs) do
 		for k, t in pairs(tracker) do SetAuraTimeLeft(t); if (t[5] > 0) and (t[2] == 0) then tracker[k] = ReleaseTable(t) end end
 	end
-	for id, tracker in pairs(unitDebuffs) do
+	for _, tracker in pairs(unitDebuffs) do
 		for k, t in pairs(tracker) do SetAuraTimeLeft(t); if (t[5] > 0) and (t[2] == 0) then tracker[k] = ReleaseTable(t) end end
 	end
 end
@@ -1292,18 +1297,20 @@ function MOD:UpdateCooldowns()
 			end
 		end
 
+		table.wipe(foundSpells)
 		for tab = 1, 2 do -- scan first two tabs of player spell book (general and current spec) for player spells on cooldown
 			local _, _, offset, numSpells = GetSpellTabInfo(tab)
 			for i = 1, numSpells do
 				local index = i + offset
 				local stype, id = GetSpellBookItemInfo(index, "spell")
 				if stype == "SPELL" then -- use spellbook index to check for cooldown
-					local start, duration, enable, count, charges
-					count, charges, start, duration = GetSpellCharges(index, "spell")
-					if count and charges and count < charges then enable = 1 else start, duration, enable = GetSpellCooldown(index, "spell") end
-					if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
-						local name, _, icon = GetSpellInfo(index, "spell")
-						if name then -- make sure we have a valid spell name
+					local name, _, icon = GetSpellInfo(index, "spell")
+					if name then
+						knownSpells[name] = id; foundSpells[name] = id -- cache of previously seen spell names (ids are not sufficient)
+						local start, duration, enable, count, charges
+						count, charges, start, duration = GetSpellCharges(index, "spell")
+						if count and charges and count < charges then enable = 1 else start, duration, enable = GetSpellCooldown(index, "spell") end
+						if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 							if (MOD.myClass ~= "DEATHKNIGHT") or CheckRuneCooldown(name, duration) then -- if death knight check rune cooldown
 								local locked = false
 								if lockedOut then -- check if this spell is on same cooldown as any lockout spell
@@ -1321,10 +1328,11 @@ function MOD:UpdateCooldowns()
 					for slot = 1, numSlots do
 						local spellID = GetFlyoutSlotInfo(id, slot)
 						if spellID then
-							local start, duration, enable = GetSpellCooldown(spellID)
-							if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
-								local name, _, icon = GetSpellInfo(spellID)
-								if name then -- make sure we have a valid spell name
+							local name, _, icon = GetSpellInfo(spellID)
+							if name then -- make sure we have a valid spell name
+								knownSpells[name] = spellID; foundSpells[name] = spellID -- cache of previously seen spell names
+								local start, duration, enable = GetSpellCooldown(spellID)
+								if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 									if (MOD.myClass ~= "DEATHKNIGHT") or CheckRuneCooldown(name, duration) then -- if death knight check rune cooldown
 										local locked = false
 										if lockedOut then -- check if this spell is on same cooldown as any lockout spell
@@ -1340,6 +1348,25 @@ function MOD:UpdateCooldowns()
 						end
 					end
 				end
+			end
+		end
+
+		for name, spellID in pairs(knownSpells) do -- special case for spells like Stormstrike with cooldowns that may not be in spellbook
+			if not foundSpells[name] then -- found a previously known spell that is not currently in the spell book!
+				local start, duration, enable = GetSpellCooldown(name)
+				if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
+					if (MOD.myClass ~= "DEATHKNIGHT") or CheckRuneCooldown(name, duration) then -- if death knight check rune cooldown
+						local locked = false
+						if lockedOut then -- check if this spell is on same cooldown as any lockout spell
+							for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
+						end
+						if not locked then
+							local _, _, icon = GetSpellInfo(name)
+							local link = GetSpellLink(name)
+							AddCooldown(name, spellID, icon, start, duration, "spell link", link, "player")
+						end
+					end
+				end				
 			end
 		end
 		

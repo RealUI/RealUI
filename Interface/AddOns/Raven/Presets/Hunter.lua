@@ -28,6 +28,7 @@ Raven.classSpells.HUNTER = {
 	{ "Cobra Strikes", BUFF, p.Pink, id = 53260 },
 	{ "Concussive Barrage", DEBUFF, p.Cyan, id = 35102 },
 	{ "Concussive Shot", DEBUFF, p.Cyan, cooldown = true, id = 5116 },
+	{ "Counter Shot", DEBUFF, p.Gray, cooldown = true, id = 147362 }, -- added for 5.4
 	{ "Deterrence", BUFF, p.Cyan, cooldown = true, id = 19263 },
 	{ "Dire Beast", BUFF, p.Gray, cooldown = true, school = "Nature", id = 120679 },
 	{ "Disengage", nil, p.Purple3, cooldown = true, id = 781 },
@@ -41,6 +42,7 @@ Raven.classSpells.HUNTER = {
 	{ "Feign Death", BUFF, p.Green3, cooldown = true, id = 5384 },
 	{ "Fervor", BUFF, p.Blue3, cooldown = true, id = 82726 },
 	{ "Fireworks", nil, p.Red2, id = 127933 },
+	{ "Fire!", BUFF, p.Blue3, id = 82926 }, -- proc from Master Marksman
 	{ "Flare", DEBUFF, p.Orange2, cooldown = true, school = "Arcane", id = 1543 },
 	{ "Focus Fire", BUFF, p.Orange3, id = 82692 },
 	{ "Freezing Trap", nil, p.Purple3, cooldown = true, shared = L["Frost Traps"], school = "Frost", id = 1499 },
@@ -58,13 +60,14 @@ Raven.classSpells.HUNTER = {
 	{ "Master's Call", BUFF, p.Yellow2, cooldown = true, id = 53271 },
 	{ "Mend Pet", BUFF, p.Orange2, school = "Nature", id = 136 },
 	{ "Misdirection", BUFF, p.Cyan, cooldown = true, id = 34477 },
-	{ "Narrow Escape", DEBUFF, p.Red2, id = 109298},
+	{ "Narrow Escape", DEBUFF, p.Red2, school = "Nature", id = 109298},
 	{ "Piercing Shots", DEBUFF, p.Red2, id = 53238 },
 	{ "Posthaste", BUFF, p.Brown3, id = 109215},
 	{ "Powershot", nil, p.Yellow1, cooldown = true, id = 109259 },
 	{ "Rapid Fire", BUFF, p.Red2, cooldown = true, id = 3045 },
 	{ "Rapid Recuperation", BUFF, p.Red2, id = 53232 },
-	{ "Readiness", nil, p.Blue1, cooldown = true, id = 23989 },
+--	{ "Readiness", nil, p.Blue1, cooldown = true, id = 23989 }, -- removed in 5.4
+	{ "Ready, Set, Aim...", BUFF, p.Brown3, id = 82925 }, -- stacking buff from Master Marksman
 	{ "Scare Beast", DEBUFF, p.Blue2, school = "Nature", id = 1513},
 	{ "Scatter Shot", DEBUFF, p.Gray, cooldown = true, id = 19503 },
 	{ "Serpent Sting", DEBUFF, p.Brown3, school = "Nature", lockout = true, id = 1978 },
@@ -104,7 +107,7 @@ Raven.classConditions.HUNTER = {
 			["Player Status"] = { enable = true, isResting = false, isMounted = false, },
 			["Spell Ready"] = { enable = true, spell = 13165 }, -- "Aspect of the Hawk"
 			["Any Buffs"] = { enable = true, toggle = true, unit = "player", isMine = true,
-				auras = { 5118, 82661, 13165, 13159, 20043 }, }, -- "Aspect of the Cheetah", "Fox", "Hawk", "Pack", "Wild"
+				auras = { 5118, 82661, 13165, 13159, 20043, 109260 }, }, -- "Aspect of the Cheetah", "Fox", "Hawk", "Pack", "Wild", "Iron Hawk"
 		},	
 	},
 	["No Pet!"] = {

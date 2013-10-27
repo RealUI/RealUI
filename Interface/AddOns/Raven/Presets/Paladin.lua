@@ -6,6 +6,7 @@ local DEBUFF = false
 local p = Raven.ColorPalette
 
 Raven.classSpells.PALADIN = {
+	{ "Alabaster Shield", BUFF, p.Gray, id = 121467 }, 
 	{ "Ancient Crusader", BUFF, p.Purple3, id = 86701 }, -- Guardian of Ancient Kings 
 	{ "Ancient Guardian", BUFF, p.Brown3, id = 86657 }, -- Guardian of Ancient Kings 
 	{ "Ancient Healer", BUFF, p.Orange3, id = 86674 }, -- Guardian of Ancient Kings 
@@ -19,7 +20,7 @@ Raven.classSpells.PALADIN = {
 	{ "Blessing of Kings", BUFF, p.Blue1, school = "Holy", id = 20217 },
 	{ "Blessing of Might", BUFF, p.Blue1, school = "Holy", id = 19740 },
 	{ "Blinding Light", DEBUFF, p.Yellow1, cooldown = true, school = "Holy", id = 115750 },
-	{ "Burden of Guilt", BUFF, p.Blue3, id = 110301 },
+	{ "Burden of Guilt", BUFF, p.Blue3, id = 110300 },
 	{ "Cleanse", nil, p.Yellow1, cooldown = true, school = "Holy", id = 4987 },
 	{ "Censure", DEBUFF, p.Yellow3, school = "Holy", id = 31803 },
 	{ "Consecration", DEBUFF, p.Yellow1, cooldown = true, school = "Holy", id = 26573 },
@@ -83,7 +84,7 @@ Raven.classSpells.PALADIN = {
 	{ "Reckoning", DEBUFF, p.Orange3, cooldown = true, school = "Holy", id = 62124 },
 	{ "Repentance", DEBUFF, p.Brown2, cooldown = true, school = "Holy", id = 20066 },
 	{ "Righteous Fury", BUFF, p.Red3, cooldown = true, id = 25780 },
-	{ "Sacred Shield", BUFF, p.Yellow2, cooldown = true, school = "Holy", id = 20925 },
+	{ "Sacred Shield", BUFF, p.Yellow2, cooldown = true, school = "Holy", id = 20925 }, -- in 5.4, holy get only 3 charges
 	{ "Seal of Command", BUFF, p.Red3, school = "Holy", id = 105361 },
 	{ "Seal of Insight", BUFF, p.Orange1, school = "Holy", id = 20165 },
 	{ "Seal of Justice", BUFF, p.Orange2, school = "Holy", id = 20164 },
@@ -95,7 +96,7 @@ Raven.classSpells.PALADIN = {
 	{ "Stay of Execution", BUFF, p.Yellow2, school = "Holy", id = 114917 },
 	{ "Supplication", BUFF, p.Orange2, id = 31868 },
 	{ "The Art of War", BUFF, p.Orange3, id = 87138 },
-	{ "Turn Evil", DEBUFF, p.Brown3, school = "Holy", id = 10326 },
+	{ "Turn Evil", DEBUFF, p.Brown3, cooldown = true, school = "Holy", id = 10326 }, -- cooldown added in 5.4
 	{ "Unbreakable Spirit", BUFF, p.Brown3, id = 114154 },
 	{ "Vengeance", BUFF, p.Brown2, id = 84839 },
 	{ "Word of Glory", nil, p.Yellow3, cooldown = true, school = "Holy", id = 85673 },
