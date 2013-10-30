@@ -284,13 +284,16 @@ end
 
 function Map:OnEnable()
 	if IsAddOnLoaded("Mapster") or IsAddOnLoaded("m_Map") or IsAddOnLoaded("MetaMap") then return end
+
+	-- 5.4.1 Taint fix
+	setfenv(WorldMapFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
 	
 	-- Make sure we're not in Windowed mode
 	if ( WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE ) then
 		SetCVar("miniWorldMap", 0)
 		WorldMap_ToggleSizeUp()
 	end
-	
+
 	self:SetMapStrata()	
 	
 	WorldMapShowDropDown:SetPoint("BOTTOMRIGHT", WorldMapPositioningGuide, "BOTTOMRIGHT", -2, -4)
