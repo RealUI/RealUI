@@ -584,6 +584,13 @@ function nibRealUI:VARIABLES_LOADED()
 		end
 	end)
 
+	-- Temp solution for Blizzard's 5.4.1 craziness
+	hooksecurefunc("StaticPopup_Show", function(msg)
+		if msg == "ADDON_ACTION_FORBIDDEN" then
+			StaticPopup_Hide(msg)
+		end
+	end)
+
 	-- Fix Regeant shift+clicking in TradeSkill window
 	LoadAddOn("Blizzard_TradeSkillUI")
 	local function TradeSkillReagent_OnClick(self)
