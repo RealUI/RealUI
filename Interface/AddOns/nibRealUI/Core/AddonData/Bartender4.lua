@@ -64,7 +64,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["hidemacrotext"] = true,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 								},
 							}, -- [1]
 							{
@@ -123,7 +123,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["hidemacrotext"] = true,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 									["vehicleui"] = false,
 								},
 								["states"] = {
@@ -201,7 +201,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["always"] = false,
 									["custom"] = true,
 									["possess"] = false,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 									["nocombat"] = false,
 									["vehicleui"] = false,
 								},
@@ -265,7 +265,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["visibility"] = {
 									["custom"] = true,
 									["possess"] = false,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
 									["nocombat"] = false,
 									["vehicleui"] = false,
 								},
@@ -328,7 +328,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["hidemacrotext"] = true,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
 									["vehicleui"] = false,
 								},
 							}, -- [5]
@@ -620,7 +620,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["padding"] = -9,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 								},
 							}, -- [1]
 							{
@@ -679,7 +679,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["padding"] = -9,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 									["vehicleui"] = false,
 								},
 								["states"] = {
@@ -754,7 +754,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["version"] = 3,
 								["padding"] = -9,
 								["visibility"] = {
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]show;hide",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
 									["custom"] = true,
 									["possess"] = false,
 									["always"] = false,
@@ -821,7 +821,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["visibility"] = {
 									["custom"] = true,
 									["possess"] = false,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
 									["nocombat"] = false,
 									["vehicleui"] = false,
 								},
@@ -884,7 +884,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["padding"] = -9,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
+									["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
 									["vehicleui"] = false,
 								},
 							}, -- [5]
@@ -939,7 +939,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 								["hidemacrotext"] = true,
 								["visibility"] = {
 									["custom"] = false,
-									["customdata"] = "[mod:ctrl]show;fade",
+									["customdata"] = "[mod:ctrl][cursor]show;fade",
 									["vehicleui"] = false,
 								},
 							}, -- [6]

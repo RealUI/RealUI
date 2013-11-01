@@ -78,5 +78,24 @@ function nibRealUI:MiniPatch(ver)
 	elseif ver == "80r16" then
 		AuroraConfig = nil
 
+	elseif ver == "80r21" then
+		if IsAddOnLoaded("Bartender4") and Bartender4DB then
+			if Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"] then
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"][1]["visibility"]["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"][2]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"][3]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"][4]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI"]["actionbars"][5]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade"
+			end
+			if Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"] then
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][1]["visibility"]["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][2]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][3]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][4]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][5]["visibility"]["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade"
+				Bartender4DB["namespaces"]["ActionBars"]["profiles"]["RealUI-Healing"]["actionbars"][6]["visibility"]["customdata"] = "[mod:ctrl][cursor]show;fade"
+			end
+		end
+
 	end
 end

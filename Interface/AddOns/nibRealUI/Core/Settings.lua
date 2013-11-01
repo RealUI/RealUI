@@ -11,7 +11,7 @@ local nibRealUICharacter_defaults = {
 
 -- Minipatch list. These get flagged on a PrimaryInstall as not being required.
 local MiniPatchMajorVer = "80"
-local MiniPatches = {1,2,6,8,9,12,16}
+local MiniPatches = {1,2,6,8,9,12,16,21}
 
 local Textures = {
 	Logo = [[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]],
