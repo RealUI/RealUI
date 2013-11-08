@@ -6,7 +6,7 @@ _G.RealUI = nibRealUI
 nibRealUI.verinfo = {
 	[1] = 8,
 	[2] = 0,
-	[3] = 20,
+	[3] = 21,
 }
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -585,9 +585,9 @@ function nibRealUI:VARIABLES_LOADED()
 	end)
 
 	-- Temp solution for Blizzard's 5.4.1 craziness
-	hooksecurefunc("StaticPopup_Show", function(msg)
-		if msg == "ADDON_ACTION_FORBIDDEN" then
-			StaticPopup_Hide(msg)
+	UIParent:HookScript("OnEvent", function(self, event, a1, a2)
+		if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then 
+			StaticPopup_Hide(event)
 		end
 	end)
 
