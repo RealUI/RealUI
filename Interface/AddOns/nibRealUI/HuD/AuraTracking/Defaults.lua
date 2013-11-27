@@ -58,6 +58,7 @@ nibRealUI.auraTrackingDefaults = {
 	},
 -- Free Buffs
 	{spell = 114851},	-- Blood Charge
+	{spell = 51124},	-- Killing Machine
 	{spell = 51271},	-- Pillar of Frost
 	{spell = 49039},	-- Lichborne
 	{spell = 48792},	-- Icebound Fortitude
@@ -204,8 +205,8 @@ nibRealUI.auraTrackingDefaults = {
 		specs = {false, true, false}
 	},
 	{	-- Lock and Load (Surv)
-		spell = 53301,
-		minLevel = 58,
+		spell = 56453,
+		minLevel = 43,
 		order = 1,
 		specs = {false, false, true}
 	},
@@ -222,6 +223,7 @@ nibRealUI.auraTrackingDefaults = {
 -- Free Buffs
 	{spell = 82692},	-- Focus Fire
 	{spell = 34471},	-- Beast Within
+	{spell = 53301},	-- Explosive Shot (buff or debuff?)
 	{spell = 53302},	-- Sniper Training
 	{spell = 19263},	-- Deterrence
 	{spell = 53480},	-- Roar of Sacrifice (Cunning)
