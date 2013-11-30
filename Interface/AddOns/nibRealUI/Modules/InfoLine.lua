@@ -3259,29 +3259,16 @@ local function Clock_OnEnter(self)
 	GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 	
 	-- TB/WG
+	GameTooltip:AddLine(" ")
 	local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
 	local _, _, _, _, TBTime = GetWorldPVPAreaInfo(2)
-	
 	if ( WGTime ~= nil ) then
-		WGTime = ConvertSecondstoTime(WGTime)
-	else
-		WGTime = L["No Wintergrasp Time Available"]
-	end
-
-	if ( TBTime ~= nil ) then
-		TBTime = ConvertSecondstoTime(TBTime)
-	else
-		TBTime = L["No Tol Barad Time Available"]
-	end
-
-	GameTooltip:AddLine(" ")
-	if ( WGTime ~= nil ) then
-		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Wintergrasp Time Left"]), strform("%s", WGTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Wintergrasp Time Left"]), strform("%s", ConvertSecondstoTime(WGTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 	else
 		GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["No Wintergrasp Time Available"]))
 	end
 	if ( TBTime ~= nil ) then
-		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Tol Barad Time Left"]), strform("%s", TBTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Tol Barad Time Left"]), strform("%s", ConvertSecondstoTime(TBTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 	else
 		GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["No Tol Barad Time Available"]))
 	end
