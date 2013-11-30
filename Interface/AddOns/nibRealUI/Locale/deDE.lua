@@ -238,4 +238,15 @@ L["HuD Instructions"] = [[
 		|cffffa500Step 3:|r Wen Du fertig bist, klicke |cff30ff30UI-Elemente verbergen|r.
 	]]
 
+-- World Boss Info
+L["Galion"]="Galion"
+L["Sha Of Anger"]="Sha Of Anger"
+L["Nalak"]="Nalak"
+L["Oondasta"]="Oondasta"
+L["Celestrials"]="Celestrials"
+L["Ordos"]="Ordos"
+
+L["World Boss Done"]="\124cff00ff00Done\124r"
+L["World Boss Not Done"]="\124cffff0000Not Done\124r"
+
 end

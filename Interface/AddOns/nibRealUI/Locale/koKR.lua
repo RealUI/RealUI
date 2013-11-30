@@ -238,4 +238,15 @@ L["HuD Instructions"] = [[
 		|cffffa500Step 3:|r 끝낼 때는 |cff30ff30UI 구성 숨기기|r를 클릭합니다.
 	]]
 
+-- World Boss Info
+L["Galion"]="Galion"
+L["Sha Of Anger"]="Sha Of Anger"
+L["Nalak"]="Nalak"
+L["Oondasta"]="Oondasta"
+L["Celestrials"]="Celestrials"
+L["Ordos"]="Ordos"
+
+L["World Boss Done"]="\124cff00ff00Done\124r"
+L["World Boss Not Done"]="\124cffff0000Not Done\124r"
+
 end

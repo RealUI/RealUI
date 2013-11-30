@@ -236,4 +236,15 @@ L["HuD Instructions"] = [[
 		|cffffa500Step 3:|r Once finished, click |cff30ff30Okay|r to close the UI Config screen.
 	]]
 
+-- World Boss Info
+L["Galion"]="Galion"
+L["Sha Of Anger"]="Sha Of Anger"
+L["Nalak"]="Nalak"
+L["Oondasta"]="Oondasta"
+L["Celestrials"]="Astres"
+L["Ordos"]="Ordos"
+
+L["World Boss Done"]="\124cff00ff00Done\124r"
+L["World Boss Not Done"]="\124cffff0000Not Done\124r"
+
 end

@@ -6,7 +6,7 @@ L["Enabled"] = "Activ\195\169"
 L["Type /realui"] = "Taper %s Pour configurer l'interface."
 L["Combat Lockdown"] = "Combat Lockdown"
 L["Layout will change after you leave combat."] = "La dosposition changera d\195\168s la sortie du combat."
-L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
+L["Info Line currency tracking will update after UI Reload (/rl)"] = "Le suivi des monnaies dans la barre d'info sera mis à jour après le rechargement de l'UI (/rl)"
 
 -- Installation
 L["INSTALL"] = "CLIQUEZ POUR INSTALLER"
@@ -64,8 +64,8 @@ L["Bars"] = "Barres"	-- Class Color Health "Bars"
 L["Link Layouts"] = "Lier les confs"
 L["Use same settings between DPS/Tank and Healing layouts."] = "Utilise les m\195\170mes param\195\168tres entre DPS/Tank et Soigneur."
 L["Use Large HuD"] = "Use Large HuD"
-L["Increases size of key HuD elements (Unit Frames, etc)."] = "Increases size of key HuD elements (Unit Frames, etc)."
-L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."
+L["Increases size of key HuD elements (Unit Frames, etc)."] = "Augmente la taille des élément clés du HuD (cadres d'unit\195\169, etc)."
+L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."] = "Changer la taille du HuD modifiera la taille de plusieurs \195\169l\195\169ments, en cons\195\169quence il est recommand\195\169 de v\195\169rifier les positions de \195\169l\195\169ments de l'UI une fois le changement de taille efffectu\195\169."
 
 L["RealUI Control"] = "Contr\195\180le RealUI"
 L["Allow RealUI to control the action bars."] = "Autoriser RealUI a contr\195\180ler les barres d'actions."
@@ -235,5 +235,16 @@ L["HuD Instructions"] = [[
 		|cffffa500Step 2:|r Utiliser la fenetre |cff30ff30Parametres des elements|r pour positionner chaque element.
 		|cffffa500Step 3:|r Une fois terminer, cliquer |cff30ff30OK|r pour fermer l'ecran de configuration.
 	]]
+
+-- World Boss Info
+L["Galion"]="Galion"
+L["Sha Of Anger"]="Sha de la Col\195\168re"
+L["Nalak"]="Nalak"
+L["Oondasta"]="Oondasta"
+L["Celestrials"]="Astres"
+L["Ordos"]="Ordos"
+
+L["World Boss Done"]="\124cff00ff00Fait\124r"
+L["World Boss Not Done"]="\124cffff0000Pas Fait\124r"
 
 end

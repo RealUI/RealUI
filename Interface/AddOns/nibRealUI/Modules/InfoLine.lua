@@ -3251,29 +3251,29 @@ local function Clock_OnEnter(self)
 	local serTime = RetrieveGameTime(not db.other.clock.hr24)
 	local caltext = date("%b %d (%a)")
 
-	local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
-	local _, _, _, _, TBTime = GetWorldPVPAreaInfo(2)
-	
-	-- Wintergrasp
-	if ( WGTime ~= nil ) then
-		WGTime = ConvertSecondstoTime(WGTime)
-	else
-		WGTime = L["No Wintergrasp Time Available"]
-	end
-
-	-- Tol Barad
-	if ( TBTime ~= nil ) then
-		TBTime = ConvertSecondstoTime(TBTime)
-	else
-		TBTime = L["No Tol Barad Time Available"]
-	end
-
 	GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
 	GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, TIMEMANAGER_TOOLTIP_TITLE))
 	GameTooltip:AddLine(" ")
 	GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_REALMTIME), strform("%s", serTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 	GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_LOCALTIME), strform("%s", locTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 	GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+	
+	-- TB/WG
+	local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
+	local _, _, _, _, TBTime = GetWorldPVPAreaInfo(2)
+	
+	if ( WGTime ~= nil ) then
+		WGTime = ConvertSecondstoTime(WGTime)
+	else
+		WGTime = L["No Wintergrasp Time Available"]
+	end
+
+	if ( TBTime ~= nil ) then
+		TBTime = ConvertSecondstoTime(TBTime)
+	else
+		TBTime = L["No Tol Barad Time Available"]
+	end
+
 	GameTooltip:AddLine(" ")
 	if ( WGTime ~= nil ) then
 		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Wintergrasp Time Left"]), strform("%s", WGTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
@@ -3285,11 +3285,29 @@ local function Clock_OnEnter(self)
 	else
 		GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["No Tol Barad Time Available"]))
 	end
+	
+	-- Invites
 	GameTooltip:AddLine(" ")
 	if self.pendingCalendarInvites and self.pendingCalendarInvites > 0 then
 		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Pending Invites:"]), strform("%s", self.pendingCalendarInvites), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 		GameTooltip:AddLine(" ")
 	end
+
+	-- World Bosses infos
+	local WorldBosses = {
+		["Galion"] = 32098,
+		["Sha Of Anger"] = 32099,
+		["Nalak"] = 32518,
+		["Oondasta"] = 32519,
+		["Celestrials"] = 33117,
+		["Ordos"] = 33118
+	}
+	for k,v in pairs(WorldBosses) do 
+		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L[k]), strform(IsQuestFlaggedCompleted(v) and L["World Boss Done"] or L["World Boss Not Done"]),  0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+	end
+
+	-- Hint
+	GameTooltip:AddLine(" ")
 	GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to show calendar."]))
 	GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Shift+Click> to show timer."]))
 	GameTooltip:Show()
