@@ -3294,20 +3294,22 @@ local function Clock_OnEnter(self)
 	end
 
 	-- World Bosses infos
-	local WorldBosses = {
-		["Galion"] = 32098,
-		["Sha Of Anger"] = 32099,
-		["Nalak"] = 32518,
-		["Oondasta"] = 32519,
-		["Celestrials"] = 33117,
-		["Ordos"] = 33118
-	}
-	for k,v in pairs(WorldBosses) do 
-		GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L[k]), strform(IsQuestFlaggedCompleted(v) and L["World Boss Done"] or L["World Boss Not Done"]),  0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+	if UnitLevel("player") >= 90 then
+		local WorldBosses = {
+			["Galion"] = 32098,
+			["Sha Of Anger"] = 32099,
+			["Nalak"] = 32518,
+			["Oondasta"] = 32519,
+			["Celestrials"] = 33117,
+			["Ordos"] = 33118
+		}
+		for k,v in pairs(WorldBosses) do 
+			GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L[k]), strform(IsQuestFlaggedCompleted(v) and L["World Boss Done"] or L["World Boss Not Done"]),  0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+		end
+		GameTooltip:AddLine(" ")
 	end
 
 	-- Hint
-	GameTooltip:AddLine(" ")
 	GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to show calendar."]))
 	GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Shift+Click> to show timer."]))
 	GameTooltip:Show()
