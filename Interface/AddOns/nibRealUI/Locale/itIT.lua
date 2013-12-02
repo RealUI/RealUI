@@ -237,11 +237,11 @@ L["HuD Instructions"] = [[
 	]]
 
 -- World Boss Info
-L["Galion"]="Galion"
+L["Galleon"]="Galleon"
 L["Sha Of Anger"]="Sha Of Anger"
 L["Nalak"]="Nalak"
 L["Oondasta"]="Oondasta"
-L["Celestrials"]="Astres"
+L["Celestials"]="Astres"
 L["Ordos"]="Ordos"
 
 L["World Boss Done"]="\124cff00ff00Done\124r"

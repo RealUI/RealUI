@@ -3283,11 +3283,11 @@ local function Clock_OnEnter(self)
 	-- World Bosses infos
 	if UnitLevel("player") >= 90 then
 		local WorldBosses = {
-			["Galion"] = 32098,
+			["Galleon"] = 32098,
 			["Sha Of Anger"] = 32099,
 			["Nalak"] = 32518,
 			["Oondasta"] = 32519,
-			["Celestrials"] = 33117,
+			["Celestials"] = 33117,
 			["Ordos"] = 33118
 		}
 		for k,v in pairs(WorldBosses) do 
