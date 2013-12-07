@@ -974,7 +974,12 @@ function UnitFrames:UpdateUnitInfo(UnitID)
 	_, UF[UnitID].class = UnitClass(UnitID)
 	
 	-- Level
-	local uLevel = UnitLevel(UnitID)
+	local uLevel
+	if(UnitIsWildBattlePet(UnitID) or UnitIsBattlePetCompanion(UnitID)) then
+		uLevel = UnitBattlePetLevel(UnitID)
+	else
+		uLevel = UnitLevel(UnitID)
+	end
 	if uLevel <= 0 then
 		uLevel = 99
 	end
