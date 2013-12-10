@@ -185,7 +185,7 @@ function ConfigBar_AuraTracking:ChangeTrackerSetting(key, value)
 		forms[value] = not(forms[value])
 		AuraTracking:ChangeTrackerSetting(selTracker, "forms", forms)
 
-	elseif (key == "hideOOC") or (key == "hideStacks") then
+	elseif (key == "hideOOC") or (key == "hideStacks") or (key == "hideTime") then
 		local val = AuraTracking:GetTrackingData(selTracker)[key]
 		if val then
 			AuraTracking:ChangeTrackerSetting(selTracker, key, nil)
@@ -209,7 +209,7 @@ function ConfigBar_AuraTracking:UpdateTrackerConfig()
 
 	local tableHeight = 247
 	local staticHeight = 86
-	local auraHeight = 294
+	local auraHeight = 314
 
 	if nibRealUI.class == "DRUID" then auraHeight = auraHeight + 20 end
 
@@ -338,6 +338,10 @@ function ConfigBar_AuraTracking:UpdateTrackerConfig()
 		-- HideStacks
 		local hideStacks = info.hideStacks ~= nil
 		self.trackerSettings.hideStacks.check.highlight:SetAlpha(hideStacks and 1 or 0)
+
+		-- Hide Time
+		local hideTime = info.hideTime ~= nil
+		self.trackerSettings.hideTime.check.highlight:SetAlpha(hideTime and 1 or 0)
 
 	else
 		oP.aura:Hide()
@@ -934,6 +938,23 @@ function ConfigBar_AuraTracking:SetupWindow()
 		},
 	}
 	self.trackerSettings.hideStacks = cbGUI:CreateOptionList(aP, "VERTICAL", check)[1]
+
+	-- Hide Time
+	check = {
+		{
+			label = L["Hide Time"],
+			desc = L["Don't show Buff/Debuff time remaining on this tracker."],
+			descGap = 170,
+			func = function()
+				self:ChangeTrackerSetting("hideTime")
+			end,
+			width = (Element.info.window.width - 24),
+			height = 20,
+			x = 0,
+			y = nextY - 52,
+		},
+	}
+	self.trackerSettings.hideTime = cbGUI:CreateOptionList(aP, "VERTICAL", check)[1]
 
 
 	---------------------------

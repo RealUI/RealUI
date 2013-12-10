@@ -12,6 +12,11 @@ local ConfigBar_ActionBars = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceCo
 
 local Element = {}
 
+function RealUI_ToggleKeyBindings()
+	LibStub('LibKeyBound-1.0'):Toggle()
+	ConfigBar_ActionBars:Close()
+end
+
 local sideBarsLinked
 local function UpdateSideBarLink()
 	sideBarsLinked = not(ndb.actionBarSettings[nibRealUI.cLayout].sidePositions == 2)
@@ -175,10 +180,10 @@ function ConfigBar_ActionBars:ToggleRealUIControl(refresh)
 
 	if inControl then
 		self.optionsPanel:Show()
-		Element.window:SetHeight(535)
+		Element.window:SetHeight(569)
 	else
 		self.optionsPanel:Hide()
-		Element.window:SetHeight(160)
+		Element.window:SetHeight(192)
 	end
 
 	self:SetUpChatCommands()
@@ -274,11 +279,23 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	---- Bartender Options ----
 	local button = {
-		label = ADVANCED_LABEL.." "..CHAT_CONFIGURATION,
-		width = 136,
+		label = LibStub("AceLocale-3.0"):GetLocale("Bartender4")["Key Bindings"],
+		width = 150,
 		height = 22,
 		x = 14,
-		y = -79,
+		y = -84,
+		secure = true,
+		macroText = "/tar "..UnitName("player").."\n/focus\n/run RealUI_ToggleKeyBindings()",
+	}
+	local kbButton = cbGUI:CreateButton(Element, button)
+	nibRealUI:CreateBGSection(Element.window, kbButton, kbButton)
+
+	button = {
+		label = ADVANCED_LABEL.." "..CHAT_CONFIGURATION,
+		width = 150,
+		height = 22,
+		x = 14,
+		y = -113,
 		func = function()
 			LibStub("AceConfigDialog-3.0"):Open("Bartender4")
 			self:Close()
@@ -291,7 +308,7 @@ function ConfigBar_ActionBars:SetupWindow()
 	local note = {
 		text = L["Note: Bartender settings"],
 		x = 12,
-		y = -108,
+		y = -142,
 		color = "green",
 	}
 	cbGUI:CreateString(Element, note)
@@ -300,7 +317,7 @@ function ConfigBar_ActionBars:SetupWindow()
 	---- Options Panel ----
 	self.optionsPanel = CreateFrame("Frame", nil, Element.window)
 	local oP = self.optionsPanel
-		oP:SetPoint("TOPLEFT", Element.window, "TOPLEFT", 0, -160)
+		oP:SetPoint("TOPLEFT", Element.window, "TOPLEFT", 0, -194)
 		oP:SetPoint("BOTTOMRIGHT")
 
 		

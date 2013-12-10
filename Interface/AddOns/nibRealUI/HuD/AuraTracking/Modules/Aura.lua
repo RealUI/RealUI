@@ -132,7 +132,7 @@ local function AuraUpdate(self, event, unit)
 	-- Update Frame
 	if self.auraEndTime ~= nil and (self.auraEndTime == 0 or self.auraEndTime >= GetTime()) then
 		-- Cooldown
-		if not(self.bIsAura) and (self.auraEndTime > 0) then
+		if not(self.bIsAura) and (self.auraEndTime > 0) and not(self.hideTime) then
 			if self.useCustomCD then
 				self.customCD:Show()
 				self.customCDTime:Show()
@@ -419,6 +419,7 @@ function Aura:SetIndicatorInfo(info)
 
 	f.hideOOC = info.hideOOC
 	f.hideStacks = info.hideStacks
+	f.hideTime = info.hideTime
 
 	f.ignoreRaven = info.ignoreRaven
 
