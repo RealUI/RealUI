@@ -123,14 +123,16 @@ local Tablets = {
 	durability = Tablet20,
 }
 
--- Try Dynamics Currency start
 local HPName, CPName, JPName, VPName, BPCurr1Name, BPCurr2Name, BPCurr3Name, GoldName 
--- Try Dynamics Currency end
 local CurrencyStartSet
 
 local LootSpecIDs = {}
 local LootSpecClass
 
+
+----------------
+-- Micro Menu --
+----------------
 local ddMenuFrame = CreateFrame("Frame", "RealUIStartDropDown", UIParent, "UIDropDownMenuTemplate")
 local MicroMenu = {
 	{text = "|cffffffffRealUI|r",
@@ -243,10 +245,21 @@ local MicroMenu = {
 	{text = ENCOUNTER_JOURNAL,
 		func = function() ToggleEncounterJournal() end,
 		notCheckable = true
+	},	
+	{text = LOOKING_FOR_RAID,
+		func = function() ToggleRaidBrowser() end,
+		notCheckable = true
 	},
+	{text = BLIZZARD_STORE,
+		func = function() ToggleStoreUI() end,
+		notCheckable = true,
+		-- disabled = IsTrialAccount() or C_StorePublic.IsDisabledByParentalControls()
+	}
 }
 
--- Options
+-------------
+-- Options --
+-------------
 local table_Sides = {
 	"LEFT",
 	"RIGHT"

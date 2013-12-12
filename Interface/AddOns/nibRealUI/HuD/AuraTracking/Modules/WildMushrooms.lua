@@ -12,8 +12,8 @@ local ShroomID = 145205	-- Wild Mushrooms
 local ShroomName = ""
 local BloomID = 102791	-- Wild Mushrooms: Bloom
 local RejuvID = 774		-- Rejuvenation
-local MaxHealthPercent = 0.67
-local OverHealPercent = 0.5
+local MaxHealthPercent = 2
+local OverHealPercent = 1
 local MinLevel = 84
 
 local function GetMushroomTime()
