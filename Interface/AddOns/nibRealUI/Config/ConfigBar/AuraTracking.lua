@@ -942,8 +942,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Hide Time
 	check = {
 		{
-			label = L["Hide Time"],
-			desc = L["Don't show Buff/Debuff time remaining on this tracker."],
+			label = "Hide Time",
+			desc = "Don't show Buff/Debuff time remaining on this tracker.",
 			descGap = 170,
 			func = function()
 				self:ChangeTrackerSetting("hideTime")

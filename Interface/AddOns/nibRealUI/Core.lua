@@ -561,8 +561,8 @@ function nibRealUI:RegisterLockdownUpdate(id, fun, ...)
 end
 
 -- Version info retrieval
-function nibRealUI:GetVerString(...)
-	if ... then
+function nibRealUI:GetVerString(returnLong)
+	if returnLong then
 		return string.format("|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange).."%s|r.|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue).."%s|r |cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.green).."r%s|r", nibRealUI.verinfo[1], nibRealUI.verinfo[2], nibRealUI.verinfo[3])
 	else
 		return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
@@ -584,12 +584,12 @@ function nibRealUI:VARIABLES_LOADED()
 		end
 	end)
 
-	-- Temp solution for Blizzard's 5.4.1 craziness
-	UIParent:HookScript("OnEvent", function(self, event, a1, a2)
-		if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then 
-			StaticPopup_Hide(event)
-		end
-	end)
+	-- -- Temp solution for Blizzard's 5.4.1 craziness
+	-- UIParent:HookScript("OnEvent", function(self, event, a1, a2)
+	-- 	if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then 
+	-- 		StaticPopup_Hide(event)
+	-- 	end
+	-- end)
 
 	-- Fix Regeant shift+clicking in TradeSkill window
 	LoadAddOn("Blizzard_TradeSkillUI")
@@ -712,6 +712,7 @@ function nibRealUI:PLAYER_LOGIN()
 		end
 	end
 
+	-- Update styling
 	self:StyleSetStripeOpacity()
 	self:StyleSetWindowOpacity()
 	self:StyleSetChatFont()
@@ -827,23 +828,23 @@ function nibRealUI:SetModuleEnabled(module, value)
 end
 
 function nibRealUI:Refresh()	
-	db = self.db.profile
-	dbc = self.db.char
-	dbg = self.db.global
-	self.media = db.media
+	-- db = self.db.profile
+	-- dbc = self.db.char
+	-- dbg = self.db.global
+	-- self.media = db.media
 	
-	for key, val in self:IterateModules() do
-		if self:GetModuleEnabled(key) and not val:IsEnabled() then
-			self:EnableModule(key)
-		elseif not self:GetModuleEnabled(key) and val:IsEnabled() then
-			self:DisableModule(key)
-		end
-		if val.RefreshMod then
-			if type(val.RefreshMod) == "function" and val:IsEnabled() then
-				val:RefreshMod()
-			end
-		end
-	end	
-	nibRealUI:ConfigRefresh()
+	-- for key, val in self:IterateModules() do
+	-- 	if self:GetModuleEnabled(key) and not val:IsEnabled() then
+	-- 		self:EnableModule(key)
+	-- 	elseif not self:GetModuleEnabled(key) and val:IsEnabled() then
+	-- 		self:DisableModule(key)
+	-- 	end
+	-- 	if val.RefreshMod then
+	-- 		if type(val.RefreshMod) == "function" and val:IsEnabled() then
+	-- 			val:RefreshMod()
+	-- 		end
+	-- 	end
+	-- end	
+	-- nibRealUI:ConfigRefresh()
 	nibRealUI:ReloadUIDialog()
 end

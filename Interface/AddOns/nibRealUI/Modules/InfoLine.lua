@@ -1237,7 +1237,7 @@ local function Currency_UpdateTablet()
 	local HasMaxLvl, OnlyMe = false, true
 	
 	-- Get max col widths
-	MaxWidth = {[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0}
+	MaxWidth = {[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0, [12] = 0}
 	for kr, vr in pairs(CurrencyTabletData) do
 		local realm = kr
 		if (CurrencyTabletData[realm]["Alliance"] and (#CurrencyTabletData[realm]["Alliance"] > 0)) or
@@ -1250,7 +1250,7 @@ local function Currency_UpdateTablet()
 						if vn[2] == MAX_PLAYER_LEVEL then HasMaxLvl = true end
 						TotalGold = TotalGold + vn[3]
 						MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize))
-						for i = 4, 9 do
+						for i = 4, (NumCurrencies + 4) do
 							MaxWidth[i] = max(MaxWidth[i], GetTextWidth(vn[i], db.text.tablets.normalsize))
 						end
 					end
@@ -1259,7 +1259,7 @@ local function Currency_UpdateTablet()
 			MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(TotalGold), db.text.tablets.normalsize))
 		end
 	end
-	MaxWidth[2] = 20
+	MaxWidth[2] = 20 	-- Level
 	
 	wipe(RealmSection)
 	local line = {}
