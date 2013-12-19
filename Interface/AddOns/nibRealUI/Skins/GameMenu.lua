@@ -19,6 +19,9 @@ function GameMenu:Skin()
 		end
 	end
 
+	GameMenuButtonStore:SetScale(0.00001)
+	GameMenuButtonStore:SetAlpha(0)
+
 	-- RealUI Control
 	GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 37)
 
@@ -44,5 +47,5 @@ function GameMenu:OnInitialize()
 end
 
 function GameMenu:OnEnable()
-	self:Skin()
+	GameMenuFrame:HookScript("OnShow", function() GameMenu:Skin() end)
 end
