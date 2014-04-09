@@ -1093,7 +1093,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		OpenMailFrameIcon:Hide()
 		OpenMailHorizontalBarLeft:Hide()
 		select(18, MailFrame:GetRegions()):Hide()
-		select(26, OpenMailFrame:GetRegions()):Hide()
+		-- select(26, OpenMailFrame:GetRegions()):Hide()
 
 		OpenMailLetterButton:SetNormalTexture("")
 		OpenMailLetterButton:SetPushedTexture("")
