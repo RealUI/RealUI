@@ -1,0 +1,107 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <Font name="RealUISkinFont" font="Interface\AddOns\DBM-RealUI\media\pixel_small.ttf" outline="NORMAL" virtual="true">
+        <Color r="1.0" g="1.0" b="1.0"/>
+        <FontHeight>
+            <AbsValue val="8"/>
+        </FontHeight>
+    </Font>
+    <Frame name="RealUISkinTimerTemplate" virtual="true" frameStrata="MEDIUM" topLevel="true">
+        <Size>
+            <AbsDimension x="185" y="24"/>
+        </Size>
+        <Frames>
+            <StatusBar name="$parentBar">
+                <Size>
+                    <AbsDimension x="185" y="10"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="CENTER" relativePoint="CENTER">
+                        <Offset>
+                            <AbsDimension x="0" y="9"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers> 
+                    <Layer level="OVERLAY">
+                        <Texture name="$parentSpark" file="Interface\AddOns\DBM-RealUI\media\DBMSpark" alphaMode="ADD">
+                            <Size>
+                                <AbsDimension x="16" y="30"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </Texture>
+                        <FontString name="$parentTimer" inherits="RealUISkinFont" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+                                    <Offset>
+                                        <AbsDimension x="-4" y="14"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                        <FontString name="$parentName" inherits="RealUISkinFont" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+                                    <Offset>
+                                        <AbsDimension x="0" y="14"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                        <Texture name="$parentIcon1">
+                            <Size>
+                                <AbsDimension x="24" y="24"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT">
+                                    <Offset>
+                                        <AbsDimension x="-4" y="-1"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentIcon2">
+                            <Size>
+                                <AbsDimension x="24" y="24"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+                                    <Offset>
+                                        <AbsDimension x="4" y="-1"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+                <BarTexture name="$parentTexture" parentKey="texture" file="Interface\AddOns\DBM-RealUI\media\Plain"/>
+                <BarColor r="1.0" g="0.8" b="0.0"/>
+            </StatusBar>
+            <Frame name="$parentBackdrop" frameStrata="BACKGROUND">
+                <Size x="187" y="12"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentBar" x="-1" y="1"/>
+                </Anchors>
+                <Backdrop bgFile="Interface\AddOns\DBM-RealUI\media\Plain" edgeFile="Interface\AddOns\DBM-RealUI\media\Plain">
+                    <Color r="0" g="0" b="0" a="0.5"/>
+                    <BorderColor r="0" g="0" b="0" a="1"/>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <TileSize>
+                        <AbsValue val="16"/>
+                    </TileSize>
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                </Backdrop>
+            </Frame>
+        </Frames>
+    </Frame>
+</Ui>

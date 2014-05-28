@@ -1,0 +1,13 @@
+﻿## Interface: 50400
+## Title:|cffffe00a<|r|cffff7d0aDBM Skin|r|cffffe00a>|r |cff69ccf0RealUI Skin|r
+## Author: Gethe88
+## Version: @project-version@
+## RequiredDeps: DBM-Core
+## X-DBM-Timer-Skin: 1
+## X-DBM-Timer-Skin-Name: RealUI
+## X-DBM-Timer-Skin-Textures: Interface\AddOns\DBM-RealUI\media\Plain.tga
+## X-DBM-Timer-Skin-Texture-Names: Plain
+## X-DBM-Timer-Skin-Fonts: Interface\AddOns\DBM-RealUI\media\pixel_small.ttf
+## X-DBM-Timer-Skin-Font-Names: Pixel Small
+TimerSkin.xml
+Skin.lua

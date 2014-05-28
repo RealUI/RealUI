@@ -5,7 +5,7 @@
 ## Version: 8.0 r28
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
-## OptionalDeps: Ace3, SharedMedia, AceGUI-3.0-SharedMediaWidgets, Aurora, Grid2, Bartender4, Raven
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Aurora, Bartender4, Grid2, Raven, SharedMedia
 ## X-oUF: oUFembed
 
 Libs\Embeds.xml

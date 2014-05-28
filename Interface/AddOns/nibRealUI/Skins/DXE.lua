@@ -150,7 +150,7 @@ function SkinDXE:OnInitialize()
 	dbc = self.db.char
 
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterSkin(MODNAME, "DBM")
+	nibRealUI:RegisterSkin(MODNAME, "DXE")
 end
 
 function SkinDXE:OnEnable()

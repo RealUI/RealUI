@@ -5,17 +5,13 @@ local MODNAME = "SkinDBM"
 local SkinDBM = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local dbc
 
+local F, C = unpack(Aurora)
+
 function SkinDBM:Skin()
-	local F = Aurora[1]
 	if DBM and DBM.Bars and nibRealUICharacter then
 		if not dbc.settingsApplied then
 			nibRealUI:LoadDBMData()
 
-			DBM.Bars:SetOption("FontSize", 1)
-			DBM.Bars:SetOption("HugeScale", 1)
-			DBM.Bars:SetOption("Scale", 1)
-			DBM.Bars:SetOption("HugeWidth", 160)
-			DBM.Bars:SetOption("Width", 160)
 			DBM.Bars:SetOption("HugeBarYOffset", 9)
 			DBM.Bars:SetOption("BarYOffset", 9)
 
@@ -27,57 +23,146 @@ function SkinDBM:Skin()
 			end
 		end
 	end
+end
 
-	hooksecurefunc(DBT, "CreateBar", function(self)
-		for bar in self:GetBarIterator() do
+function SkinDBM:styleCore()
+	local firstInfo = true
+	hooksecurefunc(DBM.InfoFrame, "Show", function()
+		if firstInfo then
+			DBMInfoFrame:SetBackdrop(nil)
+			local bd = CreateFrame("Frame", nil, DBMInfoFrame)
+			bd:SetPoint("TOPLEFT")
+			bd:SetPoint("BOTTOMRIGHT")
+			bd:SetFrameLevel(DBMInfoFrame:GetFrameLevel()-1)
+			F.CreateBD(bd)
+
+			firstInfo = false
+		end
+	end)
+
+	local firstRange = true
+	hooksecurefunc(DBM.RangeCheck, "Show", function()
+		if firstRange then
+			DBMRangeCheck:SetBackdrop(nil)
+			local bd = CreateFrame("Frame", nil, DBMRangeCheck)
+			bd:SetPoint("TOPLEFT")
+			bd:SetPoint("BOTTOMRIGHT")
+			bd:SetFrameLevel(DBMRangeCheck:GetFrameLevel()-1)
+			F.CreateBD(bd)
+
+			firstRange = false
+		end
+	end)
+
+	local count = 1
+
+	local styleBar = function()
+		local bar = _G["DBM_BossHealth_Bar_"..count]
+
+		while bar do
 			if not bar.styled then
-				local frame = bar.frame
-				local name = frame:GetName()
-
-				local tbar = _G[name.."Bar"]
-				local texture = _G[name.."BarTexture"]
-				local spark = _G[name.."BarSpark"]
+				local name = bar:GetName()
+				local sb = _G[name.."Bar"]
 				local text = _G[name.."BarName"]
 				local timer = _G[name.."BarTimer"]
-				local icon1 = _G[name.."BarIcon1"]
 
-				tbar:SetHeight(7)
+				_G[name.."BarBackground"]:Hide()
+				_G[name.."BarBorder"]:SetNormalTexture("")
 
-				F.CreateBDFrame(tbar, 0.35)
+				sb:SetStatusBarTexture(C.media.backdrop)
 
-				texture:SetTexture(RealUI.media.textures.plain)
-				texture.SetTexture = F.dummy
-
-				spark:SetHeight(28)
-				spark:SetWidth(16)
-				spark:SetTexture([[Interface\AddOns\nibRealUI\Media\Skins\DBMSpark]])
-
-				text:ClearAllPoints()
-				text:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 18)
-				text:SetFont(RealUI.font.standard, 11, "OUTLINE")
-				text:SetShadowColor(0, 0, 0, 0)
-				text.SetFont = F.dummy
-
-				timer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -4, 16)
-				timer:SetFont(RealUI.font.standard, 11, "OUTLINE")
-				timer:SetShadowColor(0, 0, 0, 0)
-				timer.SetFont = F.dummy
-				
-				icon1:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-				icon1:ClearAllPoints()
-				icon1:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", -4, 6.5)
-				icon1:SetSize(24, 24)
-				F.CreateBDFrame(icon1)
+				F.CreateBDFrame(sb)
 
 				bar.styled = true
 			end
+
+			count = count + 1
+			bar = _G["DBM_BossHealth_Bar_"..count]
 		end
+	end
+
+	hooksecurefunc(DBM.BossHealth, "AddBoss", styleBar)
+	hooksecurefunc(DBM.BossHealth, "UpdateSettings", styleBar)
+end
+
+function SkinDBM:styleGUI()
+	DBM_GUI_OptionsFrameHeader:SetTexture(nil)
+	DBM_GUI_OptionsFramePanelContainer:SetBackdrop(nil)
+	DBM_GUI_OptionsFrameBossMods:DisableDrawLayer("BACKGROUND")
+	DBM_GUI_OptionsFrameDBMOptions:DisableDrawLayer("BACKGROUND")
+
+	for i = 1, 2 do
+		_G["DBM_GUI_OptionsFrameTab"..i.."Left"]:SetAlpha(0)
+		_G["DBM_GUI_OptionsFrameTab"..i.."Middle"]:SetAlpha(0)
+		_G["DBM_GUI_OptionsFrameTab"..i.."Right"]:SetAlpha(0)
+		_G["DBM_GUI_OptionsFrameTab"..i.."LeftDisabled"]:SetAlpha(0)
+		_G["DBM_GUI_OptionsFrameTab"..i.."MiddleDisabled"]:SetAlpha(0)
+		_G["DBM_GUI_OptionsFrameTab"..i.."RightDisabled"]:SetAlpha(0)
+	end
+
+	local count = 1
+
+	local function styleDBM()
+		local option = _G["DBM_GUI_Option_"..count]
+		while option do
+			local objType = option:GetObjectType()
+			if objType == "CheckButton" then
+				F.ReskinCheck(option)
+			elseif objType == "Slider" then
+				F.ReskinSlider(option)
+			elseif objType == "EditBox" then
+				F.ReskinInput(option)
+			elseif option:GetName():find("DropDown") then
+				F.ReskinDropDown(option)
+			elseif objType == "Button" then
+				F.Reskin(option)
+			elseif objType == "Frame" then
+				option:SetBackdrop(nil)
+			end
+
+			count = count + 1
+			option = _G["DBM_GUI_Option_"..count]
+			if not option then
+				option = _G["DBM_GUI_DropDown"..count]
+			end
+		end
+	end
+
+	DBM:RegisterOnGuiLoadCallback(function()
+		styleDBM()
+		hooksecurefunc(DBM_GUI, "UpdateModList", styleDBM)
+		DBM_GUI_OptionsFrameBossMods:HookScript("OnShow", styleDBM)
 	end)
+
+	hooksecurefunc(DBM_GUI_OptionsFrame, "DisplayButton", function(button, element)
+		-- bit of a hack, can't get the API to work
+		local pushed = element.toggle:GetPushedTexture():GetTexture()
+
+		if not element.styled then
+			F.ReskinExpandOrCollapse(element.toggle)
+			element.toggle:GetPushedTexture():SetAlpha(0)
+
+			element.styled = true
+		end
+
+		element.toggle.plus:SetShown(pushed and pushed:find("Plus"))
+	end)
+
+	F.CreateBD(DBM_GUI_OptionsFrame)
+	F.CreateSD(DBM_GUI_OptionsFrame)
+	F.Reskin(DBM_GUI_OptionsFrameWebsiteButton)
+	F.Reskin(DBM_GUI_OptionsFrameOkay)
+	F.ReskinScroll(DBM_GUI_OptionsFramePanelContainerFOVScrollBar)
 end
 
 function SkinDBM:ADDON_LOADED(event, addon)
 	if addon == "DBM-Core" then
 		self:Skin()
+		self:styleCore()
+	elseif addon == "DBM-GUI" then -- GUI can't load before core
+		self:styleGUI()
+
+		self:UnregisterEvent("ADDON_LOADED")
 	end
 end
 ----------
@@ -100,7 +185,7 @@ function SkinDBM:OnEnable()
 	if not Aurora then return end
 	if IsAddOnLoaded("DBM-Core") then
 		self:Skin()
-	else
-		self:RegisterEvent("ADDON_LOADED")
+		self:styleCore()
 	end
+	self:RegisterEvent("ADDON_LOADED")
 end

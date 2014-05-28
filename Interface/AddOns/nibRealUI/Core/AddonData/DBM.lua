@@ -114,30 +114,18 @@ function nibRealUI:LoadDBMData()
 	}
 	DBT_SavedOptions = {
 		["DBM"] = {
-			["EndColorG"] = 0.09803921568627451,
 			["HugeTimerY"] = -134.5714874267578,
 			["HugeBarXOffset"] = 0,
 			["Scale"] = 1,
-			["StartColorR"] = 1,
-			["HugeWidth"] = 185,
 			["TimerX"] = 281.5830078125,
-			["Texture"] = "Interface\\Addons\\nibRealUI\\Media\\Plain",
-			["IconRight"] = false,
 			["TimerPoint"] = "TOP",
-			["StartColorG"] = 0.8156862745098039,
 			["HugeBarYOffset"] = 9,
 			["HugeScale"] = 1,
-			["EndColorR"] = 1,
-			["Width"] = 185,
 			["HugeTimerPoint"] = "TOP",
-			["Font"] = "Interface\\Addons\\SharedMedia_MyMedia\\font\\pixel_hr_small.ttf",
-			["StartColorB"] = 0,
-			["FontSize"] = 8,
 			["BarYOffset"] = 9,
 			["HugeTimerX"] = -249.2625427246094,
 			["TimerY"] = -135.1245422363281,
 			["BarXOffset"] = 0,
-			["EndColorB"] = 0,
 		},
 	}
 end
