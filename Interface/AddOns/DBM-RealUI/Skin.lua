@@ -5,9 +5,10 @@ skin.defaults = {
     Template = "RealUISkinTimerTemplate",
     Texture = "Interface\\AddOns\\DBM-RealUI\\media\\Plain.tga",
     FillUpBars = false,
-    Font = "",
-    FontSize = 8,
     IconLocked = false,
+
+    Font = "", --If this has any set font it will override the XML font template, so it needs to be blank.
+    FontSize = 8,
 
     StartColorR = 1,
     StartColorG = 0.8,
@@ -32,7 +33,11 @@ skin.defaults = {
     HugeBarYOffset = 9,
 }
 
-DBM.Bars:SetSkin("RealUI")
+local skins = DBM.Bars:GetSkins()
+if skins[skin.defaults.Skin].loaded == nil then
+    --only set the skin if it isn't loaded.
+    DBM.Bars:SetSkin("RealUI")
+end
 
 ---- DBM Defaults ----
 --[[options = { 
@@ -47,6 +52,7 @@ DBM.Bars:SetSkin("RealUI")
     FillUpBars = true,
     ExpandUpwards = false,
     ClickThrough = false,
+    IconLocked = true, --When true, the icon hieght will be locked to the hieght of the bar.
 
     Font = STANDARD_TEXT_FONT,
     FontSize = 10,

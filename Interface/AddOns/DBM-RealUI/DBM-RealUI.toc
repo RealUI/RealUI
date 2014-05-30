@@ -1,7 +1,7 @@
 ﻿## Interface: 50400
 ## Title:|cffffe00a<|r|cffff7d0aDBM Skin|r|cffffe00a>|r |cff69ccf0RealUI Skin|r
 ## Author: Gethe88
-## Version: @project-version@
+## Version: v1.0.0
 ## RequiredDeps: DBM-Core
 ## X-DBM-Timer-Skin: 1
 ## X-DBM-Timer-Skin-Name: RealUI
