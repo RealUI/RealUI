@@ -410,6 +410,7 @@ local LootIconSize = 32
 
 local RealUILootFrame = CreateFrame("Button", "RealUI_Loot", UIParent)
 RealUILootFrame:SetFrameStrata("HIGH")
+RealUILootFrame:SetToplevel(true)
 RealUILootFrame:SetHeight(64)
 
 RealUILootFrame.close = CreateFrame("Button", "RealUI_Loot_Close", RealUILootFrame, "UIPanelCloseButton")

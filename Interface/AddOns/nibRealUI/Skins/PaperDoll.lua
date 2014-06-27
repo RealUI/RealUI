@@ -46,7 +46,7 @@ function PaperDoll:CreateILVLString(slottype, slot)
 end
 
 -- Border creation
-local rightItems = {Waist = true, Legs = true, Feet = true, Hands = true, MainHand = true}
+--local rightItems = {Waist = true, Legs = true, Feet = true, Hands = true, MainHand = true}
 function PaperDoll:CreateBorder(slottype, slot, hasDurability)
 	local gslot = _G[slottype..slot.."Slot"]
 	local height = 37
@@ -72,12 +72,12 @@ function PaperDoll:CreateBorder(slottype, slot, hasDurability)
 		if hasDurability and Aurora then
 			local durStatus = CreateFrame("StatusBar", slot.."DurabilityStatus", gslot)
 			
-			if rightItems[slot] then
-				durStatus:SetPoint("TOPRIGHT", gslot, "TOPLEFT", -1, 0)
-				durStatus:SetPoint("BOTTOMLEFT", gslot, "BOTTOMLEFT", -2, 0)
+			if slot == "SecondaryHand" then
+				durStatus:SetPoint("TOPLEFT", gslot, "TOPRIGHT", 2, 0)
+				durStatus:SetPoint("BOTTOMRIGHT", gslot, "BOTTOMRIGHT", 3, 0)
 			else
-				durStatus:SetPoint("TOPLEFT", gslot, "TOPRIGHT", 1, 0)
-				durStatus:SetPoint("BOTTOMRIGHT", gslot, "BOTTOMRIGHT", 2, 0)
+				durStatus:SetPoint("TOPRIGHT", gslot, "TOPLEFT", -2, 0)
+				durStatus:SetPoint("BOTTOMLEFT", gslot, "BOTTOMLEFT", -3, 0)
 			end
 			
 			durStatus:SetStatusBarTexture(nibRealUI.media.textures.plain)
@@ -137,9 +137,9 @@ function PaperDoll:UpdateItems()
 		end
 		
 		-- Quality Border
-		self:ColorBorders(id, item)
+		--self:ColorBorders(id, item)
 	end
-	self:ColorBordersND()
+	--self:ColorBordersND()
 
 	-- Item Upgrades/Levels
 	for _, item in ipairs(ILVL_ITEMS) do
