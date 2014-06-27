@@ -71,6 +71,7 @@ function panel:CreateOptions()
     table.insert(bits, self.PlayerFrame)
     table.insert(bits, self.PetFrame)
     table.insert(bits, self.TargetFrame)
+	table.insert(bits, self.TargetFrameToT)
     table.insert(bits, self.FocusFrame)
     table.insert(bits, self.FocusFrameToT)
 
@@ -103,6 +104,7 @@ function panel.refresh()
     panel.PlayerFrame:SetChecked(opt.PlayerFrame)
     panel.PetFrame:SetChecked(opt.PetFrame)
     panel.TargetFrame:SetChecked(opt.TargetFrame)
+    panel.TargetFrameToT:SetChecked(opt.TargetFrameToT)
     panel.FocusFrame:SetChecked(opt.FocusFrame)
     panel.FocusFrameToT:SetChecked(opt.FocusFrameToT)
     panel.arena:SetChecked(opt.arena)
@@ -117,6 +119,7 @@ function panel.okay()
     opt.PlayerFrame = not not panel.PlayerFrame:GetChecked()
     opt.PetFrame = not not panel.PetFrame:GetChecked()
     opt.TargetFrame = not not panel.TargetFrame:GetChecked()
+    opt.TargetFrameToT = not not panel.TargetFrameToT:GetChecked()
     opt.FocusFrame = not not panel.FocusFrame:GetChecked()
     opt.FocusFrameToT = not not panel.FocusFrameToT:GetChecked()
     opt.arena = not not panel.arena:GetChecked()
@@ -156,10 +159,12 @@ function addon:Enable_BlizzCompactUnitFrames()
             local buff = _G[name .. "Buff" .. i]
             local debuff = _G[name .. "Debuff" .. i]
             local dispel = _G[name .. "DispelDebuff" .. i]
+			local statusIcon = _G[name .. "CenterStatusIcon" .. i]
 
             if buff then enable(buff) end
             if debuff then enable(debuff) end
             if dispel then enable(dispel) end
+			if statusIcon then enable(statusIcon) end
         end
         enable(frame)
     end)

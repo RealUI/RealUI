@@ -1,15 +1,15 @@
 --
--- $Id: BugGrabber.lua 188 2012-08-28 19:07:09Z nevcairiel $
+-- $Id: BugGrabber.lua 197 2013-10-21 13:55:05Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
--- Current Developer: Rabbit
+-- Current Developer: Funkydude, Rabbit
 -- Past Developers: Rowne, Ramble, industrial, Fritti, kergoth, ckknight
 -- Testers: Ramble, Sariash
 --
 --[[
 
 !BugGrabber, World of Warcraft addon that catches errors and formats them with a debug stack.
-Copyright (C) 2011 The !BugGrabber Team
+Copyright (C) 2013 The !BugGrabber Team
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ local bugGrabberParentAddon, parentAddonTable = ...
 local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
 	for i, handler in next, { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" } do
-		local enabled = select(4, GetAddOnInfo(handler))
+		local _, _, _, enabled = GetAddOnInfo(handler)
 		if enabled then return end -- Bail out
 	end
 end
@@ -65,8 +65,8 @@ local L = {
 	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
 	ADDON_DISABLED = "|cffffff00!BugGrabber and %s cannot coexist; %s has been forcefully disabled. If you want to, you may log out, disable !BugGrabber, and enable %s.|r",
 	BUGGRABBER_STOPPED = "|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r",
-	ERROR_UNABLE = "|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r",
 	ERROR_DETECTED = "%s |cffffff00captured, click the link for more information.|r",
+	ERROR_UNABLE = "|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r",
 	NO_DISPLAY_1 = "|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r",
 	NO_DISPLAY_2 = "|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r",
 	NO_DISPLAY_STOP = "|cffffff00If you don't want to be reminded about this again, run /stopnag.|r",
@@ -77,36 +77,20 @@ local L = {
 -- Locals
 --
 
--- isGetAddOnMetadataFunctional is a Mists of Pandaria Beta workaround (GetAddOnMetadata doesn't work for "X-" tags)
-local isGetAddOnMetadataFunctional
-if select(4, GetBuildInfo()) >= 50000 then
-	isGetAddOnMetadataFunctional = GetAddOnMetadata("!BugGrabber", "X-Credits")
-else
-	isGetAddOnMetadataFunctional = true
-end
 local frame = CreateFrame("Frame")
 
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
-if isGetAddOnMetadataFunctional then
-	for i = 1, GetNumAddOns() do
-		local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
-		if meta then
-			local enabled = select(4, GetAddOnInfo(i))
-			if enabled then
-				displayObjectName = meta
-				break
-			end
+for i = 1, GetNumAddOns() do
+	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
+	if meta then
+		local _, _, _, enabled = GetAddOnInfo(i)
+		if enabled then
+			displayObjectName = meta
+			break
 		end
 	end
-else
-	-- If we can't search through metadata, then just look for BugSack and use it if its enabled
-	local bugSackEnabled = select(4, GetAddOnInfo("BugSack"))
-	if bugSackEnabled then
-		displayObjectName = "BugSack"
-	end
 end
-
 
 -- Shorthand to BugGrabberDB.errors
 local db = nil
@@ -139,7 +123,7 @@ local function setupCallbacks()
 		setupCallbacks = nil
 	end
 end
-setupCallbacks()
+addon.setupCallbacks = setupCallbacks; -- make it accessible from the outside for add-ons relying on BugGrabber events so they can make BugGrabber.RegisterCallback appear when they need it (CallbackHandler-1.0 is not embedded in BugGrabber)
 
 local function triggerEvent(...)
 	if not callbacks then setupCallbacks() end
@@ -178,7 +162,7 @@ local function printErrorObject(err)
 	end
 end
 
--- XXX Re-enabled until someone complains and demands that they go away again.
+-- Re-enabled until someone complains and demands that they go away again.
 local function registerAddonActionEvents()
 	frame:RegisterEvent("ADDON_ACTION_BLOCKED")
 	frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
@@ -208,7 +192,7 @@ end
 -- Error catching
 --
 
-local sanitizeStack, sanitizeLocals, findVersions = nil, nil, nil
+local sanitizeStack, findVersions = nil, nil
 do
 	local function scanObject(o)
 		local version, revision = nil, nil
@@ -304,21 +288,6 @@ do
 		dump = dump:gsub("[`']", "\"")
 		return dump
 	end
-
-	function sanitizeLocals(dump)
-		if not dump then return end
-		dump = dump:gsub("Interface\\", "")
-		dump = dump:gsub("AddOns\\", "")
-		-- Reduce Foo\\Bar-3.0\\Bar-3.0.lua to Foo\\..\\Bar-3.0.lua to save room
-		-- since wow crashes with strings > 983 chars and I don't want to split
-		-- stuff, it's so hacky :/
-		for token in dump:gmatch("\\([^\\]+)%.lua") do
-			dump = dump:gsub(escapeCache[token] .. "\\", "..\\")
-		end
-		dump = dump:gsub("<function> defined", "<func>")
-		dump = dump:gsub("{%s+}", "{}")
-		return dump
-	end
 end
 
 -- Error handler
@@ -328,8 +297,7 @@ do
 	function grabError(errorMessage)
 		if paused then return end
 		errorMessage = tostring(errorMessage)
-		if string.find(errorMessage, "Compact") then return end
-		
+
 		local looping = errorMessage:find("BugGrabber") and true or nil
 		if looping then
 			print(errorMessage)
@@ -368,7 +336,7 @@ do
 			errorObject = {
 				message = sanitizedMessage,
 				stack = table.concat(tmp, "\n"),
-				locals = sanitizeLocals(debuglocals(4)),
+				locals = debuglocals(4),
 				session = addon:GetSessionId(),
 				time = date("%Y/%m/%d %H:%M:%S"),
 				counter = 1,
@@ -377,13 +345,13 @@ do
 			wipe(tmp)
 		end
 
-		addon:StoreError(errorObject)
-
-		triggerEvent("BugGrabber_BugGrabbed", errorObject)
-
 		if not isBugGrabbedRegistered then
 			print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
 		end
+
+		addon:StoreError(errorObject)
+
+		triggerEvent("BugGrabber_BugGrabbed", errorObject)
 	end
 end
 
@@ -404,28 +372,24 @@ function addon:StoreError(errorObject)
 end
 
 do
-	local hookCreated = nil
 	local function createChatHook()
 		-- Set up the ItemRef hook that allow us to link bugs.
-		local origHandler = _G.ChatFrame_OnHyperlinkShow
-		_G.ChatFrame_OnHyperlinkShow = function(chatFrame, link, ...)
-			local player, tableId = link:match("^buggrabber:(%a+):(%x+)")
-			if not player or not tableId then return origHandler(chatFrame, link, ...) end
-			if IsModifiedClick("CHATLINK") then
-				ChatEdit_InsertLink(link)
+		local SetHyperlink = ItemRefTooltip.SetHyperlink
+		function ItemRefTooltip:SetHyperlink(link, ...)
+			local player, tableId = link:match("^buggrabber:([^:]+):(%x+)")
+			if player then
+				addon:HandleBugLink(player, tableId, link)
 			else
-				addon:HandleBugLink(player, tableId, link, chatFrame, ...)
+				SetHyperlink(self, link, ...)
 			end
 		end
-		hookCreated = true
 	end
 
-	-- XXX We need to hook the chat frame when anyone requests a chat link from
-	-- XXX us, in case some other addon has hooked :HandleBugLink to process it.
-	-- XXX If not, we could've just created the hook in grabError when we do the
-	-- XXX print.
+	-- We need to hook the chat frame when anyone requests a chat link from us,
+	-- in case some other addon has hooked :HandleBugLink to process it. If not,
+	-- we could've just created the hook in grabError when we do the print.
 	function addon:GetChatLink(errorObject)
-		if not hookCreated then createChatHook() end
+		if createChatHook then createChatHook() createChatHook = nil end
 		local tableId = tostring(errorObject):sub(8)
 		return chatLinkFormat:format(playerName, tableId, tableId)
 	end
@@ -504,21 +468,21 @@ local function initDatabase()
 		addon.LoadTranslations = nil
 	end
 
-	-- -- Only warn about missing display if we're running standalone.
-	-- if not displayObjectName and bugGrabberParentAddon == STANDALONE_NAME then
-		-- local currentInterface = select(4, GetBuildInfo())
-		-- if type(currentInterface) ~= "number" then currentInterface = 0 end
-		-- if not sv.stopnag or sv.stopnag < currentInterface then
-			-- print(L.NO_DISPLAY_1)
-			-- print(L.NO_DISPLAY_2)
-			-- print(L.NO_DISPLAY_STOP)
-			-- _G.SlashCmdList.BugGrabberStopNag = function()
-				-- print(L.STOP_NAG)
-				-- sv.stopnag = currentInterface
-			-- end
-			-- _G.SLASH_BugGrabberStopNag1 = "/stopnag"
-		-- end
-	-- end
+	-- Only warn about missing display if we're running standalone.
+	if not displayObjectName and bugGrabberParentAddon == STANDALONE_NAME then
+		local _, _, _, currentInterface = GetBuildInfo()
+		if type(currentInterface) ~= "number" then currentInterface = 0 end
+		if not sv.stopnag or sv.stopnag < currentInterface then
+			print(L.NO_DISPLAY_1)
+			print(L.NO_DISPLAY_2)
+			print(L.NO_DISPLAY_STOP)
+			_G.SlashCmdList.BugGrabberStopNag = function()
+				print(L.STOP_NAG)
+				sv.stopnag = currentInterface
+			end
+			_G.SLASH_BugGrabberStopNag1 = "/stopnag"
+		end
+	end
 
 	initDatabase = nil
 end
@@ -569,7 +533,7 @@ do
 			end
 			Swatter = nil
 
-			local enabled = select(4, GetAddOnInfo("Stubby"))
+			local _, _, _, enabled = GetAddOnInfo("Stubby")
 			if enabled then createSwatter() end
 
 			real_seterrorhandler(grabError)

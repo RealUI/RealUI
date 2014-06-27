@@ -73,7 +73,7 @@ local barTemplate = { -- these fields are cleared with a bar is deleted
 -- Check if using Tukui skin for icon and bar borders (which may require a reloadui)
 local function UseTukui() return Raven.frame.CreateBackdrop and Raven.frame.SetOutside and Raven.db.global.TukuiSkin end
 local function GetTukuiFont(font) if Raven.db.global.TukuiFont and ChatFrame1 then return ChatFrame1:GetFont() else return font end end
-local function PS(x) if pixelPerfect then return pixelScale * math.floor(x / pixelScale + 0.5) else return x end end
+local function PS(x) if pixelPerfect and type(x) == "number" then return pixelScale * math.floor(x / pixelScale + 0.5) else return x end end
 
 -- Calculate alpha for flashing bars, period is how long the total flash time should last
 function MOD.Nest_FlashAlpha(maxAlpha, period)
@@ -1556,6 +1556,11 @@ end
 
 -- Update routine does all the actual work of setting up and displaying bar groups.
 function MOD.Nest_Update()
+	if C_PetBattles.IsInBattle() then -- force update when entering or leaving pet battles to hide anchors and timeline
+		if not inPetBattle then inPetBattle = true; update = true end
+	else
+		if inPetBattle then inPetBattle = false; update = true end
+	end
 	for _, bg in pairs(barGroups) do
 		if bg.configuration then -- make sure configuration is valid
 			local config = MOD.Nest_SupportedConfigurations[bg.configuration]
@@ -1563,11 +1568,6 @@ function MOD.Nest_Update()
 			if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
 			if not bg.moving then bg.frame:SetFrameStrata(bg.strata or "MEDIUM") end
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
-			if C_PetBattles.IsInBattle() then -- force update when entering or leaving pet battles to hide anchor and timeline
-				if not inPetBattle then inPetBattle = true; bg.update = true end
-			else
-				if inPetBattle then inPetBattle = false; bg.update = true end
-			end
 			if update or bg.update then BarGroup_UpdateAnchor(bg, config); BarGroup_UpdateBackground(bg, config) end
 			for _, bar in pairs(bg.bars) do
 				if update or bg.update or bar.update then -- see if any bar configurations need to be updated

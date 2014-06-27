@@ -1,0 +1,381 @@
+------------------------------------------------------------------------
+r562 | oscarucb | 2014-06-06 08:51:02 +0000 (Fri, 06 Jun 2014) | 1 line
+Changed paths:
+   A /tags/1.4-19 (from /trunk:561)
+
+Tagging as 1.4-19
+------------------------------------------------------------------------
+r561 | oscarucb | 2014-06-05 21:20:05 +0000 (Thu, 05 Jun 2014) | 7 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+
+Fix another minor display glitch
+Where under the correct conditions all the bars in a window would appear
+"shortened" due to an incorrectly high .maxValue for the displayed bargroup.
+bar:SetMaxValue() must be called after bar:SetValue(), otherwise the max cannot
+be lowered below the "old" value (with the original ordering bar:SetMaxValue()
+had no effect in that case).
+
+------------------------------------------------------------------------
+r560 | oscarucb | 2014-06-05 10:31:46 +0000 (Thu, 05 Jun 2014) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+fix a minor window update glitch
+
+------------------------------------------------------------------------
+r559 | oscarucb | 2014-06-03 15:41:03 +0000 (Tue, 03 Jun 2014) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+fix a lua erorr in last with aggressive combat detection
+
+------------------------------------------------------------------------
+r558 | oscarucb | 2014-06-03 09:13:39 +0000 (Tue, 03 Jun 2014) | 40 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Stop using ENCOUNTER_START/END to delineate segments
+
+It turns out there are several rare but serious problems with using
+ENCOUNTER_START/END for segment delineation.  Most significantly, on rare
+occasions during wipes in SoO the server can fire ENCOUNTER_END followed
+immediately by a spurious ENCOUNTER_START (I have multiple logs and screenshots
+demonstrating this). This happens most frequently on fights with adds, and is
+possibly related to players using vanish-like abilities to despawn the
+encounter. Worse still, the subsequent boss engage after such an occurence
+usually does NOT fire ENCOUNTER_START. Since r477, the spurious ENCOUNTER_START
+was suppressing combat-based Skada:Tick() end detection, and that resulted in
+an "early start" segment for the second fight that inflated the segment length
+to include all the out-of-combat time before the second pull (ie several
+minutes of rezzing, eating, rebuffing etc). This bug is believed to be directly
+responsible for multiple user reports of DPS/HPS numbers with recent Skada
+releases intermittently showing as artificially low (even though the damage
+done and effective healing were about right). In order to avoid this problem
+and guarantee reliable segment termination we need to preserve the regular
+Skada:Tick()-based end detection, which means there is no longer any benefit to
+using ENCOUNTER_END for segment delineation.
+
+Even if the Blizzard problem with the spurious ENCOUNTER_START was fixed, there
+would still be cases when ENCOUNTER_START/END do not correctly delineate a raid
+encounter. Most notably, there are many fights where adds can temporarily
+outlive the boss and keep the raid in combat for a few seconds after
+ENCOUNTER_END. Truncating the segment at ENCOUNTER_END in those cases leads to
+the creation of a "trivial" segment for those adds, leaving "current fight"
+windows displaying useless information after combat ends. Similarly, there are
+some fights (such as Spoils) where ENCOUNTER_START arrives several seconds
+before combat begins, and starting the segment at that point would result in
+immediate termination via Tick (unless further measures were in place to
+prevent it). The events are also "just plain wrong" when multiple bosses are
+pulled together (think Earth, Wind & Fire). In those type of situations the
+events might not be alternating and in fact may not even be properly nested,
+making them completely inappropriate for segment delineation.
+
+This commit removes the use of ENCOUNTER_START/END for segment delineation. They
+are now only used to retrieve an encounter name for the segment.
+
+
+------------------------------------------------------------------------
+r557 | oscarucb | 2014-06-03 08:37:45 +0000 (Tue, 03 Jun 2014) | 4 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Add a utility for debug output (off by default)
+Toggled with /skada debug
+Change the recently-added auto-enable/disable messages to debug output.
+
+------------------------------------------------------------------------
+r556 | oscarucb | 2014-06-02 10:26:37 +0000 (Mon, 02 Jun 2014) | 2 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+   M /trunk/modules/TotalHealing.lua
+
+fix ticket 365: bar resizing display glitch in Total Healing module
+
+------------------------------------------------------------------------
+r555 | oscarucb | 2014-06-02 09:45:25 +0000 (Mon, 02 Jun 2014) | 2 lines
+Changed paths:
+   M /trunk/lib/SpecializedLibBars-1.0/SpecializedLibBars-1.0.lua
+
+another fix to bars sticking out past the window edge after a resize
+
+------------------------------------------------------------------------
+r554 | oscarucb | 2014-05-27 03:40:12 +0000 (Tue, 27 May 2014) | 6 lines
+Changed paths:
+   M /trunk/Skada.lua
+   M /trunk/locale/enUS.lua
+
+Make data collection state more transparent to users
+"Disable while hidden" option now prints a console message when data collection is being automatically disabled or reenabled.
+Also add a "disabled" indicator to the BarDisplay title bar when you are looking at the current or total set while collection is disabled.
+Together these should hopefully reduce user confusion as to why data collection is not happening. 
+Fix a related bug in SetActive() where toggling the "Disable while hidden" option could fail to update data collection state.
+
+------------------------------------------------------------------------
+r553 | oscarucb | 2014-05-24 03:43:04 +0000 (Sat, 24 May 2014) | 9 lines
+Changed paths:
+   M /trunk/modules/Damage.lua
+
+Damage module tuning
+
+Don't store empty table entries for player spell miss types that did not occur
+in each segment, as we can get the same effect more efficiently by leaving them nil.  
+
+This small change was measured as providing a 22% reduction in Skada's
+total memory utilization for 30 sets of a 10-man raid night, with all modes
+enabled.
+
+------------------------------------------------------------------------
+r552 | oscarucb | 2014-05-23 18:06:45 +0000 (Fri, 23 May 2014) | 2 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+   M /trunk/Skada.lua
+
+clean up some unnecessary memory utilization/churn in BarDisplay navigation
+
+------------------------------------------------------------------------
+r551 | oscarucb | 2014-05-23 00:26:36 +0000 (Fri, 23 May 2014) | 2 lines
+Changed paths:
+   M /trunk/modules/Damage.lua
+
+fix bar maxvalue scaling for spell damage detail
+
+------------------------------------------------------------------------
+r550 | oscarucb | 2014-05-22 20:47:04 +0000 (Thu, 22 May 2014) | 10 lines
+Changed paths:
+   M /trunk/modules/Healing.lua
+
+Fix ticket 362: display error for Blood DK Death Strike healing
+
+The "player's healing-by-spell" submodule was intermittently hiding the bar for
+the Death Strike heal of Blood DKs in segments where the DK cast Death Strike
+while Dancing Rune Weapon was active. The DS heal from the player and rune
+weapon were aliased in the bar display system, causing the bar for one or other
+to disappear from the submodule display (but not from the tooltip). The DS
+healing was still correctly accounted for and correctly displayed in other
+modules (notably the total healing done by the DK).  
+
+------------------------------------------------------------------------
+r549 | oscarucb | 2014-05-21 09:52:38 +0000 (Wed, 21 May 2014) | 3 lines
+Changed paths:
+   M /trunk
+
+Revert r548 and restore svn:externals, so a checkout actually works and contains the required libraries
+If you don't like this behavior use svn --ignore-externals
+
+------------------------------------------------------------------------
+r548 | funkydude | 2014-05-21 09:25:49 +0000 (Wed, 21 May 2014) | 1 line
+Changed paths:
+   M /trunk
+   M /trunk/Skada.lua
+   M /trunk/lib
+
+Revert r540, addition of svn:externals. Let's keep it like 99% of other wowace addons, thanks.
+------------------------------------------------------------------------
+r547 | oscarucb | 2014-05-21 05:05:31 +0000 (Wed, 21 May 2014) | 2 lines
+Changed paths:
+   M /trunk/modules/DamageTaken.lua
+
+fix bar max for player damage taken spell list
+
+------------------------------------------------------------------------
+r545 | oscarucb | 2014-05-20 03:02:08 +0000 (Tue, 20 May 2014) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+fix ticket 361: lua error in Deaths module
+
+------------------------------------------------------------------------
+r544 | oscarucb | 2014-05-18 20:08:49 +0000 (Sun, 18 May 2014) | 3 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Make sure window list in options is updated after a profile change
+Also ensure correct options list update on a window rename
+
+------------------------------------------------------------------------
+r543 | oscarucb | 2014-05-18 19:14:53 +0000 (Sun, 18 May 2014) | 6 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+fix the "Hide in PvP" option
+
+During login or teleport, PLAYER_ENTERING_WORLD fires before zone information is available. 
+Also, outdoor PVP combat zones never fire PLAYER_ENTERING_WORLD.
+Fixed using ZONE_CHANGED_NEW_AREA.
+
+------------------------------------------------------------------------
+r542 | oscarucb | 2014-05-18 18:29:48 +0000 (Sun, 18 May 2014) | 3 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+
+fix ticket 323: lua error after profile reset
+BarDisplay button click function closures were holding a stale window reference across profile resets
+
+------------------------------------------------------------------------
+r541 | oscarucb | 2014-05-18 18:05:21 +0000 (Sun, 18 May 2014) | 4 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Fix window set and mode saving on reload/relog
+Previously set was usually discarded, and mode was discarded while in submodes
+Fix some unnecessary memory churn
+
+------------------------------------------------------------------------
+r540 | oscarucb | 2014-05-18 16:57:02 +0000 (Sun, 18 May 2014) | 2 lines
+Changed paths:
+   M /trunk
+
+set svn:externals for libraries
+
+------------------------------------------------------------------------
+r539 | oscarucb | 2014-05-18 04:58:00 +0000 (Sun, 18 May 2014) | 5 lines
+Changed paths:
+   M /trunk/Menus.lua
+   M /trunk/Options.lua
+   M /trunk/Skada.lua
+   M /trunk/locale/enUS.lua
+
+Add some user control over set label format
+Centralize set label formatting in a new function Skada:GetSetLabel(set)
+New configuration option lets user choose between a handful of time formats for the set label, notably including optional fight duration.
+Tweak the report title locale string to accomodate flexible set label formatting.
+
+------------------------------------------------------------------------
+r538 | oscarucb | 2014-05-17 23:56:56 +0000 (Sat, 17 May 2014) | 2 lines
+Changed paths:
+   M /trunk/modules/Debuffs.lua
+
+fix ticket 307: Some weapon enchant buffs missing from buff uptime tracker
+
+------------------------------------------------------------------------
+r537 | oscarucb | 2014-05-17 21:53:10 +0000 (Sat, 17 May 2014) | 6 lines
+Changed paths:
+   M /trunk/modules/Healing.lua
+
+Fix HealingTaken for cross-realm players
+Previously, cross-realm targets were never shown under HealingTaken 
+Re-key the player.healed table by dstGUID to ensure correct and unique lookup
+Replace the O(player^3) algorithm in healingtaken:Update() with a O(player^2) one, for better performance in large raids
+
+
+------------------------------------------------------------------------
+r536 | oscarucb | 2014-05-17 21:52:29 +0000 (Sat, 17 May 2014) | 4 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Tune the SPELL_SUMMON handler for pets[]
+Replacing a pointless O(pets) table scan with an equivalent O(1) lookup, for better performance in large raid long sessions which may accumulate a large number of temporary pets.
+It appears the check in question may now be superfluous (due to Blizzard spell changes), but leave it for now just in case.
+
+------------------------------------------------------------------------
+r535 | oscarucb | 2014-05-17 21:51:37 +0000 (Sat, 17 May 2014) | 4 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+Fix Skada:FixMyPets() for pets with the same name as other players
+This bug was fixed awhile ago in Skada:FixPets(), but this function was still incorrect.
+The only built-in module still using this code path is Enemy Damage Taken, which now works correctly when pets are named after other players in the raid.
+
+------------------------------------------------------------------------
+r534 | oscarucb | 2014-05-17 21:47:58 +0000 (Sat, 17 May 2014) | 3 lines
+Changed paths:
+   M /trunk/modules/Deaths.lua
+
+Remove superfluous calls to Skada:FixMyPets() in Deaths module
+Our deathlog events are already filtered dst_is_interesting_nopets, so Skada:FixMyPets(dstGUID, dstName) is always a no-op
+
+------------------------------------------------------------------------
+r533 | oscarucb | 2014-05-17 03:25:03 +0000 (Sat, 17 May 2014) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+
+minor fix to last
+
+------------------------------------------------------------------------
+r532 | oscarucb | 2014-05-16 06:39:14 +0000 (Fri, 16 May 2014) | 2 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+   M /trunk/Skada.lua
+
+better version of r531
+
+------------------------------------------------------------------------
+r531 | oscarucb | 2014-05-15 21:59:46 +0000 (Thu, 15 May 2014) | 2 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+
+use a nicer icon for the total bar with classicons
+
+------------------------------------------------------------------------
+r530 | oscarucb | 2014-05-15 16:37:39 +0000 (Thu, 15 May 2014) | 2 lines
+Changed paths:
+   M /trunk/Menus.lua
+
+fix a couple old and obscure lua errors in the dropdown menu
+
+------------------------------------------------------------------------
+r529 | oscarucb | 2014-05-15 16:16:01 +0000 (Thu, 15 May 2014) | 2 lines
+Changed paths:
+   M /trunk/Skada.toc
+
+add LibDualSpec-1.0 to OptionalDeps
+
+------------------------------------------------------------------------
+r528 | oscarucb | 2014-05-15 12:12:33 +0000 (Thu, 15 May 2014) | 5 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Skada.lua
+   M /trunk/embeds.xml
+
+better fix to ticket 359
+
+parse the /skada report command without AceConsole
+Also upgrade the command to allow specifying a set and do instance chat output
+
+------------------------------------------------------------------------
+r526 | zarnivoop | 2014-05-15 11:51:40 +0000 (Thu, 15 May 2014) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+
+fix that .pkgmeta
+------------------------------------------------------------------------
+r525 | zarnivoop | 2014-05-15 11:43:20 +0000 (Thu, 15 May 2014) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Skada.lua
+   M /trunk/embeds.xml
+
+undo removal of AceConsole (#469), which broke the report command
+------------------------------------------------------------------------
+r523 | oscarucb | 2014-05-11 20:36:35 +0000 (Sun, 11 May 2014) | 3 lines
+Changed paths:
+   M /trunk/modules/Deaths.lua
+
+Add absorb display to Death log
+New absorb column shows when a damage event was reduced by a heal absorb
+
+------------------------------------------------------------------------
+r522 | oscarucb | 2014-05-08 10:37:39 +0000 (Thu, 08 May 2014) | 2 lines
+Changed paths:
+   M /trunk/modules/Deaths.lua
+
+fix an intermittent display glitch introduced in r521
+
+------------------------------------------------------------------------
+r521 | oscarucb | 2014-05-08 00:19:05 +0000 (Thu, 08 May 2014) | 5 lines
+Changed paths:
+   M /trunk/modules/Deaths.lua
+
+Improve the Deaths summary display
+For regular fight sets, sort by initial death time (previously last death)
+For total set sort by number of deaths
+Bar length for both now graphs the number of deaths for the set (previously unused)
+
+------------------------------------------------------------------------
+r520 | znuff | 2014-05-04 22:56:05 +0000 (Sun, 04 May 2014) | 1 line
+Changed paths:
+   M /trunk/Skada.toc
+
+Added LibBossIDs-1.0 as an optional dependency.
+------------------------------------------------------------------------

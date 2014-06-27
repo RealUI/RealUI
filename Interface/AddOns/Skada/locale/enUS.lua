@@ -2,6 +2,8 @@ local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true)
 
 if not L then return end
 
+L["Include set"] = true
+L["Include set name in title bar"] = true
 L["Disable"] = true
 L["Profiles"] = true
 L["Hint: Left-Click to toggle Skada window."] = true
@@ -23,6 +25,9 @@ L["Skada: Modes"] = true
 L["Skada: Fights"] = true
 
 -- Options
+L["Disabled Modules"] = true
+L["This change requires a UI reload. Are you sure?"] = true
+L["Tick the modules you want to disable."] = true
 L["Bar font"] = true
 L["The font used by all bars."] = true
 L["Bar font size"] = true
@@ -52,7 +57,7 @@ L["Show minimap button"] = true
 L["Toggles showing the minimap button."] = true
 
 L["reports the active mode"] = true
-L["Skada report on %s for %s, %s to %s:"] = "Skada: %s for %s, %s - %s:"
+L["Skada: %s for %s:"] = "Skada: %s for %s:"
 L["Only keep boss fighs"] = "Only keep boss fights"
 L["Boss fights will be kept with this on, and non-boss fights are discarded."] = true
 L["Show raw threat"] = true
@@ -64,6 +69,8 @@ L["Reverse bar growth"] = "Reverse bar growth"
 L["Bars will grow up instead of down."] = "Bars will grow up instead of down."
 L["Number format"] = "Number format"
 L["Controls the way large numbers are displayed."] = "Controls the way large numbers are displayed."
+L["Set format"] = "Set format"
+L["Controls the way set names are displayed."] = "Controls the way set names are displayed."
 L["Reset on entering instance"] = "Reset on entering instance"
 L["Controls if data is reset when you enter an instance."] = "Controls if data is reset when you enter an instance."
 L["Reset on joining a group"] = "Reset on joining a group"
@@ -191,6 +198,9 @@ L["Absorb"] = "Absorb"
 L["Last fight"] = "Last fight"
 L["Disable while hidden"] = "Disable while hidden"
 L["Skada will not collect any data when automatically hidden."] = "Skada will not collect any data when automatically hidden."
+L["Data Collection"] = "Data Collection"
+L["ENABLED"] = "ENABLED"
+L["DISABLED"] = "DISABLED"
 
 L["Rename window"] = "Rename window"
 L["Enter the name for the window."] = "Enter the name for the window."
@@ -280,6 +290,11 @@ L["Healing"] = true
 L["'s Healing"] = true
 L["Overhealing"] = true
 L["Threat"] = true
+L["Power"] = true
+L["Enemies"] = true
+L["Debuffs"] = true
+L["DamageTaken"] = "Damage Taken"
+L["TotalHealing"] = "Total Healing"
 
 L["Announce CC breaking to party"] = true
 L["Ignore Main Tanks"] = true
@@ -383,3 +398,9 @@ L["Instance"] = "Instance"
 
 L["Enemy healing done"] = "Enemy healing done"
 L["Enemy healing taken"] = "Enemy healing taken"
+
+L["Skada has changed!"] = true
+L["All Skada functionality is now in 1 addon folder."] = true
+L["Skada will |cFFFF0000NOT|r function properly until you delete the following AddOns:"] = true
+L["Click below and configure your '|cFFFF0000Disabled Modules|r'."] = true
+

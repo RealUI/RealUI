@@ -460,6 +460,7 @@ local function UpdateFontPreviews()
   fontSize = frame.normalFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.normalOutlineDropdown:GetSelectedID()]
   frame.normalPreviewFontString:SetFont(fontPath, fontSize, outline)
+  frame.normalPreviewFontString:SetText(L.MSG_NORMAL_PREVIEW_TEXT)
   frame.normalPreviewFontString:SetAlpha(frame.normalFontOpacitySlider:GetValue() / 100)
  end
  
@@ -468,6 +469,7 @@ local function UpdateFontPreviews()
   fontSize = frame.critFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.critOutlineDropdown:GetSelectedID()]
   if (fontPath and outline) then frame.critPreviewFontString:SetFont(fontPath, fontSize, outline) end
+  frame.critPreviewFontString:SetText(L.MSG_CRIT)
   frame.critPreviewFontString:SetAlpha(frame.critFontOpacitySlider:GetValue() / 100)
  end
 end

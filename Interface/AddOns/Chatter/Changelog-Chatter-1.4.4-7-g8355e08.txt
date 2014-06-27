@@ -1,0 +1,10 @@
+daf:
+	- attempted to fix a bug were ocasionaly UnitName seems to returns a empty string instead of nil on same realm players
+Benjamin Staneck:
+	- pretty sure this fixes nothing but add a nil check here to avoid the error
+daf:
+	- telltarget should now work properly on connected realms
+Benjamin Staneck:
+	- remove pre 5.0 compat.
+	- toc bump
+	- add back spaces so /gr works properly again.

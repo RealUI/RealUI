@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDualSpec-1.0", 11
+local MAJOR, MINOR = "LibDualSpec-1.0", 12
 assert(LibStub, MAJOR.." requires LibStub")
 local lib, minor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -330,8 +330,20 @@ end
 -- ----------------------------------------------------------------------------
 
 lib.eventFrame:RegisterEvent('PLAYER_TALENT_UPDATE')
-lib.eventFrame:SetScript('OnEvent', function()
-	lib.specLoaded = true
+if not lib.specLoaded then
+	lib.eventFrame:RegisterEvent('ADDON_LOADED')
+end
+lib.eventFrame:SetScript('OnEvent', function(_, event)
+	-- Before the first PLAYER_TALENT_UPDATE, GetActiveSpecGroup() always returns 1.
+	-- However, when LDS is loaded on demand, we cannot afford to wait for a PLAYER_TALENT_UPDATE.
+	-- So we wait either for any PLAYER_TALENT_UPDATE or for an ADDON_LOADED when IsLoggedIn() yields true.
+	if event == 'ADDON_LOADED' and not IsLoggedIn() then
+		return
+	end
+	if not lib.specLoaded then
+		lib.specLoaded = true
+		lib.eventFrame:UnregisterEvent('ADDON_LOADED')
+	end
 	local newSpecGroup = GetActiveSpecGroup()
 	if lib.specGroup ~= newSpecGroup then
 		lib.specGroup = newSpecGroup

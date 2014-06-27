@@ -10,12 +10,19 @@ local mod = addon:NewModule('CastBar', 'AceEvent-3.0')
 mod.uiName = 'Cast bars'
 
 local format = format
+local function ResetFade(f)
+	kui.frameFadeRemoveFrame(f.castbar)
+	f.castbar.shield:Hide()
+	f.castbar:Hide()
+	f.castbar:SetAlpha(1)
+end
 
 ------------------------------------------------------------- Script handlers --
 local function OnDefaultCastbarShow(self)
 	if not mod.enabledState then return end
 
 	local f = self:GetParent():GetParent().kui
+	ResetFade(f)
 
 	if f.castbar.name then
 		f.castbar.name:SetText(f.spellName:GetText())
@@ -43,7 +50,6 @@ local function OnDefaultCastbarShow(self)
 
 		if f.castbar.curr then
 			f.castbar.curr:Hide()
-			f.castbar.max:Hide()
 		end
 	else
 		if f.castbar.icon then
@@ -58,7 +64,6 @@ local function OnDefaultCastbarShow(self)
 
 		if f.castbar.curr then
 			f.castbar.curr:Show()
-			f.castbar.max:Show()
 		end
 	end
 
@@ -67,8 +72,16 @@ end
 
 local function OnDefaultCastbarHide(self)
 	local f = self:GetParent():GetParent().kui
-	f.castbar.shield:Hide()
-	f.castbar:Hide()
+
+	kui.frameFade(f.castbar, {
+		mode		= 'OUT',
+		timeToFade	= .5,
+		startAlpha	= 1,
+		endAlpha	= 0,
+		finishedFunc = function()
+			ResetFade(f)
+		end,
+	})
 end
 
 local function OnDefaultCastbarUpdate(self, elapsed)
@@ -77,8 +90,7 @@ local function OnDefaultCastbarUpdate(self, elapsed)
 	local f = self:GetParent():GetParent().kui
 	local min,max = self:GetMinMaxValues()
 
-	if f.castbar.max then
-		f.castbar.max:SetText(format("%.1f", max))
+	if f.castbar.curr then
 		f.castbar.curr:SetText(format("%.1f", self:GetValue()))
 	end
 
@@ -87,8 +99,9 @@ local function OnDefaultCastbarUpdate(self, elapsed)
 end
 ---------------------------------------------------------------------- create --
 function mod:CreateCastbar(msg, frame)
+	if frame.castbar then return end
 	-- container ---------------------------------------------------------------
-	frame.castbar = CreateFrame('Frame', nil, frame.parent)
+	frame.castbar = CreateFrame('Frame', nil, frame)
 	frame.castbar:Hide()
 	
 	-- background --------------------------------------------------------------
@@ -103,7 +116,7 @@ function mod:CreateCastbar(msg, frame)
 	
 	-- cast bar ------------------------------------------------------------
 	frame.castbar.bar = CreateFrame("StatusBar", nil, frame.castbar)
-	frame.castbar.bar:SetStatusBarTexture(kui.m.t.bar)
+	frame.castbar.bar:SetStatusBarTexture(addon.bartexture)
 
 	frame.castbar.bar:SetPoint('TOPLEFT', frame.castbar.bg, 'TOPLEFT', 1, -1)
 	frame.castbar.bar:SetPoint('BOTTOMLEFT', frame.castbar.bg, 'BOTTOMLEFT', 1, 1)
@@ -112,10 +125,18 @@ function mod:CreateCastbar(msg, frame)
 	frame.castbar.bar:SetFrameLevel(frame.castbar:GetFrameLevel() + 1)
 	frame.castbar.bar:SetMinMaxValues(0, 1)
 
+	-- spark
+	frame.castbar.spark = frame.castbar.bar:CreateTexture(nil, 'ARTWORK')
+	frame.castbar.spark:SetDrawLayer('ARTWORK', 7)
+	frame.castbar.spark:SetVertexColor(1,1,.8)
+	frame.castbar.spark:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\spark')
+	frame.castbar.spark:SetPoint('CENTER', frame.castbar.bar:GetRegions(), 'RIGHT', 1, 0)
+	frame.castbar.spark:SetSize(6, addon.sizes.frame.cbheight + 6)
+
 	-- uninterruptible cast shield -----------------------------------------
 	frame.castbar.shield = frame.overlay:CreateTexture(nil, 'ARTWORK')
 	frame.castbar.shield:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\Shield')
-	frame.castbar.shield:SetTexCoord(0, .46875, 0, .5625)
+	frame.castbar.shield:SetTexCoord(0, .53125, 0, .625)
 
 	frame.castbar.shield:SetSize(addon.sizes.tex.shieldw, addon.sizes.tex.shieldh)
 	frame.castbar.shield:SetPoint('LEFT', frame.castbar.bg, -7, 0)
@@ -128,23 +149,32 @@ function mod:CreateCastbar(msg, frame)
 	
 	-- cast bar text -------------------------------------------------------
 	if self.db.profile.display.spellname then
-		frame.castbar.name = frame:CreateFontString(frame.castbar, {
-			size = 'name' })
-		frame.castbar.name:SetPoint('TOPLEFT', frame.castbar.bg, 'BOTTOMLEFT', 2, -2)
-		frame.castbar.name:SetPoint('TOPRIGHT', frame.castbar.bg, 'BOTTOMRIGHT', -2, 0)
-		frame.castbar.name:SetJustifyH('LEFT')
+		frame.castbar.name = frame:CreateFontString(frame.castbar.bar, {
+			size = 'small' })
+        
+        if addon.db.profile.general.leftie then
+            frame.castbar.name:SetPoint('TOPLEFT', frame.castbar.bar, 'BOTTOMLEFT', 2.5, -3)
+            frame.castbar.name:SetPoint('TOPRIGHT', frame.castbar.bar, 'BOTTOMRIGHT')
+            frame.castbar.name:SetJustifyH('LEFT')
+        else
+            frame.castbar.name:SetPoint('TOP', frame.castbar.bar, 'BOTTOM', 0, -3)
+        end
 	end
 
 	if self.db.profile.display.casttime then
-		frame.castbar.curr = frame:CreateFontString(frame.castbar, {
-			size = 'name' })
-		frame.castbar.curr:SetPoint('TOPRIGHT', frame.castbar.bg, 'BOTTOMRIGHT', -2, -2)
+		frame.castbar.curr = frame:CreateFontString(frame.castbar.bar, {
+			size = 'small' })
 
-		frame.castbar.max = frame:CreateFontString(frame.castbar, {
-			size = 'small', alpha = .5 })
-		frame.castbar.max:SetPoint('TOPRIGHT', frame.castbar.curr, 'TOPLEFT', -1, 0)
+        if addon.db.profile.general.leftie then
+            frame.castbar.curr:SetPoint('TOPRIGHT', frame.castbar.bar, 'BOTTOMRIGHT', -2.5, -3)
+            frame.castbar.curr:SetJustifyH('RIGHT')
 
-		frame.castbar.name:SetPoint('TOPRIGHT', frame.castbar.max, 'TOPLEFT', -1, 0)
+            if frame.castbar.name then
+                frame.castbar.name:SetPoint('RIGHT', frame.castbar.curr, 'LEFT')
+            end
+        else
+            frame.castbar.curr:SetPoint('LEFT', frame.castbar.bg, 'RIGHT', 2, 0)
+        end
 	end
 
 	if self.db.profile.display.spellicon then
@@ -175,8 +205,7 @@ end
 ------------------------------------------------------------------------ Hide --
 function mod:HideCastbar(msg, frame)
     if frame.castbar then
-        frame.castbar.shield:Hide()
-        frame.castbar:Hide()
+    	ResetFade(frame)
     end
 end
 
@@ -261,7 +290,7 @@ function mod:OnInitialize()
 		profile = {
 			enabled   = true,
 			display = {
-				casttime        = true,
+				casttime        = false,
 				spellname       = true,
 				spellicon       = true,
 				cbheight        = 4,

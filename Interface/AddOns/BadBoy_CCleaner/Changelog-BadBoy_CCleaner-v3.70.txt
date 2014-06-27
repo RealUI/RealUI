@@ -1,0 +1,21 @@
+------------------------------------------------------------------------
+r84 | funkydude | 2014-05-05 17:17:54 +0000 (Mon, 05 May 2014) | 1 line
+Changed paths:
+   A /tags/v3.70 (from /trunk:83)
+
+Tagging as v3.70
+------------------------------------------------------------------------
+r83 | funkydude | 2014-05-05 16:29:32 +0000 (Mon, 05 May 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_CCleaner.lua
+   M /trunk/BadBoy_CCleaner.toc
+
+Use the lineId in the CanComplainChat check to avoid issues with player names and servers.
+------------------------------------------------------------------------
+r82 | funkydude | 2014-02-22 15:06:25 +0000 (Sat, 22 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_CCleaner.lua
+   M /trunk/BadBoy_CCleaner.toc
+
+Revert Ambiguate changes, BadBoy loads LibChatAmbiguate.
+------------------------------------------------------------------------

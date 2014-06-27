@@ -36,18 +36,17 @@ function Skada:OpenMenu(window)
 	        UIDropDownMenu_AddButton(info, level)
 
 			-- Can't report if we are not in a mode.
-			if not window or (window or window.selectedmode) then
+		if not window or (window and window.selectedmode) then
 		        wipe(info)
 		        info.text = L["Report"]
 				info.func = function() Skada:OpenReportWindow(window) end
 		        info.value = "report"
 				info.notCheckable = 1
 		        UIDropDownMenu_AddButton(info, level)
-		    end
+		end
 
 	        wipe(info)
 	        info.text = L["Delete segment"]
-	        info.func = function() Skada:DeleteSet() end
 	        info.hasArrow = 1
 	        info.notCheckable = 1
 	        info.value = "delete"
@@ -55,7 +54,6 @@ function Skada:OpenMenu(window)
 
 	        wipe(info)
 	        info.text = L["Keep segment"]
-	        info.func = function() Skada:KeepSet() end
 	        info.notCheckable = 1
 	        info.hasArrow = 1
 	        info.value = "keep"
@@ -88,7 +86,7 @@ function Skada:OpenMenu(window)
 
 	        wipe(info)
 	        info.text = L["Configure"]
-	        info.func = function() InterfaceOptionsFrame_OpenToCategory("Skada") end
+	        info.func = function() InterfaceOptionsFrame_OpenToCategory("Skada") InterfaceOptionsFrame_OpenToCategory("Skada") end
 	        info.notCheckable = 1
 	        UIDropDownMenu_AddButton(info, level)
 
@@ -149,7 +147,7 @@ function Skada:OpenMenu(window)
 
 		        for i, set in ipairs(Skada:GetSets()) do
 			        wipe(info)
-		            info.text = set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime)
+		            info.text = Skada:GetSetLabel(set)
 		            info.func = function()
 		            				window.selectedset = i
 		            				Skada:Wipe()
@@ -183,7 +181,7 @@ function Skada:OpenMenu(window)
 		    elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
 		        for i, set in ipairs(Skada:GetSets()) do
 			        wipe(info)
-		            info.text = set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime)
+		            info.text = Skada:GetSetLabel(set)
 		            info.func = function() Skada:DeleteSet(set) end
 			        info.notCheckable = 1
 		            UIDropDownMenu_AddButton(info, level)
@@ -191,7 +189,7 @@ function Skada:OpenMenu(window)
 		    elseif UIDROPDOWNMENU_MENU_VALUE == "keep" then
 		        for i, set in ipairs(Skada:GetSets()) do
 			        wipe(info)
-		            info.text = set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime)
+		            info.text = Skada:GetSetLabel(set)
 		            info.func = function()
 		            				set.keep = not set.keep
 		            				Skada:Wipe()
@@ -223,8 +221,8 @@ function Skada:OpenMenu(window)
 	            info.checked = (Skada.db.profile.report.set == "current")
 	            UIDropDownMenu_AddButton(info, level)
 
-		        for i, set in ipairs(sets) do
-		            info.text = set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime)
+		        for i, set in ipairs(Skada:GetSets()) do
+		            info.text = Skada:GetSetLabel(set)
 		            info.func = function() Skada.db.profile.report.set = i end
 		            info.checked = (Skada.db.profile.report.set == i)
 		            UIDropDownMenu_AddButton(info, level)
@@ -339,7 +337,7 @@ function Skada:SegmentMenu(window)
 
 		for i, set in ipairs(Skada:GetSets()) do
 		    wipe(info)
-			info.text = set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime)
+			info.text = Skada:GetSetLabel(set)
 			info.func = function()
 							window.selectedset = i
 	            					Skada:Wipe()
@@ -439,7 +437,7 @@ function Skada:CreateReportWindow(window)
 		setbox:SetLabel(L["Segment"])
 		setbox:SetList({total = L["Total"], current = L["Current"]})
 		for i, set in ipairs(Skada:GetSets()) do
-			setbox:AddItem(i, set.name..": "..date("%H:%M",set.starttime).." - "..date("%H:%M",set.endtime))
+			setbox:AddItem(i, Skada:GetSetLabel(set))
 		end
 		setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.set = value end)
 		setbox:SetValue(Skada.db.profile.report.set or Skada:GetSets()[1])

@@ -1,0 +1,8 @@
+2013-12-18  oscarucb  <oscarucb>
+
+[7371dc23e406] [3.4.7]
+* ACP.xml:
+
+fix GameMenu button spacing, which changed behavior in 5.4.2
+
+

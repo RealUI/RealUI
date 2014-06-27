@@ -6,8 +6,6 @@ local AceTab = LibStub("AceTab-3.0")
 
 mod.modName = L["Player Names"]
 
-local WoW5 = select(4, GetBuildInfo()) >= 50000
-
 local format = _G.string.format
 local gsub = _G.string.gsub
 local strlower = _G.string.lower
@@ -29,9 +27,7 @@ local GetGuildRosterSelection = _G.GetGuildRosterSelection
 local GetGuildRosterShowOffline = _G.GetGuildRosterShowOffline
 local GetNumFriends = _G.GetNumFriends
 local GetNumGuildMembers = _G.GetNumGuildMembers
-local GetNumGroupMembers = WoW5 and _G.GetNumGroupMembers
-local GetNumPartyMembers = not WoW5 and _G.GetNumPartyMembers
-local GetNumRaidMembers = not WoW5 and _G.GetNumRaidMembers
+local GetNumGroupMembers = _G.GetNumGroupMembers
 local GetNumWhoResults = _G.GetNumWhoResults
 local GetWhoInfo = _G.GetWhoInfo
 local GuildRoster = _G.GuildRoster
@@ -235,12 +231,7 @@ end
 local storedName = nil
 
 function mod:OnEnable()
-	if WoW5 then
-		self:RegisterEvent("GROUP_ROSTER_UPDATE")
-	else
-		self:RegisterEvent("PARTY_MEMBERS_CHANGED")
-		self:RegisterEvent("RAID_ROSTER_UPDATE")
-	end
+	self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:RegisterEvent("WHO_LIST_UPDATE")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self:RegisterEvent("CHAT_MSG_SYSTEM", "WHO_LIST_UPDATE")
@@ -259,13 +250,8 @@ function mod:OnEnable()
 	player = UnitName("player") -- can be UNKNOWN when main chunk loads, so do it here.
 	self:AddPlayer(player, (select(2, UnitClass("player"))), UnitLevel("player"))
 
-	if WoW5 then
-		self:GROUP_ROSTER_UPDATE()
-	else
-		self:PARTY_MEMBERS_CHANGED()
-		self:RAID_ROSTER_UPDATE()
-	end
-
+	self:GROUP_ROSTER_UPDATE()
+	
 	for i = 1, NUM_CHAT_WINDOWS do
 		local cf = _G["ChatFrame" .. i]
 		if cf ~= COMBATLOG then
@@ -302,9 +288,6 @@ function mod:OnDisable()
 	if CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS.UnregisterCallback then
 		CUSTOM_CLASS_COLORS:UnregisterCallback(wipeCache)
 	end
-end
-
-function mod:ClearCustomClassColorCache()
 end
 
 function mod:AddPlayer(name, class, level, save)
@@ -369,30 +352,6 @@ function mod:GROUP_ROSTER_UPDATE(evt) -- WoW5 only
 			local _, c = UnitClass(u)
 			local l = UnitLevel(u)
 			channels.PARTY[n] = true
-			self:AddPlayer(n, c, l, self.db.profile.saveParty)
-		end
-	end
-end
-
-function mod:PARTY_MEMBERS_CHANGED(evt) -- delete when WoW5 goes live
-	wipe(channels.PARTY)
-
-	for i = 1, GetNumPartyMembers() do
-		local n = UnitName("party" .. i)
-		local _, c = UnitClass("party" .. i)
-		local l = UnitLevel("party" .. i)
-		channels.PARTY[n] = true
-		self:AddPlayer(n, c, l, self.db.profile.saveParty)
-	end
-end
-
-function mod:RAID_ROSTER_UPDATE(evt) -- delete when WoW5 goes live
-	wipe(channels.RAID)
-
-	for i = 1, GetNumRaidMembers() do
-		local n, _, _, l, _, c = GetRaidRosterInfo(i)
-		if n and c and l then
-			channels.RAID[n] = true
 			self:AddPlayer(n, c, l, self.db.profile.saveParty)
 		end
 	end

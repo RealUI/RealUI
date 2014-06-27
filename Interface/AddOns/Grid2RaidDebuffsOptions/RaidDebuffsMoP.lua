@@ -268,6 +268,7 @@ RDDB["Mists of Pandaria"] = {
 		143198, --Garrote
 		143301, --Gouge
 		143423, --Sha Sear
+		143840, --Mark of Anguish
 		},
 		["[866-3]Norushen"] = {
 		146703, --Bottomless Pit
@@ -359,6 +360,7 @@ RDDB["Mists of Pandaria"] = {
 		144236, --Pattern Recognition
 		143856, --Superheated
 		144466, --Magnetic Crush
+		143828, --Locked On
 		},
 		["[853-13]Paragons of the Klaxxi"] = {
 			--Kil'ruk the Wind-Reaver

@@ -1,5 +1,5 @@
 ﻿## Interface: 50400
-## X-Curse-Packaged-Version: 3.4.3
+## X-Curse-Packaged-Version: 3.4.7
 ## X-Curse-Project-Name: Addon Control Panel
 ## X-Curse-Project-ID: acp
 ## X-Curse-Repository-ID: wow/acp/mainline
@@ -11,7 +11,7 @@
 ## Notes-zhTW: 在系統選單按「插件管理」按鈕管理插件。ACP 以 rMCP (MCP，由Rophy修改) 為基礎。
 ## Notes-esES: A?ade un panel de Accesorios en el juego mediante el men? 'Accesorios'. Soporte especial para accesorios multi-parte. Basado en rMCP de Rophy.
 ## Notes-zhCN: 在系统选项按「插件管理」按钮管理插件。ACP 以 rMCP（MCP，由 Rophy 修改）为基础。
-## Version: 3.4.3 
+## Version: 3.4.7 
 ## SavedVariables: ACP_Data
 
 ## X-Credits: ACP based now on rMCP, which is MCP modified by Rophy, originally by Saien.

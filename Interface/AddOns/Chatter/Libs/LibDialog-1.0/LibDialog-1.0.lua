@@ -26,7 +26,7 @@ local MAJOR = "LibDialog-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
-local MINOR = 2 -- Should be manually increased
+local MINOR = 4 -- Should be manually increased
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then
@@ -239,6 +239,13 @@ local function _Dialog_OnHide(dialog)
         delegate.on_hide(dialog, dialog.data)
     end
     _ReleaseDialog(dialog)
+
+    if #delegate_queue > 0 then
+        local delegate
+        repeat
+            delegate = _ProcessQueue()
+            until not delegate
+    end
 end
 
 local function _Dialog_OnUpdate(dialog, elapsed)
@@ -251,7 +258,7 @@ local function _Dialog_OnUpdate(dialog, elapsed)
             dialog.time_remaining = nil
 
             if delegate.on_cancel then
-                delegate.oncancel(dialog, dialog.data, "timeout")
+                delegate.on_cancel(dialog, dialog.data, "timeout")
             end
             dialog:Hide()
             return
@@ -535,6 +542,7 @@ local function _BuildDialog(delegate, data)
 
         local close_button = _G.CreateFrame("Button", nil, dialog, "UIPanelCloseButton")
         close_button:SetPoint("TOPRIGHT", -3, -3)
+        close_button:Hide()
 
         dialog.close_button = close_button
 
@@ -548,6 +556,12 @@ local function _BuildDialog(delegate, data)
     dialog.delegate = delegate
     dialog.data = data
     dialog.text:SetText(delegate.text or "")
+
+    if delegate.no_close_button then
+        dialog.close_button:Hide()
+    else
+        dialog.close_button:Show()
+    end
 
     if _G.type(delegate.icon) == "string" then
         if not dialog.icon then
@@ -740,7 +754,7 @@ function lib:Spawn(reference, data)
 
             if dialog.delegate.is_exclusive then
                 if dialog.delegate.on_cancel then
-                    dialog.delegate.oncancel(dialog, dialog.data, "override")
+                    dialog.delegate.on_cancel(dialog, dialog.data, "override")
                 end
                 dialog:Hide()
             end
@@ -761,7 +775,7 @@ function lib:Spawn(reference, data)
                         dialog:Hide()
 
                         if dialog.delegate.on_cancel then
-                            dialog.delegate.oncancel(dialog, dialog.data, "override")
+                            dialog.delegate.on_cancel(dialog, dialog.data, "override")
                         end
                     end
                 end

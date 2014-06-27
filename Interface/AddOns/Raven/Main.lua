@@ -898,8 +898,8 @@ end
 
 -- See if totems have changed since last update, can't count on events, and save for future checks
 function MOD:ChangedTotems()
-	local changed = false
-	if MOD.myClass == "SHAMAN" then
+	local changed, cl = false, MOD.myClass
+	if cl == "SHAMAN" or cl == "DRUID" then
 		for i = 1, 4 do local _, name = GetTotemInfo(i); if lastTotems[i] ~= name then lastTotems[i] = name; changed = true end end
 	end
 	return changed
@@ -1021,7 +1021,7 @@ local function GetStanceAura()
 	end
 end
 
--- Create an aura for class-specific power buffs: soul shards, holy power, shadow orbs
+-- Create an aura for class-specific power buffs: soul shards, holy power, shadow orbs, etc.
 local function GetPowerBuffs()
 	local power, id = nil, nil
 	if MOD.myClass == "PALADIN" then power = UnitPower("player", SPELL_POWER_HOLY_POWER); id = 85247
@@ -1034,6 +1034,29 @@ local function GetPowerBuffs()
 			power = UnitPower("player", SPELL_POWER_SOUL_SHARDS); id = 117198
 		elseif IsSpellKnown(104315) then
 			power = UnitPower("player", SPELL_POWER_DEMONIC_FURY); id = 104315
+		end
+	elseif MOD.myClass == "DRUID" then
+		if IsSpellKnown(145205) then -- restoration druid only has one mushroom
+			local haveTotem, name, startTime, duration, icon = GetTotemInfo(1)
+			if haveTotem and name then
+				local link = GetSpellLink(145205)
+				AddAura("player", name, true, 145205, 1, nil, duration or 0, "player", nil, nil, nil, icon, nil,
+					(startTime or 0) + (duration or 0), "spell link", link)
+			end
+		elseif IsSpellKnown(88747) then -- balance druid can have three mushrooms
+			local count, start, dur = 0, 0, 0
+			for i = 1, 3 do
+				local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
+				if haveTotem and name and startTime then
+					count = count + 1
+					if startTime > start then start = startTime; dur = duration end
+				end
+			end
+			local name, _, icon = GetSpellInfo(88747)
+			if name and (count > 0) then
+				local link = GetSpellLink(88747)
+				AddAura("player", name, true, 88747, count, nil, dur, "player", nil, nil, nil, icon, nil, start + dur, "spell link", link)
+			end
 		end
 	end
 	if power and power > 0 then

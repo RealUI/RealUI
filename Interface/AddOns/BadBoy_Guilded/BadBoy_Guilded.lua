@@ -1,5 +1,5 @@
 
-local strfind = string.find
+local strfind, Ambiguate = string.find, Ambiguate
 local prevLineId, result, triggers = 0, nil, {
 	"wowstead%.com",
 	"guildlaunch%.com",
@@ -163,11 +163,12 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,
 	else
 		prevLineId, result = lineId, nil
 		if chanId == 0 or chanId == 25 then return end --Don't scan custom channels or GuildRecruitment channel
-		if not CanComplainChat(lineId) or UnitIsInMyGuild(player) then return end --Don't filter ourself/friends
+		local trimmedPlayer = Ambiguate(player, "none")
+		if not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) then return end --Don't filter ourself/friends
 		msg = msg:lower() --Lower all text, remove capitals
 		for i = 1, #triggers do
 			if strfind(msg, triggers[i]) then --Found a match
-				if BadBoyLog then BadBoyLog("Guilded", event, player, msg) end
+				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, msg) end
 				result = true
 				return true --found a trigger, filter
 			end
@@ -314,12 +315,13 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_,event,msg,player,
 		return whispResult
 	else
 		whispPrevLineId, whispResult = lineId, nil
-		if not BADBOY_GWHISPER or tbl[player] or not CanComplainChat(player) or UnitIsInMyGuild(player) or UnitInRaid(player) or UnitInParty(player) or flag == "GM" or flag == "DEV" then return end
+		local trimmedPlayer = Ambiguate(player, "none")
+		if not BADBOY_GWHISPER or tbl[trimmedPlayer] or not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) or UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer) or flag == "GM" or flag == "DEV" then return end
 		msg = msg:lower() --Lower all text, remove capitals
 		for i = 1, #whispers do
 			if strfind(msg, whispers[i]) then --Found a match
 				--print(whispers[i])
-				if BadBoyLog then BadBoyLog("Guilded", event, player, msg) end
+				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, msg) end
 				whispResult = true
 				return true --found a trigger, filter
 			end
@@ -328,6 +330,7 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_,event,msg,player,
 end)
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", function(_,_,_,player)
-	if BADBOY_GWHISPER and not tbl[player] then tbl[player] = true end
+	local trimmedPlayer = Ambiguate(player, "none")
+	if BADBOY_GWHISPER and not tbl[trimmedPlayer] then tbl[trimmedPlayer] = true end
 end)
 

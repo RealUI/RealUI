@@ -37,8 +37,13 @@ function mod:TellTarget(frame, msg)
 	if UnitIsPlayer("target") and (UnitIsFriend("player", "target") or UnitIsCharmed("target"))  then
 		unitname, realm = UnitName("target")
 		if unitname then unitname = gsub(unitname, " ", "") end
-		if unitname and not UnitIsSameServer("player", "target") then
-			unitname = unitname .. "-" .. gsub(realm, " ", "")
+		if realm then
+			-- Since sometimes when using UnitName on people from your realm
+			-- that aren't in your zone you get a empty string instead of nil
+			-- we need an aditional check.
+			if strlen(realm) > 2 then
+				unitname = unitname .. "-" .. gsub(realm, " ", "")
+			end
 		end
 	end
 	ChatFrame_SendTell((unitname or "InvalidTarget"), frame)

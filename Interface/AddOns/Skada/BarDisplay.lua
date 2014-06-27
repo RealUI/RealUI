@@ -31,13 +31,14 @@ function mod:Create(window)
 		window.bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(window.bargroup)
 	else
 		window.bargroup = mod:NewBarGroup(window.db.name, nil, window.db.background.height, window.db.barwidth, window.db.barheight, "SkadaBarWindow"..window.db.name)
+		local bargroup = window.bargroup -- ticket 323
 
 		-- Add window buttons.
-		window.bargroup:AddButton(L["Configure"], "Interface\\Addons\\Skada\\images\\icon-config", "Interface\\Addons\\Skada\\images\\icon-config", function() Skada:OpenMenu(window) end)
+		window.bargroup:AddButton(L["Configure"], "Interface\\Addons\\Skada\\images\\icon-config", "Interface\\Addons\\Skada\\images\\icon-config", function() Skada:OpenMenu(bargroup.win) end)
 		window.bargroup:AddButton(L["Reset"], "Interface\\Addons\\Skada\\images\\icon-reset", "Interface\\Addons\\Skada\\images\\icon-reset", function() Skada:ShowPopup() end)
-		window.bargroup:AddButton(L["Segment"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:SegmentMenu(window) end)
-		window.bargroup:AddButton(L["Mode"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:ModeMenu(window) end)
-		window.bargroup:AddButton(L["Report"], "Interface\\Buttons\\UI-GuildButton-MOTD-Up", "Interface\\Buttons\\UI-GuildButton-MOTD-Up", function() Skada:OpenReportWindow(window) end)
+		window.bargroup:AddButton(L["Segment"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:SegmentMenu(bargroup.win) end)
+		window.bargroup:AddButton(L["Mode"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:ModeMenu(bargroup.win) end)
+		window.bargroup:AddButton(L["Report"], "Interface\\Buttons\\UI-GuildButton-MOTD-Up", "Interface\\Buttons\\UI-GuildButton-MOTD-Up", function() Skada:OpenReportWindow(bargroup.win) end)
 	end
 	window.bargroup.win = window
 	window.bargroup.RegisterCallback(mod, "AnchorMoved")
@@ -56,6 +57,15 @@ function mod:Create(window)
 
 	-- Restore window position.
 	libwindow.RestorePosition(window.bargroup)
+
+	if not mod.class_icon_tcoords then -- amortized class icon coordinate adjustment
+		mod.class_icon_tcoords = {}
+		for class, coords in pairs(CLASS_ICON_TCOORDS) do
+			local l,r,t,b = unpack(coords)
+			local adj = 0.02
+			mod.class_icon_tcoords[class] = {(l+adj),(r-adj),(t+adj),(b-adj)}
+		end
+	end
 end
 
 -- Called by Skada windows when the window is to be destroyed/cleared.
@@ -98,7 +108,15 @@ local function showmode(win, id, label, mode)
 	win:DisplayMode(mode)
 end
 
-local function BarClick(win, id, label, button)
+local function BarClickIgnore(bar, button)
+	local win = bar.win
+	if button == "RightButton" then 
+		win:RightClick() 
+	end
+end
+
+local function BarClick(bar, button)
+	local win, id, label = bar.win, bar.id, bar.text
 	local click1 = win.metadata.click1
 	local click2 = win.metadata.click2
 	local click3 = win.metadata.click3
@@ -120,7 +138,8 @@ end
 
 local ttactive = false
 
-local function BarEnter(win, id, label)
+local function BarEnter(bar)
+	local win, id, label = bar.win, bar.id, bar.text
 	local t = GameTooltip
 	if Skada.db.profile.tooltips and (win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip) then
 		ttactive = true
@@ -179,10 +198,41 @@ local function BarEnter(win, id, label)
 	end
 end
 
-local function BarLeave(win, id, label)
+local function BarLeave(bar)
+	local win, id, label = bar.win, bar.id, bar.text
 	if ttactive then
 		GameTooltip:Hide()
 		ttactive = false
+	end
+end
+
+local function BarResize(bar)
+	if bar.bgwidth then
+		bar.bgtexture:SetWidth(bar.bgwidth * bar:GetWidth())
+	else
+		bar:SetScript("OnSizeChanged",bar.OnSizeChanged)
+	end
+	bar:OnSizeChanged() -- call library version
+end
+
+local function BarIconEnter(icon)
+	local bar = icon.bar
+	local win = bar.win
+	if bar.link and win and win.bargroup then
+		Skada:SetTooltipPosition(GameTooltip, win.bargroup); 
+		GameTooltip:SetHyperlink(bar.link); 
+		GameTooltip:Show();
+	end
+end
+
+local function BarIconMouseDown(icon) -- shift-click to link spell into chat
+	local bar = icon.bar
+	if not IsShiftKeyDown() or not bar.link then return end
+	local activeEditBox = ChatEdit_GetActiveWindow()
+	if activeEditBox then
+		ChatEdit_InsertLink(bar.link)
+	else
+		ChatFrame_OpenChat(bar.link, DEFAULT_CHAT_FRAME)
 	end
 end
 
@@ -198,6 +248,10 @@ end
 
 local function bar_order_sort(a,b)
 	return a and b and a.order and b.order and a.order < b.order
+end
+
+local function HideGameTooltip()
+	GameTooltip:Hide()
 end
 
 -- Called by Skada windows when title of window should change.
@@ -219,7 +273,7 @@ function mod:Update(win)
 	-- Find out if we have icons in this update, and if so, adjust accordingly.
 	local hasicon = false
 	for i, data in ipairs(win.dataset) do
-		if data.icon or (data.class and win.db.classicons) then
+		if (data.icon and not data.ignore) or (data.class and win.db.classicons) then
 			hasicon = true
 		end
 	end
@@ -252,7 +306,7 @@ function mod:Update(win)
 
 			local bar = win.bargroup:GetBar(barid)
 
-			if bar and bar.missingclass and data.class and not data.ignore then 
+			if bar and bar.missingclass and data.class and not data.ignore then
 			        -- fixup bar that was generated before class info was available
 				bar:Hide()
 				win.bargroup:RemoveBar(bar)
@@ -261,53 +315,55 @@ function mod:Update(win)
 			end
 
 			if bar then
-				bar:SetMaxValue(win.metadata.maxvalue or 1)
 				bar:SetValue(data.value)
+				bar:SetMaxValue(win.metadata.maxvalue or 1) -- MUST come after SetValue
 			else
 				-- Initialization of bars.
 				bar = mod:CreateBar(win, barid, barlabel, data.value, win.metadata.maxvalue or 1, data.icon, false)
-				bar.id = data.id
+				bar.id = barid
+				bar.text = barlabel
 				if not data.ignore then
 
 					if data.icon then
 						bar:ShowIcon()
 
+						bar.link = nil
 						if data.spellid then
 							local spell = data.spellid
-							bar.iconFrame:EnableMouse(true)
-							bar.iconFrame:SetScript("OnEnter", function(bar) Skada:SetTooltipPosition(GameTooltip, win.bargroup); GameTooltip:SetSpellByID(spell); GameTooltip:Show() end)
-							bar.iconFrame:SetScript("OnLeave", function(bar) GameTooltip:Hide() end)
+							bar.link = GetSpellLink(spell)
 						elseif data.hyperlink then
-							local link = data.hyperlink
+							bar.link = data.hyperlink
+						end
+						if bar.link then
+							bar.iconFrame.bar = bar
 							bar.iconFrame:EnableMouse(true)
-							bar.iconFrame:SetScript("OnEnter", function(bar) Skada:SetTooltipPosition(GameTooltip, win.bargroup); GameTooltip:SetHyperlink(link); GameTooltip:Show(); end)
-							bar.iconFrame:SetScript("OnLeave", function(bar) GameTooltip:Hide() end)
+							bar.iconFrame:SetScript("OnEnter", BarIconEnter)
+							bar.iconFrame:SetScript("OnLeave", HideGameTooltip)
+							bar.iconFrame:SetScript("OnMouseDown", BarIconMouseDown)
 						end
 					end
 
 					bar:EnableMouse(true)
-					bar:SetScript("OnEnter", function(bar) BarEnter(win, barid, barlabel) end)
-					bar:SetScript("OnLeave", function(bar) BarLeave(win, barid, barlabel) end)
-					bar:SetScript("OnMouseDown", function(bar, button) BarClick(win, barid, barlabel, button) end)
+					bar:SetScript("OnEnter", BarEnter)
+					bar:SetScript("OnLeave", BarLeave)
+					bar:SetScript("OnMouseDown", BarClick)
 				else
 					bar:SetScript("OnEnter", nil)
 					bar:SetScript("OnLeave", nil)
-					bar:SetScript("OnMouseDown", function(bar, button) if button == "RightButton" then win:RightClick() end end)
+					bar:SetScript("OnMouseDown", BarClickIgnore)
 				end
 				bar:SetValue(data.value)
 
-				if not data.class and 
+				if not data.class and
 				   (win.db.classicons or win.db.classcolorbars or win.db.classcolortext) then
 					bar.missingclass = true
 				else
 					bar.missingclass = nil
 				end
 
-				if data.class and win.db.classicons and CLASS_ICON_TCOORDS[data.class] then
+				if data.class and win.db.classicons and mod.class_icon_tcoords[data.class] then
 					bar:ShowIcon()
-					local adj = 0.02
-					local l,r,t,b = unpack(CLASS_ICON_TCOORDS[data.class])
-					bar:SetIconWithCoord("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes", {(l+adj),(r-adj),(t+adj),(b-adj)})
+					bar:SetIconWithCoord("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes", mod.class_icon_tcoords[data.class])
 				end
 
 				if data.color then
@@ -374,7 +430,11 @@ function mod:Update(win)
 				bar.bgtexture:ClearAllPoints()
 				bar.bgtexture:SetPoint("BOTTOMLEFT")
 				bar.bgtexture:SetPoint("TOPLEFT")
-				bar.bgtexture:SetWidth(data.backgroundwidth * bar:GetLength())
+				bar.bgwidth = data.backgroundwidth
+				bar:SetScript("OnSizeChanged",BarResize) -- ticket 365: required to resize bgtexture
+				BarResize(bar)
+			else
+				bar.bgwidth = nil
 			end
 
 			if not data.ignore then
@@ -436,7 +496,8 @@ local function getNumberOfBars(win)
 	return n
 end
 
-function mod:OnMouseWheel(win, frame, direction)
+local function OnMouseWheel(frame, direction)
+	local win = frame.win
 	local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
 	if direction == 1 and win.bargroup:GetBarOffset() > 0 then
 		win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
@@ -445,12 +506,23 @@ function mod:OnMouseWheel(win, frame, direction)
 	end
 end
 
+function mod:OnMouseWheel(win, frame, direction) -- external scrolling interface (SkadaScroll)
+	if not frame then
+		mod.framedummy = mod.framedummy or {}
+		mod.framedummy.win = win
+		frame = mod.framedummy
+	end
+	OnMouseWheel(frame, direction)
+end
+
 function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
 	local bar = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon)
+	bar.win = win
 	bar:EnableMouseWheel(true)
-	bar:SetScript("OnMouseWheel", function(f, d) mod:OnMouseWheel(win, f, d) end)
+	bar:SetScript("OnMouseWheel", OnMouseWheel)
 	bar.iconFrame:SetScript("OnEnter", nil)
 	bar.iconFrame:SetScript("OnLeave", nil)
+	bar.iconFrame:SetScript("OnMouseDown", nil)
 	bar.iconFrame:EnableMouse(false)
 	return bar
 end
@@ -754,7 +826,6 @@ function mod:AddDisplayOptions(win, options)
 			        type="toggle",
 			        name=L["Enable"],
 			        desc=L["Enables the title bar."],
-					width="full",
 			        order=0,
 			        get=function() return db.enabletitle end,
 			        set=function()
@@ -763,6 +834,17 @@ function mod:AddDisplayOptions(win, options)
 			        	end,
 			},
 
+			titleset = {
+			        type="toggle",
+			        name=L["Include set"],
+			        desc=L["Include set name in title bar"],
+			        order=0.5,
+			        get=function() return db.titleset end,
+			        set=function()
+			        		db.titleset = not db.titleset
+		         			Skada:ApplySettings()
+			        	end,
+			},
 			height = {
 				type="range",
 				name=L["Title height"],

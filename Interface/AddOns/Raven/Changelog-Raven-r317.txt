@@ -1,0 +1,39 @@
+------------------------------------------------------------------------
+r317 | tomber | 2013-11-11 05:51:26 +0000 (Mon, 11 Nov 2013) | 3 lines
+Changed paths:
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Fix issue with hiding some UI elements when entering pet battles.
+Add extra check to pixel perfect alignment code to fix obscure Lua error (i.e., root cause not clear but this should fix the symptom).
+Generate wild mushroom buff for resto and balance druids including count and remaining time (when count > 1 for balance druids then remaining time is for longest duration wild mushroom).
+------------------------------------------------------------------------
+r316 | tomber | 2013-10-21 16:40:23 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/Raven.toc
+
+Add version number to TOC so that it can be detected and displayed by other addons.
+------------------------------------------------------------------------
+r315 | tomber | 2013-10-16 05:25:15 +0000 (Wed, 16 Oct 2013) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Cancel.lua
+   M /trunk/Conditions.lua
+   M /trunk/Highlights.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Presets/Priest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+This version includes numerous changes related to code quality, specifically getting rid of excess global variables.
+Added Void Tendril's Grasp to priest presets.
+Added option to include tenths of second when checking time left under Timer Options tab.
+------------------------------------------------------------------------
+r314 | tomber | 2013-10-02 18:33:50 +0000 (Wed, 02 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Cancel.lua
+
+Add line in tooltip showing the listed spell ids (only when alt and control keys are held down when mousing over the bar/icon) from imported spell lists such as in the Raven_Filter_Leila addon. This is a quality of life improvement for maintainers of such lists, allowing them to find listed spell ids for spells that have multiple associated spell ids. This has essentially no impact on the primary code path.
+------------------------------------------------------------------------

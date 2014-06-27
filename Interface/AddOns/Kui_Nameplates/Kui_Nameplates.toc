@@ -3,7 +3,7 @@
 ## Title: |cff9900ffKui|r Nameplates
 ## Notes: Prettier, lightweight, configurable nameplates.
 ## SavedVariables: KuiNameplatesGDB
-## X-Curse-Packaged-Version: 211
+## X-Curse-Packaged-Version: 239
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline
@@ -15,6 +15,7 @@ config.lua
 create.lua
 layout.lua
 
+tankmode.lua
 castbar.lua
 castwarnings.lua
 combopoints.lua

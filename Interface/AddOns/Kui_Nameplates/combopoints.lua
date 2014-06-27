@@ -82,7 +82,7 @@ function mod:CreateComboPoints(msg, frame)
 		local cp = frame.combopoints:CreateTexture(nil, 'ARTWORK')
 		cp:SetDrawLayer('ARTWORK', 2)
 		cp:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\combopoint-round')
-		cp:SetTexCoord(0, .375, 0, .375)
+		--cp:SetTexCoord(0, .375, 0, .375)
 		cp:SetSize(addon.sizes.tex.combopoints, addon.sizes.tex.combopoints)
 
 		if i == 0 then
@@ -124,7 +124,6 @@ function mod:GetOptions()
 			name = 'Show combo points',
 			desc = 'Show combo points on the target',
 			type = 'toggle',
-			width = 'double',
 			order = 0
 		},
 		scale = {

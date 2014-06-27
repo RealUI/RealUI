@@ -90,7 +90,12 @@ function MicroMenuMod:MicroMenuBarShow()
 end
 
 function MicroMenuMod:BlizzardBarShow()
-	for i,v in pairs(self.bar.buttons) do v:ClearSetPoint(unpack(self.bar.anchors[i])) end
+	-- Only reset button positions not set in MoveMicroButtons()
+	for i,v in pairs(self.bar.buttons) do
+		if (((i-1)%6) > 0) then
+			v:ClearSetPoint(unpack(self.bar.anchors[i]))
+		end
+	end
 end
 
 MicroMenuBar.button_width = 28

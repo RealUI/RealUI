@@ -495,22 +495,7 @@ function ACP:OnLoad(this)
         OnAccept = function()
             ReloadUI()
         end,
-        OnCancel = function(data, reason)
-            if (reason == "timeout") then
-                ReloadUI()
-            else
-                StaticPopupDialogs["ACP_RELOADUI"].reloadAccepted = false
-            end
-        end,
-        OnHide = function()
-            if (StaticPopupDialogs["ACP_RELOADUI"].reloadAccepted) then
-                ReloadUI();
-            end
-        end,
-        OnShow = function()
-            StaticPopupDialogs["ACP_RELOADUI"].reloadAccepted = true;
-        end,
-        timeout = 5,
+        timeout = 0,
         hideOnEscape = 1,
         exclusive = 1,
         whileDead = 1,
@@ -521,15 +506,13 @@ function ACP:OnLoad(this)
         text = L["ACP: Some protected addons aren't loaded. Reload now?"],
         button1 = TEXT(ACCEPT),
         button2 = TEXT(CANCEL),
-        OnAccept = function()
+        OnAccept = function(this)
             ReloadUI()
         end,
-        OnCancel = function(data, reason)
-            if (reason == "timeout") then
-                ReloadUI()
-            end
+        OnCancel = function(this, data, reason)
+            ACP_Data.reloadRequired = nil
         end,
-        timeout = 5,
+        timeout = 10,
         hideOnEscape = 1,
         exclusive = 1,
         whileDead = 1,
@@ -540,7 +523,7 @@ function ACP:OnLoad(this)
         text = L["Save the current addon list to [%s]?"],
         button1 = TEXT(YES),
         button2 = TEXT(CANCEL),
-        OnAccept = function()
+        OnAccept = function(this)
             self:SaveSet(self.savingSet)
             CloseDropDownMenus(1)
         end,

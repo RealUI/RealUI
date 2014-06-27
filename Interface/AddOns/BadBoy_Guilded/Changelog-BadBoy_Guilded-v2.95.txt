@@ -1,0 +1,21 @@
+------------------------------------------------------------------------
+r197 | funkydude | 2014-05-05 17:17:21 +0000 (Mon, 05 May 2014) | 1 line
+Changed paths:
+   A /tags/v2.95 (from /trunk:196)
+
+Tagging as v2.95
+------------------------------------------------------------------------
+r196 | funkydude | 2014-05-05 16:38:39 +0000 (Mon, 05 May 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+   M /trunk/BadBoy_Guilded.toc
+
+Add player trimming.
+------------------------------------------------------------------------
+r195 | funkydude | 2014-02-22 15:08:27 +0000 (Sat, 22 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+   M /trunk/BadBoy_Guilded.toc
+
+Revert Ambiguate changes, BadBoy loads LibChatAmbiguate.
+------------------------------------------------------------------------

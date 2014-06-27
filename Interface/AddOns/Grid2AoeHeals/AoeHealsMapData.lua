@@ -7,7 +7,7 @@
 	Maps tables format: ['MapName'] = { floor1_width,floor1_height, floor2_width,floor2_height, floor3_width,floor3_height, ... }
 --]]
 
-local Maps= {
+--[[local Maps= {
 	['AhnQiraj'] = { 2777.544,1851.690, 977.560,651.700, 577.560,385.040, },
 	['AhnQirajTheFallenKingdom'] = { 4050.000,2700.000, },
 	['Ahnkahet'] = { 972.418,648.279, },
@@ -247,9 +247,10 @@ local Maps= {
 	['ValleyOfPowerScenario'] = { 839.583,560.416, },
 	['ValleyofTrialsStart'] = { 1350.000,900.000, },
 	['ValleyoftheFourWinds'] = { 3925.001,2616.667, },
-}
+}]]
 
 local AOEM = Grid2:GetModule("Grid2AoeHeals")
+local MapLib = LibStub("LibMapData-1.0")
 
 local GetMapInfo = GetMapInfo
 local SetMapToCurrentZone = SetMapToCurrentZone
@@ -259,25 +260,25 @@ local strfind,strsub = strfind, strsub
 
 local frame, curMap, curFloor, curMapWidth, curMapHeight
 
-local function GetMapTable(mapName)
-	local map = Maps[mapName]
-	if not map then
-		local index = strfind( mapName,"_terrain%d")  -- maybe its is a phased zone, format: "mapname_terrain%d"
-		if index then
-			map = Maps[ strsub(mapName,1,index-1) ]  -- remove "_terrain%d" from de map name
-		end
-	end
-	return map
-end
+--local function GetMapTable(mapName)
+--	local map = Maps[mapName]
+--	if not map then
+--		local index = strfind( mapName,"_terrain%d")  -- maybe its is a phased zone, format: "mapname_terrain%d"
+--		if index then
+--			map = Maps[ strsub(mapName,1,index-1) ]  -- remove "_terrain%d" from de map name
+--		end
+--	end
+--	return map
+--end
 
-local function GetMapSize( mapName,floorIndex )
-	local map = GetMapTable( mapName )
-	if map then
-		local index = (floorIndex and floorIndex>0 and (floorIndex-1)*2) or 0
-		if index>=#map then	index = 0 end
-		return map[index+1], map[index+2]
-	end
-end
+--local function GetMapSize( mapName,floorIndex )
+--	local map = GetMapTable( mapName )
+--	if map then
+--		local index = (floorIndex and floorIndex>0 and (floorIndex-1)*2) or 0
+--		if index>=#map then	index = 0 end
+--		return map[index+1], map[index+2]
+--	end
+--end
 
 local function ZoneChanged()
 	if not WorldMapFrame:IsVisible() then 
@@ -289,7 +290,7 @@ local function ZoneChanged()
 				local newFloor = GetCurrentMapDungeonLevel()
 				if newMap ~= curMap or newFloor ~= curFloor then
 					curMap, curFloor = newMap, newFloor
-					curMapWidth, curMapHeight = GetMapSize( newMap, newFloor )
+					curMapWidth, curMapHeight = MapLib:MapArea(newMap, newFloor)
 					AOEM:Debug("Zone changed:", curMap, curFloor, curMapWidth, curMapHeight)
 				end
 				return

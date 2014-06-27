@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Skins\Zoomed.lua
-	* Revision.: 384
+	* Revision.: 396
 	* Author...: JJSheets, StormFX
 
 	'Zoomed' skin for Masque.
@@ -13,7 +13,7 @@ local _, Core = ...
 
 Core:AddSkin("Zoomed", {
 	Author = "JJSheets, StormFX",
-	Version = "5.0.389",
+	Version = "5.4.396",
 	Masque_Version = 40300,
 	Shape = "Square",
 	Backdrop = {

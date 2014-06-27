@@ -1,4 +1,4 @@
---[[ $Id: AceGUIWidget-DropDown.lua 1100 2013-10-21 08:06:03Z nevcairiel $ ]]--
+--[[ $Id: AceGUIWidget-DropDown.lua 1101 2013-10-25 12:46:47Z nevcairiel $ ]]--
 local AceGUI = LibStub("AceGUI-3.0")
 
 -- Lua APIs
@@ -356,7 +356,7 @@ end
 
 do
 	local widgetType = "Dropdown"
-	local widgetVersion = 28
+	local widgetVersion = 29
 	
 	--[[ Static data ]]--
 	
@@ -405,6 +405,7 @@ do
 		end
 		
 		self.open = true
+		self:Fire("OnOpened")
 	end
 
 	local function OnPulloutClose(this)

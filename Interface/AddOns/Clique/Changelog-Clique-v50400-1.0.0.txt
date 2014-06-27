@@ -1,0 +1,14 @@
+tag v50400-1.0.0
+1bc50137cbfcd838d8e14951b4d4ac8887bf819d
+Jim Whitehead <jnwhiteh@gmail.com>
+2013-09-12 07:28:15 +0200
+
+Tagging v50400-1.0.0
+
+
+--------------------
+
+Jim Whitehead:
+	- Update for 5.4
+James Whitehead II:
+	- Enable status icon on compact raid frames

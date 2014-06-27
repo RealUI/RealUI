@@ -1,0 +1,12 @@
+tag 4.5.13.2
+bfd1e99b1b81c112899695d86bb33766fc1d30f3
+Hendrik Leppkes <h.leppkes@gmail.com>
+2013-10-30 15:54:20 +0100
+
+Tag as 4.5.13.2
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Fix micro menu button placement

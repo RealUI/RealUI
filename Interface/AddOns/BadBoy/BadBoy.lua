@@ -1,8 +1,8 @@
 
--- GLOBALS: BADBOY_NOREPORT, BADBOY_POPUP, BadBoyLog, BNGetFriendInviteInfo, BNGetNumFriends, BNGetNumFriendToons, BNGetFriendToonInfo, BNReportFriendInvite
--- GLOBALS: CanComplainChat, ChatFrame1, GetTime, print, REPORT_SPAM_CONFIRMATION, ReportPlayer, StaticPopup_Show, StaticPopup_Resize
--- GLOBALS: strsplit, tonumber, type, UnitInParty, UnitInRaid, UnitIsInMyGuild, ChatHistory_GetAccessID, BNGetNumFriendInvites
-local myDebug = nil
+-- GLOBALS: BADBOY_NOREPORT, BADBOY_POPUP, BADBOY_BLACKLIST, BadBoyLog, BNGetFriendInviteInfo, BNGetNumFriends, BNGetNumFriendToons, BNGetFriendToonInfo, BNReportFriendInvite
+-- GLOBALS: CanComplainChat, ChatFrame1, GetTime, print, wipe, REPORT_SPAM_CONFIRMATION, ReportPlayer, StaticPopup_Show, StaticPopup_Resize
+-- GLOBALS: strsplit, tonumber, type, UnitInParty, UnitInRaid, ChatHistory_GetAccessID, BNGetNumFriendInvites, CalendarGetDate, SetCVar
+local myDebug = false
 
 local reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam blocked, click to report!]|h|r <<<"
 local throttleMsg = "|cFF33FF99BadBoy|r: Please wait ~7 seconds between reports to prevent being disconnected (Blizzard bug)"
@@ -15,10 +15,12 @@ do
 		reportBnet = "BadBoy: >>> |cfffe2ec8Battle.net inviter bloqué à partir de |cffffff00%s|r|r <<<"
 	elseif L == "deDE" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam geblockt, zum Melden klicken!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Bitte warte ca. ~7 Sekunden zwischen Meldungen um einen Disconnect zu verhindern (Blizzard Bug)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Bitte warte ca. 7 Sekunden zwischen Meldungen um einen Disconnect zu verhindern (Blizzard Bug)"
+		reportBnet = "BadBoy: >>> |cfffe2ec8Battle.net-Freundschaftsanfrage von |cffffff00%s|r geblockt|r <<<"
 	elseif L == "zhTW" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[發出的垃圾訊息已被阻擋, 點擊以舉報 !]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: 請等候~7秒在回報時，為了防止斷線(暴雪的bug)"
+		reportBnet = "BadBoy: >>> |cfffe2ec8已忽略來自 |cffffff00%s|r 的Battle.net邀請|r <<<"
 	elseif L == "zhCN" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[垃圾信息已被阻挡，点击举报!]|h|r"
 		throttleMsg = "|cFF33FF99BadBoy|r: 请在举报时等待~7 秒以防断线（暴雪的bug）"
@@ -200,7 +202,7 @@ local whiteList = {
 	"|cff",
 	"raid",
 	"roleplay",
-	"apply",
+	"appl[iy]", --apply/application
 	"contender", --Contender's Silk
 	"enjin%.com",
 	"guildlaunch%.com",
@@ -308,6 +310,14 @@ local instantReportList = {
 	"^wt[bs]a?n?awesomersaccount", --wts awesome rs account /w me
 	"runescapegoldforwowgold", --Selling my runescape gold for wow gold
 
+	--[[ CS:GO ]]--
+	"^wtbcsgoskin.*info", --WTB CS GO skins /w for more infomation
+	"^wtbsomecsgoskin.*info", --WTB some CSGO skins and sell some /w for more info
+
+	--[[ Hearthstone ]]--
+	"^sellinghearthstonebeta", --SELLING HEARTHSTONE BETA KEY FOR GOLD /w ME YOUR PRICE
+	"^wtshearthstonebeta", --WTS Hearthstone beta, whisper offers people! :)
+
 	--[[  SC 2 ]]--
 	"^wtsstarcraft.*cdkey.*gold", --WTS Starcraft Heart of Swarm cd key for wow golds.
 
@@ -329,7 +339,7 @@ local instantReportList = {
 	"^sellingloleuw?acc.*info", --Selling LOL EUW acc pm for more info
 	"^wt[bs].*leagueoflegends.*points.*pay", --WTB 100 DOLLARS OF LEAGUE OF LEGENDS RIOT POINTS PST. YOU PAY WITH YOUR PHONE. PST PAYING A LOT.
 	"wts.*leagueoflegends.*acc.*info", --{rt1}wts golden{rt1} League of Legends{rt1} acc /w me for more info{rt1}
-	"sellingm?y?leagueoflegends", --Selling my league of legends account, 100 champs 40 skins 2-3 legendary 4 runepage, gold. /EUW /W 
+	"sellingm?y?leagueoflegends", --Selling my league of legends account, 100 champs 40 skins 2-3 legendary 4 runepage, gold. /EUW /W
 
 	--[[  Account Buy/Sell  ]]--
 	"wtsnonemergeacc.*lvl?%d+char", --!WTS none-merge acc(can get a lv80 char)./W me for more info!
@@ -393,6 +403,9 @@ local instantReportList = {
 	"wts.*diablo3goldfor%d+", --wts 150 mill Diablo 3 gold for 50k
 
 	--[[  Illegal Items ]]--
+	"selling.*mount.*pet.*pvp.*purchase", --Selling all rare mounts, TGC pets, all PvP services, and much more! We offer great savings for combo purchases! Pst!
+	"wts.*timelost.*mount.*char", --WTS [Reins of the Time-Lost Proto-Drake] [Reins of the Phosphorescent Stone Drake]{rt1}World MOUNTS{rt6}non-sharing acc{rt4}transfer characters
+	"wts.*mounts.*sale.*skype", --{rt1}{rt3}WTS [Reins of the Spectral Tiger] [Reins of the Swift Spectral Tiger] {rt3}{rt2} cool mounts on sale!! {rt3}pst!!!~~~skype:ah4pgirl
 	"%[.*%].*%[.*%].*facebook.com/buyboe", --Win Free[Volcano][Spire of Scarlet Pain][Obsidium Cleaver]from a simple contest, go www.facebook.com/buyboe now!
 	--WTS 6PETS [Cenarion Hatchling],Lil'Rag,XT,KT,Moonkin,Panda 8K each;Prepaid gametimecard 10K;Flying Mounts[Winged Guardian],[Celestial Steed]20K each.
 	"wts.*gamet?i?m?e?card.*mount", --WTS 90 Day Pre-Paid Game Card 35K Also selling mount from BLZ STORE,25k for golden dragon/lion
@@ -466,6 +479,8 @@ local instantReportList = {
 	--WTS Gametime-Subscribtion /w me
 	"^wt[bs]gametime", --WTS {rt1} GAMETIME {rt1} {rt8} MoP Upgrade{rt8}
 	"^wts%d+days?gc$", --WTS 60days GC
+	"^anyonesellinggametime", --anyone selling game time
+	"^lookingforgametime", --LOOKING FOR GAME TIME
 	--Wts gamecard 60days very cheap
 	"^wt[bs]gamecard", --WTB GAME CARD
 	"^wt[bs]gamecode", --wtb game codes
@@ -487,6 +502,10 @@ local instantReportList = {
 	"^wts.*website.*paypal.*deliver", --WTS Custom Guild Website + 12 months of maintenance + hosting + seo ($100 paypal of 100kg in game) (1-3 days to deliver custom guild website)
 	"^wts.*prepaid.*wowingamecurrency", --WTS Rchange/Transfer/Prepaid for WoW ingame currency! {rt4}
 	"^wts.*tiger.*rooster.*timecard", --WTS  [Reins of the Swift Spectral Tiger]240k[Magic Rooster Egg]120k and Prepaid Timecard,Panda [MOP.Faction] change and Race change Pst.
+	"mount.*code.*dving[%.,]net", --Achievements, Mounts, Loot-Codes, PVE / PVP - Dving.net
+	"sale.*loot.*dving[%.,]net", --5.4 content on sale! Hardmodes and Loot Raids for Siege of Orgrimmar! - Dving.net
+	"arena.*help.*dving[%.,]net", --Offering arena/RBG help. Season 14. 2200/2400/2650 - Dving.net
+	"gold.*heroic.*dving[%.,]net", --Challenge Conqueror: Gold. Itemlevel of 560 or 570! Garrosh Heroic! Glory of the raider! - [Dving.net] {rt8}
 	--Any achievements for you(skype: DvingHelp)
 	--Help you with 2200/2400/2600(hero) skype: DvingHelp
 	"you.*skype.*dvinghelp", --Help you with The Bloodthirsty(72 hours), Sun Horde/Ally(48hours) skype: DvingHelp
@@ -505,8 +524,17 @@ local instantReportList = {
 	"wts.*%[.*%].*boefans.*deliver", --wts[Magic Rooster Egg][Falling Blossom Cowl]{rt6}{rt6}on boefans.c{rt2}m,4 years Exp,fast and safe delivery{rt6}
 	"wts.*nightwing.*gametime", --WTS [Heart of the Nightwing] for 14k.wts 30day gametime for 10k.60k for 16k
 	"^wts%d+kgolds?.*euro.*paypal", --WTS 95K Golds for 25 euro! Transaction is done via paypal!
+	"feat.*mount.*koroboost", --Get feat of strength [Cutting Edge: Garrosh Hellscream (25 player)] - Heroic mount as GIFT at Koroboost.com
+	--Any pve runs . normal 25 180 euro. flex from 65 euro, heroic 25 hc  LOOT runs With LOOT GUARANTEED , all tier pack in single run.  Cheapest mount from Garrosh Heroic 170 eu. Also have D3 boost. Koroboost.com {rt1}
+	"cheap.*koroboost[%.,]com", --Cheapest [Challenge Conqueror: Gold] in 2-3hours. 44 eu. Selfplay possible. Take it before enf of season. Koroboost.com
+	"wts.*account.*mount.*skype", --{rt1} {rt1}  WTS Old Unmerged WoW Accounts {rt1}  Get old achivements/mounts/pets/titles from Vanilla/TBC/WOTLK on your main {rt1} Already seen: Scarab Lord, Old Gladiators etc Skype: kubadoman11 (only skype name) Site:
+	"wts.*drake.*skype.*discount", --WTS BOP[Reins of the Time-Lost Proto-Drake][Reins of the Phosphorescent Stone Drake]Pst Skype:tlpd.bop super discount{rt1}
+	"rbg.*gold.*sale.*mount", --Gladiator, Rank 1, 2200-2700 Arena & RBG, CM: Gold and much more for sale! Also selling rare & unobtainable mounts/titles (including scarab lord) - Pst!
+	"wts.*%[.*%].*gametime.*days", --WTS [Armored Bloodwing] [Enchanted Fey Dragon] [Iron Skyreaver] and gametime30-60-90-180days{star}WOD{rt1}
+	"boost.*mount.*euro.*skype", --BoostFull Heroic 14/14 SoO Clear (Siege of Orgrimmar Heroic) + Your Class Loot + Garrosh Mount + [Heroic: Garrosh Hellscream] 179.95 euro - MORE Info @ Skype: MRD BOOST
 
 	--[[  RBG  ]]--
+	"gold.*boost.*service.*skype", --[Challenge Conqueror: Gold] Boosting Service. We can start right now! Fastest(2hours), Really good conditions. Skype: CMGBOOST
 	"rbg.*2[%.,]2.*quick.*skype", --{rt8}WTS RBG Boost! We boosts any rating 2.2, 2.4, 2.7(HERO), 3k and more! Cap games also! Quickly, efficiently, safely! Test game included.{rt8} Details on skype {rt1}wowbooster666{rt1}
 	--{rt8} Get your RBG rating fast and safe! 2200|2400|HERO. No account sharing. 3850+ conquest points per week. Mount, 16+ achievements and 14 titles. Access to elite gear & T2 weap. We have website and business PayPal! Skype - Deni1189 {rt8}
 	"rbg.*2200.*account.*skype", --New unique RBG boost. 2200,2400.2600. [Hero.Cap.] No account sharing, you play for your character. Skype Axelretreem
@@ -605,7 +633,7 @@ local instantReportList = {
 	"selling.*gladiator.*achiev.*rbg.*arena.*gold.*coaching", --Selling Gladiator/R1, every achieve in RBG/Arena, Challenge Mode: Gold, T15.5, and more! Elo/Coaching in LoL too
 	"2200.*account.*points.*skype", --{rt2} SUPER OFFER ! 2200|2400|HERO. NO ACCOUNT SHARING. 3850+ conquest points per week. Mount, 16+ achievements and 14 titles/skype BGboost{rt2}
 	--prommote.me will help you gain any RBG rating (2200, 2400 an higher), fill the weekly cap, acquire T2 weapons and become the Gladiator and Hero of the Horde/Alliance Good pricing, no transfer/account sharing required
-	--prommote.me will help you get any PVE/PVP and other achievements, mounts, titles and top raid gear, and help you gain 20300 achievement points. PM for details. 
+	--prommote.me will help you get any PVE/PVP and other achievements, mounts, titles and top raid gear, and help you gain 20300 achievement points. PM for details.
 	"prommote%.me.*helpyou", --prommote.me will help you gear up in T15 HM raids and get 13/13 progress.
 	--prommote.me now offers special summer prices for the [Glory of the Pandaria Raider]
 	"prommote%.me.*prices?forthe", --prommote.me, fast service and modest prices for the [Challenge Conqueror: Gold]
@@ -617,6 +645,20 @@ local instantReportList = {
 	"rbg.*2200.*payment.*skype", --{rt8} RBG BOOST: 1800-2000-2200-2400-Hero, NEW MOUNT(40 WINS). Test game. Partial payments. Very quickly. Skype: PRO_RATING {rt8}
 	"rbg.*2000.*test.*skype", --{rt8}RBG RATING.1800-2000-2200-2400-HERO. Test Game. Fastest. Skype:RBG-SUPPORT{rt8}
 	"rbg.*sale.*2200.*skype", --{rt1} The best EU/RU RBGboosting without sharing acc! 6th season in work! Lowest prices! Good sales! cap/2200/2400/3000 Our skype: kkboosting
+	"selling.*arena.*boost.*rbg.*skype", --{rt8} {rt8}  {rt8} Selling 5v5,3v3 ArenaBoost. You playing your character. Also any 2v2 raiting with acc sharing, and 3v3 coaching. RBG/3v3 Arena cap games. 250.000k HKs just in 2 days!| skype: alex_flame2 (Nederland){rt8}  {rt8} {rt8}
+	"rbg.*mount.*payment.*skype", --{rt8} {rt8}WTS RBG BOOST! Any rating, CAP Games, Wins. Get the mount, 21+achievements,16 titles, top gear, tabard with us. Test game, partial payments, self playing. For more info add me in skype AltisRBG
+	"rbg.*mount.*discount.*skype", --{rt1}WTS RBG CAP/40wins/75wins{rt1} || SELF PLAY || RBG achivements and MOUNTS! || 100% positive feedback on the ownedcore || FLEXIBLE DISCOUNTS || challenge modes || {rt1} Add Skype: Azpirox {rt1}
+	"selling.*gold.*rating.*top", --Elitist-gaming,com Selling SoO runs in heroic or normal. CM: gold, reins of galakras, Kor'kron Juggernaut. Any 3v3/5v5 rating including Glad and Rank 1. Our suppliers are top 30 U.S. guilds and top level pvp players. Check us out!largest in the US
+	"selling.*boost.*gold.*skype", --Selling CM Boost 9/9Gold, Flex 1-4, you self play! accept gold payment, preorder for New season RBG 22OO! have proofs skype FBOOSTX
+	"selling.*service.*2400.*mount", --Selling basically every PvP & PvE service! 2400+ Arena/RBG/Gladiator/Rank 1/Arena Master | T16/Gold Challenges/Mounts/Pets. Pst!
+	"selling.*achiev.*rbg.*discount", --Selling Gladiator/R1, every achieve in RBG/Arena, Challenge Mode: Gold, T16, and more! Preorder for discounts!
+	"selling.*service.*rbg.*mount", --Selling PvP services: Gladiator, 2700 Arena & RBG, Rank 1! Also selling rare mounts (including scarab lord!) and many PvE services. Msg me!
+	"boost.*safe.*paypal.*skype", --WTS BOOST RBG/ARENA,CAP/WINS GAMES,GOLD CHALLENGE MODE,PVE:SoO HC/N/Flex 14/14+loot(mount)! Best prices in Europe! FAST AND SAFE! It's the 7th season of our work. We have website+business Paypal.SKYPE: BLLIZZIK
+	"boosting[%.,]pro.*discount", --[H] <DND>[Jedrict]: {skull}{skull}{skull} [www.Boosting.Pro] - Premium Arena boosting - {circle} SUPER DISCOUNTS ON ALL RATINGS {circle} Over 50 successful Gladiator orders in season 14! {skull}{skull}{skull}
+	"boosting[%.,]pro.*sale", --[H] <DND>[Jedrict]: {square}{square}{square} [www.Boosting.Pro] - Elite PvE Services: {circle} HC LOOT RUN + GARROSH MOUNT {circle} on Sale now! Only 25 man raids, warforged loot, weapons and trinkets are included! {square}{square}{square}
+	"rating.*rbg.*epiccarry[%.,]com", --{rt2} Arena rating\Rbg wins\Arena wins on epiccarry.com {rt1}
+	"flex.*realm.*epiccarry[%.,]com", --{rt2} SOO Flex\Normal\Heroic\Glory + T15+T14 contents selfplay, no realm transfer on epiccarry.com {rt1}
+	"arenahelp[%.,]eu.*boost.*skype", --{rt1} Arenahelp.eu - Offering LEGIT boosts in RBG and Arena by the top players!!!  Check website or Skype: [arenahelp.eu.] Ownedcore verified. Consider our prices.
 
 	--[[  Russian  ]]--
 	--[skull]Ovoschevik.rf[skull] continues to harm the enemy, to please you with fresh [circle]vegetables! BC 450. Operators of girls waiting for you!
@@ -712,6 +754,7 @@ local instantReportList = {
 	"坐骑.*rbg.*2200.*skype", --{diamond}代打金牌挑战模式***各类职业。奖励。奖励一套拉风幻化装，凤凰坐骑一枚+等级代练，RBG2200/2400/2600/2700/...+每周混分-skype:tessg4p--幽灵虎团队 778587316
 
 	--[[  Advanced URL's/Misc  ]]--
+	"happygolds.*stock.*receive", --[Enchanted Elementium Bar]{RT3}{RT3}{RT2}Feldrake{RT3}hàppygôlds,Cô.m{RT4}{RT3}{RT2}WE HAVE 800K in stock and you can receive within 5-10minutes {RT3}{RT3}hàppygôlds,Cô.m{RT4}{RT3}E
 	"%d+eu.*deliver.*credible.*kcq[%.,]", --12.66EUR/10000G 10 minutes delivery.absolutely credible. K C Q .< 0 M
 	"deliver.*gears.*g4p", --Fast delivery for Level 359/372 BoE gears!Vist <www.g4pitem.com> to get whatever you need!
 	"pkpkg.*boe.*deliver", --[PKPKG.COM] sells all kinds of 346,359lvl BOE gears. fast delivery. your confidence is all garanteed
@@ -763,7 +806,7 @@ local instantReportList = {
 	"billiggull.*koster.*skype", --{star} Interessert i billig GULL? 100k koster 700 NOK (7 NOK pr 1k) – Bet: Pay Pal og nettbank. Bare nor,swe,dk kunder! Lei av kineserene? Jeg er mye sikrere, instant gull etter bet, online ofte og billig! Add meg på SKYPE for mer info: Nolixz1 {star}
 	"order.*nightwing.*%d+k.*stock", --WTS{star}50K Order can get <heart of the nightwing> for free,100k Order can get it for free,500k in stock,pst{square}
 	"kb8g[0o][1l]d.*deliver", --1OK // 7.9 E { www,Kb8G01d,Com } <5Mins Delivery>
-	"mmomarket.*gold.*boost", --{rt1}{rt1} We are [MMO-market.com]!!! WE are all you ever going to NEED: GOLD / CHARACTERS(from 150$ char to 5000$ char)/ BOOSTs in PvE or ARENA BOOSTs in PvP! FULLY PROFESSIONAL. Come and check us! [MMO-MARKET.COM]{rt1}{rt1}
+	"mmomarket.*gold.*boost", --{rt1}{rt1} We are MMO-market.com!!! WE are all you ever going to NEED: GOLD / CHARACTERS(from 150$ char to 5000$ char)/ BOOSTs in PvE or ARENA BOOSTs in PvP! FULLY PROFESSIONAL. Come and check us! [MMO-MARKET.COM]{rt1}{rt1}
 	"complete.*gold.*challenge.*$%d+.*hurry", --complete all the Gold dungeon challenge (\n?) achievements now only $200 (\n?) paladin(tank) (\n?) shaman), Hurry contact me, you will complete all the Gold dungeon challenge quickly.
 	"cheap.*fast.*gold.*item.*skype", --{rt3}{rt3}To get cheap,fast gold and hot items in a great deal, please add my skype {rt3} linda871230 {rt3}for more information!{rt3}{rt3}
 	"rbg.*challenge.*mount.*boost", --WTS Iphone game: Clash of Clans  Gems----much cheaper than APP store2200/2400/2700 RGB,get your cool titles todayChallenge Mode, fast get ur Xmogs and mountT14.5 set boosted by 16/16H raid group
@@ -771,6 +814,8 @@ local instantReportList = {
 	"gold.*challenge.*achiev.*%$%d+.*sk[py][yp]e", --{rt5}{rt5}spots open for Complete all the Gold dungeon challenge achievements， only $79, lvl522 item $100 each piece ,  raid progress TOT12/12,offer t15set, lvl522 lvl535 weapons,trinket etc,  PST to get more info or add skpye jolinvipservice
 	"fast4gold.*%d+k.*stock", --[Blazefury, Reborn]Feldrakefast4gold,Cô.mWE HAVE 800K in stock and you can receive within 5-10minutes fast4gold,Cô.mE--------------7286
 	"skype.*chefboosting[%.,]com", --{rt6}| WTS RBG Boost|{rt6}, Challenge Mode boost, Power leveling & SoR accounts // Must trusted boosting website in the world, supported by top Twitch Streamers!  contact skype :  chef-xtrem or [www.chefboosting.com]
+	"sellgold.*only%d+euro", --{rt1}Sell GOLD! 10.000 GOLD Only 5 Euro!{rt1}
+	"mia911[%.,]c.*skype", --{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}[www.mia911.cQm]{rt4}{rt4}{rt4}{rt4}{rt4}{rt4}800K G in sotck{rt5}{rt5}10000=8USD{rt5}{rt5}pl add skype;mia9116{rt5}{rt5}mia911.cQm{rt5}{rt5}{RT
 }
 
 --This is the replacement table. It serves to deobfuscate words by replacing letters with their English "equivalents".
@@ -834,8 +879,9 @@ local IsSpam = function(msg, num)
 end
 
 --[[ Chat Scanning ]]--
-local gsub, next, tremove, prevLineId, result, chatLines, chatPlayers, prevWarn = gsub, next, tremove, 0, nil, {}, {}, 0
+local Ambiguate, gsub, next, tremove, prevLineId, result, chatLines, chatPlayers, prevWarn = Ambiguate, gsub, next, tremove, 0, nil, {}, {}, 0
 local filter = function(_, event, msg, player, _, _, _, flag, channelId, channelNum, _, _, lineId, guid, arg13)
+	local trimmedPlayer
 	if lineId == prevLineId then
 		return result --Incase a message is sent more than once (registered to more than 1 chatframe)
 	else
@@ -848,8 +894,9 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 			return
 		end
 		prevLineId, result = lineId, nil
+		trimmedPlayer = Ambiguate(player, "none")
 		if event == "CHAT_MSG_CHANNEL" and (channelId == 0 or type(channelId) ~= "number") then return end --Only scan official custom channels (gen/trade)
-		if not CanComplainChat(lineId) or UnitIsInMyGuild(player) or UnitInRaid(player) or UnitInParty(player) then return end --Don't scan ourself/friends/GMs/guildies or raid/party members
+		if not myDebug and (not CanComplainChat(lineId) or UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer)) then return end --Don't scan ourself/friends/GMs/guildies or raid/party members
 		if event == "CHAT_MSG_WHISPER" then --These scan prevention checks only apply to whispers, it would be too heavy to apply to all chat
 			if flag == "GM" or flag == "DEV" then return end --GM's can't get past the CanComplainChat call but "apparently" someone had a GM reported by the phishing filter which I don't believe, no harm in having this check I guess
 			--RealID support, don't scan people that whisper us via their character instead of RealID
@@ -861,7 +908,7 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 					local _, rName, rGame = BNGetFriendToonInfo(i, j)
 					--don't bother checking server anymore as bnet has been bugging up a lot lately
 					--returning "" as server/location (probably other things too) making the check useless
-					if rName == player and rGame == "WoW" then
+					if rName == trimmedPlayer and rGame == "WoW" then
 						return
 					end
 				end
@@ -904,25 +951,25 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 
 	--20 line text buffer, this checks the current line, and blocks it if it's the same as one of the previous 20
 	for i=1, #chatLines do
-		if chatLines[i] == msg and chatPlayers[i] == player then --If message same as one in previous 20 and from the same person...
+		if chatLines[i] == msg and chatPlayers[i] == trimmedPlayer then --If message same as one in previous 20 and from the same person...
 			result = true return true --...filter!
 		end
 		if i == 20 then tremove(chatLines, 1) tremove(chatPlayers, 1) end --Don't let the DB grow larger than 20
 	end
 	chatLines[#chatLines+1] = msg
-	chatPlayers[#chatPlayers+1] = player
+	chatPlayers[#chatPlayers+1] = trimmedPlayer
 	--End text buffer
 
 	if IsSpam(msg, icon) then
 		if BadBoyLog and not myDebug then
-			BadBoyLog("BadBoy", event, player, debug)
+			BadBoyLog("BadBoy", event, trimmedPlayer, debug)
 		end
 		if myDebug then
-			print("|cFF33FF99BadBoy_REPORT|r: ", debug, "-", event, "-", player)
+			print("|cFF33FF99BadBoy_REPORT|r: ", debug, "-", event, "-", trimmedPlayer)
 		else
 			if BADBOY_POPUP then --Manual reporting via popup
-				local dialog = StaticPopup_Show("CONFIRM_REPORT_SPAM_CHAT", player, nil, lineId)
-				dialog.text:SetFormattedText("BadBoy: %s \n\n %s", REPORT_SPAM_CONFIRMATION:format(player), debug) --Add original spam line to Blizzard popup message
+				local dialog = StaticPopup_Show("CONFIRM_REPORT_SPAM_CHAT", trimmedPlayer, nil, lineId)
+				dialog.text:SetFormattedText("BadBoy: %s \n\n %s", REPORT_SPAM_CONFIRMATION:format(trimmedPlayer), debug) --Add original spam line to Blizzard popup message
 				StaticPopup_Resize(dialog, "CONFIRM_REPORT_SPAM_CHAT")
 			else
 				--Show block message
@@ -960,7 +1007,7 @@ do
 			extraData = tonumber(extraData)
 			if CanComplainChat(lineId) then
 				local t = GetTime()
-				if (t-prevReport) > 7 then --Throttle reports to try and prevent disconnects, please fix it Blizz.
+				if (t-prevReport) > 8 then --Throttle reports to try and prevent disconnects, please fix it Blizz.
 					prevReport = t
 					ReportPlayer("spam", lineId)
 					BADBOY_BLACKLIST[guid] = true
@@ -984,15 +1031,15 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_DND", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_AFK", filter)
 
-SetCVar("spamFilter", 1)
-
 --[[ BNet Invites ]]--
 do
 	local f = CreateFrame("Frame")
 	f:RegisterEvent("PLAYER_LOGIN")
 	f:SetScript("OnEvent", function(frame,event,bnEvent)
-		if event == "PLAYER_LOGIN" or bnEvent == "FRIEND_PENDING" then
+		if event == "PLAYER_LOGIN" or bnEvent == "FRIEND_REQUEST" or bnEvent == "FRIEND_PENDING" then
 			if event == "PLAYER_LOGIN" then
+				SetCVar("spamFilter", 1)
+
 				-- Throw blacklist DB setup in here
 				if not BADBOY_BLACKLIST then BADBOY_BLACKLIST = {} end
 				local _, _, day = CalendarGetDate()

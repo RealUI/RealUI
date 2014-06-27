@@ -1,20 +1,16 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 3
+local MAJOR, MINOR = 'KuiSpellList-1.0', 6
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
+local _
 
 if not KuiSpellList then
 	-- already registered
 	return
 end
 
+local listeners = {}
 local whitelist = {
 --[[ Important spells ----------------------------------------------------------
 	Target auras which the player needs to keep track of.
-
-	TODO spells regardless of class
-	-- Silences/stuns --
-	[50613] = true, -- arcane torrent
-	[20549] = true, -- war stone
-	[107079] = true, -- quaking palm
 
 	-- LEGEND --
 	gp = guaranteed passive
@@ -28,7 +24,8 @@ local whitelist = {
 		[1822] = true, -- rake
 		[8921] = true, -- moonfire
 		[9007] = true, -- pounce bleed
-		[77758] = true, -- thrash; td ma
+		[77758] = true, -- bear thrash; td ma
+		[106830] = true, -- cat thrash
 		[93402] = true, -- sunfire
 		[33745] = true, -- lacerate
 		[102546] = true, -- pounce
@@ -109,6 +106,7 @@ local whitelist = {
 		[61305] = true, -- polymorph: cat
 		[61721] = true, -- polymorph: rabbit
 		[61780] = true, -- polymorph: turkey
+		[44572] = true, -- deep freeze
 	
 		[1459] = true, -- arcane brilliance
 		
@@ -201,7 +199,9 @@ local whitelist = {
 		[20707]  = true, -- soulstone
 		[109773] = true, -- dark intent
 	
-		[172] = true,    -- corruption
+		[172] = true,    -- corruption, demo. version
+		[146739] = true, -- corruption
+		[114790] = true,  -- Soulburn: Seed of Corruption
 		[348] = true,    -- immolate
 		[108686] = true, -- immolate (aoe)
 		[980] = true,    -- agony
@@ -254,6 +254,7 @@ local whitelist = {
 		[6346] = true,   -- fear ward
 		[33206] = true,  -- pain suppression
 		[41635] = true,  -- prayer of mending buff
+		[47753] = true,  -- divine aegis
 		[47788] = true,  -- guardian spirit
 		[114908] = true, -- spirit shell shield
 		
@@ -275,6 +276,7 @@ local whitelist = {
 		[605] = true,    -- dominate mind
 		[114404] = true, -- void tendril root
 		[113792] = true, -- psychic terror
+		[129250] = true, -- power word: solace
 	},
 	ROGUE = { -- 5.2 COMPLETE
 		[703] = true,    -- garrote
@@ -317,8 +319,9 @@ local whitelist = {
 		[123725] = true, -- breath of fire
 		[120086] = true, -- fists of fury stun
 		[122470] = true, -- touch of karma
+		[128531] = true, -- blackout kick debuff
 		[130320] = true, -- rising sun kick debuff
-		
+
 		[116781] = true, -- legacy of the white tiger
 		[116844] = true, -- ring of peace
 		[117666] = true, -- legacy of the emperor group
@@ -338,6 +341,19 @@ local whitelist = {
 		[119392] = true, -- charging ox wave
 		[119381] = true, -- leg sweep
 	},
+
+	GlobalSelf = {
+		[28730] = true, -- arcane torrent
+		[25046] = true,
+		[50613] = true,
+		[69179] = true,
+		[80483] = true,
+		[129597] = true,
+		--[155145] = true, -- seems to not be implemented 
+		[20549] = true, -- war stomp
+		[107079] = true, -- quaking palm
+	},
+
 -- Important auras regardless of caster (cc, flags...) -------------------------
 --[[
 	Global = {
@@ -349,6 +365,68 @@ local whitelist = {
 ]]
 }
 
+KuiSpellList.RegisterChanged = function(table, method)
+	-- register listener for whitelist updates
+	tinsert(listeners, { table, method })
+end
+
+KuiSpellList.WhitelistChanged = function()
+	-- inform listeners of whitelist update
+	for _,listener in ipairs(listeners) do
+		if (listener[1])[listener[2]] then
+			(listener[1])[listener[2]]()
+		end
+	end
+end
+
+KuiSpellList.AppendGlobalSpells = function(toList)
+	for spellid,_ in pairs(whitelist.GlobalSelf) do
+		toList[spellid] = true
+	end
+	return toList
+end
+
+KuiSpellList.GetDefaultSpells = function(class,onlyClass)
+	-- get spell list, ignoring KuiSpellListCustom
+	local list = {}
+
+	-- return a copy of the list rather than a reference
+	for spellid,_ in pairs(whitelist[class]) do
+		list[spellid] = true
+	end
+
+	if not onlyClass then
+		KuiSpellList.AppendGlobalSpells(list)
+	end
+
+	return list
+end
+
 KuiSpellList.GetImportantSpells = function(class)
-	return whitelist[class]
+	-- get spell list and merge with KuiSpellListCustom if it is set
+	local list = KuiSpellList.GetDefaultSpells(class)
+
+	if KuiSpellListCustom then
+		for _,group in pairs({class,'GlobalSelf'}) do
+			if KuiSpellListCustom.Ignore and
+			   KuiSpellListCustom.Ignore[group]
+			then
+				-- remove ignored spells
+				for spellid,_ in pairs(KuiSpellListCustom.Ignore[group]) do
+					list[spellid] = nil
+				end
+			end
+
+			if KuiSpellListCustom.Classes and
+			   KuiSpellListCustom.Classes[group]
+			then
+				-- merge custom added spells
+				for spellid,_ in pairs(KuiSpellListCustom.Classes[group]) do
+					list[spellid] = true
+				end
+			end
+		end
+	end
+
+	return list
 end

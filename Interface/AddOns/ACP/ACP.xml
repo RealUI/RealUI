@@ -150,12 +150,14 @@
             </Anchor>
         </Anchors>
         <Scripts>
-            <!--<OnLoad>
-            GameMenuButtonLogout:SetPoint("TOP",self:GetName(),"BOTTOM",0,-1);
-            GameMenuFrame:SetHeight(GameMenuFrame:GetHeight()+25);
-            </OnLoad>-->
+            <OnLoad>
+	    if GameMenuFrame_UpdateVisibleButtons then
+	      hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function()
+	        GameMenuFrame:SetHeight(GameMenuFrame:GetHeight()+25)
+	      end)
+	    end
+            </OnLoad>
             <OnShow>
-            GameMenuFrame:SetHeight(GameMenuFrame:GetHeight()+25);
             
             local point, relativeTo, relativePoint, x, y= GameMenuButtonMacros:GetPoint(1);
 			if (relativeTo and relativeTo ~= self ) then
@@ -165,9 +167,6 @@
             GameMenuButtonMacros:ClearAllPoints()
             GameMenuButtonMacros:SetPoint("TOP",self,"BOTTOM",0,-1);
         </OnShow>
-            <OnHide>
-            GameMenuFrame:SetHeight(GameMenuFrame:GetHeight()-25);
-        </OnHide>
             <OnClick>
             PlaySound("igMainMenuOption");
             HideUIPanel(GameMenuFrame);

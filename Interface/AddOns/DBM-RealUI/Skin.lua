@@ -33,9 +33,8 @@ skin.defaults = {
     HugeBarYOffset = 9,
 }
 
-local skins = DBM.Bars:GetSkins()
-if skins[skin.defaults.Skin].loaded == nil then
-    --only set the skin if it isn't loaded.
+if (DBM.Bars.options.Template ~= skin.defaults.Template) then
+    --only set the skin if it isn't already set.
     DBM.Bars:SetSkin("RealUI")
 end
 

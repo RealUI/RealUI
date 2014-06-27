@@ -6,11 +6,15 @@
    Auras module for Kui_Nameplates core layout.
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
-local whitelist = LibStub('KuiSpellList-1.0').GetImportantSpells(select(2, UnitClass("player")))
+local spelllist = LibStub('KuiSpellList-1.0')
 local kui = LibStub('Kui-1.0')
 local mod = addon:NewModule('Auras', 'AceEvent-3.0')
+local whitelist, _
 
 local GetTime, floor, ceil = GetTime, floor, ceil
+
+-- auras pulsate when they have less than this many seconds remaining
+local FADE_THRESHOLD = 5
 
 -- combat log events to listen to for fading auras
 local auraEvents = {
@@ -31,7 +35,7 @@ local function ArrangeButtons(self)
 			b:ClearAllPoints()
 			
 			if pv then
-				if (self.visible-1) % 5 == 0 then
+				if (self.visible-1) % (self.frame.trivial and 3 or 5) == 0 then
 					-- start of row
 					b:SetPoint('BOTTOMLEFT', pc, 'TOPLEFT', 0, 1)
 					pc = b
@@ -55,21 +59,83 @@ local function ArrangeButtons(self)
 		self:Show()
 	end
 end
+-- aura pulsating functions ----------------------------------------------------
+local DoPulsateAura
+do
+	local function OnFadeOutFinished(button)
+		button.fading = nil
+		button.faded = true
+		DoPulsateAura(button)
+	end
+	local function OnFadeInFinished(button)
+		button.fading = nil
+		button.faded = nil
+		DoPulsateAura(button)
+	end
 
+	DoPulsateAura = function(button)
+		if button.fading or not button.doPulsate then return end
+		button.fading = true
+	
+		if button.faded then
+			kui.frameFade(button, {
+				startAlpha = .5,
+				timeToFade = .5,
+				finishedFunc = OnFadeInFinished
+			})
+		else
+			kui.frameFade(button, {
+				mode = 'OUT',
+				endAlpha = .5,
+				timeToFade = .5,
+				finishedFunc = OnFadeOutFinished
+			})
+		end
+	end
+end
+local function StopPulsatingAura(button)
+	kui.frameFadeRemoveFrame(button)
+	button.doPulsate = nil
+	button.fading = nil
+	button.faded = nil
+	button:SetAlpha(1)
+end
+--------------------------------------------------------------------------------
 local function OnAuraUpdate(self, elapsed)
 	self.elapsed = self.elapsed - elapsed
 
 	if self.elapsed <= 0 then
-		local timeLeft = floor(self.expirationTime - GetTime())
+		local timeLeft = self.expirationTime - GetTime()
 		
+		if mod.db.profile.display.pulsate then
+			if self.doPulsate and timeLeft > FADE_THRESHOLD then
+				-- reset pulsating status if the time is extended
+				StopPulsatingAura(self)
+			elseif not self.doPulsate and timeLeft <= FADE_THRESHOLD then
+				-- make the aura pulsate
+				self.doPulsate = true
+				DoPulsateAura(self)
+			end
+		end
+
 		if mod.db.profile.display.timerThreshold > -1 and
 		   timeLeft > mod.db.profile.display.timerThreshold
 		then
 			self.time:Hide()
 		else
-			local timeLeftS = (timeLeft > 60 and
-			                   ceil(timeLeft/60)..'m' or
-			                   timeLeft)
+			local timeLeftS
+
+			if mod.db.profile.display.decimal and
+			   timeLeft <= 1 and timeLeft > 0
+			then
+				-- decimal places for the last second
+				timeLeftS = string.format("%.1f", timeLeft)
+			else
+				timeLeftS = (timeLeft > 60 and
+				             ceil(timeLeft/60)..'m' or
+				             floor(timeLeft)
+				            )
+			end
 
 			if timeLeft <= 5 then
 				-- red text
@@ -87,10 +153,19 @@ local function OnAuraUpdate(self, elapsed)
 		end
 		
 		if timeLeft < 0 then
+			-- used when a non-targeted mob's auras timer gets below 0
+			-- but the combat log hasn't reported that it has faded yet.
 			self.time:SetText('0')
 		end
 		
-		self.elapsed = .5
+		if mod.db.profile.display.decimal and
+		   timeLeft <= 2 and timeLeft > 0
+		then
+			-- faster updates in the last two seconds
+			self.elapsed = .05
+		else
+			self.elapsed = .5
+		end
 	end
 end
 
@@ -108,6 +183,9 @@ local function OnAuraHide(self)
 
 	self.time:Hide()
 	self.spellId = nil
+
+	-- reset button pulsating
+	StopPulsatingAura(self)
 
 	parent:ArrangeButtons()
 end
@@ -135,20 +213,18 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 		
 		button.icon = button:CreateTexture(nil, 'ARTWORK') 
 		
-		button.time = self.frame:CreateFontString(button, {
-			size = 'large', outline = 'OUTLINE' })
+		button.time = self.frame:CreateFontString(button,{
+			size = 'large' })
 		button.time:SetJustifyH('LEFT')
 		button.time:SetPoint('TOPLEFT', -2, 4)
 		button.time:Hide()
 		
 		button.count = self.frame:CreateFontString(button, {
-			size = 'name', outline = 'OUTLINE'})
+			outline = 'OUTLINE'})
 		button.count:SetJustifyH('RIGHT')
 		button.count:SetPoint('BOTTOMRIGHT', 2, -2)
 		button.count:Hide()
 
-		button:SetHeight(addon.sizes.frame.auraHeight)
-		button:SetWidth(addon.sizes.frame.auraWidth)
 		button:SetBackdrop({ bgFile = kui.m.t.solid })
 		button:SetBackdropColor(0,0,0)
 
@@ -162,10 +238,24 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 		button:SetScript('OnHide', OnAuraHide)
 		button:SetScript('OnShow', OnAuraShow)
 	end
+
+	if self.frame.trivial then
+		-- shrink icons for trivial frames!
+		button:SetHeight(addon.sizes.frame.tauraHeight)
+		button:SetWidth(addon.sizes.frame.tauraWidth)
+		button.time = self.frame:CreateFontString(button.time, {
+			reset = true, size = 'small' })
+	else
+		-- normal size!
+		button:SetHeight(addon.sizes.frame.auraHeight)
+		button:SetWidth(addon.sizes.frame.auraWidth)
+		button.time = self.frame:CreateFontString(button.time, {
+			reset = true, size = 'large' })
+	end
 	
 	button.icon:SetTexture(icon)
 
-	if count > 1 then
+	if count > 1 and not self.frame.trivial then
 		button.count:SetText(count)
 		button.count:Show()
 	else
@@ -191,13 +281,10 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 end
 ----------------------------------------------------------------------- hooks --
 function mod:Create(msg, frame)
-	frame.auras = CreateFrame('Frame', nil, frame.parent)
+	frame.auras = CreateFrame('Frame', nil, frame)
 	frame.auras.frame = frame
 	
-	frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
-		3, addon.sizes.frame.aurasOffset)
 	frame.auras:SetPoint('BOTTOMRIGHT', frame.health, 'TOPRIGHT', -3, 0)
-	
 	frame.auras:SetHeight(50)
 	frame.auras:Hide()
 
@@ -214,6 +301,17 @@ function mod:Create(msg, frame)
 
 		self.visible = 0
 	end)
+end
+
+function mod:Show(msg, frame)
+	-- set vertical position of the container frame
+	if frame.trivial then
+		frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
+			3, addon.sizes.frame.taurasOffset)
+	else
+		frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
+			3, addon.sizes.frame.aurasOffset)
+	end
 end
 
 function mod:Hide(msg, frame)
@@ -256,7 +354,8 @@ function mod:UNIT_AURA(event, unit)
 	-- select the unit's nameplate	
 	--unit = 'target' -- DEBUG
 	local frame = addon:GetNameplate(UnitGUID(unit), nil)
-	if not frame or not frame.auras or frame.trivial then return end
+	if not frame or not frame.auras then return end
+	if frame.trivial and not self.db.profile.showtrivial then return end
 	--unit = 'player' -- DEBUG
 
 	local filter = 'PLAYER '
@@ -266,18 +365,13 @@ function mod:UNIT_AURA(event, unit)
 		filter = filter..'HARMFUL'
 	end
 
-	-- hide currently displayed auras
-	local _,button
-	for _,button in pairs(frame.auras.spellIds) do
-		button:Hide()
-	end
-
 	for i = 0,40 do
 		local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitAura(unit, i, filter)
+		name = name and strlower(name) or nil
 
-		if name and
+		if  name and
 		   (not self.db.profile.behav.useWhitelist or
-		    whitelist[spellId]) and
+		    (whitelist[spellId] or whitelist[name])) and
 		   (duration >= self.db.profile.display.lengthMin) and
 		   (self.db.profile.display.lengthMax == -1 or (
 		   	duration > 0 and
@@ -286,10 +380,24 @@ function mod:UNIT_AURA(event, unit)
 			local button = frame.auras:GetAuraButton(spellId, icon, count, duration, expirationTime)
 			frame.auras:Show()
 			button:Show()
+			button.used = true
 		end
+	end
+
+	for _,button in pairs(frame.auras.buttons) do
+		-- hide buttons that weren't used this update
+		if not button.used then
+			button:Hide()
+		end
+
+		button.used = nil
 	end
 end
 
+function mod:WhitelistChanged()
+	-- update spell whitelist
+	whitelist = spelllist.GetImportantSpells(select(2, UnitClass("player")))
+end
 ---------------------------------------------------- Post db change functions --
 mod.configChangedFuncs = { runOnce = {} }
 mod.configChangedFuncs.runOnce.enabled = function(val)
@@ -310,6 +418,15 @@ function mod:GetOptions()
 			order = 1,
 			disabled = false
 		},
+		showtrivial = {
+			name = 'Show on trivial units',
+			desc = 'Show auras on trivial (half-size, lower maximum health) nameplates.',
+			type = 'toggle',
+			order = 3,
+			disabled = function()
+				return not self.db.profile.enabled
+			end,
+		},
 		display = {
 			name = 'Display',
 			type = 'group',
@@ -317,7 +434,20 @@ function mod:GetOptions()
 			disabled = function()
 				return not self.db.profile.enabled
 			end,
+			order = 10,
 			args = {
+				pulsate = {
+					name = 'Pulsate auras',
+					desc = 'Pulsate aura icons when they have less than 5 seconds remaining.\nSlightly increases memory usage.',
+					type = 'toggle',
+					order = 5,
+				},
+				decimal = {
+					name = 'Show decimal places',
+					desc = 'Show decimal places (.9 to .0) when an aura has less than one second remaining, rather than just showing 0.',
+					type = 'toggle',
+					order = 8,
+				},
 				timerThreshold = {
 					name = 'Timer threshold (s)',
 					desc = 'Timer text will be displayed on auras when their remaining length is less than or equal to this value. -1 to always display timer.',
@@ -355,10 +485,11 @@ function mod:GetOptions()
 			disabled = function()
 				return not self.db.profile.enabled
 			end,
+			order = 5,
 			args = {
 				useWhitelist = {
 					name = 'Use whitelist',
-					desc = 'Only display spells which your class needs to keep track of for PVP or an effective DPS rotation. Most passive effects are excluded.',
+					desc = 'Only display spells which your class needs to keep track of for PVP or an effective DPS rotation. Most passive effects are excluded.\n\n|cff00ff00You can use KuiSpellListConfig from Curse.com to customise this list.',
 					type = 'toggle',
 					order = 0,
 				},
@@ -370,9 +501,12 @@ end
 function mod:OnInitialize()
 	self.db = addon.db:RegisterNamespace(self.moduleName, {
 		profile = {
-			enabled = false,
+			enabled = true,
+			showtrivial = false,
 			display = {
-				timerThreshold = 20,
+				pulsate = true,
+				decimal = true,
+				timerThreshold = 60,
 				lengthMin = 0,
 				lengthMax = -1,
 			},
@@ -382,17 +516,26 @@ function mod:OnInitialize()
 		}
 	})
 
-	addon:RegisterSize('frame', 'auraHeight', 14)
-	addon:RegisterSize('frame', 'auraWidth', 20)
+	addon:RegisterSize('frame', 'auraHeight',  14)
+	addon:RegisterSize('frame', 'auraWidth',   20)
+	addon:RegisterSize('frame', 'tauraHeight',  9)
+	addon:RegisterSize('frame', 'tauraWidth',  15)
+
 	addon:RegisterSize('frame', 'aurasOffset', 20)
+	addon:RegisterSize('frame', 'taurasOffset', 13)
 
 	addon:InitModuleOptions(self)
 	mod:SetEnabledState(self.db.profile.enabled)
+
+	self:WhitelistChanged()
+	spelllist.RegisterChanged(self, 'WhitelistChanged')
 end
 
 function mod:OnEnable()
 	self:RegisterMessage('KuiNameplates_PostCreate', 'Create')
+	self:RegisterMessage('KuiNameplates_PostShow', 'Show')
 	self:RegisterMessage('KuiNameplates_PostHide', 'Hide')
+	self:RegisterMessage('KuiNameplates_PostTarget', 'PLAYER_TARGET_CHANGED')
 
 	self:RegisterEvent('UNIT_AURA')
 	self:RegisterEvent('PLAYER_TARGET_CHANGED')

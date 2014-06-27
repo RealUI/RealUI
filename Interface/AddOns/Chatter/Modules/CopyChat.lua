@@ -201,7 +201,10 @@ end
 
 local function fixName(misc, id, moreMisc, fakeName, tag, colon)
 	local _, charName, _, _, _, _, _, englishClass = BNGetToonInfo(id)
-	return charName..colon
+	if charName then 
+		return charName..colon
+	else 
+	end
 end
 
 function mod:GetLines(...)

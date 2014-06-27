@@ -1,6 +1,6 @@
 ﻿--[[
 Name: LibWindow-1.1
-Revision: $Rev: 5 $
+Revision: $Rev: 8 $
 Author(s): Mikk (dpsgnome@mail.com)
 Website: http://old.wowace.com/wiki/LibWindow-1.1
 Documentation: http://old.wowace.com/wiki/LibWindow-1.1
@@ -11,7 +11,7 @@ License: Public Domain
 ]]
 
 local MAJOR = "LibWindow-1.1"
-local MINOR = tonumber(("$Revision: 5 $"):match("(%d+)"))
+local MINOR = tonumber(("$Revision: 8 $"):match("(%d+)"))
 
 local lib = LibStub:NewLibrary(MAJOR,MINOR)
 if not lib then return end
@@ -79,7 +79,6 @@ local function queueSavePosition(frame)
 	lib.delayedSavePosition[frame] = true
 	lib.utilFrame:Show()
 end
-
 
 
 ---------------------------------------------------------
@@ -175,7 +174,7 @@ function lib.RestorePosition(frame)
 	
 	local s = getStorage(frame, "scale")
 	if s then
-		frame:SetScale(s)
+		(frame.lw11origSetScale or frame.SetScale)(frame,s)
 	else
 		s = frame:GetScale()
 	end
@@ -205,8 +204,8 @@ end
 
 mixins["SetScale"]=true
 function lib.SetScale(frame, scale)
-	setStorage(frame, "scale", scale)
-	frame:SetScale(scale)
+	setStorage(frame, "scale", scale);
+	(frame.lw11origSetScale or frame.SetScale)(frame,scale)
 	lib.RestorePosition(frame)
 end
 
@@ -305,6 +304,7 @@ function lib:Embed(target)
 	if not target or not target[0] or not target.GetObjectType then
 		error("Usage: LibWindow:Embed(frame)", 1)
 	end
+	target.lw11origSetScale = target.SetScale
 	for name, _ in pairs(mixins) do
 		target[name] = self[name]
 	end
