@@ -15,6 +15,7 @@ EASYMAIL_FROMAUCTION = "from auction of %s";
 EASYMAIL_FROM = "from %s";
 EASYMAIL_MONEYSUBJECT = "Money: %s";
 EASYMAIL_TOTALMONEY = "Total money received from attachments: %s";
+EASYMAIL_RECEIVEATT = "You receive attachment: %s";
 EASYMAIL_NOTEXT = "<No Text>";
 EASYMAIL_FORWARD_PREFIX = "FW:"
 
@@ -42,7 +43,7 @@ EASYMAIL_TOTALHELPMSG = "Output total money received from mail when getting all 
 EASYMAIL_TOOLTIPHELPMSG = "Display mail text in the inbox item tooltip. WARNING: Mails will be immediately marked as "
    .."read once the tooltip has been displayed. Mail text may take a few seconds to appear in the tooltip.";
 
-EASYMAIL_CONFIG_MAXLEN = "Maximum list length (%i - %i):";
+EASYMAIL_CONFIG_MAXLEN = "Maximum list length (%i - %i)";
 EASYMAIL_CONFIG_CLEARLIST = "Clear recently-mailed list";
 EASYMAIL_CONFIG_CLEARLISTBTNTEXT = "Clear List";
 EASYMAIL_CONFIG_AUTOADD = "Add logged-in characters to recently-mailed list";

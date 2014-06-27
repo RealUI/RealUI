@@ -27,8 +27,8 @@ local function toggle(f)
 	end
 end
 
-local function createToggleBox(parent, name, value, text)
-	local f = CreateFrame("CheckButton", name, parent, "InterfaceOptionsCheckButtonTemplate")
+local function createToggleBox(parent, value, text)
+	local f = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
 	f.value = value
 
 	f.Text:SetText(text)
@@ -48,7 +48,7 @@ InterfaceOptions_AddCategory(gui)
 
 local title = gui:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOP", 0, -26)
-title:SetText("Aurora v."..GetAddOnMetadata("Aurora", "Version"))
+title:SetText("Aurora "..GetAddOnMetadata("Aurora", "Version"))
 
 local credits = gui:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 credits:SetText("Aurora by Freethinker @ Steamwheedle Cartel - EU / Haleth on wowinterface.com")
@@ -66,40 +66,37 @@ line:SetSize(600, 1)
 line:SetPoint("TOPLEFT", alphaSlider, "BOTTOMLEFT", 0, -30)
 line:SetTexture(1, 1, 1, .2)
 
-local fontBox = createToggleBox(gui, "AuroraOptionsEnableFont", "enableFont", "Replace default game fonts")
+local fontBox = createToggleBox(gui, "enableFont", "Replace default game fonts")
 fontBox:SetPoint("TOPLEFT", 16, -140)
 
-local colourBox = createToggleBox(gui, "AuroraOptionsUseClassColours", "useCustomColour", "Use custom colour rather than class as highlight")
+local colourBox = createToggleBox(gui, "useCustomColour", "Custom highlight colour")
 colourBox:SetPoint("TOPLEFT", fontBox, "BOTTOMLEFT", 0, -8)
 
-local colourButton = CreateFrame("Button", "AuroraOptionsCustomColour", gui, "UIPanelButtonTemplate")
+local colourButton = CreateFrame("Button", nil, gui, "UIPanelButtonTemplate")
 colourButton:SetPoint("LEFT", colourBox.Text, "RIGHT", 20, 0)
 colourButton:SetSize(128, 25)
 colourButton:SetText("Change...")
 
-local bagsBox = createToggleBox(gui, "AuroraOptionsBags", "bags", "Bags")
-bagsBox:SetPoint("TOPLEFT", colourBox, "BOTTOMLEFT", 0, -16)
+local useButtonGradientColourBox = createToggleBox(gui, "useButtonGradientColour", "Gradient button style")
+useButtonGradientColourBox:SetPoint("TOPLEFT", colourBox, "BOTTOMLEFT", 0, -8)
 
-local lootBox = createToggleBox(gui, "AuroraOptionsLoot", "loot", "Loot")
-lootBox:SetPoint("LEFT", bagsBox, "RIGHT", 90, 0)
+local bagsBox = createToggleBox(gui, "bags", "Bags")
+bagsBox:SetPoint("TOPLEFT", useButtonGradientColourBox, "BOTTOMLEFT", 0, -16)
 
-local chatBubbleBox = createToggleBox(gui, "AuroraOptionsChatBubbles", "chatBubbles", "Chat bubbles")
-chatBubbleBox:SetPoint("LEFT", lootBox, "RIGHT", 90, 0)
+local chatBubbleBox = createToggleBox(gui, "chatBubbles", "Chat bubbles")
+chatBubbleBox:SetPoint("LEFT", bagsBox, "RIGHT", 90, 0)
 
-local mapBox = createToggleBox(gui, "AuroraOptionsMap", "map", "Map")
-mapBox:SetPoint("TOPLEFT", bagsBox, "BOTTOMLEFT", 0, -8)
+local lootBox = createToggleBox(gui, "loot", "Loot")
+lootBox:SetPoint("TOPLEFT", bagsBox, "BOTTOMLEFT", 0, -8)
 
-local tooltipsBox = createToggleBox(gui, "AuroraOptionsTooltips", "tooltips", "Tooltips")
-tooltipsBox:SetPoint("LEFT", mapBox, "RIGHT", 90, 0)
-
-local qualityColourBox = createToggleBox(gui, "AuroraOptionsQualityColour", "qualityColour", "Item quality colours")
-qualityColourBox:SetPoint("LEFT", tooltipsBox, "RIGHT", 90, 0)
+local tooltipsBox = createToggleBox(gui, "tooltips", "Tooltips")
+tooltipsBox:SetPoint("LEFT", lootBox, "RIGHT", 90, 0)
 
 local reloadText = gui:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 reloadText:SetPoint("TOPLEFT", bagsBox, "BOTTOMLEFT", 0, -60)
 reloadText:SetText("These settings require a UI reload.")
 
-local reloadButton = CreateFrame("Button", "AuroraOptionsReloadUI", gui, "UIPanelButtonTemplate")
+local reloadButton = CreateFrame("Button", nil, gui, "UIPanelButtonTemplate")
 reloadButton:SetPoint("LEFT", reloadText, "RIGHT", 20, 0)
 reloadButton:SetSize(128, 25)
 reloadButton:SetText("Reload UI")
@@ -183,8 +180,7 @@ colourBox:SetScript("OnClick", function(self)
 end)
 
 local function setColour()
-	local r, g, b = ColorPickerFrame:GetColorRGB()
-	AuroraConfig.customColour.r, AuroraConfig.customColour.g, AuroraConfig.customColour.b = r, g, b
+	AuroraConfig.customColour.r, AuroraConfig.customColour.g, AuroraConfig.customColour.b = ColorPickerFrame:GetColorRGB()
 end
 
 local function resetColour(restore)

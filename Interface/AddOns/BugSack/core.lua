@@ -1,3 +1,4 @@
+
 local addonName, addon = ...
 
 -----------------------------------------------------------------------
@@ -10,20 +11,7 @@ if not LibStub then
 	return
 end
 
-local L = nil
-local AL = LibStub:GetLibrary("AceLocale-3.0", true)
-if AL then
-	if type(addon.LoadTranslations) == "function" then
-		addon:LoadTranslations(AL)
-		addon.LoadTranslations = nil
-	end
-	L = AL:GetLocale(addonName)
-	AL = nil
-else
-	L = setmetatable({}, {__index = function(t,k) t[k] = k return k end })
-end
-addon.L = L
-
+local L = addon.L
 local BugGrabber = BugGrabber
 if not BugGrabber then
 	local msg = L["|cffff4411BugSack requires the |r|cff44ff44!BugGrabber|r|cffff4411 addon, which you can download from the same place you got BugSack. Happy bug hunting!|r"]
@@ -167,7 +155,10 @@ function eventFrame:PLAYER_LOGIN()
 	-- Set up our error event handler
 	BugGrabber.RegisterCallback(addon, "BugGrabber_BugGrabbed", onError)
 
-	SlashCmdList.BugSack = function() InterfaceOptionsFrame_OpenToCategory(addonName) end
+	SlashCmdList.BugSack = function()
+		InterfaceOptionsFrame_OpenToCategory(addonName)
+		InterfaceOptionsFrame_OpenToCategory(addonName)
+	end
 	SLASH_BugSack1 = "/bugsack"
 
 	self.PLAYER_LOGIN = nil

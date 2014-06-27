@@ -1,0 +1,33 @@
+------------------------------------------------------------------------
+r198 | funkydude | 2013-10-21 17:26:10 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   A /tags/r198-release (from /trunk:197)
+
+Tagging as r198-release
+------------------------------------------------------------------------
+r197 | funkydude | 2013-10-21 13:55:05 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+   M /trunk/locales.lua
+
+Add Italian and fixed translations on wowace. Translators note than all strings have been changed and will need checked.
+------------------------------------------------------------------------
+r196 | funkydude | 2013-10-21 13:23:53 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Attempt to fix a script too long error by not bothering to sanitize the locals dump. If it's the locals dump function itself taking too long this won't fix anything and we may just need to remove the listing of locals.
+------------------------------------------------------------------------
+r195 | funkydude | 2013-10-21 12:02:36 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/!BugGrabber.toc
+   M /trunk/BugGrabber.lua
+
+Cleanups
+------------------------------------------------------------------------
+r194 | nevcairiel | 2013-09-20 12:36:09 +0000 (Fri, 20 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/!BugGrabber.toc
+
+Update TOC for 5.4
+------------------------------------------------------------------------

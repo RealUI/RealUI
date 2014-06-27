@@ -303,8 +303,8 @@ function EasyMail.OnEvent(self, event, ...)
 		-- Hook the mail frame show function to reset the Mark All button
 		MailFrame:SetScript("OnShow", EasyMail.ResetMarkAll);
 		
-		-- Hook the take attachment function to display money received
-		OpenMailMoneyButton:HookScript("OnClick", EasyMail.PrintMoney);
+		-- Hook the take money function to display money received
+		OpenMailMoneyButton:HookScript("OnClick", function() if (EasyMail_SavedVars.Money == "Y") then EasyMail.PrintMoney(); end end);
 		
 		-- Set scroll frame so that it resets the dropdown hide counter
 		EasyMailDropdownScrollFrameScrollBar:SetScript("OnEnter", EasyMail.ScrollOnEnter);
@@ -859,7 +859,7 @@ function EasyMail.GetGuildNames()
 	
 	-- Copy list entries into temporary table for sorting, ignoring the entry for the current player
 	for t = 1, GetNumGuildMembers(true) do
-		local name = GetGuildRosterInfo(t);
+		local name = Ambiguate(GetGuildRosterInfo(t), "guild");
 		
 		if (name ~= CurPlayer) then
 			GuildList[count] = name;
@@ -1550,9 +1550,9 @@ function EasyMail.PrintMoney()
 	local back = strsub(auctiontext, loc + 2);
 	
 	if (subject and EasyMail.MatchTemplate(auctiontext, subject)) then
-		fromtext = format(EASYMAIL_FROMAUCTION, gsub(subject, front.."(.+)"..back, "%1"))
+		fromtext = format(EASYMAIL_FROMAUCTION, gsub(subject, front.."(.+)"..back, "%1"));
 	else
-		fromtext = format(EASYMAIL_FROM, OpenMailSender:GetText())
+		fromtext = format(EASYMAIL_FROM, OpenMailSender.Name:GetText());
 	end
 	
 	EasyMail.Print("|cffffff00"..format(EASYMAIL_RECEIVEMONEY, EasyMail.GetLongMoneyString(OpenMailFrame.money),
@@ -1866,7 +1866,7 @@ function EasyMail.AutoComplete(self, char, skipFriends, skipGuild)
 		numFriends = GetNumGuildMembers(true);	-- true to include offline members
 		if ( numFriends > 0 ) then
 			for i=1, numFriends do
-				name = GetGuildRosterInfo(i);
+				name = Ambiguate(GetGuildRosterInfo(i), "guild");
 				if ( name and text and (strfind(strupper(name), strupper(text), 1, 1) == 1) ) then
 					self:SetText(name);
 					if ( self:IsInIMECompositionMode() ) then

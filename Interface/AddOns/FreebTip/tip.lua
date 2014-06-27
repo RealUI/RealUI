@@ -60,6 +60,8 @@ local style
 
 local GetTime = GetTime
 local tonumber = tonumber
+local find = string.find
+local format = string.format
 local select = select
 local _G = _G
 local GameTooltip = GameTooltip
@@ -80,6 +82,10 @@ local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 local talentcache = {}
 local talenttext = SPECIALIZATION
 local talentcolor = {r=1,g=1,b=1}
+local INTERACTIVE_SERVER_LABEL = INTERACTIVE_SERVER_LABEL
+local FOREIGN_SERVER_LABEL = FOREIGN_SERVER_LABEL
+local COALESCED_REALM_TOOLTIP1 = string.split(FOREIGN_SERVER_LABEL, COALESCED_REALM_TOOLTIP)
+local INTERACTIVE_REALM_TOOLTIP1 = string.split(INTERACTIVE_SERVER_LABEL, INTERACTIVE_REALM_TOOLTIP)
 
 local colors = {power = {}}
 for power, color in next, PowerBarColor do
@@ -99,16 +105,14 @@ local classification = {
 
 local numberize = function(val)
 	if(val >= 1e6) then
-		return ("%dm"):format(val / 1e6)
+		return ("%.0fm"):format(val / 1e6)
 	elseif(val >= 1e3) then
-		return ("%dk"):format(val / 1e3)
+		return ("%.0fk"):format(val / 1e3)
 	else
 		return ("%d"):format(val)
 	end
 end
 
-local find = string.find
-local format = string.format
 local hex = function(color)
 	return (color.r and format('|cff%02x%02x%02x', color.r * 255, color.g * 255, color.b * 255)) or "|cffFFFFFF"
 end
@@ -150,12 +154,55 @@ local function formatLines(self)
 			tiptext:SetPoint("TOPLEFT", self, "TOPLEFT", x, y)
 		else
 			local key = i-1
-			local preTiptext = _G["GameTooltipTextLeft"..key] 
-			if(not preTiptext:IsShown()) then
-				key = key-1
+
+			while(true) do
+				local preTiptext = _G["GameTooltipTextLeft"..key]
+
+				if(preTiptext and not preTiptext:IsShown()) then
+					key = key-1
+				else
+					break
+				end
 			end
 
 			tiptext:SetPoint("TOPLEFT", _G["GameTooltipTextLeft"..key], "BOTTOMLEFT", x, -2)
+		end
+	end
+end
+
+local function hideLines(self)
+	for i=3, self:NumLines() do
+		local tiptext = _G["GameTooltipTextLeft"..i]
+		local linetext = tiptext:GetText()
+
+		if(linetext) then
+			if(cfg.hidePvP and linetext:find(PVP)) then
+				tiptext:SetText(nil)
+				tiptext:Hide()
+			elseif(linetext:find(COALESCED_REALM_TOOLTIP1) or linetext:find(INTERACTIVE_REALM_TOOLTIP1)) then
+				tiptext:SetText(nil)
+				tiptext:Hide()
+
+				local pretiptext = _G["GameTooltipTextLeft"..i-1]
+				pretiptext:SetText(nil)
+				pretiptext:Hide()
+
+				self:Show()
+			elseif(linetext:find(FACTION_ALLIANCE)) then
+				if(cfg.hideFaction) then
+					tiptext:SetText(nil)
+					tiptext:Hide()
+				else
+					tiptext:SetText("|cff7788FF"..linetext.."|r")
+				end
+			elseif(linetext:find(FACTION_HORDE)) then
+				if(cfg.hideFaction) then
+					tiptext:SetText(nil)
+					tiptext:Hide()
+				else
+					tiptext:SetText("|cffFF4444"..linetext.."|r")
+				end
+			end
 		end
 	end
 end
@@ -345,32 +392,6 @@ GameTooltip:HookScript("OnTooltipCleared", function(self)
 	self.freebHeightSet = nil
 end)
 
-local function hideLines(self)
-	for i=3, self:NumLines() do
-		local tiptext = _G["GameTooltipTextLeft"..i]
-		local linetext = tiptext:GetText()
-
-		if(cfg.hidePvP and linetext:find(PVP)) then
-			tiptext:SetText(nil)
-			tiptext:Hide()
-		elseif(linetext:find(FACTION_ALLIANCE)) then
-			if(cfg.hideFaction) then
-				tiptext:SetText(nil)
-				tiptext:Hide()
-			else
-				tiptext:SetText("|cff7788FF"..linetext.."|r")
-			end
-		elseif(linetext:find(FACTION_HORDE)) then
-			if(cfg.hideFaction) then
-				tiptext:SetText(nil)
-				tiptext:Hide()
-			else
-				tiptext:SetText("|cffFF4444"..linetext.."|r")
-			end
-		end
-	end
-end
-
 -- Time to add those faction icons in, for Horde and Alliance. Just for eye-candy! -WIP
 -- Thanks to Azilroka, from Tukui.org
 local StatusIcon = GameTooltip:CreateTexture(nil, "ARTWORK")
@@ -405,6 +426,11 @@ local function PlayerTitle(self, unit)
 
 	if(unitName) then GameTooltipTextLeft1:SetText(unitName) end
 
+	local relationship = UnitRealmRelationship(unit)	
+	if(relationship == LE_REALM_RELATION_VIRTUAL) then
+		self:AppendText(("|cffcccccc%s|r"):format(INTERACTIVE_SERVER_LABEL))
+	end
+
 	local status = UnitIsAFK(unit) and CHAT_FLAG_AFK or UnitIsDND(unit) and CHAT_FLAG_DND or 
 	not UnitIsConnected(unit) and "<DC>"
 
@@ -417,15 +443,20 @@ local function PlayerGuild(self, unit)
 	local unitGuild, unitRank = GetGuildInfo(unit)
 	if(unitGuild) then
 		local text2 = GameTooltipTextLeft2
-		local str = hex(cfg.gcolor).."<%s> |cffEEEEEE%s|r"
+		local str = hex(cfg.gcolor).."<%s> |cff00E6A8%s|r"
 		local unitRank = cfg.showRank and unitRank or ""
 
-		text2:SetText((str):format(unitGuild, unitRank))
+		text2:SetFormattedText(str, unitGuild, unitRank)
 	end
 end
 
 local function SetStatusBar(self, unit)
 	if(gtSB:IsShown()) then
+		if(cfg.hideHealthbar) then
+			GameTooltipStatusBar:Hide()
+			return
+		end
+
 		if(cfg.powerbar) then
 			ShowPowerBar(self, unit, gtSB)
 		end
@@ -465,28 +496,8 @@ local function ShowTarget(self, unit)
 		local tarRicon = GetRaidTargetIndex(unit.."target")
 		local tar = ("%s%s"):format((tarRicon and ICON_LIST[tarRicon].."10|t") or "", getTarget(unit.."target"))
 
-		local tarSet = false
-		for i=3, self:NumLines() do
-			local tiptext = _G["GameTooltipTextLeft"..i]
-
-			if(not tiptext:IsShown()) then
-				tiptext:SetText(targettext)
-				tiptext:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-				tiptext:Show()
-
-				local tipRtext = _G["GameTooltipTextRight"..i]
-				tipRtext:SetText(tar)
-				tipRtext:SetTextColor(GameTooltip_UnitColor(unit.."target"))
-				tipRtext:Show()
-
-				tarSet = true
-				break
-			end
-		end
-		if(not tarSet) then
-			self:AddDoubleLine(targettext, tar, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
-			GameTooltip_UnitColor(unit.."target"))
-		end
+		self:AddDoubleLine(targettext, tar, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
+		GameTooltip_UnitColor(unit.."target"))
 	end
 end
 
@@ -497,7 +508,11 @@ local function OnSetUnit(self)
 
 	hideLines(self)
 
-	local unit = select(2, self:GetUnit()) or GetMouseFocus().unit or "mouseover"
+	local _, unit = self:GetUnit()
+	if(not unit) then
+		unit = GetMouseFocus() and GetMouseFocus().unit or nil
+	end
+
 	if(UnitExists(unit)) then
 		local isPlayer = UnitIsPlayer(unit)
 
@@ -509,12 +524,12 @@ local function OnSetUnit(self)
 		local ricon = GetRaidTargetIndex(unit)
 		if(ricon) then
 			local text = GameTooltipTextLeft1:GetText()
-			GameTooltipTextLeft1:SetText(("%s %s"):format(ICON_LIST[ricon]..cfg.fontsize.."|t", text))
+			GameTooltipTextLeft1:SetFormattedText(("%s %s"), ICON_LIST[ricon]..cfg.fontsize.."|t", text)
 		end
 
 		local color = unitColor(unit)
 		local line1 = GameTooltipTextLeft1:GetText()
-		GameTooltipTextLeft1:SetFormattedText("%s", hex(color)..line1)
+		GameTooltipTextLeft1:SetFormattedText(("%s"), hex(color)..line1)
 		GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
 		local alive = not UnitIsDeadOrGhost(unit)
@@ -564,6 +579,9 @@ local function OnSetUnit(self)
 	end
 
 	SetStatusBar(self, unit)
+
+	self.freebHeightSet = nil
+	self.freebtipUpdate = 0
 end
 
 GameTooltip:HookScript("OnTooltipSetUnit", OnSetUnit)
@@ -725,6 +743,11 @@ local function GT_OnUpdate(self, elapsed)
 
 	if(self:GetHeight() == self.freebHeightSet) then return end	
 
+	local unit = GetMouseFocus() and GetMouseFocus().unit or "mouseover"
+	if(UnitExists(unit)) then
+		hideLines(self)
+	end
+
 	if(gtSB:IsShown()) then
 		local height = gtSB:GetHeight()+6
 
@@ -740,17 +763,6 @@ local function GT_OnUpdate(self, elapsed)
 	formatLines(self)
 end
 
-
--- Just a tool to get spell ids..
-hooksecurefunc(GameTooltip, "SetUnitAura", function(self,...)
-	local id = select(11,UnitAura(...))
-	if(cfg.spellid and id) then
-		--print(id)
-		GameTooltip:AddLine("ID: "..id)
-		GameTooltip:Show()
-	end
-end)
-
 -- xRUI
 -- Because if you're not hacking, you're doing it wrong
 local function OverrideGetBackdropColor()
@@ -758,13 +770,13 @@ local function OverrideGetBackdropColor()
 end
 
 GameTooltip.GetBackdropColor = OverrideGetBackdropColor
+GameTooltip:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
 
 local function OverrideGetBackdropBorderColor()
 	return 0, 0, 0
 end
 
 GameTooltip.GetBackdropBorderColor = OverrideGetBackdropBorderColor
-GameTooltip:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
 GameTooltip:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
 GameTooltip:HookScript("OnUpdate", GT_OnUpdate)
 

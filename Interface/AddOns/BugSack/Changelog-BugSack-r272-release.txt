@@ -1,0 +1,44 @@
+------------------------------------------------------------------------
+r272 | funkydude | 2013-10-29 03:10:42 +0000 (Tue, 29 Oct 2013) | 1 line
+Changed paths:
+   A /tags/r272-release (from /trunk:271)
+
+Tagging as r272-release
+------------------------------------------------------------------------
+r271 | funkydude | 2013-10-29 02:53:09 +0000 (Tue, 29 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Media/error.ogg
+   A /trunk/Media/error.wav
+   M /trunk/core.lua
+   M /trunk/locales.lua
+   M /trunk/sack.lua
+
+Slightly higher quality ogg file, tweaks.
+------------------------------------------------------------------------
+r270 | funkydude | 2013-10-29 00:03:01 +0000 (Tue, 29 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/BugSack.toc
+   M /trunk/config.lua
+   M /trunk/core.lua
+   D /trunk/license
+   M /trunk/locales.lua
+
+Remove AceLocale.
+------------------------------------------------------------------------
+r269 | funkydude | 2013-10-28 23:46:54 +0000 (Mon, 28 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/BugSack.toc
+   M /trunk/config.lua
+   M /trunk/ldb.lua
+   M /trunk/locales.lua
+
+Re-arrange config and cleanup dropdowns to prevent taint. Fix right-click the minimap icon to open config. Add itIT localization.
+------------------------------------------------------------------------
+r267 | funkydude | 2013-10-21 12:04:02 +0000 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/BugSack.toc
+
+bump toc
+------------------------------------------------------------------------

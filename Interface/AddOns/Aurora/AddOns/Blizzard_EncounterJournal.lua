@@ -48,11 +48,11 @@ C.modules["Blizzard_EncounterJournal"] = function()
 		F.CreateBD(EncounterJournalSearchResults, .75)
 
 		EncounterJournalEncounterFrameInfoBossTab:ClearAllPoints()
-		EncounterJournalEncounterFrameInfoBossTab:SetPoint("TOPRIGHT", EncounterJournalEncounterFrame, "TOPRIGHT", 75, 20)
+		EncounterJournalEncounterFrameInfoBossTab:SetPoint("TOPRIGHT", EncounterJournalEncounterFrame, "TOPRIGHT", 74, 20)
 		EncounterJournalEncounterFrameInfoLootTab:ClearAllPoints()
-		EncounterJournalEncounterFrameInfoLootTab:SetPoint("TOP", EncounterJournalEncounterFrameInfoBossTab, "BOTTOM", 0, -4)
+		EncounterJournalEncounterFrameInfoLootTab:SetPoint("TOP", EncounterJournalEncounterFrameInfoBossTab, "BOTTOM", 0, -2)
 		EncounterJournalEncounterFrameInfoModelTab:ClearAllPoints()
-		EncounterJournalEncounterFrameInfoModelTab:SetPoint("TOP", EncounterJournalEncounterFrameInfoLootTab, "BOTTOM", 0, -4)
+		EncounterJournalEncounterFrameInfoModelTab:SetPoint("TOP", EncounterJournalEncounterFrameInfoLootTab, "BOTTOM", 0, -2)
 
 		local tabs = {EncounterJournalEncounterFrameInfoBossTab, EncounterJournalEncounterFrameInfoLootTab, EncounterJournalEncounterFrameInfoModelTab}
 		for _, tab in pairs(tabs) do
@@ -238,6 +238,7 @@ C.modules["Blizzard_EncounterJournal"] = function()
 		F.Reskin(EncounterJournalEncounterFrameInfoDifficulty)
 		F.Reskin(EncounterJournalEncounterFrameInfoResetButton)
 		F.Reskin(EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggle)
+		F.ReskinArrow(EncounterJournalInstanceSelectScrollDownButton, "down")
 		F.ReskinClose(EncounterJournalCloseButton)
 		F.ReskinClose(EncounterJournalSearchResultsCloseButton)
 		F.ReskinInput(EncounterJournalSearchBox)

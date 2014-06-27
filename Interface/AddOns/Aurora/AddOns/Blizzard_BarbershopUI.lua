@@ -7,10 +7,13 @@ C.modules["Blizzard_BarbershopUI"] = function()
 	F.Reskin(BarberShopFrameOkayButton)
 	F.Reskin(BarberShopFrameCancelButton)
 	F.Reskin(BarberShopFrameResetButton)
+
 	F.ReskinArrow(BarberShopFrameSelector1Prev, "left")
 	F.ReskinArrow(BarberShopFrameSelector1Next, "right")
 	F.ReskinArrow(BarberShopFrameSelector2Prev, "left")
 	F.ReskinArrow(BarberShopFrameSelector2Next, "right")
 	F.ReskinArrow(BarberShopFrameSelector3Prev, "left")
 	F.ReskinArrow(BarberShopFrameSelector3Next, "right")
+	F.ReskinArrow(BarberShopFrameSelector4Prev, "left")
+	F.ReskinArrow(BarberShopFrameSelector4Next, "right")
 end

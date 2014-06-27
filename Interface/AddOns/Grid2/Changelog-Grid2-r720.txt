@@ -1,4 +1,27 @@
 ------------------------------------------------------------------------
+r720 | gragagrogog | 2013-09-17 17:43:11 +0000 (Tue, 17 Sep 2013) | 3 lines
+Changed paths:
+   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
+   M /trunk/modules/StatusColor.lua
+
+-class/creature colors should properly update after "charmed" fades
+-added "Locked On" and "Mark of Anguish" to SoO RD list
+
+------------------------------------------------------------------------
+r719 | gragagrogog | 2013-09-15 22:09:03 +0000 (Sun, 15 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/modules/StatusRaidIcon.lua
+
+Fixed lua error caused by "ElvUI Raid Markers"
+------------------------------------------------------------------------
+r718 | gragagrogog | 2013-09-12 13:15:32 +0000 (Thu, 12 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/AoeHeals/AoeHealsMapData.lua
+   M /trunk/Grid2.toc
+
+Using LibMapData-1.0 for AoE heals now.
+------------------------------------------------------------------------
 r717 | stanzilla | 2013-09-10 15:48:34 +0000 (Tue, 10 Sep 2013) | 1 line
 Changed paths:
    M /trunk/Grid2.toc

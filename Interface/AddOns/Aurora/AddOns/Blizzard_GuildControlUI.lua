@@ -23,24 +23,31 @@ C.modules["Blizzard_GuildControlUI"] = function()
 	GuildControlUIRankBankFrameInsetScrollFrameTop:SetAlpha(0)
 	GuildControlUIRankBankFrameInsetScrollFrameBottom:SetAlpha(0)
 
-	hooksecurefunc("GuildControlUI_RankOrder_Update", function()
-		for i = 1, GuildControlGetNumRanks() do
-			local rank = _G["GuildControlUIRankOrderFrameRank"..i]
-			if not rank.styled then
-				rank.upButton.icon:Hide()
-				rank.downButton.icon:Hide()
-				rank.deleteButton.icon:Hide()
+	do
+		local function updateGuildRanks()
+			for i = 1, GuildControlGetNumRanks() do
+				local rank = _G["GuildControlUIRankOrderFrameRank"..i]
+				if not rank.styled then
+					rank.upButton.icon:Hide()
+					rank.downButton.icon:Hide()
+					rank.deleteButton.icon:Hide()
 
-				F.ReskinArrow(rank.upButton, "up")
-				F.ReskinArrow(rank.downButton, "down")
-				F.ReskinClose(rank.deleteButton)
+					F.ReskinArrow(rank.upButton, "up")
+					F.ReskinArrow(rank.downButton, "down")
+					F.ReskinClose(rank.deleteButton)
 
-				F.ReskinInput(rank.nameBox, 20)
+					F.ReskinInput(rank.nameBox, 20)
 
-				rank.styled = true
+					rank.styled = true
+				end
 			end
 		end
-	end)
+
+		local f = CreateFrame("Frame")
+		f:RegisterEvent("GUILD_RANKS_UPDATE")
+		f:SetScript("OnEvent", updateGuildRanks)
+		hooksecurefunc("GuildControlUI_RankOrder_Update", updateGuildRanks)
+	end
 
 	hooksecurefunc("GuildControlUI_BankTabPermissions_Update", function()
 		for i = 1, GetNumGuildBankTabs() + 1 do

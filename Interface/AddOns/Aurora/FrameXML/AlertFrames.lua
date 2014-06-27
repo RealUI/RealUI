@@ -244,10 +244,17 @@ tinsert(C.modules["Aurora"], function()
 			frame.IconBorder:Hide()
 			frame.glow:SetTexture("")
 			frame.shine:SetTexture("")
+			frame.SpecRing:SetTexture("")
 
 			frame.Icon:SetTexCoord(.08, .92, .08, .92)
 			F.CreateBG(frame.Icon)
+
+			frame.SpecIcon:SetTexCoord(.08, .92, .08, .92)
+			frame.SpecIcon.bg = F.CreateBG(frame.SpecIcon)
+			frame.SpecIcon.bg:SetDrawLayer("BORDER", 2)
 		end
+
+		frame.SpecIcon.bg:SetShown(frame.SpecIcon:IsShown())
 	end)
 
 	-- Money won alert

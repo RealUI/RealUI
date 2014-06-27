@@ -61,7 +61,8 @@ function RaidIcon:UpdateUnit(_, unit)
 end
 
 function RaidIcon:IsActive(unit)
-	return self.cache[unit]
+	local index = self.cache[unit]
+	return index and index < 9
 end
 
 function RaidIcon:GetColor(unit)

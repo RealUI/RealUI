@@ -2,9 +2,6 @@ local addonName, addon = ...
 if not addon.healthCheck then return end
 local L = addon.L
 
-local wow_ver = select(4, GetBuildInfo())
-local wow_500 = wow_ver >= 50000
-
 -- The sack
 local window = nil
 
@@ -174,7 +171,6 @@ local function filterSack(editbox)
 	updateSackDisplay(true)
 end
 
-local UIPanelButtonTemplate = wow_500 and "UIPanelButtonTemplate" or "UIPanelButtonTemplate2"
 local function createBugSack()
 	window = CreateFrame("Frame", "BugSackFrame", UIParent)
 	UIPanelWindows.BugSackFrame = { area = "center", pushable = 0, whileDead = 1 }
@@ -342,7 +338,7 @@ local function createBugSack()
 	searchBox:SetPoint("BOTTOMRIGHT", countLabel, "BOTTOMLEFT", -3, -1)
 	searchBox:Hide()
 
-	nextButton = CreateFrame("Button", "BugSackNextButton", window, UIPanelButtonTemplate)
+	nextButton = CreateFrame("Button", "BugSackNextButton", window, "UIPanelButtonTemplate")
 	nextButton:SetPoint("BOTTOMRIGHT", window, -11, 16)
 	nextButton:SetWidth(130)
 	nextButton:SetText(L["Next >"])
@@ -355,7 +351,7 @@ local function createBugSack()
 		updateSackDisplay()
 	end)
 
-	prevButton = CreateFrame("Button", "BugSackPrevButton", window, UIPanelButtonTemplate)
+	prevButton = CreateFrame("Button", "BugSackPrevButton", window, "UIPanelButtonTemplate")
 	prevButton:SetPoint("BOTTOMLEFT", window, 14, 16)
 	prevButton:SetWidth(130)
 	prevButton:SetText(L["< Previous"])
@@ -369,7 +365,7 @@ local function createBugSack()
 	end)
 
 	if addon.Serialize then
-		sendButton = CreateFrame("Button", "BugSackSendButton", window, UIPanelButtonTemplate)
+		sendButton = CreateFrame("Button", "BugSackSendButton", window, "UIPanelButtonTemplate")
 		sendButton:SetPoint("LEFT", prevButton, "RIGHT")
 		sendButton:SetPoint("RIGHT", nextButton, "LEFT")
 		sendButton:SetText(L["Send bugs"])

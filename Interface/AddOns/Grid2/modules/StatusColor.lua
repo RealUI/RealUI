@@ -36,11 +36,15 @@ end
 function Shared:OnEnable()
 	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", "UpdateUnit")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnit")
+	self:RegisterEvent("UNIT_FLAGS", "UpdateUnit")
+	self:RegisterEvent("UNIT_FACTION", "UpdateUnit")
 end
 
 function Shared:OnDisable()
 	self:UnregisterEvent("UNIT_CLASSIFICATION_CHANGED")
 	self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
+	self:UnregisterEvent("UNIT_FLAGS")
+	self:UnregisterEvent("UNIT_FACTION")
 end
 
 function Shared:GetColor(unit)

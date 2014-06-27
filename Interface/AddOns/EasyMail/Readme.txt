@@ -16,7 +16,7 @@ Modifications to the World of Warcraft mail frame.
 
 - A Take All button is added to the Open Mail window that allows the player to move all the item and money attachments for the open mail into the player's bags with a single click. This button is disabled on COD mails until the user clicks one item and confirms the COD. The button will not take existing mail text as an attachment. The Take All process will time out if it is unable to take an attachment for 8 seconds.  Closing the mail window will also cancel the process.
 
-- A Get Marked button is added to the inbox that allows the user to get all attachments from all mails that have been selected using checkboxes positioned to the left of each mail entry. Four other buttons added to the inbox allow the user to either mark or clear all mails or mark or clear the mails on the current page for attachment retrieval. COD mails will be ignored until the COD is confirmed manually for each mail by the user. To cancel the attachment retrieval process, close the mailbox.
+- Checkboxes added to the mail inbox allow the user to select mails for attachment retreival. Four graphical buttons added at the top of the inbox allow the user to either mark or clear all mails or mark or clear the mails on the current page. A fifth button starts the get attachments process. COD mails will be ignored until the COD is confirmed manually for each mail by the user. To cancel the attachment retrieval process, close the mailbox.
 
 - Right-click attachment retrieval and mail deletion from the inbox can be enabled using addon options. Right-clicking a mail item with attachments in the inbox will cause the take all process to attempt to retrieve all attachments from the mail. If the mail has text but no attachments, right-clicking will delete the mail. If the mail has both attachments and text, right-clicking will cause the take all to retrieve the attachments. Then, right-clicking again will delete the mail. The right-click does not affect COD mails until after the user chooses to accept the COD manually. The user can opt to disable the deletion prompt for mails marked as read. EasyMail will always prompt on the deletion of unread mails.
 
@@ -25,6 +25,8 @@ Modifications to the World of Warcraft mail frame.
 - A Forward button is added to the open mail window. Clicking this button opens a new mail with "FW:" + <subject> copied into the subject line and the text of the open mail body copied into the new mail body. IMPORTANT NOTE: Blizzard's mail system design complicates the automatic forwarding of mail attachments. Therefore, attachments cannot be forwarded using this button at this time. Only the text of the open mail will be copied into the new mail. Attachments must still be moved to the new mail manually. However, this new forwarding functionality makes the process a bit less cumbersome, since the new mail will be visible while you are still viewing the mail with attachments.
 
 - The user is now able to page through the inbox using the mouse wheel.
+
+- Configuration options allow the user to output money amounts and information about attachments being retreived to the chat window for easy post-process review.
 
 
 Configuration

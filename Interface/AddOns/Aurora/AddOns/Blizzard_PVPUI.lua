@@ -104,7 +104,7 @@ C.modules["Blizzard_PVPUI"] = function()
 	F.CreateBG(BonusFrame.BattlegroundReward2.Icon)
 
 	hooksecurefunc("HonorFrameBonusFrame_Update", function()
-		local canQueue, bgName, battleGroundID, hasWon, winHonorAmount, winConquestAmount = GetHolidayBGInfo()
+		local hasData, canQueue, bgName, battleGroundID, hasWon, winHonorAmount, winConquestAmount = GetHolidayBGInfo()
 		local rewardIndex = 0
 		if winConquestAmount and winConquestAmount > 0 then
 			rewardIndex = rewardIndex + 1
@@ -225,12 +225,14 @@ C.modules["Blizzard_PVPUI"] = function()
 
 	F.CreateBD(ConquestTooltip)
 
-	ConquestTooltip:HookScript("OnShow", function(self)
-		self:SetScale(UIParent:GetScale())
+	local ConquestFrameButton_OnEnter = function(self)
+		ConquestTooltip:SetPoint("TOPLEFT", self, "TOPRIGHT", 1, 0)
+	end
 
-		local p1, anchor, p2 = self:GetPoint()
-		self:SetPoint(p1, anchor, p2, 1, 0)
-	end)
+	ConquestFrame.Arena2v2:HookScript("OnEnter", ConquestFrameButton_OnEnter)
+	ConquestFrame.Arena3v3:HookScript("OnEnter", ConquestFrameButton_OnEnter)
+	ConquestFrame.Arena5v5:HookScript("OnEnter", ConquestFrameButton_OnEnter)
+	ConquestFrame.RatedBG:HookScript("OnEnter", ConquestFrameButton_OnEnter)
 
 	for _, bu in pairs({ConquestFrame.Arena2v2, ConquestFrame.Arena3v3, ConquestFrame.Arena5v5, ConquestFrame.RatedBG}) do
 		F.Reskin(bu, true)
@@ -252,7 +254,7 @@ C.modules["Blizzard_PVPUI"] = function()
 	ConquestFrame.RatedBGReward.Icon:SetSize(16, 16)
 	F.CreateBG(ConquestFrame.RatedBGReward.Icon)
 
-	ConquestFrame.ArenaReward.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Honor-"..englishFaction)
+	ConquestFrame.ArenaReward.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Conquest-"..englishFaction)
 	ConquestFrame.RatedBGReward.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Conquest-"..englishFaction)
 
 	for i = 1, 4 do

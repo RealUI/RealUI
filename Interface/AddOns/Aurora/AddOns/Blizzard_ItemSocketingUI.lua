@@ -1,7 +1,6 @@
 local F, C = unpack(select(2, ...))
 
 C.modules["Blizzard_ItemSocketingUI"] = function()
-	ItemSocketingFrame:DisableDrawLayer("BORDER")
 	ItemSocketingFrame:DisableDrawLayer("ARTWORK")
 	ItemSocketingScrollFrameTop:SetAlpha(0)
 	ItemSocketingScrollFrameMiddle:SetAlpha(0)
@@ -13,8 +12,17 @@ C.modules["Blizzard_ItemSocketingUI"] = function()
 	ItemSocketingSocket3Left:SetAlpha(0)
 	ItemSocketingSocket3Right:SetAlpha(0)
 
+	for i = 36, 51 do
+		select(i, ItemSocketingFrame:GetRegions()):Hide()
+	end
+
+	local title = select(18, ItemSocketingFrame:GetRegions())
+	title:ClearAllPoints()
+	title:SetPoint("TOP", 0, -5)
+
 	for i = 1, MAX_NUM_SOCKETS do
 		local bu = _G["ItemSocketingSocket"..i]
+		local shine = _G["ItemSocketingSocket"..i.."Shine"]
 
 		_G["ItemSocketingSocket"..i.."BracketFrame"]:Hide()
 		_G["ItemSocketingSocket"..i.."Background"]:SetAlpha(0)
@@ -23,25 +31,17 @@ C.modules["Blizzard_ItemSocketingUI"] = function()
 		bu:SetPushedTexture("")
 		bu.icon:SetTexCoord(.08, .92, .08, .92)
 
-		local bg = CreateFrame("Frame", nil, bu)
-		bg:SetAllPoints(bu)
-		bg:SetFrameLevel(bu:GetFrameLevel()-1)
-		F.CreateBD(bg, .25)
+		shine:ClearAllPoints()
+		shine:SetPoint("TOPLEFT", bu)
+		shine:SetPoint("BOTTOMRIGHT", bu, 1, 0)
 
-		bu.glow = CreateFrame("Frame", nil, bu)
-		bu.glow:SetBackdrop({
-			edgeFile = C.media.glow,
-			edgeSize = 4,
-		})
-		bu.glow:SetPoint("TOPLEFT", -4, 4)
-		bu.glow:SetPoint("BOTTOMRIGHT", 4, -4)
+		bu.bg = F.CreateBDFrame(bu, .25)
 	end
 
 	hooksecurefunc("ItemSocketingFrame_Update", function()
 		for i = 1, MAX_NUM_SOCKETS do
 			local color = GEM_TYPE_INFO[GetSocketTypes(i)]
-			_G["ItemSocketingSocket"..i].glow:SetBackdropBorderColor(color.r, color.g, color.b)
-
+			_G["ItemSocketingSocket"..i].bg:SetBackdropBorderColor(color.r, color.g, color.b)
 		end
 
 		local num = GetNumSockets()

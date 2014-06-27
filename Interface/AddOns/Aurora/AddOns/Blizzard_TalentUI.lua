@@ -44,17 +44,59 @@ C.modules["Blizzard_TalentUI"] = function()
 		end
 	end
 
+	hooksecurefunc("PlayerTalentFrame_UpdateTabs", function()
+		for i = 1, NUM_TALENT_FRAME_TABS do
+			local tab = _G["PlayerTalentFrameTab"..i]
+			local a1, p, a2, x = tab:GetPoint()
+
+			tab:ClearAllPoints()
+			tab:SetPoint(a1, p, a2, x, 2)
+		end
+	end)
+
 	for i = 1, NUM_TALENT_FRAME_TABS do
-		local tab = _G["PlayerTalentFrameTab"..i]
-		F.ReskinTab(tab)
+		F.ReskinTab(_G["PlayerTalentFrameTab"..i])
 	end
 
-	PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.ring:Hide()
-	PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.specIcon:SetTexCoord(.08, .92, .08, .92)
-	F.CreateBG(PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.specIcon)
-	PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.ring:Hide()
-	PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.specIcon:SetTexCoord(.08, .92, .08, .92)
-	F.CreateBG(PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.specIcon)
+	for _, frame in pairs({PlayerTalentFrameSpecialization, PlayerTalentFramePetSpecialization}) do
+		local scrollChild = frame.spellsScroll.child
+
+		scrollChild.ring:Hide()
+		scrollChild.specIcon:SetTexCoord(.08, .92, .08, .92)
+		F.CreateBG(scrollChild.specIcon)
+
+		local roleIcon = scrollChild.roleIcon
+
+		roleIcon:SetTexture(C.media.roleIcons)
+
+		local left = scrollChild:CreateTexture(nil, "OVERLAY")
+		left:SetWidth(1)
+		left:SetTexture(C.media.backdrop)
+		left:SetVertexColor(0, 0, 0)
+		left:SetPoint("TOPLEFT", roleIcon, 3, -3)
+		left:SetPoint("BOTTOMLEFT", roleIcon, 3, 4)
+
+		local right = scrollChild:CreateTexture(nil, "OVERLAY")
+		right:SetWidth(1)
+		right:SetTexture(C.media.backdrop)
+		right:SetVertexColor(0, 0, 0)
+		right:SetPoint("TOPRIGHT", roleIcon, -3, -3)
+		right:SetPoint("BOTTOMRIGHT", roleIcon, -3, 4)
+
+		local top = scrollChild:CreateTexture(nil, "OVERLAY")
+		top:SetHeight(1)
+		top:SetTexture(C.media.backdrop)
+		top:SetVertexColor(0, 0, 0)
+		top:SetPoint("TOPLEFT", roleIcon, 3, -3)
+		top:SetPoint("TOPRIGHT", roleIcon, -3, -3)
+
+		local bottom = scrollChild:CreateTexture(nil, "OVERLAY")
+		bottom:SetHeight(1)
+		bottom:SetTexture(C.media.backdrop)
+		bottom:SetVertexColor(0, 0, 0)
+		bottom:SetPoint("BOTTOMLEFT", roleIcon, 3, 4)
+		bottom:SetPoint("BOTTOMRIGHT", roleIcon, -3, 4)
+	end
 
 	hooksecurefunc("PlayerTalentFrame_UpdateSpecFrame", function(self, spec)
 		local playerTalentSpec = GetSpecialization(nil, self.isPet, PlayerSpecTab2:GetChecked() and 2 or 1)
@@ -72,26 +114,32 @@ C.modules["Blizzard_TalentUI"] = function()
 		else
 			bonuses = SPEC_SPELLS_DISPLAY[id]
 		end
+
 		for i = 1, #bonuses, 2 do
 			local frame = scrollChild["abilityButton"..index]
 			local _, icon = GetSpellTexture(bonuses[i])
+
 			frame.icon:SetTexture(icon)
 			frame.subText:SetTextColor(.75, .75, .75)
-			if not frame.reskinned then
-				frame.reskinned = true
+
+			if not frame.styled then
 				frame.ring:Hide()
 				frame.icon:SetTexCoord(.08, .92, .08, .92)
 				F.CreateBG(frame.icon)
+
+				frame.styled = true
 			end
+
 			index = index + 1
 		end
 
 		for i = 1, GetNumSpecializations(nil, self.isPet) do
 			local bu = self["specButton"..i]
-			if bu.selected then
-				bu.glowTex:Show()
+
+			if bu.disabled then
+				bu.roleName:SetTextColor(.5, .5, .5)
 			else
-				bu.glowTex:Hide()
+				bu.roleName:SetTextColor(1, 1, 1)
 			end
 		end
 	end)
@@ -112,16 +160,15 @@ C.modules["Blizzard_TalentUI"] = function()
 
 			bu.bg:SetAlpha(0)
 			bu.ring:Hide()
-			bu.learnedTex:SetPoint("TOPLEFT", 1, -1)
-			bu.learnedTex:SetPoint("BOTTOMRIGHT", -1, 1)
 			_G[name..i.."Glow"]:SetTexture("")
 
 			F.Reskin(bu, true)
 
-			bu.selectedTex:SetTexture("")
-			bu.learnedTex:SetTexture(C.media.backdrop)
-			bu.learnedTex:SetVertexColor(r, g, b, .2)
-			bu.learnedTex:SetDrawLayer("BACKGROUND")
+			bu.learnedTex:SetTexture("")
+			bu.selectedTex:SetTexture(C.media.backdrop)
+			bu.selectedTex:SetVertexColor(r, g, b, .2)
+			bu.selectedTex:SetDrawLayer("BACKGROUND")
+			bu.selectedTex:SetAllPoints()
 
 			bu.specIcon:SetTexCoord(.08, .92, .08, .92)
 			bu.specIcon:SetSize(58, 58)
@@ -130,16 +177,37 @@ C.modules["Blizzard_TalentUI"] = function()
 			local bg = F.CreateBG(bu.specIcon)
 			bg:SetDrawLayer("BORDER")
 
-			bu.glowTex = CreateFrame("Frame", nil, bu)
-			bu.glowTex:SetBackdrop({
-				edgeFile = C.media.glow,
-				edgeSize = 5,
-			})
-			bu.glowTex:SetPoint("TOPLEFT", -6, 5)
-			bu.glowTex:SetPoint("BOTTOMRIGHT", 5, -5)
-			bu.glowTex:SetBackdropBorderColor(r, g, b)
-			bu.glowTex:SetFrameLevel(bu:GetFrameLevel()-1)
-			bu.glowTex:Hide()
+			local roleIcon = bu.roleIcon
+
+			roleIcon:SetTexture(C.media.roleIcons)
+
+			local left = bu:CreateTexture(nil, "OVERLAY")
+			left:SetWidth(1)
+			left:SetTexture(C.media.backdrop)
+			left:SetVertexColor(0, 0, 0)
+			left:SetPoint("TOPLEFT", roleIcon, 2, -2)
+			left:SetPoint("BOTTOMLEFT", roleIcon, 2, 3)
+
+			local right = bu:CreateTexture(nil, "OVERLAY")
+			right:SetWidth(1)
+			right:SetTexture(C.media.backdrop)
+			right:SetVertexColor(0, 0, 0)
+			right:SetPoint("TOPRIGHT", roleIcon, -2, -2)
+			right:SetPoint("BOTTOMRIGHT", roleIcon, -2, 3)
+
+			local top = bu:CreateTexture(nil, "OVERLAY")
+			top:SetHeight(1)
+			top:SetTexture(C.media.backdrop)
+			top:SetVertexColor(0, 0, 0)
+			top:SetPoint("TOPLEFT", roleIcon, 2, -2)
+			top:SetPoint("TOPRIGHT", roleIcon, -2, -2)
+
+			local bottom = bu:CreateTexture(nil, "OVERLAY")
+			bottom:SetHeight(1)
+			bottom:SetTexture(C.media.backdrop)
+			bottom:SetVertexColor(0, 0, 0)
+			bottom:SetPoint("BOTTOMLEFT", roleIcon, 2, 3)
+			bottom:SetPoint("BOTTOMRIGHT", roleIcon, -2, 3)
 		end
 	end
 
@@ -210,7 +278,7 @@ C.modules["Blizzard_TalentUI"] = function()
 	end
 
 	hooksecurefunc("PlayerTalentFrame_UpdateSpecs", function()
-		PlayerSpecTab1:SetPoint("TOPLEFT", PlayerTalentFrame, "TOPRIGHT", 11, -36)
+		PlayerSpecTab1:SetPoint("TOPLEFT", PlayerTalentFrame, "TOPRIGHT", 2, -36)
 		PlayerSpecTab2:SetPoint("TOP", PlayerSpecTab1, "BOTTOM")
 	end)
 

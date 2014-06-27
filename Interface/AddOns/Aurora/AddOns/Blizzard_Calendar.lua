@@ -188,6 +188,10 @@ C.modules["Blizzard_Calendar"] = function()
 		F.Reskin(cbutton)
 	end
 
+	CalendarViewEventAcceptButton.flashTexture:SetTexture("")
+	CalendarViewEventTentativeButton.flashTexture:SetTexture("")
+	CalendarViewEventDeclineButton.flashTexture:SetTexture("")
+
 	F.ReskinClose(CalendarCloseButton, "TOPRIGHT", CalendarFrame, "TOPRIGHT", -14, -4)
 	F.ReskinClose(CalendarCreateEventCloseButton)
 	F.ReskinClose(CalendarViewEventCloseButton)

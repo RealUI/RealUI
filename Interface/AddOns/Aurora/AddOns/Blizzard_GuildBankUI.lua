@@ -67,28 +67,23 @@ C.modules["Blizzard_GuildBankUI"] = function()
 			bu:SetPushedTexture("")
 
 			bu.icon:SetTexCoord(.08, .92, .08, .92)
-			bu.bg = F.CreateBG(bu)
 		end
 	end
 
 	local function updateButtons()
-		if GuildBankFrame.mode == "bank" then
-			for i = 1, MAX_GUILDBANK_SLOTS_PER_TAB do
-				local index = mod(i, NUM_SLOTS_PER_GUILDBANK_GROUP)
-				if index == 0 then
-					index = NUM_SLOTS_PER_GUILDBANK_GROUP
-				end
+		local tab = GetCurrentGuildBankTab()
 
-				local column = ceil((i-0.5)/NUM_SLOTS_PER_GUILDBANK_GROUP)
-
-				local button = _G["GuildBankColumn"..column.."Button"..index]
-
-				if button.icon:IsShown() then
-					button.bg:Show()
-				else
-					button.bg:Hide()
-				end
+		for i = 1, MAX_GUILDBANK_SLOTS_PER_TAB do
+			local index = math.fmod(i, 14)
+			if index == 0 then
+				index = 14
 			end
+			local column = math.ceil((i-0.5)/14)
+
+			local slotLink = GetGuildBankItemLink(tab, i)
+			local slotFrame = _G["GuildBankColumn"..column.."Button"..index]
+
+			F.ColourQuality(slotFrame, slotLink)
 		end
 	end
 
@@ -106,7 +101,7 @@ C.modules["Blizzard_GuildBankUI"] = function()
 		F.CreateSD(bu, 5, 0, 0, 0, 1, 1)
 
 		local a1, p, a2, x, y = bu:GetPoint()
-		bu:SetPoint(a1, p, a2, x + 11, y)
+		bu:SetPoint(a1, p, a2, x + 1, y)
 
 		ic:SetTexCoord(.08, .92, .08, .92)
 		tb:GetRegions():Hide()
