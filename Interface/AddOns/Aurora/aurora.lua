@@ -1612,10 +1612,17 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		local function UpdateScroll()
 			for i = 1, FRIENDS_TO_DISPLAY do
 				local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
+				local en = bu.travelPassButton:IsEnabled()
+
+				if en == 1 then
+					bu.inv:SetAlpha(0.7)
+				else
+					bu.inv:SetAlpha(0.3)
+				end
 
 				if bu.gameIcon:IsShown() then
 					bu.bg:Show()
-					bu.gameIcon:SetPoint("TOPRIGHT", bu, "TOPRIGHT", -2, -2)
+					bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -1, -5)
 				else
 					bu.bg:Hide()
 				end
