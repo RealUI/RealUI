@@ -1,4 +1,4 @@
-## Interface: 50300
+## Interface: 50400
 ## Title: Chatter
 ## Notes: Lightweight Chat Improvements
 ## Notes-zhTW: 一個輕量級的聊天增強插件

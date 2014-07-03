@@ -31,11 +31,6 @@ local BarWidth = {
 local FontStringsRegular = {}
 
 local VengeanceID = 132365
-local LightID = 124275
-local ModerateID = 124274
-local HeavyID = 124273
-local StaggerID = 124255
-local PurifyID = 119582
 local MinLevel = 10
 local maxHealth
 
@@ -124,65 +119,45 @@ function Stagger:UpdateAuras(event, units)
 	if units and not(units.player) then return end
 
 	-- Stagger
-	self.curStagger = 0
+	self.curStagger = UnitStagger("player")
+	self.percent = self.curStagger / maxHealth
 	self.staggerLevel = 1
-	for i = 1, 40 do
-		local _,_,_,_,_,_,_,_,_,_,debuffID,_,_,_,amount = UnitDebuff("player", i)
-		if debuffID == LightID or debuffID == ModerateID or debuffID == HeavyID then
-			self.staggerLevel = (debuffID == LightID) and 1 or (debuffID == ModerateID) and 2 or 3
-			self.curStagger = amount or 0
-			break
-		end
-	end
 
-	local staggerPer = nibRealUI:Clamp(self.curStagger / maxHealth, 0, 1/5) * 5
+	local staggerPer = nibRealUI:Clamp(self.percent, 0, 1/5) * 5
 	AngleStatusBar:SetValue(self.sBar.stagger.bar, staggerPer)
 	self.sBar.stagger.value:SetText(nibRealUI:ReadableNumber(self.curStagger, 0))
 
-	if self.staggerLevel == 3 then
-		self.sBar.stagger.endBox:SetVertexColor(unpack(nibRealUI.media.colors.red))
-		AngleStatusBar:SetBarColor(self.sBar.stagger.bar, nibRealUI.media.colors.red)
-	elseif self.staggerLevel == 2 then
+    if (self.percent > STAGGER_YELLOW_TRANSITION and self.percent < STAGGER_RED_TRANSITION) then
+    	--Moderate
 		self.sBar.stagger.endBox:SetVertexColor(unpack(nibRealUI.media.colors.yellow))
 		AngleStatusBar:SetBarColor(self.sBar.stagger.bar, nibRealUI.media.colors.yellow)
-	else
+    elseif (self.percent > STAGGER_RED_TRANSITION) then
+    	--Heavy
+		self.sBar.stagger.endBox:SetVertexColor(unpack(nibRealUI.media.colors.red))
+		AngleStatusBar:SetBarColor(self.sBar.stagger.bar, nibRealUI.media.colors.red)
+    else
+    	--Light
 		self.sBar.stagger.endBox:SetVertexColor(unpack(nibRealUI.media.colors.green))
 		AngleStatusBar:SetBarColor(self.sBar.stagger.bar, nibRealUI.media.colors.green)
-	end
+    end
 
 	-- Vengeance
-	if event ~= "CLEU" then
-		self:UpdateCurrentVengeance()
-		
-		local vengPer = nibRealUI:Clamp(self.curVeng / self.maxVeng, 0, 1)
-		AngleStatusBar:SetValue(self.sBar.veng.bar, vengPer)
-		self.sBar.veng.value:SetText(nibRealUI:ReadableNumber(self.curVeng, 0))
+	self:UpdateCurrentVengeance()
+	
+	local vengPer = nibRealUI:Clamp(self.curVeng / self.maxVeng, 0, 1)
+	AngleStatusBar:SetValue(self.sBar.veng.bar, vengPer)
+	self.sBar.veng.value:SetText(nibRealUI:ReadableNumber(self.curVeng, 0))
 
-		if vengPer > 0 then
-			self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
-		else
-			self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
-		end
+	if vengPer > 0 then
+		self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
+	else
+		self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 	end
 
 	-- Update visibility
 	if (((self.curStagger > 0) or (self.curVeng > 0)) and not(self.sBar:IsShown())) or
 		(((self.curStagger <= 0) or (self.curVeng <= 0)) and self.sBar:IsShown()) then
 			self:UpdateShown()
-	end
-end
-
-function Stagger:CLEU(event, ...)
-	local _, cEvent, _,_,_,_,_, destGUID, _,_,_, spellID = ...
-
-	if (cEvent == "SPELL_CAST_SUCCESS") and (spellID == PurifyID) then
-		self:UpdateAuras("CLEU")
-	elseif (destGUID == self.guid) then
-		if (cEvent == "SPELL_PERIODIC_DAMAGE") and (spellID == StaggerID) then
-			self:UpdateAuras("CLEU")
-		elseif (cEvent == "SWING_DAMAGE") or (cEvent == "SPELL_AURA_APPLIED") or (cEvent == "SPELL_AURA_REMOVED") then
-			self:UpdateAuras("CLEU")
-		end
 	end
 end
 
@@ -253,7 +228,7 @@ function Stagger:CreateFrames()
 		sBar:SetPoint("BOTTOM")
 		-- sBar:Hide()
 	
-	-- Guard
+	-- Stagger
 	sBar.stagger = CreateFrame("Frame", nil, sBar)
 		sBar.stagger:SetPoint("BOTTOMRIGHT", sBar, "BOTTOM", -1, 0)
 		sBar.stagger:SetSize(BarWidth[layoutSize], 6)
@@ -365,8 +340,7 @@ function Stagger:OnEnable()
 	self:RegisterEvent("PLAYER_DEAD", "UpdateShown")
 	self:RegisterEvent("PLAYER_LEVEL_UP", "UpdateShown")
 	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateMax")
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CLEU")
-	self:RegisterBucketEvent({"UNIT_AURA", "UNIT_ABSORB_AMOUNT_CHANGED"}, updateSpeed, "UpdateAuras")
+	self:RegisterBucketEvent({"UNIT_DISPLAYPOWER", "UNIT_AURA", "UNIT_ABSORB_AMOUNT_CHANGED"}, updateSpeed, "UpdateAuras")
 end
 
 function Stagger:OnDisable()

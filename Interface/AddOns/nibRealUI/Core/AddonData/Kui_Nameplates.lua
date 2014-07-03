@@ -18,7 +18,6 @@ nibRealUI.LoadAddOnData_Kui_Nameplates = function()
 			},
 		},
 		["profileKeys"] = {
-			["Real - Zul'jin"] = "RealUI",
 		},
 		["profiles"] = {
 			["RealUI"] = {
@@ -29,6 +28,9 @@ nibRealUI.LoadAddOnData_Kui_Nameplates = function()
 						["monochrome"] = true,
 						["fontscale"] = 0.6243767738342285,
 					},
+				},
+				["general"] = {
+					["bartexture"] = "Flat",
 				},
 				["fade"] = {
 					["smooth"] = false,
