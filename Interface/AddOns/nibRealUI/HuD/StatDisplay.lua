@@ -13,14 +13,14 @@ local StatFrame = {}
 local PercentFormatString = "%.1f%%"
 local RoundFormatString = "%.1f"
 
---[[local Stats = {  --Warlords
-    --Primary stats
+local Stats = {  --Warlords
+    --Attributes
     [1]  = "Strength",
     [2]  = "Agility",
     [3]  = "Stamina",
     [4]  = "Intellect",
 
-    --Secondary stats
+    --Enhancments
     [5]  = "Haste",
     [6]  = "Crit",
     [7]  = "Mastery",
@@ -28,146 +28,96 @@ local RoundFormatString = "%.1f"
     [9]  = "Versitility",
     [10] = "Bonus_Armor", --Tanks
     [11] = "Spirit", --Healers
-    
-    --Pysical stats
-    [12] = "Melee_AP",
-    [13] = "Range_AP",
-    [14] = "Dodge",
-    [15] = "Parry",
-    [16] = "Block",
-    [17] = "Total_Armor",
 
-    --Spell stats
-    [18] = "Spell_Power",
-    [19] = "Combat_Regen",
+    --Attack
+    [12] = "Attack_Power",
+    [13] = "Attack_Speed",
+    [14] = "Res_Regen", --Energy, Focus, and Runes regen
 
-    --PvP stats
-    [20] = "PvP_Resilience",
-    [21] = "PvP_Power",
-}]]
+    --Spell
+    [15] = "Spell_Power",
+    [16] = "Combat_Regen",
+    [17] = "Mana_Regen",
+
+    --Defense
+    [18] = "Dodge",
+    [19] = "Parry",
+    [20] = "Block",
+    [21] = "Total_Armor",
+]]
 
 local convertStat = { --Test prep for Warlords
-    ["Melee_Armor_Pen"] = "Melee_Crit",
-    ["Range_Armor_Pen"] = "Range_Crit",
-}
-
-local Stats = {
-    [1]  = "Dodge",
-    [2]  = "Parry",
-    [3]  = "Block",
-    [4]  = "Armor_Defense",
-    [5]  = "Defense_Mastery",
-    
-    [6]  = "Melee_Haste",
-    [7]  = "Melee_Hit",
-    [8]  = "Melee_AP",
-    [9]  = "Melee_Crit",
-    [10] = "Expertise",
-    [11] = "Weapon_Speed",
-    [12] = "Melee_Mastery",
-    
-    [13] = "Dmg_Reduction",
-    [14] = "Total_Resilience",
-    [15] = "Total_PvPPower",
-    
-    [16] = "Range_Haste",
-    [17] = "Range_Hit",
-    [18] = "Range_AP",
-    [19] = "Range_Crit",
-    [20] = "Range_Speed",
-    [21] = "Range_Mastery",
-    
-    [22] = "Spell_Power",
-    [23] = "Spell_Crit",
-    [24] = "Spell_Haste",
-    [25] = "Spell_Hit",
-    [26] = "MP5",
-    [27] = "Spell_Mastery",
-
-    [28] = "Strength",
-    [29] = "Agility",
-    [30] = "Stamina",
-    [31] = "Intellect",
-    [32] = "Spirit",
+    ["Melee_Haste"] = "Haste",
+    ["Range_Haste"] = "Haste",
+    ["Spell_Haste"] = "Haste",
+    ["Melee_Crit"] = "Crit",
+    ["Range_Crit"] = "Crit",
+    ["Spell_Crit"] = "Crit",
+    ["Defense_Mastery"] = "Mastery",
+    ["Melee_Mastery"] = "Mastery",
+    ["Range_Mastery"] = "Mastery",
+    ["Spell_Mastery"] = "Mastery",
+    ["Melee_AP"] = "Attack_Power",
+    ["Range_AP"] = "Attack_Power",
+    ["Weapon_Speed"] = "Attack_Speed",
+    ["Range_Speed"] = "Attack_Speed",
+    ["MP5"] = "Combat_Regen",
+    ["Armor_Defense"] = "Total_Armor",
 }
 
 local StatIcons = {
-    [1] = "DoubleArrow2",
-    [2] = "Shield",
-    [3] = "Shield",
-    [4] = "Shield",
-    [5] = "Shield",
-    
-    [6] = "DoubleArrow2",
-    [7] = "Sword",
-    [8] = "Sword",
-    [9] = "Lightning",
-    [10] = "Sword",
-    [11] = "DoubleArrow2",
+    [1]  = "PersonPlus",
+    [2]  = "PersonPlus",
+    [3]  = "Heart",
+    [4]  = "PersonPlus",
+
+    [5]  = "Lightning",
+    [6]  = "DoubleArrow2",
+    [7]  = "Sword",
+    [8]  = "DoubleArrow2",
+    [9]  = "Heart",
+    [10] = "Shield",
+    [11]  = "Flame",
+             
     [12] = "Sword",
-    
-	[13] = "Shield",
-    [14] = "Shield",
-    [15] = "Lightning",
-    
-    [16] = "DoubleArrow2",
+    [13] = "Lightning",
+    [14] = "DoubleArrow2",
+          
+    [15] = "Flame",
+    [16] = "Lightning",
     [17] = "Lightning",
+         
     [18] = "Lightning",
     [19] = "Lightning",
-    [20] = "DoubleArrow2",
-    [21] = "Lightning",
-    
-    [22] = "Flame",
-    [23] = "Lightning",
-    [24] = "DoubleArrow2",
-    [25] = "Flame",
-    [26] = "Flame",
-    [27] = "Flame",
-
-    [28] = "PersonPlus",
-    [29] = "PersonPlus",
-    [30] = "PersonPlus",
-    [31] = "PersonPlus",
-    [32] = "PersonPlus",
+    [20] = "Shield",
+    [21] = "Shield",
 }
 local StatTexts = {
-    [1] = PLAYERSTAT_DEFENSES..": "..STAT_DODGE,
-    [2] = PLAYERSTAT_DEFENSES..": "..STAT_PARRY,
-    [3] = PLAYERSTAT_DEFENSES..": "..STAT_BLOCK,
-    [4] = PLAYERSTAT_DEFENSES..": "..ARMOR,
-    [5] = PLAYERSTAT_DEFENSES..": "..STAT_MASTERY,
-    
-    [6] = PLAYERSTAT_MELEE_COMBAT..": "..STAT_HASTE,
-    [7] = PLAYERSTAT_MELEE_COMBAT..": "..STAT_HIT_CHANCE,
-    [8] = PLAYERSTAT_MELEE_COMBAT..": "..STAT_ATTACK_POWER,
-    [9] = PLAYERSTAT_MELEE_COMBAT..": "..MELEE_CRIT_CHANCE,
-    [10] = PLAYERSTAT_MELEE_COMBAT..": "..STAT_EXPERTISE,
-    [11] = PLAYERSTAT_MELEE_COMBAT..": "..WEAPON_SPEED,
-    [12] = PLAYERSTAT_MELEE_COMBAT..": "..STAT_MASTERY,
-    
-    [13] = PVP.." "..COMBAT_TEXT_SHOW_RESISTANCES_TEXT,
-    [14] = RESILIENCE,
-    [15] = STAT_PVP_POWER,
-    
-    [16] = PLAYERSTAT_RANGED_COMBAT..": "..STAT_HASTE,
-    [17] = PLAYERSTAT_RANGED_COMBAT..": "..STAT_HIT_CHANCE,
-    [18] = PLAYERSTAT_RANGED_COMBAT..": "..STAT_ATTACK_POWER,
-    [19] = PLAYERSTAT_RANGED_COMBAT..": "..RANGED_CRIT_CHANCE,
-    [20] = PLAYERSTAT_RANGED_COMBAT..": "..WEAPON_SPEED,
-    [21] = PLAYERSTAT_RANGED_COMBAT..": "..STAT_MASTERY,
-    
-    [22] = PLAYERSTAT_SPELL_COMBAT..": "..STAT_SPELLPOWER,
-    [23] = PLAYERSTAT_SPELL_COMBAT..": "..SPELL_CRIT_CHANCE,
-    [24] = PLAYERSTAT_SPELL_COMBAT..": "..STAT_HASTE,
-    [25] = PLAYERSTAT_SPELL_COMBAT..": "..STAT_HIT_CHANCE,
-    [26] = PLAYERSTAT_SPELL_COMBAT..": "..MANA_REGEN,
-    [27] = PLAYERSTAT_SPELL_COMBAT..": "..STAT_MASTERY,
+    [1]  = SPELL_STAT1_NAME,
+    [2]  = SPELL_STAT2_NAME,
+    [3]  = SPELL_STAT3_NAME,
+    [4]  = SPELL_STAT4_NAME,
 
-    [28] = SPELL_STAT1_NAME,
-    [29] = SPELL_STAT2_NAME,
-    [30] = SPELL_STAT3_NAME,
-    [31] = SPELL_STAT4_NAME,
-    [32] = SPELL_STAT5_NAME,
+    [5]  = STAT_HASTE,
+    [6]  = CRIT_CHANCE,
+    [7]  = STAT_MASTERY,
+    [8]  = STAT_MULTISTRIKE,
+    [9]  = STAT_VERSATILITY,
+    [10] = BONUS_ARMOR,
+    [11] = SPELL_STAT5_NAME,
+          
+    [12] = STAT_ATTACK_SPEED,
+    [13] = STAT_ATTACK_SPEED,
+    [14] = {STAT_ENERGY_REGEN, STAT_FOCUS_REGEN, STAT_RUNE_REGEN},
+          
+    [15] = STAT_SPELLPOWER,
+    [16] = MANA_REGEN_COMBAT,
+    [17] = MANA_REGEN,
+          
+    [18] = STAT_DODGE,
+    [19] = STAT_PARRY,
+    [20] = STAT_BLOCK,
+    [21] = ARMOR,
 }
 
 local options
@@ -339,175 +289,9 @@ end
 local InCombat
 local watchedStats = {}
 local StatFunc = {}
------------------
----- Defense ----
------------------
-StatFunc.Dodge = function()
-    local Total_Dodge = GetDodgeChance()
-    return strform(PercentFormatString, Total_Dodge)
-end
-
-StatFunc.Parry = function()
-    local Total_Parry = GetParryChance()
-    return strform(PercentFormatString, Total_Parry)
-end
-
-StatFunc.Block = function()
-    local Total_Block = GetBlockChance()
-    return strform(PercentFormatString, Total_Block)
-end
-
-StatFunc.Armor_Defense = function()
-    local base, effectiveArmor, armor, posBuff, negBuff = UnitArmor("player")
-    local Melee_Reduction = effectiveArmor
-    return nibRealUI:ReadableNumber(Melee_Reduction)
-end
-
-StatFunc.Defense_Mastery = function()
-    local Total_DM = GetMasteryEffect("player")
-    return strform(PercentFormatString, Total_DM)
-end
-
----------------
----- Melee ----
----------------
-StatFunc.Melee_Haste = function()
-    local Total_Melee_Haste = GetMeleeHaste("player")
-    return strform(PercentFormatString, Total_Melee_Haste)
-end
-
-StatFunc.Melee_Hit = function()
-    local Total_Hit = GetCombatRatingBonus("6")
-    return strform(PercentFormatString, Total_Hit)
-end
-
-StatFunc.Melee_AP = function()
-    local base, posBuff, negBuff = UnitAttackPower("player")
-    local Melee_AP = base + posBuff + negBuff
-    return nibRealUI:ReadableNumber(Melee_AP)
-end
-
-StatFunc.Melee_Crit = function()
-    local Melee_Crit = GetCritChance("player")
-    return strform(PercentFormatString, Melee_Crit)
-end
-
-StatFunc.Expertise = function()
-    local Expertise = GetCombatRatingBonus("24")
-    return strform(PercentFormatString, Expertise)
-end
-
-StatFunc.Melee_Armor_Pen = function()
-    local Melee_Armor_Pen = GetCombatRatingBonus("25")
-    return strform(PercentFormatString, Melee_Armor_Pen)
-end
-
-StatFunc.Weapon_Speed = function()
-    local mainSpeed, offSpeed = UnitAttackSpeed("player");
-    local MH = mainSpeed
-    local OH = offSpeed
-    return strform(RoundFormatString, MH)
-end
-
-StatFunc.Melee_Mastery = function()
-    local Total_MM = GetMasteryEffect("player");
-    return strform(PercentFormatString, Total_MM)
-end
-
--------------
----- PvP ----
--------------
-StatFunc.Dmg_Reduction = function()
-    local PvPDmg = GetCombatRatingBonus("16") + 40
-    return strform("-"..PercentFormatString, PvPDmg)
-end
-
-StatFunc.Total_Resilience = function()
-    local Total_Resil = GetCombatRating("16")
-    return nibRealUI:ReadableNumber(Total_Resil)
-end
-
-StatFunc.Total_PvPPower = function()
-    local PvPPower = GetCombatRatingBonus("27")
-    return strform(PercentFormatString, PvPPower)
-end
-
----------------
----- Range ----
----------------
-StatFunc.Range_Haste = function()
-    local Total_Range_Haste = GetRangedHaste("player")
-    return strform(PercentFormatString, Total_Range_Haste)
-end
-
-StatFunc.Range_Hit = function()
-    local Total_Range_Hit = GetCombatRatingBonus("7")
-    return strform(PercentFormatString, Total_Range_Hit)
-end
-
-StatFunc.Range_Armor_Pen = function()
-    local Range_Armor_Pen = GetCombatRatingBonus("25")
-    return strform(PercentFormatString, Range_Armor_Pen)
-end
-
-StatFunc.Range_AP = function()
-    local base, posBuff, negBuff = UnitRangedAttackPower("player")
-    local Range_AP = base + posBuff + negBuff
-    return nibRealUI:ReadableNumber(Range_AP)
-end
-
-StatFunc.Range_Crit = function()
-    local Range_Crit = GetRangedCritChance("25")
-    return strform(PercentFormatString, Range_Crit)
-end
-
-StatFunc.Range_Speed = function()
-    local speed = UnitRangedDamage("player")
-    local Total_Range_Speed = speed
-    return strform(RoundFormatString, Total_Range_Speed)
-end
-
-StatFunc.Range_Mastery = function()
-    local Total_RM = GetMasteryEffect("player")
-    return strform(PercentFormatString, Total_RM)
-end
-
-----------------
----- Spells ----
-----------------
-StatFunc.Spell_Power = function()
-    local SP = GetSpellBonusDamage("2")
-    return nibRealUI:ReadableNumber(SP)
-end
-
-StatFunc.Spell_Crit = function()
-    local SC = GetSpellCritChance("2")
-    return strform(PercentFormatString, SC)
-end
-
-StatFunc.Spell_Haste = function()
-    local Total_Spell_Haste = UnitSpellHaste("player")
-    return strform(PercentFormatString, Total_Spell_Haste)
-end
-
-StatFunc.Spell_Hit = function()
-    local Total_Spell_Hit = GetCombatRatingBonus("8")
-    return strform(PercentFormatString, Total_Spell_Hit)
-end
-
-StatFunc.MP5 = function()
-    local base, casting = GetManaRegen()
-    local MP5_1 = (casting * 5)
-    return strform("%.0f", MP5_1)
-end
-
-StatFunc.Spell_Mastery = function()
-    local Total_SM = GetMasteryEffect("player")
-    return strform(PercentFormatString, Total_SM)
-end
 
 --------------------
----- Base Stats ----
+---- Attributes ----
 --------------------
 StatFunc.Strength = function()
     local _, effectiveStat = UnitStat("player", 1)
@@ -529,87 +313,217 @@ StatFunc.Intellect = function()
     return nibRealUI:ReadableNumber(effectiveStat)
 end
 
-StatFunc.Spirit = function()
-    local _, effectiveStat = UnitStat("player", 5)
-    return nibRealUI:ReadableNumber(effectiveStat)
+---------------------
+---- Enhancments ----
+---------------------
+StatFunc.Haste = function()
+    local Haste = GetHaste()
+    return strform(PercentFormatString, Haste)
 end
+
+StatFunc.Crit = function()
+    local Crit
+    local spellCrit = GetSpellCritChance("2")
+    local rangedCrit = GetRangedCritChance();
+    local meleeCrit = GetCritChance();
+
+    if (spellCrit >= rangedCrit and spellCrit >= meleeCrit) then
+        Crit = spellCrit;
+    elseif (rangedCrit >= meleeCrit) then
+        Crit = rangedCrit;
+    else
+        Crit = meleeCrit;
+    end
+    return strform(PercentFormatString, Crit)
+end
+
+StatFunc.Mastery = function()
+    local Mastery = GetMasteryEffect();
+    return strform(PercentFormatString, Mastery)
+end
+
+StatFunc.Multistrike = function()
+    local Multistrike = GetMultistrike();
+    return strform(PercentFormatString, Multistrike)
+end
+
+StatFunc.Versitility = function()
+    local Versitility = GetVersatility();
+    return strform(PercentFormatString, Versitility)
+end
+
+StatFunc.Bonus_Armor = function()
+    local _, _, _, posBuff, negBuff = UnitArmor("player")
+    local Bonus_Armor = posBuff + negBuff
+    return nibRealUI:ReadableNumber(Bonus_Armor)
+end
+
+StatFunc.Spirit = function()
+    local _, Spirit = UnitStat("player", 5)
+    return nibRealUI:ReadableNumber(Spirit)
+end
+
+----------------
+---- Attack ----
+----------------
+StatFunc.Attack_Power = function()
+    local rangedWeapon = IsRangedWeapon();
+    local base, posBuff, negBuff
+
+    if ( rangedWeapon ) then
+        base, posBuff, negBuff = UnitRangedAttackPower("player");
+    else 
+        base, posBuff, negBuff = UnitAttackPower("player");
+    end
+
+    local Attack_Power = max(0, base + posBuff + negBuff) 
+    return nibRealUI:ReadableNumber(Attack_Power)
+end
+
+StatFunc.Attack_Speed = function()
+    local rangedWeapon = IsRangedWeapon();
+    if ( rangedWeapon ) then
+        speed = UnitRangedDamage(unit); 
+    else 
+        speed, offhandSpeed = UnitAttackSpeed(unit);
+    end
+    if ( offhandSpeed ) then
+        return strform(RoundFormatString, speed).." / ".. strform(RoundFormatString, offhandSpeed);
+    else
+        return strform(RoundFormatString, speed)
+    end
+end
+
+StatFunc.Res_Regen = function()
+    local _, class = UnitClass(unit);
+    local Res_Regen
+    if (class == "DEATHKNIGHT") then
+        _, Res_Regen = GetRuneCooldown(1);
+    else
+        Res_Regen = GetPowerRegen();
+    end
+    return strform(RoundFormatString, Res_Regen)
+end
+
+---------------
+---- Spell ----
+---------------
+StatFunc.Spell_Power = function()
+    local Spell_Power = GetSpellBonusDamage("2")
+    return nibRealUI:ReadableNumber(Spell_Power)
+end
+
+StatFunc.Combat_Regen = function()
+    local base, casting = GetManaRegen()
+    local Combat_Regen = floor(casting * 5)
+    return strform("%.0f", Combat_Regen)
+end
+
+StatFunc.Mana_Regen = function()
+    local base, casting = GetManaRegen()
+    local Mana_Regen = floor(base * 5)
+    return strform("%.0f", Mana_Regen)
+end
+
+
+-----------------
+---- Defense ----
+-----------------
+StatFunc.Dodge = function()
+    local Dodge = GetDodgeChance()
+    return strform(PercentFormatString, Dodge)
+end
+
+StatFunc.Parry = function()
+    local Parry = GetParryChance()
+    return strform(PercentFormatString, Parry)
+end
+
+StatFunc.Block = function()
+    local Block = GetBlockChance()
+    return strform(PercentFormatString, Block)
+end
+
+StatFunc.Total_Armor = function()
+    local _, Total_Armor = UnitArmor("player")
+    return nibRealUI:ReadableNumber(Total_Armor)
+end
+
 
 
 ------------
 local GetStatText
 local DefaultStatTypes = {
-    Tank = {"Armor_Defense", "Defense_Mastery"},
-    Melee = {"Melee_AP", "Melee_Crit"},
-    Ranged = {"Range_AP", "Range_Crit"},
-    Spell = {"Spell_Power", "Spell_Crit"},
-    Heal = {"MP5", "Spell_Mastery"},
+    Melee = {"Attack_Power", "Crit"},
+    Ranged = {"Attack_Power", "Crit"},
+    Spell = {"Spell_Power", "Crit"},
 }
 local DefaultStats = {
     ["DEATHKNIGHT"] = {
-        [1] = DefaultStatTypes.Tank,    -- B
-        [2] = DefaultStatTypes.Melee,   -- F
-        [3] = DefaultStatTypes.Melee,   -- U
+        [1] = {"Multistrike", "Mastery"},   -- Blood
+        [2] = {"Haste", "Attack_Power"},   -- Frost
+        [3] = {"Multistrike", "Attack_Power"},   -- Unholy
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["DRUID"] = {
-        [1] = DefaultStatTypes.Spell,   -- B
-        [2] = DefaultStatTypes.Melee,   -- F
-        [3] = DefaultStatTypes.Tank,    -- G
-        [4] = DefaultStatTypes.Heal,    -- R
+        [1] = {"Mastery", "Spell_Power"},   -- Bal
+        [2] = {"Crit", "Attack_Power"},   -- Feral
+        [3] = {"Mastery", "Crit"},    -- Guardian
+        [4] = {"Haste", "Combat_Regen"},    -- Resto
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["HUNTER"] = {
-        [1] = DefaultStatTypes.Ranged,  -- BM
-        [2] = DefaultStatTypes.Ranged,  -- MM
-        [3] = DefaultStatTypes.Ranged,  -- S
+        [1] = {"Mastery", "Attack_Power"},  -- BM
+        [2] = {"Crit", "Attack_Power"},  -- MM
+        [3] = {"Multistrike", "Attack_Power"},  -- SV
         ["NA"] = DefaultStatTypes.Ranged,
     },
     ["MAGE"] = {
-        [1] = DefaultStatTypes.Spell,   -- A
-        [2] = DefaultStatTypes.Spell,   -- Fi
-        [3] = DefaultStatTypes.Spell,   -- Fr
+        [1] = {"Mastery", "Spell_Power"},   -- Arc
+        [2] = {"Crit", "Spell_Power"},   -- Fire
+        [3] = {"Multistrike", "Spell_Power"},   -- Frost
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["MONK"] = {
-        [1] = DefaultStatTypes.Tank,    -- BM
-        [2] = DefaultStatTypes.Heal,    -- MW
-        [3] = DefaultStatTypes.Melee,   -- WW
+        [1] = {"Crit", "Mastery"},    -- BrM
+        [2] = {"Multistrike", "Combat_Regen"},    -- MW
+        [3] = {"Multistrike", "Attack_Power"},   -- WW
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["PALADIN"] = {
-        [1] = DefaultStatTypes.Heal,    -- H
-        [2] = DefaultStatTypes.Tank,    -- P
-        [3] = DefaultStatTypes.Melee,   -- R
+        [1] = {"Crit", "Combat_Regen"},    -- Holy
+        [2] = {"Haste", "Block"},    -- Prot
+        [3] = {"Mastery", "Attack_Power"},   -- Ret
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["PRIEST"] = {
-        [1] = DefaultStatTypes.Heal,    -- D
-        [2] = DefaultStatTypes.Heal,    -- H
-        [3] = DefaultStatTypes.Spell,   -- S
+        [1] = {"Crit", "Combat_Regen"},    -- Disc
+        [2] = {"Multistrike", "Combat_Regen"},    -- Holy
+        [3] = {"Haste", "Spell_Power"},   -- Shadow
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["ROGUE"] = {
-        [1] = DefaultStatTypes.Melee,   -- A
-        [2] = DefaultStatTypes.Melee,   -- C
-        [3] = DefaultStatTypes.Melee,   -- S
+        [1] = {"Mastery", "Attack_Power"},   -- Assass
+        [2] = {"Haste", "Attack_Power"},   -- Combat
+        [3] = {"Multistrike", "Attack_Power"},   -- Sub
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["SHAMAN"] = {
-        [1] = DefaultStatTypes.Spell,   -- El
-        [2] = DefaultStatTypes.Melee,   -- Enh
-        [3] = DefaultStatTypes.Heal,    -- R
+        [1] = {"Multistrike", "Spell_Power"},   -- Ele
+        [2] = {"Haste", "Attack_Power"},   -- Enh
+        [3] = {"Mastery", "Combat_Regen"},    -- Resto
         ["NA"] = DefaultStatTypes.Melee,
     },
     ["WARLOCK"] = {
-        [1] = DefaultStatTypes.Spell,   -- A
-        [2] = DefaultStatTypes.Spell,   -- Dem
-        [3] = DefaultStatTypes.Spell,   -- Des
+        [1] = {"Haste", "Spell_Power"},   -- Afflic
+        [2] = {"Mastery", "Spell_Power"},   -- Demo
+        [3] = {"Crit", "Spell_Power"},   -- Destro
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["WARRIOR"] = {
-        [1] = DefaultStatTypes.Melee,   -- A
-        [2] = DefaultStatTypes.Melee,   -- F
-        [3] = DefaultStatTypes.Tank,    -- P
+        [1] = {"Mastery", "Attack_Power"},   -- Arms
+        [2] = {"Crit", "Attack_Power"},   -- Fury
+        [3] = {"Mastery", "Block"},    -- Prot
         ["NA"] = DefaultStatTypes.Melee,
     },
 }
@@ -618,45 +532,31 @@ local DefaultStats = {
 local function RefreshStats()
     if GetStatText == nil then
         GetStatText = {
-            Dodge               = function() return StatFunc.Dodge() end,
-            Parry               = function() return StatFunc.Parry() end,
-            Block               = function() return StatFunc.Block() end,
-            Armor_Defense       = function() return StatFunc.Armor_Defense() end,
-            Defense_Mastery     = function() return StatFunc.Defense_Mastery() end,
-            
-            Melee_Haste         = function() return StatFunc.Melee_Haste() end,
-            Melee_Hit           = function() return StatFunc.Melee_Hit() end,
-            Melee_AP            = function() return StatFunc.Melee_AP() end,
-            Melee_Crit          = function() return StatFunc.Melee_Crit() end,
-            Expertise           = function() return StatFunc.Expertise() end,
-            Melee_Armor_Pen     = function() return StatFunc.Melee_Armor_Pen() end,
-            Weapon_Speed        = function() return StatFunc.Weapon_Speed() end,
-            Melee_Mastery       = function() return StatFunc.Melee_Mastery() end,
-            
-            Dmg_Reduction       = function() return StatFunc.Dmg_Reduction() end,
-            Total_Resilience    = function() return StatFunc.Total_Resilience() end,
-            Total_PvPPower      = function() return StatFunc.Total_PvPPower() end,
-            
-            Range_Haste         = function() return StatFunc.Range_Haste() end,
-            Range_Hit           = function() return StatFunc.Range_Hit() end,
-            Range_Armor_Pen     = function() return StatFunc.Range_Armor_Pen() end,
-            Range_AP            = function() return StatFunc.Range_AP() end,
-            Range_Crit          = function() return StatFunc.Range_Crit() end,
-            Range_Speed         = function() return StatFunc.Range_Speed() end,
-            Range_Mastery       = function() return StatFunc.Range_Mastery() end,
-            
-            Spell_Power         = function() return StatFunc.Spell_Power() end,
-            Spell_Crit          = function() return StatFunc.Spell_Crit() end,
-            Spell_Haste         = function() return StatFunc.Spell_Haste() end,
-            Spell_Hit           = function() return StatFunc.Spell_Hit() end,
-            MP5                 = function() return StatFunc.MP5() end,
-            Spell_Mastery       = function() return StatFunc.Spell_Mastery() end,
+            Strength     = function() return StatFunc.Strength() end,
+            Agility      = function() return StatFunc.Agility() end,
+            Stamina      = function() return StatFunc.Stamina() end,
+            Intellect    = function() return StatFunc.Intellect() end,
 
-            Strength            = function() return StatFunc.Strength() end,
-            Agility             = function() return StatFunc.Agility() end,
-            Stamina             = function() return StatFunc.Stamina() end,
-            Intellect           = function() return StatFunc.Intellect() end,
-            Spirit              = function() return StatFunc.Spirit() end,
+            Haste        = function() return StatFunc.Haste() end,
+            Crit         = function() return StatFunc.Crit() end,
+            Mastery      = function() return StatFunc.Mastery() end,
+            Multistrike  = function() return StatFunc.Multistrike() end,
+            Versitility  = function() return StatFunc.Versitility() end,
+            Bonus_Armor  = function() return StatFunc.Bonus_Armor() end,
+            Spirit       = function() return StatFunc.Spirit() end,
+
+            Attack_Power = function() return StatFunc.Attack_Power() end,
+            Attack_Speed = function() return StatFunc.Attack_Speed() end,
+            Res_Regen    = function() return StatFunc.Res_Regen() end,
+
+            Spell_Power  = function() return StatFunc.Spell_Power() end,
+            Combat_Regen = function() return StatFunc.Combat_Regen() end,
+            Mana_Regen   = function() return StatFunc.Mana_Regen() end,
+
+            Dodge        = function() return StatFunc.Dodge() end,
+            Parry        = function() return StatFunc.Parry() end,
+            Block        = function() return StatFunc.Block() end,
+            Total_Armor  = function() return StatFunc.Total_Armor() end,
         }
     end
 end
