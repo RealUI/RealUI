@@ -295,11 +295,8 @@ local defaults = {
 function nibRealUI:ToggleGridTestMode(show)
 	if show then
 		if RealUIGridConfiguring then return end
-		LoadAddOn("Grid2Options")
-		if IsAddOnLoaded("Grid2Options") and Grid2Options then
-			if Grid2Options.Initialize then Grid2Options:Initialize() end
-			Grid2Options.LayoutTestEnable(Grid2Options, "By Group 25")
-		end
+		if not Grid2Options then Grid2:LoadGrid2Options() end
+		Grid2Options.LayoutTestEnable(Grid2Options, "By Group 25")
 		RealUIGridConfiguring = true
 	else
 		RealUIGridConfiguring = false

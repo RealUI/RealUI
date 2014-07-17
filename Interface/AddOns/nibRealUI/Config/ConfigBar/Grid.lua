@@ -227,14 +227,7 @@ function ConfigBar_Grid:SetupWindow()
 		x = 14,
 		y = -116,
 		func = function()
-			LoadAddOn("Grid2Options")
-			if IsAddOnLoaded("Grid2Options") and Grid2Options then
-				if Grid2Options.Initialize then Grid2Options:Initialize() end
-				self:ScheduleTimer(function()
-					LibStub("AceConfigDialog-3.0"):Open("Grid2")
-				end, 0.25)
-				self:Close()
-			end
+			Grid2:OnChatCommand("")
 		end,
 	}
 	local advButton = cbGUI:CreateButton(tabPanel1, button)
