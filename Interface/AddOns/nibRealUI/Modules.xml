@@ -7,7 +7,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Script file="Misc\CurrencyTip.lua"/>
 	<Script file="Misc\DragEmAll.lua"/>
 	<Script file="Misc\StopAddonSpam.lua"/>
-	
+
 	<!-- Modules -->
 	<Script file="Modules\ActionBarDoodads.lua"/>
 	<Script file="Modules\AlertFrameMove.lua"/>
@@ -22,15 +22,15 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Script file="Modules\Loot.lua"/>
 	<Script file="Modules\MinimapAdv.lua"/>
 	<Script file="Modules\MirrorBar.lua"/>
+	<Script file="Modules\ObjectivesAdv.lua"/>
 	<Script file="Modules\Pitch.lua"/>
 	<Script file="Modules\PlayerShields.lua"/>
-	<Script file="Modules\RaidDebuffs.lua"/>
+	<!--Script file="Modules\RaidDebuffs.lua"/-->
 	<Script file="Modules\RavenBorders.lua"/>
 	<Script file="Modules\RuneDisplay.lua"/>
 	<Script file="Modules\ScreenSaver.lua"/>
 	<Script file="Modules\SpeechBubbles.lua"/>
 	<Script file="Modules\SpellAlerts.lua"/>
-	<Script file="Modules\WatchFrameAdv.lua"/>
 	<Script file="Modules\WorldMarker.lua"/>
 	<Include file="Modules\Chat.xml"/>
 </Ui>

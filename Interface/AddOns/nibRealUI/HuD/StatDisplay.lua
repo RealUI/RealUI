@@ -44,7 +44,7 @@ local Stats = {  --Warlords
     [19] = "Parry",
     [20] = "Block",
     [21] = "Total_Armor",
-]]
+}
 
 local convertStat = { --Test prep for Warlords
     ["Melee_Haste"] = "Haste",
@@ -99,7 +99,7 @@ local StatTexts = {
     [4]  = SPELL_STAT4_NAME,
 
     [5]  = STAT_HASTE,
-    [6]  = CRIT_CHANCE,
+    [6]  = STAT_CRITICAL_STRIKE,
     [7]  = STAT_MASTERY,
     [8]  = STAT_MULTISTRIKE,
     [9]  = STAT_VERSATILITY,

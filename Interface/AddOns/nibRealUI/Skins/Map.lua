@@ -192,12 +192,12 @@ function Map:SetUpCoords()
 	self.coords:SetFrameStrata(WorldMapDetailFrame:GetFrameStrata())
 	
 	self.coords.player = self.coords:CreateFontString(nil, "OVERLAY")
-	self.coords.player:SetPoint("BOTTOMLEFT", WorldMapPositioningGuide, "BOTTOMLEFT", 4.5, 4.5)
+	self.coords.player:SetPoint("BOTTOMLEFT", WorldMapDetailFrame, "BOTTOMLEFT", 4.5, 4.5)
 	self.coords.player:SetFont(unpack(nibRealUI.font.pixel1))
 	self.coords.player:SetText("")
 	
 	self.coords.mouse = self.coords:CreateFontString(nil, "OVERLAY")
-	self.coords.mouse:SetPoint("BOTTOMLEFT", WorldMapPositioningGuide, "BOTTOMLEFT", 120.5, 4.5)
+	self.coords.mouse:SetPoint("BOTTOMLEFT", WorldMapDetailFrame, "BOTTOMLEFT", 120.5, 4.5)
 	self.coords.mouse:SetFont(unpack(nibRealUI.font.pixel1))
 	self.coords.mouse:SetText("")
 end
@@ -252,15 +252,12 @@ function Map:ToggleTinyWorldMapSetting()
 	
 	BlackoutWorld:SetTexture(nil)
 	
-	self:SecureHook("WorldMap_ToggleSizeUp", "AdjustMapSize")
-	self:SecureHook("WorldMapFrame_SetFullMapView", "SetLargeWorldMap")
-	self:SecureHook("WorldMapFrame_SetQuestMapView", "SetQuestWorldMap")
+	self:SecureHook("WorldMap_ToggleSizeUp", "SetLargeWorldMap")
+	self:SecureHook("WorldMap_ToggleSizeDown", "SetQuestWorldMap")
 	
 	if WORLDMAP_SETTINGS.size == WORLDMAP_FULLMAP_SIZE then
 		self:SetLargeWorldMap()
 	elseif WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE then
-		self:SetQuestWorldMap()
-	elseif WORLDMAP_SETTINGS.size == WORLDMAP_QUESTLIST_SIZE then
 		self:SetQuestWorldMap()
 	end
 end
@@ -296,13 +293,13 @@ function Map:OnEnable()
 
 	self:SetMapStrata()	
 	
-	WorldMapShowDropDown:SetPoint("BOTTOMRIGHT", WorldMapPositioningGuide, "BOTTOMRIGHT", -2, -4)
-	WorldMapZoomOutButton:SetPoint("LEFT", WorldMapZoneDropDown, "RIGHT", 0, 2)
-	WorldMapLevelUpButton:SetPoint("TOPLEFT", WorldMapLevelDropDown, "TOPRIGHT", -2, 6)
-	WorldMapLevelDownButton:SetPoint("BOTTOMLEFT", WorldMapLevelDropDown, "BOTTOMRIGHT", -2, 2)
+	--WorldMapShowDropDown:SetPoint("BOTTOMRIGHT", WorldMapPositioningGuide, "BOTTOMRIGHT", -2, -4)
+	--WorldMapZoomOutButton:SetPoint("LEFT", WorldMapZoneDropDown, "RIGHT", 0, 2)
+	--WorldMapLevelUpButton:SetPoint("TOPLEFT", WorldMapLevelDropDown, "TOPRIGHT", -2, 6)
+	--WorldMapLevelDownButton:SetPoint("BOTTOMLEFT", WorldMapLevelDropDown, "BOTTOMRIGHT", -2, 2)
 	
 	self:HookScript(WorldMapFrame, "OnShow", "WorldMapFrame_OnShow")
-	self:HookScript(WorldMapZoneDropDownButton, "OnClick", "ResetDropDownListPosition")
+	--self:HookScript(WorldMapZoneDropDownButton, "OnClick", "ResetDropDownListPosition")
 	
 	self:SetUpCoords()
 	self:ToggleTinyWorldMapSetting()

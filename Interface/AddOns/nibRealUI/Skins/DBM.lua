@@ -5,6 +5,8 @@ local MODNAME = "SkinDBM"
 local SkinDBM = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local dbc
 
+if not Aurora then return end
+
 local F, C = unpack(Aurora)
 
 function SkinDBM:Skin()

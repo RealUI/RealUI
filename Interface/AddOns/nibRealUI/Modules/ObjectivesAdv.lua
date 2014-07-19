@@ -1,8 +1,8 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
-local MODNAME = "WatchFrame Adv."
-local WatchFrameAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local MODNAME = "Objectives Adv."
+local ObjectivesAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local LoggedIn = false
 
@@ -11,30 +11,30 @@ local options
 local function GetOptions()
 	if not options then options = {
 		type = "group",
-		name = "Watch Frame Adv.",
-		desc = "Style and re-position the Quest Watch Frame.",
+		name = "Objectives Adv.",
+		desc = "Style and re-position the Objective Tracker.",
 		childGroups = "tab",
 		arg = MODNAME,
 		args = {
 			header = {
 				type = "header",
-				name = "Watch Frame Adv.",
+				name = "Objectives Adv.",
 				order = 10,
 			},
 			desc = {
 				type = "description",
-				name = "Style and re-position the Quest Watch Frame.",
+				name = "Style and re-position the Objective Tracker.",
 				fontSize = "medium",
 				order = 20,
 			},
 			enabled = {
 				type = "toggle",
 				name = "Enabled",
-				desc = "Enable/Disable the Watch Frame Adv. module.",
+				desc = "Enable/Disable the Objectives Adv. module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
-					WatchFrameAdv:RefreshMod()				
+					ObjectivesAdv:RefreshMod()
 				end,
 				order = 30,
 			},
@@ -53,9 +53,9 @@ local function GetOptions()
 						type = "toggle",
 						name = "Enabled",
 						get = function(info) return db.position.enabled end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.position.enabled = value
-							WatchFrameAdv:UpdatePosition()
+							ObjectivesAdv:UpdatePosition()
 							nibRealUI:ReloadUIDialog()
 						end,
 						order = 20,
@@ -86,7 +86,7 @@ local function GetOptions()
 								set = function(info, value)
 									value = nibRealUI:ValidateOffset(value)
 									db.position.x = value
-									WatchFrameAdv:UpdatePosition()
+									ObjectivesAdv:UpdatePosition()
 								end,
 							},
 							yoffset = {
@@ -98,7 +98,7 @@ local function GetOptions()
 								set = function(info, value)
 									value = nibRealUI:ValidateOffset(value)
 									db.position.y = value
-									WatchFrameAdv:UpdatePosition()
+									ObjectivesAdv:UpdatePosition()
 								end,
 							},
 							negheightoffset = {
@@ -111,7 +111,7 @@ local function GetOptions()
 								set = function(info, value)
 									value = nibRealUI:ValidateOffset(value)
 									db.position.negheightofs = value
-									WatchFrameAdv:UpdatePosition()
+									ObjectivesAdv:UpdatePosition()
 								end,
 							},
 						},
@@ -131,14 +131,14 @@ local function GetOptions()
 							anchorto = {
 								type = "select",
 								name = "Anchor To",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorto then return k end
 									end
 								end,
 								set = function(info, value)
 									db.position.anchorto = nibRealUI.globals.anchorPoints[value]
-									WatchFrameAdv:UpdatePosition()
+									ObjectivesAdv:UpdatePosition()
 								end,
 								style = "dropdown",
 								width = nil,
@@ -148,14 +148,14 @@ local function GetOptions()
 							anchorfrom = {
 								type = "select",
 								name = "Anchor From",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorfrom then return k end
 									end
 								end,
 								set = function(info, value)
 									db.position.anchorfrom = nibRealUI.globals.anchorPoints[value]
-									WatchFrameAdv:UpdatePosition()
+									ObjectivesAdv:UpdatePosition()
 								end,
 								style = "dropdown",
 								width = nil,
@@ -181,9 +181,9 @@ local function GetOptions()
 						type = "toggle",
 						name = "Enabled",
 						get = function(info) return db.hidden.enabled end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.hidden.enabled = value
-							WatchFrameAdv:UpdateCollapseState()
+							ObjectivesAdv:UpdateCollapseState()
 						end,
 						order = 20,
 					},
@@ -203,9 +203,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "Arenas",
 								get = function(info) return db.hidden.collapse.arena end,
-								set = function(info, value) 
+								set = function(info, value)
 									db.hidden.collapse.arena = value
-									WatchFrameAdv:UpdateCollapseState()
+									ObjectivesAdv:UpdateCollapseState()
 								end,
 								order = 10,
 							},
@@ -215,7 +215,7 @@ local function GetOptions()
 								get = function(info) return db.hidden.collapse.pvp end,
 								set = function(info, value)
 									db.hidden.collapse.pvp = value
-									WatchFrameAdv:UpdateCollapseState()
+									ObjectivesAdv:UpdateCollapseState()
 								end,
 								order = 20,
 							},
@@ -223,9 +223,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "5 Man Dungeons",
 								get = function(info) return db.hidden.collapse.party end,
-								set = function(info, value) 
+								set = function(info, value)
 									db.hidden.collapse.party = value
-									WatchFrameAdv:UpdateCollapseState()
+									ObjectivesAdv:UpdateCollapseState()
 								end,
 								order = 30,
 							},
@@ -233,9 +233,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "Raid Dungeons",
 								get = function(info) return db.hidden.collapse.raid end,
-								set = function(info, value) 
-									db.hidden.collapse.raid = value 
-									WatchFrameAdv:UpdateCollapseState()
+								set = function(info, value)
+									db.hidden.collapse.raid = value
+									ObjectivesAdv:UpdateCollapseState()
 								end,
 								order = 40,
 							},
@@ -257,9 +257,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "Arenas",
 								get = function(info) return db.hidden.hide.arena end,
-								set = function(info, value) 
+								set = function(info, value)
 									db.hidden.hide.arena = value
-									WatchFrameAdv:UpdateHideState()
+									ObjectivesAdv:UpdateHideState()
 								end,
 								order = 10,
 							},
@@ -269,7 +269,7 @@ local function GetOptions()
 								get = function(info) return db.hidden.hide.pvp end,
 								set = function(info, value)
 									db.hidden.hide.pvp = value
-									WatchFrameAdv:UpdateHideState()
+									ObjectivesAdv:UpdateHideState()
 								end,
 								order = 20,
 							},
@@ -277,9 +277,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "5 Man Dungeons",
 								get = function(info) return db.hidden.hide.party end,
-								set = function(info, value) 
+								set = function(info, value)
 									db.hidden.hide.party = value
-									WatchFrameAdv:UpdateHideState()
+									ObjectivesAdv:UpdateHideState()
 								end,
 								order = 30,
 							},
@@ -287,9 +287,9 @@ local function GetOptions()
 								type = "toggle",
 								name = "Raid Dungeons",
 								get = function(info) return db.hidden.hide.raid end,
-								set = function(info, value) 
-									db.hidden.hide.raid = value 
-									WatchFrameAdv:UpdateHideState()
+								set = function(info, value)
+									db.hidden.hide.raid = value
+									ObjectivesAdv:UpdateHideState()
 								end,
 								order = 40,
 							},
@@ -307,7 +307,7 @@ end
 -- Collapse / Hide --
 ---------------------
 -- Hide Quest Tracker based on zone
-function WatchFrameAdv:UpdateHideState()
+function ObjectivesAdv:UpdateHideState()
 	local Hide = false
 	local _, instanceType = GetInstanceInfo()
 
@@ -324,13 +324,13 @@ function WatchFrameAdv:UpdateHideState()
 	end
 	if Hide then
 		self.hidden = true
-		WatchFrame.realUIHidden = true
-		WatchFrame:Hide() 
+		ObjectiveTrackerFrame.realUIHidden = true
+		ObjectiveTrackerFrame:Hide()
 	else
 		local oldHidden = self.hidden
 		self.hidden = false
-		WatchFrame.realUIHidden = false
-		WatchFrame:Show()
+		ObjectiveTrackerFrame.realUIHidden = false
+		ObjectiveTrackerFrame:Show()
 
 		-- Refresh fade, since fade won't update while hidden
 		local CF = nibRealUI:GetModule("CombatFader", 1)
@@ -341,7 +341,7 @@ function WatchFrameAdv:UpdateHideState()
 end
 
 -- Collapse Quest Tracker based on zone
-function WatchFrameAdv:UpdateCollapseState()
+function ObjectivesAdv:UpdateCollapseState()
 	local Collapsed = false
 	local _, instanceType = GetInstanceInfo()
 
@@ -356,19 +356,19 @@ function WatchFrameAdv:UpdateCollapseState()
 			Collapsed = true
 		end
 	end
-	
+
 	if Collapsed then
 		self.collapsed = true
-		WatchFrame.userCollapsed = true
-		WatchFrame_Collapse(WatchFrame)
+		ObjectiveTrackerFrame.userCollapsed = true
+		ObjectiveTracker_Collapse()
 	else
 		self.collapsed = false
-		WatchFrame.userCollapsed = false
-		WatchFrame_Expand(WatchFrame)
-	end	
+		ObjectiveTrackerFrame.userCollapsed = false
+		ObjectiveTracker_Expand()
+	end
 end
 
-function WatchFrameAdv:UpdatePlayerLocation()
+function ObjectivesAdv:UpdatePlayerLocation()
 	self:UpdateCollapseState()
 	self:UpdateHideState()
 end
@@ -376,7 +376,7 @@ end
 ---------------
 ---- Style ----
 ---------------
--- Styling code from Mythology (adapted from nibWatchFrameAdv) by p3lim
+-- Styling code from Mythology (adapted from nibObjectivesAdv) by p3lim
 local function SkinButton(button, texture)
 	if(string.match(button:GetName(), 'WatchFrameItem%d+') and not button.skinned) then
 		button:SetSize(26, 26)
@@ -408,11 +408,13 @@ end
 
 local function GetQuestData(self)
 	if(self.type == 'QUEST') then
-		local questIndex = GetQuestIndexForWatch(self.index)
+		local _, _, questIndex = GetQuestWatchInfo(self.index)
 		if(questIndex) then
-			local _, level, _, _, _, _, _, daily = GetQuestLogTitle(questIndex)
-			if(daily) then
+			local _, level, _, _, _, _, frequency = GetQuestLogTitle(questIndex)
+			if (frequency == LE_QUEST_FREQUENCY_DAILY) then
 				return 1/4, 6/9, 1, 'D'
+			elseif (frequency == LE_QUEST_FREQUENCY_WEEKLY) then
+				return 1/4, 6/9, 1, 'W'
 			else
 				local color = GetQuestDifficultyColor(level)
 				return color.r, color.g, color.b, level
@@ -426,9 +428,9 @@ end
 local function IsSuperTracked(self)
 	if(self.type ~= 'QUEST') then return end
 
-	local questIndex = GetQuestIndexForWatch(self.index)
+	local _, _, questIndex = GetQuestWatchInfo(self.index)
 	if(questIndex) then
-		local _, _, _, _, _, _, _, _, id = GetQuestLogTitle(questIndex)
+		local _, _, _, _, _, _, _, id = GetQuestLogTitle(questIndex)
 		if(id and GetSuperTrackedQuestID() == id) then
 			return true
 		end
@@ -584,9 +586,9 @@ local function QuestPOI(name, type, index)
 end
 
 local function null() end
-function WatchFrameAdv:Skin()
-	hooksecurefunc('WatchFrame_SetLine', SetLine)
-	hooksecurefunc('WatchFrame_Update', SkinLine)
+function ObjectivesAdv:Skin()
+	--hooksecurefunc('WatchFrame_SetLine', SetLine)
+	hooksecurefunc('ObjectiveTracker_Update', SkinLine)
 	hooksecurefunc('WatchFrameScenario_UpdateScenario', SkinScenarioLine)
 	hooksecurefunc('QuestPOI_DisplayButton', QuestPOI)
 	hooksecurefunc('SetItemButtonTexture', SkinButton)
@@ -613,82 +615,52 @@ function WatchFrameAdv:Skin()
 end
 
 
--------------------------
----- Position / Size ----
--------------------------
--- Set Width
-function WatchFrameAdv:UpdateWidth()
-	if not (db.position.enabled and nibRealUI:GetModuleEnabled(MODNAME)) then return end
-
-	if not self.WFWidthReplaced then
-		self.WFWidthReplaced = true
-	
-		_WatchFrame_SetWidth = WatchFrame_SetWidth
-		WatchFrame_SetWidth = function(width)
-			 if ( width == "0" ) then
-				WATCHFRAME_EXPANDEDWIDTH = db.position.width
-				WATCHFRAME_MAXLINEWIDTH = db.position.width - 10
-			else
-				WATCHFRAME_EXPANDEDWIDTH = (db.position.width * 1.5)
-				WATCHFRAME_MAXLINEWIDTH = (db.position.width * 1.5) - 10
-			end
-			if WatchFrameScenarioPopUpFrame then
-				WatchFrameScenarioPopUpFrame:SetWidth(WATCHFRAME_EXPANDEDWIDTH)
-			end
-			if ( WatchFrame:IsShown() and not WatchFrame.collapsed ) then
-				WatchFrame:SetWidth(WATCHFRAME_EXPANDEDWIDTH)
-				WatchFrame_Update()
-			end
-		end
-	end
-
-	WatchFrame_SetWidth(GetCVar("watchFrameWidth"))
-end
-
+------------------
+---- Position ----
+------------------
 -- Position
-function WatchFrameAdv:UpdatePosition()
+function ObjectivesAdv:UpdatePosition()
 	if not (db.position.enabled and nibRealUI:GetModuleEnabled(MODNAME)) then return end
 
 	if not self.origSet then
-		self.origSet = WatchFrame.SetPoint
-		self.origClear = WatchFrame.ClearAllPoints
+		self.origSet = ObjectiveTrackerFrame.SetPoint
+		self.origClear = ObjectiveTrackerFrame.ClearAllPoints
 
-		WatchFrame.SetPoint = function() end
-		WatchFrame.ClearAllPoints = function() end
+		ObjectiveTrackerFrame.SetPoint = function() end
+		ObjectiveTrackerFrame.ClearAllPoints = function() end
 	end
 
-	self.origClear(WatchFrame)
-	self.origSet(WatchFrame, db.position.anchorfrom, "UIParent", db.position.anchorto, db.position.x, db.position.y)
+	self.origClear(ObjectiveTrackerFrame)
+	self.origSet(ObjectiveTrackerFrame, db.position.anchorfrom, "UIParent", db.position.anchorto, db.position.x, db.position.y)
 
-	WatchFrame:SetHeight(UIParent:GetHeight() - db.position.negheightofs)
-	
-	WatchFrameCollapseExpandButton:SetPoint("TOPRIGHT", WatchFrame, "TOPRIGHT", -12, -1)
+	ObjectiveTrackerFrame:SetHeight(UIParent:GetHeight() - db.position.negheightofs)
+
+	--ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:SetPoint("TOPRIGHT", ObjectiveTrackerFrame, "TOPRIGHT", -12, -1)
 end
 
 
 -----------------------
-function WatchFrameAdv:RefreshMod()
+function ObjectivesAdv:RefreshMod()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	
-	self:UpdatePosition()
-	self:UpdateWidth()
-end
 
-function WatchFrameAdv:UI_SCALE_CHANGED()
 	self:UpdatePosition()
 end
 
-function WatchFrameAdv:PLAYER_ENTERING_WORLD()
+function ObjectivesAdv:UI_SCALE_CHANGED()
+	self:UpdatePosition()
+end
+
+function ObjectivesAdv:PLAYER_ENTERING_WORLD()
 	self:ScheduleTimer("UpdatePlayerLocation", 1)
 end
 
-function WatchFrameAdv:PLAYER_LOGIN()
+function ObjectivesAdv:PLAYER_LOGIN()
 	LoggedIn = true
 	self:RefreshMod()
-	self:Skin()
+	--self:Skin()
 end
 
-function WatchFrameAdv:OnInitialize()
+function ObjectivesAdv:OnInitialize()
 	self.db = nibRealUI.db:RegisterNamespace(MODNAME)
 	self.db:RegisterDefaults({
 		profile = {
@@ -699,7 +671,6 @@ function WatchFrameAdv:OnInitialize()
 				x = -32,
 				y = -200,
 				negheightofs = 300,
-				width = 210,
 			},
 			hidden = {
 				enabled = true,
@@ -719,21 +690,21 @@ function WatchFrameAdv:OnInitialize()
 		},
 	})
 	db = self.db.profile
-	
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
-	
+
 	self:RegisterEvent("PLAYER_LOGIN")
 end
 
-function WatchFrameAdv:OnEnable()
+function ObjectivesAdv:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("UI_SCALE_CHANGED")
-	
+
 	if LoggedIn then self:RefreshMod() end
 end
 
-function WatchFrameAdv:OnDisable()
+function ObjectivesAdv:OnDisable()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	self:UnregisterEvent("UI_SCALE_CHANGED")
 end

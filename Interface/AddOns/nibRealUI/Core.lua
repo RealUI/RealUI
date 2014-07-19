@@ -372,7 +372,7 @@ function nibRealUI:SetPowerMode(val)
 		if self:GetModuleEnabled(k) and mod.SetUpdateSpeed and type(mod.SetUpdateSpeed) == "function" then
 			mod:SetUpdateSpeed()
 		end
-	end	
+	end
 end
 
 ---- Style Updates ----
@@ -422,7 +422,7 @@ function nibRealUI:StyleSetFont(style)
 		if self:GetModuleEnabled(k) and mod.UpdateFonts and type(mod.UpdateFonts) == "function" then
 			mod:UpdateFonts()
 		end
-	end	
+	end
 
 	-- Update Fonts that have been stored in global font arrays
 	local fontTiny = 	nibRealUI:Font(false, "tiny")
@@ -447,9 +447,9 @@ function nibRealUI:StyleSetFont(style)
 	nibRealUI:GetModule("HuDConfig"):RegisterForUpdate("AB", "stance")
 
 	-- Refresh Watch Frame
-	if not WatchFrame.collapsed then
-		WatchFrame_Collapse(WatchFrame)
-		WatchFrame_Expand(WatchFrame)
+	if not ObjectiveTracker.collapsed then
+		ObjectiveTracker_Collapse()
+		ObjectiveTracker_Expand()
 	end
 end
 
@@ -459,7 +459,7 @@ function nibRealUI:StyleUpdateColors()
 		if self:GetModuleEnabled(k) and mod.UpdateGlobalColors and type(mod.UpdateGlobalColors) == "function" then
 			mod:UpdateGlobalColors()
 		end
-	end	
+	end
 end
 
 -- Layout Updates
@@ -487,19 +487,19 @@ function nibRealUI:SetLayout()
 			self:ToggleGridTestMode(true)
 		end, 0.5)
 	end
-	
+
 	-- ActionBarExtras
 	if self:GetModuleEnabled("ActionBarExtras") then
 		local ABE = self:GetModule("ActionBarExtras", true)
 		if ABE then ABE:RefreshMod() end
 	end
-	
+
 	-- Grid Layout changer
 	if self:GetModuleEnabled("GridLayout") then
 		local GL = self:GetModule("GridLayout", true)
 		if GL then GL:Update() end
 	end
-	
+
 	-- Layout Button (For Installation)
 	if self:GetModuleEnabled("InfoLine") then
 		local IL = self:GetModule("InfoLine", true)
@@ -586,7 +586,7 @@ function nibRealUI:VARIABLES_LOADED()
 
 	-- -- Temp solution for Blizzard's 5.4.1 craziness
 	-- UIParent:HookScript("OnEvent", function(self, event, a1, a2)
-	-- 	if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then 
+	-- 	if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then
 	-- 		StaticPopup_Hide(event)
 	-- 	end
 	-- end)
@@ -613,11 +613,11 @@ function nibRealUI:UPDATE_PENDING_MAIL()
 	self:UnregisterEvent("UPDATE_PENDING_MAIL")
 
 	CancelEmote()	-- Cancel Map Holding animation
-	
+
 	-- Refresh WatchFrame lines and positioning
-	if not WatchFrame.collapsed then
-		WatchFrame_Collapse(WatchFrame)
-		WatchFrame_Expand(WatchFrame)
+	if ObjectiveTracker and ObjectiveTracker.collapsed then
+		ObjectiveTracker_Collapse()
+		ObjectiveTracker_Expand()
 	end
 
 	-- Update chat font after Chatter sets it (PLAYER_ENTERING_WORLD)
@@ -629,7 +629,7 @@ function nibRealUI:PLAYER_ENTERING_WORLD()
 	self:LockdownUpdates()
 
 	-- >= 10 minute garbage collection
-	self:ScheduleTimer(function() 
+	self:ScheduleTimer(function()
 		local now = GetTime()
 		if now >= lastGarbageCollection + 600 then
 			collectgarbage("collect")
@@ -660,7 +660,7 @@ function nibRealUI:PLAYER_LOGIN()
 		self:InitRetinaDisplayOptions()
 		return
 	end
-	
+
 	-- Low Res optimization check
 	if (nibRealUICharacter and nibRealUICharacter.installStage == -1) then
 		self:LowResOptimizationCheck()
@@ -728,7 +728,7 @@ end
 
 function nibRealUI:ADDON_LOADED(event, addon)
 	if addon ~= "nibRealUI" then return end
-	
+
 	-- Open before login to stop taint
 	ToggleFrame(SpellBookFrame)
 	PetJournal_LoadUI()
@@ -746,7 +746,7 @@ function nibRealUI:OnInitialize()
 	dbc = self.db.char
 	dbg = self.db.global
 	self.media = db.media
-	
+
 	-- Vars
 	self.realm = GetRealmName()
 	self.faction = UnitFactionGroup("player")
@@ -756,15 +756,15 @@ function nibRealUI:OnInitialize()
 	self.key = string.format("%s - %s", self.name, self.realm)
 	self.cLayout = dbc.layout.current
 	self.ncLayout = self.cLayout == 1 and 2 or 1
-	
+
 	-- Profile change
 	self.db.RegisterCallback(self, "OnProfileChanged", "Refresh")
 	self.db.RegisterCallback(self, "OnProfileCopied", "Refresh")
 	self.db.RegisterCallback(self, "OnProfileReset", "Refresh")
-	
+
 	-- Initial Options setup
 	nibRealUI:SetUpInitialOptions()
-	
+
 	-- Register events
 	self:RegisterEvent("ADDON_LOADED")
 	self:RegisterEvent("PLAYER_LOGIN")
@@ -773,7 +773,7 @@ function nibRealUI:OnInitialize()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 	self:RegisterEvent("VARIABLES_LOADED")
 	self:RegisterEvent("UPDATE_PENDING_MAIL")
-	
+
 	-- Chat Commands
 	self:RegisterChatCommand("real", "ChatCommand_Config")
 	self:RegisterChatCommand("realui", "ChatCommand_Config")
@@ -797,7 +797,7 @@ function nibRealUI:OnInitialize()
 	InterfaceOptionsFrameCancel:SetScript("OnClick", function()
 		InterfaceOptionsFrameOkay:Click()
 	end)
-	
+
 	-- Done
 	print(format("RealUI %s loaded.", nibRealUI:GetVerString(true)))
 	if not(dbg.tags.slashRealUITyped) and nibRealUICharacter and (nibRealUICharacter.installStage == -1) then
@@ -827,12 +827,12 @@ function nibRealUI:SetModuleEnabled(module, value)
 	end
 end
 
-function nibRealUI:Refresh()	
+function nibRealUI:Refresh()
 	-- db = self.db.profile
 	-- dbc = self.db.char
 	-- dbg = self.db.global
 	-- self.media = db.media
-	
+
 	-- for key, val in self:IterateModules() do
 	-- 	if self:GetModuleEnabled(key) and not val:IsEnabled() then
 	-- 		self:EnableModule(key)
@@ -844,7 +844,7 @@ function nibRealUI:Refresh()
 	-- 			val:RefreshMod()
 	-- 		end
 	-- 	end
-	-- end	
+	-- end
 	-- nibRealUI:ConfigRefresh()
 	nibRealUI:ReloadUIDialog()
 end

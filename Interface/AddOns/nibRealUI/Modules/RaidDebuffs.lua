@@ -68,8 +68,8 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Raid Debuffs module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)			
+				set = function(info, value)
+					nibRealUI:SetModuleEnabled(MODNAME, value)
 				end,
 				order = 30,
 			},
@@ -89,7 +89,7 @@ local function GetOptions()
 						type = "toggle",
 						name = "While Solo",
 						get = function(info) return db.show.solo end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.show.solo = value
 							RaidDebuffs:UpdateVisibility()
 						end,
@@ -109,7 +109,7 @@ local function GetOptions()
 						type = "toggle",
 						name = "In PvP",
 						get = function(info) return db.show.pvp end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.show.pvp = value
 							RaidDebuffs:UpdateVisibility()
 						end,
@@ -120,7 +120,7 @@ local function GetOptions()
 						name = "Only Bosses",
 						desc = "Only show when Target unit is a Boss.",
 						get = function(info) return db.show.onlyBosses end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.show.onlyBosses = value
 							RaidDebuffs:UpdateVisibility()
 						end,
@@ -158,7 +158,7 @@ local function GetOptions()
 					rPoint = {
 						type = "select",
 						name = "Anchor To",
-						get = function(info) 
+						get = function(info)
 							for k,v in pairs(nibRealUI.globals.anchorPoints) do
 								if v == db.position.rPoint then return k end
 							end
@@ -174,7 +174,7 @@ local function GetOptions()
 					point = {
 						type = "select",
 						name = "Anchor From",
-						get = function(info) 
+						get = function(info)
 							for k,v in pairs(nibRealUI.globals.anchorPoints) do
 								if v == db.position.point then return k end
 							end
@@ -235,7 +235,7 @@ function RaidDebuffs:CreateButton(i)
 
 	local STR_ANY = cap(SPELL_TARGET_TYPE1_DESC)
 	local STR_PET = cap(PET)
-	
+
 	local strAny = "%s %s"							-- STR_ANY DRUID
 	local strPet = "%s %s |cffffffff(%s: %s)|r"		-- STR_ANY WARLOCK (STR_PET: Imp)
 	local strBeastMaster = classes["HUNTER"]..": |cffffffff"..locale["Beast Mastery"].." ("..STR_PET..": ".."%s)|r"
@@ -243,7 +243,7 @@ function RaidDebuffs:CreateButton(i)
 	local strSpec2 = "%s: |cffffffff%s, %s|r"		-- DK: frost, unholy
 
 	local btn = CreateFrame("Frame", "RealUIRaidDebuff"..i, self.rdF)
-	
+
 	if i == 1 then
 		btn.icon =  "Interface\\ICONS\\ability_warrior_sunder"
 		btn.desc = ARMOR_TEMPLATE:format("-12%") --"-12% armor"
@@ -270,7 +270,7 @@ function RaidDebuffs:CreateButton(i)
 			strAny:format(STR_ANY, classes["ROGUE"]),
 			strAny:format(STR_ANY, classes["WARLOCK"]),
 			strPet:format(STR_ANY, classes["HUNTER"], STR_PET, "Dragonhawk, Wind Serpent"),
-			
+
 		}
 	elseif i == 4 then
 		btn.icon = "Interface\\ICONS\\spell_nature_thunderclap"
@@ -284,7 +284,7 @@ function RaidDebuffs:CreateButton(i)
 			strAny:format(STR_ANY, classes["WARLOCK"]),
 			strAny:format(STR_ANY, classes["WARRIOR"]),
 			strPet:format(STR_ANY, classes["HUNTER"], STR_PET, "Bear, Carrion Bird"),
-		}	
+		}
 	elseif i == 5 then
 		btn.icon = "Interface\\ICONS\\spell_nature_nullifydisease"
 		btn.desc = STAT_HASTE_SPELL_TOOLTIP.." (-30%)" --"-30% casting speed"
@@ -307,9 +307,9 @@ function RaidDebuffs:CreateButton(i)
 			strBeastMaster:format("Devilsaur"),
 		}
 	end
-	
+
 	if db.tooltip then
-		btn:SetScript("OnEnter", function(self) 
+		btn:SetScript("OnEnter", function(self)
 			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
 			GameTooltip:ClearLines()
 			GameTooltip:AddLine(self.desc)
@@ -320,12 +320,12 @@ function RaidDebuffs:CreateButton(i)
 			end
 			GameTooltip:Show()
 		end)
-			
-		btn:SetScript("OnLeave", function(self) 
+
+		btn:SetScript("OnLeave", function(self)
 			GameTooltip:Hide()
 		end)
 	end
-	
+
 	btn:SetHeight(23)
 	btn:SetWidth(23)
 	btn.bg = btn:CreateTexture(nil, "BACKGROUND")
@@ -336,15 +336,15 @@ function RaidDebuffs:CreateButton(i)
 	nibRealUI:CreateBDFrame(btn)
 
 	btn:Show()
-	
+
 	return btn
-end	
+end
 
 function RaidDebuffs:CreateFrames()
 	self.rdF = CreateFrame("Frame", "RealUIRaidDebuffs", UIParent)
 
 	local x = db.position.x
-	
+
 	self.rdF:SetParent(db.position.parent)
 	self.rdF:SetPoint(db.position.point, db.position.parent, db.position.rPoint, x, db.position.y)
 	self.rdF:SetFrameStrata("MEDIUM")
@@ -545,7 +545,7 @@ function RaidDebuffs:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	ndbc = nibRealUI.db.char
-	
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 

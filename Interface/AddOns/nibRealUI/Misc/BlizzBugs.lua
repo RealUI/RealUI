@@ -79,32 +79,6 @@ do
 	hooksecurefunc("InterfaceOptionsFrame_OpenToCategory", InterfaceOptionsFrame_OpenToCategory_Fix)
 end
 
--- Fix an issue where the GlyphUI depends on the TalentUI but doesn't
--- always load it.  This issue will manafest with an error like this:
--- attempt to index global "PlayerTalentFrame" (a nil value)
--- More details and the report to Blizzard here:
--- http://us.battle.net/wow/en/forum/topic/6470967787
-if wow_build >= 16016 then
-	local frame = CreateFrame("Frame")
-	frame:RegisterEvent("ADDON_LOADED")
-	frame:SetScript("OnEvent", function(self, event, name)
-		if event == "ADDON_LOADED" and name == "Blizzard_GlyphUI" then
-			TalentFrame_LoadUI()
-		end
-	end)
-end
-
--- Fix an issue where the "DEATH" StaticPopup is wrongly shown when reloading the
--- UI.  The cause of the problem is in UIParent.lua around line 889 it seems
--- GetReleaseTimeRemaining is wrongly returning a non-zero value on the first
--- PLAYER_ENTERING_WORLD event.
-hooksecurefunc("StaticPopup_Show", function(which)
-	if which == "DEATH" and not UnitIsDead("player") then
-		StaticPopup_Hide("DEATH")
-	end
-end)
-
-
 -- Fix an issue where Blizzard's use of UIFrameFlash will prevent
 -- the ability to change talents if a user has a separate chat tab
 -- for e.g. whispers and also has a chat mod installed or a mod that

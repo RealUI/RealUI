@@ -1098,8 +1098,11 @@ local function activate( newInstance, oldInstance )
 		newInstance.HarvestedMapData = { VERSION = HARVESTED_DATA_VERSION };
 		local HarvestedMapData = newInstance.HarvestedMapData;
 		
-		newInstance.ContinentList = { GetMapContinents() };
-		for C in pairs(newInstance.ContinentList) do
+		newInstance.ContinentList = {}
+		continentList = { GetMapContinents() };
+		local C = 0
+		for i = 1, #continentList, 2 do
+			C = C + 1
 			local zones = { GetMapZones(C) };
 			newInstance.ContinentList[C] = zones;
 			SetMapZoom(C, 0);
