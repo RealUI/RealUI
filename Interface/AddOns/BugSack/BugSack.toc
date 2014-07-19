@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: BugSack
 ## Notes: Toss those bugs inna sack.
 ## Notes-zhCN: 错误信息收集器。
@@ -12,7 +12,7 @@
 ## X-Category: Development Tools
 ## X-License: All Rights Reserved
 ## X-BugGrabber-Display: BugSack
-## X-Curse-Packaged-Version: r272-release
+## X-Curse-Packaged-Version: r275
 ## X-Curse-Project-Name: BugSack
 ## X-Curse-Project-ID: bugsack
 ## X-Curse-Repository-ID: wow/bugsack/mainline

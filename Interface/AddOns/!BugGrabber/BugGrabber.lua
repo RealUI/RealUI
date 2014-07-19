@@ -1,5 +1,5 @@
 --
--- $Id: BugGrabber.lua 197 2013-10-21 13:55:05Z funkydude $
+-- $Id: BugGrabber.lua 201 2013-11-28 03:43:26Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
 -- Current Developer: Funkydude, Rabbit
@@ -26,6 +26,23 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ]]
+
+-----------------------------------------------------------------------
+-- local-ization, mostly for use with the FindGlobals script to catch
+-- misnamed variable names. We're not hugely concerned with performance.
+
+local _G = _G
+local type, table, next, wipe =
+      type, table, next, wipe
+local tostring, tonumber, GetTime =
+      tostring, tonumber, GetTime
+local debuglocals = debuglocals
+-- GLOBALS: LibStub, GetLocale,GetBuildInfo,DisableAddOn,Swatter,GetAddOnInfo
+-- GLOBALS: BugGrabberDB, ItemRefTooltip, debugstack, debuglocals, date
+-- GLOBALS: seterrorhandler, print, IsAddOnLoaded, GetAddOnMetadata
+-- GLOBALS: MAX_BUGGRABBER_ERRORS, BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
+-- GLOBALS: SlashCmdList, SLASH_SWATTER1, SLASH_SWATTER2
+
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
@@ -192,11 +209,11 @@ end
 -- Error catching
 --
 
-local sanitizeStack, findVersions = nil, nil
+local findVersions = nil
 do
 	local function scanObject(o)
 		local version, revision = nil, nil
-		for k, v in pairs(o) do
+		for k, v in next, o do
 			if type(k) == "string" and (type(v) == "string" or type(v) == "number") then
 				local low = k:lower()
 				if not version and low:find("version") then
@@ -277,25 +294,39 @@ do
 		wipe(tmp)
 		return line
 	end
-
-	function sanitizeStack(dump)
-		if not dump then return end
-		dump = dump:gsub("Interface\\", "")
-		dump = dump:gsub("AddOns\\", "")
-		dump = dump:gsub("%.%.%.[^\\]+\\", "")
-		dump = dump:gsub("%[C%]:.-\n", "<in C code>\n")
-		dump = dump:gsub("%<?%[string (\".-\")%](:%d+)%>?", "<string>:%1%2")
-		dump = dump:gsub("[`']", "\"")
-		return dump
-	end
 end
 
 -- Error handler
 local grabError
 do
 	local tmp = {}
+	local msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
+	local msgsAllowedLastTime = GetTime()
+	local lastWarningTime = 0
 	function grabError(errorMessage)
-		if paused then return end
+		-- Flood protection --
+		msgsAllowed = msgsAllowed + (GetTime()-msgsAllowedLastTime)*BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
+		msgsAllowedLastTime = GetTime()
+		if msgsAllowed < 1 then
+			if not paused then
+				if bugGrabberParentAddon == STANDALONE_NAME then
+					if GetTime() > lastWarningTime + 10 then
+						print(L.BUGGRABBER_STOPPED)
+						lastWarningTime = GetTime()
+					end
+				end
+				paused=true
+				triggerEvent("BugGrabber_CapturePaused")
+			end
+			return
+		end
+		paused=false
+		if msgsAllowed > BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE then
+			msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
+		end
+		msgsAllowed = msgsAllowed - 1
+
+		-- Grab it --
 		errorMessage = tostring(errorMessage)
 
 		local looping = errorMessage:find("BugGrabber") and true or nil
@@ -304,7 +335,7 @@ do
 			return
 		end
 
-		local sanitizedMessage = findVersions(sanitizeStack(errorMessage))
+		local sanitizedMessage = findVersions(errorMessage)
 
 		-- Insert the error into the correct database if it's not there
 		-- already. If it is, just increment the counter.
@@ -320,12 +351,10 @@ do
 		-- XXX be done here instead, as "fetchFromDatabase" implies a simple
 		-- XXX :Get procedure.
 
-		frame.count = frame.count + 1
-
 		local errorObject = found
 
 		if not errorObject then
-			local stack = sanitizeStack(debugstack(3))
+			local stack = debugstack(3)
 
 			-- Scan for version numbers in the stack
 			for line in stack:gmatch("(.-)\n") do
@@ -521,7 +550,7 @@ do
 			DisableAddOn("!Swatter")
 			SlashCmdList.SWATTER = nil
 			SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
-			for k, v in pairs(Swatter) do
+			for k, v in next, Swatter do
 				if type(v) == "table" then
 					if v.UnregisterAllEvents then
 						v:UnregisterAllEvents()
@@ -545,8 +574,13 @@ function frame:PLAYER_LOGIN()
 	if not callbacks then setupCallbacks() end
 	real_seterrorhandler(grabError)
 end
+local badAddons = {}
 function frame:ADDON_ACTION_FORBIDDEN(event, addonName, addonFunc)
-	grabError(L.ADDON_CALL_PROTECTED:format(event, addonName or "<name>", addonFunc or "<func>"))
+	local name = addonName or "<name>"
+	if not badAddons[name] then
+		badAddons[name] = true
+		grabError(L.ADDON_CALL_PROTECTED:format(event, name or "<name>", addonFunc or "<func>"))
+	end
 end
 frame.ADDON_ACTION_BLOCKED = frame.ADDON_ACTION_FORBIDDEN -- XXX Unused?
 frame:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
@@ -556,31 +590,6 @@ registerAddonActionEvents()
 
 real_seterrorhandler(grabError)
 function seterrorhandler() --[[ noop ]] end
-
-do
-	-- Flood protection
-	local totalElapsed = 0
-	frame.count = 0
-	frame:SetScript("OnUpdate", function(self, elapsed)
-		totalElapsed = totalElapsed + elapsed
-		if totalElapsed > 1 then
-			-- Seems like we're getting more errors/sec than we want.
-			if self.count > BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE then
-				if bugGrabberParentAddon == STANDALONE_NAME then
-					print(L.BUGGRABBER_STOPPED)
-				end
-				unregisterAddonActionEvents()
-				real_seterrorhandler(function() --[[ noop ]] end)
-				paused = true
-				triggerEvent("BugGrabber_CapturePaused")
-				self:SetScript("OnUpdate", nil)
-				self:Hide()
-			end
-			self.count = 0
-			totalElapsed = 0
-		end
-	end)
-end
 
 -- Set up slash command
 _G.SlashCmdList.BugGrabber = slashHandler
