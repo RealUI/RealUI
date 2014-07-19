@@ -260,7 +260,7 @@ local _, classKey = UnitClass("player")
 local _, raceKey = UnitRace("player")
 local factionKey = UnitFactionGroup("player")
 local factionrealmKey = factionKey .. " - " .. realmKey
-local factionrealmregionKey = factionrealmKey .. " - " .. string.sub(GetCVar("realmList"), 1, 2):upper()
+local factionrealmregionKey = factionrealmKey .. " - " .. "US"
 local localeKey = GetLocale():lower()
 
 -- Actual database initialization function

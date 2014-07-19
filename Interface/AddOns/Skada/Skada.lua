@@ -1262,7 +1262,24 @@ function Skada:EndSegment()
 			self.current.endtime = time()
 			self.current.time = self.current.endtime - self.current.starttime
 			setPlayerActiveTimes(self.current)
-			self.current.name = self.current.mobname
+
+			-- compute a count suffix for the set name
+			local setname = self.current.mobname
+			if self.db.profile.setnumber then
+				local max = 0
+				for _, set in ipairs(self.char.sets) do
+					if set.name == setname and max == 0 then
+						max = 1
+					else
+						local n,c = set.name:match("^(.-)%s*%((%d+)%)$")
+						if n == setname then max = math.max(max,tonumber(c) or 0) end
+					end
+				end
+				if max > 0 then
+					setname = setname .. " ("..(max+1)..")"
+				end
+			end
+			self.current.name = setname
 
 			-- Tell each mode that set has finished and do whatever it wants to do about it.
 			for i, mode in ipairs(modes) do

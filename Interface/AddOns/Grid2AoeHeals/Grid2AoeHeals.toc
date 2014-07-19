@@ -1,4 +1,4 @@
-## Interface: 50300
+## Interface: 60000
 ## Title: Grid2 |cd1ff7d0aAOE Heals|r
 ## Notes: Display best targets for AOE Heals
 ## Notes-esES: Muestra los mejores objetivos para las curas de area

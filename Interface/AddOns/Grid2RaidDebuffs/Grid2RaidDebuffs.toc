@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: Grid2 |cd1ff7d0aRaidDebuffs|r
 ## Notes: Adds a Raid Boss debuff status.
 ## Notes-esES: Muestra los debuffs de Bosses de Raid en el Grid2.

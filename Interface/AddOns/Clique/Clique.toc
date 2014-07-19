@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: Clique
 ## Author: Cladhaire
 ## Version: v50400-1.0.0

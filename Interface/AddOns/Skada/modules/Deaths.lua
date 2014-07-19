@@ -142,9 +142,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			misstype, _, samount = select(3,...)
 		end
 		if dstGUID and timestamp == SORtime[dstGUID] then -- this is actually the killing blow for the SOR we just recorded
-			-- print("SOR Miss killing blow: ",dstName, spellid, samount)
-			-- for an SOR miss/IMMUNE, the amount is the amount of the killing blow
-			log_deathlog(Skada.total, dstGUID, dstName, srcName, spellId, nil, samount and -samount, nil, timestamp)
+			Skada:Debug("SOR Miss killing blow: ",dstName, spellid, samount)
+			-- for an SOR miss/IMMUNE, the amount is SOMETIMES the amount of the killing blow, but is often nil
+			log_deathlog(Skada.total, dstGUID, dstName, srcName, spellId, nil, samount and -samount, nil, timestamp, nil, 0)
 		elseif misstype == "ABSORB" then -- for a miss/ABSORB, the amount is the full absorb value
 			log_deathlog(Skada.total, dstGUID, dstName, srcName, spellId, nil, nil, samount and -samount, timestamp)
 		end

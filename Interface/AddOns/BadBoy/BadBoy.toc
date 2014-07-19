@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Version: 12.316
 ## Title: BadBoy
 ## Notes: A simple spam blocker & reporter.

@@ -1,4 +1,4 @@
-﻿## Interface: 50400
+﻿## Interface: 60000
 ## Title: Masque
 ## Version: 5.4.396
 ## Author: StormFX, JJSheets

@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Author: Kesava
 ## Title: |cff9900ffKui|r Nameplates
 ## Notes: Prettier, lightweight, configurable nameplates.

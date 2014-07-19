@@ -678,7 +678,7 @@ local Event =  CreateFrame('Frame', nil)
 Event:RegisterEvent("PLAYER_ENTERING_WORLD")
 Event:SetScript('OnEvent', function(self, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
-		for bagID = -2, 11 do
+		for bagID = -3, 11 do
 			local slots = GetContainerNumSlots(bagID)
 			for slotID=1,slots do
 				local button = cbNivaya.buttonClass:New(bagID, slotID)

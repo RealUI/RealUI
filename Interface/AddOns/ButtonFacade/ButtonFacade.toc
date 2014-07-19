@@ -1,4 +1,4 @@
-﻿## Interface: 50400
+﻿## Interface: 60000
 ## Title: ButtonFacade
 ## Version: 5.4.396
 ## Notes: Loads Masque for add-ons still using ButtonFacade's API. Do NOT disable this!

@@ -55,6 +55,7 @@ Skada.defaults = {
 		icon = {hide = false, radius = 80, minimapPos = 195},
 		numberformat=1,
 		setformat=3,
+		setnumber=true,
 		showranks=true,
 		setstokeep=10,
 		tooltips=true,
@@ -405,6 +406,15 @@ Skada.options = {
 						get=function() return Skada.db.profile.setstokeep end,
 						set=function(self, val) Skada.db.profile.setstokeep = val end,
 						order=13,
+					},
+
+					setnumber = {
+							type="toggle",
+							name=L["Number set duplicates"],
+							desc=L["Append a count to set names with duplicate mob names."],
+							order=13.5,
+							get=function() return Skada.db.profile.setnumber end,
+							set=function() Skada.db.profile.setnumber = not Skada.db.profile.setnumber end,
 					},
 
 					setformat = {

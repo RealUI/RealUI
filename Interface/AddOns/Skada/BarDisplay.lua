@@ -469,7 +469,7 @@ function mod:AnchorMoved(cbk, group, x, y)
 end
 
 function mod:WindowResized(cbk, group)
---	libwindow.SavePosition(group)
+	libwindow.SavePosition(group)
 
 	-- Also save size.
 	group.win.db.background.height = group:GetHeight()
@@ -611,6 +611,8 @@ function mod:ApplySettings(win)
 
 	-- Scale
 	g:SetScale(p.scale)
+
+	libwindow.SavePosition(g)
 
 	g:SortBars()
 end

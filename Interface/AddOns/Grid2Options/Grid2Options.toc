@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: Grid2 |cd0ff7d0aOptions|r
 ## Title-esES: Grid2 |cd0ff7d0aOpciones|r
 ## Notes: Configuration module for Grid2

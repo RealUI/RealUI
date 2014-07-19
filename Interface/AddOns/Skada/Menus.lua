@@ -437,7 +437,7 @@ function Skada:CreateReportWindow(window)
 		setbox:SetLabel(L["Segment"])
 		setbox:SetList({total = L["Total"], current = L["Current"]})
 		for i, set in ipairs(Skada:GetSets()) do
-			setbox:AddItem(i, Skada:GetSetLabel(set))
+			setbox:AddItem(i, (Skada:GetSetLabel(set)))
 		end
 		setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.set = value end)
 		setbox:SetValue(Skada.db.profile.report.set or Skada:GetSets()[1])
