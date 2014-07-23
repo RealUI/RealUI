@@ -52,23 +52,6 @@ local function Round(num, idp)
 	return math.floor(num * mult + 0.5) / mult
 end
 
-local ilvlLimits = {
-	normal = 385,
-	uncommon = 437,
-	rare = 463,
-}
-local function GetILVLColor(ilvl)
-	if ilvl >= ilvlLimits.rare then
-		return {GetItemQualityColor(4)}
-	elseif ilvl >= ilvlLimits.uncommon then
-		return {GetItemQualityColor(3)}
-	elseif ilvl >= ilvlLimits.normal then
-		return {GetItemQualityColor(2)}
-	else
-		return {0.8, 0.8, 0.8, "ffd0d0d0"}
-	end
-end
-
 local function ItemColorGradient(perc, ...)
 	if perc >= 1 then
 		return select(select('#', ...) - 2, ...)
@@ -170,7 +153,7 @@ local function ItemButton_Update(self, item)
 			end
 
 			self.BottomString:SetText(itemLevel)
-			self.BottomString:SetTextColor(unpack(GetILVLColor(itemLevel)))
+			self.BottomString:SetTextColor(GetItemQualityColor(itemRarity))
 		else
 			self.BottomString:SetText("")
 		end

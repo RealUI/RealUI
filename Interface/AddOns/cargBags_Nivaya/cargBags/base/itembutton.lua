@@ -36,7 +36,7 @@ local ItemButton = cargBags:NewClass("ItemButton", nil, "Button")
 function ItemButton:GetTemplate(bagID)
 	bagID = bagID or self.bagID
 	return (bagID == -3 and "ReagentBankItemButtonGenericTemplate") or (bagID == -1 and "BankItemButtonGenericTemplate") or (bagID and "ContainerFrameItemButtonTemplate") or "ItemButtonTemplate",
-      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and "ContainerFrameItemButtonTemplate") or "ItemButtonTemplate";
+      (bagID == -3 and ReagentBankFrame) or (bagID == -1 and BankFrame) or (bagID and _G["ContainerFrame"..bagID + 1]) or "ItemButtonTemplate";
 end 
 
 local mt_gen_key = {__index = function(self,k) self[k] = {}; return self[k]; end}

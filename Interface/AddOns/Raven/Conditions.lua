@@ -401,7 +401,7 @@ end
 
 -- Check if target matches the specified type
 local function CheckTarget(targetType, unit)
-	local m = UnitExists(unit) == nil
+	local m = UnitExists(unit)
 	if targetType == "none" then m = not m end
 	if targetType == "player" then m = m or (UnitIsUnit("target", unit) == nil) end
 	return not m
@@ -720,13 +720,13 @@ function MOD:UpdateConditions()
 	end
 	stat.combo = GetComboPoints("player")
 	stat.stance = GetStance()
-	stat.noPet = (UnitExists("pet") == nil)
+	stat.noPet = not UnitExists("pet")
 	if not stat.noPet then
 		stat.petCombat = (UnitAffectingCombat("pet") ~= nil)
 		m = UnitHealthMax("pet"); if m > 0 then stat.petHealth = (100 * UnitHealth("pet") / m) else stat.petHealth = 0 end
 		m = UnitPowerMax("pet"); if m > 0 then stat.petPower = (100 * UnitPower("pet") / m) else stat.petPower = 0 end
 	end
-	stat.noTarget = (UnitExists("target") == nil)
+	stat.noTarget = not UnitExists("target")
 	if not stat.noTarget then
 		stat.targetPlayer = (UnitIsPlayer("target") ~= nil)
 		stat.targetEnemy = (UnitIsEnemy("player", "target") ~= nil)
@@ -740,7 +740,7 @@ function MOD:UpdateConditions()
 		m = UnitPowerMax("target"); if m > 0 then stat.targetPower = (100 * UnitPower("target") / m) else stat.targetPower = 0 end
 		stat.targetInRange = UnitRangeCheck("target")
 	end
-	stat.noFocus = (UnitExists("focus") == nil)
+	stat.noFocus = not UnitExists("focus")
 	if not stat.noFocus then
 		stat.focusPlayer = (UnitIsPlayer("focus") ~= nil)
 		stat.focusEnemy = (UnitIsEnemy("player", "focus") ~= nil)

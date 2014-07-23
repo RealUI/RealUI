@@ -257,6 +257,7 @@ function Implementation:Init()
 	self:RegisterEvent("BAG_UPDATE_COOLDOWN", self, self.BAG_UPDATE_COOLDOWN)
 	self:RegisterEvent("ITEM_LOCK_CHANGED", self, self.ITEM_LOCK_CHANGED)
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", self, self.PLAYERBANKSLOTS_CHANGED)
+	self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
 	self:RegisterEvent("BAG_CLOSED", self, self.BAG_CLOSED)
 end
@@ -471,6 +472,19 @@ function Implementation:PLAYERBANKSLOTS_CHANGED(event, bagID, slotID)
 	else
 		bagID = bagID - NUM_BANKGENERIC_SLOTS
 	end
+
+	self:BAG_UPDATE(event, bagID, slotID)
+end
+
+--[[!
+	Fired when reagent bank slots need to be updated
+	@param bagID <number>
+	@param slotID <number> [optional]
+]]
+function Implementation:PLAYERREAGENTBANKSLOTS_CHANGED(event, ...)
+	slotID = ...
+	bagID = -3
+	print("PLAYERBANKSLOTS_CHANGED", bagID, slotID)
 
 	self:BAG_UPDATE(event, bagID, slotID)
 end

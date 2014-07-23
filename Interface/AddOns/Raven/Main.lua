@@ -495,19 +495,20 @@ local function InitializeTalents()
 	if tabs == 0 then return end
 
 	local currentSpec = GetSpecialization()
+	local specGroup = GetActiveSpecGroup()
 	MOD.talentSpec = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "None"
-	
 	talentsInitialized = true; doUpdate = true
 	table.wipe(MOD.talents); table.wipe(MOD.talentList)
 	
-	local ts = GetNumTalents(currentSpec)
 	local select = 1
-	for i = 1, ts do
-		local name, texture, tier, _, selected = GetTalentInfo(i) -- player's active talents
-		if name then
-			MOD.talents[name] = { tab = currentSpec, index = i, tier = tier, icon = texture, active = selected }
-			MOD.talentList[select] = name
-			select = select + 1
+	for tier = 1, MAX_TALENT_TIERS do
+		for column = 1, NUM_TALENT_COLUMNS do
+			local talentID, name, texture, selected = GetTalentInfo(tier, column, specGroup) -- player's active talents
+			if name then
+				MOD.talents[name] = { tab = currentSpec, column = column, tier = tier, icon = texture, active = selected }
+				MOD.talentList[select] = name
+				select = select + 1
+			end
 		end
 	end
 
@@ -692,7 +693,7 @@ local function AddAura(unit, name, isBuff, spellID, count, btype, duration, cast
 		if caster then
 			local guid = UnitGUID(caster); cname = UnitName(caster); vehicle = UnitHasVehicleUI(caster)
 			if guid then
-				local first3 = tonumber("0x" .. strsub(guid, 3,5)); local unitType = bit.band(first3,0x00f)
+				local first3 = tonumber("0x" .. strsub(guid, 8,10)); local unitType = bit.band(first3,0x00f)
 				isNPC = (unitType == 0x003); vehicle = vehicle or (unitType == 0x005)
 				if MOD.LibBossIDs and MOD.LibBossIDs.BossIDs[tonumber(guid:sub(-13, -9), 16)] then boss = 1 end
 			end

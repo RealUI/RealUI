@@ -3,7 +3,7 @@ local cargBags = ns.cargBags
 
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
-function cbNivaya:UpdateBags() for i = -2, 11 do cbNivaya:UpdateBag(i) end end
+function cbNivaya:UpdateBags() for i = -3, 11 do cbNivaya:UpdateBag(i) end end
 
 local L = cBnivL
 cB_Filters = {}
@@ -19,6 +19,7 @@ cB_filterEnabled = { Armor = true, Quest = true, TradeGoods = true, Consumables 
 --------------------
 cB_Filters.fBags = function(item) return item.bagID >= 0 and item.bagID <= 4 end
 cB_Filters.fBank = function(item) return item.bagID == -1 or item.bagID >= 5 and item.bagID <= 11 end
+cB_Filters.fBankReagent = function(item) return item.bagID == -3 end
 cB_Filters.fBankFilter = function() return cBnivCfg.FilterBank end
 cB_Filters.fHideEmpty = function(item) if cBnivCfg.CompressEmpty then return item.link ~= nil else return true end end
 

@@ -13,6 +13,7 @@ if gl == "deDE" then
 	cBnivL.MarkAsKnown = "Als bekannt markieren"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"] 			= "Bank",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "Sets",
 		["cBniv_BankArmor"]		= "Waffen & Rüstung",
 		["cBniv_BankQuest"]		= "Quest Items",
@@ -41,6 +42,7 @@ elseif gl == "ruRU" then
 	cBnivL.MarkAsKnown = "Перенести в Известные предметы"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"] 			= "Банк",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "Комплекты",
 		["cBniv_BankArmor"]		= "Оружие и доспехи",
 		["cBniv_BankQuest"]		= "Задания",
@@ -69,6 +71,7 @@ elseif gl == "zhTW" then
 	cBnivL.MarkAsKnown = "Mark as Known"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"]			= "銀行",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "套裝",
 		["cBniv_BankArmor"]		= "裝備",
 		["cBniv_BankQuest"]		= "任務物品",
@@ -97,6 +100,7 @@ elseif gl == "zhCN" then
 	cBnivL.MarkAsKnown = "Mark as Known"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"]			= "银行",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "套装",
 		["cBniv_BankArmor"]		= "装备",
 		["cBniv_BankQuest"]		= "任务物品",
@@ -125,6 +129,7 @@ elseif gl == "koKR" then
 	cBnivL.MarkAsKnown = "Mark as Known"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"]  		= "은행",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "세트",
 		["cBniv_BankArmor"]		= "무기 & 방어구",
 		["cBniv_BankQuest"]		= "퀘스트",
@@ -153,6 +158,7 @@ elseif gl == "ruRU" then
 	cBnivL.MarkAsKnown = "Mark as Known"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"] 			= "Bank",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "Sets",
 		["cBniv_BankArmor"]		= "Weapons & Armor",
 		["cBniv_BankQuest"]		= "Quest Items",
@@ -181,6 +187,7 @@ elseif gl == "frFR" then
 	cBnivL.MarkAsKnown = "Marquer comme Connu"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"] 			= "Banque",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "Sets",
 		["cBniv_BankArmor"]		= "Armes et Armures",
 		["cBniv_BankQuest"]		= "Qu\195\170te",
@@ -209,6 +216,7 @@ elseif gl == "itIT" then
     cBnivL.MarkAsKnown = "Segna come Conosciuto"
     cBnivL.bagCaptions = {
         ["cBniv_Bank"] 			= "Banca",
+		["cBniv_BankReagent"]	= "Reagents",
         ["cBniv_BankSets"]	    = "Sets",
         ["cBniv_BankArmor"]		= "Armature e Armi",
         ["cBniv_BankQuest"]		= "Oggetti di Missione",
@@ -237,6 +245,7 @@ else
 	cBnivL.MarkAsKnown = "Mark as Known"
 	cBnivL.bagCaptions = {
 		["cBniv_Bank"] 			= "Bank",
+		["cBniv_BankReagent"]	= "Reagents",
 		["cBniv_BankSets"]		= "Sets",
 		["cBniv_BankArmor"]		= "Weapons & Armor",
 		["cBniv_BankQuest"]		= "Quest Items",

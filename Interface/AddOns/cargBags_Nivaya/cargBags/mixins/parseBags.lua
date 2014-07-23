@@ -39,8 +39,9 @@ local bagStrings = {
 	["bags"]			= { 1, 2, 3, 4 },
 	["backpack+bags"]	= { 0, 1, 2, 3, 4, },
 	["bankframe"]		= { -1 },
-	["bank"]			= { 5, 6, 7, 8, 9, 10, 11 },
 	["bankframe+bank"]	= { -1, 5, 6, 7, 8, 9, 10, 11 },
+	["bankreagent"]		= { -3 },
+	["bank"]			= { 5, 6, 7, 8, 9, 10, 11 },
 	["keyring"]			= { -2 },
 }
 cargBags.BagStrings = bagStrings
@@ -51,6 +52,7 @@ cargBags.BagStrings = bagStrings
 	@return bags <table>
 ]]
 function cargBags:ParseBags(bags)
+	print("ParseBags", bags)
 	if(type(bags) == "table") then return bags end
 	if(bagStrings[bags]) then return bagStrings[bags] end
 	local min, max = bags and bags:match("(%d+)-(%d+)")

@@ -40,6 +40,9 @@ local GetNumFreeSlots = function(bagType)
 			free = free + GetContainerNumFreeSlots(i)
 			max = max + GetContainerNumSlots(i)
 		end
+	elseif bagType == "bankReagent" then
+		free = GetContainerNumFreeSlots(-3)
+		max = GetContainerNumSlots(-3)
 	else
 		local containerIDs = {-1,5,6,7,8,9,10,11}
 		for _,i in next, containerIDs do	
@@ -82,6 +85,7 @@ function MyContainer:OnContentsChanged()
 	local tName = self.name
 	local tBankBags = string.find(tName, "cBniv_Bank%a+")
 	local tBank = tBankBags or (tName == "cBniv_Bank")
+	local tReagent = (tName == "cBniv_BankReagent")
 
 	local buttonIDs = {}
   	for i, button in pairs(self.buttons) do
@@ -94,7 +98,7 @@ function MyContainer:OnContentsChanged()
 			buttonIDs[i] = { -1, -2, button, -1 }
 		end
 	end
-	if (tBank and cBnivCfg.SortBank) or (not tBank and cBnivCfg.SortBags) then QuickSort(buttonIDs) end
+	if ((tBank or tReagent) and cBnivCfg.SortBank) or (not (tBank or tReagent) and cBnivCfg.SortBags) then QuickSort(buttonIDs) end
 
 	for _,v in ipairs(buttonIDs) do
 		local button = v[3]
@@ -131,13 +135,14 @@ function MyContainer:OnContentsChanged()
 		
 		cB_Bags.main.EmptySlotCounter:SetText(GetNumFreeSlots("bag"))
 		cB_Bags.bank.EmptySlotCounter:SetText(GetNumFreeSlots("bank"))
+		cB_Bags.bankReagent.EmptySlotCounter:SetText(GetNumFreeSlots("bankReagent"))
 	end
 	
 	-- This variable stores the size of the item button container
 	self.ContainerHeight = (row + (col > 0 and 1 or 0)) * (itemSlotSize + 2)
 
 	if (self.UpdateDimensions) then self:UpdateDimensions() end -- Update the bag's height
-	local t = (tName == "cBniv_Bag") or (tName == "cBniv_Bank") 
+	local t = (tName == "cBniv_Bag") or (tName == "cBniv_Bank") or (tName == "cBniv_BankReagent")
 	local tAS = (tName == "cBniv_Ammo") or (tName == "cBniv_Soulshards")
 	if (not tBankBags and cB_Bags.main:IsShown() and not (t or tAS)) or (tBankBags and cB_Bags.bank:IsShown()) then 
 		if isEmpty then self:Hide() else self:Show() end 
@@ -194,123 +199,15 @@ end
 JS:SetScript("OnEvent", function() SellJunk() end)
 
 -- Restack Items
-local ContainerID = { bags = { 0 }, bank = { -1 }, guild = { 42 } }
-for i = 1, NUM_BAG_SLOTS do table.insert(ContainerID.bags, i) end
-for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do table.insert(ContainerID.bank, i) end
-
--- yielding function; items will get locked and we have to wait
-local f = CreateFrame("Frame")
-local function coYield(loc, bag, slot, count)
-	local elapsed = 0
-	f:SetScript("OnUpdate", function(_, update)
-		elapsed = elapsed + update
-		if type(restacker) == "thread" and coroutine.status(restacker) == "suspended" and elapsed > 0.1 then
-			local locked = true
-			locked = select(3, GetContainerItemInfo(bag, slot))
-			if not locked then coroutine.resume(restacker) end
-			elapsed = 0
-		end
-	end)
-	coroutine.yield()
-end
-
 local restackItems = function(self)
 	local tBag, tBank = (self.name == "cBniv_Bag"), (self.name == "cBniv_Bank")
-	local loc = tBank and "bank" or "bags"
-	
-	if type(restacker) ~= "thread" or coroutine.status(restacker) == "dead" then
-		restacker = coroutine.create(function()
-			tabswap = 0
-			local changed = true
-			while changed do
-				changed = false
-				for _, bag in ipairs(ContainerID[loc]) do
-					if changed then break end
-					for slot = 1, (GetContainerNumSlots(bag)) do
-						while true do
-							local locked = select(3, GetContainerItemInfo(bag, slot))
-							if locked then coYield(loc, bag, slot) else break end
-						end
-						local item = GetContainerItemLink(bag, slot)
-						if item then
-							local itemid = tonumber(item:match("item:(%d+)"))
-							local stack = select(8, GetItemInfo(itemid))
-							local count = select(2, GetContainerItemInfo(bag, slot))
-
-							-- do "special" things with "special" items by moving them into "special" bags
-							if select(9, GetItemInfo(itemid)) ~= "INVTYPE_BAG" then
-								local bagType = (bag ~= 0 and bag ~= -1) and GetItemFamily(GetInventoryItemLink("player", ContainerIDToInventoryID(bag))) or 0								
-								for _, sbag in ipairs(ContainerID[loc]) do
-									if sbag > 0 and GetContainerNumFreeSlots(sbag) > 0 then
-										local sbagID = ContainerIDToInventoryID(sbag)
-										local sbagType = GetItemFamily(GetInventoryItemLink("player", sbagID))
-										local itemType = GetItemFamily(item)
-
-										if sbagType > 0 and sbagType == itemType and bagType == 0 then
-											PickupContainerItem(bag, slot)
-											PutItemInBag(sbagID)
-											coYield(loc, bag, slot)
-											break
-										end
-									end
-								end	
-							end
-							if count < stack then
-								-- found a partial stack
-								local locked, found, done, pbag, pslot
-								while true do
-									-- search through bags backwards for another partial stack with a matching itemid
-									for i = #ContainerID[loc], 1, -1 do
-										local _bag = ContainerID[loc][i]
-										if found or done then break end
-										local _slots = GetContainerNumSlots(_bag)
-										for _slot = _slots, 1, -1 do
-											if not (_bag == bag and _slot == slot) then
-												local _item = GetContainerItemLink(_bag, _slot)
-												if _item then
-													local _itemid = tonumber(_item:match("item:(%d+):"))
-													if _itemid == itemid then
-														local _stack = select(8, GetItemInfo(_itemid))
-														local _count = select(2, GetContainerItemInfo(_bag, _slot))
-														if _count < _stack then found, pbag, pslot = true, _bag, _slot; break end
-													end
-												end
-											else done = true; break end
-										end
-									end
-									locked = found and select(3, GetContainerItemInfo(pbag, pslot)) or false
-									if locked then coYield(loc, pbag, pslot) else break end
-								end
-
-								if found then
-									ClearCursor()
-
-									-- if second partial stack is inside a special bag, move the original stack into it
-									local bagType = (bag ~= 0 and bag ~= -1) and GetItemFamily(GetInventoryItemLink("player", ContainerIDToInventoryID(bag))) or 0
-									local pbagType = (pbag ~= 0 and pbag ~= -1) and GetItemFamily(GetInventoryItemLink("player", ContainerIDToInventoryID(pbag))) or 0
-									if pbagType > 0 and bagType == 0 then
-										PickupContainerItem(bag, slot)
-										PickupContainerItem(pbag, pslot)
-									else
-										PickupContainerItem(pbag, pslot)
-										PickupContainerItem(bag, slot)
-									end
-									
-									ClearCursor()
-									
-									changed = true
-									break
-								end
-							end
-						end
-					end
-				end
-			end
-			-- turn off yielding function
-			f:SetScript("OnUpdate", nil)
-		end)
-		coroutine.resume(restacker)
-	end	
+	--local loc = tBank and "bank" or "bags"
+	if tBank then
+		SortBankBags()
+		SortReagentBankBags()
+	elseif tBag then
+		SortBags()
+	end
 end
 
 -- Reset New
@@ -494,6 +391,16 @@ local GetFirstFreeSlot = function(bagtype)
 				end
 			end
 		end
+	elseif bagtype == "bankReagent" then
+		bagID = -3
+		local t = GetContainerNumFreeSlots(bagID)
+		if t > 0 then
+			local tNumSlots = GetContainerNumSlots(bagID)
+			for j = 1,tNumSlots do
+				local tLink = GetContainerItemLink(bagID,j)
+				if not tLink then return bagID,j end
+			end
+		end
 	else
 		local containerIDs = {-1,5,6,7,8,9,10,11}
 		for _,i in next, containerIDs do
@@ -511,20 +418,23 @@ local GetFirstFreeSlot = function(bagtype)
 end
 
 function MyContainer:OnCreate(name, settings)
+	print("MyContainer:OnCreate", name)
 	local font = RealUI.font.pixel1
 	
 	settings = settings or {}
 	self.Settings = settings
 	self.name = name
 
-	local tBag, tBank = (name == "cBniv_Bag"), (name == "cBniv_Bank")
+	local tBag, tBank, tReagent = (name == "cBniv_Bag"), (name == "cBniv_Bank"), (name == "cBniv_BankReagent")
 	local tBankBags = string.find(name, "Bank")
-	
+
 	local numSlotsBag = {GetNumFreeSlots("bag")}
 	local numSlotsBank = {GetNumFreeSlots("bank")}
+	local numSlotsReagent = {GetNumFreeSlots("bankReagent")}
 	
 	local usedSlotsBag = numSlotsBag[2] - numSlotsBag[1]
 	local usedSlotsBank = numSlotsBank[2] - numSlotsBank[1]
+	local usedSlotsReagent = numSlotsReagent[2] - numSlotsReagent[1]
 
 	self:EnableMouse(true)
 	
@@ -533,12 +443,14 @@ function MyContainer:OnCreate(name, settings)
 	self:SetFrameStrata("HIGH")
 	tinsert(UISpecialFrames, self:GetName()) -- Close on "Esc"
 
-	if tBag or tBank then 
+	if (tBag or tBank) then 
 		SetFrameMovable(self, cBnivCfg.Unlocked) 
 	end
 
-	if tBank or tBankBags then
+	if (tBank or tBankBags) then
 		self.Columns = (usedSlotsBank > ns.options.sizes.bank.largeItemCount) and ns.options.sizes.bank.columnsLarge or ns.options.sizes.bank.columnsSmall
+	elseif (tReagent) then
+		self.Columns = (usedSlotsReagent > ns.options.sizes.bank.largeItemCount) and ns.options.sizes.bank.columnsLarge or ns.options.sizes.bank.columnsSmall
 	else
 		self.Columns = (usedSlotsBag > ns.options.sizes.bags.largeItemCount) and ns.options.sizes.bags.columnsLarge or ns.options.sizes.bags.columnsSmall
 	end
@@ -583,7 +495,7 @@ function MyContainer:OnCreate(name, settings)
 		caption:SetPoint("TOPLEFT", 7.5, -7.5)
 		self.Caption = caption
 		
-		if tBag or tBank then
+		if (tBag or tBank) then
 			local close = CreateFrame("Button", nil, self, "UIPanelCloseButton")
 			if Aurora then
 				local F = Aurora[1]
@@ -650,8 +562,8 @@ function MyContainer:OnCreate(name, settings)
 	end
 		
 	local tBtnOffs = 0
-  	if tBag or tBank then
-		 -- Bag bar for changing bags
+  	if (tBag or tBank) then
+		-- Bag bar for changing bags
 		local bagType = tBag and "bags" or "bank"
 		
 		local tS = tBag and "backpack+bags" or "bank"
@@ -739,6 +651,27 @@ function MyContainer:OnCreate(name, settings)
 			end)
 		end
 		
+		-- Button to send reagents to Reagent Bank:
+		if tBank then
+			local rbHint = IsReagentBankUnlocked() and REAGENTBANK_DEPOSIT or REAGENT_BANK
+			self.reagentBtn = createIconButton("SendReagents", self, Textures.SellJunk, "BOTTOMRIGHT", rbHint, tBag)
+			if self.optionsBtn then
+				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.optionsBtn, "BOTTOMLEFT", 0, 0)
+			elseif self.restackBtn then
+				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.restackBtn, "BOTTOMLEFT", 0, 0)
+			else
+				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.bagToggle, "BOTTOMLEFT", 0, 0)
+			end
+			self.reagentBtn:SetScript("OnClick", function()
+				print("Reagent Bank!!!")
+				if IsReagentBankUnlocked() then
+					DepositReagentBank()
+				else
+					StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB");
+				end
+			end)
+		end
+
 		-- Tooltip positions
 		local numButtons = 1
 		local btnTable = {self.bagToggle}
@@ -747,6 +680,9 @@ function MyContainer:OnCreate(name, settings)
 		if tBag then
 			if self.resetBtn then numButtons = numButtons + 1; tinsert(btnTable, self.resetBtn) end
 			if self.junkBtn then numButtons = numButtons + 1; tinsert(btnTable, self.junkBtn) end
+		end
+		if tBank then
+			if self.reagentBtn then numButtons = numButtons + 1; tinsert(btnTable, self.reagentBtn) end
 		end
 		local ttPos = -(numButtons * 15 + 18)
 		if tBank then ttPos = ttPos + 3 end
@@ -759,7 +695,7 @@ function MyContainer:OnCreate(name, settings)
 	end
 
 	-- Item drop target
-	if (tBag or tBank) then
+	if (tBag or tBank or tReagent) then
 		self.DropTarget = CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
 		local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
 		if dtNT then dtNT:SetTexture(nil) end
@@ -778,7 +714,7 @@ function MyContainer:OnCreate(name, settings)
 		
 		local DropTargetProcessItem = function()
 			-- if CursorHasItem() then	-- Commented out to fix Guild Bank -> Bags item dragging
-				local bID, sID = GetFirstFreeSlot(tBag and "bag" or "bank")
+				local bID, sID = GetFirstFreeSlot((tBag and "bag") or (tBank and "bank") or "bankReagent")
 				if bID then PickupContainerItem(bID, sID) end
 			-- end
 		end
