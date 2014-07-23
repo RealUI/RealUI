@@ -34,6 +34,7 @@ local defaults = {
 		snapping = true,
 		blizzardVehicle = false,
 		minimapIcon = {},
+		mouseovermod = "NONE"
 	}
 }
 

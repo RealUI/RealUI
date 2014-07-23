@@ -17,21 +17,17 @@
 
 local kui = LibStub('Kui-1.0')
 local LSM = LibStub('LibSharedMedia-3.0')
-local kn = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
+local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local slowUpdateTime, critUpdateTime = 1, .1
-
--- TODO this is temporary for compatibility etc etc
-local addon = kn
 
 --[===[@debug@
 --KuiNameplatesDebug=true
 --@end-debug@]===]
 
-local targetExists
-
 --------------------------------------------------------------------- globals --
 local select, strfind, strsplit, pairs, ipairs, unpack, tinsert, type, floor
     = select, strfind, strsplit, pairs, ipairs, unpack, tinsert, type, floor
+local UnitExists=UnitExists
 
 ------------------------------------------------------------- Frame functions --
 local function SetFrameCentre(f)
@@ -247,9 +243,9 @@ local function OnFrameShow(self)
     end
 
     ---------------------------------------------- Trivial sizing/positioning --
-    if kn.uiscale then
+    if addon.uiscale then
         -- change our parent frame size if we're using fixaa..
-        f:SetSize(self:GetWidth()/kn.uiscale, self:GetHeight()/kn.uiscale)
+        f:SetSize(self:GetWidth()/addon.uiscale, self:GetHeight()/addon.uiscale)
     end
     -- otherwise, size is changed automatically thanks to using SetAllPoints
 
@@ -312,7 +308,7 @@ local function OnFrameHide(self)
     f.health.r, f.health.g, f.health.b, f.health.reset
         = nil, nil, nil, nil
 
-    kn:SendMessage('KuiNameplates_PostHide', f)
+    addon:SendMessage('KuiNameplates_PostHide', f)
 end
 -- stuff that needs to be updated every frame
 local function OnFrameUpdate(self, e)
@@ -326,8 +322,8 @@ local function OnFrameUpdate(self, e)
         ------------------------------------------------------------ Position --
         local scale = f.firstChild:GetScale()
         local x, y = select(4, f.firstChild:GetPoint())
-        x = (x / kn.uiscale) * scale
-        y = (y / kn.uiscale) * scale
+        x = (x / addon.uiscale) * scale
+        y = (y / addon.uiscale) * scale
 
         f:SetPoint('BOTTOMLEFT', WorldFrame, 'BOTTOMLEFT',
             floor(x - (f:GetWidth() / 2)),
@@ -345,7 +341,7 @@ local function OnFrameUpdate(self, e)
 
     ------------------------------------------------------------------- Alpha --
     -- determine alpha value!
-    if (f.defaultAlpha == 1 and targetExists)
+    if (f.defaultAlpha == 1 and UnitExists('target'))
        or
        -- avoid fading low hp units
        (((f.friend and addon.db.profile.fade.rules.avoidfriendhp) or
@@ -360,7 +356,7 @@ local function OnFrameUpdate(self, e)
        (addon.db.profile.fade.fademouse and f.highlighted)
     then
         f.currentAlpha = 1
-    elseif targetExists or addon.db.profile.fade.fadeall then
+    elseif UnitExists('target') or addon.db.profile.fade.fadeall then
         -- if a target exists or fadeall is enabled...
         f.currentAlpha = addon.db.profile.fade.fadedalpha or .3
     else
@@ -428,7 +424,7 @@ local function UpdateFrame(self)
         -- return guid to an assumed unique name
         addon:GetGUID(self)
 
-        kn:SendMessage('KuiNameplates_PostShow', self)
+        addon:SendMessage('KuiNameplates_PostShow', self)
         self.DispatchPostShow = nil
     end
 end
@@ -470,9 +466,7 @@ local function UpdateFrameCritical(self)
         end
     end
     ------------------------------------------------------------ Target stuff --
-    if targetExists and
-       self.defaultAlpha == 1
-    then
+    if UnitExists('target') and self.defaultAlpha == 1 then
         if not self.target then
             -- this frame just became targeted
             self.target = true
@@ -490,7 +484,7 @@ local function UpdateFrameCritical(self)
                 self.targetGlow:Show()
             end
 
-            kn:SendMessage('KuiNameplates_PostTarget', self)
+            addon:SendMessage('KuiNameplates_PostTarget', self)
         end
     elseif self.target then
         self.target = nil
@@ -536,6 +530,10 @@ local function UpdateFrameCritical(self)
             self.nametext:SetText(nil)
         end
 
+        if self.target then
+            self.nametext:SetText((self.nametext:GetText() or '')..' [target]')
+        end
+
         if self.friend then
             self.isfriend:SetText('friendly')
         else
@@ -552,7 +550,7 @@ local function SetName(self)
 end
 
 --------------------------------------------------------------- KNP functions --
-function kn:IsNameplate(frame)
+function addon:IsNameplate(frame)
     if frame:GetName() and strfind(frame:GetName(), '^NamePlate%d') then
         local nameTextChild = select(2, frame:GetChildren())
         if nameTextChild then
@@ -562,7 +560,7 @@ function kn:IsNameplate(frame)
     end
 end
 
-function kn:InitFrame(frame)
+function addon:InitFrame(frame)
     -- container for kui objects!
     frame.kui = CreateFrame('Frame', nil, WorldFrame)
     local f = frame.kui
@@ -628,9 +626,9 @@ function kn:InitFrame(frame)
 
     ------------------------------------------------------------------ Layout --
     local parent
-    if self.db.profile.general.fixaa and kn.uiscale then
-        f:SetSize(frame:GetWidth()/kn.uiscale, frame:GetHeight()/kn.uiscale)
-        f:SetScale(kn.uiscale)
+    if self.db.profile.general.fixaa and addon.uiscale then
+        f:SetSize(frame:GetWidth()/addon.uiscale, frame:GetHeight()/addon.uiscale)
+        f:SetScale(addon.uiscale)
 
         f:SetPoint('BOTTOMLEFT', UIParent)
         f:Hide()
@@ -682,7 +680,7 @@ function kn:InitFrame(frame)
 
     -- raid icon ---------------------------------------------------------------
     f.icon:SetParent(f.overlay)
-    f.icon:SetSize(kn.sizes.tex.raidicon, kn.sizes.tex.raidicon)
+    f.icon:SetSize(addon.sizes.tex.raidicon, addon.sizes.tex.raidicon)
     f.icon:ClearAllPoints()
     f.icon:SetPoint('LEFT', f.health, 'RIGHT', 5, 1)
 
@@ -715,7 +713,7 @@ function kn:InitFrame(frame)
     f.oldHealth:HookScript('OnValueChanged', OnHealthValueChanged)
 
     ------------------------------------------------------------ Finishing up --
-    kn:SendMessage('KuiNameplates_PostCreate', f)
+    addon:SendMessage('KuiNameplates_PostCreate', f)
 
     if frame:IsShown() then
         -- force OnShow
@@ -726,22 +724,18 @@ function kn:InitFrame(frame)
 end
 
 ---------------------------------------------------------------------- Events --
-function kn:PLAYER_TARGET_CHANGED()
-    targetExists = UnitExists('target')
-end
-
 -- automatic toggling of enemy frames
-function kn:PLAYER_REGEN_ENABLED()
+function addon:PLAYER_REGEN_ENABLED()
     SetCVar('nameplateShowEnemies', 0)
 end
-function kn:PLAYER_REGEN_DISABLED()
+function addon:PLAYER_REGEN_DISABLED()
     SetCVar('nameplateShowEnemies', 1)
 end
 
 ------------------------------------------------------------- Script handlers --
 do
     local WorldFrame = WorldFrame
-    function kn:OnUpdate()
+    function addon:OnUpdate()
         local frames = select('#', WorldFrame:GetChildren())
 
         if frames ~= self.numFrames then
@@ -760,7 +754,7 @@ do
     end
 end
 
-function kn:ToggleCombatEvents(io)
+function addon:ToggleCombatEvents(io)
     if io then
         self:RegisterEvent('PLAYER_REGEN_ENABLED')
         self:RegisterEvent('PLAYER_REGEN_DISABLED')

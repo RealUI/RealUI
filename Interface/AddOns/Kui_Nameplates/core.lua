@@ -504,8 +504,6 @@ function addon:OnEnable()
         end)
     end
 
-    self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:ToggleCombatEvents(self.db.profile.general.combat)
-
     addon:ScheduleRepeatingTimer('OnUpdate', .1)
 end

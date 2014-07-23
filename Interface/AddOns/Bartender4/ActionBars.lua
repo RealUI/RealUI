@@ -10,8 +10,6 @@ local select, ipairs, pairs, tostring, tonumber, min, setmetatable = select, ipa
 
 -- GLOBALS: UnitClass, InCombatLockdown, GetBindingKey, ClearOverrideBindings, SetOverrideBindingClick
 
-local ActionBar, ActionBar_MT
-
 local abdefaults = {
 	['**'] = Bartender4:Merge({
 		enabled = true,
@@ -56,14 +54,14 @@ local defaults = {
 	}
 }
 
+local ActionBar_MT = {__index = Bartender4.ActionBar}
+
+-- export defaults for other modules
+Bartender4.ActionBar.defaults = abdefaults['**']
+
 function BT4ActionBars:OnInitialize()
 	self.db = Bartender4.db:RegisterNamespace("ActionBars", defaults)
-
-	-- fetch the prototype information
-	ActionBar = Bartender4.ActionBar
-	ActionBar_MT = {__index = ActionBar}
 end
-
 
 local LBF = LibStub("LibButtonFacade", true)
 

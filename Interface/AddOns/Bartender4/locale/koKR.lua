@@ -13,8 +13,10 @@ L["Always Hide"] = "항상 숨김"
 L["Anchor"] = "앵커"
 L["Apply Preset"] = "프리셋 적용"
 L["Auto-Assist"] = "자동 지원"
+L["Auto-Assist Casting"] = "자동 지원 대상 시전"
 L["Bag Bar"] = "가방 바"
 L["Bar Options"] = "바 옵션"
+L["Bar Paging"] = "바 페이지"
 L["Bars"] = "바"
 L["Bar %s"] = "바 %s"
 L["Bar Snapping"] = "자동 붙임 기능"
@@ -80,10 +82,16 @@ L["Down"] = "아래"
 L["Empty button background"] = "빈 버튼 배경"
 L[ [=[Enable Auto-Assist for this bar.
  Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = "이 바에 대해 자동 지원 기능을 활성화합니다. 자동 지원 기능은 선택된 주문에 대해 대상이 유효하지 않은 경우 대상의 대상에게 자동으로 시전할 것입니다."
+L[ [=[Enable Auto-Assist for this bar.
+Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[현재 바의 자동 지원 대상 시전을 사용합니다.
+자동 지원 대상은 원하는 주문을 대상이 아니더라도 자동으로 찾게 됩니다.]=]
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = "게임에서 제공하는 행동 단축바 제어에 기반한 바 전환 기능을 활성화합니다. 블리자드 행동바 단축키를 참조하세요. 일반적으로 Shift+마우스 휠 또는 Shift+1~Shift+6으로 지정합니다."
 L["Enabled"] = "활성화"
 L["Enable/Disable the bar."] = "바를 활성화 또는 비활성화합니다."
+L[ [=[Enable Mouse-Over Casting for this bar.
+Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[마우스 오버 시전을 사용합니다.
+마우스 오버 시전은 가능하다면 대상이 없이도 마우스 오버에 자동으로 시전합니다.]=]
 L["Enable State-based Button Swaping"] = "캐릭터 상태에 따른 버튼 교체를 활성화합니다."
 L["Enable the Bag Bar"] = "가방 바를 활성화합니다."
 L["Enable the Blizzard Art Bar"] = "블리자드 아트 바를 활성화합니다."
@@ -149,8 +157,16 @@ L["Lock the buttons."] = "버튼을 고정합니다."
 L["Micro Menu"] = "게임 메뉴"
 L["Minimap Icon"] = "미니맵 아이콘"
 L["Modifier Based Switching"] = "기능키 기반 교체"
+L["Mouse-Over Casting"] = "마우스 오버 시전"
+L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "마우스 오버 시전은 기능키를 이용하여 사용을 조절할 수 있습니다. \"바\"설정에서 그 방법을 선택할 수 있습니다."
+L["Mouse-Over Casting Modifier"] = "마우스 오버 시전 기능키"
 L["No Display"] = "표시 안함"
 L["None"] = "없음"
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["없음"은 항상 마우스 오버 시전을 항상 사용합니다. 즉 기능 키를 필요로 하지 않습니다.
+
+마우스 오버 시전을 개별바에 사용할 수 있습니다. "상태 설정' 탭에서 개별바 별로 사용 방법을 선택할 수 있습니다.]=]
 L["No Stance/Form"] = "태세/폼 없음"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "주의: 사용자 조건을 활성화할 경우 위의 모든 설정은 비활성화 될 것입니다."
 L["Number of buttons."] = "버튼 수를 조절합니다."
@@ -177,6 +193,7 @@ L["Right-click Self-Cast"] = "우-클릭 시 자신에게 시전"
 L["Right ending"] = "오른쪽 끝"
 L["Rows"] = "열"
 L["Scale"] = "크기"
+L["Select a modifier for Mouse-Over Casting"] = "마우스 오버 시전에 사용할 기능키를 선택합니다."
 L["Select the Focus-Cast Modifier"] = "주시 대상에게 시전 시 사용할 기능키를 선택합니다."
 L["Select the Self-Cast Modifier"] = "자신에게 시전 시 사용할 기능키를 선택합니다."
 L["Self-Cast by modifier"] = "기능키에 의한 자신에게 시전"
@@ -185,6 +202,7 @@ L["SHIFT"] = "SHIFT 키"
 L["Show a Icon to open the config at the Minimap"] = "설정창을 열기 위해 미니맵에 버튼을 표시합니다."
 L["Show Reputation Bar"] = "평판 바 표시"
 L["Show XP Bar"] = "경험치 바 표시"
+L["Smart Target selection"] = "인공지능 대상 선택"
 L["Specify the Color of the Out of Mana Indicator"] = "마나 부족 지시기의 색상을 지정합니다."
 L["Specify the Color of the Out of Range Indicator"] = "시전 거리밖 지시기의 색상을 지정합니다."
 L["Stance Bar"] = "태세 바"
@@ -196,6 +214,7 @@ L["The background of button places where no buttons are placed"] = "버튼이 �
 L["The bar default is to be visible all the time, you can configure conditions here to control when the bar should be hidden."] = "모든 바의 기본 상태는 '항상 표시'입니다. 바를 숨기고자 할 때 이곳에서 조건을 설정할 수 있습니다."
 L["The default behaviour of this bar when no state-based paging option affects it."] = "캐릭터 상태에 기반한 페이징 옵션이 바에 영향을 미치지 않을 때만 기본 동작을 설정합니다."
 L["The Positioning options here will allow you to position the bar to your liking and with an absolute precision."] = "위치 설정 모드를 이용해 원하는 위치에 정확히 바를 위치시킬 수 있습니다."
+L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."] = "이 설정은 매크로의 조건에 따라 주문을 위한 다른 대상을 자동으로 선택할 수 있습니다. 그러나 그것은 일반 매크로의 대상 변경방법과는 어긋나는 것입니다."
 L["This bar will be hidden once you enter combat."] = "전투에 참여하면 바를 숨김니다."
 L["This bar will be hidden whenever you are not in combat."] = "전투가 종료되면 바를 숨김니다."
 L["Three bars stacked"] = "세 개의 바 (위로)"

@@ -1,9 +1,10 @@
 ------------------------------------------------------------------------
-r1210 | funkydude | 2014-05-19 00:00:42 +0000 (Mon, 19 May 2014) | 1 line
+r1211 | funkydude | 2014-06-04 17:35:44 +0000 (Wed, 04 Jun 2014) | 1 line
 Changed paths:
-   A /tags/v12.316 (from /trunk:1209)
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
 
-Tagging as v12.316
+anti-spam update
 ------------------------------------------------------------------------
 r1209 | funkydude | 2014-05-18 23:59:26 +0000 (Sun, 18 May 2014) | 1 line
 Changed paths:

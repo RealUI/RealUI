@@ -13,8 +13,10 @@ L["Always Hide"] = "Ocultar siempre"
 L["Anchor"] = "Anclar"
 L["Apply Preset"] = "Usar preestablecidos."
 L["Auto-Assist"] = "Asistente automático"
+L["Auto-Assist Casting"] = "Asistente automático"
 L["Bag Bar"] = "Barra de bolsas"
 L["Bar Options"] = "Opciones de Barra"
+L["Bar Paging"] = "Paginación de barra"
 L["Bars"] = "Barras"
 L["Bar %s"] = "Barra %s"
 L["Bar Snapping"] = "Ajuste de barras"
@@ -79,13 +81,19 @@ L["Don't Page"] = "No paginar"
 L["Down"] = "Abajo"
 L["Empty button background"] = "Boton de fondo vacio"
 L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Permitir asistente automático para esta barra..
- Asistente Automático tratará de lanzar automáticamente la habilidad en el objetivo de tu objetivo, si éste no es un objetivo válido para la habilidad seleccionada.]=]
+ Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Permitir asistente automático para esta barra.
+Asistente automático tratará de lanzar automáticamente la habilidad en el objetivo de tu objetivo, si éste no es un objetivo válido para la habilidad seleccionada.]=]
+L[ [=[Enable Auto-Assist for this bar.
+Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Permitir asistente automático para esta barra.
+Asistente automático tratará de lanzar automáticamente la habilidad en el objetivo de tu objetivo, si éste no es un objetivo válido para la habilidad seleccionada.]=]
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[Permitir intercambio de barras basado en los controles de barras de acciones porporcionados por el juego.
 Vea Asignación de Teclas de Blizzard para referencia - Generalmente Mayusculas-Rueda del Ratón y Mayusculas+1 - Mayusculas+6.]=]
 L["Enabled"] = "Habilitada"
 L["Enable/Disable the bar."] = "Habilitar/Deshabilitar la barra."
+L[ [=[Enable Mouse-Over Casting for this bar.
+Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[Permitir a lanzar al razon para esta barra.
+Con este función, tus hechizos se lanzan automáticamente en la unidad bajo del raton sin seleccionarla, si es posible.]=]
 L["Enable State-based Button Swaping"] = "Permitir Intercambio de botones basado en el estado"
 L["Enable the Bag Bar"] = "Habilitar la barra de bolsas"
 L["Enable the Blizzard Art Bar"] = "Abilite la Barra de Blizzard Art"
@@ -151,8 +159,16 @@ L["Lock the buttons."] = "Bloquear los botones"
 L["Micro Menu"] = "Micro Menú"
 L["Minimap Icon"] = "Icono del minimapa"
 L["Modifier Based Switching"] = "Intercambio basado en modificadores"
+L["Mouse-Over Casting"] = "Lanzar al raton"
+L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "Lanzar al raton puede ser limitada para activar sólo mientras se pulsa una tecla modificadora. El modificador se puede configurar en las opciones globales \"Barra\"."
+L["Mouse-Over Casting Modifier"] = "Modificador para lanzar al raton"
 L["No Display"] = "No mostrar"
 L["None"] = "Nada"
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["Ninguno" significa que la función está siempre activa, y no se requiere ningún modificador.
+
+Tienes que activar a lanzar al raton para cada barra individual que deseas, en la pestaña "Configuración de estado" en las opciones para esa barra.]=]
 L["No Stance/Form"] = "Sin Estado/Forma"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "Nota: Habilitar las condiciones personalizadas deshabilitará todas las opciones anteriores"
 L["Number of buttons."] = "Número de botones"
@@ -179,6 +195,7 @@ L["Right-click Self-Cast"] = "Auto-Lanzarse con el botón derecho"
 L["Right ending"] = "Terminado a la derecha"
 L["Rows"] = "Filas"
 L["Scale"] = "Escala"
+L["Select a modifier for Mouse-Over Casting"] = "Selecciona un modificador para lanzar al raton"
 L["Select the Focus-Cast Modifier"] = "Seleccione el modificador de lanzamiento al foco"
 L["Select the Self-Cast Modifier"] = "Seleccione el modificador de lanzamiento sobre si mismo"
 L["Self-Cast by modifier"] = "Lanzar sobre si mismo según modificador"
@@ -187,6 +204,7 @@ L["SHIFT"] = "Mayúsculas"
 L["Show a Icon to open the config at the Minimap"] = "Mostrar un icono para abrir la configuración en el Minimapa"
 L["Show Reputation Bar"] = "Mostar Barra de Reputación"
 L["Show XP Bar"] = "Mostrar Barra de XP"
+L["Smart Target selection"] = "Selección intelligente de objetivo"
 L["Specify the Color of the Out of Mana Indicator"] = "Especificar el color del Indicador Sin Maná"
 L["Specify the Color of the Out of Range Indicator"] = "Especificar el color del Indicador de Fuera de Alcance"
 L["Stance Bar"] = "Barra de Estados"
@@ -198,6 +216,7 @@ L["The background of button places where no buttons are placed"] = "El fondo de 
 L["The bar default is to be visible all the time, you can configure conditions here to control when the bar should be hidden."] = "Por defecto la barra es visible todo el tiempo, aquí se pueden configurar condiciones para controlar cuando se desea ocultar la barra"
 L["The default behaviour of this bar when no state-based paging option affects it."] = "Comportamiento por defecto de esta barra cuando no le afectan opciones de paginación basadas en el estado"
 L["The Positioning options here will allow you to position the bar to your liking and with an absolute precision."] = "Las opciones de Posicionamiento le permitirá posicionar la barra a su gusto y con una precisión absoluta."
+L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."] = "Estas opciones pueden seleccionar un objectivo different para tu hechizo mediante condiciones de macros. Sin embargo, estas condiciones ignorarán cualquier cambio de objectivo por los macros normales."
 L["This bar will be hidden once you enter combat."] = "Esta barra se ocultará estando en combate"
 L["This bar will be hidden whenever you are not in combat."] = "Esta barra se ocultará siempre que no esté en combate"
 L["Three bars stacked"] = "Tres barras apiladas"

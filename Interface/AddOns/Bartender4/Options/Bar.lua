@@ -203,7 +203,7 @@ function Bar:GetOptionObject()
 			type = "group",
 			cmdInline = true,
 			name = L["General Settings"],
-			order = 1,
+			order = 10,
 			args = {
 				styleheader = {
 					order = 10,
@@ -244,7 +244,7 @@ function Bar:GetOptionObject()
 		visibility = {
 			type = "group",
 			name = L["Visibility"],
-			order = 2,
+			order = 20,
 			get = visibilityGetter,
 			set = visibilitySetter,
 			args = {
@@ -400,7 +400,7 @@ function Bar:GetOptionObject()
 		position = {
 			type = "group",
 			name = L["Positioning"],
-			order = 20,
+			order = 30,
 			args = {
 				info = {
 					order = 1,

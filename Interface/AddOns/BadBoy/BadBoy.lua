@@ -656,8 +656,8 @@ local instantReportList = {
 	"boost.*safe.*paypal.*skype", --WTS BOOST RBG/ARENA,CAP/WINS GAMES,GOLD CHALLENGE MODE,PVE:SoO HC/N/Flex 14/14+loot(mount)! Best prices in Europe! FAST AND SAFE! It's the 7th season of our work. We have website+business Paypal.SKYPE: BLLIZZIK
 	"boosting[%.,]pro.*discount", --[H] <DND>[Jedrict]: {skull}{skull}{skull} [www.Boosting.Pro] - Premium Arena boosting - {circle} SUPER DISCOUNTS ON ALL RATINGS {circle} Over 50 successful Gladiator orders in season 14! {skull}{skull}{skull}
 	"boosting[%.,]pro.*sale", --[H] <DND>[Jedrict]: {square}{square}{square} [www.Boosting.Pro] - Elite PvE Services: {circle} HC LOOT RUN + GARROSH MOUNT {circle} on Sale now! Only 25 man raids, warforged loot, weapons and trinkets are included! {square}{square}{square}
-	"rating.*rbg.*epiccarry[%.,]com", --{rt2} Arena rating\Rbg wins\Arena wins on epiccarry.com {rt1}
-	"flex.*realm.*epiccarry[%.,]com", --{rt2} SOO Flex\Normal\Heroic\Glory + T15+T14 contents selfplay, no realm transfer on epiccarry.com {rt1}
+	"rbg.*epiccarry[%.,]com", --{rt2} Arena rating\Rbg wins\Arena wins on epiccarry.com {rt1}
+	"realm.*epiccarry[%.,]com", --{rt2} SOO Flex\Normal\Heroic\Glory + T15+T14 contents selfplay, no realm transfer on epiccarry.com {rt1}
 	"arenahelp[%.,]eu.*boost.*skype", --{rt1} Arenahelp.eu - Offering LEGIT boosts in RBG and Arena by the top players!!!  Check website or Skype: [arenahelp.eu.] Ownedcore verified. Consider our prices.
 
 	--[[  Russian  ]]--
