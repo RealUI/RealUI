@@ -260,7 +260,7 @@ function AddonControl:CreateOptionsFrame()
 
 			-- Reset
 			bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, false, true)
-			bReset[cnt].addon = addon
+			bReset[cnt].addon = altAddOnTable[addon] or addon
 			bReset[cnt].id = cnt
 			if not prevReset then
 				bReset[cnt]:SetPoint("TOPRIGHT", acAddonSect, "TOPRIGHT", -4, -4)
