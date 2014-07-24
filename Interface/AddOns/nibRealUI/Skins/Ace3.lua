@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+if not Aurora then return end
 local F, C = unpack(Aurora)
 
 local _

@@ -260,7 +260,7 @@ function AddonControl:CreateOptionsFrame()
 
 			-- Reset
 			bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, false, true)
-			bReset[cnt].addon = addon
+			bReset[cnt].addon = altAddOnTable[addon] or addon
 			bReset[cnt].id = cnt
 			if not prevReset then
 				bReset[cnt]:SetPoint("TOPRIGHT", acAddonSect, "TOPRIGHT", -4, -4)
@@ -273,6 +273,7 @@ function AddonControl:CreateOptionsFrame()
 				nibRealUI:LoadSpecificAddOnData(self.addon)
 			end)
 			bReset[cnt]:SetScript("OnEnter", function(self)
+				print("OnEnter", self.addon)
 				GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 64, 4)
 				GameTooltip:AddLine("Reset |cffffffff"..addon.."'s|r data to defaults.\nThis will erase any changes you've\nmade to this AddOn's settings.")
 				GameTooltip:Show()

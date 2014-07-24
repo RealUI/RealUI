@@ -27,6 +27,7 @@ end
 function nibRealUI:LoadSpecificAddOnData(addon, skipReload)
 	if self["LoadAddOnData_"..addon] then
 		self["LoadAddOnData_"..addon]()
+		--setProfile
 		if skipReload then return end
 		self:ReloadUIDialog()
 	end

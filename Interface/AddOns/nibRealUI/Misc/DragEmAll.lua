@@ -10,104 +10,94 @@ local DragEmAll = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 -- Based on the frame list from NDragIt by Nemes.
 -- These frames are hooked on login.
 local frames = {
-	-- ["FrameName"] = true (the parent frame should be moved) or false (the frame itself should be moved)
+	-- ["FrameName"] = true/false (the parent / the frame itself) or another frame
 
 	-- Blizzard Frames
-	["SpellBookFrame"] = false,
-	["QuestLogFrame"] = false,
-	["QuestLogDetailFrame"] = false,
-	["FriendsFrame"] = false,
-	["KnowledgeBaseFrame"] = true,
-	["HelpFrame"] = false,
-	["GossipFrame"] = false,
-	["MerchantFrame"] = false,
-	["MailFrame"] = false,
-	["OpenMailFrame"] = false,
-	["GuildRegistrarFrame"] = false,
-	["DressUpFrame"] = false,
-	["TabardFrame"] = false,
-	["TaxiFrame"] = false,
-	["QuestFrame"] = false,
-	["TradeFrame"] = false,
-	["LootFrame"] = false,
-	["PetStableFrame"] = false,
-	["StackSplitFrame"] = false,
-	["PetitionFrame"] = false,
-	["WorldStateScoreFrame"] = false,
-	["BattlefieldFrame"] = false,
-	["ArenaFrame"] = false,
-	["ItemTextFrame"] = false,
-	["GameMenuFrame"] = false,
-	["InterfaceOptionsFrame"] = false,
-	["MacOptionsFrame"] = false,
-	["PetPaperDollFrame"] = true,
-	["PetPaperDollFrameCompanionFrame"] = "CharacterFrame",
-	["PetPaperDollFramePetFrame"] = "CharacterFrame",
-	["PaperDollFrame"] = true,
-	["ReputationFrame"] = true,
-	["SkillFrame"] = true,
-	["PVPFrame"] = not cata, -- changed in cataclysm
-	["PVPBattlegroundFrame"] = true,
-	["SendMailFrame"] = true,
-	["TokenFrame"] = true,
-	["InterfaceOptionsFrame"] = false,
-	["VideoOptionsFrame"] = false,
+	["AddonList"] = false,
 	["AudioOptionsFrame"] = false,
 	["BankFrame"] = false,
-	--["WorldMapTitleButton"] = true,
-	-- ["WorldMapPositioningGuide"] = true,
-	--["TicketStatusFrame"] = false,
-	["StaticPopup1"] = false,
-	--["GhostFrame"] = false,
+	["DressUpFrame"] = false,
 	["EncounterJournal"] = false, -- only in 4.2
-	["RaidParentFrame"] = false,
-	["TutorialFrame"] = false,
-	["MissingLootFrame"] = false,
-	["ScrollOfResurrectionSelectionFrame"] = false,
-
-	-- New frames in MoP
-	["PVPBannerFrame"] = false,
-	["PVEFrame"] = false, -- dungeon finder + challenges
+	["FriendsFrame"] = false,
+	["GameMenuFrame"] = false,
+	--["GhostFrame"] = false,
+	["GossipFrame"] = false,
 	["GuildInviteFrame"] = false,
-	
+	["GuildRegistrarFrame"] = false,
+	["HelpFrame"] = false,
+	["InterfaceOptionsFrame"] = false,
+	["ItemTextFrame"] = false,
+	["LootFrame"] = false,
+	["MacOptionsFrame"] = false,
+	["MailFrame"] = false,
+	["MerchantFrame"] = false,
+	["MissingLootFrame"] = false,
+	["OpenMailFrame"] = false,
+	["PaperDollFrame"] = true,
+	["PetitionFrame"] = false,
+	["PetPaperDollFrame"] = true,
+	["PetStableFrame"] = false,
+	["PVEFrame"] = false, -- dungeon finder + PvP + challenges
+	["QuestFrame"] = false,
+	["QuestLogPopupDetailFrame"] = false,
+	["PetPaperDollFrameCompanionFrame"] = "CharacterFrame",
+	["RaidParentFrame"] = false,
+	--["ReputationFrame"] = true,
+	["ScrollOfResurrectionSelectionFrame"] = false,
+	["SendMailFrame"] = true,
+	["SpellBookFrame"] = false,
+	["StaticPopup1"] = false,
+	["StackSplitFrame"] = false,
+	["TabardFrame"] = false,
+	["TaxiFrame"] = false,
+	--["TicketStatusFrame"] = false,
+	["TokenFrame"] = true,
+	--["TokenFrameContainer"] = "TokenFrame",
+	["TradeFrame"] = false,
+	["TutorialFrame"] = false,
+	["VideoOptionsFrame"] = false,
+	["WorldMapFrame"] = false,
+	["WorldMapTitleButton"] = true,
+	--["WorldMapPositioningGuide"] = true,
+	["WorldStateScoreFrame"] = false,
 }
 
 -- Frames provided by load on demand addons, hooked when the addon is loaded.
 local lodFrames = {
 	-- AddonName = { list of frames, same syntax as above }
+	Blizzard_AchievementUI = { ["AchievementFrame"] = false, ["AchievementFrameHeader"] = true, ["AchievementFrameCategoriesContainer"] = "AchievementFrame" },
+	Blizzard_ArchaeologyUI = { ["ArchaeologyFrame"] = false },
+	--Blizzard_ArenaUI
 	Blizzard_AuctionUI = { ["AuctionFrame"] = false },
+	Blizzard_BarbershopUI = { ["BarberShopFrame"] = false },
 	Blizzard_BindingUI = { ["KeyBindingFrame"] = false },
+	Blizzard_BlackMarketUI = { ["BlackMarketFrame"] = false },
+	Blizzard_Calendar = { ["CalendarFrame"] = false, ["CalendarCreateEventFrame"] = true },
+	Blizzard_ChallengesUI = { ["ChallengesLeaderboardFrame"] = false },
 	Blizzard_CraftUI = { ["CraftFrame"] = false },
+	Blizzard_EncounterJournal = { ["EncounterJournal"] = false },
+	--Blizzard_GarrisonUI
+	--Blizzard_GlyphUI = { ["GlyphFrame"] = true },
 	Blizzard_GMSurveyUI = { ["GMSurveyFrame"] = false },
+	Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
+	--Blizzard_GuildControlUI
+	Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true },
 	Blizzard_InspectUI = { ["InspectFrame"] = false, ["InspectPVPFrame"] = true, ["InspectTalentFrame"] = true },
+	Blizzard_ItemAlterationUI = { ["TransmogrifyFrame"] = false },
 	Blizzard_ItemSocketingUI = { ["ItemSocketingFrame"] = false },
+	Blizzard_ItemUpgradeUI = { ["ItemUpgradeFrame"] = false, },
+	Blizzard_LookingForGuildUI = { ["LookingForGuildFrame"] = false },
 	Blizzard_MacroUI = { ["MacroFrame"] = false },
+	--Blizzard_ObjectiveTracker
+	Blizzard_PetJournal = { ["PetJournalParent"] = false },
+	--Blizzard_PVPUI
+	--Blizzard_QuestChoice
 	Blizzard_TalentUI = { ["PlayerTalentFrame"] = false },
+	Blizzard_TimeManager = { ["TimeManagerFrame"] = false },
+	--Blizzard_TokenUI = { ["TokenFrame"] = true },
 	Blizzard_TradeSkillUI = { ["TradeSkillFrame"] = false },
 	Blizzard_TrainerUI = { ["ClassTrainerFrame"] = false },
-	Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
-	Blizzard_TimeManager = { ["TimeManagerFrame"] = false },
-	Blizzard_AchievementUI = { ["AchievementFrame"] = false, ["AchievementFrameHeader"] = true, ["AchievementFrameCategoriesContainer"] = "AchievementFrame" },
-	Blizzard_TokenUI = { ["TokenFrame"] = true },
-	Blizzard_ItemSocketingUI = { ["ItemSocketingFrame"] = false },
-	--Blizzard_GlyphUI = { ["GlyphFrame"] = true },
-	Blizzard_BarbershopUI = { ["BarberShopFrame"] = false },
-	Blizzard_Calendar = { ["CalendarFrame"] = false, ["CalendarCreateEventFrame"] = true },
-	Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true },
-	Blizzard_ReforgingUI = { ["ReforgingFrame"] = false, ["ReforgingFrameInvisibleButton"] = true, ["ReforgingFrame.InvisibleButton"] = true },
-	Blizzard_ArchaeologyUI = { ["ArchaeologyFrame"] = false },
-	Blizzard_LookingForGuildUI = { ["LookingForGuildFrame"] = false },
 	Blizzard_VoidStorageUI = { ["VoidStorageFrame"] = false, ["VoidStorageBorderFrameMouseBlockFrame"] = "VoidStorageFrame" },
-	Blizzard_ItemAlterationUI = { ["TransmogrifyFrame"] = false },
-	Blizzard_EncounterJournal = { ["EncounterJournal"] = false }, -- as of 4.3
-
-	-- New frames in MoP
-	Blizzard_PetJournal = { ["PetJournalParent"] = false },
-	Blizzard_BlackMarketUI = { ["BlackMarketFrame"] = false }, -- UNTESTED
-	Blizzard_ChallengesUI = { ["ChallengesLeaderboardFrame"] = false }, -- UNTESTED
-	Blizzard_ItemUpgradeUI = { ["ItemUpgradeFrame"] = false, }, -- UNTESTED
-
-	Blizzard_PVPUI = { ["PVPUIFrame"] = false },
 }
 
 local parentFrame = {}

@@ -94,7 +94,7 @@ end
 function RealUIHuDCloseConfig()
 	-- Watch Frames
 	if not WFCollapsed then
-		ObjectiveTracker:Show()
+		ObjectiveTrackerFrame:Show()
 	end
 
 	-- HuDConfig_Positions:ToggleMovers(false)
@@ -103,8 +103,8 @@ end
 
 function HuDConfig:InitHuDConfig()
 	-- WatchFrame
-	WFCollapsed = ObjectiveTracker.userCollapsed or not(ObjectiveTracker:IsShown())
-	if not WFCollapsed then ObjectiveTracker:Hide() end
+	WFCollapsed = ObjectiveTrackerFrame.userCollapsed or not(ObjectiveTrackerFrame:IsShown())
+	if not WFCollapsed then ObjectiveTrackerFrame:Hide() end
 
 	-- EAB
 	EABShown = ExtraActionBarFrame:IsShown()
