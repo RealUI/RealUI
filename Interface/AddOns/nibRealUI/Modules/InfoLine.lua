@@ -1979,6 +1979,29 @@ local function Friends_OnEnter(self)
 	end
 end
 
+local BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+local function Friends_BNetRequest(self, event, ...)
+	print("Friends_BNetRequest: event", event)
+	if (event == "BN_FRIEND_INVITE_REMOVED") then
+		print("Friends_BNetRequest", "Hide")
+		BNetRequestAlert:Hide();
+	elseif (event == "BN_FRIEND_INVITE_ADDED") or (not BNetRequestAlert.isHidden) then
+		print("Friends_BNetRequest", "Show")
+		BNetRequestAlert:SetSize(177, BNetRequestAlert.Text:GetHeight()+42);
+		BNetRequestAlert.Arrow:SetPoint("TOP", BNetRequestAlert, "BOTTOM", -30, 4)
+		BNetRequestAlert:SetPoint("BOTTOM", self, "TOP", 30, 18)
+		BNetRequestAlert.CloseButton:SetScript("OnClick", function(self)
+			BNetRequestAlert:Hide()
+			BNetRequestAlert.isHidden = true
+		end);
+		BNetRequestAlert.Text:SetText(BN_TOAST_NEW_INVITE);
+		BNetRequestAlert.Text:SetWidth(145);
+		BNetRequestAlert:Show();
+		BNetRequestAlert.isHidden = false
+	end
+	print("Friends_BNetRequest: isHidden", BNetRequestAlert.isHidden)
+end
+
 local function Friends_Update(self)
 	FriendsTabletData = nil
 	FriendsTabletDataNames = nil
@@ -3834,10 +3857,16 @@ function InfoLine:CreateFrames()
 	tinsert(TextureFrames, {ILFrames.friends, ILFrames.friends.icon, "friends"})
 	ILFrames.friends.tag = "friends"
 	ILFrames.friends:RegisterEvent("FRIENDLIST_UPDATE")
+	ILFrames.friends:RegisterEvent("BN_FRIEND_INVITE_ADDED")
+	ILFrames.friends:RegisterEvent("BN_FRIEND_INVITE_LIST_INITIALIZED")
+	ILFrames.friends:RegisterEvent("BN_FRIEND_INVITE_REMOVED")
 	ILFrames.friends:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
 	ILFrames.friends:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
 	ILFrames.friends:RegisterEvent("PLAYER_ENTERING_WORLD")
-	ILFrames.friends:SetScript("OnEvent", function(self) 
+	ILFrames.friends:SetScript("OnEvent", function(self, event, ...)
+		if (BNGetNumFriendInvites() > 0) or event == "BN_FRIEND_INVITE_REMOVED" then
+			Friends_BNetRequest(self, event, ...)
+		end
 		if not db.elements.friends then return end
 		self.needrefreshed = true
 		self.elapsed = 0

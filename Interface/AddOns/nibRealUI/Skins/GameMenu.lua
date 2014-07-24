@@ -23,13 +23,11 @@ function GameMenu:Skin()
 	GameMenuButtonStore:SetAlpha(0)
 
 	-- RealUI Control
-	GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 37)
-
 	local ConfigStr = string.format("|cffffffffReal|r|cff%sUI|r Config", nibRealUI:ColorTableToStr(nibRealUI.media.colors.red))
 	GameMenuFrame.realuiControl = nibRealUI:CreateTextButton(ConfigStr, GameMenuFrame, GameMenuButtonQuit:GetWidth(), GameMenuButtonQuit:GetHeight())
 	GameMenuFrame.realuiControl:SetPoint("BOTTOM", GameMenuFrame, "BOTTOM", 0, 21)
 	GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() nibRealUI:ShowConfigBar(); HideUIPanel(GameMenuFrame) end)
-	
+
 	-- Button Backgrounds
 	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonHelp, GameMenuButtonHelp)
 	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonOptions, GameMenuButtonMacros)
@@ -47,5 +45,6 @@ function GameMenu:OnInitialize()
 end
 
 function GameMenu:OnEnable()
-	GameMenuFrame:HookScript("OnShow", function() GameMenu:Skin() end)
+	GameMenu:Skin()
+	GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 37) end)
 end
