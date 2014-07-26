@@ -2,7 +2,6 @@ local F, C = unpack(select(2, ...))
 
 tinsert(C.modules["Aurora"], function()
 	F.CreateBD(RolePollPopup)
-	F.CreateSD(RolePollPopup)
 	F.Reskin(RolePollPopupAcceptButton)
 	F.ReskinClose(RolePollPopupCloseButton)
 

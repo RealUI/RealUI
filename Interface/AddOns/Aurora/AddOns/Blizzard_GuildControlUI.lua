@@ -4,7 +4,6 @@ C.modules["Blizzard_GuildControlUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	F.CreateBD(GuildControlUI)
-	F.CreateSD(GuildControlUI)
 
 	for i = 1, 9 do
 		select(i, GuildControlUI:GetRegions()):Hide()

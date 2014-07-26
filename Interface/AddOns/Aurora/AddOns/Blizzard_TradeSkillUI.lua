@@ -2,7 +2,6 @@ local F, C = unpack(select(2, ...))
 
 C.modules["Blizzard_TradeSkillUI"] = function()
 	F.CreateBD(TradeSkillGuildFrame)
-	F.CreateSD(TradeSkillGuildFrame)
 	F.CreateBD(TradeSkillGuildFrameContainer, .25)
 	TradeSkillFramePortrait:Hide()
 	TradeSkillFramePortrait.Show = F.dummy

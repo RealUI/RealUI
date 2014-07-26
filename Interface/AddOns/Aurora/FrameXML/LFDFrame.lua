@@ -58,7 +58,6 @@ tinsert(C.modules["Aurora"], function()
 	F.CreateBG(bonusValor.Icon)
 
 	F.CreateBD(LFDRoleCheckPopup)
-	F.CreateSD(LFDRoleCheckPopup)
 	F.Reskin(LFDRoleCheckPopupAcceptButton)
 	F.Reskin(LFDRoleCheckPopupDeclineButton)
 	F.Reskin(LFDQueueFrameRandomScrollFrameChildFrame.bonusRepFrame.ChooseButton)

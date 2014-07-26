@@ -92,9 +92,7 @@ C.modules["Blizzard_ItemAlterationUI"] = function()
 		end
 	end)
 
-	TransmogrifyConfirmationPopup:SetScale(UIParent:GetScale())
 	F.CreateBD(TransmogrifyConfirmationPopup)
-	F.CreateSD(TransmogrifyConfirmationPopup)
 	F.Reskin(TransmogrifyConfirmationPopup.Button1)
 	F.Reskin(TransmogrifyConfirmationPopup.Button2)
 

@@ -31,7 +31,6 @@ C.modules["Blizzard_PetJournal"] = function()
 	PetJournalTutorialButton.Ring:Hide()
 
 	F.CreateBD(PetJournalParent)
-	F.CreateSD(PetJournalParent)
 	F.CreateBD(MountJournal.MountCount, .25)
 	F.CreateBD(PetJournal.PetCount, .25)
 	F.CreateBD(MountJournal.MountDisplay.ModelFrame, .25)

@@ -37,7 +37,6 @@ tinsert(C.modules["Aurora"], function()
 			tab:SetPoint(a1, p, a2, x + 2, y)
 		end
 		F.CreateBG(tab)
-		F.CreateSD(tab, 5, 0, 0, 0, 1, 1)
 		select(2, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
 	end
 

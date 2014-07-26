@@ -4,7 +4,6 @@ C.modules["Blizzard_AchievementUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	F.CreateBD(AchievementFrame)
-	F.CreateSD(AchievementFrame)
 	AchievementFrameCategories:SetBackdrop(nil)
 	AchievementFrameSummary:SetBackdrop(nil)
 	for i = 1, 17 do
@@ -63,7 +62,7 @@ C.modules["Blizzard_AchievementUI"] = function()
 	AchievementFrameFilterDropDownText:SetPoint("CENTER", -10, 1)
 
 	AchievementFrameSummaryCategoriesStatusBar:SetStatusBarTexture(C.media.backdrop)
-	AchievementFrameSummaryCategoriesStatusBar:GetStatusBarTexture():SetGradient("VERTICAL", 0, .5, 0, 0, .5, 0)
+	AchievementFrameSummaryCategoriesStatusBar:GetStatusBarTexture():SetGradient("VERTICAL", 0, .4, 0, 0, .6, 0)
 	AchievementFrameSummaryCategoriesStatusBarLeft:Hide()
 	AchievementFrameSummaryCategoriesStatusBarMiddle:Hide()
 	AchievementFrameSummaryCategoriesStatusBarRight:Hide()
@@ -262,7 +261,7 @@ C.modules["Blizzard_AchievementUI"] = function()
 		local label = _G["AchievementFrameSummaryCategoriesCategory"..i.."Label"]
 
 		bu:SetStatusBarTexture(C.media.backdrop)
-		bar:SetGradient("VERTICAL", 0, .5, 0, 0, .5, 0)
+		bar:SetGradient("VERTICAL", 0, .4, 0, 0, .6, 0)
 		label:SetTextColor(1, 1, 1)
 		label:SetPoint("LEFT", bu, "LEFT", 6, 0)
 
@@ -312,7 +311,7 @@ C.modules["Blizzard_AchievementUI"] = function()
 	for _, bar in pairs(bars) do
 		local name = bar:GetName()
 		bar:SetStatusBarTexture(C.media.backdrop)
-		bar:GetStatusBarTexture():SetGradient("VERTICAL", 0, .5, 0, 0, .5, 0)
+		bar:GetStatusBarTexture():SetGradient("VERTICAL", 0, .4, 0, 0, .6, 0)
 		_G[name.."Left"]:Hide()
 		_G[name.."Middle"]:Hide()
 		_G[name.."Right"]:Hide()

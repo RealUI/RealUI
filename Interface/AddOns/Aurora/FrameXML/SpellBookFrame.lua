@@ -81,7 +81,6 @@ tinsert(C.modules["Aurora"], function()
 				tab:SetCheckedTexture(C.media.checked)
 
 				F.CreateBG(tab)
-				F.CreateSD(tab, 5, 0, 0, 0, 1, 1)
 
 				tab:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
 
@@ -101,7 +100,6 @@ tinsert(C.modules["Aurora"], function()
 			tab:SetCheckedTexture(C.media.checked)
 
 			F.CreateBG(tab)
-			F.CreateSD(tab, 5, 0, 0, 0, 1, 1)
 
 			tab:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
 

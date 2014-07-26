@@ -20,7 +20,6 @@ tinsert(C.modules["Aurora"], function()
 	LootHistoryFrame.ResizeButton:SetSize(32, 12)
 
 	F.CreateBD(LootHistoryFrame)
-	F.CreateSD(LootHistoryFrame)
 
 	F.ReskinClose(LootHistoryFrame.CloseButton)
 	F.ReskinScroll(LootHistoryFrameScrollFrameScrollBar)

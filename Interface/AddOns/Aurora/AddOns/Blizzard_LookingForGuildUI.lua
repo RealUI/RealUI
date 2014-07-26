@@ -18,7 +18,6 @@ C.modules["Blizzard_LookingForGuildUI"] = function()
 	LookingForGuildFrameInset:DisableDrawLayer("BACKGROUND")
 	LookingForGuildFrameInset:DisableDrawLayer("BORDER")
 	F.CreateBD(GuildFinderRequestMembershipFrame)
-	F.CreateSD(GuildFinderRequestMembershipFrame)
 	for i = 1, 5 do
 		local bu = _G["LookingForGuildBrowseFrameContainerButton"..i]
 		F.CreateBD(bu, .25)

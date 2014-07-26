@@ -5,9 +5,6 @@ C.modules["Blizzard_GuildBankUI"] = function()
 	GuildBankFrame:DisableDrawLayer("BORDER")
 	GuildBankFrame:DisableDrawLayer("OVERLAY")
 	GuildBankTabTitle:SetDrawLayer("ARTWORK")
-	GuildBankLimitLabel:SetDrawLayer("ARTWORK")
-	GuildBankCashFlowLabel:SetDrawLayer("ARTWORK")
-
 
 	GuildBankEmblemFrame:Hide()
 	GuildBankPopupFrameTopLeft:Hide()
@@ -62,7 +59,7 @@ C.modules["Blizzard_GuildBankUI"] = function()
 		_G["GuildBankColumn"..i]:GetRegions():Hide()
 		for j = 1, NUM_SLOTS_PER_GUILDBANK_GROUP do
 			local bu = _G["GuildBankColumn"..i.."Button"..j]
-			F.CreateBD(_G["GuildBankColumn"..i.."Button"..j])
+
 			bu:SetNormalTexture("")
 			bu:SetPushedTexture("")
 
@@ -98,7 +95,6 @@ C.modules["Blizzard_GuildBankUI"] = function()
 
 		bu:SetCheckedTexture(C.media.checked)
 		F.CreateBG(bu)
-		F.CreateSD(bu, 5, 0, 0, 0, 1, 1)
 
 		local a1, p, a2, x, y = bu:GetPoint()
 		bu:SetPoint(a1, p, a2, x + 1, y)

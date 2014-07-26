@@ -1,9 +1,7 @@
-local alpha, useButtonGradientColour
-
-if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
-if not REALUI_WINDOW_FRAMES then REALUI_WINDOW_FRAMES = {} end
-
 -- [[ Core ]]
+
+-- for custom APIs (see docs online)
+local LATEST_API_VERSION = "5.0.7"
 
 local addon, core = ...
 
@@ -15,6 +13,8 @@ Aurora = core
 AuroraConfig = {}
 
 local F, C = unpack(select(2, ...))
+
+-- [[ Constants and settings ]]
 
 C.classcolours = {
 	["HUNTER"] = { r = 0.58, g = 0.86, b = 0.49 },
@@ -37,19 +37,19 @@ C.media = {
 	["arrowRight"] = "Interface\\AddOns\\Aurora\\media\\arrow-right-active",
 	["backdrop"] = "Interface\\ChatFrame\\ChatFrameBackground",
 	["checked"] = "Interface\\AddOns\\Aurora\\media\\CheckButtonHilight",
-	["font"] = "Interface\\AddOns\\nibRealUI\\Fonts\\standard.ttf",
+	["font"] = "Interface\\AddOns\\Aurora\\media\\font.ttf",
 	["gradient"] = "Interface\\AddOns\\Aurora\\media\\gradient",
 	["roleIcons"] = "Interface\\Addons\\Aurora\\media\\UI-LFG-ICON-ROLES",
 }
 
 C.defaults = {
-	["alpha"] = 0.9,
+	["alpha"] = 0.5,
 	["bags"] = true,
-	["buttonGradientColour"] = {0.09, 0.09, 0.09, 1},
-	["buttonSolidColour"] = {0.09, 0.09, 0.09, 1},
-	["useButtonGradientColour"] = false,
-	["chatBubbles"] = false,
-	["enableFont"] = false,
+	["buttonGradientColour"] = {.3, .3, .3, .3},
+	["buttonSolidColour"] = {.2, .2, .2, 1},
+	["useButtonGradientColour"] = true,
+	["chatBubbles"] = true,
+	["enableFont"] = true,
 	["loot"] = true,
 	["useCustomColour"] = false,
 		["customColour"] = {r = 1, g = 1, b = 1},
@@ -70,6 +70,10 @@ C.shouldStyleTooltips = true -- set to false if one of the above is loaded or Au
 
 C.frames = {}
 
+-- [[ Cached variables ]]
+
+local alpha, useButtonGradientColour
+
 -- [[ Functions ]]
 
 local _, class = UnitClass("player")
@@ -88,7 +92,7 @@ F.CreateBD = function(f, a)
 		edgeFile = C.media.backdrop,
 		edgeSize = 1,
 	})
-	f:SetBackdropColor(0.03, 0.03, 0.03, a or alpha)
+	f:SetBackdropColor(0, 0, 0, a or alpha)
 	f:SetBackdropBorderColor(0, 0, 0)
 	if not a then tinsert(C.frames, f) end
 end
@@ -101,32 +105,9 @@ F.CreateBG = function(frame)
 	bg:SetPoint("TOPLEFT", frame, -1, 1)
 	bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
 	bg:SetTexture(C.media.backdrop)
-	bg:SetVertexColor(0.03, 0.03, 0.03)
+	bg:SetVertexColor(0, 0, 0)
 
 	return bg
-end
-
-F.CreateSD = function(parent, size, r, g, b, alpha, offset)
-	local sd = CreateFrame("Frame", nil, parent)
-	sd.size = size or 5
-	sd.offset = offset or 0
-	sd:SetBackdrop({
-		edgeFile = nil,
-		edgeSize = sd.size,
-	})
-	sd:SetPoint("TOPLEFT", parent, -sd.size - 1 - sd.offset, sd.size + 1 + sd.offset)
-	sd:SetPoint("BOTTOMRIGHT", parent, sd.size + 1 + sd.offset, -sd.size - 1 - sd.offset)
-	sd:SetBackdropBorderColor(r or 0, g or 0, b or 0)
-	sd:SetAlpha(alpha or 1)
-	tinsert(REALUI_WINDOW_FRAMES, parent)
-
-	sd.tex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
-	sd.tex:SetAllPoints()
-	sd.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-	sd.tex:SetHorizTile(true)
-	sd.tex:SetVertTile(true)
-	sd.tex:SetBlendMode("ADD")
-	tinsert(REALUI_STRIPE_TEXTURES, sd.tex)
 end
 
 -- we assign these after loading variables for caching
@@ -557,7 +538,6 @@ F.SetBD = function(f, x, y, x2, y2)
 	end
 	bg:SetFrameLevel(0)
 	F.CreateBD(bg)
-	F.CreateSD(bg)
 end
 
 F.ReskinPortraitFrame = function(f, isButtonFrame)
@@ -587,7 +567,6 @@ F.ReskinPortraitFrame = function(f, isButtonFrame)
 	end
 
 	F.CreateBD(f)
-	F.CreateSD(f)
 	F.ReskinClose(_G[name.."CloseButton"])
 end
 
@@ -662,7 +641,7 @@ F.ColourQuality = function(button, id)
 	end
 end
 
--- [[ Module handling ]]
+-- [[ Variable and module handling ]]
 
 C.modules = {}
 C.modules["Aurora"] = {}
@@ -708,22 +687,55 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 		-- for modules
 		C.r, C.g, C.b = r, g, b
-	end
 
-	for module, moduleFunc in pairs(C.modules) do
-		if type(moduleFunc) == "function" then
-			if module == addon then
-				moduleFunc()
-			end
-		elseif type(moduleFunc) == "table" then
-			if module == addon then
-				for _, moduleFunc in pairs(C.modules[module]) do
-					moduleFunc()
+		-- [[ Custom style support ]]
+
+		local customStyle = AURORA_CUSTOM_STYLE
+
+		if customStyle and customStyle.apiVersion ~= nil and customStyle.apiVersion == LATEST_API_VERSION then
+			-- replace functions
+			if customStyle.functions then
+				for funcName, func in pairs(customStyle.functions) do
+					if F[funcName] then
+						F[funcName] = func
+					end
 				end
+			end
+
+			-- replace class colours
+			if customStyle.classcolors then
+				C.classcolours = customStyle.classcolors
+
+				if not AuroraConfig.useCustomColour then
+ 					r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
+ 					C.r, C.g, C.b = r, g, b
+ 				end
+			end
+
+			-- replace colour scheme
+			local highlightColour = customStyle.highlightColor
+			if highlightColour then
+				r, g, b = highlightColour.r, highlightColour.g, highlightColour.b
+				C.r, C.g, C.b = r, g, b
 			end
 		end
 	end
 
+	-- [[ Load modules ]]
+
+	-- check if the addon loaded is supported by Aurora, and if it is, execute its module
+	local addonModule = C.modules[addon]
+	if addonModule then
+		if type(addonModule) == "function" then
+			addonModule()
+		else
+			for _, moduleFunc in pairs(addonModule) do
+				moduleFunc()
+			end
+		end
+	end
+
+	-- all this should be moved out of the main file when I have time
 	if addon == "Aurora" then
 
 		-- [[ Headers ]]
@@ -744,7 +756,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Simple backdrops ]]
 
-		local bds = {"AutoCompleteBox", "TicketStatusFrameButton", "GearManagerDialogPopup", "TokenFramePopup", "RaidInfoFrame", "ScrollOfResurrectionSelectionFrame", "ScrollOfResurrectionFrame", "VoiceChatTalkers", "ReportPlayerNameDialog", "ReportCheatingDialog", "QueueStatusFrame"}
+		local bds = {"AutoCompleteBox", "TicketStatusFrameButton", "GearManagerDialogPopup", "RaidInfoFrame", "ScrollOfResurrectionSelectionFrame", "ScrollOfResurrectionFrame", "VoiceChatTalkers", "ReportPlayerNameDialog", "ReportCheatingDialog", "QueueStatusFrame"}
 
 		for i = 1, #bds do
 			local bd = _G[bds[i]]
@@ -816,24 +828,12 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		F.ReskinArrow(TabardCharacterModelRotateRightButton, "right")
 
 		hooksecurefunc("CharacterFrame_Expand", function()
-			select(15, CharacterFrameExpandButton:GetRegions()):SetTexture(C.media.arrowLeft)
+			CharacterFrameExpandButton.tex:SetTexture(C.media.arrowLeft)
 		end)
 
 		hooksecurefunc("CharacterFrame_Collapse", function()
-			select(15, CharacterFrameExpandButton:GetRegions()):SetTexture(C.media.arrowRight)
+			CharacterFrameExpandButton.tex:SetTexture(C.media.arrowRight)
 		end)
-
-		-- [[ Check boxes ]]
-
-		local checkboxes = {"TokenFramePopupInactiveCheckBox", "TokenFramePopupBackpackCheckBox"}
-		for i = 1, #checkboxes do
-			local checkbox = _G[checkboxes[i]]
-			if checkbox then
-				F.ReskinCheck(checkbox)
-			else
-				print("Aurora: "..checkboxes[i].." was not found.")
-			end
-		end
 
 		-- [[ Radio buttons ]]
 
@@ -857,7 +857,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		for i = 1, #FrameBDs do
 			local FrameBD = _G[FrameBDs[i]]
 			F.CreateBD(FrameBD)
-			F.CreateSD(FrameBD)
 		end
 
 		-- Dropdown lists
@@ -869,23 +868,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				if not backdrop.reskinned then
 					F.CreateBD(menu)
 					F.CreateBD(backdrop)
-
-					backdrop.tex = backdrop:CreateTexture(nil, "BACKGROUND", nil, 1)
-					backdrop.tex:SetAllPoints()
-					backdrop.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-					backdrop.tex:SetHorizTile(true)
-					backdrop.tex:SetVertTile(true)
-					backdrop.tex:SetBlendMode("ADD")
-					tinsert(REALUI_STRIPE_TEXTURES, backdrop.tex)
-
-					menu.tex = menu:CreateTexture(nil, "BACKGROUND", nil, 1)
-					menu.tex:SetAllPoints()
-					menu.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-					menu.tex:SetHorizTile(true)
-					menu.tex:SetVertTile(true)
-					menu.tex:SetBlendMode("ADD")
-					tinsert(REALUI_STRIPE_TEXTURES, menu.tex)
-	
 					backdrop.reskinned = true
 				end
 			end
@@ -1134,7 +1116,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		OpenMailFrameIcon:Hide()
 		OpenMailHorizontalBarLeft:Hide()
 		select(18, MailFrame:GetRegions()):Hide()
-		-- select(26, OpenMailFrame:GetRegions()):Hide()
 		select(25, OpenMailFrame:GetRegions()):Hide()
 		for i = 4, 7 do
 			select(i, SendMailFrame:GetRegions()):Hide()
@@ -1237,8 +1218,17 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- Currency frame
 
+		TokenFramePopupCorner:Hide()
+		TokenFramePopup:SetPoint("TOPLEFT", TokenFrame, "TOPRIGHT", 1, -28)
+		F.CreateBD(TokenFramePopup)
+		F.ReskinClose(TokenFramePopupCloseButton)
+		F.ReskinCheck(TokenFramePopupInactiveCheckBox)
+		F.ReskinCheck(TokenFramePopupBackpackCheckBox)
+
 		local function updateButtons()
 			local buttons = TokenFrameContainer.buttons
+
+			if not buttons then return end
 
 			for i = 1, #buttons do
 				local bu = buttons[i]
@@ -1249,6 +1239,24 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 					bu.highlight.SetPoint = F.dummy
 					bu.highlight:SetTexture(r, g, b, .2)
 					bu.highlight.SetTexture = F.dummy
+
+					bu.expandIcon:SetTexture("")
+
+					local minus = bu:CreateTexture(nil, "OVERLAY")
+					minus:SetSize(7, 1)
+					minus:SetPoint("LEFT", 8, 0)
+					minus:SetTexture(C.media.backdrop)
+					minus:SetVertexColor(1, 1, 1)
+					minus:Hide()
+					bu.minus = minus
+
+					local plus = bu:CreateTexture(nil, "OVERLAY")
+					plus:SetSize(1, 7)
+					plus:SetPoint("LEFT", 11, 0)
+					plus:SetTexture(C.media.backdrop)
+					plus:SetVertexColor(1, 1, 1)
+					plus:Hide()
+					bu.plus = plus
 
 					bu.categoryMiddle:SetAlpha(0)
 					bu.categoryLeft:SetAlpha(0)
@@ -1262,13 +1270,18 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 				if bu.isHeader then
 					bu.bg:Hide()
+					bu.minus:Show()
+					bu.plus:SetShown(not bu.isExpanded)
 				else
 					bu.bg:Show()
+					bu.plus:Hide()
+					bu.minus:Hide()
 				end
 			end
 		end
 
 		TokenFrame:HookScript("OnShow", updateButtons)
+		hooksecurefunc("TokenFrame_Update", updateButtons)
 		hooksecurefunc(TokenFrameContainer, "update", updateButtons)
 
 		F.ReskinScroll(TokenFrameContainerScrollBar)
@@ -1591,12 +1604,8 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			local ic = bu.gameIcon
 
 			bu.background:Hide()
-			F.Reskin(bu.travelPassButton)
-			bu.travelPassButton:SetSize(20, 32)
-			bu.inv = bu.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
-			bu.inv:SetTexture("Interface\\FriendsFrame\\PlusManz-PlusManz")
-			bu.inv:SetPoint("TOPRIGHT", 1, -4)
-			bu.inv:SetSize(22, 22)
+			bu.travelPassButton:SetAlpha(0)
+			bu.travelPassButton:EnableMouse(false)
 
 			bu:SetHighlightTexture(C.media.backdrop)
 			bu:GetHighlightTexture():SetVertexColor(.24, .56, 1, .2)
@@ -1612,17 +1621,10 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		local function UpdateScroll()
 			for i = 1, FRIENDS_TO_DISPLAY do
 				local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
-				local en = bu.travelPassButton:IsEnabled()
-
-				if en == 1 then
-					bu.inv:SetAlpha(0.7)
-				else
-					bu.inv:SetAlpha(0.3)
-				end
 
 				if bu.gameIcon:IsShown() then
 					bu.bg:Show()
-					bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -1, -5)
+					bu.gameIcon:SetPoint("TOPRIGHT", bu, "TOPRIGHT", -2, -2)
 				else
 					bu.bg:Hide()
 				end
@@ -1704,7 +1706,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		F.CreateBD(BattleTagInviteFrame)
-		F.CreateSD(BattleTagInviteFrame)
 		F.CreateBD(BattleTagInviteFrame.NoteFrame, .25)
 
 		local _, send, cancel = BattleTagInviteFrame:GetChildren()
@@ -1829,7 +1830,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				if slotLink then
 					slot.icon:SetAlpha(1)
 				else
-					slot.icon:SetAlpha(1)
+					slot.icon:SetAlpha(0)
 				end
 
 				F.ColourQuality(slot, slotLink)
@@ -2563,7 +2564,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		-- Tutorial Frame
 
 		F.CreateBD(TutorialFrame)
-		F.CreateSD(TutorialFrame)
 
 		TutorialFrameBackground:Hide()
 		TutorialFrameBackground.Show = F.dummy
@@ -2579,10 +2579,12 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- because gradient alpha and OnUpdate doesn't work for some reason...
 
-		select(14, TutorialFrameOkayButton:GetRegions()):Hide()
-		select(15, TutorialFramePrevButton:GetRegions()):Hide()
-		select(15, TutorialFrameNextButton:GetRegions()):Hide()
-		select(14, TutorialFrameCloseButton:GetRegions()):Hide()
+		if select(14, TutorialFrameOkayButton:GetRegions()) then
+			select(14, TutorialFrameOkayButton:GetRegions()):Hide()
+			select(15, TutorialFramePrevButton:GetRegions()):Hide()
+			select(15, TutorialFrameNextButton:GetRegions()):Hide()
+			select(14, TutorialFrameCloseButton:GetRegions()):Hide()
+		end
 		TutorialFramePrevButton:SetScript("OnEnter", nil)
 		TutorialFrameNextButton:SetScript("OnEnter", nil)
 		TutorialFrameOkayButton:SetBackdropColor(0, 0, 0, .25)
@@ -2820,7 +2822,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end)
 
 		F.CreateBD(CinematicFrameCloseDialog)
-		F.CreateSD(CinematicFrameCloseDialog)
 		F.Reskin(CinematicFrameCloseDialogConfirmButton)
 		F.Reskin(CinematicFrameCloseDialogResumeButton)
 
@@ -3009,14 +3010,12 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end)
 
 		F.CreateBD(MovieFrame.CloseDialog)
-		F.CreateSD(MovieFrame.CloseDialog)
 		F.Reskin(MovieFrame.CloseDialog.ConfirmButton)
 		F.Reskin(MovieFrame.CloseDialog.ResumeButton)
 
 		-- Pet battle queue popup
 
 		F.CreateBD(PetBattleQueueReadyFrame)
-		F.CreateSD(PetBattleQueueReadyFrame)
 		F.CreateBG(PetBattleQueueReadyFrame.Art)
 		F.Reskin(PetBattleQueueReadyFrame.AcceptButton)
 		F.Reskin(PetBattleQueueReadyFrame.DeclineButton)
@@ -3063,7 +3062,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		F.CreateBD(PVPReadyDialog)
 		PVPReadyDialog.SetBackdrop = F.dummy
-		F.CreateSD(PVPReadyDialog)
 
 		F.Reskin(PVPReadyDialog.enterButton)
 		F.Reskin(PVPReadyDialog.leaveButton)
@@ -3138,7 +3136,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		select(5, HelpFrameGM_Response:GetChildren()):Hide()
 		select(6, HelpFrameGM_Response:GetChildren()):Hide()
 		HelpFrameKnowledgebaseNavBarHomeButtonLeft:Hide()
-		TokenFramePopupCorner:Hide()
 		GearManagerDialogPopupScrollFrame:GetRegions():Hide()
 		select(2, GearManagerDialogPopupScrollFrame:GetRegions()):Hide()
 		for i = 1, 10 do
@@ -3342,7 +3339,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		HelpFrameGM_ResponseScrollFrame1ScrollBar:SetPoint("TOPLEFT", HelpFrameGM_ResponseScrollFrame1, "TOPRIGHT", 1, -16)
 		HelpFrameGM_ResponseScrollFrame2ScrollBar:SetPoint("TOPLEFT", HelpFrameGM_ResponseScrollFrame2, "TOPRIGHT", 1, -16)
 		RaidInfoFrame:SetPoint("TOPLEFT", RaidFrame, "TOPRIGHT", 1, -28)
-		TokenFramePopup:SetPoint("TOPLEFT", TokenFrame, "TOPRIGHT", 1, -28)
 		CharacterFrameExpandButton:SetPoint("BOTTOMRIGHT", CharacterFrameInset, "BOTTOMRIGHT", -14, 6)
 		TabardCharacterModelRotateRightButton:SetPoint("TOPLEFT", TabardCharacterModelRotateLeftButton, "TOPRIGHT", 1, 0)
 		LFDQueueFrameSpecificListScrollFrameScrollBarScrollDownButton:SetPoint("TOP", LFDQueueFrameSpecificListScrollFrameScrollBar, "BOTTOM", 0, 2)
@@ -3369,7 +3365,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		if IsAddOnLoaded("ACP") then F.Reskin(GameMenuButtonAddOns) end
 
-		local closebuttons = {"HelpFrameCloseButton", "RaidInfoCloseButton", "ItemRefCloseButton", "TokenFramePopupCloseButton", "ChannelFrameDaughterFrameDetailCloseButton", "RaidParentFrameCloseButton", "SideDressUpModelCloseButton"}
+		local closebuttons = {"HelpFrameCloseButton", "RaidInfoCloseButton", "ItemRefCloseButton", "ChannelFrameDaughterFrameDetailCloseButton", "RaidParentFrameCloseButton", "SideDressUpModelCloseButton"}
 		for i = 1, #closebuttons do
 			local closebutton = _G[closebuttons[i]]
 			F.ReskinClose(closebutton)
@@ -3418,7 +3414,7 @@ Delay:SetScript("OnEvent", function()
 			end
 
 			local getBackdropColor = function()
-				return unpack(RealUI.media.window)
+				return 0, 0, 0, .6
 			end
 
 			local getBackdropBorderColor = function()
@@ -3433,9 +3429,8 @@ Delay:SetScript("OnEvent", function()
 				bg:SetPoint("BOTTOMRIGHT")
 				bg:SetFrameLevel(t:GetFrameLevel()-1)
 				bg:SetBackdrop(backdrop)
-				bg:SetBackdropColor(0.03, 0.03, 0.03, 0.9)
+				bg:SetBackdropColor(0, 0, 0, .6)
 				bg:SetBackdropBorderColor(0, 0, 0)
-				tinsert(REALUI_WINDOW_FRAMES, bg)
 
 				t.GetBackdrop = getBackdrop
 				t.GetBackdropColor = getBackdropColor

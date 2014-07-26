@@ -29,7 +29,6 @@ C.modules["Blizzard_QuestChoice"] = function()
 	end
 
 	F.CreateBD(QuestChoiceFrame)
-	F.CreateSD(QuestChoiceFrame)
 	F.Reskin(QuestChoiceFrame.Option1.OptionButton)
 	F.Reskin(QuestChoiceFrame.Option2.OptionButton)
 	F.ReskinClose(QuestChoiceFrame.CloseButton)

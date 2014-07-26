@@ -34,7 +34,6 @@ tinsert(C.modules["Aurora"], function()
 		copper:SetPoint("LEFT", silver, "RIGHT", 1, 0)
 
 		F.CreateBD(frame)
-		F.CreateSD(frame)
 
 		for j = 1, 3 do
 			F.Reskin(frame["button"..j])

@@ -7,7 +7,6 @@ C.modules["Blizzard_DebugTools"] = function()
 		ScriptErrorsFrameTitleBG:Hide()
 		ScriptErrorsFrameDialogBG:Hide()
 		F.CreateBD(ScriptErrorsFrame)
-		F.CreateSD(ScriptErrorsFrame)
 
 		FrameStackTooltip:SetScale(UIParent:GetScale())
 		FrameStackTooltip:SetBackdrop(nil)
