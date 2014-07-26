@@ -693,8 +693,8 @@ local function AddAura(unit, name, isBuff, spellID, count, btype, duration, cast
 		if caster then
 			local guid = UnitGUID(caster); cname = UnitName(caster); vehicle = UnitHasVehicleUI(caster)
 			if guid then
-				local first3 = tonumber("0x" .. strsub(guid, 8,10)); local unitType = bit.band(first3,0x00f)
-				isNPC = (unitType == 0x003); vehicle = vehicle or (unitType == 0x005)
+				local unitType = strsplit(":", guid)
+				isNPC = (unitType == "Creature"); vehicle = vehicle or (unitType == "Vehicle")
 				if MOD.LibBossIDs and MOD.LibBossIDs.BossIDs[tonumber(guid:sub(-13, -9), 16)] then boss = 1 end
 			end
 		end

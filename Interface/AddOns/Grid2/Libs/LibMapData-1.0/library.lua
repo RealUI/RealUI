@@ -2293,10 +2293,12 @@ do
 	
 	-- Build the localized name list.
 	local continentList = {GetMapContinents()}
-	for cID = 1, #continentList do
+	local cID = 0
+	for i = 1, #continentList, 2 do
+		cID = cID + 1
 		SetMapZoom(cID, 0)
 		local mapfile = GetMapInfo()
-		local cname = continentList[cID]
+		local cname = continentList[i + 1]
 		mapToLocal[mapfile] = cname
 		localToMap[cname] = mapfile
 		mapData[idToMap[mapfile]].continent = cID

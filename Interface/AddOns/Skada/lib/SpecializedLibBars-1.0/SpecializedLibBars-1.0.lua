@@ -796,18 +796,16 @@ function barListPrototype:ReverseGrowth(reverse)
 	end
 
 	if self.resizebutton then
-		if reverse then
-			self.resizebutton:SetNormalTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRightTop")
-			self.resizebutton:SetHighlightTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRightTop")
-		else
-			self.resizebutton:SetNormalTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRight")
-			self.resizebutton:SetHighlightTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRight")
-		end
-
+		self.resizebutton:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
+		self.resizebutton:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Down")
 		self.resizebutton:ClearAllPoints()
 		if reverse then
+			self.resizebutton:GetNormalTexture():SetRotation(math.pi/2)
+			self.resizebutton:GetHighlightTexture():SetRotation(math.pi/2)
 			self.resizebutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
 		else
+			self.resizebutton:GetNormalTexture():SetRotation(0)
+			self.resizebutton:GetHighlightTexture():SetRotation(0)
 			self.resizebutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
 		end
 	end

@@ -1,4 +1,12 @@
 ------------------------------------------------------------------------
+r567 | nebula169 | 2014-07-22 10:06:40 +0000 (Tue, 22 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/BarDisplay.lua
+   D /trunk/images
+   M /trunk/lib/SpecializedLibBars-1.0/SpecializedLibBars-1.0.lua
+
+use game assets for title bar buttons and resize grip
+------------------------------------------------------------------------
 r566 | oscarucb | 2014-07-09 21:57:22 +0000 (Wed, 09 Jul 2014) | 2 lines
 Changed paths:
    M /trunk/Menus.lua

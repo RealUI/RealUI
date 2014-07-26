@@ -1659,7 +1659,7 @@ local masterProfile = {
 
  -- Loot settings.
  qualityExclusions		= {
-  [ITEM_QUALITY_POOR] = true,
+  [LE_ITEM_QUALITY_POOR] = true,
  },
  alwaysShowQuestItems	= true,
  itemsAllowed			= {},
