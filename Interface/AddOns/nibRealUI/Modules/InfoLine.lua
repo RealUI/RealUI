@@ -1981,12 +1981,9 @@ end
 
 local BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
 local function Friends_BNetRequest(self, event, ...)
-	print("Friends_BNetRequest: event", event)
 	if (event == "BN_FRIEND_INVITE_REMOVED") then
-		print("Friends_BNetRequest", "Hide")
 		BNetRequestAlert:Hide();
 	elseif (event == "BN_FRIEND_INVITE_ADDED") or (not BNetRequestAlert.isHidden) then
-		print("Friends_BNetRequest", "Show")
 		BNetRequestAlert:SetSize(177, BNetRequestAlert.Text:GetHeight()+42);
 		BNetRequestAlert.Arrow:SetPoint("TOP", BNetRequestAlert, "BOTTOM", -30, 4)
 		BNetRequestAlert:SetPoint("BOTTOM", self, "TOP", 30, 18)
@@ -1999,7 +1996,6 @@ local function Friends_BNetRequest(self, event, ...)
 		BNetRequestAlert:Show();
 		BNetRequestAlert.isHidden = false
 	end
-	print("Friends_BNetRequest: isHidden", BNetRequestAlert.isHidden)
 end
 
 local function Friends_Update(self)
