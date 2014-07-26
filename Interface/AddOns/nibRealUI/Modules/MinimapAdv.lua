@@ -1186,7 +1186,7 @@ function MinimapAdv:UpdatePOIGlow()
 			QuestPOI_SelectButton(poi.poiButton)
 			poi:SetFrameLevel(Minimap:GetFrameLevel() + 3)
 		else
-			QuestPOI_DeselectButton(poi.poiButton)
+			QuestPOI_ClearSelection(Minimap)
 			poi:SetFrameLevel(Minimap:GetFrameLevel() + 2)
 		end
 	end
@@ -1223,11 +1223,11 @@ function MinimapAdv:POIUpdate(...)
 	local numEntries = QuestMapUpdateAllQuests()
 	-- Iterate through all available quests, retrieving POI info
 	for i = 1, numEntries do
-		local questId, questLogIndex = QuestPOIGetQuestIDByVisibleIndex(i)
-		if questId then
-			local _, posX, posY, objective = QuestPOIGetIconInfo(questId)
+		local questID, questLogIndex = QuestPOIGetQuestIDByVisibleIndex(i)
+		if questID then
+			local _, posX, posY, objective = QuestPOIGetIconInfo(questID)
 			if ( posX and posY and (IsQuestWatched(questLogIndex) or not db.poi.watchedOnly) ) then
-				local title, level, questTag, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily = GetQuestLogTitle(questLogIndex)
+				local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, _, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory = GetQuestLogTitle(questLogIndex)
 				local numObjectives = GetNumQuestLeaderBoards(questLogIndex)
 				if isComplete and isComplete < 0 then
 					isComplete = false
@@ -1254,10 +1254,10 @@ function MinimapAdv:POIUpdate(...)
 					-- Using QUEST_POI_COMPLETE_SWAP gets the ? without any circle
 					-- Using QUEST_POI_COMPLETE_IN gets the ? in a brownish circle
 					numCompletedQuests = numCompletedQuests + 1
-					poiButton = QuestPOI_DisplayButton("Minimap", QUEST_POI_COMPLETE_IN, numCompletedQuests, questId)
+					poiButton = QuestPOI_GetButton(Minimap, questID)--, "completed", numCompletedQuests)
 				else
 					numNumericQuests = numNumericQuests + 1
-					poiButton = QuestPOI_DisplayButton("Minimap", QUEST_POI_NUMERIC, numNumericQuests, questId)
+					poiButton = QuestPOI_GetButton(Minimap, questID, "numeric", numNumericQuests, isStory)
 				end
 				poiButton:SetPoint("CENTER", poi)
 				poiButton:SetScale(db.poi.icons.scale)
@@ -1266,7 +1266,7 @@ function MinimapAdv:POIUpdate(...)
 				poi.poiButton = poiButton
 				
 				poi.index = i
-				poi.questId = questId
+				poi.questID = questID
 				poi.questLogIndex = questLogIndex
 				poi.c = c
 				poi.z = z
@@ -1308,6 +1308,7 @@ end
 
 function MinimapAdv:UpdatePOIEnabled()
 	if db.poi.enabled and not(IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ")) then
+		QuestPOI_Initialize(Minimap, onCreateFunc)
 		self:POIUpdate()
 		self:InitializePOI()
 	else
@@ -1371,82 +1372,97 @@ function MinimapAdv:QueueTimeFrequentCheck()
 	end
 end
 
----- Dungeon Difficulty ----
+--[[ Dungeon Difficulty ----
+	ID - "Name"
+    1  - "Normal"
+    2  - "Heroic"
+    3  - "10 Player"
+    4  - "25 Player"
+    5  - "10 Player (Heroic)"
+    6  - "25 Player (Heroic)"
+    7  - "Looking For Raid"
+    8  - "Challenge Mode"
+    9  - "40 Player"
+    10 - nil
+    11 - "Heroic Scenario"
+    12 - "Normal Scenario"
+    13 - nil
+    14 - "Normal"  10-30 Player 
+    15 - "Heroic"  10-30 Player 
+    16 - "Mythic"  20 Player 
+    17 - "Looking For Raid" 10-25 Player 
+]]--
 function MinimapAdv:DungeonDifficultyUpdate()
 	-- If in a Party/Raid then show Dungeon Difficulty text
 	MMFrames.info.dungeondifficulty.text:SetText("")
 	local _, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
-	if (self.IsGuildGroup or ((instanceType == "party" or instanceType == "raid") and not (difficulty == 1 and maxPlayers == 5))) then
-		-- Get Dungeon Difficulty
-		local isHeroic = false
-		--[[ difficulty values:	
-		    1-"Normal"
-		    2-"Heroic"
-		    3-"10 Player"
-		    4-"25 Player"
-		    5-"10 Player (Heroic)"
-		    6-"25 Player (Heroic)"
-		    7-"Looking For Raid"
-		    8-"Challenge Mode"
-		    9-"40 Player"
-		    10-nil
-		    11-"Heroic Scenario"
-		    12-"Normal Scenario"
-		    13-nil
-		    14-"Flexible"
-		]]--
-		if (difficulty == 2) or (difficulty == 5) or (difficulty == 6) or (difficulty == 8) or (difficulty == 11) then 
-			isHeroic = true
-		else
-			isHeroic = false
-		end
-		
-		-- Set Text
-		local DifficultyText
+	local name, groupType, isHeroic, isChallengeMode = GetDifficultyInfo(difficulty)
+	if instanceType ~= "none" then
+		if (instanceType == "party" or instanceType == "scenario") then
+			self.DifficultyText = "D: "..maxPlayers
+			if isChallengeMode then self.DifficultyText = self.DifficultyText.."+" end
+		elseif (instanceType == "raid") then
+			self.DifficultyText = "R: "
+			
+			--Set raid size
+			if (difficulty <= 9) or (difficulty == 16) then
+				--Legacy raids and Mythic are fixed size
+				self.DifficultyText = self.DifficultyText..maxPlayers
+			else
+				--Current Normal, Heroic, and LFR are flexible
+				self.DifficultyText = self.DifficultyText..currPlayers
+			end
 
-		if (difficulty == 14) then 
-			DifficultyText = "Flex ("..currPlayers..")" 
+			--Give Mythic double "+" because it's #Hardcore
+			if (difficulty == 16) then
+				--Mythic gets the isHeroic flag
+				self.DifficultyText = self.DifficultyText.."+"
+			elseif (difficulty == 15) then
+				--Heroic does not
+				self.DifficultyText = self.DifficultyText.."+"
+			end
 		else
-			DifficultyText = tostring(maxPlayers)
+			self.DifficultyText = "PvP: "
+			if (instanceType == "arena") then
+				self.DifficultyText = self.DifficultyText..currPlayers
+			else
+				self.DifficultyText = self.DifficultyText..maxPlayers
+			end
 		end
 
-		if isHeroic then DifficultyText = DifficultyText.."+" end
-		if self.IsGuildGroup then DifficultyText = DifficultyText.." ("..GUILD..")" end
-		
-		MMFrames.info.dungeondifficulty.text:SetText("D: "..DifficultyText)
-		MMFrames.info.dungeondifficulty:SetWidth(MMFrames.info.dungeondifficulty.text:GetStringWidth() + 12)
-		
+		if isHeroic then self.DifficultyText = self.DifficultyText.."+" end
+
 		-- Update Frames
+		MMFrames.info.dungeondifficulty.text:SetText(self.DifficultyText.." ")
 		MMFrames.info.dungeondifficulty:EnableMouse(true)
-		
-		if self.IsGuildGroup then
-			MMFrames.info.dungeondifficulty:SetScript("OnEnter", function(self)
-				local guildName = GetGuildInfo("player")
-				local _, instanceType, _, _, maxPlayers = GetInstanceInfo()
-				local _, numGuildPresent, numGuildRequired = InGuildParty()
-				if instanceType == "arena" then
-					maxPlayers = numGuildRequired
-				end
-				GameTooltip:SetOwner(MMFrames.info.dungeondifficulty, "ANCHOR_RIGHT", 18)
-				GameTooltip:SetText(GUILD_GROUP, 1, 1, 1)
-				GameTooltip:AddLine(strform(GUILD_ACHIEVEMENTS_ELIGIBLE, numGuildRequired, maxPlayers, guildName), nil, nil, nil, 1)
-				GameTooltip:Show()
-			end)
-			MMFrames.info.dungeondifficulty:SetScript("OnLeave", function()
-				if GameTooltip:IsShown() then GameTooltip:Hide() end
-			end)
-		else
-			MMFrames.info.dungeondifficulty:SetScript("OnEnter", nil)
-		end
+		MMFrames.info.dungeondifficulty:SetWidth(MMFrames.info.dungeondifficulty.text:GetStringWidth() + 12)
 		
 		-- Set to show DungeonDifficulty
 		InfoShown.dungeondifficulty = true
 	else
-		-- Update Frames
-		MMFrames.info.dungeondifficulty:SetScript("OnEnter", nil)
-		
+		self.DifficultyText = ""
 		-- Set to hide DungeonDifficulty
 		InfoShown.dungeondifficulty = false
+	end
+	if self.IsGuildGroup then
+		self.DifficultyText = self.DifficultyText.."("..GUILD..")"
+		MMFrames.info.dungeondifficulty:SetScript("OnEnter", function(self)
+			local guildName = GetGuildInfo("player")
+			local _, instanceType, _, _, maxPlayers = GetInstanceInfo()
+			local _, numGuildPresent, numGuildRequired = InGuildParty()
+			if instanceType == "arena" then
+				maxPlayers = numGuildRequired
+			end
+			GameTooltip:SetOwner(MMFrames.info.dungeondifficulty, "ANCHOR_RIGHT", 18)
+			GameTooltip:SetText(GUILD_GROUP, 1, 1, 1)
+			GameTooltip:AddLine(strform(GUILD_ACHIEVEMENTS_ELIGIBLE, numGuildRequired, maxPlayers, guildName), nil, nil, nil, 1)
+			GameTooltip:Show()
+		end)
+		MMFrames.info.dungeondifficulty:SetScript("OnLeave", function()
+			if GameTooltip:IsShown() then GameTooltip:Hide() end
+		end)
+	else
+		MMFrames.info.dungeondifficulty:SetScript("OnEnter", nil)
 	end
 	if not UpdateProcessing then
 		self:UpdateInfoPosition()

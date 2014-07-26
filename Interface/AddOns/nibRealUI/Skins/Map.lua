@@ -6,8 +6,6 @@ local Map = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceHoo
 
 local strform = string.format
 
-local mop_530 = select(4, GetBuildInfo()) >= 50300
-
 ----------
 function Map:SetMapStrata()
 	WorldMapFrame:SetFrameLevel(10)
@@ -21,13 +19,14 @@ function Map:Skin()
 	
 	local F = Aurora[1]
 	
-	WorldMapFrameTitle:Hide()
+	--WorldMapFrameTitle:Hide()
 	
 	F.SetBD(WorldMapPositioningGuide)
 
 	WorldMapPlayerUpper:EnableMouse(false)
 	WorldMapPlayerLower:EnableMouse(false)
 	
+	--[[
 	F.ReskinScroll(WorldMapQuestScrollFrameScrollBar)
 	F.ReskinScroll(WorldMapQuestDetailScrollFrameScrollBar)
 	F.ReskinScroll(WorldMapQuestRewardScrollFrameScrollBar)
@@ -36,25 +35,24 @@ function Map:Skin()
 		WorldMapPositioningGuide:SetWidth(WorldMapPositioningGuide:GetWidth() - 8)
 		WorldMapPositioningGuide:SetHeight(WorldMapPositioningGuide:GetHeight() - 6)
 		WorldMapPositioningGuide.SizeSet = true
-	end
+	end]]
 	
 	F.ReskinClose(WorldMapFrameCloseButton)
 	WorldMapFrameCloseButton:SetPoint("TOPRIGHT", WorldMapPositioningGuide, "TOPRIGHT", -3, -3)
 	WorldMapFrameCloseButton:SetFrameStrata("HIGH")
 	WorldMapFrameCloseButton:SetFrameLevel(12)
 	
+	--[[
 	F.ReskinDropDown(WorldMapLevelDropDown)
 	F.ReskinDropDown(WorldMapZoneMinimapDropDown)
 	F.ReskinDropDown(WorldMapContinentDropDown)
 	F.ReskinDropDown(WorldMapZoneDropDown)
 	F.ReskinDropDown(WorldMapShowDropDown)
 	
-	F.Reskin(WorldMapZoomOutButton)
+	F.Reskin(WorldMapZoomOutButton)]]
 	
-	if not mop_530 then
-		F.ReskinCheck(WorldMapQuestShowObjectives)
-		F.ReskinCheck(WorldMapShowDigSites)
-	end
+	F.ReskinCheck(WorldMapQuestShowObjectives)
+	F.ReskinCheck(WorldMapShowDigSites)
 
 	if foglightmenu then
 		F.ReskinDropDown(foglightmenu)

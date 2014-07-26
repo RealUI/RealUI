@@ -1,6 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-if not Aurora then return end
-local F, C = unpack(Aurora)
+local F, C
 
 local _
 local MODNAME = "SkinAce3"
@@ -87,6 +86,7 @@ end
 function SkinAce3:Skin()
 	local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 	if not AceGUI then return end
+	F, C = unpack(Aurora)
 
 	local r, g, b = nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3]
 
