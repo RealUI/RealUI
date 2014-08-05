@@ -7,7 +7,7 @@ function cbNivaya:UpdateBags() for i = -3, 11 do cbNivaya:UpdateBag(i) end end
 
 local L = cBnivL
 cB_Filters = {}
-cB_KnownItems = {}
+cB_KnownItems = cB_KnownItems or {}
 cBniv_CatInfo = {}
 cB_ItemClass = {}
 
@@ -108,9 +108,9 @@ cB_Filters.fNewItems = function(item)
 	if not cBnivCfg.NewItems then return false end
 	if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
 	if not item.link then return false end
-	if not cB_KnownItems[item.name] then return true end
-	local t = cbNivaya:getItemCount(item.name)
-	return (t > cB_KnownItems[item.name]) and true or false
+	if not cB_KnownItems[item.id] then return true end
+	local t = cbNivaya:getItemCount(item.id)
+	return (t > cB_KnownItems[item.id]) and true or false
 end
 
 -----------------------------------------

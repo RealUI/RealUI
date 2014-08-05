@@ -212,30 +212,18 @@ end
 
 -- Reset New
 local resetNewItems = function(self)
-	cB_KnownItems = {}
-	for i = 0,4 do
-		local tNumSlots = GetContainerNumSlots(i)
+	cB_KnownItems = cB_KnownItems or {}
+	for bag = 0, 4 do
+		local tNumSlots = GetContainerNumSlots(bag)
 		if tNumSlots > 0 then
-			for j = 1,tNumSlots do
-				local tLink = GetContainerItemLink(i,j)
-				if tLink then
-					if (strsub(tLink, 13, 21) == "battlepet") then
-						local _, tName = strmatch(tLink, "|H(.-)|h(.-)|h")
-						local _,tStackCount = GetContainerItemInfo(i,j)
-						if cB_KnownItems[tName] then
-							cB_KnownItems[tName] = cB_KnownItems[tName] + tStackCount
-						else
-							cB_KnownItems[tName] = tStackCount
-						end
-					else	
-						local tName = GetItemInfo(tLink)
-						local _,tStackCount = GetContainerItemInfo(i,j)
-						if cB_KnownItems[tName] then
-							cB_KnownItems[tName] = cB_KnownItems[tName] + tStackCount
-						else
-							cB_KnownItems[tName] = tStackCount
-						end
-					end
+			for slot = 1, tNumSlots do
+				local item = cbNivaya:GetItemInfo(bag, slot, i)
+				print("resetNewItems", item.id)
+				item.id = item.id or 0
+				if cB_KnownItems[item.id] then
+					cB_KnownItems[item.id] = cB_KnownItems[item.id] + (item.stackCount and item.stackCount or 0)
+				else
+					cB_KnownItems[item.id] = item.stackCount and item.stackCount or 0
 				end
 			end 
 		end
@@ -418,7 +406,7 @@ local GetFirstFreeSlot = function(bagtype)
 end
 
 function MyContainer:OnCreate(name, settings)
-	print("MyContainer:OnCreate", name)
+	--print("MyContainer:OnCreate", name)
 	local font = RealUI.font.pixel1
 	
 	settings = settings or {}
