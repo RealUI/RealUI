@@ -15,12 +15,15 @@ local ButtonWidthCollapsed = 3
 local NeedRefreshed, FramesCreated
 
 local MarkerColors = {
-	[1] = {0.2, 	0.2,		1,		0.8},
-	[2] = {0.2, 	0.9,		0.2,	0.8},
-	[3] = {1, 		0.2,		1,		0.8},
-	[4] = {1, 		0.2,		0.2,	0.8},
-	[5] = {1, 		1,			0.2,	0.8},
-	[6] = {0.3,		0.3,		0.3,	0.8},
+	[1] = {0.0,  0.71, 1.0,  0.8}, --Blue   RaidTargetingIcon_6
+	[2] = {0.04, 0.95, 0.0,  0.8}, --Green  RaidTargetingIcon_4
+	[3] = {0.83, 0.22, 0.9,  0.8}, --Purple RaidTargetingIcon_3
+	[4] = {1.0,  0.24, 0.17, 0.8}, --Red    RaidTargetingIcon_7
+	[5] = {1.0,  0.92, 0.0,  0.8}, --Yellow RaidTargetingIcon_1
+	[6] = {0.98, 0.57, 0.0,  0.8}, --Orange RaidTargetingIcon_2
+	[7] = {0.7,  0.82, 0.87, 0.8}, --Silver RaidTargetingIcon_5
+	[8] = {0.98, 0.98, 0.98, 0.8}, --White  RaidTargetingIcon_8
+	[9] = {0.3,  0.3,  0.3,  0.8}, --Clear all
 }
 
 -- Options
@@ -272,9 +275,21 @@ local function CreateFrames()
 	WMF.Buttons[5] = CreateButton(5)
 	WMF.Buttons[5]:SetAttribute("macrotext", "/wm 5")
 	
-	-- Clear All
+	-- Orange
 	WMF.Buttons[6] = CreateButton(6)
-	WMF.Buttons[6]:SetAttribute("macrotext", "/cwm all")
+	WMF.Buttons[6]:SetAttribute("macrotext", "/wm 6")
+	
+	-- Silver
+	WMF.Buttons[7] = CreateButton(7)
+	WMF.Buttons[7]:SetAttribute("macrotext", "/wm 7")
+	
+	-- White
+	WMF.Buttons[8] = CreateButton(8)
+	WMF.Buttons[8]:SetAttribute("macrotext", "/wm 8")
+	
+	-- Clear All
+	WMF.Buttons[9] = CreateButton(9)
+	WMF.Buttons[9]:SetAttribute("macrotext", "/cwm all")
 	
 	FramesCreated = true
 end

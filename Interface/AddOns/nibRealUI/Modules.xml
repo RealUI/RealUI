@@ -10,6 +10,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 
 	<!-- Modules -->
 	<Script file="Modules\ActionBarDoodads.lua"/>
+	<Script file="Modules\AddonListAdv.lua"/>
 	<Script file="Modules\AlertFrameMove.lua"/>
 	<Script file="Modules\AltPowerBar.lua"/>
 	<Script file="Modules\CombatFader.lua"/>

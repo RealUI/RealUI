@@ -976,6 +976,7 @@ end
 ---------------------
 local BlackList = {
 	["QueueStatusMinimapButton"] = true,
+	["GarrisonLandingPageMinimapButton"] = true,
 	["MiniMapTracking"] = true,
 	["MiniMapMailFrame"] = true,
 	["HelpOpenTicketButton"] = true,
@@ -985,36 +986,50 @@ local OddList = {
 	["BagSync_MinimapButton"] = true,
 	["OutfitterMinimapButton"] = true,
 }
+
 local buttons = {}
 local button = CreateFrame("Frame", "ButtonCollectFrame", UIParent)
-local line = math.ceil(Minimap:GetWidth() / 20)
+button:SetPoint("TOPLEFT", Minimap, "BOTTOMLEFT", -1, -5)
+button:SetSize(136, 32)
+button:EnableMouse(true)
+button:SetAlpha(0)
+button:Show()
+local function fadeIn()
+	--print("fadeIn")
+	if InCombatLockdown() then return end
+	UIFrameFadeIn(button, 0.1, button:GetAlpha(), 1)
+end
+local function fadeOut()
+	--print("fadeOut")
+	UIFrameFadeOut(button, 0.5, button:GetAlpha(), 0)
+end
+button:HookScript("OnEnter", fadeIn)
+button:HookScript("OnLeave", fadeOut)
+local line = math.floor(button:GetWidth() / 32)
 
 local function PositionAndStyle()
-	button:SetSize(20, 20)
-	button:SetPoint("TOPLEFT", Minimap, "BOTTOMLEFT", 0, -15)
+	local row = 0
 	for i = 1, #buttons do
 		if not buttons[i].styled then
+			buttons[i]:SetParent(button)
 			buttons[i]:ClearAllPoints()
-			if i == 1 then
-				buttons[i]:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
-			elseif i == line then
-				buttons[i]:SetPoint("TOPLEFT", buttons[1], "BOTTOMLEFT", 0, -1)
+			--print("Eval", i, i + line - 1, math.floor(row+1) * line, row)
+			if i + line - 1 == math.floor(row+1) * line then
+				--print("Row start", i)
+				buttons[i]:SetPoint("TOPLEFT", button, "TOPLEFT", 0, -(row * 32))
 			else
-				buttons[i]:SetPoint("TOPLEFT", buttons[i-1], "TOPRIGHT", 1, 0)
+				--print("Row cont.", i)
+				buttons[i]:SetPoint("TOPLEFT", buttons[i-1], "TOPRIGHT", 2, 0)
 			end
+			row = i / line
 			buttons[i].ClearAllPoints = function() return end
 			buttons[i].SetPoint = function() return end
-			buttons[i]:SetAlpha(0)
-			buttons[i]:HookScript("OnEnter", function(self)
-				if InCombatLockdown() then return end
-				UIFrameFadeIn(self, 0.1, self:GetAlpha(), 1)
-			end)
-			buttons[i]:HookScript("OnLeave", function(self)
-				UIFrameFadeOut(self, 0.8, self:GetAlpha(), 0)
-			end)
+			buttons[i]:HookScript("OnEnter", fadeIn)
+			buttons[i]:HookScript("OnLeave", fadeOut)
 			buttons[i].styled = true
 		end
 	end
+	button:SetHeight(math.ceil(row) * 32)
 end
 
 local function MoveMMButton(mmb)
@@ -1049,6 +1064,11 @@ local collect = CreateFrame("Frame")
 collect:RegisterEvent("PLAYER_ENTERING_WORLD")
 collect:SetScript("OnEvent", function(self, event)
 	self:UnregisterEvent(event)
+	if Aurora then
+		print("Minimap holder")
+		local F = Aurora[1]
+		F.CreateBD(button)
+	end
 	if db.information.minimapbuttons then
 		UpdateMMButtonsTable()
 		PositionAndStyle()
@@ -1770,10 +1790,12 @@ local function Farm_OnMouseDown()
 		ExpandedState = 1
 		MMFrames.farm.icon:SetTexture(Textures.Collapse)
 		PlaySound("igMiniMapOpen")
+		button:Hide()
 	else
 		ExpandedState = 0
 		MMFrames.farm.icon:SetTexture(Textures.Expand)
 		PlaySound("igMiniMapClose")
+		button:Show()
 	end
 	if DropDownList1 then DropDownList1:Hide() end
 	if DropDownList2 then DropDownList2:Hide() end
@@ -1909,6 +1931,7 @@ end
 
 -- Hide default Clock Button
 function MinimapAdv:ADDON_LOADED(event, ...)
+	print("MinimapAdv:", event, ...)
 	local addon = ...
 	if addon == "Blizzard_TimeManager" then
 		TimeManagerClockButton:HookScript("OnShow", function()
@@ -2169,6 +2192,23 @@ local function SetUpMinimapFrame()
 	QueueStatusMinimapButton:SetParent(Minimap)
 	QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
 	QueueStatusMinimapButtonBorder:Hide()
+
+	GarrisonLandingPageMinimapButton:SetParent(Minimap)
+	GarrisonLandingPageMinimapButton:ClearAllPoints()
+	GarrisonLandingPageMinimapButton:SetPoint("TOPRIGHT", 2, 2)
+	GarrisonLandingPageMinimapButton:SetSize(32, 32)
+	GarrisonLandingPageMinimapButton:SetScript("OnEnter", function()
+		GameTooltip:SetOwner(GarrisonLandingPageMinimapButton, "ANCHOR_RIGHT");
+		GameTooltip:SetText(GARRISON_LANDING_PAGE_TITLE, 1, 1, 1);
+		GameTooltip:AddLine(MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP, nil, nil, nil, true);
+		GameTooltip:Show();
+	end)
+
+	GarrisonLandingPageTutorialBox:ClearAllPoints()
+	GarrisonLandingPageTutorialBox:SetPoint("TOP", GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
+	SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 180)
+	GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
+	GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", GarrisonLandingPageTutorialBox, "TOP", 0, -3)
 
 	MinimapNorthTag:SetAlpha(0)
 	

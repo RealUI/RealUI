@@ -414,7 +414,7 @@ RealUILootFrame:SetToplevel(true)
 RealUILootFrame:SetHeight(64)
 
 RealUILootFrame.close = CreateFrame("Button", "RealUI_Loot_Close", RealUILootFrame, "UIPanelCloseButton")
-RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
+--RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
 RealUILootFrame.slots = {}
 
 local function LootOnEnter(self)
@@ -554,13 +554,15 @@ RealUILootFrame:SetScript("OnHide", function(self)
 	CloseLoot()
 end)
 
-function Loot:LOOT_OPENED(event, autoloot)
-	--print("LOOT_OPENED: ")
+function Loot:LOOT_READY(event, autoLoot)
+	--print("Loot:", event, autoLoot)
 	RealUILootFrame:Show()
 	RealUILootFrame:SetWidth(db.lootwidth)
 	
-	if(not RealUILootFrame:IsShown()) then
-		CloseLoot(not autoLoot)
+	--print("Loot:", not RealUILootFrame:IsShown(), autoLoot == 0)
+	if (not RealUILootFrame:IsShown()) then
+		--print("Loot:", "Close?")
+		CloseLoot(autoLoot == 0)
 	end
 
 	local items = GetNumLootItems()
@@ -601,7 +603,7 @@ function Loot:LOOT_OPENED(event, autoloot)
 	else
 		local slot = RealUILootFrame.slots[1] or createSlot(1)
 
-		slot.name:SetText(":\\ "..EMPTY)
+		slot.name:SetText(EMPTY)
 		slot.icon:SetTexture[[Interface\Icons\Inv_box_01]]
 		slot.icon:SetDesaturated(true)
 
@@ -622,8 +624,8 @@ function Loot:LOOT_SLOT_CLEARED(event, slot)
 	anchorSlots(RealUILootFrame)
 end
 
-function Loot:LOOT_CLOSED()
-	--print("LOOT_CLOSED: ")
+function Loot:LOOT_CLOSED(...)
+	--print("Loot:", ...)
 	StaticPopup_Hide"LOOT_BIND"
 	RealUILootFrame:Hide()
 
@@ -665,7 +667,7 @@ function Loot:InitializeLoot()
 		MasterLooterFrame:Hide();
 	end
 	
-	self:RegisterEvent("LOOT_OPENED")
+	self:RegisterEvent("LOOT_READY")
 	self:RegisterEvent("LOOT_SLOT_CLEARED")
 	self:RegisterEvent("LOOT_CLOSED")
 	self:RegisterEvent("OPEN_MASTER_LOOT_LIST")
@@ -686,6 +688,9 @@ end
 
 function Loot:PLAYER_LOGIN()
 	self:RefreshMod()
+	if Aurora then
+		Aurora[1].ReskinClose(RealUILootFrame.close, "BOTTOMRIGHT", RealUILootFrame, "TOPRIGHT", 1, -3)
+	end
 end
 
 function Loot:OnInitialize()

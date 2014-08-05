@@ -4287,7 +4287,7 @@ function InfoLine:OnInitialize()
 				guild = true,
 				friends = true,
 				durability = true,
-				bag = false,
+				bag = true,
 				currency = true,
 				xprep = true,
 				clock = true,
