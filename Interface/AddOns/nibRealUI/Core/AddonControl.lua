@@ -9,17 +9,19 @@ local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local RealUIAddOns = {
 	["Chatter"] =					{isAce = true,	db = "ChatterDB"},
 	["DXE"] =						{isAce = true,	db = "DXEDB"},
+	["DBM"] =						{isAce = false,	db = "DBT_PersistentOptions"},
 	["Masque"] =					{isAce = true,	db = "MasqueDB"},
 	["KuiNameplates"] =				{isAce = true,	db = "KuiNameplatesGDB"},
 	["Raven"] =						{isAce = true,	db = "RavenDB"},
 	["Skada"] =						{isAce = true,	db = "SkadaDB"},
 	["Bartender4"] =				{isAce = true,	db = "Bartender4DB"},
 	["Grid2"] =						{isAce = true,	db = "Grid2DB"},
-	["mikScrollingBattleText"] =	{isAce = false,	db = "MSBTProfiles_SavedVarsPerChar",	profKey = "currentProfileName"},
+	["mikScrollingBattleText"] =	{isAce = false,	db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
 	"Chatter",
 	"DXE",
+	"DBM",
 	"KuiNameplates",
 	"Masque",
 	"mikScrollingBattleText",
@@ -98,11 +100,11 @@ function AddonControl:CreateOptionsFrame()
 		acO:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 		acO:Hide()
 	
-	acO.okay = nibRealUI:CreateTextButton(OKAY, acO, 100, 24, false, true)
+	acO.okay = nibRealUI:CreateTextButton(OKAY, acO, 100, 24, true)
 		acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
 		acO.okay:SetScript("OnClick", function() RealUIAddonControlOptions:Hide() end)
 	
-	acO.reloadui = nibRealUI:CreateTextButton("Reload UI", acO, 100, 24, false, true)
+	acO.reloadui = nibRealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
 		acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
 		acO.reloadui:SetScript("OnClick", function() ReloadUI() end)
 		
@@ -158,6 +160,7 @@ function AddonControl:CreateOptionsFrame()
 		["Grid2"] = true,
 	}
 	local PositionAddOns = {
+		["DBM"] = true,
 		["Bartender4"] = true,
 		["Grid2"] = true,
 		["mikScrollingBattleText"] = true,
@@ -168,6 +171,7 @@ function AddonControl:CreateOptionsFrame()
 		["Raven"] = true,
 	}
 	local altAddOnTable = {
+		["DBM"] = "DBM-StatusBarTimers",
 		["KuiNameplates"] = "Kui_Nameplates"
 	}
 	local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevCBStyle, prevReset
@@ -259,7 +263,7 @@ function AddonControl:CreateOptionsFrame()
 			prevCBStyle = cbStyle[cnt]
 
 			-- Reset
-			bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, false, true)
+			bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
 			bReset[cnt].addon = altAddOnTable[addon] or addon
 			bReset[cnt].id = cnt
 			if not prevReset then
@@ -346,6 +350,16 @@ function AddonControl:OnInitialize()
 					},	
 					control = {
 						position = false,
+						style = false,
+					},
+				},
+				["DBM"] = {
+					profiles = {
+						base =			{use = true,	key = "RealUI"},
+						layout =		{use = false,	key = "Healing"},
+					},	
+					control = {
+						position = true,
 						style = false,
 					},
 				},

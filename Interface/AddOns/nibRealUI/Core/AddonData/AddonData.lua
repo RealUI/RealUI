@@ -7,6 +7,7 @@ nibRealUI.AddOns = {
 	"Bartender4",
 	"Chatter",
 	"DXE",
+	"DBM-StatusBarTimers",
 	"FreebTip",
 	"Grid2",
 	"Kui_Nameplates",
@@ -25,6 +26,7 @@ function nibRealUI:LoadAddonData()
 end
 
 function nibRealUI:LoadSpecificAddOnData(addon, skipReload)
+	print("nibRealUI:LoadSpecificAddOnData", addon, skipReload, self["LoadAddOnData_"..addon])
 	if self["LoadAddOnData_"..addon] then
 		self["LoadAddOnData_"..addon]()
 		--setProfile

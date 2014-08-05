@@ -284,7 +284,7 @@ function ConfigBar_ActionBars:SetupWindow()
 		height = 22,
 		x = 14,
 		y = -84,
-		secure = true,
+		template = "SecureActionButtonTemplate",
 		macroText = "/tar "..UnitName("player").."\n/focus\n/run RealUI_ToggleKeyBindings()",
 	}
 	local kbButton = cbGUI:CreateButton(Element, button)

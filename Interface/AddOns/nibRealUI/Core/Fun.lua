@@ -364,13 +364,12 @@ function nibRealUI:CreateCheckbox(name, parent, label, side, size)
 	return f
 end
 
-function nibRealUI:CreateTextButton(name, parent, width, height, secure, small)
-	local f
-	if secure then
-		f = CreateFrame("Button", nil, parent, "SecureActionButtonTemplate")
-	else
-		f = CreateFrame("Button", nil, parent)
+function nibRealUI:CreateTextButton(text, parent, template, width, height, small)
+	if not template then template = "UIPanelButtonTemplate" end
+	if (type(template) ~= "string") then
+		template, width, height, small = "UIPanelButtonTemplate", template, width, height
 	end
+	local f = CreateFrame("Button", nil, parent, template)
 
 	f:SetFrameLevel(parent:GetFrameLevel() + 2)
 	if small then
@@ -380,9 +379,10 @@ function nibRealUI:CreateTextButton(name, parent, width, height, secure, small)
 		f:SetNormalFontObject(GameFontHighlight)
 		f:SetHighlightFontObject(GameFontHighlight)
 	end
-	f:SetText(name)
-	f:SetWidth(width)
-	f:SetHeight(height)
+	if width then
+		f:SetSize(width, height)
+	end
+	f:SetText(text)
 
 	if Aurora then
 		Aurora[1].Reskin(f)

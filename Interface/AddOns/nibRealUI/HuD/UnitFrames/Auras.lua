@@ -148,8 +148,8 @@ Auras.FilterBossAuras = function(...)
 		local guid, isNPC = UnitGUID(caster), false
 		if guid then
 			local first3 = tonumber("0x" .. strsub(guid, 3,5))
-			local unitType = bit.band(first3, 0x00f)
-			isNPC = (unitType == 0x003)
+			local unitType = strsplit(":", guid)
+			isNPC = (unitType == "Creature")
 		end
 		return isNPC
 	end

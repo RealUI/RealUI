@@ -159,7 +159,9 @@ function ConfigBar_Appearance:SetupWindow()
 			min = 50,
 			max = 100,
 			func = function(value)
+				--print("AppearanceWindowOpacity", value / 100)
 				nibRealUI.media.window[4] = value / 100
+				if AuroraConfig then AuroraConfig.alpha = value / 100 end
 				nibRealUI:StyleSetWindowOpacity()
 			end,
 			value = nibRealUI.media.window[4] * 100,

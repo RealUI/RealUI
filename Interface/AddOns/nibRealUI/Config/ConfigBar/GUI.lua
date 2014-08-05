@@ -437,7 +437,7 @@ end
 -- Button
 function ConfigBar_GUI:CreateButton(element, info)
 	local parent = element.window or element
-	local button = nibRealUI:CreateTextButton(info.label, parent, info.width, info.height, info.secure, true)
+	local button = nibRealUI:CreateTextButton(info.label, parent, info.template, info.width, info.height, true)
 	button:SetPoint("TOPLEFT", parent, "TOPLEFT", info.x, info.y)
 	
 	if info.macroText then

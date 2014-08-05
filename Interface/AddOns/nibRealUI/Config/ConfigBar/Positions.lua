@@ -125,7 +125,7 @@ function ConfigBar_Positions:SetupWindow()
 	local buttons = {}
 	local button = {
 		label = L["Show UI Elements"],
-		secure = true,
+		template = "SecureActionButtonTemplate",
 		macroText = "/tar "..UnitName("player").."\n/focus\n/run RealUIHuDTestMode(true)",
 		width = 146,
 		height = 22,
@@ -136,7 +136,7 @@ function ConfigBar_Positions:SetupWindow()
 
 	button = {
 		label = L["Hide UI Elements"],
-		secure = true,
+		template = "SecureActionButtonTemplate",
 		macroText = "/clearfocus\n/cleartarget\n/run RealUIHuDTestMode(false)",
 		width = 146,
 		height = 22,

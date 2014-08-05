@@ -57,7 +57,7 @@ local frames = {
 	["TutorialFrame"] = false,
 	["VideoOptionsFrame"] = false,
 	["WorldMapFrame"] = false,
-	["WorldMapTitleButton"] = true,
+	["WorldMapFrame.BorderFrame"] = true,
 	--["WorldMapPositioningGuide"] = true,
 	["WorldStateScoreFrame"] = false,
 }
@@ -76,7 +76,7 @@ local lodFrames = {
 	Blizzard_ChallengesUI = { ["ChallengesLeaderboardFrame"] = false },
 	Blizzard_CraftUI = { ["CraftFrame"] = false },
 	Blizzard_EncounterJournal = { ["EncounterJournal"] = false },
-	--Blizzard_GarrisonUI
+	Blizzard_GarrisonUI = { ["GarrisonLandingPage"] = false, ["GarrisonBuildingFrame"] = false, ["GarrisonMissionFrame"] = false },
 	--Blizzard_GlyphUI = { ["GlyphFrame"] = true },
 	Blizzard_GMSurveyUI = { ["GMSurveyFrame"] = false },
 	Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
@@ -91,7 +91,7 @@ local lodFrames = {
 	--Blizzard_ObjectiveTracker
 	Blizzard_PetJournal = { ["PetJournalParent"] = false },
 	--Blizzard_PVPUI
-	--Blizzard_QuestChoice
+	Blizzard_QuestChoice = { ["QuestChoiceFrame"] = false },
 	Blizzard_TalentUI = { ["PlayerTalentFrame"] = false },
 	Blizzard_TimeManager = { ["TimeManagerFrame"] = false },
 	--Blizzard_TokenUI = { ["TokenFrame"] = true },

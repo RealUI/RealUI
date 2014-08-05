@@ -112,19 +112,22 @@ function nibRealUI:LoadDBMData()
 		["ShowRecoveryMessage"] = true,
 		["ShowEngageMessage"] = true,
 	}
-	DBT_SavedOptions = {
+end
+
+nibRealUI["LoadAddOnData_DBM-StatusBarTimers"] = function()
+	DBT_PersistentOptions = {
 		["DBM"] = {
-			["HugeTimerY"] = -134.5714874267578,
+			["HugeTimerY"] = 300,
 			["HugeBarXOffset"] = 0,
 			["Scale"] = 1,
-			["TimerX"] = 281.5830078125,
-			["TimerPoint"] = "TOP",
+			["TimerX"] = 400,
+			["TimerPoint"] = "CENTER",
 			["HugeBarYOffset"] = 9,
 			["HugeScale"] = 1,
-			["HugeTimerPoint"] = "TOP",
+			["HugeTimerPoint"] = "CENTER",
 			["BarYOffset"] = 9,
-			["HugeTimerX"] = -249.2625427246094,
-			["TimerY"] = -135.1245422363281,
+			["HugeTimerX"] = -400,
+			["TimerY"] = 300,
 			["BarXOffset"] = 0,
 		},
 	}
