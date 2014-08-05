@@ -2,10 +2,10 @@
 ## Title: |cffffffffReal|r|cffbf3333UI|r
 ## Author: Nibelheim
 ## Notes: RealUI core
-## Version: 8.0 r31
+## Version: 8.1 r1
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Aurora, Bartender4, Grid2, Raven, SharedMedia
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Bartender4, Grid2, Raven, SharedMedia
 ## X-oUF: oUFembed
 
 Libs\Embeds.xml
@@ -19,6 +19,5 @@ Core.xml
 Modules.xml
 HuD.xml
 Config.xml
-Skins.xml
 
 Bindings.xml

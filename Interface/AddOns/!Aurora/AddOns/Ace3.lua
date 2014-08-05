@@ -74,7 +74,7 @@ local function skinLSM30(frame)
 	bg:SetPoint("TOP", frame.dropButton, 0, 0)
 	bg:SetPoint("BOTTOM", frame.dropButton, 0, 0)
 	bg:SetFrameLevel(frame:GetFrameLevel()-1)
-	nibRealUI:CreateBD(bg, 0)
+	F.CreateBD(bg, 0)
 	CreateBackdropTexture(frame, bg)
 	frame.bg = bg
 
@@ -84,7 +84,7 @@ local function skinLSM30(frame)
 end
 
 function SkinAce3:Skin()
-	local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
+	local AceGUI = LibStub("AceGUI-3.0", true)
 	if not AceGUI then return end
 	F, C = unpack(Aurora)
 
@@ -93,8 +93,14 @@ function SkinAce3:Skin()
 	local oldRegisterAsWidget = AceGUI.RegisterAsWidget
 	AceGUI.RegisterAsWidget = function(self, widget)
 		local TYPE = widget.type
-		--print(TYPE)
-		if TYPE == "CheckBox" then
+		--print("Widget:", TYPE)
+		if TYPE == "Button" then
+			if not widget.skinned then
+				F.Reskin(widget.frame)
+				widget.skinned = true
+			end
+
+		elseif TYPE == "CheckBox" then
 			if not widget.skinned then
 				widget["SetType"] = function(self, type)
 					local checkbg = self.checkbg
@@ -181,7 +187,7 @@ function SkinAce3:Skin()
 					widget.skinnedCheckBG = CreateFrame('Frame', nil, widget.frame)
 					widget.skinnedCheckBG:SetPoint('TOPLEFT', widget.checkbg, 'TOPLEFT', 4, -4)
 					widget.skinnedCheckBG:SetPoint('BOTTOMRIGHT', widget.checkbg, 'BOTTOMRIGHT', -4, 4)
-					nibRealUI:CreateBD(widget.skinnedCheckBG, 0)
+					F.CreateBD(widget.skinnedCheckBG, 0)
 					CreateBackdropTexture(widget.frame, widget.skinnedCheckBG)
 				end
 
@@ -193,6 +199,18 @@ function SkinAce3:Skin()
 				widget.check:SetDesaturated(true)
 				widget.check:SetVertexColor(r, g, b)
 
+				widget.skinned = true
+			end
+
+		elseif TYPE == "ColorPicker" then
+			if not widget.skinned then
+				F.CreateBDFrame(widget.colorSwatch)
+				widget.colorSwatch:SetTexture(C.media.backdrop)
+				widget.colorSwatch:SetSize(14, 14)
+				local texture = select(2, widget.frame:GetRegions())
+				texture:Hide()
+				local checkers = select(3, widget.frame:GetRegions())
+				checkers:SetDrawLayer("BORDER")
 				widget.skinned = true
 			end
 
@@ -209,6 +227,43 @@ function SkinAce3:Skin()
 				widget.text:ClearAllPoints()
 				widget.text:SetPoint("LEFT", widget.dropdown, 0, 0)
 				widget.text:SetPoint("RIGHT", widget.dropdown, -40, 0)
+				widget.skinned = true
+			end
+
+		elseif TYPE == "EditBox" then
+			if not widget.skinned then
+				F.ReskinInput(widget.editbox)
+				F.Reskin(widget.button)
+				widget.skinned = true
+			end
+
+		elseif TYPE == "Slider" then
+			if not widget.skinned then
+				local frame = widget.slider
+				local editbox = widget.editbox
+				local lowtext = widget.lowtext
+				local hightext = widget.hightext
+				local HEIGHT = 12
+
+				StripTextures(frame)
+				F.CreateBD(frame, 0)
+				frame:SetHeight(HEIGHT)
+				CreateBackdropTexture(frame)
+
+				local slider = frame:GetThumbTexture()
+				slider:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+				slider:SetBlendMode("ADD")
+
+				F.CreateBD(editbox, 0)
+				editbox.SetBackdropColor = function() end
+				editbox.SetBackdropBorderColor = function() end
+				editbox:SetHeight(15)
+				editbox:SetPoint("TOP", frame, "BOTTOM", 0, -1)
+				CreateBackdropTexture(editbox)
+
+				lowtext:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 2, -2)
+				hightext:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", -2, -2)
+
 				widget.skinned = true
 			end
 
@@ -249,64 +304,22 @@ function SkinAce3:Skin()
 				widget.skinned = true
 			end
 
-		elseif TYPE == "EditBox" then
-			if not widget.skinned then
-				F.ReskinInput(widget.editbox)
-				F.Reskin(widget.button)
-				widget.skinned = true
-			end
-
-		elseif TYPE == "Button" then
-			if not widget.skinned then
-				F.Reskin(widget.frame)
-				widget.skinned = true
-			end
-
-		elseif TYPE == "Slider" then
-			if not widget.skinned then
-				local frame = widget.slider
-				local editbox = widget.editbox
-				local lowtext = widget.lowtext
-				local hightext = widget.hightext
-				local HEIGHT = 12
-
-				StripTextures(frame)
-				nibRealUI:CreateBD(frame, 0)
-				frame:SetHeight(HEIGHT)
-				CreateBackdropTexture(frame)
-
-				local slider = frame:GetThumbTexture()
-				slider:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-				slider:SetBlendMode("ADD")
-
-				nibRealUI:CreateBD(editbox, 0)
-				editbox.SetBackdropColor = function() end
-				editbox.SetBackdropBorderColor = function() end
-				editbox:SetHeight(15)
-				editbox:SetPoint("TOP", frame, "BOTTOM", 0, -1)
-				CreateBackdropTexture(editbox)
-
-				lowtext:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 2, -2)
-				hightext:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", -2, -2)
-
-				widget.skinned = true
-			end
 
 		end
 		return oldRegisterAsWidget(self, widget)
 	end
 
 	local oldRegisterAsContainer = AceGUI.RegisterAsContainer
-
 	AceGUI.RegisterAsContainer = function(self, widget)
 		local TYPE = widget.type
+		--print("Container:", TYPE)
 		if TYPE == "ScrollFrame" then
 			local frame = widget.scrollbar
 			F.ReskinScroll(frame)
 
 		elseif TYPE == "InlineGroup" or TYPE == "TreeGroup" or TYPE == "TabGroup" or TYPE == "SimpleGroup" or TYPE == "Frame" or TYPE == "DropdownGroup" then
 			local frame = widget.content:GetParent()
-			nibRealUI:CreateBD(frame, .4)
+			F.CreateBD(frame, .4)
 			if TYPE == "Frame" then
 				StripTextures(frame)
 				for i=1, frame:GetNumChildren() do
@@ -317,14 +330,35 @@ function SkinAce3:Skin()
 						StripTextures(child)
 					end
 				end
-				F.CreateSD(frame)
-				nibRealUI:CreateBD(frame)
+				F.CreateBD(frame)
 				frame:SetBackdropColor(unpack(nibRealUI.media.window))
 			end
 
 			if widget.treeframe then
-				nibRealUI:CreateBD(widget.treeframe, .3)
+				--print("TreeFrame!!!")
+				F.CreateBD(widget.treeframe, .3)
 				frame:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
+				hooksecurefunc(widget, "RefreshTree", function(self, ...)
+					--print("RefreshTree", self)
+					local buttons = self.buttons 
+					for i, v in ipairs(buttons) do
+						F.ReskinExpandOrCollapse(_G[v:GetName().."Toggle"])
+					end
+					if not self.skinned then
+						--print("Skin Tree!!!!")
+						F.ReskinScroll(self.scrollbar)
+						self.dragger:SetAlpha(0)
+						self.dragger:SetScript("OnEnter", function(dragger) dragger:SetAlpha(1) end)
+						self.dragger:SetScript("OnLeave", function(dragger) dragger:SetAlpha(0) end)
+						local tex = self.dragger:CreateTexture(nil, "OVERLAY")
+						tex:SetWidth(1)
+						tex:SetPoint("TOP", self.treeframe, "TOPRIGHT", 1, -1)
+						tex:SetPoint("BOTTOM", self.treeframe, "BOTTOMRIGHT", 1, 1)
+						tex:SetTexture(C.media.backdrop)
+						tex:SetVertexColor(1, 1, 1)
+						self.skinned = true
+					end
+				end)
 			end
 
 			if TYPE == "TabGroup" then

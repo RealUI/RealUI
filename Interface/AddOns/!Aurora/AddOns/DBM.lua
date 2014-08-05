@@ -1,21 +1,18 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local dbc
 
 local _
 local MODNAME = "SkinDBM"
 local SkinDBM = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
-local dbc
 
-if not Aurora then return end
+local F, C
 
-local F, C = unpack(Aurora)
-
-function SkinDBM:Skin()
+function SkinDBM:SetOptions(reset)
+	--print("SkinDBM:SetOptions", DBM and DBM.Bars)
 	if DBM and DBM.Bars and nibRealUICharacter then
-		if not dbc.settingsApplied then
+		--print("SkinDBM:SetOptions", dbc.settingsApplied)
+		if not dbc.settingsApplied or reset then
 			nibRealUI:LoadDBMData()
-
-			DBM.Bars:SetOption("HugeBarYOffset", 9)
-			DBM.Bars:SetOption("BarYOffset", 9)
 
 			dbc.settingsApplied = true
 
@@ -28,6 +25,7 @@ function SkinDBM:Skin()
 end
 
 function SkinDBM:styleCore()
+	F, C = unpack(Aurora)
 	local firstInfo = true
 	hooksecurefunc(DBM.InfoFrame, "Show", function()
 		if firstInfo then
@@ -151,15 +149,15 @@ function SkinDBM:styleGUI()
 	end)
 
 	F.CreateBD(DBM_GUI_OptionsFrame)
-	F.CreateSD(DBM_GUI_OptionsFrame)
 	F.Reskin(DBM_GUI_OptionsFrameWebsiteButton)
 	F.Reskin(DBM_GUI_OptionsFrameOkay)
 	F.ReskinScroll(DBM_GUI_OptionsFramePanelContainerFOVScrollBar)
 end
 
 function SkinDBM:ADDON_LOADED(event, addon)
+	--print("SkinDBM:", event, addon)
 	if addon == "DBM-Core" then
-		self:Skin()
+		self:SetOptions()
 		self:styleCore()
 	elseif addon == "DBM-GUI" then -- GUI can't load before core
 		self:styleGUI()
@@ -184,9 +182,8 @@ function SkinDBM:OnInitialize()
 end
 
 function SkinDBM:OnEnable()
-	if not Aurora then return end
-	if IsAddOnLoaded("DBM-Core") then
-		self:Skin()
+	if DBM and DBM.Bars then
+		self:SetOptions()
 		self:styleCore()
 	end
 	self:RegisterEvent("ADDON_LOADED")

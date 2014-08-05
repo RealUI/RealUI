@@ -9,5 +9,9 @@
 ## X-DBM-Timer-Skin-Texture-Names: Plain
 ## X-DBM-Timer-Skin-Fonts: Interface\AddOns\DBM-RealUI\media\pixel_small.ttf
 ## X-DBM-Timer-Skin-Font-Names: Pixel Small
+## X-Curse-Packaged-Version: v1.0.1
+## X-Curse-Project-Name: DBM-RealUI
+## X-Curse-Project-ID: dbm-realui
+## X-Curse-Repository-ID: wow/dbm-realui/mainline
 TimerSkin.xml
 Skin.lua

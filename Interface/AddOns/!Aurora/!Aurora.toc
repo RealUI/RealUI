@@ -1,3 +1,27 @@
 ## Interface: 60000
 ## Title: !Aurora
+## Author: Gethe88
+## Version: v0.0.1
+## RequiredDeps: nibRealUI
+## OptionalDeps: !BugGrabber
 !Aurora.lua
+
+AddOns\Blizzard_PetBattleUI.lua
+
+AddOns\Ace3.lua
+AddOns\Bartender4.lua
+AddOns\DBM.lua
+AddOns\DXE.lua
+AddOns\Grid2.lua
+AddOns\KNP.lua
+AddOns\Masque.lua
+AddOns\Raven.lua
+AddOns\Skada.lua
+AddOns\WeakAuras.lua
+
+FrameXML\GameMenuFrame.lua
+FrameXML\PaperDollFrame.lua
+FrameXML\QuestMapFrame.lua
+
+Misc\MiscSkins.lua
+Misc\TimerTrackers.lua

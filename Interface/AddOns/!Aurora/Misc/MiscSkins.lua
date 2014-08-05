@@ -24,8 +24,6 @@ function MiscSkins:Skin()
 		bg:SetFrameLevel(tab:GetFrameLevel()-1)
 		F.CreateBD(bg)
 
-		F.CreateSD(tab, 5, 0, 0, 0, 1, 1)
-
 		select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
 	end
 
