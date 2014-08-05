@@ -10,20 +10,14 @@ C.modules["Blizzard_PVPUI"] = function()
 	local WarGamesFrame = WarGamesFrame
 	local PVPArenaTeamsFrame = PVPArenaTeamsFrame
 
-	PVPUIFrame:DisableDrawLayer("ARTWORK")
-	PVPUIFrame.LeftInset:DisableDrawLayer("BORDER")
-	PVPUIFrame.Background:Hide()
 	PVPUIFrame.Shadows:Hide()
-	PVPUIFrame.LeftInset:GetRegions():Hide()
-	select(24, PVPUIFrame:GetRegions()):Hide()
-	select(25, PVPUIFrame:GetRegions()):Hide()
 
 	-- Category buttons
 
-	for i = 1, 3 do
+	for i = 1, 4 do
 		local bu = PVPQueueFrame["CategoryButton"..i]
 		local icon = bu.Icon
-		local cu = bu.CurrencyIcon
+		local cu = bu.CurrencyDisplay
 
 		bu.Ring:Hide()
 
@@ -40,13 +34,15 @@ C.modules["Blizzard_PVPUI"] = function()
 		icon.bg:SetDrawLayer("ARTWORK")
 
 		if cu then
-			cu:SetSize(16, 16)
-			cu:SetPoint("TOPLEFT", bu.Name, "BOTTOMLEFT", 0, -8)
-			bu.CurrencyAmount:SetPoint("LEFT", cu, "RIGHT", 4, 0)
+			local ic = cu.Icon
 
-			cu:SetTexCoord(.08, .92, .08, .92)
-			cu.bg = F.CreateBG(cu)
-			cu.bg:SetDrawLayer("BACKGROUND", 1)
+			ic:SetSize(16, 16)
+			ic:SetPoint("TOPLEFT", bu.Name, "BOTTOMLEFT", 0, -8)
+			cu.Amount:SetPoint("LEFT", ic, "RIGHT", 4, 0)
+
+			ic:SetTexCoord(.08, .92, .08, .92)
+			ic.bg = F.CreateBG(ic)
+			ic.bg:SetDrawLayer("BACKGROUND", 1)
 		end
 	end
 
@@ -55,12 +51,12 @@ C.modules["Blizzard_PVPUI"] = function()
 	PVPQueueFrame.CategoryButton3.Icon:SetTexture("Interface\\Icons\\ability_warrior_offensivestance")
 
 	local englishFaction = UnitFactionGroup("player")
-	PVPQueueFrame.CategoryButton1.CurrencyIcon:SetTexture("Interface\\Icons\\PVPCurrency-Honor-"..englishFaction)
-	PVPQueueFrame.CategoryButton2.CurrencyIcon:SetTexture("Interface\\Icons\\PVPCurrency-Conquest-"..englishFaction)
+	PVPQueueFrame.CategoryButton1.CurrencyDisplay.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Honor-"..englishFaction)
+	PVPQueueFrame.CategoryButton2.CurrencyDisplay.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Conquest-"..englishFaction)
 
 	hooksecurefunc("PVPQueueFrame_SelectButton", function(index)
 		local self = PVPQueueFrame
-		for i = 1, 3 do
+		for i = 1, 4 do
 			local bu = self["CategoryButton"..i]
 			if i == index then
 				bu.Background:Show()
@@ -86,7 +82,7 @@ C.modules["Blizzard_PVPUI"] = function()
 
 	F.Reskin(BonusFrame.DiceButton)
 
-	for _, bu in pairs({BonusFrame.RandomBGButton, BonusFrame.CallToArmsButton, BonusFrame.WorldPVP1Button, BonusFrame.WorldPVP2Button}) do
+	for _, bu in pairs({BonusFrame.RandomBGButton, BonusFrame.Arena1Button, BonusFrame.Arena2Button}) do
 		F.Reskin(bu, true)
 
 		bu.SelectedTexture:SetDrawLayer("BACKGROUND")
@@ -356,9 +352,10 @@ C.modules["Blizzard_PVPUI"] = function()
 		hooksecurefunc(header, "SetNormalTexture", onSetNormalTexture)
 	end
 
+	F.ReskinCheck(WarGameTournamentModeCheckButton)
+
 	-- Main style
 
-	F.ReskinPortraitFrame(PVPUIFrame)
 	F.Reskin(HonorFrame.SoloQueueButton)
 	F.Reskin(HonorFrame.GroupQueueButton)
 	F.Reskin(ConquestFrame.JoinButton)

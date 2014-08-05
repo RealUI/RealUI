@@ -20,7 +20,7 @@ C.modules["Blizzard_ChallengesUI"] = function()
 
 		ChallengesFrameDungeonButton1:SetPoint("TOPLEFT", ChallengesFrame, "TOPLEFT", 8, -83)
 
-		for i = 1, 9 do
+		for i = 1, ChallengesFrame.numMaps do
 			local bu = ChallengesFrame["button"..i]
 			F.CreateBD(bu, .25)
 			bu:SetHighlightTexture("")

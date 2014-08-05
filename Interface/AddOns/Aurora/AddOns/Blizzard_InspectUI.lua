@@ -22,78 +22,20 @@ C.modules["Blizzard_InspectUI"] = function()
 
 		for i = 1, #slots do
 			local slot = _G["Inspect"..slots[i].."Slot"]
+			local border = slot.IconBorder
+
 			_G["Inspect"..slots[i].."SlotFrame"]:Hide()
 
 			slot:SetNormalTexture("")
 			slot:SetPushedTexture("")
 
+			border:SetTexture(C.media.backdrop)
+			border:SetPoint("TOPLEFT", -1, 1)
+			border:SetPoint("BOTTOMRIGHT", 1, -1)
+			border:SetDrawLayer("BACKGROUND")
+
 			slot.icon:SetTexCoord(.08, .92, .08, .92)
 		end
-
-		local missing = {}
-
-		local pollFrame = CreateFrame("Frame")
-		pollFrame:Hide()
-		pollFrame:SetScript("OnUpdate", function(self, elapsed)
-			local unit = InspectFrame.unit
-			if not unit then
-				self:Hide()
-				table.wipe(missing)
-			end
-
-			for i, slotName in next, missing do
-				local slotLink = GetInventoryItemLink(unit, i)
-				if slotLink then
-					local slotFrame = _G["Inspect"..slotName.."Slot"]
-					F.ColourQuality(slotFrame, slotLink)
-					slotFrame:Show()
-					missing[i] = nil
-				end
-			end
-
-			if not next(missing) then
-				self:Hide()
-			end
-		end)
-
-		local updateInspect = function()
-			if not InspectFrame or not InspectFrame:IsShown() then return end
-
-			local unit = InspectFrame.unit
-
-			for i, slotName in ipairs(slots) do
-				if i == 18 then i = 19 end
-
-				local slotFrame = _G["Inspect"..slotName.."Slot"]
-				local slotLink = GetInventoryItemLink(unit, i)
-				local slotTexture = GetInventoryItemTexture(unit, i)
-
-				if slotTexture and not slotLink then
-					missing[i] = slotName
-					pollFrame:Show()
-				elseif slotLink then
-					slotFrame:Show()
-				else
-					slotFrame:Hide()
-					pollFrame:Show()
-				end
-
-				F.ColourQuality(slotFrame, slotLink)
-			end
-		end
-
-		local inspectHandler = CreateFrame("Frame")
-		inspectHandler:RegisterEvent("INSPECT_READY")
-		inspectHandler:RegisterEvent("UNIT_INVENTORY_CHANGED")
-		inspectHandler:SetScript("OnEvent", function(self, event, ...)
-			if event == "INSPECT_READY" then
-				updateInspect()
-			else
-				if InspectFrame.unit == ... then
-					updateInspect()
-				end
-			end
-		end)
 
 		-- PvP
 

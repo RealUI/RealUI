@@ -165,7 +165,7 @@ function MOD:SetSpellDefaults()
 	
 	if MOD.myClass == "DEATHKNIGHT" then -- localize rune spell names
 		local t = {}
-		for k, p in pairs(MOD.runeSpells) do if p.id then local name = GetSpellInfo(p.id); if name then t[name] = p end end end
+		for k, p in pairs(MOD.runeSpells) do if p.id then local name = GetSpellInfo(p.id); if name and name ~= "" then t[name] = p end end end
 		MOD.runeSpells = t
 	end
 end
@@ -177,7 +177,7 @@ function MOD:SetCooldownDefaults()
 	
 	for i = 1, numSpells do
 		local name, _, icon = GetSpellInfo(i, "spell") -- doesn't account for "FLYOUT" spellbook entries, but not an issue currently
-		if name then
+		if name and name ~= "" then
 			local ls = MOD.lockSpells[name]
 			if ls then
 				ls.index = i
@@ -200,11 +200,11 @@ function MOD:SetInternalCooldownDefaults()
 	local ict = MOD.DefaultProfile.global.InternalCooldowns
 	for _, cd in pairs(MOD.internalCooldowns) do
 		local name, _, icon = GetSpellInfo(cd.id)
-		if name and (not ict[name] or not cd.item or IsUsableItem(cd.item)) then 
+		if name and (name ~= "") and (not ict[name] or not cd.item or IsUsableItem(cd.item)) then 
 			local t = { id = cd.id, duration = cd.duration, icon = icon, item = cd.item, class = cd.class }
 			if cd.cancel then
 				t.cancel = {}
-				for k, c in pairs(cd.cancel) do local n = GetSpellInfo(c); if n then t.cancel[k] = n end end
+				for k, c in pairs(cd.cancel) do local n = GetSpellInfo(c); if n and n ~= "" then t.cancel[k] = n end end
 			end
 			ict[name] = t
 		end
@@ -218,10 +218,10 @@ function MOD:SetSpellEffectDefaults()
 	local ect = MOD.DefaultProfile.global.SpellEffects
 	for _, ec in pairs(MOD.spellEffects) do
 		local name, _, icon = GetSpellInfo(ec.id)
-		if name then
+		if name and name ~= "" then
 			local id, spell, talent = ec.id, nil, nil
-			if ec.spell then spell, _, icon = GetSpellInfo(ec.spell); id = ec.spell end
-			if ec.talent then talent = GetSpellInfo(ec.talent) end
+			if ec.spell then spell, _, icon = GetSpellInfo(ec.spell); id = ec.spell end -- must be valid
+			if ec.talent then talent = GetSpellInfo(ec.talent) end -- must be valid
 			local t = { duration = ec.duration, icon = icon, spell = spell, id = id, renew = ec.renew, talent = talent }
 			ect[name] = t
 		end
@@ -273,20 +273,20 @@ function MOD:SetIconDefaults()
 			local stype, id = GetSpellBookItemInfo(index, "spell")
 			if stype == "SPELL" then -- use spellbook index to check for cooldown
 				local name, _, icon = GetSpellInfo(index, "spell")
-				if name then iconCache[name] = icon end
+				if name and name ~= "" then iconCache[name] = icon end
 			elseif stype == "FLYOUT" then -- use spell id to check for cooldown
 				local _, _, numSlots = GetFlyoutInfo(id)
 				for slot = 1, numSlots do
 					local spellID = GetFlyoutSlotInfo(id, slot)
 					if spellID then
 						local name, _, icon = GetSpellInfo(spellID)
-						if name then iconCache[name] = icon end
+						if name and name ~= "" then iconCache[name] = icon end
 					end
 				end
 			end
 		end
 	end
-	local _, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent)
+	local _, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
 	iconCache[L["GCD"]] = iconGCD
 end
 
@@ -405,16 +405,16 @@ function MOD:GetIcon(name, spellID)
 	local n, _, tex
 	local id = nil -- next check if the name is a numeric spell id (with or without preceding # sign)
 	if string.find(name, "^#%d+") then id = tonumber(string.sub(name, 2)) else id = tonumber(name) end
-	if id then n, _, tex = GetSpellInfo(id); if n then return tex else return nil end end -- return icon looked up by spell id (note: no valid name so return nil if not found)
+	if id then n, _, tex = GetSpellInfo(id); if n and n ~= "" then return tex else return nil end end -- return icon looked up by spell id (note: no valid name so return nil if not found)
 	
 	tex = iconCache[name] -- check the in-memory icon cache which is initialized from player's spell book
 	if not tex then -- if not found then try to look it up through spell API
 		n, _, tex = GetSpellInfo(name) -- first try to find it based on the name
-		if n and tex then
+		if n and n ~= "" and tex and tex ~= "" then
 			iconCache[name] = tex -- only cache textures found by looking up the name
 		else
 			id = spellID or MOD:GetSpellID(name)
-			if id then _, _, tex = GetSpellInfo(id) end -- then try based on id
+			if id then _, _, tex = GetSpellInfo(id); if tex == "" then tex = nil end end -- then try based on id
 		end
 	end
 	return tex
@@ -510,7 +510,7 @@ function MOD:GetDuration(name, spellID)
 	return duration
 end
 
--- Get localized names for all spells used internally or in built-in conditions
+-- Get localized names for all spells used internally or in built-in conditions, spell ids must be valid
 function MOD:SetSpellNameDefaults()
 	LSPELL["Freezing Trap"] = GetSpellInfo(1499)
 	LSPELL["Ice Trap"] = GetSpellInfo(13809)
@@ -545,6 +545,7 @@ end
 -- Check if a spell id is known and usable by the player
 local function RavenCheckSpellKnown(spellID)
 	local name = GetSpellInfo(spellID)
+	if not name or name == "" then return false end
 	return IsUsableSpell(name)
 end
 
@@ -634,7 +635,7 @@ function MOD:RegisterBarGroupFilter(bgName, list, spell)
 	elseif list == "Cooldown" then listName = "filterCooldownList" end
 	
 	local id = tonumber(spell) -- convert to spell name if provided a number
-	if id then spell = GetSpellInfo(id) end
+	if id then spell = GetSpellInfo(id); if spell == "" then spell = nil end end
 	
 	if bgName and listName and spell then
 		local bg = MOD.db.profile.BarGroups[bgName]
@@ -656,9 +657,14 @@ function MOD:RegisterSpellList(name, spellList, reset)
 	for _, spell in pairs(spellList) do
 		local n, id = spell, tonumber(spell) -- convert to spell name if provided a number
 		if string.find(n, "^#%d+") then
-			id = tonumber(string.sub(n, 2)); if id and not GetSpellInfo(id) then id = nil end -- support #12345 format for spell ids
+			id = tonumber(string.sub(n, 2)); if id and GetSpellInfo(id) == "" then id = nil end -- support #12345 format for spell ids
 		else
-			if id then n = GetSpellInfo(id) else id = MOD:GetSpellID(n) end -- otherwise look up the id
+			if id then -- otherwise look up the id
+				n = GetSpellInfo(id)
+				if n == "" then n = nil end -- make sure valid return
+			else
+				id = MOD:GetSpellID(n)
+			end
 		end
 		if n and id then if not slt[n] then count = count + 1 end slt[n] = id else print(L["Not valid string"](spell)) end -- only spells with valid name and id
 	end
@@ -745,7 +751,7 @@ MOD.DefaultProfile = {
 		ButtonFacadeBorder = false,		-- enable color of border texture in ButtonFacade
 		SoundChannel = "Master",		-- by default, use the Master sound channel
 		HideOmniCC = false,				-- hide OmniCC counts on all bar group icons
-		HideBorder = false,				-- hide custom border in all bar groups
+		HideBorder = true,				-- hide custom border in all bar groups
 		TukuiSkin = true,				-- skin with Tukui borders
 		TukuiFont = true,				-- skin with Tukui fonts
 		TukuiScale = true,				-- skin Tukui with pixel perfect size and position

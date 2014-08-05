@@ -67,26 +67,6 @@ C.modules["Blizzard_GuildBankUI"] = function()
 		end
 	end
 
-	local function updateButtons()
-		local tab = GetCurrentGuildBankTab()
-
-		for i = 1, MAX_GUILDBANK_SLOTS_PER_TAB do
-			local index = math.fmod(i, 14)
-			if index == 0 then
-				index = 14
-			end
-			local column = math.ceil((i-0.5)/14)
-
-			local slotLink = GetGuildBankItemLink(tab, i)
-			local slotFrame = _G["GuildBankColumn"..column.."Button"..index]
-
-			F.ColourQuality(slotFrame, slotLink)
-		end
-	end
-
-	hooksecurefunc("GuildBankFrame_UpdateFiltered", updateButtons)
-	hooksecurefunc("GuildBankFrame_Update", updateButtons)
-
 	for i = 1, 8 do
 		local tb = _G["GuildBankTab"..i]
 		local bu = _G["GuildBankTab"..i.."Button"]

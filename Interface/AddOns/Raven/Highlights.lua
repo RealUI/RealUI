@@ -44,6 +44,7 @@ local function CheckButtonAction(b, action)
 			sID = GetMacroSpell(bID)
 		elseif bType == "spell"  then
 			sID = GetSpellInfo(bID) -- Cataclysm changed return value from GetActionInfo to spell id
+			if sID == "" then sID = nil end -- must be valid name
 		elseif bType == "item" then
 			sID = GetItemInfo(bID)
 		end

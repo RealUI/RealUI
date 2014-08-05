@@ -63,14 +63,15 @@ end
 local function ValidateSpellName(name, allowPlusIDs)
 	if not name or (name == "") then return nil end
 	if allowPlusIDs then
-		if string.find(name, "^#%d+") then local id = tonumber(string.sub(name, 2)); if id and GetSpellInfo(id) then return name end return nil end
+		if string.find(name, "^#%d+") then local id = tonumber(string.sub(name, 2)); if id and GetSpellInfo(id) ~= "" then return name end return nil end
 	end
 	local t = tonumber(name)
 	if t then
 		name = GetSpellInfo(t) -- convert spell id
+		if name == "" then name = nil end
 	else
 		local found, _, idString = string.find(name, "^|c%x+|Hspell:(.+)|h%[.*%]")
-		if found then local id = tonumber(idString); if id then name = GetSpellInfo(id) end end -- convert hyperlink
+		if found then local id = tonumber(idString); if id then name = GetSpellInfo(id); if name == "" then name = nil end end end -- convert hyperlink
 	end
 	if not MOD:GetIcon(name) then
 		print(L["Not valid string"](name))
@@ -1286,7 +1287,7 @@ local function AddNewInternalCooldown(name)
 	local id = tonumber(name)
 	if not id then id = MOD:GetSpellID(name) end
 	if id then
-		local n, _, icon = GetSpellInfo(id)
+		local n, _, icon = GetSpellInfo(id) -- n must be valid
 		local ict = MOD.db.global.InternalCooldowns[n]
 		if not ict then
 			ict = { duration = 0; id = id; icon = icon }
@@ -1319,7 +1320,7 @@ local function GetListTable(t, listType)
 		start = nexts + 1
 	until start > string.len(s)
 	if listType == "spells" then
-		for k, v in pairs(spells) do local n = tonumber(v); if n then v = GetSpellInfo(n); spells[k] = v end end -- translate ids
+		for k, v in pairs(spells) do local n = tonumber(v); if n then v = GetSpellInfo(n); spells[k] = v end end -- translate ids, must be valid
 	elseif listType == "strings" then
 		for k, v in pairs(spells) do spells[k] = v end
 	end
@@ -1410,7 +1411,7 @@ local function AddNewSpellEffect(name)
 	local id = tonumber(name)
 	if not id then id = MOD:GetSpellID(name) end
 	if id then
-		local n, _, icon = GetSpellInfo(id)
+		local n, _, icon = GetSpellInfo(id) -- must be valid
 		local ect = MOD.db.global.SpellEffects[n]
 		if not ect then
 			ect = { duration = 0; id = id; icon = icon }

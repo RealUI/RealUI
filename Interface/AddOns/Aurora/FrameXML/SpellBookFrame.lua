@@ -133,16 +133,6 @@ tinsert(C.modules["Aurora"], function()
 		end
 	end)
 
-	hooksecurefunc("SpellBook_UpdateWhatHasChangedTab", function()
-		for i = 1, #SpellBookWhatHasChanged.ChangedItems do
-			local bu = SpellBook_GetWhatChangedItem(i)
-			bu.Ring:Hide()
-			select(2, bu:GetRegions()):Hide()
-			bu:SetTextColor(.9, .9, .9)
-			bu.Title:SetTextColor(1, 1, 1)
-		end
-	end)
-
 	SpellBookFrameTutorialButton.Ring:Hide()
 	SpellBookFrameTutorialButton:SetPoint("TOPLEFT", SpellBookFrame, "TOPLEFT", -12, 12)
 end)

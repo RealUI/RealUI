@@ -1,8 +1,8 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: Aurora
 ## Notes: Minimalistic window theme.
 ## Author: Haleth/Freethinker
-## Version: 5.0.7
+## Version: 6.0
 ## SavedVariables: AuroraConfig
 
 aurora.lua
@@ -33,7 +33,6 @@ AddOns\Blizzard_MacroUI.lua
 AddOns\Blizzard_PetJournal.lua
 AddOns\Blizzard_PVPUI.lua
 AddOns\Blizzard_QuestChoice.lua
-AddOns\Blizzard_ReforgingUI.lua
 AddOns\Blizzard_TalentUI.lua
 AddOns\Blizzard_TimeManager.lua
 AddOns\Blizzard_TradeSkillUI.lua
@@ -41,8 +40,9 @@ AddOns\Blizzard_TrainerUI.lua
 AddOns\Blizzard_VoidStorageUI.lua
 AddOns\Recount.lua
 
+SharedXML\AddonList.lua
+
 FrameXML\AlertFrames.lua
-FrameXML\FlexRaidFrame.lua
 FrameXML\Fonts.lua
 FrameXML\LFDFrame.lua
 FrameXML\LFGFrame.lua

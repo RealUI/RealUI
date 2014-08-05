@@ -56,8 +56,14 @@ C.modules["Blizzard_VoidStorageUI"] = function()
 
 	for i = 1, 80 do
 		local bu = _G["VoidStorageStorageButton"..i]
+		local border = bu.IconBorder
 
 		bu:SetPushedTexture("")
+
+		border:SetTexture(C.media.backdrop)
+		border:SetPoint("TOPLEFT", -1, 1)
+		border:SetPoint("BOTTOMRIGHT", 1, -1)
+		border:SetDrawLayer("BACKGROUND")
 
 		_G["VoidStorageStorageButton"..i.."Bg"]:Hide()
 		_G["VoidStorageStorageButton"..i.."IconTexture"]:SetTexCoord(.08, .92, .08, .92)
@@ -69,60 +75,3 @@ C.modules["Blizzard_VoidStorageUI"] = function()
 	F.ReskinClose(VoidStorageBorderFrame:GetChildren(), nil)
 	F.ReskinInput(VoidItemSearchBox)
 end
-
-local voidHandler = CreateFrame("Frame")
-voidHandler:RegisterEvent("ADDON_LOADED")
-voidHandler:RegisterEvent("VOID_STORAGE_CONTENTS_UPDATE")
-voidHandler:RegisterEvent("VOID_STORAGE_DEPOSIT_UPDATE")
-voidHandler:RegisterEvent("VOID_TRANSFER_DONE")
-voidHandler:RegisterEvent("VOID_STORAGE_OPEN")
-
-local updateContents = function()
-	if not IsAddOnLoaded("Blizzard_VoidStorageUI") then return end
-
-	for slot = 1, VOID_WITHDRAW_MAX or 80 do
-		F.ColourQuality(_G["VoidStorageStorageButton"..slot], GetVoidItemInfo(slot))
-	end
-
-	for slot = 1, VOID_WITHDRAW_MAX or 9 do
-		F.ColourQuality(_G["VoidStorageWithdrawButton"..slot], GetVoidTransferWithdrawalInfo(slot))
-	end
-end
-
-local updateDeposit = function(slot)
-	if not IsAddOnLoaded("Blizzard_VoidStorageUI") then return end
-
-	F.ColourQuality(_G["VoidStorageDepositButton"..slot], GetVoidTransferDepositInfo(slot))
-end
-
-local update = function()
-	if not IsAddOnLoaded("Blizzard_VoidStorageUI") then return end
-
-	for slot = 1, VOID_DEPOSIT_MAX or 9 do
-		updateDeposit(slot)
-	end
-
-	return updateContents()
-end
-
-voidHandler:SetScript("OnEvent", function(self, event, ...)
-	if event == "ADDON_LOADED" then
-		if ... == "Blizzard_VoidStorageUI" then
-			self:UnregisterEvent("ADDON_LOADED")
-			local last = 0
-			self:SetScript("OnUpdate", function(self, elapsed)
-				last = last + elapsed
-				if last > 1 then
-					self:SetScript("OnUpdate", nil)
-					update()
-				end
-			end)
-		end
-	elseif event == "VOID_STORAGE_CONTENTS_UPDATE" then
-		updateContents()
-	elseif event == "VOID_STORAGE_DEPOSIT_UPDATE" then
-		updateDeposit(...)
-	elseif event == "VOID_TRANSFER_DONE" or event == "VOID_STORAGE_OPEN" then
-		update()
-	end
-end)

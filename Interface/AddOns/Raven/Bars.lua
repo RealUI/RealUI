@@ -11,7 +11,7 @@ local media = LibStub("LibSharedMedia-3.0")
 local rc = { r = 1, g = 0, b = 0, a = 1 }
 local vc = { r = 1, g = 0, b = 0, a = 0 }
 local gc = { r = 0.5, g = 0.5, b = 0.5, a = 0.5 }
-local fishSpell = GetSpellInfo(7620)
+local fishSpell = GetSpellInfo(7620) -- must be valid
 local hidden = false
 local detectedBar = { enableBar = true, sorder = 0 }
 local headerBar = { enableBar = true, sorder = 0 }

@@ -12,7 +12,7 @@ local MOD = Raven
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
 local LSPELL = MOD.LocalSpellNames
 MOD.status = {} -- global status info cached on every update
-local fishSpell = GetSpellInfo(7620)
+local fishSpell = GetSpellInfo(7620) -- must be valid
 local range_initialized = false
 local timeEvents = {} -- table of times at which to trigger a simulated event during update processing
 local classificationList = { normal = L["Normal"], worldboss = L["Boss"], elite = L["Elite"], rare = L["Rare"], rlite = L["Rare Elite"] }
@@ -168,7 +168,7 @@ local function InitializeRangeSpells()
 	for k, v in pairs(range_tables) do
 		if v[class] then
 			local t = {}
-			for _, sid in pairs(v[class]) do local name = GetSpellInfo(sid); if name then table.insert(t, name) end end
+			for _, sid in pairs(v[class]) do local name = GetSpellInfo(sid); if name and name ~= "" then table.insert(t, name) end end
 			range_spells[k] = t
 		end
 	end
@@ -330,9 +330,11 @@ end
 -- Return whether the specified talent (either spell name or spell id) is active in current spec
 function MOD.CheckTalent(talent)
 	local id = tonumber(talent)
-	if id then talent = GetSpellInfo(id) end -- translate spell id
-	local t = MOD.talents[talent]
-	if t and t.active then return true end
+	if id then talent = GetSpellInfo(id); if talent == "" then talent = nil end end -- translate spell id
+	if talent then
+		local t = MOD.talents[talent]
+		if t and t.active then return true end
+	end
 	return nil
 end
 
@@ -401,7 +403,7 @@ end
 
 -- Check if target matches the specified type
 local function CheckTarget(targetType, unit)
-	local m = UnitExists(unit)
+	local m = not UnitExists(unit)
 	if targetType == "none" then m = not m end
 	if targetType == "player" then m = m or (UnitIsUnit("target", unit) == nil) end
 	return not m
@@ -432,7 +434,7 @@ end
 local function CheckPetSpec(spec)
 	if not spec then spec = "none" end
 	local currentName = "none"
-	local ferocity = GetSpellInfo(4154) -- hack workaround to localize Ferocity, fingers crossed it works in all languages
+	local ferocity = GetSpellInfo(4154) -- hack workaround to localize Ferocity, fingers crossed it works in all languages, spell id must be valid
 	if UnitExists("pet") then currentName = GetPetTalentTree() or ((MOD.myClass == "HUNTER") and ferocity) or "none" end
 	return spec == currentName
 end
@@ -733,7 +735,7 @@ function MOD:UpdateConditions()
 		stat.targetFriend = (UnitIsFriend("player", "target") ~= nil)
 		stat.targetDead = (UnitIsDead("target") ~= nil)
 		local classification = UnitClassification("target")
-		if MOD.LibBossIDs and MOD.LibBossIDs.BossIDs[tonumber(UnitGUID("target"):sub(-13, -9), 16)] then classification = "worldboss" end
+		if MOD.LibBossIDs and MOD.CheckLibBossIDs(UnitGUID("target")) then classification = "worldboss" end
 		stat.targetClassification = classification
 		m = UnitHealthMax("target")
 		if m > 0 then stat.targetMaxHealth = m; stat.targetHealth = (100 * UnitHealth("target") / m) else stat.targetMaxHealth = 0; stat.targetHealth = 0 end
@@ -747,7 +749,7 @@ function MOD:UpdateConditions()
 		stat.focusFriend = (UnitIsFriend("player", "focus") ~= nil)
 		stat.focusDead = (UnitIsDead("focus") ~= nil)
 		local classification = UnitClassification("focus")
-		if MOD.LibBossIDs and MOD.LibBossIDs.BossIDs[tonumber(UnitGUID("focus"):sub(-13, -9), 16)] then classification = "worldboss" end
+		if MOD.LibBossIDs and MOD.CheckLibBossIDs(UnitGUID("focus")) then classification = "worldboss" end
 		stat.focusClassification = classification
 		m = UnitHealthMax("focus"); if m > 0 then stat.focusHealth = (100 * UnitHealth("focus") / m) else stat.focusHealth = 0 end
 		m = UnitPowerMax("focus"); if m > 0 then stat.focusPower = (100 * UnitPower("focus") / m) else stat.focusPower = 0 end
@@ -803,7 +805,7 @@ end
 local function GetLocalizedSpellName(field)
 	if not field then return nil end
 	local id, name = tonumber(field), field
-	if id then name = GetSpellInfo(id) end
+	if id then name = GetSpellInfo(id); if name == "" then name = nil end end
 	return name
 end
 	

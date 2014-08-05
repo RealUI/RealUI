@@ -105,7 +105,7 @@ function MOD:OnInitialize()
 end
 
 -- Functions called to trigger updates
-local function TriggerPlayerUpdate() unitUpdate.player = true; doUpdate = true end
+local function TriggerPlayerUpdate() unitUpdate.player = true; updateCooldowns = true; doUpdate = true end
 local function TriggerCooldownUpdate() updateCooldowns = true; doUpdate = true end
 local function TriggerActionsUpdate() MOD.updateActions = true; doUpdate = true end
 local function TriggerGlyphUpdate() updateGlyphs = true; doUpdate = true end
@@ -300,7 +300,7 @@ local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, 
 			end
 		elseif e == "SPELL_SUMMON" and MOD.myClass == "MAGE" and spellID == 99063 then -- special case for mage T12 2-piece
 			local name = GetSpellInfo(99061) -- T12 bonus spell name
-			if name then
+			if name and name ~= "" then
 				if MOD.db.global.DetectInternalCooldowns then MOD:DetectInternalCooldown(name, false) end
 				if MOD.db.global.DetectSpellEffects then MOD:DetectSpellEffect(name, "player") end
 			end
@@ -410,7 +410,7 @@ end
 -- Cache icons for special purposes such as shared cooldowns
 local function InitializeIcons()
 	local _
-	_, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent)
+	_, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
 	iconPotion = GetItemIcon(31677) -- icon for shared potions cooldown
 	iconElixir = GetItemIcon(28104) -- icon for shared elixirs cooldown
 end
@@ -462,7 +462,7 @@ end
 function MOD:UNIT_POWER(e, unit) if unit == "player" then unitUpdate[unit] = true; doUpdate = true end end
 
 -- Event for when vehicle info changes
-function MOD:VEHICLE_UPDATE() TriggerCooldownUpdate(); TriggerPlayerUpdate() end
+function MOD:VEHICLE_UPDATE() TriggerPlayerUpdate() end
 
 -- Event called with a unit's target changes
 function MOD:UNIT_TARGET(e, unit)
@@ -496,7 +496,7 @@ local function InitializeTalents()
 
 	local currentSpec = GetSpecialization()
 	local specGroup = GetActiveSpecGroup()
-	MOD.talentSpec = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "None"
+	MOD.talentSpec = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "None"	
 	talentsInitialized = true; doUpdate = true
 	table.wipe(MOD.talents); table.wipe(MOD.talentList)
 	
@@ -682,6 +682,17 @@ end
 -- Calculate aura time left from expiration time and current time, this is always done before returning aura descriptors
 -- If no duration or has expired then set to 0 (Blizzard may not yet have sent aura update event so could sit at 0 for a moment)
 local function SetAuraTimeLeft(b) if b[5] > 0 then b[2] = b[10] - GetTime() if b[2] < 0 then b[2] = 0 end else b[2] = 0 end end
+
+-- Check if a GUID belongs to a boss per LibBossIDs
+function MOD.CheckLibBossIDs(guid)
+	local _, id
+	_, _, _, _, _, id = string.match(guid, "(%a+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+	if id then
+		id = tonumber(id)
+		if id and MOD.LibBossIDs.BossIDs[id] then return 1 end
+	end
+	return nil
+end
 	
 -- Add an active aura to the table for the specified unit
 local function AddAura(unit, name, isBuff, spellID, count, btype, duration, caster, steal, boss, apply, icon, rank, expire, tt_type, tt_arg)
@@ -693,9 +704,9 @@ local function AddAura(unit, name, isBuff, spellID, count, btype, duration, cast
 		if caster then
 			local guid = UnitGUID(caster); cname = UnitName(caster); vehicle = UnitHasVehicleUI(caster)
 			if guid then
-				local unitType = strsplit(":", guid)
-				isNPC = (unitType == "Creature"); vehicle = vehicle or (unitType == "Vehicle")
-				if MOD.LibBossIDs and MOD.LibBossIDs.BossIDs[tonumber(guid:sub(-13, -9), 16)] then boss = 1 end
+				local unitType = string.match(guid, "(%a+):")
+				isNPC = (unitType == "Creature") or (unitType == "Vignette"); vehicle = vehicle or (unitType == "Vehicle")
+				if isNPC and MOD.LibBossIDs then boss = boss or MOD.CheckLibBossIDs(guid) end
 			end
 		end
 		b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19] =
@@ -1054,7 +1065,7 @@ local function GetPowerBuffs()
 				end
 			end
 			local name, _, icon = GetSpellInfo(88747)
-			if name and (count > 0) then
+			if name and (name ~= "") and (count > 0) then
 				local link = GetSpellLink(88747)
 				AddAura("player", name, true, 88747, count, nil, dur, "player", nil, nil, nil, icon, nil, start + dur, "spell link", link)
 			end
@@ -1063,7 +1074,7 @@ local function GetPowerBuffs()
 	if power and power > 0 then
 		local name, _, icon = GetSpellInfo(id)
 		local link = GetSpellLink(id)
-		if name then
+		if name and (name ~= "") then
 			AddAura("player", name, true, id, power, "Power", 0, "player", nil, nil, nil, icon, nil, 0, "spell link", link)
 		end
 	end
@@ -1301,6 +1312,15 @@ local function CheckSpellEffectCooldowns()
 	end
 end
 
+-- Check for special case mage Rune of Power and add them as cooldowns of type "effect"
+local function CheckRuneOfPower()
+	local link = GetSpellLink(116011)
+	local haveTotem, name, startTime, duration, icon = GetTotemInfo(1)
+	if haveTotem and name then AddCooldown(name .. " #1", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player") end
+	haveTotem, name, startTime, duration, icon = GetTotemInfo(2)
+	if haveTotem and name then AddCooldown(name .. " #2", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player") end
+end
+
 -- Check for new and expiring cooldowns associated with all action bar slots plus trinkets (might want to add inventory slots someday)
 function MOD:UpdateCooldowns()
 	if updateCooldowns then
@@ -1329,7 +1349,7 @@ function MOD:UpdateCooldowns()
 				local stype, id = GetSpellBookItemInfo(index, "spell")
 				if stype == "SPELL" then -- use spellbook index to check for cooldown
 					local name, _, icon = GetSpellInfo(index, "spell")
-					if name then
+					if name and name ~= "" then
 						knownSpells[name] = id; foundSpells[name] = id -- cache of previously seen spell names (ids are not sufficient)
 						local start, duration, enable, count, charges
 						count, charges, start, duration = GetSpellCharges(index, "spell")
@@ -1353,7 +1373,7 @@ function MOD:UpdateCooldowns()
 						local spellID = GetFlyoutSlotInfo(id, slot)
 						if spellID then
 							local name, _, icon = GetSpellInfo(spellID)
-							if name then -- make sure we have a valid spell name
+							if name and name ~= "" then -- make sure we have a valid spell name
 								knownSpells[name] = spellID; foundSpells[name] = spellID -- cache of previously seen spell names
 								local start, duration, enable = GetSpellCooldown(spellID)
 								if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
@@ -1385,9 +1405,11 @@ function MOD:UpdateCooldowns()
 							for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 						end
 						if not locked then
-							local _, _, icon = GetSpellInfo(name)
-							local link = GetSpellLink(name)
-							AddCooldown(name, spellID, icon, start, duration, "spell link", link, "player")
+							local n, _, icon = GetSpellInfo(name)
+							if n and n ~= "" then
+								local link = GetSpellLink(name)
+								AddCooldown(name, spellID, icon, start, duration, "spell link", link, "player")
+							end
 						end
 					end
 				end				
@@ -1406,7 +1428,7 @@ function MOD:UpdateCooldowns()
 						local start, duration, enable = GetSpellCooldown(index, "spell")
 						if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 							local name, _, icon = GetSpellInfo(index, "spell")
-							if name then -- make sure we have a valid spell name
+							if name and name ~= "" then -- make sure we have a valid spell name
 								local link = GetSpellLink(index, "spell")
 								AddCooldown(name, id, icon, start, duration, "spell link", link, "player")
 							end
@@ -1422,7 +1444,7 @@ function MOD:UpdateCooldowns()
 				local start, duration, enable = GetSpellCooldown(i, "pet")
 				if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 					local name, _, icon = GetSpellInfo(i, "pet")
-					if name then
+					if name and name ~= "" then
 						local hyperlink = GetSpellLink(i, "pet")
 						local _, spellID = GetSpellBookItemInfo(i, "pet")
 						AddCooldown(name, spellID, icon, start, duration, "spell link", hyperlink, "pet")
@@ -1440,7 +1462,7 @@ function MOD:UpdateCooldowns()
 					local start, duration, enable = GetSpellCooldown(spellID)
 					if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 						local name, _, icon = GetSpellInfo(spellID)
-						if name then AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player") end
+						if name and name ~= "" then AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player") end
 					end
 				end
 			end
@@ -1484,6 +1506,7 @@ function MOD:UpdateCooldowns()
 		
 		CheckInternalCooldowns()
 		CheckSpellEffectCooldowns()
+		if MOD.myClass == "MAGE" then CheckRuneOfPower() end
 		updateCooldowns = false
 	end
 end

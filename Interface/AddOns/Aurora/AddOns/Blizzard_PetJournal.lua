@@ -41,6 +41,7 @@ C.modules["Blizzard_PetJournal"] = function()
 	F.Reskin(PetJournalFilterButton)
 	F.ReskinTab(PetJournalParentTab1)
 	F.ReskinTab(PetJournalParentTab2)
+	F.ReskinTab(PetJournalParentTab3)
 	F.ReskinClose(PetJournalParentCloseButton)
 	F.ReskinScroll(MountJournalListScrollFrameScrollBar)
 	F.ReskinScroll(PetJournalListScrollFrameScrollBar)
@@ -52,11 +53,7 @@ C.modules["Blizzard_PetJournal"] = function()
 	PetJournalTutorialButton:SetPoint("TOPLEFT", PetJournal, "TOPLEFT", -14, 14)
 
 	PetJournalParentTab2:SetPoint("LEFT", PetJournalParentTab1, "RIGHT", -15, 0)
-
-	PetJournalHealPetButtonBorder:Hide()
-	PetJournalHealPetButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
-	PetJournal.HealPetButton:SetPushedTexture("")
-	F.CreateBG(PetJournal.HealPetButton)
+	PetJournalParentTab3:SetPoint("LEFT", PetJournalParentTab2, "RIGHT", -15, 0)
 
 	local scrollFrames = {MountJournal.ListScrollFrame.buttons, PetJournal.listScroll.buttons}
 	for _, scrollFrame in pairs(scrollFrames) do
@@ -120,6 +117,16 @@ C.modules["Blizzard_PetJournal"] = function()
 	hooksecurefunc("MountJournal_UpdateMountList", updateScroll)
 	hooksecurefunc(MountJournalListScrollFrame, "update", updateScroll)
 
+	PetJournalHealPetButtonBorder:Hide()
+	PetJournalHealPetButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
+	PetJournal.HealPetButton:SetPushedTexture("")
+	F.CreateBG(PetJournal.HealPetButton)
+
+	MountJournalSummonRandomFavoriteButtonBorder:Hide()
+	MountJournalSummonRandomFavoriteButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
+	MountJournalSummonRandomFavoriteButton:SetPushedTexture("")
+	F.CreateBG(MountJournalSummonRandomFavoriteButton)
+
 	if C.shouldStyleTooltips then
 		for _, f in pairs({PetJournalPrimaryAbilityTooltip, PetJournalSecondaryAbilityTooltip}) do
 			f:DisableDrawLayer("BACKGROUND")
@@ -136,7 +143,6 @@ C.modules["Blizzard_PetJournal"] = function()
 	local card = PetJournalPetCard
 
 	PetJournalPetCardBG:Hide()
-	card.AbilitiesBG:SetAlpha(0)
 	card.PetInfo.levelBG:SetAlpha(0)
 	card.PetInfo.qualityBorder:SetAlpha(0)
 
