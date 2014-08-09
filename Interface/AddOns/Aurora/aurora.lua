@@ -609,10 +609,19 @@ F.ReskinColourSwatch = function(f)
 	bg:SetPoint("BOTTOMRIGHT", -2, 2)
 end
 
+F.ReskinFilterButton = function(f)
+	F.Reskin(f)
+	f.Icon:SetTexture(C.media.arrowRight)
+
+	f.Text:SetPoint("CENTER")
+	f.Icon:SetPoint("RIGHT", f, "RIGHT", -5, 0)
+	f.Icon:SetSize(8, 8)
+end
+
 -- [[ Variable and module handling ]]
 
-C.modules = {}
-C.modules["Aurora"] = {}
+C.themes = {}
+C.themes["Aurora"] = {}
 
 local Skin = CreateFrame("Frame", nil, UIParent)
 Skin:RegisterEvent("ADDON_LOADED")
@@ -692,7 +701,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 	-- [[ Load modules ]]
 
 	-- check if the addon loaded is supported by Aurora, and if it is, execute its module
-	local addonModule = C.modules[addon]
+	local addonModule = C.themes[addon]
 	if addonModule then
 		if type(addonModule) == "function" then
 			addonModule()
@@ -759,14 +768,14 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Dropdowns ]]
 
-		for _, dropdown in pairs({LFDQueueFrameTypeDropDown, WhoFrameDropDown, FriendsFriendsFrameDropDown, WorldMapLevelDropDown, RaidFinderQueueFrameSelectionDropDown, Advanced_GraphicsAPIDropDown}) do
-			F.ReskinDropDown(dropdown)
+		for _, dropdown in pairs({"LFDQueueFrameTypeDropDown", "WhoFrameDropDown", "FriendsFriendsFrameDropDown", "RaidFinderQueueFrameSelectionDropDown", "Advanced_GraphicsAPIDropDown"}) do
+			F.ReskinDropDown(_G[dropdown])
 		end
 
 		-- [[ Input frames ]]
 
-		for _, input in pairs({AddFriendNameEditBox, GearManagerDialogPopupEditBox, HelpFrameKnowledgebaseSearchBox, ChannelFrameDaughterFrameChannelName, ChannelFrameDaughterFrameChannelPassword, ScrollOfResurrectionSelectionFrameTargetEditBox, ScrollOfResurrectionFrameNoteFrame, FriendsFrameBroadcastInput}) do
-			F.ReskinInput(input)
+		for _, input in pairs({"AddFriendNameEditBox", "GearManagerDialogPopupEditBox", "HelpFrameKnowledgebaseSearchBox", "ChannelFrameDaughterFrameChannelName", "ChannelFrameDaughterFrameChannelPassword", "ScrollOfResurrectionSelectionFrameTargetEditBox", "ScrollOfResurrectionFrameNoteFrame", "FriendsFrameBroadcastInput"}) do
+			F.ReskinInput(_G[input])
 		end
 
 		-- [[ Arrows ]]
@@ -1126,23 +1135,48 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		for i = 1, ATTACHMENTS_MAX_SEND do
-			local button = _G["SendMailAttachment"..i]
-			button:GetRegions():Hide()
+			local bu = _G["SendMailAttachment"..i]
+			local border = bu.IconBorder
 
-			local bg = CreateFrame("Frame", nil, button)
+			bu:GetRegions():Hide()
+
+			border:SetTexture(C.media.backdrop)
+			border:SetPoint("TOPLEFT", -1, 1)
+			border:SetPoint("BOTTOMRIGHT", 1, -1)
+			border:SetDrawLayer("BACKGROUND")
+
+			local bg = CreateFrame("Frame", nil, bu)
 			bg:SetPoint("TOPLEFT", -1, 1)
 			bg:SetPoint("BOTTOMRIGHT", 1, -1)
 			bg:SetFrameLevel(0)
 			F.CreateBD(bg, .25)
 		end
 
+		-- sigh
+		-- we mess with quality colour numbers, so we have to fix this
+		hooksecurefunc("SendMailFrame_Update", function()
+			for i = 1, ATTACHMENTS_MAX_SEND do
+				local bu = _G["SendMailAttachment"..i]
+
+				if bu:GetNormalTexture() == nil and bu.IconBorder:IsShown() then
+					bu.IconBorder:Hide()
+				end
+			end
+		end)
+
 		for i = 1, ATTACHMENTS_MAX_RECEIVE do
 			local bu = _G["OpenMailAttachmentButton"..i]
 			local ic = _G["OpenMailAttachmentButton"..i.."IconTexture"]
+			local border = bu.IconBorder
 
 			bu:SetNormalTexture("")
 			bu:SetPushedTexture("")
 			ic:SetTexCoord(.08, .92, .08, .92)
+
+			border:SetTexture(C.media.backdrop)
+			border:SetPoint("TOPLEFT", -1, 1)
+			border:SetPoint("BOTTOMRIGHT", 1, -1)
+			border:SetDrawLayer("BACKGROUND")
 
 			local bg = CreateFrame("Frame", nil, bu)
 			bg:SetPoint("TOPLEFT", -1, 1)
@@ -1160,8 +1194,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			end
 		end)
 
-		F.ReskinPortraitFrame(MailFrame, true)
-		F.ReskinPortraitFrame(OpenMailFrame, true)
 		F.ReskinPortraitFrame(MailFrame, true)
 		F.ReskinPortraitFrame(OpenMailFrame, true)
 		F.ReskinInput(SendMailNameEditBox, 20)
@@ -1794,8 +1826,8 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			popout:HookScript("OnLeave", colourPopout)
 		end
 
-		select(10, CharacterMainHandSlot:GetRegions()):Hide()
-		select(10, CharacterSecondaryHandSlot:GetRegions()):Hide()
+		select(11, CharacterMainHandSlot:GetRegions()):Hide()
+		select(11, CharacterSecondaryHandSlot:GetRegions()):Hide()
 
 		local updateChar = function(self)
 			if not PaperDollFrame:IsShown() then return end
@@ -2107,8 +2139,8 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			end
 		end)
 
-		for _, questButton in pairs({QuestFrameAcceptButton, QuestFrameDeclineButton, QuestFrameCompleteQuestButton, QuestFrameCompleteButton, QuestFrameGoodbyeButton, QuestFrameGreetingGoodbyeButton}) do
-			F.Reskin(questButton)
+		for _, questButton in pairs({"QuestFrameAcceptButton", "QuestFrameDeclineButton", "QuestFrameCompleteQuestButton", "QuestFrameCompleteButton", "QuestFrameGoodbyeButton", "QuestFrameGreetingGoodbyeButton"}) do
+			F.Reskin(_G[questButton])
 		end
 
 		F.ReskinScroll(QuestProgressScrollFrameScrollBar)
@@ -3127,23 +3159,23 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			self.subSpellString:SetTextColor(1, 1, 1)
 		end)
 
-		function PaperDollFrame_SetLevel()
+		hooksecurefunc("PaperDollFrame_SetLevel", function()
 			local primaryTalentTree = GetSpecialization()
 			local classDisplayName, class = UnitClass("player")
 			local classColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or C.classcolours[class]
 			local classColorString = format("ff%.2x%.2x%.2x", classColor.r * 255, classColor.g * 255, classColor.b * 255)
-			local specName
+			local specName, _
 
-			if (primaryTalentTree) then
-				_, specName = GetSpecializationInfo(primaryTalentTree);
+			if primaryTalentTree then
+				_, specName = GetSpecializationInfo(primaryTalentTree, nil, nil, nil, UnitSex("player"))
 			end
 
-			if (specName and specName ~= "") then
-				CharacterLevelText:SetFormattedText(PLAYER_LEVEL, UnitLevel("player"), classColorString, specName, classDisplayName);
+			if specName and specName ~= "" then
+				CharacterLevelText:SetFormattedText(PLAYER_LEVEL, UnitLevel("player"), classColorString, specName, classDisplayName)
 			else
-				CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, UnitLevel("player"), classColorString, classDisplayName);
+				CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, UnitLevel("player"), classColorString, classDisplayName)
 			end
-		end
+		end)
 
 		-- [[ Change positions ]]
 

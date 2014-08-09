@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_TimeManager"] = function()
+C.themes["Blizzard_TimeManager"] = function()
 	TimeManagerGlobe:Hide()
 	StopwatchFrameBackgroundLeft:Hide()
 	select(2, StopwatchFrame:GetRegions()):Hide()

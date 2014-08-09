@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_ItemUpgradeUI"] = function()
+C.themes["Blizzard_ItemUpgradeUI"] = function()
 	local ItemUpgradeFrame = ItemUpgradeFrame
 	local ItemButton = ItemUpgradeFrame.ItemButton
 

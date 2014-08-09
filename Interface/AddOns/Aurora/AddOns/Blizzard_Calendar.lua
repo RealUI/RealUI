@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_Calendar"] = function()
+C.themes["Blizzard_Calendar"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	CalendarFrame:DisableDrawLayer("BORDER")

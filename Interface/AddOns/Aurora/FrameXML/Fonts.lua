@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-tinsert(C.modules["Aurora"], function()
+tinsert(C.themes["Aurora"], function()
 	if AuroraConfig.enableFont then
 		local font = C.media.font
 
@@ -111,5 +111,6 @@ tinsert(C.modules["Aurora"], function()
 
 		-- Why?
 		HelpFrameKnowledgebaseNavBarHomeButtonText:SetFont(font, 12)
+		WorldMapFrameNavBarHomeButtonText:SetFont(font, 12)
 	end
 end)

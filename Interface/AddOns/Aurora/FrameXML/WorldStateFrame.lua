@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-tinsert(C.modules["Aurora"], function()
+tinsert(C.themes["Aurora"], function()
 	-- PvP score frame
 
 	select(2, WorldStateScoreScrollFrame:GetRegions()):Hide()

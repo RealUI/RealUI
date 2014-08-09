@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_GuildControlUI"] = function()
+C.themes["Blizzard_GuildControlUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	F.CreateBD(GuildControlUI)

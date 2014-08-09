@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-tinsert(C.modules["Aurora"], function()
+tinsert(C.themes["Aurora"], function()
 	F.ReskinPortraitFrame(AddonList, true)
 	F.Reskin(AddonListEnableAllButton)
 	F.Reskin(AddonListDisableAllButton)

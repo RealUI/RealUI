@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_VoidStorageUI"] = function()
+C.themes["Blizzard_VoidStorageUI"] = function()
 	F.SetBD(VoidStorageFrame, 20, 0, 0, 20)
 	F.CreateBD(VoidStoragePurchaseFrame)
 

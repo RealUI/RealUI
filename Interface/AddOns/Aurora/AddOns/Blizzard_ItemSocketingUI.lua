@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_ItemSocketingUI"] = function()
+C.themes["Blizzard_ItemSocketingUI"] = function()
 	ItemSocketingFrame:DisableDrawLayer("ARTWORK")
 	ItemSocketingScrollFrameTop:SetAlpha(0)
 	ItemSocketingScrollFrameMiddle:SetAlpha(0)

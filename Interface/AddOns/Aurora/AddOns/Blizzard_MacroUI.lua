@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_MacroUI"] = function()
+C.themes["Blizzard_MacroUI"] = function()
 	select(18, MacroFrame:GetRegions()):Hide()
 	MacroHorizontalBarLeft:Hide()
 	select(21, MacroFrame:GetRegions()):Hide()

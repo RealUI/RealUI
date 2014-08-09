@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_PetJournal"] = function()
+C.themes["Blizzard_PetJournal"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	local PetJournal = PetJournal
@@ -25,9 +25,6 @@ C.modules["Blizzard_PetJournal"] = function()
 	MountJournal.MountDisplay.YesMountsTex:SetAlpha(0)
 	MountJournal.MountDisplay.NoMountsTex:SetAlpha(0)
 	MountJournal.MountDisplay.ShadowOverlay:Hide()
-	PetJournalFilterButtonLeft:Hide()
-	PetJournalFilterButtonRight:Hide()
-	PetJournalFilterButtonMiddle:Hide()
 	PetJournalTutorialButton.Ring:Hide()
 
 	F.CreateBD(PetJournalParent)
@@ -38,7 +35,6 @@ C.modules["Blizzard_PetJournal"] = function()
 	F.Reskin(MountJournalMountButton)
 	F.Reskin(PetJournalSummonButton)
 	F.Reskin(PetJournalFindBattle)
-	F.Reskin(PetJournalFilterButton)
 	F.ReskinTab(PetJournalParentTab1)
 	F.ReskinTab(PetJournalParentTab2)
 	F.ReskinTab(PetJournalParentTab3)
@@ -49,6 +45,8 @@ C.modules["Blizzard_PetJournal"] = function()
 	F.ReskinInput(PetJournalSearchBox)
 	F.ReskinArrow(MountJournal.MountDisplay.ModelFrame.RotateLeftButton, "left")
 	F.ReskinArrow(MountJournal.MountDisplay.ModelFrame.RotateRightButton, "right")
+	F.ReskinFilterButton(PetJournalFilterButton)
+	F.ReskinFilterButton(MountJournalFilterButton)
 
 	PetJournalTutorialButton:SetPoint("TOPLEFT", PetJournal, "TOPLEFT", -14, 14)
 
@@ -59,9 +57,11 @@ C.modules["Blizzard_PetJournal"] = function()
 	for _, scrollFrame in pairs(scrollFrames) do
 		for i = 1, #scrollFrame do
 			local bu = scrollFrame[i]
+			local ic = bu.icon
 
 			bu:GetRegions():Hide()
 			bu:SetHighlightTexture("")
+			bu.iconBorder:SetTexture("")
 
 			bu.selectedTexture:SetPoint("TOPLEFT", 0, -1)
 			bu.selectedTexture:SetPoint("BOTTOMRIGHT", 0, 1)
@@ -75,9 +75,8 @@ C.modules["Blizzard_PetJournal"] = function()
 			F.CreateBD(bg, .25)
 			bu.bg = bg
 
-			bu.icon:SetTexCoord(.08, .92, .08, .92)
-			bu.icon:SetDrawLayer("OVERLAY")
-			bu.icon.bg = F.CreateBG(bu.icon)
+			ic:SetTexCoord(.08, .92, .08, .92)
+			ic.bg = F.CreateBG(ic)
 
 			bu.name:SetParent(bg)
 
@@ -126,6 +125,12 @@ C.modules["Blizzard_PetJournal"] = function()
 	MountJournalSummonRandomFavoriteButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
 	MountJournalSummonRandomFavoriteButton:SetPushedTexture("")
 	F.CreateBG(MountJournalSummonRandomFavoriteButton)
+
+	do
+		local ic = MountJournal.MountDisplay.InfoButton.Icon
+		ic:SetTexCoord(.08, .92, .08, .92)
+		F.CreateBG(ic)
+	end
 
 	if C.shouldStyleTooltips then
 		for _, f in pairs({PetJournalPrimaryAbilityTooltip, PetJournalSecondaryAbilityTooltip}) do

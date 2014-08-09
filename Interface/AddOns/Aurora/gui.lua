@@ -51,7 +51,7 @@ title:SetPoint("TOP", 0, -26)
 title:SetText("Aurora "..GetAddOnMetadata("Aurora", "Version"))
 
 local credits = gui:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-credits:SetText("Aurora by Freethinker @ Steamwheedle Cartel - EU / Haleth on wowinterface.com")
+credits:SetText("Aurora by Lightsword @ Argent Dawn - EU / Haleth on wowinterface.com")
 credits:SetPoint("TOP", 0, -380)
 
 local alphaSlider = CreateFrame("Slider", "AuroraOptionsAlpha", gui, "OptionsSliderTemplate")

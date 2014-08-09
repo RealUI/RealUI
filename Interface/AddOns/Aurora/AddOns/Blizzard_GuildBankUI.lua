@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_GuildBankUI"] = function()
+C.themes["Blizzard_GuildBankUI"] = function()
 	GuildBankFrame:DisableDrawLayer("BACKGROUND")
 	GuildBankFrame:DisableDrawLayer("BORDER")
 	GuildBankFrame:DisableDrawLayer("OVERLAY")

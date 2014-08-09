@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_EncounterJournal"] = function()
+C.themes["Blizzard_EncounterJournal"] = function()
 		EncounterJournalEncounterFrameInfo:DisableDrawLayer("BACKGROUND")
 		EncounterJournal:DisableDrawLayer("BORDER")
 		EncounterJournalInset:DisableDrawLayer("BORDER")

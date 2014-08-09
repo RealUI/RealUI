@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_PVPUI"] = function()
+C.themes["Blizzard_PVPUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	local PVPUIFrame = PVPUIFrame
@@ -82,7 +82,9 @@ C.modules["Blizzard_PVPUI"] = function()
 
 	F.Reskin(BonusFrame.DiceButton)
 
-	for _, bu in pairs({BonusFrame.RandomBGButton, BonusFrame.Arena1Button, BonusFrame.Arena2Button}) do
+	for _, bonusButton in pairs({"RandomBGButton", "Arena1Button", "Arena2Button"}) do
+		local bu = BonusFrame[bonusButton]
+
 		F.Reskin(bu, true)
 
 		bu.SelectedTexture:SetDrawLayer("BACKGROUND")

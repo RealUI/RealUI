@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_GuildUI"] = function()
+C.themes["Blizzard_GuildUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	F.ReskinPortraitFrame(GuildFrame, true)
@@ -30,19 +30,10 @@ C.modules["Blizzard_GuildUI"] = function()
 		select(i, GuildNewsFiltersFrame:GetRegions()):Hide()
 		select(i, GuildTextEditFrame:GetRegions()):Hide()
 	end
-	select(2, GuildNewPerksFrame:GetRegions()):Hide()
-	select(3, GuildNewPerksFrame:GetRegions()):Hide()
 	GuildAllPerksFrame:GetRegions():Hide()
 	GuildNewsFrame:GetRegions():Hide()
 	GuildRewardsFrame:GetRegions():Hide()
 	GuildNewsBossModelShadowOverlay:Hide()
-	GuildPerksToggleButtonLeft:Hide()
-	GuildPerksToggleButtonMiddle:Hide()
-	GuildPerksToggleButtonRight:Hide()
-	GuildPerksToggleButtonHighlightLeft:Hide()
-	GuildPerksToggleButtonHighlightMiddle:Hide()
-	GuildPerksToggleButtonHighlightRight:Hide()
-	GuildNewPerksFrameHeader1:SetAlpha(0)
 	GuildInfoFrameInfoHeader1:SetAlpha(0)
 	GuildInfoFrameInfoHeader2:SetAlpha(0)
 	GuildInfoFrameInfoHeader3:SetAlpha(0)
@@ -141,8 +132,15 @@ C.modules["Blizzard_GuildUI"] = function()
 
 	for i = 1, 5 do
 		local bu = _G["GuildInfoFrameApplicantsContainerButton"..i]
-		F.CreateBD(bu, .25)
+
+		bu:SetBackdrop(nil)
 		bu:SetHighlightTexture("")
+
+		local bg = F.CreateBDFrame(bu, .25)
+		bg:ClearAllPoints()
+		bg:SetPoint("TOPLEFT", 0, 0)
+		bg:SetPoint("BOTTOMRIGHT", 0, 1)
+
 		bu:GetRegions():SetTexture(C.media.backdrop)
 		bu:GetRegions():SetVertexColor(r, g, b, .2)
 	end
@@ -160,53 +158,15 @@ C.modules["Blizzard_GuildUI"] = function()
 	GuildFactionBar.bg:SetFrameLevel(0)
 	F.CreateBD(GuildFactionBar.bg, .25)
 
-	GuildXPFrame:ClearAllPoints()
-	GuildXPFrame:SetPoint("TOP", GuildFrame, "TOP", 0, -40)
-	GuildXPBarProgress:SetTexture(C.media.backdrop)
-	GuildXPBarLeft:SetAlpha(0)
-	GuildXPBarRight:SetAlpha(0)
-	GuildXPBarMiddle:SetAlpha(0)
-	GuildXPBarBG:SetAlpha(0)
-	GuildXPBarShadow:SetAlpha(0)
-	GuildXPBarShadow:SetAlpha(0)
-	GuildXPBarCap:SetAlpha(0)
-	GuildXPBarDivider1:Hide()
-	GuildXPBarDivider2:Hide()
-	GuildXPBarDivider3:Hide()
-	GuildXPBarDivider4:Hide()
-	GuildXPBar.bg = CreateFrame("Frame", nil, GuildXPBar)
-	GuildXPBar.bg:SetPoint("TOPLEFT", GuildXPBar, 0, -3)
-	GuildXPBar.bg:SetPoint("BOTTOMRIGHT", GuildXPBar, 0, 1)
-	GuildXPBar.bg:SetFrameLevel(0)
-	F.CreateBD(GuildXPBar.bg, .25)
-
-	local perkbuttons = {"GuildLatestPerkButton", "GuildNextPerkButton"}
-	for _, button in pairs(perkbuttons) do
-		local bu = _G[button]
-		local ic = _G[button.."IconTexture"]
-		local na = _G[button.."NameFrame"]
-
-		na:SetAlpha(0)
-		ic:SetTexCoord(.08, .92, .08, .92)
-		ic:SetDrawLayer("OVERLAY")
-		F.CreateBG(ic)
-
-		bu.bg = CreateFrame("Frame", nil, bu)
-		bu.bg:SetPoint("TOPLEFT", 0, -1)
-		bu.bg:SetPoint("BOTTOMRIGHT", 0, 2)
-		bu.bg:SetFrameLevel(0)
-		F.CreateBD(bu.bg, .25)
-	end
-
-	select(5, GuildLatestPerkButton:GetRegions()):Hide()
-	select(6, GuildLatestPerkButton:GetRegions()):Hide()
-
 	for _, bu in pairs(GuildPerksContainer.buttons) do
-		bu.DisableDrawLayer = F.dummy
-
-		for i = 1, 6 do
+		for i = 1, 4 do
 			select(i, bu:GetRegions()):SetAlpha(0)
 		end
+
+		local bg = F.CreateBDFrame(bu, .25)
+		bg:ClearAllPoints()
+		bg:SetPoint("TOPLEFT", 1, -3)
+		bg:SetPoint("BOTTOMRIGHT", 0, 4)
 
 		bu.icon:SetTexCoord(.08, .92, .08, .92)
 		F.CreateBG(bu.icon)
@@ -215,20 +175,15 @@ C.modules["Blizzard_GuildUI"] = function()
 	GuildPerksContainerButton1:SetPoint("LEFT", -1, 0)
 
 	for _, bu in pairs(GuildRewardsContainer.buttons) do
-		local nt = bu:GetNormalTexture()
+		bu:SetNormalTexture("")
 
 		bu:SetHighlightTexture("")
 		bu.disabledBG:SetTexture("")
 
-		local bg = CreateFrame("Frame", nil, bu)
-		bg:SetPoint("TOPLEFT", 0, -1)
-		bg:SetPoint("BOTTOMRIGHT")
-		F.CreateBD(bg, 0)
-
-		nt:SetTexture(C.media.backdrop)
-		nt:SetVertexColor(0, 0, 0, .25)
-		nt:SetPoint("TOPLEFT", 0, -1)
-		nt:SetPoint("BOTTOMRIGHT", 0, 1)
+		local bg = F.CreateBDFrame(bu, .25)
+		bg:ClearAllPoints()
+		bg:SetPoint("TOPLEFT", 1, -1)
+		bg:SetPoint("BOTTOMRIGHT", 0, 0)
 
 		bu.icon:SetTexCoord(.08, .92, .08, .92)
 		F.CreateBG(bu.icon)
@@ -282,12 +237,10 @@ C.modules["Blizzard_GuildUI"] = function()
 	hooksecurefunc("GuildRoster_Update", UpdateIcons)
 	hooksecurefunc(GuildRosterContainer, "update", UpdateIcons)
 
-	GuildLevelFrame:SetAlpha(0)
-	local closebutton = select(4, GuildTextEditFrame:GetChildren())
-	F.Reskin(closebutton)
-	local logbutton = select(3, GuildLogFrame:GetChildren())
-	F.Reskin(logbutton)
-	local gbuttons = {"GuildAddMemberButton", "GuildViewLogButton", "GuildControlButton", "GuildTextEditFrameAcceptButton", "GuildMemberGroupInviteButton", "GuildMemberRemoveButton", "GuildRecruitmentInviteButton", "GuildRecruitmentMessageButton", "GuildRecruitmentDeclineButton", "GuildPerksToggleButton", "GuildRecruitmentListGuildButton"}
+	F.Reskin(select(4, GuildTextEditFrame:GetChildren()))
+	F.Reskin(select(3, GuildLogFrame:GetChildren()))
+
+	local gbuttons = {"GuildAddMemberButton", "GuildViewLogButton", "GuildControlButton", "GuildTextEditFrameAcceptButton", "GuildMemberGroupInviteButton", "GuildMemberRemoveButton", "GuildRecruitmentInviteButton", "GuildRecruitmentMessageButton", "GuildRecruitmentDeclineButton", "GuildRecruitmentListGuildButton"}
 	for i = 1, #gbuttons do
 		F.Reskin(_G[gbuttons[i]])
 	end

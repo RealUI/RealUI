@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_TrainerUI"] = function()
+C.themes["Blizzard_TrainerUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	ClassTrainerFrameBottomInset:DisableDrawLayer("BORDER")

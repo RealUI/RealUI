@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_BindingUI"] = function()
+C.themes["Blizzard_BindingUI"] = function()
 	local KeyBindingFrame = KeyBindingFrame
 
 	KeyBindingFrame.header:DisableDrawLayer("BACKGROUND")

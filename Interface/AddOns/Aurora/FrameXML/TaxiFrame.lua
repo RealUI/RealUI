@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-tinsert(C.modules["Aurora"], function()
+tinsert(C.themes["Aurora"], function()
 	TaxiFrame:DisableDrawLayer("BORDER")
 	TaxiFrame:DisableDrawLayer("OVERLAY")
 	TaxiFrame.Bg:Hide()

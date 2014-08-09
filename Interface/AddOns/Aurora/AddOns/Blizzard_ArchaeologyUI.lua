@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_ArchaeologyUI"] = function()
+C.themes["Blizzard_ArchaeologyUI"] = function()
 	F.SetBD(ArchaeologyFrame)
 	F.Reskin(ArchaeologyFrameArtifactPageSolveFrameSolveButton)
 	F.Reskin(ArchaeologyFrameArtifactPageBackButton)

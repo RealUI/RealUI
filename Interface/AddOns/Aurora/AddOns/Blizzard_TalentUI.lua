@@ -1,6 +1,6 @@
 local F, C = unpack(select(2, ...))
 
-C.modules["Blizzard_TalentUI"] = function()
+C.themes["Blizzard_TalentUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
 	PlayerTalentFrameTalents:DisableDrawLayer("BORDER")
