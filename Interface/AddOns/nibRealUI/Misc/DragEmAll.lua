@@ -81,7 +81,7 @@ local lodFrames = {
 	Blizzard_GMSurveyUI = { ["GMSurveyFrame"] = false },
 	Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
 	--Blizzard_GuildControlUI
-	Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true },
+	Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true, ["GuildFrame.TitleMouseover"] = true },
 	Blizzard_InspectUI = { ["InspectFrame"] = false, ["InspectPVPFrame"] = true, ["InspectTalentFrame"] = true },
 	Blizzard_ItemAlterationUI = { ["TransmogrifyFrame"] = false },
 	Blizzard_ItemSocketingUI = { ["ItemSocketingFrame"] = false },

@@ -2237,9 +2237,6 @@ local function Guild_UpdateTablet()
 		GuildSection.headerCat:AddLine("text", gname, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", db.colors.ttheader[1], "textG", db.colors.ttheader[2], "textB", db.colors.ttheader[3])
 		GuildSection.headerCat:AddLine("isLine", true, "text", "")
 		
-		-- Guild Level
-		GuildSection.headerCat:AddLine("text", (GetGuildFactionGroup() == 0) and strform(GUILD_LEVEL_AND_FACTION, GetGuildLevel(), FACTION_HORDE) or strform(GUILD_LEVEL_AND_FACTION, GetGuildLevel(), FACTION_ALLIANCE), "size", db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, "textR", nibRealUI.media.colors.blue[1], "textG", nibRealUI.media.colors.blue[2], "textB", nibRealUI.media.colors.blue[3])
-		
 		-- Reputation
 		GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize, "textR", 0.7, "textG", 0.7, "textB", 0.7)
 		AddBlankTabLine(GuildSection.headerCat, 5)

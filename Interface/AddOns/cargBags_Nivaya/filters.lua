@@ -46,15 +46,6 @@ function cbNivaya:ClassifyItem(item)
 	-- keyring
 	if item.bagID == -2 then cB_ItemClass[item.id] = "Keyring"; return true end
 
-	-- TODO: remove after a while --
-	-- neccessary for upgrading from r36 or older:
-	local tcat = cBniv_CatInfo[item.name]
-	if tcat then
-		cBniv_CatInfo[item.id] = tcat
-		cBniv_CatInfo[item.name] = nil
-	end
-	-- TODO end --
-
 	-- user assigned containers
 	local tC = cBniv_CatInfo[item.id]
 	if tC then cB_ItemClass[item.id] = tC; return true end
@@ -122,6 +113,7 @@ local IR = IsAddOnLoaded('ItemRack')
 local OF = IsAddOnLoaded('Outfitter')
 
 cB_Filters.fItemSets = function(item)
+	--print("fItemSets", item, item.isInSet)
 	if not cB_filterEnabled["ItemSets"] then return false end
 	if not item.link then return false end
 	local tC = cBniv_CatInfo[item.name]

@@ -91,9 +91,7 @@ function MyContainer:OnContentsChanged()
   	for i, button in pairs(self.buttons) do
 		local item = cbNivaya:GetItemInfo(button.bagID, button.slotID)
 		if item.link then
-			local _,_,tQ = GetItemInfo(item.link)
-			local _,cnt = GetContainerItemInfo(button.bagID, button.slotID)
-			buttonIDs[i] = { item.id, tQ, button, cnt }
+			buttonIDs[i] = { item.id, item.rarity, button, item.count }
 		else
 			buttonIDs[i] = { -1, -2, button, -1 }
 		end
@@ -173,17 +171,15 @@ JS:RegisterEvent("MERCHANT_SHOW")
 local function SellJunk()
 	if not(cBnivCfg.SellJunk) or (UnitLevel("player") < 5) then return end
 	
-	local Profit, SoldCount, Rarity, ItemPrice, ItemCount = 0, 0, 0, 0, 0
-	local CurrentItemLink
+	local Profit, SoldCount = 0, 0
+	local item
 
 	for BagID = 0, 4 do
 		for BagSlot = 1, GetContainerNumSlots(BagID) do
-			CurrentItemLink = GetContainerItemLink(BagID, BagSlot)
-			if CurrentItemLink then
-				_, _, Rarity, _, _, _, _, _, _, _, ItemPrice = GetItemInfo(CurrentItemLink)
-				_, ItemCount = GetContainerItemInfo(BagID, BagSlot)
-				if Rarity == 0 and ItemPrice ~= 0 then
-					Profit = Profit + (ItemPrice * ItemCount)
+			item = cbNivaya:GetItemInfo(BagID, BagSlot)
+			if item then
+				if item.rarity == 0 and item.sellPrice ~= 0 then
+					Profit = Profit + (item.sellPrice * item.count)
 					SoldCount = SoldCount + 1
 					UseContainerItem(BagID, BagSlot)
 				end
@@ -192,7 +188,7 @@ local function SellJunk()
 	end
 	
 	if Profit > 0 then
-		local g, s, c = math.floor(Profit / 10000) or 0, math.floor((Profit%10000) / 100) or 0, Profit%100
+		local g, s, c = math.floor(Profit / 10000) or 0, math.floor((Profit % 10000) / 100) or 0, Profit % 100
 		print("Vendor trash sold: |cff00a956+|r |cffffffff"..g.."\124TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0\124t "..s.."\124TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0\124t "..c.."\124TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0\124t".."|r")
 	end
 end

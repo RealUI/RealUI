@@ -1079,6 +1079,12 @@ end)
 local bugSackStyled
 if BugSack then
 	hooksecurefunc(BugSack, "UpdateDisplay", function()
+		local count = #BugSack:GetErrors(BugGrabber:GetSessionId())
+		if count and count > 0 then
+			LibDBIcon10_BugSack:Show()
+		else
+			LibDBIcon10_BugSack:Hide()
+		end
 		if db.information.minimapbuttons then
 			if not bugSackStyled then
 				bugSackStyled = true

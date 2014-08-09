@@ -10,7 +10,7 @@ local nibRealUICharacter_defaults = {
 }
 
 -- Minipatch list. These get flagged on a PrimaryInstall as not being required.
-local MiniPatchMajorVer = "80"
+local MiniPatchMajorVer = "81"
 local MiniPatches = {1,2,6,8,9,12,16,21}
 
 local Textures = {
@@ -318,7 +318,7 @@ end
 
 local function MiniPatchInstallation()
 	local CurVer = nibRealUI.verinfo
-	if CurVer[1] == 8 and CurVer[2] == 0 then
+	if CurVer[1] == 8 and CurVer[2] == 1 then
 		-- Find out which Mini Patches are needed
 		local NP = {}
 		local needPatchCount = 0

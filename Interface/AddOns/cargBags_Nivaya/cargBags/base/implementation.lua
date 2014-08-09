@@ -312,11 +312,12 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 		i.texture, i.count, i.locked, i.quality, i.readable = GetContainerItemInfo(bagID, slotID)
 		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
 		i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
-		
+		i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
+
 		-- *edits by Lars "Goldpaw" Norberg for WoW 5.0.4 (MoP)
 		-- last return value here, "texture", doesn't show for battle pets
 		local texture
-		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture = GetItemInfo(clink)
+		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(clink)
 		i.texture = i.texture or texture
 		-- battle pet info must be extracted from the itemlink
 		if (clink:find("battlepet")) then
@@ -332,6 +333,7 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 			i.minLevel = level
 			i.link = clink
 		end
+		--print("GetItemInfo:", i.isInSet, i.setName, i.name)
 	end
 	return i
 end

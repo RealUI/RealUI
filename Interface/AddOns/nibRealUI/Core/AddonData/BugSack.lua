@@ -8,6 +8,6 @@ nibRealUI.LoadAddOnData_BugSack = function()
 		["chatframe"] = false,
 	}
 	BugSackLDBIconDB = {
-		["hide"] = true,
+		["hide"] = false,
 	}
 end

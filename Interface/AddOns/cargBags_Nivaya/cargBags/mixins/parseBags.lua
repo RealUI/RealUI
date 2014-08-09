@@ -52,7 +52,7 @@ cargBags.BagStrings = bagStrings
 	@return bags <table>
 ]]
 function cargBags:ParseBags(bags)
-	print("ParseBags", bags)
+	--print("ParseBags", bags)
 	if(type(bags) == "table") then return bags end
 	if(bagStrings[bags]) then return bagStrings[bags] end
 	local min, max = bags and bags:match("(%d+)-(%d+)")

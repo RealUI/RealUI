@@ -15,15 +15,15 @@ local ButtonWidthCollapsed = 3
 local NeedRefreshed, FramesCreated
 
 local MarkerColors = {
-	[1] = {0.0,  0.71, 1.0,  0.8}, --Blue   RaidTargetingIcon_6
-	[2] = {0.04, 0.95, 0.0,  0.8}, --Green  RaidTargetingIcon_4
-	[3] = {0.83, 0.22, 0.9,  0.8}, --Purple RaidTargetingIcon_3
-	[4] = {1.0,  0.24, 0.17, 0.8}, --Red    RaidTargetingIcon_7
-	[5] = {1.0,  0.92, 0.0,  0.8}, --Yellow RaidTargetingIcon_1
-	[6] = {0.98, 0.57, 0.0,  0.8}, --Orange RaidTargetingIcon_2
-	[7] = {0.7,  0.82, 0.87, 0.8}, --Silver RaidTargetingIcon_5
-	[8] = {0.98, 0.98, 0.98, 0.8}, --White  RaidTargetingIcon_8
-	[9] = {0.3,  0.3,  0.3,  0.8}, --Clear all
+    {0.98, 0.98, 0.98, 0.8}, --White  RaidTargetingIcon_8
+    {1.0,  0.24, 0.17, 0.8}, --Red    RaidTargetingIcon_7
+	{0.0,  0.71, 1.0,  0.8}, --Blue   RaidTargetingIcon_6
+    {0.7,  0.82, 0.87, 0.8}, --Silver RaidTargetingIcon_5
+	{0.04, 0.95, 0.0,  0.8}, --Green  RaidTargetingIcon_4
+	{0.83, 0.22, 0.9,  0.8}, --Purple RaidTargetingIcon_3
+    {0.98, 0.57, 0.0,  0.8}, --Orange RaidTargetingIcon_2
+	{1.0,  0.92, 0.0,  0.8}, --Yellow RaidTargetingIcon_1
+	{0.3,  0.3,  0.3,  0.8}, --Clear all
 }
 
 -- Options
@@ -121,8 +121,6 @@ local function GetOptions()
 	return options
 end
 
-
-
 -- OnLeave
 local function ButtonOnLeave(index)
 	WMF.Buttons[index].mouseover = false
@@ -212,11 +210,11 @@ function WorldMarker:UpdatePosition()
 	WMF.Parent:SetWidth(ButtonWidthExpanded)
 	WMF.Parent:SetHeight(MMHeight)
 	
-	local totHeight, btnHeight = 0
-	for i = 1, 6 do
-		btnHeight = floor(MMHeight / 6) + 1
+    local numBtns = #MarkerColors
+	local totHeight, btnHeight = 0, floor(MMHeight / numBtns) + 2
+	for i = 1, numBtns do
 		WMF.Buttons[i]:ClearAllPoints()
-		if i == 6 then
+		if i == numBtns then
 			WMF.Buttons[i]:SetPoint("TOPLEFT", WMF.Parent, "TOPLEFT", 0, -totHeight + 1)
 			WMF.Buttons[i]:SetHeight(MMHeight - totHeight + 2)
 			WMF.Buttons[i].bg:SetHeight(MMHeight - totHeight + 2)
@@ -254,42 +252,18 @@ local function CreateFrames()
 	WMF.Parent = CreateFrame("Frame", "RealUI_WorldMarker", _G["Minimap"])
 	
 	-- Buttons
+    local numBtns = #MarkerColors
 	WMF.Buttons = {}
-	-- Blue
-	WMF.Buttons[1] = CreateButton(1)
-	WMF.Buttons[1]:SetAttribute("macrotext", "/wm 1")
-	
-	-- Green
-	WMF.Buttons[2] = CreateButton(2)
-	WMF.Buttons[2]:SetAttribute("macrotext", "/wm 2")
-	
-	-- Purple
-	WMF.Buttons[3] = CreateButton(3)
-	WMF.Buttons[3]:SetAttribute("macrotext", "/wm 3")
-	
-	-- Red
-	WMF.Buttons[4] = CreateButton(4)
-	WMF.Buttons[4]:SetAttribute("macrotext", "/wm 4")
-	
-	-- Yellow
-	WMF.Buttons[5] = CreateButton(5)
-	WMF.Buttons[5]:SetAttribute("macrotext", "/wm 5")
-	
-	-- Orange
-	WMF.Buttons[6] = CreateButton(6)
-	WMF.Buttons[6]:SetAttribute("macrotext", "/wm 6")
-	
-	-- Silver
-	WMF.Buttons[7] = CreateButton(7)
-	WMF.Buttons[7]:SetAttribute("macrotext", "/wm 7")
-	
-	-- White
-	WMF.Buttons[8] = CreateButton(8)
-	WMF.Buttons[8]:SetAttribute("macrotext", "/wm 8")
-	
-	-- Clear All
-	WMF.Buttons[9] = CreateButton(9)
-	WMF.Buttons[9]:SetAttribute("macrotext", "/cwm all")
+    for i = 1, numBtns do
+        if i == numBtns then
+            --clear markers
+            WMF.Buttons[i] = CreateButton(i)
+            WMF.Buttons[i]:SetAttribute("macrotext", "/cwm all")
+        else
+            WMF.Buttons[i] = CreateButton(i)
+            WMF.Buttons[i]:SetAttribute("macrotext", "/wm "..WORLD_RAID_MARKER_ORDER[i])
+        end
+    end
 	
 	FramesCreated = true
 end
