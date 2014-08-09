@@ -19,7 +19,7 @@ style.functions = {
         if not a then
 	        --print("CreateSD")
 	        f:SetBackdropColor(unpack(nibRealUI.media.window))
-	        f.tex = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+	        f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
 	        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
 	        f.tex:SetAlpha(db.settings.stripeOpacity)
 	        f.tex:SetAllPoints()
@@ -32,62 +32,6 @@ style.functions = {
 	    	--print("CreateBD: alpha", a)
 	    	f:SetBackdropColor(0, 0, 0, a)
         end
-    end,
-    ["CreateBG"] = function(frame)
-        --print("Override CreateBG")
-        local f = frame
-        if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
-
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetPoint("TOPLEFT", frame, -1, 1)
-        bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
-        bg:SetTexture(C.media.backdrop)
-        bg:SetVertexColor(0.03, 0.03, 0.03)
-
-        return bg
-    end,
-    ["SetBD"] = function(f, x, y, x2, y2)
-        --print("Override SetBD")
-        local bg = CreateFrame("Frame", nil, f)
-        if not x then
-            bg:SetPoint("TOPLEFT")
-            bg:SetPoint("BOTTOMRIGHT")
-        else
-            bg:SetPoint("TOPLEFT", x, y)
-            bg:SetPoint("BOTTOMRIGHT", x2, y2)
-        end
-        bg:SetFrameLevel(0)
-        F.CreateBD(bg)
-    end,
-    ["ReskinPortraitFrame"] = function(f, isButtonFrame)
-        --print("Override ReskinPortraitFrame")
-        local name = f:GetName()
-
-        _G[name.."Bg"]:Hide()
-        _G[name.."TitleBg"]:Hide()
-        _G[name.."Portrait"]:Hide()
-        _G[name.."PortraitFrame"]:Hide()
-        _G[name.."TopRightCorner"]:Hide()
-        _G[name.."TopLeftCorner"]:Hide()
-        _G[name.."TopBorder"]:Hide()
-        _G[name.."TopTileStreaks"]:SetTexture("")
-        _G[name.."BotLeftCorner"]:Hide()
-        _G[name.."BotRightCorner"]:Hide()
-        _G[name.."BottomBorder"]:Hide()
-        _G[name.."LeftBorder"]:Hide()
-        _G[name.."RightBorder"]:Hide()
-
-        if isButtonFrame then
-            _G[name.."BtnCornerLeft"]:SetTexture("")
-            _G[name.."BtnCornerRight"]:SetTexture("")
-            _G[name.."ButtonBottomBorder"]:SetTexture("")
-
-            f.Inset.Bg:Hide()
-            f.Inset:DisableDrawLayer("BORDER")
-        end
-
-        F.CreateBD(f)
-        F.ReskinClose(_G[name.."CloseButton"])
     end,
 }
 

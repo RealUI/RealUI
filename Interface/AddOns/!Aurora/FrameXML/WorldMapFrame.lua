@@ -8,34 +8,49 @@ local strform = string.format
 
 ----------
 function Map:SetMapStrata()
+	WorldMapFrame:SetFrameStrata("HIGH")
 	WorldMapFrame:SetFrameLevel(10)
 	WorldMapDetailFrame:SetFrameLevel(WorldMapFrame:GetFrameLevel() + 1)
-	WorldMapFrame:SetFrameStrata("HIGH")
 end
 
 function Map:Skin()
+	QuestMapFrame_Open()
 	if not Aurora then return end
 	
 	local F = Aurora[1]
-	
-	--WorldMapFrameTitle:Hide()
-	
+
 	WorldMapPlayerUpper:EnableMouse(false)
 	WorldMapPlayerLower:EnableMouse(false)
+	--local regions = WorldMapFrame:GetRegions()
 
-	--F.ReskinPortraitFrame(WorldMapFrame.BorderFrame)
-	
-	--F.ReskinClose(WorldMapFrame.BorderFrame.CloseButton)
-	F.ReskinMinMax(WorldMapFrameSizeUpButton, "Max", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -25, -6)
-	F.ReskinMinMax(WorldMapFrameSizeDownButton, "Min", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -25, -6)
-	
-	if foglightmenu then
-		foglightmenu:ClearAllPoints()
-		foglightmenu:SetPoint("BOTTOMRIGHT", WorldMapFrame.UIElementsFrame, "BOTTOMRIGHT", -20.5, 4.5)
-		F.ReskinDropDown(foglightmenu)
+	if not WorldMapFrame.skinned then
+		F.ReskinPortraitFrame(WorldMapFrame)
+
+		--Buttons
+		F.ReskinMinMax(WorldMapFrameSizeUpButton, "Max", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -26, -6)
+		F.ReskinMinMax(WorldMapFrameSizeDownButton, "Min", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -26, -6)
+		WorldMapFrame.BorderFrame.ButtonFrameEdge:Hide()
+		
+		--Map Inset
+		WorldMapFrame.BorderFrame.InsetBorderTop:Hide()
+		WorldMapFrame.BorderFrame.Inset.Bg:Hide()
+		WorldMapFrame.BorderFrame.Inset:DisableDrawLayer("BORDER")
+
+		--Nav Bar
+		WorldMapFrame.NavBar:GetRegions():Hide()
+		WorldMapFrame.NavBar.overlay:Hide()
+		WorldMapFrame.NavBar:DisableDrawLayer("BORDER")
+		WorldMapFrameNavBarHomeButtonLeft:Hide()
+		F.Reskin(WorldMapFrameNavBarHomeButton)
+
+		WorldMapFrame.skinned = true
 	end
 
-	--hooksecurefunc("WorldMap_ToggleSizeUp", FixSkin)
+	if foglightmenu then
+		foglightmenu:ClearAllPoints()
+		foglightmenu:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame.TrackingOptionsButton.Button, "TOPLEFT", 10, 0)
+		F.ReskinDropDown(foglightmenu)
+	end
 end
 
 -- Coordinate Display --
@@ -93,9 +108,7 @@ end
 -- Size Adjust --
 function Map:SetMapSize()
 	WorldMapFrame:SetParent(UIParent)
-	WorldMapFrame:EnableMouse(false)
-	WorldMapFrame:EnableKeyboard(false)
-	
+
 	if WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center" then
 		SetUIPanelAttribute(WorldMapFrame, "area", "center");
 	end
@@ -103,18 +116,13 @@ function Map:SetMapSize()
 	if WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true then
 		SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
 	end
-	
-	--WorldMapFrameSizeDownButton:Hide()
-	--WorldMapFrameSizeDownButton.Show = function() return end
-	--WorldMapFrameSizeUpButton:Hide()
-	--WorldMapFrameSizeUpButton.Show = function() return end
 end
 
 function Map:SetLargeWorldMap()
 	if InCombatLockdown() then return end
 	
 	self:SetMapSize()
-	WorldMapFrame:SetScale(1)
+	--WorldMapFrame:SetScale(1)
 end
 
 function Map:SetQuestWorldMap()
@@ -141,24 +149,19 @@ function Map:ToggleTinyWorldMapSetting()
 	
 	BlackoutWorld:SetTexture(nil)
 	
+	QuestMapFrame_Hide()
+	if GetCVar("questLogOpen") == 1 then
+		QuestMapFrame_Show()
+	end
+
 	self:SecureHook("WorldMap_ToggleSizeUp", "SetLargeWorldMap")
 	self:SecureHook("WorldMap_ToggleSizeDown", "SetQuestWorldMap")
 	
 	if WORLDMAP_SETTINGS.size == WORLDMAP_FULLMAP_SIZE then
-		self:SetLargeWorldMap()
+		WorldMap_ToggleSizeUp()
 	elseif WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE then
-		self:SetQuestWorldMap()
+		WorldMap_ToggleSizeDown()
 	end
-end
-
-function Map:ResetDropDownListPosition(frame)
-	DropDownList1:ClearAllPoints()
-	DropDownList1:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", -17, -4)
-end
-
-function Map:WorldMapFrame_OnShow()
-	if InCombatLockdown() then return; end
-	self:SetMapStrata()
 end
 
 ----------
@@ -174,71 +177,17 @@ function Map:OnEnable()
 	-- 5.4.1 Taint fix
 	--setfenv(WorldMapFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
 	
-	-- Make sure we're not in Windowed mode
-	if ( WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE ) then
-		SetCVar("miniWorldMap", 0)
-		WorldMap_ToggleSizeUp()
-	end
-
 	self:SetMapStrata()	
-	
-	--WorldMapShowDropDown:SetPoint("BOTTOMRIGHT", WorldMapPositioningGuide, "BOTTOMRIGHT", -2, -4)
-	--WorldMapZoomOutButton:SetPoint("LEFT", WorldMapZoneDropDown, "RIGHT", 0, 2)
-	--WorldMapLevelUpButton:SetPoint("TOPLEFT", WorldMapLevelDropDown, "TOPRIGHT", -2, 6)
-	--WorldMapLevelDownButton:SetPoint("BOTTOMLEFT", WorldMapLevelDropDown, "BOTTOMRIGHT", -2, 2)
-	
-	--self:HookScript(WorldMapFrame, "OnShow", "WorldMapFrame_OnShow")
-	--self:HookScript(WorldMapZoneDropDownButton, "OnClick", "ResetDropDownListPosition")
-	
 	self:SetUpCoords()
 	self:ToggleTinyWorldMapSetting()
+
+	WorldMapFrame:SetUserPlaced(true)
 	
 	WorldMapFrame:HookScript("OnShow", function()
-		--print("WMF:OnShow")
+		--print("WMF:OnShow", WORLDMAP_SETTINGS.size, GetCVarBool("miniWorldMap"))
 		ticker = C_Timer.NewTicker(0.05, updateCoords)
-	--[[ Strip textures, set standard fonts
-		for i = 1, WorldMapFrame:GetNumRegions() do
-			local region = select(i, WorldMapFrame:GetRegions())
-			if region:GetObjectType() == "Texture" then
-				region:SetTexture(nil)
-			elseif region:GetObjectType() == "FontString" then
-				region:SetFont(nibRealUI.font.standard, 13)
-			end
-		end
-		
-		-- Top Dropdown Fonts
-		local function SetDropdownHeaderFont(r)
-			r:SetFont(unpack(nibRealUI.font.pixel1))
-			r:SetTextColor(unpack(nibRealUI.classColor))
-			r:SetShadowColor(0, 0, 0, 0)
-		end
-		for i = 1, WorldMapZoneMinimapDropDown:GetNumRegions() do
-			local region = select(i, WorldMapZoneMinimapDropDown:GetRegions())
-			if region:GetObjectType() == "FontString" then
-				if region:GetText() == BATTLEFIELD_MINIMAP then
-					SetDropdownHeaderFont(region)
-				end
-			end
-		end
-		for i = 1, WorldMapContinentDropDown:GetNumRegions() do
-			local region = select(i, WorldMapContinentDropDown:GetRegions())
-			if region:GetObjectType() == "FontString" then
-				if region:GetText() == CONTINENT then
-					SetDropdownHeaderFont(region)
-				end
-			end
-		end
-		for i = 1, WorldMapZoneDropDown:GetNumRegions() do
-			local region = select(i, WorldMapZoneDropDown:GetRegions())
-			if region:GetObjectType() == "FontString" then
-				if region:GetText() == ZONE then
-					SetDropdownHeaderFont(region)
-				end
-			end
-		end
-		SetDropdownHeaderFont(WorldMapLevelDropDown.header)
-		
-		-- Frame level
+		self:Skin()
+		--[[Frame level
 		if InCombatLockdown() then return end
 		self:SetMapStrata()]]
 	end)
@@ -253,5 +202,4 @@ function Map:OnEnable()
 		end		
 	end)
 	
-	self:Skin()
 end
