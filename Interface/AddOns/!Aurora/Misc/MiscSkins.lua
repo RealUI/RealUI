@@ -3,9 +3,9 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local _
 local MODNAME = "MiscSkins"
 local MiscSkins = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local F, C
 
 function MiscSkins:Skin()
-	local F, C
 	if Aurora then 
 		F = Aurora[1]
 		C = Aurora[2]
@@ -84,8 +84,24 @@ function MiscSkins:ADDON_LOADED(event, addon)
 			end
 		end
 		EventTraceFrame:SetHeight(600)
-		EventTraceFrameScroll:Hide()
-		if Aurora then Aurora[1].ReskinClose(EventTraceFrameCloseButton) end
+		--EventTraceFrameScroll:Hide()
+		if Aurora then
+			F.CreateBD(EventTraceFrame)
+
+			EventTraceFrameScrollBG:Hide()
+			local thumb = EventTraceFrameScroll.thumb
+			thumb:SetAlpha(0)
+			thumb:SetWidth(17)
+			thumb.bg = CreateFrame("Frame", nil, EventTraceFrameScroll)
+			thumb.bg:SetPoint("TOPLEFT", thumb, 0, 0)
+			thumb.bg:SetPoint("BOTTOMRIGHT", thumb, 0, 0)
+			F.CreateBD(thumb.bg, 0)
+			thumb.tex = F.CreateGradient(thumb.bg)
+			thumb.tex:SetPoint("TOPLEFT", thumb.bg, 1, -1)
+			thumb.tex:SetPoint("BOTTOMRIGHT", thumb.bg, -1, 1)
+
+			F.ReskinClose(EventTraceFrameCloseButton)
+		end
 	end
 end
 ----------

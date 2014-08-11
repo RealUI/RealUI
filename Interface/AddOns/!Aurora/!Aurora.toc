@@ -21,7 +21,7 @@ AddOns\WeakAuras.lua
 
 FrameXML\GameMenuFrame.lua
 FrameXML\PaperDollFrame.lua
-#FrameXML\QuestMapFrame.lua
+FrameXML\QuestMapFrame.lua
 FrameXML\WorldMapFrame.lua
 
 Misc\MiscSkins.lua

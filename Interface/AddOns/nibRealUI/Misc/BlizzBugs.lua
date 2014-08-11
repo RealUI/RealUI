@@ -12,7 +12,7 @@ if GetLocale() == "deDE" then
 end
 
 -- fixes the issue with InterfaceOptionsFrame_OpenToCategory not actually opening the Category (and not even scrolling to it)
--- Confirmed still broken in Mists of Pandaria as of build 16016 (5.0.4)
+-- Confirmed still broken in Mists of Pandaria as of build 17538 (5.4.1)
 do
 	local function get_panel_name(panel)
 		local tp = type(panel)
@@ -68,21 +68,19 @@ do
 			end
 		end
 		local Smin, Smax = InterfaceOptionsFrameAddOnsListScrollBar:GetMinMaxValues()
-		if shownpanels > 15 then
-			InterfaceOptionsFrameAddOnsListScrollBar:SetValue((Smax/(shownpanels-15))*(mypanel-2))
-			doNotRun = true
-			InterfaceOptionsFrame_OpenToCategory(panel)
-			doNotRun = false
+		if shownpanels > 15 and Smin < Smax then 
+		  local val = (Smax/(shownpanels-15))*(mypanel-2)
+		  InterfaceOptionsFrameAddOnsListScrollBar:SetValue(val)
 		end
+		doNotRun = true
+		InterfaceOptionsFrame_OpenToCategory(panel)
+		doNotRun = false
 	end
 
 	hooksecurefunc("InterfaceOptionsFrame_OpenToCategory", InterfaceOptionsFrame_OpenToCategory_Fix)
 end
 
--- Fix an issue where Blizzard's use of UIFrameFlash will prevent
--- the ability to change talents if a user has a separate chat tab
--- for e.g. whispers and also has a chat mod installed or a mod that
--- filters whispers. More info here:
+-- Avoid taint from the UIFrameFlash usage of the chat frames.  More info here:
 -- http://forums.wowace.com/showthread.php?p=324936
 
 -- Fixed by embedding LibChatAnims
@@ -90,16 +88,17 @@ end
 
 -- Fix an issue where the PetJournal drag buttons cannot be clicked to link a pet into chat
 -- The necessary code is already present, but the buttons are not registered for the correct click
+-- Confirmed still broken in Mists of Pandaria as of build 17538 (5.4.1)
 if true then
-		local frame = CreateFrame("Frame")
-		frame:RegisterEvent("ADDON_LOADED")
-		frame:SetScript("OnEvent", function(self, event, name)
-			if event == "ADDON_LOADED" and name == "Blizzard_PetJournal" then
-				for i=1,3 do
-					local d = _G["PetJournalLoadoutPet"..i]
-					d = d and d.dragButton
-					if d then d:RegisterForClicks("LeftButtonUp") end
-				end
+        local frame = CreateFrame("Frame")
+        frame:RegisterEvent("ADDON_LOADED")
+        frame:SetScript("OnEvent", function(self, event, name)
+                if event == "ADDON_LOADED" and name == "Blizzard_PetJournal" then
+			for i=1,3 do
+				local d = _G["PetJournalLoadoutPet"..i]
+				d = d and d.dragButton
+				if d then d:RegisterForClicks("LeftButtonUp") end
 			end
-		end)
+                end
+        end)
 end

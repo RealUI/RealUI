@@ -1,3 +1,4 @@
+local _, mods = ...
 local F, C
 local style = {}
 style.apiVersion = "6.0"
@@ -35,6 +36,7 @@ style.functions = {
     end,
 }
 
+--style.highlightColor = {r = 0, g = 1, b = 0}
 style.classcolors = {
     ["DEATHKNIGHT"] = { r = 0.77, g = 0.12, b = 0.23 },
     ["DRUID"]       = { r = 1.00, g = 0.49, b = 0.04 },
@@ -49,9 +51,6 @@ style.classcolors = {
     ["WARRIOR"]     = { r = 0.78, g = 0.61, b = 0.43 },
 }
 
---style.highlightColor = {r = 0, g = 1, b = 0}
-
-
 AURORA_CUSTOM_STYLE = style
 
 local f = CreateFrame("Frame")
@@ -59,6 +58,9 @@ f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event, addon)
     if addon == "Aurora" then
         F, C = unpack(Aurora)
+        --for when skinning code has fully migrated to !Aurora
+        --C.themes["nibRealUI"] = mods
+
         local _, class = UnitClass("player")
         local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
 
@@ -104,12 +106,12 @@ f:SetScript("OnEvent", function(self, event, addon)
             f.pixels = {}
 
             local horiz = f:CreateTexture(nil, "OVERLAY")
-            horiz:SetSize(5, 1)
+            horiz:SetSize(7, 1)
             horiz:SetTexture(C.media.backdrop)
             horiz:SetVertexColor(1, 1, 1)
 
             local vert = f:CreateTexture(nil, "OVERLAY")
-            vert:SetSize(1, 5)
+            vert:SetSize(1, 7)
             vert:SetTexture(C.media.backdrop)
             vert:SetVertexColor(1, 1, 1)
 
