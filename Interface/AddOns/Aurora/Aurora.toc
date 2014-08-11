@@ -50,6 +50,8 @@ FrameXML\LootHistory.lua
 FrameXML\ModelPreviewFrame.lua
 FrameXML\ProductChoiceFrame.lua
 FrameXML\PVEFrame.lua
+FrameXML\QuestInfo.lua
+FrameXML\QuestMapFrame.lua
 FrameXML\QueueStatusFrame.lua
 FrameXML\RaidFinder.lua
 FrameXML\RecruitAFriendFrame.lua
@@ -59,6 +61,7 @@ FrameXML\SpellBookFrame.lua
 FrameXML\SplashFrame.lua
 FrameXML\StaticPopup.lua
 FrameXML\TaxiFrame.lua
+FrameXML\WorldMapFrame.lua
 FrameXML\WorldStateFrame.lua
 
 SharedXML\AddonList.lua

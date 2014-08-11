@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2012, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2014, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 --[[
@@ -31,7 +31,7 @@ end
 local function onDragStart(self)
 	if InCombatLockdown() then return end
 	if not Bartender4.db.profile.buttonlock or IsModifiedClick("PICKUPACTION") then
-		self:SetChecked(0)
+		self:SetChecked(false)
 		PickupPetAction(self.id)
 		self:Update()
 	end
@@ -39,7 +39,7 @@ end
 
 local function onReceiveDrag(self)
 	if InCombatLockdown() then return end
-	self:SetChecked(0)
+	self:SetChecked(false)
 	PickupPetAction(self.id)
 	self:Update()
 end
@@ -117,7 +117,7 @@ function PetButtonPrototype:Update()
 
 	self.isToken = isToken
 	self.tooltipSubtext = subtext
-	self:SetChecked(isActive and 1 or 0)
+	self:SetChecked(isActive)
 	if autoCastAllowed and not autoCastEnabled then
 		self.autocastable:Show()
 		AutoCastShine_AutoCastStop(self.autocast)

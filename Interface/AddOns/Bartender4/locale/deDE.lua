@@ -13,10 +13,8 @@ L["Always Hide"] = "Immer verstecken"
 L["Anchor"] = "Anker"
 L["Apply Preset"] = "Vorlage speichern."
 L["Auto-Assist"] = "Automatische Hilfe"
--- L["Auto-Assist Casting"] = "Auto-Assist Casting"
 L["Bag Bar"] = "Taschenleiste"
 L["Bar Options"] = "Leistenoptionen"
--- L["Bar Paging"] = "Bar Paging"
 L["Bars"] = "Leisten"
 L["Bar %s"] = "Leiste %s"
 L["Bar Snapping"] = "An Leisten ausrichten"
@@ -83,17 +81,11 @@ L["Empty button background"] = "Hintergrund leerer Schaltflächen"
 L[ [=[Enable Auto-Assist for this bar.
  Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Automatische Hilfe für diese Leiste aktivieren.
 Falls der gewählte Zauber nicht auf das Ziel anwendbar ist, wird die automatische Hilfe versuchen ihn auf das Ziel des Ziels zu wirken.]=]
---[==[ L[ [=[Enable Auto-Assist for this bar.
-Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Enable Auto-Assist for this bar.
-Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ]==]
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[Leistenwechsel aktivieren, basierend auf der vom Spiel vorgesehenen Steuerung der Aktionsleisten.
 Für die Zuweisungen, sieh dir die Tastenbelegungen von Blizzard an - meist SHIFT-Mausrad und SHIFT-1 bis SHIFT-6]=]
 L["Enabled"] = "Aktiviert"
 L["Enable/Disable the bar."] = "Die Leiste aktivieren/deaktivieren."
---[==[ L[ [=[Enable Mouse-Over Casting for this bar.
-Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[Enable Mouse-Over Casting for this bar.
-Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ]==]
 L["Enable State-based Button Swaping"] = "Situationsbedingten Schaltflächenwechsel aktivieren."
 L["Enable the Bag Bar"] = "Taschenleiste aktivieren"
 L["Enable the Blizzard Art Bar"] = "Die Blizzard-Kunst-Leiste aktivieren"
@@ -159,16 +151,8 @@ L["Lock the buttons."] = "Die Schaltflächen verschließen"
 L["Micro Menu"] = "Mikromenü"
 L["Minimap Icon"] = "Icon an der Minikarte"
 L["Modifier Based Switching"] = "Modifikatorbasierter Leistenwechsel"
--- L["Mouse-Over Casting"] = "Mouse-Over Casting"
--- L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."
--- L["Mouse-Over Casting Modifier"] = "Mouse-Over Casting Modifier"
 L["No Display"] = "Keine Anzeige"
 L["None"] = "Keine"
---[==[ L[ [=["None" as modifier means its always active, and no modifier is required.
-
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["None" as modifier means its always active, and no modifier is required.
-
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ]==]
 L["No Stance/Form"] = "Keine Haltung/Form"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "Hinweis: Das Aktivieren von eigenen Bedingungen wird alle obigen Einstellungen deaktivieren."
 L["Number of buttons."] = "Anzahl der Schaltflächen."
@@ -195,7 +179,6 @@ L["Right-click Self-Cast"] = "Bei Rechtsklick auf sich selbst wirken"
 L["Right ending"] = "Rechter Abschluß"
 L["Rows"] = "Reihen"
 L["Scale"] = "Skalierung"
--- L["Select a modifier for Mouse-Over Casting"] = "Select a modifier for Mouse-Over Casting"
 L["Select the Focus-Cast Modifier"] = "Den Fokus-Zauber-Modifikator auswählen"
 L["Select the Self-Cast Modifier"] = "Den Selbstzauber-Modifikator auswählen"
 L["Self-Cast by modifier"] = "Selbstzauber mittels Modifikators"
@@ -204,7 +187,6 @@ L["SHIFT"] = "SHIFT"
 L["Show a Icon to open the config at the Minimap"] = "Icon zum Öffnen der Konfiguration an der Minikarte zeigen."
 L["Show Reputation Bar"] = "Rufleiste anzeigen"
 L["Show XP Bar"] = "Zeige Erfahrungsleiste"
--- L["Smart Target selection"] = "Smart Target selection"
 L["Specify the Color of the Out of Mana Indicator"] = "Farbe für die \"Kein Mana\" Anzeige festlegen."
 L["Specify the Color of the Out of Range Indicator"] = "Farbe für die \"Außer Reichweite\" Anzeige festlegen."
 L["Stance Bar"] = "Haltungsleiste"
@@ -216,7 +198,6 @@ L["The background of button places where no buttons are placed"] = "Der Hintergr
 L["The bar default is to be visible all the time, you can configure conditions here to control when the bar should be hidden."] = "Die Leiste ist standardmäßig immer sichtbar. Man kann Bedingungen konfigurieren um zu kontrollieren wann die Leiste versteckt werden soll."
 L["The default behaviour of this bar when no state-based paging option affects it."] = "Das Standardverhalten dieser Leiste wenn sie von keinem Wechsel betroffen ist."
 L["The Positioning options here will allow you to position the bar to your liking and with an absolute precision."] = "Diese Optionen erlauben dir, die Leiste nach deinen Vorstellungen und absolut präzise zu positionieren."
--- L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."] = "These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."
 L["This bar will be hidden once you enter combat."] = "Diese Leiste verstecken, wenn man sich im Kampf befindet."
 L["This bar will be hidden whenever you are not in combat."] = "Diese Leiste verstecken, wenn man sich nicht im Kampf befindet."
 L["Three bars stacked"] = "Drei Leisten übereinander gestapelt"

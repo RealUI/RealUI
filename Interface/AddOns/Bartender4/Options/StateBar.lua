@@ -24,7 +24,6 @@ do
 		actionbar = "StateOption",
 		possess = "StateOption",
 		autoassist = "ConfigAutoAssist",
-		mouseover = "ConfigMouseOver",
 		customEnabled = "StateOption",
 		custom = "StateOption",
 		customCopy = "CopyCustomConditionals",
@@ -115,51 +114,19 @@ function StateBar:GetOptionObject()
 			get = optGetter,
 			set = optSetter,
 		},
-		header_target = {
+		sep1 = {
 			order = 2,
-			type = "header",
-			name = L["Smart Target selection"],
-		},
-		target = {
-			order = 3,
-			type = "group",
-			inline = true,
+			type = "description",
 			name = "",
+		},
+		autoassist = {
+			order = 3,
+			type = "toggle",
+			name = L["Auto-Assist"],
+			desc = L["Enable Auto-Assist for this bar.\n Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell."],
 			get = optGetter,
 			set = optSetter,
-			args = {
-				autoassist = {
-					order = 2,
-					type = "toggle",
-					name = L["Auto-Assist Casting"],
-					desc = L["Enable Auto-Assist for this bar.\nAuto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell."],
-					get = optGetter,
-					set = optSetter,
-				},
-				mouseover = {
-					order = 3,
-					type = "toggle",
-					name = L["Mouse-Over Casting"],
-					desc = L["Enable Mouse-Over Casting for this bar.\nMouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible."],
-					get = optGetter,
-					set = optSetter,
-				},
-				target_desc = {
-					order = 10,
-					type = "description",
-					name = L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."],
-				},
-				mouseover_desc = {
-					order = 11,
-					type = "description",
-					name = L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."],
-				},
-			}
-		},
-		header_paging = {
-			order = 4,
-			type = "header",
-			name = L["Bar Paging"],
+			width = "full",
 		},
 		possess = {
 			order = 5,
@@ -313,7 +280,7 @@ function StateBar:GetOptionObject()
 	local states = {
 		type = "group",
 		name = L["State Configuration"],
-		order = 25,
+		order = 5,
 		args = options,
 	}
 	obj:NewCategory("state", states)

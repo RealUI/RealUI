@@ -1,7 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true)
 
-if not L then return end
-
 L["Include set"] = true
 L["Include set name in title bar"] = true
 L["Disable"] = true
@@ -283,6 +281,7 @@ L["Resisted"] = true
 L["Blocked"] = true
 L["Glancing"] = true
 L["Crushing"] = "Crushing"
+L["Multistrike"] = STAT_MULTISTRIKE or true -- XXX compat
 L["Absorbed"] = true
 L["Dispels"] = true
 L["Fails"] = true

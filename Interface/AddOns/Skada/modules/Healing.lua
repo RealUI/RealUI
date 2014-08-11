@@ -23,6 +23,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 			if is_absorb then
 				player.shielding = player.shielding + amount
 			end
+			if heal.multistrike then
+				player.multistrikes = player.multistrikes + 1
+			end
 
 			-- Also add to set total damage.
 			set.healing = set.healing + amount
@@ -30,6 +33,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 			set.healingabsorbed = set.healingabsorbed + heal.absorbed
 			if is_absorb then
 				set.shielding = set.shielding + amount
+			end
+			if heal.multistrike then
+				set.multistrikes = set.multistrikes + 1
 			end
 
 			-- Add to recipient healing.
@@ -57,7 +63,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 				-- Create spell if it does not exist.
 				if not spell then
-					spell = {id = heal.spellid, name = heal.spellname, hits = 0, healing = 0, overhealing = 0, absorbed = 0, shielding = 0, critical = 0, min = nil, max = 0}
+					spell = {id = heal.spellid, name = heal.spellname, hits = 0, healing = 0, overhealing = 0, absorbed = 0, shielding = 0, critical = 0, multistrike = 0, min = nil, max = 0}
 					player.healingspells[heal.spellname] = spell
 				end
 
@@ -69,6 +75,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				spell.absorbed = spell.absorbed + heal.absorbed
 				if is_absorb then
 					spell.shielding = spell.shielding + amount
+				end
+				if heal.multistrike then
+					spell.multistrike = spell.multistrike + 1
 				end
 
 				spell.hits = (spell.hits or 0) + 1
@@ -87,7 +96,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- Healing
-		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical = ...
+		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical, smultistrike = ...
 
 		-- We want to avoid "heals" that are really drains from mobs
 		-- So check if a) the source is player-controlled
@@ -104,6 +113,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 			heal.amount = samount
 			heal.overhealing = soverhealing
 			heal.critical = scritical
+			heal.multistrike = smultistrike
 			heal.absorbed = absorbed
 
 			Skada:FixPets(heal)
@@ -160,6 +170,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					heal.amount = prev - amount
 					heal.overhealing = 0
 					heal.critical = nil
+					heal.multistrike = nil
 					heal.absorbed = 0
 
 					Skada:FixPets(heal)
@@ -189,6 +200,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					heal.amount = prev
 					heal.overhealing = amount
 					heal.critical = nil
+					heal.multistrike = nil
 					heal.absorbed = 0
 
 					Skada:FixPets(heal)
@@ -311,6 +323,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.healing / spell.hits), 255,255,255,255,255,255)
 				if spell.hits then
 					tooltip:AddDoubleLine(L["Critical"]..":", ("%02.1f%%"):format(spell.critical / spell.hits * 100), 255,255,255,255,255,255)
+				end
+				if spell.hits and spell.multistrike then
+					tooltip:AddDoubleLine(L["Multistrike"]..":", ("%02.1f%%"):format(spell.multistrike / spell.hits * 100), 255,255,255,255,255,255)
 				end
 				if spell.hits then
 					tooltip:AddDoubleLine(L["Overhealing"]..":", ("%02.1f%%"):format(spell.overhealing / (spell.overhealing + spell.healing) * 100), 255,255,255,255,255,255)
@@ -450,17 +465,18 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		player.healingspells = player.healingspells or {}		-- Healing spells
 		player.overhealing = player.overhealing or 0			-- Overheal total
 		player.healingabsorbed = player.healingabsorbed or 0	-- Absorbed total
+		player.multistrikes = player.multistrikes or 0			-- Multistrike total
 
 		-- update any pre-existing healingspells for new properties
-		local _, heal, healed
 		for _, heal in pairs(player.healingspells) do
-			heal.absorbed = heal.absorbed or 0 		-- Amount of healing that was absorbed
-			heal.shielding = heal.shielding or 0	-- Amount of healing that was due to shields
+			heal.absorbed = heal.absorbed or 0					-- Amount of healing that was absorbed
+			heal.shielding = heal.shielding or 0				-- Amount of healing that was due to shields
+			heal.multistrikes = heal.multistrikes or 0			-- Amount of healing that was due to multistrike
 		end
 
 		-- update any pre-existing healed players for new properties
 		for _, healed in pairs(player.healed) do
-			healed.shielding = healed.shielding or 0	-- Amount of healing that was due to shields
+			healed.shielding = healed.shielding or 0			-- Amount of healing that was due to shields
 		end
 	end
 
@@ -470,6 +486,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		set.shielding = set.shielding or 0
 		set.overhealing = set.overhealing or 0
 		set.healingabsorbed = set.healingabsorbed or 0
+		set.multistrikes = set.multistrikes or 0
 		wipe(shields)
 	end
 end)

@@ -1,4 +1,27 @@
 ------------------------------------------------------------------------
+r570 | nebula169 | 2014-08-08 18:38:16 +0000 (Fri, 08 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/locale/enUS.lua
+   M /trunk/modules/Damage.lua
+
+WoD quick fix for Mage's Prismatic Crystal talent
+------------------------------------------------------------------------
+r569 | nebula169 | 2014-08-08 17:28:23 +0000 (Fri, 08 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/DamageTaken.lua
+
+more consistent ordering
+------------------------------------------------------------------------
+r568 | nebula169 | 2014-08-08 17:20:45 +0000 (Fri, 08 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/locale/enUS.lua
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/DamageTaken.lua
+   M /trunk/modules/Healing.lua
+
+add multistrike counts to damage, damage taken, and healing modules
+------------------------------------------------------------------------
 r567 | nebula169 | 2014-07-22 10:06:40 +0000 (Tue, 22 Jul 2014) | 1 line
 Changed paths:
    M /trunk/BarDisplay.lua
@@ -21,21 +44,5 @@ Changed paths:
    M /trunk/locale/enUS.lua
 
 new option: number duplicate set names (ie pull count)
-
-------------------------------------------------------------------------
-r564 | oscarucb | 2014-06-23 02:42:02 +0000 (Mon, 23 Jun 2014) | 4 lines
-Changed paths:
-   M /trunk/BarDisplay.lua
-
-fix ticket 299: window movement on reload
-
-window position was not being correctly saved when the last window operation was a resize or a rescale
-
-------------------------------------------------------------------------
-r563 | oscarucb | 2014-06-10 07:46:33 +0000 (Tue, 10 Jun 2014) | 2 lines
-Changed paths:
-   M /trunk/modules/Deaths.lua
-
-cosmetic fix to SOR immunity killing blow
 
 ------------------------------------------------------------------------
