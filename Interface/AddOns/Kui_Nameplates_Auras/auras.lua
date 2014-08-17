@@ -168,12 +168,10 @@ local function OnAuraUpdate(self, elapsed)
 		end
 	end
 end
-
 local function OnAuraShow(self)
 	local parent = self:GetParent()
 	parent:ArrangeButtons()
 end
-
 local function OnAuraHide(self)
 	local parent = self:GetParent()
 
@@ -189,7 +187,6 @@ local function OnAuraHide(self)
 
 	parent:ArrangeButtons()
 end
-
 local function GetAuraButton(self, spellId, icon, count, duration, expirationTime)
 	local button
 
@@ -284,6 +281,7 @@ function mod:Create(msg, frame)
 	frame.auras = CreateFrame('Frame', nil, frame)
 	frame.auras.frame = frame
 	
+	-- BOTTOMLEFT is set OnShow
 	frame.auras:SetPoint('BOTTOMRIGHT', frame.health, 'TOPRIGHT', -3, 0)
 	frame.auras:SetHeight(50)
 	frame.auras:Hide()
@@ -302,7 +300,6 @@ function mod:Create(msg, frame)
 		self.visible = 0
 	end)
 end
-
 function mod:Show(msg, frame)
 	-- set vertical position of the container frame
 	if frame.trivial then
@@ -312,14 +309,15 @@ function mod:Show(msg, frame)
 		frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
 			3, addon.sizes.frame.aurasOffset)
 	end
-end
 
+	-- TODO calculate size of auras & num per column here
+	
+end
 function mod:Hide(msg, frame)
 	if frame.auras then
 		frame.auras:Hide()
 	end
 end
-
 -------------------------------------------------------------- event handlers --
 function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 	local castTime, event, _, guid, name, _, _, targetGUID, targetName = ...
@@ -341,15 +339,12 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 		f.auras.spellIds[spId]:Hide()
 	end
 end
-
 function mod:PLAYER_TARGET_CHANGED()
 	self:UNIT_AURA('UNIT_AURA', 'target')
 end
-
 function mod:UPDATE_MOUSEOVER_UNIT()
 	self:UNIT_AURA('UNIT_AURA', 'mouseover')
 end
-
 function mod:UNIT_AURA(event, unit)
 	-- select the unit's nameplate	
 	--unit = 'target' -- DEBUG
@@ -393,7 +388,6 @@ function mod:UNIT_AURA(event, unit)
 		button.used = nil
 	end
 end
-
 function mod:WhitelistChanged()
 	-- update spell whitelist
 	whitelist = spelllist.GetImportantSpells(select(2, UnitClass("player")))
@@ -407,7 +401,6 @@ mod.configChangedFuncs.runOnce.enabled = function(val)
 		mod:Disable()
 	end
 end
-
 ---------------------------------------------------- initialisation functions --
 function mod:GetOptions()
 	return {
@@ -497,7 +490,6 @@ function mod:GetOptions()
 		}
 	}
 end
-
 function mod:OnInitialize()
 	self.db = addon.db:RegisterNamespace(self.moduleName, {
 		profile = {
@@ -530,7 +522,6 @@ function mod:OnInitialize()
 	self:WhitelistChanged()
 	spelllist.RegisterChanged(self, 'WhitelistChanged')
 end
-
 function mod:OnEnable()
 	self:RegisterMessage('KuiNameplates_PostCreate', 'Create')
 	self:RegisterMessage('KuiNameplates_PostShow', 'Show')
@@ -549,7 +540,6 @@ function mod:OnEnable()
 		end
 	end
 end
-
 function mod:OnDisable()
 	self:UnregisterEvent('UNIT_AURA')
 	self:UnregisterEvent('PLAYER_TARGET_CHANGED')

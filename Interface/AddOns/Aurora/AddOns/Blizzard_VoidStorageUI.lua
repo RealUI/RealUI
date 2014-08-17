@@ -28,30 +28,23 @@ C.themes["Blizzard_VoidStorageUI"] = function()
 		select(i, VoidStoragePurchaseFrame:GetRegions()):Hide()
 	end
 
-	for i = 1, 9 do
-		local bu1 = _G["VoidStorageDepositButton"..i]
-		local bu2 = _G["VoidStorageWithdrawButton"..i]
+	for _, voidButton in pairs({"VoidStorageDepositButton", "VoidStorageWithdrawButton"}) do
+		for i = 1, 9 do
+			local bu = _G[voidButton..i]
+			local border = bu.IconBorder
 
-		bu1:SetPushedTexture("")
-		bu2:SetPushedTexture("")
+			bu:SetPushedTexture("")
+			_G[voidButton..i.."Bg"]:Hide()
 
-		_G["VoidStorageDepositButton"..i.."Bg"]:Hide()
-		_G["VoidStorageWithdrawButton"..i.."Bg"]:Hide()
+			bu.icon:SetTexCoord(.08, .92, .08, .92)
 
-		_G["VoidStorageDepositButton"..i.."IconTexture"]:SetTexCoord(.08, .92, .08, .92)
-		_G["VoidStorageWithdrawButton"..i.."IconTexture"]:SetTexCoord(.08, .92, .08, .92)
+			border:SetTexture(C.media.backdrop)
+			border:SetPoint("TOPLEFT", -1, 1)
+			border:SetPoint("BOTTOMRIGHT", 1, -1)
+			border:SetDrawLayer("BACKGROUND")
 
-		local bg1 = CreateFrame("Frame", nil, bu1)
-		bg1:SetPoint("TOPLEFT", -1, 1)
-		bg1:SetPoint("BOTTOMRIGHT", 1, -1)
-		bg1:SetFrameLevel(bu1:GetFrameLevel()-1)
-		F.CreateBD(bg1, .25)
-
-		local bg2 = CreateFrame("Frame", nil, bu2)
-		bg2:SetPoint("TOPLEFT", -1, 1)
-		bg2:SetPoint("BOTTOMRIGHT", 1, -1)
-		bg2:SetFrameLevel(bu2:GetFrameLevel()-1)
-		F.CreateBD(bg2, .25)
+			F.CreateBDFrame(bu, .25)
+		end
 	end
 
 	for i = 1, 80 do
@@ -68,6 +61,20 @@ C.themes["Blizzard_VoidStorageUI"] = function()
 		_G["VoidStorageStorageButton"..i.."Bg"]:Hide()
 		_G["VoidStorageStorageButton"..i.."IconTexture"]:SetTexCoord(.08, .92, .08, .92)
 	end
+
+	for i = 1, 2 do
+		local tab = VoidStorageFrame["Page"..i]
+
+		tab:GetRegions():Hide()
+		tab:SetCheckedTexture(C.media.checked)
+
+		F.CreateBG(tab)
+
+		tab:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
+	end
+
+	VoidStorageFrame.Page1:ClearAllPoints()
+	VoidStorageFrame.Page1:SetPoint("LEFT", VoidStorageFrame, "TOPRIGHT", 2, -60)
 
 	F.Reskin(VoidStoragePurchaseButton)
 	F.Reskin(VoidStorageHelpBoxButton)

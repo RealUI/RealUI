@@ -41,13 +41,16 @@ AddOns\Blizzard_VoidStorageUI.lua
 AddOns\Recount.lua
 
 FrameXML\AlertFrames.lua
+FrameXML\CharacterFrame.lua
 FrameXML\Constants.lua
+FrameXML\EquipmentFlyout.lua
 FrameXML\Fonts.lua
 FrameXML\LFDFrame.lua
 FrameXML\LFGFrame.lua
 FrameXML\LFRFrame.lua
 FrameXML\LootHistory.lua
 FrameXML\ModelPreviewFrame.lua
+FrameXML\PaperDollFrame.lua
 FrameXML\ProductChoiceFrame.lua
 FrameXML\PVEFrame.lua
 FrameXML\QuestInfo.lua

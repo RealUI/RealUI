@@ -69,10 +69,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 
 	local abuttons = {"BrowseBidButton", "BrowseBuyoutButton", "BrowseCloseButton", "BrowseSearchButton", "BrowseResetButton", "BidBidButton", "BidBuyoutButton", "BidCloseButton", "AuctionsCloseButton", "AuctionsCancelAuctionButton", "AuctionsCreateAuctionButton", "AuctionsNumStacksMaxButton", "AuctionsStackSizeMaxButton"}
 	for i = 1, #abuttons do
-		local reskinbutton = _G[abuttons[i]]
-		if reskinbutton then
-			F.Reskin(reskinbutton)
-		end
+		F.Reskin(_G[abuttons[i]])
 	end
 
 	BrowseCloseButton:ClearAllPoints()
@@ -112,6 +109,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 
 			F.CreateBG(it)
 
+			it.IconBorder:SetTexture("")
 			_G["BrowseButton"..i.."Left"]:Hide()
 			select(5, _G["BrowseButton"..i]:GetRegions()):Hide()
 			_G["BrowseButton"..i.."Right"]:Hide()
@@ -143,6 +141,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 
 		F.CreateBG(it)
 
+		it.IconBorder:SetTexture("")
 		_G["BidButton"..i.."Left"]:Hide()
 		select(6, _G["BidButton"..i]:GetRegions()):Hide()
 		_G["BidButton"..i.."Right"]:Hide()
@@ -173,6 +172,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 
 		F.CreateBG(it)
 
+		it.IconBorder:SetTexture("")
 		_G["AuctionsButton"..i.."Left"]:Hide()
 		select(4, _G["AuctionsButton"..i]:GetRegions()):Hide()
 		_G["AuctionsButton"..i.."Right"]:Hide()
@@ -194,7 +194,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 	local auctionhandler = CreateFrame("Frame")
 	auctionhandler:RegisterEvent("NEW_AUCTION_UPDATE")
 	auctionhandler:SetScript("OnEvent", function()
-		local AuctionsItemButtonIconTexture = select(14, AuctionsItemButton:GetRegions()) -- blizzard, please name your textures
+		local AuctionsItemButtonIconTexture = select(14, AuctionsItemButton:GetRegions())
 		if AuctionsItemButtonIconTexture then
 			AuctionsItemButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
 			AuctionsItemButtonIconTexture:SetPoint("TOPLEFT", 1, -1)
@@ -215,12 +215,14 @@ C.themes["Blizzard_AuctionUI"] = function()
 	F.ReskinInput(BrowseName)
 	F.ReskinArrow(BrowsePrevPageButton, "left")
 	F.ReskinArrow(BrowseNextPageButton, "right")
+	F.ReskinCheck(ExactMatchCheckButton)
 	F.ReskinCheck(IsUsableCheckButton)
 	F.ReskinCheck(ShowOnPlayerCheckButton)
 
+	BrowsePrevPageButton:SetPoint("TOPLEFT", 660, -60)
+	BrowseNextPageButton:SetPoint("TOPRIGHT", 67, -60)
 	BrowsePrevPageButton:GetRegions():SetPoint("LEFT", BrowsePrevPageButton, "RIGHT", 2, 0)
 
-	-- seriously, consistency
 	BrowseDropDownLeft:SetAlpha(0)
 	BrowseDropDownMiddle:SetAlpha(0)
 	BrowseDropDownRight:SetAlpha(0)
@@ -240,7 +242,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 	local bg = CreateFrame("Frame", nil, BrowseDropDown)
 	bg:SetPoint("TOPLEFT", 16, -5)
 	bg:SetPoint("BOTTOMRIGHT", 109, 11)
-	bg:SetFrameLevel(BrowseDropDown:GetFrameLevel(-1))
+	bg:SetFrameLevel(BrowseDropDown:GetFrameLevel()-1)
 	F.CreateBD(bg, 0)
 
 	F.CreateGradient(bg)

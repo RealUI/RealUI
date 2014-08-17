@@ -5,12 +5,9 @@
 
    Rename this file to custom.lua to attach custom code to the addon. Once
    renamed, you'll need to completely restart WoW so that it detects the file.
-   
-   Updated 14/03/13:
-   
-   * Now using AceEvent's RegisterMessage.
-   
-   * Functions are now in the `mod` table.
+
+   Some examples can be found at the following URL:
+   https://github.com/rbtwrrr/Kui_Nameplates-Customs
 ]]
 local kn = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local mod = kn:NewModule('CustomInjector', 'AceEvent-3.0')
