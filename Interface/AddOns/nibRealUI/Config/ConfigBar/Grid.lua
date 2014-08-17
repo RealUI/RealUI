@@ -9,7 +9,7 @@ local cbGUI = nibRealUI:GetModule("ConfigBar_GUI")
 local rGridLayout = nibRealUI:GetModule("GridLayout")
 
 local MODNAME = "ConfigBar_Grid"
-local ConfigBar_Grid = nibRealUI:NewModule(MODNAME, "AceTimer-3.0", "AceConsole-3.0")
+local ConfigBar_Grid = nibRealUI:NewModule(MODNAME, "AceConsole-3.0")
 
 local Element = {}
 
@@ -152,13 +152,13 @@ function ConfigBar_Grid:SetupWindow()
 			func = function() self:ChangeTab(1) end,
 		},
 		{
-			texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]],
+			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
 			texCoord = {GetTexCoordsForRole("DAMAGER")},
 			texOffset = {-3, -4, 3, 2},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(2) end,
 		},
 		{
-			texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]],
+			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
 			texCoord = {GetTexCoordsForRole("HEALER")},
 			texOffset = {-2, -3, 2, 1},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(3) end,

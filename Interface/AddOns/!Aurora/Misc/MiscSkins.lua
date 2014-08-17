@@ -6,13 +6,11 @@ local MiscSkins = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local F, C
 
 function MiscSkins:Skin()
-	if Aurora then 
-		F = Aurora[1]
-		C = Aurora[2]
-	end
+	if not Aurora then return end
+	F, C = Aurora
 
 	-- Clique
-	if F and CliqueSpellTab then
+	if CliqueSpellTab then
 		local tab = CliqueSpellTab
 		F.ReskinTab(CliqueSpellTab)
 

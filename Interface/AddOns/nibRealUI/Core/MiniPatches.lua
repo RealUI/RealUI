@@ -11,7 +11,7 @@ function nibRealUI:MiniPatch(ver)
 				AuroraConfig["loot"] = false
 				AuroraConfig["useCustomColour"] = false
 				AuroraConfig["enableFont"] = false
-				AuroraConfig["buttonSolidColour"] = {0.2, 0.2, 0.2, 1}
+				AuroraConfig["buttonSolidColour"] = {0.09, 0.09, 0.09, 1}
 			end
 		end
 		if IsAddOnLoaded("DBM-StatusBarTimers") then

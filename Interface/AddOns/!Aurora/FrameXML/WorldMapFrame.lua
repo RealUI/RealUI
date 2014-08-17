@@ -13,86 +13,39 @@ function Map:SetMapStrata()
     WorldMapDetailFrame:SetFrameLevel(WorldMapFrame:GetFrameLevel() + 1)
 end
 
-function Map:Event(...)
-    print("Map:", ...)
-    QuestInfoObjectivesFrame:GetRegions()
-    local numObjectives = GetNumQuestLeaderBoards()
-    local objective
-    local text, type, finished
-    local objectivesTable = QuestInfoObjectivesFrame.Objectives
-    for i = 1, numObjectives do
-        text, type, finished = GetQuestLogLeaderBoard(i)
-        objective = objectivesTable[i]
-        if ( finished ) then
-            objective:SetTextColor(0.5, 0.5, 0.5)
-        else
-            objective:SetTextColor(1, 1, 1)
-        end
-    end
-    QuestInfoRewardsFrame.Header:SetTextColor(1, 1, 1)
-    QuestInfoRewardsFrame.ItemReceiveText:SetTextColor(1, 1, 1)
-    QuestInfoXPFrame.ReceiveText:SetTextColor(1, 1, 1)
-end
-
-function Map:Skin()
-    print("Map:Skin")
-    QuestMapFrame_Open()
+function Map:Skin(size)
+    --print("Map:Skin")
     if not Aurora then return end
-    local F = Aurora[1]
     
-    local name = WorldMapFrame:GetName()
-
     WorldMapPlayerUpper:EnableMouse(false)
     WorldMapPlayerLower:EnableMouse(false)
-    --local regions = WorldMapFrame:GetRegions()
 
-    --_G[name.."Portrait"]:Hide()
-    --_G[name.."PortraitFrame"]:Hide()
-    _G[name.."TopLeftCorner"]:Hide()
+    if size == 1 then
+        --Big Map
+        local name = WorldMapFrame:GetName()
+        _G[name.."TopLeftCorner"]:Hide()
+    else
+        --Small Map
+        --Nav Bar
+        WorldMapFrameNavBar:ClearAllPoints()
+        WorldMapFrameNavBar:SetPoint("BOTTOMLEFT", WorldMapFrame.BorderFrame.Inset, "TOPLEFT", 3, -4)
+        WorldMapFrameNavBar:SetWidth(700)
+    end
 
     if not WorldMapFrame.skinned then
-        --[[_G[name.."Bg"]:Hide()
-        _G[name.."TitleBg"]:Hide()
-        _G[name.."TopRightCorner"]:Hide()
-        _G[name.."TopBorder"]:Hide()
-        _G[name.."TopTileStreaks"]:SetTexture("")
-        _G[name.."BotLeftCorner"]:Hide()
-        _G[name.."BotRightCorner"]:Hide()
-        _G[name.."BottomBorder"]:Hide()
-        _G[name.."LeftBorder"]:Hide()
-        _G[name.."RightBorder"]:Hide()
-
-        F.CreateBD(WorldMapFrame.BorderFrame)
-        F.ReskinClose(_G[name.."CloseButton"])
-
-        F.ReskinMinMax(WorldMapFrameSizeUpButton, "Max", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -26, -6)
-        WorldMapFrame.BorderFrame.ButtonFrameEdge:Hide()
-        
-        --Map Inset
-        WorldMapFrame.BorderFrame.InsetBorderTop:Hide()
-        WorldMapFrame.BorderFrame.Inset.Bg:Hide()
-        WorldMapFrame.BorderFrame.Inset:DisableDrawLayer("BORDER")]]
+        local F = Aurora[1]
+        WorldMapFrame:SetUserPlaced(true)
 
         --Buttons
         F.ReskinMinMax(WorldMapFrameSizeDownButton, "Min", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -27, -6)
-        QuestMapFrame.DetailsFrame.AbandonButton:ClearAllPoints()
-        QuestMapFrame.DetailsFrame.AbandonButton:SetPoint("BOTTOMLEFT", -2, -2)
-        QuestMapFrame.DetailsFrame.AbandonButton:SetWidth(96)
-        QuestMapFrame.DetailsFrame.ShareButton:SetWidth(97)
-        QuestMapFrame.DetailsFrame.TrackButton:SetWidth(96)
 
-
-        --Nav Bar
-        WorldMapFrameNavBar:ClearAllPoints()
-        WorldMapFrameNavBar:SetPoint("BOTTOMLEFT", WorldMapDetailFrame, "TOPLEFT", 1, 0)
-
+        --Foglight
+        if foglightmenu then
+            foglightmenu:ClearAllPoints()
+            foglightmenu:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame.TrackingOptionsButton.Button, "TOPLEFT", 10, 0)
+            F.ReskinDropDown(foglightmenu)
+        end
         WorldMapFrame.skinned = true
-    end
-
-    if foglightmenu then
-        foglightmenu:ClearAllPoints()
-        foglightmenu:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame.TrackingOptionsButton.Button, "TOPLEFT", 10, 0)
-        F.ReskinDropDown(foglightmenu)
     end
 end
 
@@ -217,23 +170,17 @@ end
 
 function Map:OnEnable()
     if IsAddOnLoaded("Mapster") or IsAddOnLoaded("m_Map") or IsAddOnLoaded("MetaMap") then return end
-
-    -- 5.4.1 Taint fix
-    --setfenv(WorldMapFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
     
     self:SetMapStrata() 
     self:SetUpCoords()
     self:ToggleTinyWorldMapSetting()
-    self:RegisterEvent("WORLD_MAP_UPDATE", "Event")
-    self:RegisterEvent("QUEST_COMPLETE", "Event")
-    self:RegisterEvent("QUEST_DETAIL", "Event")
 
     --WorldMapFrame:SetUserPlaced(true)
         
     WorldMapFrame:HookScript("OnShow", function()
         --print("WMF:OnShow", WORLDMAP_SETTINGS.size, GetCVarBool("miniWorldMap"))
         ticker = C_Timer.NewTicker(0.1, updateCoords)
-        self:Skin()
+        self:Skin(WORLDMAP_SETTINGS.size)
         --[[Frame level
         if InCombatLockdown() then return end
         self:SetMapStrata()]]
