@@ -4,9 +4,10 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResource_Stagger"
-local Stagger = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local Stagger = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
+local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
 local layoutSize
 
@@ -29,8 +30,6 @@ local BarWidth = {
 }
 
 local FontStringsRegular = {}
-
-local VengeanceID = 132365
 local MinLevel = 10
 local maxHealth
 
@@ -40,7 +39,7 @@ local function GetOptions()
 	if not options then options = {
 		type = "group",
 		name = "Stagger",
-		desc = "Monk Stagger tracker (+ Vengeance).",
+		desc = "Monk Stagger tracker (+ Resolve).",
 		arg = MODNAME,
 		childGroups = "tab",
 		args = {
@@ -51,7 +50,7 @@ local function GetOptions()
 			},
 			desc = {
 				type = "description",
-				name = "Monk Stagger tracker (+ Vengeance).",
+				name = "Monk Stagger tracker (+ Resolve).",
 				fontSize = "medium",
 				order = 20,
 			},
@@ -71,51 +70,16 @@ local function GetOptions()
 	return options
 end
 
-------------------------
----- Vengeance Scan ----
-------------------------
--- Scan the tooltip and extract the vengeance value
-do
-	local regions = {}
-	local spellName = GetSpellInfo(VengeanceID)
-	local tooltipBufferStagger = CreateFrame("GameTooltip","RealUIBufferTooltip_Stagger",nil,"GameTooltipTemplate")
-	tooltipBufferStagger:SetOwner(WorldFrame, "ANCHOR_NONE")
-
-	local function makeTable(t, ...)
-		wipe(t)
-		for i = 1, select("#", ...) do
-			t[i] = select(i, ...)
-		end
-	end
-
-	function Stagger:UpdateCurrentVengeance()
-		local name = UnitAura("player", spellName)
-		if name then
-			-- Buff found, copy it into the buffer for scanning
-			tooltipBufferStagger:ClearLines()
-			tooltipBufferStagger:SetUnitBuff("player", name)
-
-			-- Grab all regions, stuff em into our table
-			makeTable(regions, tooltipBufferStagger:GetRegions())
-
-			-- Convert FontStrings to strings, replace anything else with ""
-			for i=1, #regions do
-				local region = regions[i]
-				regions[i] = region:GetObjectType() == "FontString" and region:GetText() or ""
-			end
-
-			-- Find the number, save it
-			self.curVeng = tonumber(string.match(table.concat(regions),"%d+")) or 0
-		else
-			self.curVeng = 0
-		end
-	end
-end
-
 -----------------
 ---- Updates ----
 -----------------
-function Stagger:UpdateAuras(event, units)
+function Stagger:UpdateAuras(units)
+	--print("UpdateAuras", units)
+	if units then
+		for k, v in pairs(units) do
+			--print(k, v)
+		end
+	end
 	if units and not(units.player) then return end
 
 	-- Stagger
@@ -141,37 +105,38 @@ function Stagger:UpdateAuras(event, units)
 		AngleStatusBar:SetBarColor(self.sBar.stagger.bar, nibRealUI.media.colors.green)
     end
 
-	-- Vengeance
-	self:UpdateCurrentVengeance()
+	-- Resolve
+	Resolve:UpdateCurrent()
 	
-	local vengPer = nibRealUI:Clamp(self.curVeng / self.maxVeng, 0, 1)
-	AngleStatusBar:SetValue(self.sBar.veng.bar, vengPer)
-	self.sBar.veng.value:SetText(nibRealUI:ReadableNumber(self.curVeng, 0))
+	AngleStatusBar:SetValue(self.sBar.resolve.bar, Resolve.percent)
+	self.sBar.resolve.value:SetText(nibRealUI:ReadableNumber(Resolve.current, 0))
 
-	if vengPer > 0 then
-		self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
+	if Resolve.percent > 0 then
+		self.sBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
 	else
-		self.sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
+		self.sBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 	end
 
 	-- Update visibility
-	if (((self.curStagger > 0) or (self.curVeng > 0)) and not(self.sBar:IsShown())) or
-		(((self.curStagger <= 0) or (self.curVeng <= 0)) and self.sBar:IsShown()) then
+	if (((self.curStagger > 0) or (Resolve.current > floor(Resolve.base))) and not(self.sBar:IsShown())) or
+		(((self.curStagger <= 0) or (Resolve.current <= floor(Resolve.base))) and self.sBar:IsShown()) then
 			self:UpdateShown()
 	end
 end
 
 function Stagger:UpdateMax(event, unit)
+	--print("UpdateMax", event, unit)
 	if (unit and (unit ~= "player")) then
 		return
 	end
 	
 	maxHealth = UnitHealthMax("player")
-	self.maxVeng = maxHealth
+	Resolve:UpdateBase(event, unit)
 	self:UpdateAuras()
 end
 
 function Stagger:UpdateShown(event, unit)
+	--print("UpdateShown")
 	if unit and unit ~= "player" then return end
 
 	if self.configMode then
@@ -179,7 +144,7 @@ function Stagger:UpdateShown(event, unit)
 		return
 	end
 
-	if ( (GetSpecialization() == 1) and ((self.curVeng and (self.curVeng > 0)) or (self.curStagger and (self.curStagger > 0))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
+	if ( (GetSpecialization() == 1) and ((Resolve.current and (Resolve.current > floor(Resolve.base))) or (self.curStagger and (self.curStagger > 0))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
 		self.sBar:Show()
 	else
 		self.sBar:Hide()
@@ -205,7 +170,7 @@ end
 function Stagger:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 	if nibRealUI.class ~= "MONK" then return end
-	AngleStatusBar:SetBarColor(self.sBar.veng.bar, nibRealUI.media.colors.orange)
+	AngleStatusBar:SetBarColor(self.sBar.resolve.bar, nibRealUI.media.colors.orange)
 	self:UpdateAuras()
 end
 
@@ -253,32 +218,32 @@ function Stagger:CreateFrames()
 			sBar.stagger.value:SetJustifyH("LEFT")
 			tinsert(FontStringsRegular, sBar.stagger.value)
 	
-	-- Vengeance
-	sBar.veng = CreateFrame("Frame", nil, sBar)
-		sBar.veng:SetPoint("BOTTOMLEFT", sBar, "BOTTOM", 0, 0)
-		sBar.veng:SetSize(BarWidth[layoutSize], 6)
+	-- Resolve
+	sBar.resolve = CreateFrame("Frame", nil, sBar)
+		sBar.resolve:SetPoint("BOTTOMLEFT", sBar, "BOTTOM", 0, 0)
+		sBar.resolve:SetSize(BarWidth[layoutSize], 6)
 
-		sBar.veng.bg = sBar.veng:CreateTexture(nil, "ARTWORK")
-			sBar.veng.bg:SetPoint("BOTTOMLEFT")
-			sBar.veng.bg:SetSize(128, 16)
-			sBar.veng.bg:SetTexture(Textures[layoutSize].bar)
-			sBar.veng.bg:SetTexCoord(1, 0, 0, 1)
-			sBar.veng.bg:SetVertexColor(unpack(nibRealUI.media.background))
+		sBar.resolve.bg = sBar.resolve:CreateTexture(nil, "ARTWORK")
+			sBar.resolve.bg:SetPoint("BOTTOMLEFT")
+			sBar.resolve.bg:SetSize(128, 16)
+			sBar.resolve.bg:SetTexture(Textures[layoutSize].bar)
+			sBar.resolve.bg:SetTexCoord(1, 0, 0, 1)
+			sBar.resolve.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		sBar.veng.endBox = sBar.veng:CreateTexture(nil, "ARTWORK")
-			sBar.veng.endBox:SetPoint("BOTTOMLEFT", sBar.veng, "BOTTOMRIGHT", -4, 0)
-			sBar.veng.endBox:SetSize(16, 16)
-			sBar.veng.endBox:SetTexture(Textures[layoutSize].endBox)
-			sBar.veng.endBox:SetTexCoord(1, 0, 0, 1)
-			sBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
+		sBar.resolve.endBox = sBar.resolve:CreateTexture(nil, "ARTWORK")
+			sBar.resolve.endBox:SetPoint("BOTTOMLEFT", sBar.resolve, "BOTTOMRIGHT", -4, 0)
+			sBar.resolve.endBox:SetSize(16, 16)
+			sBar.resolve.endBox:SetTexture(Textures[layoutSize].endBox)
+			sBar.resolve.endBox:SetTexCoord(1, 0, 0, 1)
+			sBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 
-		sBar.veng.bar = AngleStatusBar:NewBar(sBar.veng, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
-			sBar.veng.bar.reverse = true
+		sBar.resolve.bar = AngleStatusBar:NewBar(sBar.resolve, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
+			sBar.resolve.bar.reverse = true
 
-		sBar.veng.value = sBar.veng:CreateFontString()
-			sBar.veng.value:SetPoint("BOTTOMRIGHT", sBar.veng, "TOPRIGHT", 9.5, 1.5)
-			sBar.veng.value:SetJustifyH("RIGHT")
-			tinsert(FontStringsRegular, sBar.veng.value)
+		sBar.resolve.value = sBar.resolve:CreateFontString()
+			sBar.resolve.value:SetPoint("BOTTOMRIGHT", sBar.resolve, "TOPRIGHT", 9.5, 1.5)
+			sBar.resolve.value:SetJustifyH("RIGHT")
+			tinsert(FontStringsRegular, sBar.resolve.value)
 
 	-- Middle
 	sBar.middle = sBar:CreateTexture(nil, "ARTWORK")

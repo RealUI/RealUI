@@ -4,9 +4,10 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResource_BloodShield"
-local BloodShield = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local BloodShield = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
+local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
 local layoutSize
 
@@ -29,8 +30,6 @@ local BarWidth = {
 }
 
 local FontStringsRegular = {}
-
-local VengeanceID = 132365
 local BloodShieldID = 77535
 local BloodShieldName
 local MinLevel = 10
@@ -42,7 +41,7 @@ local function GetOptions()
 	if not options then options = {
 		type = "group",
 		name = "Blood Shield",
-		desc = "Deathknight Blood Shield tracker (+ Vengeance).",
+		desc = "Deathknight Blood Shield tracker (+ Resolve).",
 		arg = MODNAME,
 		childGroups = "tab",
 		args = {
@@ -53,7 +52,7 @@ local function GetOptions()
 			},
 			desc = {
 				type = "description",
-				name = "Deathknight Blood Shield tracker (+ Vengeance).",
+				name = "Deathknight Blood Shield tracker (+ Resolve).",
 				fontSize = "medium",
 				order = 20,
 			},
@@ -71,47 +70,6 @@ local function GetOptions()
 	}
 	end
 	return options
-end
-
-------------------------
----- Vengeance Scan ----
-------------------------
--- Scan the tooltip and extract the vengeance value
-do
-	local regions = {}
-	local spellName = GetSpellInfo(VengeanceID)
-	local tooltipBufferBloodShield = CreateFrame("GameTooltip","RealUIBufferTooltip_BloodShield",nil,"GameTooltipTemplate")
-	tooltipBufferBloodShield:SetOwner(WorldFrame, "ANCHOR_NONE")
-
-	local function makeTable(t, ...)
-		wipe(t)
-		for i = 1, select("#", ...) do
-			t[i] = select(i, ...)
-		end
-	end
-
-	function BloodShield:UpdateCurrentVengeance()
-		local name = UnitAura("player", spellName)
-		if name then
-			-- Buff found, copy it into the buffer for scanning
-			tooltipBufferBloodShield:ClearLines()
-			tooltipBufferBloodShield:SetUnitBuff("player", name)
-
-			-- Grab all regions, stuff em into our table
-			makeTable(regions, tooltipBufferBloodShield:GetRegions())
-
-			-- Convert FontStrings to strings, replace anything else with ""
-			for i=1, #regions do
-				local region = regions[i]
-				regions[i] = region:GetObjectType() == "FontString" and region:GetText() or ""
-			end
-
-			-- Find the number, save it
-			self.curVeng = tonumber(string.match(table.concat(regions),"%d+")) or 0
-		else
-			self.curVeng = 0
-		end
-	end
 end
 
 -----------------
@@ -138,23 +96,22 @@ function BloodShield:UpdateAuras(event, units)
 		self.bsBar.bShield.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 	end
 
-	-- Vengeance
+	-- Resolve
 	if event ~= "CLEU" then
-		self:UpdateCurrentVengeance()
+		Resolve:UpdateCurrent()
 
-		local vengPer = nibRealUI:Clamp(self.curVeng / self.maxVeng, 0, 1)
-		AngleStatusBar:SetValue(self.bsBar.veng.bar, vengPer)
-		self.bsBar.veng.value:SetText(nibRealUI:ReadableNumber(self.curVeng, 0))
-		if vengPer > 0 then
-			self.bsBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
+		AngleStatusBar:SetValue(self.bsBar.resolve.bar, Resolve.percent)
+		self.bsBar.resolve.value:SetText(nibRealUI:ReadableNumber(Resolve.current, 0))
+		if Resolve.percent > 0 then
+			self.bsBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
 		else
-			self.bsBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
+			self.bsBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 		end
 	end
 
 	-- Update visibility
-	if (((self.curBloodAbsorb > 0) or (self.curVeng > 0)) and not(self.bsBar:IsShown())) or
-		(((self.curBloodAbsorb <= 0) or (self.curVeng <= 0)) and self.bsBar:IsShown()) then
+	if (((self.curBloodAbsorb > 0) or (Resolve.current > Resolve.base)) and not(self.bsBar:IsShown())) or
+		(((self.curBloodAbsorb <= 0) or (Resolve.current <= Resolve.base)) and self.bsBar:IsShown()) then
 			self:UpdateShown()
 	end
 end
@@ -172,17 +129,8 @@ function BloodShield:UpdateMax(event, unit)
 		return
 	end
 	
-	-- local Stam, MaxHealth, BaseHealth = UnitStat("player", 3), UnitHealthMax("player")
-	-- if Stam < 20 then
-	-- 	BaseHealth = MaxHealth - Stam
-	-- else
-	-- 	BaseHealth = MaxHealth - ((Stam - 19) * 10) - 6
-	-- end
-	-- local MaxVeng = floor(Stam + (BaseHealth / 10))
-	
-	maxHealth = UnitHealthMax("player")
-	self.maxVeng = maxHealth
-	self.maxBlood = maxHealth
+	self.maxBlood = UnitHealthMax("player")
+	Resolve:UpdateBase()
 	self:UpdateAuras()
 end
 
@@ -194,7 +142,7 @@ function BloodShield:UpdateShown(event, unit)
 		return
 	end
 
-	if ( (GetSpecialization() == 1) and ((self.curVeng and (self.curVeng > 0)) or (self.curBloodAbsorb and (self.curBloodAbsorb > 0))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
+	if ( (GetSpecialization() == 1) and ((Resolve.current and (Resolve.current > Resolve.base)) or (self.curBloodAbsorb and (self.curBloodAbsorb > 0))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
 		self.bsBar:Show()
 	else
 		self.bsBar:Hide()
@@ -221,7 +169,7 @@ function BloodShield:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 	if nibRealUI.class ~= "DEATHKNIGHT" then return end
 	AngleStatusBar:SetBarColor(self.bsBar.bShield.bar, nibRealUI.media.colors.red)
-	AngleStatusBar:SetBarColor(self.bsBar.veng.bar, nibRealUI.media.colors.orange)
+	AngleStatusBar:SetBarColor(self.bsBar.resolve.bar, nibRealUI.media.colors.orange)
 	self:UpdateAuras()
 end
 
@@ -269,32 +217,32 @@ function BloodShield:CreateFrames()
 			bsBar.bShield.value:SetJustifyH("LEFT")
 			tinsert(FontStringsRegular, bsBar.bShield.value)
 	
-	-- Vengeance
-	bsBar.veng = CreateFrame("Frame", nil, bsBar)
-		bsBar.veng:SetPoint("BOTTOMLEFT", bsBar, "BOTTOM", 0, 0)
-		bsBar.veng:SetSize(BarWidth[layoutSize], 6)
+	-- Resolve
+	bsBar.resolve = CreateFrame("Frame", nil, bsBar)
+		bsBar.resolve:SetPoint("BOTTOMLEFT", bsBar, "BOTTOM", 0, 0)
+		bsBar.resolve:SetSize(BarWidth[layoutSize], 6)
 
-		bsBar.veng.bg = bsBar.veng:CreateTexture(nil, "ARTWORK")
-			bsBar.veng.bg:SetPoint("BOTTOMLEFT")
-			bsBar.veng.bg:SetSize(128, 16)
-			bsBar.veng.bg:SetTexture(Textures[layoutSize].bar)
-			bsBar.veng.bg:SetTexCoord(1, 0, 0, 1)
-			bsBar.veng.bg:SetVertexColor(unpack(nibRealUI.media.background))
+		bsBar.resolve.bg = bsBar.resolve:CreateTexture(nil, "ARTWORK")
+			bsBar.resolve.bg:SetPoint("BOTTOMLEFT")
+			bsBar.resolve.bg:SetSize(128, 16)
+			bsBar.resolve.bg:SetTexture(Textures[layoutSize].bar)
+			bsBar.resolve.bg:SetTexCoord(1, 0, 0, 1)
+			bsBar.resolve.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
-		bsBar.veng.endBox = bsBar.veng:CreateTexture(nil, "ARTWORK")
-			bsBar.veng.endBox:SetPoint("BOTTOMLEFT", bsBar.veng, "BOTTOMRIGHT", -4, 0)
-			bsBar.veng.endBox:SetSize(16, 16)
-			bsBar.veng.endBox:SetTexture(Textures[layoutSize].endBox)
-			bsBar.veng.endBox:SetTexCoord(1, 0, 0, 1)
-			bsBar.veng.endBox:SetVertexColor(unpack(nibRealUI.media.background))
+		bsBar.resolve.endBox = bsBar.resolve:CreateTexture(nil, "ARTWORK")
+			bsBar.resolve.endBox:SetPoint("BOTTOMLEFT", bsBar.resolve, "BOTTOMRIGHT", -4, 0)
+			bsBar.resolve.endBox:SetSize(16, 16)
+			bsBar.resolve.endBox:SetTexture(Textures[layoutSize].endBox)
+			bsBar.resolve.endBox:SetTexCoord(1, 0, 0, 1)
+			bsBar.resolve.endBox:SetVertexColor(unpack(nibRealUI.media.background))
 
-		bsBar.veng.bar = AngleStatusBar:NewBar(bsBar.veng, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
-			bsBar.veng.bar.reverse = true
+		bsBar.resolve.bar = AngleStatusBar:NewBar(bsBar.resolve, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
+			bsBar.resolve.bar.reverse = true
 
-		bsBar.veng.value = bsBar.veng:CreateFontString()
-			bsBar.veng.value:SetPoint("BOTTOMRIGHT", bsBar.veng, "TOPRIGHT", 9.5, 1.5)
-			bsBar.veng.value:SetJustifyH("RIGHT")
-			tinsert(FontStringsRegular, bsBar.veng.value)
+		bsBar.resolve.value = bsBar.resolve:CreateFontString()
+			bsBar.resolve.value:SetPoint("BOTTOMRIGHT", bsBar.resolve, "TOPRIGHT", 9.5, 1.5)
+			bsBar.resolve.value:SetJustifyH("RIGHT")
+			tinsert(FontStringsRegular, bsBar.resolve.value)
 
 	-- Middle
 	bsBar.middle = bsBar:CreateTexture(nil, "ARTWORK")
