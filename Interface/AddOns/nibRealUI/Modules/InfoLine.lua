@@ -2854,7 +2854,6 @@ function InfoLine:SpecUpdateEquip()
 	elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
 		EquipmentManager_EquipSet(GetEquipmentSetInfo(dbc.specgear.secondary))
 	end
-	self:CancelTimer(self.timerSpecEquip)
 end
 
 local function Spec_Update(self)
@@ -2909,8 +2908,7 @@ local function Spec_Update(self)
 	end
 	
 	if NeedSpecUpdate then
-		-- Register timer to update equipment set (can't be updated as soon as cast ends)
-		InfoLine.timerSpecEquip = InfoLine:ScheduleRepeatingTimer("SpecUpdateEquip", 0.25)
+		InfoLine:SpecUpdateEquip()
 		
 		-- Update Layout
 		local NewTG = GetActiveSpecGroup()

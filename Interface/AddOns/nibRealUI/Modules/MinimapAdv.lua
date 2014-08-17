@@ -4,7 +4,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndbc
 
 local MODNAME = "MinimapAdv"
-local MinimapAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local MinimapAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Astrolabe = DongleStub("Astrolabe-1.0")
 
 RealUIMinimap = MinimapAdv
@@ -1423,8 +1423,8 @@ function MinimapAdv:DungeonDifficultyUpdate()
     MMFrames.info.dungeondifficulty.text:SetText("")
     local _, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
     local name, groupType, isHeroic, isChallengeMode = GetDifficultyInfo(difficulty)
-    if (instanceType ~= "none")  or (difficulty ~= 1)then
-        if (instanceType == "party" or instanceType == "scenario") then
+    if (instanceType ~= "none") then
+        if (instanceType == "party" or instanceType == "scenario") and (maxPlayers <= 5) then
             self.DifficultyText = "D: "..maxPlayers
             if isChallengeMode then self.DifficultyText = self.DifficultyText.."+" end
         elseif (instanceType == "raid") then
@@ -1884,7 +1884,7 @@ local function hookfunc(self, lock, enabled)
 end]]
 
 local function Garrison_OnEnter(self)
-    print("Garrison_OnEnter")
+    --print("Garrison_OnEnter")
     GameTooltip:SetOwner(GarrisonLandingPageMinimapButton, "ANCHOR_RIGHT");
     GameTooltip:SetText(GARRISON_LANDING_PAGE_TITLE, 1, 1, 1);
     GameTooltip:AddLine(MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP, nil, nil, nil, true);
@@ -2041,8 +2041,7 @@ function MinimapAdv:RegEvents()
     self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
     self:RegisterEvent("LFG_PROPOSAL_SHOW", "GetLFGQueue")
     self:RegisterEvent("LFG_QUEUE_STATUS_UPDATE", "GetLFGQueue")
-    self:ScheduleRepeatingTimer("QueueTimeFrequentCheck", 1)
-    
+
     -- POI
     self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
     self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
@@ -2051,11 +2050,16 @@ function MinimapAdv:RegEvents()
     hooksecurefunc("AddQuestWatch", UpdatePOICall)
     hooksecurefunc("RemoveQuestWatch", UpdatePOICall)
 
-    -- Movement Timer
+    -- Player Coords
     self.LastX = 0
     self.LastY = 0
     self.StationaryTime = 0
-    self:ScheduleRepeatingTimer("MovementUpdate", 0.5)
+    self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
+        self.coordsTicker = C_Timer.NewTicker(0.5, MinimapAdv.MovementUpdate)
+    end)
+    self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
+        self.coordsTicker:Cancel()
+    end)
 end
 
 --------------------------

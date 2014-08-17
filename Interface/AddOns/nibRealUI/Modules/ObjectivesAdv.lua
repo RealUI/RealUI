@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "Objectives Adv."
-local ObjectivesAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local ObjectivesAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 
@@ -651,7 +651,7 @@ function ObjectivesAdv:UI_SCALE_CHANGED()
 end
 
 function ObjectivesAdv:PLAYER_ENTERING_WORLD()
-	self:ScheduleTimer("UpdatePlayerLocation", 1)
+	ObjectivesAdv:UpdatePlayerLocation()
 end
 
 function ObjectivesAdv:PLAYER_LOGIN()

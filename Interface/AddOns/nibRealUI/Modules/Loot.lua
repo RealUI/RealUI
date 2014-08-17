@@ -469,8 +469,8 @@ local createSlot = function(id)
 	frame:SetPoint("RIGHT")
 	frame:SetPoint("LEFT")
 	frame:SetHeight(24)
-	frame:SetFrameStrata("HIGH")
-	frame:SetFrameLevel(20)
+	--frame:SetFrameStrata("HIGH")
+	--frame:SetFrameLevel(20)
 	frame:SetID(id)
 	RealUILootFrame.slots[id] = frame
 

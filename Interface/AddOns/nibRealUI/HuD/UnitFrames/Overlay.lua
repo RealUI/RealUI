@@ -483,6 +483,7 @@ function UnitFrames:RangeDisplayUpdate()
 	-- Get range
 	local section
 	local minRange, maxRange = RC:GetRange(TARGET_ID)
+	--print("RangeDisplayUpdate", minRange, maxRange)
 	
 	-- No change? Skip
 	if ((minRange == UF[TARGET_ID].stat1.lastMinRange) and (maxRange == UF[TARGET_ID].stat1.lastMinRange)) then return end
@@ -2158,10 +2159,12 @@ function UnitFrames:ThreatUpdate(event, UnitID)
 	if not UnitExists(TARGET_ID) then return end
 
 	local isTanking, _, _, rawPercentage = UnitDetailedThreatSituation(PLAYER_ID, TARGET_ID)
-	local display = rawPercentage
+	local tankLead
 	if ( isTanking ) then
-		display = UnitThreatPercentageOfLead(PLAYER_ID, TARGET_ID)
+		tankLead = UnitThreatPercentageOfLead(PLAYER_ID, TARGET_ID)
 	end
+	local display = tankLead or rawPercentage
+	--print("ThreatUpdate", event, isTanking, rawPercentage, tankLead, display)
 	if not(UnitIsDeadOrGhost("target")) and (display and (display ~= 0)) then
 		UF[TARGET_ID].stat2.icon:Show()
 		UF[TARGET_ID].stat2.text:SetFormattedText("%d%%", display)
@@ -2462,7 +2465,6 @@ function UnitFrames:InitializeOverlay()
 	-- Threat
 	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", "ThreatUpdate")
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", "ThreatUpdate")
-	self:ScheduleRepeatingTimer("ThreatUpdate", 0.25)
 	
 	-- Death
 	self:RegisterEvent("PLAYER_DEAD", "PlayerDeathEvent")
