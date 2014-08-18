@@ -88,7 +88,7 @@
         <Scripts>
             <OnEnter>
                 local parent = self:GetParent()
-                if parent:IsEnabled() == 1 then
+                if Clique:APIIsTrue(parent:IsEnabled()) then
                     SpellButton_OnEnter(parent)
                 else
                     self:GetHighlightTexture():Hide()

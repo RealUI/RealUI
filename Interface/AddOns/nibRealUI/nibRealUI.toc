@@ -1,5 +1,5 @@
 ## Interface: 60000
-## Title: Real|cffbf3333UI|r
+## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Author: Nibelheim
 ## Notes: RealUI core
 ## Version: 8.1 r1

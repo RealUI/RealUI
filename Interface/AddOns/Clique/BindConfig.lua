@@ -148,7 +148,7 @@ function CliqueConfig:EnableSpellbookButtons()
 
     if self.spellbookButtons then
         for idx, button in ipairs(self.spellbookButtons) do
-            if enabled and button.spellbutton:IsEnabled() == 1 then
+            if enabled and addon:APIIsTrue(button.spellbutton:IsEnabled()) then
                 button:Show()
             else
                 button:Hide()

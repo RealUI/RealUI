@@ -12,7 +12,7 @@ function MiscSkins:Skin()
 	-- Clique
 	if CliqueSpellTab then
 		local tab = CliqueSpellTab
-		F.ReskinTab(CliqueSpellTab)
+		F.ReskinTab(tab)
 
 		tab:SetCheckedTexture(C.media.checked)
 
@@ -100,6 +100,8 @@ function MiscSkins:ADDON_LOADED(event, addon)
 
 			F.ReskinClose(EventTraceFrameCloseButton)
 		end
+	elseif addon == "Aurora" then
+		self:Skin()
 	end
 end
 ----------
@@ -111,6 +113,5 @@ function MiscSkins:OnInitialize()
 end
 
 function MiscSkins:OnEnable()
-	self:Skin()
 	self:RegisterEvent("ADDON_LOADED")
 end

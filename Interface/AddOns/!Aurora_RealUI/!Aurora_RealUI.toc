@@ -1,5 +1,6 @@
 ## Interface: 60000
-## Title: !Aurora
+## Title: !Aurora |cffffffffReal|r|cffbf3333UI|r
+## Notes: A custom Aurora skin for RealUI
 ## Author: Gethe88
 ## Version: v0.0.1
 ## RequiredDeps: nibRealUI

@@ -52,6 +52,21 @@ if EMERGENCY_DEBUG then
 end
 
 --[[-------------------------------------------------------------------------
+--  API compatibility support
+-------------------------------------------------------------------------]]--
+
+-- Returns true if the API value is true-ish (handles old 1/nil returns)
+function addon:APIIsTrue(val, ...)
+	if type(val) == "boolean" then
+		return val
+	elseif type(val) == "number" then
+		return val == 1
+	else
+		return false
+	end
+end
+
+--[[-------------------------------------------------------------------------
 --  Print/Printf support
 -------------------------------------------------------------------------]]--
 

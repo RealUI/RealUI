@@ -159,13 +159,14 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 		_G[self:GetName().."EditBox"]:SetFocus();
 	end,
 	EditBoxOnEnterPressed = function(self)
-		if (_G[self:GetParent():GetName().."Button1"]:IsEnabled() == 1) then
-            local base = self:GetParent():GetName()
-            local editbox = _G[base .. "EditBox"]
-            local profileName = editbox:GetText()
-            addon.db:SetProfile(profileName)
-        end
-        self:GetParent():Hide();
+		local button = _G[self:GetParent():GetName().."Button1"]
+		if addon:APIIsTrue(button:IsEnabled()) then
+			local base = self:GetParent():GetName()
+			local editbox = _G[base .. "EditBox"]
+			local profileName = editbox:GetText()
+			addon.db:SetProfile(profileName)
+		end
+		self:GetParent():Hide();
 	end,
 	EditBoxOnTextChanged = function (self)
 		local editBox = _G[self:GetParent():GetName().."EditBox"];

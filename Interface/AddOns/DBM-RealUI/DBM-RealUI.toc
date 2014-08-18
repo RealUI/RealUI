@@ -1,5 +1,5 @@
 ﻿## Interface: 60000
-## Title:|cffffe00a<|r|cffff7d0aDBM Skin|r|cffffe00a>|r |cff69ccf0RealUI Skin|r
+## Title:|cffffe00a<|r|cffff7d0aDBM Skin|r|cffffe00a>|r |cffffffffReal|r|cffbf3333UI|r |cff69ccf0Skin|r
 ## Author: Gethe88
 ## Version: v1.0.1
 ## RequiredDeps: DBM-Core
