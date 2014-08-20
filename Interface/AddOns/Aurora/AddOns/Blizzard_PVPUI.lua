@@ -10,8 +10,6 @@ C.themes["Blizzard_PVPUI"] = function()
 	local WarGamesFrame = WarGamesFrame
 	local PVPArenaTeamsFrame = PVPArenaTeamsFrame
 
-	PVPUIFrame.Shadows:Hide()
-
 	-- Category buttons
 
 	for i = 1, 4 do
@@ -65,6 +63,8 @@ C.themes["Blizzard_PVPUI"] = function()
 			end
 		end
 	end)
+
+	PVPQueueFrame.CategoryButton1.Background:Show()
 
 	-- Honor frame
 

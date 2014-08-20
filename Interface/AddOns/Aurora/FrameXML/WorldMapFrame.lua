@@ -30,6 +30,7 @@ tinsert(C.themes["Aurora"], function()
 	F.ReskinArrow(WorldMapFrame.UIElementsFrame.CloseQuestPanelButton, "left")
 	F.ReskinArrow(WorldMapFrame.UIElementsFrame.OpenQuestPanelButton, "right")
 	F.ReskinDropDown(WorldMapLevelDropDown)
+	F.ReskinNavBar(WorldMapFrameNavBar)
 
 	BorderFrame.CloseButton:SetPoint("TOPRIGHT", -9, -6)
 
@@ -102,12 +103,4 @@ tinsert(C.themes["Aurora"], function()
 	TrackingOptions.Background:Hide()
 	TrackingOptions.IconOverlay:SetTexture("")
 	TrackingOptions.Button.Border:Hide()
-
-	-- nav bar
-
-	WorldMapFrameNavBar:GetRegions():Hide()
-	WorldMapFrameNavBar:DisableDrawLayer("BORDER")
-	WorldMapFrameNavBar.overlay:Hide()
-	WorldMapFrameNavBarHomeButtonLeft:Hide()
-	F.Reskin(WorldMapFrameNavBar.home)
 end)

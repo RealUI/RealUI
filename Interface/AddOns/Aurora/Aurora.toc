@@ -47,9 +47,11 @@ FrameXML\EquipmentFlyout.lua
 FrameXML\Fonts.lua
 FrameXML\LFDFrame.lua
 FrameXML\LFGFrame.lua
+FrameXML\LFGList.lua
 FrameXML\LFRFrame.lua
 FrameXML\LootHistory.lua
 FrameXML\ModelPreviewFrame.lua
+FrameXML\NavigationBar.lua
 FrameXML\PaperDollFrame.lua
 FrameXML\ProductChoiceFrame.lua
 FrameXML\PVEFrame.lua
@@ -64,6 +66,7 @@ FrameXML\SpellBookFrame.lua
 FrameXML\SplashFrame.lua
 FrameXML\StaticPopup.lua
 FrameXML\TaxiFrame.lua
+FrameXML\VideoOptionsFrame.lua
 FrameXML\WorldMapFrame.lua
 FrameXML\WorldStateFrame.lua
 
