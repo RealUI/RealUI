@@ -46,13 +46,18 @@ nibRealUI.auraTrackingDefaults = {
         specs = {true, false, false}
     },
 -- Static Debuffs
+    {   -- Necrotic Plague
+        spell = 155159,
+        auraType = "debuff",
+        order = 1,
+    },
     {   -- Blood Plague
-        spell = 59879,
+        spell = 55078,
         auraType = "debuff",
         order = 1,
     },
     {   -- Frost Fever
-        spell = 59921,
+        spell = 55095,
         auraType = "debuff",
         order = 2,
     },
@@ -69,7 +74,6 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 87256},    -- Dancing Rune Weapon
     {spell = 49222},    -- Bone Shield
     {spell = 50461},    -- Anti-Magic Zone
-    {spell = 49016},    -- Unholy Frenzy
     {spell = 96268},    -- Death's Advance
     {spell = 81340},    -- Sudden Doom
     {spell = 63560, unit = "pet"},  -- Dark Transformation
@@ -88,20 +92,13 @@ nibRealUI.auraTrackingDefaults = {
         specs = {false, false, false, true},
         forms = {false, false, false, true} -- Show in Human form
     },
-    {   -- Nature's Grace (Balance)
+    --[[{   -- Nature's Grace (Balance)
         spell = 16886,
         minLevel = 10,
         order = 1,
         ignoreSpec = true,
         forms = {false, false, true, false} -- Show in Moonkin form
-    },
-    {   -- Lunar Shower (Balance)
-        spell = 81192,
-        minLevel = 82,
-        order = 2,
-        ignoreSpec = true,
-        forms = {false, false, true, false} -- Show in Moonkin form
-    },
+    },]]
     {   -- Savage Roar (Feral)
         type = "SavageRoar",
         order = 1,
@@ -165,10 +162,8 @@ nibRealUI.auraTrackingDefaults = {
     },
 -- Free Buffs
     {spell = 22812},    -- Barkskin
-    {spell = 29166},    -- Innervate
     {spell = 50322},    -- Survival Instincts
     {spell = 5211},     -- Dash
-    {spell = 5229},     -- Enrage
     {spell = 69369},    -- Predator's Swiftness
     {spell = 33831},    -- Force of Nature
     {spell = 135700},   -- Clearcasting
@@ -176,9 +171,7 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 135286},   -- Tooth and Claw
 -- Free Debuffs
     {spell = 50334, auraType = "debuff"},   -- Berserk
-    {spell = 115798, auraType = "debuff"},  -- Weakened Blows
     {spell = 22570, auraType = "debuff"},   -- Maim
-    {spell = 9007, auraType = "debuff"},    -- Pounce Bleed
     {spell = 770, auraType = "debuff"},     -- Faerie Fire
     {spell = 58180, auraType = "debuff"},   -- Infected Wounds
     {   -- Lacerate (Feral)
@@ -230,7 +223,7 @@ nibRealUI.auraTrackingDefaults = {
     },
 -- Free Buffs
     {spell = 82692},    -- Focus Fire
-    {spell = 34471},    -- Beast Within
+    {spell = 19574},    -- Bestial Wrath
     {spell = 53301},    -- Explosive Shot (buff or debuff?)
     {spell = 19263},    -- Deterrence
     {spell = 53480},    -- Roar of Sacrifice (Cunning)
@@ -245,7 +238,6 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 13812, auraType = "debuff"},   -- Explosive Trap
     {spell = 3355, auraType = "debuff"},    -- Freezing Trap
     {spell = 13810, auraType = "debuff"},   -- Ice Trap
-    {spell = 13797, auraType = "debuff"},   -- Immolation Trap
     {spell = 131894, auraType = "debuff"},  -- A Murder of Crows
 
 },  -- HUNTER -------------------
@@ -290,7 +282,6 @@ nibRealUI.auraTrackingDefaults = {
     },
 -- Free Buffs
     {spell = 12043},    -- Presence of Mind
-    {spell = 116257},   -- Invoker's Energy
     {spell = 1463},     -- Incanter's Ward
     {spell = 116267},   -- Incanter's Absorption
     {spell = 12472},    -- Icy Veins
@@ -325,7 +316,7 @@ nibRealUI.auraTrackingDefaults = {
         specs = {true, false, false},
     },
     {   -- Elusive Brew (Brewmaster)
-        spell = 128939,
+        spell = 128939, --115308
         minLevel = 10,
         order = 2,
         specs = {true, false, false},
@@ -363,7 +354,6 @@ nibRealUI.auraTrackingDefaults = {
     },
 -- Free Buffs
     {spell = 120954},   -- Fortifying Brew
-    {spell = 131523},   -- Zen Meditation
     {spell = 122783},   -- Diffuse Magic
     {spell = 122278},   -- Dampen Harm
     {spell = 116849},   -- Life Cocoon
@@ -371,6 +361,7 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 116841},   -- Tiger's Lust
     {spell = 115294},   -- Mana Tea
     {spell = 115295},   -- Guard
+    {spell = 152173},   -- Serenity
 -- Free Debuffs
     {spell = 115804, auraType = "debuff"}, -- Mortal Wounds
 
@@ -385,11 +376,6 @@ nibRealUI.auraTrackingDefaults = {
         order = 1,
         specs = {false, false, true},
     },
-    {   -- Inquisition (Ret)
-        spell = 84963,
-        order = 2,
-        specs = {false, false, true},
-    },
 -- Static Debuff
 -- Free Buffs
     {   -- Avenging Wrath (Holy, Prot)
@@ -398,13 +384,12 @@ nibRealUI.auraTrackingDefaults = {
     },
     {spell = 498},      -- Divine Protection
     {spell = 105809},   -- Holy Avenger
-    {spell = {86659,86669,86698}},  -- Guardian
+    {spell = 86659},    -- Guardian
     {spell = 1044},     -- Hand of Freedom
     {spell = 1022},     -- Hand of Protection
     {spell = 6940},     -- Hand of Sacrifice
     {spell = 1038},     -- Hand of Salvation
     {spell = 642},      -- Divine Shield
-    {spell = 54428},    -- Divine Plea
     {spell = 20925},    -- Holy Shield
     {spell = 31842},    -- Divine Favor
     {spell = 114039},   -- Hand of Purity
@@ -415,7 +400,6 @@ nibRealUI.auraTrackingDefaults = {
 -- Free Debuffs
     {spell = 31935, auraType = "debuff"}, -- Avenger's Shield
     {spell = 26573, auraType = "debuff"}, -- Concecration
-    {spell = 115798, auraType = "debuff"}, -- Weakened Blows
     {spell = 31803, auraType = "debuff"}, -- Censure
 
 },  -- PALADIN -------------------
@@ -527,7 +511,6 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 5277},     -- Evasion
     {spell = 108208},   -- Subterfuge
     {spell = 121153},   -- Blindside
-    {spell = 121471},   -- Shadow Blades
     {spell = 57933},    -- TotT
     {spell = 31223},    -- Master of Subtlety
     {spell = 31224},    -- Cloak of Shadows
@@ -535,11 +518,10 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 114018},   -- Shroud of Concealment
     {spell = 11327},    -- Vanish
     {spell = 137619},   -- Marked for Death
-    {spell = 122289},   -- Feint
+    {spell = 1966},     -- Feint
     {spell = 74002},    -- Combat Insight
 -- Free Debuffs
     {spell = 16511, auraType = "debuff"},   -- Hemorrhage
-    {spell = 108215, auraType = "debuff"},  -- Paralytic Poison
     {spell = 79140, auraType = "debuff"},   -- Vendetta
     {spell = 703, auraType = "debuff"},     -- Garrote
     {spell = 108210, auraType = "debuff"},  -- Nerve Strike
@@ -583,7 +565,6 @@ nibRealUI.auraTrackingDefaults = {
         specs = {true, false, false}
     },
     {spell = 30823},    -- Shamanistic Rage
-    {spell = 16246},    -- Clearcasting
     {spell = 73683},    -- Unleash Flame
     {spell = 73681},    -- Unleash Wind
     {spell = 79206},    -- Spiritwalker's Grace
@@ -592,17 +573,15 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 108271},   -- Astral Shift
     {spell = 16188},    -- Ancestral Swiftness
     {spell = 2825},     -- Bloodlust
-    {spell = 16191},    -- Mana Tide
     {spell = 8178},     -- Grounding Totem Effect
     {spell = 58875},    -- Spirit Walk
     {spell = 108281},   -- Ancestral Guidance
-    {spell = 16166},    -- Elemental Mastery
+    {spell = 16166},    -- Elemental Mastery (talent)
     {spell = 114896},   -- Windwalk Totem
     {spell = 114049},   -- Ascendance
 -- Free Debuffs
     {spell = 8050, auraType = "debuff", specs = {false, false, true}},  -- Flame Shock (Resto)
     {spell = 8056, auraType = "debuff", specs = {false, false, true}},  -- Frost Shock (Resto)
-    {spell = 115798, auraType = "debuff"},  -- Weakened Blows
     {spell = 17364, auraType = "debuff"},   -- Stormstrike
     
 },  -- SHAMAN ------------------
@@ -699,13 +678,13 @@ nibRealUI.auraTrackingDefaults = {
         specs = {false, true, false},
     },
 -- Static Debuffs
-    {   -- Weakened Armor
+    --[[{   -- Weakened Armor
         spell = 113746,
         auraType = "debuff",
         minLevel = 16,
         order = 1,
         anyone = true,
-    },
+    },]]
 -- Free Buffs
     {spell = 118038},   -- Die by the Sword
     {spell = 55694},    -- Enraged Regeneration
@@ -730,7 +709,6 @@ nibRealUI.auraTrackingDefaults = {
     {spell = 12294, auraType = "debuff"},   -- Mortal Strike
     {spell = 64382, auraType = "debuff"},   -- Shattering Throw
     {spell = 6552, auraType = "debuff"},    -- Pummel
-    {spell = 115798, auraType = "debuff"},  -- Weakened Blows
     {spell = 1715, auraType = "debuff"},    -- Hamstring
     
 },  -- WARRIOR ------------------

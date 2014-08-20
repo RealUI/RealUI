@@ -7,7 +7,7 @@ local F, C
 
 function MiscSkins:Skin()
 	if not Aurora then return end
-	F, C = Aurora
+	F, C = unpack(Aurora)
 
 	-- Clique
 	if CliqueSpellTab then
@@ -75,15 +75,17 @@ end
 function MiscSkins:ADDON_LOADED(event, addon)
 	if addon =="Blizzard_DebugTools" then
 		-- EventTrace
-		for i = 1, EventTraceFrame:GetNumRegions() do
-			local region = select(i, EventTraceFrame:GetRegions())
-			if region:GetObjectType() == "Texture" then
-				region:SetTexture(nil)
-			end
-		end
-		EventTraceFrame:SetHeight(600)
-		--EventTraceFrameScroll:Hide()
 		if Aurora then
+			F, C = unpack(Aurora)
+
+			for i = 1, EventTraceFrame:GetNumRegions() do
+				local region = select(i, EventTraceFrame:GetRegions())
+				if region:GetObjectType() == "Texture" then
+					region:SetTexture(nil)
+				end
+			end
+			EventTraceFrame:SetHeight(600)
+			--EventTraceFrameScroll:Hide()
 			F.CreateBD(EventTraceFrame)
 
 			EventTraceFrameScrollBG:Hide()
