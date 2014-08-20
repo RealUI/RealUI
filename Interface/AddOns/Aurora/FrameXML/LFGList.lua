@@ -21,7 +21,7 @@ tinsert(C.themes["Aurora"], function()
 	hooksecurefunc("LFGListCategorySelection_AddButton", function(self, btnIndex)
 		local bu = self.CategoryButtons[btnIndex]
 
-		if not bu.styled then
+		if bu and not bu.styled then
 			bu.Cover:Hide()
 
 			bu.Icon:SetDrawLayer("BACKGROUND", 1)
