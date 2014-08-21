@@ -45,7 +45,7 @@ local function GetAuraInfo(self, index)
 	local remaining
 	local spellName = index and self.spellNames[index] or self.spellName
 	local spellID = index and self.spellIDs[index] or self.spellID
-	print("GetAuraInfo", spellID, spellName)
+	--print("GetAuraInfo", spellID, spellName)
 	local buffFilter = (self.isBuff and "HELPFUL" or "HARMFUL") .. (self.anyone and "" or "|PLAYER")
 	
 	local name, rank, texture, count, type, duration, endTime, unitCaster, _, _, curSpellID = UnitAura(self.unit, spellName, nil, buffFilter)
