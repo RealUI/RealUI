@@ -4,45 +4,27 @@ local _
 local MODNAME = "Map"
 local Map = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
-local strform = string.format
-
 ----------
-function Map:SetMapStrata()
-    WorldMapFrame:SetFrameStrata("HIGH")
-    WorldMapFrame:SetFrameLevel(10)
-    WorldMapDetailFrame:SetFrameLevel(WorldMapFrame:GetFrameLevel() + 1)
-end
-
-function Map:Skin(size)
+function Map:Skin()
     --print("Map:Skin")
-    if not Aurora then return end
-    
     WorldMapPlayerUpper:EnableMouse(false)
     WorldMapPlayerLower:EnableMouse(false)
 
-    if size == 1 then
-        --Big Map
-        local name = WorldMapFrame:GetName()
-        _G[name.."TopLeftCorner"]:Hide()
-    else
-        --Small Map
-        --Nav Bar
-        WorldMapFrameNavBar:ClearAllPoints()
-        WorldMapFrameNavBar:SetPoint("BOTTOMLEFT", WorldMapFrame.BorderFrame.Inset, "TOPLEFT", 3, -4)
-        WorldMapFrameNavBar:SetWidth(700)
-    end
-
     if not WorldMapFrame.skinned then
-        local F = Aurora[1]
         WorldMapFrame:SetUserPlaced(true)
+        local trackingBtn = WorldMapFrame.UIElementsFrame.TrackingOptionsButton
 
         --Buttons
-        F.ReskinMinMax(WorldMapFrameSizeDownButton, "Min", "TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -27, -6)
+        WorldMapLevelDropDown:ClearAllPoints()
+        WorldMapLevelDropDown:SetPoint("TOPLEFT", WorldMapFrame.UIElementsFrame, -15, 3)
+        trackingBtn:ClearAllPoints()
+        trackingBtn:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame, 3, 3)
 
         --Foglight
-        if foglightmenu then
+        if foglightmenu and Aurora then
+            local F = Aurora[1]
             foglightmenu:ClearAllPoints()
-            foglightmenu:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame.TrackingOptionsButton.Button, "TOPLEFT", 10, 0)
+            foglightmenu:SetPoint("TOPRIGHT", trackingBtn, "TOPLEFT", 20, 0)
             F.ReskinDropDown(foglightmenu)
         end
         WorldMapFrame.skinned = true
@@ -102,46 +84,31 @@ function Map:SetUpCoords()
 end
 
 -- Size Adjust --
-function Map:SetMapSize()
-    WorldMapFrame:SetParent(UIParent)
-
-    if WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center" then
-        SetUIPanelAttribute(WorldMapFrame, "area", "center");
-    end
-    
-    if WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true then
-        SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
-    end
-end
-
 function Map:SetLargeWorldMap()
+    print("Map:SetLargeWorldMap")
     if InCombatLockdown() then return end
     
-    self:SetMapSize()
-    --self:Skin()
+    -- reparent
+    WorldMapFrame:SetParent(UIParent)
+    WorldMapFrame:SetFrameStrata("HIGH")
+    WorldMapFrame:EnableKeyboard(true)
+
+    --reposition
+    WorldMapFrame:ClearAllPoints()
+    WorldMapFrame:SetPoint("CENTER", 0, 0)
+    SetUIPanelAttribute(WorldMapFrame, "area", "center")
+    SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
+    WorldMapFrame:SetSize(1022, 766)
 end
 
 function Map:SetQuestWorldMap()
     if InCombatLockdown() then return end
     
-    self:SetMapSize()
-    --self:Skin()
+    WorldMapFrameNavBar:SetPoint("TOPLEFT", WorldMapFrame.BorderFrame, 3, -33)
+    WorldMapFrameNavBar:SetWidth(700)
 end
 
-function Map:AdjustMapSize()
-    if InCombatLockdown() then return end
-    
-    if WORLDMAP_SETTINGS.size ~= WORLDMAP_QUESTLIST_SIZE then
-        WORLDMAP_SETTINGS.size = WORLDMAP_QUESTLIST_SIZE
-    end
-    self:SetQuestWorldMap()
-    
-    WorldMapFrame:SetFrameStrata("HIGH")
-    WorldMapFrame:SetFrameLevel(3)
-    WorldMapDetailFrame:SetFrameLevel(WorldMapFrame:GetFrameLevel() + 1)
-end
-
-function Map:ToggleTinyWorldMapSetting()
+function Map:SetUpSizes()
     if InCombatLockdown() then return end
     
     BlackoutWorld:SetTexture(nil)
@@ -171,9 +138,8 @@ end
 function Map:OnEnable()
     if IsAddOnLoaded("Mapster") or IsAddOnLoaded("m_Map") or IsAddOnLoaded("MetaMap") then return end
     
-    self:SetMapStrata() 
     self:SetUpCoords()
-    self:ToggleTinyWorldMapSetting()
+    self:SetUpSizes()
 
     --WorldMapFrame:SetUserPlaced(true)
         
@@ -181,9 +147,6 @@ function Map:OnEnable()
         --print("WMF:OnShow", WORLDMAP_SETTINGS.size, GetCVarBool("miniWorldMap"))
         ticker = C_Timer.NewTicker(0.1, updateCoords)
         self:Skin(WORLDMAP_SETTINGS.size)
-        --[[Frame level
-        if InCombatLockdown() then return end
-        self:SetMapStrata()]]
     end)
     WorldMapFrame:HookScript("OnHide", function()
         --print("WMF:OnHide")
