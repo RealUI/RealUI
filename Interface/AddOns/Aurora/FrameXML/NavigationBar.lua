@@ -4,13 +4,35 @@ tinsert(C.themes["Aurora"], function()
 	local r, g, b = C.r, C.g, C.b
 
 	local function moveNavButtons(self)
-		for i=1, #self.navList do
-			local navButton = self.navList[i]
-			local lastNav = self.navList[i-1]
-			if navButton and lastNav then
-				navButton:ClearAllPoints()
-				navButton:SetPoint("LEFT", lastNav, "RIGHT", 1, 0)
+		local width = 0
+		local collapsedWidth
+		local maxWidth = self:GetWidth() - self.widthBuffer
+
+		local lastShown
+		local collapsed = false
+
+		for i = #self.navList, 1, -1 do
+			width = width + self.navList[i]:GetWidth()
+
+			if width > maxWidth then
+				collapsed = true
+				if not collapsedWidth then
+					collapsedWidth = width
+				end
+			else
+				if lastShown then
+					self.navList[lastShown]:SetPoint("LEFT", self.navList[i], "RIGHT", 1, 0)
+				end
+				lastShown = i
 			end
+		end
+
+		if collapsed then
+			if collapsedWidth + self.overflowButton:GetWidth() > maxWidth then
+				lastShown = lastShown + 1
+			end
+
+			self.navList[lastShown]:SetPoint("LEFT", self.overflowButton, "RIGHT", 1, 0)
 		end
 	end
 

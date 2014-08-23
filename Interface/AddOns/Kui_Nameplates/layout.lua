@@ -302,6 +302,7 @@ local function OnFrameHide(self)
     f.fadingTo  = nil
     f.hasThreat = nil
     f.target    = nil
+    f.targetDelay = nil
 	f.stickyHealthColour = nil
 
     -- unset stored health bar colours
@@ -468,36 +469,59 @@ local function UpdateFrameCritical(self)
     ------------------------------------------------------------ Target stuff --
     if UnitExists('target') and self.defaultAlpha == 1 then
         if not self.target then
-            -- this frame just became targeted
-            self.target = true
-            addon:StoreGUID(self, 'target')
-
-            -- move this frame above others
-            self:SetFrameLevel(10)
-
-            if addon.db.profile.hp.mouseover then
-                self.health.p:Show()
-                if self.health.mo then self.health.mo:Show() end
+            if self.guid and self.guid == UnitGUID('target') then
+                -- this is definitely the target
+                self.targetDelay = 1
+            else
+                -- this -may- be the target's frame but we need to wait a moment
+                -- before we can be sure.
+                -- this alpha update delay is a blizzard issue.
+                self.targetDelay = (self.targetDelay and self.targetDelay + 1) or 0
             end
+
+            if self.targetDelay >= 1 then
+                -- this is almost probably certainly maybe the target
+                -- (the delay may not be long enough, but it already feels
+                -- laggy so i'd prefer not to make it longer)
+                self.target = true
+                self.targetDelay = nil
+                addon:StoreGUID(self, 'target')
+
+                -- move this frame above others
+                self:SetFrameLevel(10)
+
+                if addon.db.profile.hp.mouseover then
+                    self.health.p:Show()
+                    if self.health.mo then self.health.mo:Show() end
+                end
+
+                if self.targetGlow then
+                    self.targetGlow:Show()
+                end
+
+                addon:SendMessage('KuiNameplates_PostTarget', self)
+            end
+        end
+    else
+        if self.targetDelay then
+            -- it wasn't the target after all. phew.
+            self.targetDelay = nil
+        end
+
+        if self.target then
+            -- or it was, but no longer is.
+            self.target = nil
+
+            self:SetFrameLevel(0)
 
             if self.targetGlow then
-                self.targetGlow:Show()
+                self.targetGlow:Hide()
             end
 
-            addon:SendMessage('KuiNameplates_PostTarget', self)
-        end
-    elseif self.target then
-        self.target = nil
-
-        self:SetFrameLevel(0)
-
-        if self.targetGlow then
-            self.targetGlow:Hide()
-        end
-
-        if not self.highlighted and addon.db.profile.hp.mouseover then
-            self.health.p:Hide()
-            if self.health.mo then self.health.mo:Hide() end
+            if not self.highlighted and addon.db.profile.hp.mouseover then
+                self.health.p:Hide()
+                if self.health.mo then self.health.mo:Hide() end
+            end
         end
     end
 
@@ -625,7 +649,6 @@ function addon:InitFrame(frame)
     f.OnHealthValueChanged = OnHealthValueChanged
 
     ------------------------------------------------------------------ Layout --
-    local parent
     if self.db.profile.general.fixaa and addon.uiscale then
         f:SetSize(frame:GetWidth()/addon.uiscale, frame:GetHeight()/addon.uiscale)
         f:SetScale(addon.uiscale)

@@ -55,6 +55,7 @@ FrameXML\NavigationBar.lua
 FrameXML\PaperDollFrame.lua
 FrameXML\ProductChoiceFrame.lua
 FrameXML\PVEFrame.lua
+FrameXML\QuestFrame.lua
 FrameXML\QuestInfo.lua
 FrameXML\QuestMapFrame.lua
 FrameXML\QueueStatusFrame.lua

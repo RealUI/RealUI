@@ -13,7 +13,7 @@ tinsert(C.themes["Aurora"], function()
 	BorderFrame.portrait:SetTexture("")
 	BorderFrame.portraitFrame:SetTexture("")
 	for i = 5, 7 do
-		select(i, BorderFrame:GetRegions()):Hide()
+		select(i, BorderFrame:GetRegions()):SetAlpha(0)
 	end
 	BorderFrame.TopTileStreaks:SetTexture("")
 	for i = 10, 14 do
@@ -26,7 +26,6 @@ tinsert(C.themes["Aurora"], function()
 
 	F.SetBD(BorderFrame, 1, 0, -3, 2)
 	F.ReskinClose(BorderFrame.CloseButton)
-	F.Reskin(WorldMapFrameSizeUpButton)
 	F.ReskinArrow(WorldMapFrame.UIElementsFrame.CloseQuestPanelButton, "left")
 	F.ReskinArrow(WorldMapFrame.UIElementsFrame.OpenQuestPanelButton, "right")
 	F.ReskinDropDown(WorldMapLevelDropDown)
@@ -34,13 +33,18 @@ tinsert(C.themes["Aurora"], function()
 
 	BorderFrame.CloseButton:SetPoint("TOPRIGHT", -9, -6)
 
-	local WorldMapFrameSizeUpButton = WorldMapFrameSizeUpButton
-	WorldMapFrameSizeUpButton:SetSize(17, 17)
-	WorldMapFrameSizeUpButton:ClearAllPoints()
-	WorldMapFrameSizeUpButton:SetPoint("RIGHT", BorderFrame.CloseButton, "LEFT", -1, 0)
+	-- [[ Size up / down buttons ]]
 
-	do
-		local function colourClose(f)
+	for _, buttonName in pairs{"WorldMapFrameSizeUpButton", "WorldMapFrameSizeDownButton"} do
+		local button = _G[buttonName]
+
+		button:SetSize(17, 17)
+		button:ClearAllPoints()
+		button:SetPoint("RIGHT", BorderFrame.CloseButton, "LEFT", -1, 0)
+
+		F.Reskin(button)
+
+		local function colourArrow(f)
 			if f:IsEnabled() then
 				for _, pixel in pairs(f.pixels) do
 					pixel:SetVertexColor(r, g, b)
@@ -48,37 +52,45 @@ tinsert(C.themes["Aurora"], function()
 			end
 		end
 
-		local function clearClose(f)
+		local function clearArrow(f)
 			for _, pixel in pairs(f.pixels) do
 				pixel:SetVertexColor(1, 1, 1)
 			end
 		end
 
-		WorldMapFrameSizeUpButton.pixels = {}
+		button.pixels = {}
 
 		for i = 1, 8 do
-			local tex = WorldMapFrameSizeUpButton:CreateTexture()
+			local tex = button:CreateTexture()
 			tex:SetTexture(1, 1, 1)
 			tex:SetSize(1, 1)
 			tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
-			tinsert(WorldMapFrameSizeUpButton.pixels, tex)
+			tinsert(button.pixels, tex)
 		end
 
-		local topLine = WorldMapFrameSizeUpButton:CreateTexture()
-		topLine:SetTexture(1, 1, 1)
-		topLine:SetSize(7, 1)
-		topLine:SetPoint("TOP", 1, -4)
-		tinsert(WorldMapFrameSizeUpButton.pixels, topLine)
+		local hline = button:CreateTexture()
+		hline:SetTexture(1, 1, 1)
+		hline:SetSize(7, 1)
+		tinsert(button.pixels, hline)
 
-		local rightLine = WorldMapFrameSizeUpButton:CreateTexture()
-		rightLine:SetTexture(1, 1, 1)
-		rightLine:SetSize(1, 7)
-		rightLine:SetPoint("RIGHT", -4, 1)
-		tinsert(WorldMapFrameSizeUpButton.pixels, rightLine)
+		local vline = button:CreateTexture()
+		vline:SetTexture(1, 1, 1)
+		vline:SetSize(1, 7)
+		tinsert(button.pixels, vline)
 
-		WorldMapFrameSizeUpButton:SetScript("OnEnter", colourClose)
-		WorldMapFrameSizeUpButton:SetScript("OnLeave", clearClose)
+		if buttonName == "WorldMapFrameSizeUpButton" then
+			hline:SetPoint("TOP", 1, -4)
+			vline:SetPoint("RIGHT", -4, 1)
+		else
+			hline:SetPoint("BOTTOM", 1, 4)
+			vline:SetPoint("LEFT", 4, 1)
+		end
+
+		button:SetScript("OnEnter", colourArrow)
+		button:SetScript("OnLeave", clearArrow)
 	end
+
+	-- [[ Misc ]]
 
 	WorldMapFrameTutorialButton.Ring:Hide()
 	WorldMapFrameTutorialButton:SetPoint("TOPLEFT", WorldMapFrame, "TOPLEFT", -12, 12)
@@ -96,6 +108,8 @@ tinsert(C.themes["Aurora"], function()
 		rightLine:SetPoint("BOTTOMRIGHT", 1, 0)
 		rightLine:SetPoint("TOPRIGHT", 1, 1)
 	end
+
+	-- [[ Tracking options ]]
 
 	local TrackingOptions = WorldMapFrame.UIElementsFrame.TrackingOptionsButton
 

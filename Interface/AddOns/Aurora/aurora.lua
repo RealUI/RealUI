@@ -611,6 +611,16 @@ F.ReskinColourSwatch = function(f)
 end
 
 F.ReskinFilterButton = function(f)
+	f.TopLeft:Hide()
+	f.TopRight:Hide()
+	f.BottomLeft:Hide()
+	f.BottomRight:Hide()
+	f.TopMiddle:Hide()
+	f.MiddleLeft:Hide()
+	f.MiddleRight:Hide()
+	f.BottomMiddle:Hide()
+	f.MiddleMiddle:Hide()
+
 	F.Reskin(f)
 	f.Icon:SetTexture(C.media.arrowRight)
 
@@ -620,11 +630,24 @@ F.ReskinFilterButton = function(f)
 end
 
 F.ReskinNavBar = function(f)
+	local overflowButton = f.overflowButton
+
 	f:GetRegions():Hide()
 	f:DisableDrawLayer("BORDER")
 	f.overlay:Hide()
 	f.homeButton:GetRegions():Hide()
+
 	F.Reskin(f.homeButton)
+	F.Reskin(overflowButton, true)
+
+	local tex = overflowButton:CreateTexture(nil, "ARTWORK")
+	tex:SetTexture(C.media.arrowLeft)
+	tex:SetSize(8, 8)
+	tex:SetPoint("CENTER")
+	overflowButton.tex = tex
+
+	overflowButton:HookScript("OnEnter", colourArrow)
+	overflowButton:HookScript("OnLeave", clearArrow)
 end
 
 -- [[ Variable and module handling ]]
@@ -1713,112 +1736,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		local send, cancel = BattleTagInviteFrame:GetChildren()
 		F.Reskin(send)
 		F.Reskin(cancel)
-
-		-- Quest Frame
-
-		F.ReskinPortraitFrame(QuestFrame, true)
-
-		QuestFrameDetailPanel:DisableDrawLayer("BACKGROUND")
-		QuestFrameProgressPanel:DisableDrawLayer("BACKGROUND")
-		QuestFrameRewardPanel:DisableDrawLayer("BACKGROUND")
-		QuestFrameGreetingPanel:DisableDrawLayer("BACKGROUND")
-		QuestFrameDetailPanel:DisableDrawLayer("BORDER")
-		QuestFrameRewardPanel:DisableDrawLayer("BORDER")
-
-		QuestDetailScrollFrameTop:Hide()
-		QuestDetailScrollFrameBottom:Hide()
-		QuestDetailScrollFrameMiddle:Hide()
-		QuestProgressScrollFrameTop:Hide()
-		QuestProgressScrollFrameBottom:Hide()
-		QuestProgressScrollFrameMiddle:Hide()
-		QuestRewardScrollFrameTop:Hide()
-		QuestRewardScrollFrameBottom:Hide()
-		QuestRewardScrollFrameMiddle:Hide()
-		QuestGreetingScrollFrameTop:Hide()
-		QuestGreetingScrollFrameBottom:Hide()
-		QuestGreetingScrollFrameMiddle:Hide()
-
-		QuestNPCModelShadowOverlay:Hide()
-		QuestNPCModelBg:Hide()
-		QuestNPCModel:DisableDrawLayer("OVERLAY")
-		QuestNPCModelNameText:SetDrawLayer("ARTWORK")
-		QuestNPCModelTextFrameBg:Hide()
-		QuestNPCModelTextFrame:DisableDrawLayer("OVERLAY")
-
-		QuestFrameProgressPanelMaterialTopLeft:SetAlpha(0)
-		QuestFrameProgressPanelMaterialTopRight:SetAlpha(0)
-		QuestFrameProgressPanelMaterialBotLeft:SetAlpha(0)
-		QuestFrameProgressPanelMaterialBotRight:SetAlpha(0)
-
-		local line = QuestFrameGreetingPanel:CreateTexture()
-		line:SetTexture(1, 1, 1, .2)
-		line:SetSize(256, 1)
-		line:SetPoint("CENTER", QuestGreetingFrameHorizontalBreak)
-
-		QuestGreetingFrameHorizontalBreak:SetTexture("")
-
-		QuestFrameGreetingPanel:HookScript("OnShow", function()
-			line:SetShown(QuestGreetingFrameHorizontalBreak:IsShown())
-		end)
-
-		local npcbd = CreateFrame("Frame", nil, QuestNPCModel)
-		npcbd:SetPoint("TOPLEFT", -1, 1)
-		npcbd:SetPoint("RIGHT", 1, 0)
-		npcbd:SetPoint("BOTTOM", QuestNPCModelTextScrollFrame)
-		npcbd:SetFrameLevel(0)
-		F.CreateBD(npcbd)
-
-		local npcLine = CreateFrame("Frame", nil, QuestNPCModel)
-		npcLine:SetPoint("BOTTOMLEFT", 0, -2)
-		npcLine:SetPoint("BOTTOMRIGHT", 0, -2)
-		npcLine:SetHeight(1)
-		npcLine:SetFrameLevel(0)
-		F.CreateBD(npcLine, 0)
-
-		for i = 1, MAX_REQUIRED_ITEMS do
-			local bu = _G["QuestProgressItem"..i]
-			local ic = _G["QuestProgressItem"..i.."IconTexture"]
-			local na = _G["QuestProgressItem"..i.."NameFrame"]
-			local co = _G["QuestProgressItem"..i.."Count"]
-
-			ic:SetSize(40, 40)
-			ic:SetTexCoord(.08, .92, .08, .92)
-			ic:SetDrawLayer("OVERLAY")
-
-			F.CreateBD(bu, .25)
-
-			na:Hide()
-			co:SetDrawLayer("OVERLAY")
-
-			local line = CreateFrame("Frame", nil, bu)
-			line:SetSize(1, 40)
-			line:SetPoint("RIGHT", ic, 1, 0)
-			F.CreateBD(line)
-		end
-
-		QuestDetailScrollFrame:SetWidth(302) -- else these buttons get cut off
-
-		hooksecurefunc("QuestFrame_ShowQuestPortrait", function(parentFrame, _, _, _, _, y)
-			QuestNPCModel:SetPoint("TOPLEFT", parentFrame, "TOPRIGHT", 2, y)
-		end)
-
-		hooksecurefunc(QuestProgressRequiredMoneyText, "SetTextColor", function(self, r, g, b)
-			if r == 0 then
-				self:SetTextColor(.8, .8, .8)
-			elseif r == .2 then
-				self:SetTextColor(1, 1, 1)
-			end
-		end)
-
-		for _, questButton in pairs({"QuestFrameAcceptButton", "QuestFrameDeclineButton", "QuestFrameCompleteQuestButton", "QuestFrameCompleteButton", "QuestFrameGoodbyeButton", "QuestFrameGreetingGoodbyeButton"}) do
-			F.Reskin(_G[questButton])
-		end
-
-		F.ReskinScroll(QuestProgressScrollFrameScrollBar)
-		F.ReskinScroll(QuestRewardScrollFrameScrollBar)
-		F.ReskinScroll(QuestDetailScrollFrameScrollBar)
-		F.ReskinScroll(QuestGreetingScrollFrameScrollBar)
-		F.ReskinScroll(QuestNPCModelTextScrollFrameScrollBar)
 
 		-- Gossip Frame
 
@@ -3021,27 +2938,25 @@ Delay:SetScript("OnEvent", function()
 		BagItemAutoSortButton:GetPushedTexture():SetTexCoord(.17, .83, .17, .83)
 		F.CreateBG(BagItemAutoSortButton)
 
-		-- Bank
+		-- [[ Bank ]]
 
-		F.SetBD(BankFrame)
-		BankFrame:DisableDrawLayer("BACKGROUND")
-		BankFrame:DisableDrawLayer("BORDER")
-		BankFrame:DisableDrawLayer("OVERLAY")
+		select(16, BankFrame:GetRegions()):Hide()
 		BankSlotsFrame:DisableDrawLayer("BORDER")
 		BankPortraitTexture:Hide()
 		BankFrameMoneyFrameInset:Hide()
 		BankFrameMoneyFrameBorder:Hide()
 
+		-- "item slots" and "bag slots" text
 		select(9, BankSlotsFrame:GetRegions()):SetDrawLayer("OVERLAY")
 		select(10, BankSlotsFrame:GetRegions()):SetDrawLayer("OVERLAY")
 
+		F.ReskinPortraitFrame(BankFrame)
 		F.Reskin(BankFramePurchaseButton)
+		F.ReskinTab(BankFrameTab1)
+		F.ReskinTab(BankFrameTab2)
 		F.ReskinInput(BankItemSearchBox)
-		F.ReskinClose(BankFrameCloseButton)
 
-		for i = 1, 28 do
-			local item = "BankFrameItem"..i
-			local bu = _G[item]
+		local function styleBankButton(bu)
 			local border = bu.IconBorder
 
 			bu.IconQuestTexture:SetAlpha(0)
@@ -3063,13 +2978,20 @@ Delay:SetScript("OnEvent", function()
 			bu:HookScript("OnLeave", onLeave)
 		end
 
+		for i = 1, 28 do
+			styleBankButton(_G["BankFrameItem"..i])
+		end
+
 		for i = 1, 7 do
 			local bag = BankSlotsFrame["Bag"..i]
+			local _, highlightFrame = bag:GetChildren()
 			local border = bag.IconBorder
 
 			bag:SetNormalTexture("")
 			bag:SetPushedTexture("")
 			bag:SetHighlightTexture("")
+
+			highlightFrame:GetRegions():SetTexture(C.media.checked)
 
 			border:SetTexture(C.media.backdrop)
 			border:SetPoint("TOPLEFT", -1, 1)
@@ -3091,6 +3013,28 @@ Delay:SetScript("OnEvent", function()
 		hooksecurefunc("BankFrameItemButton_Update", function(button)
 			if not button.isBag and button.IconQuestTexture:IsShown() then
 				button.IconBorder:SetVertexColor(1, 1, 0)
+			end
+		end)
+
+		-- [[ Reagent bank ]]
+
+		ReagentBankFrame:DisableDrawLayer("BACKGROUND")
+		ReagentBankFrame:DisableDrawLayer("BORDER")
+		ReagentBankFrame:DisableDrawLayer("ARTWORK")
+
+		F.Reskin(ReagentBankFrame.DespositButton)
+		F.Reskin(ReagentBankFrameUnlockInfoPurchaseButton)
+
+		-- make button more visible
+		ReagentBankFrameUnlockInfoBlackBG:SetTexture(.1, .1, .1)
+
+		local reagentButtonsStyled = false
+		ReagentBankFrame:HookScript("OnShow", function()
+			if not reagentButtonsStyled then
+				for i = 1, 98 do
+					styleBankButton(_G["ReagentBankFrameItem"..i])
+				end
+				reagentButtonsStyled = true
 			end
 		end)
 	end
