@@ -144,13 +144,13 @@ local Enable = function(self)
 
 		self:RegisterEvent('PLAYER_TOTEM_UPDATE', Path, true)
 
-		TotemFrame.Show = TotemFrame.Hide
+		--[[TotemFrame.Show = TotemFrame.Hide
 		TotemFrame:Hide()
 
 		TotemFrame:UnregisterEvent"PLAYER_TOTEM_UPDATE"
 		TotemFrame:UnregisterEvent"PLAYER_ENTERING_WORLD"
 		TotemFrame:UnregisterEvent"UPDATE_SHAPESHIFT_FORM"
-		TotemFrame:UnregisterEvent"PLAYER_TALENT_UPDATE"
+		TotemFrame:UnregisterEvent"PLAYER_TALENT_UPDATE"]]
 
 		return true
 	end
@@ -158,13 +158,13 @@ end
 
 local Disable = function(self)
 	if(self.Totems) then
-		TotemFrame.Show = nil
+		--[[TotemFrame.Show = nil
 		TotemFrame:Show()
 
 		TotemFrame:RegisterEvent"PLAYER_TOTEM_UPDATE"
 		TotemFrame:RegisterEvent"PLAYER_ENTERING_WORLD"
 		TotemFrame:RegisterEvent"UPDATE_SHAPESHIFT_FORM"
-		TotemFrame:RegisterEvent"PLAYER_TALENT_UPDATE"
+		TotemFrame:RegisterEvent"PLAYER_TALENT_UPDATE"]]
 
 		self:UnregisterEvent('PLAYER_TOTEM_UPDATE', Path)
 	end

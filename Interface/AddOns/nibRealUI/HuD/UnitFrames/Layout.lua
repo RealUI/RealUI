@@ -255,6 +255,25 @@ function UnitFrames:InitializeLayout()
 		player = function(self, ...)
 			Shared(self, ...)
 			self:SetSize(unit_sizes[layoutSize].player.width, unit_sizes[layoutSize].player.height)
+			--if RealUI.class == "DEATHKNIGHT" then
+				--print("Totems!!!")
+				-- DestroyTotem is protected, so we hack the default
+				local totemBar = _G["TotemFrame"]
+				totemBar:SetParent(self)
+				hooksecurefunc("TotemFrame_Update", function()
+					totemBar:ClearAllPoints()
+					totemBar:SetPoint('TOPLEFT', self, 'BOTTOMLEFT', 40, -4)
+				end)
+				for i = 1, 4 do
+					local name = "TotemFrameTotem"..i
+					local totem = _G[name]
+					totem:DisableDrawLayer("BACKGROUND")
+					local icon = _G[name.."IconTexture"]
+					icon:SetTexCoord(.08, .92, .08, .92)
+					local _, border = totem:GetChildren()
+					border:DisableDrawLayer("OVERLAY")
+				end
+			--end
 		end,
 		
 		focus = function(self, ...)

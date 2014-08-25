@@ -1,6 +1,6 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
-local _
+local ticker, _
 local MODNAME = "Map"
 local Map = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
