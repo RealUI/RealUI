@@ -7,24 +7,12 @@ C.themes["Blizzard_EncounterJournal"] = function()
 	EncounterJournal:DisableDrawLayer("BORDER")
 	EncounterJournalInset:DisableDrawLayer("BORDER")
 	EncounterJournal:DisableDrawLayer("OVERLAY")
-	EncounterJournalInstanceSelectDungeonTab:DisableDrawLayer("OVERLAY")
-	EncounterJournalInstanceSelectRaidTab:DisableDrawLayer("OVERLAY")
 
 	EncounterJournalPortrait:Hide()
 	EncounterJournalInstanceSelectBG:Hide()
 	EncounterJournalBg:Hide()
 	EncounterJournalTitleBg:Hide()
 	EncounterJournalInsetBg:Hide()
-	EncounterJournalInstanceSelectDungeonTabMid:Hide()
-	EncounterJournalInstanceSelectDungeonTabLeft:Hide()
-	EncounterJournalInstanceSelectDungeonTabRight:Hide()
-	EncounterJournalInstanceSelectRaidTabMid:Hide()
-	EncounterJournalInstanceSelectRaidTabLeft:Hide()
-	EncounterJournalInstanceSelectRaidTabRight:Hide()
-	for i = 8, 10 do
-		select(i, EncounterJournalInstanceSelectDungeonTab:GetRegions()):SetAlpha(0)
-		select(i, EncounterJournalInstanceSelectRaidTab:GetRegions()):SetAlpha(0)
-	end
 	EncounterJournalEncounterFrameInfoModelFrameShadow:Hide()
 	EncounterJournalEncounterFrameInfoModelFrame.dungeonBG:Hide()
 	EncounterJournalEncounterFrameInfoDifficultyUpLeft:SetAlpha(0)
@@ -42,7 +30,48 @@ C.themes["Blizzard_EncounterJournal"] = function()
 
 	F.SetBD(EncounterJournal)
 
-	-- [[ Tabs ]]
+	-- [[ Dungeon / raid tabs ]]
+
+	local function onEnable(self)
+		self:SetHeight(self.storedHeight) -- prevent it from resizing
+		self:SetBackdropColor(0, 0, 0, 0)
+	end
+
+	local function onDisable(self)
+		self:SetBackdropColor(r, g, b, .2)
+	end
+
+	local function onClick(self)
+		self:GetFontString():SetTextColor(1, 1, 1)
+	end
+
+	for _, tabName in pairs({"EncounterJournalInstanceSelectDungeonTab", "EncounterJournalInstanceSelectRaidTab"}) do
+		local tab = _G[tabName]
+		local text = tab:GetFontString()
+
+		tab:DisableDrawLayer("OVERLAY")
+
+		tab.mid:Hide()
+		tab.left:Hide()
+		tab.right:Hide()
+
+		tab.midHighlight:SetAlpha(0)
+		tab.leftHighlight:SetAlpha(0)
+		tab.rightHighlight:SetAlpha(0)
+
+		text:SetPoint("CENTER")
+		text:SetTextColor(1, 1, 1)
+
+		tab:HookScript("OnEnable", onEnable)
+		tab:HookScript("OnDisable", onDisable)
+		tab:HookScript("OnClick", onClick)
+
+		F.Reskin(tab)
+	end
+
+	EncounterJournalInstanceSelectDungeonTab:SetBackdropColor(r, g, b, .2)
+
+	-- [[ Side tabs ]]
 
 	EncounterJournalEncounterFrameInfoOverviewTab:ClearAllPoints()
 	EncounterJournalEncounterFrameInfoOverviewTab:SetPoint("TOPLEFT", EncounterJournalEncounterFrameInfo, "TOPRIGHT", 9, -35)
@@ -110,28 +139,36 @@ C.themes["Blizzard_EncounterJournal"] = function()
 
 	F.CreateBDFrame(EncounterJournalEncounterFrameInfoModelFrame, .25)
 
-	hooksecurefunc("EncounterJournal_DisplayInstance", function()
-		local bossIndex = 1;
-		local name, description, bossID, _, link = EJ_GetEncounterInfoByIndex(bossIndex)
-		while bossID do
-			local bossButton = _G["EncounterJournalBossButton"..bossIndex]
+	EncounterJournalEncounterFrameInfoCreatureButton1:SetPoint("TOPLEFT", EncounterJournalEncounterFrameInfoModelFrame, 0, -35)
 
-			if not bossButton.reskinned then
-				bossButton.reskinned = true
+	do
+		local numBossButtons = 1
+		local bossButton
 
+		hooksecurefunc("EncounterJournal_DisplayInstance", function()
+			bossButton = _G["EncounterJournalBossButton"..numBossButtons]
+			while bossButton do
 				F.Reskin(bossButton, true)
+
 				bossButton.text:SetTextColor(1, 1, 1)
 				bossButton.text.SetTextColor = F.dummy
+
+				local hl = bossButton:GetHighlightTexture()
+				hl:SetTexture(r, g, b, .2)
+				hl:SetPoint("TOPLEFT", 2, -1)
+				hl:SetPoint("BOTTOMRIGHT", 0, 1)
+
+				bossButton.creature:SetPoint("TOPLEFT", 0, -4)
+
+				numBossButtons = numBossButtons + 1
+				bossButton = _G["EncounterJournalBossButton"..numBossButtons]
 			end
 
-			bossIndex = bossIndex + 1
-			name, description, bossID, _, link = EJ_GetEncounterInfoByIndex(bossIndex)
-		end
-
-		-- move last tab
-		local _, point = EncounterJournalEncounterFrameInfoModelTab:GetPoint()
-		EncounterJournalEncounterFrameInfoModelTab:SetPoint("TOP", point, "BOTTOM", 0, 1)
-	end)
+			-- move last tab
+			local _, point = EncounterJournalEncounterFrameInfoModelTab:GetPoint()
+			EncounterJournalEncounterFrameInfoModelTab:SetPoint("TOP", point, "BOTTOM", 0, 1)
+		end)
+	end
 
 	hooksecurefunc("EncounterJournal_ToggleHeaders", function(self)
 		local index = 1
@@ -226,6 +263,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		item.bosslessTexture:SetAlpha(0)
 
 		item.icon:SetPoint("TOPLEFT", 1, -1)
+
 		item.icon:SetTexCoord(.08, .92, .08, .92)
 		item.icon:SetDrawLayer("OVERLAY")
 		F.CreateBG(item.icon)
@@ -233,14 +271,8 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		local bg = CreateFrame("Frame", nil, item)
 		bg:SetPoint("TOPLEFT")
 		bg:SetPoint("BOTTOMRIGHT", 0, 1)
-		bg:SetFrameStrata("BACKGROUND")
-		F.CreateBD(bg, 0)
-
-		local tex = item:CreateTexture(nil, "BACKGROUND")
-		tex:SetPoint("TOPLEFT")
-		tex:SetPoint("BOTTOMRIGHT", -1, 2)
-		tex:SetTexture(C.media.backdrop)
-		tex:SetVertexColor(0, 0, 0, .25)
+		bg:SetFrameLevel(item:GetFrameLevel() - 1)
+		F.CreateBD(bg, .25)
 	end
 
 	-- [[ Search results ]]
@@ -357,8 +389,6 @@ C.themes["Blizzard_EncounterJournal"] = function()
 
 	-- [[ Various controls ]]
 
-	F.Reskin(EncounterJournalInstanceSelectDungeonTab)
-	F.Reskin(EncounterJournalInstanceSelectRaidTab)
 	F.Reskin(EncounterJournalEncounterFrameInfoDifficulty)
 	F.Reskin(EncounterJournalEncounterFrameInfoResetButton)
 	F.Reskin(EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggle)

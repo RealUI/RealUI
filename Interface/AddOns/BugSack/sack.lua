@@ -138,7 +138,7 @@ local function setActiveMethod(tab)
 		searchThrough = nil
 	end
 
-	state = tab:GetName()
+	state = type(tab) == "table" and tab:GetName() or tab
 	updateSackDisplay(true)
 end
 

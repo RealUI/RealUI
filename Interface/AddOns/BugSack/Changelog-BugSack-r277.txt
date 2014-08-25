@@ -1,0 +1,27 @@
+------------------------------------------------------------------------
+r277 | funkydude | 2014-08-23 14:55:10 +0000 (Sat, 23 Aug 2014) | 3 lines
+Changed paths:
+   M /trunk
+   M /trunk/BugSack.toc
+   A /trunk/Libs
+
+Revert addition of svn:externals, sorry but no thanks.
+Revert addition of X-Curse-Project-ID, this is automatically added by the Curse packager so it would end up in the file twice, and is otherwise useless.
+I've left X-WoWI-ID as it may serve some form of purpose? (I doubt it)
+------------------------------------------------------------------------
+r276 | Phanx | 2014-08-23 14:23:03 +0000 (Sat, 23 Aug 2014) | 3 lines
+Changed paths:
+   M /trunk
+   M /trunk/BugSack.toc
+   M /trunk/sack.lua
+
+- Fixed error when clearing a search
+- Add project ID to TOC
+- Add svn:externals for developer convenience
+------------------------------------------------------------------------
+r275 | funkydude | 2013-11-25 15:32:50 +0000 (Mon, 25 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/core.lua
+
+Attempt to compensate for the beginning of errors sometimes being trimmed with ... when removing "Interface" and "AddOns" from the display.
+------------------------------------------------------------------------
