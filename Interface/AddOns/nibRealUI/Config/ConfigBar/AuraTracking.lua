@@ -676,7 +676,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 		oP:SetPoint("BOTTOMRIGHT", tabPanel1, "BOTTOMRIGHT", -12, 12)
 
 	-- Is Static
-	check = {
+	local check = {
 		{
 			label = L["Static"],
 			desc = L["Static Trackers remain visible and in the same location."],

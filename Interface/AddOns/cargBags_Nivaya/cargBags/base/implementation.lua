@@ -483,9 +483,8 @@ end
 	@param bagID <number>
 	@param slotID <number> [optional]
 ]]
-function Implementation:PLAYERREAGENTBANKSLOTS_CHANGED(event, ...)
-	slotID = ...
-	bagID = -3
+function Implementation:PLAYERREAGENTBANKSLOTS_CHANGED(event, slotID)
+	local bagID = -3
 	print("PLAYERBANKSLOTS_CHANGED", bagID, slotID)
 
 	self:BAG_UPDATE(event, bagID, slotID)

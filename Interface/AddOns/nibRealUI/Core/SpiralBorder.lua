@@ -82,7 +82,7 @@ function SpiralBorder:SetSpiralValue(spiral, per)
 end
 
 function SpiralBorder:AttachSpiral(bar, inset, hasFrame)
-	local barFame, barIcon
+	local barFrame, barIcon
 	if hasFrame then 
 		barFrame = bar.frame
 	else
@@ -198,7 +198,7 @@ function SpiralBorder:AttachSpiral(bar, inset, hasFrame)
 end
 
 function SpiralBorder:RemoveSpiral(bar, id, hasFrame)
-	local barFame
+	local barFrame
 	if hasFrame then barFrame = bar.frame else barFrame = bar end
 	
 	if id and activeSpirals[id] then

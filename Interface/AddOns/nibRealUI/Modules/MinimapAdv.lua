@@ -1,7 +1,5 @@
-local _
-
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndbc
+local db, ndbc, _
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -582,7 +580,7 @@ local UpdateProcessing = false
 ----------
 -- Seconds to Time
 local function ConvertSecondstoTime(value)
-    local minues, seconds
+    local minutes, seconds
     minutes = floor(value / 60)
     seconds = floor(value - (minutes * 60))
     if ( minutes > 0 ) then

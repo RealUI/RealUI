@@ -94,7 +94,7 @@ local function HookBars()
 
 	Nest_CreateBar_ = Raven.Nest_CreateBar
 	Raven.Nest_CreateBar = function(bg, name)
-		bar = Nest_CreateBar_(bg, name)
+		local bar = Nest_CreateBar_(bg, name)
 		bar.frame:Show()
 		bar.container:Show()
 

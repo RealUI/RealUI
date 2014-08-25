@@ -187,7 +187,7 @@ function EclipseBar:OnUpdate()
         end
 
     else
-        powerPer = ((power + 100) / (maxPower + 100))
+        local powerPer = ((power + 100) / (maxPower + 100))
         --print("EclipseBar:None", powerPer)
 
         if powerPer <= 0.5 then

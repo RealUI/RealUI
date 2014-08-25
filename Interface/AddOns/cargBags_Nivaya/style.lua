@@ -376,7 +376,7 @@ local GetFirstFreeSlot = function(bagtype)
 			end
 		end
 	elseif bagtype == "bankReagent" then
-		bagID = -3
+		local bagID = -3
 		local t = GetContainerNumFreeSlots(bagID)
 		if t > 0 then
 			local tNumSlots = GetContainerNumSlots(bagID)

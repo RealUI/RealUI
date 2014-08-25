@@ -1,7 +1,7 @@
 -- Original code from aTooltip by Alza, modified code from FreeUI by Haleth
 
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndbc
+local db, ndbc, _
 
 local MODNAME = "Tooltip"
 local Tooltip = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")

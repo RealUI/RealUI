@@ -211,7 +211,7 @@ end
 
 -- Seconds to Time
 function nibRealUI:ConvertSecondstoTime(value, onlyOne)
-	local hours, minues, seconds
+	local hours, minutes, seconds
 	hours = floor(value / 3600)
 	minutes = floor((value - (hours * 3600)) / 60)
 	seconds = floor(value - ((hours * 3600) + (minutes * 60)))

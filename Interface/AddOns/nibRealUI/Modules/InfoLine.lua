@@ -784,7 +784,7 @@ end
 
 -- Seconds to Time
 local function ConvertSecondstoTime(value)
-	local hours, minues, seconds
+	local hours, minutes, seconds
 	hours = floor(value / 3600)
 	minutes = floor((value - (hours * 3600)) / 60)
 	seconds = floor(value - ((hours * 3600) + (minutes * 60)))
@@ -956,10 +956,10 @@ local function UpdateGraph(id, vals, ...)
 	if not Graphs[id] then return end
 	if not Graphs[id].enabled then return end
 	
-	numVals = Graphs[id].numVals
+	local numVals = Graphs[id].numVals
 	
 	-- Set new Min/Max
-	newMax = ...
+	local newMax = ...
 	if newMax then
 		Graphs[id].max = newMax
 	end

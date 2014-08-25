@@ -367,13 +367,13 @@ end
 ---- Attack ----
 ----------------
 StatFunc.Attack_Power = function()
-    local rangedWeapon = IsRangedWeapon();
+    local rangedWeapon = IsRangedWeapon()
     local base, posBuff, negBuff
 
     if ( rangedWeapon ) then
-        base, posBuff, negBuff = UnitRangedAttackPower("player");
+        base, posBuff, negBuff = UnitRangedAttackPower("player")
     else 
-        base, posBuff, negBuff = UnitAttackPower("player");
+        base, posBuff, negBuff = UnitAttackPower("player")
     end
 
     local Attack_Power = max(0, base + posBuff + negBuff) 
@@ -381,14 +381,15 @@ StatFunc.Attack_Power = function()
 end
 
 StatFunc.Attack_Speed = function()
-    local rangedWeapon = IsRangedWeapon();
+    local rangedWeapon = IsRangedWeapon()
+    local speed, offhandSpeed
     if ( rangedWeapon ) then
-        speed = UnitRangedDamage(unit); 
+        speed = UnitRangedDamage(unit)
     else 
-        speed, offhandSpeed = UnitAttackSpeed(unit);
+        speed, offhandSpeed = UnitAttackSpeed(unit)
     end
     if ( offhandSpeed ) then
-        return strform(RoundFormatString, speed).." / ".. strform(RoundFormatString, offhandSpeed);
+        return strform(RoundFormatString, speed).." / ".. strform(RoundFormatString, offhandSpeed)
     else
         return strform(RoundFormatString, speed)
     end

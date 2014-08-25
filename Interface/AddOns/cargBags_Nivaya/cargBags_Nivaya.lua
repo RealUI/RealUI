@@ -453,7 +453,6 @@ local DropDownInitialized
 function cbNivaya:CatDropDownInit()
 	if DropDownInitialized then return end
 	DropDownInitialized = true
-	level = 1
 	local info = {}--UIDropDownMenu_CreateInfo()
   
 	local function AddInfoItem(type)
@@ -467,9 +466,6 @@ function cbNivaya:CatDropDownInit()
 		else
 			info.func = function(self) cbNivaya:CatDropDownOnClick(self, type) end
 		end
-		
-	--	info.owner = self:GetParent()
-	--	UIDropDownMenu_AddButton(info, level)
 		
 		cbNivCatDropDown:AddButton(info.text, type, info.func)
 	end

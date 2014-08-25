@@ -249,7 +249,7 @@ function MirrorBar:OnUpdate(bar, elapsed)
 	curTimer.timeRemaining = nibRealUI:Clamp(curTimer.timeRemaining, 0, curTimer.max / 1000)
 	
 	-- Scale
-	scale = (curTimer.max ~= 0) and (curTimer.value / curTimer.max) or 0
+	local scale = (curTimer.max ~= 0) and (curTimer.value / curTimer.max) or 0
 	scale = nibRealUI:Clamp(scale, 0, 1)
 	
 	-- Update bar
