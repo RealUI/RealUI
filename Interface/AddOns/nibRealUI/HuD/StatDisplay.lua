@@ -15,7 +15,7 @@ local RoundFormatString = "%.1f"
 
 local statTable = {}
 local function createStats(class)
-    print("Class", class)
+    --print("Class", class)
     -- Attributes
         if class == "DEATHKNIGHT" or class == "PALADIN" or class == "WARRIOR" then
             -- Strength Users
@@ -158,7 +158,6 @@ local function GetOptions()
                         values = function(...)
                             local vals = {}
                             for k, v in pairs(statTable) do
-                                print(k,v)
                                 vals[k] = v.name
                             end
                             return vals
@@ -193,7 +192,6 @@ local function GetOptions()
                         values = function(...)
                             local vals = {}
                             for k, v in pairs(statTable) do
-                                print(k,v)
                                 vals[k] = v.name
                             end
                             return vals
@@ -237,7 +235,6 @@ local function GetOptions()
                         values = function(...)
                             local vals = {}
                             for k, v in pairs(statTable) do
-                                print(k,v)
                                 vals[k] = v.name
                             end
                             return vals
@@ -272,7 +269,6 @@ local function GetOptions()
                         values = function(...)
                             local vals = {}
                             for k, v in pairs(statTable) do
-                                print(k,v)
                                 vals[k] = v.name
                             end
                             return vals
@@ -674,7 +670,7 @@ end
 
 function StatDisplay:CombatUpdate()
     convert()
-    print("Stat", statTable[4].slug)
+    --print("Stat", statTable[4].slug)
     InCombat = UnitAffectingCombat("player")
     if InCombat then
         self:TalentUpdate()
@@ -715,7 +711,7 @@ local function stat_initialize(dropdown, level)
             info.text = entry.name
             info.value = entry.name
             info.func = function(frame, ...)
-                print("DropFunc", entry, ...)
+                --print("DropFunc", entry, ...)
                 UIDropDownMenu_SetSelectedValue(dropdown, entry.name)
                 for k, v in pairs(statTable) do
                     if v.name == entry.name then

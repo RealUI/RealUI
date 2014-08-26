@@ -737,7 +737,7 @@ end
 -- Sort by Character
 local function CharSort(a, b)
 	if a[2] == b[2] then
-		return a[12] < b[12]
+		return a[8] < b[8]
 	end
 	return a[2] < b[2]
 end
@@ -1170,7 +1170,7 @@ local CurrencyTabletDataRK = {}
 local CurrencyTabletDataStart = {}
 local CurrencyTabletDataCurrent = {}
 
-local NumCurrencies = 8
+local NumCurrencies = 4
 
 local function ShortenDynamicCurrencyName(name)
 	local IgnoreLocales = {
@@ -1282,13 +1282,9 @@ local function Currency_UpdateTablet()
 				NAME,
 				LEVEL_ABBR,
 				GoldName,
-				L["Justice Points"],
-				L["Valor Points"],
-				L["Honor Points"],
-				L["Conquest Points"],
-				"BP1",
-				"BP2",
-				"BP3",
+				CURRENCY .. 1,
+				CURRENCY .. 2,
+				CURRENCY .. 3,
 				L["Updated"]
 			}
 			RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
@@ -1339,18 +1335,18 @@ local function Currency_UpdateTablet()
 								line["indentation"..i] = 12.5
 								
 							else
-								local curSuffix = ""
-								-- Backpack Currency suffix
-								if (i >= 8) and (i <= 10) then
-									if dbg.currency[realm][vf][currentName].bpCurrencies[i - 7].name then
-										curSuffix = " "..ShortenDynamicCurrencyName(dbg.currency[realm][vf][currentName].bpCurrencies[i - 7].name)
-									end
+								--if not vn[i] then return end
+								local text
+								if not vn[i] or vn[i] < 0 then
+									text = dbg.currency[realm][vf][currentName].bpCurrencies[i - 3].name
+								else
+									text = (vn[i] or "0").." "..ShortenDynamicCurrencyName(dbg.currency[realm][vf][currentName].bpCurrencies[i - 3].name)
 								end
-								line["text"..i] = (vn[i] or "0")..curSuffix
+								line["text"..i] = text
 								line["justify"..i] = "RIGHT"
 								line["customwidth"..i] = MaxWidth[i]
 								line["indentation"..i] = 12.5
-								if vn[i + (NumCurrencies + 1)] == 0 then
+								if vn[i] == 0 then
 									line["text"..i.."R"] = NormColor - ZeroShade
 									line["text"..i.."G"] = NormColor - ZeroShade
 									line["text"..i.."B"] = NormColor - ZeroShade
@@ -1381,14 +1377,8 @@ local function Currency_UpdateTablet()
 									line["size"..i] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
 									line["customwidth"..i] = MaxWidth[i]
 									line["indentation"..i] = 12
-								elseif i == 3 then
-									line["text"..i] = Currency_GetDifference(CurrencyTabletDataStart[3], CurrencyTabletDataCurrent[3], true)
-									line["justify"..i] = "RIGHT"
-									line["size"..i] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
-									line["customwidth"..i] = MaxWidth[3]
-									line["indentation"..i] = 12
 								else
-									line["text"..i] = Currency_GetDifference(CurrencyTabletDataStart[i + (NumCurrencies + 1)], CurrencyTabletDataCurrent[i + (NumCurrencies + 1)], false)
+									line["text"..i] = Currency_GetDifference(CurrencyTabletDataStart[i], CurrencyTabletDataCurrent[i], i == 3)
 									line["justify"..i] = "RIGHT"
 									line["size"..i] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
 									line["customwidth"..i] = MaxWidth[i]
@@ -1500,88 +1490,58 @@ end
 
 local function Currency_GetVals()
 	local curr = {}
-	curr[HPName] = 0	
-	curr[CPName] = 0
-	curr[JPName] = 0
-	curr[VPName] = 0
-	-- Try Dynamics Currency Start
-	if(BPCurr1Name ~= nil) then
-		curr[BPCurr1Name] = 0
-	end
-	if(BPCurr2Name ~= nil) then
-		curr[BPCurr2Name] = 0
-	end
-	if(BPCurr3Name ~= nil) then
-		curr[BPCurr3Name] = 0
-	end
-	-- Try Dynamics Currency End
-	
-	local currencySize = GetCurrencyListSize()
-	for i = 1, currencySize do
-		local name, isHeader, _, _, _, count = GetCurrencyListInfo(i)
-		if curr[name] and (not isHeader) then
-			curr[name] = count or 0
+	local idx = 1
+	for i = 1, GetCurrencyListSize() do
+		local name, isHeader, _, _, isWatched, count = GetCurrencyListInfo(i)
+		if isWatched then
+			curr[idx] = {
+				name = name,
+				amnt = count or 0
+			}
+			--print(curr[idx].name, curr[idx].amnt)
+			idx = idx + 1
 		end
 	end
-	
+
 	return curr
 end
 
 local function Currency_Update(self)
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].class = nibRealUI.class
+	local currDB = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name]
+	currDB.class = nibRealUI.class
 	
 	local money = GetMoney()
 	local currVals = Currency_GetVals()
 	local valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax = Currency_GetWeeklyValues()
 	
-	local curDate = date("%d/%m")
+	local curDate = date("%b %d") -- e.g. Sep 25
 	if strsub(curDate, 1, 1) == "0" then
 		curDate = strsub(curDate, 2)
 	end
 	
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].gold = money or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].updated = curDate
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp = currVals[JPName] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp = currVals[VPName] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp = currVals[HPName] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp = currVals[CPName] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt = currVals[BPCurr1Name] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt = currVals[BPCurr2Name] or 0
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt = currVals[BPCurr3Name] or 0
+	currDB.gold = money or 0
+	for i = 1, MAX_WATCHED_TOKENS do
+		currDB.bpCurrencies[i] = currVals[i] or {amnt = -1, name = "---"}
+		--print(currDB.bpCurrencies[i].name, currDB.bpCurrencies[i].amnt)
+	end
+
+	currDB.updated = curDate
 	
 	if self.hasshown or self.initialized then
-		local oldVPW = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw
-		local oldCPW = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw
-		dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw = valorThisWeek
-		dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw = conquestThisWeek
-	
-		if (valorThisWeek < oldVPW) or (conquestThisWeek < oldCPW) then
-			-- Weekly reset
-			Currency_ResetWeeklyValues()
-		end
-	
 		-- Quick Current reference list
 		CurrencyTabletDataCurrent = {
 			"",
 			"",
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].gold,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp,
-			"",
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
-			"",
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt,
+			currDB.gold,
+			currDB.bpCurrencies[1].amnt,
+			currDB.bpCurrencies[2].amnt,
+			currDB.bpCurrencies[3].amnt,
 			"",
 			-- Start session values
 			nil,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].amnt,
-			dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].amnt,
+			currDB.bpCurrencies[1].amnt,
+			currDB.bpCurrencies[2].amnt,
+			currDB.bpCurrencies[3].amnt,
 		}
 		
 		-- Start Session
@@ -1607,13 +1567,6 @@ local function Currency_Update(self)
 				if vf then
 					for kn, vn in pairs(dbg.currency[kr][kf]) do
 						if vn then
-							local vpStr = tostring(dbg.currency[kr][kf][kn].vp)
-							local cpStr = tostring(dbg.currency[kr][kf][kn].cp)
-							if dbg.currency[kr][kf][kn].level == MAX_PLAYER_LEVEL then
-								vpStr = vpStr.." ("..tostring(dbg.currency[kr][kf][kn].vpw or 0).."/"..valorWeeklyMax..")"
-								cpStr = cpStr.." ("..tostring(dbg.currency[kr][kf][kn].cpw or 0).."/"..conquestWeeklyMax..")"
-							end
-							
 							local classColor = nibRealUI:GetClassColor(dbg.currency[kr][kf][kn].class)
 							local nameStr = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, kn)
 							
@@ -1627,21 +1580,13 @@ local function Currency_Update(self)
 
 							tinsert(CurrencyTabletData[kr][kf], {
 								nameStr,
-								dbg.currency[kr][kf][kn].level,
+								dbg.currency[kr][kf][kn].level or 0,
 								dbg.currency[kr][kf][kn].gold,
-								dbg.currency[kr][kf][kn].jp,
-								vpStr,
-								dbg.currency[kr][kf][kn].hp,
-								cpStr,
 								dbg.currency[kr][kf][kn].bpCurrencies[1].amnt,
 								dbg.currency[kr][kf][kn].bpCurrencies[2].amnt,
 								dbg.currency[kr][kf][kn].bpCurrencies[3].amnt,
 								dbg.currency[kr][kf][kn].updated,
 								kn,
-								dbg.currency[kr][kf][kn].jp,
-								dbg.currency[kr][kf][kn].vp,
-								dbg.currency[kr][kf][kn].hp,
-								dbg.currency[kr][kf][kn].cp
 							})
 						end
 						
@@ -1664,41 +1609,22 @@ local function Currency_Update(self)
 	end
 
 	local CurText, curCurrency, rawValue
+	--print(dbc.currencystate)
 	if dbc.currencystate == 1 then
 		CurText, curCurrency, rawValue = convertMoney(money)
 		if not(rawValue < 100000) then
 			CurText = nibRealUI:ReadableNumber(rawValue, 1)
 		end
-	elseif dbc.currencystate == 2 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].jp, "JP")
-	elseif dbc.currencystate == 3 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vp, "VP")
-	elseif dbc.currencystate == 4 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].vpw, "VPw")
-	elseif dbc.currencystate == 5 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].hp, "HP")
-	elseif dbc.currencystate == 6 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cp, "CP")
-	elseif dbc.currencystate == 7 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].cpw, "CPw")
-	elseif dbc.currencystate == 8 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].amnt, ShortenDynamicCurrencyName(BPCurr1Name))
-	elseif dbc.currencystate == 9 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr2, ShortenDynamicCurrencyName(BPCurr2Name))
-	elseif dbc.currencystate == 10 then
-		CurText = CurrencyDisplayText(dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpcurr3, ShortenDynamicCurrencyName(BPCurr3Name))
-	end
-	self.text:SetFormattedText("%s", CurText)
-
-	-- If Gold, then show C/S/G colored square
-	if dbc.currencystate == 1 then
+		-- show C/S/G colored square
 		self.icon:Show()
 		self.icon:ClearAllPoints()
 		self.icon:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", self.text:GetWidth() + 6, 6)
 		self.icon:SetVertexColor(unpack(CurrencyColors[curCurrency]))
 	else
+		CurText = CurrencyDisplayText(currDB.bpCurrencies[dbc.currencystate - 1].amnt, ShortenDynamicCurrencyName(currDB.bpCurrencies[dbc.currencystate - 1].name))
 		self.icon:Hide()
 	end
+	self.text:SetFormattedText("%s", CurText)
 	
 	UpdateElementWidth(self)
 end
@@ -1736,7 +1662,6 @@ local function Currency_OnEnter(self)
 	
 	self.hasshown = true
 	Currency_Update(self)
-	
 end
 
 function Currency_OnMouseDown(self)
@@ -1747,12 +1672,11 @@ function Currency_OnMouseDown(self)
 	elseif IsAltKeyDown() then
 		print("|cff0099ffRealUI: |r|cffffffffTo erase character data, mouse-over their entry in the Currency display and then Alt+Click.")
 	else
-		dbc.currencystate = (dbc.currencystate < (NumCurrencies + 2)) and (dbc.currencystate + 1) or 1
-		if UnitLevel("player") < MAX_PLAYER_LEVEL then
-			if dbc.currencystate == 3 or dbc.currencystate == 4 then 	-- Skip VP if not Max Level
-				dbc.currencystate = 5
-			elseif dbc.currencystate > (NumCurrencies + 2) then
-				dbc.currencystate = 1
+		local currDB = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name]
+		dbc.currencystate = (dbc.currencystate < NumCurrencies) and (dbc.currencystate + 1) or 1
+		for i = 1, MAX_WATCHED_TOKENS do
+			if (dbc.currencystate == i + 1) and (currDB.bpCurrencies[i].amnt < 0) then
+				dbc.currencystate = (dbc.currencystate < NumCurrencies) and (dbc.currencystate + 1) or 1
 			end
 		end
 		if not InCombatLockdown() then
@@ -3331,18 +3255,13 @@ local function Clock_OnEnter(self)
 		GameTooltip:AddLine(" ")
 	end
 
-	-- World Bosses infos
-	if UnitLevel("player") >= 90 then
-		local WorldBosses = {
-			["Galleon"] = 32098,
-			["Sha Of Anger"] = 32099,
-			["Nalak"] = 32518,
-			["Oondasta"] = 32519,
-			["Celestials"] = 33117,
-			["Ordos"] = 33118
-		}
-		for k,v in pairs(WorldBosses) do 
-			GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L[k]), strform(IsQuestFlaggedCompleted(v) and L["World Boss Done"] or L["World Boss Not Done"]),  0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+	-- World Bosses
+	local numSavedBosses = GetNumSavedWorldBosses()
+	if (UnitLevel("player") >= 90) and (numSavedBosses > 0) then
+		GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, WORLD .. LFG_LIST_BOSSES_DEFEATED))
+		for i = 1, numSavedBosses do
+			local bossName, bossID, bossReset = GetSavedWorldBossInfo(i)
+			GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, bossName), strform("%s", ConvertSecondstoTime(bossReset)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 		end
 		GameTooltip:AddLine(" ")
 	end
@@ -3966,10 +3885,6 @@ function InfoLine:CreateFrames()
 			self.elapsed = 0
 		end
 	end)
-	-- Hook into TokenFrame "Show On Backpack" checkbox
-	TokenFramePopupBackpackCheckBox:HookScript("OnClick", function(self)
-		nibRealUI:Notification(TOKEN_OPTIONS, true, L["Info Line currency tracking will update after UI Reload (/rl)"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
-	end)
 	
 	-- -- XP/Rep
 	ILFrames.xprep = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].xp)
@@ -4163,18 +4078,6 @@ function InfoLine:PLAYER_LOGIN()
 	end
 	
 	-- Currency Names
-	HPName = GetCurrencyInfo(392)
-	CPName = GetCurrencyInfo(390)
-	JPName = GetCurrencyInfo(395)
-	VPName = GetCurrencyInfo(396)
-	-- Try Dynamics Currency Start
-	BPCurr1Name = GetBackpackCurrencyInfo(1)
-	BPCurr2Name = GetBackpackCurrencyInfo(2)
-	BPCurr3Name = GetBackpackCurrencyInfo(3)
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[1].name = BPCurr1Name
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[2].name = BPCurr2Name
-	dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].bpCurrencies[3].name = BPCurr3Name
-	-- Try Dynamics Currency End
 	GoldName = strtrim(strsub(strform(nibRealUI.goldstr or GOLD_AMOUNT, 0), 2))
 
 	-- Loot Spec
@@ -4219,19 +4122,11 @@ function InfoLine:OnInitialize()
 							class = "",
 							level = 0,
 							gold = -1,
-							jp = -1,
-							vp = -1,
-							vpw = -1,
-							hp = -1,
-							cp = -1,
-							cpw = -1,
-							-- Try Dynamics Currency start
 							bpCurrencies = {
 								[1] = {amnt = -1, name = nil},
 								[2] = {amnt = -1, name = nil},
 								[3] = {amnt = -1, name = nil},
 							},
-							-- Try Dynamics Currency end
 							updated = "",
 						},
 					},
