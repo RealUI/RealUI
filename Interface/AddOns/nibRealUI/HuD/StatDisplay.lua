@@ -13,39 +13,78 @@ local StatFrame = {}
 local PercentFormatString = "%.1f%%"
 local RoundFormatString = "%.1f"
 
-local Stats = {  --Warlords
-    --Attributes
-    [1]  = "Strength",
-    [2]  = "Agility",
-    [3]  = "Stamina",
-    [4]  = "Intellect",
+local statTable = {}
+local function createStats(class)
+    print("Class", class)
+    -- Attributes
+        if class == "DEATHKNIGHT" or class == "PALADIN" or class == "WARRIOR" then
+            -- Strength Users
+            tinsert(statTable, {slug = "Strength", icon = "PersonPlus", name = SPELL_STAT1_NAME})
+        end
+        if class == "DRUID" or class == "HUNTER" or class == "MONK" or class == "ROGUE" or class == "SHAMAN" then
+            -- Agility Users
+            tinsert(statTable, {slug = "Agility", icon = "PersonPlus", name = SPELL_STAT2_NAME})
+        end
+        if class == "DRUID" or class == "MAGE" or class == "MONK" or class == "PALADIN" 
+            or class == "PRIEST" or class == "SHAMAN" or class == "WARLOCK" then
+            -- Intellect Users
+            tinsert(statTable, {slug = "Intellect", icon = "PersonPlus", name = SPELL_STAT4_NAME})
+        end
+        tinsert(statTable, {slug = "Stamina", icon = "Heart", name = SPELL_STAT3_NAME})
 
-    --Enhancments
-    [5]  = "Haste",
-    [6]  = "Crit",
-    [7]  = "Mastery",
-    [8]  = "Multistrike",
-    [9]  = "Versitility",
-    [10] = "Bonus_Armor", --Tanks
-    [11] = "Spirit", --Healers
+    -- Enhancments
+        tinsert(statTable, {slug = "Haste", icon = "Lightning", name = STAT_HASTE})
+        tinsert(statTable, {slug = "Crit", icon = "DoubleArrow2", name = STAT_CRITICAL_STRIKE})
+        tinsert(statTable, {slug = "Mastery", icon = "Sword", name = STAT_MASTERY})
+        tinsert(statTable, {slug = "Multistrike", icon = "DoubleArrow2", name = STAT_MULTISTRIKE})
+        tinsert(statTable, {slug = "Versitility", icon = "Heart", name = STAT_VERSATILITY})
+        if class == "DEATHKNIGHT" or class == "DRUID" or class == "MONK" or class == "PALADIN" or class == "WARRIOR" then
+            -- Tanks
+            tinsert(statTable, {slug = "Bonus_Armor", icon = "Shield", name = BONUS_ARMOR})
+        end
+        if class == "DRUID" or class == "MONK" or class == "PALADIN" or class == "PRIEST" or class == "SHAMAN" then
+            -- Healers
+            tinsert(statTable, {slug = "Spirit", icon = "Flame", name = SPELL_STAT5_NAME}) 
+        end
 
-    --Attack
-    [12] = "Attack_Power",
-    [13] = "Attack_Speed",
-    [14] = "Res_Regen", --Energy, Focus, and Runes regen
+    -- Attack
+        if class == "DEATHKNIGHT" or class == "DRUID" or class == "MONK" or class == "PALADIN" or class == "WARRIOR" then
+            -- Physical
+            tinsert(statTable, {slug = "Attack_Power", icon = "Sword", name = STAT_ATTACK_POWER})
+            tinsert(statTable, {slug = "Attack_Speed", icon = "Lightning", name = STAT_ATTACK_SPEED})
+        end
+        if class == "HUNTER" then
+            -- Focus regen
+            tinsert(statTable, {slug = "Res_Regen", icon = "DoubleArrow2", name = STAT_FOCUS_REGEN})
+        elseif class == "DRUID" or class == "MONK" or class == "ROGUE" then
+            -- Energy regen
+            tinsert(statTable, {slug = "Res_Regen", icon = "DoubleArrow2", name = STAT_ENERGY_REGEN})
+        elseif class == "DEATHKNIGHT" then
+            -- Runes regen
+            tinsert(statTable, {slug = "Res_Regen", icon = "DoubleArrow2", name = STAT_RUNE_REGEN})
+        end
 
-    --Spell
-    [15] = "Spell_Power",
-    [16] = "Combat_Regen",
-    [17] = "Mana_Regen",
+    -- Spell
+        if class == "DRUID" or class == "MAGE" or class == "MONK" or class == "PALADIN" 
+              or class == "PRIEST" or class == "SHAMAN" or class == "WARLOCK" then
+            -- Casters
+            tinsert(statTable, {slug = "Spell_Power", icon = "Flame", name = STAT_SPELLPOWER}) 
+            tinsert(statTable, {slug = "Combat_Regen", icon = "Lightning", name = MANA_REGEN_COMBAT}) 
+            tinsert(statTable, {slug = "Mana_Regen", icon = "Lightning", name = MANA_REGEN}) 
+        end
 
-    --Defense
-    [18] = "Dodge",
-    [19] = "Parry",
-    [20] = "Block",
-    [21] = "Total_Armor",
-}
-
+    -- Defense
+        if class == "PALADIN" or class == "WARRIOR" then
+            -- Block Tanks
+            tinsert(statTable, {slug = "Block", icon = "Shield", name = STAT_BLOCK})
+        end
+        if class == "DEATHKNIGHT" or class == "DRUID" or class == "MONK" or class == "PALADIN" or class == "WARRIOR" then
+            -- Tanks
+            tinsert(statTable, {slug = "Dodge", icon = "Lightning", name = STAT_DODGE})
+            tinsert(statTable, {slug = "Parry", icon = "Lightning", name = STAT_PARRY})
+            tinsert(statTable, {slug = "Total_Armor", icon = "Shield", name = ARMOR})
+        end
+end
 local convertStat = { --Test prep for Warlords
     ["Melee_Haste"] = "Haste",
     ["Range_Haste"] = "Haste",
@@ -63,61 +102,6 @@ local convertStat = { --Test prep for Warlords
     ["Range_Speed"] = "Attack_Speed",
     ["MP5"] = "Combat_Regen",
     ["Armor_Defense"] = "Total_Armor",
-}
-
-local StatIcons = {
-    [1]  = "PersonPlus",
-    [2]  = "PersonPlus",
-    [3]  = "Heart",
-    [4]  = "PersonPlus",
-
-    [5]  = "Lightning",
-    [6]  = "DoubleArrow2",
-    [7]  = "Sword",
-    [8]  = "DoubleArrow2",
-    [9]  = "Heart",
-    [10] = "Shield",
-    [11]  = "Flame",
-             
-    [12] = "Sword",
-    [13] = "Lightning",
-    [14] = "DoubleArrow2",
-          
-    [15] = "Flame",
-    [16] = "Lightning",
-    [17] = "Lightning",
-         
-    [18] = "Lightning",
-    [19] = "Lightning",
-    [20] = "Shield",
-    [21] = "Shield",
-}
-local StatTexts = {
-    [1]  = SPELL_STAT1_NAME,
-    [2]  = SPELL_STAT2_NAME,
-    [3]  = SPELL_STAT3_NAME,
-    [4]  = SPELL_STAT4_NAME,
-
-    [5]  = STAT_HASTE,
-    [6]  = STAT_CRITICAL_STRIKE,
-    [7]  = STAT_MASTERY,
-    [8]  = STAT_MULTISTRIKE,
-    [9]  = STAT_VERSATILITY,
-    [10] = BONUS_ARMOR,
-    [11] = SPELL_STAT5_NAME,
-          
-    [12] = STAT_ATTACK_SPEED,
-    [13] = STAT_ATTACK_SPEED,
-    [14] = {STAT_ENERGY_REGEN, STAT_FOCUS_REGEN, STAT_RUNE_REGEN},
-          
-    [15] = STAT_SPELLPOWER,
-    [16] = MANA_REGEN_COMBAT,
-    [17] = MANA_REGEN,
-          
-    [18] = STAT_DODGE,
-    [19] = STAT_PARRY,
-    [20] = STAT_BLOCK,
-    [21] = ARMOR,
 }
 
 local options
@@ -166,19 +150,26 @@ local function GetOptions()
                         type = "select",
                         name = "Stat 1",
                         set = function(info, value)
-                            dbc.stats[1][1] = Stats[value]
+                            dbc.stats[1][1] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = StatTexts,
+                        values = function(...)
+                            local vals = {}
+                            for k, v in pairs(statTable) do
+                                print(k,v)
+                                vals[k] = v.name
+                            end
+                            return vals
+                        end,
                         order = 10,
                     },
                     stat1name = {
                         name = function()
-                            for k,v in pairs(Stats) do
-                                if v == dbc.stats[1][1] then
-                                    return StatTexts[k]
+                            for k, v in pairs(statTable) do
+                                if v.slug == dbc.stats[1][1] then
+                                    return v.name
                                 end
                             end
                         end,
@@ -194,19 +185,26 @@ local function GetOptions()
                         type = "select",
                         name = "Stat 2",
                         set = function(info, value)
-                            dbc.stats[1][2] = Stats[value]
+                            dbc.stats[1][2] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = StatTexts,
+                        values = function(...)
+                            local vals = {}
+                            for k, v in pairs(statTable) do
+                                print(k,v)
+                                vals[k] = v.name
+                            end
+                            return vals
+                        end,
                         order = 30,
                     },
                     stat2name = {
                         name = function()
-                            for k,v in pairs(Stats) do
-                                if v == dbc.stats[1][2] then
-                                    return StatTexts[k]
+                            for k,v in pairs(statTable) do
+                                if v.slug == dbc.stats[1][2] then
+                                    return v.name
                                 end
                             end
                         end,
@@ -231,19 +229,26 @@ local function GetOptions()
                         type = "select",
                         name = "Stat 1",
                         set = function(info, value)
-                            dbc.stats[2][1] = Stats[value]
+                            dbc.stats[2][1] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = StatTexts,
+                        values = function(...)
+                            local vals = {}
+                            for k, v in pairs(statTable) do
+                                print(k,v)
+                                vals[k] = v.name
+                            end
+                            return vals
+                        end,
                         order = 10,
                     },
                     stat1name = {
                         name = function()
-                            for k,v in pairs(Stats) do
-                                if v == dbc.stats[2][1] then
-                                    return StatTexts[k]
+                            for k,v in pairs(statTable) do
+                                if v.slug == dbc.stats[2][1] then
+                                    return v.name
                                 end
                             end
                         end,
@@ -259,19 +264,26 @@ local function GetOptions()
                         type = "select",
                         name = "Stat 2",
                         set = function(info, value)
-                            dbc.stats[2][2] = Stats[value]
+                            dbc.stats[2][2] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = StatTexts,
+                        values = function(...)
+                            local vals = {}
+                            for k, v in pairs(statTable) do
+                                print(k,v)
+                                vals[k] = v.name
+                            end
+                            return vals
+                        end,
                         order = 30,
                     },
                     stat2name = {
                         name = function()
-                            for k,v in pairs(Stats) do
-                                if v == dbc.stats[2][2] then
-                                    return StatTexts[k]
+                            for k,v in pairs(statTable) do
+                                if v.slug == dbc.stats[2][2] then
+                                    return v.name
                                 end
                             end
                         end,
@@ -570,18 +582,18 @@ function StatDisplay:GetCharStatTexts()
         {},
         {},
     }
-    for k,v in pairs(Stats) do
-        if v == dbc.stats[1][1] then
-            stats[1][1] = StatTexts[k]
+    for k,v in pairs(statTable) do
+        if v.slug == dbc.stats[1][1] then
+            stats[1][1] = v.name
         end
-        if v == dbc.stats[1][2] then
-            stats[1][2] = StatTexts[k]
+        if v.slug == dbc.stats[1][2] then
+            stats[1][2] = v.name
         end
-        if v == dbc.stats[2][1] then
-            stats[2][1] = StatTexts[k]
+        if v.slug == dbc.stats[2][1] then
+            stats[2][1] = v.name
         end
-        if v == dbc.stats[2][2] then
-            stats[2][2] = StatTexts[k]
+        if v.slug == dbc.stats[2][2] then
+            stats[2][2] = v.name
         end
     end
     return stats
@@ -646,12 +658,12 @@ function StatDisplay:TalentUpdate()
     watchedStats = dbc.stats[specGroup]
     nibRealUI.watchedStats = watchedStats
 
-    for k,v in pairs(Stats) do
-        if v == dbc.stats[specGroup][1] then
-            StatFrame[1].icon:SetTexture(nibRealUI.media.icons[StatIcons[k]])
+    for k,v in pairs(statTable) do
+        if v.slug == dbc.stats[specGroup][1] then
+            StatFrame[1].icon:SetTexture(nibRealUI.media.icons[v.icon])
         end
-        if v == dbc.stats[specGroup][2] then
-            StatFrame[2].icon:SetTexture(nibRealUI.media.icons[StatIcons[k]])
+        if v.slug == dbc.stats[specGroup][2] then
+            StatFrame[2].icon:SetTexture(nibRealUI.media.icons[v.icon])
         end
     end
 
@@ -662,6 +674,7 @@ end
 
 function StatDisplay:CombatUpdate()
     convert()
+    print("Stat", statTable[4].slug)
     InCombat = UnitAffectingCombat("player")
     if InCombat then
         self:TalentUpdate()
@@ -688,6 +701,7 @@ function StatDisplay:PLAYER_LOGIN()
     end
     StatFrame[1] = RealUIPlayerStat1
     StatFrame[2] = RealUIPlayerStat2
+    createStats(nibRealUI.class)
     self:CombatUpdate()
 end
 
@@ -696,15 +710,16 @@ end
 --------------------
 local function stat_initialize(dropdown, level)
     if not level or level == 1 then
-        for idx, entry in ipairs(StatTexts) do
+        for idx, entry in ipairs(statTable) do
             local info = UIDropDownMenu_CreateInfo()
-            info.text = entry
-            info.value = entry
+            info.text = entry.name
+            info.value = entry.name
             info.func = function(frame, ...)
-                UIDropDownMenu_SetSelectedValue(dropdown, entry)
-                for k,v in pairs(StatTexts) do
-                    if v == entry then
-                        dbc.stats[dropdown.spec][dropdown.stat] = Stats[k]
+                print("DropFunc", entry, ...)
+                UIDropDownMenu_SetSelectedValue(dropdown, entry.name)
+                for k, v in pairs(statTable) do
+                    if v.name == entry.name then
+                        dbc.stats[dropdown.spec][dropdown.stat] = v.slug
                     end
                 end
                 StatDisplay:TalentUpdate()
@@ -718,17 +733,17 @@ function StatDisplay:RefreshOptions()
     local sdO = self.options
     local stats = self:GetCharStatTexts()
     local statKeys = {{},{}}
-    for k,v in pairs(Stats) do
-        if v == dbc.stats[1][1] then
+    for k, v in pairs(statTable) do
+        if v.slug == dbc.stats[1][1] then
             statKeys[1][1] = k
         end
-        if v == dbc.stats[1][2] then
+        if v.slug == dbc.stats[1][2] then
             statKeys[1][2] = k
         end
-        if v == dbc.stats[2][1] then
+        if v.slug == dbc.stats[2][1] then
             statKeys[2][1] = k
         end
-        if v == dbc.stats[2][2] then
+        if v.slug == dbc.stats[2][2] then
             statKeys[2][2] = k
         end
     end
