@@ -18,13 +18,6 @@ C.themes["Blizzard_LookingForGuildUI"] = function()
 	LookingForGuildFrameInset:DisableDrawLayer("BACKGROUND")
 	LookingForGuildFrameInset:DisableDrawLayer("BORDER")
 	F.CreateBD(GuildFinderRequestMembershipFrame)
-	for i = 1, 5 do
-		local bu = _G["LookingForGuildBrowseFrameContainerButton"..i]
-		F.CreateBD(bu, .25)
-		bu:SetHighlightTexture("")
-		bu:GetRegions():SetTexture(C.media.backdrop)
-		bu:GetRegions():SetVertexColor(r, g, b, .2)
-	end
 	for i = 1, 9 do
 		select(i, LookingForGuildCommentInputFrame:GetRegions()):Hide()
 	end
@@ -43,6 +36,43 @@ C.themes["Blizzard_LookingForGuildUI"] = function()
 	LookingForGuildFramePortraitFrame:Hide()
 	LookingForGuildFrameTopBorder:Hide()
 	LookingForGuildFrameTopRightCorner:Hide()
+
+	F.Reskin(LookingForGuildBrowseButton)
+	F.Reskin(GuildFinderRequestMembershipFrameAcceptButton)
+	F.Reskin(GuildFinderRequestMembershipFrameCancelButton)
+	F.ReskinClose(LookingForGuildFrameCloseButton)
+	F.ReskinCheck(LookingForGuildQuestButton)
+	F.ReskinCheck(LookingForGuildDungeonButton)
+	F.ReskinCheck(LookingForGuildRaidButton)
+	F.ReskinCheck(LookingForGuildPvPButton)
+	F.ReskinCheck(LookingForGuildRPButton)
+	F.ReskinCheck(LookingForGuildWeekdaysButton)
+	F.ReskinCheck(LookingForGuildWeekendsButton)
+	F.ReskinInput(GuildFinderRequestMembershipFrameInputFrame)
+
+	-- [[ Browse frame ]]
+
+	F.Reskin(LookingForGuildRequestButton)
+	F.ReskinScroll(LookingForGuildBrowseFrameContainerScrollBar)
+
+	for i = 1, 5 do
+		local bu = _G["LookingForGuildBrowseFrameContainerButton"..i]
+
+		bu:SetBackdrop(nil)
+		bu:SetHighlightTexture("")
+
+		-- my client crashes if I put this in a var? :x
+		bu:GetRegions():SetTexture(C.media.backdrop)
+		bu:GetRegions():SetVertexColor(r, g, b, .2)
+		bu:GetRegions():SetPoint("TOPLEFT", 1, -1)
+		bu:GetRegions():SetPoint("BOTTOMRIGHT", -1, 2)
+
+		local bg = F.CreateBDFrame(bu, .25)
+		bg:SetPoint("TOPLEFT")
+		bg:SetPoint("BOTTOMRIGHT", 0, 1)
+	end
+
+	-- [[ Role buttons ]]
 
 	for _, roleButton in pairs({LookingForGuildTankButton, LookingForGuildHealerButton, LookingForGuildDamagerButton}) do
 		roleButton.cover:SetTexture(C.media.roleIcons)
@@ -84,20 +114,4 @@ C.themes["Blizzard_LookingForGuildUI"] = function()
 
 		F.ReskinCheck(roleButton.checkButton)
 	end
-
-	F.Reskin(LookingForGuildBrowseButton)
-	F.Reskin(LookingForGuildRequestButton)
-	F.Reskin(GuildFinderRequestMembershipFrameAcceptButton)
-	F.Reskin(GuildFinderRequestMembershipFrameCancelButton)
-
-	F.ReskinScroll(LookingForGuildBrowseFrameContainerScrollBar)
-	F.ReskinClose(LookingForGuildFrameCloseButton)
-	F.ReskinCheck(LookingForGuildQuestButton)
-	F.ReskinCheck(LookingForGuildDungeonButton)
-	F.ReskinCheck(LookingForGuildRaidButton)
-	F.ReskinCheck(LookingForGuildPvPButton)
-	F.ReskinCheck(LookingForGuildRPButton)
-	F.ReskinCheck(LookingForGuildWeekdaysButton)
-	F.ReskinCheck(LookingForGuildWeekendsButton)
-	F.ReskinInput(GuildFinderRequestMembershipFrameInputFrame)
 end

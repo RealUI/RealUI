@@ -59,6 +59,9 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		tab.leftHighlight:SetAlpha(0)
 		tab.rightHighlight:SetAlpha(0)
 
+		tab:SetHeight(tab.storedHeight)
+		tab.grayBox:GetRegions():SetAllPoints(tab)
+
 		text:SetPoint("CENTER")
 		text:SetTextColor(1, 1, 1)
 

@@ -103,7 +103,7 @@ C.themes["Blizzard_GuildUI"] = function()
 	GuildRecruitmentCommentFrame:ClearAllPoints()
 	GuildRecruitmentCommentFrame:SetPoint("TOPLEFT", GuildRecruitmentLevelFrame, "BOTTOMLEFT", 0, 1)
 	F.ReskinCheck(GuildRosterShowOfflineButton)
-	for i = 1, 7 do
+	for i = 1, 6 do
 		F.ReskinCheck(_G["GuildNewsFilterButton"..i])
 	end
 

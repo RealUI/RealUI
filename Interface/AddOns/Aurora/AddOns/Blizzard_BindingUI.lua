@@ -1,6 +1,8 @@
 local F, C = unpack(select(2, ...))
 
 C.themes["Blizzard_BindingUI"] = function()
+	local r, g, b = C.r, C.g, C.b
+
 	local KeyBindingFrame = KeyBindingFrame
 
 	KeyBindingFrame.header:DisableDrawLayer("BACKGROUND")
@@ -20,13 +22,29 @@ C.themes["Blizzard_BindingUI"] = function()
 	F.ReskinCheck(KeyBindingFrame.characterSpecificButton)
 	F.ReskinScroll(KeyBindingFrameScrollFrameScrollBar)
 
+	local function styleBindingButton(bu)
+		local selected = bu.selectedHighlight
+
+		for i = 1, 9 do
+			select(i, bu:GetRegions()):Hide()
+		end
+
+		selected:SetTexture(C.media.backdrop)
+		selected:SetPoint("TOPLEFT", 1, -1)
+		selected:SetPoint("BOTTOMRIGHT", -1, 1)
+		selected:SetTexture(r, g, b, .2)
+
+		F.Reskin(bu)
+	end
+
 	for i = 1, KEY_BINDINGS_DISPLAYED do
 		local button1 = _G["KeyBindingFrameKeyBinding"..i.."Key1Button"]
 		local button2 = _G["KeyBindingFrameKeyBinding"..i.."Key2Button"]
 
 		button2:SetPoint("LEFT", button1, "RIGHT", 1, 0)
-		F.Reskin(button1)
-		F.Reskin(button2)
+
+		styleBindingButton(button1)
+		styleBindingButton(button2)
 	end
 
 	KeyBindingFrame.header.text:ClearAllPoints()

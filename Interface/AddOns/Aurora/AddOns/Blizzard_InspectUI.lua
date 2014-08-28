@@ -37,6 +37,10 @@ C.themes["Blizzard_InspectUI"] = function()
 		slot.icon:SetTexCoord(.08, .92, .08, .92)
 	end
 
+	hooksecurefunc("InspectPaperDollItemSlotButton_Update", function(button)
+		button.icon:SetShown(button.hasItem)
+	end)
+
 	-- PvP
 
 	InspectPVPFrame.BG:Hide()

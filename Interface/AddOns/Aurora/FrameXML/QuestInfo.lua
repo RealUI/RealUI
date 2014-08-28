@@ -3,50 +3,9 @@ local F, C = unpack(select(2, ...))
 tinsert(C.themes["Aurora"], function()
 	local r, g, b = C.r, C.g, C.b
 
-	-- [[ Quest info rewards ]]
+	-- [[ Item reward highlight ]]
 
 	QuestInfoItemHighlight:GetRegions():Hide()
-	QuestInfoSpellObjectiveFrameNameFrame:Hide()
-
-	QuestInfoSkillPointFrameIconTexture:SetSize(40, 40)
-	QuestInfoSkillPointFrameIconTexture:SetTexCoord(.08, .92, .08, .92)
-
-	local bg = CreateFrame("Frame", nil, QuestInfoSkillPointFrame)
-	bg:SetPoint("TOPLEFT", -3, 0)
-	bg:SetPoint("BOTTOMRIGHT", -3, 0)
-	bg:Lower()
-	F.CreateBD(bg, .25)
-
-	QuestInfoSkillPointFrameNameFrame:Hide()
-	QuestInfoSkillPointFrameName:SetParent(bg)
-	QuestInfoSkillPointFrameIconTexture:SetParent(bg)
-
-	local skillPointLine = QuestInfoSkillPointFrame:CreateTexture(nil, "BACKGROUND")
-	skillPointLine:SetSize(1, 40)
-	skillPointLine:SetPoint("RIGHT", QuestInfoSkillPointFrameIconTexture, 1, 0)
-	skillPointLine:SetTexture(C.media.backdrop)
-	skillPointLine:SetVertexColor(0, 0, 0)
-
-	QuestInfoRewardSpellIconTexture:SetSize(40, 40)
-	QuestInfoRewardSpellIconTexture:SetTexCoord(.08, .92, .08, .92)
-	QuestInfoRewardSpellIconTexture:SetDrawLayer("OVERLAY")
-
-	local bg = CreateFrame("Frame", nil, QuestInfoRewardSpell)
-	bg:SetPoint("TOPLEFT", 9, -1)
-	bg:SetPoint("BOTTOMRIGHT", -10, 13)
-	bg:Lower()
-	F.CreateBD(bg, .25)
-
-	QuestInfoRewardSpellNameFrame:Hide()
-	QuestInfoRewardSpellSpellBorder:Hide()
-	QuestInfoRewardSpellName:SetParent(bg)
-	QuestInfoRewardSpellIconTexture:SetParent(bg)
-
-	local spellLine = QuestInfoRewardSpell:CreateTexture(nil, "BACKGROUND")
-	spellLine:SetSize(1, 40)
-	spellLine:SetPoint("RIGHT", QuestInfoRewardSpellIconTexture, 1, 0)
-	spellLine:SetTexture(C.media.backdrop)
-	spellLine:SetVertexColor(0, 0, 0)
 
 	local function clearHighlight()
 		for _, button in pairs(QuestInfoRewardsFrame.RewardButtons) do
@@ -67,15 +26,30 @@ tinsert(C.themes["Aurora"], function()
 	QuestInfoItemHighlight:HookScript("OnShow", setHighlight)
 	QuestInfoItemHighlight:HookScript("OnHide", clearHighlight)
 
-	hooksecurefunc(QuestInfoRequiredMoneyText, "SetTextColor", function(self, r, g, b)
-		if r == 0 then
-			self:SetTextColor(.8, .8, .8)
-		elseif r == .2 then
-			self:SetTextColor(1, 1, 1)
-		end
-	end)
+	-- [[ Shared ]]
+
+	local function restyleSpellButton(bu)
+		local name = bu:GetName()
+		local icon = bu.Icon
+
+		_G[name.."NameFrame"]:Hide()
+		_G[name.."SpellBorder"]:Hide()
+
+		icon:SetPoint("TOPLEFT", 3, -2)
+		icon:SetDrawLayer("ARTWORK")
+		icon:SetTexCoord(.08, .92, .08, .92)
+		F.CreateBG(icon)
+
+		local bg = CreateFrame("Frame", nil, bu)
+		bg:SetPoint("TOPLEFT", 2, -1)
+		bg:SetPoint("BOTTOMRIGHT", 0, 14)
+		bg:SetFrameLevel(0)
+		F.CreateBD(bg, .25)
+	end
 
 	-- [[ Objectives ]]
+
+	restyleSpellButton(QuestInfoSpellObjectiveFrame)
 
 	local function colourObjectivesText()
 		if not QuestInfoFrame.questLog then return end
@@ -103,6 +77,8 @@ tinsert(C.themes["Aurora"], function()
 	hooksecurefunc("QuestInfo_Display", colourObjectivesText)
 
 	-- [[ Quest rewards ]]
+
+	restyleSpellButton(QuestInfoRewardSpell)
 
 	local function restyleRewardButton(bu, isMapQuestInfo)
 		bu.NameFrame:Hide()
@@ -137,6 +113,7 @@ tinsert(C.themes["Aurora"], function()
 		end
 	end)
 
+	restyleRewardButton(QuestInfoSkillPointFrame)
 	restyleRewardButton(MapQuestInfoRewardsFrame.SpellFrame, true)
 	restyleRewardButton(MapQuestInfoRewardsFrame.XPFrame, true)
 	restyleRewardButton(MapQuestInfoRewardsFrame.MoneyFrame, true)
@@ -145,6 +122,14 @@ tinsert(C.themes["Aurora"], function()
 	MapQuestInfoRewardsFrame.XPFrame.Name:SetShadowOffset(0, 0)
 
 	-- [[ Change text colours ]]
+
+	hooksecurefunc(QuestInfoRequiredMoneyText, "SetTextColor", function(self, r, g, b)
+		if r == 0 then
+			self:SetTextColor(.8, .8, .8)
+		elseif r == .2 then
+			self:SetTextColor(1, 1, 1)
+		end
+	end)
 
 	QuestInfoTitleHeader:SetTextColor(1, 1, 1)
 	QuestInfoTitleHeader.SetTextColor = F.dummy

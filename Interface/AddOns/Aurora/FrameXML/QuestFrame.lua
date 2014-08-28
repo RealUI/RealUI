@@ -108,20 +108,20 @@ tinsert(C.themes["Aurora"], function()
 
 	local npcbd = CreateFrame("Frame", nil, QuestNPCModel)
 	npcbd:SetPoint("TOPLEFT", -1, 1)
-	npcbd:SetPoint("RIGHT", 1, 0)
+	npcbd:SetPoint("RIGHT", 2, 0)
 	npcbd:SetPoint("BOTTOM", QuestNPCModelTextScrollFrame)
 	npcbd:SetFrameLevel(0)
 	F.CreateBD(npcbd)
 
 	local npcLine = CreateFrame("Frame", nil, QuestNPCModel)
-	npcLine:SetPoint("BOTTOMLEFT", 0, -2)
-	npcLine:SetPoint("BOTTOMRIGHT", 0, -2)
+	npcLine:SetPoint("BOTTOMLEFT", 0, -1)
+	npcLine:SetPoint("BOTTOMRIGHT", 1, -1)
 	npcLine:SetHeight(1)
 	npcLine:SetFrameLevel(0)
 	F.CreateBD(npcLine, 0)
 
 	hooksecurefunc("QuestFrame_ShowQuestPortrait", function(parentFrame, _, _, _, x, y)
-		if parentFrame == QuestLogPopupDetailFrame then
+		if parentFrame == QuestLogPopupDetailFrame or parentFrame == QuestFrame then
 			x = x + 3
 		end
 

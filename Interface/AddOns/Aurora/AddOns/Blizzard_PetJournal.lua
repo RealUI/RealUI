@@ -170,7 +170,7 @@ C.themes["Blizzard_PetJournal"] = function()
 		F.CreateBG(ic)
 	end
 
-	if C.shouldStyleTooltips then
+	if AuroraConfig.tooltips then
 		for _, f in pairs({PetJournalPrimaryAbilityTooltip, PetJournalSecondaryAbilityTooltip}) do
 			f:DisableDrawLayer("BACKGROUND")
 			local bg = CreateFrame("Frame", nil, f)

@@ -34,14 +34,13 @@ tinsert(C.themes["Aurora"], function()
 
 	for i = 1, #slots do
 		local slot = _G["Character"..slots[i].."Slot"]
-		local ic = _G["Character"..slots[i].."SlotIconTexture"]
 		local border = slot.IconBorder
 
 		_G["Character"..slots[i].."SlotFrame"]:Hide()
 
 		slot:SetNormalTexture("")
 		slot:SetPushedTexture("")
-		ic:SetTexCoord(.08, .92, .08, .92)
+		slot.icon:SetTexCoord(.08, .92, .08, .92)
 
 		border:SetTexture(C.media.backdrop)
 		border:SetPoint("TOPLEFT", -1, 1)
@@ -74,31 +73,13 @@ tinsert(C.themes["Aurora"], function()
 	select(11, CharacterMainHandSlot:GetRegions()):Hide()
 	select(11, CharacterSecondaryHandSlot:GetRegions()):Hide()
 
-	local updateChar = function(self)
-		if not PaperDollFrame:IsShown() then return end
-
-		for i, slotName in ipairs(slots) do
-			if i == 18 then i = 19 end
-
-			local slot = _G["Character"..slotName.."Slot"]
-			local slotLink = GetInventoryItemLink("player", i)
-
-			if slotLink then
-				slot.icon:SetAlpha(1)
-			else
-				slot.icon:SetAlpha(0)
-			end
-
-			colourPopout(slot.popoutButton)
+	hooksecurefunc("PaperDollItemSlotButton_Update", function(button)
+		-- also fires for bag slots, we don't want that
+		if button.popoutButton then
+			button.icon:SetShown(button.hasItem)
+			colourPopout(button.popoutButton)
 		end
-	end
-
-	do
-		local f = CreateFrame("Frame")
-		f:RegisterEvent("UNIT_INVENTORY_CHANGED")
-		f:SetScript("OnEvent", updateChar)
-		PaperDollFrame:HookScript("OnShow", updateChar)
-	end
+	end)
 
 	-- [[ Sidebar tabs ]]
 

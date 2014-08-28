@@ -50,6 +50,7 @@ C.themes["Blizzard_VoidStorageUI"] = function()
 	for i = 1, 80 do
 		local bu = _G["VoidStorageStorageButton"..i]
 		local border = bu.IconBorder
+		local searchOverlay = bu.searchOverlay
 
 		bu:SetPushedTexture("")
 
@@ -57,6 +58,9 @@ C.themes["Blizzard_VoidStorageUI"] = function()
 		border:SetPoint("TOPLEFT", -1, 1)
 		border:SetPoint("BOTTOMRIGHT", 1, -1)
 		border:SetDrawLayer("BACKGROUND")
+
+		searchOverlay:SetPoint("TOPLEFT", -1, 1)
+		searchOverlay:SetPoint("BOTTOMRIGHT", 1, -1)
 
 		_G["VoidStorageStorageButton"..i.."Bg"]:Hide()
 		_G["VoidStorageStorageButton"..i.."IconTexture"]:SetTexCoord(.08, .92, .08, .92)

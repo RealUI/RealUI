@@ -3,6 +3,9 @@
 -- for custom APIs (see docs online)
 local LATEST_API_VERSION = "6.0"
 
+-- see F.AddPlugin
+local AURORA_LOADED = false
+
 local addon, core = ...
 
 core[1] = {} -- F, functions
@@ -43,6 +46,8 @@ C.media = {
 }
 
 C.defaults = {
+	["acknowledgedSplashScreen"] = false,
+
 	["alpha"] = 0.5,
 	["bags"] = true,
 	["buttonGradientColour"] = {.3, .3, .3, .3},
@@ -56,23 +61,11 @@ C.defaults = {
 	["tooltips"] = true,
 }
 
-C.tooltipAddons = {
-	["CowTip"] = true,
-	["FreebTip"] = true,
-	["iTip"] = true,
-	["lolTip"] = true,
-	["StarTip"] = true,
-	["TipTac"] = true,
-	["TipTop"] = true,
-}
-
-C.shouldStyleTooltips = true -- set to false if one of the above is loaded or AuroraConfig.tooltips is false
-
 C.frames = {}
 
 -- [[ Cached variables ]]
 
-local alpha, useButtonGradientColour
+local useButtonGradientColour
 
 -- [[ Functions ]]
 
@@ -92,7 +85,7 @@ F.CreateBD = function(f, a)
 		edgeFile = C.media.backdrop,
 		edgeSize = 1,
 	})
-	f:SetBackdropColor(0, 0, 0, a or alpha)
+	f:SetBackdropColor(0, 0, 0, a or AuroraConfig.alpha)
 	f:SetBackdropBorderColor(0, 0, 0)
 	if not a then tinsert(C.frames, f) end
 end
@@ -655,6 +648,18 @@ end
 C.themes = {}
 C.themes["Aurora"] = {}
 
+-- use of this function ensures that Aurora and custom style (if used) are properly initialised
+-- prior to loading third party plugins
+F.AddPlugin = function(func)
+	if AURORA_LOADED then
+		func()
+	else
+		tinsert(C.themes["Aurora"], func)
+	end
+end
+
+-- [[ Initialize addon ]]
+
 local Skin = CreateFrame("Frame", nil, UIParent)
 Skin:RegisterEvent("ADDON_LOADED")
 Skin:SetScript("OnEvent", function(self, event, addon)
@@ -682,7 +687,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			end
 		end
 
-		alpha = AuroraConfig.alpha
 		useButtonGradientColour = AuroraConfig.useButtonGradientColour
 
 		if useButtonGradientColour then
@@ -699,13 +703,19 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Custom style support ]]
 
+		local shouldSkipSplashScreen = false
+
 		local customStyle = AURORA_CUSTOM_STYLE
 
 		if customStyle and customStyle.apiVersion ~= nil and customStyle.apiVersion == LATEST_API_VERSION then
+			local protectedFunctions = {
+				["AddPlugin"] = true,
+			}
+
 			-- replace functions
 			if customStyle.functions then
 				for funcName, func in pairs(customStyle.functions) do
-					if F[funcName] then
+					if F[funcName] and not protectedFunctions[funcName] then
 						F[funcName] = func
 					end
 				end
@@ -727,8 +737,28 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				r, g, b = highlightColour.r, highlightColour.g, highlightColour.b
 				C.r, C.g, C.b = r, g, b
 			end
+
+			-- skip splash screen if requested
+			if customStyle.skipSplashScreen then
+				shouldSkipSplashScreen = true
+			end
+		end
+
+		-- [[ Splash screen for first time users ]]
+
+		if not AuroraConfig.acknowledgedSplashScreen then
+			if shouldSkipSplashScreen then
+				AuroraConfig.acknowledgedSplashScreen = true
+			else
+				AuroraSplashScreen:Show()
+			end
 		end
 	end
+
+	-- [[ Plugin helper ]]
+
+	-- from this point, plugins added with F.AddPlugin are executed directly instead of cached
+	AURORA_LOADED = true
 
 	-- [[ Load modules ]]
 
@@ -1008,6 +1038,13 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 						toggleBackdrop(bu, false)
 					end
 				end
+			end
+		end)
+
+		hooksecurefunc("UIDropDownMenu_SetIconImage", function(icon, texture)
+			if texture:find("Divider") then
+				icon:SetTexture(1, 1, 1, .2)
+				icon:SetHeight(1)
 			end
 		end)
 
@@ -2737,404 +2774,5 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		F.ReskinClose(DressUpFrameCloseButton, "TOPRIGHT", DressUpFrame, "TOPRIGHT", -38, -16)
-	end
-end)
-
-local Delay = CreateFrame("Frame")
-Delay:RegisterEvent("PLAYER_ENTERING_WORLD")
-Delay:SetScript("OnEvent", function()
-	Delay:UnregisterEvent("PLAYER_ENTERING_WORLD")
-
-	if AuroraConfig.tooltips then
-		for addon in pairs(C.tooltipAddons) do
-			if IsAddOnLoaded(addon) then
-				C.shouldStyleTooltips = false
-				break
-			end
-		end
-
-		if C.shouldStyleTooltips then
-			local tooltips = {
-				"GameTooltip",
-				"ItemRefTooltip",
-				"ShoppingTooltip1",
-				"ShoppingTooltip2",
-				"WorldMapTooltip",
-				"ChatMenu",
-				"EmoteMenu",
-				"LanguageMenu",
-				"VoiceMacroMenu",
-			}
-
-			local backdrop = {
-				bgFile = C.media.backdrop,
-				edgeFile = C.media.backdrop,
-				edgeSize = 1,
-			}
-
-			-- so other stuff which tries to look like GameTooltip doesn't mess up
-			local getBackdrop = function()
-				return backdrop
-			end
-
-			local getBackdropColor = function()
-				return 0, 0, 0, .6
-			end
-
-			local getBackdropBorderColor = function()
-				return 0, 0, 0
-			end
-
-			for i = 1, #tooltips do
-				local t = _G[tooltips[i]]
-				t:SetBackdrop(nil)
-				local bg = CreateFrame("Frame", nil, t)
-				bg:SetPoint("TOPLEFT")
-				bg:SetPoint("BOTTOMRIGHT")
-				bg:SetFrameLevel(t:GetFrameLevel()-1)
-				bg:SetBackdrop(backdrop)
-				bg:SetBackdropColor(0, 0, 0, .6)
-				bg:SetBackdropBorderColor(0, 0, 0)
-
-				t.GetBackdrop = getBackdrop
-				t.GetBackdropColor = getBackdropColor
-				t.GetBackdropBorderColor = getBackdropBorderColor
-			end
-
-			local sb = _G["GameTooltipStatusBar"]
-			sb:SetHeight(3)
-			sb:ClearAllPoints()
-			sb:SetPoint("BOTTOMLEFT", GameTooltip, "BOTTOMLEFT", 1, 1)
-			sb:SetPoint("BOTTOMRIGHT", GameTooltip, "BOTTOMRIGHT", -1, 1)
-			sb:SetStatusBarTexture(C.media.backdrop)
-
-			local sep = GameTooltipStatusBar:CreateTexture(nil, "ARTWORK")
-			sep:SetHeight(1)
-			sep:SetPoint("BOTTOMLEFT", 0, 3)
-			sep:SetPoint("BOTTOMRIGHT", 0, 3)
-			sep:SetTexture(C.media.backdrop)
-			sep:SetVertexColor(0, 0, 0)
-
-			F.CreateBD(FriendsTooltip)
-
-			-- pet battle stuff
-
-			local tooltips = {PetBattlePrimaryAbilityTooltip, PetBattlePrimaryUnitTooltip, FloatingBattlePetTooltip, BattlePetTooltip, FloatingPetBattleAbilityTooltip}
-			for _, f in pairs(tooltips) do
-				f:DisableDrawLayer("BACKGROUND")
-				local bg = CreateFrame("Frame", nil, f)
-				bg:SetAllPoints()
-				bg:SetFrameLevel(0)
-				F.CreateBD(bg)
-			end
-
-			PetBattlePrimaryUnitTooltip.Delimiter:SetTexture(0, 0, 0)
-			PetBattlePrimaryUnitTooltip.Delimiter:SetHeight(1)
-			PetBattlePrimaryAbilityTooltip.Delimiter1:SetHeight(1)
-			PetBattlePrimaryAbilityTooltip.Delimiter1:SetTexture(0, 0, 0)
-			PetBattlePrimaryAbilityTooltip.Delimiter2:SetHeight(1)
-			PetBattlePrimaryAbilityTooltip.Delimiter2:SetTexture(0, 0, 0)
-			FloatingPetBattleAbilityTooltip.Delimiter1:SetHeight(1)
-			FloatingPetBattleAbilityTooltip.Delimiter1:SetTexture(0, 0, 0)
-			FloatingPetBattleAbilityTooltip.Delimiter2:SetHeight(1)
-			FloatingPetBattleAbilityTooltip.Delimiter2:SetTexture(0, 0, 0)
-			FloatingBattlePetTooltip.Delimiter:SetTexture(0, 0, 0)
-			FloatingBattlePetTooltip.Delimiter:SetHeight(1)
-			F.ReskinClose(FloatingBattlePetTooltip.CloseButton)
-			F.ReskinClose(FloatingPetBattleAbilityTooltip.CloseButton)
-		end
-	else
-		C.shouldStyleTooltips = false
-	end
-
-	if AuroraConfig.bags == true and not(IsAddOnLoaded("Baggins") or IsAddOnLoaded("Stuffing") or IsAddOnLoaded("Combuctor") or IsAddOnLoaded("cargBags") or IsAddOnLoaded("famBags") or IsAddOnLoaded("ArkInventory") or IsAddOnLoaded("Bagnon")) then
-		BackpackTokenFrame:GetRegions():Hide()
-
-		local function onEnter(self)
-			self.bg:SetBackdropBorderColor(r, g, b)
-		end
-
-		local function onLeave(self)
-			self.bg:SetBackdropBorderColor(0, 0, 0)
-		end
-
-		for i = 1, 12 do
-			local con = _G["ContainerFrame"..i]
-			local name = _G["ContainerFrame"..i.."Name"]
-
-			for j = 1, 5 do
-				select(j, con:GetRegions()):SetAlpha(0)
-			end
-			select(7, con:GetRegions()):SetAlpha(0)
-
-			con.PortraitButton.Highlight:SetTexture("")
-
-			name:ClearAllPoints()
-			name:SetPoint("TOP", 0, -10)
-
-			for k = 1, MAX_CONTAINER_ITEMS do
-				local item = "ContainerFrame"..i.."Item"..k
-				local button = _G[item]
-				local border = button.IconBorder
-
-				_G[item.."IconQuestTexture"]:SetAlpha(0)
-
-				button:SetNormalTexture("")
-				button:SetPushedTexture("")
-				button:SetHighlightTexture("")
-
-				button.icon:SetTexCoord(.08, .92, .08, .92)
-
-				button.bg = F.CreateBDFrame(button, 0)
-
-				border:SetTexture(C.media.backdrop)
-				border:SetPoint("TOPLEFT", -1, 1)
-				border:SetPoint("BOTTOMRIGHT", 1, -1)
-				border:SetDrawLayer("BACKGROUND", 1)
-
-				button:HookScript("OnEnter", onEnter)
-				button:HookScript("OnLeave", onLeave)
-			end
-
-			local f = CreateFrame("Frame", nil, con)
-			f:SetPoint("TOPLEFT", 8, -4)
-			f:SetPoint("BOTTOMRIGHT", -4, 3)
-			f:SetFrameLevel(con:GetFrameLevel()-1)
-			F.CreateBD(f)
-
-			F.ReskinClose(_G["ContainerFrame"..i.."CloseButton"], "TOPRIGHT", con, "TOPRIGHT", -6, -6)
-		end
-
-		for i = 1, 3 do
-			local ic = _G["BackpackTokenFrameToken"..i.."Icon"]
-			ic:SetDrawLayer("OVERLAY")
-			ic:SetTexCoord(.08, .92, .08, .92)
-			F.CreateBG(ic)
-		end
-
-		F.ReskinInput(BagItemSearchBox)
-
-		hooksecurefunc("ContainerFrame_Update", function(frame)
-			local id = frame:GetID()
-			local name = frame:GetName()
-
-			if id == 0 then
-				BagItemSearchBox:ClearAllPoints()
-				BagItemSearchBox:SetPoint("TOPLEFT", frame, "TOPLEFT", 50, -35)
-				BagItemAutoSortButton:ClearAllPoints()
-				BagItemAutoSortButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -9, -31)
-			end
-
-			for i = 1, frame.size do
-				local itemButton = _G[name.."Item"..i]
-
-				if _G[name.."Item"..i.."IconQuestTexture"]:IsShown() then
-					itemButton.IconBorder:SetVertexColor(1, 1, 0)
-				end
-			end
-		end)
-
-		BagItemAutoSortButton:GetNormalTexture():SetTexCoord(.17, .83, .17, .83)
-		BagItemAutoSortButton:GetPushedTexture():SetTexCoord(.17, .83, .17, .83)
-		F.CreateBG(BagItemAutoSortButton)
-
-		-- [[ Bank ]]
-
-		select(16, BankFrame:GetRegions()):Hide()
-		BankSlotsFrame:DisableDrawLayer("BORDER")
-		BankPortraitTexture:Hide()
-		BankFrameMoneyFrameInset:Hide()
-		BankFrameMoneyFrameBorder:Hide()
-
-		-- "item slots" and "bag slots" text
-		select(9, BankSlotsFrame:GetRegions()):SetDrawLayer("OVERLAY")
-		select(10, BankSlotsFrame:GetRegions()):SetDrawLayer("OVERLAY")
-
-		F.ReskinPortraitFrame(BankFrame)
-		F.Reskin(BankFramePurchaseButton)
-		F.ReskinTab(BankFrameTab1)
-		F.ReskinTab(BankFrameTab2)
-		F.ReskinInput(BankItemSearchBox)
-
-		local function styleBankButton(bu)
-			local border = bu.IconBorder
-
-			bu.IconQuestTexture:SetAlpha(0)
-
-			border:SetTexture(C.media.backdrop)
-			border:SetPoint("TOPLEFT", -1, 1)
-			border:SetPoint("BOTTOMRIGHT", 1, -1)
-			border:SetDrawLayer("BACKGROUND", 1)
-
-			bu:SetNormalTexture("")
-			bu:SetPushedTexture("")
-			bu:SetHighlightTexture("")
-
-			bu.icon:SetTexCoord(.08, .92, .08, .92)
-
-			bu.bg = F.CreateBDFrame(bu, 0)
-
-			bu:HookScript("OnEnter", onEnter)
-			bu:HookScript("OnLeave", onLeave)
-		end
-
-		for i = 1, 28 do
-			styleBankButton(_G["BankFrameItem"..i])
-		end
-
-		for i = 1, 7 do
-			local bag = BankSlotsFrame["Bag"..i]
-			local _, highlightFrame = bag:GetChildren()
-			local border = bag.IconBorder
-
-			bag:SetNormalTexture("")
-			bag:SetPushedTexture("")
-			bag:SetHighlightTexture("")
-
-			highlightFrame:GetRegions():SetTexture(C.media.checked)
-
-			border:SetTexture(C.media.backdrop)
-			border:SetPoint("TOPLEFT", -1, 1)
-			border:SetPoint("BOTTOMRIGHT", 1, -1)
-			border:SetDrawLayer("BACKGROUND", 1)
-
-			bag.icon:SetTexCoord(.08, .92, .08, .92)
-
-			bag.bg = F.CreateBDFrame(bag, 0)
-
-			bag:HookScript("OnEnter", onEnter)
-			bag:HookScript("OnLeave", onLeave)
-		end
-
-		BankItemAutoSortButton:GetNormalTexture():SetTexCoord(.17, .83, .17, .83)
-		BankItemAutoSortButton:GetPushedTexture():SetTexCoord(.17, .83, .17, .83)
-		F.CreateBG(BankItemAutoSortButton)
-
-		hooksecurefunc("BankFrameItemButton_Update", function(button)
-			if not button.isBag and button.IconQuestTexture:IsShown() then
-				button.IconBorder:SetVertexColor(1, 1, 0)
-			end
-		end)
-
-		-- [[ Reagent bank ]]
-
-		ReagentBankFrame:DisableDrawLayer("BACKGROUND")
-		ReagentBankFrame:DisableDrawLayer("BORDER")
-		ReagentBankFrame:DisableDrawLayer("ARTWORK")
-
-		F.Reskin(ReagentBankFrame.DespositButton)
-		F.Reskin(ReagentBankFrameUnlockInfoPurchaseButton)
-
-		-- make button more visible
-		ReagentBankFrameUnlockInfoBlackBG:SetTexture(.1, .1, .1)
-
-		local reagentButtonsStyled = false
-		ReagentBankFrame:HookScript("OnShow", function()
-			if not reagentButtonsStyled then
-				for i = 1, 98 do
-					styleBankButton(_G["ReagentBankFrameItem"..i])
-				end
-				reagentButtonsStyled = true
-			end
-		end)
-	end
-
-	if AuroraConfig.loot == true and not(IsAddOnLoaded("Butsu") or IsAddOnLoaded("LovelyLoot") or IsAddOnLoaded("XLoot")) then
-		LootFramePortraitOverlay:Hide()
-
-		select(19, LootFrame:GetRegions()):SetPoint("TOP", LootFrame, "TOP", 0, -7)
-
-		hooksecurefunc("LootFrame_UpdateButton", function(index)
-			local ic = _G["LootButton"..index.."IconTexture"]
-
-			if not ic.bg then
-				local bu = _G["LootButton"..index]
-
-				_G["LootButton"..index.."IconQuestTexture"]:SetAlpha(0)
-				_G["LootButton"..index.."NameFrame"]:Hide()
-
-				bu:SetNormalTexture("")
-				bu:SetPushedTexture("")
-
-				local bd = CreateFrame("Frame", nil, bu)
-				bd:SetPoint("TOPLEFT")
-				bd:SetPoint("BOTTOMRIGHT", 114, 0)
-				bd:SetFrameLevel(bu:GetFrameLevel()-1)
-				F.CreateBD(bd, .25)
-
-				ic:SetTexCoord(.08, .92, .08, .92)
-				ic.bg = F.CreateBG(ic)
-			end
-
-			if select(6, GetLootSlotInfo(index)) then
-				ic.bg:SetVertexColor(1, 1, 0)
-			else
-				ic.bg:SetVertexColor(0, 0, 0)
-			end
-		end)
-
-		LootFrameDownButton:ClearAllPoints()
-		LootFrameDownButton:SetPoint("BOTTOMRIGHT", -8, 6)
-		LootFramePrev:ClearAllPoints()
-		LootFramePrev:SetPoint("LEFT", LootFrameUpButton, "RIGHT", 4, 0)
-		LootFrameNext:ClearAllPoints()
-		LootFrameNext:SetPoint("RIGHT", LootFrameDownButton, "LEFT", -4, 0)
-
-		F.ReskinPortraitFrame(LootFrame, true)
-		F.ReskinArrow(LootFrameUpButton, "up")
-		F.ReskinArrow(LootFrameDownButton, "down")
-	end
-
-	if AuroraConfig.chatBubbles then
-		local bubbleHook = CreateFrame("Frame")
-
-		local function styleBubble(frame)
-			local scale = UIParent:GetScale()
-
-			for i = 1, frame:GetNumRegions() do
-				local region = select(i, frame:GetRegions())
-				if region:GetObjectType() == "Texture" then
-					region:SetTexture(nil)
-				elseif region:GetObjectType() == "FontString" then
-					region:SetFont(C.media.font, 13)
-					region:SetShadowOffset(scale, -scale)
-				end
-			end
-
-			frame:SetBackdrop({
-				bgFile = C.media.backdrop,
-				edgeFile = C.media.backdrop,
-				edgeSize = scale,
-			})
-			frame:SetBackdropColor(0, 0, 0, AuroraConfig.alpha)
-			frame:SetBackdropBorderColor(0, 0, 0)
-		end
-
-		local function isChatBubble(frame)
-			if frame:GetName() then return end
-			if not frame:GetRegions() then return end
-			return frame:GetRegions():GetTexture() == [[Interface\Tooltips\ChatBubble-Background]]
-		end
-
-		local last = 0
-		local numKids = 0
-
-		bubbleHook:SetScript("OnUpdate", function(self, elapsed)
-			last = last + elapsed
-			if last > .1 then
-				last = 0
-				local newNumKids = WorldFrame:GetNumChildren()
-				if newNumKids ~= numKids then
-					for i=numKids + 1, newNumKids do
-						local frame = select(i, WorldFrame:GetChildren())
-
-						if isChatBubble(frame) then
-							styleBubble(frame)
-						end
-					end
-					numKids = newNumKids
-				end
-			end
-		end)
 	end
 end)
