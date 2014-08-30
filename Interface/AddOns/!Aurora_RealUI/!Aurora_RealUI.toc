@@ -7,6 +7,7 @@
 ## OptionalDeps: !BugGrabber
 !Aurora.lua
 
+AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_PetBattleUI.lua
 
 AddOns\Ace3.lua
@@ -22,8 +23,11 @@ AddOns\WeakAuras.lua
 
 FrameXML\GameMenuFrame.lua
 FrameXML\PaperDollFrame.lua
-FrameXML\QuestMapFrame.lua
+FrameXML\Timer.lua
 FrameXML\WorldMapFrame.lua
 
 Misc\MiscSkins.lua
-Misc\TimerTrackers.lua
+
+# Test
+#FrameXML\mod.lua
+#AddOns\addon.lua

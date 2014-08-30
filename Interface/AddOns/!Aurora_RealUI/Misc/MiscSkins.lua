@@ -1,30 +1,8 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, mods = ...
 
-local _
-local MODNAME = "MiscSkins"
-local MiscSkins = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
-local F, C
-
-function MiscSkins:Skin()
-	if not Aurora then return end
-	F, C = unpack(Aurora)
-
-	-- Clique
-	if CliqueSpellTab then
-		local tab = CliqueSpellTab
-		F.ReskinTab(tab)
-
-		tab:SetCheckedTexture(C.media.checked)
-
-		local bg = CreateFrame("Frame", nil, tab)
-		bg:SetPoint("TOPLEFT", -1, 1)
-		bg:SetPoint("BOTTOMRIGHT", 1, -1)
-		bg:SetFrameLevel(tab:GetFrameLevel()-1)
-		F.CreateBD(bg)
-
-		select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
-	end
-
+tinsert(mods["Aurora"], function()
+	local F, C = unpack(Aurora)
+	print("MiscSkins")
 	--Travel Pass
 	for i = 1, FRIENDS_TO_DISPLAY do
 		local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
@@ -62,6 +40,34 @@ function MiscSkins:Skin()
 	hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
 	hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
+	-- Splash Frame
+	F.CreateBD(SplashFrame, nil, true)
+	SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
+	SplashFrame.RightTexture:SetDrawLayer("BACKGROUND", 7)
+	SplashFrame.BottomTexture:SetDrawLayer("BACKGROUND", 7)
+	SplashFrame.Label:SetTextColor(1, 1, 1)
+end)
+
+--[[function MiscSkins:Skin()
+	F, C = unpack(Aurora)
+
+	-- Clique
+	if CliqueSpellTab then
+		local tab = CliqueSpellTab
+		F.ReskinTab(tab)
+
+		tab:SetCheckedTexture(C.media.checked)
+
+		local bg = CreateFrame("Frame", nil, tab)
+		bg:SetPoint("TOPLEFT", -1, 1)
+		bg:SetPoint("BOTTOMRIGHT", 1, -1)
+		bg:SetFrameLevel(tab:GetFrameLevel()-1)
+		F.CreateBD(bg)
+
+		select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
+	end
+
+
 	-- Time Manager unnecessary buttons
 	if TimeManagerMilitaryTimeCheck then TimeManagerMilitaryTimeCheck:Hide() end
 	if TimeManagerLocalTimeCheck then TimeManagerLocalTimeCheck:Hide() end
@@ -73,9 +79,10 @@ function MiscSkins:Skin()
 end
 
 function MiscSkins:ADDON_LOADED(event, addon)
+	--print("MiscSkins:", event, addon)
 	if addon =="Blizzard_DebugTools" then
 		-- EventTrace
-		if Aurora then
+		if Aurora then 
 			F, C = unpack(Aurora)
 
 			for i = 1, EventTraceFrame:GetNumRegions() do
@@ -105,15 +112,4 @@ function MiscSkins:ADDON_LOADED(event, addon)
 	elseif addon == "Aurora" then
 		self:Skin()
 	end
-end
-----------
-
-function MiscSkins:OnInitialize()
-	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterSkin(MODNAME, "Miscellaneous")
-end
-
-function MiscSkins:OnEnable()
-	self:RegisterEvent("ADDON_LOADED")
-end
+end]]

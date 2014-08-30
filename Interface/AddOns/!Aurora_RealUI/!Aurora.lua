@@ -1,12 +1,16 @@
 local _, mods = ...
+mods["Aurora"] = {}
+
+-- RealUI skin hook
+REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
+REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
+local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local db = nibRealUI.db.profile
+
+-- Aurora API
 local F, C
 local style = {}
 style.apiVersion = "6.0"
-
-if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
-if not REALUI_WINDOW_FRAMES then REALUI_WINDOW_FRAMES = {} end
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db = nibRealUI.db.profile
 
 style.functions = {
     ["CreateBD"] = function(f, a)
@@ -36,6 +40,8 @@ style.functions = {
     end,
 }
 
+style.skipSplashScreen = true
+
 --style.highlightColor = {r = 0, g = 1, b = 0}
 style.classcolors = {
     ["DEATHKNIGHT"] = { r = 0.77, g = 0.12, b = 0.23 },
@@ -58,8 +64,6 @@ f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(self, event, addon)
     if addon == "Aurora" then
         F, C = unpack(Aurora)
-        --for when skinning code has fully migrated to !Aurora
-        --C.themes["nibRealUI"] = mods
 
         local _, class = UnitClass("player")
         local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
@@ -139,7 +143,20 @@ f:SetScript("OnEvent", function(self, event, addon)
 
         F.ReskinExpCol = function(f)
         end
+    end
 
-	    self:UnregisterEvent("ADDON_LOADED")
+    -- mod logic by Haleth from Aurora
+    local addonModule = mods[addon]
+    if addonModule then
+        if type(addonModule) == "function" then
+            addonModule(F, C)
+        else
+            -- Aurora
+            for _, moduleFunc in pairs(addonModule) do
+                F.AddPlugin(function()
+                    moduleFunc(F, C)
+                end)
+            end
+        end
     end
 end)
