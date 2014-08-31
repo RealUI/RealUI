@@ -408,12 +408,12 @@ function CombatFader:OnInitialize()
 				unitframes = {
 					name = "Unit Frames",
 					frames = {
-						["oUF_RealUIPlayer_Overlay"] = true,
-						["oUF_RealUITarget_Overlay"] = true,
-						["oUF_RealUIFocus_Overlay"] = true,
-						["oUF_RealUIFocusTarget_Overlay"] = true,
-						["oUF_RealUITargetTarget_Overlay"] = true,
-						["oUF_RealUIPet_Overlay"] = true,
+						["RealUIPlayerFrame"] = true,
+						--["oUF_RealUITarget_Overlay"] = true,
+						--["oUF_RealUIFocus_Overlay"] = true,
+						--["oUF_RealUIFocusTarget_Overlay"] = true,
+						--["oUF_RealUITargetTarget_Overlay"] = true,
+						--["oUF_RealUIPet_Overlay"] = true,
 					},
 				},
 				watchframe = {

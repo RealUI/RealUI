@@ -355,7 +355,7 @@ function SkinAce3:Skin()
 						tex:SetPoint("TOP", self.treeframe, "TOPRIGHT", 1, -1)
 						tex:SetPoint("BOTTOM", self.treeframe, "BOTTOMRIGHT", 1, 1)
 						tex:SetTexture(C.media.backdrop)
-						tex:SetVertexColor(1, 1, 1)
+						tex:SetVertexColor(r, g, b, .8)
 						self.skinned = true
 					end
 				end)

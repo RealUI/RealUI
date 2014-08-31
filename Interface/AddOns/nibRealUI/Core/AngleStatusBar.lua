@@ -49,6 +49,7 @@ smoothUpdateFrame:SetScript("OnUpdate", function()
 end)
 
 function AngleStatusBar:SetValue(bar, per, ignoreSmooth)
+    --print("SetValue", self, bar, per, ignoreSmooth)
     if bar.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(bar, per)
     else
@@ -96,14 +97,12 @@ function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, 
     bar.x = x
     bar.y = y
 
-    -- Size
+    -- Create pixel lines for the actual bar
     bar:SetHeight(height)
-
-    -- Rows
     bar.row = {}
     local rX, rY, endX = 0, 0, 0
     for r = 1, height do
-        bar.row[r] = bar:CreateTexture(nil, "ARTWORK")
+        bar.row[r] = parent:CreateTexture(nil, "ARTWORK")
         bar.row[r]:SetPoint(startPoint, bar, startPoint, rX, rY)
         bar.row[r]:SetPoint(endPoint, bar, endPoint, endX, rY)
         bar.row[r]:SetHeight(1)
@@ -114,6 +113,17 @@ function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, 
             bar.row[r]:Hide()
         end
     end
+
+    bar:SetScript("OnHide", function()
+        for r = 1, #bar.row do
+            bar.row[r]:Hide()
+        end
+    end)
+    bar:SetScript("OnShow", function()
+        for r = 1, #bar.row do
+            bar.row[r]:Show()
+        end
+    end)
 
     bar:SetWidth(1)
     bar:Hide()

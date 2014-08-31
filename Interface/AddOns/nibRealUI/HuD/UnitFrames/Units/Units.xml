@@ -1,0 +1,10 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <Script file="Player.lua"/>
+    <Script file="Target.lua"/>
+    <Script file="TargetTarget.lua"/>
+    <Script file="Focus.lua"/>
+    <Script file="FocusTarget.lua"/>
+    <Script file="Pet.lua"/>
+</Ui>

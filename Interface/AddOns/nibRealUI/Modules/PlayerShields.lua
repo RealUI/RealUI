@@ -572,7 +572,7 @@ function PlayerShields:OnInitialize()
 				onlySpec = true,
 			},
 			position = {
-				parent = "oUF_RealUIPlayer_Overlay",
+				parent = "RealUIPlayerFrame",
 				point = "BOTTOMRIGHT",
 				rPoint = "LEFT",
 				x = 19,

@@ -2,16 +2,14 @@
 ## Title: !Aurora |cffffffffReal|r|cffbf3333UI|r
 ## Notes: A custom Aurora skin for RealUI
 ## Author: Gethe88
-## Version: v0.0.1
+## Version: 8.1 r1
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: !BugGrabber
 !Aurora.lua
 
+AddOns\Bartender4.lua
 AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_PetBattleUI.lua
-
-AddOns\Ace3.lua
-AddOns\Bartender4.lua
 AddOns\DBM.lua
 AddOns\DXE.lua
 AddOns\Grid2.lua
@@ -26,6 +24,7 @@ FrameXML\PaperDollFrame.lua
 FrameXML\Timer.lua
 FrameXML\WorldMapFrame.lua
 
+Misc\Ace3.lua
 Misc\MiscSkins.lua
 
 # Test

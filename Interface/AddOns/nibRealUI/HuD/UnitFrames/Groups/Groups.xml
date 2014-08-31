@@ -1,8 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-    <Script file="UnitFrames.lua"/>
-    <Script file="Tags.lua"/>
-    <Script file="Auras.lua"/>
-    <Include file="Units\Units.xml"/>
+    <Script file="Boss.lua"/>
+    <Script file="Arena.lua"/>
 </Ui>
