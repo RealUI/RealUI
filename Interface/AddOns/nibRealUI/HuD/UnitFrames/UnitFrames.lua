@@ -591,27 +591,27 @@ function UnitFrames:OnInitialize()
                         normal = {0.66, 0.22, 0.22},
                     },
                     power = {
-                        [MANA] =          {0.00, 0.50, 0.94},
-                        [RAGE] =          {0.75, 0.12, 0.12},
-                        [FOCUS] =         {0.95, 0.50, 0.20},
-                        [ENERGY] =        {0.90, 0.80, 0.20},
-                        [CHI] =           {0.35, 0.80, 0.70},
-                        [RUNES] =         {0.50, 0.50, 0.50},
-                        [RUNIC_POWER] =   {0.00, 0.65, 0.85},
-                        [SOUL_SHARDS_POWER] = {0.50, 0.32, 0.55},
-                        [HOLY_POWER] =    {0.90, 0.80, 0.50},
-                        [AMMOSLOT] =      {0.80, 0.60, 0.00},
-                        [FUEL] =          {0.00, 0.55, 0.50},
-                        [ALTERNATE_RESOURCE_TEXT] = {0.00, 0.80, 0.80},
+                        ["MANA"] =        {0.00, 0.50, 0.94},
+                        ["RAGE"] =        {0.75, 0.12, 0.12},
+                        ["FOCUS"] =       {0.95, 0.50, 0.20},
+                        ["ENERGY"] =      {0.90, 0.80, 0.20},
+                        ["CHI"] =         {0.35, 0.80, 0.70},
+                        ["RUNES"] =       {0.50, 0.50, 0.50},
+                        ["RUNIC_POWER"] = {0.00, 0.65, 0.85},
+                        ["SOUL_SHARDS"] = {0.50, 0.32, 0.55},
+                        ["HOLY_POWER"] =  {0.90, 0.80, 0.50},
+                        ["AMMOSLOT"] =    {0.80, 0.60, 0.00},
+                        ["FUEL"] =        {0.00, 0.55, 0.50},
+                        ["ALTERNATE"] =   {0.00, 0.80, 0.80},
                     },
                     status = {
-                        [FACTION_STANDING_LABEL2] = {0.81, 0.20, 0.15}, -- Hostile
-                        [FACTION_STANDING_LABEL4] = {0.90, 0.90, 0.20}, -- Neutral
-                        [FACTION_STANDING_LABEL5] = {0.28, 0.85, 0.28}, -- Friendly
-                        [DAMAGE] =        {1, 0, 0},
+                        hostile = {0.81, 0.20, 0.15},
+                        neutral = {0.90, 0.90, 0.20},
+                        friendly = {0.28, 0.85, 0.28},
+                        damage =        {1, 0, 0},
                         incomingHeal =  {1, 1, 0},
-                        [HEALS] =          {0, 1, 0},
-                        [TUTORIAL_TITLE30] =       {0, 1, 0}, -- Resting
+                        heal =          {0, 1, 0},
+                        resting =       {0, 1, 0},
                         combat =        {1, 0, 0},
                         afk =           {1, 1, 0},
                         offline =       {0.6, 0.6, 0.6},
@@ -642,7 +642,7 @@ function UnitFrames:OnEnable()
     self:SetPowerColors()
     self.colorStrings = {
         health = nibRealUI:ColorTableToStr(db.overlay.colors.health.normal),
-        mana = nibRealUI:ColorTableToStr(db.overlay.colors.power[MANA]),
+        mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
     for _, func in pairs(UnitFrames.units) do
         func()

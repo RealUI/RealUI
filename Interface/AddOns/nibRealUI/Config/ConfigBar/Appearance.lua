@@ -398,59 +398,59 @@ function ConfigBar_Appearance:SetupWindow()
 				{
 					label = MANA,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesPowerColor(2, MANA, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesPowerColor(2, "MANA", r, g, b)
 					end,
-					color = UnitFrames:GetPowerColors()[MANA],
+					color = UnitFrames:GetPowerColors()["MANA"],
 				},
 				{
 					label = RUNIC_POWER,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesPowerColor(3, RUNIC_POWER, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesPowerColor(3, "RUNIC_POWER", r, g, b)
 					end,
-					color = UnitFrames:GetPowerColors()[RUNIC_POWER],
+					color = UnitFrames:GetPowerColors()["RUNIC_POWER"],
 				},
 				{
 					label = POWER_TYPE_ENERGY,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesPowerColor(4, ENERGY, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesPowerColor(4, "ENERGY", r, g, b)
 					end,
-					color = UnitFrames:GetPowerColors()[ENERGY],
+					color = UnitFrames:GetPowerColors()["ENERGY"],
 				},
 				{
 					label = FOCUS,
 					func = function(r, g, b, a)
 						a = 1
-						ConfigBar_Appearance:UpdateUnitFramesPowerColor(5, FOCUS, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesPowerColor(5, "FOCUS", r, g, b)
 					end,
-					color = UnitFrames:GetPowerColors()[FOCUS],
+					color = UnitFrames:GetPowerColors()["FOCUS"],
 				},
 				{
 					label = RAGE,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesPowerColor(6, RAGE, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesPowerColor(6, "RAGE", r, g, b)
 					end,
-					color = UnitFrames:GetPowerColors()[RAGE],
+					color = UnitFrames:GetPowerColors()["RAGE"],
 				},
 				{
-					label = FACTION_STANDING_LABEL5, -- Friendly
+					label = FACTION_STANDING_LABEL5,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesStatusColor(7, FACTION_STANDING_LABEL5, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesStatusColor(7, "friendly", r, g, b)
 					end,
-					color = UnitFrames:GetStatusColors()[FACTION_STANDING_LABEL5],
+					color = UnitFrames:GetStatusColors()["friendly"],
 				},
 				{
-					label = FACTION_STANDING_LABEL4, -- Neutral
+					label = FACTION_STANDING_LABEL4,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesStatusColor(8, FACTION_STANDING_LABEL4, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesStatusColor(8, "neutral", r, g, b)
 					end,
-					color = UnitFrames:GetStatusColors()[FACTION_STANDING_LABEL4],
+					color = UnitFrames:GetStatusColors()["neutral"],
 				},
 				{
-					label = FACTION_STANDING_LABEL2, -- Hostile
+					label = FACTION_STANDING_LABEL2,
 					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateUnitFramesStatusColor(9, FACTION_STANDING_LABEL2, r, g, b)
+						ConfigBar_Appearance:UpdateUnitFramesStatusColor(9, "hostile", r, g, b)
 					end,
-					color = UnitFrames:GetStatusColors()[FACTION_STANDING_LABEL2],
+					color = UnitFrames:GetStatusColors()["hostile"],
 				},
 			}
 			self.colors.unitFrames = cbGUI:CreateColorPickerList(tabPanel3, "VERTICAL", colorPickers)
