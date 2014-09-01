@@ -7,12 +7,6 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
-local ReversePowers = {
-    ["RAGE"] = true,
-    ["RUNIC_POWER"] = true,
-    ["POWER_TYPE_SUN_POWER"] = true,
-}
-
 UnitFrames.textures[1].F1.health.coords = {0.1328125, 1, 0.1875, 1}
 UnitFrames.textures[1].F1.power.coords = {0.23046875, 1, 0, 0.5}
 
@@ -44,13 +38,7 @@ local function CreateHealthBar(parent)
     health.text:SetJustifyH("LEFT")
     parent:Tag(health.text, "[realui:health]")
 
-    health.Override = function(self, event, unit)
-        --self.Health.bar.reverse = true
-        --print("Health Override", self, event, unit)
-        local uHealth, uHealthMax, PerHP = UnitFrames:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
-        AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
-        AngleStatusBar:SetValue(self.Health.bar, PerHP, majorUpdate)
-    end
+    health.Override = UnitFrames.HealthOverride
     return health
 end
 
@@ -60,7 +48,7 @@ local function CreatePowerBar(parent)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
     power:SetSize(texture.width, texture.height)
 
-    power.bar = AngleStatusBar:NewBar(power, -7, -1, 189, 6, "RIGHT", "RIGHT", "LEFT", true)
+    power.bar = AngleStatusBar:NewBar(power, -9, -1, texture.width - 17, texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
 
     ---[[
     power.bg = power:CreateTexture(nil, "BACKGROUND")
@@ -81,19 +69,7 @@ local function CreatePowerBar(parent)
     power.text:SetJustifyH("LEFT")
     parent:Tag(power.text, "[realui:power]")
 
-    power.Override = function(self, event, unit, powerType)
-        --print("Power Override", self, event, unit, powerType)
-        if powerType then
-            if ReversePowers[powerType] then
-                self.Power.bar.reverse = true
-            else
-                self.Power.bar.reverse = false
-            end
-            AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
-        end
-        local power, powerMax, powerPer = UnitFrames:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
-        AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
-    end
+    power.Override = UnitFrames.PowerOverride
     return power
 end
 
@@ -109,7 +85,7 @@ local function CreatePvPStatus(parent)
     border:SetAllPoints(pvp)
 
     pvp.Override = function(self, event, unit)
-        print("PvP Override", self, event, unit, IsPVPTimerRunning())
+        --print("PvP Override", self, event, unit, IsPVPTimerRunning())
         pvp:SetVertexColor(0, 0, 0, 0.6)
         if UnitIsPVP(unit) then
             if UnitIsFriend(unit, "player") then
@@ -122,7 +98,7 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
-local function CreateBasicStyle(self)
+local function CreatePlayer(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
     self.PvP = CreatePvPStatus(self.Health)
@@ -143,7 +119,7 @@ tinsert(UnitFrames.units, function(...)
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
 
-    oUF:RegisterStyle("RealUI:player", CreateBasicStyle)
+    oUF:RegisterStyle("RealUI:player", CreatePlayer)
     oUF:SetActiveStyle("RealUI:player")
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)

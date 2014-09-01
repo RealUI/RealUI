@@ -349,6 +349,11 @@ function barListPrototype:AdjustButtons()
 			nr = nr + 1
 		end
 	end
+	if lastbtn then
+		self.button:GetFontString():SetPoint("RIGHT", lastbtn, "LEFT")
+	else
+		self.button:GetFontString():SetPoint("RIGHT", self.button, "RIGHT")
+	end
 end
 
 function barListPrototype:SetBarBackgroundColor(r, g, b, a)
@@ -499,6 +504,7 @@ do
 				local top, left = p:GetTop(), p:GetLeft()
 				if p.isResizing == true then
 					p:StopMovingOrSizing()
+					p:SetLength(p:GetWidth())
 					p.callbacks:Fire("WindowResized", self:GetParent())
 					p.isResizing = false
 					p:SortBars()
@@ -790,18 +796,16 @@ function barListPrototype:ReverseGrowth(reverse)
 	end
 
 	if self.resizebutton then
-		if reverse then
-			self.resizebutton:SetNormalTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRightTop")
-			self.resizebutton:SetHighlightTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRightTop")
-		else
-			self.resizebutton:SetNormalTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRight")
-			self.resizebutton:SetHighlightTexture("Interface\\AddOns\\Skada\\images\\ResizeGripRight")
-		end
-
+		self.resizebutton:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
+		self.resizebutton:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Down")
 		self.resizebutton:ClearAllPoints()
 		if reverse then
+			self.resizebutton:GetNormalTexture():SetRotation(math.pi/2)
+			self.resizebutton:GetHighlightTexture():SetRotation(math.pi/2)
 			self.resizebutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
 		else
+			self.resizebutton:GetNormalTexture():SetRotation(0)
+			self.resizebutton:GetHighlightTexture():SetRotation(0)
 			self.resizebutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
 		end
 	end
@@ -832,6 +836,7 @@ function barListPrototype:SetLength(length)
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
 			v:SetLength(length)
+			v:OnSizeChanged() -- widget fires this before .length is set, do it again to ensure update
 		end
 	end
 	self:UpdateOrientationLayout()
@@ -1438,7 +1443,7 @@ do
 		local width = max(0.0001, length - iconSize)
 		local height = thickness
 		barPrototype.super.SetWidth(self, width)
-		barPrototype.super.SetHeight(self, height)
+        barPrototype.super.SetHeight(self, height)
 		self.icon:SetWidth(thickness)
 		self.icon:SetHeight(thickness)
 	end

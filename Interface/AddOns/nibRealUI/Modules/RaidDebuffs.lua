@@ -534,7 +534,7 @@ function RaidDebuffs:OnInitialize()
 				onlyBosses = true,
 			},
 			position = {
-				parent = "oUF_RealUITarget_Overlay",
+				parent = "RealUITargetFrame",
 				point = "BOTTOMLEFT",
 				rPoint = "RIGHT",
 				x = -19,

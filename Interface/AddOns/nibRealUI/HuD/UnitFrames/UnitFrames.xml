@@ -4,5 +4,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="UnitFrames.lua"/>
     <Script file="Tags.lua"/>
     <Script file="Auras.lua"/>
+    <Script file="Shared.lua"/>
     <Include file="Units\Units.xml"/>
+    <Include file="Groups\Groups.xml"/>
 </Ui>

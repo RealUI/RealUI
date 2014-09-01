@@ -311,7 +311,7 @@ function CombatFader:FadeFrames()
 				for k2, v2 in pairs(db.elements[k].frames) do
 					if db.elements[k].frames[k2] then
 						frame = _G[k2]
-						if (k2 == "oUF_RealUIPet_Overlay") and self.ABShown then
+						if (k2 == "RealUIPetFrame") and self.ABShown then
 							if frame then FadeIt(frame, 1, true) end
 						else
 							if frame then FadeIt(frame, NewOpacity) end
@@ -409,11 +409,11 @@ function CombatFader:OnInitialize()
 					name = "Unit Frames",
 					frames = {
 						["RealUIPlayerFrame"] = true,
-						--["oUF_RealUITarget_Overlay"] = true,
-						--["oUF_RealUIFocus_Overlay"] = true,
-						--["oUF_RealUIFocusTarget_Overlay"] = true,
-						--["oUF_RealUITargetTarget_Overlay"] = true,
-						--["oUF_RealUIPet_Overlay"] = true,
+						["RealUITargetFrame"] = true,
+						["RealUIFocusFrame"] = true,
+						["RealUIFocusTargetFrame"] = true,
+						["RealUITargetTargetFrame"] = true,
+						["RealUIPetFrame"] = true,
 					},
 				},
 				watchframe = {

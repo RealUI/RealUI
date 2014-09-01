@@ -705,9 +705,9 @@ function CastBars:UpdateAnchors()
 
 
 	-- Focus
-	self.focus:SetParent(oUF_RealUIFocus_Overlay)
+	self.focus:SetParent(RealUIFocusFrame)
 	self.focus:ClearAllPoints()
-	self.focus:SetPoint("TOPRIGHT", oUF_RealUIFocus_Overlay, "TOPRIGHT", db.size.focus.x + 3, db.size.focus.y)
+	self.focus:SetPoint("TOPRIGHT", RealUIFocusFrame, "TOPRIGHT", db.size.focus.x + 3, db.size.focus.y)
 
 	-- if textPointVert == "TOP" then textY = -(db.size.height + 5) else textY = 2 end
 	-- textX = textPointHoriz == "LEFT" and 37 or -23

@@ -2,7 +2,7 @@ local _, mods = ...
 
 tinsert(mods["Aurora"], function()
 	local F, C = unpack(Aurora)
-	print("MiscSkins")
+	--print("MiscSkins")
 	--Travel Pass
 	for i = 1, FRIENDS_TO_DISPLAY do
 		local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]

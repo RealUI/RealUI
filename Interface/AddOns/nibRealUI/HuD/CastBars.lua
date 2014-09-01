@@ -773,9 +773,9 @@ function CastBars:UpdateAnchors()
 
 
     -- Focus
-    self.focus:SetParent(oUF_RealUIFocus_Overlay)
+    self.focus:SetParent(RealUIFocusFrame)
     self.focus:ClearAllPoints()
-    self.focus:SetPoint("TOPRIGHT", oUF_RealUIFocus_Overlay, "TOPRIGHT", db.size[layoutSize].focus.x + 3, db.size[layoutSize].focus.y)
+    self.focus:SetPoint("TOPRIGHT", RealUIFocusFrame, "TOPRIGHT", db.size[layoutSize].focus.x + 3, db.size[layoutSize].focus.y)
 
     -- if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 5) else textY = 2 end
     -- textX = textPointHoriz == "LEFT" and 37 or -23
@@ -868,12 +868,12 @@ local function CreateCastBar(parent, unit, side)
     NewCB:SetSize(256, 16)
     if side == "RIGHT" then NewCB:SetPoint("TOPLEFT", parent) else NewCB:SetPoint("TOPRIGHT", parent) end
 
-    NewCB.surround = NewCB:CreateTexture(nil, "ARTWORK")
+    NewCB.surround = NewCB:CreateTexture(nil, "BORDER")
     NewCB.surround:SetAllPoints()
     NewCB.surround:SetTexture(Textures[layoutSize][unit].surround)
     if side == "RIGHT" then NewCB.surround:SetTexCoord(1, 0, 0, 1) end
 
-    NewCB.bg = NewCB:CreateTexture(nil, "ARTWORK")
+    NewCB.bg = NewCB:CreateTexture(nil, "BACKGROUND")
     NewCB.bg:SetAllPoints()
     NewCB.bg:SetTexture(Textures[layoutSize][unit].bar)
     if side == "RIGHT" then NewCB.bg:SetTexCoord(1, 0, 0, 1) end

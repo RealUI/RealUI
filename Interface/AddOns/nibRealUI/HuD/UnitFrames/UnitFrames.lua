@@ -376,53 +376,6 @@ local function GetOptions()
     return options
 end
 
-UnitFrames.textures = {
-    [1] = {
-        F1 = {
-            health = {
-                width = 222,
-                height = 13,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Surround]=],
-            },
-            power = {
-                width = 197,
-                height = 8,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Surround]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Surround]=],
-            },
-        },
-    },
-    [2] = {
-        F1 = {
-            health = {
-                width = 259,
-                height = 15,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Surround]=],
-            },
-            power = {
-                width = 230,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Surround]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]=],
-            },
-        },
-    },
-}
-
 function UnitFrames:GetSafeVals(vCur, vMax)
     local percent
     if vCur > 0 and vMax == 0 then
@@ -453,7 +406,11 @@ local NameLengths = {
     },
 }
 function UnitFrames:AbrvName(name, unit)
+    --print("AbrvName", name, string.match(name, "%w+"), unit)
     if not name then return "" end
+    if not string.match(name, "%w+") then
+        return name
+    end
 
     if (unit == "target") and (db.misc.alwaysDisplayFullHealth) then
         return nibRealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] - 7)
@@ -644,6 +601,8 @@ function UnitFrames:OnEnable()
         health = nibRealUI:ColorTableToStr(db.overlay.colors.health.normal),
         mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
+
+    self:InitShared()
     for _, func in pairs(UnitFrames.units) do
         func()
     end
