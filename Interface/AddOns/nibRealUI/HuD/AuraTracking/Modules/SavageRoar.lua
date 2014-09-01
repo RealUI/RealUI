@@ -7,7 +7,6 @@ local SavageRoar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local AuraTracking = nibRealUI:GetModule("AuraTracking")
 
 local SRID, SRName = 52610
-local SRFID, SRFName = 127538
 local gapPerComboPoint = 6
 local maxComboPoints = 5
 local baseSRDuration = 18
@@ -49,6 +48,7 @@ local function CustomCooldownUpdate(self, elapsed)
 end
 
 local function GetBuffDuration(unitName, buffName)
+	--print("GetBuffDuration:Savage", unitName, buffName)
 	local name, _, _, _, _, duration, endTime = UnitAura(unitName, buffName)
 	if name then
 		return name, duration, endTime - GetTime()
@@ -64,9 +64,6 @@ local function AuraUpdate(self, event, unit)
 	local points = GetComboPoints("player", "target")
 
 	local name, duration, remaining = GetBuffDuration("player", SRName)
-	if not name then
-		name, duration, remaining = GetBuffDuration("player", SRFName)
-	end
 
 	local endTime
 	if not remaining then
@@ -182,7 +179,6 @@ local function TalentUpdate(self, event, unit, initializing)
 
 	-- Raven Spell Lists
 	AuraTracking:ToggleRavenAura(false, "buff", "#"..SRID, not(self.inactive))
-	AuraTracking:ToggleRavenAura(false, "buff", "#"..SRFID, not(self.inactive))
 end
 
 function SavageRoar:TalentRefresh()
@@ -215,11 +211,10 @@ end
 function SavageRoar:SetIndicatorInfo(info)
 	local f = self.frame
 
-	local name,_,icon = GetSpellInfo(SRID)
+	local name,_,icon = GetSpellInfo(SRID) -- 52610
 	f.texture = icon
 
 	SRName = name
-	SRFName = (GetSpellInfo(SRFID))
 
 	f.side = "LEFT"
 	f.unit = "player"

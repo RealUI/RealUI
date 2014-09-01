@@ -284,13 +284,13 @@ function EclipseBar:UpdateVisibility(event, unit)
 end
 
 function EclipseBar:PLAYER_REGEN_DISABLED(event, ...)
-    print("EclipseBar", event, ...)
+    --print("EclipseBar", event, ...)
     self.inCombat = true
     self:UpdateVisibility()
 end
 
 function EclipseBar:PLAYER_REGEN_ENABLED(event, ...)
-    print("EclipseBar", event, ...)
+    --print("EclipseBar", event, ...)
     self.inCombat = false
     self:UpdateVisibility()
 end
