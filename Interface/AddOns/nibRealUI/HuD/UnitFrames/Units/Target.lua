@@ -75,9 +75,9 @@ local function CreatePowerBar(parent)
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPLEFT", power, "BOTTOMLEFT", 0, -3)
     power.text:SetFont(unpack(nibRealUI:Font()))
-    power.text:SetJustifyH("LEFT")
     parent:Tag(power.text, "[realui:power]")
 
+    power.frequentUpdates = true
     power.Override = UnitFrames.PowerOverride
     return power
 end
@@ -118,8 +118,10 @@ local function CreateTarget(self)
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
     self.Name:SetFont(unpack(nibRealUI:Font()))
-    self.Name:SetJustifyH("RIGHT")
     self:Tag(self.Name, "[realui:level] [realui:name]")
+
+    self:SetScript("OnEnter", UnitFrame_OnEnter)
+    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 end

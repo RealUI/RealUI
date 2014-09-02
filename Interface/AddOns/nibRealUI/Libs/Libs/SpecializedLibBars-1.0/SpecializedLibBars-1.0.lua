@@ -905,7 +905,18 @@ do
 	local values = {}
 
 	local function sortFunc(a, b)
-		local apct, bpct = a.value / a.maxValue, b.value / b.maxValue
+		--print("LibBars sort", a.value, a.maxValue, b.value, b.maxValue)
+		local apct, bpct
+		if a.value == 0 or a.maxValue == 0 then
+			apct = 0
+		else
+			apct = a.value / a.maxValue
+		end
+		if b.value == 0 or b.maxValue == 0 then
+			bpct = 0
+		else
+			bpct = b.value / b.maxValue
+		end
 		if apct == bpct then
 			if a.maxValue == b.maxValue then
 				return a.name > b.name

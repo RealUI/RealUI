@@ -18,7 +18,7 @@ tags.Methods["realui:name"] = function(unit)
 
     local classColor = "ffffff"
     if UnitFrames.db.profile.overlay.classColorNames then 
-        print("Class color names", unit)
+        --print("Class color names", unit)
         local _, class = UnitClass(unit)
         classColor = nibRealUI:ColorTableToStr(nibRealUI:GetClassColor(class))
     end

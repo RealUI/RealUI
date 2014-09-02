@@ -3,6 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 -- Misc Functions
+-- FindSpellID("Savage Roar", "player", false)
 function FindSpellID(SpellName, unit, isDebuff)
 	print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
 	local f = CreateFrame("FRAME")
@@ -193,6 +194,24 @@ function nibRealUI:GetLootSpecData()
 end
 
 -- Math
+function nibRealUI:GetSafeVals(vCur, vMax)
+    local percent
+    if vCur > 0 and vMax == 0 then
+        vMax = vCur
+        percent = 1
+    elseif vCur == 0 and vMax == 0 then
+        percent = 1
+    elseif (vCur < 0) or (vMax < 0) then
+        vCur = abs(vCur)
+        vMax = abs(vMax)
+        vMax = max(vCur, vMax)
+        percent = vCur / vMax
+    else
+        percent = vCur / vMax
+    end
+    return percent, vCur, vMax
+end
+
 function nibRealUI:Round(value, places)
 	return (("%%.%df"):format(places or 0)):format(value)
 end

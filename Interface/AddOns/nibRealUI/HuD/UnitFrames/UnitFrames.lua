@@ -376,24 +376,6 @@ local function GetOptions()
     return options
 end
 
-function UnitFrames:GetSafeVals(vCur, vMax)
-    local percent
-    if vCur > 0 and vMax == 0 then
-        vMax = vCur
-        percent = 1
-    elseif vCur == 0 and vMax == 0 then
-        percent = 1
-    elseif (vCur < 0) or (vMax < 0) then
-        vCur = abs(vCur)
-        vMax = abs(vMax)
-        vMax = max(vCur, vMax)
-        percent = vCur / vMax
-    else
-        percent = vCur / vMax
-    end
-    return vCur, vMax, percent
-end
-
 -- Abbreviated Name
 local NameLengths = {
     [1] = {
@@ -474,6 +456,23 @@ end
 function UnitFrames:GetStatusColors()
 	return db.overlay.colors.status
 end
+
+-- Squelch taint popup
+hooksecurefunc("UnitPopup_OnClick",function(self)
+    local button = self.value
+    if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
+        if StaticPopup1 then
+            StaticPopup1:Hide()
+        end
+        if db.misc.focusclick then
+            nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        end
+    elseif button == "PET_DISMISS" then
+        if StaticPopup1 then
+            StaticPopup1:Hide()
+        end
+    end
+end)
 
 ----------------------------
 ------ Initialization ------

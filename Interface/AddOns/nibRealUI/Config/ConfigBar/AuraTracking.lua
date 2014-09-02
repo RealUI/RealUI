@@ -523,7 +523,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	local tabs = {
 		{
 			texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]],
-			texCoord = CLASS_ICON_TCOORDS[strupper(nibRealUI.class)],
+			texCoord = {CLASS_ICON_TCOORDS[nibRealUI.class][1] + .02, CLASS_ICON_TCOORDS[nibRealUI.class][2] - .02, CLASS_ICON_TCOORDS[nibRealUI.class][3] + .02, CLASS_ICON_TCOORDS[nibRealUI.class][4] - .02},
 			func = function() self:ChangeTab(1) end,
 		},
 		{

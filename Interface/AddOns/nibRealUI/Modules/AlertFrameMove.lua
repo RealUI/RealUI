@@ -5,39 +5,39 @@ local AlertFrameMove = nibRealUI:NewModule(MODNAME, "AceHook-3.0")
 
 local options
 local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Alert Frame Mover",
-		desc = "Move the Blizzard Alert Frame and all attached frames.",
-		arg = MODNAME,
-		-- order = 112,
-		args = {
-			header = {
-				type = "header",
-				name = "Alert Frame Mover",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Move the Blizzard Alert Frame and all attached frames.",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Alert Frame Mover module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	
-	return options
+    if not options then options = {
+        type = "group",
+        name = "Alert Frame Mover",
+        desc = "Move the Blizzard Alert Frame and all attached frames.",
+        arg = MODNAME,
+        -- order = 112,
+        args = {
+            header = {
+                type = "header",
+                name = "Alert Frame Mover",
+                order = 10,
+            },
+            desc = {
+                type = "description",
+                name = "Move the Blizzard Alert Frame and all attached frames.",
+                fontSize = "medium",
+                order = 20,
+            },
+            enabled = {
+                type = "toggle",
+                name = "Enabled",
+                desc = "Enable/Disable the Alert Frame Mover module.",
+                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+                set = function(info, value) 
+                    nibRealUI:SetModuleEnabled(MODNAME, value)
+                end,
+                order = 30,
+            },
+        },
+    }
+    end
+    
+    return options
 end
 
 local AlertFrameHolder = CreateFrame("Frame", "AlertFrameHolder", UIParent)
@@ -49,154 +49,207 @@ local AFPosition, AFAnchor, AFYOffset = "TOP", "BOTTOM", -10
 local IsMoving = false;
 
 local function PostAlertMove(screenQuadrant)
-	AFPosition = "TOP"
-	AFAnchor = "BOTTOM"
-	AFYOffset = -10
-	
-	AlertFrame:ClearAllPoints()
-	AlertFrame:SetAllPoints(AlertFrameHolder)
+    AFPosition = "TOP"
+    AFAnchor = "BOTTOM"
+    AFYOffset = -10
+    
+    AlertFrame:ClearAllPoints()
+    AlertFrame:SetAllPoints(AlertFrameHolder)
 
-	if screenQuadrant then
-		IsMoving = true
-		AlertFrame_FixAnchors()
-		IsMoving = false
-	end
+    if screenQuadrant then
+        IsMoving = true
+        AlertFrame_FixAnchors()
+        IsMoving = false
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetLootAnchors(alertAnchor)
-	if ( MissingLootFrame:IsShown() ) then
-		MissingLootFrame:ClearAllPoints()
-		MissingLootFrame:SetPoint(AFPosition, alertAnchor, AFAnchor)
-		if ( GroupLootContainer:IsShown() ) then
-			GroupLootContainer:ClearAllPoints()
-			GroupLootContainer:SetPoint(AFPosition, MissingLootFrame, AFAnchor, 0, AFYOffset)
-		end		
-	elseif ( GroupLootContainer:IsShown() or IsMoving) then
-		GroupLootContainer:ClearAllPoints()
-		GroupLootContainer:SetPoint(AFPosition, alertAnchor, AFAnchor)	
-	end
+    if ( MissingLootFrame:IsShown() ) then
+        MissingLootFrame:ClearAllPoints()
+        MissingLootFrame:SetPoint(AFPosition, alertAnchor, AFAnchor)
+        if ( GroupLootContainer:IsShown() ) then
+            GroupLootContainer:ClearAllPoints()
+            GroupLootContainer:SetPoint(AFPosition, MissingLootFrame, AFAnchor, 0, AFYOffset)
+        end     
+    elseif ( GroupLootContainer:IsShown() or IsMoving) then
+        GroupLootContainer:ClearAllPoints()
+        GroupLootContainer:SetPoint(AFPosition, alertAnchor, AFAnchor)  
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetStorePurchaseAnchors(alertAnchor)
+    local frame = StorePurchaseAlertFrame;
+    if ( frame:IsShown() ) then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetLootWonAnchors(alertAnchor)
-	for i = 1, #LOOT_WON_ALERT_FRAMES do
-		local frame = LOOT_WON_ALERT_FRAMES[i];
-		if ( frame:IsShown() ) then
-			frame:ClearAllPoints()
-			frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-			alertAnchor = frame
-		end
-	end
+    for i = 1, #LOOT_WON_ALERT_FRAMES do
+        local frame = LOOT_WON_ALERT_FRAMES[i];
+        if ( frame:IsShown() ) then
+            frame:ClearAllPoints()
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+            alertAnchor = frame
+        end
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetLootUpgradeFrameAnchors(alertAnchor)
+    for i=1, #LOOT_UPGRADE_ALERT_FRAMES do
+        local frame = LOOT_UPGRADE_ALERT_FRAMES[i];
+        if ( frame:IsShown() ) then
+            frame:ClearAllPoints()
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+            alertAnchor = frame;
+        end
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetMoneyWonAnchors(alertAnchor)
-	for i = 1, #MONEY_WON_ALERT_FRAMES do
-		local frame = MONEY_WON_ALERT_FRAMES[i];
-		if ( frame:IsShown() ) then
-			frame:ClearAllPoints()
-			frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-			alertAnchor = frame
-		end
-	end
+    for i = 1, #MONEY_WON_ALERT_FRAMES do
+        local frame = MONEY_WON_ALERT_FRAMES[i];
+        if ( frame:IsShown() ) then
+            frame:ClearAllPoints()
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+            alertAnchor = frame
+        end
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetAchievementAnchors(alertAnchor)
-	if ( AchievementAlertFrame1 ) then
-		for i = 1, MAX_ACHIEVEMENT_ALERTS do
-			local frame = _G["AchievementAlertFrame"..i];
-			if ( frame and frame:IsShown() ) then
-				frame:ClearAllPoints()
-				frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-				alertAnchor = frame
-			end
-		end
-	end
+    if ( AchievementAlertFrame1 ) then
+        for i = 1, MAX_ACHIEVEMENT_ALERTS do
+            local frame = _G["AchievementAlertFrame"..i];
+            if ( frame and frame:IsShown() ) then
+                frame:ClearAllPoints()
+                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+                alertAnchor = frame
+            end
+        end
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetCriteriaAnchors(alertAnchor)
-	if ( CriteriaAlertFrame1 ) then
-		for i = 1, MAX_ACHIEVEMENT_ALERTS do
-			local frame = _G["CriteriaAlertFrame"..i];
-			if ( frame and frame:IsShown() ) then
-				frame:ClearAllPoints()
-				frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-				alertAnchor = frame
-			end
-		end
-	end
+    if ( CriteriaAlertFrame1 ) then
+        for i = 1, MAX_ACHIEVEMENT_ALERTS do
+            local frame = _G["CriteriaAlertFrame"..i];
+            if ( frame and frame:IsShown() ) then
+                frame:ClearAllPoints()
+                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+                alertAnchor = frame
+            end
+        end
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetChallengeModeAnchors(alertAnchor)
-	local frame = ChallengeModeAlertFrame1;
-	if ( frame:IsShown() ) then
-		frame:ClearAllPoints()
-		frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-	end
+    local frame = ChallengeModeAlertFrame1;
+    if ( frame:IsShown() ) then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetDungeonCompletionAnchors(alertAnchor)
-	local frame = DungeonCompletionAlertFrame1;
-	if ( frame:IsShown() ) then
-		frame:ClearAllPoints()
-		frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-	end
+    local frame = DungeonCompletionAlertFrame1;
+    if ( frame:IsShown() ) then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetScenarioAnchors(alertAnchor)
-	local frame = ScenarioAlertFrame1;
-	if ( frame:IsShown() ) then
-		frame:ClearAllPoints()
-		frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-	end
+    local frame = ScenarioAlertFrame1;
+    if ( frame:IsShown() ) then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetGuildChallengeAnchors(alertAnchor)
-	local frame = GuildChallengeAlertFrame;
-	if ( frame:IsShown() ) then
-		frame:ClearAllPoints()
-		frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-	end
+    local frame = GuildChallengeAlertFrame;
+    if ( frame:IsShown() ) then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetDigsiteCompleteToastFrameAnchors(alertAnchor)
+    if ( DigsiteCompleteToastFrame and DigsiteCompleteToastFrame:IsShown() ) then
+        DigsiteCompleteToastFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        alertAnchor = DigsiteCompleteToastFrame;
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetGarrisonBuildingAlertFrameAnchors(alertAnchor)
+    if ( GarrisonBuildingAlertFrame and GarrisonBuildingAlertFrame:IsShown() ) then
+        GarrisonBuildingAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        alertAnchor = GarrisonBuildingAlertFrame;
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetGarrisonMissionAlertFrameAnchors(alertAnchor)
+    if ( GarrisonMissionAlertFrame and GarrisonMissionAlertFrame:IsShown() ) then
+        GarrisonMissionAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        alertAnchor = GarrisonMissionAlertFrame;
+    end
+end
+
+function AlertFrameMove:AlertFrame_SetGarrisonFollowerAlertFrameAnchors(alertAnchor)
+    if ( GarrisonFollowerAlertFrame and GarrisonFollowerAlertFrame:IsShown() ) then
+        GarrisonFollowerAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        alertAnchor = GarrisonFollowerAlertFrame;
+    end
 end
 
 local brfMoving = false
 local function BonusRollFrame_SetPoint()
-	if brfMoving then return end
-	brfMoving = true
-	BonusRollFrame:ClearAllPoints()
-	BonusRollFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-	brfMoving = false
+    if brfMoving then return end
+    brfMoving = true
+    BonusRollFrame:ClearAllPoints()
+    BonusRollFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    brfMoving = false
 end
 
 local function BonusRollFrame_Show()
-	brfMoving = true
-	BonusRollFrame:ClearAllPoints()
-	BonusRollFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-	brfMoving = false
+    brfMoving = true
+    BonusRollFrame:ClearAllPoints()
+    BonusRollFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    brfMoving = false
 end
 
 function AlertFrameMove:AlertMovers()
-	self:SecureHook('AlertFrame_FixAnchors', PostAlertMove)
-	self:SecureHook('AlertFrame_SetLootAnchors')
-	self:SecureHook('AlertFrame_SetLootWonAnchors')
-	self:SecureHook('AlertFrame_SetMoneyWonAnchors')
-	self:SecureHook('AlertFrame_SetAchievementAnchors')
-	self:SecureHook('AlertFrame_SetCriteriaAnchors')
-	self:SecureHook('AlertFrame_SetChallengeModeAnchors')
-	self:SecureHook('AlertFrame_SetDungeonCompletionAnchors')
-	self:SecureHook('AlertFrame_SetScenarioAnchors')
-	self:SecureHook('AlertFrame_SetGuildChallengeAnchors')
-	
-	hooksecurefunc(BonusRollFrame, 'SetPoint', BonusRollFrame_SetPoint)
-	hooksecurefunc(BonusRollFrame, 'Show', BonusRollFrame_Show)
-	
-	UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
+    self:SecureHook('AlertFrame_FixAnchors', PostAlertMove)
+    self:SecureHook('AlertFrame_SetLootAnchors')
+    self:SecureHook('AlertFrame_SetStorePurchaseAnchors');
+    self:SecureHook('AlertFrame_SetLootWonAnchors')
+    self:SecureHook('AlertFrame_SetLootUpgradeFrameAnchors');
+    self:SecureHook('AlertFrame_SetMoneyWonAnchors')
+    self:SecureHook('AlertFrame_SetAchievementAnchors')
+    self:SecureHook('AlertFrame_SetCriteriaAnchors')
+    self:SecureHook('AlertFrame_SetChallengeModeAnchors')
+    self:SecureHook('AlertFrame_SetDungeonCompletionAnchors')
+    self:SecureHook('AlertFrame_SetScenarioAnchors')
+    self:SecureHook('AlertFrame_SetGuildChallengeAnchors')
+    self:SecureHook('AlertFrame_SetDigsiteCompleteToastFrameAnchors');
+    self:SecureHook('AlertFrame_SetGarrisonBuildingAlertFrameAnchors');
+    self:SecureHook('AlertFrame_SetGarrisonMissionAlertFrameAnchors');
+    self:SecureHook('AlertFrame_SetGarrisonFollowerAlertFrameAnchors');
+    
+    hooksecurefunc(BonusRollFrame, 'SetPoint', BonusRollFrame_SetPoint)
+    hooksecurefunc(BonusRollFrame, 'Show', BonusRollFrame_Show)
+    
+    UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
 end
 
 ----------
 function AlertFrameMove:OnInitialize()
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function AlertFrameMove:OnEnable()
-	self:AlertMovers()
+    self:AlertMovers()
 end

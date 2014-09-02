@@ -7,14 +7,20 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
-UnitFrames.textures[1].F1.health.coords = {0.1328125, 1, 0.1875, 1}
-UnitFrames.textures[1].F1.power.coords = {0.23046875, 1, 0, 0.5}
-
-UnitFrames.textures[2].F1.health.coords = {0.494140625, 1, 0.0625, 1}
-UnitFrames.textures[2].F1.power.coords = {0.1015625, 1, 0, 0.625}
+local coords = {
+    [1] = {
+        health = {0.1328125, 1, 0.1875, 1},
+        power = {0.23046875, 1, 0, 0.5},
+    },
+    [2] = {
+        health = {0.494140625, 1, 0.0625, 1},
+        power = {0.1015625, 1, 0, 0.625},
+    },
+}
 
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local coords = coords[UnitFrames.layoutSize].health
     local health = CreateFrame("Frame", nil, parent)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     health:SetSize(texture.width, texture.height)
@@ -23,19 +29,18 @@ local function CreateHealthBar(parent)
 
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
-    health.bg:SetTexCoord(texture.coords[1], texture.coords[2], texture.coords[3], texture.coords[4])
+    health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.bg:SetVertexColor(0, 0, 0, 0.4)
     health.bg:SetAllPoints(health)
 
     health.border = health:CreateTexture(nil, "BORDER")
     health.border:SetTexture(texture.border)
-    health.border:SetTexCoord(texture.coords[1], texture.coords[2], texture.coords[3], texture.coords[4])
+    health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.border:SetAllPoints(health)
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
     health.text:SetFont(unpack(nibRealUI:Font()))
-    health.text:SetJustifyH("LEFT")
     parent:Tag(health.text, "[realui:health]")
 
     health.Override = UnitFrames.HealthOverride
@@ -44,6 +49,7 @@ end
 
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
+    local coords = coords[UnitFrames.layoutSize].power
     local power = CreateFrame("Frame", nil, parent)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
     power:SetSize(texture.width, texture.height)
@@ -53,22 +59,22 @@ local function CreatePowerBar(parent)
     ---[[
     power.bg = power:CreateTexture(nil, "BACKGROUND")
     power.bg:SetTexture(texture.bar)
-    power.bg:SetTexCoord(texture.coords[1], texture.coords[2], texture.coords[3], texture.coords[4])
+    power.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     power.bg:SetVertexColor(0, 0, 0, 0.4)
     power.bg:SetAllPoints(power)
     ---]]
 
     power.border = power:CreateTexture(nil, "BORDER")
     power.border:SetTexture(texture.border)
-    power.border:SetTexCoord(texture.coords[1], texture.coords[2], texture.coords[3], texture.coords[4])
+    power.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     power.border:SetAllPoints(power)
 
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
     power.text:SetFont(unpack(nibRealUI:Font()))
-    power.text:SetJustifyH("LEFT")
     parent:Tag(power.text, "[realui:power]")
 
+    power.frequentUpdates = true
     power.Override = UnitFrames.PowerOverride
     return power
 end
@@ -98,10 +104,48 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
+local function CreateCombatResting(parent)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
+    -- Combat status has priority so we'll use the BG as its base
+    local combat = parent:CreateTexture(nil, "BORDER")
+    combat:SetTexture(texture.bar)
+    combat:SetSize(texture.width, texture.height)
+    combat:SetPoint("TOPRIGHT", parent, "TOPLEFT", 8, 0)
+
+    -- Resting is second priority, so we use the border then change the BG in Override.
+    local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    resting:SetTexture(texture.border)
+    resting:SetAllPoints(combat)
+
+    local combatColor = db.overlay.colors.status.combat
+    combat.Override = function(self, event, unit)
+        if event == "PLAYER_REGEN_DISABLED" then
+            print("Combat Override", self, event, unit)
+            self.Combat:SetVertexColor(combatColor[1], combatColor[2], combatColor[3], combatColor[4])
+            self.Combat.isCombat = true
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            print("Combat Override", self, event, unit)
+            self.Combat:SetVertexColor(0, 0, 0, 0.6)
+            self.Combat.isCombat = false
+            self.Resting.Override(self, event, unit)
+        end
+    end
+    
+    local restColor = db.overlay.colors.status.resting
+    resting.Override = function(self, event, unit)
+        if self.Combat.isCombat then return end
+        print("Resting Override", self, event, unit)
+        self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
+    end
+    
+    return combat, resting
+end
+
 local function CreatePlayer(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
     self.PvP = CreatePvPStatus(self.Health)
+    self.Combat, self.Resting = CreateCombatResting(self.Power)
 
     self.PvP.text = self:CreateFontString(nil, "OVERLAY")
     self.PvP.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
@@ -109,6 +153,10 @@ local function CreatePlayer(self)
     self.PvP.text:SetJustifyH("LEFT")
     self.PvP.text.frequentUpdates = 1
     self:Tag(self.PvP.text, "[realui:pvptimer]")
+
+
+    self:SetScript("OnEnter", UnitFrame_OnEnter)
+    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 end
