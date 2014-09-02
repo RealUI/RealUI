@@ -592,10 +592,10 @@ end
 local function CreateCaptureFuncs()
  captureFuncs = {
   -- Damage events.
-  SWING_DAMAGE = function (p, ...) p.eventType, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", ... end,
+  SWING_DAMAGE = function (p, ...) p.eventType, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing, p.isOffHand, p.isMultistrike = "damage", ... end,
   RANGE_DAMAGE = function (p, ...) p.eventType, p.isRange, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", true, ... end,
-  SPELL_DAMAGE = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", ... end,
-  SPELL_PERIODIC_DAMAGE = function (p, ...) p.eventType, p.isDoT, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", true, ... end,
+  SPELL_DAMAGE = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing, p.isOffHand, p.isMultistrike = "damage", ... end,
+  SPELL_PERIODIC_DAMAGE = function (p, ...) p.eventType, p.isDoT, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing, p.isOffHand, p.isMultistrike = "damage", true, ... end,
   SPELL_BUILDING_DAMAGE = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", ... end,
   DAMAGE_SHIELD = function (p, ...) p.eventType, p.isDamageShield, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", true, ... end,
 
@@ -607,8 +607,8 @@ local function CreateCaptureFuncs()
   SPELL_DISPEL_FAILED = function (p, ...) p.eventType, p.missType, p.skillID, p.skillName, p.skillSchool, p.extraSkillID, p.extraSkillName, p.extraSkillSchool = "miss", "RESIST", ... end,
 
   -- Heal events.
-  SPELL_HEAL = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overhealAmount, p.absorbAmount, p.isCrit = "heal", ... end,
-  SPELL_PERIODIC_HEAL = function (p, ...) p.eventType, p.isHoT, p.skillID, p.skillName, p.skillSchool, p.amount, p.overhealAmount, p.absorbAmount, p.isCrit = "heal", true, ... end,
+  SPELL_HEAL = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overhealAmount, p.absorbAmount, p.isCrit, p.isMultistrike = "heal", ... end,
+  SPELL_PERIODIC_HEAL = function (p, ...) p.eventType, p.isHoT, p.skillID, p.skillName, p.skillSchool, p.amount, p.overhealAmount, p.absorbAmount, p.isCrit, p.isMultistrike = "heal", true, ... end,
   
   -- Environmental events.
   ENVIRONMENTAL_DAMAGE = function (p, ...) p.eventType, p.hazardType, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "environmental", ... end,
