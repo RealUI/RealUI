@@ -166,7 +166,7 @@ function DemonicFury:CreateFrames()
 		dfBar.left:SetPoint("BOTTOMRIGHT", dfBar, "BOTTOM", -1, 0)
 		dfBar.left:SetSize(BarWidth[layoutSize], 6)
 
-		dfBar.left.bg = dfBar.left:CreateTexture(nil, "ARTWORK")
+		dfBar.left.bg = dfBar.left:CreateTexture(nil, "BACKGROUND")
 			dfBar.left.bg:SetPoint("BOTTOMRIGHT")
 			dfBar.left.bg:SetSize(128, 16)
 			dfBar.left.bg:SetTexture(Textures[layoutSize].bar)
@@ -180,7 +180,7 @@ function DemonicFury:CreateFrames()
 		dfBar.right:SetPoint("BOTTOMLEFT", dfBar, "BOTTOM", 0, 0)
 		dfBar.right:SetSize(BarWidth[layoutSize], 6)
 
-		dfBar.right.bg = dfBar.right:CreateTexture(nil, "ARTWORK")
+		dfBar.right.bg = dfBar.right:CreateTexture(nil, "BACKGROUND")
 			dfBar.right.bg:SetPoint("BOTTOMLEFT")
 			dfBar.right.bg:SetSize(128, 16)
 			dfBar.right.bg:SetTexture(Textures[layoutSize].bar)
@@ -191,7 +191,7 @@ function DemonicFury:CreateFrames()
 			dfBar.right.bar.reverse = true
 
 	-- Middle
-	dfBar.middle = dfBar:CreateTexture(nil, "ARTWORK")
+	dfBar.middle = dfBar:CreateTexture(nil, "BACKGROUND")
 		dfBar.middle:SetPoint("BOTTOM")
 		dfBar.middle:SetSize(16, 16)
 		dfBar.middle:SetTexture(Textures[layoutSize].middle)

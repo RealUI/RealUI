@@ -753,12 +753,12 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				AuroraSplashScreen:Show()
 			end
 		end
+
+		-- [[ Plugin helper ]]
+
+		-- from this point, plugins added with F.AddPlugin are executed directly instead of cached
+		AURORA_LOADED = true
 	end
-
-	-- [[ Plugin helper ]]
-
-	-- from this point, plugins added with F.AddPlugin are executed directly instead of cached
-	AURORA_LOADED = true
 
 	-- [[ Load modules ]]
 

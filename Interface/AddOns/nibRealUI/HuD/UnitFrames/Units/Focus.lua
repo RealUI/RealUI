@@ -66,18 +66,16 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
-local function CreateCombatResting(parent)
+local function CreateCombat(parent)
     local texture = F2.statusBox
-    -- Combat status has priority so we'll use the BG as its base
     local combat = parent:CreateTexture(nil, "BORDER")
     combat:SetTexture(texture.bar)
     combat:SetSize(texture.width, texture.height)
     combat:SetPoint("TOPRIGHT", parent, "TOPLEFT", 8, 0)
 
-    -- Resting is second priority, so we use the border then change the BG in Override.
-    local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
-    resting:SetTexture(texture.border)
-    resting:SetAllPoints(combat)
+    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    border:SetTexture(texture.border)
+    border:SetAllPoints(combat)
 
     local combatColor = db.overlay.colors.status.combat
     combat.Override = function(self, event, unit)
@@ -93,21 +91,14 @@ local function CreateCombatResting(parent)
         end
     end
     
-    local restColor = db.overlay.colors.status.resting
-    resting.Override = function(self, event, unit)
-        if self.Combat.isCombat then return end
-        print("Resting Override", self, event, unit)
-        self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
-    end
-    
-    return combat, resting
+    return combat
 end
 
 local function CreateFocus(self)
     self:SetSize(F2.health.width, F2.health.height)
     self.Health = CreateHealthBar(self)
     self.PvP = CreatePvPStatus(self)
-    self.Combat = CreateCombatResting(self)
+    self.Combat = CreateCombat(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 0)

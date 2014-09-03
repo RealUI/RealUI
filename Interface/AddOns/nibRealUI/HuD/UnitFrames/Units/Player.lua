@@ -7,35 +7,51 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
-local coords = {
+local positions = {
     [1] = {
-        health = {0.1328125, 1, 0.1875, 1},
-        power = {0.23046875, 1, 0, 0.5},
+        health = {
+            x = -2,
+            widthOfs = 13,
+            coords = {0.1328125, 1, 0.1875, 1},
+        },
+        power = {
+            x = -7,
+            widthOfs = 10,
+            coords = {0.23046875, 1, 0, 0.5},
+        },
     },
     [2] = {
-        health = {0.494140625, 1, 0.0625, 1},
-        power = {0.1015625, 1, 0, 0.625},
+        health = {
+            x = -2,
+            widthOfs = 15,
+            coords = {0.494140625, 1, 0.0625, 1},
+        },
+        power = {
+            x = -9,
+            widthOfs = 12,
+            coords = {0.1015625, 1, 0, 0.625},
+        },
     },
 }
 
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local coords = coords[UnitFrames.layoutSize].health
+    local pos = positions[UnitFrames.layoutSize].health
     local health = CreateFrame("Frame", nil, parent)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     health:SetSize(texture.width, texture.height)
 
-    health.bar = AngleStatusBar:NewBar(health, -2, -1, texture.width - 17, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
+    health.bar = AngleStatusBar:NewBar(health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
 
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
-    health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     health.bg:SetVertexColor(0, 0, 0, 0.4)
     health.bg:SetAllPoints(health)
 
     health.border = health:CreateTexture(nil, "BORDER")
     health.border:SetTexture(texture.border)
-    health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    health.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     health.border:SetAllPoints(health)
 
     health.text = health:CreateFontString(nil, "OVERLAY")
@@ -49,24 +65,24 @@ end
 
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
-    local coords = coords[UnitFrames.layoutSize].power
+    local pos = positions[UnitFrames.layoutSize].power
     local power = CreateFrame("Frame", nil, parent)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
     power:SetSize(texture.width, texture.height)
-
-    power.bar = AngleStatusBar:NewBar(power, -9, -1, texture.width - 17, texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
+    -- texture.width - 17 | Layout 1?
+    power.bar = AngleStatusBar:NewBar(power, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
 
     ---[[
     power.bg = power:CreateTexture(nil, "BACKGROUND")
     power.bg:SetTexture(texture.bar)
-    power.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     power.bg:SetVertexColor(0, 0, 0, 0.4)
     power.bg:SetAllPoints(power)
     ---]]
 
     power.border = power:CreateTexture(nil, "BORDER")
     power.border:SetTexture(texture.border)
-    power.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    power.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     power.border:SetAllPoints(power)
 
     power.text = power:CreateFontString(nil, "OVERLAY")
@@ -120,11 +136,11 @@ local function CreateCombatResting(parent)
     local combatColor = db.overlay.colors.status.combat
     combat.Override = function(self, event, unit)
         if event == "PLAYER_REGEN_DISABLED" then
-            print("Combat Override", self, event, unit)
+            --print("Combat Override", self, event, unit)
             self.Combat:SetVertexColor(combatColor[1], combatColor[2], combatColor[3], combatColor[4])
             self.Combat.isCombat = true
         elseif event == "PLAYER_REGEN_ENABLED" then
-            print("Combat Override", self, event, unit)
+            --print("Combat Override", self, event, unit)
             self.Combat:SetVertexColor(0, 0, 0, 0.6)
             self.Combat.isCombat = false
             self.Resting.Override(self, event, unit)

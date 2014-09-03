@@ -357,16 +357,18 @@ end
 
 local function TryToEnable(addon)
 	if DONT_ENABLE_LIBRARIES then return end
-	local isondemand = IsAddOnLoadOnDemand(addon)
-	if isondemand then
-		local _, _, _, enabled = GetAddOnInfo(addon)
-		EnableAddOn(addon)
-		local _, _, _, _, loadable = GetAddOnInfo(addon)
-		if not loadable and not enabled then
-			DisableAddOn(addon)
-		end
+	for i = 1, GetNumAddOns() do
+		local isondemand = IsAddOnLoadOnDemand(addon)
+		if isondemand then
+			local _, _, _, enabled = GetAddOnInfo(i)
+			EnableAddOn(addon)
+			local _, _, _, _, loadable = GetAddOnInfo(i)
+			if not loadable and not enabled then
+				DisableAddOn(addon)
+			end
 
-		return loadable
+			return loadable
+		end
 	end
 end
 
@@ -381,18 +383,18 @@ local function TryToLoadStandalone(major)
 
 	AceLibrary.scannedlibs[major] = true
 
-	local name, _, _, enabled, loadable = GetAddOnInfo(major)
-	
-	loadable = (enabled and loadable) or TryToEnable(name)
-	
-	local loaded = false
-	if loadable then
-		loaded = true
-		LoadAddOn(name)
-	end
-	
 	local field = "X-AceLibrary-" .. major 
 	for i = 1, GetNumAddOns() do
+		local name, _, _, enabled, loadable = GetAddOnInfo(i)
+		
+		loadable = (enabled and loadable) or TryToEnable(name)
+		
+		local loaded = false
+		if loadable then
+			loaded = true
+			LoadAddOn(name)
+		end
+		
 		if GetAddOnMetadata(i, field) then
 			name, _, _, enabled, loadable = GetAddOnInfo(i)
 			

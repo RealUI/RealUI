@@ -154,11 +154,11 @@ function UnitFrames:PowerOverride(event, unit, powerType)
     if ReversePowers[unitPower] then
         --print("Reverse")
         self.Power.bar.reverse = true
-        AngleStatusBar:SetReverseDirection(self.Power.bar, "LEFT", -2, -1)
+        --AngleStatusBar:SetReverseDirection(self.Power.bar, "LEFT", -2, -1)
     else
         --print("Not reverse")
         self.Power.bar.reverse = false
-        AngleStatusBar:SetReverseDirection(self.Power.bar)
+        --AngleStatusBar:SetReverseDirection(self.Power.bar)
     end
     if powerType and (unitPower == powerType) then
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])

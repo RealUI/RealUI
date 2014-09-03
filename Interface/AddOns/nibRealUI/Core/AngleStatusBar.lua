@@ -81,7 +81,7 @@ function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, 
     bar.origDirection = bar.direction
 
     -- Growth direction of Bar Start and End
-    local startAngle, endAngle
+    local startAngle, endAngle  -- / <-- LEFT   RIGHT --> \
     startAngle = (typeStart == "LEFT") and -1 or (typeStart == "RIGHT") and 1 or 0
     endAngle = (typeEnd == "LEFT") and -1 or (typeEnd == "RIGHT") and 1 or 0
 

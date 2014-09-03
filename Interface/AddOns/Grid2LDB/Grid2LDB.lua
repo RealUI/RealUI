@@ -10,7 +10,7 @@ local MenuLayoutsShow
 
 local Grid2LDB = DataBroker:NewDataObject("Grid2", {
 	type  = "launcher",
-	label = GetAddOnInfo("Grid2", "Title"),
+	label = "Grid2",
 	icon  = "Interface\\AddOns\\Grid2\\media\\icon",
 	OnClick = function(self, button)
 		if button=="LeftButton" then

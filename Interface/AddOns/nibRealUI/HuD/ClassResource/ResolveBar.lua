@@ -168,7 +168,7 @@ function ResolveBar:CreateFrames()
         rBar.left:SetPoint("BOTTOMRIGHT", rBar, "BOTTOM", -1, 0)
         rBar.left:SetSize(BarWidth[layoutSize], 6)
 
-        rBar.left.bg = rBar.left:CreateTexture(nil, "ARTWORK")
+        rBar.left.bg = rBar.left:CreateTexture(nil, "BACKGROUND")
             rBar.left.bg:SetPoint("BOTTOMRIGHT")
             rBar.left.bg:SetSize(128, 16)
             rBar.left.bg:SetTexture(Textures[layoutSize].bar)
@@ -182,7 +182,7 @@ function ResolveBar:CreateFrames()
         rBar.right:SetPoint("BOTTOMLEFT", rBar, "BOTTOM", 0, 0)
         rBar.right:SetSize(BarWidth[layoutSize], 6)
 
-        rBar.right.bg = rBar.right:CreateTexture(nil, "ARTWORK")
+        rBar.right.bg = rBar.right:CreateTexture(nil, "BACKGROUND")
             rBar.right.bg:SetPoint("BOTTOMLEFT")
             rBar.right.bg:SetSize(128, 16)
             rBar.right.bg:SetTexture(Textures[layoutSize].bar)
@@ -193,7 +193,7 @@ function ResolveBar:CreateFrames()
             rBar.right.bar.reverse = true
 
     -- Middle
-    rBar.middle = rBar:CreateTexture(nil, "ARTWORK")
+    rBar.middle = rBar:CreateTexture(nil, "BACKGROUND")
         rBar.middle:SetPoint("BOTTOM")
         rBar.middle:SetSize(16, 16)
         rBar.middle:SetTexture(Textures[layoutSize].middle)
