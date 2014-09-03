@@ -1,17 +1,49 @@
 local F, C = unpack(select(2, ...))
 
 tinsert(C.themes["Aurora"], function()
+	local r, g, b = C.r, C.g, C.b
+
 	local QuestMapFrame = QuestMapFrame
 
 	-- [[ Quest scroll frame ]]
 
 	local QuestScrollFrame = QuestScrollFrame
+	local StoryHeader = QuestScrollFrame.Contents.StoryHeader
 
 	QuestMapFrame.VerticalSeparator:Hide()
 	QuestScrollFrame.Background:Hide()
 
+	F.CreateBD(QuestScrollFrame.StoryTooltip)
 	F.Reskin(QuestScrollFrame.ViewAll)
 	F.ReskinScroll(QuestScrollFrame.ScrollBar)
+
+	-- Story header
+
+	StoryHeader.Background:Hide()
+	StoryHeader.Shadow:Hide()
+
+	do
+		local bg = F.CreateBDFrame(StoryHeader, .25)
+		bg:SetPoint("TOPLEFT", 0, -1)
+		bg:SetPoint("BOTTOMRIGHT", -4, 0)
+
+		local hl = StoryHeader.HighlightTexture
+
+		hl:SetTexture(C.media.backdrop)
+		hl:SetVertexColor(r, g, b, .2)
+		hl:SetPoint("TOPLEFT", 1, -2)
+		hl:SetPoint("BOTTOMRIGHT", -5, 1)
+		hl:SetDrawLayer("BACKGROUND")
+		hl:Hide()
+
+		StoryHeader:HookScript("OnEnter", function()
+			hl:Show()
+		end)
+
+		StoryHeader:HookScript("OnLeave", function()
+			hl:Hide()
+		end)
+	end
 
 	-- [[ Quest details ]]
 

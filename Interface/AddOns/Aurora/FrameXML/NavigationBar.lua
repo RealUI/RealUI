@@ -12,12 +12,13 @@ tinsert(C.themes["Aurora"], function()
 		local collapsed = false
 
 		for i = #self.navList, 1, -1 do
+			local currentWidth = width
 			width = width + self.navList[i]:GetWidth()
 
 			if width > maxWidth then
 				collapsed = true
 				if not collapsedWidth then
-					collapsedWidth = width
+					collapsedWidth = currentWidth
 				end
 			else
 				if lastShown then
@@ -32,7 +33,13 @@ tinsert(C.themes["Aurora"], function()
 				lastShown = lastShown + 1
 			end
 
-			self.navList[lastShown]:SetPoint("LEFT", self.overflowButton, "RIGHT", 1, 0)
+			if lastShown then
+				local lastButton = self.navList[lastShown]
+
+				if lastButton then
+					lastButton:SetPoint("LEFT", self.overflowButton, "RIGHT", 1, 0)
+				end
+			end
 		end
 	end
 
