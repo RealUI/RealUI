@@ -205,7 +205,7 @@ nibRealUI.auraTrackingDefaults = {
         specs = {false, true, false}
     },
     {   -- Lock and Load (SV)
-        spell = 56453,
+        spell = 168980,
         minLevel = 43,
         order = 1,
         specs = {false, false, true}

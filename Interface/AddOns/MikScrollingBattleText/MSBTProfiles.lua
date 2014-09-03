@@ -80,7 +80,7 @@ local SPELL_HAMMER_OF_WRATH		= GetSkillName(SPELLID_HAMMER_OF_WRATH)
 local SPELL_KILL_SHOT				= GetSkillName(SPELLID_KILL_SHOT)
 local SPELL_KILLING_MACHINE		= GetSkillName(51124)
 local SPELL_LAVA_SURGE				= GetSkillName(SPELLID_LAVA_SURGE)
-local SPELL_LOCK_AND_LOAD			= GetSkillName(56453)
+local SPELL_LOCK_AND_LOAD			= GetSkillName(168980)
 local SPELL_MAELSTROM_WEAPON		= GetSkillName(53817)
 local SPELL_MANA_TEA				= GetSkillName(115867)
 local SPELL_MISSILE_BARRAGE		= GetSkillName(62401)
@@ -1313,7 +1313,7 @@ local masterProfile = {
    classes			= "SHAMAN",
    mainEvents		= "SPELL_CAST_SUCCESS{sourceAffiliation;;eq;;" .. FLAG_YOU .. ";;skillID;;eq;;" .. SPELLID_LAVA_SURGE .. "}",
   },
-  MSBT_TRIGGER_LOCK_AND_LOAD = {
+  --[[MSBT_TRIGGER_LOCK_AND_LOAD = {
    colorR			= 0.627,
    colorG			= 0.5,
    colorB			= 0,
@@ -1322,7 +1322,7 @@ local masterProfile = {
    fontSize			= 26,
    classes			= "HUNTER",
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_LOCK_AND_LOAD .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },
+  },]]
   MSBT_TRIGGER_LOW_HEALTH = {
    colorG			= 0.5,
    colorB			= 0.5,

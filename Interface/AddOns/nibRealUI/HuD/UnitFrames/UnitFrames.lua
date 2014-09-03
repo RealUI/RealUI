@@ -482,7 +482,7 @@ function UnitFrames:OnInitialize()
     local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
 
     self.layoutSize = nibRealUI.db.profile.settings.hudSize
-    print("Layout", self.layoutSize)
+    --print("Layout", self.layoutSize)
 
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

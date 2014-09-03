@@ -150,7 +150,7 @@ local function CreateCombatResting(parent)
     local restColor = db.overlay.colors.status.resting
     resting.Override = function(self, event, unit)
         if self.Combat.isCombat then return end
-        print("Resting Override", self, event, unit)
+        --print("Resting Override", self, event, unit)
         self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
     end
     

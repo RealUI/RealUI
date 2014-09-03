@@ -54,7 +54,7 @@ Raven.classSpells.HUNTER = {
 	{ "Intimidation", DEBUFF, p.Brown3, cooldown = true, school = "Nature", id = 19577 },
 	{ "Kill Command", nil, p.Orange3, cooldown = true, id = 34026 },
 	{ "Kill Shot", nil, p.Red1, cooldown = true, id = 53351 },
-	{ "Lock and Load", BUFF, p.Red3, id = 56453 },
+	{ "Lock and Load", BUFF, p.Red3, id = 168980 },
 	{ "Lynx Rush", nil, p.Yellow2, cooldown = true, id = 120697 },
 	{ "Master Marksman", BUFF, p.Purple3, id = 34487 },
 	{ "Master's Call", BUFF, p.Yellow2, cooldown = true, id = 53271 },

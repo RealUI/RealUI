@@ -3,7 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 -- Misc Functions
--- FindSpellID("Savage Roar", "player", false)
+-- FindSpellID("Spell", "player", false)
 function FindSpellID(SpellName, unit, isDebuff)
 	print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
 	local f = CreateFrame("FRAME")
