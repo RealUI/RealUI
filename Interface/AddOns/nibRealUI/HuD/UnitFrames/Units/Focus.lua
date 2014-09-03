@@ -114,12 +114,11 @@ tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
-    print("Layout", UnitFrames.layoutSize)
     F2 = UnitFrames.textures[UnitFrames.layoutSize].F2
 
     oUF:RegisterStyle("RealUI:focus", CreateFocus)
     oUF:SetActiveStyle("RealUI:focus")
     local focus = oUF:Spawn("focus", "RealUIFocusFrame")
-    focus:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
+    focus:SetPoint("RIGHT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
 end)
 

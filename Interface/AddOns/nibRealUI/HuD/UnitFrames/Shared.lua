@@ -57,8 +57,8 @@ UnitFrames.textures = {
         },
         F3 = { -- Focus Target / Pet
             health = {
-                width = 222,
-                height = 13,
+                width = 105,
+                height = 9,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Surround]=],
             },
@@ -119,8 +119,8 @@ UnitFrames.textures = {
         },
         F3 = { -- Focus Target / Pet
             health = {
-                width = 222,
-                height = 13,
+                width = 126,
+                height = 10,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Surround]=],
             },
