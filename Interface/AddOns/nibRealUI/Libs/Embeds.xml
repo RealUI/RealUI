@@ -24,4 +24,5 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Include file="Libs\LibBabble-TalentTree-3.0\lib.xml"/>
 	<Include file="Libs\lib-st\lib-st.xml"/>
 	<Include file="Libs\SpecializedLibBars-1.0\lib.xml"/>
+	<Include file="Libs\oUF\oUF.xml"/>
 </Ui>
