@@ -18,6 +18,10 @@
 
  Options
 
+ .displayAltPower   - Use this to let the widget display alternate power if the
+                      unit has one. If no alternate power the display will fall
+                      back to primary power.
+
  The following options are listed by priority. The first check that returns
  true decides the color of the bar.
 
@@ -103,7 +107,7 @@ oUF.colors.power[0] = oUF.colors.power["MANA"]
 oUF.colors.power[1] = oUF.colors.power["RAGE"]
 oUF.colors.power[2] = oUF.colors.power["FOCUS"]
 oUF.colors.power[3] = oUF.colors.power["ENERGY"]
-oUF.colors.power[4] = oUF.colors.power["UNUSED"]
+oUF.colors.power[4] = oUF.colors.power["CHI"]
 oUF.colors.power[5] = oUF.colors.power["RUNES"]
 oUF.colors.power[6] = oUF.colors.power["RUNIC_POWER"]
 oUF.colors.power[7] = oUF.colors.power["SOUL_SHARDS"]
@@ -112,10 +116,8 @@ oUF.colors.power[9] = oUF.colors.power["HOLY_POWER"]
 
 local GetDisplayPower = function(power, unit)
 	local _, _, _, _, _, _, showOnRaid = UnitAlternatePowerInfo(unit)
-	if(power.displayAltPower and showOnRaid) then
+	if(showOnRaid) then
 		return ALTERNATE_POWER_INDEX
-	else
-		return (UnitPowerType(unit))
 	end
 end
 
@@ -125,7 +127,7 @@ local Update = function(self, event, unit)
 
 	if(power.PreUpdate) then power:PreUpdate(unit) end
 
-	local displayType = GetDisplayPower(power, unit)
+	local displayType = power.displayAltPower and GetDisplayPower(power, unit)
 	local min, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
 	local disconnected = not UnitIsConnected(unit)
 	power:SetMinMaxValues(0, max)

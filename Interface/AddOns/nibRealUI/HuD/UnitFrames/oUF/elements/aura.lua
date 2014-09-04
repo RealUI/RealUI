@@ -91,25 +91,10 @@ local createAuraIcon = function(icons, index)
 
 	local icon = button:CreateTexture(nil, "BORDER")
 	icon:SetAllPoints(button)
-	-- RealUI
-	icon:SetTexCoord(.08, .92, .08, .92)
-	local iconBorder = CreateFrame("Frame", nil, button)
-	icon.border = iconBorder
-		iconBorder:SetAllPoints()
-		iconBorder:SetBackdrop({
-			bgFile = RealUI.media.textures.plain,
-			edgeFile = RealUI.media.textures.plain,
-			edgeSize = 1,
-			insets = {top = 1, bottom = -1, left = -1, right = 1}
-		})
-		iconBorder:SetBackdropColor(0, 0, 0, 0)
-		iconBorder:SetBackdropBorderColor(0, 0, 0, 1)
 
 	local count = button:CreateFontString(nil, "OVERLAY")
-	-- RealUI
-	count:SetFontObject(RealUIFontPixel)
-	local countY = RealUI.db.char.resolution == 1 and -1.5 or -2.5
-	count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
+	count:SetFontObject(NumberFontNormal)
+	count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 0)
 
 	local overlay = button:CreateTexture(nil, "OVERLAY")
 	overlay:SetTexture"Interface\\Buttons\\UI-Debuff-Overlays"
@@ -217,17 +202,6 @@ local updateIcon = function(unit, icons, index, offset, filter, isDebuff, visibl
 					cd:Hide()
 				end
 			end
-
-			-- RealUI
-			if (duration and duration > 0) then
-				icon.startTime = timeLeft - duration
-				icon.endTime = timeLeft
-				icon.timeLeft = timeLeft
-			else
-				icon.endTime = nil
-				icon.timeLeft = math.huge
-			end
-			icon.needsUpdate = true
 
 			if((isDebuff and icons.showDebuffType) or (not isDebuff and icons.showBuffType) or icons.showType) then
 				local color = DebuffTypeColor[dtype] or DebuffTypeColor.none
@@ -349,7 +323,6 @@ local UpdateAuras = function(self, event, unit)
 		local max = numBuffs + numDebuffs
 
 		local visibleBuffs, hiddenBuffs = filterIcons(unit, auras, auras.buffFilter or auras.filter or 'HELPFUL', numBuffs, nil, 0, true)
-		auras.visibleBuffs = visibleBuffs
 
 		local hasGap
 		if(visibleBuffs ~= 0 and auras.gap) then
@@ -392,6 +365,7 @@ local UpdateAuras = function(self, event, unit)
 			visibleBuffs = visibleBuffs - 1
 		end
 
+		auras.visibleBuffs = visibleBuffs
 		auras.visibleAuras = auras.visibleBuffs + auras.visibleDebuffs
 
 		local fromRange, toRange

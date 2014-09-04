@@ -77,8 +77,6 @@ local Enable = function(self)
 			threat:SetTexCoord(6/8, 7/8, 1/8, 2/8)
 		end
 
-		threat:Hide()
-
 		return true
 	end
 end
@@ -86,6 +84,7 @@ end
 local Disable = function(self)
 	local threat = self.Threat
 	if(threat) then
+		threat:Hide()
 		self:UnregisterEvent("UNIT_THREAT_SITUATION_UPDATE", Path)
 	end
 end
