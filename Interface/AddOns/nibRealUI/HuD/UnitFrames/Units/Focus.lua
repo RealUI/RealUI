@@ -22,19 +22,19 @@ local function CreateHealthBar(parent)
     local coords = coords[UnitFrames.layoutSize].health
     local health = CreateFrame("Frame", nil, parent)
     health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
-    health:SetSize(256, 16)
+    health:SetAllPoints(parent)
 
     health.bar = AngleStatusBar:NewBar(health, -2, -1, texture.width, texture.height - 2, "LEFT", "RIGHT", "LEFT", true)
 ---[[
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
-    --health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.bg:SetVertexColor(0, 0, 0, 0.4)
     health.bg:SetAllPoints(health)
 ---]]
     health.border = health:CreateTexture(nil, "BORDER")
     health.border:SetTexture(texture.border)
-    --health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.border:SetAllPoints(health)
 
     health.Override = UnitFrames.HealthOverride
@@ -119,6 +119,6 @@ tinsert(UnitFrames.units, function(...)
     oUF:RegisterStyle("RealUI:focus", CreateFocus)
     oUF:SetActiveStyle("RealUI:focus")
     local focus = oUF:Spawn("focus", "RealUIFocusFrame")
-    focus:SetPoint("RIGHT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
+    focus:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
 end)
 

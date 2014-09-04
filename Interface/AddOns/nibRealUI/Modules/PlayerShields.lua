@@ -10,7 +10,7 @@ local buffs = {
 	IlluminatedHealing = 86273,
 	DivineAegis = 47753,
 	SpiritShell = 114908,
-	Guard = 118604,
+	Guard = 115295,
 }
 local spellInfo = {}
 
@@ -574,9 +574,9 @@ function PlayerShields:OnInitialize()
 			position = {
 				parent = "RealUIPlayerFrame",
 				point = "BOTTOMRIGHT",
-				rPoint = "LEFT",
-				x = 19,
-				y = 20,
+				rPoint = "TOPLEFT",
+				x = -8,
+				y = 5,
 			},
 		},
 	})

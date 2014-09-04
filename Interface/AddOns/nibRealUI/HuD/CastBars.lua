@@ -1031,8 +1031,8 @@ function CastBars:OnInitialize()
                     focus = {
                         width = 126,
                         height = 3,
-                        x = 0,
-                        y = 0,
+                        x = 3,
+                        y = 6,
                     },
                 },
                 [2] = {
@@ -1041,8 +1041,8 @@ function CastBars:OnInitialize()
                     focus = {
                         width = 146,
                         height = 4,
-                        x = 1,
-                        y = 1,
+                        x = 4,
+                        y = 7,
                     },
                 },
             },

@@ -222,6 +222,7 @@ nibRealUI.auraTrackingDefaults = {
         specs = {false, false, true}
     },
 -- Free Buffs
+    {spell = 34720},    -- Thrill of the Hunt (Talent)
     {spell = 82692},    -- Focus Fire
     {spell = 19574},    -- Bestial Wrath
     {spell = 53301},    -- Explosive Shot (buff or debuff?)

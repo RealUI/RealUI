@@ -482,7 +482,7 @@ function UnitFrames:OnInitialize()
     local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
 
     self.layoutSize = nibRealUI.db.profile.settings.hudSize
-    --print("Layout", self.layoutSize)
+    print("Layout", self.layoutSize)
 
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -519,7 +519,7 @@ function UnitFrames:OnInitialize()
                 [1] = {
                     player =        { x = 0,    y = 0},     -- Anchored to Positioner
                     pet =           { x = -59,  y = -76},   -- Anchored to Player
-                    focus =         { x = -70,  y = -54},   -- Anchored to Player
+                    focus =         { x = 29,   y = -62},   -- Anchored to Player
                     focustarget =   { x = 0,    y = -11},   -- Anchored to Focus
                     target =        { x = 0,    y = 0},     -- Anchored to Positioner
                     targettarget =  { x = 70,   y = -54},   -- Anchored to Target
