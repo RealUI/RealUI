@@ -24,7 +24,7 @@ tags.Methods["realui:name"] = function(unit)
     end
     return string.format("|cff%s%s|r", classColor, name)
 end
-oUF.Tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
+tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 
 -- Level
 tags.Methods["realui:level"] = function(unit)
@@ -44,7 +44,7 @@ tags.Methods["realui:level"] = function(unit)
     end
     return string.format("|cff%02x%02x%02x%s|r", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level)
 end
-oUF.Tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
+tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
 -- Health
 tags.Methods["realui:health"] = function(unit)
@@ -52,7 +52,7 @@ tags.Methods["realui:health"] = function(unit)
 
     return nibRealUI:ReadableNumber(UnitHealth(unit))
 end
-oUF.Tags.Events["realui:health"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+tags.Events["realui:health"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
 -- Health %
 tags.Methods["realui:healthPercent"] = function(unit)
@@ -68,7 +68,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     end
     return ("%d|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
 end
-oUF.Tags.Events["realui:healthPercent"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+tags.Events["realui:healthPercent"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
 -- Power
 tags.Methods["realui:power"] = function(unit)
@@ -76,7 +76,7 @@ tags.Methods["realui:power"] = function(unit)
 
     return nibRealUI:ReadableNumber(UnitPower(unit))
 end
-oUF.Tags.Events["realui:power"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_TARGETABLE_CHANGED"
+tags.Events["realui:power"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_TARGETABLE_CHANGED"
 
 -- PvP Timer
 tags.Methods["realui:pvptimer"] = function(unit)
@@ -85,4 +85,4 @@ tags.Methods["realui:pvptimer"] = function(unit)
 
     return nibRealUI:ConvertSecondstoTime(floor(GetPVPTimer() / 1000))
 end
-oUF.Tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
+tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"

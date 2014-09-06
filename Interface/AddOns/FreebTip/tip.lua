@@ -738,28 +738,36 @@ for i, frame in ipairs(tooltips) do
 	end
 end
 
+local timer = 0.1
 local function GT_OnUpdate(self, elapsed)
 	self:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
 
-	if(self:GetHeight() == self.freebHeightSet) then return end	
+	self.freebtipUpdate = (self.freebtipUpdate or timer) - elapsed
+	if(self.freebtipUpdate > 0) then return end
+
+	self.freebtipUpdate = timer
 
 	local unit = GetMouseFocus() and GetMouseFocus().unit or "mouseover"
 	if(UnitExists(unit)) then
 		hideLines(self)
 	end
 
-	if(gtSB:IsShown()) then
-		local height = gtSB:GetHeight()+6
+	local numLines = self:NumLines()
+	if(self.freebHeightSet ~= numLines) then
+		if(gtSB:IsShown()) then
+			local height = gtSB:GetHeight()+6
 
-		local powbar = GameTooltipFreebTipPowerBar
-		if(powbar and powbar:IsShown()) then
-			height = (gtSB:GetHeight()*2)+9
+			local powbar = GameTooltipFreebTipPowerBar
+			if(powbar and powbar:IsShown()) then
+				height = (gtSB:GetHeight()*2)+9
+			end
+
+			self:SetHeight((self:GetHeight()+height))
 		end
 
-		self:SetHeight((self:GetHeight()+height))
+		self.freebHeightSet = numLines
 	end
-
-	self.freebHeightSet = self:GetHeight()
+	
 	formatLines(self)
 end
 

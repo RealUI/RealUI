@@ -59,6 +59,7 @@ local function CreateHealthBar(parent)
     health.text:SetFont(unpack(nibRealUI:Font()))
     parent:Tag(health.text, "[realui:health]")
 
+    health.frequentUpdates = true
     health.Override = UnitFrames.HealthOverride
     return health
 end
@@ -137,6 +138,8 @@ local function CreateCombatResting(parent)
     combat.Override = function(self, event, unit)
         if event == "PLAYER_REGEN_DISABLED" then
             --print("Combat Override", self, event, unit)
+            self.Combat:Show()
+            self.Resting:Show()
             self.Combat:SetVertexColor(combatColor[1], combatColor[2], combatColor[3], combatColor[4])
             self.Combat.isCombat = true
         elseif event == "PLAYER_REGEN_ENABLED" then
@@ -151,10 +154,38 @@ local function CreateCombatResting(parent)
     resting.Override = function(self, event, unit)
         if self.Combat.isCombat then return end
         --print("Resting Override", self, event, unit)
-        self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
+        if IsResting() then
+            self.Combat:Show()
+            self.Resting:Show()
+            self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
+        else
+            self.Combat:Hide()
+            self.Resting:Hide()
+            self.Combat:SetVertexColor(0, 0, 0, 0.6)
+        end
     end
     
     return combat, resting
+end
+
+local function CreateStats(parent)
+    local stats = {}
+    for i = 1, 2 do
+        stats[i] = {}
+        stats[i].icon = parent:CreateTexture(nil, "OVERLAY")
+        stats[i].icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
+        stats[i].icon:SetSize(16, 16)
+        if i == 1 then
+            stats[i].icon:SetPoint("BOTTOMLEFT", parent.Health, "BOTTOMRIGHT", 0, 0)
+        else
+            stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 5, 5)
+        end
+
+        stats[i].text = parent:CreateFontString(nil, "OVERLAY")
+        stats[i].text:SetFont(unpack(nibRealUI:Font()))
+        stats[i].text:SetPoint("BOTTOMLEFT", stats[i].icon, "BOTTOMRIGHT", 0, 0)
+    end
+    return stats
 end
 
 local function CreatePlayer(self)
@@ -162,6 +193,7 @@ local function CreatePlayer(self)
     self.Power = CreatePowerBar(self)
     self.PvP = CreatePvPStatus(self.Health)
     self.Combat, self.Resting = CreateCombatResting(self.Power)
+    self.Stats = CreateStats(self)
 
     self.PvP.text = self:CreateFontString(nil, "OVERLAY")
     self.PvP.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)

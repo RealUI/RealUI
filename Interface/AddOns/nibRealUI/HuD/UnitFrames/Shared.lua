@@ -142,6 +142,7 @@ local ReversePowers = {
 
 function UnitFrames:HealthOverride(event, unit)
     --self.Health.bar.reverse = true
+    if unit == "target" then return end
     --print("Health Override", self, event, unit)
     local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
@@ -150,6 +151,7 @@ end
 
 function UnitFrames:PowerOverride(event, unit, powerType)
     --print("Power Override", self, event, unit, powerType)
+    if unit == "target" then return end
     local _, unitPower = UnitPowerType(unit)
     if ReversePowers[unitPower] then
         --print("Reverse")

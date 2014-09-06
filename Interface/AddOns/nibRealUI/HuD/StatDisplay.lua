@@ -15,7 +15,7 @@ local RoundFormatString = "%.1f"
 
 local statTable = {}
 local function createStats(class)
-    --print("Class", class)
+    print("Class", class)
     -- Attributes
         if class == "DEATHKNIGHT" or class == "PALADIN" or class == "WARRIOR" then
             -- Strength Users
@@ -356,8 +356,9 @@ StatFunc.Multistrike = function()
 end
 
 StatFunc.Versitility = function()
-    local Versitility = GetVersatility();
-    return strform(PercentFormatString, Versitility)
+    local damageBonus = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE);
+    --local damageReduction = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_TAKEN) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_TAKEN);
+    return strform(PercentFormatString, damageBonus)
 end
 
 StatFunc.Bonus_Armor = function()
@@ -463,77 +464,76 @@ end
 ------------
 local GetStatText
 local DefaultStatTypes = {
-    Melee = {"Attack_Power", "Crit"},
-    Ranged = {"Attack_Power", "Crit"},
+    Physical = {"Attack_Power", "Crit"},
     Spell = {"Spell_Power", "Crit"},
 }
 local DefaultStats = {
     ["DEATHKNIGHT"] = {
-        [1] = {"Multistrike", "Mastery"},   -- Blood
-        [2] = {"Haste", "Attack_Power"},   -- Frost
-        [3] = {"Multistrike", "Attack_Power"},   -- Unholy
-        ["NA"] = DefaultStatTypes.Melee,
+        [1] = {"Multistrike", "Mastery"},      -- Blood
+        [2] = {"Haste", "Attack_Power"},       -- Frost
+        [3] = {"Multistrike", "Attack_Power"}, -- Unholy
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["DRUID"] = {
-        [1] = {"Mastery", "Spell_Power"},   -- Bal
+        [1] = {"Mastery", "Spell_Power"}, -- Bal
         [2] = {"Crit", "Attack_Power"},   -- Feral
-        [3] = {"Mastery", "Crit"},    -- Guardian
-        [4] = {"Haste", "Combat_Regen"},    -- Resto
-        ["NA"] = DefaultStatTypes.Melee,
+        [3] = {"Mastery", "Crit"},        -- Guardian
+        [4] = {"Haste", "Combat_Regen"},  -- Resto
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["HUNTER"] = {
-        [1] = {"Mastery", "Attack_Power"},  -- BM
-        [2] = {"Crit", "Attack_Power"},  -- MM
-        [3] = {"Multistrike", "Attack_Power"},  -- SV
-        ["NA"] = DefaultStatTypes.Ranged,
+        [1] = {"Mastery", "Attack_Power"},     -- BM
+        [2] = {"Crit", "Attack_Power"},        -- MM
+        [3] = {"Multistrike", "Attack_Power"}, -- SV
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["MAGE"] = {
-        [1] = {"Mastery", "Spell_Power"},   -- Arc
-        [2] = {"Crit", "Spell_Power"},   -- Fire
-        [3] = {"Multistrike", "Spell_Power"},   -- Frost
+        [1] = {"Mastery", "Spell_Power"},     -- Arc
+        [2] = {"Crit", "Spell_Power"},        -- Fire
+        [3] = {"Multistrike", "Spell_Power"}, -- Frost
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["MONK"] = {
-        [1] = {"Crit", "Mastery"},    -- BrM
-        [2] = {"Multistrike", "Combat_Regen"},    -- MW
-        [3] = {"Multistrike", "Attack_Power"},   -- WW
-        ["NA"] = DefaultStatTypes.Melee,
+        [1] = {"Crit", "Mastery"},             -- BrM
+        [2] = {"Multistrike", "Combat_Regen"}, -- MW
+        [3] = {"Multistrike", "Attack_Power"}, -- WW
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["PALADIN"] = {
         [1] = {"Crit", "Combat_Regen"},    -- Holy
-        [2] = {"Haste", "Block"},    -- Prot
-        [3] = {"Mastery", "Attack_Power"},   -- Ret
-        ["NA"] = DefaultStatTypes.Melee,
+        [2] = {"Haste", "Block"},          -- Prot
+        [3] = {"Mastery", "Attack_Power"}, -- Ret
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["PRIEST"] = {
-        [1] = {"Crit", "Combat_Regen"},    -- Disc
-        [2] = {"Multistrike", "Combat_Regen"},    -- Holy
-        [3] = {"Haste", "Spell_Power"},   -- Shadow
+        [1] = {"Crit", "Combat_Regen"},        -- Disc
+        [2] = {"Multistrike", "Combat_Regen"}, -- Holy
+        [3] = {"Haste", "Spell_Power"},        -- Shadow
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["ROGUE"] = {
-        [1] = {"Mastery", "Attack_Power"},   -- Assass
-        [2] = {"Haste", "Attack_Power"},   -- Combat
-        [3] = {"Multistrike", "Attack_Power"},   -- Sub
-        ["NA"] = DefaultStatTypes.Melee,
+        [1] = {"Mastery", "Attack_Power"},     -- Assass
+        [2] = {"Haste", "Attack_Power"},       -- Combat
+        [3] = {"Multistrike", "Attack_Power"}, -- Sub
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["SHAMAN"] = {
-        [1] = {"Multistrike", "Spell_Power"},   -- Ele
-        [2] = {"Haste", "Attack_Power"},   -- Enh
+        [1] = {"Multistrike", "Spell_Power"}, -- Ele
+        [2] = {"Haste", "Attack_Power"},      -- Enh
         [3] = {"Mastery", "Combat_Regen"},    -- Resto
-        ["NA"] = DefaultStatTypes.Melee,
+        ["NA"] = DefaultStatTypes.Physical,
     },
     ["WARLOCK"] = {
         [1] = {"Haste", "Spell_Power"},   -- Afflic
-        [2] = {"Mastery", "Spell_Power"},   -- Demo
-        [3] = {"Crit", "Spell_Power"},   -- Destro
+        [2] = {"Mastery", "Spell_Power"}, -- Demo
+        [3] = {"Crit", "Spell_Power"},    -- Destro
         ["NA"] = DefaultStatTypes.Spell,
     },
     ["WARRIOR"] = {
-        [1] = {"Mastery", "Attack_Power"},   -- Arms
-        [2] = {"Crit", "Attack_Power"},   -- Fury
-        [3] = {"Mastery", "Block"},    -- Prot
-        ["NA"] = DefaultStatTypes.Melee,
+        [1] = {"Mastery", "Attack_Power"}, -- Arms
+        [2] = {"Crit", "Attack_Power"},    -- Fury
+        [3] = {"Mastery", "Block"},        -- Prot
+        ["NA"] = DefaultStatTypes.Physical,
     },
 }
 
@@ -625,8 +625,18 @@ local function SetValues(row, text)
     StatFrame[row].text:SetText(text)
 end
 
-local function ToggleRow(row, state)
-    StatFrame[row]:SetShown(state)
+local function ShowStats(show)
+    if show then
+        for i = 1, 2 do
+            StatFrame[i].icon:Show()
+            StatFrame[i].text:Show()
+        end
+    else
+        for i = 1, 2 do
+            StatFrame[i].icon:Hide()
+            StatFrame[i].text:Hide()
+        end
+    end
 end
 
 local function GatherStats(stats)
@@ -654,7 +664,9 @@ function StatDisplay:TalentUpdate()
     watchedStats = dbc.stats[specGroup]
     nibRealUI.watchedStats = watchedStats
 
-    for k,v in pairs(statTable) do
+    --for k, v in pairs(statTable) do
+    for k, v in next, statTable do
+        print("TalentUpdate", k, v)
         if v.slug == dbc.stats[specGroup][1] then
             StatFrame[1].icon:SetTexture(nibRealUI.media.icons[v.icon])
         end
@@ -673,16 +685,16 @@ function StatDisplay:CombatUpdate()
     --print("Stat", statTable[4].slug)
     InCombat = UnitAffectingCombat("player")
     if InCombat then
+        print("CombatUpdate: in combat")
         self:TalentUpdate()
         self:StatUpdate()
         if not StatUpdateTimer then
             StatUpdateTimer = self:ScheduleRepeatingTimer("StatUpdate", 1)
         end
-        ToggleRow(1, true)
-        ToggleRow(2, true)
+        ShowStats(true)
     else
-        ToggleRow(1, false)
-        ToggleRow(2, false)
+        print("CombatUpdate: no combat")
+        ShowStats(false)
         if StatUpdateTimer then
             self:CancelTimer(StatUpdateTimer)
             StatUpdateTimer = nil
@@ -691,12 +703,13 @@ function StatDisplay:CombatUpdate()
 end
 
 function StatDisplay:PLAYER_LOGIN()
-    if not (RealUIPlayerStat1 and RealUIPlayerStat2) then
+    --print("StatDisply:PLAYER_LOGIN")
+    if not RealUIPlayerFrame.Stats then
         self:UnregisterAllEvents()
         return
     end
-    StatFrame[1] = RealUIPlayerStat1
-    StatFrame[2] = RealUIPlayerStat2
+    StatFrame[1] = RealUIPlayerFrame.Stats[1]
+    StatFrame[2] = RealUIPlayerFrame.Stats[2]
     createStats(nibRealUI.class)
     self:CombatUpdate()
 end
@@ -711,7 +724,7 @@ local function stat_initialize(dropdown, level)
             info.text = entry.name
             info.value = entry.name
             info.func = function(frame, ...)
-                --print("DropFunc", entry, ...)
+                --print("DropFunc", entry, entry.name, ...)
                 UIDropDownMenu_SetSelectedValue(dropdown, entry.name)
                 for k, v in pairs(statTable) do
                     if v.name == entry.name then
@@ -728,32 +741,17 @@ end
 function StatDisplay:RefreshOptions()
     local sdO = self.options
     local stats = self:GetCharStatTexts()
-    local statKeys = {{},{}}
-    for k, v in pairs(statTable) do
-        if v.slug == dbc.stats[1][1] then
-            statKeys[1][1] = k
-        end
-        if v.slug == dbc.stats[1][2] then
-            statKeys[1][2] = k
-        end
-        if v.slug == dbc.stats[2][1] then
-            statKeys[2][1] = k
-        end
-        if v.slug == dbc.stats[2][2] then
-            statKeys[2][2] = k
-        end
-    end
     UIDropDownMenu_Initialize(sdO.ddP1, stat_initialize)
-    UIDropDownMenu_SetSelectedValue(sdO.ddP1, statKeys[1][1])
+    UIDropDownMenu_SetSelectedValue(sdO.ddP1, stats[1][1])
     UIDropDownMenu_SetText(sdO.ddP1, stats[1][1])
     UIDropDownMenu_Initialize(sdO.ddP2, stat_initialize)
-    UIDropDownMenu_SetSelectedValue(sdO.ddP2, statKeys[1][2])
+    UIDropDownMenu_SetSelectedValue(sdO.ddP2, stats[1][2])
     UIDropDownMenu_SetText(sdO.ddP2, stats[1][2])
     UIDropDownMenu_Initialize(sdO.ddS1, stat_initialize)
-    UIDropDownMenu_SetSelectedValue(sdO.ddS1, statKeys[2][1])
+    UIDropDownMenu_SetSelectedValue(sdO.ddS1, stats[2][1])
     UIDropDownMenu_SetText(sdO.ddS1, stats[2][1])
     UIDropDownMenu_Initialize(sdO.ddS2, stat_initialize)
-    UIDropDownMenu_SetSelectedValue(sdO.ddS2, statKeys[2][2])
+    UIDropDownMenu_SetSelectedValue(sdO.ddS2, stats[2][2])
     UIDropDownMenu_SetText(sdO.ddS2, stats[2][2])
 end
 

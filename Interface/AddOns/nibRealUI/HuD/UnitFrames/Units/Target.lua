@@ -62,6 +62,7 @@ local function CreateHealthBar(parent)
     health.text:SetJustifyH("LEFT")
     parent:Tag(health.text, "[realui:healthPercent][realui:health]")
 
+    health.frequentUpdates = true
     health.Override = UnitFrames.HealthOverride
     return health
 end
