@@ -167,7 +167,7 @@ end
 
 -- Script Hooks --
 CPF:HookScript("OnShow", function(self)
-	print("CPF:OnShow")
+	--print("CPF:OnShow")
 	if Aurora then
 		local F = Aurora[1]
 		F.Reskin(CPFCopyButton)

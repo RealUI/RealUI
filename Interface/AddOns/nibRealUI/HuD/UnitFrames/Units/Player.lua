@@ -134,36 +134,8 @@ local function CreateCombatResting(parent)
     resting:SetTexture(texture.border)
     resting:SetAllPoints(combat)
 
-    local combatColor = db.overlay.colors.status.combat
-    combat.Override = function(self, event, unit)
-        if event == "PLAYER_REGEN_DISABLED" then
-            --print("Combat Override", self, event, unit)
-            self.Combat:Show()
-            self.Resting:Show()
-            self.Combat:SetVertexColor(combatColor[1], combatColor[2], combatColor[3], combatColor[4])
-            self.Combat.isCombat = true
-        elseif event == "PLAYER_REGEN_ENABLED" then
-            --print("Combat Override", self, event, unit)
-            self.Combat:SetVertexColor(0, 0, 0, 0.6)
-            self.Combat.isCombat = false
-            self.Resting.Override(self, event, unit)
-        end
-    end
-    
-    local restColor = db.overlay.colors.status.resting
-    resting.Override = function(self, event, unit)
-        if self.Combat.isCombat then return end
-        --print("Resting Override", self, event, unit)
-        if IsResting() then
-            self.Combat:Show()
-            self.Resting:Show()
-            self.Combat:SetVertexColor(restColor[1], restColor[2], restColor[3], restColor[4])
-        else
-            self.Combat:Hide()
-            self.Resting:Hide()
-            self.Combat:SetVertexColor(0, 0, 0, 0.6)
-        end
-    end
+    combat.Override = UnitFrames.CombatResting
+    resting.Override = UnitFrames.CombatResting
     
     return combat, resting
 end

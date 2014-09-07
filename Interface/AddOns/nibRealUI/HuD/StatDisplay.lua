@@ -157,7 +157,7 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 vals[k] = v.name
                             end
                             return vals
@@ -166,7 +166,7 @@ local function GetOptions()
                     },
                     stat1name = {
                         name = function()
-                            for k, v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 if v.slug == dbc.stats[1][1] then
                                     return v.name
                                 end
@@ -191,7 +191,7 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 vals[k] = v.name
                             end
                             return vals
@@ -200,7 +200,7 @@ local function GetOptions()
                     },
                     stat2name = {
                         name = function()
-                            for k,v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 if v.slug == dbc.stats[1][2] then
                                     return v.name
                                 end
@@ -234,7 +234,7 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 vals[k] = v.name
                             end
                             return vals
@@ -243,7 +243,7 @@ local function GetOptions()
                     },
                     stat1name = {
                         name = function()
-                            for k,v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 if v.slug == dbc.stats[2][1] then
                                     return v.name
                                 end
@@ -268,7 +268,7 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 vals[k] = v.name
                             end
                             return vals
@@ -277,7 +277,7 @@ local function GetOptions()
                     },
                     stat2name = {
                         name = function()
-                            for k,v in pairs(statTable) do
+                            for k, v in next, statTable do
                                 if v.slug == dbc.stats[2][2] then
                                     return v.name
                                 end
@@ -393,9 +393,9 @@ StatFunc.Attack_Speed = function()
     local rangedWeapon = IsRangedWeapon()
     local speed, offhandSpeed
     if ( rangedWeapon ) then
-        speed = UnitRangedDamage(unit)
+        speed = UnitRangedDamage("player")
     else 
-        speed, offhandSpeed = UnitAttackSpeed(unit)
+        speed, offhandSpeed = UnitAttackSpeed("player")
     end
     if ( offhandSpeed ) then
         return strform(RoundFormatString, speed).." / ".. strform(RoundFormatString, offhandSpeed)
@@ -405,7 +405,7 @@ StatFunc.Attack_Speed = function()
 end
 
 StatFunc.Res_Regen = function()
-    local _, class = UnitClass(unit);
+    local _, class = UnitClass("player");
     local Res_Regen
     if (class == "DEATHKNIGHT") then
         _, Res_Regen = GetRuneCooldown(1);
@@ -578,7 +578,7 @@ function StatDisplay:GetCharStatTexts()
         {},
         {},
     }
-    for k,v in pairs(statTable) do
+    for k, v in next, statTable do
         if v.slug == dbc.stats[1][1] then
             stats[1][1] = v.name
         end
@@ -664,9 +664,8 @@ function StatDisplay:TalentUpdate()
     watchedStats = dbc.stats[specGroup]
     nibRealUI.watchedStats = watchedStats
 
-    --for k, v in pairs(statTable) do
     for k, v in next, statTable do
-        print("TalentUpdate", k, v)
+        --print("TalentUpdate", k, v)
         if v.slug == dbc.stats[specGroup][1] then
             StatFrame[1].icon:SetTexture(nibRealUI.media.icons[v.icon])
         end
@@ -685,7 +684,7 @@ function StatDisplay:CombatUpdate()
     --print("Stat", statTable[4].slug)
     InCombat = UnitAffectingCombat("player")
     if InCombat then
-        print("CombatUpdate: in combat")
+        --print("CombatUpdate: in combat")
         self:TalentUpdate()
         self:StatUpdate()
         if not StatUpdateTimer then
@@ -693,7 +692,7 @@ function StatDisplay:CombatUpdate()
         end
         ShowStats(true)
     else
-        print("CombatUpdate: no combat")
+        --print("CombatUpdate: no combat")
         ShowStats(false)
         if StatUpdateTimer then
             self:CancelTimer(StatUpdateTimer)
@@ -719,14 +718,14 @@ end
 --------------------
 local function stat_initialize(dropdown, level)
     if not level or level == 1 then
-        for idx, entry in ipairs(statTable) do
+        for idx, entry in next, statTable do
             local info = UIDropDownMenu_CreateInfo()
             info.text = entry.name
             info.value = entry.name
             info.func = function(frame, ...)
                 --print("DropFunc", entry, entry.name, ...)
                 UIDropDownMenu_SetSelectedValue(dropdown, entry.name)
-                for k, v in pairs(statTable) do
+                for k, v in next, statTable do
                     if v.name == entry.name then
                         dbc.stats[dropdown.spec][dropdown.stat] = v.slug
                     end

@@ -171,6 +171,30 @@ function UnitFrames:PowerOverride(event, unit, powerType)
     AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
 end
 
+function UnitFrames:CombatResting(event)
+    local unit = self.unit
+    if UnitAffectingCombat(unit) then
+        --print("Combat", self, event, unit)
+        self.Combat:Show()
+        self.Resting:Show()
+        self.Combat:SetVertexColor(db.overlay.colors.status.combat[1], db.overlay.colors.status.combat[2], db.overlay.colors.status.combat[3], db.overlay.colors.status.combat[4])
+        self.Combat.status = "combat"
+    elseif IsResting(unit) then
+        --print("Resting", self, event, unit)
+        self.Combat:Show()
+        self.Resting:Show()
+        self.Combat:SetVertexColor(db.overlay.colors.status.resting[1], db.overlay.colors.status.resting[2], db.overlay.colors.status.resting[3], db.overlay.colors.status.resting[4])
+        self.Combat.status = "resting"
+    else
+        --print("CR: None", self, event, unit)
+        self.Combat:Hide()
+        self.Resting:Hide()
+        self.Combat:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+        self.Combat.status = false
+    end
+end
+
+
 -- Init
 function UnitFrames:InitShared()
     db = UnitFrames.db.profile
