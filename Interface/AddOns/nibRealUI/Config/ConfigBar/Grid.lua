@@ -39,8 +39,7 @@ function ConfigBar_Grid:SetUnitHeight(layout, value)
 end
 
 function ConfigBar_Grid:SetUnitWidth(layout, value, key)
-	local type = (key == 1) and "width" or "sWidth"
-	nibRealUI:SetGridLayoutSettings(value, layout, type)
+	nibRealUI:SetGridLayoutSettings(value, layout, "width", key)
 end
 
 function ConfigBar_Grid:ToggleShowSolo(layout, key)
@@ -314,9 +313,19 @@ function ConfigBar_Grid:SetupWindow()
 			min = 40,
 			max = 110,
 			func = function(value)
-				self:SetUnitWidth("dps", value, 1)
+				self:SetUnitWidth("dps", value, "normal")
 			end,
-			value = nibRealUI:GetGridLayoutSettings("dps", "width"),
+			value = nibRealUI:GetGridLayoutSettings("dps", "width", "normal"),
+		},
+		{
+			label = "30-man Unit Width",
+			name = "GLD30MUnitWidth",
+			min = 35,
+			max = 100,
+			func = function(value)
+				self:SetUnitWidth("dps", value, "30")
+			end,
+			value = nibRealUI:GetGridLayoutSettings("dps", "width", 30),
 		},
 		{
 			label = "40-man Unit Width",
@@ -324,9 +333,9 @@ function ConfigBar_Grid:SetupWindow()
 			min = 30,
 			max = 90,
 			func = function(value)
-				self:SetUnitWidth("dps", value, 2)
+				self:SetUnitWidth("dps", value, "40")
 			end,
-			value = nibRealUI:GetGridLayoutSettings("dps", "sWidth"),
+			value = nibRealUI:GetGridLayoutSettings("dps", "width", 40),
 		}
 	}
 	self.dtUnitWidth = cbGUI:CreateSliderList(tabPanel2, "VERTICAL", sliders)
@@ -408,9 +417,19 @@ function ConfigBar_Grid:SetupWindow()
 			min = 40,
 			max = 110,
 			func = function(value)
-				self:SetUnitWidth("healing", value, 1)
+				self:SetUnitWidth("healing", value, "normal")
 			end,
-			value = nibRealUI:GetGridLayoutSettings("healing", "width"),
+			value = nibRealUI:GetGridLayoutSettings("healing", "width", "normal"),
+		},
+		{
+			label = "30-man Unit Width",
+			name = "GLH30MUnitWidth",
+			min = 35,
+			max = 100,
+			func = function(value)
+				self:SetUnitWidth("healing", value, "30")
+			end,
+			value = nibRealUI:GetGridLayoutSettings("healing", "width", 30),
 		},
 		{
 			label = "40-man Unit Width",
@@ -418,9 +437,9 @@ function ConfigBar_Grid:SetupWindow()
 			min = 30,
 			max = 90,
 			func = function(value)
-				self:SetUnitWidth("healing", value, 2)
+				self:SetUnitWidth("healing", value, "40")
 			end,
-			value = nibRealUI:GetGridLayoutSettings("healing", "sWidth"),
+			value = nibRealUI:GetGridLayoutSettings("healing", "width", 40),
 		}
 	}
 	self.hUnitWidth = cbGUI:CreateSliderList(tabPanel3, "VERTICAL", sliders)

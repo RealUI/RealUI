@@ -146,7 +146,7 @@ function GridLayout:Update()
 	local NewLayout
 	
 	-- Get Instance type
-	local _, instanceType, difficultyIndex = GetInstanceInfo()
+	local _, instanceType, difficultyIndex, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
 	
 	-- Get Map ID
 	if not WorldMapFrame:IsShown() then
@@ -199,9 +199,9 @@ function GridLayout:Update()
 		-- Adjust Grid Frame Width
 		local NewWidth
 		if (NewLayout == "By Group 40") and not(LayoutDB.hGroups.bg) then
-			NewWidth = LayoutDB.sWidth
+			NewWidth = LayoutDB.width[40]
 		else
-			NewWidth = LayoutDB.width
+			NewWidth = LayoutDB.width["normal"]
 		end
 		SetGridFrameWidth(NewWidth)
 		-- print(NewWidth)
@@ -230,34 +230,61 @@ function GridLayout:Update()
 		end
 		
 		-- Adjust Grid Frame Width
-		SetGridFrameWidth(LayoutDB.width)
+		SetGridFrameWidth(LayoutDB.width["normal"])
 
 	-- Raid
 	elseif (instanceType == "raid") then
 		--print("You are in a Raid, difficulty: "..difficultyIndex)
-		if difficultyIndex == (3 or 5) then
+		if (maxPlayers == 10) or (currPlayers <= 10) then
 			--print("You are in a 10 Man")
 			NewLayout = "By Group 10"
-		elseif difficultyIndex == (4 or 6) or 7 then
+		elseif (currPlayers <= 15) then
+			--print("You are in a 15 Man flex")
+			NewLayout = "By Group 15"
+		elseif (maxPlayers == 20) or (currPlayers <= 20) then
+			--print("You are in a Mythic raid")
+			NewLayout = "By Group 20"
+		elseif (maxPlayers == 25) or (currPlayers <= 25) then
 			--print("You are in a 25 Man")
 			NewLayout = "By Group 25"
+		else
+			--print("You are in a 30 Man flex")
+			NewLayout = "By Group 30"
 		end
 
 		-- Change Grid Layout
 		local NewHoriz = LayoutDB.hGroups.normal
-		if difficultyIndex == (3 or 5) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+		local layoutSize = string.match(layout, "%d+")
+		if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 			Grid2Layout.db.profile.layouts.raid10 = NewLayout
 			Grid2Layout.db.profile.horizontal = NewHoriz
 			Grid2Layout:ReloadLayout()
-
-		elseif difficultyIndex == (4 or 6) or 7 and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+		elseif (layoutSize == 15) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid15) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+			Grid2Layout.db.profile.layouts.raid15 = NewLayout
+			Grid2Layout.db.profile.horizontal = NewHoriz
+			Grid2Layout:ReloadLayout()
+		elseif (layoutSize == 20) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 			Grid2Layout.db.profile.layouts.raid25 = NewLayout
+			Grid2Layout.db.profile.horizontal = NewHoriz
+			Grid2Layout:ReloadLayout()
+		elseif (layoutSize == 25) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+			Grid2Layout.db.profile.layouts.raid25 = NewLayout
+			Grid2Layout.db.profile.horizontal = NewHoriz
+			Grid2Layout:ReloadLayout()
+		elseif (layoutSize == 30) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid40) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+			Grid2Layout.db.profile.layouts.raid40 = NewLayout
 			Grid2Layout.db.profile.horizontal = NewHoriz
 			Grid2Layout:ReloadLayout()
 		end
 		
 		-- Adjust Grid Frame Width
-		SetGridFrameWidth(LayoutDB.width)
+		local NewWidth
+		if (LayoutDB.sWidth[layoutSize]) and not(LayoutDB.hGroups.raid) then
+			NewWidth = LayoutDB.width[layoutSize]
+		else
+			NewWidth = LayoutDB.width["normal"]
+		end
+		SetGridFrameWidth(NewWidth)
 
 		-- If not BG, Arena, Raid or Dungeon, then set normal values
 	else
@@ -267,7 +294,7 @@ function GridLayout:Update()
 
 		-- Solo
 		if raidSize == 0 then
-			SetGridFrameWidth(LayoutDB.width)
+			SetGridFrameWidth(LayoutDB.width["normal"])
 			Grid2Layout.db.profile.horizontal = LayoutDB.hGroups.normal
 			if LayoutDB.showSolo then
 				if UnitExists("pet") and LayoutDB.showPet then 
@@ -300,12 +327,18 @@ function GridLayout:Update()
 			end
 			
 			local NewHoriz = LayoutDB.hGroups.raid
-			if (raidGroupInUse.group8 or raidGroupInUse.group7) or raidGroupInUse.group6 then --newSize > 25 then
-				--print("You have more than 25 players in the raid")
+			if (raidGroupInUse.group8 or raidGroupInUse.group7) then --newSize > 30 then
+				--print("You have more than 30 players in the raid")
 				NewLayout = "By Group 40"
-			elseif (raidGroupInUse.group5 or raidGroupInUse.group4) then --newSize > 15 then
-				--print("You have more than 15 players in the raid")
+			elseif raidGroupInUse.group6 then --newSize > 25 then
+				--print("You have more than 25 players in the raid")
+				NewLayout = "By Group 30"
+			elseif raidGroupInUse.group5 then --newSize > 20 then
+				--print("You have more than 20 players in the raid")
 				NewLayout = "By Group 25"
+			elseif raidGroupInUse.group4 then --newSize > 15 then
+				--print("You have more than 15 players in the raid")
+				NewLayout = "By Group 20"
 			elseif raidGroupInUse.group3 then --newSize > 10 then
 				--print("You have more than 10 players in the raid")
 				NewLayout = "By Group 15"
@@ -318,22 +351,35 @@ function GridLayout:Update()
 			end
 
 			-- Change Grid Layout
-			if ( (difficulty == 1 or 3) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) ) then
+			local layoutSize = string.match(layout, "%d+") --["raid"..layoutSize]
+			if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 				Grid2Layout.db.profile.layouts.raid10 = NewLayout
 				Grid2Layout.db.profile.horizontal = NewHoriz
 				Grid2Layout:ReloadLayout()
-			elseif ( (difficulty == 2 or 4) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) ) then
+			elseif (layoutSize == 15) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid15) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+				Grid2Layout.db.profile.layouts.raid15 = NewLayout
+				Grid2Layout.db.profile.horizontal = NewHoriz
+				Grid2Layout:ReloadLayout()
+			elseif (layoutSize == 20) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 				Grid2Layout.db.profile.layouts.raid25 = NewLayout
+				Grid2Layout.db.profile.horizontal = NewHoriz
+				Grid2Layout:ReloadLayout()
+			elseif (layoutSize == 25) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+				Grid2Layout.db.profile.layouts.raid25 = NewLayout
+				Grid2Layout.db.profile.horizontal = NewHoriz
+				Grid2Layout:ReloadLayout()
+			elseif (layoutSize == 30) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid40) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
+				Grid2Layout.db.profile.layouts.raid40 = NewLayout
 				Grid2Layout.db.profile.horizontal = NewHoriz
 				Grid2Layout:ReloadLayout()
 			end
 
 			-- Adjust Grid Frame Width
 			local NewWidth
-			if (NewLayout == "By Group 40") and not(LayoutDB.hGroups.raid) then
-				NewWidth = LayoutDB.sWidth
+			if (LayoutDB.sWidth[layoutSize]) and not(LayoutDB.hGroups.raid) then
+				NewWidth = LayoutDB.width[layoutSize]
 			else
-				NewWidth = LayoutDB.width
+				NewWidth = LayoutDB.width["normal"]
 			end
 			SetGridFrameWidth(NewWidth)
 		end
@@ -347,6 +393,7 @@ function GridLayout:Update()
 end
 
 function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
+	print("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
 	if key3 then
 		db[key1][key2][key3] = value
 	else
@@ -356,6 +403,7 @@ function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
 end
 
 function nibRealUI:GetGridLayoutSettings(key1, key2, key3)
+	-- print("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
 	if key3 then
 		return db[key1][key2][key3]
 	else
@@ -368,15 +416,13 @@ function GridLayout:OnInitialize()
 	self.db:RegisterDefaults({
 		profile = {
 			dps = {
-				width = 65,
-				sWidth = 40,
-				hGroups = {normal = true, raid = true, bg = false},
+				width = {normal = 65, [30] = 54, [40] = 40},
+				hGroups = {normal = true, raid = false, bg = false},
 				showPet = true,
 				showSolo = false,
 			},
 			healing = {
-				width = 65,
-				sWidth = 40,
+				width = {normal = 65, [30] = 54, [40] = 40},
 				hGroups = {normal = false, raid = false, bg = false},
 				showPet = true,
 				showSolo = false,
@@ -384,7 +430,27 @@ function GridLayout:OnInitialize()
 		},
 	})
 	db = self.db.profile
-	
+
+	-- Remove after some time.
+	if type(db.dps.width) == "number" then
+		db.dps.width = {
+			normal = db.dps.width
+		}
+	end
+	if db.dps.sWidth then
+		db.dps.width[40] = db.dps.sWidth
+		db.dps.sWidth = nil
+	end
+	if type(db.healing.width) == "number" then
+		db.healing.width = {
+			normal = db.healing.width
+		}
+	end
+	if db.healing.sWidth then
+		db.healing.width[40] = db.healing.sWidth
+		db.healing.sWidth = nil
+	end
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 end
 
