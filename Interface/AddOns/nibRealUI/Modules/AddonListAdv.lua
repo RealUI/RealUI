@@ -230,8 +230,8 @@ function AddonListAdv:SetDropDown_Populate(level)
         UIDropDownMenu_AddButton(info)
 
         local count
-        for set, t in next, dbc do
-            --print("SetDropDown_Populate", set, t)
+        for set = 1, dbc do
+            --print("SetDropDown_Populate", set, dbc[set])
             if dbc and dbc[set] then
                 count = #dbc[set]
             else

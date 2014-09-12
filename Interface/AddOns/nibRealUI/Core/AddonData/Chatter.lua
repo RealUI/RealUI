@@ -1155,8 +1155,8 @@ nibRealUI.LoadAddOnData_Chatter = function()
 			["EditBox"] = {
 				["profiles"] = {
 					["RealUI"] = {
-						["editW"] = 422.0097775971747,
-						["attach"] = "LOCK",
+						["editW"] = 422,
+						["attach"] = "TOP",
 						["border"] = "None",
 						["editY"] = 228.4514578142029,
 						["font"] = "Standard",
@@ -1166,7 +1166,7 @@ nibRealUI.LoadAddOnData_Chatter = function()
 						["height"] = 20,
 						["background"] = "Solid",
 						["backgroundColor"] = {
-							["a"] = 0,
+							["a"] = 0.5,
 						},
 						["editX"] = -7.090228140514713,
 					},

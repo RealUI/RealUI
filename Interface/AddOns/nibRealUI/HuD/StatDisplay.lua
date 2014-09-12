@@ -15,7 +15,7 @@ local RoundFormatString = "%.1f"
 
 local statTable = {}
 local function createStats(class)
-    print("Class", class)
+    --print("Class", class)
     -- Attributes
         if class == "DEATHKNIGHT" or class == "PALADIN" or class == "WARRIOR" then
             -- Strength Users
@@ -157,8 +157,8 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in next, statTable do
-                                vals[k] = v.name
+                            for i = 1, #statTable do
+                                vals[i] = statTable[i].name
                             end
                             return vals
                         end,
@@ -166,9 +166,9 @@ local function GetOptions()
                     },
                     stat1name = {
                         name = function()
-                            for k, v in next, statTable do
-                                if v.slug == dbc.stats[1][1] then
-                                    return v.name
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][1] then
+                                    return statTable[i].name
                                 end
                             end
                         end,
@@ -191,8 +191,8 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in next, statTable do
-                                vals[k] = v.name
+                            for i = 1, #statTable do
+                                vals[i] = statTable[i].name
                             end
                             return vals
                         end,
@@ -200,9 +200,9 @@ local function GetOptions()
                     },
                     stat2name = {
                         name = function()
-                            for k, v in next, statTable do
-                                if v.slug == dbc.stats[1][2] then
-                                    return v.name
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][1] then
+                                    return statTable[i].name
                                 end
                             end
                         end,
@@ -234,8 +234,8 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in next, statTable do
-                                vals[k] = v.name
+                            for i = 1, #statTable do
+                                vals[i] = statTable[i].name
                             end
                             return vals
                         end,
@@ -243,9 +243,9 @@ local function GetOptions()
                     },
                     stat1name = {
                         name = function()
-                            for k, v in next, statTable do
-                                if v.slug == dbc.stats[2][1] then
-                                    return v.name
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][1] then
+                                    return statTable[i].name
                                 end
                             end
                         end,
@@ -268,8 +268,8 @@ local function GetOptions()
                         width = nil,
                         values = function(...)
                             local vals = {}
-                            for k, v in next, statTable do
-                                vals[k] = v.name
+                            for i = 1, #statTable do
+                                vals[i] = statTable[i].name
                             end
                             return vals
                         end,
@@ -277,9 +277,9 @@ local function GetOptions()
                     },
                     stat2name = {
                         name = function()
-                            for k, v in next, statTable do
-                                if v.slug == dbc.stats[2][2] then
-                                    return v.name
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][1] then
+                                    return statTable[i].name
                                 end
                             end
                         end,
@@ -578,18 +578,18 @@ function StatDisplay:GetCharStatTexts()
         {},
         {},
     }
-    for k, v in next, statTable do
-        if v.slug == dbc.stats[1][1] then
-            stats[1][1] = v.name
+    for i = i, #statTable do
+        if statTable[i].slug == dbc.stats[1][1] then
+            stats[1][1] = statTable[i].name
         end
-        if v.slug == dbc.stats[1][2] then
-            stats[1][2] = v.name
+        if statTable[i].slug == dbc.stats[1][2] then
+            stats[1][2] = statTable[i].name
         end
-        if v.slug == dbc.stats[2][1] then
-            stats[2][1] = v.name
+        if statTable[i].slug == dbc.stats[2][1] then
+            stats[2][1] = statTable[i].name
         end
-        if v.slug == dbc.stats[2][2] then
-            stats[2][2] = v.name
+        if statTable[i].slug == dbc.stats[2][2] then
+            stats[2][2] = statTable[i].name
         end
     end
     return stats
@@ -664,13 +664,13 @@ function StatDisplay:TalentUpdate()
     watchedStats = dbc.stats[specGroup]
     nibRealUI.watchedStats = watchedStats
 
-    for k, v in next, statTable do
-        --print("TalentUpdate", k, v)
-        if v.slug == dbc.stats[specGroup][1] then
-            StatFrame[1].icon:SetTexture(nibRealUI.media.icons[v.icon])
+    for i = 1, #statTable do
+        --print("TalentUpdate", i, statTable[i])
+        if statTable[i].slug == dbc.stats[specGroup][1] then
+            StatFrame[1].icon:SetTexture(nibRealUI.media.icons[statTable[i].icon])
         end
-        if v.slug == dbc.stats[specGroup][2] then
-            StatFrame[2].icon:SetTexture(nibRealUI.media.icons[v.icon])
+        if statTable[i].slug == dbc.stats[specGroup][2] then
+            StatFrame[2].icon:SetTexture(nibRealUI.media.icons[statTable[i].icon])
         end
     end
 
@@ -718,16 +718,16 @@ end
 --------------------
 local function stat_initialize(dropdown, level)
     if not level or level == 1 then
-        for idx, entry in next, statTable do
+        for idx = 1, #statTable do
             local info = UIDropDownMenu_CreateInfo()
-            info.text = entry.name
-            info.value = entry.name
+            info.text = statTable[idx].name
+            info.value = statTable[idx].name
             info.func = function(frame, ...)
-                --print("DropFunc", entry, entry.name, ...)
-                UIDropDownMenu_SetSelectedValue(dropdown, entry.name)
-                for k, v in next, statTable do
-                    if v.name == entry.name then
-                        dbc.stats[dropdown.spec][dropdown.stat] = v.slug
+                --print("DropFunc", statTable[idx], statTable[idx].name, ...)
+                UIDropDownMenu_SetSelectedValue(dropdown, statTable[idx].name)
+                for i = 1, #statTable do
+                    if statTable[i].name == statTable[idx].name then
+                        dbc.stats[dropdown.spec][dropdown.stat] = statTable[i].slug
                     end
                 end
                 StatDisplay:TalentUpdate()
