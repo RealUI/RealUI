@@ -78,7 +78,7 @@ local function CreateCombatResting(parent)
     combat:SetTexture(texture.bar)
     combat:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     combat:SetSize(texture.width, texture.height)
-    combat:SetPoint("TOPLEFT", parent, "TOPRIGHT", -8, 0)
+    combat:SetPoint("TOPLEFT", parent, "TOPRIGHT", -7, 0)
 
     local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     resting:SetTexture(texture.border)
@@ -116,7 +116,7 @@ local function CreateTargetTarget(self)
     self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
-    self.Name:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -9, 0)
+    self.Name:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -5, 2 - UnitFrames.layoutSize)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:name]")
 
