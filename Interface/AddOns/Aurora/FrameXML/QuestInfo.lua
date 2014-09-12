@@ -91,10 +91,10 @@ tinsert(C.themes["Aurora"], function()
 		bg:SetPoint("TOPLEFT", bu, 1, 1)
 
 		if isMapQuestInfo then
-			bg:SetPoint("BOTTOMRIGHT", bu, -2, 0)
+			bg:SetPoint("BOTTOMRIGHT", bu, -3, 0)
 			bu.Icon:SetSize(29, 29)
 		else
-			bg:SetPoint("BOTTOMRIGHT", bu, -2, 1)
+			bg:SetPoint("BOTTOMRIGHT", bu, -3, 1)
 		end
 
 		bg:SetFrameLevel(0)
