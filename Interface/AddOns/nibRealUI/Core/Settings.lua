@@ -11,7 +11,7 @@ local nibRealUICharacter_defaults = {
 
 -- Minipatch list. These get flagged on a PrimaryInstall as not being required.
 local MiniPatchMajorVer = "81"
-local MiniPatches = {1,2,6,8,9,12,16,21}
+local MiniPatches = {1}
 
 local Textures = {
 	Logo = [[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]],
@@ -367,22 +367,25 @@ function nibRealUI:InstallProcedure()
 	dbg = self.db.global
 	
 	---- Version checking
-	local CurVer = nibRealUI.verinfo
-	local OldVer = nibRealUI.verinfo
-	local IsNewVer = nibRealUI:MajorVerChange(OldVer, CurVer)
+	local curVer = nibRealUI.verinfo
+	local oldVer = dbg.verinfo or {8, 0}
+	local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
 	
 	-- nibRealUIVersion = nibRealUI.verinfo
 	
 	-- Reset DB if new Major version
-	if IsNewVer then
+	print("InstallProcedure", newVer)
+	if newVer == "major" then
 		nibRealUI.db:ResetDB("RealUI")
 		if StaticPopup1 then
 			StaticPopup1:Hide()
 		end
+	elseif newVer == "minor" then
+		dbg.minipatches = nil
 	end
 
 	-- Set Char defaults
-	if not(db.registeredChars[self.key]) or not(nibRealUICharacter) or IsNewVer or not(nibRealUICharacter.installStage) then
+	if not(db.registeredChars[self.key]) or not(nibRealUICharacter) or newVer or not(nibRealUICharacter.installStage) then
 		nibRealUICharacter = nibRealUICharacter_defaults
 		db.registeredChars[self.key] = true
 	end
@@ -395,4 +398,5 @@ function nibRealUI:InstallProcedure()
 	else
 		MiniPatchInstallation()
 	end
+	dbg.verinfo = nibRealUI.verinfo
 end

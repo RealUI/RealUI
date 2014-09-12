@@ -180,6 +180,7 @@ local function GetOptions()
 						isPercent = true,
 						get = function(info) return db.elements[ke].opacity.outofcombat end,
 						set = function(info, value)
+							print("OutCombat Inv", ke)
 							db.elements[ke].opacity.outofcombat = value
 							CombatFader:OptionsRefresh()
 						end,
@@ -219,6 +220,7 @@ local function GetOptions()
 						isPercent = true,
 						get = function(info) return db.elements[ke].opacity.outofcombat end,
 						set = function(info, value)
+							print("OutCombat", ke)
 							db.elements[ke].opacity.outofcombat = value
 							CombatFader:OptionsRefresh()
 						end,
@@ -265,7 +267,7 @@ local function FadeIt(self, NewOpacity, instant)
 	local FadeTime = instant and 0 or FadeTime
 	if NewOpacity > CurrentOpacity then
 		UIFrameFadeIn(self, FadeTime, CurrentOpacity, NewOpacity)
-	elseif NewOpacity < CurrentOpacity then
+	elseif NewOpacity < CurrentOpacity and self:IsShown() then
 		UIFrameFadeOut(self, FadeTime, CurrentOpacity, NewOpacity)
 	end
 end
@@ -273,7 +275,7 @@ end
 -- Determine new opacity values for frames
 function CombatFader:FadeFrames()
 	local NewOpacity
-	for k,v in pairs(db.elements) do
+	for k, v in next, db.elements do
 		if db.elements[k].enabled then
 			-- Retrieve Element's opacity/visibility for current status
 			NewOpacity = 1
@@ -308,9 +310,10 @@ function CombatFader:FadeFrames()
 			-- Fade Frames
 			if db.elements[k].frames then
 				local frame
-				for k2, v2 in pairs(db.elements[k].frames) do
+				for k2, v2 in next, db.elements[k].frames do
 					if db.elements[k].frames[k2] then
 						frame = _G[k2]
+						--print("FadeFrames", k, k2, NewOpacity)
 						if (k2 == "RealUIPetFrame") and self.ABShown then
 							if frame then FadeIt(frame, 1, true) end
 						else
@@ -416,11 +419,11 @@ function CombatFader:OnInitialize()
 						["RealUIPetFrame"] = true,
 					},
 				},
-				watchframe = {
-					name = "Watch Frame",
+				objectives = {
+					name = "Objective Tracker",
 					inverse = true,
 					frames = {
-						["WatchFrame"] = true,
+						["ObjectiveTrackerFrame"] = true,
 					},
 					opacity = {
 						incombat = 0.5,
@@ -433,7 +436,7 @@ function CombatFader:OnInitialize()
     })
 	db = self.db.profile
 	ndbc = nibRealUI.db.char
-    
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
