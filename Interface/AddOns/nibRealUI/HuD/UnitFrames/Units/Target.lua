@@ -22,6 +22,11 @@ local positions = {
         },
         healthBox = {1, 0, 0, 1},
         statusBox = {1, 0, 0, 1},
+        endBox = {
+            x = 10,
+            y = -4,
+            coords = {1, 0, 0, 1},
+        }
     },
     [2] = {
         health = {
@@ -36,6 +41,11 @@ local positions = {
         },
         healthBox = {1, 0, 0, 1},
         statusBox = {1, 0, 0, 1},
+        endBox = {
+            x = 11,
+            y = -2,
+            coords = {1, 0, 0, 1},
+        }
     },
 }
 
@@ -164,7 +174,7 @@ local function CreateRange(parent)
     local range = parent:CreateTexture(nil, "OVERLAY")
     range:SetTexture(nibRealUI.media.icons.DoubleArrow)
     range:SetSize(16, 16)
-    range:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", 0, 0)
+    range:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -5, 0)
     range.insideAlpha = 1
     range.outsideAlpha = 0.5
 
@@ -205,7 +215,7 @@ local function CreateThreat(parent)
     local threat = parent:CreateTexture(nil, "OVERLAY")
     threat:SetTexture(nibRealUI.media.icons.Lightning)
     threat:SetSize(16, 16)
-    threat:SetPoint("TOPRIGHT", parent, "TOPLEFT", 0, 0)
+    threat:SetPoint("TOPRIGHT", parent, "TOPLEFT", -5, 0)
 
     threat.text = parent:CreateFontString(nil, "OVERLAY")
     threat.text:SetFont(unpack(nibRealUI:Font()))
@@ -234,6 +244,23 @@ local function CreateThreat(parent)
     return threat
 end
 
+local function CreateEndBox(parent)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
+    local pos = positions[UnitFrames.layoutSize].endBox
+    local endBox = parent:CreateTexture(nil, "BORDER")
+    endBox:SetTexture(texture.bar)
+    endBox:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    endBox:SetSize(texture.width, texture.height)
+    endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
+
+    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    border:SetTexture(texture.border)
+    border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    border:SetAllPoints(endBox)
+   
+    return endBox
+end
+
 local function CreateTarget(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
@@ -241,6 +268,7 @@ local function CreateTarget(self)
     self.Combat, self.Resting = CreateCombatResting(self.Power)
     self.Range = CreateRange(self.Health)
     self.Threat = CreateThreat(self.Power)
+    self.endBox = CreateEndBox(self)
     
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
@@ -254,6 +282,7 @@ local function CreateTarget(self)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
+        UnitFrames:UpdateEndBox(self, event)
     end
 end
 

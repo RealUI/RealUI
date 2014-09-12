@@ -416,25 +416,6 @@ function UnitFrames:SetPowerColors()
     self.PowerColors["POWER_TYPE_OOZE"] = { 0.75686281919479, 1, 0 }
 end
 
-function UnitFrames:SetUpdateSpeed()
-    if ndb.settings.powerMode == 1 then     -- Normal
-        db.misc.powerupdatespeed = {
-            ["default"] =   1/10,
-            ["ENERGY"] =    1/20,
-        }
-    elseif ndb.settings.powerMode == 2 then -- Economy
-        db.misc.powerupdatespeed = {
-            ["default"] =   1/10,
-            ["ENERGY"] =    1/15,
-        }
-    else                            -- Turbo
-        db.misc.powerupdatespeed = {
-            ["default"] =   1/10,
-            ["ENERGY"] =    1/30,
-        }
-    end
-end
-
 -- Color Retrieval for Config Bar
 function UnitFrames:ToggleClassColoring(names)
 	if names then
@@ -498,10 +479,6 @@ function UnitFrames:OnInitialize()
                     ["WARLOCK"] =   {0.35, 0.2},
                     ["WARRIOR"] =   {0.35, 0.2},
                 },
-                powerupdatespeed = {
-                    ["default"] =   1/10,
-                    ["ENERGY"] =    1/20,
-                },
             },
             units = {
                 arena = false,
@@ -522,16 +499,16 @@ function UnitFrames:OnInitialize()
                     focus =         { x = 29,   y = -62},   -- Anchored to Player
                     focustarget =   { x = 0,    y = -11},   -- Anchored to Focus
                     target =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    targettarget =  { x = 70,   y = -54},   -- Anchored to Target
+                    targettarget =  { x = -29,   y = -62},   -- Anchored to Target
                     boss =          { x = 0,    y = 0},     -- Anchored to Positioner
                 },
                 [2] = {
                     player =        { x = 0,    y = 0},     -- Anchored to Positioner
                     pet =           { x = -58,  y = -83},   -- Anchored to Player
-                    focus =         { x = -70,  y = -60},   -- Anchored to Player
+                    focus =         { x = 36,   y = -67},   -- Anchored to Player
                     focustarget =   { x = 0,    y = -11},   -- Anchored to Focus
                     target =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    targettarget =  { x = 70,   y = -60},   -- Anchored to Target
+                    targettarget =  { x = -36,  y = -67},   -- Anchored to Target
                     boss =          { x = 0,    y = 0},     -- Anchored to Positioner
                 },
             },
@@ -595,7 +572,6 @@ function UnitFrames:OnInitialize()
 end
 
 function UnitFrames:OnEnable()
-    self:SetUpdateSpeed()
     self:SetPowerColors()
     self.colorStrings = {
         health = nibRealUI:ColorTableToStr(db.overlay.colors.health.normal),

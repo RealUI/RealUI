@@ -19,6 +19,10 @@ local positions = {
             widthOfs = 10,
             coords = {0.23046875, 1, 0, 0.5},
         },
+        endBox = {
+            x = -10,
+            y = -4
+        }
     },
     [2] = {
         health = {
@@ -31,6 +35,10 @@ local positions = {
             widthOfs = 12,
             coords = {0.1015625, 1, 0, 0.625},
         },
+        endBox = {
+            x = -11,
+            y = -2
+        }
     },
 }
 
@@ -148,9 +156,9 @@ local function CreateStats(parent)
         stats[i].icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
         stats[i].icon:SetSize(16, 16)
         if i == 1 then
-            stats[i].icon:SetPoint("BOTTOMLEFT", parent.Health, "BOTTOMRIGHT", 0, 0)
+            stats[i].icon:SetPoint("BOTTOMLEFT", parent.Health, "BOTTOMRIGHT", 10, 0)
         else
-            stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 5, 5)
+            stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 15, 5)
         end
 
         stats[i].text = parent:CreateFontString(nil, "OVERLAY")
@@ -160,12 +168,28 @@ local function CreateStats(parent)
     return stats
 end
 
+local function CreateEndBox(parent)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
+    local pos = positions[UnitFrames.layoutSize].endBox
+    local endBox = parent:CreateTexture(nil, "BORDER")
+    endBox:SetTexture(texture.bar)
+    endBox:SetSize(texture.width, texture.height)
+    endBox:SetPoint("BOTTOMLEFT", parent, "BOTTOMRIGHT", pos.x, pos.y)
+
+    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    border:SetTexture(texture.border)
+    border:SetAllPoints(endBox)
+   
+    return endBox
+end
+
 local function CreatePlayer(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
     self.PvP = CreatePvPStatus(self.Health)
     self.Combat, self.Resting = CreateCombatResting(self.Power)
     self.Stats = CreateStats(self)
+    self.endBox = CreateEndBox(self)
 
     self.PvP.text = self:CreateFontString(nil, "OVERLAY")
     self.PvP.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
@@ -174,11 +198,13 @@ local function CreatePlayer(self)
     self.PvP.text.frequentUpdates = 1
     self:Tag(self.PvP.text, "[realui:pvptimer]")
 
-
+    self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
     self:SetScript("OnEnter", UnitFrame_OnEnter)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
 
-    self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
+    function self:PostUpdate(event)
+        UnitFrames:UpdateEndBox(self, event)
+    end
 end
 
 -- Init

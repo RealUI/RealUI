@@ -1,6 +1,6 @@
 local nibRealUI = LibStub("AceAddon-3.0"):NewAddon("nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
-local db, dbc, dbg
+local db, dbc, dbg, _
 _G.RealUI = nibRealUI
 
 nibRealUI.verinfo = {
@@ -747,7 +747,7 @@ function nibRealUI:OnInitialize()
 	-- Vars
 	self.realm = GetRealmName()
 	self.faction = UnitFactionGroup("player")
-	self.class = select(2, UnitClass("player"))
+	_, self.class = UnitClass("player")
 	self.classColor = nibRealUI:GetClassColor(self.class)
 	self.name = UnitName("player")
 	self.key = string.format("%s - %s", self.name, self.realm)

@@ -28,11 +28,23 @@ UnitFrames.textures = {
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Surround]=],
             },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Warning]=],
+            },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Surround]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 32,
+                height = 32,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Surround]=],
             },
         },
         F2 = { -- Focus / Target Target
@@ -48,11 +60,22 @@ UnitFrames.textures = {
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Surround]=],
             },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Step]=],
+            },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Surround]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Surround]=],
             },
         },
         F3 = { -- Focus Target / Pet
@@ -67,6 +90,17 @@ UnitFrames.textures = {
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Surround]=],
+            },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Step]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Surround]=],
             },
         },
     },
@@ -90,11 +124,23 @@ UnitFrames.textures = {
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]=],
             },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]=],
+            },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Surround]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 32,
+                height = 32,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Surround]=],
             },
         },
         F2 = { -- Focus / Target Target
@@ -110,11 +156,22 @@ UnitFrames.textures = {
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Surround]=],
             },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]=],
+            },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Surround]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Surround]=],
             },
         },
         F3 = { -- Focus Target / Pet
@@ -129,6 +186,17 @@ UnitFrames.textures = {
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Surround]=],
+            },
+            healthStep = {
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]=],
+            },
+            endBox = { -- Tapped, Hostile, Friendly
+                width = 16,
+                height = 16,
+                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Bar]=],
+                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Surround]=],
             },
         },
     },
@@ -194,6 +262,26 @@ function UnitFrames:CombatResting(event)
     end
 end
 
+function UnitFrames:UpdateEndBox(self, ...)
+    print("UpdateEndBox", self and self.unit, ...)
+    local unit, color = self.unit
+    local _, class = UnitClass(unit)
+    if UnitIsPlayer(unit) then
+        color = nibRealUI:GetClassColor(class)
+    else
+        if ( not UnitPlayerControlled(unit) and UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) ) then
+            color = db.overlay.colors.status.tapped
+        elseif UnitIsEnemy("player", unit) then
+            color = db.overlay.colors.status.hostile
+        elseif UnitCanAttack("player", unit) then
+            color = db.overlay.colors.status.neutral
+        else
+            color = db.overlay.colors.status.friendly
+        end
+    end
+    self.endBox:Show()
+    self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
+end
 
 -- Init
 function UnitFrames:InitShared()

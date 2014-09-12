@@ -13,7 +13,7 @@ local coords = {
         health = {0.546875, 1, 0.4375, 1},
     },
     [2] = {
-        health = {0.5390625, 1, 0.375, 1},
+        health = {0.4609375, 1, 0.375, 1},
     },
 }
 
@@ -25,13 +25,13 @@ local function CreateHealthBar(parent)
     health:SetAllPoints(parent)
 
     health.bar = AngleStatusBar:NewBar(health, -2, -1, texture.width, texture.height - 2, "LEFT", "RIGHT", "LEFT", true)
----[[
+
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
     health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.bg:SetVertexColor(0, 0, 0, 0.4)
     health.bg:SetAllPoints(health)
----]]
+
     health.border = health:CreateTexture(nil, "BORDER")
     health.border:SetTexture(texture.border)
     health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
@@ -66,39 +66,43 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
-local function CreateCombat(parent)
+local function CreateCombatResting(parent)
     local texture = F2.statusBox
     local combat = parent:CreateTexture(nil, "BORDER")
     combat:SetTexture(texture.bar)
     combat:SetSize(texture.width, texture.height)
     combat:SetPoint("TOPRIGHT", parent, "TOPLEFT", 8, 0)
 
+    local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    resting:SetTexture(texture.border)
+    resting:SetAllPoints(combat)
+
+    combat.Override = UnitFrames.CombatResting
+    resting.Override = UnitFrames.CombatResting
+    
+    return combat, resting
+end
+
+local function CreateEndBox(parent)
+    local texture = F2.endBox
+    local endBox = parent:CreateTexture(nil, "BORDER")
+    endBox:SetTexture(texture.bar)
+    endBox:SetSize(texture.width, texture.height)
+    endBox:SetPoint("BOTTOMLEFT", parent, "BOTTOMRIGHT", -6 - UnitFrames.layoutSize, 0)
+
     local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
-    border:SetAllPoints(combat)
-
-    local combatColor = db.overlay.colors.status.combat
-    combat.Override = function(self, event, unit)
-        if event == "PLAYER_REGEN_DISABLED" then
-            print("Combat Override", self, event, unit)
-            self.Combat:SetVertexColor(combatColor[1], combatColor[2], combatColor[3], combatColor[4])
-            self.Combat.isCombat = true
-        elseif event == "PLAYER_REGEN_ENABLED" then
-            print("Combat Override", self, event, unit)
-            self.Combat:SetVertexColor(0, 0, 0, 0.6)
-            self.Combat.isCombat = false
-            self.Resting.Override(self, event, unit)
-        end
-    end
-    
-    return combat
+    border:SetAllPoints(endBox)
+   
+    return endBox
 end
 
 local function CreateFocus(self)
     self:SetSize(F2.health.width, F2.health.height)
     self.Health = CreateHealthBar(self)
     self.PvP = CreatePvPStatus(self)
-    self.Combat = CreateCombat(self)
+    self.Combat, self.Resting = CreateCombatResting(self)
+    self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 0)
@@ -107,6 +111,11 @@ local function CreateFocus(self)
 
     self:SetScript("OnEnter", UnitFrame_OnEnter)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
+
+    function self:PostUpdate(event)
+        self.Combat.Override(self, event)
+        UnitFrames:UpdateEndBox(self, event)
+    end
 end
 
 -- Init
