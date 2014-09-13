@@ -188,20 +188,30 @@ local ReversePowers = {
     ["POWER_TYPE_SUN_POWER"] = true,
 }
 
-function UnitFrames:HealthOverride(event, unit)
-    --print("Health Override", self, event, unit)
-    local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    if self.Health.steps then
-        for i = 1, 2 do
-            print(healthPer)
-            if healthPer < stepPoints[i] then
-                self.Health.steps[i]:SetTexture(UnitFrames.textures[UnitFrames.layoutSize].F1.health.warn)
-            else
-                self.Health.steps[i]:SetTexture(UnitFrames.textures[UnitFrames.layoutSize].F1.health.step)
-            end
+local function updateSteps(unit, type, percent, frame)
+    local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    if unit == "player" or unit == "target" then
+        texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
+    elseif unit == "focus" or unit == "targettarget" then
+        texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
+    elseif unit == "focustarget" or unit == "pet" then
+        texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
+    end
+    for i = 1, 2 do
+        --print(percent)
+        if percent < stepPoints[i] then
+            frame.steps[i]:SetTexture(texture.warn)
+        else
+            frame.steps[i]:SetTexture(texture.step)
         end
     end
+end
+
+function UnitFrames:HealthOverride(event, unit)
+    --self.Health.bar.reverse = true
+    --print("Health Override", self, event, unit)
+    local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    updateSteps(unit, "health", healthPer, self.Health)
     AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
     AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
 end
@@ -252,7 +262,7 @@ function UnitFrames:CombatResting(event)
 end
 
 function UnitFrames:UpdateEndBox(self, ...)
-    print("UpdateEndBox", self and self.unit, ...)
+    --print("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit
     local _, class = UnitClass(unit)
     if UnitIsPlayer(unit) then

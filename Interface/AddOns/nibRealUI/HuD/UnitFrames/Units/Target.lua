@@ -82,7 +82,7 @@ local function CreateHealthBar(parent)
         health.steps[i]:SetTexture(texture.step)
         health.steps[i]:SetTexCoord(1, 0, 0, 1)
         health.steps[i]:SetSize(16, 16)
-        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width)), -1)
+        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width) - 6), 0)
     end
 
     health.frequentUpdates = true
@@ -197,6 +197,7 @@ local function CreateRange(parent)
         local minRange, maxRange = RC:GetRange("target")
 
         if (UnitIsUnit("player", "target")) or (minRange and minRange > 80) then maxRange = nil end
+        local section
         if maxRange then
             if maxRange <= 5 then
                 section = 5
@@ -225,7 +226,7 @@ local function CreateThreat(parent)
     local threat = parent:CreateTexture(nil, "OVERLAY")
     threat:SetTexture(nibRealUI.media.icons.Lightning)
     threat:SetSize(16, 16)
-    threat:SetPoint("TOPRIGHT", parent, "TOPLEFT", -5, 0)
+    threat:SetPoint("TOPRIGHT", parent, "TOPLEFT", -10, 0)
 
     threat.text = parent:CreateFontString(nil, "OVERLAY")
     threat.text:SetFont(unpack(nibRealUI:Font()))
@@ -242,7 +243,7 @@ local function CreateThreat(parent)
         local display = tankLead or rawPercentage
         if not (UnitIsDeadOrGhost("target")) and (display and (display ~= 0)) then
             self.Threat.text:SetFormattedText("%d%%", display)
-            r, g, b = GetThreatStatusColor(status)
+            local r, g, b = GetThreatStatusColor(status)
             self.Threat.text:SetTextColor(r, g, b)
             self.Threat:Show()
         else

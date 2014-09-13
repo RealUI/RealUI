@@ -24,7 +24,7 @@ local function CreateHealthBar(parent)
     health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
     health:SetAllPoints(parent)
 
-    health.bar = AngleStatusBar:NewBar(health, -2, -1, texture.width, texture.height - 2, "LEFT", "RIGHT", "LEFT", true)
+    health.bar = AngleStatusBar:NewBar(health, -9, -1, texture.width - 11, texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
 
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
@@ -37,18 +37,27 @@ local function CreateHealthBar(parent)
     health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     health.border:SetAllPoints(health)
 
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    health.steps = {}
+    for i = 1, 2 do
+        health.steps[i] = health:CreateTexture(nil, "OVERLAY")
+        health.steps[i]:SetTexture(texture.step)
+        health.steps[i]:SetSize(16, 16)
+        health.steps[i]:SetPoint("BOTTOMLEFT", health, floor(stepPoints[i] * texture.width) - 6, 0)
+    end
+
     health.Override = UnitFrames.HealthOverride
     return health
 end
 
 local function CreatePvPStatus(parent)
     local texture = F3.healthBox
-    local pvp = parent:CreateTexture(nil, "OVERLAY", nil, 1)
+    local pvp = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
     pvp:SetTexture(texture.bar)
     pvp:SetSize(texture.width, texture.height)
     pvp:SetPoint("TOPRIGHT", parent, -8, -1)
 
-    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    local border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetAllPoints(pvp)
 

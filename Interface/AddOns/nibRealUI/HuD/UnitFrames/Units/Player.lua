@@ -73,7 +73,7 @@ local function CreateHealthBar(parent)
         health.steps[i] = health:CreateTexture(nil, "OVERLAY")
         health.steps[i]:SetTexture(texture.step)
         health.steps[i]:SetSize(16, 16)
-        health.steps[i]:SetPoint("TOPLEFT", health, floor(stepPoints[i] * texture.width) - 7, -1)
+        health.steps[i]:SetPoint("TOPLEFT", health, floor(stepPoints[i] * texture.width) - 6, 0)
     end
 
     health.frequentUpdates = true

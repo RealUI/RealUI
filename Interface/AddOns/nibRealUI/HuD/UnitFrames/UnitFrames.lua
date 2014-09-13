@@ -504,9 +504,9 @@ function UnitFrames:OnInitialize()
                 },
                 [2] = {
                     player =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    pet =           { x = -58,  y = -83},   -- Anchored to Player
+                    pet =           { x = 60,  y = -91},   -- Anchored to Player
                     focus =         { x = 36,   y = -67},   -- Anchored to Player
-                    focustarget =   { x = 0,    y = -2},   -- Anchored to Focus
+                    focustarget =   { x = 12,    y = -2},   -- Anchored to Focus
                     target =        { x = 0,    y = 0},     -- Anchored to Positioner
                     targettarget =  { x = -36,  y = -67},   -- Anchored to Target
                     boss =          { x = 0,    y = 0},     -- Anchored to Positioner
