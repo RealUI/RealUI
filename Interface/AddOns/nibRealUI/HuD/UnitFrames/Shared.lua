@@ -15,24 +15,22 @@ UnitFrames.textures = {
                 height = 13,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Warning]=],
             },
             power = {
                 width = 197,
                 height = 8,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Warning]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Warning]=],
             },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
@@ -53,17 +51,13 @@ UnitFrames.textures = {
                 height = 9,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Step]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Step]=],
             },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
@@ -84,17 +78,13 @@ UnitFrames.textures = {
                 height = 9,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Step]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Step]=],
             },
             endBox = { -- Tapped, Hostile, Friendly
                 width = 16,
@@ -111,24 +101,22 @@ UnitFrames.textures = {
                 height = 15,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Warning]=],
             },
             power = {
                 width = 230,
                 height = 10,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Step]=],
+                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]=],
             },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
@@ -149,17 +137,13 @@ UnitFrames.textures = {
                 height = 10,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]=],
             },
             statusBox = { -- Combat, Resting, Leader, AFK
                 width = 16,
@@ -180,17 +164,13 @@ UnitFrames.textures = {
                 height = 10,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Surround]=],
+                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]=],
             },
             healthBox = { -- PvP Status / Classification
                 width = 16,
                 height = 16,
                 bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Bar]=],
                 border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Surround]=],
-            },
-            healthStep = {
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]=],
             },
             endBox = { -- Tapped, Hostile, Friendly
                 width = 16,
@@ -209,10 +189,19 @@ local ReversePowers = {
 }
 
 function UnitFrames:HealthOverride(event, unit)
-    --self.Health.bar.reverse = true
-    if unit == "target" then return end
     --print("Health Override", self, event, unit)
     local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    if self.Health.steps then
+        for i = 1, 2 do
+            print(healthPer)
+            if healthPer < stepPoints[i] then
+                self.Health.steps[i]:SetTexture(UnitFrames.textures[UnitFrames.layoutSize].F1.health.warn)
+            else
+                self.Health.steps[i]:SetTexture(UnitFrames.textures[UnitFrames.layoutSize].F1.health.step)
+            end
+        end
+    end
     AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
     AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
 end

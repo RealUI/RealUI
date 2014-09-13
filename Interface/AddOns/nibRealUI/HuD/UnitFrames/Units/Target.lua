@@ -75,6 +75,16 @@ local function CreateHealthBar(parent)
     health.text:SetJustifyH("LEFT")
     parent:Tag(health.text, "[realui:healthPercent][realui:health]")
 
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    health.steps = {}
+    for i = 1, 2 do
+        health.steps[i] = health:CreateTexture(nil, "OVERLAY")
+        health.steps[i]:SetTexture(texture.step)
+        health.steps[i]:SetTexCoord(1, 0, 0, 1)
+        health.steps[i]:SetSize(16, 16)
+        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width)), -1)
+    end
+
     health.frequentUpdates = true
     health.Override = UnitFrames.HealthOverride
     return health
