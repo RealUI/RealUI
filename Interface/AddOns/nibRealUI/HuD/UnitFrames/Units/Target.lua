@@ -79,7 +79,6 @@ local function CreateHealthBar(parent)
     health.steps = {}
     for i = 1, 2 do
         health.steps[i] = health:CreateTexture(nil, "OVERLAY")
-        health.steps[i]:SetTexture(texture.step)
         health.steps[i]:SetTexCoord(1, 0, 0, 1)
         health.steps[i]:SetSize(16, 16)
         health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width) - 6), 0)
@@ -116,6 +115,15 @@ local function CreatePowerBar(parent)
     power.text:SetPoint("TOPLEFT", power, "BOTTOMLEFT", 0, -3)
     power.text:SetFont(unpack(nibRealUI:Font()))
     parent:Tag(power.text, "[realui:power]")
+
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    power.steps = {}
+    for i = 1, 2 do
+        power.steps[i] = power:CreateTexture(nil, "OVERLAY")
+        power.steps[i]:SetTexCoord(1, 0, 0, 1)
+        power.steps[i]:SetSize(16, 16)
+        power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
+    end
 
     power.frequentUpdates = true
     power.Override = UnitFrames.PowerOverride

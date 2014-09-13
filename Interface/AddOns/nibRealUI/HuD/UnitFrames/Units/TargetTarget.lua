@@ -26,7 +26,7 @@ local function CreateHealthBar(parent)
     health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
     health:SetAllPoints(parent)
 
-    health.bar = AngleStatusBar:NewBar(health, 0, -1, texture.width - 4, texture.height - 2, "LEFT", "RIGHT", "LEFT", true)
+    health.bar = AngleStatusBar:NewBar(health, 2, -1, texture.width - 3, texture.height - 2, "RIGHT", "LEFT", "RIGHT", true)
 
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
@@ -43,10 +43,9 @@ local function CreateHealthBar(parent)
     health.steps = {}
     for i = 1, 2 do
         health.steps[i] = health:CreateTexture(nil, "OVERLAY")
-        health.steps[i]:SetTexture(texture.step)
         health.steps[i]:SetTexCoord(1, 0, 0, 1)
         health.steps[i]:SetSize(16, 16)
-        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width)), 0)
     end
 
     health.Override = UnitFrames.HealthOverride

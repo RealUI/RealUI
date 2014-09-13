@@ -108,6 +108,14 @@ local function CreatePowerBar(parent)
     power.text:SetFont(unpack(nibRealUI:Font()))
     parent:Tag(power.text, "[realui:power]")
 
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    power.steps = {}
+    for i = 1, 2 do
+        power.steps[i] = power:CreateTexture(nil, "OVERLAY")
+        power.steps[i]:SetSize(16, 16)
+        power.steps[i]:SetPoint("BOTTOMLEFT", power, floor(stepPoints[i] * texture.width) - 6, 0)
+    end
+
     power.frequentUpdates = true
     power.Override = UnitFrames.PowerOverride
     return power

@@ -198,8 +198,8 @@ local function updateSteps(unit, type, percent, frame)
         texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
     end
     for i = 1, 2 do
-        --print(percent)
-        if percent < stepPoints[i] then
+        print(percent, unit, type)
+        if percent < stepPoints[i] and (unit == "player" or unit == "target") then
             frame.steps[i]:SetTexture(texture.warn)
         else
             frame.steps[i]:SetTexture(texture.step)
@@ -208,9 +208,8 @@ local function updateSteps(unit, type, percent, frame)
 end
 
 function UnitFrames:HealthOverride(event, unit)
-    --self.Health.bar.reverse = true
     --print("Health Override", self, event, unit)
-    local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local healthPer = 0.35 --nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
     AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
     AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
@@ -235,6 +234,7 @@ function UnitFrames:PowerOverride(event, unit, powerType)
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[unitPower])
     end
     local powerPer = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
+    updateSteps(unit, "power", powerPer, self.Power)
     AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
 end
 
