@@ -693,6 +693,9 @@ function nibRealUI:PLAYER_LOGIN()
 	end
 
 	-- Helpful messages
+	local blue = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
+	local red = nibRealUI:ColorTableToStr(nibRealUI.media.colors.red)
+	
 	if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
 		if not(dbg.messages.resetNew) then
 			if IsAddOnLoaded("cargBags_Nivaya") then
@@ -704,9 +707,16 @@ function nibRealUI:PLAYER_LOGIN()
 			end
 		end
 		if not(dbg.messages.largeHuDOption) then
-			local blue = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
 			print("Using a hi-res display? Check out the new |cff"..blue.."Large HuD|r option found in the Positions config panel (|cFFFF8000/realui|r > Positions)")
 		end
+	end
+	
+	-- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
+	if GetCVar("scriptProfile") == "1" then
+		print("|cff"..red.."CPU Profiling is enabled!|r To disable, type: |cff"..blue.."/cpuProfiling")
+	end
+	if GetCVar("taintLog") ~= "0" then
+		print("|cff"..red.."Taint Logging is enabled!|r To disable, type: |cff"..blue.."/taintLogging")
 	end
 
 	-- Update styling
@@ -721,6 +731,16 @@ function RealUI_TestRaidWarnings()
 		RaidNotice_AddMessage(RaidWarningFrame, "This is a raid warning message!", { r = 0, g = 1, b = 0 })
 		RaidNotice_AddMessage(RaidBossEmoteFrame, "This is a boss emote message!", { r = 0, g = 1, b = 0 })
 	end, 5)
+end
+
+function nibRealUI:CPU_Profiling_Toggle()
+	SetCVar("scriptProfile", (GetCVar("scriptProfile") == "1") and "0" or "1")
+	ReloadUI()
+end
+
+function nibRealUI:Taint_Logging_Toggle()
+	SetCVar("taintLog", (GetCVar("taintLog") ~= "0") and "0" or "2")
+	ReloadUI()
 end
 
 function nibRealUI:ADDON_LOADED(event, addon)
@@ -777,6 +797,8 @@ function nibRealUI:OnInitialize()
 	self:RegisterChatCommand("realadv", function() nibRealUI:OpenOptions() end)
 	self:RegisterChatCommand("memory", "MemoryDisplay")
 	self:RegisterChatCommand("rl", function() ReloadUI() end)
+	self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
+	self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
 
 	-- Synch user's settings
 	if dbg.tags.firsttime then
