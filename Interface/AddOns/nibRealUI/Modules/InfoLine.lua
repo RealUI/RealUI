@@ -3981,6 +3981,7 @@ function InfoLine:CreateFrames()
 		Graphs["fps"].enabled = true
 		ILFrames.pc:UnregisterEvent("UPDATE_PENDING_MAIL")
 	end)
+	ILFrames.pc.elapsed1PowerModeTimes = {1, 2, 1}	-- Update FPS more or less frequently based on Power Mode setting {Normal, Economy, Turbo}
 	ILFrames.pc.elapsed1 = 1
 	ILFrames.pc.elapsed2 = 5
 	ILFrames.pc:SetScript("OnUpdate", function(self, elapsed) 
@@ -3988,7 +3989,7 @@ function InfoLine:CreateFrames()
 		if ILFrames.pc.ready then
 			self.elapsed1 = self.elapsed1 + elapsed
 			self.elapsed2 = self.elapsed2 + elapsed
-			if self.elapsed1 >= 1 then
+			if self.elapsed1 >= self.elapsed1PowerModeTimes[ndb.settings.powerMode] then
 				-- FPS update
 				PC_Update(self, true)
 				self.elapsed1 = 0
