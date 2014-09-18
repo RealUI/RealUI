@@ -3088,7 +3088,9 @@ local function PC_Update(self, short)
 		end
 		
 		-- Graph
-		UpdateGraph("fps", SysStats.fps.tally)
+		if Graphs["fps"].shown then
+			UpdateGraph("fps", SysStats.fps.tally)
+		end
 	else
 		-- Net
 		SysStats.bwIn.cur, SysStats.bwOut.cur, SysStats.lagHome.cur, SysStats.lagWorld.cur = GetNetStats()
@@ -3338,6 +3340,8 @@ function InfoLine:OnLeave(self)
 		self.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
 		color = nibRealUI.media.colors.orange
 		self.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
+	elseif self.tag == "pc" then
+		PC_OnLeave(self)
 	end
 end
 
