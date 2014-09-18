@@ -33,6 +33,8 @@ tinsert(C.themes["Aurora"], function()
 
 	BorderFrame.CloseButton:SetPoint("TOPRIGHT", -9, -6)
 
+	WorldMapLevelDropDown:SetPoint("TOPLEFT", -14, 2)
+
 	-- [[ Size up / down buttons ]]
 
 	for _, buttonName in pairs{"WorldMapFrameSizeUpButton", "WorldMapFrameSizeDownButton"} do

@@ -368,14 +368,15 @@ function nibRealUI:InstallProcedure()
 	
 	---- Version checking
 	local curVer = nibRealUI.verinfo
-	local oldVer = dbg.verinfo or {8, 0}
+	local oldVer = dbg.verinfo or {8, 0, 31}
 	local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
 	
 	-- nibRealUIVersion = nibRealUI.verinfo
 	
 	-- Reset DB if new Major version
 	print("InstallProcedure", newVer)
-	if newVer == "major" then
+	if newVer == "major" or (not dbg.minipatches[8] and dbg.verinfo[2] < 1) then
+		-- reset if major version or they are upgrading from an old minor version
 		nibRealUI.db:ResetDB("RealUI")
 		if StaticPopup1 then
 			StaticPopup1:Hide()

@@ -209,7 +209,7 @@ end
 
 function UnitFrames:HealthOverride(event, unit)
     --print("Health Override", self, event, unit)
-    local healthPer = 0.35 --nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
     AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
     AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)

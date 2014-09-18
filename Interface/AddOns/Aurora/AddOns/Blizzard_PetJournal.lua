@@ -366,7 +366,12 @@ C.themes["Blizzard_PetJournal"] = function()
 		local toyString = _G[self:GetName().."ToyName"]
 
 		if PlayerHasToy(self.itemID) then
-			toyString:SetTextColor(1, 1, 1)
+			local _, _, quality = GetItemInfo(self.itemID)
+			if quality then
+				toyString:SetTextColor(GetItemQualityColor(quality))
+			else
+				toyString:SetTextColor(1, 1, 1)
+			end
 		else
 			toyString:SetTextColor(.5, .5, .5)
 		end
