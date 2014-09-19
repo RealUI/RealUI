@@ -151,7 +151,9 @@ local function HasEclipseBuffs()
     return retval
 end
 
-function EclipseBar:OnUpdate()
+function EclipseBar:OnUpdate(event, unit, powerType)
+    --print("EclipseBar:OnUpdate", unit, powerType)
+    if unit ~= "player" or powerType ~= "ECLIPSE" then return end
     -- Power Text
     local power = UnitPower("player", SPELL_POWER_ECLIPSE)
     local maxPower = UnitPowerMax("player", SPELL_POWER_ECLIPSE)
@@ -163,7 +165,7 @@ function EclipseBar:OnUpdate()
 
     --local status = GetEclipseDirection()
     if self.direction == "sun" then
-        --print("EclipseBar:Sun", powerPer)
+        --print("EclipseBar:Sun", power)
 
         if power > 0 then
             AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
@@ -171,11 +173,11 @@ function EclipseBar:OnUpdate()
         else
             AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
             AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
-            self:ECLIPSE_DIRECTION_CHANGE("ECLIPSE_DIRECTION_CHANGE", GetEclipseDirection())
+            self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
         end
 
     elseif self.direction == "moon" then
-        --print("EclipseBar:Moon", powerPer)
+        --print("EclipseBar:Moon", power)
 
         if power < 0 then
             AngleStatusBar:SetValue(self.eBar.lunar.bar, abs(power / 100))
@@ -183,22 +185,15 @@ function EclipseBar:OnUpdate()
         else
             AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
             AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
-            self:ECLIPSE_DIRECTION_CHANGE("ECLIPSE_DIRECTION_CHANGE", GetEclipseDirection())
+            self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
         end
 
     else
-        local powerPer = ((power + 100) / (maxPower + 100))
-        --print("EclipseBar:None", powerPer)
+        --print("EclipseBar:None", power)
 
-        if powerPer <= 0.5 then
-            -- Lunar side
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, 1- (powerPer * 2))
-            AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
-        else
-            -- Solar side
-            AngleStatusBar:SetValue(self.eBar.solar.bar, (powerPer - 0.5) * 2)
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
-        end
+        AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
+        AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
+        self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
     end
 
     self.eBar.power.text:SetText(abs(power))
@@ -314,7 +309,7 @@ function EclipseBar:PLAYER_ENTERING_WORLD(event, ...)
     self:UpdatePlayerLocation()
     self:UpdateVisibility()
     self:UpdateAuras()
-    self:ECLIPSE_DIRECTION_CHANGE(nil, GetEclipseDirection())
+    self:OnUpdate(event, "player", "ECLIPSE")
 end
 
 -----------------------
@@ -468,9 +463,10 @@ function EclipseBar:OnEnable()
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterBucketEvent("UNIT_AURA", updateSpeed, "UpdateAuras")
-    self:RegisterEvent("ECLIPSE_DIRECTION_CHANGE")
+    self:RegisterBucketEvent("UNIT_POWER_FREQUENT", updateSpeed, "OnUpdate")
+    --self:RegisterEvent("ECLIPSE_DIRECTION_CHANGE")
 
-    self.updateTimer = self:ScheduleRepeatingTimer("OnUpdate", updateSpeed)
+    --self.updateTimer = self:ScheduleRepeatingTimer("OnUpdate", updateSpeed)
 end
 
 function EclipseBar:OnDisable()
