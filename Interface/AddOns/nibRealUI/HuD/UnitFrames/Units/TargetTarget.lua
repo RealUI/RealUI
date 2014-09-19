@@ -133,7 +133,7 @@ local function CreateTargetTarget(self)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
     
     function self:PostUpdate(event)
-        self.Combat.Override(self, event)
+        --self.Combat.Override(self, event)
         UnitFrames:UpdateEndBox(self, event)
     end
 end

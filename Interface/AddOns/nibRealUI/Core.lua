@@ -565,9 +565,6 @@ function nibRealUI:GetVerString(returnLong)
 		return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
 	end
 end
-function nibRealUI:MajorVerChange(oldVer, curVer)
-	return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
-end
 
 -- Events
 function nibRealUI:VARIABLES_LOADED()

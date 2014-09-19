@@ -27,14 +27,6 @@ tinsert(C.themes["Aurora"], function()
 		button.enableButton:GetCheckedTexture():SetDesaturated(true)
 	end)
 
-	local bonusValor = LFDQueueFrameRandomScrollFrameChildFrameBonusValor
-	bonusValor.Border:Hide()
-	bonusValor.Icon:SetTexCoord(.08, .92, .08, .92)
-	bonusValor.Icon:SetPoint("CENTER", bonusValor.Border, -3, 0)
-	bonusValor.Icon:SetSize(24, 24)
-	bonusValor.BonusText:SetPoint("LEFT", bonusValor.Border, "RIGHT", -5, -1)
-	F.CreateBG(bonusValor.Icon)
-
 	F.CreateBD(LFDRoleCheckPopup)
 	F.Reskin(LFDRoleCheckPopupAcceptButton)
 	F.Reskin(LFDRoleCheckPopupDeclineButton)

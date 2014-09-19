@@ -120,6 +120,7 @@ local function CreatePowerBar(parent)
     power.steps = {}
     for i = 1, 2 do
         power.steps[i] = power:CreateTexture(nil, "OVERLAY")
+        power.steps[i]:SetTexture(texture.warn)
         power.steps[i]:SetTexCoord(1, 0, 0, 1)
         power.steps[i]:SetSize(16, 16)
         power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
@@ -174,8 +175,8 @@ local function CreateCombatResting(parent)
     resting:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     resting:SetAllPoints(combat)
 
-    combat.Override = UnitFrames.CombatResting
-    resting.Override = UnitFrames.CombatResting
+    combat.Override = UnitFrames.UpdateStatus
+    resting.Override = UnitFrames.UpdateStatus
     
     return combat, resting
 end
@@ -300,7 +301,7 @@ local function CreateTarget(self)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PostUpdate(event)
-        self.Combat.Override(self, event)
+        --self.Combat.Override(self, event)
         UnitFrames:UpdateEndBox(self, event)
     end
 end

@@ -578,7 +578,7 @@ function StatDisplay:GetCharStatTexts()
         {},
         {},
     }
-    for i = i, #statTable do
+    for i = 1, #statTable do
         if statTable[i].slug == dbc.stats[1][1] then
             stats[1][1] = statTable[i].name
         end

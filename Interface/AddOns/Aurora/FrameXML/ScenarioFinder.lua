@@ -15,14 +15,6 @@ tinsert(C.themes["Aurora"], function()
 
 	ScenarioQueueFrameRandomScrollFrame:SetWidth(304)
 
-	local bonusValor = ScenarioQueueFrameRandomScrollFrameChildFrameBonusValor
-	bonusValor.Border:Hide()
-	bonusValor.Icon:SetTexCoord(.08, .92, .08, .92)
-	bonusValor.Icon:SetPoint("CENTER", bonusValor.Border, -3, 0)
-	bonusValor.Icon:SetSize(24, 24)
-	bonusValor.BonusText:SetPoint("LEFT", bonusValor.Border, "RIGHT", -5, -1)
-	F.CreateBG(bonusValor.Icon)
-
 	F.Reskin(ScenarioQueueFrameFindGroupButton)
 	F.Reskin(ScenarioQueueFrameRandomScrollFrameChildFrame.bonusRepFrame.ChooseButton)
 	F.ReskinDropDown(ScenarioQueueFrameTypeDropDown)
