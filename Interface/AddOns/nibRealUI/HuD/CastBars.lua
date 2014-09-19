@@ -383,7 +383,7 @@ function CastBars:StartBar(unit, action, message)
 	if self.configMode then
 		self[unit].icon.bg:SetTexture("Interface\\Icons\\Spell_Fire_Immolation")
 		self[unit].name.text:SetTextColor(1, 1, 1, 1)
-		self[unit].name.text:SetText("Pew Pew Laser Beams!")
+		self[unit].name.text:SetText(unit.." cast bar")
 		self[unit].time.text:SetText("2.5")
 
 		AngleStatusBar:SetValue(self[unit].cast.bar, 0.35)
