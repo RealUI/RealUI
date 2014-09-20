@@ -150,7 +150,7 @@ function RavenBorders:OnInitialize()
 end
 
 function RavenBorders:OnEnable()
-	if IsAddOnLoaded("Raven") then
+	if IsAddOnLoaded("Raven") and nibRealUI:DoesAddonStyle("Raven") then
 		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	end
 end
