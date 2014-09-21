@@ -7,6 +7,12 @@ local db
 local MODNAME = "EventNotifier"
 local EventNotifier = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
+-- For maps where we don't want notifications of vignettes
+local VignetteExclusionMapIDs = {
+	--[123] = true,
+}
+
+
 local options
 local function GetOptions()
 	if not options then options = {
@@ -62,12 +68,12 @@ local function GetOptions()
 						end,
 						order = 20,
 					},
-					checkTIRares = {
+					checkMinimapRares = {
 						type = "toggle",
-						name = "Timeless Isle rares",
-						get = function() return db.checkTIRares end,
+						name = MINIMAP_LABEL.." "..ITEM_QUALITY3_DESC,
+						get = function() return db.checkMinimapRares end,
 						set = function(info, value) 
-							db.checkTIRares = value
+							db.checkMinimapRares = value
 						end,
 						order = 30,
 					},
@@ -136,11 +142,26 @@ function EventNotifier:CALENDAR_UPDATE_GUILD_EVENTS()
 	end
 end
 
-function EventNotifier:VIGNETTE_ADDED()
-	if db.checkTIRares then
-		PlaySoundFile("Sound\\Interface\\RaidWarning.wav")
-		nibRealUI:Notification("Rare Spotted", true, "A rare mob has appeared on the MiniMap!", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+function EventNotifier:VIGNETTE_ADDED(vigID)
+	if not(db.checkMinimapRares) or VignetteExclusionMapIDs[GetCurrentMapAreaID()] then return end
+
+	if (vigID ~= self.lastMinimapRare.id) then
+
+		-- Vignette Info
+		local ofsX, ofsY, name, objectIcon = C_Vignettes.GetVignetteInfoFromInstanceID(vigID)
+		local left, right, top, bottom = GetObjectIconTextureCoords(objectIcon)
+
+		-- Notify
+		if (GetTime() > self.lastMinimapRare.time + 20) then
+			PlaySoundFile([[Sound\Interface\RaidWarning.wav]])
+		end
+		nibRealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\OBJECTICONS]], left, right, top, bottom)
+
 	end
+
+	-- Set last Vignette data
+	self.lastMinimapRare.time = GetTime()
+	self.lastMinimapRare.id = vigID
 end
 
 function EventNotifier:CALENDAR_UPDATE_PENDING_INVITES()
@@ -173,13 +194,15 @@ function EventNotifier:OnInitialize()
 		profile = {
 			checkEvents = true,
 			checkGuildEvents = true,
-			checkTIRares = true,
+			checkMinimapRares = true,
 		},
 	})
 	db = self.db.profile
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+
+	self.lastMinimapRare = {time = 0, id = nil}
 end
 
 function EventNotifier:OnEnable()
