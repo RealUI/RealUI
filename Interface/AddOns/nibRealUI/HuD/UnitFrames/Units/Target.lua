@@ -61,7 +61,7 @@ local function CreateHealthBar(parent)
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
     health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    health.bg:SetVertexColor(0, 0, 0, 0.4)
+    health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
     health.bg:SetAllPoints(health)
 
     health.border = health:CreateTexture(nil, "BORDER")
@@ -102,7 +102,7 @@ local function CreatePowerBar(parent)
     power.bg = power:CreateTexture(nil, "BACKGROUND")
     power.bg:SetTexture(texture.bar)
     power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    power.bg:SetVertexColor(0, 0, 0, 0.4)
+    power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
     power.bg:SetAllPoints(power)
     ---]]
 
@@ -123,7 +123,7 @@ local function CreatePowerBar(parent)
         power.steps[i]:SetTexture(texture.warn)
         power.steps[i]:SetTexCoord(1, 0, 0, 1)
         power.steps[i]:SetSize(16, 16)
-        power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        --power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
     end
 
     power.frequentUpdates = true
@@ -159,26 +159,35 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
-local function CreateCombatResting(parent)
+local function CreateStatuses(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
     local coords = positions[UnitFrames.layoutSize].healthBox
-    -- Combat status has priority so we'll use the BG as its base
-    local combat = parent:CreateTexture(nil, "BORDER")
-    combat:SetTexture(texture.bar)
-    combat:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    combat:SetSize(texture.width, texture.height)
-    combat:SetPoint("TOPLEFT", parent, "TOPRIGHT", -8, 0)
+    local status = {}
+    for i = 1, 2 do
+        status[i] = {}
+        status[i].bg = parent.Power:CreateTexture(nil, "BORDER")
+        status[i].bg:SetTexture(texture.bar)
+        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].bg:SetSize(texture.width, texture.height)
 
-    -- Resting is second priority, so we use the border then change the BG in Override.
-    local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
-    resting:SetTexture(texture.border)
-    resting:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    resting:SetAllPoints(combat)
+        status[i].border = parent.Power:CreateTexture(nil, "OVERLAY", nil, 3)
+        status[i].border:SetTexture(texture.border)
+        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].border:SetAllPoints(status[i].bg)
 
-    combat.Override = UnitFrames.UpdateStatus
-    resting.Override = UnitFrames.UpdateStatus
-    
-    return combat, resting
+        status[i].bg.Override = UnitFrames.UpdateStatus
+        status[i].border.Override = UnitFrames.UpdateStatus
+
+        if i == 1 then
+            status[i].bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -8, 0)
+            parent.Combat = status[i].bg
+            parent.Resting = status[i].border
+        else
+            status[i].bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -2, 0)
+            parent.Leader = status[i].bg
+            parent.AFK = status[i].border
+        end
+    end
 end
 
 local function CreateRange(parent)
@@ -285,10 +294,10 @@ local function CreateTarget(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
     self.PvP = CreatePvPStatus(self.Health)
-    self.Combat, self.Resting = CreateCombatResting(self.Power)
     self.Range = CreateRange(self.Health)
     self.Threat = CreateThreat(self.Power)
     self.endBox = CreateEndBox(self)
+    CreateStatuses(self)
     
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
@@ -300,9 +309,50 @@ local function CreateTarget(self)
     self:SetScript("OnEnter", UnitFrame_OnEnter)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
 
-    function self:PostUpdate(event)
+    function self:PreUpdate(event)
         --self.Combat.Override(self, event)
         UnitFrames:UpdateEndBox(self, event)
+
+        if UnitPowerMax(self.unit) > 0 then
+            print("Has power")
+            if not self.Power.enabled then
+                print("Enable power")
+                self.Power.enabled = true
+                --self.Power.bar:Show()
+                self.Power.text:Show()
+                for i = 1, 2 do
+                    self.Power.steps[i]:Show()
+                end
+            end
+        else
+            print("Disable power")
+            self.Power.enabled = false
+            --self.Power.bar:Hide()
+            self.Power.text:Hide()
+            for i = 1, 2 do
+                self.Power.steps[i]:Hide()
+            end
+            --return
+        end
+        local _, powerType = UnitPowerType(self.unit)
+        --UnitFrames.PowerOverride(self, event, self.unit, powerType)
+
+        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
+        self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false
+
+        local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
+        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+        if self.Power.bar.reverse then
+            for i = 1, 2 do
+                self.Power.steps[i]:ClearAllPoints()
+                self.Power.steps[i]:SetPoint("BOTTOMLEFT", self.Power, floor(stepPoints[i] * texture.width) - 6, 0)
+            end
+        else
+            for i = 1, 2 do
+                self.Power.steps[i]:ClearAllPoints()
+                self.Power.steps[i]:SetPoint("BOTTOMRIGHT", self.Power, -(floor(stepPoints[i] * texture.width) - 6), 0)
+            end
+        end
     end
 end
 

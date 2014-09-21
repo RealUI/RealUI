@@ -54,7 +54,7 @@ local function CreateHealthBar(parent)
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
     health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    health.bg:SetVertexColor(0, 0, 0, 0.4)
+    health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
     health.bg:SetAllPoints(health)
 
     health.border = health:CreateTexture(nil, "BORDER")
@@ -94,7 +94,7 @@ local function CreatePowerBar(parent)
     power.bg = power:CreateTexture(nil, "BACKGROUND")
     power.bg:SetTexture(texture.bar)
     power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    power.bg:SetVertexColor(0, 0, 0, 0.4)
+    power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
     power.bg:SetAllPoints(power)
     ---]]
 
@@ -113,7 +113,7 @@ local function CreatePowerBar(parent)
     for i = 1, 2 do
         power.steps[i] = power:CreateTexture(nil, "OVERLAY")
         power.steps[i]:SetSize(16, 16)
-        power.steps[i]:SetPoint("BOTTOMLEFT", power, floor(stepPoints[i] * texture.width) - 6, 0)
+        --power.steps[i]:SetPoint("BOTTOMLEFT", power, floor(stepPoints[i] * texture.width) - 6, 0)
     end
 
     power.frequentUpdates = true
@@ -230,6 +230,25 @@ local function CreatePlayer(self)
 
     function self:PostUpdate(event)
         UnitFrames:UpdateEndBox(self, event)
+
+        local _, powerType = UnitPowerType(self.unit)
+        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
+        self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false
+        self.Power.enabled = true
+
+        local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
+        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+        if self.Power.bar.reverse then
+            for i = 1, 2 do
+                self.Power.steps[i]:ClearAllPoints()
+                self.Power.steps[i]:SetPoint("BOTTOMRIGHT", self.Power, -(floor(stepPoints[i] * texture.width) - 6), 0)
+            end
+        else
+            for i = 1, 2 do
+                self.Power.steps[i]:ClearAllPoints()
+                self.Power.steps[i]:SetPoint("BOTTOMLEFT", self.Power, floor(stepPoints[i] * texture.width) - 6, 0)
+            end
+        end
     end
 end
 

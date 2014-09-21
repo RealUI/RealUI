@@ -198,9 +198,9 @@ function nibRealUI:GetSafeVals(vCur, vMax)
     local percent
     if vCur > 0 and vMax == 0 then
         vMax = vCur
-        percent = 1
+        percent = 0.00000000000001
     elseif vCur == 0 and vMax == 0 then
-        percent = 1
+        percent = 0.00000000000001
     elseif (vCur < 0) or (vMax < 0) then
         vCur = abs(vCur)
         vMax = abs(vMax)

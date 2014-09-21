@@ -182,7 +182,7 @@ UnitFrames.textures = {
     },
 }
 
-local ReversePowers = {
+UnitFrames.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
     ["POWER_TYPE_SUN_POWER"] = true,
@@ -200,12 +200,14 @@ local function updateSteps(unit, type, percent, frame)
     for i = 1, 2 do
         --print(percent, unit, type)
         if frame.bar.reverse then
+            --print("step reverse")
             if percent > stepPoints[i] and (unit == "player" or unit == "target") then
                 frame.steps[i]:SetTexture(texture.warn)
             else
                 frame.steps[i]:SetTexture(texture.step)
             end
         else
+            --print("step normal")
             if percent < stepPoints[i] and (unit == "player" or unit == "target") then
                 frame.steps[i]:SetTexture(texture.warn)
             else
@@ -225,14 +227,8 @@ end
 
 function UnitFrames:PowerOverride(event, unit, powerType)
     --print("Power Override", self, event, unit, powerType)
-    --if unit == "target" then return end
-    local _, unitPower = UnitPowerType(unit)
-    self.Power.bar.reverse = ReversePowers[unitPower] or false
-    if powerType and (unitPower == powerType) then
-        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
-    else
-        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[unitPower])
-    end
+    --if not self.Power.enabled then return end
+
     local powerPer = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
     AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
@@ -241,50 +237,55 @@ end
 function UnitFrames:UpdateStatus(event, ...)
     --print("UpdateStatus", self, event, ...)
     local unit = self.unit
+    local color
     if UnitIsAFK(unit) then
         --print("AFK", self, event, unit)
-        self.Leader:Show()
-        self.AFK:Show()
-        self.Leader:SetVertexColor(db.overlay.colors.status.afk[1], db.overlay.colors.status.afk[2], db.overlay.colors.status.afk[3], db.overlay.colors.status.afk[4])
+        color = db.overlay.colors.status.afk
         self.Leader.status = "afk"
     elseif not(UnitIsConnected(unit)) then
         --print("Offline", self, event, unit)
-        self.Leader:Show()
-        self.AFK:Show()
-        self.Leader:SetVertexColor(db.overlay.colors.status.offline[1], db.overlay.colors.status.offline[2], db.overlay.colors.status.offline[3], db.overlay.colors.status.offline[4])
+        color = db.overlay.colors.status.offline
         self.Leader.status = "offline"
-    elseif true then--UnitIsGroupLeader(unit)
+    elseif UnitIsGroupLeader(unit) then
         --print("Leader", self, event, unit)
-        self.Leader:Show()
-        self.AFK:Show()
-        self.Leader:SetVertexColor(db.overlay.colors.status.leader[1], db.overlay.colors.status.leader[2], db.overlay.colors.status.leader[3], db.overlay.colors.status.leader[4])
+        color = db.overlay.colors.status.leader
         self.Leader.status = "leader"
     else
         --print("Status2: None", self, event, unit)
+        self.Leader.status = false
+    end
+    if self.Leader.status then
+        self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
+        self.Leader:Show()
+        self.AFK:Show()
+    else
         self.Leader:Hide()
         self.AFK:Hide()
-        self.Leader:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-        self.Leader.status = false
     end
 
     if UnitAffectingCombat(unit) then
         --print("Combat", self, event, unit)
-        self.Combat:Show()
-        self.Resting:Show()
-        self.Combat:SetVertexColor(db.overlay.colors.status.combat[1], db.overlay.colors.status.combat[2], db.overlay.colors.status.combat[3], db.overlay.colors.status.combat[4])
+        color = db.overlay.colors.status.combat
         self.Combat.status = "combat"
     elseif IsResting(unit) then
         --print("Resting", self, event, unit)
-        self.Combat:Show()
-        self.Resting:Show()
-        self.Combat:SetVertexColor(db.overlay.colors.status.resting[1], db.overlay.colors.status.resting[2], db.overlay.colors.status.resting[3], db.overlay.colors.status.resting[4])
+        color = db.overlay.colors.status.resting
         self.Combat.status = "resting"
     else
         --print("Status1: None", self, event, unit)
+        self.Combat.status = false
+    end
+    if self.Leader.status and not self.Combat.status then
+        self.Combat:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+        self.Combat:Show()
+        self.Resting:Show()
+    elseif self.Combat.status then
+        self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
+        self.Combat:Show()
+        self.Resting:Show()
+    else
         self.Combat:Hide()
         self.Resting:Hide()
-        self.Combat:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-        self.Combat.status = false
     end
 end
 

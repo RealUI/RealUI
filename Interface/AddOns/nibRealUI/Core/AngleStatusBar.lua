@@ -9,6 +9,7 @@ local min, max, abs, floor = math.min, math.max, math.abs, math.floor
 local dontSmooth
 local smoothing = {}
 local function SetBarPosition(bar, per)
+    --print(bar:GetParent():GetName(), per)
     bar.value = per
     if not bar.reverse then
         bar:SetWidth(bar.fullWidth * (1 - bar.value))
@@ -17,6 +18,7 @@ local function SetBarPosition(bar, per)
     end
 
     per = floor(per * 100) / 100
+    --print("Floored", bar:GetParent():GetName(), per)
     bar:SetShown((not(bar.reverse) and (per < 1)) or (bar.reverse and (per > 0)))
 end
 

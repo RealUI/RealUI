@@ -254,7 +254,7 @@ function GridLayout:Update()
 
 		-- Change Grid Layout
 		local NewHoriz = LayoutDB.hGroups.normal
-		local layoutSize = string.match(layout, "%d+")
+		local layoutSize = string.match(NewLayout, "%d+")
 		if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 			Grid2Layout.db.profile.layouts.raid10 = NewLayout
 			Grid2Layout.db.profile.horizontal = NewHoriz
@@ -279,7 +279,7 @@ function GridLayout:Update()
 		
 		-- Adjust Grid Frame Width
 		local NewWidth
-		if (LayoutDB.sWidth[layoutSize]) and not(LayoutDB.hGroups.raid) then
+		if (LayoutDB.width[layoutSize]) and not(LayoutDB.hGroups.raid) then
 			NewWidth = LayoutDB.width[layoutSize]
 		else
 			NewWidth = LayoutDB.width["normal"]
@@ -351,7 +351,7 @@ function GridLayout:Update()
 			end
 
 			-- Change Grid Layout
-			local layoutSize = string.match(layout, "%d+") --["raid"..layoutSize]
+			local layoutSize = string.match(NewLayout, "%d+") --["raid"..layoutSize]
 			if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
 				Grid2Layout.db.profile.layouts.raid10 = NewLayout
 				Grid2Layout.db.profile.horizontal = NewHoriz
@@ -376,7 +376,7 @@ function GridLayout:Update()
 
 			-- Adjust Grid Frame Width
 			local NewWidth
-			if (LayoutDB.sWidth[layoutSize]) and not(LayoutDB.hGroups.raid) then
+			if (LayoutDB.width[layoutSize]) and not(LayoutDB.hGroups.raid) then
 				NewWidth = LayoutDB.width[layoutSize]
 			else
 				NewWidth = LayoutDB.width["normal"]

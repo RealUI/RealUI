@@ -31,7 +31,7 @@ local function CreateHealthBar(parent)
     health.bg = health:CreateTexture(nil, "BACKGROUND")
     health.bg:SetTexture(texture.bar)
     health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    health.bg:SetVertexColor(0, 0, 0, 0.4)
+    health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
     health.bg:SetAllPoints(health)
 
     health.border = health:CreateTexture(nil, "BORDER")
