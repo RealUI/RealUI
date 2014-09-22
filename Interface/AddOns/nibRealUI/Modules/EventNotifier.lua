@@ -142,7 +142,7 @@ function EventNotifier:CALENDAR_UPDATE_GUILD_EVENTS()
 	end
 end
 
-function EventNotifier:VIGNETTE_ADDED(vigID)
+function EventNotifier:VIGNETTE_ADDED(event, vigID)
 	if not(db.checkMinimapRares) or VignetteExclusionMapIDs[GetCurrentMapAreaID()] then return end
 
 	if (vigID ~= self.lastMinimapRare.id) then

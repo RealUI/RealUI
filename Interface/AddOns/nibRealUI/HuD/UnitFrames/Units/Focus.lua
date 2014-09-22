@@ -74,21 +74,32 @@ local function CreatePvPStatus(parent)
     return pvp
 end
 
-local function CreateCombatResting(parent)
+local function CreateStatuses(parent)
     local texture = F2.statusBox
-    local combat = parent:CreateTexture(nil, "BORDER")
-    combat:SetTexture(texture.bar)
-    combat:SetSize(texture.width, texture.height)
-    combat:SetPoint("TOPRIGHT", parent, "TOPLEFT", 7, 0)
+    local status = {}
+    for i = 1, 2 do
+        status[i] = {}
+        status[i].bg = parent.Health:CreateTexture(nil, "BORDER")
+        status[i].bg:SetTexture(texture.bar)
+        status[i].bg:SetSize(texture.width, texture.height)
 
-    local resting = parent:CreateTexture(nil, "OVERLAY", nil, 3)
-    resting:SetTexture(texture.border)
-    resting:SetAllPoints(combat)
+        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status[i].border:SetTexture(texture.border)
+        status[i].border:SetAllPoints(status[i].bg)
 
-    combat.Override = UnitFrames.CombatResting
-    resting.Override = UnitFrames.CombatResting
-    
-    return combat, resting
+        status[i].bg.Override = UnitFrames.UpdateStatus
+        status[i].border.Override = UnitFrames.UpdateStatus
+
+        if i == 1 then
+            status[i].bg:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", 6 + UnitFrames.layoutSize, 0)
+            parent.Combat = status[i].bg
+            parent.Resting = status[i].border
+        else
+            status[i].bg:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", UnitFrames.layoutSize, 0)
+            parent.Leader = status[i].bg
+            parent.AFK = status[i].border
+        end
+    end
 end
 
 local function CreateEndBox(parent)
@@ -101,6 +112,8 @@ local function CreateEndBox(parent)
     local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetAllPoints(endBox)
+
+    endBox.Update = UnitFrames.UpdateEndBox
    
     return endBox
 end
@@ -109,7 +122,7 @@ local function CreateFocus(self)
     self:SetSize(F2.health.width, F2.health.height)
     self.Health = CreateHealthBar(self)
     self.PvP = CreatePvPStatus(self)
-    self.Combat, self.Resting = CreateCombatResting(self)
+    CreateStatuses(self)
     self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
@@ -122,7 +135,7 @@ local function CreateFocus(self)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
-        UnitFrames:UpdateEndBox(self, event)
+        self.endBox.Update(self, event)
     end
 end
 

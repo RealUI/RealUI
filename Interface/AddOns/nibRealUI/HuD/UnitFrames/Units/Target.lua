@@ -286,6 +286,8 @@ local function CreateEndBox(parent)
     border:SetTexture(texture.border)
     border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     border:SetAllPoints(endBox)
+
+    endBox.Update = UnitFrames.UpdateEndBox
    
     return endBox
 end
@@ -311,7 +313,7 @@ local function CreateTarget(self)
 
     function self:PreUpdate(event)
         --self.Combat.Override(self, event)
-        UnitFrames:UpdateEndBox(self, event)
+        self.endBox.Update(self, event)
 
         if UnitPowerMax(self.unit) > 0 then
             print("Has power")
@@ -335,7 +337,6 @@ local function CreateTarget(self)
             --return
         end
         local _, powerType = UnitPowerType(self.unit)
-        --UnitFrames.PowerOverride(self, event, self.unit, powerType)
 
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
         self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false

@@ -237,7 +237,7 @@ end
 function UnitFrames:UpdateStatus(event, ...)
     --print("UpdateStatus", self, event, ...)
     local unit = self.unit
-    local color
+    local color = nibRealUI.media.background
     if UnitIsAFK(unit) then
         --print("AFK", self, event, unit)
         color = db.overlay.colors.status.afk
@@ -289,9 +289,9 @@ function UnitFrames:UpdateStatus(event, ...)
     end
 end
 
-function UnitFrames:UpdateEndBox(self, ...)
+function UnitFrames:UpdateEndBox(...)
     --print("UpdateEndBox", self and self.unit, ...)
-    local unit, color = self.unit
+    local unit, color = self.unit, nil
     local _, class = UnitClass(unit)
     if UnitIsPlayer(unit) then
         color = nibRealUI:GetClassColor(class)

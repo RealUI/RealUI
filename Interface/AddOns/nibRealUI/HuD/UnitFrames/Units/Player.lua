@@ -205,6 +205,8 @@ local function CreateEndBox(parent)
     local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetAllPoints(endBox)
+
+    endBox.Update = UnitFrames.UpdateEndBox
    
     return endBox
 end
@@ -229,7 +231,7 @@ local function CreatePlayer(self)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PostUpdate(event)
-        UnitFrames:UpdateEndBox(self, event)
+        self.endBox.Update(self, event)
 
         local _, powerType = UnitPowerType(self.unit)
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])

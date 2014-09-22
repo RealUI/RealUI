@@ -460,11 +460,6 @@ end)
 ----------------------------
 function UnitFrames:OnInitialize()
     ---[[
-    local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
-
-    self.layoutSize = nibRealUI.db.profile.settings.hudSize
-    print("Layout", self.layoutSize)
-
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
@@ -565,7 +560,13 @@ function UnitFrames:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
-    
+
+    local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
+
+    self.layoutSize = ndb.settings.hudSize
+    print("Layout", self.layoutSize)
+
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     ---]]
@@ -579,7 +580,7 @@ function UnitFrames:OnEnable()
     }
 
     self:InitShared()
-    for _, func in pairs(UnitFrames.units) do
-        func()
+    for i = 1, #UnitFrames.units do
+        UnitFrames.units[i]()
     end
 end

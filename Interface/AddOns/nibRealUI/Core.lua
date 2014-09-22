@@ -724,7 +724,7 @@ end
 
 -- To help position UI elements
 function RealUI_TestRaidWarnings()
-	self:ScheduleRepeatingTimer(function()
+    nibRealUI:ScheduleRepeatingTimer(function()
 		RaidNotice_AddMessage(RaidWarningFrame, "This is a raid warning message!", { r = 0, g = 1, b = 0 })
 		RaidNotice_AddMessage(RaidBossEmoteFrame, "This is a boss emote message!", { r = 0, g = 1, b = 0 })
 	end, 5)
