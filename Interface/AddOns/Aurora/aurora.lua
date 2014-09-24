@@ -1404,7 +1404,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- Raid frame (social frame)
 
-		F.Reskin(RaidFrameRaidBrowserButton)
 		F.ReskinCheck(RaidFrameAllAssistCheckButton)
 
 		-- Professions

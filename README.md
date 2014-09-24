@@ -1,15 +1,13 @@
-RealUI-80
-=========
+RealUI
+======
 
-RealUI v8.0 for WoW
+RealUI v8.1 for WoW
 
 
 Addon Update Exclusions
 -----------------------
 The following addons have been modified to suit RealUI and should not be updated:
 
-  - Aurora
-  - BugSack
   - cargBags_Nivaya
   - EasyMail
   - FreebTip

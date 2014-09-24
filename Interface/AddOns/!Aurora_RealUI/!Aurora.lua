@@ -65,83 +65,17 @@ f:SetScript("OnEvent", function(self, event, addon)
     if addon == "Aurora" then
         F, C = unpack(Aurora)
 
-        local _, class = UnitClass("player")
-        local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
-
-        local function colourMinMax(f)
-            if f:IsEnabled() then
-                for _, pixel in pairs(f.pixels) do
-                    pixel:SetVertexColor(r, g, b)
-                end
-            end
-        end
-
-        local function clearMinMax(f)
-            for _, pixel in pairs(f.pixels) do
-                pixel:SetVertexColor(1, 1, 1)
-            end
-        end
-
-        F.ReskinMinMax = function(f, type, a1, p, a2, x, y)
-            f:SetSize(17, 17)
-
-            if not a1 then
-                f:SetPoint("TOPRIGHT", -6, -6)
+        F.ReskinAtlas = function(f, atlas, is8Point)
+            print("ReskinAtlas")
+            if not atlas then atlas = f:GetAtlas() end
+            local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
+            file = file:sub(10) -- cut off "Interface"
+            f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
+            if is8Point then
+                return left, right, top, bottom
             else
-                f:ClearAllPoints()
-                f:SetPoint(a1, p, a2, x, y)
+                f:SetTexCoord(left, right, top, bottom)
             end
-
-            f:SetNormalTexture("")
-            f:SetHighlightTexture("")
-            f:SetPushedTexture("")
-            f:SetDisabledTexture("")
-
-            F.CreateBD(f, 0)
-
-            F.CreateGradient(f)
-
-            f:SetDisabledTexture(C.media.backdrop)
-            local dis = f:GetDisabledTexture()
-            dis:SetVertexColor(0, 0, 0, .4)
-            dis:SetDrawLayer("OVERLAY")
-            dis:SetAllPoints()
-
-            f.pixels = {}
-
-            local horiz = f:CreateTexture(nil, "OVERLAY")
-            horiz:SetSize(7, 1)
-            horiz:SetTexture(C.media.backdrop)
-            horiz:SetVertexColor(1, 1, 1)
-
-            local vert = f:CreateTexture(nil, "OVERLAY")
-            vert:SetSize(1, 7)
-            vert:SetTexture(C.media.backdrop)
-            vert:SetVertexColor(1, 1, 1)
-
-            if type == "Max" then
-                horiz:SetPoint("TOPRIGHT", -5, -4)
-                vert:SetPoint("TOPRIGHT", -4, -5)
-            else
-                horiz:SetPoint("BOTTOMLEFT", 5, 4)
-                vert:SetPoint("BOTTOMLEFT", 4, 5)
-            end
-
-            for i = 1, 9 do
-                local tex = f:CreateTexture()
-                tex:SetTexture(1, 1, 1)
-                tex:SetSize(1, 1)
-                tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
-                tinsert(f.pixels, tex)
-            end
-            tinsert(f.pixels, horiz)
-            tinsert(f.pixels, vert)
-
-            f:HookScript("OnEnter", colourMinMax)
-            f:HookScript("OnLeave", clearMinMax)
-        end
-
-        F.ReskinExpCol = function(f)
         end
     end
 

@@ -42,11 +42,21 @@ tinsert(mods["Aurora"], function()
 	hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
 	-- Splash Frame
-	F.CreateBD(SplashFrame, nil, true)
-	SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
-	SplashFrame.RightTexture:SetDrawLayer("BACKGROUND", 7)
-	SplashFrame.BottomTexture:SetDrawLayer("BACKGROUND", 7)
-	SplashFrame.Label:SetTextColor(1, 1, 1)
+    F.CreateBD(SplashFrame, nil, true)
+    hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
+        print("SplashFrame", tag, showStartButton)
+        SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(SplashFrame.LeftTexture, SPLASH_SCREENS[tag].leftTex)
+
+        SplashFrame.RightTexture:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(SplashFrame.RightTexture, SPLASH_SCREENS[tag].rightTex)
+
+        SplashFrame.BottomTexture:SetDrawLayer("BACKGROUND", 7)
+        local left, right, top, bottom = F.ReskinAtlas(SplashFrame.BottomTexture, SPLASH_SCREENS[tag].bottomTex, true)
+        SplashFrame.BottomTexture:SetTexCoord(right, top, left, top, right, bottom, left, bottom)
+
+        SplashFrame.Label:SetTextColor(1, 1, 1)
+    end)
 end)
 
 --[[function MiscSkins:Skin()
@@ -78,39 +88,4 @@ end)
 		TimeManagerAlarmEnabledButton:SetPoint("TOPLEFT", TimeManagerAlarmMessageEditBox, "BOTTOMLEFT", -6, -4)
 	end
 end
-
-function MiscSkins:ADDON_LOADED(event, addon)
-	--print("MiscSkins:", event, addon)
-	if addon =="Blizzard_DebugTools" then
-		-- EventTrace
-		if Aurora then 
-			F, C = unpack(Aurora)
-
-			for i = 1, EventTraceFrame:GetNumRegions() do
-				local region = select(i, EventTraceFrame:GetRegions())
-				if region:GetObjectType() == "Texture" then
-					region:SetTexture(nil)
-				end
-			end
-			EventTraceFrame:SetHeight(600)
-			--EventTraceFrameScroll:Hide()
-			F.CreateBD(EventTraceFrame)
-
-			EventTraceFrameScrollBG:Hide()
-			local thumb = EventTraceFrameScroll.thumb
-			thumb:SetAlpha(0)
-			thumb:SetWidth(17)
-			thumb.bg = CreateFrame("Frame", nil, EventTraceFrameScroll)
-			thumb.bg:SetPoint("TOPLEFT", thumb, 0, 0)
-			thumb.bg:SetPoint("BOTTOMRIGHT", thumb, 0, 0)
-			F.CreateBD(thumb.bg, 0)
-			thumb.tex = F.CreateGradient(thumb.bg)
-			thumb.tex:SetPoint("TOPLEFT", thumb.bg, 1, -1)
-			thumb.tex:SetPoint("BOTTOMRIGHT", thumb.bg, -1, 1)
-
-			F.ReskinClose(EventTraceFrameCloseButton)
-		end
-	elseif addon == "Aurora" then
-		self:Skin()
-	end
-end]]
+]]
