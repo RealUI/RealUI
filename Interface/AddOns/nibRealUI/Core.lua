@@ -283,10 +283,6 @@ local defaults = {
 				Sword =			[[Interface\AddOns\nibRealUI\Media\Icons\Sword]],
 			},
 		},
-		-- Other
-		other = {
-			uiscaler = true,
-		},
 	},
 }
 --------------------------------------------------------
@@ -337,27 +333,6 @@ function nibRealUI:RetinaDisplayCheck()
 		dbg.tags.retinaDisplay.checked = true
 		dbg.tags.retinaDisplay.set = false
 		return false
-	end
-end
-
--- UI Scaler
-local ScaleOptionsHidden
-function nibRealUI:UpdateUIScale()
-	if db.other.uiscaler and not nibRealUI.uiscalechanging then
-		nibRealUI.uiscalechanging = true
-		local scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
-		if dbg.tags.retinaDisplay.set then scale = scale * 2 end
-		if scale < .64 then
-			UIParent:SetScale(scale)
-		else
-			SetCVar("uiScale", scale)
-		end
-		if not ScaleOptionsHidden then
-			_G["Advanced_UseUIScale"]:Hide()
-			_G["Advanced_UIScaleSlider"]:Hide()
-			ScaleOptionsHidden = true
-		end
-		nibRealUI.uiscalechanging = false
 	end
 end
 
@@ -568,8 +543,6 @@ end
 
 -- Events
 function nibRealUI:VARIABLES_LOADED()
-	self:UpdateUIScale()
-
 	---- Blizzard Bug Fixes
 	-- No Map emote
 	hooksecurefunc("DoEmote", function(emote)
@@ -642,10 +615,6 @@ function nibRealUI:PLAYER_ENTERING_WORLD()
 		FCF_SavePositionAndDimensions(ChatFrame1)
 		nibRealUICharacter.needchatmoved = false
 	end
-end
-
-function nibRealUI:UI_SCALE_CHANGED()
-	self:UpdateUIScale()
 end
 
 function nibRealUI:PLAYER_LOGIN()
@@ -782,7 +751,6 @@ function nibRealUI:OnInitialize()
 	-- Register events
 	self:RegisterEvent("ADDON_LOADED")
 	self:RegisterEvent("PLAYER_LOGIN")
-	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 	self:RegisterEvent("VARIABLES_LOADED")

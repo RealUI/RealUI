@@ -168,42 +168,6 @@ local function GetOptions()
 					},
 				},
 			},
-			gap2 = {
-				name = " ",
-				type = "description",
-				order = 51,
-			},
-			uiscaler = {
-				type = "group",
-				name = "UI Scaling",
-				inline = true,
-				order = 50,
-				args = {
-					enabled = {
-						type = "toggle",
-						name = "Enable UI Scaler",
-						desc = "Enable/Disable the UI Scaler. The UI Scaler automatically adjusts the UI scale for Pixel Perfect interface elements.",
-						get = function() return db.other.uiscaler end,
-						set = function(info, value) 
-							db.other.uiscaler = value
-							nibRealUI:ReloadUIDialog()
-						end,
-						order = 10,
-					},
-					retinaDisplay = {
-						type = "toggle",
-						name = "Retina Display",
-						desc = "Double UI scaling so that UI elements are easier to see on a Retina Display.",
-						disabled = function() return not(db.other.uiscaler) end,
-						get = function() return dbg.tags.retinaDisplay.set end,
-						set = function(info, value) 
-							dbg.tags.retinaDisplay.set = value
-							nibRealUI:ReloadUIDialog()
-						end,
-						order = 20,
-					},
-				},
-			},
 		},
 	}
 	end

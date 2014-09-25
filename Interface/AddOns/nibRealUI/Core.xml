@@ -11,6 +11,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Script file="Core\Settings.lua"/>
 	<Script file="Core\Positioners.lua"/>
 	<Script file="Core\Tutorial.lua"/>
+	<Script file="Core\UIScaler.lua"/>
 	<Script file="Core\Notifications.lua"/>
 	<Script file="Core\SpiralBorder.lua"/>
 	<Script file="Core\AngleStatusBar.lua"/>
