@@ -35,14 +35,14 @@ tinsert(UnitFrames.units, function(...)
     end
 end)
 
-function RealUIUFBossConfig(toggle, unit)
+function RealUIUFBossConfig(toggle)
     for i = 1, MAX_BOSS_FRAMES do
         local f = _G["RealUIBossFrame" .. i]
         if toggle then
             if not f.__realunit then
                 f.__realunit = f:GetAttribute("unit") or f.unit
-                f:SetAttribute("unit", unit)
-                f.unit = unit
+                f:SetAttribute("unit", "player")
+                f.unit = "player"
                 f:Show()
             end
         else

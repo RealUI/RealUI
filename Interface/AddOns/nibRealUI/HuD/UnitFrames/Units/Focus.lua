@@ -49,32 +49,32 @@ local function CreateHealthBar(parent)
     return health
 end
 
-local function CreatePvPStatus(parent)
+local function CreateHealthStatus(parent) -- PvP/Classification
     local texture = F2.healthBox
-    local pvp = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-    pvp:SetTexture(texture.bar)
-    pvp:SetSize(texture.width, texture.height)
-    pvp:SetPoint("TOPRIGHT", parent, -8, -1)
+    local status = {}
+    for i = 1, 2 do
+        status[i] = {}
+        status[i].bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
+        status[i].bg:SetTexture(texture.bar)
+        status[i].bg:SetSize(texture.width, texture.height)
 
-    local border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetAllPoints(pvp)
+        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status[i].border:SetTexture(texture.border)
+        status[i].border:SetAllPoints(status[i].bg)
 
-    pvp.Override = function(self, event, unit)
-        --print("PvP Override", self, event, unit, IsPVPTimerRunning())
-        pvp:SetVertexColor(0, 0, 0, 0.6)
-        if UnitIsPVP(unit) then
-            if UnitIsFriend(unit, "focus") then
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpFriendly))
-            else
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpEnemy))
-            end
+        if i == 1 then
+            status[i].bg:SetPoint("TOPRIGHT", parent.Health, -8, -1)
+            parent.PvP = status[i].bg
+            parent.PvP.Override = UnitFrames.PvPOverride
+        else
+            status[i].bg:SetPoint("TOPRIGHT", parent.Health, -16, -1)
+            parent.Class = status[i].bg
+            parent.Class.Update = UnitFrames.UpdateClassification
         end
     end
-    return pvp
 end
 
-local function CreateStatuses(parent)
+local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = F2.statusBox
     local status = {}
     for i = 1, 2 do
@@ -121,8 +121,8 @@ end
 local function CreateFocus(self)
     self:SetSize(F2.health.width, F2.health.height)
     self.Health = CreateHealthBar(self)
-    self.PvP = CreatePvPStatus(self)
-    CreateStatuses(self)
+    CreateHealthStatus(self)
+    CreatePowerStatus(self)
     self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
@@ -150,5 +150,6 @@ tinsert(UnitFrames.units, function(...)
     oUF:SetActiveStyle("RealUI:focus")
     local focus = oUF:Spawn("focus", "RealUIFocusFrame")
     focus:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
+    focus:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", focus.Class.Update)
 end)
 

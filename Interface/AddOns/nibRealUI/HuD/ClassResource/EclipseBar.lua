@@ -305,7 +305,7 @@ function EclipseBar:UpdatePlayerLocation()
 end
 
 function EclipseBar:PLAYER_ENTERING_WORLD(event, ...)
-    print("EclipseBar", event, ...)
+    --print("EclipseBar", event, ...)
     self:UpdatePlayerLocation()
     self:UpdateVisibility()
     self:UpdateAuras()

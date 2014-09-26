@@ -55,7 +55,7 @@ function RealUIHuDTestMode(toggle)
 	end
 
 	-- Boss Frames
-	RealUIUFBossConfig(toggle, "player")
+	RealUIUFBossConfig(toggle)
 
 	-- Spell Alerts
 	local sAlert = {

@@ -189,7 +189,7 @@ UnitFrames.ReversePowers = {
 }
 
 local function updateSteps(unit, type, percent, frame)
-    local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
     if unit == "player" or unit == "target" then
         texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
     elseif unit == "focus" or unit == "targettarget" then
@@ -234,6 +234,30 @@ function UnitFrames:PowerOverride(event, unit, powerType)
     AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
 end
 
+function UnitFrames:PvPOverride(event, unit)
+    --print("PvP Override", self, event, unit, IsPVPTimerRunning())
+    local color = nibRealUI.media.background
+    if UnitIsPVP(unit) then
+        if UnitIsFriend("player", unit) then
+            --print("Friend")
+            color = db.overlay.colors.status.pvpFriendly
+            self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+        else
+            --print("Enemy")
+            color = db.overlay.colors.status.pvpEnemy
+            self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+        end
+    else
+        self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+    end
+end
+
+function UnitFrames:UpdateClassification(event)
+    --print("Classification", self.unit, event, UnitClassification(self.unit))
+    local color = db.overlay.colors.status.elite --[UnitClassification(self.unit)] or nibRealUI.media.background
+    self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
+end
+
 function UnitFrames:UpdateStatus(event, ...)
     --print("UpdateStatus", self, event, ...)
     local unit = self.unit
@@ -252,7 +276,7 @@ function UnitFrames:UpdateStatus(event, ...)
         self.Leader.status = "leader"
     else
         --print("Status2: None", self, event, unit)
-        self.Leader.status = false
+        self.Leader.status = true --false
     end
     if self.Leader.status then
         self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
@@ -315,4 +339,6 @@ function UnitFrames:InitShared()
     db = UnitFrames.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
+
+    -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
 end

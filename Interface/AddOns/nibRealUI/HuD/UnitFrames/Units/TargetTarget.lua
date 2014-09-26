@@ -52,35 +52,35 @@ local function CreateHealthBar(parent)
     return health
 end
 
-local function CreatePvPStatus(parent)
+local function CreateHealthStatus(parent) -- PvP/Classification
     local texture = F2.healthBox
     local coords = coords[UnitFrames.layoutSize].status
-    local pvp = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-    pvp:SetTexture(texture.bar)
-    pvp:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    pvp:SetSize(texture.width, texture.height)
-    pvp:SetPoint("TOPLEFT", parent, 8, -1)
+    local status = {}
+    for i = 1, 2 do
+        status[i] = {}
+        status[i].bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
+        status[i].bg:SetTexture(texture.bar)
+        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].bg:SetSize(texture.width, texture.height)
 
-    local border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    border:SetAllPoints(pvp)
+        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status[i].border:SetTexture(texture.border)
+        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].border:SetAllPoints(status[i].bg)
 
-    pvp.Override = function(self, event, unit)
-        --print("PvP Override", self, event, unit, IsPVPTimerRunning())
-        pvp:SetVertexColor(0, 0, 0, 0.6)
-        if UnitIsPVP(unit) then
-            if UnitIsFriend(unit, "focus") then
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpFriendly))
-            else
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpEnemy))
-            end
+        if i == 1 then
+            status[i].bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
+            parent.PvP = status[i].bg
+            parent.PvP.Override = UnitFrames.PvPOverride
+        else
+            status[i].bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
+            parent.Class = status[i].bg
+            parent.Class.Update = UnitFrames.UpdateClassification
         end
     end
-    return pvp
 end
 
-local function CreateStatuses(parent)
+local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = F2.statusBox
     local coords = coords[UnitFrames.layoutSize].status
     local status = {}
@@ -133,8 +133,8 @@ end
 local function CreateTargetTarget(self)
     self:SetSize(F2.health.width, F2.health.height)
     self.Health = CreateHealthBar(self)
-    self.PvP = CreatePvPStatus(self)
-    CreateStatuses(self)
+    CreateHealthStatus(self)
+    CreatePowerStatus(self)
     self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
@@ -146,7 +146,7 @@ local function CreateTargetTarget(self)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
     
     function self:PostUpdate(event)
-        --self.Combat.Override(self, event)
+        self.Class.Update(self, event)
         self.endBox.Update(self, event)
     end
 end
@@ -162,4 +162,5 @@ tinsert(UnitFrames.units, function(...)
     oUF:SetActiveStyle("RealUI:targettarget")
     local targettarget = oUF:Spawn("targettarget", "RealUITargetTargetFrame")
     targettarget:SetPoint("BOTTOMRIGHT", "RealUITargetFrame", db.positions[UnitFrames.layoutSize].targettarget.x, db.positions[UnitFrames.layoutSize].targettarget.y)
+    targettarget:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", targettarget.Class.Update)
 end)

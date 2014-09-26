@@ -89,6 +89,34 @@ local function CreateHealthBar(parent)
     return health
 end
 
+local function CreateHealthStatus(parent) -- PvP/Classification
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.healthBox
+    local coords = positions[UnitFrames.layoutSize].healthBox
+    local status = {}
+    for i = 1, 2 do
+        status[i] = {}
+        status[i].bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
+        status[i].bg:SetTexture(texture.bar)
+        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].bg:SetSize(texture.width, texture.height)
+
+        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status[i].border:SetTexture(texture.border)
+        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status[i].border:SetAllPoints(status[i].bg)
+
+        if i == 1 then
+            status[i].bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
+            parent.PvP = status[i].bg
+            parent.PvP.Override = UnitFrames.PvPOverride
+        else
+            status[i].bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
+            parent.Class = status[i].bg
+            parent.Class.Update = UnitFrames.UpdateClassification
+        end
+    end
+end
+
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local pos = positions[UnitFrames.layoutSize].power
@@ -131,35 +159,7 @@ local function CreatePowerBar(parent)
     return power
 end
 
-local function CreatePvPStatus(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.healthBox
-    local coords = positions[UnitFrames.layoutSize].healthBox
-    local pvp = parent:CreateTexture(nil, "OVERLAY", nil, 1)
-    pvp:SetTexture(texture.bar)
-    pvp:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    pvp:SetSize(texture.width, texture.height)
-    pvp:SetPoint("TOPLEFT", parent, 8, -1)
-
-    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    border:SetAllPoints(pvp)
-
-    pvp.Override = function(self, event, unit)
-        --print("PvP Override", self, event, unit, IsPVPTimerRunning())
-        pvp:SetVertexColor(0, 0, 0, 0.6)
-        if UnitIsPVP(unit) then
-            if UnitIsFriend(unit, "target") then
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpFriendly))
-            else
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpEnemy))
-            end
-        end
-    end
-    return pvp
-end
-
-local function CreateStatuses(parent)
+local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
     local coords = positions[UnitFrames.layoutSize].healthBox
     local status = {}
@@ -295,11 +295,11 @@ end
 local function CreateTarget(self)
     self.Health = CreateHealthBar(self)
     self.Power = CreatePowerBar(self)
-    self.PvP = CreatePvPStatus(self.Health)
+    CreateHealthStatus(self)
     self.Range = CreateRange(self.Health)
     self.Threat = CreateThreat(self.Power)
     self.endBox = CreateEndBox(self)
-    CreateStatuses(self)
+    CreatePowerStatus(self)
     
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
@@ -313,12 +313,13 @@ local function CreateTarget(self)
 
     function self:PreUpdate(event)
         --self.Combat.Override(self, event)
+        self.Class.Update(self, event)
         self.endBox.Update(self, event)
 
         if UnitPowerMax(self.unit) > 0 then
-            print("Has power")
+            --print("Has power")
             if not self.Power.enabled then
-                print("Enable power")
+                --print("Enable power")
                 self.Power.enabled = true
                 --self.Power.bar:Show()
                 self.Power.text:Show()
@@ -327,7 +328,7 @@ local function CreateTarget(self)
                 end
             end
         else
-            print("Disable power")
+            --print("Disable power")
             self.Power.enabled = false
             --self.Power.bar:Hide()
             self.Power.text:Hide()
@@ -368,5 +369,6 @@ tinsert(UnitFrames.units, function(...)
     local target = oUF:Spawn("target", "RealUITargetFrame")
     target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT", db.positions[UnitFrames.layoutSize].target.x, db.positions[UnitFrames.layoutSize].target.y)
     target:RegisterEvent("UNIT_THREAT_LIST_UPDATE", target.Threat.Override)
+    target:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", target.Class.Update)
 end)
 

@@ -60,21 +60,11 @@ local function CreatePvPStatus(parent)
     border:SetTexture(texture.border)
     border:SetAllPoints(pvp)
 
-    pvp.Override = function(self, event, unit)
-        --print("PvP Override", self, event, unit, IsPVPTimerRunning())
-        pvp:SetVertexColor(0, 0, 0, 0.6)
-        if UnitIsPVP(unit) then
-            if UnitIsFriend(unit, "focus") then
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpFriendly))
-            else
-                self.PvP:SetVertexColor(unpack(db.overlay.colors.status.pvpEnemy))
-            end
-        end
-    end
+    pvp.Override = UnitFrames.PvPOverride
     return pvp
 end
 
-local function CreateStatuses(parent)
+local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F2.statusBox
     local status = {}
     for i = 1, 2 do
@@ -122,7 +112,7 @@ local function CreatePet(self)
     self:SetSize(F3.health.width, F3.health.height)
     self.Health = CreateHealthBar(self)
     self.PvP = CreatePvPStatus(self)
-    CreateStatuses(self)
+    CreatePowerStatus(self)
     self.endBox = CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
