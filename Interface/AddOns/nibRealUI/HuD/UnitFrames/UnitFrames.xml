@@ -3,7 +3,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <Script file="UnitFrames.lua"/>
     <Script file="Tags.lua"/>
-    <Script file="Auras.lua"/>
     <Script file="Shared.lua"/>
     <Include file="Units\Units.xml"/>
     <Include file="Groups\Groups.xml"/>

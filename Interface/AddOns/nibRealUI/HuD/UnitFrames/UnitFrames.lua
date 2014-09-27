@@ -564,7 +564,7 @@ function UnitFrames:OnInitialize()
     local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
 
     self.layoutSize = ndb.settings.hudSize
-    print("Layout", self.layoutSize)
+    --print("Layout", self.layoutSize)
 
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))

@@ -131,6 +131,7 @@ local function CreateFocus(self)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
+        self.Class.Update(self, event)
         self.endBox.Update(self, event)
     end
 end

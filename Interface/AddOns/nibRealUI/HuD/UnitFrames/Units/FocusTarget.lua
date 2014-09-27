@@ -49,7 +49,7 @@ local function CreateHealthBar(parent)
 end
 
 local function CreateHealthStatus(parent) -- PvP/Classification
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F2.healthBox
+    local texture = F3.healthBox
     local status = {}
     for i = 1, 2 do
         status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
@@ -130,6 +130,7 @@ local function CreateFocusTarget(self)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
+        self.Class.Update(self, event)
         self.endBox.Update(self, event)
     end
 end

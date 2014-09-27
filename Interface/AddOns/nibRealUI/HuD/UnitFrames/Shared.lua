@@ -226,7 +226,7 @@ function UnitFrames:HealthOverride(event, unit)
 end
 
 function UnitFrames:PredictOverride(event, unit)
-    print("Predict Override", self, event, unit)
+    --print("Predict Override", self, event, unit)
     local hp = self.HealPrediction
 
     local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
@@ -234,7 +234,7 @@ function UnitFrames:PredictOverride(event, unit)
     local absorbPer = math.min(absorbTotal, healthCurr) / healthMax
 
     AngleStatusBar:SetValue(hp.absorbBar, 1-absorbPer, true)
-    print("absorb", absorbPer, 1 - absorbPer)
+    --print("absorb", absorbPer, 1 - absorbPer)
     local atMax = (healthCurr == healthMax)
     if unit == "player" then
         if atMax then
@@ -359,6 +359,7 @@ function UnitFrames:UpdateEndBox(...)
     self.endBox:Show()
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
 end
+
 
 -- Init
 function UnitFrames:Shared()
