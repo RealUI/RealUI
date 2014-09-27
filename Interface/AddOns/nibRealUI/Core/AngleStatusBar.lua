@@ -9,7 +9,6 @@ local min, max, abs, floor = math.min, math.max, math.abs, math.floor
 local dontSmooth
 local smoothing = {}
 local function SetBarPosition(bar, per)
-    --print(bar:GetParent():GetName(), per)
     bar.value = per
     if not bar.reverse then
         bar:SetWidth(bar.fullWidth * (1 - bar.value))
@@ -51,7 +50,6 @@ smoothUpdateFrame:SetScript("OnUpdate", function()
 end)
 
 function AngleStatusBar:SetValue(bar, per, ignoreSmooth)
-    --print("SetValue", self, bar, per, ignoreSmooth)
     if bar.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(bar, per)
     else
@@ -59,9 +57,12 @@ function AngleStatusBar:SetValue(bar, per, ignoreSmooth)
     end
 end
 
-function AngleStatusBar:SetBarColor(bar, color)
-    for r = 1, #bar.row do
-        bar.row[r]:SetTexture(unpack(color))
+function AngleStatusBar:SetBarColor(bar, r, g, b, a)
+    if type(r) == "table" then
+        r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    for i = 1, #bar.row do
+        bar.row[i]:SetTexture(r, g, b, a or 1)
     end
 end
 

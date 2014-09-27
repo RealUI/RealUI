@@ -80,6 +80,19 @@ local function CreateHealthBar(parent)
     parent.Health.Override = UnitFrames.HealthOverride
 end
 
+local function CreatePredictBar(parent)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local pos = positions[UnitFrames.layoutSize].health
+    local absorbBar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
+    AngleStatusBar:SetBarColor(absorbBar, 1, 1, 1, db.overlay.bar.opacity.absorb)
+
+    parent.HealPrediction = {
+        absorbBar = absorbBar,
+        frequentUpdates = true,
+        Override = UnitFrames.PredictOverride,
+    }
+end
+
 local function CreatePvPStatus(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.healthBox
     parent.PvP = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
@@ -200,6 +213,7 @@ end
 
 local function CreatePlayer(self)
     CreateHealthBar(self)
+    CreatePredictBar(self)
     CreatePvPStatus(self)
     CreatePowerBar(self)
     CreatePowerStatus(self)

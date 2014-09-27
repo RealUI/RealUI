@@ -225,6 +225,32 @@ function UnitFrames:HealthOverride(event, unit)
     AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
 end
 
+function UnitFrames:PredictOverride(event, unit)
+    print("Predict Override", self, event, unit)
+    local hp = self.HealPrediction
+
+    local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local absorbTotal = UnitGetTotalAbsorbs(unit)
+    local absorbPer = math.min(absorbTotal, healthCurr) / healthMax
+
+    AngleStatusBar:SetValue(hp.absorbBar, 1-absorbPer, true)
+    print("absorb", absorbPer, 1 - absorbPer)
+    local atMax = (healthCurr == healthMax)
+    if unit == "player" then
+        if atMax then
+            hp.absorbBar:SetPoint("TOPRIGHT", self.Health, -2, -1)
+        else
+            hp.absorbBar:SetPoint("TOPRIGHT", self.Health.bar, "TOPLEFT", 0, 0)
+        end
+    else
+        if atMax then
+            hp.absorbBar:SetPoint("TOPLEFT", self.Health, 2, -1)
+        else
+            hp.absorbBar:SetPoint("TOPLEFT", self.Health.bar, "TOPRIGHT", 0, 0)
+        end
+    end
+end
+
 function UnitFrames:PowerOverride(event, unit, powerType)
     --print("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
