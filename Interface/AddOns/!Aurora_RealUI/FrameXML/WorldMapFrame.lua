@@ -85,7 +85,7 @@ end
 
 -- Size Adjust --
 function Map:SetLargeWorldMap()
-    print("Map:SetLargeWorldMap")
+    --print("Map:SetLargeWorldMap")
     if InCombatLockdown() then return end
     
     -- reparent

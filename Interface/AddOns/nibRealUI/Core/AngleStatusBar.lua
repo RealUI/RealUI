@@ -35,7 +35,7 @@ end
 local smoothUpdateFrame = CreateFrame("Frame")
 smoothUpdateFrame:SetScript("OnUpdate", function()
     local limit = 30 / GetFramerate()
-    for bar, per in pairs(smoothing) do
+    for bar, per in next, smoothing do
         local setPer = per * bar.fullWidth
         local setCur = bar.value * bar.fullWidth
         local new = setCur + min((setPer - setCur) / 2, max(setPer - setCur, limit * bar.fullWidth))

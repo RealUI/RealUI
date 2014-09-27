@@ -22,34 +22,33 @@ local coords = {
 local function CreateHealthBar(parent)
     local texture = F2.health
     local coords = coords[UnitFrames.layoutSize].health
-    local health = CreateFrame("Frame", nil, parent)
-    health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
-    health:SetAllPoints(parent)
+    parent.Health = CreateFrame("Frame", nil, parent)
+    parent.Health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
+    parent.Health:SetAllPoints(parent)
 
-    health.bar = AngleStatusBar:NewBar(health, 2, -1, texture.width - 3, texture.height - 2, "RIGHT", "LEFT", "RIGHT", true)
+    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, 2, -1, texture.width - 3, texture.height - 2, "RIGHT", "LEFT", "RIGHT", true)
 
-    health.bg = health:CreateTexture(nil, "BACKGROUND")
-    health.bg:SetTexture(texture.bar)
-    health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-    health.bg:SetAllPoints(health)
+    parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
+    parent.Health.bg:SetTexture(texture.bar)
+    parent.Health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    parent.Health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Health.bg:SetAllPoints(parent.Health)
 
-    health.border = health:CreateTexture(nil, "BORDER")
-    health.border:SetTexture(texture.border)
-    health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    health.border:SetAllPoints(health)
+    parent.Health.border = parent.Health:CreateTexture(nil, "BORDER")
+    parent.Health.border:SetTexture(texture.border)
+    parent.Health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    parent.Health.border:SetAllPoints(parent.Health)
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    health.steps = {}
+    parent.Health.steps = {}
     for i = 1, 2 do
-        health.steps[i] = health:CreateTexture(nil, "OVERLAY")
-        health.steps[i]:SetTexCoord(1, 0, 0, 1)
-        health.steps[i]:SetSize(16, 16)
-        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width)), 0)
+        parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
+        parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
+        parent.Health.steps[i]:SetSize(16, 16)
+        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width)), 0)
     end
 
-    health.Override = UnitFrames.HealthOverride
-    return health
+    parent.Health.Override = UnitFrames.HealthOverride
 end
 
 local function CreateHealthStatus(parent) -- PvP/Classification
@@ -57,24 +56,23 @@ local function CreateHealthStatus(parent) -- PvP/Classification
     local coords = coords[UnitFrames.layoutSize].status
     local status = {}
     for i = 1, 2 do
-        status[i] = {}
-        status[i].bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-        status[i].bg:SetTexture(texture.bar)
-        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].bg:SetSize(texture.width, texture.height)
+        status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
+        status.bg:SetTexture(texture.bar)
+        status.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.bg:SetSize(texture.width, texture.height)
 
-        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status[i].border:SetTexture(texture.border)
-        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].border:SetAllPoints(status[i].bg)
+        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status.border:SetTexture(texture.border)
+        status.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.border:SetAllPoints(status.bg)
 
         if i == 1 then
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
-            parent.PvP = status[i].bg
+            status.bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
+            parent.PvP = status.bg
             parent.PvP.Override = UnitFrames.PvPOverride
         else
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
-            parent.Class = status[i].bg
+            status.bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
+            parent.Class = status.bg
             parent.Class.Update = UnitFrames.UpdateClassification
         end
     end
@@ -85,28 +83,27 @@ local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local coords = coords[UnitFrames.layoutSize].status
     local status = {}
     for i = 1, 2 do
-        status[i] = {}
-        status[i].bg = parent.Health:CreateTexture(nil, "BORDER")
-        status[i].bg:SetTexture(texture.bar)
-        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].bg:SetSize(texture.width, texture.height)
+        status.bg = parent.Health:CreateTexture(nil, "BORDER")
+        status.bg:SetTexture(texture.bar)
+        status.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.bg:SetSize(texture.width, texture.height)
 
-        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status[i].border:SetTexture(texture.border)
-        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].border:SetAllPoints(status[i].bg)
+        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
+        status.border:SetTexture(texture.border)
+        status.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.border:SetAllPoints(status.bg)
 
-        status[i].bg.Override = UnitFrames.UpdateStatus
-        status[i].border.Override = UnitFrames.UpdateStatus
+        status.bg.Override = UnitFrames.UpdateStatus
+        status.border.Override = UnitFrames.UpdateStatus
 
         if i == 1 then
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, "TOPRIGHT", -6 - UnitFrames.layoutSize, 0)
-            parent.Combat = status[i].bg
-            parent.Resting = status[i].border
+            status.bg:SetPoint("TOPLEFT", parent.Health, "TOPRIGHT", -6 - UnitFrames.layoutSize, 0)
+            parent.Combat = status.bg
+            parent.Resting = status.border
         else
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, "TOPRIGHT", -UnitFrames.layoutSize, 0)
-            parent.Leader = status[i].bg
-            parent.AFK = status[i].border
+            status.bg:SetPoint("TOPLEFT", parent.Health, "TOPRIGHT", -UnitFrames.layoutSize, 0)
+            parent.Leader = status.bg
+            parent.AFK = status.border
         end
     end
 end
@@ -114,28 +111,26 @@ end
 local function CreateEndBox(parent)
     local texture = F2.endBox
     local coords = coords[UnitFrames.layoutSize].status
-    local endBox = parent:CreateTexture(nil, "BORDER")
-    endBox:SetTexture(texture.bar)
-    endBox:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    endBox:SetSize(texture.width, texture.height)
-    endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", 6 + UnitFrames.layoutSize, 0)
+    parent.endBox = parent:CreateTexture(nil, "BORDER")
+    parent.endBox:SetTexture(texture.bar)
+    parent.endBox:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+    parent.endBox:SetSize(texture.width, texture.height)
+    parent.endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", 6 + UnitFrames.layoutSize, 0)
 
     local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    border:SetAllPoints(endBox)
+    border:SetAllPoints(parent.endBox)
 
-    endBox.Update = UnitFrames.UpdateEndBox
-   
-    return endBox
+    parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
 local function CreateTargetTarget(self)
     self:SetSize(F2.health.width, F2.health.height)
-    self.Health = CreateHealthBar(self)
+    CreateHealthBar(self)
     CreateHealthStatus(self)
     CreatePowerStatus(self)
-    self.endBox = CreateEndBox(self)
+    CreateEndBox(self)
 
     self.Name = self:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -5, 2 - UnitFrames.layoutSize)

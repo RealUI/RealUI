@@ -44,7 +44,7 @@ tinsert(mods["Aurora"], function()
 	-- Splash Frame
     F.CreateBD(SplashFrame, nil, true)
     hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
-        print("SplashFrame", tag, showStartButton)
+        --print("SplashFrame", tag, showStartButton)
         SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
         F.ReskinAtlas(SplashFrame.LeftTexture, SPLASH_SCREENS[tag].leftTex)
 

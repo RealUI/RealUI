@@ -52,41 +52,40 @@ local positions = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = positions[UnitFrames.layoutSize].health
-    local health = CreateFrame("Frame", nil, parent)
-    health:SetPoint("TOPLEFT", parent, 0, 0)
-    health:SetSize(texture.width, texture.height)
+    parent.Health = CreateFrame("Frame", nil, parent)
+    parent.Health:SetPoint("TOPLEFT", parent, 0, 0)
+    parent.Health:SetSize(texture.width, texture.height)
 
-    health.bar = AngleStatusBar:NewBar(health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
+    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
 
-    health.bg = health:CreateTexture(nil, "BACKGROUND")
-    health.bg:SetTexture(texture.bar)
-    health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-    health.bg:SetAllPoints(health)
+    parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
+    parent.Health.bg:SetTexture(texture.bar)
+    parent.Health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    parent.Health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Health.bg:SetAllPoints(parent.Health)
 
-    health.border = health:CreateTexture(nil, "BORDER")
-    health.border:SetTexture(texture.border)
-    health.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    health.border:SetAllPoints(health)
+    parent.Health.border = parent.Health:CreateTexture(nil, "BORDER")
+    parent.Health.border:SetTexture(texture.border)
+    parent.Health.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    parent.Health.border:SetAllPoints(parent.Health)
 
-    health.text = health:CreateFontString(nil, "OVERLAY")
-    health.text:SetPoint("BOTTOMLEFT", health, "TOPLEFT", 0, 2)
-    health.text:SetFont(unpack(nibRealUI:Font()))
-    health.text:SetJustifyH("LEFT")
-    parent:Tag(health.text, "[realui:healthPercent][realui:health]")
+    parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
+    parent.Health.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 0, 2)
+    parent.Health.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Health.text:SetJustifyH("LEFT")
+    parent:Tag(parent.Health.text, "[realui:healthPercent][realui:health]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    health.steps = {}
+    parent.Health.steps = {}
     for i = 1, 2 do
-        health.steps[i] = health:CreateTexture(nil, "OVERLAY")
-        health.steps[i]:SetTexCoord(1, 0, 0, 1)
-        health.steps[i]:SetSize(16, 16)
-        health.steps[i]:SetPoint("TOPRIGHT", health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
+        parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
+        parent.Health.steps[i]:SetSize(16, 16)
+        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
     end
 
-    health.frequentUpdates = true
-    health.Override = UnitFrames.HealthOverride
-    return health
+    parent.Health.frequentUpdates = true
+    parent.Health.Override = UnitFrames.HealthOverride
 end
 
 local function CreateHealthStatus(parent) -- PvP/Classification
@@ -120,43 +119,42 @@ end
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local pos = positions[UnitFrames.layoutSize].power
-    local power = CreateFrame("Frame", nil, parent)
-    power:SetPoint("BOTTOMLEFT", parent, 5, 0)
-    power:SetSize(texture.width, texture.height)
+    parent.Power = CreateFrame("Frame", nil, parent)
+    parent.Power:SetPoint("BOTTOMLEFT", parent, 5, 0)
+    parent.Power:SetSize(texture.width, texture.height)
 
-    power.bar = AngleStatusBar:NewBar(power, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "RIGHT", true)
+    parent.Power.bar = AngleStatusBar:NewBar(parent.Power, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "RIGHT", true)
 
     ---[[
-    power.bg = power:CreateTexture(nil, "BACKGROUND")
-    power.bg:SetTexture(texture.bar)
-    power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-    power.bg:SetAllPoints(power)
+    parent.Power.bg = parent.Power:CreateTexture(nil, "BACKGROUND")
+    parent.Power.bg:SetTexture(texture.bar)
+    parent.Power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    parent.Power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Power.bg:SetAllPoints(parent.Power)
     ---]]
 
-    power.border = power:CreateTexture(nil, "BORDER")
-    power.border:SetTexture(texture.border)
-    power.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    power.border:SetAllPoints(power)
+    parent.Power.border = parent.Power:CreateTexture(nil, "BORDER")
+    parent.Power.border:SetTexture(texture.border)
+    parent.Power.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    parent.Power.border:SetAllPoints(parent.Power)
 
-    power.text = power:CreateFontString(nil, "OVERLAY")
-    power.text:SetPoint("TOPLEFT", power, "BOTTOMLEFT", 0, -3)
-    power.text:SetFont(unpack(nibRealUI:Font()))
-    parent:Tag(power.text, "[realui:power]")
+    parent.Power.text = parent.Power:CreateFontString(nil, "OVERLAY")
+    parent.Power.text:SetPoint("TOPLEFT", parent.Power, "BOTTOMLEFT", 0, -3)
+    parent.Power.text:SetFont(unpack(nibRealUI:Font()))
+    parent:Tag(parent.Power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    power.steps = {}
+    parent.Power.steps = {}
     for i = 1, 2 do
-        power.steps[i] = power:CreateTexture(nil, "OVERLAY")
-        power.steps[i]:SetTexture(texture.warn)
-        power.steps[i]:SetTexCoord(1, 0, 0, 1)
-        power.steps[i]:SetSize(16, 16)
+        parent.Power.steps[i] = parent.Power:CreateTexture(nil, "OVERLAY")
+        parent.Power.steps[i]:SetTexture(texture.warn)
+        parent.Power.steps[i]:SetTexCoord(1, 0, 0, 1)
+        parent.Power.steps[i]:SetSize(16, 16)
         --power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
     end
 
-    power.frequentUpdates = true
-    power.Override = UnitFrames.PowerOverride
-    return power
+    parent.Power.frequentUpdates = true
+    parent.Power.Override = UnitFrames.PowerOverride
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
@@ -164,28 +162,27 @@ local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local coords = positions[UnitFrames.layoutSize].healthBox
     local status = {}
     for i = 1, 2 do
-        status[i] = {}
-        status[i].bg = parent.Power:CreateTexture(nil, "BORDER")
-        status[i].bg:SetTexture(texture.bar)
-        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].bg:SetSize(texture.width, texture.height)
+        status.bg = parent.Power:CreateTexture(nil, "BORDER")
+        status.bg:SetTexture(texture.bar)
+        status.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.bg:SetSize(texture.width, texture.height)
 
-        status[i].border = parent.Power:CreateTexture(nil, "OVERLAY", nil, 3)
-        status[i].border:SetTexture(texture.border)
-        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].border:SetAllPoints(status[i].bg)
+        status.border = parent.Power:CreateTexture(nil, "OVERLAY", nil, 3)
+        status.border:SetTexture(texture.border)
+        status.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+        status.border:SetAllPoints(status.bg)
 
-        status[i].bg.Override = UnitFrames.UpdateStatus
-        status[i].border.Override = UnitFrames.UpdateStatus
+        status.bg.Override = UnitFrames.UpdateStatus
+        status.border.Override = UnitFrames.UpdateStatus
 
         if i == 1 then
-            status[i].bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -8, 0)
-            parent.Combat = status[i].bg
-            parent.Resting = status[i].border
+            status.bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -8, 0)
+            parent.Combat = status.bg
+            parent.Resting = status.border
         else
-            status[i].bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -2, 0)
-            parent.Leader = status[i].bg
-            parent.AFK = status[i].border
+            status.bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -2, 0)
+            parent.Leader = status.bg
+            parent.AFK = status.border
         end
     end
 end
@@ -199,18 +196,18 @@ local function CreateRange(parent)
         [100] = nibRealUI.media.colors.red,
     }
 
-    local range = parent:CreateTexture(nil, "OVERLAY")
-    range:SetTexture(nibRealUI.media.icons.DoubleArrow)
-    range:SetSize(16, 16)
-    range:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -5, 0)
-    range.insideAlpha = 1
-    range.outsideAlpha = 0.5
+    parent.Range = parent.Health:CreateTexture(nil, "OVERLAY")
+    parent.Range:SetTexture(nibRealUI.media.icons.DoubleArrow)
+    parent.Range:SetSize(16, 16)
+    parent.Range:SetPoint("BOTTOMRIGHT", parent.Health, "BOTTOMLEFT", -5, 0)
+    parent.Range.insideAlpha = 1
+    parent.Range.outsideAlpha = 0.5
 
-    range.text = parent:CreateFontString(nil, "OVERLAY")
-    range.text:SetFont(unpack(nibRealUI:Font()))
-    range.text:SetPoint("BOTTOMRIGHT", range, "BOTTOMLEFT", 0, 0)
+    parent.Range.text = parent.Health:CreateFontString(nil, "OVERLAY")
+    parent.Range.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Range.text:SetPoint("BOTTOMRIGHT", parent.Range, "BOTTOMLEFT", 0, 0)
 
-    range.Override = function(self, status)
+    parent.Range.Override = function(self, status)
         --print("Range Override", self, status)
         local minRange, maxRange = RC:GetRange("target")
 
@@ -236,21 +233,19 @@ local function CreateRange(parent)
             self.Range:Hide()
         end
     end
-
-    return range
 end
 
 local function CreateThreat(parent)
-    local threat = parent:CreateTexture(nil, "OVERLAY")
-    threat:SetTexture(nibRealUI.media.icons.Lightning)
-    threat:SetSize(16, 16)
-    threat:SetPoint("TOPRIGHT", parent, "TOPLEFT", -10, 0)
+    parent.Threat = parent.Power:CreateTexture(nil, "OVERLAY")
+    parent.Threat:SetTexture(nibRealUI.media.icons.Lightning)
+    parent.Threat:SetSize(16, 16)
+    parent.Threat:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", -10, 0)
 
-    threat.text = parent:CreateFontString(nil, "OVERLAY")
-    threat.text:SetFont(unpack(nibRealUI:Font()))
-    threat.text:SetPoint("BOTTOMRIGHT", threat, "BOTTOMLEFT", 0, 0)
+    parent.Threat.text = parent.Power:CreateFontString(nil, "OVERLAY")
+    parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 0, 0)
 
-    threat.Override = function(self, event, unit)
+    parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
         local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
 
@@ -269,36 +264,32 @@ local function CreateThreat(parent)
             self.Threat:Hide()
         end
     end
-
-    return threat
 end
 
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = positions[UnitFrames.layoutSize].endBox
-    local endBox = parent:CreateTexture(nil, "BORDER")
-    endBox:SetTexture(texture.bar)
-    endBox:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    endBox:SetSize(texture.width, texture.height)
-    endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
+    parent.endBox = parent:CreateTexture(nil, "BORDER")
+    parent.endBox:SetTexture(texture.bar)
+    parent.endBox:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
+    parent.endBox:SetSize(texture.width, texture.height)
+    parent.endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
 
     local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    border:SetAllPoints(endBox)
+    border:SetAllPoints(parent.endBox)
 
-    endBox.Update = UnitFrames.UpdateEndBox
-   
-    return endBox
+    parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
 local function CreateTarget(self)
-    self.Health = CreateHealthBar(self)
-    self.Power = CreatePowerBar(self)
+    CreateHealthBar(self)
     CreateHealthStatus(self)
-    self.Range = CreateRange(self.Health)
-    self.Threat = CreateThreat(self.Power)
-    self.endBox = CreateEndBox(self)
+    CreatePowerBar(self)
+    CreateRange(self)
+    CreateThreat(self)
+    CreateEndBox(self)
     CreatePowerStatus(self)
     
     self.Name = self:CreateFontString(nil, "OVERLAY")

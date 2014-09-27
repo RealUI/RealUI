@@ -66,7 +66,7 @@ f:SetScript("OnEvent", function(self, event, addon)
         F, C = unpack(Aurora)
 
         F.ReskinAtlas = function(f, atlas, is8Point)
-            print("ReskinAtlas")
+            --print("ReskinAtlas")
             if not atlas then atlas = f:GetAtlas() end
             local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
             file = file:sub(10) -- cut off "Interface"

@@ -254,7 +254,7 @@ end
 
 function UnitFrames:UpdateClassification(event)
     --print("Classification", self.unit, event, UnitClassification(self.unit))
-    local color = db.overlay.colors.status.elite --[UnitClassification(self.unit)] or nibRealUI.media.background
+    local color = db.overlay.colors.status[UnitClassification(self.unit)] or nibRealUI.media.background
     self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
 end
 
@@ -276,7 +276,7 @@ function UnitFrames:UpdateStatus(event, ...)
         self.Leader.status = "leader"
     else
         --print("Status2: None", self, event, unit)
-        self.Leader.status = true --false
+        self.Leader.status = false
     end
     if self.Leader.status then
         self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
@@ -335,10 +335,14 @@ function UnitFrames:UpdateEndBox(...)
 end
 
 -- Init
-function UnitFrames:InitShared()
+function UnitFrames:Shared()
     db = UnitFrames.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
+
+    for i = 1, #UnitFrames.units do
+        UnitFrames.units[i]()
+    end
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
 end
