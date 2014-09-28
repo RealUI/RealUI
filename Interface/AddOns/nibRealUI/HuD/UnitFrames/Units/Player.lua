@@ -259,5 +259,6 @@ tinsert(UnitFrames.units, function(...)
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)
     player:RegisterEvent("PLAYER_FLAGS_CHANGED", UnitFrames.UpdateStatus)
+    player:RegisterEvent("UPDATE_SHAPESHIFT_FORM", player.PostUpdate)
 end)
 

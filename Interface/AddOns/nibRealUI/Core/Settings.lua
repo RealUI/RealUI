@@ -162,7 +162,7 @@ end
 local function CreateInstallWindow()
 	-- To help with debugging
 	local bdAlpha, ibSizeOffs = 0.9, 0
-	if true then
+	if nibRealUI.key == "Real - Zul'jin" then
 		bdAlpha = 0.5
 		ibSizeOffs = 300
 	end
@@ -383,7 +383,6 @@ function nibRealUI:InstallProcedure()
 	local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
 	
 	-- Reset DB if new Major version
-	print("InstallProcedure", newVer, oldVer[2], dbg.verinfo[2])
 	if newVer == "major" then
 		nibRealUI.db:ResetDB("RealUI")
 		if StaticPopup1 then
@@ -393,11 +392,9 @@ function nibRealUI:InstallProcedure()
 
 	-- Set Char defaults
 	if not(db.registeredChars[self.key]) or not(nibRealUICharacter) or (newVer == "major") or not(nibRealUICharacter.installStage) then
-        print("Do Major!!")
 		nibRealUICharacter = nibRealUICharacter_defaults
 		db.registeredChars[self.key] = true
     elseif not dbg.verinfo[1] or newVer == "minor" then
-        print("Do Minor!!")
         dbg.minipatches = {}
     end
 	

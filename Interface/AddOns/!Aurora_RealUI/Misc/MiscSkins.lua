@@ -5,18 +5,34 @@ tinsert(mods["Aurora"], function()
 	local F, C = unpack(Aurora)
 	--print("MiscSkins")
 	--Travel Pass
-	for i = 1, FRIENDS_TO_DISPLAY do
-		local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
+    FriendsFrame:HookScript("OnShow", function()
+        if not FriendsFrame.skinned then
+            for i = 1, FRIENDS_TO_DISPLAY do
+                local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
 
-		F.Reskin(bu.travelPassButton)
-		bu.travelPassButton:SetAlpha(1)
-		bu.travelPassButton:EnableMouse(true)
-		bu.travelPassButton:SetSize(20, 32)
-		bu.inv = bu.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
-		bu.inv:SetTexture("Interface\\FriendsFrame\\PlusManz-PlusManz")
-		bu.inv:SetPoint("TOPRIGHT", 1, -4)
-		bu.inv:SetSize(22, 22)
-	end
+                --local frame = CreateFrame("frame", nil, bu)
+                --frame:SetSize(60, 32)
+
+                F.Reskin(bu.travelPassButton)
+                bu.travelPassButton:SetAlpha(1)
+                bu.travelPassButton:EnableMouse(true)
+                bu.travelPassButton:SetSize(20, 32)
+
+                bu.bg:SetSize(bu.gameIcon:GetWidth()+2, bu.gameIcon:GetHight()+2)
+                bu.bg:ClearAllPoints()
+                bu.bg:SetPoint("TOPLEFT", bu.gameIcon, -1, 1)
+                bu.gameIcon:SetParent(bu.bg)
+                bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -1, -5)
+                bu.gameIcon.SetPoint = function() end
+
+                bu.inv = bu.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
+                bu.inv:SetTexture("Interface\\FriendsFrame\\PlusManz-PlusManz")
+                bu.inv:SetPoint("TOPRIGHT", 1, -4)
+                bu.inv:SetSize(22, 22)
+            end
+            FriendsFrame.skinned = true
+        end
+    end)
 
 	local function UpdateScroll()
 		for i = 1, FRIENDS_TO_DISPLAY do
@@ -32,7 +48,6 @@ tinsert(mods["Aurora"], function()
 
 			if bu.gameIcon:IsShown() then
 				bu.bg:Show()
-				bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -1, -5)
 			else
 				bu.bg:Hide()
 			end
