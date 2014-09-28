@@ -211,6 +211,7 @@ local defaults = {
 			resetNew = false,
 			largeHuDOption = false,
 		},
+        verinfo = {},
 		minipatches = {},
 	},
 	char = {
@@ -289,6 +290,7 @@ local defaults = {
 
 -- Toggle Grid2's "Test Layout"
 function nibRealUI:ToggleGridTestMode(show)
+    if not Grid2 then return end
 	if show then
 		if RealUIGridConfiguring then return end
 		if not Grid2Options then Grid2:LoadGrid2Options() end
@@ -539,6 +541,9 @@ function nibRealUI:GetVerString(returnLong)
 	else
 		return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
 	end
+end
+function nibRealUI:MajorVerChange(oldVer, curVer)
+	return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
 end
 
 -- Events

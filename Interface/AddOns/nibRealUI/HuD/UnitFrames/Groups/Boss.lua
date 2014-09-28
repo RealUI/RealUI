@@ -244,6 +244,9 @@ local function CreateBoss(self)
     self.RaidIcon = self:CreateTexture(nil, 'OVERLAY')
     self.RaidIcon:SetSize(21, 21)
     self.RaidIcon:SetPoint("LEFT", self, "RIGHT", 1, 1)
+
+    self:SetScript("OnEnter", UnitFrame_OnEnter)
+    self:SetScript("OnLeave", UnitFrame_OnLeave)
 end
 
 -- Init

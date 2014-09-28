@@ -479,6 +479,9 @@ function UnitFrames:OnInitialize()
                 arena = false,
                 tank = false,
             },
+            arena = {
+                announceUse = true,
+            },
             boss = {
                 gap = 3,
                 buffCount = 3,

@@ -21,8 +21,8 @@ local IWF = {}
 -- CVars
 local function SetDefaultCVars()
 	-- Graphics
-	if GetCVar("gxMultisample") ~= "1" then
-		SetCVar("gxMultisample", 1)
+	if GetCVar("ffxAntiAliasingMode") ~= "0" then
+		SetCVar("ffxAntiAliasingMode", 0)
 		RestartGx()
 	end
 	-- Sound
@@ -54,7 +54,6 @@ local function SetDefaultCVars()
 	SetCVar("conversationMode", "inline")			-- Conversation Mode = "In-line"
 	-- Quests
 	SetCVar("autoQuestWatch", 1)					-- Auto Track Quests
-	SetCVar("mapQuestDifficulty", 1)				-- Color Quests by Difficulty on World Map
 	-- Names
 	SetCVar("UnitNameNPC", 1)						-- Turn on NPC Names
 	SetCVar("UnitNamePlayerPVPTitle", 0)			-- Turn off PvP Player Titles
@@ -163,7 +162,7 @@ end
 local function CreateInstallWindow()
 	-- To help with debugging
 	local bdAlpha, ibSizeOffs = 0.9, 0
-	if nibRealUI.key == "Real - Zul'jin" then
+	if true then
 		bdAlpha = 0.5
 		ibSizeOffs = 300
 	end
@@ -290,10 +289,16 @@ local function InstallationStage1()
 	
 	---- Set MiniPatch flags
 	dbg.minipatches = {}
-	for k,v in ipairs(MiniPatches) do
+	for k,v in next, MiniPatches do
 		dbg.minipatches[k] = v
-	end
-	
+    end
+
+    ---- Set version info
+    dbg.verinfo = {}
+    for k,v in next, nibRealUI.verinfo do
+        dbg.verinfo[k] = v
+    end
+
 	DEFAULT_CHATFRAME_ALPHA = 0
 end
 
@@ -313,7 +318,12 @@ local function ApplyMiniPatches(np, accepted)
 			end
 			dbg.minipatches[k] = MiniPatches[k]
 		end
-	end
+    end
+    ---- Set version info
+    dbg.verinfo = {}
+    for k,v in next, nibRealUI.verinfo do
+        dbg.verinfo[k] = v
+    end
 end
 
 local function MiniPatchInstallation()
@@ -337,6 +347,7 @@ local function MiniPatchInstallation()
 		local toPatch = {}
 		local MiniPatchAccepted = false
 		if dbg.minipatches == nil then dbg.minipatches = {} end
+        if dbg.verinfo == nil then dbg.verinfo = nibRealUI.verinfo end
 
 		if needPatchCount > 0 then
 			StaticPopupDialogs["PUDRUIMP"] = {
@@ -368,27 +379,27 @@ function nibRealUI:InstallProcedure()
 	
 	---- Version checking
 	local curVer = nibRealUI.verinfo
-	local oldVer = dbg.verinfo or {8, 0, 31}
-	local newVer = false
+	local oldVer = (dbg.verinfo[1] and dbg.verinfo) or nibRealUI.verinfo
+	local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
 	
 	-- Reset DB if new Major version
-	if (oldVer[1] < curVer[1]) or (not dbg.minipatches[8] and oldVer[2] < 1) then
-		-- reset if major version or they are upgrading from an old minor version
+	print("InstallProcedure", newVer, oldVer[2], dbg.verinfo[2])
+	if newVer == "major" then
 		nibRealUI.db:ResetDB("RealUI")
 		if StaticPopup1 then
 			StaticPopup1:Hide()
 		end
-		newVer = true
-	elseif (oldVer[2] < curVer[2]) then
-		dbg.minipatches = nil
-		newVer = true
 	end
 
 	-- Set Char defaults
-	if not(db.registeredChars[self.key]) or not(nibRealUICharacter) or newVer or not(nibRealUICharacter.installStage) then
+	if not(db.registeredChars[self.key]) or not(nibRealUICharacter) or (newVer == "major") or not(nibRealUICharacter.installStage) then
+        print("Do Major!!")
 		nibRealUICharacter = nibRealUICharacter_defaults
 		db.registeredChars[self.key] = true
-	end
+    elseif not dbg.verinfo[1] or newVer == "minor" then
+        print("Do Minor!!")
+        dbg.minipatches = {}
+    end
 	
 	-- Primary Stages
 	if nibRealUICharacter.installStage > -1 then
@@ -398,5 +409,4 @@ function nibRealUI:InstallProcedure()
 	else
 		MiniPatchInstallation()
 	end
-	dbg.verinfo = nibRealUI.verinfo
 end
