@@ -6,13 +6,11 @@ Major Features
 2) Multi-target HoT and DoT tracking bars
 3) Timelines to show buff, debuff and cooldown icons sliding along a bar
 4) Comprehensive condition checking to support buffing/debuffing, spell rotations, etc.
-5) Highlights for active spells plus cooldown counters on popular action bar addon buttons
-6) Preset spell colors and cooldowns plus buff-related conditions for each class
+5) Preset spell colors and buff-related conditions for each class
 
 Project page: http://wow.curseforge.com/addons/raven
 Offical forum thread: http://forums.curseforge.com/showthread.php?t=18429
 FAQ: http://wow.curseforge.com/addons/raven/pages/faq
-Localizations: Chinese (zhCN and zhTW) by surgesoft and Alice, Korean (koKR) by rhinomans
 
 Installation and Configuration
 
@@ -88,23 +86,15 @@ Cancelling Buffs
 
 Raven includes support for cancelling buffs. When out of combat, you simply right-click the icon on any player buff bar to cancel the buff (this works for shaman weapon enchants and rogue poisons too). For cancelling buffs in combat, Raven includes an "in-combat" bar that you set up while out of combat with a list of player buffs that you want to be able to cancel in combat (you may need to do reload the UI after setting up the "in-combat" bar before using the buttons). When one of these buffs becomes active in combat, its icon pulses into place on the "in-combat" bar and you can right-click it to cancel the buff.
 
-Class-Specific Modules
+Support for Runes and Totems
 
 Raven includes special bar groups for Death Knight and Shaman classes. These show up as the Runes and Totems standard bar groups on the Setup tab. The Runes bar group replaces the Blizzard runes default UI and displays cooldown timer bars for all your runes. The Totems bar group tracks currently active totems and show a placeholder ready bar for each empty totem slot. You can right-click on a totem icon to destroy a totem. You can disable the placeholder bars by turning off Show If Unlimited Duration.
-
-Raven supports optional modules that add spell rotation notifications for particular classes/specs (e.g., feral druid, survival hunter, destruction warlock). They contain conditions that prioritize spell selection based on current player and target status plus resource availabilty (combo points, energy, etc.). These modules are separate addons and distributed/enabled separately. A growing collection of these modules, many including video demos, is available at Zoumtag's website at http://noiretendard.free.fr/wow_addons/Raven_plugins/Info.html.
-
-Since Raven allows anyone to create, view and edit conditions, you can see exactly how a module supports a spell rotation and customize it to your own preferences. Note, however, that spell rotations are often optimized for boss fights and may not be suitable for all circumstances. It is important to understand your class well enough to know when it is appropriate to follow spell rotation notifications and when to ignore them. Similarly, module writers should try to take into consideration a variety of scenarios (boss fights, trash pulls, questing) when designing spell rotations.
-
-Highlights
-
-If you are using Bartender4, Dominos or Macaroon then Raven can add overlays to buttons to show which of your spells are active and which are on cooldown. Raven is already tracking your buffs, debuffs and cooldowns so it does this with minimal added resources. You can customize (or disable) this feature in the configuration panel Highlights tab. Active spell highlights are color-coded to indicate if on player, target or focus. If ButtonFacade is loaded then Raven can use it for color highlighting. However, since this does not work well with all skins, ButtonFacade support is disabled by default. Cooldown counters are shown by default unless OmniCC is installed.
 
 Multiple Characters
 
 Raven is designed to simplify configuration across multiple characters. This is required because each class may make quite different use of timer bars (e.g., some depend on tracking cooldowns while others watch for debuffs to expire on the target). In the Profiles tab, Raven includes the profile options common to Ace3-based addons and, by default, creates a new profile for each character.
 
-In addition to using profiles, Raven shares a variety of settings across characters. This can result in some confusion since it works differently than in other addons (but can simplify configuring Raven if you play several different classes). First, the appearance options on the Defaults tab (dimensions, fonts, textures) apply to all profiles (they can be overridden as needed in any bar group, of course). Second, almost all bar group settings (the primary exception being the actual bars associated with custom groups) are linked between bar groups of the same name in all profiles that have Link Settings enabled (note that Link Settings is no longer enabled by default for standard bar groups on the Setup tab). Third, filter lists are linked by default between auto bar groups of the same name in all profiles, simplifying dealing with unwanted buff, debuff and cooldown bars. Fourth, all settings related to button highlights are shared across characters.
+In addition to using profiles, Raven shares a variety of settings across characters. This can result in some confusion since it works differently than in other addons (but can simplify configuring Raven if you play several different classes). First, the appearance options on the Defaults tab (dimensions, fonts, textures) apply to all profiles (they can be overridden as needed in any bar group, of course). Second, almost all bar group settings (the primary exception being the actual bars associated with custom groups) are linked between bar groups of the same name in all profiles that have Link Settings enabled (note that Link Settings is no longer enabled by default for standard bar groups on the Setup tab). Third, filter lists are linked by default between auto bar groups of the same name in all profiles, simplifying dealing with unwanted buff, debuff and cooldown bars.
 
 Final Words
 

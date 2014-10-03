@@ -26,9 +26,7 @@ MOD.ldb = nil
 MOD.ldbi = nil -- set when using DBIcon library
 MOD.myClass = nil; MOD.localClass = nil
 MOD.myRace = nil; MOD.localRace = nil
-MOD.lockSpells = {} -- spells for testing lock out of each school of magic for current player
-MOD.classSpells = {} -- stores info about pre-defined spells for each class
-MOD.petSpells = {} -- stores info about pre-defined spells for pets
+MOD.lockoutSpells = {} -- spells for testing lock out of each school of magic for current player
 MOD.classConditions = {} -- stores info about pre-defined conditions for each class
 MOD.talents = {} -- table containing names and talent table location for each talent
 MOD.talentList = {} -- table with list of talent names
@@ -270,11 +268,7 @@ local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, 
 				name = spellName; rank = ""; count = 1; bType = nil; duration = MOD:GetDuration(name, spellID)
 				if duration > 0 then expire = now + duration else duration = 0; expire = 0 end
 				caster = "player"; isStealable = nil; boss = nil; apply = nil; isBuff = false
-				if MOD.BuffTable[name] ~= nil then
-					isBuff = true
-				elseif MOD.DebuffTable[name] == nil then
-					isBuff = (bit.band(df1, COMBATLOG_OBJECT_REACTION_MASK) ~= COMBATLOG_OBJECT_REACTION_HOSTILE)
-				end
+				isBuff = (bit.band(df1, COMBATLOG_OBJECT_REACTION_MASK) ~= COMBATLOG_OBJECT_REACTION_HOSTILE)
 			end
 			if name and caster == "player" and (isBuff or (srcGUID ~= dstGUID)) then
 				AddTracker(dstGUID, dstName, isBuff, name, rank, icon, count, btype, duration, expire, caster, isStealable, spellID, boss, apply, nil)
@@ -435,7 +429,6 @@ function MOD:PLAYER_ENTERING_WORLD()
 	if not enteredWorld then
 		for _, k in pairs(units) do unitUpdate[k] = true; activeBuffs[k] = {}; activeDebuffs[k] = {}; cacheBuffs[k] = {}; cacheDebuffs[k] = {}  end -- track auras
 		updateCooldowns = true -- start tracking cooldowns
-		MOD:InitializeHighlights() -- initialize routine that does action bar highlighting
 		MOD:InitializeBuffTooltip() -- initialize tooltip used to monitor weapon buffs
 		MOD:InitializeConditions() -- initialize routine that shows cooldown overlays and cooldown bars	
 		InitializeRunes() -- death knight specific initialization
@@ -646,7 +639,6 @@ function MOD:Update(elapsed)
 				MOD:UpdateTrackers() -- update aura trackers for multiple targets
 				MOD:UpdateCooldowns() -- update table containing current cooldowns on action bar buttons and trinkets
 				MOD:UpdateConditions() -- update table containing currently triggered conditions
-				MOD:UpdateHighlights() -- update action bar buttons with highlights and cooldown text
 				MOD.Nest_CheckDisplayDimensions() -- check display dimensions and update anchors if they have changed
 				MOD:UpdateBars() -- update timer bars for auras and cooldowns
 				MOD:UpdateInCombatBar() -- update the in-combat bar if necessary
@@ -667,7 +659,6 @@ function MOD:Update(elapsed)
 		if elapsedTime >= 1 then -- check occasionally to make sure everything is in the right state
 			elapsedTime = 0
 			CheckBlizzFrames() -- make sure blizzard frames are visible or not
-			MOD:HideHighlights()
 			MOD:HideBars()
 			MOD:HideInCombatBar()
 		end
@@ -686,7 +677,7 @@ local function SetAuraTimeLeft(b) if b[5] > 0 then b[2] = b[10] - GetTime() if b
 -- Check if a GUID belongs to a boss per LibBossIDs
 function MOD.CheckLibBossIDs(guid)
 	local _, id
-	_, _, _, _, _, id = string.match(guid, "(%a+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+	_, _, _, _, _, id = string.match(guid, "(%a+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)")
 	if id then
 		id = tonumber(id)
 		if id and MOD.LibBossIDs.BossIDs[id] then return 1 end
@@ -704,7 +695,7 @@ local function AddAura(unit, name, isBuff, spellID, count, btype, duration, cast
 		if caster then
 			local guid = UnitGUID(caster); cname = UnitName(caster); vehicle = UnitHasVehicleUI(caster)
 			if guid then
-				local unitType = string.match(guid, "(%a+):")
+				local unitType = string.match(guid, "(%a+)%-")
 				isNPC = (unitType == "Creature") or (unitType == "Vignette"); vehicle = vehicle or (unitType == "Vehicle")
 				if isNPC and MOD.LibBossIDs then boss = boss or MOD.CheckLibBossIDs(guid) end
 			end
@@ -1329,7 +1320,7 @@ function MOD:UpdateCooldowns()
 		local lockedOut = false -- flag set if any lockout spells are found
 		for school in pairs(lockouts) do lockouts[school] = 0 end -- clear any previous settings in lockout table
 		if UnitLevel("player") >= 10 then -- don't detect lockouts for low-level characters, this allows more options for lockout detection spells
-			for name, ls in pairs(MOD.lockSpells) do
+			for name, ls in pairs(MOD.lockoutSpells) do
 				if not lockouts[ls.school] then lockouts[ls.school] = 0 end -- initialize when school seen for first time
 				if ls.index and (lockouts[ls.school] == 0) then
 					local start, duration = GetSpellCooldown(ls.index, "spell")

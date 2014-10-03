@@ -1,12 +1,12 @@
 ## Interface: 60000
 ## Title: Raven
-## Notes: Monitors spells, provides timers, cooldowns, action bar highlights, helpful notifications
+## Notes: Monitors buffs, debuffs and cooldowns and provides timer bars and icons plus helpful notifications
 ## Author: Tomber
 ## DefaultState: enabled
 ## OptionalDependencies: Masque
 ## SavedVariables: RavenDB
-## Version: r318
-## X-Curse-Packaged-Version: r318
+## Version: r323
+## X-Curse-Packaged-Version: r323
 ## X-Curse-Project-Name: Raven
 ## X-Curse-Project-ID: raven
 ## X-Curse-Repository-ID: wow/raven/mainline
@@ -16,13 +16,9 @@ embeds.xml
 #@end-no-lib-strip@
 
 Localizations\enUS.lua
-Localizations\zhCN.lua
-Localizations\zhTW.lua
-Localizations\koKR.lua
 
 Main.lua
 Profile.lua
-Highlights.lua
 Conditions.lua
 Bars.lua
 Cancel.lua

@@ -264,10 +264,10 @@ end
 -- Callback function for when a bar group anchor is clicked with a modifier key down
 -- Shift left click is test bars, right click is "toggle lock and hide",
 local function Anchor_Clicked(anchor, bgName, button)
-	local shiftLeftClick = (button == "LeftButton") and (IsShiftKeyDown() == 1)
-	local shiftRightClick = (button == "RightButton") and (IsShiftKeyDown() == 1)
-	local altLeftClick = (button == "LeftButton") and (IsAltKeyDown() == 1)
-	local altRightClick = (button == "RightButton") and (IsAltKeyDown() == 1)
+	local shiftLeftClick = (button == "LeftButton") and IsShiftKeyDown()
+	local shiftRightClick = (button == "RightButton") and IsShiftKeyDown()
+	local altLeftClick = (button == "LeftButton") and IsAltKeyDown()
+	local altRightClick = (button == "RightButton") and IsAltKeyDown()
 	local rightClick = (button == "RightButton")
 
 	local bp = MOD.db.profile.BarGroups[bgName]
@@ -400,14 +400,7 @@ end
 -- Get the right color for the bar based on bar group settings
 local function GetColorForBar(bg, bar, btype)
 	local bt, ba, b, c = bar.barType, bar.action, nil, nil
-	if bg.barColors == "Class" then
-		if bt == "Buff" then b = MOD.BuffTable[ba] end
-		if bt == "Debuff" then b = MOD.DebuffTable[ba] end
-		if bt == "Cooldown" then b = MOD.CooldownTable[ba] end
-		if b and b.class then
-			if CUSTOM_CLASS_COLORS then c = CUSTOM_CLASS_COLORS[b.class] else c = RAID_CLASS_COLORS[b.class] end
-		end
-	elseif bg.barColors == "Spell" then
+	if bg.barColors == "Spell" then
 		if bar.color then c = bar.color else c = MOD:GetSpellColorForBar(bar) end
 	elseif bg.barColors == "Custom" then
 		c = bg.fgColor or defaultWhite
@@ -606,11 +599,10 @@ function MOD:UpdateBarGroup(bp)
 		MOD.Nest_SetBarGroupAttribute(bg, "isAuto", bp.auto) -- save for tooltip
 		MOD.Nest_SetBarGroupAttribute(bg, "attachment", bp.anchor) -- save for tooltip
 		MOD.Nest_SetBarGroupAttribute(bg, "clockReverse", bp.clockReverse) -- save for clock animations
---		MOD.Nest_SetBarGroupAttribute(bg, "clockEdge", bp.clockEdge) -- save for clock animations, removed in 5.0.4 release
 		MOD.Nest_SetBarGroupTimeFormat(bg, bp.timeFormat, bp.timeSpaces, bp.timeCase)
 		MOD.Nest_SetBarGroupAttribute(bg, "headerGaps", bp.headerGaps and bp.noHeaders) -- convert headers into spaces for tracker bar groups
 		local sf = "alpha"
-		if bp.sor == "T" then sf = "time" elseif bp.sor == "D" then sf = "duration" elseif bp.sor == "S" then sf = "start" elseif bp.sor == "C" then sf = "class" end
+		if bp.sor == "T" then sf = "time" elseif bp.sor == "D" then sf = "duration" elseif bp.sor == "S" then sf = "start" end
 		MOD.Nest_BarGroupSortFunction(bg, sf, bp.reverseSort, bp.timeSort, bp.playerSort)
 		MOD.Nest_SetBarGroupAttribute(bg, "noDurationFirst", bp.noDurationFirst) -- controls in no duration sorts first or last
 	else
@@ -825,12 +817,7 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		if (b.hide and (elapsed >= (b.delayTime or 5))) or (bp.hide and (elapsed >= (bp.delayTime or 5))) then return end
 	end
 	
-	local bar, barname, label, src, classSort = nil, b.barLabel .. b.uniqueID, b.barLabel, b.barSource, nil
-	if vbp.sor == "C" then -- prefixes are added to the barname to facilitate sorting
-		if not src or (src == "Racial") or (src == "Spell") or (src == "Detected") then src = "zzzz" end -- non-class goes to end of list
-		if src == MOD.myClass then src = "AAAA" end -- sort player's class to front of list
-		classSort = "zzzz" .. string.upper(src)
-	end
+	local bar, barname, label = nil, b.barLabel .. b.uniqueID, b.barLabel
 	if vbp.sor == "X" then barname = string.format("%05d ", b.sorder) .. barname end
 	
 	local maxTime = duration
@@ -911,7 +898,6 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		MOD.Nest_SetColors(bar, c.r, c.g, c.b, c.a, bc.r, bc.g, bc.b, bc.a, ibr, ibg, ibb, iba)
 		MOD.Nest_SetCount(bar, iconCount) -- set the icon text to this count or blank if nil
 		bat.iconColors = vbp.iconColors -- required in order to do right thing with "None"
-		bat.class = classSort -- optional sort string for class sorting
 		bat.isMine = (isMine == true) -- optional indication that bar action was cast by player
 		local desat = vbp.desaturate and (not vbp.desaturateFriend or (UnitExists("target") and UnitIsFriend("player", "target")))
 		bat.desaturate = (desat and not isMine) -- optionally desaturate if not player bar
@@ -1007,15 +993,6 @@ function MOD:CheckCastBy(caster, cb)
 		((cb == "focus") and (caster ~= "unknown") and UnitIsUnit("focus", caster))
 end
 
--- Return the source for a buff, debuff or cooldown
-local function GetSpellSource(t)
-	if not t then return "Unknown" end
-	local s = classNames[t.class]
-	if not s and t.race then s = "Racial" end
-	if not s then s = "Detected" end
-	return s
-end
-
 -- Check if an action is in the associated filter bar group
 local function CheckFilterBarGroup(bgname, btype, action, value)
 	if not bgname then return false end
@@ -1052,8 +1029,6 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		if (bp.filterBuff and listed) or (bp.showBuff and not listed) then return end
 	end
 	if bp.filterBuffBars and CheckFilterBarGroup(bp.filterBuffBarGroup, "Buff", n, bp.detectBuffsMonitor) then return end -- check if in filter bar group
-	local bt = MOD.BuffTable
-	if not bt[n] then bt[n] = { det = true } end -- newly detected aura goes into auras table
 	local label = MOD:GetLabel(n, aura[14]) -- check if there is a cached label for this action or spellid
 	local checkTracking = not (bp.detectTracking and bp.detectOnlyTracking)
 	if (aura[4] == "Tracking") then checkTracking = bp.detectTracking end
@@ -1069,7 +1044,7 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	local isCastable = aura[17] and not isWeapon
 	local isOther = not isStealable and not isCastable and not isNPC and not isVehicle and not isMagic and not isEffect and not isWeapon and not isBoss and not isEnrage
 	local isMine = (aura[6] == "player")
-	local id, gname = aura[20], aura[21] -- these fields are only valid if unit == "all
+	local id, gname = aura[20], aura[21] -- these fields are only valid if unit == "all"
 	local checkAll = (unit == "all")
 	local checkTypes = not bp.filterBuffTypes or (bp.detectStealable and isStealable) or (bp.detectCastable and isCastable)
 		or (bp.detectNPCBuffs and isNPC) or (bp.detectVehicleBuffs and isVehicle) or (bp.detectBossBuffs and isBoss) or (bp.detectEnrageBuffs and isEnrage)
@@ -1095,7 +1070,7 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		end
 		b.group = id -- if unit is "all" then this is GUID of unit with buff, otherwise it is nil
 		b.groupName = gname -- if unit is "all" then this is the name of the unit with buff, otherwise it is nil
-		b.uniqueID = tag; b.listID = listID; b.barLabel = label; b.barSource = GetSpellSource(bt[n])
+		b.uniqueID = tag; b.listID = listID; b.barLabel = label
 		UpdateBar(bp, vbp, bg, b, aura[8], aura[2], aura[5], aura[3], aura[4], tt, ta, unit, aura[16], isMine)
 	end
 end
@@ -1110,8 +1085,6 @@ local function DetectNewDebuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		if (bp.filterDebuff and listed) or (bp.showDebuff and not listed) then return end
 	end
 	if bp.filterDebuffBars and CheckFilterBarGroup(bp.filterDebuffBarGroup, "Debuff", n, bp.detectDebuffsMonitor) then return end -- check if in filter bar group
-	local bt = MOD.DebuffTable
-	if not bt[n] then bt[n] = { det = true } end -- newly detected aura goes into auras table
 	local label = MOD:GetLabel(n, aura[14]) -- check if there is a cached label for this action or spellid
 	local isDispel = MOD:IsDebuffDispellable(n, unit, aura[4])
 	local isInflict = aura[17]
@@ -1151,7 +1124,7 @@ local function DetectNewDebuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		end
 		b.group = id -- if unit is "all" then this is GUID of unit with debuff, otherwise it is nil
 		b.groupName = gname -- if unit is "all" then this is the name of the unit with buff, otherwise it is nil
-		b.uniqueID = tag; b.listID = listID; b.barLabel = label; b.barSource = GetSpellSource(bt[n])
+		b.uniqueID = tag; b.listID = listID; b.barLabel = label
 		UpdateBar(bp, vbp, bg, b, aura[8], aura[2], aura[5], aura[3], aura[4], tt, ta, unit, aura[16], isMine)
 	end
 end
@@ -1214,7 +1187,7 @@ local function AutoRuneBars(bp, vbp, bg)
 		local icon = MOD.runeIcons[rune.rtype]
 		local b = detectedBar
 		b.action = MOD.runeTypes[rune.rtype]; b.spellID = nil; b.barLabel = runeSlotPrefix[i] .. b.action
-		b.barType = "Cooldown"; b.uniqueID = "Cooldown"; b.group = nil; b.barSource = "Detected"
+		b.barType = "Cooldown"; b.uniqueID = "Cooldown"; b.group = nil
 		if rune.ready then -- generate ready bar with no duration
 			if CheckTimeAndDuration(bp, 0, 0) then
 				UpdateBar(bp, vbp, bg, b, icon, 0, 0, nil, nil, "text", b.action, nil, nil, true)
@@ -1234,7 +1207,7 @@ local function AutoTotemBars(bp, vbp, bg)
 	if MOD.myClass ~= "SHAMAN" then return end
 	for i = 1, 4 do
 		local b = detectedBar
-		b.barType = "Cooldown"; b.uniqueID = "Totem" .. i; b.group = nil; b.barSource = totemSlotName[i]
+		b.barType = "Cooldown"; b.uniqueID = "Totem" .. i; b.group = nil
 		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
 		if haveTotem and name and name ~= "" then -- generate timer bar for the totem in the slot
 			local timeLeft = duration - (GetTime() - startTime)
@@ -1261,13 +1234,10 @@ local function DetectNewCooldowns(n, cd, bp, vbp, bg)
 		if (bp.filterCooldown and listed) or (bp.showCooldown and not listed) then return end
 	end
 	if bp.filterCooldownBars and CheckFilterBarGroup(bp.filterCooldownBarGroup, "Cooldown", n, true) then return end -- check if in filter bar group
-	local cdt = MOD.CooldownTable	
-	if not cdt[n] then cdt[n] = { det = true } end -- newly detected cooldown goes into cooldowns table
 	local label = MOD:GetLabel(n, cd[8]) -- check if there is a cached label for this action or spellid
 	if MOD:CheckCastBy(cd[7], bp.detectCooldownsBy) and CheckCooldownType(cd, bp) and CheckTimeAndDuration(bp, cd[1], cd[4]) then
 		local b = detectedBar
 		b.action = n; b.spellID = cd[8]; b.barType = "Cooldown"; b.barLabel = label; b.uniqueID = "Cooldown"; b.listID = listID; b.group = nil
-		b.barSource = GetSpellSource(cdt[n])
 		if CheckSharedCooldowns(n, b, bp) then
 			UpdateBar(bp, vbp, bg, b, cd[2], cd[1], cd[4], cd[9], nil, cd[5], cd[6], nil, nil, true)
 		end
@@ -1308,7 +1278,7 @@ local function UpdateBarGroupBars(bp, vbp, bg)
 					local rti = MOD:GetRaidTarget(id)
 					if rti then label = prefixRaidTargetIcon .. rti .. ":0|t " .. name end
 					b.action = ""; b.spellID = nil; b.barLabel = label; b.barType = "Notification"
-					b.uniqueID = id; b.group = id; b.barSource = "header"
+					b.uniqueID = id; b.group = id
 					UpdateBar(bp, vbp, bg, b, nil, 0, 0, nil, nil, "header", name, id, nil, nil)
 				end
 			end
@@ -1339,10 +1309,9 @@ local function UpdateBarGroupBars(bp, vbp, bg)
 							if bar.readyTime == 0 then bar.startReady = nil end
 							if not bar.startReady or ((GetTime() - bar.startReady) < bar.readyTime) then
 								if not bar.startReady then bar.startReady = GetTime() end
-								local bt = (t == "Buff") and MOD.BuffTable or MOD.DebuffTable
-								local aura, ttype, link = bt[aname]
-								if aura then link = GetSpellLink(aura.id or aname) end
-								if link then ttype = "spell link" else ttype = "text"; link = aname end
+								local link = GetSpellLink(aname)
+								local ttype = "spell link"
+								if not link then ttype = "text"; link = aname end
 								UpdateBar(bp, vbp, bg, bar, MOD:GetIcon(aname), 0, 0, nil, nil, ttype, link, nil, nil, nil)
 							end
 						end

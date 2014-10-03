@@ -22,14 +22,10 @@
 
 local MOD = Raven
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
-MOD.BuffTable = {}
-MOD.DebuffTable = {}
-MOD.CooldownTable = {}
 local LSPELL = MOD.LocalSpellNames
 local media = LibStub("LibSharedMedia-3.0")
 
 local dispelTypes = {} -- table of debuff types that the character can dispel
-local cooldownSpells = {} -- table of spells that have cooldowns
 local spellColors = {} -- table of default spell colors
 
 -- Saved variables don't handle being set to nil properly so need to use alternate value to indicate an option has been turned off
@@ -100,7 +96,6 @@ function MOD:InitializeProfile()
 	MOD:SetInternalCooldownDefaults()
 	MOD:SetSpellEffectDefaults()
 	MOD:SetConditionDefaults()
-	MOD:SetHighlightDefaults()
 	MOD:SetIconDefaults()
 	MOD:SetSpellNameDefaults()
 	MOD:SetDimensionDefaults(MOD.DefaultProfile.global.Defaults)
@@ -114,54 +109,25 @@ function MOD:InitializeProfile()
 	MOD:InitializeSettings() -- Initialize bar group settings with default values
 end
 
--- Process an aura description and add info to tables for buffs, debuffs, cooldowns
--- p[1] = name, p[2] = isBuff (nil if not actually an aura), p[3] = color
--- isBuff=true for BUFFs, false for DEBUFFs, nil for other spells
--- color = array of r, g, b, a to be used for associated bars
--- cooldown = true for spells that have a cooldown
--- school = school of magic that the spell belongs to
--- lockout = true for spells that can be used to test if a school is locked out
-local function ProcessSpellInfo(p, pet, class, race, special)
-	local c = p[3]
-	local name = nil
-	if p.id then name = GetSpellInfo(p.id) end -- get localized name
-	if not name then name = p[1] end -- if no id specified then use the non-localized name
-	MOD.DefaultProfile.global.SpellColors[name] = c -- sets default color in the shared color table
-	if p.cooldown and (not MOD.CooldownTable[name] or (class == MOD.myClass)) then -- add to the cooldown table, indexed by name
-		MOD.CooldownTable[name] = { pet = pet, class = class, race = race, id = p.id }
-	end
-	if not pet and ((class == MOD.myClass) or (race == MOD.myRace) or special) then
-		if p.lockout and p.school then MOD.lockSpells[name] = { school = p.school or "Physical", id = p.id } end
-		if p.cooldown and (not cooldownSpells[name] or (class == MOD.myClass)) then -- prefer player's class
-			cooldownSpells[name] = { school = p.school or "Physical", id = p.id, refer = p.refer, profession = p.profession }
-		end
-	end
-	if p[2] ~= nil then -- add to the buff or debuff table, prefer player's class if already present
-		local bt = p[2] and MOD.BuffTable or MOD.DebuffTable
-		if not bt[name] or (class == MOD.myClass) then bt[name] = { pet = pet, class = class, race = race, id = p.id } end
-	end	
-end
-	
 -- Initialize spells for class auras and cooldowns, also scan other classes for group buffs and cooldowns
 -- Buffs, debuffs and cooldowns are tracked in tables containing name, color, class, race
 function MOD:SetSpellDefaults()
-	for class, at in pairs(MOD.petSpells) do -- look at all pet spells
-		for _, p in pairs(at) do ProcessSpellInfo(p, true, class, nil, false) end
-	end	
-	for class, at in pairs(MOD.classSpells) do -- look at all class spells
-		for _, p in pairs(at) do ProcessSpellInfo(p, false, class, nil, false) end
-	end	
-	for race, at in pairs(MOD.racialSpells) do -- look at racial spells
-		for _, p in pairs(at) do ProcessSpellInfo(p, false, nil, race, false) end
-	end	
-	for _, p in pairs(MOD.generalSpells) do ProcessSpellInfo(p, false, nil, nil, true) end -- look at general purpose spells
+	for id, hex in pairs(MOD.defaultColors) do -- add spell colors with localized names to the profile
+		local c = MOD.HexColor(hex) -- convert from hex coded string
+		local name = GetSpellInfo(id) -- get localized name from the spell id
+		if name and c then MOD.DefaultProfile.global.SpellColors[name] = c end-- sets default color in the shared color table
+	end
+
+	for name, hex in pairs(MOD.generalSpells) do -- add some general purpose localized colors
+		local c = MOD.HexColor(hex) -- convert from hex coded string
+		local ln = L[name] -- get localized name
+		if ln and c then MOD.DefaultProfile.global.SpellColors[ln] = c end -- add to the shared color table
+	end
 	
-	MOD.classSpells = nil -- not used again after initialization so okay to delete
-	MOD.petSpells = nil
-	MOD.racialSpells = nil
+	MOD.defaultColors = nil -- not used again after initialization so okay to delete
 	MOD.generalSpells = nil
 	
-	spellColors = MOD.DefaultProfile.global.SpellColors
+	spellColors = MOD.DefaultProfile.global.SpellColors -- save for restoring defaults later
 	
 	if MOD.myClass == "DEATHKNIGHT" then -- localize rune spell names
 		local t = {}
@@ -171,16 +137,23 @@ function MOD:SetSpellDefaults()
 end
 
 -- Initialize cooldown info from spellbook, should be called whenever spell book changes
+-- This is currently only used to initialize some info related to spell school lockouts
 function MOD:SetCooldownDefaults()
+	table.wipe(MOD.lockoutSpells) -- erase any previous entries in the spell lockout table
+	for _, p in pairs(MOD.lockSpells) do -- then add in all known spells from the table of spells used to test for lockouts
+		local name = GetSpellInfo(p.id)
+		if name and name ~= "" then MOD.lockoutSpells[name] = { school = p.school, id = p.id } end
+	end
+	
 	local numSpells = 0
 	for i = 1, 2 do local _, _, _, n = GetSpellTabInfo(i); numSpells = numSpells + n end
 	
 	for i = 1, numSpells do
-		local name, _, icon = GetSpellInfo(i, "spell") -- doesn't account for "FLYOUT" spellbook entries, but not an issue currently
+		local name = GetSpellInfo(i, "spell") -- doesn't account for "FLYOUT" spellbook entries, but not an issue currently
 		if name and name ~= "" then
-			local ls = MOD.lockSpells[name]
+			local ls = MOD.lockoutSpells[name]
 			if ls then
-				ls.index = i
+				ls.index = i -- add fields for the spell book index plus localized text
 				if ls.school == "Frost" then ls.label = L["Frost School"]; ls.text = L["Locked out of Frost school of magic."]
 				elseif ls.school == "Fire" then ls.label = L["Fire School"]; ls.text = L["Locked out of Fire school of magic."]
 				elseif ls.school == "Nature" then ls.label = L["Nature School"]; ls.text = L["Locked out of Nature school of magic."]
@@ -365,17 +338,14 @@ end
 
 -- Find and cache spell ids (this should be used rarely, primarily when entering spell names manually
 function MOD:GetSpellID(name)
-	if not name then return nil end -- prevent parameter errors
-	local b = MOD.BuffTable[name] or MOD.DebuffTable[name] -- check if in either buff or debuff preset table
-	if b and b.id then return b.id end
-	
+	if not name then return nil end -- prevent parameter errors	
 	local id = MOD.db.global.SpellIDs[name]
 	if id == 0 then return nil end -- only scan invalid ones once in a session
 	if id and (name ~= GetSpellInfo(id)) then id = nil end -- verify it is still valid
 
 	if not id and not InCombatLockdown() then -- disallow the search when in combat due to script time limit (MoP)
 		id = 0
-		while id < 155000 do -- increased for 5.4, with a bit of headroom for good measure
+		while id < 200000 do -- increased for 6.0, with a bit of headroom for good measure
 			id = id + 1
 			local n = GetSpellInfo(id)
 			if n == name then
@@ -596,7 +566,7 @@ function MOD:IsDebuffDispellable(n, unit, debuffType)
 	if not t then return false end
 	if (t == "player") and (unit ~= "player") then return false end -- special case for self-only dispels
 	if unit == "player" then return true end -- always can dispel debuffs on self
-	if UnitIsFriend("player", unit) ~= nil then return true end -- only can dispel on friendly units
+	if UnitIsFriend("player", unit) then return true end -- only can dispel on friendly units
 	return false
 end
 
@@ -706,9 +676,9 @@ MOD.DefaultProfile = {
 		SpellIDs = {},					-- cache of spell ids that had to be looked up
 		Settings = {},					-- settings table indexed by bar group names
 		Defaults = {},					-- default settings for bar group layout, fonts and textures
-		FilterBuff = {},				-- shared bar group filter for buffs
-		FilterDebuff = {},				-- shared bar group filter for debuffs
-		FilterCooldown = {},			-- shared bar group filter for cooldowns
+		FilterBuff = {},				-- shared table of buff filters
+		FilterDebuff = {},				-- shared table of debuff filters
+		FilterCooldown = {},			-- shared table of cooldown filters
 		SharedConditions = {},			-- shared condition settings
 		BuffDurations = {},				-- cache of buff durations used for weapon buffs
 		DetectInternalCooldowns = true,	-- enable detecting internal cooldowns
@@ -724,28 +694,6 @@ MOD.DefaultProfile = {
 		DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"]),
 		DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"]),
 		DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"]),
-		HighlightsEnabled = true,		-- enable highlight support
-		PlayerBuffHighlights = true, 	-- enable highlights for player buffs
-		PlayerDebuffHighlights = true,	-- enable highlights for player debuffs
-		TargetBuffHighlights = true,	-- enable highlights for target buffs
-		TargetDebuffHighlights = true,	-- enable highlights for target debuffs
-		FocusBuffHighlights = true,		-- enable highlights for target buffs
-		FocusDebuffHighlights = true,	-- enable highlights for target debuffs
-		PlayerBuffColor = MOD.HexColor("8ae234"), -- Green1
-		PlayerDebuffColor = MOD.HexColor("fcaf3e"), -- Orange1
-		TargetBuffColor = MOD.HexColor("3465a4"), -- Blue2
-		TargetDebuffColor = MOD.HexColor("cc0000"), -- Red2
-		FocusBuffColor = MOD.HexColor("ad7fa8"), -- Purple1
-		FocusDebuffColor = MOD.HexColor("fce94f"), -- Yellow1
-		FlashExpiring = true,			-- enable flashing of expiring buffs and debuffs
-		FlashTime = 5,					-- how many seconds to flash before expiration
-		CooldownText = true,			-- enable cooldown text overlays
-		CooldownFont = "Arial Narrow",	-- default font for cooldown text
-		CooldownFsize = 10,				-- default font size for cooldown text
-		CooldownTimeFormat = 24,		-- default time format for cooldown text
-		CooldownTimeSpaces = false,		-- default is no spaces in cooldown text
-		CooldownTimeCase = false,		-- default is lowercase for cooldown text
-		ButtonFacade = false,			-- enable highlights support for ButtonFacade if it is loaded
 		ButtonFacadeIcons = true,		-- enable use of ButtonFacade for icons
 		ButtonFacadeNormal = true,		-- enable color of normal texture in ButtonFacade
 		ButtonFacadeBorder = false,		-- enable color of border texture in ButtonFacade

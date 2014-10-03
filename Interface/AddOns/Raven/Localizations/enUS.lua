@@ -43,6 +43,7 @@ L["Locked out of Physical school of magic."] = true
 
 -- Bars.lua
 L["Test Bar"] = true
+L["Timer Bar"] = true
 L["Custom Bar Group"] = true
 L["Auto Bar Group"] = true
 L["Anchor attached"] = '|cffffff00Attached|r to "'
@@ -229,8 +230,8 @@ L["is a duplicate of an existing bar label"] = true
 L["does not begin with a letter or contains restricted characters"] = true
 L["Type and condition string"] = function(t, a) return string.format("|cFF7adbf2Type:|r %s\n|cFF7adbf2Condition:|r %s", t, a) end
 L["Associated spell string"] = function(s) return string.format("\n|cFF7adbf2Associated Spell:|r %s", s) end
-L["Action type source string"] = function(a, t, s) return string.format("|cFF7adbf2Action:|r %s\n|cFF7adbf2Type:|r %s\n|cFF7adbf2Source:|r %s", a, t, s) end
-L["Type source string"] = function(t, s) return string.format("|cFF7adbf2Type:|r %s\n|cFF7adbf2Source:|r %s", t, s) end
+L["Type action string"] = function(a, t, s) return string.format("|cFF7adbf2Type:|r %s\n|cFF7adbf2Action:|r %s", t, a) end
+L["Type string"] = function(t, s) return string.format("|cFF7adbf2Type:|r %s", t) end
 L["Action on cast by string"] = function(m, c) return string.format("\n|cFF7adbf2Action On:|r %s\n|cFF7adbf2Cast By:|r %s", m, c) end
 
 -- Blizzard Addons option table
@@ -299,6 +300,8 @@ L["Lock All Anchors"] = true
 L["Lock and hide the anchors for all bar groups."] = true
 L["Unlock All Anchors"] = true
 L["Unlock and show the anchors for all bar groups."] = true
+L["Bar Group Anchors and Test Mode"] = true
+L["Toggle test mode for all bar groups."] = true
 
 -- Defaults tab
 L["Defaults"] = true
@@ -422,9 +425,9 @@ L["RESET DEBUFF COLORS\nAre you sure you want to reset debuff colors back to def
 L["OmniCC"] = true
 L["Hide OmniCC"] = true
 L["If checked, OmniCC counts are hidden on icons in all bar groups (requires /reload)."] = true
-L["Tukui"] = true
-L["If checked, icons and bars are skinned with Tukui borders (requires /reload)."] = true
-L["If checked, fonts are replaced with Tukui's normal font (requires /reload)."] = true
+L["Tukui/ElvUI"] = true
+L["If checked, icons and bars are skinned with Tukui/ElvUI borders (requires /reload)."] = true
+L["If checked, fonts are replaced with the normal font for Tukui/ElvUI (requires /reload)."] = true
 L["Pixel Perfect"] = true
 L["If checked, icons and bars will be adjusted for pixel perfect size and position (requires /reload)."] = true
 L["Skin Options"] = true
@@ -433,6 +436,9 @@ L["By default, icons are displayed with a custom border and can be informatively
 L["Trim Icon Texture"] = true
 L["When hiding custom borders, the full icon texture is displayed by default but when this option is enabled the texture is trimmed to remove the outer edge."] = true
 L["If checked, custom borders are automatically hidden and icons are skinned with Masque (requires /reload)."] = true
+L["Use Masque"] = true
+L["Masque"] = true
+L["Enable setting highlights through Masque if it is loaded. This is not ideal for every skin which is why it can be disabled. Try both enabled and disabled settings and see which works best."] = true
 L["Rectangular Icons"] = true
 L["If checked, allow rectangular icons in icon-oriented configurations, using bar width to set icon's width (requires /reload)."] = true
 L["Default Border Color"] = true
@@ -483,6 +489,12 @@ L["Reset spell sounds back to defaults."] = true
 L["RESET SPELL SOUNDS\nAre you sure you want to reset all spell sounds back to defaults?"] = true
 L["Internal Cooldowns"] = true
 L["Enable detecting internal cooldowns."] = true
+L["Internal Cooldowns Triggered By Buffs/Debuffs/Heals"] = true
+L["Enter a new internal cooldown triggered by a buff, debuff or heal spell."] = true
+L["Enter spell name or numeric identifier for new internal cooldown."] = true
+L["Enter comma-separated list of buff, debuff or heal spell names (or numeric identifiers) that reset the internal cooldown."] = true
+L["If checked, test if buff, debuff or heal spell was cast by the player."] = true
+L["If checked, test if buff, debuff or heal spell is on player and cast by anyone other than the player."] = true
 L["Cooldown List"] = true
 L["New Cooldown"] = true
 L["Enter Spell Name or ID"] = true
@@ -530,6 +542,7 @@ L["If checked, spell must be cast by the player's pet to trigger the spell effec
 L["If checked, spell must be cast by the target to trigger the spell effect."] = true
 L["If checked, spell must be cast by the focus to trigger the spell effect."] = true
 L["If checked, spell must be cast by anyone other than the player or pet to trigger the spell effect."] = true
+L["If checked, spell must be cast by the player or pet to trigger the spell effect."] = true
 L["If checked, trigger the spell effect if the spell is cast by anyone, including player."] = true
 L["Spell Lists"] = true
 L["Spell List"] = true
@@ -593,12 +606,14 @@ L["Duration"] = true
 L["If checked, sort by overall duration in ascending order starting at bar closest to the anchor."] = true
 L["Creation"] = true
 L["If checked, show bars in order created with oldest bar closest to the anchor."] = true
-L["Class"] = true
-L["If checked, sort by associated class name, if any, in ascending alphabetical order starting at bar closest to the anchor."] = true
 L["Custom"] = true
 L["If checked, allow manually setting the order of bars."] = true
 L["Reverse Order"] = true
 L['If checked, reverse the sort order (e.g., "A to Z" becomes "Z to A").'] = true
+L["Also Time Left"] = true
+L['If checked, before applying selected sort order, first sort by time left.'] = true
+L["Also Player First"] = true
+L['If checked, after applying selected sort order, sort bars with actions by player first.'] = true
 L["Show When"] = true
 L["If checked, bar group is shown when the player is in combat."] = true
 L["If checked, bar group is shown when the player is out of combat."] = true
@@ -666,7 +681,7 @@ L["Set color for combat text warning."] = true
 L["expiring"] = true
 L["Miscellaneous Options"] = true
 L["Frame Strata"] = true
-L["Frame strata string"] = "Select the general layering strata for the frame, making the bar group appear either above or behind other UI elements."
+L["Frame strata string"] = "Select the general layering strata for the frame, making the bar group appear either above or behind other UI elements. Note that this can interfere with other capabilities, such as tooltips and right-click cancelling buffs."
 L["Lock"] = true
 L["Lock and hide the anchor for the bar group."] = true
 L["Unlock"] = true
@@ -691,6 +706,8 @@ L["Targets"] = true
 L["When showing all buffs or debuffs cast by player without headers, show target names in labels."] = true
 L["When showing all buffs or debuffs cast by player without headers, show spell names in labels."] = true
 L["When showing all buffs or debuffs cast by player without headers, keep spacing between groups."] = true
+L["Clock Direction"] = true
+L["Set empty/fill direction for clock animations on icons."] = true
 
 -- Bar Groups > Custom Bars tab
 L["Custom Bars"] = true
@@ -718,6 +735,7 @@ L["Mouseover"] = true
 L["Pet's Target"] = true
 L["Target's Target"] = true
 L["Focus's Target"] = true
+L["Player Or Pet"] = true
 L["If checked, only add bars for buffs if they are on the mouseover unit."] = true
 L["If checked, only add bars for buffs if they are on the pet's target."] = true
 L["If checked, only add bars for buffs if they are on the target's target."] = true
@@ -727,6 +745,7 @@ L["If checked, only add bars for buffs if cast by the player's pet."] = true
 L["If checked, only add bars for buffs if cast by the target."] = true
 L["If checked, only add bars for buffs if cast by the focus."] = true
 L["If checked, only add bars for buffs if cast by anyone other than the player or pet."] = true
+L["If checked, only add bars for buffs if cast by player or pet."] = true
 L["If checked, add bars for buffs if cast by anyone, including player."] = true
 L["Other"] = true
 L["Anyone"] = true
@@ -742,7 +761,13 @@ L['Include buffs that mages can spellsteal (you must include both Stealable and 
 L['Include magic buffs but not those considered stealable (magic buffs can usually be removed with abilities like Purge).'] = true
 L['Include other buffs not selected with filter types.'] = true
 L['Include buffs cast by boss.'] = true
+L["NPC"] = true
+L['Include buffs cast by an NPC (note: only valid while caster is selected, such as when checking target of target).'] = true
+L['Include buffs cast by a vehicle (note: only valid while caster is selected, such as when checking target of target).'] = true
+L["Enrage"] = true
 L['Include enrage buffs.'] = true
+L["Castable"] = true
+L['Include buffs that the player can cast.'] = true
 L["Filter List"] = true
 L["Black List"] = true
 L["White List"] = true
@@ -783,6 +808,7 @@ L["If checked, only add bars for debuffs if cast by the player's pet."] = true
 L["If checked, only add bars for debuffs if cast by the target."] = true
 L["If checked, only add bars for debuffs if cast by the focus."] = true
 L["If checked, only add bars for debuffs if cast by anyone other than the player or pet."] = true
+L["If checked, only add bars for debuffs if cast by player or pet."] = true
 L["If checked, add bars for debuffs if cast by anyone, including player."] = true
 L["If checked, don't display any debuffs that are in the filter list."] = true
 L["If checked, only display debuffs that are in the filter list."] = true
@@ -795,6 +821,10 @@ L['Include poison debuffs.'] = true
 L['Include curse debuffs.'] = true
 L['Include magic debuffs.'] = true
 L['Include disease debuffs.'] = true
+L["Include enrage debuffs."] = true
+L['Include debuffs cast by an NPC (note: only valid while caster is selected, such as when checking target of target).'] = true
+L['Include debuffs cast by a vehicle (note: only valid while caster is selected, such as when checking target of target).'] = true
+L['Include debuffs that the player can cast.'] = true
 L["If checked, the debuff filter list is shared with bar groups in other profiles with the same name."] = true
 L["Enter Debuff"] = true
 L["Enter a debuff to be added to the filter list."] = true
@@ -932,6 +962,10 @@ L["Icon Text Inset"] = true
 L["Set horizontal inset for icon text from middle of icon."] = true
 L["Icon Text Offset"] = true
 L["Set vertical offset for icon text from center of icon."] = true
+L["If checked, hide count overlay text on icon."] = true
+L["If checked, set \"Left\" alignment for icon text."] = true
+L["If checked, set \"Center\" alignment for icon text."] = true
+L["If checked, set \"Right\" alignment for icon text."] = true
 L["If checked, time text is shown on the icon instead of the bar."] = true
 L["Icon Configuration Options"] = true
 L["Set how many bars/icons to display before wrapping to next row or column. If this is set to 0 then wrapping is disabled."] = true
@@ -947,6 +981,15 @@ L["Bar/Icon Limit"] = true
 L["Set the maximum number of bars/icons to display (the ones that sort closest to the anchor have priority). If this is set to 0 then the number is not limited."] = true
 L["Fill"] = true
 L["If checked then timer bars fill up, otherwise they empty."] = true
+L["Test Mode"] = true
+L["Unlimited Duration"] = true
+L["Set the number of unlimited duration bars/icons to generate in test mode."] = true
+L["Timers"] = true
+L["Set the number of timer bars/icons to generate in test mode."] = true
+L["Refresh Timers"] = true
+L["If checked, timers are refreshed when they expire, otherwise they disappear."] = true
+L["Toggle Test Mode"] = true
+L["Toggle display of test bars/icons."] = true
 L["Attachment"] = true
 L["Select a bar group to attach to (for independent position, attach to self)."] = true
 L["Offset X"] = true
@@ -986,8 +1029,6 @@ L["Bar Color Scheme"] = true
 L["Foreground:"] = true
 L["Show bars in default colors for their type, including special debuff colors when applicable."] = true
 L["Color the bars with a custom color."] = true
-L["Class Colors"] = true
-L["Show bars in class colors of associated spells when possible, otherwise use default bar colors."] = true
 L["Spell Colors"] = true
 L["Show bars using spell colors when possible, otherwise use default bar colors."] = true
 L["Background:"] = true
@@ -1001,6 +1042,11 @@ L["Color the icon border string"] = "Color the icon border only for debuffs (i.e
 L["Color icon border same as bar foreground for spells cast by players, color same as bar background for non-player spells."] = true
 L["None"] = true
 L["Do not color the icon border."] = true
+L["Icon Color:"] = true
+L["Desaturate Non-Player"] = true
+L["Desaturate if action not cast by player."] = true
+L["Only Friendly Target"] = true
+L["Desaturate only if the current target is a friend."] = true
 
 -- Bar Groups > Timer Options tab
 L["Timer Options"] = true
@@ -1506,51 +1552,6 @@ L["Fade Opacity"] = true
 L["Set fade opacity for buff icon when mouseover is not detected."] = true
 L["By default, buff icons are displayed with a custom border. If this option is checked then custom borders are hidden."] = true
 
--- Highlights tab
-L["Highlights"] = true
-L["Highlights string"] = "If you are using Bartender4, Dominos or Macaroon then you can enable button highlights " ..
-	"to indicate active buffs and debuffs that you cast (with flashing to indicate they are expiring). " ..
-	"One highlight can be shown at a time and the priority is those on target first, focus second, and player last. " ..
-	"You can also show cooldown counters on buttons for spells and items (disabled by default if OmniCC is loaded).\n"
-L["Enable Highlights"] = true
-L["If checked, enable Raven's support for button highlights and cooldown counts."] = true
-L["Highlight Buffs"] = true
-L["Enable player buff highlights on buttons."] = true
-L["Buff Color"] = true
-L["Set player buff highlight color."] = true
-L["Highlight Debuffs"] = true
-L["Enable player debuff highlights on buttons."] = true
-L["Debuff Color"] = true
-L["Set player debuff highlight color."] = true
-L["Enable target buff highlights on buttons."] = true
-L["Set target buff highlight color."] = true
-L["Enable target debuff highlights on buttons."] = true
-L["Set target debuff highlight color."] = true
-L["Enable focus buff highlights on buttons."] = true
-L["Set focus buff highlight color."] = true
-L["Enable focus debuff highlights on buttons."] = true
-L["Set focus debuff highlight color."] = true
-L["Flashing"] = true
-L["Enable highlight flashing for expiring buffs and debuffs."] = true
-L["Set number of seconds to flash before buffs and debuffs expire."] = true
-L["Cooldown Time"] = true
-L["Show cooldown time remaining on buttons."] = true
-L["Set font size for cooldown time text overlay."] = true
-L["Font"] = true
-L["Select font for cooldown time text overlay."] = true
-L["Cooldown format string"] = "Select time format for bars and icons. There are separate settings for five ranges: " ..
-	"more then an hour, 2 minutes to an hour, 1 minute to 2 minutes, 10 seconds to 1 minute, less than 10 seconds. " ..
-	"These are illustrated by samples in the drop-down menu for each format option."
-L["Alignment"] = true
-L["Vertical:"] = true
-L["Horizontal:"] = true
-L["If checked, vertically align cooldown text to top."] = true
-L["If checked, vertically align cooldown text in middle."] = true
-L["If checked, vertically align cooldown text to bottom."] = true
-L["If checked, horizontally align cooldown text to left."] = true
-L["If checked, horizontally align cooldown text in center."] = true
-L["If checked, horizontally align cooldown text to right."] = true
-
 -- Inserted Bar Information tab
 L["Bar Information"] = true
 L["Custom Sort Order"] = true
@@ -1602,6 +1603,10 @@ L["Normal Opacity"] = true
 L["Set normal opacity for this bar."] = true
 L["Fade Opacity"] = true
 L["Set fade opacity for this bar."] = true
+L["Fade Effects"] = true
+L["Set opacity for bar group when in combat."] = true
+L["Set opacity for bar group when out of combat."] = true
+L["Set opacity for bar group when mouse is over it (overrides in and out of combat opacities)."] = true
 L["Set opacity for faded bars."] = true
 L["Ready Opacity"] = true
 L["Set opacity for ready bar."] = true
@@ -1611,7 +1616,7 @@ L["If checked, this is a buff bar."] = true
 L["If checked, this is a debuff bar."] = true
 L["If checked, this is a cooldown bar."] = true
 L["Source"] = true
-L["Race"] = true
+L["Action"] = true
 L["If checked, select actions associated with a class."] = true
 L["If checked, select actions associated with a pet."] = true
 L["If checked, select actions associated with a race."] = true
@@ -1641,7 +1646,7 @@ L["If checked, select death knight actions."] = true
 L["Conditions To Monitor"] = true
 L["Select all the conditions."] = true
 L["Deselect all the conditions."] = true
-L["Other Spell"] = true
+L["Enter Spell Name or Identifier"] = true
 L["Actions To Monitor"] = true
 L["All On"] = true
 L["Select all the actions."] = true
@@ -1662,74 +1667,3 @@ L["If checked, track if cast by anyone, including player and pet."] = true
 L["OK"] = true
 L["Confirm creating new bars for the selected actions/conditions."] = true
 L["Cancel creating new bars."] = true
-
-------- New Entries September 5, 2011
-L["Enrage"] = true
-L["Include enrage debuffs."] = true
-L["Required Class"] = true
-L["Enter class required for internal cooldown (leave blank if all classes can trigger the internal cooldown)."] = true
-------- New Entries September 6, 2011
-L["If checked, hide count overlay text on icon."] = true
-L["If checked, set \"Left\" alignment for icon text."] = true
-L["If checked, set \"Center\" alignment for icon text."] = true
-L["If checked, set \"Right\" alignment for icon text."] = true
-------- New Entries October 1, 2011
-L["Castable"] = true
-L['Include buffs that the player can cast.'] = true
-L['Include debuffs that the player can cast.'] = true
-L["NPC"] = true
-L['Include buffs cast by an NPC (note: only valid while caster is selected, such as when checking target of target).'] = true
-L['Include debuffs cast by an NPC (note: only valid while caster is selected, such as when checking target of target).'] = true
-L['Include buffs cast by a vehicle (note: only valid while caster is selected, such as when checking target of target).'] = true
-L['Include debuffs cast by a vehicle (note: only valid while caster is selected, such as when checking target of target).'] = true
-------- New Entries October 26, 2011
-L["Icon Color:"] = true
-L["Desaturate Non-Player"] = true
-L["Desaturate if action not cast by player."] = true
-L["Only Friendly Target"] = true
-L["Desaturate only if the current target is a friend."] = true
-------- New Entries October 27, 2011
-L["Also Time Left"] = true
-L['If checked, before applying selected sort order, first sort by time left.'] = true
-L["Also Player First"] = true
-L['If checked, after applying selected sort order, sort bars with actions by player first.'] = true
-------- New Entries November 15, 2011
-L["Set opacity for bar group when in combat."] = true
-L["Set opacity for bar group when out of combat."] = true
-L["Set opacity for bar group when mouse is over it (overrides in and out of combat opacities)."] = true
-L["Fade Effects"] = true
-------- New Entries November 19, 2011
-L["Clock Direction"] = true
-L["Set empty/fill direction for clock animations on icons."] = true
-L["Clock Edge"] = true
-L["If checked, show a bright line on the moving edge of clock animations."] = true
-------- New Entries December 4, 2011
-L["Test Mode"] = true
-L["Unlimited Duration"] = true
-L["Set the number of unlimited duration bars/icons to generate in test mode."] = true
-L["Timers"] = true
-L["Set the number of timer bars/icons to generate in test mode."] = true
-L["Refresh Timers"] = true
-L["If checked, timers are refreshed when they expire, otherwise they disappear."] = true
-L["Toggle Test Mode"] = true
-L["Toggle display of test bars/icons."] = true
-L["Timer Bar"] = true
-L["Player Or Pet"] = true
-L["If checked, only add bars for buffs if cast by player or pet."] = true
-L["If checked, only add bars for debuffs if cast by player or pet."] = true
-L["If checked, spell must be cast by the player or pet to trigger the spell effect."] = true
--- The following entries are modified from the previous ones related to internal cooldowns
-L["Internal Cooldowns Triggered By Buffs/Debuffs/Heals"] = true
-L["Enter a new internal cooldown triggered by a buff, debuff or heal spell."] = true
-L["Enter spell name or numeric identifier for new internal cooldown."] = true
-L["Enter comma-separated list of buff, debuff or heal spell names (or numeric identifiers) that reset the internal cooldown."] = true
-L["If checked, test if buff, debuff or heal spell was cast by the player."] = true
-L["If checked, test if buff, debuff or heal spell is on player and cast by anyone other than the player."] = true
--- Changed entries for December 10, 2011 related to Masque replacing ButtonFacade
-L["Use Masque"] = true
-L["Masque"] = true
-L["Enable setting highlights through Masque if it is loaded. This is not ideal for every skin which is why it can be disabled. Try both enabled and disabled settings and see which works best."] = true
--- Added entry for December 25, 2011
-L["Bar Group Anchors and Test Mode"] = true
-L["Toggle test mode for all bar groups."] = true
-

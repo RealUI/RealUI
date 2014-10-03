@@ -102,7 +102,6 @@ local function InitializeOptions()
 	acereg:RegisterOptionsTable("Raven: "..options.args.FrontPage.name, options.args.FrontPage)
 	acereg:RegisterOptionsTable("Raven: "..options.args.BarGroups.name, options.args.BarGroups)
 	acereg:RegisterOptionsTable("Raven: "..options.args.Conditions.name, options.args.Conditions)
-	acereg:RegisterOptionsTable("Raven: "..options.args.Highlights.name, options.args.Highlights)
 	acereg:RegisterOptionsTable("Raven: "..options.args.profile.name, options.args.profile)
 	acereg:RegisterOptionsTable("Raven Options", MOD.TopOptionsTable)
 	acedia:AddToBlizOptions("Raven Options", "Raven")
@@ -550,70 +549,41 @@ local function EnterNewBar(state)
 		bars.mode = true
 		if bars.save then -- cache of previous settings
 			bars.template = { -- only preserve selected fields from saved bar description
-				barType = bars.save.barType, barSource = bars.save.barSource, barClass = bars.save.barClass, barLabel = "",
-				monitor = bars.save.monitor, castBy = bars.save.castBy
+				barType = bars.save.barType, barLabel = "", monitor = bars.save.monitor, castBy = bars.save.castBy
 			}
 			bars.save = nil
 		else
 			bars.template = { -- set defaults
-				barType = "Notification", barSource = "Class", barClass = classIndex[MOD.myClass],
-				barLabel = "", monitor = "player", castBy = "player"
+				barType = "Buff",  barLabel = "", monitor = "player", castBy = "player"
 			}
 		end
 		if not bars.template.monitor then bars.template.monitor = "player" else bars.template.monitor = string.lower(bars.template.monitor) end
 		if not bars.template.castBy then bars.template.castBy = "player" else bars.template.castBy = string.lower(bars.template.castBy) end
 	elseif state == "ok" then
 		bars.mode = false		
-		local source = barSources[bars.template.barClass]
-		if bars.template.barSource == "Pet" then source = "Pet" end
-		if (bars.template.barType ~= "Notification") and (bars.template.barSource == "Other") and ValidateSpellName(conditions.name) then
-			if not bars.template.actionList then bars.template.actionList = {} end
-			if not bars.template.selectList then bars.template.selectList = {} end
-			bars.template.actionList[1] = conditions.name
-			bars.template.selectList[1] = true
-		end
 		local sel = nil
-		if (bars.template.barType == "Buff") or (bars.template.barType == "Debuff") then -- buff or debuff
-			if bars.template.actionList then
-				for k, n in pairs(bars.template.selectList) do
-					if n then
-						local bname = bars.template.actionList[k]
-						local label = MOD:GetLabel(bname)
-						local bar = {
-							action = bname, enableBar = true, barLabel = label, barType = bars.template.barType,
-							barSource = source, monitor = bars.template.monitor, castBy = bars.template.castBy
-						}
-						if AddBarToGroup(bg, bar) then if not sel then sel = bar.barLabel end end
-					end
-				end
-			end
-		elseif bars.template.barType == "Cooldown" then -- cooldown
-			if bars.template.actionList then
-				for k, n in pairs(bars.template.selectList) do
-					if n then
-						local bname = bars.template.actionList[k]
-						local label = MOD:GetLabel(bname)
-						local bar = {
-							action = bname, enableBar = true, barLabel = label, barType = bars.template.barType,
-							barSource = source, monitor = nil, castBy = nil, enableReady = nil, readyNotUsable = nil
-						}
-						if AddBarToGroup(bg, bar) then if not sel then sel = bar.barLabel end end
-					end
-				end
-			end
-		elseif bars.template.barType == "Notification" then -- notification
+		if bars.template.barType == "Notification" then -- notification
 			if bars.template.conditionList and bars.template.selectCondition then
 				for k, n in pairs(bars.template.selectCondition) do
 					if n then
 						local bname = bars.template.conditionList[k]
 						local bar = {
 							action = bname, enableBar = true, barLabel = bname, barType = bars.template.barType,
-							barSource = nil, monitor = nil, castBy = nil
+							monitor = nil, castBy = nil
 						}
 						if AddBarToGroup(bg, bar) then if not sel then sel = bar.barLabel end end
 					end
 				end
 			end
+		elseif ValidateSpellName(conditions.name) then
+			local bname = conditions.name
+			local label = MOD:GetLabel(bname)
+			local bar = {
+				action = bname, enableBar = true, barLabel = label, barType = bars.template.barType,
+				monitor = bars.template.monitor, castBy = bars.template.castBy
+			}
+			if bar.barType == "Cooldown" then bar.monitor = nil; bar.castBy = nil end
+			if AddBarToGroup(bg, bar) then if not sel then sel = bar.barLabel end end
 		end
 		if sel then UpdateBarList(); SelectBar(sel) end
 		bars.save = bars.template
@@ -636,9 +606,9 @@ local function GetBarDescription(info)
 			if spell then a = a .. L["Associated spell string"](spell) end
 		elseif n.barType == "Buff" or n.barType == "Debuff" or n.barType == "Cooldown" then
 			if n.action then
-				a = L["Action type source string"](n.action, n.barType, n.barSource)
+				a = L["Type action string"](n.action, n.barType)
 			else
-				a = L["Type source string"](n.barType, n.barSource)
+				a = L["Type string"](n.barType)
 			end
 			if n.barType ~= "Cooldown" then
 				if not n.monitor then n.monitor = "player" else n.monitor = string.lower(n.monitor) end
@@ -727,59 +697,10 @@ local function SetBarLabel(info, newLabel, isLinked)
 	return true
 end
 
--- Generate a list of auras that meet the criteria of type and source specified in the bars.template table
-local function GenerateBarActionList()
-	local i = 0
-	bars.template.actionList = {}
-	bars.template.selectList = {}
-	conditions.name = nil -- for entered spell names
-
-	local btype = bars.template.barType
-	local c = classList[bars.template.barClass]
-	if (btype == "Buff") or (btype == "Debuff") or (btype == "Cooldown") then
-		local btable = MOD[btype .. "Table"]
-		if bars.template.barSource == "Class" then
-			for name, action in pairs(btable) do
-				if (action.class == c) and not action.pet then i = i + 1; bars.template.actionList[i] = name; end
-			end
-		elseif bars.template.barSource == "Pet" then -- racial buffs
-			for name, action in pairs(btable) do
-				if (action.class == c) and action.pet then i = i + 1; bars.template.actionList[i] = name; end
-			end
-		elseif bars.template.barSource == "Racial" then -- racial buffs
-			for name, action in pairs(btable) do
-				if action.race then i = i + 1; bars.template.actionList[i] = name; end
-			end
-		end
-	end
-
-	table.sort(bars.template.actionList) -- alphabetical order to improve readability
-	for k in pairs(bars.template.actionList) do bars.template.selectList[k] = false end -- default to all not selected
-	bars.template.actionListCount = i
-end
-
 -- Functions for accessing bar type lists
 local function SetSelectedBarType(value)
 	if bars.template.barType ~= value then
 		bars.template.barType = value
-		GenerateBarActionList()
-	end
-end
-
--- Functions for accessing bar source lists
-local function SetSelectedBarSource(value)
-	if bars.template.barSource ~= value then 
-		bars.template.barSource = value
-		if (value == "Pet") and not petClassList[bars.template.barClass] then bars.template.barClass = 3 end
-		GenerateBarActionList()
-	end
-end
-
--- Functions for accessing bar class lists
-local function SetSelectedBarClass(value)
-	if bars.template.barClass ~= value then 
-		bars.template.barClass = value
-		GenerateBarActionList()
 	end
 end
 
@@ -810,13 +731,6 @@ local function GetBarConditionListCount() GetBarConditionList(); return bars.tem
 local function GetSelectedBarCondition(key) return bars.template.selectCondition[key] end
 local function SetSelectedBarCondition(key, value) bars.template.selectCondition[key] = value end
 local function SetAllBarConditions(value) for k in pairs(bars.template.conditionList) do bars.template.selectCondition[k] = value end end
-
--- Generate a list of auras that meet the criteria of type and source specified in the bars.template table
-local function GetBarActionList() if not bars.template.actionList then GenerateBarActionList() end; return bars.template.actionList end
-local function GetBarActionListCount() if not bars.template.actionList then GenerateBarActionList() end; return bars.template.actionListCount end
-local function GetSelectedBarAction(key) return bars.template.selectList[key] end
-local function SetSelectedBarAction(key, value) bars.template.selectList[key] = value end
-local function SetAllBarActions(value) for k in pairs(bars.template.actionList) do bars.template.selectList[k] = value end end
 
 -- Functions for accessing condition lists
 local function GetConditionList() return GetNameList("Conditions", MOD.db.profile.Conditions[MOD.myClass]) end
@@ -1489,7 +1403,7 @@ local function AddNotificationsToBarGroup(bg)
 		for _, c in pairs(ct) do
 			if IsOn(c) and c.name and c.notify then
 				local bname = c.name
-				local bar = { action = bname, enableBar = true, barLabel = bname, barType = "Notification", barSource = nil, monitor = nil, castBy = nil, }
+				local bar = { action = bname, enableBar = true, barLabel = bname, barType = "Notification", monitor = nil, castBy = nil, }
 				AddBarToGroup(bg, bar)
 			end
 		end
@@ -1548,14 +1462,13 @@ local function ConfigureBarGroups(style)
 	end
 	if standard.ShortBuffs then
 		local bg = CreateBarGroup(L["Short Buffs"], true, false, style, 0, offsetY)
-		bg.checkDuration = true; bg.minimumDuration = false; bg.filterDuration = 120; bg.showNoDuration = false
+		bg.checkDuration = true; bg.minimumDuration = false; bg.filterDuration = 120; bg.showNoDuration = false; bg.sor = "A"
 		AddAurasToBarGroup(bg, true, "player", "anyone")
 		offsetY = offsetY + delta
 	end
 	if standard.LongBuffs then -- minimum duration of two minutes
 		local bg = CreateBarGroup(L["Long Buffs"], true, false, style, 0, offsetY)
-		bg.checkDuration = true; bg.minimumDuration = true; bg.filterDuration = 120; bg.showNoDuration = true
-		bg.barColors = "Class"; bg.sor = "C"
+		bg.checkDuration = true; bg.minimumDuration = true; bg.filterDuration = 120; bg.showNoDuration = true; bg.sor = "A"
 		AddAurasToBarGroup(bg, true, "player", "anyone")
 		offsetY = offsetY + delta
 	end
@@ -1595,7 +1508,7 @@ local function GetTimeFormatList(s, c)
 end
 
 -- Create a mini-options table to be inserted at top level in the Bliz interface
--- L["Top Options"] = "This addon lets you monitor buffs and debuffs for player, target and focus. Highlights and cooldown counts can be added to buttons to show status. Monitored buffs and debuffs can trigger helpful notifications."
+-- L["Top Options"] = "This addon lets you monitor buffs and debuffs for player, target and focus. Monitored buffs and debuffs can trigger helpful notifications."
 -- For some reason cannot localize the strings in this table!
 MOD.TopOptionsTable = {
 	type = "group", order = 1,
@@ -2622,19 +2535,19 @@ MOD.OptionsTable = {
 					},
 				},
 				TukuiGroup = {
-					type = "group", order = 50, name = L["Tukui"], inline = true,
+					type = "group", order = 50, name = L["Tukui/ElvUI"], inline = true,
 					hidden = function(info) return not Raven.frame.SetTemplate end, -- check if Tukui frame API installed
 					args = {
 						Enable = {
 							type = "toggle", order = 10, name = L["Enable"],
-							desc = L["If checked, icons and bars are skinned with Tukui borders (requires /reload)."],
+							desc = L["If checked, icons and bars are skinned with Tukui/ElvUI borders (requires /reload)."],
 							get = function(info) return MOD.db.global.TukuiSkin end,
 							set = function(info, value) MOD.db.global.TukuiSkin = value; MOD:UpdateAllBarGroups() end,
 						},
 						Font = {
 							type = "toggle", order = 20, name = L["Font"],
 							disabled = function(info) return not MOD.db.global.TukuiSkin end,
-							desc = L["If checked, fonts are replaced with Tukui's normal font (requires /reload)."],
+							desc = L["If checked, fonts are replaced with the normal font for Tukui/ElvUI (requires /reload)."],
 							get = function(info) return MOD.db.global.TukuiFont end,
 							set = function(info, value) MOD.db.global.TukuiFont = value; MOD:UpdateAllBarGroups() end,
 						},
@@ -3416,12 +3329,6 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("sor") == "S" end,
 									set = function(info, value) SetBarGroupField("sor", "S") end,
 								},
-								ClassOrder = {
-									type = "toggle", order = 40, name = L["Class"], width = "half", 
-									desc = L["If checked, sort by associated class name, if any, in ascending alphabetical order starting at bar closest to the anchor."],
-									get = function(info) return GetBarGroupField("sor") == "C" end,
-									set = function(info, value) SetBarGroupField("sor", "C") end,
-								},
 								CustomOrder = {
 									type = "toggle", order = 50, name = L["Custom"], width = "half",
 									desc = L["If checked, allow manually setting the order of bars."],
@@ -4010,12 +3917,6 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("clockReverse") end,
 									set = function(info, value) SetBarGroupField("clockReverse", value) end,
 								},
-								--[[ DrawEdge = { -- removed in 5.0.4 and apparently not coming back
-									type = "toggle", order = 85, name = L["Clock Edge"],
-									desc = L["If checked, show a bright line on the moving edge of clock animations."],
-									get = function(info) return GetBarGroupField("clockEdge") end,
-									set = function(info, value) SetBarGroupField("clockEdge", value) end,
-								}, ]]--
 							},
 						},
 					},
@@ -6225,12 +6126,6 @@ MOD.OptionsTable = {
 											t = { r = r, g = g, b = b, a = a }; SetBarGroupField("fgColor", t) end
 										MOD:UpdateAllBarGroups()
 									end,
-								},
-								ClassColors = {
-									type = "toggle", order = 20, name = L["Class"], width = "half",
-									desc = L["Show bars in class colors of associated spells when possible, otherwise use default bar colors."],
-									get = function(info) return GetBarGroupField("barColors") == "Class" end,
-									set = function(info, value) SetBarGroupField("barColors", "Class") end,
 								},
 								SpellColors = {
 									type = "toggle", order = 30, name = L["Spell"], width = "half",
@@ -9949,282 +9844,6 @@ MOD.OptionsTable = {
 				},
 			},
 		},
-		Highlights = {
-			type = "group", order = 50, name = L["Highlights"], 
-			hidden = function(info) return not MOD.highlights end, -- must have compatible action bar mod
-			disabled = function(info) return InMode() end, -- must have compatible action bar mod
-			args = {
-				intro = {
-					type = "description", order = 1,
-					name = L["Highlights string"],
-				},
-				EnableGroup = {
-					type = "group", order = 10, name = L["Enable"], inline = true,
-					args = {
-						EnableGroup = {
-							type = "toggle", order = 10, name = L["Enable Highlights"],
-							desc = L["If checked, enable Raven's support for button highlights and cooldown counts."],
-							get = function(info) return MOD.db.global.HighlightsEnabled end,
-							set = function(info, value) MOD.db.global.HighlightsEnabled = value end,
-						},
-						ButtonFacade = {
-							type = "toggle", order = 20, name = L["Use Masque"],
-							desc = L["Enable setting highlights through Masque if it is loaded. This is not ideal for every skin which is why it can be disabled. Try both enabled and disabled settings and see which works best."],
-							disabled = function(info) return not MOD.db.global.HighlightsEnabled or not MOD.MSQ end,
-							get = function(info) return MOD.db.global.ButtonFacade end,
-							set = function(info, value) MOD.db.global.ButtonFacade = value end,
-						},
-					},
-				},
-				PlayerGroup = {
-					type = "group", order = 20, name = L["Player"], inline = true, 
-					disabled = function(info) return not MOD.db.global.HighlightsEnabled end,
-					args = {
-						PlayerBuffHighlightsEnable = {
-							type = "toggle", order = 4, name = L["Highlight Buffs"],
-							desc = L["Enable player buff highlights on buttons."],
-							get = function(info) return MOD.db.global.PlayerBuffHighlights end,
-							set = function(info, value) MOD.db.global.PlayerBuffHighlights = value end,
-						},
-						PlayerBuffColor = {
-							type = "color", order = 5, name = L["Buff Color"], hasAlpha = false,
-							desc = L["Set player buff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.PlayerBuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.PlayerBuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-						PlayerDebuffHighlightsEnable = {
-							type = "toggle", order = 23, name = L["Highlight Debuffs"],
-							desc = L["Enable player debuff highlights on buttons."],
-							get = function(info) return MOD.db.global.PlayerDebuffHighlights end,
-							set = function(info, value) MOD.db.global.PlayerDebuffHighlights = value end,
-						},
-						PlayerDebuffColor = {
-							type = "color", order = 24, name = L["Debuff Color"], hasAlpha = false,
-							desc = L["Set player debuff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.PlayerDebuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.PlayerDebuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-					},
-				},
-				TargetGroup = {
-					type = "group", order = 30, name = L["Target"], inline = true,
-					disabled = function(info) return not MOD.db.global.HighlightsEnabled end,
-					args = {
-						TargetBuffHighlightsEnable = {
-							type = "toggle", order = 3, name = L["Highlight Buffs"],
-							desc = L["Enable target buff highlights on buttons."],
-							get = function(info) return MOD.db.global.TargetBuffHighlights end,
-							set = function(info, value) MOD.db.global.TargetBuffHighlights = value end,
-						},
-						TargetBuffColor = {
-							type = "color", order = 4, name = L["Buff Color"], hasAlpha = false,
-							desc = L["Set target buff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.TargetBuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.TargetBuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-						TargetDebuffHighlightsEnable = {
-							type = "toggle", order = 23, name = L["Highlight Debuffs"],
-							desc = L["Enable target debuff highlights on buttons."],
-							get = function(info) return MOD.db.global.TargetDebuffHighlights end,
-							set = function(info, value) MOD.db.global.TargetDebuffHighlights = value end,
-						},
-						TargetDebuffColor = {
-							type = "color", order = 24, name = L["Debuff Color"], hasAlpha = false,
-							desc = L["Set target debuff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.TargetDebuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.TargetDebuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-					},
-				},
-				FocusGroup = {
-					type = "group", order = 40, name = L["Focus"], inline = true,
-					disabled = function(info) return not MOD.db.global.HighlightsEnabled end,
-					args = {
-						FocusBuffHighlightsEnable = {
-							type = "toggle", order = 3, name = L["Highlight Buffs"],
-							desc = L["Enable focus buff highlights on buttons."],
-							get = function(info) return MOD.db.global.FocusBuffHighlights end,
-							set = function(info, value) MOD.db.global.FocusBuffHighlights = value end,
-						},
-						FocusBuffColor = {
-							type = "color", order = 4, name = L["Buff Color"], hasAlpha = false,
-							desc = L["Set focus buff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.FocusBuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.FocusBuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-						FocusDebuffHighlightsEnable = {
-							type = "toggle", order = 23, name = L["Highlight Debuffs"],
-							desc = L["Enable focus debuff highlights on buttons."],
-							get = function(info) return MOD.db.global.FocusDebuffHighlights end,
-							set = function(info, value) MOD.db.global.FocusDebuffHighlights = value end,
-						},
-						FocusDebuffColor = {
-							type = "color", order = 24, name = L["Debuff Color"], hasAlpha = false,
-							desc = L["Set focus debuff highlight color."],
-							get = function(info)
-								local t = MOD.db.global.FocusDebuffColor
-								return t.r, t.g, t.b, t.a
-							end,
-							set = function(info, r, g, b, a)
-								local t = MOD.db.global.FocusDebuffColor
-								t.r, t.g, t.b, t.a = r, g, b, a
-							end,
-						},
-					},
-				},
-				Flashing = {
-					type = "group", order = 80, name = L["Flashing"],  inline = true,
-					disabled = function(info) return not MOD.db.global.HighlightsEnabled end,
-					args = {
-						FlashExpiring = {
-							type = "toggle", order = 2, name = L["Flash When Expiring"],
-							desc = L["Enable highlight flashing for expiring buffs and debuffs."],
-							get = function(info) return MOD.db.global.FlashExpiring end,
-							set = function(info, value) MOD.db.global.FlashExpiring = value end,
-						},
-						FlashTime = {
-							type = "range", order = 3, name = L["Seconds"], min = 1, max = 30, step = 1,
-							desc = L["Set number of seconds to flash before buffs and debuffs expire."],
-							disabled = function(info) return not MOD.db.global.FlashExpiring end,
-							get = function(info) return MOD.db.global.FlashTime end,
-							set = function(info, value) MOD.db.global.FlashTime = value end,
-						},
-					},
-				},
-				Cooldowns = {
-					type = "group", order = 90, name = L["Cooldowns"],  inline = true,
-					disabled = function(info) return not MOD.db.global.HighlightsEnabled end,
-					args = {
-						CooldownText = {
-							type = "toggle", order = 10, name = L["Cooldown Time"],
-							desc = L["Show cooldown time remaining on buttons."],
-							get = function(info) return MOD.db.global.CooldownText end,
-							set = function(info, value) MOD.db.global.CooldownText = value end,
-						},
-						CooldownFontSize = {
-							type = "range", order = 20, name = L["Font Size"], min = 5, max = 50, step = 1,
-							desc = L["Set font size for cooldown time text overlay."],
-							disabled = function(info) return not MOD.db.global.CooldownText end,
-							get = function(info) return MOD.db.global.CooldownFsize end,
-							set = function(info, value) MOD.db.global.CooldownFsize = value end,
-						},
-						CooldownFont = {
-							type = "select", order = 30, name = L["Font"], 
-							desc = L["Select font for cooldown time text overlay."],
-							disabled = function(info) return not MOD.db.global.CooldownText end,
-							dialogControl = 'LSM30_Font',
-							values = AceGUIWidgetLSMlists.font,
-							get = function(info) return MOD.db.global.CooldownFont end,
-							set = function(info, value) MOD.db.global.CooldownFont = value end,
-						},
-						TimeFormatGroup = {
-							type = "group", order = 35, name = L["Time Format"],  inline = true,
-							args = {
-								TimeFormat = {
-									type = "select", order = 10, name = L["Options"], width = "double",
-									desc = L["Cooldown format string"],
-									get = function(info) return MOD.db.global.CooldownTimeFormat end,
-									set = function(info, value) MOD.db.global.CooldownTimeFormat = value end,
-									values = function(info)
-										local s = MOD.db.global.CooldownTimeSpaces
-										local c = MOD.db.global.CooldownTimeCase
-										return GetTimeFormatList(s, c)
-									end,
-									style = "dropdown",
-								},
-								Space1 = { type = "description", name = "", order = 15, width = "half" },
-								Spaces = {
-									type = "toggle", order = 20, name = L["Spaces"], width = "half",
-									desc = L["Include spaces between values in time format."],
-									get = function(info) return MOD.db.global.CooldownTimeSpaces end,
-									set = function(info, value) MOD.db.global.CooldownTimeSpaces = value end,
-								},
-								Capitals = {
-									type = "toggle", order = 30, name = L["Uppercase"],
-									desc = L["If checked, use uppercase H, M and S in time format, otherwise use lowercase."],
-									get = function(info) return MOD.db.global.CooldownTimeCase end,
-									set = function(info, value) MOD.db.global.CooldownTimeCase = value end,
-								},
-							},
-						},
-						CooldownAlignment = {
-							type = "group", order = 40, name = L["Alignment"], inline = true,
-							args = {
-								VText = { type = "description", name = L["Vertical:"], order = 1, width = "half" },
-								VLeftAlign = {
-									type = "toggle", order = 10, name = L["Top"],
-									desc = L["If checked, vertically align cooldown text to top."],
-									get = function(info) return MOD.db.global.CooldownVertical == "Top" end,
-									set = function(info, value) MOD.db.global.CooldownVertical = "Top" end,
-								},
-								VCenterAlign = {
-									type = "toggle", order = 20, name = L["Middle"],
-									desc = L["If checked, vertically align cooldown text in middle."],
-									get = function(info) return not MOD.db.global.CooldownVertical end,
-									set = function(info, value) MOD.db.global.CooldownVertical = false end,
-								},
-								VRightAlign = {
-									type = "toggle", order = 30, name = L["Bottom"],
-									desc = L["If checked, vertically align cooldown text to bottom."],
-									get = function(info) return MOD.db.global.CooldownVertical == "Bottom" end,
-									set = function(info, value) MOD.db.global.CooldownVertical = "Bottom" end,
-								},
-								spacer = { type = "description", name = "", order = 40 },
-								HText = { type = "description", name = L["Horizontal:"], order = 41, width = "half" },
-								HLeftAlign = {
-									type = "toggle", order = 50, name = L["Left"],
-									desc = L["If checked, horizontally align cooldown text to left."],
-									get = function(info) return MOD.db.global.CooldownHorizontal == "Left" end,
-									set = function(info, value) MOD.db.global.CooldownHorizontal = "Left" end,
-								},
-								HCenterAlign = {
-									type = "toggle", order = 60, name = L["Center"],
-									desc = L["If checked, horizontally align cooldown text in center."],
-									get = function(info) return not MOD.db.global.CooldownHorizontal end,
-									set = function(info, value) MOD.db.global.CooldownHorizontal = false end,
-								},
-								HRightAlign = {
-									type = "toggle", order = 70, name = L["Right"],
-									desc = L["If checked, horizontally align cooldown text to right."],
-									get = function(info) return MOD.db.global.CooldownHorizontal == "Right" end,
-									set = function(info, value) MOD.db.global.CooldownHorizontal = "Right" end,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
 	},
 }
 
@@ -10799,141 +10418,29 @@ MOD.barOptions = {
 			SelectBarType = {
 				type = "group", order = 1, name = L["Type"], inline = true,
 				args = {
-					NotificationBar = {
-						type = "toggle", order = 10, name = L["Notify"], width = "half",
-						desc = L["If checked, this is a notify bar."],
-						get = function(info) return bars.template.barType == "Notification" end,
-						set = function(info, value) SetSelectedBarType("Notification") end,
-					},
 					BuffBar = {
-						type = "toggle", order = 20, name = L["Buff"], width = "half",
+						type = "toggle", order = 10, name = L["Buff"], width = "half",
 						desc = L["If checked, this is a buff bar."],
 						get = function(info) return bars.template.barType == "Buff" end,
 						set = function(info, value) SetSelectedBarType("Buff") end,
 					},
 					DebuffBar = {
-						type = "toggle", order = 30, name = L["Debuff"], width = "half",
+						type = "toggle", order = 20, name = L["Debuff"], width = "half",
 						desc = L["If checked, this is a debuff bar."],
 						get = function(info) return bars.template.barType == "Debuff" end,
 						set = function(info, value) SetSelectedBarType("Debuff") end,
+					},
+					NotificationBar = {
+						type = "toggle", order = 30, name = L["Notify"], width = "half",
+						desc = L["If checked, this is a notify bar."],
+						get = function(info) return bars.template.barType == "Notification" end,
+						set = function(info, value) SetSelectedBarType("Notification") end,
 					},
 					CooldownBar = {
 						type = "toggle", order = 40, name = L["Cooldown"],
 						desc = L["If checked, this is a cooldown bar."],
 						get = function(info) return bars.template.barType == "Cooldown" end,
 						set = function(info, value) SetSelectedBarType("Cooldown") end,
-					},
-				},
-			},
-			SelectBarSource = {
-				type = "group", order = 10, name = L["Source"], inline = true,
-				hidden = function(info) return (bars.template.barType == "Notification") end,
-				args = {
-					Class = {
-						type = "toggle", order = 10, name = L["Class"], width = "half",
-						desc = L["If checked, select actions associated with a class."],
-						get = function(info) return bars.template.barSource == "Class" end,
-						set = function(info, value) SetSelectedBarSource("Class") end,
-					},
-					Racial = {
-						type = "toggle", order = 20, name = L["Race"], width = "half",
-						desc = L["If checked, select actions associated with a race."],
-						get = function(info) return bars.template.barSource == "Racial" end,
-						set = function(info, value) SetSelectedBarSource("Racial") end,
-					},
-					Pet = {
-						type = "toggle", order = 30, name = L["Pet"], width = "half",
-						desc = L["If checked, select actions associated with a pet."],
-						get = function(info) return bars.template.barSource == "Pet" end,
-						set = function(info, value) SetSelectedBarSource("Pet") end,
-					},
-					Spell = {
-						type = "toggle", order = 40, name = L["Other Spell"],
-						desc = L["If checked, enter spell name for an associated action."],
-						get = function(info) return bars.template.barSource == "Other" end,
-						set = function(info, value) SetSelectedBarSource("Other") end,
-					},
-				},
-			},
-			SelectClass = {
-				type = "group", order = 15, name = L["Class"], inline = true,
-				hidden = function(info)
-					return (bars.template.barType == "Notification") or ((bars.template.barSource ~= "Class") and (bars.template.barSource ~= "Pet"))
-				end,
-				args = {
-					Druid = {
-						type = "toggle", order = 10, name = L["Druid"], width = "half",
-						desc = L["If checked, select druid actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 2 end,
-						set = function(info, value) SetSelectedBarClass(2) end,
-					},
-					Hunter = {
-						type = "toggle", order = 15, name = L["Hunter"], width = "half",
-						desc = L["If checked, select hunter actions."],
-						get = function(info) return bars.template.barClass == 3 end,
-						set = function(info, value) SetSelectedBarClass(3) end,
-					},
-					Mage = {
-						type = "toggle", order = 20, name = L["Mage"], width = "half",
-						desc = L["If checked, select mage actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 4 end,
-						set = function(info, value) SetSelectedBarClass(4) end,
-					},
-					Monk = {
-						type = "toggle", order = 22, name = L["Monk"], width = "half",
-						desc = L["If checked, select monk actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 11 end,
-						set = function(info, value) SetSelectedBarClass(11) end,
-					},
-					Paladin = {
-						type = "toggle", order = 25, name = L["Paladin"], width = "half",
-						desc = L["If checked, select paladin actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 5 end,
-						set = function(info, value) SetSelectedBarClass(5) end,
-					},
-					Priest = {
-						type = "toggle", order = 30, name = L["Priest"], width = "half",
-						desc = L["If checked, select priest actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 6 end,
-						set = function(info, value) SetSelectedBarClass(6) end,
-					},
-					Rogue = {
-						type = "toggle", order = 35, name = L["Rogue"], width = "half",
-						desc = L["If checked, select rogue actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 7 end,
-						set = function(info, value) SetSelectedBarClass(7) end,
-					},
-					Shaman = {
-						type = "toggle", order = 40, name = L["Shaman"], width = "half",
-						desc = L["If checked, select shaman actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 8 end,
-						set = function(info, value) SetSelectedBarClass(8) end,
-					},
-					Warlock = {
-						type = "toggle", order = 45, name = L["Warlock"], width = "half",
-						desc = L["If checked, select warlock actions."],
-						get = function(info) return bars.template.barClass == 9 end,
-						set = function(info, value) SetSelectedBarClass(9) end,
-					},
-					Warrior = {
-						type = "toggle", order = 50, name = L["Warrior"], width = "half",
-						desc = L["If checked, select warrior actions."],
-						hidden = function(info) return bars.template.barSource == "Pet" end,
-						get = function(info) return bars.template.barClass == 10 end,
-						set = function(info, value) SetSelectedBarClass(10) end,
-					},
-					DeathKnight = {
-						type = "toggle", order = 55, name = L["Death Knight"],
-						desc = L["If checked, select death knight actions."],
-						get = function(info) return bars.template.barClass == 1 end,
-						set = function(info, value) SetSelectedBarClass(1) end,
 					},
 				},
 			},
@@ -10959,37 +10466,15 @@ MOD.barOptions = {
 					},
 				},
 			},
-			EnterOtherSpellGroup = {
-				type = "group", order = 40, name = L["Other Spell"], inline = true,
-				hidden = function(info) return (bars.template.barType == "Notification") or (bars.template.barSource ~= "Other") end,
+			EnterSpellNameGroup = {
+				type = "group", order = 40, name = L["Action"], inline = true,
+				hidden = function(info) return bars.template.barType == "Notification" end,
 				args = {
 					SpellName = {
-						type = "input", order = 10, name = L["Spell Name"],
+						type = "input", order = 10, name = L["Enter Spell Name or Identifier"],
 						desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id)."],
 						get = function(info) return conditions.name end,
 						set = function(info, n) n = ValidateSpellName(n, true); conditions.name = n end,
-					},
-				},
-			},
-			BarActionGroup = {
-				type = "group", order = 50, name = L["Actions To Monitor"], inline = true,
-				hidden = function(info) return (bars.template.barSource == "Other") or (GetBarActionListCount() == 0) end,
-				args = {
-					AllOnBar = {
-						type = "execute", order = 10, name = L["All On"], width = "half",
-						desc = L["Select all the actions."],
-						func = function(info) SetAllBarActions(true) end,
-					},
-					AllOffBar = {
-						type = "execute", order = 20, name = L["All Off"], width = "half",
-						desc = L["Deselect all the actions."],
-						func = function(info) SetAllBarActions(false) end,
-					},
-					SelectBarAction = {
-						type = "multiselect", order = 30, name = "",
-						get = function(info, key) return GetSelectedBarAction(key) end,
-						set = function(info, key, value) SetSelectedBarAction(key, value) end,
-						values = function(info) return GetBarActionList() end,
 					},
 				},
 			},
