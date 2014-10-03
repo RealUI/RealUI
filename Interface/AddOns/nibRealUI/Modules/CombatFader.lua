@@ -437,6 +437,17 @@ function CombatFader:OnInitialize()
 	db = self.db.profile
 	ndbc = nibRealUI.db.char
 
+    if nibRealUIDB["namespaces"]["CombatFader"]["profiles"] then
+        for profile, table in next, nibRealUIDB["namespaces"]["CombatFader"]["profiles"] do
+            if nibRealUIDB["namespaces"]["CombatFader"]["profiles"][profile]["elements"]["watchframe"] then
+                for k, v in next, nibRealUIDB["namespaces"]["CombatFader"]["profiles"][profile]["elements"]["watchframe"] do
+                    nibRealUIDB["namespaces"]["CombatFader"]["profiles"][profile]["elements"]["objectives"][k] = v
+                    nibRealUIDB["namespaces"]["CombatFader"]["profiles"][profile]["elements"]["watchframe"] = nil
+                end
+            end
+        end
+    end
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end

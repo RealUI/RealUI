@@ -41,7 +41,7 @@ local function CreateBD(parent, alpha)
 end
 
 local function AttachStatusBar(icon, unit)
-    print("AttachStatusBar")
+    --print("AttachStatusBar")
     local sBar = CreateFrame("StatusBar", nil, icon)
     sBar:SetValue(0)
     sBar:SetMinMaxValues(0, 1)
@@ -173,7 +173,7 @@ local function CreateAuras(parent)
         end
     end
     parent.Auras.PostCreateIcon = function(self, button)
-        print("PostCreateIcon", self, button)
+        --print("PostCreateIcon", self, button)
         button.icon:SetTexCoord(.08, .92, .08, .92)
         button.border = CreateFrame("Frame", nil, button)
         button.border:SetAllPoints(button)
@@ -191,7 +191,7 @@ local function CreateAuras(parent)
         button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
     end
     parent.Auras.PostUpdateIcon = function(self, unit, icon, index)
-        print("PostUpdateIcon", self, unit, icon, index)
+        --print("PostUpdateIcon", self, unit, icon, index)
         if not icon.sCooldown then
             icon.sCooldown, icon.timeStr = AttachStatusBar(icon, unit)
 

@@ -720,6 +720,7 @@ local tooltips = {
 	ItemRefShoppingTooltip2,
 	ItemRefShoppingTooltip3,
 	FloatingBattlePetTooltip,
+    FloatingGarrisonFollowerTooltip,
 	BattlePetTooltip,
 	DropDownList1MenuBackdrop,
 	DropDownList2MenuBackdrop,

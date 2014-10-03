@@ -463,14 +463,11 @@ function EclipseBar:OnEnable()
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterBucketEvent("UNIT_AURA", updateSpeed, "UpdateAuras")
-    self:RegisterBucketEvent("UNIT_POWER_FREQUENT", updateSpeed, "OnUpdate")
+    self:RegisterEvent("UNIT_POWER_FREQUENT", "OnUpdate")
     --self:RegisterEvent("ECLIPSE_DIRECTION_CHANGE")
-
-    --self.updateTimer = self:ScheduleRepeatingTimer("OnUpdate", updateSpeed)
 end
 
 function EclipseBar:OnDisable()
     self:UnregisterAllEvents()
     self:UnregisterAllBuckets()
-    if self.updateTimer then self:CancelTimer(self.updateTimer) end
 end
