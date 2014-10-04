@@ -184,7 +184,6 @@ function AddonListAdv:RenameSet(set, name)
     dbc[set].name = name
 
     print(string.format("Addons [%s] renamed to [%s].", oldName, name))
-
 end
 
 function AddonListAdv:SetsOnClick(btn)
@@ -230,7 +229,7 @@ function AddonListAdv:SetDropDown_Populate(level)
         UIDropDownMenu_AddButton(info)
 
         local count
-        for set = 1, dbc do
+        for set, v in next, dbc do
             --print("SetDropDown_Populate", set, dbc[set])
             if dbc and dbc[set] then
                 count = #dbc[set]
@@ -321,7 +320,7 @@ function AddonListAdv:OnInitialize()
                 --
             },
             RealUISet = {
-                "!Aurora",
+                "!Aurora_RealUI",
                 "!BugGrabber",
                 "Aurora",
                 "BadBoy",
