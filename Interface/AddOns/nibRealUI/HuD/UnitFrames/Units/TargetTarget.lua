@@ -125,7 +125,7 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-local function CreateTargetTarget(self)
+UnitFrames["targettarget"] = function(self)
     self:SetSize(F2.health.width, F2.health.height)
     CreateHealthBar(self)
     CreateHealthStatus(self)
@@ -137,9 +137,6 @@ local function CreateTargetTarget(self)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:name]")
 
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
-    
     function self:PostUpdate(event)
         self.Class.Update(self, event)
         self.endBox.Update(self, event)
@@ -153,8 +150,6 @@ tinsert(UnitFrames.units, function(...)
     ndbc = nibRealUI.db.char
     F2 = UnitFrames.textures[UnitFrames.layoutSize].F2
 
-    oUF:RegisterStyle("RealUI:targettarget", CreateTargetTarget)
-    oUF:SetActiveStyle("RealUI:targettarget")
     local targettarget = oUF:Spawn("targettarget", "RealUITargetTargetFrame")
     targettarget:SetPoint("BOTTOMRIGHT", "RealUITargetFrame", db.positions[UnitFrames.layoutSize].targettarget.x, db.positions[UnitFrames.layoutSize].targettarget.y)
     targettarget:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", targettarget.Class.Update)

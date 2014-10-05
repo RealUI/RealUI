@@ -113,7 +113,7 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-local function CreateFocusTarget(self)
+UnitFrames["focustarget"] = function(self)
     self:SetSize(F3.health.width, F3.health.height)
     CreateHealthBar(self)
     CreateHealthStatus(self)
@@ -124,9 +124,6 @@ local function CreateFocusTarget(self)
     self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:name]")
-
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
@@ -142,8 +139,6 @@ tinsert(UnitFrames.units, function(...)
     ndbc = nibRealUI.db.char
     F3 = UnitFrames.textures[UnitFrames.layoutSize].F3
 
-    oUF:RegisterStyle("RealUI:focustarget", CreateFocusTarget)
-    oUF:SetActiveStyle("RealUI:focustarget")
     local focustarget = oUF:Spawn("focustarget", "RealUIFocusTargetFrame")
     focustarget:SetPoint("TOPLEFT", "RealUIFocusFrame", "BOTTOMLEFT", db.positions[UnitFrames.layoutSize].focustarget.x, db.positions[UnitFrames.layoutSize].focustarget.y)
     focustarget:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", focustarget.Class.Update)

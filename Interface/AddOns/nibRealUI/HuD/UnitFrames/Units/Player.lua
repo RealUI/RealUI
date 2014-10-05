@@ -211,7 +211,7 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-local function CreatePlayer(self)
+UnitFrames["player"] = function(self)
     CreateHealthBar(self)
     CreatePredictBar(self)
     CreatePvPStatus(self)
@@ -221,8 +221,6 @@ local function CreatePlayer(self)
     CreateEndBox(self)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PostUpdate(event)
         self.endBox.Update(self, event)
@@ -254,8 +252,6 @@ tinsert(UnitFrames.units, function(...)
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
 
-    oUF:RegisterStyle("RealUI:player", CreatePlayer)
-    oUF:SetActiveStyle("RealUI:player")
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)
     player:RegisterEvent("PLAYER_FLAGS_CHANGED", UnitFrames.UpdateStatus)

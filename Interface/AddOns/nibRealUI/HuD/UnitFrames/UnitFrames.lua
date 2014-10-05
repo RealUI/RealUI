@@ -582,5 +582,5 @@ function UnitFrames:OnEnable()
         mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
 
-    self:Shared()
+    self:InitializeLayout()
 end

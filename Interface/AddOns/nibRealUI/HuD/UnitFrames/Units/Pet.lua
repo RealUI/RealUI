@@ -103,7 +103,7 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-local function CreatePet(self)
+UnitFrames["pet"] = function(self)
     self:SetSize(F3.health.width, F3.health.height)
     CreateHealthBar(self)
     CreatePvPStatus(self)
@@ -114,9 +114,6 @@ local function CreatePet(self)
     self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:name]")
-
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
@@ -131,8 +128,6 @@ tinsert(UnitFrames.units, function(...)
     ndbc = nibRealUI.db.char
     F3 = UnitFrames.textures[UnitFrames.layoutSize].F3
 
-    oUF:RegisterStyle("RealUI:pet", CreatePet)
-    oUF:SetActiveStyle("RealUI:pet")
     local pet = oUF:Spawn("pet", "RealUIPetFrame")
     pet:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].pet.x, db.positions[UnitFrames.layoutSize].pet.y)
 end)

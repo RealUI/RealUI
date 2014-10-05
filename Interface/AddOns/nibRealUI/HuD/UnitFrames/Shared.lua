@@ -360,16 +360,98 @@ function UnitFrames:UpdateEndBox(...)
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
 end
 
+-- Dropdown Menu
+local dropdown = CreateFrame("Frame", "RealUIUnitFramesDropDown", UIParent, "UIDropDownMenuTemplate")
+
+hooksecurefunc("UnitPopup_OnClick",function(self)
+    local button = self.value
+    if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
+        if StaticPopup1 then
+            StaticPopup1:Hide()
+        end
+        if db.misc.focusclick then
+            nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        end
+    elseif button == "PET_DISMISS" then
+        if StaticPopup1 then
+            StaticPopup1:Hide()
+        end
+    end
+end)
+local function menu(self)
+    dropdown:SetParent(self)
+    return ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
+end
+local init = function(self)
+    local unit = self:GetParent().unit
+    local menu, name, id
+
+    if (not unit) then
+        return
+    end
+
+    if (UnitIsUnit(unit, "player")) then
+        menu = "SELF"
+    elseif (UnitIsUnit(unit, "vehicle")) then
+        menu = "VEHICLE"
+    elseif (UnitIsUnit(unit, "pet")) then
+        menu = "PET"
+    elseif (UnitIsPlayer(unit)) then
+        id = UnitInRaid(unit)
+        if(id) then
+            menu = "RAID_PLAYER"
+            name = GetRaidRosterInfo(id)
+        elseif(UnitInParty(unit)) then
+            menu = "PARTY"
+        else
+            menu = "PLAYER"
+        end
+    else
+        menu = "TARGET"
+        name = RAID_TARGET_ICON
+    end
+
+    if (menu) then
+        UnitPopup_ShowMenu(self, menu, unit, name, id)
+    end
+end
+UIDropDownMenu_Initialize(dropdown, init, "MENU")
 
 -- Init
-function UnitFrames:Shared()
+local function Shared(self, unit)
+    --print("Shared", self, self.unit, unit)
+    self.menu = menu
+
+    self:SetScript("OnEnter", UnitFrame_OnEnter)
+    self:SetScript("OnLeave", UnitFrame_OnLeave)
+    self:RegisterForClicks("AnyUp")
+
+    if db.misc.focusclick then
+        local ModKey = db.misc.focuskey
+        local MouseButton = 1
+        local key = ModKey .. "-type" .. (MouseButton or "")
+        if(self.unit == "focus") then
+            self:SetAttribute(key, "macro")
+            self:SetAttribute("macrotext", "/clearfocus")
+        else
+            self:SetAttribute(key, "focus")
+        end
+    end
+
+    -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
+    UnitFrames[unit](self)
+end
+
+function UnitFrames:InitializeLayout()
     db = UnitFrames.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
 
+    oUF:RegisterStyle("RealUI", Shared)
+    oUF:SetActiveStyle("RealUI")
+
     for i = 1, #UnitFrames.units do
         UnitFrames.units[i]()
     end
-
-    -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
 end
+

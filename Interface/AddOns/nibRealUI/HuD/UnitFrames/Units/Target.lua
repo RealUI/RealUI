@@ -296,7 +296,7 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-local function CreateTarget(self)
+UnitFrames["target"] = function(self)
     CreateHealthBar(self)
     CreatePredictBar(self)
     CreateHealthStatus(self)
@@ -312,9 +312,6 @@ local function CreateTarget(self)
     self:Tag(self.Name, "[realui:level] [realui:name]")
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
-
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
 
     function self:PreUpdate(event)
         --self.Combat.Override(self, event)
@@ -369,8 +366,6 @@ tinsert(UnitFrames.units, function(...)
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
 
-    oUF:RegisterStyle("RealUI:target", CreateTarget)
-    oUF:SetActiveStyle("RealUI:target")
     local target = oUF:Spawn("target", "RealUITargetFrame")
     target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT", db.positions[UnitFrames.layoutSize].target.x, db.positions[UnitFrames.layoutSize].target.y)
     target:RegisterEvent("UNIT_THREAT_LIST_UPDATE", target.Threat.Override)
