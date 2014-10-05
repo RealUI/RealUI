@@ -73,7 +73,7 @@ local function CreateHealthBar(parent)
     parent.Health.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 0, 2)
     parent.Health.text:SetFont(unpack(nibRealUI:Font()))
     parent.Health.text:SetJustifyH("LEFT")
-    parent:Tag(parent.Health.text, "[realui:healthPercent][realui:health]")
+    parent:Tag(parent.Health.text, "[realui:healthPercent< - ][realui:health]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     parent.Health.steps = {}

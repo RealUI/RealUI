@@ -65,7 +65,7 @@ local function CreateHealthBar(parent)
     parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Health.text:SetPoint("BOTTOMRIGHT", parent.Health, "TOPRIGHT", 2, 2)
     parent.Health.text:SetFont(unpack(nibRealUI:Font()))
-    parent:Tag(parent.Health.text, "[realui:health]")
+    parent:Tag(parent.Health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     parent.Health.steps = {}

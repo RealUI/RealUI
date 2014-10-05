@@ -59,16 +59,25 @@ tags.Methods["realui:healthPercent"] = function(unit)
     if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
 
     local percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
-    if unit == "target" then
+    if unit == "target" or unit == "player" then
         if percent > 90 then 
             return
-        else
-            return ("%d|cff%s%%|r - "):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
         end
     end
     return ("%d|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
 end
 tags.Events["realui:healthPercent"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+
+-- Smart Health
+tags.Methods["realui:smartHealth"] = function(unit)
+    local healthPer = tags.Methods["realui:healthPercent"](unit)
+    if healthPer then
+        return healthPer
+    else
+        return tags.Methods["realui:health"](unit)
+    end
+end
+tags.Events["realui:smartHealth"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
 -- Power
 tags.Methods["realui:power"] = function(unit)
