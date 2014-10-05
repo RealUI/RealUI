@@ -1,6 +1,6 @@
 -- Credit to Sylvanaar's ACP for much of this code.
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local dbc, dbg
+local dbc, dbk, dbg
 
 local MODNAME = "AddonListAdv"
 local AddonListAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
@@ -80,110 +80,126 @@ StaticPopupDialogs["ALA_SaveAs"] = {
 --------------
 ---- Sets ----
 --------------
-function AddonListAdv:SaveSet(set, newName)
-    --print("SaveSet", set, newName)
-    if not set then set, newName = newName, set end
-    if newName and dbc[set] then dbc[set] = nil; set = newName end
-    --print("SaveSet2", set, newName)
-    
-    local list
-    if set == nibRealUI.class then
-        list = dbg[nibRealUI.class]
+local function GetSet(name)
+    print("GetSet", name)
+    local set, db
+    if name == nibRealUI.classLocale then
+        if not dbk[1] then
+            dbk[1] = {["name"] = nibRealUI.classLocale}
+        end
+        set = dbk[1]
     else
+        for k, v in next, {dbg, dbc} do
+            local setIndex = 0
+            repeat
+                setIndex = setIndex + 1
+                set = v[setIndex]
+                print("repeat", setIndex, v, dbg)
+            until not set or set.name == name
+            if set then
+                db = v
+                break
+            end
+        end
+    end
+    return set, db
+end
 
-        list = dbc[set] or {}
+function AddonListAdv:SaveSet(name, newName)
+    print("SaveSet", name, newName)
+    if not name then
+        name = newName
+        table.insert(dbc, {["name"] = name,})
     end
 
-    for k, v in next, list do
-        --print("SaveSet3", k, v)
-        table.remove(list, k)
+    local set = GetSet(name)
+    if name and newName then
+        -- rename
+        return AddonListAdv:RenameSet(set, newName)
+    end
+
+    print("SaveSet2", set, set.name)
+    
+    for i = 1, #set do
+        print("SaveSet3", i, set[i])
+        table.remove(set, i)
     end
 
     local name, enabled, _
     for i = 1, GetNumAddOns() do
         name, _, _, enabled = GetAddOnInfo(i)
-        --print("SaveSet4", name, enabled)
+        print("SaveSet4", name, enabled)
         if enabled then
-            table.insert(list, name)
+            table.insert(set, name)
         end
     end
 
-    if (set ~= nibRealUI.class) and (not dbc[set]) then
-        --print("SaveSet5", list)
-        dbc[set] = list
-    end
-    --print("SaveSet6", dbc[set])
-    print(string.format("Addons [%s] Saved.", self:GetSetName(set))) 
-end
-
-function AddonListAdv:GetSetName(set)
-    --print("GetSetName", set)
-    if set == "RealUISet" then
-        set = "RealUI"
-        return "Set " .. set
-    elseif set == nibRealUI.class then
-        set = UnitClass("player")
-        return "Set " .. set
-    elseif dbc[set] then
-        return "Set " .. set
-    else
-        print("Nope!!")
-    end
+    print(("Set [%s] Saved."):format(set.name))
 end
 
 function AddonListAdv:UnloadSet(set)
-    local list
-
-    if set == "RealUISet" or set == nibRealUI.class then
-        list = dbg[set]
-    else
-        list = dbc[set]
+    print("UnloadSet", set)
+    if type(set) ~= "table" then
+        set = GetSet(set)
     end
 
-    for i = 1, #list do
-        --print("UnloadSet: name", list[i])
-        if GetAddOnInfo(list[i]) then
-            DisableAddOn(list[i])
+    for i = 1, #set do
+        --print("UnloadSet:", set[i])
+        if GetAddOnInfo(set[i]) then
+            DisableAddOn(set[i])
         end
     end
 
-    print(string.format("Addons [%s] Unloaded.", self:GetSetName(set)))
+    print(string.format("Set [%s] Unloaded.", set.name))
     AddonList_Update()
 end
 
-function AddonListAdv:ClearSelectionAndLoadSet(set)
-    --print("ClearSelectionAndLoadSet", set)
+function AddonListAdv:DeleteSet(set)
+    print("DeleteSet", set)
+    local db
+    if type(set) ~= "table" then
+        set, db = GetSet(set)
+    end
+
+    local setName = set.name
+    for i = 1, #db do
+        if db[i] == set then
+            table.remove(db, i)
+        end
+    end
+
+    print(string.format("Set [%s] Deleted.", setName))
+end
+
+function AddonListAdv:ClearSelectionAndLoadSet(name)
+    print("ClearSelectionAndLoadSet", name)
+    local set = GetSet(name)
+
     DisableAllAddOns()
     self:LoadSet(set)
 end
 
 function AddonListAdv:LoadSet(set)
-    --print("LoadSet", set)
-    local list
-
-    if set == "RealUISet" or set == nibRealUI.class then
-        list = dbg[set]
-    else
-        list = dbc[set]
+    print("LoadSet", set)
+    if type(set) ~= "table" then
+        set = GetSet(set)
     end
 
-    for i = 1, #list do
-        --print("LoadSet: name", list[i])
-        if GetAddOnInfo(list[i]) then
-            EnableAddOn(list[i])
+    for i = 1, #set do
+        --print("LoadSet: name", set[i])
+        if GetAddOnInfo(set[i]) then
+            EnableAddOn(set[i])
         end
     end
 
-    print(string.format("Addons [%s] Loaded.", self:GetSetName(set)))
+    print(string.format("Set [%s] Loaded.", set.name))
     AddonList_Update()
 end
 function AddonListAdv:RenameSet(set, name)
+    local oldName = set.name
+    set.name = name
 
-    local oldName = self:GetSetName(set)
-    if not dbc[set] then dbc[set] = {} end
-    dbc[set].name = name
-
-    print(string.format("Addons [%s] renamed to [%s].", oldName, name))
+    print(string.format("Set [%s] renamed to [%s].", oldName, set.name))
 end
 
 function AddonListAdv:SetsOnClick(btn)
@@ -202,10 +218,6 @@ function AddonListAdv:Skin()
         AddonList.sets:SetPoint("LEFT", AddonCharacterDropDownButton, "RIGHT", 10, 0)
         AddonList.sets:SetScript("OnClick", self.SetsOnClick)
     end
-    if Aurora then
-        local F = Aurora[1]
-        F.ReskinScroll(AddonListScrollFrameScrollBar)
-    end
 end
 
 function AddonListAdv:SetDropDown_Populate(level)
@@ -216,29 +228,63 @@ function AddonListAdv:SetDropDown_Populate(level)
     if level == 1 then
         info = UIDropDownMenu_CreateInfo()
         info.notCheckable = true
+
+        --[[ Account Sets ]]
+        info.isTitle = true
+        info.hasArrow = false
+        info.text = "Account Sets"
+        UIDropDownMenu_AddButton(info)
+
+        info.isTitle = false
+        info.disabled = false
         info.hasArrow = true
-
-        -- RealUI set.
-        info.text = string.format("%s (%d)", "RealUI", #dbg.RealUISet)
-        info.value = "RealUISet"
-        UIDropDownMenu_AddButton(info)
-
-        -- Class set.
-        info.text = string.format("%s (%d)", UnitClass("player"), #dbg[nibRealUI.class])
-        info.value = nibRealUI.class
-        UIDropDownMenu_AddButton(info)
-
         local count
-        for set, v in next, dbc do
-            --print("SetDropDown_Populate", set, dbc[set])
-            if dbc and dbc[set] then
-                count = #dbc[set]
+        for i = 1, #dbg do
+            --print("SetDropDown_Populate", i, dbg[i])
+
+            if dbg and dbg[i] then
+                count = #dbg[i]
             else
                 count = 0
             end
 
-            info.text = string.format("%s (%d)", set, count)
-            info.value = set
+            info.text = string.format("%s (%d)", dbg[i].name, count)
+            info.value = dbg[i].name
+            UIDropDownMenu_AddButton(info)
+
+            if i == 1 then
+                -- insert class set after RealUI
+                if dbk and dbk[1] then
+                    count = #dbk[1]
+                else
+                    count = 0
+                end
+
+                info.text = string.format("%s (%d)", nibRealUI.classLocale, count)
+                info.value = nibRealUI.classLocale
+                UIDropDownMenu_AddButton(info)
+            end
+        end
+
+        --[[ Character Sets ]]
+        info.isTitle = true
+        info.hasArrow = false
+        info.text = "Character Sets"
+        UIDropDownMenu_AddButton(info)
+
+        info.isTitle = false
+        info.disabled = false
+        info.hasArrow = true
+        for i = 1, #dbc do
+            --print("SetDropDown_Populate", i, dbc[i])
+            if dbc and dbc[i] then
+                count = #dbc[i]
+            else
+                count = 0
+            end
+
+            info.text = string.format("%s (%d)", dbc[i].name, count)
+            info.value = dbc[i].name
             UIDropDownMenu_AddButton(info)
         end
 
@@ -260,7 +306,7 @@ function AddonListAdv:SetDropDown_Populate(level)
         info = UIDropDownMenu_CreateInfo()
         info.notCheckable = true
 
-        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUISet" then
+        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" then
             info.text = "Save"
             info.func = function() self:SaveSet(setName) end
             UIDropDownMenu_AddButton(info, level)
@@ -280,7 +326,11 @@ function AddonListAdv:SetDropDown_Populate(level)
         info.func = function() self:UnloadSet(UIDROPDOWNMENU_MENU_VALUE) end
         UIDropDownMenu_AddButton(info, level)
 
-        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUISet" and UIDROPDOWNMENU_MENU_VALUE ~= nibRealUI.class then
+        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and UIDROPDOWNMENU_MENU_VALUE ~= nibRealUI.classLocale then
+            info.text = "Delete"
+            info.func = function() self:DeleteSet(UIDROPDOWNMENU_MENU_VALUE) end
+            UIDropDownMenu_AddButton(info, level)
+
             info.text = "Rename"
             info.func = function()
                 self.savingSet = UIDROPDOWNMENU_MENU_VALUE
@@ -297,7 +347,7 @@ end
 function AddonListAdv:RefreshMod()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 
-    --self:UpdatePosition()
+    self:Skin()
 end
 
 function AddonListAdv:PLAYER_ENTERING_WORLD()
@@ -307,7 +357,6 @@ end
 function AddonListAdv:PLAYER_LOGIN()
     LoggedIn = true
     self:RefreshMod()
-    self:Skin()
 end
 
 function AddonListAdv:OnInitialize()
@@ -315,11 +364,11 @@ function AddonListAdv:OnInitialize()
     self.db:RegisterDefaults({
         char = {
         },
+        class = {
+        },
         global = {
-            [nibRealUI.class] = {
-                --
-            },
-            RealUISet = {
+            {
+                name = "RealUI",
                 "!Aurora_RealUI",
                 "!BugGrabber",
                 "Aurora",
@@ -351,6 +400,7 @@ function AddonListAdv:OnInitialize()
         },
     })
     dbc = self.db.char
+    dbk = self.db.class
     dbg = self.db.global
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))

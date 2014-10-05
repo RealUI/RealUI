@@ -711,7 +711,7 @@ end
 
 function nibRealUI:Taint_Logging_Toggle()
 	SetCVar("taintLog", (GetCVar("taintLog") ~= "0") and "0" or "2")
-	ReloadUI()
+	--ReloadUI()
 end
 
 function nibRealUI:ADDON_LOADED(event, addon)
@@ -738,7 +738,7 @@ function nibRealUI:OnInitialize()
 	-- Vars
 	self.realm = GetRealmName()
 	self.faction = UnitFactionGroup("player")
-	_, self.class = UnitClass("player")
+    self.classLocale, self.class = UnitClass("player")
 	self.classColor = nibRealUI:GetClassColor(self.class)
 	self.name = UnitName("player")
 	self.key = string.format("%s - %s", self.name, self.realm)
