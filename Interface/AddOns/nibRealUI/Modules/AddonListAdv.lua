@@ -292,7 +292,7 @@ function AddonListAdv:SetDropDown_Populate(level)
         info.text = "Create a new set"
         info.hasArrow = false
         info.func = function()
-            StaticPopup_Show("ALA_SaveAs", setName)
+            StaticPopup_Show("ALA_SaveAs")
         end
         UIDropDownMenu_AddButton(info)
     elseif level == 2 then

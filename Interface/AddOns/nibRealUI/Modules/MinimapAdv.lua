@@ -1332,7 +1332,7 @@ end
 
 function MinimapAdv:UpdatePOIEnabled()
     if db.poi.enabled and not(IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ")) then
-        QuestPOI_Initialize(Minimap, onCreateFunc)
+        QuestPOI_Initialize(Minimap, function(self) end)
         self:POIUpdate()
         self:InitializePOI()
     else

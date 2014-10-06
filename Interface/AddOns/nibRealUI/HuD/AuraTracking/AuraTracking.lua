@@ -445,7 +445,7 @@ function AuraTracking:UpdateFonts()
 end
 
 function AuraTracking:RegisterFont(type, fs)
-	if tpye == "cooldown" then
+	if type == "cooldown" then
 		tinsert(FontStringsCooldown, fs)
 	end
 end

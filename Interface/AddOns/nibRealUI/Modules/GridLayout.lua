@@ -70,7 +70,7 @@ function GridLayout:UpdateLockdown(...)
 end
 
 -- Reload Grid Layout
-local function ReloadGridLayout()
+local function ReloadGridLayout(NewWidth)
 	local ReloadLayoutTimer = CreateFrame("Frame")
 	ReloadLayoutTimer:Show()
 	ReloadLayoutTimer.Elapsed = 0
@@ -116,7 +116,7 @@ local function SetGridFrameWidth(NewWidth)
 						if FM then FM:MoveAddons() end
 					end
 
-					-- ReloadGridLayout()
+					-- ReloadGridLayout(NewWidth)
 				end
 				
 				ResizeTimer.Elapsed = 0

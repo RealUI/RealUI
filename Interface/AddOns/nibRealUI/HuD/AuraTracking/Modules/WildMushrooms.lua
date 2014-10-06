@@ -61,7 +61,7 @@ local function AuraUpdate(self)
 				self.count:SetTextColor(nibRealUI:GetDurabilityColor(per))
 			else
 				self.count:SetText("100.")
-				self.count:SetTextColor(nibRealUI:GetDurabilityColor(per))
+				self.count:SetTextColor(nibRealUI:GetDurabilityColor(1))
 			end
 		else
 			self.count:SetText("")

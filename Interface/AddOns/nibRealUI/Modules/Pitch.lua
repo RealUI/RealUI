@@ -428,7 +428,7 @@ end
 ---- UPDATES
 local function ClassColorsUpdate()
 	if PitchFrame then
-		self:UpdateColors()
+        Pitch:UpdateColors()
 	end
 end
 

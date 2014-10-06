@@ -108,7 +108,6 @@ end
 
 function ResolveBar:UpdateShown()
     --print("UpdateShown")
-    if unit and unit ~= "player" then return end
 
     if self.configMode then
         self.rBar:Show()

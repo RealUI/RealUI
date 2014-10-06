@@ -107,7 +107,7 @@ end
 
 -- Filter out messages
 function StopAddonSpam:AddMessage(obj, msg, r, g, b, id)
-	if not self:IsMessageSpam(msg, id, this) then
+	if not self:IsMessageSpam(msg, id, obj) then
 		-- Let the message pass through.
 		self.hooks[obj].AddMessage(obj, msg, r, g, b, id)
 	end

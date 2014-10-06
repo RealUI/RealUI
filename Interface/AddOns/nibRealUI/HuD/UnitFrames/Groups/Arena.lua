@@ -186,20 +186,7 @@ local function CreateArena(self)
 
     self:SetScript("OnEnter", UnitFrame_OnEnter)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
-
-    function self:PostUpdate(event)
-        local _, instanceType = IsInInstance()
-        if instanceType == "arena" then
-            self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UpdateTrinket)
-            self.Trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-]]..UnitFactionGroup(self.unit))
-        elseif self:IsEventRegistered("UNIT_SPELLCAST_SUCCEEDED") then
-            self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-            for _, trinket in pairs(trinkets) do
-                trinket:SetCooldown(0, 0)
-                trinket:Hide()
-            end
-        end
-    end
+    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UpdateTrinket)
 end
 
 -- Init

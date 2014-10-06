@@ -710,8 +710,9 @@ function nibRealUI:CPU_Profiling_Toggle()
 end
 
 function nibRealUI:Taint_Logging_Toggle()
-	SetCVar("taintLog", (GetCVar("taintLog") ~= "0") and "0" or "2")
-	--ReloadUI()
+    local taintLog = GetCVar("taintLog")
+	SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
+	print("Taint Logging is "..((taintLog ~= "0" and "disabled.") or "enabled."))
 end
 
 function nibRealUI:ADDON_LOADED(event, addon)

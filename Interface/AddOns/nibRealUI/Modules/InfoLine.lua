@@ -1903,7 +1903,7 @@ local function Friends_OnEnter(self)
 	end
 end
 
-local BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+local BNetRequestAlert = CreateFrame("Frame", nil, ILFrames.friends, "MicroButtonAlertTemplate")
 local function Friends_BNetRequest(self, event, ...)
 	if (event == "BN_FRIEND_INVITE_REMOVED") then
 		BNetRequestAlert:Hide();
@@ -3952,7 +3952,7 @@ function InfoLine:CreateFrames()
 	ILFrames.spec:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 	ILFrames.spec:RegisterEvent("EQUIPMENT_SETS_CHANGED")
 	ILFrames.spec:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-	ILFrames.spec:SetScript("OnEvent", function(self) 
+	ILFrames.spec:SetScript("OnEvent", function(self, event)
 		if not db.elements.specchanger then return end
 		if event == "UPDATE_PENDING_MAIL" then
 			ILFrames.spec:UnregisterEvent("UPDATE_PENDING_MAIL")
