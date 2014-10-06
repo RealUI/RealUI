@@ -17,8 +17,10 @@ L["Always Hide"] = true
 L["Anchor"] = true
 L["Apply Preset"] = true
 L["Auto-Assist"] = true
+L["Auto-Assist Casting"] = true
 L["Bag Bar"] = true
 L["Bar Options"] = true
+L["Bar Paging"] = true
 L["Bars"] = true
 L["Bar %s"] = true
 L["Bar Snapping"] = true
@@ -84,10 +86,14 @@ L["Down"] = true
 L["Empty button background"] = true
 L[ [=[Enable Auto-Assist for this bar.
  Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = true
+L[ [=[Enable Auto-Assist for this bar.
+Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = true
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = true
 L["Enabled"] = true
 L["Enable/Disable the bar."] = true
+L[ [=[Enable Mouse-Over Casting for this bar.
+Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = true
 L["Enable State-based Button Swaping"] = true
 L["Enable the Bag Bar"] = true
 L["Enable the Blizzard Art Bar"] = true
@@ -153,8 +159,14 @@ L["Lock the buttons."] = true
 L["Micro Menu"] = true
 L["Minimap Icon"] = true
 L["Modifier Based Switching"] = true
+L["Mouse-Over Casting"] = true
+L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = true
+L["Mouse-Over Casting Modifier"] = true
 L["No Display"] = true
 L["None"] = true
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = true
 L["No Stance/Form"] = true
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = true
 L["Number of buttons."] = true
@@ -181,6 +193,7 @@ L["Right-click Self-Cast"] = true
 L["Right ending"] = true
 L["Rows"] = true
 L["Scale"] = true
+L["Select a modifier for Mouse-Over Casting"] = true
 L["Select the Focus-Cast Modifier"] = true
 L["Select the Self-Cast Modifier"] = true
 L["Self-Cast by modifier"] = true
@@ -189,6 +202,7 @@ L["SHIFT"] = true
 L["Show a Icon to open the config at the Minimap"] = true
 L["Show Reputation Bar"] = true
 L["Show XP Bar"] = true
+L["Smart Target selection"] = true
 L["Specify the Color of the Out of Mana Indicator"] = true
 L["Specify the Color of the Out of Range Indicator"] = true
 L["Stance Bar"] = true
@@ -200,6 +214,7 @@ L["The background of button places where no buttons are placed"] = true
 L["The bar default is to be visible all the time, you can configure conditions here to control when the bar should be hidden."] = true
 L["The default behaviour of this bar when no state-based paging option affects it."] = true
 L["The Positioning options here will allow you to position the bar to your liking and with an absolute precision."] = true
+L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."] = true
 L["This bar will be hidden once you enter combat."] = true
 L["This bar will be hidden whenever you are not in combat."] = true
 L["Three bars stacked"] = true

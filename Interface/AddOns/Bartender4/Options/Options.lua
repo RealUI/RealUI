@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2012, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2014, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 local _, Bartender4 = ...
@@ -194,6 +194,18 @@ local function generateOptions()
 								end,
 								values = { none = L["No Display"], button = L["Full Button Mode"], hotkey = L["Hotkey Mode"] },
 							},
+							tooltip = {
+								order = 110,
+								name = L["Button Tooltip"],
+								type = "select",
+								desc = L["Configure the Button Tooltip."],
+								values = { ["disabled"] = L["Disabled"], ["nocombat"] = L["Disabled in Combat"], ["enabled"] = L["Enabled"] },
+								get = function() return Bartender4.db.profile.tooltip end,
+								set = function(info, value)
+									Bartender4.db.profile.tooltip = value
+									Bartender4.Bar:ForAll("UpdateButtonConfig")
+								end,
+							},
 							colors = {
 								order = 130,
 								type = "group",
@@ -223,17 +235,24 @@ local function generateOptions()
 									},
 								},
 							},
-							tooltip = {
-								order = 200,
-								name = L["Button Tooltip"],
+							header_target = {
+								order = 300,
+								type = "header",
+								name = L["Mouse-Over Casting"],
+							},
+							mouseovermod = {
+								order = 301,
 								type = "select",
-								desc = L["Configure the Button Tooltip."],
-								values = { ["disabled"] = L["Disabled"], ["nocombat"] = L["Disabled in Combat"], ["enabled"] = L["Enabled"] },
-								get = function() return Bartender4.db.profile.tooltip end,
-								set = function(info, value)
-									Bartender4.db.profile.tooltip = value
-									Bartender4.Bar:ForAll("UpdateButtonConfig")
-								end,
+								name = L["Mouse-Over Casting Modifier"],
+								desc = L["Select a modifier for Mouse-Over Casting"],
+								get = function(info) return Bartender4.db.profile.mouseovermod end,
+								set = function(info, value) Bartender4.db.profile.mouseovermod = value; Bartender4.Bar:ForAll("UpdateStates") end,
+								values = { NONE = L["None"], ALT = L["ALT"], SHIFT = L["SHIFT"], CTRL = L["CTRL"] },
+							},
+							mouseovermod_desc = {
+								order = 302,
+								type = "description",
+								name = "\n" .. L["\"None\" as modifier means its always active, and no modifier is required.\n\nRemember to enable Mouse-Over Casting for the individual bars, on the \"State Configuration\" tab, if you want it to be active for a specific bar."],
 							},
 						},
 					},
@@ -334,7 +353,6 @@ end
 function Bartender4:SetupOptions()
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Bartender4", getOptions)
 	AceConfigDialog:SetDefaultSize("Bartender4", 680,525)
-	self:RegisterChatCommand( "bar", "ChatCommand")
 	self:RegisterChatCommand( "bt", "ChatCommand")
 	self:RegisterChatCommand( "bt4", "ChatCommand")
 	self:RegisterChatCommand( "bartender", "ChatCommand")

@@ -13,8 +13,10 @@ L["Always Hide"] = "总是隐藏"
 L["Anchor"] = "锚点"
 L["Apply Preset"] = "套用预设"
 L["Auto-Assist"] = "自动协助"
+L["Auto-Assist Casting"] = "自动辅助施法"
 L["Bag Bar"] = "背包栏"
 L["Bar Options"] = "动作条选项"
+L["Bar Paging"] = "动作条切换"
 L["Bars"] = "动作条"
 L["Bar %s"] = "动作条%s"
 L["Bar Snapping"] = "动作条粘附"
@@ -81,11 +83,17 @@ L["Empty button background"] = "清空按钮的背景"
 L[ [=[Enable Auto-Assist for this bar.
  Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[为该动作条启用自动协助。
  当你所尝试使用的技能不能对你当前目标生效时，自动协助会尝试对目标的目标使用该技能。]=]
+L[ [=[Enable Auto-Assist for this bar.
+Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[为此动作条启用自动辅助施法.
+如果施法目标为无效目标,自动辅助会尝试对目标的目标施法.]=]
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[启用游戏内置动作条切换控制。
 具体查看暴雪按键绑定设置 - 通常是 Shift-鼠标滚轮和 Shift+1 至 Shift+6。]=]
 L["Enabled"] = "已启用"
 L["Enable/Disable the bar."] = "启用或禁用该动作条。"
+L[ [=[Enable Mouse-Over Casting for this bar.
+Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[为此动作条启用鼠标指向施法.
+如果可能,鼠标指向施法会自动对当前鼠标所指的目标施法,不会改变当前目标.]=]
 L["Enable State-based Button Swaping"] = "启用基于状态的按钮切换"
 L["Enable the Bag Bar"] = "启用背包栏"
 L["Enable the Blizzard Art Bar"] = "启用暴雪风格动作条"
@@ -151,8 +159,16 @@ L["Lock the buttons."] = "锁定按钮。"
 L["Micro Menu"] = "微型主菜单"
 L["Minimap Icon"] = "小地图图标"
 L["Modifier Based Switching"] = "修改基本切换"
+L["Mouse-Over Casting"] = "鼠标指向施法"
+L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "鼠标指向施法仅限于在有辅助键被按下时才会激活. 你能在全局选项中设置辅助键."
+L["Mouse-Over Casting Modifier"] = "鼠标指向施法辅助键"
 L["No Display"] = "不显示"
 L["None"] = "无"
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["无" 表示总是激活且不需要辅助键.
+
+如果你想激活一个特定动作条,记得在单个动作条的"状态配置"标签里启用鼠标指向施法.]=]
 L["No Stance/Form"] = "没有姿态或变形"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "注意：启用自定义条件将禁用以上所有设置！"
 L["Number of buttons."] = "按钮数量。"
@@ -179,6 +195,7 @@ L["Right-click Self-Cast"] = "右键自我施法"
 L["Right ending"] = "右侧结束"
 L["Rows"] = "行"
 L["Scale"] = "缩放"
+L["Select a modifier for Mouse-Over Casting"] = "为鼠标指向施法选择一个辅助键"
 L["Select the Focus-Cast Modifier"] = "选择焦点施法"
 L["Select the Self-Cast Modifier"] = "选择自我施法"
 L["Self-Cast by modifier"] = "自身施法"
@@ -187,6 +204,7 @@ L["SHIFT"] = "SHIFT"
 L["Show a Icon to open the config at the Minimap"] = "显示小地图配置图标"
 L["Show Reputation Bar"] = "显示声望条"
 L["Show XP Bar"] = "显示经验条"
+L["Smart Target selection"] = "智能选择目标"
 L["Specify the Color of the Out of Mana Indicator"] = "指定法力不足的指示颜色"
 L["Specify the Color of the Out of Range Indicator"] = "指定过远距离的指示颜色"
 L["Stance Bar"] = "姿态栏"
@@ -198,6 +216,7 @@ L["The background of button places where no buttons are placed"] = "当按键是
 L["The bar default is to be visible all the time, you can configure conditions here to control when the bar should be hidden."] = "所有动作条默认为可见，你可以在这里配置条件来设置何时隐藏。"
 L["The default behaviour of this bar when no state-based paging option affects it."] = "当没有状态配置作用于该动作条时的动作条默认行为。"
 L["The Positioning options here will allow you to position the bar to your liking and with an absolute precision."] = "定位选项可以依个人喜好和绝对精确定位动作条。"
+L["These options can automatically select a different target for your spell, based on macro conditions. Note however that they will overrule any target changes from normal macros."] = "这个选项能为你自动选择施法目标, 它基于宏命令条件下. 但是请注意, 它会阻止标准的宏命令对目标的改变."
 L["This bar will be hidden once you enter combat."] = "此动作条进入战斗时将隐藏。"
 L["This bar will be hidden whenever you are not in combat."] = "此动作条脱离战斗时将隐藏。"
 L["Three bars stacked"] = "三个动作条堆叠"

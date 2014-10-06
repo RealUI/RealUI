@@ -147,7 +147,7 @@ local function CreateAuras(parent)
     parent.Auras.CustomFilter = function(self, ...)
         local _,icon,_,_,_,_,_,duration,timeLeft,caster,_,_,_,canApplyAura = ...
         if not caster then return false end
-        print("CustomFilter", self, icon, duration, timeLeft, caster, canApplyAura)
+        --print("CustomFilter", self, icon, duration, timeLeft, caster, canApplyAura)
 
         if (duration and duration > 0) then
             icon.startTime = timeLeft - duration
