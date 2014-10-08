@@ -637,7 +637,8 @@ function MyContainer:OnCreate(name, settings)
 		
 		-- Button to send reagents to Reagent Bank:
 		if tBank then
-			local rbHint = IsReagentBankUnlocked() and REAGENTBANK_DEPOSIT or REAGENT_BANK
+			local isUnlocked = IsReagentBankUnlocked()
+			local rbHint = isUnlocked and REAGENTBANK_DEPOSIT or REAGENT_BANK
 			self.reagentBtn = createIconButton("SendReagents", self, Textures.SellJunk, "BOTTOMRIGHT", rbHint, tBag)
 			if self.optionsBtn then
 				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.optionsBtn, "BOTTOMLEFT", 0, 0)
@@ -647,13 +648,42 @@ function MyContainer:OnCreate(name, settings)
 				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.bagToggle, "BOTTOMLEFT", 0, 0)
 			end
 			self.reagentBtn:SetScript("OnClick", function()
-				print("Reagent Bank!!!")
-				if IsReagentBankUnlocked() then
-					DepositReagentBank()
-				else
-					StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB");
-				end
+				--print("Deposit!!!")
+				DepositReagentBank()
 			end)
+			self.reagentBtn:Hide()
+
+			if isUnlocked then
+				self.reagentBtn:Show()
+			else
+				local buyReagent = CreateFrame("Button", nil, NivayacBniv_BankReagent, "UIPanelButtonTemplate")
+				buyReagent:SetText(BANKSLOTPURCHASE)
+				buyReagent:SetWidth(buyReagent:GetTextWidth() + 20)
+				buyReagent:SetPoint("CENTER", NivayacBniv_BankReagent, 0, 0)
+				buyReagent:SetScript("OnEnter", function(self)
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					GameTooltip:AddLine(REAGENT_BANK_HELP, 1, 1, 1, true)
+					GameTooltip:Show()
+				end)
+				buyReagent:SetScript("OnLeave", function()
+					GameTooltip:Hide()
+				end)
+				buyReagent:SetScript("OnClick", function()
+					--print("Reagent Bank!!!")
+					StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
+				end)
+				buyReagent:SetScript("OnEvent", function(...)
+					--print("OnReagentPurchase", ...)
+					buyReagent:UnregisterEvent("REAGENTBANK_PURCHASED")
+					self.reagentBtn:Show()
+					buyReagent:Hide()
+				end)
+				if Aurora then
+					local F = Aurora[1]
+					F.Reskin(buyReagent)
+				end
+				buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
+			end
 		end
 
 		-- Tooltip positions

@@ -1903,8 +1903,11 @@ local function Friends_OnEnter(self)
 	end
 end
 
-local BNetRequestAlert = CreateFrame("Frame", nil, ILFrames.friends, "MicroButtonAlertTemplate")
+local BNetRequestAlert
 local function Friends_BNetRequest(self, event, ...)
+    if not BNetRequestAlert then
+        BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+    end
 	if (event == "BN_FRIEND_INVITE_REMOVED") then
 		BNetRequestAlert:Hide();
 	elseif (event == "BN_FRIEND_INVITE_ADDED") or (not BNetRequestAlert.isHidden) then

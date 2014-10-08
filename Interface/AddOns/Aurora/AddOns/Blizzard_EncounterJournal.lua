@@ -192,14 +192,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 				header.button.expandedIcon:SetTextColor(1, 1, 1)
 				header.button.expandedIcon.SetTextColor = F.dummy
 
-				F.Reskin(header.button)
-
-				-- workaround because blizz uses 'tex' as key and I use it in API
-				if header.expanded then
-					header.button.tex = header.button.textures.expanded
-				else
-					header.button.tex = header.button.textures.collapsed
-				end
+				F.Reskin(header.button, true)
 
 				header.button.abilityIcon:SetTexCoord(.08, .92, .08, .92)
 				header.button.bg = F.CreateBG(header.button.abilityIcon)
@@ -234,7 +227,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 			header.button.expandedIcon:SetTextColor(1, 1, 1)
 			header.button.expandedIcon.SetTextColor = F.dummy
 
-			F.Reskin(header.button)
+			F.Reskin(header.button, true)
 
 			header.styled = true
 		end
