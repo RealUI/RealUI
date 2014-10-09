@@ -13,6 +13,7 @@ local Textures = {
 	Restack =		mediaPath .. "Restack",
 	Config =		mediaPath .. "Config",
 	SellJunk =		mediaPath .. "SellJunk",
+	Deposit =		mediaPath .. "Deposit",
 	TooltipIcon =	mediaPath .. "TooltipIcon",
 	Up =			mediaPath .. "Up",
 	Down =			mediaPath .. "Down",
@@ -637,9 +638,8 @@ function MyContainer:OnCreate(name, settings)
 		
 		-- Button to send reagents to Reagent Bank:
 		if tBank then
-			local isUnlocked = IsReagentBankUnlocked()
-			local rbHint = isUnlocked and REAGENTBANK_DEPOSIT or REAGENT_BANK
-			self.reagentBtn = createIconButton("SendReagents", self, Textures.SellJunk, "BOTTOMRIGHT", rbHint, tBag)
+			local rbHint = REAGENTBANK_DEPOSIT
+			self.reagentBtn = createIconButton("SendReagents", self, Textures.Deposit, "BOTTOMRIGHT", rbHint, tBag)
 			if self.optionsBtn then
 				self.reagentBtn:SetPoint("BOTTOMRIGHT", self.optionsBtn, "BOTTOMLEFT", 0, 0)
 			elseif self.restackBtn then
@@ -651,39 +651,6 @@ function MyContainer:OnCreate(name, settings)
 				--print("Deposit!!!")
 				DepositReagentBank()
 			end)
-			self.reagentBtn:Hide()
-
-			if isUnlocked then
-				self.reagentBtn:Show()
-			else
-				local buyReagent = CreateFrame("Button", nil, NivayacBniv_BankReagent, "UIPanelButtonTemplate")
-				buyReagent:SetText(BANKSLOTPURCHASE)
-				buyReagent:SetWidth(buyReagent:GetTextWidth() + 20)
-				buyReagent:SetPoint("CENTER", NivayacBniv_BankReagent, 0, 0)
-				buyReagent:SetScript("OnEnter", function(self)
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-					GameTooltip:AddLine(REAGENT_BANK_HELP, 1, 1, 1, true)
-					GameTooltip:Show()
-				end)
-				buyReagent:SetScript("OnLeave", function()
-					GameTooltip:Hide()
-				end)
-				buyReagent:SetScript("OnClick", function()
-					--print("Reagent Bank!!!")
-					StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
-				end)
-				buyReagent:SetScript("OnEvent", function(...)
-					--print("OnReagentPurchase", ...)
-					buyReagent:UnregisterEvent("REAGENTBANK_PURCHASED")
-					self.reagentBtn:Show()
-					buyReagent:Hide()
-				end)
-				if Aurora then
-					local F = Aurora[1]
-					F.Reskin(buyReagent)
-				end
-				buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
-			end
 		end
 
 		-- Tooltip positions

@@ -692,6 +692,40 @@ Event:SetScript('OnEvent', function(self, event, ...)
 			button:Free()
 		end
 		cbNivaya:UpdateBags()
+
+		if IsReagentBankUnlocked() then
+			NivayacBniv_Bank.reagentBtn:Show()
+		else
+			NivayacBniv_Bank.reagentBtn:Hide()
+			local buyReagent = CreateFrame("Button", nil, NivayacBniv_BankReagent, "UIPanelButtonTemplate")
+			buyReagent:SetText(BANKSLOTPURCHASE)
+			buyReagent:SetWidth(buyReagent:GetTextWidth() + 20)
+			buyReagent:SetPoint("CENTER", NivayacBniv_BankReagent, 0, 0)
+			buyReagent:SetScript("OnEnter", function(self)
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				GameTooltip:AddLine(REAGENT_BANK_HELP, 1, 1, 1, true)
+				GameTooltip:Show()
+			end)
+			buyReagent:SetScript("OnLeave", function()
+				GameTooltip:Hide()
+			end)
+			buyReagent:SetScript("OnClick", function()
+				--print("Reagent Bank!!!")
+				StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
+			end)
+			buyReagent:SetScript("OnEvent", function(...)
+				--print("OnReagentPurchase", ...)
+				buyReagent:UnregisterEvent("REAGENTBANK_PURCHASED")
+				NivayacBniv_Bank.reagentBtn:Show()
+				buyReagent:Hide()
+			end)
+			if Aurora then
+				local F = Aurora[1]
+				F.Reskin(buyReagent)
+			end
+			buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
+		end
+
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
 end)
