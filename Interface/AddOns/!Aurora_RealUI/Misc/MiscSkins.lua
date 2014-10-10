@@ -18,11 +18,11 @@ tinsert(mods["Aurora"], function()
                 bu.travelPassButton:EnableMouse(true)
                 bu.travelPassButton:SetSize(20, 32)
 
-                bu.bg:SetSize(bu.gameIcon:GetWidth()+2, bu.gameIcon:GetHight()+2)
+                bu.bg:SetSize(bu.gameIcon:GetWidth()+2, bu.gameIcon:GetHeight()+2)
                 bu.bg:ClearAllPoints()
                 bu.bg:SetPoint("TOPLEFT", bu.gameIcon, -1, 1)
                 bu.gameIcon:SetParent(bu.bg)
-                bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -1, -5)
+                bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -2, -5)
                 bu.gameIcon.SetPoint = function() end
 
                 bu.inv = bu.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)

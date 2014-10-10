@@ -1,0 +1,50 @@
+------------------------------------------------------------------------
+r205 | funkydude | 2014-10-09 18:45:52 +0000 (Thu, 09 Oct 2014) | 1 line
+Changed paths:
+   A /tags/v2.96 (from /trunk:204)
+
+Tagging as v2.96
+------------------------------------------------------------------------
+r204 | funkydude | 2014-10-07 19:30:00 +0000 (Tue, 07 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+   M /trunk/BadBoy_Guilded.toc
+
+filter more ads
+------------------------------------------------------------------------
+r203 | funkydude | 2014-10-07 18:32:47 +0000 (Tue, 07 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+filter more ads
+------------------------------------------------------------------------
+r202 | funkydude | 2014-10-06 23:27:23 +0000 (Mon, 06 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+more ads
+------------------------------------------------------------------------
+r201 | funkydude | 2014-10-06 21:29:48 +0000 (Mon, 06 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+more ads
+------------------------------------------------------------------------
+r200 | funkydude | 2014-10-06 16:03:36 +0000 (Mon, 06 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+more ads
+------------------------------------------------------------------------
+r199 | funkydude | 2014-10-04 11:29:02 +0000 (Sat, 04 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+more ads
+------------------------------------------------------------------------
+r198 | funkydude | 2014-10-04 10:50:50 +0000 (Sat, 04 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+more ads
+------------------------------------------------------------------------
