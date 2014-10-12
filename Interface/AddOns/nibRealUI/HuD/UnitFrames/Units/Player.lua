@@ -211,6 +211,38 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
+local function CreateTotems(parent)
+    -- DestroyTotem is protected, so we hack the default
+    local totemBar = _G["TotemFrame"]
+    totemBar:SetParent(parent)
+    hooksecurefunc("TotemFrame_Update", function()
+        totemBar:ClearAllPoints()
+        totemBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
+    end)
+    for i = 1, 4 do
+        local name = "TotemFrameTotem"..i
+        local totem = _G[name]
+        totem:SetSize(22, 22)
+        totem:ClearAllPoints()
+        totem:SetPoint("TOPLEFT", totemBar, i * (totem:GetWidth() + 3), 0)
+        nibRealUI:CreateBG(totem)
+        
+        local bg = _G[name.."Background"]
+        bg:SetTexture("")
+        local dur = _G[name.."Duration"]
+        dur:Hide()
+        dur.Show = function() end
+        
+        local icon = _G[name.."IconTexture"]
+        icon:SetTexCoord(.08, .92, .08, .92)
+        icon:ClearAllPoints()
+        icon:SetAllPoints()
+        
+        local _, border = totem:GetChildren()
+        border:DisableDrawLayer("OVERLAY")
+    end
+end
+
 UnitFrames["player"] = function(self)
     CreateHealthBar(self)
     CreatePredictBar(self)
@@ -219,6 +251,7 @@ UnitFrames["player"] = function(self)
     CreatePowerStatus(self)
     CreateStats(self)
     CreateEndBox(self)
+    CreateTotems(self)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 

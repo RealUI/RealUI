@@ -525,8 +525,8 @@ function nibRealUI:CreateBG(frame, alpha)
 	if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
 
 	local bg = f:CreateTexture(nil, "BACKGROUND")
-	bg:SetPoint("TOPLEFT", f, -1, 1)
-	bg:SetPoint("BOTTOMRIGHT", f, 1, -1)
+	bg:SetPoint("TOPLEFT", frame, -1, 1)
+	bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
 	bg:SetTexture(nibRealUI.media.textures.plain)
 	bg:SetVertexColor(0, 0, 0, alpha)
 
@@ -594,6 +594,7 @@ function nibRealUI:CreateFS(parent, justify, ...)
 
 	return f
 end
+
 
 -- Formatting
 local IgnoreLocales = {
@@ -722,20 +723,19 @@ function nibRealUI:GetDurabilityColor(percent)
 	end
 end
 
-local ilvlLimits = {
-	normal = 385,
-	uncommon = 437,
-	rare = 463,
-}
-function nibRealUI:GetILVLColor(ilvl)
-	if ilvl >= ilvlLimits.rare then
-		return {GetItemQualityColor(4)}
-	elseif ilvl >= ilvlLimits.uncommon then
-		return {GetItemQualityColor(3)}
-	elseif ilvl >= ilvlLimits.normal then
-		return {GetItemQualityColor(2)}
+local ilvlLimits = 385
+function nibRealUI:GetILVLColor(lvl, ilvl)
+    if lvl > 90 then
+        ilvlLimits = (lvl - 91) * 9 + 510
+    end
+	if ilvl >= ilvlLimits + 28 then
+		return ITEM_QUALITY_COLORS[4] -- epic
+	elseif ilvl >= ilvlLimits + 14 then
+		return ITEM_QUALITY_COLORS[3] -- rare
+	elseif ilvl >= ilvlLimits then
+		return ITEM_QUALITY_COLORS[2] -- uncommon
 	else
-		return {0.8, 0.8, 0.8, "ffd0d0d0"}
+		return ITEM_QUALITY_COLORS[1] -- common
 	end
 end
 

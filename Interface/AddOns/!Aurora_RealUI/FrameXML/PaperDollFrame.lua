@@ -168,7 +168,7 @@ function PaperDoll:UpdateItems()
 						itemLevel = itemLevel + (tonumber(currentUpgradeLevel) * 4)
 					end
 				end
-				ilvlStr:SetTextColor(unpack(nibRealUI:GetILVLColor(itemLevel)))
+				ilvlStr:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
 				ilvlStr:SetText(itemLevel)
 			else
 				ilvlStr:SetText("")
@@ -185,11 +185,11 @@ function PaperDoll:UpdateItems()
 		self.ilvl:SetPoint("TOP", PaperDollFrame, "TOP", 0, -20)
 	end
 	local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel()
-	local aILColor = nibRealUI:GetILVLColor(avgItemLevel)[4]
-	local aILEColor = nibRealUI:GetILVLColor(avgItemLevelEquipped)[4]
+	local aILColor = nibRealUI:GetILVLColor(UnitLevel("player"), avgItemLevel)["hex"]
+	local aILEColor = nibRealUI:GetILVLColor(UnitLevel("player"), avgItemLevelEquipped)["hex"]
     avgItemLevel = floor(avgItemLevel)
     avgItemLevelEquipped = floor(avgItemLevelEquipped)
-    self.ilvl:SetText("|c"..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r |c"..aILColor..avgItemLevel)
+    self.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
 end
 
 function PaperDoll:CharacterFrame_OnShow()
