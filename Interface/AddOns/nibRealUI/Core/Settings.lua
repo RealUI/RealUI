@@ -52,6 +52,8 @@ local function SetDefaultCVars()
 	SetCVar("chatBubblesParty", 0)					-- Turn off Party Chat Bubbles
 	SetCVar("chatStyle", "classic")					-- Chat Style = "Classic"
 	SetCVar("conversationMode", "inline")			-- Conversation Mode = "In-line"
+    -- ActionBars
+    SetCVar("countdownForCooldowns", 0)             -- Disable Blizz cooldown count
 	-- Quests
 	SetCVar("autoQuestWatch", 1)					-- Auto Track Quests
 	-- Names

@@ -2,6 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 function nibRealUI:MiniPatch(ver)
 	if ver == "81r1" then
+        SetCVar("countdownForCooldowns", 0)
 		if IsAddOnLoaded("Aurora") then
 			if AuroraConfig then
 				AuroraConfig["useButtonGradientColour"] = false
