@@ -1925,6 +1925,22 @@ local function Friends_BNetRequest(self, event, ...)
 	end
 end
 
+local function GetClientStr(client)
+	if ( client == BNET_CLIENT_WOW ) then
+		return "WoW";
+	elseif ( client == BNET_CLIENT_SC2 ) then
+		return "SC2";
+	elseif ( client == BNET_CLIENT_D3 ) then
+		return "D3";
+	elseif ( client == BNET_CLIENT_WTCG ) then
+		return "HS";
+	elseif ( client == BNET_CLIENT_HEROES ) then
+		return "HotS";
+	else
+		return "App";
+	end
+end
+
 local function Friends_Update(self)
 	FriendsTabletData = nil
 	FriendsTabletDataNames = nil
@@ -1973,7 +1989,7 @@ local function Friends_Update(self)
 			if (realmName == nibRealUI.realm) then
 				FriendsTabletDataNames[toonname] = true
 			end
-
+            
 			-- Class
 			local classColor = nibRealUI:GetClassColor(ClassLookup[class])
 			class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
@@ -2008,12 +2024,12 @@ local function Friends_Update(self)
 			
 			-- Add Friend to list
 			tinsert(FriendsTabletData, { cname, lvl, area, faction, client, BNname, note, name, BNid })
-		-- SC2 friends
-		elseif ( online and client=="S2" ) then
+		-- Friends in other games
+		elseif (online) then
 			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 			
 			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
-			client = "SC2"
+			client = GetClientStr(client)
 			curFriendsOnline = curFriendsOnline + 1
 			
 			-- Name
@@ -2031,79 +2047,7 @@ local function Friends_Update(self)
 			end
 			
 			-- Add Friend to list
-			tinsert(FriendsTabletData, { cname, "", gametext, "", client, BNname, note, "", BNid })
-		-- D3 friends
-		elseif ( online and client=="D3" ) then
-			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
-			
-			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
-			client = "D3"
-			curFriendsOnline = curFriendsOnline + 1
-			
-			-- Name
-			local cname
-			cname = strform(
-				"|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
-				FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-				BNname,
-				toonname
-			)
-			if ( isafk and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-			elseif ( isdnd and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_DND, cname)
-			end
-			
-			-- Add Friend to list
-			tinsert(FriendsTabletData, { cname, lvl, gametext, class, client, BNname, note, "", BNid })
-		-- Hearthstone friends
-		elseif ( online and client=="WTCG" ) then
-			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
-
-			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
-			client = "HS"
-			curFriendsOnline = curFriendsOnline + 1
-			
-			-- Name
-			local cname
-			cname = strform(
-				"|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
-				FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-				BNname,
-				toonname
-			)
-			if ( isafk and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-			elseif ( isdnd and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_DND, cname)
-			end
-			
-			-- Add Friend to list
-			tinsert(FriendsTabletData, { cname, lvl, gametext, class, client, BNname, note, "", BNid })
-		-- BNet App friends
-		elseif ( online and client=="App" ) then
-			if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
-			
-			local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
-			client = "App"
-			curFriendsOnline = curFriendsOnline + 1
-			
-			-- Name
-			local cname
-			cname = strform(
-				"|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
-				FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-				BNname,
-				toonname
-			)
-			if ( isafk and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-			elseif ( isdnd and toonname ) then
-				cname = strform("%s %s", CHAT_FLAG_DND, cname)
-			end
-			
-			-- Add Friend to list
-			tinsert(FriendsTabletData, { cname, lvl, gametext, class, client, BNname, note, "", BNid })
+			tinsert(FriendsTabletData, {cname, lvl, gametext, class, client, BNname, note, "", BNid})
 		end
 	end
 	
