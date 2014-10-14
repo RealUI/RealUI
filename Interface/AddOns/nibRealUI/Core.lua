@@ -6,7 +6,7 @@ _G.RealUI = nibRealUI
 nibRealUI.verinfo = {
 	[1] = 8,
 	[2] = 1,
-	[3] = 1,
+	[3] = 2,
 }
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -294,7 +294,7 @@ function nibRealUI:ToggleGridTestMode(show)
 	if show then
 		if RealUIGridConfiguring then return end
 		if not Grid2Options then Grid2:LoadGrid2Options() end
-		Grid2Options.LayoutTestEnable(Grid2Options, "By Group 25")
+		Grid2Options.LayoutTestEnable(Grid2Options, "By Group 20")
 		RealUIGridConfiguring = true
 	else
 		RealUIGridConfiguring = false

@@ -128,9 +128,9 @@ function ConfigBar_Grid:ChangeTab(tabID, isInit)
 	if tabID == 1 then
 		Element.window:SetHeight(197)
 	elseif tabID == 2 then
-		Element.window:SetHeight(212)
+		Element.window:SetHeight(225)
 	else
-		Element.window:SetHeight(212)
+		Element.window:SetHeight(225)
 	end
 end
 
