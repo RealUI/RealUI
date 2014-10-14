@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 
 -- Main.lua contains initialization and update routines supporting Raven's core capability of tracking active auras and cooldowns.
 -- It includes special cases for weapon buffs, stances, and trinkets.
@@ -382,7 +382,7 @@ function MOD:OnEnable()
 	self:RegisterEvent("GLYPH_ADDED", TriggerGlyphUpdate)
 	self:RegisterEvent("GLYPH_UPDATED", TriggerGlyphUpdate)
 	MOD:InitializeBars() -- initialize routine that manages the bar library
-	MOD:InitializeSounds() -- add sounds to LibSharedMedia
+	MOD:InitializeMedia() -- add sounds to LibSharedMedia
 	MOD.LibBossIDs = LibStub("LibBossIDs-1.0", true)
 	MOD.db.global.Version = "7" -- version number for database validation
 end

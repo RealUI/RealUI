@@ -75,6 +75,34 @@ local function UseTukui() return Raven.frame.CreateBackdrop and Raven.frame.SetO
 local function GetTukuiFont(font) if Raven.db.global.TukuiFont and ChatFrame1 then return ChatFrame1:GetFont() else return font end end
 local function PS(x) if pixelPerfect and type(x) == "number" then return pixelScale * math.floor(x / pixelScale + 0.5) else return x end end
 
+local function PSetSize(frame, w, h)
+	if pixelPerfect then
+		if w then w = pixelScale * math.floor(w / pixelScale + 0.5) end
+		if h then h = pixelScale * math.floor(h / pixelScale + 0.5) end
+	end
+	frame:SetSize(w, h)
+end
+
+local function PSetWidth(frame, w) if pixelPerfect and w then w = pixelScale * math.floor(w / pixelScale + 0.5) end frame:SetWidth(w) end
+local function PSetHeight(frame, h) if pixelPerfect and h then h = pixelScale * math.floor(h / pixelScale + 0.5) end frame:SetHeight(h) end
+
+local function PCSetPoint(frame, point, relativeFrame, relativePoint, x, y)
+	frame:ClearAllPoints()
+	if pixelPerfect then
+		if x then x = pixelScale * math.floor(x / pixelScale + 0.5) end
+		if y then y = pixelScale * math.floor(y / pixelScale + 0.5) end
+	end
+	frame:SetPoint(point, relativeFrame, relativePoint, x or 0, y or 0)
+end
+
+local function PSetPoint(frame, point, relativeFrame, relativePoint, x, y)
+	if pixelPerfect then
+		if x then x = pixelScale * math.floor(x / pixelScale + 0.5) end
+		if y then y = pixelScale * math.floor(y / pixelScale + 0.5) end
+	end
+	frame:SetPoint(point, relativeFrame, relativePoint, x or 0, y or 0)
+end
+
 -- Calculate alpha for flashing bars, period is how long the total flash time should last
 function MOD.Nest_FlashAlpha(maxAlpha, period)
 	local frac = GetTime() / period
@@ -110,7 +138,9 @@ local function BarAnimation(bar, anchor1, frame, anchor2, xoffset, yoffset)
 		b.scale = scale; b.alpha = alpha
 	end
 	local w, h = bar.icon:GetSize()
-	b.frame:ClearAllPoints(); b.frame:SetPoint(anchor1, frame, anchor2, xoffset, yoffset); b.frame:SetSize(w, h); b.frame:Show()
+	PSetSize(b.frame, w, h)
+	PCSetPoint(b.frame, anchor1, frame, anchor2, xoffset, yoffset)
+	b.frame:Show()
 	b.texture:SetTexture(tex); b.texture:ClearAllPoints(); b.texture:SetAllPoints(b.frame); b.texture:Show()
 	b.anim:Stop(); b.anim:Play()
 	b.endTime = GetTime() + 1 -- stop after one second
@@ -136,7 +166,8 @@ local function ShowTimeline(bg)
 		if bg.tlTexture then back.bar:SetTexture(bg.tlTexture) end
 		local t = bg.tlColor; if t then back.bar:SetVertexColor(t.r, t.g, t.b, t.a) end
 		if bg.borderTexture then
-			back.backdrop:ClearAllPoints(); back.backdrop:SetPoint("CENTER", back, "CENTER", 0, 0); back.backdrop:Show()
+			PCSetPoint(back.backdrop, "CENTER", back, "CENTER", 0, 0)
+			back.backdrop:Show()
 		else
 			back.backdrop:Hide()
 		end
@@ -297,7 +328,7 @@ function MOD.Nest_CreateBarGroup(name)
 		bg.frame = CreateFrame("Frame", "RavenBarGroup" .. xname, UIParent) -- add name for reference from other addons
 		bg.frame:SetFrameLevel(bg.frame:GetFrameLevel() + 20) -- higher than other addons
 		bg.frame:SetMovable(true); bg.frame:SetClampedToScreen(true)
-		bg.frame:ClearAllPoints(); bg.frame:SetPoint("CENTER", UIParent, "CENTER")	
+		PCSetPoint(bg.frame, "CENTER", UIParent, "CENTER")	
 		bg.backdrop = CreateFrame("Frame", "RavenBarGroupBackdrop" .. xname, bg.frame)
 		bg.backdropTable = { tile = false, insets = { left = 2, right = 2, top = 2, bottom = 2 }}
 		bg.borderTable = { tile = false, insets = { left = 2, right = 2, top = 2, bottom = 2 }}
@@ -346,7 +377,7 @@ function MOD.Nest_DeleteBarGroup(bg)
 	for n in pairs(bg.attributes) do bg.attributes[n] = nil end
 	for n in pairs(bg.callbacks) do bg.callbacks[n] = nil end
 	for n in pairs(bgTemplate) do bg[n] = nil end -- reset current bar group settings
-	bg.frame:ClearAllPoints(); bg.frame:SetPoint("CENTER", UIParent, "CENTER") -- return to neutral position
+	PCSetPoint(bg.frame, "CENTER", UIParent, "CENTER") -- return to neutral position
 	bg.anchor:SetScript("OnMouseDown", nil)
 	bg.anchor:SetScript("OnMouseUp", nil)
 	bg.anchor:SetScript("OnClick", nil)
@@ -515,23 +546,21 @@ function MOD.Nest_SetAnchorPoint(bg, left, right, bottom, top, scale, width, hei
 			if left > 0.5 then xoffset = dw - (right * dw) - width end
 			if bottom > 0.5 then yoffset = dh - (top * dh) - height end
 		end
-		bg.frame:SetScale(scale); bg.frame:SetSize(width, height)
-		bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", PS(xoffset / scale), PS(yoffset / scale))
+		bg.frame:SetScale(scale); PSetSize(bg.frame, width, height)
+		PCSetPoint(bg.frame, "BOTTOMLEFT", nil, "BOTTOMLEFT", xoffset / scale, yoffset / scale)
 	end
 end
 
 -- Set a bar group's display position as relative to another bar group
 function MOD.Nest_SetRelativeAnchorPoint(bg, rTo, rFrame, rPoint, rX, rY, rLB, rEmpty, rRow, rColumn)
 	if rFrame and GetClickFrame(rFrame) then -- set relative to a specific frame
-		bg.frame:ClearAllPoints(); bg.frame:SetPoint(rPoint or "CENTER", GetClickFrame(rFrame), rPoint or "CENTER", rX, rY)
+		PCSetPoint(bg.frame, rPoint or "CENTER", GetClickFrame(rFrame), rPoint or "CENTER", rX, rY)
 		if pixelPerfect then -- have to re-align relative to bottom left since we can't be sure that anchor point itself is pixel aligned
-			local xoffset, yoffset = PS(bg.frame:GetLeft()), PS(bg.frame:GetBottom())
-			bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", xoffset, yoffset)		
+			PCSetPoint(bg.frame, "BOTTOMLEFT", nil, "BOTTOMLEFT", bg.frame:GetLeft(), bg.frame:GetBottom())	
 		end
 		bg.relativeTo = nil -- remove relative anchor point	
 	elseif bg.relativeTo and not rTo then -- removing a relative anchor point
-		local left, bottom = bg.frame:GetLeft(), bg.frame:GetBottom()
-		bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", PS(left), PS(bottom))
+		PCSetPoint(bg.frame, "BOTTOMLEFT", nil, "BOTTOMLEFT", bg.frame:GetLeft(), bg.frame:GetBottom())
 		bg.relativeTo = nil -- remove relative anchor point
 	else
 		bg.relativeTo = rTo -- if relativeTo is nil then relative anchor point is not set
@@ -613,6 +642,7 @@ function MOD.Nest_CreateBar(bg, name)
 		bar.cooldown = CreateFrame("Cooldown", bname .. "Cooldown", bar.frame) -- cooldown overlay to animate timer
 		bar.cooldown.noCooldownCount = Raven.db.global.HideOmniCC
 		bar.cooldown.noOCC = Raven.db.global.HideOmniCC -- added for Tukui
+		bar.cooldown:SetHideCountdownNumbers(true) -- added for WoD
 		bar.iconTextFrame = CreateFrame("Frame", bname .. "IconTextFrame", bar.frame)
 		bar.iconText = bar.iconTextFrame:CreateFontString(nil, "OVERLAY", nil, 4)
 		bar.iconBorder = bar.iconTextFrame:CreateTexture(nil, "BACKGROUND", nil, 3)		
@@ -830,7 +860,7 @@ end
 local function BarGroup_UpdateAnchor(bg, config)
 	local pFrame = bg.attributes.parentFrame
 	if pFrame and GetClickFrame(pFrame) then bg.frame:SetParent(pFrame) else bg.frame:SetParent(UIParent) end
-	bg.anchor:SetSize(bg.width, bg.height)
+	PSetSize(bg.anchor, bg.width, bg.height)
 	bg.anchor:SetText(bg.name)
 	local align = "BOTTOMLEFT" -- select corner to attach based on configuration
 	if config.iconOnly then -- icons can grow in any direction
@@ -842,7 +872,7 @@ local function BarGroup_UpdateAnchor(bg, config)
 	else -- bars can grow either up are down
 		if not bg.reverse then align = "TOPLEFT" end -- align bottoms for going up (reverse=true), tops for down (reverse=false)
 	end
-	bg.anchor:ClearAllPoints(); bg.anchor:SetPoint(align, bg.frame, align)
+	PCSetPoint(bg.anchor, align, bg.frame, align)
 	if not bg.locked and not inPetBattle then bg.anchor:Show() else bg.anchor:Hide() end
 end
 
@@ -869,13 +899,13 @@ local function BarGroup_UpdateBackground(bg, config)
 			if not bg.reverse then back.anchorPoint = "TOPLEFT"; dir = -1; edge = "BOTTOM"; justV = "BOTTOM" end
 			offX = 0; offY = -dir
 		end
-		back:SetSize(w, h); back:SetAlpha(bg.tlAlpha); back.bar:SetSize(w, h); 
+		PSetSize(back, w, h); back:SetAlpha(bg.tlAlpha); PSetSize(back.bar, w, h); 
 		if bg.borderTexture then
 			local offset, edgeSize = bg.borderOffset, bg.borderWidth; if (edgeSize < 0.1) then edgeSize = 0.1 end
 			bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = edgeSize
 			back.backdrop:SetBackdrop(bg.borderTable)
 			local t = bg.borderColor; back.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
-			back.backdrop:SetSize(w + offset, h + offset)
+			PSetSize(back.backdrop, w + offset, h + offset)
 		end
 		if type(bg.tlLabels) == "table" then -- table of time values for labels
 			local i = 1
@@ -897,7 +927,8 @@ local function BarGroup_UpdateBackground(bg, config)
 					local delta = Timeline_Offset(bg, secs) + ((bg.iconSize + bg.labelFSize) / 2)
 					local offsetX = (offX == 0) and 0 or ((delta - w) * dir)
 					local offsetY = (offY == 0) and 0 or ((delta - h) * dir)
-					fs:SetPoint(edge, back, edge, PS(offsetX + bg.labelInset), PS(offsetY + bg.labelOffset)); fs.hidden = false; i = i + 1
+					PSetPoint(fs, edge, back, edge, offsetX + bg.labelInset, offsetY + bg.labelOffset)
+					fs.hidden = false; i = i + 1
 				end
 			end
 			while i <= back.labelCount do back.labels[i].hidden = true; i = i + 1 end
@@ -931,85 +962,98 @@ local function Bar_UpdateLayout(bg, bar, config)
 	bar.icon:ClearAllPoints(); bar.iconTexture:ClearAllPoints(); bar.spark:ClearAllPoints(); bar.labelText:ClearAllPoints(); bar.cooldown:ClearAllPoints()
 	bar.timeText:ClearAllPoints(); bar.fgTexture:ClearAllPoints(); bar.bgTexture:ClearAllPoints(); bar.backdrop:ClearAllPoints()
 	local iconWidth = (config.iconOnly and rectIcons) and bg.barWidth or bg.iconSize
-	bar.icon:SetSize(iconWidth or bg.iconSize, bg.iconSize)
+	PSetSize(bar.icon, iconWidth or bg.iconSize, bg.iconSize)
 	local w, h = bg.width, bg.height
 	if config.iconOnly then -- icon only layouts
-		bar.icon:SetPoint("TOPLEFT", bar.frame, "TOPLEFT", 0, 0)
+		PSetPoint(bar.icon, "TOPLEFT", bar.frame, "TOPLEFT", 0, 0)
 		if (bg.barHeight > 0) and (bg.barWidth > 0) and config.bars ~= "timeline" then
 			local offset = (w - bg.barWidth) / 2 -- how far bars start from edge of frame
 			if config.bars == "r2l" then 
-				bar.fgTexture:SetPoint("TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
-				bar.bgTexture:SetPoint("TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
+				PSetPoint(bar.fgTexture, "TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
+				PSetPoint(bar.bgTexture, "TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
 			elseif config.bars == "l2r" then
-				bar.fgTexture:SetPoint("TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
-				bar.bgTexture:SetPoint("TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
+				PSetPoint(bar.fgTexture, "TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
+				PSetPoint(bar.bgTexture, "TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
 			end
-			bar.fgTexture:SetHeight(bg.barHeight); bar.bgTexture:SetHeight(bg.barHeight)
+			PSetHeight(bar.fgTexture, bg.barHeight); PSetHeight(bar.bgTexture, bg.barHeight)
 		end
-		bar.timeText:SetPoint("TOP", bar.icon, "BOTTOM", bg.timeInset, bg.timeOffset)
-		bar.timeText:SetPoint("LEFT", bar.icon, "LEFT", bg.timeInset - 10, bg.timeOffset)
-		bar.timeText:SetPoint("RIGHT", bar.icon, "RIGHT", bg.timeInset + 12, bg.timeOffset) -- pad right to center time text better
+		PSetPoint(bar.timeText, "TOP", bar.icon, "BOTTOM", bg.timeInset, bg.timeOffset)
+		PSetPoint(bar.timeText, "LEFT", bar.icon, "LEFT", bg.timeInset - 10, bg.timeOffset)
+		PSetPoint(bar.timeText, "RIGHT", bar.icon, "RIGHT", bg.timeInset + 12, bg.timeOffset) -- pad right to center time text better
 		if bg.timeAlign == "normal" then bar.timeText:SetJustifyH("CENTER") else bar.timeText:SetJustifyH(bg.timeAlign) end
 		bar.timeText:SetJustifyV("MIDDLE")
-		bar.labelText:SetPoint("LEFT", bar.icon, "LEFT", bg.labelInset, bg.labelOffset)
-		bar.labelText:SetPoint("RIGHT", bar.icon, "RIGHT", bg.labelInset + abs(bg.barWidth), bg.labelOffset)
+		PSetPoint(bar.labelText, "LEFT", bar.icon, "LEFT", bg.labelInset, bg.labelOffset)
+		PSetPoint(bar.labelText, "RIGHT", bar.icon, "RIGHT", bg.labelInset + abs(bg.barWidth), bg.labelOffset)
 		bar.labelText:SetJustifyH("CENTER"); bar.labelText:SetJustifyV(bg.labelAlign)
 	else -- bar layouts
 		local offsetLeft, offsetRight, fudge, ti = 0, 0, 0, bg.timeIcon and bg.showIcon
 		if bg.timeAlign == "normal" then fudge = 4 end
 		if bg.showIcon then
 			if config.icon == "left" then
-				bar.icon:SetPoint("LEFT", bar.frame, "LEFT", bg.iconOffsetX, bg.iconOffsetY)
+				PSetPoint(bar.icon, "LEFT", bar.frame, "LEFT", bg.iconOffsetX, bg.iconOffsetY)
 				offsetLeft = bg.iconSize
 			elseif config.icon == "right" then
-				bar.icon:SetPoint("RIGHT", bar.frame, "RIGHT", bg.iconOffsetX, bg.iconOffsetY)
+				PSetPoint(bar.icon, "RIGHT", bar.frame, "RIGHT", bg.iconOffsetX, bg.iconOffsetY)
 				offsetRight = bg.iconSize
 			end
 		end
 		if ti then
-			bar.timeText:SetPoint("LEFT", bar.icon, "LEFT", bg.timeInset - 10, bg.timeOffset)
-			bar.timeText:SetPoint("RIGHT", bar.icon, "RIGHT", bg.timeInset + 12, bg.timeOffset) -- pad right to center time text better
+			PSetPoint(bar.timeText, "LEFT", bar.icon, "LEFT", bg.timeInset - 10, bg.timeOffset)
+			PSetPoint(bar.timeText, "RIGHT", bar.icon, "RIGHT", bg.timeInset + 12, bg.timeOffset) -- pad right to center time text better
 		end
 		if config.label == "right" then
-			if not ti then bar.timeText:SetPoint("LEFT", bar.frame, "LEFT", bg.timeInset + offsetLeft + fudge, bg.timeOffset) end
+			if not ti then PSetPoint(bar.timeText, "LEFT", bar.frame, "LEFT", bg.timeInset + offsetLeft + fudge, bg.timeOffset) end
 			if bg.timeAlign == "normal" then bar.timeText:SetJustifyH(ti and "CENTER" or "LEFT") else bar.timeText:SetJustifyH(bg.timeAlign) end
-			bar.labelText:SetPoint("RIGHT", bar.frame, "RIGHT", -bg.labelInset - offsetRight - fudge, bg.labelOffset)
+			PSetPoint(bar.labelText, "RIGHT", bar.frame, "RIGHT", -bg.labelInset - offsetRight - fudge, bg.labelOffset)
 			if (bg.labelOffset == bg.timeOffset) and (bg.timeAlign == "normal") then
-				if ti then bar.labelText:SetPoint("LEFT", bar.frame, "LEFT", 0, 0) else bar.labelText:SetPoint("LEFT", bar.timeText, "RIGHT", 0, 0) end
+				if ti then
+					PSetPoint(bar.labelText, "LEFT", bar.frame, "LEFT", 0, 0)
+				else
+					PSetPoint(bar.labelText, "LEFT", bar.timeText, "RIGHT", 0, 0)
+				end
 			else
-				bar.labelText:SetPoint("LEFT", bar.frame, "LEFT", 0, bg.labelOffset)
-				if not ti then bar.timeText:SetPoint("RIGHT", bar.frame, "RIGHT", bg.timeInset - offsetRight, bg.timeOffset) end
+				PSetPoint(bar.labelText, "LEFT", bar.frame, "LEFT", 0, bg.labelOffset)
+				if not ti then PSetPoint(bar.timeText, "RIGHT", bar.frame, "RIGHT", bg.timeInset - offsetRight, bg.timeOffset) end
 			end
 			bar.labelText:SetJustifyH(bg.labelCenter and "CENTER" or "RIGHT")
 		elseif config.label == "left" then
-			if not ti then bar.timeText:SetPoint("RIGHT", bar.frame, "RIGHT", bg.timeInset - offsetRight - fudge, bg.timeOffset) end
+			if not ti then PSetPoint(bar.timeText, "RIGHT", bar.frame, "RIGHT", bg.timeInset - offsetRight - fudge, bg.timeOffset) end
 			if bg.timeAlign == "normal" then bar.timeText:SetJustifyH(ti and "CENTER" or "RIGHT") else bar.timeText:SetJustifyH(bg.timeAlign) end
-			bar.labelText:SetPoint("LEFT", bar.frame, "LEFT", bg.labelInset + offsetLeft + fudge, bg.labelOffset)
+			PSetPoint(bar.labelText, "LEFT", bar.frame, "LEFT", bg.labelInset + offsetLeft + fudge, bg.labelOffset)
 			if (bg.labelOffset == bg.timeOffset) and (bg.timeAlign == "normal") then
-				if ti then bar.labelText:SetPoint("RIGHT", bar.frame, "RIGHT", 0, 0) else bar.labelText:SetPoint("RIGHT", bar.timeText, "LEFT", 0, 0) end
+				if ti then
+					PSetPoint(bar.labelText, "RIGHT", bar.frame, "RIGHT", 0, 0)
+				else
+					PSetPoint(bar.labelText, "RIGHT", bar.timeText, "LEFT", 0, 0)
+				end
 			else
-				bar.labelText:SetPoint("RIGHT", bar.frame, "RIGHT", 0, bg.labelOffset)
-				if not ti then bar.timeText:SetPoint("LEFT", bar.frame, "LEFT", bg.timeInset + offsetLeft, bg.timeOffset) end
+				PSetPoint(bar.labelText, "RIGHT", bar.frame, "RIGHT", 0, bg.labelOffset)
+				if not ti then PSetPoint(bar.timeText, "LEFT", bar.frame, "LEFT", bg.timeInset + offsetLeft, bg.timeOffset) end
 			end
 			bar.labelText:SetJustifyH(bg.labelCenter and "CENTER" or "LEFT")
 		end
 		if config.bars == "r2l" then 
-			bar.fgTexture:SetPoint("TOPLEFT", bar.frame, "TOPLEFT", offsetLeft, 0)
-			bar.bgTexture:SetPoint("TOPRIGHT", bar.frame, "TOPRIGHT", -offsetRight, 0)
+			PSetPoint(bar.fgTexture, "TOPLEFT", bar.frame, "TOPLEFT", offsetLeft, 0)
+			PSetPoint(bar.bgTexture, "TOPRIGHT", bar.frame, "TOPRIGHT", -offsetRight, 0)
 		elseif config.bars == "l2r" then
-			bar.fgTexture:SetPoint("TOPRIGHT", bar.frame, "TOPRIGHT", -offsetRight, 0)
-			bar.bgTexture:SetPoint("TOPLEFT", bar.frame, "TOPLEFT", offsetLeft, 0)
+			PSetPoint(bar.fgTexture, "TOPRIGHT", bar.frame, "TOPRIGHT", -offsetRight, 0)
+			PSetPoint(bar.bgTexture, "TOPLEFT", bar.frame, "TOPLEFT", offsetLeft, 0)
 		end	
-		bar.fgTexture:SetHeight(h); bar.bgTexture:SetHeight(h)
+		PSetHeight(bar.fgTexture, h); PSetHeight(bar.bgTexture, h)
 		bar.timeText:SetJustifyV("MIDDLE"); bar.labelText:SetJustifyV(bg.labelAlign)
 	end
 
-	if config.bars == "r2l" then bar.spark:SetPoint("TOP", bar.fgTexture, "TOPRIGHT", 0, 4); bar.spark:SetPoint("BOTTOM", bar.fgTexture, "BOTTOMRIGHT", 0, -4)
-	elseif config.bars == "l2r" then bar.spark:SetPoint("TOP", bar.fgTexture, "TOPLEFT", 0, 4); bar.spark:SetPoint("BOTTOM", bar.fgTexture, "BOTTOMLEFT", 0, -4) end
+	if config.bars == "r2l" then
+		PSetPoint(bar.spark, "TOP", bar.fgTexture, "TOPRIGHT", 0, 4)
+		PSetPoint(bar.spark, "BOTTOM", bar.fgTexture, "BOTTOMRIGHT", 0, -4)
+	elseif config.bars == "l2r" then
+		PSetPoint(bar.spark, "TOP", bar.fgTexture, "TOPLEFT", 0, 4)
+		PSetPoint(bar.spark, "BOTTOM", bar.fgTexture, "BOTTOMLEFT", 0, -4)
+	end
 		
 	bar.tooltipAnchor = bg.attributes.anchorTips
 	bar.labelText:SetWordWrap(bg.labelWrap)
-	bar.labelText:SetHeight(h + bg.spacingY) -- limit label height to frame's height plus vertical spacing
+	PSetHeight(bar.labelText, h + bg.spacingY) -- limit label height to frame's height plus vertical spacing
 	bar.labelText:SetFontObject(ChatFontNormal); bar.timeText:SetFontObject(ChatFontNormal); bar.iconText:SetFontObject(ChatFontNormal)
 	bar.labelText:SetFont(bg.labelFont, bg.labelFSize, bg.labelFlags)
 	bar.timeText:SetFont(bg.timeFont, bg.timeFSize, bg.timeFlags)
@@ -1020,13 +1064,15 @@ local function Bar_UpdateLayout(bg, bar, config)
 
 	if config.bars ~= "timeline" then SetBarFrameLevel(bar, bg.frame:GetFrameLevel() + 5, config.iconOnly) end
 	if bg.showIcon then
-		bar.iconText:SetPoint("LEFT", bar.icon, "LEFT", bg.iconInset - 10, bg.iconOffset)
-		bar.iconText:SetPoint("RIGHT", bar.icon, "RIGHT", bg.iconInset + 12, bg.iconOffset) -- pad right to center time text better
+		PSetPoint(bar.iconText, "LEFT", bar.icon, "LEFT", bg.iconInset - 10, bg.iconOffset)
+		PSetPoint(bar.iconText, "RIGHT", bar.icon, "RIGHT", bg.iconInset + 12, bg.iconOffset) -- pad right to center time text better
 		bar.iconText:SetJustifyH(bg.iconAlign); bar.iconText:SetJustifyV("MIDDLE")
 		if MSQ and bg.MSQ_Group and Raven.db.global.ButtonFacadeIcons then -- if using Masque, set custom fields in button data table and add to skinnning group
-			bar.cooldown:SetSize(iconWidth, bg.iconSize); bar.cooldown:SetPoint("CENTER", bar.icon, "CENTER")
+			PSetSize(bar.cooldown, iconWidth, bg.iconSize)
+			PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
 			bar.iconTexture:SetTexCoord(0, 1, 0, 1)
-			bar.iconTexture:SetSize(iconWidth, bg.iconSize); bar.iconTexture:SetPoint("CENTER", bar.icon, "CENTER")
+			PSetSize(bar.iconTexture, iconWidth, bg.iconSize)
+			PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
 			bg.MSQ_Group:RemoveButton(bar.icon, true) -- needed so size changes work when icon is reused
 			local bdata = bar.buttonData
 			bdata.Icon = bar.iconTexture
@@ -1038,31 +1084,35 @@ local function Bar_UpdateLayout(bg, bar, config)
 			if bg.MSQ_Group then bg.MSQ_Group:RemoveButton(bar.icon) end -- remove skin, if any
 			if not (UseTukui() or Raven.db.global.HideBorder) then
 				local trim, crop, sliceWidth, sliceHeight = 0.06, 0.94, 0.88 * iconWidth, 0.88 * bg.iconSize
-				bar.cooldown:SetSize(sliceWidth, sliceHeight); bar.cooldown:SetPoint("CENTER", bar.icon, "CENTER")
+				PSetSize(bar.cooldown, sliceWidth, sliceHeight)
+				PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
 				bar.iconTexture:SetTexCoord(trim, crop, trim, crop)
-				bar.iconTexture:SetSize(sliceWidth, sliceHeight); bar.iconTexture:SetPoint("CENTER", bar.icon, "CENTER")
-				bar.iconBorder:SetTexture("Interface\\AddOns\\Raven\\Normal")
+				PSetSize(bar.iconTexture, sliceWidth, sliceHeight)
+				PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
+				bar.iconBorder:SetTexture("Interface\\AddOns\\Raven\\Borders\\IconDefault")
 			else
-				bar.cooldown:SetSize(iconWidth, bg.iconSize); bar.cooldown:SetPoint("CENTER", bar.icon, "CENTER")
+				PSetSize(bar.cooldown, iconWidth, bg.iconSize)
+				PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
 				if UseTukui() or Raven.db.global.TrimIcon then
 					local trim, crop = 0.06, 0.94
 					bar.iconTexture:SetTexCoord(trim, crop, trim, crop)
 				else
 					bar.iconTexture:SetTexCoord(0, 1, 0, 1)
 				end
-				bar.iconTexture:SetSize(iconWidth, bg.iconSize); bar.iconTexture:SetPoint("CENTER", bar.icon, "CENTER")
+				PSetSize(bar.iconTexture, iconWidth, bg.iconSize)
+				PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
 				bar.iconBorder:SetTexture(0, 0, 0, 0)
 			end
 		end
 	end	
-	bar.frame:SetSize(w, h); bar.container:SetSize(w, h); bar.container:SetAllPoints()
+	PSetSize(bar.frame, w, h); PSetSize(bar.container, w, h); bar.container:SetAllPoints()
 	if bg.showBar and bg.borderTexture and not bar.attributes.header then
-		local offset, edgeSize = bg.borderOffset, bg.borderWidth; if (edgeSize < 0.1) then edgeSize = 0.1 end
-		bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = edgeSize
+		local offset, edgeSize = bg.borderOffset / pixelScale, bg.borderWidth / pixelScale; if (edgeSize < 0.1) then edgeSize = 0.1 end
+		bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = PS(edgeSize)
 		bar.backdrop:SetBackdrop(bg.borderTable)
 		t = bg.borderColor; bar.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
-		bar.backdrop:SetSize(bg.barWidth + offset, bg.barHeight + offset)
-		bar.backdrop:SetPoint("CENTER", bar.bgTexture, "CENTER", 0, 0)
+		PSetSize(bar.backdrop, bg.barWidth + offset, bg.barHeight + offset)
+		PSetPoint(bar.backdrop, "CENTER", bar.bgTexture, "CENTER")
 		bar.backdrop:Show()
 	else
 		bar.backdrop:SetBackdrop(nil); bar.backdrop:Hide()
@@ -1200,11 +1250,13 @@ local function Bar_UpdateSettings(bg, bar, config)
 		local ar, ag, ab = MOD.Nest_AdjustColor(bar.br, bar.bg, bar.bb, bg.bgSaturation or 0, bg.bgBrightness or 0)
 		if expiring then ec = bar.attributes.expireColor; if ec and ec.a > 0 then ar = ec.r; ag = ec.g; ab = ec.b end end
 		bb:SetVertexColor(ar, ag, ab, 1); bb:SetTexture(bg.bgTexture); bb:SetAlpha(bg.bgAlpha)
-		bb:SetWidth(w); bb:SetTexCoord(0, 1, 0, 1); bb:Show()
-		if (fill > 0) and (bg.fgNotTimer or bar.timeLeft) then
-			if bg.showSpark and (fill < 1) then sparky = true end
+		PSetWidth(bb, w); bb:SetTexCoord(0, 1, 0, 1); bb:Show()
+		local fillw = w * fill
+		if (fillw > 0) and (bg.fgNotTimer or bar.timeLeft) then
 			if not expiring then ar, ag, ab = MOD.Nest_AdjustColor(bar.cr, bar.cg, bar.cb, bg.fgSaturation or 0, bg.fgBrightness or 0) end
-			bf:SetVertexColor(ar, ag, ab, 1); bf:SetTexture(bg.fgTexture); bf:SetAlpha(bg.fgAlpha); bf:SetWidth(w * fill)
+			bf:SetVertexColor(ar, ag, ab, 1); bf:SetTexture(bg.fgTexture); bf:SetAlpha(bg.fgAlpha)
+			if fillw > 0 then bf:SetWidth(fillw) end -- doesn't get pixel perfect treatment
+			if bg.showSpark and fill < 1 and fillw > 1 then sparky = true end
 			if config.bars == "r2l" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
 			bf:Show()
 		else bf:Hide() end
@@ -1277,8 +1329,9 @@ local function Bar_RefreshAnimations(bg, bar, config)
 	if bg.showBar and config.bars ~= "timeline" and (fill > 0) and (bg.fgNotTimer or bar.timeLeft) then
 		local bf, w, h = bar.fgTexture, bg.width - offsetX, bg.height; if config.iconOnly then w = bg.barWidth; h = bg.barHeight end
 		if (w > 0) and (h > 0) then
-			if bg.showSpark and (fill < 1) then sparky = true end
-			bf:SetWidth(w * fill)
+			local fillw = w * fill
+			if fillw > 0 then bf:SetWidth(fillw) end -- doesn't get pixel perfect treatment
+			if bg.showSpark and fill < 1 and fillw > 1 then sparky = true end
 			if config.bars == "r2l" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
 			bf:Show()
 		else bf:Hide() end
@@ -1333,7 +1386,8 @@ local function BarGroup_RefreshTimeline(bg, config)
 			lastDelta = delta; lastBar = bar; lastLevel = clevel
 			local x1 = isVertical and 0 or ((delta - w) * dir); local y1 = isVertical and ((delta - h) * dir) or 0
 			y1 = y1 + (bg.tlOffset or 0) + (overlapCount * (bg.tlDelta or 0))
-			bar.frame:ClearAllPoints(); bar.frame:SetPoint(edge, back, edge, PS(x1), PS(y1)); bar.frame:Show()
+			PCSetPoint(bar.frame, edge, back, edge, x1, y1)
+			bar.frame:Show()
 		else
 			lastBar = nil; bar.frame:Hide()
 		end
@@ -1421,22 +1475,25 @@ local function BarGroup_SortBars(bg, config)
 		BarGroup_RefreshTimeline(bg, config)
 	else	
 		for i = 1, count do
-			local bar = bg.bars[bg.sorter[i].name]; bar.frame:ClearAllPoints()
+			local bar = bg.bars[bg.sorter[i].name]
+			bar.frame:ClearAllPoints()
 			if i <= maxBars then
 				local w, skip = i - 1, 0; if wrap > 0 then skip = math.floor(w / wrap); w = w % wrap end
 				x1 = x0 + (dx * w) + (wx * skip); y1 = y0 + (dy * w) + (wy * skip)
-				bar.frame:SetPoint(anchorPoint, bg.frame, anchorPoint, PS(x1), PS(y1)); bar.frame:Show()
+				PSetPoint(bar.frame, anchorPoint, bg.frame, anchorPoint, x1, y1)
+				bar.frame:Show()
 			else
 				bar.frame:Hide()
 			end
 		end
 	end
-	bg.frame:SetSize(bg.width, bg.height)
+	PSetSize(bg.frame, bg.width, bg.height)
 	bg.anchorPoint = anchorPoint -- reference position for attaching bar groups together
 	local back = bg.background
 	if back then
 		if isTimeline and (not bg.tlHide or (count > 0)) and not inPetBattle then
-			back:ClearAllPoints(); back:SetPoint(back.anchorPoint, bg.frame, back.anchorPoint, PS(x0), PS(y0)); ShowTimeline(bg)
+			PCSetPoint(back, back.anchorPoint, bg.frame, back.anchorPoint, x0, y0)
+			ShowTimeline(bg)
 			count = 1 -- trigger drawing backdrop
 		else HideTimeline(bg) end
 	end
@@ -1453,19 +1510,18 @@ local function BarGroup_SortBars(bg, config)
 		local offset = 4
 		if (bg.backdropTexture or bg.backdropPanel) then
 			offset = bg.backdropPadding
-			local edgeSize = bg.backdropWidth; if (edgeSize < 0.1) then edgeSize = 0.1 end
-			local x, d = bg.backdropInset, bg.backdropTable.insets; d.left = x; d.right = x; d.top = x; d.bottom = x
-			bg.backdropTable.bgFile = bg.backdropPanel; bg.backdropTable.edgeFile = bg.backdropTexture; bg.backdropTable.edgeSize = edgeSize
+			local edgeSize = bg.backdropWidth / pixelScale; if (edgeSize < 0.1) then edgeSize = 0.1 end
+			local x, d = bg.backdropInset / pixelScale, bg.backdropTable.insets; d.left = x; d.right = x; d.top = x; d.bottom = x
+			bg.backdropTable.bgFile = bg.backdropPanel; bg.backdropTable.edgeFile = bg.backdropTexture; bg.backdropTable.edgeSize = PS(edgeSize)
 			bg.backdrop:SetBackdrop(bg.backdropTable)
 			local t = bg.backdropColor; bg.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
 			t = bg.backdropFill; bg.backdrop:SetBackdropColor(t.r, t.g, t.b, t.a)
 		else
 			bg.backdrop:SetBackdrop(nil)
 		end
-		bg.backdrop:ClearAllPoints()
-		bg.backdrop:SetSize(w + offset - wadjust + bg.backdropPadW, h + offset + bg.backdropPadH)
+		PSetSize(bg.backdrop, w + offset - wadjust + bg.backdropPadW, h + offset + bg.backdropPadH)
 		xoffset = xoffset + bg.backdropOffsetX; yoffset = yoffset + bg.backdropOffsetY
-		bg.backdrop:SetPoint(anchorPoint, bg.frame, anchorPoint, (-xdir * offset / 2) + xoffset, (-ydir * offset / 2) + yoffset)
+		PCSetPoint(bg.backdrop, anchorPoint, bg.frame, anchorPoint, (-xdir * offset / 2) + xoffset, (-ydir * offset / 2) + yoffset)
 		bg.backdrop:SetFrameStrata("BACKGROUND")
 		bg.backdrop:Show()
 	else
@@ -1479,7 +1535,7 @@ local function BarGroup_SortBars(bg, config)
 			scale = scale / bg.scale -- compute scaling factor
 			x0 = bg.frame:GetLeft() * scale; y0 = bg.frame:GetBottom() * scale -- normalize by scale factor
 			bg.frame:SetScale(bg.scale)
-			bg.frame:ClearAllPoints(); bg.frame:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", PS(x0), PS(y0))
+			PCSetPoint( bg.frame, "BOTTOMLEFT", nil, "BOTTOMLEFT", x0, y0)
 		end
 	end
 end
@@ -1508,7 +1564,7 @@ local function UpdateRelativePositions()
 						elseif bg.relativeColumn and rbg.lastColumn then offsetY = offsetY + rbg.lastColumn end
 					end
 				end
-				bg.frame:ClearAllPoints(); bg.frame:SetPoint(align, rbg.frame, align, PS(offsetX), PS(offsetY))
+				PCSetPoint(bg.frame, align, rbg.frame, align, offsetX, offsetY)
 			end
 		end
 	end
@@ -1553,7 +1609,11 @@ function MOD.Nest_Initialize()
 		MSQ_ButtonData = { AutoCast = false, AutoCastable = false, Border = false, Checked = false, Cooldown = false, Count = false, Duration = false,
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
-	pixelScale = 768 / string.match(GetCVar("gxResolution"), "%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+	if GetCVar("useUiScale") == "1" then
+		pixelScale = 768 / string.match(GetCVar("gxResolution"), "%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+	else
+		pixelScale = 1
+	end
 	pixelPerfect = (not Raven.db.global.TukuiSkin and Raven.db.global.PixelPerfect) or (Raven.db.global.TukuiSkin and Raven.db.global.TukuiScale)
 	rectIcons = (Raven.db.global.RectIcons == true)
 end

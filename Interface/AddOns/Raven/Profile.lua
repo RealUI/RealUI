@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 
 -- Profile.lua contains the default profile for initializing the player's selected profile.
 -- It includes routines to process preset aura and cooldown info for all classes and races.
@@ -641,29 +641,62 @@ function MOD:RegisterSpellList(name, spellList, reset)
 	return count
 end
 
--- Register Raven's sound library with LibSharedMedia
-function MOD:InitializeSounds()
+-- Register Raven's media entries to LibSharedMedia
+function MOD:InitializeMedia()
 	local mt = media.MediaType.SOUND
-	media:Register(mt, "Raven Alert", "Interface\\Addons\\Raven\\Sounds\\alert.mp3")
-	media:Register(mt, "Raven Bell", "Interface\\Addons\\Raven\\Sounds\\bell.mp3")
-	media:Register(mt, "Raven Boom", "Interface\\Addons\\Raven\\Sounds\\boom.mp3")
-	media:Register(mt, "Raven Buzzer", "Interface\\Addons\\Raven\\Sounds\\buzzer.mp3")
-	media:Register(mt, "Raven Chimes", "Interface\\Addons\\Raven\\Sounds\\chime.mp3")
-	media:Register(mt, "Raven Clong", "Interface\\Addons\\Raven\\Sounds\\clong.mp3")
-	media:Register(mt, "Raven Coin", "Interface\\Addons\\Raven\\Sounds\\coin.mp3")
-	media:Register(mt, "Raven Coocoo", "Interface\\Addons\\Raven\\Sounds\\coocoo.mp3")
-	media:Register(mt, "Raven Creak", "Interface\\Addons\\Raven\\Sounds\\creak.mp3")
-	media:Register(mt, "Raven Drill", "Interface\\Addons\\Raven\\Sounds\\drill.mp3")
-	media:Register(mt, "Raven Elephant", "Interface\\Addons\\Raven\\Sounds\\elephant.mp3")
-	media:Register(mt, "Raven Flute", "Interface\\Addons\\Raven\\Sounds\\flute.mp3")
-	media:Register(mt, "Raven Honk", "Interface\\Addons\\Raven\\Sounds\\honk.mp3")
-	media:Register(mt, "Raven Knock", "Interface\\Addons\\Raven\\Sounds\\knock.mp3")
-	media:Register(mt, "Raven Laser", "Interface\\Addons\\Raven\\Sounds\\laser.mp3")
-	media:Register(mt, "Raven Rub", "Interface\\Addons\\Raven\\Sounds\\rubbing.mp3")
-	media:Register(mt, "Raven Slide", "Interface\\Addons\\Raven\\Sounds\\slide.mp3")
-	media:Register(mt, "Raven Squeaky", "Interface\\Addons\\Raven\\Sounds\\squeaky.mp3")
-	media:Register(mt, "Raven Whistle", "Interface\\Addons\\Raven\\Sounds\\whistle.mp3")
-	media:Register(mt, "Raven Zoing", "Interface\\Addons\\Raven\\Sounds\\zoing.mp3")
+	media:Register(mt, "Raven Alert", [[Interface\Addons\Raven\Sounds\alert.ogg]])
+	media:Register(mt, "Raven Bell", [[Interface\Addons\Raven\Sounds\bell.ogg]])
+	media:Register(mt, "Raven Boom", [[Interface\Addons\Raven\Sounds\boom.ogg]])
+	media:Register(mt, "Raven Buzzer", [[Interface\Addons\Raven\Sounds\buzzer.ogg]])
+	media:Register(mt, "Raven Chimes", [[Interface\Addons\Raven\Sounds\chime.ogg]])
+	media:Register(mt, "Raven Clong", [[Interface\Addons\Raven\Sounds\clong.ogg]])
+	media:Register(mt, "Raven Coin", [[Interface\Addons\Raven\Sounds\coin.ogg]])
+	media:Register(mt, "Raven Coocoo", [[Interface\Addons\Raven\Sounds\coocoo.ogg]])
+	media:Register(mt, "Raven Creak", [[Interface\Addons\Raven\Sounds\creak.ogg]])
+	media:Register(mt, "Raven Drill", [[Interface\Addons\Raven\Sounds\drill.ogg]])
+	media:Register(mt, "Raven Elephant", [[Interface\Addons\Raven\Sounds\elephant.ogg]])
+	media:Register(mt, "Raven Flute", [[Interface\Addons\Raven\Sounds\flute.ogg]])
+	media:Register(mt, "Raven Honk", [[Interface\Addons\Raven\Sounds\honk.ogg]])
+	media:Register(mt, "Raven Knock", [[Interface\Addons\Raven\Sounds\knock.ogg]])
+	media:Register(mt, "Raven Laser", [[Interface\Addons\Raven\Sounds\laser.ogg]])
+	media:Register(mt, "Raven Rub", [[Interface\Addons\Raven\Sounds\rubbing.ogg]])
+	media:Register(mt, "Raven Slide", [[Interface\Addons\Raven\Sounds\slide.ogg]])
+	media:Register(mt, "Raven Squeaky", [[Interface\Addons\Raven\Sounds\squeaky.ogg]])
+	media:Register(mt, "Raven Whistle", [[Interface\Addons\Raven\Sounds\whistle.ogg]])
+	media:Register(mt, "Raven Zoing", [[Interface\Addons\Raven\Sounds\zoing.ogg]])
+
+	mt = media.MediaType.STATUSBAR
+	media:Register(mt, "Raven Black", [[Interface\Addons\Raven\Statusbars\Black.tga]]) 
+	media:Register(mt, "Raven CrossHatch", [[Interface\Addons\Raven\Statusbars\CrossHatch.tga]]) 
+	media:Register(mt, "Raven DarkAbove", [[Interface\Addons\Raven\Statusbars\DarkAbove.tga]]) 
+	media:Register(mt, "Raven DarkBelow", [[Interface\Addons\Raven\Statusbars\DarkBelow.tga]]) 
+	media:Register(mt, "Raven Deco", [[Interface\Addons\Raven\Statusbars\Deco.tga]]) 
+	media:Register(mt, "Raven Foggy", [[Interface\Addons\Raven\Statusbars\Foggy.tga]]) 
+	media:Register(mt, "Raven Glassy", [[Interface\Addons\Raven\Statusbars\Glassy.tga]]) 
+	media:Register(mt, "Raven Glossy", [[Interface\Addons\Raven\Statusbars\Glossy.tga]]) 
+	media:Register(mt, "Raven Gray", [[Interface\Addons\Raven\Statusbars\Gray.tga]]) 
+	media:Register(mt, "Raven Linear", [[Interface\Addons\Raven\Statusbars\Linear.tga]]) 
+	media:Register(mt, "Raven Mesh", [[Interface\Addons\Raven\Statusbars\Mesh.tga]]) 
+	media:Register(mt, "Raven Minimal", [[Interface\Addons\Raven\Statusbars\Minimal.tga]]) 
+	media:Register(mt, "Raven Paper", [[Interface\Addons\Raven\Statusbars\Paper.tga]]) 
+	media:Register(mt, "Raven Reticulate", [[Interface\Addons\Raven\Statusbars\Reticulate.tga]]) 
+	media:Register(mt, "Raven Reverso", [[Interface\Addons\Raven\Statusbars\Reverso.tga]]) 
+	media:Register(mt, "Raven Sleet", [[Interface\Addons\Raven\Statusbars\Sleet.tga]]) 
+	media:Register(mt, "Raven Smoke", [[Interface\Addons\Raven\Statusbars\Smoke.tga]]) 
+	media:Register(mt, "Raven Smudge", [[Interface\Addons\Raven\Statusbars\Smudge.tga]]) 
+	media:Register(mt, "Raven StepIn", [[Interface\Addons\Raven\Statusbars\StepIn.tga]]) 
+	media:Register(mt, "Raven StepOut", [[Interface\Addons\Raven\Statusbars\StepOut.tga]]) 
+	media:Register(mt, "Raven Strip", [[Interface\Addons\Raven\Statusbars\Strip.tga]]) 
+	media:Register(mt, "Raven Stripes", [[Interface\Addons\Raven\Statusbars\Stripes.tga]]) 
+	media:Register(mt, "Raven Sunrise", [[Interface\Addons\Raven\Statusbars\Sunrise.tga]]) 
+	media:Register(mt, "Raven White", [[Interface\Addons\Raven\Statusbars\White.tga]]) 
+
+	mt = media.MediaType.BORDER
+	media:Register(mt, "Raven SingleWhite", [[Interface\Addons\Raven\Borders\SingleWhite.tga]]) 
+	media:Register(mt, "Raven SingleGray", [[Interface\Addons\Raven\Borders\SingleGray.tga]]) 
+	media:Register(mt, "Raven DoubleWhite", [[Interface\Addons\Raven\Borders\DoubleWhite.tga]]) 
+	media:Register(mt, "Raven DoubleGray", [[Interface\Addons\Raven\Borders\DoubleGray.tga]]) 
+	media:Register(mt, "Raven Rounded", [[Interface\Addons\Raven\Borders\Rounded.tga]]) 
 end
 
 -- Default profile description used to initialize the SavedVariables persistent database

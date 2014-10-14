@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 
 -- Bars.lua supports mapping auras to bars and grouping bars into multiple moveable frames.
 -- It has special case code for tooltips, test bars, shaman totems, and death knight runes.
@@ -66,8 +66,7 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	detectDebuffsCastBy = "player", detectCooldownsBy = "player", detectTracking = false, detectOnlyTracking = false,
 	detectSpellCooldowns = true, detectTrinketCooldowns = true, detectInternalCooldowns = true, detectSpellEffectCooldowns = true,
 	detectPotionCooldowns = true, detectOtherCooldowns = true, detectRuneCooldowns = false,
-	detectSharedStances = true, detectSharedShouts = true,
-	detectSharedFrostTraps = true, detectSharedFireTraps = true, detectSharedShocks = true, detectSharedCrusader = true,
+	detectSharedStances = true, detectSharedShouts = true, detectSharedFrostTraps = true, detectSharedShocks = true, detectSharedCrusader = true,
 	setDuration = false, uniformDuration = 120, checkDuration = false, minimumDuration = true, filterDuration = 120,
 	checkTimeLeft = false, minimumTimeLeft = true, filterTimeLeft = 120, showNoDuration = false, showOnlyNoDuration = false,
 	showNoDurationBackground = false, noDurationFirst = false, timeFormat = 6, timeSpaces = false, timeCase = false,
@@ -1154,10 +1153,6 @@ local function CheckSharedCooldowns(n, b, bp)
 	if bp.detectSharedFrostTraps then
 		if n == LSPELL["Freezing Trap"] then return false end
 		if n == LSPELL["Ice Trap"] then b.barLabel = L["Frost Traps"] end
-	end
-	if bp.detectSharedFireTraps then
-		if (n == LSPELL["Black Arrow"]) or (n == LSPELL["Immolation Trap"]) then return false end
-		if n == LSPELL["Explosive Trap"] then b.barLabel = L["Fire Traps"] end
 	end
 	if bp.detectSharedShocks then
 		if (n == LSPELL["Frost Shock"]) or (n == LSPELL["Flame Shock"]) then return false end

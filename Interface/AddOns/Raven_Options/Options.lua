@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 -- Raven_Options is a load-on-demand module that only gets loaded and initialized when the user requests the GUI
 
 -- Options.lua contains the tables used by the options panel as well as all the supporting functions for displaying
@@ -2266,13 +2266,13 @@ MOD.OptionsTable = {
 									set = function(info, value) MOD.db.global.Defaults.backdropTexture = value; MOD:UpdateAllBarGroups() end,
 								},
 								BackdropWidth = {
-									type = "range", order = 44, name = L["Edge Size"], min = 0, max = 32, step = 0.1,
+									type = "range", order = 44, name = L["Edge Size"], min = 0, max = 32, step = 0.01,
 									desc = L["Adjust size of the border's edge."],
 									get = function(info) return MOD.db.global.Defaults.backdropWidth end,
 									set = function(info, value) MOD.db.global.Defaults.backdropWidth = value; MOD:UpdateAllBarGroups() end,
 								},
 								BackdropInset = {
-									type = "range", order = 45, name = L["Inset"], min = -16, max = 16, step = 0.1,
+									type = "range", order = 45, name = L["Inset"], min = -16, max = 16, step = 0.01,
 									desc = L["Adjust inset from the border to background panel's fill color."],
 									get = function(info) return MOD.db.global.Defaults.backdropInset end,
 									set = function(info, value) MOD.db.global.Defaults.backdropInset = value; MOD:UpdateAllBarGroups() end,
@@ -2301,13 +2301,13 @@ MOD.OptionsTable = {
 									set = function(info, value) MOD.db.global.Defaults.borderTexture = value; MOD:UpdateAllBarGroups() end,
 								},
 								BorderWidth = {
-									type = "range", order = 65, name = L["Edge Size"], min = 0, max = 32, step = 0.1,
+									type = "range", order = 65, name = L["Edge Size"], min = 0, max = 32, step = 0.01,
 									desc = L["Adjust size of the border's edge."],
 									get = function(info) return MOD.db.global.Defaults.borderWidth end,
 									set = function(info, value) MOD.db.global.Defaults.borderWidth = value; MOD:UpdateAllBarGroups() end,
 								},
 								BorderOffset = {
-									type = "range", order = 70, name = L["Offset"], min = -16, max = 16, step = 0.1,
+									type = "range", order = 70, name = L["Offset"], min = -16, max = 16, step = 0.01,
 									desc = L["Adjust offset to the border from the bar."],
 									get = function(info) return MOD.db.global.Defaults.borderOffset end,
 									set = function(info, value) MOD.db.global.Defaults.borderOffset = value; MOD:UpdateAllBarGroups() end,
@@ -4741,12 +4741,6 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("detectSharedFrostTraps") end,
 									set = function(info, value) SetBarGroupField("detectSharedFrostTraps", value) end,
 								},
-								FireTrapsCooldowns = {
-									type = "toggle", order = 15, name = L["Fire Traps"],
-									desc = L["If checked, only show one cooldown for hunter Fire Traps."],
-									get = function(info) return GetBarGroupField("detectSharedFireTraps") end,
-									set = function(info, value) SetBarGroupField("detectSharedFireTraps", value) end,
-								},
 								ShockCooldowns = {
 									type = "toggle", order = 20, name = L["Shocks"],
 									desc = L["If checked, only show one cooldown for shaman Shocks."],
@@ -5801,14 +5795,14 @@ MOD.OptionsTable = {
 											set = function(info, value) SetBarGroupField("backdropTexture", value) end,
 										},
 										BackdropWidth = {
-											type = "range", order = 42, name = L["Edge Size"], min = 0, max = 32, step = 0.1,
+											type = "range", order = 42, name = L["Edge Size"], min = 0, max = 32, step = 0.01,
 											disabled = function(info) return GetBarGroupField("useDefaultFontsAndTextures") end,
 											desc = L["Adjust size of the border's edge."],
 											get = function(info) return GetBarGroupField("backdropWidth") end,
 											set = function(info, value) SetBarGroupField("backdropWidth", value) end,
 										},
 										BackdropInset = {
-											type = "range", order = 45, name = L["Inset"], min = -16, max = 16, step = 0.1,
+											type = "range", order = 45, name = L["Inset"], min = -16, max = 16, step = 0.01,
 											disabled = function(info) return GetBarGroupField("useDefaultFontsAndTextures") end,
 											desc = L["Adjust inset from the border to background panel's fill color."],
 											get = function(info) return GetBarGroupField("backdropInset") end,
@@ -5840,14 +5834,14 @@ MOD.OptionsTable = {
 											set = function(info, value) SetBarGroupField("borderTexture", value) end,
 										},
 										BorderWidth = {
-											type = "range", order = 65, name = L["Edge Size"], min = 0, max = 32, step = 0.1,
+											type = "range", order = 65, name = L["Edge Size"], min = 0, max = 32, step = 0.01,
 											disabled = function(info) return GetBarGroupField("useDefaultFontsAndTextures") end,
 											desc = L["Adjust size of the border's edge."],
 											get = function(info) return GetBarGroupField("borderWidth") end,
 											set = function(info, value) SetBarGroupField("borderWidth", value) end,
 										},
 										BorderOffset = {
-											type = "range", order = 70, name = L["Offset"], min = -16, max = 16, step = 0.1,
+											type = "range", order = 70, name = L["Offset"], min = -16, max = 16, step = 0.01,
 											disabled = function(info) return GetBarGroupField("useDefaultFontsAndTextures") end,
 											desc = L["Adjust offset to the border from the bar."],
 											get = function(info) return GetBarGroupField("borderOffset") end,

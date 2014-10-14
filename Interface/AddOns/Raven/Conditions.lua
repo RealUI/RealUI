@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 
 -- Conditions.lua contains routines to test auras and status info to generate notifications.
 
@@ -175,7 +175,7 @@ local function InitializeRangeSpells()
 end
 
 -- Check a table to see if a unit is in range of any of the spells it contains
-local function InRangeSpells(unit, t) if t then for _, s in pairs(t) do if IsSpellInRange(s, unit) then return true end end end return false end
+local function InRangeSpells(unit, t) if t then for _, s in pairs(t) do if (IsSpellInRange(s, unit) == 1) then return true end end end return false end
 
 -- Return true or false if the unit is in range based on whether it is enemy, friend or pet
 local function UnitRangeCheck(unit)
@@ -214,7 +214,7 @@ local function CheckSpellReady(spell, unit, rangeCheck, usable, checkCharges, ch
 		local cd = MOD:CheckCooldown(spell) -- checks if spell is on cooldown (note this should correctly ignore DK rune cooldowns)
 		if cd and ((cd[4] ~= nil) and (not cd[9] or cd[9] == 0)) then return false end -- verify is on cooldown and has a valid duration and no charges remaining
 	end
-	if IsOn(rangeCheck) and IsOn(unit) and (IsSpellInRange(spell, unit) ~= rangeCheck) then return false end
+	if IsOn(rangeCheck) and IsOn(unit) and ((IsSpellInRange(spell, unit) == 1) ~= rangeCheck) then return false end
 	return true
 end
 

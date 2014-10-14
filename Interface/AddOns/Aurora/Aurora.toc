@@ -1,7 +1,7 @@
 ## Interface: 60000
 ## Title: Aurora
 ## Notes: Minimalistic window theme.
-## Author: Haleth/Freethinker
+## Author: Haleth/Lightsword
 ## Version: 6.0
 ## SavedVariables: AuroraConfig
 

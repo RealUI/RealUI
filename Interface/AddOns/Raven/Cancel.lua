@@ -1,4 +1,4 @@
--- Raven is an addon to monitor auras and cooldowns, providing timer bars, action bar highlights, and helpful notifications.
+-- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
 
 -- Cancel.lua supports right-click cancel of player buffs:
 
@@ -135,7 +135,7 @@ local function AllocateOverlay()
 		b:SetScript("OnLeave", Overlay_OnLeave)
 		b:EnableMouse(true)
 		b:RegisterForClicks("RightButtonUp")
-		-- b:SetNormalTexture("Interface\\AddOns\\Raven\\Normal") -- for debugging only
+		-- b:SetNormalTexture("Interface\\AddOns\\Raven\\Borders\\IconDefault") -- for debugging only
 	end
 	return b
 end
@@ -206,7 +206,7 @@ function MOD:SetInCombatBar(enable, lock, list, opt)
 		v.container:SetScript("OnMouseUp", InCombatBar_OnMouseUp)
 		v.highlight = v.container:CreateTexture(nil, "ARTWORK")
 		v.backdrop = v.container:CreateTexture(nil, "OVERLAY")
-		v.backdrop:SetTexture("Interface\\AddOns\\Raven\\Normal")			
+		v.backdrop:SetTexture("Interface\\AddOns\\Raven\\Borders\\IconDefault")			
 		v.anim = v.container:CreateAnimationGroup()
 		v.anim:SetLooping("NONE")
 		local grow = v.anim:CreateAnimation("Scale")
