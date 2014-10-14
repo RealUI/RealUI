@@ -214,7 +214,7 @@ local resetNewItems = function(self)
 		local tNumSlots = GetContainerNumSlots(bag)
 		if tNumSlots > 0 then
 			for slot = 1, tNumSlots do
-				local item = cbNivaya:GetItemInfo(bag, slot, slot)
+				local item = cbNivaya:GetItemInfo(bag, slot)
 				--print("resetNewItems", item.id)
 				item.id = item.id or 0
 				if cB_KnownItems[item.id] then
