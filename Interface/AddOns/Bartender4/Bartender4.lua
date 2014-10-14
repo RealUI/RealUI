@@ -66,24 +66,19 @@ function Bartender4:OnInitialize()
 	end
 
 	BINDING_HEADER_Bartender4 = "Bartender4"
-	BINDING_CATEGORY_Bartender4 = "Action Bars"
+	BINDING_CATEGORY_Bartender4 = "Bartender4"
 	BINDING_NAME_BTTOGGLEACTIONBARLOCK = BINDING_NAME_TOGGLEACTIONBARLOCK
 	for i=1,10 do
-		if i > 1 then
-			_G[("BINDING_CATEGORY_BT4BLANK%d"):format(i)] = "Action Bars" -- myBindings2 compat
-			_G[("BINDING_HEADER_BT4BLANK%d"):format(i)] = "Bartender4 " .. L["Bar %s"]:format(i)
-		end
+		_G[("BINDING_HEADER_BT4BLANK%d"):format(i)] = L["Bar %s"]:format(i)
 		for k=1,12 do
-			_G[("BINDING_NAME_CLICK BT4Button%d:LeftButton"):format(((i-1)*12)+k)] = ("Bartender4 %s %s"):format(L["Bar %s"]:format(i), L["Button %s"]:format(k))
+			_G[("BINDING_NAME_CLICK BT4Button%d:LeftButton"):format(((i-1)*12)+k)] = ("%s %s"):format(L["Bar %s"]:format(i), L["Button %s"]:format(k))
 		end
 	end
-	BINDING_HEADER_BT4PET = "Bartender4 " .. L["Pet Bar"]
-	BINDING_CATEGORY_BT4PET = "Action Bars"
-	BINDING_HEADER_BT4STANCE = "Bartender4 " .. L["Stance Bar"]
-	BINDING_CATEGORY_BT4STANCE = "Action Bars"
+	BINDING_HEADER_BT4PET = L["Pet Bar"]
+	BINDING_HEADER_BT4STANCE = L["Stance Bar"]
 	for k=1,10 do
-		_G[("BINDING_NAME_CLICK BT4PetButton%d:LeftButton"):format(k)] = ("Bartender4 %s %s"):format(L["Pet Bar"], L["Button %s"]:format(k))
-		_G[("BINDING_NAME_CLICK BT4StanceButton%d:LeftButton"):format(k)] = ("Bartender4 %s %s"):format(L["Stance Bar"], L["Button %s"]:format(k))
+		_G[("BINDING_NAME_CLICK BT4PetButton%d:LeftButton"):format(k)] = ("%s %s"):format(L["Pet Bar"], L["Button %s"]:format(k))
+		_G[("BINDING_NAME_CLICK BT4StanceButton%d:LeftButton"):format(k)] = ("%s %s"):format(L["Stance Bar"], L["Button %s"]:format(k))
 	end
 end
 

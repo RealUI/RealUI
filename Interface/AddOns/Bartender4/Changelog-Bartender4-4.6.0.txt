@@ -1,0 +1,31 @@
+tag 4.6.0
+4ab427e83dd9bc8c5be69c1014b3a59772980eea
+Hendrik Leppkes <h.leppkes@gmail.com>
+2014-10-14 19:39:03 +0200
+
+Tag as 4.6.0
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Add a spell override list for replacement spells like Moonfire/Sunfire
+	Only Moonfire/Sunfir on it so far, though!
+	- Make use of the new keybinding categories
+	- Remove the /bar slash command, as its considered too generic, and an xpac is a good time to annoy a few users!
+	- Remove Incarnation: Tree of Life bar stance, it was broken.
+	- Fix warrior stance handling. Berserker Stance is gone, Gladiator Stance is new.
+	- SetChecked takes true/false
+	- Update copyright
+	- Update TOC
+	- Improve Blizzard preset bag positions
+	- Fix indentation
+	- Adjust bar options order to allow for new elements to add themself in the middle
+	- Move a bit of actionbar functionality around to make it reusable.
+	- Enable smarttarget functionality on action bars when mouseover is enabled
+	Before, it would only be active if Auto-Assist was also activated.
+	- Rename all "assist" related state variables to "target", which is more generic.
+	- Move a newline out of the localized string
+	- Move the tooltip option to slightly reduce the height of the dialog
+	- Use the @ syntax in target macros
+	- Add an option for Mouse-Over casting

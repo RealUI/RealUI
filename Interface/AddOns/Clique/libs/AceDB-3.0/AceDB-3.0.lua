@@ -39,8 +39,8 @@
 -- end
 -- @class file
 -- @name AceDB-3.0.lua
--- @release $Id: AceDB-3.0.lua 940 2010-06-19 08:01:47Z nevcairiel $
-local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 21
+-- @release $Id: AceDB-3.0.lua 1115 2014-09-21 11:52:35Z kaelten $
+local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 25
 local AceDB, oldminor = LibStub:NewLibrary(ACEDB_MAJOR, ACEDB_MINOR)
 
 if not AceDB then return end -- No upgrade needed
@@ -260,6 +260,12 @@ local _, classKey = UnitClass("player")
 local _, raceKey = UnitRace("player")
 local factionKey = UnitFactionGroup("player")
 local factionrealmKey = factionKey .. " - " .. realmKey
+local localeKey = GetLocale():lower()
+
+local regionTable = { "US", "KR", "EU", "TW", "CN" }
+local regionKey = _G["GetCurrentRegion"] and regionTable[GetCurrentRegion()] or string.sub(GetCVar("realmList"), 1, 2):upper()
+local factionrealmregionKey = factionrealmKey .. " - " .. regionKey
+
 -- Actual database initialization function
 local function initdb(sv, defaults, defaultProfile, olddb, parent)
 	-- Generate the database keys for each section
@@ -295,7 +301,9 @@ local function initdb(sv, defaults, defaultProfile, olddb, parent)
 		["race"] = raceKey,
 		["faction"] = factionKey,
 		["factionrealm"] = factionrealmKey,
+		["factionrealmregion"] = factionrealmregionKey,
 		["profile"] = profileKey,
+        ["locale"] = localeKey,
 		["global"] = true,
 		["profiles"] = true,
 	}
@@ -352,7 +360,7 @@ local function logoutHandler(frame, event)
 		for db in pairs(AceDB.db_registry) do
 			db.callbacks:Fire("OnDatabaseShutdown", db)
 			db:RegisterDefaults(nil)
-			
+
 			-- cleanup sections that are empty without defaults
 			local sv = rawget(db, "sv")
 			for section in pairs(db.keys) do
@@ -517,6 +525,15 @@ function DBObjectLib:DeleteProfile(name, silent)
 	if self.children then
 		for _, db in pairs(self.children) do
 			DBObjectLib.DeleteProfile(db, name, true)
+		end
+	end
+
+	-- switch all characters that use this profile back to the default
+	if self.sv.profileKeys then
+		for key, profile in pairs(self.sv.profileKeys) do
+			if profile == name then
+				self.sv.profileKeys[key] = nil
+			end
 		end
 	end
 

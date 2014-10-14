@@ -5,9 +5,9 @@
 ## Notes-zhCN: 一个轻量级的聊天增强插件
 ## Author: Antiarc
 ## X-Category: Chat/Communication
-## Version: 1.4.4-7-g8355e08
+## Version: 1.4.5
 ## SavedVariables: ChatterDB
-## X-Curse-Packaged-Version: 1.4.4-7-g8355e08
+## X-Curse-Packaged-Version: 1.4.5
 ## X-Curse-Project-Name: Chatter
 ## X-Curse-Project-ID: chatter
 ## X-Curse-Repository-ID: wow/chatter/mainline

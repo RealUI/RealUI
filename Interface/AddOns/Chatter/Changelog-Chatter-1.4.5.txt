@@ -1,3 +1,14 @@
+tag 1.4.5
+7c38b006be29e343438143c2ace0a1f13be9a527
+Benjamin Staneck <staneck@gmail.com>
+2014-10-14 21:02:13 +0200
+
+
+
+--------------------
+
+Benjamin Staneck:
+	- TOC Update
 daf:
 	- attempted to fix a bug were ocasionaly UnitName seems to returns a empty string instead of nil on same realm players
 Benjamin Staneck:

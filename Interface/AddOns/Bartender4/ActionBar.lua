@@ -33,6 +33,7 @@ function ActionBar:ApplyConfig(config)
 
 	if not self.config.position.x then initialPosition(self) end
 
+	self:SetupSmartTarget()
 	self:UpdateButtons()
 	self:UpdateButtonConfig()
 end
@@ -82,6 +83,7 @@ local UpdateSmartTarget = [[
 			type, action = GetActionInfo(action)
 		end
 		if type == "spell" and action > 0 then
+			if BT_Spell_Overrides[action] then action = BT_Spell_Overrides[action] end
 			local id, subtype = FindSpellBookSlotBySpellID(action), "spell"
 			if id and id > 0 then
 				if IsHelpfulSpell(id, subtype) then
@@ -96,8 +98,20 @@ local UpdateSmartTarget = [[
 	end
 ]]
 
+function ActionBar:SetupSmartTarget()
+	self:Execute([[
+		BT_Spell_Overrides = newtable()
+		BT_Spell_Overrides[93402] = 8921 -- sunfire -> moonfire
+	]])
+
+	self:SetAttribute("ChildUpdateSmartTarget", UpdateSmartTarget)
+end
+
 function ActionBar:SetupSmartButton(button)
-	button:SetAttribute("OnStateChanged", UpdateSmartTarget)
+	button:SetAttribute("OnStateChanged", [[
+		local header = self:GetParent()
+		header:RunFor(self, header:GetAttribute("ChildUpdateSmartTarget"), ...)
+	]])
 
 	button:SetAttribute("_childupdate-target-help", [[
 		self:SetAttribute("target_help", message)

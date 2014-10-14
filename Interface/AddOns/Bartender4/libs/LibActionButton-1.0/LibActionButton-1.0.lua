@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ]]
 local MAJOR_VERSION = "LibActionButton-1.0"
-local MINOR_VERSION = 50
+local MINOR_VERSION = 51
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
@@ -678,6 +678,7 @@ function InitializeEventHandler()
 	lib.eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 
 	lib.eventFrame:RegisterEvent("LOSS_OF_CONTROL_ADDED")
+	lib.eventFrame:RegisterEvent("LOSS_OF_CONTROL_UPDATE")
 
 	lib.eventFrame:Show()
 	lib.eventFrame:SetScript("OnUpdate", OnUpdate)
@@ -739,6 +740,10 @@ function OnEvent(frame, event, arg1, ...)
 			if GameTooltip:GetOwner() == button then
 				UpdateTooltip(button)
 			end
+		end
+	elseif event == "LOSS_OF_CONTROL_UPDATE" then
+		for button in next, ActiveButtons do
+			UpdateCooldown(button)
 		end
 	elseif event == "TRADE_SKILL_SHOW" or event == "TRADE_SKILL_CLOSE"  or event == "ARCHAEOLOGY_CLOSED" then
 		ForAllButtons(UpdateButtonState, true)
@@ -1138,6 +1143,11 @@ function UpdateCount(self)
 	end
 end
 
+function OnCooldownDone(self)
+	self:SetScript("OnCooldownDone", nil)
+	UpdateCooldown(self:GetParent())
+end
+
 function UpdateCooldown(self)
 	local locStart, locDuration = self:GetLossOfControlCooldown()
 	local start, duration, enable, charges, maxCharges = self:GetCooldown()
@@ -1158,7 +1168,9 @@ function UpdateCooldown(self)
 			self.cooldown:SetHideCountdownNumbers(false)
 			self.cooldown.currentCooldownType = COOLDOWN_TYPE_NORMAL
 		end
-
+		if locStart > 0 then
+			self.cooldown:SetScript("OnCooldownDone", OnCooldownDone)
+		end
 		CooldownFrame_SetTimer(self.cooldown, start, duration, enable, charges, maxCharges)
 	end
 end

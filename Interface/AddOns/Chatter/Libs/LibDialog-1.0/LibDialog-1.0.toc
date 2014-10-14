@@ -2,12 +2,12 @@
 ## Title: Lib: Dialog-1.0
 ## Notes: Replacement for the default UI's StaticPopup dialogs.
 ## Author: Torhal
-## Version: r67
+## Version: r72
 ## LoadOnDemand: 1
-## X-Date: 2013-11-02T07:46:26Z
+## X-Date: 2014-09-21T08:47:43Z
 ## X-Category: Libraries
 ## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r67
+## X-Curse-Packaged-Version: r72
 ## X-Curse-Project-Name: LibDialog-1.0
 ## X-Curse-Project-ID: libdialog-1-0
 ## X-Curse-Repository-ID: wow/libdialog-1-0/mainline
