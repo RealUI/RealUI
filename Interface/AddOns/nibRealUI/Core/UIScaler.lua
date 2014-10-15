@@ -53,15 +53,14 @@ local function GetOptions()
 				order = 40,
 			},
 			customScale = {
-				type = "range",
+				type = "input",
 				name = "Custom "..UI_SCALE,
-				desc = "Set a custom UI scale. Note: UI elements may lose their sharp appearance.",
+				desc = "Set a custom UI scale (0.48 to 1.00). Note: UI elements may lose their sharp appearance.",
 				order = 50,
-				min = 0.48, max = 1, step = 0.02,
 				disabled = function() return db.pixelPerfect end,
-				get = function() return db.customScale end,
+				get = function() return tostring(db.customScale) end,
 				set = function(info, value) 
-					db.customScale = value
+					db.customScale = nibRealUI:ValidateOffset(value, 0.48, 1)
 					UIScaler:UpdateUIScale()
 				end,
 			},
@@ -90,11 +89,11 @@ function UIScaler:UpdateUIScale()
 	if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
 	-- Set Scale (WoW CVar can't go below .64)
-	if scale < .64 then
+	-- if scale < .64 then
 		UIParent:SetScale(scale)
-	else
-		SetCVar("uiScale", scale)
-	end
+	-- else
+	-- 	SetCVar("uiScale", scale)
+	-- end
 
 	-- Keep WoW UI Scale slider hidden and replace with RealUI button
 	if not ScaleOptionsHidden then
