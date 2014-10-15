@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Core\Groups.lua
-	* Revision.: 384
+	* Revision.: 399
 	* Author...: StormFX, JJSheets
 
 	Group API
@@ -25,16 +25,16 @@ do
 	local Callbacks = {}
 
 	-- Notifies an add-on of skin changes.
-	function FireCB(Addon, Group, SkinID, Gloss, Backdrop, Colors)
+	function FireCB(Addon, Group, SkinID, Gloss, Backdrop, Colors, Disabled)
 		local args = Callbacks[Addon]
 		if args then
 			for arg, callback in pairs(args) do
-				callback(arg and arg, Group, SkinID, Gloss, Backdrop, Colors)
+				callback(arg and arg, Group, SkinID, Gloss, Backdrop, Colors, Disabled)
 			end
 		end
 	end
 
-	-- Registers an add-on to be notified on skin changes.
+	-- API: Registers an add-on to be notified on skin changes.
 	function Core.API:Register(Addon, Callback, arg)
 		local arg = Callback and arg or false
 		Callbacks[Addon] = Callbacks[Addon] or {}
@@ -85,7 +85,7 @@ local function NewGroup(Addon, Group)
 		Parent.SubList[id] = Group
 		Core:UpdateOptions(Addon)
 	end
-	o:Update(true, true)
+	o:Update(true)
 	return o
 end
 
@@ -105,7 +105,7 @@ function Core:ListGroups(Addon)
 	return Groups[Addon].SubList
 end
 
--- API method that validates and returns a button group.
+-- API: Validates and returns a button group.
 function Core.API:Group(Addon, Group)
 	if type(Addon) ~= "string" or Addon == MASQUE then
 		if Core.db.profile.Debug then
@@ -191,37 +191,35 @@ do
 				end
 			end,
 
-			-- Removes a button from the group and optionally applies the default skin.
-			RemoveButton = function(self, Button, Static)
+			-- Removes a button from the group and applies the default skin.
+			RemoveButton = function(self, Button)
 				if Button then
 					local ButtonData = self.Buttons[Button]
 					Group[Button] = nil
-					if ButtonData and not Static then
+					if ButtonData then
 						SkinButton(Button, ButtonData, "Blizzard")
 					end
 					self.Buttons[Button] = nil
 				end
 			end,
 
-			-- Deletes the current group and optionally applies the default skin.
-			Delete = function(self, Static)
+			-- Deletes the current group and applies the default skin to its buttons.
+			Delete = function(self)
 				local Subs = self.SubList
 				if Subs then
 					for Sub in pairs(Subs) do
-						Groups[Sub]:Delete(Static)
+						Groups[Sub]:Delete()
 					end
 				end
 				for Button in pairs(self.Buttons) do
 					Group[Button] = nil
-					if not Static then
-						SkinButton(Button, self.Buttons[Button], "Blizzard")
-					end
+					SkinButton(Button, self.Buttons[Button], "Blizzard")
 					self.Buttons[Button] = nil
 				end
 				if self.Parent then
 					self.Parent.SubList[self.ID] = nil
 				end
-				Core:UpdateOptions(self.Addon)
+				Core:RemoveOptions(self.Addon, self.Group)
 				Groups[self.ID] = nil
 			end,
 
@@ -264,6 +262,8 @@ do
 				for Button in pairs(self.Buttons) do
 					SkinButton(Button, self.Buttons[Button], "Blizzard")
 				end
+				local db = self.db
+				FireCB(self.Addon, self.Group, db.SkinID, db.Gloss, db.Backdrop, db.Colors, true)
 				local Subs = self.SubList
 				if Subs then
 					for Sub in pairs(Subs) do
@@ -327,26 +327,24 @@ do
 			end,
 
 			-- Resets the group's skin back to its defaults.
-			Reset = function(self, Static)
+			Reset = function(self)
 				self.db.Gloss = 0
 				self.db.Backdrop = false
 				self.db.Fonts = nil -- Clean up on the old "Fonts" entry.
 				for Layer in pairs(self.db.Colors) do
 					self.db.Colors[Layer] = nil
 				end
-				if not Static then
-					self:ReSkin()
-				end
+				self:ReSkin()
 				local Subs = self.SubList
 				if Subs then
 					for Sub in pairs(Subs) do
-						Groups[Sub]:Reset(Static)
+						Groups[Sub]:Reset()
 					end
 				end
 			end,
 
 			-- Updates the group on profile activity, etc.
-			Update = function(self, Static, Limit)
+			Update = function(self, Limit)
 				self.db = Core.db.profile.Groups[self.ID]
 				if self.Parent then
 					local db = self.Parent.db
@@ -366,20 +364,18 @@ do
 						self.db.Inherit = false
 					end
 				end
-				if not Static then
-					if self.db.Disabled then
-						for Button in pairs(self.Buttons) do
-							SkinButton(Button, self.Buttons[Button], "Blizzard")
-						end
-					else
-						self:ReSkin()
+				if self.db.Disabled then
+					for Button in pairs(self.Buttons) do
+						SkinButton(Button, self.Buttons[Button], "Blizzard")
 					end
+				else
+					self:ReSkin()
 				end
 				if not Limit then
 					local Subs = self.SubList
 					if Subs then
 						for Sub in pairs(Subs) do
-							Groups[Sub]:Update(Static)
+							Groups[Sub]:Update()
 						end
 					end
 				end
@@ -395,16 +391,16 @@ do
 			-- These methods are deprecated and will be removed.
 
 			-- Returns a layer color.
-			GetLayerColor = function(self, Layer)
-				return self:GetColor(Layer)
-			end,
+			--GetLayerColor = function(self, Layer)
+			--	return self:GetColor(Layer)
+			--end,
 
 			-- Deprecated
-			AddSubGroup = __MTF,
-			RemoveSubGroup = __MTF,
-			SetLayerColor = __MTF,
-			Skin = __MTF,
-			ResetColors = __MTF,
+			--AddSubGroup = __MTF,
+			--RemoveSubGroup = __MTF,
+			--SetLayerColor = __MTF,
+			--Skin = __MTF,
+			--ResetColors = __MTF,
 		}
 	}
 end

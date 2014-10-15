@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Masque.lua
-	* Revision.: 384
+	* Revision.: 398
 	* Author...: StormFX
 
 	Add-On Setup
@@ -12,23 +12,23 @@
 local MASQUE, Core = ...
 local print = print
 
----------------------------------------------
+----------------------------------------
 -- Libraries, etc.
----------------------------------------------
+----------------------------------------
 
 local LibStub = assert(LibStub, "Masque requires LibStub.")
 local Masque = LibStub("AceAddon-3.0"):NewAddon(MASQUE)
 
-Core.API = LibStub:NewLibrary(MASQUE, 40300)
+Core.API = LibStub:NewLibrary(MASQUE, 60000)
 
 local LDB = LibStub("LibDataBroker-1.1", true)
 local DBI = LibStub("LibDBIcon-1.0", true)
 
 local L = Core.Locale
 
----------------------------------------------
--- Base Options Table
----------------------------------------------
+----------------------------------------
+-- Basic Options Table
+----------------------------------------
 
 Core.Options = {
 	type = "group",
@@ -43,15 +43,14 @@ Core.Options = {
 	},
 }
 
----------------------------------------------
+----------------------------------------
 -- ADDON_LOADED Event
----------------------------------------------
+----------------------------------------
 
 function Masque:OnInitialize()
 	local Defaults = {
 		profile = {
 			Debug = false,
-			Preload = false,
 			Groups = {
 				["*"] = {
 					Inherit = true,
@@ -85,30 +84,27 @@ function Masque:OnInitialize()
 	end
 end
 
----------------------------------------------
+----------------------------------------
 -- PLAYER_LOGIN Event
----------------------------------------------
+----------------------------------------
 
 function Masque:OnEnable()
 	local db = Core.db.profile
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(MASQUE, Core.Options)
 	Core.OptionsPanel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(MASQUE, MASQUE, nil, "General")
-	if db.Preload then
-		Core:LoadOptions()
-	else
-		Core.Options.args.General.args.Load = {
-			type = "execute",
-			name = L["Load Masque Options"],
-			desc = (L["Click this button to load Masque's options. You can also use the %s or %s chat command."]):format("|cffffcc00/msq|r", "|cffffcc00/masque|r"),
-			func = function()
-				Core:LoadOptions()
-			end,
-			hidden = function()
-				return Core.OptionsLoaded
-			end,
-			order = 0,
-		}
-	end
+	Core.Options.args.General.args.Load = {
+		type = "execute",
+		name = L["Load Masque Options"],
+		desc = (L["Click this button to load Masque's options. You can also use the %s or %s chat command."]):format("|cffffcc00/msq|r", "|cffffcc00/masque|r"),
+		func = function()
+			Core:LoadOptions()
+			InterfaceOptionsFrame_OpenToCategory(Core.OptionsPanel.Addons)
+		end,
+		hidden = function()
+			return Core.OptionsLoaded
+		end,
+		order = 0,
+	}
 	if LDB then
 		Core.LDBO = LDB:NewDataObject(MASQUE, {
 			type  = "launcher",
@@ -134,9 +130,9 @@ function Masque:OnEnable()
 	end
 end
 
----------------------------------------------
+----------------------------------------
 -- Core Methods
----------------------------------------------
+----------------------------------------
 
 -- Toggles debug mode.
 function Core:Debug()

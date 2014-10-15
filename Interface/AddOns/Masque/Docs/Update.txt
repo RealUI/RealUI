@@ -1,0 +1,26 @@
+== v6.0.0 ==
+
+== General ==
+
+* Updated for WoD.
+* The legacy support add-on "ButtonFacade" and its associated library have been removed.  If an add-on or skin you use throws an error... Seriously, it's been //years//.  Update or adapt.
+* The options panel is now always load-on-demand.
+
+== API ==
+
+* A new API method, :UpdateSpellAlert(Button) is available. This will allow add-ons that use internal spell alert methods to have them updated by Masque.
+* The callback for an add-on registered with Masque will now have a 6th parameter (not counting **self**) set to **true** if the group has been disabled or to **nil** otherwise.
+* The Static parameter for Group methods has been removed.
+* The following legacy group methods have been removed:
+  ** GetLayerColor
+  ** AddSubGroup
+  ** RemoveSubGroup
+  ** SetLayerColor
+  ** Skin
+  ** ResetColors
+
+== Bug Fixes ==
+
+* Fixed an issue that was preventing a group's options from being removed from the options panel.
+  ** To prevent errors, the options panel will close (if open) when the Group:Delete() method is called.
+* The options panel should now correctly show and set the focus to the "Add-Ons" panel when the "Load Options" button is pressed.

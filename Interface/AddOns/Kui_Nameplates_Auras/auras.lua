@@ -12,6 +12,7 @@ local mod = addon:NewModule('Auras', 'AceEvent-3.0')
 local whitelist, _
 
 local GetTime, floor, ceil = GetTime, floor, ceil
+local UnitExists,UnitGUID=UnitExists,UnitGUID
 
 -- auras pulsate when they have less than this many seconds remaining
 local FADE_THRESHOLD = 5
@@ -280,7 +281,7 @@ end
 function mod:Create(msg, frame)
 	frame.auras = CreateFrame('Frame', nil, frame)
 	frame.auras.frame = frame
-	
+
 	-- BOTTOMLEFT is set OnShow
 	frame.auras:SetPoint('BOTTOMRIGHT', frame.health, 'TOPRIGHT', -3, 0)
 	frame.auras:SetHeight(50)
@@ -311,7 +312,6 @@ function mod:Show(msg, frame)
 	end
 
 	-- TODO calculate size of auras & num per column here
-	
 end
 function mod:Hide(msg, frame)
 	if frame.auras then
@@ -320,17 +320,27 @@ function mod:Hide(msg, frame)
 end
 -------------------------------------------------------------- event handlers --
 function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
+	-- used to hide expired auras on previously known frames
+	-- and to detect aura updates on the mouseover, if it exists
+	-- (since UNIT_AURA doesn't fire for mouseover)
 	local castTime, event, _, guid, name, _, _, targetGUID, targetName = ...
 	if not guid then return end
-	if not auraEvents[event] then return end
 	if guid ~= UnitGUID('player') then return end
 
-	--print(event..' from '..name..' on '..targetName)
+	if UnitGUID('mouseover') == targetGUID then
+		-- update the mouseover's auras
+		self:UNIT_AURA('UNIT_AURA','mouseover')
+	end
+
+	-- only listen for removals from now
+	if not auraEvents[event] then return end
 
 	-- fetch the subject's nameplate
 	local f = addon:GetNameplate(targetGUID, targetName)
 	if not f or not f.auras then return end
 
+	-- DEBUG
+	--print(event..' from '..name..' on '..targetName)
 	--print('(frame for guid: '..targetGUID..')')
 
 	local spId = select(12, ...)
@@ -346,7 +356,7 @@ function mod:UPDATE_MOUSEOVER_UNIT()
 	self:UNIT_AURA('UNIT_AURA', 'mouseover')
 end
 function mod:UNIT_AURA(event, unit)
-	-- select the unit's nameplate	
+	-- select the unit's nameplate
 	--unit = 'target' -- DEBUG
 	local frame = addon:GetNameplate(UnitGUID(unit), nil)
 	if not frame or not frame.auras then return end

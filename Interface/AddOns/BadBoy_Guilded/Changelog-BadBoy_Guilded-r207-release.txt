@@ -1,9 +1,15 @@
 ------------------------------------------------------------------------
-r205 | funkydude | 2014-10-09 18:45:52 +0000 (Thu, 09 Oct 2014) | 1 line
+r207 | funkydude | 2014-10-14 22:21:17 +0000 (Tue, 14 Oct 2014) | 1 line
 Changed paths:
-   A /tags/v2.96 (from /trunk:204)
+   A /tags/r207-release (from /trunk:206)
 
-Tagging as v2.96
+Tagging as r207-release
+------------------------------------------------------------------------
+r206 | funkydude | 2014-10-14 19:42:08 +0000 (Tue, 14 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.toc
+
+bump toc
 ------------------------------------------------------------------------
 r204 | funkydude | 2014-10-07 19:30:00 +0000 (Tue, 07 Oct 2014) | 1 line
 Changed paths:

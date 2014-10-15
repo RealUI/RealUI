@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Core\Button.lua
-	* Revision.: 381
+	* Revision.: 398
 	* Author...: StormFX, JJSheets
 
 	Button Core
@@ -270,7 +270,7 @@ do
 		end
 	end
 
-	-- API method to get the 'Gloss' layer of a button.
+	-- API: Returns the 'Gloss' layer of a button.
 	function Core.API:GetGloss(Button)
 		if type(Button) ~= "table" then
 			if Core.db.profile.Debug then
@@ -448,7 +448,15 @@ do
 	end
 	hooksecurefunc("ActionButton_ShowOverlayGlow", UpdateSpellAlert)
 
-	-- Adds a spell alert texture set.
+	-- API: Allows add-ons to call the update when not using the native API.
+	function Core.API:UpdateSpellAlert(Button)
+		if type(Button) ~= "table" then
+			return
+		end
+		UpdateSpellAlert(Button)
+	end
+
+	-- API: Adds a spell alert texture set.
 	function Core.API:AddSpellAlert(Shape, Glow, Ants)
 		if type(Shape) ~= "string" then
 			if Core.db.profile.Debug then
@@ -466,7 +474,7 @@ do
 		Alerts[Shape] = Overlay
 	end
 
-	-- Returns a spell alert texture set.
+	-- API: Returns a spell alert texture set.
 	function Core.API:GetSpellAlert(Shape)
 		if type(Shape) ~= "string" then
 			if Core.db.profile.Debug then

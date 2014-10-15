@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Core\Options.lua
-	* Revision.: 381
+	* Revision.: 398
 	* Author...: StormFX
 
 	Options Setup
@@ -15,9 +15,9 @@ local pairs = pairs
 local L = Core.Locale
 local Skins, SkinList = Core.Skins, Core.SkinList
 
----------------------------------------------
+----------------------------------------
 -- Options Loader
----------------------------------------------
+----------------------------------------
 
 -- Loads the options when called.
 function Core:LoadOptions()
@@ -27,38 +27,28 @@ function Core:LoadOptions()
 		name = L["Masque is a dynamic button skinning add-on."].."\n",
 		order = 1,
 	}
-	args.Preload = {
-		type = "toggle",
-		name = L["Preload Options"],
-		desc = L["Causes Masque to preload its options instead of having them loaded on demand."],
-		get = function()
-			return Core.db.profile.Preload
-		end,
-		set = function(i, v)
-			Core.db.profile.Preload = v
-		end,
-		order = 2,
-	}
-	args.Icon = {
-		type = "toggle",
-		name = L["Minimap Icon"],
-		desc = L["Enable the minimap icon."],
-		get = function()
-			return not Core.db.profile.LDB.hide
-		end,
-		set = function(i, v)
-			Core.db.profile.LDB.hide = not v
-			if not v then
-				Core.DBI:Hide(MASQUE)
-			else
-				Core.DBI:Show(MASQUE)
-			end
-		end,
-		disabled = function()
-			return not Core.DBI
-		end,
-		order = 3,
-	}
+	if Core.LDB then
+		args.Icon = {
+			type = "toggle",
+			name = L["Minimap Icon"],
+			desc = L["Enable the minimap icon."],
+			get = function()
+				return not Core.db.profile.LDB.hide
+			end,
+			set = function(i, v)
+				Core.db.profile.LDB.hide = not v
+				if not v then
+					Core.DBI:Hide(MASQUE)
+				else
+					Core.DBI:Show(MASQUE)
+				end
+			end,
+			disabled = function()
+				return not Core.DBI
+			end,
+			order = 3,
+		}
+	end
 	args.Debug = {
 		type = "toggle",
 		name = L["Debug Mode"],
@@ -94,62 +84,79 @@ function Core:LoadOptions()
 	self.Options.args.Profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	self.Options.args.Profiles.order = -1
 	self.OptionsPanel.Profiles = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(MASQUE, L["Profiles"], MASQUE, "Profiles")
-	local LDS = LibStub('LibDualSpec-1.0', true)
+	local LDS = LibStub("LibDualSpec-1.0", true)
 	if LDS then
 		LDS:EnhanceDatabase(self.db, MASQUE)
 		LDS:EnhanceOptions(self.Options.args.Profiles, self.db)
 	end
 end
 
----------------------------------------------
+----------------------------------------
 -- Options Window Toggle
----------------------------------------------
+----------------------------------------
 
 -- Opens or closes the options window.
 function Core:ShowOptions()
 	if not self.OptionsLoaded then
-		print("|cffffff99"..L["Loading Masque Options..."].."|r")
 		self:LoadOptions()
 	end
-	if InterfaceOptionsFrame:IsShown() then
-		InterfaceOptionsFrame_Show()
-	else
-		InterfaceOptionsFrame_OpenToCategory(Core.OptionsPanel.Addons)
-	end
+	InterfaceOptionsFrame_Show()
+	InterfaceOptionsFrame_OpenToCategory(Core.OptionsPanel.Addons)
 end
 
----------------------------------------------
+----------------------------------------
 -- Options Updater
----------------------------------------------
+----------------------------------------
 
-do
-	local args
-
-	-- Updates the specified add-on options.
-	function Core:UpdateOptions(Addon, Group)
-		if not self.OptionsLoaded then
-			return
-		end
-		args = args or self.Options.args.Addons.args
-		if not Addon then
-			for _, Addon in pairs(self:ListAddons()) do
-				local a = Addon:gsub("%s", "_")
-				args[a] = args[a] or self:GetOptions(Addon)
-			end
-		elseif not Group then
+-- Updates the specified add-on options.
+function Core:UpdateOptions(Addon, Group)
+	if not self.OptionsLoaded then
+		return
+	end
+	local args = self.Options.args.Addons.args
+	if not Addon then
+		for _, Addon in pairs(self:ListAddons()) do
 			local a = Addon:gsub("%s", "_")
-			for _, Group in pairs(self:ListGroups(Addon)) do
-				local g = Group:gsub("%s", "_")
-				local aargs = args[a].args
-				aargs[g] = aargs[g] or self:GetOptions(Addon, Group)
-			end
+			args[a] = args[a] or self:GetOptions(Addon)
+		end
+	elseif not Group then
+		local a = Addon:gsub("%s", "_")
+		for _, Group in pairs(self:ListGroups(Addon)) do
+			local g = Group:gsub("%s", "_")
+			local aargs = args[a].args
+			aargs[g] = aargs[g] or self:GetOptions(Addon, Group)
 		end
 	end
 end
 
----------------------------------------------
--- Options Table
----------------------------------------------
+----------------------------------------
+-- Options Remover
+----------------------------------------
+
+-- Deletes an Addon or Group's options table.
+function Core:RemoveOptions(Addon, Group)
+	if not self.OptionsLoaded then
+		return
+	end
+	if InterfaceOptionsFrame:IsShown() then
+		InterfaceOptionsFrame:Hide()
+	end
+	if Addon then
+		local args = self.Options.args.Addons.args
+		local a = Addon:gsub("%s", "_")
+		if Group then
+			local g = Group:gsub("%s", "_")
+			local aargs = args[a].args
+			aargs[g] = nil
+		else
+			args[a] = nil
+		end
+	end
+end
+
+----------------------------------------
+-- Options API
+----------------------------------------
 
 do
 	-- Gets an option's value.
@@ -229,7 +236,7 @@ do
 	-- Returns an options group for an add-on or add-on group.
 	function Core:GetOptions(Addon, SubGroup)
 		local Group = Core:Group(Addon, SubGroup)
-		local Name, Info, Desc
+		local Name, Info
 		if SubGroup then
 			Name = SubGroup
 			Info = (L["Adjust the skin of all buttons registered to %s: %s."]):format(Addon, SubGroup)
@@ -396,24 +403,6 @@ do
 						},
 					},
 				},
-				--[[Fonts = {
-					type = "group",
-					name = L["Font Settings"],
-					inline = true,
-					order = 7,
-					args = {
-						Fonts = {
-							type = "toggle",
-							name = L["Enable"],
-							desc = L["Enable fonts provided by skins."],
-							get = GetOption,
-							set = SetOption,
-							arg = Group,
-							disabled = true, -- Disabled.
-							order = 1,
-						},
-					},
-				},]]
 				Reset = {
 					type = "execute",
 					name = L["Reset Skin"],
