@@ -639,7 +639,7 @@ function MOD.Nest_CreateBar(bg, name)
 		bar.timeText = bar.textFrame:CreateFontString(nil, "OVERLAY")
 		bar.icon = CreateFrame("Button", bname, bar.frame)
 		bar.iconTexture = bar.icon:CreateTexture(bname .. "IconTexture", "ARTWORK") -- texture for the bar's icon
-		bar.cooldown = CreateFrame("Cooldown", bname .. "Cooldown", bar.frame) -- cooldown overlay to animate timer
+		bar.cooldown = CreateFrame("Cooldown", bname .. "Cooldown", bar.frame, "CooldownFrameTemplate") -- cooldown overlay to animate timer
 		bar.cooldown.noCooldownCount = Raven.db.global.HideOmniCC
 		bar.cooldown.noOCC = Raven.db.global.HideOmniCC -- added for Tukui
 		bar.cooldown:SetHideCountdownNumbers(true) -- added for WoD

@@ -264,18 +264,17 @@ local function CheckAuras(unit, auras, hasAll, isMine, buff, toggle)
 	if (unit == "focus") and MOD.status.noFocus then return not toggle end
 	local found = false
 	for _, aname in pairs(auras) do -- look for each aura and check if buff/debuff and cast by player
+		local foundThis = false
 		local auraList = MOD:CheckAura(unit, aname, buff)
 		if #auraList > 0 then
 			for _, aura in pairs(auraList) do
 				if IsOff(isMine) or (isMine == (aura[6] == "player")) then -- check cast by setting
 					found = true -- found at least one of the auras
-				else
-					if hasAll then return toggle end -- not all are found
+					foundThis = true -- found this particular aura
 				end
 			end
-		else
-			if hasAll then return toggle end -- not all are found
 		end
+		if hasAll and not foundThis then return toggle end -- not all are found
 	end
 	if toggle then return not found end -- flip result if necessary
 	return found

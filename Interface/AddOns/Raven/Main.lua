@@ -102,6 +102,18 @@ function MOD:OnInitialize()
 	MOD.MSQ = LibStub("Masque", true)
 end
 
+-- Print debug messages with variable number of arguments in a useful format
+function MOD.Debug(a, ...)
+	if type(a) == "table" then
+		for k, v in pairs(a) do print(tostring(k) .. " = " .. tostring(v)) end -- if first parameter is a table, print out its fields
+	else
+		local s = tostring(a) -- otherwise first argument is a string but just make sure
+		local parm = {...}
+		for i = 1, #parm do s = s .. " " .. tostring(parm[i]) end -- append remaining arguments converted to strings
+		print(s)
+	end
+end
+
 -- Functions called to trigger updates
 local function TriggerPlayerUpdate() unitUpdate.player = true; updateCooldowns = true; doUpdate = true end
 local function TriggerCooldownUpdate() updateCooldowns = true; doUpdate = true end
@@ -148,7 +160,8 @@ local function AddTracker(dstGUID, dstName, isBuff, name, rank, icon, count, bty
 	if not t then t = AllocateTable(); tracker[id] = t end -- create the tracker if necessary
 	local vehicle = UnitHasVehicleUI("player")
 	t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], t[12], t[13], t[14], t[15], t[16], t[17], t[18], t[19], t[20], t[21], t[22] =
-		true, 0, count, btype, duration, caster, isStealable, icon, rank, expire, "spell id", spellID, name, spellID, boss, UnitName("player"), apply, nil, vehicle, dstGUID, dstName, tag
+		true, 0, count, btype, duration, caster, isStealable, icon, rank, expire, "spell id", spellID, name, spellID,
+		boss, UnitName("player"), apply, nil, vehicle, dstGUID, dstName, tag
 end
 
 -- Remove tracker entries for a unit, if tag is specified then only remove if tracker tag not equal
@@ -242,13 +255,14 @@ local function GetUnitIDFromGUID(guid)
 	return uid
 end
 
--- Function called for combat log events to track hots and dots (updated for 4.2)
-local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, sf2, dstGUID, dstName, df1, df2, spellID, spellName, spellSchool)
-	if srcGUID == UnitGUID("player") then -- make sure event is from a player action
+-- Function called for combat log events to track hots and dots
+local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, sf2, dstGUID, dstName, df1, df2, spellID, spellName, spellSchool, auraType)
+	if bit.band(sf1, COMBATLOG_OBJECT_AFFILIATION_MASK) == COMBATLOG_OBJECT_AFFILIATION_MINE then -- make sure event controlled by the player
+	-- MOD.Debug("CULE: ", e, dstGUID, dstName, spellName, string.format("%x", sf1), auraType)
 		doUpdate = true
 		local now = GetTime()
 		if e == "SPELL_CAST_SUCCESS" then -- check for special cases
-			if spellID == 33763 then e = "SPELL_AURA_APPLIED" end -- Lifebloom refreshes don't always generate aura applied events
+			if spellID == 33763 then e = "SPELL_AURA_APPLIED"; auraType = "BUFF" end -- Lifebloom refreshes don't always generate aura applied events
 		end
 		if e == "SPELL_AURA_APPLIED" or e == "SPELL_AURA_APPLIED_DOSE" or e == "SPELL_AURA_REFRESH" then
 			local name, rank, icon, count, bType, duration, expire, caster, isStealable, boss, sid, apply, _
@@ -267,8 +281,7 @@ local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, 
 			if not name then
 				name = spellName; rank = ""; count = 1; bType = nil; duration = MOD:GetDuration(name, spellID)
 				if duration > 0 then expire = now + duration else duration = 0; expire = 0 end
-				caster = "player"; isStealable = nil; boss = nil; apply = nil; isBuff = false
-				isBuff = (bit.band(df1, COMBATLOG_OBJECT_REACTION_MASK) ~= COMBATLOG_OBJECT_REACTION_HOSTILE)
+				caster = "player"; isStealable = nil; boss = nil; apply = nil; isBuff = (auraType == "BUFF")
 			end
 			if name and caster == "player" and (isBuff or (srcGUID ~= dstGUID)) then
 				AddTracker(dstGUID, dstName, isBuff, name, rank, icon, count, btype, duration, expire, caster, isStealable, spellID, boss, apply, nil)
@@ -1106,6 +1119,14 @@ function MOD:UpdateTrackers()
 		for k, t in pairs(tracker) do SetAuraTimeLeft(t); if (t[5] > 0) and (t[2] == 0) then tracker[k] = ReleaseTable(t) end end
 	end
 end
+
+--[[
+function MOD.DebugTrackers(whence)
+	MOD.Debug("Trackers: ", whence)
+	for id, tracker in pairs(unitBuffs) do for k, t in pairs(tracker) do MOD.Debug("buff", id, t[13]) end end
+	for id, tracker in pairs(unitDebuffs) do for k, t in pairs(tracker) do MOD.Debug("debuff", id, t[13]) end end
+end
+]]--
 
 -- Update aura table with current player, target and focus auras and debuffs, include player weapon buffs
 function MOD:UpdateAuras()

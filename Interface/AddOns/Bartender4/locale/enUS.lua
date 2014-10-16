@@ -16,7 +16,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = true
 L["Anchor"] = true
 L["Apply Preset"] = true
-L["Auto-Assist"] = true
 L["Auto-Assist Casting"] = true
 L["Bag Bar"] = true
 L["Bar Options"] = true
@@ -84,8 +83,6 @@ L["Disabled in Combat"] = true
 L["Don't Page"] = true
 L["Down"] = true
 L["Empty button background"] = true
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = true
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = true
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 

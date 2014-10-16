@@ -198,6 +198,23 @@ end
 -- ****************************************************************************
 -- Called when the text in the input frame editbox changes to allow validation.
 -- ****************************************************************************
+local function ValidateInputCallback(message)
+ local frame = popupFrames.inputFrame
+ 
+ -- Clear validation message and enable okay button.
+ frame.validateFontString:SetText("")
+ frame.okayButton:Enable()
+
+  -- Disable the save button and display the validation message if validation failed.
+  if (message) then
+   frame.validateFontString:SetText(message)
+   frame.okayButton:Disable()
+  end
+end
+
+-- ****************************************************************************
+-- Called when the text in the input frame editbox changes to allow validation.
+-- ****************************************************************************
 local function ValidateInput(this)
  local frame = popupFrames.inputFrame
 
@@ -208,7 +225,7 @@ local function ValidateInput(this)
  if (frame.validateHandler) then
   local firstText = frame.inputEditbox:GetText()
   local secondText = frame.secondInputEditbox:GetText()
-  local message = frame.validateHandler(firstText, frame.showSecondEditbox and secondText)
+  local message = frame.validateHandler(firstText, frame.showSecondEditbox and secondText, ValidateInputCallback)
 
   -- Disable the save button and display the validation message if validation failed.
   if (message) then
@@ -460,6 +477,7 @@ local function UpdateFontPreviews()
   fontSize = frame.normalFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.normalOutlineDropdown:GetSelectedID()]
   frame.normalPreviewFontString:SetFont(fontPath, fontSize, outline)
+  frame.normalPreviewFontString:SetText("")
   frame.normalPreviewFontString:SetText(L.MSG_NORMAL_PREVIEW_TEXT)
   frame.normalPreviewFontString:SetAlpha(frame.normalFontOpacitySlider:GetValue() / 100)
  end
@@ -468,8 +486,11 @@ local function UpdateFontPreviews()
   fontPath = fonts[frame.critFontDropdown:GetSelectedID()]
   fontSize = frame.critFontSizeSlider:GetValue()
   outline = OUTLINE_MAP[frame.critOutlineDropdown:GetSelectedID()]
-  if (fontPath and outline) then frame.critPreviewFontString:SetFont(fontPath, fontSize, outline) end
-  frame.critPreviewFontString:SetText(L.MSG_CRIT)
+  if (fontPath and outline) then
+   frame.critPreviewFontString:SetFont(fontPath, fontSize, outline)
+   frame.critPreviewFontString:SetText("")
+   frame.critPreviewFontString:SetText(L.MSG_CRIT)
+  end
   frame.critPreviewFontString:SetAlpha(frame.critFontOpacitySlider:GetValue() / 100)
  end
 end
@@ -3417,7 +3438,6 @@ local function CreateTriggerPopup()
  local warriorStances = {
   [1] = GetSkillName(2457),
   [2] = GetSkillName(71),
-  [3] = GetSkillName(2458),
  }
 
  -- Localized zone types.

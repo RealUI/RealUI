@@ -12,7 +12,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "Toujours cacher"
 L["Anchor"] = "Ancre"
 L["Apply Preset"] = "Appliquer préétablis"
-L["Auto-Assist"] = "Soutien auto."
 L["Auto-Assist Casting"] = "Incantaion avec Assistance Automatique"
 L["Bag Bar"] = "Barre des sacs"
 L["Bar Options"] = "Options de la barre"
@@ -80,9 +79,6 @@ L["Disabled in Combat"] = "Désactivée en combat"
 L["Don't Page"] = "Ne pas paginer"
 L["Down"] = "Vers le bas"
 L["Empty button background"] = "Arrière-plan des boutons vides"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Active le soutien automatique pour cett barre.
-Le soutient automatique tentera automatiquement d'incanter le sort sur la cible de votre cible si votre cible n'est pas une cible valide pour le sort sélectionné.]=]
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Activer Assitance Automatique pour cette Barre.
 Assistance Automatique tentera de faire votre sort sur la cible de votre cible, si la cible n'est pas valable pour le sort que vous essayer de faire.]=]

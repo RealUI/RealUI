@@ -1,4 +1,14 @@
 ------------------------------------------------------------------------
+r327 | tomber | 2014-10-15 22:50:22 +0000 (Wed, 15 Oct 2014) | 3 lines
+Changed paths:
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Fix missing clock-style cooldown animations.
+Fix detection of dots spread with AOE abilities (e.g., Shockwave, Arcane Torrent) and dots cast with the summoning mechanism (e.g., Void Tendril's Grasp).
+Fix condition tests All Buffs and All Debuffs to work correctly when listed auras were cast by other players.
+------------------------------------------------------------------------
 r326 | tomber | 2014-10-14 00:44:26 +0000 (Tue, 14 Oct 2014) | 2 lines
 Changed paths:
    A /trunk/Borders

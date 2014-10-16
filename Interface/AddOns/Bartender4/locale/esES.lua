@@ -12,7 +12,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "Ocultar siempre"
 L["Anchor"] = "Anclar"
 L["Apply Preset"] = "Usar preestablecidos."
-L["Auto-Assist"] = "Asistente automático"
 L["Auto-Assist Casting"] = "Asistente automático"
 L["Bag Bar"] = "Barra de bolsas"
 L["Bar Options"] = "Opciones de Barra"
@@ -80,9 +79,6 @@ L["Disabled in Combat"] = "Deshabilitar en combate"
 L["Don't Page"] = "No paginar"
 L["Down"] = "Abajo"
 L["Empty button background"] = "Boton de fondo vacio"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Permitir asistente automático para esta barra.
-Asistente automático tratará de lanzar automáticamente la habilidad en el objetivo de tu objetivo, si éste no es un objetivo válido para la habilidad seleccionada.]=]
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Permitir asistente automático para esta barra.
 Asistente automático tratará de lanzar automáticamente la habilidad en el objetivo de tu objetivo, si éste no es un objetivo válido para la habilidad seleccionada.]=]

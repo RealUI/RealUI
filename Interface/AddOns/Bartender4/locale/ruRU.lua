@@ -8,15 +8,14 @@ if not L then return end
 L["ActionBar Paging"] = "Листание панелей"
 L["Alpha"] = "Прозрачность"
 L["ALT"] = "Alt"
--- L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowace|r"] = "Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowace|r"
+L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowace|r"] = "Также, вы можете найти нас на  |cffffff78irc://irc.freenode.org/wowace|r" -- Needs review
 L["Always Hide"] = "Всегда скрывать"
 L["Anchor"] = "Якорь"
 L["Apply Preset"] = "Применить предустановку"
-L["Auto-Assist"] = "Авто-Помощь"
 -- L["Auto-Assist Casting"] = "Auto-Assist Casting"
 L["Bag Bar"] = "Панель сумок"
 L["Bar Options"] = "Опции панели"
--- L["Bar Paging"] = "Bar Paging"
+L["Bar Paging"] = "Листание панелей с кнопками" -- Needs review
 L["Bars"] = "Панели"
 L["Bar %s"] = "Панель № %s"
 L["Bar Snapping"] = "Прилипание панелей"
@@ -57,7 +56,7 @@ L["Configure the alpha of the bar."] = "Настройка прозрачнос�
 L["Configure the Bag Bar"] = "Настройка панели сумок"
 L["Configure the Blizzard Art Bar"] = "Настроить панели Blizzard Арт"
 L["Configure the Button Tooltip."] = "Настройка всплывающих подсказок для кнопок."
--- L["Configure the Extra Action Bar"] = "Configure the Extra Action Bar"
+L["Configure the Extra Action Bar"] = "Настроить Extra Action Bar" -- Needs review
 L["Configure the Fade Out Alpha"] = "Настройка прозрачности исчезновения"
 L["Configure the Fade Out Delay"] = "Настройка задержки исчезновения"
 L["Configure the Micro Menu"] = "Настройка системных кнопок"
@@ -80,9 +79,6 @@ L["Disabled in Combat"] = "Отключать в бою"
 L["Don't Page"] = "Не листать"
 L["Down"] = "Вниз"
 L["Empty button background"] = "Фон пустых клавиш"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Включить авто-помощь для этой панели.
-Авто-помощь будет автоматически пытаться применить ваше заклинание на цель цели, если оно не может быть использовано на вашу цель.]=]
 --[==[ L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ]==]
@@ -97,7 +93,7 @@ Mouse-Over Casting will automatically cast onto the unit under your mouse withou
 L["Enable State-based Button Swaping"] = "Разрешить переключение панелей"
 L["Enable the Bag Bar"] = "Включить панель сумок"
 L["Enable the Blizzard Art Bar"] = "Разрешить панели Blizzard Арт"
--- L["Enable the Extra Action Bar"] = "Enable the Extra Action Bar"
+L["Enable the Extra Action Bar"] = "Включить Extra Action Bar" -- Needs review
 L["Enable the FadeOut mode"] = "Включить исчезновение панели"
 L["Enable the Micro Menu"] = "Включить микроменю"
 L["Enable the PetBar"] = "Включить панель питомца"
@@ -107,12 +103,12 @@ L["Enable the use of a custom condition, disabling all of the above."] = "Раз
 L["Enable the use of the Blizzard Vehicle UI, hiding any Bartender4 bars in the meantime."] = "Разрешить использование стандартного интерфейса управления транспортом, все панели Bartender4 будут скрыты на это время."
 L["Enable the Vehicle Bar"] = "Включить панель транспорта"
 L["Enable the XP Bar"] = "Включить полосу опыта"
--- L["Extra Action Bar"] = "Extra Action Bar"
+L["Extra Action Bar"] = "Extra Action Bar" -- Needs review
 L["Fade Out"] = "Исчезновение"
 L["Fade Out Alpha"] = "Прозрачность исчезновения"
 L["Fade Out Delay"] = "Задержка сокрытия"
 L["FAQ"] = "ЧаВо"
--- L["Flyout Direction"] = "Flyout Direction"
+L["Flyout Direction"] = "Flyout Direction" -- Needs review
 L["Focus-Cast by modifier"] = "Применение к фокусу по модификатору"
 L["Focus-Cast Modifier"] = "Применение к фокусу"
 L["Frequently Asked Questions"] = "Часто задаваемые Вопросы"

@@ -170,7 +170,7 @@ end
 -- ****************************************************************************
 -- Validates the passed custom font path.
 -- ****************************************************************************
-local function MediaTab_ValidateCustomFontPath(fontPath)
+local function MediaTab_ValidateCustomFontPath(fontPath, _, callback)
  if (not fontPath or fontPath == "") then return L.MSG_INVALID_CUSTOM_FONT_PATH end
  local fontPathLower = string.lower(fontPath)
  if (not string.find(fontPathLower, ".ttf")) then return L.MSG_INVALID_CUSTOM_FONT_PATH end
@@ -179,24 +179,44 @@ local function MediaTab_ValidateCustomFontPath(fontPath)
  local normalFontPath, normalFontSize = GameFontNormal:GetFont()
  if (fontPathLower == string.lower(normalFontPath)) then return end
 
+ -- This section is a bit hacky.  First, it seems that in order for a new font
+ -- instance to take effect the text must be changed after setting it.  This
+ -- was not always case, but appears to be now.  Next, the SetFont function now
+ -- returns before the font is actually set.  It appears to be loaded async now.
+ -- So, when a failing ttf is provided, setup a callback to give the font a
+ -- chance to load before checking it again.
  validationFontString:SetFont(normalFontPath, normalFontSize)
+ validationFontString:SetText("")
  if (not string.find(fontPath, "\\", 1, true)) then fontPath = DEFAULT_FONT_PATH .. fontPath end
- validationFontString:SetFont(fontPath, normalFontSize, "MONOCHROME")
- if (validationFontString:GetFont() == normalFontPath) then return L.MSG_UNABLE_TO_SET_FONT end
+ validationFontString:SetFont(fontPath, normalFontSize, "")
+ validationFontString:SetText("Test")
+ if (validationFontString:GetFont() == normalFontPath) then
+  -- Setup a callback which checks the font path again after half a second and
+  -- in turn calls the validate callback which updates the input box's error
+  -- label and OK button.
+  MSBTOptions.Main.ScheduleCallback(0.5,
+   function ()
+    local message
+    if (validationFontString:GetFont() == normalFontPath) then message = L.MSG_UNABLE_TO_SET_FONT end
+    callback(message)
+   end
+  )
+  return L.MSG_TESTING_FONT
+ end
 end
 
 
 -- ****************************************************************************
 -- Validates the passed custom font name and path.
 -- ****************************************************************************
-local function MediaTab_ValidateCustomFont(fontName, fontPath)
+local function MediaTab_ValidateCustomFont(fontName, fontPath, callback)
  if (not fontName or fontName == "") then return L.MSG_INVALID_CUSTOM_FONT_NAME end
 
  for name in pairs(MSBTMedia.fonts) do
   if (name == fontName) then return L.MSG_FONT_NAME_ALREADY_EXISTS end
  end
  
- return MediaTab_ValidateCustomFontPath(fontPath)
+ return MediaTab_ValidateCustomFontPath(fontPath, nil, callback)
 end
 
 
@@ -608,6 +628,9 @@ local function MediaTab_Create()
 
  -- Font path validation font string.
  local fontString = tabFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+ fontString:SetPoint("BOTTOMRIGHT", tabFrame, "BOTTOMRIGHT", 0, 0)
+ fontString:SetText("Test")
+ fontString:SetAlpha(0)
  tabFrame.fontPathValidationFontString = fontString
  
  tabFrame.created = true
@@ -3443,7 +3466,7 @@ local function LootAlertsTab_Create()
 
  -- Item quality checkboxes.
  local anchor = fontString
- for quality = ITEM_QUALITY_POOR, ITEM_QUALITY_EPIC do
+ for quality = LE_ITEM_QUALITY_POOR, LE_ITEM_QUALITY_EPIC do
   local checkbox = MSBTControls.CreateCheckbox(tabFrame)
   local label = _G["ITEM_QUALITY" .. quality .. "_DESC"]
   local color = ITEM_QUALITY_COLORS[quality]
@@ -3548,7 +3571,7 @@ local function LootAlertsTab_OnShow()
  tabFrame.moneyGainsFontString:SetText(eventSettings.message)
 
  -- Item qualities.
- for quality = ITEM_QUALITY_POOR, ITEM_QUALITY_EPIC do
+ for quality = LE_ITEM_QUALITY_POOR, LE_ITEM_QUALITY_EPIC do
   controls["quality" .. quality .. "Checkbox"]:SetChecked(not currentProfile.qualityExclusions[quality])
  end
  

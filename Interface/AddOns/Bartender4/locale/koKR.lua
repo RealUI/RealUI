@@ -12,7 +12,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "항상 숨김"
 L["Anchor"] = "앵커"
 L["Apply Preset"] = "프리셋 적용"
-L["Auto-Assist"] = "자동 지원"
 L["Auto-Assist Casting"] = "자동 지원 대상 시전"
 L["Bag Bar"] = "가방 바"
 L["Bar Options"] = "바 옵션"
@@ -80,8 +79,6 @@ L["Disabled in Combat"] = "전투 중 비활성화"
 L["Don't Page"] = "변경하지 않음"
 L["Down"] = "아래"
 L["Empty button background"] = "빈 버튼 배경"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = "이 바에 대해 자동 지원 기능을 활성화합니다. 자동 지원 기능은 선택된 주문에 대해 대상이 유효하지 않은 경우 대상의 대상에게 자동으로 시전할 것입니다."
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[현재 바의 자동 지원 대상 시전을 사용합니다.
 자동 지원 대상은 원하는 주문을 대상이 아니더라도 자동으로 찾게 됩니다.]=]

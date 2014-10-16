@@ -109,6 +109,7 @@ end
 
 function ActionBar:SetupSmartButton(button)
 	button:SetAttribute("OnStateChanged", [[
+		if self:GetAttribute("statehidden") then return end
 		local header = self:GetParent()
 		header:RunFor(self, header:GetAttribute("ChildUpdateSmartTarget"), ...)
 	]])

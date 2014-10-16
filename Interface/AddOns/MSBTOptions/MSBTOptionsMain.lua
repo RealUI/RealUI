@@ -42,6 +42,10 @@ local popupFrames = {};
 local tabData = {};
 local tabListbox;
 
+-- Scheduling variables.
+local waitTable = {};
+local waitFrame = nil;
+
 
 -------------------------------------------------------------------------------
 -- Tab functions.
@@ -315,6 +319,40 @@ local function RegisterPopupFrame(frame)
 end
 
 
+-------------------------------------------------------------------------------
+-- Scheduling functions.
+-------------------------------------------------------------------------------
+
+-- ****************************************************************************
+-- Registers frames that float above the main options window.
+-- These frames will be hidden when a tab is selected or the main options
+-- window is hidden.
+-- ****************************************************************************
+local function ScheduleCallback(delay, func, ...)
+ if (waitFrame == nil) then
+  waitFrame = CreateFrame("Frame", nil, UIParent)
+  waitFrame:SetScript("OnUpdate",function (self, elapsed)
+   local count = #waitTable
+   local i = 1
+   while (i <= count) do
+    local waitRecord = tremove(waitTable, i)
+    local duration = tremove(waitRecord, 1)
+    local func = tremove(waitRecord, 1)
+    local params = tremove(waitRecord, 1)
+    if (duration > elapsed) then
+     tinsert(waitTable, i, {duration - elapsed, func, params})
+     i = i + 1
+    else
+     count = count - 1
+     func(unpack(params))
+    end
+   end
+  end)
+ end
+ tinsert(waitTable, {delay, func, {...}})
+ return true
+end
+
 
 
 -------------------------------------------------------------------------------
@@ -322,7 +360,8 @@ end
 -------------------------------------------------------------------------------
 
 -- Protected Functions.
-module.ShowMainFrame			= ShowMainFrame;
-module.HideMainFrame			= HideMainFrame;
-module.RegisterPopupFrame		= RegisterPopupFrame;
-module.AddTab					= AddTab;
+module.ShowMainFrame       = ShowMainFrame
+module.HideMainFrame	   = HideMainFrame
+module.RegisterPopupFrame  = RegisterPopupFrame
+module.AddTab              = AddTab
+module.ScheduleCallback    = ScheduleCallback

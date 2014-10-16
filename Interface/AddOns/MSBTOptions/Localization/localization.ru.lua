@@ -24,6 +24,7 @@ L.MSG_INVALID_CUSTOM_FONT_NAME		= "Неверное название шрифт�
 L.MSG_FONT_NAME_ALREADY_EXISTS		= "Название шрифта уже существует."
 L.MSG_INVALID_CUSTOM_FONT_PATH		= "Путь к шрифту должен быть указан на файл .ttf."
 --L.MSG_UNABLE_TO_SET_FONT			= "Unable to set specified font." 
+--L.MSG_TESTING_FONT			= "Testing the specified font for validity..."
 L.MSG_CUSTOM_SOUNDS					= "Пользовательские звуки"
 L.MSG_INVALID_CUSTOM_SOUND_NAME		= "Неверное название звукового файла."
 L.MSG_SOUND_NAME_ALREADY_EXISTS		= "Название звукового файла уже существует."

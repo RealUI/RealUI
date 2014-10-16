@@ -12,7 +12,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "總是隱藏"
 L["Anchor"] = "錨點"
 L["Apply Preset"] = "套用預設"
-L["Auto-Assist"] = "自動協助"
 L["Auto-Assist Casting"] = "自動輔助施法"
 L["Bag Bar"] = "背包欄"
 L["Bar Options"] = "快捷列選項"
@@ -80,9 +79,6 @@ L["Disabled in Combat"] = "戰鬥中已禁用"
 L["Don't Page"] = "不翻頁"
 L["Down"] = "下"
 L["Empty button background"] = "清空按鈕的背景"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[為該動作條啟用自動協助。
- 自動協助會自動地試著對你目標的目標施法，假如選定的技能目標是個無效的目標。]=]
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = "此動作條啟用自動輔助施法。"
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 

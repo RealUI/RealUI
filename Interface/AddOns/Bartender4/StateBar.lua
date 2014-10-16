@@ -45,6 +45,7 @@ function Bartender4.StateBar:Create(id, config, name)
 		bar:RegisterEvent("PLAYER_TALENT_UPDATE")
 		bar:RegisterEvent("PLAYER_REGEN_ENABLED")
 		bar:RegisterEvent("GLYPH_UPDATED")
+		bar:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 		bar:SetScript("OnEvent", StateBar.OnEvent)
 	end
 	return bar
@@ -58,7 +59,7 @@ function StateBar:ApplyConfig(config)
 end
 
 function StateBar:OnEvent(event, ...)
-	if event == "PLAYER_TALENT_UPDATE" or event == "GLYPH_UPDATED" then
+	if event == "PLAYER_TALENT_UPDATE" or event == "GLYPH_UPDATED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
 		if InCombatLockdown() then
 			self.updateStateOnCombatLeave = true
 		else
@@ -111,9 +112,10 @@ local DefaultStanceMap = setmetatable({}, { __index = function(t,k)
 		}
 	elseif k == "MONK" then
 		newT = {
-			{ id = "tiger", name = GetSpellInfo(103985), index = 1 },
-			{ id = "ox", name = GetSpellInfo(115069), index = 2 },
-			{ id = "serpent", name = GetSpellInfo(115070), index = 3 },
+			{ id = "tiger", name = GetSpellInfo(103985), index = 1, spec = 3 },
+			{ id = "crane", name = GetSpellInfo(154436), index = 1, spec = 2 },
+			{ id = "ox", name = GetSpellInfo(115069), index = 2, spec = 1 },
+			{ id = "serpent", name = GetSpellInfo(115070), index = 3, spec = 2 },
 		}
 	end
 	rawset(t, k, newT)
@@ -163,7 +165,7 @@ function StateBar:UpdateStates(returnOnly)
 			if not stateconfig.stance[playerclass] then stateconfig.stance[playerclass] = {} end
 			for i,v in pairs(stancemap) do
 				local state = self:GetStanceState(v)
-				if state and state ~= 0 and v.index then
+				if state and state ~= 0 and v.index and (v.spec == nil or v.spec == GetSpecialization()) then
 					-- hack for druid prowl, since its no real "stance", but we want to handle it anyway
 					if playerclass == "DRUID" then
 						if v.id == "cat" then

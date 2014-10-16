@@ -657,7 +657,6 @@ local function MergeEvents(numEvents, currentProfile)
     unmergedEvent.eventMerged = true
 
     -- Total the amount if there is one.
-    if (unmergedEvent.amount) and (type(unmergedEvent.amount) == "boolean") then print("MSBT: Error with event merge; failed for event with stats: ", unmergedEvent.eventType, unmergedEvent.effectName, unmergedEvent.name, unmergedEvent.class) end
     if (unmergedEvent.amount) then mergedEvent.amount = (mergedEvent.amount or 0) + unmergedEvent.amount end
 
     -- Total the overheal amount if there is one.
@@ -679,7 +678,7 @@ local function MergeEvents(numEvents, currentProfile)
    unmergedEvent.numMerged = 0
 
    -- Set the number of crits depending on if the event is a crit or not.
-   if (unmergedEvent.isCrit or unmergedEvent.isMultistrike) then unmergedEvent.numCrits = 1 else unmergedEvent.numCrits = 0 end
+   if (unmergedEvent.isCrit) then unmergedEvent.numCrits = 1 else unmergedEvent.numCrits = 0 end
 
    -- Add the event to the end of the merged events array.
    mergedEvents[#mergedEvents+1] = unmergedEvent

@@ -56,13 +56,10 @@ local SPELLID_HAMMER_OF_WRATH	= 24275
 local SPELLID_KILL_SHOT		= 53351
 local SPELLID_LAVA_SURGE		= 77762
 local SPELLID_REVENGE			= 6572
-local SPELLID_RUNE_STRIKE		= 56815
-local SPELLID_OVERPOWER		= 7384
 local SPELLID_VICTORY_RUSH		= 34428
 local SPELLID_SHADOW_ORB		= 77487
 
 -- Trigger spell names.
---local SPELL_BACKLASH				= GetSkillName(34936)
 local SPELL_BERSERK				= GetSkillName(SPELLID_BERSERK)
 local SPELL_BLINDSIDE				= GetSkillName(121153)
 local SPELL_BLOODSURGE				= GetSkillName(46916)
@@ -70,8 +67,6 @@ local SPELL_BRAIN_FREEZE			= GetSkillName(44549)
 local SPELL_BF_FIREBALL			= GetSkillName(57761)
 local SPELL_CLEARCASTING			= GetSkillName(16870)
 local SPELL_DECIMATION				= GetSkillName(108869)
---local SPELL_ECLIPSE_SOLAR			= GetSkillName(48517)
---local SPELL_ECLIPSE_LUNAR			= GetSkillName(48518)
 local SPELL_ELUSIVE_BREW			= GetSkillName(128939)
 local SPELL_EXECUTE				= GetSkillName(SPELLID_EXECUTE)
 local SPELL_FINGERS_OF_FROST		= GetSkillName(112965)
@@ -86,14 +81,10 @@ local SPELL_MANA_TEA				= GetSkillName(115867)
 local SPELL_MISSILE_BARRAGE		= GetSkillName(62401)
 local SPELL_MOLTEN_CORE			= GetSkillName(122351)
 local SPELL_NIGHTFALL				= GetSkillName(108558)
---local SPELL_OWLKIN_FRENZY			= GetSkillName(48391)
---local SPELL_POWER_GUARD			= GetSkillName(118636)
 local SPELL_PREDATORS_SWIFTNESS	= GetSkillName(69369)
 local SPELL_PVP_TRINKET			= GetSkillName(42292)
 local SPELL_REVENGE				= GetSkillName(SPELLID_REVENGE)
 local SPELL_RIME 					= GetSkillName(59057)
---local SPELL_RUNE_STRIKE			= GetSkillName(SPELLID_RUNE_STRIKE)
---local SPELL_OVERPOWER				= GetSkillName(SPELLID_OVERPOWER)
 local SPELL_SHADOW_TRANCE			= GetSkillName(17941)
 local SPELL_SHIELD_SLAM			= GetSkillName(23922)
 local SPELL_SHADOW_INFUSION		= GetSkillName(91342)
@@ -1162,16 +1153,6 @@ local masterProfile = {
  
  -- Default trigger settings.
  triggers = {
-  --[[MSBT_TRIGGER_BACKLASH = {
-   colorR			= 0.709,
-   colorG			= 0,
-   colorB			= 0.709,
-   message			= SPELL_BACKLASH .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "WARLOCK",
-   mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_BACKLASH .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },]]
   MSBT_TRIGGER_BERSERK = {
    colorG			= 0.25,
    colorB			= 0.25,
@@ -1227,23 +1208,6 @@ local masterProfile = {
    classes			= "WARLOCK",
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_DECIMATION .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
   },
-  --[[MSBT_TRIGGER_ECLIPSE_SOLAR = {
-   colorG			= 0.725,
-   message			= SPELL_ECLIPSE_SOLAR .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "DRUID",
-   mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_ECLIPSE_SOLAR .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },
-  MSBT_TRIGGER_ECLIPSE_LUNAR = {
-   colorR			= 0.5,
-   colorB			= 0.5,
-   message			= SPELL_ECLIPSE_LUNAR .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "DRUID",
-   mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_ECLIPSE_LUNAR .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },]]
   MSBT_TRIGGER_ELUSIVE_BREW = {
    colorB			= 0,
    message			= SPELL_ELUSIVE_BREW .. " x%a!",
@@ -1313,7 +1277,7 @@ local masterProfile = {
    classes			= "SHAMAN",
    mainEvents		= "SPELL_CAST_SUCCESS{sourceAffiliation;;eq;;" .. FLAG_YOU .. ";;skillID;;eq;;" .. SPELLID_LAVA_SURGE .. "}",
   },
-  --[[MSBT_TRIGGER_LOCK_AND_LOAD = {
+  MSBT_TRIGGER_LOCK_AND_LOAD = {
    colorR			= 0.627,
    colorG			= 0.5,
    colorB			= 0,
@@ -1322,7 +1286,7 @@ local masterProfile = {
    fontSize			= 26,
    classes			= "HUNTER",
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_LOCK_AND_LOAD .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },]]
+  },
   MSBT_TRIGGER_LOW_HEALTH = {
    colorG			= 0.5,
    colorB			= 0.5,
@@ -1399,25 +1363,6 @@ local masterProfile = {
    classes			= "WARLOCK",
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_SHADOW_TRANCE .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
   },
-  --[[MSBT_TRIGGER_OVERPOWER = {
-   colorB			= 0,
-   message			= SPELL_OVERPOWER .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "WARRIOR",
-   mainEvents		= "GENERIC_MISSED{sourceAffiliation;;eq;;" .. FLAG_YOU .. ";;missType;;eq;;DODGE}",
-   exceptions		= "unavailableSkill;;eq;;" .. SPELL_OVERPOWER,
-   iconSkill		= SPELLID_OVERPOWER,
-  },
-  MSBT_TRIGGER_POWER_GUARD = {
-   colorR			= 0.5,
-   colorB			= 0.5,
-   message			= SPELL_POWER_GUARD .. " x3!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "MONK",
-   mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_POWER_GUARD .. ";;amount;;eq;;3;;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },]]
   MSBT_TRIGGER_PVP_TRINKET = {
    colorB			= 0,
    message			= SPELL_PVP_TRINKET .. "! (%r)",
@@ -1426,16 +1371,6 @@ local masterProfile = {
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_PVP_TRINKET .. ";;recipientReaction;;eq;;" .. REACTION_HOSTILE .. "}",
    exceptions		= "zoneType;;ne;;arena",
   },
-  --[[MSBT_TRIGGER_OWLKIN_FRENZY = {
-   colorR			= 0.627,
-   colorG			= 0.5,
-   colorB			= 0,
-   message			= SPELL_OWLKIN_FRENZY .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "DRUID",
-   mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_OWLKIN_FRENZY .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
-  },]]
   MSBT_TRIGGER_PREDATORS_SWIFTNESS = {
    colorR			= 0.5,
    colorB			= 0.5,
@@ -1464,17 +1399,6 @@ local masterProfile = {
    classes			= "DEATHKNIGHT",
    mainEvents		= "SPELL_AURA_APPLIED{skillName;;eq;;" .. SPELL_FREEZING_FOG .. ";;recipientAffiliation;;eq;;" .. FLAG_YOU .. "}",
   },
-  --[[MSBT_TRIGGER_RUNE_STRIKE = {
-   colorG			= 0.25,
-   colorB			= 0.25,
-   message			= SPELL_RUNE_STRIKE .. "!",
-   alwaysSticky		= true,
-   fontSize			= 26,
-   classes			= "DEATHKNIGHT",
-   mainEvents		= "GENERIC_MISSED{recipientAffiliation;;eq;;" .. FLAG_YOU .. ";;missType;;eq;;DODGE}&&GENERIC_MISSED{recipientAffiliation;;eq;;" .. FLAG_YOU .. ";;missType;;eq;;PARRY}",
-   exceptions		= "unavailableSkill;;eq;;" .. SPELL_RUNE_STRIKE .. ";;recentlyFired;;lt;;5",
-   iconSkill		= SPELLID_RUNE_STRIKE,
-  },]]
   MSBT_TRIGGER_SHADOW_INFUSION = {
    colorR			= 0.709,
    colorG			= 0,

@@ -12,7 +12,6 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "Immer verstecken"
 L["Anchor"] = "Anker"
 L["Apply Preset"] = "Vorlage speichern."
-L["Auto-Assist"] = "Automatische Hilfe"
 L["Auto-Assist Casting"] = "Automatisches Unterstützen"
 L["Bag Bar"] = "Taschenleiste"
 L["Bar Options"] = "Leistenoptionen"
@@ -80,9 +79,6 @@ L["Disabled in Combat"] = "Im Kampf deaktivieren"
 L["Don't Page"] = "Kein Seitenwechsel"
 L["Down"] = "Runter"
 L["Empty button background"] = "Hintergrund leerer Schaltflächen"
-L[ [=[Enable Auto-Assist for this bar.
- Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Automatische Hilfe für diese Leiste aktivieren.
-Falls der gewählte Zauber nicht auf das Ziel anwendbar ist, wird die automatische Hilfe versuchen ihn auf das Ziel des Ziels zu wirken.]=]
 L[ [=[Enable Auto-Assist for this bar.
 Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Automatisches Unterstützen für diese Leiste aktivieren.
 Falls der gewählte Zauber nicht auf das Ziel anwendbar ist, wird Automatisches Unterstützen versuchen ihn auf das Ziel des Ziels zu wirken.]=]
