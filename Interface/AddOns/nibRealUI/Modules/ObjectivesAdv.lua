@@ -692,10 +692,12 @@ function ObjectivesAdv:OnInitialize()
 	db = self.db.profile
 
 	if nibRealUIDB["namespaces"]["WatchFrame Adv."] then
-		for k, v in next, nibRealUIDB["namespaces"]["WatchFrame Adv."]["profiles"] do
-			nibRealUIDB["namespaces"]["Objectives Adv."]["profiles"][k] = v
-			nibRealUIDB["namespaces"]["WatchFrame Adv."] = nil
+		if nibRealUIDB["namespaces"]["WatchFrame Adv."]["profiles"] then
+			for k, v in next, nibRealUIDB["namespaces"]["WatchFrame Adv."]["profiles"] do
+				nibRealUIDB["namespaces"]["Objectives Adv."]["profiles"][k] = v
+			end
 		end
+		nibRealUIDB["namespaces"]["WatchFrame Adv."] = nil
 	end
 
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
