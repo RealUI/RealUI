@@ -180,7 +180,7 @@ local function GetOptions()
                         isPercent = true,
                         get = function(info) return db.elements[ke].opacity.outofcombat end,
                         set = function(info, value)
-                            print("OutCombat Inv", ke)
+                            --print("OutCombat Inv", ke)
                             db.elements[ke].opacity.outofcombat = value
                             CombatFader:OptionsRefresh()
                         end,
@@ -220,7 +220,7 @@ local function GetOptions()
                         isPercent = true,
                         get = function(info) return db.elements[ke].opacity.incombat end,
                         set = function(info, value)
-                            print("OutCombat", ke)
+                            --print("OutCombat", ke)
                             db.elements[ke].opacity.incombat = value
                             CombatFader:OptionsRefresh()
                         end,

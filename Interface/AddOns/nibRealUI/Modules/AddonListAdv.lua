@@ -81,7 +81,7 @@ StaticPopupDialogs["ALA_SaveAs"] = {
 ---- Sets ----
 --------------
 local function GetSet(name)
-    print("GetSet", name)
+    --print("GetSet", name)
     local set, db
     if name == nibRealUI.classLocale then
         if not dbk[1] then
@@ -94,7 +94,7 @@ local function GetSet(name)
             repeat
                 setIndex = setIndex + 1
                 set = v[setIndex]
-                print("repeat", setIndex, v, dbg)
+                --print("repeat", setIndex, v, dbg)
             until not set or set.name == name
             if set then
                 db = v
@@ -106,7 +106,7 @@ local function GetSet(name)
 end
 
 function AddonListAdv:SaveSet(name, newName)
-    print("SaveSet", name, newName)
+    --print("SaveSet", name, newName)
     if not name then
         name = newName
         table.insert(dbc, {["name"] = name,})
@@ -118,7 +118,7 @@ function AddonListAdv:SaveSet(name, newName)
         return AddonListAdv:RenameSet(set, newName)
     end
 
-    print("SaveSet2", set, set.name)
+    --print("SaveSet2", set, set.name)
     
     for i = 1, #set do
         print("SaveSet3", i, set[i])
@@ -138,7 +138,7 @@ function AddonListAdv:SaveSet(name, newName)
 end
 
 function AddonListAdv:UnloadSet(set)
-    print("UnloadSet", set)
+    --print("UnloadSet", set)
     if type(set) ~= "table" then
         set = GetSet(set)
     end
@@ -155,7 +155,7 @@ function AddonListAdv:UnloadSet(set)
 end
 
 function AddonListAdv:DeleteSet(set)
-    print("DeleteSet", set)
+    --print("DeleteSet", set)
     local db
     if type(set) ~= "table" then
         set, db = GetSet(set)
@@ -172,7 +172,7 @@ function AddonListAdv:DeleteSet(set)
 end
 
 function AddonListAdv:ClearSelectionAndLoadSet(name)
-    print("ClearSelectionAndLoadSet", name)
+    --print("ClearSelectionAndLoadSet", name)
     local set = GetSet(name)
 
     DisableAllAddOns()
@@ -180,7 +180,7 @@ function AddonListAdv:ClearSelectionAndLoadSet(name)
 end
 
 function AddonListAdv:LoadSet(set)
-    print("LoadSet", set)
+    --print("LoadSet", set)
     if type(set) ~= "table" then
         set = GetSet(set)
     end
