@@ -485,7 +485,6 @@ end
 ]]
 function Implementation:PLAYERREAGENTBANKSLOTS_CHANGED(event, slotID)
 	local bagID = -3
-	print("PLAYERBANKSLOTS_CHANGED", bagID, slotID)
 
 	self:BAG_UPDATE(event, bagID, slotID)
 end

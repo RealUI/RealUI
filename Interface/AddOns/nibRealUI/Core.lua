@@ -712,7 +712,7 @@ end
 function nibRealUI:Taint_Logging_Toggle()
     local taintLog = GetCVar("taintLog")
 	SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
-	print("Taint Logging is "..((taintLog ~= "0" and "disabled.") or "enabled."))
+	ReloadUI()
 end
 
 function nibRealUI:ADDON_LOADED(event, addon)
