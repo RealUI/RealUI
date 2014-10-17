@@ -1609,7 +1609,7 @@ local function Currency_Update(self)
 	end
 
 	local CurText, curCurrency, rawValue
-	print("currencystate:", dbc.currencystate)
+	-- print("currencystate:", dbc.currencystate)
 	if dbc.currencystate == 1 then
 		CurText, curCurrency, rawValue = convertMoney(money)
 		if not(rawValue < 100000) then
@@ -1621,7 +1621,7 @@ local function Currency_Update(self)
 		self.icon:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", self.text:GetWidth() + 6, 6)
 		self.icon:SetVertexColor(unpack(CurrencyColors[curCurrency]))
 	else
-		print("currDB:", currDB, " - bpCurrencies:", currDB and currDB.bpCurrencies)
+		-- print("currDB:", currDB, " - bpCurrencies:", currDB and currDB.bpCurrencies)
 		CurText = CurrencyDisplayText(currDB.bpCurrencies[dbc.currencystate - 1].amnt, ShortenDynamicCurrencyName(currDB.bpCurrencies[dbc.currencystate - 1].name))
 		self.icon:Hide()
 	end
