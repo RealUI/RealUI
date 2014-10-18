@@ -130,7 +130,6 @@ function BloodShield:UpdateMax(event, unit)
 	end
 	
 	self.maxBlood = UnitHealthMax("player")
-	Resolve:UpdateBase()
 	self:UpdateAuras()
 end
 

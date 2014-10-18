@@ -96,16 +96,6 @@ function ResolveBar:UpdateAuras(units)
     end
 end
 
-function ResolveBar:UpdateBase(event, unit)
-    --print("UpdateBase", event, unit)
-    if (unit and (unit ~= "player")) then
-        return
-    end
-
-    Resolve:UpdateBase(event, unit)
-    self:UpdateAuras()
-end
-
 function ResolveBar:UpdateShown()
     --print("UpdateShown")
 
@@ -255,7 +245,6 @@ function ResolveBar:OnEnable()
     self:RegisterEvent("PLAYER_ALIVE", "UpdateShown")
     self:RegisterEvent("PLAYER_DEAD", "UpdateShown")
     self:RegisterEvent("PLAYER_LEVEL_UP", "UpdateShown")
-    self:RegisterEvent("UNIT_MAXHEALTH", "UpdateBase")
     self:RegisterBucketEvent("UNIT_AURA", updateSpeed, "UpdateAuras")
 end
 

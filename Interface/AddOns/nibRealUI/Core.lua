@@ -421,7 +421,7 @@ function nibRealUI:StyleSetFont(style)
 	nibRealUI:GetModule("HuDConfig"):RegisterForUpdate("AB", "stance")
 
 	-- Refresh Watch Frame
-	if not ObjectiveTracker.collapsed then
+	if not ObjectiveTrackerFrame.collapsed then
 		ObjectiveTracker_Collapse()
 		ObjectiveTracker_Expand()
 	end
@@ -587,7 +587,7 @@ function nibRealUI:UPDATE_PENDING_MAIL()
 	CancelEmote()	-- Cancel Map Holding animation
 
 	-- Refresh WatchFrame lines and positioning
-	if ObjectiveTracker and ObjectiveTracker.collapsed then
+	if ObjectiveTrackerFrame and ObjectiveTrackerFrame.collapsed then
 		ObjectiveTracker_Collapse()
 		ObjectiveTracker_Expand()
 	end

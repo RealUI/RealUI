@@ -131,7 +131,6 @@ function Stagger:UpdateMax(event, unit)
 	end
 	
 	maxHealth = UnitHealthMax("player")
-	Resolve:UpdateBase(event, unit)
 	self:UpdateAuras()
 end
 
