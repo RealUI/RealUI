@@ -36,12 +36,23 @@ local raidGroupInUse = {
 	group8 = false,
 }
 
--- Options
-local table_GroupSizes = {
-	"10",
-	"15",
-	"25",
-	"40",
+local isStaticSize = {
+	true,  -- 5 Normal
+	true,  -- 5 Heroic
+	true,  -- 10 Normal
+	true,  -- 25 Normal
+	true,  -- 10 Heroic
+	true,  -- 25 Heroic
+	false, -- LFR
+	true,  -- 5 Challenge
+	false, -- Classic raid
+	false, -- nil
+	true,  -- 3 Heroic Scen
+	true,  -- 3 Normal Scen
+	false, -- nil
+	false, -- Flex Normal
+	false, -- Flex Heroic
+	true,  -- 20 Mythic
 }
 
 ------------------------
@@ -171,22 +182,21 @@ function GridLayout:Update()
 		-- print("You are in a Battleground")
 		local RaidSize = SizeByMapID[CurMapID] or 40
 		local LayoutKey
-		local NewSize = RaidSize
 		
-		if NewSize == 10 then
+		if RaidSize == 10 then
 			NewLayout = "By Group 10"
 			LayoutKey = "raid10"
-		elseif NewSize == 15 then
+		elseif RaidSize == 15 then
 			NewLayout = "By Group 15"
 			LayoutKey = "raid15"
-		elseif NewSize == 25 then
+		elseif RaidSize == 25 then
 			NewLayout = "By Group 25"
 			LayoutKey = "raid25"
-		elseif NewSize == 40 then
+		elseif RaidSize == 40 then
 			NewLayout = "By Group 40"
 			LayoutKey = "raid40"
 		end
-		-- print(NewLayout, NewSize)
+		-- print(NewLayout, RaidSize)
 
 		-- Change Grid Layout
 		local NewHoriz = LayoutDB.hGroups.bg
@@ -233,50 +243,34 @@ function GridLayout:Update()
 		SetGridFrameWidth(LayoutDB.width["normal"])
 
 	-- Raid
-	elseif (instanceType == "raid") then
-		--print("You are in a Raid, difficulty: "..difficultyIndex)
+	elseif (instanceType == "raid") and isStaticSize[difficultyIndex] then
+		local LayoutKey
+
+		--print("You are in a Raid, size: "..currPlayers)
 		if (maxPlayers == 10) or (currPlayers <= 10) then
-			--print("You are in a 10 Man")
+			--print("You are in a 10 person raid")
 			NewLayout = "By Group 10"
-		elseif (currPlayers <= 15) then
-			--print("You are in a 15 Man flex")
-			NewLayout = "By Group 15"
+			LayoutKey = "raid10"
 		elseif (maxPlayers == 20) or (currPlayers <= 20) then
-			--print("You are in a Mythic raid")
+			--print("You are in a 20 person raid")
 			NewLayout = "By Group 20"
+			LayoutKey = "raid25"
 		elseif (maxPlayers == 25) or (currPlayers <= 25) then
-			--print("You are in a 25 Man")
+			--print("You are in a 25 person raid")
 			NewLayout = "By Group 25"
-		else
-			--print("You are in a 30 Man flex")
-			NewLayout = "By Group 30"
+			LayoutKey = "raid25"
 		end
 
 		-- Change Grid Layout
-		local NewHoriz = LayoutDB.hGroups.normal
-		local layoutSize = string.match(NewLayout, "%d+")
-		if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-			Grid2Layout.db.profile.layouts.raid10 = NewLayout
-			Grid2Layout.db.profile.horizontal = NewHoriz
-			Grid2Layout:ReloadLayout()
-		elseif (layoutSize == 15) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid15) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-			Grid2Layout.db.profile.layouts.raid15 = NewLayout
-			Grid2Layout.db.profile.horizontal = NewHoriz
-			Grid2Layout:ReloadLayout()
-		elseif (layoutSize == 20) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-			Grid2Layout.db.profile.layouts.raid25 = NewLayout
-			Grid2Layout.db.profile.horizontal = NewHoriz
-			Grid2Layout:ReloadLayout()
-		elseif (layoutSize == 25) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-			Grid2Layout.db.profile.layouts.raid25 = NewLayout
-			Grid2Layout.db.profile.horizontal = NewHoriz
-			Grid2Layout:ReloadLayout()
-		elseif (layoutSize == 30) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid40) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-			Grid2Layout.db.profile.layouts.raid40 = NewLayout
+		local NewHoriz = LayoutDB.hGroups.raid
+		--print("Set raid:", NewLayout)
+		if ( NewLayout and ((NewLayout ~= Grid2Layout.db.profile.layouts[LayoutKey]) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) ) then
+			--print("Apply raid:", NewLayout)
+			Grid2Layout.db.profile.layouts[LayoutKey] = NewLayout
 			Grid2Layout.db.profile.horizontal = NewHoriz
 			Grid2Layout:ReloadLayout()
 		end
-		
+
 		-- Adjust Grid Frame Width
 		local NewWidth
 		if (LayoutDB.width[layoutSize]) and not(LayoutDB.hGroups.raid) then
@@ -326,50 +320,43 @@ function GridLayout:Update()
 				end
 			end
 			
-			local NewHoriz = LayoutDB.hGroups.raid
-			if (raidGroupInUse.group8 or raidGroupInUse.group7) then --newSize > 30 then
+			local LayoutKey
+			if (raidGroupInUse.group8 or raidGroupInUse.group7) then
 				--print("You have more than 30 players in the raid")
 				NewLayout = "By Group 40"
-			elseif raidGroupInUse.group6 then --newSize > 25 then
+				LayoutKey = "raid40"
+			elseif raidGroupInUse.group6 then
 				--print("You have more than 25 players in the raid")
 				NewLayout = "By Group 30"
-			elseif raidGroupInUse.group5 then --newSize > 20 then
+				LayoutKey = "raid40"
+			elseif raidGroupInUse.group5 then
 				--print("You have more than 20 players in the raid")
 				NewLayout = "By Group 25"
-			elseif raidGroupInUse.group4 then --newSize > 15 then
+				LayoutKey = "raid25"
+			elseif raidGroupInUse.group4 then
 				--print("You have more than 15 players in the raid")
 				NewLayout = "By Group 20"
-			elseif raidGroupInUse.group3 then --newSize > 10 then
+				LayoutKey = "raid25"
+			elseif raidGroupInUse.group3 then
 				--print("You have more than 10 players in the raid")
 				NewLayout = "By Group 15"
-			elseif raidGroupInUse.group2 then --newSize > 5 then
+				LayoutKey = "raid15"
+			elseif raidGroupInUse.group2 then
 				--print("You have more than 5 players in the raid")
 				NewLayout = "By Group 10"
-			else--if newSize <= 5 then
+				LayoutKey = "raid10"
+			else
 				--print("You have 5 or less players in the raid")
 				NewLayout = "By Group 5"
+				LayoutKey = "party"
 			end
 
 			-- Change Grid Layout
-			local layoutSize = string.match(NewLayout, "%d+") --["raid"..layoutSize]
-			if (layoutSize == 10) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid10) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-				Grid2Layout.db.profile.layouts.raid10 = NewLayout
-				Grid2Layout.db.profile.horizontal = NewHoriz
-				Grid2Layout:ReloadLayout()
-			elseif (layoutSize == 15) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid15) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-				Grid2Layout.db.profile.layouts.raid15 = NewLayout
-				Grid2Layout.db.profile.horizontal = NewHoriz
-				Grid2Layout:ReloadLayout()
-			elseif (layoutSize == 20) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-				Grid2Layout.db.profile.layouts.raid25 = NewLayout
-				Grid2Layout.db.profile.horizontal = NewHoriz
-				Grid2Layout:ReloadLayout()
-			elseif (layoutSize == 25) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid25) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-				Grid2Layout.db.profile.layouts.raid25 = NewLayout
-				Grid2Layout.db.profile.horizontal = NewHoriz
-				Grid2Layout:ReloadLayout()
-			elseif (layoutSize == 30) and ((NewLayout ~= Grid2Layout.db.profile.layouts.raid40) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) then
-				Grid2Layout.db.profile.layouts.raid40 = NewLayout
+			local NewHoriz = LayoutDB.hGroups.raid
+			--print("Set group:", NewLayout)
+			if ( NewLayout and ((NewLayout ~= Grid2Layout.db.profile.layouts[LayoutKey]) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) ) then
+				--print("Apply group:", NewLayout)
+				Grid2Layout.db.profile.layouts[LayoutKey] = NewLayout
 				Grid2Layout.db.profile.horizontal = NewHoriz
 				Grid2Layout:ReloadLayout()
 			end

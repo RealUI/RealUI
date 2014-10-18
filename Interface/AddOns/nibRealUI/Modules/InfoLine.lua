@@ -203,7 +203,7 @@ local MicroMenu = {
 		notCheckable = true
 	},
 	{text = QUESTLOG_BUTTON,
-		func = function() ToggleFrame(QuestLogFrame) end,
+		func = function() ToggleQuestLog() end,
 		notCheckable = true
 	},
 	{text = MOUNTS_AND_PETS,
