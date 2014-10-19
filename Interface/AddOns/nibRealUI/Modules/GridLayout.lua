@@ -290,7 +290,7 @@ function GridLayout:Update()
     -- Change Grid Layout
     --print("Set group:", NewLayout, Grid2Layout.partyType)
     if ( NewLayout and ((NewLayout ~= Grid2Layout.db.profile.layouts[LayoutKey]) or (NewHoriz ~= Grid2Layout.db.profile.horizontal)) ) then
-        print("Apply group:", NewLayout)
+        --print("Apply group:", NewLayout)
         Grid2Layout.db.profile.layouts[LayoutKey] = NewLayout
         Grid2Layout.db.profile.horizontal = NewHoriz
         Grid2Layout:ReloadLayout()

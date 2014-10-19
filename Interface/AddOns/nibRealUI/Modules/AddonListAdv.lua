@@ -121,14 +121,14 @@ function AddonListAdv:SaveSet(name, newName)
     --print("SaveSet2", set, set.name)
     
     for i = 1, #set do
-        print("SaveSet3", i, set[i])
+        --print("SaveSet3", i, set[i])
         table.remove(set, i)
     end
 
     local name, enabled, _
     for i = 1, GetNumAddOns() do
         name, _, _, enabled = GetAddOnInfo(i)
-        print("SaveSet4", name, enabled)
+        --print("SaveSet4", name, enabled)
         if enabled then
             table.insert(set, name)
         end

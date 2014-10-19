@@ -109,6 +109,7 @@ end
 	@return item <table>
 ]]
 function ItemButton:GetItemInfo(item)
+	--print("ItemButton:GetItemInfo", bagID)
 	return self.implementation:GetItemInfo(self.bagID, self.slotID, item)
 end
 

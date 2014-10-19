@@ -172,8 +172,18 @@ local defaults =	{
 local ItemSetCaption = (IsAddOnLoaded('ItemRack') and "ItemRack ") or (IsAddOnLoaded('Outfitter') and "Outfitter ") or "Item "
 local bankOpenState = false
 
-function cbNivaya:ShowBags(...) for i = 1, select("#", ...) do local bag = select(i, ...); if not cB_BagHidden[bag.name] then bag:Show() end end end
-function cbNivaya:HideBags(...) for i = 1, select("#", ...) do select(i, ...):Hide() end end
+function cbNivaya:ShowBags(...)
+	for i = 1, select("#", ...) do
+		local bag = select(i, ...)
+		if not cB_BagHidden[bag.name] then
+			bag:Show()
+		end
+	end
+end
+function cbNivaya:HideBags(...) for i = 1, select("#", ...) do
+	select(i, ...):Hide()
+	end
+end
 
 local LoadDefaults = function()
 	cBniv = cBniv or {}

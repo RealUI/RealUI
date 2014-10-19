@@ -300,6 +300,7 @@ local defaultItem = cargBags:NewItemTable()
 	@return i <table>
 ]]
 function Implementation:GetItemInfo(bagID, slotID, i)
+	--print("GetItemInfo", bagID)
 	i = i or defaultItem
 	for k in pairs(i) do i[k] = nil end
 
@@ -308,7 +309,7 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 
 	local clink = GetContainerItemLink(bagID, slotID)
 
-	if(clink) then
+	if (clink) then
 		i.texture, i.count, i.locked, i.quality, i.readable = GetContainerItemInfo(bagID, slotID)
 		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
 		i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
@@ -333,7 +334,7 @@ function Implementation:GetItemInfo(bagID, slotID, i)
 			i.minLevel = level
 			i.link = clink
 		end
-		--print("GetItemInfo:", i.isInSet, i.setName, i.name)
+		--print("GetItemInfo:", i.setName, i.name)
 	end
 	return i
 end
@@ -348,9 +349,9 @@ function Implementation:UpdateSlot(bagID, slotID)
 	local button = self:GetButton(bagID, slotID)
 	local container = self:GetContainerForItem(item, button)
 
-	if(container) then
-		if(button) then
-			if(container ~= button.container) then
+	if (container) then
+		if (button) then
+			if (container ~= button.container) then
 				button.container:RemoveButton(button)
 				container:AddButton(button)
 			end
@@ -361,7 +362,7 @@ function Implementation:UpdateSlot(bagID, slotID)
 		end
 
 		button:Update(item)
-	elseif(button) then
+	elseif (button) then
 		button.container:RemoveButton(button)
 		self:SetButton(bagID, slotID, nil)
 		button:Free()
@@ -376,7 +377,7 @@ local closed
 ]]
 function Implementation:UpdateBag(bagID)
 	local numSlots
-	if(closed) then
+	if (closed) then
 		numSlots, closed = 0
 	else
 		numSlots = GetContainerNumSlots(bagID)
@@ -384,12 +385,12 @@ function Implementation:UpdateBag(bagID)
 	local lastSlots = self.bagSizes[bagID] or 0
 	self.bagSizes[bagID] = numSlots
 
-	for slotID=1, numSlots do
+	for slotID = 1, numSlots do
 		self:UpdateSlot(bagID, slotID)
 	end
-	for slotID=numSlots+1, lastSlots do
+	for slotID = numSlots + 1, lastSlots do
 		local button = self:GetButton(bagID, slotID)
-		if(button) then
+		if (button) then
 			button.container:RemoveButton(button)
 			self:SetButton(bagID, slotID, nil)
 			button:Free()
@@ -404,12 +405,13 @@ end
 	@callback Container:OnBagUpdate(bagID, slotID)
 ]]
 function Implementation:BAG_UPDATE(event, bagID, slotID)
-	if(bagID and slotID) then
+	--print("BAG_UPDATE")
+	if (bagID and slotID) then
 		self:UpdateSlot(bagID, slotID)
-	elseif(bagID) then
+	elseif (bagID) then
 		self:UpdateBag(bagID)
 	else
-		for bagID = -2, 11 do
+		for bagID = -3, 11 do
 			self:UpdateBag(bagID)
 		end
 	end
@@ -429,18 +431,12 @@ end
 	@param bagID <number> [optional]
 ]]
 function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
-	if(bagID) then
-		for slotID=1, GetContainerNumSlots(bagID) do
+	--print("BAG_UPDATE_COOLDOWN", bagID)
+	if (bagID) then
+		for slotID = 1, GetContainerNumSlots(bagID) do
 			local button = self:GetButton(bagID, slotID)
-			if(button) then
+			if (button) then
 				local item = self:GetItemInfo(bagID, slotID)
-				button:UpdateCooldown(item)
-			end
-		end
-	else
-		for id, container in pairs(self.contByID) do
-			for i, button in pairs(container.buttons) do
-				local item = self:GetItemInfo(button.bagID, button.slotID)
 				button:UpdateCooldown(item)
 			end
 		end
@@ -453,6 +449,7 @@ end
 	@param slotID <number> [optional]
 ]]
 function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
+	--print("ITEM_LOCK_CHANGED", bagID)
 	if(not slotID) then return end
 
 	local button = self:GetButton(bagID, slotID)
@@ -493,6 +490,7 @@ end
 	Fired when the quest log of a unit changes
 ]]
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
+	--print("UNIT_QUEST_LOG_CHANGED", bagID)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
 			local item = self:GetItemInfo(button.bagID, button.slotID)
