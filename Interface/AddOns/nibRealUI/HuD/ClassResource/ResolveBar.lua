@@ -225,7 +225,6 @@ function ResolveBar:OnEnable()
     self.configMode = false
 
     if not self.rBar then self:CreateFrames() end
-    self:UpdateBase()
     self:UpdateFonts()
     self:UpdateGlobalColors()
 
