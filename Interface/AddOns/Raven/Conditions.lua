@@ -118,7 +118,7 @@ function MOD:FinalizeConditions()
 					if ct then for k, v in pairs(ct) do if test[k] == v then test[k] = nil end end end
 				end
 			end
-			if c.shared then
+			if c.shared and c.name then
 				local t = MOD.CopyTable(c)
 				t.shared = false
 				MOD.db.global.SharedConditions["[" .. MOD.myClass .. "] " .. c.name] = t

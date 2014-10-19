@@ -60,7 +60,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "Scroll area name already exists."
 L.MSG_INVALID_SCROLL_AREA_NAME		= "Invalid scroll area name."
 L.MSG_ACKNOWLEDGE_TEXT				= "Are you sure you wish to perform this action?"
 L.MSG_NORMAL_PREVIEW_TEXT			= "Normal"
-L.MSG_INVALID_SOUND_FILE			= "Sound must be a .mp3 or .ogg file."
+L.MSG_INVALID_SOUND_FILE			= "Sound must be an .ogg file."
 L.MSG_NEW_TRIGGER					= "New Trigger"
 L.MSG_TRIGGER_CLASSES				= "Trigger Classes"
 L.MSG_MAIN_EVENTS					= "Main Events"
@@ -236,7 +236,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="Font name:", tooltip="The name used to identify the font.\n\nExample: My Super Font"}
 obj["customFontPath"]	= { label="Font path:", tooltip="The path to the font's file.\n\nNOTE: If the file is located in the recommended MikScrollingBattleText\\Fonts directory, only the filename needs to be entered here instead of th full path.\n\nExample: myFont.ttf "}
 obj["customSoundName"]	= { label="Sound name:", tooltip="The name used to identify the sound.\n\nExample: My Sound"}
-obj["customSoundPath"]	= { label="Sound path:", tooltip="The path to the sounds's file.\n\nNOTE: If the file is located in the recommended MikScrollingBattleText\\Sounds directory, only the filename needs to be entered here instead of th full path.\n\nExample: mySound.mp3 "}
+obj["customSoundPath"]	= { label="Sound path:", tooltip="The path to the sounds's file.\n\nNOTE: If the file is located in the recommended MikScrollingBattleText\\Sounds directory, only the filename needs to be entered here instead of th full path.\n\nExample: mySound.ogg "}
 obj["copyProfile"]		= { label="New profile name:", tooltip="Name of the new profile to copy the currently selected one to."}
 obj["partialEffect"]	= { tooltip="The trailer that will be appended when the partial effect occurs."}
 obj["scrollAreaName"]	= { label="New scroll area name:", tooltip="New name for the scroll area."}

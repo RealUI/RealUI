@@ -36,7 +36,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "Name für Scroll-Bereich existiert bereits."
 L.MSG_INVALID_SCROLL_AREA_NAME		= "Ungültiger Name für Scroll-Bereich."
 L.MSG_ACKNOWLEDGE_TEXT				= "Bist du sicher, dass du diese Aktion durchführen willst?"
 L.MSG_NORMAL_PREVIEW_TEXT			= "Normal"
-L.MSG_INVALID_SOUND_FILE			= "Sound muss eine .mp3 oder .ogg Datei sein."
+L.MSG_INVALID_SOUND_FILE			= "Sound muss eine .ogg Datei sein."
 L.MSG_NEW_TRIGGER					= "Neuer Auslöser"
 L.MSG_TRIGGER_CLASSES				= "Klassen Auslöser"
 L.MSG_MAIN_EVENTS					= "Hauptereignisse"
@@ -212,7 +212,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="Schriftname:", tooltip="Der Name wird benutzt um die Schrift zu identifizieren.\n\nBeispiel: Meine Super Schrift"}
 obj["customFontPath"]	= { label="Schrift Pfad:", tooltip="Der Pfad zu der Schrift Datei.\n\nNOTIZ: Wenn die Datei in dem empfohlenen MikScrollingBattleText\\Fonts Ordner ist, muss nur der Dateiname hier eingegeben werden anstatt der ganze Pfad.\n\nBeispiel: meineSchrift.ttf "}
 obj["customSoundName"]	= { label="Sound Name:", tooltip="Der Name wird benutzt um den Sound zu identifizieren.\n\nBeispiel: Mein Sound"}
-obj["customSoundPath"]	= { label="Sound Pfad:", tooltip="Der Pfad zu der Sound Datei.\n\nNOTIZ: Wenn die Datei in dem empfohlenen MikScrollingBattleText\\Sounds Ordner ist, muss nur der Dateiname hier eingegeben werden anstatt der ganze Pfad.\n\nBeispiel: mySound.mp3 "}
+obj["customSoundPath"]	= { label="Sound Pfad:", tooltip="Der Pfad zu der Sound Datei.\n\nNOTIZ: Wenn die Datei in dem empfohlenen MikScrollingBattleText\\Sounds Ordner ist, muss nur der Dateiname hier eingegeben werden anstatt der ganze Pfad.\n\nBeispiel: mySound.ogg "}
 obj["copyProfile"]		= { label="Neuer Profilname:", tooltip="Der Name des neuen Profils auf den das eben gewählte Profil kopiert werden soll."}
 obj["partialEffect"]	= { tooltip="Der Trailer, der angehängt wird wenn der Partielle Effekte erscheint."}
 obj["scrollAreaName"]	= { label="Neuen Scroll-Bereich-Namen eingeben:", tooltip="Neuer Name für den Scroll-Bereich."}

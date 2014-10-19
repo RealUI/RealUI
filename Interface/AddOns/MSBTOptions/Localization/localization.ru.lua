@@ -36,7 +36,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "Название области прокру
 L.MSG_INVALID_SCROLL_AREA_NAME		= "Неверное название области прокрутки."
 L.MSG_ACKNOWLEDGE_TEXT				= "Вы уверены что хотите выполнить данное действие?"
 L.MSG_NORMAL_PREVIEW_TEXT			= "Нормальный"
-L.MSG_INVALID_SOUND_FILE			= "Звуки должны быть в .mp3 или .ogg формате."
+L.MSG_INVALID_SOUND_FILE			= "Звуки должны быть в .ogg формате."
 L.MSG_NEW_TRIGGER					= "Новый триггер"
 L.MSG_TRIGGER_CLASSES				= "Триггер классы"
 L.MSG_MAIN_EVENTS					= "Главные события"
@@ -212,7 +212,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="Шрифт:", tooltip="Название, используемое для определения шрифта.\n\nПример: Мой Супер Шрифт"}
 obj["customFontPath"]	= { label="Путь к шрифту:", tooltip="Путь к файлу шрифта.\n\nNOTE: Если файл находится в рекомендованном директории шрифтов\\MikScrollingBattleText, тогда впишите только названия файла, вместо полного пути.\n\nПример: мойШрифт.ttf "} 
 obj["customSoundName"]	= { label="Звук:", tooltip="Название, используемое для определения звука.\n\nПример: Мой Звук"}
-obj["customSoundPath"]	= { label="Путь к звуку:", tooltip="Путь к файлу звука.\n\nNOTE: Если файл находится в рекомендованном директории звуков\\MikScrollingBattleText, тогда впишите только названия файла, вместо полного пути.\n\nExample: мойЗвук.mp3 "}
+obj["customSoundPath"]	= { label="Путь к звуку:", tooltip="Путь к файлу звука.\n\nNOTE: Если файл находится в рекомендованном директории звуков\\MikScrollingBattleText, тогда впишите только названия файла, вместо полного пути.\n\nExample: мойЗвук.ogg "}
 obj["copyProfile"]		= { label="Новое название профиля:", tooltip="Название нового профиля в который будет скопирован выбранный профиль."}
 obj["partialEffect"]	= { tooltip="Трейлер который будут добавляться при возникновении частичного эффекта."}
 obj["scrollAreaName"]	= { label="Новое названия области прокрутки:", tooltip="Новое название для области прокрутки."}

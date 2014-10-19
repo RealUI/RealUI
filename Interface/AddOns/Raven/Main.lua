@@ -693,9 +693,9 @@ function MOD.CheckLibBossIDs(guid)
 	_, _, _, _, _, id = string.match(guid, "(%a+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)")
 	if id then
 		id = tonumber(id)
-		if id and MOD.LibBossIDs.BossIDs[id] then return 1 end
+		if id and MOD.LibBossIDs.BossIDs[id] then return true end
 	end
-	return nil
+	return false
 end
 	
 -- Add an active aura to the table for the specified unit
@@ -704,7 +704,7 @@ local function AddAura(unit, name, isBuff, spellID, count, btype, duration, cast
 	local auraCache = isBuff and cacheBuffs[unit] or cacheDebuffs[unit]
 	if auraTable then
 		local b = AllocateTable() -- get an empty aura descriptor
-		local cname, isNPC, vehicle = nil, nil, nil
+		local cname, isNPC, vehicle = nil, false, false
 		if caster then
 			local guid = UnitGUID(caster); cname = UnitName(caster); vehicle = UnitHasVehicleUI(caster)
 			if guid then
@@ -878,7 +878,7 @@ local function GetWeaponBuffs()
 	if ohLastBuff then ReleasePlayerBuff(ohLastBuff) end 
 	
 	-- first check if there are weapon auras then, only if necessary, use tooltip to scan for the buff names
-	local mh, mhms, mhc, oh, ohms, ohc = GetWeaponEnchantInfo()
+	local mh, mhms, mhc, mx, oh, ohms, ohc, ox = GetWeaponEnchantInfo()
 	if mh then -- add the mainhand buff, if any, to the table
 		local islot = GetInventorySlotInfo("MainHandSlot")
 		local mhbuff = GetWeaponBuffName(islot)
@@ -1042,13 +1042,19 @@ local function GetPowerBuffs()
 	local power, id = nil, nil
 	if MOD.myClass == "PALADIN" then power = UnitPower("player", SPELL_POWER_HOLY_POWER); id = 85247
 	elseif MOD.myClass == "PRIEST" then power = UnitPower("player", SPELL_POWER_SHADOW_ORBS); id = 95740
-	elseif MOD.myClass == "MONK" then power = UnitPower("player", SPELL_POWER_CHI); id = 97272
+	elseif MOD.myClass == "MONK" then
+		local chi = UnitPower("player", SPELL_POWER_CHI)
+		local _, _, icon = GetSpellInfo(115460)
+		local name = L["Chi"] or "Chi"
+		if chi and chi > 0 then
+			AddAura("player", name, true, nil, chi, "Power", 0, "player", nil, nil, nil, icon, nil, 0, "text", name)
+		end
 	elseif MOD.myClass == "WARLOCK" then
-		if IsSpellKnown(108647) then
+		if IsSpellKnown(116858) then -- check chaos bolt for destruction spec
 			power = UnitPower("player", SPELL_POWER_BURNING_EMBERS, true); id = 108647
-		elseif IsSpellKnown(1120) then
+		elseif IsSpellKnown(30108) then -- check unstable affliction for affliction spec
 			power = UnitPower("player", SPELL_POWER_SOUL_SHARDS); id = 117198
-		elseif IsSpellKnown(104315) then
+		elseif IsSpellKnown(103958) then -- check metamorphosis for demonology spec
 			power = UnitPower("player", SPELL_POWER_DEMONIC_FURY); id = 104315
 		end
 	elseif MOD.myClass == "DRUID" then
@@ -1133,7 +1139,7 @@ function MOD:UpdateAuras()
 	for _, k in pairs(units) do unitStatus[k] = MOD:ValidateUnit(k)	end	 -- set current unit status, defer actual update until referenced
 	for _, k in pairs(eventUnits) do unitUpdate[k] = (unitStatus[k] == 1) end -- can't count on events for these units
 	if throttleCount == 0 then -- things to do every second...
-		GetWeaponBuffs() -- get current weapon buffs, if any
+		GetWeaponBuffs() -- get current weapon buffs, if any (less useful in WoD since no longer track shaman weapon enchants or rogue poisons)
 		RefreshTrackers() -- validate the unit id cache for the trackers
 	end
 end

@@ -368,7 +368,7 @@ end
 local function MediaTab_ValidateCustomSoundPath(soundPath)
  if (not soundPath or soundPath == "") then return L.MSG_INVALID_SOUND_FILE end
  local soundPathLower = string.lower(soundPath)
- if (not string.find(soundPathLower, ".mp3") and not string.find(soundPathLower, ".ogg")) then
+ if (not string.find(soundPathLower, ".ogg")) then
   return L.MSG_INVALID_SOUND_FILE
  end
 end

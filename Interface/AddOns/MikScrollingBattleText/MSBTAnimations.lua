@@ -70,12 +70,11 @@ local TEMP_TEXTURE_PATH = "Interface\\Icons\\Temp"
 -- Private variables.
 -------------------------------------------------------------------------------
 
+-- Prevent tainting global _.
+local _
+
 -- Dynamically created frame for animation updates.
 local animationFrame
-
--- Memoizing font path validation.
-local testFontString
-local testedFonts = {}
 
 -- Pools of dynamically created display events and textures that are reused.
 local displayEventCache = {}
@@ -92,26 +91,14 @@ local scrollAreas = {}
 -- Scroll area table to be returned for external use.
 local externalScrollAreas = {}
 
+-- Dynmically create frame and font strings used to do initial load of used
+-- fonts.
+local fontLoaderFrame
+local loadedFontStrings = {}
 
 -------------------------------------------------------------------------------
 -- Utility functions.
 -------------------------------------------------------------------------------
-
--- ****************************************************************************
--- Tests a font path and memoizes the result into the passed table so the font
--- path is only tested once.  This is the target of a metatable __index field.
--- ****************************************************************************
-local function TestFontPath(tbl, fontPath)
- -- Mark the font path invalid if the font string was not actually set to it.
- local isValid = true
- testFontString:SetFont(fontPath, DEFAULT_FONT_SIZE, DEFAULT_OUTLINE)
- if (string_lower(fontPath) ~= string_lower(testFontString:GetFont() or "")) then isValid = false end
-
- -- Memoize result.
- tbl[fontPath] = isValid
- return isValid
-end
-
 
 -- ****************************************************************************
 -- Returns whether or not the passed scroll area is valid and enabled.
@@ -213,6 +200,35 @@ local function IterateScrollAreas()
 end
 
 
+-- ****************************************************************************
+-- Loads the provided name into its own invisible font string in the animation
+-- frame.  This is used to force fonts to load during initial start and profile
+-- switches so they are ready to be used for showing events.
+-- ****************************************************************************
+local function LoadFont(fontName)
+ local fontPath = MikSBT.Media.fonts[fontName]
+ if fontPath == nil then return end
+
+ -- Don't load the font a second time.
+ local fontString = loadedFontStrings[fontName]
+ if fontString ~= nil then return end
+
+ -- Create the font string and load the font.  Since it's only being used to
+ -- cause the font to be loaded by the game, the default font size and outline
+ -- flags are acceptable to use.
+ fontLoaderFrame:Show()
+ fontString = fontLoaderFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+ fontString:SetPoint("BOTTOM")
+ fontString:SetFont(DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, DEFAULT_FONT_OUTLINE)
+ fontString:SetText("Font Loader")
+ fontString:SetFont(fontPath, DEFAULT_FONT_SIZE, DEFAULT_FONT_OUTLINE)
+ fontString:SetText("")
+ fontString:SetAlpha(0)
+ loadedFontStrings[fontName] = fontString
+ fontLoaderFrame:Hide()
+end
+
+
 -------------------------------------------------------------------------------
 -- Display functions.
 -------------------------------------------------------------------------------
@@ -256,7 +272,7 @@ local function Display(message, saSettings, isSticky, colorR, colorG, colorB, fo
   displayEvent.fontString:SetAlpha(0)
   if (displayEvent.texture) then displayEvent.texture:SetAlpha(0) end
  else
-  displayEvent = table_remove(displayEventCache) or { fontString = animationFrame:CreateFontString(nil, "ARTWORK", MasterFont) }
+  displayEvent = table_remove(displayEventCache) or { fontString = animationFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal") }
  end
 
  -- Get a local reference to the current profile.
@@ -277,11 +293,13 @@ local function Display(message, saSettings, isSticky, colorR, colorG, colorB, fo
  displayEvent.positionY = 0
  displayEvent.fontSize = fontSize
  
- -- Set font string properties.
+ -- Set font string properties.  The font is set to the default font first to
+ -- ensure any invalid font paths revert to the default.
  local fontString = displayEvent.fontString
  local fontOutline = OUTLINE_MAP[outlineIndex] or DEFAULT_OUTLINE
- if (not fontPath) then fontPath = DEFAULT_FONT_PATH else fontPath = testedFonts[fontPath] and fontPath or DEFAULT_FONT_PATH end
+ if (not fontPath) then fontPath = DEFAULT_FONT_PATH end
  fontString:ClearAllPoints()
+ if (fontPath ~= DEFAULT_FONT_PATH) then fontString:SetFont(DEFAULT_FONT_PATH, fontSize, fontOutline) end
  fontString:SetFont(fontPath, fontSize, fontOutline)
  fontString:SetTextColor(colorR, colorG, colorB)
  fontString:SetDrawLayer(isSticky and "OVERLAY" or "ARTWORK")
@@ -539,11 +557,13 @@ animationFrame:SetHeight(0.0001)
 animationFrame:Hide()
 animationFrame:SetScript("OnUpdate", OnUpdateAnimationFrame)
 
--- Memoize tested font paths so they only have to be tested once.
-testFontString = animationFrame:CreateFontString(nil, "ARTWORK", MasterFont)
-testedFonts.__index = TestFontPath
-setmetatable(testedFonts, testedFonts)
-
+-- Create a frame for preloading fonts.  It seems that it needs to be anchored
+-- and have a height and width in order for the fonts to actually to be loaded.
+fontLoaderFrame = CreateFrame("Frame", nil, UIParent)
+fontLoaderFrame:SetPoint("BOTTOM")
+fontLoaderFrame:SetWidth(0.0001)
+fontLoaderFrame:SetHeight(0.0001)
+fontLoaderFrame:Hide()
 
 
 
@@ -557,11 +577,12 @@ module.animationStyles			= animationStyles
 module.stickyAnimationStyles	= stickyAnimationStyles
 
 -- Protected Functions.
-module.IsScrollAreaActive			= IsScrollAreaActive
-module.IsScrollAreaIconShown		= IsScrollAreaIconShown
-module.UpdateScrollAreas			= UpdateScrollAreas
-module.RegisterAnimationStyle		= RegisterAnimationStyle
-module.RegisterStickyAnimationStyle	= RegisterStickyAnimationStyle
-module.IterateScrollAreas			= IterateScrollAreas
-module.DisplayMessage				= DisplayMessage
-module.DisplayEvent					= DisplayEvent
+module.IsScrollAreaActive           = IsScrollAreaActive
+module.IsScrollAreaIconShown        = IsScrollAreaIconShown
+module.UpdateScrollAreas            = UpdateScrollAreas
+module.RegisterAnimationStyle       = RegisterAnimationStyle
+module.RegisterStickyAnimationStyle = RegisterStickyAnimationStyle
+module.IterateScrollAreas           = IterateScrollAreas
+module.LoadFont                     = LoadFont
+module.DisplayMessage               = DisplayMessage
+module.DisplayEvent                 = DisplayEvent

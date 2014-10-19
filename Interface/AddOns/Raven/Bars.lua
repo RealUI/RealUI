@@ -1090,7 +1090,7 @@ local function DetectNewDebuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	local isNPC = aura[18]
 	local isVehicle = aura[19]
 	local tt, ta, tc = aura[11], aura[12], aura[6]
-	local isBoss = (aura[15] ~= nil)
+	local isBoss = aura[15]
 	local isEffect = (tt == "effect")
 	local isPoison, isCurse, isMagic, isDisease = (aura[4] == "Poison"), (aura[4] == "Curse"), (aura[4] == "Magic"), (aura[4] == "Disease")
 	local isOther = not isBoss and not isEffect and not isPoison and not isCurse and not isMagic and not isDisease

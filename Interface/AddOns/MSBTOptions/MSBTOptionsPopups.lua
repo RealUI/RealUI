@@ -2083,7 +2083,7 @@ end
 -- Validates if the passed skill name does not already exist and is valid.
 -- ****************************************************************************
 local function ValidateSoundFileName(fileName)
- if (not string.find(fileName, ".mp3") and not string.find(fileName, ".ogg")) then
+ if (not string.find(fileName, ".ogg")) then
   return L.MSG_INVALID_SOUND_FILE
  end
 end

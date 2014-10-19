@@ -642,13 +642,17 @@ function MOD.Nest_CreateBar(bg, name)
 		bar.cooldown = CreateFrame("Cooldown", bname .. "Cooldown", bar.frame, "CooldownFrameTemplate") -- cooldown overlay to animate timer
 		bar.cooldown.noCooldownCount = Raven.db.global.HideOmniCC
 		bar.cooldown.noOCC = Raven.db.global.HideOmniCC -- added for Tukui
-		bar.cooldown:SetHideCountdownNumbers(true) -- added for WoD
+		bar.cooldown:SetHideCountdownNumbers(true); bar.cooldown:SetDrawBling(false); bar.cooldown:SetDrawEdge(false) -- added for WoD
 		bar.iconTextFrame = CreateFrame("Frame", bname .. "IconTextFrame", bar.frame)
 		bar.iconText = bar.iconTextFrame:CreateFontString(nil, "OVERLAY", nil, 4)
 		bar.iconBorder = bar.iconTextFrame:CreateTexture(nil, "BACKGROUND", nil, 3)		
 		if UseTukui() then
-			bar.frame:CreateBackdrop("Transparent"); bar.frame.backdrop:SetOutside(bar.frame)
-			bar.tukcolor_r, bar.tukcolor_g, bar.tukcolor_b, bar.tukcolor_a = bar.frame.backdrop:GetBackdropBorderColor() -- save default border color
+			bar.frame:CreateBackdrop("Transparent")
+			local bdrop = bar.frame.backdrop or bar.frame.Backdrop
+			if bdrop then
+				bdrop:SetOutside(bar.frame)
+				bar.tukcolor_r, bar.tukcolor_g, bar.tukcolor_b, bar.tukcolor_a = bdrop:GetBackdropBorderColor() -- save default border color
+			end
 		end
 		
 		local anim = bar.icon:CreateAnimationGroup()
@@ -1213,11 +1217,12 @@ local function Bar_UpdateSettings(bg, bar, config)
 			if Raven.db.global.ButtonFacadeNormal and nx and nx.SetVertexColor then nx:SetVertexColor(bar.ibr, bar.ibg, bar.ibb, bar.iba) end
 		else
 			if UseTukui() then
-				if bar.frame.backdrop then
+				local bdrop = bar.frame.backdrop or bar.frame.Backdrop
+				if bdrop then
 					if bar.attributes.iconColors == "None" then
-						bar.frame.backdrop:SetBackdropBorderColor(bar.tukcolor_r, bar.tukcolor_g, bar.tukcolor_b, bar.tukcolor_a)
+						bdrop:SetBackdropBorderColor(bar.tukcolor_r, bar.tukcolor_g, bar.tukcolor_b, bar.tukcolor_a)
 					else
-						bar.frame.backdrop:SetBackdropBorderColor(bar.ibr, bar.ibg, bar.ibb, bar.iba)
+						bdrop:SetBackdropBorderColor(bar.ibr, bar.ibg, bar.ibb, bar.iba)
 					end
 				end
 			elseif not Raven.db.global.HideBorder then
@@ -1230,7 +1235,6 @@ local function Bar_UpdateSettings(bg, bar, config)
 	if showBorder and bar.iconPath then bx:Show() else bx:Hide() end
 	if bg.showIcon and not bg.iconHide and not isHeader and bar.iconCount then bi:SetText(tostring(bar.iconCount)); bi:Show() else bi:Hide() end
 	if bg.showIcon and not isHeader and bg.showCooldown and config.bars ~= "timeline" and bar.timeLeft and (bar.timeLeft >= 0) and not ba:IsPlaying() then
---		bar.cooldown:SetDrawEdge(bg.attributes.clockEdge) -- Removed in 5.0.4 release and apparently not coming back
 		bar.cooldown:SetReverse(bg.attributes.clockReverse)
 		bar.cooldown:SetCooldown(bar.startTime - bar.offsetTime, bar.duration); bar.cooldown:Show()
 	else
@@ -1266,6 +1270,7 @@ local function Bar_UpdateSettings(bg, bar, config)
 	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
 	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
+	bar.cooldown:SetSwipeColor(0, 0, 0, 0.8 * bar.icon:GetEffectiveAlpha()) -- hack to fix cooldown alpha not tracking rest of bar
 	if not isHeader and (bg.attributes.noMouse or (bg.attributes.iconMouse and not bg.showIcon)) then -- non-interactive or "only icon" but icon disabled
 		bar.icon:EnableMouse(false); bar.frame:EnableMouse(false); if callbacks.deactivate then callbacks.deactivate(bar.overlay) end
 	elseif not isHeader and bg.attributes.iconMouse then -- only icon is interactive
@@ -1341,6 +1346,7 @@ local function Bar_RefreshAnimations(bg, bar, config)
 	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
 	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
+	bar.cooldown:SetSwipeColor(0, 0, 0, 0.8 * bar.icon:GetEffectiveAlpha()) -- hack to fix cooldown alpha not tracking rest of bar
 	if bar.attributes.soundStart and (not bar.soundDone or (bar.attributes.replay and (now > (bar.soundDone + bar.attributes.replayTime)))) then
 		PlaySoundFile(bar.attributes.soundStart, Raven.db.global.SoundChannel); bar.soundDone = now
 	end

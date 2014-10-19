@@ -1617,6 +1617,7 @@ local function ShowOptions()
  if (IsAddOnLoaded(optionsName)) then MSBTOptions.Main.ShowMainFrame() end
 end
 
+
 -- ****************************************************************************
 -- Recursively removes empty tables and their differential map entries.
 -- ****************************************************************************
@@ -1773,7 +1774,6 @@ local function DisableBlizzardCombatText()
 end
 
 
-
 -- ****************************************************************************
 -- Set the user disabled option
 -- ****************************************************************************
@@ -1820,6 +1820,46 @@ local function UpdateCustomClassColors()
  end
 end
 
+-- ****************************************************************************
+-- Searches through current profile for all used fonts and uses the animation
+-- module to preload each font so they're available for use.
+-- ****************************************************************************
+local function LoadUsedFonts()
+  -- Add the normal and crit master font.
+  local usedFonts = {}
+  if currentProfile.normalFontName then usedFonts[currentProfile.normalFontName] = true end
+  if currentProfile.critFontName then usedFonts[currentProfile.critFontName] = true end
+
+  -- Add any unique fonts used in the scroll areas.
+  if currentProfile.scrollAreas then
+   for saKey, saSettings in pairs(currentProfile.scrollAreas) do
+    if saSettings.normalFontName then usedFonts[saSettings.normalFontName] = true end
+    if saSettings.critFontName then usedFonts[saSettings.critFontName] = true end
+   end
+  end
+
+  -- Add any unique fonts used in the events.
+  if currentProfile.events then
+   for eventName, eventSettings in pairs(currentProfile.events) do
+    if eventSettings.fontName then usedFonts[eventSettings.fontName] = true end
+   end
+  end
+
+  -- Add any unique fonts used in the triggers.
+  if currentProfile.triggers then
+   for triggerName, triggerSettings in pairs(currentProfile.triggers) do
+    if type(triggerSettings) == "table" then
+     if triggerSettings.fontName then usedFonts[triggerSettings.fontName] = true end
+    end
+   end
+  end
+ 
+  -- Let the animation system preload the fonts.
+  for fontName in pairs(usedFonts) do MikSBT.Animations.LoadFont(fontName) end
+end
+
+
+
 
 -------------------------------------------------------------------------------
 -- Profile functions.
@@ -1855,13 +1895,17 @@ local function SelectProfile(profileName)
   -- Set the current profile pointer.
   currentProfile = savedVariables.profiles[profileName]
   module.currentProfile = currentProfile
-  
+
   -- Clear the differential table map.
   EraseTable(differentialMap)
- 
+
   -- Associate the current profile tables with the corresponding master profile entries.
   AssociateDifferentialTables(currentProfile, masterProfile)
- 
+
+  -- Load the fonts used by the profile now so they are available by the time
+  -- the first text is shown.
+  LoadUsedFonts()
+
   -- Update the scroll areas and triggers with the current profile settings. 
   MikSBT.Animations.UpdateScrollAreas()
   MikSBT.Triggers.UpdateTriggers()
@@ -2155,7 +2199,10 @@ end
 -------------------------------------------------------------------------------
 
 -- Create a frame to receive events.
-eventFrame = CreateFrame("Frame")
+eventFrame = CreateFrame("Frame", "MSBTProfileFrame", UIParent)
+eventFrame:SetPoint("BOTTOM")
+eventFrame:SetWidth(0.0001)
+eventFrame:SetHeight(0.0001)
 eventFrame:Hide()
 eventFrame:SetScript("OnEvent", OnEvent)
 

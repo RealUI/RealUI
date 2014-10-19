@@ -37,7 +37,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "스크롤 영역 이름이 이미 존재합�
 L.MSG_INVALID_SCROLL_AREA_NAME		= "허용되지 않는 스크롤 영역 이름입니다."
 L.MSG_ACKNOWLEDGE_TEXT				= "이 동작을 수행 하시겠습니까?"
 L.MSG_NORMAL_PREVIEW_TEXT			= "기본"
-L.MSG_INVALID_SOUND_FILE			= "효과음은 .mp3 혹은 .ogg 파일이어야 합니다."
+L.MSG_INVALID_SOUND_FILE			= "효과음은 .ogg 파일이어야 합니다."
 L.MSG_NEW_TRIGGER					= "새로운 트리거"
 L.MSG_TRIGGER_CLASSES				= "직업 트리거"
 L.MSG_MAIN_EVENTS					= "메인 이벤트"
@@ -213,7 +213,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="글꼴 이름:", tooltip="이름은 글꼴을 식별하는데 사용합니다.\n\n사용예: 나의 최강 글꼴"}
 obj["customFontPath"]	= { label="글꼴 경로:", tooltip="글꼴 파일이 있는 경로.\n\n노트: 만약 파일이 권장하는 MikScrollingBattleText\\Fonts 폴더 위치에 있으면, 여기엔 오로지 전체 경로 대신 파일 이름을 입력해야 됩니다.\n\n사용예: myFont.ttf "}
 obj["customSoundName"]	= { label="소리 이름:", tooltip="이름은 소리를 식별하는데 사용합니다.\n\n사용예: 나의 소리"}
-obj["customSoundPath"]	= { label="소리 경로:", tooltip="소리 파일이 있는 경로.\n\n노트: 만약 파일이 권장하는 MikScrollingBattleText\\Sounds 폴더 위치에 있으면, 여기엔 오로지 전체 경로 대신 파일 이름을 입력해야 됩니다.\n\n사용예: mySound.mp3 "}
+obj["customSoundPath"]	= { label="소리 경로:", tooltip="소리 파일이 있는 경로.\n\n노트: 만약 파일이 권장하는 MikScrollingBattleText\\Sounds 폴더 위치에 있으면, 여기엔 오로지 전체 경로 대신 파일 이름을 입력해야 됩니다.\n\n사용예: mySound.ogg "}
 obj["copyProfile"]		= { label="새 프로필 이름 입력:", tooltip="선택된 프로필로부터 복사될 새로운 프로필의 이름."}
 obj["partialEffect"]	= { tooltip="부분 효과 발생 시 추가될 메세지."}
 obj["scrollAreaName"]	= { label="새 스크롤 영역 이름 입력:", tooltip="새로운 스크롤 영역의 이름."}

@@ -205,7 +205,7 @@ local function CreateConditionFuncs()
   -- Health/power changes.
   threshold = function (f, t, v) if (type(v)=="number") then return f(t.currentPercentage, v/100) and not f(t.lastPercentage, v/100) end end,
   unitID = function (f, t, v) if ((v == "party" and string_find(t.unitID, "party%d+")) or (v == "raid" and (string_find(t.unitID, "raid%d+") or string_find(t.unitID, "party%d+")))) then v = t.unitID end return f(t.unitID, v) end,
-  unitReaction = function (f, t, v) if (v == REACTION_HOSTILE) then return f(UnitIsFriend(t.unitID, "player"), nil) else return f(UnitIsFriend(t.unitID, "player"), 1) end end,
+  unitReaction = function (f, t, v) if (v == REACTION_HOSTILE) then return f(UnitIsFriend(t.unitID, "player"), false) else return f(UnitIsFriend(t.unitID, "player"), true) end end,
  }
 
 

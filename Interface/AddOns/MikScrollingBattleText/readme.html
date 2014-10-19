@@ -39,7 +39,7 @@
   <div id="HeaderBlock">
    Version: 5.7<br />
    Author: Mikord<br />
-   Updated: October 15, 2014<br />
+   Updated: October 16, 2014<br />
    Official Site: <a href="http://mikord.wowinterface.com">http://mikord.wowinterface.com</a><br /><br />
    <a href="#Credits">See Credits</a>
   </div>
@@ -1211,6 +1211,33 @@
    <table cellspacing="3">
     <tr>
      <td class="ParameterName" nowrap="nowrap"><a name="WhatsNew"></a>Latest</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Moved the new font loader logic into its own frame to prevent issues with UIs such as RealUI that play with opacity on objects they don't own.</li>
+       <li>Fixed unit reaction condition that was preventing many triggers like Kill Shot and Hammer of Wrath from working.</li>
+       <li>Fixed taint issues cause by the _ global variable.</li>
+       <li>Updated options dialogs to remove reference to support for mp3s which the game no longer supports.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.137</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Corrected an error that occurs on startup with deleted default triggers.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.136</td>
+     <td class="ParameterDesc">
+      <ul>
+       <li>Reworked the font handling to preload fonts during initial load to resolve the issue where the fonts would reset to the default on initial game load.</li>
+      </ul>
+     </td>
+    </tr>
+    <tr>
+     <td class="ParameterName" nowrap="nowrap">5.7.135</td>
      <td class="ParameterDesc">
       <ul>
        <li>Fixed the ability to add custom fonts via the custom media tab.</li>

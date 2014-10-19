@@ -38,7 +38,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "此滾動區域名稱已存在"
 L.MSG_INVALID_SCROLL_AREA_NAME		= "無效的滾動區名稱"
 L.MSG_ACKNOWLEDGE_TEXT				= "你確定要執行這個動作嗎？"
 L.MSG_NORMAL_PREVIEW_TEXT			= "一般"
-L.MSG_INVALID_SOUND_FILE			= "音效必須為MP3或OGG格式。"
+L.MSG_INVALID_SOUND_FILE			= "音效必須為OGG格式。"
 L.MSG_NEW_TRIGGER					= "新增觸發"
 L.MSG_TRIGGER_CLASSES				= "觸發職業"
 L.MSG_MAIN_EVENTS					= "主要事件"
@@ -214,7 +214,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="字體名:", tooltip="用來確定字體的名字.\n\n例如: 我的字體"}
 obj["customFontPath"]	= { label="字體路徑:", tooltip="字體檔的路徑.\n\n注意: 如果檔在 MikScrollingBattleText\\Fonts 中的話, 只需要輸入檔案名就可以.\n\n例如: myFont.ttf "}
 obj["customSoundName"]	= { label="音效名:", tooltip="用來確定音效的名字.\n\n例如: 我的音效"}
-obj["customSoundPath"]	= { label="音效路徑:", tooltip="音效檔的路徑.\n\n注意: 如果檔在 MikScrollingBattleText\\Sounds 中的話, 只需要輸入檔案名就可以.\n\n例如: mySound.mp3 "}
+obj["customSoundPath"]	= { label="音效路徑:", tooltip="音效檔的路徑.\n\n注意: 如果檔在 MikScrollingBattleText\\Sounds 中的話, 只需要輸入檔案名就可以.\n\n例如: mySound.ogg "}
 obj["copyProfile"]		= { label="新增記錄檔：", tooltip="輸入新增記錄檔的名稱"}
 obj["partialEffect"]	= { tooltip="特效觸發時的提示."}
 obj["scrollAreaName"]	= { label="新增滾動區域:", tooltip="新增滾動區域的名稱"}

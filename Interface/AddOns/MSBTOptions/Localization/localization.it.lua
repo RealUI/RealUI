@@ -36,7 +36,7 @@ L.MSG_SCROLL_AREA_ALREADY_EXISTS	= "Nome esistente per l'area di scorrimento."
 L.MSG_INVALID_SCROLL_AREA_NAME		= "Nome invalido per l'area di scorrimento."
 L.MSG_ACKNOWLEDGE_TEXT				= "Sei sicuro di voler eseguire questa operazione?"
 L.MSG_NORMAL_PREVIEW_TEXT			= "Normale"
-L.MSG_INVALID_SOUND_FILE			= "Il suono deve essere un file .mp3 o un .ogg."
+L.MSG_INVALID_SOUND_FILE			= "Il suono deve essere un file .ogg."
 L.MSG_NEW_TRIGGER					= "Nuovo Innesco"
 L.MSG_TRIGGER_CLASSES				= "Innesco Classi"
 L.MSG_MAIN_EVENTS					= "Evento Principale"
@@ -212,7 +212,7 @@ obj = L.EDITBOXES
 obj["customFontName"]	= { label="Nome Carattere:", tooltip="Il nome usato epr identificare il carattere"}
 obj["customFontPath"]	= { label="Percorso Carattere:", tooltip="Il percorso al file del carattere.\n\nNOTA: se il file e' nella cartella raccomandara MikScrollingBattleText\\Fonts, solo il nome del file necessita di essere inserito invece che l'intero percorso.\n\nEsempio: myFont.ttf "}
 obj["customSoundName"]	= { label="Nome Suono:", tooltip="Il nome usato per identificare il suono"}
-obj["customSoundPath"]	= { label="Percorso Suono:", tooltip="Il percorso al file del suono.\n\nNOTA: se il file e' nella cartella raccomandara MikScrollingBattleText\\Sounds, solo il nome del file necessita di essere inserito invece che l'intero percorso.\n\nEsempio: mySound.mp3"}
+obj["customSoundPath"]	= { label="Percorso Suono:", tooltip="Il percorso al file del suono.\n\nNOTA: se il file e' nella cartella raccomandara MikScrollingBattleText\\Sounds, solo il nome del file necessita di essere inserito invece che l'intero percorso.\n\nEsempio: mySound.ogg"}
 obj["copyProfile"]		= { label="Nome Nuovo Profilo:", tooltip="Nome del nuovo profilo in cui copiare l'attuale."}
 obj["partialEffect"]	= { tooltip="La coda da aggiunger dopo che l'effetto parziale e' avvenuto."}
 obj["scrollAreaName"]	= { label="Nome nuova area di scorrimento:", tooltip="Il nuovo nome per l'area di scorrimento."}
