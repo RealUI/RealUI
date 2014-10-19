@@ -60,7 +60,7 @@ local function GetOptions()
 				disabled = function() return db.pixelPerfect end,
 				get = function() return tostring(db.customScale) end,
 				set = function(info, value) 
-					db.customScale = nibRealUI:ValidateOffset(value, 0.48, 1)
+					db.customScale = nibRealUI:ValidateOffset(tonumber(value), 0.48, 1)
 					UIScaler:UpdateUIScale()
 				end,
 			},
@@ -89,11 +89,12 @@ function UIScaler:UpdateUIScale()
 	if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
 	-- Set Scale (WoW CVar can't go below .64)
-	-- if scale < .64 then
+	if scale < .64 then
 		UIParent:SetScale(scale)
-	-- else
-	-- 	SetCVar("uiScale", scale)
-	-- end
+	else
+		if self.debugging then print("UpdateUIScale", scale, GetCVar("uiScale")) end
+		SetCVar("uiScale", scale)
+	end
 
 	-- Keep WoW UI Scale slider hidden and replace with RealUI button
 	if not ScaleOptionsHidden then
@@ -110,6 +111,15 @@ function UIScaler:UpdateUIScale()
 	self.uiScaleChanging = false
 end
 
+function UIScaler:PLAYER_ENTERING_WORLD()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+
+	self:RegisterEvent("VARIABLES_LOADED", "UpdateUIScale")
+	self:RegisterEvent("UI_SCALE_CHANGED", "UpdateUIScale")
+
+	self:UpdateUIScale()
+end
+
 function UIScaler:OnInitialize()
 	self.db = nibRealUI.db:RegisterNamespace(MODNAME)
 	self.db:RegisterDefaults({
@@ -124,6 +134,6 @@ function UIScaler:OnInitialize()
 
 	nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
 	
-	self:RegisterEvent("VARIABLES_LOADED", "UpdateUIScale")
-	self:RegisterEvent("UI_SCALE_CHANGED", "UpdateUIScale")
+	-- CVar "uiScale" doesn't exist until late in the loading process
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
