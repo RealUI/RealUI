@@ -259,7 +259,7 @@ UnitFrames["player"] = function(self)
         self.endBox.Update(self, event)
 
         local _, powerType = UnitPowerType(self.unit)
-        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
+        AngleStatusBar:SetBarColor(self.Power.bar, UnitFrames.PowerColors[powerType])
         self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false
         self.Power.enabled = true
 

@@ -190,25 +190,38 @@ UnitFrames.ReversePowers = {
 
 local function updateSteps(unit, type, percent, frame)
     local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
-    if unit == "player" or unit == "target" or unit == "vehicle" then
-        texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
-    elseif unit == "focus" or unit == "targettarget" then
-        texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
-    elseif unit == "focustarget" or unit == "pet" then
-        texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
+    local isLargeFrame = false
+    if UnitInVehicle("player") then
+        if unit == "vehicle" or unit == "target" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
+            isLargeFrame = true
+        elseif unit == "focus" or unit == "targettarget" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
+        elseif unit == "focustarget" or unit == "pet" or unit == "player" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
+        end
+    else
+        if unit == "player" or unit == "target" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
+            isLargeFrame = true
+        elseif unit == "focus" or unit == "targettarget" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
+        elseif unit == "focustarget" or unit == "pet" then
+            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
+        end
     end
     for i = 1, 2 do
-        --print(percent, unit, type)
+        --print(percent, unit, type, frame:GetParent().unit)
         if frame.bar.reverse then
             --print("step reverse")
-            if percent > stepPoints[i] and (unit == "player" or unit == "target") then
+            if percent > stepPoints[i] and isLargeFrame then
                 frame.steps[i]:SetTexture(texture.warn)
             else
                 frame.steps[i]:SetTexture(texture.step)
             end
         else
             --print("step normal")
-            if percent < stepPoints[i] and (unit == "player" or unit == "target") then
+            if percent < stepPoints[i] and isLargeFrame then
                 frame.steps[i]:SetTexture(texture.warn)
             else
                 frame.steps[i]:SetTexture(texture.step)

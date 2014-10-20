@@ -118,6 +118,10 @@ UnitFrames["pet"] = function(self)
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
         self.endBox.Update(self, event)
+        --print("unit", self.unit)
+        if self.unit == "player" then
+            UnitFrames.HealthOverride(self, "PostUpdate", "pet")
+        end
     end
 end
 

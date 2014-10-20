@@ -17,7 +17,7 @@ local function SetBarPosition(bar, per)
     end
 
     per = floor(per * 100) / 100
-    --print("Floored", bar:GetParent():GetName(), per)
+    --print("Floored", bar:GetParent():GetParent().unit, bar.reverse, per)
     bar:SetShown((not(bar.reverse) and (per < 1)) or (bar.reverse and (per > 0)))
 end
 
