@@ -205,6 +205,11 @@ end
 -- Check if a spell is ready to be cast by the player, if rangeCheck then make sure in range of unit too
 local function CheckSpellReady(spell, unit, rangeCheck, usable, checkCharges, charges)
 	if not spell or (spell == "") then return true end
+	if string.find(spell, "^#%d+") then -- check if name is in special format for specific spell id (i.e., #12345)
+		local id = tonumber(string.sub(spell, 2)) -- extract the spell id and get the name
+		spell = GetSpellInfo(id)
+		if not spell or (spell == "") then return false end
+	end
 	if usable and not IsUsableSpell(spell) then return false end -- checks player has learned the spell, has mana and/or reagents, and reactive conditions are met
 	if IsOn(checkCharges) then -- optionally check for remaining spell charges (can't count on the value of cd if not on cooldown)
 		local n = GetSpellCharges(spell) -- this has to be done separate from cooldown check in order to correctly handle the check for "less than"

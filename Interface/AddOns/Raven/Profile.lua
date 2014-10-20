@@ -338,7 +338,9 @@ end
 
 -- Find and cache spell ids (this should be used rarely, primarily when entering spell names manually
 function MOD:GetSpellID(name)
-	if not name then return nil end -- prevent parameter errors	
+	if not name then return nil end -- prevent parameter error
+	if string.find(name, "^#%d+") then return tonumber(string.sub(name, 2)) end -- check if name is in special format for specific spell id (i.e., #12345)
+	
 	local id = MOD.db.global.SpellIDs[name]
 	if id == 0 then return nil end -- only scan invalid ones once in a session
 	if id and (name ~= GetSpellInfo(id)) then id = nil end -- verify it is still valid

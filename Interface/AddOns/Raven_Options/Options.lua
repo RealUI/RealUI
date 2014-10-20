@@ -1127,7 +1127,7 @@ local function SetTestFieldString(ttype, fname, s)
 	if whiteStart == 1 then s = string.sub(s, whiteEnd + 1) end
 	local str = string.reverse(s) -- get the string after white space, reverse again to restore original order
 	if str ~= "" then -- make sure not empty string
-		if fname ~= "item" and fname ~= "spec" and fname ~= "glyph" and fname ~= "stance" and fname ~= "family" and fname ~= "maxHealth" then str = ValidateSpellName(str) end
+		if fname ~= "item" and fname ~= "spec" and fname ~= "glyph" and fname ~= "stance" and fname ~= "family" and fname ~= "maxHealth" then str = ValidateSpellName(str, true) end
 		SetTestField(ttype, fname, str)
 	else
 		SetTestField(ttype, fname, nil)
@@ -2676,7 +2676,7 @@ MOD.OptionsTable = {
 							type = "input", order = 30, name = L["Spell Name"],
 							desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id)."],
 							get = function(info) return conditions.name end,
-							set = function(info, n) n = ValidateSpellName(n); conditions.name = n end,
+							set = function(info, n) n = ValidateSpellName(n, true); conditions.name = n end,
 						},
 						StandardColors = {
 							type = "select", order = 40, name = L["Color"], width = "half",
@@ -2728,7 +2728,7 @@ MOD.OptionsTable = {
 							type = "input", order = 56, name = L["Spell Icon"],
 							desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id) for an icon to be used by default with this spell."],
 							get = function(info) return conditions.name and MOD.db.global.SpellIcons[conditions.name] or nil end,
-							set = function(info, n) n = ValidateSpellName(n); MOD.db.global.SpellIcons[conditions.name] = n end,
+							set = function(info, n) n = ValidateSpellName(n, true); MOD.db.global.SpellIcons[conditions.name] = n end,
 						},
 						SpellSound = {
 							type = "select", order = 57, name = L["Spell Sound"], 
@@ -9255,7 +9255,7 @@ MOD.OptionsTable = {
 									args = {
 										SpellName = {
 											type = "input", order = 1, name = L["Spell"], width = "full",
-											desc = L["Enter spell to test if ready to be cast."],
+											desc = L["Enter spell name (or numeric identifier, optionally preceded by # for a specific spell id) to test if ready to be cast."],
 											get = function(info) return GetTestField("Spell Ready", "spell") end,
 											set = function(info, value) SetTestFieldString("Spell Ready", "spell", value) end,
 										},
@@ -9900,14 +9900,23 @@ MOD.barOptions = {
 					MOD:UpdateAllBarGroups()
 				end,
 			},
+			spacer1 = { type = "description", name = "", order = 35, },
 			LabelNumber = {
 				type = "toggle", order = 40, name = L["Add Tooltip Number"],
-				desc = L["If checked, the first number found in the tooltip is added to the label. If label contains the string TT# then the number replaces the label."],
+				desc = L["If checked, a number found in the tooltip is added to the label. If label contains the string TT# then the number replaces the label."],
 				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
 				get = function(info) return GetBarField(info, "labelNumber") end,
 				set = function(info, value) SetBarField(info, "labelNumber", value); MOD:UpdateAllBarGroups() end,
 			},
-			spacer = { type = "description", name = "", order = 50, hidden = function(info) return GetBarField(info, "barType") ~= "Cooldown" end, },
+			LabelNumberOffset = {
+				type = "range", order = 45, name = L["Number Position"], min = 1, max = 10, step = 1,
+				desc = L["Set which number in tooltip to add to label. Supports decimals although can affect position."],
+				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
+				disabled = function(info) return not GetBarField(info, "labelNumber") end,
+				get = function(info) return GetBarField(info, "labelNumberOffset") or 1 end,
+				set = function(info, value) SetBarField(info, "labelNumberOffset", value) end,
+			},
+			spacer2 = { type = "description", name = "", order = 50, },
 			EnableCooldownReadyBar = {
 				type = "toggle", order = 60, name = L["Show When Ready"],
 				desc = L["If checked, show ready bar when action is not on cooldown."],

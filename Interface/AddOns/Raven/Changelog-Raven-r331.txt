@@ -1,0 +1,242 @@
+------------------------------------------------------------------------
+r331 | tomber | 2014-10-19 23:11:41 +0000 (Sun, 19 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/Profile.lua
+
+Fix typo.
+------------------------------------------------------------------------
+r330 | tomber | 2014-10-19 22:28:56 +0000 (Sun, 19 Oct 2014) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Fix bug in optional auras for hunter tracking abilities.
+No longer create stance auras for warrior since now provided by blizzard.
+Add ability to parse tooltips for the n-th number, rather than just the first.
+Allow entering spells in the #12345 format in more places, but particularly in the Spell Ready condition test.
+
+------------------------------------------------------------------------
+r329 | tomber | 2014-10-17 23:08:06 +0000 (Fri, 17 Oct 2014) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Fix error in "filter by type" detection of boss type.
+Fix error with temporary weapon enchant buffs (caused Lua error when attaching a lure to a fishing pole).
+Fix Lua error in skinning for Tukui.
+Fix Lua error during logout process (nuisance rather than functional).
+
+------------------------------------------------------------------------
+r328 | tomber | 2014-10-17 05:21:19 +0000 (Fri, 17 Oct 2014) | 2 lines
+Changed paths:
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Fix detection of monk chi and warlock burning embers, demonic fury, and soul shards.
+Fix opacity adjustment of cooldown clock overlay when using bar group combat and mouseover fading.
+------------------------------------------------------------------------
+r327 | tomber | 2014-10-15 22:50:22 +0000 (Wed, 15 Oct 2014) | 3 lines
+Changed paths:
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Fix missing clock-style cooldown animations.
+Fix detection of dots spread with AOE abilities (e.g., Shockwave, Arcane Torrent) and dots cast with the summoning mechanism (e.g., Void Tendril's Grasp).
+Fix condition tests All Buffs and All Debuffs to work correctly when listed auras were cast by other players.
+------------------------------------------------------------------------
+r326 | tomber | 2014-10-14 00:44:26 +0000 (Tue, 14 Oct 2014) | 2 lines
+Changed paths:
+   A /trunk/Borders
+   A /trunk/Borders/DoubleGray.tga
+   A /trunk/Borders/DoubleWhite.tga
+   A /trunk/Borders/IconDefault.tga
+   A /trunk/Borders/Rounded.tga
+   A /trunk/Borders/SingleGray.tga
+   A /trunk/Borders/SingleWhite.tga
+   M /trunk/Cancel.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   D /trunk/Normal.tga
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+   A /trunk/Statusbars
+   A /trunk/Statusbars/Black.tga
+   A /trunk/Statusbars/CrossHatch.tga
+   A /trunk/Statusbars/DarkAbove.tga
+   A /trunk/Statusbars/DarkBelow.tga
+   A /trunk/Statusbars/Deco.tga
+   A /trunk/Statusbars/Foggy.tga
+   A /trunk/Statusbars/Glassy.tga
+   A /trunk/Statusbars/Glossy.tga
+   A /trunk/Statusbars/Gray.tga
+   A /trunk/Statusbars/Linear.tga
+   A /trunk/Statusbars/Mesh.tga
+   A /trunk/Statusbars/Minimal.tga
+   A /trunk/Statusbars/Paper.tga
+   A /trunk/Statusbars/Reticulate.tga
+   A /trunk/Statusbars/Reverso.tga
+   A /trunk/Statusbars/Sleet.tga
+   A /trunk/Statusbars/Smoke.tga
+   A /trunk/Statusbars/Smudge.tga
+   A /trunk/Statusbars/StepIn.tga
+   A /trunk/Statusbars/StepOut.tga
+   A /trunk/Statusbars/Strip.tga
+   A /trunk/Statusbars/Stripes.tga
+   A /trunk/Statusbars/Sunrise.tga
+   A /trunk/Statusbars/White.tga
+
+Added default bar textures and borders to give the user some options if no other shared media is loaded.
+Adjusted pixel perfect option to work better with non-standard UI scales (remember that you need to reload UI after adjusting the UI scale).
+------------------------------------------------------------------------
+r325 | tomber | 2014-10-12 06:05:50 +0000 (Sun, 12 Oct 2014) | 3 lines
+Changed paths:
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   D /trunk/Sounds/alert.mp3
+   A /trunk/Sounds/alert.ogg
+   D /trunk/Sounds/bell.mp3
+   A /trunk/Sounds/bell.ogg
+   D /trunk/Sounds/boom.mp3
+   A /trunk/Sounds/boom.ogg
+   D /trunk/Sounds/buzzer.mp3
+   A /trunk/Sounds/buzzer.ogg
+   D /trunk/Sounds/chime.mp3
+   A /trunk/Sounds/chime.ogg
+   D /trunk/Sounds/clong.mp3
+   A /trunk/Sounds/clong.ogg
+   D /trunk/Sounds/coin.mp3
+   A /trunk/Sounds/coin.ogg
+   D /trunk/Sounds/coocoo.mp3
+   A /trunk/Sounds/coocoo.ogg
+   D /trunk/Sounds/creak.mp3
+   A /trunk/Sounds/creak.ogg
+   D /trunk/Sounds/drill.mp3
+   A /trunk/Sounds/drill.ogg
+   D /trunk/Sounds/elephant.mp3
+   A /trunk/Sounds/elephant.ogg
+   D /trunk/Sounds/flute.mp3
+   A /trunk/Sounds/flute.ogg
+   D /trunk/Sounds/honk.mp3
+   A /trunk/Sounds/honk.ogg
+   D /trunk/Sounds/knock.mp3
+   A /trunk/Sounds/knock.ogg
+   D /trunk/Sounds/laser.mp3
+   A /trunk/Sounds/laser.ogg
+   D /trunk/Sounds/rubbing.mp3
+   A /trunk/Sounds/rubbing.ogg
+   D /trunk/Sounds/slide.mp3
+   A /trunk/Sounds/slide.ogg
+   D /trunk/Sounds/squeaky.mp3
+   A /trunk/Sounds/squeaky.ogg
+   D /trunk/Sounds/whistle.mp3
+   A /trunk/Sounds/whistle.ogg
+   D /trunk/Sounds/zoing.mp3
+   A /trunk/Sounds/zoing.ogg
+
+Fixed so that numbers are not overlaid on icons when the new Blizzard option for cooldown counts on action buttons is enabled.
+Converted the sound files from mp3 to ogg.
+This build is for 6.0.2 and will be marked beta/release if no other bugs are found.
+------------------------------------------------------------------------
+r324 | tomber | 2014-10-10 17:39:22 +0000 (Fri, 10 Oct 2014) | 4 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Bars.lua
+   M /trunk/Cancel.lua
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Remove detection of hunter fire traps shared cooldowns (no longer needed and was messing up Black Arrow).
+Fix IsSpellInRange result detection.
+Clean up comments and packager.
+This build is for 6.0.2 and will be marked beta/release if no other bugs are found.
+------------------------------------------------------------------------
+r323 | tomber | 2014-09-28 21:12:23 +0000 (Sun, 28 Sep 2014) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/DeathKnight.lua
+   M /trunk/Presets/Druid.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Presets/Hunter.lua
+   M /trunk/Presets/Mage.lua
+   M /trunk/Presets/Monk.lua
+   M /trunk/Presets/Paladin.lua
+   M /trunk/Presets/Pets.lua
+   M /trunk/Presets/Priest.lua
+   M /trunk/Presets/Racials.lua
+   M /trunk/Presets/Rogue.lua
+   M /trunk/Presets/Shaman.lua
+   M /trunk/Presets/Warlock.lua
+   M /trunk/Presets/Warrior.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Readme.txt
+
+Remove class spell info in the preset files. Clean up class-specific conditions in the preset files. Clean up readme.txt file. Recognize latest GUID format change.
+
+When testing this on the PTR or beta servers, please download and include as a separate addon the latest Ace3 release from wowace. This is to ensure that the correct libraries are being used.
+
+This build now includes all changes planned prior to the release of 6.0.2. Please report any bugs found while testing on the PTR to the curseforge forum thread for Raven under General Addons.
+------------------------------------------------------------------------
+r322 | tomber | 2014-09-25 21:39:09 +0000 (Thu, 25 Sep 2014) | 4 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Remove dependencies on class info in the preset files.
+Add new number formats.
+Separate spell lockout info from the class-specific preset files.
+
+------------------------------------------------------------------------
+r321 | tomber | 2014-09-21 05:11:26 +0000 (Sun, 21 Sep 2014) | 3 lines
+Changed paths:
+   D /trunk/API.txt
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Changed how new bars are created in custom bar groups to requiring spell names or numeric ids to be entered for each new buff/debuff/cooldown bar. This removes the dependence on the preset tables being accurate for all races, classes and specializations. This will significantly reduce the update requirements for the preset tables going into WoD and sets the stage for reducing the amount of info encoded in presets.
+
+Removed the localizations for KR, CN and TW since they have gotten too far out-of-date to be included in this release. The EN localization has been cleaned up some, as well.
+------------------------------------------------------------------------
+r320 | tomber | 2014-09-20 21:17:37 +0000 (Sat, 20 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   D /trunk/Highlights.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Remove the capability of adding buff/debuff/cooldown info on action bar buttons. This feature will not be supported for WoD due to the challenge of maintaining it given dependence on action bar addons. This feature has always been somewhat confusing to people who don't expect a buff/debuff/cooldown addon to alter the appearance of action bars.
+------------------------------------------------------------------------
+r319 | tomber | 2014-09-14 20:16:55 +0000 (Sun, 14 Sep 2014) | 3 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Highlights.lua
+   M /trunk/Profile.lua
+
+Fix more tests for returned values from Blizzard API that changed from nil or 1 to true or false. This should fix some issues with clicking on anchors and various condition tests.
+
+Change packager to pick up latest versions of Ace3 library. This is intended to get the alpha release of the libraries for WoD.
+------------------------------------------------------------------------

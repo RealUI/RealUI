@@ -979,7 +979,7 @@ local function GetTracking()
 	local notTracking, notTrackingIcon, found = L["Not Tracking"], "Interface\\Minimap\\Tracking\\None", false
 	for i = 1, GetNumTrackingTypes() do
 		local tracking, trackingIcon, active = GetTrackingInfo(i)
-		if active == 1 then
+		if active then
 			found = true
 			AddAura("player", tracking, true, nil, 1, "Tracking", 0, "player", nil, nil, nil, trackingIcon, nil, 0, "tracking", tracking)
 		end
@@ -1022,9 +1022,9 @@ local function GetSpellEffectAuras()
 	end
 end
 
--- Create an aura for current stance for warriors and paladins
+-- Create an aura for current stance for classes that don't include stance buffs
 local function GetStanceAura()
-	if MOD.myClass == "WARRIOR" or MOD.myClass == "PALADIN" or MOD.myClass == "MONK" then
+	if MOD.myClass == "PALADIN" or MOD.myClass == "MONK" then
 		local stance = GetShapeshiftForm()
 		if stance and stance > 0 then
 			local _, name = GetShapeshiftFormInfo(stance)

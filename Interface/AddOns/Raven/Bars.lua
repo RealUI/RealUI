@@ -696,9 +696,7 @@ local function Bar_OnEnter(frame, bgName, barName, ttanchor)
 		GameTooltip:SetText(id)
 	elseif (tt == "inventory") or (tt == "weapon") then
 		local slot = GetInventorySlotInfo(id)
-		if slot then
-			GameTooltip:SetInventoryItem("player", slot)
-		end
+		if slot then GameTooltip:SetInventoryItem("player", slot) end
 	elseif (tt == "spell link") or (tt == "item link") then
 		GameTooltip:SetHyperlink(id)
 	elseif (tt == "spell id") or (tt == "internal") then
@@ -782,8 +780,22 @@ local function CheckTimeAndDuration(bp, timeLeft, duration)
 	return true
 end
 
--- Return the first number found in a tooltip, if any, for auras and cooldowns
-local function GetTooltipNumber(ttType, ttID, ttUnit)
+local numberPatterns = { -- patterns for extracting up to 10 numbers from a string
+	"(%d+%.?%d*)",
+	"%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
+}
+
+-- Return a number found in a tooltip for auras and cooldowns
+local function GetTooltipNumber(ttType, ttID, ttUnit, ttOffset)
+	if not ttOffset or ttOffset > #numberPatterns then ttOffset = 1 end -- determine offset into numberPatterns
 	local tt = nil
 	if ttType == "buff" then
 		tt = MOD:GetBuffTooltip(); tt:SetUnitAura(ttUnit, ttID, "HELPFUL") -- fill in the tooltip for the buff
@@ -793,17 +805,20 @@ local function GetTooltipNumber(ttType, ttID, ttUnit)
 		tt = MOD:GetBuffTooltip(); tt:SetHyperlink(ttID)
 	elseif (ttType == "spell id") or (ttType == "internal") then
 		tt = MOD:GetBuffTooltip(); tt:SetSpellByID(ttID)
+	elseif (ttType == "inventory") or (ttType == "weapon") then
+		tt = MOD:GetBuffTooltip()
+		local slot = GetInventorySlotInfo(ttID)
+		if slot then tt:SetInventoryItem("player", slot) end
 	end
 	if tt then
+		local pattern = numberPatterns[ttOffset]
+		local t = ""
 		for i = 1, 30 do
-			local text = tt.tooltiplines[i]:GetText()
-			if text then
-				local num = text:match("(%d+)") -- extract first number in the line, if any
-				if num then return tonumber(num) end
-			else
-				break
-			end
+			local s = tt.tooltiplines[i]:GetText()
+			if s then t = t .. s else break end
 		end
+		t = string.gsub(t, "|c........", ""); t = string.gsub(t, "|r", "") -- remove color escape sequences from the text
+		return string.match(t, pattern) -- extract number from the tooltip, if one exists for the specified offset
 	end
 	return nil
 end
@@ -822,12 +837,12 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 	local maxTime = duration
 	if vbp.setDuration then maxTime = vbp.uniformDuration end -- override with uniform duration for all bars in group
 
-	if b.labelNumber then -- optionally get the first number found in the tooltip and add it to the label
-		local num = GetTooltipNumber(ttType, ttID, ttUnit)
+	if b.labelNumber then -- optionally get a number found in the tooltip and add it to the label
+		local num = GetTooltipNumber(ttType, ttID, ttUnit, b.labelNumberOffset) -- returns number as a string
 		if string.find(label, "TT#") then -- special case to just show the number without rest of label
-			if num and not b.startReady then label = tostring(num) else label = "" end
+			if num and not b.startReady then label = num else label = "" end
 		else
-			if num then label = string.format("%s: %d", label, num) end
+			if num then label = string.format("%s: %s", label, num) end
 		end
 	end
 

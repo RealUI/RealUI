@@ -5,8 +5,8 @@
 ## DefaultState: enabled
 ## OptionalDependencies: Masque
 ## SavedVariables: RavenDB
-## Version: r329
-## X-Curse-Packaged-Version: r329
+## Version: r331
+## X-Curse-Packaged-Version: r331
 ## X-Curse-Project-Name: Raven
 ## X-Curse-Project-ID: raven
 ## X-Curse-Repository-ID: wow/raven/mainline
