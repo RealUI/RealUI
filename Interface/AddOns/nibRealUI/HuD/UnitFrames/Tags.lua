@@ -11,18 +11,23 @@ local tags = oUF.Tags
 ------------------
 -- Name
 tags.Methods["realui:name"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    local isDead = false
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then
+        isDead = true
+    end
 
     local unitTag = unit:match("(boss)%d?$") or unit
     local name = UnitFrames:AbrvName(UnitName(unit), unitTag)
 
-    local classColor = "ffffff"
-    if UnitFrames.db.profile.overlay.classColorNames then 
+    local nameColor = "ffffff"
+    if isDead then
+        nameColor = "3f3f3f"
+    elseif UnitFrames.db.profile.overlay.classColorNames then 
         --print("Class color names", unit)
         local _, class = UnitClass(unit)
-        classColor = nibRealUI:ColorTableToStr(nibRealUI:GetClassColor(class))
+        nameColor = nibRealUI:ColorTableToStr(nibRealUI:GetClassColor(class))
     end
-    return string.format("|cff%s%s|r", classColor, name)
+    return string.format("|cff%s%s|r", nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 

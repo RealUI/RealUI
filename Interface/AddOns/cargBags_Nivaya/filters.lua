@@ -3,7 +3,11 @@ local cargBags = ns.cargBags
 
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
-function cbNivaya:UpdateBags() for i = -3, 11 do cbNivaya:UpdateBag(i) end end
+function cbNivaya:UpdateBags()
+	for i = -3, 11 do
+		cbNivaya:UpdateBag(i)
+	end
+end
 
 local L = cBnivL
 cB_Filters = {}

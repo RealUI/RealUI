@@ -190,7 +190,7 @@ UnitFrames.ReversePowers = {
 
 local function updateSteps(unit, type, percent, frame)
     local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
-    if unit == "player" or unit == "target" then
+    if unit == "player" or unit == "target" or unit == "vehicle" then
         texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
     elseif unit == "focus" or unit == "targettarget" then
         texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]

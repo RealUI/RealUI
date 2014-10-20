@@ -31,7 +31,7 @@ local Types = {
     ["PRIEST"] = {
         name = "Priest",
         points = {
-            [1] = {name = "Shadow Orbs", id = "so", barcount = 3},
+            [1] = {name = "Shadow Orbs", id = "so", barcount = 5},
         },
     },
     ["ROGUE"] = {
