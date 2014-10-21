@@ -24,7 +24,10 @@ local function CreateHealthBar(parent)
     parent.Health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
     parent.Health:SetAllPoints(parent)
 
-    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, -(7 + UnitFrames.layoutSize), -1, texture.width - (8 + UnitFrames.layoutSize), texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
+    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, -(7 + UnitFrames.layoutSize), -1, texture.width - (10 + UnitFrames.layoutSize), texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
+    if ndb.settings.reverseUnitFrameBars then 
+        AngleStatusBar:SetReverseFill(parent.Health.bar, true)
+    end
 
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
@@ -42,7 +45,11 @@ local function CreateHealthBar(parent)
     for i = 1, 2 do
         parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
         parent.Health.steps[i]:SetSize(16, 16)
-        parent.Health.steps[i]:SetPoint("BOTTOMLEFT", parent.Health, floor(stepPoints[i] * texture.width), 0)
+        if parent.Health.bar.reverse then
+            parent.Health.steps[i]:SetPoint("BOTTOMRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width)), 0)
+        else
+            parent.Health.steps[i]:SetPoint("BOTTOMLEFT", parent.Health, floor(stepPoints[i] * texture.width), 0)
+        end
     end
 
     parent.Health.Override = UnitFrames.HealthOverride

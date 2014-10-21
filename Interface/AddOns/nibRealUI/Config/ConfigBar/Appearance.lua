@@ -96,7 +96,7 @@ function ConfigBar_Appearance:ChangeTab(tabID, isInit)
 	self.currentTab = tabID
 
 	if tabID == 1 then
-		Element.window:SetHeight(128)
+		Element.window:SetHeight(168)
 	elseif tabID == 2 then
 		Element.window:SetHeight(182)
 	else
@@ -189,7 +189,7 @@ function ConfigBar_Appearance:SetupWindow()
 				self.settings[2][1].check.highlight:SetAlpha(ndb.settings.infoLineBackground and 1 or 0)
 			end,
 			checked = ndb.settings.infoLineBackground,
-			width = Element.info.window.width / 2,
+			width = Element.info.window.width,
 			height = 20,
 			x = 0,
 			y = -66
@@ -206,10 +206,10 @@ function ConfigBar_Appearance:SetupWindow()
 					self.settings[3][1].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColor and 1 or 0)
 				end,
 				checked = UnitFrames.db.profile.overlay.classColor,
-				width = Element.info.window.width / 2,
+				width = Element.info.window.width,
 				height = 20,
-				x = Element.info.window.width / 2,
-				y = -66
+				x = 0,
+				y = -88
 			},
 			{
 				label = CLASS.." "..COLOR.." "..UNIT_NAMES,
@@ -219,6 +219,15 @@ function ConfigBar_Appearance:SetupWindow()
 				end,
 				checked = UnitFrames.db.profile.overlay.classColorNames,
 			},
+			{
+				label = "Reverse UF Bars (ie. default WoW style health/power bars)",
+				func = function()
+					ndb.settings.reverseUnitFrameBars = not(ndb.settings.reverseUnitFrameBars)
+					self.settings[3][3].check.highlight:SetAlpha(ndb.settings.reverseUnitFrameBars and 1 or 0)
+					nibRealUI:ReloadUIDialog()
+				end,
+				checked = ndb.settings.reverseUnitFrameBars,
+			}
 		}
 		self.settings[3] = cbGUI:CreateOptionList(tabPanel1, "VERTICAL", check)
 	end

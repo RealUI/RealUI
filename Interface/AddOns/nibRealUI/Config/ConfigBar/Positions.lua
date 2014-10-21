@@ -118,7 +118,7 @@ function ConfigBar_Positions:SetupWindow()
 				self:ToggleHuDSize()
 			end,
 			checked = ndb.settings.hudSize == 2,
-		}
+		},
 	}
 	self.positionOptions = cbGUI:CreateOptionList(Element, "VERTICAL", options)
 
