@@ -250,7 +250,7 @@ local defaults = {
 			infoLineBackground = true,
 			stripeOpacity = 0.5,
 			hudSize = 1,
-			reverseUnitFrameBars = true,
+			reverseUnitFrameBars = false,
 		},
 		-- Media
 		media = {
