@@ -215,9 +215,9 @@ local function updateSteps(unit, type, percent, frame)
         if frame.bar.reverse then
             --print("step reverse")
             if percent > stepPoints[i] and isLargeFrame then
-                frame.steps[i]:SetTexture(texture.warn)
-            else
                 frame.steps[i]:SetTexture(texture.step)
+            else
+                frame.steps[i]:SetTexture(texture.warn)
             end
         else
             --print("step normal")

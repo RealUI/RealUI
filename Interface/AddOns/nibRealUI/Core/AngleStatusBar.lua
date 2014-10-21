@@ -80,7 +80,7 @@ end
 
 function AngleStatusBar:SetReverseFill(bar, reverse)    -- Reverse fill style (reverse: 100% = full)
     bar.reverse = reverse
-    self:SetBarValue(bar, bar.value, true)
+    self:SetValue(bar, bar.value, true)
 end
 
 function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, direction, smooth)

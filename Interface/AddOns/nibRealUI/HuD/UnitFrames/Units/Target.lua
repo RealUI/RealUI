@@ -56,7 +56,10 @@ local function CreateHealthBar(parent)
     parent.Health:SetPoint("TOPLEFT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
-    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
+    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
+    if ndb.settings.reverseUnitFrameBars then 
+        AngleStatusBar:SetReverseFill(parent.Health.bar, true)
+    end
 
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
@@ -81,7 +84,11 @@ local function CreateHealthBar(parent)
         parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
         parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
         parent.Health.steps[i]:SetSize(16, 16)
-        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        if not parent.Health.bar.reverse then
+            parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        else
+            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
+        end
     end
 
     parent.Health.frequentUpdates = true
@@ -342,7 +349,7 @@ UnitFrames["target"] = function(self)
         local _, powerType = UnitPowerType(self.unit)
 
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
-        self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false
+        AngleStatusBar:SetReverseFill(self.Power.bar, UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
 
         local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
