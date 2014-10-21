@@ -668,13 +668,13 @@ function CastBars:UpdateAnchors()
 	self.player.icon:SetPoint(textPointVert..textPointHoriz, self.player, "TOP"..textPointHoriz, textX + xOfs, textY)
 
 	if db.reverse.player then
-		AngleStatusBar:SetReverseDirection(self.player.cast.bar, db.reverse.player, (251 - db.size.width), -1)
-		AngleStatusBar:SetReverseDirection(self.player.cast.latencyLeft, db.reverse.player, -5, -1)
-		AngleStatusBar:SetReverseDirection(self.player.cast.latencyRight, db.reverse.player, (251 - db.size.width), -1)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.bar, db.reverse.player, (251 - db.size.width), -1)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.latencyLeft, db.reverse.player, -5, -1)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.latencyRight, db.reverse.player, (251 - db.size.width), -1)
 	else
-		AngleStatusBar:SetReverseDirection(self.player.cast.bar, db.reverse.player)
-		AngleStatusBar:SetReverseDirection(self.player.cast.latencyLeft, db.reverse.player)
-		AngleStatusBar:SetReverseDirection(self.player.cast.latencyRight, db.reverse.player)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.bar, db.reverse.player)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.latencyLeft, db.reverse.player)
+		AngleStatusBar:ReverseBarDirection(self.player.cast.latencyRight, db.reverse.player)
 	end
 
 	-- Target
@@ -698,9 +698,9 @@ function CastBars:UpdateAnchors()
 	self.target.icon:SetPoint(textPointVert..textPointHoriz, self.target, "TOP"..textPointHoriz, textX - xOfs, textY)
 
 	if db.reverse.target then
-		AngleStatusBar:SetReverseDirection(self.target.cast.bar, db.reverse.target, 5 + db.size.width - 256, -1)
+		AngleStatusBar:ReverseBarDirection(self.target.cast.bar, db.reverse.target, 5 + db.size.width - 256, -1)
 	else
-		AngleStatusBar:SetReverseDirection(self.target.cast.bar, db.reverse.target)
+		AngleStatusBar:ReverseBarDirection(self.target.cast.bar, db.reverse.target)
 	end
 
 

@@ -66,7 +66,7 @@ function AngleStatusBar:SetBarColor(bar, r, g, b, a)
     end
 end
 
-function AngleStatusBar:SetReverseDirection(bar, val, x, y)
+function AngleStatusBar:ReverseBarDirection(bar, val, x, y)
     if val then
         bar.direction = (bar.direction == "LEFT") and "RIGHT" or "LEFT"
         bar:ClearAllPoints()
@@ -76,6 +76,11 @@ function AngleStatusBar:SetReverseDirection(bar, val, x, y)
         bar:ClearAllPoints()
         bar:SetPoint(bar.startPoint, bar.parent, bar.startPoint, bar.x, bar.y)
     end
+end
+
+function AngleStatusBar:SetReverseFill(bar, reverse)    -- Reverse fill style (reverse: 100% = full)
+    bar.reverse = reverse
+    self:SetBarValue(bar, bar.value, true)
 end
 
 function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, direction, smooth)

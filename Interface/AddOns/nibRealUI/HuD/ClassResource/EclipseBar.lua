@@ -240,15 +240,15 @@ end
 function EclipseBar:ReverseBar(side, reverse)
     if side == "lunar" then
         if reverse then
-            AngleStatusBar:SetReverseDirection(self.eBar.lunar.bar, true, 2, -1)
+            AngleStatusBar:ReverseBarDirection(self.eBar.lunar.bar, true, 2, -1)
         else
-            AngleStatusBar:SetReverseDirection(self.eBar.lunar.bar, false, 5, -1)
+            AngleStatusBar:ReverseBarDirection(self.eBar.lunar.bar, false, 5, -1)
         end
     else
         if reverse then
-            AngleStatusBar:SetReverseDirection(self.eBar.solar.bar, true, -2, -1)
+            AngleStatusBar:ReverseBarDirection(self.eBar.solar.bar, true, -2, -1)
         else
-            AngleStatusBar:SetReverseDirection(self.eBar.solar.bar, false, 5, -1)
+            AngleStatusBar:ReverseBarDirection(self.eBar.solar.bar, false, 5, -1)
         end
     end
 end

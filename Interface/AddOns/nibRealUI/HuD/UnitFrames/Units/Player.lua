@@ -50,6 +50,9 @@ local function CreateHealthBar(parent)
     parent.Health:SetSize(texture.width, texture.height)
 
     parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
+    if ndb.settings.reverseUnitFrameBars then 
+        AngleStatusBar:SetReverseFill(parent.Health.bar, true)
+    end
 
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
@@ -73,7 +76,11 @@ local function CreateHealthBar(parent)
         parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
         parent.Health.steps[i]:SetTexture(texture.step)
         parent.Health.steps[i]:SetSize(16, 16)
-        parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
+        if parent.Health.bar.reverse then
+            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        else
+            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
+        end
     end
 
     parent.Health.frequentUpdates = true
@@ -260,7 +267,7 @@ UnitFrames["player"] = function(self)
 
         local _, powerType = UnitPowerType(self.unit)
         AngleStatusBar:SetBarColor(self.Power.bar, UnitFrames.PowerColors[powerType])
-        self.Power.bar.reverse = UnitFrames.ReversePowers[powerType] or false
+        AngleStatusBar:SetReverseFill(self.Power.bar, UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
         self.Power.enabled = true
 
         local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
