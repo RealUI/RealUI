@@ -82,7 +82,11 @@ function SkinAce3:Skin()
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
     AceGUI.RegisterAsWidget = function(self, widget)
         local TYPE = widget.type
+        local _, TYPE2, TYPE3 = strsplit("-", TYPE)
+        local _, LSMTYPE = strsplit("_", TYPE)
         --print("Widget:", TYPE)
+        --print("Subtype", TYPE2 or LSMTYPE, TYPE3)
+
         if TYPE == "Button" then
             if not widget.skinned then
                 F.Reskin(widget.frame)
@@ -197,6 +201,27 @@ function SkinAce3:Skin()
                 widget.skinned = true
             end
 
+        elseif TYPE2 == "Pullout" then
+            if not widget.skinned then
+                F.CreateBD(widget.frame)
+                widget.skinned = true
+            end
+
+        elseif TYPE2 == "Item" then
+            if not widget.skinned then
+                widget.highlight:SetTexture(r, g, b, .2)
+                widget.highlight:ClearAllPoints()
+                widget.highlight:SetPoint("TOPLEFT", 0, 0)
+                widget.highlight:SetPoint("BOTTOMRIGHT", 0, 0)
+
+                if TYPE3 == "Toggle" then
+
+                elseif TYPE3 == "Menu" then
+                    --
+                end
+                widget.skinned = true
+            end
+
         elseif TYPE == "EditBox" then
             if not widget.skinned then
                 F.ReskinInput(widget.editbox)
@@ -234,48 +259,34 @@ function SkinAce3:Skin()
                 widget.skinned = true
             end
 
-        elseif TYPE == "LSM30_Statusbar" then
+        elseif LSMTYPE then
             if not widget.skinned then
                 skinLSM30(widget.frame)
-                widget.bar:ClearAllPoints()
-                widget.bar:SetPoint("TOPLEFT", widget.frame.bg, 2, -2)
-                widget.bar:SetPoint("BOTTOMRIGHT", widget.frame.bg, -21, 2)
+
+                if LSMTYPE == "Statusbar" then
+                    widget.bar:ClearAllPoints()
+                    widget.bar:SetPoint("TOPLEFT", widget.frame.bg, 2, -2)
+                    widget.bar:SetPoint("BOTTOMRIGHT", widget.frame.bg, -21, 2)
+
+                elseif LSMTYPE == "Background" then
+                    widget.frame.bg:ClearAllPoints()
+                    widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
+                    widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
+
+                elseif LSMTYPE == "Border" then
+                    widget.frame.bg:ClearAllPoints()
+                    widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
+                    widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
+
+                elseif LSMTYPE == "Font" then
+                    --
+
+                elseif LSMTYPE == "Sound" then
+                    widget.soundbutton:ClearAllPoints()
+                    widget.soundbutton:SetPoint("TOPLEFT", widget.frame.bg, 4, -2)
+                end
                 widget.skinned = true
             end
-
-        elseif TYPE == "LSM30_Background" then
-            if not widget.skinned then
-                skinLSM30(widget.frame)
-                widget.frame.bg:ClearAllPoints()
-                widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
-                widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
-                widget.skinned = true
-            end
-
-        elseif TYPE == "LSM30_Border" then
-            if not widget.skinned then
-                skinLSM30(widget.frame)
-                widget.frame.bg:ClearAllPoints()
-                widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
-                widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
-                widget.skinned = true
-            end
-
-        elseif TYPE == "LSM30_Font" then
-            if not widget.skinned then
-                skinLSM30(widget.frame)
-                widget.skinned = true
-            end
-
-        elseif TYPE == "LSM30_Sound" then
-            if not widget.skinned then
-                skinLSM30(widget.frame)
-                widget.soundbutton:ClearAllPoints()
-                widget.soundbutton:SetPoint("TOPLEFT", widget.frame.bg, 4, -2)
-                widget.skinned = true
-            end
-
-
         end
         return oldRegisterAsWidget(self, widget)
     end
@@ -284,37 +295,71 @@ function SkinAce3:Skin()
     AceGUI.RegisterAsContainer = function(self, widget)
         local TYPE = widget.type
         --print("Container:", TYPE)
-        if TYPE == "ScrollFrame" then
-            local frame = widget.scrollbar
-            F.ReskinScroll(frame)
 
-        elseif TYPE == "InlineGroup" or TYPE == "TreeGroup" or TYPE == "TabGroup" or TYPE == "SimpleGroup" or TYPE == "Frame" or TYPE == "DropdownGroup" then
-            local frame = widget.content:GetParent()
-            F.CreateBD(frame, .4)
-            if TYPE == "Frame" then
-                StripTextures(frame)
-                for i=1, frame:GetNumChildren() do
-                    local child = select(i, frame:GetChildren())
-                    if child:GetObjectType() == "Button" and child:GetText() then
-                        F.Reskin(child)
-                    else
-                        StripTextures(child)
-                    end
-                end
-                F.CreateBD(frame)
-                frame:SetBackdropColor(unpack(nibRealUI.media.window))
+        local frame = widget.content:GetParent()
+        if TYPE == "DropdownGroup" then
+            if not widget.skinned then
+                F.CreateBD(frame, 0.4)
             end
 
-            if widget.treeframe then
+        elseif TYPE == "Frame" then
+            if not widget.skinned then
+                -- Sizer
+                local line1, line2 = widget.sizer_se:GetRegions()
+                line1:SetSize(2, 2)
+                line1:SetTexture(C.media.backdrop)
+                line1:SetVertexColor(r, g, b, .8)
+
+                line2:SetSize(2, 2)
+                line2:SetPoint("BOTTOMRIGHT", line1, "TOPRIGHT", 0, 4)
+                line2:SetTexture(C.media.backdrop)
+                line2:SetVertexColor(r, g, b, .8)
+
+                local line3 = widget.sizer_se:CreateTexture(nil, "BACKGROUND")
+                line3:SetSize(2, 2)
+                line3:SetPoint("BOTTOMRIGHT", line1, "BOTTOMLEFT", -4, 0)
+                line3:SetTexture(C.media.backdrop)
+                line3:SetVertexColor(r, g, b, .8)
+
+                -- Skin Children
+                local children = {frame:GetChildren()}
+                F.Reskin(children[1]) -- Close button
+                StripTextures(children[2]) -- Status bar
+
+                -- Remove Title BG
+                StripTextures(frame)
+
+                -- StripTextures will actually remove the backdrop too, so we need to put that back
+                F.CreateBD(frame)
+            end
+
+        elseif TYPE == "InlineGroup" then
+            if not widget.skinned then
+                F.CreateBD(frame, 0.4)
+            end
+
+        elseif TYPE == "TabGroup" then
+            if not widget.skinned then
+                local oldCreateTab = widget.CreateTab
+                widget.CreateTab = function(self, id)
+                    local tab = oldCreateTab(self, id)
+                    StripTextures(tab)
+                    return tab
+                end
+                F.CreateBD(frame, 0.4)
+            end
+
+        elseif TYPE == "TreeGroup" then
+            if not widget.skinned then
                 --print("TreeFrame!!!")
-                F.CreateBD(widget.treeframe, .3)
-                frame:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
                 hooksecurefunc(widget, "RefreshTree", function(self, ...)
                     --print("RefreshTree", self)
                     local buttons = self.buttons 
                     for i, v in next, buttons do
                         if not v.skinned then
-                            F.ReskinExpandOrCollapse(_G[v:GetName().."Toggle"])
+                            local toggle = _G[v:GetName().."Toggle"]
+                            F.ReskinExpandOrCollapse(toggle)
+                            toggle.SetPushedTexture = F.dummy
                             v.skinned = true
                         end
                     end
@@ -333,15 +378,47 @@ function SkinAce3:Skin()
                         self.skinned = true
                     end
                 end)
+                F.CreateBD(widget.treeframe, .3)
+                F.CreateBD(frame)
+                frame:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
             end
 
-            if TYPE == "TabGroup" then
-                local oldCreateTab = widget.CreateTab
-                widget.CreateTab = function(self, id)
-                    local tab = oldCreateTab(self, id)
-                    StripTextures(tab)
-                    return tab
-                end
+        elseif TYPE == "ScrollFrame" then
+            if not widget.skinned then
+                F.ReskinScroll(widget.scrollbar)
+            end
+
+        elseif TYPE == "SimpleGroup" then
+            if not widget.skinned then
+                --
+            end
+
+        elseif TYPE == "Window" then
+            if not widget.skinned then
+                -- Sizer
+                local line1, line2 = widget.sizer_se:GetRegions()
+                line1:SetSize(2, 2)
+                line1:SetTexture(C.media.backdrop)
+                line1:SetVertexColor(r, g, b, .8)
+
+                line2:SetSize(2, 2)
+                line2:SetPoint("BOTTOMRIGHT", line1, "TOPRIGHT", 0, 4)
+                line2:SetTexture(C.media.backdrop)
+                line2:SetVertexColor(r, g, b, .8)
+
+                local line3 = widget.sizer_se:CreateTexture(nil, "BACKGROUND")
+                line3:SetSize(2, 2)
+                line3:SetPoint("BOTTOMRIGHT", line1, "BOTTOMLEFT", -4, 0)
+                line3:SetTexture(C.media.backdrop)
+                line3:SetVertexColor(r, g, b, .8)
+
+                F.ReskinClose(widget.closebutton)
+
+                -- Remove Borders
+                StripTextures(frame)
+
+                -- StripTextures will actually remove the backdrop too, so we need to put that back
+                F.CreateBD(frame)
             end
         end
         return oldRegisterAsContainer(self, widget)
