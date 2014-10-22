@@ -59,7 +59,7 @@ local function CreateHealthBar(parent)
     parent.Health:SetStatusBarTexture(nibRealUI.media.textures.plain)
     parent.Health:SetStatusBarColor(unpack(db.overlay.colors.health.normal))
     parent.Health.frequentUpdates = true
-    if db.boss.reverseHealth then
+    if not(ndb.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
         parent.Health.PostUpdate = function(self, unit, min, max)
             self:SetValue(max - self:GetValue())

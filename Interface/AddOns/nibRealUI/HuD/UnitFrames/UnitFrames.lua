@@ -132,20 +132,6 @@ local function GetOptions()
                         type = "description",
                         order = 21,
                     },
-                    reverseHealth = {
-                        type = "toggle",
-                        name = "Reverse Health Bar",
-                        get = function() return db.boss.reverseHealth end,
-                        set = function(info, value) 
-                            db.boss.reverseHealth = value
-                        end,
-                        order = 30,
-                    },
-                    gap3 = {
-                        name = " ",
-                        type = "description",
-                        order = 41,
-                    },
                     auras = {
                         type = "group",
                         inline = true,
@@ -488,7 +474,6 @@ function UnitFrames:OnInitialize()
                 debuffCount = 5,
                 showPlayerAuras = true,
                 showNPCAuras = true,
-                reverseHealth = true,
             },
             positions = {
                 [1] = {
