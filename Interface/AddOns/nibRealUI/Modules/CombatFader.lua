@@ -323,9 +323,12 @@ function CombatFader:FadeFrames()
             if db.elements[k].frames then
                 local frame
                 for k2, v2 in next, db.elements[k].frames do
-                    if db.elements[k].frames[k2] then
-                        frame = _G[k2]
-                        --print("FadeFrames", k, k2, NewOpacity, status)
+                    --print("FadeFrames", k, k2, NewOpacity, status)
+                    frame = _G[k2]
+                    if frame then
+                        if k == "unitframes" then
+                            frame = frame.overlay
+                        end
                         if (k2 == "RealUIPetFrame") and self.ABShown then
                             if frame then FadeIt(frame, 1, true) end
                         else

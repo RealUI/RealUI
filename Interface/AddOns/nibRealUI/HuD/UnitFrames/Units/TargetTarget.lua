@@ -22,7 +22,7 @@ local coords = {
 local function CreateHealthBar(parent)
     local texture = F2.health
     local coords = coords[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent)
+    parent.Health = CreateFrame("Frame", nil, parent.overlay)
     parent.Health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
     parent.Health:SetAllPoints(parent)
 
@@ -119,13 +119,13 @@ end
 local function CreateEndBox(parent)
     local texture = F2.endBox
     local coords = coords[UnitFrames.layoutSize].status
-    parent.endBox = parent:CreateTexture(nil, "BORDER")
+    parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
     parent.endBox:SetTexture(texture.bar)
     parent.endBox:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     parent.endBox:SetSize(texture.width, texture.height)
     parent.endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", 6 + UnitFrames.layoutSize, 0)
 
-    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    local border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     border:SetAllPoints(parent.endBox)
@@ -140,7 +140,7 @@ UnitFrames["targettarget"] = function(self)
     CreatePowerStatus(self)
     CreateEndBox(self)
 
-    self.Name = self:CreateFontString(nil, "OVERLAY")
+    self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -5, 2 - UnitFrames.layoutSize)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:name]")

@@ -45,7 +45,7 @@ local positions = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = positions[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent)
+    parent.Health = CreateFrame("Frame", nil, parent.overlay)
     parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
@@ -79,8 +79,8 @@ local function CreateHealthBar(parent)
         if parent.Health.bar.reverse then
             parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
         else
-            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
-        end
+        parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
+    end
     end
 
     parent.Health.frequentUpdates = true
@@ -124,7 +124,7 @@ end
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local pos = positions[UnitFrames.layoutSize].power
-    parent.Power = CreateFrame("Frame", nil, parent)
+    parent.Power = CreateFrame("Frame", nil, parent.overlay)
     parent.Power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
     parent.Power:SetSize(texture.width, texture.height)
     -- texture.width - 17 | Layout 1?
@@ -188,7 +188,7 @@ local function CreateStats(parent)
     parent.Stats = {}
     for i = 1, 2 do
         parent.Stats[i] = {}
-        parent.Stats[i].icon = parent:CreateTexture(nil, "OVERLAY")
+        parent.Stats[i].icon = parent.overlay:CreateTexture(nil, "OVERLAY")
         parent.Stats[i].icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
         parent.Stats[i].icon:SetSize(16, 16)
         if i == 1 then
@@ -197,7 +197,7 @@ local function CreateStats(parent)
             parent.Stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 15, 5)
         end
 
-        parent.Stats[i].text = parent:CreateFontString(nil, "OVERLAY")
+        parent.Stats[i].text = parent.overlay:CreateFontString(nil, "OVERLAY")
         parent.Stats[i].text:SetFont(unpack(nibRealUI:Font()))
         parent.Stats[i].text:SetPoint("BOTTOMLEFT", parent.Stats[i].icon, "BOTTOMRIGHT", 0, 0)
     end
@@ -206,12 +206,12 @@ end
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = positions[UnitFrames.layoutSize].endBox
-    parent.endBox = parent:CreateTexture(nil, "BORDER")
+    parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
     parent.endBox:SetTexture(texture.bar)
     parent.endBox:SetSize(texture.width, texture.height)
     parent.endBox:SetPoint("BOTTOMLEFT", parent, "BOTTOMRIGHT", pos.x, pos.y)
 
-    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    local border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetAllPoints(parent.endBox)
 
@@ -221,7 +221,7 @@ end
 local function CreateTotems(parent)
     -- DestroyTotem is protected, so we hack the default
     local totemBar = _G["TotemFrame"]
-    totemBar:SetParent(parent)
+    totemBar:SetParent(parent.overlay)
     hooksecurefunc("TotemFrame_Update", function()
         totemBar:ClearAllPoints()
         totemBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)

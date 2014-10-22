@@ -52,7 +52,7 @@ local positions = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = positions[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent)
+    parent.Health = CreateFrame("Frame", nil, parent.overlay)
     parent.Health:SetPoint("TOPLEFT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
@@ -139,7 +139,7 @@ end
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local pos = positions[UnitFrames.layoutSize].power
-    parent.Power = CreateFrame("Frame", nil, parent)
+    parent.Power = CreateFrame("Frame", nil, parent.overlay)
     parent.Power:SetPoint("BOTTOMLEFT", parent, 5, 0)
     parent.Power:SetSize(texture.width, texture.height)
 
@@ -289,13 +289,13 @@ end
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = positions[UnitFrames.layoutSize].endBox
-    parent.endBox = parent:CreateTexture(nil, "BORDER")
+    parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
     parent.endBox:SetTexture(texture.bar)
     parent.endBox:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     parent.endBox:SetSize(texture.width, texture.height)
     parent.endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
 
-    local border = parent:CreateTexture(nil, "OVERLAY", nil, 3)
+    local border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
     border:SetTexture(texture.border)
     border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     border:SetAllPoints(parent.endBox)
@@ -313,7 +313,7 @@ UnitFrames["target"] = function(self)
     CreateEndBox(self)
     CreatePowerStatus(self)
     
-    self.Name = self:CreateFontString(nil, "OVERLAY")
+    self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
     self.Name:SetFont(unpack(nibRealUI:Font()))
     self:Tag(self.Name, "[realui:level] [realui:name]")

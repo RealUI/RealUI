@@ -451,6 +451,9 @@ local function Shared(self, unit)
         end
     end
 
+    -- Create a proxy frame for the CombatFader to avoid taint city.
+    self.overlay = CreateFrame("Frame", nil, self)
+
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
     UnitFrames[unit](self)
 end
