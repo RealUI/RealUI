@@ -1,0 +1,90 @@
+------------------------------------------------------------------------
+r731 | gragagrogog | 2014-10-22 10:43:37 +0000 (Wed, 22 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+
+Don't call deleted functions in AoeHeals.lua
+------------------------------------------------------------------------
+r730 | gragagrogog | 2014-10-21 21:10:39 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+
+forgot { groupFilter = "6" }
+------------------------------------------------------------------------
+r729 | gragagrogog | 2014-10-21 20:56:37 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/GridLayout.lua
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/GridRoster.lua
+   M /trunk/Options/modules/general/GridLayouts.lua
+
+Allow flex normal/heroic layout to scale to 30.
+------------------------------------------------------------------------
+r728 | gragagrogog | 2014-10-21 20:05:14 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+   D /trunk/AoeHeals/AoeHealsMapData.lua
+   M /trunk/AoeHeals/Grid2AoeHeals.toc
+   M /trunk/modules/StatusDirection.lua
+
+All GetPlayerMapPosition() to UnitPosition()
+------------------------------------------------------------------------
+r727 | gragagrogog | 2014-10-21 15:57:11 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/GridLayout.lua
+   M /trunk/GridRoster.lua
+
+Correct layout should load defaultly for mythic.
+------------------------------------------------------------------------
+r726 | stanzilla | 2014-10-21 14:56:06 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/GridRoster.lua
+
+add raid20 here, too
+------------------------------------------------------------------------
+r725 | stanzilla | 2014-10-21 14:54:51 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/modules/IndicatorIcon.lua
+
+Hide Countdown Numbers on icon indicators
+------------------------------------------------------------------------
+r724 | stanzilla | 2014-10-21 14:49:37 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/Options/modules/general/GridLayouts.lua
+
+raid20 layout
+------------------------------------------------------------------------
+r723 | stanzilla | 2014-10-20 19:43:16 +0000 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+
+add ByGroup20 and ByGroup20/wPets layouts
+------------------------------------------------------------------------
+r722 | gragagrogog | 2014-10-14 19:59:04 +0000 (Tue, 14 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/AoeHeals/AoeHealsMapData.lua
+   M /trunk/Grid2.toc
+
+no longer using libMapData for mapdata
+------------------------------------------------------------------------
+r721 | gragagrogog | 2014-10-14 19:41:00 +0000 (Tue, 14 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/AoeHeals/Grid2AoeHeals.toc
+   M /trunk/Grid2.toc
+   M /trunk/LDB/Grid2LDB.toc
+   M /trunk/Options/Grid2Options.toc
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.toc
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+
+toc bump
+------------------------------------------------------------------------
+r720 | gragagrogog | 2013-09-17 17:43:11 +0000 (Tue, 17 Sep 2013) | 3 lines
+Changed paths:
+   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
+   M /trunk/modules/StatusColor.lua
+
+-class/creature colors should properly update after "charmed" fades
+-added "Locked On" and "Mark of Anguish" to SoO RD list
+
+------------------------------------------------------------------------

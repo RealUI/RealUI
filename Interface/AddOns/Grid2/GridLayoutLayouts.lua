@@ -7,9 +7,9 @@ Created by Grid2 original authors, modified by Michael
 local L = LibStub("AceLocale-3.0"):GetLocale("Grid2")
 
 local DEFAULT_GROUP_ORDER = "WARRIOR,DEATHKNIGHT,ROGUE,PALADIN,DRUID,SHAMAN,PRIEST,MAGE,WARLOCK,HUNTER"
-local DEFAULT_PET_ORDER = "HUNTER,WARLOCK,DEATHKNIGHT,PRIEST,MAGE,DRUID,SHAMAN,WARRIOR,ROGUE,PALADIN"
+local DEFAULT_PET_ORDER = "HUNTER,WARLOCK,DEATHKNIGHT,MAGE,PRIEST,DRUID,SHAMAN,WARRIOR,ROGUE,PALADIN"
 
-local groupFilters =  { { groupFilter = "1" }, { groupFilter = "2" }, { groupFilter = "3" }, {	groupFilter = "4" }, {	groupFilter = "5" } }
+local groupFilters =  { { groupFilter = "1" }, { groupFilter = "2" }, { groupFilter = "3" }, {	groupFilter = "4" }, {	groupFilter = "5" }, {	groupFilter = "6" } }
 
 Grid2Layout:AddLayout("None", {
 	meta = {
@@ -183,6 +183,88 @@ Grid2Layout:AddLayout("By Group 15 w/Pets", {
 	[2] = groupFilters[2],
 	[3] = groupFilters[3],
 	[4] = {
+		type = "raidpet",
+		groupingOrder = DEFAULT_PET_ORDER,
+		showPlayer = true,
+		showParty = true,
+		showRaid = true,
+		unitsPerColumn = 5,
+		maxColumns = 3,
+	},
+ })
+
+Grid2Layout:AddLayout("By Group 20", {
+	meta = {
+		raid20 = true,
+	},
+	defaults = {
+		groupingOrder = DEFAULT_GROUP_ORDER,
+        allowVehicleTarget = true,
+		toggleForVehicle = true,
+	},
+	[1] = groupFilters[1],
+	[2] = groupFilters[2],
+	[3] = groupFilters[3],
+	[4] = groupFilters[4],
+
+})
+
+Grid2Layout:AddLayout("By Group 20 w/Pets", {
+	meta = {
+		raid20 = true,
+	},
+	defaults = {
+		groupingOrder = DEFAULT_GROUP_ORDER,
+        allowVehicleTarget = true,
+	},
+	[1] = groupFilters[1],
+	[2] = groupFilters[2],
+	[3] = groupFilters[3],
+	[4] = groupFilters[4],
+	[5] = {
+		type = "raidpet",
+		groupingOrder = DEFAULT_PET_ORDER,
+		showPlayer = true,
+		showParty = true,
+		showRaid = true,
+		unitsPerColumn = 5,
+		maxColumns = 3,
+	},
+ })
+
+Grid2Layout:AddLayout("By Group 30", {
+	meta = {
+		raid30 = true,
+	},
+	defaults = {
+		groupingOrder = DEFAULT_GROUP_ORDER,
+        allowVehicleTarget = true,
+		toggleForVehicle = true,
+	},
+	[1] = groupFilters[1],
+	[2] = groupFilters[2],
+	[3] = groupFilters[3],
+	[4] = groupFilters[4],
+	[5] = groupFilters[5],
+	[6] = groupFilters[6],
+
+})
+
+Grid2Layout:AddLayout("By Group 30 w/Pets", {
+	meta = {
+		raid30 = true,
+	},
+	defaults = {
+		groupingOrder = DEFAULT_GROUP_ORDER,
+        allowVehicleTarget = true,
+	},
+	[1] = groupFilters[1],
+	[2] = groupFilters[2],
+	[3] = groupFilters[3],
+	[4] = groupFilters[4],
+	[5] = groupFilters[5],
+	[6] = groupFilters[6],
+	[7] = {
 		type = "raidpet",
 		groupingOrder = DEFAULT_PET_ORDER,
 		showPlayer = true,

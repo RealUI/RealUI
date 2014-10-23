@@ -130,8 +130,17 @@ do
 	end
 	function Grid2:GroupChanged(event)
 		local _, instType = IsInInstance()
+		local _, _, difficultyID = GetInstanceInfo()
 		if instType == "raid" and IsInRaid() then
-			instType = select(5,GetInstanceInfo()) > 10 and "raid25" or "raid10"
+			if difficultyID == 16 then --Mythic
+				instType = "raid20"
+			--elseif difficultyID == 7 then --LFR... does lfr scale up?
+			--	instType = "raid25"
+			elseif difficultyID == 14 or difficultyID == 15 then --flexible raid normal/heroic
+				instType = GetGroupType(0, 10, 15, 25, 30)
+			else --oldass 10/25raids
+				instType = select(5,GetInstanceInfo()) > 10 and "raid25" or "raid10"
+			end
 		elseif instType == "pvp" then
 			instType = GetGroupType(0, 10, 15, 40)
 		elseif instType ~= "arena" then

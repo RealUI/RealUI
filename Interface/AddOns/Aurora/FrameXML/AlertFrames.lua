@@ -240,9 +240,6 @@ tinsert(C.themes["Aurora"], function()
 			frame:HookScript("OnHide", showHideBg)
 			frame:HookScript("OnUpdate", onUpdate)
 
-			frame.Background:Hide()
-			frame.IconBorder:Hide()
-			frame.glow:SetTexture("")
 			frame.shine:SetTexture("")
 			frame.SpecRing:SetTexture("")
 
@@ -254,6 +251,11 @@ tinsert(C.themes["Aurora"], function()
 			frame.SpecIcon.bg:SetDrawLayer("BORDER", 2)
 		end
 
+		frame.Background:Hide()
+		frame.IconBorder:Hide()
+		frame.glow:SetTexture("")
+		frame.PvPBackground:Hide()
+		frame.BGAtlas:Hide()
 		frame.SpecIcon.bg:SetShown(frame.SpecIcon:IsShown())
 	end)
 

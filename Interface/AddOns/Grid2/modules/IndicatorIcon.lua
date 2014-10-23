@@ -26,6 +26,7 @@ local function Icon_Create(self, parent)
 			Cooldown.noCooldownCount = nil
 		end
 		Cooldown:SetReverse(self.dbx.reverseCooldown)
+		Cooldown:SetHideCountdownNumbers(true)
 		Cooldown:Hide()
 		f.Cooldown = Cooldown
 	end

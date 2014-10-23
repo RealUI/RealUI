@@ -7,47 +7,38 @@ local PI2 = PI*2
 local floor = math.floor
 local atan2 = math.atan2
 local GetPlayerFacing = GetPlayerFacing
-local GetPlayerMapPosition = GetPlayerMapPosition
-local SetMapToCurrentZone= SetMapToCurrentZone
+local UnitPosition = UnitPosition
 local UnitIsUnit= UnitIsUnit
--- local UnitInRange= UnitInRange
--- local UnitIsVisible= UnitIsVisible
--- local UnitIsDead= UnitIsDead -- this is useless, loadstring functions dont reach this scope
+
+local f_env = {
+	UnitIsUnit= UnitIsUnit,
+	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+	UnitInRange = UnitInRange,
+	UnitIsVisible = UnitIsVisible,
+	UnitIsDead = UnitIsDead,
+}
 
 local timer
--- local ValidMap
 local directions= {}
 local UnitCheck
 local mouseover = ""
 
 local function UpdateDirections()
-	local x1,y1 = GetPlayerMapPosition("player")
-	if x1 == 0 then Direction:ClearDirections() return end
+	local x1,y1, _, map1 = UnitPosition("player")
+	if not x1 then Direction:ClearDirections() return end
 	local facing = GetPlayerFacing()
 	for unit,_ in Grid2:IterateRosterUnits() do
 		local direction
 		if not UnitIsUnit(unit, "player") and UnitCheck(unit, mouseover) then
-			local x2,y2 = GetPlayerMapPosition(unit)
-			if x2~=0 then
-				direction = floor( (PI-atan2(x1 - x2, y2 - y1)-facing) / PI2 * 32 + 0.5) % 32
+			local x2,y2, _, map2 = UnitPosition(unit)
+			if (map1 == map2) then
+				direction = floor( (atan2(y2 - y1, x2 - x1)-facing) / PI2 * 32 + 0.5) % 32
 			end
 		end	
 		if direction ~= directions[unit] then
 			directions[unit]= direction
 			Direction:UpdateIndicators(unit)
 		end
-	end
-end
-
-local function ZoneChanged()
-	if not WorldMapFrame:IsVisible() then 
-		SetMapToCurrentZone()
-		-- local x,y = GetPlayerMapPosition("player")
-		-- local ValidMap=  (x~=0 or y~=0)
-		-- Direction:SetTimer(ValidMap)
-		-- if not ValidMap then
-			-- Direction:ClearDirections()
-		-- end
 	end
 end
 
@@ -132,22 +123,15 @@ function Direction:UpdateDB()
 	t[#t+1]= "end"
 	SetMouseoverHooks((isRestr or self.dbx.showOnlyStickyUnits) and self.dbx.StickyMouseover)
 	UnitCheck = assert(loadstring(table.concat(t)))()
+	setfenv(UnitCheck, f_env)
 end
 
 function Direction:OnEnable()
 	self:UpdateDB()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", ZoneChanged)
-	self:RegisterEvent("ZONE_CHANGED", ZoneChanged)
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", ZoneChanged)
-	self:RegisterEvent("ZONE_CHANGED_INDOORS", ZoneChanged)
 	self:SetTimer(true)
 end
 
 function Direction:OnDisable()
-	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	self:UnregisterEvent("ZONE_CHANGED")
-	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
-	self:UnregisterEvent("ZONE_CHANGED_INDOORS")
 	self:SetTimer(false)
 end
 

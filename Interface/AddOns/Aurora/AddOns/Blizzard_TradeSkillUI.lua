@@ -133,7 +133,7 @@ C.themes["Blizzard_TradeSkillUI"] = function()
 
 		for i = 1, diplayedSkills do
 			skillIndex = i + skillOffset
-			_, skillType, _, isExpanded = GetTradeSkillInfo(skillIndex)
+			local _, skillType, _, isExpanded = GetTradeSkillInfo(skillIndex)
 			if hasFilterBar then
 				buttonIndex = i + 1
 			else

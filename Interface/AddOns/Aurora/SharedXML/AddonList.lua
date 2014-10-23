@@ -8,6 +8,7 @@ tinsert(C.themes["Aurora"], function()
 	F.Reskin(AddonListOkayButton)
 	F.ReskinCheck(AddonListForceLoad)
 	F.ReskinDropDown(AddonCharacterDropDown)
+	F.ReskinScroll(AddonListScrollFrameScrollBar)
 
 	AddonCharacterDropDown:SetWidth(170)
 

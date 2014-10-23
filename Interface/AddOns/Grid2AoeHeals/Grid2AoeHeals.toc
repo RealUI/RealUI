@@ -5,14 +5,13 @@
 ## Author: Michael
 ## Dependencies: Grid2
 ## DefaultState: disabled
-## Version: r722
-## X-Curse-Packaged-Version: r722
+## Version: r731
+## X-Curse-Packaged-Version: r731
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
 
 AoeHeals.lua
-AoeHealsMapData.lua
 AoeHealsOptions.lua
 AoeHealsStatusRaid.lua
 AoeHealsStatusParty.lua
