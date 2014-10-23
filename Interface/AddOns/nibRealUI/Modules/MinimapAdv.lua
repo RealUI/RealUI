@@ -1562,7 +1562,7 @@ end
 ---------------------
 function MinimapAdv:MovementUpdate()
     if not(db.information.coordDelayHide) or IsInInstance() or not(Minimap:IsVisible()) then return end
-
+    
     local X, Y = GetPlayerMapPosition("player")
     if X == self.LastX and Y == self.LastY then
         self.StationaryTime = self.StationaryTime + 0.5
@@ -1571,8 +1571,8 @@ function MinimapAdv:MovementUpdate()
     end
     self.LastX = X
     self.LastY = Y
-    
-    if ((self.StationaryTime == 10) and (InfoShown.coords)) or ((self.StationaryTime < 10) and not(InfoShown.coords)) then
+
+    if ((self.StationaryTime >= 10) and (InfoShown.coords)) or ((self.StationaryTime < 10) and not(InfoShown.coords)) then
         self:CoordsUpdate()
     end
 end
@@ -2052,12 +2052,15 @@ function MinimapAdv:RegEvents()
     self.LastX = 0
     self.LastY = 0
     self.StationaryTime = 0
-    self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
-        self.coordsTicker = C_Timer.NewTicker(0.5, MinimapAdv.MovementUpdate)
-    end)
-    self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
-        self.coordsTicker:Cancel()
-    end)
+    -- self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
+    local function MovementTimerUpdate()
+        MinimapAdv:MovementUpdate()
+    end
+    self.coordsTicker = C_Timer.NewTicker(0.5, MovementTimerUpdate)
+    -- end)
+    -- self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
+        -- self.coordsTicker:Cancel()
+    -- end)
 end
 
 --------------------------
