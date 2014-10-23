@@ -111,6 +111,7 @@ local function Text_Create(self, parent)
 	f.Text = Text
 	Text:SetFontObject(GameFontHighlightSmall)
 	Text:SetFont(self.textfont, self.dbx.fontSize, self.dbx.fontFlags)
+	Text:SetShadowOffset(0,0)
 	Text:Show()	
 end
 
