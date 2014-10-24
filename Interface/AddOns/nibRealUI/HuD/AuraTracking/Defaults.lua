@@ -48,16 +48,19 @@ nibRealUI.auraTrackingDefaults = {
 -- Static Debuffs
     {   -- Necrotic Plague
         spell = 155159,
+        minLevel = 68,
         auraType = "debuff",
         order = 1,
     },
     {   -- Blood Plague
         spell = 55078,
+        minLevel = 55,
         auraType = "debuff",
         order = 1,
     },
     {   -- Frost Fever
         spell = 55095,
+        minLevel = 55,
         auraType = "debuff",
         order = 2,
     },
