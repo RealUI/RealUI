@@ -6,27 +6,7 @@ local _
 local MODNAME = "ClassResource_DemonicFury"
 local DemonicFury = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-
-local layoutSize
-
-local Textures = {
-	[1] = {
-		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
-		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
-	},
-	[2] = {
-		bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
-		middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
-	},
-}
-
-local BarWidth = {
-	[1] = 84,
-	[2] = 114,
-}
-
-local FontStringsRegular = {}
+local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 
 local MetamorphosisSpellID = 103958
 local MetamorphosisSpellName
@@ -83,28 +63,28 @@ function DemonicFury:OnUpdate()
 	local powerPer = power / maxPower
 	
 	if powerPer < 0.5 then
-		AngleStatusBar:SetValue(self.dfBar.left.bar, powerPer * 2)
-		AngleStatusBar:SetValue(self.dfBar.right.bar, 0)
+		self.dfBar:SetValue("left", powerPer * 2)
+		self.dfBar:SetValue("right", 0)
 	else
-		AngleStatusBar:SetValue(self.dfBar.right.bar, (powerPer - 0.5) * 2)
-		AngleStatusBar:SetValue(self.dfBar.left.bar, 1)
+		self.dfBar:SetValue("right", (powerPer - 0.5) * 2)
+		self.dfBar:SetValue("left", 1)
 	end
 
-	self.dfBar.power.text:SetText(abs(power))
+	self.dfBar:SetText("middle", abs(power))
 end
 
 function DemonicFury:UpdateShown(event, unit)
 	if unit and unit ~= "player" then return end
 
 	if self.configMode then
-		self.dfBar:Show()
+		self.dfBar:SetShown(true)
 		return
 	end
 
 	if ( (GetSpecialization() == 2) and UnitExists("target") and UnitCanAttack("player", "target") and not(UnitIsDeadOrGhost("player")) and not(UnitIsDeadOrGhost("target")) and not(UnitInVehicle("player")) ) then
-		self.dfBar:Show()
+		self.dfBar:SetShown(true)
 	else
-		self.dfBar:Hide()
+		self.dfBar:SetShown(false)
 	end
 end
 
@@ -113,9 +93,9 @@ function DemonicFury:UpdateAuras(units)
 
 	-- Middle Arrow colors
 	if UnitBuff("player", MetamorphosisSpellName) then
-		self.dfBar.middle:SetVertexColor(unpack(nibRealUI.media.colors.orange))
+		self.dfBar:SetBoxColor("middle", nibRealUI.media.colors.orange)
 	else
-		self.dfBar.middle:SetVertexColor(unpack(nibRealUI.classColor))
+		self.dfBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 end
 
@@ -127,78 +107,13 @@ end
 -----------------------
 ---- Frame Updates ----
 -----------------------
-function DemonicFury:UpdateFonts()
-	local font = nibRealUI:Font()
-	for k, fontString in pairs(FontStringsRegular) do
-		fontString:SetFont(unpack(font))
-	end
-end
-
 function DemonicFury:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 	if nibRealUI.class ~= "WARLOCK" then return end
-	AngleStatusBar:SetBarColor(self.dfBar.left.bar, nibRealUI.media.colors.purple)
-	AngleStatusBar:SetBarColor(self.dfBar.right.bar, nibRealUI.media.colors.purple)
+
+	self.dfBar:SetBarColor("left", nibRealUI.media.colors.purple)
+	self.dfBar:SetBarColor("right", nibRealUI.media.colors.purple)
 	self:UpdateAuras()
-end
-
-local function CreateTextFrame(parent, size)
-	local NewTextFrame = CreateFrame("Frame", nil, parent)
-	NewTextFrame:SetSize(12, 12)
-
-	NewTextFrame.text = NewTextFrame:CreateFontString(nil, "ARTWORK")
-	NewTextFrame.text:SetFont(unpack(nibRealUI:Font()))
-	NewTextFrame.text:SetPoint("BOTTOM", NewTextFrame, "BOTTOM", 0.5, 0.5)
-	tinsert(FontStringsRegular, NewTextFrame.text)
-	
-	return NewTextFrame
-end
-
-function DemonicFury:CreateFrames()
-	self.dfBar = CreateFrame("Frame", "RealUI_DemonicFury", RealUIPositionersClassResource)
-	local dfBar = self.dfBar
-		dfBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
-		dfBar:SetPoint("BOTTOM")
-		-- dfBar:Hide()
-	
-	-- Lunar
-	dfBar.left = CreateFrame("Frame", nil, dfBar)
-		dfBar.left:SetPoint("BOTTOMRIGHT", dfBar, "BOTTOM", -1, 0)
-		dfBar.left:SetSize(BarWidth[layoutSize], 6)
-
-		dfBar.left.bg = dfBar.left:CreateTexture(nil, "BACKGROUND")
-			dfBar.left.bg:SetPoint("BOTTOMRIGHT")
-			dfBar.left.bg:SetSize(128, 16)
-			dfBar.left.bg:SetTexture(Textures[layoutSize].bar)
-			dfBar.left.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-		dfBar.left.bar = AngleStatusBar:NewBar(dfBar.left, 2, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "RIGHT")
-			dfBar.left.bar.reverse = true
-	
-	-- Solar
-	dfBar.right = CreateFrame("Frame", nil, dfBar)
-		dfBar.right:SetPoint("BOTTOMLEFT", dfBar, "BOTTOM", 0, 0)
-		dfBar.right:SetSize(BarWidth[layoutSize], 6)
-
-		dfBar.right.bg = dfBar.right:CreateTexture(nil, "BACKGROUND")
-			dfBar.right.bg:SetPoint("BOTTOMLEFT")
-			dfBar.right.bg:SetSize(128, 16)
-			dfBar.right.bg:SetTexture(Textures[layoutSize].bar)
-			dfBar.right.bg:SetTexCoord(1, 0, 0, 1)
-			dfBar.right.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-		dfBar.right.bar = AngleStatusBar:NewBar(dfBar.right, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
-			dfBar.right.bar.reverse = true
-
-	-- Middle
-	dfBar.middle = dfBar:CreateTexture(nil, "BACKGROUND")
-		dfBar.middle:SetPoint("BOTTOM")
-		dfBar.middle:SetSize(16, 16)
-		dfBar.middle:SetTexture(Textures[layoutSize].middle)
-
-	-- Power text
-	dfBar.power = CreateTextFrame(dfBar)
-		dfBar.power:SetPoint("BOTTOM", dfBar, "TOP", 0, 3)
 end
 
 ------------
@@ -233,8 +148,11 @@ function DemonicFury:OnEnable()
 
 	MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)
 
-	if not self.dfBar then self:CreateFrames() end
-	self:UpdateFonts()
+	if not self.dfBar then 
+		self.dfBar = ClassResourceBar:New()
+		self.dfBar:SetEndBoxShown("left", false)
+		self.dfBar:SetEndBoxShown("right", false)
+	end
 	self:UpdateGlobalColors()
 
 	local updateSpeed
