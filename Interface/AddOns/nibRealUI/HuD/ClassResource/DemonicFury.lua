@@ -77,14 +77,14 @@ function DemonicFury:UpdateShown(event, unit)
 	if unit and unit ~= "player" then return end
 
 	if self.configMode then
-		self.dfBar:SetShown(true)
+		self.dfBar:Show()
 		return
 	end
 
 	if ( (GetSpecialization() == 2) and UnitExists("target") and UnitCanAttack("player", "target") and not(UnitIsDeadOrGhost("player")) and not(UnitIsDeadOrGhost("target")) and not(UnitInVehicle("player")) ) then
-		self.dfBar:SetShown(true)
+		self.dfBar:Show()
 	else
-		self.dfBar:SetShown(false)
+		self.dfBar:Hide()
 	end
 end
 

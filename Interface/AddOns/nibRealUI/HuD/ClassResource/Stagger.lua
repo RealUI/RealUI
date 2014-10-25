@@ -118,14 +118,14 @@ function Stagger:UpdateShown(event, unit)
 	if unit and unit ~= "player" then return end
 
 	if self.configMode then
-		self.sBar:SetShown(true)
+		self.sBar:Show()
 		return
 	end
 
 	if ( (GetSpecialization() == 1) and ((Resolve.current and (Resolve.current > floor(Resolve.base))) or (self.curStagger and (self.curStagger > 0))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
-		self.sBar:SetShown(true)
+		self.sBar:Show()
 	else
-		self.sBar:SetShown(false)
+		self.sBar:Hide()
 	end
 end
 

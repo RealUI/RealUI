@@ -81,14 +81,14 @@ function ResolveBar:UpdateShown()
     --print("UpdateShown")
 
     if self.configMode then
-        self.rBar:SetShown(true)
+        self.rBar:Show()
         return
     end
 
     if ( (Resolve.current and (Resolve.current > floor(Resolve.base))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
-        self.rBar:SetShown(true)
+        self.rBar:Show()
     else
-        self.rBar:SetShown(false)
+        self.rBar:Hide()
     end
 end
 

@@ -75,6 +75,14 @@ function ClassResourceBar:SetShown(value)
     self.parent:SetShown(value)
 end
 
+function ClassResourceBar:Show()
+	self.parent:Show()
+end
+
+function ClassResourceBar:Hide()
+	self.parent:Hide()
+end
+
 function ClassResourceBar:IsShown()
     return self.parent:IsShown()
 end
