@@ -75,6 +75,10 @@ function ClassResourceBar:SetShown(value)
     self.parent:SetShown(value)
 end
 
+function ClassResourceBar:IsShown()
+    return self.parent:IsShown()
+end
+
 -----------------------
 ---- Frame Updates ----
 -----------------------

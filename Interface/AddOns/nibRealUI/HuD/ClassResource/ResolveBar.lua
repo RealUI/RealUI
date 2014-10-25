@@ -4,30 +4,11 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResource_ResolveBar"
+local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local ResolveBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
-local layoutSize
 local class
-
-local Textures = {
-    [1] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
-    },
-    [2] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
-    },
-}
-
-local BarWidth = {
-    [1] = 84,
-    [2] = 114,
-}
-
-local FontStringsRegular = {}
 local MinLevel = 10
 
 -- Options
@@ -72,22 +53,22 @@ end
 ---------------------------
 function ResolveBar:UpdateAuras(units)
     --print("UpdateAuras", units)
-    if units then
-        for k, v in pairs(units) do
-            --print(k, v)
-        end
-    end
+    -- if units then
+    --     for k, v in pairs(units) do
+    --         --print(k, v)
+    --     end
+    -- end
     if units and not(units.player) then return end
 
     Resolve:UpdateCurrent()
 
-    self.rBar.value.text:SetText(nibRealUI:ReadableNumber(Resolve.current, 0))
+    self.rBar:SetText("middle", nibRealUI:ReadableNumber(Resolve.current, 0))
     if Resolve.percent < 0.5 then
-        AngleStatusBar:SetValue(self.rBar.left.bar, Resolve.percent * 2)
-        AngleStatusBar:SetValue(self.rBar.right.bar, 0)
+        self.rBar:SetValue("left", Resolve.percent * 2)
+        self.rBar:SetValue("right", 0)
     else
-        AngleStatusBar:SetValue(self.rBar.right.bar, (Resolve.percent - 0.5) * 2)
-        AngleStatusBar:SetValue(self.rBar.left.bar, 1)
+        self.rBar:SetValue("right", (Resolve.percent - 0.5) * 2)
+        self.rBar:SetValue("left", 1)
     end
 
     if ((Resolve.current > floor(Resolve.base)) and not(self.rBar:IsShown())) or
@@ -100,14 +81,14 @@ function ResolveBar:UpdateShown()
     --print("UpdateShown")
 
     if self.configMode then
-        self.rBar:Show()
+        self.rBar:SetShown(true)
         return
     end
 
     if ( (Resolve.current and (Resolve.current > floor(Resolve.base))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
-        self.rBar:Show()
+        self.rBar:SetShown(true)
     else
-        self.rBar:Hide()
+        self.rBar:SetShown(false)
     end
 end
 
@@ -117,80 +98,10 @@ function ResolveBar:PLAYER_ENTERING_WORLD()
     self:UpdateShown()
 end
 
------------------------
----- Frame Updates ----
------------------------
-function ResolveBar:UpdateFonts()
-    local font = nibRealUI:Font()
-    for k, fontString in pairs(FontStringsRegular) do
-        fontString:SetFont(unpack(font))
-    end
-end
-
 function ResolveBar:UpdateGlobalColors()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    AngleStatusBar:SetBarColor(self.rBar.left.bar, nibRealUI.media.colors.orange)
-    AngleStatusBar:SetBarColor(self.rBar.right.bar, nibRealUI.media.colors.orange)
-end
-
-local function CreateTextFrame(parent, size)
-    local NewTextFrame = CreateFrame("Frame", nil, parent)
-    NewTextFrame:SetSize(12, 12)
-
-    NewTextFrame.text = NewTextFrame:CreateFontString(nil, "ARTWORK")
-    NewTextFrame.text:SetFont(unpack(nibRealUI:Font()))
-    NewTextFrame.text:SetPoint("BOTTOM", NewTextFrame, "BOTTOM", 0.5, 0.5)
-    tinsert(FontStringsRegular, NewTextFrame.text)
-    
-    return NewTextFrame
-end
-
-function ResolveBar:CreateFrames()
-    self.rBar = CreateFrame("Frame", "RealUI_Resolve", RealUIPositionersClassResource)
-    local rBar = self.rBar
-        rBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
-        rBar:SetPoint("BOTTOM")
-        -- rBar:Hide()
-    
-    -- Left
-    rBar.left = CreateFrame("Frame", nil, rBar)
-        rBar.left:SetPoint("BOTTOMRIGHT", rBar, "BOTTOM", -1, 0)
-        rBar.left:SetSize(BarWidth[layoutSize], 6)
-
-        rBar.left.bg = rBar.left:CreateTexture(nil, "BACKGROUND")
-            rBar.left.bg:SetPoint("BOTTOMRIGHT")
-            rBar.left.bg:SetSize(128, 16)
-            rBar.left.bg:SetTexture(Textures[layoutSize].bar)
-            rBar.left.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-        rBar.left.bar = AngleStatusBar:NewBar(rBar.left, 2, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "RIGHT")
-            rBar.left.bar.reverse = true
-    
-    -- Right
-    rBar.right = CreateFrame("Frame", nil, rBar)
-        rBar.right:SetPoint("BOTTOMLEFT", rBar, "BOTTOM", 0, 0)
-        rBar.right:SetSize(BarWidth[layoutSize], 6)
-
-        rBar.right.bg = rBar.right:CreateTexture(nil, "BACKGROUND")
-            rBar.right.bg:SetPoint("BOTTOMLEFT")
-            rBar.right.bg:SetSize(128, 16)
-            rBar.right.bg:SetTexture(Textures[layoutSize].bar)
-            rBar.right.bg:SetTexCoord(1, 0, 0, 1)
-            rBar.right.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-        rBar.right.bar = AngleStatusBar:NewBar(rBar.right, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
-            rBar.right.bar.reverse = true
-
-    -- Middle
-    rBar.middle = rBar:CreateTexture(nil, "BACKGROUND")
-        rBar.middle:SetPoint("BOTTOM")
-        rBar.middle:SetSize(16, 16)
-        rBar.middle:SetTexture(Textures[layoutSize].middle)
-        rBar.middle:SetVertexColor(unpack(nibRealUI.classColor))
-
-    -- Resolve text
-    rBar.value = CreateTextFrame(rBar)
-        rBar.value:SetPoint("BOTTOM", rBar, "TOP", 0, 3)
+    self.rBar:SetBarColor("left", nibRealUI.media.colors.orange)
+    self.rBar:SetBarColor("right", nibRealUI.media.colors.orange)
 end
 
 ------------
@@ -212,7 +123,6 @@ function ResolveBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
 
-    layoutSize = ndb.settings.hudSize
     class = nibRealUI.class
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
@@ -224,8 +134,12 @@ function ResolveBar:OnEnable()
     if Resolve.special[class] then return end
     self.configMode = false
 
-    if not self.rBar then self:CreateFrames() end
-    self:UpdateFonts()
+    if not self.rBar then 
+        self.rBar = ClassResourceBar:New()
+        self.rBar:SetEndBoxShown("left", false)
+        self.rBar:SetEndBoxShown("right", false)
+    end
+
     self:UpdateGlobalColors()
 
     local updateSpeed
