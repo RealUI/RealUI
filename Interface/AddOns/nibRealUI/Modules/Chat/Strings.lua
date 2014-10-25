@@ -54,8 +54,10 @@ function Chat_Strings:ChangeStrings()
 		CHAT_FLAG_AFK = "[AFK] "
 		CHAT_FLAG_DND = "[DND] "
 		CHAT_YOU_CHANGED_NOTICE = "|Hchannel:%d|h[%s]|h"
-		ERR_FRIEND_OFFLINE_S = "%s has gone |cffff0000offline|r."
-		ERR_FRIEND_ONLINE_SS = "|Hplayer:%s|h[%s]|h has come |cff00ff00online|r."
+		if not IsAddOnLoaded("GuildGreet") then
+			ERR_FRIEND_OFFLINE_S = "%s has gone |cffff0000offline|r."
+			ERR_FRIEND_ONLINE_SS = "|Hplayer:%s|h[%s]|h has come |cff00ff00online|r."
+		end
 		ERR_SKILL_UP_SI = "%s |cff1eff00%d|r"
 		FACTION_STANDING_DECREASED = "%s -%d"
 		FACTION_STANDING_INCREASED = "%s +%d"
