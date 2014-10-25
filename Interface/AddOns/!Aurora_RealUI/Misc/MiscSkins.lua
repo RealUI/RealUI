@@ -56,9 +56,6 @@ tinsert(mods["Aurora"], function()
 	hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
 	hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
-    -- AddOn List
-    F.ReskinScroll(AddonListScrollFrameScrollBar)
-
 	-- Splash Frame
     F.CreateBD(SplashFrame, nil, true)
     hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)

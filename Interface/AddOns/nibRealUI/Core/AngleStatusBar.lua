@@ -3,6 +3,7 @@ local db, ndb, ndbc
 
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = nibRealUI:NewModule(MODNAME)
+local oUF = oUFembed
 
 local min, max, abs, floor = math.min, math.max, math.abs, math.floor
 
@@ -139,6 +140,80 @@ function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, 
 
     return bar
 end
+
+
+-- New Status bars WIP
+local function CreateAngleBG(self, width, height, info)
+    print("CreateAngleBG", self.unit, info)
+    local bg = CreateFrame("Frame", nil, self.overlay)
+    bg:SetSize(width, height)
+
+    local leftX, rightX = 0, 0
+    -- These conditions keep the textures within the frame.
+    -- Doing this removes the need to make a bunch of offsets elsewhere.
+    leftX = (info.leftAngle == [[/]]) and height or 0
+    rightX = (info.rightAngle == [[\]]) and -height or 0
+
+    bg.top = bg:CreateTexture(nil, "BACKGROUND")
+    bg.top:SetTexture(0, 0, 0)
+    bg.top:SetHeight(1)
+    bg.top:SetPoint("TOPLEFT", leftX, 0)
+    bg.top:SetPoint("TOPRIGHT", rightX, 0)
+
+    local left, right
+    for i = 1, height - 2 do
+        -- Left side
+        local left = bg:CreateTexture(nil, "BACKGROUND")
+        left:SetTexture(0, 0, 0)
+        left:SetSize(1, 1)
+        left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", -i, 1 - i)
+
+        -- Right side
+        local right = bg:CreateTexture(nil, "BACKGROUND")
+        right:SetTexture(0, 0, 0)
+        right:SetSize(1, 1)
+        right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", -i, -i)
+
+        -- Middle
+        local tex = bg:CreateTexture(nil, "BACKGROUND")
+        --tex:SetTexture(1, 1, 1, 0.5)
+        tex:SetTexture(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+        tex:SetHeight(1)
+        tex:SetPoint("TOPLEFT", left, "TOPRIGHT", 0, 0)
+        tex:SetPoint("TOPRIGHT", right, "TOPLEFT", 0, 0)
+    end
+
+    bg.bottom = bg:CreateTexture(nil, "BACKGROUND")
+    bg.bottom:SetTexture(0, 0, 0)
+    bg.bottom:SetHeight(1)
+    bg.bottom:SetPoint("BOTTOMLEFT", rightX, 0)
+    bg.bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
+
+    return bg, leftX, rightX
+end
+oUF:RegisterMetaFunction("CreateAngleBG", CreateAngleBG) -- oUF magic
+
+local function CreateAngleStatusBar(self, width, height, info)
+    print("CreateAngleStatusBar", self.unit, info)
+    local status, leftX, rightX = CreateAngleBG(self, width, height, info)
+    local bar = CreateFrame("Frame", nil, bg)
+    bar:SetPoint("TOPRIGHT", bg, -1, -1)
+
+    bar.fullWidth, bar.origDirection, bar.smooth = width, info.growDirection, info.smooth
+    bar.row = {}
+    for i = 1, height do
+        bar.row[i] = bar:CreateTexture(nil, "BACKGROUND")
+        bar.row[i]:SetHeight(1)
+        bar.row[i]:SetPoint("TOPLEFT", abs(leftX - i), -i)
+        bar.row[i]:SetPoint("TOPRIGHT", abs(rightX - i), -i)
+    end
+
+    AngleStatusBar:SetValue(bar, 0, true)
+
+    status.bar = bar
+    return status
+end
+oUF:RegisterMetaFunction("CreateAngleStatusBar", CreateAngleStatusBar) -- oUF magic
 
 -------------
 function AngleStatusBar:OnInitialize()
