@@ -62,7 +62,7 @@ local function CreateHealthBar(parent)
     if ndb.settings.reverseUnitFrameBars then 
         AngleStatusBar:SetReverseFill(parent.Health.bar, true)
     end
-    UnitFrames:SetHealthColor(parent.Health.bar)
+    UnitFrames:SetHealthColor(parent)
 
     ---[[ comment these for new bars
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")

@@ -28,7 +28,7 @@ local function CreateHealthBar(parent)
     if ndb.settings.reverseUnitFrameBars then 
         AngleStatusBar:SetReverseFill(parent.Health.bar, true)
     end
-    UnitFrames:SetHealthColor(parent.Health.bar)
+    UnitFrames:SetHealthColor(parent)
 
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
@@ -133,6 +133,7 @@ UnitFrames["focustarget"] = function(self)
         self.Combat.Override(self, event)
         self.Class.Update(self, event)
         self.endBox.Update(self, event)
+        UnitFrames:SetHealthColor(self)
     end
 end
 

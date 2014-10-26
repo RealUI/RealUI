@@ -120,7 +120,7 @@ end
 function ClassResourceBar:CreateResourceBar(size)
     self.parent = CreateFrame("Frame", nil, RealUIPositionersClassResource)
     local rBar = self.parent
-        rBar:SetSize((BarWidth[size]layoutSize] * 2) + 1, 6)
+        rBar:SetSize((BarWidth[size][layoutSize] * 2) + 1, 6)
         rBar:SetPoint("BOTTOM")
         -- rBar:Hide()
     

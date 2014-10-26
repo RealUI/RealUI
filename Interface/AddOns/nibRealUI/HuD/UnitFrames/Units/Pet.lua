@@ -28,7 +28,7 @@ local function CreateHealthBar(parent)
     if ndb.settings.reverseUnitFrameBars then 
         AngleStatusBar:SetReverseFill(parent.Health.bar, true)
     end
-    UnitFrames:SetHealthColor(parent.Health.bar)
+    UnitFrames:SetHealthColor(parent)
 
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
@@ -126,6 +126,7 @@ UnitFrames["pet"] = function(self)
     function self:PostUpdate(event)
         self.Combat.Override(self, event)
         self.endBox.Update(self, event)
+        UnitFrames:SetHealthColor(self)
         --print("unit", self.unit)
         if self.unit == "player" then
             UnitFrames.HealthOverride(self, "PostUpdate", "pet")

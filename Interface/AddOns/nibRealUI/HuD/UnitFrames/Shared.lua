@@ -215,9 +215,9 @@ local function updateSteps(unit, type, percent, frame)
         if frame.bar.reverse then
             --print("step reverse")
             if percent > stepPoints[i] and isLargeFrame then
-                frame.steps[i]:SetTexture(texture.step)
+                frame.steps[i]:SetTexture(type == "power" and texture.warn or texture.step)
             else
-                frame.steps[i]:SetTexture(texture.warn)
+                frame.steps[i]:SetTexture(type == "power" and texture.step or texture.warn)
             end
         else
             --print("step normal")
@@ -233,7 +233,7 @@ end
 function UnitFrames:HealthOverride(event, unit)
     --print("Health Override", self, event, unit)
     if event == "ClassColorBars" or event == "UpdateUnitFramesHealthColor" then
-        UnitFrames:SetHealthColor(self.Health.bar)
+        UnitFrames:SetHealthColor(self)
     end
     local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
@@ -379,14 +379,15 @@ function UnitFrames:UpdateEndBox(...)
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
 end
 
-function UnitFrames:SetHealthColor(bar)
+function UnitFrames:SetHealthColor(self)
     local healthColor
     if db.overlay.classColor then
-        healthColor = nibRealUI:GetClassColor(nibRealUI.class)
+        local _, class = UnitClass(self.unit)
+        healthColor = nibRealUI:GetClassColor(class)
     else
         healthColor = db.overlay.colors.health.normal
     end
-    AngleStatusBar:SetBarColor(bar, healthColor)
+    AngleStatusBar:SetBarColor(self.Health.bar, healthColor)
 end
 
 -- Dropdown Menu
