@@ -54,7 +54,7 @@ local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = info[UnitFrames.layoutSize].health
     parent.Health = CreateFrame("Frame", nil, parent.overlay) -- comment this for new bars
-    --parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, info[UnitFrames.layoutSize].health)
+    --parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, pos)
     parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
@@ -64,7 +64,7 @@ local function CreateHealthBar(parent)
     end
     UnitFrames:SetHealthColor(parent.Health.bar)
 
-    --[[ comment these for new bars
+    ---[[ comment these for new bars
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
     parent.Health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])

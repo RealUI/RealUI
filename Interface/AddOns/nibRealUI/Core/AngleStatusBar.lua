@@ -11,19 +11,29 @@ local dontSmooth
 local smoothing = {}
 local function SetBarPosition(bar, per)
     bar.value = per
-    if not bar.reverse then
-        bar:SetWidth(bar.fullWidth * (1 - bar.value))
+    local reverse = bar.reverse
+    local value = bar.value
+    local maxWidth
+    if bar.info then
+        maxWidth = bar.info.maxWidth
+        bar = bar.bar
     else
-        bar:SetWidth(bar.fullWidth * bar.value)
+        maxWidth = bar.fullWidth
+    end
+    if not reverse then
+        bar:SetWidth(maxWidth * (1 - value))
+    else
+        bar:SetWidth(maxWidth * value)
     end
 
     per = floor(per * 100) / 100
-    --print("Floored", bar:GetParent():GetParent().unit, bar.reverse, per)
-    bar:SetShown((not(bar.reverse) and (per < 1)) or (bar.reverse and (per > 0)))
+    --print("Floored", bar:GetParent():GetParent().unit, reverse, per)
+    bar:SetShown((not(reverse) and (per < 1)) or (reverse and (per > 0)))
 end
 
 local function SetBarValue(bar, per)
-    per = per + (1 / bar.fullWidth)
+    local maxWidth = bar.info and bar.info.maxWidth or bar.fullWidth
+    per = per + (1 / maxWidth)
     if per ~= bar.value then
         smoothing[bar] = per
     else
@@ -36,15 +46,16 @@ local smoothUpdateFrame = CreateFrame("Frame")
 smoothUpdateFrame:SetScript("OnUpdate", function()
     local limit = 30 / GetFramerate()
     for bar, per in next, smoothing do
-        local setPer = per * bar.fullWidth
-        local setCur = bar.value * bar.fullWidth
-        local new = setCur + min((setPer - setCur) / 2, max(setPer - setCur, limit * bar.fullWidth))
+        local maxWidth = bar.info and bar.info.maxWidth or bar.fullWidth
+        local setPer = per * maxWidth
+        local setCur = bar.value * maxWidth
+        local new = setCur + min((setPer - setCur) / 2, max(setPer - setCur, limit * maxWidth))
         if new ~= new then
-            new = per * bar.fullWidth
+            new = per * maxWidth
         end
-        SetBarPosition(bar, new / bar.fullWidth)
+        SetBarPosition(bar, new / maxWidth)
         if setCur == setPer or abs(new - setPer) < 2 then
-            SetBarPosition(bar, setPer / bar.fullWidth)
+            SetBarPosition(bar, setPer / maxWidth)
             smoothing[bar] = nil
         end
     end
@@ -143,17 +154,34 @@ end
 
 
 -- New Status bars WIP
-local function CreateAngleBG(self, width, height, info)
+
+-- This should except a percentage or discrete value.
+-- If SetMinMaxValues (NYI) is not called, default to min = 0, max = 1.
+local function SetValue(self, value, ignoreSmooth)
+    print("SetValue", value, ignoreSmooth)
+    if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
+        SetBarValue(self, value)
+    else
+        SetBarPosition(self, value)
+    end
+end
+
+local function CreateAngleBG(self, width, height, parent, info)
     print("CreateAngleBG", self.unit, info)
-    local bg = CreateFrame("Frame", nil, self.overlay)
+    local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
+
+    local test = bg:CreateTexture(nil, "BACKGROUND", nil, -8)
+    test:SetTexture(1, 1, 1, 0.5)
+    test:SetAllPoints(bg)
 
     local leftX, rightX = 0, 0
     -- These conditions keep the textures within the frame.
     -- Doing this removes the need to make a bunch of offsets elsewhere.
-    leftX = (info.leftAngle == [[/]]) and height or 0
-    rightX = (info.rightAngle == [[\]]) and -height or 0
+    leftX = (info.leftAngle == [[/]]) and height - 1 or 0
+    rightX = (info.rightAngle == [[\]]) and -(height - 1) or 0
 
+    print("CreateBG", leftX, rightX)
     bg.top = bg:CreateTexture(nil, "BACKGROUND")
     bg.top:SetTexture(0, 0, 0)
     bg.top:SetHeight(1)
@@ -193,24 +221,43 @@ local function CreateAngleBG(self, width, height, info)
 end
 oUF:RegisterMetaFunction("CreateAngleBG", CreateAngleBG) -- oUF magic
 
-local function CreateAngleStatusBar(self, width, height, info)
+local function CreateAngleStatusBar(self, width, height, parent, info)
     print("CreateAngleStatusBar", self.unit, info)
-    local status, leftX, rightX = CreateAngleBG(self, width, height, info)
-    local bar = CreateFrame("Frame", nil, bg)
-    bar:SetPoint("TOPRIGHT", bg, -1, -1)
+    local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
 
-    bar.fullWidth, bar.origDirection, bar.smooth = width, info.growDirection, info.smooth
-    bar.row = {}
-    for i = 1, height do
-        bar.row[i] = bar:CreateTexture(nil, "BACKGROUND")
-        bar.row[i]:SetHeight(1)
-        bar.row[i]:SetPoint("TOPLEFT", abs(leftX - i), -i)
-        bar.row[i]:SetPoint("TOPRIGHT", abs(rightX - i), -i)
+    info.maxWidth, info.minWidth, info.origDirection = width - 4, height - 2, info.growDirection
+    info.startPoint = (info.growDirection == "LEFT") and "TOPRIGHT" or "TOPLEFT"
+    info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
+
+    local bar = CreateFrame("Frame", nil, status)
+    bar:SetPoint(info.startPoint, status, -2, -1)
+    bar:SetHeight(info.minWidth)
+
+    local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
+    test:SetTexture(1, 1, 1, 0.5)
+    test:SetAllPoints(bar)
+
+    if info.growDirection == "LEFT" then
+        --
+    else
+        --\
     end
 
-    AngleStatusBar:SetValue(bar, 0, true)
+    bar.row = {}
+    for i = 1, info.minWidth do
+        bar.row[i] = bar:CreateTexture(nil, "BACKGROUND")
+        bar.row[i]:SetHeight(1)
+        bar.row[i]:SetPoint("TOPLEFT", abs(leftX), 1 - i)
+        bar.row[i]:SetPoint("TOPRIGHT", rightX, 1 - i)
+    end
 
+    status.info = info
     status.bar = bar
+    
+    -- StatusBar API
+    status.SetValue = SetValue
+
+    status:SetValue(1, true)
     return status
 end
 oUF:RegisterMetaFunction("CreateAngleStatusBar", CreateAngleStatusBar) -- oUF magic
