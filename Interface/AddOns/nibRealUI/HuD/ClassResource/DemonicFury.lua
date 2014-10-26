@@ -149,7 +149,7 @@ function DemonicFury:OnEnable()
 	MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)
 
 	if not self.dfBar then 
-		self.dfBar = ClassResourceBar:New()
+		self.dfBar = ClassResourceBar:New("short")
 		self.dfBar:SetEndBoxShown("left", false)
 		self.dfBar:SetEndBoxShown("right", false)
 	end

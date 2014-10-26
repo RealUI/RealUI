@@ -11,21 +11,41 @@ local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 local layoutSize
 
 local Textures = {
-    [1] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
-        endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+    short = {
+        [1] = {
+            bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
+            endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
+            middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+        },
+        [2] = {
+            bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
+            endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
+            middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+        },
     },
-    [2] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
-        endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+    long = {
+        [1] = {
+            bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar_Long]],
+            endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
+            middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
+        },
+        [2] = {
+            bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar_Long]],
+            endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
+            middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
+        },
     },
 }
 
 local BarWidth = {
-    [1] = 84,
-    [2] = 114,
+    short = {
+        [1] = 84,
+        [2] = 114,
+    },
+    long = {
+        [1] = 118,
+        [2] = 128,
+    },
 }
 
 local FontStringsRegular = {}

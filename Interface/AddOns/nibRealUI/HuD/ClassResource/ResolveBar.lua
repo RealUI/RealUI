@@ -135,7 +135,7 @@ function ResolveBar:OnEnable()
     self.configMode = false
 
     if not self.rBar then 
-        self.rBar = ClassResourceBar:New()
+        self.rBar = ClassResourceBar:New("short")
         self.rBar:SetEndBoxShown("left", false)
         self.rBar:SetEndBoxShown("right", false)
     end

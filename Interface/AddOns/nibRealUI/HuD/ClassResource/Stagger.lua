@@ -171,7 +171,7 @@ function Stagger:OnEnable()
 	self.configMode = false
 
 	if not self.sBar then 
-		self.sBar = ClassResourceBar:New()
+		self.sBar = ClassResourceBar:New("long")
 		self.sBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 
