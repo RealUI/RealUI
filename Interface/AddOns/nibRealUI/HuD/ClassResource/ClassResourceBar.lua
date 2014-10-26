@@ -187,7 +187,7 @@ function ClassResourceBar:CreateResourceBar(size)
         rBar.middle:SetTexture(Textures[size][layoutSize].middle)
 
     rBar.middle.value = rBar:CreateFontString()
-        rBar.middle.value:SetPoint("BOTTOM", rBar, "TOP", 0, 3)
+        rBar.middle.value:SetPoint("BOTTOM", rBar, "TOP", 1.5, 3.5)
         rBar.middle.value:SetFont(unpack(nibRealUI:Font()))
         rBar.middle.value:SetJustifyH("CENTER")
         tinsert(FontStringsRegular, rBar.middle.value)

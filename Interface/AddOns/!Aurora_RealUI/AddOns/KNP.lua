@@ -60,7 +60,7 @@ function KNP:UpdateFonts()
 	if kuiNP.db.profile then
 		for _, frame in pairs(kuiNP.frameList) do
 			if frame.kui then
-				kuiNP.configChangedFuncs.font(frame.kui, kuiNP.db.profile.fonts.options.font)
+				kuiNP.configChangedFuncs.runOnce.font(kuiNP.db.profile.fonts.options.font)
 			end
 		end
 	end
