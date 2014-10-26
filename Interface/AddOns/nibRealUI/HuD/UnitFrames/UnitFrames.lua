@@ -387,6 +387,15 @@ function UnitFrames:AbrvName(name, unit)
     end
 end
 
+function UnitFrames:RefreshUnits(event)
+    RealUIPlayerFrame:UpdateAllElements(event)
+    RealUITargetFrame:UpdateAllElements(event)
+    RealUIFocusFrame:UpdateAllElements(event)
+    RealUIFocusTargetFrame:UpdateAllElements(event)
+    RealUIPetFrame:UpdateAllElements(event)
+    RealUITargetTargetFrame:UpdateAllElements(event)
+end
+
 function UnitFrames:SetPowerColors()
     self.PowerColors = {}
     for pToken, color in pairs(db.overlay.colors.power) do
@@ -409,7 +418,6 @@ function UnitFrames:ToggleClassColoring(names)
 	else
 		db.overlay.classColor = not db.overlay.classColor
 	end
-	self:RefreshUnits()
 end
 
 function UnitFrames:GetHealthColor()

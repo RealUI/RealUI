@@ -39,7 +39,7 @@ end
 
 function ConfigBar_Appearance:UpdateUnitFramesStatusColor(index, key, r, g, b)
 	UnitFrames.db.profile.overlay.colors.status[key] = {r, g, b}
-	UnitFrames:RefreshUnits()
+	UnitFrames:RefreshUnits("UpdateUnitFramesStatusColor")
 	self.colors.unitFrames[index].r = r
 	self.colors.unitFrames[index].g = g
 	self.colors.unitFrames[index].b = b
@@ -49,7 +49,7 @@ end
 function ConfigBar_Appearance:UpdateUnitFramesPowerColor(index, key, r, g, b)
 	UnitFrames.db.profile.overlay.colors.power[key] = {r, g, b}
 	UnitFrames:SetPowerColors()
-	UnitFrames:RefreshUnits()
+	UnitFrames:RefreshUnits("UpdateUnitFramesPowerColor")
 	self.colors.unitFrames[index].r = r
 	self.colors.unitFrames[index].g = g
 	self.colors.unitFrames[index].b = b
@@ -204,6 +204,7 @@ function ConfigBar_Appearance:SetupWindow()
 				func = function()
 					UnitFrames:ToggleClassColoring(false)
 					self.settings[3][1].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColor and 1 or 0)
+					UnitFrames:RefreshUnits("ClassColorBars")
 				end,
 				checked = UnitFrames.db.profile.overlay.classColor,
 				width = Element.info.window.width,
@@ -216,6 +217,7 @@ function ConfigBar_Appearance:SetupWindow()
 				func = function()
 					UnitFrames:ToggleClassColoring(true)
 					self.settings[3][2].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColorNames and 1 or 0)
+					UnitFrames:RefreshUnits("ClassColorNames")
 				end,
 				checked = UnitFrames.db.profile.overlay.classColorNames,
 			},
@@ -395,7 +397,7 @@ function ConfigBar_Appearance:SetupWindow()
 					func = function(r, g, b, a)
 						a = 1
 						UnitFrames.db.profile.overlay.colors.health.normal = {r, g, b}
-						UnitFrames:RefreshUnits()
+						UnitFrames:RefreshUnits("UpdateUnitFramesHealthColor")
 						self.colors.unitFrames[1].r = r self.colors.unitFrames[1].g = g self.colors.unitFrames[1].b = b self.colors.unitFrames[1].a = a
 					end,
 					color = UnitFrames:GetHealthColor(),

@@ -232,10 +232,16 @@ end
 
 function UnitFrames:HealthOverride(event, unit)
     --print("Health Override", self, event, unit)
+    if event == "ClassColorBars" or event == "UpdateUnitFramesHealthColor" then
+        UnitFrames:SetHealthColor(self.Health.bar)
+    end
     local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
-    AngleStatusBar:SetBarColor(self.Health.bar, db.overlay.colors.health.normal)
-    AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
+    if self.Health.info then
+        self.Health:SetValue(healthPer)
+    else
+        AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
+    end
 end
 
 function UnitFrames:PredictOverride(event, unit)
@@ -371,6 +377,16 @@ function UnitFrames:UpdateEndBox(...)
     end
     self.endBox:Show()
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
+end
+
+function UnitFrames:SetHealthColor(bar)
+    local healthColor
+    if db.overlay.classColor then
+        healthColor = nibRealUI:GetClassColor(nibRealUI.class)
+    else
+        healthColor = db.overlay.colors.health.normal
+    end
+    AngleStatusBar:SetBarColor(bar, healthColor)
 end
 
 -- Dropdown Menu
