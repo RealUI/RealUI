@@ -381,9 +381,11 @@ end
 
 function UnitFrames:SetHealthColor(self)
     local healthColor
-    if db.overlay.classColor then
+    if db.overlay.classColor and (self.unit ~= "player") and UnitIsPlayer(self.unit) then
         local _, class = UnitClass(self.unit)
         healthColor = nibRealUI:GetClassColor(class)
+        healthColor = nibRealUI:ColorDarken(healthColor, 0.15)
+        healthColor = nibRealUI:ColorDesaturate(healthColor, 0.2)
     else
         healthColor = db.overlay.colors.health.normal
     end
