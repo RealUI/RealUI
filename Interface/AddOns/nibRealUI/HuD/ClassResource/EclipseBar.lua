@@ -6,29 +6,7 @@ local _
 local MODNAME = "ClassResource_EclipseBar"
 local EclipseBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-
-local layoutSize
-
-local Textures = {
-    [1] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Bar]],
-        endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_End]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\1\Small_Middle]],
-    },
-    [2] = {
-        bar = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Bar]],
-        endBox = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_End]],
-        middle = [[Interface\AddOns\nibRealUI\Media\StatusBars\2\Small_Middle]],
-    },
-}
-
-local BarWidth = {
-    [1] = 84,
-    [2] = 114,
-}
-
-local FontStringsRegular = {}
+local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 
 -- Options
 local options
@@ -168,11 +146,11 @@ function EclipseBar:OnUpdate(event, unit, powerType)
         --print("EclipseBar:Sun", power)
 
         if power > 0 then
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
-            AngleStatusBar:SetValue(self.eBar.solar.bar, power / 100)
+            self.eBar:SetValue("left", 0)
+            self.eBar:SetValue("right", power / 100)
         else
-            AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
+            self.eBar:SetValue("right", 0)
+            self.eBar:SetValue("left", 0)
             self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
         end
 
@@ -180,23 +158,23 @@ function EclipseBar:OnUpdate(event, unit, powerType)
         --print("EclipseBar:Moon", power)
 
         if power < 0 then
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, abs(power / 100))
-            AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
+            self.eBar:SetValue("left", abs(power / 100))
+            self.eBar:SetValue("right", 0)
         else
-            AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
-            AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
+            self.eBar:SetValue("right", 0)
+            self.eBar:SetValue("left", 0)
             self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
         end
 
     else
         --print("EclipseBar:None", power)
 
-        AngleStatusBar:SetValue(self.eBar.lunar.bar, 0)
-        AngleStatusBar:SetValue(self.eBar.solar.bar, 0)
+        self.eBar:SetValue("left", 0)
+        self.eBar:SetValue("right", 0)
         self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
     end
 
-    self.eBar.power.text:SetText(abs(power))
+    self.eBar:SetText("middle", abs(power))
 end
 
 function EclipseBar:UpdateAuras(units)
@@ -204,13 +182,13 @@ function EclipseBar:UpdateAuras(units)
 
     -- Middle Arrow colors
     if self.direction == "sun" then
-        self.eBar.middle:SetVertexColor(unpack(nibRealUI.media.colors.orange))
+        self.eBar:SetBoxColor("middle", nibRealUI.media.colors.orange)
 
     elseif self.direction == "moon" then
-        self.eBar.middle:SetVertexColor(unpack(nibRealUI.media.colors.blue))
+        self.eBar:SetBoxColor("middle", nibRealUI.media.colors.blue)
 
     else
-        self.eBar.middle:SetVertexColor(0.2, 0.2, 0.2, 1)
+        self.eBar:SetBoxColor("middle", {0.2, 0.2, 0.2, 1})
     end
 end
 
@@ -220,36 +198,16 @@ function EclipseBar:ECLIPSE_DIRECTION_CHANGE(event, ...)
 
     -- End Box colors and Bar colors
     if self.direction == "sun" then
-        self.eBar.solar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
-        self.eBar.lunar.endBox:SetVertexColor(unpack(nibRealUI.media.background))
-        --self:ReverseBar("lunar", true)
-        --self:ReverseBar("solar", false)
+        self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
+        self.eBar:SetBoxColor("left", nibRealUI.media.colors.background)
     elseif self.direction == "moon" then
-        self.eBar.solar.endBox:SetVertexColor(unpack(nibRealUI.media.background))
-        self.eBar.lunar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.blue))
-        --self:ReverseBar("lunar", false)
-        --self:ReverseBar("solar", true)
+        self.eBar:SetBoxColor("right", nibRealUI.media.colors.background)
+        self.eBar:SetBoxColor("left", nibRealUI.media.colors.blue)
     else
-        self.eBar.solar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
-        self.eBar.lunar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.blue))
-        self:ReverseBar("lunar", false)
-        self:ReverseBar("solar", false)
-    end
-end
-
-function EclipseBar:ReverseBar(side, reverse)
-    if side == "lunar" then
-        if reverse then
-            AngleStatusBar:ReverseBarDirection(self.eBar.lunar.bar, true, 2, -1)
-        else
-            AngleStatusBar:ReverseBarDirection(self.eBar.lunar.bar, false, 5, -1)
-        end
-    else
-        if reverse then
-            AngleStatusBar:ReverseBarDirection(self.eBar.solar.bar, true, -2, -1)
-        else
-            AngleStatusBar:ReverseBarDirection(self.eBar.solar.bar, false, 5, -1)
-        end
+        self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
+        self.eBar:SetBoxColor("left", nibRealUI.media.colors.blue)
+        self.eBar:ReverseBar("left", false)
+        self.eBar:ReverseBar("right", false)
     end
 end
 
@@ -315,91 +273,10 @@ end
 -----------------------
 ---- Frame Updates ----
 -----------------------
-function EclipseBar:UpdateFonts()
-    local font = nibRealUI:Font()
-    for k, fontString in pairs(FontStringsRegular) do
-        fontString:SetFont(unpack(font))
-    end
-end
-
 function EclipseBar:UpdateGlobalColors()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
     if nibRealUI.class ~= "DRUID" then return end
     self:ECLIPSE_DIRECTION_CHANGE()
-end
-
-local function CreateTextFrame(parent, size)
-    local NewTextFrame = CreateFrame("Frame", nil, parent)
-    NewTextFrame:SetSize(12, 12)
-
-    NewTextFrame.text = NewTextFrame:CreateFontString(nil, "ARTWORK")
-    NewTextFrame.text:SetFont(unpack(nibRealUI:Font()))
-    NewTextFrame.text:SetPoint("BOTTOM", NewTextFrame, "BOTTOM", 0.5, 0.5)
-    tinsert(FontStringsRegular, NewTextFrame.text)
-    
-    return NewTextFrame
-end
-
-function EclipseBar:CreateFrames()
-    self.eBar = CreateFrame("Frame", "RealUI_EclipseBar", RealUIPositionersClassResource)
-    local eBar = self.eBar
-        eBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
-        eBar:SetPoint("BOTTOM")
-        -- eBar:Hide()
-    
-    -- Lunar
-    eBar.lunar = CreateFrame("Frame", nil, eBar)
-        eBar.lunar:SetPoint("BOTTOMRIGHT", eBar, "BOTTOM", -1, 0)
-        eBar.lunar:SetSize(BarWidth[layoutSize], 6)
-
-        eBar.lunar.bg = eBar.lunar:CreateTexture(nil, "BACKGROUND")
-            eBar.lunar.bg:SetPoint("BOTTOMRIGHT")
-            eBar.lunar.bg:SetSize(128, 16)
-            eBar.lunar.bg:SetTexture(Textures[layoutSize].bar)
-            eBar.lunar.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-        eBar.lunar.endBox = eBar.lunar:CreateTexture(nil, "BACKGROUND")
-            eBar.lunar.endBox:SetPoint("BOTTOMRIGHT", eBar.lunar, "BOTTOMLEFT", 4, 0)
-            eBar.lunar.endBox:SetSize(16, 16)
-            eBar.lunar.endBox:SetTexture(Textures[layoutSize].endBox)
-            eBar.lunar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.blue))
-
-        eBar.lunar.bar = AngleStatusBar:NewBar(eBar.lunar, -5, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "LEFT")
-            AngleStatusBar:SetBarColor(eBar.lunar.bar, nibRealUI.media.colors.blue)
-            eBar.lunar.bar.reverse = true
-    
-    -- Solar
-    eBar.solar = CreateFrame("Frame", nil, eBar)
-        eBar.solar:SetPoint("BOTTOMLEFT", eBar, "BOTTOM", 0, 0)
-        eBar.solar:SetSize(BarWidth[layoutSize], 6)
-
-        eBar.solar.bg = eBar.solar:CreateTexture(nil, "BACKGROUND")
-            eBar.solar.bg:SetPoint("BOTTOMLEFT")
-            eBar.solar.bg:SetSize(128, 16)
-            eBar.solar.bg:SetTexture(Textures[layoutSize].bar)
-            eBar.solar.bg:SetTexCoord(1, 0, 0, 1)
-            eBar.solar.bg:SetVertexColor(unpack(nibRealUI.media.background))
-
-        eBar.solar.endBox = eBar.solar:CreateTexture(nil, "BACKGROUND")
-            eBar.solar.endBox:SetPoint("BOTTOMLEFT", eBar.solar, "BOTTOMRIGHT", -4, 0)
-            eBar.solar.endBox:SetSize(16, 16)
-            eBar.solar.endBox:SetTexture(Textures[layoutSize].endBox)
-            eBar.solar.endBox:SetTexCoord(1, 0, 0, 1)
-            eBar.solar.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
-
-        eBar.solar.bar = AngleStatusBar:NewBar(eBar.solar, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
-            AngleStatusBar:SetBarColor(eBar.solar.bar, nibRealUI.media.colors.orange)
-            eBar.solar.bar.reverse = true
-
-    -- Middle
-    eBar.middle = eBar:CreateTexture(nil, "BACKGROUND")
-        eBar.middle:SetPoint("BOTTOM")
-        eBar.middle:SetSize(16, 16)
-        eBar.middle:SetTexture(Textures[layoutSize].middle)
-
-    -- Power text
-    eBar.power = CreateTextFrame(eBar)
-        eBar.power:SetPoint("BOTTOM", eBar, "TOP", 0, 3)
 end
 
 ------------
@@ -426,8 +303,6 @@ function EclipseBar:OnInitialize()
     })
     db = self.db.profile
     ndb = nibRealUI.db.profile
-
-    layoutSize = ndb.settings.hudSize
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
@@ -439,8 +314,9 @@ function EclipseBar:OnEnable()
 
     self.configMode = false
 
-    if not self.eBar then self:CreateFrames() end
-    self:UpdateFonts()
+    if not self.eBar then 
+        self.eBar = ClassResourceBar:New("short")
+    end
 
     local updateSpeed
     if nibRealUI.db.profile.settings.powerMode == 1 then
