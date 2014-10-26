@@ -351,7 +351,18 @@ UnitFrames["target"] = function(self)
         local _, powerType = UnitPowerType(self.unit)
 
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
-        AngleStatusBar:SetReverseFill(self.Power.bar, UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
+
+        -- Reverse power
+        local oldReverse = self.Power.bar.reverse
+        local newReverse = UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars)
+        AngleStatusBar:SetReverseFill(self.Power.bar, newReverse)
+
+        -- If reverse is different from old target to new target then do an instant SetValue on power bar
+        -- (stops power bar appearing unneccesarily when changing from, for example, a DK at no power (no bar shown) to a Mage at full power (no bar shown))
+        if oldReverse ~= newReverse then
+            local powerPer = nibRealUI:GetSafeVals(UnitPower(self.unit), UnitPowerMax(self.unit))
+            AngleStatusBar:SetValue(self.Power.bar, powerPer, true)
+        end
 
         local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]

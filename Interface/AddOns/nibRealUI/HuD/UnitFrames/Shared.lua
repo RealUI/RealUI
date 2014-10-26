@@ -240,7 +240,7 @@ function UnitFrames:HealthOverride(event, unit)
     if self.Health.info then
         self.Health:SetValue(healthPer)
     else
-        AngleStatusBar:SetValue(self.Health.bar, healthPer, majorUpdate)
+        AngleStatusBar:SetValue(self.Health.bar, healthPer)
     end
 end
 
@@ -271,12 +271,12 @@ function UnitFrames:PredictOverride(event, unit)
 end
 
 function UnitFrames:PowerOverride(event, unit, powerType)
-    --print("Power Override", self, event, unit, powerType)
+    -- print("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
 
     local powerPer = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
-    AngleStatusBar:SetValue(self.Power.bar, powerPer, majorUpdate)
+    AngleStatusBar:SetValue(self.Power.bar, powerPer)
 end
 
 function UnitFrames:PvPOverride(event, unit)
