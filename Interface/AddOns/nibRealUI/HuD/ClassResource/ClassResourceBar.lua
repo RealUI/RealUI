@@ -117,31 +117,31 @@ function ClassResourceBar:UpdateFonts()
     end
 end
 
-function ClassResourceBar:CreateResourceBar()
+function ClassResourceBar:CreateResourceBar(size)
     self.parent = CreateFrame("Frame", nil, RealUIPositionersClassResource)
     local rBar = self.parent
-        rBar:SetSize((BarWidth[layoutSize] * 2) + 1, 6)
+        rBar:SetSize((BarWidth[size]layoutSize] * 2) + 1, 6)
         rBar:SetPoint("BOTTOM")
         -- rBar:Hide()
     
     -- Left
     rBar.left = CreateFrame("Frame", nil, rBar)
         rBar.left:SetPoint("BOTTOMRIGHT", rBar, "BOTTOM", -1, 0)
-        rBar.left:SetSize(BarWidth[layoutSize], 6)
+        rBar.left:SetSize(BarWidth[size][layoutSize], 6)
 
         rBar.left.bg = rBar.left:CreateTexture(nil, "BACKGROUND")
             rBar.left.bg:SetPoint("BOTTOMRIGHT")
             rBar.left.bg:SetSize(128, 16)
-            rBar.left.bg:SetTexture(Textures[layoutSize].bar)
+            rBar.left.bg:SetTexture(Textures[size][layoutSize].bar)
             rBar.left.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
         rBar.left.endBox = rBar.left:CreateTexture(nil, "BACKGROUND")
             rBar.left.endBox:SetPoint("BOTTOMRIGHT", rBar.left, "BOTTOMLEFT", 4, 0)
             rBar.left.endBox:SetSize(16, 16)
-            rBar.left.endBox:SetTexture(Textures[layoutSize].endBox)
+            rBar.left.endBox:SetTexture(Textures[size][layoutSize].endBox)
             rBar.left.endBox:SetVertexColor(unpack(nibRealUI.media.colors.blue))
 
-        rBar.left.bar = AngleStatusBar:NewBar(rBar.left, -5, -1, BarWidth[layoutSize] - 7, 4, "RIGHT", "RIGHT", "LEFT")
+        rBar.left.bar = AngleStatusBar:NewBar(rBar.left, -5, -1, BarWidth[size][layoutSize] - 7, 4, "RIGHT", "RIGHT", "LEFT")
             AngleStatusBar:SetBarColor(rBar.left.bar, nibRealUI.media.colors.blue)
             rBar.left.bar.reverse = true
 
@@ -154,23 +154,23 @@ function ClassResourceBar:CreateResourceBar()
     -- Right
     rBar.right = CreateFrame("Frame", nil, rBar)
         rBar.right:SetPoint("BOTTOMLEFT", rBar, "BOTTOM", 0, 0)
-        rBar.right:SetSize(BarWidth[layoutSize], 6)
+        rBar.right:SetSize(BarWidth[size][layoutSize], 6)
 
         rBar.right.bg = rBar.right:CreateTexture(nil, "BACKGROUND")
             rBar.right.bg:SetPoint("BOTTOMLEFT")
             rBar.right.bg:SetSize(128, 16)
-            rBar.right.bg:SetTexture(Textures[layoutSize].bar)
+            rBar.right.bg:SetTexture(Textures[size][layoutSize].bar)
             rBar.right.bg:SetTexCoord(1, 0, 0, 1)
             rBar.right.bg:SetVertexColor(unpack(nibRealUI.media.background))
 
         rBar.right.endBox = rBar.right:CreateTexture(nil, "BACKGROUND")
             rBar.right.endBox:SetPoint("BOTTOMLEFT", rBar.right, "BOTTOMRIGHT", -4, 0)
             rBar.right.endBox:SetSize(16, 16)
-            rBar.right.endBox:SetTexture(Textures[layoutSize].endBox)
+            rBar.right.endBox:SetTexture(Textures[size][layoutSize].endBox)
             rBar.right.endBox:SetTexCoord(1, 0, 0, 1)
             rBar.right.endBox:SetVertexColor(unpack(nibRealUI.media.colors.orange))
 
-        rBar.right.bar = AngleStatusBar:NewBar(rBar.right, 5, -1, BarWidth[layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
+        rBar.right.bar = AngleStatusBar:NewBar(rBar.right, 5, -1, BarWidth[size][layoutSize] - 7, 4, "LEFT", "LEFT", "RIGHT")
             AngleStatusBar:SetBarColor(rBar.right.bar, nibRealUI.media.colors.orange)
             rBar.right.bar.reverse = true
 
@@ -184,7 +184,7 @@ function ClassResourceBar:CreateResourceBar()
     rBar.middle = rBar:CreateTexture(nil, "BACKGROUND")
         rBar.middle:SetPoint("BOTTOM")
         rBar.middle:SetSize(16, 16)
-        rBar.middle:SetTexture(Textures[layoutSize].middle)
+        rBar.middle:SetTexture(Textures[size][layoutSize].middle)
 
     rBar.middle.value = rBar:CreateFontString()
         rBar.middle.value:SetPoint("BOTTOM", rBar, "TOP", 0, 3)
@@ -193,11 +193,11 @@ function ClassResourceBar:CreateResourceBar()
         tinsert(FontStringsRegular, rBar.middle.value)
 end
 
-function ClassResourceBar:New()
+function ClassResourceBar:New(size)
     local ResourceBar = {}
     setmetatable(ResourceBar, {__index = self})
 
-    ResourceBar:CreateResourceBar()
+    ResourceBar:CreateResourceBar(size)
 
     return ResourceBar
 end
