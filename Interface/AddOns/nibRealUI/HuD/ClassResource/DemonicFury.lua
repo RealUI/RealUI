@@ -152,6 +152,7 @@ function DemonicFury:OnEnable()
 		self.dfBar = ClassResourceBar:New("short")
 		self.dfBar:SetEndBoxShown("left", false)
 		self.dfBar:SetEndBoxShown("right", false)
+		self.dfBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 	self:UpdateGlobalColors()
 

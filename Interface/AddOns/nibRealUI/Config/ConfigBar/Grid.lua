@@ -152,14 +152,14 @@ function ConfigBar_Grid:SetupWindow()
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
-			texCoord = {GetTexCoordsForRole("DAMAGER")},
-			texOffset = {-3, -4, 3, 2},	-- BLx, BLy, TRx, TRy
+			texCoord = {GetTexCoordsForRole("TANK")},
+			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(2) end,
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
 			texCoord = {GetTexCoordsForRole("HEALER")},
-			texOffset = {-2, -3, 2, 1},	-- BLx, BLy, TRx, TRy
+			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(3) end,
 		},
 	}
