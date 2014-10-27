@@ -152,7 +152,7 @@ function ConfigBar_Grid:SetupWindow()
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
-			texCoord = {GetTexCoordsForRole("TANK")},
+			texCoord = {GetTexCoordsForRole("DAMAGER")},
 			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(2) end,
 		},
