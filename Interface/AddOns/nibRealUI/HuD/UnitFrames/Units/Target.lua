@@ -26,6 +26,14 @@ local positions = {
             x = 10,
             y = -4,
             coords = {1, 0, 0, 1},
+        },
+        tanking = {
+            x = 0,
+            y = 1,
+        },
+        range = {
+            x = 0,
+            y = 2,
         }
     },
     [2] = {
@@ -45,6 +53,14 @@ local positions = {
             x = 11,
             y = -2,
             coords = {1, 0, 0, 1},
+        },
+        tanking = {
+            x = 0,
+            y = 2,
+        },
+        range = {
+            x = 0,
+            y = 3,
         }
     },
 }
@@ -212,21 +228,35 @@ local function CreateRange(parent)
     local RangeColors = {
         [5] = nibRealUI.media.colors.green,
         [30] = nibRealUI.media.colors.yellow,
-        [40] = nibRealUI.media.colors.amber,
-        [50] = nibRealUI.media.colors.orange,
+        [35] = nibRealUI.media.colors.amber,
+        [40] = nibRealUI.media.colors.orange,
+        [50] = nibRealUI.media.colors.red,
         [100] = nibRealUI.media.colors.red,
     }
 
-    parent.Range = parent.Health:CreateTexture(nil, "OVERLAY")
-    parent.Range:SetTexture(nibRealUI.media.icons.DoubleArrow)
-    parent.Range:SetSize(16, 16)
-    parent.Range:SetPoint("BOTTOMRIGHT", parent.Health, "BOTTOMLEFT", -5, 0)
+    -- parent.Range = parent.Health:CreateTexture(nil, "OVERLAY")
+    -- parent.Range:SetTexture(nibRealUI.media.icons.DoubleArrow)
+    -- parent.Range:SetSize(16, 16)
+    -- parent.Range:SetPoint("BOTTOMRIGHT", parent.Health, "BOTTOMLEFT", -5, 0)
+
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.range
+    local pos = positions[UnitFrames.layoutSize].range
+
+    parent.Range = parent.overlay:CreateTexture(nil, "BORDER")
+    parent.Range:SetTexture(texture.bar)
+    parent.Range:SetSize(texture.width, texture.height)
+    parent.Range:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
     parent.Range.insideAlpha = 1
     parent.Range.outsideAlpha = 0.5
 
-    parent.Range.text = parent.Health:CreateFontString(nil, "OVERLAY")
+    parent.Range.border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
+    parent.Range.border:SetTexture(texture.border)
+    parent.Range.border:SetAllPoints(parent.Range)
+
+    parent.Range.text = parent.overlay:CreateFontString(nil, "OVERLAY")
     parent.Range.text:SetFont(unpack(nibRealUI:Font()))
-    parent.Range.text:SetPoint("BOTTOMRIGHT", parent.Range, "BOTTOMLEFT", 0, 0)
+    parent.Range.text:SetJustifyH("right")
+    parent.Range.text:SetPoint("BOTTOMRIGHT", parent.Range, "BOTTOMLEFT", 20.5, 4.5)
 
     parent.Range.Override = function(self, status)
         --print("Range Override", self, status)
@@ -234,11 +264,13 @@ local function CreateRange(parent)
 
         if (UnitIsUnit("player", "target")) or (minRange and minRange > 80) then maxRange = nil end
         local section
-        if maxRange then
+        if maxRange and not(self.Threat.isActive) then
             if maxRange <= 5 then
                 section = 5
             elseif maxRange <= 30 then
                 section = 30
+            elseif maxRange <= 35 then
+                section = 35
             elseif maxRange <= 40 then
                 section = 40
             elseif maxRange <= 50 then
@@ -248,41 +280,67 @@ local function CreateRange(parent)
             end
             self.Range.text:SetFormattedText("%d", maxRange)
             self.Range.text:SetTextColor(RangeColors[section][1], RangeColors[section][2], RangeColors[section][3])
+            self.Range:SetVertexColor(RangeColors[section][1], RangeColors[section][2], RangeColors[section][3])
             self.Range:Show()
+            self.Range.border:Show()
         else
             self.Range.text:SetText("")
             self.Range:Hide()
+            self.Range.border:Hide()
         end
     end
 end
 
 local function CreateThreat(parent)
-    parent.Threat = parent.Power:CreateTexture(nil, "OVERLAY")
-    parent.Threat:SetTexture(nibRealUI.media.icons.Lightning)
-    parent.Threat:SetSize(16, 16)
-    parent.Threat:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", -10, 0)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.tanking
+    local pos = positions[UnitFrames.layoutSize].tanking
 
-    parent.Threat.text = parent.Power:CreateFontString(nil, "OVERLAY")
-    parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
-    parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 0, 0)
+    -- parent.Threat = parent.Power:CreateTexture(nil, "OVERLAY")
+    -- parent.Threat:SetTexture(nibRealUI.media.icons.Lightning)
+    -- parent.Threat:SetSize(16, 16)
+    -- parent.Threat:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", -10, 0)
+
+    -- parent.Threat.text = parent.Power:CreateFontString(nil, "OVERLAY")
+    -- parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
+    -- parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 0, 0)
+
+    parent.Threat = parent.overlay:CreateTexture(nil, "BORDER")
+    parent.Threat:SetTexture(texture.bar)
+    parent.Threat:SetSize(texture.width, texture.height)
+    parent.Threat:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
+
+    parent.Threat.border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
+    parent.Threat.border:SetTexture(texture.border)
+    parent.Threat.border:SetAllPoints(parent.Threat)
+
+    parent.Threat.isActive = false
 
     parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
-        local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
+        -- local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
 
-        local tankLead
-        if ( isTanking ) then
-            tankLead = UnitThreatPercentageOfLead("player", "target")
-        end
-        local display = tankLead or rawPercentage
-        if not (UnitIsDeadOrGhost("target")) and (display and (display ~= 0)) then
-            self.Threat.text:SetFormattedText("%d%%", display)
-            local r, g, b = GetThreatStatusColor(status)
-            self.Threat.text:SetTextColor(r, g, b)
+        -- local tankLead
+        -- if ( isTanking ) then
+        --     tankLead = UnitThreatPercentageOfLead("player", "target")
+        -- end
+        -- local display = tankLead or rawPercentage
+        -- if not (UnitIsDeadOrGhost("target")) and (display and (display ~= 0)) then
+
+        local status = UnitThreatSituation(unit)
+        if (status and status > 0) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
+            -- self.Threat.text:SetFormattedText("%d%%", display)
+            -- self.Threat.text:SetTextColor(r, g, b)
+            self.Threat:SetVertexColor(GetThreatStatusColor(status))
             self.Threat:Show()
+            self.Threat.border:Show()
+            self.Range:Hide()
+            self.Range.border:Hide()
+            self.Threat.isActive = true
         else
-            self.Threat.text:SetText("")
+            -- self.Threat.text:SetText("")
             self.Threat:Hide()
+            self.Threat.border:Hide()
+            self.Threat.isActive = false
         end
     end
 end
@@ -325,6 +383,8 @@ UnitFrames["target"] = function(self)
         --self.Combat.Override(self, event)
         self.Class.Update(self, event)
         self.endBox.Update(self, event)
+        self.Threat.Override(self, event, self.unit)
+        self.Range.Override(self)
         UnitFrames:SetHealthColor(self)
 
         if UnitPowerMax(self.unit) > 0 then
