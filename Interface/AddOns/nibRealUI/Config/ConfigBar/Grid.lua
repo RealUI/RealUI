@@ -117,11 +117,17 @@ function ConfigBar_Grid:ChangeTab(tabID, isInit)
 		if k ~= tabID then
 			self.tabPanels[k]:Hide()
 			self.tabs[k].icon:SetVertexColor(0.5, 0.5, 0.5)
+			if self.tabs[k].icon2 then
+				self.tabs[k].icon2:SetVertexColor(0.5, 0.5, 0.5)
+			end
 		end
 	end
 
 	self.tabPanels[tabID]:Show()
 	self.tabs[tabID].icon:SetVertexColor(1, 1, 1)
+	if self.tabs[tabID].icon2 then
+		self.tabs[tabID].icon2:SetVertexColor(1, 1, 1)
+	end
 	
 	self.currentTab = tabID
 
@@ -152,8 +158,11 @@ function ConfigBar_Grid:SetupWindow()
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
-			texCoord = {GetTexCoordsForRole("DAMAGER")},
+			texCoord = {GetTexCoordsForRole("TANK")},
+			texture2 = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
+			texCoord2 = {GetTexCoordsForRole("DAMAGER")},
 			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
+			texOffset2 = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
 			func = function() self:ChangeTab(2) end,
 		},
 		{

@@ -576,18 +576,19 @@ function ConfigBar_GUI:CreateTabList(element, tabs, direction, point, x, y)
 
 		-- Icon
 		tabFrames[k].icon = tabFrames[k]:CreateTexture(nil, "ARTWORK")
-			if info.texPosition then
-				tabFrames[k].icon:SetPoint("TOP", tabFrames[k], "TOP", info.texPosition.x, info.texPosition.y)
-			elseif info.texOffset then
-				tabFrames[k].icon:SetPoint("BOTTOMLEFT", info.texOffset[1], info.texOffset[2])
-				tabFrames[k].icon:SetPoint("TOPRIGHT", info.texOffset[3], info.texOffset[4])
-			else
-				tabFrames[k].icon:SetAllPoints(tabFrames[k])
-			end
-			if info.texCoord then
-				tabFrames[k].icon:SetTexCoord(unpack(info.texCoord))
-			end
-			tabFrames[k].icon:SetTexture(info.texture)
+
+		if info.texPosition then
+			tabFrames[k].icon:SetPoint("TOP", tabFrames[k], "TOP", info.texPosition.x, info.texPosition.y)
+		elseif info.texOffset then
+			tabFrames[k].icon:SetPoint("BOTTOMLEFT", info.texOffset[1], info.texOffset[2])
+			tabFrames[k].icon:SetPoint("TOPRIGHT", info.texOffset[3], info.texOffset[4])
+		else
+			tabFrames[k].icon:SetAllPoints(tabFrames[k])
+		end
+		if info.texCoord then
+			tabFrames[k].icon:SetTexCoord(unpack(info.texCoord))
+		end
+		tabFrames[k].icon:SetTexture(info.texture)
 
 		-- Background
 		tabFrames[k].bg = tabFrames[k]:CreateTexture(nil, "BACKGROUND")
@@ -626,6 +627,45 @@ function ConfigBar_GUI:CreateTabList(element, tabs, direction, point, x, y)
 			else
 				tabFrames[k]:SetPoint("TOPLEFT", tabFrames[k-1], "TOPRIGHT", 1, 0)
 			end
+		end
+
+		-- Two textures side by side	
+		if info.texture2 then
+			-- Use a ScrollFrame to create a cropped icon to overlap the first half of the first icon
+			local iconSF = CreateFrame("ScrollFrame", nil, element.window)
+			iconSF:SetPoint("BOTTOMLEFT", tabFrames[k], "BOTTOMLEFT", 0, 0) 
+			iconSF:SetPoint("TOPRIGHT", tabFrames[k], "TOP", 0, 0)
+			-- iconSF:SetFrameLevel(tabFrames[k]:GetFrameLevel() + 20)
+						
+			iconSF.iconFrame = CreateFrame("Frame", nil, iconSF)
+			iconSF.iconFrame:SetSize(tabFrames[k]:GetSize())
+			iconSF.iconFrame:SetPoint("LEFT")
+
+			iconSF:SetScrollChild(iconSF.iconFrame) 
+
+			tabFrames[k].icon2 = iconSF.iconFrame:CreateTexture(nil, "ARTWORK")
+			if info.texPosition2 then
+				tabFrames[k].icon2:SetPoint("TOP", iconSF.iconFrame, "TOP", info.texPosition2.x, info.texPosition2.y)
+			elseif info.texOffset2 then
+				tabFrames[k].icon2:SetPoint("BOTTOMLEFT", info.texOffset2[1], info.texOffset2[2])
+				tabFrames[k].icon2:SetPoint("TOPRIGHT", info.texOffset2[3], info.texOffset2[4])
+			else
+				tabFrames[k].icon2:SetAllPoints(iconSF.iconFrame)
+			end
+			if info.texCoord2 then
+				tabFrames[k].icon2:SetTexCoord(unpack(info.texCoord2))
+			end
+			tabFrames[k].icon2:SetTexture(info.texture2)
+
+			-- Highlight
+			tabFrames[k].highlight2 = iconSF.iconFrame:CreateTexture(nil, "OVERLAY")
+				tabFrames[k].highlight2:SetPoint("BOTTOMLEFT", iconSF.iconFrame, "BOTTOMLEFT", 1, 1)
+				tabFrames[k].highlight2:SetPoint("TOPRIGHT", iconSF.iconFrame, "TOPRIGHT", -1, -1)
+				tabFrames[k].highlight2:SetTexture(nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3], 0.2)
+				tabFrames[k].highlight2:Hide()
+
+			tabFrames[k]:HookScript("OnEnter", function(self) self.highlight2:Show() end)
+			tabFrames[k]:HookScript("OnLeave", function(self) self.highlight2:Hide() end)
 		end
 	end
 
