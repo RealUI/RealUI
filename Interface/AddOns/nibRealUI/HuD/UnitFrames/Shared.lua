@@ -259,10 +259,11 @@ function UnitFrames:HealthOverride(event, unit)
     if event == "ClassColorBars" or event == "UpdateUnitFramesHealthColor" then
         UnitFrames:SetHealthColor(self)
     end
-    local healthPer = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
     if self.Health.info then
-        self.Health:SetValue(healthPer)
+        self.Health:SetMinMaxValues(0, healthMax)
+        self.Health:SetValue(healthCurr)
     else
         AngleStatusBar:SetValue(self.Health.bar, healthPer)
     end

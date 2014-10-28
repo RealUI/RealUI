@@ -53,18 +53,18 @@ local info = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = info[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent.overlay) -- comment this for new bars
-    --parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, pos)
+    --parent.Health = CreateFrame("Frame", nil, parent.overlay) -- comment this for new bars
+    parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, pos)
     parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
-    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
+    --parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
     if ndb.settings.reverseUnitFrameBars then 
-        AngleStatusBar:SetReverseFill(parent.Health.bar, true)
+        AngleStatusBar:SetReverseFill(parent.Health, true)
     end
     UnitFrames:SetHealthColor(parent)
 
-    ---[[ comment these for new bars
+    --[[ comment these for new bars
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
     parent.Health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
@@ -75,7 +75,7 @@ local function CreateHealthBar(parent)
     parent.Health.border:SetTexture(texture.border)
     parent.Health.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
     parent.Health.border:SetAllPoints(parent.Health)
-    ---]]
+    --]]
     parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Health.text:SetPoint("BOTTOMRIGHT", parent.Health, "TOPRIGHT", 2, 2)
     parent.Health.text:SetFont(unpack(nibRealUI:Font()))

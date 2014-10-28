@@ -9,36 +9,43 @@ local min, max, abs, floor = math.min, math.max, math.abs, math.floor
 
 local dontSmooth
 local smoothing = {}
-local function SetBarPosition(bar, per)
-    bar.value = per
-    local reverse = bar.reverse
-    local value = bar.value
-    local maxWidth
-    if bar.info then
-        maxWidth = bar.info.maxWidth
-        bar = bar.bar
-    else
-        maxWidth = bar.fullWidth
-    end
-    if not reverse then
-        bar:SetWidth(maxWidth * (1 - value))
-    else
-        bar:SetWidth(maxWidth * value)
-    end
+local function SetBarPosition(self, value)
+    self.value = value
+    if self.info then
+        local info = self.info
+        local width
+        if self.reverse then
+            -- This will take the raw value, percent or exact, and adjust it to within the bounds of the bar.
+            width = (((value - self.min) * (info.maxWidth - info.minWidth)) / (self.max - self.min)) + info.minWidth
+        else
+            width = (((value - self.min) * (info.minWidth - info.maxWidth)) / (self.max - self.min)) + info.maxWidth
+        end
+        self.bar:SetWidth(width)
 
-    per = floor(per * 100) / 100
-    --print("Floored", bar:GetParent():GetParent().unit, reverse, per)
-    bar:SetShown((not(reverse) and (per < 1)) or (reverse and (per > 0)))
+        value = floor(value * self.max) / self.max
+        self.bar:SetShown((not(self.reverse) and (value < self.max)) or (self.reverse and (value > self.min)))
+    else
+        if not self.reverse then
+            self:SetWidth(self.fullWidth * (1 - value))
+        else
+            self:SetWidth(self.fullWidth * value)
+        end
+
+        value = floor(value * 100) / 100
+        --print("Floored", self:GetParent():GetParent().unit, reverse, value)
+        self:SetShown((not(self.reverse) and (value < 1)) or (self.reverse and (value > 0)))
+    end
 end
 
-local function SetBarValue(bar, per)
-    local maxWidth = bar.info and bar.info.maxWidth or bar.fullWidth
-    per = per + (1 / maxWidth)
-    if per ~= bar.value then
-        smoothing[bar] = per
+local function SetBarValue(self, value)
+    if not self.info then
+        value = value + (1 / self.fullWidth)
+    end
+    if value ~= self.value then
+        smoothing[self] = value
     else
-        SetBarPosition(bar, per)
-        smoothing[bar] = nil
+        SetBarPosition(self, value)
+        smoothing[self] = nil
     end
 end
 
@@ -155,10 +162,17 @@ end
 
 -- New Status bars WIP
 
+-- If SetMinMaxValues is not called, default to min = 0, max = 1.
+local function SetMinMaxValues(self, min, max)
+    print("SetMinMaxValues", min, max)
+    self.min = min
+    self.max = max
+end
+
 -- This should except a percentage or discrete value.
--- If SetMinMaxValues (NYI) is not called, default to min = 0, max = 1.
 local function SetValue(self, value, ignoreSmooth)
     print("SetValue", value, ignoreSmooth)
+    if not self.min then SetMinMaxValues(self, 0, 1) end
     if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(self, value)
     else
@@ -171,9 +185,11 @@ local function CreateAngleBG(self, width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
+    --[[
     local test = bg:CreateTexture(nil, "BACKGROUND", nil, -8)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(bg)
+    --]]
 
     local leftX, rightX = 0, 0
     -- These conditions keep the textures within the frame.
@@ -225,6 +241,7 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     print("CreateAngleStatusBar", self.unit, info)
     local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
 
+    -- info is meta data for the status bar itself, regardles of what it's used for.
     info.maxWidth, info.minWidth, info.origDirection = width - 4, height - 2, info.growDirection
     info.startPoint = (info.growDirection == "LEFT") and "TOPRIGHT" or "TOPLEFT"
     info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
@@ -233,30 +250,34 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     bar:SetPoint(info.startPoint, status, -2, -1)
     bar:SetHeight(info.minWidth)
 
+    ---[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(bar)
-
+    ---]]
+ 
     if info.growDirection == "LEFT" then
-        --
+        leftX = leftX - 2
     else
         --\
     end
 
     bar.row = {}
     for i = 1, info.minWidth do
-        bar.row[i] = bar:CreateTexture(nil, "BACKGROUND")
+        bar.row[i] = status:CreateTexture(nil, "ARTWORK")
         bar.row[i]:SetHeight(1)
-        bar.row[i]:SetPoint("TOPLEFT", abs(leftX), 1 - i)
-        bar.row[i]:SetPoint("TOPRIGHT", rightX, 1 - i)
+        bar.row[i]:SetPoint("TOPLEFT", bar, "TOPLEFT", abs(leftX) - (i - 1), 1 - i)
+        bar.row[i]:SetPoint("TOPRIGHT", bar, "TOPRIGHT", rightX - (i - 1), 1 - i)
     end
 
     status.info = info
     status.bar = bar
     
     -- StatusBar API
+    status.SetMinMaxValues = SetMinMaxValues
     status.SetValue = SetValue
 
+    status.value = 1
     status:SetValue(1, true)
     return status
 end
