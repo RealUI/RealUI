@@ -23,6 +23,7 @@ local function SetBarPosition(self, value)
         self.bar:SetWidth(width)
 
         value = floor(value * self.max) / self.max
+        --print("Floored", self:GetParent():GetParent().unit, self.reverse, value)
         self.bar:SetShown((not(self.reverse) and (value < self.max)) or (self.reverse and (value > self.min)))
     else
         if not self.reverse then
@@ -76,9 +77,13 @@ function AngleStatusBar:SetValue(bar, per, ignoreSmooth)
     end
 end
 
-function AngleStatusBar:SetBarColor(bar, r, g, b, a)
+function AngleStatusBar:SetBarColor(self, r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    local bar = self
+    if self.info then
+        bar = self.bar
     end
     for i = 1, #bar.row do
         bar.row[i]:SetTexture(r, g, b, a or 1)
@@ -164,14 +169,14 @@ end
 
 -- If SetMinMaxValues is not called, default to min = 0, max = 1.
 local function SetMinMaxValues(self, min, max)
-    print("SetMinMaxValues", min, max)
+    --print("SetMinMaxValues", min, max)
     self.min = min
     self.max = max
 end
 
 -- This should except a percentage or discrete value.
 local function SetValue(self, value, ignoreSmooth)
-    print("SetValue", value, ignoreSmooth)
+    --print("SetValue", value, ignoreSmooth)
     if not self.min then SetMinMaxValues(self, 0, 1) end
     if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(self, value)
@@ -181,7 +186,7 @@ local function SetValue(self, value, ignoreSmooth)
 end
 
 local function CreateAngleBG(self, width, height, parent, info)
-    print("CreateAngleBG", self.unit, info)
+    --print("CreateAngleBG", self.unit, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
@@ -197,7 +202,12 @@ local function CreateAngleBG(self, width, height, parent, info)
     leftX = (info.leftAngle == [[/]]) and height - 1 or 0
     rightX = (info.rightAngle == [[\]]) and -(height - 1) or 0
 
-    print("CreateBG", leftX, rightX)
+    if info.noBG then
+        bg = parent
+        return bg, leftX, rightX
+    end
+
+    --print("CreateBG", leftX, rightX)
     bg.top = bg:CreateTexture(nil, "BACKGROUND")
     bg.top:SetTexture(0, 0, 0)
     bg.top:SetHeight(1)
@@ -270,11 +280,24 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
         bar.row[i]:SetPoint("TOPRIGHT", bar, "TOPRIGHT", rightX - (i - 1), 1 - i)
     end
 
+    bar:SetScript("OnHide", function()
+        for r = 1, #bar.row do
+            bar.row[r]:Hide()
+        end
+    end)
+    bar:SetScript("OnShow", function()
+        for r = 1, #bar.row do
+            bar.row[r]:Show()
+        end
+    end)
+
     status.info = info
     status.bar = bar
     
     -- StatusBar API
     status.SetMinMaxValues = SetMinMaxValues
+    status.SetReverseFill = AngleStatusBar.SetReverseFill
+    status.SetStatusBarColor = AngleStatusBar.SetBarColor
     status.SetValue = SetValue
 
     status.value = 1
