@@ -3,6 +3,7 @@ local F, C = unpack(select(2, ...))
 C.themes["Blizzard_TradeSkillUI"] = function()
 	F.CreateBD(TradeSkillGuildFrame)
 	F.CreateBD(TradeSkillGuildFrameContainer, .25)
+
 	TradeSkillFramePortrait:Hide()
 	TradeSkillFramePortrait.Show = F.dummy
 	for i = 18, 20 do
@@ -123,7 +124,7 @@ C.themes["Blizzard_TradeSkillUI"] = function()
 	hooksecurefunc("TradeSkillFrame_Update", function()
 		local numTradeSkills = GetNumTradeSkills()
 		local skillOffset = FauxScrollFrame_GetOffset(TradeSkillListScrollFrame)
-		local skillIndex
+		local _, skillIndex, skillType, isExpanded
 		local diplayedSkills = TRADE_SKILLS_DISPLAYED
 		local hasFilterBar = TradeSkillFilterBar:IsShown()
 		if hasFilterBar then
@@ -133,7 +134,7 @@ C.themes["Blizzard_TradeSkillUI"] = function()
 
 		for i = 1, diplayedSkills do
 			skillIndex = i + skillOffset
-			local _, skillType, _, isExpanded = GetTradeSkillInfo(skillIndex)
+			_, skillType, _, isExpanded = GetTradeSkillInfo(skillIndex)
 			if hasFilterBar then
 				buttonIndex = i + 1
 			else

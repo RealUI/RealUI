@@ -77,7 +77,9 @@ function SkinAce3:Skin()
     if not AceGUI then return end
     F, C = unpack(Aurora)
 
-    local r, g, b = nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3]
+    local _, class = UnitClass("player")
+    local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
+    local alpha = 0.25
 
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
     AceGUI.RegisterAsWidget = function(self, widget)
@@ -299,7 +301,7 @@ function SkinAce3:Skin()
         local frame = widget.content:GetParent()
         if TYPE == "DropdownGroup" then
             if not widget.skinned then
-                F.CreateBD(frame, 0.4)
+                F.CreateBD(frame, alpha)
             end
 
         elseif TYPE == "Frame" then
@@ -335,7 +337,7 @@ function SkinAce3:Skin()
 
         elseif TYPE == "InlineGroup" then
             if not widget.skinned then
-                F.CreateBD(frame, 0.4)
+                F.CreateBD(frame, alpha)
             end
 
         elseif TYPE == "TabGroup" then
@@ -346,7 +348,7 @@ function SkinAce3:Skin()
                     StripTextures(tab)
                     return tab
                 end
-                F.CreateBD(frame, 0.4)
+                F.CreateBD(frame, alpha)
             end
 
         elseif TYPE == "TreeGroup" then
@@ -378,8 +380,8 @@ function SkinAce3:Skin()
                         self.skinned = true
                     end
                 end)
-                F.CreateBD(widget.treeframe, .3)
-                F.CreateBD(frame)
+                F.CreateBD(widget.treeframe, alpha)
+                F.CreateBD(frame, alpha)
                 frame:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
             end
 

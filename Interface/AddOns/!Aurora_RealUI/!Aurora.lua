@@ -14,7 +14,7 @@ style.apiVersion = "6.0"
 
 style.functions = {
     ["CreateBD"] = function(f, a)
-        --if f:GetName() then print("Override CreateBD", f:GetName(), a) end
+        --print("Override CreateBD", f:GetName(), a)
         f:SetBackdrop({
             bgFile = C.media.backdrop,
             edgeFile = C.media.backdrop,
@@ -52,7 +52,7 @@ style.classcolors = {
     ["PALADIN"]     = { r = 0.96, g = 0.55, b = 0.73 },
     ["PRIEST"]      = { r = 0.80, g = 0.80, b = 0.80 },
     ["ROGUE"]       = { r = 1.00, g = 0.96, b = 0.41 },
-    ["SHAMAN"]      = { r = 0.00, g = 0.44, b = 0.87 };
+    ["SHAMAN"]      = { r = 0.00, g = 0.44, b = 0.87 },
     ["WARLOCK"]     = { r = 0.58, g = 0.51, b = 0.79 },
     ["WARRIOR"]     = { r = 0.78, g = 0.61, b = 0.43 },
 }
