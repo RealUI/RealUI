@@ -448,6 +448,10 @@ function CombatFader:OnInitialize()
     db = self.db.profile
     ndbc = nibRealUI.db.char
 
+    if db.elements["watchframe"] then
+        db.elements["watchframe"] = nil
+    end
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
