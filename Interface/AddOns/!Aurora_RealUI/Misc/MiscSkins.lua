@@ -70,6 +70,9 @@ tinsert(mods["Aurora"], function()
         SplashFrame.BottomTexture:SetTexCoord(right, top, left, top, right, bottom, left, bottom)
 
         SplashFrame.Label:SetTextColor(1, 1, 1)
+
+        SplashFrame.BottomLine:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(SplashFrame.BottomLine, "splash-botleft")
     end)
 
     -- Objective Tracker
