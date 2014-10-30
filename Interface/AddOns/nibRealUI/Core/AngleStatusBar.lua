@@ -260,11 +260,11 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     bar:SetPoint(info.startPoint, status, -2, -1)
     bar:SetHeight(info.minWidth)
 
-    ---[[
+    --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(bar)
-    ---]]
+    --]]
  
     if info.growDirection == "LEFT" then
         leftX = leftX - 2
