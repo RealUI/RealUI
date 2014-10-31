@@ -313,29 +313,35 @@ local function CreateThreat(parent)
     parent.Threat.border:SetTexture(texture.border)
     parent.Threat.border:SetAllPoints(parent.Threat)
 
+    parent.Threat.text = parent.overlay:CreateFontString(nil, "OVERLAY")
+    parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Threat.text:SetJustifyH("right")
+    parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 14.5, 4.5)
+
     parent.Threat.isActive = false
 
     parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
-        
-
-        -- local tankLead
-        -- if ( isTanking ) then
-        --     tankLead = UnitThreatPercentageOfLead("player", "target")
-        -- end
-        -- local display = tankLead or rawPercentage
-
         local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
+        local tankLead
+        if isTanking then
+            tankLead = UnitThreatPercentageOfLead("player", "target")
+        end
+        local display = tankLead or rawPercentage
+
         if (rawPercentage and (rawPercentage >= 0.8)) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
-            -- self.Threat.text:SetFormattedText("%d%%", display)
-            -- self.Threat.text:SetTextColor(r, g, b)
+            local r, g, b
             if (status and status > 0) then
-                self.Threat:SetVertexColor(GetThreatStatusColor(status))
-            elseif rawPercentage >= 0.9 then
-                self.Threat:SetVertexColor(GetThreatStatusColor(0))
+                r, g, b = GetThreatStatusColor(status)
+            elseif rawPercentage and rawPercentage >= 0.9 then
+                r, g, b = GetThreatStatusColor(0)
             else
-                self.Threat:SetVertexColor(0, 1, 0, 1)
+                r, g, b = 0, 1, 0
             end
+            self.Threat:SetVertexColor(r, g, b)
+
+            self.Threat.text:SetFormattedText("%d%%", display)
+            self.Threat.text:SetTextColor(r, g, b)
 
             self.Threat:Show()
             self.Threat.border:Show()
@@ -343,7 +349,7 @@ local function CreateThreat(parent)
             self.Range.border:Hide()
             self.Threat.isActive = true
         else
-            -- self.Threat.text:SetText("")
+            self.Threat.text:SetText("")
             self.Threat:Hide()
             self.Threat.border:Hide()
             self.Threat.isActive = false
