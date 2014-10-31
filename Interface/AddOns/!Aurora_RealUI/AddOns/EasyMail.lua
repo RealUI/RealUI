@@ -73,11 +73,11 @@ mods["EasyMail"] = function(F, C)
     EasyMail_MailButton:HookScript("OnEnter", F.colourArrow)
     EasyMail_MailButton:HookScript("OnLeave", F.clearArrow)
 
-
+    -- Dropdown pullout
     F.CreateBD(EasyMail_MailDropdownBackdrop)
     for i = 1, 15 do
         local highlight = _G["EasyMail_MailDropdownButton" .. i .. "Highlight"]
-        highlight:SetTexture(r, g, b, .8)
+        highlight:SetTexture(r, g, b, .4)
         highlight:ClearAllPoints()
         highlight:SetPoint("TOPLEFT", -11, 0)
         highlight:SetPoint("BOTTOMRIGHT", 12, 0)

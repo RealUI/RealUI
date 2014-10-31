@@ -77,13 +77,9 @@ function AngleStatusBar:SetValue(bar, per, ignoreSmooth)
     end
 end
 
-function AngleStatusBar:SetBarColor(self, r, g, b, a)
+function AngleStatusBar:SetBarColor(bar, r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
-    end
-    local bar = self
-    if self.info then
-        bar = self.bar
     end
     for i = 1, #bar.row do
         bar.row[i]:SetTexture(r, g, b, a or 1)
@@ -167,6 +163,31 @@ end
 
 -- New Status bars WIP
 
+-- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
+-- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
+local function SetReverseFill(self, val, x, y)
+    --print("SetReverseFill", reverse)
+    if val then
+        bar.direction = (bar.direction == "LEFT") and "RIGHT" or "LEFT"
+        bar:ClearAllPoints()
+        bar:SetPoint(bar.endPoint, bar.parent, bar.endPoint, x, y)
+    else
+        bar.direction = bar.origDirection
+        bar:ClearAllPoints()
+        bar:SetPoint(bar.startPoint, bar.parent, bar.startPoint, bar.x, bar.y)
+    end
+end
+
+function SetStatusBarColor(self, r, g, b, a)
+    if type(r) == "table" then
+        r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    local bar = self.bar
+    for i = 1, #bar.row do
+        bar.row[i]:SetTexture(r, g, b, a or 1)
+    end
+end
+
 -- If SetMinMaxValues is not called, default to min = 0, max = 1.
 local function SetMinMaxValues(self, min, max)
     --print("SetMinMaxValues", min, max)
@@ -185,6 +206,21 @@ local function SetValue(self, value, ignoreSmooth)
     end
 end
 
+-- Setting this to true will make the bars show full when at 0%.
+local function SetReversePercent(self, reverse)
+    --print("SetReversePercent", reverse)
+    self.reverse = reverse
+    SetValue(self, self.value, true)
+end
+
+local function GetOffSets(leftAngle, rightAngle, height)
+    local leftX, rightX = 0, 0
+    -- These conditions keep the textures within the frame.
+    -- Doing this removes the need to make a bunch of offsets elsewhere.
+    leftX = (leftAngle == [[/]]) and height - 1 or 0
+    rightX = (rightAngle == [[\]]) and -(height - 1) or 0
+    return leftX, rightX
+end
 local function CreateAngleBG(self, width, height, parent, info)
     --print("CreateAngleBG", self.unit, info)
     local bg = CreateFrame("Frame", nil, parent)
@@ -195,17 +231,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(bg)
     --]]
-
-    local leftX, rightX = 0, 0
-    -- These conditions keep the textures within the frame.
-    -- Doing this removes the need to make a bunch of offsets elsewhere.
-    leftX = (info.leftAngle == [[/]]) and height - 1 or 0
-    rightX = (info.rightAngle == [[\]]) and -(height - 1) or 0
-
-    if info.noBG then
-        bg = parent
-        return bg, leftX, rightX
-    end
+    local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
 
     --print("CreateBG", leftX, rightX)
     bg.top = bg:CreateTexture(nil, "BACKGROUND")
@@ -247,17 +273,22 @@ local function CreateAngleBG(self, width, height, parent, info)
 end
 oUF:RegisterMetaFunction("CreateAngleBG", CreateAngleBG) -- oUF magic
 
-local function CreateAngleStatusBar(self, width, height, parent, info)
-    print("CreateAngleStatusBar", self.unit, info)
-    local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
+local function CreateAngleBar(self, width, height, parent, info, isStatus)
+    --print("CreateAngleBar", self.unit, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
     info.maxWidth, info.minWidth, info.origDirection = width - 4, height - 2, info.growDirection
     info.startPoint = (info.growDirection == "LEFT") and "TOPRIGHT" or "TOPLEFT"
     info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
 
-    local bar = CreateFrame("Frame", nil, status)
-    bar:SetPoint(info.startPoint, status, -2, -1)
+    local status, bar
+    if not isStatus then
+        status = CreateFrame("Frame", nil, parent)
+        bar = CreateFrame("Frame", nil, status)
+    else
+        bar = CreateFrame("Frame", nil, parent)
+    end
+    bar:SetPoint(info.startPoint, parent, -2, -1)
     bar:SetHeight(info.minWidth)
 
     --[[
@@ -266,6 +297,8 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     test:SetAllPoints(bar)
     --]]
  
+    local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
+
     if info.growDirection == "LEFT" then
         leftX = leftX - 2
     else
@@ -274,7 +307,7 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
 
     bar.row = {}
     for i = 1, info.minWidth do
-        bar.row[i] = status:CreateTexture(nil, "ARTWORK")
+        bar.row[i] = parent:CreateTexture(nil, "ARTWORK")
         bar.row[i]:SetHeight(1)
         bar.row[i]:SetPoint("TOPLEFT", bar, "TOPLEFT", abs(leftX) - (i - 1), 1 - i)
         bar.row[i]:SetPoint("TOPRIGHT", bar, "TOPRIGHT", rightX - (i - 1), 1 - i)
@@ -291,17 +324,42 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
         end
     end)
 
-    status.info = info
+    if isStatus then
+        return bar, info
+    else
+        status.bar = bar
+        status.info = info
+
+        -- StatusBar API
+        status.SetMinMaxValues = SetMinMaxValues
+        status.SetReverseFill = SetReverseFill
+        status.SetReversePercent = SetReversePercent
+        status.SetStatusBarColor = SetStatusBarColor
+        status.SetValue = SetValue
+
+        status.value = 0
+        status:SetValue(0, true)
+        return status
+    end
+end
+oUF:RegisterMetaFunction("CreateAngleBar", CreateAngleBar) -- oUF magic
+
+local function CreateAngleStatusBar(self, width, height, parent, info)
+    local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
+    local bar, info = CreateAngleBar(self, width, height, status, info, true)
+
     status.bar = bar
-    
+    status.info = info
+
     -- StatusBar API
     status.SetMinMaxValues = SetMinMaxValues
-    status.SetReverseFill = AngleStatusBar.SetReverseFill
-    status.SetStatusBarColor = AngleStatusBar.SetBarColor
+    status.SetReverseFill = SetReverseFill
+    status.SetReversePercent = SetReversePercent
+    status.SetStatusBarColor = SetStatusBarColor
     status.SetValue = SetValue
 
-    status.value = 1
-    status:SetValue(1, true)
+    status.value = 0
+    status:SetValue(0, true)
     return status
 end
 oUF:RegisterMetaFunction("CreateAngleStatusBar", CreateAngleStatusBar) -- oUF magic
