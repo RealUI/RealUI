@@ -333,7 +333,7 @@ local function CreateThreat(parent)
             local r, g, b
             if (status and status > 0) then
                 r, g, b = GetThreatStatusColor(status)
-            elseif rawPercentage and rawPercentage >= 0.9 then
+            elseif rawPercentage >= 0.9 then
                 r, g, b = GetThreatStatusColor(0)
             else
                 r, g, b = 0, 1, 0
