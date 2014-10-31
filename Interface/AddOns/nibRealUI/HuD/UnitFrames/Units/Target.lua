@@ -317,20 +317,26 @@ local function CreateThreat(parent)
 
     parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
-        -- local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
+        
 
         -- local tankLead
         -- if ( isTanking ) then
         --     tankLead = UnitThreatPercentageOfLead("player", "target")
         -- end
         -- local display = tankLead or rawPercentage
-        -- if not (UnitIsDeadOrGhost("target")) and (display and (display ~= 0)) then
 
-        local status = UnitThreatSituation(unit)
-        if (status and status > 0) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
+        local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
+        if (rawPercentage and (rawPercentage >= 0.8)) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
             -- self.Threat.text:SetFormattedText("%d%%", display)
             -- self.Threat.text:SetTextColor(r, g, b)
-            self.Threat:SetVertexColor(GetThreatStatusColor(status))
+            if (status and status > 0) then
+                self.Threat:SetVertexColor(GetThreatStatusColor(status))
+            elseif rawPercentage >= 0.9 then
+                self.Threat:SetVertexColor(GetThreatStatusColor(0))
+            else
+                self.Threat:SetVertexColor(0, 1, 0, 1)
+            end
+
             self.Threat:Show()
             self.Threat.border:Show()
             self.Range:Hide()
