@@ -295,15 +295,6 @@ local function CreateThreat(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.tanking
     local pos = positions[UnitFrames.layoutSize].tanking
 
-    -- parent.Threat = parent.Power:CreateTexture(nil, "OVERLAY")
-    -- parent.Threat:SetTexture(nibRealUI.media.icons.Lightning)
-    -- parent.Threat:SetSize(16, 16)
-    -- parent.Threat:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", -10, 0)
-
-    -- parent.Threat.text = parent.Power:CreateFontString(nil, "OVERLAY")
-    -- parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
-    -- parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 0, 0)
-
     parent.Threat = parent.overlay:CreateTexture(nil, "BORDER")
     parent.Threat:SetTexture(texture.bar)
     parent.Threat:SetSize(texture.width, texture.height)
@@ -323,11 +314,6 @@ local function CreateThreat(parent)
     parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
         local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
-        local tankLead
-        if isTanking then
-            tankLead = UnitThreatPercentageOfLead("player", "target")
-        end
-        local display = tankLead or rawPercentage
 
         if (rawPercentage and (rawPercentage >= 0.8)) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
             local r, g, b
@@ -339,9 +325,13 @@ local function CreateThreat(parent)
                 r, g, b = 0, 1, 0
             end
             self.Threat:SetVertexColor(r, g, b)
-
-            self.Threat.text:SetFormattedText("%d%%", display)
             self.Threat.text:SetTextColor(r, g, b)
+
+            local tankLead
+            if isTanking then
+                tankLead = UnitThreatPercentageOfLead("player", "target")
+            end
+            self.Threat.text:SetFormattedText("%d%%", tankLead or rawPercentage)
 
             self.Threat:Show()
             self.Threat.border:Show()
