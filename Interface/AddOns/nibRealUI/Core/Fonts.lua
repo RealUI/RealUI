@@ -399,7 +399,7 @@ function Fonts:UpdateUIFonts()
 
     STANDARD_TEXT_FONT = NORMAL
     UNIT_NAME_FONT     = NORMAL
-    NAMEPLATE_FONT     = NORMAL
+    -- NAMEPLATE_FONT will be changed indirectly through its defined font object.
     if db.changeFCT then
         DAMAGE_TEXT_FONT = NORMAL
     end
@@ -509,10 +509,6 @@ function Fonts:UpdateUIFonts()
     end
 end
 
-function Fonts:PLAYER_LOGIN()
-    self:UpdateUIFonts()
-end
-
 function nibRealUI:Font(isLSM, size)
     local db = nibRealUI.db.profile
     local size = size or "default"
@@ -603,6 +599,6 @@ function Fonts:OnInitialize()
     RealUIFontLarge:SetFont(unpack(nibRealUI.font.pixel2))
     RealUIFontPixel:SetFont(unpack(nibRealUI.font.pixel1))
     RealUIStandardFont10:SetFont(nibRealUI.font.standard, 10 + db.standard.sizeadjust)
-    
-    self:RegisterEvent("PLAYER_LOGIN")
+
+    self:UpdateUIFonts()
 end
