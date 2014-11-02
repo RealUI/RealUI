@@ -1249,14 +1249,14 @@ local function Currency_UpdateTablet()
 					for kn, vn in pairs(CurrencyTabletData[realm][vf]) do
 						if vn[2] == MAX_PLAYER_LEVEL then HasMaxLvl = true end
 						TotalGold = TotalGold + vn[3]
-						MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize))
+						MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
 						for i = 4, (NumCurrencies + 4) do
-							MaxWidth[i] = max(MaxWidth[i], GetTextWidth(vn[i], db.text.tablets.normalsize))
+							MaxWidth[i] = max(MaxWidth[i], GetTextWidth(vn[i], db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
 						end
 					end
 				end
 			end
-			MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(TotalGold), db.text.tablets.normalsize))
+			MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(TotalGold), db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
 		end
 	end
 	MaxWidth[2] = 20 	-- Level
@@ -1317,7 +1317,7 @@ local function Currency_UpdateTablet()
 								line["text"] = vn[i]
 								line["justify"] = "LEFT"
 								line["func"] = function() Currency_TabletClickFunc(realm, vf, currentName) end
-								line["size"] = db.text.tablets.normalsize
+								line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
 								line["customwidth"] = MaxWidth[NumCurrencies + 4]
 							elseif (i == 2) or (i == (NumCurrencies + 3)) then
 								line["text"..i] = vn[i]
@@ -1843,7 +1843,7 @@ local function Friends_UpdateTablet()
 					line["text"] = val[i]
 					line["justify"] = "LEFT"
 					line["func"] = function() Friends_TabletClickFunc(val[6],val[8],val[9]) end
-					line["size"] = db.text.tablets.normalsize
+					line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
 				elseif i == 2 then	-- Level
 					line["text"..i] = val[2]
 					line["justify"..i] = "RIGHT"
@@ -1851,14 +1851,14 @@ local function Friends_UpdateTablet()
 					line["text"..i.."R"] = uLevelColor.r
 					line["text"..i.."G"] = uLevelColor.g
 					line["text"..i.."B"] = uLevelColor.b
-					line["size"..i] = db.text.tablets.normalsize
+					line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
 				else	-- The rest
 					line["text"..i] = val[i]
 					line["justify"..i] = "LEFT"
 					line["text"..i.."R"] = 0.8
 					line["text"..i.."G"] = 0.8
 					line["text"..i.."B"] = 0.8
-					line["size"..i] = db.text.tablets.normalsize
+					line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
 				end
 			end
 			FriendsCat:AddLine(line)
@@ -2110,13 +2110,13 @@ local function Guild_UpdateTablet()
 		GuildSection.headerCat:AddLine("isLine", true, "text", "")
 		
 		-- Reputation
-		GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize, "textR", 0.7, "textG", 0.7, "textB", 0.7)
+		GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, "textR", 0.7, "textG", 0.7, "textB", 0.7)
 		AddBlankTabLine(GuildSection.headerCat, 5)
 		
 		-- GMOTD
 		local gmotd = GetGuildRosterMOTD()
 		if gmotd ~= "" then
-			GuildSection.headerCat:AddLine("text", gmotd, "wrap", true, "size", db.text.tablets.normalsize, "textR", 1, "textG", 1, "textB", 1, "func", function() Guild_GMOTDClickFunc(gmotd) end)
+			GuildSection.headerCat:AddLine("text", gmotd, "wrap", true, "size", db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1, "func", function() Guild_GMOTDClickFunc(gmotd) end)
 			AddBlankTabLine(GuildSection.headerCat, 5)
 		end
 		AddBlankTabLine(GuildSection.headerCat)
@@ -2474,7 +2474,7 @@ local function SpecAddEquipListToCat(self, cat)
 			for i = 1, 4 do
 				if i == 1 then
 					line["text"] = strform("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s", SpecEquipList[k].icon, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
-					line["size"] = db.text.tablets.normalsize
+					line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
 					line["justify"] = "LEFT"
 					line["textR"] = 0.9
 					line["textG"] = 0.9
@@ -2549,7 +2549,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
 			else
 				id, name, description, icon = nil, NONE, nil, defaultSpecTexture
 			end
-			-- line["text"..i] = strform("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize, db.text.tablets.normalsize, 0, 0)
+			-- line["text"..i] = strform("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, 0, 0)
 			line["text"..i] = name
 			line["justify"..i] = "RIGHT"
 			line["text"..i.."R"] = SpecColor[1]
