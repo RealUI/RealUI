@@ -25,4 +25,5 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Include file="Libs\lib-st\lib-st.xml"/>
 	<Include file="Libs\SpecializedLibBars-1.0\lib.xml"/>
 	<Include file="Libs\oUF\oUF.xml"/>
+	<Include file="Libs\LibQTip-1.0\lib.xml" />
 </Ui>
