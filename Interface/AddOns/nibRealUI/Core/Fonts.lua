@@ -574,7 +574,7 @@ function Fonts:OnInitialize()
         profile = {
             changeFCT = true,
             standard = {
-                sizeadjust = 0,
+                sizeadjust = 1,
                 changeYellow = true,
                 yellowColor = {1, 0.55, 0}
             },
@@ -602,7 +602,7 @@ function Fonts:OnInitialize()
     RealUIFontSmall:SetFont(unpack(nibRealUI.font.pixel1))
     RealUIFontLarge:SetFont(unpack(nibRealUI.font.pixel2))
     RealUIFontPixel:SetFont(unpack(nibRealUI.font.pixel1))
-    RealUIStandardFont10:SetFont(nibRealUI.font.standard, 10)
+    RealUIStandardFont10:SetFont(nibRealUI.font.standard, 10 + db.standard.sizeadjust)
     
     self:RegisterEvent("PLAYER_LOGIN")
 end

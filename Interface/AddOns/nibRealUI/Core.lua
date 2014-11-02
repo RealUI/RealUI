@@ -241,7 +241,7 @@ local defaults = {
 		settings = {
 			powerMode = 1,	-- 1 = Normal, 2 = Economy, 3 = Turbo
 			fontStyle = 1,
-			chatFontSize = 12,
+			chatFontSize = 13,
 			chatFontOutline = true,
 			chatFontCustom = {
 				enabled = false,
