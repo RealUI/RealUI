@@ -1,13 +1,12 @@
 ## Interface: 60000
 ## Title: FreebTip
 ## Notes: Custom GameTooltip
-## Version: 2.6.1
-## Author: Freebaser, Modified by Kkthnxbye
+## Version: 2.7.6
+## Author: Freebaser
 ## OptionalDeps: IDCard
 ## SavedVariables: FreebTipDB
 
 tip.lua
 anchor.lua
-Itemicons.lua
-Itemlevel.lua
+tipicons.lua
 FreebTip_Multi.xml

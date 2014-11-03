@@ -11,7 +11,7 @@
 					<AbsDimension x="0" y="80"/>
 				</Offset>
 			</Anchor>
-		</Anchors>   
+		</Anchors>
 		<Frames>
 			<Button name="$parentCloseButton">
 				<Size>

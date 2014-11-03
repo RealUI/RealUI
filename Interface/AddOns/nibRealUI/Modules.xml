@@ -2,11 +2,17 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<!-- Misc -->
+	<Script file="Misc\ArmoryLink.lua"/>
 	<Script file="Misc\BlizzBugs.lua"/>
 	<Script file="Misc\ColorWindowAdv.lua"/>
 	<Script file="Misc\CPUProfiler.lua"/>
 	<Script file="Misc\CurrencyTip.lua"/>
 	<Script file="Misc\DragEmAll.lua"/>
+	<Script file="Misc\Misc.lua"/>
+	<Script file="Misc\GuildFinderSort.lua"/>
+	<Script file="Misc\LFGQueueTimer.lua"/>
+	<Script file="Misc\Screenshots.lua"/>
+	<Script file="Misc\Speedy.lua"/>
 	<Script file="Misc\StopAddonSpam.lua"/>
 
 	<!-- Modules -->

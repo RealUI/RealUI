@@ -1,0 +1,12 @@
+## Interface: 50400
+## Title: Lib: ItemUpgradeInfo-1.0
+## Notes: Database of item upgrade IDs
+## Author: eridius
+## Version: 1.0.6
+## X-Category: Library
+## X-Curse-Packaged-Version: v1.0.6
+## X-Curse-Project-Name: LibItemUpgradeInfo-1.0
+## X-Curse-Project-ID: libitemupgradeinfo-1-0
+## X-Curse-Repository-ID: wow/libitemupgradeinfo-1-0/mainline
+
+LibItemUpgradeInfo-1.0.xml

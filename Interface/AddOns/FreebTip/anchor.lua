@@ -52,9 +52,8 @@ do
 	end
 end
 
-local _anchor = CreateFrame("Frame", ADDON_NAME.."_Anchor2", UIParent)
+local _anchor = CreateFrame("Frame", nil, UIParent)
 setframe(_anchor)
-_anchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 200)
 _anchor.text:SetText(ADDON_NAME)
 
 local _LOCK
@@ -78,9 +77,12 @@ do
 		_DB = FreebTipDB or {}
 		FreebTipDB = _DB
 
+		_anchor:ClearAllPoints()
+
 		if _DB.point then
-			_anchor:ClearAllPoints()
 			_anchor:SetPoint(_DB.point, UIParent, _DB.point, _DB.x, _DB.y)
+		else
+			_anchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 200)
 		end
 
 		hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
@@ -94,6 +96,7 @@ do
 					point = "BOTTOMRIGHT"
 				end
 
+				tooltip:ClearAllPoints()
 				tooltip:SetOwner(parent, "ANCHOR_NONE")
 				if ns.cfg.point then
 					local cfg = ns.cfg

@@ -10,10 +10,8 @@
 AddOns\Bartender4.lua
 AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_PetBattleUI.lua
-AddOns\Clique.lua
 AddOns\DBM.lua
 AddOns\DXE.lua
-AddOns\EasyMail.lua
 AddOns\Grid2.lua
 AddOns\KNP.lua
 AddOns\Masque.lua
@@ -21,6 +19,7 @@ AddOns\Raven.lua
 AddOns\Skada.lua
 AddOns\WeakAuras.lua
 
+FrameXML\CleanBossButton.lua
 FrameXML\GameMenuFrame.lua
 FrameXML\PaperDollFrame.lua
 FrameXML\Timer.lua

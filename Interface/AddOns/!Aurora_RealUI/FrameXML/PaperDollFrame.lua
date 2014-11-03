@@ -4,6 +4,8 @@ local _
 local MODNAME = "PaperDoll"
 local PaperDoll = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0")
 
+local F, C = unpack(Aurora)
+
 local BordersSet = false
 local DURABILITY_ITEMS, NON_DURABILITY_ITEMS, ILVL_ITEMS
 
@@ -231,6 +233,77 @@ end
 function PaperDoll:BorderToggle()
 	self:UpdateItems()
 end
+
+
+------------------------------------
+-- Toggle Helm and Cloak -----------
+------------------------------------
+local hcToggle = CreateFrame('Frame')
+hcToggle.Head = CreateFrame('Button', nil, CharacterHeadSlot)
+hcToggle.Head:SetFrameStrata('HIGH')
+hcToggle.Head:SetSize(16, 32)
+hcToggle.Head:SetPoint('LEFT', CharacterHeadSlot, 'CENTER', 9, 0)
+
+hcToggle.Head:SetScript('OnClick', function() 
+	ShowHelm(not ShowingHelm()) 
+end)
+
+hcToggle.Head:SetScript('OnEnter', function(self) 
+	GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT', 13, -10)
+	GameTooltip:AddLine(SHOW_HELM)
+	GameTooltip:Show()
+end)
+
+hcToggle.Head:SetScript('OnLeave', function() 
+	GameTooltip:Hide()
+end)
+
+hcToggle.Head:SetNormalTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\textureNormal')
+hcToggle.Head:SetHighlightTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\textureHighlight')
+hcToggle.Head:SetPushedTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\texturePushed')
+
+CharacterHeadSlotPopoutButton:SetScript('OnShow', function()
+	hcToggle.Head:ClearAllPoints()
+	hcToggle.Head:SetPoint('RIGHT', CharacterHeadSlot, 'CENTER', -9, 0)
+end)
+
+CharacterHeadSlotPopoutButton:SetScript('OnHide', function()
+	hcToggle.Head:ClearAllPoints()
+	hcToggle.Head:SetPoint('LEFT', CharacterHeadSlot, 'CENTER', 9, 0)
+end)
+
+hcToggle.Cloak = CreateFrame('Button', nil, CharacterBackSlot)
+hcToggle.Cloak:SetFrameStrata('HIGH')
+hcToggle.Cloak:SetSize(16, 32)
+hcToggle.Cloak:SetPoint('LEFT', CharacterBackSlot, 'CENTER', 9, 0)
+
+hcToggle.Cloak:SetScript('OnClick', function() 
+	ShowCloak(not ShowingCloak()) 
+end)
+
+hcToggle.Cloak:SetScript('OnEnter', function(self) 
+	GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT', 13, -10)
+	GameTooltip:AddLine(SHOW_CLOAK)
+	GameTooltip:Show()
+end)
+
+hcToggle.Cloak:SetScript('OnLeave', function() 
+	GameTooltip:Hide()
+end)
+
+hcToggle.Cloak:SetNormalTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\textureNormal')
+hcToggle.Cloak:SetHighlightTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\textureHighlight')
+hcToggle.Cloak:SetPushedTexture('Interface\\AddOns\\nibRealUIExtras\\Media\\texturePushed')
+
+CharacterBackSlotPopoutButton:SetScript('OnShow', function()
+	hcToggle.Cloak:ClearAllPoints()
+	hcToggle.Cloak:SetPoint('RIGHT', CharacterBackSlot, 'CENTER', -9, 0)
+end)
+
+CharacterBackSlotPopoutButton:SetScript('OnHide', function()
+	hcToggle.Cloak:ClearAllPoints()
+	hcToggle.Cloak:SetPoint('LEFT', CharacterBackSlot, 'CENTER', 9, 0)
+end)
 
 --------------------
 -- Initialization --

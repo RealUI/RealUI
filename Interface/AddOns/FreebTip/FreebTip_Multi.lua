@@ -11,6 +11,7 @@ local types = {
 	talent = true,
 	enchant = true,
 	achievement = true,
+	instancelock = true,
 }
 
 function ns:CreateTip(link)
@@ -62,6 +63,8 @@ function SetItemRef(...)
 	--print("link - "..link.. " - text "..text.." - button "..button)
 
 	local handled = strsplit(":", link)
+	--print(handled)
+
 	if((not IsModifiedClick()) and handled and types[handled]) then
 		local tip = ns:CreateTip(link)
 

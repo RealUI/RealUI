@@ -1,0 +1,23 @@
+## Interface: 60000
+## X-Curse-Packaged-Version: Release-r1041
+## X-Curse-Project-Name: LibInspect
+## X-Curse-Project-ID: libinspect
+## X-Curse-Repository-ID: wow/libinspect/mainline
+## X-Curse-Packaged-Version: 0.2.7-alpha
+## X-Curse-Project-Name: LibInspect
+## X-Curse-Project-ID: libinspect
+## X-Curse-Repository-ID: wow/libinspect/mainline
+
+## Title: Lib: Inspect
+## Notes: Libary for cleanly inspecting other players
+## Author: Scotepi
+## X-Website: http://www.wowace.com/addons/libinspect/
+## X-Category: Library
+## X-License: GNU General Public License version 3 (GPLv3)
+## OptionalDeps: LibStub
+
+#@no-lib-strip@
+LibStub\LibStub.lua
+#@end-no-lib-strip@
+
+LibInspect.lua

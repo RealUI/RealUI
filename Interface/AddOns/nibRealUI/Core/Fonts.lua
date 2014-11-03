@@ -570,7 +570,7 @@ function Fonts:OnInitialize()
         profile = {
             changeFCT = true,
             standard = {
-                sizeadjust = 1,
+                sizeadjust = 0,
                 changeYellow = true,
                 yellowColor = {1, 0.55, 0}
             },

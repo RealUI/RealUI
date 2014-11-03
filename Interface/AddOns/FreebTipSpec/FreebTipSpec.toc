@@ -1,0 +1,9 @@
+## Interface: 60000
+## Title: FreebTipSpec
+## Notes: Specialization Info for the GameTooltip
+## Version: 2.7.6
+## Author: Freebaser
+
+libs\LibInspect\LibStub\LibStub.lua
+libs\LibInspect\LibInspect.lua
+spec.lua
