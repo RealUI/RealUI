@@ -4,8 +4,6 @@ local _
 local MODNAME = "PaperDoll"
 local PaperDoll = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0")
 
-local F, C = unpack(Aurora)
-
 local BordersSet = false
 local DURABILITY_ITEMS, NON_DURABILITY_ITEMS, ILVL_ITEMS
 

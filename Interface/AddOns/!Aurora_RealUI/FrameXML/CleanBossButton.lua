@@ -1,5 +1,3 @@
-local F, C = unpack(Aurora)
-
 -------------------------------
 -- Code Taken from Tukui v16 --
 -------------------------------
