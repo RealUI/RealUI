@@ -1,10 +1,9 @@
 local _, mods = ...
 
 tinsert(mods["Aurora"], function()
---F.AddPlugin(function()
-	local F, C = unpack(Aurora)
-	--print("MiscSkins")
-	--Travel Pass
+    local F, C = unpack(Aurora)
+    --print("MiscSkins")
+    --Travel Pass
     FriendsFrame:HookScript("OnShow", function()
         if not FriendsFrame.skinned then
             for i = 1, FRIENDS_TO_DISPLAY do
@@ -34,29 +33,29 @@ tinsert(mods["Aurora"], function()
         end
     end)
 
-	local function UpdateScroll()
-		for i = 1, FRIENDS_TO_DISPLAY do
-			local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
-			local en = bu.travelPassButton:IsEnabled()
-			--print("UpdateScroll", i, en)
+    local function UpdateScroll()
+        for i = 1, FRIENDS_TO_DISPLAY do
+            local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
+            local en = bu.travelPassButton:IsEnabled()
+            --print("UpdateScroll", i, en)
 
-			if en then
-				bu.inv:SetAlpha(0.7)
-			else
-				bu.inv:SetAlpha(0.3)
-			end
+            if en then
+                bu.inv:SetAlpha(0.7)
+            else
+                bu.inv:SetAlpha(0.3)
+            end
 
-			if bu.gameIcon:IsShown() then
-				bu.bg:Show()
-			else
-				bu.bg:Hide()
-			end
-		end
-	end
-	hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
-	hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
+            if bu.gameIcon:IsShown() then
+                bu.bg:Show()
+            else
+                bu.bg:Hide()
+            end
+        end
+    end
+    hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
+    hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
-	-- Splash Frame
+    -- Splash Frame
     F.CreateBD(SplashFrame, nil, true)
     hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
         --print("SplashFrame", tag, showStartButton)
@@ -71,36 +70,15 @@ tinsert(mods["Aurora"], function()
         SplashFrame.BottomTexture:SetTexCoord(right, top, left, top, right, bottom, left, bottom)
 
         SplashFrame.Label:SetTextColor(1, 1, 1)
+
+        SplashFrame.BottomLine:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(SplashFrame.BottomLine, "splash-botleft")
     end)
+
+    -- Objective Tracker
+    F.ReskinExpandOrCollapse(ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
+
+    -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
+    -- Due to this, we need to call them directly until we can remove nibRealUI as a dependancy.
+    mods["Clique"](F, C)
 end)
-
---[[function MiscSkins:Skin()
-	F, C = unpack(Aurora)
-
-	-- Clique
-	if CliqueSpellTab then
-		local tab = CliqueSpellTab
-		F.ReskinTab(tab)
-
-		tab:SetCheckedTexture(C.media.checked)
-
-		local bg = CreateFrame("Frame", nil, tab)
-		bg:SetPoint("TOPLEFT", -1, 1)
-		bg:SetPoint("BOTTOMRIGHT", 1, -1)
-		bg:SetFrameLevel(tab:GetFrameLevel()-1)
-		F.CreateBD(bg)
-
-		select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
-	end
-
-
-	-- Time Manager unnecessary buttons
-	if TimeManagerMilitaryTimeCheck then TimeManagerMilitaryTimeCheck:Hide() end
-	if TimeManagerLocalTimeCheck then TimeManagerLocalTimeCheck:Hide() end
-	if TimeManagerFrame then
-		TimeManagerFrame:SetHeight(TimeManagerFrame:GetHeight() - 60)
-		TimeManagerAlarmEnabledButton:ClearAllPoints()
-		TimeManagerAlarmEnabledButton:SetPoint("TOPLEFT", TimeManagerAlarmMessageEditBox, "BOTTOMLEFT", -6, -4)
-	end
-end
-]]
