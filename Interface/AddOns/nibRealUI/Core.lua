@@ -381,11 +381,21 @@ function nibRealUI:StyleSetChatFont()
 		local cf = _G["ChatFrame" .. i]
 		local cfEditBox = _G["ChatFrame" .. i .. "EditBox"]
 
+		local shadowOffset = db.settings.chatFontOutline and 0 or 1
+
 		cf:SetFont(						cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cf:SetShadowOffset(shadowOffset, -shadowOffset)
 		cfEditBox:SetFont(				cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox:SetShadowOffset(shadowOffset, -shadowOffset)
 		cfEditBox.header:SetFont(		cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox.header:SetShadowOffset(shadowOffset, -shadowOffset)
 		cfEditBox.headerSuffix:SetFont(	cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+
+		for k = 6, 11 do
+			select(k, cfEditBox:GetRegions()):SetTexture(nil)
+		end	
 	end
+
 end
 
 -- Style - UI Font

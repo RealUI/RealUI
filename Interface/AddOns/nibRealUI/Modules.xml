@@ -5,6 +5,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Script file="Misc\ArmoryLink.lua"/>
 	<Script file="Misc\BlizzBugs.lua"/>
 	<Script file="Misc\ColorWindowAdv.lua"/>
+	<Script file="Misc\CopyChat.lua"/>
 	<Script file="Misc\CPUProfiler.lua"/>
 	<Script file="Misc\CurrencyTip.lua"/>
 	<Script file="Misc\DragEmAll.lua"/>

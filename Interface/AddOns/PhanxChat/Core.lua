@@ -314,7 +314,6 @@ end
 
 for i = 1, NUM_CHAT_WINDOWS do
 	_G["ChatFrame" .. i]:SetClampRectInsets(0, 0, 0, 0)
-	_G["ChatFrame" .. i]:SetShadowOffset(0, 0)
 end
 
 FCF_ValidateChatFramePosition = noop

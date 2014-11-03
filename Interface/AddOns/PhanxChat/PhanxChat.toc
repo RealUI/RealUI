@@ -50,7 +50,6 @@ Locales\Locale-zhTW.lua
 Core.lua
 Options.lua
 
-Modules\CopyChat.lua
 Modules\EnableArrows.lua
 Modules\EnableResizeEdges.lua
 Modules\EnableSticky.lua

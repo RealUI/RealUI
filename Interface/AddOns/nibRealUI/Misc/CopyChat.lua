@@ -1,62 +1,51 @@
+local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+
+local MODNAME = "CopyChat"
+local CopyChat = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+
 local select = select
 local tostring = tostring
 local concat = table.concat
 
-local F, C = unpack(Aurora)
+local copyFrame
 
-local alpha
-local RealUIStripeOpacity = 0.5
+function CopyChat:CreateFrames()
+	copyFrame = CreateFrame('Frame', nil, UIParent)
+	copyFrame:SetHeight(220)
+	copyFrame:SetBackdropColor(0, 0, 0, 1)
+	copyFrame:SetPoint('BOTTOMLEFT', ChatFrame1EditBox, 'TOPLEFT', 3, 10)
+	copyFrame:SetPoint('BOTTOMRIGHT', ChatFrame1EditBox, 'TOPRIGHT', -3, 10)
+	copyFrame:SetFrameStrata('DIALOG')
+	nibRealUI:CreateBD(copyFrame, nil, true, true)
 
--- First, we create the copy frame
+	copyFrame:Hide()
 
-local f = CreateFrame('Frame', nil, UIParent)
-f:SetHeight(220)
-f:SetBackdropColor(0, 0, 0, 1)
-f:SetPoint('BOTTOMLEFT', ChatFrame1EditBox, 'TOPLEFT', 3, 10)
-f:SetPoint('BOTTOMRIGHT', ChatFrame1EditBox, 'TOPRIGHT', -3, 10)
-f:SetFrameStrata('DIALOG')
-F.CreateBD(f)
+	copyFrame.t = copyFrame:CreateFontString(nil, 'OVERLAY')
+	copyFrame.t:SetFont('Fonts\\ARIALN.ttf', 18)
+	copyFrame.t:SetPoint('TOPLEFT', copyFrame, 8, -8)
+	copyFrame.t:SetTextColor(1, 1, 0)
+	copyFrame.t:SetShadowOffset(1, -1)
+	copyFrame.t:SetJustifyH('LEFT')
 
-f:Hide()
+	copyFrame.b = CreateFrame('EditBox', nil, copyFrame)
+	copyFrame.b:SetMultiLine(true)
+	copyFrame.b:SetMaxLetters(20000)
+	copyFrame.b:SetSize(450, 270)
+	copyFrame.b:SetScript('OnEscapePressed', function()
+		copyFrame:Hide() 
+	end)
 
--- xRUI
-f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+	copyFrame.s = CreateFrame('ScrollFrame', '$parentScrollBar', copyFrame, 'UIPanelScrollFrameTemplate')
+	copyFrame.s:SetPoint('TOPLEFT', copyFrame, 'TOPLEFT', 8, -30)
+	copyFrame.s:SetPoint('BOTTOMRIGHT', copyFrame, 'BOTTOMRIGHT', -30, 8)
+	copyFrame.s:SetScrollChild(copyFrame.b)
 
--- Stripes xRUI
-if not f.stripeTex then
-	f.stripeTex = f:CreateTexture(nil, "BACKGROUND", nil, 1)
-	f.stripeTex:SetAllPoints()
-	f.stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-	f.stripeTex:SetHorizTile(true)
-	f.stripeTex:SetVertTile(true)
-	f.stripeTex:SetBlendMode("ADD")
-	f.stripeTex:SetAlpha(RealUI.db.profile.settings.stripeOpacity)
-	tinsert(REALUI_STRIPE_TEXTURES, f.stripeTex)
+	copyFrame.c = CreateFrame('Button', nil, copyFrame, 'UIPanelCloseButton')
+	copyFrame.c:SetPoint('TOPRIGHT', copyFrame, 'TOPRIGHT', 0, -1)
+	if Aurora then
+        Aurora[1].ReskinClose(copyFrame.c)
+    end
 end
-
-f.t = f:CreateFontString(nil, 'OVERLAY')
-f.t:SetFont('Fonts\\ARIALN.ttf', 18)
-f.t:SetPoint('TOPLEFT', f, 8, -8)
-f.t:SetTextColor(1, 1, 0)
-f.t:SetShadowOffset(1, -1)
-f.t:SetJustifyH('LEFT')
-
-f.b = CreateFrame('EditBox', nil, f)
-f.b:SetMultiLine(true)
-f.b:SetMaxLetters(20000)
-f.b:SetSize(450, 270)
-f.b:SetScript('OnEscapePressed', function()
-	f:Hide() 
-end)
-
-f.s = CreateFrame('ScrollFrame', '$parentScrollBar', f, 'UIPanelScrollFrameTemplate')
-f.s:SetPoint('TOPLEFT', f, 'TOPLEFT', 8, -30)
-f.s:SetPoint('BOTTOMRIGHT', f, 'BOTTOMRIGHT', -30, 8)
-f.s:SetScrollChild(f.b)
-
-f.c = CreateFrame('Button', nil, f, 'UIPanelCloseButton')
-f.c:SetPoint('TOPRIGHT', f, 'TOPRIGHT', 0, -1)
-F.ReskinClose(f.c)
 
 local lines = {}
 local function GetChatLines(...)
@@ -81,14 +70,14 @@ local function copyChat(self)
 	FCF_SetChatWindowFontSize(self, chat, fontSize)
 	
 	if (lineCount > 0) then
-		ToggleFrame(f)
-		f.t:SetText(chat:GetName())
+		ToggleFrame(copyFrame)
+		copyFrame.t:SetText(chat:GetName())
 		
 		local f1, f2, f3 = ChatFrame1:GetFont()
-		f.b:SetFont(f1, f2, f3)
+		copyFrame.b:SetFont(f1, f2, f3)
 		
 		local text = concat(lines, '\n', 1, lineCount)
-		f.b:SetText(text)
+		copyFrame.b:SetText(text)
 	end
 end
 
@@ -131,5 +120,14 @@ local function EnableCopyButton()
 		end
 	end
 end
-hooksecurefunc('FCF_OpenTemporaryWindow', EnableCopyButton)
-EnableCopyButton()
+
+function CopyChat:OnInitialize()
+
+end
+
+function CopyChat:OnEnable()
+	self:CreateFrames()
+	
+	hooksecurefunc('FCF_OpenTemporaryWindow', EnableCopyButton)
+	EnableCopyButton()
+end
