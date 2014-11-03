@@ -1,7 +1,7 @@
 local F, C = unpack(Aurora)
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
-if IsAddOnLoaded("BigWigs") then return end
+if IsAddOnLoaded("DBM-Core") or IsAddOnLoaded("BigWigs") then return end
 
 ----------------------------------------------------------------------------------------
 --	Queue timer on LFGDungeonReadyDialog
@@ -9,12 +9,13 @@ if IsAddOnLoaded("BigWigs") then return end
 local frame = CreateFrame("Frame", nil, LFGDungeonReadyDialog)
 
 frame:SetPoint("BOTTOM", LFGDungeonReadyDialog, "BOTTOM", 0, 8)
-F.CreateBD(frame, "Overlay") -- Not sure.
-frame:SetSize(240, 10)
+F.CreateBD(frame)
+frame:SetSize(244, 12)
 
 frame.bar = CreateFrame("StatusBar", nil, frame)
 frame.bar:SetStatusBarTexture(nibRealUI.media.textures.plain)
-frame.bar:SetAllPoints()
+frame.bar:SetPoint("TOPLEFT", 1, -1)
+frame.bar:SetPoint("BOTTOMLEFT", -1, 1)
 frame.bar:SetFrameLevel(LFGDungeonReadyDialog:GetFrameLevel() + 1)
 frame.bar:SetStatusBarColor(1, 0.7, 0)
 
