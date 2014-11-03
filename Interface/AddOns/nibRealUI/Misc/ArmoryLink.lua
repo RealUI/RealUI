@@ -1,6 +1,4 @@
 local F, C = unpack(Aurora)
-local name, ns = ...
-local cfg = ns.cfg
 
 L_POPUP_ARMORY = "Armory"
 

@@ -1,10 +1,7 @@
 local E, L, C = unpack(select(2, ...))
-local name, ns = ...
-local cfg = ns.cfg
 
 ----------------------------------------------------------------------------------------
 --	Take screenshots of Achievements(Based on Achievement Screenshotter by Blamdarot)
-if not cfg.Screenshots then return end
 ----------------------------------------------------------------------------------------
 local function TakeScreen(delay, func, ...)
 	local waitTable = {}
