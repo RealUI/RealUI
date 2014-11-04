@@ -1,5 +1,6 @@
 local _, mods = ...
 mods["Aurora"] = {}
+mods["PLAYER_LOGIN"] = {}
 
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
@@ -61,8 +62,15 @@ AURORA_CUSTOM_STYLE = style
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
+f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(self, event, addon)
-    if addon == "Aurora" then
+    if event == "PLAYER_LOGIN" then
+        -- some skins need to be deferred till after all other addons.
+        for _, func in next, mods[event] do
+            func(F, C)
+        end
+        f:UnregisterEvent("PLAYER_LOGIN")
+    elseif event == "ADDON_LOADED" and addon == "Aurora" then
         F, C = unpack(Aurora)
 
         F.ReskinAtlas = function(f, atlas, is8Point)

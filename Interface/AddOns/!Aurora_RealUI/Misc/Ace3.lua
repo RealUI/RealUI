@@ -1,85 +1,81 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local F, C
+local _, mods = ...
 
-local _
-local MODNAME = "SkinAce3"
-local SkinAce3 = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
-
-local HiddenFrame = CreateFrame("Frame", nil, UIParent)
-HiddenFrame:Hide()
-
-local function Kill(object)
-    if object.UnregisterAllEvents then
-        object:UnregisterAllEvents()
-        object:SetParent(HiddenFrame)
-    else
-        object.Show = function() end
-    end
-    object:Hide()
-end
-
-local function StripTextures(object, kill)
-    for i=1, object:GetNumRegions() do
-        local region = select(i, object:GetRegions())
-        if region:GetObjectType() == "Texture" then
-            if kill then
-                region:Kill()
-            else
-                region:SetTexture(nil)
-            end
-        end
-    end
-end
-
-local function skinLSM30(frame)
-    frame.DLeft:SetAlpha(0)
-    frame.DMiddle:SetAlpha(0)
-    frame.DRight:SetAlpha(0)
-
-    local bg = CreateFrame("Frame", nil, frame)
-    bg:SetPoint("TOPLEFT", 0, -18)
-    bg:SetPoint("BOTTOMRIGHT", 0, 6)
-    bg:SetFrameLevel(frame:GetFrameLevel()-1)
-    F.CreateBD(bg, 0)
-    F.CreateGradient(bg)
-    frame.bg = bg
-
-    frame.dropButton:SetParent(frame.bg)
-    frame.dropButton:SetSize(20, 20)
-    frame.dropButton:ClearAllPoints()
-    frame.dropButton:SetPoint("BOTTOMRIGHT", frame.bg, 0, 0)
-
-    F.Reskin(frame.dropButton, true)
-
-    frame.dropButton:SetDisabledTexture(C.media.backdrop)
-    local dis = frame.dropButton:GetDisabledTexture()
-    dis:SetVertexColor(0, 0, 0, .4)
-    dis:SetDrawLayer("OVERLAY")
-    dis:SetAllPoints()
-
-    local tex = frame.dropButton:CreateTexture(nil, "ARTWORK")
-    tex:SetTexture(C.media.arrowDown)
-    tex:SetSize(8, 8)
-    tex:SetPoint("CENTER")
-    tex:SetVertexColor(1, 1, 1)
-    frame.dropButton.tex = tex
-
-    frame.dropButton:HookScript("OnEnter", F.colourArrow)
-    frame.dropButton:HookScript("OnLeave", F.clearArrow)
-
-    frame.text:ClearAllPoints()
-    frame.text:SetPoint("LEFT", frame.bg, 0, 0)
-    frame.text:SetPoint("RIGHT", frame.bg, -25, 0)
-end
-
-function SkinAce3:Skin()
+tinsert(mods["PLAYER_LOGIN"], function(F, C)
+    print("AceGUI")
     local AceGUI = LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
-    F, C = unpack(Aurora)
+    print("AceGUI-3.0")
+
+    local HiddenFrame = CreateFrame("Frame", nil, UIParent)
+    HiddenFrame:Hide()
 
     local _, class = UnitClass("player")
     local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
     local alpha = 0.25
+
+    local function Kill(object)
+        if object.UnregisterAllEvents then
+            object:UnregisterAllEvents()
+            object:SetParent(HiddenFrame)
+        else
+            object.Show = function() end
+        end
+        object:Hide()
+    end
+
+    local function StripTextures(object, kill)
+        for i=1, object:GetNumRegions() do
+            local region = select(i, object:GetRegions())
+            if region:GetObjectType() == "Texture" then
+                if kill then
+                    region:Kill()
+                else
+                    region:SetTexture(nil)
+                end
+            end
+        end
+    end
+
+    local function skinLSM30(frame)
+        frame.DLeft:SetAlpha(0)
+        frame.DMiddle:SetAlpha(0)
+        frame.DRight:SetAlpha(0)
+
+        local bg = CreateFrame("Frame", nil, frame)
+        bg:SetPoint("TOPLEFT", 0, -18)
+        bg:SetPoint("BOTTOMRIGHT", 0, 6)
+        bg:SetFrameLevel(frame:GetFrameLevel()-1)
+        F.CreateBD(bg, 0)
+        F.CreateGradient(bg)
+        frame.bg = bg
+
+        frame.dropButton:SetParent(frame.bg)
+        frame.dropButton:SetSize(20, 20)
+        frame.dropButton:ClearAllPoints()
+        frame.dropButton:SetPoint("BOTTOMRIGHT", frame.bg, 0, 0)
+
+        F.Reskin(frame.dropButton, true)
+
+        frame.dropButton:SetDisabledTexture(C.media.backdrop)
+        local dis = frame.dropButton:GetDisabledTexture()
+        dis:SetVertexColor(0, 0, 0, .4)
+        dis:SetDrawLayer("OVERLAY")
+        dis:SetAllPoints()
+
+        local tex = frame.dropButton:CreateTexture(nil, "ARTWORK")
+        tex:SetTexture(C.media.arrowDown)
+        tex:SetSize(8, 8)
+        tex:SetPoint("CENTER")
+        tex:SetVertexColor(1, 1, 1)
+        frame.dropButton.tex = tex
+
+        frame.dropButton:HookScript("OnEnter", F.colourArrow)
+        frame.dropButton:HookScript("OnLeave", F.clearArrow)
+
+        frame.text:ClearAllPoints()
+        frame.text:SetPoint("LEFT", frame.bg, 0, 0)
+        frame.text:SetPoint("RIGHT", frame.bg, -25, 0)
+    end
 
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
     AceGUI.RegisterAsWidget = function(self, widget)
@@ -106,17 +102,17 @@ function SkinAce3:Skin()
                     if type == "radio" then
                         size = 18
                         checkbg:SetTexture("")
-                        check:SetTexture(nibRealUI.media.textures.plain)
+                        check:SetTexture(C.media.backdrop)
                         check:SetBlendMode("ADD")
                         check:SetAllPoints(self.bg)
-                        highlight:SetTexture(nibRealUI.media.textures.plain)
+                        highlight:SetTexture(C.media.backdrop)
                     else
                         size = 24
                         checkbg:SetTexture("")
                         check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
                         check:SetBlendMode("BLEND")
                         check:SetAllPoints(checkbg)
-                        highlight:SetTexture(nibRealUI.media.textures.plain)
+                        highlight:SetTexture(C.media.backdrop)
                     end
                     checkbg:SetHeight(size)
                     checkbg:SetWidth(size)
@@ -425,19 +421,4 @@ function SkinAce3:Skin()
         end
         return oldRegisterAsContainer(self, widget)
     end
-end
-----------
-function SkinAce3:PLAYER_LOGIN()
-    if Aurora then
-        self:Skin()
-    end
-end
-
-function SkinAce3:OnInitialize()
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterSkin(MODNAME, "Ace3")
-end
-
-function SkinAce3:OnEnable()
-    self:RegisterEvent("PLAYER_LOGIN")
-end
+end)

@@ -1,7 +1,6 @@
 local _, mods = ...
 
-tinsert(mods["Aurora"], function()
-    local F, C = unpack(Aurora)
+tinsert(mods["Aurora"], function(F, C)
     --print("MiscSkins")
     --Travel Pass
     FriendsFrame:HookScript("OnShow", function()
@@ -78,7 +77,17 @@ tinsert(mods["Aurora"], function()
     -- Objective Tracker
     F.ReskinExpandOrCollapse(ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
 
+    -- Extra Action Button - Tukui v16
+    local Button = ExtraActionButton1
+    local Texture = Button.style
+    local RemoveTexture = function(self, texture)
+        if texture and (string.sub(texture, 1, 9) == "Interface" or string.sub(texture, 1, 9) == "INTERFACE") then
+            self:SetTexture("")
+        end
+    end
+    hooksecurefunc(Texture, "SetTexture", RemoveTexture)
+
     -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
-    -- Due to this, we need to call them directly until we can remove nibRealUI as a dependancy.
+    -- Thus, we need to call them directly until we can remove nibRealUI as a dependancy.
     mods["Clique"](F, C)
 end)
