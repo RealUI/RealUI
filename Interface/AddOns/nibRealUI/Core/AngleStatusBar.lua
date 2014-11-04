@@ -162,21 +162,34 @@ end
 
 
 -- New Status bars WIP
+
+--[[ Internal functions ]]--
+
+local function GetOffSets(leftAngle, rightAngle, height)
+    local leftX, rightX = 0, 0
+    -- These conditions keep the textures within the frame.
+    -- Doing this removes the need to make a bunch of offsets elsewhere.
+    leftX = (leftAngle == [[/]]) and height - 1 or 0
+    rightX = (rightAngle == [[\]]) and -(height - 1) or 0
+    return leftX, rightX
+end
+
+--[[ API Functions ]]--
 -- This should be converted to AngleStatusBar once everything is finalized.
 local ASB = {}
 
 -- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
 -- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
-function ASB:SetReverseFill(val, x, y)
+function ASB:SetReverseFill(val)
     --print("SetReverseFill", reverse)
     if val then
-        bar.direction = (bar.direction == "LEFT") and "RIGHT" or "LEFT"
-        bar:ClearAllPoints()
-        bar:SetPoint(bar.endPoint, bar.parent, bar.endPoint, x, y)
+        self.growDirection = (self.growDirection == "LEFT") and "RIGHT" or "LEFT"
+        self.bar:ClearAllPoints()
+        self.bar:SetPoint(self.endPoint, self:GetParent(), self.endPoint, -(self.info.x), -1)
     else
-        bar.direction = bar.origDirection
-        bar:ClearAllPoints()
-        bar:SetPoint(bar.startPoint, bar.parent, bar.startPoint, bar.x, bar.y)
+        self.growDirection = self.origDirection
+        self.bar:ClearAllPoints()
+        self.bar:SetPoint(self.startPoint, self:GetParent(), self.startPoint, self.info.x, -1)
     end
 end
 
@@ -215,14 +228,8 @@ function ASB:SetReversePercent(reverse)
     self:SetValue(self.value, true)
 end
 
-local function GetOffSets(leftAngle, rightAngle, height)
-    local leftX, rightX = 0, 0
-    -- These conditions keep the textures within the frame.
-    -- Doing this removes the need to make a bunch of offsets elsewhere.
-    leftX = (leftAngle == [[/]]) and height - 1 or 0
-    rightX = (rightAngle == [[\]]) and -(height - 1) or 0
-    return leftX, rightX
-end
+--[[ oUF Methods ]]--
+
 local function CreateAngleBG(self, width, height, parent, info)
     --print("CreateAngleBG", self.unit, info)
     local bg = CreateFrame("Frame", nil, parent)
@@ -290,7 +297,8 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     else
         bar = CreateFrame("Frame", nil, parent)
     end
-    bar:SetPoint(info.startPoint, parent, -2, -1)
+    info.x = (info.startPoint == "TOPRIGHT") and -2 or 2
+    bar:SetPoint(info.startPoint, parent, info.x, -1)
     bar:SetHeight(info.minWidth)
 
     --[[
@@ -331,7 +339,6 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     else
         local mt = getmetatable(status).__index
         for key, func in next, ASB do
-            print("Meta setup", mt, key, func)
             if not mt[key] then
                 mt[key] = func
             end
@@ -352,7 +359,6 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
 
     local mt = getmetatable(status).__index
     for key, func in next, ASB do
-        print("Meta setup", mt, key, func)
         if not mt[key] then
             mt[key] = func
         end

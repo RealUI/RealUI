@@ -235,20 +235,43 @@ local function updateSteps(unit, type, percent, frame)
         end
     end
     for i = 1, 2 do
-        --print(percent, unit, type, frame:GetParent().unit)
-        if frame.bar.reverse then
-            --print("step reverse")
-            if percent > stepPoints[i] and isLargeFrame then
-                frame.steps[i]:SetTexture(type == "power" and texture.warn or texture.step)
+        if frame.step then
+            --print(percent, unit, type, frame:GetParent().unit)
+            if frame.bar.reverse then
+                --print("step reverse")
+                if percent > stepPoints[i] and isLargeFrame then
+                    frame.step[i]:SetAlpha(type == "power" and 0 or 1)
+                    frame.warn[i]:SetAlpha(type == "power" and 1 or 0)
+                else
+                    frame.step[i]:SetAlpha(type == "power" and 1 or 0)
+                    frame.warn[i]:SetAlpha(type == "power" and 0 or 1)
+                end
             else
-                frame.steps[i]:SetTexture(type == "power" and texture.step or texture.warn)
+                --print("step normal")
+                if percent < stepPoints[i] and isLargeFrame then
+                    frame.step[i]:SetAlpha(0)
+                    frame.warn[i]:SetAlpha(1)
+                else
+                    frame.step[i]:SetAlpha(1)
+                    frame.warn[i]:SetAlpha(0)
+                end
             end
         else
-            --print("step normal")
-            if percent < stepPoints[i] and isLargeFrame then
-                frame.steps[i]:SetTexture(texture.warn)
+            --print(percent, unit, type, frame:GetParent().unit)
+            if frame.bar.reverse then
+                --print("step reverse")
+                if percent > stepPoints[i] and isLargeFrame then
+                    frame.steps[i]:SetTexture(type == "power" and texture.warn or texture.step)
+                else
+                    frame.steps[i]:SetTexture(type == "power" and texture.step or texture.warn)
+                end
             else
-                frame.steps[i]:SetTexture(texture.step)
+                --print("step normal")
+                if percent < stepPoints[i] and isLargeFrame then
+                    frame.steps[i]:SetTexture(texture.warn)
+                else
+                    frame.steps[i]:SetTexture(texture.step)
+                end
             end
         end
     end

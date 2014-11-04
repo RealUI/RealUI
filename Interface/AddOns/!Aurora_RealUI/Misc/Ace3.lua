@@ -1,10 +1,10 @@
 local _, mods = ...
 
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    print("AceGUI")
+    --print("AceGUI")
     local AceGUI = LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
-    print("AceGUI-3.0")
+    --print("AceGUI-3.0")
 
     local HiddenFrame = CreateFrame("Frame", nil, UIParent)
     HiddenFrame:Hide()

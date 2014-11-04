@@ -14,9 +14,6 @@ local info = {
             rightAngle = [[/]],
             growDirection = "LEFT",
             smooth = true,
-            x = -2,
-            widthOfs = 13,
-            coords = {0.1328125, 1, 0.1875, 1},
         },
         power = {
             x = -7,
@@ -34,9 +31,6 @@ local info = {
             rightAngle = [[/]],
             growDirection = "LEFT",
             smooth = true,
-            x = -2,
-            widthOfs = 15,
-            coords = {0.494140625, 1, 0.0625, 1},
         },
         power = {
             x = -9,
@@ -52,13 +46,13 @@ local info = {
 
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local pos = info[UnitFrames.layoutSize].health
-    parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, pos)
+    local info = info[UnitFrames.layoutSize].health
+    parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, info)
     parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
     if ndb.settings.reverseUnitFrameBars then 
-        AngleStatusBar:SetReverseFill(parent.Health, true)
+        parent.Health:SetReversePercent(true)
     end
     UnitFrames:SetHealthColor(parent)
 
@@ -68,16 +62,20 @@ local function CreateHealthBar(parent)
     parent:Tag(parent.Health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    parent.Health.steps = {}
+    local stepHeight = ceil(parent.Health.info.minWidth / 2)
+    parent.Health.step = {}
+    parent.Health.warn = {}
     for i = 1, 2 do
-        parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
-        parent.Health.steps[i]:SetTexture(texture.step)
-        parent.Health.steps[i]:SetSize(16, 16)
+        parent.Health.step[i] = parent:CreateAngleBG(stepHeight + 2, stepHeight, parent.Health, info)
+        parent.Health.warn[i] = parent:CreateAngleBG(texture.height + 2, texture.height, parent.Health, info)
+        local xOfs = floor(stepPoints[i] * parent.Health.info.maxWidth) + parent.Health.info.minWidth
         if parent.Health.bar.reverse then
-            parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+            parent.Health.step[i]:SetPoint("TOPRIGHT", parent.Health, -xOfs, 0)
+            parent.Health.warn[i]:SetPoint("TOPRIGHT", parent.Health, -xOfs, 0)
         else
-        parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
-    end
+            parent.Health.step[i]:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", xOfs, 0)
+            parent.Health.warn[i]:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", xOfs, 0)
+        end
     end
 
     parent.Health.frequentUpdates = true
@@ -87,9 +85,6 @@ end
 local function CreatePredictBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = info[UnitFrames.layoutSize].health
-    --local absorbBar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "LEFT", "LEFT", "LEFT", true)
-    --AngleStatusBar:SetBarColor(absorbBar, 1, 1, 1, db.overlay.bar.opacity.absorb)
-    pos.noBG = true
     local absorbBar = parent:CreateAngleBar(texture.width, texture.height, parent.Health, pos)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
     absorbBar:SetReversePercent(true)
