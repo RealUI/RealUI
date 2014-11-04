@@ -390,6 +390,7 @@ function nibRealUI:StyleSetChatFont()
 		cfEditBox.header:SetFont(		cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
 		cfEditBox.header:SetShadowOffset(shadowOffset, -shadowOffset)
 		cfEditBox.headerSuffix:SetFont(	cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
+		cfEditBox.headerSuffix:SetShadowOffset(shadowOffset, -shadowOffset)
 
 		for k = 6, 11 do
 			select(k, cfEditBox:GetRegions()):SetTexture(nil)
