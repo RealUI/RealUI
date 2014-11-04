@@ -162,10 +162,12 @@ end
 
 
 -- New Status bars WIP
+-- This should be converted to AngleStatusBar once everything is finalized.
+local ASB = {}
 
 -- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
 -- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
-local function SetReverseFill(self, val, x, y)
+function ASB:SetReverseFill(val, x, y)
     --print("SetReverseFill", reverse)
     if val then
         bar.direction = (bar.direction == "LEFT") and "RIGHT" or "LEFT"
@@ -178,7 +180,7 @@ local function SetReverseFill(self, val, x, y)
     end
 end
 
-function SetStatusBarColor(self, r, g, b, a)
+function ASB:SetStatusBarColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
@@ -189,16 +191,16 @@ function SetStatusBarColor(self, r, g, b, a)
 end
 
 -- If SetMinMaxValues is not called, default to min = 0, max = 1.
-local function SetMinMaxValues(self, min, max)
+function ASB:SetMinMaxValues(min, max)
     --print("SetMinMaxValues", min, max)
     self.min = min
     self.max = max
 end
 
 -- This should except a percentage or discrete value.
-local function SetValue(self, value, ignoreSmooth)
+function ASB:SetValue(value, ignoreSmooth)
     --print("SetValue", value, ignoreSmooth)
-    if not self.min then SetMinMaxValues(self, 0, 1) end
+    if not self.min then self:SetMinMaxValues(0, 1) end
     if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(self, value)
     else
@@ -207,10 +209,10 @@ local function SetValue(self, value, ignoreSmooth)
 end
 
 -- Setting this to true will make the bars show full when at 0%.
-local function SetReversePercent(self, reverse)
+function ASB:SetReversePercent(reverse)
     --print("SetReversePercent", reverse)
     self.reverse = reverse
-    SetValue(self, self.value, true)
+    self:SetValue(self.value, true)
 end
 
 local function GetOffSets(leftAngle, rightAngle, height)
@@ -327,16 +329,16 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     if isStatus then
         return bar, info
     else
+        local mt = getmetatable(status).__index
+        for key, func in next, ASB do
+            print("Meta setup", mt, key, func)
+            if not mt[key] then
+                mt[key] = func
+            end
+        end
+
         status.bar = bar
         status.info = info
-
-        -- StatusBar API
-        status.SetMinMaxValues = SetMinMaxValues
-        status.SetReverseFill = SetReverseFill
-        status.SetReversePercent = SetReversePercent
-        status.SetStatusBarColor = SetStatusBarColor
-        status.SetValue = SetValue
-
         status.value = 0
         status:SetValue(0, true)
         return status
@@ -348,16 +350,16 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
     local bar, info = CreateAngleBar(self, width, height, status, info, true)
 
+    local mt = getmetatable(status).__index
+    for key, func in next, ASB do
+        print("Meta setup", mt, key, func)
+        if not mt[key] then
+            mt[key] = func
+        end
+    end
+
     status.bar = bar
     status.info = info
-
-    -- StatusBar API
-    status.SetMinMaxValues = SetMinMaxValues
-    status.SetReverseFill = SetReverseFill
-    status.SetReversePercent = SetReversePercent
-    status.SetStatusBarColor = SetStatusBarColor
-    status.SetValue = SetValue
-
     status.value = 0
     status:SetValue(0, true)
     return status
