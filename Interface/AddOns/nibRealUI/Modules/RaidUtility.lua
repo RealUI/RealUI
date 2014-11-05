@@ -43,6 +43,37 @@ local function GetOptions()
 	return options
 end
 
+local function DisbandRaidGroup()
+	if InCombatLockdown() then return end
+
+	if UnitInRaid("player") then
+		SendChatMessage(ERR_GROUP_DISBANDED, "RAID")
+		for i = 1, GetNumGroupMembers() do
+			local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
+			if online and name ~= nibRealUI.name then UninviteUnit(name) end
+		end
+	else
+		SendChatMessage(ERR_GROUP_DISBANDED, "PARTY")
+		for i = MAX_PARTY_MEMBERS, 1, -1 do
+			if GetNumGroupMembers(i) then UninviteUnit(UnitName("party"..i)) end
+		end
+	end
+	LeaveParty()
+end
+
+StaticPopupDialogs["PUDRUIDISBANDRAID"] = {
+    text = "Disband the raid group?",
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        DisbandRaidGroup()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false,
+}
+
 local function CheckRaidStatus()
 	local _, instanceType = IsInInstance()
 	if ((GetNumGroupMembers() > 0 and UnitIsGroupLeader("player") and not UnitInRaid("player")) or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) and (instanceType ~= "pvp" or instanceType ~= "arena") then
@@ -102,8 +133,8 @@ function RaidUtility:SetUpFrame()
 	RaidUtilityCloseButton:SetAttribute("_onclick", [=[self:GetParent():Hide(); self:GetFrameRef("RaidUtilityShowButton"):Show();]=])
 	RaidUtilityCloseButton:SetScript("OnMouseUp", function(self) RaidUtilityPanel.toggled = false end)
 
-	CreateButton("RaidUtilityDisbandButton", RaidUtilityPanel, "UIPanelButtonTemplate", RaidUtilityPanel:GetWidth() * 0.8, 18, "TOP", RaidUtilityPanel, "TOP", 0, -5, L_GROUP_DISBAND)
-	RaidUtilityDisbandButton:SetScript("OnMouseUp", function(self) D.ShowPopup("DUFFEDUIDISBAND_RAID") end)
+	CreateButton("RaidUtilityDisbandButton", RaidUtilityPanel, "UIPanelButtonTemplate", RaidUtilityPanel:GetWidth() * 0.8, 18, "TOP", RaidUtilityPanel, "TOP", 0, -5, "Disband")
+	RaidUtilityDisbandButton:SetScript("OnMouseUp", function(self) StaticPopup_Show("PUDRUIDISBANDRAID") end)
 
 	CreateButton("RaidUtilityConvertButton", RaidUtilityPanel, "UIPanelButtonTemplate", RaidUtilityPanel:GetWidth() * 0.8, 18, "TOP", RaidUtilityDisbandButton, "BOTTOM", 0, -5, UnitInRaid("player") and CONVERT_TO_PARTY or CONVERT_TO_RAID)
 	RaidUtilityConvertButton:SetScript("OnMouseUp", function(self)
