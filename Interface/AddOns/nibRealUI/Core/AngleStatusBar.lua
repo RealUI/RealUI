@@ -214,6 +214,7 @@ end
 function ASB:SetValue(value, ignoreSmooth)
     --print("SetValue", value, ignoreSmooth)
     if not self.min then self:SetMinMaxValues(0, 1) end
+    if value > self.max then value = self.max end
     if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
         SetBarValue(self, value)
     else
