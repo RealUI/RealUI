@@ -380,8 +380,8 @@ UnitFrames["target"] = function(self)
     self:Tag(self.Name, "[realui:level] [realui:name]")
 
     self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
-    self.RaidIcon:SetSize(16, 16)
-    self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 0)
+    self.RaidIcon:SetSize(20, 20)
+    self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 
