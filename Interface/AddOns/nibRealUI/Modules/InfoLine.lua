@@ -682,6 +682,12 @@ end
 --------------------
 -- Misc Functions --
 --------------------
+-- Convert numbers into currency format (ie. 123456 = 123,456)
+function NumberToCurrencyFormat(val)
+	local left, num, right = string.match(val,'^([^%d]*%d)(%d*)(.-)$')
+	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+end
+
 -- Create Copy Frame
 local CopyFrame
 
@@ -1138,7 +1144,7 @@ function InfoLine_XR_Update(self)
 	if XRPer < 10 then XRLen = 3 else XRLen = 4 end
 	if XRSuffix == "XP:" then
 		if XRRested ~= "" then
-			self.text:SetFormattedText("|cff%s %s÷ [%s÷]|r", TextColorNormal, strsub(XRStr, 1, XRLen), XRRested)
+			self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, strsub(XRStr, 1, XRLen), TextColorblue1, XRRested)
 		else
 			self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, strsub(XRStr, 1, XRLen))
 		end
@@ -1613,9 +1619,8 @@ local function Currency_Update(self)
 	-- print("currencystate:", dbc.currencystate)
 	if dbc.currencystate == 1 then
 		CurText, curCurrency, rawValue = convertMoney(money)
-		if not(rawValue < 100000) then
-			CurText = nibRealUI:ReadableNumber(rawValue, 1)
-		end
+		CurText = NumberToCurrencyFormat(nibRealUI:Round(rawValue))
+		
 		-- show C/S/G colored square
 		self.icon:Show()
 		self.icon:ClearAllPoints()
