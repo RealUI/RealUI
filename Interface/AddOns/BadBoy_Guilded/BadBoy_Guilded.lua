@@ -4,10 +4,13 @@ local prevLineId, result, triggers = 0, nil, {
 	"wowstead%.com",
 	"guildlaunch%.com",
 	"corplaunch%.com",
+	"wowlaunch%.com",
 	"guildportal%.com",
 	"shivtr%.com",
 	"enjin%.com",
 	"guildomatic%.com",
+	"guildwork.com",
+	"guildhosting.org",
 	"re[cq]rui?t",
 	"^wt[bs] guild",
 	"wt[bs] %d+%+? guild",
@@ -76,10 +79,14 @@ local prevLineId, result, triggers = 0, nil, {
 	"guild.*active.*social", --Hello, are you looking for a guild that is active for real? We "*" have events each night of the week, a HC 10m team, a 25m normal team, a RBG team, and enough social events to enjoy:) if you are social and mature, we can fit you in:)
 	"guild.*members.*community", --* new PvP guild, has already 150+members and great leaders we will shortly become the best pvp guild for the long term on * if you are 2.4+ cr/ RBG 2.4+ or hero pm me - already has alot of good players and good community
 	"team.*raid.*visit", --<*> 12HC LF Skilled , Dedicated & Exceptional HC raiders for our team to expand for SoO/WoD 20m. We advocate patience, respect & communication - working together to provide a strong & enjoyable raid experience! Visit our site or /w me
-	"guild.*players.*info", --{rt8} * {rt8} Persian 14/14 HC guild, switching to 25-man raiding for final resets of MOP, need more DPS players.9 HCs+25man HC raiding XP required, Times: Wed, Fri, Sun, Tues 18:30 - 22:00. /w for more - info 
+	"guild.*players.*info", --{rt8} * {rt8} Persian 14/14 HC guild, switching to 25-man raiding for final resets of MOP, need more DPS players.9 HCs+25man HC raiding XP required, Times: Wed, Fri, Sun, Tues 18:30 - 22:00. /w for more - info
 	"le?ve?l%d+.*progress.*whisp", --<*> <lvl 25> <14/14 n soo> we are in need of dps and healers to increase to 25 man we raid wed/sun/mon 8pm please be 560 item level and have 14/14 progress to start hc. we in need of mage and warlock the most.please whisper.
 	"looking.*raiders.*interest", --{rt6} * (lvl25) {rt6} is currently looking for serious Raiders for our WoD team. We need R-Dps(mage,druid), Tank(monk), Healer(priest,shaman). If you interested /w me and let's have a chat !
 	"guild.*missing.*info", --Guild {rt1} <*> (10M) Have Downed 7/14 Hc , We are Re-Building Again, We are Missing 2 tanks and 2RDps (Hunter) And 1 dps With Os heal) Have atleast 570+ And atleast 6/14 Hc exp , We Raid At Wed-Thurs-Mon 6 To 9:00 ST /W For more Info
+	"social.*community.*pv[ep]", --[*] Are you looking for a social And Mature Community? That focus's on all Aspects of Wow! So if you Enjoy PvE, PvP or just want to be social then we're the place for you! Interested? head over to * (16+) or /w me!
+	"looking.*player.*mature", --* is looking for more experienced and willing players for WoD raiding, We'll be raiding Mythic and so we request you to optimise your gameplay:) All we ask is mature and positve behaviour. Please /w me if interested
+	"looking.*friendly.*team", --<*> is currently looking for friendly and raid experienced players for WoD raiding team. We need mostly DPS but also some healers. /w me for some more info
+	"join.*guild.*info", --Are you sick and tired of playing alone? Do you want to join a guild that treasures its community and values clearing WOD content together? Then wait no longer and join <*>, we'll be clearing raids, RBGs and enjoy guild events. /w for more info
 
 	--Dutch
 	"guild.*zoek naar.*social", -- [25] Nederlands sprekende Guild <*> zijn op zoek naar Tanks: Geen / Melee dps: Warrior / Ranger dps: warlock, Mage / Healers: Paladin / raid tijden ma, di ,do van 20:00ST tot 23:00ST, social invite is ook mogelijk whisper voor meer info.
@@ -103,6 +110,7 @@ local prevLineId, result, triggers = 0, nil, {
 	--Norwegian
 	"søker.*medlemmer", --"*" Søker flere norske medlemmer. Vi er nyoppstarta og begynner med DS10 + noen HC i denne uka. /w for mer info. Social er også velkomne
 	"rekruterer", -->>>*<<< Er en Norsk social /raiding guild. Vi rekruterer for å starte en ny 10man group får å cleare alt som kan cleares. Guilden er lvl 25 og nyflyttet fra bloodfeather, Vis du vil bli med bare gi oss en whisper, alle er velkommen!
+	"søger.*team.*dedikeret", --{rt1}{rt1}*{rt1}{rt1} 14/14 hc pre 6.0. Søger pt 1 healer(druid/monk) 3 dps(rogue/lock/moonkin til vores WOD mythic raid team. vi raider ons-søn-man 20.00-23.00. forventer du kender din class, du er en dedikeret raider. 18år +
 
 	--Danish
 	"søger.*medlemmer", --* søger flere medlemmer danskere svenskere og nordmæn
@@ -158,15 +166,22 @@ local prevLineId, result, triggers = 0, nil, {
 	"guild.*info.*wh?isp", --Hali ! * lvl 25 guild tagfelvételt hirdet minden class számára! Raidek szombaton és vasárnap délután MOP-tól! További info wisp: *
 	"klán.*raid.*karakter", --A * klán (lvl25) felnött vagy felnött gondolkodású embereket keres raidezésre, pvp-re és egyéb szórakozásokra. Nem számít a karakter vagy a felszerelés szintje, csak az igény a könnyed, stresszmentes szórakozásra.
 	"klán.*jelentkezését", --* lvl 25-ös klán újra aktív. Aktív játékosok jelentkezését várjuk, akik Pandaria altt is raidelni szeretnénke majd. Infóért írjatok rám nyugodtan.
-	"guild.*keresünk", --* guild tagfelvételt hírdet, amit keresünk az heal( pap,Shaman) és dps( rugó, Hunter,)! Célunk az aktuális content minél elöbbi kitakarítása normálban(ill. hcban)! Részletek whispben.
+	"guild.*keress?ünk", --* guild tagfelvételt hírdet, amit keresünk az heal( pap,Shaman) és dps( rugó, Hunter,)! Célunk az aktuális content minél elöbbi kitakarítása normálban(ill. hcban)! Részletek whispben.
 	"guild.*keres.*játékost", --<*> Frissen alakult Magyar guild tagokat keres. Várunk szeretettel minden játékost szint/gear megkötés nélkül! Ha szeretnél tagja lenni egy aktív csapatnak írj bátran nekem, vagy Woolfie-nak!
 	"raider.*keres.*info", --* [14/16] aktív raider jelentkezöket keres 10 fös csapatába! Bövebb információk a www.*.in weblapon.
 	"guild.*keres.*szivesen", --* guild keres olyan playereket akik már a WoD-ra készülnek.Célunk WoDra egy ütőképes társaság kialakítása.A maradék MoP időben fun raid.A klán magja 10/14HC expel rendelkezik. Mindenkit szivesen látunk :)
+	"keresi.*aktív", --Sziasztok! Az * keresi aktív, raidelni vágyó játékosait a jelenlegi contentre és a következõ kiegre! Tapasztalt, jól müködõ, jó hangulatú csapat vagyunk! Mindenkit szeretettel várunk! infoért /w me!
 
 	--Polish
 	"gildia.*szuka", --Polska gildia RP-PvE szuka graczy do wspolnej zabawy. Chcemy stworzyc porzadna ekipe do gry zarówno PvE jak i PvP! Jednoczesnie chcemy aby w "*" panowała miła atmosfera. Gildia stworzona przez ludzi z duzym doswiadczeniem w WoW i innych grach MMO
 	"gildia.*poszukuje", --Gildia "*" (11/14 HC SoO) poszukuje aktywnych graczy do zasilenia grupy raidowej w 6.0 i WoD. Rekrutujemy zarowno raiderow jak i sociali. Gwarantujemy dobra zabawe i wsparcie doswiadczonych graczy.Masz jakies pytania? Whispuj smialo! :D Zapraszamy
 	"rekrutuje", --{rt1}Polska gildia * rekrutuje! {rt1}Zapraszamy wszystkich chetnych do stworzenia zgranej paczki, ktora z pelna para rusz na Draenor! Kazdy jest mile widziany. Goraco zapraszamy!
+	"poszukuje.*gildii", --<*> poszukuje ludzi do reaktywacji gildii w WoD. Zapraszamy wszystkich chetnych do wspolnej gry. W planach: rozwoj sekcji pvp (grupa RBG) oraz pve. Zapewniamy wsparcie wielu doswiadczonych graczy oraz wlasny serwer ts3 oraz strone internetowa.
+	"poszukuje.*ludzi.*sklad", --< * >  Poszukuje ludzi by wzmocnic sklad na Mythic raidy w WoD. Potrzebujemy healerow i dpsow.  W razie pytan /w Robiko , Amka
+
+	--Lithuanian
+	"gu?ildija.*iesko", --Gildija * ruosiasi WoD'ui ir ta proga iesko daugiau zmoniu mythic raidinimui. Del daugiau info pm *, *, *, *.
+	"gu?ildija.*aktyviu", --*-Nauja Lietuviu guildija ieskanti aktyviu nariu! Naujame expansione planuojame surinkti groupa ir valyti raidus draugiskoje aplinkoje. Priimam visus be issimciu!
 }
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,_,_,_,_,chanId,_,_,_,lineId)

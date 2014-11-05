@@ -32,7 +32,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 			end
 
 			if dmg.multistrike then
-				spell.multistrike = spell.multistrike + 1
+				spell.multistrike = (spell.multistrike or 0) + 1
 			end
 
 			if dmg.crushing then

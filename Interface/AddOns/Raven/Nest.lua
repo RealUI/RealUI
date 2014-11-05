@@ -574,7 +574,7 @@ function MOD.Nest_SetBarGroupCallbacks(bg, onMove, onClick, onEnter, onLeave)
 end
 
 -- Set opacity for a bar group, including mouseover override
-function MOD.Nest_SetBarGroupAlpha(bg, alpha, mouseAlpha) bg.alpha = alpha or 1; bg.mouseAlpha = mouseAlpha or 1 end
+function MOD.Nest_SetBarGroupAlpha(bg, alpha, mouseAlpha, disableAlpha) bg.alpha = alpha or 1; bg.mouseAlpha = mouseAlpha or 1; bg.disableAlpha = disableAlpha end
 
 -- Set a bar group attribute. This is the mechanism to associate application-specific data with bar groups.
 function MOD.Nest_SetBarGroupAttribute(bg, name, value) bg.attributes[name] = value end
@@ -1634,8 +1634,10 @@ function MOD.Nest_Update()
 	for _, bg in pairs(barGroups) do
 		if bg.configuration then -- make sure configuration is valid
 			local config = MOD.Nest_SupportedConfigurations[bg.configuration]
-			local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
-			if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
+			if not bg.disableAlpha then
+				local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
+				if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
+			end
 			if not bg.moving then bg.frame:SetFrameStrata(bg.strata or "MEDIUM") end
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
 			if update or bg.update then BarGroup_UpdateAnchor(bg, config); BarGroup_UpdateBackground(bg, config) end
@@ -1663,8 +1665,10 @@ function MOD.Nest_Refresh()
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
 			for _, bar in pairs(bg.bars) do if not bar.update then Bar_RefreshAnimations(bg, bar, config) end end
 			if config.bars == "timeline" then BarGroup_RefreshTimeline(bg, config) end
-			local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
-			if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
+			if not bg.disableAlpha then
+				local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
+				if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
+			end
 		end
 	end
 	UpdateAnimations() -- check for completed animations

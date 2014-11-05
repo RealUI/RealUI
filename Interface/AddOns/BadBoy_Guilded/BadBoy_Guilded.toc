@@ -9,7 +9,7 @@
 ## SavedVariablesPerCharacter: BADBOY_GWHISPER
 ## X-Category: Chat/Communication
 ## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r207-release
+## X-Curse-Packaged-Version: r216-release
 ## X-Curse-Project-Name: BadBoy_Guilded: Block Guild Advertising
 ## X-Curse-Project-ID: badboy_guilded
 ## X-Curse-Repository-ID: wow/badboy_guilded/mainline

@@ -1,4 +1,28 @@
 ------------------------------------------------------------------------
+r333 | tomber | 2014-10-27 05:53:20 +0000 (Mon, 27 Oct 2014) | 2 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add option to support fader addons like King Kong Frame Fader by disabling bar group opacity adjustments within Raven.
+Change initialization order so that media is registered in SharedMedia during OnLoad (was during OnEnable).
+------------------------------------------------------------------------
+r332 | tomber | 2014-10-26 23:23:40 +0000 (Sun, 26 Oct 2014) | 4 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Raven_Options/Options.lua
+
+Active shaman totems are now tracked as pseudo-buffs (like how special power buffs work). This lets you use the Spells tab to change labels and colors for totems. The Totems standard bar group now sorts by totem slot (when alphabetic sorting is enabled) so water totems always appear in same position, fire totems in same position, etc. Active totems are optionally trackable as buffs in auto bar groups (look on the Buffs tab when on a shaman). You can also track them in custom bar groups if you want more creative configurations. All condition tests that check for buffs now also work to check totems, allowing you to have conditions to warn you, for example, when searing totem is down to less than five seconds.
+
+Fixed some issues with responsiveness (totem API returns expired totems up to a second after done). Since druid wild mushrooms and mage runes of power also use same API they might also benefit from this change.
+
+------------------------------------------------------------------------
 r331 | tomber | 2014-10-19 23:11:41 +0000 (Sun, 19 Oct 2014) | 1 line
 Changed paths:
    M /trunk/Profile.lua
@@ -202,41 +226,4 @@ Remove dependencies on class info in the preset files.
 Add new number formats.
 Separate spell lockout info from the class-specific preset files.
 
-------------------------------------------------------------------------
-r321 | tomber | 2014-09-21 05:11:26 +0000 (Sun, 21 Sep 2014) | 3 lines
-Changed paths:
-   D /trunk/API.txt
-   M /trunk/Localizations/enUS.lua
-   M /trunk/Presets/General.lua
-   M /trunk/Profile.lua
-   M /trunk/Raven.toc
-   M /trunk/Raven_Options/Options.lua
-
-Changed how new bars are created in custom bar groups to requiring spell names or numeric ids to be entered for each new buff/debuff/cooldown bar. This removes the dependence on the preset tables being accurate for all races, classes and specializations. This will significantly reduce the update requirements for the preset tables going into WoD and sets the stage for reducing the amount of info encoded in presets.
-
-Removed the localizations for KR, CN and TW since they have gotten too far out-of-date to be included in this release. The EN localization has been cleaned up some, as well.
-------------------------------------------------------------------------
-r320 | tomber | 2014-09-20 21:17:37 +0000 (Sat, 20 Sep 2014) | 1 line
-Changed paths:
-   M /trunk/.pkgmeta
-   D /trunk/Highlights.lua
-   M /trunk/Localizations/enUS.lua
-   M /trunk/Main.lua
-   M /trunk/Profile.lua
-   M /trunk/Raven.toc
-   M /trunk/Raven_Options/Options.lua
-
-Remove the capability of adding buff/debuff/cooldown info on action bar buttons. This feature will not be supported for WoD due to the challenge of maintaining it given dependence on action bar addons. This feature has always been somewhat confusing to people who don't expect a buff/debuff/cooldown addon to alter the appearance of action bars.
-------------------------------------------------------------------------
-r319 | tomber | 2014-09-14 20:16:55 +0000 (Sun, 14 Sep 2014) | 3 lines
-Changed paths:
-   M /trunk/.pkgmeta
-   M /trunk/Bars.lua
-   M /trunk/Conditions.lua
-   M /trunk/Highlights.lua
-   M /trunk/Profile.lua
-
-Fix more tests for returned values from Blizzard API that changed from nil or 1 to true or false. This should fix some issues with clicking on anchors and various condition tests.
-
-Change packager to pick up latest versions of Ace3 library. This is intended to get the alpha release of the libraries for WoD.
 ------------------------------------------------------------------------

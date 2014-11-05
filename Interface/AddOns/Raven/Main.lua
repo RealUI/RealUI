@@ -13,6 +13,7 @@
 
 Raven = LibStub("AceAddon-3.0"):NewAddon("Raven", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
+local media = LibStub("LibSharedMedia-3.0")
 local MOD = Raven
 local MOD_Options = "Raven_Options"
 local optionsLoaded = false -- set when the load-on-demand options panel module has been loaded
@@ -77,8 +78,6 @@ local talentsInitialized = false -- set once talents have been initialized
 local matchTable = {} -- passed from MOD:CheckAura with list of active auras
 local startGCD, durationGCD = nil -- detect global cooldowns
 local raidTargets = {} -- raid target to GUID
-local shamanEnchants = nil -- table of shaman weapon enchants
-local fireSpells = nil -- special case support for mage Impact procs
 local petGUID = nil -- cache pet GUID so can properly remove trackers for them when dismissed
 local enteredWorld = nil -- set by PLAYER_ENTERING_WORLD event
 local trackerTag = 0 -- used for mark/sweep in AddTrackers
@@ -395,7 +394,7 @@ function MOD:OnEnable()
 	self:RegisterEvent("GLYPH_ADDED", TriggerGlyphUpdate)
 	self:RegisterEvent("GLYPH_UPDATED", TriggerGlyphUpdate)
 	MOD:InitializeBars() -- initialize routine that manages the bar library
-	MOD:InitializeMedia() -- add sounds to LibSharedMedia
+	MOD:InitializeMedia(media) -- add sounds to LibSharedMedia
 	MOD.LibBossIDs = LibStub("LibBossIDs-1.0", true)
 	MOD.db.global.Version = "7" -- version number for database validation
 end
@@ -422,21 +421,6 @@ local function InitializeIcons()
 	iconElixir = GetItemIcon(28104) -- icon for shared elixirs cooldown
 end
 
--- Set up table of shaman weapon enchants
-local function InitializeShamanEnchants()
-	if MOD.myClass == "SHAMAN" then
-		shamanEnchants = { LSPELL["Earthliving Weapon"], LSPELL["Flametongue Weapon"], LSPELL["Frostbrand Weapon"],
-			LSPELL["Rockbiter Weapon"], LSPELL["Windfury Weapon"] }
-	end
-end
-
--- Set up table of mage fire spells that can be spread by Impact procs
-local function InitializeFireSpells()
-	if MOD.myClass == "MAGE" then
-		fireSpells = { LSPELL["Combustion"], LSPELL["Ignite"], LSPELL["Pyroblast"], LSPELL["Living Bomb"] }
-	end
-end
-
 -- Initialize when play starts, deferred to allow system initialization to complete
 function MOD:PLAYER_ENTERING_WORLD()
 	if not enteredWorld then
@@ -446,8 +430,6 @@ function MOD:PLAYER_ENTERING_WORLD()
 		MOD:InitializeConditions() -- initialize routine that shows cooldown overlays and cooldown bars	
 		InitializeRunes() -- death knight specific initialization
 		InitializeIcons() -- cache special purpose icons
-		InitializeShamanEnchants() -- cache names of shaman weapon enchants
-		InitializeFireSpells() -- cache names of mage fire spells
 		MOD:InitializeOverlays() -- initialize overlays used to cancel player buffs
 		MOD:InitializeInCombatBar() -- initialize special bar for cancelling buffs in combat
 		MOD:UpdateAllBarGroups() -- final update before starting event-based updates
@@ -628,9 +610,28 @@ local function CheckBlizzFrames()
 	end
 end
 
--- Check for update requirements that are not triggered by events
+-- See if totems have changed since last update because can't count on events for totems
+local function CheckTotemUpdates()
+	local cl = MOD.myClass
+	if cl == "SHAMAN" or cl == "DRUID" or cl == "MAGE" then
+		local changed = false
+		local now = GetTime()
+		for i = 1, 4 do
+			local haveTotem, name, startTime, duration = GetTotemInfo(i)
+			if haveTotem and name and name ~= "" and now <= (startTime + duration) then
+				if not lastTotems[i] or name ~= lastTotems[i] then changed = true end
+				lastTotems[i] = name
+			else
+				if lastTotems[i] then changed = true end
+				lastTotems[i] = nil
+			end
+		end
+		if changed then updateCooldowns = true; unitUpdate.player = true; doUpdate = true; forceUpdate = true end
+	end
+end
+
+-- Check for possess bar and vehicle updates which are not triggered by events
 local function CheckMiscellaneousUpdates()
-	if MOD:ChangedTotems() then updateCooldowns = true; unitUpdate.player = true; doUpdate = true; forceUpdate = true end
 	if IsPossessBarVisible() or UnitHasVehicleUI("player") then updateCooldowns = true; unitUpdate.player = true; doUpdate = true end
 end
 
@@ -642,6 +643,7 @@ function MOD:Update(elapsed)
 		if forceUpdate or (elapsedTime >= throttleTime) then
 			forceUpdate = false; throttleCount = throttleCount + 1; if throttleCount == 5 then throttleCount = 0 end
 			if not talentsInitialized then InitializeTalents() end -- retry until talents initialized
+			CheckTotemUpdates() -- check if totems have changed since last update
 			CheckMiscellaneousUpdates() -- check for update requirements that don't have events
 			MOD:UpdateInternalCooldowns() -- check for expiring internal cooldowns
 			MOD:UpdateCooldownTimes() -- check for expiring normal cooldowns
@@ -843,9 +845,6 @@ local function GetWeaponBuffName(weaponSlot)
 			local name = text:match("^(.+) %(%d+ [^$)]+%)$") -- extract up to left paren if match weapon buff format
 			if name then
 				name = (name:match("^(.*) %d+$")) or name -- remove any trailing numbers
-				if shamanEnchants then -- special case for localing shaman weapon enhancements
-					for _, enchant in pairs(shamanEnchants) do if string.find(enchant, name) then name = enchant; break end end
-				end
 				return name
 			end
 		else
@@ -910,15 +909,6 @@ local function GetWeaponBuffs()
 		AddAura("player", ohbuff, true, nil, ohc, "Offhand", duration, "player", nil, nil, 1, icon, nil, expire, "weapon", "SecondaryHandSlot")
 		ohLastBuff = ohbuff -- caches the name of the weapon buff so can clear it later
 	elseif ohLastBuff then ResetWeaponBuffDuration(ohLastBuff); ohLastBuff = nil end
-end
-
--- See if totems have changed since last update, can't count on events, and save for future checks
-function MOD:ChangedTotems()
-	local changed, cl = false, MOD.myClass
-	if cl == "SHAMAN" or cl == "DRUID" then
-		for i = 1, 4 do local _, name = GetTotemInfo(i); if lastTotems[i] ~= name then lastTotems[i] = name; changed = true end end
-	end
-	return changed
 end
 
 -- Add buffs for the specified unit to the active buffs table
@@ -1040,6 +1030,7 @@ end
 -- Create an aura for class-specific power buffs: soul shards, holy power, shadow orbs, etc.
 local function GetPowerBuffs()
 	local power, id = nil, nil
+	local now = GetTime()
 	if MOD.myClass == "PALADIN" then power = UnitPower("player", SPELL_POWER_HOLY_POWER); id = 85247
 	elseif MOD.myClass == "PRIEST" then power = UnitPower("player", SPELL_POWER_SHADOW_ORBS); id = 95740
 	elseif MOD.myClass == "MONK" then
@@ -1060,7 +1051,7 @@ local function GetPowerBuffs()
 	elseif MOD.myClass == "DRUID" then
 		if IsSpellKnown(145205) then -- restoration druid only has one mushroom
 			local haveTotem, name, startTime, duration, icon = GetTotemInfo(1)
-			if haveTotem and name then
+			if haveTotem and name and name ~= "" and now <= (startTime + duration) then
 				local link = GetSpellLink(145205)
 				AddAura("player", name, true, 145205, 1, nil, duration or 0, "player", nil, nil, nil, icon, nil,
 					(startTime or 0) + (duration or 0), "spell link", link)
@@ -1069,7 +1060,7 @@ local function GetPowerBuffs()
 			local count, start, dur = 0, 0, 0
 			for i = 1, 3 do
 				local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
-				if haveTotem and name and startTime then
+				if haveTotem and name and name ~= "" and now <= (startTime + duration) then
 					count = count + 1
 					if startTime > start then start = startTime; dur = duration end
 				end
@@ -1090,6 +1081,18 @@ local function GetPowerBuffs()
 	end
 end
 
+-- Get buffs for shaman totems if option is selected
+local function GetTotemBuffs()
+	if MOD.myClass ~= "SHAMAN" then return end
+	local now = GetTime()
+	for i = 1, 4 do
+		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
+		if haveTotem and name and name ~= "" and now <= (startTime + duration) then -- generate buff for an active totem in the slot
+			AddAura("player", name, true, nil, 1, "Totem", duration, "player", nil, nil, nil, icon, nil, startTime + duration, "totem", i)
+		end
+	end
+end
+
 -- Update unit auras if necessary (deferred until requested)
 function MOD:UnitStatusUpdate(unit)
 	local status = unitStatus[unit]
@@ -1097,7 +1100,7 @@ function MOD:UnitStatusUpdate(unit)
 		if status ~= 1 then unit = status end
 		if unitUpdate[unit] then -- need to do an update for this unit
 			ReleaseAuras(unit); GetBuffs(unit); GetDebuffs(unit)
-			if unit == "player" then GetTracking(); GetSpellEffectAuras(); GetStanceAura(); GetPowerBuffs() end
+			if unit == "player" then GetTracking(); GetSpellEffectAuras(); GetStanceAura(); GetPowerBuffs(); GetTotemBuffs() end
 			unitUpdate[unit] = false
 		end
 		return unit
@@ -1332,11 +1335,16 @@ end
 
 -- Check for special case mage Rune of Power and add them as cooldowns of type "effect"
 local function CheckRuneOfPower()
+	local now = GetTime()
 	local link = GetSpellLink(116011)
 	local haveTotem, name, startTime, duration, icon = GetTotemInfo(1)
-	if haveTotem and name then AddCooldown(name .. " #1", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player") end
+	if haveTotem and name and name ~= "" and now <= (startTime + duration) then
+		AddCooldown(name .. " #1", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player")
+	end
 	haveTotem, name, startTime, duration, icon = GetTotemInfo(2)
-	if haveTotem and name then AddCooldown(name .. " #2", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player") end
+	if haveTotem and name and name ~= "" and now <= (startTime + duration) then
+		AddCooldown(name .. " #2", 116011, icon, startTime or 0, (duration or 0), "internal", 116011, "player")
+	end
 end
 
 -- Check for new and expiring cooldowns associated with all action bar slots plus trinkets (might want to add inventory slots someday)

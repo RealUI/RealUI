@@ -1,41 +1,34 @@
 
--- GLOBALS: BADBOY_NOREPORT, BADBOY_POPUP, BADBOY_BLACKLIST, BadBoyLog, BNGetFriendInviteInfo, BNGetNumFriends, BNGetNumFriendToons, BNGetFriendToonInfo, BNReportFriendInvite
--- GLOBALS: CanComplainChat, ChatFrame1, GetTime, print, wipe, REPORT_SPAM_CONFIRMATION, ReportPlayer, StaticPopup_Show, StaticPopup_Resize
--- GLOBALS: strsplit, tonumber, type, UnitInParty, UnitInRaid, ChatHistory_GetAccessID, BNGetNumFriendInvites, CalendarGetDate, SetCVar
+-- GLOBALS: BADBOY_NOREPORT, BADBOY_POPUP, BADBOY_BLACKLIST, BadBoyLog, BNGetNumFriends, BNGetNumFriendToons, BNGetFriendToonInfo
+-- GLOBALS: CanComplainChat, ChatFrame1, GetTime, print, REPORT_SPAM_CONFIRMATION, ReportPlayer, StaticPopup_Show, StaticPopup_Resize
+-- GLOBALS: strsplit, tonumber, type, UnitInParty, UnitInRaid, ChatHistory_GetAccessID, CalendarGetDate, SetCVar
 local myDebug = false
 
 local reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam blocked, click to report!]|h|r <<<"
 local throttleMsg = "|cFF33FF99BadBoy|r: Please wait ~7 seconds between reports to prevent being disconnected (Blizzard bug)"
-local reportBnet = "BadBoy: >>> |cfffe2ec8Battle.net invite blocked from |cffffff00%s|r|r <<<"
 do
 	local L = GetLocale()
 	if L == "frFR" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqué, cliquez pour signaler !]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Veuillez patienter ~7 secondes entre les signalements afin d'éviter d'être déconnecté (bug de Blizzard)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8Battle.net inviter bloqué à partir de |cffffff00%s|r|r <<<"
 	elseif L == "deDE" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam geblockt, zum Melden klicken!]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Bitte warte ca. 7 Sekunden zwischen Meldungen um einen Disconnect zu verhindern (Blizzard Bug)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8Battle.net-Freundschaftsanfrage von |cffffff00%s|r geblockt|r <<<"
 	elseif L == "zhTW" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[發出的垃圾訊息已被阻擋, 點擊以舉報 !]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: 請等候~7秒在回報時，為了防止斷線(暴雪的bug)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8已忽略來自 |cffffff00%s|r 的Battle.net邀請|r <<<"
 	elseif L == "zhCN" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[垃圾信息已被阻挡，点击举报!]|h|r"
 		throttleMsg = "|cFF33FF99BadBoy|r: 请在举报时等待~7 秒以防断线（暴雪的bug）"
 	elseif L == "esES" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqueado. Clic para informar!]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Por favor espere ~7 segundos entre los informes para evitar que se desconecte (error de Blizzard)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8Invitación de Battle.net bloqueado por|r |cffffff00%s|r <<<"
 	elseif L == "esMX" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqueado. Clic para informar!]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Por favor espere ~7 segundos entre los informes para evitar que se desconecte (error de Blizzard)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8Invitación de Battle.net bloqueado por|r |cffffff00%s|r <<<"
 	elseif L == "ruRU" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Спам заблокирован. Нажмите, чтобы сообщить!]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Пожалуйста, подождите ~7 секунды между донесениями, чтобы избежать отключения (ошибка Blizzard)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8приглашение Battle.net от |cffffff00%s|r блокировано|r <<<"
 	elseif L == "koKR" then
 
 	elseif L == "ptBR" then
@@ -44,7 +37,6 @@ do
 	elseif L == "itIT" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloccata, clic qui per riportare!]|h|r <<<"
 		throttleMsg = "|cFF33FF99BadBoy|r: Prego aspetta ~7 secondi tra una segnalazione e l'altra per far si che tu non venga disconnesso (bug della Blizzard)"
-		reportBnet = "BadBoy: >>> |cfffe2ec8Invito Battle.net bloccato da |cffffff00%s|r|r <<<"
 	end
 end
 
@@ -219,7 +211,11 @@ local boostingWhiteList = {
 	"social",
 	"%d+k", --10k/dungeon
 	"onlyacceptinggold",
+	"goldonly",
 	"goldprices",
+	"tonight",
+	"gametime",
+	"servertime",
 }
 
 --These entries remove -2 points
@@ -237,6 +233,7 @@ local whiteList = {
 	"enjin%.com",
 	"guildlaunch%.com",
 	"corplaunch%.com",
+	"wowlaunch%.com",
 	"wowstead%.com",
 	"guildwork.com",
 	"guildportal%.com",
@@ -343,14 +340,18 @@ local instantReportList = {
 	"runescapegoldforwowgold", --Selling my runescape gold for wow gold
 
 	--[[ CS:GO ]]--
-	"^wt[bs]somecsgoskin", --WTB some CSGO skins and sell some /w for more info
+	"^wt[bst]somecsgoskin", --WTB some CSGO skins and sell some /w for more info
 	--WTS CS:GO Skins
-	"^wt[bs]csgoskin", --WTB CS GO skins /w for more infomation
-	"^wt[bs]csgokey", --{rt1} WTB CS:GO KEYS & SKINS FOR GOLD {rt1}
-	"^wt[bs]csgoacc", --WTS CS GO ACC UNRANK
-	"^wt[bs]csgoknife", --WTSCS GO knife M9 Bayonet Stained in (minimal wear) /w and give me offer
-	"^wt[bs]csgoitem", --WTB CS:GO Items for Gold! /W me your items!!
-	"^wt[bs]anycsgoskin", --{rt1} WTB ANY CS:GO SKINS FOR WOW GOLD {rt1}
+	"^wt[bst]csgoskin", --WTB CS GO skins /w for more infomation
+	"^wt[bst]csgokey", --{rt1} WTB CS:GO KEYS & SKINS FOR GOLD {rt1}
+	"^wt[bst]csgoacc", --WTS CS GO ACC UNRANK
+	"^wt[bst]csgoknife", --WTSCS GO knife M9 Bayonet Stained in (minimal wear) /w and give me offer
+	"^wt[bst]csgoitem", --WTB CS:GO Items for Gold! /W me your items!!
+	"^wt[bst]anycsgoskin", --{rt1} WTB ANY CS:GO SKINS FOR WOW GOLD {rt1}
+	"^buyingcsgoskin", --{rt1}{rt3} Buying CS:GO Skins & Keys for WoW Gold | Paying good  {rt3}{rt1}
+	"^sellingsomecsgocase", --Selling some CS:GO cases! PM ME!
+	"^sellingcsgocase", --Selling CS:GO cases! PM ME!
+	"^sellingcsgoitem", --{rt1} SELLING CS GO ITEMS FOR GOLD {rt1}
 
 	--[[ Hearthstone ]]--
 	"^sellinghearthstonebeta", --SELLING HEARTHSTONE BETA KEY FOR GOLD /w ME YOUR PRICE
@@ -379,6 +380,8 @@ local instantReportList = {
 	"wts.*leagueoflegends.*acc.*info", --{rt1}wts golden{rt1} League of Legends{rt1} acc /w me for more info{rt1}
 	"sellingm?y?leagueoflegends", --Selling my league of legends account, 100 champs 40 skins 2-3 legendary 4 runepage, gold. /EUW /W
 	"^wt[bs]lolacc.*cheap", --WTS LOL ACC PLAT 4 1600 NORMAL WINS, EUW 40 SKINS, 106 CHAMPS  CHEAP!!
+	"^wt[bs]lolacc.*skins", --WTS LoL acc level 30 EUW name ** got about 50 skins /w me for info include 3200 RP!
+	"^wt[bst]mygold%d*leagueoflegends", --WTT My Gold 3 League of Legends account for some sick CS:GO skins! 116 Champions, 158 Skins, 6 rune pages. /w me for more info/skype!
 
 	--[[  Account Buy/Sell  ]]--
 	"wtsnonemergeacc.*lvl?%d+char", --!WTS none-merge acc(can get a lv80 char)./W me for more info!
@@ -572,6 +575,9 @@ local instantReportList = {
 	"wts.*%[.*%].*boefans.*deliver", --wts[Magic Rooster Egg][Falling Blossom Cowl]{rt6}{rt6}on boefans.c{rt2}m,4 years Exp,fast and safe delivery{rt6}
 	"wts.*nightwing.*gametime", --WTS [Heart of the Nightwing] for 14k.wts 30day gametime for 10k.60k for 16k
 	"^wts%d+kgolds?.*euro.*paypal", --WTS 95K Golds for 25 euro! Transaction is done via paypal!
+	"fast.*help.*koroboost", --Fast and easy help with Mythic/Heroic 100% drop of heirloom weapon. Be [Ready for Raiding] in WoD. Кorоbооst.соm
+	"koroboost.*visit", --[Kor'kron Juggernaut] at Кorobооst.cоm. Get it while it's still 100% drop. Also any pve/pvp achievements. Just visit us.
+	"koroboost.*skype", --Koroboost.com - best gaming service. Online support at page and thousand of reviewes. Skype Korsstart
 	"feat.*mount.*koroboost", --Get feat of strength [Cutting Edge: Garrosh Hellscream (25 player)] - Heroic mount as GIFT at Koroboost.com
 	--Any pve runs . normal 25 180 euro. flex from 65 euro, heroic 25 hc  LOOT runs With LOOT GUARANTEED , all tier pack in single run.  Cheapest mount from Garrosh Heroic 170 eu. Also have D3 boost. Koroboost.com {rt1}
 	"wts.*account.*mount.*skype", --{rt1} {rt1}  WTS Old Unmerged WoW Accounts {rt1}  Get old achivements/mounts/pets/titles from Vanilla/TBC/WOTLK on your main {rt1} Already seen: Scarab Lord, Old Gladiators etc Skype: kubadoman11 (only skype name) Site:
@@ -579,8 +585,14 @@ local instantReportList = {
 	"wts.*%[.*%].*gametime.*days", --WTS [Armored Bloodwing] [Enchanted Fey Dragon] [Iron Skyreaver] and gametime30-60-90-180days{star}WOD{rt1}
 	"boost.*mount.*euro.*skype", --BoostFull Heroic 14/14 SoO Clear (Siege of Orgrimmar Heroic) + Your Class Loot + Garrosh Mount + [Heroic: Garrosh Hellscream] 179.95 euro - MORE Info @ Skype: MRD BOOST
 	"guarantee.*speed.*mount.*skype", --{rt4} {rt6} Invincible, Ashes of Al’ar, Mimiron’s Head in just a month, GUARANTEED! Speed farming of any mount! Skype: mmo-support3 {rt3}
+	--
+	"wowpvpcarry.*promotion", --Preorder any service from WoWPvPCarry now to save! Gear, titles, achievements, mounts, we do it all! Contact me to take advantage of promotions now!
+	"bestgear.*messageus.*preorder.*promotion", --Do you want to get the best gear and achieves in the upcoming expansion before everyone else? Message us now to preorder and save! Order while the promotions are still on!
+	"selling.*services.*preorder.*savings", --Selling Gladiator/Rank 1/Challenge modes/BiS gear and more - Almost all PvP and PvE services! Preorder for the expansion now for huge savings!
+	--
 
 	--[[  RBG/boosting  ]]--
+	"prommote%.me.*payment", --dnd Website: Prommote.me ; Skype: mmo-support3 ; E-mail: prommote@gmail.com ; Support work hours: 13:00 - 01:00 CET. Ingame whispers are ignored. Gold is not accepted as payment.
 	"prommote%.me.*mount.*loot", --{rt6} {rt8} www.prommote.me - Mythic Garrosh kills and Mount | Heroic and Mythic Loot | Over 90 feedbacks! {rt6}
 	--prommote.me will help you gain any RBG rating (2200, 2400 an higher), fill the weekly cap, acquire T2 weapons and become the Gladiator and Hero of the Horde/Alliance Good pricing, no transfer/account sharing required
 	--prommote.me will help you get any PVE/PVP and other achievements, mounts, titles and top raid gear, and help you gain 20300 achievement points. PM for details.
@@ -597,6 +609,7 @@ local instantReportList = {
 	"rbg.*epiccarry[%.,]com", --{rt2} Arena rating\Rbg wins\Arena wins on epiccarry.com {rt1}
 	"realm.*epiccarry[%.,]com", --{rt2} SOO Flex\Normal\Heroic\Glory + T15+T14 contents selfplay, no realm transfer on epiccarry.com {rt1}
 	"chiefboost[%.,]com.*service", --chiefboost.com - premium service from world top guilds without intermediaries! Siege of Orgrimmar 14/14 loot raids N/HM
+	"skype.*chiefboost", --100% Heirloom weapons from SoO, Glory of Orgrimmar and WoD pre-orders for a reasonable price. skype: chiefboost
 	"starboosting[%.,]com.*pro", --{rt1} www.starboosting.com {rt1} Professional game help {rt1}
 	"arena.*2200.*skype", --arena ratings for (rdruid, mage, rogue,warlock,priest,warrior,shaman) 2200/2400/2600 add skype for more info - Dezleit
 	"hurry.*season.*share.*acc.*pro", --Hurry up! The end of season is coming! Without share acc! Play with pro!
@@ -604,6 +617,7 @@ local instantReportList = {
 	"wowst[o0]re[%.,]com.*pvp.*rbg", --wow-st0re.com Le n°1 du pl français depuis 2013 - SoO 25 NM/HM - PvP Arène / RBG côte - Bastonneurs - Armes Légendaires - [Défi d'or 9/9 à seulement 70k po!] http://wow-st0re.com 100% FR
 	"boost.*skype.*tridon", --WTS Big conquest cap Boost / Contact me Skype: Tridon.boosting
 	"help.*gold.*week.*skype", --{rt6}We help you with [Challenge Conqueror: Gold], CM's shutting down in less than a week. Right now available. Skype: CMhotBOOT{rt6}
+	"hurry.*draenor.*loot.*mount.*price.*info", --{rt1}{rt1} Hurry up! Draenor is coming {rt1}{rt1} Loot-Raids, Mount and Heirloom from Garrosh! Low price!!! {rt1}{rt1} /w for info {rt1}{rt1} 
 	--
 	"help.*2200.*fast.*pvp.*wisper.*info", --We will help you with  [Three's Company: 2200] . Fastest rating ever, up to 3 hours for geared pvp chars! Wisper for info.
 	"help.*gold.*challenge.*mount.*skype", --help with [Challenge Conqueror: Gold] from Challenge masters! get achiment. title, mount and xmog set for 2 hours! skype CMGoldMasters
@@ -616,7 +630,7 @@ local instantReportList = {
 
 	--[[  Russian  ]]--
 	--[skull]Ovoschevik.rf[skull] continues to harm the enemy, to please you with fresh [circle]vegetables! BC 450. Operators of girls waiting for you!
-	"oвoщeвик%.pф.*cвeжиmи", --[skull]Овощевик.рф[skull] продолжает, на зло врагaм, радовaть вас свежими [circle]oвoщaми! Бл 450. oператoры девyшки ждyт вaс!
+	"oвoщeвиk%.pф.*cвeжиmи", --[skull]Овощевик.рф[skull] продолжает, на зло врагaм, радовaть вас свежими [circle]oвoщaми! Бл 450. oператoры девyшки ждyт вaс!
 	-- [[MMOSHOP.RU]] [circle] ot23r] real price [WM BL:270] [ICQ:192625006 Skype:MMOSHOP.RU, chat on the site] [Webmoney,Yandex,other]
 	"mmoshop%.ru.*цeнa.*skype", -- [ [MMOSHOP.RU]] [circle] от23р] реальная цена [WM BL:270] [ICQ:192625006 Skype:MMOSHOP.RU, Чат на сайте] [Вебмани,Яндекс,другие]
 	--[square] [RPGdealer.ru] [square] gives you quick access to wealth. Always on top!
@@ -628,17 +642,17 @@ local instantReportList = {
 	--Buy MERRY COINS on the funny-money.rf Funny price:)
 		--Купи ВЕСЕЛЫЕ МОНЕТКИ на фани-мани.рф Смешные цены:)
 	--Buy GOLD at [circle]funny-money.rf[circle] Price Calculator on the site.
-	"куп.*фaни-maни%.pф", --Купи ЗОЛОТО на [circle]фани-мани.рф[circle] Калькулятор цен на сайте.
+	"kуп.*фaни-maни%.pф", --Купи ЗОЛОТО на [circle]фани-мани.рф[circle] Калькулятор цен на сайте.
 	--[COINS] of 23 per 1OOO | website | INGMONEY. RU | | SALE + Super Award - Spectral Tiger! ICQ 77-21-87 | | Skype INGMONEY. RU
 	"ingmoney%.ru.*skype", --[МОНЕТЫ]  от 23 за 1OOO | сайт | INGMONEY. RU ||АКЦИЯ + Супер Приз - Спектральный Тигр! ICQ 77-21-87 || Skype INGMONEY. RU
 	--Sell 55kg of potatoes at a low price quickly! Skype v_techno_delo [circle] 8 = 1kg
-	"пpoдam.*кapтoшки.*cpoчнo.*cкaйп", --Продам 55кг картошки по дешевке  срочно! скайп v_techno_delo  [circle] 8 = 1кг
+	"пpoдam.*kapтoшkи.*cpoчнo.*ckaйп", --Продам 55кг картошки по дешевке  срочно! скайп v_techno_delo  [circle] 8 = 1кг
 	--Gold Exchange Invitation to participate suppliers and shops. With our more than 800 suppliers and 100 stores. GexDex.ru
 	"з[o0]л[o0]т[ao0].*gexdex%.ru", --[skull][skull][skull] Биржа золота приглaшaет к учaстию постaвщиков и магазины. С нами болee 800 постaвщиков и 100 магaзинов. GеxDеx.ru
 	--Cheapest price only here! Price 1000 gold-20R, from 40k-18r on, from-60k to 17p! Website [playwowtime.vipshop.ru]! ICQ 196-353-353, skype nickname playwowtime2011!
 	"vipshop%.ru.*skype", --Самые дешевые цены только у нас! Цены 1000 золотых- 20р , от 40к -по 18р , от 60к-по 17р ! Сайт [playwowtime.vipshop.ru] ! ICQ 196-353-353 , skype ник playwowtime2011!
 	--we are help with RAITING BATTLE GROUND -2200-2400-2650 /admission of cap/PVP set for honor points/mount/leveling 1-90/ skype - [RPGBOX.RU] icq  819-207 site [rpgbox.ru]
-	"cкaйп.*rpgbox%.ru", --поможем РЕЙТИНГ ПОЛЕ БОЯ -2200-2400-2650 /набор капа/ПВП сет за очки чести/маунт/прокачка 1-90/ скайп - [RPGBOX.RU] ася  819-207 сайт [rpgbox.ru]
+	"ckaйп.*rpgbox%.ru", --поможем РЕЙТИНГ ПОЛЕ БОЯ -2200-2400-2650 /набор капа/ПВП сет за очки чести/маунт/прокачка 1-90/ скайп - [RPGBOX.RU] ася  819-207 сайт [rpgbox.ru]
 	--website [RPGBOX.RU] RBG 2200-2400-2650 / cap/PVP set for honor points/mount/UP 1-90 /farm kills 250K /any progress in raids and dungeons for players and guilds
 	"rpgbox%.ru.*2200.*maунт", --сайт [RPGBOX.RU] РПБ 2200-2400-2650 / кап/ПВП сет за очки чести/маунт/UP  1-90 /фарм килов 250к /любые достижения в рейдах  и подземельях для игроков и гильдмй
 	--Sell! [gold] 16r-1000g. Looking for suppliers. Quality levelling of character's, honor point's and profession's. ICQ: 406-887-855 Skуре: WoW-Crabbs  Webmoney BL [360]
@@ -650,19 +664,19 @@ local instantReportList = {
 	--[MMOah.ru]  [circle] Gold at competitive prices [circle] BL85+ IСQ  49-48-48 , online chat on the site, we are accepted any kind of payments WM/YM/Visa/qiwi/Robokassa/SMS, we are produce recruitment of suppl
 	"mmoah%.ru.*зoлoтo.*icq", --[MMOah.ru]  [circle] Золото по выгодным ценам [circle] BL85+ IСQ  49-48-48 , на сайте онлайн чат, принимаем все виды оплат WM/ЯД/Visa/qiwi/Robokassa/SMS, производим набор пост
 	--Seling [G[circle]LD], Fast, reliably, any kind of payments. Attestat of seller's. Looking for supplier's details to pm.
-	"g{.*}ld.*быcтpo.*oплaты.*пocтaвщикoв", --Продам [G[circle]LD], Быстро, надежно, различные способы оплаты. Аттестат продовца. Ищем поставщиков подробности в пм.
+	"g{.*}ld.*быcтpo.*oплaты.*пocтaвщиkoв", --Продам [G[circle]LD], Быстро, надежно, различные способы оплаты. Аттестат продовца. Ищем поставщиков подробности в пм.
 	--selling [circle] 1k at 13 rub
-	"^пpoдam.*{.*}.*%d+кзa%d+pуб", --продам [circle] 1к за 13 руб
+	"^пpoдam.*{.*}.*%d+kзa%d+pуб", --продам [circle] 1к за 13 руб
 	--Help with RPBБ. [blue square] 2200 - 2400 - 2600. CAP [blue square]. Fast and safe. Best service. Without share of your account. You are play yourself. Site, BL 320+. Skype: R
-	"быcтpo.*бeзoпacнo.*cepвиc.*aккaунтa.*cкaйп", --Помощь с РПБ. [blue square] 2200 - 2400 - 2600. КАП [blue square]. Быстро и безопасно. Лучший сервис. Без передачи аккаунта. Вы играете сами. Сайт, БЛ 320+. Скайп: R
+	"быcтpo.*бeзoпacнo.*cepвиc.*akkaунтa.*ckaйп", --Помощь с РПБ. [blue square] 2200 - 2400 - 2600. КАП [blue square]. Быстро и безопасно. Лучший сервис. Без передачи аккаунта. Вы играете сами. Сайт, БЛ 320+. Скайп: R
 	--Help with RBG raiting  2200.2400.2600. Cap. Detail in skype Axelretreem
-	"пomoжem.*pбгpeйтингom.*%d%d%d%d.*cкaйп", --Поможем с РБГ рейтингом  2200.2400.2600. Кап. Подробнее в скайп Axelretreem
+	"пomoжem.*pбгpeйтингom.*%d%d%d%d.*ckaйп", --Поможем с РБГ рейтингом  2200.2400.2600. Кап. Подробнее в скайп Axelretreem
 	--[PLAY-START_RU] G[circle]l0d0 from 14,8r, any kind of payment, delivery 5-15min. Reiiably. Attestat of seller's. We are looking for suppliers details in pm.
-	"playstart[%.,]?ru.*oплaты.*дocтaвкa", --[PLAY-START_RU] З[circle]л0т0 от 14,8р, различные способы оплаты, доставка 5-15мин. Надежно. Аттестат продовца. Ищем поставщиков подробности в пм.
+	"playstart[%.,]?ru.*oплaты.*дocтaвka", --[PLAY-START_RU] З[circle]л0т0 от 14,8р, различные способы оплаты, доставка 5-15мин. Надежно. Аттестат продовца. Ищем поставщиков подробности в пм.
 	--Sell shiny little coins guarantees [circle]
 	--Продам блестяшки гарантии [circle]
 	--sell shiny little coins [circle]
-	"^пpoдamблecтяшки", --продам блестяшки [circle]
+	"^пpoдamблecтяшkи", --продам блестяшки [circle]
 	--We are help with Arena and RBG 2200\2400\2700. Hero of Alliance\Horde [Dving.ru]
 		--Поможем с Ареной и РБГ 2200\2400\2700. Герой Альянс\Орды [Dving.ru]
 	--Honor points , Conquest, Valor on site [Dving.ru]
@@ -674,12 +688,13 @@ local instantReportList = {
 	--Personal service and individual orders for [Dving.ru]
 	"д.*dving%.ru$", --Персональное обслуживание и индивидуальные заказы на [Dving.ru]
 	--[square][skull][Gold] at 14r for 1000 on site [WHISPERS RU].Raids,BG,Arena,levelling,professions,mounts and pets.Windsteed and timecard for gold Skype [Whispers.ru] ICQ634-810-845[star]
-	"whispers%.?ru.*гoлд.*cкaйп", --[square][skull][Золото] от l4p за l ООО на [WHISPERS RU].Рейды,БГ,Арена,прокачка,профессии,маунты и петы.Ветророг и тk за голд Скайп [Whispers.ru] ICQ634-810-845[star]
+	"whispers%.?ru.*гoлд.*ckaйп", --[square][skull][Золото] от l4p за l ООО на [WHISPERS RU].Рейды,БГ,Арена,прокачка,профессии,маунты и петы.Ветророг и тk за голд Скайп [Whispers.ru] ICQ634-810-845[star]
 	--[circle]15 for 1000! Website [Gann-money.ru]! All kinds of payments! Gifts wholesalers! High BL! ICQ 9937937 skype Gann-money or operator on the site!
 	"gannmoney%.ru.*skype", --[circle]по 15 за 1000! Сайт [Gann-money.ru] ! Все виды оплат! Подарки оптовикам! Высокий БЛ! ICQ 9937937 skype Gann-money или оператору на сайте!
 	--{квадрат} Продаём баклажаны от 16р за 1к.  Bcе виды оплат. BL245+. Сайт WoWMoney.гu. Связь через icq З84829 или cкайп wowmoneyally .{квадрат}
 	--{треугольник} Продаём {круг} от 16р за 1к.  Сайт WoWMoney.гu. BL245+. Bсe виды оплат. Связь чeрeз скайп wowmoneyally или icq З84829 {треугольник}
 	"пpoдaem.*wowmoney%..*icq", --{звезда} Пpодaём голдец от 16p зa 1к.  BL245+. Bсe виды оплaт. Caйт WoWMoney.гu. Cвязь чepeз скaйп wowmoneyally или icq З8-48-29 .{звезда}
+	"wowmart%.ru.*зoлoтo", ---= WOWMART.RU =- Адекватные цены на Золото и товары за Золото.
 
 	--[[  Chinese  ]]--
 	--嗨 大家好  团购金币送代练 炼金龙 还有各职业账号 详情请咨询 谢谢$18=10k;$90=50k+1000G free;$180=100k+2000g+月卡，也可用G 换月卡
@@ -754,6 +769,7 @@ local instantReportList = {
 	"game4ok[%.,]c.*livechat", --{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}[www.game4ok.cQm]{rt4}{rt4}{rt4}[game4ok.cQm]{rt4}{rt4}800K G in sotck{rt5}{rt5}{rt5}traden in 10minutes{rt5}{[RT5game4ok.cQm]{rt5}{rt5}{rt5} [game4ok.cQm]{rt6}{rt6}{rt6}{rt6}[game4ok.cQm] contact by;Live Chat {rt4}{rt4}{rt4}{rt4}
 	"raidbroker[%.,]com.*skype", --Both Horde/Alliance teams! http://raidbroker.com ~ Jarvis.Dresden on Skype!!
 	"g@ld.*livraison.*exclusiv", --Envie de G@LD pour bien commencer WoD, livraison en moins de 5 min en exclusivité sur ysondre
+	"verkaufengold.*skype", --{rt7}Wir Verkaufen Gold sehr Günstig. Skypename : betz-210{rt7}
 }
 
 --This is the replacement table. It serves to deobfuscate words by replacing letters with their English "equivalents".
@@ -762,6 +778,7 @@ local repTbl = {
 	["с"]="c", ["ç"]="c", --First letter is Russian "\209\129". Convert > \99
 	["е"]="e", ["è"]="e", ["é"]="e", ["ë"]="e", ["ё"]="e",["ê"]="e", --First letter is Russian "\208\181". Convert > \101
 	["ì"]="i", ["í"]="i", ["ï"]="i", ["î"]="i", --Convert > \105
+	["к"]="k", -- First letter is Russian "\208\186". Convert > \107
 	["Μ"]="m", ["м"]="m",--First letter is capital Greek μ "\206\156". Convert > \109
 	["о"]="o", ["ò"]="o", ["ó"]="o", ["ö"]="o", ["ō"]="o", ["ô"]="o", ["õ"]="o", --First letter is Russian "\208\190". Convert > \111
 	["р"]="p", --First letter is Russian "\209\128". Convert > \112
@@ -892,7 +909,7 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 	--End symbol & space removal
 
 	--They like to replace English letters with UTF-8 "equivalents" to avoid detection
-	if strfind(msg, "[аàáäâãåсçеèéëёêìíïîΜмоòóöōôõрùúüû]+") then --Only run the string replacement if the chat line has letters that need replaced
+	if strfind(msg, "[аàáäâãåсçеèéëёêìíïîкΜмоòóöōôõрùúüû]+") then --Only run the string replacement if the chat line has letters that need replaced
 		--This is no where near as resource intensive as I originally thought, it barely uses any CPU
 		for k,v in next, repTbl do --Parse over the 'repTbl' table and replace strings
 			msg = gsub(msg, k, v)
@@ -976,7 +993,6 @@ end
 
 --[[ Add Filters ]]--
 ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter)
@@ -987,57 +1003,16 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_AFK", filter)
 do
 	local f = CreateFrame("Frame")
 	f:RegisterEvent("PLAYER_LOGIN")
-	f:SetScript("OnEvent", function(frame,event,bnEvent)
-		if event == "PLAYER_LOGIN" or bnEvent == "FRIEND_REQUEST" or bnEvent == "FRIEND_PENDING" then
-			if event == "PLAYER_LOGIN" then
-				SetCVar("spamFilter", 1)
+	f:SetScript("OnEvent", function(frame)
+		SetCVar("spamFilter", 1)
 
-				-- Throw blacklist DB setup in here
-				if not BADBOY_BLACKLIST then BADBOY_BLACKLIST = {} end
-				local _, _, day = CalendarGetDate()
-				if BADBOY_BLACKLIST.dayFromCal ~= day then wipe(BADBOY_BLACKLIST) end
-				BADBOY_BLACKLIST.dayFromCal = day
-
-				frame:RegisterEvent("CHAT_MSG_BN_INLINE_TOAST_ALERT")
-				frame:UnregisterEvent("PLAYER_LOGIN")
-			end
-			for i=BNGetNumFriendInvites(), 1, -1 do
-				local id, player, _, msg = BNGetFriendInviteInfo(i)
-				if type(msg) == "string" then
-					local debug = msg
-					msg = msg:lower() --Lower all text, remove capitals
-
-					--Symbol & space removal
-					msg = gsub(msg, "[%*%-%(%)\"`'_%+#%%%^&;:~{} ]", "")
-					msg = gsub(msg, "¨", "")
-					msg = gsub(msg, "”", "")
-					msg = gsub(msg, "“", "")
-					--End symbol & space removal
-
-					--They like to replace English letters with UTF-8 "equivalents" to avoid detection
-					if strfind(msg, "[аàáäâãåсçеèéëёêìíïîΜмоòóöōôõùúüû]+") then --Only run the string replacement if the chat line has letters that need replaced
-						--This is no where near as resource intensive as I originally thought, it barely uses any CPU
-						for k,v in next, repTbl do --Parse over the 'repTbl' table and replace strings
-							msg = gsub(msg, k, v)
-						end
-						if myDebug then print("Running replacements for BNET") end
-					end
-					--End string replacements
-
-					if IsSpam(msg, 0) then
-						if myDebug then
-							print("BNET invite", i, "is spam from player:", player)
-						else
-							ChatFrame1:AddMessage(reportBnet:format(player), 0.2, 1, 0.6)
-							if BadBoyLog then
-								BadBoyLog("BadBoy", "CHAT_MSG_BNET_INVITE", "", debug)
-							end
-							BNReportFriendInvite(id, "SPAM", "")
-						end
-					end
-				end
-			end
+		-- Blacklist DB setup, needed since Blizz nerfed ReportPlayer so hard the block sometimes only lasts a few minutes.
+		local _, _, day = CalendarGetDate()
+		if type(BADBOY_BLACKLIST) ~= "table" or BADBOY_BLACKLIST.dayFromCal ~= day then
+			BADBOY_BLACKLIST = {dayFromCal = day}
 		end
+
+		frame:UnregisterEvent("PLAYER_LOGIN")
 	end)
 end
 

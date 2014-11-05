@@ -4,7 +4,7 @@
 ## Author: Tomber
 ## Dependencies: Raven
 ## LoadOnDemand: 1
-## X-Curse-Packaged-Version: r331
+## X-Curse-Packaged-Version: r333
 ## X-Curse-Project-Name: Raven
 ## X-Curse-Project-ID: raven
 ## X-Curse-Repository-ID: wow/raven/mainline

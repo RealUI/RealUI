@@ -1104,7 +1104,9 @@ function Skada:Reset()
 
 	self:UpdateDisplay(true)
 	self:Print(L["All data has been reset."])
-	collectgarbage("collect")
+	if not InCombatLockdown() then -- ticket 377: avoid timeout errors in combat because GC can run too long
+		collectgarbage("collect")
+	end
 end
 
 -- Delete a set.

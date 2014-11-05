@@ -1,9 +1,82 @@
 ------------------------------------------------------------------------
-r1239 | funkydude | 2014-10-14 22:20:23 +0000 (Tue, 14 Oct 2014) | 1 line
+r1253 | funkydude | 2014-11-02 16:11:20 +0000 (Sun, 02 Nov 2014) | 1 line
 Changed paths:
-   A /tags/v12.408 (from /trunk:1238)
+   A /tags/v12.428 (from /trunk:1252)
 
-Tagging as v12.408
+Tagging as v12.428
+------------------------------------------------------------------------
+r1252 | funkydude | 2014-11-02 16:06:02 +0000 (Sun, 02 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1251 | funkydude | 2014-11-02 14:21:40 +0000 (Sun, 02 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1250 | funkydude | 2014-11-01 14:53:32 +0000 (Sat, 01 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1249 | funkydude | 2014-10-30 09:05:00 +0000 (Thu, 30 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1248 | funkydude | 2014-10-30 08:53:10 +0000 (Thu, 30 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1246 | funkydude | 2014-10-27 15:57:21 +0000 (Mon, 27 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+
+cleanup comments
+------------------------------------------------------------------------
+r1245 | funkydude | 2014-10-27 15:39:34 +0000 (Mon, 27 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+
+Remove old locale string
+------------------------------------------------------------------------
+r1244 | funkydude | 2014-10-27 15:13:33 +0000 (Mon, 27 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1243 | funkydude | 2014-10-27 14:53:53 +0000 (Mon, 27 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+
+Remove BNet invite scanning. To my knowledge, Blizzard removed the ability to send messages along with friend invites in v6. Most likely due to abuse by spammers.
+------------------------------------------------------------------------
+r1241 | funkydude | 2014-10-21 22:22:22 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+
+anti-spam update
+------------------------------------------------------------------------
+r1240 | funkydude | 2014-10-21 22:16:12 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
 ------------------------------------------------------------------------
 r1238 | funkydude | 2014-10-14 22:14:32 +0000 (Tue, 14 Oct 2014) | 1 line
 Changed paths:
@@ -139,27 +212,6 @@ Changed paths:
 anti-spam update
 ------------------------------------------------------------------------
 r1216 | funkydude | 2014-10-02 17:39:48 +0000 (Thu, 02 Oct 2014) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1214 | funkydude | 2014-09-29 23:32:30 +0000 (Mon, 29 Sep 2014) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1213 | funkydude | 2014-09-29 23:25:30 +0000 (Mon, 29 Sep 2014) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1212 | funkydude | 2014-08-10 10:59:12 +0000 (Sun, 10 Aug 2014) | 1 line
 Changed paths:
    M /trunk/BadBoy.lua
    M /trunk/BadBoy.toc

@@ -158,12 +158,6 @@ C.themes["Blizzard_PetJournal"] = function()
 	PetJournal.HealPetButton:SetPushedTexture("")
 	F.CreateBG(PetJournal.HealPetButton)
 
-	MountJournalSummonRandomFavoriteButton:SetPoint("TOPRIGHT", -7, -32)
-	MountJournalSummonRandomFavoriteButtonBorder:Hide()
-	MountJournalSummonRandomFavoriteButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
-	MountJournalSummonRandomFavoriteButton:SetPushedTexture("")
-	F.CreateBG(MountJournalSummonRandomFavoriteButton)
-
 	do
 		local ic = MountJournal.MountDisplay.InfoButton.Icon
 		ic:SetTexCoord(.08, .92, .08, .92)
@@ -182,6 +176,23 @@ C.themes["Blizzard_PetJournal"] = function()
 
 	PetJournalLoadoutBorderSlotHeaderText:SetParent(PetJournal)
 	PetJournalLoadoutBorderSlotHeaderText:SetPoint("CENTER", PetJournalLoadoutBorderTop, "TOP", 0, 4)
+
+	-- Favourite mount button
+
+	MountJournalSummonRandomFavoriteButtonBorder:Hide()
+	MountJournalSummonRandomFavoriteButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
+	MountJournalSummonRandomFavoriteButton:SetPushedTexture("")
+	F.CreateBG(MountJournalSummonRandomFavoriteButton)
+
+	do
+		local movedButton = false
+		MountJournal:HookScript("OnShow", function()
+			if not InCombatLockdown() then
+				MountJournalSummonRandomFavoriteButton:SetPoint("TOPRIGHT", -7, -32)
+				movedButton = true
+			end
+		end)
+	end
 
 	-- Pet card
 

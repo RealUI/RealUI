@@ -23,7 +23,6 @@
 local MOD = Raven
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
 local LSPELL = MOD.LocalSpellNames
-local media = LibStub("LibSharedMedia-3.0")
 
 local dispelTypes = {} -- table of debuff types that the character can dispel
 local spellColors = {} -- table of default spell colors
@@ -644,7 +643,7 @@ function MOD:RegisterSpellList(name, spellList, reset)
 end
 
 -- Register Raven's media entries to LibSharedMedia
-function MOD:InitializeMedia()
+function MOD:InitializeMedia(media)
 	local mt = media.MediaType.SOUND
 	media:Register(mt, "Raven Alert", [[Interface\Addons\Raven\Sounds\alert.ogg]])
 	media:Register(mt, "Raven Bell", [[Interface\Addons\Raven\Sounds\bell.ogg]])

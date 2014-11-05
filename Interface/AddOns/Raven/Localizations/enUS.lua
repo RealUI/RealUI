@@ -708,6 +708,8 @@ L["When showing all buffs or debuffs cast by player without headers, show spell 
 L["When showing all buffs or debuffs cast by player without headers, keep spacing between groups."] = true
 L["Clock Direction"] = true
 L["Set empty/fill direction for clock animations on icons."] = true
+L["External Fader"] = true
+L["Support external fader addons by disabling bar group opacity options (requires /reload)."] = true
 
 -- Bar Groups > Custom Bars tab
 L["Custom Bars"] = true
@@ -721,6 +723,8 @@ L["Auto Buffs"] = true
 L['Enable automatically displaying bars for buffs that match these settings.'] = true
 L["All Cast By Player"] = true
 L['Include all buffs cast by player on others.'] = true
+L["Include Totems"] = true
+L['Include active totems as buffs.'] = true
 L["Action On"] = true
 L["If checked, only add bars for buffs if they are on the player."] = true
 L["If checked, only add bars for buffs if they are on the player's pet."] = true

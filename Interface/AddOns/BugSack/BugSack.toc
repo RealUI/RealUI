@@ -14,7 +14,7 @@
 ## X-License: All Rights Reserved
 ## X-BugGrabber-Display: BugSack
 ## X-WoWI-ID: 5995
-## X-Curse-Packaged-Version: r281-release
+## X-Curse-Packaged-Version: r283-release
 ## X-Curse-Project-Name: BugSack
 ## X-Curse-Project-ID: bugsack
 ## X-Curse-Repository-ID: wow/bugsack/mainline

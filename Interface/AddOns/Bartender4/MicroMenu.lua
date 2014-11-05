@@ -70,11 +70,12 @@ function MicroMenuMod:OnEnable()
 	self:SecureHookScript(OverrideActionBar, "OnHide", "MicroMenuBarShow")
 	self:SecureHookScript(PetBattleFrame.BottomFrame.MicroButtonFrame, "OnShow", "BlizzardBarShow")
 	self:SecureHookScript(PetBattleFrame.BottomFrame.MicroButtonFrame, "OnHide", "MicroMenuBarShow")
-	self:MicroMenuBarShow()
 
 	self.bar:Enable()
 	self:ToggleOptions()
 	self:ApplyConfig()
+
+	self:MicroMenuBarShow()
 end
 
 function MicroMenuMod:ApplyConfig()

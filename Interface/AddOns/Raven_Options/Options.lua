@@ -87,7 +87,7 @@ local function GetSortedListEntry(list, n) for i, k in pairs(GetSortedList(list)
 -- Update the addon when the profile changes
 local function OnProfileChanged()
 	conditions.profiles = {} -- necessary since this is not cached in the profile itself
-	MOD:InitializeBars() -- required because of the linkage between the profile and LibBars
+	MOD:InitializeBars() -- required because of the linkage between the profile and graphics library
 end
 
 -- Initialize options for the configuration GUI
@@ -1420,7 +1420,7 @@ local function ConfigureBarGroups(style)
 	end
 	if standard.Totems then
 		local bg = CreateBarGroup(L["Totems"], true, false, style, 0, offsetY)
-		bg.detectTotems = true; bg.showNoDuration = true; bg.sor = "C"; bg.showNoDurationBackground = false
+		bg.detectTotems = true; bg.showNoDuration = true; bg.showNoDurationBackground = false
 		offsetY = offsetY + delta
 	end
 	if standard.Runes then
@@ -3597,24 +3597,28 @@ MOD.OptionsTable = {
 								InCombatlpha = {
 									type = "range", order = 10, name = L["In Combat"], min = 0, max = 1, step = 0.05,
 									desc = L["Set opacity for bar group when in combat."],
+									disabled = function(info) return GetBarGroupField("disableAlpha") end,
 									get = function(info) return GetBarGroupField("bgCombatAlpha") end,
 									set = function(info, value) SetBarGroupField("bgCombatAlpha", value) end,
 								},
 								OutOfCombatAlpha = {
 									type = "range", order = 20, name = L["Out Of Combat"], min = 0, max = 1, step = 0.05,
 									desc = L["Set opacity for bar group when out of combat."],
+									disabled = function(info) return GetBarGroupField("disableAlpha") end,
 									get = function(info) return GetBarGroupField("bgNormalAlpha") end,
 									set = function(info, value) SetBarGroupField("bgNormalAlpha", value) end,
 								},
 								MouseAlpha = {
 									type = "range", order = 30, name = L["Mouseover"], min = 0, max = 1, step = 0.05,
 									desc = L["Set opacity for bar group when mouse is over it (overrides in and out of combat opacities)."],
+									disabled = function(info) return GetBarGroupField("disableAlpha") end,
 									get = function(info) return GetBarGroupField("mouseAlpha") end,
 									set = function(info, value) SetBarGroupField("mouseAlpha", value) end,
 								},
 								FadeAlpha = {
 									type = "range", order = 40, name = L["Fade Effects"], min = 0, max = 1, step = 0.05,
 									desc = L["Set opacity for faded bars."],
+									disabled = function(info) return GetBarGroupField("disableAlpha") end,
 									get = function(info) return GetBarGroupField("fadeAlpha") end,
 									set = function(info, value) SetBarGroupField("fadeAlpha", value) end,
 								},
@@ -3882,6 +3886,7 @@ MOD.OptionsTable = {
 								},
 								TargetAlpha = {
 									type = "range", order = 65, name = L["Non-Target Opacity"], min = 0, max = 1, step = 0.05,
+									hidden = function(info) return not GetBarGroupField("auto") end,
 									desc = L["When showing all buffs or debuffs cast by player, set opacity for ones not on target."],
 									get = function(info) return GetBarGroupField("targetAlpha") end,
 									set = function(info, value) SetBarGroupField("targetAlpha", value) end,
@@ -3916,6 +3921,12 @@ MOD.OptionsTable = {
 									desc = L["Set empty/fill direction for clock animations on icons."],
 									get = function(info) return GetBarGroupField("clockReverse") end,
 									set = function(info, value) SetBarGroupField("clockReverse", value) end,
+								},
+								KongAlpha = {
+									type = "toggle", order = 85, name = L["External Fader"],
+									desc = L["Support external fader addons by disabling bar group opacity options (requires /reload)."],
+									get = function(info) return GetBarGroupField("disableAlpha") end,
+									set = function(info, value) SetBarGroupField("disableAlpha", value) end,
 								},
 							},
 						},
@@ -3961,6 +3972,14 @@ MOD.OptionsTable = {
 									desc = L['Include all buffs cast by player on others.'],
 									get = function(info) return GetBarGroupField("detectAllBuffs") end,
 									set = function(info, value) SetBarGroupField("detectAllBuffs", value) end,
+								},
+								IncludeTotems = {
+									type = "toggle", order = 10, name = L["Include Totems"],
+									disabled = function(info) return not GetBarGroupField("detectBuffs") end,
+									hidden = function(info) return MOD.myClass ~= "SHAMAN" end,
+									desc = L['Include active totems as buffs.'],
+									get = function(info) return GetBarGroupField("includeTotems") end,
+									set = function(info, value) SetBarGroupField("includeTotems", value) end,
 								},
 							},
 						},

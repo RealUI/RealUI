@@ -38,6 +38,23 @@ function ActionBar:ApplyConfig(config)
 	self:UpdateButtonConfig()
 end
 
+function ActionBar:OnEvent(event, ...)
+	if event == "PLAYER_TALENT_UPDATE" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "LEARNED_SPELL_IN_TAB" then
+		if InCombatLockdown() then
+			self.updateSmartTargetOnOutOfCombat = true
+		else
+			self:SetupSmartTarget()
+		end
+	elseif event == "PLAYER_REGEN_ENABLED" then
+		if self.updateSmartTargetOnOutOfCombat and not InCombatLockdown() then
+			self.updateSmartTargetOnOutOfCombat = nil
+			self:SetupSmartTarget()
+		end
+	end
+
+	StateBar.OnEvent(self, event, ...)
+end
+
 function ActionBar:UpdateButtonConfig()
 	StateBar.UpdateButtonConfig(self)
 	if not self.buttonConfig then self.buttonConfig = { colors = { range = {}, mana = {} }, hideElements = {} } end
@@ -99,10 +116,26 @@ local UpdateSmartTarget = [[
 ]]
 
 function ActionBar:SetupSmartTarget()
-	self:Execute([[
+	local s = [[
 		BT_Spell_Overrides = newtable()
 		BT_Spell_Overrides[93402] = 8921 -- sunfire -> moonfire
-	]])
+	]]
+
+	local i = 1
+	local subtype, action = GetSpellBookItemInfo(i, "spell")
+	while subtype do
+		if subtype == "SPELL" then
+			local spellId = select(7, GetSpellInfo(i, "spell"))
+			if spellId and spellId ~= action then
+				s = s .. "\n" .. ([[ BT_Spell_Overrides[%d] = %d ]]):format(spellId, action)
+			end
+		end
+
+		i = i + 1
+		subtype, action = GetSpellBookItemInfo(i, "spell")
+	end
+
+	self:Execute(s)
 
 	self:SetAttribute("ChildUpdateSmartTarget", UpdateSmartTarget)
 end

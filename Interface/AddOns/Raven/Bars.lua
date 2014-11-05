@@ -49,7 +49,7 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	soundSpellStart = false, soundSpellEnd = false, soundSpellExpire = false, soundAltStart = "None", soundAltEnd = "None", soundAltExpire = "None",
 	labelOffset = 0, labelInset = 0, labelWrap = false, labelCenter = false, labelAlign = "MIDDLE",
 	timeOffset = 0, timeInset = 0, timeAlign = "normal", timeIcon = false, iconOffset = 0, iconInset = 0, iconHide = false, iconAlign = "CENTER",
-	expireTime = 5, expireMinimum = 0, colorExpiring = false, expireMSBT = false, criticalMSBT = false, clockReverse = true, -- clockEdge = false,
+	expireTime = 5, expireMinimum = 0, colorExpiring = false, expireMSBT = false, criticalMSBT = false, clockReverse = true, disableAlpha = false,
 	expireColor = false, expireLabelColor = false, expireTimeColor = false, desaturate = false, desaturateFriend = false,
 	timelineWidth = 225, timelineHeight = 25, timelineDuration = 300, timelineExp = 3, timelineHide = false, timelineAlternate = true,
 	timelineSwitch = 2, timelineTexture = "Blizzard", timelineAlpha = 1, timelineColor = false, timelineLabels = false,
@@ -58,7 +58,7 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showPrimary = true, showSecondary = true,
 	showResting = true, showMounted = true, showVehicle = true, showFriendly = true, showEnemy = true, showBlizz = true, showNotBlizz = true,
 	detectBuffs = false, detectDebuffs = false, detectAllBuffs = false, detectAllDebuffs = false, detectDispellable = false, detectInflictable = false,
-	detectNPCDebuffs = false, detectVehicleDebuffs = false, detectBoss = false,
+	detectNPCDebuffs = false, detectVehicleDebuffs = false, detectBoss = false, includeTotems = false,
 	noHeaders = false, noTargets = false, noLabels = false, headerGaps = false, targetFirst = false, targetAlpha = 1, replay = false, replayTime = 5,
 	detectCastable = false, detectStealable = false, detectMagicBuffs = false, detectEffectBuffs = false, detectWeaponBuffs = false,
 	detectNPCBuffs = false, detectVehicleBuffs = false, detectOtherBuffs = false, detectBossBuffs = false, detectEnrageBuffs = false,
@@ -459,11 +459,12 @@ local function GetSoundsForBar(bg, bar)
 	return start, finish, expire, et, mt, replay, replayTime
 end
 
--- Initialize bar group in LibBars and set default values from those set in profile
+-- Initialize bar group in graphics library and set default values from those set in profile
 function MOD:InitializeBarGroup(bp, offsetX, offsetY)
 	local bg = MOD.Nest_GetBarGroup(bp.name)
 	if not bg then bg = MOD.Nest_CreateBarGroup(bp.name) end
 	if bp.linkSettings then UpdateLinkedSettings(bp, false) end
+	if bp.sor == "C" then bp.sor = "A" end -- fix out-dated sort setting
 	if bp.auto then -- initialize the auto bar group filter lists
 		if (bp.filterBuff or bp.showBuff) and bp.filterBuffLink then UpdateLinkedFilter(bp, false, "Buff") end -- shared settings for buffs
 		if (bp.filterDebuff or bp.showDebuff) and bp.filterDebuffLink then UpdateLinkedFilter(bp, false, "Debuff") end -- shared settings for debuffs
@@ -525,14 +526,6 @@ end
 local function ResetCache(bg, block)
 	if bg.cache and bg.cache.block then table.wipe(bg.cache.block) end
 end
-
--- Bar sorting functions, assumes sort order was built into name
-local function SortAlphaUp(a, b) return a.name > b.name end
-local function SortAlphaDown(a, b) return a.name < b.name end
-local function SortTimeLeftUp(a, b) if a.value ~= b.value then return a.value > b.value else return a.name > b.name end end
-local function SortTimeLeftDown(a, b) if a.value ~= b.value then return a.value < b.value else return a.name < b.name end end
-local function SortDurationUp(a, b) if a.maxValue ~= b.maxValue then return a.maxValue > b.maxValue else return a.name > b.name end end
-local function SortDurationDown(a, b) if a.maxValue ~= b.maxValue then return a.maxValue < b.maxValue else return a.name < b.name end end
 
 -- Update a bar group in with the current values in the profile
 function MOD:UpdateBarGroup(bp)
@@ -666,7 +659,7 @@ function MOD:ToggleBarGroupLocks()
 	MOD:LockBarGroups(not anyLocked)
 end
 
--- Release all the bars in the named bar group in LibBars
+-- Release all the bars in the named bar group in the graphics library
 function MOD:ReleaseBarGroup(bp)
 	if bp then 
 		local bg = MOD.Nest_GetBarGroup(bp.name)
@@ -833,6 +826,7 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 	
 	local bar, barname, label = nil, b.barLabel .. b.uniqueID, b.barLabel
 	if vbp.sor == "X" then barname = string.format("%05d ", b.sorder) .. barname end
+	if bp.detectTotems then barname = b.uniqueID .. b.barLabel end -- use slot order for auto-generated totem bars
 	
 	local maxTime = duration
 	if vbp.setDuration then maxTime = vbp.uniformDuration end -- override with uniform duration for all bars in group
@@ -1045,14 +1039,15 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	if bp.filterBuffBars and CheckFilterBarGroup(bp.filterBuffBarGroup, "Buff", n, bp.detectBuffsMonitor) then return end -- check if in filter bar group
 	local label = MOD:GetLabel(n, aura[14]) -- check if there is a cached label for this action or spellid
 	local checkTracking = not (bp.detectTracking and bp.detectOnlyTracking)
-	if (aura[4] == "Tracking") then checkTracking = bp.detectTracking end
-	local tt, ta, tc = aura[11], aura[12], aura[6]
+	local tt, ta, tc, ttype = aura[11], aura[12], aura[6], aura[4]
+	if (ttype == "Tracking") then checkTracking = bp.detectTracking end -- check if including tracking
+	if (ttype == "Totem") and not bp.includeTotems then return end -- check if including totems
 	local isStealable = (aura[7] == 1)
 	local isNPC = aura[18]
 	local isVehicle = aura[19]
 	local isBoss = (aura[15] ~= nil)
-	local isEnrage = (aura[4] == "")
-	local isMagic = (aura[4] == "Magic") and not isStealable
+	local isEnrage = (ttype == "")
+	local isMagic = (ttype == "Magic") and not isStealable
 	local isEffect = (tt == "effect")
 	local isWeapon = (tt == "weapon")
 	local isCastable = aura[17] and not isWeapon
@@ -1085,7 +1080,7 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		b.group = id -- if unit is "all" then this is GUID of unit with buff, otherwise it is nil
 		b.groupName = gname -- if unit is "all" then this is the name of the unit with buff, otherwise it is nil
 		b.uniqueID = tag; b.listID = listID; b.barLabel = label
-		UpdateBar(bp, vbp, bg, b, aura[8], aura[2], aura[5], aura[3], aura[4], tt, ta, unit, aura[16], isMine)
+		UpdateBar(bp, vbp, bg, b, aura[8], aura[2], aura[5], aura[3], ttype, tt, ta, unit, aura[16], isMine)
 	end
 end
 
@@ -1215,19 +1210,23 @@ local totemSlotName = { [1] = L["Fire Totem"], [2] = L["Earth Totem"], [3] = L["
 -- Automatically generate totem bars for the four totem slots
 local function AutoTotemBars(bp, vbp, bg)
 	if MOD.myClass ~= "SHAMAN" then return end
+	local now = GetTime()
 	for i = 1, 4 do
+		local slotDone = false
 		local b = detectedBar
 		b.barType = "Cooldown"; b.uniqueID = "Totem" .. i; b.group = nil
 		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
-		if haveTotem and name and name ~= "" then -- generate timer bar for the totem in the slot
-			local timeLeft = duration - (GetTime() - startTime)
+		if haveTotem and name and name ~= "" and now <= (startTime + duration) then -- generate timer bar for the totem in the slot
+			local timeLeft = duration - (now - startTime)
 			if CheckTimeAndDuration(bp, timeLeft, duration) then
-				b.action = name; b.barLabel = name; b.spellID = nil
+				b.action = name; b.barLabel = MOD:GetLabel(name); b.spellID = nil
 				UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, nil, nil, "totem", i, "player", nil, true)
+				slotDone = true
 			end
-		else -- generate ready bar with no duration
+		end
+		if not slotDone then -- generate ready bar with no duration
 			if CheckTimeAndDuration(bp, 0, 0) then
-				b.action = totemSlotName[i]; b.barLabel = b.action; b.spellID = nil
+				b.action = totemSlotName[i]; b.barLabel = MOD:GetLabel(b.action); b.spellID = nil
 				UpdateBar(bp, vbp, bg, b, nil, 0, 0, nil, nil, "text", b.action, nil, nil, true)
 			end
 		end
@@ -1406,7 +1405,7 @@ function MOD:UpdateBars()
 	
 	for _, bp in pairs(MOD.db.profile.BarGroups) do -- iterate through the all bar groups
 		if IsOn(bp) then
-			local bg = MOD.Nest_GetBarGroup(bp.name) -- match the profile bar group to the LibBars bar group
+			local bg = MOD.Nest_GetBarGroup(bp.name) -- match the profile bar group to the graphics library bar group
 			if bg then	
 				if bp.enabled then -- check all the conditions under which the bar group might be hidden are not true
 					MOD.Nest_SetAllAttributes(bg, "updated", false) -- first, mark all the bars in the group as not updated...
@@ -1417,7 +1416,7 @@ function MOD:UpdateBars()
 								UpdateBarGroupBars(mbp, bp, bg) -- update all bars for merged bar group into same display bar group
 							end
 						end
-						MOD.Nest_SetBarGroupAlpha(bg, MOD.status.inCombat and bp.bgCombatAlpha or bp.bgNormalAlpha, bp.mouseAlpha)
+						MOD.Nest_SetBarGroupAlpha(bg, MOD.status.inCombat and bp.bgCombatAlpha or bp.bgNormalAlpha, bp.mouseAlpha, bp.disableAlpha)
 					end				
 					UpdateGhostBars(bp, bg) -- create and/or update ghost bars in this bar group
 					UpdateTestBars(bp, bg) -- update any unexpired test bars in this bar group

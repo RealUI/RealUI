@@ -173,8 +173,7 @@ end
 
 local function createBugSack()
 	window = CreateFrame("Frame", "BugSackFrame", UIParent)
-	UIPanelWindows.BugSackFrame = { area = "center", pushable = 0, whileDead = 1 }
-	HideUIPanel(window)
+	window:Hide()
 
 	window:SetFrameStrata("FULLSCREEN_DIALOG")
 	window:SetWidth(500)
@@ -373,7 +372,7 @@ local function createBugSack()
 			local eo = currentSackContents[currentErrorIndex]
 			local popup = StaticPopup_Show("BugSackSendBugs", eo.session)
 			popup.data = eo.session
-			HideUIPanel(window)
+			window:Hide()
 		end)
 	end
 
@@ -442,11 +441,11 @@ local function show()
 		createBugSack = nil
 	end
 	updateSackDisplay()
-	ShowUIPanel(window)
+	window:Show()
 end
 
 function addon:CloseSack()
-	HideUIPanel(window)
+	window:Hide()
 end
 
 function addon:OpenSack(errorObject)

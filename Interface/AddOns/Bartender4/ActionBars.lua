@@ -176,6 +176,12 @@ function BT4ActionBars:Create(id, config)
 	local bar = setmetatable(Bartender4.StateBar:Create(id, config, (L["Bar %s"]):format(id)), ActionBar_MT)
 	bar.module = self
 
+	bar:SetScript("OnEvent", bar.OnEvent)
+	bar:RegisterEvent("PLAYER_TALENT_UPDATE")
+	bar:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	bar:RegisterEvent("LEARNED_SPELL_IN_TAB")
+	bar:RegisterEvent("PLAYER_REGEN_ENABLED")
+
 	self:CreateBarOption(id)
 
 	bar:ApplyConfig()
