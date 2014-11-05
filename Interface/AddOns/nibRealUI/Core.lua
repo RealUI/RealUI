@@ -27,7 +27,6 @@ do
 		esES = true,
 		esMX = true,
 		ptBR = true,
-		ruRU = true,
 	}
 
 	if not(nibRealUI.locale) or StandardLanguageSupport[nibRealUI.locale] then
@@ -36,6 +35,16 @@ do
 			pixel = {
 				small =		{"pixel_small",		8,	"MONOCHROMEOUTLINE"},
 				large =		{"pixel_large",		8,	"MONOCHROMEOUTLINE"},
+				numbers =	{"pixel_numbers",	16,	"MONOCHROMEOUTLINE"},
+				cooldown =	{"pixel_cooldown",	16,	"MONOCHROMEOUTLINE"},
+			}
+		}
+	elseif nibRealUI.locale == "ruRU" then
+		nibRealUI.defaultFonts = {
+			standard = {"Standard"},
+			pixel = {
+				small =		{"Standard Regular",	10,	"OUTLINE"},
+				large =		{"Standard Regular",	11,	"OUTLINE"},
 				numbers =	{"pixel_numbers",	16,	"MONOCHROMEOUTLINE"},
 				cooldown =	{"pixel_cooldown",	16,	"MONOCHROMEOUTLINE"},
 			}

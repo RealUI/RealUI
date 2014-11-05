@@ -16,7 +16,9 @@ LSM:Register("border", "Seerah Solid", [[Interface\Addons\SharedMedia_MyMedia\bo
 -- -----
 --   FONT
 -- -----
-LSM:Register("font", "Standard", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]])
+LSM:Register("font", "Standard", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]], 130)
+LSM:Register("font", "Standard Regular", [[Interface\Addons\nibRealUI\Fonts\standard_regular.ttf]], 130)
+LSM:Register("font", "Standard Medium", [[Interface\Addons\nibRealUI\Fonts\standard_medium.ttf]], 130)
 LSM:Register("font", "pixel_small", [[Interface\Addons\nibRealUI\Fonts\pixel_small.ttf]])
 LSM:Register("font", "pixel_large", [[Interface\Addons\nibRealUI\Fonts\pixel_large.ttf]])
 LSM:Register("font", "pixel_numbers", [[Interface\Addons\nibRealUI\Fonts\pixel_numbers.ttf]])
