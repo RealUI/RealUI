@@ -41,10 +41,10 @@ do
 		}
 	elseif nibRealUI.locale == "ruRU" then
 		nibRealUI.defaultFonts = {
-			standard = {"Standard"},
+			standard = {"Standard RU"},
 			pixel = {
-				small =		{"Standard Regular",	10,	"OUTLINE"},
-				large =		{"Standard Regular",	11,	"OUTLINE"},
+				small =		{"Standard Regular RU",	10,	"OUTLINE"},
+				large =		{"Standard Regular RU",	11,	"OUTLINE"},
 				numbers =	{"pixel_numbers",	16,	"MONOCHROMEOUTLINE"},
 				cooldown =	{"pixel_cooldown",	16,	"MONOCHROMEOUTLINE"},
 			}

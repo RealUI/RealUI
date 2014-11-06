@@ -376,6 +376,7 @@ local function GetOptions()
 end
 
 local function SetFont(obj, font, size, style, color, shadow, x, y)
+    if not obj then return end
     obj:SetFont(font, size + db.standard.sizeadjust, style)
     if shadow then obj:SetShadowColor(shadow[1], shadow[2], shadow[3], shadow[4]) end
     if x and y then obj:SetShadowOffset(x, y) end
