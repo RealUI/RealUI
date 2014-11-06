@@ -5,7 +5,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	<Script file="AddonData\Bartender4.lua"/>
 	<Script file="AddonData\BugGrabber.lua"/>
 	<Script file="AddonData\BugSack.lua"/>
-	<Script file="AddonData\Chatter.lua"/>
 	<Script file="AddonData\DBM.lua"/>
 	<Script file="AddonData\DXE.lua"/>
 	<Script file="AddonData\FreebTip.lua"/>

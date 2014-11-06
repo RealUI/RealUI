@@ -7,7 +7,6 @@ local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {
-	["Chatter"] =					{isAce = true,	db = "ChatterDB"},
 	["DXE"] =						{isAce = true,	db = "DXEDB"},
 	["DBM"] =						{isAce = false,	db = "DBT_PersistentOptions"},
 	["Masque"] =					{isAce = true,	db = "MasqueDB"},
@@ -19,7 +18,6 @@ local RealUIAddOns = {
 	["mikScrollingBattleText"] =	{isAce = false,	db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
-	"Chatter",
 	"DXE",
 	"DBM",
 	"KuiNameplates",
@@ -333,16 +331,6 @@ function AddonControl:OnInitialize()
 	self.db:RegisterDefaults({
 		profile = {
 			addonControl = {
-				["Chatter"] = {
-					profiles = {
-						base =			{use = true,	key = "RealUI"},
-						layout =		{use = false,	key = "Healing"},
-					},	
-					control = {
-						position = false,
-						style = false,
-					},
-				},
 				["DXE"] = {
 					profiles = {
 						base =			{use = true,	key = "RealUI"},

@@ -5,7 +5,6 @@ nibRealUI.AddOns = {
 	"BugGrabber",
 	"BugSack",
 	"Bartender4",
-	"Chatter",
 	"DXE",
 	"DBM-StatusBarTimers",
 	"FreebTip",

@@ -10,7 +10,7 @@ local MODNAME = "ConfigBar_Other"
 local ConfigBar_Other = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local Element = {}
-local buttonCount = 3
+local buttonCount = 2
 local buttonWidth = 120
 local buttonHeight = 24
 
@@ -39,15 +39,6 @@ function ConfigBar_Other:SetupWindow()
 			justifyH = "LEFT",
 			x = 0,
 			y = -1,
-		},
-		{
-			label = CHAT_OPTIONS_LABEL,
-			func = function()
-				local Chatter = LibStub("AceAddon-3.0"):GetAddon("Chatter", true)
-				if Chatter then Chatter:OpenConfig() end
-				self:Close()
-			end,
-			isDisabled = not(IsAddOnLoaded("Chatter")),
 		},
 		{
 			label = UNIT_NAMEPLATES ,

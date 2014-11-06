@@ -16,14 +16,19 @@ LSM:Register("border", "Seerah Solid", [[Interface\Addons\SharedMedia_MyMedia\bo
 -- -----
 --   FONT
 -- -----
-LSM:Register("font", "Standard", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]], 130)
-LSM:Register("font", "Standard Regular", [[Interface\Addons\nibRealUI\Fonts\standard_regular.ttf]], 130)
-LSM:Register("font", "Standard Medium", [[Interface\Addons\nibRealUI\Fonts\standard_medium.ttf]], 130)
+LSM:Register("font", "Standard", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]])
+LSM:Register("font", "Standard Regular", [[Interface\Addons\nibRealUI\Fonts\standard_regular.ttf]])
+LSM:Register("font", "Standard Medium", [[Interface\Addons\nibRealUI\Fonts\standard_medium.ttf]])
 LSM:Register("font", "pixel_small", [[Interface\Addons\nibRealUI\Fonts\pixel_small.ttf]])
 LSM:Register("font", "pixel_large", [[Interface\Addons\nibRealUI\Fonts\pixel_large.ttf]])
 LSM:Register("font", "pixel_numbers", [[Interface\Addons\nibRealUI\Fonts\pixel_numbers.ttf]])
 LSM:Register("font", "pixel_cooldown", [[Interface\Addons\nibRealUI\Fonts\pixel_cooldown.ttf]])
 LSM:Register("font", "pixel_crits", [[Interface\Addons\nibRealUI\Fonts\pixel_crits.ttf]])
+
+-- RU
+LSM:Register("font", "Standard RU", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]], 2)
+LSM:Register("font", "Standard Regular RU", [[Interface\Addons\nibRealUI\Fonts\standard_regular.ttf]], 2)
+LSM:Register("font", "Standard Medium RU", [[Interface\Addons\nibRealUI\Fonts\standard_medium.ttf]], 2)
 
 -- -----
 --   SOUND

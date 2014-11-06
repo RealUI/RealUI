@@ -379,7 +379,6 @@ function AddonListAdv:OnInitialize()
                 "BugSack",
                 "ButtonFacade",
                 "cargBags_Nivaya",
-                "Chatter",
                 "EasyMail",
                 "FreebTip",
                 "Grid2",
