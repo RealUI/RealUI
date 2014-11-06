@@ -672,7 +672,7 @@ end
 -- Font Retrieval
 function nibRealUI:RetrieveFont(font)
     local font = LSM:Fetch("font", font)
-    if font == nil then font = GameFontNormalSmall:GetFont() end
+    if font == nil then font = LSM:Fetch("font", "Arial Narrow") end
     return font
 end
 
