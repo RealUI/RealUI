@@ -516,13 +516,13 @@ function nibRealUI:Font(isLSM, size)
     if size == "default" then
         if db.settings.fontStyle == 1 then
             if isLSM then
-                return "pixel_small"
+                return db.media.font.pixel.small[1]
             else
                 return nibRealUI.font.pixel1
             end
         else
             if isLSM then
-                return "pixel_large"
+                return db.media.font.pixel.large[1]
             else
                 return nibRealUI.font.pixel2
             end
@@ -531,19 +531,19 @@ function nibRealUI:Font(isLSM, size)
     elseif size == "small" then
         if db.settings.fontStyle == 1 then
             if isLSM then
-                return "pixel_small"
+                return db.media.font.pixel.small[1]
             else
                 return nibRealUI.font.pixel1
             end
         elseif db.settings.fontStyle == 2 then
             if isLSM then
-                return "pixel_small"
+                return db.media.font.pixel.small[1]
             else
                 return nibRealUI.font.pixel1
             end
         elseif db.settings.fontStyle == 3 then
             if isLSM then
-                return "pixel_large"
+                return db.media.font.pixel.large[1]
             else
                 return nibRealUI.font.pixel2
             end
@@ -551,14 +551,14 @@ function nibRealUI:Font(isLSM, size)
 
     elseif size == "large" then
         if isLSM then
-            return "pixel_large"
+            return db.media.font.pixel.large[1]
         else
             return nibRealUI.font.pixel2
         end
 
     elseif size == "tiny" then
         if isLSM then
-            return "pixel_tiny"
+            return db.media.font.pixel.small[1]
         else
             return nibRealUI.font.pixel1
         end
