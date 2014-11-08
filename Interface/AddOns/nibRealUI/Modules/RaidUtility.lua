@@ -201,12 +201,16 @@ local function ToggleRaidUtil(self, event)
 end
 
 -------
-function RaidUtility:GROUP_ROSTER_UPDATE()
-	ToggleRaidUtil()
+function RaidUtility:PLAYER_REGEN_ENABLED(event)
+	ToggleRaidUtil(self, event)
 end
 
-function RaidUtility:PLAYER_ENTERING_WORLD()
-	ToggleRaidUtil()
+function RaidUtility:GROUP_ROSTER_UPDATE(event)
+	ToggleRaidUtil(self, event)
+end
+
+function RaidUtility:PLAYER_ENTERING_WORLD(event)
+	ToggleRaidUtil(self, event)
 end
 
 -------

@@ -199,9 +199,9 @@ function EclipseBar:ECLIPSE_DIRECTION_CHANGE(event, ...)
     -- End Box colors and Bar colors
     if self.direction == "sun" then
         self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
-        self.eBar:SetBoxColor("left", nibRealUI.media.colors.background)
+        self.eBar:SetBoxColor("left", nibRealUI.media.background)
     elseif self.direction == "moon" then
-        self.eBar:SetBoxColor("right", nibRealUI.media.colors.background)
+        self.eBar:SetBoxColor("right", nibRealUI.media.background)
         self.eBar:SetBoxColor("left", nibRealUI.media.colors.blue)
     else
         self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
