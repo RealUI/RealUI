@@ -325,7 +325,7 @@ function CombatFader:FadeFrames()
                 for k2, v2 in next, db.elements[k].frames do
                     --print("FadeFrames", k, k2, NewOpacity, status)
                     frame = _G[k2]
-                    if frame then
+                    if frame and db.elements[k].frames[k2] then
                         if k == "unitframes" then
                             frame = frame.overlay
                         end
