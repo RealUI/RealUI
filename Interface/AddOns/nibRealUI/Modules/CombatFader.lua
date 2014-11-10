@@ -275,61 +275,61 @@ end
 -- Determine new opacity values for frames
 function CombatFader:FadeFrames()
     local NewOpacity
-    for k, v in next, db.elements do
-        if db.elements[k].enabled then
+    for modName, module in next, db.elements do
+        if module.enabled then
             -- Retrieve Element's opacity/visibility for current status
             NewOpacity = 1
-            if db.elements[k].inverse then
-                --print("inverse", db.elements[k].opacity.incombat, db.elements.objectives.opacity.incombat)
+            if module.inverse then
+                --print("inverse", module.opacity.incombat, db.elements.objectives.opacity.incombat)
                 if status == "INCOMBAT" then
-                    if db.elements[k].opacity.outofcombat ~= nil then
-                        NewOpacity = db.elements[k].opacity.outofcombat
+                    if module.opacity.outofcombat ~= nil then
+                        NewOpacity = module.opacity.outofcombat
                     end
                 elseif status == "HARMTARGET" then
-                    if db.elements[k].opacity.harmtarget ~= nil then
-                        NewOpacity = db.elements[k].opacity.harmtarget
+                    if module.opacity.harmtarget ~= nil then
+                        NewOpacity = module.opacity.harmtarget
                     end
                 elseif status == "OUTOFCOMBAT" then
-                    if db.elements[k].opacity.incombat ~= nil then
-                        NewOpacity = db.elements[k].opacity.incombat
+                    if module.opacity.incombat ~= nil then
+                        NewOpacity = module.opacity.incombat
                     end
                 end
             else
                 --print("normal")
                 if status == "INCOMBAT" then
-                    if db.elements[k].opacity.incombat ~= nil then
-                        NewOpacity = db.elements[k].opacity.incombat
+                    if module.opacity.incombat ~= nil then
+                        NewOpacity = module.opacity.incombat
                     end
                 elseif status == "TARGET" then
-                    if db.elements[k].opacity.target ~= nil then
-                        NewOpacity = db.elements[k].opacity.target
+                    if module.opacity.target ~= nil then
+                        NewOpacity = module.opacity.target
                     end
                 elseif status == "HARMTARGET" then
-                    if db.elements[k].opacity.target ~= nil then
-                        NewOpacity = db.elements[k].opacity.target
+                    if module.opacity.target ~= nil then
+                        NewOpacity = module.opacity.target
                     end
                 elseif status == "HURT" then
-                    if db.elements[k].opacity.hurt ~= nil then
-                        NewOpacity = db.elements[k].opacity.hurt
+                    if module.opacity.hurt ~= nil then
+                        NewOpacity = module.opacity.hurt
                     end
                 elseif status == "OUTOFCOMBAT" then
-                    if db.elements[k].opacity.outofcombat ~= nil then
-                        NewOpacity = db.elements[k].opacity.outofcombat
+                    if module.opacity.outofcombat ~= nil then
+                        NewOpacity = module.opacity.outofcombat
                     end
                 end
             end
 
             -- Fade Frames
-            if db.elements[k].frames then
+            if module.frames then
                 local frame
-                for k2, v2 in next, db.elements[k].frames do
-                    --print("FadeFrames", k, k2, NewOpacity, status)
-                    frame = _G[k2]
-                    if frame and db.elements[k].frames[k2] then
-                        if k == "unitframes" then
+                for frameName, enabled in next, module.frames do
+                    --print("FadeFrames", modName, frameName, NewOpacity, status)
+                    frame = _G[frameName]
+                    if frame and enabled then
+                        if modName == "unitframes" then
                             frame = frame.overlay
                         end
-                        if (k2 == "RealUIPetFrame") and self.ABShown then
+                        if (frameName == "RealUIPetFrame") and self.ABShown then
                             if frame then FadeIt(frame, 1, true) end
                         else
                             if frame then FadeIt(frame, NewOpacity) end
