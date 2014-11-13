@@ -996,6 +996,13 @@ local OddList = {
 
 local buttons = {}
 local button = CreateFrame("Frame", "ButtonCollectFrame", UIParent)
+button:SetBackdrop({
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+})
+button:SetBackdropBorderColor(0, 0, 0)
+button:SetBackdropColor(0, 0, 0, .5)
 button:SetPoint("TOPLEFT", Minimap, "BOTTOMLEFT", -1, -5)
 button:SetSize(136, 32)
 button:EnableMouse(true)
@@ -1012,12 +1019,12 @@ local function PositionAndStyle()
             buttons[i]:SetParent(button)
             buttons[i]:ClearAllPoints()
             --print("Eval", i, i + line - 1, math.floor(row+1) * line, row)
-            if i + line - 1 == math.floor(row+1) * line then
+            if i + line - 1 == math.floor(row + 1) * line then
                 --print("Row start", i)
                 buttons[i]:SetPoint("TOPLEFT", button, "TOPLEFT", 0, -(row * 32))
             else
                 --print("Row cont.", i)
-                buttons[i]:SetPoint("TOPLEFT", buttons[i-1], "TOPRIGHT", 2, 0)
+                buttons[i]:SetPoint("TOPLEFT", buttons[i - 1], "TOPRIGHT", 2, 0)
             end
             row = i / line
             buttons[i].ClearAllPoints = function() return end
@@ -1040,14 +1047,14 @@ local function MoveMMButton(mmb)
 end
 
 local function UpdateMMButtonsTable()
-    for i, child in ipairs({Minimap:GetChildren()}) do
+    for i, child in next, {Minimap:GetChildren()} do
         if not(BlackList[child:GetName()]) then
             if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 and child:IsShown() then
                 MoveMMButton(child)
             end
         end
     end
-    for f,_ in pairs(OddList) do
+    for f, _ in pairs(OddList) do
         MoveMMButton(_G[f])
     end
 
@@ -1062,37 +1069,11 @@ local collect = CreateFrame("Frame")
 collect:RegisterEvent("PLAYER_ENTERING_WORLD")
 collect:SetScript("OnEvent", function(self, event)
     self:UnregisterEvent(event)
-    if Aurora then
-        --print("Minimap holder")
-        local F = Aurora[1]
-        F.CreateBD(button)
-    end
     if db.information.minimapbuttons then
         UpdateMMButtonsTable()
         PositionAndStyle()
     end
 end)
-
--- Style BugSack icon when it gets updated
-local bugSackStyled
-if BugSack then
-    hooksecurefunc(BugSack, "UpdateDisplay", function()
-        local count = #BugSack:GetErrors(BugGrabber:GetSessionId())
-        if count and count > 0 then
-            LibDBIcon10_BugSack:Show()
-        else
-            LibDBIcon10_BugSack:Hide()
-        end
-        if db.information.minimapbuttons then
-            if not bugSackStyled then
-                bugSackStyled = true
-                UpdateMMButtonsTable()
-                PositionAndStyle()
-            end
-        end
-    end)
-end
-
 
 -------------------------
 -- INFORMATION UPDATES --

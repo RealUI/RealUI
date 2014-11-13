@@ -588,7 +588,7 @@ end
 local function null() end
 function ObjectivesAdv:Skin()
 	--hooksecurefunc('WatchFrame_SetLine', SetLine)
-	hooksecurefunc('ObjectiveTracker_Update', SkinLine)
+	--hooksecurefunc('ObjectiveTracker_Update', SkinLine)
 	hooksecurefunc('WatchFrameScenario_UpdateScenario', SkinScenarioLine)
 	hooksecurefunc('QuestPOI_DisplayButton', QuestPOI)
 	hooksecurefunc('SetItemButtonTexture', SkinButton)
