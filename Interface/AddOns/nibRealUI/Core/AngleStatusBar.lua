@@ -178,21 +178,6 @@ end
 -- This should be converted to AngleStatusBar once everything is finalized.
 local ASB = {}
 
--- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
--- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
-function ASB:SetReverseFill(val)
-    --print("SetReverseFill", reverse)
-    if val then
-        self.growDirection = (self.growDirection == "LEFT") and "RIGHT" or "LEFT"
-        self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.endPoint, self:GetParent(), self.endPoint, -(self.info.x), -1)
-    else
-        self.growDirection = self.origDirection
-        self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.startPoint, self:GetParent(), self.startPoint, self.info.x, -1)
-    end
-end
-
 function ASB:SetStatusBarColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
@@ -222,6 +207,21 @@ function ASB:SetValue(value, ignoreSmooth)
     end
 end
 
+-- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
+-- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
+function ASB:SetReverseFill(val)
+    --print("SetReverseFill", reverse)
+    if val then
+        self.growDirection = (self.growDirection == "LEFT") and "RIGHT" or "LEFT"
+        self.bar:ClearAllPoints()
+        self.bar:SetPoint(self.endPoint, self:GetParent(), self.endPoint, -(self.info.x), -1)
+    else
+        self.growDirection = self.origDirection
+        self.bar:ClearAllPoints()
+        self.bar:SetPoint(self.startPoint, self:GetParent(), self.startPoint, self.info.x, -1)
+    end
+end
+
 -- Setting this to true will make the bars show full when at 0%.
 function ASB:SetReversePercent(reverse)
     --print("SetReversePercent", reverse)
@@ -229,10 +229,10 @@ function ASB:SetReversePercent(reverse)
     self:SetValue(self.value, true)
 end
 
---[[ oUF Methods ]]--
+--[[ Frame Construction ]]--
 
 local function CreateAngleBG(self, width, height, parent, info)
-    --print("CreateAngleBG", self.unit, info)
+    print("CreateAngleBG", self.unit, width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
@@ -279,9 +279,8 @@ local function CreateAngleBG(self, width, height, parent, info)
     bg.bottom:SetPoint("BOTTOMLEFT", rightX, 0)
     bg.bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
 
-    return bg, leftX, rightX
+    return bg
 end
-oUF:RegisterMetaFunction("CreateAngleBG", CreateAngleBG) -- oUF magic
 
 local function CreateAngleBar(self, width, height, parent, info, isStatus)
     --print("CreateAngleBar", self.unit, info)
@@ -292,11 +291,11 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
 
     local status, bar
-    if not isStatus then
+    if isStatus then
+        bar = CreateFrame("Frame", nil, parent)
+    else
         status = CreateFrame("Frame", nil, parent)
         bar = CreateFrame("Frame", nil, status)
-    else
-        bar = CreateFrame("Frame", nil, parent)
     end
     info.x = (info.startPoint == "TOPRIGHT") and -2 or 2
     bar:SetPoint(info.startPoint, parent, info.x, -1)
@@ -338,25 +337,20 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     if isStatus then
         return bar, info
     else
-        local mt = getmetatable(status).__index
-        for key, func in next, ASB do
-            if not mt[key] then
-                mt[key] = func
-            end
-        end
-
-        status.bar = bar
-        status.info = info
-        status.value = 0
-        status:SetValue(0, true)
-        return status
+        return status, bar, info
     end
 end
-oUF:RegisterMetaFunction("CreateAngleBar", CreateAngleBar) -- oUF magic
 
-local function CreateAngleStatusBar(self, width, height, parent, info)
-    local status, leftX, rightX = CreateAngleBG(self, width, height, parent, info)
-    local bar, info = CreateAngleBar(self, width, height, status, info, true)
+local function CreateAngleFrame(self, frameType, width, height, parent, info)
+    local status, bar
+    if frameType == "Frame" then
+        return CreateAngleBG(self, width, height, parent, info)
+    elseif frameType == "Bar" then
+        status, bar, info = CreateAngleBar(self, width, height, parent, info)
+    elseif frameType == "Status" then
+        status = CreateAngleBG(self, width, height, parent, info)
+        bar, info = CreateAngleBar(self, width, height, status, info, true)
+    end
 
     local mt = getmetatable(status).__index
     for key, func in next, ASB do
@@ -371,7 +365,7 @@ local function CreateAngleStatusBar(self, width, height, parent, info)
     status:SetValue(0, true)
     return status
 end
-oUF:RegisterMetaFunction("CreateAngleStatusBar", CreateAngleStatusBar) -- oUF magic
+oUF:RegisterMetaFunction("CreateAngleFrame", CreateAngleFrame) -- oUF magic
 
 -------------
 function AngleStatusBar:OnInitialize()

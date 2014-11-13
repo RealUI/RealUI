@@ -47,7 +47,7 @@ local info = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local info = info[UnitFrames.layoutSize].health
-    parent.Health = parent:CreateAngleStatusBar(texture.width, texture.height, parent.overlay, info)
+    parent.Health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
     parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
@@ -66,8 +66,8 @@ local function CreateHealthBar(parent)
     parent.Health.step = {}
     parent.Health.warn = {}
     for i = 1, 2 do
-        parent.Health.step[i] = parent:CreateAngleBG(stepHeight + 2, stepHeight, parent.Health, info)
-        parent.Health.warn[i] = parent:CreateAngleBG(texture.height + 2, texture.height, parent.Health, info)
+        parent.Health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, parent.Health, info)
+        parent.Health.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, parent.Health, info)
         local xOfs = floor(stepPoints[i] * parent.Health.info.maxWidth) + parent.Health.info.minWidth
         if parent.Health.bar.reverse then
             parent.Health.step[i]:SetPoint("TOPRIGHT", parent.Health, -xOfs, 0)
@@ -84,8 +84,8 @@ end
 
 local function CreatePredictBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local pos = info[UnitFrames.layoutSize].health
-    local absorbBar = parent:CreateAngleBar(texture.width, texture.height, parent.Health, pos)
+    local info = info[UnitFrames.layoutSize].health
+    local absorbBar = parent:CreateAngleFrame("Bar", texture.width, texture.height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
     absorbBar:SetReversePercent(true)
 
