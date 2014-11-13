@@ -1,6 +1,9 @@
 local MSQ = LibStub("Masque", true)
 if not MSQ then return end
 
+local Button = ExtraActionButton1
+Button:SetNormalTexture("")
+
 -- RealUI
 MSQ:AddSkin(
 	"RealUI", 

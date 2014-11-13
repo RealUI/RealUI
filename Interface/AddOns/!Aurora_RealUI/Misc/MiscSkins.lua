@@ -98,16 +98,6 @@ tinsert(mods["Aurora"], function(F, C)
         flash:SetVertexColor(r, g, b, .8)
     end
 
-    -- Extra Action Button - Tukui v16
-    local Button = ExtraActionButton1
-    local Texture = Button.style
-    local RemoveTexture = function(self, texture)
-        if texture and (string.sub(texture, 1, 9) == "Interface" or string.sub(texture, 1, 9) == "INTERFACE") then
-            self:SetTexture("")
-        end
-    end
-    hooksecurefunc(Texture, "SetTexture", RemoveTexture)
-
     -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
     -- Thus, we need to call them directly until we can remove nibRealUI as a dependancy.
     mods["Clique"](F, C)
