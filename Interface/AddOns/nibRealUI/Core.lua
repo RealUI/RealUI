@@ -621,6 +621,36 @@ local lastGarbageCollection = 0
 function nibRealUI:PLAYER_ENTERING_WORLD()
 	self:LockdownUpdates()
 
+	-- Modify Main Menu
+	for i = 1, GameMenuFrame:GetNumRegions() do
+		local region = select(i, GameMenuFrame:GetRegions())
+		if region:GetObjectType() == "FontString" then
+			if region:GetText() == MAINMENU_BUTTON then
+				region:SetFont(unpack(nibRealUI.font.pixel1))
+				region:SetTextColor(unpack(nibRealUI.classColor))
+				region:SetShadowColor(0, 0, 0, 0)
+				region:SetPoint("TOP", GameMenuFrame, "TOP", 0, -10.5)
+			end
+		end
+	end
+
+	GameMenuButtonStore:SetScale(0.00001)
+	GameMenuButtonStore:SetAlpha(0)
+
+	-- RealUI Control
+	local ConfigStr = string.format("|cffffffffReal|r|cff%sUI|r Config", nibRealUI:ColorTableToStr(nibRealUI.media.colors.red))
+	GameMenuFrame.realuiControl = nibRealUI:CreateTextButton(ConfigStr, GameMenuFrame, "GameMenuButtonTemplate")
+	GameMenuFrame.realuiControl:SetPoint("TOP", GameMenuButtonContinue, "BOTTOM", 0, -16)
+	GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() nibRealUI:ShowConfigBar(); HideUIPanel(GameMenuFrame) end)
+
+	-- Button Backgrounds
+	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonHelp, GameMenuButtonWhatsNew)
+	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonOptions, GameMenuButtonAddons)
+
+	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonLogout, GameMenuButtonQuit)
+	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonContinue, GameMenuButtonContinue)
+	nibRealUI:CreateBGSection(GameMenuFrame, GameMenuFrame.realuiControl, GameMenuFrame.realuiControl)
+
 	-- >= 10 minute garbage collection
 	self:ScheduleTimer(function()
 		local now = GetTime()
@@ -791,6 +821,7 @@ function nibRealUI:OnInitialize()
 	self:RegisterChatCommand("rl", function() ReloadUI() end)
 	self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
 	self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+	GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
 
 	-- Synch user's settings
 	if dbg.tags.firsttime then
