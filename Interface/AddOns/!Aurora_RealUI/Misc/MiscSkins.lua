@@ -2,6 +2,8 @@ local _, mods = ...
 
 tinsert(mods["Aurora"], function(F, C)
     --print("MiscSkins")
+    local r, g, b = C.r, C.g, C.b
+
     --Travel Pass
     FriendsFrame:HookScript("OnShow", function()
         if not FriendsFrame.skinned then
@@ -76,6 +78,25 @@ tinsert(mods["Aurora"], function(F, C)
 
     -- Objective Tracker
     F.ReskinExpandOrCollapse(ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
+
+    -- Scroll to bottom
+    for i = 1, 10 do
+        local chat = _G["ChatFrame" .. i]
+        local btn = chat.buttonFrame.bottomButton
+        btn:SetSize(20, 20)
+        F.Reskin(btn, true)
+
+        local arrow = btn:CreateTexture(nil, "ARTWORK")
+        arrow:SetPoint("TOPLEFT", 6, -6)
+        arrow:SetPoint("BOTTOMRIGHT", -6, 6)
+        arrow:SetTexture(C.media.arrowDown)
+
+        local flash = _G[btn:GetName() .. "Flash"]
+        flash:ClearAllPoints()
+        flash:SetAllPoints(arrow)
+        flash:SetTexture(C.media.arrowDown)
+        flash:SetVertexColor(r, g, b, .8)
+    end
 
     -- Extra Action Button - Tukui v16
     local Button = ExtraActionButton1

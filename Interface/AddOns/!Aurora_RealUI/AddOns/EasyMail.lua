@@ -2,9 +2,8 @@ local _, mods = ...
 
 mods["EasyMail"] = function(F, C)
     --print("HELLO EasyMail!!!", F, C)
-    local _, class = UnitClass("player")
-    local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
-
+    local r, g, b = C.r, C.g, C.b
+    
     local function SetTexture(f, name)
         f:SetNormalTexture([[Interface\AddOns\!Aurora_RealUI\Media\AddOns\EasyMail\]]..name)
         local nTex = f:GetNormalTexture()

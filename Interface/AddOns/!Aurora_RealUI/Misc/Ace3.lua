@@ -9,8 +9,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     local HiddenFrame = CreateFrame("Frame", nil, UIParent)
     HiddenFrame:Hide()
 
-    local _, class = UnitClass("player")
-    local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
+    local r, g, b = C.r, C.g, C.b
     local alpha = 0.25
 
     local function Kill(object)
