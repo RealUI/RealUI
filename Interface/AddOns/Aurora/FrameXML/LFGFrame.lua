@@ -235,11 +235,13 @@ tinsert(C.themes["Aurora"], function()
 		F.ReskinCheck(roleButton.checkButton)
 	end
 
-	for _, roleButton in pairs({LFDRoleCheckPopupRoleButtonTank, LFDRoleCheckPopupRoleButtonHealer, LFDRoleCheckPopupRoleButtonDPS, LFGInvitePopupRoleButtonTank, LFGInvitePopupRoleButtonHealer, LFGInvitePopupRoleButtonDPS}) do
+	for _, roleButton in pairs({LFDRoleCheckPopupRoleButtonTank, LFDRoleCheckPopupRoleButtonHealer, LFDRoleCheckPopupRoleButtonDPS, LFGInvitePopupRoleButtonTank, LFGInvitePopupRoleButtonHealer, LFGInvitePopupRoleButtonDPS, LFGListApplicationDialog.DamagerButton, LFGListApplicationDialog.TankButton, LFGListApplicationDialog.HealerButton}) do
+		local checkButton = roleButton.checkButton or roleButton.CheckButton
+
 		roleButton.cover:SetTexture(C.media.roleIcons)
 		roleButton:SetNormalTexture(C.media.roleIcons)
 
-		roleButton.checkButton:SetFrameLevel(roleButton:GetFrameLevel() + 2)
+		checkButton:SetFrameLevel(roleButton:GetFrameLevel() + 2)
 
 		local left = roleButton:CreateTexture(nil, "OVERLAY")
 		left:SetWidth(1)
@@ -269,7 +271,7 @@ tinsert(C.themes["Aurora"], function()
 		bottom:SetPoint("BOTTOMLEFT", roleButton, 9, 11)
 		bottom:SetPoint("BOTTOMRIGHT", roleButton, -9, 11)
 
-		F.ReskinCheck(roleButton.checkButton)
+		F.ReskinCheck(checkButton)
 	end
 
 	do

@@ -14,5 +14,6 @@ tinsert(C.themes["Aurora"], function()
 
 	for i = 1, MAX_ADDONS_DISPLAYED do
 		F.ReskinCheck(_G["AddonListEntry"..i.."Enabled"])
+		F.Reskin(_G["AddonListEntry"..i.."Load"])
 	end
 end)

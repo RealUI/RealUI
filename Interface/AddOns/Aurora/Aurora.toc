@@ -2,7 +2,7 @@
 ## Title: Aurora
 ## Notes: Minimalistic window theme.
 ## Author: Haleth/Lightsword
-## Version: 6.0.1b
+## Version: 6.0.2
 ## SavedVariables: AuroraConfig
 
 aurora.lua
