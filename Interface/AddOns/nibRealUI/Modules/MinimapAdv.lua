@@ -17,9 +17,17 @@ BINDING_NAME_REALUIMINIMAPFARM = "Toggle Farm Mode"
 local FontStringsRegular = {}
 
 -- Options
-local table_AnchorPointsMinimap = {
-    "BOTTOMLEFT",
+local minimapOffsets = {
+    {x = 7, y = -7},
+    {x = -7, y = -7},
+    {x = 7, y = 28},
+    {x = -7, y = 28},
+}
+local minimapAnchors = {
     "TOPLEFT",
+    "TOPRIGHT",
+    "BOTTOMLEFT",
+    "BOTTOMRIGHT",
 }
 
 local options
@@ -280,17 +288,20 @@ local function GetOptions()
                                 type = "select",
                                 name = "Anchor To",
                                 get = function(info) 
-                                    for k,v in pairs(table_AnchorPointsMinimap) do
+                                    for k,v in pairs(minimapAnchors) do
                                         if v == db.position.anchorto then return k end
                                     end
                                 end,
                                 set = function(info, value)
-                                    db.position.anchorto = table_AnchorPointsMinimap[value]
+                                    print("Set Anchor", info.option, value)
+                                    db.position.anchorto = minimapAnchors[value]
+                                    db.position.x = minimapOffsets[value].x
+                                    db.position.y = minimapOffsets[value].y
                                     MinimapAdv:UpdateMinimapPosition()
                                 end,
                                 style = "dropdown",
                                 width = nil,
-                                values = table_AnchorPointsMinimap,
+                                values = minimapAnchors,
                                 order = 40,
                             },
                         },
@@ -378,17 +389,19 @@ local function GetOptions()
                                 type = "select",
                                 name = "Anchor To",
                                 get = function(info) 
-                                    for k,v in pairs(table_AnchorPointsMinimap) do
+                                    for k, v in pairs(minimapAnchors) do
                                         if v == db.expand.position.anchorto then return k end
                                     end
                                 end,
                                 set = function(info, value)
-                                    db.expand.position.anchorto = table_AnchorPointsMinimap[value]
+                                    db.expand.position.anchorto = minimapAnchors[value]
+                                    db.expand.position.x = minimapOffsets[value].x
+                                    db.expand.position.y = minimapOffsets[value].y
                                     MinimapAdv:UpdateMinimapPosition()
                                 end,
                                 style = "dropdown",
                                 width = nil,
-                                values = table_AnchorPointsMinimap,
+                                values = minimapAnchors,
                                 order = 30,
                             },
                         },
@@ -564,7 +577,6 @@ local Textures = {
 }
 
 local MMFrames = MinimapAdv.Frames
-local MinimapNewBorder
 local InfoShown = {
     coords = false,
     dungeondifficulty = false,
@@ -670,19 +682,21 @@ local function GetPositionData()
         NewMinimapPoints = {
             xofs = db.position.x,
             yofs = db.position.y,
-            point = db.position.anchorto,
-            rpoint = db.position.anchorto,
+            anchor = db.position.anchorto,
             scale = db.position.scale,
             opacity = 1,
+            isTop = db.position.anchorto:find("TOP"),
+            isLeft = db.position.anchorto:find("LEFT"),
         }
     else
         NewMinimapPoints = {
             xofs = db.expand.position.x,
             yofs = db.expand.position.y,
-            point = db.expand.position.anchorto,
-            rpoint = db.expand.position.anchorto,
+            anchor = db.expand.position.anchorto,
             scale = db.expand.appearance.scale,
             opacity = db.expand.appearance.opacity,
+            isTop = db.position.anchorto:find("TOP"),
+            isLeft = db.position.anchorto:find("LEFT"),
         }
     end
     
@@ -695,9 +709,10 @@ function MinimapAdv:UpdateInfoPosition()
     
     local mm_xofs = NewMinimapPoints.xofs
     local mm_yofs = NewMinimapPoints.yofs
-    local mm_point = NewMinimapPoints.point
+    local mm_anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
-    local rpoint, point
+    local isTop = NewMinimapPoints.isTop
+    local isLeft = NewMinimapPoints.isLeft
     
     local mm_width = Minimap:GetWidth()
     local mm_height = Minimap:GetHeight()
@@ -720,19 +735,30 @@ function MinimapAdv:UpdateInfoPosition()
     
     if Minimap:IsVisible() and (ExpandedState == 0) then
         -- Set Offsets, Positions, Gaps
-        xofs = db.information.position.x
-        ymulti = 1
-        if mm_point == "TOPLEFT" then
-            ymulti = -1
-            point = "TOPLEFT"
-            rpoint = "BOTTOMLEFT"
-        elseif mm_point == "BOTTOMLEFT" then
-            ymulti = 1
-            point = "BOTTOMLEFT"
-            rpoint = "TOPLEFT"
-        end
+        ymulti = isTop and -1 or 1
+        xofs = isLeft and db.information.position.x or -db.information.position.x
         yofs = (db.information.position.y + 11) * ymulti - (5 * scale * ymulti)
         yadj = iHeight * ymulti
+
+        local rpoint, point, Cpoint
+        if isTop then
+            point = "TOP"
+            rpoint = "BOTTOM"
+            Cpoint = "BOTTOM"
+        else
+            point = "BOTTOM"
+            rpoint = "TOP"
+            Cpoint = "TOP"
+        end
+        if isLeft then
+            point = point .. "LEFT"
+            rpoint = rpoint .. "LEFT"
+            Cpoint = Cpoint .. "LEFT"
+        else
+            point = point .. "RIGHT"
+            rpoint = rpoint .. "RIGHT"
+            Cpoint = Cpoint .. "RIGHT"
+        end
         
         -- Zone Indicator
         if MMFrames.info.zoneIndicator.isHostile then
@@ -744,7 +770,7 @@ function MinimapAdv:UpdateInfoPosition()
         -- Coordinates
         if InfoShown.coords then
             MMFrames.info.coords:ClearAllPoints()
-            MMFrames.info.coords:SetPoint("BOTTOMLEFT", "Minimap", "BOTTOMLEFT", 0, 0)
+            MMFrames.info.coords:SetPoint(Cpoint, "Minimap", Cpoint, 0, 0)
             MMFrames.info.coords.text:SetFontObject("MinimapFont1")
             MMFrames.info.coords.text:SetJustifyH("LEFT")
             
@@ -825,16 +851,16 @@ function MinimapAdv:UpdateInfoPosition()
             MMFrames.info.Squeue:Hide()
         end
         
-        -- if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_point == "TOPLEFT") then
+        -- if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
         --  numText = numText + 1
         --  CRFM = _G["CompactRaidFrameManager"]
         --      --print("scale: "..scale)
         --      --print("numText: "..numText)
         --      --local ofsy = -41.5 - 149.4 * scale
-        --      MinimapAdv:AdjustCRFManager(CRFM, scale, mm_point, numText)
+        --      MinimapAdv:AdjustCRFManager(CRFM, scale, mm_anchor, numText)
         --  --end)
         --  hooksecurefunc("CompactRaidFrameManager_Toggle", function(self)
-        --      MinimapAdv:AdjustCRFManager(self, scale, mm_point, numText)
+        --      MinimapAdv:AdjustCRFManager(self, scale, mm_anchor, numText)
         --  end)
         -- end
     else
@@ -851,7 +877,7 @@ function MinimapAdv:UpdateInfoPosition()
 end
 
 
-function MinimapAdv:AdjustCRFManager(self, scale, mm_point, numText)
+function MinimapAdv:AdjustCRFManager(self, scale, mm_anchor, numText)
     -- yofs with 0 info lines:
     -- -77 @ 50%
     -- -140 (default yofs)
@@ -862,7 +888,7 @@ function MinimapAdv:AdjustCRFManager(self, scale, mm_point, numText)
     if (InCombatLockdown()) then
         return;
     end
-    if ( self.collapsed ) and (mm_point == "TOPLEFT")then
+    if ( self.collapsed ) and (mm_anchor == "TOPLEFT")then
         CompactRaidFrameManager:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -182, yofs)
     else
         CompactRaidFrameManager:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -7, yofs)
@@ -873,34 +899,23 @@ end
 -- Set Button positions
 function MinimapAdv:UpdateButtonsPosition()
     local NewMinimapPoints = GetPositionData()
+    print("isTop", NewMinimapPoints.isTop)
     
-    local xofs = NewMinimapPoints.xofs
-    local yofs = NewMinimapPoints.yofs
-    local point = NewMinimapPoints.point
-    local rpoint = NewMinimapPoints.rpoint
+    local anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
-    
-    -- Get offset multipliers based on whether the Minimap is located at the bottom or top
-    local tbxofs, tbyofs
-    if point == "BOTTOMLEFT" then
-        tbxofs = -1
-        tbyofs = -1
-    elseif point == "TOPLEFT" then
-        tbxofs = -1
-        tbyofs = 1
-    end
+    local isTop = NewMinimapPoints.isTop
+    local isLeft = NewMinimapPoints.isLeft
     
     -- Set button positions and visibility for Normal or Farm Mode
-    local xPos, yPos, bfWidth
-    xPos = floor((tbxofs + xofs) * scale + 0.5)
-    yPos = floor((tbyofs + yofs) * scale + 0.5)
-    bfWidth = 21
+    local bfWidth = 21
+    local side = isLeft and "LEFT" or "RIGHT"
     
     MMFrames.buttonframe:ClearAllPoints()
-    MMFrames.buttonframe:SetPoint(point, "UIParent", rpoint, xPos, yPos)
+    MMFrames.buttonframe:SetPoint("TOP"..side, "UIParent", "TOP"..side, isLeft and 1 or -1, -1)
     MMFrames.buttonframe:SetScale(1)
     MMFrames.buttonframe:Show()
     
+    -- Hide/Show Toggle
     if Minimap:IsVisible() then
         MMFrames.config:Show()
         bfWidth = bfWidth + 15
@@ -908,7 +923,8 @@ function MinimapAdv:UpdateButtonsPosition()
         MMFrames.config:Hide()
         MMFrames.config.mouseover = false
     end
-        
+
+    -- Tracking
     if Minimap:IsVisible() and ExpandedState == 0 then
         MMFrames.tracking:Show()
         bfWidth = bfWidth + 15
@@ -917,6 +933,7 @@ function MinimapAdv:UpdateButtonsPosition()
         MMFrames.tracking.mouseover = false
     end
         
+    -- Farm mode
     if ( Minimap:IsVisible() and (not IsInInstance()) ) then
         MMFrames.farm:Show()
         MMFrames.farm:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", bfWidth - 1, 1)
@@ -941,10 +958,11 @@ function MinimapAdv:UpdateMinimapPosition()
     
     local xofs = NewMinimapPoints.xofs
     local yofs = NewMinimapPoints.yofs
-    local point = NewMinimapPoints.point
-    local rpoint = NewMinimapPoints.rpoint
+    local anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
     local opacity = NewMinimapPoints.opacity
+    local isTop = NewMinimapPoints.isTop
+    local isLeft = NewMinimapPoints.isLeft
     
     -- Set new size and position
     Minimap:SetFrameStrata("LOW")
@@ -956,21 +974,66 @@ function MinimapAdv:UpdateMinimapPosition()
     
     Minimap:SetMovable(true)
     Minimap:ClearAllPoints()
-    Minimap:SetPoint(point, "UIParent", rpoint, xofs, yofs)
+    Minimap:SetPoint(anchor, "UIParent", anchor, xofs, yofs)
     Minimap:SetUserPlaced(true)
     
-    -- LFD Button Tooltip
-    local lfdpoint, lfdrpoint
-    if point == "BOTTOMLEFT" then
-        lfdpoint = "BOTTOMLEFT"
-        lfdrpoint = "BOTTOMRIGHT"
-    else    -- Set anchor to default
-        lfdpoint = "TOPLEFT"
-        lfdrpoint = "TOPRIGHT"
+    -- Kinda dirty, but it works
+    local LFDrpoint, LFDpoint, Qpoint, Gpoint
+    if isTop then
+        LFDpoint = "TOP"
+        LFDrpoint = "TOP"
+        Qpoint = "BOTTOM"
+        Gpoint = "TOP"
+    else
+        LFDpoint = "BOTTOM"
+        LFDrpoint = "BOTTOM"
+        Qpoint = "TOP"
+        Gpoint = "BOTTOM"
     end
+    if isLeft then
+        LFDpoint = LFDpoint .. "LEFT"
+        LFDrpoint = LFDrpoint .. "RIGHT"
+        Qpoint = Qpoint .. "RIGHT"
+        Gpoint = Gpoint .. "RIGHT"
+    else
+        LFDpoint = LFDpoint .. "RIGHT"
+        LFDrpoint = LFDrpoint .. "LEFT"
+        Qpoint = Qpoint .. "LEFT"
+        Gpoint = Gpoint .. "LEFT"
+    end
+
+    -- Queue Status
+    QueueStatusMinimapButton:ClearAllPoints()
+    QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
+
+    -- LFD Button Tooltip
+    print("QueueStatusFrame", LFDpoint, LFDrpoint)
     QueueStatusFrame:ClearAllPoints()
-    QueueStatusFrame:SetPoint(lfdpoint, "QueueStatusMinimapButton", lfdrpoint)
+    QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
     QueueStatusFrame:SetClampedToScreen(true)
+
+    -- Garrisons
+    GarrisonLandingPageMinimapButton:ClearAllPoints()
+    GarrisonLandingPageMinimapButton:SetPoint(Gpoint, isLeft and 2 or -2, isTop and 2 or -2)
+
+    GarrisonLandingPageTutorialBox:ClearAllPoints()
+    GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
+    if isTop then
+        GarrisonLandingPageTutorialBox:SetPoint("TOP", GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
+        GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", GarrisonLandingPageTutorialBox, "TOP", 0, -3)
+        SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 180)
+    else
+        GarrisonLandingPageTutorialBox:SetPoint("BOTTOM", GarrisonLandingPageMinimapButton, "TOP", 0, 20)
+        GarrisonLandingPageTutorialBox.Arrow:SetPoint("TOP", GarrisonLandingPageTutorialBox, "BOTTOM", 0, 3)
+        SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 90)
+    end
+
+    ButtonCollectFrame:ClearAllPoints()
+    if isTop then
+        ButtonCollectFrame:SetPoint("TOPLEFT", Minimap, "BOTTOMLEFT", -1, -5)
+    else
+        ButtonCollectFrame:SetPoint("BOTTOMLEFT", Minimap, "TOPLEFT", -1, 5)
+    end
     
     -- Update the rest of the Minimap
     self:UpdateButtonsPosition()
@@ -1092,10 +1155,10 @@ local function POI_OnEnter(self)
     
     -- Set Tooltip position
     local NewMinimapPoints = GetPositionData()
-    local mm_point = NewMinimapPoints.point
-    if mm_point == "TOPLEFT" then
+    local mm_anchor = NewMinimapPoints.anchor
+    if mm_anchor == "TOPLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
-    elseif mm_point == "BOTTOMLEFT" then
+    elseif mm_anchor == "BOTTOMLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_TOPMRIGHT", 5, 5)
     end
     
@@ -1822,10 +1885,10 @@ local function Farm_OnLeave()
     MinimapAdv:FadeButtons()
 end
 
----- Garrison ----
+--[[ Garrison 
 --The pulse anim that these function call will reset the alpha of the whole button each time it repeats.
 --This was the only reliable way I could find to get this button back to full opacity.
---[[local oldGarrisonMinimapBuilding_ShowPulse = GarrisonMinimapBuilding_ShowPulse
+local oldGarrisonMinimapBuilding_ShowPulse = GarrisonMinimapBuilding_ShowPulse
 GarrisonMinimapBuilding_ShowPulse = function(self)
     print("Pre-hook: Building")
     self:SetAlpha(1)
@@ -1860,7 +1923,8 @@ local function hookfunc(self, lock, enabled)
     else
         self:SetAlpha(0)
     end
-end]]
+end
+]]--
 
 local function Garrison_OnEnter(self)
     --print("Garrison_OnEnter")
@@ -2129,16 +2193,15 @@ local function CreateFrames()
     
     ---- Buttons
     MMFrames.buttonframe = CreateFrame("Frame", nil, UIParent)
-    MMFrames.buttonframe:SetHeight(17)
-    MMFrames.buttonframe:SetWidth(66)
+    MMFrames.buttonframe:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 1, -1)
+    MMFrames.buttonframe:SetSize(66, 17)
     MMFrames.buttonframe:SetFrameStrata("MEDIUM")
     MMFrames.buttonframe:SetFrameLevel(5)
     nibRealUI:CreateBD(MMFrames.buttonframe, nil, true, true)
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.edge:SetTexture(1, 1, 1, 1)
     MMFrames.buttonframe.edge:SetPoint("LEFT", MMFrames.buttonframe, "LEFT", 1, 0)
-    MMFrames.buttonframe.edge:SetHeight(15)
-    MMFrames.buttonframe.edge:SetWidth(4)
+    MMFrames.buttonframe.edge:SetSize(4, 15)
     
     MMFrames.buttonframe.tooltip = MMFrames.buttonframe:CreateFontString()
     MMFrames.buttonframe.tooltip:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 78.5, 4.5)
@@ -2238,6 +2301,7 @@ local function SetUpMinimapFrame()
     QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
     QueueStatusMinimapButtonBorder:Hide()
 
+    GarrisonLandingPageTutorialBox:SetParent(Minimap)
     --GarrisonLandingPageMinimapButton:SetAlpha(0)
     GarrisonLandingPageMinimapButton:SetParent(Minimap)
     GarrisonLandingPageMinimapButton:ClearAllPoints()
@@ -2248,12 +2312,6 @@ local function SetUpMinimapFrame()
     GarrisonLandingPageMinimapButton:SetScript("OnEnter", Garrison_OnEnter)
     --hooksecurefunc("GarrisonMinimap_SetPulseLock", hookfunc)
 
-    GarrisonLandingPageTutorialBox:SetParent(Minimap)
-    GarrisonLandingPageTutorialBox:ClearAllPoints()
-    GarrisonLandingPageTutorialBox:SetPoint("TOP", GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
-    GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
-    GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", GarrisonLandingPageTutorialBox, "TOP", 0, -3)
-    SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 180)
 
     MinimapNorthTag:SetAlpha(0)
     

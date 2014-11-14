@@ -232,7 +232,7 @@ end
 --[[ Frame Construction ]]--
 
 local function CreateAngleBG(self, width, height, parent, info)
-    print("CreateAngleBG", self.unit, width, height, parent, info)
+    --print("CreateAngleBG", self.unit, width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
