@@ -1025,7 +1025,7 @@ function MinimapAdv:UpdateMinimapPosition()
     else
         GarrisonLandingPageTutorialBox:SetPoint("BOTTOM", GarrisonLandingPageMinimapButton, "TOP", 0, 20)
         GarrisonLandingPageTutorialBox.Arrow:SetPoint("TOP", GarrisonLandingPageTutorialBox, "BOTTOM", 0, 3)
-        SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 90)
+        SetClampedTextureRotation(GarrisonLandingPageTutorialBox.Arrow, 0)
     end
 
     ButtonCollectFrame:ClearAllPoints()
@@ -1927,8 +1927,9 @@ end
 ]]--
 
 local function Garrison_OnEnter(self)
+    local isLeft = db.position.anchorto:find("LEFT")
     --print("Garrison_OnEnter")
-    GameTooltip:SetOwner(GarrisonLandingPageMinimapButton, "ANCHOR_RIGHT");
+    GameTooltip:SetOwner(GarrisonLandingPageMinimapButton, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"));
     GameTooltip:SetText(GARRISON_LANDING_PAGE_TITLE, 1, 1, 1);
     GameTooltip:AddLine(MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP, nil, nil, nil, true);
     GameTooltip:Show();
