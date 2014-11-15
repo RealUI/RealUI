@@ -112,7 +112,7 @@ end
 function ActionBarDoodads:TogglePetBar()
 	if not(Doodads and Doodads.pet) then return end
 	
-	if ( nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet and nibRealUI:GetModuleEnabled(MODNAME) and (UnitExists("pet") and not UnitInVehicle("player")) and nibRealUI.cLayout == 1 ) then
+	if ( nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet and nibRealUI:GetModuleEnabled(MODNAME) and (UnitExists("pet") and not UnitInVehicle("player")) ) then
 		Doodads.pet:Show()
 	else
 		Doodads.pet:Hide()

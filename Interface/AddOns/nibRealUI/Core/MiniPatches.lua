@@ -36,5 +36,9 @@ function nibRealUI:MiniPatch(ver)
 				BugSackLDBIconDB["hide"] = false
 			end
 		end
+	elseif ver == "81r8" then
+		if IsAddOnLoaded("Bartender4") and Bartender4DB then
+			Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] = Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI"]
+		end
 	end
 end

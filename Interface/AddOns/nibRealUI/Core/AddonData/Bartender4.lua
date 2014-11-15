@@ -1553,8 +1553,8 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 						},
 					},
 					["RealUI-Healing"] = {
-						["enabled"] = false,
-						["version"] = 3,
+						["rows"] = 10,
+						["fadeoutalpha"] = 0,
 						["skin"] = {
 							["Colors"] = {
 								["Normal"] = {
@@ -1597,7 +1597,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 							["ID"] = "PixelSkin",
 							["Backdrop"] = false,
 						},
-						["fadeoutalpha"] = 0,
+						["version"] = 3,
 						["padding"] = -7,
 						["visibility"] = {
 							["custom"] = true,
@@ -1607,9 +1607,9 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 							},
 						},
 						["position"] = {
-							["y"] = -260.5,
-							["x"] = -132.5,
-							["point"] = "CENTER",
+							["y"] = 124.5,
+							["x"] = -8,
+							["point"] = "LEFT",
 						},
 					},
 				},

@@ -274,7 +274,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 		-- Pet Bar
 		----
 		if barSettings.moveBars.pet then
-			if nibRealUI.cLayout == 1 then
+			-- if nibRealUI.cLayout == 1 then
 				local numPetBarButtons = 10
 				local pbX, pbY, pbPoint
 				local pbP = barSettings.petBar.padding
@@ -306,7 +306,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 				end
 				local B4PetBar = Bar4:GetModule("PetBar", true)
 				if B4PetBar then B4PetBar:ApplyConfig() end
-			end
+			-- end
 		end
 
 		----
