@@ -1,0 +1,83 @@
+------------------------------------------------------------------------
+r247 | nevcairiel | 2014-11-08 13:58:44 +0000 (Sat, 08 Nov 2014) | 1 line
+Changed paths:
+   A /tags/v1.3.2 (from /trunk:246)
+
+Tagging as v1.3.2
+------------------------------------------------------------------------
+r246 | nevcairiel | 2014-11-05 15:41:24 +0000 (Wed, 05 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+   M /trunk/HandyNotes_HandyNotes.lua
+
+Some more local variable cleanups
+------------------------------------------------------------------------
+r245 | nevcairiel | 2014-11-05 15:38:47 +0000 (Wed, 05 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+
+Remove unused parameters
+------------------------------------------------------------------------
+r244 | nevcairiel | 2014-11-05 15:17:35 +0000 (Wed, 05 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+
+Fix minimap notes on maps not enumerated by GetMapZones
+------------------------------------------------------------------------
+r243 | nevcairiel | 2014-11-03 08:52:39 +0000 (Mon, 03 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.toc
+
+Use @project-version@ in the toc Version field
+------------------------------------------------------------------------
+r242 | nevcairiel | 2014-11-02 12:23:19 +0000 (Sun, 02 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_HandyNotes.lua
+   M /trunk/Locales/Locale-enUS.lua
+
+Remove cartographer waypoint support
+------------------------------------------------------------------------
+r241 | nevcairiel | 2014-10-26 15:34:07 +0000 (Sun, 26 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_HandyNotes.lua
+
+Use TomTom:AddMFWaypoint instead of AddZWaypoint to avoid a bug in TomTom
+------------------------------------------------------------------------
+r240 | kemayo | 2014-10-21 06:40:58 +0000 (Tue, 21 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.toc
+
+Add an optdep on Astrolabe.
+------------------------------------------------------------------------
+r239 | nevcairiel | 2014-10-19 11:10:52 +0000 (Sun, 19 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_HandyNotes.lua
+
+Add Draenor continent mapping
+------------------------------------------------------------------------
+r237 | nevcairiel | 2014-10-18 12:03:29 +0000 (Sat, 18 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+
+Restore mapping for the "World"/"Azeroth" view (continent id 0)
+------------------------------------------------------------------------
+r235 | nevcairiel | 2014-10-15 09:40:31 +0000 (Wed, 15 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+
+Fix GetMapZones weirdness
+------------------------------------------------------------------------
+r234 | nevcairiel | 2014-10-15 09:13:21 +0000 (Wed, 15 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.lua
+   M /trunk/HandyNotes_HandyNotes.lua
+
+Update for 6.0
+------------------------------------------------------------------------
+r233 | nevcairiel | 2014-10-15 07:47:16 +0000 (Wed, 15 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/HandyNotes.toc
+   M /trunk/Libs
+
+Update TOC and strip Ace3 svn:externals
+------------------------------------------------------------------------
