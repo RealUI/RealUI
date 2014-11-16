@@ -36,12 +36,14 @@
 
  Hooks
 
- OverrideVisibility(self) - Used to completely override the internal visibility function.
-                            Removing the table key entry will make the element fall-back
-                            to its internal function again.
- Override(self)           - Used to completely override the internal update function.
-                            Removing the table key entry will make the element fall-back
-                            to its internal function again.
+ OverrideVisibility(self) - Used to completely override the internal visibility
+                            function. Removing the table key entry will make
+                            the element fall-back to its internal function
+                            again.
+ Override(self)           - Used to completely override the internal
+                            update function. Removing the table key entry will
+                            make the element fall-back to its internal function
+                            again.
 ]]
 
 local parent, ns = ...
@@ -141,6 +143,7 @@ local Enable = function(self, unit)
 	if(element) then
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
+		element:Hide()
 
 		color = self.colors.power[BREWMASTER_POWER_BAR_NAME]
 

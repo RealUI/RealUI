@@ -1,5 +1,5 @@
 local MAJOR = "LibQTip-1.0"
-local MINOR = 42 -- Should be manually increased
+local MINOR = 43 -- Should be manually increased
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
@@ -56,6 +56,17 @@ local cellPrototype = lib.cellPrototype
 local cellMetatable = lib.cellMetatable
 
 local activeTooltips = lib.activeTooltips
+
+local highlightFrame = CreateFrame("Frame", nil, UIParent)
+highlightFrame:SetFrameStrata("TOOLTIP")
+highlightFrame:Hide()
+
+local DEFAULT_HIGHLIGHT_TEXTURE_PATH = [[Interface\QuestFrame\UI-QuestTitleHighlight]]
+
+local highlightTexture = highlightFrame:CreateTexture(nil, "OVERLAY")
+highlightTexture:SetTexture(DEFAULT_HIGHLIGHT_TEXTURE_PATH)
+highlightTexture:SetBlendMode("ADD")
+highlightTexture:SetAllPoints(highlightFrame)
 
 ------------------------------------------------------------------------------
 -- Private methods for Caches and Tooltip
@@ -378,6 +389,10 @@ function ReleaseTooltip(tooltip)
 
 	layoutCleaner.registry[tooltip] = nil
 	tinsert(tooltipHeap, tooltip)
+
+	highlightTexture:SetTexture(DEFAULT_HIGHLIGHT_TEXTURE_PATH)
+	highlightTexture:SetTexCoord(0, 1, 0, 1)
+
 	--[===[@debug@
 	usedTooltips = usedTooltips - 1
 	--@end-debug@]===]
@@ -1098,6 +1113,14 @@ function tipPrototype:SetLineTextColor(lineNum, r, g, b, a)
 	end
 end
 
+function tipPrototype:SetHighlightTexture(...)
+	return highlightTexture:SetTexture(...)
+end
+
+function tipPrototype:SetHighlightTexCoord(...)
+	highlightTexture:SetTexCoord(...)
+end
+
 do
 	local function checkFont(font, level, silent)
 		local bad = false
@@ -1190,28 +1213,21 @@ function tipPrototype:GetColumnCount() return #self.columns end
 ------------------------------------------------------------------------------
 -- Frame Scripts
 ------------------------------------------------------------------------------
-local highlight = CreateFrame("Frame", nil, UIParent)
-highlight:SetFrameStrata("TOOLTIP")
-highlight:Hide()
-
-highlight._texture = highlight:CreateTexture(nil, "OVERLAY")
-highlight._texture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-highlight._texture:SetBlendMode("ADD")
-highlight._texture:SetAllPoints(highlight)
-
 local scripts = {
 	OnEnter = function(frame, ...)
-		highlight:SetParent(frame)
-		highlight:SetAllPoints(frame)
-		highlight:Show()
+		highlightFrame:SetParent(frame)
+		highlightFrame:SetAllPoints(frame)
+		highlightFrame:Show()
+
 		if frame._OnEnter_func then
 			frame:_OnEnter_func(frame._OnEnter_arg, ...)
 		end
 	end,
 	OnLeave = function(frame, ...)
-		highlight:Hide()
-		highlight:ClearAllPoints()
-		highlight:SetParent(nil)
+		highlightFrame:Hide()
+		highlightFrame:ClearAllPoints()
+		highlightFrame:SetParent(nil)
+
 		if frame._OnLeave_func then
 			frame:_OnLeave_func(frame._OnLeave_arg, ...)
 		end

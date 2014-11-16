@@ -1,0 +1,25 @@
+------------------------------------------------------------------------
+r170 | torhal | 2014-11-16 14:54:22 +0000 (Sun, 16 Nov 2014) | 1 line
+Changed paths:
+   A /tags/r170-release (from /trunk:169)
+
+Tagging as r170-release
+------------------------------------------------------------------------
+r169 | torhal | 2014-11-16 14:51:42 +0000 (Sun, 16 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/LibQTip-1.0.lua
+
+Upped MINOR version.
+------------------------------------------------------------------------
+r168 | torhal | 2014-11-16 14:51:02 +0000 (Sun, 16 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/LibQTip-1.0.lua
+
+Added tooltip:SetHighlightTexture() and tooltip:SetHighlightTexCoord() methods.
+------------------------------------------------------------------------
+r166 | torhal | 2014-10-25 18:09:58 +0000 (Sat, 25 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/LibQTip-1.0.toc
+
+Updated ToC Interface to 60000
+------------------------------------------------------------------------

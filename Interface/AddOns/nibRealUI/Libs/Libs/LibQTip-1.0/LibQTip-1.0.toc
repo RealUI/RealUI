@@ -2,14 +2,14 @@
 ## Title: Lib: QTip-1.0
 ## Notes: Library providing multi-column tooltips.
 ## Author: Torhal, Adirelle, Elkano, Tristanian
-## Version: r167-release 
+## Version: r170-release 
 ## LoadOnDemand: 1
-## X-Date: 2014-10-25T18:09:58Z
+## X-Date: 2014-11-16T14:51:42Z
 ## X-Credits: Kaelten (input on initial design)
 ## X-Category: Library, Tooltip
 ## X-License: Ace3 BSD-like license
 ## X-Website: http://www.wowace.com/addons/libqtip-1-0/ 
-## X-Curse-Packaged-Version: r167-release
+## X-Curse-Packaged-Version: r170-release
 ## X-Curse-Project-Name: LibQTip-1.0
 ## X-Curse-Project-ID: libqtip-1-0
 ## X-Curse-Repository-ID: wow/libqtip-1-0/mainline
