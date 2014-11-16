@@ -80,9 +80,9 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     AceGUI.RegisterAsWidget = function(self, widget)
         local TYPE = widget.type
         local _, TYPE2, TYPE3 = strsplit("-", TYPE)
-        local _, LSMTYPE = strsplit("_", TYPE)
-        --print("Widget:", TYPE)
-        --print("Subtype", TYPE2 or LSMTYPE, TYPE3)
+        local MODULE, MODULETYPE = strsplit("_", TYPE)
+        --print("Widget:", MODULE or TYPE)
+        --print("Subtype", TYPE2 or MODULETYPE, TYPE3)
 
         if TYPE == "Button" then
             if not widget.skinned then
@@ -256,32 +256,42 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget.skinned = true
             end
 
-        elseif LSMTYPE then
+        -- LibSharedMedia Widgets
+        elseif MODULE == "LSM30" then
             if not widget.skinned then
                 skinLSM30(widget.frame)
 
-                if LSMTYPE == "Statusbar" then
+                if MODULETYPE == "Statusbar" then
                     widget.bar:ClearAllPoints()
                     widget.bar:SetPoint("TOPLEFT", widget.frame.bg, 2, -2)
                     widget.bar:SetPoint("BOTTOMRIGHT", widget.frame.bg, -21, 2)
 
-                elseif LSMTYPE == "Background" then
+                elseif MODULETYPE == "Background" then
                     widget.frame.bg:ClearAllPoints()
                     widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
                     widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
 
-                elseif LSMTYPE == "Border" then
+                elseif MODULETYPE == "Border" then
                     widget.frame.bg:ClearAllPoints()
                     widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
                     widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
 
-                elseif LSMTYPE == "Font" then
+                elseif MODULETYPE == "Font" then
                     --
 
-                elseif LSMTYPE == "Sound" then
+                elseif MODULETYPE == "Sound" then
                     widget.soundbutton:ClearAllPoints()
                     widget.soundbutton:SetPoint("TOPLEFT", widget.frame.bg, 4, -2)
                 end
+                widget.skinned = true
+            end
+
+        -- SearchEditBox
+        elseif MODULE == "SearchEditBox" then
+            if not widget.skinned then
+                F.ReskinInput(widget.editBox)
+                F.Reskin(widget.button)
+                F.CreateBD(widget.predictor)
                 widget.skinned = true
             end
         end
