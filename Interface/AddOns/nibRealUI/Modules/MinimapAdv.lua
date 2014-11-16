@@ -899,7 +899,6 @@ end
 -- Set Button positions
 function MinimapAdv:UpdateButtonsPosition()
     local NewMinimapPoints = GetPositionData()
-    print("isTop", NewMinimapPoints.isTop)
     
     local anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
@@ -1007,7 +1006,6 @@ function MinimapAdv:UpdateMinimapPosition()
     QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
 
     -- LFD Button Tooltip
-    print("QueueStatusFrame", LFDpoint, LFDrpoint)
     QueueStatusFrame:ClearAllPoints()
     QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
     QueueStatusFrame:SetClampedToScreen(true)

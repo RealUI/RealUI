@@ -21,8 +21,6 @@ AddOns\Raven.lua
 AddOns\Skada.lua
 AddOns\WeakAuras.lua
 
-FrameXML\CleanBossButton.lua
-FrameXML\GameMenuFrame.lua
 FrameXML\PaperDollFrame.lua
 FrameXML\Timer.lua
 FrameXML\WorldMapFrame.lua
