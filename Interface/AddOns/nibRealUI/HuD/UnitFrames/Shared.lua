@@ -216,6 +216,9 @@ local function updateSteps(unit, type, percent, frame)
     local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
     local isLargeFrame = false
     if UnitInVehicle("player") then
+        if unit == "player" and type == "power" then
+            return
+        end
         if unit == "vehicle" or unit == "target" then
             texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
             isLargeFrame = true
