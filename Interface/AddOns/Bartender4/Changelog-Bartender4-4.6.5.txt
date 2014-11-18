@@ -1,0 +1,16 @@
+tag 4.6.5
+d0b62a9454e37b3eb31150db8da749ded706d6eb
+Hendrik Leppkes <h.leppkes@gmail.com>
+2014-11-08 14:57:52 +0100
+
+Tag as 4.6.5
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Revert "Split esMX into its own file, since translators worked on it!"
+	The two locale files are exactly the same, no need to carry them both for now.
+	- Don't use a global for the bindings category to avoid taint
+	- Split esMX into its own file, since translators worked on it!
+	- Add a safeguard against "actionpage" attribute being nil

@@ -54,6 +54,23 @@ local function NewIndicator()
 	end
 end
 
+-- ban theese indicator names
+-- /run for k,v in pairs(select(2,next(Grid2Frame.registeredFrames))) do if not Grid2.indicators[k] then print(k) end end
+-- for case when some1 is trying to create a new indicator with an empty layout
+-- Grid2Frame.registeredFrames == {} in that case
+local indicator_name_blacklist = {
+	["0"] = true,
+	["UnwrapScript"] = true,
+	["Execute"] = true,
+	["CreateIndicators"] = true,
+	["SetFrameRef"] = true,
+	["WrapScript"] = true,
+	["UpdateIndicators"] = true,
+	["Layout"] = true,
+	["menu"] = true,
+	["container"] = true,
+}
+
 local function NewIndicatorDisabled()
 	local name = Grid2Options:GetValidatedName(newIndicatorValues.name)
 	if name and name ~= "" then
@@ -67,6 +84,8 @@ local function NewIndicatorDisabled()
 					end
 				end
 				return false
+			else
+				return indicator_name_blacklist[name] == true
 			end	
 		end
 	end

@@ -1,5 +1,9 @@
 ## Interface: 60000
-## Version: 6.0.2.253
+## Version: 6.0.3.87
+## X-Curse-Packaged-Version: 6.0.3.87
+## X-Curse-Project-Name: PhanxChat
+## X-Curse-Project-ID: phanxchat
+## X-Curse-Repository-ID: wow/phanxchat/mainline
 
 ## Title: PhanxChat
 ## Notes: Removes chat frame clutter and adds some functionality.
@@ -15,18 +19,14 @@
 ## Author: Phanx
 ## X-Email: addons@phanx.net
 ## X-Copyright: Copyright (c) 2006-2014 Phanx. All rights reserved.
-## X-License: See the accompanying LICENSE file for details.
-## X-CompatibleLocales: enUS, deDE, esES, esMX, frFR, itIT, ptBR, ptPT, ruRU, koKR, zhCN, zhTW
-## X-Localizations: enUS, deDE, esES, esMX, frFR, itIT, ptBR, ptPT, ruRU, koKR, zhCN, zhTW
-## X-Website: http://www.wowinterface.com/downloads/info6323-PhanxChat
-## X-Curse-Project-ID: phanxchat
-## X-WoWI-ID: 6323
+## X-Website: https://github.com/Phanx/PhanxChat
 
 ## OptionalDependencies: LibAboutPanel, PhanxConfigWidgets, LibChatAnims
 ## SavedVariables: PhanxChatDB
 
 Libs\LibStub\LibStub.lua
 Libs\LibAboutPanel\LibAboutPanel.lua
+Libs\LibChatAnims\LibChatAnims.lua
 Libs\PhanxConfig-Checkbox\PhanxConfig-Checkbox.lua
 Libs\PhanxConfig-Dropdown\PhanxConfig-Dropdown.lua
 Libs\PhanxConfig-EditBox\PhanxConfig-EditBox.lua
@@ -34,19 +34,7 @@ Libs\PhanxConfig-Header\PhanxConfig-Header.lua
 Libs\PhanxConfig-OptionsPanel\PhanxConfig-OptionsPanel.lua
 Libs\PhanxConfig-Slider\PhanxConfig-Slider.lua
 
-Libs\LibChatAnims\LibChatAnims.lua
-
-Locales\Locale-en.lua
-Locales\Locale-de.lua
-Locales\Locale-es.lua
-Locales\Locale-fr.lua
-Locales\Locale-it.lua
-Locales\Locale-pt.lua
-Locales\Locale-ru.lua
-Locales\Locale-ko.lua
-Locales\Locale-zhCN.lua
-Locales\Locale-zhTW.lua
-
+Localization.lua
 Core.lua
 Options.lua
 

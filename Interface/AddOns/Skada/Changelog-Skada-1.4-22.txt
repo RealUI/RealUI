@@ -1,9 +1,45 @@
 ------------------------------------------------------------------------
-r577 | zarnivoop | 2014-10-24 16:08:42 +0000 (Fri, 24 Oct 2014) | 1 line
+r584 | funkydude | 2014-11-11 21:35:06 +0000 (Tue, 11 Nov 2014) | 1 line
 Changed paths:
-   A /tags/1.4-21 (from /trunk:576)
+   A /tags/1.4-22 (from /trunk:583)
 
-Tagging as 1.4-21
+Tagging as 1.4-22
+------------------------------------------------------------------------
+r583 | funkydude | 2014-11-11 21:32:37 +0000 (Tue, 11 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Damage.lua
+
+Damage: fix prismatic crystal guid format.
+------------------------------------------------------------------------
+r582 | nebula169 | 2014-11-05 03:48:12 +0000 (Wed, 05 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/Bindings.xml
+
+only use one Binding header
+------------------------------------------------------------------------
+r581 | funkydude | 2014-11-01 12:55:14 +0000 (Sat, 01 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/Bindings.xml
+
+Fix binding header.
+------------------------------------------------------------------------
+r580 | nebula169 | 2014-11-01 08:02:03 +0000 (Sat, 01 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/Bindings.xml
+
+move keybinds to "AddOns" category
+------------------------------------------------------------------------
+r579 | nebula169 | 2014-11-01 07:54:04 +0000 (Sat, 01 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/Bindings.xml
+
+move keybinds to "AddOns" category
+------------------------------------------------------------------------
+r578 | zarnivoop | 2014-10-26 16:09:06 +0000 (Sun, 26 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Damage.lua
+
+count multistrikes separately (fixes #381)
 ------------------------------------------------------------------------
 r576 | oscarucb | 2014-10-19 20:41:02 +0000 (Sun, 19 Oct 2014) | 2 lines
 Changed paths:

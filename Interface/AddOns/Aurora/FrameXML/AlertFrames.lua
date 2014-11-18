@@ -256,6 +256,8 @@ tinsert(C.themes["Aurora"], function()
 		frame.glow:SetTexture("")
 		frame.PvPBackground:Hide()
 		frame.BGAtlas:Hide()
+
+		frame.Icon:SetDrawLayer("BORDER")
 		frame.SpecIcon.bg:SetShown(frame.SpecIcon:IsShown())
 	end)
 

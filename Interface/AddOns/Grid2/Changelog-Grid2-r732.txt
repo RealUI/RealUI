@@ -1,4 +1,10 @@
 ------------------------------------------------------------------------
+r732 | gragagrogog | 2014-10-26 17:23:07 +0000 (Sun, 26 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/Options/modules/indicators/NewIndicator.lua
+
+Fix for disabled "Create Indicator" button when trying to create an indicator without grid2 showing any unit.(ticket #363) 
+------------------------------------------------------------------------
 r731 | gragagrogog | 2014-10-22 10:43:37 +0000 (Wed, 22 Oct 2014) | 1 line
 Changed paths:
    M /trunk/AoeHeals/AoeHeals.lua

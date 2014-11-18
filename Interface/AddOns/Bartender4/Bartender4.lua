@@ -66,7 +66,6 @@ function Bartender4:OnInitialize()
 	end
 
 	BINDING_HEADER_Bartender4 = "Bartender4"
-	BINDING_CATEGORY_Bartender4 = "Bartender4"
 	BINDING_NAME_BTTOGGLEACTIONBARLOCK = BINDING_NAME_TOGGLEACTIONBARLOCK
 	for i=1,10 do
 		_G[("BINDING_HEADER_BT4BLANK%d"):format(i)] = L["Bar %s"]:format(i)
@@ -258,7 +257,7 @@ function Bartender4:UpdateBlizzardVehicle()
 			self.vehicleController:SetAttribute("_onstate-vehicle", [[
 				if newstate == "override" then
 					local f = self:GetFrameRef("overrideActionBar")
-					if f:GetAttribute("actionpage") > 10 then
+					if (f:GetAttribute("actionpage") or 0) > 10 then
 						newstate = "vehicle"
 					end
 				end

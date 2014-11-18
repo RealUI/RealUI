@@ -2,9 +2,9 @@
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
 	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
+	https://github.com/Phanx/PhanxChat
 ----------------------------------------------------------------------]]
 
 local _, PhanxChat = ...
@@ -234,12 +234,10 @@ function PhanxChat:HideTextures(frame)
 			hooks[tab].OnLeave = nil
 		end
 	end
-	
+
 	PanelTemplates_TabResize(frame.tab, frame.tab.sizePadding or 0)
 	frame.tab.textWidth = frame.tab.text:GetWidth()
 end
-
-PET_BATTLE_COMBAT_LOG = PhanxChat.ShortStrings.PET_BATTLE_COMBAT_LOG -- TODO: put this somewhere else?
 
 hooksecurefunc("PanelTemplates_TabResize", function(tab, padding, dynTabSize)
 	if dynTabSize and tab.conversationIcon and PhanxChat.db.HideTextures then

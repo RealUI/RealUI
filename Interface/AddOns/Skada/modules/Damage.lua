@@ -62,6 +62,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			end
 
 			spell.damage = spell.damage + amount
+
+			-- Multistrikes can crit.
+			if dmg.multistrike then
+				spell.multistrike = (spell.multistrike or 0) + 1
+			end
+			-- These below are mutually exclusive.
 			if dmg.critical then
 				spell.critical = (spell.critical or 0) + 1
 			elseif dmg.missed ~= nil then
@@ -70,8 +76,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				spell.glancing = (spell.glancing or 0) + 1
 			elseif dmg.crushing then
 				spell.crushing = (spell.crushing or 0) + 1
-			elseif dmg.multistrike then
-				spell.multistrike = (spell.multistrike or 0) + 1
 			else
 				spell.hit = (spell.hit or 0) + 1
 			end
@@ -99,7 +103,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if srcGUID ~= dstGUID then
 			-- XXX WoD quick fix for Mage's Prismatic Crystal talent
 			-- All damage done to the crystal is transferred, so ignore it
-			if dstGUID:match("^Creature:0:%d+:%d+:%d+:76933:%w+$") then 
+			if dstGUID:match("^Creature%-0%-%d+%-%d+%-%d+%-76933%-%w+$") then
 				return
 			end
 

@@ -7,7 +7,7 @@
 	See the accompanying README and LICENSE files for more information.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = tonumber(string.match("$Revision: 176 $", "%d+"))
+local MINOR_VERSION = tonumber(string.match("$Revision: 185 $", "%d+"))
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-EditBox", MINOR_VERSION)
 if not lib then return end
@@ -39,7 +39,7 @@ function scripts:OnEnter()
 		GameTooltip:SetText(container.tooltipText, nil, nil, nil, nil, true)
 	end
 end
-local function OnLeave()
+function scripts:OnLeave()
 	GameTooltip:Hide()
 end
 
@@ -54,16 +54,16 @@ function scripts:OnEditFocusLost() -- print("OnEditFocusLost")
 	self.currText, self.origText = nil, nil
 end
 
-function scripts:OnTextChanged()
+function scripts:OnTextChanged(userInput)
 	if not self:HasFocus() then return end
 
 	local text = self:GetText()
 	if text:len() == 0 then text = nil end -- experimental
 
 	local parent = self:GetParent()
-	local callback = parent.CallbackOnTextChanged or parent.OnTextChanged
+	local callback = parent.OnTextChanged
 	if callback and text ~= self.currText then
-		callback(parent, text)
+		callback(parent, text, userInput)
 		self.currText = text
 	end
 end
@@ -74,7 +74,7 @@ function scripts:OnEnterPressed() -- print("OnEnterPressed")
 	self:ClearFocus()
 
 	local parent = self:GetParent()
-	local callback = parent.Callback or parent.OnValueChanged
+	local callback = parent.OnValueChanged
 	if callback then
 		callback(parent, text)
 	end
@@ -85,17 +85,59 @@ function scripts:OnEscapePressed() -- print("OnEscapePressed")
 end
 
 function scripts:OnReceiveDrag()
-	local type, id, info = GetCursorInfo()
+	local type, arg1, arg2, arg3, arg4 = GetCursorInfo()
 	if type == "item" then
-		self:SetText(info)
-		scripts.OnEnterPressed(self)
-		ClearCursor()
+		-- itemID, itemLink
+		if self:IsNumeric() then
+			self:SetNumber(arg1)
+		else
+			local name = GetItemInfo(arg1)
+			self:SetText(name)
+		end
+	elseif type == "macro" then
+		-- index
+		if self:IsNumeric() then
+			self:SetNumber(arg1)
+		else
+			local name = GetMacroInfo(arg1)
+			self:SetText(name)
+		end
+	elseif type == "merchant" then
+		-- index
+		if self:IsNumeric() then
+			local link = GetMerchantItemLink(arg1)
+			local id = strmatch(link, "|Hitem:(%d+)")
+			if id then
+				self:SetNumber(id)
+			else
+				self:SetText("")
+			end
+		else
+			local name = GetMerchantItemInfo(arg1)
+			self:SetText(name)
+		end
+	elseif type == "money" then
+		-- amount in copper
+		if self:IsNumeric() then
+			self:SetNumber(arg1)
+		else
+			local mode = ENABLE_COLORBLIND_MODE
+			ENABLE_COLORBLIND_MODE = "1"
+			local text = GetMoneyString(arg1)
+			ENABLE_COLORBLIND_MODE = mode
+			self:SetText(text)
+		end
 	elseif type == "spell" then
-		local name = GetSpellInfo(id, info)
-		self:SetText(name)
-		scripts.OnEnterPressed(self)
-		ClearCursor()
+		-- index, bookType, spellID
+		if self:IsNumeric() then
+			self:SetNumber(arg3)
+		else
+			local name = GetSpellInfo(arg3)
+			self:SetText(name)
+		end
 	end
+	scripts.OnEnterPressed(self)
+	ClearCursor()
 end
 
 ------------------------------------------------------------------------
@@ -148,6 +190,7 @@ function lib:New(parent, name, tooltipText, maxLetters)
 	editbox:SetPoint("RIGHT", -5, 0)
 	editbox:SetHeight(19)
 	editbox:EnableMouse(true)
+	editbox:SetAltArrowKeyMode(false)
 	editbox:SetAutoFocus(false)
 	editbox:SetFontObject(ChatFontNormal)
 	editbox:SetMaxLetters(maxLetters or 256)
@@ -156,20 +199,22 @@ function lib:New(parent, name, tooltipText, maxLetters)
 	frame.editbox = editbox
 
 	editbox.bgLeft = editbox:CreateTexture(nil, "BACKGROUND")
-	editbox.bgLeft:SetPoint("LEFT", 0, 0)
+	editbox.bgLeft:SetPoint("TOPLEFT", 0, 0)
+	editbox.bgLeft:SetPoint("BOTTOMLEFT", 0, 0)
 	editbox.bgLeft:SetSize(8, 20)
 	editbox.bgLeft:SetTexture([[Interface\Common\Common-Input-Border]])
 	editbox.bgLeft:SetTexCoord(0, 0.0625, 0, 0.625)
 
 	editbox.bgRight = editbox:CreateTexture(nil, "BACKGROUND")
-	editbox.bgRight:SetPoint("RIGHT", 0, 0)
+	editbox.bgRight:SetPoint("TOPRIGHT", 0, 0)
+	editbox.bgRight:SetPoint("BOTTOMRIGHT", 0, 0)
 	editbox.bgRight:SetSize(8, 20)
 	editbox.bgRight:SetTexture([[Interface\Common\Common-Input-Border]])
 	editbox.bgRight:SetTexCoord(0.9375, 1, 0, 0.625)
 
 	editbox.bgMiddle = editbox:CreateTexture(nil, "BACKGROUND")
-	editbox.bgMiddle:SetPoint("LEFT", editbox.bgLeft, "RIGHT")
-	editbox.bgMiddle:SetPoint("RIGHT", editbox.bgRight, "LEFT")
+	editbox.bgMiddle:SetPoint("TOPLEFT", editbox.bgLeft, "TOPRIGHT")
+	editbox.bgMiddle:SetPoint("BOTTOMRIGHT", editbox.bgRight, "BOTTOMLEFT")
 	editbox.bgMiddle:SetSize(10, 20)
 	editbox.bgMiddle:SetTexture([[Interface\Common\Common-Input-Border]])
 	editbox.bgMiddle:SetTexCoord(0.0625, 0.9375, 0, 0.625)

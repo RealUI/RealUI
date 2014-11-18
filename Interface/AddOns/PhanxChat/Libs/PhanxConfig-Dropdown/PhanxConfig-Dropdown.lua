@@ -8,7 +8,7 @@
 	See the accompanying README and LICENSE files for more information.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = tonumber(strmatch("$Revision: 182 $", "%d+"))
+local MINOR_VERSION = tonumber(strmatch("$Revision: 187 $", "%d+"))
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-Dropdown", MINOR_VERSION)
 if not lib then return end
@@ -314,6 +314,20 @@ function methods:GetValue()
 end
 function methods:SetValue(value, text)
 	self.selected = value
+	if not text and self.items and type(self.items[1]) == "table" then
+		local found
+		for i = 1, #self.items do
+			local item = self.items[i]
+			if type(item) == "table" and item.value == value then
+				text = item.text
+				found = true
+				break
+			end
+		end
+		if not found then
+			text = CUSTOM
+		end
+	end
 	self.valueText:SetText(text or value)
 end
 
@@ -354,6 +368,13 @@ function methods:Disable()
 	self.labelText:SetFontObject(GameFontDisable)
 	self.valueText:SetFontObject(GameFontDisableSmall)
 	self.button:Disable()
+end
+function methods:SetEnabled(enable)
+	if enable then
+		self:Enable()
+	else
+		self:Disable()
+	end
 end
 
 ------------------------------------------------------------------------

@@ -2,9 +2,9 @@
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
 	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
+	https://github.com/Phanx/PhanxChat
 ----------------------------------------------------------------------]]
 
 local URL_STYLE = "|cff33ccff%s|r"

@@ -19,6 +19,7 @@ AddOns\Blizzard_Calendar.lua
 AddOns\Blizzard_ChallengesUI.lua
 AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_EncounterJournal.lua
+AddOns\Blizzard_GarrisonUI.lua
 AddOns\Blizzard_GlyphUI.lua
 AddOns\Blizzard_GMSurveyUI.lua
 AddOns\Blizzard_GuildBankUI.lua
@@ -48,12 +49,15 @@ FrameXML\ContainerFrame.lua
 FrameXML\EquipmentFlyout.lua
 FrameXML\Fonts.lua
 FrameXML\GameTooltip.lua
+FrameXML\InterfaceOptionsFrame.lua
 FrameXML\LFDFrame.lua
 FrameXML\LFGFrame.lua
 FrameXML\LFGList.lua
 FrameXML\LFRFrame.lua
 FrameXML\LootFrame.lua
 FrameXML\LootHistory.lua
+FrameXML\MailFrame.lua
+FrameXML\MerchantFrame.lua
 FrameXML\ModelPreviewFrame.lua
 FrameXML\NavigationBar.lua
 FrameXML\PaperDollFrame.lua

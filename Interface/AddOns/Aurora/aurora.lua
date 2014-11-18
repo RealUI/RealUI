@@ -779,7 +779,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Headers ]]
 
-		local header = {"GameMenuFrame", "InterfaceOptionsFrame", "AudioOptionsFrame", "ChatConfigFrame", "ColorPickerFrame"}
+		local header = {"GameMenuFrame", "AudioOptionsFrame", "ChatConfigFrame", "ColorPickerFrame"}
 		for i = 1, #header do
 		local title = _G[header[i].."Header"]
 			if title then
@@ -818,7 +818,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Scroll bars ]]
 
-		local scrollbars = {"CharacterStatsPaneScrollBar", "LFDQueueFrameSpecificListScrollFrameScrollBar", "HelpFrameKnowledgebaseScrollFrameScrollBar", "HelpFrameReportBugScrollFrameScrollBar", "HelpFrameSubmitSuggestionScrollFrameScrollBar", "HelpFrameTicketScrollFrameScrollBar", "PaperDollTitlesPaneScrollBar", "PaperDollEquipmentManagerPaneScrollBar", "SendMailScrollFrameScrollBar", "OpenMailScrollFrameScrollBar", "RaidInfoScrollFrameScrollBar", "FriendsFriendsScrollFrameScrollBar", "HelpFrameGM_ResponseScrollFrame1ScrollBar", "HelpFrameGM_ResponseScrollFrame2ScrollBar", "HelpFrameKnowledgebaseScrollFrame2ScrollBar", "WhoListScrollFrameScrollBar", "GearManagerDialogPopupScrollFrameScrollBar", "LFDQueueFrameRandomScrollFrameScrollBar", "ScrollOfResurrectionSelectionFrameListScrollFrameScrollBar", "ChannelRosterScrollFrameScrollBar"}
+		local scrollbars = {"CharacterStatsPaneScrollBar", "LFDQueueFrameSpecificListScrollFrameScrollBar", "HelpFrameKnowledgebaseScrollFrameScrollBar", "HelpFrameReportBugScrollFrameScrollBar", "HelpFrameSubmitSuggestionScrollFrameScrollBar", "HelpFrameTicketScrollFrameScrollBar", "PaperDollTitlesPaneScrollBar", "PaperDollEquipmentManagerPaneScrollBar", "RaidInfoScrollFrameScrollBar", "FriendsFriendsScrollFrameScrollBar", "HelpFrameGM_ResponseScrollFrame1ScrollBar", "HelpFrameGM_ResponseScrollFrame2ScrollBar", "HelpFrameKnowledgebaseScrollFrame2ScrollBar", "WhoListScrollFrameScrollBar", "GearManagerDialogPopupScrollFrameScrollBar", "LFDQueueFrameRandomScrollFrameScrollBar", "ScrollOfResurrectionSelectionFrameListScrollFrameScrollBar", "ChannelRosterScrollFrameScrollBar"}
 		for i = 1, #scrollbars do
 			local scrollbar = _G[scrollbars[i]]
 			if scrollbar then
@@ -846,14 +846,12 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		F.ReskinArrow(SpellBookNextPageButton, "right")
 		F.ReskinArrow(InboxPrevPageButton, "left")
 		F.ReskinArrow(InboxNextPageButton, "right")
-		F.ReskinArrow(MerchantPrevPageButton, "left")
-		F.ReskinArrow(MerchantNextPageButton, "right")
 		F.ReskinArrow(TabardCharacterModelRotateLeftButton, "left")
 		F.ReskinArrow(TabardCharacterModelRotateRightButton, "right")
 
 		-- [[ Radio buttons ]]
 
-		local radiobuttons = {"ReportPlayerNameDialogPlayerNameCheckButton", "ReportPlayerNameDialogGuildNameCheckButton", "SendMailSendMoneyButton", "SendMailCODButton"}
+		local radiobuttons = {"ReportPlayerNameDialogPlayerNameCheckButton", "ReportPlayerNameDialogGuildNameCheckButton"}
 		for i = 1, #radiobuttons do
 			local radiobutton = _G[radiobuttons[i]]
 			if radiobutton then
@@ -869,7 +867,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		F.SetBD(HelpFrame)
 		F.SetBD(RaidParentFrame)
 
-		local FrameBDs = {"GameMenuFrame", "InterfaceOptionsFrame", "AudioOptionsFrame", "ChatConfigFrame", "StackSplitFrame", "AddFriendFrame", "FriendsFriendsFrame", "ColorPickerFrame", "ReadyCheckFrame", "GuildInviteFrame", "ChannelFrameDaughterFrame"}
+		local FrameBDs = {"GameMenuFrame", "AudioOptionsFrame", "ChatConfigFrame", "StackSplitFrame", "AddFriendFrame", "FriendsFriendsFrame", "ColorPickerFrame", "ReadyCheckFrame", "GuildInviteFrame", "ChannelFrameDaughterFrame"}
 		for i = 1, #FrameBDs do
 			local FrameBD = _G[FrameBDs[i]]
 			F.CreateBD(FrameBD)
@@ -1130,138 +1128,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GhostBD:SetPoint("BOTTOMRIGHT", GhostFrameContentsFrameIcon, 1, -1)
 		F.CreateBD(GhostBD, 0)
 
-		-- Mail frame
-
-		SendMailMoneyInset:DisableDrawLayer("BORDER")
-		InboxFrame:GetRegions():Hide()
-		SendMailMoneyBg:Hide()
-		SendMailMoneyInsetBg:Hide()
-		OpenMailFrameIcon:Hide()
-		OpenMailHorizontalBarLeft:Hide()
-		select(18, MailFrame:GetRegions()):Hide()
-		select(25, OpenMailFrame:GetRegions()):Hide()
-		for i = 4, 7 do
-			select(i, SendMailFrame:GetRegions()):Hide()
-		end
-
-		OpenMailLetterButton:SetNormalTexture("")
-		OpenMailLetterButton:SetPushedTexture("")
-		OpenMailLetterButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
-
-		for i = 1, 2 do
-			F.ReskinTab(_G["MailFrameTab"..i])
-		end
-
-		local bgmail = CreateFrame("Frame", nil, OpenMailLetterButton)
-		bgmail:SetPoint("TOPLEFT", -1, 1)
-		bgmail:SetPoint("BOTTOMRIGHT", 1, -1)
-		bgmail:SetFrameLevel(OpenMailLetterButton:GetFrameLevel()-1)
-		F.CreateBD(bgmail)
-
-		OpenMailMoneyButton:SetNormalTexture("")
-		OpenMailMoneyButton:SetPushedTexture("")
-		OpenMailMoneyButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
-
-		local bgmoney = CreateFrame("Frame", nil, OpenMailMoneyButton)
-		bgmoney:SetPoint("TOPLEFT", -1, 1)
-		bgmoney:SetPoint("BOTTOMRIGHT", 1, -1)
-		bgmoney:SetFrameLevel(OpenMailMoneyButton:GetFrameLevel()-1)
-		F.CreateBD(bgmoney)
-
-		SendMailSubjectEditBox:SetPoint("TOPLEFT", SendMailNameEditBox, "BOTTOMLEFT", 0, -1)
-
-		for i = 1, INBOXITEMS_TO_DISPLAY do
-			local it = _G["MailItem"..i]
-			local bu = _G["MailItem"..i.."Button"]
-			local st = _G["MailItem"..i.."ButtonSlot"]
-			local ic = _G["MailItem"..i.."Button".."Icon"]
-			local line = select(3, _G["MailItem"..i]:GetRegions())
-
-			local a, b = it:GetRegions()
-			a:Hide()
-			b:Hide()
-
-			bu:SetCheckedTexture(C.media.checked)
-
-			st:Hide()
-			line:Hide()
-			ic:SetTexCoord(.08, .92, .08, .92)
-
-			local bg = CreateFrame("Frame", nil, bu)
-			bg:SetPoint("TOPLEFT", -1, 1)
-			bg:SetPoint("BOTTOMRIGHT", 1, -1)
-			bg:SetFrameLevel(bu:GetFrameLevel()-1)
-			F.CreateBD(bg, 0)
-		end
-
-		for i = 1, ATTACHMENTS_MAX_SEND do
-			local bu = _G["SendMailAttachment"..i]
-			local border = bu.IconBorder
-
-			bu:GetRegions():Hide()
-
-			border:SetTexture(C.media.backdrop)
-			border:SetPoint("TOPLEFT", -1, 1)
-			border:SetPoint("BOTTOMRIGHT", 1, -1)
-			border:SetDrawLayer("BACKGROUND")
-
-			local bg = CreateFrame("Frame", nil, bu)
-			bg:SetPoint("TOPLEFT", -1, 1)
-			bg:SetPoint("BOTTOMRIGHT", 1, -1)
-			bg:SetFrameLevel(0)
-			F.CreateBD(bg, .25)
-		end
-
-		-- sigh
-		-- we mess with quality colour numbers, so we have to fix this
-		hooksecurefunc("SendMailFrame_Update", function()
-			for i = 1, ATTACHMENTS_MAX_SEND do
-				local bu = _G["SendMailAttachment"..i]
-
-				if bu:GetNormalTexture() == nil and bu.IconBorder:IsShown() then
-					bu.IconBorder:Hide()
-				end
-			end
-		end)
-
-		for i = 1, ATTACHMENTS_MAX_RECEIVE do
-			local bu = _G["OpenMailAttachmentButton"..i]
-			local ic = _G["OpenMailAttachmentButton"..i.."IconTexture"]
-			local border = bu.IconBorder
-
-			bu:SetNormalTexture("")
-			bu:SetPushedTexture("")
-			ic:SetTexCoord(.08, .92, .08, .92)
-
-			border:SetTexture(C.media.backdrop)
-			border:SetPoint("TOPLEFT", -1, 1)
-			border:SetPoint("BOTTOMRIGHT", 1, -1)
-			border:SetDrawLayer("BACKGROUND")
-
-			local bg = CreateFrame("Frame", nil, bu)
-			bg:SetPoint("TOPLEFT", -1, 1)
-			bg:SetPoint("BOTTOMRIGHT", 1, -1)
-			bg:SetFrameLevel(0)
-			F.CreateBD(bg, .25)
-		end
-
-		hooksecurefunc("SendMailFrame_Update", function()
-			for i = 1, ATTACHMENTS_MAX_SEND do
-				local button = _G["SendMailAttachment"..i]
-				if button:GetNormalTexture() then
-					button:GetNormalTexture():SetTexCoord(.08, .92, .08, .92)
-				end
-			end
-		end)
-
-		F.ReskinPortraitFrame(MailFrame, true)
-		F.ReskinPortraitFrame(OpenMailFrame, true)
-		F.ReskinInput(SendMailNameEditBox, 20)
-		F.ReskinInput(SendMailSubjectEditBox)
-		F.ReskinInput(SendMailMoneyGold)
-		F.ReskinInput(SendMailMoneySilver)
-		F.ReskinInput(SendMailMoneyCopper)
-
 		-- Currency frame
 
 		TokenFramePopupCorner:Hide()
@@ -1487,166 +1353,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			end
 		end)
 
-		-- Merchant Frame
-
-		MerchantMoneyInset:DisableDrawLayer("BORDER")
-		MerchantExtraCurrencyInset:DisableDrawLayer("BORDER")
-		BuybackBG:SetAlpha(0)
-		MerchantMoneyBg:Hide()
-		MerchantMoneyInsetBg:Hide()
-		MerchantFrameBottomLeftBorder:SetAlpha(0)
-		MerchantFrameBottomRightBorder:SetAlpha(0)
-		MerchantExtraCurrencyBg:SetAlpha(0)
-		MerchantExtraCurrencyInsetBg:Hide()
-
-		F.ReskinPortraitFrame(MerchantFrame, true)
-		F.ReskinDropDown(MerchantFrameLootFilter)
-
-		MerchantFrameTab1:ClearAllPoints()
-		MerchantFrameTab1:SetPoint("CENTER", MerchantFrame, "BOTTOMLEFT", 50, -14)
-		MerchantFrameTab2:SetPoint("LEFT", MerchantFrameTab1, "RIGHT", -15, 0)
-
-		for i = 1, 2 do
-			F.ReskinTab(_G["MerchantFrameTab"..i])
-		end
-
-		for i = 1, BUYBACK_ITEMS_PER_PAGE do
-			local button = _G["MerchantItem"..i]
-			local bu = _G["MerchantItem"..i.."ItemButton"]
-			local mo = _G["MerchantItem"..i.."MoneyFrame"]
-			local ic = bu.icon
-
-			bu:SetHighlightTexture("")
-
-			_G["MerchantItem"..i.."SlotTexture"]:Hide()
-			_G["MerchantItem"..i.."NameFrame"]:Hide()
-			_G["MerchantItem"..i.."Name"]:SetHeight(20)
-
-			local a1, p, a2= bu:GetPoint()
-			bu:SetPoint(a1, p, a2, -2, -2)
-			bu:SetNormalTexture("")
-			bu:SetPushedTexture("")
-			bu:SetSize(40, 40)
-
-			local a3, p2, a4, x, y = mo:GetPoint()
-			mo:SetPoint(a3, p2, a4, x, y+2)
-
-			F.CreateBD(bu, 0)
-
-			button.bd = CreateFrame("Frame", nil, button)
-			button.bd:SetPoint("TOPLEFT", 39, 0)
-			button.bd:SetPoint("BOTTOMRIGHT")
-			button.bd:SetFrameLevel(0)
-			F.CreateBD(button.bd, .25)
-
-			ic:SetTexCoord(.08, .92, .08, .92)
-			ic:ClearAllPoints()
-			ic:SetPoint("TOPLEFT", 1, -1)
-			ic:SetPoint("BOTTOMRIGHT", -1, 1)
-
-			for j = 1, 3 do
-				F.CreateBG(_G["MerchantItem"..i.."AltCurrencyFrameItem"..j.."Texture"])
-				_G["MerchantItem"..i.."AltCurrencyFrameItem"..j.."Texture"]:SetTexCoord(.08, .92, .08, .92)
-			end
-		end
-
-		hooksecurefunc("MerchantFrame_UpdateMerchantInfo", function()
-			local numMerchantItems = GetMerchantNumItems()
-			for i = 1, MERCHANT_ITEMS_PER_PAGE do
-				local index = ((MerchantFrame.page - 1) * MERCHANT_ITEMS_PER_PAGE) + i
-				if index <= numMerchantItems then
-					local name, texture, price, stackCount, numAvailable, isUsable, extendedCost = GetMerchantItemInfo(index)
-					if extendedCost and (price <= 0) then
-						_G["MerchantItem"..i.."AltCurrencyFrame"]:SetPoint("BOTTOMLEFT", "MerchantItem"..i.."NameFrame", "BOTTOMLEFT", 0, 35)
-					end
-
-					local bu = _G["MerchantItem"..i.."ItemButton"]
-					local name = _G["MerchantItem"..i.."Name"]
-					if bu.link then
-						local _, _, quality = GetItemInfo(bu.link)
-						local r, g, b = GetItemQualityColor(quality)
-
-						name:SetTextColor(r, g, b)
-					else
-						name:SetTextColor(1, 1, 1)
-					end
-				end
-			end
-
-			local name = GetBuybackItemLink(GetNumBuybackItems())
-			if name then
-				local _, _, quality = GetItemInfo(name)
-				local r, g, b = GetItemQualityColor(quality)
-
-				MerchantBuyBackItemName:SetTextColor(r, g, b)
-			end
-		end)
-
-		hooksecurefunc("MerchantFrame_UpdateBuybackInfo", function()
-			for i = 1, BUYBACK_ITEMS_PER_PAGE do
-				local itemLink = GetBuybackItemLink(i)
-				local name = _G["MerchantItem"..i.."Name"]
-
-				if itemLink then
-					local _, _, quality = GetItemInfo(itemLink)
-					local r, g, b = GetItemQualityColor(quality)
-
-					name:SetTextColor(r, g, b)
-				else
-					name:SetTextColor(1, 1, 1)
-				end
-			end
-		end)
-
-		MerchantBuyBackItemSlotTexture:SetAlpha(0)
-		MerchantBuyBackItemNameFrame:Hide()
-		MerchantBuyBackItemItemButton:SetNormalTexture("")
-		MerchantBuyBackItemItemButton:SetPushedTexture("")
-
-		F.CreateBD(MerchantBuyBackItemItemButton, 0)
-		F.CreateBD(MerchantBuyBackItem, .25)
-
-		MerchantBuyBackItemItemButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
-		MerchantBuyBackItemItemButtonIconTexture:ClearAllPoints()
-		MerchantBuyBackItemItemButtonIconTexture:SetPoint("TOPLEFT", 1, -1)
-		MerchantBuyBackItemItemButtonIconTexture:SetPoint("BOTTOMRIGHT", -1, 1)
-
-		MerchantBuyBackItemName:SetHeight(25)
-		MerchantBuyBackItemName:ClearAllPoints()
-		MerchantBuyBackItemName:SetPoint("LEFT", MerchantBuyBackItemSlotTexture, "RIGHT", -5, 8)
-
-		MerchantGuildBankRepairButton:SetPushedTexture("")
-		F.CreateBG(MerchantGuildBankRepairButton)
-		MerchantGuildBankRepairButtonIcon:SetTexCoord(0.595, 0.8075, 0.05, 0.52)
-
-		MerchantRepairAllButton:SetPushedTexture("")
-		F.CreateBG(MerchantRepairAllButton)
-		MerchantRepairAllIcon:SetTexCoord(0.31375, 0.53, 0.06, 0.52)
-
-		MerchantRepairItemButton:SetPushedTexture("")
-		F.CreateBG(MerchantRepairItemButton)
-		local ic = MerchantRepairItemButton:GetRegions()
-		ic:SetTexture("Interface\\Icons\\INV_Hammer_20")
-		ic:SetTexCoord(.08, .92, .08, .92)
-
-		hooksecurefunc("MerchantFrame_UpdateCurrencies", function()
-			for i = 1, MAX_MERCHANT_CURRENCIES do
-				local bu = _G["MerchantToken"..i]
-				if bu and not bu.reskinned then
-					local ic = _G["MerchantToken"..i.."Icon"]
-					local co = _G["MerchantToken"..i.."Count"]
-
-					ic:SetTexCoord(.08, .92, .08, .92)
-					ic:SetDrawLayer("OVERLAY")
-					ic:SetPoint("LEFT", co, "RIGHT", 2, 0)
-					co:SetPoint("TOPLEFT", bu, "TOPLEFT", -2, 0)
-
-					F.CreateBG(ic)
-					bu.reskinned = true
-				end
-			end
-		end)
-
 		-- Friends Frame
 
 		FriendsFrameFriendsScrollFrameTop:Hide()
@@ -1865,76 +1571,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		F.CreateBD(BrowserSettingsTooltip)
 		F.Reskin(BrowserSettingsTooltip.CacheButton)
 		F.Reskin(BrowserSettingsTooltip.CookiesButton)
-
-		-- Option panels
-
-		local interface = false
-		InterfaceOptionsFrame:HookScript("OnShow", function()
-			if interface == true then return end
-			interface = true
-
-			local line = InterfaceOptionsFrame:CreateTexture(nil, "ARTWORK")
-			line:SetSize(1, 546)
-			line:SetPoint("LEFT", 205, 10)
-			line:SetTexture(1, 1, 1, .2)
-
-			local checkboxes = {"InterfaceOptionsControlsPanelStickyTargeting", "InterfaceOptionsControlsPanelAutoDismount", "InterfaceOptionsControlsPanelAutoClearAFK", "InterfaceOptionsControlsPanelBlockTrades", "InterfaceOptionsControlsPanelBlockGuildInvites", "InterfaceOptionsControlsPanelBlockChatChannelInvites", "InterfaceOptionsControlsPanelLootAtMouse", "InterfaceOptionsControlsPanelAutoLootCorpse", "InterfaceOptionsControlsPanelAutoOpenLootHistory", "InterfaceOptionsControlsPanelInteractOnLeftClick", "InterfaceOptionsControlsPanelReverseCleanUpBags", "InterfaceOptionsControlsPanelReverseNewLoot", "InterfaceOptionsCombatPanelAttackOnAssist", "InterfaceOptionsCombatPanelStopAutoAttack", "InterfaceOptionsNamesPanelUnitNameplatesNameplateClassColors", "InterfaceOptionsCombatPanelTargetOfTarget", "InterfaceOptionsCombatPanelShowSpellAlerts", "InterfaceOptionsCombatPanelReducedLagTolerance", "InterfaceOptionsCombatPanelActionButtonUseKeyDown", "InterfaceOptionsCombatPanelEnemyCastBarsOnPortrait", "InterfaceOptionsCombatPanelEnemyCastBarsOnNameplates", "InterfaceOptionsCombatPanelEnemyCastBarsOnOnlyTargetNameplates", "InterfaceOptionsCombatPanelEnemyCastBarsNameplateSpellNames", "InterfaceOptionsCombatPanelAutoSelfCast", "InterfaceOptionsCombatPanelLossOfControl", "InterfaceOptionsDisplayPanelShowCloak", "InterfaceOptionsDisplayPanelShowHelm", "InterfaceOptionsDisplayPanelShowAggroPercentage", "InterfaceOptionsDisplayPanelPlayAggroSounds", "InterfaceOptionsDisplayPanelShowSpellPointsAvg", "InterfaceOptionsDisplayPanelShowFreeBagSpace", "InterfaceOptionsDisplayPanelCinematicSubtitles", "InterfaceOptionsDisplayPanelRotateMinimap", "InterfaceOptionsDisplayPanelShowAccountAchievments", "InterfaceOptionsObjectivesPanelAutoQuestTracking", "InterfaceOptionsObjectivesPanelMapFade", "InterfaceOptionsSocialPanelProfanityFilter", "InterfaceOptionsSocialPanelSpamFilter", "InterfaceOptionsSocialPanelChatBubbles", "InterfaceOptionsSocialPanelPartyChat", "InterfaceOptionsSocialPanelChatHoverDelay", "InterfaceOptionsSocialPanelGuildMemberAlert", "InterfaceOptionsSocialPanelChatMouseScroll", "InterfaceOptionsSocialPanelWholeChatWindowClickable", "InterfaceOptionsActionBarsPanelBottomLeft", "InterfaceOptionsActionBarsPanelBottomRight", "InterfaceOptionsActionBarsPanelRight", "InterfaceOptionsActionBarsPanelRightTwo", "InterfaceOptionsActionBarsPanelLockActionBars", "InterfaceOptionsActionBarsPanelAlwaysShowActionBars", "InterfaceOptionsActionBarsPanelSecureAbilityToggle", "InterfaceOptionsActionBarsPanelCountdownCooldowns", "InterfaceOptionsNamesPanelMyName", "InterfaceOptionsNamesPanelMinus", "InterfaceOptionsNamesPanelFriendlyPlayerNames", "InterfaceOptionsNamesPanelFriendlyPets", "InterfaceOptionsNamesPanelFriendlyGuardians", "InterfaceOptionsNamesPanelFriendlyTotems", "InterfaceOptionsNamesPanelUnitNameplatesFriends", "InterfaceOptionsNamesPanelUnitNameplatesFriendlyPets", "InterfaceOptionsNamesPanelUnitNameplatesFriendlyGuardians", "InterfaceOptionsNamesPanelUnitNameplatesFriendlyTotems", "InterfaceOptionsNamesPanelGuilds", "InterfaceOptionsNamesPanelGuildTitles", "InterfaceOptionsNamesPanelTitles", "InterfaceOptionsNamesPanelNonCombatCreature", "InterfaceOptionsNamesPanelEnemyPlayerNames", "InterfaceOptionsNamesPanelEnemyPets", "InterfaceOptionsNamesPanelEnemyGuardians", "InterfaceOptionsNamesPanelEnemyTotems", "InterfaceOptionsNamesPanelUnitNameplatesEnemies", "InterfaceOptionsNamesPanelUnitNameplatesEnemyPets", "InterfaceOptionsNamesPanelUnitNameplatesEnemyGuardians", "InterfaceOptionsNamesPanelUnitNameplatesEnemyTotems", "InterfaceOptionsNamesPanelUnitNameplatesEnemyMinus", "InterfaceOptionsCombatTextPanelTargetDamage", "InterfaceOptionsCombatTextPanelPeriodicDamage", "InterfaceOptionsCombatTextPanelPetDamage", "InterfaceOptionsCombatTextPanelHealing", "InterfaceOptionsCombatTextPanelHealingAbsorbTarget", "InterfaceOptionsCombatTextPanelTargetEffects", "InterfaceOptionsCombatTextPanelOtherTargetEffects", "InterfaceOptionsCombatTextPanelEnableFCT", "InterfaceOptionsCombatTextPanelDodgeParryMiss", "InterfaceOptionsCombatTextPanelDamageReduction", "InterfaceOptionsCombatTextPanelRepChanges", "InterfaceOptionsCombatTextPanelReactiveAbilities", "InterfaceOptionsCombatTextPanelFriendlyHealerNames", "InterfaceOptionsCombatTextPanelCombatState", "InterfaceOptionsCombatTextPanelHealingAbsorbSelf", "InterfaceOptionsCombatTextPanelComboPoints", "InterfaceOptionsCombatTextPanelLowManaHealth", "InterfaceOptionsCombatTextPanelEnergyGains", "InterfaceOptionsCombatTextPanelPeriodicEnergyGains", "InterfaceOptionsCombatTextPanelHonorGains", "InterfaceOptionsCombatTextPanelAuras", "InterfaceOptionsCombatTextPanelPetBattle", "InterfaceOptionsStatusTextPanelPlayer", "InterfaceOptionsStatusTextPanelPet", "InterfaceOptionsStatusTextPanelParty", "InterfaceOptionsStatusTextPanelTarget", "InterfaceOptionsStatusTextPanelAlternateResource", "InterfaceOptionsStatusTextPanelXP", "InterfaceOptionsUnitFramePanelPartyPets", "InterfaceOptionsUnitFramePanelArenaEnemyFrames", "InterfaceOptionsUnitFramePanelArenaEnemyCastBar", "InterfaceOptionsUnitFramePanelArenaEnemyPets", "InterfaceOptionsUnitFramePanelFullSizeFocusFrame", "InterfaceOptionsBuffsPanelDispellableDebuffs", "InterfaceOptionsBuffsPanelCastableBuffs", "InterfaceOptionsBuffsPanelConsolidateBuffs", "InterfaceOptionsBuffsPanelShowAllEnemyDebuffs", "InterfaceOptionsBattlenetPanelOnlineFriends", "InterfaceOptionsBattlenetPanelOfflineFriends", "InterfaceOptionsBattlenetPanelBroadcasts", "InterfaceOptionsBattlenetPanelFriendRequests", "InterfaceOptionsBattlenetPanelConversations", "InterfaceOptionsBattlenetPanelShowToastWindow", "InterfaceOptionsCameraPanelFollowTerrain", "InterfaceOptionsCameraPanelHeadBob", "InterfaceOptionsCameraPanelWaterCollision", "InterfaceOptionsCameraPanelSmartPivot", "InterfaceOptionsMousePanelInvertMouse", "InterfaceOptionsMousePanelEnableMouseSpeed", "InterfaceOptionsMousePanelClickToMove", "InterfaceOptionsMousePanelWoWMouse", "InterfaceOptionsHelpPanelShowTutorials", "InterfaceOptionsHelpPanelEnhancedTooltips", "InterfaceOptionsHelpPanelShowLuaErrors", "InterfaceOptionsHelpPanelColorblindMode", "InterfaceOptionsHelpPanelMovePad"}
-			for i = 1, #checkboxes do
-				F.ReskinCheck(_G[checkboxes[i]])
-			end
-
-			local dropdowns = {"InterfaceOptionsControlsPanelAutoLootKeyDropDown", "InterfaceOptionsCombatPanelFocusCastKeyDropDown", "InterfaceOptionsCombatPanelSelfCastKeyDropDown", "InterfaceOptionsCombatPanelLossOfControlFullDropDown", "InterfaceOptionsCombatPanelLossOfControlSilenceDropDown", "InterfaceOptionsCombatPanelLossOfControlInterruptDropDown", "InterfaceOptionsCombatPanelLossOfControlDisarmDropDown", "InterfaceOptionsCombatPanelLossOfControlRootDropDown", "InterfaceOptionsDisplayPanelOutlineDropDown", "InterfaceOptionsObjectivesPanelQuestSorting", "InterfaceOptionsSocialPanelChatStyle", "InterfaceOptionsSocialPanelTimestamps", "InterfaceOptionsSocialPanelWhisperMode", "InterfaceOptionsSocialPanelBnWhisperMode", "InterfaceOptionsSocialPanelConversationMode", "InterfaceOptionsActionBarsPanelPickupActionKeyDropDown", "InterfaceOptionsNamesPanelNPCNamesDropDown", "InterfaceOptionsNamesPanelUnitNameplatesMotionDropDown", "InterfaceOptionsCombatTextPanelTargetModeDropDown", "InterfaceOptionsCombatTextPanelFCTDropDown", "InterfaceOptionsStatusTextPanelDisplayDropDown", "InterfaceOptionsCameraPanelStyleDropDown", "InterfaceOptionsMousePanelClickMoveStyleDropDown"}
-			for i = 1, #dropdowns do
-				F.ReskinDropDown(_G[dropdowns[i]])
-			end
-
-			local sliders = {"InterfaceOptionsCombatPanelSpellAlertOpacitySlider", "InterfaceOptionsCombatPanelMaxSpellStartRecoveryOffset", "InterfaceOptionsBattlenetPanelToastDurationSlider", "InterfaceOptionsCameraPanelMaxDistanceSlider", "InterfaceOptionsCameraPanelFollowSpeedSlider", "InterfaceOptionsMousePanelMouseSensitivitySlider", "InterfaceOptionsMousePanelMouseLookSpeedSlider"}
-			for i = 1, #sliders do
-				F.ReskinSlider(_G[sliders[i]])
-			end
-
-			F.Reskin(InterfaceOptionsHelpPanelResetTutorials)
-
-			if IsAddOnLoaded("Blizzard_CompactRaidFrames") then
-				CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateBG:Hide()
-
-				local boxes = {CompactUnitFrameProfilesRaidStylePartyFrames, CompactUnitFrameProfilesGeneralOptionsFrameKeepGroupsTogether, CompactUnitFrameProfilesGeneralOptionsFrameHorizontalGroups, CompactUnitFrameProfilesGeneralOptionsFrameDisplayIncomingHeals, CompactUnitFrameProfilesGeneralOptionsFrameDisplayPowerBar, CompactUnitFrameProfilesGeneralOptionsFrameDisplayAggroHighlight, CompactUnitFrameProfilesGeneralOptionsFrameUseClassColors, CompactUnitFrameProfilesGeneralOptionsFrameDisplayPets, CompactUnitFrameProfilesGeneralOptionsFrameDisplayMainTankAndAssist, CompactUnitFrameProfilesGeneralOptionsFrameDisplayBorder, CompactUnitFrameProfilesGeneralOptionsFrameShowDebuffs, CompactUnitFrameProfilesGeneralOptionsFrameDisplayOnlyDispellableDebuffs, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate2Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate3Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate5Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate10Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate15Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate25Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivate40Players, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateSpec1, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateSpec2, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivatePvP, CompactUnitFrameProfilesGeneralOptionsFrameAutoActivatePvE}
-
-				for _, box in next, boxes do
-					F.ReskinCheck(box)
-				end
-
-				F.Reskin(CompactUnitFrameProfilesSaveButton)
-				F.Reskin(CompactUnitFrameProfilesDeleteButton)
-				F.Reskin(CompactUnitFrameProfilesGeneralOptionsFrameResetPositionButton)
-				F.ReskinDropDown(CompactUnitFrameProfilesProfileSelector)
-				F.ReskinDropDown(CompactUnitFrameProfilesGeneralOptionsFrameSortByDropdown)
-				F.ReskinDropDown(CompactUnitFrameProfilesGeneralOptionsFrameHealthTextDropdown)
-				F.ReskinSlider(CompactUnitFrameProfilesGeneralOptionsFrameHeightSlider)
-				F.ReskinSlider(CompactUnitFrameProfilesGeneralOptionsFrameWidthSlider)
-			end
-		end)
-
-		hooksecurefunc("InterfaceOptions_AddCategory", function()
-			local num = #INTERFACEOPTIONS_ADDONCATEGORIES
-			for i = 1, num do
-				local bu = _G["InterfaceOptionsFrameAddOnsButton"..i.."Toggle"]
-				if bu and not bu.reskinned then
-					F.ReskinExpandOrCollapse(bu)
-					bu:SetPushedTexture("")
-					bu.SetPushedTexture = F.dummy
-					bu.reskinned = true
-				end
-			end
-		end)
-
-		hooksecurefunc("OptionsListButtonToggle_OnClick", function(self)
-			if self:GetParent().element.collapsed then
-				self.plus:Show()
-			else
-				self.plus:Hide()
-			end
-		end)
 
 		-- SideDressUp
 
@@ -2519,11 +2155,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Hide regions ]]
 
-		local bglayers = {"WhoFrameColumnHeader1", "WhoFrameColumnHeader2", "WhoFrameColumnHeader3", "WhoFrameColumnHeader4", "RaidInfoInstanceLabel", "RaidInfoIDLabel", "HelpFrameMainInset", "HelpFrame", "HelpFrameLeftInset", "InterfaceOptionsFrameCategories", "InterfaceOptionsFrameAddOns", "RaidParentFrame"}
+		local bglayers = {"WhoFrameColumnHeader1", "WhoFrameColumnHeader2", "WhoFrameColumnHeader3", "WhoFrameColumnHeader4", "RaidInfoInstanceLabel", "RaidInfoIDLabel", "HelpFrameMainInset", "HelpFrame", "HelpFrameLeftInset", "RaidParentFrame"}
 		for i = 1, #bglayers do
 			_G[bglayers[i]]:DisableDrawLayer("BACKGROUND")
 		end
-		local borderlayers = {"WhoFrameListInset", "WhoFrameEditBoxInset", "ChannelFrameLeftInset", "ChannelFrameRightInset", "HelpFrame", "HelpFrameLeftInset", "HelpFrameMainInset", "InterfaceOptionsFramePanelContainer", "RaidParentFrame", "RaidParentFrameInset", "RaidFinderFrameRoleInset"}
+		local borderlayers = {"WhoFrameListInset", "WhoFrameEditBoxInset", "ChannelFrameLeftInset", "ChannelFrameRightInset", "HelpFrame", "HelpFrameLeftInset", "HelpFrameMainInset", "RaidParentFrame", "RaidParentFrameInset", "RaidFinderFrameRoleInset"}
 		for i = 1, #borderlayers do
 			_G[borderlayers[i]]:DisableDrawLayer("BORDER")
 		end
@@ -2585,10 +2221,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 		InboxPrevPageButton:GetRegions():Hide()
 		InboxNextPageButton:GetRegions():Hide()
-		MerchantPrevPageButton:GetRegions():Hide()
-		MerchantNextPageButton:GetRegions():Hide()
-		select(2, MerchantPrevPageButton:GetRegions()):Hide()
-		select(2, MerchantNextPageButton:GetRegions()):Hide()
 		LFDQueueFrameRandomScrollFrameScrollBackground:Hide()
 		ChannelFrameDaughterFrameCorner:Hide()
 		LFDQueueFrameSpecificListScrollFrameScrollBackgroundTopLeft:Hide()
@@ -2615,29 +2247,16 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				titles = true
 			end
 		end)
-		MerchantNameText:SetDrawLayer("ARTWORK")
 		SendScrollBarBackgroundTop:Hide()
-		select(4, SendMailScrollFrame:GetRegions()):Hide()
 		HelpFrameKnowledgebaseTopTileStreaks:Hide()
 		for i = 2, 5 do
 			select(i, DressUpFrame:GetRegions()):Hide()
 		end
 		ChannelFrameDaughterFrameTitlebar:Hide()
 		OpenScrollBarBackgroundTop:Hide()
-		select(2, OpenMailScrollFrame:GetRegions()):Hide()
 		WhoListScrollFrame:GetRegions():Hide()
 		select(2, WhoListScrollFrame:GetRegions()):Hide()
 		select(2, GuildChallengeAlertFrame:GetRegions()):Hide()
-		InterfaceOptionsFrameTab1TabSpacer:SetAlpha(0)
-		for i = 1, 2 do
-			_G["InterfaceOptionsFrameTab"..i.."Left"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab"..i.."Middle"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab"..i.."Right"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab"..i.."LeftDisabled"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab"..i.."MiddleDisabled"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab"..i.."RightDisabled"]:SetAlpha(0)
-			_G["InterfaceOptionsFrameTab2TabSpacer"..i]:SetAlpha(0)
-		end
 		ChannelRosterScrollFrameTop:SetAlpha(0)
 		ChannelRosterScrollFrameBottom:SetAlpha(0)
 		WhoFrameListInsetBg:Hide()
@@ -2673,9 +2292,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		InvoiceTextFontNormal:SetTextColor(1, 1, 1)
 		InvoiceTextFontSmall:SetTextColor(1, 1, 1)
 		SpellBookPageText:SetTextColor(.8, .8, .8)
-		QuestProgressRequiredItemsText:SetTextColor(1, 1, 1)
-		QuestProgressRequiredItemsText:SetShadowColor(0, 0, 0)
-		QuestProgressTitleText:SetShadowColor(0, 0, 0)
 		AvailableServicesText:SetTextColor(1, 1, 1)
 		AvailableServicesText:SetShadowColor(0, 0, 0)
 		PetitionFrameCharterTitle:SetTextColor(1, 1, 1)
@@ -2684,22 +2300,9 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		PetitionFrameMasterTitle:SetShadowColor(0, 0, 0)
 		PetitionFrameMemberTitle:SetTextColor(1, 1, 1)
 		PetitionFrameMemberTitle:SetShadowColor(0, 0, 0)
-		QuestProgressTitleText:SetTextColor(1, 1, 1)
-		QuestProgressTitleText.SetTextColor = F.dummy
-		QuestProgressText:SetTextColor(1, 1, 1)
-		QuestProgressText.SetTextColor = F.dummy
 		ItemTextPageText:SetTextColor(1, 1, 1)
 		ItemTextPageText.SetTextColor = F.dummy
-		GreetingText:SetTextColor(1, 1, 1)
-		GreetingText.SetTextColor = F.dummy
-		AvailableQuestsText:SetTextColor(1, 1, 1)
-		AvailableQuestsText.SetTextColor = F.dummy
-		AvailableQuestsText:SetShadowColor(0, 0, 0)
-		CurrentQuestsText:SetTextColor(1, 1, 1)
-		CurrentQuestsText.SetTextColor = F.dummy
-		CurrentQuestsText:SetShadowColor(0, 0, 0)
 		CoreAbilityFont:SetTextColor(1, 1, 1)
-		SystemFont_Large:SetTextColor(1, 1, 1)
 
 		hooksecurefunc("UpdateProfessionButton", function(self)
 			self.spellString:SetTextColor(1, 1, 1);
@@ -2733,9 +2336,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		PaperDollEquipmentManagerPaneSaveSet:SetPoint("LEFT", PaperDollEquipmentManagerPaneEquipSet, "RIGHT", 1, 0)
 		GearManagerDialogPopup:SetPoint("LEFT", PaperDollFrame, "RIGHT", 1, 0)
 		DressUpFrameResetButton:SetPoint("RIGHT", DressUpFrameCancelButton, "LEFT", -1, 0)
-		SendMailMailButton:SetPoint("RIGHT", SendMailCancelButton, "LEFT", -1, 0)
-		OpenMailDeleteButton:SetPoint("RIGHT", OpenMailCancelButton, "LEFT", -1, 0)
-		OpenMailReplyButton:SetPoint("RIGHT", OpenMailDeleteButton, "LEFT", -1, 0)
 		HelpFrameReportBugScrollFrameScrollBar:SetPoint("TOPLEFT", HelpFrameReportBugScrollFrame, "TOPRIGHT", 1, -16)
 		HelpFrameSubmitSuggestionScrollFrameScrollBar:SetPoint("TOPLEFT", HelpFrameSubmitSuggestionScrollFrame, "TOPRIGHT", 1, -16)
 		HelpFrameTicketScrollFrameScrollBar:SetPoint("TOPLEFT", HelpFrameTicketScrollFrame, "TOPRIGHT", 1, -16)
@@ -2745,16 +2345,13 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		TabardCharacterModelRotateRightButton:SetPoint("TOPLEFT", TabardCharacterModelRotateLeftButton, "TOPRIGHT", 1, 0)
 		LFDQueueFrameSpecificListScrollFrameScrollBarScrollDownButton:SetPoint("TOP", LFDQueueFrameSpecificListScrollFrameScrollBar, "BOTTOM", 0, 2)
 		LFDQueueFrameRandomScrollFrameScrollBarScrollDownButton:SetPoint("TOP", LFDQueueFrameRandomScrollFrameScrollBar, "BOTTOM", 0, 2)
-		SendMailMoneySilver:SetPoint("LEFT", SendMailMoneyGold, "RIGHT", 1, 0)
-		SendMailMoneyCopper:SetPoint("LEFT", SendMailMoneySilver, "RIGHT", 1, 0)
 		WhoFrameWhoButton:SetPoint("RIGHT", WhoFrameAddFriendButton, "LEFT", -1, 0)
 		WhoFrameAddFriendButton:SetPoint("RIGHT", WhoFrameGroupInviteButton, "LEFT", -1, 0)
 		FriendsFrameTitleText:SetPoint("TOP", FriendsFrame, "TOP", 0, -8)
-		InterfaceOptionsFrameOkay:SetPoint("BOTTOMRIGHT", InterfaceOptionsFrameCancel, "BOTTOMLEFT", -1, 0)
 
 		-- [[ Buttons ]]
 
-		local buttons = {"AudioOptionsFrameOkay", "AudioOptionsFrameCancel", "AudioOptionsFrameDefaults", "InterfaceOptionsFrameDefaults", "InterfaceOptionsFrameOkay", "InterfaceOptionsFrameCancel", "ChatConfigFrameOkayButton", "ChatConfigFrameDefaultButton", "DressUpFrameCancelButton", "DressUpFrameResetButton", "WhoFrameWhoButton", "WhoFrameAddFriendButton", "WhoFrameGroupInviteButton", "SendMailMailButton", "SendMailCancelButton", "OpenMailReplyButton", "OpenMailDeleteButton", "OpenMailCancelButton", "OpenMailReportSpamButton", "ChannelFrameNewButton", "RaidFrameRaidInfoButton", "RaidFrameConvertToRaidButton", "GearManagerDialogPopupOkay", "GearManagerDialogPopupCancel", "StackSplitOkayButton", "StackSplitCancelButton", "GameMenuButtonHelp", "GameMenuButtonWhatsNew", "GameMenuButtonStore", "GameMenuButtonOptions", "GameMenuButtonUIOptions", "GameMenuButtonKeybindings", "GameMenuButtonMacros", "GameMenuButtonAddons", "GameMenuButtonLogout", "GameMenuButtonQuit", "GameMenuButtonContinue", "GameMenuButtonMacOptions", "LFDQueueFrameFindGroupButton", "AddFriendEntryFrameAcceptButton", "AddFriendEntryFrameCancelButton", "FriendsFriendsSendRequestButton", "FriendsFriendsCloseButton", "ColorPickerOkayButton", "ColorPickerCancelButton", "GuildInviteFrameJoinButton", "GuildInviteFrameDeclineButton", "FriendsFramePendingButton1AcceptButton", "FriendsFramePendingButton1DeclineButton", "RaidInfoExtendButton", "RaidInfoCancelButton", "PaperDollEquipmentManagerPaneEquipSet", "PaperDollEquipmentManagerPaneSaveSet", "HelpFrameAccountSecurityOpenTicket", "HelpFrameCharacterStuckStuck", "HelpFrameOpenTicketHelpTopIssues", "HelpFrameOpenTicketHelpOpenTicket", "ReadyCheckFrameYesButton", "ReadyCheckFrameNoButton", "HelpFrameTicketSubmit", "HelpFrameTicketCancel", "HelpFrameKnowledgebaseSearchButton", "GhostFrame", "HelpFrameGM_ResponseNeedMoreHelp", "HelpFrameGM_ResponseCancel", "GMChatOpenLog", "AddFriendInfoFrameContinueButton", "LFDQueueFramePartyBackfillBackfillButton", "LFDQueueFramePartyBackfillNoBackfillButton", "ChannelFrameDaughterFrameOkayButton", "ChannelFrameDaughterFrameCancelButton", "PendingListInfoFrameContinueButton", "LFDQueueFrameNoLFDWhileLFRLeaveQueueButton", "InterfaceOptionsHelpPanelResetTutorials", "RaidFinderFrameFindRaidButton", "RaidFinderQueueFrameIneligibleFrameLeaveQueueButton", "SideDressUpModelResetButton", "RaidFinderQueueFramePartyBackfillBackfillButton", "RaidFinderQueueFramePartyBackfillNoBackfillButton", "ScrollOfResurrectionSelectionFrameAcceptButton", "ScrollOfResurrectionSelectionFrameCancelButton", "ScrollOfResurrectionFrameAcceptButton", "ScrollOfResurrectionFrameCancelButton", "HelpFrameReportBugSubmit", "HelpFrameSubmitSuggestionSubmit", "ReportPlayerNameDialogReportButton", "ReportPlayerNameDialogCancelButton", "ReportCheatingDialogReportButton", "ReportCheatingDialogCancelButton", "HelpFrameOpenTicketHelpItemRestoration"}
+		local buttons = {"AudioOptionsFrameOkay", "AudioOptionsFrameCancel", "AudioOptionsFrameDefaults", "ChatConfigFrameOkayButton", "ChatConfigFrameDefaultButton", "DressUpFrameCancelButton", "DressUpFrameResetButton", "WhoFrameWhoButton", "WhoFrameAddFriendButton", "WhoFrameGroupInviteButton", "ChannelFrameNewButton", "RaidFrameRaidInfoButton", "RaidFrameConvertToRaidButton", "GearManagerDialogPopupOkay", "GearManagerDialogPopupCancel", "StackSplitOkayButton", "StackSplitCancelButton", "GameMenuButtonHelp", "GameMenuButtonWhatsNew", "GameMenuButtonStore", "GameMenuButtonOptions", "GameMenuButtonUIOptions", "GameMenuButtonKeybindings", "GameMenuButtonMacros", "GameMenuButtonAddons", "GameMenuButtonLogout", "GameMenuButtonQuit", "GameMenuButtonContinue", "GameMenuButtonMacOptions", "LFDQueueFrameFindGroupButton", "AddFriendEntryFrameAcceptButton", "AddFriendEntryFrameCancelButton", "FriendsFriendsSendRequestButton", "FriendsFriendsCloseButton", "ColorPickerOkayButton", "ColorPickerCancelButton", "GuildInviteFrameJoinButton", "GuildInviteFrameDeclineButton", "FriendsFramePendingButton1AcceptButton", "FriendsFramePendingButton1DeclineButton", "RaidInfoExtendButton", "RaidInfoCancelButton", "PaperDollEquipmentManagerPaneEquipSet", "PaperDollEquipmentManagerPaneSaveSet", "HelpFrameAccountSecurityOpenTicket", "HelpFrameCharacterStuckStuck", "HelpFrameOpenTicketHelpTopIssues", "HelpFrameOpenTicketHelpOpenTicket", "ReadyCheckFrameYesButton", "ReadyCheckFrameNoButton", "HelpFrameTicketSubmit", "HelpFrameTicketCancel", "HelpFrameKnowledgebaseSearchButton", "GhostFrame", "HelpFrameGM_ResponseNeedMoreHelp", "HelpFrameGM_ResponseCancel", "GMChatOpenLog", "AddFriendInfoFrameContinueButton", "LFDQueueFramePartyBackfillBackfillButton", "LFDQueueFramePartyBackfillNoBackfillButton", "ChannelFrameDaughterFrameOkayButton", "ChannelFrameDaughterFrameCancelButton", "PendingListInfoFrameContinueButton", "LFDQueueFrameNoLFDWhileLFRLeaveQueueButton", "RaidFinderFrameFindRaidButton", "RaidFinderQueueFrameIneligibleFrameLeaveQueueButton", "SideDressUpModelResetButton", "RaidFinderQueueFramePartyBackfillBackfillButton", "RaidFinderQueueFramePartyBackfillNoBackfillButton", "ScrollOfResurrectionSelectionFrameAcceptButton", "ScrollOfResurrectionSelectionFrameCancelButton", "ScrollOfResurrectionFrameAcceptButton", "ScrollOfResurrectionFrameCancelButton", "HelpFrameReportBugSubmit", "HelpFrameSubmitSuggestionSubmit", "ReportPlayerNameDialogReportButton", "ReportPlayerNameDialogCancelButton", "ReportCheatingDialogReportButton", "ReportCheatingDialogCancelButton", "HelpFrameOpenTicketHelpItemRestoration"}
 		for i = 1, #buttons do
 		local reskinbutton = _G[buttons[i]]
 			if reskinbutton then

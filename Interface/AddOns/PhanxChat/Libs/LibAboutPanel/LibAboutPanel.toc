@@ -1,0 +1,32 @@
+﻿## Title: Lib: AboutPanel
+## X-Curse-Packaged-Version: 1.6.2
+## X-Curse-Project-Name: LibAboutPanel
+## X-Curse-Project-ID: libaboutpanel
+## X-Curse-Repository-ID: wow/libaboutpanel/mainline
+
+## Notes: Adds an about panel to interface options.
+
+## Author: Ackis
+## X-Email: ackis AT shaw DOT ca
+## X-Author-Faction: Horde
+## X-Author-Server: Hyjal US
+## X-Donate: http://www.curseforge.com/projects/libaboutpanel/#w_donations
+
+## Interface: 50400
+## Version: 1.6.2
+## X-Revision: @project-revision@
+## X-Date: 2014-02-24T20:41:20Z
+
+## X-Category: Libraries
+## X-Localizations: enUS, deDE, esES, esMX
+## X-Website: http://www.wowwiki.com/LibAboutPanel
+## X-Feedback: http://wow.curse.com/downloads/wow-addons/details/libaboutpanel.aspx
+
+## OptionalDeps: LibStub, CallbackHandler-1.0
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+#@end-no-lib-strip@
+
+LibAboutPanel.lua

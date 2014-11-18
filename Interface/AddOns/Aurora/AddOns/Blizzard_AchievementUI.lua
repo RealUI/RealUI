@@ -208,6 +208,9 @@ C.themes["Blizzard_AchievementUI"] = function()
 		end
 	end)
 
+	-- this is hidden behind other stuff in default UI
+	AchievementFrameSummaryAchievementsEmptyText:SetText("")
+
 	hooksecurefunc("AchievementFrameSummary_UpdateAchievements", function()
 		for i = 1, ACHIEVEMENTUI_MAX_SUMMARY_ACHIEVEMENTS do
 			local bu = _G["AchievementFrameSummaryAchievement"..i]

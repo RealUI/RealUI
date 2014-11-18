@@ -2,9 +2,9 @@
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
 	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
+	https://github.com/Phanx/PhanxChat
 ----------------------------------------------------------------------]]
 
 local PHANXCHAT, PhanxChat = ...
@@ -123,14 +123,14 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 	end
 
 	--------------------------------------------------------------------
-	
+
 	local HidePetCombatLog = self:CreateCheckbox(L.HidePetCombatLog .. NEW, L.HidePetCombatLog_Desc)
 	HidePetCombatLog:SetPoint("TOPLEFT", notes, "BOTTOM", 2, -12)
 	function HidePetCombatLog:Callback(value)
 		if PhanxChat.debug then print("PhanxChat: HidePetCombatLog", value) end
 		db.HidePetCombatLog = value
 	end
-	
+
 	--------------------------------------------------------------------
 
 	local HideButtons = self:CreateCheckbox(L.HideButtons, L.HideButtons_Desc)
@@ -195,19 +195,20 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 		PhanxChat:SetFadeTime(value)
 		return value
 	end
+	local MINUTES_AND_SECONDS = MINUTE_ONELETTER_ABBR .. " " .. SECOND_ONELETTER_ABBR
 	function FadeTime.valueText:SetText(text)
 		local v = self:GetParent():GetValue()
 		if PhanxChat.debug then print(type(v), tostring(v), "SetText", type(text), tostring(text)) end
 		local m = floor(text)
 		local s = 60 * (text - m)
 		if m > 0 and s > 0 then
-			self:SetFormattedText("%dm %ds", m, s)
+			self:SetFormattedText(MINUTES_AND_SECONDS, m, s)
 		elseif m > 0 then
-			self:SetFormattedText("%dm", m)
+			self:SetFormattedText(MINUTE_ONELETTER_ABBR, m)
 		elseif s > 0 then
-			self:SetFormattedText("%ds", s)
+			self:SetFormattedText(SECOND_ONELETTER_ABBR, s)
 		else
-			self:SetFormattedText("Disabled") -- use instead of SetText to avoid infinite loop
+			self:SetFormattedText(VIDEO_OPTIONS_DISABLED) -- use instead of SetText to avoid infinite loop
 		end
 	end
 
