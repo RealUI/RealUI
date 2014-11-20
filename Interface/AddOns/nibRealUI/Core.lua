@@ -238,6 +238,7 @@ local defaults = {
 	profile = {
 		modules = {
 			['*'] = true,
+			["AchievementScreenshots"] = false,
 		},
 		registeredChars = {},
 		-- HuD positions
