@@ -1,4 +1,16 @@
 ------------------------------------------------------------------------
+r734 | gragagrogog | 2014-11-21 09:07:48 +0000 (Fri, 21 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+
+Fix for ticket #379
+------------------------------------------------------------------------
+r733 | gragagrogog | 2014-11-20 23:21:18 +0000 (Thu, 20 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/GridRoster.lua
+
+Load raid40 layout in Molten Core.
+------------------------------------------------------------------------
 r732 | gragagrogog | 2014-10-26 17:23:07 +0000 (Sun, 26 Oct 2014) | 1 line
 Changed paths:
    M /trunk/Options/modules/indicators/NewIndicator.lua
@@ -65,32 +77,4 @@ Changed paths:
    M /trunk/GridLayoutLayouts.lua
 
 add ByGroup20 and ByGroup20/wPets layouts
-------------------------------------------------------------------------
-r722 | gragagrogog | 2014-10-14 19:59:04 +0000 (Tue, 14 Oct 2014) | 1 line
-Changed paths:
-   M /trunk/.pkgmeta
-   M /trunk/AoeHeals/AoeHealsMapData.lua
-   M /trunk/Grid2.toc
-
-no longer using libMapData for mapdata
-------------------------------------------------------------------------
-r721 | gragagrogog | 2014-10-14 19:41:00 +0000 (Tue, 14 Oct 2014) | 1 line
-Changed paths:
-   M /trunk/AoeHeals/Grid2AoeHeals.toc
-   M /trunk/Grid2.toc
-   M /trunk/LDB/Grid2LDB.toc
-   M /trunk/Options/Grid2Options.toc
-   M /trunk/RaidDebuffs/Grid2RaidDebuffs.toc
-   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
-
-toc bump
-------------------------------------------------------------------------
-r720 | gragagrogog | 2013-09-17 17:43:11 +0000 (Tue, 17 Sep 2013) | 3 lines
-Changed paths:
-   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
-   M /trunk/modules/StatusColor.lua
-
--class/creature colors should properly update after "charmed" fades
--added "Locked On" and "Mark of Anguish" to SoO RD list
-
 ------------------------------------------------------------------------

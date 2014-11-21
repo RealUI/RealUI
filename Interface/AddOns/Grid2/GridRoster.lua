@@ -132,7 +132,9 @@ do
 		local _, instType = IsInInstance()
 		local _, _, difficultyID = GetInstanceInfo()
 		if instType == "raid" and IsInRaid() then
-			if difficultyID == 16 then --Mythic
+			if select(8, GetInstanceInfo()) == 409 then
+				instType = "raid40"
+			elseif difficultyID == 16 then --Mythic
 				instType = "raid20"
 			--elseif difficultyID == 7 then --LFR... does lfr scale up?
 			--	instType = "raid25"

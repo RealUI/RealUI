@@ -111,7 +111,7 @@ end
 local function Init()
 	if not rosterRaid then
 		rosterRaid  = {}
-		for i=1,25 do
+		for i=1,30 do
 			rosterRaid[i] = { neighbors={} } 
 		end	
 	end

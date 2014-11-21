@@ -4,7 +4,7 @@
 ## Notes: Load on demand Options for Grid2RaidDebuffs.
 ## Notes-esES: Opciones de configuracion para el modulo Grid2RaidDebuffs.
 ## Author: Michael
-## X-Curse-Packaged-Version: r732
+## X-Curse-Packaged-Version: r734
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
@@ -12,7 +12,7 @@
 ## Dependencies: Grid2, Grid2RaidDebuffs
 ## LoadOnDemand: 1
 
-## Version: r732
+## Version: r734
 
 #@no-lib-strip@
 #Libs\LibBabble-Boss-3.0\lib.xml

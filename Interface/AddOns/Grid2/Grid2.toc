@@ -6,7 +6,7 @@
 ## Notes-zhCN: 小巧的轻量级模块化队伍框架
 ## Notes-zhTW: 精簡的團隊框架功能
 ## Author: Pastamancer & Maia, Jerry, Toadkiller
-## X-Curse-Packaged-Version: r732
+## X-Curse-Packaged-Version: r734
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
@@ -16,7 +16,7 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 
-## Version: r732
+## Version: r734
 ## X-ReleaseDate: "$Date: 2014-10-14 19:59:04 +0000 (Tue, 14 Oct 2014) $"
 ## X-Category: UnitFrame
 
