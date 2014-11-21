@@ -19,7 +19,7 @@ local Types = {
     ["MONK"] = {
         name = "Monk",
         points = {
-            [1] = {name = "Chi", id = "chi", barcount = 5},
+            [1] = {name = "Chi", id = "chi", barcount = 6},
         },
     },
     ["PALADIN"] = {

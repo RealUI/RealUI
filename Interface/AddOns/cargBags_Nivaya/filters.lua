@@ -32,7 +32,9 @@ cB_Filters.fHideEmpty = function(item) if cBnivCfg.CompressEmpty then return ite
 ------------------------------------
 cB_Filters.fItemClass = function(item, container)
 	if not item.id  then	return false	end
-	if not cB_ItemClass[item.id] then cbNivaya:ClassifyItem(item) end
+    if not cB_ItemClass[item.id] then
+        cbNivaya:ClassifyItem(item)
+    end
 	
 	local t, bag = cB_ItemClass[item.id]
 

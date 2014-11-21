@@ -145,43 +145,46 @@ cB_CustomBags = {}
 
 -- Those are default values only, change them ingame via "/cbniv":
 local optDefaults = {
-					NewItems = true,
-					Restack = true,
-					TradeGoods = true,
-					Armor = true,
-					CoolStuff = false,
-					Junk = true,
-					ItemSets = true,
-					Consumables = true,
-					Quest = true,
-					BankBlack = true,
-					scale = 1,
-					FilterBank = true,
-					CompressEmpty = true,
-					Unlocked = true,
-					SortBags = true,
-					SortBank = true,
-					BankCustomBags = true,
-					SellJunk = true,
-					}
+	NewItems = true,
+	Restack = true,
+	TradeGoods = true,
+	Armor = true,
+	CoolStuff = false,
+	Junk = true,
+	ItemSets = true,
+	Consumables = true,
+	Quest = true,
+	BankBlack = true,
+	scale = 1,
+	FilterBank = true,
+	CompressEmpty = true,
+	Unlocked = true,
+	SortBags = true,
+	SortBank = true,
+	BankCustomBags = true,
+	SellJunk = true,
+}
 
 -- Those are internal settings, don't touch them at all:
-local defaults =	{ 
-					}
+local defaults = {}
 
 local ItemSetCaption = (IsAddOnLoaded('ItemRack') and "ItemRack ") or (IsAddOnLoaded('Outfitter') and "Outfitter ") or "Item "
 local bankOpenState = false
 
 function cbNivaya:ShowBags(...)
-	for i = 1, select("#", ...) do
-		local bag = select(i, ...)
+	local bags = {...}
+	for i = 1, #bags do
+		local bag = bags[i]
 		if not cB_BagHidden[bag.name] then
 			bag:Show()
 		end
 	end
 end
-function cbNivaya:HideBags(...) for i = 1, select("#", ...) do
-	select(i, ...):Hide()
+function cbNivaya:HideBags(...)
+	local bags = {...}
+	for i = 1, #bags do
+		local bag = bags[i]
+		bag:Hide()
 	end
 end
 
@@ -398,27 +401,35 @@ function cbNivaya:OnOpen()
 	cB_Bags.main:Show()
 	cbNivaya:ShowBags(cB_Bags.armor, cB_Bags.bagNew, cB_Bags.bagItemSets, cB_Bags.quest, cB_Bags.consumables, cB_Bags.battlepet, 
 					  cB_Bags.tradegoods, cB_Bags.bagStuff, cB_Bags.bagJunk)
-	for _,v in ipairs(cB_CustomBags) do if v.active then cbNivaya:ShowBags(cB_Bags[v.name]) end end
+	for _, v in next, cB_CustomBags do
+		if v.active then cbNivaya:ShowBags(cB_Bags[v.name]) end
+	end
 end
 
 function cbNivaya:OnClose()
 	cbNivaya:HideBags(cB_Bags.main, cB_Bags.armor, cB_Bags.bagNew, cB_Bags.bagItemSets, cB_Bags.quest, cB_Bags.consumables, cB_Bags.battlepet, 
 					  cB_Bags.tradegoods, cB_Bags.bagStuff, cB_Bags.bagJunk, cB_Bags.key)
-	for _,v in ipairs(cB_CustomBags) do if v.active then cbNivaya:HideBags(cB_Bags[v.name]) end end
+	for _,v in ipairs(cB_CustomBags) do
+		if v.active then cbNivaya:HideBags(cB_Bags[v.name]) end
+	end
 end
 
 function cbNivaya:OnBankOpened() 
 	cB_Bags.bank:Show(); 
 	cbNivaya:ShowBags(cB_Bags.bankSets, cB_Bags.bankReagent, cB_Bags.bankArmor, cB_Bags.bankQuest, cB_Bags.bankTrade, cB_Bags.bankConsumables, cB_Bags.bankBattlePet) 
 	if cBniv.BankCustomBags then
-		for _,v in ipairs(cB_CustomBags) do if v.active then cbNivaya:ShowBags(cB_Bags['Bank'..v.name]) end end
+		for _,v in ipairs(cB_CustomBags) do
+			if v.active then cbNivaya:ShowBags(cB_Bags['Bank'..v.name]) end
+		end
 	end
 end
 
 function cbNivaya:OnBankClosed()
 	cbNivaya:HideBags(cB_Bags.bank, cB_Bags.bankSets, cB_Bags.bankReagent, cB_Bags.bankArmor, cB_Bags.bankQuest, cB_Bags.bankTrade, cB_Bags.bankConsumables, cB_Bags.bankBattlePet)
 	if cBniv.BankCustomBags then
-		for _,v in ipairs(cB_CustomBags) do if v.active then cbNivaya:HideBags(cB_Bags['Bank'..v.name]) end end
+		for _,v in ipairs(cB_CustomBags) do
+			if v.active then cbNivaya:HideBags(cB_Bags['Bank'..v.name]) end
+		end
 	end
 end
 

@@ -104,7 +104,7 @@ function FilterSet:Check(item)
 	local funcs, params = self.funcs, self.params
 
 	-- check own filters
-	for filter, flag in pairs(funcs) do
+	for filter, flag in next, funcs do
 		local result = filter(item, params[filter])
 		if((flag == true and not result) or (flag == -1 and result)) then
 			return nil
@@ -127,8 +127,8 @@ end
 	@return container <Container>
 ]]
 function Implementation:GetContainerForItem(item)
-	for i, container in ipairs(self.contByID) do
-		if(not container.filters or container.filters:Check(item)) then
+	for i, container in next, self.contByID do
+		if (not container.filters or container.filters:Check(item)) then
 			return container
 		end
 	end
