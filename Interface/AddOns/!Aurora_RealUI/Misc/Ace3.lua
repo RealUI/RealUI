@@ -23,7 +23,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     end
 
     local function StripTextures(object, kill)
-        for i=1, object:GetNumRegions() do
+        for i = 1, object:GetNumRegions() do
             local region = select(i, object:GetRegions())
             if region:GetObjectType() == "Texture" then
                 if kill then
@@ -74,6 +74,14 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         frame.text:ClearAllPoints()
         frame.text:SetPoint("LEFT", frame.bg, 0, 0)
         frame.text:SetPoint("RIGHT", frame.bg, -25, 0)
+    end
+
+    local function skinWeakAuras(widget)
+        local bg = widget.background or widget.frame.background -- adjust for BS
+        bg:SetTexture(1, 1, 1, 0.4)
+
+        widget.frame.highlight:SetTexture(C.media.backdrop)
+        widget.frame.highlight:SetVertexColor(r, g, b, alpha)
     end
 
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
@@ -226,6 +234,57 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget.skinned = true
             end
 
+        elseif TYPE == "Heading" then
+            if not widget.skinned then
+                --
+                widget.skinned = true
+            end
+
+        elseif TYPE == "Icon" then
+            if not widget.skinned then
+                widget["SetImage"] = function(self, path, ...)
+                    local image = self.image
+                    image:SetTexture(path)
+                    
+                    if image:GetTexture() then
+                        local n = select("#", ...)
+                        if n == 4 or n == 8 then
+                            image:SetTexCoord(...)
+                        else
+                            image:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+                        end
+                    end
+                end
+                widget.skinned = true
+            end
+
+        elseif TYPE == "InteractiveLabel" then
+            if not widget.skinned then
+                --
+                widget.skinned = true
+            end
+
+        elseif TYPE == "Keybinding" then
+            if not widget.skinned then
+                F.Reskin(widget.button)
+                widget.skinned = true
+            end
+
+        elseif TYPE == "Label" then
+            if not widget.skinned then
+                --
+                widget.skinned = true
+            end
+
+        elseif TYPE == "MultiLineEditBox" then
+            if not widget.skinned then
+                --F.ReskinInput(widget.editbox)
+                F.CreateBD(widget.scrollBG, alpha)
+                F.ReskinScroll(widget.scrollBar)
+                F.Reskin(widget.button)
+                widget.skinned = true
+            end
+
         elseif TYPE == "Slider" then
             if not widget.skinned then
                 local frame = widget.slider
@@ -293,6 +352,58 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 F.Reskin(widget.button)
                 F.CreateBD(widget.predictor)
                 widget.skinned = true
+            end
+        end
+
+        -- WeakAuras
+        local WA = {TYPE:find("WeakAuras")}
+        if WA[1] then
+            local WATYPE = TYPE:sub(WA[2] + 1)
+            --print("WeakAura:", WATYPE)
+            if WATYPE == "DisplayButton" then
+                if not widget.skinned then
+                    skinWeakAuras(widget)
+                    F.ReskinInput(widget.renamebox)
+                    F.ReskinExpandOrCollapse(widget.expand)
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "IconButton" then
+                if not widget.skinned then
+                    --
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "ImportButton" then
+                if not widget.skinned then
+                    --
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "LoadedHeaderButton" then
+                if not widget.skinned then
+                    skinWeakAuras(widget)
+                    F.ReskinExpandOrCollapse(widget.expand)
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "NewButton" then
+                if not widget.skinned then
+                    skinWeakAuras(widget)
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "NewHeaderButton" then
+                if not widget.skinned then
+                    skinWeakAuras(widget)
+                    widget.skinned = true
+                end
+
+            elseif WATYPE == "TextureButton" then
+                if not widget.skinned then
+                    --
+                    widget.skinned = true
+                end
             end
         end
         return oldRegisterAsWidget(self, widget)
