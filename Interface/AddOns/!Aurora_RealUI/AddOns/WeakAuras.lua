@@ -1,7 +1,7 @@
 local _, mods = ...
 
 mods["WeakAuras"] = function(F, C)
-    print("WeakAuras", F, C)
+    --print("WeakAuras", F, C)
     -- Skin regions
     local function SkinAura(region)
         region.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
@@ -28,7 +28,7 @@ mods["WeakAuras"] = function(F, C)
     WeakAuras.regionTypes.icon.modify = ModifyAura
     
     for wa, _ in next, WeakAuras.regions do
-        print("regions", wa, _)
+        --print("regions", wa, _)
         if WeakAuras.regions[wa].regionType == "icon" then
             SkinAura(WeakAuras.regions[wa].region)
         end
@@ -36,7 +36,7 @@ mods["WeakAuras"] = function(F, C)
 end
 
 mods["WeakAurasOptions"] = function(F, C)
-    print("WeakAurasOptions", F, C)
+    --print("WeakAurasOptions", F, C)
     local function StripTextures(object, kill)
         for i = 1, object:GetNumRegions() do
             local region = select(i, object:GetRegions())
@@ -52,7 +52,7 @@ mods["WeakAurasOptions"] = function(F, C)
 
     -- Skin options frame
     local function skin(...)
-        print("Options opened", ...)
+        --print("Options opened", ...)
         local frame = WeakAuras.OptionsFrame()
         if frame.skinned then return end
 

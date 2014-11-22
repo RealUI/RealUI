@@ -293,7 +293,7 @@ local function GetOptions()
                                     end
                                 end,
                                 set = function(info, value)
-                                    print("Set Anchor", info.option, value)
+                                    --print("Set Anchor", info.option, value)
                                     db.position.anchorto = minimapAnchors[value]
                                     db.position.x = minimapOffsets[value].x
                                     db.position.y = minimapOffsets[value].y
@@ -904,19 +904,17 @@ function MinimapAdv:UpdateButtonsPosition()
     local scale = NewMinimapPoints.scale
     local isTop = NewMinimapPoints.isTop
     local isLeft = NewMinimapPoints.isLeft
+    local frameOrder = {
+        "toggle",
+    }
     
-    -- Set button positions and visibility for Normal or Farm Mode
+    -- Set visibility for Normal or Farm Mode
     local bfWidth = 21
-    local side = isLeft and "LEFT" or "RIGHT"
-    
-    MMFrames.buttonframe:ClearAllPoints()
-    MMFrames.buttonframe:SetPoint("TOP"..side, "UIParent", "TOP"..side, isLeft and 1 or -1, -1)
-    MMFrames.buttonframe:SetScale(1)
-    MMFrames.buttonframe:Show()
-    
-    -- Hide/Show Toggle
+
+    -- Config
     if Minimap:IsVisible() then
         MMFrames.config:Show()
+        tinsert(frameOrder, "config")
         bfWidth = bfWidth + 15
     else 
         MMFrames.config:Hide()
@@ -926,6 +924,7 @@ function MinimapAdv:UpdateButtonsPosition()
     -- Tracking
     if Minimap:IsVisible() and ExpandedState == 0 then
         MMFrames.tracking:Show()
+        tinsert(frameOrder, "tracking")
         bfWidth = bfWidth + 15
     else 
         MMFrames.tracking:Hide()
@@ -935,13 +934,47 @@ function MinimapAdv:UpdateButtonsPosition()
     -- Farm mode
     if ( Minimap:IsVisible() and (not IsInInstance()) ) then
         MMFrames.farm:Show()
-        MMFrames.farm:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", bfWidth - 1, 1)
+        tinsert(frameOrder, "farm")
         bfWidth = bfWidth + 15
     else 
         MMFrames.farm:Hide()
         MMFrames.farm.mouseover = false
     end
     
+    -- Set button positions
+    MMFrames.buttonframe:ClearAllPoints()
+    MMFrames.buttonframe:SetPoint(anchor, "Minimap", isLeft and 1 or -1, isTop and -1 or 1)
+    MMFrames.buttonframe:SetScale(1)
+    MMFrames.buttonframe:Show()
+
+    if isLeft then
+        local prevFrame = MMFrames.buttonframe.edge
+        prevFrame:ClearAllPoints()
+        prevFrame:SetPoint("LEFT", MMFrames.buttonframe, 1, 0)
+        for i = 1, #frameOrder do
+            --print("Left", frameOrder[i])
+            local frame = MMFrames[frameOrder[i]]
+            frame:ClearAllPoints()
+            frame:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT", 0, 0)
+            prevFrame = frame
+        end
+        MMFrames.buttonframe.tooltip:ClearAllPoints()
+        MMFrames.buttonframe.tooltip:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT", 9, -3)
+    else
+        local prevFrame = MMFrames.buttonframe.edge
+        prevFrame:ClearAllPoints()
+        prevFrame:SetPoint("RIGHT", MMFrames.buttonframe, -1, 0)
+        for i = 1, #frameOrder do
+            --print("Right", frameOrder[i])
+            local frame = MMFrames[frameOrder[i]]
+            frame:ClearAllPoints()
+            frame:SetPoint("TOPRIGHT", prevFrame, "TOPLEFT", 0, 0)
+            prevFrame = frame
+        end
+        MMFrames.buttonframe.tooltip:ClearAllPoints()
+        MMFrames.buttonframe.tooltip:SetPoint("TOPRIGHT", prevFrame, "TOPLEFT", 0, -3)
+    end
+
     if MMFrames.buttonframe.tooltip:IsShown() then
         MMFrames.buttonframe:SetWidth(Minimap:GetWidth() * scale + 2)
     else
