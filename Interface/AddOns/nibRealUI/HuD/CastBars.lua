@@ -58,12 +58,16 @@ local ChannelingTicks = {
     [GetSpellInfo(5143)] = 5,   -- Arcane Missiles
     [GetSpellInfo(10)] = 8,     -- Blizzard
     [GetSpellInfo(12051)] = 3,  -- Evocation
+    -- Monk
+    [GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
+    [GetSpellInfo(115175)] = 8,  -- Soothing Mist
+    [GetSpellInfo(115294)] = 6,  -- Mana Tea
+    [GetSpellInfo(113656)] = 4,  -- Fists of Fury
     -- Priest
     [GetSpellInfo(64843)] = 4,  -- Divine Hymn
-    --[GetSpellInfo(64901)] = 4,    -- Hymn of Hope
     [GetSpellInfo(15407)] = 3,  -- Mind Flay
     [GetSpellInfo(129197)] = 3, -- Mind Flay (Insanity)
-    [GetSpellInfo(32000)] = 5,  -- Mind Sear
+    [GetSpellInfo(48045)] = 5,  -- Mind Sear
     [GetSpellInfo(47540)] = 2,  -- Penance
     -- Warlock
     [GetSpellInfo(689)] = 6,    -- Drain Life
@@ -214,28 +218,6 @@ function CastBars:SetBarTicks(ticks)
     end
 end
 
--- Range Check
-function CastBars:TargetInRange()
-    local bCheckRange = true
-    local inRange
-
-    if not(self.player.current) or not(UnitExists("target")) then
-        return true
-    elseif not(UnitIsVisible("target")) then
-        return false
-    else
-        inRange = IsSpellInRange(self.player.current, "target")
-        if inRange == nil then
-            return true
-        end
-        if inRange == 0 then
-            return false
-        else
-            return true
-        end
-    end
-end
-
 ----
 -- Bar Updates
 ----
@@ -288,31 +270,6 @@ function CastBars:OnUpdate(unit, elapsed)
             if perCast + self.player.cast.latencyRight.value > 1 then
                 AngleStatusBar:SetValue(self[unit].cast.latencyRight, 1-perCast)
             end
-        end
-
-        -- Target in range
-        if (unit == self.player.unit) then
-            local color
-            if self:TargetInRange() then
-                -- if not self.player.targetInRange then
-                    self.player.targetInRange = true
-                    if db.colors.useGlobal then
-                        color = nibRealUI.media.colors.blue
-                    else
-                        color = db.colors.player
-                    end
-                -- end
-            else
-                -- if self.player.targetInRange then
-                    self.player.targetInRange = false
-                    if db.colors.useGlobal then
-                        color = nibRealUI:ColorDarken(nibRealUI.media.colors.blue, 0.25)
-                    else
-                        color = db.colors.outOfRange
-                    end
-                -- end
-            end
-            AngleStatusBar:SetBarColor(self.player.cast.bar, color)
         end
 
         -- Stop if time remaining <= 0
@@ -639,7 +596,7 @@ function CastBars:UpdateInterruptibleColor(unit)
         end
     else
         if db.colors.useGlobal then
-            color = nibRealUI.media.colors.orange
+            color = nibRealUI.media.colors.blue
         else
             color = db.colors[unit]
         end
@@ -1051,7 +1008,6 @@ function CastBars:OnInitialize()
                 player =            {0.15, 0.61, 1.00, 1},
                 focus =             {1.00, 0.38, 0.08, 1},
                 target =            {1.00, 0.38, 0.08, 1},
-                outOfRange =        {0.24, 0.48, 0.67, 1},
                 uninterruptible =   {0.85, 0.14, 0.14, 1},
                 latency =           {0.80, 0.13, 0.13, 1},
             },

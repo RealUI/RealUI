@@ -1,9 +1,10 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Script file="HuD\StatDisplay.lua"/>
-	<Script file="HuD\CastBars.lua"/>
-	<Include file="HuD\UnitFrames\UnitFrames.xml"/>
-	<Include file="HuD\ClassTracking.xml"/>
-	<Include file="HuD\ClassResource.xml"/>
+    <Include file="HuD\UnitFrames\UnitFrames.xml"/>
+    <Include file="HuD\AuraTracking\AuraTracking.xml"/>
+    <Include file="HuD\PointTracking\PointTracking.xml"/>
+    <Include file="HuD\ClassResource\ClassResource.xml"/>
+    <Script file="HuD\CastBars.lua"/>
+    <Script file="HuD\StatDisplay.lua"/>
 </Ui>

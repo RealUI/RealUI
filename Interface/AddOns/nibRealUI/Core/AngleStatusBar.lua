@@ -182,9 +182,9 @@ function ASB:SetStatusBarColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
-    local bar = self.bar
-    for i = 1, #bar.row do
-        bar.row[i]:SetTexture(r, g, b, a or 1)
+    local row = self.bar.row
+    for i = 1, #row do
+        row[i]:SetTexture(r, g, b, a or 1)
     end
 end
 
@@ -241,7 +241,9 @@ local function CreateAngleBG(self, width, height, parent, info)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(bg)
     --]]
+
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
+    local color = info.bgColor or nibRealUI.media.background
 
     --print("CreateBG", leftX, rightX)
     bg.top = bg:CreateTexture(nil, "BACKGROUND")
@@ -266,8 +268,7 @@ local function CreateAngleBG(self, width, height, parent, info)
 
         -- Middle
         local tex = bg:CreateTexture(nil, "BACKGROUND")
-        --tex:SetTexture(1, 1, 1, 0.5)
-        tex:SetTexture(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+        tex:SetTexture(color[1], color[2], color[3], nibRealUI.media.background[4])
         tex:SetHeight(1)
         tex:SetPoint("TOPLEFT", left, "TOPRIGHT", 0, 0)
         tex:SetPoint("TOPRIGHT", right, "TOPLEFT", 0, 0)

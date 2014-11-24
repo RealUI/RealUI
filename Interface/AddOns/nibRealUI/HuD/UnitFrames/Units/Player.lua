@@ -47,39 +47,39 @@ local info = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local info = info[UnitFrames.layoutSize].health
-    parent.Health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
-    parent.Health:SetPoint("TOPRIGHT", parent, 0, 0)
-    parent.Health:SetSize(texture.width, texture.height)
+    local health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
+    health:SetPoint("TOPRIGHT", parent, 0, 0)
+    health:SetSize(texture.width, texture.height)
 
-    if ndb.settings.reverseUnitFrameBars then 
-        parent.Health:SetReversePercent(true)
-    end
-    UnitFrames:SetHealthColor(parent)
-
-    parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Health.text:SetPoint("BOTTOMRIGHT", parent.Health, "TOPRIGHT", 2, 2)
-    parent.Health.text:SetFont(unpack(nibRealUI:Font()))
-    parent:Tag(parent.Health.text, "[realui:smartHealth]")
+    health.text = health:CreateFontString(nil, "OVERLAY")
+    health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
+    health.text:SetFont(unpack(nibRealUI:Font()))
+    parent:Tag(health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    local stepHeight = ceil(parent.Health.info.minWidth / 2)
-    parent.Health.step = {}
-    parent.Health.warn = {}
+    local stepHeight = ceil(health.info.minWidth / 2)
+    health.step = {}
+    health.warn = {}
     for i = 1, 2 do
-        parent.Health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, parent.Health, info)
-        parent.Health.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, parent.Health, info)
-        local xOfs = floor(stepPoints[i] * parent.Health.info.maxWidth) + parent.Health.info.minWidth
-        if parent.Health.bar.reverse then
-            parent.Health.step[i]:SetPoint("TOPRIGHT", parent.Health, -xOfs, 0)
-            parent.Health.warn[i]:SetPoint("TOPRIGHT", parent.Health, -xOfs, 0)
+        health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
+        health.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, health, info)
+        local xOfs = floor(stepPoints[i] * health.info.maxWidth) + health.info.minWidth
+        if health.bar.reverse then
+            health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
+            health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
         else
-            parent.Health.step[i]:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", xOfs, 0)
-            parent.Health.warn[i]:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", xOfs, 0)
+            health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
+            health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
         end
     end
 
-    parent.Health.frequentUpdates = true
-    parent.Health.Override = UnitFrames.HealthOverride
+    health.frequentUpdates = true
+    health.Override = UnitFrames.HealthOverride
+    parent.Health = health
+    if ndb.settings.reverseUnitFrameBars then 
+        health:SetReversePercent(true)
+    end
+    UnitFrames:SetHealthColor(parent)
 end
 
 local function CreatePredictBar(parent)
