@@ -87,7 +87,7 @@ mods["WeakAurasOptions"] = function(F, C)
         -- Title
         --children[3]
 
-        -- Sizer
+        -- Frame size handle
         local sizer = children[4]
         sizer:SetNormalTexture("")
         sizer:SetHighlightTexture("")
@@ -122,7 +122,7 @@ mods["WeakAurasOptions"] = function(F, C)
             children[12+tutOfs] buttonsContainer
         ]]
 
-        -- MoverSizer
+        -- Selected aura border/sizer
         local moversizer = children[13+tutOfs]
         moversizer.bl.l:SetTexture(r, g, b, .8)
         moversizer.bl.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
