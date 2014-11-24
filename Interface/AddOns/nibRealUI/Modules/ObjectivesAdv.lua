@@ -343,14 +343,15 @@ end
 -- Collapse Quest Tracker based on zone
 function ObjectivesAdv:UpdateCollapseState()
 	local Collapsed = false
-	local _, instanceType = GetInstanceInfo()
+	local instanceName, instanceType = GetInstanceInfo()
+	local isInGarrison = instanceName:find("Garrison")
 
 	if db.hidden.enabled and (instanceType ~= "none") and nibRealUI:GetModuleEnabled(MODNAME) then
 		if (instanceType == "pvp" and db.hidden.collapse.pvp) then			-- Battlegrounds
 			Collapsed = true
 		elseif (instanceType == "arena" and db.hidden.collapse.arena) then	-- Arena
 			Collapsed = true
-		elseif (((instanceType == "party") or (instanceType == "scenario")) and db.hidden.collapse.party) then	-- 5 Man Dungeons
+		elseif (((instanceType == "party" and not isInGarrison) or (instanceType == "scenario")) and db.hidden.collapse.party) then	-- 5 Man Dungeons
 			Collapsed = true
 		elseif (instanceType == "raid" and db.hidden.collapse.raid) then	-- Raid Dungeons
 			Collapsed = true

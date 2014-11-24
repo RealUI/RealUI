@@ -156,7 +156,10 @@ function GridLayout:Update()
     local NewLayout, NewHoriz, LayoutKey
     
     -- Get Instance type
-    local _, instanceType, difficultyIndex, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
+    local instanceName, instanceType, difficultyIndex, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
+
+    -- Check for Garrison
+    local isInGarrison = instanceName:find("Garrison")
     
     -- Get Map ID
     if not WorldMapFrame:IsShown() then
@@ -194,7 +197,7 @@ function GridLayout:Update()
         end
         -- print(NewLayout, RaidSize)
     -- 5 man group - Adjust w/pets
-    elseif ( (instanceType == "arena") or (instanceType == "party" or nil) ) then
+    elseif ( (instanceType == "arena") or ((instanceType == "party" and not isInGarrison) or nil) ) then
         --print("You are in a Dungeon, Scenario, or Arena")
         NewHoriz = LayoutDB.hGroups.normal
         LayoutKey = Grid2Layout.partyType or "party"
