@@ -49,6 +49,7 @@ FrameXML\ContainerFrame.lua
 FrameXML\EquipmentFlyout.lua
 FrameXML\Fonts.lua
 FrameXML\GameTooltip.lua
+FrameXML\GarrisonFollowerTooltip.lua
 FrameXML\InterfaceOptionsFrame.lua
 FrameXML\LFDFrame.lua
 FrameXML\LFGFrame.lua

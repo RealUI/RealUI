@@ -258,7 +258,7 @@ tinsert(C.themes["Aurora"], function()
 		frame.BGAtlas:Hide()
 
 		frame.Icon:SetDrawLayer("BORDER")
-		frame.SpecIcon.bg:SetShown(frame.SpecIcon:IsShown())
+		frame.SpecIcon.bg:SetShown(frame.SpecIcon:IsShown() and frame.SpecIcon:GetTexture() ~= nil) -- sometimes appears when it shouldn't
 	end)
 
 	-- Money won alert
