@@ -332,9 +332,14 @@ function UnitFrames:PowerOverride(event, unit, powerType)
     -- print("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
 
-    local powerPer = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
+    local powerPer, powerCurr, powerMax = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
-    AngleStatusBar:SetValue(self.Power.bar, powerPer)
+    if self.Power.info then
+        self.Power:SetMinMaxValues(0, powerMax)
+        self.Power:SetValue(powerCurr)
+    else
+        AngleStatusBar:SetValue(self.Power.bar, powerPer)
+    end
 end
 
 function UnitFrames:PvPOverride(event, unit)

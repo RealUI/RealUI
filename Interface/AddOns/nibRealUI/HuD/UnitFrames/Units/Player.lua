@@ -8,13 +8,19 @@ local db, ndb, ndbc
 local oUF = oUFembed
 
 local info = {
+    health = {
+        leftAngle = [[/]],
+        rightAngle = [[/]],
+        growDirection = "LEFT",
+        smooth = true,
+    },
+    power = {
+        leftAngle = [[\]],
+        rightAngle = [[\]],
+        growDirection = "LEFT",
+        smooth = true,
+    },
     [1] = {
-        health = {
-            leftAngle = [[/]],
-            rightAngle = [[/]],
-            growDirection = "LEFT",
-            smooth = true,
-        },
         power = {
             x = -7,
             widthOfs = 10,
@@ -26,12 +32,6 @@ local info = {
         }
     },
     [2] = {
-        health = {
-            leftAngle = [[/]],
-            rightAngle = [[/]],
-            growDirection = "LEFT",
-            smooth = true,
-        },
         power = {
             x = -9,
             widthOfs = 12,
@@ -46,10 +46,10 @@ local info = {
 
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local info = info[UnitFrames.layoutSize].health
+    local info = info.health
     local health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
-    health:SetSize(texture.width, texture.height)
+    --health:SetSize(texture.width, texture.height)
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
@@ -86,7 +86,7 @@ end
 
 local function CreatePredictBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local info = info[UnitFrames.layoutSize].health
+    local info = info.health
     local absorbBar = parent:CreateAngleFrame("Bar", texture.width, texture.height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
     absorbBar:SetReversePercent(true)
@@ -119,38 +119,30 @@ end
 
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
-    local pos = info[UnitFrames.layoutSize].power
-    parent.Power = CreateFrame("Frame", nil, parent.overlay)
-    parent.Power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
-    parent.Power:SetSize(texture.width, texture.height)
-    -- texture.width - 17 | Layout 1?
-    parent.Power.bar = AngleStatusBar:NewBar(parent.Power, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
+    local info = info.power
+    print("Create Power bar")
+    local power = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
+    power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
 
-    parent.Power.bg = parent.Power:CreateTexture(nil, "BACKGROUND")
-    parent.Power.bg:SetTexture(texture.bar)
-    parent.Power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
-    parent.Power.bg:SetAllPoints(parent.Power)
-
-    parent.Power.border = parent.Power:CreateTexture(nil, "BORDER")
-    parent.Power.border:SetTexture(texture.border)
-    parent.Power.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Power.border:SetAllPoints(parent.Power)
-
-    parent.Power.text = parent.Power:CreateFontString(nil, "OVERLAY")
-    parent.Power.text:SetPoint("TOPRIGHT", parent.Power, "BOTTOMRIGHT", 2, -3)
-    parent.Power.text:SetFont(unpack(nibRealUI:Font()))
-    parent:Tag(parent.Power.text, "[realui:power]")
+    power.text = power:CreateFontString(nil, "OVERLAY")
+    power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
+    power.text:SetFont(unpack(nibRealUI:Font()))
+    parent:Tag(power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    parent.Power.steps = {}
+    local stepHeight = ceil(texture.height / 2)
+    power.step = {}
+    power.warn = {}
     for i = 1, 2 do
-        parent.Power.steps[i] = parent.Power:CreateTexture(nil, "OVERLAY")
-        parent.Power.steps[i]:SetSize(16, 16)
+        power.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, power, info)
+        power.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, power, info)
+        power.step[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
+        power.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
-    parent.Power.frequentUpdates = true
-    parent.Power.Override = UnitFrames.PowerOverride
+    power.frequentUpdates = true
+    power.Override = UnitFrames.PowerOverride
+    parent.Power = power
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
@@ -265,22 +257,21 @@ UnitFrames["player"] = function(self)
     function self:PostUpdate(event)
         self.endBox.Update(self, event)
 
+        local power = self.Power
         local _, powerType = UnitPowerType(self.unit)
-        AngleStatusBar:SetBarColor(self.Power.bar, UnitFrames.PowerColors[powerType])
-        AngleStatusBar:SetReverseFill(self.Power.bar, UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
-        self.Power.enabled = true
+        power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
+        power:SetReversePercent(UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
+        power.enabled = true
 
-        local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-        if self.Power.bar.reverse then
-            for i = 1, 2 do
-                self.Power.steps[i]:ClearAllPoints()
-                self.Power.steps[i]:SetPoint("BOTTOMRIGHT", self.Power, -(floor(stepPoints[i] * texture.width) - 6), 0)
-            end
-        else
-            for i = 1, 2 do
-                self.Power.steps[i]:ClearAllPoints()
-                self.Power.steps[i]:SetPoint("BOTTOMLEFT", self.Power, floor(stepPoints[i] * texture.width) - 6, 0)
+        for i = 1, 2 do
+            local xOfs = floor(stepPoints[i] * power.info.maxWidth) + power.info.minWidth
+            if power.bar.reverse then
+                power.step[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
+                power.warn[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
+            else
+                power.step[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
+                power.warn[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
             end
         end
     end

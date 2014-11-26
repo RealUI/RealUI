@@ -262,19 +262,28 @@ local function CreateAngleBG(self, width, height, parent, info)
     bg.top:SetPoint("TOPLEFT", leftX, 0)
     bg.top:SetPoint("TOPRIGHT", rightX, 0)
 
+    local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
     local row, left, right = {}
-    for i = 1, height - 2 do
+    for i = 1, maxRows do
         -- Left side
         left = bg:CreateTexture(nil, "BACKGROUND")
         left:SetTexture(0, 0, 0)
         left:SetSize(1, 1)
-        left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", -i, 1 - i)
+        if leftX == 0 then
+            left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", i, 1 - i)
+        else
+            left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", -i, 1 - i)
+        end
 
         -- Right side
         right = bg:CreateTexture(nil, "BACKGROUND")
         right:SetTexture(0, 0, 0)
         right:SetSize(1, 1)
-        right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", -i, -i)
+        if rightX == 0 then
+            right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", -i, -i)
+        else
+            right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", i, -i)
+        end
 
         -- Middle
         row[i] = bg:CreateTexture(nil, "BACKGROUND")
@@ -288,7 +297,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     bg.bottom = bg:CreateTexture(nil, "BACKGROUND")
     bg.bottom:SetTexture(0, 0, 0)
     bg.bottom:SetHeight(1)
-    bg.bottom:SetPoint("BOTTOMLEFT", rightX, 0)
+    bg.bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
     bg.bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
 
     return bg
