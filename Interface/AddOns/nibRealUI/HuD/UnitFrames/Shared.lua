@@ -340,18 +340,19 @@ end
 function UnitFrames:PvPOverride(event, unit)
     --print("PvP Override", self, event, unit, IsPVPTimerRunning())
     local color = nibRealUI.media.background
+    local setColor = self.PvP.row and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
     if UnitIsPVP(unit) then
         if UnitIsFriend("player", unit) then
             --print("Friend")
             color = db.overlay.colors.status.pvpFriendly
-            self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+            setColor(self.PvP, color[1], color[2], color[3], color[4])
         else
             --print("Enemy")
             color = db.overlay.colors.status.pvpEnemy
-            self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+            setColor(self.PvP, color[1], color[2], color[3], color[4])
         end
     else
-        self.PvP:SetVertexColor(color[1], color[2], color[3], color[4])
+        setColor(self.PvP, color[1], color[2], color[3], color[4])
     end
 end
 

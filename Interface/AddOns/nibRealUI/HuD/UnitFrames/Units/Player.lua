@@ -57,7 +57,7 @@ local function CreateHealthBar(parent)
     parent:Tag(health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    local stepHeight = ceil(health.info.minWidth / 2)
+    local stepHeight = ceil(texture.height / 2)
     health.step = {}
     health.warn = {}
     for i = 1, 2 do
@@ -71,6 +71,8 @@ local function CreateHealthBar(parent)
             health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
             health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
         end
+        health.step[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
+        health.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
     health.frequentUpdates = true
@@ -97,24 +99,22 @@ local function CreatePredictBar(parent)
 end
 
 local function CreatePvPStatus(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.healthBox
-    parent.PvP = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-    parent.PvP:SetTexture(texture.bar)
-    parent.PvP:SetSize(texture.width, texture.height)
-    parent.PvP:SetPoint("TOPRIGHT", parent.Health, -8, -1)
+    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local info = info.health
 
-    local border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetAllPoints(parent.PvP)
+    local height = ceil(texture.height * 0.65)
+    local pvp = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
+    pvp:SetPoint("TOPRIGHT", parent.Health, -8, 0)
 
-    parent.PvP.text = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.PvP.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 15, 2)
-    parent.PvP.text:SetFont(unpack(nibRealUI:Font()))
-    parent.PvP.text:SetJustifyH("LEFT")
-    parent.PvP.text.frequentUpdates = 1
-    parent:Tag(parent.PvP.text, "[realui:pvptimer]")
+    pvp.text = pvp:CreateFontString(nil, "OVERLAY")
+    pvp.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 15, 2)
+    pvp.text:SetFont(unpack(nibRealUI:Font()))
+    pvp.text:SetJustifyH("LEFT")
+    pvp.text.frequentUpdates = 1
+    parent:Tag(pvp.text, "[realui:pvptimer]")
 
-    parent.PvP.Override = UnitFrames.PvPOverride
+    pvp.Override = UnitFrames.PvPOverride
+    parent.PvP = pvp
 end
 
 local function CreatePowerBar(parent)

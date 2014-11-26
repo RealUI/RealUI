@@ -188,6 +188,16 @@ function ASB:SetStatusBarColor(r, g, b, a)
     end
 end
 
+function ASB:SetBackgroundColor(r, g, b, a)
+    if type(r) == "table" then
+        r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    local row = self.row
+    for i = 1, #row do
+        row[i]:SetTexture(r, g, b, a or 1)
+    end
+end
+
 -- If SetMinMaxValues is not called, default to min = 0, max = 1.
 function ASB:SetMinMaxValues(min, max)
     --print("SetMinMaxValues", min, max)
@@ -243,7 +253,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     --]]
 
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
-    local color = info.bgColor or nibRealUI.media.background
+    local bgColor = nibRealUI.media.background
 
     --print("CreateBG", leftX, rightX)
     bg.top = bg:CreateTexture(nil, "BACKGROUND")
@@ -252,27 +262,28 @@ local function CreateAngleBG(self, width, height, parent, info)
     bg.top:SetPoint("TOPLEFT", leftX, 0)
     bg.top:SetPoint("TOPRIGHT", rightX, 0)
 
-    local left, right
+    local row, left, right = {}
     for i = 1, height - 2 do
         -- Left side
-        local left = bg:CreateTexture(nil, "BACKGROUND")
+        left = bg:CreateTexture(nil, "BACKGROUND")
         left:SetTexture(0, 0, 0)
         left:SetSize(1, 1)
         left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", -i, 1 - i)
 
         -- Right side
-        local right = bg:CreateTexture(nil, "BACKGROUND")
+        right = bg:CreateTexture(nil, "BACKGROUND")
         right:SetTexture(0, 0, 0)
         right:SetSize(1, 1)
         right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", -i, -i)
 
         -- Middle
-        local tex = bg:CreateTexture(nil, "BACKGROUND")
-        tex:SetTexture(color[1], color[2], color[3], nibRealUI.media.background[4])
-        tex:SetHeight(1)
-        tex:SetPoint("TOPLEFT", left, "TOPRIGHT", 0, 0)
-        tex:SetPoint("TOPRIGHT", right, "TOPLEFT", 0, 0)
+        row[i] = bg:CreateTexture(nil, "BACKGROUND")
+        row[i]:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+        row[i]:SetHeight(1)
+        row[i]:SetPoint("TOPLEFT", left, "TOPRIGHT", 0, 0)
+        row[i]:SetPoint("TOPRIGHT", right, "TOPLEFT", 0, 0)
     end
+    bg.row = row
 
     bg.bottom = bg:CreateTexture(nil, "BACKGROUND")
     bg.bottom:SetTexture(0, 0, 0)
@@ -345,7 +356,9 @@ end
 local function CreateAngleFrame(self, frameType, width, height, parent, info)
     local status, bar
     if frameType == "Frame" then
-        return CreateAngleBG(self, width, height, parent, info)
+        status = CreateAngleBG(self, width, height, parent, info)
+        status.SetBackgroundColor = ASB.SetBackgroundColor
+        return status
     elseif frameType == "Bar" then
         status, bar, info = CreateAngleBar(self, width, height, parent, info)
     elseif frameType == "Status" then
