@@ -330,19 +330,35 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
  
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
 
-    if info.growDirection == "LEFT" then
-        leftX = leftX - 2
+    if leftX == 0 then
+        rightX = rightX + 2
     else
-        --\
+        leftX = leftX - 2
     end
 
-    bar.row = {}
+    local row, prevRow = {}
     for i = 1, info.minWidth do
-        bar.row[i] = parent:CreateTexture(nil, "ARTWORK")
-        bar.row[i]:SetHeight(1)
-        bar.row[i]:SetPoint("TOPLEFT", bar, "TOPLEFT", abs(leftX) - (i - 1), 1 - i)
-        bar.row[i]:SetPoint("TOPRIGHT", bar, "TOPRIGHT", rightX - (i - 1), 1 - i)
+        -- Created from "parent" to ensure proper layering
+        row[i] = parent:CreateTexture(nil, "ARTWORK")
+        row[i]:SetHeight(1)
+        if i == 1 then
+            row[i]:SetPoint("TOPLEFT", bar, leftX, 0)
+            row[i]:SetPoint("TOPRIGHT", bar, rightX, 0)
+        else
+            if leftX == 0 then
+                row[i]:SetPoint("TOPLEFT", prevRow, 1, -1)
+            else
+                row[i]:SetPoint("TOPLEFT", prevRow, -1, -1)
+            end
+            if rightX == 0 then
+                row[i]:SetPoint("TOPRIGHT", prevRow, -1, -1)
+            else
+                row[i]:SetPoint("TOPRIGHT", prevRow, 1, -1)
+            end
+        end
+        prevRow = row[i]
     end
+    bar.row = row
 
     bar:SetScript("OnHide", function()
         for r = 1, #bar.row do

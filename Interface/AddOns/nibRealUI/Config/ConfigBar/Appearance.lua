@@ -529,13 +529,6 @@ function ConfigBar_Appearance:SetupWindow()
 					y = -72,
 				},
 				{
-					label = SPELL_FAILED_OUT_OF_RANGE,
-					func = function(r, g, b, a)
-						ConfigBar_Appearance:UpdateCastBarColor(2, "outOfRange", r, g, b)
-					end,
-					color = CastBars:GetColors()["outOfRange"],
-				},
-				{
 					label = TARGET,
 					func = function(r, g, b, a)
 						ConfigBar_Appearance:UpdateCastBarColor(3, "target", r, g, b)

@@ -50,6 +50,9 @@ local function CreateHealthBar(parent)
     local health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     --health:SetSize(texture.width, texture.height)
+    if ndb.settings.reverseUnitFrameBars then 
+        health:SetReversePercent(true)
+    end
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
@@ -78,9 +81,6 @@ local function CreateHealthBar(parent)
     health.frequentUpdates = true
     health.Override = UnitFrames.HealthOverride
     parent.Health = health
-    if ndb.settings.reverseUnitFrameBars then 
-        health:SetReversePercent(true)
-    end
     UnitFrames:SetHealthColor(parent)
 end
 
@@ -120,7 +120,7 @@ end
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local info = info.power
-    print("Create Power bar")
+    --print("Create Power bar")
     local power = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
 
