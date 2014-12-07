@@ -280,4 +280,47 @@ tinsert(C.themes["Aurora"], function()
 	F.CreateBD(LFGListApplicationDialog.Description, .25)
 	F.Reskin(LFGListApplicationDialog.SignUpButton)
 	F.Reskin(LFGListApplicationDialog.CancelButton)
+
+	-- [[ Invite dialog ]]
+
+	local LFGListInviteDialog = LFGListInviteDialog
+
+	F.CreateBD(LFGListInviteDialog)
+	F.Reskin(LFGListInviteDialog.AcceptButton)
+	F.Reskin(LFGListInviteDialog.DeclineButton)
+	F.Reskin(LFGListInviteDialog.AcknowledgeButton)
+
+	do
+		local RoleIcon = LFGListInviteDialog.RoleIcon
+
+		RoleIcon:SetTexture(C.media.roleIcons)
+
+		local left = LFGListInviteDialog:CreateTexture(nil, "OVERLAY")
+		left:SetWidth(1)
+		left:SetTexture(C.media.backdrop)
+		left:SetVertexColor(0, 0, 0)
+		left:SetPoint("TOPLEFT", RoleIcon, 8, -6)
+		left:SetPoint("BOTTOMLEFT", RoleIcon, 8, 10)
+
+		local right = LFGListInviteDialog:CreateTexture(nil, "OVERLAY")
+		right:SetWidth(1)
+		right:SetTexture(C.media.backdrop)
+		right:SetVertexColor(0, 0, 0)
+		right:SetPoint("TOPRIGHT", RoleIcon, -8, -6)
+		right:SetPoint("BOTTOMRIGHT", RoleIcon, -8, 10)
+
+		local top = LFGListInviteDialog:CreateTexture(nil, "OVERLAY")
+		top:SetHeight(1)
+		top:SetTexture(C.media.backdrop)
+		top:SetVertexColor(0, 0, 0)
+		top:SetPoint("TOPLEFT", RoleIcon, 8, -6)
+		top:SetPoint("TOPRIGHT", RoleIcon, -8, -6)
+
+		local bottom = LFGListInviteDialog:CreateTexture(nil, "OVERLAY")
+		bottom:SetHeight(1)
+		bottom:SetTexture(C.media.backdrop)
+		bottom:SetVertexColor(0, 0, 0)
+		bottom:SetPoint("BOTTOMLEFT", RoleIcon, 8, 10)
+		bottom:SetPoint("BOTTOMRIGHT", RoleIcon, -8, 10)
+	end
 end)

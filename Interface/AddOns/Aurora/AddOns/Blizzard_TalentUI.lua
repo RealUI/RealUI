@@ -110,7 +110,7 @@ C.themes["Blizzard_TalentUI"] = function()
 		local index = 1
 		local bonuses
 		if self.isPet then
-			bonuses = {GetSpecializationSpells(shownSpec, nil, self.isPet)}
+			bonuses = {GetSpecializationSpells(shownSpec, nil, self.isPet, true)}
 		else
 			bonuses = SPEC_SPELLS_DISPLAY[id]
 		end

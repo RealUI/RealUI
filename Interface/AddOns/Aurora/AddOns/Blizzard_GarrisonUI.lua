@@ -3,33 +3,158 @@ local F, C = unpack(select(2, ...))
 C.themes["Blizzard_GarrisonUI"] = function()
 	local r, g, b = C.r, C.g, C.b
 
-	-- [[ Shared functions ]]
+	-- [[ Building frame ]]
 
-	local function restyleFollowerPortrait(portrait)
-		local level = portrait.Level
-		local cover = portrait.PortraitRingCover
+	local GarrisonBuildingFrame = GarrisonBuildingFrame
 
-		portrait.PortraitRing:Hide()
-		portrait.PortraitRingQuality:SetTexture("")
-
-		portrait.LevelBorder:SetTexture(0, 0, 0, .5)
-		portrait.LevelBorder:SetSize(44, 11)
-		portrait.LevelBorder:ClearAllPoints()
-		portrait.LevelBorder:SetPoint("BOTTOM", 0, 12)
-
-		level:ClearAllPoints()
-		level:SetPoint("BOTTOM", portrait, 0, 12)
-
-		local squareBG = CreateFrame("Frame", nil, portrait)
-		squareBG:SetFrameLevel(portrait:GetFrameLevel()-1)
-		squareBG:SetPoint("TOPLEFT", 3, -3)
-		squareBG:SetPoint("BOTTOMRIGHT", -3, 11)
-		F.CreateBD(squareBG, 1)
-		portrait.squareBG = squareBG
-
-		cover:SetTexture(0, 0, 0)
-		cover:SetAllPoints(squareBG)
+	for i = 1, 18 do
+		select(i, GarrisonBuildingFrame:GetRegions()):Hide()
 	end
+
+	GarrisonBuildingFrame.TitleText:Show()
+
+	F.CreateBD(GarrisonBuildingFrame)
+	F.ReskinClose(GarrisonBuildingFrame.CloseButton)
+
+	-- Tutorial button
+
+	local MainHelpButton = GarrisonBuildingFrame.MainHelpButton
+
+	MainHelpButton.Ring:Hide()
+	MainHelpButton:SetPoint("TOPLEFT", GarrisonBuildingFrame, "TOPLEFT", -12, 12)
+
+	-- Building list
+
+	local BuildingList = GarrisonBuildingFrame.BuildingList
+
+	BuildingList:DisableDrawLayer("BORDER")
+	BuildingList.MaterialFrame:GetRegions():Hide()
+
+	for i = 1, GARRISON_NUM_BUILDING_SIZES do
+		local tab = BuildingList["Tab"..i]
+
+		tab:GetNormalTexture():SetAlpha(0)
+
+		local bg = CreateFrame("Frame", nil, tab)
+		bg:SetPoint("TOPLEFT", 6, -7)
+		bg:SetPoint("BOTTOMRIGHT", -6, 7)
+		bg:SetFrameLevel(tab:GetFrameLevel()-1)
+		F.CreateBD(bg, .25)
+		tab.bg = bg
+
+		local hl = tab:GetHighlightTexture()
+		hl:SetTexture(r, g, b, .1)
+		hl:ClearAllPoints()
+		hl:SetPoint("TOPLEFT", bg, 1, -1)
+		hl:SetPoint("BOTTOMRIGHT", bg, -1, 1)
+	end
+
+	hooksecurefunc("GarrisonBuildingList_SelectTab", function(tab)
+		local list = GarrisonBuildingFrame.BuildingList
+
+		for i = 1, GARRISON_NUM_BUILDING_SIZES do
+			local otherTab = list["Tab"..i]
+			if i ~= tab:GetID() then
+				otherTab.bg:SetBackdropColor(0, 0, 0, .25)
+			end
+		end
+		tab.bg:SetBackdropColor(r, g, b, .2)
+
+		for _, button in pairs(list.Buttons) do
+			if not button.styled then
+				button.BG:Hide()
+
+				F.ReskinIcon(button.Icon)
+
+				local bg = CreateFrame("Frame", nil, button)
+				bg:SetPoint("TOPLEFT", 44, -5)
+				bg:SetPoint("BOTTOMRIGHT", 0, 6)
+				bg:SetFrameLevel(button:GetFrameLevel()-1)
+				F.CreateBD(bg, .25)
+
+				button.SelectedBG:SetTexture(r, g, b, .2)
+				button.SelectedBG:ClearAllPoints()
+				button.SelectedBG:SetPoint("TOPLEFT", bg, 1, -1)
+				button.SelectedBG:SetPoint("BOTTOMRIGHT", bg, -1, 1)
+
+				local hl = button:GetHighlightTexture()
+				hl:SetTexture(r, g, b, .1)
+				hl:ClearAllPoints()
+				hl:SetPoint("TOPLEFT", bg, 1, -1)
+				hl:SetPoint("BOTTOMRIGHT", bg, -1, 1)
+
+				button.styled = true
+			end
+		end
+	end)
+
+	-- Building level tooltip
+
+	local BuildingLevelTooltip = GarrisonBuildingFrame.BuildingLevelTooltip
+
+	for i = 1, 9 do
+		select(i, BuildingLevelTooltip:GetRegions()):Hide()
+		F.CreateBD(BuildingLevelTooltip)
+	end
+
+	-- Follower list
+
+	local FollowerList = GarrisonBuildingFrame.FollowerList
+
+	FollowerList:DisableDrawLayer("BACKGROUND")
+	FollowerList:DisableDrawLayer("BORDER")
+	F.ReskinScroll(FollowerList.listScroll.scrollBar)
+
+	FollowerList:ClearAllPoints()
+	FollowerList:SetPoint("BOTTOMLEFT", 24, 34)
+
+	-- Info box
+
+	local InfoBox = GarrisonBuildingFrame.InfoBox
+	local TownHallBox = GarrisonBuildingFrame.TownHallBox
+
+	for i = 1, 25 do
+		select(i, InfoBox:GetRegions()):Hide()
+		select(i, TownHallBox:GetRegions()):Hide()
+	end
+
+	F.CreateBD(InfoBox, .25)
+	F.CreateBD(TownHallBox, .25)
+	F.Reskin(InfoBox.UpgradeButton)
+	F.Reskin(TownHallBox.UpgradeButton)
+
+	do
+		local FollowerPortrait = InfoBox.FollowerPortrait
+
+		F.ReskinGarrisonPortrait(FollowerPortrait)
+
+		FollowerPortrait:SetPoint("BOTTOMLEFT", 230, 10)
+		FollowerPortrait.RemoveFollowerButton:ClearAllPoints()
+		FollowerPortrait.RemoveFollowerButton:SetPoint("TOPRIGHT", 4, 4)
+	end
+
+	hooksecurefunc("GarrisonBuildingInfoBox_ShowFollowerPortrait", function(_, _, infoBox)
+		local portrait = infoBox.FollowerPortrait
+
+		if portrait:IsShown() then
+			portrait.squareBG:SetBackdropBorderColor(portrait.PortraitRing:GetVertexColor())
+		end
+	end)
+
+	-- Confirmation popup
+
+	local Confirmation = GarrisonBuildingFrame.Confirmation
+
+	Confirmation:GetRegions():Hide()
+
+	F.CreateBD(Confirmation)
+
+	F.Reskin(Confirmation.CancelButton)
+	F.Reskin(Confirmation.BuildButton)
+	F.Reskin(Confirmation.UpgradeButton)
+	F.Reskin(Confirmation.UpgradeGarrisonButton)
+	F.Reskin(Confirmation.ReplaceButton)
+	F.Reskin(Confirmation.SwitchButton)
 
 	-- [[ Capacitive display frame ]]
 
@@ -97,6 +222,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local Report = GarrisonLandingPage.Report
 
+	select(2, Report:GetRegions()):Hide()
 	Report.List:GetRegions():Hide()
 
 	local scrollFrame = Report.List.listScroll
@@ -320,12 +446,17 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	for i = 1, 11 do
 		select(i, MissionPage:GetRegions()):Hide()
 	end
+	MissionPage.StartMissionButton.Flash:SetTexture("")
 
 	F.Reskin(MissionPage.StartMissionButton)
 	F.ReskinClose(MissionPage.CloseButton)
 
 	MissionPage.CloseButton:ClearAllPoints()
 	MissionPage.CloseButton:SetPoint("TOPRIGHT", -10, -5)
+
+	hooksecurefunc("GarrisonMissionPage_UpdateStartButton", function(missionPage)
+		missionPage.StartMissionButton.FlashAnim:Stop()
+	end)
 
 	for i = 4, 8 do
 		select(i, MissionPage.Stage:GetRegions()):Hide()
@@ -432,7 +563,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	hooksecurefunc("GarrisonMissionFrame_SetFollowerPortrait", function(portraitFrame, followerInfo)
 		if not portraitFrame.styled then
-			restyleFollowerPortrait(portraitFrame)
+			F.ReskinGarrisonPortrait(portraitFrame)
 			portraitFrame.styled = true
 		end
 
@@ -496,7 +627,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	for i = 1, 3 do
 		local recruit = FollowerSelection["Recruit"..i]
 
-		restyleFollowerPortrait(recruit.PortraitFrame)
+		F.ReskinGarrisonPortrait(recruit.PortraitFrame)
 
 		F.Reskin(recruit.HireRecruits)
 	end
@@ -533,6 +664,28 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		end
 	end)
 
+	-- [[ Monuments ]]
+
+	local GarrisonMonumentFrame = GarrisonMonumentFrame
+
+	GarrisonMonumentFrame.Background:Hide()
+	F.SetBD(GarrisonMonumentFrame, 6, -10, -6, 4)
+
+	do
+		local left = GarrisonMonumentFrame.LeftBtn
+		local right = GarrisonMonumentFrame.RightBtn
+
+		left.Texture:Hide()
+		right.Texture:Hide()
+
+		F.ReskinArrow(left, "left")
+		F.ReskinArrow(right, "right")
+		left:SetSize(35, 35)
+		left.tex:SetSize(16, 16)
+		right:SetSize(35, 35)
+		right.tex:SetSize(16, 16)
+	end
+
 	-- [[ Shared templates ]]
 
 	hooksecurefunc("GarrisonFollowerList_Update", function(self)
@@ -558,8 +711,14 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 				button.BusyFrame:SetAllPoints()
 
+				local hl = button:GetHighlightTexture()
+				hl:SetTexture(r, g, b, .1)
+				hl:ClearAllPoints()
+				hl:SetPoint("TOPLEFT", 1, -1)
+				hl:SetPoint("BOTTOMRIGHT", -1, 1)
+
 				if portrait then
-					restyleFollowerPortrait(portrait)
+					F.ReskinGarrisonPortrait(portrait)
 					portrait:ClearAllPoints()
 					portrait:SetPoint("TOPLEFT", 4, -1)
 				end
