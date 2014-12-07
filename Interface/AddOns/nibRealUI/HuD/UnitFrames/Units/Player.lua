@@ -49,7 +49,6 @@ local function CreateHealthBar(parent)
     local info = info.health
     local health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
-    --health:SetSize(texture.width, texture.height)
     if ndb.settings.reverseUnitFrameBars then
         health:SetReversePercent(true)
     end
@@ -66,11 +65,12 @@ local function CreateHealthBar(parent)
     for i = 1, 2 do
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
         health.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, health, info)
-        local xOfs = floor(stepPoints[i] * health.info.maxWidth) + health.info.minWidth
+        local xOfs = floor(stepPoints[i] * health.info.maxWidth)
         if health.reverse then
-            health.step[i]:SetPoint("TOPLEFT", health, "TOPRIGHT", -xOfs, 0)
-            health.warn[i]:SetPoint("TOPLEFT", health, "TOPRIGHT", -xOfs, 0)
+            health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
+            health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
         else
+            xOfs = xOfs + health.info.minWidth
             health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
             health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
         end
@@ -78,8 +78,12 @@ local function CreateHealthBar(parent)
         health.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
+    health.colorClass = db.overlay.classColor
+    health.colorHealth = true
+
     health.frequentUpdates = true
-    health.Override = UnitFrames.HealthOverride
+    health.PostUpdate = UnitFrames.UpdateSteps
+    --health.Override = UnitFrames.HealthOverride
     parent.Health = health
     UnitFrames:SetHealthColor(parent)
 end

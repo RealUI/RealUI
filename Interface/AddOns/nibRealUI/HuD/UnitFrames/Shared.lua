@@ -212,6 +212,33 @@ UnitFrames.ReversePowers = {
     ["POWER_TYPE_SUN_POWER"] = true,
 }
 
+function UnitFrames:UpdateSteps(unit, min, max)
+    local percent = nibRealUI:GetSafeVals(min, max)
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    for i = 1, 2 do
+        --print(percent, unit, min, max, self.colorClass)
+        if self.reverse then
+            --print("step reverse")
+            if percent > stepPoints[i] then
+                self.step[i]:SetAlpha(1)
+                self.warn[i]:SetAlpha(0)
+            else
+                self.step[i]:SetAlpha(0)
+                self.warn[i]:SetAlpha(1)
+            end
+        else
+            --print("step normal")
+            if percent < stepPoints[i] then
+                self.step[i]:SetAlpha(0)
+                self.warn[i]:SetAlpha(1)
+            else
+                self.step[i]:SetAlpha(1)
+                self.warn[i]:SetAlpha(0)
+            end
+        end
+    end
+end
+
 local function updateSteps(unit, type, percent, frame)
     local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
     local isLargeFrame = false
