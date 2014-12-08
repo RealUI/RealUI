@@ -12,6 +12,10 @@ local ModKeys = {
     "ctrl",
     "alt"
 }
+local trinkChat = {
+    "PARTY",
+    "SAY",
+}
 local options
 local function GetOptions()
     if not options then options = {
@@ -20,10 +24,15 @@ local function GetOptions()
         arg = MODNAME,
         order = 2114,
         args = {
-            header = {
+            header1 = {
                 type = "header",
                 name = "Unit Frames",
                 order = 10,
+            },
+            desc3 = {
+                type = "description",
+                name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                order = 11,
             },
             enabled = {
                 type = "toggle",
@@ -36,77 +45,59 @@ local function GetOptions()
                 end,
                 order = 20,
             },
-            desc3 = {
-                type = "description",
-                name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+            header2 = {
+                type = "header",
+                name = "General",
                 order = 21,
+            },
+            focusclick = {
+                type = "toggle",
+                name = "Click Set Focus",
+                desc = "Set focus by click+modifier on the Unit Frames.",
+                get = function() return db.misc.focusclick end,
+                set = function(info, value) 
+                    db.misc.focusclick = value
+                end,
+                order = 30,
+            },
+            focuskey = {
+                type = "select",
+                name = "Modifier Key",
+                values = ModKeys,
+                disabled = function() return not db.misc.focusclick end,
+                get = function(info)
+                    for i = 1, #ModKeys do
+                        if ModKeys[i] == db.misc.focuskey then
+                            return i
+                        end
+                    end
+                end,
+                set = function(info, value)
+                    db.misc.focuskey = ModKeys[value]
+                end,
+                order = 40,
             },
             gap1 = {
                 name = " ",
                 type = "description",
-                order = 22,
+                order = 41,
             },
-            misc = {
-                type = "group",
-                name = "General",
-                disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
-                order = 30,
-                args = {
-                    focusclick = {
-                        type = "toggle",
-                        name = "Click Set Focus",
-                        desc = "Set focus by click+modifier on the Unit Frames.",
-                        get = function() return db.misc.focusclick end,
-                        set = function(info, value) 
-                            db.misc.focusclick = value
-                        end,
-                        order = 10,
-                    },
-                    gap1 = {
-                        name = " ",
-                        type = "description",
-                        order = 11,
-                    },
-                    focuskey = {
-                        type = "select",
-                        name = "Modifier Key",
-                        set = function(info, value)
-                            db.misc.focuskey = ModKeys[value]
-                        end,
-                        style = "dropdown",
-                        width = nil,
-                        values = ModKeys,
-                        order = 20,
-                    },
-                    focuskeyname = {
-                        name = function()
-                            return db.misc.focuskey
-                        end,
-                        type = "description",
-                        order = 21,
-                    },
-                    gap2 = {
-                        name = " ",
-                        type = "description",
-                        order = 22,
-                    },
-                    alwaysDisplayFullHealth = {
-                        type = "toggle",
-                        name = "Full Health on Target",
-                        desc = "Always display the full health value on the Target frame.",
-                        get = function() return db.misc.alwaysDisplayFullHealth end,
-                        set = function(info, value) 
-                            db.misc.alwaysDisplayFullHealth = value
-                        end,
-                        order = 30,
-                    },
-                },
-            },
-            boss = {
-                type = "group",
-                name = "Boss Frames",
-                disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
+            alwaysDisplayFullHealth = {
+                type = "toggle",
+                name = "Full Health on Target",
+                desc = "Always display the full health value on the Target frame.",
+                get = function() return db.misc.alwaysDisplayFullHealth end,
+                set = function(info, value) 
+                    db.misc.alwaysDisplayFullHealth = value
+                end,
                 order = 50,
+            },
+            groups = {
+                type = "group",
+                name = "Groups",
+                childGroups = "tab",
+                disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
+                order = 60,
                 args = {
                     rlnote = {
                         type = "description",
@@ -116,12 +107,12 @@ local function GetOptions()
                     gap1 = {
                         name = " ",
                         type = "description",
-                        order = 12,
+                        order = 10,
                     },
                     gap = {
                         type = "range",
                         name = "Gap",
-                        desc = "Vertical distance between each Boss Frame.",
+                        desc = "Vertical distance between each unit.",
                         min = 0, max = 10, step = 1,
                         get = function(info) return db.boss.gap end,
                         set = function(info, value) db.boss.gap = value end,
@@ -132,11 +123,11 @@ local function GetOptions()
                         type = "description",
                         order = 21,
                     },
-                    auras = {
+                    boss = {
                         type = "group",
-                        inline = true,
-                        name = "Auras",
-                        order = 50,
+                        name = "Boss Frames",
+                        disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
+                        order = 30,
                         args = {
                             showPlayerAuras = {
                                 type = "toggle",
@@ -176,6 +167,52 @@ local function GetOptions()
                             },
                         },
                     },
+                    arena = {
+                        type = "group",
+                        name = "Arena Frames",
+                        disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
+                        order = 40,
+                        args = {
+                            enabled = {
+                                type = "toggle",
+                                name = "Enabled",
+                                desc = "Enable/Disable RealUI Arena Frames.",
+                                get = function() return db.arena.enabled end,
+                                set = function(info, value) 
+                                    db.arena.enabled = value
+                                end,
+                                order = 10,
+                            },
+                            announceUse = {
+                                type = "toggle",
+                                name = "Announce trinkets",
+                                desc = "Announce opponent trinket use to chat.",
+                                get = function() return db.arena.announceUse end,
+                                set = function(info, value) 
+                                    db.arena.announceUse = value
+                                end,
+                                order = 20,
+                            },
+                            announceChat = {
+                                type = "select",
+                                name = "Chat channel",
+                                desc = "Chat channel used for trinket announcement.",
+                                values = trinkChat,
+                                disabled = function() return not db.arena.announceUse end,
+                                get = function(info)
+                                    for i = 1, #trinkChat do
+                                        if trinkChat[i] == db.arena.announceChat then
+                                            return i
+                                        end
+                                    end
+                                end,
+                                set = function(info, value)
+                                    db.arena.announceChat = trinkChat[value]
+                                end,
+                                order = 30,
+                            },
+                        },
+                    },
                 },
             },
             positions = {
@@ -183,7 +220,7 @@ local function GetOptions()
                 name = "Positions",
                 disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
                 childGroups = "tab",
-                order = 60,
+                order = 70,
                 args = {
                     rlnote = {
                         type = "description",
@@ -197,7 +234,7 @@ local function GetOptions()
                 name = "Appearance",
                 disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
                 childGroups = "tab",
-                order = 70,
+                order = 80,
                 args = {
                     rlnote = {
                         type = "description",
@@ -266,14 +303,14 @@ local function GetOptions()
     ---------------
     local PositionLayoutOpts, PositionOpts = {}, {}
     local Opts_PositionOrderCnt = 10
-    for kl,vl in pairs(db.positions) do
-        local layout = kl == 1 and "Low Res" or "High Res"
+    for size, units in next, db.positions do
+        local layout = size == 1 and "Low Res" or "High Res"
         wipe(PositionOpts)
-        for ip,vp in pairs(db.positions[kl]) do
-            PositionOpts[ip] = {
+        for unit, position in next, units do
+            PositionOpts[unit] = {
                 type = "group",
                 inline = true,
-                name = ip,
+                name = unit,
                 order = Opts_PositionOrderCnt,
                 args = {
                     x = {
@@ -281,10 +318,10 @@ local function GetOptions()
                         name = "X",
                         width = "half",
                         order = 10,
-                        get = function(info) return tostring(db.positions[kl][ip].x) end,
+                        get = function(info) return tostring(position.x) end,
                         set = function(info, value)
                             value = nibRealUI:ValidateOffset(value)
-                            db.positions[kl][ip].x = value
+                            position.x = value
                         end,
                     },
                     y = {
@@ -292,10 +329,10 @@ local function GetOptions()
                         name = "Y",
                         width = "half",
                         order = 20,
-                        get = function(info) return tostring(db.positions[kl][ip].y) end,
+                        get = function(info) return tostring(position.y) end,
                         set = function(info, value)
                             value = nibRealUI:ValidateOffset(value)
-                            db.positions[kl][ip].y = value
+                            position.y = value
                         end,
                     },
                 },
@@ -304,17 +341,17 @@ local function GetOptions()
             Opts_PositionOrderCnt = Opts_PositionOrderCnt + 10
         end
         
-        PositionLayoutOpts["res"..kl] = {
+        PositionLayoutOpts["res"..size] = {
             type = "group",
             name = layout,
-            order = kl,
+            order = size,
             args = {}
         }
-        for key, val in pairs(PositionOpts) do
-            PositionLayoutOpts["res"..kl].args[key] = (type(val) == "function") and val() or val
+        for key, val in next, PositionOpts do
+            PositionLayoutOpts["res"..size].args[key] = (type(val) == "function") and val() or val
         end
     end
-    for key, val in pairs(PositionLayoutOpts) do
+    for key, val in next, PositionLayoutOpts do
         options.args.positions.args[key] = (type(val) == "function") and val() or val
     end
     
@@ -322,40 +359,38 @@ local function GetOptions()
     -- Colors --
     ------------
     local ColorGroupOpts, ColorOpts = {}, {}
-    local Opts_ColorGroupOrderCnt, Opts_ColorsOrderCnt = 20, 10
-    for kl,vl in pairs(db.overlay.colors) do
+    local Opts_ColorGroupOrderCnt = 20
+    for group, colors in next, db.overlay.colors do
         wipe(ColorOpts)
-        for ic,vc in pairs(db.overlay.colors[kl]) do
-            ColorOpts[ic] = {
+        for name, color in next, colors do
+            ColorOpts[name] = {
                 type = "color",
-                name = ic,
-                get = function(info,r,g,b,a)
-                    return db.overlay.colors[kl][ic][1], db.overlay.colors[kl][ic][2], db.overlay.colors[kl][ic][3]
+                name = name,
+                get = function(info, r, g, b, a)
+                    return color[1], color[2], color[3]
                 end,
-                set = function(info,r,g,b,a)
-                    db.overlay.colors[kl][ic][1] = r
-                    db.overlay.colors[kl][ic][2] = g
-                    db.overlay.colors[kl][ic][3] = b
+                set = function(info, r, g, b, a)
+                    color[1] = r
+                    color[2] = g
+                    color[3] = b
                 end,
                 order = 10,
             };
-            
-            Opts_ColorsOrderCnt = Opts_ColorsOrderCnt + 10
         end
         
-        ColorGroupOpts[kl] = {
+        ColorGroupOpts[group] = {
             type = "group",
             inline = true,
-            name = kl,
+            name = group,
             order = Opts_ColorGroupOrderCnt,
             args = {}
         }
-        for key, val in pairs(ColorOpts) do
-            ColorGroupOpts[kl].args[key] = (type(val) == "function") and val() or val
+        for key, val in next, ColorOpts do
+            ColorGroupOpts[group].args[key] = (type(val) == "function") and val() or val
         end
         Opts_ColorGroupOrderCnt = Opts_ColorGroupOrderCnt + 10
     end
-    for key, val in pairs(ColorGroupOpts) do
+    for key, val in next, ColorGroupOpts do
         options.args.overlay.args.colors.args[key] = (type(val) == "function") and val() or val
     end
 
@@ -387,28 +422,36 @@ function UnitFrames:AbrvName(name, unit)
     end
 end
 
+local units = {
+    "Player",
+    "Target",
+    "Focus",
+    "FocusTarget",
+    "Pet",
+    "TargetTarget",
+}
+
 function UnitFrames:RefreshUnits(event)
-    RealUIPlayerFrame:UpdateAllElements(event)
-    RealUITargetFrame:UpdateAllElements(event)
-    RealUIFocusFrame:UpdateAllElements(event)
-    RealUIFocusTargetFrame:UpdateAllElements(event)
-    RealUIPetFrame:UpdateAllElements(event)
-    RealUITargetTargetFrame:UpdateAllElements(event)
+    for i = 1, #units do
+        local unit = _G["RealUI" .. units[i] .. "Frame"]
+        unit:UpdateAllElements(event)
+    end
 end
 
-function UnitFrames:SetPowerColors()
-    self.PowerColors = {}
-    for pToken, color in pairs(db.overlay.colors.power) do
-        if color[1] then
-            self.PowerColors[pToken] = color
-            oUF.colors.power[pToken] = color
+function UnitFrames:SetoUFColors()
+    local colors = db.overlay.colors
+    for power, color in next, colors.power do
+        if (type(power) == "string") then
+            oUF.colors.power[power] = color
         end
     end
-    self.PowerColors["POWER_TYPE_PYRITE"] = { 0, 0.79215693473816, 1 }
-    self.PowerColors["POWER_TYPE_STEAM"] = { 0.94901967048645, 0.94901967048645, 0.94901967048645 }
-    self.PowerColors["POWER_TYPE_HEAT"] = { 1, 0.490019610742107, 0 }
-    self.PowerColors["POWER_TYPE_BLOOD_POWER"] = { 0.73725494556129, 0, 1 }
-    self.PowerColors["POWER_TYPE_OOZE"] = { 0.75686281919479, 1, 0 }
+    oUF.colors.health = colors.health.normal
+    for eclass, _ in next, RAID_CLASS_COLORS do
+        local color = nibRealUI:GetClassColor(eclass)
+        color = nibRealUI:ColorDarken(color, 0.15)
+        color = nibRealUI:ColorDesaturate(color, 0.2)
+        oUF.colors.class[eclass] = color
+    end
 end
 
 -- Color Retrieval for Config Bar
@@ -420,12 +463,16 @@ function UnitFrames:ToggleClassColoring(names)
 	end
 end
 
+function UnitFrames:GetoUFColors()
+    return oUF.colors
+end
+
 function UnitFrames:GetHealthColor()
-	return db.overlay.colors.health.normal
+	return oUF.colors.health
 end
 
 function UnitFrames:GetPowerColors()
-	return db.overlay.colors.power
+	return oUF.colors.power
 end
 
 function UnitFrames:GetStatusColors()
@@ -469,12 +516,10 @@ function UnitFrames:OnInitialize()
                     ["WARRIOR"] = {0.35, 0.2},
                 },
             },
-            units = {
-                arena = false,
-                tank = false,
-            },
             arena = {
+                enabled = true,
                 announceUse = true,
+                announceChat = "PARTY",
             },
             boss = {
                 gap = 3,
@@ -485,22 +530,22 @@ function UnitFrames:OnInitialize()
             },
             positions = {
                 [1] = {
-                    player =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    pet =           { x = 51,  y = -84},   -- Anchored to Player
-                    focus =         { x = 29,   y = -62},   -- Anchored to Player
-                    focustarget =   { x = 11,    y = -2},   -- Anchored to Focus
-                    target =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    targettarget =  { x = -29,   y = -62},   -- Anchored to Target
-                    boss =          { x = 0,    y = 0},     -- Anchored to Positioner
+                    player =       { x = 0,    y = 0},    -- Anchored to Positioner
+                    pet =          { x = 51,  y = -84},   -- Anchored to Player
+                    focus =        { x = 29,   y = -62},  -- Anchored to Player
+                    focustarget =  { x = 11,    y = -2},  -- Anchored to Focus
+                    target =       { x = 0,    y = 0},    -- Anchored to Positioner
+                    targettarget = { x = -29,   y = -62}, -- Anchored to Target
+                    boss =         { x = 0,    y = 0},    -- Anchored to Positioner
                 },
                 [2] = {
-                    player =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    pet =           { x = 60,  y = -91},   -- Anchored to Player
-                    focus =         { x = 36,   y = -67},   -- Anchored to Player
-                    focustarget =   { x = 12,    y = -2},   -- Anchored to Focus
-                    target =        { x = 0,    y = 0},     -- Anchored to Positioner
-                    targettarget =  { x = -36,  y = -67},   -- Anchored to Target
-                    boss =          { x = 0,    y = 0},     -- Anchored to Positioner
+                    player =       { x = 0,    y = 0},   -- Anchored to Positioner
+                    pet =          { x = 60,  y = -91},  -- Anchored to Player
+                    focus =        { x = 36,   y = -67}, -- Anchored to Player
+                    focustarget =  { x = 12,    y = -2}, -- Anchored to Focus
+                    target =       { x = 0,    y = 0},   -- Anchored to Positioner
+                    targettarget = { x = -36,  y = -67}, -- Anchored to Target
+                    boss =         { x = 0,    y = 0},   -- Anchored to Positioner
                 },
             },
             overlay = {
@@ -530,24 +575,24 @@ function UnitFrames:OnInitialize()
                         ["ALTERNATE"] =   {0.00, 0.80, 0.80},
                     },
                     status = {
-                        hostile = {0.81, 0.20, 0.15},
-                        neutral = {0.90, 0.90, 0.20},
-                        friendly = {0.28, 0.85, 0.28},
-                        damage =        {1, 0, 0},
-                        incomingHeal =  {1, 1, 0},
-                        heal =          {0, 1, 0},
-                        resting =       {0, 1, 0},
-                        combat =        {1, 0, 0},
-                        afk =           {1, 1, 0},
-                        offline =       {0.6, 0.6, 0.6},
-                        leader =        {0, 1, 1},
-                        tapped =        {0.4, 0.4, 0.4},
-                        pvpEnemy =      {1, 0, 0},
-                        pvpFriendly =   {0, 1, 0},
-                        dead =          {0.2, 0.2, 0.2},
-                        rareelite =     {1, 0.5, 0},
-                        elite =         {1, 1, 0},
-                        rare =          {0.75, 0.75, 0.75},
+                        hostile =      {0.81, 0.20, 0.15},
+                        neutral =      {0.90, 0.90, 0.20},
+                        friendly =     {0.28, 0.85, 0.28},
+                        damage =       {1, 0, 0},
+                        incomingHeal = {1, 1, 0},
+                        heal =         {0, 1, 0},
+                        resting =      {0, 1, 0},
+                        combat =       {1, 0, 0},
+                        afk =          {1, 1, 0},
+                        offline =      {0.6, 0.6, 0.6},
+                        leader =       {0, 1, 1},
+                        tapped =       {0.4, 0.4, 0.4},
+                        pvpEnemy =     {1, 0, 0},
+                        pvpFriendly =  {0, 1, 0},
+                        dead =         {0.2, 0.2, 0.2},
+                        rareelite =    {1, 0.5, 0},
+                        elite =        {1, 1, 0},
+                        rare =         {0.75, 0.75, 0.75},
                     },
                 },
             },
@@ -569,7 +614,7 @@ function UnitFrames:OnInitialize()
 end
 
 function UnitFrames:OnEnable()
-    self:SetPowerColors()
+    self:SetoUFColors()
     self.colorStrings = {
         health = nibRealUI:ColorTableToStr(db.overlay.colors.health.normal),
         mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),

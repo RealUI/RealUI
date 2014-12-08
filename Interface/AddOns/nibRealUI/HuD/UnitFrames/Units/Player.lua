@@ -144,8 +144,11 @@ local function CreatePowerBar(parent)
         power.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
+    power.colorPower = true
+
     power.frequentUpdates = true
-    power.Override = UnitFrames.PowerOverride
+    power.PostUpdate = UnitFrames.UpdateSteps
+    --power.Override = UnitFrames.PowerOverride
     parent.Power = power
 end
 
@@ -263,7 +266,7 @@ UnitFrames["player"] = function(self)
 
         local power = self.Power
         local _, powerType = UnitPowerType(self.unit)
-        power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
+        --power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
         power:SetReversePercent(UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
         power.enabled = true
 

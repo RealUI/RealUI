@@ -46,7 +46,7 @@ local function UpdateTrinket(self, unitID, spell, rank, lineID, spellID)
         self.Trinket.startTime = startTime
         self.Trinket.endTime = startTime + duration
         if db.arena.announceUse then
-            SendChatMessage("Trinket used by: "..GetUnitName(unitID, true), "PARTY")
+            SendChatMessage("Trinket used by: "..GetUnitName(unitID, true), db.arena.announceChat)
         end
     end
 end
@@ -172,6 +172,7 @@ local function CreateTrinket(parent)
 end
 
 local function CreateArena(self)
+    --print("CreateArena", self.unit)
     self:SetSize(135, 22)
     CreateBD(self, 0.7)
 
@@ -194,6 +195,7 @@ tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
+    if not db.arena.enabled then return end
 
     oUF:RegisterStyle("RealUI:arena", CreateArena)
     oUF:SetActiveStyle("RealUI:arena")

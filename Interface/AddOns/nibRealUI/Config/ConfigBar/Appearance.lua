@@ -48,7 +48,7 @@ end
 
 function ConfigBar_Appearance:UpdateUnitFramesPowerColor(index, key, r, g, b)
 	UnitFrames.db.profile.overlay.colors.power[key] = {r, g, b}
-	UnitFrames:SetPowerColors()
+	UnitFrames:SetoUFColors()
 	UnitFrames:RefreshUnits("UpdateUnitFramesPowerColor")
 	self.colors.unitFrames[index].r = r
 	self.colors.unitFrames[index].g = g
@@ -105,6 +105,8 @@ function ConfigBar_Appearance:ChangeTab(tabID, isInit)
 end
 
 function ConfigBar_Appearance:SetupWindow()
+	local oUFColors = UnitFrames:GetoUFColors()
+
 	-- Window
 	Element.window = cbGUI:CreateWindow(Element, "Appearance")
 
@@ -204,7 +206,7 @@ function ConfigBar_Appearance:SetupWindow()
 				func = function()
 					UnitFrames:ToggleClassColoring(false)
 					self.settings[3][1].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColor and 1 or 0)
-					UnitFrames:RefreshUnits("ClassColorBars")
+					UnitFrames:RefreshUnits("colorClass")
 				end,
 				checked = UnitFrames.db.profile.overlay.classColor,
 				width = Element.info.window.width,
@@ -397,6 +399,7 @@ function ConfigBar_Appearance:SetupWindow()
 					func = function(r, g, b, a)
 						a = 1
 						UnitFrames.db.profile.overlay.colors.health.normal = {r, g, b}
+						oUFColors.health = {r, g, b}
 						UnitFrames:RefreshUnits("UpdateUnitFramesHealthColor")
 						self.colors.unitFrames[1].r = r self.colors.unitFrames[1].g = g self.colors.unitFrames[1].b = b self.colors.unitFrames[1].a = a
 					end,
