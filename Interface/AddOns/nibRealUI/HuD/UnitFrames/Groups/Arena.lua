@@ -5,6 +5,7 @@ local UnitFrames = nibRealUI:GetModule(MODNAME)
 local db, ndb, ndbc
 
 local oUF = oUFembed
+local prepFrames = {}
 
 --[[ Utils ]]--
 local function TimeFormat(t)
@@ -34,19 +35,51 @@ local function CreateBD(parent, alpha)
     bg:SetFrameLevel(parent:GetFrameLevel() - 1)
     bg:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 1, -1)
     bg:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 1)
-    bg:SetBackdrop({bgFile = nibRealUI.media.textures.plain, edgeFile = nibRealUI.media.textures.plain, edgeSize = 1, insets = {top = 0, bottom = 0, left = 0, right = 0}})
+    bg:SetBackdrop({
+        bgFile = nibRealUI.media.textures.plain,
+        edgeFile = nibRealUI.media.textures.plain,
+        edgeSize = 1,
+        insets = {top = 0, bottom = 0, left = 0, right = 0}
+    })
     bg:SetBackdropColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], alpha or nibRealUI.media.background[4])
     bg:SetBackdropBorderColor(0, 0, 0, 1)
     return bg
 end
 
-local function UpdateTrinket(self, unitID, spell, rank, lineID, spellID)
+local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
+    --print(self.unit, event, unitID, spell, rank, lineID, spellID)
     if spellID == 59752 or spellID == 42292 then
         local startTime, duration = GetSpellCooldown(spellID)
         self.Trinket.startTime = startTime
         self.Trinket.endTime = startTime + duration
         if db.arena.announceUse then
-            SendChatMessage("Trinket used by: "..GetUnitName(unitID, true), db.arena.announceChat)
+            local chat = db.arena.announceChat
+            if chat == "GROUP" then
+                chat = "INSTANCE_CHAT"
+            end
+            SendChatMessage("Trinket used by: "..GetUnitName(unitID, true), chat)
+        end
+    end
+end
+
+local function UpdatePrep(self, event, ...)
+    --print("UpdatePrep", self, event, ...)
+    local numOpps = GetNumArenaOpponentSpecs()
+    --print("numOpps", numOpps)
+    for i = 1, 5 do
+        local opp = prepFrames[i]
+        if (i <= numOpps) then
+            local specID, gender = GetArenaOpponentSpec(i)
+            --print("Opponent", i, "specID:", specID, "gender:", gender)
+            if (specID > 0) then 
+                local _, _, _, specIcon, _, _, class = GetSpecializationInfoByID(specID, gender)
+                opp.icon:SetTexture(specIcon)
+                opp:Show()
+            else
+                opp:Hide()
+            end
+        else
+            opp:Hide()
         end
     end
 end
@@ -102,19 +135,11 @@ local function CreatePowerBar(parent)
 end
 
 local function CreateTrinket(parent)
-    parent.Trinket = CreateFrame("Frame", nil, parent)
-    parent.Trinket:SetHeight(24)
-    parent.Trinket:SetWidth(24)
-    parent.Trinket:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain,
-        edgeFile = nibRealUI.media.textures.plain,
-        edgeSize = 1,
-        insets = {top = 1, bottom = -1, left = -1, right = 1}
-    })
-    parent.Trinket:SetBackdropColor(0, 0, 0, 0)
-    parent.Trinket:SetBackdropBorderColor(0, 0, 0, 1)
-    parent.Trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -2, -1)
-    parent.Trinket:SetScript("OnUpdate", function(self, elapsed)
+    trinket = CreateFrame("Frame", nil, parent)
+    trinket:SetSize(22, 22)
+    CreateBD(trinket, 0.5)
+    trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -3, 0)
+    trinket:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= self.interval then
             self.elapsed = 0
@@ -142,33 +167,34 @@ local function CreateTrinket(parent)
             end
         end
     end)
-    parent.Trinket.elapsed = 0
-    parent.Trinket.interval = 1/4
+    trinket.elapsed = 0
+    trinket.interval = 1/4
 
-    parent.Trinket.icon = parent.Trinket:CreateTexture(nil, "BACKGROUND")
-    parent.Trinket.icon:SetAllPoints()
-    parent.Trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
-    parent.Trinket.icon:SetTexCoord(.08, .92, .08, .92)
+    trinket.icon = trinket:CreateTexture(nil, "BACKGROUND")
+    trinket.icon:SetAllPoints()
+    trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
+    trinket.icon:SetTexCoord(.08, .92, .08, .92)
 
-    parent.Trinket.timer = CreateFrame("StatusBar", nil, parent.Trinket)
-    parent.Trinket.timer:SetMinMaxValues(0, 1)
-    parent.Trinket.timer:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    parent.Trinket.timer:SetStatusBarColor(1,1,1,1)
+    trinket.timer = CreateFrame("StatusBar", nil, trinket)
+    trinket.timer:SetMinMaxValues(0, 1)
+    trinket.timer:SetStatusBarTexture(nibRealUI.media.textures.plain)
+    trinket.timer:SetStatusBarColor(1,1,1,1)
 
-    parent.Trinket.timer:SetPoint("BOTTOMLEFT", parent.Trinket, "BOTTOMLEFT", 1, 1)
-    parent.Trinket.timer:SetPoint("TOPRIGHT", parent.Trinket, "BOTTOMRIGHT", -1, 3)
-    parent.Trinket.timer:SetFrameLevel(parent.Trinket:GetFrameLevel() + 2)
+    trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)
+    trinket.timer:SetPoint("TOPRIGHT", trinket, "BOTTOMRIGHT", -1, 3)
+    trinket.timer:SetFrameLevel(trinket:GetFrameLevel() + 2)
 
-    local sBarBG = CreateFrame("Frame", nil, parent.Trinket.timer)
-    sBarBG:SetPoint("TOPLEFT", parent.Trinket.timer, -1, 1)
-    sBarBG:SetPoint("BOTTOMRIGHT", parent.Trinket.timer, 1, -1)
-    sBarBG:SetFrameLevel(parent.Trinket:GetFrameLevel() + 1)
-    nibRealUI:CreateBD(sBarBG)
+    local sBarBG = CreateFrame("Frame", nil, trinket.timer)
+    sBarBG:SetPoint("TOPLEFT", trinket.timer, -1, 1)
+    sBarBG:SetPoint("BOTTOMRIGHT", trinket.timer, 1, -1)
+    sBarBG:SetFrameLevel(trinket:GetFrameLevel() + 1)
+    CreateBD(sBarBG)
 
-    parent.Trinket.text = parent.Trinket:CreateFontString(nil, "OVERLAY")
-    parent.Trinket.text:SetFont(unpack(nibRealUI.font.pixel1))
-    parent.Trinket.text:SetPoint("BOTTOMLEFT", parent.Trinket, "BOTTOMLEFT", 1.5, 4)
-    parent.Trinket.text:SetJustifyH("LEFT")
+    trinket.text = trinket:CreateFontString(nil, "OVERLAY")
+    trinket.text:SetFont(unpack(nibRealUI.font.pixel1))
+    trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
+    trinket.text:SetJustifyH("LEFT")
+    parent.Trinket = trinket
 end
 
 local function CreateArena(self)
@@ -183,11 +209,28 @@ local function CreateArena(self)
 
     self.RaidIcon = self:CreateTexture(nil, 'OVERLAY')
     self.RaidIcon:SetSize(21, 21)
-    self.RaidIcon:SetPoint("LEFT", self, "RIGHT", 1, 1)
+    self.RaidIcon:SetPoint("CENTER", self)
 
     self:SetScript("OnEnter", UnitFrame_OnEnter)
     self:SetScript("OnLeave", UnitFrame_OnLeave)
-    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UpdateTrinket)
+    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UnitCastUpdate)
+end
+
+local function SetupPrepFrames(index)
+    --print("SetupPrepFrames")
+    local prep = CreateFrame("Frame", nil, UIParent)
+    CreateBD(prep, 0.5)
+    if (index == 1) then
+        prep:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
+    else
+        prep:SetPoint("TOP", prepFrames[index - 1], "BOTTOM", 0, -db.boss.gap)
+    end
+    prep:SetSize(22, 22)
+    prep:Hide()
+    prep.icon = prep:CreateTexture(nil, 'OVERLAY')
+    prep.icon:SetAllPoints()
+    prep.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    prepFrames[index] = prep
 end
 
 -- Init
@@ -201,11 +244,11 @@ tinsert(UnitFrames.units, function(...)
     oUF:SetActiveStyle("RealUI:arena")
     -- Bosses and arenas are mutually excusive, so we'll just use some boss stuff for both for now.
     for i = 1, MAX_BOSS_FRAMES do
+        SetupPrepFrames(i)
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
-        if (i == 1) then
-            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
-        else
-            arena:SetPoint("TOP", _G["RealUIArenaFrame" .. i - 1], "BOTTOM", 0, -db.boss.gap)
-        end
+        arena:SetPoint("RIGHT", prepFrames[i], "LEFT", -3, 0)
     end
+    prepFrames[1]:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+    prepFrames[1]:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    prepFrames[1]:SetScript("OnEvent", UpdatePrep)
 end)

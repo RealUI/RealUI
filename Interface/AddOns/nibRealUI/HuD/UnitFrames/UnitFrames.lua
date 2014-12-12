@@ -13,7 +13,7 @@ local ModKeys = {
     "alt"
 }
 local trinkChat = {
-    "PARTY",
+    "GROUP",
     "SAY",
 }
 local options
@@ -183,33 +183,62 @@ local function GetOptions()
                                 end,
                                 order = 10,
                             },
-                            announceUse = {
-                                type = "toggle",
-                                name = "Announce trinkets",
-                                desc = "Announce opponent trinket use to chat.",
-                                get = function() return db.arena.announceUse end,
-                                set = function(info, value) 
-                                    db.arena.announceUse = value
-                                end,
+                            options = {
+                                type = "group",
+                                name = "",
+                                inline = true,
+                                disabled = function() return not db.arena.enabled end,
                                 order = 20,
-                            },
-                            announceChat = {
-                                type = "select",
-                                name = "Chat channel",
-                                desc = "Chat channel used for trinket announcement.",
-                                values = trinkChat,
-                                disabled = function() return not db.arena.announceUse end,
-                                get = function(info)
-                                    for i = 1, #trinkChat do
-                                        if trinkChat[i] == db.arena.announceChat then
-                                            return i
-                                        end
-                                    end
-                                end,
-                                set = function(info, value)
-                                    db.arena.announceChat = trinkChat[value]
-                                end,
-                                order = 30,
+                                args = {
+                                    announceUse = {
+                                        type = "toggle",
+                                        name = "Announce trinkets",
+                                        desc = "Announce opponent trinket use to chat.",
+                                        get = function() return db.arena.announceUse end,
+                                        set = function(info, value) 
+                                            db.arena.announceUse = value
+                                        end,
+                                        order = 10,
+                                    },
+                                    announceChat = {
+                                        type = "select",
+                                        name = CHAT,
+                                        desc = "Chat channel used for trinket announcement.",
+                                        values = trinkChat,
+                                        disabled = function() return not db.arena.announceUse end,
+                                        get = function(info)
+                                            for i = 1, #trinkChat do
+                                                if trinkChat[i] == db.arena.announceChat then
+                                                    return i
+                                                end
+                                            end
+                                        end,
+                                        set = function(info, value)
+                                            db.arena.announceChat = trinkChat[value]
+                                        end,
+                                        order = 20,
+                                    },
+                                    --[[showPets = {
+                                        type = "toggle",
+                                        name = SHOW_ARENA_ENEMY_PETS_TEXT,
+                                        desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_PETS,
+                                        get = function() return db.arena.showPets end,
+                                        set = function(info, value) 
+                                            db.arena.showPets = value
+                                        end,
+                                        order = 30,
+                                    },
+                                    showCast = {
+                                        type = "toggle",
+                                        name = SHOW_ARENA_ENEMY_CASTBAR_TEXT,
+                                        desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_CASTBAR,
+                                        get = function() return db.arena.showCast end,
+                                        set = function(info, value) 
+                                            db.arena.showCast = value
+                                        end,
+                                        order = 40,
+                                    },]]
+                                },
                             },
                         },
                     },
@@ -307,10 +336,11 @@ local function GetOptions()
         local layout = size == 1 and "Low Res" or "High Res"
         wipe(PositionOpts)
         for unit, position in next, units do
+            local unitName = unit == "boss" and "boss/arena" or unit
             PositionOpts[unit] = {
                 type = "group",
                 inline = true,
-                name = unit,
+                name = unitName,
                 order = Opts_PositionOrderCnt,
                 args = {
                     x = {
@@ -519,7 +549,9 @@ function UnitFrames:OnInitialize()
             arena = {
                 enabled = true,
                 announceUse = true,
-                announceChat = "PARTY",
+                announceChat = "GROUP",
+                showCast = true,
+                showPets = true,
             },
             boss = {
                 gap = 3,

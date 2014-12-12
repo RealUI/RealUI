@@ -98,6 +98,20 @@ tinsert(mods["Aurora"], function(F, C)
         flash:SetVertexColor(r, g, b, .8)
     end
 
+    -- World State Frame
+    F.Reskin(WorldStateScoreFrameQueueButton)
+    for i = 1, MAX_WORLDSTATE_SCORE_BUTTONS do
+        local scoreBtn = _G["WorldStateScoreButton" .. i]
+        scoreBtn.factionLeft:SetTexture(C.media.backdrop)
+        scoreBtn.factionLeft:SetBlendMode("ADD")
+        scoreBtn.factionRight:SetTexture(C.media.backdrop)
+        scoreBtn.factionRight:SetBlendMode("ADD")
+    end
+    WorldStateScoreWinnerFrameLeft:SetTexture(C.media.backdrop)
+    WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
+    WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
+    WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
+
     -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
     -- Thus, we need to call them directly until we can remove nibRealUI as a dependancy.
     mods["Clique"](F, C)
