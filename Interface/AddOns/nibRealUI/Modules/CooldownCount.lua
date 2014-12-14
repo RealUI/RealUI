@@ -17,7 +17,7 @@ local UIParent = _G["UIParent"]
 local GetTime = _G["GetTime"]
 local floor = math.floor
 local min = math.min
-local round = function(x) return floor(x + 0.5) end
+local round = nibRealUI.Round
 local strform = string.format
 
 -- Options

@@ -1619,7 +1619,7 @@ local function Currency_Update(self)
 	-- print("currencystate:", dbc.currencystate)
 	if dbc.currencystate == 1 then
 		CurText, curCurrency, rawValue = convertMoney(money)
-		CurText = NumberToCurrencyFormat(nibRealUI:Round(rawValue))
+		CurText = NumberToCurrencyFormat(nibRealUI.Round(rawValue))
 		
 		-- show C/S/G colored square
 		self.icon:Show()

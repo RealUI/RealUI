@@ -68,7 +68,7 @@ local maxSlots = 24
 -------------------
 ---- Functions ----
 -------------------
-local round = function(x) return floor(x + 0.5) end
+local round = nibRealUI.Round
 
 local DAY, HOUR, MINUTE = 86400, 3600, 60 --used for formatting text
 local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for formatting text at transition points

@@ -546,6 +546,14 @@ function UnitFrames:OnInitialize()
                     ["WARRIOR"] = {0.35, 0.2},
                 },
             },
+            units = {
+                -- Eventually, these setting will be used to adjust unit frame size.
+                player = {
+                    size = {x = 259, y = 28},
+                    position = {x = 0, y = 0}, --maybe
+                    healthHieght = 0.6, --percentage of the unit hieght used by the healthbar
+                },
+            },
             arena = {
                 enabled = true,
                 announceUse = true,
@@ -562,22 +570,22 @@ function UnitFrames:OnInitialize()
             },
             positions = {
                 [1] = {
-                    player =       { x = 0,    y = 0},    -- Anchored to Positioner
-                    pet =          { x = 51,  y = -84},   -- Anchored to Player
-                    focus =        { x = 29,   y = -62},  -- Anchored to Player
-                    focustarget =  { x = 11,    y = -2},  -- Anchored to Focus
-                    target =       { x = 0,    y = 0},    -- Anchored to Positioner
-                    targettarget = { x = -29,   y = -62}, -- Anchored to Target
-                    boss =         { x = 0,    y = 0},    -- Anchored to Positioner
+                    player =       { x = 0,   y = 0},   -- Anchored to Positioner
+                    pet =          { x = 51,  y = -84}, -- Anchored to Player
+                    focus =        { x = 29,  y = -62}, -- Anchored to Player
+                    focustarget =  { x = 11,  y = -2},  -- Anchored to Focus
+                    target =       { x = 0,   y = 0},   -- Anchored to Positioner
+                    targettarget = { x = -29, y = -62}, -- Anchored to Target
+                    boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
                 [2] = {
-                    player =       { x = 0,    y = 0},   -- Anchored to Positioner
-                    pet =          { x = 60,  y = -91},  -- Anchored to Player
-                    focus =        { x = 36,   y = -67}, -- Anchored to Player
-                    focustarget =  { x = 12,    y = -2}, -- Anchored to Focus
-                    target =       { x = 0,    y = 0},   -- Anchored to Positioner
-                    targettarget = { x = -36,  y = -67}, -- Anchored to Target
-                    boss =         { x = 0,    y = 0},   -- Anchored to Positioner
+                    player =       { x = 0,   y = 0},   -- Anchored to Positioner
+                    pet =          { x = 60,  y = -91}, -- Anchored to Player
+                    focus =        { x = 36,  y = -67}, -- Anchored to Player
+                    focustarget =  { x = 12,  y = -2},  -- Anchored to Focus
+                    target =       { x = 0,   y = 0},   -- Anchored to Positioner
+                    targettarget = { x = -36, y = -67}, -- Anchored to Target
+                    boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
             },
             overlay = {

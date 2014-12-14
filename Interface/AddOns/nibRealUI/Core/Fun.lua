@@ -212,8 +212,9 @@ function nibRealUI:GetSafeVals(vCur, vMax)
     return percent, vCur, vMax
 end
 
-function nibRealUI:Round(value, places)
-    return (("%%.%df"):format(places or 0)):format(value)
+nibRealUI.Round = function(value, places)
+    local mult = 10 ^ (places or 0)
+    return math.floor(value * mult + 0.5) / mult
 end
 
 function nibRealUI:Clamp(value, min, max)

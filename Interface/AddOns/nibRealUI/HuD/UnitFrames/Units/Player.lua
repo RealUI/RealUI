@@ -7,6 +7,7 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
+local round = nibRealUI.Round
 local info = {
     health = {
         leftAngle = [[/]],
@@ -21,33 +22,27 @@ local info = {
         smooth = true,
     },
     [1] = {
-        power = {
-            x = -7,
-            widthOfs = 10,
-            coords = {0.23046875, 1, 0, 0.5},
-        },
+        x = 222,
+        y = 24,
         endBox = {
             x = -10,
-            y = -4
-        }
+            y = -4,
+        },
     },
     [2] = {
-        power = {
-            x = -9,
-            widthOfs = 12,
-            coords = {0.1015625, 1, 0, 0.625},
-        },
+        x = 259,
+        y = 28,
         endBox = {
             x = -11,
-            y = -2
-        }
+            y = -2,
+        },
     },
 }
 
 local function CreateHealthBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHieght)
     local info = info.health
-    local health = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
+    local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     if ndb.settings.reverseUnitFrameBars then
         health:SetReversePercent(true)
@@ -59,13 +54,13 @@ local function CreateHealthBar(parent)
     parent:Tag(health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    local stepHeight = ceil(texture.height / 2)
+    local stepHeight = round(height / 2)
     health.step = {}
     health.warn = {}
     for i = 1, 2 do
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
-        health.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, health, info)
-        local xOfs = floor(stepPoints[i] * health.info.maxWidth)
+        health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
+        local xOfs = round(stepPoints[i] * health.info.maxWidth)
         if health.reverse then
             health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
             health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
@@ -89,9 +84,9 @@ local function CreateHealthBar(parent)
 end
 
 local function CreatePredictBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local width, height = parent.Health:GetSize()
     local info = info.health
-    local absorbBar = parent:CreateAngleFrame("Bar", texture.width, texture.height, parent.Health, info)
+    local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
     absorbBar:SetReversePercent(true)
 
@@ -103,10 +98,10 @@ local function CreatePredictBar(parent)
 end
 
 local function CreatePvPStatus(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
+    local width, height = parent.Health:GetSize()
     local info = info.health
 
-    local height = ceil(texture.height * 0.65)
+    local height = ceil(height * 0.65)
     local pvp = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
     pvp:SetPoint("TOPRIGHT", parent.Health, -8, 0)
 
@@ -122,10 +117,10 @@ local function CreatePvPStatus(parent)
 end
 
 local function CreatePowerBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
+    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHieght))
     local info = info.power
     --print("Create Power bar")
-    local power = parent:CreateAngleFrame("Status", texture.width, texture.height, parent.overlay, info)
+    local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
 
     power.text = power:CreateFontString(nil, "OVERLAY")
@@ -134,12 +129,12 @@ local function CreatePowerBar(parent)
     parent:Tag(power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    local stepHeight = ceil(texture.height / 2)
+    local stepHeight = round(height / 2)
     power.step = {}
     power.warn = {}
     for i = 1, 2 do
         power.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, power, info)
-        power.warn[i] = parent:CreateAngleFrame("Frame", texture.height + 2, texture.height, power, info)
+        power.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, power, info)
         power.step[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
         power.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
@@ -246,6 +241,8 @@ local function CreateTotems(parent)
 end
 
 UnitFrames["player"] = function(self)
+    self:SetSize(info[UnitFrames.layoutSize].x, info[UnitFrames.layoutSize].y)
+
     CreateHealthBar(self)
     CreatePredictBar(self)
     CreatePvPStatus(self)
@@ -254,8 +251,6 @@ UnitFrames["player"] = function(self)
     CreateStats(self)
     CreateEndBox(self)
     CreateTotems(self)
-
-    self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 
     self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
     self.RaidIcon:SetSize(20, 20)
