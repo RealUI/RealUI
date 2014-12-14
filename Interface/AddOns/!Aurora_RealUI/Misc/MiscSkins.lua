@@ -111,8 +111,11 @@ tinsert(mods["Aurora"], function(F, C)
     WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
     WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
     WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
+end)
 
+tinsert(mods["PLAYER_LOGIN"], function(F, C)
     -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
     -- Thus, we need to call them directly until we can remove nibRealUI as a dependancy.
     mods["Clique"](F, C)
+    mods["nibRealUI"](F, C)
 end)

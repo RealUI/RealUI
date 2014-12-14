@@ -17,6 +17,7 @@ AddOns\EasyMail.lua
 AddOns\Grid2.lua
 AddOns\KNP.lua
 AddOns\Masque.lua
+AddOns\nibRealUI.lua
 AddOns\Raven.lua
 AddOns\Skada.lua
 AddOns\WeakAuras.lua

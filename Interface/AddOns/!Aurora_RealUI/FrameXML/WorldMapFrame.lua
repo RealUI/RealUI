@@ -39,8 +39,8 @@ local function updateCoords(self, elapsed)
     
     -- Player
     local x, y = GetPlayerMapPosition("player")
-    x = nibRealUI:Round(100 * x, 1)
-    y = nibRealUI:Round(100 * y, 1)
+    x = nibRealUI.Round(100 * x, 1)
+    y = nibRealUI.Round(100 * y, 1)
     
     if x ~= 0 and y ~= 0 then
         Map.coords.player:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, PLAYER, x, y))
@@ -58,8 +58,8 @@ local function updateCoords(self, elapsed)
     local adjustedY = (centerY + (height/2) - y / scale) / height   
 
     if (adjustedX >= 0  and adjustedY >= 0 and adjustedX <= 1 and adjustedY <= 1) then
-        adjustedX = nibRealUI:Round(100 * adjustedX, 1)
-        adjustedY = nibRealUI:Round(100 * adjustedY, 1)
+        adjustedX = nibRealUI.Round(100 * adjustedX, 1)
+        adjustedY = nibRealUI.Round(100 * adjustedY, 1)
         Map.coords.mouse:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, MOUSE_LABEL, adjustedX, adjustedY))
     else
         Map.coords.mouse:SetText("")
