@@ -122,10 +122,11 @@ function PaperDoll:UpdateItems()
                 itemSlot.ilvl:SetText("")
             end
             if item.hasDura then
-                local percent, min, max = nibRealUI:GetSafeVals(GetInventoryItemDurability(slotID))
-                if (max ~= 0) then
+                local min, max = GetInventoryItemDurability(slotID)
+                if max then
+                    local percent = nibRealUI:GetSafeVals(min, max)
                     itemSlot.dura:SetValue(percent)
-                    itemSlot.dura:SetStatusBarColor(nibRealUI:GetDurabilityColor(min/max))
+                    itemSlot.dura:SetStatusBarColor(nibRealUI:GetDurabilityColor(percent))
                     itemSlot.dura:Show()
                 else
                     itemSlot.dura:Hide()

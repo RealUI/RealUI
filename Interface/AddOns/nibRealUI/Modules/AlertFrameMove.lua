@@ -64,6 +64,7 @@ local function PostAlertMove(screenQuadrant)
 end
 
 function AlertFrameMove:AlertFrame_SetLootAnchors(alertAnchor)
+    --print("AlertFrame_SetLootAnchors", IsMoving)
     if ( MissingLootFrame:IsShown() ) then
         MissingLootFrame:ClearAllPoints()
         MissingLootFrame:SetPoint(AFPosition, alertAnchor, AFAnchor)
@@ -78,53 +79,58 @@ function AlertFrameMove:AlertFrame_SetLootAnchors(alertAnchor)
 end
 
 function AlertFrameMove:AlertFrame_SetStorePurchaseAnchors(alertAnchor)
-    local frame = StorePurchaseAlertFrame;
+    --print("AlertFrame_SetStorePurchaseAnchors", IsMoving)
+    local frame = StorePurchaseAlertFrame
     if ( frame:IsShown() ) then
         frame:ClearAllPoints()
-        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
     end
 end
 
 function AlertFrameMove:AlertFrame_SetLootWonAnchors(alertAnchor)
+    --print("AlertFrame_SetLootWonAnchors", IsMoving)
     for i = 1, #LOOT_WON_ALERT_FRAMES do
-        local frame = LOOT_WON_ALERT_FRAMES[i];
+        local frame = LOOT_WON_ALERT_FRAMES[i]
         if ( frame:IsShown() ) then
             frame:ClearAllPoints()
-            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
             alertAnchor = frame
         end
     end
 end
 
 function AlertFrameMove:AlertFrame_SetLootUpgradeFrameAnchors(alertAnchor)
+    --print("AlertFrame_SetLootUpgradeFrameAnchors", IsMoving)
     for i=1, #LOOT_UPGRADE_ALERT_FRAMES do
-        local frame = LOOT_UPGRADE_ALERT_FRAMES[i];
+        local frame = LOOT_UPGRADE_ALERT_FRAMES[i]
         if ( frame:IsShown() ) then
             frame:ClearAllPoints()
-            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-            alertAnchor = frame;
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+            alertAnchor = frame
         end
     end
 end
 
 function AlertFrameMove:AlertFrame_SetMoneyWonAnchors(alertAnchor)
+    --print("AlertFrame_SetMoneyWonAnchors", IsMoving)
     for i = 1, #MONEY_WON_ALERT_FRAMES do
-        local frame = MONEY_WON_ALERT_FRAMES[i];
+        local frame = MONEY_WON_ALERT_FRAMES[i]
         if ( frame:IsShown() ) then
             frame:ClearAllPoints()
-            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+            frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
             alertAnchor = frame
         end
     end
 end
 
 function AlertFrameMove:AlertFrame_SetAchievementAnchors(alertAnchor)
+    --print("AlertFrame_SetAchievementAnchors", IsMoving)
     if ( AchievementAlertFrame1 ) then
         for i = 1, MAX_ACHIEVEMENT_ALERTS do
-            local frame = _G["AchievementAlertFrame"..i];
+            local frame = _G["AchievementAlertFrame"..i]
             if ( frame and frame:IsShown() ) then
                 frame:ClearAllPoints()
-                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
                 alertAnchor = frame
             end
         end
@@ -132,12 +138,13 @@ function AlertFrameMove:AlertFrame_SetAchievementAnchors(alertAnchor)
 end
 
 function AlertFrameMove:AlertFrame_SetCriteriaAnchors(alertAnchor)
+    --print("AlertFrame_SetCriteriaAnchors", IsMoving)
     if ( CriteriaAlertFrame1 ) then
         for i = 1, MAX_ACHIEVEMENT_ALERTS do
-            local frame = _G["CriteriaAlertFrame"..i];
+            local frame = _G["CriteriaAlertFrame"..i]
             if ( frame and frame:IsShown() ) then
                 frame:ClearAllPoints()
-                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
                 alertAnchor = frame
             end
         end
@@ -145,62 +152,82 @@ function AlertFrameMove:AlertFrame_SetCriteriaAnchors(alertAnchor)
 end
 
 function AlertFrameMove:AlertFrame_SetChallengeModeAnchors(alertAnchor)
-    local frame = ChallengeModeAlertFrame1;
+    --print("AlertFrame_SetChallengeModeAnchors", IsMoving)
+    local frame = ChallengeModeAlertFrame1
     if ( frame:IsShown() ) then
         frame:ClearAllPoints()
-        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetDungeonCompletionAnchors(alertAnchor)
-    local frame = DungeonCompletionAlertFrame1;
+    --print("AlertFrame_SetDungeonCompletionAnchors", IsMoving)
+    local frame = DungeonCompletionAlertFrame1
     if ( frame:IsShown() ) then
         frame:ClearAllPoints()
-        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetScenarioAnchors(alertAnchor)
-    local frame = ScenarioAlertFrame1;
+    --print("AlertFrame_SetScenarioAnchors", IsMoving)
+    local frame = ScenarioAlertFrame1
     if ( frame:IsShown() ) then
         frame:ClearAllPoints()
-        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetGuildChallengeAnchors(alertAnchor)
-    local frame = GuildChallengeAlertFrame;
+    --print("AlertFrame_SetGuildChallengeAnchors", IsMoving)
+    local frame = GuildChallengeAlertFrame
     if ( frame:IsShown() ) then
         frame:ClearAllPoints()
-        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetDigsiteCompleteToastFrameAnchors(alertAnchor)
-    if ( DigsiteCompleteToastFrame and DigsiteCompleteToastFrame:IsShown() ) then
-        DigsiteCompleteToastFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-        alertAnchor = DigsiteCompleteToastFrame;
+    --print("AlertFrame_SetDigsiteCompleteToastFrameAnchors", IsMoving)
+    local frame = DigsiteCompleteToastFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonBuildingAlertFrameAnchors(alertAnchor)
-    if ( GarrisonBuildingAlertFrame and GarrisonBuildingAlertFrame:IsShown() ) then
-        GarrisonBuildingAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-        alertAnchor = GarrisonBuildingAlertFrame;
+    print("AlertFrame_SetGarrisonBuildingAlertFrameAnchors", IsMoving)
+    local frame = GarrisonBuildingAlertFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonMissionAlertFrameAnchors(alertAnchor)
-    if ( GarrisonMissionAlertFrame and GarrisonMissionAlertFrame:IsShown() ) then
-        GarrisonMissionAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-        alertAnchor = GarrisonMissionAlertFrame;
+    print("AlertFrame_SetGarrisonMissionAlertFrameAnchors", IsMoving)
+    local frame = GarrisonMissionAlertFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonFollowerAlertFrameAnchors(alertAnchor)
-    if ( GarrisonFollowerAlertFrame and GarrisonFollowerAlertFrame:IsShown() ) then
-        GarrisonFollowerAlertFrame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset);
-        alertAnchor = GarrisonFollowerAlertFrame;
+    print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
+    local frame = GarrisonFollowerAlertFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
     end
 end
 
@@ -244,10 +271,200 @@ function AlertFrameMove:AlertMovers()
     UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
 end
 
+local ID = {
+    spec = 268, -- Brewmaster
+    item = 30234, -- Nordrassil Wrath-Kilt
+    rollType = LOOT_ROLL_TYPE_NEED,
+    currency = 823, -- Apexis Crystals
+    building = "Barn",
+    mission = 165,
+    follower = 208, -- Ahm
+    archRace = 1, -- 
+}
+local alertTest = {
+    type = "group",
+    args = {
+        achievementAlerts = {
+            name = "Achievement Alerts",
+            type = "group",
+            args = {
+                achievementGet = {
+                    name = "Achievement",
+                    desc = "AchievementAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        if not AchievementFrame then UIParentLoadAddOn("Blizzard_AchievementUI") end
+                        AchievementAlertFrame_ShowAlert(6348)
+                    end,
+                },
+                achievementCrit = {
+                    name = "Achievement Criteria",
+                    desc = "CriteriaAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        if not AchievementFrame then UIParentLoadAddOn("Blizzard_AchievementUI") end
+                        CriteriaAlertFrame_ShowAlert(6348, 1)
+                    end,
+                },
+            },
+        },
+        lfgAlerts = {
+            name = "LFG Alerts",
+            type = "group",
+            args = {
+                scenario = {
+                    name = "Scenario",
+                    desc = "ScenarioAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        ScenarioAlertFrame_ShowAlert()
+                    end,
+                },
+                dungeon = {
+                    name = "Dungeon",
+                    desc = "DungeonCompletionAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        DungeonCompletionAlertFrame_ShowAlert()
+                    end,
+                },
+                guildDungeon = {
+                    name = "Guild Dungeon",
+                    desc = "GuildChallengeAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        GuildChallengeAlertFrame_ShowAlert(1, 2, 5)
+                    end,
+                },
+                challenge = {
+                    name = "Challenge Mode",
+                    desc = "ChallengeModeAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        ChallengeModeAlertFrame_ShowAlert()
+                    end,
+                },
+            },
+        },
+        lootAlerts = {
+            name = "Loot Alerts",
+            type = "group",
+            args = {
+                lootWon = {
+                    name = "Loot Roll Won",
+                    desc = "LootWonAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        LootWonAlertFrame_ShowAlert(ID.item, 1, rollType, 98)
+                    end,
+                },
+                lootGiven = {
+                    name = "Loot Given",
+                    desc = "LootWonAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        LootWonAlertFrame_ShowAlert(ID.item, 1, nil, nil, specID)
+                    end,
+                },
+                lootMoney = {
+                    name = "Loot Money",
+                    desc = "MoneyWonAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        MoneyWonAlertFrame_ShowAlert(ID.item)
+                    end,
+                },
+                lootCurrency = {
+                    name = "Loot Currency",
+                    desc = "LootWonAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        LootWonAlertFrame_ShowAlert(ID.currency, 100, nil, nil, ID.spec, true, false, 2)
+                    end,
+                },
+                lootGarrisonCache = {
+                    name = "Loot Garrison Cache",
+                    desc = "LootWonAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        LootWonAlertFrame_ShowAlert(137, 100, nil, nil, specID, true, false, 10)
+                    end,
+                },
+                lootUpgrade = {
+                    name = "Loot Upgrade",
+                    desc = "LootUpgradeFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        LootUpgradeFrame_ShowAlert(ID.item, 1, 2, 3)
+                    end,
+                },
+            },
+        },
+        garrisonAlerts = {
+            name = "Garrison Alerts",
+            type = "group",
+            args = {
+                building = {
+                    name = "Garrison Building",
+                    desc = "GarrisonBuildingAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        GarrisonBuildingAlertFrame_ShowAlert(ID.building)
+                    end,
+                },
+                mission = {
+                    name = "Garrison Mission",
+                    desc = "GarrisonMissionAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        GarrisonMissionAlertFrame_ShowAlert(ID.mission)
+                    end,
+                },
+                follower = {
+                    name = "Garrison Follower",
+                    desc = "GarrisonFollowerAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        GarrisonFollowerAlertFrame_ShowAlert(ID.follower, "Ahm", 208, 100, 2)
+                    end,
+                },
+            },
+        },
+        miscAlerts = {
+            name = "Misc Alerts",
+            type = "group",
+            args = {
+                store = {
+                    name = "Store Purchase",
+                    desc = "StorePurchaseAlertFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        StorePurchaseAlertFrame_ShowAlert("Interface\\Icons\\inv_pants_mail_15", "Nordrassil Wrath-Kilt", ID.item)
+                    end,
+                },
+                digsite = {
+                    name = "Digsite Complete",
+                    desc = "DigsiteCompleteToastFrame_ShowAlert",
+                    type = "execute",
+                    func = function()
+                        DigsiteCompleteToastFrame_ShowAlert(ID.archRace)
+                    end,
+                },
+            },
+        },
+    },
+}
+function RealUIAlertFrameTest()
+    LibStub("AceConfigDialog-3.0"):Open("alertTest")
+end
+
 ----------
 function AlertFrameMove:OnInitialize()
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+
+    local AceConfig = LibStub("AceConfig-3.0")
+    AceConfig:RegisterOptionsTable("alertTest", alertTest, {"/alertTest"})
 end
 
 function AlertFrameMove:OnEnable()
