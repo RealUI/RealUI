@@ -15,6 +15,12 @@ local info = {
         growDirection = "LEFT",
         smooth = true,
     },
+    predict = {
+        leftAngle = [[/]],
+        rightAngle = [[/]],
+        growDirection = "LEFT",
+        smooth = true,
+    },
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
@@ -85,7 +91,7 @@ end
 
 local function CreatePredictBar(parent)
     local width, height = parent.Health:GetSize()
-    local info = info.health
+    local info = info.predict
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
     absorbBar:SetReversePercent(true)

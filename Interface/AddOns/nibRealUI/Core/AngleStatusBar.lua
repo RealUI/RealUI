@@ -303,7 +303,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     return bg
 end
 
-local function CreateAngleBar(self, width, height, parent, info, isStatus)
+local function CreateAngleBar(self, width, height, parent, info)
     --print("CreateAngleBar", self.unit, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
@@ -311,13 +311,7 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
     info.startPoint = (info.growDirection == "LEFT") and "TOPRIGHT" or "TOPLEFT"
     info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
 
-    local status, bar
-    if isStatus then
-        bar = CreateFrame("Frame", nil, parent)
-    else
-        status = CreateFrame("Frame", nil, parent)
-        bar = CreateFrame("Frame", nil, status)
-    end
+    local bar = CreateFrame("Frame", nil, parent)
     info.x = (info.startPoint == "TOPRIGHT") and -2 or 2
     bar:SetPoint(info.startPoint, parent, info.x, -1)
     bar:SetHeight(info.minWidth)
@@ -371,11 +365,7 @@ local function CreateAngleBar(self, width, height, parent, info, isStatus)
         end
     end)
 
-    if isStatus then
-        return bar, info
-    else
-        return status, bar, info
-    end
+    return bar, info
 end
 
 local function CreateAngleFrame(self, frameType, width, height, parent, info)
@@ -385,10 +375,12 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
         status.SetBackgroundColor = ASB.SetBackgroundColor
         return status
     elseif frameType == "Bar" then
-        status, bar, info = CreateAngleBar(self, width, height, parent, info)
+        bar, info = CreateAngleBar(self, width, height, parent, info)
+        -- Do this to maintain a consistant hierarchy without having to use self.bar for direct manipulation.
+        status = bar
     elseif frameType == "Status" then
         status = CreateAngleBG(self, width, height, parent, info)
-        bar, info = CreateAngleBar(self, width, height, status, info, true)
+        bar, info = CreateAngleBar(self, width, height, status, info)
     end
 
     local mt = getmetatable(status).__index

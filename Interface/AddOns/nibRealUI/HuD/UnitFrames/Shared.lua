@@ -326,31 +326,33 @@ function UnitFrames:PredictOverride(event, unit)
     --print("Predict Override", self, event, unit)
     local hp = self.HealPrediction
     local absorbBar = hp.absorbBar
+    local health = self.Health
+    local width = floor(health.bar:GetWidth())
 
     local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     local absorbTotal = UnitGetTotalAbsorbs(unit)
     local absorbPer = math.min(absorbTotal, healthCurr) / healthMax
 
     if absorbBar.info then
-        --print("Has Info")
-        absorbBar:SetMinMaxValues(0, healthCurr)
+        absorbBar.info.maxWidth = health.info.maxWidth - width
+        absorbBar:SetMinMaxValues(0, health.value)
         absorbBar:SetValue(absorbTotal)
     else
-        AngleStatusBar:SetValue(hp.absorbBar, 1-absorbPer, true)
+        AngleStatusBar:SetValue(hp.absorbBar, 1 - absorbPer, true)
     end
     --print("absorb", absorbTotal, absorbPer, 1 - absorbPer)
     local atMax = (not(ndb.settings.reverseUnitFrameBars) and (healthCurr == healthMax))
     if unit == "player" then
         if atMax then
-            absorbBar.bar:SetPoint("TOPRIGHT", self.Health, -2, -1)
+            absorbBar:SetPoint("TOPRIGHT", health, -2, -1)
         else
-            absorbBar.bar:SetPoint("TOPRIGHT", self.Health.bar, "TOPLEFT", absorbBar.info.minWidth, 0)
+            absorbBar:SetPoint("TOPRIGHT", health, -(width - health.info.minWidth), -1)
         end
     else
         if atMax then
-            absorbBar:SetPoint("TOPLEFT", self.Health, 2, -1)
+            absorbBar:SetPoint("TOPLEFT", health, 2, -1)
         else
-            absorbBar:SetPoint("TOPLEFT", self.Health.bar, "TOPRIGHT", 0, 0)
+            absorbBar:SetPoint("TOPLEFT", health.bar, "TOPRIGHT", 0, 0)
         end
     end
 end

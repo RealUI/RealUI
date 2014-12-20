@@ -36,6 +36,7 @@ local raidGroupInUse = {
     group8 = false,
 }
 
+
 local isStaticSize = {
     true,  -- 5 Normal
     true,  -- 5 Heroic

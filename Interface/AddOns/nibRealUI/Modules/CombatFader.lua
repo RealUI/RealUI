@@ -399,6 +399,11 @@ function CombatFader:OptionsRefresh()
     self:UpdateStatus(true)
 end
 
+function nibRealUI:RegisterForFade(mod, info)
+    db.elements[mod] = info
+    CombatFader:OptionsRefresh()
+end
+
 function CombatFader:PLAYER_TARGET_CHANGED()
     self:UpdateStatus()
 end
