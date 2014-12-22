@@ -65,6 +65,7 @@
                                     </Offset>
                                 </Anchor>
                             </Anchors>
+                            <TexCoords left="0.08" right="0.92" top="0.08" bottom="0.92"/>
                         </Texture>
                         <Texture name="$parentIcon2">
                             <Size>
@@ -77,6 +78,7 @@
                                     </Offset>
                                 </Anchor>
                             </Anchors>
+                            <TexCoords left="0.08" right="0.92" top="0.08" bottom="0.92"/>
                         </Texture>
                     </Layer>
                 </Layers>

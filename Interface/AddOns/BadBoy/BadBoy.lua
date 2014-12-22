@@ -239,6 +239,7 @@ local whiteList = {
 	"guildportal%.com",
 	"guildomatic%.com",
 	"guildhosting.org",
+	"%.wix%.com",
 	"shivtr%.com",
 	"own3d%.tv",
 	"ustream%.tv",
@@ -254,6 +255,7 @@ local whiteList = {
 	"portal",
 	"town",
 	"vialofthe",
+	"synonym",
 	"[235]v[235]",
 	"sucht", --de
 	"gilde", --de
@@ -601,6 +603,8 @@ local instantReportList = {
 	"prommote%.me.*prices?forthe", --prommote.me, fast service and modest prices for the [Challenge Conqueror: Gold]
 	"prommote%.me.*boost", --{rt6} {rt3} www.prommote.me - Challenge mode boosting to Gold or Challenge Master. Tons of feedbacks, done in 3 hours! {rt3} {rt4}
 	"prommote[%.,]me.*arena.*boost", --{rt3} {rt8} www.prommote.me - safe Arena boosting. Over 50 positive feedbacks! Ask on website for details! {rt4}
+	"gladiator.*preorder.*free.*tinyurl", --{rt8}{rt5} How can you be sure that your Gladiator boost won’t be disqualified? We can tell you! Pre-order a Gladiator and get a FREE PvP set at the start of WoD! tinyurl.com/s16glad {rt5} || URL LINKS TO https://prommote.me/eu/arena
+	"elite.*services.*glory.*tinyurl", --{rt7}{rt5} Elite Warlords of Draenor services are up! Everything from Glory of the Draenor Hero and Raider to full Highmaul and Blackrock Foundry Mythic gear! tinyurl.com/mythicwarlord {rt5} || URL LINKS TO https://prommote.me/eu/60-content
 	"boosting[%.,]pro.*discount", --[H] <DND>[Jedrict]: {skull}{skull}{skull} www.Boosting.Pro - Premium Arena boosting - {circle} SUPER DISCOUNTS ON ALL RATINGS {circle} Over 50 successful Gladiator orders in season 14! {skull}{skull}{skull}
 	--{rt6}{rt6}{rt6} www.Boosting.Pro - Elite PvE Services: {rt2} GET FREE GARROSH MOUNT {rt2} today! Only 25 man raids, warforged loot, weapons and trinkets are included! {rt6}{rt6}{rt6}
 	"boosting[%.,]pro.*service", --[H] <DND>[Jedrict]: {square}{square}{square} www.Boosting.Pro - Elite PvE Services: {circle} HC LOOT RUN + GARROSH MOUNT {circle} on Sale now! Only 25 man raids, warforged loot, weapons and trinkets are included! {square}{square}{square}
@@ -769,7 +773,9 @@ local instantReportList = {
 	"game4ok[%.,]c.*livechat", --{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}{rt6}[www.game4ok.cQm]{rt4}{rt4}{rt4}[game4ok.cQm]{rt4}{rt4}800K G in sotck{rt5}{rt5}{rt5}traden in 10minutes{rt5}{[RT5game4ok.cQm]{rt5}{rt5}{rt5} [game4ok.cQm]{rt6}{rt6}{rt6}{rt6}[game4ok.cQm] contact by;Live Chat {rt4}{rt4}{rt4}{rt4}
 	"raidbroker[%.,]com.*skype", --Both Horde/Alliance teams! http://raidbroker.com ~ Jarvis.Dresden on Skype!!
 	"g@ld.*livraison.*exclusiv", --Envie de G@LD pour bien commencer WoD, livraison en moins de 5 min en exclusivité sur ysondre
-	"verkaufengold.*skype", --{rt7}Wir Verkaufen Gold sehr Günstig. Skypename : betz-210{rt7}
+	--{rt1}VERKAUFE GOLD Sehr Billig. Skypename : betz-500{rt1}
+	"verkaufen?gold.*skype", --{rt7}Wir Verkaufen Gold sehr Günstig. Skypename : betz-210{rt7}
+	"titaniumbay.*extra", ---= TitaniumBay =- Get 10 % extra {rt2}! Fast and safe delivery!
 }
 
 --This is the replacement table. It serves to deobfuscate words by replacing letters with their English "equivalents".
@@ -887,6 +893,18 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 	local debug = msg --Save original message format
 	msg = msg:lower() --Lower all text, remove capitals
 
+	--|cffff8000|Hgarrfollower:178:5:100:690:130:131:127:0:78:186:201:79|h[|TInterface\PVPFrame\PVP-Banner-Emblem-1.png:70:70|t]|h|r
+	--\124cffff8000\124Hgarrfollower:439:5:100:690:138:158:131:0:78:186:201:79\124h[Mila Kunis Leaked Photos CLICK!]\124h\124r
+	-- Trade chat image abuse filtering. Since we only filter public channels and followers aren't tradeable, just flat out filter it until Blizz fixes it.
+	-- Alternative would be an ever growing database and they keep changing the text for links that are just custom text with no image.
+	if msg:find("hgarrfollower:", nil, true) then
+		if BadBoyLog and not myDebug then
+			BadBoyLog("BadBoy", event, trimmedPlayer, debug)
+		end
+		result = true
+		return true
+	end
+
 	--They like to use raid icons to avoid detection
 	local icon = 0
 	if strfind(msg, "{", nil, true) then --Only run the icon removal code if the chat line has raid icons that need removed
@@ -999,7 +1017,7 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_EMOTE", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_DND", filter)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_AFK", filter)
 
---[[ BNet Invites ]]--
+--[[ Blacklist ]]--
 do
 	local f = CreateFrame("Frame")
 	f:RegisterEvent("PLAYER_LOGIN")

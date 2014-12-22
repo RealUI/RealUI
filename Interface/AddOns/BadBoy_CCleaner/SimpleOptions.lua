@@ -1,6 +1,6 @@
 
 do
-	BadBoyCCleanerConfigTitle:SetText("BadBoy_CCleaner r86-release") --wowace magic, replaced with tag version
+	BadBoyCCleanerConfigTitle:SetText("BadBoy_CCleaner r88-release") --wowace magic, replaced with tag version
 
 	local ccleanerNoIcons = CreateFrame("CheckButton", nil, BadBoyConfig, "OptionsBaseCheckButtonTemplate")
 	ccleanerNoIcons:SetPoint("TOPLEFT", BadBoyConfigPopupButton, "BOTTOMLEFT", 0, -135)

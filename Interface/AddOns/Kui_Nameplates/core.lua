@@ -58,7 +58,9 @@ local defaults = {
         general = {
             combat      = false, -- automatically show hostile plates upon entering combat
             highlight   = true, -- highlight plates on mouse-over
+            highlight_target = false,
             fixaa       = true, -- attempt to make plates appear sharper
+            compatibility = false,
             targetglow  = true,
             bartexture  = DEFAULT_BAR,
             targetglowcolour = { .3, .7, 1, 1 },
@@ -163,6 +165,9 @@ do
             -- force the registered f for this name to change
             loadedNames[f.name.text] = nil
         end
+
+        --print('got GUID for: '..f.name.text.. '; '..f.guid)
+        addon:SendMessage('KuiNameplates_GUIDStored', f, unit)
     end
     function addon:StoreName(f)
         if not f.name.text or f.guid then return end

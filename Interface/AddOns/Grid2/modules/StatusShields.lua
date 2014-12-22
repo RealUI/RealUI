@@ -21,6 +21,7 @@ local shields_ava = {
 	11426,  -- Ice Barrier (Mage)
 	1463,   -- Mana Shield (Mage)
 	116849, -- LifeCocoon (Monk)
+	152118, -- Clarity of Will (Priest)
 }
 
 local shields     = {}  

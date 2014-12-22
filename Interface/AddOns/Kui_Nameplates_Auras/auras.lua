@@ -4,6 +4,12 @@
 -- All rights reserved
 
    Auras module for Kui_Nameplates core layout.
+
+   Applications fire twice for multiple reasons.
+    GUIDStore & PostTarget on a newly displayed frame
+    COMBAT_LOG_EVENT & UNIT_AURA on party targets/other valid units
+    UPDATE_MOUSEOVER_UNIT fires twice when clicking on targets
+    PostTarget + UPDATE_MOUSEOVER_UNIT x2 when clicking targets
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local spelllist = LibStub('KuiSpellList-1.0')
@@ -14,16 +20,30 @@ local whitelist, _
 local GetTime, floor, ceil = GetTime, floor, ceil
 local UnitExists,UnitGUID=UnitExists,UnitGUID
 
+-- store profiles to reduce lookup in OnAuraUpdate
+local db_display,db_behav
+
 -- auras pulsate when they have less than this many seconds remaining
 local FADE_THRESHOLD = 5
 
 -- combat log events to listen to for fading auras
-local auraEvents = {
---	['SPELL_DISPEL'] = true,
+local REMOVAL_EVENTS = {
 	['SPELL_AURA_REMOVED'] = true,
 	['SPELL_AURA_BROKEN'] = true,
 	['SPELL_AURA_BROKEN_SPELL'] = true,
 }
+local ADDITION_EVENTS = {
+	['SPELL_AURA_APPLIED'] = true,
+}
+local MOUSEOVER_EVENTS = {
+	['SPELL_AURA_REMOVED_DOSE'] = true,
+	['SPELL_AURA_APPLIED_DOSE'] = true,
+	['SPELL_AURA_REFRESH'] = true,
+}
+
+local function debug_print(msg)
+	print(GetTime()..': '..msg)
+end
 
 local function ArrangeButtons(self)
 	local pv, pc
@@ -108,7 +128,7 @@ local function OnAuraUpdate(self, elapsed)
 	if self.elapsed <= 0 then
 		local timeLeft = self.expirationTime - GetTime()
 		
-		if mod.db.profile.display.pulsate then
+		if db_display.pulsate then
 			if self.doPulsate and timeLeft > FADE_THRESHOLD then
 				-- reset pulsating status if the time is extended
 				StopPulsatingAura(self)
@@ -119,23 +139,20 @@ local function OnAuraUpdate(self, elapsed)
 			end
 		end
 
-		if mod.db.profile.display.timerThreshold > -1 and
-		   timeLeft > mod.db.profile.display.timerThreshold
+		if db_display.timerThreshold > -1 and
+		   timeLeft > db_display.timerThreshold
 		then
 			self.time:Hide()
 		else
 			local timeLeftS
 
-			if mod.db.profile.display.decimal and
+			if db_display.decimal and
 			   timeLeft <= 1 and timeLeft > 0
 			then
 				-- decimal places for the last second
 				timeLeftS = string.format("%.1f", timeLeft)
 			else
-				timeLeftS = (timeLeft > 60 and
-				             ceil(timeLeft/60)..'m' or
-				             floor(timeLeft)
-				            )
+				timeLeftS = (timeLeft > 60 and ceil(timeLeft/60)..'m' or floor(timeLeft))
 			end
 
 			if timeLeft <= 5 then
@@ -156,10 +173,13 @@ local function OnAuraUpdate(self, elapsed)
 		if timeLeft < 0 then
 			-- used when a non-targeted mob's auras timer gets below 0
 			-- but the combat log hasn't reported that it has faded yet.
-			self.time:SetText('0')
+			self.time:Hide()
+			self:SetScript('OnUpdate', nil)
+			StopPulsatingAura(self)
+			return
 		end
 		
-		if mod.db.profile.display.decimal and
+		if db_display.decimal and
 		   timeLeft <= 2 and timeLeft > 0
 		then
 			-- faster updates in the last two seconds
@@ -277,6 +297,25 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 
 	return button
 end
+function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
+	--debug_print('aura application of '..name)
+
+	name = strlower(name) or nil
+	if  name and
+	   (not db_behav.useWhitelist or
+	    (whitelist[spellid] or whitelist[name])) and
+	   (duration >= db_display.lengthMin) and
+	   (db_display.lengthMax == -1 or (
+	   	duration > 0 and
+	    duration <= db_display.lengthMax))
+	then
+		local button = self:GetAuraButton(spellid, icon, count, duration, expirationTime)
+		self:Show()
+
+		button:Show()
+		button.used = true
+	end
+end
 ----------------------------------------------------------------------- hooks --
 function mod:Create(msg, frame)
 	frame.auras = CreateFrame('Frame', nil, frame)
@@ -290,8 +329,9 @@ function mod:Create(msg, frame)
 	frame.auras.visible = 0
 	frame.auras.buttons = {}
 	frame.auras.spellIds = {}
-	frame.auras.GetAuraButton = GetAuraButton
+	frame.auras.GetAuraButton  = GetAuraButton
 	frame.auras.ArrangeButtons = ArrangeButtons
+	frame.auras.DisplayAura    = DisplayAura
 
 	frame.auras:SetScript('OnHide', function(self)
 		for k,b in pairs(self.buttons) do
@@ -321,32 +361,58 @@ end
 -------------------------------------------------------------- event handlers --
 function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 	-- used to hide expired auras on previously known frames
-	-- and to detect aura updates on the mouseover, if it exists
+	-- to detect aura updates on the mouseover, if it exists
 	-- (since UNIT_AURA doesn't fire for mouseover)
-	local castTime, event, _, guid, name, _, _, targetGUID, targetName = ...
+	-- and place auras on frames for which GUIDs are know, if possible
+	local guid = select(4,...)
 	if not guid then return end
 	if guid ~= UnitGUID('player') then return end
 
-	if UnitGUID('mouseover') == targetGUID then
-		-- update the mouseover's auras
-		self:UNIT_AURA('UNIT_AURA','mouseover')
-	end
+	local event = select(2,...)
 
-	-- only listen for removals from now
-	if not auraEvents[event] then return end
+	if  REMOVAL_EVENTS[event] or
+		ADDITION_EVENTS[event] or
+		MOUSEOVER_EVENTS[event]
+	then
+		local destGUID = select(8,...)
 
-	-- fetch the subject's nameplate
-	local f = addon:GetNameplate(targetGUID, targetName)
-	if not f or not f.auras then return end
+		-- events on the current target will be caught by UNIT_AURA
+		-- some other units will fire twice too, but this catches the majority
+		if destGUID == UnitGUID('target') then return end
 
-	-- DEBUG
-	--print(event..' from '..name..' on '..targetName)
-	--print('(frame for guid: '..targetGUID..')')
+		if UnitGUID('mouseover') == destGUID then
+			-- event on the mouseover unit - update directly
+			self:UNIT_AURA('UNIT_AURA','mouseover')
+			return
+		end
 
-	local spId = select(12, ...)
+		-- only want dose applications/removals for mouseover
+		if MOUSEOVER_EVENTS[event] then return end
 
-	if f.auras.spellIds[spId] then
-		f.auras.spellIds[spId]:Hide()
+		local castTime,_,_,_,name,_,_,_,destName = ...
+
+		-- only listen for simple removals/additions from now
+		-- fetch the subject's nameplate
+		local f = addon:GetNameplate(destGUID, destName)
+		if not f or not f.auras then return end
+
+		--debug_print('COMBAT_LOG_EVENT fired on '..f.name.text)
+
+		local spId = select(12, ...)
+		if not spId then return end
+
+		if REMOVAL_EVENTS[event] then
+			-- hide an aura button when the combat log reports it has expired
+			if f.auras.spellIds[spId] then
+				f.auras.spellIds[spId]:Hide()
+			end
+		elseif ADDITION_EVENTS[event] then
+			-- show a placeholder button with no timer when possible
+			if not f.auras.spellIds[spId] then
+				local spellName,_,icon = GetSpellInfo(spId)
+				f.auras:DisplayAura(spId, spellName, icon, 1,0,0)
+			end
+		end
 	end
 end
 function mod:PLAYER_TARGET_CHANGED()
@@ -354,6 +420,9 @@ function mod:PLAYER_TARGET_CHANGED()
 end
 function mod:UPDATE_MOUSEOVER_UNIT()
 	self:UNIT_AURA('UNIT_AURA', 'mouseover')
+end
+function mod:GUIDStored(msg, f, unit)
+	self:UNIT_AURA('UNIT_AURA', unit)
 end
 function mod:UNIT_AURA(event, unit)
 	-- select the unit's nameplate
@@ -363,6 +432,8 @@ function mod:UNIT_AURA(event, unit)
 	if frame.trivial and not self.db.profile.showtrivial then return end
 	--unit = 'player' -- DEBUG
 
+	--debug_print('UNIT_AURA fired on '..frame.name.text)
+
 	local filter = 'PLAYER '
 	if UnitIsFriend(unit, 'player') then
 		filter = filter..'HELPFUL'
@@ -371,21 +442,10 @@ function mod:UNIT_AURA(event, unit)
 	end
 
 	for i = 0,40 do
-		local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitAura(unit, i, filter)
-		name = name and strlower(name) or nil
+		local name, _, icon, count, _, duration, expirationTime, _, _, _, spellid = UnitAura(unit, i, filter)
 
-		if  name and
-		   (not self.db.profile.behav.useWhitelist or
-		    (whitelist[spellId] or whitelist[name])) and
-		   (duration >= self.db.profile.display.lengthMin) and
-		   (self.db.profile.display.lengthMax == -1 or (
-		   	duration > 0 and
-		    duration <= self.db.profile.display.lengthMax))
-		then
-			local button = frame.auras:GetAuraButton(spellId, icon, count, duration, expirationTime)
-			frame.auras:Show()
-			button:Show()
-			button.used = true
+		if spellid then
+			frame.auras:DisplayAura(spellid,name,icon,count,duration,expirationTime)
 		end
 	end
 
@@ -403,6 +463,11 @@ function mod:WhitelistChanged()
 	whitelist = spelllist.GetImportantSpells(select(2, UnitClass("player")))
 end
 ---------------------------------------------------- Post db change functions --
+mod.configChangedListener = function(self)
+	db_display = self.db.profile.display
+	db_behav   = self.db.profile.behav
+end
+
 mod.configChangedFuncs = { runOnce = {} }
 mod.configChangedFuncs.runOnce.enabled = function(val)
 	if val then
@@ -536,10 +601,10 @@ function mod:OnEnable()
 	self:RegisterMessage('KuiNameplates_PostCreate', 'Create')
 	self:RegisterMessage('KuiNameplates_PostShow', 'Show')
 	self:RegisterMessage('KuiNameplates_PostHide', 'Hide')
+	self:RegisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
 	self:RegisterMessage('KuiNameplates_PostTarget', 'PLAYER_TARGET_CHANGED')
 
 	self:RegisterEvent('UNIT_AURA')
-	self:RegisterEvent('PLAYER_TARGET_CHANGED')
 	self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
 	self:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
 
@@ -552,7 +617,6 @@ function mod:OnEnable()
 end
 function mod:OnDisable()
 	self:UnregisterEvent('UNIT_AURA')
-	self:UnregisterEvent('PLAYER_TARGET_CHANGED')
 	self:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')
 	self:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
 

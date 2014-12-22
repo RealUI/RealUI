@@ -7,7 +7,7 @@
    renamed, you'll need to completely restart WoW so that it detects the file.
 
    Some examples can be found at the following URL:
-   https://github.com/rbtwrrr/Kui_Nameplates-Customs
+   https://github.com/kesava-wow/kuinameplates-customs
 ]]
 local kn = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local mod = kn:NewModule('CustomInjector', 'AceEvent-3.0')

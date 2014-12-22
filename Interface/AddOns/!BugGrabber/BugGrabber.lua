@@ -1,15 +1,15 @@
 --
--- $Id: BugGrabber.lua 201 2013-11-28 03:43:26Z funkydude $
+-- $Id: BugGrabber.lua 207 2014-11-30 01:36:45Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
--- Current Developer: Funkydude, Rabbit
--- Past Developers: Rowne, Ramble, industrial, Fritti, kergoth, ckknight
+-- Current Developer: Funkydude
+-- Past Developers: Rowne, Ramble, industrial, Fritti, kergoth, ckknight, Rabbit
 -- Testers: Ramble, Sariash
 --
 --[[
 
 !BugGrabber, World of Warcraft addon that catches errors and formats them with a debug stack.
-Copyright (C) 2013 The !BugGrabber Team
+Copyright (C) 2015 The !BugGrabber Team
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,17 +32,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -- misnamed variable names. We're not hugely concerned with performance.
 
 local _G = _G
-local type, table, next, wipe =
-      type, table, next, wipe
-local tostring, tonumber, GetTime =
-      tostring, tonumber, GetTime
-local debuglocals = debuglocals
--- GLOBALS: LibStub, GetLocale,GetBuildInfo,DisableAddOn,Swatter,GetAddOnInfo
--- GLOBALS: BugGrabberDB, ItemRefTooltip, debugstack, debuglocals, date
--- GLOBALS: seterrorhandler, print, IsAddOnLoaded, GetAddOnMetadata
+local type, table, next, tostring, tonumber, print =
+      type, table, next, tostring, tonumber, print
+local debuglocals, debugstack, wipe, InCombatLockdown, UnitAffectingCombat, GetTime =
+      debuglocals, debugstack, wipe, InCombatLockdown, UnitAffectingCombat, GetTime
+-- GLOBALS: LibStub, GetLocale, GetBuildInfo, DisableAddOn, Swatter, GetAddOnInfo
+-- GLOBALS: BugGrabberDB, ItemRefTooltip, date
+-- GLOBALS: seterrorhandler, IsAddOnLoaded, GetAddOnMetadata
 -- GLOBALS: MAX_BUGGRABBER_ERRORS, BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
 -- GLOBALS: SlashCmdList, SLASH_SWATTER1, SLASH_SWATTER2
-
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
@@ -56,8 +54,9 @@ if _G.BugGrabber then return end
 local bugGrabberParentAddon, parentAddonTable = ...
 local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
-	for i, handler in next, { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" } do
-		local _, _, _, enabled = GetAddOnInfo(handler)
+	local tbl = { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" }
+	for i = 1, 3 do
+		local _, _, _, enabled = GetAddOnInfo(tbl[i])
 		if enabled then return end -- Bail out
 	end
 end
@@ -69,6 +68,7 @@ local real_seterrorhandler = seterrorhandler
 -----------------------------------------------------------------------
 -- Global config variables
 --
+
 MAX_BUGGRABBER_ERRORS = 1000
 
 -- If we get more errors than this per second, we stop all capturing
@@ -77,6 +77,7 @@ BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
 -----------------------------------------------------------------------
 -- Localization
 --
+
 local L = {
 	ADDON_CALL_PROTECTED = "[%s] AddOn '%s' tried to call the protected function '%s'.",
 	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
@@ -90,6 +91,7 @@ local L = {
 	STOP_NAG = "|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r",
 	USAGE = "|cffffff00Usage: /buggrabber <1-%d>.|r",
 }
+
 -----------------------------------------------------------------------
 -- Locals
 --
@@ -276,7 +278,7 @@ do
 		local found = matchCache[object]
 		if found then
 			tmp[object] = true
-			return (start ~= 1 and start or "") .. object .. "-" .. found .. (type(tail) == "string" and tail or "")
+			return (type(start) == "string" and start or "") .. object .. "-" .. found .. (type(tail) == "string" and tail or "")
 		end
 	end
 
@@ -288,8 +290,8 @@ do
 	}
 	function findVersions(line)
 		if not line or line:find("FrameXML\\") then return line end
-		for i, m in next, matchers do
-			line = line:gsub(m, replacer)
+		for i = 1, 4 do
+			line = line:gsub(matchers[i], replacer)
 		end
 		wipe(tmp)
 		return line
@@ -362,10 +364,11 @@ do
 			end
 
 			-- Store the error
+			local inCombat = InCombatLockdown() or UnitAffectingCombat("player")
 			errorObject = {
 				message = sanitizedMessage,
 				stack = table.concat(tmp, "\n"),
-				locals = debuglocals(4),
+				locals = inCombat and "" or debuglocals(4),
 				session = addon:GetSessionId(),
 				time = date("%Y/%m/%d %H:%M:%S"),
 				counter = 1,

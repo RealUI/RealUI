@@ -8,6 +8,7 @@ local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local AceConfig = LibStub('AceConfig-3.0')
 local AceConfigDialog = LibStub('AceConfigDialog-3.0')
 
+local RELOAD_HINT = '\n\n|cffff0000UI reload required to take effect.'
 --------------------------------------------------------------- Options table --
 do
     local StrataSelectList = {
@@ -25,6 +26,12 @@ do
 
     -- called by handler:Set when configuration is changed
     local function ConfigChangedSkeleton(mod, key, profile)
+        if mod.configChangedListener then
+            -- notify that any option has changed
+            mod:configChangedListener()
+        end
+
+        -- call option specific callbacks
         if mod.configChangedFuncs.runOnce and
            mod.configChangedFuncs.runOnce[key]
         then
@@ -101,7 +108,7 @@ do
         args = {
             header = {
                 type = 'header',
-                name = '|cffff0000Many options currently require a UI reload to take effect.|r',
+                name = '|cffff4444Many options currently require a UI reload to take effect.|r',
                 order = 0
             },
             general = {
@@ -115,41 +122,56 @@ do
                         type = 'toggle',
                         order = 0
                     },
-                    highlight = {
-                        name = 'Highlight',
-                        desc = 'Highlight plates on mouse over (when not targeted)',
+                    fixaa = {
+                        name = 'Fix aliasing',
+                        desc = 'Attempt to make plates appear sharper. Has a positive effect on FPS, but will make plates appear a bit "loose", especially at low frame rates. Works best when uiscale is disabled and at larger resolutions (lower resolutions automatically downscale the interface regardless of uiscale setting).'..RELOAD_HINT,
                         type = 'toggle',
                         order = 1
                     },
-                    fixaa = {
-                        name = 'Fix aliasing',
-                        desc = 'Attempt to make plates appear sharper. Has a positive effect on FPS, but will make plates appear a bit "loose", especially at low frame rates. Works best when uiscale is disabled and at larger resolutions (lower resolutions automatically downscale the interface regardless of uiscale setting).\n\n|cffff0000UI reload required to take effect.',
+                    compatibility = {
+                        name = 'Stereo compatibility',
+                        desc = 'Fix compatibility with stereo video. This has a negative effect on performance when many nameplates are visible.'..RELOAD_HINT,
                         type = 'toggle',
-                        order = 3
+                        order = 2
                     },
                     leftie = {
                         name = 'Use leftie layout',
-                        desc = 'Use left-aligned text layout (similar to the pre-223 layout). Note that this layout truncates long names. But maybe you prefer that.\n\n|cffff0000UI reload required to take effect.',
+                        desc = 'Use left-aligned text layout (similar to the pre-223 layout). Note that this layout truncates long names. But maybe you prefer that.'..RELOAD_HINT,
                         type = 'toggle',
-                        order = 4,
+                        order = 3,
+                    },
+                    highlight = {
+                        name = 'Highlight',
+                        desc = 'Highlight plates on mouse over.',
+                        type = 'toggle',
+                        order = 4
+                    },
+                    highlight_target = {
+                        name = 'Highlight target',
+                        desc = 'Also highlight the current target.',
+                        type = 'toggle',
+                        order = 5,
+                        disabled = function(info)
+                            return not addon.db.profile.general.highlight
+                        end
                     },
                     glowshadow = {
                         name = 'Use glow as shadow',
                         desc = 'The frame glow is used to indicate threat. It becomes black when a unit has no threat status. Disabling this option will make it transparent instead.',
                         type = 'toggle',
-                        order = 5,
+                        order = 7,
                         width = 'double'
                     },
                     targetglow = {
                         name = 'Show target glow',
                         desc = 'Make your target\'s nameplate glow',
                         type = 'toggle',
-                        order = 6
+                        order = 8
                     },
                     targetglowcolour = {
                         name = 'Target glow colour',
                         type = 'color',
-                        order = 7,
+                        order = 9,
                         hasAlpha = true,
                         disabled = function(info)
                             return not addon.db.profile.general.targetglow
@@ -158,7 +180,7 @@ do
                     hheight = {
                         name = 'Health bar height',
                         desc = 'Note that these values do not affect the size or shape of the click-box, which cannot be changed.',
-                        order = 8,
+                        order = 10,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -168,7 +190,7 @@ do
                     thheight = {
                         name = 'Trivial health bar height',
                         desc = 'Height of the health bar of trivial (small, low maximum health) units.',
-                        order = 9,
+                        order = 11,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -177,7 +199,7 @@ do
                     },
                     width = {
                         name = 'Frame width',
-                        order = 10,
+                        order = 12,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -186,7 +208,7 @@ do
                     },
                     twidth = {
                         name = 'Trivial frame width',
-                        order = 11,
+                        order = 14,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -434,7 +456,7 @@ do
                             },
                             noalpha = {
                                 name = 'All fonts opaque',
-                                desc = 'Use 100% alpha value on all fonts.\n|cffff0000Requires a UI reload.|r',
+                                desc = 'Use 100% alpha value on all fonts.'..RELOAD_HINT,
                                 type = 'toggle',
                                 order = 25
                             },
@@ -457,6 +479,11 @@ do
     function addon:CreateConfigChangedListener(module)
         if module.configChangedFuncs and not module.ConfigChanged then
             module.ConfigChanged = ConfigChangedSkeleton
+        end
+
+        if module.configChangedListener then
+            -- run listener upon initialisation
+            module:configChangedListener()
         end
     end
 

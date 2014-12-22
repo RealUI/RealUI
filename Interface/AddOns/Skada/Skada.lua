@@ -178,13 +178,13 @@ function Window:AddOptions()
 					name=L["Rename window"],
 					desc=L["Enter the name for the window."],
 					get=function() return db.name end,
-					set=function(win, val) 
-						if val ~= db.name and val ~= "" then 
+					set=function(win, val)
+						if val ~= db.name and val ~= "" then
 							local oldname = db.name
-							db.name = val 
+							db.name = val
 							Skada.options.args.windows.args[val] = Skada.options.args.windows.args[oldname]
 							Skada.options.args.windows.args[oldname] = nil
-						end 
+						end
 					    end,
 					order=1,
 				},
@@ -322,7 +322,7 @@ end
 function Window:UpdateInProgress()
 	for i, data in ipairs(self.dataset) do
 		if data.ignore then -- ensure total bar icon is cleared before bar is recycled
-			data.icon = nil 
+			data.icon = nil
 		end
 		data.id = nil
 		data.ignore = nil
@@ -452,7 +452,7 @@ function Window:set_mode_title()
 	local name = self.selectedmode.title or self.selectedmode:GetName()
 
 	-- save window settings for RestoreView after reload
-	self.db.set = self.selectedset 
+	self.db.set = self.selectedset
 	local savemode = name
 	if self.history[1] then -- can't currently preserve a nested mode, use topmost one
 		savemode = self.history[1].title or self.history[1]:GetName()
@@ -475,7 +475,7 @@ function Window:set_mode_title()
 			name = name..": "..setname
 		end
 	end
-	if disabled and (self.selectedset == "current" or self.selectedset == "total") then 
+	if disabled and (self.selectedset == "current" or self.selectedset == "total") then
 		-- indicate when data collection is disabled
 		name = name.."  |cFFFF0000"..L["DISABLED"].."|r"
 	end
@@ -706,19 +706,19 @@ local function slashHandler(param)
 		local set = "current"
 		local report_mode_name = L["Damage"]
 		local w1, w2, w3, w4 = param:match("^%s*(%w*)%s*(%w*)%s*([^%d]-)%s*(%d*)%s*$",7)
-		if w1 and #w1 > 0 then 
+		if w1 and #w1 > 0 then
 			chan = string.lower(w1)
 		end
 		if w2 and #w2 > 0 then
 			w2 = tonumber(w2) or w2:lower()
-			if Skada:find_set(w2) then 
+			if Skada:find_set(w2) then
 				set = w2
 			end
 		end
 		if w3 and #w3 > 0 then
 			w3 = strtrim(w3)
 			w3 = strtrim(w3,"'\"[]()") -- strip optional quoting
-			if find_mode(w3) then 
+			if find_mode(w3) then
 				report_mode_name = w3
 			end
 		end
@@ -973,7 +973,7 @@ end
 function Skada:PLAYER_ENTERING_WORLD()
 
 	Skada:ZoneCheck() -- catch reloadui within a zone, which does not fire ZONE_CHANGED_NEW_AREA
-	-- If this event fired in response to a login or teleport, zone info is usually not yet available 
+	-- If this event fired in response to a login or teleport, zone info is usually not yet available
 	-- and will be caught by a sunsequent ZONE_CHANGED_NEW_AREA
 
 	-- make sure we update once on reload
@@ -1393,7 +1393,7 @@ function Skada:StartCombat()
 		self.current = createSet(L["Current"])
 	end
 
-	if self.encounterName and 
+	if self.encounterName and
 	   GetTime() < (self.encounterTime or 0) + 15 then -- a recent ENCOUNTER_START named our segment
 		self:Debug("StartCombat setting encounterName from ENCOUNTER_START",self.encounterName)
 		self.current.mobname = self.encounterName
@@ -1709,7 +1709,7 @@ cleuFrame:SetScript("OnEvent", function(frame, event, timestamp, eventtype, hide
 	if Skada.current and src_is_interesting and not Skada.current.gotboss then
 		-- Store mob name for set name. For now, just save first unfriendly name available, or first boss available.
 		if bit.band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-			if not Skada.current.gotboss and boss.BossIDs[tonumber(dstGUID:sub(6, 10), 16)] then
+			if not Skada.current.gotboss and boss.BossIDs[tonumber(dstGUID:sub(-16, -12))] then
 				Skada.current.mobname = dstName
 				Skada.current.gotboss = true
 			elseif not Skada.current.mobname then

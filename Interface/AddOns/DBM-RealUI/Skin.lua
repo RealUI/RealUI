@@ -18,7 +18,7 @@ skin.defaults = {
     EndColorB = 0,
 
     Width = 185,
-    Height = 10,
+    Height = 24,
     Scale = 1,
     TimerPoint = "TOP",
     TimerX = 281.5,

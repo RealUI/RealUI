@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 6
+local MAJOR, MINOR = 'KuiSpellList-1.0', 8
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
 local _
 
@@ -22,28 +22,21 @@ local whitelist = {
 		[770] = true, -- faerie fire
 		[1079] = true, -- rip
 		[1822] = true, -- rake
+		[155722] = true, -- rake 6.0
 		[8921] = true, -- moonfire
-		[9007] = true, -- pounce bleed
 		[77758] = true, -- bear thrash; td ma
 		[106830] = true, -- cat thrash
 		[93402] = true, -- sunfire
 		[33745] = true, -- lacerate
-		[102546] = true, -- pounce
 		
 		[339] = true, -- entangling roots
-		[2637] = true, -- hibernate
 		[6795] = true, -- growl
 		[16914] = true, -- hurricane
-		[19975] = true, -- nature's grasp roots
 		[22570] = true, -- maim
 		[33786] = true, -- cyclone
-		--[58180] = true, -- infected wounds; gp nd
 		[78675] = true, -- solar beam silence
-		[102795] = true, -- bear hug
 
 		[1126] = true, -- mark of the wild
-		[29166] = true, -- innervate
-		[110309] = true, -- symbiosis
 
 		[774] = true, -- rejuvenation
 		[8936] = true, -- regrowth
@@ -52,8 +45,6 @@ local whitelist = {
 		[102342] = true, -- ironbark
 
 		-- talents
-		--[16979] = true, -- wild charge: bear; gp nd
-		--[49376] = true, -- wild charge: cat; gp nd
 		[102351] = true, -- cenarion ward
 		[102355] = true, -- faerie swarm
 		[102359] = true, -- mass entanglement
@@ -65,16 +56,12 @@ local whitelist = {
 		[1130] = true, -- hunter's mark
 		[3674] = true, -- black arrow
 		[53301] = true, -- explosive shot
-		[63468] = true, -- piercing shots
 		[118253] = true, -- serpent sting
 
 		[5116] = true, -- concussive shot
-		[19503] = true, -- scatter shot
 		[20736] = true, -- distracting shot
 		[24394] = true, -- intimidation
-		[35101] = true, -- concussive barrage
 		[64803] = true, -- entrapment
-		[82654] = true, -- widow venom
 		[131894] = true, -- murder by way of crow
 
 		[3355] = true, -- freezing trap
@@ -85,7 +72,6 @@ local whitelist = {
 
 		-- talents
 		[136634] = true, -- narrow escape
-		[34490] = true, -- silencing shot
 		[19386] = true, -- wyvern sting
 		[117405] = true, -- binding shot
 		[117526] = true, -- binding shot stun
@@ -98,7 +84,6 @@ local whitelist = {
 		[12654] = true, -- ignite
 		[31589] = true, -- slow
 		[83853] = true, -- combustion
-		[132210] = true, -- pyromaniac
 		
 		[118] = true, -- polymorph
 		[28271] = true, -- polymorph: turtle
@@ -137,10 +122,9 @@ local whitelist = {
 	},
 	WARRIOR = { -- 5.2 COMPLETE
 		[86346] = true,  -- colossus smash
-		[113746] = true, -- weakened armour
 
 		[355] = true,    -- taunt
-		[676] = true,    -- disarm
+		[772] = true,    -- rend
 		[1160] = true,   -- demoralizing shout
 		[1715] = true,   -- hamstring
 		[5246] = true,   -- intimidating shout
@@ -148,7 +132,6 @@ local whitelist = {
 		[18498] = true,  -- gag order
 		[64382] = true,  -- shattering throw
 		[115767] = true, -- deep wounds; td
-		[137637] = true, -- warbringer slow
 		
 		[469] = true,    -- commanding shout
 		[3411] = true,   -- intervene
@@ -194,16 +177,18 @@ local whitelist = {
 		[114916] = true, -- execution sentence dot
 		[114917] = true, -- stay of execution hot
 	},
-	WARLOCK = { -- 5.2 COMPLETE
+	WARLOCK = {
 		[5697]  = true,  -- unending breath
 		[20707]  = true, -- soulstone
 		[109773] = true, -- dark intent
 	
-		[172] = true,    -- corruption, demo. version
+		[172] = true,    -- corruption (demo version)
 		[146739] = true, -- corruption
-		[114790] = true,  -- Soulburn: Seed of Corruption
+		[114790] = true, -- Soulburn: Seed of Corruption
 		[348] = true,    -- immolate
 		[108686] = true, -- immolate (aoe)
+		[157736] = true, -- immolate (green?)
+
 		[980] = true,    -- agony
 		[27243] = true,  -- seed of corruption
 		[30108] = true,  -- unstable affliction
@@ -211,19 +196,15 @@ local whitelist = {
 		[48181] = true,  -- haunt
 		[80240] = true,  -- havoc
 		
-		[1490] = true,   -- curse of the elements
-		[18223] = true,  -- curse of exhaustion
-		[109466] = true, -- curse of enfeeblement
-		
 		[710] = true,    -- banish
 		[1098] = true,   -- enslave demon
 		[5782] = true,   -- fear
+		[118619] = true, -- fear (again)
+		[171018] = true, -- meteor strike (abyssal stun)
 
 		                 -- metamorphosis:
 		[603] = true,    -- doom
 		[124915] = true, -- chaos wave
-		[116202] = true, -- aura of the elements
-		[116198] = true, -- aura of enfeeblement
 		
 		                 -- talents:
 		[5484] = true,   -- howl of terror
@@ -243,11 +224,9 @@ local whitelist = {
 
 		[546] = true,    -- water walking
 		[974] = true,    -- earth shield
-		[51945] = true,  -- earthliving
 		[61295] = true,  -- riptide
 		
 		[51514] = true,  -- hex
-		[76780] = true,  -- bind elemental
 	},
 	PRIEST = { -- 5.2 COMPLETE
 		[139] = true,    -- renew
@@ -269,14 +248,15 @@ local whitelist = {
 		
 		[589] = true,    -- shadow word: pain
 		[2944] = true,   -- devouring plague
+		[158831] = true, -- devouring plague
 		[14914] = true,  -- holy fire
 		[34914] = true,  -- vampiric touch
 		
 		                 -- talents:
 		[605] = true,    -- dominate mind
 		[114404] = true, -- void tendril root
-		[113792] = true, -- psychic terror
 		[129250] = true, -- power word: solace
+		[155361] = true, -- void entropy
 	},
 	ROGUE = { -- 5.2 COMPLETE
 		[703] = true,    -- garrote
@@ -284,14 +264,11 @@ local whitelist = {
 		[79140] = true,  -- vendetta
 		[84617] = true,  -- revealing strike
 		[89775] = true,  -- hemorrhage
-		[113746] = true, -- weakened armour
 		[122233] = true, -- crimson tempest
 
 		[2818] = true,   -- deadly poison
 		[3409] = true,   -- crippling poison
 		[115196] = true, -- debilitating poison
-		[5760] = true,   -- mind numbing poison
-		[115194] = true, -- mind paralysis
 		[8680] = true,   -- wound poison
 
 		[408] = true,    -- kidney shot
@@ -300,38 +277,33 @@ local whitelist = {
 		[2094] = true,   -- blind
 		[6770] = true,   -- sap
 		[26679] = true,  -- deadly throw
-		[51722] = true,  -- dismantle
 		[88611] = true,  -- smoke bomb
 
         [57934] = true,  -- tricks of the trade
 
                          -- talents:
         [112961] = true, -- leeching poison
-        [113952] = true, -- paralytic poison
-        [113953] = true, -- paralysis
-        [115197] = true, -- partial paralysis
         [137619] = true, -- marked for death
 	},
 	MONK = { -- 5.2 COMPLETE
 		[116189] = true, -- provoke taunt
 		[116330] = true, -- dizzying haze debuff
-		[123727] = true, -- keg smash - dizzying haze debuff
 		[123725] = true, -- breath of fire
 		[120086] = true, -- fists of fury stun
 		[122470] = true, -- touch of karma
 		[128531] = true, -- blackout kick debuff
 		[130320] = true, -- rising sun kick debuff
 
+		[138130] = true, -- storm, earth and fire 1
+		[138131] = true, -- storm, earth and fire 2
+
 		[116781] = true, -- legacy of the white tiger
 		[116844] = true, -- ring of peace
-		[117666] = true, -- legacy of the emperor group
-		[117667] = true, -- legacy of the emperor target (um.)
 		
 		[116849] = true, -- life cocoon
 		[132120] = true, -- enveloping mist
 		[119611] = true, -- renewing mist
 		
-		[117368] = true, -- grapple weapon
 		[116095] = true, -- disable
 		[115078] = true, -- paralysis
 	

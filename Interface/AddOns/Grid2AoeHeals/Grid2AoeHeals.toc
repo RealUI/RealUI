@@ -5,8 +5,8 @@
 ## Author: Michael
 ## Dependencies: Grid2
 ## DefaultState: disabled
-## Version: r734
-## X-Curse-Packaged-Version: r734
+## Version: r737
+## X-Curse-Packaged-Version: r737
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
