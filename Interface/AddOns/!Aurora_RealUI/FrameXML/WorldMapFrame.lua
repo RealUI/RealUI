@@ -158,5 +158,4 @@ function Map:OnEnable()
             DropDownList1:SetScale(UIParent:GetScale())
         end     
     end)
-    
 end
