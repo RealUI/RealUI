@@ -1,0 +1,18 @@
+## Interface: 60000
+## Title: Lib: TextTable-1.1
+## Notes: Creates simple table controls for tabular text data.
+## Author: Saiket, Torhal
+## Version: 1.1
+## X-Date: 2014-10-15T02:32:59Z
+## X-Category: Library
+## X-License: GPLv3
+## X-Email: jcallahan@curse.com
+## LoadOnDemand: 1
+## X-Curse-Packaged-Version: 6.0.2.1
+## X-Curse-Project-Name: LibTextTable-1.1
+## X-Curse-Project-ID: libtexttable-1-1
+## X-Curse-Repository-ID: wow/libtexttable-1-1/mainline
+
+LibStub\LibStub.lua
+
+Lib.xml
