@@ -135,7 +135,7 @@ local function CreatePowerBar(parent)
 end
 
 local function CreateTrinket(parent)
-    trinket = CreateFrame("Frame", nil, parent)
+    local trinket = CreateFrame("Frame", nil, parent)
     trinket:SetSize(22, 22)
     CreateBD(trinket, 0.5)
     trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -3, 0)

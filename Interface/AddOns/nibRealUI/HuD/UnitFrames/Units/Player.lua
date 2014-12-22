@@ -2,7 +2,6 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:GetModule(MODNAME)
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 local db, ndb, ndbc
 
 local oUF = oUFembed

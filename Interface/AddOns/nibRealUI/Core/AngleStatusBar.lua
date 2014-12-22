@@ -355,13 +355,13 @@ local function CreateAngleBar(self, width, height, parent, info)
     bar.row = row
 
     bar:SetScript("OnHide", function()
-        for r = 1, #bar.row do
-            bar.row[r]:Hide()
+        for r = 1, #row do
+            row[r]:Hide()
         end
     end)
     bar:SetScript("OnShow", function()
-        for r = 1, #bar.row do
-            bar.row[r]:Show()
+        for r = 1, #row do
+            row[r]:Show()
         end
     end)
 

@@ -341,12 +341,12 @@ function UnitFrames:PredictOverride(event, unit)
         AngleStatusBar:SetValue(hp.absorbBar, 1 - absorbPer, true)
     end
     --print("absorb", absorbTotal, absorbPer, 1 - absorbPer)
-    local atMax = (not(ndb.settings.reverseUnitFrameBars) and (healthCurr == healthMax))
+    local atMax = (not (ndb.settings.reverseUnitFrameBars) and (healthCurr == healthMax))
     if unit == "player" then
         if atMax then
             absorbBar:SetPoint("TOPRIGHT", health, -2, -1)
         else
-            absorbBar:SetPoint("TOPRIGHT", health, -(width - health.info.minWidth), -1)
+            absorbBar:SetPoint("TOPRIGHT", health.bar, "TOPLEFT", health.info.minWidth - 1, 0)
         end
     else
         if atMax then
