@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Author: Nibelheim
 ## Notes: RealUI core
-## Version: 8.1 r8
+## Version: 8.1 r9
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Bartender4, Grid2, Raven, SharedMedia
