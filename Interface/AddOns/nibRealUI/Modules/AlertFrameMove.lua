@@ -61,6 +61,11 @@ local function PostAlertMove(screenQuadrant)
         AlertFrame_FixAnchors()
         IsMoving = false
     end
+    local height = GroupLootContainer:GetHeight()
+    if (height > 10) then
+        -- This is to prevent the alert frames from creeping down the screen.
+        GroupLootContainer:SetHeight(1)
+    end
 end
 
 function AlertFrameMove:AlertFrame_SetLootAnchors(alertAnchor)
@@ -202,7 +207,7 @@ function AlertFrameMove:AlertFrame_SetDigsiteCompleteToastFrameAnchors(alertAnch
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonBuildingAlertFrameAnchors(alertAnchor)
-    print("AlertFrame_SetGarrisonBuildingAlertFrameAnchors", IsMoving)
+    --print("AlertFrame_SetGarrisonBuildingAlertFrameAnchors", IsMoving)
     local frame = GarrisonBuildingAlertFrame
     if frame and frame:IsShown() then
         frame:ClearAllPoints()
@@ -212,7 +217,7 @@ function AlertFrameMove:AlertFrame_SetGarrisonBuildingAlertFrameAnchors(alertAnc
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonMissionAlertFrameAnchors(alertAnchor)
-    print("AlertFrame_SetGarrisonMissionAlertFrameAnchors", IsMoving)
+    --print("AlertFrame_SetGarrisonMissionAlertFrameAnchors", IsMoving)
     local frame = GarrisonMissionAlertFrame
     if frame and frame:IsShown() then
         frame:ClearAllPoints()
@@ -222,7 +227,7 @@ function AlertFrameMove:AlertFrame_SetGarrisonMissionAlertFrameAnchors(alertAnch
 end
 
 function AlertFrameMove:AlertFrame_SetGarrisonFollowerAlertFrameAnchors(alertAnchor)
-    print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
+    --print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
     local frame = GarrisonFollowerAlertFrame
     if frame and frame:IsShown() then
         frame:ClearAllPoints()
