@@ -690,6 +690,7 @@ nibRealUI.auraTrackingDefaults = {
         anyone = true,
     },]]
 -- Free Buffs
+    {spell = 169686},   -- Unyielding Strikes
     {spell = 118038},   -- Die by the Sword
     {spell = 55694},    -- Enraged Regeneration
     {spell = 97463},    -- Rallying Cry

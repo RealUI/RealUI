@@ -100,52 +100,57 @@ local function CreateTags(parent)
 end
 
 local function CreatePowerBar(parent)
-    parent.Power = CreateFrame("StatusBar", nil, parent)
-    parent.Power:SetFrameStrata("MEDIUM")
-    parent.Power:SetFrameLevel(6)
-    parent.Power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
-    parent.Power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
-    parent.Power:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    parent.Power:SetStatusBarColor(db.overlay.colors.power["MANA"][1], db.overlay.colors.power["MANA"][2], db.overlay.colors.power["MANA"][3])
-    parent.Power.colorPower = true
-    parent.Power.PostUpdate = function(bar, unit, min, max)
+    power = CreateFrame("StatusBar", nil, parent)
+    power:SetFrameStrata("MEDIUM")
+    power:SetFrameLevel(6)
+    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
+    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
+    power:SetStatusBarTexture(nibRealUI.media.textures.plain)
+    power:SetStatusBarColor(db.overlay.colors.power["MANA"][1], db.overlay.colors.power["MANA"][2], db.overlay.colors.power["MANA"][3])
+    power.colorPower = true
+    power.PostUpdate = function(bar, unit, min, max)
         bar:SetShown(max > 0)
     end
 
-    local powerBG = CreateBD(parent.Power, 0)
+    local powerBG = CreateBD(power, 0)
     powerBG:SetFrameStrata("LOW")
+
+    parent.Power = power
 end
 
 local function CreateAltPowerBar(parent)
-    parent.AltPowerBar = CreateFrame("StatusBar", nil, parent)
-    parent.AltPowerBar:SetFrameStrata("MEDIUM")
-    parent.AltPowerBar:SetFrameLevel(6)
-    parent.AltPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 3)
-    parent.AltPowerBar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 5)
-    parent.AltPowerBar:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    -- AltPowerBar:SetStatusBarColor(db.overlay.colors.power["ALTERNATE"][1], db.overlay.colors.power["ALTERNATE"][2], db.overlay.colors.power["ALTERNATE"][3])
-    parent.AltPowerBar.colorPower = true
-    -- AltPowerBar.PostUpdate = function(bar, unit, min, max)
+    altPowerBar = CreateFrame("StatusBar", nil, parent)
+    altPowerBar:SetFrameStrata("MEDIUM")
+    altPowerBar:SetFrameLevel(6)
+    altPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 3)
+    altPowerBar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 5)
+    altPowerBar:SetStatusBarTexture(nibRealUI.media.textures.plain)
+    -- altPowerBar:SetStatusBarColor(db.overlay.colors.power["ALTERNATE"][1], db.overlay.colors.power["ALTERNATE"][2], db.overlay.colors.power["ALTERNATE"][3])
+    altPowerBar.colorPower = true
+    -- altPowerBar.PostUpdate = function(bar, unit, min, max)
     -- 	bar:SetShown(max > 0)
     -- end
 
-    local altpowerBG = CreateBD(parent.AltPowerBar, 0)
+    local altpowerBG = CreateBD(altPowerBar, 0)
     altpowerBG:SetFrameStrata("LOW")
+
+    parent.AltPowerBar = altPowerBar
 end
 
 local function CreateAuras(parent)
-    parent.Auras = CreateFrame("Frame", nil, parent)
-    parent.Auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, -1)
-    parent.Auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
-    parent.Auras:SetHeight(22)
-    parent.Auras["size"] = 24
-    parent.Auras["spacing"] = 1
-    parent.Auras["numBuffs"] = db.boss.buffCount
-    parent.Auras["numDebuffs"] = db.boss.debuffCount
-    parent.Auras["growth-x"] = "LEFT"
-    parent.Auras.disableCooldown = true
-    parent.Auras.CustomFilter = function(self, ...)
-        local _,icon,_,_,_,_,_,duration,timeLeft,caster,_,_,_,canApplyAura = ...
+    auras = CreateFrame("Frame", nil, parent)
+    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, -1)
+    auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
+    auras:SetHeight(22)
+    auras["size"] = 24
+    auras["spacing"] = 1
+    auras["numBuffs"] = db.boss.buffCount
+    auras["numDebuffs"] = db.boss.debuffCount
+    auras["growth-x"] = "LEFT"
+    auras.disableCooldown = true
+    auras.CustomFilter = function(self, ...)
+        --    unit, icon, name, rank, texture, count, dtype, duration, timeLeft, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
+        local _, icon, _, _, _, _, _, _, duration, timeLeft, caster, _, _, _, canApplyAura = ...
         if not caster then return false end
         --print("CustomFilter", self, icon, duration, timeLeft, caster, canApplyAura)
 
@@ -172,7 +177,7 @@ local function CreateAuras(parent)
             return isNPC
         end
     end
-    parent.Auras.PostCreateIcon = function(self, button)
+    auras.PostCreateIcon = function(self, button)
         --print("PostCreateIcon", self, button)
         button.icon:SetTexCoord(.08, .92, .08, .92)
         button.border = CreateFrame("Frame", nil, button)
@@ -190,7 +195,7 @@ local function CreateAuras(parent)
         local countY = ndbc.resolution == 1 and -1.5 or -2.5
         button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
     end
-    parent.Auras.PostUpdateIcon = function(self, unit, icon, index)
+    auras.PostUpdateIcon = function(self, unit, icon, index)
         --print("PostUpdateIcon", self, unit, icon, index)
         if not icon.sCooldown then
             icon.sCooldown, icon.timeStr = AttachStatusBar(icon, unit)
@@ -227,8 +232,10 @@ local function CreateAuras(parent)
             end)
         end
     end
-    -- parent.Auras.showType = true
-    -- parent.Auras.showStealableAuras = true
+    -- auras.showType = true
+    -- auras.showStealableAuras = true
+
+    parent.Auras = auras
 end
 
 local function CreateBoss(self)
