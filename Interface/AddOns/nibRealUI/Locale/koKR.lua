@@ -175,10 +175,8 @@ L["ms"] = "ms"
 L["FPS"] = "FPS"
 
 L["Date"] = "날짜"
-L["Wintergrasp Time Left"] = "겨울손아귀 호수 남은 시간:"
-L["No Wintergrasp Time Available"] = "현재 겨울손아귀 호수 불가능"
-L["Tol Barad Time Left"] = "톨 바라드 남은 시간:"
-L["No Tol Barad Time Available"] = "현재 톨 바라드 불가능"
+L["PVP Time Left"] = "%s Time Left"
+L["No PVP Time Available"] = "No %S Time Available"
 L["Pending Invites:"] = "Pending Invites:"
 
 L["Layout Changer"] = "레이아웃 변경"

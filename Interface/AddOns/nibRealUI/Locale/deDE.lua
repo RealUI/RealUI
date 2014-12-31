@@ -175,10 +175,8 @@ L["ms"] = "ms"
 L["FPS"] = "FPS"
 
 L["Date"] = "Datum"
-L["Wintergrasp Time Left"] = "Restzeit Tausendwintersee"
-L["No Wintergrasp Time Available"] = "Keine Zeit für Tausendwintersee verfügbar"
-L["Tol Barad Time Left"] = "Restzeit Tol Barad"
-L["No Tol Barad Time Available"] = "Keine Zeit für Tol Barad Time verfügbar"
+L["PVP Time Left"] = "%s Time Left"
+L["No PVP Time Available"] = "No %S Time Available"
 L["Pending Invites:"] = "Offene Einladungen:"
 
 L["Layout Changer"] = "Layout-Changer"

@@ -173,10 +173,8 @@ L["ms"] = "ms"
 L["FPS"] = "IPS"
 
 L["Date"] = "Date"
-L["Wintergrasp Time Left"] = "Temps Restant - Joug-d'Hiver:"
-L["No Wintergrasp Time Available"] = "Pas de temps pour le Joug-d'Hiver"
-L["Tol Barad Time Left"] = "Temps Restant - Tol Barad:"
-L["No Tol Barad Time Available"] = "Pas de temps restant pour Tol Barad"
+L["PVP Time Left"] = "%s Time Left"
+L["No PVP Time Available"] = "No %S Time Available"
 L["Pending Invites:"] = "Invitation en attente:"
 
 L["Layout Changer"] = "S\195\169lecteur de Disposition"
