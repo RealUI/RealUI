@@ -5,12 +5,12 @@ local MODNAME = "InfoLine"
 local InfoLine = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 local db, dbc, dbg, ndb, ndbc, ndbg
 
-local lsm = LibStub("LibSharedMedia-3.0")
-local ldb = LibStub("LibDataBroker-1.1")
+local LSM = LibStub("LibSharedMedia-3.0")
+local LDB = LibStub("LibDataBroker-1.1")
 local qTip = LibStub("LibQTip-1.0")
-local lif = LibStub("LibIconFonts-1.0")
-lif:RegisterPath([[Interface\AddOns\nibRealUI\Libs]])
-local octicons = lif:octicons()
+local LIF = LibStub("LibIconFonts-1.0")
+LIF:RegisterPath([[Interface\AddOns\nibRealUI\Libs]])
+local octicons = LIF:octicons()
 
 local _
 local min = math.min
@@ -721,7 +721,7 @@ function InfoLine:CreateFrames()
     tinsert(REALUI_STRIPE_TEXTURES, tex)
 
     --[[ template 
-    local test = ldb:NewDataObject("test", {
+    local test = LDB:NewDataObject("test", {
         type = "RealUI",
         text = "TEST 1 test",
         value = 1,
@@ -735,44 +735,46 @@ function InfoLine:CreateFrames()
     -- Start
     local startMenu = CreateFrame("Frame", "RealUIStartDropDown", UIParent, "UIDropDownMenuTemplate")
     local menuList = {
-        {text = "|cffffffffRealUI|r",
-            isTitle = true,
-            notCheckable = true,
-        },
         {text = L["RealUI Config"],
             func = function() nibRealUI:ShowConfigBar() end,
             notCheckable = true,
         },
-        {text = "Power Mode",
+        {text = L["Power Mode"],
             notCheckable = true,
             hasArrow = true,
             menuList = {
                 {
-                    text = "Economy",
+                    text = L["Economy"],
+                    tooltipTitle = L["Economy"],
+                    tooltipText = L["EconomyDesc"],
+                    tooltipOnButton = 1,
                     func = function() 
-                        print(L["PowerModeEconomy"])
                         nibRealUI:SetPowerMode(2)
                         nibRealUI:ReloadUIDialog()
                     end,
-                    checked = function() return nibRealUI.db.profile.settings.powerMode == 2 end,
+                    checked = function() return ndb.settings.powerMode == 2 end,
                 },
                 {
-                    text = "Normal",
+                    text = L["Normal"],
+                    tooltipTitle = L["Normal"],
+                    tooltipText = L["NormalDesc"],
+                    tooltipOnButton = 1,
                     func = function()
-                        print(L["PowerModeNormal"])
                         nibRealUI:SetPowerMode(1)
                         nibRealUI:ReloadUIDialog()
                     end,
-                    checked = function() return nibRealUI.db.profile.settings.powerMode == 1 end,
+                    checked = function() return ndb.settings.powerMode == 1 end,
                 },
                 {
-                    text = "Turbo",
+                    text = L["Turbo"],
+                    tooltipTitle = L["Turbo"],
+                    tooltipText = L["TurboDesc"],
+                    tooltipOnButton = 1,
                     func = function()
-                        print(L["PowerModeTurbo"])
                         nibRealUI:SetPowerMode(3)
                         nibRealUI:ReloadUIDialog()
                     end,
-                    checked = function() return nibRealUI.db.profile.settings.powerMode == 3 end,
+                    checked = function() return ndb.settings.powerMode == 3 end,
                 },
             },
         },
@@ -846,11 +848,19 @@ function InfoLine:CreateFrames()
             func = function() ToggleHelpFrame() end,
             notCheckable = true,
         },  
+        {text = "",
+            notCheckable = true,
+            disabled = true,
+        },
+        {text = CANCEL,
+            func = function() CloseDropDownMenus() end,
+            notCheckable = true,
+        },
     }
 
-    local start = ldb:NewDataObject("Start", {
+    local start = LDB:NewDataObject(L["Start"], {
         type = "RealUI",
-        text = "Start",
+        text = L["Start"],
         side = "left",
         index = 1,
         OnClick = function(self, ...)
@@ -870,7 +880,7 @@ function InfoLine:CreateFrames()
     -- Mail
 
     -- Guild Roster
-    local guild = ldb:NewDataObject(GUILD, {
+    local guild = LDB:NewDataObject(GUILD, {
         type = "RealUI",
         label = octicons["alignment-unalign"],
         labelFont = {octicons.font, barHeight * .6, "OUTLINE"},
@@ -891,7 +901,8 @@ function InfoLine:CreateFrames()
             local canOffNote = CanViewOfficerNote()
 
             local tooltip = qTip:Acquire(self, canOffNote and 6 or 5, "LEFT", "CENTER", "LEFT", "LEFT", "LEFT", canOffNote and "LEFT" or nil)
-            self.tooltip = tooltip
+            local r, g, b = nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3]
+            tooltip:SetHighlightTexture(r, g, b, 0.2)
             local lineNum, colNum
 
             lineNum, colNum = tooltip:AddHeader()
@@ -919,24 +930,25 @@ function InfoLine:CreateFrames()
                 local name, rank, _, lvl, _class, zone, note, offnote, isOnline, status, class, _, _, isMobile = GetGuildRosterInfo(i)
                 if isOnline or isMobile then
                     -- Remove server from name
-                    name = Ambiguate(name, "guild")
+                    local displayName = Ambiguate(name, "guild")
 
                     -- Status tag
+                    local curStatus = ""
                     if status > 0 then
-                        local curStatus = PlayerStatusValToStr[status] or ""
-                        name = curStatus .. name
+                        curStatus = PlayerStatusValToStr[status]
+                        displayName = curStatus .. displayName
                     end
 
                     -- Mobile tag
                     if isMobile and (not isOnline) then
-                        name = REMOTE_CHAT_ICON .. name
+                        displayName = REMOTE_CHAT_ICON .. displayName
                         zone = REMOTE_CHAT
                     end
 
                     if canOffNote then
-                        lineNum, colNum = tooltip:AddLine(name, lvl, zone, rank, note, offnote)
+                        lineNum, colNum = tooltip:AddLine(displayName, lvl, zone, rank, note, offnote)
                     else
-                        lineNum = tooltip:AddLine(name, lvl, zone, rank, note)
+                        lineNum = tooltip:AddLine(displayName, lvl, zone, rank, note)
                     end
 
                     -- Class color names
@@ -970,6 +982,7 @@ function InfoLine:CreateFrames()
             tooltip:SetAutoHideDelay(0.10, self)
 
             tooltip:Show()
+            self.tooltip = tooltip
         end,
         OnEvent = function(self, event, ...)
             --print("Guild: OnEvent", event, ...)
@@ -1010,7 +1023,7 @@ function InfoLine:CreateFrames()
         {slot = "MainHand", hasDura = true},
         {slot = "SecondaryHand", hasDura = true},
     }
-    local dura = ldb:NewDataObject(DURABILITY, {
+    local dura = LDB:NewDataObject(DURABILITY, {
         type = "RealUI",
         text = 1,
         side = "left",
@@ -1061,6 +1074,25 @@ function InfoLine:CreateFrames()
                     print(slotID, item.slot, round(per, 3), round(lowest, 3))
                 end
             end
+            if not self.alert then
+                self.alert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+            end
+            local alert = self.alert
+            if lowest < 0.1 and not alert.isHidden then
+                alert:SetSize(177, alert.Text:GetHeight() + 42);
+                alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
+                alert:SetPoint("BOTTOM", self, "TOP", 30, 18)
+                alert.CloseButton:SetScript("OnClick", function(self)
+                    alert:Hide()
+                    alert.isHidden = true
+                end);
+                alert.Text:SetText(L["Your items are almost broken."]);
+                alert.Text:SetWidth(145);
+                alert:Show();
+                alert.isHidden = false
+            else
+                alert:Hide()
+            end
             self.dataObj.text = round(lowest * 100) .. "%"
             self.timer = false
             UpdateElementWidth(self)
@@ -1076,7 +1108,7 @@ function InfoLine:CreateFrames()
     -- Currency
 
     -- XP / Rep
-    local xprep = ldb:NewDataObject(XP.."/"..REPUTATION_ABBR, {
+    local xprep = LDB:NewDataObject(L["XP/Rep"], {
         type = "RealUI",
         label = XP,
         text = 1,
@@ -1195,7 +1227,7 @@ function InfoLine:CreateFrames()
         self.isMilitary = GetCVar("timeMgrUseMilitaryTime") == "1"
         self.isLocal = GetCVar("timeMgrUseLocalTime") == "1"
     end
-    local clock = ldb:NewDataObject(TIMEMANAGER_TITLE, {
+    local clock = LDB:NewDataObject(TIMEMANAGER_TITLE, {
         type = "RealUI",
         text = 1,
         value = 1,
@@ -1222,30 +1254,58 @@ function InfoLine:CreateFrames()
             if qTip:IsAcquired(self) then return end
             --print("Clock: OnEnter", self.side, ...)
 
-            local tooltip = qTip:Acquire(self, 2, "LEFT", "RIGHT")
+            local tooltip = qTip:Acquire(self, 3, "LEFT", "CENTER", "RIGHT")
             self.tooltip = tooltip
             local lineNum, colNum
 
-            lineNum, colNum = tooltip:AddHeader()
-            tooltip:SetCell(lineNum, colNum, TIMEMANAGER_TOOLTIP_TITLE, nil, 2)
+            lineNum, colNum = tooltip:AddHeader(TIMEMANAGER_TOOLTIP_TITLE)
+            --tooltip:SetCell(lineNum, colNum, , nil, 2)
 
             -- Realm time
             local timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, false)
-            tooltip:AddLine(TIMEMANAGER_TOOLTIP_REALMTIME, strform(timeFormat, hour, min) .. " " .. suffix)
+            tooltip:AddLine(TIMEMANAGER_TOOLTIP_REALMTIME, " ", strform(timeFormat, hour, min) .. " " .. suffix)
 
             -- Local time
             timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, true)
-            tooltip:AddLine(TIMEMANAGER_TOOLTIP_LOCALTIME, strform(timeFormat, hour, min) .. " " .. suffix)
+            tooltip:AddLine(TIMEMANAGER_TOOLTIP_LOCALTIME, " ", strform(timeFormat, hour, min) .. " " .. suffix)
 
-            tooltip:AddLine(" ")
+            -- Date
+            lineNum, colNum = tooltip:AddLine() --L["Date:"], date(L["DateString"]))
+            tooltip:SetCell(lineNum, 1, L["Date:"])
+            tooltip:SetCell(lineNum, 2, date(L["DateString"]), "RIGHT", 2)
 
-            for i = 1, 3 do
-                local _, zone, isActive, canQueue, startTime, canEnter = GetWorldPVPAreaInfo(i)
-                if startTime then
-                    tooltip:AddLine(strform(L["PVP Time Left"], zone), ConvertSecondstoTime(startTime))
-                else
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, strform(L["No PVP Time Available"], zone), nil, 2)
+            -- PvP zones
+            if UnitLevel("player") >= 90 then
+                tooltip:AddLine(" ")
+                for i = 1, 2 do -- 1 == Wintergrasp, 2 == Tol Barad, 3 == Ashran
+                    local _, zone, _, _, startTime = GetWorldPVPAreaInfo(i)
+                    if startTime then
+                        lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, 1, strform(L["PVP starts in:"], zone), "LEFT", 2)
+                        tooltip:SetCell(lineNum, 3, ConvertSecondstoTime(startTime))
+                    else
+                        lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, 1, strform(L["PVP start time is not available."], zone), "LEFT", 2)
+                    end
+                end
+            end
+
+            -- Invites
+            if self.invites and self.invites > 0 then
+                tooltip:AddLine(" ")
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, strform(L["You have # pending invites"], self.invites), nil, 2)
+            end
+
+            -- World Bosses
+            local numSavedBosses = GetNumSavedWorldBosses()
+            if (UnitLevel("player") >= 90) and (numSavedBosses > 0) then
+                tooltip:AddLine(" ")
+                lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetCell(lineNum, colNum, L["World bosses defeated:"], nil, 2)
+                for i = 1, numSavedBosses do
+                    local bossName, bossID, bossReset = GetSavedWorldBossInfo(i)
+                    tooltip:AddLine(bossName, ConvertSecondstoTime(bossReset))
                 end
             end
 
@@ -1271,6 +1331,27 @@ function InfoLine:CreateFrames()
                 hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
                 hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
                 setTimeOptions(self)
+            elseif event == "CALENDAR_UPDATE_EVENT_LIST" then
+                if not self.alert then
+                    self.alert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+                end
+                local alert = self.alert
+                self.invites = CalendarEventGetNumInvites()
+                if self.invites > 0 and not alert.isHidden then
+                    alert:SetSize(177, alert.Text:GetHeight() + 42);
+                    alert:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 18)
+                    alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                    alert.CloseButton:SetScript("OnClick", function(self)
+                        alert:Hide()
+                        alert.isHidden = true
+                    end);
+                    alert.Text:SetText(GAMETIME_TOOLTIP_CALENDAR_INVITES);
+                    alert.Text:SetWidth(145);
+                    alert:Show();
+                    alert.isHidden = false
+                else
+                    alert:Hide()
+                end
             end
             local timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, self.isLocal)
             self.dataObj.value = strform(timeFormat, hour, min)
@@ -1278,6 +1359,7 @@ function InfoLine:CreateFrames()
             UpdateElementWidth(self)
         end,
         events = {
+            "CALENDAR_UPDATE_EVENT_LIST",
             "PLAYER_ENTERING_WORLD",
         },
     })
@@ -1461,7 +1543,7 @@ local function updatePositions()
 end
 
 function InfoLine:IterateObjects(event)
-    for name, dataObj in ldb:DataObjectIterator() do
+    for name, dataObj in LDB:DataObjectIterator() do
         self:LibDataBroker_DataObjectCreated(event, name, dataObj, true)
     end
 end
@@ -1475,7 +1557,7 @@ function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate
         end
     elseif dataObj.type == "data source" then
         --print(name, dataObj.type)
-        for k, v in ldb:pairs(dataObj) do
+        for k, v in LDB:pairs(dataObj) do
             --print(k, v)
         end
         if db.blocks.others[name].enabled then
@@ -1585,15 +1667,15 @@ function InfoLine:OnEnable()
     self:CreateFrames()
     self:IterateObjects("OnEnable")
     updatePositions()
-    ldb.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
+    LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
 end
 
 function InfoLine:OnDisable()
-    for name, dataObj in ldb:DataObjectIterator() do
+    for name, dataObj in LDB:DataObjectIterator() do
         if blocks[name] then blocks[name]:Hide() end
     end
     for k, v in pairs(blocks) do
         v:Hide()
     end
-    ldb.UnregisterCallback(self, "LibDataBroker_DataObjectCreated")
+    LDB.UnregisterCallback(self, "LibDataBroker_DataObjectCreated")
 end
