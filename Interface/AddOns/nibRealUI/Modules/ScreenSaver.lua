@@ -1,13 +1,10 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local Tablet20 = LibStub("Tablet-2.0")
 local db, ndb, ndbc
 
 local MODNAME = "ScreenSaver"
 local ScreenSaver = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn
-
-local Tablets = {}
 
 -- Options
 local options

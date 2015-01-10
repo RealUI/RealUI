@@ -1047,7 +1047,7 @@ function InfoLine:CreateFrames()
 
             for slotID = 1, #itemSlots do
                 local item = itemSlots[slotID]
-                if item.hasDura then
+                if item.hasDura and item.dura then
                     tooltip:AddLine(item.slot, round(item.dura * 100) .. "%")
                 end
             end
@@ -1058,20 +1058,25 @@ function InfoLine:CreateFrames()
             tooltip:Show()
         end,
         OnEvent = function(self, event, ...)
-            print("Durability: OnEvent", event, self.timer, ...)
-            if event == "UPDATE_INVENTORY_DURABILITY" and not self.timer then
-                self.timer = InfoLine:ScheduleTimer(self.dataObj.OnEvent, 1, self, "timerUpdate")
+            print("Durability1: OnEvent", event, self.timer, ...)
+            if event == "UPDATE_INVENTORY_DURABILITY" then
+                if self.timer then return end
+                print("Make timer")
+                self.timer = InfoLine:ScheduleTimer(self.dataObj.OnEvent, 1, self)
                 return
             end
+            print("Durability2: OnEvent", event, self.timer, ...)
             local lowest = 1
             for slotID = 1, #itemSlots do
                 local item = itemSlots[slotID]
                 if item.hasDura then
                     local min, max = GetInventoryItemDurability(slotID)
-                    local per = nibRealUI:GetSafeVals(min, max)
-                    item.dura = per
-                    lowest = per < lowest and per or lowest
-                    print(slotID, item.slot, round(per, 3), round(lowest, 3))
+                    if max then
+                        local per = nibRealUI:GetSafeVals(min, max)
+                        item.dura = per
+                        lowest = per < lowest and per or lowest
+                        print(slotID, item.slot, round(per, 3), round(lowest, 3))
+                    end
                 end
             end
             if not self.alert then
@@ -1326,17 +1331,16 @@ function InfoLine:CreateFrames()
         end,
         OnEvent = function(self, event, ...)
             --print("Clock: OnEvent", event, ...)
-            if event == "PLAYER_ENTERING_WORLD" then
-                InfoLine:ScheduleRepeatingTimer(self.dataObj.OnEvent, 1, self, "Update")
-                hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
-                hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
-                setTimeOptions(self)
-            elseif event == "CALENDAR_UPDATE_EVENT_LIST" then
-                if not self.alert then
+            if event then
+                if event == "PLAYER_ENTERING_WORLD" then
                     self.alert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+                    InfoLine:ScheduleRepeatingTimer(self.dataObj.OnEvent, 1, self)
+                    hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
+                    hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
+                    setTimeOptions(self)
                 end
                 local alert = self.alert
-                self.invites = CalendarEventGetNumInvites()
+                self.invites = CalendarGetNumPendingInvites()
                 if self.invites > 0 and not alert.isHidden then
                     alert:SetSize(177, alert.Text:GetHeight() + 42);
                     alert:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 18)
@@ -1344,10 +1348,10 @@ function InfoLine:CreateFrames()
                     alert.CloseButton:SetScript("OnClick", function(self)
                         alert:Hide()
                         alert.isHidden = true
-                    end);
-                    alert.Text:SetText(GAMETIME_TOOLTIP_CALENDAR_INVITES);
-                    alert.Text:SetWidth(145);
-                    alert:Show();
+                    end)
+                    alert.Text:SetText(GAMETIME_TOOLTIP_CALENDAR_INVITES)
+                    alert.Text:SetWidth(145)
+                    alert:Show()
                     alert.isHidden = false
                 else
                     alert:Hide()
