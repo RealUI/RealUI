@@ -16,19 +16,19 @@ function nibRealUI:MiniPatch(ver)
 			end
 		end
 		if IsAddOnLoaded("DBM-StatusBarTimers") then
-			if DBT_PersistentOptions["DBM"] then
-				DBT_PersistentOptions["DBM"]["HugeTimerY"] = 300
-				DBT_PersistentOptions["DBM"]["HugeBarXOffset"] = 0
-				DBT_PersistentOptions["DBM"]["Scale"] = 1
-				DBT_PersistentOptions["DBM"]["TimerX"] = 400
-				DBT_PersistentOptions["DBM"]["TimerPoint"] = "CENTER"
-				DBT_PersistentOptions["DBM"]["HugeBarYOffset"] = 9
-				DBT_PersistentOptions["DBM"]["HugeScale"] = 1
-				DBT_PersistentOptions["DBM"]["HugeTimerPoint"] = "CENTER"
-				DBT_PersistentOptions["DBM"]["BarYOffset"] = 9
-				DBT_PersistentOptions["DBM"]["HugeTimerX"] = -400
-				DBT_PersistentOptions["DBM"]["TimerY"] = 300
-				DBT_PersistentOptions["DBM"]["BarXOffset"] = 0
+			if DBT_AllPersistentOptions and DBT_AllPersistentOptions["DBM"] then
+				DBT_AllPersistentOptions["DBM"]["HugeTimerY"] = 300
+				DBT_AllPersistentOptions["DBM"]["HugeBarXOffset"] = 0
+				DBT_AllPersistentOptions["DBM"]["Scale"] = 1
+				DBT_AllPersistentOptions["DBM"]["TimerX"] = 400
+				DBT_AllPersistentOptions["DBM"]["TimerPoint"] = "CENTER"
+				DBT_AllPersistentOptions["DBM"]["HugeBarYOffset"] = 9
+				DBT_AllPersistentOptions["DBM"]["HugeScale"] = 1
+				DBT_AllPersistentOptions["DBM"]["HugeTimerPoint"] = "CENTER"
+				DBT_AllPersistentOptions["DBM"]["BarYOffset"] = 9
+				DBT_AllPersistentOptions["DBM"]["HugeTimerX"] = -400
+				DBT_AllPersistentOptions["DBM"]["TimerY"] = 300
+				DBT_AllPersistentOptions["DBM"]["BarXOffset"] = 0
 			end
 		end
 		if IsAddOnLoaded("BugSack") then

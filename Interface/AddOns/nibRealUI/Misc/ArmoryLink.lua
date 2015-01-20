@@ -6,7 +6,7 @@ L_POPUP_ARMORY = "Armory"
 -- Find the Realm and Local
 local realmName = string.lower(GetRealmName())
 local realmLocal = string.lower(GetCVar("portal"))
-local link
+local link, linkurl
 
 if realmLocal == "ru" then realmLocal = "eu" end
 

@@ -547,12 +547,11 @@ function nibRealUI:UpdateLockdown(...)
 	if not self.lockdownTimer then self.lockdownTimer = self:ScheduleRepeatingTimer("LockdownUpdates", 0.5) end
 end
 function nibRealUI:RegisterLockdownUpdate(id, fun, ...)
-	local retVal = ...
 	if not InCombatLockdown() then
 		self.oocFunctions[id] = nil
-		fun(retVal)
+		fun(...)
 	else
-		self.oocFunctions[id] = function() fun(retVal) end
+		self.oocFunctions[id] = function(...) fun(...) end
 	end
 end
 

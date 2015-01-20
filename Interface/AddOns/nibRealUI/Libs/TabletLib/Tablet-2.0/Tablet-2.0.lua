@@ -1120,7 +1120,7 @@ local function NewLine(self)
 		
 		local highlight = button:CreateTexture(nil, "BACKGROUND")
 		button.highlight = highlight
-			highlight:SetTexture("Interface\\AddOns\\nibRealUI\\Libs\\Libs\\TabletLib\\Highlight")
+            highlight:SetTexture([[Interface\Tooltips\UI-Tooltip-Background]]) --\\nibRealUI
 			highlight:SetVertexColor(unpack(RealUI.classColor))
 			highlight:SetBlendMode("ADD")
 			highlight:SetAllPoints(button)
@@ -1343,7 +1343,10 @@ local function AcquireFrame(self, registration, data, detachedData)
 				'bottom', 1
 			)
 		))
-		slider:SetThumbTexture("Interface\\AddOns\\nibRealUI\\Libs\\Libs\\TabletLib\\SliderButton")
+        local thumb = slider:CreateTexture()
+        thumb:SetTexture([[Interface\ChatFrame\ChatFrameColorSwatch]]) --\\nibRealUI
+        thumb:SetVertexColor(0.5, 0.5, 0.5)
+		slider:SetThumbTexture(thumb)
 		slider:SetScript("OnEnter", tooltip:GetScript("OnEnter"))
 		slider:SetScript("OnLeave", tooltip:GetScript("OnLeave"))
 		slider.tablet = tooltip
@@ -1360,20 +1363,19 @@ local function AcquireFrame(self, registration, data, detachedData)
 		end)
 		local sliderArrowTop = CreateFrame("Frame", nil, tooltip)
 		sliderArrowTop:SetPoint("TOPRIGHT", tooltip, "TOPRIGHT", -5, -5)
-		sliderArrowTop:SetWidth(16)
-		sliderArrowTop:SetHeight(16)
+		sliderArrowTop:SetSize(16, 12)
 		sliderArrowTop.bg = sliderArrowTop:CreateTexture()
 		sliderArrowTop.bg:SetAllPoints()
-		sliderArrowTop.bg:SetTexture("Interface\\AddOns\\nibRealUI\\Libs\\Libs\\TabletLib\\SliderArrow")
+		sliderArrowTop.bg:SetTexture([[Interface\PaperDollInfoFrame\StatSortArrows]]) --\\nibRealUI
+        sliderArrowTop.bg:SetTexCoord(0, 1, 0, 0.5)
 		tooltip.sliderArrowTop = sliderArrowTop
 		local sliderArrowBottom = CreateFrame("Frame", nil, tooltip)
 		sliderArrowBottom:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
-		sliderArrowBottom:SetWidth(16)
-		sliderArrowBottom:SetHeight(16)
+		sliderArrowBottom:SetSize(16, 12)
 		sliderArrowBottom.bg = sliderArrowBottom:CreateTexture()
 		sliderArrowBottom.bg:SetAllPoints()
-		sliderArrowBottom.bg:SetTexture("Interface\\AddOns\\nibRealUI\\Libs\\Libs\\TabletLib\\SliderArrow")
-		sliderArrowBottom.bg:SetTexCoord(0, 1, 1, 0)
+		sliderArrowBottom.bg:SetTexture([[Interface\PaperDollInfoFrame\StatSortArrows]]) --\\nibRealUI
+		sliderArrowBottom.bg:SetTexCoord(0, 1, 0.5, 1)
 		tooltip.sliderArrowBottom = sliderArrowBottom
 		
 		NewLine(tooltip)

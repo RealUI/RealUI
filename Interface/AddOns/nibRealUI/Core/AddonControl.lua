@@ -8,7 +8,7 @@ local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local RealUIAddOns = {
 	["DXE"] =						{isAce = true,	db = "DXEDB"},
-	["DBM"] =						{isAce = false,	db = "DBT_PersistentOptions"},
+	["DBM"] =						{isAce = false,	db = "DBT_AllPersistentOptions"},
 	["Masque"] =					{isAce = true,	db = "MasqueDB"},
 	["KuiNameplates"] =				{isAce = true,	db = "KuiNameplatesGDB"},
 	["Raven"] =						{isAce = true,	db = "RavenDB"},

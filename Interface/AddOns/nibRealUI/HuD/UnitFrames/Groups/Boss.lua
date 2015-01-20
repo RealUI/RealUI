@@ -100,7 +100,7 @@ local function CreateTags(parent)
 end
 
 local function CreatePowerBar(parent)
-    power = CreateFrame("StatusBar", nil, parent)
+    local power = CreateFrame("StatusBar", nil, parent)
     power:SetFrameStrata("MEDIUM")
     power:SetFrameLevel(6)
     power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
@@ -119,7 +119,7 @@ local function CreatePowerBar(parent)
 end
 
 local function CreateAltPowerBar(parent)
-    altPowerBar = CreateFrame("StatusBar", nil, parent)
+    local altPowerBar = CreateFrame("StatusBar", nil, parent)
     altPowerBar:SetFrameStrata("MEDIUM")
     altPowerBar:SetFrameLevel(6)
     altPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 3)
@@ -138,7 +138,7 @@ local function CreateAltPowerBar(parent)
 end
 
 local function CreateAuras(parent)
-    auras = CreateFrame("Frame", nil, parent)
+    local auras = CreateFrame("Frame", nil, parent)
     auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, -1)
     auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
     auras:SetHeight(22)
