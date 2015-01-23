@@ -8,7 +8,7 @@ local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local RealUIAddOns = {
 	["DXE"] =						{isAce = true,	db = "DXEDB"},
-	["DBM"] =						{isAce = false,	db = "DBT_AllPersistentOptions"},
+	["DBM"] =						{isAce = false,	db = "DBT_AllPersistentOptions", profKey = DBM_UsedProfile},
 	["Masque"] =					{isAce = true,	db = "MasqueDB"},
 	["KuiNameplates"] =				{isAce = true,	db = "KuiNameplatesGDB"},
 	["Raven"] =						{isAce = true,	db = "RavenDB"},
@@ -44,8 +44,7 @@ local function GetProfileInfo(addon)
 end
 
 -- Set Addon profiles
-local function SetProfileKey(addonDB, profile, isAce, ...)
-	local profKey = isAce and "profileKeys" or ...
+local function SetProfileKey(addonDB, profile, isAce, profKey)
 	if _G[addonDB] and _G[addonDB][profKey] then 
 		if isAce then
 			_G[addonDB][profKey][nibRealUI.key] = profile
@@ -63,8 +62,8 @@ function nibRealUI:SetProfileKeys()
 	for addon, data in pairs(RealUIAddOns) do
 		if db.addonControl[addon].profiles.base.use then
 			local profile = GetProfileInfo(addon)
-			local profKey = data.profKey or nil
-			SetProfileKey(data.db, profile, data.isAce, profKey)
+			local profKey = data.profKey or "profileKeys"
+			SetProfileKey(data.db, profile, data.isAce, data.profKey)
 		end
 	end
 end

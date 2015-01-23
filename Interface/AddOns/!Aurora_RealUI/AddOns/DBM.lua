@@ -129,7 +129,7 @@ function SkinDBM:styleGUI()
     end
 
     DBM:RegisterOnGuiLoadCallback(function()
-        print("DBMSkin: RegisterOnGuiLoadCallback")
+        --print("DBMSkin: RegisterOnGuiLoadCallback")
         styleDBM()
         hooksecurefunc(DBM_GUI, "UpdateModList", styleDBM)
         DBM_GUI_OptionsFrameBossMods:HookScript("OnShow", styleDBM)
@@ -151,7 +151,7 @@ function SkinDBM:styleGUI()
 
     local MAX_BUTTONS = 10
     hooksecurefunc(DBM_GUI_DropDown, "ShowMenu", function(self, values)
-        print("DBMSkin: ShowMenu", self, values)
+        --print("DBMSkin: ShowMenu", self, values)
         local button = self.buttons[1]
         local _, _, _, x = button:GetPoint()
         for i = 1, MAX_BUTTONS do
@@ -160,7 +160,7 @@ function SkinDBM:styleGUI()
                     local text = self.buttons[i]:GetText()
                     local t, j = text:find("Check:0")
                     text = text:sub(j+3)
-                    print("Button "..i.."text:", text)
+                    --print("Button "..i.."text:", text)
                 end
                 --button = self.buttons[i]
 
