@@ -91,17 +91,21 @@ C.themes["Blizzard_GuildUI"] = function()
 	F.ReskinScroll(GuildRosterContainerScrollBar)
 	F.ReskinScroll(GuildNewsContainerScrollBar)
 	F.ReskinScroll(GuildRewardsContainerScrollBar)
+	F.ReskinScroll(GuildInfoFrameInfoMOTDScrollFrameScrollBar)
 	F.ReskinScroll(GuildInfoDetailsFrameScrollBar)
 	F.ReskinScroll(GuildLogScrollFrameScrollBar)
 	F.ReskinScroll(GuildTextEditScrollFrameScrollBar)
+	F.ReskinScroll(GuildRecruitmentCommentInputFrameScrollFrameScrollBar)
 	F.ReskinScroll(GuildInfoFrameApplicantsContainerScrollBar)
 	F.ReskinDropDown(GuildRosterViewDropdown)
 	F.ReskinDropDown(GuildMemberRankDropdown)
 	F.ReskinInput(GuildRecruitmentCommentInputFrame)
+
 	GuildRecruitmentCommentInputFrame:SetWidth(312)
 	GuildRecruitmentCommentEditBox:SetWidth(284)
 	GuildRecruitmentCommentFrame:ClearAllPoints()
 	GuildRecruitmentCommentFrame:SetPoint("TOPLEFT", GuildRecruitmentLevelFrame, "BOTTOMLEFT", 0, 1)
+
 	F.ReskinCheck(GuildRosterShowOfflineButton)
 	for i = 1, 6 do
 		F.ReskinCheck(_G["GuildNewsFilterButton"..i])
@@ -189,20 +193,6 @@ C.themes["Blizzard_GuildUI"] = function()
 		F.CreateBG(bu.icon)
 	end
 
-	local tcoords = {
-		["WARRIOR"]     = {0.02, 0.23, 0.02, 0.23},
-		["MAGE"]        = {0.27, 0.47609375, 0.02, 0.23},
-		["ROGUE"]       = {0.51609375, 0.7221875, 0.02, 0.23},
-		["DRUID"]       = {0.7621875, 0.96828125, 0.02, 0.23},
-		["HUNTER"]      = {0.02, 0.23, 0.27, 0.48},
-		["SHAMAN"]      = {0.27, 0.47609375, 0.27, 0.48},
-		["PRIEST"]      = {0.51609375, 0.7221875, 0.27, 0.48},
-		["WARLOCK"]     = {0.7621875, 0.96828125, 0.27, 0.48},
-		["PALADIN"]     = {0.02, 0.23, 0.52, 0.73},
-		["DEATHKNIGHT"] = {0.27, .48, 0.52, .73},
-		["MONK"]		= {0.52, 0.71828125, 0.52, .73},
-	}
-
 	local UpdateIcons = function()
 		local index
 		local offset = HybridScrollFrame_GetOffset(GuildRosterContainer)
@@ -226,7 +216,8 @@ C.themes["Blizzard_GuildUI"] = function()
 			index = offset + i
 			local name, _, _, _, _, _, _, _, _, _, classFileName  = GetGuildRosterInfo(index)
 			if name and index <= visibleMembers and bu.icon:IsShown() then
-				bu.icon:SetTexCoord(unpack(tcoords[classFileName]))
+				local tcoords = CLASS_ICON_TCOORDS[classFileName]
+				bu.icon:SetTexCoord(tcoords[1] + 0.022, tcoords[2] - 0.025, tcoords[3] + 0.022, tcoords[4] - 0.025)
 				bu.bg:Show()
 			else
 				bu.bg:Hide()

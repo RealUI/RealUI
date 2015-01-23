@@ -84,6 +84,11 @@ MOD.BarGroupLayoutTemplate = { -- all the bar group settings involved in layout 
 	hideIcon = 0, hideClock = 0, hideBar = 0, hideSpark = 0, hideValue = 0, hideLabel = 0, hideCount = 0, showTooltips = 0
 }
 
+-- Check for active tooltip for a bar and update once per second
+local function BarTooltipUpdate()
+	if MOD.tooltipBar and MOD.Bar_OnUpdate then MOD.Bar_OnUpdate(MOD.tooltipBar) end
+end
+
 -- Initialize bar groups from those specified in the profile after, for example, a reloadUI or reset profile
 function MOD:InitializeBars()
 	local bgs = MOD.Nest_GetBarGroups()
@@ -99,6 +104,8 @@ function MOD:InitializeBars()
 		end
 	end
 	MOD:UpdateAllBarGroups() -- this is done last to get all positions updated correctly
+	MOD.tooltipBar = nil -- set when showing a tooltip for a bar
+	C_Timer.NewTicker(0.5, BarTooltipUpdate) -- update tooltips for bars when hovering over them
 end
 
 -- Finalize bar groups prior to logout, stripping out all values that match current defaults
@@ -667,24 +674,15 @@ function MOD:ReleaseBarGroup(bp)
 	end
 end
 
--- Show tooltip when entering a bar
-local function Bar_OnEnter(frame, bgName, barName, ttanchor)
-	if (ttanchor == "DEFAULT") and (GetCVar("UberTooltips") == "1") then
-		GameTooltip_SetDefaultAnchor(GameTooltip, frame)
-	else
-		if not ttanchor or (ttanchor == "DEFAULT") then ttanchor = "ANCHOR_BOTTOMLEFT" else ttanchor = "ANCHOR_" .. ttanchor end
-		GameTooltip:SetOwner(frame, ttanchor)
-	end
-	local bg = MOD.Nest_GetBarGroup(bgName)
-	if not bg then return end
-	local bar = MOD.Nest_GetBar(bg, barName)
-	if not bar then return end	
+-- Update a tooltip for a bar
+local function Bar_OnUpdate(bar)
 	local bat = bar.attributes
 	local tt = bat.tooltipType
 	local id = bat.tooltipID
 	local unit = bat.tooltipUnit
 	local spell = bat.tooltipSpell
 	local caster = bat.caster
+	GameTooltip:ClearLines() -- clear current tooltip contents
 	if tt == "text" then
 		GameTooltip:SetText(id)
 	elseif (tt == "inventory") or (tt == "weapon") then
@@ -729,10 +727,28 @@ local function Bar_OnEnter(frame, bgName, barName, ttanchor)
 	if caster and (caster ~= "") then GameTooltip:AddLine(L["<Applied by "] .. caster .. ">", 0, 0.8, 1, false) end
 	GameTooltip:Show()
 end
+MOD.Bar_OnUpdate = Bar_OnUpdate -- saved for tooltip updating
+
+-- Show tooltip when entering a bar
+local function Bar_OnEnter(frame, bgName, barName, ttanchor)
+	if (ttanchor == "DEFAULT") and (GetCVar("UberTooltips") == "1") then
+		GameTooltip_SetDefaultAnchor(GameTooltip, frame)
+	else
+		if not ttanchor or (ttanchor == "DEFAULT") then ttanchor = "ANCHOR_BOTTOMLEFT" else ttanchor = "ANCHOR_" .. ttanchor end
+		GameTooltip:SetOwner(frame, ttanchor)
+	end
+	local bg = MOD.Nest_GetBarGroup(bgName)
+	if not bg then return end
+	local bar = MOD.Nest_GetBar(bg, barName)
+	if bar then
+		MOD.tooltipBar = bar
+		Bar_OnUpdate(bar)
+	end
+end
 
 -- Hide tooltip when leaving a bar
 local function Bar_OnLeave(frame, bgName, barName, ttanchor)
-	GameTooltip:Hide()
+	MOD.tooltipBar = nil; GameTooltip:Hide()
 end
 
 -- Handle clicking on a bar for various purposes
@@ -984,8 +1000,8 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 			MOD.Nest_SetFlash(bar, false)
 		end
 		if not faded then -- fading is highest priority
-			if b.startReady then if b.readyAlpha then alpha = alpha * b.readyAlpha end -- this is a ready bar
-			elseif b.normalAlpha then alpha = alpha * b.normalAlpha end -- normal bar
+			if b.startReady or (b.enableReady and b.readyCharges and count and (count >= 1)) then if b.readyAlpha then alpha = alpha * b.readyAlpha end
+			elseif b.normalAlpha then alpha = alpha * b.normalAlpha end
 		end
 		MOD.Nest_SetAlpha(bar, alpha)
 	end
@@ -1042,10 +1058,10 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	local tt, ta, tc, ttype = aura[11], aura[12], aura[6], aura[4]
 	if (ttype == "Tracking") then checkTracking = bp.detectTracking end -- check if including tracking
 	if (ttype == "Totem") and not bp.includeTotems then return end -- check if including totems
-	local isStealable = (aura[7] == 1)
+	local isStealable = ((aura[7] == 1) or (aura[7] == true))
 	local isNPC = aura[18]
 	local isVehicle = aura[19]
-	local isBoss = (aura[15] ~= nil)
+	local isBoss = ((aura[15] == 1) or (aura[15] == true))
 	local isEnrage = (ttype == "")
 	local isMagic = (ttype == "Magic") and not isStealable
 	local isEffect = (tt == "effect")

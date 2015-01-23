@@ -155,6 +155,7 @@ local function SeparateNumber(number)
 
  local formatted = number
  while true do
+   local k
    formatted, k = string_gsub(formatted, "^(-?%d+)(%d%d%d)", SEPARATOR_REPLACE_PATTERN)
    if (k==0) then break end
  end

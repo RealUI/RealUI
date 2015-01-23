@@ -169,6 +169,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 				d.valuetext = Skada:FormatNumber(player.damagetakenspells[self.spellname].damage)
 				d.id = player.id
 				d.class = player.class
+				d.role = player.role
 
 				if player.damagetakenspells[self.spellname].damage > max then
 					max = player.damagetakenspells[self.spellname].damage
@@ -202,6 +203,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 											)
 				d.id = player.id
 				d.class = player.class
+				d.role = player.role
 
 				if player.damagetaken > max then
 					max = player.damagetaken

@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ]]
 local MAJOR_VERSION = "LibActionButton-1.0"
-local MINOR_VERSION = 57
+local MINOR_VERSION = 59
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
@@ -55,9 +55,11 @@ local str_match, format, tinsert, tremove = string.match, format, tinsert, tremo
 -- GLOBALS: GetItemIcon, GetItemCount, GetItemCooldown, IsEquippedItem, IsCurrentItem, IsUsableItem, IsConsumableItem, IsItemInRange
 -- GLOBALS: GetActionCharges, IsItemAction, GetSpellCharges
 -- GLOBALS: RANGE_INDICATOR, ATTACK_BUTTON_FLASH_TIME, TOOLTIP_UPDATE_TIME
+-- GLOBALS: DraenorZoneAbilityFrame, HasDraenorZoneAbility, GetLastDraenorSpellTexture
 
 local KeyBound = LibStub("LibKeyBound-1.0", true)
 local CBH = LibStub("CallbackHandler-1.0")
+local LBG = LibStub("LibButtonGlow-1.0", true)
 
 lib.eventFrame = lib.eventFrame or CreateFrame("Frame")
 lib.eventFrame:UnregisterAllEvents()
@@ -110,7 +112,7 @@ local ButtonRegistry, ActiveButtons, ActionButtons, NonActionButtons = lib.butto
 local Update, UpdateButtonState, UpdateUsable, UpdateCount, UpdateCooldown, UpdateTooltip, UpdateNewAction
 local StartFlash, StopFlash, UpdateFlash, UpdateHotkeys, UpdateRangeTimer, UpdateOverlayGlow
 local UpdateFlyout, ShowGrid, HideGrid, UpdateGrid, SetupSecureSnippets, WrapOnClick
-local ShowOverlayGlow, HideOverlayGlow, GetOverlayGlow, OverlayGlowAnimOutFinished
+local ShowOverlayGlow, HideOverlayGlow
 local HookCooldown
 
 local InitializeEventHandler, OnEvent, ForAllButtons, OnUpdate
@@ -1047,6 +1049,23 @@ function Update(self)
 
 	-- Update icon and hotkey
 	local texture = self:GetTexture()
+
+	-- Draenor zone button handling
+	self.draenorZoneDisabled = false
+	self.icon:SetDesaturated(false)
+	if self._state_type == "action" then
+		local action_type, id = GetActionInfo(self._state_action)
+		if ((action_type == "spell" or action_type == "companion") and DraenorZoneAbilityFrame and DraenorZoneAbilityFrame.baseName and not HasDraenorZoneAbility()) then
+			local name = GetSpellInfo(DraenorZoneAbilityFrame.baseName)
+			local abilityName = GetSpellInfo(id)
+			if name == abilityName then
+				texture = GetLastDraenorSpellTexture()
+				self.draenorZoneDisabled = true
+				self.icon:SetDesaturated(true)
+			end
+		end
+	end
+
 	if texture then
 		self.icon:SetTexture(texture)
 		self.icon:Show()
@@ -1270,62 +1289,16 @@ function UpdateHotkeys(self)
 	end
 end
 
-local function OverlayGlow_OnHide(self)
-	if self.animOut:IsPlaying() then
-		self.animOut:Stop()
-		OverlayGlowAnimOutFinished(self.animOut)
-	end
-end
-
-function GetOverlayGlow()
-	local overlay = tremove(lib.unusedOverlayGlows);
-	if not overlay then
-		lib.numOverlays = lib.numOverlays + 1
-		overlay = CreateFrame("Frame", "LAB10ActionButtonOverlay"..lib.numOverlays, UIParent, "ActionBarButtonSpellActivationAlert")
-		overlay.animOut:SetScript("OnFinished", OverlayGlowAnimOutFinished)
-		overlay:SetScript("OnHide", OverlayGlow_OnHide)
-	end
-	return overlay
-end
-
 function ShowOverlayGlow(self)
-	if self.overlay then
-		if self.overlay.animOut:IsPlaying() then
-			self.overlay.animOut:Stop()
-			self.overlay.animIn:Play()
-		end
-	else
-		self.overlay = GetOverlayGlow()
-		local frameWidth, frameHeight = self:GetSize()
-		self.overlay:SetParent(self)
-		self.overlay:ClearAllPoints()
-		--Make the height/width available before the next frame:
-		self.overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4)
-		self.overlay:SetPoint("TOPLEFT", self, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2)
-		self.overlay:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2)
-		self.overlay.animIn:Play()
+	if LBG then
+		LBG.ShowOverlayGlow(self)
 	end
 end
 
 function HideOverlayGlow(self)
-	if self.overlay then
-		if self.overlay.animIn:IsPlaying() then
-			self.overlay.animIn:Stop()
-		end
-		if self:IsVisible() then
-			self.overlay.animOut:Play()
-		else
-			OverlayGlowAnimOutFinished(self.overlay.animOut)
-		end
+	if LBG then
+		LBG.HideOverlayGlow(self)
 	end
-end
-
-function OverlayGlowAnimOutFinished(animGroup)
-	local overlay = animGroup:GetParent()
-	local actionButton = overlay:GetParent()
-	overlay:Hide()
-	tinsert(lib.unusedOverlayGlows, overlay)
-	actionButton.overlay = nil
 end
 
 function UpdateOverlayGlow(self)

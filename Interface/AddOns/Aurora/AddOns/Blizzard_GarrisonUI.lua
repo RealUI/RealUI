@@ -572,6 +572,15 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		portraitFrame.squareBG:SetBackdropBorderColor(color.r, color.g, color.b)
 	end)
 
+	-- Mechanic tooltip
+
+	if AuroraConfig.tooltips then
+		GarrisonMissionMechanicTooltip:SetBackdrop(nil)
+		GarrisonMissionMechanicFollowerCounterTooltip:SetBackdrop(nil)
+		F.CreateBDFrame(GarrisonMissionMechanicTooltip, .6)
+		F.CreateBDFrame(GarrisonMissionMechanicFollowerCounterTooltip, .6)
+	end
+
 	-- [[ Recruiter frame ]]
 
 	local GarrisonRecruiterFrame = GarrisonRecruiterFrame

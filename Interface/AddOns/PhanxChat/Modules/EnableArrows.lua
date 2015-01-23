@@ -51,7 +51,7 @@ local function IncrementHistorySelection(frame, increment)
 	local prev = frame:GetText()
 	local text = history[frame][target]
 	if text ~= prev then
-		frame:SetText(text)
+		frame:SetText(strtrim(text)) -- FUCK OFF SPACES
 		frame:SetCursorPosition(strlen(text))
 	end
 

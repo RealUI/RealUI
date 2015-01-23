@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2014, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2015, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 --[[ Generic Template for a ButtonBar with state control ]]

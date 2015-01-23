@@ -69,6 +69,7 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 				d.value = player.power[MANA].amount
 				d.valuetext = Skada:FormatNumber(player.power[MANA].amount)
 				d.class = player.class
+				d.role = player.role
 
 				if player.power[MANA].amount > max then
 					max = player.power[MANA].amount

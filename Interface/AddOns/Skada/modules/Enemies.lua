@@ -16,7 +16,8 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 		local player = mob.players[name]
 		if player then return player end
 		local _, playerClass = UnitClass(name)
-		player = {done = 0, taken = 0, class = playerClass}
+        local playerRole = UnitGroupRolesAssigned(name)
+		player = {done = 0, taken = 0, class = playerClass, role = playerRole}
 		mob.players[name] = player
 		return player
 	end
@@ -197,6 +198,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 					d.value = player.done
 					d.valuetext = Skada:FormatNumber(player.done)..(" (%02.1f%%)"):format(player.done / mob.done * 100)
 					d.class = player.class
+                    d.role = player.role
 
 					if player.done > max then
 						max = player.done
@@ -233,6 +235,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 					d.value = player.taken
 					d.valuetext = Skada:FormatNumber(player.taken)..(" (%02.1f%%)"):format(player.taken / mob.taken * 100)
 					d.class = player.class
+                    d.role = player.role
 
 					if player.taken > max then
 						max = player.taken

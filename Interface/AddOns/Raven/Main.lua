@@ -60,6 +60,7 @@ local tablePool = {} -- pool of available tables
 local activeCooldowns = {} -- spells/items that are currently on cooldown
 local internalCooldowns = {} -- tracking entries for internal cooldowns
 local spellEffects = {} -- tracking entries for spell effects
+local lastTime = 0 -- time when last update happened
 local elapsedTime = 0 -- time in seconds since last update
 local refreshTime = 0 -- time since last animation refresh
 local refreshThrottle = 0.04 -- max of around 25 times per second
@@ -360,8 +361,6 @@ function MOD:OnEnable()
 	MOD.frame = CreateFrame('Frame')
 	-- Set frame level high so visible above other addons
 	MOD.frame:SetFrameLevel(MOD.frame:GetFrameLevel() + 8)
-	-- Register the update method
-	MOD.frame:SetScript('OnUpdate', function(self, elapsed) MOD:Update(elapsed) end)
 	-- Register events called prior to starting play
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("UNIT_AURA")
@@ -409,7 +408,7 @@ local function InitializeRunes()
 	r[2] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy"
 	r[3] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost"
 	r[4] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Death"
-	t[1] = L["Blood Rune"]; t[2] = L["Unholy Rune"]; t[3] = L["Frost Rune"]; t[4] = L["Death Rune"]
+	t[1] = COMBAT_TEXT_RUNE_BLOOD; t[2] = COMBAT_TEXT_RUNE_UNHOLY; t[3] = COMBAT_TEXT_RUNE_FROST; t[4] = COMBAT_TEXT_RUNE_DEATH
 	for i = 1, 4 do MOD:SetIcon(t[i], r[i]) end
 end
 
@@ -419,6 +418,12 @@ local function InitializeIcons()
 	_, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
 	iconPotion = GetItemIcon(31677) -- icon for shared potions cooldown
 	iconElixir = GetItemIcon(28104) -- icon for shared elixirs cooldown
+end
+
+-- Updates will be driven by the new timer function, compute elapsed time since last update
+local function UpdateHandler()
+	local now = GetTime(); local elapsed = now - lastTime; lastTime = now
+	MOD:Update(elapsed)
 end
 
 -- Initialize when play starts, deferred to allow system initialization to complete
@@ -434,6 +439,7 @@ function MOD:PLAYER_ENTERING_WORLD()
 		MOD:InitializeInCombatBar() -- initialize special bar for cancelling buffs in combat
 		MOD:UpdateAllBarGroups() -- final update before starting event-based updates
 		enteredWorld = true; doUpdate = true
+		UpdateHandler(); C_Timer.NewTicker(0.0333, UpdateHandler)
 	end
 	collectgarbage("collect") -- recover deleted preset data
 end
@@ -1387,8 +1393,7 @@ function MOD:UpdateCooldowns()
 									for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 								end
 								if not locked then
-									local link = GetSpellLink(index, "spell")
-									AddCooldown(name, id, icon, start, duration, "spell link", link, "player", count)
+									AddCooldown(name, id, icon, start, duration, "spell id", id, "player", count)
 								end
 							end
 						end
@@ -1409,8 +1414,7 @@ function MOD:UpdateCooldowns()
 											for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 										end
 										if not locked then
-											local link = GetSpellLink(spellID)
-											AddCooldown(name, spellID, icon, start, duration, "spell link", link, "player")
+											AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player")
 										end
 									end
 								end
@@ -1433,8 +1437,7 @@ function MOD:UpdateCooldowns()
 						if not locked then
 							local n, _, icon = GetSpellInfo(name)
 							if n and n ~= "" then
-								local link = GetSpellLink(name)
-								AddCooldown(name, spellID, icon, start, duration, "spell link", link, "player")
+								AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player")
 							end
 						end
 					end
@@ -1455,8 +1458,7 @@ function MOD:UpdateCooldowns()
 						if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 							local name, _, icon = GetSpellInfo(index, "spell")
 							if name and name ~= "" then -- make sure we have a valid spell name
-								local link = GetSpellLink(index, "spell")
-								AddCooldown(name, id, icon, start, duration, "spell link", link, "player")
+								AddCooldown(name, id, icon, start, duration, "spell id", id, "player")
 							end
 						end
 					end
@@ -1471,9 +1473,8 @@ function MOD:UpdateCooldowns()
 				if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
 					local name, _, icon = GetSpellInfo(i, "pet")
 					if name and name ~= "" then
-						local hyperlink = GetSpellLink(i, "pet")
 						local _, spellID = GetSpellBookItemInfo(i, "pet")
-						AddCooldown(name, spellID, icon, start, duration, "spell link", hyperlink, "pet")
+						AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "pet")
 					end
 				end
 			end

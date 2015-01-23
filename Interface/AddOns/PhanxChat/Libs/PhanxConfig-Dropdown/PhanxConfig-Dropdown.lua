@@ -1,14 +1,20 @@
 --[[--------------------------------------------------------------------
 	PhanxConfig-Dropdown
-	Simple scrolling dropdown widget generator.
+	Simple scrolling dropdown widget generator. Requires LibStub.
 	Based on tekKonfig-Dropdown by Tekkub and OmniCC_Options by Tuller.
-	Requires LibStub.
-	https://github.com/phanx/PhanxConfigWidgets
-	Copyright (c) 2009-2014 Phanx. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
+	https://github.com/Phanx/PhanxConfig-Dropdown
+
+	Copyright (c) 2009-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Feel free to include copies of this file WITHOUT CHANGES inside World of
+	Warcraft addons that make use of it as a library, and feel free to use code
+	from this file in other projects as long as you DO NOT use my name or the
+	original name of this library anywhere in your project outside of an optional
+	credits line -- any modified versions must be renamed to avoid conflicts and
+	confusion. If you wish to do something else, or have questions about whether
+	you can do something, email me at the address listed above.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = tonumber(strmatch("$Revision: 187 $", "%d+"))
+local MINOR_VERSION = 20141222
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-Dropdown", MINOR_VERSION)
 if not lib then return end
@@ -94,7 +100,7 @@ local function ListButton_OnClick(self)
 
 	dropdown.valueText:SetText(self:GetText() or self.value)
 
-	local callback = dropdown.OnValueChanged or dropdown.Callback
+	local callback = dropdown.OnValueChanged
 	if callback then
 		callback(dropdown, self.value, self:GetText())
 	end
@@ -225,7 +231,7 @@ local function UpdateList(self)
 			button:Hide()
 		end
 
-		local callback = dropdown.OnListButtonChanged or dropdown.ListButtonCallback
+		local callback = dropdown.OnListButtonChanged
 		if callback then
 			callback(dropdown, button, item, selected)
 		end
@@ -315,17 +321,11 @@ end
 function methods:SetValue(value, text)
 	self.selected = value
 	if not text and self.items and type(self.items[1]) == "table" then
-		local found
 		for i = 1, #self.items do
-			local item = self.items[i]
-			if type(item) == "table" and item.value == value then
-				text = item.text
-				found = true
+			if self.items[i].value == value then
+				text = self.items[i].text
 				break
 			end
-		end
-		if not found then
-			text = CUSTOM
 		end
 	end
 	self.valueText:SetText(text or value)
@@ -368,13 +368,6 @@ function methods:Disable()
 	self.labelText:SetFontObject(GameFontDisable)
 	self.valueText:SetFontObject(GameFontDisableSmall)
 	self.button:Disable()
-end
-function methods:SetEnabled(enable)
-	if enable then
-		self:Enable()
-	else
-		self:Disable()
-	end
 end
 
 ------------------------------------------------------------------------

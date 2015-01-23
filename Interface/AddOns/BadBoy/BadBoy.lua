@@ -5,38 +5,35 @@
 local myDebug = false
 
 local reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam blocked, click to report!]|h|r <<<"
-local throttleMsg = "|cFF33FF99BadBoy|r: Please wait ~7 seconds between reports to prevent being disconnected (Blizzard bug)"
+local throttleMsg = "|cFF33FF99BadBoy|r: Please wait ~8 seconds between reports to prevent being disconnected (Blizzard bug)"
 do
 	local L = GetLocale()
 	if L == "frFR" then
-		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqué, cliquez pour signaler !]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Veuillez patienter ~7 secondes entre les signalements afin d'éviter d'être déconnecté (bug de Blizzard)"
+		reportMsg = "BadBoy : >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqué, cliquez pour signaler !]|h|r <<<"
+		throttleMsg = "|cFF33FF99BadBoy|r: Veuillez patienter ~8 secondes entre les signalements afin d'éviter d'être déconnecté (bug de Blizzard)"
 	elseif L == "deDE" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam geblockt, zum Melden klicken!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Bitte warte ca. 7 Sekunden zwischen Meldungen um einen Disconnect zu verhindern (Blizzard Bug)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Bitte warte ca. 8 Sekunden zwischen Meldungen um einen Disconnect zu verhindern (Blizzard Bug)"
 	elseif L == "zhTW" then
-		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[發出的垃圾訊息已被阻擋, 點擊以舉報 !]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: 請等候~7秒在回報時，為了防止斷線(暴雪的bug)"
+		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[垃圾訊息已被阻擋, 點擊以舉報 !]|h|r <<<"
+		throttleMsg = "|cFF33FF99BadBoy|r: 為了防止斷線，舉報請至少間隔~8秒 (暴雪的bug)"
 	elseif L == "zhCN" then
-		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[垃圾信息已被阻挡，点击举报!]|h|r"
-		throttleMsg = "|cFF33FF99BadBoy|r: 请在举报时等待~7 秒以防断线（暴雪的bug）"
-	elseif L == "esES" then
+		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[垃圾信息已被拦截，点击举报！]|h|r <<<"
+		throttleMsg = "|cFF33FF99BadBoy|r: 请在举报时等待~8 秒以防断线（暴雪的bug）"
+	elseif L == "esES" or L == "esMX" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqueado. Clic para informar!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Por favor espere ~7 segundos entre los informes para evitar que se desconecte (error de Blizzard)"
-	elseif L == "esMX" then
-		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqueado. Clic para informar!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Por favor espere ~7 segundos entre los informes para evitar que se desconecte (error de Blizzard)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Por favor espere ~8 segundos entre los informes para evitar que se desconecte (error de Blizzard)"
 	elseif L == "ruRU" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Спам заблокирован. Нажмите, чтобы сообщить!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Пожалуйста, подождите ~7 секунды между донесениями, чтобы избежать отключения (ошибка Blizzard)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Пожалуйста, подождите ~8 секунды между донесениями, чтобы избежать отключения (ошибка Blizzard)"
 	elseif L == "koKR" then
 
 	elseif L == "ptBR" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloqueado, clique para denunciar!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Por favor aguarde ~7 segundos entre denúncias para evitar ser desconectado (erro de Blizzard)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Por favor aguarde ~8 segundos entre denúncias para evitar ser desconectado (erro de Blizzard)"
 	elseif L == "itIT" then
 		reportMsg = "BadBoy: >>> |cfffe2ec8|Hbadboy:%s:%d:%d:%s|h[Spam bloccata, clic qui per riportare!]|h|r <<<"
-		throttleMsg = "|cFF33FF99BadBoy|r: Prego aspetta ~7 secondi tra una segnalazione e l'altra per far si che tu non venga disconnesso (bug della Blizzard)"
+		throttleMsg = "|cFF33FF99BadBoy|r: Prego aspetta ~8 secondi tra una segnalazione e l'altra per far si che tu non venga disconnesso (bug della Blizzard)"
 	end
 end
 
@@ -354,6 +351,7 @@ local instantReportList = {
 	"^sellingsomecsgocase", --Selling some CS:GO cases! PM ME!
 	"^sellingcsgocase", --Selling CS:GO cases! PM ME!
 	"^sellingcsgoitem", --{rt1} SELLING CS GO ITEMS FOR GOLD {rt1}
+	"^buyingcsgokey", --{rt3}Buying Cs:Go Key's for {rt4}4k{rt4} Per key! Buying high amount! Whisper for more information!{rt3}
 
 	--[[ Hearthstone ]]--
 	"^sellinghearthstonebeta", --SELLING HEARTHSTONE BETA KEY FOR GOLD /w ME YOUR PRICE
@@ -553,6 +551,7 @@ local instantReportList = {
 	"^wts.*website.*paypal.*deliver", --WTS Custom Guild Website + 12 months of maintenance + hosting + seo ($100 paypal of 100kg in game) (1-3 days to deliver custom guild website)
 	"^wts.*prepaid.*wowingamecurrency", --WTS Rchange/Transfer/Prepaid for WoW ingame currency! {rt4}
 	"^wts.*tiger.*rooster.*timecard", --WTS  [Reins of the Swift Spectral Tiger]240k[Magic Rooster Egg]120k and Prepaid Timecard,Panda [MOP.Faction] change and Race change Pst.
+	"highmaul.*edge.*dving[%.,]net", --{skull} Highmaul. Lootruns and achievments runs. Cutting Edge: Imperator's Fall. Be First! - Dving.net {skull}
 	"mount.*code.*dving[%.,]net", --Achievements, Mounts, Loot-Codes, PVE / PVP - Dving.net
 	"sale.*loot.*dving[%.,]net", --5.4 content on sale! Hardmodes and Loot Raids for Siege of Orgrimmar! - Dving.net
 	"arena.*help.*dving[%.,]net", --Offering arena/RBG help. Season 14. 2200/2400/2650 - Dving.net
@@ -587,6 +586,9 @@ local instantReportList = {
 	"wts.*%[.*%].*gametime.*days", --WTS [Armored Bloodwing] [Enchanted Fey Dragon] [Iron Skyreaver] and gametime30-60-90-180days{star}WOD{rt1}
 	"boost.*mount.*euro.*skype", --BoostFull Heroic 14/14 SoO Clear (Siege of Orgrimmar Heroic) + Your Class Loot + Garrosh Mount + [Heroic: Garrosh Hellscream] 179.95 euro - MORE Info @ Skype: MRD BOOST
 	"guarantee.*speed.*mount.*skype", --{rt4} {rt6} Invincible, Ashes of Al’ar, Mimiron’s Head in just a month, GUARANTEED! Speed farming of any mount! Skype: mmo-support3 {rt3}
+	"wts.*gold.*security.*powerlevel", --{MOON}WTS:655 Jewelry,Ring and Weapons{MOON} for all class! Moreover,{Star}WOD Challenge Mode:Gold{Star}is online,security and professional power_leveling for you.If you are interested in it please /w me!-XJIU
+	"^vk.*%[.*%].*gametime", --VK[Reins of the Swift Spectral Tiger][Enchanted Fey Dragon]{star}game time 90-180days{star}WOD{star}
+	"^bietengold.*mount.*skype", --{rt1}BIETEN GOLD/MOUNTS UND ITEMS. Skypename : mom-525{rt1}
 	--
 	"wowpvpcarry.*promotion", --Preorder any service from WoWPvPCarry now to save! Gear, titles, achievements, mounts, we do it all! Contact me to take advantage of promotions now!
 	"bestgear.*messageus.*preorder.*promotion", --Do you want to get the best gear and achieves in the upcoming expansion before everyone else? Message us now to preorder and save! Order while the promotions are still on!
@@ -621,7 +623,10 @@ local instantReportList = {
 	"wowst[o0]re[%.,]com.*pvp.*rbg", --wow-st0re.com Le n°1 du pl français depuis 2013 - SoO 25 NM/HM - PvP Arène / RBG côte - Bastonneurs - Armes Légendaires - [Défi d'or 9/9 à seulement 70k po!] http://wow-st0re.com 100% FR
 	"boost.*skype.*tridon", --WTS Big conquest cap Boost / Contact me Skype: Tridon.boosting
 	"help.*gold.*week.*skype", --{rt6}We help you with [Challenge Conqueror: Gold], CM's shutting down in less than a week. Right now available. Skype: CMhotBOOT{rt6}
-	"hurry.*draenor.*loot.*mount.*price.*info", --{rt1}{rt1} Hurry up! Draenor is coming {rt1}{rt1} Loot-Raids, Mount and Heirloom from Garrosh! Low price!!! {rt1}{rt1} /w for info {rt1}{rt1} 
+	"hurry.*draenor.*loot.*mount.*price.*info", --{rt1}{rt1} Hurry up! Draenor is coming {rt1}{rt1} Loot-Raids, Mount and Heirloom from Garrosh! Low price!!! {rt1}{rt1} /w for info {rt1}{rt1}
+	"elitistgaming[%.,]com.*gold.*best", --Elitist-gaming,com Selling CM:Gold 8/8 and normal,heroic,mythic Highmaul and Blackrock Foundry. Individual Blackhand kills or with the Ironhoof Destroyer mount! Done by some of the best players in the world! Everything is updated for Wod!
+	"^wts.*curve.*raid.*selfplay.*skype", --{square}{square} WTS[Ahead of the Curve: Imperator's Fall] {cross}Highmaul — Heroic Loot Run 7/7 {cross}. Raid today.SELFPLAY. Skype: ozyboost{square}
+	"rocketgaming.*service.*quality", --{rt3} ROCKETGAMING {rt3} Excellent players help you reach your 2k - #R1/ Gladiator success in RBG/2s/3s/5s! We offer you a serious service with quality as our priority!
 	--
 	"help.*2200.*fast.*pvp.*wisper.*info", --We will help you with  [Three's Company: 2200] . Fastest rating ever, up to 3 hours for geared pvp chars! Wisper for info.
 	"help.*gold.*challenge.*mount.*skype", --help with [Challenge Conqueror: Gold] from Challenge masters! get achiment. title, mount and xmog set for 2 hours! skype CMGoldMasters
@@ -776,6 +781,7 @@ local instantReportList = {
 	--{rt1}VERKAUFE GOLD Sehr Billig. Skypename : betz-500{rt1}
 	"verkaufen?gold.*skype", --{rt7}Wir Verkaufen Gold sehr Günstig. Skypename : betz-210{rt7}
 	"titaniumbay.*extra", ---= TitaniumBay =- Get 10 % extra {rt2}! Fast and safe delivery!
+	"titaniumbay.*livraison", ---= TitaniumBay =- Obtenez 10% supplémentaire! Livraison rapide et sûr!
 }
 
 --This is the replacement table. It serves to deobfuscate words by replacing letters with their English "equivalents".
@@ -892,18 +898,6 @@ local filter = function(_, event, msg, player, _, _, _, flag, channelId, channel
 	end
 	local debug = msg --Save original message format
 	msg = msg:lower() --Lower all text, remove capitals
-
-	--|cffff8000|Hgarrfollower:178:5:100:690:130:131:127:0:78:186:201:79|h[|TInterface\PVPFrame\PVP-Banner-Emblem-1.png:70:70|t]|h|r
-	--\124cffff8000\124Hgarrfollower:439:5:100:690:138:158:131:0:78:186:201:79\124h[Mila Kunis Leaked Photos CLICK!]\124h\124r
-	-- Trade chat image abuse filtering. Since we only filter public channels and followers aren't tradeable, just flat out filter it until Blizz fixes it.
-	-- Alternative would be an ever growing database and they keep changing the text for links that are just custom text with no image.
-	if msg:find("hgarrfollower:", nil, true) then
-		if BadBoyLog and not myDebug then
-			BadBoyLog("BadBoy", event, trimmedPlayer, debug)
-		end
-		result = true
-		return true
-	end
 
 	--They like to use raid icons to avoid detection
 	local icon = 0

@@ -260,6 +260,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.label = player.name
 				end
 				d.class = player.class
+				d.role = player.role
 				win.metadata.maxvalue = math.max(win.metadata.maxvalue, d.value)
 
 				nr = nr + 1

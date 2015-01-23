@@ -34,12 +34,18 @@ function mod:Create(window)
 		local bargroup = window.bargroup -- ticket 323
 
 		-- Add window buttons.
-		window.bargroup:AddButton(L["Configure"], "Interface\\Buttons\\UI-OptionsButton", "Interface\\Buttons\\UI-OptionsButton", function() Skada:OpenMenu(bargroup.win) end)
-		window.bargroup:AddButton(L["Reset"], "Interface\\Buttons\\UI-StopButton", "Interface\\Buttons\\UI-StopButton", function() Skada:ShowPopup() end)
-		window.bargroup:AddButton(L["Segment"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:SegmentMenu(bargroup.win) end)
-		--window.bargroup:AddButton(L["Mode"], "Interface\\Buttons\\UI-GuildButton-OfficerNote-Up", "Interface\\Buttons\\UI-GuildButton-OfficerNote-Up", function() Skada:ModeMenu(bargroup.win) end)
-		window.bargroup:AddButton(L["Mode"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:ModeMenu(bargroup.win) end)
-		window.bargroup:AddButton(L["Report"], "Interface\\Buttons\\UI-GuildButton-MOTD-Up", "Interface\\Buttons\\UI-GuildButton-MOTD-Up", function() Skada:OpenReportWindow(bargroup.win) end)
+		window.bargroup:AddButton(L["Configure"], L["Configure description"], "Interface\\Buttons\\UI-OptionsButton", "Interface\\Buttons\\UI-OptionsButton", function() Skada:OpenMenu(bargroup.win) end)
+		window.bargroup:AddButton(L["Reset"], L["Reset description"], "Interface\\Buttons\\UI-StopButton", "Interface\\Buttons\\UI-StopButton", function() Skada:ShowPopup() end)
+		window.bargroup:AddButton(L["Segment"], L["Segment description"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:SegmentMenu(bargroup.win) end)
+		window.bargroup:AddButton(L["Mode"], L["Mode description"], "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", "Interface\\Buttons\\UI-GuildButton-PublicNote-Up", function() Skada:ModeMenu(bargroup.win) end)
+		window.bargroup:AddButton(L["Report"], L["Report description"], "Interface\\Buttons\\UI-GuildButton-MOTD-Up", "Interface\\Buttons\\UI-GuildButton-MOTD-Up", function() Skada:OpenReportWindow(bargroup.win) end)
+		window.bargroup:AddButton(L["Stop"], L["Stop description"], "Interface\\Buttons\\Arrow-Down-Down", "Interface\\Buttons\\Arrow-Down-Down", function()
+            if Skada.current and Skada.current.stopped then
+                Skada:ResumeSegment();
+            elseif Skada.current then
+                Skada:StopSegment()
+            end
+        end)
 	end
 	window.bargroup.win = window
 	window.bargroup.RegisterCallback(mod, "AnchorMoved")
@@ -67,6 +73,17 @@ function mod:Create(window)
 			mod.class_icon_tcoords[class] = {(l+adj),(r-adj),(t+adj),(b-adj)}
 		end
 	end
+    
+    if not mod.role_icon_tcoords then
+        mod.role_icon_tcoords = {
+            DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
+            HEALER  = {0.3125, 0.63, 0.015625, 0.3125},
+            TANK    = {0, 0.296875, 0.3125, 0.63},
+            LEADER  = {0, 0.296875, 0.015625, 0.3125},
+            NONE    = ""
+        }
+    end
+    
 end
 
 -- Called by Skada windows when the window is to be destroyed/cleared.
@@ -274,7 +291,7 @@ function mod:Update(win)
 	-- Find out if we have icons in this update, and if so, adjust accordingly.
 	local hasicon = false
 	for i, data in ipairs(win.dataset) do
-		if (data.icon and not data.ignore) or (data.class and win.db.classicons) then
+		if (data.icon and not data.ignore) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 			hasicon = true
 		end
 	end
@@ -361,12 +378,16 @@ function mod:Update(win)
 				else
 					bar.missingclass = nil
 				end
-
-				if data.class and win.db.classicons and mod.class_icon_tcoords[data.class] then
+                
+				if data.role and data.role ~= "NONE" and win.db.roleicons then
+					bar:ShowIcon()
+                    --bar:SetIconWithCoord("Interface\\LFGFrame\\UI-LFG-ICON-ROLES", GetTexCoordsForRole(data.role))
+                    bar:SetIconWithCoord("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", mod.role_icon_tcoords[data.role])
+                elseif data.class and win.db.classicons and mod.class_icon_tcoords[data.class] then
 					bar:ShowIcon()
 					bar:SetIconWithCoord("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes", mod.class_icon_tcoords[data.class])
 				end
-
+                    
 				if data.color then
 					-- Explicit color from dataset.
 					bar:SetColorAt(0, data.color.r, data.color.g, data.color.b, data.color.a or 1)
@@ -590,6 +611,7 @@ function mod:ApplySettings(win)
 	g:ShowButton(L["Mode"], p.buttons.mode)
 	g:ShowButton(L["Segment"], p.buttons.segment)
 	g:ShowButton(L["Report"], p.buttons.report)
+	g:ShowButton(L["Stop"], p.buttons.stop)
 
 	-- Window
 	local inset = p.background.margin
@@ -804,6 +826,18 @@ function mod:AddDisplayOptions(win, options)
 			        	end,
 			},
 
+			roleicons = {
+			        type="toggle",
+			        name=L["Role icons"],
+			        desc=L["Use role icons where applicable."],
+			        order=33,
+			        get=function() return db.roleicons end,
+			        set=function()
+			        		db.roleicons = not db.roleicons
+		         			Skada:ApplySettings()
+			        	end,
+			},
+                
 			clickthrough = {
 			        type="toggle",
 			        name=L["Clickthrough"],
@@ -1038,6 +1072,17 @@ function mod:AddDisplayOptions(win, options)
 								get=function() return db.buttons.menu end,
 								set=function()
 										db.buttons.menu = not db.buttons.menu
+										Skada:ApplySettings()
+									end,
+						},
+						stop = {
+								type="toggle",
+								name=L["Stop"],
+                                description=L["Stop description"],
+								order=5,
+								get=function() return db.buttons.stop end,
+								set=function()
+										db.buttons.stop = not db.buttons.stop
 										Skada:ApplySettings()
 									end,
 						},

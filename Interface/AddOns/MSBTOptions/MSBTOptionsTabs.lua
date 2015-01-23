@@ -282,7 +282,7 @@ local function MediaTab_EditCustomFontSettingsButtonOnClick(this)
   local fontPath = MSBTProfiles.savedMedia.fonts[fontKey]
   fontPath = string.gsub(fontPath, DEFAULT_FONT_PATH, "")
 
-  objLocale = L.EDITBOXES["customFontPath"]
+  local objLocale = L.EDITBOXES["customFontPath"]
   EraseTable(configTable)
   configTable.defaultText = fontPath
   configTable.editboxLabel = objLocale.label
@@ -308,8 +308,8 @@ local function MediaTab_CreateCustomFontLine(this)
  frame:EnableMouse(false)
  
  -- Delete custom font button. 
- button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteCustomFont"]
+ local button = MSBTControls.CreateIconButton(frame, "Delete")
+ local objLocale = L.BUTTONS["deleteCustomFont"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(MediaTab_DeleteCustomFontButtonOnClick)
@@ -325,7 +325,7 @@ local function MediaTab_CreateCustomFontLine(this)
  controls[#controls+1] = button
 
  -- Font name font string.
- fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+ local fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
  fontString:SetPoint("LEFT", frame, "LEFT", 10, 0)
  fontString:SetJustifyH("LEFT")
  fontString:SetWidth(130)
@@ -368,7 +368,7 @@ end
 local function MediaTab_ValidateCustomSoundPath(soundPath)
  if (not soundPath or soundPath == "") then return L.MSG_INVALID_SOUND_FILE end
  local soundPathLower = string.lower(soundPath)
- if (not string.find(soundPathLower, ".ogg")) then
+ if (not string.find(soundPathLower, ".mp3") and not string.find(soundPathLower, ".ogg")) then
   return L.MSG_INVALID_SOUND_FILE
  end
 end
@@ -450,7 +450,7 @@ local function MediaTab_EditCustomSoundSettingsButtonOnClick(this)
   local soundPath = MSBTProfiles.savedMedia.sounds[soundKey]
   soundPath = string.gsub(soundPath, DEFAULT_SOUND_PATH, "")
 
-  objLocale = L.EDITBOXES["customSoundPath"]
+  local objLocale = L.EDITBOXES["customSoundPath"]
   EraseTable(configTable)
   configTable.defaultText = soundPath
   configTable.editboxLabel = objLocale.label
@@ -476,8 +476,8 @@ local function MediaTab_CreateCustomSoundLine(this)
  frame:EnableMouse(false)
  
  -- Delete custom sound button. 
- button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteCustomSound"]
+ local button = MSBTControls.CreateIconButton(frame, "Delete")
+ local objLocale = L.BUTTONS["deleteCustomSound"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(MediaTab_DeleteCustomSoundButtonOnClick)
@@ -1264,7 +1264,7 @@ local function ScrollAreasTab_CreateLine(this)
  controls[#controls+1] = checkbox
 
  -- Delete scroll area button. 
- button = MSBTControls.CreateIconButton(frame, "Delete")
+ local button = MSBTControls.CreateIconButton(frame, "Delete")
  objLocale = L.BUTTONS["deleteScrollArea"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
@@ -1794,8 +1794,8 @@ local function EventsTab_CreateLine(this)
  controls[#controls+1] = checkbox
  
  -- Event settings button. 
- button = MSBTControls.CreateIconButton(frame, "Configure")
- objLocale = L.BUTTONS["eventSettings"]
+ local button = MSBTControls.CreateIconButton(frame, "Configure")
+ local objLocale = L.BUTTONS["eventSettings"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(EventsTab_SettingsButtonOnClick)
@@ -1858,7 +1858,7 @@ local function EventsTab_Create()
 
  -- Move all button.
  local button = MSBTControls.CreateOptionButton(tabFrame)
- objLocale = L.BUTTONS["moveAll"]
+ local objLocale = L.BUTTONS["moveAll"]
  button:Configure(15, objLocale.label, objLocale.tooltip)
  button:SetPoint("BOTTOMLEFT", texture, "TOPLEFT", 5, 5)
  button:SetClickHandler(
@@ -2193,7 +2193,7 @@ local function TriggersTab_CreateLine(this)
  controls[#controls+1] = checkbox
  
  -- Delete trigger button. 
- button = MSBTControls.CreateIconButton(frame, "Delete")
+ local button = MSBTControls.CreateIconButton(frame, "Delete")
  objLocale = L.BUTTONS["deleteTrigger"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
@@ -2359,7 +2359,7 @@ local function SpamTab_Create()
 
  -- Heal threshold slider.
  local slider = MSBTControls.CreateSlider(tabFrame)
- objLocale = L.SLIDERS["healThreshold"]
+ local objLocale = L.SLIDERS["healThreshold"]
  slider:Configure(150, objLocale.label, objLocale.tooltip)
  slider:SetPoint("TOPLEFT", tabFrame, "TOPLEFT", 5, -10)
  slider:SetMinMaxValues(0, 100000)
@@ -2442,7 +2442,7 @@ local function SpamTab_Create()
  controls.powerThrottlingSlider = slider
  
  -- Hide skills checkbox.
- checkbox = MSBTControls.CreateCheckbox(tabFrame)
+ local checkbox = MSBTControls.CreateCheckbox(tabFrame)
  objLocale = L.CHECKBOXES["hideSkills"]
  checkbox:Configure(28, objLocale.label, objLocale.tooltip)
  checkbox:SetPoint("TOPLEFT", tabFrame, "TOPLEFT", 5, -130)
@@ -2563,7 +2563,7 @@ local function SpamTab_Create()
  controls.groupNumbersCheckbox = checkbox
 
  -- Merge exclusions button.
- button = MSBTControls.CreateOptionButton(tabFrame)
+ local button = MSBTControls.CreateOptionButton(tabFrame)
  objLocale = L.BUTTONS["mergeExclusions"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("BOTTOMLEFT", tabFrame, "BOTTOMLEFT", 5, 15)

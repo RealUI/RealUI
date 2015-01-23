@@ -4,12 +4,6 @@
 -- All rights reserved
 
    Auras module for Kui_Nameplates core layout.
-
-   Applications fire twice for multiple reasons.
-    GUIDStore & PostTarget on a newly displayed frame
-    COMBAT_LOG_EVENT & UNIT_AURA on party targets/other valid units
-    UPDATE_MOUSEOVER_UNIT fires twice when clicking on targets
-    PostTarget + UPDATE_MOUSEOVER_UNIT x2 when clicking targets
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local spelllist = LibStub('KuiSpellList-1.0')
@@ -48,13 +42,13 @@ end
 local function ArrangeButtons(self)
 	local pv, pc
 	self.visible = 0
-	
+
 	for k,b in ipairs(self.buttons) do
 		if b:IsShown() then
 			self.visible = self.visible + 1
-			
+
 			b:ClearAllPoints()
-			
+
 			if pv then
 				if (self.visible-1) % (self.frame.trivial and 3 or 5) == 0 then
 					-- start of row
@@ -69,7 +63,7 @@ local function ArrangeButtons(self)
 				b:SetPoint('BOTTOMLEFT')
 				pc = b
 			end
-			
+
 			pv = b
 		end
 	end
@@ -97,7 +91,7 @@ do
 	DoPulsateAura = function(button)
 		if button.fading or not button.doPulsate then return end
 		button.fading = true
-	
+
 		if button.faded then
 			kui.frameFade(button, {
 				startAlpha = .5,
@@ -127,7 +121,7 @@ local function OnAuraUpdate(self, elapsed)
 
 	if self.elapsed <= 0 then
 		local timeLeft = self.expirationTime - GetTime()
-		
+
 		if db_display.pulsate then
 			if self.doPulsate and timeLeft > FADE_THRESHOLD then
 				-- reset pulsating status if the time is extended
@@ -140,14 +134,14 @@ local function OnAuraUpdate(self, elapsed)
 		end
 
 		if db_display.timerThreshold > -1 and
-		   timeLeft > db_display.timerThreshold
+            timeLeft > db_display.timerThreshold
 		then
 			self.time:Hide()
 		else
 			local timeLeftS
 
 			if db_display.decimal and
-			   timeLeft <= 1 and timeLeft > 0
+                timeLeft <= 1 and timeLeft > 0
 			then
 				-- decimal places for the last second
 				timeLeftS = string.format("%.1f", timeLeft)
@@ -165,11 +159,11 @@ local function OnAuraUpdate(self, elapsed)
 				-- white text
 				self.time:SetTextColor(1,1,1)
 			end
-			
+
 			self.time:SetText(timeLeftS)
 			self.time:Show()
 		end
-		
+
 		if timeLeft < 0 then
 			-- used when a non-targeted mob's auras timer gets below 0
 			-- but the combat log hasn't reported that it has faded yet.
@@ -178,9 +172,9 @@ local function OnAuraUpdate(self, elapsed)
 			StopPulsatingAura(self)
 			return
 		end
-		
+
 		if db_display.decimal and
-		   timeLeft <= 2 and timeLeft > 0
+            timeLeft <= 2 and timeLeft > 0
 		then
 			-- faster updates in the last two seconds
 			self.elapsed = .05
@@ -223,20 +217,20 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 			end
 		end
 	end
-	
+
 	if not button then
 		-- ... or create a new button
 		button = CreateFrame('Frame', nil, self)
 		button:Hide()
-		
-		button.icon = button:CreateTexture(nil, 'ARTWORK') 
-		
+
+		button.icon = button:CreateTexture(nil, 'ARTWORK')
+
 		button.time = self.frame:CreateFontString(button,{
 			size = 'large' })
 		button.time:SetJustifyH('LEFT')
 		button.time:SetPoint('TOPLEFT', -2, 4)
 		button.time:Hide()
-		
+
 		button.count = self.frame:CreateFontString(button, {
 			outline = 'OUTLINE'})
 		button.count:SetJustifyH('RIGHT')
@@ -248,11 +242,11 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 
 		button.icon:SetPoint('TOPLEFT', 1, -1)
 		button.icon:SetPoint('BOTTOMRIGHT', -1, 1)
-		
+
 		button.icon:SetTexCoord(.1, .9, .2, .8)
-		
+
 		tinsert(self.buttons, button)
-		
+
 		button:SetScript('OnHide', OnAuraHide)
 		button:SetScript('OnShow', OnAuraShow)
 	end
@@ -270,7 +264,7 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 		button.time = self.frame:CreateFontString(button.time, {
 			reset = true, size = 'large' })
 	end
-	
+
 	button.icon:SetTexture(icon)
 
 	if count > 1 and not self.frame.trivial then
@@ -292,7 +286,7 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 	button.expirationTime = expirationTime
 	button.spellId = spellId
 	button.elapsed = 0
-	
+
 	self.spellIds[spellId] = button
 
 	return button
@@ -302,12 +296,12 @@ function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
 
 	name = strlower(name) or nil
 	if  name and
-	   (not db_behav.useWhitelist or
-	    (whitelist[spellid] or whitelist[name])) and
-	   (duration >= db_display.lengthMin) and
-	   (db_display.lengthMax == -1 or (
-	   	duration > 0 and
-	    duration <= db_display.lengthMax))
+        (not db_behav.useWhitelist or
+        (whitelist[spellid] or whitelist[name])) and
+        (duration >= db_display.lengthMin) and
+        (db_display.lengthMax == -1 or (
+        duration > 0 and
+        duration <= db_display.lengthMax))
 	then
 		local button = self:GetAuraButton(spellid, icon, count, duration, expirationTime)
 		self:Show()

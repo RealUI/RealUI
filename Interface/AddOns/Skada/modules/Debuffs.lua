@@ -152,6 +152,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 				d.label = player.name
 				d.valuetext = ("%02.1f%% / %u"):format(uptime / maxtime * 100, auracount)
 				d.class = player.class
+				d.role = player.role
 
 				if uptime > max then
 					max = uptime

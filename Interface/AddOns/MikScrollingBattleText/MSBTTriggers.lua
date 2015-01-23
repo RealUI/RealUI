@@ -216,9 +216,9 @@ local function CreateConditionFuncs()
   buffInactive = function (f, t, v) return not UnitBuff("player", v) and true or false end,
   currentCP = function (f, t, v) return f(GetComboPoints("player"), v) end,
   currentPower = function (f, t, v) return f(UnitMana("player"), v) end,
-  inCombat = function (f, t, v) return f(UnitAffectingCombat("player") == 1 and true or false, v) end,
+  inCombat = function (f, t, v) return f(UnitAffectingCombat("player") == true and true or false, v) end,
   recentlyFired = function (f, t, v) return f(GetTime() - firedTimes[t], v) end,
-  trivialTarget = function (f, t, v) return f(UnitIsTrivial("target") == 1 and true or false, v) end,
+  trivialTarget = function (f, t, v) return f(UnitIsTrivial("target") == true and true or false, v) end,
   unavailableSkill = function (f, t, v) return IsSkillUnavailable(v) and true or false end,
   warriorStance = function (f, t, v) if (playerClass == "WARRIOR") then return f(GetShapeshiftForm(true), v) end end,
   zoneName = function (f, t, v) return f(GetZoneText(), v) end,
@@ -715,7 +715,7 @@ local function HandleCooldowns(cooldownType, cooldownID, cooldownName, effectTex
   -- Display the fired triggers if none of the exceptions are true.
   local recipientName = playerName
   for triggerSettings in pairs(triggersToFire) do
-   if (not TestExceptions(triggerSettings)) then DisplayTrigger(triggerSettings, nil, nil, recipientName, playerClass, skillName, nil, nil, effectTexture) end
+   if (not TestExceptions(triggerSettings)) then DisplayTrigger(triggerSettings, nil, nil, recipientName, playerClass, cooldownName, nil, nil, effectTexture) end
   end
  end -- Triggers to fire?
 end

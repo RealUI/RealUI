@@ -78,4 +78,9 @@ tinsert(C.themes["Aurora"], function()
 
 		tooltipFrame.numTraitsStyled = numTraitsStyled
 	end)
+
+	-- Mission tooltip
+
+	restyleGarrisonFollowerTooltipTemplate(FloatingGarrisonMissionTooltip)
+	F.ReskinClose(FloatingGarrisonMissionTooltip.CloseButton)
 end)

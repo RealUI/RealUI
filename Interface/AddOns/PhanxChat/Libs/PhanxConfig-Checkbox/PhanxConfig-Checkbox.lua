@@ -1,14 +1,20 @@
 --[[--------------------------------------------------------------------
 	PhanxConfig-Checkbox
-	Simple checkbox widget generator.
+	Simple checkbox widget generator. Requires LibStub.
 	Originally based on tekKonfig-Checkbox by Tekkub.
-	Requires LibStub.
-	https://github.com/phanx/PhanxConfigWidgets
-	Copyright (c) 2009-2014 Phanx. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
+	https://github.com/Phanx/PhanxConfig-Checkbox
+
+	Copyright (c) 2009-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Feel free to include copies of this file WITHOUT CHANGES inside World of
+	Warcraft addons that make use of it as a library, and feel free to use code
+	from this file in other projects as long as you DO NOT use my name or the
+	original name of this library anywhere in your project outside of an optional
+	credits line -- any modified versions must be renamed to avoid conflicts and
+	confusion. If you wish to do something else, or have questions about whether
+	you can do something, email me at the address listed above.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = tonumber(strmatch("$Revision: 176 $", "%d+"))
+local MINOR_VERSION = 20141201
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-Checkbox", MINOR_VERSION)
 if not lib then return end
@@ -22,7 +28,7 @@ function scripts:OnClick()
 	PlaySound(checked and "igMainMenuOptionCheckBoxOn" or "igMainMenuOptionCheckBoxOff")
 	self:GetScript("OnLeave")(self)
 
-	local callback = self.Callback or self.OnValueChanged
+	local callback = self.OnValueChanged
 	if callback then
 		callback(self, checked)
 	end

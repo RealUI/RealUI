@@ -51,6 +51,7 @@ Skada:AddLoadableModule("TotalHealing", function(Skada, L)
 				d.backgroundcolor = red
 				d.backgroundwidth = mypercent
 				d.class = player.class
+                d.role = player.role
 
 				nr = nr + 1
 			end

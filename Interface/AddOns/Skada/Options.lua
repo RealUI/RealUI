@@ -22,6 +22,7 @@ Skada.windowdefaults = {
 	classcolorbars = true,
 	classcolortext = false,
 	classicons = true,
+	roleicons = false,
 
 	buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 
@@ -42,7 +43,8 @@ Skada.windowdefaults = {
 
 	display = "bar",
 	snapto = true,
-	scale = 1
+	scale = 1,
+    version = 1
 }
 
 local windefaultscopy = {}
@@ -71,6 +73,7 @@ Skada.defaults = {
 		mergepets=true,
 		feed = "",
 		showtotals = false,
+        autostop = false,
 
 		modules = {},
 		columns = {},
@@ -436,6 +439,16 @@ Skada.options = {
 							get=function() return Skada.db.profile.tentativecombatstart end,
 							set=function() Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart end,
 					},
+                
+					autostop = {
+							type="toggle",
+							name=L["Autostop"],
+							desc=L["Autostop description"],
+							order=10,
+							get=function() return Skada.db.profile.autostop end,
+							set=function() Skada.db.profile.autostop = not Skada.db.profile.autostop end,
+					},
+                
 				}
 			},
 			columns = {

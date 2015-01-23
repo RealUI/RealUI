@@ -41,7 +41,11 @@ MOD.conditionTests = {
 		checkHealth = nil, minHealth = 100, checkPower = nil, minPower = 100, checkFamily = nil, family = nil, checkSpec = nil, spec = nil },
 	["Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
 		checkPower = nil, minPower = 100, classification = "normal" },
+	["Target's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
+		checkPower = nil, minPower = 100, classification = "normal" },
 	["Focus Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
+		checkPower = nil, minPower = 100, classification = "normal" },
+	["Focus's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
 		checkPower = nil, minPower = 100, classification = "normal" },
 	["All Buffs"] = { enable = false, unit = "player", auras = nil, isMine = nil, toggle = false },
 	["Any Buffs"] = { enable = false, unit = "player", auras = nil, isMine = nil, toggle = false },
@@ -59,7 +63,7 @@ MOD.conditionTests = {
 	["Item Ready"] = { enable = false, item = nil, toggle = nil, checkCount = nil, count = 1, checkCharges = nil, charges = 1 },
 }
 
-MOD.testOrder = { "Player Status", "Pet Status", "Target Status", "Focus Status", "All Buffs", "Any Buffs", "Buff Time Left",
+MOD.testOrder = { "Player Status", "Pet Status", "Target Status", "Target's Target Status", "Focus Status", "Focus's Target Status", "All Buffs", "Any Buffs", "Buff Time Left",
 	"Buff Count", "Buff Type", "All Debuffs", "Any Debuffs", "Debuff Time Left", "Debuff Count", "Debuff Type",
 	"All Cooldowns", "Spell Ready", "Spell Casting", "Item Ready"
 }
@@ -68,7 +72,9 @@ local testNames = {
 	["Player Status"]= L["Player Status"],
 	["Pet Status"]= L["Pet Status"],
 	["Target Status"] = L["Target Status"],
+	["Target's Target Status"] = L["Target's Target Status"],
 	["Focus Status"] = L["Focus Status"],
+	["Focus's Target Status"] = L["Focus's Target Status"],
 	["All Buffs"] = L["All Buffs"],
 	["Any Buffs"] = L["Any Buffs"],
 	["Buff Time Left"] = L["Buff Time Left"],
@@ -522,6 +528,19 @@ local function CheckTestAND(ttype, t)
 		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (stat.noTarget or (t.checkHealth ~= (stat.targetHealth >= t.minHealth))) then return false end
 		if IsOn(t.checkPower) and IsOn(t.minPower) and (stat.noTarget or (t.checkPower ~= (stat.targetPower >= t.minPower))) then return false end
 		if IsOn(t.inRange) and (stat.noTarget or (t.inRange ~= stat.targetInRange)) then return false end
+	elseif ttype == "Target's Target Status" then -- target's target must exist for these tests to be true
+		if IsOn(t.exists) and (t.exists == stat.noTargetTarget) then return false end
+		if IsOn(t.isPlayer) and (stat.noTargetTarget or (t.isPlayer ~= stat.targetTargetPlayer)) then return false end
+		if IsOn(t.isEnemy) and (stat.noTargetTarget or (t.isEnemy ~= stat.targetTargetEnemy)) then return false end
+		if IsOn(t.isFriend) and (stat.noTargetTarget or (t.isFriend ~= stat.targetTargetFriend)) then return false end
+		if IsOn(t.isDead) and (stat.noTargetTarget or (t.isDead ~= stat.targetTargetDead)) then return false end
+		if IsOn(t.isSteal) and (stat.noTargetTarget or (t.isSteal ~= MOD:UnitHasBuff("targettarget", "Steal"))) then return false end
+		if t.classify and (not t.classification or t.classification == "" or stat.noTargetTarget or
+			(t.classify ~= CheckClassification(stat.targetTargetClassification, t.classification))) then return false end
+		if t.checkMaxHealth and (not t.maxHealth or stat.noTargetTarget or (tonumber(t.maxHealth) or 0) > stat.targetTargetMaxHealth) then return false end
+		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (stat.noTargetTarget or (t.checkHealth ~= (stat.targetTargetHealth >= t.minHealth))) then return false end
+		if IsOn(t.checkPower) and IsOn(t.minPower) and (stat.noTargetTarget or (t.checkPower ~= (stat.targetTargetPower >= t.minPower))) then return false end
+		if IsOn(t.inRange) and (stat.noTargetTarget or (t.inRange ~= stat.targetTargetInRange)) then return false end
 	elseif ttype == "Focus Status" then -- focus must exist for these tests to be true
 		if IsOn(t.exists) and (t.exists == stat.noFocus) then return false end
 		if IsOn(t.isPlayer) and (stat.noFocus or (t.isPlayer ~= stat.focusPlayer)) then return false end
@@ -534,6 +553,18 @@ local function CheckTestAND(ttype, t)
 		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (stat.noFocus or (t.checkHealth ~= (stat.focusHealth >= t.minHealth))) then return false end
 		if IsOn(t.checkPower) and IsOn(t.minPower) and (stat.noFocus or (t.checkPower ~= (stat.focusPower >= t.minPower))) then return false end
 		if IsOn(t.inRange) and (stat.noFocus or (t.inRange ~= stat.focusInRange)) then return false end
+	elseif ttype == "Focus's Target Status" then -- focus target must exist for these tests to be true
+		if IsOn(t.exists) and (t.exists == stat.noFocusTarget) then return false end
+		if IsOn(t.isPlayer) and (stat.noFocusTarget or (t.isPlayer ~= stat.focusTargetPlayer)) then return false end
+		if IsOn(t.isEnemy) and (stat.noFocusTarget or (t.isEnemy ~= stat.focusTargetEnemy)) then return false end
+		if IsOn(t.isFriend) and (stat.noFocusTarget or (t.isFriend ~= stat.focusTargetFriend)) then return false end
+		if IsOn(t.isDead) and (stat.noFocusTarget or (t.isDead ~= stat.focusTargetDead)) then return false end
+		if IsOn(t.isSteal) and (stat.noFocusTarget or (t.isSteal ~= MOD:UnitHasBuff("focustarget", "Steal"))) then return false end
+		if t.classify and (not t.classification or t.classification == "" or stat.noFocusTarget or
+			(t.classify ~= CheckClassification(stat.focusTargetClassification, t.classification))) then return false end
+		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (stat.noFocusTarget or (t.checkHealth ~= (stat.focusTargetHealth >= t.minHealth))) then return false end
+		if IsOn(t.checkPower) and IsOn(t.minPower) and (stat.noFocusTarget or (t.checkPower ~= (stat.focusTargetPower >= t.minPower))) then return false end
+		if IsOn(t.inRange) and (stat.noFocusTarget or (t.inRange ~= stat.focusTargetInRange)) then return false end
 	elseif ttype == "All Buffs" then
 		if HasTable(t.auras) and not CheckAuras(t.unit, t.auras, true, t.isMine, true, toggle) then return false end
 	elseif ttype == "Any Buffs" then
@@ -746,6 +777,20 @@ function MOD:UpdateConditions()
 		m = UnitPowerMax("target"); if m > 0 then stat.targetPower = (100 * UnitPower("target") / m) else stat.targetPower = 0 end
 		stat.targetInRange = UnitRangeCheck("target")
 	end
+	stat.noTargetTarget = not UnitExists("targettarget")
+	if not stat.noTargetTarget then
+		stat.targetTargetPlayer = UnitIsPlayer("targettarget")
+		stat.targetTargetEnemy = UnitIsEnemy("player", "targettarget")
+		stat.targetTargetFriend = UnitIsFriend("player", "targettarget")
+		stat.targetTargetDead = UnitIsDead("targettarget")
+		local classification = UnitClassification("targettarget")
+		if MOD.LibBossIDs and MOD.CheckLibBossIDs(UnitGUID("targettarget")) then classification = "worldboss" end
+		stat.targetTargetClassification = classification
+		m = UnitHealthMax("targettarget")
+		if m > 0 then stat.targetTargetMaxHealth = m; stat.targetTargetHealth = (100 * UnitHealth("targettarget") / m) else stat.targetTargetMaxHealth = 0; stat.targetTargetHealth = 0 end
+		m = UnitPowerMax("targettarget"); if m > 0 then stat.targetTargetPower = (100 * UnitPower("targettarget") / m) else stat.targetTargetPower = 0 end
+		stat.targetTargetInRange = UnitRangeCheck("targettarget")
+	end
 	stat.noFocus = not UnitExists("focus")
 	if not stat.noFocus then
 		stat.focusPlayer = UnitIsPlayer("focus")
@@ -758,6 +803,19 @@ function MOD:UpdateConditions()
 		m = UnitHealthMax("focus"); if m > 0 then stat.focusHealth = (100 * UnitHealth("focus") / m) else stat.focusHealth = 0 end
 		m = UnitPowerMax("focus"); if m > 0 then stat.focusPower = (100 * UnitPower("focus") / m) else stat.focusPower = 0 end
 		stat.focusInRange = UnitRangeCheck("focus")
+	end
+	stat.noFocusTarget = not UnitExists("focustarget")
+	if not stat.noFocusTarget then
+		stat.focusTargetPlayer = UnitIsPlayer("focustarget")
+		stat.focusTargetEnemy = UnitIsEnemy("player", "focustarget")
+		stat.focusTargetFriend = UnitIsFriend("player", "focustarget")
+		stat.focusTargetDead = UnitIsDead("focustarget")
+		local classification = UnitClassification("focustarget")
+		if MOD.LibBossIDs and MOD.CheckLibBossIDs(UnitGUID("focustarget")) then classification = "worldboss" end
+		stat.focusTargetClassification = classification
+		m = UnitHealthMax("focustarget"); if m > 0 then stat.focusTargetHealth = (100 * UnitHealth("focustarget") / m) else stat.focusTargetHealth = 0 end
+		m = UnitPowerMax("focustarget"); if m > 0 then stat.focusTargetPower = (100 * UnitPower("focustarget") / m) else stat.focusTargetPower = 0 end
+		stat.focusTargetInRange = UnitRangeCheck("focustarget")
 	end
 	
 	-- only check conditions for the player's class
@@ -961,7 +1019,7 @@ function MOD:GetConditionText(name)
 						a = a .. d .. L["Power String"](x, t.minPower); d = ", " end
 					if IsOn(t.checkFamily) and t.family then a = a .. d .. L["Pet Family String"](t.family); d = ", " end
 					if IsOn(t.checkSpec) and t.spec then a = a .. d .. L["Pet Spec String"](t.spec); d = ", " end
-				elseif tt == "Target Status" or tt == "Focus Status" then
+				elseif tt == "Target Status" or tt == "Target's Target Status" or tt == "Focus Status" or tt == "Focus's Target Status" then
 					if IsOn(t.exists) then if t.exists then a = a .. d .. L["Exists"] else a = a .. d .. L["Not Exists"] end; d = ", " end
 					if IsOn(t.isPlayer) then if t.isPlayer then a = a .. d .. L["Is Player"] else a = a .. d .. L["Not Player"] end; d = ", " end
 					if IsOn(t.isEnemy) then if t.isEnemy then a = a .. d .. L["Is Enemy"] else a = a .. d .. L["Not Enemy"] end; d = ", " end

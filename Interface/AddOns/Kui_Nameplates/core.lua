@@ -32,10 +32,11 @@ addon.defaultSizes = {
         small     = 7
     },
     tex = {
-        raidicon = 20,
+        raidicon = 18,
         targetGlowW = 106,
         ttargetGlowW = 50, -- target glow width on trivial units
-        targetGlowH = 5
+        targetGlowH = 5,
+        targetArrow = 25,
     }
 }
 
@@ -61,9 +62,10 @@ local defaults = {
             highlight_target = false,
             fixaa       = true, -- attempt to make plates appear sharper
             compatibility = false,
-            targetglow  = true,
             bartexture  = DEFAULT_BAR,
+            targetglow  = true,
             targetglowcolour = { .3, .7, 1, 1 },
+            targetarrows = false,
             hheight     = 10,
             thheight    = 7,
             width       = 100,
@@ -90,6 +92,7 @@ local defaults = {
                 avoidfriendhp  = false,
                 avoidhpval  = 20,
                 avoidcast   = false,
+                avoidraidicon = true,
             },
         },
         text = {
@@ -403,7 +406,14 @@ addon.configChangedFuncs.runOnce.font = function(val)
 end
 
 addon.configChangedFuncs.targetglowcolour = function(frame, val)
-    frame.targetGlow:SetVertexColor(unpack(val))
+    if frame.targetGlow then
+        frame.targetGlow:SetVertexColor(unpack(val))
+    end
+
+    if frame.targetArrows then
+        frame.targetArrows.left:SetVertexColor(unpack(val))
+        frame.targetArrows.right:SetVertexColor(unpack(val))
+    end
 end
 
 addon.configChangedFuncs.strata = function(frame,val)

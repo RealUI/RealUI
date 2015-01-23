@@ -1,0 +1,94 @@
+------------------------------------------------------------------------
+r606 | zarnivoop | 2015-01-16 17:25:17 +0000 (Fri, 16 Jan 2015) | 1 line
+Changed paths:
+   A /tags/1.4-28 (from /trunk:605)
+
+Tagging as 1.4-28
+------------------------------------------------------------------------
+r605 | zarnivoop | 2015-01-08 00:30:07 +0000 (Thu, 08 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/modules/Healing.lua
+
+stagger fix
+------------------------------------------------------------------------
+r604 | zarnivoop | 2015-01-07 23:25:24 +0000 (Wed, 07 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+
+autostop fix; only do anything during encounters
+------------------------------------------------------------------------
+r603 | zarnivoop | 2015-01-07 23:17:37 +0000 (Wed, 07 Jan 2015) | 2 lines
+Changed paths:
+   M /trunk/Bindings.xml
+   M /trunk/Options.lua
+   M /trunk/Skada.lua
+   M /trunk/lib/SpecializedLibBars-1.0/SpecializedLibBars-1.0.lua
+   M /trunk/locale/enUS.lua
+   M /trunk/modules/Healing.lua
+   M /trunk/modules/Overhealing.lua
+
+option to automatically pause on impending wipe (untested)
+ignore Monk stagger absorbs
+------------------------------------------------------------------------
+r602 | zarnivoop | 2014-12-24 22:58:28 +0000 (Wed, 24 Dec 2014) | 3 lines
+Changed paths:
+   M /trunk/BarDisplay.lua
+   M /trunk/Options.lua
+   M /trunk/Skada.lua
+   M /trunk/lib/SpecializedLibBars-1.0/SpecializedLibBars-1.0.lua
+   M /trunk/locale/enUS.lua
+   M /trunk/modules/CC.lua
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/DamageTaken.lua
+   M /trunk/modules/Deaths.lua
+   M /trunk/modules/Debuffs.lua
+   M /trunk/modules/Dispels.lua
+   M /trunk/modules/Enemies.lua
+   M /trunk/modules/Healing.lua
+   M /trunk/modules/Interrupts.lua
+   M /trunk/modules/Overhealing.lua
+   M /trunk/modules/Power.lua
+   M /trunk/modules/Threat.lua
+   M /trunk/modules/TotalHealing.lua
+
+stop/resume segment
+descriptions for all the shiny buttons
+role icons
+------------------------------------------------------------------------
+r600 | zarnivoop | 2014-12-24 08:29:25 +0000 (Wed, 24 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Healing.lua
+
+fix mistaken spell name for swing absorbs
+------------------------------------------------------------------------
+r598 | zarnivoop | 2014-12-23 17:31:26 +0000 (Tue, 23 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/Healing.lua
+
+more yuletide absorb fixes!
+------------------------------------------------------------------------
+r597 | zarnivoop | 2014-12-23 16:31:55 +0000 (Tue, 23 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/Healing.lua
+
+handle swing_absorbed too
+------------------------------------------------------------------------
+r595 | zarnivoop | 2014-12-21 21:31:37 +0000 (Sun, 21 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/modules/Healing.lua
+
+temporary fix for cases where spellname is null - unknown cause, though
+------------------------------------------------------------------------
+r594 | oscarucb | 2014-12-15 13:25:45 +0000 (Mon, 15 Dec 2014) | 6 lines
+Changed paths:
+   M /trunk/modules/Deaths.lua
+
+Fix the killing blow spell label added to the death summary screen in r591
+Each deathlog is a circular queue prior to sorting (which for efficiency is intentionally delayed until deathlog:Update()), so on initial display of the summary screen, the prior algorithm was choosing an essentially random damage event from the log for the label. 
+Also for consistency, ensure we report the KB for the appropriate death, namely the one that is used to time sort the summary screen.
+Finally, don't muddy the already-too-long detail title with the spellname, since that information is already obvious in the detail rows.
+
+
+------------------------------------------------------------------------

@@ -305,7 +305,7 @@ function lib:ReleaseBar(name)
 end
 
 ---[[ Bar Groups ]]---
-function barListPrototype:AddButton(title, normaltex, highlighttex, clickfunc)
+function barListPrototype:AddButton(title, description, normaltex, highlighttex, clickfunc)
 	-- Create button frame.
 	local btn = CreateFrame("Button", nil, self.button)
 	btn.title = title
@@ -322,6 +322,7 @@ function barListPrototype:AddButton(title, normaltex, highlighttex, clickfunc)
 		function(this)
 			GameTooltip_SetDefaultAnchor(GameTooltip, this)
 			GameTooltip:SetText(title)
+            GameTooltip:AddLine(description, 1, 1, 1, true)
 			GameTooltip:Show()
 		end)
 	btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -1030,12 +1031,6 @@ do
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
 
-		if self.timeLeftTriggers then
-			for k, v in pairs(self.timeLeftTriggers) do
-				self.timeLeftTriggers[k] = false
-			end
-		end
-
 		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
 		self.bgtexture:SetAllPoints()
 		self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
@@ -1111,11 +1106,6 @@ function barPrototype:OnBarReleased()
 	if self.gradMap then
 		for k, v in pairs(self.gradMap) do
 			self.gradMap[k] = nil
-		end
-	end
-	if self.timeLeftTriggers then
-		for k, v in pairs(self.timeLeftTriggers) do
-			self.timeLeftTriggers[k] = nil
 		end
 	end
 

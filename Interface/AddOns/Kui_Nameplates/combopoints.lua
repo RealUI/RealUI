@@ -13,6 +13,7 @@ local ANTICIPATION_NAME -- the localised buff name
 local ANTICIPATION_IS_KNOWN
 local ANTICIPATION_TALENT_ID = 114015
 local ANTICIPATION_ID = 115189
+local ICON_SPACING = -1
 
 local anticipationWasActive
 
@@ -113,7 +114,7 @@ function mod:UNIT_COMBO_POINTS(event,unit)
 		end
 	end
 end
-----------------------------------------------------------------------kTarget --
+---------------------------------------------------------------------- Target --
 function mod:OnFrameTarget(msg, frame)
 	self:UNIT_COMBO_POINTS(nil, 'player')
 end
@@ -134,9 +135,9 @@ function mod:CreateComboPoints(msg, frame)
 
 		if i == 0 then
 			cp:SetPoint('BOTTOM', frame.overlay, 'BOTTOM',
-				-(addon.sizes.tex.combopoints-1)*2, -3)
+				-(addon.sizes.tex.combopoints+ICON_SPACING)*2, -3)
 		else
-			cp:SetPoint('LEFT', pcp, 'RIGHT', -1, 0)
+			cp:SetPoint('LEFT', pcp, 'RIGHT', ICON_SPACING, 0)
 		end
 
 		tinsert(frame.combopoints, i+1, cp)

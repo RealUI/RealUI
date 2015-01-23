@@ -33,9 +33,9 @@ local EraseTable = MikSBT.EraseTable
 
 -- Bit flags.
 local AFFILIATION_MINE		= 0x00000001
-local AFFILIATION_PARTY		= 0X00000002
-local AFFILIATION_RAID		= 0X00000004
-local AFFILIATION_OUTSIDER	= 0X00000008
+local AFFILIATION_PARTY		= 0x00000002
+local AFFILIATION_RAID		= 0x00000004
+local AFFILIATION_OUTSIDER	= 0x00000008
 local REACTION_FRIENDLY		= 0x00000010
 local REACTION_NEUTRAL		= 0x00000020
 local REACTION_HOSTILE		= 0x00000040
@@ -598,7 +598,13 @@ local function CreateCaptureFuncs()
   SPELL_PERIODIC_DAMAGE = function (p, ...) p.eventType, p.isDoT, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing, p.isOffHand, p.isMultistrike = "damage", true, ... end,
   SPELL_BUILDING_DAMAGE = function (p, ...) p.eventType, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", ... end,
   DAMAGE_SHIELD = function (p, ...) p.eventType, p.isDamageShield, p.skillID, p.skillName, p.skillSchool, p.amount, p.overkillAmount, p.damageType, p.resistAmount, p.blockAmount, p.absorbAmount, p.isCrit, p.isGlancing, p.isCrushing = "damage", true, ... end,
-  SPELL_ABSORBED = function (p, ...) p.eventType, p.amount, p.skillID, p.skillName, p.skillSchool, p.absorbAmount = "damage", 0, ... end,
+  --SPELL_ABSORBED = function (p, ...) p.eventType, p.amount, p.skillID, p.skillName, p.skillSchool, p.absorbAmount = "damage", 0, ... end,
+  --[[SPELL_ABSORBED = function (p, ...)
+   --[dmgSpellID, dmgSpellName, dmgSpellSchool,] absorberGUID, absorberName, absorberFlags, absorberRaidFlags, absorbSkillID, absorbSkillName, absorbSkillSchool, absorbAmount
+   local offset = 5
+   if type(...) == "number" then offset = 8 end -- 1st param is spellID and not a GUID
+    p.eventType, p.amount, p.skillID, p.skillName, p.skillSchool, p.absorbAmount = "damage", 0, select(offset, ...)
+   end,]]
 
   -- Miss events.
   SWING_MISSED = function (p, ...) p.eventType, p.missType, p.isOffHand, p.isMultistrike, p.amount = "miss", ... end,
@@ -868,7 +874,7 @@ local function Enable()
 
  -- Update the unit map and current pet information.
  isUnitMapStale = true
- isPetNameStale = true
+ isPetMapStale = true
 
  -- Start receiving updates.
  eventFrame:Show()

@@ -1,6 +1,6 @@
 --[[
 Name: LibBossIDs-1.0
-Revision: $Revision: 89 $
+Revision: $Revision: 91 $
 Author: Elsia
 Website: http://www.wowace.com/addons/libbossids-1-0/
 Documentation:
@@ -10,7 +10,7 @@ Dependencies: LibStub
 License: Public Domain, Absolutely no Warranty.
 ]]
 
-local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 89 $"
+local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 91 $"
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then return end
@@ -18,7 +18,7 @@ if not lib then return end
 -- LibBossIDs-1.0 provides a table that flags mobIDs true if the mob linked to the ID is a boss.
 -- Example: if LibStub("LibBossIDs-1.0").BossIDs[mobID] then print("Found a boss!") end
 -- How to get mobID from GUID:
--- localmobID = tonumber(GUID:sub(-13, -9), 16)
+-- localmobID = tonumber(GUID:sub(-16, -12))
 
 -- Explanation of comments. First quoted string is English locale string of mob.
 -- The first list was derived from LibBabble-Boss-3.0.
@@ -51,10 +51,10 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Auchindoun
 	-------------------------------------------------------------------------------
-	[86217]	= true,	-- Vigilant Kaathar
-	[86218]	= true,	-- Soulbinder Nyami
-	[86219]	= true,	-- Azzakel
-	[86220]	= true,	-- Teron'gor
+	[75839]	= true,	-- Vigilant Kaathar
+	[76177]	= true,	-- Soulbinder Nyami
+	[75927]	= true,	-- Azzakel
+	[77734]	= true,	-- Teron'gor
 
 	-------------------------------------------------------------------------------
 	-- Auchindoun: Auchenai Crypts
@@ -255,9 +255,9 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Bloodmaul Slag Mines
 	-------------------------------------------------------------------------------
-	[86223]	= true,	-- Roltall
-	[86222]	= true,	-- Slave Watcher Crushto
-	[86224]	= true,	-- Gug'rokk
+	[75786]	= true,	-- Roltall
+	[74787]	= true,	-- Slave Watcher Crushto
+	[74790]	= true,	-- Gug'rokk
 	[74366]	= true,	-- Forgemaster Gog'duh
 
 	-------------------------------------------------------------------------------
@@ -441,10 +441,10 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Grimrail Depot
 	-------------------------------------------------------------------------------
-	[86228]	= true,	-- Skylord Tovra
-	[86225]	= true,	-- Railmaster Rocketspark
-	[86226]	= true,	-- Borka the Brute
-	[86227]	= true,	-- Nitrogg Thundertower
+	[80005]	= true,	-- Skylord Tovra
+	[77803]	= true,	-- Railmaster Rocketspark
+	[77816]	= true,	-- Borka the Brute
+	[79545]	= true,	-- Nitrogg Thundertower
 
 	-------------------------------------------------------------------------------
 	-- Gruul's Lair
@@ -506,11 +506,11 @@ local BossIDs = {
 	-- Heart of Fear (MoP-Raid 5.0.1)
 	-------------------------------------------------------------------------------
 	[62837] = true,	-- Grand Empress Shek'zeer
-	[63664] = true,	-- Blade Lord Ta'yak
-	[63666] = true,	-- Amber-Shaper Un'sok
-	[63667] = true,	-- Garalon
-	[65501] = true,	-- Wind Lord Mel'jarak
-	[66791]	= true,	-- Zorlok
+	[62543]	= true,	-- Blade Lord Ta'yak
+	[62511]	= true,	-- Amber-Shaper Un'sok
+	[63191]	= true,	-- Garalon
+	[62397]	= true,	-- Wind Lord Mel'jarak
+	[62980]	= true,	-- Zorlok
 
 	-------------------------------------------------------------------------------
 	-- Hellfire Citadel: Hellfire Ramparts
@@ -597,12 +597,14 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Iron Docks
 	-------------------------------------------------------------------------------
-	[87451]	= true,	-- Fleshrender Nok'gar
-	[87452]	= true,	-- Ahri'ok Dugru
-	[86231]	= true,	-- Makogg Emberblade
+	[81305]	= true,	-- Fleshrender Nok'gar
+	[81297]	= true,	-- Dreadfang
+	[80816]	= true,	-- Ahri'ok Dugru
+	[80805]	= true,	-- Makogg Emberblade
 	[80808]	= true,	-- Neesa Nox
-	[86232]	= true,	-- Oshir
-	[86233]	= true,	-- Skulloc
+	[79852]	= true,	-- Oshir
+	[83612]	= true,	-- Skulloc
+	[83613]	= true,	-- Captain Koramar
 
 	-------------------------------------------------------------------------------
 	-- Isle of Giants
@@ -735,10 +737,10 @@ local BossIDs = {
 	[60399] = true,	-- Qin-xi
 	[60400] = true,	-- Jan-xi
 	[60410] = true,	-- Elegon
-	[61421] = true,	-- Zian of the Endless Shadow -- 60701?
-	[61423] = true,	-- Qiang the Merciless -- 60709?
-	[61427] = true,	-- Subetai the Swift -- 60710?
-	[61429] = true,	-- Meng the Demented
+	[60701]	= true,	-- Zian of the Endless Shadow
+	[60709]	= true,	-- Qiang the Merciless
+	[60710]	= true,	-- Subetai the Swift
+	[60708]	= true,	-- Meng the Demented
 
 	-------------------------------------------------------------------------------
 	-- Molten Core
@@ -993,9 +995,9 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Shadowmoon Burial Grounds
 	-------------------------------------------------------------------------------
-	[86234]	= true,	-- Sadana Bloodfury
-	[86236]	= true,	-- Bonemaw
-	[76268]	= true,	-- Ner'zhu
+	[75509]	= true,	-- Sadana Bloodfury
+	[75452]	= true,	-- Bonemaw
+	[76407]	= true,	-- Ner'zhul
 	[75829]	= true,	-- Nhallish
 
 	-------------------------------------------------------------------------------
@@ -1055,10 +1057,10 @@ local BossIDs = {
 	-------------------------------------------------------------------------------
 	-- Skyreach
 	-------------------------------------------------------------------------------
-	[86238]	= true,	-- Ranjit
-	[86239]	= true,	-- Araknath
-	[76379]	= true,	-- Rukhran
-	[86241]	= true,	-- High Sage Viryx
+	[75964]	= true,	-- Ranjit
+	[76141]	= true,	-- Araknath
+	[76143]	= true,	-- Rukhran
+	[76266]	= true,	-- High Sage Viryx
 
 	-------------------------------------------------------------------------------
 	-- Spires of Arak
@@ -1300,11 +1302,12 @@ local BossIDs = {
 	-- The Everbloom
 	-------------------------------------------------------------------------------
 	[83894]	= true,	-- Dulhu
-	[86244]	= true,	-- Earthshaper Telu
-	[86246]	= true,	-- Archmage Sol
-	[86247]	= true,	-- Xeri'tac
-	[86248]	= true,	-- Yalnu
-	[86242]	= true,	-- Witherbark
+	[83892]	= true,	-- Life Warden Gola
+	[83893]	= true,	-- Earthshaper Telu
+	[82682]	= true,	-- Archmage Sol
+	[84550]	= true,	-- Xeri'tac
+	[83846]	= true,	-- Yalnu
+	[81522]	= true,	-- Witherbark
 
 	-------------------------------------------------------------------------------
 	-- The Eye of Eternity
@@ -1378,9 +1381,9 @@ local BossIDs = {
 
 	-- Forgotten Depths
 	[67977]	= true,	-- Tortos
-	[70229]	= true,	-- Flaming Head <Head of Megaera>
-	[70250]	= true,	-- Frozen Head <Head of Megaera>
-	[70251]	= true,	-- Venomous Head <Head of Megaera>
+	[70212]	= true,	-- Flaming Head <Head of Megaera>
+	[70235]	= true,	-- Frozen Head <Head of Megaera>
+	[70247]	= true,	-- Venomous Head <Head of Megaera>
 	[69712]	= true,	-- Ji-Kun
 
 	-- Halls of Flesh-Shaping

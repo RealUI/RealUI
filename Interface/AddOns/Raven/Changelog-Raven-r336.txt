@@ -1,0 +1,44 @@
+------------------------------------------------------------------------
+r336 | tomber | 2014-12-25 00:06:48 +0000 (Thu, 25 Dec 2014) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Cancel.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+
+Update tooltips when hovering over a bar or icon. The remaining buff, debuff, or cooldown time will decrement in the tooltip without having to move the mouse off and then back over the bar or icon.
+
+Change Raven's overall update method to use the new C_Timer API for a slight improvement to CPU usage.
+------------------------------------------------------------------------
+r335 | tomber | 2014-12-21 00:42:30 +0000 (Sun, 21 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add option to custom cooldown ready bars that, when enabled, will apply the ready opacity when a spell has at least one charge. This is probably more intuitive for spells with charges than the default behavior of only applying the ready opacity to the bar showing max charges.
+------------------------------------------------------------------------
+r334 | tomber | 2014-12-19 21:32:36 +0000 (Fri, 19 Dec 2014) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Raven_Options/Options.lua
+
+Fix detection of stealable and boss auras.
+Add condition tests for target's target and focus's target.
+Include global localized strings in the default localization.
+------------------------------------------------------------------------
+r333 | tomber | 2014-10-27 05:53:20 +0000 (Mon, 27 Oct 2014) | 2 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add option to support fader addons like King Kong Frame Fader by disabling bar group opacity adjustments within Raven.
+Change initialization order so that media is registered in SharedMedia during OnLoad (was during OnEnable).
+------------------------------------------------------------------------

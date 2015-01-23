@@ -72,6 +72,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 				d.value = player.dispells
 				d.label = player.name
 				d.class = player.class
+				d.role = player.role
 				d.id = player.id
 				d.valuetext = tostring(player.dispells)
 				if player.dispells > max then

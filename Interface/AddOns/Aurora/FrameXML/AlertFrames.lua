@@ -401,4 +401,31 @@ tinsert(C.themes["Aurora"], function()
 			GarrisonFollowerAlertFrame.PortraitFrame.squareBG:SetBackdropBorderColor(0, 0, 0)
 		end
 	end)
+
+	-- Loot upgrade alert
+
+	hooksecurefunc("LootUpgradeFrame_SetUp", function(frame)
+		if not frame.bg then
+			local bg = CreateFrame("Frame", nil, frame)
+			bg:SetPoint("TOPLEFT", 10, -10)
+			bg:SetPoint("BOTTOMRIGHT", -10, 10)
+			bg:SetFrameLevel(frame:GetFrameLevel()-1)
+			F.CreateBD(bg)
+			frame.bg = bg
+
+			frame.Background:Hide()
+
+			F.ReskinIcon(frame.Icon)
+			frame.Icon:SetDrawLayer("BORDER", 5)
+			frame.Icon:ClearAllPoints()
+			frame.Icon:SetPoint("CENTER", frame.BaseQualityBorder)
+		end
+
+		frame.BaseQualityBorder:SetTexture(C.media.backdrop)
+		frame.UpgradeQualityBorder:SetTexture(C.media.backdrop)
+		frame.BaseQualityBorder:SetSize(52, 52)
+		frame.UpgradeQualityBorder:SetSize(52, 52)
+		frame.BaseQualityBorder:SetVertexColor(frame.BaseQualityItemName:GetTextColor())
+		frame.UpgradeQualityBorder:SetVertexColor(frame.UpgradeQualityItemName:GetTextColor())
+	end)
 end)

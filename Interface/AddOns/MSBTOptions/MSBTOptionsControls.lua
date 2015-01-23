@@ -545,6 +545,7 @@ local function CreateListbox(parent)
  slider:SetPoint("BOTTOMRIGHT", listbox, "BOTTOMRIGHT", 0, 16);
  slider:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob");
  slider:SetValueStep(1);
+ slider:SetObeyStepOnDrag(true);
  slider:SetScript("OnValueChanged", Listbox_OnValueChanged);
 
  -- Up button.
@@ -1060,6 +1061,7 @@ local function CreateSlider(parent)
  sliderFrame:SetPoint("RIGHT");
  sliderFrame:SetHeight(16);
  sliderFrame:SetBackdrop(sliderBackdrop);
+ sliderFrame:SetObeyStepOnDrag(true)
  sliderFrame:SetScript("OnValueChanged", Slider_OnValueChanged);
  sliderFrame:SetScript("OnEnter", Slider_OnEnter);
  sliderFrame:SetScript("OnLeave", Slider_OnLeave);

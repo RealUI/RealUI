@@ -2641,7 +2641,7 @@ MOD.OptionsTable = {
 						},
 						SFX = {
 							type = "toggle", order = 20, name = L["SFX"], width = "half",
-							desc = L["If checked, sound is played in SFX channel."],
+							desc = L["If checked, sound is played in Sound Effects channel."],
 							get = function(info) return MOD.db.global.SoundChannel == "SFX" end,
 							set = function(info, value) MOD.db.global.SoundChannel = "SFX" end,
 						},
@@ -7987,6 +7987,309 @@ MOD.OptionsTable = {
 								},
 							},
 						},
+						TargetTargetStatusGroup = {
+							type = "group", order = 35, name = L["Target's Target Status"],
+							args = {
+								EnableTestGroup = {
+									type = "group", order = 1, name = L["Enable Test"], inline = true,
+									args = {
+										EnableTest = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, enable this test."],
+											get = function(info) return GetTestField("Target's Target Status", "enable") end,
+											set = function(info, value) SetTestField("Target's Target Status", "enable", value) end,
+										},
+									},
+								},
+								ExistsGroup = {
+									type = "group", order = 3, name = L["Exists"], inline = true,
+									args = {
+										CheckExists = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if target's target currently exists."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "exists") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "exists", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Exists"],
+											desc = L["If checked, target's target must exist."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "exists") end,
+											get = function(info) return GetTestField("Target's Target Status", "exists") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "exists", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Exists"],
+											desc = L["If checked, target's target must not exist."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "exists") end,
+											get = function(info) return GetTestField("Target's Target Status", "exists") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "exists", false) end,
+										},
+									},
+								},
+								PlayerGroup = {
+									type = "group", order = 5, name = L["Player"], inline = true,
+									args = {
+										CheckPlayer = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the target's target is a player."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "isPlayer") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "isPlayer", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Player"],
+											desc = L["If checked, target's target must be a player."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isPlayer") end,
+											get = function(info) return GetTestField("Target's Target Status", "isPlayer") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "isPlayer", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Player"],
+											desc = L["If checked, target's target must not be a player."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isPlayer") end,
+											get = function(info) return GetTestField("Target's Target Status", "isPlayer") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "isPlayer", false) end,
+										},
+									},
+								},
+								EnemyGroup = {
+									type = "group", order = 10, name = L["Enemy"], inline = true,
+									args = {
+										CheckEnemy = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the target's target is an enemy."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "isEnemy") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "isEnemy", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Enemy"],
+											desc = L["If checked, target's target must be an enemy."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isEnemy") end,
+											get = function(info) return GetTestField("Target's Target Status", "isEnemy") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "isEnemy", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Enemy"],
+											desc = L["If checked, target's target must not be an enemy."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isEnemy") end,
+											get = function(info) return GetTestField("Target's Target Status", "isEnemy") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "isEnemy", false) end,
+										},
+									},
+								},
+								FriendGroup = {
+									type = "group", order = 20, name = L["Friendly"], inline = true,
+									args = {
+										CheckFriend = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the target's target is friendly."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "isFriend") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "isFriend", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Friendly"],
+											desc = L["If checked, target's target must be friendly."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isFriend") end,
+											get = function(info) return GetTestField("Target's Target Status", "isFriend") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "isFriend", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Friendly"],
+											desc = L["If checked, target's target must not be friendly."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isFriend") end,
+											get = function(info) return GetTestField("Target's Target Status", "isFriend") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "isFriend", false) end,
+										},
+									},
+								},
+								DeadGroup = {
+									type = "group", order = 22, name = L["Dead"], inline = true,
+									args = {
+										CheckDead = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the target's target is dead."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "isDead") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "isDead", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Dead"],
+											desc = L["If checked, target's target must be dead."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isDead") end,
+											get = function(info) return GetTestField("Target's Target Status", "isDead") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "isDead", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Dead"],
+											desc = L["If checked, target's target must not be dead."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isDead") end,
+											get = function(info) return GetTestField("Target's Target Status", "isDead") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "isDead", false) end,
+										},
+									},
+								},
+								Classification = {
+									type = "group", order = 25, name = L["Classification"], inline = true,
+									args = {
+										Enable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the target's target classification (you can select multiple classifications)."],
+											get = function(info) return GetTestField("Target's Target Status", "classify") end,
+											set = function(info, value) SetTestField("Target's Target Status", "classify", value) end,
+										},
+										spacer1 = { type = "description", name = "", order = 10 },
+										Normal = {
+											type = "toggle", order = 20, name = L["Normal"], width = "half",
+											desc = L["If checked, test for normal classification."],
+											disabled = function(info) return not GetTestField("Target's Target Status", "classify") end,
+											get = function(info) return IsClassification("Target's Target Status", "normal") end,
+											set = function(info, value) SetClassification("Target's Target Status", "normal", value) end,
+										},
+										Boss = {
+											type = "toggle", order = 21, name = L["Boss"], width = "half",
+											desc = L["If checked, test for boss classification."],
+											disabled = function(info) return not GetTestField("Target's Target Status", "classify") end,
+											get = function(info) return IsClassification("Target's Target Status", "worldboss") end,
+											set = function(info, value) SetClassification("Target's Target Status", "worldboss", value) end,
+										},
+										Elite = {
+											type = "toggle", order = 22, name = L["Elite"], width = "half",
+											desc = L["If checked, test for elite classification."],
+											disabled = function(info) return not GetTestField("Target's Target Status", "classify") end,
+											get = function(info) return IsClassification("Target's Target Status", "elite") end,
+											set = function(info, value) SetClassification("Target's Target Status", "elite", value) end,
+										},
+										Rare = {
+											type = "toggle", order = 23, name = L["Rare"], width = "half",
+											desc = L["If checked, test for rare classification."],
+											disabled = function(info) return not GetTestField("Target's Target Status", "classify") end,
+											get = function(info) return IsClassification("Target's Target Status", "rare") end,
+											set = function(info, value) SetClassification("Target's Target Status", "rare", value) end,
+										},
+										RareElite = {
+											type = "toggle", order = 25, name = L["Rare Elite"],
+											desc = L["If checked, test for rare elite classification."],
+											disabled = function(info) return not GetTestField("Target's Target Status", "classify") end,
+											get = function(info) return IsClassification("Target's Target Status", "rlite") end,
+											set = function(info, value) SetClassification("Target's Target Status", "rlite", value) end,
+										},
+									},
+								},
+								RangeGroup = {
+									type = "group", order = 30, name = L["Range"], inline = true,
+									args = {
+										CheckRange = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the target's target is in range."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "inRange") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "inRange", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["In Range"],
+											desc = L["If checked, target's target must be in range."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "inRange") end,
+											get = function(info) return GetTestField("Target's Target Status", "inRange") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "inRange", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Out Of Range"],
+											desc = L["If checked, target's target must not be in range."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "inRange") end,
+											get = function(info) return GetTestField("Target's Target Status", "inRange") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "inRange", false) end,
+										},
+									},
+								},
+								StealableGroup = {
+									type = "group", order = 35, name = L["Spellsteal"], inline = true,
+									args = {
+										CheckSteal = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test for a buff that can be transferred to the player with Spellsteal."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "isSteal") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "isSteal", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Spellsteal"],
+											desc = L["If checked, there must be a spellstealable buff."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isSteal") end,
+											get = function(info) return GetTestField("Target's Target Status", "isSteal") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "isSteal", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Spellsteal"],
+											desc = L["If checked, there must not be a spellstealable buff."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "isSteal") end,
+											get = function(info) return GetTestField("Target's Target Status", "isSteal") == false end,
+											set = function(info, value) SetTestField("Target's Target Status", "isSteal", false) end,
+										},
+									},
+								},
+								CheckMaxHealth = {
+									type = "group", order = 40, name = L["Maximum Health"], inline = true, 
+									args = {
+										CheckEnable = {
+											type = "toggle", order = 10, name = L["Enable"], width = "half",
+											desc = L["If checked, test the target's target maximum health."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "checkMaxHealth") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "checkMaxHealth", v) end,
+										},
+										MaxHealth = {
+											type = "input", order = 20, name = L["Maximum Health"],
+											desc = L["Enter minimum value for target's target maximum health required for test to be true."],
+											get = function(info) return GetTestField("Target's Target Status", "maxHealth") end,
+											set = function(info, value) SetTestFieldString("Target's Target Status", "maxHealth", value) end,
+										},
+									},
+								},
+								CheckHealthGroup = {
+									type = "group", order = 50, name = L["Health"], inline = true, 
+									args = {
+										CheckHealthEnable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the target's target health."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "checkHealth") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "checkHealth", v) end,
+										},
+										CheckHealth = {
+											type = "toggle", order = 2, name = L["Minimum"],
+											desc = L["If checked, target's target health must be at least this percentage, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "checkHealth") end,
+											get = function(info) return GetTestField("Target's Target Status", "checkHealth") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "checkHealth", value) end,
+										},
+										HealthRange = {
+											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "checkHealth") end,
+											get = function(info) return GetTestField("Target's Target Status", "minHealth") end,
+											set = function(info, value) SetTestField("Target's Target Status", "minHealth", value) end,
+										},
+									},
+								},
+								CheckPowerGroup = {
+									type = "group", order = 70, name = L["Power"], inline = true, 
+									args = {
+										CheckPowerEnable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the target's target power (i.e., mana, rage, energy, focus, runic power)."],
+											get = function(info) return IsTestFieldOn("Target's Target Status", "checkPower") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Target's Target Status", "checkPower", v) end,
+										},
+										CheckPower = {
+											type = "toggle", order = 2, name = L["Minimum"],
+											desc = L["If checked, target's target power must be at least this percentage, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "checkPower") end,
+											get = function(info) return GetTestField("Target's Target Status", "checkPower") == true end,
+											set = function(info, value) SetTestField("Target's Target Status", "checkPower", value) end,
+										},
+										PowerRange = {
+											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											disabled = function(info) return IsTestFieldOff("Target's Target Status", "checkPower") end,
+											get = function(info) return GetTestField("Target's Target Status", "minPower") end,
+											set = function(info, value) SetTestField("Target's Target Status", "minPower", value) end,
+										},
+									},
+								},
+							},
+						},
 						FocusStatusGroup = {
 							type = "group", order = 40, name = L["Focus Status"],
 							args = {
@@ -8272,6 +8575,291 @@ MOD.OptionsTable = {
 									},
 								},
 							},
+						},
+						FocusTargetStatusGroup = {
+							type = "group", order = 40, name = L["Focus's Target Status"],
+							args = {
+								EnableTestGroup = {
+									type = "group", order = 1, name = L["Enable Test"], inline = true,
+									args = {
+										EnableTest = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, enable this test."],
+											get = function(info) return GetTestField("Focus's Target Status", "enable") end,
+											set = function(info, value) SetTestField("Focus's Target Status", "enable", value) end,
+										},
+									},
+								},
+								ExistsGroup = {
+									type = "group", order = 3, name = L["Exists"], inline = true,
+									args = {
+										CheckExists = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if focus target currently exists."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "exists") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "exists", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Exists"],
+											desc = L["If checked, focus target must exist."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "exists") end,
+											get = function(info) return GetTestField("Focus's Target Status", "exists") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "exists", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Exists"],
+											desc = L["If checked, focus target must not exist."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "exists") end,
+											get = function(info) return GetTestField("Focus's Target Status", "exists") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "exists", false) end,
+										},
+									},
+								},
+								PlayerGroup = {
+									type = "group", order = 5, name = L["Player"], inline = true,
+									args = {
+										CheckPlayer = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the focus target is a player."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "isPlayer") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "isPlayer", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Player"],
+											desc = L["If checked, focus target must be a player."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isPlayer") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isPlayer") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isPlayer", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Player"],
+											desc = L["If checked, focus target must not be a player."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isPlayer") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isPlayer") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isPlayer", false) end,
+										},
+									},
+								},
+								EnemyGroup = {
+									type = "group", order = 10, name = L["Enemy"], inline = true,
+									args = {
+										CheckEnemy = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the focus target is an enemy."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "isEnemy") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "isEnemy", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Enemy"],
+											desc = L["If checked, focus target must be an enemy."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isEnemy") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isEnemy") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isEnemy", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Enemy"],
+											desc = L["If checked, focus target must not be an enemy."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isEnemy") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isEnemy") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isEnemy", false) end,
+										},
+									},
+								},
+								FriendGroup = {
+									type = "group", order = 20, name = L["Friendly"], inline = true,
+									args = {
+										CheckFriend = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the focus target is friendly."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "isFriend") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "isFriend", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Friendly"],
+											desc = L["If checked, focus target must be friendly."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isFriend") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isFriend") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isFriend", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Friendly"],
+											desc = L["If checked, focus target must not be friendly."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isFriend") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isFriend") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isFriend", false) end,
+										},
+									},
+								},
+								DeadGroup = {
+									type = "group", order = 22, name = L["Dead"], inline = true,
+									args = {
+										CheckFriend = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the focus target is dead."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "isDead") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "isDead", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Is Dead"],
+											desc = L["If checked, focus target must be dead."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isDead") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isDead") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isDead", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Dead"],
+											desc = L["If checked, focus target must not be dead."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isDead") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isDead") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isDead", false) end,
+										},
+									},
+								},
+								Classification = {
+									type = "group", order = 25, name = L["Classification"], inline = true,
+									args = {
+										Enable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the focus target's classification (you can select multiple classifications)."],
+											get = function(info) return GetTestField("Focus's Target Status", "classify") end,
+											set = function(info, value) SetTestField("Focus's Target Status", "classify", value) end,
+										},
+										spacer1 = { type = "description", name = "", order = 10 },
+										Normal = {
+											type = "toggle", order = 20, name = L["Normal"], width = "half",
+											desc = L["If checked, test for normal classification."],
+											disabled = function(info) return not GetTestField("Focus's Target Status", "classify") end,
+											get = function(info) return IsClassification("Focus's Target Status", "normal") end,
+											set = function(info, value) SetClassification("Focus's Target Status", "normal", value) end,
+										},
+										Boss = {
+											type = "toggle", order = 21, name = L["Boss"], width = "half",
+											desc = L["If checked, test for boss classification."],
+											disabled = function(info) return not GetTestField("Focus's Target Status", "classify") end,
+											get = function(info) return IsClassification("Focus's Target Status", "worldboss") end,
+											set = function(info, value) SetClassification("Focus's Target Status", "worldboss", value) end,
+										},
+										Elite = {
+											type = "toggle", order = 22, name = L["Elite"], width = "half",
+											desc = L["If checked, test for elite classification."],
+											disabled = function(info) return not GetTestField("Focus's Target Status", "classify") end,
+											get = function(info) return IsClassification("Focus's Target Status", "elite") end,
+											set = function(info, value) SetClassification("Focus's Target Status", "elite", value) end,
+										},
+										Rare = {
+											type = "toggle", order = 23, name = L["Rare"], width = "half",
+											desc = L["If checked, test for rare classification."],
+											disabled = function(info) return not GetTestField("Focus's Target Status", "classify") end,
+											get = function(info) return IsClassification("Focus's Target Status", "rare") end,
+											set = function(info, value) SetClassification("Focus's Target Status", "rare", value) end,
+										},
+										RareElite = {
+											type = "toggle", order = 25, name = L["Rare Elite"],
+											desc = L["If checked, test for rare elite classification."],
+											disabled = function(info) return not GetTestField("Focus's Target Status", "classify") end,
+											get = function(info) return IsClassification("Focus's Target Status", "rlite") end,
+											set = function(info, value) SetClassification("Focus's Target Status", "rlite", value) end,
+										},
+									},
+								},
+								RangeGroup = {
+									type = "group", order = 30, name = L["Range"], inline = true,
+									args = {
+										CheckRange = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test if the focus target is in range."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "inRange") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "inRange", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["In Range"],
+											desc = L["If checked, focus target must be in range."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "inRange") end,
+											get = function(info) return GetTestField("Focus's Target Status", "inRange") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "inRange", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Out Of Range"],
+											desc = L["If checked, focus target must not be in range."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "inRange") end,
+											get = function(info) return GetTestField("Focus's Target Status", "inRange") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "inRange", false) end,
+										},
+									},
+								},
+								StealableGroup = {
+									type = "group", order = 35, name = L["Spellsteal"], inline = true,
+									args = {
+										CheckSteal = {
+											type = "toggle", order = 1, name = L["Enable"],
+											desc = L["If checked, test for a buff that can be transferred to the player with Spellsteal."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "isSteal") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "isSteal", v) end,
+										},
+										DoTrue = {
+											type = "toggle", order = 2, name = L["Spellsteal"],
+											desc = L["If checked, there must be a spellstealable buff."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isSteal") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isSteal") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isSteal", true) end,
+										},
+										DoFalse = {
+											type = "toggle", order = 3, name = L["Not Spellsteal"],
+											desc = L["If checked, there must not be a spellstealable buff."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "isSteal") end,
+											get = function(info) return GetTestField("Focus's Target Status", "isSteal") == false end,
+											set = function(info, value) SetTestField("Focus's Target Status", "isSteal", false) end,
+										},
+									},
+								},
+								CheckHealthGroup = {
+									type = "group", order = 50, name = L["Health"], inline = true, 
+									args = {
+										CheckHealthEnable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the focus target's health."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "checkHealth") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "checkHealth", v) end,
+										},
+										CheckHealth = {
+											type = "toggle", order = 2, name = L["Minimum"],
+											desc = L["If checked, focus target's health must be at least this percentage, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "checkHealth") end,
+											get = function(info) return GetTestField("Focus's Target Status", "checkHealth") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "checkHealth", value) end,
+										},
+										HealthRange = {
+											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "checkHealth") end,
+											get = function(info) return GetTestField("Focus's Target Status", "minHealth") end,
+											set = function(info, value) SetTestField("Focus's Target Status", "minHealth", value) end,
+										},
+									},
+								},
+								CheckPowerGroup = {
+									type = "group", order = 70, name = L["Power"], inline = true, 
+									args = {
+										CheckPowerEnable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the focus target's power (i.e., mana, rage, energy, focus, runic power)."],
+											get = function(info) return IsTestFieldOn("Focus's Target Status", "checkPower") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Focus's Target Status", "checkPower", v) end,
+										},
+										CheckPower = {
+											type = "toggle", order = 2, name = L["Minimum"],
+											desc = L["If checked, focus target's power must be at least this percentage, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "checkPower") end,
+											get = function(info) return GetTestField("Focus's Target Status", "checkPower") == true end,
+											set = function(info, value) SetTestField("Focus's Target Status", "checkPower", value) end,
+										},
+										PowerRange = {
+											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "checkPower") end,
+											get = function(info) return GetTestField("Focus's Target Status", "minPower") end,
+											set = function(info, value) SetTestField("Focus's Target Status", "minPower", value) end,
+										},
+									},
+								},							},
 						},
 						AllBuffsGroup = {
 							type = "group", order = 45, name = L["All Buffs"],
@@ -9957,6 +10545,14 @@ MOD.barOptions = {
 				disabled = function(info) return not GetBarField(info, "enableReady") end,
 				get = function(info) return not GetBarField(info, "readyNotUsable") end,
 				set = function(info, value) SetBarField(info, "readyNotUsable", not value); MOD:UpdateAllBarGroups() end,
+			},
+			EnableChargesTest = {
+				type = "toggle", order = 71, name = L["Charges"], width = "half",
+				desc = L["If checked, apply ready opacity when spell has at least one charge."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Cooldown" end,
+				disabled = function(info) return not GetBarField(info, "enableReady") end,
+				get = function(info) return GetBarField(info, "readyCharges") end,
+				set = function(info, value) SetBarField(info, "readyCharges", value); MOD:UpdateAllBarGroups() end,
 			},
 			ShowTime = {
 				type = "range", order = 75, name = L["Show Time"], min = 0, max = 60, step = 1,

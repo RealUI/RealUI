@@ -43,10 +43,17 @@ function MOD:SetInCombatBarDefaults()
 	for k in pairs(inCombatBarTemplate) do g[k] = p[k] end
 end
 
+-- Check for active tooltip for an overlay and update twice per second
+local function OverlayTooltipUpdate()
+	if MOD.tooltipOverlay and MOD.Overlay_OnEnter then MOD.Overlay_OnEnter(MOD.tooltipOverlay) end
+end
+
 -- Copy in-combat bar settings from the shared layout, if linked, and update the bar for the first time
 function MOD:InitializeInCombatBar()
 	local p, g = MOD.db.profile.InCombatBar, MOD.db.global.InCombatBar
 	if p.link then for k in pairs(inCombatBarTemplate) do p[k] = g[k] end end
+	MOD.tooltipOverlay = nil -- set when an overlay displays a tooltip
+	C_Timer.NewTicker(0.5, OverlayTooltipUpdate) -- update tooltips for overlays when hovering over them
 end
 
 -- Copy in-combat bar settings back to the shared layout, if linked
@@ -99,6 +106,7 @@ local function Overlay_OnEnter(b)
 			if not ttanchor or (ttanchor == "DEFAULT") then ttanchor = "ANCHOR_BOTTOMLEFT" else ttanchor = "ANCHOR_" .. ttanchor end
 			GameTooltip:SetOwner(b, ttanchor)
 		end
+		GameTooltip:ClearLines() -- clear current tooltip contents
 		if b.aura_tt == "weapon" then
 			local slot = GetInventorySlotInfo(b.aura_id)
 			if slot then GameTooltip:SetInventoryItem("player", slot) end
@@ -115,11 +123,13 @@ local function Overlay_OnEnter(b)
 		end
 		if b.aura_caster and (b.aura_caster ~= "") then GameTooltip:AddLine(L["<Applied by "] .. b.aura_caster .. ">", 0, 0.8, 1, false) end
 		GameTooltip:Show()
+		MOD.tooltipOverlay = b
 	end
 end
+MOD.Overlay_OnEnter = Overlay_OnEnter -- save for tooltip update
 
 -- Hide tooltip when leaving an overlay
-local function Overlay_OnLeave(b) GameTooltip:Hide() end
+local function Overlay_OnLeave(b) MOD.tooltipOverlay = nil; GameTooltip:Hide() end
 
 -- Allocate an overlay and initialize the common secure attributes for cancelaura
 local function AllocateOverlay()
@@ -380,6 +390,7 @@ end
 -- Deactivate an overlay by clearing anything that could cause taint and hiding it
 local function DeactivateOverlay(b)
 	if b then
+		if MOD.tooltipOverlay == b then MOD.tooltipOverlay = nil; GameTooltip:Hide() end
 		b:ClearAllPoints()
 		b:EnableMouse(false); b:Hide()
 	end

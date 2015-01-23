@@ -174,13 +174,20 @@ do
                         order = 9,
                         hasAlpha = true,
                         disabled = function(info)
-                            return not addon.db.profile.general.targetglow
+                            return not addon.db.profile.general.targetglow and not addon.db.profile.general.targetarrows
                         end
+                    },
+                    targetarrows = {
+                        name = 'Show target arrows',
+                        desc = 'Show arrows around your target\'s nameplate. They will inherit the colour of the target glow, set above.',
+                        type = 'toggle',
+                        order = 10,
+                        width = 'double'
                     },
                     hheight = {
                         name = 'Health bar height',
                         desc = 'Note that these values do not affect the size or shape of the click-box, which cannot be changed.',
-                        order = 10,
+                        order = 20,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -190,7 +197,7 @@ do
                     thheight = {
                         name = 'Trivial health bar height',
                         desc = 'Height of the health bar of trivial (small, low maximum health) units.',
-                        order = 11,
+                        order = 21,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -199,7 +206,7 @@ do
                     },
                     width = {
                         name = 'Frame width',
-                        order = 12,
+                        order = 22,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -208,7 +215,7 @@ do
                     },
                     twidth = {
                         name = 'Trivial frame width',
-                        order = 14,
+                        order = 24,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -221,20 +228,20 @@ do
                         type = 'select',
                         dialogControl = 'LSM30_Statusbar',
                         values = AceGUIWidgetLSMlists.statusbar,
-                        order = 15,
+                        order = 25,
                     },
                     strata = { 
                         name = 'Frame strata',
                         desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 10.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
                         type = 'select',
                         values = StrataSelectList,
-                        order = 17
+                        order = 27
                     },
 					reactioncolours = {
 						name = 'Reaction colours',
 						type = 'group',
 						inline = true,
-						order = 20,
+						order = 30,
 						args = {
 							hatedcol = {
 								name = 'Hostile',
@@ -343,6 +350,12 @@ do
                                 desc = 'Avoid fading units which are casting.',
                                 type = 'toggle',
                                 order = 5
+                            },
+                            avoidraidicon = {
+                                name = 'Don\'t fade units with raid icons',
+                                desc = 'Avoid fading units which have a raid icon (skull, cross, etc).',
+                                type = 'toggle',
+                                order = 10
                             },
                         },
                     },

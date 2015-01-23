@@ -151,7 +151,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					win.dataset[nr] = d
 					d.label = name
 					local _, class = UnitClass(name)
+                    local role = UnitGroupRolesAssigned(name)
 					d.class = class
+                    d.role = role
 					d.id = name
 					d.threat = threatvalue
 					d.isTanking = isTanking
@@ -173,7 +175,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					win.dataset[nr] = d
 					d.label = name
 					local _, class = UnitClass(name)
+                    local role = UnitGroupRolesAssigned(name)
 					d.class = class
+                    d.role = role
 					d.id = name
 					d.value = threatpct
 					d.isTanking = isTanking

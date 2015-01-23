@@ -673,7 +673,7 @@ end
 
 F.ReskinIcon = function(icon)
 	icon:SetTexCoord(.08, .92, .08, .92)
-	F.CreateBG(icon)
+	return F.CreateBG(icon)
 end
 
 -- [[ Variable and module handling ]]

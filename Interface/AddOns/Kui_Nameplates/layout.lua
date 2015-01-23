@@ -277,7 +277,7 @@ local function OnFrameShow(self)
 
     f.DoShow = true
     -- dispatch the PostShow message after the first UpdateFrame
-    f.DispatchPostShow = true 
+    f.DispatchPostShow = true
 end
 local function OnFrameHide(self)
     self = self.kuiParent
@@ -288,6 +288,10 @@ local function OnFrameHide(self)
 
     if f.targetGlow then
         f.targetGlow:Hide()
+    end
+
+    if f.targetArrows then
+        f.targetArrows:Hide()
     end
 
     addon:ClearGUID(f)
@@ -347,6 +351,9 @@ local function OnFrameUpdate(self, e)
     ------------------------------------------------------------------- Alpha --
     -- determine alpha value!
     if (f.defaultAlpha == 1 and UnitExists('target'))
+       or
+       -- avoid fading units with a raid icon
+       (addon.db.profile.fade.rules.avoidraidicon and f.icon:IsVisible())
        or
        -- avoid fading low hp units
        (((f.friend and addon.db.profile.fade.rules.avoidfriendhp) or
@@ -438,31 +445,39 @@ end
 local function UpdateFrameCritical(self)
     ------------------------------------------------------------------ Threat --
     if self.glow:IsVisible() then
+        -- check the default glow colour every frame while it is visible
         self.glow.wasVisible = true
-
-        -- set glow to the current default ui's colour
         self.glow.r, self.glow.g, self.glow.b = self.glow:GetVertexColor()
-        self:SetGlowColour(self.glow.r, self.glow.g, self.glow.b)
 
         if not self.friend and addon.TankModule and addon.TankMode then
-            -- in tank mode; is the default glow red (are we tanking)?
-			self.hasThreat = true
-			self.holdingThreat = self.glow.r > .9 and (self.glow.g + self.glow.b) < .1
+            -- in tank mode
+            self.hasThreat = true
+            -- we are holding threat if the default glow is red
+            self.holdingThreat = self.glow.r > .9 and (self.glow.g + self.glow.b) < .1
 
-			self:SetGlowColour(unpack(addon.TankModule.db.profile.glowcolour))
+            if not self.targetGlow or not self.target then
+                -- set glow to tank colour unless this is the current target
+                self:SetGlowColour(unpack(addon.TankModule.db.profile.glowcolour))
+            end
 
-			if self.holdingThreat then
-				self:SetHealthColour(true, unpack(addon.TankModule.db.profile.barcolour))
-			else
-				-- losing/gaining threat
-				self:SetHealthColour(true, unpack(addon.TankModule.db.profile.midcolour))
-			end
+            if self.holdingThreat then
+                self:SetHealthColour(true, unpack(addon.TankModule.db.profile.barcolour))
+            else
+                -- losing/gaining threat
+                self:SetHealthColour(true, unpack(addon.TankModule.db.profile.midcolour))
+            end
+        elseif not self.targetGlow or not self.target then
+            -- not in tank mode, so set glow to default ui's current colour
+            -- only when this isn't the current target
+            self:SetGlowColour(self.glow.r, self.glow.g, self.glow.b)
         end
     elseif self.glow.wasVisible then
         self.glow.wasVisible = nil
 
-        -- restore shadow glow colour
-        self:SetGlowColour()
+        if not self.targetGlow or not self.target then
+            -- restore default glow colour
+            self:SetGlowColour()
+        end
 
         if self.hasThreat then
             -- lost threat
@@ -501,6 +516,11 @@ local function UpdateFrameCritical(self)
 
                 if self.targetGlow then
                     self.targetGlow:Show()
+                    self:SetGlowColour(unpack(addon.db.profile.general.targetglowcolour))
+                end
+
+                if self.targetArrows then
+                    self.targetArrows:Show()
                 end
 
                 if self.highlight and addon.db.profile.general.highlight_target then
@@ -524,6 +544,11 @@ local function UpdateFrameCritical(self)
 
             if self.targetGlow then
                 self.targetGlow:Hide()
+                self:SetGlowColour()
+            end
+
+            if self.targetArrows then
+                self.targetArrows:Hide()
             end
 
             if self.highlight and addon.db.profile.general.highlight_target then
@@ -711,6 +736,10 @@ function addon:InitFrame(frame)
     self:CreateName(frame, f)
 
     -- target highlight --------------------------------------------------------
+    if self.db.profile.general.targetarrows then
+        self:CreateTargetArrows(f)
+    end
+
     if self.db.profile.general.targetglow then
         self:CreateTargetGlow(f)
     end
@@ -719,7 +748,7 @@ function addon:InitFrame(frame)
     f.icon:SetParent(f.overlay)
     f.icon:SetSize(addon.sizes.tex.raidicon, addon.sizes.tex.raidicon)
     f.icon:ClearAllPoints()
-    f.icon:SetPoint('LEFT', f.health, 'RIGHT', 5, 1)
+    f.icon:SetPoint('LEFT',f.overlay,'RIGHT',8,0)
 
     --[===[@debug@
     if _G['KuiNameplatesDebug'] then

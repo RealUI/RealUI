@@ -527,7 +527,7 @@ local function CreateFontPopup()
 
  -- Normal font dropdown.
  local dropdown =  MSBTControls.CreateDropdown(normalControlsFrame)
- objLocale = L.DROPDOWNS["normalFont"]
+ local objLocale = L.DROPDOWNS["normalFont"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetListboxHeight(200)
  dropdown:SetPoint("TOPLEFT")
@@ -1606,7 +1606,7 @@ local function CreateScrollAreaConfig()
  
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["scrollArea"]
+ local objLocale = L.DROPDOWNS["scrollArea"]
  dropdown:Configure(200, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOP", frame, "TOP", 0, -20)
  dropdown:SetChangeHandler(
@@ -1789,7 +1789,7 @@ local function CreateScrollAreaConfig()
  frame.animationSpeedSlider = slider
  
  -- Inherit animation speed checkbox.
- checkbox = MSBTControls.CreateCheckbox(frame)
+ local checkbox = MSBTControls.CreateCheckbox(frame)
  objLocale = L.CHECKBOXES["inheritField"] 
  checkbox:Configure(20, objLocale.label, objLocale.tooltip)
  checkbox:SetPoint("BOTTOMLEFT", frame.animationSpeedSlider, "BOTTOMRIGHT", 10, 5)
@@ -1871,7 +1871,7 @@ local function CreateScrollAreaConfig()
 
 
  -- Preview button.
- button = MSBTControls.CreateOptionButton(frame)
+ local button = MSBTControls.CreateOptionButton(frame)
  objLocale = L.BUTTONS["scrollAreasPreview"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("BOTTOM", frame, "BOTTOM", 0, 50)
@@ -1974,7 +1974,7 @@ local function CreateScrollAreaSelection()
  
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["outputScrollArea"]
+ local objLocale = L.DROPDOWNS["outputScrollArea"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -45)
  frame.scrollAreaDropdown = dropdown
@@ -2083,7 +2083,7 @@ end
 -- Validates if the passed skill name does not already exist and is valid.
 -- ****************************************************************************
 local function ValidateSoundFileName(fileName)
- if (not string.find(fileName, ".ogg")) then
+ if (not string.find(fileName, ".mp3") and not string.find(fileName, ".ogg")) then
   return L.MSG_INVALID_SOUND_FILE
  end
 end
@@ -2114,7 +2114,7 @@ local function CreateEvent()
 
  -- Scroll area dropdown.
  local dropdown =  MSBTControls.CreateDropdown(frame)
- objLocale = L.DROPDOWNS["outputScrollArea"]
+ local objLocale = L.DROPDOWNS["outputScrollArea"]
  dropdown:Configure(150, objLocale.label, objLocale.tooltip)
  dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -60)
  controls.scrollAreaDropdown = dropdown
@@ -2302,7 +2302,7 @@ local function CreateClasses()
  
  -- All classes checkbox.
  local checkbox = MSBTControls.CreateCheckbox(frame)
- objLocale = L.CHECKBOXES["allClasses"] 
+ local objLocale = L.CHECKBOXES["allClasses"] 
  checkbox:Configure(24, objLocale.label, objLocale.tooltip)
  checkbox:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -40)
  checkbox:SetClickHandler(
@@ -2748,13 +2748,13 @@ local function CreateMainEvent()
 
 
  -- Trigger conditions label.
- fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+ local fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
  fontString:SetPoint("TOPLEFT", frame.mainEventDropdown, "BOTTOMLEFT", 0, -30)
  fontString:SetText(L.MSG_EVENT_CONDITIONS .. ":")
  frame.triggerConditionsLabel = fontString
  
  -- Add event condition button.
- button = MSBTControls.CreateOptionButton(frame)
+ local button = MSBTControls.CreateOptionButton(frame)
  objLocale = L.BUTTONS["addEventCondition"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.triggerConditionsLabel, "RIGHT", 10, 0)
@@ -2787,7 +2787,7 @@ local function CreateMainEvent()
  controls[#controls+1] = button
 
  -- Main event conditions listbox.
- listbox = MSBTControls.CreateListbox(frame)
+ local listbox = MSBTControls.CreateListbox(frame)
  listbox:Configure(400, 100, 25)
  listbox:SetPoint("TOPLEFT", frame.triggerConditionsLabel, "BOTTOMLEFT", 10, -10)
  listbox:SetCreateLineHandler(CreateMainEventConditionsLine)
@@ -3740,7 +3740,7 @@ local function CreateItemListLine(this)
 
  -- Delete item button.
  local button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteItem"]
+ local objLocale = L.BUTTONS["deleteItem"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(DeleteItemButtonOnClick)
@@ -3792,7 +3792,7 @@ local function CreateItemList()
  
  -- Add item button.
  local button = MSBTControls.CreateOptionButton(frame)
- objLocale = L.BUTTONS["addItem"]
+ local objLocale = L.BUTTONS["addItem"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.itemsFontString, "RIGHT", 10, 0)
  button:SetClickHandler(
@@ -3962,7 +3962,7 @@ local function CreateSkillListLine(this)
 
  -- Delete skill button.
  local button = MSBTControls.CreateIconButton(frame, "Delete")
- objLocale = L.BUTTONS["deleteSkill"]
+ local objLocale = L.BUTTONS["deleteSkill"]
  button:SetTooltip(objLocale.tooltip)
  button:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
  button:SetClickHandler(DeleteSkillButtonOnClick)
@@ -4037,7 +4037,7 @@ local function CreateSkillList()
  
  -- Add skill button.
  local button = MSBTControls.CreateOptionButton(frame)
- objLocale = L.BUTTONS["addSkill"]
+ local objLocale = L.BUTTONS["addSkill"]
  button:Configure(20, objLocale.label, objLocale.tooltip)
  button:SetPoint("LEFT", frame.skillsFontString, "RIGHT", 10, 0)
  button:SetClickHandler(

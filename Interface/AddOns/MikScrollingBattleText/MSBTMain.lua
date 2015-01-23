@@ -105,7 +105,7 @@ local SPELLID_AUTOSHOT = 75
 -- Spell names.
 local SPELL_BLINK					= GetSkillName(1953)
 local SPELL_BLIZZARD				= GetSkillName(10)
---local SPELL_BLOOD_STRIKE			= GetSkillName(45902)
+local SPELL_BLOOD_STRIKE			= GetSkillName(60945)
 local SPELL_BLOOD_STRIKE_OFF_HAND	= GetSkillName(66215)
 local SPELL_HELLFIRE				= GetSkillName(1949)
 local SPELL_HURRICANE				= GetSkillName(16914)
@@ -1474,10 +1474,10 @@ ignoreAuras[SPELL_HURRICANE] = true
 ignoreAuras[SPELL_RAIN_OF_FIRE] = true
 
 -- Get localized off-hand trailer and convert to a lua search pattern.
---[[if (SPELL_BLOOD_STRIKE ~= UNKNOWN and SPELL_BLOOD_STRIKE_OFF_HAND ~= UNKNOWN) then
+if (SPELL_BLOOD_STRIKE ~= UNKNOWN and SPELL_BLOOD_STRIKE_OFF_HAND ~= UNKNOWN) then
  offHandTrailer = string_gsub(SPELL_BLOOD_STRIKE_OFF_HAND, SPELL_BLOOD_STRIKE, "")
  offHandPattern = string_gsub(offHandTrailer, "([%^%(%)%.%[%]%*%+%-%?])", "%%%1")
-end]]
+end
 
 
 

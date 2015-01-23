@@ -8,4 +8,11 @@
 	<Binding name="SKADA_NEWSEGMENT" category="ADDONS">
 		Skada:NewSegment()
 	</Binding>
+	<Binding name="SKADA_STOP" category="ADDONS">
+        if Skada.current and Skada.current.stopped then
+            Skada:ResumeSegment();
+        elseif Skada.current then
+            Skada:StopSegment()
+        end
+	</Binding>
 </Bindings>

@@ -145,6 +145,7 @@ Skada:AddLoadableModule("CC", function(Skada, L)
 				d.valuetext = tostring(player.ccbreaks)
 				d.id = player.id
 				d.class = player.class
+				d.role = player.role
 				if player.ccbreaks > max then
 					max = player.ccbreaks
 				end

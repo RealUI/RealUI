@@ -9,6 +9,7 @@
 
 local _, PhanxChat = ...
 local L = PhanxChat.L
+local hooks = PhanxChat.hooks
 
 InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
 	if PhanxChat.db.MoveEditBox then
@@ -17,9 +18,22 @@ InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
 	end
 end)
 
+local function Insert(editBox, text)
+	-- Remove annoying prepended spaces on shift-clicked links
+	return hooks[editBox].Insert(editBox, strtrim(text))
+end
+
 function PhanxChat:MoveEditBox(frame)
 	local editBox = frame.editBox or _G[frame:GetName() .. "EditBox"]
 	if not editBox then return end
+
+	if not hooks[editBox] then
+		hooks[editBox] = {}
+	end
+	if not hooks[editBox].Insert then
+		hooks[editBox].Insert = editBox.Insert
+		editBox.Insert = Insert
+	end
 
 	if self.db.MoveEditBox then
 		editBox:ClearAllPoints()

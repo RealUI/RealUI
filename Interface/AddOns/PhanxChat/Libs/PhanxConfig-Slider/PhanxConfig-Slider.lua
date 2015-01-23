@@ -1,14 +1,20 @@
 --[[--------------------------------------------------------------------
 	PhanxConfig-Slider
-	Simple slider widget generator.
+	Simple slider widget generator. Requires LibStub.
 	Based on tekKonfig-Slider and AceGUI-3.0-Slider.
-	Requires LibStub.
-	https://github.com/phanx/PhanxConfigWidgets
-	Copyright (c) 2009-2014 Phanx. All rights reserved.
-	See the accompanying README and LICENSE files for more information.
+	https://github.com/Phanx/PhanxConfig-Slider
+
+	Copyright (c) 2009-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Feel free to include copies of this file WITHOUT CHANGES inside World of
+	Warcraft addons that make use of it as a library, and feel free to use code
+	from this file in other projects as long as you DO NOT use my name or the
+	original name of this library anywhere in your project outside of an optional
+	credits line -- any modified versions must be renamed to avoid conflicts and
+	confusion. If you wish to do something else, or have questions about whether
+	you can do something, email me at the address listed above.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = tonumber(strmatch("$Revision: 176 $", "%d+"))
+local MINOR_VERSION = 20141201
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-Slider", MINOR_VERSION)
 if not lib then return end
@@ -70,7 +76,7 @@ local function Slider_OnMouseWheel(self, delta)
 
 	self:SetValue(value)
 
-	local callback = parent.OnValueChanged or parent.Callback
+	local callback = parent.OnValueChanged
 	if callback then
 		callback(parent, value)
 	end
@@ -86,8 +92,9 @@ local function Slider_OnValueChanged(self, value, userInput)
 		parent.valueText:SetText(value)
 	end
 
-	if parent.lastValue and parent.Callback then
-		parent:Callback(value)
+	local callback = parent.OnValueChanged
+	if callback and parent.lastValue then
+		callback(parent, value)
 	end
 
 	parent.lastValue = value

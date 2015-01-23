@@ -33,7 +33,7 @@ function addon:UpdateBackground(f, trivial)
         -- switch to trivial sizes
         f.bg.fill:SetSize(self.sizes.frame.twidth, self.sizes.frame.theight)
         f.bg.fill:SetPoint('BOTTOMLEFT', f.x, f.y)
-        
+
         f.bg:SetPoint('BOTTOMLEFT', f.bg.fill, 'BOTTOMLEFT',
             -self.sizes.frame.bgOffset/2,
             -self.sizes.frame.bgOffset/2)
@@ -42,8 +42,8 @@ function addon:UpdateBackground(f, trivial)
             self.sizes.frame.bgOffset/2)
     elseif not trivial then
         -- switch back to normal sizes
-        f.bg.fill:SetSize(self.sizes.frame.width, self.sizes.frame.height)      
-        
+        f.bg.fill:SetSize(self.sizes.frame.width, self.sizes.frame.height)
+
         f.bg.fill:SetPoint('BOTTOMLEFT', f.x, f.y)
 
         f.bg:SetPoint('BOTTOMLEFT', f.bg.fill, 'BOTTOMLEFT',
@@ -187,7 +187,7 @@ function addon:UpdateLevel(f, trivial)
     end
 end
 ------------------------------------------------------------------- Name text --
-function addon:CreateName(frame, f) 
+function addon:CreateName(frame, f)
     f.name = f:CreateFontString(f.overlay, {
         font = self.font, size = 'name', outline = 'OUTLINE' })
     f.name:SetJustifyV('BOTTOM')
@@ -239,4 +239,26 @@ function addon:UpdateTargetGlow(f, trivial)
     else
         f.targetGlow:SetSize(self.sizes.tex.targetGlowW, self.sizes.tex.targetGlowH)
     end
+end
+---------------------------------------------------------------- Target arrow --
+function addon:CreateTargetArrows(f)
+    local arrowSize = floor(self.sizes.tex.targetArrow)
+    local ta = CreateFrame('Frame',nil,f.overlay)
+
+    ta.left = ta:CreateTexture(nil,'ARTWORK')
+    ta.left:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
+    ta.left:SetPoint('RIGHT',f.overlay,'LEFT',14,-1)
+    ta.left:SetSize(arrowSize,arrowSize)
+
+    ta.right = ta:CreateTexture(nil,'ARTWORK')
+    ta.right:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
+    ta.right:SetTexCoord(1,0,0,1)
+    ta.right:SetPoint('LEFT',f.overlay,'RIGHT',-14,-1)
+    ta.right:SetSize(arrowSize,arrowSize)
+
+    ta.left:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
+    ta.right:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
+
+    ta:Hide()
+    f.targetArrows = ta
 end

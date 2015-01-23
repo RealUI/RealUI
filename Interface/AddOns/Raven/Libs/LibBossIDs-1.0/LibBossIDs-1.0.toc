@@ -5,7 +5,7 @@
 ## Author: Elsia
 ## X-Category: Library
 ## X-License: Public Domain
-## X-Curse-Packaged-Version: r89
+## X-Curse-Packaged-Version: r91
 ## X-Curse-Project-Name: LibBossIDs-1.0
 ## X-Curse-Project-ID: libbossids-1-0
 ## X-Curse-Repository-ID: wow/libbossids-1-0/mainline

@@ -269,6 +269,22 @@ end
 
 ------------------------------------------------------------------------
 
+
+SLASH_CLEARCHAT1 = "/clear"
+SLASH_CLEARCHAT2 = "/clearchat"
+
+SlashCmdList.CLEARCHAT = function(cmd)
+	cmd = cmd and strtrim(strlower(cmd))
+	for i = 1, NUM_CHAT_WINDOWS do
+		local f = _G["ChatFrame"..i]
+		if f:IsVisible() or cmd == "all" then
+			f:Clear()
+		end
+	end
+end
+
+------------------------------------------------------------------------
+
 function PhanxChat:ProcessFrame(frame)
 	if frames[frame] then return end
 

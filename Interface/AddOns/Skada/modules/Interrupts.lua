@@ -48,6 +48,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 				d.valuetext = tostring(player.interrupts)
 				d.id = player.id
 				d.class = player.class
+				d.role = player.role
 				if player.interrupts > max then
 					max = player.interrupts
 				end

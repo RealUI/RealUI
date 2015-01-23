@@ -20,7 +20,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local ShortenChannelNames = self:CreateCheckbox(L.ShortenChannelNames, L.ShortenChannelNames_Desc)
 	ShortenChannelNames:SetPoint("TOPLEFT", notes, "BOTTOMLEFT", -2, -12)
-	function ShortenChannelNames:Callback(value)
+	function ShortenChannelNames:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: ShortenChannelNames", value) end
 		PhanxChat:SetShortenChannelNames(value)
 	end
@@ -29,7 +29,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local RemoveRealmNames = self:CreateCheckbox(L.RemoveRealmNames, L.RemoveRealmNames_Desc)
 	RemoveRealmNames:SetPoint("TOPLEFT", ShortenChannelNames, "BOTTOMLEFT", 0, -8)
-	function RemoveRealmNames:Callback(value)
+	function RemoveRealmNames:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: RemoveRealmNames", value) end
 		db.RemoveRealmNames = value
 	end
@@ -38,7 +38,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local ReplaceRealNames = self:CreateCheckbox(L.ReplaceRealNames, L.ReplaceRealNames_Desc)
 	ReplaceRealNames:SetPoint("TOPLEFT", RemoveRealmNames, "BOTTOMLEFT", 0, -8)
-	function ReplaceRealNames:Callback(value)
+	function ReplaceRealNames:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: ReplaceRealNames", value) end
 		PhanxChat:SetReplaceRealNames(value)
 	end
@@ -63,7 +63,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local EnableArrows = self:CreateCheckbox(L.EnableArrows, L.EnableArrows_Desc)
 	EnableArrows:SetPoint("TOPLEFT", ShortenRealNames, "BOTTOMLEFT", 0, -8)
-	function EnableArrows:Callback(value)
+	function EnableArrows:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: EnableArrows", value) end
 		PhanxChat:SetEnableArrows(value)
 	end
@@ -72,7 +72,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local EnableResizeEdges = self:CreateCheckbox(L.EnableResizeEdges, L.EnableResizeEdges_Desc)
 	EnableResizeEdges:SetPoint("TOPLEFT", EnableArrows, "BOTTOMLEFT", 0, -8)
-	function EnableResizeEdges:Callback(value)
+	function EnableResizeEdges:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetEnableResizeEdges", value) end
 		PhanxChat:SetEnableResizeEdges(value)
 	end
@@ -81,7 +81,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local LinkURLs = self:CreateCheckbox(L.LinkURLs, L.LinkURLs_Desc)
 	LinkURLs:SetPoint("TOPLEFT", EnableResizeEdges, "BOTTOMLEFT", 0, -8)
-	function LinkURLs:Callback(value)
+	function LinkURLs:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetLinkURLs", value) end
 		PhanxChat:SetLinkURLs(value)
 	end
@@ -90,7 +90,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local LockTabs = self:CreateCheckbox(L.LockTabs, L.LockTabs_Desc)
 	LockTabs:SetPoint("TOPLEFT", LinkURLs, "BOTTOMLEFT", 0, -8)
-	function LockTabs:Callback(value)
+	function LockTabs:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetLockTabs", value) end
 		PhanxChat:SetLockTabs(value)
 	end
@@ -99,7 +99,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local MoveEditBox = self:CreateCheckbox(L.MoveEditBox, L.MoveEditBox_Desc)
 	MoveEditBox:SetPoint("TOPLEFT", LockTabs, "BOTTOMLEFT", 0, -8)
-	function MoveEditBox:Callback(value)
+	function MoveEditBox:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetMoveEditBox", value) end
 		PhanxChat:SetMoveEditBox(value)
 	end
@@ -108,7 +108,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HideNotices = self:CreateCheckbox(L.HideNotices, L.HideNotices_Desc)
 	HideNotices:SetPoint("TOPLEFT", MoveEditBox, "BOTTOMLEFT", 0, -8)
-	function HideNotices:Callback(value)
+	function HideNotices:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetHideNotices", value) end
 		PhanxChat:SetHideNotices(value)
 	end
@@ -117,7 +117,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HideRepeats = self:CreateCheckbox(L.HideRepeats, L.HideRepeats_Desc)
 	HideRepeats:SetPoint("TOPLEFT", HideNotices, "BOTTOMLEFT", 0, -8)
-	function HideRepeats:Callback(value)
+	function HideRepeats:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetHideRepeats", value) end
 		PhanxChat:SetHideRepeats(value)
 	end
@@ -126,7 +126,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HidePetCombatLog = self:CreateCheckbox(L.HidePetCombatLog .. NEW, L.HidePetCombatLog_Desc)
 	HidePetCombatLog:SetPoint("TOPLEFT", notes, "BOTTOM", 2, -12)
-	function HidePetCombatLog:Callback(value)
+	function HidePetCombatLog:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: HidePetCombatLog", value) end
 		db.HidePetCombatLog = value
 	end
@@ -135,7 +135,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HideButtons = self:CreateCheckbox(L.HideButtons, L.HideButtons_Desc)
 	HideButtons:SetPoint("TOPLEFT", HidePetCombatLog, "BOTTOMLEFT", 0, -8)
-	function HideButtons:Callback(value)
+	function HideButtons:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetHideButtons", value) end
 		PhanxChat:SetHideButtons(value)
 	end
@@ -144,7 +144,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HideTextures = self:CreateCheckbox(L.HideTextures, L.HideTextures_Desc)
 	HideTextures:SetPoint("TOPLEFT", HideButtons, "BOTTOMLEFT", 0, -8)
-	function HideTextures:Callback(value)
+	function HideTextures:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetHideTextures", value) end
 		PhanxChat:SetHideTextures(value)
 	end
@@ -153,7 +153,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local HideFlash = self:CreateCheckbox(L.HideFlash, L.HideFlash_Desc)
 	HideFlash:SetPoint("TOPLEFT", HideTextures, "BOTTOMLEFT", 0, -8)
-	function HideFlash:Callback(value)
+	function HideFlash:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetHideFlash", value) end
 		PhanxChat:SetHideFlash(value)
 	end
@@ -162,7 +162,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 
 	local ShowClassColors = self:CreateCheckbox(L.ShowClassColors, L.ShowClassColors_Desc)
 	ShowClassColors:SetPoint("TOPLEFT", HideFlash, "BOTTOMLEFT", 0, -8)
-	function ShowClassColors:Callback(value)
+	function ShowClassColors:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetShowClassColors", value) end
 		PhanxChat:SetShowClassColors(value)
 		PhanxChat:SetReplaceRealNames() -- need to flush the bnetName cache
@@ -179,7 +179,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 	--EnableSticky:SetPoint("TOPRIGHT", notes, "BOTTOMRIGHT", -2, -18 - ((ShowClassColors:GetHeight() + 8) * 4))
 	EnableSticky:SetWidth(200)
 
-	function EnableSticky:Callback(value, text)
+	function EnableSticky:OnValueChanged(value, text)
 		if PhanxChat.debug then print("PhanxChat: SetEnableSticky", value) end
 		PhanxChat:SetEnableSticky(value)
 	end
@@ -190,7 +190,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 	FadeTime:SetPoint("TOPLEFT", EnableSticky, "BOTTOMLEFT", 0, -12)
 	--FadeTime:SetPoint("TOPRIGHT", EnableSticky, "BOTTOMRIGHT", 0, -12)
 	FadeTime:SetWidth(200)
-	function FadeTime:Callback(value)
+	function FadeTime:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: SetFadeTime", value) end
 		PhanxChat:SetFadeTime(value)
 		return value
@@ -218,7 +218,7 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 	FontSize:SetPoint("TOPLEFT", FadeTime, "BOTTOMLEFT", 0, -12)
 	--FontSize:SetPoint("TOPRIGHT", FadeTime, "BOTTOMRIGHT", 0, -12)
 	FontSize:SetWidth(200)
-	function FontSize:Callback(value)
+	function FontSize:OnValueChanged(value)
 		if PhanxChat.debug then print("PhanxChat: FCF_SetChatWindowFontSize", value) end
 		db.FontSize = value
 		for frame in pairs(PhanxChat.frames) do
@@ -274,11 +274,5 @@ PhanxChat.AboutPanel = LibStub("LibAboutPanel").new(PHANXCHAT, PHANXCHAT)
 SLASH_PHANXCHAT1 = "/pchat"
 
 SlashCmdList.PHANXCHAT = function(cmd)
-	if strlower(cmd) == "clear" then
-		for i = 1, NUM_CHAT_WINDOWS do
-			_G["ChatFrame"..i]:Clear()
-		end
-		return
-	end
 	InterfaceOptionsFrame_OpenToCategory(PhanxChat.OptionsPanel)
 end
