@@ -63,7 +63,7 @@ function nibRealUI:SetProfileKeys()
 		if db.addonControl[addon].profiles.base.use then
 			local profile = GetProfileInfo(addon)
 			local profKey = data.profKey or "profileKeys"
-			SetProfileKey(data.db, profile, data.isAce, data.profKey)
+			SetProfileKey(data.db, profile, data.isAce, profKey)
 		end
 	end
 end
