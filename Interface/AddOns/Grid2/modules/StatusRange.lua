@@ -66,14 +66,14 @@ function Range:OnDisable()
 	self.timer:Stop() 
 end
 
--- {{ Workaround for WoW 5.0.4 UnitInRange() bug (returns false for player&pet while solo)
-local function UnitSoloInRange() 
-	return true 
-end
-
+-- {{ Workaround for WoW 5.0.4 UnitInRange() bug (returns false for player&pet while solo or in arena)
+local Ranges38 = { 
+	solo  = function() return true end,
+	arena = function(unit) return UnitIsUnit(unit,"player") or UnitInRange(unit) end
+}
 function Range:Grid_GroupTypeChanged(_, groupType)
-	Ranges["38"] = groupType=="solo" and UnitSoloInRange or UnitInRange
-	if (tostring(self.dbx.range) or "38") == "38" then
+	if self.range == "38" then
+		Ranges["38"] = Ranges38[groupType] or UnitInRange 
 		self:UpdateDB()
 	end
 end
@@ -97,9 +97,16 @@ function Range:CreateTimer()
 end
 
 function Range:UpdateDB()
-	UnitRangeCheck = Ranges[tostring(self.dbx.range) or "38"] or Ranges["38"] 
-	if not rezSpell then UnitIsInRange = UnitRangeCheck end
 	self.defaultAlpha = self.dbx.default or 0.25
+	self.range = tostring(self.dbx.range)
+	UnitRangeCheck = Ranges[self.range]
+	if not UnitRangeCheck then
+		self.range = "38"
+		UnitRangeCheck = Ranges["38"]
+	end
+	if not rezSpell then 
+		UnitIsInRange = UnitRangeCheck 
+	end
 	if self.timer then 
 		self.timer.animation:SetDuration(self.dbx.elapsed or 0.25) 
 	end

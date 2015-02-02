@@ -167,7 +167,7 @@ RDDB["Warlords of Draenor"] = {
 		}
 		
 	},
-	[948] = { -- Spires of Arak
+	[989] = { -- Spires of Arak
 		["[1262-]Rukhmar"] = {
 		167615, -- Pierced Armor
 		}

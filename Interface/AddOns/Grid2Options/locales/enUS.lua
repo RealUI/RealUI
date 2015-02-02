@@ -140,11 +140,22 @@ L["Layout"] = true
 L["Layouts"] = true
 L["layout"] = true
 L["Layouts for each type of groups you're in."] = true
+L["Select which layout to use for: "] = true
+L["Layout editor"] = true
+L["Use Raid layout"] = true
+L["Solo"] = true
+L["Party"] = true
+L["Arena"] = true
+L["Raid"] = true
+L["PvP Instances (BGs)"] = true
+L["LFR Instances"] = true
+L["Flexible raid Instances (normal/heroic)"] = true
+L["Mythic raids Instances"] = true
+L["Other raids Instances"] = true
+L["In World"] = true
 L["Layout Settings"] = true
 L["Solo Layout"] = true
-L["Select which layout to use for solo."] = true
 L["Party Layout"] = true
-L["Select which layout to use for party."] = true
 L["Raid %s Layout"] = true
 L["Select which layout to use for %s person raids."] = true
 L["Battleground Layout"] = true
@@ -283,6 +294,8 @@ L["Bar Height"] = true
 L["Choose zero to set the bar to the same height as parent frame"] = true
 L["Anchor to"] = true
 L["Anchor the indicator to the selected bar."] = true
+L["Reverse Fill"] = true
+L["Fill the bar in reverse."] = true
 
 L["Border Size"] = true
 L["Adjust the border of each unit's frame."] = true
@@ -574,6 +587,11 @@ L["Low Health"] = true
 L["Show dead as having Full Health"] = true
 L["Frequent Updates"] = true
 L["Instant Updates"] = true
+L["Normal"] = true
+L["Fast"] = true
+L["Instant"] = true
+L["Update frequency"] = true
+L["Select the health update frequency."] = true
 
 -- health-low status
 L["Use Health Percent"] = true
@@ -601,6 +619,8 @@ L["Color for AFK."] = true
 
 -- heals-incoming status 
 L["Include player heals"] = true
+L["Substract heal absorbs"] =  true
+L["Substract heal absorbs shields from the incoming heals"] = true
 L["Display status for the player's heals."] = true
 L["Minimum value"] = true
 L["Incoming heals below the specified value will not be shown."] = true
@@ -662,7 +682,7 @@ L["Runic Power"] = true
 -- shields status
 L["shields"] = true
 L["Maximum shield amount"] = true
-L["Maximum shield amount value. Only used by bar indicators."] = true
+L["Value used by bar indicators. Select zero to use players Maximum Health."] = true
 L["Normal"] = true
 L["Medium"] = true
 L["Low"] = true
@@ -676,9 +696,11 @@ L["The value below which a shield is considered medium."] = true
 L["Custom Shields"] = true
 L["Type shield spell IDs separated by commas."] = true
 
--- boss-shields status
-L["Boss"] = true
-L["Supported debuffs"] = true
+-- heal-absorbs status
+L["heal-absorbs"] = true
+L["Maximum absorb amount"] = true
+L["Medium absorb threshold"] = true
+L["Low absorb threshold"] = true
 
 -- role related statuses
 L["Hide in combat"] = true
@@ -690,6 +712,7 @@ L["hostile casts against raid members"] = true
 L["advanced threat detection"] = true
 L["arrows pointing to each raid member"] = true
 L["display remaining amount of heal absorb shields"] = true
+L["display remaining amount of damage absorption shields"] = true
 
 -- aoe heals
 L["aoe-"] = true

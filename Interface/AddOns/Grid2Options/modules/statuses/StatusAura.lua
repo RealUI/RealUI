@@ -295,7 +295,6 @@ end )
 
 Grid2Options:RegisterStatusOptions("debuffType", "debuff", function(self, status, options, optionParams)
 	self:MakeStatusColorOptions(status, options, optionParams)
-	self:MakeStatusBlinkThresholdOptions(status, options, optionParams)
 	self:MakeStatusDebuffTypeFilterOptions(status, options, optionParams)
 end,{
 	groupOrder = 10

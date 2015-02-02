@@ -1,0 +1,221 @@
+------------------------------------------------------------------------
+r751 | michaelspain | 2015-01-29 06:36:46 +0000 (Thu, 29 Jan 2015) | 1 line
+Changed paths:
+   A /tags/r751 (from /trunk:750)
+
+Tagging as r751
+------------------------------------------------------------------------
+r750 | michaelspain | 2015-01-29 06:34:15 +0000 (Thu, 29 Jan 2015) | 5 lines
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/LDB/Grid2LDB.lua
+   M /trunk/Options/modules/general/GridFrame.lua
+   M /trunk/modules/IndicatorMultiBar.lua
+
+Fixed By Class Layout.
+Fixed a Grid2LDB issue.
+Little optimization in multibar indicator.
+Removed upper limit for frames width and height configuration.
+
+------------------------------------------------------------------------
+r749 | michaelspain | 2015-01-26 04:12:49 +0000 (Mon, 26 Jan 2015) | 3 lines
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/modules/StatusAuras.lua
+
+StatusAuras:
+- Fixed typeDebuffs crash when a duration threshold was configured. Ticket #374.
+- Removed a workaround to druid wildgrowth expiration time bug (it seems blizzard fixed the issue time ago).
+------------------------------------------------------------------------
+r748 | michaelspain | 2015-01-25 12:17:44 +0000 (Sun, 25 Jan 2015) | 3 lines
+Changed paths:
+   M /trunk/GridLayout.lua
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/modules/IndicatorMultiBar.lua
+
+- Fixed NONE layout (amazing!, it was not working).
+- Fixed raid debuffs encounter journal links (for WOD raids only)
+- Minor optimizations in multibar indicator.
+------------------------------------------------------------------------
+r747 | michaelspain | 2015-01-25 00:54:16 +0000 (Sun, 25 Jan 2015) | 4 lines
+Changed paths:
+   M /trunk/GridIndicator.lua
+   M /trunk/GridStatus.lua
+   M /trunk/GridUtils.lua
+   M /trunk/Options/GridCore.lua
+   M /trunk/Options/GridIndicators.lua
+   M /trunk/Options/GridUtils.lua
+   M /trunk/Options/locales/esES.lua
+   A /trunk/Options/media/indicator-multibar.tga
+   M /trunk/Options/modules/general/GridFrame.lua
+   M /trunk/Options/modules/indicators/Indicator.lua
+   M /trunk/Options/modules/indicators/IndicatorBar.lua
+   A /trunk/Options/modules/indicators/IndicatorMultiBar.lua
+   M /trunk/Options/modules/indicators/IndicatorText.lua
+   M /trunk/Options/modules/indicators/NewIndicator.lua
+   M /trunk/Options/modules/indicators/StatusesIndicator.lua
+   M /trunk/Options/modules/statuses/StatusHealth.lua
+   M /trunk/Options/modules.xml
+   M /trunk/modules/IndicatorBar.lua
+   A /trunk/modules/IndicatorMultiBar.lua
+   M /trunk/modules/IndicatorText.lua
+   M /trunk/modules/StatusHealth.lua
+   M /trunk/modules/StatusPurgatory.lua
+   M /trunk/modules.xml
+
+- Now indicators can be renamed. 
+- Now text shadows can be disabled.
+- Added new status "my-heals-incoming".
+- Added new indicator "multibar": this indicator manages up to 6 stacked bars, including reverse bars.
+------------------------------------------------------------------------
+r746 | michaelspain | 2015-01-18 05:58:14 +0000 (Sun, 18 Jan 2015) | 12 lines
+Changed paths:
+   D /trunk/modules/IndicatorBar-stable.lua
+   D /trunk/modules/IndicatorBarStacked.lua
+
+- Removed some erroneous files.
+From previous revision:
+- Fixed layout selection in Grid2LDB
+- Added a reverseFill option for Bar Indicators. Ticket #358
+- Now auras "show if missing" option will ignore pets. Ticket #403
+- Added an new toggle option in incoming-heals status to substract heal absorbs from incoming heals.
+- Removed "TortosCrystalShell" status.
+- Removed "boss-shields" status.
+- Added a new "heal-absorbs" status: display remaining amount of heal absorb shields from any source: bosses, player spells, etc.
+- Refactored absorb shields code: Removed absorb-above-maxHP, absorb-below-maxHP and absorb-total statuses. Replaced with the already existing status: "shields". This status can be attached to the health bar like absorb-below-max-hp, or linked to a standalone bar/text/square indicator to display total shield absorb value. 
+- Colors based on shield absorb value can be configured now for "shields" status. Ticket #336
+- Fixed ticket 384 (now custom shields cannot be defined in shields status so i bet the problem was gone)
+------------------------------------------------------------------------
+r745 | michaelspain | 2015-01-18 05:50:51 +0000 (Sun, 18 Jan 2015) | 11 lines
+Changed paths:
+   M /trunk/GridDefaults.lua
+   M /trunk/GridFrame.lua
+   M /trunk/GridIndicator.lua
+   M /trunk/GridSetup.lua
+   M /trunk/LDB/Grid2LDB.lua
+   M /trunk/Options/locales/enUS.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/indicators/IndicatorBar.lua
+   A /trunk/Options/modules/statuses/StatusHealAbsorbs.lua
+   M /trunk/Options/modules/statuses/StatusHealth.lua
+   M /trunk/Options/modules/statuses/StatusShields.lua
+   D /trunk/Options/modules/statuses/StatusShieldsBoss.lua
+   M /trunk/Options/modules.xml
+   A /trunk/modules/IndicatorBar-stable.lua
+   M /trunk/modules/IndicatorBar.lua
+   A /trunk/modules/IndicatorBarStacked.lua
+   D /trunk/modules/StatusAbsorbs.lua
+   M /trunk/modules/StatusAuras.lua
+   A /trunk/modules/StatusHealAbsorbs.lua
+   M /trunk/modules/StatusHealth.lua
+   M /trunk/modules/StatusShields.lua
+   D /trunk/modules/StatusShieldsBoss.lua
+   D /trunk/modules/StatusTortosCrystalShell.lua
+   M /trunk/modules.xml
+
+Interface:
+- Fixed layout selection in Grid2LDB
+- Added a reverseFill option for Bar Indicators. Ticket #358
+- Now auras "show if missing" option will ignore pets. Ticket #403
+- Added an new toggle option in incoming-heals status to substract heal absorbs from incoming heals.
+- Removed "TortosCrystalShell" status.
+- Removed "boss-shields" status.
+- Added a new "heal-absorbs" status: display remaining amount of heal absorb shields from any source: bosses, player spells, etc.
+- Refactored absorb shields code: Removed absorb-above-maxHP, absorb-below-maxHP and absorb-total statuses. Replaced with the already existing status: "shields". This status can be attached to the health bar like absorb-below-max-hp, or linked to a standalone bar/text/square indicator to display total shield absorb value. 
+- Colors based on shield absorb value can be configured now for "shields" status. Ticket #336
+- Fixed ticket 384 (now custom shields cannot be defined in shields status so i bet the problem was gone)
+------------------------------------------------------------------------
+r744 | michaelspain | 2015-01-14 18:55:29 +0000 (Wed, 14 Jan 2015) | 2 lines
+Changed paths:
+   M /trunk/GridLayout.lua
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/Options/modules/general/GridTestLayout.lua
+   M /trunk/modules/StatusRange.lua
+
+Grid2Layout: Added extra frame for background and border textures, to be able to resize grid2 window in combat. Changed grid2 window resizing code to fix ticket 401.
+StatusRange: Fixed range issue for player in arena, now party layouts are not allowed for arenas: use a raid layout like "by group","by role", etc.
+------------------------------------------------------------------------
+r743 | michaelspain | 2015-01-12 06:20:28 +0000 (Mon, 12 Jan 2015) | 4 lines
+Changed paths:
+   M /trunk/Options/modules/general/GridLayoutsEditor.lua
+
+Fixing a LayoutEditor bug, now new created custom layouts are correctly displayed in "Raid" option.
+To fix already created layouts: go to the layout editor tab, select the customs layouts (no modification needed),
+and return to the General or Advanced tab.
+Custom layouts are using a new group by "Role" system, if some old custom layout was using the group by "Role" option, this setting will be ignored by the editor, simply reselect "By Role" option.
+------------------------------------------------------------------------
+r742 | michaelspain | 2015-01-10 20:02:04 +0000 (Sat, 10 Jan 2015) | 6 lines
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/Options/locales/enUS.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/statuses/StatusHealth.lua
+   M /trunk/modules/StatusHealth.lua
+
+Fixed "By Role" layout, now must display all players when in Party.
+CurrentHealth status changed, now three frequency update options are available:
+Normal: React to standard UNIT_HEALTH event.
+Fast: React to UNIT_HEALTH and UNIT_HEALTH_FREQUENCY (undocumented event). Slightly more cpu usage.
+Instant: Track combatlog events to update healths as fast as possible, much more cpu usage.
+Default value: Normal  Recomended value: Fast.
+------------------------------------------------------------------------
+r741 | michaelspain | 2015-01-09 18:40:24 +0000 (Fri, 09 Jan 2015) | 5 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+   M /trunk/GridLayout.lua
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/GridRoster.lua
+   M /trunk/Options/locales/enUS.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/general/GridLayout.lua
+   M /trunk/Options/modules/general/GridLayouts.lua
+   M /trunk/Options/modules/general/GridTestLayout.lua
+   M /trunk/locales/enUS.lua
+   M /trunk/locales/esES.lua
+
+Revamped the Layouts management code. 
+Now most layouts are dynamic, for example selecting "By Group" layout the displayed groups are automatic adjusted to fit the maximum players of the instance. If someone wants to display all groups. a non dynamic 40 players layout can be selected too.
+Now "By Role" layouts will work fine, sort order is: tanks, healers, damagers, none.
+Basic options to configure layouts for: solo, party, arena, raid
+Optional Advanced tab to configure layouts for different instances: BGs,LFR, Flexible raids, Mythic raids, other, not in instance/in world.
+------------------------------------------------------------------------
+r740 | michaelspain | 2015-01-05 23:29:24 +0000 (Mon, 05 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/modules/StatusHealth.lua
+
+Reverted r739 statushealth changes
+------------------------------------------------------------------------
+r739 | michaelspain | 2015-01-05 21:46:22 +0000 (Mon, 05 Jan 2015) | 3 lines
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/Options/GridUtils.lua
+   M /trunk/locales/esES.lua
+   M /trunk/modules/StatusHealth.lua
+
+Cleaned some layouts related code, and added a new layout. Now all 40 layouts are selectable in any raid size. 
+Fixed ticket 395.
+Added new event to catch health changes.
+------------------------------------------------------------------------
+r738 | michaelspain | 2015-01-05 16:49:17 +0000 (Mon, 05 Jan 2015) | 5 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+   M /trunk/Options/modules/general/GridLayoutsEditor.lua
+   M /trunk/Options/modules/statuses/StatusHealth.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+   M /trunk/modules/IndicatorBar.lua
+   M /trunk/modules/StatusHealth.lua
+
+Fix for wrong bars positions when background color is enabled in bar indicators.
+Fix aoeheals crash in big raids.
+Now custom layouts can be selected for any raid size (already made layouts must be recreated)
+Added heals multiplier configuration option for incoming heals indicator (its not accurate, use with caution).
+Fix incorrect zoneId for Spires of Arak instance.
+------------------------------------------------------------------------
+r737 | zuz666 | 2014-12-09 06:36:25 +0000 (Tue, 09 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/modules/StatusShields.lua
+
+Added Clarity of Will (Priest) to Shields absorb status
+------------------------------------------------------------------------

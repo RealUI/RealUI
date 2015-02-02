@@ -65,6 +65,18 @@ function Grid2Options:MakeIndicatorTextCustomOptions(indicator, options)
 		end,
 		values = AceGUIWidgetLSMlists.font,
 	}
+	options.shadowDisabled = {
+		type = "toggle",
+		name = L["Disable shadow"],
+		desc = L["Disable shadow"],
+		order = 76,
+		tristate = false,
+		get = function () return indicator.dbx.shadowDisabled end,
+		set = function (_, v)
+			indicator.dbx.shadowDisabled = v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
 	self:MakeHeaderOptions( options, "Display" )
 	options.duration = {
 		type = "toggle",

@@ -3,35 +3,44 @@
 --]]	
 
 local L = Grid2Options.L
+local LG = Grid2Options.LG
 
 -- MakeLayoutsOptions()
 local MakeLayoutsOptions
 do
-	local function GetValues(info) 
-		return Grid2Options:GetLayouts(info.arg) 
+	local function GetValues(info)
+		local layouts = Grid2Options:GetLayouts(info.arg) 
+		if strfind(info.arg,"raid@") then
+			local raid = Grid2Layout.db.profile.layouts["raid"] or "undefined"
+			layouts["default"] = "*" .. L["Use Raid layout"] .. " ("..LG[raid]..")*"
+		end
+		return layouts
 	end
 	local function GetLayout(info)
-		return Grid2Layout.db.profile.layouts[info.arg]
+		return Grid2Layout.db.profile.layouts[info.arg] or "default"
 	end
 	local function SetLayout(info,v)
-		Grid2Layout.db.profile.layouts[info.arg] = v
-		if Grid2Layout.partyType == info.arg then
-			Grid2Layout:LoadLayout(v)
-		end
+		Grid2Layout.db.profile.layouts[info.arg] = (v~="default") and v or nil
+		Grid2Layout:ReloadLayout()
 	end
 	local function TestMode(info)
 		if Grid2Options.LayoutTestEnable then
-			Grid2Options:LayoutTestEnable( GetLayout(info), info.arg )
+			Grid2Options:LayoutTestEnable( Grid2Layout.db.profile.layouts[info.arg] or  
+										   Grid2Layout.db.profile.layouts["raid"] )
 		end	
 	end
-	function MakeLayoutsOptions()
+	function MakeLayoutsOptions(advanced)
 		local options = {}
-		local order = 10
-		local function MakeLayoutOptions(raidType, name, desc)
+		local order = 10	
+		local function MakeSeparatorOption(description)
+			options["sep"..order] = { type = "header",  name = L[description],  order = order }
+			order = order + 100
+		end		
+		local function MakeLayoutOptions(raidType, name)
 			options[raidType]= {
 				type   = "select",
-				name   = name and L[name] or L["Raid %s Layout"]:format( strsub(raidType,-2) ),
-				desc   = desc and L[desc] or L["Select which layout to use for %s person raids."]:format( strsub(raidType,-2) ),
+				name   = L[name],
+				desc   = L["Select which layout to use for: "] .. L[name],
 				order  = order + 5,
 				width  = "double",	
 				get    = GetLayout,
@@ -52,15 +61,21 @@ do
 			options[raidType.."sep"] = { type = "description",  name = "",  order = order + 99 }
 			order = order + 100
 		end
-		MakeLayoutOptions( "solo"  , "Solo Layout" , "Select which layout to use for solo." )
-		MakeLayoutOptions( "party" , "Party Layout", "Select which layout to use for party." )
-		MakeLayoutOptions( "arena" , "Arena Layout", "Select which layout to use for arenas." )
-		MakeLayoutOptions( "raid10" )
-		MakeLayoutOptions( "raid15" )
-		MakeLayoutOptions( "raid20" )
-		MakeLayoutOptions( "raid25" )
-		MakeLayoutOptions( "raid30" )
-		MakeLayoutOptions( "raid40" )	
+		-- partyTypes = solo party arena raid
+		-- instTypes  = none pvp lfr flex mythic other
+		if advanced then
+			MakeLayoutOptions( "raid@pvp"   , "PvP Instances (BGs)" )
+			MakeLayoutOptions( "raid@lfr"   , "LFR Instances" )
+			MakeLayoutOptions( "raid@flex"  , "Flexible raid Instances (normal/heroic)" )
+			MakeLayoutOptions( "raid@mythic", "Mythic raids Instances" )
+			MakeLayoutOptions( "raid@other" , "Other raids Instances" )
+			MakeLayoutOptions( "raid@none"  , "In World" )		
+		else
+			MakeLayoutOptions( "solo"       , "Solo"  )
+			MakeLayoutOptions( "party"      , "Party" )
+			MakeLayoutOptions( "arena"      , "Arena" )
+			MakeLayoutOptions( "raid"       , "Raid"  )
+		end
 		return options
 	end	
 end
@@ -74,12 +89,18 @@ Grid2Options:AddGeneralOptions( "Layouts", nil, {
 			type = "group",
 			order= 200,
 			name = L["General"],
-			args = MakeLayoutsOptions(),
+			args = MakeLayoutsOptions(false),
 		},
 		advanced = {
 			type = "group",
 			order= 201,
 			name = L["Advanced"],
+			args = MakeLayoutsOptions(true),		
+		},
+		editor = {
+			type = "group",
+			order= 202,
+			name = L["Layout editor"],
 			args = Grid2Options.MakeLayoutsEditorOptions and Grid2Options:MakeLayoutsEditorOptions() or {},
 		},
 	},	

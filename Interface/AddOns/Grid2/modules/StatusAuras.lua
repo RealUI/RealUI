@@ -8,6 +8,7 @@ local GetTime = GetTime
 local UnitBuff = UnitBuff
 local UnitDebuff = UnitDebuff
 local abs = math.abs
+local strlen = strlen
 
 --{{ Local variables
 local StatusList = {}
@@ -138,7 +139,7 @@ local function status_Reset(self, unit)
 end
 
 local function status_IsInactive(self, unit) -- used for "missing" status
-	return not self.states[unit]
+	return not ( self.states[unit] or Grid2:UnitIsPet(unit) )
 end
 
 local function status_IsActive(self, unit)
@@ -203,11 +204,9 @@ local function status_GetThresholdColor(self, unit)
 	return color.r, color.g, color.b, color.a
 end
 
--- This function includes a workaround to expiration variations of Druid WildGrowth HoT (little differences in expirations are ignored)
 local function status_UpdateState(self, unit, iconTexture, count, duration, expiration)
-	local prevexp = self.expirations[unit]
 	if count==0 then count = 1 end
-	if self.states[unit]==nil or self.counts[unit] ~= count or prevexp==nil or abs(prevexp-expiration)>0.15 then 
+	if self.states[unit]==nil or self.counts[unit] ~= count or expiration~=self.expirations[unit] then 
 		self.states[unit] = true
 		self.textures[unit] = iconTexture
 		self.counts[unit] = count
@@ -329,7 +328,21 @@ local function status_UpdateStateDebuffType(self, unit, iconTexture, count, dura
 end
 -- }}
 
--- {{ UpdateDB shared by all statuses
+-- {{ UpdateDB 
+local function status_UpdateDebuffTypeDB(self)
+	if self.enabled then self:OnDisable() end
+	self.subType           = self.dbx.subType
+	self.debuffFilter      = self.dbx.debuffFilter
+	self.GetBorder         = Grid2.statusLibrary.GetBorder
+	self.UpdateState       = status_UpdateStateDebuffType
+	self.GetIcon           = status_GetIcon
+	self.GetExpirationTime = status_GetExpirationTime
+	self.GetCount          = status_GetCount
+	self.IsActive          = status_IsActive
+	MakeStatusColorHandler(self)
+	if self.enabled then self:OnEnable() end	
+end
+
 local function status_UpdateDB(self)
 	if self.enabled then self:OnDisable() end
 	local dbx = self.dbx
@@ -341,7 +354,7 @@ local function status_UpdateDB(self)
 		self.GetExpirationTime = status_GetExpirationTimeMissing
 		self.GetCount          = status_GetCountMissing
 		self.IsActive          = dbx.blinkThreshold and status_IsInactiveBlink or status_IsInactive
-		MakeStatusColorHandler(self)		
+		MakeStatusColorHandler(self)
 	else
 		self.GetIcon           = status_GetIcon
 		self.GetExpirationTime = status_GetExpirationTime
@@ -365,22 +378,15 @@ local function status_UpdateDB(self)
 			MakeStatusColorHandler(self)
 		end
 	end
-	if dbx.type=="debuffType" then
-		self.subType      = self.dbx.subType
-		self.debuffFilter = self.dbx.debuffFilter
-		self.GetBorder    = Grid2.statusLibrary.GetBorder
-		self.UpdateState  = status_UpdateStateDebuffType
+	if dbx.auras then  
+		self.UpdateState =  (dbx.mine==2 and status_UpdateStateGroupNotMine) or
+							(dbx.mine    and status_UpdateStateGroupMine) or
+							 status_UpdateStateGroup
 	else
-		if dbx.auras then  
-			self.UpdateState =  (dbx.mine==2 and status_UpdateStateGroupNotMine) or
-								(dbx.mine    and status_UpdateStateGroupMine) or
-								 status_UpdateStateGroup
-		else
-			self.UpdateState =  (dbx.mine==2 and status_UpdateStateNotMine) or
-								(dbx.mine    and status_UpdateStateMine) or
-								 status_UpdateState
-		end
-	end	
+		self.UpdateState =  (dbx.mine==2 and status_UpdateStateNotMine) or
+							(dbx.mine    and status_UpdateStateMine) or
+							 status_UpdateState
+	end
 	if self.enabled then self:OnEnable() end
 end
 --}}
@@ -395,17 +401,18 @@ local function CreateAuraCommon(baseKey, dbx, types)
 	status.expirations = {}
 	status.durations = {}
 	
-	status.UpdateDB    = status_UpdateDB
 	status.Reset       = status_Reset
 	status.GetCountMax = status_GetCountMax
 	status.GetDuration = status_GetDuration
 	status.GetPercent  = status_GetPercent
 	
 	if dbx.type == "debuffType" then
+		status.UpdateDB  = status_UpdateDebuffTypeDB	
 		status.OnEnable  = status_OnDebuffTypeEnable
 		status.OnDisable = status_OnDebuffTypeDisable
 	else
 		status.tracker = {}
+		status.UpdateDB  = status_UpdateDB
 		status.OnEnable  = dbx.type=="buff" and status_OnBuffEnable  or status_OnDebuffEnable
 		status.OnDisable = dbx.type=="buff" and status_OnBuffDisable or status_OnDebuffDisable
 	end

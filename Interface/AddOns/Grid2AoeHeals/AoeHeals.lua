@@ -48,7 +48,6 @@ local tostring = tostring
 local bit_band = bit.band
 
 --{{
-local raidSizes = {raid40= 30, raid30= 30, raid25= 25, raid20= 20, raid15=15, raid10=10, party=5, solo=5}
 
 local frame, timer
 local statuses = {} 
@@ -56,7 +55,7 @@ local hlStatuses = {}
 
 local roster  = {}		-- current roster, array part indexed by position, hash part indexed by unit
 local rosterv = {}		-- valid roster,  excluded: out of range, dead, charmed units (or units at full health for chainheal status)
-local rosterRaid    	-- precalculated roster tables (30 units) to avoid garbage
+local rosterRaid    	-- precalculated roster tables (40 units) to avoid garbage
 
 local rosterValid       -- True if roster units are up to date
 local rosterPosValid	-- True if roster units position and health data was updated
@@ -74,9 +73,9 @@ end
 local function UpdateRoster()
 	ClearAllIndicators()
 	wipe(roster)
-	local m = min( IsInRaid() and GetNumGroupMembers() or 0, 30 )
+	local m = min( IsInRaid() and GetNumGroupMembers() or 0, 40 )
 	if m>0 then
-		local g = raidSizes[Grid2Layout.partyType or "solo"]  / 5
+		local g = Grid2Layout.maxInstanceGroups or 8
 		local i  = 1
 		for j=1,m do 
 			local h = select( 3, GetRaidRosterInfo(j) )
@@ -111,7 +110,7 @@ end
 local function Init()
 	if not rosterRaid then
 		rosterRaid  = {}
-		for i=1,30 do
+		for i=1,40 do
 			rosterRaid[i] = { neighbors={} } 
 		end	
 	end

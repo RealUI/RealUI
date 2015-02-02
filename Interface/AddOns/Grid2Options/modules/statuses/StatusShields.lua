@@ -9,16 +9,16 @@ Grid2Options:RegisterStatusOptions("shields", "health", function(self, status, o
 	self:MakeSpacerOptions(options, 30)
 	options.maxShieldAmount = {
 		type = "range",
-		order = 31,
+		order = 34,
 		name = L["Maximum shield amount"],
-		desc = L["Maximum shield amount value. Only used by bar indicators."],
+		desc = L["Value used by bar indicators. Select zero to use players Maximum Health."],
 		min = 0,
-		softMax = 100000,
-		bigStep = 100,
+		softMax = 200000,
+		bigStep = 1000,
 		step = 1,
-		get = function () return status.dbx.maxShieldAmount or 30000 end,
+		get = function () return status.dbx.maxShieldValue or 0 end,
 		set = function (_, v) 
-			status.dbx.maxShieldAmount = v  
+			status.dbx.maxShieldValue = v>0 and v or nil
 			status:UpdateDB() 
 		end,
 	}
@@ -28,8 +28,8 @@ Grid2Options:RegisterStatusOptions("shields", "health", function(self, status, o
 		name = L["Medium shield threshold"],
 		desc = L["The value below which a shield is considered medium."],
 		min = 0,
-		softMax = 100000,
-		bigStep = 100,
+		softMax = 200000,
+		bigStep = 1000,
 		step = 1,
 		get = function () return status.dbx.thresholdMedium end,
 		set = function (_, v)
@@ -40,12 +40,12 @@ Grid2Options:RegisterStatusOptions("shields", "health", function(self, status, o
 	}
 	options.thresholdLow = {
 		type = "range",
-		order = 34,
+		order = 31,
 		name = L["Low shield threshold"],
 		desc = L["The value below which a shield is considered low."],
 		min = 0,
-		softMax = 100000,
-		bigStep = 100,
+		softMax = 200000,
+		bigStep = 1000,
 		step = 1,
 		get = function () return status.dbx.thresholdLow end,
 		set = function (_, v)
@@ -73,52 +73,7 @@ Grid2Options:RegisterStatusOptions("shields", "health", function(self, status, o
 			end,
 		}
 	end
-	options.filter = {
-		type = "group",
-		order = 40,
-		inline= true,
-		name = L["shields"],
-		args = {},
-	}
-	local dbx = status.dbx
-	local shields = status:GetAvailableShields()
-	for _,spellId in pairs(shields) do
-		options.filter.args["shield"..spellId] = {
-			type = "toggle",
-			width = "normal",
-			name = GetSpellInfo(spellId) or tostring(spellId),
-			get = function () return not (dbx.filtered and dbx.filtered[spellId]) end,
-			set = function (_, value)
-				if value then
-					if dbx.filtered then
-						dbx.filtered[spellId] = nil
-						if not next(dbx.filtered) then dbx.filtered = nil end
-					end	
-				else
-					if not dbx.filtered then dbx.filtered = {} end
-					dbx.filtered[spellId] = true
-				end
-				status:UpdateDB()
-			end,
-		}
-	end
-	options.customShields = {
-		type = "input",
-		order = 120,
-		width = "full",
-		name = L["Custom Shields"], 
-		desc = L["Type shield spell IDs separated by commas."],
-		get = function () return status.dbx.customShields end,
-		set = function (_, v)
-			local shields = { strsplit( ",", strtrim(v, ", ")  ) }
-			for i=1,#shields do
-				local spellId = tonumber(strtrim(shields[i]))
-				shields[i] = GetSpellInfo(spellId) and tostring(spellId) or nil
-			end
-			status.dbx.customShields = table.concat(shields,",")
-			status:UpdateDB()
-		end,
-	}
 end, {
+	title = L["display remaining amount of damage absorb shields"],
 	titleIcon = "Interface\\ICONS\\Spell_Holy_PowerWordShield"
 } )

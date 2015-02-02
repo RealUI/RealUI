@@ -63,13 +63,13 @@ local function MakeDefaultsCommon()
 	Grid2:DbSetMap( "border", "health-low", 55)
 	Grid2:DbSetMap( "border", "target", 50)
 
-	Grid2:DbSetValue( "indicators",  "health", {type = "bar", childBar = "heals", level = 2, location= Location("CENTER"), texture = "Gradient", color1 = {r=0,g=0,b=0,a=1}})
+	Grid2:DbSetValue( "indicators",  "health", {type = "bar", level = 2, location= Location("CENTER"), texture = "Gradient", color1 = {r=0,g=0,b=0,a=1}})
 	Grid2:DbSetMap( "health", "health-current", 99)
 
 	Grid2:DbSetValue( "indicators",  "health-color", {type = "bar-color"})
 	Grid2:DbSetMap( "health-color", "classcolor", 99)
 
-	Grid2:DbSetValue( "indicators",  "heals", {type = "bar", parentBar = "health", level = 1, location = Location("CENTER"), texture = "Gradient", opacity=0.25, color1 = {r=0,g=0,b=0,a=0}})
+	Grid2:DbSetValue( "indicators",  "heals", {type = "bar", anchorTo = "health", level = 1, location = Location("CENTER"), texture = "Gradient", opacity=0.25, color1 = {r=0,g=0,b=0,a=0}})
 	Grid2:DbSetMap( "heals", "heals-incoming", 99)
 
 	Grid2:DbSetValue( "indicators",  "heals-color", {type = "bar-color"})
@@ -267,24 +267,31 @@ end
 function Grid2:UpdateDefaults()
 
 	local version= Grid2:DbGetValue("versions","Grid2") or 0
-	if version>=3 then return end
+	if version>=4 then return end
 	
 	if version==0 then
 		MakeDefaultsCommon()
 		MakeDefaultsClass()
-	end	
-	
-	if version<2 then
-		-- Upgrade health&heals indicator
+	else
 		local health = Grid2:DbGetValue("indicators", "health")
 		local heals  = Grid2:DbGetValue("indicators", "heals")
-		if health and heals then
-			health.childBar = "heals"
-			heals.parentBar = "health"
+		if version<2 then
+			-- Upgrade health&heals indicator to version 2
+			if health and heals then heals.parentBar = "health"	end
 		end
+		if version<4 then
+			-- Upgrade health&heals indicator to version 4
+			if heals and heals.parentBar then
+				heals.anchorTo = heals.parentBar
+				heals.parentBar = nil
+			end
+			if health and health.childBar then
+				health.childBar = nil
+			end
+		end	
 	end
 	
 	-- Set database version
-	Grid2:DbSetValue("versions","Grid2",3)
+	Grid2:DbSetValue("versions","Grid2",4)
 
 end

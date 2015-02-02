@@ -147,22 +147,25 @@ function GridFramePrototype:Layout()
 	-- highlight texture
 	self:SetHighlightTexture(dbx.mouseoverHighlight and "Interface\\QuestFrame\\UI-QuestTitleHighlight" or nil)
 	-- Adjust indicators position to the new size
-	for _, indicator in Grid2:IterateIndicators() do
-		indicator:Layout(self)
+	local indicators = Grid2:GetIndicatorsSorted()
+	for i=1,#indicators do
+		indicators[i]:Layout(self)
 	end
 end
 
 function GridFramePrototype:CreateIndicators()
-	for _, indicator in Grid2:IterateIndicators() do
-		indicator:Create(self)
+	local indicators = Grid2:GetIndicatorsSorted()
+	for i=1,#indicators do
+		indicators[i]:Create(self)
 	end
 end
 
 function GridFramePrototype:UpdateIndicators()
 	local unit = self.unit
 	if unit then
-		for _, indicator in Grid2:IterateIndicators() do
-			indicator:Update(self, unit)
+		local indicators = Grid2:GetIndicatorsSorted()
+		for i=1,#indicators do
+			indicators[i]:Update(self, unit)
 		end
 	end	
 end

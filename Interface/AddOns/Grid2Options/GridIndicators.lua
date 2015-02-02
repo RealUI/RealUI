@@ -12,7 +12,8 @@ Grid2Options.indicatorIconPath = "Interface\\Addons\\Grid2Options\\media\\indica
 -- Creatable indicators list
 Grid2Options.indicatorTypes = {}
 -- Indicators sort order
-Grid2Options.indicatorTypesOrder= {	alpha = 1, border = 2, bar = 3, text = 4, square = 5, icon = 6 }
+Grid2Options.indicatorTypesOrder= {	alpha = 1, border = 2, multibar =3, bar = 4, text = 5, square = 6, icon = 7 }
+
 
 -- Register indicator options
 function Grid2Options:RegisterIndicatorOptions(type, isCreatable, funcMakeOptions, optionParams)
@@ -47,7 +48,7 @@ function Grid2Options:MakeIndicatorOptions(indicator)
 		childGroups = "tab",
 		icon  = self.indicatorIconPath .. (self.indicatorTypesOrder[type] and type or "default"),
 		order = self.indicatorTypesOrder[type] or nil,
-		name  = L[indicator.name],
+		name  = self.LI[indicator.name] or L[indicator.name],
 		desc  = L["Options for %s."]:format(indicator.name),
 		args  = options,
 	}

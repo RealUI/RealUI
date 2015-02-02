@@ -107,7 +107,7 @@ end
 
 -- Events to track raid type changes
 do 
-	local groupType
+	local groupType, instType, instMaxPlayers
 	function Grid2:PLAYER_ENTERING_WORLD()
 		-- this is needed to trigger an update when switching from one BG directly to another
 		groupType = nil
@@ -116,42 +116,56 @@ do
 		if self.db.profile.hideBlizzardRaidFrames then
 			Grid2:HideBlizzardRaidFrames()
 		end
-	end
-	local function GetGroupType(...)
-		local count = GetNumGroupMembers()
-		if IsInRaid() then
-			for i = select("#",...)-1, 1, -1 do 
-				if count > select(i,...) then 
-					return "raid"..select(i+1,...)	
-				end
-			end
-		end	
-		return count>0 and "party" or "solo"
-	end
+	end	
+	-- partyTypes = solo party arena raid
+	-- instTypes  = none pvp lfr flex mythic other
 	function Grid2:GroupChanged(event)
-		local _, instType = IsInInstance()
-		local _, _, difficultyID = GetInstanceInfo()
-		if instType == "raid" and IsInRaid() then
-			if select(8, GetInstanceInfo()) == 409 then
-				instType = "raid40"
-			elseif difficultyID == 16 then --Mythic
-				instType = "raid20"
-			--elseif difficultyID == 7 then --LFR... does lfr scale up?
-			--	instType = "raid25"
-			elseif difficultyID == 14 or difficultyID == 15 then --flexible raid normal/heroic
-				instType = GetGroupType(0, 10, 15, 25, 30)
-			else --oldass 10/25raids
-				instType = select(5,GetInstanceInfo()) > 10 and "raid25" or "raid10"
+		local newGroupType
+		local InInstance, newInstType = IsInInstance()
+		local _, _, difficultyID, _, maxPlayers = GetInstanceInfo()		
+		
+		if newInstType == "arena" then		
+			-- arena@arena instances
+			newGroupType = newInstType
+			maxPlayers = 5
+		else
+			if IsInRaid() then
+				newGroupType = "raid"
+				if InInstance then
+					if newInstType == "pvp" then
+						-- raid@pvp / PvP battleground instance
+					elseif newInstType == "none" then
+						-- raid@none / Not in Instance, in theory its not posible to reach this point
+						maxPlayers = 40
+					elseif difficultyID == 17 then
+						-- raid@lfr / Looking for Raid instances (but not LFR especial events instances)
+						newInstType = "lfr"
+					elseif difficultyID == 16 then
+						-- raid@mythic / Mythic instance      
+						newInstType = "mythic"
+					elseif maxPlayers == 30 then
+						-- raid@flex / Flexible instances normal/heroic (but no LFR)
+						newInstType = "flex"
+					else
+						-- raid@other / Other instances: old raids/garrison/especial instances/unknow instances
+						newInstType = "other"
+					end
+				else
+					-- raid@none / In World Map or Garrison
+					newInstType = "none"
+					maxPlayers = 40
+				end
+			elseif GetNumGroupMembers()>0 then
+				newGroupType, newInstType, maxPlayers = "party", "other", 5
+			else
+				newGroupType, newInstType, maxPlayers = "solo", "other", 1
 			end
-		elseif instType == "pvp" then
-			instType = GetGroupType(0, 10, 15, 40)
-		elseif instType ~= "arena" then
-			instType = GetGroupType(0, 10, 25, 40)
-		end
-		self:Debug("GroupChanged", groupType, "=>", instType)
-		if groupType ~= instType then
-			groupType = instType
-			self:SendMessage("Grid_GroupTypeChanged", groupType)
+		end		
+		maxPlayers = maxPlayers or 40
+		self:Debug("GroupChanged", groupType, instType, "=>", newGroupType, newInstType, maxPlayers)
+		if groupType ~= newGroupType or instType ~= newInstType or instMaxPlayers ~= maxPlayers then
+			groupType, instType, instMaxPlayers = newGroupType, newInstType, maxPlayers
+			self:SendMessage("Grid_GroupTypeChanged", groupType, instType, maxPlayers)
 		end
 		self:UpdateRoster()
 	end

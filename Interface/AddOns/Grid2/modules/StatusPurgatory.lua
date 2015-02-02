@@ -6,7 +6,7 @@ local UnitDebuff = UnitDebuff
 local fmt = string.format
 local Purgatory_AuraName = GetSpellInfo(116888)
 
-local Purgatory_cache = {}
+local Purgatory_cache = setmetatable( {}, {__index = function() return 0 end} )
 local DK_UnitIDs = {}
 
 function Purgatory:OnEnable()

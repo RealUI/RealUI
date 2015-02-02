@@ -4,19 +4,48 @@ Created by Grid2 original authors, modified by Michael
 
 local Grid2 = Grid2
 
+-- function Grid2:SetupIndicators(setup)
+    -- -- remove old indicators 
+	-- for _, indicator in Grid2:IterateIndicators() do
+		-- Grid2:UnregisterIndicator(indicator)        
+	-- end
+	-- -- add new indicator types
+	-- for baseKey, dbx in pairs(setup) do
+		-- local setupFunc = self.setupFunc[dbx.type]
+		-- if (setupFunc) then
+			-- setupFunc(baseKey, dbx)
+        -- else
+			-- Grid2:Debug("SetupIndicators setupFunc not found for indicator: ", dbx.type)
+		-- end
+	-- end
+-- end
+
 function Grid2:SetupIndicators(setup)
+	local loaded = {}
+	-- Parent indicators are loaded before child indicators
+	local function SetupIndicator(baseKey, dbx)
+		if loaded[baseKey] then return true end
+		local anchorTo = dbx.anchorTo
+		if (not anchorTo) or SetupIndicator(anchorTo, setup[anchorTo]) then
+			local setupFunc = self.setupFunc[dbx.type]
+			if (setupFunc) then
+				setupFunc(baseKey, dbx)
+				loaded[baseKey] = true
+				return true
+			else
+				Grid2:Debug("SetupIndicators setupFunc not found for indicator: ", dbx.type)
+			end
+		else
+			Grid2:Debug("SetupIndicators child indicator not loaded due to failed dependencies: ", parent, dbx.type)
+		end	
+	end
     -- remove old indicators 
 	for _, indicator in Grid2:IterateIndicators() do
-		Grid2:UnregisterIndicator(indicator)        
+		Grid2:UnregisterIndicator(indicator)
 	end
 	-- add new indicator types
 	for baseKey, dbx in pairs(setup) do
-		local setupFunc = self.setupFunc[dbx.type]
-		if (setupFunc) then
-			setupFunc(baseKey, dbx)
-        else
-			Grid2:Debug("SetupIndicators setupFunc not found for indicator: ", dbx.type)
-		end
+		SetupIndicator(baseKey, dbx)
 	end
 end
 

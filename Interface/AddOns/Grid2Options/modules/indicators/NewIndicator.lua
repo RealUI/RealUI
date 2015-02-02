@@ -40,6 +40,19 @@ local function NewIndicator()
 				dbx.orientation= "HORIZONTAL"
 			end
 			Grid2:DbSetIndicator( newIndicatorName.."-color" , { type="bar-color" })
+		elseif (newIndicatorValues.type == "multibar") then
+			dbx.level = 3
+			dbx.texture= "Gradient"
+			dbx.textureColor = { r=0, g=0, b=0, a=1 }
+			local point= newIndicatorValues.relPoint
+			if point=="LEFT" or point=="RIGHT" then
+				dbx.width= 4
+				dbx.orientation= "VERTICAL"
+			elseif point~="CENTER" then
+				dbx.height= 4
+				dbx.orientation= "HORIZONTAL"
+			end
+			Grid2:DbSetIndicator( newIndicatorName.."-color" , { type="multibar-color" })			
 		end
 		Grid2:DbSetIndicator(newIndicatorName,dbx)
 		-- Create runtime indicator 
@@ -109,7 +122,7 @@ function Grid2Options:MakeNewIndicatorOptions()
 		type = 'select',
 		order = 3,
 		name = L["Type"],
-		width = "half",
+		-- width = "half",
 		desc = L["Type of indicator to create"],
 		values = Grid2Options.indicatorTypes,
 		get = function() return newIndicatorValues.type end,

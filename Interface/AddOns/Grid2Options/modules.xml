@@ -33,7 +33,7 @@
 <Script file="modules\statuses\StatusReadyCheck.lua"/>
 <Script file="modules\statuses\StatusRole.lua"/>
 <Script file="modules\statuses\StatusShields.lua"/>
-<Script file="modules\statuses\StatusShieldsBoss.lua"/>
+<Script file="modules\statuses\StatusHealAbsorbs.lua"/>
 <Script file="modules\statuses\StatusThreat.lua"/>
 <Script file="modules\statuses\StatusMisc.lua"/>
 
@@ -43,6 +43,7 @@
 <Script file="modules\indicators\StatusesIndicator.lua"/>
 <Script file="modules\indicators\IndicatorAlpha.lua"/>
 <Script file="modules\indicators\IndicatorBar.lua"/>
+<Script file="modules\indicators\IndicatorMultiBar.lua"/>
 <Script file="modules\indicators\IndicatorBorder.lua"/>
 <Script file="modules\indicators\IndicatorIcon.lua"/>
 <Script file="modules\indicators\IndicatorSquare.lua"/>

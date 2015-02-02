@@ -387,6 +387,21 @@ local function DeleteRaidDebuff(boss, spellId)
 	end
 end
 
+local function OpenJournal(info) 
+	local EJ_ID = info.arg.EJ_ID
+	if not IsAddOnLoaded("Blizzard_EncounterJournal") then LoadAddOn("Blizzard_EncounterJournal") end
+	local instanceID, encounterID, sectionID = EJ_HandleLinkPath(1, EJ_ID)
+	local _,_,difficulty = GetInstanceInfo()
+	if instanceID ~= EJ_GetCurrentInstance()  then
+		difficulty = GSRD.db.profile.defaultEJ_difficulty or 14
+	end
+	if InterfaceOptionsFrame:IsShown() then
+		InterfaceOptionsFrameOkay:Click()
+		GameMenuButtonContinue:Click()
+	end
+	EncounterJournal_OpenJournal(difficulty, instanceID, encounterID, sectionID)
+end
+
 local function MakeDebuffOptions(bossName, spellId, isCustom)
 	local spellName,_, spellIcon = GetSpellInfo(spellId)
 	local options= {
@@ -548,21 +563,8 @@ local function AddInstanceOptions(options)
 		order = 15,
 		width = "full",
 		name = L["Show in Encounter Journal"],
-		func = function() 
-				if not IsAddOnLoaded("Blizzard_EncounterJournal") then LoadAddOn("Blizzard_EncounterJournal") end
-				local instanceID, encounterID, sectionID = EJ_HandleLinkPath(1, EJ_ID)
-				local difficulty = select(3, GetInstanceInfo())
-				if difficulty > 2 and difficulty < 8 then 
-					difficulty = difficulty -2 
-				else 
-					difficulty = GSRD.db.profile.defaultEJ_difficulty or 4 
-				end
-				if InterfaceOptionsFrame:IsShown() then
-					InterfaceOptionsFrameOkay:Click()
-					GameMenuButtonContinue:Click()
-				end
-				EncounterJournal_OpenJournal(difficulty, instanceID)
-		end,
+		func =  OpenJournal,
+		arg = { EJ_ID = EJ_ID },
 		hidden = EJ_ID == nil,
 	}
 end
@@ -610,21 +612,8 @@ local function AddBossOptions(options, name)
 				order = 15,
 				width = "full",
 				name = L["Show in Encounter Journal"],
-				func = function() 
-						if not IsAddOnLoaded("Blizzard_EncounterJournal") then LoadAddOn("Blizzard_EncounterJournal") end
-						local instanceID, encounterID, sectionID = EJ_HandleLinkPath(1, EJ_ID)
-						local difficulty = select(3, GetInstanceInfo())
-						if difficulty > 2 and difficulty < 8 then 
-							difficulty = difficulty -2 
-						else 
-							difficulty = GSRD.db.profile.defaultEJ_difficulty or 4 
-						end
-						if InterfaceOptionsFrame:IsShown() then
-							InterfaceOptionsFrameOkay:Click()
-							GameMenuButtonContinue:Click()
-						end
-						EncounterJournal_OpenJournal(difficulty, instanceID, encounterID, sectionID)
-				end,
+				func =  OpenJournal,
+				arg = { EJ_ID = EJ_ID },
 				hidden = EJ_ID == nil,
 			},
 		},
@@ -743,17 +732,17 @@ local function MakeDefaultDifficultyEJ_LinkOption(options)
 	options.difficulty = {
 		type = "select",
 		order = 200,
-		name = "Encounter Journal difficulty",
+		name = L["Encounter Journal difficulty"],
 		desc = "Default difficulty for Encounter Journal links",
-		get = function () return GSRD.db.profile.defaultEJ_difficulty or 4 end,
+		get = function () return GSRD.db.profile.defaultEJ_difficulty or 14 end,
 		set = function (_, v) 
 			GSRD.db.profile.defaultEJ_difficulty = v
 		end,
 		values = {
-			[1] = "(10) "..PLAYER_DIFFICULTY1,
-			[2] = "(25) "..PLAYER_DIFFICULTY1,
-			[3] = "(10) "..PLAYER_DIFFICULTY2,
-			[4] = "(25) "..PLAYER_DIFFICULTY2,
+			[14] = PLAYER_DIFFICULTY1, -- Normal
+			[15] = PLAYER_DIFFICULTY2, -- Heroic
+			[16] = PLAYER_DIFFICULTY6, -- Mythic
+			[17] = PLAYER_DIFFICULTY3  -- LFR
 		},
 	}
 end

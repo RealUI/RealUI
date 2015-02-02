@@ -8,7 +8,7 @@ local LG = Grid2Options.LG
 
 local Grid2Layout = Grid2:GetModule("Grid2Layout")
 
-local DEFAULT_GROUP_ORDER = "WARRIOR,DEATHKNIGHT,ROGUE,PALADIN,DRUID,SHAMAN,PRIEST,MAGE,WARLOCK,HUNTER"
+local DEFAULT_GROUP_ORDER = "WARRIOR,DEATHKNIGHT,ROGUE,MONK,PALADIN,DRUID,SHAMAN,PRIEST,MAGE,WARLOCK,HUNTER"
 local DEFAULT_PET_ORDER = "HUNTER,WARLOCK,DEATHKNIGHT,PRIEST,MAGE,DRUID,SHAMAN,WARRIOR,ROGUE,PALADIN"
 
 local TYPE_VALUES = {	
@@ -35,7 +35,7 @@ local GROUP_VALUES = {
 local GROUPBY_VALUES ={
 	["CLASS"] = L["Class"],
 	["GROUP"] = L["Group"],
-	["ROLE"]  = L["Role"],
+	["ASSIGNEDROLE"]  = L["Role"],
 	["NONE"]  = L["None"],
 }
 local SORTBY_VALUES= {
@@ -193,15 +193,17 @@ local function LoadLayoutHeader( layoutName, layout, index, header )
 		get    = function() return GetHeaderOption(layout,header,"groupBy","NONE") end,
 		set    = function(_,v)	
 					if v=="CLASS" then
+						header.groupBy = v
 						header.groupingOrder = (header.type=="raid" or header.type=="party") and DEFAULT_GROUP_ORDER or DEFAULT_PET_ORDER
 					elseif v=="GROUP" then
+						header.groupBy = v
 						header.groupingOrder = header.groupFilter or "1,2,3,4,5,6,7,8"
-					elseif v=="ROLE" then
-						header.groupingOrder = "MAINTANK,MAINASSIST" 
+					elseif v=="ASSIGNEDROLE" then
+						header.groupBy = "ASSIGNEDROLE"
+						header.groupingOrder = "TANK,HEALER,DAMAGER,NONE"
 					else
-						header.groupingOrder, v = nil, nil
+						header.groupingOrder, header.groupBy, v = nil, nil, nil
 					end
-					header.groupBy = v				
 		end,
 		values = GROUPBY_VALUES,
 		disabled = disabled,
@@ -285,6 +287,10 @@ local function LoadLayoutGeneralOptions(name)
 			get = function() return layout.defaults.toggleForVehicle end,
 			set = function() layout.defaults.toggleForVehicle= not layout.defaults.toggleForVehicle end,
 		}
+		-- Upgrade old format custom layouts
+		if not layout.meta["raid"] then
+			layout.meta["raid"] = true
+		end
 	end	
 end
 
@@ -308,7 +314,7 @@ local function CreateLayout(name)
 		Grid2Layout.db.global.customLayouts= layouts
 	end
 	layouts[name]= {
-		meta     = { raid40 = true,	raid25 = true,	raid20 = true,	raid15 = true,	raid10 = true,	party = true, pvp = true, arena = true, solo = true },
+		meta     = { raid = true, party = true, arena = true, solo = true },
 		defaults = { toggleForVehicle = true, showPlayer = true, showParty = true, showRaid = true, showSolo = true },
 		[1]      = CreateNewGroupHeader(),
 	}

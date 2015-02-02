@@ -34,19 +34,24 @@ do
 	local menuFrame
 	local menuTable
 	local partyType
+	local instType
 	local layoutName
 	local function SetLayout(self)
 		if not InCombatLockdown() then
-			layoutName= self.value
-			Grid2Layout.db.profile.layouts[partyType]= self.value 
+			layoutName = self.value
+			local layouts = Grid2Layout.db.profile.layouts		
+			local key = partyType.."@"..instType
+			if not layouts[key] then key = partyType end
+			layouts[key] = layoutName
 			Grid2Layout:ReloadLayout()
 		end	
 	end
 	local function CreateMenuTable()
-		if not layoutName then layoutName= Grid2Layout.db.profile.layouts[partyType or "solo"] end
-		if partyType~=Grid2Layout.partyType then
+		layoutName = Grid2Layout.layoutName
+		if partyType~=Grid2Layout.partyType or instType~=Grid2Layout.instType then
 			local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Grid2")
 			partyType= Grid2Layout.partyType
+			instType = Grid2Layout.instType
 			local index= 2
 			if not menuTable then menuTable= { { text = L["Select Layout"],  notCheckable= true, isTitle = true} } end
 			for name, layout in pairs(Grid2Layout.layoutSettings) do
@@ -68,7 +73,7 @@ do
 	end
 	end
 	MenuLayoutsShow= function()
-		menuFrame= menuFrame or CreateFrame("Frame", "Grid2FreeLayoutMenu", UIParent, "UIDropDownMenuTemplate") 
+		menuFrame= menuFrame or CreateFrame("Frame", "Grid2LDBLayoutsMenu", UIParent, "UIDropDownMenuTemplate") 
 		CreateMenuTable()
 		EasyMenu(menuTable, menuFrame, "cursor", 0 , 0, "MENU", 1)
 	end	

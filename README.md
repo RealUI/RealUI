@@ -11,7 +11,6 @@ The following addons have been modified to suit RealUI and should not be updated
   - cargBags_Nivaya
   - EasyMail
   - FreebTip
-  - Grid2 (you may update individual Grid2 modules, but not the Grid2 folder itself)
   - SharedMedia + SharedMedia_MyMedia
 
 

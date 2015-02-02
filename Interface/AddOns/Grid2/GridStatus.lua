@@ -71,7 +71,7 @@ end
 function status:UpdateIndicators(unit)
 	for parent in next, Grid2:GetUnitFrames(unit) do
 		for indicator in pairs(self.indicators) do
-			indicator:Update(parent, unit)
+			indicator:Update(parent, unit, self)
 		end
 	end
 end
@@ -132,6 +132,12 @@ function Grid2:UnregisterStatus(status)
 			end
 		end
 	end
+end
+
+function Grid2:GetStatusByName(name)
+	for key, status in Grid2:IterateStatuses() do
+		if key == name then return status end
+	end	
 end
 
 function Grid2:IterateStatuses(type)

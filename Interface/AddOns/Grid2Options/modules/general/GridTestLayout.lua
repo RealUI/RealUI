@@ -104,12 +104,16 @@ do
 		colColors= {}
 		local layout = Grid2Layout.layoutSettings[name]
 		if layout then
+			layout = Grid2.CopyTable(layout)
+			if not layout[1] then 
+				for i=1,8 do layout[i]= {} end
+			end
 			local defaults = layout.defaults or {} 
 			colCount= 0
 			rowCount= 0
 			local col= 1
 			for i, l in ipairs(layout) do
-				local unitPerColumn= l.unitsPerColumn or defaults.unitPerColumn or 5
+				local unitPerColumn= l.unitsPerColumn or defaults.unitsPerColumn or 5
 				local maxColumns= l.maxColumns or defaults.maxColumns or 1
 				colCount= colCount + maxColumns
 				rowCount= max(rowCount,unitPerColumn)
@@ -162,10 +166,13 @@ local function LayoutRefresh()
 			i= i + 1
 		end	
 	end	
-	frameLayout:SetSize( Spacing*2 + realCols * (width+Padding) - Padding, Spacing*2 + realRows * (height+Padding) - Padding )
+	local layWidth = Spacing*2 + realCols * (width+Padding) - Padding 
+	local layHeight= Spacing*2 + realRows * (height+Padding) - Padding
+	frameLayout:SetSize(layWidth,layHeight)
+	Grid2Layout:SetSize(layWidth,layHeight)
 end	
 
-local function LayoutEnable(self,name)
+local function LayoutEnable(self, name)
 	if name and name ~= layoutName then
 		if LayoutLoad(name) then
 			LayoutRefresh()

@@ -13,6 +13,7 @@ Grid2Options.indicatorDefaultValues = {
 do
 	local function DeleteIndicator(info)
 		local indicator = info.arg
+		Grid2Options.LI[indicator.name] = nil		
 		Grid2Frame:WithAllFrames(indicator, "Disable")
 		Grid2:DbSetIndicator(indicator.name,nil)
 		if indicator.dbx.sideKick then
@@ -24,7 +25,7 @@ do
 	end
 	local function Disabled(info)
 		local indicator = info.arg
-		return #indicator.statuses>0 or (indicator.sideKick and #indicator.sideKick.statuses>0)
+		return #indicator.statuses>0 or (indicator.sideKick and #indicator.sideKick.statuses>0) or indicator.barParent or indicator.barChild
 	end	
 	function Grid2Options:MakeIndicatorDeleteOptions(indicator, options)
 		self:MakeHeaderOptions( options, "Delete" )
@@ -37,6 +38,21 @@ do
 			func  = DeleteIndicator,
 			arg   = indicator,
 			disabled = Disabled,
+		}
+		options.renameIndicator = {
+			type = "input",
+			order = 350,
+			width = "normal",
+			name = L["Rename indicator"],
+			desc = L["Type new name for the indicator"],
+			usage = L["<CharacterOnlyString>"],
+			get = function() return end,
+			set = function(_,v)	
+				if strlen(v)>3 then
+					self.LI[indicator.name] = v
+					Grid2Options:MakeIndicatorOptions(indicator)
+				end
+			end,
 		}
 	end
 end

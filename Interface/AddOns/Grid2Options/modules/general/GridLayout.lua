@@ -18,7 +18,7 @@ Grid2Options:AddGeneralOptions( "General" , "Layout Settings", { horizontal = {
 			  end,
 		set = function ()
 			Grid2Layout.db.profile.horizontal = not Grid2Layout.db.profile.horizontal
-			Grid2Layout:ReloadLayout()
+			Grid2Layout:ReloadLayout(true)
 			if Grid2Options.LayoutTestRefresh then Grid2Options:LayoutTestRefresh()	end	
 		 end,
 }, lock = {
@@ -93,7 +93,7 @@ Grid2Options:AddGeneralOptions( "General" , "Layout Settings", { horizontal = {
 			  end,
 		set = function (_, v)
 				  Grid2Layout.db.profile.Spacing = v
-				  Grid2Layout:ReloadLayout()
+				  Grid2Layout:ReloadLayout(true)
 			  end,
 }, padding = {
 		type = "range",
@@ -108,7 +108,7 @@ Grid2Options:AddGeneralOptions( "General" , "Layout Settings", { horizontal = {
 			  end,
 		set = function (_, v)
 				  Grid2Layout.db.profile.Padding = v
-				  Grid2Layout:ReloadLayout()
+				  Grid2Layout:ReloadLayout(true)
 			  end,
 }, scale = {
 		type = "range",
@@ -180,7 +180,7 @@ Grid2Options:AddGeneralOptions( "General" , "Layout Settings", { horizontal = {
 		get = function () return Grid2Layout.db.profile.groupAnchor end,
 		set = function (_, v)
 			Grid2Layout.db.profile.groupAnchor = v
-			Grid2Layout:ReloadLayout()
+			Grid2Layout:ReloadLayout(true)
 			if Grid2Options.LayoutTestRefresh then Grid2Options:LayoutTestRefresh() end	
 		end,
 		values={["TOPLEFT"] = L["TOPLEFT"], ["TOPRIGHT"] = L["TOPRIGHT"], ["BOTTOMLEFT"] = L["BOTTOMLEFT"], ["BOTTOMRIGHT"] = L["BOTTOMRIGHT"] },

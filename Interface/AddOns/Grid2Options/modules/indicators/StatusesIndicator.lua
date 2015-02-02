@@ -11,13 +11,13 @@ local function RegisterIndicatorStatus(indicator, status, priority)
 			priority = 50
 		end	
 	end	
-	Grid2:DbSetMap( indicator.name, status.name, priority)
+	Grid2:DbSetMap(indicator.name, status.name, priority)
 	indicator:RegisterStatus(status, priority)
 	-- special case for auras
 	local type = status.dbx.type
 	if type=="buff" or type=="debuff" or type=="debuffType" then
 		Grid2:RefreshAuras() 
-	end	
+	end
 end
 
 local function UnregisterIndicatorStatus(indicator, status)
@@ -80,6 +80,7 @@ local function StatusShiftUp(info, indicator, lowerStatus)
 		local newIndex = index>1 and index - 1 or #indicator.statuses
 		StatusSwapPriorities(indicator, index, newIndex)
 		RefreshIndicatorCurrentStatusOptions(info)
+		Grid2Options:RefreshIndicator(indicator, "Layout", "Update")
 	end
 end
 
@@ -89,10 +90,11 @@ local function StatusShiftDown(info, indicator, higherStatus)
 		local newIndex = index<#indicator.statuses and index+1 or 1
 		StatusSwapPriorities(indicator, index, newIndex)
 		RefreshIndicatorCurrentStatusOptions(info)
+		Grid2Options:RefreshIndicator(indicator, "Layout", "Update")
 	end
 end
 
-function Grid2Options:MakeIndicatorCurrentStatusOptions(indicator, options)
+function Grid2Options:MakeIndicatorCurrentStatusOptions(indicator, options, callBack)
 	if indicator.statuses then
 		local arg  = { indicator = indicator, options = options }
 		local more = #indicator.statuses>1

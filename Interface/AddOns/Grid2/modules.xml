@@ -4,6 +4,7 @@
 <Script file="modules\IndicatorAlpha.lua"/>
 <Script file="modules\IndicatorBorder.lua"/>
 <Script file="modules\IndicatorBar.lua"/>
+<Script file="modules\IndicatorMultiBar.lua"/>
 <Script file="modules\IndicatorText.lua"/>
 <Script file="modules\IndicatorIcon.lua"/>
 <Script file="modules\IndicatorSquare.lua"/>
@@ -27,10 +28,8 @@
 <Script file="modules\StatusDirection.lua"/>
 <Script file="modules\StatusRes.lua"/>
 <Script file="modules\StatusShields.lua"/>
-<Script file="modules\StatusShieldsBoss.lua"/>
+<Script file="modules\StatusHealAbsorbs.lua"/>
 <Script file="modules\StatusSelf.lua"/>
 <Script file="modules\StatusPurgatory.lua"/>
-<Script file="modules\StatusTortosCrystalShell.lua"/>
-<Script file="modules\StatusAbsorbs.lua"/>
 
 </Ui>

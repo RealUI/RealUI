@@ -268,7 +268,7 @@ function Grid2Options:IsCompatiblePair(indicator, status)
 end
 
 -- Grid2Options:GetAvailableStatusValues()
-function Grid2Options:GetAvailableStatusValues(indicator, statusAvailable)
+function Grid2Options:GetAvailableStatusValues(indicator, statusAvailable, statusToKeep)
 	statusAvailable = statusAvailable or {}
 	wipe(statusAvailable)
 	for statusKey, status in Grid2:IterateStatuses() do
@@ -277,7 +277,9 @@ function Grid2Options:GetAvailableStatusValues(indicator, statusAvailable)
 		end
 	end
 	for _, status in ipairs(indicator.statuses) do
-		statusAvailable[status.name] = nil
+		if status ~= statusToKeep then
+			statusAvailable[status.name] = nil
+		end	
 	end
 	return statusAvailable
 end
@@ -297,6 +299,9 @@ function Grid2Options:RefreshIndicator(indicator, method, extraAction )
 	end	
 	if indicator.UpdateDB then 
 		indicator:UpdateDB() 
+		if indicator.sideKick and indicator.sideKick.UpdateDB then 
+			indicator.sideKick:UpdateDB()
+		end	
 	end
 	if method and method ~= "Update" then
 		Grid2Frame:WithAllFrames(indicator, method) 
@@ -313,8 +318,9 @@ end
 -- Grid2Options:GetLayouts()
 function Grid2Options:GetLayouts( meta )
     local list= { }
+	local raid = strfind(meta,"raid")
 	for name, layout in pairs(Grid2Layout.layoutSettings) do
-      if layout.meta[meta] == true then
+      if layout.meta[meta] or (raid and layout.meta["raid"]) then
 	     list[name]= LG[name]
 	  end
 	end

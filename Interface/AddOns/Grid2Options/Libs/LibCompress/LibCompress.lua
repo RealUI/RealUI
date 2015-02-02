@@ -5,12 +5,12 @@
 -- Authors: jjsheets and Galmok of European Stormrage (Horde)
 -- Email : sheets.jeff@gmail.com and galmok@gmail.com
 -- Licence: GPL version 2 (General Public License)
+-- Revision: $Revision: 60 $
+-- Date: $Date: 2015-01-16 16:11:11 +0000 (Fri, 16 Jan 2015) $
 ----------------------------------------------------------------------------------
 
 
-local MAJOR, MINOR = "LibCompress", 7
-	
-local LibCompress,oldminor = LibStub:NewLibrary(MAJOR, MINOR)
+local LibCompress = LibStub:NewLibrary("LibCompress", 90000 + tonumber(("$Revision: 60 $"):match("%d+")))
 
 if not LibCompress then return end
 
@@ -51,20 +51,20 @@ local bit_rshift = bit.rshift
 
 local tables = {} -- tables that may be cleaned have to be kept here
 local tables_to_clean = {} -- list of tables by name (string) that may be reset to {} after a timeout
-local timeout = -1
 
 -- tables that may be erased
 local function cleanup()
 	for k,v in pairs(tables_to_clean) do
-		tables[k]={}
-		tables_to_clean[k]=nil
+		tables[k] = {}
+		tables_to_clean[k] = nil
 	end
 end
 
+local timeout = -1
 local function onUpdate(frame, elapsed)
+	frame:Hide()
 	timeout = timeout - elapsed
-	if timeout < 0 then
-		frame:Hide()
+	if timeout <= 0 then
 		cleanup()
 	end
 end
@@ -78,7 +78,7 @@ local function setCleanupTables(...)
 	if not LibCompress.frame:IsShown() then
 		LibCompress.frame:Show()
 	end
-	for i=1,select("#",...) do
+	for i = 1, select("#",...) do
 		tables_to_clean[(select(i, ...))] = true
 	end
 end
@@ -96,34 +96,40 @@ end
 -- the bytes returned by this do not contain "\000"
 local bytes = {}
 local function encode(x)
-	for k = 1, #bytes do bytes[k] = nil end
+	for k = 1, #bytes do
+		bytes[k] = nil
+	end
+	
 	local xmod
-	x, xmod = math_modf(x/255)
+	x, xmod = math_modf(x / 255)
 	xmod = xmod * 255
 	bytes[#bytes + 1] = xmod
+	
 	while x > 0 do
-		x, xmod = math_modf(x/255)
+		x, xmod = math_modf(x / 255)
 		xmod = xmod * 255
 		bytes[#bytes + 1] = xmod
 	end
 	if #bytes == 1 and bytes[1] > 0 and bytes[1] < 250 then
 		return string_char(bytes[1])
 	else
-		for i = 1, #bytes do bytes[i] = bytes[i] + 1 end
+		for i = 1, #bytes do
+			bytes[i] = bytes[i] + 1
+		end
 		return string_char(256 - #bytes, unpack(bytes))
 	end
 end
 
 --decode converts a unique character sequence into its equivalent number, from ss, beginning at the ith char.
 -- returns the decoded number and the count of characters used in the decode process.
-local function decode(ss,i)
+local function decode(ss, i)
 	i = i or 1
-	local a = string_byte(ss,i,i)
+	local a = string_byte(ss, i, i)
 	if a > 249 then
 		local r = 0
 		a = 256 - a
-		for n = i+a, i+1, -1 do
-			r = r * 255 + string_byte(ss,n,n) - 1
+		for n = i + a, i + 1, -1 do
+			r = r * 255 + string_byte(ss, n, n) - 1
 		end
 		return r, a + 1
 	else
@@ -143,32 +149,37 @@ function LibCompress:CompressLZW(uncompressed)
 		for k in pairs(dict) do
 			dict[k] = nil
 		end
+		
 		local result = {"\002"}
 		local w = ''
 		local ressize = 1
+		
 		for i = 0, 255 do
 			dict[string_char(i)] = i
 		end
+		
 		for i = 1, #uncompressed do
-			local c = uncompressed:sub(i,i)
+			local c = uncompressed:sub(i, i)
 			local wc = w..c
 			if dict[wc] then
 				w = wc
 			else
 				dict[wc] = dict_size
-				dict_size = dict_size +1
+				dict_size = dict_size + 1
 				local r = encode(dict[w])
 				ressize = ressize + #r
 				result[#result + 1] = r
 				w = c
 			end
 		end
+		
 		if w then
 			local r = encode(dict[w])
 			ressize = ressize + #r
 			result[#result + 1] = r
 		end
-		if (#uncompressed+1) > ressize then
+		
+		if (#uncompressed + 1) > ressize then
 			return table_concat(result)
 		else
 			return string_char(1)..uncompressed
@@ -183,31 +194,36 @@ end
 -- compressed strings are marked by beginning with "\002"
 function LibCompress:DecompressLZW(compressed)
 	if type(compressed) == "string" then
-		if compressed:sub(1,1) ~= "\002" then
-			return nil, "Can only decompress LZW compressed data ("..tostring(compressed:sub(1,1))..")"
+		if compressed:sub(1, 1) ~= "\002" then
+			return nil, "Can only decompress LZW compressed data ("..tostring(compressed:sub(1, 1))..")"
 		end
+		
 		compressed = compressed:sub(2)
 		local dict_size = 256
+		
 		for k in pairs(dict) do
 			dict[k] = nil
 		end
+		
 		for i = 0, 255 do
 			dict[i] = string_char(i)
 		end
+		
 		local result = {}
 		local t = 1
 		local delta, k
-		k, delta = decode(compressed,t)
+		k, delta = decode(compressed, t)
 		t = t + delta
-		result[#result+1] = dict[k]
+		result[#result + 1] = dict[k]
+		
 		local w = dict[k]
 		local entry
 		while t <= #compressed do
-			k, delta = decode(compressed,t)
+			k, delta = decode(compressed, t)
 			t = t + delta
-			entry = dict[k] or (w..w:sub(1,1))
-			result[#result+1] = entry
-			dict[dict_size] = w..entry:sub(1,1)
+			entry = dict[k] or (w..w:sub(1, 1))
+			result[#result + 1] = entry
+			dict[dict_size] = w..entry:sub(1, 1)
 			dict_size = dict_size + 1
 			w = entry
 		end
@@ -222,44 +238,45 @@ end
 -- Huffman codec
 -- implemented by Galmok of European Stormrage (Horde), galmok@gmail.com
 
-local function addCode(tree, bcode,len)
+local function addCode(tree, bcode, length)
 	if tree then
-		tree.bcode = bcode;
-		tree.blength = len;
+		tree.bcode = bcode
+		tree.blength = length
 		if tree.c1 then
-			addCode(tree.c1, bit_bor(bcode, bit_lshift(1,len)), len+1)
+			addCode(tree.c1, bit_bor(bcode, bit_lshift(1, length)), length + 1)
 		end
 		if tree.c2 then
-			addCode(tree.c2, bcode, len+1)
+			addCode(tree.c2, bcode, length + 1)
 		end
 	end
 end
 
-local function escape_code(code, len)
-	local escaped_code = 0;
-	local b;
-	local l = 0;
-	for i = len-1, 0,- 1 do
-		b = bit_band( code, bit_lshift(1,i))==0 and 0 or 1
-		escaped_code = bit_lshift(escaped_code,1+b) + b
-		l = l + b;
+local function escape_code(code, length)
+	local escaped_code = 0
+	local b
+	local l = 0
+	for i = length -1, 0, - 1 do
+		b = bit_band(code, bit_lshift(1, i)) == 0 and 0 or 1
+		escaped_code = bit_lshift(escaped_code, 1 + b) + b
+		l = l + b
 	end
-	return escaped_code, len+l
+	return escaped_code, length + l
 end
 
 tables.Huffman_compressed = {}
 tables.Huffman_large_compressed = {}
 
 local compressed_size = 0
-local remainder;
-local remainder_length;
-local function addBits(tbl, code, len)
+local remainder
+local remainder_length
+local function addBits(tbl, code, length)
 	remainder = remainder + bit_lshift(code, remainder_length)
-	remainder_length = len + remainder_length
+	remainder_length = length + remainder_length
 	if remainder_length > 32 then
 		return true -- Bits lost due to too long code-words.
 	end
-	while remainder_length>=8 do
+	
+	while remainder_length >= 8 do
 		compressed_size = compressed_size + 1
 		tbl[compressed_size] = string_char(bit_band(remainder, 255))
 		remainder = bit_rshift(remainder, 8)
@@ -269,7 +286,7 @@ end
 
 -- word size for this huffman algorithm is 8 bits (1 byte). This means the best compression is representing 1 byte with 1 bit, i.e. compress to 0.125 of original size.
 function LibCompress:CompressHuffman(uncompressed)
-	if not type(uncompressed)=="string" then
+	if type(uncompressed) ~= "string" then
 		return nil, "Can only compress strings"
 	end
 	if #uncompressed == 0 then
@@ -279,9 +296,9 @@ function LibCompress:CompressHuffman(uncompressed)
 	-- make histogram
 	local hist = {}
 	local n = 0
-	-- dont have to use all datat to make the histogram
+	-- don't have to use all data to make the histogram
 	local uncompressed_size = string_len(uncompressed)
-	local c;
+	local c
 	for i = 1, uncompressed_size do
 		c = string_byte(uncompressed, i)
 		hist[c] = (hist[c] or 0) + 1
@@ -289,24 +306,33 @@ function LibCompress:CompressHuffman(uncompressed)
 
 	--Start with as many leaves as there are symbols.
 	local leafs = {}
-	local leaf;
+	local leaf
 	local symbols = {}
 	for symbol, weight in pairs(hist) do
-		leaf = { symbol=string_char(symbol), weight=weight };
-		symbols[symbol] = leaf;
+		leaf = { symbol=string_char(symbol), weight=weight }
+		symbols[symbol] = leaf
 		table_insert(leafs, leaf)
 	end
+	
 	--Enqueue all leaf nodes into the first queue (by probability in increasing order so that the least likely item is in the head of the queue).
-	sort(leafs, function(a,b) if a.weight<b.weight then return true elseif a.weight>b.weight then return false else return nil end end)
+	sort(leafs, function(a, b)
+		if a.weight < b.weight then
+			return true
+		elseif a.weight > b.weight then
+			return false
+		else
+			return nil
+		end
+	end)
 
 	local nLeafs = #leafs
 	
 	-- create tree
 	local huff = {}
 	--While there is more than one node in the queues:
-	local l,h, li, hi, leaf1, leaf2
-	local newNode;
-	while (#leafs+#huff > 1) do
+	local length, height, li, hi, leaf1, leaf2
+	local newNode
+	while (#leafs + #huff > 1) do
 		-- Dequeue the two nodes with the lowest weight.
 		-- Dequeue first
 		if not next(huff) then
@@ -316,16 +342,17 @@ function LibCompress:CompressHuffman(uncompressed)
 			hi, leaf1 = next(huff)
 			table_remove(huff, hi)
 		else
-			li, l = next(leafs);
-			hi, h = next(huff);
-			if l.weight<=h.weight then
-				leaf1 = l;
+			li, length = next(leafs)
+			hi, height = next(huff)
+			if length.weight <= height.weight then
+				leaf1 = length
 				table_remove(leafs, li)
 			else
-				leaf1 = h;
+				leaf1 = height
 				table_remove(huff, hi)
 			end
 		end
+		
 		-- Dequeue second
 		if not next(huff) then
 			li, leaf2 = next(leafs)
@@ -334,34 +361,39 @@ function LibCompress:CompressHuffman(uncompressed)
 			hi, leaf2 = next(huff)
 			table_remove(huff, hi)
 		else
-			li, l = next(leafs);
-			hi, h = next(huff);
-			if l.weight<=h.weight then
-				leaf2 = l;
+			li, length = next(leafs)
+			hi, height = next(huff)
+			if length.weight <= height.weight then
+				leaf2 = length
 				table_remove(leafs, li)
 			else
-				leaf2 = h;
+				leaf2 = height
 				table_remove(huff, hi)
 			end
 		end
 
 		--Create a new internal node, with the two just-removed nodes as children (either node can be either child) and the sum of their weights as the new weight.
-		newNode = { c1 = leaf1, c2 = leaf2, weight = leaf1.weight+leaf2.weight }
+		newNode = {
+			c1 = leaf1,
+			c2 = leaf2,
+			weight = leaf1.weight + leaf2.weight
+		}
 		table_insert(huff,newNode)
 	end
-	if #leafs>0 then
-		li, l = next(leafs)
-		table_insert(huff, l)
+	
+	if #leafs > 0 then
+		li, length = next(leafs)
+		table_insert(huff, length)
 		table_remove(leafs, li)
 	end
-	huff = huff[1];
+	huff = huff[1]
 
 	-- assign codes to each symbol
 	-- c1 = "0", c2 = "1"
 	-- As a common convention, bit '0' represents following the left child and bit '1' represents following the right child.
 	-- c1 = left, c2 = right
 
-	addCode(huff,0,0);
+	addCode(huff, 0, 0)
 	if huff then
 		huff.bcode = 0
 		huff.blength = 1
@@ -385,58 +417,60 @@ function LibCompress:CompressHuffman(uncompressed)
 	-- bitfield_len = bitfield_len + 8
 	
 	-- WRITING
-	remainder = 0;
-	remainder_length = 0;
+	remainder = 0
+	remainder_length = 0
 	
 	local compressed = tables.Huffman_compressed
 	--compressed_size = 0
 
-	-- first byte is version info. 0 = uncompressed, 1 = 8-bit word huffman compressed
+	-- first byte is version info. 0 = uncompressed, 1 = 8 - bit word huffman compressed
 	compressed[1] = "\003"
 	
-	-- Header: byte 0=#leafs, byte 1-3=size of uncompressed data
+	-- Header: byte 0 = #leafs, bytes 1-3 = size of uncompressed data
 	-- max 2^24 bytes
-	local l = string_len(uncompressed)
-	compressed[2] = string_char(bit_band(nLeafs-1, 255))			-- number of leafs
-	compressed[3] = string_char(bit_band(l, 255))			-- bit 0-7
-	compressed[4] = string_char(bit_band(bit_rshift(l, 8), 255))	-- bit 8-15
-	compressed[5] = string_char(bit_band(bit_rshift(l, 16), 255))	-- bit 16-23
+	local length = string_len(uncompressed)
+	compressed[2] = string_char(bit_band(nLeafs -1, 255))	-- number of leafs
+	compressed[3] = string_char(bit_band(length, 255))			-- bit 0-7
+	compressed[4] = string_char(bit_band(bit_rshift(length, 8), 255))	-- bit 8-15
+	compressed[5] = string_char(bit_band(bit_rshift(length, 16), 255))	-- bit 16-23
 	compressed_size = 5
 	
 	-- create symbol/code map
 	for symbol, leaf in pairs(symbols) do
-		addBits(compressed, symbol, 8);
+		addBits(compressed, symbol, 8)
 		if addBits(compressed, escape_code(leaf.bcode, leaf.blength)) then
 			-- code word too long. Needs new revision to be able to handle more than 32 bits
 			return string_char(0)..uncompressed
 		end
-		addBits(compressed, 3, 2);
+		addBits(compressed, 3, 2)
 	end
 
 	-- create huffman code
 	local large_compressed = tables.Huffman_large_compressed
 	local large_compressed_size = 0
 	local ulimit
-	for i = 1, l, 200 do
-		ulimit = l<(i+199) and l or (i+199)
+	for i = 1, length, 200 do
+		ulimit = length < (i + 199) and length or (i + 199)
+		
 		for sub_i = i, ulimit do
 			c = string_byte(uncompressed, sub_i)
 			addBits(compressed, symbols[c].bcode, symbols[c].blength)
 		end
+		
 		large_compressed_size = large_compressed_size + 1
 		large_compressed[large_compressed_size] = table_concat(compressed, "", 1, compressed_size)
 		compressed_size = 0
 	end
 	
-	-- add remainding bits (if any)
-	if remainder_length>0 then
+	-- add remaining bits (if any)
+	if remainder_length > 0 then
 		large_compressed_size = large_compressed_size + 1
 		large_compressed[large_compressed_size] = string_char(remainder)
 	end
 	local compressed_string = table_concat(large_compressed, "", 1, large_compressed_size)
 	
 	-- is compression worth it? If not, return uncompressed data.
-	if (#uncompressed+1) <= #compressed_string then
+	if (#uncompressed + 1) <= #compressed_string then
 		return "\001"..uncompressed
 	end
 	
@@ -458,22 +492,22 @@ setmetatable(lshiftMask, {
 local lshiftMinusOneMask = {}
 setmetatable(lshiftMinusOneMask, {
 	__index = function (t, k)
-		local v = bit_lshift(1, k)-1
+		local v = bit_lshift(1, k) -  1
 		rawset(t, k, v)
 		return v
 	end
 })
 
 local function getCode(bitfield, field_len)
-	if field_len>=2 then
-		local b;
-		local p = 0;
-		for i = 0, field_len-1 do
+	if field_len >= 2 then
+		local b
+		local p = 0
+		for i = 0, field_len -1 do
 			b = bit_band(bitfield, lshiftMask[i])
-			if not (p==0) and not (b == 0) then
+			if not (p == 0) and not (b == 0) then
 				-- found 2 bits set right after each other (stop bits)
-				return bit_band( bitfield, lshiftMinusOneMask[i-1]), i-1, 
-					bit_rshift(bitfield, i+1), field_len-i-1
+				return bit_band( bitfield, lshiftMinusOneMask[i - 1]), i - 1, 
+					bit_rshift(bitfield, i + 1), field_len -  i - 1
 			end
 			p = b
 		end
@@ -482,13 +516,13 @@ local function getCode(bitfield, field_len)
 end
 
 local function unescape_code(code, code_len)
-	local unescaped_code=0;
-	local b;
-	local l = 0;
+	local unescaped_code = 0
+	local b
+	local l = 0
 	local i = 0
 	while i < code_len do
 		b = bit_band( code, lshiftMask[i])
-		if not (b==0) then
+		if not (b == 0) then
 			unescaped_code = bit_bor(unescaped_code, lshiftMask[l])
 			i = i + 1
 		end
@@ -499,10 +533,10 @@ local function unescape_code(code, code_len)
 end
 
 tables.Huffman_uncompressed = {}
-tables.Huffman_large_uncompressed = {} -- will always be as big as the larges string ever decompressed. Bad, but clearing i every timetakes precious time.
+tables.Huffman_large_uncompressed = {} -- will always be as big as the largest string ever decompressed. Bad, but clearing it every time takes precious time.
 
 function LibCompress:DecompressHuffman(compressed)
-	if not type(uncompressed)=="string" then
+	if not type(uncompressed) == "string" then
 		return nil, "Can only uncompress strings"
 	end
 
@@ -510,10 +544,10 @@ function LibCompress:DecompressHuffman(compressed)
 	--decode header
 	local info_byte = string_byte(compressed)
 	-- is data compressed
-	if info_byte==1 then
+	if info_byte == 1 then
 		return compressed:sub(2) --return uncompressed data
 	end
-	if not (info_byte==3) then
+	if not (info_byte == 3) then
 		return nil, "Can only decompress Huffman compressed data ("..tostring(info_byte)..")"
 	end
 
@@ -521,14 +555,14 @@ function LibCompress:DecompressHuffman(compressed)
 	local c0 = string_byte(string_sub(compressed, 3, 3))
 	local c1 = string_byte(string_sub(compressed, 4, 4))
 	local c2 = string_byte(string_sub(compressed, 5, 5))
-	local orig_size = c2*65536 + c1*256 + c0
-	if orig_size==0 then
-		return "";
+	local orig_size = c2 * 65536 + c1 * 256 + c0
+	if orig_size == 0 then
+		return ""
 	end
 
-	-- decode code->symbal map
-	local bitfield = 0;
-	local bitfield_len = 0;
+	-- decode code -> symbol map
+	local bitfield = 0
+	local bitfield_len = 0
 	local map = {} -- only table not reused in Huffman decode.
 	setmetatable(map, {
 		__index = function (t, k)
@@ -538,15 +572,15 @@ function LibCompress:DecompressHuffman(compressed)
 		end
 	})
 	
-	local i = 6; -- byte 1-5 are header bytes
-	local c, cl;
-	local minCodeLen = 1000;
-	local maxCodeLen = 0;
-	local symbol, code, code_len, _bitfield, _bitfield_len;
-	local n = 0;
-	local state = 0; -- 0 = get symbol (8 bits),  1 = get code (varying bits, ends with 2 bits set)
-	while n<num_symbols do
-		if i>compressed_size then
+	local i = 6 -- byte 1-5 are header bytes
+	local c, cl
+	local minCodeLen = 1000
+	local maxCodeLen = 0
+	local symbol, code, code_len, _bitfield, _bitfield_len
+	local n = 0
+	local state = 0 -- 0 = get symbol (8 bits),  1 = get code (varying bits, ends with 2 bits set)
+	while n < num_symbols do
+		if i > compressed_size then
 			return nil, "Cannot decode map"
 		end
 
@@ -557,25 +591,25 @@ function LibCompress:DecompressHuffman(compressed)
 		if state == 0 then
 			symbol = bit_band(bitfield, 255)
 			bitfield = bit_rshift(bitfield, 8)
-			bitfield_len = bitfield_len -8
+			bitfield_len = bitfield_len - 8
 			state = 1 -- search for code now
 		else
 			code, code_len, _bitfield, _bitfield_len = getCode(bitfield, bitfield_len)
 			if code then
 				bitfield, bitfield_len = _bitfield, _bitfield_len
 				c, cl = unescape_code(code, code_len)
-				map[cl][c]=string_char(symbol)
-				minCodeLen = cl<minCodeLen and cl or minCodeLen
-				maxCodeLen = cl>maxCodeLen and cl or maxCodeLen
+				map[cl][c] = string_char(symbol)
+				minCodeLen = cl < minCodeLen and cl or minCodeLen
+				maxCodeLen = cl > maxCodeLen and cl or maxCodeLen
 				--print("symbol: "..string_char(symbol).."  code: "..tobinary(c, cl))
 				n = n + 1
 				state = 0 -- search for next symbol (if any)
 			end
 		end
-		i=i+1
+		i = i + 1
 	end
 	
-	-- dont create new subtables for entries not in the map. Waste of space.
+	-- don't create new subtables for entries not in the map. Waste of space.
 	-- But do return an empty table to prevent runtime errors. (instead of returning nil)
 	local mt = {}
 	setmetatable(map, {
@@ -589,23 +623,25 @@ function LibCompress:DecompressHuffman(compressed)
 	local uncompressed_size = 0
 	local large_uncompressed_size = 0
 	local test_code
-	local test_code_len = minCodeLen;
-	local symbol;
-	local dec_size = 0;
+	local test_code_len = minCodeLen
+	local symbol
+	local dec_size = 0
 	compressed_size = compressed_size + 1
-	local temp_limit = 200; -- first limit of uncompressed data. large_uncompressed will hold strings of length 200
+	local temp_limit = 200 -- first limit of uncompressed data. large_uncompressed will hold strings of length 200
 	temp_limit = temp_limit > orig_size and orig_size or temp_limit
+	
 	while true do
-		if test_code_len<=bitfield_len then 
-			test_code=bit_band( bitfield, lshiftMinusOneMask[test_code_len])
+		if test_code_len <= bitfield_len then 
+			test_code = bit_band( bitfield, lshiftMinusOneMask[test_code_len])
 			symbol = map[test_code_len][test_code]
+			
 			if symbol then
 				uncompressed_size = uncompressed_size + 1
-				uncompressed[uncompressed_size]=symbol
+				uncompressed[uncompressed_size] = symbol
 				dec_size = dec_size + 1
 				if dec_size >= temp_limit then
-					if dec_size>=orig_size then -- checked here for speed reasons
-						break;
+					if dec_size >= orig_size then -- checked here for speed reasons
+						break
 					end
 					-- process compressed bytes in smaller chunks
 					large_uncompressed_size = large_uncompressed_size + 1
@@ -614,12 +650,13 @@ function LibCompress:DecompressHuffman(compressed)
 					temp_limit = temp_limit + 200 -- repeated chunk size is 200 uncompressed bytes
 					temp_limit = temp_limit > orig_size and orig_size or temp_limit
 				end
+				
 				bitfield = bit_rshift(bitfield, test_code_len)
 				bitfield_len = bitfield_len - test_code_len
 				test_code_len = minCodeLen
 			else
 				test_code_len = test_code_len + 1
-				if test_code_len>maxCodeLen then
+				if test_code_len > maxCodeLen then
 					return nil, "Decompression error at "..tostring(i).."/"..tostring(#compressed)
 				end
 			end
@@ -628,7 +665,7 @@ function LibCompress:DecompressHuffman(compressed)
 			bitfield = bitfield + bit_lshift(c or 0, bitfield_len)
 			bitfield_len = bitfield_len + 8
 			if i > compressed_size then
-				break;
+				break
 			end
 			i = i + 1
 		end
@@ -642,7 +679,7 @@ end
 -- Generic codec interface
 
 function LibCompress:DecompressUncompressed(data)
-	if type(data)~="string" then
+	if type(data) ~= "string" then
 		return nil, "Can only handle strings"
 	end
 	if string.byte(data) ~= 1 then
@@ -665,8 +702,8 @@ local decompression_methods = {
 -- try all compression codecs and return best result
 function LibCompress:Compress(data)
 	local method = next(compression_methods)
-	local result = compression_methods[method](self, data);
-	local n;
+	local result = compression_methods[method](self, data)
+	local n
 	method = next(compression_methods, method)
 	while method do
 		n = compression_methods[method](self, data)
@@ -767,11 +804,11 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 	
 	-- build list of bytes not available as a suffix to a prefix byte
 	local taken = {}
-	for i=1, strlen(encodeBytes) do 
+	for i = 1, strlen(encodeBytes) do 
 		taken[string.sub(encodeBytes, i, i)] = true
 	end
 	
-	-- allocate a table to holde encode/decode strings/functions
+	-- allocate a table to hold encode/decode strings/functions
 	local codecTable = {}
 	
 	-- the encoding can be a single gsub, but the decoding can require multiple gsubs
@@ -781,12 +818,12 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 	local encode_translate = {}
 	local decode_search = {}
 	local decode_translate = {}
-	local c,r,i,to,from
+	local c, r, i, to, from
 	local escapeCharIndex = 0
 	
 	-- map single byte to single byte
 	if #mapChars > 0 then
-		for i=1, #mapChars do
+		for i = 1, #mapChars do
 			from = string.sub(reservedChars, i, i)
 			to = string.sub(mapChars, i, i)
 			encode_translate[from] = to
@@ -801,7 +838,7 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 	end
 	
 	-- map single byte to double-byte
-	escapeCharIndex = escapeCharIndex +1
+	escapeCharIndex = escapeCharIndex + 1
 	escapeChar = string.sub(escapeChars, escapeCharIndex, escapeCharIndex)
 	r = 0 -- suffix char value to the escapeChar
 	decode_search = {}
@@ -810,9 +847,9 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 		c = string.sub(encodeBytes, i, i)
 		if not encode_translate[c] then
 			-- this loop will update escapeChar and r
-			while r<256 and taken[string.char(r)] do
-				r=r+1
-				if r>255 then -- switch to next escapeChar
+			while r < 256 and taken[string.char(r)] do
+				r = r + 1
+				if r > 255 then -- switch to next escapeChar
 					if escapeChar == "" then -- we are out of escape chars and we need more!
 						return nil, "Out of escape characters"
 					end
@@ -836,14 +873,15 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 			r = r + 1
 		end
 	end
-	if r>0 then
+	
+	if r > 0 then
 		codecTable["decode_search"..tostring(escapeCharIndex)] = escape_for_gsub(escapeChar).."([".. escape_for_gsub(table.concat(decode_search)).."])"
 		codecTable["decode_translate"..tostring(escapeCharIndex)] = decode_translate
 		tinsert(decode_func_string, "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");")
 	end
 	
 	-- change last line from "str = ...;" to "return ...;";
-	decode_func_string[#decode_func_string] = decode_func_string[#decode_func_string]:gsub("str = (.*);", "return %1;");
+	decode_func_string[#decode_func_string] = decode_func_string[#decode_func_string]:gsub("str = (.*);", "return %1;")
 	decode_func_string = "return function(self, str) "..table.concat(decode_func_string).." end"
 	
 	encode_search = "([".. escape_for_gsub(table.concat(encode_search)).."])"
@@ -895,14 +933,17 @@ function LibCompress:GetChatEncodeTable(reservedChars, escapeChars, mapChars)
 	-- 53.5% (average with random data valued zero to 255) 
 	-- 100% (only encoding data that encodes to two bytes)
 	local i
-	local r={}
-	for i=128, 255 do
+	local r = {}
+	
+	for i = 128, 255 do
 		table.insert(r, string.char(i))
 	end
+	
 	reservedChars = "sS\000\010\013\124%"..table.concat(r)..(reservedChars or "")
 	if escapeChars == "" then
 		escapeChars = "\029\031"
 	end
+	
 	if mapChars == "" then
 		mapChars = "\015\020";
 	end
@@ -919,23 +960,24 @@ end
 tables.encode7bit = {}
 
 function LibCompress:Encode7bit(str)
-	local remainder = 0;
-	local remainder_length = 0;
+	local remainder = 0
+	local remainder_length = 0
 	local tbl = tables.encode7bit
 	local encoded_size = 0
-	local l=#str
-	for i=1,l do
+	local length = #str
+	for i = 1, length do
 		code = string.byte(str, i)
 		remainder = remainder + bit_lshift(code, remainder_length)
 		remainder_length = 8 + remainder_length
-		while remainder_length>=7 do
+		while remainder_length >= 7 do
 			encoded_size = encoded_size + 1
 			tbl[encoded_size] = string_char(bit_band(remainder, 127))
 			remainder = bit_rshift(remainder, 7)
 			remainder_length = remainder_length -7
 		end
 	end
-	if remainder_length>0 then
+	
+	if remainder_length > 0 then
 		encoded_size = encoded_size + 1
 		tbl[encoded_size] = string_char(remainder)
 	end
@@ -949,24 +991,24 @@ function LibCompress:Decode7bit(str)
 	local bit8 = tables.decode8bit
 	local decoded_size = 0
 	local ch
-	local i=1
-	local bitfield_len=0
-	local bitfield=0
-	local l=#str
+	local i = 1
+	local bitfield_len = 0
+	local bitfield = 0
+	local length = #str
 	while true do
-		if bitfield_len >=8 then
+		if bitfield_len >= 8 then
 			decoded_size = decoded_size + 1
 			bit8[decoded_size] = string_char(bit.band(bitfield, 255))
 			bitfield = bit_rshift(bitfield, 8)
 			bitfield_len = bitfield_len - 8
 		end
-		ch=string_byte(str,i)
-		bitfield=bitfield+bit_lshift(ch or 0, bitfield_len)
+		ch = string_byte(str, i)
+		bitfield=bitfield + bit_lshift(ch or 0, bitfield_len)
 		bitfield_len = bitfield_len + 7
-		if i > l then
+		if i > length then
 			break
 		end
-		i=i+1
+		i = i + 1
 	end
 	setCleanupTables("decode8bit")
 	return table.concat(bit8, "", 1, decoded_size)
@@ -1004,7 +1046,7 @@ and/or fitness for purpose.
 ---------------------------------------------------------------------------
 */]]
 --// FCS-16 algorithm implemented as described in RFC 1331
-local FCSINIT16 = 65535;
+local FCSINIT16 = 65535
 --// Fast 16 bit FCS lookup table
 local fcs16tab = { [0]=0, 4489, 8978, 12955, 17956, 22445, 25910, 29887, 
 	35912, 40385, 44890, 48851, 51820, 56293, 59774, 63735,
@@ -1040,14 +1082,14 @@ local fcs16tab = { [0]=0, 4489, 8978, 12955, 17956, 22445, 25910, 29887,
 	31687, 27214, 22741, 18780, 15843, 11370, 7921, 3960 }
 
 function LibCompress:fcs16init()
-	return FCSINIT16;
+	return FCSINIT16
 end
 
 function LibCompress:fcs16update(uFcs16, pBuffer)
 	local i
-	local l=string_len(pBuffer)
-	for i = 1,l do
-		uFcs16 = bit_bxor(bit_rshift(uFcs16,8), fcs16tab[bit_band(bit_bxor(uFcs16, string_byte(pBuffer,i)), 255)])
+	local length = string_len(pBuffer)
+	for i = 1, length do
+		uFcs16 = bit_bxor(bit_rshift(uFcs16,8), fcs16tab[bit_band(bit_bxor(uFcs16, string_byte(pBuffer, i)), 255)])
 	end
 	return uFcs16
 end
@@ -1075,7 +1117,7 @@ and/or fitness for purpose.
 local FCSINIT32 = -1
 
 --// Fast 32 bit FCS lookup table
-local fcs32tab = {  [0]=0, 1996959894, -301047508, -1727442502, 124634137, 1886057615, -379345611, -1637575261,
+local fcs32tab = { [0] = 0, 1996959894, -301047508, -1727442502, 124634137, 1886057615, -379345611, -1637575261,
 	249268274, 2044508324, -522852066, -1747789432, 162941995, 2125561021, -407360249, -1866523247,
 	498536548, 1789927666, -205950648, -2067906082, 450548861, 1843258603, -187386543, -2083289657,
 	325883990, 1684777152, -43845254, -1973040660, 335633487, 1661365465, -99664541, -1928851979,
@@ -1109,14 +1151,14 @@ local fcs32tab = {  [0]=0, 1996959894, -301047508, -1727442502, 124634137, 18860
 	-1285129682, -1000256840, 1567103746, 711928724, -1274298825, -1022587231, 1510334235, 755167117 }
 
 function LibCompress:fcs32init()
-	return FCSINIT32;
+	return FCSINIT32
 end
 
 function LibCompress:fcs32update(uFcs32, pBuffer)
 	local i
-	local l=string_len(pBuffer)
-	for i = 1,l do
-		uFcs32 = bit_bxor(bit_rshift(uFcs32,8), fcs32tab[bit_band(bit_bxor(uFcs32, string_byte(pBuffer,i)), 255)])
+	local length = string_len(pBuffer)
+	for i = 1, length do
+		uFcs32 = bit_bxor(bit_rshift(uFcs32, 8), fcs32tab[bit_band(bit_bxor(uFcs32, string_byte(pBuffer, i)), 255)])
 	end
 	return uFcs32
 end

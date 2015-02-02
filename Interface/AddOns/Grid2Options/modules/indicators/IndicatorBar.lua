@@ -16,14 +16,14 @@ end)
 
 -- Grid2Options:MakeIndicatorBarParentOptions()
 do
-	local function GetValues(excludeIndicator)
+	local function GetValues(exclude)
 		-- local excludeIndicator = info.arg or info
 		local list = {}
-		for name, indicator in Grid2:IterateIndicators() do
-			if indicator.dbx.type=="bar" and indicator.sideKick and indicator~=excludeIndicator and 
-			   ( ((not indicator.parentIndicator) and (not indicator.childIndicator)) or indicator.childIndicator==excludeIndicator )
+		for _, ind in Grid2:IterateIndicators() do
+			if ind.dbx.type=="bar" and ind.sideKick and ind~=exclude and 
+			   ( ((not ind.barParent) and (not ind.barChild)) or ind.barChild==exclude )
 			then
-				list[name] = L[name]
+				list[ind.name] = L[ind.name]
 			end	
 		end
 		if next(list) then
@@ -32,37 +32,32 @@ do
 		end	
 	end
 	local function SetParent(info,v)
-		local child  = info.arg
-		local parent = v and Grid2.indicators[v]
-		local pparent = child.parentIndicator
-		if pparent then
-			pparent.dbx.childBar, pparent.childIndicator = nil, nil
-			child.dbx.parentBar,  child.parentIndicator  = nil, nil
-			pparent:UpdateDB()
+		local child = info.arg
+		local oldParent = child.barParent
+		local newParent = v and Grid2.indicators[v]
+		if oldParent then 
+			oldParent.barChild = nil 
+			oldParent:UpdateDB() -- really not necessary in current implementation
 		end
-		if parent then
-			parent.dbx.childBar = child.name
-			child.dbx.parentBar = parent.name
-			parent:UpdateDB()	
-		end
+		child.dbx.anchorTo = newParent and newParent.name or nil
 		child:UpdateDB()
-		if pparent then Grid2Frame:WithAllFrames(pparent, "Layout") end
-		if parent  then Grid2Frame:WithAllFrames(parent,  "Layout") end
-		if child   then Grid2Frame:WithAllFrames(child,   "Layout") end
+		if oldParent then Grid2Frame:WithAllFrames(oldParent, "Layout") end
+		if newParent then Grid2Frame:WithAllFrames(newParent, "Layout") end
+		Grid2Frame:WithAllFrames(child, "Layout")
 		Grid2Frame:UpdateIndicators()
-		for name, indicator in Grid2:IterateIndicators() do
+		for _, indicator in Grid2:IterateIndicators() do
 			if indicator.dbx.type=="bar" and indicator.sideKick then
 				Grid2Options:MakeIndicatorOptions(indicator)
 			end
-		end	
+		end
 	end
 	function Grid2Options:MakeIndicatorBarLocationOptions(indicator,options)
-		if indicator.parentIndicator then
+		if indicator.barParent then
 			self:MakeHeaderOptions( options, "Location" )
 		else	
 			self:MakeIndicatorLocationOptions(indicator, options)
 		end
-		if not indicator.childIndicator then
+		if not indicator.barChild then
 			local values = GetValues(indicator)
 			if values then
 				options.parentBar = {
@@ -70,7 +65,7 @@ do
 					order  = 3,
 					name   = L["Anchor to"],
 					desc   = L["Anchor the indicator to the selected bar."],
-					get    = function () return indicator.dbx.parentBar or "NONE" end,
+					get    = function () return indicator.dbx.anchorTo or "NONE" end,
 					set    = SetParent,
 					values = values,
 					arg    = indicator,
@@ -83,7 +78,7 @@ end
 -- Grid2Options:MakeIndicatorBarDisplayOptions()
 function Grid2Options:MakeIndicatorBarAppearanceOptions(indicator,options)
 	self:MakeHeaderOptions( options, "Appearance" )
-	if indicator.dbx.parentBar then return end
+	if indicator.dbx.anchorTo then return end
 	options.orientation = {
 		type = "select",
 		order = 15,
@@ -95,7 +90,10 @@ function Grid2Options:MakeIndicatorBarAppearanceOptions(indicator,options)
 		set = function (_, v)
 			if v=="DEFAULT" then v= nil	end
 			indicator:SetOrientation(v)
-			Grid2Frame:WithAllFrames(indicator, "Layout")
+			Grid2Frame:WithAllFrames(indicator, "Layout")			
+			if indicator.barChild then
+				self:RefreshIndicator(indicator.barChild, "Layout")
+			end
 		end,
 		values={ ["DEFAULT"]= L["DEFAULT"], ["VERTICAL"] = L["VERTICAL"], ["HORIZONTAL"] = L["HORIZONTAL"]}
 	}
@@ -170,6 +168,21 @@ function Grid2Options:MakeIndicatorBarAppearanceOptions(indicator,options)
 		end,
 		hidden = function() return not indicator.dbx.backColor end
 	}
+	options.reverseFill= {
+		type = "toggle",
+		name = L["Reverse Fill"],
+		desc = L["Fill the bar in reverse."],
+		order = 44,
+		tristate = false,
+		get = function () return indicator.dbx.reverseFill end,
+		set = function (_, v)
+			indicator.dbx.reverseFill = v or nil
+			self:RefreshIndicator(indicator, "Layout")
+			if indicator.barChild then
+				self:RefreshIndicator(indicator.barChild, "Layout")
+			end
+		end,
+	}
 end
 
 -- Grid2Options:MakeIndicatorBarMiscOptions()
@@ -206,7 +219,7 @@ function Grid2Options:MakeIndicatorBarMiscOptions(indicator, options)
 		type = "toggle",
 		name = L["Invert Bar Color"],
 		desc = L["Swap foreground/background colors on bars."],
-		order = 44,
+		order = 49,
 		tristate = false,
 		get = function () return indicator.dbx.invertColor	end,
 		set = function (_, v)

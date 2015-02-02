@@ -2,6 +2,7 @@
 
 local Grid2 = Grid2
 
+
 function Grid2.Dummy()
 end
 
@@ -84,3 +85,16 @@ Grid2.statusLibrary = {
 		end
 	end,
 }
+
+--  Used by bar indicators
+Grid2.AlignPoints= {
+	HORIZONTAL = { 
+		[true]  = { "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" },    -- normal Fill
+		[false] = { "BOTTOMRIGHT",  "BOTTOMLEFT", "TOPRIGHT", "TOPLEFT"  },  -- reverse Fill
+	},	
+	VERTICAL   = {
+		[true]  = { "BOTTOMLEFT","TOPLEFT","BOTTOMRIGHT","TOPRIGHT" }, -- normal Fill
+		[false] = { "TOPRIGHT", "BOTTOMRIGHT","TOPLEFT","BOTTOMLEFT" }, -- reverse Fill
+	}	
+}
+

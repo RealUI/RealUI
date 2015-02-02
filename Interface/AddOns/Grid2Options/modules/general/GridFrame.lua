@@ -16,7 +16,7 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 			Grid2Frame.db.profile.orientation = v
 			for _, indicator in Grid2:IterateIndicators() do
 				if indicator.SetOrientation and indicator.orientation==nil then
-					Grid2Frame:WithAllFrames( indicator, "Layout" )
+					Grid2Options:RefreshIndicator(indicator, "Layout", "Update")
 				end
 			end
 		end,
@@ -66,7 +66,7 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 		name = L["Frame Width"],
 		desc = L["Adjust the width of each unit's frame."],
 		min = 10,
-		max = 100,
+		softMax = 100,
 		step = 1,
 		get = function ()
 			return Grid2Frame.db.profile.frameWidth
@@ -85,7 +85,7 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 		name = L["Frame Height"],
 		desc = L["Adjust the height of each unit's frame."],
 		min = 10,
-		max = 100,
+		softMax = 100,		
 		step = 1,
 		get = function ()
 			return Grid2Frame.db.profile.frameHeight
