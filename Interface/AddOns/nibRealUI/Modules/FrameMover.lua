@@ -12,14 +12,12 @@ local FrameList = {
     addons = {
         grid2 = {
             name = "Grid2",
-            addon = "Grid2",
             hashealing = true,
             frames = {[1] = {name = "Grid2LayoutFrame"},},
             frameshealing = {[1] = {name = "Grid2LayoutFrame"},},
         },
         raven = {
             name = "Raven",
-            addon = "Raven",
             frames = {
                 [1] = {name = "RavenBarGroupPlayerBuffs"},
                 [2] = {name = "RavenBarGroupPlayerDebuffs"},
@@ -71,16 +69,47 @@ local FrameList = {
             name = "Durability Frame",
             frames = {[1] = {name = "DurabilityFrame"},},
         },
-        raid = {
-            name = "Raid",
-            frames = {},
-        },
-        party = {
-            name = "Party",
-            frames = {},
-        },
     },
 }
+
+-- Hide a Frame 
+local function HideFrame(FrameName)
+    local frame = _G[FrameName]
+    if not frame then return end
+    
+    frame:UnregisterAllEvents()
+    frame:Hide()    
+    frame:SetScript("OnShow", function(self) self:Hide() end)
+end
+
+local function HideFrameGroup(FramesTable)
+    for _, info in next, FramesTable do
+        local frame = _G[info.name]
+        if not frame then return end
+        
+        frame:UnregisterAllEvents()
+        frame:Hide()    
+        frame:SetScript("OnShow", function(self) self:Hide() end)
+    end
+end
+
+-- Move a single Addon/UIFrame group from saved variables
+local function MoveFrameGroup(FramesTable, DBTable)
+    local FrameDB = {}
+    for idx = 1, #FramesTable do
+        FramesMoving = true
+
+        local frame = _G[FramesTable[idx].name]
+        if not frame then return end
+        
+        FrameDB = DBTable[idx]
+        frame:ClearAllPoints()
+        frame:SetPoint(FrameDB.point, FrameDB.parent or UIParent, FrameDB.rpoint, FrameDB.x, FrameDB.y)
+        
+        if FrameDB.scale then frame:SetScale(FrameDB.scale) end
+        FramesMoving = false
+    end
+end
 
 -- Options
 local options
@@ -115,39 +144,40 @@ local function GetOptions()
         order = 50,
         args = {},
     }
-    local addonOrderCnt = 10    
-    for k_a,v_a in pairs(FrameList.addons) do
+    local addonOrderCnt = 10
+    for addonSlug, addon in next, FrameList.addons do
+        local addonInfo = db.addons[addonSlug]
         -- Create base options for Addons
-        addonOpts.args[k_a] = {
+        addonOpts.args[addonSlug] = {
             type = "group",
-            name = FrameList.addons[k_a].name,
+            name = addon.name,
             childGroups = "tab",
             order = addonOrderCnt,
-            disabled = function() return not(IsAddOnLoaded(FrameList.addons[k_a].addon) and nibRealUI:GetModuleEnabled(MODNAME)) end,
+            disabled = function() return not(IsAddOnLoaded(addon.name) and nibRealUI:GetModuleEnabled(MODNAME)) end,
             args = {
                 header = {
                     type = "header",
-                    name = string.format("Frame Mover - Addons - %s", FrameList.addons[k_a].name),
+                    name = string.format("Frame Mover - Addons - %s", addon.name),
                     order = 10,
                 },
                 enabled = {
                     type = "toggle",
-                    name = string.format("Move %s", FrameList.addons[k_a].name),
+                    name = string.format("Move %s", addon.name),
                     get = function(info)
-                        if k_a == "grid2" then
+                        if addonSlug == "grid2" then
                             return nibRealUI:DoesAddonMove("Grid2")
                         else
-                            return db.addons[k_a].move
+                            return addonInfo.move
                         end
                     end,
                     set = function(info, value) 
-                        if k_a == "grid2" then
+                        if addonSlug == "grid2" then
                             if nibRealUI:DoesAddonMove("Grid2") then
                                 FrameMover:MoveAddons()
                             end
                         else
-                            db.addons[k_a].move = value
-                            if db.addons[k_a].move then
+                            addonInfo.move = value
+                            if addonInfo.move then
                                 FrameMover:MoveAddons()
                             end
                         end
@@ -164,14 +194,14 @@ local function GetOptions()
         }
         
         -- Healing Enable option
-        if FrameList.addons[k_a].hashealing then
-            addonOpts.args[k_a].args.healingenabled = {
+        if addon.hashealing then
+            addonOpts.args[addonSlug].args.healingenabled = {
                 type = "toggle",
                 name = "Enable Healing Layout",
-                get = function(info) return db.addons[k_a].healing end,
+                get = function(info) return addonInfo.healing end,
                 set = function(info, value) 
-                    db.addons[k_a].healing = value 
-                    if db.addons[k_a].move then
+                    addonInfo.healing = value 
+                    if addonInfo.move then
                         FrameMover:MoveAddons()
                     end
                 end,
@@ -185,15 +215,15 @@ local function GetOptions()
             name = "Frames",
             type = "group",
             inline = true,
-            disabled = function() if db.addons[k_a].move then return false else return true end end,
+            disabled = function() if addonInfo.move then return false else return true end end,
             order = 10,
             args = {},
         }
-        local normalFrameOrderCnt = 10      
-        for k_f,v_f in ipairs(FrameList.addons[k_a].frames) do  
-            normalFrameOpts.args[tostring(k_f)] = {
+        local normalFrameOrderCnt = 10
+        for i = 1, #addon.frames do
+            normalFrameOpts.args[tostring(i)] = {
                 type = "group",
-                name = FrameList.addons[k_a].frames[k_f].name,
+                name = addon.frames[i].name,
                 inline = true,
                 order = normalFrameOrderCnt,
                 args = {
@@ -202,10 +232,10 @@ local function GetOptions()
                         name = "X Offset",
                         width = "half",
                         order = 10,
-                        get = function(info) return tostring(db.addons[k_a].frames[k_f].x) end,
+                        get = function(info) return tostring(addonInfo.frames[i].x) end,
                         set = function(info, value)
                             value = nibRealUI:ValidateOffset(value)
-                            db.addons[k_a].frames[k_f].x = value
+                            addonInfo.frames[i].x = value
                             FrameMover:MoveAddons()
                         end,
                     },
@@ -214,10 +244,10 @@ local function GetOptions()
                         name = "Y Offset",
                         width = "half",
                         order = 20,
-                        get = function(info) return tostring(db.addons[k_a].frames[k_f].y) end,
+                        get = function(info) return tostring(addonInfo.frames[i].y) end,
                         set = function(info, value)
                             value = nibRealUI:ValidateOffset(value)
-                            db.addons[k_a].frames[k_f].y = value
+                            addonInfo.frames[i].y = value
                             FrameMover:MoveAddons()
                         end,
                     },
@@ -225,12 +255,12 @@ local function GetOptions()
                         type = "select",
                         name = "Anchor To",
                         get = function(info) 
-                            for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                if v_ta == db.addons[k_a].frames[k_f].rpoint then return k_ta end
+                            for idx, point in next, nibRealUI.globals.anchorPoints do
+                                if point == addonInfo.frames[i].rpoint then return idx end
                             end
                         end,
                         set = function(info, value)
-                            db.addons[k_a].frames[k_f].rpoint = nibRealUI.globals.anchorPoints[value]
+                            addonInfo.frames[i].rpoint = nibRealUI.globals.anchorPoints[value]
                             FrameMover:MoveAddons()
                         end,
                         style = "dropdown",
@@ -242,12 +272,12 @@ local function GetOptions()
                         type = "select",
                         name = "Anchor From",
                         get = function(info) 
-                            for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                if v_ta == db.addons[k_a].frames[k_f].point then return k_ta end
+                            for idx, point in next, nibRealUI.globals.anchorPoints do
+                                if point == addonInfo.frames[i].point then return idx end
                             end
                         end,
                         set = function(info, value)
-                            db.addons[k_a].frames[k_f].point = nibRealUI.globals.anchorPoints[value]
+                            addonInfo.frames[i].point = nibRealUI.globals.anchorPoints[value]
                             FrameMover:MoveAddons()
                         end,
                         style = "dropdown",
@@ -260,10 +290,10 @@ local function GetOptions()
                         name = "Parent",
                         width = "double",
                         order = 50,
-                        get = function(info) return db.addons[k_a].frames[k_f].parent end,
+                        get = function(info) return addonInfo.frames[i].parent end,
                         set = function(info, value)
                             if not _G[value] then value = "UIParent" end
-                            db.addons[k_a].frames[k_f].parent = value
+                            addonInfo.frames[i].parent = value
                             FrameMover:MoveAddons()
                         end,
                     },
@@ -274,20 +304,20 @@ local function GetOptions()
         
         -- Create options table for Healing Frames
         local normalHealingFrameOpts = nil
-        if FrameList.addons[k_a].hashealing then
+        if addon.hashealing then
             normalHealingFrameOpts = {
                 name = "Healing Layout Frames",
                 type = "group",
                 inline = true,
-                disabled = function() return not ( db.addons[k_a].move and db.addons[k_a].healing ) end,
+                disabled = function() return not ( addonInfo.move and addonInfo.healing ) end,
                 order = 50,
                 args = {},
             }
             local normalHealingFrameOrderCnt = 10       
-            for k_f,v_f in ipairs(FrameList.addons[k_a].frameshealing) do   
-                normalHealingFrameOpts.args[tostring(k_f)] = {
+            for i = 1, #addon.frameshealing do
+                normalHealingFrameOpts.args[tostring(i)] = {
                     type = "group",
-                    name = FrameList.addons[k_a].frameshealing[k_f].name,
+                    name = addon.frameshealing[i].name,
                     inline = true,
                     order = normalHealingFrameOrderCnt,
                     args = {
@@ -296,10 +326,10 @@ local function GetOptions()
                             name = "X Offset",
                             width = "half",
                             order = 10,
-                            get = function(info) return tostring(db.addons[k_a].frameshealing[k_f].x) end,
+                            get = function(info) return tostring(addonInfo.frameshealing[i].x) end,
                             set = function(info, value)
                                 value = nibRealUI:ValidateOffset(value)
-                                db.addons[k_a].frameshealing[k_f].x = value
+                                addonInfo.frameshealing[i].x = value
                                 FrameMover:MoveAddons()
                             end,
                         },
@@ -308,10 +338,10 @@ local function GetOptions()
                             name = "Y Offset",
                             width = "half",
                             order = 20,
-                            get = function(info) return tostring(db.addons[k_a].frameshealing[k_f].y) end,
+                            get = function(info) return tostring(addonInfo.frameshealing[i].y) end,
                             set = function(info, value)
                                 value = nibRealUI:ValidateOffset(value)
-                                db.addons[k_a].frameshealing[k_f].y = value
+                                addonInfo.frameshealing[i].y = value
                                 FrameMover:MoveAddons()
                             end,
                         },
@@ -319,12 +349,12 @@ local function GetOptions()
                             type = "select",
                             name = "Anchor To",
                             get = function(info) 
-                                for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                    if v_ta == db.addons[k_a].frameshealing[k_f].rpoint then return k_ta end
+                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                    if point == addonInfo.frameshealing[i].rpoint then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                db.addons[k_a].frameshealing[k_f].rpoint = nibRealUI.globals.anchorPoints[value]
+                                addonInfo.frameshealing[i].rpoint = nibRealUI.globals.anchorPoints[value]
                                 FrameMover:MoveAddons()
                             end,
                             style = "dropdown",
@@ -336,12 +366,12 @@ local function GetOptions()
                             type = "select",
                             name = "Anchor From",
                             get = function(info) 
-                                for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                    if v_ta == db.addons[k_a].frameshealing[k_f].point then return k_ta end
+                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                    if point == addonInfo.frameshealing[i].point then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                db.addons[k_a].frameshealing[k_f].point = nibRealUI.globals.anchorPoints[value]
+                                addonInfo.frameshealing[i].point = nibRealUI.globals.anchorPoints[value]
                                 FrameMover:MoveAddons()
                             end,
                             style = "dropdown",
@@ -354,10 +384,10 @@ local function GetOptions()
                             name = "Parent",
                             width = "double",
                             order = 50,
-                            get = function(info) return db.addons[k_a].frameshealing[k_f].parent end,
+                            get = function(info) return addonInfo.frameshealing[i].parent end,
                             set = function(info, value)
                                 if not _G[value] then value = "UIParent" end
-                                db.addons[k_a].frameshealing[k_f].parent = value
+                                addonInfo.frameshealing[i].parent = value
                                 FrameMover:MoveAddons()
                             end,
                         },
@@ -368,8 +398,8 @@ local function GetOptions()
         end
 
         -- Add Frames to Addons options
-        addonOpts.args[k_a].args.normal.args.frames = normalFrameOpts
-        if normalHealingFrameOpts ~= nil then addonOpts.args[k_a].args.normal.args.healingframes = normalHealingFrameOpts end
+        addonOpts.args[addonSlug].args.normal.args.frames = normalFrameOpts
+        if normalHealingFrameOpts ~= nil then addonOpts.args[addonSlug].args.normal.args.healingframes = normalHealingFrameOpts end
         
         addonOrderCnt = addonOrderCnt + 10  
     end
@@ -383,25 +413,26 @@ local function GetOptions()
         args = {},
     }
     local uiframesordercnt = 10 
-    for k_u,v_u in pairs(FrameList.uiframes) do
+    for uiSlug, ui in next, FrameList.uiframes do
+        local uiInfo = db.uiframes[uiSlug]
         -- Create base options for UIFrames
-        uiframesopts.args[k_u] = {
+        uiframesopts.args[uiSlug] = {
             type = "group",
-            name = FrameList.uiframes[k_u].name,
+            name = ui.name,
             order = uiframesordercnt,
             args = {
                 header = {
                     type = "header",
-                    name = string.format("Frame Mover - UI Frames - %s", FrameList.uiframes[k_u].name),
+                    name = string.format("Frame Mover - UI Frames - %s", ui.name),
                     order = 10,
                 },
                 enabled = {
                     type = "toggle",
-                    name = string.format("Move %s", FrameList.uiframes[k_u].name),
-                    get = function(info) return db.uiframes[k_u].move end,
+                    name = string.format("Move %s", ui.name),
+                    get = function(info) return uiInfo.move end,
                     set = function(info, value) 
-                        db.uiframes[k_u].move = value 
-                        if db.uiframes[k_u].move and FrameList.uiframes[k_u].frames then FrameMover:MoveIndividualFrameGroup(FrameList.uiframes[k_u].frames, db.uiframes[k_u].frames) end
+                        uiInfo.move = value 
+                        if uiInfo.move and ui.frames then MoveFrameGroup(ui.frames, uiInfo.frames) end
                     end,
                     order = 20,
                 },
@@ -409,20 +440,20 @@ local function GetOptions()
         }
         
         -- Create options table for Frames
-        if FrameList.uiframes[k_u].frames then
+        if ui.frames then
             local frameopts = {
                 name = "Frames",
                 type = "group",
                 inline = true,
-                disabled = function() if db.uiframes[k_u].move then return false else return true end end,
+                disabled = function() if uiInfo.move then return false else return true end end,
                 order = 30,
                 args = {},
             }
-            local FrameOrderCnt = 10        
-            for k_f,v_f in ipairs(FrameList.uiframes[k_u].frames) do    
-                frameopts.args[tostring(k_f)] = {
+            local FrameOrderCnt = 10
+            for i = 1, #ui.frames do
+                frameopts.args[tostring(i)] = {
                     type = "group",
-                    name = FrameList.uiframes[k_u].frames[k_f].name,
+                    name = ui.frames[i].name,
                     inline = true,
                     order = FrameOrderCnt,
                     args = {
@@ -431,11 +462,11 @@ local function GetOptions()
                             name = "X Offset",
                             width = "half",
                             order = 10,
-                            get = function(info) return tostring(db.uiframes[k_u].frames[k_f].x) end,
+                            get = function(info) return tostring(uiInfo.frames[i].x) end,
                             set = function(info, value)
                                 value = nibRealUI:ValidateOffset(value)
-                                db.uiframes[k_u].frames[k_f].x = value
-                                FrameMover:MoveIndividualFrameGroup(FrameList.uiframes[k_u].frames, db.uiframes[k_u].frames)
+                                uiInfo.frames[i].x = value
+                                MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                         },
                         yoffset = {
@@ -443,24 +474,24 @@ local function GetOptions()
                             name = "Y Offset",
                             width = "half",
                             order = 20,
-                            get = function(info) return tostring(db.uiframes[k_u].frames[k_f].y) end,
+                            get = function(info) return tostring(uiInfo.frames[i].y) end,
                             set = function(info, value)
                                 value = nibRealUI:ValidateOffset(value)
-                                db.uiframes[k_u].frames[k_f].y = value
-                                FrameMover:MoveIndividualFrameGroup(FrameList.uiframes[k_u].frames, db.uiframes[k_u].frames)
+                                uiInfo.frames[i].y = value
+                                MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                         },
                         anchorto = {
                             type = "select",
                             name = "Anchor To",
                             get = function(info) 
-                                for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                    if v_ta == db.uiframes[k_u].frames[k_f].rpoint then return k_ta end
+                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                    if point == uiInfo.frames[i].rpoint then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                db.uiframes[k_u].frames[k_f].rpoint = nibRealUI.globals.anchorPoints[value]
-                                FrameMover:MoveIndividualFrameGroup(FrameList.uiframes[k_u].frames, db.uiframes[k_u].frames)
+                                uiInfo.frames[i].rpoint = nibRealUI.globals.anchorPoints[value]
+                                MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                             style = "dropdown",
                             width = nil,
@@ -471,13 +502,13 @@ local function GetOptions()
                             type = "select",
                             name = "Anchor From",
                             get = function(info) 
-                                for k_ta,v_ta in pairs(nibRealUI.globals.anchorPoints) do
-                                    if v_ta == db.uiframes[k_u].frames[k_f].point then return k_ta end
+                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                    if point == uiInfo.frames[i].point then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                db.uiframes[k_u].frames[k_f].point = nibRealUI.globals.anchorPoints[value]
-                                FrameMover:MoveIndividualFrameGroup(FrameList.uiframes[k_u].frames, db.uiframes[k_u].frames)
+                                uiInfo.frames[i].point = nibRealUI.globals.anchorPoints[value]
+                                MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                             style = "dropdown",
                             width = nil,
@@ -490,7 +521,7 @@ local function GetOptions()
             end
             
             -- Add Frames to UI Frames options
-            uiframesopts.args[k_u].args.frames = frameopts
+            uiframesopts.args[uiSlug].args.frames = frameopts
             uiframesordercnt = uiframesordercnt + 10
         end
     end
@@ -528,15 +559,16 @@ local function GetOptions()
     }
     -- Add all frames to Hide Frames options
     local hideordercnt = 10 
-    for k_u,v_u in pairs(FrameList.hide) do
+    for hideSlug, hide in next, FrameList.hide do
+        local hideInfo = db.hide [hideSlug]
         -- Create base options for Hide
-        hideopts.args.hideframes.args[k_u] = {
+        hideopts.args.hideframes.args[hideSlug] = {
             type = "toggle",
-            name = FrameList.hide[k_u].name,
-            get = function(info) return db.hide[k_u].hide end,
+            name = hide.name,
+            get = function(info) return hideInfo.hide end,
             set = function(info, value) 
-                db.hide[k_u].hide = value 
-                if db.hide[k_u].hide then
+                hideInfo.hide = value 
+                if hideInfo.hide then
                     FrameMover:HideFrames()
                 else
                     nibRealUI:ReloadUIDialog()
@@ -555,80 +587,22 @@ local function GetOptions()
     return options
 end
 
--- Hide a Frame 
-local function HideFrame(FrameName)
-    local frame = _G[FrameName]
-    if not frame then return end
-    
-    frame:UnregisterAllEvents()
-    frame:Hide()    
-    frame:SetScript("OnShow", function(self) self:Hide() end)
-end
-
-function FrameMover:HideIndividualFrameGroup(FramesTable)
-    for k,v in pairs(FramesTable) do
-        local FrameName = FramesTable[k].name
-        HideFrame(FrameName)
-    end
-end
-
--- Move a Frame
-local function MoveFrame(FrameName, point, rframe, rpoint, x, y, ...)
-    FramesMoving = true
-
-    local frame = _G[FrameName]
-    if not frame then return end
-    
-    frame:ClearAllPoints()
-    frame:SetPoint(point, rframe, rpoint, x, y)
-    -- frame:SetParent(rframe)
-    
-    local scale = ...
-    if scale ~= nil then frame:SetScale(scale) end
-    FramesMoving = false
-end
-
--- Move a single Addon/UIFrame group from saved variables
-function FrameMover:MoveIndividualFrameGroup(FramesTable, DBTable)
-    local FrameDB = {}
-    for k,v in pairs(FramesTable) do
-        local FrameName = FramesTable[k].name
-        FrameDB = DBTable[k]
-        local scale = nil
-        if FrameDB.scale then scale = FrameDB.scale end
-        local parent = _G[FrameDB.parent] or UIParent
-        MoveFrame(FrameName, FrameDB.point, parent, FrameDB.rpoint, FrameDB.x, FrameDB.y, scale)
-    end
-end
-
 -- Move all Addons
-function FrameMover:MoveAddons(addon)
+function FrameMover:MoveAddons(addonName)
     local FrameDB = {}
-    for k,v in pairs(FrameList.addons) do
-        if (addon and k == addon) or (addon == nil) then
-            if ((k ~= "grid2") and db.addons[k].move) or ((k == "grid2") and nibRealUI:DoesAddonMove("Grid2")) then
-                local IsHealing = ( FrameList.addons[k].hashealing and db.addons[k].healing and nibRealUI.cLayout == 2 )
+    for addonSlug, addon in next, FrameList.addons do
+        local addonInfo = db.addons[addonSlug]
+        --print("MoveAddons", addonSlug, addon, addonName)
+        if (addonName and addonSlug == addonName) or (addonName == nil) then
+            if ((addonSlug ~= "grid2") and addonInfo.move) or ((addonSlug == "grid2") and nibRealUI:DoesAddonMove("Grid2")) then
+                local IsHealing = ( addon.hashealing and addonInfo.healing and nibRealUI.cLayout == 2 )
                 
                 if IsHealing then
                     -- Healing Layout
-                    for k2,v2 in ipairs(FrameList.addons[k].frameshealing) do
-                        local FrameName = FrameList.addons[k].frameshealing[k2].name
-                        FrameDB = db.addons[k].frameshealing[k2]
-                        local scale = nil
-                        if FrameDB.scale then scale = FrameDB.scale end
-                        local parent = _G[FrameDB.parent] or UIParent
-                        MoveFrame(FrameName, FrameDB.point, parent, FrameDB.rpoint, FrameDB.x, FrameDB.y, scale)
-                    end
+                    MoveFrameGroup(addon.frameshealing, addonInfo.frameshealing)
                 else
                     -- Normal Layout
-                    for k2,v2 in ipairs(FrameList.addons[k].frames) do
-                        local FrameName = FrameList.addons[k].frames[k2].name
-                        FrameDB = db.addons[k].frames[k2]
-                        local scale = nil
-                        if FrameDB.scale then scale = FrameDB.scale end
-                        local parent = _G[FrameDB.parent] or UIParent
-                        MoveFrame(FrameName, FrameDB.point, parent, FrameDB.rpoint, FrameDB.x, FrameDB.y, scale)
-                    end
+                    MoveFrameGroup(addon.frames, addonInfo.frames)
                 end
             end
         end
@@ -638,59 +612,18 @@ end
 -- Move all UI Frames
 function FrameMover:MoveUIFrames()
     local FrameDB = {}
-    for k,v in pairs(FrameList.uiframes) do
-        if db.uiframes[k].move and FrameList.uiframes[k].frames then
-            for k2,v2 in ipairs(FrameList.uiframes[k].frames) do
-                local FrameName = FrameList.uiframes[k].frames[k2].name
-                FrameDB = db.uiframes[k].frames[k2]
-                local scale = nil
-                if FrameDB.scale then scale = FrameDB.scale end
-                MoveFrame(FrameName, FrameDB.point, FrameDB.parent, FrameDB.rpoint, FrameDB.x, FrameDB.y, scale)
-            end
+    for uiSlug, ui in next, FrameList.uiframes do
+        if db.uiframes[uiSlug].move and ui.frames then
+            MoveFrameGroup(ui.frames, db.uiframes[uiSlug].frames)
         end
     end
-end
-
--- Hide Party/Raid Frames
-local function RaidFramesCheck()
-    if not InCombatLockdown() then
-        if db.hide.raid.hide then
-            CompactRaidFrameManager_SetSetting("IsShown","0")
-        else
-            CompactRaidFrameManager_SetSetting("IsShown","1")
-        end
-    end
-end
-
-function FrameMover:HidePartyRaid()
-    if db.hide.raid.hide then
-        RaidFramesCheck()
-    end
-    
-    if not InCombatLockdown() then
-        if not FrameMover.partyhidden and EnteredWorld and db.hide.party.hide then
-            FrameMover.partyhidden = true
-            for i = 1, 4 do
-                local frame = _G["PartyMemberFrame"..i]
-                frame:UnregisterAllEvents()
-                frame:Hide()
-                frame.Show = function() end
-            end
-        end
-    end
-end
-function FrameMover_HidePartyRaid()
-    FrameMover:HidePartyRaid()
 end
 
 -- Hide all UI Frames
 function FrameMover:HideFrames()
-    for k,v in pairs(FrameList.hide) do
-        if db.hide[k].hide then
-            for k2,v2 in ipairs(FrameList.hide[k].frames) do
-                local FrameName = FrameList.hide[k].frames[k2].name
-                HideFrame(FrameName)
-            end
+    for hideSlug, hide in pairs(FrameList.hide) do
+        if db.hide[hideSlug].hide then
+            HideFrameGroup(hide.frames)
         end
     end
 end
@@ -701,7 +634,7 @@ local function Hook_VSI()
     hooksecurefunc(VehicleSeatIndicator, "SetPoint", function(_, _, parent)
         if nibRealUI:GetModuleEnabled(MODNAME) and db.uiframes.vsi.move then
             if (parent == "MinimapCluster") or (parent == _G["MinimapCluster"]) then
-                FrameMover:MoveIndividualFrameGroup(FrameList.uiframes.vsi.frames, db.uiframes.vsi.frames)
+                MoveFrameGroup(FrameList.uiframes.vsi.frames, db.uiframes.vsi.frames)
             end
         end
     end)
@@ -717,7 +650,7 @@ local function Hook_Raven()
     t:SetScript("OnUpdate", function(s, e)
         t.e = t.e + e
         if t.e >= 0.5 then
-            FrameMover:MoveIndividualFrameGroup(FrameList.addons.raven.frames, db.addons.raven.frames)
+            MoveFrameGroup(FrameList.addons.raven.frames, db.addons.raven.frames)
             t.e = 0
             t:Hide()
         end
@@ -762,15 +695,9 @@ function FrameMover:PLAYER_ENTERING_WORLD()
         self:HideFrames()
     end
     EnteredWorld = true
-    
-    FrameMover_HidePartyRaid()
 end
 
 ----
-function FrameMover:UpdateLockdown(...)
-    nibRealUI:RegisterLockdownUpdate("FrameMover_HidePartyRaid", FrameMover_HidePartyRaid)
-end
-
 function FrameMover:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -865,29 +792,7 @@ function FrameMover:OnInitialize()
 end
 
 function FrameMover:OnEnable()
-    if db.hide.raid.hide then
-        CompactUnitFrameProfiles:UnregisterAllEvents()
-        
-        if not IsAddOnLoaded("Blizzard_CompactRaidFrames") then
-            LoadAddOn("Blizzard_CompactRaidFrames")
-            -- compactRaid = CompactRaidFrameManager_GetSetting("IsShown")
-        end
-        CompactRaidFrameManager:UnregisterAllEvents()
-        CompactRaidFrameContainer:UnregisterAllEvents()
-        InterfaceOptionsFrameCategoriesButton11:SetScale(0.0001)
-    end
-    if db.hide.party.hide then
-        InterfaceOptionsFrameCategoriesButton10:SetScale(0.0001)
-    end
-    if db.hide.raid.hide and db.hide.part.hide then
-        InterfaceOptionsFrameCategoriesButton9:SetScale(0.0001)
-    end
-    
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("GROUP_ROSTER_UPDATE", "HidePartyRaid")
-    self:RegisterEvent("PLAYER_ALIVE", "HidePartyRaid")
-    self:RegisterEvent("PLAYER_DEAD", "HidePartyRaid")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 end
 
 function FrameMover:OnDisable()
