@@ -1,7 +1,6 @@
 local _, mods = ...
 
-mods["Clique"] = function(F, C)
-    if not CliqueSpellTab then return end
+mods["PLAYER_LOGIN"]["Clique"] = function(self, F, C)
     --print("HELLO Clique!!!", F, C)
     local tab = CliqueSpellTab
     F.ReskinTab(tab)

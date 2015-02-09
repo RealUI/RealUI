@@ -1,36 +1,33 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, mods = ...
 
-local _
-local MODNAME = "PaperDoll"
-local PaperDoll = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0")
-
-local itemSlots = {
-    {slot = "Head", hasDura = true},
-    {slot = "Neck", hasDura = false},
-    {slot = "Shoulder", hasDura = true},
-    {}, -- shirt
-    {slot = "Chest", hasDura = true},
-    {slot = "Waist", hasDura = true},
-    {slot = "Legs", hasDura = true},
-    {slot = "Feet", hasDura = true},
-    {slot = "Wrist", hasDura = true},
-    {slot = "Hands", hasDura = true},
-    {slot = "Finger0", hasDura = false},
-    {slot = "Finger1", hasDura = false},
-    {slot = "Trinket0", hasDura = false},
-    {slot = "Trinket1", hasDura = false},
-    {slot = "Back", hasDura = false},
-    {slot = "MainHand", hasDura = true},
-    {slot = "SecondaryHand", hasDura = true},
-}
-function PaperDoll:MakeFrames()
+tinsert(mods["Aurora"], function(F, C)
+    --print("HELLO WORLD!!!", F, C)
+    local itemSlots = {
+        {slot = "Head", hasDura = true},
+        {slot = "Neck", hasDura = false},
+        {slot = "Shoulder", hasDura = true},
+        {}, -- shirt
+        {slot = "Chest", hasDura = true},
+        {slot = "Waist", hasDura = true},
+        {slot = "Legs", hasDura = true},
+        {slot = "Feet", hasDura = true},
+        {slot = "Wrist", hasDura = true},
+        {slot = "Hands", hasDura = true},
+        {slot = "Finger0", hasDura = false},
+        {slot = "Finger1", hasDura = false},
+        {slot = "Trinket0", hasDura = false},
+        {slot = "Trinket1", hasDura = false},
+        {slot = "Back", hasDura = false},
+        {slot = "MainHand", hasDura = true},
+        {slot = "SecondaryHand", hasDura = true},
+    }
     -- Set up iLvl and Durability
     for slotID = 1, #itemSlots do
         local item = itemSlots[slotID]
         if item.slot then
             local itemSlot = _G["Character" .. item.slot .. "Slot"]
             local iLvl = itemSlot:CreateFontString(item.slot .. "ItemLevel", "OVERLAY")
-            iLvl:SetFont(unpack(nibRealUI.font.pixel1))
+            iLvl:SetFontObject(SystemFont_Outline_Small) --SetFont(unpack(RealUI.font.pixel1))
             iLvl:SetPoint("BOTTOMRIGHT", itemSlot, "BOTTOMRIGHT", 2, 1.5)
             itemSlot.ilvl = iLvl
             if item.hasDura then
@@ -44,21 +41,21 @@ function PaperDoll:MakeFrames()
                     dura:SetPoint("BOTTOMLEFT", itemSlot, "BOTTOMLEFT", -3, 0)
                 end
                 
-                dura:SetStatusBarTexture(nibRealUI.media.textures.plain)
+                dura:SetStatusBarTexture(RealUI.media.textures.plain)
                 dura:SetOrientation("VERTICAL")
                 dura:SetMinMaxValues(0, 1)
                 dura:SetValue(0)
                 
-                nibRealUI:CreateBDFrame(dura)
+                F.CreateBDFrame(dura)
                 dura:SetFrameLevel(itemSlot:GetFrameLevel() + 4)
                 itemSlot.dura = dura
             end
         end
     end
 
-    self.ilvl = PaperDollFrame:CreateFontString("ARTWORK")
-    self.ilvl:SetFontObject(SystemFont_Small)
-    self.ilvl:SetPoint("TOP", PaperDollFrame, "TOP", 0, -20)
+    PaperDollFrame.ilvl = PaperDollFrame:CreateFontString("ARTWORK")
+    PaperDollFrame.ilvl:SetFontObject(SystemFont_Small)
+    PaperDollFrame.ilvl:SetPoint("TOP", PaperDollFrame, "TOP", 0, -20)
 
     -- Toggle Helm and Cloak
     local helmcloak = {
@@ -71,7 +68,7 @@ function PaperDoll:MakeFrames()
         local check = CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
         check:SetSize(18, 18)
         check:SetPoint("TOPLEFT", itemSlot, -4, 4)
-        --F.ReskinCheck(check)
+        F.ReskinCheck(check)
 
         check:SetScript("OnShow", function(self) 
             self:SetChecked(isShown())
@@ -91,77 +88,81 @@ function PaperDoll:MakeFrames()
             GameTooltip:Hide()
         end)
     end
-end
 
--- Update Item display
-function PaperDoll:UpdateItems()
-    if not CharacterFrame:IsVisible() then return end
-    
-    for slotID = 1, #itemSlots do
-        local item = itemSlots[slotID]
-        if item.slot then
-            local itemSlot = _G["Character" .. item.slot .. "Slot"]
-            local itemLink = GetInventoryItemLink("player", slotID)
-            if itemLink then
-                local _, _, itemRarity, itemLevel = GetItemInfo(itemLink)
-
-                if itemLevel and itemLevel > 0 then
-                    if maxUpgradeLevel and currentUpgradeLevel and (tonumber(currentUpgradeLevel) > 0) then
-                        if itemRarity <= 3 then
-                            itemLevel = itemLevel + (tonumber(currentUpgradeLevel) * 8)
-                        else
-                            itemLevel = itemLevel + (tonumber(currentUpgradeLevel) * 4)
-                        end
-                    end
-                    itemSlot.ilvl:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
-                    itemSlot.ilvl:SetText(itemLevel)
-                else
-                    itemSlot.ilvl:SetText("")
-                end
-            else
-                itemSlot.ilvl:SetText("")
-            end
-            if item.hasDura then
-                local min, max = GetInventoryItemDurability(slotID)
-                if max then
-                    local percent = nibRealUI:GetSafeVals(min, max)
-                    itemSlot.dura:SetValue(percent)
-                    itemSlot.dura:SetStatusBarColor(nibRealUI:GetDurabilityColor(percent))
-                    itemSlot.dura:Show()
-                else
-                    itemSlot.dura:Hide()
-                end
-            end
+    local ilvlLimits = 385
+    local function GetILVLColor(lvl, ilvl)
+        if lvl > 90 then
+            ilvlLimits = (lvl - 91) * 9 + 510
+        end
+        if ilvl >= ilvlLimits + 28 then
+            return ITEM_QUALITY_COLORS[4] -- epic
+        elseif ilvl >= ilvlLimits + 14 then
+            return ITEM_QUALITY_COLORS[3] -- rare
+        elseif ilvl >= ilvlLimits then
+            return ITEM_QUALITY_COLORS[2] -- uncommon
+        else
+            return ITEM_QUALITY_COLORS[1] -- common
         end
     end
 
-    local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel()
-    local aILColor = nibRealUI:GetILVLColor(UnitLevel("player"), avgItemLevel)["hex"]
-    local aILEColor = nibRealUI:GetILVLColor(UnitLevel("player"), avgItemLevelEquipped)["hex"]
-    avgItemLevel = floor(avgItemLevel)
-    avgItemLevelEquipped = floor(avgItemLevelEquipped)
-    self.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
-end
+    -- Update Item display
+    local f, timer = CreateFrame("Frame")
+    local function UpdateItems()
+        if not CharacterFrame:IsVisible() then return end
+        
+        for slotID = 1, #itemSlots do
+            local item = itemSlots[slotID]
+            if item.slot then
+                local itemSlot = _G["Character" .. item.slot .. "Slot"]
+                local itemLink = GetInventoryItemLink("player", slotID)
+                if itemLink then
+                    local _, _, itemRarity, itemLevel = GetItemInfo(itemLink)
 
-function PaperDoll:CharacterFrame_OnShow()
-    self:RegisterBucketEvent({"UNIT_INVENTORY_CHANGED", "UPDATE_INVENTORY_DURABILITY"}, 0.25, "UpdateItems")
-    self:UpdateItems()
-end
+                    if itemLevel and itemLevel > 0 then
+                        itemSlot.ilvl:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
+                        itemSlot.ilvl:SetText(itemLevel)
+                    else
+                        itemSlot.ilvl:SetText("")
+                    end
+                else
+                    itemSlot.ilvl:SetText("")
+                end
+                if item.hasDura then
+                    local min, max = GetInventoryItemDurability(slotID)
+                    if max then
+                        local percent = RealUI:GetSafeVals(min, max)
+                        itemSlot.dura:SetValue(percent)
+                        itemSlot.dura:SetStatusBarColor(RealUI:GetDurabilityColor(percent))
+                        itemSlot.dura:Show()
+                    else
+                        itemSlot.dura:Hide()
+                    end
+                end
+            end
+        end
 
-function PaperDoll:CharacterFrame_OnHide()
-    self:UnregisterAllBuckets()
-end
+        local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel()
+        local aILColor = GetILVLColor(UnitLevel("player"), avgItemLevel)["hex"]
+        local aILEColor = GetILVLColor(UnitLevel("player"), avgItemLevelEquipped)["hex"]
+        avgItemLevel = floor(avgItemLevel)
+        avgItemLevelEquipped = floor(avgItemLevelEquipped)
+        PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
+        timer = false
+    end
 
---------------------
--- Initialization --
---------------------
-function PaperDoll:OnInitialize()
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterSkin(MODNAME, "Character Window")
-end
-
-function PaperDoll:OnEnable()
-    self:SecureHookScript(CharacterFrame, "OnShow", "CharacterFrame_OnShow")
-    self:SecureHookScript(CharacterFrame, "OnHide", "CharacterFrame_OnHide")
-    self:MakeFrames()
-end
+    f:SetScript("OnEvent", function(self, event, ...)
+        if not timer then
+            C_Timer.After(UpdateItems, .25)
+            timer = true
+        end
+    end)
+    CharacterFrame:HookScript("OnShow", function()
+        f:RegisterEvent("UNIT_INVENTORY_CHANGED")
+        f:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
+        UpdateItems()
+    end)
+    CharacterFrame:HookScript("OnHide", function()
+        f:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+        f:UnregisterEvent("UPDATE_INVENTORY_DURABILITY")
+    end)
+end)

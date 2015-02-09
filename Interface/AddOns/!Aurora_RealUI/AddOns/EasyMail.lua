@@ -1,6 +1,6 @@
 local _, mods = ...
 
-mods["EasyMail"] = function(F, C)
+mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
     --print("HELLO EasyMail!!!", F, C)
     local r, g, b = C.r, C.g, C.b
     

@@ -1,10 +1,11 @@
 ## Interface: 60000
 ## Title: !Aurora |cffffffffReal|r|cffbf3333UI|r
 ## Notes: A custom Aurora skin for RealUI
-## Author: Gethe88
-## Version: 8.1 r6
-## RequiredDeps: nibRealUI
+## Author: Gethe
+## Version: 8.1 r10
+## RequiredDeps: nibRealUI_Init
 ## OptionalDeps: !BugGrabber
+
 !Aurora.lua
 
 AddOns\Bartender4.lua
@@ -12,7 +13,6 @@ AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_PetBattleUI.lua
 AddOns\Clique.lua
 AddOns\DBM.lua
-AddOns\DXE.lua
 AddOns\EasyMail.lua
 AddOns\Grid2.lua
 AddOns\KNP.lua

@@ -194,29 +194,6 @@ function nibRealUI:GetLootSpecData()
 end
 
 -- Math
-function nibRealUI:GetSafeVals(vCur, vMax)
-    local percent
-    if vCur > 0 and vMax == 0 then
-        vMax = vCur
-        percent = 0.00000000000001
-    elseif vCur == 0 and vMax == 0 then
-        percent = 0.00000000000001
-    elseif (vCur < 0) or (vMax < 0) then
-        vCur = abs(vCur)
-        vMax = abs(vMax)
-        vMax = max(vCur, vMax)
-        percent = vCur / vMax
-    else
-        percent = vCur / vMax
-    end
-    return percent, vCur, vMax
-end
-
-nibRealUI.Round = function(value, places)
-    local mult = 10 ^ (places or 0)
-    return math.floor(value * mult + 0.5) / mult
-end
-
 function nibRealUI:Clamp(value, min, max)
     if value < min then
         value = min
@@ -708,22 +685,6 @@ function nibRealUI:ValidateOffset(value, ...)
 end
 
 -- Colors
-function nibRealUI:ColorTableToStr(vals)
-    return string.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
-end
-
-function nibRealUI:GetDurabilityColor(percent)
-    if percent < 0 then
-        return 1, 0, 0
-    elseif percent <= 0.5 then
-        return 1, percent * 2, 0
-    elseif percent >= 1 then
-        return 0, 1, 0
-    else
-        return 2 - percent * 2, 1, 0
-    end
-end
-
 local ilvlLimits = 385
 function nibRealUI:GetILVLColor(lvl, ilvl)
     if lvl > 90 then

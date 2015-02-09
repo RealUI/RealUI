@@ -69,7 +69,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
             return
         end
     end
-    return ("%d|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
+    return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
 end
 tags.Events["realui:healthPercent"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 

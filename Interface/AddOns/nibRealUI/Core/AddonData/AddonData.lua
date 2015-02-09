@@ -25,7 +25,7 @@ function nibRealUI:LoadAddonData()
 end
 
 function nibRealUI:LoadSpecificAddOnData(addon, skipReload)
-	print("nibRealUI:LoadSpecificAddOnData", addon, skipReload, self["LoadAddOnData_"..addon])
+	--print("nibRealUI:LoadSpecificAddOnData", addon, skipReload, self["LoadAddOnData_"..addon])
 	if self["LoadAddOnData_"..addon] then
 		self["LoadAddOnData_"..addon]()
 		--setProfile

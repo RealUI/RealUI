@@ -1,17 +1,11 @@
 -- Code from FreeUI by the awesome Haleth
 -- http://www.wowinterface.com/downloads/info17892-FreeUI.html
 
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndbc
+local _, mods = ...
 
-local MODNAME = "PetBattles"
-local PetBattles = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
-
-function PetBattles:Skin()
-	if not Aurora then return end
-	
-	local F, C = unpack(Aurora)
-	local r, g, b = unpack(nibRealUI.classColor)
+mods["Blizzard_PetBattleUI"] = function(F, C)
+    --print("Blizzard_PetBattleUI", F, C)
+	local r, g, b = C.r, C.g, C.b
 
 	local frame = PetBattleFrame
 	local bf = frame.BottomFrame
@@ -566,19 +560,4 @@ function PetBattles:Skin()
 		bf.ForfeitButton:ClearAllPoints()
 		bf.ForfeitButton:SetPoint("LEFT", bf.CatchButton, "RIGHT", 1, 0)
 	end)
-end
-
-function PetBattles:OnInitialize()
-	self.db = nibRealUI.db:RegisterNamespace(MODNAME)
-	self.db:RegisterDefaults({
-		profile = {}
-	})
-	db = self.db.profile
-	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterSkin(MODNAME, "Pet Battles")
-end
-
-function PetBattles:OnEnable()
-	self:Skin()
 end

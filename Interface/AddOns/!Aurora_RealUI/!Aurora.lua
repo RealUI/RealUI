@@ -5,14 +5,21 @@ mods["PLAYER_LOGIN"] = {}
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
 REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db = nibRealUI.db.profile
+local db
 
 -- Aurora API
 local F, C
 local style = {}
 style.apiVersion = "6.0"
 
+-- Save these functions so we dont have to duplicate just to place a border around an icon.
+style.copy = {
+    "CreateBD",
+    "CreateBDFrame",
+}
+
+-- Reskin* functions should never be saved, and only used within !Aurora.
+-- This is to ensure a consistent look if the user disables Aurora.
 style.functions = {
     ["CreateBD"] = function(f, a)
         --print("Override CreateBD", f:GetName(), a)
@@ -24,10 +31,10 @@ style.functions = {
         f:SetBackdropBorderColor(0, 0, 0)
         if not a then
 	        --print("CreateSD")
-	        f:SetBackdropColor(unpack(nibRealUI.media.window))
+	        f:SetBackdropColor(unpack(RealUI.media.window))
 	        f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
 	        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-	        f.tex:SetAlpha(db.settings.stripeOpacity)
+	        f.tex:SetAlpha(0.5) --db.settings.stripeOpacity)
 	        f.tex:SetAllPoints()
 	        f.tex:SetHorizTile(true)
 	        f.tex:SetVertTile(true)
@@ -38,6 +45,25 @@ style.functions = {
 	    	--print("CreateBD: alpha", a)
 	    	f:SetBackdropColor(0, 0, 0, a)
         end
+    end,
+    ["CreateBDFrame"] = function(f, a)
+        local frame
+        if f:GetObjectType() == "Texture" then
+            frame = f:GetParent()
+        else
+            frame = f
+        end
+
+        local lvl = frame:GetFrameLevel()
+
+        local bg = CreateFrame("Frame", nil, frame)
+        bg:SetPoint("TOPLEFT", f, -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", f, 1, -1)
+        bg:SetFrameLevel(lvl == 0 and 1 or lvl - 1)
+
+        F.CreateBD(bg, a)
+
+        return bg
     end,
 }
 
@@ -66,38 +92,49 @@ f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- some skins need to be deferred till after all other addons.
-        for _, func in next, mods[event] do
-            func(F, C)
-        end
-        f:UnregisterEvent("PLAYER_LOGIN")
-    elseif event == "ADDON_LOADED" and addon == "Aurora" then
-        F, C = unpack(Aurora)
-
-        F.ReskinAtlas = function(f, atlas, is8Point)
-            --print("ReskinAtlas")
-            if not atlas then atlas = f:GetAtlas() end
-            local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
-            file = file:sub(10) -- cut off "Interface"
-            f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
-            if is8Point then
-                return left, right, top, bottom
+        for addonName, func in next, mods[event] do
+            if type(addonName) == "string" and IsAddOnLoaded(addonName) then
+                local skin = RealUI:RegisterSkin(addonName)
+                if RealUI:GetModuleEnabled(addonName) then
+                    func(skin, F, C)
+                end
             else
-                f:SetTexCoord(left, right, top, bottom)
+                func(F, C)
             end
         end
-    end
+        f:UnregisterEvent("PLAYER_LOGIN")
+    elseif event == "ADDON_LOADED" then
+        if addon == "Aurora" then
+            F, C = unpack(Aurora)
 
-    -- mod logic by Haleth from Aurora
-    local addonModule = mods[addon]
-    if addonModule then
-        if type(addonModule) == "function" then
-            addonModule(F, C)
-        else
-            -- Aurora
-            for _, moduleFunc in pairs(addonModule) do
-                F.AddPlugin(function()
-                    moduleFunc(F, C)
-                end)
+            F.ReskinAtlas = function(f, atlas, is8Point)
+                --print("ReskinAtlas")
+                if not atlas then atlas = f:GetAtlas() end
+                local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
+                file = file:sub(10) -- cut off "Interface"
+                f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
+                if is8Point then
+                    return left, right, top, bottom
+                else
+                    f:SetTexCoord(left, right, top, bottom)
+                end
+            end
+        elseif addon == "nibRealUI" then
+            --db = RealUI.db.profile
+        end
+
+        -- mod logic by Haleth from Aurora
+        local addonModule = mods[addon]
+        if addonModule then
+            if type(addonModule) == "function" then
+                addonModule(F, C)
+            else
+                -- Aurora
+                for _, moduleFunc in pairs(addonModule) do
+                    F.AddPlugin(function()
+                        moduleFunc(F, C)
+                    end)
+                end
             end
         end
     end

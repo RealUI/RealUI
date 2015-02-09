@@ -672,14 +672,10 @@ local function Hook_Grid2()
     end)
 end
 
-function RealUI_MoveAll()
-    FrameMover:MoveUIFrames()
-    FrameMover:MoveAddons()
-end
-
 function FrameMover:RefreshMod()
     db = self.db.profile
-    RealUI_MoveAll()
+    self:MoveUIFrames()
+    self:MoveAddons()
 end
 
 function FrameMover:PLAYER_ENTERING_WORLD()
@@ -775,9 +771,6 @@ function FrameMover:OnInitialize()
             },
             hide = {
                 ["**"] = {
-                    hide = true,
-                },
-                raid = {
                     hide = true,
                 },
             },

@@ -226,13 +226,14 @@ local function GetOptions()
 		},
 	}
 	end
-	for key, val in pairs(SkinsOptions.modules) do
-		SkinsOptions.settings.args[key] = {
+	for i = 1, #SkinsOptions.modules do
+		local name = SkinsOptions.modules[i]
+		SkinsOptions.settings.args[name] = {
 			type = "toggle",
-			name = val,
-			get = function() return nibRealUI:GetModuleEnabled(key) end,
+			name = name,
+			get = function() return nibRealUI:GetModuleEnabled(name) end,
 			set = function(info, value) 
-				nibRealUI:SetModuleEnabled(key, value)
+				nibRealUI:SetModuleEnabled(name, value)
 				nibRealUI:ReloadUIDialog()
 			end,
 			order = 20,
@@ -332,6 +333,9 @@ function nibRealUI:RegisterModuleOptions(name, optionTbl)
 	ModuleOptions.modules[name] = optionTbl
 end
 
-function nibRealUI:RegisterSkin(name, desc)
-	SkinsOptions.modules[name] = desc
+function nibRealUI:RegisterSkin(name)
+	local skin = self:NewModule(name, "AceEvent-3.0")
+	skin:SetEnabledState(self:GetModuleEnabled(name))
+	tinsert(SkinsOptions.modules, name)
+	return skin
 end
