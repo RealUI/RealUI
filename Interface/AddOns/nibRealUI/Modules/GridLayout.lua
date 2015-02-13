@@ -39,7 +39,7 @@ function GridLayout:Update()
     local NewLayout, NewHoriz, layoutSize
     local partyType = Grid2Layout.partyType
     local Grid2DB = Grid2Layout.db.profile
-    print("partyType:", partyType)
+    --print("partyType:", partyType)
     
    
     -- Which RealUI Layout we're working on
@@ -71,7 +71,7 @@ function GridLayout:Update()
         end
     -- Raid
     elseif (partyType == "raid") then
-        print("You are in a Raid")
+        --print("You are in a Raid")
         NewHoriz = LayoutDB.hGroups.raid
 
         -- reset the table
@@ -90,31 +90,31 @@ function GridLayout:Update()
             end
         end
 
-        print("NumHeaders", #Grid2Layout.groupsUsed)
+        --print("NumHeaders", #Grid2Layout.groupsUsed)
         if (raidGroupInUse.group7 or raidGroupInUse.group8) then
-            print("Group 7 and/or 8 in use")
+            --print("Group 7 and/or 8 in use")
             layoutSize = 40
         elseif raidGroupInUse.group6 then
-            print("Group 6 in use")
+            --print("Group 6 in use")
             layoutSize = 30
         else
-            print("Group 1 - 5 in use")
+            --print("Group 1 - 5 in use")
             layoutSize = "normal"
         end
     end
     
     -- Change Grid Layout
     if (NewHoriz ~= Grid2DB.horizontal) then
-        print("Apply horizontal:", NewHoriz)
+        --print("Apply horizontal:", NewHoriz)
         Grid2DB.horizontal = NewHoriz
     end
 
     -- Adjust Grid Frame Width
     if (LayoutDB.width[layoutSize]) and not NewHoriz then
-        print("layoutWidth: small", layoutSize)
+        --print("layoutWidth: small", layoutSize)
         Grid2Frame.db.profile.frameWidth = LayoutDB.width[layoutSize]
     else
-        print("layoutWidth: normal", layoutSize)
+        --print("layoutWidth: normal", layoutSize)
         Grid2Frame.db.profile.frameWidth = LayoutDB.width["normal"]
     end
 
@@ -193,7 +193,7 @@ function GridLayout:OnEnable()
     if not(Grid2 and Grid2Layout and Grid2Frame) then return end
     local Grid2GroupChanged = Grid2.GroupChanged
     function Grid2:GroupChanged(...)
-        print("GridLayout: Grid_GroupTypeChanged")
+        --print("GridLayout: Grid_GroupTypeChanged")
         GridLayout:Update()
         Grid2GroupChanged(self, ...)
     end

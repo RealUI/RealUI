@@ -425,29 +425,6 @@ function ConfigBar_ActionBars:SetupWindow()
 	}
 	self.sidePositionOptions = cbGUI:CreateOptionList(oP, "VERTICAL", options)
 
-	---- Other Bars
-	-- options = {
-	-- 	{
-	-- 		label = L["Stance Bar"].." "..L["Center"],
-	-- 		func = function()
-	-- 			self:SetStanceBarPosition(1)
-	-- 		end,
-	-- 		checked = ndb.actionBarSettings[nibRealUI.cLayout].stanceBar.position == "TOP",
-	-- 		width = Element.info.window.width / 3,
-	-- 		height = 20,
-	-- 		x = (Element.info.window.width / 3) * 2,
-	-- 		y = -94,
-	-- 	},
-	-- 	{
-	-- 		label = L["Stance Bar"].." "..L["Bottom"],
-	-- 		func = function()
-	-- 			self:SetStanceBarPosition(2)
-	-- 		end,
-	-- 		checked = ndb.actionBarSettings[nibRealUI.cLayout].stanceBar.position == "BOTTOM",
-	-- 	},
-	-- }
-	-- self.stanceBarPositionOptions = cbGUI:CreateOptionList(oP, "VERTICAL", options)
-
 	---- Bar Settings
 	curY = curY - 151
 	cbGUI:CreateHeader(oP, L["Sizes"], curY)

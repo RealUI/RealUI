@@ -7,7 +7,6 @@ local BanditsGuile = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local AuraTracking = nibRealUI:GetModule("AuraTracking")
 
 local SinisterStrikeID = 1752
-local RevealingStrikeID = 84617
 
 local maxBGDuration = 15
 
@@ -168,7 +167,7 @@ local function CLEU(self, event, ...)
 	local _, cEvent, _,_, casterName, _,_,_,_,_,_, spellID = ...
 	if (casterName ~= self.playerName) then return end
 	
-	if (cEvent == "SPELL_DAMAGE") and ((spellID == SinisterStrikeID) or (spellID == RevealingStrikeID)) then
+	if (cEvent == "SPELL_DAMAGE") and (spellID == SinisterStrikeID) then
 		bgSwingCount = bgSwingCount + 1
 		AuraUpdate(self, nil, self.unit)
 		

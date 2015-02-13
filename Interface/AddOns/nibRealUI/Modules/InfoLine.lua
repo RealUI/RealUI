@@ -478,7 +478,7 @@ local function GetOptions()
                             InfoLine:Refresh()
                         end,
                         disabled = function()
-                            if db.colors.classcolorhighlight then return true else return false; end 
+                            if db.colors.classcolorhighlight then return true else return false end 
                         end,
                         order = 30,
                     },
@@ -657,7 +657,7 @@ local function GetOptions()
         order = 40,
         args = {},
     }
-    local elementordercnt = 10; 
+    local elementordercnt = 10 
     for k_e, v_e in pairs(Elements) do
         -- Create base options for Elements
         elementopts.args[k_e] = {
@@ -1743,6 +1743,28 @@ local SlotNameTable = {
 }
 local DuraSlotInfo = { }
 
+local DurabilityAlert
+local function Durability_Low(self, dura)
+    if not DurabilityAlert then
+        DurabilityAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+    end
+    if not dura then
+        DurabilityAlert:Hide()
+    elseif (not DurabilityAlert.isHidden) then
+        DurabilityAlert:SetSize(125, DurabilityAlert.Text:GetHeight()+42)
+        DurabilityAlert.Arrow:SetPoint("TOP", DurabilityAlert, "BOTTOM", 0, 4)
+        DurabilityAlert:SetPoint("BOTTOM", self, "TOP", 0, 18)
+        DurabilityAlert.CloseButton:SetScript("OnClick", function(self)
+            DurabilityAlert:Hide()
+            DurabilityAlert.isHidden = true
+        end)
+        DurabilityAlert.Text:SetFormattedText("%s %d%%", DURABILITY, dura)
+        DurabilityAlert.Text:SetWidth(100)
+        DurabilityAlert:Show()
+        DurabilityAlert.isHidden = false
+    end
+end
+
 function InfoLine_Durability_OnEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
     GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, DURABILITY))
@@ -1793,7 +1815,7 @@ function InfoLine_Durability_Update(self)
         self.hidden = true
         self.text:SetText("")
     end
-    UpdateElementWidth(self)
+    return minVal, UpdateElementWidth(self)
 end
 
 function InfoLine_Durability_OnMouseDown(self)
@@ -1916,35 +1938,35 @@ local function Friends_BNetRequest(self, event, ...)
         BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
     end
     if (event == "BN_FRIEND_INVITE_REMOVED") then
-        BNetRequestAlert:Hide();
+        BNetRequestAlert:Hide()
     elseif (event == "BN_FRIEND_INVITE_ADDED") or (not BNetRequestAlert.isHidden) then
-        BNetRequestAlert:SetSize(177, BNetRequestAlert.Text:GetHeight()+42);
+        BNetRequestAlert:SetSize(177, BNetRequestAlert.Text:GetHeight()+42)
         BNetRequestAlert.Arrow:SetPoint("TOP", BNetRequestAlert, "BOTTOM", -30, 4)
         BNetRequestAlert:SetPoint("BOTTOM", self, "TOP", 30, 18)
         BNetRequestAlert.CloseButton:SetScript("OnClick", function(self)
             BNetRequestAlert:Hide()
             BNetRequestAlert.isHidden = true
-        end);
-        BNetRequestAlert.Text:SetText(BN_TOAST_NEW_INVITE);
-        BNetRequestAlert.Text:SetWidth(145);
-        BNetRequestAlert:Show();
+        end)
+        BNetRequestAlert.Text:SetText(BN_TOAST_NEW_INVITE)
+        BNetRequestAlert.Text:SetWidth(145)
+        BNetRequestAlert:Show()
         BNetRequestAlert.isHidden = false
     end
 end
 
 local function GetClientStr(client)
     if ( client == BNET_CLIENT_WOW ) then
-        return "WoW";
+        return "WoW"
     elseif ( client == BNET_CLIENT_SC2 ) then
-        return "SC2";
+        return "SC2"
     elseif ( client == BNET_CLIENT_D3 ) then
-        return "D3";
+        return "D3"
     elseif ( client == BNET_CLIENT_WTCG ) then
-        return "HS";
+        return "HS"
     elseif ( client == BNET_CLIENT_HEROES ) then
-        return "HotS";
+        return "HotS"
     else
-        return "App";
+        return "App"
     end
 end
 
@@ -3760,7 +3782,12 @@ function InfoLine:CreateFrames()
     ILFrames.durability:RegisterEvent("PLAYER_ENTERING_WORLD")
     ILFrames.durability:SetScript("OnEvent", function(self) 
         if not db.elements.durability then return end
-        InfoLine_Durability_Update(self)
+        local dura = InfoLine_Durability_Update(self)
+        if (dura < 15) then
+            Durability_Low(self, dura)
+        else
+            Durability_Low(self, false)
+        end
     end)
     
     -- -- Bag Space

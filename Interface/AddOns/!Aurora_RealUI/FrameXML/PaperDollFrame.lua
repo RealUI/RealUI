@@ -152,7 +152,7 @@ tinsert(mods["Aurora"], function(F, C)
 
     f:SetScript("OnEvent", function(self, event, ...)
         if not timer then
-            C_Timer.After(UpdateItems, .25)
+            C_Timer.After(.25, UpdateItems)
             timer = true
         end
     end)
