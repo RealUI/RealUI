@@ -157,7 +157,7 @@ function ConfigBar_AuraTracking:ChangeTrackerSetting(key, value)
 		if not(spell) or (spell and spell == "") then
 			spell = "- Enter Spell Here -"
 		elseif tonumber(spell) then
-			spell = tonumber(spell)
+			spell = tonumber(spell:match("%d+"))
 		elseif string.find(spell, ",") then
 			spell = { strsplit(",", spell) }
 		end

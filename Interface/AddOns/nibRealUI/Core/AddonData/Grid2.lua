@@ -994,6 +994,7 @@ nibRealUI.LoadAddOnData_Grid2 = function()
 					},
 					["health-deficit"] = {
 						["type"] = "bar",
+						["reverseFill"] = true,
 						["location"] = {
 							["y"] = 0,
 							["relPoint"] = "RIGHT",
@@ -1129,6 +1130,7 @@ nibRealUI.LoadAddOnData_Grid2 = function()
 					},
 					["health-deficit"] = {
 						["type"] = "bar",
+						["reverseFill"] = true,
 						["orientation"] = "HORIZONTAL",
 						["level"] = 2,
 						["location"] = {

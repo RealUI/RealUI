@@ -256,50 +256,56 @@ local function CreateAngleBG(self, width, height, parent, info)
     local bgColor = nibRealUI.media.background
 
     --print("CreateBG", leftX, rightX)
-    bg.top = bg:CreateTexture(nil, "BACKGROUND")
-    bg.top:SetTexture(0, 0, 0)
-    bg.top:SetHeight(1)
-    bg.top:SetPoint("TOPLEFT", leftX, 0)
-    bg.top:SetPoint("TOPRIGHT", rightX, 0)
+    local top = bg:CreateTexture(nil, "BACKGROUND")
+    top:SetTexture(0, 0, 0)
+    top:SetHeight(1)
+    top:SetPoint("TOPLEFT", leftX, 0)
+    top:SetPoint("TOPRIGHT", rightX, 0)
+    bg.top = top
 
     local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
     local row, left, right = {}
     for i = 1, maxRows do
-        -- Left side
-        left = bg:CreateTexture(nil, "BACKGROUND")
-        left:SetTexture(0, 0, 0)
-        left:SetSize(1, 1)
-        if leftX == 0 then
-            left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", i, 1 - i)
-        else
-            left:SetPoint("TOPLEFT", bg.top, "BOTTOMLEFT", -i, 1 - i)
-        end
-
-        -- Right side
-        right = bg:CreateTexture(nil, "BACKGROUND")
-        right:SetTexture(0, 0, 0)
-        right:SetSize(1, 1)
-        if rightX == 0 then
-            right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", -i, -i)
-        else
-            right:SetPoint("TOPRIGHT", bg.top, "TOPRIGHT", i, -i)
-        end
-
-        -- Middle
         row[i] = bg:CreateTexture(nil, "BACKGROUND")
         row[i]:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
         row[i]:SetHeight(1)
-        row[i]:SetPoint("TOPLEFT", left, "TOPRIGHT", 0, 0)
-        row[i]:SetPoint("TOPRIGHT", right, "TOPLEFT", 0, 0)
+        if leftX == 0 then
+            row[i]:SetPoint("TOPLEFT", top, "TOPLEFT", (i + 1), -i)
+        else
+            row[i]:SetPoint("TOPLEFT", top, "TOPLEFT", -(i - 1), -i)
+        end
+        if rightX == 0 then
+            row[i]:SetPoint("TOPRIGHT", top, "TOPRIGHT", -(i + 1), -i)
+        else
+            row[i]:SetPoint("TOPRIGHT", top, "TOPRIGHT", (i - 1), -i)
+        end
     end
     bg.row = row
 
-    bg.bottom = bg:CreateTexture(nil, "BACKGROUND")
-    bg.bottom:SetTexture(0, 0, 0)
-    bg.bottom:SetHeight(1)
-    bg.bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
-    bg.bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
+    bottom = bg:CreateTexture(nil, "BACKGROUND")
+    bottom:SetTexture(0, 0, 0)
+    bottom:SetHeight(1)
+    bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
+    bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
+    bg.bottom = bottom
 
+    left = bg:CreateTexture(nil, "BACKGROUND")
+    left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+    left:SetVertexColor(0, 0, 0)
+    if leftX == 0 then
+        DrawRouteLine(left, bg, 2, -2, maxRows, -maxRows, 1, "TOPLEFT")
+    else
+        DrawRouteLine(left, bg, 2, 2, maxRows, maxRows, 1, "BOTTOMLEFT")
+    end
+
+    right = bg:CreateTexture(nil, "BACKGROUND")
+    right:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+    right:SetVertexColor(0, 0, 0)
+    if rightX == 0 then
+        DrawRouteLine(right, bg, -2, -2, -maxRows, -maxRows, 1, "TOPRIGHT")
+    else
+        DrawRouteLine(right, bg, -2, 2, -maxRows, maxRows, 1, "BOTTOMRIGHT")
+    end
     return bg
 end
 

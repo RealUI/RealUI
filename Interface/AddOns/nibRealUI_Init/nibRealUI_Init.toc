@@ -4,4 +4,7 @@
 ## Author: Gethe
 ## Version: 8.1 r10
 
+utf8data.lua
+utf8.lua
+
 Init.lua

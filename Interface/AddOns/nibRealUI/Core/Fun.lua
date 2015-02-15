@@ -608,16 +608,13 @@ end
 function nibRealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
 
-    local maxNameLength, endCharLength = checkCJKlength(name, maxLength or 12)
-    local newName = (strlen(name) > maxNameLength) and gsub(name, "%s?(.[\128-\191]*)%S+%s", "%1.") or name
-    maxNameLength, endCharLength = checkCJKlength(newName, maxLength or 12)
+    local maxNameLength = maxLength or 12
+    local newName = (name:utf8len() > maxNameLength) and gsub(name, "%s?(.[\128-\191]*)%S+%s", "%1. ") or name
 
-    if (strlen(newName) > maxNameLength) then
-        newName = strsub(newName, 1, maxNameLength)
-        local newNameLength = string.len(newName);
+    if (newName:utf8len() > maxNameLength) then
+        newName = newName:utf8sub(1, maxNameLength)
         newName = newName..".."
     end
-
     return newName
 end
 

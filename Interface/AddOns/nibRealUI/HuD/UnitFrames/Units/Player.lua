@@ -134,7 +134,7 @@ local function CreatePowerBar(parent)
     parent:Tag(power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-    local stepHeight = round(height / 2)
+    local stepHeight = round(height * .6)
     power.step = {}
     power.warn = {}
     for i = 1, 2 do

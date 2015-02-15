@@ -1829,8 +1829,8 @@ local FriendsTabletData
 local FriendsTabletDataNames
 local FriendsOnline = 0
 
-local function Friends_TabletClickFunc(name, iname, BNid)
-    --print("Name: "..name.." iName: "..iname.." BNid: "..BNid)
+local function Friends_TabletClickFunc(name, iname, presenceID)
+    --print("Name: "..name.." iName: "..iname.." presenceID: "..presenceID)
     if not name then return end
     if IsAltKeyDown() then
         if iname == "" then
@@ -1838,8 +1838,8 @@ local function Friends_TabletClickFunc(name, iname, BNid)
         else
             InviteUnit(iname)
         end
-    elseif BNid then
-        SetItemRef("BNplayer:"..name..":"..BNid, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
+    elseif presenceID then
+        SetItemRef("BNplayer:"..name..":"..presenceID, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
     else
         SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
     end
@@ -1954,20 +1954,27 @@ local function Friends_BNetRequest(self, event, ...)
     end
 end
 
-local function GetClientStr(client)
-    if ( client == BNET_CLIENT_WOW ) then
-        return "WoW"
-    elseif ( client == BNET_CLIENT_SC2 ) then
-        return "SC2"
-    elseif ( client == BNET_CLIENT_D3 ) then
-        return "D3"
-    elseif ( client == BNET_CLIENT_WTCG ) then
-        return "HS"
-    elseif ( client == BNET_CLIENT_HEROES ) then
-        return "HotS"
-    else
-        return "App"
+local clientString = {
+    [BNET_CLIENT_SC2] = "SC2",
+    [BNET_CLIENT_WTCG] = "HS",
+    [BNET_CLIENT_HEROES] = "HotS",
+}
+
+-- from 6.1 PTR; remove once released
+local function BNet_GetValidatedCharacterName(toonName, battleTag, client)
+    if ( not toonName or client == BNET_CLIENT_HEROES ) then
+        if ( battleTag and battleTag ~= "" ) then
+            local symbol = string.find(battleTag, "#");
+            if ( symbol ) then
+                return string.sub(battleTag, 1, symbol - 1);
+            else
+                return battleTag;
+            end
+        else
+            return nil;
+        end
     end
+    return toonName;
 end
 
 local function Friends_Update(self)
@@ -1977,8 +1984,8 @@ local function Friends_Update(self)
     
     -- Standard Friends
     for i = 1, GetNumFriends() do
-        local name, lvl, class, area, online, status, note = GetFriendInfo(i)
-        if online then
+        local name, lvl, class, area, isOnline, status, noteText = GetFriendInfo(i)
+        if isOnline then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
             
@@ -1997,7 +2004,7 @@ local function Friends_Update(self)
             end
             
             -- Add Friend to list
-            tinsert(FriendsTabletData, { cname, lvl, area, nibRealUI.faction, "WoW", name, note, "" })
+            tinsert(FriendsTabletData, { cname, lvl, area, nibRealUI.faction, "WoW", name, noteText, "" })
             if name then
                 FriendsTabletDataNames[name] = true
             end
@@ -2006,22 +2013,22 @@ local function Friends_Update(self)
     
     -- Battle.net Friends
     for t = 1, BNGetNumFriends() do
-        local BNid, BNname, battletag, isBattleTagPresence, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(t)
+        local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(t)
         -- WoW friends
-        if ( online and client=="WoW" ) then
+        if ( isOnline and client=="WoW" ) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
             
-            local _,name, _, realmName, _, faction, race, class, guild, area, lvl = BNGetToonInfo(toonid)
+            local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
+            local _, toonName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetToonInfo(toonID)
             curFriendsOnline = curFriendsOnline + 1
             
             if (realmName == nibRealUI.realm) then
-                FriendsTabletDataNames[toonname] = true
+                FriendsTabletDataNames[toonName] = true
             end
             
             -- Class
             local classColor = nibRealUI:GetClassColor(ClassLookup[class])
-            class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
             
             -- Name
             local cname
@@ -2030,35 +2037,37 @@ local function Friends_Update(self)
                 cname = strform(
                     "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc)|r",
                     FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                    BNname,
+                    presenceName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
-                    name
+                    toonName
                 )
             else
                 -- On Another Realm
                 cname = strform(
                     "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc-%s)|r",
                     FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                    BNname,
+                    presenceName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
-                    name,
+                    toonName,
                     realmName
                 )
             end
-            if (isafk and name ) then
+            if (isAFK and toonName ) then
                 cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-            elseif(isdnd and name) then
+            elseif(isDND and toonName) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
             
             -- Add Friend to list
-            tinsert(FriendsTabletData, { cname, lvl, area, faction, client, BNname, note, name, BNid })
+            tinsert(FriendsTabletData, { cname, level, zoneName, faction, client, presenceName, noteText, toonName, presenceID })
         -- Friends in other games
-        elseif (online) then
+        elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             
-            local _,name, _, realmName, faction, _, race, class, guild, area, lvl, gametext = BNGetToonInfo(toonid)
-            client = GetClientStr(client)
+            local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
+
+            toonName = BNet_GetValidatedCharacterName(toonName, battleTag, client)
+            client = clientString[client] or client
             curFriendsOnline = curFriendsOnline + 1
             
             -- Name
@@ -2066,17 +2075,17 @@ local function Friends_Update(self)
             cname = strform(
                 "|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
                 FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                BNname,
-                toonname
+                presenceName,
+                toonName
             )
-            if ( isafk and toonname ) then
+            if ( isAFK and toonName ) then
                 cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-            elseif ( isdnd and toonname ) then
+            elseif ( isDND and toonName ) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
             
             -- Add Friend to list
-            tinsert(FriendsTabletData, {cname, lvl, gametext, class, client, BNname, note, "", BNid})
+            tinsert(FriendsTabletData, {cname, level, gameText, class, client, presenceName, noteText, "", presenceID})
         end
     end
     
@@ -2262,9 +2271,9 @@ local function Guild_Update(self)
     for i = 1, GetNumGuildMembers() do
         if ( not GuildTabletData or GuildTabletData == nil ) then GuildTabletData = {} end      
         local gPrelist
-        local name, rank, _, lvl, _class, zone, note, offnote, online, status, class, _, _, mobile = GetGuildRosterInfo(i)
+        local name, rank, _, lvl, _class, zone, note, offnote, isOnline, status, class, _, _, mobile = GetGuildRosterInfo(i)
         
-        if (online or mobile) then
+        if (isOnline or mobile) then
             -- Class Color
             local classColor = nibRealUI:GetClassColor(class)
             class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
@@ -2279,7 +2288,7 @@ local function Guild_Update(self)
             end
             
             -- Mobile
-            if mobile and (not online) then
+            if mobile and (not isOnline) then
                 cname = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..cname
                 zone = REMOTE_CHAT
             end
