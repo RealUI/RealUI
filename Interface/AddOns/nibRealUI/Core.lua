@@ -230,11 +230,6 @@ local defaults = {
             needchanged = false,
             spec = {1, 1},  -- Save layout for each spec
         },
-        addonProfiles = {
-            needSet = {
-                DXE = true,
-            },
-        },
     },
     profile = {
         modules = {
@@ -667,20 +662,6 @@ function nibRealUI:PLAYER_LOGIN()
     -- Do we need a Layout change?
     if dbc.layout.needchanged then
         nibRealUI:UpdateLayout()
-    end
-
-    -- Set AddOn Profiles for new DBs
-    if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
-        -- DXE
-        if dbc.addonProfiles.needSet.DXE then
-            if IsAddOnLoaded("DXE_Loader") and not IsAddOnLoaded("DXE") then
-                SlashCmdList.DXE()
-            end
-            if IsAddOnLoaded("DXE") and DXE then
-                DXE.db:SetProfile("RealUI")
-            end
-            dbc.addonProfiles.needSet.DXE = false
-        end
     end
 
     -- Helpful messages

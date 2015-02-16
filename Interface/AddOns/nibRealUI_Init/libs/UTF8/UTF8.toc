@@ -1,0 +1,15 @@
+## Interface: 60000
+## Version: v1.1
+## X-Curse-Packaged-Version: v1.1
+## X-Curse-Project-Name: UTF8
+## X-Curse-Project-ID: utf8
+## X-Curse-Repository-ID: wow/utf8/mainline
+
+## Title: Lib: UTF8
+## Notes: A library for manipulating UTF-8 strings
+## Author: Pastamancer
+## X-License: BSD License
+## X-Website: http://www.wowace.com/addons/utf8/
+
+utf8data.lua
+utf8.lua

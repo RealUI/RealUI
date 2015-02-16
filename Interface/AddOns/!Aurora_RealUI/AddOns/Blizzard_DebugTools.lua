@@ -1,7 +1,15 @@
 local _, mods = ...
 
 mods["Blizzard_DebugTools"] = function(F, C)
-    --print("HELLO Blizzard_DebugTools!!!", F, C)
+    RealUI:Debug("HELLO Blizzard_DebugTools!!!", F, C)
+
+    -- Fix ErrorFrame
+    ScriptErrorsFrame:HookScript("OnShow", function()
+        RealUI:Debug("Fix ScriptErrorsFrame")
+        ScriptErrorsFrame:SetScale(tonumber(GetCVar("uiScale")))
+        ScriptErrorsFrame:SetSize(384, 260)
+    end)
+
     -- EventTrace
     for i = 1, EventTraceFrame:GetNumRegions() do
         local region = select(i, EventTraceFrame:GetRegions())

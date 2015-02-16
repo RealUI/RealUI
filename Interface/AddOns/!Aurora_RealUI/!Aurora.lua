@@ -15,7 +15,9 @@ style.apiVersion = "6.0"
 -- Save these functions so we dont have to duplicate just to place a border around an icon.
 style.copy = {
     "CreateBD",
+    "CreateBG",
     "CreateBDFrame",
+    "ReskinIcon",
 }
 
 -- Reskin* functions should never be saved, and only used within !Aurora.
@@ -46,6 +48,18 @@ style.functions = {
 	    	f:SetBackdropColor(0, 0, 0, a)
         end
     end,
+    ["CreateBG"] = function(frame)
+        local f = frame
+        if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
+
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetPoint("TOPLEFT", frame, -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
+        bg:SetTexture(C.media.backdrop)
+        bg:SetVertexColor(0, 0, 0)
+
+        return bg
+    end,
     ["CreateBDFrame"] = function(f, a)
         local frame
         if f:GetObjectType() == "Texture" then
@@ -64,6 +78,10 @@ style.functions = {
         F.CreateBD(bg, a)
 
         return bg
+    end,
+    ["ReskinIcon"] = function(icon)
+        icon:SetTexCoord(.08, .92, .08, .92)
+        return F.CreateBG(icon)
     end,
 }
 
@@ -93,12 +111,16 @@ f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- some skins need to be deferred till after all other addons.
         for addonName, func in next, mods[event] do
-            if type(addonName) == "string" and IsAddOnLoaded(addonName) then
-                local skin = RealUI:RegisterSkin(addonName)
-                if RealUI:GetModuleEnabled(addonName) then
-                    func(skin, F, C)
+            if type(addonName) == "string" then
+                if IsAddOnLoaded(addonName) then
+                    -- Create skin modules for addon so they can be individually disabled.
+                    local skin = RealUI:RegisterSkin(addonName)
+                    if RealUI:GetModuleEnabled(addonName) then
+                        func(skin, F, C)
+                    end
                 end
             else
+                -- Some mods are indexed
                 func(F, C)
             end
         end
@@ -108,7 +130,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             F, C = unpack(Aurora)
 
             F.ReskinAtlas = function(f, atlas, is8Point)
-                --print("ReskinAtlas")
+                --RealUI:Debug("ReskinAtlas")
                 if not atlas then atlas = f:GetAtlas() end
                 local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
                 file = file:sub(10) -- cut off "Interface"
@@ -125,6 +147,7 @@ f:SetScript("OnEvent", function(self, event, addon)
 
         -- mod logic by Haleth from Aurora
         local addonModule = mods[addon]
+        RealUI:Debug("Load Addon", addon, addonModule)
         if addonModule then
             if type(addonModule) == "function" then
                 addonModule(F, C)

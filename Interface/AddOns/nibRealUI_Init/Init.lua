@@ -1,6 +1,7 @@
 local name, ns = ...
 local RealUI = RealUI or ns
 _G.RealUI = RealUI
+local debug = true
 
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
@@ -34,12 +35,57 @@ RealUI.media = {
     },
 }
 
+local debugger -- Only defined if needed.
+local function CreateDebugFrame()
+    if debugger then
+        return
+    end
+    debugger = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format("RealUI"), 640, 480)
+end
+
+function RealUI:Debug(...)
+    if not debugger then
+        CreateDebugFrame()
+    end
+    local args = { n = select("#", ...), ... }
+    local text = ""
+    for i = 1, select("#", ...) do
+        local arg = select(i, ...)
+        if (arg ~= nil) then 
+            arg = tostring(arg)
+        else
+            arg = "nil"
+        end
+        text = text .. arg .. " "
+    end
+    debugger:AddLine(text)
+end
+
+-- Slash Commands
+SLASH_REALUIINIT1 = "/realdebug"
+function SlashCmdList.REALUIINIT(msg, editBox)
+    if not debugger then
+        CreateDebugFrame()
+    end
+
+    if debugger:Lines() == 0 then
+        debugger:AddLine("Nothing to report.")
+        debugger:Display()
+        debugger:Clear()
+        return
+    end
+    debugger:Display()
+end
+
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- Do stuff at login
+        if debug then
+            SlashCmdList.REALUIINIT()
+        end
         f:UnregisterEvent("PLAYER_LOGIN")
         f:UnregisterEvent("ADDON_LOADED")
     elseif event == "ADDON_LOADED" then

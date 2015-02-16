@@ -113,11 +113,6 @@ function RealUI_RunStage1()
 		dbg.tutorial.stage = 0
 		
 		---- Addon Data
-		-- Initialize DXE
-		if IsAddOnLoaded("DXE_Loader") and not IsAddOnLoaded("DXE") then
-			SlashCmdList.DXE()
-		end
-
 		-- Initialize Grid2
 		if Grid2 and Grid2.LoadConfig then
 			Grid2:LoadConfig()

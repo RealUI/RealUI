@@ -1,11 +1,12 @@
 local _, mods = ...
--- This is for small modifications that are not yet worth having thier own file.
 
+-- This is for small modifications that are not yet worth having thier own file.
+-- Or to make modifications to a frame that Aurora modified.
 tinsert(mods["Aurora"], function(F, C)
     --print("MiscSkins")
     local r, g, b = C.r, C.g, C.b
 
-    -- Travel Pass
+    -- Re-add Travel Pass
     FriendsFrame:HookScript("OnShow", function()
         if not FriendsFrame.skinned then
             for i = 1, FRIENDS_TO_DISPLAY do

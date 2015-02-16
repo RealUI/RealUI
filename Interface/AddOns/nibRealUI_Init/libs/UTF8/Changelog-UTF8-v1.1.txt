@@ -1,0 +1,19 @@
+------------------------------------------------------------------------
+r6 | phanx | 2014-10-28 02:27:07 +0000 (Tue, 28 Oct 2014) | 1 line
+Changed paths:
+   A /tags/v1.1 (from /trunk:5)
+
+Tagging as v1.1
+------------------------------------------------------------------------
+r5 | Phanx | 2014-10-28 02:26:44 +0000 (Tue, 28 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/UTF8.toc
+
+- Update TOC for a new release
+------------------------------------------------------------------------
+r4 | Phanx | 2012-09-07 10:25:33 +0000 (Fri, 07 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/utf8.lua
+
+- Switched from slower x:sub notation to faster upvalued strsub(x)
+------------------------------------------------------------------------

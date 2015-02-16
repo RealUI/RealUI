@@ -441,9 +441,9 @@ local NameLengths = {
 function UnitFrames:AbrvName(name, unit)
     --print("AbrvName", name, string.match(name, "%w+"), unit)
     if not name then return "" end
-    if not string.match(name, "%w+") then
-        return name
-    end
+    --if not string.match(name, "%w+") then
+    --    return name
+    --end
 
     if (unit == "target") and (db.misc.alwaysDisplayFullHealth) then
         return nibRealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] - 7)

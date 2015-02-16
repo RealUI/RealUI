@@ -17,7 +17,10 @@ tags.Methods["realui:name"] = function(unit)
     end
 
     local unitTag = unit:match("(boss)%d?$") or unit
-    local name = UnitFrames:AbrvName(UnitName(unit), unitTag)
+                            -- enUS,    zhTW,   zhCN,   ruRU, koKR
+    --local test1, test2, test3, test4, test5 = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
+    --local test = test3
+    local name = UnitFrames:AbrvName(UnitName(unit)--[[test]], unitTag) --
 
     local nameColor = "ffffff"
     if isDead then
