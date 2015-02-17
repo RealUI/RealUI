@@ -524,7 +524,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 		{
 			texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]],
 			texCoord = {CLASS_ICON_TCOORDS[nibRealUI.class][1] + .02, CLASS_ICON_TCOORDS[nibRealUI.class][2] - .02, CLASS_ICON_TCOORDS[nibRealUI.class][3] + .02, CLASS_ICON_TCOORDS[nibRealUI.class][4] - .02},
-			texOffset = {1, 1, -1, -1},	-- BLx, BLy, TRx, TRy
+			texOffset = {1, -1, -1, 1},	-- left, top, right, bottom
 			func = function() self:ChangeTab(1) end,
 		},
 		{

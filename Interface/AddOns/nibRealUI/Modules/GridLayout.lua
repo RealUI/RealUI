@@ -27,8 +27,6 @@ end
 
 -- Update Grid Layout
 function GridLayout:Update()
-    if not nibRealUI:DoesAddonStyle("Grid2") then return end
-
     -- Combat Lockdown checking
     if InCombatLockdown() then
         NeedUpdate = true
@@ -202,6 +200,5 @@ function GridLayout:OnEnable()
 end
 
 function GridLayout:OnDisable()
-    self:UnregisterAllBuckets()
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 end

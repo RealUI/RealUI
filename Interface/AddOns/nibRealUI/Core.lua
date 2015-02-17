@@ -815,6 +815,7 @@ function nibRealUI:SetModuleEnabled(module, value)
         else
             self:DisableModule(module)
         end
+        return value
     end
 end
 

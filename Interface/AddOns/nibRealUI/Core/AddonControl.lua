@@ -90,7 +90,7 @@ function AddonControl:CreateOptionsFrame()
     local F
     if Aurora then F = Aurora[1] end
 
-    self.options = nibRealUI:CreateWindow("RealUIAddonControlOptions", 390, 240, true, true)
+    self.options = nibRealUI:CreateWindow("RealUIAddonControlOptions", 330, 240, true, true)
     local acO = self.options
         acO:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
         acO:Hide()
@@ -138,13 +138,6 @@ function AddonControl:CreateOptionsFrame()
         lPosition:SetWidth(40)
         lPosition:SetTextColor(unpack(nibRealUI.classColor))
 
-    -- Label Style
-    local lStyle = nibRealUI:CreateFS(acO, "CENTER", "small")
-        lStyle:SetPoint("LEFT", lPosition, "RIGHT", 0, 0)
-        lStyle:SetText("Style")
-        lStyle:SetWidth(40)
-        lStyle:SetTextColor(unpack(nibRealUI.classColor))
-    
     local acAddonSect = nibRealUI:CreateBDFrame(acO)
     acAddonSect:SetBackdropColor(unpack(nibRealUI.media.background))
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
@@ -162,15 +155,15 @@ function AddonControl:CreateOptionsFrame()
     }
     local StyleAddOns = {
         ["Grid2"] = true,
-        ["KuiNameplates"] = true,
+        ["Kui_Nameplates"] = true,
         ["Raven"] = true,
     }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
         ["KuiNameplates"] = "Kui_Nameplates"
     }
-    local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevCBStyle, prevReset
-    local cbBase, cbLayout, cbPosition, cbStyle, bReset = {}, {}, {}, {}, {}
+    local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevReset
+    local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}, {}
     local cnt = 0
     for k, addon in pairs(RealUIAddOnsOrder) do
         if IsAddOnLoaded(addon) or (altAddOnTable[addon] and IsAddOnLoaded(altAddOnTable[addon])) then
@@ -201,7 +194,6 @@ function AddonControl:CreateOptionsFrame()
                 db.addonControl[self.addon].profiles.base.use = self:GetChecked() and true or false
                 cbLayout[self.id]:SetShown(LayoutAddOns[self.addon] and self:GetChecked())
                 cbPosition[self.id]:SetShown(PositionAddOns[self.addon] and self:GetChecked())
-                cbStyle[self.id]:SetShown(StyleAddOns[self.addon] and self:GetChecked())
             end)
             cbBase[cnt].tooltip = "Allow |cff0099ffRealUI|r to change |cffffffff"..addon.."'s|r profile."
             prevCBBase = cbBase[cnt]
@@ -239,23 +231,6 @@ function AddonControl:CreateOptionsFrame()
             end)
             cbPosition[cnt].tooltip = "Allow |cff0099ffRealUI|r to dynamically control |cffffffff"..addon.."'s|r position."
             prevCBPosition = cbPosition[cnt]
-
-            -- Style Checkboxes
-            cbStyle[cnt] = nibRealUI:CreateCheckbox("RealUIAddonControlStyle"..cnt, acAddonSect, "", "LEFT", 21)
-            cbStyle[cnt].addon = addon
-            cbStyle[cnt].id = cnt
-            if not prevCBStyle then
-                cbStyle[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 263, -3)
-            else
-                cbStyle[cnt]:SetPoint("TOPLEFT", prevCBStyle, "BOTTOMLEFT", 0, 2)
-            end
-            if not StyleAddOns[addon] then cbStyle[cnt]:Hide() end
-            cbStyle[cnt]:SetChecked(RealUI:GetModuleEnabled(addon))
-            cbStyle[cnt]:SetScript("OnClick", function(self)
-                RealUI:SetModuleEnabled(self:GetChecked())
-            end)
-            cbStyle[cnt].tooltip = "Allow |cff0099ffRealUI|r to dynamically control |cffffffff"..addon.."'s|r style and other settings."
-            prevCBStyle = cbStyle[cnt]
 
             -- Reset
             bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
@@ -298,10 +273,6 @@ SlashCmdList.AC = function()
 end
 SLASH_AC1 = "/ac"
 
-function nibRealUI:ToggleAddonStyleControl(addon, val)
-    db.addonControl[addon].control.style = val
-end
-
 function nibRealUI:ToggleAddonPositionControl(addon, val)
     db.addonControl[addon].control.position = val
 end
@@ -309,7 +280,6 @@ end
 function nibRealUI:GetAddonControlSettings(addon)
     return {
         position = db.addonControl[addon].control.position,
-        style = db.addonControl[addon].control.style,
         base = db.addonControl[addon].profiles.base.use,
     }
 end
@@ -416,8 +386,22 @@ function AddonControl:OnInitialize()
     ndbc = nibRealUI.db.char
 
     --[[ Convert Settings]]
-    for i = 1, #RealUIAddOnsOrder do
-        RealUI:SetModuleEnabled(RealUIAddOnsOrder[i], nibRealUI:DoesAddonStyle(RealUIAddOnsOrder[i]))
+    local StyleAddOns = {
+        "Grid2",
+        "Kui_Nameplates",
+        "Raven",
+    }
+    -- Use this too because we omit the "_" for some reason, and I'm not about to hunt down every use and correct it.
+    local StyleAddOnsAlt = {
+        "Grid2",
+        "KuiNameplates",
+        "Raven",
+    }
+    for i = 1, #StyleAddOns do
+        if db.addonControl[StyleAddOnsAlt[i]].control.style ~= nil then
+            RealUI:SetModuleEnabled(StyleAddOns[i], nibRealUI:DoesAddonStyle(StyleAddOnsAlt[i]))
+            db.addonControl[StyleAddOnsAlt[i]].control.style = nil
+        end
     end
     
     self:SetEnabledState(true)

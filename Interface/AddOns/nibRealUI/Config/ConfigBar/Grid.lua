@@ -80,24 +80,22 @@ function ConfigBar_Grid:ToggleRealUIControl(key)
 		nibRealUI:ToggleAddonPositionControl("Grid2", not(pos))
 		self.realControl[1].check.highlight:SetAlpha(pos and 0 or 1)
 
-	-- Layout (style)
+	-- Layout
 	elseif key == 2 then
-		local style = nibRealUI:GetAddonControlSettings("Grid2")["style"]
-		nibRealUI:ToggleAddonStyleControl("Grid2", not(style))
-		self.realControl[2].check.highlight:SetAlpha(style and 0 or 1)
+		local layout = nibRealUI:SetModuleEnabled("GridLayout", not nibRealUI:GetModuleEnabled("GridLayout"))
+		self.realControl[2].check.highlight:SetAlpha(layout and 1 or 0)
 		self:ChangeTab(self.currentTab)
 
-	-- Style (skin)
+	-- Style
 	elseif key == 3 then
-		local skin = nibRealUI:GetModuleEnabled("SkinGrid2")
-		nibRealUI:SetModuleEnabled("SkinGrid2", not(skin))
-		self.realControl[3].check.highlight:SetAlpha(skin and 0 or 1)
+		local style = nibRealUI:SetModuleEnabled("Grid2", not nibRealUI:GetModuleEnabled("Grid2"))
+		self.realControl[3].check.highlight:SetAlpha(style and 1 or 0)
 	end
 end
 
 -- Tab Change
 function ConfigBar_Grid:ChangeTab(tabID, isInit)
-	if not nibRealUI:DoesAddonStyle("Grid2") then
+	if not nibRealUI:GetModuleEnabled("GridLayout") then
 		tabID = 1
 		self.tabs[2]:Hide()
 		self.tabs[3]:Hide()
@@ -158,17 +156,17 @@ function ConfigBar_Grid:SetupWindow()
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
-			texCoord = {GetTexCoordsForRole("TANK")},
+			texCoord = {GetTexCoordsForRole("DAMAGER")},
+			texOffset = {-4, 3, -16, -6},	-- left, top, right, bottom
 			texture2 = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
-			texCoord2 = {GetTexCoordsForRole("DAMAGER")},
-			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
-			texOffset2 = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
+			texCoord2 = {GetTexCoordsForRole("TANK")},
+			texOffset2 = {16, 3, 4, -6},	-- left, top, right, bottom
 			func = function() self:ChangeTab(2) end,
 		},
 		{
 			texture = [[Interface\Addons\Aurora\media\UI-LFG-ICON-ROLES]],
 			texCoord = {GetTexCoordsForRole("HEALER")},
-			texOffset = {-4, -6, 4, 3},	-- BLx, BLy, TRx, TRy
+			texOffset = {-4, 3, 4, -6},	-- left, top, right, bottom
 			func = function() self:ChangeTab(3) end,
 		},
 	}
@@ -212,7 +210,7 @@ function ConfigBar_Grid:SetupWindow()
 			func = function()
 				self:ToggleRealUIControl(2)
 			end,
-			checked = nibRealUI:DoesAddonStyle("Grid2"),
+			checked = nibRealUI:GetModuleEnabled("GridLayout"),
 		},
 		{
 			label = L["Style"]..".",
@@ -221,7 +219,7 @@ function ConfigBar_Grid:SetupWindow()
 			func = function()
 				self:ToggleRealUIControl(3)
 			end,
-			checked = nibRealUI:GetModuleEnabled("SkinGrid2"),
+			checked = nibRealUI:GetModuleEnabled("Grid2"),
 		}
 	}
 	self.realControl = cbGUI:CreateOptionList(tabPanel1, "VERTICAL", options)
