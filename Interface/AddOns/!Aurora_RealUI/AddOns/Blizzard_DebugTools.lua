@@ -1,11 +1,10 @@
 local _, mods = ...
 
 mods["Blizzard_DebugTools"] = function(F, C)
-    RealUI:Debug("HELLO Blizzard_DebugTools!!!", F, C)
+    --RealUI.Debug("HELLO Blizzard_DebugTools!!!", F, C)
 
     -- Fix ErrorFrame
     ScriptErrorsFrame:HookScript("OnShow", function()
-        RealUI:Debug("Fix ScriptErrorsFrame")
         ScriptErrorsFrame:SetScale(tonumber(GetCVar("uiScale")))
         ScriptErrorsFrame:SetSize(384, 260)
     end)

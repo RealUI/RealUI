@@ -43,7 +43,7 @@ local function CreateDebugFrame()
     debugger = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format("RealUI"), 640, 480)
 end
 
-function RealUI:Debug(...)
+RealUI.Debug = function(...)
     if not debugger then
         CreateDebugFrame()
     end

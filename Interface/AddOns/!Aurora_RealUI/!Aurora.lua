@@ -5,6 +5,7 @@ mods["PLAYER_LOGIN"] = {}
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
 REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
+local debug = RealUI.Debug
 local db
 
 -- Aurora API
@@ -130,7 +131,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             F, C = unpack(Aurora)
 
             F.ReskinAtlas = function(f, atlas, is8Point)
-                --RealUI:Debug("ReskinAtlas")
+                --debug("ReskinAtlas")
                 if not atlas then atlas = f:GetAtlas() end
                 local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
                 file = file:sub(10) -- cut off "Interface"
@@ -147,7 +148,7 @@ f:SetScript("OnEvent", function(self, event, addon)
 
         -- mod logic by Haleth from Aurora
         local addonModule = mods[addon]
-        RealUI:Debug("Load Addon", addon, addonModule)
+        debug("Load Addon", addon, addonModule)
         if addonModule then
             if type(addonModule) == "function" then
                 addonModule(F, C)

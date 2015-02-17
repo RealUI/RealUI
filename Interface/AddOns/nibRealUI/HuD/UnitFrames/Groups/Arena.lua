@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local debug = nibRealUI.Debug
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:GetModule(MODNAME)
@@ -6,6 +7,7 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 local prepFrames = {}
+local F = Aurora[1]
 
 --[[ Utils ]]--
 local function TimeFormat(t)
@@ -63,23 +65,44 @@ local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
 end
 
 local function UpdatePrep(self, event, ...)
-    --print("UpdatePrep", self, event, ...)
-    local numOpps = GetNumArenaOpponentSpecs()
-    --print("numOpps", numOpps)
-    for i = 1, 5 do
-        local opp = prepFrames[i]
-        if (i <= numOpps) then
-            local specID, gender = GetArenaOpponentSpec(i)
-            --print("Opponent", i, "specID:", specID, "gender:", gender)
-            if (specID > 0) then 
-                local _, _, _, specIcon, _, _, class = GetSpecializationInfoByID(specID, gender)
-                opp.icon:SetTexture(specIcon)
-                opp:Show()
+    debug("----- UpdatePrep -----")
+    if event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS" then
+        debug(event)
+        local numOpps = GetNumArenaOpponentSpecs()
+        for i = 1, 5 do
+            local opp = prepFrames[i]
+            if (i <= numOpps) then
+                local specID, gender = GetArenaOpponentSpec(i)
+                --print("Opponent", i, "specID:", specID, "gender:", gender)
+                if (specID > 0) then 
+                    local _, _, _, specIcon, _, _, class = GetSpecializationInfoByID(specID, gender)
+                    opp.icon:SetTexture(specIcon)
+                    opp:Show()
+                else
+                    opp:Hide()
+                end
             else
                 opp:Hide()
             end
-        else
-            opp:Hide()
+        end
+    else
+        debug(event, ...)
+        local unit, status = ...
+        -- filter arenapet*
+        unit = unit:match("arena(%d)")
+        debug(unit, prepFrames[unit])
+        if unit then
+            local opp = prepFrames[tonumber(unit)]
+            if status == "seen" then
+                debug("Arena Opp Seen", unit, opp)
+                opp:SetAlpha(1)
+            elseif status == "destroyed" then
+                debug("Arena Opp Destroyed", unit, opp)
+                opp:SetAlpha(0)
+            elseif status == "cleared" then
+                debug("Arena Opp Cleared", unit, opp)
+                opp:Hide()
+            end
         end
     end
 end
@@ -99,8 +122,7 @@ local function CreateHealthBar(parent)
         end
     end
 
-    local healthBG = CreateBD(parent.Health, 0)
-    healthBG:SetFrameStrata("LOW")
+    F.CreateBDFrame(parent.Health, 0)
 end
 
 local function CreateTags(parent)
@@ -130,14 +152,12 @@ local function CreatePowerBar(parent)
         bar:SetShown(max > 0)
     end
 
-    local powerBG = CreateBD(parent.Power, 0)
-    powerBG:SetFrameStrata("LOW")
+    F.CreateBDFrame(parent.Power, 0)
 end
 
 local function CreateTrinket(parent)
     local trinket = CreateFrame("Frame", nil, parent)
     trinket:SetSize(22, 22)
-    CreateBD(trinket, 0.5)
     trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -3, 0)
     trinket:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
@@ -174,6 +194,7 @@ local function CreateTrinket(parent)
     trinket.icon:SetAllPoints()
     trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
     trinket.icon:SetTexCoord(.08, .92, .08, .92)
+    F.ReskinIcon(trinket.icon)
 
     trinket.timer = CreateFrame("StatusBar", nil, trinket)
     trinket.timer:SetMinMaxValues(0, 1)
@@ -183,12 +204,7 @@ local function CreateTrinket(parent)
     trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)
     trinket.timer:SetPoint("TOPRIGHT", trinket, "BOTTOMRIGHT", -1, 3)
     trinket.timer:SetFrameLevel(trinket:GetFrameLevel() + 2)
-
-    local sBarBG = CreateFrame("Frame", nil, trinket.timer)
-    sBarBG:SetPoint("TOPLEFT", trinket.timer, -1, 1)
-    sBarBG:SetPoint("BOTTOMRIGHT", trinket.timer, 1, -1)
-    sBarBG:SetFrameLevel(trinket:GetFrameLevel() + 1)
-    CreateBD(sBarBG)
+    F.CreateBDFrame(trinket.timer)
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
     trinket.text:SetFont(unpack(nibRealUI.font.pixel1))
@@ -200,7 +216,7 @@ end
 local function CreateArena(self)
     --print("CreateArena", self.unit)
     self:SetSize(135, 22)
-    CreateBD(self, 0.7)
+    F.CreateBD(self, 0.7)
 
     CreateHealthBar(self)
     CreateTags(self)
@@ -217,9 +233,8 @@ local function CreateArena(self)
 end
 
 local function SetupPrepFrames(index)
-    --print("SetupPrepFrames")
+    debug("SetupPrepFrames")
     local prep = CreateFrame("Frame", nil, UIParent)
-    CreateBD(prep, 0.5)
     if (index == 1) then
         prep:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
     else
@@ -230,6 +245,7 @@ local function SetupPrepFrames(index)
     prep.icon = prep:CreateTexture(nil, 'OVERLAY')
     prep.icon:SetAllPoints()
     prep.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    F.ReskinIcon(prep.icon)
     prepFrames[index] = prep
 end
 
