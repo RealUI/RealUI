@@ -16,9 +16,15 @@ LSM:Register("border", "Seerah Solid", [[Interface\Addons\SharedMedia_MyMedia\bo
 -- -----
 --   FONT
 -- -----
+LSM:Register("font", "Roboto", [[Interface\Addons\nibRealUI\Fonts\Roboto-Regular.ttf]])
+LSM:Register("font", "Roboto Bold-Italic", [[Interface\Addons\nibRealUI\Fonts\Roboto-BoldItalic.ttf]])
+LSM:Register("font", "Roboto Condensed", [[Interface\Addons\nibRealUI\Fonts\RobotoCondensed-Regular.ttf]])
+LSM:Register("font", "Roboto Slab", [[Interface\Addons\nibRealUI\Fonts\RobotoSlab-Regular.ttf]])
+
 LSM:Register("font", "Standard", [[Interface\Addons\nibRealUI\Fonts\standard.ttf]])
 LSM:Register("font", "Standard Regular", [[Interface\Addons\nibRealUI\Fonts\standard_regular.ttf]])
 LSM:Register("font", "Standard Medium", [[Interface\Addons\nibRealUI\Fonts\standard_medium.ttf]])
+
 LSM:Register("font", "pixel_small", [[Interface\Addons\nibRealUI\Fonts\pixel_small.ttf]])
 LSM:Register("font", "pixel_large", [[Interface\Addons\nibRealUI\Fonts\pixel_large.ttf]])
 LSM:Register("font", "pixel_numbers", [[Interface\Addons\nibRealUI\Fonts\pixel_numbers.ttf]])

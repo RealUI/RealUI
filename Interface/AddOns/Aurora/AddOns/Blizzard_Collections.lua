@@ -1,18 +1,32 @@
 local F, C = unpack(select(2, ...))
 
-C.themes["Blizzard_PetJournal"] = function()
+C.themes["Blizzard_Collections"] = function()
 	local r, g, b = C.r, C.g, C.b
+
+	-- [[ General ]]
+
+	for i = 1, 14 do
+		if i ~= 8 then
+			select(i, CollectionsJournal:GetRegions()):Hide()
+		end
+	end
+
+	F.CreateBD(CollectionsJournal)
+	F.ReskinTab(CollectionsJournalTab1)
+	F.ReskinTab(CollectionsJournalTab2)
+	F.ReskinTab(CollectionsJournalTab3)
+	F.ReskinTab(CollectionsJournalTab4)
+	F.ReskinClose(CollectionsJournalCloseButton)
+
+	CollectionsJournalTab2:SetPoint("LEFT", CollectionsJournalTab1, "RIGHT", -15, 0)
+	CollectionsJournalTab3:SetPoint("LEFT", CollectionsJournalTab2, "RIGHT", -15, 0)
+	CollectionsJournalTab4:SetPoint("LEFT", CollectionsJournalTab3, "RIGHT", -15, 0)
 
 	-- [[ Mounts and pets ]]
 
 	local PetJournal = PetJournal
 	local MountJournal = MountJournal
 
-	for i = 1, 14 do
-		if i ~= 8 then
-			select(i, PetJournalParent:GetRegions()):Hide()
-		end
-	end
 	for i = 1, 9 do
 		select(i, MountJournal.MountCount:GetRegions()):Hide()
 		select(i, PetJournal.PetCount:GetRegions()):Hide()
@@ -29,7 +43,6 @@ C.themes["Blizzard_PetJournal"] = function()
 	MountJournal.MountDisplay.ShadowOverlay:Hide()
 	PetJournalTutorialButton.Ring:Hide()
 
-	F.CreateBD(PetJournalParent)
 	F.CreateBD(MountJournal.MountCount, .25)
 	F.CreateBD(PetJournal.PetCount, .25)
 	F.CreateBD(MountJournal.MountDisplay.ModelFrame, .25)
@@ -37,10 +50,6 @@ C.themes["Blizzard_PetJournal"] = function()
 	F.Reskin(MountJournalMountButton)
 	F.Reskin(PetJournalSummonButton)
 	F.Reskin(PetJournalFindBattle)
-	F.ReskinTab(PetJournalParentTab1)
-	F.ReskinTab(PetJournalParentTab2)
-	F.ReskinTab(PetJournalParentTab3)
-	F.ReskinClose(PetJournalParentCloseButton)
 	F.ReskinScroll(MountJournalListScrollFrameScrollBar)
 	F.ReskinScroll(PetJournalListScrollFrameScrollBar)
 	F.ReskinInput(MountJournalSearchBox)
@@ -54,9 +63,6 @@ C.themes["Blizzard_PetJournal"] = function()
 	PetJournalFilterButton:SetPoint("TOPRIGHT", PetJournalLeftInset, -5, -8)
 
 	PetJournalTutorialButton:SetPoint("TOPLEFT", PetJournal, "TOPLEFT", -14, 14)
-
-	PetJournalParentTab2:SetPoint("LEFT", PetJournalParentTab1, "RIGHT", -15, 0)
-	PetJournalParentTab3:SetPoint("LEFT", PetJournalParentTab2, "RIGHT", -15, 0)
 
 	local scrollFrames = {MountJournal.ListScrollFrame.buttons, PetJournal.listScroll.buttons}
 	for _, scrollFrame in pairs(scrollFrames) do
@@ -331,50 +337,55 @@ C.themes["Blizzard_PetJournal"] = function()
 
 	-- [[ Toy box ]]
 
-	ToyBoxIconsFrame.Bg:Hide()
-	ToyBoxIconsFrameBackgroundTile:Hide()
-	ToyBoxIconsFrame:DisableDrawLayer("BORDER")
-	ToyBoxIconsFrame:DisableDrawLayer("ARTWORK")
-	ToyBoxIconsFrame:DisableDrawLayer("OVERLAY")
+	local ToyBox = ToyBox
+
+	local icons = ToyBox.iconsFrame
+	icons.Bg:Hide()
+	icons.BackgroundTile:Hide()
+	icons:DisableDrawLayer("BORDER")
+	icons:DisableDrawLayer("ARTWORK")
+	icons:DisableDrawLayer("OVERLAY")
 
 	F.ReskinInput(ToyBox.searchBox)
 	F.ReskinFilterButton(ToyBoxFilterButton)
-	F.ReskinArrow(ToyBoxPrevPageButton, "left")
-	F.ReskinArrow(ToyBoxNextPageButton, "right")
+	F.ReskinArrow(ToyBox.navigationFrame.prevPageButton, "left")
+	F.ReskinArrow(ToyBox.navigationFrame.nextPageButton, "right")
 
-	ToyBoxPrevPageButton:SetPoint("BOTTOMRIGHT", -320, 51)
-	ToyBoxNextPageButton:SetPoint("BOTTOMRIGHT", -285, 51)
+	ToyBox.navigationFrame.prevPageButton:SetPoint("BOTTOMRIGHT", -320, 51)
+	ToyBox.navigationFrame.nextPageButton:SetPoint("BOTTOMRIGHT", -285, 51)
 
 	-- Progress bar
 
-	ToyBoxProgressBarBorder:Hide()
-	ToyBoxProgressBarBackground:Hide()
+	local progressBar = ToyBox.progressBar
+	progressBar.border:Hide()
+	progressBar:DisableDrawLayer("BACKGROUND")
 
-	ToyBoxProgressBar.text:SetPoint("CENTER", 0, 1)
-	ToyBoxProgressBarBar:SetTexture(C.media.backdrop)
+	progressBar.text:SetPoint("CENTER", 0, 1)
+	progressBar:SetStatusBarTexture(C.media.backdrop)
 
-	F.CreateBDFrame(ToyBoxProgressBar, .25)
+	F.CreateBDFrame(progressBar, .25)
 
 	-- Toys!
 
+	local buttons = ToyBox.iconsFrame
 	for i = 1, 18 do
-		local bu = _G["ToySpellButton"..i]
-		local ic = _G["ToySpellButton"..i.."IconTexture"]
+		local bu = buttons["spellButton"..i]
+		local ic = bu.iconTexture
 
 		bu:SetPushedTexture("")
 		bu:SetHighlightTexture("")
 
 		bu.cooldown:SetAllPoints(ic)
 
-		_G["ToySpellButton"..i.."SlotFrameCollected"]:SetTexture("")
-		_G["ToySpellButton"..i.."SlotFrameUncollected"]:SetTexture("")
+		bu.slotFrameCollected:SetTexture("")
+		bu.slotFrameUncollected:SetTexture("")
 
 		ic:SetTexCoord(.08, .92, .08, .92)
 		F.CreateBG(ic)
 	end
 
 	hooksecurefunc("ToySpellButton_UpdateButton", function(self)
-		local toyString = _G[self:GetName().."ToyName"]
+		local toyString = self.name
 
 		if PlayerHasToy(self.itemID) then
 			local _, _, quality = GetItemInfo(self.itemID)

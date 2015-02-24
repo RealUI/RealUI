@@ -1,0 +1,13 @@
+tag v1.0.5
+108e45e5be5d87f853195307118a99bf0d5f7fac
+Gethe <gethe88@gmail.com>
+2015-02-24 00:35:17 -0600
+
+
+
+--------------------
+
+Gethe:
+	- 6.1 update
+	- fix DBM skin
+	- add support for BigWigs, change name

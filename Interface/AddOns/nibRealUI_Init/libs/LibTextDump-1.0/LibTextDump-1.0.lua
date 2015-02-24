@@ -20,7 +20,7 @@ local MAJOR = "LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
-local MINOR = 1 -- Should be manually increased
+local MINOR = 2 -- Should be manually increased
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then
@@ -57,90 +57,42 @@ local DEFAULT_FRAME_HEIGHT = 600
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
-local function CreateBorder(parent, width, height, left, right, top, bottom)
-	local border = parent:CreateTexture(nil, "BORDER")
-	border:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-Border]])
-	border:SetWidth(width)
-	border:SetHeight(height)
-	border:SetTexCoord(left, right, top, bottom)
-
-	return border
-end
-
 local function NewInstance(width, height)
 	lib.num_frames = lib.num_frames + 1
 
 	local frame_name = ("%s_CopyFrame%d"):format(MAJOR, lib.num_frames)
-	local copy_frame = _G.CreateFrame("Frame", frame_name, _G.UIParent)
+	local copy_frame = _G.CreateFrame("Frame", frame_name, _G.UIParent, "BaseBasicFrameTemplate")
 	copy_frame:SetSize(width, height)
 	copy_frame:SetPoint("CENTER", _G.UIParent, "CENTER")
 	copy_frame:SetFrameStrata("DIALOG")
 	copy_frame:EnableMouse(true)
 	copy_frame:SetMovable(true)
+	copy_frame:SetToplevel(true)
 
 	table.insert(_G.UISpecialFrames, frame_name)
 	_G.HideUIPanel(copy_frame)
 
 
-	local title_bg = copy_frame:CreateTexture(nil, "BACKGROUND")
-	title_bg:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-Title-Background]])
-	title_bg:SetPoint("TOPLEFT", 9, -6)
-	title_bg:SetPoint("BOTTOMRIGHT", copy_frame, "TOPRIGHT", -28, -24)
+	local title_bg = copy_frame:CreateTexture(nil, "BACKGROUND", "_UI-Frame-TitleTileBg")
+	title_bg:SetPoint("TOPLEFT", 2, -3)
+	title_bg:SetPoint("BOTTOMRIGHT", copy_frame.TopRightCorner, "BOTTOMLEFT", 7, 13)
 
 
 	local dialog_bg = copy_frame:CreateTexture(nil, "BACKGROUND")
 	dialog_bg:SetTexture([[Interface\Tooltips\UI-Tooltip-Background]])
 	dialog_bg:SetVertexColor(0, 0, 0, 0.75)
-	dialog_bg:SetPoint("TOPLEFT", 8, -24)
-	dialog_bg:SetPoint("BOTTOMRIGHT", -6, 8)
+	dialog_bg:SetPoint("TOPLEFT", 2, -21)
+	dialog_bg:SetPoint("BOTTOMRIGHT", -2, 21)
 
 
-	local top_left = CreateBorder(copy_frame, 64, 64, 0.501953125, 0.625, 0, 1)
-	top_left:SetPoint("TOPLEFT")
-
-
-	local top_right = CreateBorder(copy_frame, 64, 64, 0.625, 0.75, 0, 1)
-	top_right:SetPoint("TOPRIGHT")
-
-
-	local top = CreateBorder(copy_frame, 0, 64, 0.25, 0.369140625, 0, 1)
-	top:SetPoint("TOPLEFT", top_left, "TOPRIGHT", 0, 0)
-	top:SetPoint("TOPRIGHT", top_right, "TOPLEFT", 0, 0)
-
-
-	local bottom_left = CreateBorder(copy_frame, 64, 64, 0.751953125, 0.875, 0, 1)
-	bottom_left:SetPoint("BOTTOMLEFT")
-
-
-	local bottom_right = CreateBorder(copy_frame, 64, 64, 0.875, 1, 0, 1)
-	bottom_right:SetPoint("BOTTOMRIGHT")
-
-
-	local bottom = CreateBorder(copy_frame, 0, 64, 0.37695312, 0.498046875, 0, 1)
-	bottom:SetPoint("BOTTOMLEFT", bottom_left, "BOTTOMRIGHT", 0, 0)
-	bottom:SetPoint("BOTTOMRIGHT", bottom_right, "BOTTOMLEFT", 0, 0)
-
-
-	local left = CreateBorder(copy_frame, 64, 0, 0.001953125, 0.125, 0, 1)
-	left:SetPoint("TOPLEFT", top_left, "BOTTOMLEFT", 0, 0)
-	left:SetPoint("BOTTOMLEFT", bottom_left, "TOPLEFT", 0, 0)
-
-
-	local right = CreateBorder(copy_frame, 64, 0, 0.1171875, 0.2421875, 0, 1)
-	right:SetPoint("TOPRIGHT", top_right, "BOTTOMRIGHT", 0, 0)
-	right:SetPoint("BOTTOMRIGHT", bottom_right, "TOPRIGHT", 0, 0)
-
-
-	local title = copy_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	title:SetPoint("TOPLEFT", 12, -8)
-	title:SetPoint("TOPRIGHT", -32, -8)
-
+	-- assign template title region to old var
+	local title = copy_frame.TitleText
 	copy_frame.title = title
 
 
 	local drag_frame = _G.CreateFrame("Frame", nil, copy_frame)
-	drag_frame:SetPoint("TOPLEFT", title)
-	drag_frame:SetPoint("BOTTOMRIGHT", title)
+	drag_frame:SetPoint("TOPLEFT", title_bg)
+	drag_frame:SetPoint("BOTTOMRIGHT", title_bg)
 	drag_frame:EnableMouse(true)
 
 	drag_frame:SetScript("OnMouseDown", function(self, button)
@@ -152,15 +104,10 @@ local function NewInstance(width, height)
 	end)
 
 
-	local close_button = _G.CreateFrame("Button", nil, copy_frame, "UIPanelCloseButton")
-	close_button:SetSize(32, 32)
-	close_button:SetPoint("TOPRIGHT", 2, 1)
-
-
 	local footer_frame = _G.CreateFrame("Frame", nil, copy_frame, "InsetFrameTemplate")
-	footer_frame:SetHeight(23)
-	footer_frame:SetPoint("BOTTOMLEFT", copy_frame, "BOTTOMLEFT", 8, 8)
-	footer_frame:SetPoint("BOTTOMRIGHT", copy_frame, "BOTTOMRIGHT", -5, 8)
+	footer_frame:SetHeight(24)
+	footer_frame:SetPoint("BOTTOMLEFT", copy_frame, "BOTTOMLEFT", 2, 4)
+	footer_frame:SetPoint("BOTTOMRIGHT", copy_frame, "BOTTOMRIGHT", -4, 4)
 
 
 	local footer = footer_frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
@@ -168,8 +115,8 @@ local function NewInstance(width, height)
 
 
 	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "UIPanelScrollFrameTemplate")
-	scroll_area:SetPoint("TOPLEFT", copy_frame, "TOPLEFT", 10, -28)
-	scroll_area:SetPoint("BOTTOMRIGHT", copy_frame, "BOTTOMRIGHT", -28, 31)
+	scroll_area:SetPoint("TOPLEFT", 5, -24)
+	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
 
 	scroll_area:SetScript("OnMouseWheel", function(self, delta)
 		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self.ScrollBar)
@@ -186,7 +133,7 @@ local function NewInstance(width, height)
 	edit_box:EnableMouse(true)
 	edit_box:SetAutoFocus(false)
 	edit_box:SetFontObject("ChatFontNormal")
-	edit_box:SetSize(650, 270)
+	edit_box:SetSize(scroll_area:GetSize())
 
 	edit_box:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copy_frame)
@@ -198,7 +145,7 @@ local function NewInstance(width, height)
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
 	highlight_button:SetSize(16, 16)
-	highlight_button:SetPoint("BOTTOMRIGHT", -10, 10)
+	highlight_button:SetPoint("BOTTOMRIGHT", -8, 8)
 
 	highlight_button:SetScript("OnMouseUp", function(self, button)
 		self.texture:ClearAllPoints()
