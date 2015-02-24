@@ -207,8 +207,8 @@ local MicroMenu = {
         func = function() ToggleQuestLog() end,
         notCheckable = true
     },
-    {text = MOUNTS_AND_PETS,
-        func = function() TogglePetJournal() end,
+    {text = COLLECTIONS,
+        func = function() ToggleCollectionsJournal() end,
         notCheckable = true
     },
     {text = SOCIAL_BUTTON,
@@ -2328,7 +2328,7 @@ local function Meter_Update(self)
         damageMeters = {
             Skada = {
                 isVisible = function()
-                    return SkadaBarWindowSkada:IsVisible()
+                    -- we don't need the frame for skada
                 end,
                 toggle = function()
                     Skada:ToggleWindow()
@@ -2362,7 +2362,7 @@ local function Meter_Update(self)
             },
             alDamageMeter = {
                 isVisible = function()
-                    return SkadaBarWindowSkada:IsVisible()
+                    return alDamageMeterFrame:IsVisible()
                 end,
                 toggle = function(isVisible)
                     if isVisible then
