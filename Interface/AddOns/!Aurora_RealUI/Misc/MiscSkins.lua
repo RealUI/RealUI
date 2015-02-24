@@ -116,7 +116,6 @@ tinsert(mods["Aurora"], function(F, C)
 end)
 
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    -- These addons are loaded before !Aurora_RealUI due to dependancy chains with nibRealUI.
-    -- Thus, we need to call them directly until we can remove nibRealUI as a dependancy.
-    --mods["nibRealUI"](F, C)
+    -- These addons are loaded before !Aurora_RealUI.
+    --mods["Blizzard_PetBattleUI"](F, C)
 end)

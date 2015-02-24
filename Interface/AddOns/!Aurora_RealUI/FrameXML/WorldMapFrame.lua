@@ -1,7 +1,7 @@
 local _, mods = ...
 
-tinsert(mods["Aurora"], function(F, C)
-    --print("HELLO WORLD!!!", F, C)
+tinsert(mods["nibRealUI"], function(F, C)
+    RealUI.Debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
         WorldMapPlayerUpper:EnableMouse(false)
@@ -37,12 +37,12 @@ tinsert(mods["Aurora"], function(F, C)
     
     coords.player = coords:CreateFontString(nil, "OVERLAY")
     coords.player:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
-    coords.player:SetFontObject(SystemFont_Small)
+    coords.player:SetFont(unpack(RealUI:GetFont("small"))) --SetFontObject(SystemFont_Small)
     coords.player:SetText("")
     
     coords.mouse = coords:CreateFontString(nil, "OVERLAY")
     coords.mouse:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
-    coords.mouse:SetFontObject(SystemFont_Small)
+    coords.mouse:SetFont(unpack(RealUI:GetFont("small"))) --SetFontObject(SystemFont_Small)
     coords.mouse:SetText("")
 
     local round, classColorStr = RealUI.Round, RealUI:ColorTableToStr({C.r, C.g, C.b})
@@ -97,7 +97,7 @@ tinsert(mods["Aurora"], function(F, C)
     end
 
     local function SetQuestWorldMap()
-        if InCombatLockdown() then return end
+        if InCombatLockdown() or not IsAddOnLoaded("Aurora") then return end
         
         WorldMapFrameNavBar:SetPoint("TOPLEFT", WorldMapFrame.BorderFrame, 3, -33)
         WorldMapFrameNavBar:SetWidth(700)

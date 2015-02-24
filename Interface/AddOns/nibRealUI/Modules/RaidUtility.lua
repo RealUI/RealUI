@@ -89,7 +89,7 @@ local function CreateButton(name, parent, template, width, height, SetPoint, rel
 	b:SetHeight(height)
 	b:SetPoint(SetPoint, relativeto, SetPoint2, xOfs, yOfs)
 	b:EnableMouse(true)
-	if Aurora then
+	if Aurora and Aurora[1].Reskin then
         Aurora[1].Reskin(b)
     end
 	if text then
@@ -168,7 +168,7 @@ function RaidUtility:SetUpFrame()
 	CompactRaidFrameManagerDisplayFrameLeaderOptionsRaidWorldMarkerButton:SetParent("RaidUtilityPanel")
 	CompactRaidFrameManagerDisplayFrameLeaderOptionsRaidWorldMarkerButton:SetHeight(18)
 	CompactRaidFrameManagerDisplayFrameLeaderOptionsRaidWorldMarkerButton:SetWidth(RaidUtilityRoleButton:GetWidth() * 0.22)
-	if Aurora then
+	if Aurora and Aurora[1].Reskin then
         Aurora[1].Reskin(CompactRaidFrameManagerDisplayFrameLeaderOptionsRaidWorldMarkerButton)
     end
 

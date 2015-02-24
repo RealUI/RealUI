@@ -43,11 +43,10 @@ local function CreateDebugFrame()
     debugger = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format("RealUI"), 640, 480)
 end
 
-RealUI.Debug = function(...)
+local function debug(...)
     if not debugger then
         CreateDebugFrame()
     end
-    local args = { n = select("#", ...), ... }
     local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
@@ -60,6 +59,7 @@ RealUI.Debug = function(...)
     end
     debugger:AddLine(text)
 end
+RealUI.Debug = debug
 
 -- Slash Commands
 SLASH_REALUIINIT1 = "/realdebug"
@@ -83,11 +83,8 @@ f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- Do stuff at login
-        if debug then
-            SlashCmdList.REALUIINIT()
-        end
         f:UnregisterEvent("PLAYER_LOGIN")
-        f:UnregisterEvent("ADDON_LOADED")
+        --f:UnregisterEvent("ADDON_LOADED")
     elseif event == "ADDON_LOADED" then
         if addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
@@ -96,11 +93,29 @@ f:SetScript("OnEvent", function(self, event, addon)
             Aurora[2] = {} -- C, constants/config
             local F, C = unpack(Aurora)
 
+            -- Setup __index to catch other addons using functions if Aurora is disabled.
+            -- This way I don't have to add the entire API.
+            setmetatable(F, {__index = function(table, key)
+                debug("Aurora: __index", key, table)
+                if not rawget(table, key) then
+                    table[key] = function(...)
+                        debug("Aurora: function:", key, "args:", ...)
+                    end
+                    return table[key]
+                end
+            end})
+
+            F.dummy = function() end
+
             -- load RealUI overrides into Aurora namespace
             local auroraStyle = AURORA_CUSTOM_STYLE
 
-            for i = 1, #auroraStyle.copy do
-                F[auroraStyle.copy[i]] = auroraStyle.functions[auroraStyle.copy[i]]
+            for name, func in next, auroraStyle.functions do
+                if auroraStyle.copy[name] then
+                    F[name] = func
+                else
+                    --F[name] = F.dummy
+                end
             end
 
             if auroraStyle.classcolors then
@@ -110,6 +125,8 @@ f:SetScript("OnEvent", function(self, event, addon)
                 r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
                 C.r, C.g, C.b = r, g, b
             end
+
+            auroraStyle.initVars()
         elseif addon == "nibRealUI" then
             if not ns.auroraLoaded then
             end
@@ -118,55 +135,63 @@ f:SetScript("OnEvent", function(self, event, addon)
 end)
 
 -- Modified from Blizzard's DrawRouteLine
-function RealUI:DrawLine(tex, topPoint, botPoint, canvas, relPoint, startX, startY, endX, endY, width)
-    tex:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    if (not relPoint) then relPoint = "BOTTOMLEFT" end
+local lineFactor = TAXIROUTE_LINEFACTOR_2 --(32/20) / 2
 
-    -- Determine dimensions and center point of line
-    local dx,dy = endX - startX, endY - startY
-    local cx,cy = (startX + endX) / 2, (startY + endY) / 2
+function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
+   if (not relPoint) then relPoint = "BOTTOMLEFT" end
 
-    -- Normalize direction if necessary
-    if (dx < 0) then
-        dx,dy = -dx,-dy
-    end
+   T:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
 
-    -- Calculate actual length of line
-    local l = sqrt((dx * dx) + (dy * dy))
+   -- Determine dimensions and center point of line
+   local dx, dy = ex - sx, ey - sy
+   --debug("DrawLine: dx, ", dx, ", dy, ", dy)
+   local cx, cy = (sx + ex) / 2, (sy + ey) / 2
+   --debug("DrawLine: cx, ", cx, ", cy, ", cy)
 
-    -- Quick escape if it's zero length
-    if (l == 0) then
-        tex:SetTexCoord(0,0,0,0,0,0,0,0)
-        tex:SetPoint(botPoint, canvas, relPoint, cx,cy)
-        tex:SetPoint(topPoint, canvas, relPoint, cx,cy)
-        return
-    end
+   -- Normalize direction if necessary
+   if (dx < 0) then
+      dx,dy = -dx,-dy
+   end
 
-    -- Sin and Cosine of rotation, and combination (for later)
-    local s,c = -dy / l, dx / l
-    local sc = s * c
+   -- Calculate actual length of line
+   local l = sqrt((dx * dx) + (dy * dy))
 
-    -- Calculate bounding box size and texture coordinates
-    local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
-    if (dy >= 0) then
-        Bwid = ((l * c) - (width * s)) * TAXIROUTE_LINEFACTOR_2
-        Bhgt = ((width * c) - (l * s)) * TAXIROUTE_LINEFACTOR_2
-        BLx, BLy, BRy = (width / l) * sc, s * s, (l / width) * sc
-        BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx 
-        TRy = BRx
-    else
-        Bwid = ((l * c) + (width * s)) * TAXIROUTE_LINEFACTOR_2
-        Bhgt = ((width * c) + (l * s)) * TAXIROUTE_LINEFACTOR_2
-        BLx, BLy, BRx = s * s, -(l / width) * sc, 1 + (width / l) * sc
-        BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
-        TRx = TLy
-    end
+   -- Quick escape if it's zero length
+   if (l == 0) then
+      T:SetTexCoord(0,0,0,0,0,0,0,0)
+      T:SetPoint("BOTTOMLEFT", C, relPoint, cx,cy)
+      T:SetPoint("TOPRIGHT",   C, relPoint, cx,cy)
+      return
+   end
 
-    -- Set texture coordinates and anchors
-    tex:ClearAllPoints()
-    tex:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
-    tex:SetPoint(botPoint, canvas, relPoint, cx - Bwid, cy - Bhgt)
-    tex:SetPoint(topPoint, canvas, relPoint, cx + Bwid, cy + Bhgt)
+   -- Sin and Cosine of rotation, and combination (for later)
+   local s,c = -dy / l, dx / l
+   local sc = s * c
+
+   -- Calculate bounding box size and texture coordinates
+   local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
+   if (dy >= 0) then
+      Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
+      Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
+      BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
+      BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx 
+      TRy = BRx
+   else
+      Bwid = cx - sx --((l * c) + (w * s)) * lineFactor
+      Bhgt = -(cy - sy) --((w * c) + (l * s)) * lineFactor
+      BLx, BLy, BRx = s * s, -(l / w) * sc, 1 + (w / l) * sc
+      BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
+      TRx = TLy
+   end
+   --debug("DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
+   --debug("DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
+   --debug("DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
+
+   -- Set texture coordinates and anchors
+   T:ClearAllPoints()
+   T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
+   T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt)
+   T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt)
 end
 
 -- Math

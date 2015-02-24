@@ -1,7 +1,7 @@
 local _, mods = ...
 
-tinsert(mods["Aurora"], function(F, C)
-    --print("HELLO WORLD!!!", F, C)
+tinsert(mods["nibRealUI"], function(F, C)
+    RealUI.Debug("PaperDollFrame", F, C)
     local itemSlots = {
         {slot = "Head", hasDura = true},
         {slot = "Neck", hasDura = false},

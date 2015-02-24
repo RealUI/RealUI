@@ -688,7 +688,7 @@ end
 
 function Loot:PLAYER_LOGIN()
 	self:RefreshMod()
-	if Aurora then
+	if Aurora and Aurora[1].ReskinClose then
 		Aurora[1].ReskinClose(RealUILootFrame.close, "BOTTOMRIGHT", RealUILootFrame, "TOPRIGHT", 1, -3)
 	end
 end

@@ -1,6 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local LSM = LibStub("LibSharedMedia-3.0")
+local F
 
 -- Misc Functions
 -- FindSpellID("Spell", "player", false)
@@ -354,7 +355,7 @@ function nibRealUI:CreateCheckbox(name, parent, label, side, size)
     cbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
     cbg:SetFrameLevel(f:GetFrameLevel() - 1)
     
-    if Aurora then
+    if Aurora and Aurora[1].ReskinCheck then
         Aurora[1].ReskinCheck(f)
     end
 
@@ -381,7 +382,7 @@ function nibRealUI:CreateTextButton(text, parent, template, width, height, small
     end
     f:SetText(text)
 
-    if Aurora then
+    if Aurora and Aurora[1].Reskin then
         Aurora[1].Reskin(f)
     end
     
@@ -412,7 +413,7 @@ function nibRealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hide
 
     nibRealUI:CreateBD(f, nil, true, true)
 
-    if Aurora then
+    if Aurora and Aurora[1].ReskinClose then
         -- Aurora[1].SetBD(f)
         if closeOnEsc and f.close then Aurora[1].ReskinClose(f.close) end
     end
@@ -575,36 +576,6 @@ end
 
 
 -- Formatting
-local IgnoreLocales = {
-    koKR = true,
-    zhCN = true,
-    zhTW = true,
-}
-local function checkCJKlength(name, maxNameLength)
-    local lastCharLen = 0
-
-    if IgnoreLocales[nibRealUI.locale] then
-        maxNameLength = maxNameLength / 2
-        local count = maxNameLength
-
-        for c in string.gmatch(name, "([%z\1-\127\194-\244][\128-\191]*)") do
-            local ucLength = string.len(c)
-
-            if (ucLength > 1) then
-                maxNameLength = maxNameLength + ucLength - 1
-            end
-
-            count = count - 1
-
-            if (count == 0) then
-                lastCharLen = ucLength
-                break
-            end
-        end
-    end
-
-    return maxNameLength, lastCharLen
-end
 function nibRealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
 
