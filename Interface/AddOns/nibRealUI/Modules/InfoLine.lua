@@ -1960,23 +1960,6 @@ local clientString = {
     [BNET_CLIENT_HEROES] = "HotS",
 }
 
--- from 6.1 PTR; remove once released
-local function BNet_GetValidatedCharacterName(toonName, battleTag, client)
-    if ( not toonName or client == BNET_CLIENT_HEROES ) then
-        if ( battleTag and battleTag ~= "" ) then
-            local symbol = string.find(battleTag, "#");
-            if ( symbol ) then
-                return string.sub(battleTag, 1, symbol - 1);
-            else
-                return battleTag;
-            end
-        else
-            return nil;
-        end
-    end
-    return toonName;
-end
-
 local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
