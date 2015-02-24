@@ -55,5 +55,8 @@ function nibRealUI:MiniPatch(ver)
                 Grid2DB["profiles"]["RealUI"]["indicators"]["text-down"]["shadowDisabled"] = true
             end
         end
+        if IsAddOnLoaded("Aurora") and AuroraConfig then
+            AuroraConfig["buttonSolidColour"] = {0.1, 0.1, 0.1, 1}
+        end
     end
 end

@@ -70,14 +70,17 @@ local lodFrames = {
 	--Blizzard_ArenaUI
 	Blizzard_AuctionUI = { ["AuctionFrame"] = false },
 	Blizzard_BarbershopUI = { ["BarberShopFrame"] = false },
+	--Blizzard_BattlefieldMinimap
 	Blizzard_BindingUI = { ["KeyBindingFrame"] = false },
 	Blizzard_BlackMarketUI = { ["BlackMarketFrame"] = false },
 	Blizzard_Calendar = { ["CalendarFrame"] = false, ["CalendarCreateEventFrame"] = true },
 	Blizzard_ChallengesUI = { ["ChallengesLeaderboardFrame"] = false },
-	Blizzard_CraftUI = { ["CraftFrame"] = false },
+	Blizzard_Collections = { ["MountJournal"] = true, ["PetJournal"] = true, ["ToyBox"] = true, ["HeirloomsJournal"] = true },
+	--Blizzard_DeathRecap
 	Blizzard_EncounterJournal = { ["EncounterJournal"] = false },
 	Blizzard_GarrisonUI = { ["GarrisonLandingPage"] = false, ["GarrisonBuildingFrame"] = false, ["GarrisonMissionFrame"] = false },
 	--Blizzard_GlyphUI = { ["GlyphFrame"] = true },
+	--Blizzard_GMChatUI
 	Blizzard_GMSurveyUI = { ["GMSurveyFrame"] = false },
 	Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
 	--Blizzard_GuildControlUI
@@ -89,9 +92,11 @@ local lodFrames = {
 	Blizzard_LookingForGuildUI = { ["LookingForGuildFrame"] = false },
 	Blizzard_MacroUI = { ["MacroFrame"] = false },
 	--Blizzard_ObjectiveTracker
-	Blizzard_PetJournal = { ["PetJournalParent"] = false },
 	--Blizzard_PVPUI
 	Blizzard_QuestChoice = { ["QuestChoiceFrame"] = false },
+	--Blizzard_RaidUI
+	--Blizzard_SocialUI
+	--Blizzard_StoreUI
 	Blizzard_TalentUI = { ["PlayerTalentFrame"] = false },
 	Blizzard_TimeManager = { ["TimeManagerFrame"] = false },
 	--Blizzard_TokenUI = { ["TokenFrame"] = true },

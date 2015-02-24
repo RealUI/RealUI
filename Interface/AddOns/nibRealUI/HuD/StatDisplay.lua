@@ -15,6 +15,7 @@ local RoundFormatString = "%.1f"
 
 local statTable = {}
 local function createStats(class)
+    if #statTable > 0 then return end
     --print("Class", class)
     -- Attributes
         if class == "DEATHKNIGHT" or class == "PALADIN" or class == "WARRIOR" then
@@ -104,6 +105,17 @@ local convertStat = { --Test prep for Warlords
     ["Armor_Defense"] = "Total_Armor",
 }
 
+local statList
+local function fillValues(...)
+    if not statList then
+        statList = {}
+        for i = 1, #statTable do
+            statList[i] = statTable[i].name
+        end
+    end
+    return statList
+end
+
 local options
 local function GetOptions()
     if not options then options = {
@@ -125,7 +137,7 @@ local function GetOptions()
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value) 
                     nibRealUI:SetModuleEnabled(MODNAME, value)
-                    nibRealUI:ReloadUIDialog()
+                    --nibRealUI:ReloadUIDialog()
                 end,
                 order = 30,
             },
@@ -149,31 +161,19 @@ local function GetOptions()
                     stat1 = {
                         type = "select",
                         name = "Stat 1",
+                        values = fillValues,
+                        get = function(info, value, ...)
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][1] then
+                                    return i
+                                end
+                            end
+                        end,
                         set = function(info, value)
                             dbc.stats[1][1] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
-                        style = "dropdown",
-                        width = nil,
-                        values = function(...)
-                            local vals = {}
-                            for i = 1, #statTable do
-                                vals[i] = statTable[i].name
-                            end
-                            return vals
-                        end,
                         order = 10,
-                    },
-                    stat1name = {
-                        name = function()
-                            for i = 1, #statTable do
-                                if statTable[i].slug == dbc.stats[1][1] then
-                                    return statTable[i].name
-                                end
-                            end
-                        end,
-                        type = "description",
-                        order = 20,
                     },
                     gap1 = {
                         name = " ",
@@ -183,31 +183,19 @@ local function GetOptions()
                     stat2 = {
                         type = "select",
                         name = "Stat 2",
+                        values = fillValues,
+                        get = function(info, value, ...)
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[1][2] then
+                                    return i
+                                end
+                            end
+                        end,
                         set = function(info, value)
                             dbc.stats[1][2] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
-                        style = "dropdown",
-                        width = nil,
-                        values = function(...)
-                            local vals = {}
-                            for i = 1, #statTable do
-                                vals[i] = statTable[i].name
-                            end
-                            return vals
-                        end,
                         order = 30,
-                    },
-                    stat2name = {
-                        name = function()
-                            for i = 1, #statTable do
-                                if statTable[i].slug == dbc.stats[1][1] then
-                                    return statTable[i].name
-                                end
-                            end
-                        end,
-                        type = "description",
-                        order = 40,
                     },
                 },
             },
@@ -226,31 +214,19 @@ local function GetOptions()
                     stat1 = {
                         type = "select",
                         name = "Stat 1",
+                        values = fillValues,
+                        get = function(info, value, ...)
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[2][1] then
+                                    return i
+                                end
+                            end
+                        end,
                         set = function(info, value)
                             dbc.stats[2][1] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
-                        style = "dropdown",
-                        width = nil,
-                        values = function(...)
-                            local vals = {}
-                            for i = 1, #statTable do
-                                vals[i] = statTable[i].name
-                            end
-                            return vals
-                        end,
                         order = 10,
-                    },
-                    stat1name = {
-                        name = function()
-                            for i = 1, #statTable do
-                                if statTable[i].slug == dbc.stats[1][1] then
-                                    return statTable[i].name
-                                end
-                            end
-                        end,
-                        type = "description",
-                        order = 20,
                     },
                     gap1 = {
                         name = " ",
@@ -260,31 +236,19 @@ local function GetOptions()
                     stat2 = {
                         type = "select",
                         name = "Stat 2",
+                        values = fillValues,
+                        get = function(info, value, ...)
+                            for i = 1, #statTable do
+                                if statTable[i].slug == dbc.stats[2][2] then
+                                    return i
+                                end
+                            end
+                        end,
                         set = function(info, value)
                             dbc.stats[2][2] = statTable[value].slug
                             StatDisplay:TalentUpdate()
                         end,
-                        style = "dropdown",
-                        width = nil,
-                        values = function(...)
-                            local vals = {}
-                            for i = 1, #statTable do
-                                vals[i] = statTable[i].name
-                            end
-                            return vals
-                        end,
                         order = 30,
-                    },
-                    stat2name = {
-                        name = function()
-                            for i = 1, #statTable do
-                                if statTable[i].slug == dbc.stats[1][1] then
-                                    return statTable[i].name
-                                end
-                            end
-                        end,
-                        type = "description",
-                        order = 40,
                     },
                 },
             },
@@ -702,15 +666,17 @@ function StatDisplay:CombatUpdate()
 end
 
 function StatDisplay:PLAYER_LOGIN()
-    --print("StatDisply:PLAYER_LOGIN")
-    if not RealUIPlayerFrame.Stats then
-        self:UnregisterAllEvents()
-        return
-    end
+    nibRealUI.Debug("StatDisplay:PLAYER_LOGIN")
     StatFrame[1] = RealUIPlayerFrame.Stats[1]
     StatFrame[2] = RealUIPlayerFrame.Stats[2]
-    createStats(nibRealUI.class)
-    self:CombatUpdate()
+
+    if nibRealUI:GetModuleEnabled(MODNAME) then
+        createStats(nibRealUI.class)
+        self:CombatUpdate()
+    else
+        ShowStats(false)
+    end
+    self:UnregisterEvent("PLAYER_LOGIN")
 end
 
 --------------------
@@ -848,6 +814,7 @@ end
 ----------
 
 function StatDisplay:OnInitialize()
+    nibRealUI.Debug("StatDisplay:OnInitialize")
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
@@ -864,13 +831,24 @@ function StatDisplay:OnInitialize()
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
+
+    self:RegisterEvent("PLAYER_LOGIN")
 end
 
 function StatDisplay:OnEnable()
-    self:RegisterEvent("PLAYER_LOGIN")
+    nibRealUI.Debug("StatDisplay:OnEnable")
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "TalentUpdate")
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "TalentUpdate")
     self:RegisterEvent("PLAYER_TALENT_UPDATE", "TalentUpdate")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "CombatUpdate")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "CombatUpdate")
+end
+
+function StatDisplay:OnDisable()
+    nibRealUI.Debug("StatDisplay:OnDisable")
+    self:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+    self:UnregisterEvent("PLAYER_TALENT_UPDATE")
+    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 end

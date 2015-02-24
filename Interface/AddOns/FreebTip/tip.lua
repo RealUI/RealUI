@@ -5,7 +5,7 @@ local RealUIStripeOpacity = 0.5
 local mediapath = "Interface\\AddOns\\FreebTip\\media\\"
 local cfg = {
 	-- xRUI
-	font = [[Interface\AddOns\nibRealUI\Fonts\standard.ttf]],
+	font = [[Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf]],
 	pixelfont = [[Interface\AddOns\nibRealUI\Fonts\pixel_small.ttf]],
 	fontsize = 12, -- I'd suggest adjusting the scale instead of the fontsize
 	outline = "NONE",

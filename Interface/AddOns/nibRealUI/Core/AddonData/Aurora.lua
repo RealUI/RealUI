@@ -10,9 +10,9 @@ nibRealUI.LoadAddOnData_Aurora = function()
         ["useCustomColour"] = false,
         ["enableFont"] = false,
         ["buttonSolidColour"] = {
-            0.09, -- [1]
-            0.09, -- [2]
-            0.09, -- [3]
+            0.1, -- [1]
+            0.1, -- [2]
+            0.1, -- [3]
             1, -- [4]
         },
     }

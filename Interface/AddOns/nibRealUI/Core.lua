@@ -685,10 +685,10 @@ function nibRealUI:PLAYER_LOGIN()
     
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if GetCVar("scriptProfile") == "1" then
-        print("|cff"..red.."CPU Profiling is enabled!|r To disable, type: |cff"..blue.."/cpuProfiling")
+        print("|cff"..red.."CPU Profiling is enabled!|r To disable, type: |cff"..blue.."/cpuProfiling|r")
     end
     if GetCVar("taintLog") ~= "0" then
-        print("|cff"..red.."Taint Logging is enabled!|r To disable, type: |cff"..blue.."/taintLogging")
+        print("|cff"..red.."Taint Logging is enabled!|r To disable, type: |cff"..blue.."/taintLogging|r")
     end
 
     -- Update styling
