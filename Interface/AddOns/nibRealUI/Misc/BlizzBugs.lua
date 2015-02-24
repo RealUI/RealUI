@@ -3,16 +3,69 @@
 local wow_version, wow_build, wow_data, tocversion = GetBuildInfo()
 wow_build = tonumber(wow_build)
 
--- Fix incorrect translations in the German Locale.  For whatever reason
--- Blizzard changed the oneletter time abbreviations to be 3 letter in
--- the German Locale.
+-- Fix incorrect translations in the German localization
 if GetLocale() == "deDE" then
-	-- This one confirmed still bugged as of Mists of Pandaria build 16030
+	-- Day one-letter abbreviation is using a whole word instead of one letter.
+	-- Confirmed still bugged in 6.0.3.19243
 	DAY_ONELETTER_ABBR = "%d d"
+
+	-- Quality 2 (Uncommon) is incorrectly using the same translation as Quality 3 (Rare).
+	-- Previously 2/3 were Selten/Rar; it looks like they meant to update these to match the
+	-- equivalent battle pet quality strings (Ungewöhnlich/Selten) but forgot to finish the job.
+	-- Confirmed still bugged in 6.0.3.19243
+	-- A simple global override breaks unit frame dropdowns -_-
+	-- ITEM_QUALITY2_DESC = BATTLE_PET_BREED_QUALITY3
+	-- ...so we have to do all this nonsense instead:
+	-- Fix it in the sub-menu
+	UnitPopupButtons["ITEM_QUALITY2_DESC"].text = BATTLE_PET_BREED_QUALITY3
+	-- Fix it in the top-level menu
+	hooksecurefunc("UnitPopup_ShowMenu", function(menu, which, unit)
+		local lootThreshold = GetLootThreshold()
+		if UIDROPDOWNMENU_MENU_VALUE == "LOOT_THRESHOLD" then
+			for index = 1, 2 do
+				local match = (index + 1) == lootThreshold
+				local buttonName = "DropDownList"..UIDROPDOWNMENU_MENU_LEVEL.."Button"..index
+				_G[buttonName.."Check"]:SetShown(match)
+				_G[buttonName.."UnCheck"]:SetShown(not match)
+			end
+		elseif lootThreshold == 2 and which == "SELF" and UIDROPDOWNMENU_MENU_VALUE == nil then
+			for index = 1, 20 do -- arbitrary upper bound
+				local button = _G["DropDownList"..UIDROPDOWNMENU_MENU_LEVEL.."Button"..index]
+				if button and button.value == "LOOT_THRESHOLD" then
+					return button:SetText(ITEM_QUALITY_COLORS[2].hex .. BATTLE_PET_BREED_QUALITY3)
+				end
+			end
+		end
+	end)
+	-- Fix it in chat frame system messages
+	local pattern = gsub(ERR_SET_LOOT_THRESHOLD_S, "%%s", ".+")
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", function(_, _, message, ...)
+		if GetLootThreshold() == 2 and strmatch(message, pattern) then
+			return false, format(ERR_SET_LOOT_THRESHOLD_S, BATTLE_PET_BREED_QUALITY3), ...
+		end
+	end)
 end
 
--- fixes the issue with InterfaceOptionsFrame_OpenToCategory not actually opening the Category (and not even scrolling to it)
--- Confirmed still broken in Mists of Pandaria as of build 17538 (5.4.1)
+-- Fix an error in the Traditional Chinese client when the Blizzard_GuildUI loads
+-- Blizzard_GuildUI\Localization.lua:30: attempt to index global 'GuildMainFrameMembersCountLabel' (a nil value)
+-- The error is caused by Blizzard using the wrong global object name.
+-- New bug in 6.0, reported by EKE on WoWInterface.
+if GetLocale() == "zhTW" then
+	-- Create a dummy object to prevent the error:
+	GuildMainFrameMembersCountLabel = { SetPoint = function() end }
+	-- Wait for the Guild UI to load:
+	hooksecurefunc("LoadAddOn", function(name)
+		if name == "Blizzard_GuildUI" then
+			-- Make the intended change using the correct object name:
+			GuildFrameMembersCountLabel:SetPoint("BOTTOMRIGHT", GuildFrameMembersCount, "TOPRIGHT")
+			-- Delete the dummy object:
+			GuildMainFrameMembersCountLabel = nil
+		end
+	end)
+end
+
+-- Fix InterfaceOptionsFrame_OpenToCategory not actually opening the category (and not even scrolling to it)
+-- Confirmed still broken in 6.0.3.19243
 do
 	local function get_panel_name(panel)
 		local tp = type(panel)
@@ -68,9 +121,9 @@ do
 			end
 		end
 		local Smin, Smax = InterfaceOptionsFrameAddOnsListScrollBar:GetMinMaxValues()
-		if shownpanels > 15 and Smin < Smax then 
-		  local val = (Smax/(shownpanels-15))*(mypanel-2)
-		  InterfaceOptionsFrameAddOnsListScrollBar:SetValue(val)
+		if shownpanels > 15 and Smin < Smax then
+			local val = (Smax/(shownpanels-15))*(mypanel-2)
+			InterfaceOptionsFrameAddOnsListScrollBar:SetValue(val)
 		end
 		doNotRun = true
 		InterfaceOptionsFrame_OpenToCategory(panel)
@@ -82,63 +135,23 @@ end
 
 -- Avoid taint from the UIFrameFlash usage of the chat frames.  More info here:
 -- http://forums.wowace.com/showthread.php?p=324936
-
 -- Fixed by embedding LibChatAnims
-
 
 -- Fix an issue where the PetJournal drag buttons cannot be clicked to link a pet into chat
 -- The necessary code is already present, but the buttons are not registered for the correct click
--- Confirmed still broken in Mists of Pandaria as of build 17538 (5.4.1)
-if true then
-        local frame = CreateFrame("Frame")
-        frame:RegisterEvent("ADDON_LOADED")
-        frame:SetScript("OnEvent", function(self, event, name)
-                if event == "ADDON_LOADED" and name == "Blizzard_PetJournal" then
-			for i=1,3 do
-				local d = _G["PetJournalLoadoutPet"..i]
-				d = d and d.dragButton
-				if d then d:RegisterForClicks("LeftButtonUp") end
+-- Confirmed still bugged in 6.0.3.19243
+do
+	local frame = CreateFrame("Frame")
+	frame:RegisterEvent("ADDON_LOADED")
+	frame:SetScript("OnEvent", function(self, event, name)
+		if name == "Blizzard_PetJournal" then
+			for i = 1, 3 do
+				local button = _G["PetJournalLoadoutPet"..i]
+				if button and button.dragButton then
+					button.dragButton:RegisterForClicks("LeftButtonUp")
+				end
 			end
-                end
-        end)
-end
-
-
-----------------------------------------------------------------------------------------
---	Fix blank tooltip
-----------------------------------------------------------------------------------------
-local FixTooltip = CreateFrame("Frame")
-FixTooltip:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
-FixTooltip:RegisterEvent("ACTIONBAR_PAGE_CHANGED")
-FixTooltip:SetScript("OnEvent", function()
-	for i = 1, 12 do
-		local button = _G["ActionButton" .. i]
-		if GameTooltip:GetOwner() == button then
-			GameTooltip:Hide()
+			self:UnregisterAllEvents()
 		end
-	end
-end)
-
-local FixTooltipBags = CreateFrame("Frame")
-FixTooltipBags:RegisterEvent("BAG_UPDATE_DELAYED")
-FixTooltipBags:SetScript("OnEvent", function()
-	if StuffingFrameBags and StuffingFrameBags:IsShown() then
-		GameTooltip:Hide()
-	end
-end)
-
-----------------------------------------------------------------------------------------
---	Disable tooltip for player arrow on map
-----------------------------------------------------------------------------------------
-WorldMapPlayerUpper:EnableMouse(false)
-WorldMapPlayerLower:EnableMouse(false)
-
-----------------------------------------------------------------------------------------
---	Fix SearchLFGLeave() taint
-----------------------------------------------------------------------------------------
-local TaintFix = CreateFrame("Frame")
-TaintFix:SetScript("OnUpdate", function(self, elapsed)
-	if LFRBrowseFrame.timeToClear then
-		LFRBrowseFrame.timeToClear = nil
-	end
-end)
+	end)
+end

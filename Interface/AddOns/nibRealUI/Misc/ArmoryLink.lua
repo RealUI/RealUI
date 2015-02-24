@@ -42,6 +42,7 @@ StaticPopupDialogs.LINK_COPY_DIALOG = {
 }
 
 -- Dropdown menu link
+local linkurl
 hooksecurefunc("UnitPopup_OnClick", function(self)
     local dropdownFrame = UIDROPDOWNMENU_INIT_MENU
     local name = dropdownFrame.name

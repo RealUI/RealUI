@@ -122,7 +122,7 @@ f:SetScript("OnEvent", function(self, event, addon)
                 C.classcolours = auroraStyle.classcolors
                 local _, class = UnitClass("player")
 
-                r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
+                local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
                 C.r, C.g, C.b = r, g, b
             end
 

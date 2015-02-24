@@ -300,7 +300,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     if maxRows <= maxCols then
         local row = {}
         for i = 1, maxRows do
-            tex = bg:CreateTexture(nil, "BACKGROUND")
+            local tex = bg:CreateTexture(nil, "BACKGROUND")
             tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
             tex:SetHeight(1)
             if leftX == 0 then
@@ -320,7 +320,7 @@ local function CreateAngleBG(self, width, height, parent, info)
         local col = {}
         for i = 1, maxCols do
             local ofs = maxRows + 1
-            tex = bg:CreateTexture(nil, "BACKGROUND")
+            local tex = bg:CreateTexture(nil, "BACKGROUND")
             tex:SetVertexColor(bgColor[1], bgColor[2], bgColor[3])
             --DrawLine(tex, bg, i + 1, ofs, leftX)
             if leftX == 0 then
@@ -341,7 +341,7 @@ local function CreateAngleBG(self, width, height, parent, info)
         end
         bg.col = col
     end
-    bottom = bg:CreateTexture(nil, "BORDER")
+    local bottom = bg:CreateTexture(nil, "BORDER")
     bottom:SetTexture(0, 0, 0)
     bottom:SetHeight(1)
     bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
