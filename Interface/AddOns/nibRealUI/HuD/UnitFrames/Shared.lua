@@ -1,7 +1,6 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
-local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:GetModule(MODNAME)
+local UnitFrames = nibRealUI:GetModule("UnitFrames")
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 local db, ndb, ndbc
 
@@ -344,13 +343,13 @@ function UnitFrames:PredictOverride(event, unit)
     local atMax = (not (ndb.settings.reverseUnitFrameBars) and (healthCurr == healthMax))
     if unit == "player" then
         if atMax then
-            absorbBar:SetPoint("TOPRIGHT", health, -2, -1)
+            absorbBar:SetPoint("TOPRIGHT", health, -2, 0)
         else
             absorbBar:SetPoint("TOPRIGHT", health.bar, "TOPLEFT", health.info.minWidth - 1, 0)
         end
     else
         if atMax then
-            absorbBar:SetPoint("TOPLEFT", health, 2, -1)
+            absorbBar:SetPoint("TOPLEFT", health, 2, 0)
         else
             absorbBar:SetPoint("TOPLEFT", health.bar, "TOPRIGHT", 0, 0)
         end
@@ -374,7 +373,7 @@ end
 function UnitFrames:PvPOverride(event, unit)
     --print("PvP Override", self, event, unit, IsPVPTimerRunning())
     local color = nibRealUI.media.background
-    local setColor = self.PvP.row and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
+    local setColor = (self.PvP.row or self.PvP.col) and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
     if UnitIsPVP(unit) then
         if UnitIsFriend("player", unit) then
             --print("Friend")
@@ -568,6 +567,9 @@ local function Shared(self, unit)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
     UnitFrames[unit](self)
+    if unit == "player" or unit == "target" or unit == "focus" then
+        --nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    end
 end
 
 function UnitFrames:InitializeLayout()

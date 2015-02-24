@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local debug = nibRealUI.Debug
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb
 
@@ -9,6 +10,7 @@ local CastBars = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
 local layoutSize
+local round = nibRealUI.Round
 
 local Textures = {
     [1] = {
@@ -924,6 +926,78 @@ function CastBars:CreateFrames()
         cbFocus.icon = CreateIconFrame(cbFocus, 16)
 end
 
+local info = {
+    player = {
+        leftAngle = [[\]],
+        rightAngle = [[\]],
+        growDirection = "LEFT",
+        smooth = true,
+    },
+    target = {
+        leftAngle = [[/]],
+        rightAngle = [[/]],
+        growDirection = "RIGHT",
+        smooth = true,
+    },
+    focus = {
+        leftAngle = [[\]],
+        rightAngle = [[/]],
+        growDirection = "LEFT",
+        smooth = true,
+    },
+}
+function CastBars:CreateCastBars(self, unit)
+    debug("Castbar:", unit)
+    local width, height = round(self:GetWidth() * 0.91), round(self.Health:GetHeight() * 0.5)
+    local info = info[unit]
+    local color = db.colors[unit]
+    local Castbar = self:CreateAngleFrame("Status", width, height, self.overlay, info)
+    Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+
+    local Icon = Castbar:CreateTexture(nil, "OVERLAY")
+    Icon:SetSize(28, 28)
+    Aurora[1].ReskinIcon(Icon)
+
+    local Text = Castbar:CreateFontString(nil, "OVERLAY")
+    Text:SetFont(unpack(nibRealUI:Font()))
+
+    local Time = Castbar:CreateFontString(nil, "OVERLAY")
+    Time:SetFont(unpack(nibRealUI.font.pixelNumbers))
+
+    local SafeZone = self:CreateAngleFrame("Bar", width, height, Castbar, info)
+    SafeZone:SetStatusBarColor(1, 0, 0, 1)
+
+    if unit == "player" then
+        Castbar:SetPoint("TOPRIGHT", RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
+        Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT", -1, -2)
+        Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
+        Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
+   elseif unit == "target" then
+        Castbar:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
+        Icon:SetPoint("TOPLEFT", Castbar, "BOTTOMLEFT", 1, -2)
+        Text:SetPoint("TOPLEFT", Icon, "TOPRIGHT")
+        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT")
+    elseif unit == "focus" then
+        Castbar:SetPoint("BOTTOMRIGHT", self.overlay, "TOPRIGHT", 0, 9)
+        Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT")
+        Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
+        Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
+    end
+    self.Castbar = Castbar
+    self.Castbar.Icon = Icon
+    self.Castbar.Time = Time
+    self.Castbar.Text = Text
+    self.Castbar.SafeZone = SafeZone
+end
+
+CastBars["targetcast"] = function(self)
+    print("Target Castbar")
+end
+
+CastBars["focuscast"] = function(self)
+    print("Focus Castbar")
+end
+
 ----------
 function CastBars:SetUpdateSpeed()
     if ndb.settings.powerMode == 2 then -- Economy
@@ -1029,7 +1103,7 @@ end
 
 function CastBars:OnEnable()
     self.configMode = false
-
+    ---[[
     self:SetUpdateSpeed()
 
     if not self.player then self:CreateFrames() end
@@ -1082,6 +1156,7 @@ function CastBars:OnEnable()
     -- Disable default Cast Bars
     CastingBarFrame:UnregisterAllEvents()
     PetCastingBarFrame:UnregisterAllEvents()
+    ---]]
 end
 
 function CastBars:OnDisable()

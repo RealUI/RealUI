@@ -331,7 +331,7 @@ local function CreateThreat(parent)
             if isTanking then
                 tankLead = UnitThreatPercentageOfLead("player", "target")
             end
-            self.Threat.text:SetFormattedText("%s%%", AbbreviateLargeNumbers(tankLead) or tostring(rawPercentage))
+            self.Threat.text:SetFormattedText("%d%%", tankLead or rawPercentage)
 
             self.Threat:Show()
             self.Threat.border:Show()
