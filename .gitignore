@@ -3,3 +3,6 @@
 *.ipr
 *.iml
 .idea/
+DBM-*/
+DBM-*
+Blizzard_*/
