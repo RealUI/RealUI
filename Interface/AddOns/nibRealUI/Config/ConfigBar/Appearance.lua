@@ -175,10 +175,10 @@ function ConfigBar_Appearance:SetupWindow()
 			min = 0,
 			max = 100,
 			func = function(value)
-				ndb.settings.stripeOpacity = value / 100
+				RealUI_InitDB.stripeOpacity = value / 100
 				nibRealUI:StyleSetStripeOpacity()
 			end,
-			value = ndb.settings.stripeOpacity * 100,
+			value = RealUI_InitDB.stripeOpacity * 100,
 		},
 	}
 	self.settings[1] = cbGUI:CreateSliderList(tabPanel1, "VERTICAL", slider)
@@ -311,7 +311,7 @@ function ConfigBar_Appearance:SetupWindow()
 		height = 22,
 		x = 14,
 		y = -145,
-		func = function() nibRealUI:OpenOptions("Fonts") end,
+		func = function() nibRealUI:LoadConfig("nibRealUI", "Fonts") end,
 	}
 	local advButton = cbGUI:CreateButton(tabPanel2, button)
 	nibRealUI:CreateBGSection(tabPanel2, advButton, advButton)
@@ -468,16 +468,6 @@ function ConfigBar_Appearance:SetupWindow()
 				},
 			}
 			self.colors.unitFrames = cbGUI:CreateColorPickerList(tabPanel3, "VERTICAL", colorPickers)
-
-			-- button = {
-			-- 	label = ADVANCED_LABEL.." "..COLORS,
-			-- 	width = (Element.info.window.width - 72) / 3,
-			-- 	height = 24,
-			-- 	x = 12,
-			-- 	y = -464,
-			-- 	func = function() nibRealUI:OpenOptions("hud", "UnitFrames", "overlay", "colors") end,
-			-- }
-			-- cbGUI:CreateButton(Element, button)
 		end
 	end
 

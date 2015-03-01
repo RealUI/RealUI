@@ -1,7 +1,6 @@
-local name, ns = ...
+local NAME, ns = ...
 local RealUI = RealUI or ns
 _G.RealUI = RealUI
-local debug = true
 
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
@@ -33,6 +32,10 @@ RealUI.media = {
         Shield =        [[Interface\AddOns\nibRealUI\Media\Icons\Shield]],
         Sword =         [[Interface\AddOns\nibRealUI\Media\Icons\Sword]],
     },
+}
+
+local defaults = {
+    stripeOpacity = 0.5,
 }
 
 local debugger -- Only defined if needed.
@@ -86,7 +89,9 @@ f:SetScript("OnEvent", function(self, event, addon)
         f:UnregisterEvent("PLAYER_LOGIN")
         --f:UnregisterEvent("ADDON_LOADED")
     elseif event == "ADDON_LOADED" then
-        if addon == "!Aurora_RealUI" then
+        if addon == NAME then
+            RealUI_InitDB = RealUI_InitDB or defaults
+        elseif addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
             Aurora = {}
             Aurora[1] = {} -- F, functions
@@ -128,8 +133,6 @@ f:SetScript("OnEvent", function(self, event, addon)
 
             auroraStyle.initVars()
         elseif addon == "nibRealUI" then
-            if not ns.auroraLoaded then
-            end
         end
     end
 end)
@@ -144,9 +147,9 @@ function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
 
    -- Determine dimensions and center point of line
    local dx, dy = ex - sx, ey - sy
-   --debug("DrawLine: dx, ", dx, ", dy, ", dy)
+   --debug("Init", DrawLine: dx, ", dx, ", dy, ", dy)
    local cx, cy = (sx + ex) / 2, (sy + ey) / 2
-   --debug("DrawLine: cx, ", cx, ", cy, ", cy)
+   --debug("Init", "DrawLine: cx, ", cx, ", cy, ", cy)
 
    -- Normalize direction if necessary
    if (dx < 0) then
@@ -183,9 +186,9 @@ function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
       BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
       TRx = TLy
    end
-   --debug("DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
-   --debug("DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
-   --debug("DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
+   --debug("Init", "DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
+   --debug("Init", "DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
+   --debug("Init", "DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
 
    -- Set texture coordinates and anchors
    T:ClearAllPoints()

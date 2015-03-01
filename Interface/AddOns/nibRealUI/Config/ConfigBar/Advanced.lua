@@ -42,7 +42,7 @@ function ConfigBar_Advanced:SetupWindow()
 		{
 			label = ADVANCED_LABEL.." "..CHAT_CONFIGURATION,
 			func = function()
-				nibRealUI:OpenOptions()
+				nibRealUI:LoadConfig("nibRealUI")
 				self:Close()
 			end,
 		},

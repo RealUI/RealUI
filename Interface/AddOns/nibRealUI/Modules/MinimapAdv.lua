@@ -1784,7 +1784,7 @@ end
 
 ---- Config Button ----
 local function Config_OnMouseDown()
-    nibRealUI:OpenOptions("modules", "MinimapAdv")
+    nibRealUI:LoadConfig("nibRealUI", "modules", "MinimapAdv")
     
     if DropDownList1 then DropDownList1:Hide() end
     if DropDownList2 then DropDownList2:Hide() end

@@ -17,7 +17,6 @@ mods["Blizzard_DebugTools"] = function(F, C)
         end
     end
     EventTraceFrame:SetHeight(600)
-    --EventTraceFrameScroll:Hide()
     F.CreateBD(EventTraceFrame)
 
     EventTraceFrameScrollBG:Hide()

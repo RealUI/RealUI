@@ -1,6 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):NewAddon(RealUI, "nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, dbc, dbg, _
+local debug = nibRealUI.Debug
 _G.RealUI = nibRealUI
 
 nibRealUI.verinfo = {
@@ -336,7 +337,7 @@ end
 function nibRealUI:StyleSetStripeOpacity()
     for k, tex in pairs(REALUI_STRIPE_TEXTURES) do
         if tex.SetAlpha then
-            tex:SetAlpha(db.settings.stripeOpacity)
+            tex:SetAlpha(RealUI_InitDB.stripeOpacity)
         end
     end
 end
@@ -605,7 +606,7 @@ function nibRealUI:PLAYER_ENTERING_WORLD()
     local ConfigStr = string.format("|cffffffffReal|r|cff%sUI|r Config", nibRealUI:ColorTableToStr(nibRealUI.media.colors.red))
     GameMenuFrame.realuiControl = nibRealUI:CreateTextButton(ConfigStr, GameMenuFrame, "GameMenuButtonTemplate")
     GameMenuFrame.realuiControl:SetPoint("TOP", GameMenuButtonContinue, "BOTTOM", 0, -16)
-    GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() nibRealUI:ShowConfigBar(); HideUIPanel(GameMenuFrame) end)
+    GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() nibRealUI:LoadConfig("HuD"); HideUIPanel(GameMenuFrame) end)
 
     -- Button Backgrounds
     nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonHelp, GameMenuButtonWhatsNew)
@@ -726,7 +727,31 @@ end
 
 function nibRealUI:ChatCommand_Config()
     dbg.tags.slashRealUITyped = true
-    self:ShowConfigBar()
+    nibRealUI:LoadConfig("HuD")
+end
+
+local configLoaded, configFailed = false, false
+function nibRealUI:LoadConfig(mode, ...)
+    if not configLoaded then
+        configLoaded = true
+        local loaded, reason = LoadAddOn("nibRealUI_Config")
+        if not loaded then
+            print("Failed to load nibRealUI_Config:", reason)
+            configFailed = true
+        end
+    end
+    if not configFailed then return self:ToggleConfig(mode, ...) end
+
+    -- For compat until new config is finished
+    nibRealUI:SetUpOptions()
+    if mode == "HuD" and not ... then
+        return nibRealUI:ShowConfigBar()
+    end
+    if LibStub("AceConfigDialog-3.0").OpenFrames[mode] then
+        LibStub("AceConfigDialog-3.0"):Close(mode)
+    else
+        LibStub("AceConfigDialog-3.0"):Open(mode, ...)
+    end
 end
 
 function nibRealUI:OnInitialize()
@@ -735,6 +760,7 @@ function nibRealUI:OnInitialize()
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
+    self.media = db.media
 
     -- Vars
     self.realm = GetRealmName()
@@ -751,9 +777,6 @@ function nibRealUI:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileCopied", "Refresh")
     self.db.RegisterCallback(self, "OnProfileReset", "Refresh")
 
-    -- Initial Options setup
-    nibRealUI:SetUpInitialOptions()
-
     -- Register events
     self:RegisterEvent("ADDON_LOADED")
     self:RegisterEvent("PLAYER_LOGIN")
@@ -765,7 +788,7 @@ function nibRealUI:OnInitialize()
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function() nibRealUI:OpenOptions() end)
+    self:RegisterChatCommand("realadv", function() nibRealUI:LoadConfig("nibRealUI") end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", function() ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
@@ -778,6 +801,11 @@ function nibRealUI:OnInitialize()
         SetCVar("synchronizeConfig", 1)
         SetCVar("synchronizeBindings", 1)
         SetCVar("synchronizeMacros", 1)
+    end
+
+    if db.settings.stripeOpacity then
+        RealUI_InitDB.stripeOpacity = db.settings.stripeOpacity
+        db.settings.stripeOpacity = nil
     end
 
     -- Remove Interface Options cancel button because it = taint
@@ -802,6 +830,17 @@ function nibRealUI:RegisterConfigModeModule(module)
     end
 end
 
+do
+    local prototype = {
+        debug = function(self, ...)
+            debug(self.moduleName, ...)
+        end,
+    }
+    function nibRealUI:CreateModule(name, ...)
+        return self:NewModule(name, prototype, ...)
+    end
+end
+
 function nibRealUI:GetModuleEnabled(module)
     return db.modules[module]
 end
@@ -820,23 +859,5 @@ function nibRealUI:SetModuleEnabled(module, value)
 end
 
 function nibRealUI:Refresh()
-    -- db = self.db.profile
-    -- dbc = self.db.char
-    -- dbg = self.db.global
-    -- self.media = db.media
-
-    -- for key, val in self:IterateModules() do
-    --  if self:GetModuleEnabled(key) and not val:IsEnabled() then
-    --      self:EnableModule(key)
-    --  elseif not self:GetModuleEnabled(key) and val:IsEnabled() then
-    --      self:DisableModule(key)
-    --  end
-    --  if val.RefreshMod then
-    --      if type(val.RefreshMod) == "function" and val:IsEnabled() then
-    --          val:RefreshMod()
-    --      end
-    --  end
-    -- end
-    -- nibRealUI:ConfigRefresh()
     nibRealUI:ReloadUIDialog()
 end

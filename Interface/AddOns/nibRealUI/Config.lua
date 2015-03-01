@@ -83,7 +83,7 @@ local function ResetChar()
 	dbc.layout.current = 1
 	
 	-- Run Install Procedure
-	nibRealUI:CloseOptions()
+	LibStub("AceConfigDialog-3.0"):Close("nibRealUI")
 	nibRealUI:InstallProcedure()
 end
 
@@ -241,54 +241,8 @@ local function GetOptions()
 	end
 end
 
--- Add a small panel to the Interface - Addons options
-local intoptions = nil
-local function GetIntOptions()
-	if not intoptions then
-		intoptions = {
-			name = "RealUI",
-			handler = nibRealUI,
-			type = "group",
-			args = {
-				openoptions = {
-					type = "execute",
-					name = "Open RealUI Config",
-					func = function() 
-						nibRealUI:ShowConfigBar()
-					end,
-					order = 10,
-				},
-			},
-		}
-	end
-	return intoptions
-end
-
-function nibRealUI:CloseOptions()
-	LibStub("AceConfigDialog-3.0"):Close("nibRealUI")
-end
-
-function nibRealUI:OpenOptions(...)
-	if not Options.settings then nibRealUI:SetUpOptions() end
-	LibStub("AceConfigDialog-3.0"):Open("nibRealUI", ...)
-end
-
-function nibRealUI:ConfigRefresh()
-	db = self.db.profile
-	dbc = self.db.char
-	dbg = self.db.global
-	self.media = db.media
-end
-
-function nibRealUI:SetUpInitialOptions()
-	-- Create Interface - Addons panel
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("nibRealUI-Int", GetIntOptions)
-	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("nibRealUI-Int", "RealUI")
-	
-	nibRealUI:ConfigRefresh()
-end
-
 function nibRealUI:SetUpOptions()
+	if Options.settings then return end
 	db = self.db.profile
 	dbc = self.db.char
 	dbg = self.db.global
@@ -313,7 +267,7 @@ function nibRealUI:SetUpOptions()
 	Options.settings.args.profiles.order = -1
 	
 	-- Create RealUI Options window
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("nibRealUI", Options.settings)
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("nibRealUI", Options.settings)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("nibRealUI", 870, 600)
 end
 
@@ -334,7 +288,7 @@ function nibRealUI:RegisterModuleOptions(name, optionTbl)
 end
 
 function nibRealUI:RegisterSkin(name)
-	local skin = self:NewModule(name, "AceEvent-3.0")
+	local skin = self:CreateModule(name, "AceEvent-3.0")
 	skin:SetEnabledState(self:GetModuleEnabled(name))
 	tinsert(SkinsOptions.modules, name)
 	return skin

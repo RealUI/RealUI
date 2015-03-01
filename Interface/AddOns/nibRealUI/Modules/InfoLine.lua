@@ -141,7 +141,7 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = L["RealUI Config"],
-        func = function() nibRealUI:ShowConfigBar() end,
+        func = function() nibRealUI:LoadConfig("HuD") end,
         notCheckable = true
     },
     {text = "Power Mode",

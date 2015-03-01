@@ -56,8 +56,6 @@ function nibRealUI:MemoryDisplay()
 end
 
 function nibRealUI:ReloadUIDialog()
-    LibStub("AceConfigDialog-3.0"):Close("nibRealUI")
-
     -- Display Dialog
     StaticPopupDialogs["PUDRUIRELOADUI"] = {
         text = L["You need to Reload the UI for changes to take effect. Reload Now?"],
@@ -545,7 +543,7 @@ function nibRealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
         stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-        stripeTex:SetAlpha(nibRealUI.db.profile.settings.stripeOpacity)
+        stripeTex:SetAlpha(RealUI_InitDB.stripeOpacity)
         stripeTex:SetHorizTile(true)
         stripeTex:SetVertTile(true)
         stripeTex:SetBlendMode("ADD")

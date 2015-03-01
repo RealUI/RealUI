@@ -6,8 +6,9 @@ mods["PLAYER_LOGIN"] = {}
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
 REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
-local debug = RealUI.Debug
-local db
+local function debug(...)
+    RealUI.Debug("!Aurora", ...)
+end
 
 -- Aurora API
 local F, C
@@ -57,7 +58,7 @@ functions.CreateBD = function(f, a)
         f:SetBackdropColor(unpack(RealUI.media.window))
         f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
         f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-        f.tex:SetAlpha(0.5) --db.settings.stripeOpacity)
+        f.tex:SetAlpha(RealUI_InitDB.stripeOpacity)
         f.tex:SetAllPoints()
         f.tex:SetHorizTile(true)
         f.tex:SetVertTile(true)
@@ -177,7 +178,6 @@ f:SetScript("OnEvent", function(self, event, addon)
                 end)
             end
         elseif addon == "nibRealUI" then
-            --db = RealUI.db.profile
             for _, moduleFunc in pairs(addonModule) do
                 moduleFunc(F, C)
             end
