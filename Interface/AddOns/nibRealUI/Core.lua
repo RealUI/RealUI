@@ -482,7 +482,7 @@ function nibRealUI:UpdateLayout()
             self:RegisterLockdownUpdate("SetLayout", function() nibRealUI:SetLayout() end)
             dbc.layout.needchanged = true
         end
-        self:Notification("RealUI", true, L["Layout will change after you leave combat."])
+        self:Notification("RealUI", true, L["Layout_ApplyOOC"])
     else
         -- Set layout in 0.5 seconds
         self.oocFunctions["SetLayout"] = nil
@@ -671,6 +671,7 @@ function nibRealUI:PLAYER_LOGIN()
     
     if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then
+            -- This part should be in the bag addon
             if IsAddOnLoaded("cargBags_Nivaya") then
                 hooksecurefunc(Nivaya, "OnShow", function()
                     if RealUI.db.global.messages.resetNew then return end
@@ -679,17 +680,14 @@ function nibRealUI:PLAYER_LOGIN()
                 end)
             end
         end
-        if not(dbg.messages.largeHuDOption) then
-            print("Using a hi-res display? Check out the new |cff"..blue.."Large HuD|r option found in the Positions config panel (|cFFFF8000/realui|r > Positions)")
-        end
     end
     
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if GetCVar("scriptProfile") == "1" then
-        print("|cff"..red.."CPU Profiling is enabled!|r To disable, type: |cff"..blue.."/cpuProfiling|r")
+        print(L["Slash_Profile"].format(red, blue))
     end
     if GetCVar("taintLog") ~= "0" then
-        print("|cff"..red.."Taint Logging is enabled!|r To disable, type: |cff"..blue.."/taintLogging|r")
+        print(L["Slash_Taint"].format(red, blue))
     end
 
     -- Update styling
@@ -701,8 +699,8 @@ end
 -- To help position UI elements
 function RealUI_TestRaidWarnings()
     nibRealUI:ScheduleRepeatingTimer(function()
-        RaidNotice_AddMessage(RaidWarningFrame, "This is a raid warning message!", { r = 0, g = 1, b = 0 })
-        RaidNotice_AddMessage(RaidBossEmoteFrame, "This is a boss emote message!", { r = 0, g = 1, b = 0 })
+        RaidNotice_AddMessage(RaidWarningFrame, CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
+        RaidNotice_AddMessage(RaidBossEmoteFrame, CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
     end, 5)
 end
 
@@ -820,7 +818,7 @@ function nibRealUI:OnInitialize()
     -- Done
     print(format("RealUI %s loaded.", nibRealUI:GetVerString(true)))
     if not(dbg.tags.slashRealUITyped) and nibRealUICharacter and (nibRealUICharacter.installStage == -1) then
-        print(string.format(L["Type /realui"], "|cFFFF8000/realui|r"))
+        print(string.format(L["Slash_RealUI"], "|cFFFF8000/realui|r"))
     end
 end
 

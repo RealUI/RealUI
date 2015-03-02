@@ -150,7 +150,7 @@ function ConfigBar_Appearance:SetupWindow()
 
 	local slider = {
 		{
-			label = L["Window Opacity"],
+			label = L["Appearance_WinOpacity"],
 			name = "AppearanceWindowOpacity",
 			width = 260,
 			height = 20,
@@ -169,7 +169,7 @@ function ConfigBar_Appearance:SetupWindow()
 			value = nibRealUI.media.window[4] * 100,
 		},
 		{
-			label = L["Stripe Opacity"],
+			label = L["Appearance_StripeOpacity"],
 			name = "AppearanceStripeOpacity",
 			step = 5,
 			min = 0,
@@ -185,7 +185,7 @@ function ConfigBar_Appearance:SetupWindow()
 
 	local check = {
 		{
-			label = L["Info Line"].." "..BACKGROUND,
+			label = L["Appearance_InfoLineBG"],
 			func = function()
 				nibRealUI:StyleSetInfoLineBackground(not(ndb.settings.infoLineBackground))
 				self.settings[2][1].check.highlight:SetAlpha(ndb.settings.infoLineBackground and 1 or 0)
@@ -202,7 +202,7 @@ function ConfigBar_Appearance:SetupWindow()
 	if UnitFrames and nibRealUI:GetModuleEnabled("UnitFrames") then
 		check = {
 			{
-				label = CLASS.." "..COLOR.." "..HEALTH.." "..L["Bars"],
+				label = L["Appearance_ClassColorHealth"],
 				func = function()
 					UnitFrames:ToggleClassColoring(false)
 					self.settings[3][1].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColor and 1 or 0)
@@ -215,7 +215,7 @@ function ConfigBar_Appearance:SetupWindow()
 				y = -88
 			},
 			{
-				label = CLASS.." "..COLOR.." "..UNIT_NAMES,
+				label = L["Appearance_ClassColorNames"],
 				func = function()
 					UnitFrames:ToggleClassColoring(true)
 					self.settings[3][2].check.highlight:SetAlpha(UnitFrames.db.profile.overlay.classColorNames and 1 or 0)
@@ -224,7 +224,7 @@ function ConfigBar_Appearance:SetupWindow()
 				checked = UnitFrames.db.profile.overlay.classColorNames,
 			},
 			{
-				label = "Reverse UF Bars (ie. default WoW style health/power bars)",
+				label = L["HuD_ReverseBars"],
 				func = function()
 					ndb.settings.reverseUnitFrameBars = not(ndb.settings.reverseUnitFrameBars)
 					self.settings[3][3].check.highlight:SetAlpha(ndb.settings.reverseUnitFrameBars and 1 or 0)
@@ -244,7 +244,7 @@ function ConfigBar_Appearance:SetupWindow()
 	local options = {
 		{
 			label = SMALL,
-			desc = L["Use small fonts"],
+			desc = L["Fonts_SmallDesc"],
 			func = function()
 				nibRealUI:StyleSetFont(1)
 				self:UpdateFontStyleOptions()
@@ -256,8 +256,8 @@ function ConfigBar_Appearance:SetupWindow()
 			y = -18,
 		},
 		{
-			label = L["FS:Hybrid"],
-			desc = L["Use a mix of small and large fonts"],
+			label = L["Fonts_Hybrid"],
+			desc = L["Fonts_HybridDesc"],
 			func = function()
 				nibRealUI:StyleSetFont(2)
 				self:UpdateFontStyleOptions()
@@ -266,7 +266,7 @@ function ConfigBar_Appearance:SetupWindow()
 		},
 		{
 			label = LARGE,
-			desc = L["Use large fonts"],
+			desc = L["Fonts_LargeDesc"],
 			func = function()
 				nibRealUI:StyleSetFont(3)
 				self:UpdateFontStyleOptions()
@@ -274,7 +274,7 @@ function ConfigBar_Appearance:SetupWindow()
 			checked = ndb.settings.fontStyle == 3,
 		},
 		{
-			label = L["Chat Font Outline"],
+			label = L["Fonts_ChatOutline"],
 			func = function()
 				ndb.settings.chatFontOutline = not(ndb.settings.chatFontOutline)
 				nibRealUI:StyleSetChatFont()
@@ -287,7 +287,7 @@ function ConfigBar_Appearance:SetupWindow()
 
 	slider = {
 		{
-			label = CHAT.." "..FONT_SIZE,
+			label = L["Fonts_ChatSize"],
 			name = "AppearanceChatFontSize",
 			width = 260,
 			height = 20,
@@ -306,7 +306,7 @@ function ConfigBar_Appearance:SetupWindow()
 	self.chatFont = cbGUI:CreateSliderList(tabPanel2, "VERTICAL", slider)[1]
 
 	local button = {
-		label = ADVANCED_LABEL.." "..CHAT_CONFIGURATION,
+		label = L["Fonts_AdvConfig"],
 		width = 136,
 		height = 22,
 		x = 14,
@@ -326,7 +326,7 @@ function ConfigBar_Appearance:SetupWindow()
 	cbGUI:CreateSecondHeader(tabPanel3, GENERAL, 12, -32, (Element.info.window.width - 72) / 3)
 	local colorPickers = {
 		{
-			label = "Purple",
+			label = L["Colors_Purple"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(1, "purple", r, g, b, a)
 			end,
@@ -337,49 +337,49 @@ function ConfigBar_Appearance:SetupWindow()
 			y = -52,
 		},
 		{
-			label = "Blue",
+			label = L["Colors_Blue"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(2, "blue", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.blue,
 		},
 		{
-			label = "Cyan",
+			label = L["Colors_Cyan"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(3, "cyan", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.cyan,
 		},
 		{
-			label = "Green",
+			label = L["Colors_Green"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(4, "green", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.green,
 		},
 		{
-			label = "Yellow",
+			label = L["Colors_Yellow"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(5, "yellow", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.yellow,
 		},
 		{
-			label = "Amber",
+			label = L["Colors_Amber"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(6, "amber", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.amber,
 		},
 		{
-			label = "Orange",
+			label = L["Colors_Orange"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(7, "orange", r, g, b, a)
 			end,
 			color = nibRealUI.media.colors.orange,
 		},
 		{
-			label = "Red",
+			label = L["Colors_Red"],
 			func = function(r, g, b, a)
 				ConfigBar_Appearance:UpdateGeneralColor(8, "red", r, g, b, a)
 			end,
@@ -484,7 +484,7 @@ function ConfigBar_Appearance:SetupWindow()
 
 			check = {
 				{
-					label = L["Use"].." "..GENERAL,
+					label = L["Appearance_DefaultColors"],
 					func = function()
 						CastBars.db.profile.colors.useGlobal = not(CastBars.db.profile.colors.useGlobal)
 						CastBars:UpdateTextures()
@@ -501,7 +501,7 @@ function ConfigBar_Appearance:SetupWindow()
 			self.colors.castBarsGeneral = cbGUI:CreateOptionList(tabPanel3, "VERTICAL", check)
 
 			local tip = {
-				text = L["Untick"].." |cffffa300"..L["Use"].."\n"..GENERAL.."|r "..L["to set"].." \n"..L["custom colors"]..".",
+				text = L["Appearance_DefaultColorsDesc"],
 				justify = "LEFT",
 				x = x,
 				y = -76,
@@ -536,14 +536,14 @@ function ConfigBar_Appearance:SetupWindow()
 					color = CastBars:GetColors()["focus"],
 				},
 				{
-					label = "Not "..ENCOUNTER_JOURNAL_SECTION_FLAG6,
+					label = L["HuD_Uninterruptible"],
 					func = function(r, g, b, a)
 						ConfigBar_Appearance:UpdateCastBarColor(5, "uninterruptible", r, g, b)
 					end,
 					color = CastBars:GetColors()["uninterruptible"],
 				},
 				{
-					label = L["Latency"],
+					label = L["HuD_Latency"],
 					func = function(r, g, b, a)
 						ConfigBar_Appearance:UpdateCastBarColor(6, "latency", r, g, b)
 					end,

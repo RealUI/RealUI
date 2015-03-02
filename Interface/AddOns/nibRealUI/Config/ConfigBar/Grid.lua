@@ -186,13 +186,13 @@ function ConfigBar_Grid:SetupWindow()
 
 	---- Settings ----
 	-- Header
-	cbGUI:CreateHeader(tabPanel1, L["RealUI Control"], 0)
+	cbGUI:CreateHeader(tabPanel1, L["Control_AddonControl"], 0)
 
 	-- RealUI Control
 	local options = {
 		{
-			label = L["Positions"]..".",
-			desc = string.format(L["Allow RealUI to control STR position settings."], labelGrid2),
+			label = L["General_Positions"],
+			desc = string.format(L["Raid_ControlPosition"], labelGrid2),
 			descGap = 104,
 			func = function()
 				self:ToggleRealUIControl(1)
@@ -204,8 +204,8 @@ function ConfigBar_Grid:SetupWindow()
 			y = -18,
 		},
 		{
-			label = L["Layout"]..".",
-			desc = string.format(L["Allow RealUI to control STR layout settings."], labelGrid2),
+			label = L["Raid_Layout"],
+			desc = string.format(L["Raid_ControlLayout"], labelGrid2),
 			descGap = 104,
 			func = function()
 				self:ToggleRealUIControl(2)
@@ -213,8 +213,8 @@ function ConfigBar_Grid:SetupWindow()
 			checked = nibRealUI:GetModuleEnabled("GridLayout"),
 		},
 		{
-			label = L["Style"]..".",
-			desc = string.format(L["Allow RealUI to style STR."], labelGrid2),
+			label = L["Raid_Style"],
+			desc = string.format(L["Raid_ControlStyle"], labelGrid2),
 			descGap = 104,
 			func = function()
 				self:ToggleRealUIControl(3)
@@ -241,7 +241,7 @@ function ConfigBar_Grid:SetupWindow()
 
 	-- Note
 	local note = {
-		text = L["Note: Grid2 settings"],
+		text = L["Raid_NoteAdvSettings"],
 		x = 12,
 		y = -152,
 		color = "green",
@@ -251,12 +251,12 @@ function ConfigBar_Grid:SetupWindow()
 
 	---- Layout - DPS/Tank ----
 	local lY = 0
-	cbGUI:CreateHeader(tabPanel2, L["Layout"].." » "..L["DPS/Tank"], lY)
+	cbGUI:CreateHeader(tabPanel2, L["Raid_Layout"].." » "..L["Layout_DPSTank"], lY)
 
 	-- Horizontal Groups / Pet Frames
 	options = {
 		{
-			label = L["Horizontal Groups"].." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
 			func = function()
 				self:ToggleHGroups("dps", 1)
 			end,
@@ -267,28 +267,28 @@ function ConfigBar_Grid:SetupWindow()
 			y = lY - 19,
 		},
 		{
-			label = L["Horizontal Groups"].." - "..RAIDS,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..RAIDS,
 			func = function()
 				self:ToggleHGroups("dps", 2)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("dps", "hGroups", "raid"),
 		},
 		{
-			label = L["Horizontal Groups"].." - "..BATTLEFIELDS,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..BATTLEFIELDS,
 			func = function()
 				self:ToggleHGroups("dps", 3)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("dps", "hGroups", "bg"),
 		},
 		{
-			label = L["Show Pet Frames"].." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
+			label = DISPLAY_RAID_PETS.." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
 			func = function()
 				self:TogglePetFrames("dps", 4)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("dps", "showPet"),
 		},
 		{
-			label = L["Show While Solo"],
+			label = L["Raid_ShowSolo"],
 			func = function()
 				self:ToggleShowSolo("dps", 5)
 			end,
@@ -300,7 +300,7 @@ function ConfigBar_Grid:SetupWindow()
 	-- Unit Width
 	local sliders = {
 		{
-			label = "Unit Height",
+			label = RAID_FRAMES_HEIGHT,
 			name = "GLDUnitHeight",
 			width = 318,
 			height = 20,
@@ -315,7 +315,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = self:GetUnitHeight("dps"),
 		},
 		{
-			label = "Unit Width",
+			label = RAID_FRAMES_WIDTH,
 			name = "GLDUnitWidth",
 			min = 40,
 			max = 110,
@@ -325,7 +325,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = nibRealUI:GetGridLayoutSettings("dps", "width", "normal"),
 		},
 		{
-			label = "30-man Unit Width",
+			label = L["Raid_30Width"],
 			name = "GLD30MUnitWidth",
 			min = 35,
 			max = 100,
@@ -335,7 +335,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = nibRealUI:GetGridLayoutSettings("dps", "width", 30),
 		},
 		{
-			label = "40-man Unit Width",
+			label = L["Raid_40Width"],
 			name = "GLD40MUnitWidth",
 			min = 30,
 			max = 90,
@@ -350,12 +350,12 @@ function ConfigBar_Grid:SetupWindow()
 
 	---- Layout - Healing ----
 	lY = 0
-	cbGUI:CreateHeader(tabPanel3, L["Layout"].." » "..L["Healing"], lY)
+	cbGUI:CreateHeader(tabPanel3, L["Raid_Layout"].." » "..L["Layout_Healing"], lY)
 
 	-- Horizontal Groups
 	options = {
 		{
-			label = L["Horizontal Groups"].." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..SOLO.." / "..DUNGEONS.." / "..SCENARIOS.." / "..ARENA,
 			func = function()
 				self:ToggleHGroups("healing", 1)
 			end,
@@ -366,28 +366,28 @@ function ConfigBar_Grid:SetupWindow()
 			y = lY - 19,
 		},
 		{
-			label = L["Horizontal Groups"].." - "..RAIDS,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..RAIDS,
 			func = function()
 				self:ToggleHGroups("healing", 2)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("healing", "hGroups", "raid"),
 		},
 		{
-			label = L["Horizontal Groups"].." - "..BATTLEFIELDS,
+			label = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS.." - "..BATTLEFIELDS,
 			func = function()
 				self:ToggleHGroups("healing", 3)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("healing", "hGroups", "bg"),
 		},
 		{
-			label = L["Show Pet Frames"].." - "..SOLO.." / "..DUNGEONS.." / "..ARENA,
+			label = DISPLAY_RAID_PETS.." - "..SOLO.." / "..DUNGEONS.." / "..ARENA,
 			func = function()
 				self:TogglePetFrames("healing", 4)
 			end,
 			checked = nibRealUI:GetGridLayoutSettings("healing", "showPet"),
 		},
 		{
-			label = L["Show While Solo"],
+			label = L["Raid_ShowSolo"],
 			func = function()
 				self:ToggleShowSolo("healing", 5)
 			end,
@@ -396,10 +396,10 @@ function ConfigBar_Grid:SetupWindow()
 	}
 	self.hHGroups = cbGUI:CreateOptionList(tabPanel3, "VERTICAL", options)
 
-	-- Unit Width
+	-- Unit Size
 	sliders = {
 		{
-			label = "Unit Height",
+			label = RAID_FRAMES_HEIGHT,
 			name = "GLHUnitHeight",
 			width = 318,
 			height = 20,
@@ -414,7 +414,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = self:GetUnitHeight("healing"),
 		},
 		{
-			label = "Unit Width",
+			label = RAID_FRAMES_WIDTH,
 			name = "GLHUnitWidth",
 			width = 318,
 			height = 20,
@@ -429,7 +429,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = nibRealUI:GetGridLayoutSettings("healing", "width", "normal"),
 		},
 		{
-			label = "30-man Unit Width",
+			label = L["Raid_30Width"],
 			name = "GLH30MUnitWidth",
 			min = 35,
 			max = 100,
@@ -439,7 +439,7 @@ function ConfigBar_Grid:SetupWindow()
 			value = nibRealUI:GetGridLayoutSettings("healing", "width", 30),
 		},
 		{
-			label = "40-man Unit Width",
+			label = L["Raid_40Width"],
 			name = "GLH40MUnitWidth",
 			min = 30,
 			max = 90,

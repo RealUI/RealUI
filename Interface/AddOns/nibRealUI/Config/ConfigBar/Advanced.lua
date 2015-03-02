@@ -28,7 +28,7 @@ function ConfigBar_Advanced:SetupWindow()
 	-- Buttons
 	local buttons = {
 		{
-			label = L["AddOn Control"],
+			label = L["Control_AddonControl"],
 			func = function()
 				nibRealUI:GetModule("AddonControl"):ShowOptionsWindow()
 				self:Close()

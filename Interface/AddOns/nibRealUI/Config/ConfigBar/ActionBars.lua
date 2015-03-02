@@ -236,16 +236,16 @@ function ConfigBar_ActionBars:SetupWindow()
 	Element.window:Hide()
 
 	-- Header
-	Element.headerDT = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["DPS/Tank"] , 0)
-	Element.headerH = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["Healing"] , 0)
-	Element.headerDTH = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["DPS/Tank"].." + "..L["Healing"] , 0)
+	Element.headerDT = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["Layout_DPSTank"] , 0)
+	Element.headerH = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["Layout_Healing"] , 0)
+	Element.headerDTH = cbGUI:CreateHeader(Element, ACTIONBAR_LABEL.." » "..L["Layout_DPSTank"].." + "..L["Layout_Healing"] , 0)
 	self:UpdateHeader()
 
 	-- RealUI Control
 	local options = {
 		{
-			label = L["RealUI Control"]..".",
-			desc = L["Allow RealUI to control the action bars."],
+			label = L["Control_AddonControl"],
+			desc = L["Bars_Control"],
 			descGap = 120,
 			func = function()
 				self:ToggleRealUIControl()
@@ -262,8 +262,8 @@ function ConfigBar_ActionBars:SetupWindow()
 	-- Link Settings
 	options = {
 		{
-			label = L["Link Layouts"]..".",
-			desc = L["Use same settings between DPS/Tank and Healing layouts."],
+			label = L["Layout_Link"],
+			desc = L["Layout_LinkDesc"],
 			descGap = 120,
 			func = function()
 				self:ToggleLinkSettings()
@@ -279,7 +279,7 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	---- Bartender Options ----
 	local button = {
-		label = LibStub("AceLocale-3.0"):GetLocale("Bartender4")["Key Bindings"],
+		label = KEY_BINDINGS,
 		width = 150,
 		height = 22,
 		x = 14,
@@ -306,7 +306,7 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	-- Note
 	local note = {
-		text = L["Note: Bartender settings"],
+		text = L["Bars_NoteAdvSettings"],
 		x = 12,
 		y = -142,
 		color = "green",
@@ -323,13 +323,13 @@ function ConfigBar_ActionBars:SetupWindow()
 		
 	---- Bar Positions ----
 	local curY = 0
-	cbGUI:CreateHeader(oP, L["Positions"], curY)
+	cbGUI:CreateHeader(oP, L["General_Positions"], curY)
 
 	-- Move misc bars
 	options = {
 		{
-			label = L["Move Stance Bar"],
-			tip = L["Check to allow RealUI to control the Stance Bar's position."],
+			label = L["Bars_MoveStance"],
+			tip = L["Bars_MoveStanceDesc"],
 			func = function()
 				self:ToggleMoveBar("stance")
 			end,
@@ -340,16 +340,16 @@ function ConfigBar_ActionBars:SetupWindow()
 			y = curY - 18,
 		},
 		{
-			label = L["Move Pet Bar"],
-			tip = L["Check to allow RealUI to control the Pet Bar's position."],
+			label = L["Bars_MovePet"],
+			tip = L["Bars_MovePetDesc"],
 			func = function()
 				self:ToggleMoveBar("pet")
 			end,
 			checked = ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet,
 		},
 		{
-			label = L["Move Extra Button"],
-			tip = L["Check to allow RealUI to control the Extra Action Button's position."],
+			label = L["Bars_MoveEAB"],
+			tip = L["Bars_MoveEABDesc"],
 			func = function()
 				self:ToggleMoveBar("eab")
 			end,
@@ -361,7 +361,7 @@ function ConfigBar_ActionBars:SetupWindow()
 	-- Center Bars
 	options = {
 		{
-			label = "0 "..L["Center"].." - 3 "..L["Bottom"],
+			label = "0 "..L["Bars_Center"].." - 3 "..L["Bars_Bottom"],
 			func = function()
 				self:SetActionBarCenterPositions(1)
 			end,
@@ -372,21 +372,21 @@ function ConfigBar_ActionBars:SetupWindow()
 			y = curY - 44,
 		},
 		{
-			label = "1 "..L["Center"].." - 2 "..L["Bottom"],
+			label = "1 "..L["Bars_Center"].." - 2 "..L["Bars_Bottom"],
 			func = function()
 				self:SetActionBarCenterPositions(2)
 			end,
 			checked = ndb.actionBarSettings[nibRealUI.cLayout].centerPositions == 2,
 		},
 		{
-			label = "2 "..L["Center"].." - 1 "..L["Bottom"],
+			label = "2 "..L["Bars_Center"].." - 1 "..L["Bars_Bottom"],
 			func = function()
 				self:SetActionBarCenterPositions(3)
 			end,
 			checked = ndb.actionBarSettings[nibRealUI.cLayout].centerPositions == 3,
 		},
 		{
-			label = "3 "..L["Center"].." - 0 "..L["Bottom"],
+			label = "3 "..L["Bars_Center"].." - 0 "..L["Bars_Bottom"],
 			func = function()
 				self:SetActionBarCenterPositions(4)
 			end,
@@ -398,7 +398,7 @@ function ConfigBar_ActionBars:SetupWindow()
 	-- Side Bars
 	options = {
 		{
-			label = "2 "..L["Right"].." - 0 "..L["Left"],
+			label = "2 "..L["Bars_Right"].." - 0 "..L["Bars_Left"],
 			func = function()
 				self:SetActionBarSidePositions(1)
 			end,
@@ -409,14 +409,14 @@ function ConfigBar_ActionBars:SetupWindow()
 			y = curY - 44,
 		},
 		{
-			label = "1 "..L["Right"].." - 1 "..L["Left"],
+			label = "1 "..L["Bars_Right"].." - 1 "..L["Bars_Left"],
 			func = function()
 				self:SetActionBarSidePositions(2)
 			end,
 			checked = ndb.actionBarSettings[nibRealUI.cLayout].sidePositions == 2,
 		},
 		{
-			label = "0 "..L["Right"].." - 2 "..L["Left"],
+			label = "0 "..L["Bars_Right"].." - 2 "..L["Bars_Left"],
 			func = function()
 				self:SetActionBarSidePositions(3)
 			end,
@@ -427,12 +427,12 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	---- Bar Settings
 	curY = curY - 151
-	cbGUI:CreateHeader(oP, L["Sizes"], curY)
+	cbGUI:CreateHeader(oP, L["Bars_Sizes"], curY)
 
 	-- Buttons
 	local sliders = {
 		{
-			label = L["Buttons"],
+			label = L["Bars_Buttons"],
 			name = "ABSButtons",
 			width = 180,
 			height = 20,
@@ -471,7 +471,7 @@ function ConfigBar_ActionBars:SetupWindow()
 			value = ndb.actionBarSettings[nibRealUI.cLayout].bars[5].buttons,
 		},
 		-- {
-		-- 	label = L["Padding"],
+		-- 	label = L["Bars_Padding"],
 		-- 	min = 0,
 		-- 	max = 10,
 		-- 	func = function(value)
@@ -480,7 +480,7 @@ function ConfigBar_ActionBars:SetupWindow()
 		-- 	value = ndb.actionBarSettings[nibRealUI.cLayout].stanceBar.padding,
 		-- },
 		{
-			label = L["Padding"],
+			label = L["Bars_Padding"],
 			min = 0,
 			max = 10,
 			func = function(value)
@@ -504,10 +504,10 @@ function ConfigBar_ActionBars:SetupWindow()
 		label:SetFont(nibRealUI.font.standard, 10)
 		label:SetTextColor(unpack(nibRealUI.media.colors.amber))
 		if i <= 5 then
-			label:SetText("Bar "..i)
+			label:SetText(BINDING_HEADER_ACTIONBAR..i)
 		else
 			if i == 6 then
-				label:SetText(L["Pet Bar"])
+				label:SetText(TUTORIAL_TITLE61_HUNTER)
 			else
 				-- label:SetText(L["Stance Bar"])
 			end
@@ -524,7 +524,7 @@ function ConfigBar_ActionBars:SetupWindow()
 	-- Padding Sliders
 	sliders = {
 		{
-			label = L["Padding"],
+			label = L["Bars_Padding"],
 			name = "ABSPadding",
 			width = 180,
 			height = 20,
@@ -570,7 +570,7 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	-- Hint: Hold down Ctrl
 	local hint = {
-		text = L["Hint: Hold down Ctrl to view action bars."],
+		text = L["Bars_HintCtrlView"],
 		x = 12,
 		y = curY - 172,
 		color = "green",
@@ -579,7 +579,7 @@ function ConfigBar_ActionBars:SetupWindow()
 
 	-- Hint: Positions
 	note = {
-		text = L["Note: After changing bar positions..."],
+		text = L["Bars_NoteCheckUIElements"],
 		x = 12,
 		y = curY - 190,
 		color = "green",

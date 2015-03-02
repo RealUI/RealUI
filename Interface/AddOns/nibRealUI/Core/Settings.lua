@@ -249,7 +249,7 @@ local function CreateInstallWindow()
 	IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
 		IWF.installText:SetPoint("BOTTOM")
 		IWF.installText:SetFont(nibRealUI.font.standard, 18)
-		IWF.installText:SetText("[ "..L["INSTALL"].." ]")
+		IWF.installText:SetText("[ "..L["Install"].." ]")
 
 	-- Combat Check
 	IWF:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -348,7 +348,7 @@ local function MiniPatchInstallation()
 
 		if needPatchCount > 0 then
 			StaticPopupDialogs["PUDRUIMP"] = {
-				text = "|cff85e0ff"..L["RealUI Mini Patch"].."|r\n\n|cffffffff"..L["Do you wish to apply the latest RealUI settings?"],
+				text = "|cff85e0ff"..L["Patch_MiniPatch"].."|r\n\n|cffffffff"..L["Patch_DoApply"],
 				button1 = "Yes",
 				button2 = "No",
 				OnAccept = function()

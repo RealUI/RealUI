@@ -61,7 +61,7 @@ local CoreOptions = {
 -- Re-install RealUI
 function nibRealUI:ReInstall()
 	StaticPopupDialogs["PUDRUIRESETUI"] = {
-		text = L["Confirm reset RealUI?\n\nAll user settings will be lost."],
+		text = L["Reset_Confirm"] .. L["Reset_SettingsLost"],
 		button1 = "Yes",
 		button2 = "No",
 		OnAccept = function()

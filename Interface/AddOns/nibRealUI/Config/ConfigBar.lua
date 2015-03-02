@@ -171,7 +171,7 @@ end
 -- Show/Hide Config Bar
 function ConfigBar:Toggle(val, skipSlide)
     if InCombatLockdown() then
-        nibRealUI:Notification(L["Combat Lockdown"], true, L["Cannot open RealUI Configuration while in combat."], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        nibRealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         return
     end
     if val then

@@ -107,7 +107,7 @@ function AddonControl:CreateOptionsFrame()
     
     -- Header
     local header = nibRealUI:CreateFS(acO, "CENTER", "small")
-        header:SetText(L["AddOn Control"])
+        header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
     
     -- Label AddOn

@@ -58,7 +58,7 @@ end
 function nibRealUI:ReloadUIDialog()
     -- Display Dialog
     StaticPopupDialogs["PUDRUIRELOADUI"] = {
-        text = L["You need to Reload the UI for changes to take effect. Reload Now?"],
+        text = L["DoReloadUI"],
         button1 = "Yes",
         button2 = "No",
         OnAccept = function()

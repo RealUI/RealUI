@@ -129,7 +129,7 @@ function HuDConfig_Positions:SetupWindow()
 		dragTex:SetVertexColor(0.9, 0.9, 0.9)
 
 	-- Header
-	cbGUI:CreateHeader(Element, L["Element Settings"], 0)
+	cbGUI:CreateHeader(Element, L["HuD_ElementSettings"], 0)
 
 	-- Element Dropdown
 	local dropdown = {
@@ -141,8 +141,8 @@ function HuDConfig_Positions:SetupWindow()
 		text = SelectedUIElement,
 	}
 	self.ddElement = cbGUI:CreateDropdown(Element, dropdown)
-	cbGUI:CreateString(Element, {text = "« "..L["Choose UI element to configure."], x = 226, y = -38})
-	local str = cbGUI:CreateString(Element, {text = L["(use mouse-wheel for precision adjustment of sliders)"], x = 81, y = -72, color = "blue"})
+	cbGUI:CreateString(Element, {text = "« "..L["HuD_ChooseElement"], x = 226, y = -38})
+	local str = cbGUI:CreateString(Element, {text = L["HuD_MouseWheelSliders"], x = 81, y = -72, color = "blue"})
 	str:SetFont(nibRealUI.font.standard, 9)
 
 	-- Element Panels
@@ -158,7 +158,7 @@ function HuDConfig_Positions:SetupWindow()
 	-- HuD Vertical
 	local panel = self.elementPanels["HuD Vertical"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(1, {
-		{"HuDY", L["Position"], -uiH, uiH, 1}
+		{"HuDY", L["General_Position"], -uiH, uiH, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "HuDY"})
 	panel.height = 20
@@ -166,7 +166,7 @@ function HuDConfig_Positions:SetupWindow()
 	-- Unit Frames
 	panel = self.elementPanels["Unit Frames"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(1, {
-		{"UFHorizontal", L["Position"], 100, uiW*2, 2}
+		{"UFHorizontal", L["General_Position"], 100, uiW*2, 2}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "UFHorizontal"})
 	panel.height = 20
@@ -174,8 +174,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Boss Frames
 	panel = self.elementPanels["Boss Frames"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"BossX", L["Horizontal"], -(uiW*2), 0, 1},
-		{"BossY", L["Vertical"], -uiH, uiH, 1}
+		{"BossX", L["HuD_Horizontal"], -(uiW*2), 0, 1},
+		{"BossY", L["HuD_Vertical"], -uiH, uiH, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "BossX"})
 	tinsert(PositionSliders, {panel.sliders[2], "BossY"})
@@ -184,7 +184,7 @@ function HuDConfig_Positions:SetupWindow()
 	-- Action Bars (Center)
 	panel = self.elementPanels["Action Bars (Center)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(1, {
-		{"ActionBarsY", L["Vertical"], -uiH, uiH, 1, 0.5}
+		{"ActionBarsY", L["HuD_Vertical"], -uiH, uiH, 1, 0.5}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "ActionBarsY"})
 	panel.height = 20
@@ -192,8 +192,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Grid (Healing)
 	panel = self.elementPanels["Grid (Healing)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"GridTopX", L["Horizontal"], -uiW, uiW, 1},
-		{"GridTopY", L["Vertical"], -uiH + 100, uiH + 100, 1}
+		{"GridTopX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"GridTopY", L["HuD_Vertical"], -uiH + 100, uiH + 100, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "GridTopX"})
 	tinsert(PositionSliders, {panel.sliders[2], "GridTopY"})
@@ -202,8 +202,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Grid (DPS/Tank)
 	panel = self.elementPanels["Grid (DPS/Tank)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"GridBottomX", L["Horizontal"], -uiW, uiW, 1},
-		{"GridBottomY", L["Vertical"], 0, uiH*2, 1}
+		{"GridBottomX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"GridBottomY", L["HuD_Vertical"], 0, uiH*2, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "GridBottomX"})
 	tinsert(PositionSliders, {panel.sliders[2], "GridBottomY"})
@@ -212,8 +212,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Cast Bar (Player)
 	panel = self.elementPanels["Cast Bar (Player)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"CastBarPlayerX", L["Horizontal"], -uiW, uiW, 1},
-		{"CastBarPlayerY", L["Vertical"], -uiH + 150, uiH + 150, 1}
+		{"CastBarPlayerX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"CastBarPlayerY", L["HuD_Vertical"], -uiH + 150, uiH + 150, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "CastBarPlayerX"})
 	tinsert(PositionSliders, {panel.sliders[2], "CastBarPlayerY"})
@@ -222,8 +222,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Cast Bar (Target)
 	panel = self.elementPanels["Cast Bar (Target)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"CastBarTargetX", L["Horizontal"], -uiW, uiW, 1},
-		{"CastBarTargetY", L["Vertical"], -uiH + 150, uiH + 150, 1}
+		{"CastBarTargetX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"CastBarTargetY", L["HuD_Vertical"], -uiH + 150, uiH + 150, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "CastBarTargetX"})
 	tinsert(PositionSliders, {panel.sliders[2], "CastBarTargetY"})
@@ -232,7 +232,7 @@ function HuDConfig_Positions:SetupWindow()
 	-- Spell Alerts
 	panel = self.elementPanels["Spell Alerts"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(1, {
-		{"SpellAlertWidth", L["Width"], 20, uiW, 1}
+		{"SpellAlertWidth", L["HuD_Width"], 20, uiW, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "SpellAlertWidth"})
 	panel.height = 20
@@ -240,8 +240,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Aura Tracking (Player)
 	panel = self.elementPanels["Aura Tracking (Player)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"CTAurasLeftX", L["Horizontal"], -uiW, uiW, 1},
-		{"CTAurasLeftY", L["Vertical"], -uiH + 150, uiH + 150, 1}
+		{"CTAurasLeftX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"CTAurasLeftY", L["HuD_Vertical"], -uiH + 150, uiH + 150, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "CTAurasLeftX"})
 	tinsert(PositionSliders, {panel.sliders[2], "CTAurasLeftY"})
@@ -250,8 +250,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Aura Tracking (Target)
 	panel = self.elementPanels["Aura Tracking (Target)"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"CTAurasRightX", L["Horizontal"], -uiW, uiW, 1},
-		{"CTAurasRightY", L["Vertical"], -uiH + 150, uiH + 150, 1}
+		{"CTAurasRightX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"CTAurasRightY", L["HuD_Vertical"], -uiH + 150, uiH + 150, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "CTAurasRightX"})
 	tinsert(PositionSliders, {panel.sliders[2], "CTAurasRightY"})
@@ -260,8 +260,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Point Tracking
 	panel = self.elementPanels["Class Points"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"CTPointsWidth", L["Width"], 50, uiW, 2},
-		{"CTPointsHeight", L["Height"], 20, uiH, 2}
+		{"CTPointsWidth", L["HuD_Width"], 50, uiW, 2},
+		{"CTPointsHeight", L["HuD_Height"], 20, uiH, 2}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "CTPointsWidth"})
 	tinsert(PositionSliders, {panel.sliders[2], "CTPointsHeight"})
@@ -270,8 +270,8 @@ function HuDConfig_Positions:SetupWindow()
 	-- Class Power
 	panel = self.elementPanels["Class Resource"]
 	panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-		{"ClassResourceX", L["Horizontal"], -uiW, uiW, 1},
-		{"ClassResourceY", L["Vertical"], -uiH, uiH, 1}
+		{"ClassResourceX", L["HuD_Horizontal"], -uiW, uiW, 1},
+		{"ClassResourceY", L["HuD_Vertical"], -uiH, uiH, 1}
 	}))
 	tinsert(PositionSliders, {panel.sliders[1], "ClassResourceX"})
 	tinsert(PositionSliders, {panel.sliders[2], "ClassResourceY"})
@@ -281,8 +281,8 @@ function HuDConfig_Positions:SetupWindow()
 	if nibRealUI.class == "DEATHKNIGHT" then
 		panel = self.elementPanels["Runes (Deathknight)"]
 		panel.sliders = cbGUI:CreateSliderList(panel, "VERTICAL", CreatePositionSlider(2, {
-			{"RunesX", L["Horizontal"], -uiW, uiW, 1},
-			{"RunesY", L["Vertical"], -uiH, uiH, 1}
+			{"RunesX", L["HuD_Horizontal"], -uiW, uiW, 1},
+			{"RunesY", L["HuD_Vertical"], -uiH, uiH, 1}
 		}))
 		tinsert(PositionSliders, {panel.sliders[1], "RunesX"})
 		tinsert(PositionSliders, {panel.sliders[2], "RunesY"})

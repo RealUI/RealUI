@@ -2,251 +2,192 @@
 
 if L then
 
-L["Enabled"] = "Aktiviert"
-L["Type /realui"] = "Gib %s ein, um Stil, Positionen und Einstellungen zu konfigurieren."
-L["Combat Lockdown"] = "Combat Lockdown"
-L["Layout will change after you leave combat."] = "Das Layout ändert sich, nachdem Du den Kampf verlassen hast."
-L["Info Line currency tracking will update after UI Reload (/rl)"] = "Info Line currency tracking will update after UI Reload (/rl)"
+-- General
+L["Alert_CombatLockdown"] = "Kampfsperre" -- Needs review
+L["DoReloadUI"] = "Du musst das UI neu laden, so dass die Änderungen wirksam werden. Jetzt neu laden?"
+L["Slash_RealUI"] = "Tippe %s um den UI-Style, Positionen und Einstellungen zu konfigurieren" -- Needs review
+L["Version"] = "Version" -- Needs review
 
--- Installation
-L["INSTALL"] = "ZUM INSTALLIEREN KLICKEN"
 
-L["RealUI Mini Patch"] = "RealUI Mini-Patch"
-L["RealUI's settings have been updated."] = "RealUI-Einstellungen wurden aktualisiert."
-L["Do you wish to apply the latest RealUI settings?"] = "Do you wish to apply the latest RealUI settings?"
+-- Install
+L["Install"] = "KLICKEN UM DIE INSTALLATION ZU STARTEN"
+L["Patch_DoApply"] = "Möchtest du die letzten Einstellungen von RealUI übernehmen?" -- Needs review
+L["Patch_MiniPatch"] = "RealUI Mini Patch" -- Needs review
 
-L["Confirm reset RealUI?\n\nAll user settings will be lost."] = "Bist Du sicher, dass Du RealUI zurücksetzen möchtest?\n\n Alle Einstellungen gehen verloren."
-L["Reload UI now to apply these changes?"] = "UI neu laden, um die Änderungen zu übernehmen?"
-L["You need to Reload the UI for changes to take effect. Reload Now?"] = "Die UI muss neu geladen werden, damit die Änderungen wirksam werden. Jetzt neu laden?"
 
--- Power Mode
-L["PowerModeEconomy"] =
-[[|cff0099ffRealUI|r|cffffffff: Economy-Power-Modus aktiv.
-Dieser Modus sieht grafische Updates in einer langsameren Rate vor. 
-Kann die Performance bei schwächeren Rechner verbessern.]]
+-- Options
+L["Appearance_StripeOpacity"] = "Streifen-Transparenz"
+L["Appearance_WinOpacity"] = "Fenster-Transparenz"
+L["Fonts"] = "Schriftarten" -- Needs review
+L["Fonts_ChatOutline"] = "Chat Schriftartumriss" -- Needs review
+L["Fonts_Hybrid"] = "Hybrid" -- Needs review
+L["General_Enabled"] = "Aktiviert" -- Needs review
+L["Layout_ApplyOOC"] = "Layout ändert sich sobald du den Kampf verläßt."
+L["Layout_DPSTank"] = "DPS/Tank" -- Needs review
+L["Layout_Healing"] = "Heilung" -- Needs review
+L["Layout_Link"] = "Layouts verknüpfen" -- Needs review
+L["Layout_LinkDesc"] = "Benutze die gleichen Einstellungen zwischen DPS/Tank- und Heiler-Layout" -- Needs review
+L["Power_Eco"] = "Economy" -- Needs review
+L["Power_EcoDesc"] = [=[Dieser Modus plant graphische Updates mit einer geringeren Rate als normal.
+Kann bei Low-end PCs die Leistung erhöhen.]=]
+L["Power_Normal"] = "Standardmodus"
+L["Power_NormalDesc"] = "Dieser Modus plant graphische Updates mit einer Standardrate."
+L["Power_PowerMode"] = "Powermodus"
+L["Power_Turbo"] = "Turbomodus"
+L["Power_TurboDesc"] = [=[Dieser Modus plant graphische Update mit einer sehr hohen Rate und stellt die Animationen des UI flüssiger.
+Erhöht die Nutzung der CPU.]=]
+L["Reset_Confirm"] = "Bist du sicher das du RealUI reseten möchtest?"
+L["Reset_SettingsLost"] = "Alle Benutzereinstellungen gehen verloren." -- Needs review
 
-L["PowerModeNormal"] =
-[[|cff0099ffRealUI|r|cffffffff: Normal-Power-Modus aktiv.
-Dieser Modus sieht grafische Updates in der normalen Rate vor.]]
 
-L["PowerModeTurbo"] =
-[[|cff0099ffRealUI|r|cffffffff: Turbo-Power-Modus aktiv.
-Dieser Modus sieht grafische Updates in einer schnellen Rate vor, so dass UI-Animationen flüssiger werden.
-Dies wird die CPU-Last erhöhen.]]
+-- Config
+L["Alert_CantOpenInCombat"] = "Die RealUI-Konfiguration kann während des Kampfes nicht geöffnet werden." -- Needs review
+L["Appearance_DefaultColors"] = "Benutze die Standardfarben" -- Needs review
+L["Appearance_DefaultColorsDesc"] = "Deaktivere das Nutzen von benutzerdefinierten Farben" -- Needs review
+L["AuraTrack_Buff"] = "Stärkungszauber" -- Needs review
+L["AuraTrack_Create"] = "Erzeuge einen neuen Tracker" -- Needs review
+L["AuraTrack_Debuff"] = "Schwächungszauber" -- Needs review
+L["AuraTrack_Disable"] = "Deaktivieren den ausgewählten Tracker" -- Needs review
+L["AuraTrack_DruidBear"] = "Bärform" -- Needs review
+L["AuraTrack_DruidCat"] = "Katzenform" -- Needs review
+L["AuraTrack_DruidHuman"] = "Mensch" -- Needs review
+L["AuraTrack_DruidMoonkin"] = "Mondkin" -- Needs review
+L["AuraTrack_Enable"] = "Aktiviere ausgewählten Tracker" -- Needs review
+L["AuraTracker_VerticalCD"] = "Vertikale Abklingzeit" -- Needs review
+L["AuraTrack_HideOOC"] = "Verstecke ausserhalb des Kampfes" -- Needs review
+L["AuraTrack_HideOOCDesc"] = "Verstecken des Trackers erzwingen wenn man nicht im Kampf ist, auch wenn er aktiv ist." -- Needs review
+L["AuraTrack_HideStack"] = "Verstecke Stapelzähler" -- Needs review
+L["AuraTrack_HideStackDesc"] = "Zeige keinen Stapelzähler für Stärkungs-/Schwächaungszauber auf diesem Tracker." -- Needs review
+L["AuraTrack_IgnoreSpec"] = "Ignoriere Spezalisierung" -- Needs review
+L["AuraTrack_IgnoreSpecDesc"] = "Tracker anzeigen unabhängig von der Spezalisierung" -- Needs review
+L["AuraTrack_InactiveOpacity"] = "Transparenz inaktiver Indikatoren" -- Needs review
+L["AuraTrack_MinLevel"] = "Min Level (0 = ignorieren)" -- Needs review
+L["AuraTrack_NoteSpellID"] = [=[Hinweis: Zaubername oder ID muss exakt dem Zauber entsprechen den du verfolgen möchtest
+Großschreibung und Leerzeichen spielen eine Rolle
+Um mehre Zauber zu verfolgen, nutze die ZauberID und separiere sie mit einem Komma (z.B. 1122,2233,3344).]=] -- Needs review
+L["AuraTrack_Padding"] = "Indikatorfüllung" -- Needs review
+L["AuraTrack_Position"] = "Position" -- Needs review
+L["AuraTrack_Reset"] = "Bist du sicher das Tracking-Informationen auf Standard zurücksetzen möchtest?" -- Needs review
+L["AuraTrack_ShowHostile"] = "Anzeigen mit feindlichem Ziel" -- Needs review
+L["AuraTrack_ShowHostileDesc"] = "Zeige Indikatoren wenn ein angreifbares Ziel vorhanden ist" -- Needs review
+L["AuraTrack_ShowInCombat"] = "Im Kampf anzeigen" -- Needs review
+L["AuraTrack_ShowInCombatDesc"] = "Zeige Indikatoren wenn man im Kampf ist" -- Needs review
+L["AuraTrack_ShowInPvE"] = "Im PvE anzeigen" -- Needs review
+L["AuraTrack_ShowInPvEDesc"] = "Zeige Indikatoren in einer PvE-Instanz" -- Needs review
+L["AuraTrack_ShowInPvP"] = "Im PvP anzeigen" -- Needs review
+L["AuraTrack_ShowInPvPDesc"] = "Zeige Indikatoren in einer PvP-Instanz" -- Needs review
+L["AuraTrack_Size"] = "Indikatorgröße" -- Needs review
+L["AuraTrack_SpellNameID"] = "Zaubername oder ID" -- Needs review
+L["AuraTrack_Static"] = "Statisch" -- Needs review
+L["AuraTrack_StaticDesc"] = "Statische Tracker verbleiben sichtbar an der gleichen Stelle" -- Needs review
+L["AuraTrack_TrackerOptions"] = "Trackeroptionen" -- Needs review
+L["AuraTrack_VerticalCDDesc"] = "Benutze vertikale Abklingzeitenindikatoren anstatt der Spirale" -- Needs review
+L["Bars_Bottom"] = "Unten" -- Needs review
+L["Bars_Buttons"] = "Tasten" -- Needs review
+L["Bars_Center"] = "Mitte" -- Needs review
+L["Bars_Control"] = "Erlaube RealUI die Aktionsleisten zu kontrollieren." -- Needs review
+L["Bars_HintCtrlView"] = "Halte Strg gedrückt um die Aktionsleisten anzuzeigen" -- Needs review
+L["Bars_Left"] = "Links" -- Needs review
+L["Bars_MoveEAB"] = "Bewege Extra Aktionsknopf" -- Needs review
+L["Bars_MoveEABDesc"] = "Auswählen um RealUI zu erlauben die Position der Extraaktionstaste zu kontrollieren." -- Needs review
+L["Bars_MovePet"] = "Bewege Begleiterleiste" -- Needs review
+L["Bars_MovePetDesc"] = "Auswählen um RealUI zu erlauben die Position der Begleiterleiste zu kontrollieren." -- Needs review
+L["Bars_MoveStance"] = "Bewege Haltungsleiste" -- Needs review
+L["Bars_MoveStanceDesc"] = "Auswählen um RealUI zu erlauben die Position der Haltungsleiste zu kontrollieren." -- Needs review
+L["Bars_NoteAdvSettings"] = [=[Hinweis: Benuzte die Fortgeschrittenen-Einstellung um das Konfigurationfenster von Bartender zu öffnen.
+Wähle |cff30d0ffRealUI Control|r ab wenn du die Einstellungen ändern möchtest
+die RealUI kontrolliert (Position, Größe, Buttons, Füllung).]=] -- Needs review
+L["Bars_NoteCheckUIElements"] = [=[Hinweis: Nach ändern der Einstellung, stelle sicher das Du die Positionen überprüft hast
+um sicherzustellen das keines der UI-Element sich überlappt.]=] -- Needs review
+L["Bars_Padding"] = "Füllung" -- Needs review
+L["Bars_PetBar"] = "Begleiterleiste" -- Needs review
+L["Bars_Right"] = "Rechts" -- Needs review
+L["Bars_Sizes"] = "Größen" -- Needs review
+L["Control_AddonControl"] = "AddOn Kontrolle" -- Needs review
+L["Fonts_HybridDesc"] = "Benutze eine Mischung aus kleinen und großen Schriftarten" -- Needs review
+L["Fonts_LargeDesc"] = "Benutze große Schriftarten" -- Needs review
+L["Fonts_SmallDesc"] = "Benutze kleine Schriftarten" -- Needs review
+L["General_LoadDefaults"] = "Lade Standardeinstellungen" -- Needs review
+L["General_Positions"] = "Positionen" -- Needs review
+L["HuD_AlertHuDChangeSize"] = "Ändern der HUD-Größe kann die Positionen einiger Elemente verändern, es wird empfohlen vorher die Positionen der UI-Elemente zu überprüfen bevor die Änderungen angewendet werden." -- Needs review
+L["HuD_ChooseElement"] = "Wähle das UI-Element zum konfidurieren aus" -- Needs review
+L["HuD_ElementSettings"] = "Elementeinstellungen" -- Needs review
+L["HuD_Height"] = "Höhe" -- Needs review
+L["HuD_HideElements"] = "Verstecke UI-Elemente" -- Needs review
+L["HuD_Horizontal"] = "Horizontal" -- Needs review
+L["HuD_Instructions"] = "Anweisungen" -- Needs review
+L["HuD_Instructions1"] = "|cffffa500Step 1:|r Klicken |cff30ff30Zeige UI-Elemente|r um bei der Neupositionierung der UI-Elemente zu helfen." -- Needs review
+L["HuD_Instructions2"] = "|cffffa500Schritt 2:|r Benutze das Fenster |cff30ff30Elementeinstellungen|r um die einzelnen UI-Elemente zu positionieren und die Größe zu ändern" -- Needs review
+L["HuD_Instructions3"] = "|cffffa500Schritt 3:|r Wenn du fertig bist, klicke auf |cff30ff30Verstecke UI-Elemente|r." -- Needs review
+L["HuD_Latency"] = "HuD-Latenz" -- Needs review
+L["HuD_MouseWheelSliders"] = "(benutze das Mausrad für eine präzise Einstellung des Schiebereglers)"
+L["HuD_ShowElements"] = "Zeige UI-Elemente" -- Needs review
+L["HuD_UseLarge"] = "Benutze großes HuD" -- Needs review
+L["HuD_UseLargeDesc"] = "Erhöht die Größe der Schlüsselelemente des HuD (Einheitenfenster, etc)." -- Needs review
+L["HuD_Vertical"] = "Vertical" -- Needs review
+L["HuD_Width"] = "Breite" -- Needs review
+L["Raid_ControlLayout"] = "Erlaube RealUI die Layouteinstellungen von %s's zu kontrollieren." -- Needs review
+L["Raid_ControlPosition"] = "Erlaube RealUI die Positionen von %s's zu kontrollieren." -- Needs review
+L["Raid_ControlStyle"] = "Erlaube RealUI %s zu ändern (benötigt ein neu laden des UI: /rl)" -- Needs review
+L["Raid_HorizGroups"] = "Horizontale Gruppen" -- Needs review
+L["Raid_Layout"] = "Layout" -- Needs review
+L["Raid_NoteAdvSettings"] = [=[Hinweis: Benutze die Fortgeschrittenen-Einstellung um das Konfigurationsfenster von Grid2 zu öffnen.
+Wähle |cff30d0ffRealUI Control|r ab wenn du die Einstellungen ändern möchtest
+die RealUI kontrolliert (Position, Layout, Rahmen).]=] -- Needs review
+L["Raid_ShowPets"] = "Zeige Begleiterfenster" -- Needs review
+L["Raid_ShowSolo"] = "Anzeigen wenn Solo" -- Needs review
+L["Raid_Style"] = "Style" -- Needs review
 
--- RealUI Config
-L["RealUI Config"] = "RealUI-Konfiguration"
-L["Position"] = "Position"
-L["Positions"] = "Positionen"
-L["Vertical"] = "Vertikal"
-L["Horizontal"] = "Horizontal"
-L["Width"] = "Breite"
-L["Height"] = "Höhe"
 
-L["AddOn Control"] = "AddOn-Kontrolle"
-
-L["Untick"] = "Deaktiviere"
-L["Use"] = "Nutze"	-- i.e Use General Colors
-L["to set"] = ", um an-\ngepasste Farben"
-L["custom colors"] = "zu verwenden"
-
-L["Fonts"] = "Fonts"
-L["Chat Font Outline"] = "Chat Font Outline"
-L["FS:Hybrid"] = "Hybrid"	-- Mixed
-L["Use small fonts"] = "Kleine Fonts verwenden"
-L["Use a mix of small and large fonts"] = "Große und kleine Fonts gemischt verwenden"
-L["Use large fonts"] = "Große Fonts verwenden"
-
-L["Latency"] = "Latenz"
-L["Info Line"] = "Info-Line"
-L["Bars"] = "Leisten"	-- Class Color Health "Bars"
-
-L["Link Layouts"] = "Gleiche Layouts"
-L["Use same settings between DPS/Tank and Healing layouts."] = "Gleiche Einstellungen für DPS/Tank- und Heiler-Layouts."
-L["Use Large HuD"] = "Use Large HuD"
-L["Increases size of key HuD elements (Unit Frames, etc)."] = "Increases size of key HuD elements (Unit Frames, etc)."
-L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."] = "Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."
-
-L["RealUI Control"] = "RealUI-Kontrolle"
-L["Allow RealUI to control the action bars."] = "Erlaube RealUI, die Aktionsleisten zu kontrollieren."
-L["Check to allow RealUI to control the Stance Bar's position."] = "Check to allow RealUI to control the Stance Bar's position."
-L["Check to allow RealUI to control the Pet Bar's position."] = "Check to allow RealUI to control the Pet Bar's position."
-L["Check to allow RealUI to control the Extra Action Button's position."] = "Check to allow RealUI to control the Extra Action Button's position."
-L["Move Stance Bar"] = "Haltungsl. bewegen"
-L["Move Pet Bar"] = "Begleiterl. bewegen"
-L["Move Extra Button"] = "Extra-Aktionsl. bewegen"
-L["Sizes"] = "Größen"
-L["Buttons"] = "Buttons"
-L["Padding"] = "Abstand"
-L["Top"] = "Oben"
-L["Bottom"] = "Unten"
-L["Left"] = "Links"
-L["Right"] = "Rechts"
-L["Stance Bar"] = "Haltungsleiste"
-L["Pet Bar"] = "Begleiterleiste"
-
-L["Cannot open RealUI Configuration while in combat."] = "RealUI-Konfiguration kann nicht während des Kampfs geöffnet werden."
-L["Note: Bartender settings"] = "Hinweis: Klick auf Erweiterte Einstellungen, um Bartenders Konfiguration zu öffnen.\n               Deaktiviere |cff30d0ffRealUI-Kontrolle|r wenn Du Einstellungen ändern möchtest,\n               die Real-UI kontrolliert (Position, Größe, Buttons, Abstand)."
-L["Hint: Hold down Ctrl to view action bars."] = "Tipp: Drücke Strg, um die Aktionsleisten zu sehen."
-L["Note: After changing bar positions..."] = "Hinweis: Nachdem Einstellungen geändert wurden, prüfe die Positionseinstellungen\n               um sicher zu stellen, dass sich keine UI-Elemente überlappen."
-
-L["Allow RealUI to control STR position settings."] = "Erlaube RealUI, die %s-Position zu kontrollieren."
-L["Layout"] = "Layout"
-L["Allow RealUI to control STR layout settings."] = "Erlaube RealUI, das %s-Layout zu kontrollieren."
-L["Style"] = "Style"
-L["Allow RealUI to style STR."] = "Erlaube RealUI, %s zu stylen (erfordert Reload: /rl)"
-
-L["Horizontal Groups"] = "Horizontale Gruppen"
-L["Show Pet Frames"] = "Show Pet Frames"
-L["Show While Solo"] = "Show While Solo"
-L["Note: Grid2 settings"] = "Hinweis: Klick auf Erweiterte Einstellungen, um die Grid2-Konfiguration zu\n               öffen. Deaktiviere |cff30d0ffRealUI-Kontrolle|r wenn Du Einstellungen ändern\n               möchtest, die RealUI kontrolliert (Position, Layout, Ränder)."
-
-L["Element Settings"] = "Element-Einstellungen"
-L["Choose UI element to configure."] = "UI-Element zum Konfigurieren auswählen."
-L["(use mouse-wheel for precision adjustment of sliders)"] = "(Benutze das Mausrad für die Feineinstellung der Schieberegler)"
-
-L["Reverse Bar"] = "Leiste umkehren"
-L["Reverse the direction of the cast bar."] = "Kehrt die Richtung der Zauberleiste um."
-
-L["Create New Tracker"] = "Neuen Tracker anlegen"
-L["Disable Selected Tracker"] = "Disable Selected Tracker"
-L["Enable Selected Tracker"] = "Enable Selected Tracker"
-L["Are you sure you wish to reset Tracking information to defaults?"] = "Bist Du sicher, dass Du die Tracker-Informationen auf die Standardwerte zurücksetzen möchtest?"
-L["Tracker Options"] = "Tracker-Optionen"
-L["Choose Tracker type."] = "Wähle Tracker-Typ."
-L["Buff"] = "Buff"
-L["Debuff"] = "Debuff"
-L["Spell Name or ID"] = "Zaubername oder ID"
-L["Note: Spell Name or ID must match the spell you wish to track exactly. Capitalization and spaces matter."] = "Hinweis: Zaubername/ID müssen exakt dem Zauber entsprechen, der verfolgt werden soll.\n                  Groß- und Kleinschreibung und Leerzeichen werden beachtet."
-
-L["Static"] = "Statisch"
-L["Static Trackers remain visible and in the same location."] = "Statische Tracker bleiben sichtbar und am gleichen Ort."
-L["Min Level (0 = ignore)"] = "Min.-Level (0 = ignor.)"
-L["Ignore Spec"] = "Ignore Spec"
-L["Show tracker regardless of current specialization"] = "Show tracker regardless of current specialization"
-L["Cat"] = "Katze"
-L["Bear"] = "Bär"
-L["Moonkin"] = "Mondkin"
-L["Human"] = "Menschlich"
-L["Hide Out-Of-Combat"] = "OOC verbergen"
-L["Force this Tracker to hide OOC, even if it's active."] = "Diesen Tracker immer OOC verbergen, auch wenn er aktiv ist."
-L["Hide Stack Count"] = "Stack-Anzahl verbergen"
-L["Don't show Buff/Debuff stack count on this tracker."] = "Buff/Debuff-Stack-Anzahl dieses Trackers nicht zeigen."
-
-L["Indicator size"] = "Indicator Size"
-L["Indicator padding"] = "Indicator Padding"
-L["Inactive indicator opacity"] = "Inactive Indicator Opacity"
-L["Show in combat"] = "Show in combat"
-L["Show Indicators when you are in combat"] = "Show Indicators when you are in combat"
-L["Show w/ hostile"] = "Show w/ hostile"
-L["Show Indicators when you have an attackable target"] = "Show Indicators when you have an attackable target"
-L["Show in PvE"] = "Show in PvE"
-L["Show Indicators when you are in a PvE instance"] = "Show Indicators when you are in a PvE instance"
-L["Show in PvP"] = "Show in PvP"
-L["Show Indicators when you are in a PvP instance"] = "Show Indicators when you are in a PvP instance"
-L["Vertical Cooldown"] = "Vertical Cooldown"
-L["Use vertical cooldown indicator instead of spiral"] = "Use vertical cooldown indicator instead of spiral"
-
-L["Stripe Opacity"] = "Stripe Opacity"
-L["Window Opacity"] = "Window Opacity"
-
--- Info Line
-L["Micromenu"] = "Mikromenu"
-L["XP/Rep"] = "XP/Ruf"
-L["SysInfo"] = "System-Info"
-L["Spec Changer"] = "Spez.-Changer"
-L["Layout Changer"] = "Layout-Changer"
-L["Meter Toggle"] = "Anzeigen-Schalter"
-
-L["Menu"] = "Menü"
-
-L["Meters"] = "Anzeigen"
-
-L["Stat"] = "Stat"
-L["Cur"] = "Akt"
-L["Max"] = "Max"
-L["Min"] = "Min"
-L["Avg"] = "Dur"
-
-L["In"] = "In"
-L["Out"] = "Out"
-L["kbps"] = "kbps"
-L["ms"] = "ms"
-L["FPS"] = "FPS"
-
-L["Date"] = "Datum"
-L["Wintergrasp Time Left"] = "Restzeit Tausendwintersee"
-L["No Wintergrasp Time Available"] = "Keine Zeit für Tausendwintersee verfügbar"
-L["Tol Barad Time Left"] = "Restzeit Tol Barad"
-L["No Tol Barad Time Available"] = "Keine Zeit für Tol Barad Time verfügbar"
-L["Pending Invites:"] = "Offene Einladungen:"
-
-L["Layout Changer"] = "Layout-Changer"
-L["Current Layout:"] = "Aktuelles Layout:"
-L["DPS/Tank"] = "DPS/Tank"
-L["Healing"] = "Healing"
-
-L["Meter Toggle"] = "Anzeigen-Schalter"
-L["Active Meters:"] = "Aktive Anzeige:"
-
-L["Start"] = "Start"
-
-L["Current"] = "Aktuelle"
-L["Remaining"] = "Übrige"
-
-L["Honor Points"] = "EhP"
-L["Conquest Points"] = "ErP"
-L["Justice Points"] = "GP"
-L["Valor Points"] = "TP"
-L["Updated"] = "Akt."
-L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"] = "To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"
-
-L["Faction not set"] = "Keine Fraktion eingestellt"
-
-L["<Click> to switch between"] = "<Klick> zum Wechseln"
-L["XP and Rep display."] = "zwischen XP und Ruf."
-L["<Click> to switch currency displayed."] = "<Klick> Angezeigte Währung wechseln."
-L["<Alt+Click> to erase highlighted character data."] = "<Alt+Klick> Daten des markierten Charakters löschen."
-L["<Shift+Click> to reset weekly caps."] = "<Shift+Klick>: Wöchentlichen Caps zurückstellen."
-L["Note: Weekly caps will reset upon loading currency data"] = "Hinweis: Wöchentliche Caps werden auf einem Charakter, dessen wöchentliche "
-L["on a character whose weekly caps have reset."] = "Caps schon zurückgestellt sind, erst beim Laden der Währungsdaten zurückgestellt."
-L["<Click> to whisper, <Alt+Click> to invite."] = "<Klick> zum Flüstern, <Alt+Klick> zum Einladen."
-
-L["Stat Display"] = "Stat-Anzeige"
-L["<Spec Click> to change talent specs."] = "<Spez. Klick>: Talent-Spezialisierung wechseln."
-L["<Equip Click> to equip."] = "<Ausr. Klick> zum Ausrüsten."
-L["<Equip Ctl+Click> to assign to "] = "<Ausr. Strg+Klick>: Zuordnen zu "
-L["<Equip Alt+Click> to assign to "] = "<Ausr. Alt+Klick>: Zuordnen zu "
-L["<Equip Shift+Click> to unassign."] = "<Ausr. Shift+Klick>: Zuordnung aufheben."
-L["<Stat Click> to configure."] = "<Stat Klick>: Konfigurieren."
-
-L["<Click> to cycle through equipment sets."] = "<Klick> Ausrüstungsset wechseln."
-L["<Click> to show calendar."] = "<Klick>: Kalender anzeigen."
-L["<Shift+Click> to show timer."] = "<Shift+Klick>: Timer anzeigen."
-L["<Click> to change layouts."] = "<Klick>: Layout ändern."
-L["<Alt+Click> to change resolution."] = "<Alt+Klick>: Auflösung wechseln."
-L["<Click> to toggle meters."] = "<Klick>: Anzeige wechseln."
-
--- HuD Config
-L["Instructions"] = "Anleitung"
-L["Load Defaults"] = "Standardwerte laden"
-L["Show UI Elements"] = "UI-Elemente anzeigen"
-L["Hide UI Elements"] = "UI-Elemente verbergen"
-L["HuD Instructions"] = [[
-		|cffffa500Step 1:|r Klick |cff30ff30UI-Elemente anzeigen|r um HIlfe bei der Positionierung der UI-Elemente zu erhalten.
-		|cffffa500Step 2:|r Verwende das |cff30ff30Element-Sinstellungen|r-Fenster um Größe und Position einzelner UI-Elemente zu ändern.
-		|cffffa500Step 3:|r Wen Du fertig bist, klicke |cff30ff30UI-Elemente verbergen|r.
-	]]
-
--- World Boss Info
-L["Galleon"]="Galleon"
-L["Sha Of Anger"]="Sha Of Anger"
-L["Nalak"]="Nalak"
-L["Oondasta"]="Oondasta"
-L["Celestials"]="Celestials"
-L["Ordos"]="Ordos"
-
-L["World Boss Done"]="\124cff00ff00Done\124r"
-L["World Boss Not Done"]="\124cffff0000Not Done\124r"
+-- InfoLine
+L["Clock_CalenderInvites"] = "Ausstehende Einladungen" -- Needs review
+L["Clock_Date"] = "Datum" -- Needs review
+L["Clock_NoTBTime"] = "Keine Zeit für Tol Barad verfügbar" -- Needs review
+L["Clock_NoWGTime"] = "Keine Zeit für Tausendwinter verfügbar" -- Needs review
+L["Clock_ShowCalendar"] = "<Klicken> um den Kalendar anzuzeigen"
+L["Clock_ShowTimer"] = "<Shift+Klick> um die Timer anzuzeigen." -- Needs review
+L["Clock_TBTime"] = "Restliche Zeit bis Tol Barad" -- Needs review
+L["Clock_WGTime"] = "Restliche Zeit bis Tausendwinter" -- Needs review
+L["Currency_Cycle"] = "<Klicken> um durch die angezeigten Währungen zu wechseln." -- Needs review
+L["Currency_EraseData"] = "<Alt+Klick> um die hervorgehobenen Charakterdaten zu löschen"
+L["Currency_NoteWeeklyReset"] = [=[Hinweis: Wöchentliche Grenzen werden zurückgesetzt nachdem die Währungsdaten eines
+Charakters geladen werden wenn dessen wöchentliche Grenzen zurückgesetzt wurden.]=] -- Needs review
+L["Currency_ResetCaps"] = "<Shift+Klick> um die wöchentlichen Caps zurückzusetzen" -- Needs review
+L["Currency_TrackMore"] = "Um zusätzliche Währungen zu verfolgen, benutze den Währungstab im Spielerfenster und ändere die gewählte Währung zu 'Zeige im Rucksack'" -- Needs review
+L["Currency_UpdatedAbbr"] = "Upd." -- Needs review
+L["Friend_WhisperInvite"] = "<Klicken> um anzuflüstern, <Alt+Klick> zum einladen." -- Needs review
+L["Guild_WhisperInvite"] = "<Klicken> zum anflüstern, <Alt+Klick> zum einladen." -- Needs review
+L["InfoLine"] = "Informationszeile"
+L["Layout_Change"] = "<Klicken> um das Layout zu wechseln"
+L["Layout_Current"] = "Derzeitiges layout" -- Needs review
+L["Layout_LayoutChanger"] = "Layoutwechsler" -- Needs review
+L["Meters_Active"] = "Aktive Anzeigen:" -- Needs review
+L["Meters_Header"] = "Anzeigenumschalter" -- Needs review
+L["Meters_Toggle"] = "<Klicken> um Anzeigen ein- und auszublenden." -- Needs review
+L["Spec_ChangeSpec"] = "<Spec Klick> um die Talentspezialisierung zu wechseln" -- Needs review
+L["Spec_Equip"] = "<Anlegen Klicken> zum ausrüsten" -- Needs review
+L["Spec_EquipAssignPrimary"] = "<Anlegen Strg+Klick> zum zuweisen des primären Ausrüstungsset" -- Needs review
+L["Spec_EquipAssignSecondary"] = "<Anlegen Alt+Klick> zum zuweisen des sekundären Ausrüstungsset" -- Needs review
+L["Spec_EquipUnassign"] = "<Anlegen Shift+Klick> um Zuweisung aufzuheben" -- Needs review
+L["Spec_SpecChanger"] = "Spezialisierungswechsler" -- Needs review
+L["Spec_StatConfig"] = "<Stat Klicken> zum konfigurieren." -- Needs review
+L["Start"] = "Start" -- Needs review
+L["Start_Config"] = "RealUI Config" -- Needs review
+L["Sys_AverageAbbr"] = "Avg" -- Needs review
+L["Sys_CurrentAbbr"] = "Cur" -- Needs review
+L["Sys_FPS"] = "FPS" -- Needs review
+L["Sys_In"] = "Eingehend" -- Needs review
+L["Sys_kbps"] = "kbps" -- Needs review
+L["Sys_Max"] = "Max" -- Needs review
+L["Sys_Min"] = "Min" -- Needs review
+L["Sys_ms"] = "ms" -- Needs review
+L["Sys_Out"] = "Ausgehend" -- Needs review
+L["Sys_Stat"] = "Wert" -- Needs review
+L["Sys_SysInfo"] = "Systeminformation" -- Needs review
+L["XPRep"] = "XP/Ruf" -- Needs review
+L["XPRep_Current"] = "Aktuell" -- Needs review
+L["XPRep_NoFaction"] = "Keine Fraktion ausgewäühlt" -- Needs review
+L["XPRep_Remaining"] = "Verbleibend" -- Needs review
+L["XPRep_Toggle"] = "<Klicken> zum umschalten der XP/Ruf-Anzeige"
 
 end

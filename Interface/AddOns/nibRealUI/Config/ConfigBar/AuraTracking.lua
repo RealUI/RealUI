@@ -41,7 +41,7 @@ end
 function ConfigBar_AuraTracking:LoadDefaults()
 	-- Confirmation dialog
 	StaticPopupDialogs["PUDRUILOADDEFAULTS"] = {
-		text = L["Are you sure you wish to reset Tracking information to defaults?"],
+		text = L["AuraTrack_Reset"],
 		button1 = "Yes",
 		button2 = "No",
 		OnAccept = function()
@@ -68,10 +68,10 @@ function ConfigBar_AuraTracking:ToggleTrackerEnabled()
 
 	if info.isDisabled then
 		AuraTracking:EnableTracker(selTracker)
-		self.buttons.toggleTracker:SetText(L["Disable Selected Tracker"])
+		self.buttons.toggleTracker:SetText(L["AuraTrack_Disable"])
 	else
 		AuraTracking:DisableTracker(selTracker)
-		self.buttons.toggleTracker:SetText(L["Enable Selected Tracker"])
+		self.buttons.toggleTracker:SetText(L["AuraTrack_Enable"])
 	end
 
 	self:RefreshTrackingTable()
@@ -99,7 +99,7 @@ function ConfigBar_AuraTracking:CreateNewPopUp()
 		-- Header
 		local header = nibRealUI:CreateFS(window, "CENTER", "small")
 			header:SetFont(nibRealUI.font.standard, 10)
-			header:SetText(L["New Tracker Type"])
+			header:SetText(L["AuraTrack_ChooseType"])
 			header:SetPoint("TOP", window, "TOP", 0, -9)
 
 		-- Choose Type Dropdown
@@ -227,7 +227,7 @@ function ConfigBar_AuraTracking:UpdateTrackerConfig()
 		self.trackerSettings.header:Hide()
 
 		if info then
-			self.buttons.toggleTracker:SetText(L["Enable Selected Tracker"])
+			self.buttons.toggleTracker:SetText(L["AuraTrack_Enable"])
 		end
 
 		return
@@ -235,15 +235,15 @@ function ConfigBar_AuraTracking:UpdateTrackerConfig()
 	elseif AuraTracking:GetTrackingData(selTracker).isDisabled then
 		-- Disable/Enable button text
 		if info.isDisabled then
-			self.buttons.toggleTracker:SetText(L["Enable Selected Tracker"])
+			self.buttons.toggleTracker:SetText(L["AuraTrack_Enable"])
 		else
-			self.buttons.toggleTracker:SetText(L["Disable Selected Tracker"])
+			self.buttons.toggleTracker:SetText(L["AuraTrack_Disable"])
 		end
 
 	else
 		oP:Show()
 		self.trackerSettings.header:Show()
-		self.buttons.toggleTracker:SetText(L["Disable Selected Tracker"])
+		self.buttons.toggleTracker:SetText(L["AuraTrack_Disable"])
 	end
 
 	
@@ -631,7 +631,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Create New
 	self.buttons = {}
 	local button = {
-		label = L["Create New Tracker"],
+		label = L["AuraTrack_Create"],
 		width = 170,
 		height = 22,
 		x = 14,
@@ -642,7 +642,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	-- Disable/Enable
 	button = {
-		label = L["Disable Selected Tracker"],
+		label = L["AuraTrack_Disable"],
 		width = 170,
 		height = 22,
 		x = 185,
@@ -653,7 +653,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	-- Load Defaults
 	button = {
-		label = L["Load Defaults"],
+		label = RESET_TO_DEFAULT,
 		width = 170,
 		height = 22,
 		x = 356,
@@ -669,7 +669,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Tracker options panel
 	----
 	-- Header
-	self.trackerSettings.header = cbGUI:CreateHeader(tabPanel1, L["Tracker Options"], -248)
+	self.trackerSettings.header = cbGUI:CreateHeader(tabPanel1, L["AuraTrack_TrackerOptions"], -248)
 
 	self.indicatorOptionsPanel = CreateFrame("Frame", nil, tabPanel1)	
 	local oP = self.indicatorOptionsPanel
@@ -679,8 +679,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Is Static
 	local check = {
 		{
-			label = L["Static"],
-			desc = L["Static Trackers remain visible and in the same location."],
+			label = L["AuraTrack_Static"],
+			desc = L["AuraTrack_StaticDesc"],
 			func = function()
 				self:ChangeTrackerSetting("isStatic")
 			end,
@@ -695,7 +695,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Order
 	local slider = {
 		{
-			label = L["Position"],
+			label = L["General_Position"],
 			name = "AuraTrackingOrder",
 			width = 180,
 			height = 20,
@@ -722,9 +722,9 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	-- Spell
 	local input = {
-		label = L["Spell Name or ID"],
+		label = L["AuraTrack_SpellNameID"],
 		name = "AuraTrackingSpell",
-		tip = L["Note: Spell Name or ID must match the spell you wish to track exactly. Capitalization and spaces matter."],
+		tip = L["AuraTrack_NoteSpellID"],
 		func = function(value)
 			self:ChangeTrackerSetting("spell", value)
 		end,
@@ -738,7 +738,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Is Buff
 	local check = {
 		{
-			label = L["Buff"],
+			label = L["AuraTrack_Buff"],
 			func = function()
 				self:ChangeTrackerSetting("auraType", "buff")
 			end,
@@ -748,7 +748,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 			y = -34
 		},
 		{
-			label = L["Debuff"],
+			label = L["AuraTrack_Debuff"],
 			func = function()
 				self:ChangeTrackerSetting("auraType", "debuff")
 			end,
@@ -798,7 +798,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Min Level
 	slider = {
 		{
-			label = L["Min Level (0 = ignore)"],
+			label = L["AuraTrack_MinLevel"],
 			name = "AuraTrackingMinLevel",
 			width = 240,
 			height = 20,
@@ -818,8 +818,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Ignore Spec
 	check = {
 		{
-			label = L["Ignore Spec"],
-			desc = L["Show tracker regardless of current specialization"],
+			label = L["AuraTrack_IgnoreSpec"],
+			desc = L["AuraTrack_IgnoreSpecDesc"],
 			descGap = 120,
 			func = function()
 				self:ChangeTrackerSetting("ignoreSpec")
@@ -873,7 +873,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	if nibRealUI.class == "DRUID" then
 		check = {
 			{
-				label = L["Cat"],
+				label = L["AuraTrack_DruidCat"],
 				func = function()
 					self:ChangeTrackerSetting("forms", 1)
 				end,
@@ -883,19 +883,19 @@ function ConfigBar_AuraTracking:SetupWindow()
 				y = nextY
 			},
 			{
-				label = L["Bear"],
+				label = L["AuraTrack_DruidBear"],
 				func = function()
 					self:ChangeTrackerSetting("forms", 2)
 				end,
 			},
 			{
-				label = L["Moonkin"],
+				label = L["AuraTrack_DruidMoonkin"],
 				func = function()
 					self:ChangeTrackerSetting("forms", 3)
 				end,
 			},
 			{
-				label = L["Human"],
+				label = L["AuraTrack_DruidHuman"],
 				func = function()
 					self:ChangeTrackerSetting("forms", 4)
 				end,
@@ -909,8 +909,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Hide OOC
 	check = {
 		{
-			label = L["Hide Out-Of-Combat"],
-			desc = L["Force this Tracker to hide OOC, even if it's active."],
+			label = L["AuraTrack_HideOOC"],
+			desc = L["AuraTrack_HideOOCDesc"],
 			descGap = 170,
 			func = function()
 				self:ChangeTrackerSetting("hideOOC")
@@ -926,8 +926,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Hide Stacks
 	check = {
 		{
-			label = L["Hide Stack Count"],
-			desc = L["Don't show Buff/Debuff stack count on this tracker."],
+			label = L["AuraTrack_HideStack"],
+			desc = L["AuraTrack_HideStackDesc"],
 			descGap = 170,
 			func = function()
 				self:ChangeTrackerSetting("hideStacks")
@@ -943,8 +943,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Hide Time
 	check = {
 		{
-			label = "Hide Time",
-			desc = "Don't show Buff/Debuff time remaining on this tracker.",
+			label = L["AuraTrack_HideTime"],
+			desc = L["AuraTrack_HideTimeDesc"],
 			descGap = 170,
 			func = function()
 				self:ChangeTrackerSetting("hideTime")
@@ -968,7 +968,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	slider = {
 		{
-			label = L["Indicator size"],
+			label = L["AuraTrack_Size"],
 			name = "AuraTrackingIndicatorSize",
 			width = 300,
 			height = 20,
@@ -984,7 +984,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 			value = 0,
 		},
 		{
-			label = L["Indicator padding"],
+			label = L["AuraTrack_Padding"],
 			name = "AuraTrackingIndicatorPadding",
 			step = 1,
 			min = 0,
@@ -995,7 +995,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 			value = 0,
 		},
 		{
-			label = L["Inactive indicator opacity"],
+			label = L["AuraTrack_InactiveOpacity"],
 			name = "AuraTrackingInactiveOpacity",
 			step = 5,
 			min = 0,
@@ -1012,8 +1012,8 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	check = {
 		{
-			label = L["Show in combat"],
-			desc = L["Show Indicators when you are in combat"],
+			label = L["AuraTrack_ShowInCombat"],
+			desc = L["AuraTrack_ShowInCombatDesc"],
 			descGap = 150,
 			func = function()
 				self:ChangeAdvancedSetting("visibility", "showCombat")
@@ -1024,29 +1024,29 @@ function ConfigBar_AuraTracking:SetupWindow()
 			y = nextY,
 		},
 		{
-			label = L["Show w/ hostile"],
-			desc = L["Show Indicators when you have an attackable target"],
+			label = L["AuraTrack_ShowHostile"],
+			desc = L["AuraTrack_ShowHostileDesc"],
 			func = function()
 				self:ChangeAdvancedSetting("visibility", "showHostile")
 			end,
 		},
 		{
-			label = L["Show in PvE"],
-			desc = L["Show Indicators when you are in a PvE instance"],
+			label = L["AuraTrack_ShowInPvE"],
+			desc = L["AuraTrack_ShowInPvEDesc"],
 			func = function()
 				self:ChangeAdvancedSetting("visibility", "showPvE")
 			end,
 		},
 		{
-			label = L["Show in PvP"],
-			desc = L["Show Indicators when you are in a PvP instance"],
+			label = L["AuraTrack_ShowInPvP"],
+			desc = L["AuraTrack_ShowInPvPDesc"],
 			func = function()
 				self:ChangeAdvancedSetting("visibility", "showPvP")
 			end,
 		},
 		{
-			label = L["Vertical Cooldown"],
-			desc = L["Use vertical cooldown indicator instead of spiral"],
+			label = L["AuraTrack_VerticalCD"],
+			desc = L["AuraTrack_VerticalCDDesc"],
 			func = function()
 				self:ChangeAdvancedSetting("indicators", "useCustomCD")
 			end,

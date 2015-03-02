@@ -27,7 +27,7 @@ function ConfigBar_Positions:ToggleHuDSize()
 
 	-- Display Info Dialog
 	StaticPopupDialogs["PUDRUIHUDSIZEINFO"] = {
-		text = L["Changing HuD size will alter the size of several UI Elements, therefore it is recommended to check UI Element positions once the HuD Size changes have taken effect."],
+		text = L["HuD_AlertHuDChangeSize"],
 		button1 = "Okay",
 		OnAccept = function()
 			nibRealUI:ReloadUIDialog()
@@ -79,27 +79,43 @@ function ConfigBar_Positions:SetupWindow()
 	Element.window:Hide()
 
 	-- Header
-	Element.headerDT = cbGUI:CreateHeader(Element, L["Positions"].." » "..L["DPS/Tank"] , 0)
-	Element.headerH = cbGUI:CreateHeader(Element, L["Positions"].." » "..L["Healing"] , 0)
-	Element.headerDTH = cbGUI:CreateHeader(Element, L["Positions"].." » "..L["DPS/Tank"].." + "..L["Healing"] , 0)
+	Element.headerDT = cbGUI:CreateHeader(Element, L["General_Positions"].." » "..L["Layout_DPSTank"] , 0)
+	Element.headerH = cbGUI:CreateHeader(Element, L["General_Positions"].." » "..L["Layout_Healing"] , 0)
+	Element.headerDTH = cbGUI:CreateHeader(Element, L["General_Positions"].." » "..L["Layout_DPSTank"].." + "..L["Layout_Healing"] , 0)
 	self:UpdateHeader()
 
 	-- Instructions
-	cbGUI:CreateSecondHeader(Element, L["Instructions"], 12, -30, 100)
+	cbGUI:CreateSecondHeader(Element, L["HuD_Instructions"], 12, -30, 100)
 	local tip = {
-		text = L["HuD Instructions"],
+		text = L["HuD_Instructions1"],
 		justify = "LEFT",
 		spacing = 3,
 		x = 18,
-		y = -50,
+		y = -45,
+	}
+	cbGUI:CreateString(Element, tip)
+	local tip = {
+		text = L["HuD_Instructions2"],
+		justify = "LEFT",
+		spacing = 3,
+		x = 18,
+		y = -60,
+	}
+	cbGUI:CreateString(Element, tip)
+	local tip = {
+		text = L["HuD_Instructions3"],
+		justify = "LEFT",
+		spacing = 3,
+		x = 18,
+		y = -75,
 	}
 	cbGUI:CreateString(Element, tip)
 
 	-- Link Settings
 	local options = {
 		{
-			label = L["Link Layouts"],
-			desc = L["Use same settings between DPS/Tank and Healing layouts."],
+			label = L["Layout_Link"],
+			desc = L["Layout_LinkDesc"],
 			descGap = 116,
 			func = function()
 				self:ToggleLinkSettings()
@@ -111,8 +127,8 @@ function ConfigBar_Positions:SetupWindow()
 			y = -90,
 		},
 		{
-			label = L["Use Large HuD"],
-			desc = L["Increases size of key HuD elements (Unit Frames, etc)."],
+			label = L["HuD_UseLarge"],
+			desc = L["HuD_UseLargeDesc"],
 			descGap = 116,
 			func = function()
 				self:ToggleHuDSize()
@@ -124,7 +140,7 @@ function ConfigBar_Positions:SetupWindow()
 
 	local buttons = {}
 	local button = {
-		label = L["Show UI Elements"],
+		label = L["HuD_ShowElements"],
 		template = "SecureActionButtonTemplate",
 		macroText = "/tar "..UnitName("player").."\n/focus\n/run RealUIHuDTestMode(true)",
 		width = 146,
@@ -135,7 +151,7 @@ function ConfigBar_Positions:SetupWindow()
 	buttons[1] = cbGUI:CreateButton(Element, button)
 
 	button = {
-		label = L["Hide UI Elements"],
+		label = L["HuD_HideElements"],
 		template = "SecureActionButtonTemplate",
 		macroText = "/clearfocus\n/cleartarget\n/run RealUIHuDTestMode(false)",
 		width = 146,
@@ -146,7 +162,7 @@ function ConfigBar_Positions:SetupWindow()
 	buttons[2] = cbGUI:CreateButton(Element, button)
 
 	button = {
-		label = L["Load Defaults"],
+		label = RESET_TO_DEFAULT,
 		width = 146,
 		height = 22,
 		x = 308,
@@ -219,7 +235,7 @@ end
 
 function ConfigBar_Positions:Register()
 	Element.info = {
-		label = L["Positions"],
+		label = L["General_Positions"],
 		icon = [[Interface\AddOns\nibRealUI\Media\Config\Positions]],
 		window = {
 			width = 510,

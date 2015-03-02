@@ -107,12 +107,12 @@ local Elements = {
     durability =    {DURABILITY},
     bag =           {INVTYPE_BAG},
     currency =      {BONUS_ROLL_REWARD_CURRENCY},
-    xprep =         {L["XP/Rep"]},
+    xprep =         {L["XPRep"]},
     clock =         {TIMEMANAGER_TITLE},
-    pc =            {L["SysInfo"]},
-    specchanger =   {L["Spec Changer"]},
-    layoutchanger = {L["Layout Changer"]},
-    metertoggle =   {L["Meter Toggle"]},
+    pc =            {L["Sys_SysInfo"]},
+    specchanger =   {L["Spec_SpecChanger"]},
+    layoutchanger = {L["Layout_LayoutChanger"]},
+    metertoggle =   {L["Meters_Header"]},
 }
 
 local Tablets = {
@@ -140,36 +140,36 @@ local MicroMenu = {
         isTitle = true,
         notCheckable = true
     },
-    {text = L["RealUI Config"],
+    {text = L["Start_Config"],
         func = function() nibRealUI:LoadConfig("HuD") end,
         notCheckable = true
     },
-    {text = "Power Mode",
+    {text = L["Power_PowerMode"],
         notCheckable = true,
         hasArrow = true,
         menuList = {
             {
-                text = "Economy",
+                text = L["Power_Eco"],
                 func = function() 
-                    print(L["PowerModeEconomy"])
+                    print(L["Power_EcoDesc"])
                     nibRealUI:SetPowerMode(2)
                     nibRealUI:ReloadUIDialog()
                 end,
                 checked = function() return nibRealUI.db.profile.settings.powerMode == 2 end,
             },
             {
-                text = "Normal",
+                text = L["Power_Normal"],
                 func = function()
-                    print(L["PowerModeNormal"])
+                    print(L["Power_NormalDesc"])
                     nibRealUI:SetPowerMode(1)
                     nibRealUI:ReloadUIDialog()
                 end,
                 checked = function() return nibRealUI.db.profile.settings.powerMode == 1 end,
             },
             {
-                text = "Turbo",
+                text = L["Power_Turbo"],
                 func = function()
-                    print(L["PowerModeTurbo"])
+                    print(L["Power_TurboDesc"])
                     nibRealUI:SetPowerMode(3)
                     nibRealUI:ReloadUIDialog()
                 end,
@@ -270,14 +270,14 @@ local options
 local function GetOptions()
     if not options then options = {
         type = "group",
-        name = "Info Line",
+        name = L["InfoLine"],
         desc = "Information / Button display.",
         arg = MODNAME,
         childGroups = "tab",
         args = {
             header = {
                 type = "header",
-                name = "Info Line",
+                name = L["InfoLine"],
                 order = 10,
             },
             desc = {
@@ -1049,8 +1049,8 @@ function InfoLine_XR_OnEnter(self)
         else
             GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, COMBAT_XP_GAIN))
         end
-        GameTooltip:AddDoubleLine(L["Current"], nibRealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(L["Remaining"], nibRealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(L["XPRep_Current"], nibRealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         if not restxp then
             GameTooltip:AddDoubleLine(TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         else
@@ -1068,14 +1068,13 @@ function InfoLine_XR_OnEnter(self)
     end
     GameTooltip:AddDoubleLine(FACTION, watchedFaction, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     GameTooltip:AddDoubleLine(STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
-    GameTooltip:AddDoubleLine(L["Current"], nibRealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(L["Remaining"], nibRealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(L["XPRep_Current"], nibRealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     
     -- Hint
     if (UnitLevel("player") < MAX_PLAYER_LEVEL) and not(IsXPUserDisabled()) then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to switch between"]))
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", "    "..L["XP and Rep display."]))
+        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["XPRep_Toggle"]))
     end
     
     GameTooltip:Show()
@@ -1117,7 +1116,7 @@ function InfoLine_XR_Update(self)
     local percentRepStr = tostring(percentRep)
     
     if not watchedFaction then
-        watchedFaction = L["Faction not set"]
+        watchedFaction = L["XPRep_NoFaction"]
         repstatus = "---"
         rep = 0
         replvlmax = 0
@@ -1292,7 +1291,7 @@ local function Currency_UpdateTablet()
                 CURRENCY .. 1,
                 CURRENCY .. 2,
                 CURRENCY .. 3,
-                L["Updated"]
+                L["Currency_UpdatedAbbr"]
             }
             RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
             local charHeader = MakeTabletHeader(charCols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
@@ -1417,12 +1416,12 @@ local function Currency_UpdateTablet()
     -- Hint
     local hint
     if OnlyMe then
-        hint = L["<Click> to switch currency displayed."]
+        hint = L["Currency_Cycle"]
     else
         if HasMaxLvl then
-            hint = L["<Click> to switch currency displayed."].."\n"..L["<Alt+Click> to erase highlighted character data."].."\n"..L["<Shift+Click> to reset weekly caps."]
+            hint = L["Currency_Cycle"].."\n"..L["Currency_EraseData"].."\n"..L["Currency_ResetCaps"]
         else
-            hint = L["<Click> to switch currency displayed."].."\n"..L["<Alt+Click> to erase highlighted character data."]
+            hint = L["Currency_Cycle"].."\n"..L["Currency_EraseData"]
         end
     end
     local hintCat = Tablets.currency:AddCategory()
@@ -1437,7 +1436,7 @@ local function Currency_UpdateTablet()
     if not OnlyMe and HasMaxLvl then
         AddBlankTabLine(hintCat, 2)
         hintCat:AddLine(
-            "text", L["Note: Weekly caps will reset upon loading currency data"].."\n  "..L["on a character whose weekly caps have reset."],
+            "text", L["Currency_NoteWeeklyReset"],
             "size", db.text.tablets.hintsize + nibRealUI.font.sizeAdjust,
             "textR", 0.7,
             "textG", 0.7,
@@ -1447,7 +1446,7 @@ local function Currency_UpdateTablet()
     end
     AddBlankTabLine(hintCat, 1)
     hintCat:AddLine(
-        "text", L["To track additional currencies, use the Currency tab in the Player Frame and set desired Currency to 'Show On Backpack'"],
+        "text", L["Currency_TrackMore"],
         "textR", 0,
         "textG", 1,
         "textB", 0,
@@ -1893,7 +1892,7 @@ local function Friends_UpdateTablet()
         end
         
         -- Hint
-        Tablets.friends:SetHint(L["<Click> to whisper, <Alt+Click> to invite."], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
+        Tablets.friends:SetHint(L["Friend_WhisperInvite"], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
     end
 end
 
@@ -2200,7 +2199,7 @@ local function Guild_UpdateTablet()
         end
         
         -- Hint
-        Tablets.guild:SetHint(L["<Click> to whisper, <Alt+Click> to invite."], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
+        Tablets.guild:SetHint(L["Guild_WhisperInvite"], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
     end
 end
 
@@ -2565,7 +2564,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
             line["func"] = function() SpecChangeClickFunc(self, talentGroup) end
             line["customwidth"] = 110
         elseif i == 2 then
-            line["text"..i] = ndbc.layout.spec[talentGroup] == 1 and L["DPS/Tank"] or L["Healing"]
+            line["text"..i] = ndbc.layout.spec[talentGroup] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
             line["justify"..i] = "LEFT"
             line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
             line["text"..i.."R"] = LayoutColor[1]
@@ -2655,7 +2654,7 @@ local function Spec_UpdateTablet(self)
         end
         SpecSection["stats"] = {}
         SpecSection["stats"].cat = Tablets.spec:AddCategory()
-        SpecSection["stats"].cat:AddLine("text", L["Stat Display"], "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["stats"].cat:AddLine("text", L["Spec_StatDisplay"], "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["stats"].cat, 2)
         
         if numSpecGroups == 2 then Cols = {PRIMARY, SECONDARY, " "} else Cols = {PRIMARY, " "} end
@@ -2695,19 +2694,19 @@ local function Spec_UpdateTablet(self)
     -- Hint
     local hintStr = ""
     if numSpecGroups > 1 then
-        hintStr = hintStr .. L["<Spec Click> to change talent specs."]
+        hintStr = hintStr .. L["Spec_ChangeSpec"]
     end
     if numEquipSets > 0 then
         if hintStr ~= "" then hintStr = hintStr .. "\n" end
         if numSpecGroups > 1 then
-            hintStr = hintStr .. L["<Equip Click> to equip."].."\n"..L["<Equip Ctl+Click> to assign to "]..PRIMARY..".\n"..L["<Equip Alt+Click> to assign to "]..SECONDARY..".\n"..L["<Equip Shift+Click> to unassign."]
+            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
         else
-            hintStr = hintStr .. L["<Equip Click> to equip."].."\n"..L["<Equip Ctl+Click> to assign to "]..PRIMARY..".\n"..L["<Equip Shift+Click> to unassign."]
+            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
         end
     end
     if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
         if hintStr ~= "" then hintStr = hintStr .. "\n" end
-        hintStr = hintStr .. L["<Stat Click> to configure."]
+        hintStr = hintStr .. L["Spec_StatConfig"]
     end
     Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
 end
@@ -2852,11 +2851,11 @@ local function PC_UpdateTablet()
     
     -- Lines
     Cols = {
-        L["Stat"],
-        L["Cur"],
-        L["Max"],
-        L["Min"],
-        L["Avg"],
+        L["Sys_Stat"],
+        L["Sys_CurrentAbbr"],
+        L["Sys_Max"],
+        L["Sys_Min"],
+        L["Sys_AverageAbbr"],
     }
     SysSection["network"].lineCat = Tablets.pc:AddCategory("columns", #Cols)
     lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
@@ -2864,10 +2863,10 @@ local function PC_UpdateTablet()
     AddBlankTabLine(SysSection["network"].lineCat, 1)
     
     local NetworkLines = {
-        [1] = {L["In"], L["kbps"], "%.2f", SysStats.bwIn},
-        [2] = {L["Out"], L["kbps"], "%.2f", SysStats.bwOut},
-        [3] = {HOME , L["ms"], "%d", SysStats.lagHome},
-        [4] = {CHANNEL_CATEGORY_WORLD, L["ms"], "%d", SysStats.lagWorld},
+        [1] = {L["Sys_In"], L["Sys_kbps"], "%.2f", SysStats.bwIn},
+        [2] = {L["Sys_Out"], L["Sys_kbps"], "%.2f", SysStats.bwOut},
+        [3] = {HOME , L["Sys_ms"], "%d", SysStats.lagHome},
+        [4] = {CHANNEL_CATEGORY_WORLD, L["Sys_ms"], "%d", SysStats.lagWorld},
     }
     local line = {}
     for l = 1, #NetworkLines do
@@ -2923,21 +2922,13 @@ local function PC_UpdateTablet()
     SysSection["computer"].cat:AddLine("text", SYSTEMOPTIONS_MENU, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
     AddBlankTabLine(SysSection["computer"].cat, 2)
     
-    -- Lines
-    Cols = {
-        L["Stat"],
-        L["Cur"],
-        L["Max"],
-        L["Min"],
-        L["Avg"],
-    }
     SysSection["computer"].lineCat = Tablets.pc:AddCategory("columns", #Cols)
     lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
     SysSection["computer"].lineCat:AddLine(lineHeader)
     AddBlankTabLine(SysSection["computer"].lineCat, 1)
     
     local ComputerLines = {
-        [1] = {L["FPS"], SysStats.fps},
+        [1] = {L["Sys_FPS"], SysStats.fps},
     }
     for l = 1, #ComputerLines do
         wipe(line)
@@ -3181,19 +3172,6 @@ local function Clock_Update(self, ...)
         newTime = db.other.clock.hr24 and RetrieveGameTime() or RetrieveGameTime(true)
     end
     
-    
-    if ( WGTime ~= nil ) then
-        if (WGTime == 300) and db.other.clock.wgalert then
-            print(format("|cffff0000%s|r", L["5 minutes until Wintergrasp"]))
-            
-        end
-    end
-    if ( TBTime ~= nil ) and db.other.clock.tbalert then
-        if TBTime == 300 then
-            print(format("|cffff0000%s|r", L["5 minutes until Tol Barad"]))
-        end
-    end
-    
     -- Info Text
     self.text:SetFormattedText("|cff%s%s|r", TextColorNormal, newTime)
     UpdateElementWidth(self)
@@ -3217,20 +3195,20 @@ local function Clock_OnEnter(self)
     local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
     local _, _, _, _, TBTime = GetWorldPVPAreaInfo(2)
     if ( WGTime ~= nil ) then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Wintergrasp Time Left"]), strform("%s", ConvertSecondstoTime(WGTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_WGTime"]), strform("%s", ConvertSecondstoTime(WGTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     else
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["No Wintergrasp Time Available"]))
+        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_NoWGTime"]))
     end
     if ( TBTime ~= nil ) then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Tol Barad Time Left"]), strform("%s", ConvertSecondstoTime(TBTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_TBTime"]), strform("%s", ConvertSecondstoTime(TBTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     else
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["No Tol Barad Time Available"]))
+        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_NoTBTime"]))
     end
     
     -- Invites
     GameTooltip:AddLine(" ")
     if self.pendingCalendarInvites and self.pendingCalendarInvites > 0 then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Pending Invites:"]), strform("%s", self.pendingCalendarInvites), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_CalenderInvites"]), strform("%s", self.pendingCalendarInvites), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         GameTooltip:AddLine(" ")
     end
 
@@ -3246,8 +3224,8 @@ local function Clock_OnEnter(self)
     end
 
     -- Hint
-    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to show calendar."]))
-    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Shift+Click> to show timer."]))
+    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Clock_ShowCalendar"]))
+    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Clock_ShowTimer"]))
     GameTooltip:Show()
 end
 
@@ -3389,12 +3367,12 @@ function InfoLine:OnEnter(self)
         
     elseif self.tag == "meters" then
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Meter Toggle"]))
+        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Meters_Header"]))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Active Meters:"]))
+        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Meters_Active"]))
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, self.meterLoaded))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to toggle meters."]))
+        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Meters_Toggle"]))
         GameTooltip:Show()
         
     elseif self.tag == "pc" then
@@ -3404,14 +3382,14 @@ function InfoLine:OnEnter(self)
         Spec_OnEnter(self)
         
     elseif self.tag == "layout" then
-        local CurLayoutText = ndbc.layout.current == 1 and "DPS/Tank" or "Healing"
+        local CurLayoutText = ndbc.layout.current == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
         local CurResText = layoutSize == 1 and "Low" or "High"
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Layout Changer"]))
+        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Layout_LayoutChanger"]))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff%s%s |r|cff%s%s|r", TextColorblue1, L["Current Layout:"], TextColorWhite, CurLayoutText))
+        GameTooltip:AddLine(strform("|cff%s%s |r|cff%s%s|r", TextColorblue1, L["Layout_Current"], TextColorWhite, CurLayoutText))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["<Click> to change layouts."]))
+        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Layout_Change"]))
         GameTooltip:Show()
     end
 end
