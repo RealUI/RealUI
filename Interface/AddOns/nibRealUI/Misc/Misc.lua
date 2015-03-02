@@ -88,19 +88,6 @@ Fixer:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 Fixer:SetScript("OnEvent", DisableSpam)
 
 ----------------------------------------------------------------------------------------
---	Force quit
-----------------------------------------------------------------------------------------
-local CloseWoW = CreateFrame("Frame")
-CloseWoW:RegisterEvent("CHAT_MSG_SYSTEM")
-CloseWoW:SetScript("OnEvent", function(self, event, msg)
-	if event == "CHAT_MSG_SYSTEM" then
-		if msg and msg == IDLE_MESSAGE then
-			ForceQuit()
-		end
-	end
-end)
-
-----------------------------------------------------------------------------------------
 --	Clear Button on the TradeSkill search box(TradeSkillClearButton by Kunda)
 ----------------------------------------------------------------------------------------
 local TradeSkillClearButton = CreateFrame("Button", nil, UIParent)
