@@ -4,11 +4,9 @@ local db, dbc, dbg, _
 local debug = nibRealUI.Debug
 _G.RealUI = nibRealUI
 
-nibRealUI.verinfo = {
-    [1] = 8,
-    [2] = 1,
-    [3] = 11,
-}
+for word in string.gfind(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
+    tinsert(nibRealUI.verinfo, word)
+end
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
 if not REALUI_WINDOW_FRAMES then REALUI_WINDOW_FRAMES = {} end
