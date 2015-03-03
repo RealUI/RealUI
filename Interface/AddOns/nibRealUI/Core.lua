@@ -5,8 +5,8 @@ local debug = nibRealUI.Debug
 _G.RealUI = nibRealUI
 
 nibRealUI.verinfo = {}
-for word in string.gfind(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
-    tinsert(nibRealUI.verinfo, word)
+for word in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
+    tinsert(nibRealUI.verinfo, tonumber(word))
 end
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
