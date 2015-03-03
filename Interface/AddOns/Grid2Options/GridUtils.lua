@@ -153,9 +153,10 @@ do
 		-- statuses headers
 		Colors	     = { type = "header", order = 10,  name = L["Colors"]      },
 		Thresholds   = { type = "header", order = 50,  name = L["Thresholds"], },
+		Value        = { type = "header", order = 90,  name = L["Value Track"] },
 		Misc         = { type = "header", order = 100, name = L["Misc"]        },
 		Auras	     = { type = "header", order = 150, name = L["Auras"]       },		
-		DebuffFilter = { type = "header", order = 175, name = L["Filtered debuffs"] },		
+		DebuffFilter = { type = "header", order = 175, name = L["Filtered debuffs"] },
 		ClassFilter  = { type = "header", order = 200, name = L["Class Filter"] },
 	}
 	function Grid2Options:MakeHeaderOptions( options, key )
@@ -198,13 +199,15 @@ end
 do
 	local fmt = string.format
 	local HexDigits = "0123456789ABCDEF"
-	local prefixes = { "color-", "buff-", "debuff-", "aoe-" }
-	local suffixes = { "-mine", "-not-mine" }
+	local prefixes = { "color-", "buff-", "debuff-", "buffs-", "debuffs-", "aoe-" }
+	local suffixes = { "-not-mine", "-mine" }
 	local prefixes_colors = { 
 		["buff-"]   = "|cFF00ff00%s|r",
 		["debuff-"] = "|cFFff0000%s|r",
+		["buffs-"]   = "|cFF00ffa0%s|r",
+		["debuffs-"] = "|cFFff00a0%s|r",
 		["aoe-"]    = "|cFF0080ff%s|r",
-		["color-"]  = "|cFFffff00%s|r",	
+		["color-"]  = "|cFFffff00%s|r",
 	}
 	local function byteToHex(byte)
 		local L = byte % 16 + 1
@@ -220,13 +223,13 @@ do
 		local body
 		for _, value in ipairs(prefixes) do
 			if strsub(name,1,strlen(value))==value then 
-				prefix= value
+				prefix = value
 				break
 			end
 		end
 		for _, value in ipairs(suffixes) do
 			if strsub(name,-strlen(value))==value then 
-				suffix= value
+				suffix = value
 				break
 			end
 		end
@@ -250,7 +253,7 @@ do
 		if suffix~="" then
 			suffix = L[suffix]
 		end
-		return prefix .. body .. suffix	
+		return prefix .. body .. suffix
 	end	
 end
 

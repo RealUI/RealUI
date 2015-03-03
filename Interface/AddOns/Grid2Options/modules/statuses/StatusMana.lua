@@ -3,9 +3,26 @@ local L = Grid2Options.L
 Grid2Options:RegisterStatusOptions("lowmana",  "mana", Grid2Options.MakeStatusColorThresholdOptions, {
 	titleIcon = "Interface\\Icons\\Inv_potion_86"
 })
-Grid2Options:RegisterStatusOptions("mana",     "mana", Grid2Options.MakeStatusColorOptions, {
+Grid2Options:RegisterStatusOptions("mana","mana",  function(self, status, options, optionParams)
+	self:MakeStatusStandardOptions(status, options, optionParams)
+	self:MakeHeaderOptions(options, "Display")
+	options.showOnlyHealers = {
+		type = "toggle",
+		order = 200,
+		width= "full",
+		name = L["Hide mana of non healer players"],
+		tristate = false,
+		get = function () return status.dbx.showOnlyHealers end,
+		set = function (_, v)
+			status.dbx.showOnlyHealers = v or nil
+			status:UpdateDB()
+			status:UpdateAllIndicators()
+		end,
+	}
+end, {
 	titleIcon = "Interface\\Icons\\Inv_potion_72"
 })
+
 Grid2Options:RegisterStatusOptions("poweralt", "mana", Grid2Options.MakeStatusColorOptions, {
 	titleIcon = "Interface\\Icons\\Inv_potion_34"
 })

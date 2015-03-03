@@ -138,8 +138,9 @@ do
 		local c = dbx[colorKey]
 		if not c then c = {}; dbx[colorKey] = c end
 		c.r, c.g, c.b, c.a = r, g, b, a
-		if indicator.UpdateDB then indicator:UpdateDB() end
-		Grid2Frame:UpdateIndicators()
+		Grid2Options:RefreshIndicator(indicator, "Layout", "Update")
+		-- if indicator.UpdateDB then indicator:UpdateDB() end
+		-- Grid2Frame:UpdateIndicators()
 	end
 	function Grid2Options:MakeIndicatorColorOptions(indicator, options, optionParams)
 		local colorCount = indicator.dbx.colorCount or 1
@@ -188,7 +189,7 @@ do
 			set = function(_, v)
 				location.relPoint = self.pointMap[v]
 				location.point = location.relPoint
-				self:RefreshIndicator(indicator, "Layout")
+				self:RefreshIndicator(indicator, "Layout", "Update" )
 			end,
 		}
 		options.point = {
@@ -200,7 +201,7 @@ do
 			get = function() return self.pointMap[location.point] end,
 			set = function(_, v)
 				location.point = self.pointMap[v] 
-				self:RefreshIndicator(indicator, "Layout")
+				self:RefreshIndicator(indicator, "Layout", "Update" )
 			end,
 		}
 		options.x = {
@@ -212,7 +213,7 @@ do
 			get = function() return location.x end,
 			set = function(_, v)
 				location.x = v 
-				self:RefreshIndicator(indicator, "Layout")
+				self:RefreshIndicator(indicator, "Layout", "Update" )
 			end,
 		}
 		options.y = {
@@ -224,7 +225,7 @@ do
 			get = function() return location.y end,
 			set = function(_, v)
 				location.y = v
-				self:RefreshIndicator(indicator, "Layout")
+				self:RefreshIndicator(indicator, "Layout", "Update" )
 			end,
 		}
 		options.frameLevel = {
@@ -237,7 +238,7 @@ do
 			end,
 			set = function (_, v)
 				indicator.dbx.level = v
-				self:RefreshIndicator(indicator, "Layout")
+				self:RefreshIndicator(indicator, "Layout", "Update" )
 			end,
 			values = levelValues,
 		}

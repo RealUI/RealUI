@@ -28,7 +28,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]]
 local MAJOR_VERSION = "LibButtonGlow-1.0"
-local MINOR_VERSION = 3
+local MINOR_VERSION = 4
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
@@ -218,7 +218,7 @@ function lib.ShowOverlayGlow(frame)
 		overlay.animIn:Play()
 		frame.__LBGoverlay = overlay
 
-		if Masque and (not frame.overlay or not issecurevariable(frame, "overlay")) then
+		if Masque and Masque.UpdateSpellAlert and (not frame.overlay or not issecurevariable(frame, "overlay")) then
 			local old_overlay = frame.overlay
 			frame.overlay = overlay
 			Masque:UpdateSpellAlert(frame)

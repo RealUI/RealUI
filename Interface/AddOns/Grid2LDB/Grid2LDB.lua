@@ -3,8 +3,9 @@
 local DataBroker = LibStub("LibDataBroker-1.1", true)
 if not DataBroker then return end
 
-local Grid2Layout= Grid2Layout
+local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Grid2")
 
+local Grid2Layout = Grid2Layout
 
 local MenuLayoutsShow
 
@@ -21,12 +22,20 @@ local Grid2LDB = DataBroker:NewDataObject("Grid2", {
 	end,
 	OnTooltipShow = function(tooltip)
 		tooltip:AddLine("Grid2")
-		tooltip:AddLine("Left Click to open configuration", 0.2, 1, 0.2)
-		tooltip:AddLine("Right Click to open layouts menu", 0.2, 1, 0.2)
+		tooltip:AddDoubleLine( L["Layout"], L[Grid2Layout.layoutName] or "", 255,255,255, 255,255,0)
+		for _,func in pairs(Grid2.tooltipFunc) do
+			func(tooltip)
+		end
+		tooltip:AddLine("|cFFff4040Left Click|r to open configuration\n|cFFff4040Right Click|r to open layouts menu", 0.2, 1, 0.2)
 	end,
 })
 
-
+local icon = LibStub("LibDBIcon-1.0")
+if icon then 
+	icon:Register("Grid2", Grid2LDB, Grid2Layout.db.profile.minimapIcon) 
+	Grid2Layout.minimapIcon = icon
+end	
+	
 --
 -- Layouts popup menu
 --

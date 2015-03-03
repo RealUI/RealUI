@@ -2,68 +2,67 @@ local RDDB= Grid2Options:GetRaidDebuffsTable()
 
 RDDB["Cataclysm"] = {
 	[754] = {
-		["[170-2]Magmaw"]= {
+		["Magmaw"]= {
+		order = 2, ejid = 170,
 		89773, -- Mangle
-		94679, -- Parasitic Infection
 		88287, -- Massive Crash
         78199, -- Sweltering Armor		
 		},
-		["[169-1]Omnitron Defense System"]= {
+		["Omnitron Defense System"]= {
+		order = 1, ejid = 169,
 		79889, -- Lightning Conductor
 		80161, -- Chemical Cloud
 		80011, -- Soaked in Poison
-		91535, -- Flamethrower
 		91829, -- Fixate
-		92035, -- Acquiring Target
         92053, -- Shadow Conductor
         92048, -- Shadow Infusion
         92023, -- Encasing Shadows		
 		},
-		["[173-5]Maloriak"]= {
-		92991, -- Rend
+		["Maloriak"]= {
+		order = 5, ejid = 173,
 		78225, -- Acid Nova
 		92910, -- Debilitating Slime
 		77786, -- Consuming Flames
 		91829, -- Fixate
 		77760, -- Biting Chill
 		77699, -- Flash Freeze
-        92987, -- Dark Sludge
-        92982, -- Engulfing Darkness		
 		},
-		["[171-3]Atremedes"]= {
+		["Atremedes"]= {
+		order = 3, ejid = 171,
 		78092, -- Tracking
 		77840, -- Searing
 		78353, -- Roaring Flame
 		78897, -- Noisy
 		},
-		["[172-4]Chimaeron"]= {
+		["Chimaeron"]= {
+		order = 4, ejid = 172,
 		89084, -- Low Health
 		82934, -- Mortality
-		88916, -- Caustic Slime
 		82881, -- Break
         91307, -- Mocking Shadows		
 		},
-		["[174-6]Nefarian"]={
-		94075, -- Magma
+		["Nefarian"]={
+		order = 6, ejid = 174,
 		77827, -- Tail Lash
         79339, -- Explosive Cinders
         79318, -- Dominion		
 		},
 	},
 	[758] = {
-		["[156-1]Halfus Wyrmbreaker"]= {
+		["Halfus Wyrmbreaker"]= {
+		order = 1, ejid = 156,
 		83710, -- Furious Roar		
 		83908, -- Malevolent Strike
 		83603, -- Stone Touch
 		},
-		["[157-2]Valiona & Theralion"]= {
+		["Valiona & Theralion"]= {
+		order = 2, ejid = 157,
 		86788, -- Blackout
-		95639, -- Engulfing Magic
 		86360, -- Twilight Shift
         86014, -- Twilight Meteorite
-        92886, -- Twilight Zone		
 		},
-		["[158-3]Ascendant Council"]= {
+		["Ascendant Council"]= {
+		order = 3, ejid = 158,
 		82762, -- Waterlogged
 		83099, -- Lightning Rod
 		82285, -- Elemental Stasis
@@ -74,25 +73,23 @@ RDDB["Cataclysm"] = {
         83500, -- Swirling Winds
         83581, -- Grounded
         92307, -- Frost Beacon
-        92467, -- Static Overload
-        92538, -- Gravity Core		
 		},
-		["[167-4]Cho'gall"]= {
+		["Cho'gall"]= {
+		order = 4, ejid = 167,
         81836, -- Corruption: Accelerated
         82125, -- Corruption: Malformation
         82170, -- Corruption: Absolute		
-		93187, -- Corrupted Blood
 		82523, -- Gall's Blast
 		82518, -- Cho's Blast
-		93134, -- Debilitating Beam
 		},
-		["[168-5]Sinestra"]= {
+		["Sinestra"]= {
+		order = 5, ejid = 168,
 		89299, -- Twilight Spit
-		92955, -- Wrack
 		},
 	},
 	[773] = {
-		["[154-1]Conclave of Wind"]= {
+		["Conclave of Wind"]= {
+		order = 1, ejid = 154,
 		84645, -- Wind Chill
 		86107, -- Ice Patch
 		86082, -- Permafrost
@@ -102,7 +99,8 @@ RDDB["Cataclysm"] = {
 		85576, -- Withering Winds
 		93057, -- Slicing Gale		
 		},
-		["[155-2]Al'Akir"]= {
+		["Al'Akir"]= {
+		order = 2, ejid = 155,
 		88290, -- Acid Rain
 		87873, -- Static Shock
 		88427, -- Electrocute
@@ -111,64 +109,67 @@ RDDB["Cataclysm"] = {
 		},
 	},
     [752] = {
-        ["[139-1]Argaloth"]= {
+        ["Argaloth"]= {
+		order = 1, ejid = 139,
         88942, -- Meteor Slash
         88954, -- Consuming Darkness
         },
-		["[140-2]Occu'thar"] = {
+		["Occu'thar"] = {
+		order = 2, ejid = 140,
 		96913, -- Searing Shadows
 		},
-		["[339-3]Alizabal"] = {
+		["Alizabal"] = {
+		order = 3, ejid = 339,
 		104936, -- Skewer
 		105067, -- Seething Hate
 		},		
     },	
 	[800] = {
-		["[192-1]Beth'tilac"]= {
+		["Beth'tilac"]= {
+		order = 1, ejid = 192,
 		49026, -- Fixate
 		97079, -- Seeping Venom
 		97202, -- Fiery Web Spin
 		99506, -- Widow Kiss
 		},
-		["[193-2]Lord Rhyolith"]= {
+		["Lord Rhyolith"]= {
+		order = 2, ejid = 193,
 		98492, -- Eruption
 		},
-		["[194-3]Alysrazor"]= {
-		101729, -- Blazing Claw
+		["Alysrazor"]= {
+		order = 3, ejid = 194,
 		100094, -- Fireblast
 		99389,  -- Imprinted
 		99308,  -- Gushing Wound
 		100640, -- Harsh Winds
 		100555, -- Souldering Roots
 		},
-		["[195-4]Shannox"]= {
+		["Shannox"]= {
+		order = 4, ejid = 195,
 		99936,	-- Jagged Tear
 		99837,  -- Crustal Prison
 		99840,  -- Magma Rupture
-		101208, -- Inmolation Trap
 		},
-		["[196-5]Baleroc"]= {
+		["Baleroc"]= {
+		order = 5, ejid = 196,
 		99252,  -- Blaze of Glory
 		99256,  -- Torment
-		99403,  -- Tormented
 		99516,  -- Count Down
-		100908, -- Fiery Torment
 		},
-		["[197-6]Majordomo Staghelm"]= {
+		["Majordomo Staghelm"]= {
+		order = 6, ejid = 197,
 		98443,  -- Fiery Cylcone
 		98450,	-- Searing Seeds
 		98535,  -- Leaping flames
 		96993,  -- Stay Withdrawn
-		100210, -- Burning Orb
 		},
-		["[198-7]Ragnaros"]= {
+		["Ragnaros"]= {
+		order = 7, ejid = 198,
 		99399,  -- Burning Wound
-		100293, -- Lava Wave
 		100238, -- Magma Trap vulnerability
 		98313,  -- Magma blast
 		100460, -- Blazing Heat
 		98981,  -- Lava Bolt
-		100249, -- Combustion
 		99613,  -- Molten Blast
 		},
 		["Trash"]= {
@@ -183,10 +184,12 @@ RDDB["Cataclysm"] = {
 		},		
 	},
 	[824] = {
-		["[311-1]Morchok"] = {
+		["Morchok"] = {
+		order = 1, ejid = 311,
 		103687, -- Crush Armor
 		},
-		["[317-4]Hagara the Stormbinder"] = {
+		["Hagara the Stormbinder"] = {
+		order = 4, ejid = 317,
 		104451,  -- Ice Tomb
 		105285,  -- Target (next Ice Lance)
 		105316,  -- Ice Lance
@@ -195,31 +198,33 @@ RDDB["Cataclysm"] = {
 		105465,  -- Lightning Storm
 		105369,  -- Lightning Conduit
 		},
-		["[332-6]Warmaster Blackhorn"] = {
-		109204, -- Twilight Barrage
+		["Warmaster Blackhorn"] = {
+		order = 6, ejid = 332,
 		108046, -- Shockwave
 		108043, -- Devastate
 		107567, -- Brutal strike
 		107558, -- Degeneration
 		110214, -- Consuming Shroud
 		},
-		["[331-5]Ultraxion"] = {
-		110068, -- Fading light 
+		["Ultraxion"] = {
+		order = 5, ejid = 331,
 		106108, -- Heroic will
 		106415, -- Twilight burst
 		105927, -- Faded Into Twilight
 		106369, -- Twilight shift
 		},
-		["[325-3]Yor'sahj the Unsleeping"] = {
+		["Yor'sahj the Unsleeping"] = {
+		order = 3, ejid = 325,
 		104849, -- Void bolt
 		109389, -- Deep Corruption
 		105695, -- Fixate 
 		},
-		["[324-2]Warlord Zon'ozz"] = {
+		["Warlord Zon'ozz"] = {
+		order = 2, ejid = 324,
 		103434, -- Disrupting shadows
-		110306, -- Black Blood of Go'rath
 		},
-		["[318-7]Spine of Deathwing"] = {
+		["Spine of Deathwing"] = {
+		order = 7, ejid = 318,
 		105563, -- Grasping Tendrils
 		105490, -- Fiery Grip
 		105479, -- Searing Plasma
@@ -227,9 +232,8 @@ RDDB["Cataclysm"] = {
 		106200, -- Blood corruption: earth
 		106005, -- Degradation
 		},
-		["[333-8]Madness of Deathwing"] = {
-		109603, -- Tetanus
-		109632, -- Impale
+		["Madness of Deathwing"] = {
+		order = 8, ejid = 333,
 		106794, -- Shrapnel
 		106385, -- Crush
 		105841, -- Degenerative bite

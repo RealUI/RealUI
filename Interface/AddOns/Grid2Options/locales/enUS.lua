@@ -358,6 +358,7 @@ L["Y Offset"] = true
 L["Y - Vertical Offset"] = true
 
 --{{{ Statuses
+L["-value"] = "(value)"
 L["-color"] = ":color"
 L["-mine"] = ":mine"
 L["-not-mine"] = ":not mine"
@@ -413,18 +414,14 @@ L["Threshold to activate Color"] = true
 L["Track by SpellId"] = true
 L["Track by spellId instead of aura name"] = true
 L["Assigned to"] = true
-
 L["Coloring based on"] = true
 L["Number of stacks"] = true
 L["Remaining time"] = true
 L["Elapsed time"] = true
-
 L["Class Filter"] = true
 L["Show on %s."] = true
-
 L["Blink Threshold"] = true
 L["Blink Threshold at which to start blinking the status."] = true
-
 L["Name or SpellId"] = true
 L["Select Type"] = true
 L["Buff"] = true
@@ -436,6 +433,7 @@ L["Debuffs Group: Healing Prevented "] = true
 L["Debuffs Group: Healing Reduced"] = true
 L["Filtered debuffs"] = true
 L["Listed debuffs will be ignored."] = true
+L["AURAVALUE_DESC"] = "Select an aura value to track. Auras can provide up to 3 values, but not all auras have additional values. Examples of auras providing additional values are: priest shields (shield amount is stored in Value1) or DeathKnight purgatory debuff."
 
 -- general statuses
 L["name"]= true

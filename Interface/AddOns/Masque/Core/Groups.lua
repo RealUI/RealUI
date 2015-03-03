@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Core\Groups.lua
-	* Revision.: 399
+	* Revision.: 406
 	* Author...: StormFX, JJSheets
 
 	Group API
@@ -219,7 +219,7 @@ do
 				if self.Parent then
 					self.Parent.SubList[self.ID] = nil
 				end
-				Core:RemoveOptions(self.Addon, self.Group)
+				Core:UpdateOptions(self.Addon, self.Group, true)
 				Groups[self.ID] = nil
 			end,
 
@@ -362,6 +362,9 @@ do
 							end
 						end
 						self.db.Inherit = false
+					end
+					if db.Disabled then
+						self.db.Disabled = true
 					end
 				end
 				if self.db.Disabled then

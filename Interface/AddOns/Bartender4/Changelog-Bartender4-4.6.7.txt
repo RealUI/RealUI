@@ -1,0 +1,14 @@
+tag 4.6.7
+abee6536a4535e699f51639f990d2f8a39896350
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-02-24 15:31:01 +0100
+
+Tag as 4.6.7
+
+
+--------------------
+
+Hendrik Leppkes:
+	- TOC for 6.1
+	- Improve micro menu padding in the blizzard preset
+	- Fix micro menu in 6.1

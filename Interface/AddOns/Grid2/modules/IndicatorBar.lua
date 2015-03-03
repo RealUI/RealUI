@@ -58,7 +58,7 @@ local function Bar_Layout(self, parent)
 			bgBar:SetPoint( points[4], Bar, points[4], 0, 0)
 			bgBar:Show()
 		elseif bgBar then bgBar:Hide() end				
-	end    
+	end
 end
 
 local function Bar_GetBlinkFrame(self, parent)
@@ -85,15 +85,20 @@ end
 local durationTimers = {}
 local expirations = {}
 local durations= {}
-local function tevent(self, parent, bar)
-	local timeLeft = expirations[bar] - GetTime()
-	self:SetValue( parent, timeLeft>0 and timeLeft/durations[bar] or 0 ) 
-end
 local function tcancel(bar)
 	if durationTimers[bar] then
 		Grid2:CancelTimer(durationTimers[bar])
 		durationTimers[bar], expirations[bar], durations[bar] = nil, nil, nil
 	end
+end
+local function tevent(self, parent, bar)
+	local timeLeft = expirations[bar] - GetTime()
+	if timeLeft>0 then
+		timeLeft = timeLeft/durations[bar]
+	else
+		timeLeft = 0; tcancel(bar)
+	end
+	self:SetValue( parent, timeLeft ) 
 end
 
 local function Bar_OnUpdateD(self, parent, unit, status)
@@ -108,7 +113,7 @@ local function Bar_OnUpdateD(self, parent, unit, status)
 				expirations[bar]= expiration
 				durations[bar]= duration
 				if not durationTimers[bar] then
-					durationTimers[bar]= Grid2:ScheduleRepeatingTimer(tevent, (duration>3 and 0.001 or 0.001), self, parent, bar)
+					durationTimers[bar] = Grid2:ScheduleRepeatingTimer(tevent, (duration>3 and 0.2 or 0.1), self, parent, bar)
 				end	
 				value= timeLeft / duration
 			else

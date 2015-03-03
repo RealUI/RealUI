@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Masque.lua
-	* Revision.: 398
+	* Revision.: 407
 	* Author...: StormFX
 
 	Add-On Setup
@@ -19,10 +19,12 @@ local print = print
 local LibStub = assert(LibStub, "Masque requires LibStub.")
 local Masque = LibStub("AceAddon-3.0"):NewAddon(MASQUE)
 
-Core.API = LibStub:NewLibrary(MASQUE, 60000)
+Core.API = LibStub:NewLibrary(MASQUE, 60100)
+
+local ACR = LibStub("AceConfigRegistry-3.0")
 
 local LDB = LibStub("LibDataBroker-1.1", true)
-local DBI = LibStub("LibDBIcon-1.0", true)
+local LDBI = LibStub("LibDBIcon-1.0", true)
 
 local L = Core.Locale
 
@@ -36,7 +38,7 @@ Core.Options = {
 	args = {
 		General = {
 			type = "group",
-			name = MASQUE,
+			name = L["General"],
 			order = 0,
 			args = {},
 		},
@@ -90,7 +92,8 @@ end
 
 function Masque:OnEnable()
 	local db = Core.db.profile
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(MASQUE, Core.Options)
+	ACR:RegisterOptionsTable(MASQUE, Core.Options)
+	Core.ACR = ACR
 	Core.OptionsPanel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(MASQUE, MASQUE, nil, "General")
 	Core.Options.args.General.args.Load = {
 		type = "execute",
@@ -123,9 +126,10 @@ function Masque:OnEnable()
 				Tip:AddLine(L["Click to open Masque's options window."], 1, 1, 1)
 			end,
 		})
-		if DBI then
-			DBI:Register(MASQUE, Core.LDBO, db.LDB)
-			Core.DBI = DBI
+		Core.LDB = LDB
+		if LDBI then
+			LDBI:Register(MASQUE, Core.LDBO, db.LDB)
+			Core.LDBI = LDBI
 		end
 	end
 end
@@ -150,7 +154,7 @@ end
 function Core:Update()
 	local Global = Core:Group()
 	Global:Update()
-	if DBI then
-		DBI:Refresh(MASQUE, Core.db.profile.LDB)
+	if LDBI then
+		LDBI:Refresh(MASQUE, Core.db.profile.LDB)
 	end
 end

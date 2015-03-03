@@ -90,11 +90,17 @@ local prevLineId, result, triggers = 0, nil, {
 	"join.*guild.*info", --Are you sick and tired of playing alone? Do you want to join a guild that treasures its community and values clearing WOD content together? Then wait no longer and join <*>, we'll be clearing raids, RBGs and enjoy guild events. /w for more info
 	"guild.*mature.*social", -- -*- is a large social guild with lots of friendly mature people, who enjoy the social side of the game we do classic raids, achies, rep runs if youre after a friendly social guild look no further than * and give me a wisper  :)
 	"looking.*community.*accepting", --<*> Are looking for more people. We are creating a mature and active community to participate in dungeon runs and casual raiding in WoD. Accepting all classes, whisper for more info or an invite.
+	"team.*looking.*people", --<*> LF Healer   for our raiding team,We are looking for people with excellent communication skills whom are willing to put an effort into raiding with us!
+	"looking.*progress.*/w", --<*> (7/7N 2/7HC) Is looking for skilled DPS + Healers for our progression to close out highmaul and move further into HC. iLvl is no prerequisite, we are looking for loyalty and potential. Sound like your kind of environment? Give me a /w!
+	"team.*social.*welcome", --<*> Lfm for fresh raid team starting with highmaul normal , ts3 , mondays at 8:30pm to 10:30pm realm time. socials also welcome  ,whisper me for info/invite.
+	--* is looking for more experienced and willing DPS and a tank or healer for our second raid team, your dps and movement needs to be brilliant:) All we ask is mature and positive behaviour. Please /w me if interested
+	"looking.*experi[ae]nced.*raid", --"*" 7/7 N - 6/7 HC. is curently Looking for more raid experianced ppl For moving Mythic were kinda low on warlocks and a good boomkin might do wonders :D We raid Mon/Tues and Thursdays 19.30 server time. Have a nice game :)
 
 	--Dutch
 	"guild.*zoek naar.*social", -- [25] Nederlands sprekende Guild <*> zijn op zoek naar Tanks: Geen / Melee dps: Warrior / Ranger dps: warlock, Mage / Healers: Paladin / raid tijden ma, di ,do van 20:00ST tot 23:00ST, social invite is ook mogelijk whisper voor meer info.
 	"recruut.*guild.*welkom", --<*> recruut momenteel 1 Boomkin en 1 frost mage voor ons RBG team. Cleanse is een Nederlands talige pvp guild. Alle nederlandstalige spelers zijn welkom om te joinen. Onze we spelen op donderdagen en zondagen om 20:00. Whisp voor meer info
 	"guild.*gezellige", --<*> is een nederlandstalige casual/raiding guild. We zijn op zoek naar casual mensen die onze gezellige guild willen joinen. /w mij of * voor meer info
+	"guild.*op zoek", --<*> HM (7/7 heroic) en BRF (3/10 HC) is een nederlandstalige casual/raiding guild. We zijn op zoek naar mensen met raid experience voor ons mythic team. We raiden 3 dagen per week /w me voor meer info
 
 	--Swedish
 	"rekryt", --<*> rekryterar. Vi söker aktiva spelare från Sverige och Norge. Vi är i behov av DPS (SPriest, Boomkin, DK) och en tank (warr, DK) med dps OS. Progress: 3/8 HC, raidar onsd, sön & mån 20-23. Socials är alltid välkomna!. /w för mer info
@@ -177,6 +183,9 @@ local prevLineId, result, triggers = 0, nil, {
 	"keresi.*aktív", --Sziasztok! Az * keresi aktív, raidelni vágyó játékosait a jelenlegi contentre és a következõ kiegre! Tapasztalt, jól müködõ, jó hangulatú csapat vagyunk! Mindenkit szeretettel várunk! infoért /w me!
 	"klán.*aktív", --Az * klán (* elsőszámú magyar Allis PvP guildje) várja az aktív, PVP kedvelő játékosokat, geartől és classtól függetlenül. Célunk a következő RBG szezon megnyerése *. Bővebb infoért /w  vagy www.*.hu
 	"guild.*www", --A visszatero <*> guild TGF-et hirdet aktiv jatekosoknak. Esti raidek, felnott, skilled jatekosok, sajat TS, igazsagos lootosztas (DKP rendszer), garantalt jo hangulat. Info /w vagy www.*.hu!
+	"klán.*h[íi]+rdet", --* pve klán tgf-et hírdet! Elsösorban egy Roguenak vagy egy Monk dpsnek. Raid napjaink: Szerda, csütörtök és vasárnap! Infóért /w.
+	"guild.*hírdet", --* (Pve/Pvp) Guild Általános TGF-et hírdet. Level és Gear nem számít. Szeretettel várunk mindenkit.
+	"hirdet.*info", --* tagfelvételt hirdet! Ha kezdõ vagy és segítségre van szülséged, esetleg raidelni is szeretnél de még nincs kivel és hol akkor itt a helyed. Normal dungeon, hc, raid, transmog farm, pvp és minden egyéb sok röhögéssel! info /w
 
 	--Polish
 	"gildia.*szuka", --Polska gildia RP-PvE szuka graczy do wspolnej zabawy. Chcemy stworzyc porzadna ekipe do gry zarówno PvE jak i PvP! Jednoczesnie chcemy aby w "*" panowała miła atmosfera. Gildia stworzona przez ludzi z duzym doswiadczeniem w WoW i innych grach MMO

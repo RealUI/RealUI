@@ -1,39 +1,44 @@
 local RDDB = Grid2Options:GetRaidDebuffsTable()
-
 RDDB["Mists of Pandaria"] = {
 	[897] = { --Heart of Fear
 		["Trash"] = { 
 		},
-		["[745-1]Imperial Vizier Zor'lok"] = {
+		["Imperial Vizier Zor'lok"] = {
+		order = 1, ejid = 745,
 		122760, --Exhale
 		123812, --Pheromones of Zeal
 		122740, --Convert
-		122706, --Noise Cancelling        
+		122706, --Noise Cancelling
 		},
-		["[744-2]Blade Lord Ta'yak"] = {
+		["Blade Lord Ta'yak"] = {
+		order = 2, ejid = 744,
 		122949, --Unseen Strike
 		123474, --Overwhelming Assault
 		124783, --Storm Unleashed
 		123600, --Storm Unleashed?        
 		},
-		["[713-3]Garalon"] = {
+		["Garalon"] = {
+		order = 3, ejid = 713,
 		122835, --Pheromones
 		123081, --Pungency
 		123120, --Pheromone Trail        
 		},
-		["[741-4]Wind Lord Mel'jarak"] = {
+		["Wind Lord Mel'jarak"] = {
+		order = 4, ejid = 741,
 		29212,--Cripple (NH)
 		121881, --Amber Prison
 		122055, --Residue
 		122064, --Corrosive Resin        
 		},
-		["[737-5]Amber-Shaper Un'sok"] = {
+		["Amber-Shaper Un'sok"] = {
+		order = 5, ejid = 737,
 		121949, --Parasitic Growth
 		122784, --Reshape Life
 		122064, --Corrosive Resin
 		122504, --Burning Amber        
 		},
-		["[743-6]Grand Empress Shek'zeer"] = {
+		["Grand Empress Shek'zeer"] = {
+		order = 6, ejid = 743,
 		125390, --Fixate
 		123707, --Eyes of the Empress
 		123788, --Cry of Terror
@@ -54,7 +59,8 @@ RDDB["Mists of Pandaria"] = {
 		118562, --Petrified
 		116596, --Smoke Bomb
 		},
-		["[679-1]The Stone Guard"] = {
+		["The Stone Guard"] = {
+		order = 1, ejid = 679,
 		130395, --Jasper Chains: Stacks
 		130404, --Jasper Chains
 		130774, --Amethyst Pool
@@ -65,7 +71,8 @@ RDDB["Mists of Pandaria"] = {
 		125206, --Rend Flesh: Tank only
 		116008, --Jade Petrification
 		},
-		["[689-2]Feng The Accursed"] = {
+		["Feng The Accursed"] = {
+		order = 2, ejid = 689,
 		131788, --Lightning Lash: Tank Only: Stacks
 		116040, --Epicenter
 		116942, --Flaming Spear: Tank Only
@@ -77,24 +84,28 @@ RDDB["Mists of Pandaria"] = {
 		116374, --Lightning Charge: Stun effect
 		131792, --Shadowburn: Tank only: Stacks: HEROIC ONLY
 		},
-		["[682-3]Gara'jal the Spiritbinder"] = {
+		["Gara'jal the Spiritbinder"] = {
+		order = 3, ejid = 682,
 		122151, --Voodoo doll: Super Super Important! Like Holy jesus important!
 		117723, --Frail Soul: HEROIC ONLY
 		116260, --Crossed Over
 		},
-		["[687-4]The Spirit Kings"] = {
+		["The Spirit Kings"] = {
+		order = 4, ejid = 687,
 		118303, --Undying Shadow: Fixate
 		118048, --Pillaged
 		118135, --Pinned Down
 		118047, --Pillage: Target
 		118163, --Robbed Blind
 		},
-		["[726-5]Elegon"] = {
+		["Elegon"] = {
+		order = 5, ejid = 726,
 		117878, --Overcharged
 		117949, --Closed circuit (dispellable)
 		117945, --Arcing Energy
 		},
-		["[677-6]Will of the Emperor"] = {
+		["Will of the Emperor"] = {
+		order = 6, ejid = 677,
 		116525, --Focused Assault
 		116778, --Focused Defense
 		117485, --Impeding Thrust
@@ -103,7 +114,8 @@ RDDB["Mists of Pandaria"] = {
 		},
 	},
 	[809] = { --Kun-Lai Summit
-		["[691-]Sha of Anger"] = {
+		["Sha of Anger"] = {
+		ejid = 691,
 		119626, --Aggressive Behavior [NOTE: this is the MC]
 		119488, --Unleashed Wrath [NOTE: Must heal these people. Lots of shadow dmg]
 		119610, --Bitter Thoughts (Silence)
@@ -113,14 +125,16 @@ RDDB["Mists of Pandaria"] = {
 	[886] = { --Terrace of Endless Spring
 		["Trash"] = {
 		},
-		["[683-1]Protector Kaolan"] = {
+		["Protector Kaolan"] = {
+		order = 1, ejid = 683,
 		117519, --Touch of Sha
 		111850, --Lightning Prison: Targeted
 		117436, --Lightning Prison: Stunned
 		118191, --Corrupted Essence
 		117986, --Defiled Ground: Stacks
 		},
-		["[742-2]Tsulong"] = {
+		["Tsulong"] = {
+		order = 2, ejid = 742,
 		122768, --Dread Shadows
 		122777, --Nightmares (dispellable)
 		122752, --Shadow Breath
@@ -130,11 +144,13 @@ RDDB["Mists of Pandaria"] = {
 		123036, --Fright (dispellable)
 		122858, --Bathed in Light
 		},
-		["[729-3]Lei Shi"] = {
+		["Lei Shi"] = {
+		order = 3, ejid = 729,
 		123121, --Spray
 		123705, --Scary Fog
 		},
-		["[709-4]Sha of Fear"] = {
+		["Sha of Fear"] = {
+		order = 4, ejid = 709,
 		119414, --Breath of Fear
 		129147, --Onimous Cackle
 		119983, --Dread Spray
@@ -150,13 +166,15 @@ RDDB["Mists of Pandaria"] = {
 	[930] = { --Throne of Thunder
 		["Trash"] = {
 		},
-		["[827-1]Jin'rokh the Breaker"] = {
+		["Jin'rokh the Breaker"] = {
+		order = 1, ejid = 827,
 		138349, --Static Wound
 		137399, --Focused Lightning
 		138733, --Ionization
 		138002, --Fluidity
 		},
-		["[819-2]Horridon"] = {
+		["Horridon"] = {
+		order = 2, ejid = 819,
 		136767, --Triple Puncture
 		136708, --Stone Gaze
 		136719, --Blazing Sunlight
@@ -166,7 +184,8 @@ RDDB["Mists of Pandaria"] = {
 		140946, --Dire Fixation
 		136710, --Deadly Plague
 		},
-		["[816-3]Council of Elders"] = {
+		["Council of Elders"] = {
+		order = 3, ejid = 816,
 		137650, --Shadowed Soul
 		137085, --Chilled to the Bone
 		136922, --Frostbite
@@ -176,10 +195,12 @@ RDDB["Mists of Pandaria"] = {
 		137359, --Marked Soul
 		137891, --Twisted Fate
 		},
-		["[825-4]Tortos"] = {
+		["Tortos"] = {
+		order = 4, ejid = 825,
 		137552, --Crystal Shell
 		},
-		["[821-5]Megaera"] = {
+		["Megaera"] = {
+		order = 5, ejid = 821,
 		139822, --Cinders
 		137731, --Ignite Flesh
 		139866, --Torrent of Ice
@@ -189,14 +210,16 @@ RDDB["Mists of Pandaria"] = {
 		140179, --Suppression
 		139994, --Diffusion
 		},
-		["[828-6]Ji-Kun"] = {
+		["Ji-Kun"] = {
+		order = 6, ejid = 828,
 		140092, --Infected Talons
 		134256, --Slimed
 		138319, --Feed Pool
 		134366, --Talon Rake
 		140014, --Daedelian Wings
 		},
-		["[818-7]Durumu the Forgotten"] = {
+		["Durumu the Forgotten"] = {
+		order = 7, ejid = 818,
 		133767, --Serious Wound
 		133768, --Arterial Cut
 		134755, --Eye Sore
@@ -206,31 +229,36 @@ RDDB["Mists of Pandaria"] = {
 		133598, --Dark Plague
 		134007, --Devour
 		},
-		["[820-8]Primordius"] = {
+		["Primordius"] = {
+		order = 8, ejid = 820,
 		136050, --Malformed Blood
 		140546, --Fully Mutated
 		137000, --Black Blood
 		136228, --Volatile Pathogen
 		},
-		["[824-9]Dark Animus"] = {
+		["Dark Animus"] = {
+		order = 9, ejid = 824,
 		138609, --Matter Swap
 		138569, --Explosive Slam
 		138659, --Touch of the Animus
 		136954, --Anima Ring
 		},
-		["[817-10]Iron Qon"] = {
+		["Iron Qon"] = {
+		order = 10, ejid = 817,
 		134691, --Impale
 		134647, --Scorched
 		136193, --Arcing Lightning
 		135145, --Freeze
 		},
-		["[829-11]Twin Consorts"] = {
+		["Twin Consorts"] = {
+		order = 11, ejid = 829,
 		137341, --Beast of Nightmares
 		137360, --Corrupted Healing
 		137408, --Fan of Flames
 		137440, --Icy Shadows
 		},
-		["[832-12]Lei Shen"] = {
+		["Lei Shen"] = {
+		order = 12, ejid = 832,
 		134916, --Decapitate
 		135150, --Crashing Thunder
 		139011, --Helm of Command
@@ -239,24 +267,28 @@ RDDB["Mists of Pandaria"] = {
 		136295, --Overcharged
 		135703, --Static Shock
 		},
-		["[831-13]Ra-den"] = {
+		["Ra-den"] = {
+		order = 13, ejid = 831,
 		138308, --Unstable Vita
 		138372, --Vita Sensitivity
 		}
 	},
 	[929] = { --Isle of Giants
-		["[826-]Oondasta"] = {
+		["Oondasta"] = {
+		ejid = 826,
 		137504, --Crush
 		},
 	},
 	[953] = { --Siege of Orgrimmar
-		["[852-1]Immerseus"] = {
+		["Immerseus"] = {
+		order = 1, ejid = 852,
 		143436, --Corrosive Blast
 		143574, --Swelling Corruption
 		143459, --Sha Residue
 		143524, --Purified Residue
 		},
-		["[849-2]The Fallen Protectors"] = {
+		["The Fallen Protectors"] = {
+		order = 2, ejid = 849,
 		143434, --Shadow Word: Bane
 		143959, --Defiled Ground
 		144007, --Residual Burn
@@ -270,7 +302,8 @@ RDDB["Mists of Pandaria"] = {
 		143423, --Sha Sear
 		143840, --Mark of Anguish
 		},
-		["[866-3]Norushen"] = {
+		["Norushen"] = {
+		order = 3, ejid = 866,
 		146703, --Bottomless Pit
 		146124, --Self Doubt
 		146707, --Disheartening Laugh
@@ -281,7 +314,8 @@ RDDB["Mists of Pandaria"] = {
 		144851, --Test of Confidence
 		--145725, --Despair (LFR Only?)
 		},
-		["[867-4]Sha of Pride"] = {
+		["Sha of Pride"] = {
+		order = 4, ejid = 867,
 		144359, --Gift of the Titans
 		144364, --Power of the Titans
 		146817, --Aura of Pride
@@ -293,21 +327,24 @@ RDDB["Mists of Pandaria"] = {
 		145345, --Orb of Light
 		119775, --Reaching Attack
 		},
-		["[868-5]Galakras"] = {
+		["Galakras"] = {
+		order = 5, ejid = 868,
 		147705, --Poison Cloud
 		146765, --Flame Arrows
 		146902, --Poison-Tipped Blades
 		147068, --Flames of Galakrond (on random focused player)
 		147029, --Flames of Galakrond (aoe sphew)
 		},
-		["[864-6]Iron Juggernaut"] = {
+		["Iron Juggernaut"] = {
+		order = 6, ejid = 864,
 		144467, --Ignite Armor
 		144459, --Laser Burn
 		144498, --Explosive Tar
 		146325, --Cutter Laser Target
 		144918, --Cutter Laser
 		},
-		["[856-7]Kor'kron Dark Shaman"] = {
+		["Kor'kron Dark Shaman"] = {
+		order = 7, ejid = 856,
 		17153,  --Rend
 		144215, --Froststorm Strike
 		144089, --Toxic Mist
@@ -315,14 +352,16 @@ RDDB["Mists of Pandaria"] = {
 		143990, --Foul Geyser
 		144330, --Iron Prison
 		},
-		["[850-8]General Nazgrim"] = {
+		["General Nazgrim"] = {
+		order = 8, ejid = 850,
 		143431, --Magistrike
 		143480, --Assassin's Mark
 		1130,   --Hunter's Mark
 		143638, --Bonecracker
 		143494, --Sundering Blowt
 		},
-		["[846-9]Malkorok"] = {
+		["Malkorok"] = {
+		order = 9, ejid = 846,
 		142863, --Weak Ancient Barrier
 		142864, --Ancient Barrier
 		142865, --Strong Ancient Barrier
@@ -330,7 +369,8 @@ RDDB["Mists of Pandaria"] = {
 		143919, --Languish
 		142913, --Displaced Energy
 		},
-		["[870-10]Spoils of Pandaria"] = {
+		["Spoils of Pandaria"] = {
+		order = 10, ejid = 870,
 		142944, --Return to Stone
 		145993, --Set to Blow
 		148760, --Pheromone Cloud
@@ -344,7 +384,8 @@ RDDB["Mists of Pandaria"] = {
 		142524, --Encapsulated Pheromones
 		148510, --Shattered Armor
 		},
-		["[851-11]Thok the Bloodthirsty"] = {
+		["Thok the Bloodthirsty"] = {
+		order = 11, ejid = 851,
 		23364,  --Tail Lash
 		143452, --Bloodied
 		133042, --Fixate
@@ -355,14 +396,16 @@ RDDB["Mists of Pandaria"] = {
 		143767, --Scorching Breath
 		82660,  --Burning Blood
 		},
-		["[865-12]Siegecrafter Blackfuse"] = {
+		["Siegecrafter Blackfuse"] = {
+		order = 12, ejid = 865,
 		143385, --Electrostatic Charge
 		144236, --Pattern Recognition
 		143856, --Superheated
 		144466, --Magnetic Crush
 		143828, --Locked On
 		},
-		["[853-13]Paragons of the Klaxxi"] = {
+		["Paragons of the Klaxxi"] = {
+		order = 13, ejid = 853,
 			--Kil'ruk the Wind-Reaver
 		142931, --Exposed Veins
 		143939, --Gouge
@@ -389,7 +432,8 @@ RDDB["Mists of Pandaria"] = {
 			--Hisek the Swarmkeeper
 		142948, --Aim
 		},
-		["[869-14]Garrosh Hellscream"] = {
+		["Garrosh Hellscream"] = {
+		order = 14, ejid = 869,
 		87704,  --Hamstring
 		147324, --Crushing Fear
 		149347, --Embodied Doubt
@@ -405,18 +449,23 @@ RDDB["Mists of Pandaria"] = {
 		},
 	},
 	[951] = { --Timeless Isle
-		["[861-]Ordos, Fire-God of the Yaungol"] = {
+		["Ordos, Fire-God of the Yaungol"] = {
+		ejid = 861,
 		144689, --Burning Soul
 		},
-		["[857-]Chi-Ji, The Red Crane"] = {
+		["Chi-Ji, The Red Crane"] = {
+		ejid = 857,
 		},
-		["[858-]Yu'lon, The Jade Serpent"] = {
+		["Yu'lon, The Jade Serpent"] = {
+		ejid = 858,
 		144630, --Jadeflame Buffet
 		},
-		["[859-]Niuzao, The Black Ox"] = {
+		["Niuzao, The Black Ox"] = {
+		ejid = 859,
 		144607, --Oxen Fortitude
 		},
-		["[860-]Xuen, The White Tiger"] = {
+		["Xuen, The White Tiger"] = {
+		ejid = 860,
 		144638, --Spectral Swipe
 		},
 	},

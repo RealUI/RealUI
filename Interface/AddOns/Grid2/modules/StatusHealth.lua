@@ -356,9 +356,9 @@ function Heals:UpdateDB()
 	self.minimum = (m and m>1 and m ) or 1
 	self.multiplier = self.dbx.multiplier or 1
 	if self.dbx.includeHealAbsorbs then
-		HealsGetAmount = self.dbx.includePlayer and HealsAbsorbPlayer or HealsAbsorbNoPlayer
+		HealsGetAmount = self.dbx.includePlayerHeals and HealsAbsorbPlayer or HealsAbsorbNoPlayer
 	else
-		HealsGetAmount = self.dbx.includePlayer and HealsPlayer or HealsNoPlayer
+		HealsGetAmount = self.dbx.includePlayerHeals and HealsPlayer or HealsNoPlayer
 	end
 end
 

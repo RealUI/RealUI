@@ -1,6 +1,5 @@
 local _, ns = ...
 local alpha
-local RealUIStripeOpacity = 0.5
 
 local mediapath = "Interface\\AddOns\\FreebTip\\media\\"
 local cfg = {
@@ -524,25 +523,10 @@ local function style(frame)
 	if(not frame) then return end
 	
 	frame:SetScale(cfg.scale)
-	if(not frame.freebtipBD) then
-		frame:SetBackdrop(cfg.backdrop)
-		frame.freebtipBD = true
+	if (not frame.freebtipBD) then
 		-- xRUI
-		tinsert(REALUI_WINDOW_FRAMES, frame)
-	end
-	-- xRUI
-	frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
-	
-	-- Stripes xRUI
-	if not frame.stripeTex then
-		frame.stripeTex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
-		frame.stripeTex:SetAllPoints()
-		frame.stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-		frame.stripeTex:SetHorizTile(true)
-		frame.stripeTex:SetVertTile(true)
-		frame.stripeTex:SetBlendMode("ADD")
-		frame.stripeTex:SetAlpha(RealUI.db.profile.settings.stripeOpacity)
-		tinsert(REALUI_STRIPE_TEXTURES, frame.stripeTex)
+		Aurora[1].CreateBD(frame)
+		frame.freebtipBD = true
 	end
 	
 	local unit = GetMouseFocus() and GetMouseFocus().unit or "mouseover"

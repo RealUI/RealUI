@@ -2,8 +2,8 @@ local L = Grid2Options.L
 
 local BuffSubTypes= {
 	["Buff"] =  1,
-	["Buffs Group"] =  {},
-	["Buffs Group: Defensive Cooldowns"] = { 
+	["Buffs"] =  {},
+	["Buffs: Defensive Cooldowns"] = { 
 			6940,  --Hand of Sacrifice
 			31850, --Ardent Defender
 			498,   --Divine Protection
@@ -29,15 +29,15 @@ local BuffSubTypes= {
 
 local DebuffSubTypes= {
 	["Debuff"] =  1,
-	["Debuffs Group"] =  {},
-	["Debuffs Group: Healing Prevented "] = { 
+	["Debuffs"] =  {},
+	["Debuffs: Healing Prevented "] = { 
 		82170, -- Corrupcion absoluta (Chogall)
 		82890, -- Mortalidad (Chimaeron)
 		85576, -- Vientos fulminadores (Alakir)
 		92787, -- Oscuridad engullidora (Maloriak Hc)
 		76903, -- Prision antimagia (Void Seeker/Hall of Originations)
 	},
-	["Debuffs Group: Healing Reduced"] = { 
+	["Debuffs: Healing Reduced"] = { 
 		83908, -- Golpes malevolos (Halfus)
 		76727, -- Golpe mortal (Grim Batol)
 		22687, -- Velo de sombras (Nefarian)
@@ -61,14 +61,14 @@ local NewAuraHandlerMT = {
 	Init = function (self)
 		self.name = ""
 		self.mine = 1
-		self.colorCount = 1
 		self.spellName = nil
 	end,
 	GetKey = function (self)
+		local result
 		local name = self.name:gsub("[ %.\"]", "")
 		if name == "" then return end
 		if self.type == "debuff" then
-			return self.type.."-"..name
+			result = self.realType.."-"..name
 		else
 			local mine = self.mine
 			if mine == 2 then
@@ -78,8 +78,9 @@ local NewAuraHandlerMT = {
 			else
 				mine = ""
 			end
-			return self.type.."-"..name..mine
+			result = self.realType.."-"..name..mine
 		end	
+		return result
 	end,
 	GetName = function (self)
 		return self.name
@@ -90,14 +91,14 @@ local NewAuraHandlerMT = {
 		if not spell then
 			spell, prefix = value, ""
 		end	
-		spellName= tonumber(spell) or spell
+		spellName = tonumber(spell) or spell
 		if type(spellName)=="number" then
 			spell= GetSpellInfo(spellName)
 			if spell==nil then
 				spell,spellName= "", nil
 			end
 		end
-		self.spellName = spellName	
+		self.spellName = spellName
 		self.name = prefix .. spell
 	end,
 	GetMine = function (self)
@@ -112,12 +113,6 @@ local NewAuraHandlerMT = {
 	SetNotMine = function (self, info, value)
 		self.mine = value and 2
 	end,
-	GetColorCount = function (self)
-		return self.colorCount
-	end,
-	SetColorCount = function (self, info, value)
-		self.colorCount = value
-	end,
 	GetAvailableSubTypes = function(self)
 		local result= {}
 		for k in pairs(self.subTypes) do
@@ -129,13 +124,15 @@ local NewAuraHandlerMT = {
 		return self.subType
 	end,
 	SetSubType= function(self,info,value)
-		self.subType = value
-		if type(self.subTypes[value]) == "table" then
+		self.subType  = value
+		self.isGroup  = type(self.subTypes[value]) == "table"
+		self.realType = self.isGroup and self.type.."s" or self.type
+		self.spellName = nil		
+		if self.isGroup then
 			self.spellName = value
-			self.name = L[value]
+			self.name = L[ string.match(value, "^.-: (.*)$") or value ]
 			self.mine = nil
 		else
-			self.spellName = nil
 			self.name = ""
 			self.mine = 1
 		end
@@ -143,26 +140,27 @@ local NewAuraHandlerMT = {
 	Create = function (self)
 		local baseKey = self:GetKey()
 		if baseKey then
-			--Add to options and runtime db 
-			local dbx	
+			--Add to options and runtime db
+			local dbx
+			local spellName = (not self.isGroup) and self.spellName or nil
+			local color = { r = self.color.r , g = self.color.g, b = self.color.b , a = self.color.a }
 			if self.type == "debuff" then
-				dbx = {type = self.type, spellName = self.spellName, color1 = self.color}
+				dbx = {type = self.realType, spellName = spellName, color1 = color }
 			else
-				dbx = {type = self.type, spellName = self.spellName, mine = self.mine, color1 = self.color}
-				if self.colorCount>1 then
-					dbx.colorCount= self.colorCount
-					for i = 2, self.colorCount do
-						dbx["color"..i]= {r=1,g=1,b=1,a=1}
-					end
-				end
+				dbx = {type = self.realType, spellName = spellName, mine = self.mine, color1 = color }
 			end
-			local subType= self.subTypes[self.subType]
-			if type(subType) == "table" then -- Buffs or Debuffs Group
-				dbx.auras= {}
-				for i,v in pairs(subType) do
-					dbx.auras[i]= v
-				end
-			end				
+			if self.isGroup then -- Buffs or Debuffs Group
+				local auras = self.subTypes[self.subType]
+				if #auras>0 or self.type == "buff" then
+					dbx.auras= {} 
+					for i,v in pairs(auras) do
+						dbx.auras[i]= v
+					end
+					if self.type == "debuff" then 
+						dbx.useWhiteList = true
+					end	
+				end	
+			end
 			Grid2.db.profile.statuses[baseKey]= dbx
 			--Create the status
 			local status = Grid2.setupFunc[dbx.type](baseKey, dbx)
@@ -183,7 +181,7 @@ NewAuraHandlerMT.__index = NewAuraHandlerMT
 -- }}
 
 --{{ Buff Creation options
-local NewBuffHandler = setmetatable({type = "buff", subType="Buff", subTypes= BuffSubTypes, color = {r=1,g=1,b=1,a=1}}, NewAuraHandlerMT)
+local NewBuffHandler = setmetatable({type = "buff", realType= "buff", subType="Buff", subTypes= BuffSubTypes, color = {r=1,g=1,b=1,a=1}}, NewAuraHandlerMT)
 
 NewBuffHandler.options = {
 	newStatusBuffType = {
@@ -227,17 +225,6 @@ NewBuffHandler.options = {
 		disabled = "GetMine",
 		handler = NewBuffHandler,
 	},
-	newStatusColorCount = {
-		type = "select",
-		order = 5.4,
-		width="half",
-		name = L["Color count"],
-		desc = L["Select how many colors the status must provide."],
-		get = "GetColorCount",
-		set = "SetColorCount",
-		values = ColorCountValues,
-		handler = NewBuffHandler,
-	},
 	newStatusBuffSpacer = {
 		type = "header",
 		order = 5.5,
@@ -259,7 +246,7 @@ Grid2Options:RegisterStatusCategoryOptions("buff", NewBuffHandler.options)
 --}}
 
 --{{ Debuff Creation options
-local NewDebuffHandler = setmetatable({type = "debuff", subType="Debuff", subTypes= DebuffSubTypes, color = {r=1,g=.2,b=.2,a=1}}, NewAuraHandlerMT)
+local NewDebuffHandler = setmetatable({type = "debuff", realType = "debuff", subType="Debuff", subTypes= DebuffSubTypes, color = {r=1,g=.2,b=.2,a=1}}, NewAuraHandlerMT)
 
 NewDebuffHandler.options = {
 	newStatusDebuffType = {
@@ -283,9 +270,14 @@ NewDebuffHandler.options = {
 		set = "SetName",
 		handler = NewDebuffHandler,
 	},
+	newStatusDebuffSpacer = {
+		type = "header",
+		order = 5.4,
+		name = ""
+	},
 	newStatusDebuff = {
 		type = "execute",
-		order = 5.3,
+		order = 5.5,
 		name = L["Create Debuff"],
 		desc = L["Create a new status."],
 		func = "Create",

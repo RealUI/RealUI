@@ -34,6 +34,7 @@ local GridLayoutHeaderClass = {
 		frame:SetAttribute("initialConfigFunction", [[
 			RegisterUnitWatch(self)
 			self:SetAttribute("*type1", "target")
+			self:SetAttribute("*type2", "menu")
 			self:SetAttribute("useparent-toggleForVehicle", true)
 			self:SetAttribute("useparent-allowVehicleTarget", true)
 			self:SetAttribute("useparent-unitsuffix", true)
@@ -140,6 +141,7 @@ Grid2Layout.defaultDB = {
 		groupAnchor = "TOPLEFT",
 		PosX = 500,
 		PosY = -200,
+		minimapIcon = { hide = false },
 	},
 }
 

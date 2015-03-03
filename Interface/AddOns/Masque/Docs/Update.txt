@@ -1,12 +1,32 @@
-== v6.0.0 ==
+=== __v6.1.0__ ===
 
-== General ==
+**General**
+
+* ToC Update.
+
+**API**
+
+* Calling the Group:Delete() method no longer hides the options frame.
+
+**Bug Fixes**
+
+* Fixed an issue with the mini-map icon option not appearing.
+* Fixed the "General" options group so that "Masque - General" is displayed rather than "Masque - Masque".
+* Fixed disabled state inheritance.
+
+**Miscellaneous**
+
+* Masque will now use the esES locale for esMX, since they're nearly identical.
+
+=== __v6.0.0__ ===
+
+**General**
 
 * Updated for WoD.
 * The legacy support add-on "ButtonFacade" and its associated library have been removed.  If an add-on or skin you use throws an error... Seriously, it's been //years//.  Update or adapt.
 * The options panel is now always load-on-demand.
 
-== API ==
+**API**
 
 * A new API method, :UpdateSpellAlert(Button) is available. This will allow add-ons that use internal spell alert methods to have them updated by Masque.
 * The callback for an add-on registered with Masque will now have a 6th parameter (not counting **self**) set to **true** if the group has been disabled or to **nil** otherwise.
@@ -19,7 +39,7 @@
   ** Skin
   ** ResetColors
 
-== Bug Fixes ==
+**Bug Fixes**
 
 * Fixed an issue that was preventing a group's options from being removed from the options panel.
   ** To prevent errors, the options panel will close (if open) when the Group:Delete() method is called.

@@ -2,7 +2,6 @@
 
 local Grid2 = Grid2
 
-
 function Grid2.Dummy()
 end
 
@@ -13,9 +12,13 @@ function Grid2:HideBlizzardRaidFrames()
 	CompactRaidFrameContainer:Hide()
 end
 
-local defaultColor = {r=0,g=0,b=0,a=0}
-function Grid2:MakeColor(color)
-	return color or defaultColor
+local defaultColors = {
+	TRANSPARENT = {r=0,g=0,b=0,a=0},
+	BLACK       = {r=0,g=0,b=0,a=1},
+	WHITE       = {r=1,g=1,b=1,a=1},
+}
+function Grid2:MakeColor(color, default)
+	return color or defaultColors[default or "TRANSPARENT"]
 end
 
 local media = LibStub("LibSharedMedia-3.0", true)

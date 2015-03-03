@@ -12,7 +12,7 @@ Grid2Options.indicatorIconPath = "Interface\\Addons\\Grid2Options\\media\\indica
 -- Creatable indicators list
 Grid2Options.indicatorTypes = {}
 -- Indicators sort order
-Grid2Options.indicatorTypesOrder= {	alpha = 1, border = 2, multibar =3, bar = 4, text = 5, square = 6, icon = 7 }
+Grid2Options.indicatorTypesOrder= {	alpha = 1, border = 2, multibar =3, bar = 4, text = 5, square = 6, icon = 7, icons = 8 }
 
 
 -- Register indicator options

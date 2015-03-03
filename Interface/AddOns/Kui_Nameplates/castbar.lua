@@ -36,7 +36,7 @@ local function OnDefaultCastbarShow(self)
 		f.castbar.bar:SetStatusBarColor(unpack(mod.db.profile.display.barcolour))
 		f.castbar.shield:Hide()
 	end
-	
+
 	if f.trivial then
 		-- hide text & icon
 		if f.castbar.icon then
@@ -105,17 +105,17 @@ function mod:CreateCastbar(msg, frame)
 	-- container ---------------------------------------------------------------
 	frame.castbar = CreateFrame('Frame', nil, frame)
 	frame.castbar:Hide()
-	
+
 	-- background --------------------------------------------------------------
 	frame.castbar.bg = frame.castbar:CreateTexture(nil, 'BACKGROUND')
 	frame.castbar.bg:SetTexture(kui.m.t.solid)
 	frame.castbar.bg:SetVertexColor(0, 0, 0, .85)
 
 	frame.castbar.bg:SetHeight(addon.sizes.frame.cbheight)
-	
+
 	frame.castbar.bg:SetPoint('TOPLEFT', frame.bg.fill, 'BOTTOMLEFT', 0, -1)
 	frame.castbar.bg:SetPoint('TOPRIGHT', frame.bg.fill, 'BOTTOMRIGHT', 0, 0)
-	
+
 	-- cast bar ------------------------------------------------------------
 	frame.castbar.bar = CreateFrame("StatusBar", nil, frame.castbar)
 	frame.castbar.bar:SetStatusBarTexture(addon.bartexture)
@@ -145,15 +145,15 @@ function mod:CreateCastbar(msg, frame)
 
 	frame.castbar.shield:SetBlendMode('BLEND')
 	frame.castbar.shield:SetDrawLayer('ARTWORK', 7)
-	frame.castbar.shield:SetVertexColor(unpack(mod.db.profile.display.shieldbarcolour))
-	
+	frame.castbar.shield:SetVertexColor(1,1,1)
+
 	frame.castbar.shield:Hide()
-	
+
 	-- cast bar text -------------------------------------------------------
 	if self.db.profile.display.spellname then
 		frame.castbar.name = frame:CreateFontString(frame.castbar.bar, {
 			size = 'small' })
-        
+
         if addon.db.profile.general.leftie then
             frame.castbar.name:SetPoint('TOPLEFT', frame.castbar.bar, 'BOTTOMLEFT', 2.5, -3)
             frame.castbar.name:SetPoint('TOPRIGHT', frame.castbar.bar, 'BOTTOMRIGHT')
@@ -189,12 +189,12 @@ function mod:CreateCastbar(msg, frame)
 		frame.castbar.icon.bg:SetSize(addon.sizes.frame.icon, addon.sizes.frame.icon)
 		frame.castbar.icon.bg:SetPoint(
 			'TOPRIGHT', frame.health, 'TOPLEFT', -2, 1)
-		
+
 		frame.castbar.icon:SetPoint(
 			'TOPLEFT', frame.castbar.icon.bg, 'TOPLEFT', 1, -1)
 		frame.castbar.icon:SetPoint(
 			'BOTTOMRIGHT', frame.castbar.icon.bg, 'BOTTOMRIGHT', -1, 1)
-		
+
 		frame.castbar.icon.bg:SetDrawLayer('ARTWORK', 1)
 		frame.castbar.icon:SetDrawLayer('ARTWORK', 2)
 	end
@@ -303,7 +303,7 @@ function mod:OnInitialize()
 	})
 
 	addon:RegisterSize('frame', 'cbheight', self.db.profile.display.cbheight)
-	addon:RegisterSize('frame', 'icon', 
+	addon:RegisterSize('frame', 'icon',
 		addon.db.profile.general.hheight + addon.defaultSizes.frame.cbheight + 1)
 	addon:RegisterSize('tex', 'shieldw', 10)
 	addon:RegisterSize('tex', 'shieldh', 12)

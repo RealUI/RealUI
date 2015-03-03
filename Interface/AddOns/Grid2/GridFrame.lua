@@ -77,8 +77,8 @@ function GridFrameEvents:OnAttributeChanged(name, value)
 			if self.unit ~= unit then
 				Grid2Frame:Debug("updated", self:GetName(), name, value, unit)
 				self.unit = unit
-				self:UpdateIndicators()
 				Grid2:SetFrameUnit(self, unit)
+				self:UpdateIndicators()				
 			end
 		elseif self.unit then
 			Grid2Frame:Debug("removed", self:GetName(), name, self.unit)

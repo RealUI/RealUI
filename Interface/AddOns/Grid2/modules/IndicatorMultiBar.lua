@@ -84,18 +84,17 @@ local function Bar_OnFrameUpdate(bar)
 end
 
 -- {{{ Optimization: Updating modified bars only on next frame repaint
-local frameUpdates
 local updates = {}
-do
-	frameUpdates = CreateFrame("Frame", nil, Grid2LayoutFrame)
-	frameUpdates:SetScript("OnUpdate", function()
+local EnableDelayedUpdates = function()
+	CreateFrame("Frame", nil, Grid2LayoutFrame):SetScript("OnUpdate", function()
 		for bar in pairs(updates) do
 			Bar_OnFrameUpdate(bar)
 		end
 		wipe(updates)
 	end)
-	frameUpdates:Hide()
+	EnableDelayedUpdates = Grid2.Dummy
 end	
+
 -- Warning: This is an overrided indicator:Update() NOT the standard indicator:OnUpdate()
 local function Bar_Update(self, parent, unit, status)
 	if unit then
@@ -226,7 +225,6 @@ local function Bar_UpdateDB(self, dbx)
 		self.barCount = self.barCount + 1
 	    self.bars[self.barCount] = { texture = self.backTexture, color = dbx.backColor, sublayer = 0 }
 	end
-	frameUpdates:Show()
 end
 
 --{{ Bar Color indicator
@@ -272,7 +270,8 @@ local function Create(indicatorKey, dbx)
 	Bar.UpdateDB       = Bar_UpdateDB	
 	Bar_UpdateDB(Bar,dbx)
 	Grid2:RegisterIndicator(Bar, { "percent" }, true)
-
+	EnableDelayedUpdates()
+	
 	local colorKey    = indicatorKey .. "-color"
 	local BarColor    = Grid2.indicators[colorKey] or Grid2.indicatorPrototype:new(colorKey)
 	BarColor.BarName  = indicatorKey
@@ -281,9 +280,8 @@ local function Create(indicatorKey, dbx)
 	BarColor.UpdateDB = BarColor_UpdateDB
 	BarColor_UpdateDB(BarColor, dbx)
 	Grid2:RegisterIndicator(BarColor, { "color" })
-
 	Bar.sideKick = BarColor
-
+	
 	return Bar, BarColor
 end
 

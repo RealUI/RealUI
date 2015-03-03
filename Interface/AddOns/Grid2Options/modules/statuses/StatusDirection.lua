@@ -23,6 +23,7 @@ Grid2Options:RegisterStatusOptions( "direction", "target", function(self, status
 		type = "header",
 		order = 99,
 		name = L["Display"],
+		hidden = function ()	return status.dbx.showOnlyStickyUnits end,
 	}
 	options.showOutOfRange = {
 		type = "toggle",
@@ -115,6 +116,11 @@ Grid2Options:RegisterStatusOptions( "direction", "target", function(self, status
 			status.dbx.StickyTanks = v or nil
 			status:UpdateDB()
 		end,
+	}
+	options.spacer3 = {
+		type = "header",
+		order = 165,
+		name = "",
 	}
 	options.showOnlyStickyUnits = {
 		type = "toggle",

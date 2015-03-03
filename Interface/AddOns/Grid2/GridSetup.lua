@@ -4,21 +4,16 @@ Created by Grid2 original authors, modified by Michael
 
 local Grid2 = Grid2
 
--- function Grid2:SetupIndicators(setup)
-    -- -- remove old indicators 
-	-- for _, indicator in Grid2:IterateIndicators() do
-		-- Grid2:UnregisterIndicator(indicator)        
-	-- end
-	-- -- add new indicator types
-	-- for baseKey, dbx in pairs(setup) do
-		-- local setupFunc = self.setupFunc[dbx.type]
-		-- if (setupFunc) then
-			-- setupFunc(baseKey, dbx)
-        -- else
-			-- Grid2:Debug("SetupIndicators setupFunc not found for indicator: ", dbx.type)
-		-- end
-	-- end
--- end
+function Grid2:SetupShutdown()
+	-- remove indicators 
+	for _, indicator in Grid2:IterateIndicators() do
+		Grid2:UnregisterIndicator(indicator)
+	end
+  	-- remove statuses
+	for _, status in Grid2:IterateStatuses() do
+		Grid2:UnregisterStatus(status)
+	end
+end
 
 function Grid2:SetupIndicators(setup)
 	local loaded = {}
@@ -39,10 +34,6 @@ function Grid2:SetupIndicators(setup)
 			Grid2:Debug("SetupIndicators child indicator not loaded due to failed dependencies: ", parent, dbx.type)
 		end	
 	end
-    -- remove old indicators 
-	for _, indicator in Grid2:IterateIndicators() do
-		Grid2:UnregisterIndicator(indicator)
-	end
 	-- add new indicator types
 	for baseKey, dbx in pairs(setup) do
 		SetupIndicator(baseKey, dbx)
@@ -50,10 +41,6 @@ function Grid2:SetupIndicators(setup)
 end
 
 function Grid2:SetupStatuses(setup)
-  	-- remove old statuses
-	for _, status in Grid2:IterateStatuses() do
-		Grid2:UnregisterStatus(status)
-	end
 	-- add new statuses
 	for baseKey, dbx in pairs(setup) do
 		local setupFunc = self.setupFunc[dbx.type]

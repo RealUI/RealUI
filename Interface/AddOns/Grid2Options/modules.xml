@@ -10,6 +10,7 @@
 <Script file="modules\general\GridLayouts.lua"/>
 <Script file="modules\general\GridTextFormat.lua"/>
 <Script file="modules\general\GridBlink.lua"/>
+<Script file="modules\general\GridMinimapIcon.lua"/>
 <Script file="modules\general\GridHideBlizzardFrames.lua"/>
 <Script file="modules\general\GridLoadOnDemand.lua"/>
 <Script file="modules\general\GridProfile.lua"/>
@@ -46,6 +47,7 @@
 <Script file="modules\indicators\IndicatorMultiBar.lua"/>
 <Script file="modules\indicators\IndicatorBorder.lua"/>
 <Script file="modules\indicators\IndicatorIcon.lua"/>
+<Script file="modules\indicators\IndicatorIcons.lua"/>
 <Script file="modules\indicators\IndicatorSquare.lua"/>
 <Script file="modules\indicators\IndicatorText.lua"/>
 

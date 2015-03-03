@@ -218,7 +218,7 @@ end
 local function OnFrameShow(self)
     self = self.kuiParent
     local f = self.kui
-    local trivial = f.firstChild:GetScale() < 1
+    local trivial = f.firstChild:GetScale() < 1 and not addon.notrivial
 
     -- classifications
     if not trivial and f.level.enabled then

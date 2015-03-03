@@ -115,6 +115,8 @@ L["ADDON_CALL_PROTECTED"] = "[%s] O AddOn '%s' tentou chamar a função protegid
 L["ADDON_CALL_PROTECTED_MATCH"] = "^%[(.*)%] (AddOn '.*' tentou chamar a função protegida '.*'.)$"
 L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r e |cffffff7f%s|r não podem existir juntos. |cffffff7f%s|r foi desabilitado por causa disso. Se você quiser, você pode sair, desabilitar o |cffffff7fBugGrabber|r e habilitar o |cffffff7f%s|r." -- Needs review
 L["BUGGRABBER_STOPPED"] = "|cffffff7fBugGrabber|r parou de capturar erros, já que capturou mais de %d erros por segundo. A captura será resumida em %d segundos." -- Needs review
+L["ERROR_DETECTED"] = "%s |cffffff00capturado, clique no link para mais informações.|r" -- Needs review
+L["ERROR_UNABLE"] = "|cffffff00!BugGrabber não pode receber erros por outros jogadores por si só. Por favor, instale BugSack ou outro programa que oferece essa funcionalidade." -- Needs review
 L["NO_DISPLAY_1"] = "|cffff4411Aparentemente você está usando !BugGrabber sem nenhum addon de exibição para acompanhá-lo. Apesar do !BugGrabber fornecer um comando para acessar os erros dentro do jogo, um addon de exibição pode ajudar você a gerenciar esses erros de uma forma mais conveniente.|r" -- Needs review
 L["NO_DISPLAY_2"] = "|cffff4411O exibidor padrão do !BugGrabber é conhecido por |r|cff44ff44BugSack|r|cffff4411, e pode provavelmente ser encontrado no mesmo site onde você achou o !BugGrabber.|r" -- Needs review
 L["NO_DISPLAY_STOP"] = "|cffff4411Se você não deseja ser lembrado disso novamente, por favor utilize o comando |cff44ff44/stopnag|r|cffff4411.|r" -- Needs review
@@ -122,13 +124,17 @@ L["STOP_NAG"] = "|cffff4411!BugGrabber não irá perturbar sobre não ter detect
 L["USAGE"] = "Uso: /buggraber <1-%d>" -- Needs review
 
 	elseif locale == "itIT" then
-L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r e |cffffff7f%s|r non possono essere contemporaneamente installati. |cffffff7f%s|r è stato quindi disabilitato. Se vuoi, puoi uscire dal gioco, disabilitare |cffffff7fBugGrabber|r e riattivare |cffffff7f%s|r." -- Needs review
-L["BUGGRABBER_STOPPED"] = "|cffffff7fBugGrabber|r ha smesso di catturare errori, poichè ha catturato più di %d errori al second. La cattura riprenderà tra %d secondi." -- Needs review
-L["NO_DISPLAY_1"] = "lcffff4411Sembra che tu stia eseguendo !BugGrabber senza alcun addon che ne visualizzi gli errori. Anche se !BugGrabber ha un comando per visualizzarli nella chat, un addon aggiuntivo per visualizzarli potrebbe esserti utile.|r" -- Needs review
-L["NO_DISPLAY_2"] = "|cffff4411L'addon standard per la visualizzazione degli errori catturati da !BugGrabber si chiama |r|cff44ff44BugSack|r|cffff4411, e molto probabilmente lo puoi trovare sullo stesso sito dove hai trovato !BugGrabber.|r" -- Needs review
-L["NO_DISPLAY_STOP"] = "|cffff4411Se non vuoi visualizzare più questo messaggio, esegui il comando |cff44ff44/stopnag|r|cffff4411.|r" -- Needs review
-L["STOP_NAG"] = "|cffff4411!BugGrabber non ti ricorderà più di installare |r|cff44ff44BugSack|r|cffff4411 fino al prossimo aggiornamento.|r" -- Needs review
-L["USAGE"] = "Uso: /buggrabber <1-%d>." -- Needs review
+L["ADDON_CALL_PROTECTED"] = "[%s] AddOn '%s' ha cercato di chiamare la funzione protetta '%s'."
+L["ADDON_CALL_PROTECTED_MATCH"] = "^%[(.*)%] (AddOn '.*' ha cercato di chiamare la funzione protetta '.*'.)$"
+L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r e %s non possono essere contemporaneamente installati. %s è stato quindi disabilitato. Se vuoi, puoi uscire dal gioco, disabilitare !BugGrabber e riattivare %s."
+L["BUGGRABBER_STOPPED"] = "|cffffff00Ci sono troppi errori nella tua UI. Di conseguenza, la tua esperienza di gioco potrebbe essere non completamente appagante. Disabilita o aggirna l'addon che genera così tanti avvisi se non vuoi più vedere questo messaggio.|r"
+L["ERROR_DETECTED"] = "%s |cffffff00catturato, clicca sul link per maggiori informazioni.|r"
+L["ERROR_UNABLE"] = "|cffffff00!BugGrabber non è capace di rivelare errori dovuti ad altri giocatori. Per favore, installa BugSack o un'addon equivalente per poter visualizzare anche questo tipo di errori.|r"
+L["NO_DISPLAY_1"] = "lcffff4411Sembra che tu stia eseguendo !BugGrabber senza alcun addon che ne visualizzi gli errori. Anche se !BugGrabber ha un comando per visualizzarli nella chat, un addon aggiuntivo per visualizzarli potrebbe esserti utile.|r"
+L["NO_DISPLAY_2"] = "|cffffff00L'addon standard per la visualizzazione degli errori catturati da !BugGrabber si chiama BugSack, e molto probabilmente lo puoi trovare sullo stesso sito dove hai trovato !BugGrabber.|r"
+L["NO_DISPLAY_STOP"] = "|cffffff00Se non vuoi visualizzare più questo messaggio, esegui il comando /stopnag.|r"
+L["STOP_NAG"] = "|cffffff00!BugGrabber non ti ricorderà più di installare BugSack fino al prossimo aggiornamento.|r"
+L["USAGE"] = "Uso: /buggrabber <1-%d>."
 
 	end
 end

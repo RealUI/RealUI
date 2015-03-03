@@ -120,13 +120,17 @@ function Range:GetRanges()
 	return Ranges
 end
 
-Range.IsActive = Grid2.statusLibrary.IsActive
+function Range:IsActive(unit)
+	return not cache[unit]
+end
+
+Range.GetColor = Grid2.statusLibrary.GetColor
 
 local function Create(baseKey, dbx)
-	Grid2:RegisterStatus(Range, {"percent"}, baseKey, dbx)
+	Grid2:RegisterStatus(Range, {"percent", "color"}, baseKey, dbx)
 	return Range
 end
 
 Grid2.setupFunc["range"] = Create
 
-Grid2:DbSetStatusDefaultValue( "range", {type = "range", range= 38, default = 0.25, elapsed = 0.5})
+Grid2:DbSetStatusDefaultValue( "range", {type = "range", color1 = {r=1, g=0, b=0, a=1}, range= 38, default = 0.25, elapsed = 0.5})

@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Skins\Dream.lua
-	* Revision.: 398
+	* Revision.: 407
 	* Author...: JJSheets, StormFX
 
 	'Dream' skin for Masque.
@@ -13,8 +13,8 @@ local _, Core = ...
 
 Core:AddSkin("Dream", {
 	Author = "JJSheets, StormFX",
-	Version = "6.0.0",
-	Masque_Version = 60000,
+	Version = "6.1.0",
+	Masque_Version = 60100,
 	Shape = "Square",
 	Backdrop = {
 		Width = 36,

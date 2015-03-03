@@ -39,7 +39,7 @@ function AuraPredictor:GetValues( text, values, max )
 		values[spellID] = self:GetSpellDescription(spellID, spellName, spellIcon, "")
 	elseif text ~= "" then
 		max = 12
-		text = "^" .. strlower(suffix or text)
+		text = strlower(suffix or text)
 		-- search buffs or debuffs
 		for className,spells in pairs(self.spells) do
 			max = self:GetTableValues(spells, values, text, max, className )
@@ -47,9 +47,10 @@ function AuraPredictor:GetValues( text, values, max )
 		end
 		-- search raid-debuffs if module is available
 		if self.type=="debuff" and Grid2Options.GetRaidDebuffsTable then
-			local module = (Grid2Options:GetRaidDebuffsTable())["Cataclysm"]
+			local module = (Grid2Options:GetRaidDebuffsTable())["Warlords of Draenor"]
 			for _,instance in pairs(module) do
 				for bossName,boss in pairs(instance) do
+					bossName = string.gsub(bossName, "%[.-%]", "")
 					max = self:GetTableValues(boss, values, text, max, bossName, true)
 					if max==0 then return end
 				end
@@ -89,7 +90,7 @@ end
 function AuraPredictor:GetTableValues(spells, values, text, max, category, isBoss)
 	for _, spellID in ipairs(spells) do
 		local spellName,_,spellIcon = GetSpellInfo(spellID)
-		if spellName and strmatch(strlower(spellName), text) then
+		if spellName and strfind(strlower(spellName), text, 1, true)==1 then
 			local key = self:GetSpellKey(spellID, category, isBoss)
 			values[key] = self:GetSpellDescription(spellID, spellName, spellIcon, category, isBoss)
 			max = max - 1; if max == 0 then break end

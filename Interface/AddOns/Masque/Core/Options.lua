@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Core\Options.lua
-	* Revision.: 398
+	* Revision.: 404
 	* Author...: StormFX
 
 	Options Setup
@@ -38,13 +38,13 @@ function Core:LoadOptions()
 			set = function(i, v)
 				Core.db.profile.LDB.hide = not v
 				if not v then
-					Core.DBI:Hide(MASQUE)
+					Core.LDBI:Hide(MASQUE)
 				else
-					Core.DBI:Show(MASQUE)
+					Core.LDBI:Show(MASQUE)
 				end
 			end,
 			disabled = function()
-				return not Core.DBI
+				return not Core.LDBI
 			end,
 			order = 3,
 		}
@@ -92,15 +92,16 @@ function Core:LoadOptions()
 end
 
 ----------------------------------------
--- Options Window Toggle
+-- Options Window
 ----------------------------------------
 
--- Opens or closes the options window.
+-- Opens the options window.
 function Core:ShowOptions()
 	if not self.OptionsLoaded then
 		self:LoadOptions()
 	end
-	InterfaceOptionsFrame_Show()
+	-- Double call to ensure the proper category is opened.
+	InterfaceOptionsFrame_OpenToCategory(Core.OptionsPanel)
 	InterfaceOptionsFrame_OpenToCategory(Core.OptionsPanel.Addons)
 end
 
@@ -109,49 +110,38 @@ end
 ----------------------------------------
 
 -- Updates the specified add-on options.
-function Core:UpdateOptions(Addon, Group)
+function Core:UpdateOptions(Addon, Group, Delete)
 	if not self.OptionsLoaded then
 		return
 	end
 	local args = self.Options.args.Addons.args
-	if not Addon then
-		for _, Addon in pairs(self:ListAddons()) do
+	if Delete then
+		if Addon then
 			local a = Addon:gsub("%s", "_")
-			args[a] = args[a] or self:GetOptions(Addon)
+			if Group then
+				local g = Group:gsub("%s", "_")
+				local aargs = args[a].args
+				aargs[g] = nil
+			else
+				args[a] = nil
+			end
 		end
-	elseif not Group then
-		local a = Addon:gsub("%s", "_")
-		for _, Group in pairs(self:ListGroups(Addon)) do
-			local g = Group:gsub("%s", "_")
-			local aargs = args[a].args
-			aargs[g] = aargs[g] or self:GetOptions(Addon, Group)
-		end
-	end
-end
-
-----------------------------------------
--- Options Remover
-----------------------------------------
-
--- Deletes an Addon or Group's options table.
-function Core:RemoveOptions(Addon, Group)
-	if not self.OptionsLoaded then
-		return
-	end
-	if InterfaceOptionsFrame:IsShown() then
-		InterfaceOptionsFrame:Hide()
-	end
-	if Addon then
-		local args = self.Options.args.Addons.args
-		local a = Addon:gsub("%s", "_")
-		if Group then
-			local g = Group:gsub("%s", "_")
-			local aargs = args[a].args
-			aargs[g] = nil
-		else
-			args[a] = nil
+	else
+		if not Addon then
+			for _, Addon in pairs(self:ListAddons()) do
+				local a = Addon:gsub("%s", "_")
+				args[a] = args[a] or self:GetOptions(Addon)
+			end
+		elseif not Group then
+			local a = Addon:gsub("%s", "_")
+			for _, Group in pairs(self:ListGroups(Addon)) do
+				local g = Group:gsub("%s", "_")
+				local aargs = args[a].args
+				aargs[g] = aargs[g] or self:GetOptions(Addon, Group)
+			end
 		end
 	end
+	Core.ACR:NotifyChange(MASQUE)
 end
 
 ----------------------------------------

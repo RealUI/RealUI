@@ -267,8 +267,7 @@ end
 function Grid2:UpdateDefaults()
 
 	local version= Grid2:DbGetValue("versions","Grid2") or 0
-	if version>=4 then return end
-	
+	if version>=5 then return end
 	if version==0 then
 		MakeDefaultsCommon()
 		MakeDefaultsClass()
@@ -288,10 +287,20 @@ function Grid2:UpdateDefaults()
 			if health and health.childBar then
 				health.childBar = nil
 			end
-		end	
+		end
+		if version<5 then
+			-- Upgrade buffs and debuffs groups statuses
+			for _, status in pairs(self.db.profile.statuses) do
+				if status.auras and (status.type == "buff" or status.type=="debuff") then
+					status.type = status.type .. "s"  -- Convert type: buff -> buffs , debuff -> debuffs
+					if status.type == "debuffs" then
+						status.useWhiteList = true
+					end	
+				end
+			end
+		end
 	end
-	
 	-- Set database version
-	Grid2:DbSetValue("versions","Grid2",4)
+	Grid2:DbSetValue("versions","Grid2",5)
 
 end

@@ -195,6 +195,7 @@ local function BuildBlizzardProfile()
 
 	config = Bartender4.db:GetNamespace("MicroMenu").profile
 	config.position.scale = 1.0
+	config.padding = -2
 	SetBarLocation( config, "BOTTOM", 37.5, 41.75 )
 
 	if PresetsMod.showRepBar then

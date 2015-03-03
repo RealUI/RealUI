@@ -1,9 +1,9 @@
-## Interface: 60000
+## Interface: 60100
 ## Author: Kesava
 ## Title: Kui |cff9966ffNameplates|r
 ## Notes: Prettier nameplates.
 ## SavedVariables: KuiNameplatesGDB
-## X-Curse-Packaged-Version: 247
+## X-Curse-Packaged-Version: 248
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline

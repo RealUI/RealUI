@@ -1,0 +1,270 @@
+------------------------------------------------------------------------
+r767 | michaelspain | 2015-02-28 04:23:07 +0000 (Sat, 28 Feb 2015) | 2 lines
+Changed paths:
+   M /trunk/GridLayout.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+
+- Updated Blackrock Foundry raid debuffs.
+- Improved frame units right click menu (clique addon is needed to enable this menu)
+------------------------------------------------------------------------
+r766 | michaelspain | 2015-02-27 09:12:42 +0000 (Fri, 27 Feb 2015) | 3 lines
+Changed paths:
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/Options/modules/statuses/StatusDirection.lua
+   M /trunk/modules/StatusAurasBuffs.lua
+   M /trunk/modules/StatusMana.lua
+
+- StatusMana: Code optimization when the "hide mana of non healers" option is enabled.
+- Updated spanish localization.
+- Fixed crash in icons indicators: ticket #417
+------------------------------------------------------------------------
+r765 | michaelspain | 2015-02-27 05:31:23 +0000 (Fri, 27 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/Options/modules/indicators/IndicatorIcons.lua
+   M /trunk/Options/modules/indicators/IndicatorMultiBar.lua
+
+Removed some unused code.
+------------------------------------------------------------------------
+r764 | michaelspain | 2015-02-27 00:34:33 +0000 (Fri, 27 Feb 2015) | 3 lines
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/modules/IndicatorIcons.lua
+   M /trunk/modules/StatusAuras.lua
+   M /trunk/modules/StatusAurasDebuffType.lua
+   M /trunk/modules/StatusAurasDebuffs.lua
+
+Debuffs status: 
+Added an option to colorize the status using the debuff type color. 
+Icon and icons indicators can apply this color to the icon border (if a border for the indicator is configured and "Use status color" option is enabled)
+------------------------------------------------------------------------
+r763 | michaelspain | 2015-02-26 02:56:34 +0000 (Thu, 26 Feb 2015) | 3 lines
+Changed paths:
+   M /trunk/AoeHeals/Grid2AoeHeals.toc
+   M /trunk/Grid2.toc
+   M /trunk/LDB/Grid2LDB.toc
+   M /trunk/Options/Grid2Options.toc
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.lua
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.toc
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+   M /trunk/RaidDebuffsOptions/OptionsAdvanced.lua
+   M /trunk/RaidDebuffsOptions/OptionsRegAuto.lua
+
+- TOC Update
+- Fixed a crash in raid debuffs options when load on demand was not active.
+- Improved bosses detection in raid debuffs, now must detect bosses in low level 5 man instances.
+------------------------------------------------------------------------
+r762 | michaelspain | 2015-02-24 23:54:01 +0000 (Tue, 24 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusRange.lua
+   M /trunk/RaidDebuffsOptions/OptionsAdvanced.lua
+   M /trunk/modules/StatusRange.lua
+
+Status Range: Added a color option.
+------------------------------------------------------------------------
+r761 | michaelspain | 2015-02-24 03:29:39 +0000 (Tue, 24 Feb 2015) | 4 lines
+Changed paths:
+   M /trunk/GridCore.lua
+   M /trunk/LDB/Grid2LDB.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/OptionsAdvanced.lua
+   M /trunk/RaidDebuffsOptions/OptionsGeneral.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+
+RaidDebuffOptions: Fixed a crash when changing autodetection status.
+Added extra info to the Grid2 tooltip.
+Added some missing 5 man instances raiddebuffs.
+Removed some debug messages.
+------------------------------------------------------------------------
+r760 | michaelspain | 2015-02-24 00:32:06 +0000 (Tue, 24 Feb 2015) | 2 lines
+Changed paths:
+   M /trunk/LDB/Libs
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+   A /trunk/RaidDebuffsOptions/OptionsAdvanced.lua
+   A /trunk/RaidDebuffsOptions/OptionsGeneral.lua
+   A /trunk/RaidDebuffsOptions/OptionsLuaCode.lua
+   A /trunk/RaidDebuffsOptions/OptionsRegAuto.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+   M /trunk/modules/StatusMana.lua
+
+Refactored RaidDebuffsOptions code, no visible changes, better boss detection.
+StatusMana, now player mana is displayed when alone.
+------------------------------------------------------------------------
+r759 | michaelspain | 2015-02-20 23:58:27 +0000 (Fri, 20 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+
+RaidDebuffs: Fixed world boss Rukhmar zoneId.
+------------------------------------------------------------------------
+r758 | michaelspain | 2015-02-20 23:32:02 +0000 (Fri, 20 Feb 2015) | 15 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   M /trunk/GridLayout.lua
+   M /trunk/LDB/Grid2LDB.lua
+   M /trunk/LDB/Grid2LDB.toc
+   M /trunk/Options/locales/esES.lua
+   A /trunk/Options/modules/general/GridMinimapIcon.lua
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/Options/modules/statuses/StatusMana.lua
+   M /trunk/Options/modules.xml
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.lua
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsCataclysm.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsLichKing.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsMoP.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+   M /trunk/modules/StatusMana.lua
+
+Mana Status
+- a new option to hide mana of non-healer players
+
+Grid2LDB: 
+- Added a minimap Icon, the icon can be disabled/enabled from config: Grid2>General>Misc
+
+RaidDebuffs:
+- Changed raid debuffs database/table format of all modules.
+- Updated World of Draenor module, added all 5-man instances.
+- Added Raid debuffs Autodetection System: Enabling the option, the addon will collect all new raid debuffs and generate
+zones/bosses/debuffs in a new [Custom Debuffs] section. In this new section all autodetected and custom created debuffs are displayed. The autodetection option is automatic disabled if the UI is reloaded or WOW is closed.
+
+** Note for mantainers/developers **
+Enabling Raid2Debuffs debugging (General>Debug), a Gen.Lua button becomes visible in Debuffs Tab.
+This button generates the LUA source code containing the debuffs database of the current selected module.
+------------------------------------------------------------------------
+r757 | michaelspain | 2015-02-13 00:05:15 +0000 (Fri, 13 Feb 2015) | 15 lines
+Changed paths:
+   M /trunk/GridCore.lua
+   M /trunk/GridDefaults.lua
+   M /trunk/GridSetup.lua
+   M /trunk/Options/GridStatuses.lua
+   M /trunk/Options/GridUtils.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/Options/modules/statuses/StatusAuraNew.lua
+   M /trunk/Options/modules/statuses/StatusDirection.lua
+   M /trunk/modules/IndicatorBar.lua
+   M /trunk/modules/IndicatorIcons.lua
+   M /trunk/modules/StatusAuras.lua
+   A /trunk/modules/StatusAurasBuffDebuff.lua
+   A /trunk/modules/StatusAurasBuffs.lua
+   A /trunk/modules/StatusAurasDebuffType.lua
+   A /trunk/modules/StatusAurasDebuffs.lua
+   M /trunk/modules.xml
+
+*Internal changes:
+- Refactored buffs/debuffs management code and splited statuses in different files, now must be a bit more easy to understand/maintain.
+- Changed icons indicator/auras statuses interface code to avoid generating memory garbage.
+- Added a profileshutdown event to unregister indicators/statuses.
+
+* User visible changes:
+Now buffs/debuffs groups are named simply Buffs/Debuffs.
+Now "Debuffs" statuses will track/display all debuffs on players.
+Several filtering options for Debuffs can be configured to show/hide:
+-Boss Debuffs/non boss debuffs, 
+-Long duration debuffs/Short duration debuffs
+-Self/Non Self debuffs
+-Debuffs Whitelist or Blacklist can be configured too.
+Several "Debuffs" statuses can be created, for example one status to track Boss debuffs, another to track non boss debuffs or long duration debuffs, etc.
+Warning !!!! this version has a lot of internal changes, it's really Alpha, please report any crash.
+------------------------------------------------------------------------
+r756 | michaelspain | 2015-02-06 19:43:20 +0000 (Fri, 06 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/modules/StatusAuras.lua
+
+Fixed a crash in statusauras module with boss debuffs.
+------------------------------------------------------------------------
+r755 | michaelspain | 2015-02-06 19:13:33 +0000 (Fri, 06 Feb 2015) | 4 lines
+Changed paths:
+   M /trunk/GridFrame.lua
+   M /trunk/Options/GridStatuses.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/media/indicator-icons.tga
+   M /trunk/Options/modules/general/GridTestIndicators.lua
+   M /trunk/Options/modules/indicators/Indicator.lua
+   M /trunk/Options/modules/indicators/IndicatorIcons.lua
+   M /trunk/Options/modules/indicators/NewIndicator.lua
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/modules/IndicatorBar.lua
+   M /trunk/modules/IndicatorIcons.lua
+   M /trunk/modules/IndicatorMultiBar.lua
+   M /trunk/modules/StatusAuras.lua
+
+- Fixed Indicator Tests crash with multibars. Ticket #410
+- Fixed "Icons" creation indicator crash when an invalid anchor point was selected.
+- Changed "Icons" indicator behaviour, now will display all statuses linked to the indicator, not only the first active indicator.
+
+------------------------------------------------------------------------
+r754 | michaelspain | 2015-02-05 00:10:19 +0000 (Thu, 05 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/Options/GridIndicators.lua
+   M /trunk/Options/locales/esES.lua
+   A /trunk/Options/media/indicator-icons.tga
+   A /trunk/Options/modules/indicators/IndicatorIcons.lua
+   M /trunk/Options/modules/indicators/NewIndicator.lua
+   M /trunk/Options/modules.xml
+   A /trunk/modules/IndicatorIcons.lua
+   M /trunk/modules/StatusAuras.lua
+   M /trunk/modules.xml
+
+Added a new indicator "icons".  Groups of buffs or debuffs can be assigned to this indicator, and in theory the indicator will spawn several icons, one icon for each active buff/debuff.
+------------------------------------------------------------------------
+r753 | michaelspain | 2015-02-02 17:25:04 +0000 (Mon, 02 Feb 2015) | 10 lines
+Changed paths:
+   M /trunk
+   M /trunk/GridUtils.lua
+   M /trunk/Options/GridStatuses.lua
+   M /trunk/Options/GridUtils.lua
+   M /trunk/Options/locales/enUS.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/indicators/IndicatorMultiBar.lua
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/Options/modules/statuses/StatusAuraNew.lua
+   M /trunk/Options/modules/statuses/StatusAuraNewPredictor.lua
+   M /trunk/Options/modules/statuses/StatusAuraNewSpells.lua
+   M /trunk/modules/IndicatorBar.lua
+   M /trunk/modules/StatusAuras.lua
+   D /trunk/modules/StatusPurgatory.lua
+   M /trunk/modules.xml
+
+- Now buffs&debuffs statuses can be configured to monitorize and display an additional value.
+Not all auras have extra values, examples of auras providing additional info are:
+All priest shields, for example buff Power Word:Shield can be configured now to 
+track the remaining amount of the shield. The value can be displayed in a text, bar or in a 
+square indicator configuring several colors/thresholds.
+
+- Removed dk-purgatory status, it's not necessary anymore, a standard debuff can be created to
+track the same information, create a purgatory debuff and configure the debuff to track Value1.
+
+- Updated buffs and debuffs displayed in the create buff/debuff drop down list.
+------------------------------------------------------------------------
+r752 | michaelspain | 2015-01-31 12:31:51 +0000 (Sat, 31 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/modules/StatusHealth.lua
+
+Fixed incoming-heals status: include player heals option was not working (ticket #407)
+------------------------------------------------------------------------
+r750 | michaelspain | 2015-01-29 06:34:15 +0000 (Thu, 29 Jan 2015) | 5 lines
+Changed paths:
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/LDB/Grid2LDB.lua
+   M /trunk/Options/modules/general/GridFrame.lua
+   M /trunk/modules/IndicatorMultiBar.lua
+
+Fixed By Class Layout.
+Fixed a Grid2LDB issue.
+Little optimization in multibar indicator.
+Removed upper limit for frames width and height configuration.
+
+------------------------------------------------------------------------
+r749 | michaelspain | 2015-01-26 04:12:49 +0000 (Mon, 26 Jan 2015) | 3 lines
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusAura.lua
+   M /trunk/modules/StatusAuras.lua
+
+StatusAuras:
+- Fixed typeDebuffs crash when a duration threshold was configured. Ticket #374.
+- Removed a workaround to druid wildgrowth expiration time bug (it seems blizzard fixed the issue time ago).
+------------------------------------------------------------------------
