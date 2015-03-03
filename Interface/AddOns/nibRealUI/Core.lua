@@ -680,14 +680,17 @@ function nibRealUI:PLAYER_LOGIN()
                 end)
             end
         end
+        if not LOCALE_enUS then
+            print("Help localize RealUI to your language. Go to http://wow.curseforge.com/addons/realui-localization/localization/")
+        end
     end
     
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if GetCVar("scriptProfile") == "1" then
-        print(L["Slash_Profile"].format(red, blue))
+        print(format(L["Slash_Profile"], red, blue))
     end
     if GetCVar("taintLog") ~= "0" then
-        print(L["Slash_Taint"].format(red, blue))
+        print(format(L["Slash_Taint"], red, blue))
     end
 
     -- Update styling
