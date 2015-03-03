@@ -7,14 +7,15 @@ local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {
-    ["DBM"] =                       {isAce = false, db = "DBT_AllPersistentOptions", profKey = DBM_UsedProfile},
-    ["Masque"] =                    {isAce = true,  db = "MasqueDB"},
-    ["KuiNameplates"] =             {isAce = true,  db = "KuiNameplatesGDB"},
-    ["Raven"] =                     {isAce = true,  db = "RavenDB"},
-    ["Skada"] =                     {isAce = true,  db = "SkadaDB"},
-    ["Bartender4"] =                {isAce = true,  db = "Bartender4DB"},
-    ["Grid2"] =                     {isAce = true,  db = "Grid2DB"},
-    ["mikScrollingBattleText"] =    {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
+    ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
+    ["Grid2"] =         {isAce = true, db = "Grid2DB",          profKey = "profileKeys"},
+    ["KuiNameplates"] = {isAce = true, db = "KuiNameplatesGDB", profKey = "profileKeys"},
+    ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
+    ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
+    ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
+
+    ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
+    ["mikScrollingBattleText"] = {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
     "DBM",
@@ -32,24 +33,13 @@ local RealUIAddOnsOrder = {
 ----------------------------
 
 local function GetProfileInfo(addon)
-    local profile = db.addonControl[addon].profiles.base.key
+    local profiles = db.addonControl[addon].profiles
 
-    if db.addonControl[addon].profiles.layout.use then
-        if (nibRealUI.cLayout == 2) then profile = profile .. "-" .. db.addonControl[addon].profiles.layout.key end
+    if profiles.layout.use then
+        if (nibRealUI.cLayout == 2) then profiles.base.key = profiles.base.key .. "-" .. profiles.layout.key end
     end
 
-    return profile
-end
-
--- Set Addon profiles
-local function SetProfileKey(addonDB, profile, isAce, profKey)
-    if _G[addonDB] and _G[addonDB][profKey] then 
-        if isAce then
-            _G[addonDB][profKey][nibRealUI.key] = profile
-        else
-            _G[addonDB][profKey] = profile
-        end
-    end
+    return profiles.base.key
 end
 
 -- Set Profile Keys of all AddOns
@@ -59,9 +49,15 @@ function nibRealUI:SetProfileKeys()
 
     for addon, data in pairs(RealUIAddOns) do
         if db.addonControl[addon].profiles.base.use then
+            -- Set Addon profiles
             local profile = GetProfileInfo(addon)
-            local profKey = data.profKey or "profileKeys"
-            SetProfileKey(data.db, profile, data.isAce, profKey)
+            if _G[data.db] and _G[data.db][data.profKey] then 
+                if data.isAce then
+                    _G[data.db][data.profKey][self.key] = profile
+                else
+                    _G[data.db][data.profKey] = profile
+                end
+            end
         end
     end
 end
