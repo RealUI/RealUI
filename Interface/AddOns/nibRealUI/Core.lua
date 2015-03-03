@@ -4,6 +4,7 @@ local db, dbc, dbg, _
 local debug = nibRealUI.Debug
 _G.RealUI = nibRealUI
 
+nibRealUI.verinfo = {}
 for word in string.gfind(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
     tinsert(nibRealUI.verinfo, word)
 end
