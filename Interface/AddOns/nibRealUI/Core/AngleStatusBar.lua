@@ -462,11 +462,8 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
         bar, info = CreateAngleBar(self, width, height, status, info)
     end
 
-    local mt = getmetatable(status).__index
     for key, func in next, ASB do
-        if not mt[key] then
-            mt[key] = func
-        end
+        status[key] = func
     end
 
     status.bar = bar

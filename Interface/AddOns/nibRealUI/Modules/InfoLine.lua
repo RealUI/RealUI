@@ -3188,7 +3188,7 @@ local function Clock_OnEnter(self)
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_REALMTIME), strform("%s", serTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_LOCALTIME), strform("%s", locTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Clock_Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     
     -- TB/WG
     GameTooltip:AddLine(" ")
