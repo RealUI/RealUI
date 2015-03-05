@@ -35,11 +35,17 @@ local RealUIAddOnsOrder = {
 local function GetProfileInfo(addon)
     local profiles = db.addonControl[addon].profiles
 
-    if profiles.layout.use then
-        if (nibRealUI.cLayout == 2) then profiles.base.key = profiles.base.key .. "-" .. profiles.layout.key end
+    -- fix messed profile keys
+    if profiles.base.key:match("Healing") then
+        profiles.base.key = "RealUI"
     end
 
-    return profiles.base.key
+    local profileKey = profiles.base.key
+    if profiles.layout.use then
+        if (nibRealUI.cLayout == 2) then profileKey = profiles.base.key .. "-" .. profiles.layout.key end
+    end
+
+    return profileKey
 end
 
 -- Set Profile Keys of all AddOns

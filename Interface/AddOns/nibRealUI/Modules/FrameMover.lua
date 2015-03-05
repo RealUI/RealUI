@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb, ndbc
 
 local _
@@ -104,7 +105,11 @@ local function MoveFrameGroup(FramesTable, DBTable)
         
         FrameDB = DBTable[idx]
         frame:ClearAllPoints()
-        frame:SetPoint(FrameDB.point, FrameDB.parent or UIParent, FrameDB.rpoint, FrameDB.x, FrameDB.y)
+        if _G[FrameDB.parent] then
+            frame:SetPoint(FrameDB.point, FrameDB.parent, FrameDB.rpoint, FrameDB.x, FrameDB.y)
+        else
+            print(L["General_InvalidParent"]:format(FramesTable[idx].name, MODNAME, "Addons -> Raven"))
+        end
         
         if FrameDB.scale then frame:SetScale(FrameDB.scale) end
         FramesMoving = false
@@ -288,6 +293,7 @@ local function GetOptions()
                     parent = {
                         type = "input",
                         name = "Parent",
+                        desc = L["General_NoteParent"],
                         width = "double",
                         order = 50,
                         get = function(info) return addonInfo.frames[i].parent end,
@@ -382,6 +388,7 @@ local function GetOptions()
                         parent = {
                             type = "input",
                             name = "Parent",
+                            desc = L["General_NoteParent"],
                             width = "double",
                             order = 50,
                             get = function(info) return addonInfo.frameshealing[i].parent end,

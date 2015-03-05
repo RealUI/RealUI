@@ -829,10 +829,14 @@ function StatDisplay:OnInitialize()
     dbc = self.db.char
     ndbc = nibRealUI.db.char
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
+    if nibRealUI:GetModuleEnabled("UnitFrames") then
+        self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+        nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
 
-    self:RegisterEvent("PLAYER_LOGIN")
+        self:RegisterEvent("PLAYER_LOGIN")
+    else
+        self:SetEnabledState(false)
+    end
 end
 
 function StatDisplay:OnEnable()
