@@ -104,7 +104,7 @@ tinsert(C.themes["Aurora"], function()
 				for _, pixel in pairs(closeButton.pixels) do
 					pixel:Show()
 				end
-				closeButton.minimize.Hide()
+				closeButton.minimize:Hide()
 			end
 		end
 	end)
