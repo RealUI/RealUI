@@ -43,7 +43,7 @@ local function AuraUpdate(self)
 	local shroomTime = GetMushroomTime()
 	if shroomTime and self.AreShroomsDown then
 		self.isActive = true
-		
+
 		-- Set Icon Desaturated
 		self.icon:SetDesaturated(nil)
 
@@ -103,7 +103,7 @@ local function TotemUpdate(self)
 		self.AreShroomsDown = false
 	else
 		self.AreShroomsDown = true
-	end	
+	end
 	AuraUpdate(self)
 end
 
@@ -112,7 +112,7 @@ local function SpellCastSucceeded(self, event, unitID, spellName, spellRank, lin
 		self.MaxOverheal = UnitHealthMax("player") * MaxHealthPercent
 		self.AreShroomsDown = true
 		AuraUpdate(self)
-	
+
 	elseif ( spellID == BloomID) then --Wild Mushroom: Bloom
 		self.AreShroomsDown = false
 		self.CurrentOverheal = 0
@@ -127,7 +127,7 @@ local function CLEU(self, event, ...)
 	if ( spellID == RejuvID and self.AreShroomsDown) then -- Rejuvenation
 		if ( self.CurrentOverheal < self.MaxOverheal ) then
 			self.CurrentOverheal = self.CurrentOverheal + (overhealing * OverHealPercent)
-			if ( self.CurrentOverheal >= self.MaxOverheal ) then 
+			if ( self.CurrentOverheal >= self.MaxOverheal ) then
 				self.CurrentOverheal = self.MaxOverheal
 			end
 			self.BloomPercent = (self.CurrentOverheal / self.MaxOverheal) * 100
@@ -223,7 +223,7 @@ function WildMushrooms:SetIndicatorInfo(info)
 
 	f.side = "LEFT"
 	f.unit = "player"
-	
+
 	f.isStatic = (info.order ~= nil)
 	if f.isStatic then
 		f.icon:SetDesaturated(1)
@@ -271,7 +271,7 @@ function WildMushrooms:CreateIndicator()
 		f.icon:SetAllPoints(f)
 		f.icon:SetTexCoord(.08, .92, .08, .92)
 	f.count = f:CreateFontString()
-		f.count:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.count:SetFontObject(RealUIFont_PixelCooldown)
 		f.count:SetJustifyH("RIGHT")
 		f.count:SetJustifyV("TOP")
 		f.count:SetPoint("TOPRIGHT", f, "TOPRIGHT", 1.5, 2.5)
@@ -282,14 +282,14 @@ function WildMushrooms:CreateIndicator()
 		f.customCD:SetHeight(0)
 		f.customCD:SetTexture(0, 0, 0, 0.75)
 	f.customCDTime = f:CreateFontString()
-		f.customCDTime:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.customCDTime:SetFontObject(RealUIFont_PixelCooldown)
 		f.customCDTime:SetJustifyH("LEFT")
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 

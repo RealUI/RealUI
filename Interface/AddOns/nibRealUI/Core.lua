@@ -17,6 +17,40 @@ nibRealUI.configModeModules = {}
 
 -- Localized Fonts
 do
+    local LSM = LibStub("LibSharedMedia-3.0")
+    local lsmFonts = LSM:List("font")
+    local function findFont(font)
+        local fontPath, fontSize, fontArgs = font:GetFont()
+        local fontName, path
+        for i = 1, #lsmFonts do
+            fontName = lsmFonts[i]
+            path = LSM:Fetch("font", fontName)
+            debug("Fonts|", fontName, "|", path, "|", fontPath)
+            if path == fontPath then
+                debug("Fonts Equal|", fontName, "|", fontSize, "|", fontArgs)
+                local tab = {
+                    fontName,
+                    fontSize,
+                    fontArgs,
+                    fontPath,
+                }
+                return tab
+            end
+        end
+    end
+    local fonts = {
+        standard = findFont(RealUIFont_Normal),
+        chat = findFont(RealUIFont_Chat),
+        pixel = {
+            small =    findFont(RealUIFont_PixelSmall),
+            large =    findFont(RealUIFont_PixelLarge),
+            numbers =  findFont(RealUIFont_PixelNumbers),
+            cooldown = findFont(RealUIFont_PixelCooldown),
+        }
+    }
+    nibRealUI.media.font = fonts
+end
+--[[ do
     nibRealUI.locale = GetLocale()
     local StandardLanguageSupport = {
         enUS = true,
@@ -61,12 +95,7 @@ do
         }
     end
     nibRealUI.media.font = defaultFonts
-end
-
-nibRealUI.fontStringsTiny = {}
-nibRealUI.fontStringsSmall = {}
-nibRealUI.fontStringsRegular = {}
-nibRealUI.fontStringsLarge = {}
+end]]
 
 nibRealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
@@ -349,7 +378,7 @@ end
 
 -- Style - Chat Font
 function nibRealUI:StyleSetChatFont()
-    local cfFont = not(db.settings.chatFontCustom.enabled) and nibRealUI.font.standard or nibRealUI:RetrieveFont(db.settings.chatFontCustom.font)
+    --[[ local cfFont = not (db.settings.chatFontCustom.enabled) and db.media.font.chat or nibRealUI:RetrieveFont(db.settings.chatFontCustom.font)
 
     for i = 1, NUM_CHAT_WINDOWS do
         local cf = _G["ChatFrame" .. i]
@@ -368,49 +397,9 @@ function nibRealUI:StyleSetChatFont()
 
         for k = 6, 11 do
             select(k, cfEditBox:GetRegions()):SetTexture(nil)
-        end 
-    end
-
-end
-
--- Style - UI Font
-function nibRealUI:StyleSetFont(style)
-    db.settings.fontStyle = style
-
-    -- Update Fonts throughout nibRealUI modules
-    for k, mod in self:IterateModules() do
-        if self:GetModuleEnabled(k) and mod.UpdateFonts and type(mod.UpdateFonts) == "function" then
-            mod:UpdateFonts()
         end
-    end
+    end]]
 
-    -- Update Fonts that have been stored in global font arrays
-    local fontTiny =    nibRealUI:Font(false, "tiny")
-    local fontSmall =   nibRealUI:Font(false, "small")
-    local fontRegular = nibRealUI:Font()
-    local fontLarge =   nibRealUI:Font(false, "large")
-
-    for k, fontString in pairs(nibRealUI.fontStringsTiny) do
-        fontString:SetFont(unpack(fontTiny))
-    end
-    for k, fontString in pairs(nibRealUI.fontStringsSmall) do
-        fontString:SetFont(unpack(fontSmall))
-    end
-    for k, fontString in pairs(nibRealUI.fontStringsRegular) do
-        fontString:SetFont(unpack(fontRegular))
-    end
-    for k, fontString in pairs(nibRealUI.fontStringsLarge) do
-        fontString:SetFont(unpack(fontLarge))
-    end
-
-    -- Stance Bar position
-    nibRealUI:GetModule("HuDConfig"):RegisterForUpdate("AB", "stance")
-
-    -- Refresh Watch Frame
-    if not ObjectiveTrackerFrame.collapsed then
-        ObjectiveTracker_Collapse()
-        ObjectiveTracker_Expand()
-    end
 end
 
 -- Style - Global Colors
@@ -590,7 +579,7 @@ function nibRealUI:PLAYER_ENTERING_WORLD()
         local region = select(i, GameMenuFrame:GetRegions())
         if region:GetObjectType() == "FontString" then
             if region:GetText() == MAINMENU_BUTTON then
-                region:SetFont(unpack(nibRealUI.font.pixel1))
+                region:SetFontObject(RealUIFont_PixelSmall)
                 region:SetTextColor(unpack(nibRealUI.classColor))
                 region:SetShadowColor(0, 0, 0, 0)
                 region:SetPoint("TOP", GameMenuFrame, "TOP", 0, -10.5)
@@ -667,7 +656,7 @@ function nibRealUI:PLAYER_LOGIN()
     -- Helpful messages
     local blue = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
     local red = nibRealUI:ColorTableToStr(nibRealUI.media.colors.red)
-    
+
     if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then
             -- This part should be in the bag addon
@@ -683,7 +672,7 @@ function nibRealUI:PLAYER_LOGIN()
             print("Help localize RealUI to your language. Go to http://wow.curseforge.com/addons/realui-localization/localization/")
         end
     end
-    
+
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if GetCVar("scriptProfile") == "1" then
         print(format(L["Slash_Profile"], red, blue))

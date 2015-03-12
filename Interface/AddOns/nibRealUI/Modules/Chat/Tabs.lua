@@ -4,19 +4,17 @@ local db, ndb
 
 local Chat = nibRealUI:GetModule("Chat")
 local MODNAME = "Chat_Tabs"
-local Chat_Tabs = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Chat_Tabs = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Tab Style update
 local TStyleColors = {}
 local function UpdateTabStyle(self, style)
+	Chat_Tabs:debug("UpdateTabStyle", self.text, style)
 	-- Retrieve FontString of tab
-	if self.GetFontString then
-		self = self:GetFontString()
-	else
-		self = self:GetParent():GetFontString()
-	end
-	
-	self:SetFont(unpack(nibRealUI:Font(false, "small")))
+	self = self.text or self:GetParent().text
+
+	--local font, size, outline = RealUIFont_PixelSmall:GetFont()
+	self:SetFont(RealUIFont_PixelSmall:GetFont())
 	self:SetShadowColor(0, 0, 0, 0)
 
 	-- Color
@@ -59,7 +57,7 @@ function Chat_Tabs:UpdateTabs(SimpleUpdate)
 		chat = _G["ChatFrame"..i]
 		tab = _G["ChatFrame"..i.."Tab"]
 		flash = _G["ChatFrame"..i.."TabFlash"]
-		
+
 		if not SimpleUpdate then
 			-- Hide regular Chat Tab textures
 			_G["ChatFrame"..i.."TabLeft"]:Hide()
@@ -68,17 +66,18 @@ function Chat_Tabs:UpdateTabs(SimpleUpdate)
 			_G["ChatFrame"..i.."TabHighlightLeft"]:Hide()
 			_G["ChatFrame"..i.."TabHighlightMiddle"]:Hide()
 			_G["ChatFrame"..i.."TabHighlightRight"]:Hide()
+			tab.text = _G["ChatFrame"..i.."TabText"]
 
 			-- Hook Tab
 			tab:SetScript("OnEnter", ChatTab_OnEnter)
 			tab:SetScript("OnLeave", ChatTab_OnLeave)
 		end
-		
+
 		-- Update Selected
 		_G["ChatFrame"..i.."TabSelectedLeft"]:Hide()
 		_G["ChatFrame"..i.."TabSelectedMiddle"]:Hide()
-		_G["ChatFrame"..i.."TabSelectedRight"]:Hide()		
-		
+		_G["ChatFrame"..i.."TabSelectedRight"]:Hide()
+
 		-- Update Tab Appearance
 		if chat == SELECTED_CHAT_FRAME then
 			UpdateTabStyle(tab, "selected")
@@ -87,7 +86,7 @@ function Chat_Tabs:UpdateTabs(SimpleUpdate)
 		else
 			UpdateTabStyle(tab, "normal")
 		end
-		
+
 		chat:SetSpacing(1)
 	end
 end
@@ -105,14 +104,14 @@ function Chat_Tabs:HookFCF()
 
 	-- New Window
 	hooksecurefunc("FCF_OpenNewWindow", ChatWindowCreated)
-	
+
 	-- Window Close
 	hooksecurefunc("FCF_Close", function(self, fallback)
 		local frame = fallback or self
 		UIParent.Hide(_G[frame:GetName().."Tab"])
 		FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
 	end)
-	
+
 	-- Flash
 	-- Start
 	hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
@@ -122,7 +121,7 @@ function Chat_Tabs:HookFCF()
 	hooksecurefunc("FCF_StopAlertFlash", function(chatFrame)
 		ChatTabFlash_OnHide(_G[chatFrame:GetName().."Tab"])
 	end)
-	
+
 	-- New UpdateColors function, stop it!
 	FCFTab_UpdateColors = function(...) end
 end
@@ -138,18 +137,14 @@ function Chat_Tabs:PLAYER_LOGIN()
 end
 
 ------------
-function Chat_Tabs:UpdateFonts()
-	self:UpdateTabs(true)
-end
-
 function Chat_Tabs:OnInitialize()
 	db = Chat.db.profile.modules.tabs
 	ndb = nibRealUI.db.profile
-	
+
 	self:SetEnabledState(db.enabled and nibRealUI:GetModuleEnabled("Chat"))
 end
 
-function Chat_Tabs:OnEnable() 
+function Chat_Tabs:OnEnable()
 	self:RegisterEvent("PLAYER_LOGIN")
 	self:RegisterEvent("PET_BATTLE_OPENING_START")
 end

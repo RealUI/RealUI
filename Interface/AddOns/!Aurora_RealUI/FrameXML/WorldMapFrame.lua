@@ -31,18 +31,18 @@ tinsert(mods["nibRealUI"], function(F, C)
     -- Coordinate Display --
     local coords = CreateFrame("Frame", nil, WorldMapFrame)
     WorldMapFrame.coords = coords
-    
+
     coords:SetFrameLevel(WorldMapDetailFrame:GetFrameLevel() + 1)
     coords:SetFrameStrata(WorldMapDetailFrame:GetFrameStrata())
-    
+
     coords.player = coords:CreateFontString(nil, "OVERLAY")
     coords.player:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
-    coords.player:SetFont(unpack(RealUI:GetFont("small"))) --SetFontObject(SystemFont_Small)
+    coords.player:SetFontObject(RealUIFont_PixelSmall)
     coords.player:SetText("")
-    
+
     coords.mouse = coords:CreateFontString(nil, "OVERLAY")
     coords.mouse:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
-    coords.mouse:SetFont(unpack(RealUI:GetFont("small"))) --SetFontObject(SystemFont_Small)
+    coords.mouse:SetFontObject(RealUIFont_PixelSmall)
     coords.mouse:SetText("")
 
     local round, classColorStr = RealUI.Round, RealUI:ColorTableToStr({C.r, C.g, C.b})
@@ -53,13 +53,13 @@ tinsert(mods["nibRealUI"], function(F, C)
         local x, y = GetPlayerMapPosition("player")
         x = round(100 * x, 1)
         y = round(100 * y, 1)
-        
+
         if x ~= 0 and y ~= 0 then
             coords.player:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, PLAYER, x, y))
         else
             coords.player:SetText("")
         end
-        
+
         -- Mouse
         local scale = WorldMapDetailFrame:GetEffectiveScale()
         local width = WorldMapDetailFrame:GetWidth()
@@ -67,7 +67,7 @@ tinsert(mods["nibRealUI"], function(F, C)
         local centerX, centerY = WorldMapDetailFrame:GetCenter()
         local x, y = GetCursorPosition()
         local adjustedX = (x / scale - (centerX - (width/2))) / width
-        local adjustedY = (centerY + (height/2) - y / scale) / height   
+        local adjustedY = (centerY + (height/2) - y / scale) / height
 
         if (adjustedX >= 0  and adjustedY >= 0 and adjustedX <= 1 and adjustedY <= 1) then
             adjustedX = round(100 * adjustedX, 1)
@@ -82,7 +82,7 @@ tinsert(mods["nibRealUI"], function(F, C)
     local function SetLargeWorldMap()
         --print("SetLargeWorldMap")
         if InCombatLockdown() then return end
-        
+
         -- reparent
         WorldMapFrame:SetParent(UIParent)
         WorldMapFrame:SetFrameStrata("HIGH")
@@ -98,13 +98,13 @@ tinsert(mods["nibRealUI"], function(F, C)
 
     local function SetQuestWorldMap()
         if InCombatLockdown() or not IsAddOnLoaded("Aurora") then return end
-        
+
         WorldMapFrameNavBar:SetPoint("TOPLEFT", WorldMapFrame.BorderFrame, 3, -33)
         WorldMapFrameNavBar:SetWidth(700)
     end
 
     if InCombatLockdown() then return end
-    
+
     BlackoutWorld:SetTexture(nil)
 
     QuestMapFrame_Hide()
@@ -135,6 +135,6 @@ tinsert(mods["nibRealUI"], function(F, C)
     DropDownList1:HookScript("OnShow", function(self)
         if DropDownList1:GetScale() ~= UIParent:GetScale() then
             DropDownList1:SetScale(UIParent:GetScale())
-        end     
+        end
     end)
 end)

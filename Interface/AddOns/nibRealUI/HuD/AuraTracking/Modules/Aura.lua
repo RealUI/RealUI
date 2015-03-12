@@ -47,7 +47,7 @@ local function GetAuraInfo(self, index)
 	local spellID = index and self.spellIDs[index] or self.spellID
 	--print("GetAuraInfo", spellID, spellName)
 	local buffFilter = (self.isBuff and "HELPFUL" or "HARMFUL") .. (self.anyone and "" or "|PLAYER")
-	
+
 	local name, rank, texture, count, type, duration, endTime, unitCaster, _, _, curSpellID = UnitAura(self.unit, spellName, nil, buffFilter)
 
 	if (spellID and (curSpellID == spellID)) or (name == spellName) then
@@ -227,7 +227,7 @@ local function CheckSpellValidity(self)
 				isValid = IsPlayerSpell(self.spellID)
 			end
 		end
-		
+
 	elseif (self.minLevel > 0) then
 		-- Min Level specified, are we high enough level?
 		if UnitLevel("player") >= self.minLevel then
@@ -245,7 +245,7 @@ end
 local formIDs = {[CAT_FORM] = 1, [BEAR_FORM] = 2, [MOONKIN_FORM] = 3}	-- Cat, Bear, Moonkin
 local function TalentUpdate(self, event, unit, initializing)
 	local oldInactive = self.inactive
-	
+
 	-- Check specs
 	if not self.ignoreSpec then
 		local spec = GetSpecialization()
@@ -255,7 +255,7 @@ local function TalentUpdate(self, event, unit, initializing)
 	-- Check shapeshift forms
 	if not(self.inactive) and self.forms and (nibRealUI.class == "DRUID") then
 		local form = GetShapeshiftFormID()
-		
+
 		if not(self.forms[1] or self.forms[2] or self.forms[3]) then
 			-- No forms, test for Human mode
 			if form ~= nil then self.inactive = true end
@@ -289,7 +289,7 @@ local function TalentUpdate(self, event, unit, initializing)
 	-- Raven Spell Lists
 	if self.trackMultiple then
 		for k,spellID in pairs(self.spellIDs) do
-			AuraTracking:ToggleRavenAura(self.ignoreRaven, self.auraType, "#"..spellID, not(self.inactive))		
+			AuraTracking:ToggleRavenAura(self.ignoreRaven, self.auraType, "#"..spellID, not(self.inactive))
 		end
 	else
 		AuraTracking:ToggleRavenAura(self.ignoreRaven, self.auraType, self.spellID and "#"..self.spellID or self.spellName, not(self.inactive))
@@ -345,7 +345,7 @@ function Aura:SetUpdates()
 	elseif f.unit == "pet" then
 		f:RegisterEvent("UNIT_PET")
 	end
-	
+
 	f:SetScript("OnEvent", function(self, event, unit)
 		if (event == "UNIT_AURA") then
 			AuraUpdate(self, event, unit)
@@ -376,7 +376,7 @@ function Aura:SetIndicatorInfo(info)
 	f.side = info.side
 	if not f.side then
 		if f.unit == "player" or f.unit == "pet" or f.unit == "trinket" then
-			f.side = "LEFT" 
+			f.side = "LEFT"
 		else
 			f.side = "RIGHT"
 		end
@@ -411,7 +411,7 @@ function Aura:SetIndicatorInfo(info)
 	else
 		f:Hide()
 	end
-	
+
 	if info.checkKnown then
 		f.checkKnown = info.checkKnown
 	else
@@ -465,7 +465,7 @@ function Aura:CreateIndicator()
 		f.icon:SetAllPoints(f)
 		f.icon:SetTexCoord(.08, .92, .08, .92)
 	f.count = f:CreateFontString()
-		f.count:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.count:SetFontObject(RealUIFont_PixelCooldown)
 		f.count:SetJustifyH("RIGHT")
 		f.count:SetJustifyV("TOP")
 		f.count:SetPoint("TOPRIGHT", f, "TOPRIGHT", 1.5, 2.5)
@@ -476,14 +476,14 @@ function Aura:CreateIndicator()
 		f.customCD:SetHeight(0)
 		f.customCD:SetTexture(0, 0, 0, 0.75)
 	f.customCDTime = f:CreateFontString()
-		f.customCDTime:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.customCDTime:SetFontObject(RealUIFont_PixelCooldown)
 		f.customCDTime:SetJustifyH("LEFT")
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 	f:SetScript("OnEnter", OnEnter)

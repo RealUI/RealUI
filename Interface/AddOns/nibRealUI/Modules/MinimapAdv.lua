@@ -14,8 +14,6 @@ BINDING_HEADER_REALUIMINIMAP = "RealUI Minimap"
 BINDING_NAME_REALUIMINIMAPTOGGLE = "Toggle Minimap"
 BINDING_NAME_REALUIMINIMAPFARM = "Toggle Farm Mode"
 
-local FontStringsRegular = {}
-
 -- Options
 local minimapOffsets = {
     {x = 7, y = -7},
@@ -56,7 +54,7 @@ local function GetOptions()
                 name = "Enabled",
                 desc = "Enable/Disable the Minimap module.",
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
+                set = function(info, value)
                     nibRealUI:SetModuleEnabled(MODNAME, value)
                     nibRealUI:ReloadUIDialog()
                 end,
@@ -78,7 +76,7 @@ local function GetOptions()
                         name = "Fade out Coords",
                         desc = "Hide the Coordinate display when you haven't moved for 10 seconds.",
                         get = function(info) return db.information.coordDelayHide end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.information.coordDelayHide = value
                             MinimapAdv.StationaryTime = 0
                             MinimapAdv.LastX = 0
@@ -92,7 +90,7 @@ local function GetOptions()
                         name = "Hide Minimap Buttons",
                         desc = "Moves buttons attached to the Minimap to underneath and shows them on mouse-over.",
                         get = function(info) return db.information.minimapbuttons end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.information.minimapbuttons = value
                             nibRealUI:ReloadUIDialog()
                         end,
@@ -103,7 +101,7 @@ local function GetOptions()
                         name = "Location Name",
                         desc = "Show the name of your current location underneath the Minimap.",
                         get = function(info) return db.information.location end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.information.location = value
                             MinimapAdv:UpdateInfoPosition()
                         end,
@@ -183,7 +181,7 @@ local function GetOptions()
                         type = "group",
                         name = "Hide in..",
                         inline = true,
-                        disabled = function() 
+                        disabled = function()
                             return not(db.hidden.enabled and nibRealUI:GetModuleEnabled(MODNAME))
                         end,
                         order = 20,
@@ -287,7 +285,7 @@ local function GetOptions()
                             anchorto = {
                                 type = "select",
                                 name = "Anchor To",
-                                get = function(info) 
+                                get = function(info)
                                     for k,v in pairs(minimapAnchors) do
                                         if v == db.position.anchorto then return k end
                                     end
@@ -328,7 +326,7 @@ local function GetOptions()
                                 step = 0.05,
                                 isPercent = true,
                                 get = function(info) return db.expand.appearance.scale end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.expand.appearance.scale = value
                                     MinimapAdv:UpdateMinimapPosition()
                                 end,
@@ -388,7 +386,7 @@ local function GetOptions()
                             anchorto = {
                                 type = "select",
                                 name = "Anchor To",
-                                get = function(info) 
+                                get = function(info)
                                     for k, v in pairs(minimapAnchors) do
                                         if v == db.expand.position.anchorto then return k end
                                     end
@@ -423,7 +421,7 @@ local function GetOptions()
                                 disabled = function() if not Gatherer then return true else return false end end,
                                 desc = "If you have Gatherer installed, then MinimapAdv will automatically disable Gatherer's minimap icons and HUD while not in Farm Mode, and enable them while in Farm Mode.",
                                 get = function(info) return db.expand.extras.gatherertoggle end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.expand.extras.gatherertoggle = value
                                     MinimapAdv:ToggleGatherer()
                                 end,
@@ -480,7 +478,7 @@ local function GetOptions()
                         type = "group",
                         name = "General Settings",
                         inline = true,
-                        disabled = function() 
+                        disabled = function()
                             return not(db.poi.enabled and nibRealUI:GetModuleEnabled(MODNAME))
                         end,
                         order = 20,
@@ -490,7 +488,7 @@ local function GetOptions()
                                 name = "Watched Only",
                                 desc = "Only show POI icons for watched quests.",
                                 get = function(info) return db.poi.watchedOnly end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.poi.watchedOnly = value
                                     MinimapAdv:POIUpdate()
                                 end,
@@ -501,7 +499,7 @@ local function GetOptions()
                                 name = "Fade at Edge",
                                 desc = "Fade icons when they go off the edge of the minimap.",
                                 get = function(info) return db.poi.fadeEdge end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.poi.fadeEdge = value
                                     MinimapAdv:POIUpdate()
                                 end,
@@ -518,7 +516,7 @@ local function GetOptions()
                         type = "group",
                         name = "Icon Settings",
                         inline = true,
-                        disabled = function() 
+                        disabled = function()
                             return not(db.poi.enabled and nibRealUI:GetModuleEnabled(MODNAME))
                         end,
                         order = 30,
@@ -558,7 +556,7 @@ local function GetOptions()
         },
     }
     end
-    
+
     return options
 end
 
@@ -621,14 +619,14 @@ RefreshTimer:SetScript("OnUpdate", function(s, e)
         -- Map
         if RefreshMap then
             local x, y = GetPlayerMapPosition("Player")
-            
+
             -- If Coords are at 0,0 then it's possible that they are stuck
             if x == 0 and y == 0 and not WorldMapFrame:IsVisible() then
                 SetMapToCurrentZone()
             end
             RefreshMap = false
         end
-        
+
         -- Zoom
         if RefreshZoom then
             ZoomMinimapOut()
@@ -677,7 +675,7 @@ end
 local function GetPositionData()
     -- Get Normal or Expanded data
     local NewMinimapPoints
-    
+
     if ExpandedState == 0 then
         NewMinimapPoints = {
             xofs = db.position.x,
@@ -699,40 +697,40 @@ local function GetPositionData()
             isLeft = db.position.anchorto:find("LEFT"),
         }
     end
-    
+
     return NewMinimapPoints
 end
 
 -- Set Info text/button positions
 function MinimapAdv:UpdateInfoPosition()
     local NewMinimapPoints = GetPositionData()
-    
+
     local mm_xofs = NewMinimapPoints.xofs
     local mm_yofs = NewMinimapPoints.yofs
     local mm_anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
     local isTop = NewMinimapPoints.isTop
     local isLeft = NewMinimapPoints.isLeft
-    
+
     local mm_width = Minimap:GetWidth()
     local mm_height = Minimap:GetHeight()
-    
+
     local xofs
     local yofs
     local yadj
     local ymulti
-    
-    local font1 = nibRealUI.font.pixel1
-    local font2 = nibRealUI:Font()
+
+    local font1 = {RealUIFont_PixelSmall:GetFont()}
+    local font2 = {RealUIFont_Pixel:GetFont()}
     local fontSize
     Font1:SetFont(font1[1], font1[2] / db.position.scale, font1[3])
     Font2:SetFont(font2[1], font2[2] / db.position.scale, font2[3])
     fontSize = font2[2]
-    
+
     local iHeight = (fontSize + db.information.gap) / scale
-    
+
     local numText = 0
-    
+
     if Minimap:IsVisible() and (ExpandedState == 0) then
         -- Set Offsets, Positions, Gaps
         ymulti = isTop and -1 or 1
@@ -759,7 +757,7 @@ function MinimapAdv:UpdateInfoPosition()
             rpoint = rpoint .. "RIGHT"
             Cpoint = Cpoint .. "RIGHT"
         end
-        
+
         -- Zone Indicator
         if MMFrames.info.zoneIndicator.isHostile then
             MMFrames.info.zoneIndicator:Show()
@@ -773,12 +771,12 @@ function MinimapAdv:UpdateInfoPosition()
             MMFrames.info.coords:SetPoint(Cpoint, "Minimap", Cpoint, 0, 0)
             MMFrames.info.coords.text:SetFontObject("MinimapFont1")
             MMFrames.info.coords.text:SetJustifyH("LEFT")
-            
+
             MMFrames.info.coords:Show()
         else
             MMFrames.info.coords:Hide()
         end
-        
+
         ---- Info List
         -- Location
         if db.information.location then
@@ -790,7 +788,7 @@ function MinimapAdv:UpdateInfoPosition()
         else
             MMFrames.info.location:Hide()
         end
-        
+
         -- Dungeon Difficulty
         if InfoShown.dungeondifficulty and not(InfoShown.coords) then
             MMFrames.info.dungeondifficulty:ClearAllPoints()
@@ -814,7 +812,7 @@ function MinimapAdv:UpdateInfoPosition()
         else
             MMFrames.info.lootSpec:Hide()
         end
-        
+
         -- Dungeon Finder Queue
         if InfoShown.queue then
             MMFrames.info.queue:ClearAllPoints()
@@ -826,7 +824,7 @@ function MinimapAdv:UpdateInfoPosition()
         else
             MMFrames.info.queue:Hide()
         end
-        
+
         -- Raid Finder Queue
         if InfoShown.RFqueue then
             MMFrames.info.RFqueue:ClearAllPoints()
@@ -838,7 +836,7 @@ function MinimapAdv:UpdateInfoPosition()
         else
             MMFrames.info.RFqueue:Hide()
         end
-        
+
         -- Scenarios Queue
         if InfoShown.Squeue then
             MMFrames.info.Squeue:ClearAllPoints()
@@ -850,7 +848,7 @@ function MinimapAdv:UpdateInfoPosition()
         else
             MMFrames.info.Squeue:Hide()
         end
-        
+
         -- if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
         --  numText = numText + 1
         --  CRFM = _G["CompactRaidFrameManager"]
@@ -899,7 +897,7 @@ end
 -- Set Button positions
 function MinimapAdv:UpdateButtonsPosition()
     local NewMinimapPoints = GetPositionData()
-    
+
     local anchor = NewMinimapPoints.anchor
     local scale = NewMinimapPoints.scale
     local isTop = NewMinimapPoints.isTop
@@ -907,7 +905,7 @@ function MinimapAdv:UpdateButtonsPosition()
     local frameOrder = {
         "toggle",
     }
-    
+
     -- Set visibility for Normal or Farm Mode
     local bfWidth = 21
 
@@ -916,7 +914,7 @@ function MinimapAdv:UpdateButtonsPosition()
         MMFrames.config:Show()
         tinsert(frameOrder, "config")
         bfWidth = bfWidth + 15
-    else 
+    else
         MMFrames.config:Hide()
         MMFrames.config.mouseover = false
     end
@@ -926,21 +924,21 @@ function MinimapAdv:UpdateButtonsPosition()
         MMFrames.tracking:Show()
         tinsert(frameOrder, "tracking")
         bfWidth = bfWidth + 15
-    else 
+    else
         MMFrames.tracking:Hide()
         MMFrames.tracking.mouseover = false
     end
-        
+
     -- Farm mode
     if ( Minimap:IsVisible() and (not IsInInstance()) ) then
         MMFrames.farm:Show()
         tinsert(frameOrder, "farm")
         bfWidth = bfWidth + 15
-    else 
+    else
         MMFrames.farm:Hide()
         MMFrames.farm.mouseover = false
     end
-    
+
     -- Set button positions
     MMFrames.buttonframe:ClearAllPoints()
     MMFrames.buttonframe:SetPoint(anchor, "Minimap", isLeft and 1 or -1, isTop and -1 or 1)
@@ -980,14 +978,14 @@ function MinimapAdv:UpdateButtonsPosition()
     else
         MMFrames.buttonframe:SetWidth(bfWidth)
     end
-    
+
     self:FadeButtons()
 end
 
 -- Set Minimap position
 function MinimapAdv:UpdateMinimapPosition()
     local NewMinimapPoints = GetPositionData()
-    
+
     local xofs = NewMinimapPoints.xofs
     local yofs = NewMinimapPoints.yofs
     local anchor = NewMinimapPoints.anchor
@@ -995,20 +993,20 @@ function MinimapAdv:UpdateMinimapPosition()
     local opacity = NewMinimapPoints.opacity
     local isTop = NewMinimapPoints.isTop
     local isLeft = NewMinimapPoints.isLeft
-    
+
     -- Set new size and position
     Minimap:SetFrameStrata("LOW")
-    Minimap:SetFrameLevel(1)    
-    
+    Minimap:SetFrameLevel(1)
+
     Minimap:SetSize(db.position.size, db.position.size)
     Minimap:SetScale(scale)
     Minimap:SetAlpha(opacity)
-    
+
     Minimap:SetMovable(true)
     Minimap:ClearAllPoints()
     Minimap:SetPoint(anchor, "UIParent", anchor, xofs, yofs)
     Minimap:SetUserPlaced(true)
-    
+
     -- Kinda dirty, but it works
     local LFDrpoint, LFDpoint, Qpoint, Gpoint
     if isTop then
@@ -1065,7 +1063,7 @@ function MinimapAdv:UpdateMinimapPosition()
     else
         ButtonCollectFrame:SetPoint("BOTTOMLEFT", Minimap, "TOPLEFT", -1, 5)
     end
-    
+
     -- Update the rest of the Minimap
     self:UpdateButtonsPosition()
     self:UpdateInfoPosition()
@@ -1183,7 +1181,7 @@ local function POI_OnEnter(self)
     else
         POITooltip:SetParent(self)
     end
-    
+
     -- Set Tooltip position
     local NewMinimapPoints = GetPositionData()
     local mm_anchor = NewMinimapPoints.anchor
@@ -1192,7 +1190,7 @@ local function POI_OnEnter(self)
     elseif mm_anchor == "BOTTOMLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_TOPMRIGHT", 5, 5)
     end
-    
+
     -- Add Hyperlink
     local link = GetQuestLink(self.questLogIndex)
     if link then
@@ -1226,7 +1224,7 @@ function MinimapAdv:ClosestPOI(all)
     for k, poi in pairs(self.pois) do
         if poi.active then
             poi_distance = Astrolabe:GetDistanceToIcon(poi)
-            
+
             if closest then
                 if ( poi_distance and closest_distance and (poi_distance < closest_distance) ) then
                     closest = poi
@@ -1250,8 +1248,8 @@ end
 -- Select Closest POI
 function MinimapAdv:SelectClosestPOI()
     if not db.poi.enabled then return end
-    if IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ") then return end 
-    
+    if IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ") then return end
+
     local closest = self:ClosestPOI()
     if closest then
         self:SelectSpecificPOI(self)
@@ -1307,16 +1305,16 @@ end
 function MinimapAdv:POIUpdate(...)
     if ( (not db.poi.enabled) or (ExpandedState == 1 and db.expand.extras.hidepoi) ) then return end
     if IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ") then return end
-    
+
     self:RemoveAllPOIs()
-    
+
     local c,z,x,y = Astrolabe:GetCurrentPlayerPosition()
-    
+
     -- Update was probably triggered by World Map browsing. Don't update any POIs.
     if not (c and z and x and y) then return end
-    
+
     QuestPOIUpdateIcons()
-    
+
     local numNumericQuests = 0
     local numCompletedQuests = 0
     local numEntries = QuestMapUpdateAllQuests()
@@ -1333,7 +1331,7 @@ function MinimapAdv:POIUpdate(...)
                 elseif numObjectives == 0 then
                     isComplete = true
                 end
-                
+
                 -- Create POI arrow
                 local poi = pois[i]
                 if not poi then
@@ -1346,7 +1344,7 @@ function MinimapAdv:POIUpdate(...)
                     poi:SetScript("OnMouseUp", POI_OnMouseUp)
                     poi:EnableMouse()
                 end
-                
+
                 -- Create POI button
                 local poiButton
                 if isComplete then
@@ -1363,7 +1361,7 @@ function MinimapAdv:POIUpdate(...)
                 poiButton:SetParent(poi)
                 poiButton:EnableMouse(false)
                 poi.poiButton = poiButton
-                
+
                 poi.index = i
                 poi.questID = questID
                 poi.questLogIndex = questLogIndex
@@ -1374,9 +1372,9 @@ function MinimapAdv:POIUpdate(...)
                 poi.title = title
                 poi.active = true
                 poi.complete = isComplete
-                
+
                 Astrolabe:PlaceIconOnMinimap(poi, c, z, posX, posY)
-                
+
                 pois[i] = poi
             else
                 -- Skipped
@@ -1392,7 +1390,7 @@ function MinimapAdv:InitializePOI()
     Astrolabe:Register_OnEdgeChanged_Callback(function(...)
         self:UpdatePOIEdges()
     end, "MinimapAdv")
-    
+
     -- Update POI timer
     local GlowTimer = CreateFrame("Frame")
     GlowTimer.elapsed = 0
@@ -1430,7 +1428,7 @@ function MinimapAdv:QueueTimeUpdate(category)
     if mode == "queued" then
         local queueStr = ""
         local hasData, _, _, _, _, _, _, _, _, _, _, _, _, _, _, myWait, queuedTime = GetLFGQueueStats(category)
-        
+
         if not hasData then
             queueStr = LESS_THAN_ONE_MINUTE
         else
@@ -1439,7 +1437,7 @@ function MinimapAdv:QueueTimeUpdate(category)
             local awtStr = strform("%s", myWait == -1 and TIME_UNKNOWN or SecondsToTime(myWait, false, false, 1))
             queueStr = strform("%s |cffc0c0c0(%s)|r", tiqStr, awtStr)
         end
-        
+
         local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
         if category == 1 then -- Dungeon Finder
             MMFrames.info.queue.text:SetText("|cff"..colorOrange.."DF:|r "..queueStr)
@@ -1486,10 +1484,10 @@ end
     11 - "Heroic Scenario"
     12 - "Normal Scenario"
     13 - nil
-    14 - "Normal"  10-30 Player 
-    15 - "Heroic"  10-30 Player 
-    16 - "Mythic"  20 Player 
-    17 - "Looking For Raid" 10-25 Player 
+    14 - "Normal"  10-30 Player
+    15 - "Heroic"  10-30 Player
+    16 - "Mythic"  20 Player
+    17 - "Looking For Raid" 10-25 Player
 ]]--
 function MinimapAdv:DungeonDifficultyUpdate()
     -- If in a Party/Raid then show Dungeon Difficulty text
@@ -1502,7 +1500,7 @@ function MinimapAdv:DungeonDifficultyUpdate()
             if isChallengeMode then self.DifficultyText = self.DifficultyText.."+" end
         elseif (instanceType == "raid") then
             self.DifficultyText = "R: "
-            
+
             --Set raid size
             if (difficulty <= 9) or (difficulty == 16) then
                 --Legacy raids and Mythic are fixed size
@@ -1535,7 +1533,7 @@ function MinimapAdv:DungeonDifficultyUpdate()
         MMFrames.info.dungeondifficulty.text:SetText(self.DifficultyText.." ")
         MMFrames.info.dungeondifficulty:EnableMouse(true)
         MMFrames.info.dungeondifficulty:SetWidth(MMFrames.info.dungeondifficulty.text:GetStringWidth() + 12)
-        
+
         -- Set to show DungeonDifficulty
         InfoShown.dungeondifficulty = true
     else
@@ -1604,7 +1602,7 @@ function MinimapAdv:LootSpecUpdate()
         MMFrames.info.lootSpec.text:SetText("")
         InfoShown.lootSpec = false
     end
-            
+
     if not UpdateProcessing then
         self:UpdateInfoPosition()
     end
@@ -1614,7 +1612,7 @@ end
 ---- Coordinates ----
 local coords_int = 0.5
 function MinimapAdv:CoordsUpdate()
-    if (IsInInstance() or not(Minimap:IsVisible()) or self.StationaryTime >= 10) then   -- Hide Coords 
+    if (IsInInstance() or not(Minimap:IsVisible()) or self.StationaryTime >= 10) then   -- Hide Coords
         MMFrames.info.coords:SetScript("OnUpdate", nil)
         InfoShown.coords = false
     else    -- Show Coords
@@ -1637,7 +1635,7 @@ end
 ---------------------
 function MinimapAdv:MovementUpdate()
     if not(db.information.coordDelayHide) or IsInInstance() or not(Minimap:IsVisible()) then return end
-    
+
     local X, Y = GetPlayerMapPosition("player")
     if X == self.LastX and Y == self.LastY then
         self.StationaryTime = self.StationaryTime + 0.5
@@ -1688,7 +1686,7 @@ function MinimapAdv:UpdateShownState()
                 MinimapShown = false
             end
         end
-        
+
         -- Disable Farm Mode while in dungeon
         if ExpandedState ~= 0 then
             ExpandedState = 0
@@ -1707,20 +1705,20 @@ end
 function MinimapAdv:FadeButtons()
     local NewMinimapPoints = GetPositionData()
     local scale = NewMinimapPoints.scale
-    
+
     if Minimap:IsVisible() then
         if Minimap.mouseover or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
-            
+
             if ExpandedState == 0 then
                 MMFrames.tracking:Show()
-                numButtons = numButtons + 1 
+                numButtons = numButtons + 1
             end
             if not IsInInstance() then
                 MMFrames.farm:Show()
                 numButtons = numButtons + 1
             end
-            
+
             if MMFrames.buttonframe.tooltip:IsShown() and (ExpandedState == 0) then
                 MMFrames.buttonframe:SetWidth(Minimap:GetWidth() * scale + 2)
             else
@@ -1728,7 +1726,7 @@ function MinimapAdv:FadeButtons()
                 MMFrames.buttonframe.tooltipIcon:Hide()
                 MMFrames.buttonframe:SetWidth(6 + numButtons * 15)
             end
-            
+
             MMFrames.buttonframe:Show()
         else
             MMFrames.buttonframe:Hide()
@@ -1736,7 +1734,7 @@ function MinimapAdv:FadeButtons()
             MMFrames.farm:Hide()
         end
     else
-        
+
     end
 end
 
@@ -1760,62 +1758,62 @@ end
 
 local function Toggle_OnEnter()
     MMFrames.toggle.mouseover = true
-    
+
     MMFrames.toggle.icon:SetVertexColor(unpack(nibRealUI.classColor))
     MMFrames.toggle:SetFrameLevel(6)
-    
+
     MMFrames.buttonframe.tooltip:Hide()
     MMFrames.buttonframe.tooltipIcon:Hide()
-    
+
     MinimapAdv:FadeButtons()
 end
 
 local function Toggle_OnLeave()
     MMFrames.toggle.mouseover = false
-    
+
     MMFrames.toggle.icon:SetVertexColor(0.8, 0.8, 0.8)
     MMFrames.toggle:SetFrameLevel(5)
-    
+
     MMFrames.buttonframe.tooltip:Hide()
     MMFrames.buttonframe.tooltipIcon:Hide()
-    
+
     MinimapAdv:FadeButtons()
 end
 
 ---- Config Button ----
 local function Config_OnMouseDown()
     nibRealUI:LoadConfig("nibRealUI", "modules", "MinimapAdv")
-    
+
     if DropDownList1 then DropDownList1:Hide() end
     if DropDownList2 then DropDownList2:Hide() end
 end
 
 local function Config_OnEnter()
     MMFrames.config.mouseover = true
-    
+
     MMFrames.config.icon:SetVertexColor(unpack(nibRealUI.classColor))
     MMFrames.config:SetFrameLevel(6)
-    
+
     if ExpandedState == 0 then
         MMFrames.buttonframe.tooltip:SetText("Options")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
     end
-    
+
     MinimapAdv:FadeButtons()
 end
 
 local function Config_OnLeave()
     MMFrames.config.mouseover = false
-    
+
     MMFrames.config.icon:SetVertexColor(0.8, 0.8, 0.8)
     MMFrames.config:SetFrameLevel(5)
-    
+
     MMFrames.buttonframe.tooltip:Hide()
     MMFrames.buttonframe.tooltipIcon:Hide()
-    
+
     MinimapAdv:FadeButtons()
-    
+
     if GameTooltip:IsShown() then GameTooltip:Hide() end
 end
 
@@ -1826,37 +1824,37 @@ end
 
 local function Tracking_OnEnter()
     MMFrames.tracking.mouseover = true
-    
+
     MMFrames.tracking.icon:SetVertexColor(unpack(nibRealUI.classColor))
     MMFrames.tracking:SetFrameLevel(6)
-    
+
     if ExpandedState == 0 then
         MMFrames.buttonframe.tooltip:SetText("Tracking")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
     end
-    
+
     MinimapAdv:FadeButtons()
 end
 
 local function Tracking_OnLeave()
     MMFrames.tracking.mouseover = false
-    
+
     MMFrames.tracking.icon:SetVertexColor(0.8, 0.8, 0.8)
     MMFrames.tracking:SetFrameLevel(5)
-    
+
     MMFrames.buttonframe.tooltip:Hide()
     MMFrames.buttonframe.tooltipIcon:Hide()
-    
+
     MinimapAdv:FadeButtons()
-    
+
     if GameTooltip:IsShown() then GameTooltip:Hide() end
 end
 
 ---- Farm Button ----
 function MinimapAdv:ToggleGatherer()
     if ( (not db.expand.extras.gatherertoggle) or (not Gatherer) ) then return end
-    
+
     if ExpandedState == 1 then
         Gatherer.Config.SetSetting("minimap.enable", true)
     else
@@ -1878,7 +1876,7 @@ local function Farm_OnMouseDown()
     end
     if DropDownList1 then DropDownList1:Hide() end
     if DropDownList2 then DropDownList2:Hide() end
-    
+
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
     MinimapAdv:UpdateFarmModePOI()
@@ -1891,32 +1889,32 @@ end
 
 local function Farm_OnEnter()
     MMFrames.farm.mouseover = true
-    
+
     MMFrames.farm.icon:SetVertexColor(unpack(nibRealUI.classColor))
     MMFrames.farm:SetFrameLevel(6)
-    
+
     if ExpandedState == 0 then
         MMFrames.buttonframe.tooltip:SetText("Farm Mode")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
     end
-    
+
     MinimapAdv:FadeButtons()
 end
 
 local function Farm_OnLeave()
     MMFrames.farm.mouseover = false
-    
+
     MMFrames.farm.icon:SetVertexColor(0.8, 0.8, 0.8)
     MMFrames.farm:SetFrameLevel(5)
-    
+
     MMFrames.buttonframe.tooltip:Hide()
     MMFrames.buttonframe.tooltipIcon:Hide()
-    
+
     MinimapAdv:FadeButtons()
 end
 
---[[ Garrison 
+--[[ Garrison
 --The pulse anim that these function call will reset the alpha of the whole button each time it repeats.
 --This was the only reliable way I could find to get this button back to full opacity.
 local oldGarrisonMinimapBuilding_ShowPulse = GarrisonMinimapBuilding_ShowPulse
@@ -2007,7 +2005,7 @@ function MinimapAdv:ZoneChange()
     elseif pvpType == "combat" then
         r, g, b = 1, 0, 0
     end
-    
+
     MMFrames.info.zoneIndicator.bg:SetVertexColor(r, g, b)
     MMFrames.info.zoneIndicator.isHostile = hostilePvPTypes[pvpType]
     if MMFrames.info.zoneIndicator.isHostile then
@@ -2015,24 +2013,24 @@ function MinimapAdv:ZoneChange()
     else
         MMFrames.info.zoneIndicator:Hide()
     end
-    
+
     local oldName = GetMinimapZoneText()
     local zName = (strlen(oldName) > 22) and gsub(oldName, "%s?(.[\128-\191]*)%S+%s", "%1.") or oldName
     if strlen(zName) > 22 then
         zName = strsub(zName, 1, 20)..".."
     end
-    
+
     MMFrames.info.location.text:SetText(zName)
     MMFrames.info.location.text:SetTextColor(r, g, b)
     MMFrames.info.location:SetWidth(MMFrames.info.location.text:GetWidth() + 4)
-    
+
     RefreshMap = true
 end
 
 function MinimapAdv:ZONE_CHANGED_NEW_AREA()
     SetMapToCurrentZone()
     self:ZoneChange()
-    
+
     -- Update POIs
     self:POIUpdate()
 end
@@ -2046,17 +2044,17 @@ function MinimapAdv:PLAYER_ENTERING_WORLD()
     -- Hide persistent Minimap elements
     GameTimeFrame:Hide()
     GameTimeFrame.Show = function() end
-    
+
     -- Update specific information
     self:DungeonDifficultyUpdate()
-    
+
     -- Update Minimap position and visible state
     self:UpdateMinimapPosition()
     self:UpdateShownState() -- Will also call MinimapAdv:Update
-    
+
     -- Update POIs
     self:UpdatePOIEnabled()
-    
+
     -- Timer
     RefreshMap = true
     RefreshZoom = true
@@ -2083,13 +2081,13 @@ end
 function MinimapAdv:RegEvents()
     -- Hook into Blizzard addons
     self:RegisterEvent("ADDON_LOADED")
-    
+
     -- Basic settings
     self:RegisterEvent("PLAYER_LOGIN")
-    
+
     -- Initialise settings on UI load
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    
+
     -- Set Minimap Zoom
     self:RegisterEvent("MINIMAP_UPDATE_ZOOM")
 
@@ -2100,7 +2098,7 @@ function MinimapAdv:RegEvents()
         "ZONE_CHANGED_INDOORS",
         "WORLD_MAP_UPDATE",
     }, 0.2, "ZoneChange")
-    
+
     -- Dungeon Difficulty
     self:RegisterEvent("GUILD_PARTY_STATE_UPDATED", "UpdateGuildPartyState")
     self:RegisterEvent("PLAYER_GUILD_UPDATE", "UpdateGuildPartyState")
@@ -2111,7 +2109,7 @@ function MinimapAdv:RegEvents()
         "PARTY_MEMBER_ENABLE",
         "PARTY_MEMBER_DISABLE",
     }, 1, "InstanceDifficultyOnEvent")
-    
+
     -- Queue
     self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
     self:RegisterEvent("LFG_PROPOSAL_SHOW", "GetLFGQueue")
@@ -2120,7 +2118,7 @@ function MinimapAdv:RegEvents()
     -- POI
     self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
     self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
-    
+
     local UpdatePOICall = function() self:POIUpdate() end
     hooksecurefunc("AddQuestWatch", UpdatePOICall)
     hooksecurefunc("RemoveQuestWatch", UpdatePOICall)
@@ -2146,15 +2144,15 @@ end
 -- Update Frame fonts
 function MinimapAdv:UpdateFonts()
     -- Retrieve Font variables
-    local font1 = nibRealUI.font.pixel1
-    local font2 = nibRealUI:Font()
+    local font1 = {RealUIFont_PixelSmall:GetFont()}
+    local font2 = {RealUIFont_Pixel:GetFont()}
     local fontSize
     Font1:SetFont(font1[1], font1[2] / db.position.scale, font1[3])
     Font2:SetFont(font2[1], font2[2] / db.position.scale, font2[3])
     fontSize = font2[2]
 
     -- Set Info font
-    local fs    
+    local fs
     for k,v in pairs(MMFrames.info) do
         fs = MMFrames.info[k].text
         if fs then
@@ -2173,42 +2171,41 @@ end
 -- Frame Template
 local function NewInfoFrame(name, parent, size2)
     local NewFrame
-    
+
     NewFrame = CreateFrame("Frame", name, parent)
     NewFrame:SetHeight(12)
     NewFrame:SetWidth(12)
     NewFrame:SetFrameStrata("LOW")
     NewFrame:SetFrameLevel(5)
-    
+
     NewFrame.text = NewFrame:CreateFontString(nil, "ARTWORK")
     if size2 then
-        tinsert(FontStringsRegular, NewFrame.text)
         NewFrame.text.style = 2
     else
         NewFrame.text.style = 1
     end
-    
+
     return NewFrame
 end
 
 -- Create Information/Toggle frames
 local function CreateButton(Name, Texture, index)
     local NewButton
-    
+
     NewButton = CreateFrame("Frame", Name, MMFrames.buttonframe)
     NewButton:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 5 + ((index -1) * 15), 1)
     NewButton:SetHeight(15)
     NewButton:SetWidth(15)
     NewButton:EnableMouse(true)
     NewButton:Show()
-    
+
     NewButton.icon = NewButton:CreateTexture(nil, "ARTWORK")
     NewButton.icon:SetTexture(Texture)
     NewButton.icon:SetVertexColor(0.8, 0.8, 0.8)
     NewButton.icon:SetPoint("BOTTOMLEFT", NewButton, "BOTTOMLEFT", 0, 0)
     NewButton.icon:SetHeight(16)
     NewButton.icon:SetWidth(16)
-    
+
     return NewButton
 end
 
@@ -2222,7 +2219,7 @@ local function CreateFrames()
         info = {},
     }
     MMFrames = MinimapAdv.Frames
-    
+
     ---- Buttons
     MMFrames.buttonframe = CreateFrame("Frame", nil, UIParent)
     MMFrames.buttonframe:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 1, -1)
@@ -2234,13 +2231,13 @@ local function CreateFrames()
     MMFrames.buttonframe.edge:SetTexture(1, 1, 1, 1)
     MMFrames.buttonframe.edge:SetPoint("LEFT", MMFrames.buttonframe, "LEFT", 1, 0)
     MMFrames.buttonframe.edge:SetSize(4, 15)
-    
+
     MMFrames.buttonframe.tooltip = MMFrames.buttonframe:CreateFontString()
     MMFrames.buttonframe.tooltip:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 78.5, 4.5)
     MMFrames.buttonframe.tooltip:SetFontObject("MinimapFont1")
     MMFrames.buttonframe.tooltip:SetTextColor(0.8, 0.8, 0.8)
     MMFrames.buttonframe.tooltip:Hide()
-    
+
     MMFrames.buttonframe.tooltipIcon = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.tooltipIcon:SetPoint("BOTTOMRIGHT", MMFrames.buttonframe.tooltip, "BOTTOMLEFT", -1.5, -0.5)
     MMFrames.buttonframe.tooltipIcon:SetWidth(16)
@@ -2254,35 +2251,35 @@ local function CreateFrames()
     MMFrames.toggle:SetScript("OnEnter", Toggle_OnEnter)
     MMFrames.toggle:SetScript("OnLeave", Toggle_OnLeave)
     MMFrames.toggle:SetScript("OnMouseDown", Toggle_OnMouseDown)
-    
+
     -- Config Button
     MMFrames.config = CreateButton("MinimapAdv_Config", Textures.Config, 2)
     MMFrames.config:SetScript("OnEnter", Config_OnEnter)
     MMFrames.config:SetScript("OnLeave", Config_OnLeave)
     MMFrames.config:SetScript("OnMouseDown", Config_OnMouseDown)
-    
+
     -- Tracking Button
     MMFrames.tracking = CreateButton("MinimapAdv_Tracking", Textures.Tracking, 3)
     MMFrames.tracking:SetScript("OnEnter", Tracking_OnEnter)
     MMFrames.tracking:SetScript("OnLeave", Tracking_OnLeave)
     MMFrames.tracking:SetScript("OnMouseDown", Tracking_OnMouseDown)
-    
+
     -- Farm Button
     MMFrames.farm = CreateButton("MinimapAdv_Farm", Textures.Expand, 4)
     MMFrames.farm:SetScript("OnEnter", Farm_OnEnter)
     MMFrames.farm:SetScript("OnLeave", Farm_OnLeave)
     MMFrames.farm:SetScript("OnMouseDown", Farm_OnMouseDown)
-    
+
     -- Info
     MMFrames.info.location = NewInfoFrame("MinimapAdv_Location", Minimap, true)
     MMFrames.info.coords = NewInfoFrame("MinimapAdv_Coords", Minimap)
     MMFrames.info.coords:SetAlpha(0.75)
-    MMFrames.info.dungeondifficulty = NewInfoFrame("MinimapAdv_DungeonDifficulty", Minimap, true)   
-    MMFrames.info.lootSpec = NewInfoFrame("MinimapAdv_LootSpec", Minimap, true) 
-    MMFrames.info.queue = NewInfoFrame("MinimapAdv_Queue", Minimap, true)   
-    MMFrames.info.RFqueue = NewInfoFrame("MinimapAdv_RFQueue", Minimap, true)   
-    MMFrames.info.Squeue = NewInfoFrame("MinimapAdv_SQueue", Minimap, true) 
-    
+    MMFrames.info.dungeondifficulty = NewInfoFrame("MinimapAdv_DungeonDifficulty", Minimap, true)
+    MMFrames.info.lootSpec = NewInfoFrame("MinimapAdv_LootSpec", Minimap, true)
+    MMFrames.info.queue = NewInfoFrame("MinimapAdv_Queue", Minimap, true)
+    MMFrames.info.RFqueue = NewInfoFrame("MinimapAdv_RFQueue", Minimap, true)
+    MMFrames.info.Squeue = NewInfoFrame("MinimapAdv_SQueue", Minimap, true)
+
     -- Zone Indicator
     MMFrames.info.zoneIndicator = CreateFrame("Frame", "MinimapAdv_Zone", Minimap)
     MMFrames.info.zoneIndicator:SetHeight(16)
@@ -2291,12 +2288,12 @@ local function CreateFrames()
     MMFrames.info.zoneIndicator:SetFrameLevel(5)
     MMFrames.info.zoneIndicator:ClearAllPoints()
     MMFrames.info.zoneIndicator:SetPoint("BOTTOMRIGHT", "Minimap", "BOTTOMRIGHT", 1, -1)
-    
+
     MMFrames.info.zoneIndicator.bg = MMFrames.info.zoneIndicator:CreateTexture(nil, "BACKGROUND")
     MMFrames.info.zoneIndicator.bg:SetTexture(Textures.ZoneIndicator)
     MMFrames.info.zoneIndicator.bg:SetVertexColor(0.5, 0.5, 0.5)
     MMFrames.info.zoneIndicator.bg:SetAllPoints(MMFrames.info.zoneIndicator)
-    
+
     -- Update Fonts
     MinimapAdv:UpdateFonts()
 end
@@ -2318,16 +2315,16 @@ local function SetUpMinimapFrame()
     end)
     Minimap:SetScript("OnEnter", Minimap_OnEnter)
     Minimap:SetScript("OnLeave", Minimap_OnLeave)
-    
+
     -- Hide/Move Minimap elements
     MiniMapTracking:Hide()
-    
+
     MiniMapMailFrame:Hide()
     MiniMapMailFrame.Show = function() end
 
     MinimapZoneText:Hide()
     MinimapZoneTextButton:Hide()
-    
+
     QueueStatusMinimapButton:ClearAllPoints()
     QueueStatusMinimapButton:SetParent(Minimap)
     QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
@@ -2346,24 +2343,24 @@ local function SetUpMinimapFrame()
 
 
     MinimapNorthTag:SetAlpha(0)
-    
+
     MiniMapInstanceDifficulty:Hide()
     MiniMapInstanceDifficulty.Show = function() end
     GuildInstanceDifficulty:Hide()
     GuildInstanceDifficulty.Show = function() end
     MiniMapChallengeMode:Hide()
     MiniMapChallengeMode.Show = function() end
-    
+
     MiniMapWorldMapButton:Hide()
-    
+
     GameTimeFrame:Hide()
-    
+
     MinimapBorderTop:Hide()
-    
+
     -- Make it square
     MinimapBorder:SetTexture(nil)
     Minimap:SetMaskTexture(Textures.SquareMask)
-    
+
     -- Create New Border
     nibRealUI:CreateBG(Minimap)
 
@@ -2428,12 +2425,12 @@ function MinimapAdv:OnInitialize()
     })
     db = self.db.profile
     ndbc = nibRealUI.db.char
-    
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
-function MinimapAdv:OnEnable()  
+function MinimapAdv:OnEnable()
     -- Create frames, register events, begin the Minimap
     SetUpMinimapFrame()
     CreateFrames()

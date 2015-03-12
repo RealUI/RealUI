@@ -112,7 +112,7 @@ function ConfigBar:CreateElement(element, order)
     -- Label
     NewElement.label = NewElement:CreateFontString()
         NewElement.label:SetPoint("BOTTOM", NewElement, "BOTTOM", 0.5, 7.5)
-        NewElement.label:SetFont(nibRealUI.font.standard, 10)
+        NewElement.label:SetFontObject(RealUIFont_Normal)
         NewElement.label:SetText(info.label)
         if info.isDisabled then
             NewElement.label:SetTextColor(0.5, 0.5, 0.5)

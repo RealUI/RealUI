@@ -31,7 +31,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Raid Utility module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 					nibRealUI:ReloadUIDialog()
 				end,
@@ -94,7 +94,7 @@ local function CreateButton(name, parent, template, width, height, SetPoint, rel
     end
 	if text then
 		b.t = b:CreateFontString(nil, "OVERLAY")
-		b.t:SetFontObject(SystemFont_Small)
+		b.t:SetFontObject(RealUIFont_PixelSmall)
 		b.t:SetPoint("CENTER", 0, -1)
 		b.t:SetJustifyH("CENTER")
 		b.t:SetText(text)
@@ -221,7 +221,7 @@ function RaidUtility:OnInitialize()
 		},
 	})
 	db = self.db.profile
-	
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
@@ -235,7 +235,7 @@ end
 
 function RaidUtility:OnDisable()
 	self:UnregisterAllEvents()
-	
+
 	if RaidUtilityPanel and RaidUtilityShowButton then
 		RaidUtilityShowButton:Hide()
 		RaidUtilityPanel:Hide()

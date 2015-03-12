@@ -57,7 +57,7 @@ function nibRealUI:SetProfileKeys()
         if db.addonControl[addon].profiles.base.use then
             -- Set Addon profiles
             local profile = GetProfileInfo(addon)
-            if _G[data.db] and _G[data.db][data.profKey] then 
+            if _G[data.db] and _G[data.db][data.profKey] then
                 if data.isAce then
                     _G[data.db][data.profKey][self.key] = profile
                 else
@@ -88,7 +88,7 @@ end
 
 function AddonControl:CreateOptionsFrame()
     if self.options then return end
-    
+
     local F
     if Aurora then F = Aurora[1] end
 
@@ -96,29 +96,29 @@ function AddonControl:CreateOptionsFrame()
     local acO = self.options
         acO:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
         acO:Hide()
-    
+
     acO.okay = nibRealUI:CreateTextButton(OKAY, acO, 100, 24, true)
         acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
         acO.okay:SetScript("OnClick", function() RealUIAddonControlOptions:Hide() end)
-    
+
     acO.reloadui = nibRealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
         acO.reloadui:SetScript("OnClick", function() ReloadUI() end)
-        
+
     nibRealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
-    
+
     -- Header
     local header = nibRealUI:CreateFS(acO, "CENTER", "small")
         header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
-    
+
     -- Label AddOn
     local lAddon = nibRealUI:CreateFS(acO, "LEFT", "small")
         lAddon:SetPoint("TOPLEFT", acO, "TOPLEFT", 12, -30)
         lAddon:SetText("AddOn")
         lAddon:SetWidth(130)
         lAddon:SetTextColor(unpack(nibRealUI.classColor))
-    
+
     -- Label Base
     local lBase = nibRealUI:CreateFS(acO, "CENTER", "small")
         lBase:SetPoint("LEFT", lAddon, "RIGHT", 0, 0)
@@ -173,7 +173,7 @@ function AddonControl:CreateOptionsFrame()
 
             -- AddOn name
             local fs = acO:CreateFontString(nil, "OVERLAY")
-            fs:SetFont(nibRealUI.font.standard, 10)
+            fs:SetFontObject(RealUIFont_Normal)
             fs:SetText(addon)
             if not prevLabel then
                 fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -9.5)
@@ -262,7 +262,7 @@ function AddonControl:CreateOptionsFrame()
     end
     acO:SetHeight(84 + (cnt * 19.25))
     nibRealUI:CreateBGSection(acAddonSect, acAddonSect.firstReset, acAddonSect.lastReset)
-    
+
     acO:Show()
 end
 
@@ -304,7 +304,7 @@ function AddonControl:OnInitialize()
                     profiles = {
                         base =          {use = true,    key = "RealUI"},
                         layout =        {use = false,   key = "Healing"},
-                    },  
+                    },
                     control = {
                         position = true,
                         style = false,
@@ -405,6 +405,6 @@ function AddonControl:OnInitialize()
             db.addonControl[StyleAddOnsAlt[i]].control.style = nil
         end
     end
-    
+
     self:SetEnabledState(true)
 end

@@ -4,18 +4,13 @@ local db, ndb, ndbc
 local MODNAME = "Fonts"
 local Fonts = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-nibRealUI.font = {
-    standard = nil,
-    pixel1 = nil,
-    pixel2 = nil,
-    pixelNumbers = nil,
-    pixelCooldown = nil,
+local font
+local outlines = {
+	"NONE",
+	"OUTLINE",
+	"THICKOUTLINE",
+	"MONOCHROMEOUTLINE"
 }
-
-RealUIFontSmall = CreateFont("RealUIFontObjectSmall")
-RealUIFontLarge = CreateFont("RealUIFontObjectLarge")
-RealUIFontPixel = CreateFont("RealUIFontObjectPixel")
-RealUIStandardFont10 = CreateFont("RealUIFontObjectStandard10")
 
 -- Options
 local options
@@ -69,10 +64,10 @@ local function GetOptions()
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return nibRealUI.media.font.standard[1]
+                            return font.standard[1]
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.standard[1] = value
+                            font.standard[1] = value
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -83,9 +78,8 @@ local function GetOptions()
                         desc = "Increase/Decrease all UI Standard font sizes by this value.",
                         min = -6, max = 6, step = 1,
                         get = function(info) return db.standard.sizeadjust end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.standard.sizeadjust = value
-                            nibRealUI.font.sizeAdjust = db.standard.sizeadjust
                         end,
                         order = 20,
                     },
@@ -94,7 +88,7 @@ local function GetOptions()
                         name = "Adjust Yellow Fonts",
                         desc = "Change the color of WoW's 'yellow' fonts.",
                         get = function() return db.standard.changeYellow end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.standard.changeYellow = value
                             InfoLine:Refresh()
                         end,
@@ -132,7 +126,7 @@ local function GetOptions()
                         name = "Use custom chat font",
                         desc = "Use a font other than Standard for the Chat window.",
                         get = function() return ndb.settings.chatFontCustom.enabled end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             ndb.settings.chatFontCustom.enabled = value
                             nibRealUI:StyleSetChatFont()
                         end,
@@ -170,10 +164,10 @@ local function GetOptions()
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return nibRealUI.media.font.pixel.small[1]
+                            return font.pixel.small[1]
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.small[1] = value
+                            font.pixel.small[1] = value
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -182,23 +176,23 @@ local function GetOptions()
                         type = "range",
                         name = "Size",
                         min = 6, max = 28, step = 1,
-                        get = function(info) return nibRealUI.media.font.pixel.small[2] end,
+                        get = function(info) return font.pixel.small[2] end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.small[2] = value
+                            font.pixel.small[2] = value
                         end,
                         order = 20,
                     },
                     outline = {
                         type = "select",
                         name = "Outline",
-                        values = nibRealUI.globals.outlines,
+                        values = outlines,
                         get = function()
-                            for k,v in pairs(nibRealUI.globals.outlines) do
-                                if v == nibRealUI.media.font.pixel.small[3] then return k end
+                            for k,v in pairs(outlines) do
+                                if v == font.pixel.small[3] then return k end
                             end
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.small[3] = nibRealUI.globals.outlines[value]
+                            font.pixel.small[3] = outlines[value]
                         end,
                         order = 30,
                     },
@@ -220,10 +214,10 @@ local function GetOptions()
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return nibRealUI.media.font.pixel.large[1]
+                            return font.pixel.large[1]
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.large[1] = value
+                            font.pixel.large[1] = value
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -232,23 +226,23 @@ local function GetOptions()
                         type = "range",
                         name = "Size",
                         min = 6, max = 28, step = 1,
-                        get = function(info) return nibRealUI.media.font.pixel.large[2] end,
+                        get = function(info) return font.pixel.large[2] end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.large[2] = value
+                            font.pixel.large[2] = value
                         end,
                         order = 20,
                     },
                     outline = {
                         type = "select",
                         name = "Outline",
-                        values = nibRealUI.globals.outlines,
+                        values = outlines,
                         get = function()
-                            for k,v in pairs(nibRealUI.globals.outlines) do
-                                if v == nibRealUI.media.font.pixel.large[3] then return k end
+                            for k,v in pairs(outlines) do
+                                if v == font.pixel.large[3] then return k end
                             end
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.large[3] = nibRealUI.globals.outlines[value]
+                            font.pixel.large[3] = outlines[value]
                         end,
                         order = 30,
                     },
@@ -270,10 +264,10 @@ local function GetOptions()
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return nibRealUI.media.font.pixel.numbers[1]
+                            return font.pixel.numbers[1]
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.numbers[1] = value
+                            font.pixel.numbers[1] = value
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -282,23 +276,23 @@ local function GetOptions()
                         type = "range",
                         name = "Size",
                         min = 6, max = 28, step = 1,
-                        get = function(info) return nibRealUI.media.font.pixel.numbers[2] end,
+                        get = function(info) return font.pixel.numbers[2] end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.numbers[2] = value
+                            font.pixel.numbers[2] = value
                         end,
                         order = 20,
                     },
                     outline = {
                         type = "select",
                         name = "Outline",
-                        values = nibRealUI.globals.outlines,
+                        values = outlines,
                         get = function()
-                            for k,v in pairs(nibRealUI.globals.outlines) do
-                                if v == nibRealUI.media.font.pixel.numbers[3] then return k end
+                            for k,v in pairs(outlines) do
+                                if v == font.pixel.numbers[3] then return k end
                             end
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.numbers[3] = nibRealUI.globals.outlines[value]
+                            font.pixel.numbers[3] = outlines[value]
                         end,
                         order = 30,
                     },
@@ -341,14 +335,14 @@ local function GetOptions()
                     outline = {
                         type = "select",
                         name = "Outline",
-                        values = nibRealUI.globals.outlines,
+                        values = outlines,
                         get = function()
-                            for k,v in pairs(nibRealUI.globals.outlines) do
+                            for k,v in pairs(outlines) do
                                 if v == nibRealUI.media.font.pixel.cooldown[3] then return k end
                             end
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.cooldown[3] = nibRealUI.globals.outlines[value]
+                            nibRealUI.media.font.pixel.cooldown[3] = outlines[value]
                         end,
                         order = 30,
                     },
@@ -364,7 +358,7 @@ local function GetOptions()
                 name = "Change Floating Combat Text",
                 desc = "Change the font of the default Floating Combat Text.",
                 get = function() return db.changeFCT end,
-                set = function(info, value) 
+                set = function(info, value)
                     db.changeFCT = value
                 end,
                 order = 90,
@@ -386,17 +380,17 @@ end
 
 function Fonts:UpdateUIFonts()
     -- Regular text: replaces FRIZQT__.TTF
-    local NORMAL = nibRealUI.font.standard
-    --local NORMAL = nibRealUI.font.normal
+    local NORMAL = font.standard[4]
+    --local NORMAL = font.normal
 
     -- Chat Font: replaces ARIALN.TTF
-    local CHAT   = nibRealUI.font.chat
+    local CHAT   = font.chat[4]
 
     -- Crit Font: replaces skurri.ttf
-    local CRIT   = nibRealUI.font.crit
+    local CRIT   = NORMAL --font.crit[4]
 
     -- Header Font: replaces MORPHEUS.ttf
-    local HEADER = nibRealUI.font.header
+    local HEADER = NORMAL --font.header[4]
 
     STANDARD_TEXT_FONT = NORMAL
     UNIT_NAME_FONT     = NORMAL
@@ -404,7 +398,27 @@ function Fonts:UpdateUIFonts()
     if db.changeFCT then
         DAMAGE_TEXT_FONT = NORMAL
     end
-    
+
+    -- RealUI Fonts
+    SetFont(RealUIFont_Normal, font.standard[4], font.standard[2], font.standard[3])
+    SetFont(RealUIFont_Chat, font.chat[4], font.chat[2], font.chat[3])
+    if ndb.settings.fontStyle == 1 then
+        RealUIFont_Pixel:SetFont(font.pixel.small[4], font.pixel.small[2], font.pixel.small[3])
+        RealUIFont_PixelSmall:SetFont(font.pixel.small[4], font.pixel.small[2], font.pixel.small[3])
+        RealUIFont_PixelLarge:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+    elseif ndb.settings.fontStyle == 2 then
+        RealUIFont_Pixel:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+        RealUIFont_PixelSmall:SetFont(font.pixel.small[4], font.pixel.small[2], font.pixel.small[3])
+        RealUIFont_PixelLarge:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+    elseif ndb.settings.fontStyle == 3 then
+        RealUIFont_Pixel:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+        RealUIFont_PixelSmall:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+        RealUIFont_PixelLarge:SetFont(font.pixel.large[4], font.pixel.large[2], font.pixel.large[3])
+    end
+    RealUIFont_PixelNumbers:SetFont( font.pixel.numbers[4], font.pixel.numbers[2], font.pixel.numbers[3])
+    RealUIFont_PixelCooldown:SetFont(font.pixel.cooldown[4], font.pixel.cooldown[2], font.pixel.cooldown[3])
+
+
     -- Base fonts, everything inhierits from these fonts.
     -- FrameXML\Fonts.xml
     SetFont(SystemFont_Small,               NORMAL, 10)
@@ -517,56 +531,55 @@ function Fonts:UpdateUIFonts()
 end
 
 function nibRealUI:Font(isLSM, size)
-    local db = nibRealUI.db.profile
-    local size = size or "default"
+    size = size or "default"
     if size == "default" then
-        if db.settings.fontStyle == 1 then
+        if ndb.settings.fontStyle == 1 then
             if isLSM then
-                return db.media.font.pixel.small[1]
+                return font.pixel.small[1]
             else
-                return nibRealUI.font.pixel1
+                return font.pixel.small[4]
             end
         else
             if isLSM then
-                return db.media.font.pixel.large[1]
+                return font.pixel.large[1]
             else
-                return nibRealUI.font.pixel2
+                return font.pixel.large[4]
             end
         end
 
     elseif size == "small" then
-        if db.settings.fontStyle == 1 then
+        if ndb.settings.fontStyle == 1 then
             if isLSM then
-                return db.media.font.pixel.small[1]
+                return font.pixel.small[1]
             else
-                return nibRealUI.font.pixel1
+                return font.pixel.small[4]
             end
-        elseif db.settings.fontStyle == 2 then
+        elseif ndb.settings.fontStyle == 2 then
             if isLSM then
-                return db.media.font.pixel.small[1]
+                return font.pixel.small[1]
             else
-                return nibRealUI.font.pixel1
+                return font.pixel.small[4]
             end
-        elseif db.settings.fontStyle == 3 then
+        elseif ndb.settings.fontStyle == 3 then
             if isLSM then
-                return db.media.font.pixel.large[1]
+                return font.pixel.large[1]
             else
-                return nibRealUI.font.pixel2
+                return font.pixel.large[4]
             end
         end
 
     elseif size == "large" then
         if isLSM then
-            return db.media.font.pixel.large[1]
+            return font.pixel.large[1]
         else
-            return nibRealUI.font.pixel2
+            return font.pixel.large[4]
         end
 
     elseif size == "tiny" then
         if isLSM then
-            return db.media.font.pixel.small[1]
+            return font.pixel.small[1]
         else
-            return nibRealUI.font.pixel1
+            return font.pixel.small[4]
         end
     end
 end
@@ -586,26 +599,12 @@ function Fonts:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
-    
+
+    font = ndb.media.font
+    font.sizeAdjust = db.standard.sizeadjust
+
     self:SetEnabledState(true)
     nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
-    
-    nibRealUI.font.standard = nibRealUI:GetFont("standard")
-    nibRealUI.font.chat = nibRealUI:GetFont("standard")
-    nibRealUI.font.crit = nibRealUI:GetFont("standard")
-    nibRealUI.font.header = nibRealUI:GetFont("standard")
-
-    nibRealUI.font.pixel1 = nibRealUI:GetFont("small")
-    nibRealUI.font.pixel2 = nibRealUI:GetFont("large")
-    nibRealUI.font.pixelNumbers = nibRealUI:GetFont("numbers")
-    nibRealUI.font.pixelCooldown = nibRealUI:GetFont("cooldown")
-
-    nibRealUI.font.sizeAdjust = db.standard.sizeadjust
-
-    RealUIFontSmall:SetFont(unpack(nibRealUI.font.pixel1))
-    RealUIFontLarge:SetFont(unpack(nibRealUI.font.pixel2))
-    RealUIFontPixel:SetFont(unpack(nibRealUI.font.pixel1))
-    RealUIStandardFont10:SetFont(nibRealUI.font.standard, 10 + db.standard.sizeadjust)
 
     self:UpdateUIFonts()
 end

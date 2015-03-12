@@ -105,7 +105,7 @@ local function GetOptions()
                 name = "Enabled",
                 desc = "Enable/Disable the Cast Bars module.",
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
+                set = function(info, value)
                     nibRealUI:SetModuleEnabled(MODNAME, value)
                 end,
                 order = 30,
@@ -126,7 +126,7 @@ local function GetOptions()
                         name = "Reverse Player",
                         desc = "Reverse direction of Player cast bar.",
                         get = function() return db.reverse.player end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.reverse.player = value
                             CastBars:UpdateAnchors()
                         end,
@@ -137,7 +137,7 @@ local function GetOptions()
                         name = "Reverse Target",
                         desc = "Reverse direction of Target cast bar.",
                         get = function() return db.reverse.target end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.reverse.target = value
                             CastBars:UpdateAnchors()
                         end,
@@ -161,7 +161,7 @@ local function GetOptions()
                         name = "Inside",
                         desc = "Spell Name and Time text displayed on the inside.",
                         get = function() return db.text.textInside end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.text.textInside = value
                             CastBars:UpdateAnchors()
                         end,
@@ -172,7 +172,7 @@ local function GetOptions()
                         name = "On Bottom",
                         desc = "Spell Name and Time text displayed below the cast bars.",
                         get = function() return db.text.textOnBottom end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.text.textOnBottom = value
                             CastBars:UpdateAnchors()
                         end,
@@ -185,10 +185,6 @@ local function GetOptions()
     end
     return options
 end
-
-local FontStringsSmall = {}
-local FontStringsRegular = {}
-local FontStringsNumbers = {}
 
 local MaxNameLengths = {
     player = 26,
@@ -256,7 +252,7 @@ function CastBars:OnUpdate(unit, elapsed)
     -- handle casting and channeling
     if (self[unit].action == "CAST" or self[unit].action == "CHANNEL") then
         local remainingTime = self[unit].actionStartTime + self[unit].actionDuration - GetTime()
-        
+
         local perCast = (self[unit].actionDuration ~= 0 and remainingTime / self[unit].actionDuration or 0)
         -- Reverse channeling
         if (self[unit].action == "CHANNEL") then
@@ -364,14 +360,14 @@ function CastBars:StartBar(unit, action, message)
 
     self:Show(unit, true)
     self[unit].action = action
-    
+
     if (icon ~= nil) then
         self[unit].icon.bg:SetTexture(icon)
         self[unit].icon:Show()
     else
         self[unit].icon:Hide()
     end
-    
+
     self[unit].current = spell
     self[unit].actionStartTime = GetTime()
     self[unit].actionMessage = message
@@ -424,7 +420,7 @@ function CastBars:SpellCastStart(event, unit, spell, rank)
     if not(self[unit] and self[unit].unit == unit) then return end
     self[unit].current = spell
     self:StartBar(unit, "CAST")
-    
+
     if not self[unit]:IsShown() or not self[unit].actionDuration then return end
 
     if unit == self.player.unit then self:SetBarTicks(0) end
@@ -461,7 +457,7 @@ end
 
 function CastBars:SpellCastFailed(event, unit, spell, rank)
     if not(self[unit] and self[unit].unit == unit) then return end
-    
+
     if (self[unit].current and spell and self[unit].current ~= spell) then return end
 
     -- channeled spells will call ChannelStop, not cast failed
@@ -516,7 +512,7 @@ end
 ----
 function CastBars:SpellCastChannelStart(event, unit)
     if not(self[unit] and self[unit].unit == unit) then return end
-    
+
     self:StartBar(unit, "CHANNEL")
 
     if not self[unit]:IsShown() or not self[unit].actionDuration then return end
@@ -706,7 +702,7 @@ function CastBars:UpdateAnchors()
 
     -- Target
     if db.text.textInside then textPointHoriz = "LEFT" else textPointHoriz = "RIGHT" end
-    
+
     if textPointVert == "TOP" then textY = -(db.size[layoutSize].height + 5) else textY = 2 end
     textX = textPointHoriz == "LEFT" and 37 or -23
     SetTextPosition(self.target.name, textPointVert, textPointHoriz)
@@ -770,24 +766,6 @@ function CastBars:UpdateTextures()
     self:UpdateInterruptibleColor("focus")
 end
 
-function CastBars:UpdateFonts()
-    local font1 = nibRealUI:Font(false, "small")
-    local font2 = nibRealUI:Font()
-    local font3 = nibRealUI.font.pixelNumbers
-
-    for k, fontString in pairs(FontStringsSmall) do
-        fontString:SetFont(unpack(font1))
-    end
-    for k, fontString in pairs(FontStringsRegular) do
-        fontString:SetFont(unpack(font2))
-    end
-    for k, fontString in pairs(FontStringsNumbers) do
-        fontString:SetFont(unpack(font3))
-    end
-
-    self:UpdateAnchors()
-end
-
 function CastBars:UpdateGlobalColors()
     self:UpdateTextures()
 end
@@ -810,14 +788,14 @@ local function CreateTextFrame(parent, size)
     NewTextFrame:SetSize(12, 12)
 
     NewTextFrame.text = NewTextFrame:CreateFontString(nil, "ARTWORK")
-    if size == "numbers" then 
-        tinsert(FontStringsNumbers, NewTextFrame.text)
+    if size == "numbers" then
+        NewTextFrame.text:SetFontObject(RealUIFont_PixelNumbers)
     elseif size == "small" then
-        tinsert(FontStringsSmall, NewTextFrame.text)
+        NewTextFrame.text:SetFontObject(RealUIFont_PixelSmall)
     else
-        tinsert(FontStringsRegular, NewTextFrame.text)
+        NewTextFrame.text:SetFontObject(RealUIFont_Pixel)
     end
-    
+
     return NewTextFrame
 end
 
@@ -959,10 +937,10 @@ function CastBars:CreateCastBars(self, unit)
     Aurora[1].ReskinIcon(Icon)
 
     local Text = Castbar:CreateFontString(nil, "OVERLAY")
-    Text:SetFont(unpack(nibRealUI:Font()))
+    Text:SetFontObject(RealUIFont_PixelSmall)
 
     local Time = Castbar:CreateFontString(nil, "OVERLAY")
-    Time:SetFont(unpack(nibRealUI.font.pixelNumbers))
+    Time:SetFontObject(RealUIFont_PixelNumbers)
 
     local SafeZone = self:CreateAngleFrame("Bar", width, height, Castbar, info)
     SafeZone:SetStatusBarColor(1, 0, 0, 1)
@@ -1013,7 +991,6 @@ function CastBars:ToggleConfigMode(val)
     self.configMode = val
 
     if self.configMode then
-        self:UpdateFonts()
         self:UpdateAnchors()
         self:UpdateTextures()
 
@@ -1095,7 +1072,7 @@ function CastBars:OnInitialize()
     ndb = nibRealUI.db.profile
 
     layoutSize = ndb.settings.hudSize
-    
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     nibRealUI:RegisterConfigModeModule(self)
@@ -1107,7 +1084,6 @@ function CastBars:OnEnable()
     self:SetUpdateSpeed()
 
     if not self.player then self:CreateFrames() end
-    self:UpdateFonts()
     self:UpdateAnchors()
     self:UpdateTextures()
 

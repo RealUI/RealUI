@@ -102,7 +102,7 @@ function ConfigBar_ActionBars:SetActionBarSizeButtons(value, index, refresh)
 		self.ButtonsRefreshing = false
 		return
 	end
-	
+
 	if self.ButtonsRefreshing then return end
 
 	ndb.actionBarSettings[nibRealUI.cLayout].bars[index].buttons = value
@@ -190,7 +190,7 @@ function ConfigBar_ActionBars:ToggleRealUIControl(refresh)
 end
 
 function ConfigBar_ActionBars:ToggleLinkSettings(refresh)
-	if refresh then 
+	if refresh then
 		if ndb.abSettingsLink then
 			self.linkLayouts[1].check.highlight:SetAlpha(1)
 		else
@@ -320,7 +320,7 @@ function ConfigBar_ActionBars:SetupWindow()
 		oP:SetPoint("TOPLEFT", Element.window, "TOPLEFT", 0, -194)
 		oP:SetPoint("BOTTOMRIGHT")
 
-		
+
 	---- Bar Positions ----
 	local curY = 0
 	cbGUI:CreateHeader(oP, L["General_Positions"], curY)
@@ -496,12 +496,12 @@ function ConfigBar_ActionBars:SetupWindow()
 	for i = 1, 6 do
 		local label = self.buttonsSliders[i]:CreateFontString()
 		self.barLabels[i] = label
-		
+
 		label:SetPoint("RIGHT", self.buttonsSliders[i], "LEFT", 0, 0)
 		label:SetJustifyH("LEFT")
 		label:SetJustifyV("MIDDLE")
 		label:SetSize(76, 20)
-		label:SetFont(nibRealUI.font.standard, 10)
+		label:SetFontObject(RealUIFont_Normal)
 		label:SetTextColor(unpack(nibRealUI.media.colors.amber))
 		if i <= 5 then
 			label:SetText(BINDING_HEADER_ACTIONBAR..i)
@@ -612,7 +612,7 @@ end
 function ConfigBar_ActionBars:ShowWindow()
 	-- Watch for combat so we can hide window
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	
+
 	-- Refresh display
 	self:RefreshDisplay()
 

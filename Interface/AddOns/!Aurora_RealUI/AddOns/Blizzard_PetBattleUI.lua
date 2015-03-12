@@ -112,7 +112,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         unit.Border2:SetPoint("TOPLEFT", unit.Icon, -1, 1)
         unit.Border2:SetPoint("BOTTOMRIGHT", unit.Icon, 1, -1)
 
-        unit.Level:SetFont(RealUI.font.standard, 16)
+        unit.Level:SetFont(RealUIFont_Normal:GetFont(), 16)
         unit.Level:SetTextColor(1, 1, 1)
 
         local bg = CreateFrame("Frame", nil, unit)
@@ -299,7 +299,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     frame.bg = F.CreateBG(frame.Icon)
                 end
 
-                frame.Duration:SetFont(unpack(RealUI.font.pixel1))
+                frame.Duration:SetFontObject(RealUIFont_PixelSmall)
                 frame.Duration:SetShadowOffset(0, 0)
                 frame.Duration:ClearAllPoints()
                 frame.Duration:SetPoint("BOTTOM", frame.Icon, 1, -1)
@@ -485,9 +485,9 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         se:SetTexture(r, g, b, .2)
         se:SetAllPoints()
 
-        ho:SetFont(unpack(RealUI.font.pixel1))
+        ho:SetFontObject(RealUIFont_PixelSmall)
 
-        cd:SetFont(unpack(RealUI.font.pixelCooldown))
+        cd:SetFontObject(RealUIFont_PixelCooldown)
         cd:SetTextColor(1, 1, 1)
         cd:SetShadowOffset(0, 0)
 

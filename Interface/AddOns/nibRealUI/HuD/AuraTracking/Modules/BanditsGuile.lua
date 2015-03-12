@@ -166,11 +166,11 @@ end
 local function CLEU(self, event, ...)
 	local _, cEvent, _,_, casterName, _,_,_,_,_,_, spellID = ...
 	if (casterName ~= self.playerName) then return end
-	
+
 	if (cEvent == "SPELL_DAMAGE") and (spellID == SinisterStrikeID) then
 		bgSwingCount = bgSwingCount + 1
 		AuraUpdate(self, nil, self.unit)
-		
+
 	elseif ((cEvent == "SPELL_AURA_REMOVED") or (cEvent == "SPELL_AURA_APPLIED")) and ((spellID == bgSpellIDs[3]) or (spellID == bgSpellIDs[2]) or (spellID == bgSpellIDs[1])) then
 		bgSwingCount = 0
 		AuraUpdate(self, nil, self.unit)
@@ -253,7 +253,7 @@ function BanditsGuile:SetIndicatorInfo(info)
 
 	f.side = "LEFT"
 	f.unit = "player"
-	
+
 	f.isStatic = (info.order ~= nil)
 	if f.isStatic then
 		f.texture = bgIcons[1]
@@ -305,7 +305,7 @@ function BanditsGuile:CreateIndicator()
 		f.icon:SetAllPoints(f)
 		f.icon:SetTexCoord(.08, .92, .08, .92)
 	f.count = f:CreateFontString()
-		f.count:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.count:SetFontObject(RealUIFont_PixelCooldown)
 		f.count:SetJustifyH("RIGHT")
 		f.count:SetJustifyV("TOP")
 		f.count:SetPoint("TOPRIGHT", f, "TOPRIGHT", 1.5, 2.5)
@@ -316,14 +316,14 @@ function BanditsGuile:CreateIndicator()
 		f.customCD:SetHeight(0)
 		f.customCD:SetTexture(0, 0, 0, 0.75)
 	f.customCDTime = f:CreateFontString()
-		f.customCDTime:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.customCDTime:SetFontObject(RealUIFont_PixelCooldown)
 		f.customCDTime:SetJustifyH("LEFT")
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 

@@ -379,11 +379,11 @@ function ScreenSaver:CreateFrames()
 	self.timeLabel = nibRealUI:CreateFS(self.panel, "CENTER")
 		self.timeLabel:SetPoint("RIGHT", self.panel, "CENTER", 15, 0)
 		self.timeLabel:SetText("|cffffffffAFK |r|cff"..nibRealUI:ColorTableToStr(nibRealUI.classColor).."TIME:")
-		self.timeLabel:SetFont(unpack(nibRealUI.font.pixel1))
+		self.timeLabel:SetFontObject(RealUIFont_PixelSmall)
 	
 	self.time = nibRealUI:CreateFS(self.panel, "LEFT")
 		self.time:SetPoint("LEFT", self.panel, "CENTER", 17, 0)
-		self.time:SetFont(unpack(nibRealUI.font.pixel1))
+		self.time:SetFontObject(RealUIFont_PixelSmall)
 		self.time:SetText("0s")
 end
 

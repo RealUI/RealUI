@@ -47,7 +47,7 @@ end
 local function showBanner()
 	bannerShown = true
 	f:Show()
-	
+
 	local scale
 	f:SetScript("OnUpdate", function(self)
 		scale = self:GetScale() + interval
@@ -200,18 +200,18 @@ function nibRealUI:InitNotifications()
 	sep:SetTexture(0, 0, 0)
 
 	title = f:CreateFontString(nil, "OVERLAY")
-	title:SetFont(nibRealUI.font.standard, 14)
+	title:SetFont(RealUIFont_Normal:GetFont(), 14)
 	title:SetShadowOffset(1, -1)
 	title:SetPoint("TOPLEFT", sep, "TOPRIGHT", 9, -9)
 	title:SetPoint("RIGHT", f, -9, 0)
 	title:SetJustifyH("LEFT")
 
 	text = f:CreateFontString(nil, "OVERLAY")
-	text:SetFont(nibRealUI.font.standard, 12)
+	text:SetFont(RealUIFont_Normal:GetFont(), 12)
 	text:SetShadowOffset(1, -1)
 	text:SetPoint("BOTTOMLEFT", sep, "BOTTOMRIGHT", 9, 9)
 	text:SetPoint("RIGHT", f, -9, 0)
 	text:SetJustifyH("LEFT")
-	
+
 	hasInitialized = true
 end

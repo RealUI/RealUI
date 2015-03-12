@@ -26,7 +26,6 @@ local NeedSpecUpdate = false
 
 local ILFrames
 local HighlightBar
-local FontStringsLarge = {}
 local TextureFrames = {}
 local FramesCreated = false
 
@@ -124,7 +123,7 @@ local Tablets = {
     durability = Tablet20,
 }
 
-local HPName, CPName, JPName, VPName, BPCurr1Name, BPCurr2Name, BPCurr3Name, GoldName 
+local HPName, CPName, JPName, VPName, BPCurr1Name, BPCurr2Name, BPCurr3Name, GoldName
 local CurrencyStartSet
 
 local LootSpecIDs = {}
@@ -150,7 +149,7 @@ local MicroMenu = {
         menuList = {
             {
                 text = L["Power_Eco"],
-                func = function() 
+                func = function()
                     print(L["Power_EcoDesc"])
                     nibRealUI:SetPowerMode(2)
                     nibRealUI:ReloadUIDialog()
@@ -190,10 +189,10 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = TALENTS_BUTTON,
-        func = function() 
-            if not PlayerTalentFrame then 
+        func = function()
+            if not PlayerTalentFrame then
                 TalentFrame_LoadUI()
-            end 
+            end
 
             ShowUIPanel(PlayerTalentFrame)
         end,
@@ -224,13 +223,13 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = ACHIEVEMENTS_GUILD_TAB,
-        func = function() 
-            if IsInGuild() then 
-                if not GuildFrame then GuildFrame_LoadUI() end 
-                GuildFrame_Toggle() 
-            else 
-                if not LookingForGuildFrame then LookingForGuildFrame_LoadUI() end 
-                LookingForGuildFrame_Toggle() 
+        func = function()
+            if IsInGuild() then
+                if not GuildFrame then GuildFrame_LoadUI() end
+                GuildFrame_Toggle()
+            else
+                if not LookingForGuildFrame then LookingForGuildFrame_LoadUI() end
+                LookingForGuildFrame_Toggle()
             end
         end,
         notCheckable = true
@@ -242,11 +241,11 @@ local MicroMenu = {
     {text = HELP_BUTTON,
         func = function() ToggleHelpFrame() end,
         notCheckable = true
-    },  
+    },
     {text = ENCOUNTER_JOURNAL,
         func = function() ToggleEncounterJournal() end,
         notCheckable = true
-    },  
+    },
     {text = LOOKING_FOR_RAID,
         func = function() ToggleRaidBrowser() end,
         notCheckable = true
@@ -291,7 +290,7 @@ local function GetOptions()
                 name = "Enabled",
                 desc = "Enable/Disable the Info Line module.",
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
+                set = function(info, value)
                     nibRealUI:SetModuleEnabled(MODNAME, value)
                     nibRealUI:ReloadUIDialog()
                 end,
@@ -478,7 +477,7 @@ local function GetOptions()
                             InfoLine:Refresh()
                         end,
                         disabled = function()
-                            if db.colors.classcolorhighlight then return true else return false end 
+                            if db.colors.classcolorhighlight then return true else return false end
                         end,
                         order = 30,
                     },
@@ -487,7 +486,7 @@ local function GetOptions()
                         name = "Class Color Highlight",
                         desc = "Use your Class Color for the highlight.",
                         get = function() return db.colors.classcolorhighlight end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.colors.classcolorhighlight = value
                             InfoLine:Refresh()
                         end,
@@ -586,7 +585,7 @@ local function GetOptions()
                         name = "In Combat Tooltips",
                         desc = "Show the tooltips in combat.",
                         get = function() return db.other.icTips end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.other.icTips = value
                             nibRealUI.InfoLineICTips = value        -- Tablet-2.0 use
                             InfoLine:Refresh()
@@ -604,7 +603,7 @@ local function GetOptions()
                                 name = "24 hour clock",
                                 desc = "Show the time in 24 hour format.",
                                 get = function() return db.other.clock.hr24 end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.other.clock.hr24 = value
                                     InfoLine:Refresh()
                                 end,
@@ -615,7 +614,7 @@ local function GetOptions()
                                 name = "Use local time",
                                 desc = "Show the time at your home.",
                                 get = function() return db.other.clock.uselocal end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.other.clock.uselocal = value
                                     InfoLine:Refresh()
                                 end,
@@ -648,7 +647,7 @@ local function GetOptions()
         },
     }
     end
-    
+
     -- Create Elements options table
     local elementopts = {
         name = "Elements",
@@ -657,7 +656,7 @@ local function GetOptions()
         order = 40,
         args = {},
     }
-    local elementordercnt = 10 
+    local elementordercnt = 10
     for k_e, v_e in pairs(Elements) do
         -- Create base options for Elements
         elementopts.args[k_e] = {
@@ -665,7 +664,7 @@ local function GetOptions()
             name = Elements[k_e][1],
             desc = "Enable the "..Elements[k_e][1].." element.",
             get = function() return db.elements[k_e] end,
-            set = function(info, value) 
+            set = function(info, value)
                 db.elements[k_e] = value
                 InfoLine:Refresh()
             end,
@@ -674,7 +673,7 @@ local function GetOptions()
         elementordercnt = elementordercnt + 10
     end
     options.args.elements = elementopts
-    
+
     return options
 end
 ----
@@ -694,7 +693,7 @@ local CopyFrame
 local function CreateCopyFrame()
     local frame = CreateFrame("Frame", "RealUICopyFrame", UIParent)
     tinsert(UISpecialFrames, "RealUICopyFrame")
-    
+
     frame:SetBackdrop({
         bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
         edgeFile = [[Interface\DialogFrame\UI-DialogBox-Border]],
@@ -708,11 +707,11 @@ local function CreateCopyFrame()
     frame:Hide()
     frame:SetFrameStrata("DIALOG")
     CopyFrame = frame
-    
+
     local scrollArea = CreateFrame("ScrollFrame", "RealUICopyScroll", frame, "UIPanelScrollFrameTemplate")
     scrollArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -30)
     scrollArea:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -30, 8)
-    
+
     local editBox = CreateFrame("EditBox", nil, frame)
     editBox:SetMultiLine(true)
     editBox:SetMaxLetters(99999)
@@ -723,16 +722,16 @@ local function CreateCopyFrame()
     editBox:SetHeight(170)
     editBox:SetScript("OnEscapePressed", function() frame:Hide() end)
     CopyFrame.editBox = editBox
-    
+
     scrollArea:SetScrollChild(editBox)
-    
+
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
 end
 
 -- Sort by Realm
 local function RealmSort(a, b)
-    if a.name == nibRealUI.realm then 
+    if a.name == nibRealUI.realm then
         return true
     elseif b.name == nibRealUI.realm then
         return false
@@ -766,12 +765,12 @@ end
 local function RetrieveGameTime(...)
     local serTime, serAMPM
     local hour, min = GetGameTime()
-    
+
     if ( min < 10 ) then min = strform("%s%s", "0", min) end
-    
+
     if ... then
         -- 12 hour clock
-        if hour >= 12 then 
+        if hour >= 12 then
             serAMPM = "PM"
             if hour > 12 then
                 hour = hour - 12
@@ -785,7 +784,7 @@ local function RetrieveGameTime(...)
         serAMPM = ""
         serTime = strform("%d:%s", hour, min)
     end
-    
+
     return serTime, serAMPM
 end
 
@@ -813,7 +812,7 @@ end
 local TestStr = CreateFrame("Frame", nil, UIParent)
 TestStr.text = TestStr:CreateFontString()
 local function GetTextWidth(str, size)
-    TestStr.text:SetFont(nibRealUI.font.standard, size)
+    TestStr.text:SetFont(RealUIFont_Normal:GetFont(), size)
     TestStr.text:SetText(str)
     return TestStr.text:GetWidth() + 4
 end
@@ -832,7 +831,7 @@ local function MakeTabletHeader(col, size, indentation, justifyTable)
     local header = {}
     local colors = {}
     colors = nibRealUI.media.colors.orange
-    
+
     for i = 1, #col do
         if ( i == 1 ) then
             header["text"] = col[i]
@@ -911,12 +910,12 @@ local GraphColor3 = {0.5, 0.5, 0.5, 0.75}
 -- Create Graph
 local function CreateGraph(id, maxVal, numVals, parentFrame)
     if Graphs[id] then return end
-    
+
     -- Create Graph frame
     Graphs[id] = CreateFrame("Frame", nil, UIParent)
     Graphs[id].parentFrame = parentFrame
     Graphs[id]:SetHeight(GraphHeight + 1)
-    
+
     Graphs[id].gridBot = CreateFrame("Frame", nil, Graphs[id])
     Graphs[id].gridBot:SetHeight(1)
     Graphs[id].gridBot:SetPoint("BOTTOMLEFT", Graphs[id], 0, 0)
@@ -924,7 +923,7 @@ local function CreateGraph(id, maxVal, numVals, parentFrame)
     Graphs[id].gridBot.bg = Graphs[id].gridBot:CreateTexture()
     Graphs[id].gridBot.bg:SetAllPoints()
     Graphs[id].gridBot.bg:SetTexture(GraphColor2[1], GraphColor2[2], GraphColor2[3], GraphColor2[4])
-    
+
     Graphs[id].topLines = {}
     Graphs[id].gapLines = {}
     for c = 1, numVals do
@@ -932,13 +931,13 @@ local function CreateGraph(id, maxVal, numVals, parentFrame)
         Graphs[id].topLines[c]:SetPoint("BOTTOMLEFT", Graphs[id], "BOTTOMLEFT", (c - 1) * GraphLineWidth, 0)
         Graphs[id].topLines[c]:SetHeight(GraphHeight - 1)
         Graphs[id].topLines[c]:SetWidth(GraphLineWidth - 1)
-        
+
         Graphs[id].topLines[c].point = Graphs[id].topLines[c]:CreateTexture()
         Graphs[id].topLines[c].point:SetPoint("BOTTOM", Graphs[id].topLines[c], "BOTTOM", 0, 0)
         Graphs[id].topLines[c].point:SetHeight(1)
         Graphs[id].topLines[c].point:SetWidth(GraphLineWidth - 1)
         Graphs[id].topLines[c].point:SetTexture(1, 0.15, 0.15)
-        
+
         Graphs[id].gapLines[c] = {}
         for r = 1, (GraphHeight / 2) + 1 do
             Graphs[id].gapLines[c][r] = Graphs[id].topLines[c]:CreateTexture()
@@ -948,7 +947,7 @@ local function CreateGraph(id, maxVal, numVals, parentFrame)
             Graphs[id].gapLines[c][r]:SetTexture(0, 0, 0, 0)
         end
     end
-    
+
     -- Fill out Graph info
     Graphs[id].max = maxVal
     Graphs[id].numVals = numVals
@@ -962,24 +961,24 @@ end
 local function UpdateGraph(id, vals, ...)
     if not Graphs[id] then return end
     if not Graphs[id].enabled then return end
-    
+
     local numVals = Graphs[id].numVals
-    
+
     -- Set new Min/Max
     local newMax = ...
     if newMax then
         Graphs[id].max = newMax
     end
-    
+
     -- Update Vals
     if Graphs[id].shown then
         for c = 1, numVals do
             Graphs[id].vals[c] = min(vals[c] or 0, Graphs[id].max)
             Graphs[id].vals[c] = max(Graphs[id].vals[c], 0)
-            
+
             local topPoint = max(floor(Graphs[id].vals[c] * ((GraphHeight - 1) / Graphs[id].max) - 1), 0) + 2
             Graphs[id].topLines[c].point:SetPoint("BOTTOM", Graphs[id].topLines[c], "BOTTOM", 0, topPoint)
-            
+
             for g = 1, (GraphHeight / 2) do
                 Graphs[id].gapLines[c][g]:SetTexture(0, 0, 0, 0)
             end
@@ -1001,7 +1000,7 @@ local function ShowGraph(id, parent, relPoint, point, x, y, parentFrame)
     Graphs[id]:SetFrameLevel(20)
     Graphs[id]:SetPoint(relPoint, parent, point, x, y)
     Graphs[id]:SetWidth(Graphs[id].numVals * 3)
-    
+
     Graphs[id]:Show()
     Graphs[id].shown = true
 end
@@ -1039,11 +1038,11 @@ function InfoLine_XR_OnEnter(self)
     self:SetAlpha(1)
 
     GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-    
+
     if UnitLevel("player") < MAX_PLAYER_LEVEL then
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, XP.." / "..REPUTATION))
         GameTooltip:AddLine(" ")
-        
+
         if IsXPUserDisabled() then
             GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, COMBAT_XP_GAIN.." ("..VIDEO_OPTIONS_DISABLED..")"))
         else
@@ -1070,13 +1069,13 @@ function InfoLine_XR_OnEnter(self)
     GameTooltip:AddDoubleLine(STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
     GameTooltip:AddDoubleLine(L["XPRep_Current"], nibRealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     GameTooltip:AddDoubleLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    
+
     -- Hint
     if (UnitLevel("player") < MAX_PLAYER_LEVEL) and not(IsXPUserDisabled()) then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(strform("|cff00ff00%s|r", L["XPRep_Toggle"]))
     end
-    
+
     GameTooltip:Show()
 end
 
@@ -1095,18 +1094,18 @@ function InfoLine_XR_Update(self)
     end
     local percentXPStr = tostring(percentXP)
     local percentRestXPStr = tostring(floor((restxp / xpmax) * 100))
-    
+
     -- Currency
     dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].level = lvl
-    
+
     -- Rep Data
     local CurWatchedFaction, replvl, repmin, repmax, repvalue = GetWatchedFactionInfo()
     watchedFaction = CurWatchedFaction
     rep = repvalue - repmin
     replvlmax = repmax - repmin
-    repstatus = getglobal("FACTION_STANDING_LABEL"..replvl)
+    repstatus = _G["FACTION_STANDING_LABEL"..replvl]
     repStandingID = replvl
-    
+
     local percentRep
     if (replvlmax <= 0) then
         percentRep = 0
@@ -1114,7 +1113,7 @@ function InfoLine_XR_Update(self)
         percentRep = (rep/(replvlmax))*100
     end
     local percentRepStr = tostring(percentRep)
-    
+
     if not watchedFaction then
         watchedFaction = L["XPRep_NoFaction"]
         repstatus = "---"
@@ -1122,7 +1121,7 @@ function InfoLine_XR_Update(self)
         replvlmax = 0
         percentRepStr = "---"
     end
-    
+
     -- Set Info Text
     local XRSuffix, XRStr, XRPer, XRLen, XRRested
     local HideMe = false
@@ -1152,7 +1151,7 @@ function InfoLine_XR_Update(self)
         self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, strsub(XRStr, 1, XRLen))
         self.icon:SetTexture(Icons[layoutSize].rep[1])
     end
-    
+
     self.hidden = HideMe
     if HideMe then
         self.text:SetText("")
@@ -1196,7 +1195,7 @@ local function Currency_GetDifference(startVal, endVal, isGold)
     endVal = endVal or 0
     local newVal = endVal - startVal
     local newPrefix, newSuffix = "", ""
-    
+
     if newVal > 0 then
         newPrefix = "|cff00c000+"
     elseif newVal < 0 then
@@ -1204,7 +1203,7 @@ local function Currency_GetDifference(startVal, endVal, isGold)
     else
         newPrefix = "|cff4D4D4D"
     end
-    
+
     if isGold and newVal ~= 0 then
         local gold, silver, copper = abs(newVal / 10000), abs(mod(newVal / 100, 100)), abs(mod(newVal, 100))
         if floor(gold) > 0 then
@@ -1220,7 +1219,7 @@ local function Currency_GetDifference(startVal, endVal, isGold)
     else
         newSuffix = "|r"
     end
-    
+
     return string.format(newPrefix.."%s"..newSuffix, newVal ~= 0 and abs(newVal) or "~")
 end
 
@@ -1238,49 +1237,49 @@ local RealmSection, MaxWidth = {}, {}
 local FactionList = {nibRealUI.faction, nibRealUI:OtherFaction(nibRealUI.faction)}
 local function Currency_UpdateTablet()
     if not CurrencyTabletData then return end
-    
+
     local FactionList = {nibRealUI.faction, nibRealUI:OtherFaction(nibRealUI.faction)}
     local HasMaxLvl, OnlyMe = false, true
-    
+
     -- Get max col widths
     MaxWidth = {[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0, [12] = 0}
     for kr, vr in pairs(CurrencyTabletData) do
         local realm = kr
         if (CurrencyTabletData[realm]["Alliance"] and (#CurrencyTabletData[realm]["Alliance"] > 0)) or
             (CurrencyTabletData[realm]["Horde"] and (#CurrencyTabletData[realm]["Horde"] > 0)) then
-            
+
             local TotalGold = 0
             for kf, vf in ipairs(FactionList) do
                 if CurrencyTabletData[realm][vf] and #CurrencyTabletData[realm][vf] > 0 then
                     for kn, vn in pairs(CurrencyTabletData[realm][vf]) do
                         if vn[2] == MAX_PLAYER_LEVEL then HasMaxLvl = true end
                         TotalGold = TotalGold + vn[3]
-                        MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
+                        MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize + ndb.media.font.sizeAdjust))
                         for i = 4, (NumCurrencies + 4) do
-                            MaxWidth[i] = max(MaxWidth[i], GetTextWidth(vn[i], db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
+                            MaxWidth[i] = max(MaxWidth[i], GetTextWidth(vn[i], db.text.tablets.normalsize + ndb.media.font.sizeAdjust))
                         end
                     end
                 end
             end
-            MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(TotalGold), db.text.tablets.normalsize + nibRealUI.font.sizeAdjust))
+            MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(TotalGold), db.text.tablets.normalsize + ndb.media.font.sizeAdjust))
         end
     end
     MaxWidth[2] = 20    -- Level
-    
+
     wipe(RealmSection)
     local line = {}
     for kr, vr in ipairs(CurrencyTabletDataRK) do
         local realm = CurrencyTabletDataRK[kr].name
         if  (CurrencyTabletData[realm]["Alliance"] and (#CurrencyTabletData[realm]["Alliance"] > 0)) or
             (CurrencyTabletData[realm]["Horde"] and (#CurrencyTabletData[realm]["Horde"] > 0)) then
-            
+
             -- Realm Category
             RealmSection[realm] = {}
             RealmSection[realm].cat = Tablets.currency:AddCategory()
             if kr > 1 then
                 AddBlankTabLine(RealmSection[realm].cat, 4)
             end
-            RealmSection[realm].cat:AddLine("text", realm, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+            RealmSection[realm].cat:AddLine("text", realm, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
             AddBlankTabLine(RealmSection[realm].cat, 2)
 
             -- Characters
@@ -1294,10 +1293,10 @@ local function Currency_UpdateTablet()
                 L["Currency_UpdatedAbbr"]
             }
             RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
-            local charHeader = MakeTabletHeader(charCols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
+            local charHeader = MakeTabletHeader(charCols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
             RealmSection[realm].charCat:AddLine(charHeader)
             AddBlankTabLine(RealmSection[realm].charCat, 1)
-            
+
             local TotalGold, TotalRealmChars = 0, 0
             for kf, vf in ipairs(FactionList) do
                 if CurrencyTabletData[realm][vf] and #CurrencyTabletData[realm][vf] > 0 then
@@ -1309,7 +1308,7 @@ local function Currency_UpdateTablet()
                         if not isPlayer then OnlyMe = false end
                         local NormColor = isPlayer and 1 or 0.7
                         local ZeroShade = isPlayer and 0.1 or 0.4
-                        
+
                         wipe(line)
                         for i = 1, #charCols do
                             if (i == 1) then
@@ -1323,7 +1322,7 @@ local function Currency_UpdateTablet()
                                 line["text"] = vn[i]
                                 line["justify"] = "LEFT"
                                 line["func"] = function() Currency_TabletClickFunc(realm, vf, currentName) end
-                                line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                                line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                                 line["customwidth"] = MaxWidth[NumCurrencies + 4]
                             elseif (i == 2) or (i == (NumCurrencies + 3)) then
                                 line["text"..i] = vn[i]
@@ -1339,7 +1338,7 @@ local function Currency_UpdateTablet()
                                 line["justify"..i] = "RIGHT"
                                 line["customwidth"..i] = MaxWidth[i]
                                 line["indentation"..i] = 12.5
-                                
+
                             else
                                 --if not vn[i] then return end
                                 local text
@@ -1361,11 +1360,11 @@ local function Currency_UpdateTablet()
                                     line["text"..i.."G"] = NormColor
                                     line["text"..i.."B"] = NormColor
                                 end
-                                
+
                             end
                         end
                         RealmSection[realm].charCat:AddLine(line)
-                        
+
                         -- Start values
                         if isPlayer then
                             NormColor = 0.5
@@ -1375,18 +1374,18 @@ local function Currency_UpdateTablet()
                                     line["indentation"] = 12
                                     line["text"] = ""
                                     line["justify"] = "LEFT"
-                                    line["size"] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
+                                    line["size"] = db.text.tablets.columnsize + ndb.media.font.sizeAdjust
                                     line["customwidth"] = MaxWidth[(NumCurrencies + 4)]
                                 elseif i == 2 or i == (NumCurrencies + 3) then
                                     line["text"..i] = ""
                                     line["justify"..i] = "RIGHT"
-                                    line["size"..i] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
+                                    line["size"..i] = db.text.tablets.columnsize + ndb.media.font.sizeAdjust
                                     line["customwidth"..i] = MaxWidth[i]
                                     line["indentation"..i] = 12
                                 else
                                     line["text"..i] = Currency_GetDifference(CurrencyTabletDataStart[i], CurrencyTabletDataCurrent[i], i == 3)
                                     line["justify"..i] = "RIGHT"
-                                    line["size"..i] = db.text.tablets.columnsize + nibRealUI.font.sizeAdjust
+                                    line["size"..i] = db.text.tablets.columnsize + ndb.media.font.sizeAdjust
                                     line["customwidth"..i] = MaxWidth[i]
                                     line["indentation"..i] = 12
                                 end
@@ -1398,21 +1397,21 @@ local function Currency_UpdateTablet()
                     AddBlankTabLine(RealmSection[realm].charCat, 4)
                 end
             end
-            
+
             -- Realm Total
             if TotalRealmChars > 1 then
                 RealmSection[realm].charCat:AddLine(
                     "text3", convertMoney(TotalGold),
                     "justify3", "RIGHT",
                     "customwidth3", MaxWidth[3],
-                    "size3", db.text.tablets.columnsize + nibRealUI.font.sizeAdjust,
+                    "size3", db.text.tablets.columnsize + ndb.media.font.sizeAdjust,
                     "indentation3", 12
                 )
                 AddBlankTabLine(RealmSection[realm].charCat, 4)
             end
         end
     end
-    
+
     -- Hint
     local hint
     if OnlyMe then
@@ -1437,7 +1436,7 @@ local function Currency_UpdateTablet()
         AddBlankTabLine(hintCat, 2)
         hintCat:AddLine(
             "text", L["Currency_NoteWeeklyReset"],
-            "size", db.text.tablets.hintsize + nibRealUI.font.sizeAdjust,
+            "size", db.text.tablets.hintsize + ndb.media.font.sizeAdjust,
             "textR", 0.7,
             "textG", 0.7,
             "textB", 0.7,
@@ -1474,7 +1473,7 @@ end
 local function Currency_GetWeeklyValues()
     local Name, earnedTotal, earnedThisWeek, weeklyMax, IsDiscovered
     local valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax = 0,0,0,0,0,0
-    
+
     -- Valor
     Name, earnedTotal, _, earnedThisWeek, weeklyMax, _, IsDiscovered = GetCurrencyInfo(396)
     if Name and IsDiscovered then
@@ -1482,7 +1481,7 @@ local function Currency_GetWeeklyValues()
         valorThisWeek = earnedThisWeek or 0
         valorWeeklyMax = weeklyMax/100 or 0
     end
-    
+
     -- Conquest
     Name, earnedTotal, _, earnedThisWeek, weeklyMax, _, IsDiscovered = GetCurrencyInfo(390)
     if Name and IsDiscovered then
@@ -1490,7 +1489,7 @@ local function Currency_GetWeeklyValues()
         conquestThisWeek = earnedThisWeek or 0
         conquestWeeklyMax = weeklyMax or 0
     end
-    
+
     return valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax
 end
 
@@ -1515,16 +1514,16 @@ end
 local function Currency_Update(self)
     local currDB = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name]
     currDB.class = nibRealUI.class
-    
+
     local money = GetMoney()
     local currVals = Currency_GetVals()
     local valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax = Currency_GetWeeklyValues()
-    
+
     local curDate = date("%b %d") -- e.g. Sep 25
     if strsub(curDate, 1, 1) == "0" then
         curDate = strsub(curDate, 2)
     end
-    
+
     currDB.gold = money or 0
     for i = 1, MAX_WATCHED_TOKENS do
         currDB.bpCurrencies[i] = currVals[i] or {amnt = -1, name = "---"}
@@ -1532,7 +1531,7 @@ local function Currency_Update(self)
     end
 
     currDB.updated = curDate
-    
+
     if self.hasshown or self.initialized then
         -- Quick Current reference list
         CurrencyTabletDataCurrent = {
@@ -1549,14 +1548,14 @@ local function Currency_Update(self)
             currDB.bpCurrencies[2].amnt,
             currDB.bpCurrencies[3].amnt,
         }
-        
+
         -- Start Session
         if not CurrencyStartSet then
             CurrencyTabletDataStart = CurrencyTabletDataCurrent
             CurrencyStartSet = true
         end
     end
-    
+
     -- Fill out columns
     wipe(CurrencyTabletData)
     wipe(CurrencyTabletDataRK)
@@ -1565,17 +1564,17 @@ local function Currency_Update(self)
         rCnt = rCnt + 1
         CurrencyTabletData[kr] = {}
         CurrencyTabletDataRK[rCnt] = {name = kr}
-        
+
         if vr then
             for kf, vf in pairs(dbg.currency[kr]) do
                 CurrencyTabletData[kr][kf] = {}
-                
+
                 if vf then
                     for kn, vn in pairs(dbg.currency[kr][kf]) do
                         if vn then
                             local classColor = nibRealUI:GetClassColor(dbg.currency[kr][kf][kn].class)
                             local nameStr = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, kn)
-                            
+
                             if not dbg.currency[kr][kf][kn].bpCurrencies then
                                 dbg.currency[kr][kf][kn].bpCurrencies = {
                                     [1] = {amnt = 0, name = nil},
@@ -1595,20 +1594,20 @@ local function Currency_Update(self)
                                 kn,
                             })
                         end
-                        
+
                     end
                 end
             end
         end
     end
-    
+
     -- Refresh tablet
     if Tablets.currency:IsRegistered(self) then
         if Tablet20Frame:IsShown() then
             Tablets.currency:Refresh(self)
         end
     end
-    
+
     -- Info Text
     local function CurrencyDisplayText(val, abrv)
         return tostring(val or 0) .. " " .. abrv
@@ -1619,7 +1618,7 @@ local function Currency_Update(self)
     if dbc.currencystate == 1 then
         CurText, curCurrency, rawValue = convertMoney(money)
         CurText = NumberToCurrencyFormat(nibRealUI.Round(rawValue))
-        
+
         -- show C/S/G colored square
         self.icon:Show()
         self.icon:ClearAllPoints()
@@ -1631,7 +1630,7 @@ local function Currency_Update(self)
         self.icon:Hide()
     end
     self.text:SetFormattedText("%s", CurText)
-    
+
     UpdateElementWidth(self)
 end
 
@@ -1653,19 +1652,19 @@ local function Currency_OnEnter(self)
             "hideWhenEmpty", true
         )
     end
-    
+
     if Tablets.currency:IsRegistered(self) then
         -- Tablets.currency appearance
         Tablets.currency:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
         Tablets.currency:SetTransparency(self, nibRealUI.media.window[4])
         Tablets.currency:SetFontSizePercent(self, 1)
-        
+
         -- Open
         Tablets.currency:Open(self)
-        
+
         HideOtherGraphs(self)
     end
-    
+
     self.hasshown = true
     Currency_Update(self)
 end
@@ -1695,7 +1694,7 @@ end
 ---- Bag
 function InfoLine_Bag_Update(self)
     local freeSlots, totalSlots = 0, 0
-    
+
     -- Cycle through bags
     for i = 0, 4 do
         local slots, slotsTotal = GetContainerNumFreeSlots(i), GetContainerNumSlots(i)
@@ -1782,7 +1781,7 @@ end
 function InfoLine_Durability_Update(self)
     local durability
     local minVal = 100
-    
+
     for i = 1, 10 do
         if not DuraSlotInfo[i] then tinsert(DuraSlotInfo, i, {equip, value, max, perc}) end
         local slotID = GetInventorySlotInfo(SlotNameTable[i].slot)
@@ -1805,7 +1804,7 @@ function InfoLine_Durability_Update(self)
             if DuraSlotInfo[i].perc < minVal then minVal = DuraSlotInfo[i].perc end
         end
     end
-    
+
     -- Info Text
     if minVal <= 95 then
         self.hidden = false
@@ -1848,7 +1847,7 @@ local FriendsCat
 local function Friends_UpdateTablet()
     if ( FriendsOnline > 0 and FriendsTabletData ) then
         local Cols, lineHeader
-        
+
         -- Title
         local Cols = {
             NAME,
@@ -1858,10 +1857,10 @@ local function Friends_UpdateTablet()
             GAME
         }
         FriendsCat = Tablets.friends:AddCategory("columns", #Cols)
-        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 0, {"LEFT", "RIGHT", "LEFT", "LEFT", "LEFT"})
+        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 0, {"LEFT", "RIGHT", "LEFT", "LEFT", "LEFT"})
         FriendsCat:AddLine(lineHeader)
         AddBlankTabLine(FriendsCat)
-        
+
         -- Friends
         for _, val in ipairs(FriendsTabletData) do
             local line = {}
@@ -1870,7 +1869,7 @@ local function Friends_UpdateTablet()
                     line["text"] = val[i]
                     line["justify"] = "LEFT"
                     line["func"] = function() Friends_TabletClickFunc(val[6],val[8],val[9]) end
-                    line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 elseif i == 2 then  -- Level
                     line["text"..i] = val[2]
                     line["justify"..i] = "RIGHT"
@@ -1878,21 +1877,21 @@ local function Friends_UpdateTablet()
                     line["text"..i.."R"] = uLevelColor.r
                     line["text"..i.."G"] = uLevelColor.g
                     line["text"..i.."B"] = uLevelColor.b
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 else    -- The rest
                     line["text"..i] = val[i]
                     line["justify"..i] = "LEFT"
                     line["text"..i.."R"] = 0.8
                     line["text"..i.."G"] = 0.8
                     line["text"..i.."B"] = 0.8
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 end
             end
             FriendsCat:AddLine(line)
         end
-        
+
         -- Hint
-        Tablets.friends:SetHint(L["Friend_WhisperInvite"], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
+        Tablets.friends:SetHint(L["Friend_WhisperInvite"], db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
     end
 end
 
@@ -1914,19 +1913,19 @@ local function Friends_OnEnter(self)
             "hideWhenEmpty", true
         )
     end
-    
+
     if Tablets.friends:IsRegistered(self) then
         -- Tablets.friends appearance
         Tablets.friends:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
         Tablets.friends:SetTransparency(self, nibRealUI.media.window[4])
         Tablets.friends:SetFontSizePercent(self, 1)
-        
+
         -- Open
         if ( FriendsOnline > 0 ) then
             ShowFriends()
         end
         Tablets.friends:Open(self)
-        
+
         HideOtherGraphs(self)
     end
 end
@@ -1963,20 +1962,20 @@ local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
     local curFriendsOnline = 0
-    
+
     -- Standard Friends
     for i = 1, GetNumFriends() do
         local name, lvl, class, area, isOnline, status, noteText = GetFriendInfo(i)
         if isOnline then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
-            
+
             curFriendsOnline = curFriendsOnline + 1
-            
+
             -- Class
             local classColor = nibRealUI:GetClassColor(ClassLookup[class])
             class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
-            
+
             -- Name
             local cname
             if ( status == "" and name ) then
@@ -1984,7 +1983,7 @@ local function Friends_Update(self)
             elseif ( name ) then
                 cname = strform("%s |cff%02x%02x%02x%s|r", status, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             end
-            
+
             -- Add Friend to list
             tinsert(FriendsTabletData, { cname, lvl, area, nibRealUI.faction, "WoW", name, noteText, "" })
             if name then
@@ -1992,7 +1991,7 @@ local function Friends_Update(self)
             end
         end
     end
-    
+
     -- Battle.net Friends
     for t = 1, BNGetNumFriends() do
         local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(t)
@@ -2000,18 +1999,18 @@ local function Friends_Update(self)
         if ( isOnline and client=="WoW" ) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
-            
+
             local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
             local _, toonName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetToonInfo(toonID)
             curFriendsOnline = curFriendsOnline + 1
-            
+
             if (realmName == nibRealUI.realm) then
                 FriendsTabletDataNames[toonName] = true
             end
-            
+
             -- Class
             local classColor = nibRealUI:GetClassColor(ClassLookup[class])
-            
+
             -- Name
             local cname
             if ( realmName == GetRealmName() ) then
@@ -2039,19 +2038,19 @@ local function Friends_Update(self)
             elseif(isDND and toonName) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
-            
+
             -- Add Friend to list
             tinsert(FriendsTabletData, { cname, level, zoneName, faction, client, presenceName, noteText, toonName, presenceID })
         -- Friends in other games
         elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
-            
+
             local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
 
             toonName = BNet_GetValidatedCharacterName(toonName, battleTag, client)
             client = clientString[client] or client
             curFriendsOnline = curFriendsOnline + 1
-            
+
             -- Name
             local cname
             cname = strform(
@@ -2065,12 +2064,12 @@ local function Friends_Update(self)
             elseif ( isDND and toonName ) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
-            
+
             -- Add Friend to list
             tinsert(FriendsTabletData, {cname, level, gameText, class, client, presenceName, noteText, "", presenceID})
         end
     end
-    
+
     -- OnEnter
     FriendsOnline = curFriendsOnline
     if FriendsOnline > 0 then
@@ -2078,14 +2077,14 @@ local function Friends_Update(self)
     else
         self.hasfriends = false
     end
-    
+
     -- Refresh tablet
     if Tablets.friends:IsRegistered(self) then
         if Tablet20Frame:IsShown() then
             Tablets.friends:Refresh(self)
         end
     end
-    
+
     -- Info Text
     self.text:SetFormattedText("|cff%s %d|r", TextColorNormal, FriendsOnline)
     UpdateElementWidth(self)
@@ -2121,25 +2120,25 @@ local function Guild_UpdateTablet()
     if ( IsInGuild() and GuildOnline > 0 ) then
         local Cols, lineHeader
         wipe(GuildSection)
-        
+
         -- Guild Name
         local gname, _, _ = GetGuildInfo("player")
         GuildSection.headerCat = Tablets.guild:AddCategory()
-        GuildSection.headerCat:AddLine("text", gname, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", db.colors.ttheader[1], "textG", db.colors.ttheader[2], "textB", db.colors.ttheader[3])
+        GuildSection.headerCat:AddLine("text", gname, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", db.colors.ttheader[1], "textG", db.colors.ttheader[2], "textB", db.colors.ttheader[3])
         GuildSection.headerCat:AddLine("isLine", true, "text", "")
-        
+
         -- Reputation
-        GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, "textR", 0.7, "textG", 0.7, "textB", 0.7)
+        GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize + ndb.media.font.sizeAdjust, "textR", 0.7, "textG", 0.7, "textB", 0.7)
         AddBlankTabLine(GuildSection.headerCat, 5)
-        
+
         -- GMOTD
         local gmotd = GetGuildRosterMOTD()
         if gmotd ~= "" then
-            GuildSection.headerCat:AddLine("text", gmotd, "wrap", true, "size", db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1, "func", function() Guild_GMOTDClickFunc(gmotd) end)
+            GuildSection.headerCat:AddLine("text", gmotd, "wrap", true, "size", db.text.tablets.normalsize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1, "func", function() Guild_GMOTDClickFunc(gmotd) end)
             AddBlankTabLine(GuildSection.headerCat, 5)
         end
         AddBlankTabLine(GuildSection.headerCat)
-        
+
         -- Titles
         local Cols = {
             NAME,
@@ -2151,12 +2150,12 @@ local function Guild_UpdateTablet()
         if CanViewOfficerNote() then
             tinsert(Cols, "Officer Note")
         end
-        
+
         GuildSection.guildCat = Tablets.guild:AddCategory("columns", #Cols)
-        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 0, {"LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"})
+        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 0, {"LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"})
         GuildSection.guildCat:AddLine(lineHeader)
         AddBlankTabLine(GuildSection.guildCat)
-        
+
         -- Guild Members
         local nameslot = #Cols + 1
         local isPlayer, isFriend, isGM, normColor
@@ -2167,8 +2166,8 @@ local function Guild_UpdateTablet()
                 isFriend = (not isPlayer) and FriendsTabletDataNames[val[7]] or false
             end
             isGM = val[4] == GUILD_RANK0_DESC
-            normColor =     isPlayer and {0.3, 1, 0.3} or 
-                            isFriend and {0, 0.8, 0.8} or 
+            normColor =     isPlayer and {0.3, 1, 0.3} or
+                            isFriend and {0, 0.8, 0.8} or
                             isGM and {1, 0.65, 0.2} or
                             {0.8, 0.8, 0.8}
             wipe(line)
@@ -2177,7 +2176,7 @@ local function Guild_UpdateTablet()
                     line["text"] = val[i]
                     line["justify"] = "LEFT"
                     line["func"] = function() Guild_TabletClickFunc(val[7]) end
-                    line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 elseif i == 2 then  -- Level
                     line["text"..i] = val[i]
                     line["justify"..i] = "RIGHT"
@@ -2185,21 +2184,21 @@ local function Guild_UpdateTablet()
                     line["text"..i.."R"] = uLevelColor.r
                     line["text"..i.."G"] = uLevelColor.g
                     line["text"..i.."B"] = uLevelColor.b
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 else    -- The rest
                     line["text"..i] = val[i]
                     line["justify"..i] = "LEFT"
                     line["text"..i.."R"] = normColor[1]
                     line["text"..i.."G"] = normColor[2]
                     line["text"..i.."B"] = normColor[3]
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 end
             end
             GuildSection.guildCat:AddLine(line)
         end
-        
+
         -- Hint
-        Tablets.guild:SetHint(L["Guild_WhisperInvite"], db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
+        Tablets.guild:SetHint(L["Guild_WhisperInvite"], db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
     end
 end
 
@@ -2221,19 +2220,19 @@ local function Guild_OnEnter(self)
             "hideWhenEmpty", true
         )
     end
-    
+
     if Tablets.guild:IsRegistered(self) then
         -- Tablets.guild appearance
         Tablets.guild:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
         Tablets.guild:SetTransparency(self, nibRealUI.media.window[4])
         Tablets.guild:SetFontSizePercent(self, 1)
-        
+
         -- Open
         if ( IsInGuild() and GuildOnline > 0 ) then
             GuildRoster()
         end
         Tablets.guild:Open(self)
-        
+
         HideOtherGraphs(self)
     end
 end
@@ -2247,19 +2246,19 @@ local function Guild_Update(self)
         UpdateElementWidth(self)
         return
     end
-    
+
     GuildTabletData = nil
     -- Total Online Guildies
     for i = 1, GetNumGuildMembers() do
-        if ( not GuildTabletData or GuildTabletData == nil ) then GuildTabletData = {} end      
+        if ( not GuildTabletData or GuildTabletData == nil ) then GuildTabletData = {} end
         local gPrelist
         local name, rank, _, lvl, _class, zone, note, offnote, isOnline, status, class, _, _, mobile = GetGuildRosterInfo(i)
-        
+
         if (isOnline or mobile) then
             -- Class Color
             local classColor = nibRealUI:GetClassColor(class)
             class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
-            
+
             -- Player Name
             local cname
             if status == 0 then
@@ -2268,26 +2267,26 @@ local function Guild_Update(self)
                 local curStatus = PlayerStatusValToStr[status] or ""
                 cname = strform("%s |cff%02x%02x%02x%s|r", curStatus, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             end
-            
+
             -- Mobile
             if mobile and (not isOnline) then
                 cname = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..cname
                 zone = REMOTE_CHAT
             end
-            
+
             -- Note
             if CanViewOfficerNote() then
                 gPrelist = { cname, lvl, zone, rank, note, offnote, name }
             else
                 gPrelist = { cname, lvl, zone, rank, note, " ", name }
             end
-            
+
             -- Add to list
             tinsert(GuildTabletData, gPrelist)
             guildonline = guildonline + 1
         end
     end
-    
+
     -- OnEnter
     GuildOnline = guildonline
     if GuildOnline > 0 then
@@ -2295,12 +2294,12 @@ local function Guild_Update(self)
     else
         self.hasguild = false
     end
-    
+
     -- Refresh tablet
     if Tablets.guild:IsRegistered(self) then
         Tablets.guild:Refresh(self)
     end
-    
+
     -- Info Text
     self.hidden = false
     self.text:SetFormattedText("|cff%s %d|r", TextColorNormal, guildonline)
@@ -2318,7 +2317,7 @@ local damageMeters
 local function Meter_Toggle(self)
     if not self.initialized then return end
     local meter = damageMeters[self.meterLoaded]
-    
+
     meter.toggle(meter.isVisible())
 end
 
@@ -2380,7 +2379,7 @@ local function Meter_Update(self)
         self.hidden = not self.meterLoaded
         self.initialized = true
     end
-    
+
     if not self.hidden then
         self.windowopen = damageMeters[self.meterLoaded].isVisible()
     end
@@ -2390,7 +2389,7 @@ local function Meter_Update(self)
     else
         self.icon:SetVertexColor(0.25, 0.25, 0.25)
     end
-    
+
     InfoLine:UpdatePositions()
 end
 
@@ -2417,13 +2416,13 @@ local function SpecChangeClickFunc(self, ...)
     if ... then
         if GetActiveSpecGroup() == ... then return end
     end
-    
+
     if GetNumSpecGroups() > 1 then
         local NewTG = GetActiveSpecGroup() == 1 and 2 or 1
-        
+
         -- Set Spec
         SetActiveSpecGroup(NewTG)
-        
+
         -- Flag for changing Equip and Layout once Spec change completes
         NeedSpecUpdate = true
     end
@@ -2431,7 +2430,7 @@ end
 
 local function SpecGearClickFunc(self, index, equipName)
     if not index then return end
-    
+
     if IsShiftKeyDown() then
         if dbc.specgear.primary == index then
             dbc.specgear.primary = -1
@@ -2446,7 +2445,7 @@ local function SpecGearClickFunc(self, index, equipName)
     else
         EquipmentManager_EquipSet(equipName)
     end
-    
+
     Tablets.spec:Refresh(self)
 end
 
@@ -2467,14 +2466,14 @@ local function SpecAddLootSpecToCat(self, cat)
     end
 
     local curLootSpecName = nibRealUI:GetCurrentLootSpecName()
-    
+
     -- Specs
     local line = {}
     for i = 1, numSpecs do
         wipe(line)
 
         line["text"] = specNames[i]
-        line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+        line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
         line["justify"] = "LEFT"
         line["textR"] = (curLootSpecName == specNames[i]) and nibRealUI.media.colors.blue[1] or db.colors.disabled[1]
         line["textG"] = (curLootSpecName == specNames[i]) and nibRealUI.media.colors.blue[2] or db.colors.disabled[2]
@@ -2491,18 +2490,18 @@ end
 
 local function SpecAddEquipListToCat(self, cat)
     local numSpecGroups = GetNumSpecGroups()
-    
+
     -- Sets
     local line = {}
     if #SpecEquipList > 0 then
         for k, v in ipairs(SpecEquipList) do
             local _, _, _, isEquipped = GetEquipmentSetInfo(k)
-            
+
             wipe(line)
             for i = 1, 4 do
                 if i == 1 then
-                    line["text"] = strform("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s", SpecEquipList[k].icon, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
-                    line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["text"] = strform("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s", SpecEquipList[k].icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
+                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"] = "LEFT"
                     line["textR"] = 0.9
                     line["textG"] = 0.9
@@ -2514,21 +2513,21 @@ local function SpecAddEquipListToCat(self, cat)
                     line["customwidth"] = 110
                 elseif i == 2 then
                     line["text"..i] = PRIMARY
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"..i] = "LEFT"
                     line["text"..i.."R"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[1] or 0.3
                     line["text"..i.."G"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[2] or 0.3
                     line["text"..i.."B"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[3] or 0.3
                 elseif (i == 3) and (numSpecGroups > 1) then
                     line["text"..i] = SECONDARY
-                    line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"..i] = "LEFT"
                     line["text"..i.."R"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[1] or 0.3
                     line["text"..i.."G"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[2] or 0.3
                     line["text"..i.."B"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[3] or 0.3
                 end
             end
-            
+
             cat:AddLine(line)
         end
     end
@@ -2540,13 +2539,13 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
     local ActiveGroupColor = nibRealUI.media.colors.blue
     local ActiveSpecColor =  nibRealUI.media.colors.orange
     local ActiveLayoutColor = db.colors.normal
-    
+
     local activeSpecGroup = GetActiveSpecGroup()
     local activeSpec = GetSpecialization()
     local id, name, description, icon, spec
     local defaultSpecTexture = "Interface\\Icons\\Ability_Marksmanship"
     local line = {}
-    
+
     for i = 1, 3 do
         local GroupColor = (activeSpecGroup == talentGroup) and ActiveGroupColor or InactiveColor
         local SpecColor = (activeSpecGroup == talentGroup) and ActiveSpecColor or InactiveColor
@@ -2554,7 +2553,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
         if i == 1 then
             line["text"] = talentGroup == 1 and PRIMARY or SECONDARY
             line["justify"] = "LEFT"
-            line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+            line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
             line["textR"] = GroupColor[1]
             line["textG"] = GroupColor[2]
             line["textB"] = GroupColor[3]
@@ -2566,7 +2565,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
         elseif i == 2 then
             line["text"..i] = ndbc.layout.spec[talentGroup] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
             line["justify"..i] = "LEFT"
-            line["size"..i] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
             line["text"..i.."R"] = LayoutColor[1]
             line["text"..i.."G"] = LayoutColor[2]
             line["text"..i.."B"] = LayoutColor[3]
@@ -2577,7 +2576,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
             else
                 id, name, description, icon = nil, NONE, nil, defaultSpecTexture
             end
-            -- line["text"..i] = strform("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, db.text.tablets.normalsize + nibRealUI.font.sizeAdjust, 0, 0)
+            -- line["text"..i] = strform("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0)
             line["text"..i] = name
             line["justify"..i] = "RIGHT"
             line["text"..i.."R"] = SpecColor[1]
@@ -2591,15 +2590,15 @@ end
 local SpecSection = {}
 local function Spec_UpdateTablet(self)
     local Cols, lineHeader
-    
+
     local numSpecGroups = GetNumSpecGroups()
-    
+
     wipe(SpecSection)
-    
+
     ---- Spec Category
     SpecSection["specs"] = {}
     SpecSection["specs"].cat = Tablets.spec:AddCategory()
-    SpecSection["specs"].cat:AddLine("text", SPECIALIZATION, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SpecSection["specs"].cat:AddLine("text", SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
 
     SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", 3)
     AddBlankTabLine(SpecSection["specs"].talentCat, 2)
@@ -2607,22 +2606,22 @@ local function Spec_UpdateTablet(self)
     if numSpecGroups > 1 then
         SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 2)
     end
-    
+
     ---- Equipment
     local numEquipSets = GetNumEquipmentSets()
     if numEquipSets > 0 then
         AddBlankTabLine(SpecSection["specs"].talentCat, 8)
-        
+
         -- Equipment Category
         SpecSection["equipment"] = {}
         SpecSection["equipment"].cat = Tablets.spec:AddCategory()
-        SpecSection["equipment"].cat:AddLine("text", EQUIPMENT_MANAGER, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["equipment"].cat:AddLine("text", EQUIPMENT_MANAGER, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["equipment"].cat, 2)
-        
+
         -- Equipment Cat
         SpecSection["equipment"].equipCat = Tablets.spec:AddCategory("columns", 3)
         AddBlankTabLine(SpecSection["equipment"].equipCat, 1)
-        
+
         SpecAddEquipListToCat(self, SpecSection["equipment"].equipCat)
     end
 
@@ -2635,17 +2634,17 @@ local function Spec_UpdateTablet(self)
         end
         SpecSection["loot"] = {}
         SpecSection["loot"].cat = Tablets.spec:AddCategory()
-        SpecSection["loot"].cat:AddLine("text", LOOT.." "..SPECIALIZATION, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["loot"].cat:AddLine("text", LOOT.." "..SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["loot"].cat, 2)
         SpecAddLootSpecToCat(self, SpecSection["loot"].cat)
     end
-    
+
     ---- Stat Display
     if not StatDisplay then
         StatDisplay = nibRealUI:GetModule("StatDisplay", true)
     end
     if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
-        if GetSpecialization() then 
+        if GetSpecialization() then
             AddBlankTabLine(SpecSection["loot"].cat, 8)
         elseif numEquipSets > 0 then
             AddBlankTabLine(SpecSection["equipment"].equipCat, 8)
@@ -2654,15 +2653,15 @@ local function Spec_UpdateTablet(self)
         end
         SpecSection["stats"] = {}
         SpecSection["stats"].cat = Tablets.spec:AddCategory()
-        SpecSection["stats"].cat:AddLine("text", L["Spec_StatDisplay"], "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["stats"].cat:AddLine("text", L["Spec_StatDisplay"], "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["stats"].cat, 2)
-        
+
         if numSpecGroups == 2 then Cols = {PRIMARY, SECONDARY, " "} else Cols = {PRIMARY, " "} end
         SpecSection["stats"].statCat = Tablets.spec:AddCategory("columns", #Cols)
-        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "LEFT"})
+        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "LEFT"})
         SpecSection["stats"].statCat:AddLine(lineHeader)
         AddBlankTabLine(SpecSection["stats"].statCat, 1)
-        
+
         local watchedStatTexts = StatDisplay:GetCharStatTexts()
         local line = {}
         for r = 1, 2 do
@@ -2670,7 +2669,7 @@ local function Spec_UpdateTablet(self)
             for s = 1, numSpecGroups do
                 if s == 1 then
                     line["text"] = watchedStatTexts[s][r]
-                    line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"] = "LEFT"
                     line["textR"] = 0.9
                     line["textG"] = 0.9
@@ -2679,7 +2678,7 @@ local function Spec_UpdateTablet(self)
                     line["func"] = function() SpecStatClickFunc(self, s) end
                 elseif s == 2 then
                     line["text2"] = watchedStatTexts[s][r]
-                    line["size2"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                    line["size2"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify2"] = "LEFT"
                     line["text2R"] = 0.9
                     line["text2G"] = 0.9
@@ -2690,7 +2689,7 @@ local function Spec_UpdateTablet(self)
             SpecSection["stats"].statCat:AddLine(line)
         end
     end
-    
+
     -- Hint
     local hintStr = ""
     if numSpecGroups > 1 then
@@ -2708,7 +2707,7 @@ local function Spec_UpdateTablet(self)
         if hintStr ~= "" then hintStr = hintStr .. "\n" end
         hintStr = hintStr .. L["Spec_StatConfig"]
     end
-    Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + nibRealUI.font.sizeAdjust)
+    Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
 end
 
 local function Spec_OnEnter(self)
@@ -2729,19 +2728,19 @@ local function Spec_OnEnter(self)
             "hideWhenEmpty", true
         )
     end
-    
+
     if Tablets.spec:IsRegistered(self) then
         -- Tablets.spec appearance
         Tablets.spec:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
         Tablets.spec:SetTransparency(self, nibRealUI.media.window[4])
         Tablets.spec:SetFontSizePercent(self, 1)
-        
+
         -- Open
         Tablets.spec:Open(self)
-        
+
         HideOtherGraphs(self)
     end
-    
+
     self.mouseover = true
     self.text:SetTextColor(unpack(TextColorNormalVals))
 end
@@ -2770,7 +2769,7 @@ local function Spec_Update(self)
             }
         end
     end
-    
+
     -- Gear sets
     wipe(SpecEquipList)
     local numEquipSets = GetNumEquipmentSets()
@@ -2789,7 +2788,7 @@ local function Spec_Update(self)
     if dbc.specgear.secondary > numEquipSets then
         dbc.specgear.secondary = -1
     end
-    
+
     -- Info text
     -- Active talent tree
     if GetActiveSpecGroup() == 1 then
@@ -2799,17 +2798,17 @@ local function Spec_Update(self)
         self.text:SetText(SECONDARY)
         UpdateElementWidth(self)
     end
-    
+
     -- Refresh Tablet
     if Tablets.spec:IsRegistered(self) then
         if Tablet20Frame:IsShown() then
             Tablets.spec:Refresh(self)
         end
     end
-    
+
     if NeedSpecUpdate then
         InfoLine:SpecUpdateEquip()
-        
+
         -- Update Layout
         local NewTG = GetActiveSpecGroup()
         ndbc.layout.current = ndbc.layout.spec[NewTG]
@@ -2821,7 +2820,7 @@ local function Spec_Update(self)
             local ABD = nibRealUI:GetModule("ActionBarDoodads", true)
             if ABD then ABD:RefreshMod() end
         end
-        
+
         -- No longer need Equip/Layout update on Spec change
         NeedSpecUpdate = false
     end
@@ -2842,13 +2841,13 @@ local SysSection = {}
 local function PC_UpdateTablet()
     local Cols, lineHeader
     wipe(SysSection)
-    
+
     -- Network Category
     SysSection["network"] = {}
     SysSection["network"].cat = Tablets.pc:AddCategory()
-    SysSection["network"].cat:AddLine("text", NETWORK_LABEL, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SysSection["network"].cat:AddLine("text", NETWORK_LABEL, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
     AddBlankTabLine(SysSection["network"].cat, 2)
-    
+
     -- Lines
     Cols = {
         L["Sys_Stat"],
@@ -2858,10 +2857,10 @@ local function PC_UpdateTablet()
         L["Sys_AverageAbbr"],
     }
     SysSection["network"].lineCat = Tablets.pc:AddCategory("columns", #Cols)
-    lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
+    lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
     SysSection["network"].lineCat:AddLine(lineHeader)
     AddBlankTabLine(SysSection["network"].lineCat, 1)
-    
+
     local NetworkLines = {
         [1] = {L["Sys_In"], L["Sys_kbps"], "%.2f", SysStats.bwIn},
         [2] = {L["Sys_Out"], L["Sys_kbps"], "%.2f", SysStats.bwOut},
@@ -2875,7 +2874,7 @@ local function PC_UpdateTablet()
             if i == 1 then
                 line["text"] = strform("|cffe5e5e5%s|r |cff808080(%s)|r", NetworkLines[l][1], NetworkLines[l][2])
                 line["justify"] = "LEFT"
-                line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 line["indentation"] = 12.5
                 line["customwidth"] = 90
             elseif i == 2 then
@@ -2915,18 +2914,18 @@ local function PC_UpdateTablet()
         SysSection["network"].lineCat:AddLine(line)
     end
     AddBlankTabLine(SysSection["network"].lineCat, 4)
-    
+
     -- Computer Category
     SysSection["computer"] = {}
     SysSection["computer"].cat = Tablets.pc:AddCategory()
-    SysSection["computer"].cat:AddLine("text", SYSTEMOPTIONS_MENU, "size", db.text.tablets.headersize + nibRealUI.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SysSection["computer"].cat:AddLine("text", SYSTEMOPTIONS_MENU, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
     AddBlankTabLine(SysSection["computer"].cat, 2)
-    
+
     SysSection["computer"].lineCat = Tablets.pc:AddCategory("columns", #Cols)
-    lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + nibRealUI.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
+    lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"})
     SysSection["computer"].lineCat:AddLine(lineHeader)
     AddBlankTabLine(SysSection["computer"].lineCat, 1)
-    
+
     local ComputerLines = {
         [1] = {L["Sys_FPS"], SysStats.fps},
     }
@@ -2936,7 +2935,7 @@ local function PC_UpdateTablet()
             if i == 1 then
                 line["text"] = strform("|cffe5e5e5%s|r", ComputerLines[l][1])
                 line["justify"] = "LEFT"
-                line["size"] = db.text.tablets.normalsize + nibRealUI.font.sizeAdjust
+                line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 line["indentation"] = 12.5
                 line["customwidth"] = 90
             elseif i == 2 then
@@ -3003,25 +3002,25 @@ local function PC_OnEnter(self)
             "hideWhenEmpty", true
         )
     end
-    
+
     if Tablets.pc:IsRegistered(self) then
         -- Tablets.pc appearance
         Tablets.pc:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
         Tablets.pc:SetTransparency(self, nibRealUI.media.window[4])
         Tablets.pc:SetFontSizePercent(self, 1)
-        
+
         Tablets.pc:Open(self)
-        
+
         ShowGraph("fps", Tablet20Frame, "BOTTOMRIGHT", "BOTTOMRIGHT", -10, 10, self)
         HideOtherGraphs(self)
     end
 end
 
 local function PC_Update(self, short)
-    if short then   
+    if short then
         -- FPS
         SysStats.fps.cur = floor((GetFramerate() or 0) + 0.5)
-        
+
         -- Get last 60 second data
         if ( (SysStats.fps.cur > 0) and (SysStats.fps.cur < 120) ) then
             if SysStats.fpsTally < 0 then
@@ -3041,7 +3040,7 @@ local function PC_Update(self, short)
                     end
                     SysStats.fps.tally[fpsCount] = SysStats.fps.cur
                 end
-                
+
                 -- Get Average/Min/Max fps
                 local minfps, maxfps, totalfps = nil, 0, 0
                 for i = 1, fpsCount do
@@ -3054,7 +3053,7 @@ local function PC_Update(self, short)
                 SysStats.fps.max = maxfps
             end
         end
-        
+
         -- Graph
         if Graphs["fps"].shown then
             UpdateGraph("fps", SysStats.fps.tally)
@@ -3064,18 +3063,18 @@ local function PC_Update(self, short)
         SysStats.bwIn.cur, SysStats.bwOut.cur, SysStats.lagHome.cur, SysStats.lagWorld.cur = GetNetStats()
         SysStats.bwIn.cur = floor(SysStats.bwIn.cur * 100 + 0.5 ) / 100
         SysStats.bwOut.cur = floor(SysStats.bwOut.cur * 100 + 0.5 ) / 100
-        
+
         -- Get last 60 net updates
         local netCount = 60
         if SysStats.netTally < netCount then
             -- Tally up to 60
             SysStats.netTally = SysStats.netTally + 1
-            
+
             SysStats.bwIn.tally[SysStats.netTally] = SysStats.bwIn.cur
             SysStats.bwOut.tally[SysStats.netTally] = SysStats.bwOut.cur
             SysStats.lagHome.tally[SysStats.netTally] = SysStats.lagHome.cur
             SysStats.lagWorld.tally[SysStats.netTally] = SysStats.lagWorld.cur
-            
+
             netCount = SysStats.netTally
         else
             -- Shift our tally table down by 1
@@ -3091,53 +3090,53 @@ local function PC_Update(self, short)
             SysStats.lagHome.tally[netCount] = SysStats.lagHome.cur
             SysStats.lagWorld.tally[netCount] = SysStats.lagWorld.cur
         end
-        
+
         -- Get Average/Min/Max
         local minBwIn, maxBwIn, totalBwIn = nil, 0, 0
         local minBwOut, maxBwOut, totalBwOut = nil, 0, 0
         local minLagHome, maxLagHome, totalLagHome = nil, 0, 0
         local minLagWorld, maxLagWorld, totalLagWorld = nil, 0, 0
-        
+
         for i = 1, netCount do
             totalBwIn = totalBwIn + SysStats.bwIn.tally[i]
             if not minBwIn then minBwIn = SysStats.bwIn.tally[i] else minBwIn = min(minBwIn, SysStats.bwIn.tally[i]) end
             maxBwIn = max(maxBwIn, SysStats.bwIn.tally[i])
-            
+
             totalBwOut = totalBwOut + SysStats.bwOut.tally[i]
             if not minBwOut then minBwOut = SysStats.bwOut.tally[i] else minBwOut = min(minBwOut, SysStats.bwOut.tally[i]) end
             maxBwOut = max(maxBwOut, SysStats.bwOut.tally[i])
-            
+
             totalLagHome = totalLagHome + SysStats.lagHome.tally[i]
             if not minLagHome then minLagHome = SysStats.lagHome.tally[i] else minLagHome = min(minLagHome, SysStats.lagHome.tally[i]) end
             maxLagHome = max(maxLagHome, SysStats.lagHome.tally[i])
-            
+
             totalLagWorld = totalLagWorld + SysStats.lagWorld.tally[i]
             if not minLagWorld then minLagWorld = SysStats.lagWorld.tally[i] else minLagWorld = min(minLagWorld, SysStats.lagWorld.tally[i]) end
             maxLagWorld = max(maxLagWorld, SysStats.lagWorld.tally[i])
         end
-        
+
         SysStats.bwIn.avg = floor((totalBwIn / netCount) * 100 + 0.5) / 100
         SysStats.bwIn.min = minBwIn
         SysStats.bwIn.max = maxBwIn
-        
+
         SysStats.bwOut.avg = floor((totalBwOut / netCount) * 100 + 0.5) / 100
         SysStats.bwOut.min = minBwOut
         SysStats.bwOut.max = maxBwOut
-        
+
         SysStats.lagHome.avg = floor((totalLagHome / netCount) + 0.5)
         SysStats.lagHome.min = minLagHome
         SysStats.lagHome.max = maxLagHome
-        
+
         SysStats.lagWorld.avg = floor((totalLagWorld / netCount) + 0.5)
         SysStats.lagWorld.min = minLagWorld
         SysStats.lagWorld.max = maxLagWorld
     end
-    
+
     -- Info Text
     self.text1:SetFormattedText("|cff%s%d|r", TextColorNormal, floor(SysStats.fps.cur + 0.5))
     self.text2:SetFormattedText("|cff%s%d|r", TextColorNormal, SysStats.lagWorld.cur)
     UpdateElementWidth(self)
-    
+
     -- Tablet
     if Tablets.pc:IsRegistered(self) then
         if Tablet20Frame:IsShown() then
@@ -3171,7 +3170,7 @@ local function Clock_Update(self, ...)
     else
         newTime = db.other.clock.hr24 and RetrieveGameTime() or RetrieveGameTime(true)
     end
-    
+
     -- Info Text
     self.text:SetFormattedText("|cff%s%s|r", TextColorNormal, newTime)
     UpdateElementWidth(self)
@@ -3179,7 +3178,7 @@ end
 
 local function Clock_OnEnter(self)
     local locTime = db.other.clock.hr24 and date("%H:%M") or strform("%d%s", strsub(date("%I:%M %p"), 1, 2), strsub(date("%I:%M %p"), 3))
-    
+
     local serTime = RetrieveGameTime(not db.other.clock.hr24)
     local caltext = date("%b %d (%a)")
 
@@ -3189,7 +3188,7 @@ local function Clock_OnEnter(self)
     GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_REALMTIME), strform("%s", serTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_LOCALTIME), strform("%s", locTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Clock_Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    
+
     -- TB/WG
     GameTooltip:AddLine(" ")
     local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
@@ -3204,7 +3203,7 @@ local function Clock_OnEnter(self)
     else
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_NoTBTime"]))
     end
-    
+
     -- Invites
     GameTooltip:AddLine(" ")
     if self.pendingCalendarInvites and self.pendingCalendarInvites > 0 then
@@ -3247,34 +3246,34 @@ end
 function InfoLine:OnMouseDown(self)
     if self.tag == "start" then
         EasyMenu(MicroMenu, RealUIStartDropDown, self, 0, 0, "MENU", 2)
-        
+
     elseif self.tag == "guild" then
         Guild_OnMouseDown(self)
-        
+
     elseif self.tag == "friends" then
         Friends_OnMouseDown(self)
-        
+
     elseif self.tag == "durability" then
         InfoLine_Durability_OnMouseDown(self)
-        
+
     elseif self.tag == "bag" then
         InfoLine_Bag_OnMouseDown(self)
-        
+
     elseif self.tag == "currency" then
         Currency_OnMouseDown(self)
-        
+
     elseif self.tag == "xprep" then
         InfoLine_XR_OnMouseDown(self)
-        
+
     elseif self.tag == "clock" then
         Clock_OnMouseDown(self)
-        
+
     elseif self.tag == "meters" then
         Meter_Toggle(self)
-        
+
     elseif self.tag == "spec" then
         SpecChangeClickFunc(self)
-        
+
     elseif self.tag == "layout" then
         local NewLayout = ndbc.layout.current == 1 and 2 or 1
         ndbc.layout.current = NewLayout
@@ -3314,14 +3313,14 @@ function InfoLine:OnEnter(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, MAINMENU_BUTTON))
         GameTooltip:Show()
-        
+
         local color = nibRealUI.media.colors.blue
         self.icon1:SetVertexColor(color[1], color[2], color[3])
         color = nibRealUI.media.colors.orange
         self.icon2:SetVertexColor(color[1], color[2], color[3])
     elseif self.tag == "mail" and self.hasMail then
         MinimapMailFrameUpdate()
-        
+
         local send1, send2, send3 = GetLatestThreeSenders()
         local toolText
 
@@ -3337,34 +3336,34 @@ function InfoLine:OnEnter(self)
         if send3 then GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, send3)) end
 
         GameTooltip:Show()
-        
+
     elseif self.tag == "guild" then
         if self.hasguild then
             Guild_OnEnter(self)
         end
-        
+
     elseif self.tag == "friends" then
         if self.hasfriends then
             Friends_OnEnter(self)
         end
-        
+
     elseif self.tag == "durability" then
         InfoLine_Durability_OnEnter(self)
-        
+
     elseif self.tag == "bag" then
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, EMPTY .. " " .. BAGSLOTTEXT))
         GameTooltip:Show()
-        
+
     elseif self.tag == "currency" then
         Currency_OnEnter(self)
-        
+
     elseif self.tag == "xprep" then
         InfoLine_XR_OnEnter(self)
-        
+
     elseif self.tag == "clock" then
         Clock_OnEnter(self)
-        
+
     elseif self.tag == "meters" then
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
         GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Meters_Header"]))
@@ -3374,13 +3373,13 @@ function InfoLine:OnEnter(self)
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Meters_Toggle"]))
         GameTooltip:Show()
-        
+
     elseif self.tag == "pc" then
         PC_OnEnter(self)
-        
+
     elseif self.tag == "spec" then
         Spec_OnEnter(self)
-        
+
     elseif self.tag == "layout" then
         local CurLayoutText = ndbc.layout.current == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
         local CurResText = layoutSize == 1 and "Low" or "High"
@@ -3407,7 +3406,7 @@ function InfoLine:SetBackground()
             ILFrames.parent.backgroundBottom:SetTexture(0, 0, 0, 1)
         else
             ILFrames.parent.backgroundBottom:SetTexture(0, 0, 0, 0)
-        end 
+        end
         ILFrames.parent.stripeTex:Show()
     else
         ILFrames.parent:SetBackdropColor(0, 0, 0, 0)
@@ -3420,12 +3419,6 @@ end
 -- Font
 function InfoLine:UpdateFonts()
     layoutSize = (ndb.settings.fontStyle == 3) and 2 or 1
-
-    -- Set Fonts
-    local font = nibRealUI:Font(false, "small")
-    for k, fontString in pairs(FontStringsLarge) do
-        fontString:SetFont(unpack(font))
-    end
 
     -- Set Icons
     for i,v in pairs(TextureFrames) do
@@ -3459,7 +3452,7 @@ local AlreadyUpdating
 function InfoLine:UpdatePositions()
     if AlreadyUpdating then return end
     AlreadyUpdating = true
-    
+
     local Frames = {
         left = {
             {ILFrames.start,        db.elements.start},
@@ -3479,15 +3472,15 @@ function InfoLine:UpdatePositions()
             {ILFrames.pc,           db.elements.pc},
         },
     }
-    
+
     local EHeight = db.position.yoff + ElementHeight[layoutSize] + db.position.yoff
-    
+
     -- Parent
     ILFrames.parent:ClearAllPoints()
     ILFrames.parent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT",  db.position.xleft, db.position.y)
     ILFrames.parent:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT",  db.position.xright, db.position.y)
     ILFrames.parent:SetHeight(EHeight)
-    
+
     ---- Left
     local XPos = 0
     for k,v in ipairs(Frames.left) do
@@ -3502,7 +3495,7 @@ function InfoLine:UpdatePositions()
             v[1]:Hide()
         end
     end
-    
+
     -- Right
     XPos = 0
     for k,v in ipairs(Frames.right) do
@@ -3517,7 +3510,7 @@ function InfoLine:UpdatePositions()
             v[1]:Hide()
         end
     end
-    
+
     AlreadyUpdating = false
 end
 
@@ -3530,10 +3523,10 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
     local NewElement = CreateFrame("Frame", name, UIParent)
     NewElement.side = side
     NewElement.type = type
-    
+
     NewElement:SetFrameStrata(ILFrames.parent:GetFrameStrata())
     NewElement:SetFrameLevel(ILFrames.parent:GetFrameLevel() + 1)
-    
+
     if type ~= 4 then
         if (type == 1) or (type == 3) then
             if extra == "start" then
@@ -3564,11 +3557,10 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
             end
             NewElement.iconwidth = iconInfo[2]
         end
-        
+
         if (type == 2) or (type == 3) then
             NewElement.text = NewElement:CreateFontString(nil, "ARTWORK")
-            tinsert(FontStringsLarge, NewElement.text)
-            NewElement.text:SetFont(unpack(nibRealUI.font.pixel1))
+            NewElement.text:SetFontObject(RealUIFont_Pixel)
             NewElement.text:SetJustifyH("LEFT")
             if type == 2 then
                 NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap, db.position.yoff + db.text.yoffset + 0.5)
@@ -3579,39 +3571,37 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
         end
     else
         NewElement.text1 = NewElement:CreateFontString(nil, "ARTWORK")
-        tinsert(FontStringsLarge, NewElement.text1)
-        NewElement.text1:SetFont(unpack(nibRealUI.font.pixel1))
+        NewElement.text1:SetFontObject(RealUIFont_Pixel)
         NewElement.text1:SetJustifyH("LEFT")
-        
+
         NewElement.icon = NewElement:CreateTexture(nil, "ARTWORK")
         NewElement.icon:SetHeight(16)
         NewElement.icon:SetWidth(16)
         NewElement.icon:SetTexture(iconInfo[1])
         NewElement.iconwidth = iconInfo[2]
-        
+
         NewElement.text2 = NewElement:CreateFontString(nil, "ARTWORK")
-        tinsert(FontStringsLarge, NewElement.text2)
-        NewElement.text2:SetFont(unpack(nibRealUI.font.pixel1))
+        NewElement.text2:SetFontObject(RealUIFont_Pixel)
         NewElement.text2:SetTextColor(unpack(TextColorNormalVals))
         NewElement.text2:SetJustifyH("LEFT")
-        
+
         NewElement.curwidth = 100
     end
-    
+
     NewElement:EnableMouse(true)
     NewElement.mouseover = false
     NewElement:SetScript("OnEnter", function(self) InfoLine:OnEnter(self) end)
     NewElement:SetScript("OnLeave", function(self) InfoLine:OnLeave(self) end)
     NewElement:SetScript("OnMouseDown", function(self) InfoLine:OnMouseDown(self) end)
-    
+
     return NewElement
 end
 
 function InfoLine:CreateFrames()
     if FramesCreated then return end
-    
+
     ILFrames = {}
-    
+
     -- Parent
     ILFrames.parent = CreateFrame("Frame", "RealUI_InfoLine", UIParent)
     ILFrames.parent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
@@ -3620,7 +3610,7 @@ function InfoLine:CreateFrames()
 
     -- Background
     ILFrames.parent:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain, 
+        bgFile = nibRealUI.media.textures.plain,
         edgeFile = nil,
     })
     ILFrames.parent.stripeTex = nibRealUI:AddStripeTex(ILFrames.parent)
@@ -3631,7 +3621,7 @@ function InfoLine:CreateFrames()
         ILFrames.parent.backgroundBottom:SetPoint("BOTTOMLEFT", ILFrames.parent, "BOTTOMLEFT")
         ILFrames.parent.backgroundBottom:SetPoint("TOPRIGHT", ILFrames.parent, "BOTTOMRIGHT", 0, 1)
     self:SetBackground()
-    
+
     -- Highlight Bar
     HighlightBar = CreateFrame("Frame", nil, UIParent)
     HighlightBar:Hide()
@@ -3645,14 +3635,14 @@ function InfoLine:CreateFrames()
     HighlightBar.line:SetPoint("BOTTOMLEFT", HighlightBar, "BOTTOMLEFT", 1, 1)
     HighlightBar.line:SetPoint("TOPRIGHT", HighlightBar, "TOPRIGHT", -1, -1)
     HighlightBar.line:SetTexture(unpack(HighlightColorVals))
-    
+
     -------- LEFT
     -- -- Start Button
     ILFrames.start = CreateNewElement("RealUIInfoLineStart", "LEFT", 1, Icons[layoutSize].start1, "start")
     tinsert(TextureFrames, {ILFrames.start, ILFrames.start.icon1, "start1"})
     tinsert(TextureFrames, {ILFrames.start, ILFrames.start.icon2, "start2"})
     ILFrames.start.tag = "start"
-    
+
     -- -- Mail
     ILFrames.mail = CreateNewElement(nil, "LEFT", 1, Icons[layoutSize].mail)
     tinsert(TextureFrames, {ILFrames.mail, ILFrames.mail.icon, "mail"})
@@ -3681,7 +3671,7 @@ function InfoLine:CreateFrames()
             end
         end
     end)
-    
+
     -- -- Guild
     ILFrames.guild = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].guild)
     tinsert(TextureFrames, {ILFrames.guild, ILFrames.guild.icon, "guild"})
@@ -3702,7 +3692,7 @@ function InfoLine:CreateFrames()
         end
     end)
     ILFrames.guild.elapsed = 2
-    ILFrames.guild:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.guild:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= 2 then
             if self.needrefreshed then
@@ -3712,7 +3702,7 @@ function InfoLine:CreateFrames()
             self.elapsed = 0
         end
     end)
-    
+
     -- -- Friends
     ILFrames.friends = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].friends)
     tinsert(TextureFrames, {ILFrames.friends, ILFrames.friends.icon, "friends"})
@@ -3733,7 +3723,7 @@ function InfoLine:CreateFrames()
         self.elapsed = 0
     end)
     ILFrames.friends.elapsed = 2
-    ILFrames.friends:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.friends:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= 2 then
             if self.needrefreshed then
@@ -3743,14 +3733,14 @@ function InfoLine:CreateFrames()
             self.elapsed = 0
         end
     end)
-    
+
     -- -- Durability
     ILFrames.durability = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].durability)
     tinsert(TextureFrames, {ILFrames.durability, ILFrames.durability.icon, "durability"})
     ILFrames.durability.tag = "durability"
     ILFrames.durability:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
     ILFrames.durability:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.durability:SetScript("OnEvent", function(self) 
+    ILFrames.durability:SetScript("OnEvent", function(self)
         if not db.elements.durability then return end
         local dura = InfoLine_Durability_Update(self)
         if (dura < 15) then
@@ -3759,7 +3749,7 @@ function InfoLine:CreateFrames()
             Durability_Low(self, false)
         end
     end)
-    
+
     -- -- Bag Space
     ILFrames.bag = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].bag)
     tinsert(TextureFrames, {ILFrames.bag, ILFrames.bag.icon, "bag"})
@@ -3768,11 +3758,11 @@ function InfoLine:CreateFrames()
     ILFrames.bag:RegisterEvent("UNIT_INVENTORY_CHANGED")
     ILFrames.bag:RegisterEvent("BAG_UPDATE")
     ILFrames.bag:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.bag:SetScript("OnEvent", function(self) 
+    ILFrames.bag:SetScript("OnEvent", function(self)
         if not db.elements.bag then return end
         InfoLine_Bag_Update(self)
     end)
-    
+
     -- -- Currency
     ILFrames.currency = CreateNewElement(nil, "LEFT", 2, nil)
     ILFrames.currency.icon = ILFrames.currency:CreateTexture(nil, "ARTWORK")
@@ -3818,7 +3808,7 @@ function InfoLine:CreateFrames()
             if self.ingame then
                 self.initialized = true
             end
-            if MoneyPossibilityEvents[event] then 
+            if MoneyPossibilityEvents[event] then
                 for k, v in pairs(MoneyPossibilityEvents) do
                     if v then
                         ILFrames.currency:UnregisterEvent(k)
@@ -3831,7 +3821,7 @@ function InfoLine:CreateFrames()
     end)
     -- Update on interval, avoids too many updates due to lots of events
     ILFrames.currency.elapsed = 1
-    ILFrames.currency:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.currency:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= 1 then
             if self.needrefreshed then
@@ -3841,7 +3831,7 @@ function InfoLine:CreateFrames()
             self.elapsed = 0
         end
     end)
-    
+
     -- -- XP/Rep
     ILFrames.xprep = CreateNewElement(nil, "LEFT", 3, Icons[layoutSize].xp)
     tinsert(TextureFrames, {ILFrames.xprep, ILFrames.xprep.icon, "xp"})
@@ -3851,24 +3841,24 @@ function InfoLine:CreateFrames()
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.xprep:SetScript("OnEvent", function(self) 
+    ILFrames.xprep:SetScript("OnEvent", function(self)
         if not db.elements.xprep then return end
         InfoLine_XR_Update(self)
     end)
-    
-    
+
+
     ------- RIGHT
     -- -- Clock
     ILFrames.clock = CreateNewElement(nil, "RIGHT", 2, nil)
     ILFrames.clock.tag = "clock"
     ILFrames.clock.text:SetJustifyH("RIGHT")
     ILFrames.clock:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.clock:SetScript("OnEvent", function(self) 
+    ILFrames.clock:SetScript("OnEvent", function(self)
         if not db.elements.clock then return end
         Clock_Update(self, true)
     end)
     ILFrames.clock.elapsed = 1
-    ILFrames.clock:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.clock:SetScript("OnUpdate", function(self, elapsed)
         if not db.elements.clock then return end
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= 1 then
@@ -3876,18 +3866,18 @@ function InfoLine:CreateFrames()
             self.elapsed = 0
         end
     end)
-    
+
     -- -- Meters Button
     ILFrames.meters = CreateNewElement(nil, "RIGHT", 1, Icons[layoutSize].meters)
     tinsert(TextureFrames, {ILFrames.meters, ILFrames.meters.icon, "meters"})
     ILFrames.meters.tag = "meters"
     ILFrames.meters:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.meters:SetScript("OnEvent", function(self) 
+    ILFrames.meters:SetScript("OnEvent", function(self)
         if not db.elements.metertoggle then return end
         Meter_Update(self)
     end)
     ILFrames.meters.elapsed = 2
-    ILFrames.meters:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.meters:SetScript("OnUpdate", function(self, elapsed)
         if not db.elements.metertoggle then return end
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= 2 then
@@ -3895,7 +3885,7 @@ function InfoLine:CreateFrames()
             self.elapsed = 0
         end
     end)
-    
+
     -- -- Spec Button
     ILFrames.spec = CreateNewElement("RealUIInfoLineSpecChanger", "RIGHT", 2, nil)
     ILFrames.spec.tag = "spec"
@@ -3911,12 +3901,12 @@ function InfoLine:CreateFrames()
         end
         Spec_Update(self)
     end)
-    
+
     -- -- Layout Button
     ILFrames.layout = CreateNewElement(nil, "RIGHT", 1, Icons[layoutSize].layout_dt, 32)
     ILFrames.layout.tag = "layout"
     ILFrames.layout:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.layout:SetScript("OnEvent", function(self) 
+    ILFrames.layout:SetScript("OnEvent", function(self)
         if not db.elements.layoutchanger then return end
         Layout_Update(self)
     end)
@@ -3936,7 +3926,7 @@ function InfoLine:CreateFrames()
     ILFrames.pc.elapsed1PowerModeTimes = {1, 2, 1}  -- Update FPS more or less frequently based on Power Mode setting {Normal, Economy, Turbo}
     ILFrames.pc.elapsed1 = 1
     ILFrames.pc.elapsed2 = 5
-    ILFrames.pc:SetScript("OnUpdate", function(self, elapsed) 
+    ILFrames.pc:SetScript("OnUpdate", function(self, elapsed)
         if not db.elements.pc then return end
         if ILFrames.pc.ready then
             self.elapsed1 = self.elapsed1 + elapsed
@@ -3990,12 +3980,12 @@ function InfoLine:Refresh()
     TextColorOrange1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
     TextColorblue1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
     TextColorBlue1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
-    
+
     -- Create Frames if it has been delayed
     if not FramesCreated then
         InfoLine:CreateFrames()
     end
-    
+
     -- Update
     InfoLine:UpdateFonts()
     InfoLine:UpdatePositions()
@@ -4004,7 +3994,7 @@ function InfoLine:Refresh()
     ILFrames.start.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
     color = nibRealUI.media.colors.orange
     ILFrames.start.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
-    
+
     -- InfoLine:UpdateAllInfo()
 end
 
@@ -4019,7 +4009,7 @@ end
 
 function InfoLine:PLAYER_LOGIN()
     LoggedIn = true
-    
+
     -- Class Name lookup table
     ClassLookup = {}
     for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
@@ -4028,31 +4018,31 @@ function InfoLine:PLAYER_LOGIN()
     for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do
         ClassLookup[v] = k
     end
-    
+
     -- Class Colors
     if CUSTOM_CLASS_COLORS then
         CUSTOM_CLASS_COLORS:RegisterCallback(ClassColorsUpdate)
     end
-    
+
     -- Currency Names
     GoldName = strtrim(strsub(strform(nibRealUI.goldstr or GOLD_AMOUNT, 0), 2))
 
     -- Loot Spec
     LootSpecIDs, LootSpecClass = nibRealUI:GetLootSpecData()
-    
+
     -- Start title
     MicroMenu[1].text = nibRealUI:GetVerString(true)
-    
+
     InfoLine:Refresh()
 end
 
 function InfoLine:RefreshMod()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    
+
     db = self.db.profile
     ndbc = nibRealUI.db.char
     ndbg = nibRealUI.db.global
-    
+
     InfoLine:Refresh()
 end
 
@@ -4153,16 +4143,16 @@ function InfoLine:OnInitialize()
     ndbg = nibRealUI.db.global
 
     self.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
-    
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function InfoLine:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
-    
+
     CreateCopyFrame()
-    
+
     if LoggedIn then
         InfoLine:Refresh()
     end

@@ -53,7 +53,7 @@ local function AuraUpdate(self, event, unit)
 
 	local remaining
 	local spellName,_,_,_,_,_,endTime,_,_,_,spellID,_,_,_, absorb = UnitAura("player", BloodShieldName)
-	if ( spellID == BloodShieldID ) then 
+	if ( spellID == BloodShieldID ) then
 		self.CurrentAbsorb = absorb
 		remaining = endTime - now
 	end
@@ -206,7 +206,7 @@ function BloodShield:SetIndicatorInfo(info)
 
 	f.side = "LEFT"
 	f.unit = "player"
-	
+
 	f.isStatic = (info.order ~= nil)
 	if f.isStatic then
 		f.texture = icon
@@ -256,7 +256,7 @@ function BloodShield:CreateIndicator()
 		f.icon:SetAllPoints(f)
 		f.icon:SetTexCoord(.08, .92, .08, .92)
 	f.count = f:CreateFontString()
-		f.count:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.count:SetFontObject(RealUIFont_PixelCooldown)
 		f.count:SetJustifyH("RIGHT")
 		f.count:SetJustifyV("TOP")
 		f.count:SetPoint("TOPRIGHT", f, "TOPRIGHT", 1.5, 2.5)
@@ -267,14 +267,14 @@ function BloodShield:CreateIndicator()
 		f.customCD:SetHeight(0)
 		f.customCD:SetTexture(0, 0, 0, 0.75)
 	f.customCDTime = f:CreateFontString()
-		f.customCDTime:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		f.customCDTime:SetFontObject(RealUIFont_PixelCooldown)
 		f.customCDTime:SetJustifyH("LEFT")
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 

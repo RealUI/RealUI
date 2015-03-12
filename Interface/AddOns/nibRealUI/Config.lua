@@ -25,13 +25,6 @@ nibRealUI.globals.stratas = {
 	"TOOLTIP"
 }
 
-nibRealUI.globals.outlines = {
-	"NONE",
-	"OUTLINE",
-	"THICKOUTLINE",
-	"MONOCHROMEOUTLINE"
-}
-
 -- Primary Options table
 local Options = {
 	settings = nil,
@@ -81,7 +74,7 @@ local function ResetChar()
 	-- Set all Char settings to default
 	nibRealUICharacter = nil
 	dbc.layout.current = 1
-	
+
 	-- Run Install Procedure
 	LibStub("AceConfigDialog-3.0"):Close("nibRealUI")
 	nibRealUI:InstallProcedure()
@@ -98,7 +91,7 @@ local function GetOptions()
 			args = {},
 		}
 	end
-	
+
 	-- Core
 	if not CoreOptions.settings then CoreOptions.settings = {
 		name = "RealUI Core",
@@ -171,12 +164,12 @@ local function GetOptions()
 		},
 	}
 	end
-	
+
 	-- Plain Options
 	for key, val in pairs(Options.modules) do
 		Options.settings.args[key] = (type(val) == "function") and val() or val
 	end
-	
+
 	-- HuD
 	if not HuDOptions.settings then HuDOptions.settings = {
 		type = "group",
@@ -198,7 +191,7 @@ local function GetOptions()
 	for key, val in pairs(HuDOptions.ClassResource) do
 		HuDOptions.settings.args.ClassResource.args[key] = (type(val) == "function") and val() or val
 	end
-	
+
 	-- Modules
 	if not ModuleOptions.settings then ModuleOptions.settings = {
 		type = "group",
@@ -211,7 +204,7 @@ local function GetOptions()
 	for key, val in pairs(ModuleOptions.modules) do
 		ModuleOptions.settings.args[key] = (type(val) == "function") and val() or val
 	end
-	
+
 	-- Skins
 	if not SkinsOptions.settings then SkinsOptions.settings = {
 		name = "Skins",
@@ -232,7 +225,7 @@ local function GetOptions()
 			type = "toggle",
 			name = name,
 			get = function() return nibRealUI:GetModuleEnabled(name) end,
-			set = function(info, value) 
+			set = function(info, value)
 				nibRealUI:SetModuleEnabled(name, value)
 				nibRealUI:ReloadUIDialog()
 			end,
@@ -247,25 +240,25 @@ function nibRealUI:SetUpOptions()
 	dbc = self.db.char
 	dbg = self.db.global
 	self.media = db.media
-	
+
 	-- Fill out Options table
 	GetOptions()
-	
+
 	Options.settings.args.hud = HuDOptions.settings
 	Options.settings.args.hud.order = 9000
-	
+
 	Options.settings.args.modules = ModuleOptions.settings
 	Options.settings.args.modules.order = 9001
-	
+
 	Options.settings.args.skins = SkinsOptions.settings
 	Options.settings.args.skins.order = 9002
-	
+
 	Options.settings.args.core = CoreOptions.settings
 	Options.settings.args.core.order = 9500
-	
+
 	Options.settings.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	Options.settings.args.profiles.order = -1
-	
+
 	-- Create RealUI Options window
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("nibRealUI", Options.settings)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("nibRealUI", 870, 600)

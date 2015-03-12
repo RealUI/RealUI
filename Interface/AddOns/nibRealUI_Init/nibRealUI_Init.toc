@@ -6,5 +6,6 @@
 ## SavedVariables: RealUI_InitDB
 
 libs\libs.xml
+Fonts.xml
 
 Init.lua

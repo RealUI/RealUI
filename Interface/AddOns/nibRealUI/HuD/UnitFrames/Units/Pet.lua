@@ -25,7 +25,7 @@ local function CreateHealthBar(parent)
     parent.Health:SetAllPoints(parent)
 
     parent.Health.bar = AngleStatusBar:NewBar(parent.Health, -(7 + UnitFrames.layoutSize), -1, texture.width - (10 + UnitFrames.layoutSize), texture.height - 2, "RIGHT", "RIGHT", "LEFT", true)
-    if ndb.settings.reverseUnitFrameBars then 
+    if ndb.settings.reverseUnitFrameBars then
         AngleStatusBar:SetReverseFill(parent.Health.bar, true)
     end
     UnitFrames:SetHealthColor(parent)
@@ -120,7 +120,7 @@ UnitFrames["pet"] = function(self)
 
     self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
-    self.Name:SetFont(unpack(nibRealUI:Font()))
+    self.Name:SetFontObject(RealUIFont_Pixel)
     self:Tag(self.Name, "[realui:name]")
 
     function self:PostUpdate(event)

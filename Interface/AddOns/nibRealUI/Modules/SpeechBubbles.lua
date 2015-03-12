@@ -1,7 +1,7 @@
 -- Code concepts from FreeUI by Haleth
 
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db
+local db, ndb
 
 local _
 local MODNAME = "SpeechBubbles"
@@ -33,7 +33,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Speech Bubbles module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 					nibRealUI:ReloadUIDialog()
 				end,
@@ -66,7 +66,7 @@ local function GetOptions()
 						name = "Sender Name Size",
 						min = 6, max = 32, step = 1,
 						get = function(info) return db.sendersize end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.sendersize = value
 						end,
 						order = 10,
@@ -75,7 +75,7 @@ local function GetOptions()
 						type = "toggle",
 						name = "Hide Sender Name",
 						get = function() return db.hideSender end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.hideSender = value
 						end,
 						order = 11,
@@ -85,7 +85,7 @@ local function GetOptions()
 						name = "Message Size",
 						min = 6, max = 32, step = 1,
 						get = function(info) return db.messagesize end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.messagesize = value
 						end,
 						order = 20,
@@ -95,7 +95,7 @@ local function GetOptions()
 						name = "Edge Size",
 						min = 0, max = 20, step = 1,
 						get = function(info) return db.edgesize end,
-						set = function(info, value) 
+						set = function(info, value)
 							db.edgesize = value
 						end,
 						order = 30,
@@ -173,11 +173,12 @@ local function SkinBubble(frame)
 			frame.text = region
 		end
 	end
-	
+
+	local font, _, outline = RealUIFont_Chat:GetFont()
 	-- Message Font
-	frame.text:SetFont(nibRealUI.font.standard, db.messagesize, "OUTLINE")
+	frame.text:SetFont(font, db.messagesize, outline)
 	frame.text:SetJustifyH("LEFT")
-	
+
 	-- Sender Name
 	local senderHeight = not(db.hideSender) and FixedScale(db.sendersize) or 0
 	if not(db.hideSender) then
@@ -185,7 +186,7 @@ local function SkinBubble(frame)
 		frame.sender:SetPoint("TOP", 0, -db.edgesize)
 		frame.sender:SetPoint("LEFT", frame.text)
 		frame.sender:SetPoint("RIGHT", frame.text)
-		frame.sender:SetFont(nibRealUI.font.standard, db.sendersize, "OUTLINE")
+		frame.sender:SetFont(font, db.sendersize, outline)
 		frame.sender:SetJustifyH("LEFT")
 	end
 
@@ -199,26 +200,26 @@ local function SkinBubble(frame)
 		edgeSize = UIParent:GetScale(),
 	})
 	frame:SetBackdropBorderColor(unpack(db.colors.border))
-	
+
 	-- Background
 	local bg = frame:CreateTexture(nil, "BACKGROUND")
 	bg:SetAllPoints()
 	bg:SetTexture(nibRealUI.media.textures.plain)
 	bg:SetVertexColor(unpack(db.colors.bg))
-	
+
 	frame:HookScript("OnHide", function() frame.inUse = false end)
 end
 
 local function UpdateFrame(frame, guid, name)
 	if not frame.text then SkinBubble(frame) end
 	frame.inUse = true
-	
+
 	if name and not(db.hideSender) then
 		local class
 		if guid ~= nil and guid ~= "" then
 			_, class, _, _, _, _ = GetPlayerInfoByGUID(guid)
 		end
-	
+
 		local color = nibRealUI:GetClassColor(class)
 		frame.sender:SetText(("|cff%2x%2x%2x%s|r"):format(color[1] * 255, color[2] * 255, color[3] * 255, name))
 		if frame.text:GetWidth() < frame.sender:GetWidth() then
@@ -273,7 +274,8 @@ function SpeechBubbles:OnInitialize()
 		},
 	})
 	db = self.db.profile
-	
+	ndb = nibRealUI.db.profile
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end

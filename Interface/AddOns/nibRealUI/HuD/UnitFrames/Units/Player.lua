@@ -55,7 +55,7 @@ local function CreateHealthBar(parent)
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
-    health.text:SetFont(unpack(nibRealUI:Font()))
+    health.text:SetFontObject(RealUIFont_Pixel)
     parent:Tag(health.text, "[realui:smartHealth]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
@@ -112,7 +112,7 @@ local function CreatePvPStatus(parent)
 
     pvp.text = pvp:CreateFontString(nil, "OVERLAY")
     pvp.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 15, 2)
-    pvp.text:SetFont(unpack(nibRealUI:Font()))
+    pvp.text:SetFontObject(RealUIFont_Pixel)
     pvp.text:SetJustifyH("LEFT")
     pvp.text.frequentUpdates = 1
     parent:Tag(pvp.text, "[realui:pvptimer]")
@@ -130,7 +130,7 @@ local function CreatePowerBar(parent)
 
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
-    power.text:SetFont(unpack(nibRealUI:Font()))
+    power.text:SetFontObject(RealUIFont_Pixel)
     parent:Tag(power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
@@ -193,7 +193,7 @@ local function CreateStats(parent)
         end
 
         parent.Stats[i].text = parent.overlay:CreateFontString(nil, "OVERLAY")
-        parent.Stats[i].text:SetFont(unpack(nibRealUI:Font()))
+        parent.Stats[i].text:SetFontObject(RealUIFont_Pixel)
         parent.Stats[i].text:SetPoint("BOTTOMLEFT", parent.Stats[i].icon, "BOTTOMRIGHT", 0, 0)
     end
 end
@@ -228,18 +228,18 @@ local function CreateTotems(parent)
         totem:ClearAllPoints()
         totem:SetPoint("TOPLEFT", totemBar, i * (totem:GetWidth() + 3), 0)
         nibRealUI:CreateBG(totem)
-        
+
         local bg = _G[name.."Background"]
         bg:SetTexture("")
         local dur = _G[name.."Duration"]
         dur:Hide()
         dur.Show = function() end
-        
+
         local icon = _G[name.."IconTexture"]
         icon:SetTexCoord(.08, .92, .08, .92)
         icon:ClearAllPoints()
         icon:SetAllPoints()
-        
+
         local _, border = totem:GetChildren()
         border:DisableDrawLayer("OVERLAY")
     end
@@ -296,4 +296,3 @@ tinsert(UnitFrames.units, function(...)
     player:RegisterEvent("PLAYER_FLAGS_CHANGED", UnitFrames.UpdateStatus)
     player:RegisterEvent("UPDATE_SHAPESHIFT_FORM", player.PostUpdate)
 end)
-

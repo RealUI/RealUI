@@ -19,12 +19,12 @@ local function CreateIWTextureFrame(texture, width, height, position, color)
 	frame:SetFrameLevel(RDF:GetFrameLevel() + 1)
 	frame:SetWidth(width)
 	frame:SetHeight(height)
-	
+
 	frame.bg = frame:CreateTexture()
 	frame.bg:SetAllPoints(frame)
 	frame.bg:SetTexture(texture)
 	frame.bg:SetVertexColor(unpack(color))
-	
+
 	return frame
 end
 
@@ -50,7 +50,7 @@ local function CreateRDOptions()
 	RDF.accept.header = CreateIWTextureFrame(Textures.RetinaText, 512, 64, {"TOP", RDF.accept, "TOP", 52, -33}, {1, 1, 1, 1})
 	RDF.accept.text = RDF.accept:CreateFontString(nil, "OVERLAY")
 		RDF.accept.text:SetPoint("TOPLEFT", RDF.accept.header, "BOTTOMLEFT", 2, -18)
-		RDF.accept.text:SetFont(nibRealUI.font.standard, 24)
+		RDF.accept.text:SetFont(RealUIFont_Normal:GetFont(), 24)
 		RDF.accept.text:SetText("Set up RealUI using 2x UI Scaling so that\nUI elements are easier to see on a Retina Display.")
 		RDF.accept.text:SetJustifyH("LEFT")
 	RDF.accept:SetPoint("TOPLEFT", RDF.logo, "TOPLEFT", 284, 0)
@@ -71,7 +71,7 @@ local function CreateRDOptions()
 	RDF.cancel.header = CreateIWTextureFrame(Textures.NormalText, 512, 64, {"TOP", RDF.cancel, "TOP", 52, -33}, {1, 1, 1, 1})
 	RDF.cancel.text = RDF.cancel:CreateFontString(nil, "OVERLAY")
 		RDF.cancel.text:SetPoint("TOPLEFT", RDF.cancel.header, "BOTTOMLEFT", 2, -18)
-		RDF.cancel.text:SetFont(nibRealUI.font.standard, 24)
+		RDF.cancel.text:SetFont(RealUIFont_Normal:GetFont(), 24)
 		RDF.cancel.text:SetText("Set up RealUI using normal UI Scaling.\nUI elements may be hard to see on a Retina Display.")
 		RDF.cancel.text:SetJustifyH("LEFT")
 	RDF.cancel:SetPoint("BOTTOMLEFT", RDF.logo, "BOTTOMLEFT", 284, 105)
@@ -84,7 +84,7 @@ local function CreateRDOptions()
 		dbg.tags.retinaDisplay.checked = true
 		ReloadUI()
 	end)
-	
+
 	if Aurora then
 		local F = unpack(Aurora)
 		F.Reskin(RDF.accept)

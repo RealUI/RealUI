@@ -98,7 +98,7 @@ local function InitialSettings()
 	-- Make Chat windows transparent
 	SetChatWindowAlpha(1, 0)
 	SetChatWindowAlpha(2, 0)
-	
+
 	-- Initial Settings done
 	nibRealUICharacter.initialized = true
 end
@@ -107,11 +107,11 @@ end
 ---- Stage 1
 function RealUI_RunStage1()
 	nibRealUICharacter.installStage = -1
-	
+
 	if dbg.tags.firsttime then
 		dbg.tags.firsttime = false
 		dbg.tutorial.stage = 0
-		
+
 		---- Addon Data
 		-- Initialize Grid2
 		if Grid2 and Grid2.LoadConfig then
@@ -130,11 +130,11 @@ function RealUI_RunStage1()
 			end
 		end
 	end
-	
+
 	-- Make Chat windows transparent (again)
 	SetChatWindowAlpha(1, 0)
 	SetChatWindowAlpha(2, 0)
-	
+
 	-- Addon Profiles
 	nibRealUI:SetProfileKeys()
 end
@@ -147,12 +147,12 @@ local function CreateIWTextureFrame(texture, width, height, position, color)
 	frame:SetFrameLevel(IWF:GetFrameLevel() + 1)
 	frame:SetWidth(width)
 	frame:SetHeight(height)
-	
+
 	frame.bg = frame:CreateTexture()
 	frame.bg:SetAllPoints(frame)
 	frame.bg:SetTexture(texture)
 	frame.bg:SetVertexColor(unpack(color))
-	
+
 	return frame
 end
 
@@ -176,7 +176,7 @@ local function CreateInstallWindow()
 	})
 	IWF:SetBackdropColor(0, 0, 0, bdAlpha)
 	nibRealUI:AddStripeTex(IWF)
-	
+
 	-- Logo
 	IWF.logo = CreateIWTextureFrame(Textures.Logo, 256, 256, {"BOTTOM", IWF, "CENTER", 0, 0}, {1, 1, 1, 1})
 
@@ -219,10 +219,10 @@ local function CreateInstallWindow()
 
 	-- Version string
 	IWF.verStr = IWF:CreateFontString(nil, "OVERLAY")
-		IWF.verStr:SetFont(nibRealUI.font.standard, 18)
+		IWF.verStr:SetFont(RealUIFont_Normal:GetFont(), 18)
 		IWF.verStr:SetText(L["Version"].." "..nibRealUI:GetVerString(true))
 		IWF.verStr:SetPoint("TOP", IWF, "CENTER", 0, -12)
-	
+
 	-- Button
 	IWF.install = CreateFrame("Button", "RealUI_Install", IWF, "SecureActionButtonTemplate")
 		IWF.install:SetPoint("CENTER")
@@ -237,7 +237,7 @@ local function CreateInstallWindow()
 	IWF.installTextFrame = CreateFrame("Frame", nil, IWF)
 		IWF.installTextFrame:SetPoint("BOTTOM", 0, UIParent:GetHeight() / 4)
 		IWF.installTextFrame:SetSize(2,2)
-	IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup() 
+	IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup()
 		IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
 		IWF.installTextFrame.fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
 		IWF.installTextFrame.fade:SetDuration(1)
@@ -248,7 +248,7 @@ local function CreateInstallWindow()
 
 	IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
 		IWF.installText:SetPoint("BOTTOM")
-		IWF.installText:SetFont(nibRealUI.font.standard, 18)
+		IWF.installText:SetFont(RealUIFont_Normal:GetFont(), 18)
 		IWF.installText:SetText("[ "..L["Install"].." ]")
 
 	-- Combat Check
@@ -272,18 +272,18 @@ end
 local function InstallationStage1()
 	---- Create Installation Window
 	CreateInstallWindow()
-	
+
 	---- First Time
 	if dbg.tags.firsttime then
 		-- CVars
 		SetDefaultCVars()
 	end
-	
+
 	---- Initial Character Settings
 	if not nibRealUICharacter.initialized then
 		InitialSettings()
 	end
-	
+
 	---- Set MiniPatch flags
 	dbg.minipatches = {}
 	for k,v in next, MiniPatches do
@@ -339,7 +339,7 @@ local function MiniPatchInstallation()
 				needPatchCount = needPatchCount - 1
 			end
 		end
-		
+
 		-- Run through MiniPatches
 		local toPatch = {}
 		local MiniPatchAccepted = false
@@ -373,12 +373,12 @@ function nibRealUI:InstallProcedure()
 	db = self.db.profile
 	dbc = self.db.char
 	dbg = self.db.global
-	
+
 	---- Version checking
 	local curVer = nibRealUI.verinfo
 	local oldVer = (dbg.verinfo[1] and dbg.verinfo) or nibRealUI.verinfo
 	local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
-	
+
 	-- Reset DB if new Major version
 	if newVer == "major" then
 		nibRealUI.db:ResetDB("RealUI")
@@ -394,11 +394,11 @@ function nibRealUI:InstallProcedure()
     elseif not dbg.verinfo[1] or newVer == "minor" then
         dbg.minipatches = {}
     end
-	
+
 	-- Primary Stages
 	if nibRealUICharacter.installStage > -1 then
 		PrimaryInstallation()
-		
+
 	-- Mini Patch
 	else
 		MiniPatchInstallation()

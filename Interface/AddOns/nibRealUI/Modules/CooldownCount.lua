@@ -2,7 +2,7 @@
 -- http://www.wowinterface.com/downloads/info17602-tullaCooldownCount.html
 
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db
+local db, ndb
 
 local _
 local MODNAME = "CooldownCount"
@@ -58,7 +58,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Cooldown Count module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 					nibRealUI:ReloadUIDialog()
 				end,
@@ -76,7 +76,7 @@ local function GetOptions()
 				min = 0, max = 1, step = 0.05,
 				isPercent = true,
 				get = function(info) return db.minScale end,
-				set = function(info, value) 
+				set = function(info, value)
 					db.minScale = value
 				end,
 				disabled = function() return not nibRealUI:GetModuleEnabled(MODNAME) end,
@@ -88,7 +88,7 @@ local function GetOptions()
 				desc = "The minimum number of seconds a cooldown's duration must be to display text.",
 				min = 0, max = 30, step = 1,
 				get = function(info) return db.minDuration end,
-				set = function(info, value) 
+				set = function(info, value)
 					db.minDuration = value
 				end,
 				disabled = function() return not nibRealUI:GetModuleEnabled(MODNAME) end,
@@ -100,7 +100,7 @@ local function GetOptions()
 				desc = "The minimum number of seconds a cooldown must be to display in the expiring format.",
 				min = 0, max = 30, step = 1,
 				get = function(info) return db.expiringDuration end,
-				set = function(info, value) 
+				set = function(info, value)
 					db.expiringDuration = value
 				end,
 				disabled = function() return not nibRealUI:GetModuleEnabled(MODNAME) end,
@@ -205,7 +205,7 @@ local function GetOptions()
 					point = {
 						type = "select",
 						name = "Anchor",
-						get = function(info) 
+						get = function(info)
 							for k,v in pairs(nibRealUI.globals.anchorPoints) do
 								if v == db.position.point then return k end
 							end
@@ -243,7 +243,7 @@ local function GetOptions()
 					justify = {
 						type = "select",
 						name = "Text Justification",
-						get = function(info) 
+						get = function(info)
 							for k,v in pairs(table_Justify) do
 								if v == db.position.justify then return k end
 							end
@@ -261,7 +261,7 @@ local function GetOptions()
 		},
 	}
 	end
-	
+
 	return options
 end
 
@@ -332,10 +332,10 @@ end
 local function cooldown_Update(self)
 	local button = self:GetParent()
 	local action = button.action
-	
+
 	local start, duration, enable = GetActionCooldown(action)
 	local charges, maxCharges, chargeStart, chargeDuration = GetActionCharges(action)
-	
+
 	if cooldown_ShouldUpdateTimer(self, start, duration, charges, maxCharges) then
 		Timer.Start(self, start, duration, charges, maxCharges)
 	end
@@ -385,10 +385,11 @@ function Timer.UpdateText(self)
 			Timer.SetNextUpdate(self, 1)
 		else
 			local formatStr, time, nextUpdate = getTimeText(remain)
-			if (remain >= MINUTEISH * 10) and (nibRealUI.font.pixelCooldown[2] >= 16) then
-				self.text:SetFont(nibRealUI.font.pixelCooldown[1], nibRealUI.font.pixelCooldown[2] / 2, nibRealUI.font.pixelCooldown[3])
+			if (remain >= MINUTEISH * 10) and (ndb.media.font.pixel.cooldown[2] >= 16) then
+				local font, size, outline = RealUIFont_PixelCooldown:GetFont()
+				self.text:SetFont(font, size / 2, outline)
 			else
-				self.text:SetFont(nibRealUI.font.pixelCooldown[1], nibRealUI.font.pixelCooldown[2], nibRealUI.font.pixelCooldown[3])
+				self.text:SetFontObject(RealUIFont_PixelCooldown)
 			end
 			self.text:SetFormattedText(formatStr, time)
 			Timer.SetNextUpdate(self, nextUpdate)
@@ -416,7 +417,7 @@ function Timer.OnSizeChanged(self, width, height)
 	if fontScale < db.minScale then
 		self:Hide()
 	else
-		self.text:SetFont(nibRealUI.font.pixelCooldown[1], nibRealUI.font.pixelCooldown[2], nibRealUI.font.pixelCooldown[3])
+		self.text:SetFontObject(RealUIFont_PixelCooldown)
 		if self.enabled then
 			Timer.ForceUpdate(self)
 		end
@@ -432,19 +433,19 @@ function Timer.Create(cd)
 
 	local timer = CreateFrame('Frame', nil, scaler); timer:Hide()
 	timer:SetAllPoints(scaler)
-	
+
 	local updater = timer:CreateAnimationGroup()
 	updater:SetLooping('NONE')
 	updater:SetScript('OnFinished', function(self) Timer.UpdateText(timer) end)
-	
+
 	local a = updater:CreateAnimation('Animation'); a:SetOrder(1)
-	timer.updater = updater	
+	timer.updater = updater
 
 	local text = timer:CreateFontString(nil, 'OVERLAY')
 	timer.text = text
 		text:SetPoint(db.position.point, db.position.x, db.position.y)
 		text:SetJustifyH(db.position.justify)
-		text:SetFont(nibRealUI.font.pixelCooldown[1], nibRealUI.font.pixelCooldown[2], nibRealUI.font.pixelCooldown[3])
+		text:SetFontObject(RealUIFont_PixelCooldown)
 
 	Timer.OnSizeChanged(timer, scaler:GetSize())
 	scaler:SetScript('OnSizeChanged', function(self, ...) Timer.OnSizeChanged(timer, ...) end)
@@ -455,7 +456,7 @@ end
 
 function Timer.Start(cd, start, duration, charges, maxCharges)
 	local remainingCharges = charges or 0
-	
+
 	--start timer
 	if start > 0 and duration > db.minDuration and remainingCharges == 0 and (not cd.noCooldownCount) then
 		local timer = cd.timer or Timer.Create(cd)
@@ -497,7 +498,8 @@ function CooldownCount:OnInitialize()
 		},
 	})
 	db = self.db.profile
-	
+	ndb = nibRealUI.db.profile
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
@@ -506,7 +508,7 @@ function CooldownCount:OnEnable()
 	setTimeFormats()
 
 	hooksecurefunc(getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", Timer.Start)
-	
+
 	-- 4.3 compatibility
 	-- In WoW 4.3 and later, action buttons can completely bypass lua for updating cooldown timers
 	-- This set of code is there to check and force update timers on standard action buttons (henceforth defined as anything that reuses's blizzard's ActionButton.lua code)

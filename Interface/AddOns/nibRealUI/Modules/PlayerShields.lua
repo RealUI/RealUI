@@ -74,8 +74,8 @@ local function GetOptions()
                 name = "Enabled",
                 desc = "Enable/Disable the Player Shields module.",
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)          
+                set = function(info, value)
+                    nibRealUI:SetModuleEnabled(MODNAME, value)
                 end,
                 order = 30,
             },
@@ -95,7 +95,7 @@ local function GetOptions()
                         type = "toggle",
                         name = "While Solo",
                         get = function(info) return db.show.solo end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.show.solo = value
                             PlayerShields:UpdateVisibility()
                         end,
@@ -115,7 +115,7 @@ local function GetOptions()
                         type = "toggle",
                         name = "In PvP",
                         get = function(info) return db.show.pvp end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.show.pvp = value
                             PlayerShields:UpdateVisibility()
                         end,
@@ -125,7 +125,7 @@ local function GetOptions()
                         type = "toggle",
                         name = "Only Role = Tank",
                         get = function(info) return db.show.onlyTank end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.show.onlyTank = value
                             PlayerShields:UpdateVisibility()
                         end,
@@ -135,7 +135,7 @@ local function GetOptions()
                         type = "toggle",
                         name = "Only Spec = Tank",
                         get = function(info) return db.show.onlySpec end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.show.onlySpec = value
                             PlayerShields:UpdateVisibility()
                         end,
@@ -174,7 +174,7 @@ local function GetOptions()
                     rPoint = {
                         type = "select",
                         name = "Anchor To",
-                        get = function(info) 
+                        get = function(info)
                             for k,v in pairs(nibRealUI.globals.anchorPoints) do
                                 if v == db.position.rPoint then return k end
                             end
@@ -190,7 +190,7 @@ local function GetOptions()
                     point = {
                         type = "select",
                         name = "Anchor From",
-                        get = function(info) 
+                        get = function(info)
                             for k,v in pairs(nibRealUI.globals.anchorPoints) do
                                 if v == db.position.point then return k end
                             end
@@ -259,7 +259,7 @@ function PlayerShields:CreateButton(i)
         nibRealUI:CreateBDFrame(btn)
         btn:SetHeight(23)
         btn:SetWidth(23)
-    
+
     btn.bg = btn:CreateTexture(nil, "BACKGROUND")
         btn.bg:SetAllPoints(btn)
         btn.bg:SetTexture(shields[i].icon)
@@ -275,7 +275,7 @@ function PlayerShields:CreateButton(i)
         btn.absorbBar:SetFrameLevel(btn:GetFrameLevel() + 1)
 
     btn.timeStr = btn:CreateFontString(nil, "OVERLAY")
-        btn.timeStr:SetFont(unpack(nibRealUI.font.pixel1))
+        btn.timeStr:SetFontObject(RealUIFont_PixelSmall)
         btn.timeStr:SetJustifyH("LEFT")
         btn.timeStr:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0.5, 0.5)
         btn.timeStr:SetParent(btn.absorbBar)
@@ -295,9 +295,9 @@ function PlayerShields:CreateButton(i)
     end)
 
     btn:Show()
-    
+
     return btn
-end 
+end
 
 function PlayerShields:CreateFrames()
     self.psF = CreateFrame("Frame", "RealUIPlayerShields", UIParent)
@@ -331,12 +331,13 @@ function PlayerShields:CreateFrames()
     end
 
     self.psF.strTotal = self.psF:CreateFontString(nil, "OVERLAY")
-        self.psF.strTotal:SetFont(nibRealUI.font.pixel1[1], nibRealUI.font.pixel1[2] * 2, nibRealUI.font.pixel1[3])
+        local font, size, outline = RealUIFont_PixelSmall:GetFont()
+        self.psF.strTotal:SetFont(font, size * 2, outline)
         self.psF.strTotal:SetJustifyH("RIGHT")
         self.psF.strTotal:SetPoint("BOTTOMRIGHT", self.psF, "BOTTOMLEFT", 2.5, -2.5)
 
     self.psF.strTotalPer = self.psF:CreateFontString(nil, "OVERLAY")
-        self.psF.strTotalPer:SetFont(unpack(nibRealUI.font.pixel1))
+        self.psF.strTotalPer:SetFontObject(RealUIFont_PixelSmall)
         self.psF.strTotalPer:SetJustifyH("RIGHT")
         self.psF.strTotalPer:SetPoint("TOPRIGHT", self.psF, "TOPLEFT", 2.5, -6.5)
 
@@ -390,7 +391,6 @@ function PlayerShields:AuraUpdate(units)
         if shield.info then
             name, duration, expirationTime, absorb = shield.info[1], shield.info[2], shield.info[3], shield.info[4]
         end
-        self:debug("AuraUpdate", i, name, duration, expirationTime, absorb)
         if name then
             -- Icon
             self.psF[i].bg:SetDesaturated(nil)
@@ -501,7 +501,7 @@ function PlayerShields:UpdateVisibility()
 end
 
 function PlayerShields:RoleCheck()
-    if  (UnitGroupRolesAssigned("player") == "TANK") or GetPartyAssignment("MAINTANK", "player") or 
+    if  (UnitGroupRolesAssigned("player") == "TANK") or GetPartyAssignment("MAINTANK", "player") or
             GetPartyAssignment("MAINASSIST", "player") then
         self.psF.tankRole = true
     else
@@ -532,7 +532,7 @@ function PlayerShields:PLAYER_ENTERING_WORLD()
         self.psF.pve = false
         self.psF.pvp = false
     end
-    
+
     self:RoleCheck()
     self:UpdateVisibility()
 end
@@ -594,7 +594,7 @@ function PlayerShields:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
-    
+
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 

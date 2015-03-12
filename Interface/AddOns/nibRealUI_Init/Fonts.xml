@@ -1,0 +1,123 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <FontFamily  name="RealUIFont_Normal" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\standard_medium.ttf" height="10"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_Chat" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\standard_medium.ttf" height="10" outline="NORMAL"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_Pixel" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\pixel_small.ttf" height="8" outline="NORMAL" monochrome="true"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_PixelSmall" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\pixel_small.ttf" height="8" outline="NORMAL" monochrome="true"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_PixelLarge" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\pixel_large.ttf" height="8" outline="NORMAL" monochrome="true"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_PixelNumbers" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\pixel_numbers.ttf" height="16" outline="NORMAL" monochrome="true"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+    <FontFamily  name="RealUIFont_PixelCooldown" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Interface\AddOns\nibRealUI\Fonts\pixel_cooldown.ttf" height="16" outline="NORMAL" monochrome="true"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.ttf" height="10"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="9"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\blei00d.TTF" height="9"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="9"/>
+        </Member>
+    </FontFamily>
+</Ui>

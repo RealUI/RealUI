@@ -13,7 +13,7 @@ end
 local function GetPositionData(pT)
 	local point, parent, rPoint, x, y, width, height, xKeyTable, yKeyTable, widthKeyTable, heightKeyTable =
 			pT[1], pT[2], pT[3], pT[4], pT[5], pT[6], pT[7], pT[8], pT[9], pT[10], pT[11]
-	
+
 	local xAdj, yAdj, widthAdj, heightAdj = 0, 0, 0, 0
 
 	if xKeyTable then
@@ -45,6 +45,7 @@ local function GetPositionData(pT)
 end
 
 function nibRealUI:UpdatePositioners()
+	self.Debug("UpdatePositioners")
 	local positioners = {}
 	for k, v in pairs(db.positioners) do
 		positioners[k] = v
@@ -62,11 +63,11 @@ local function CreatePositionerFrame(point, parent, rpoint, x, y, w, h, name)
 	frame:SetPoint(point, _G[parent], rpoint, x, y)
 	frame:SetHeight(h)
 	frame:SetWidth(w)
-	
+
 	-- frame.bg = frame:CreateTexture(nil, "OVERLAY")
 	-- frame.bg:SetAllPoints(frame)
 	-- frame.bg:SetTexture(1, 1, 0, 0.5)
-	
+
 	return frame
 end
 
@@ -110,8 +111,8 @@ function Positioners:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	ndbc = nibRealUI.db.char
-	
+
 	self:SetEnabledState(true)
-	
+
 	CreatePositioners()
 end

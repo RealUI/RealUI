@@ -37,7 +37,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Mirror Bar module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 				end,
 				order = 30,
@@ -78,7 +78,7 @@ local function GetOptions()
 							MirrorBar:UpdatePosition()
 						end,
 					},
-				},							
+				},
 			},
 			gap2 = {
 				name = " ",
@@ -125,7 +125,7 @@ local function GetOptions()
 							anchorto = {
 								type = "select",
 								name = "Anchor To",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorto then return k end
 									end
@@ -142,7 +142,7 @@ local function GetOptions()
 							anchorfrom = {
 								type = "select",
 								name = "Anchor From",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorfrom then return k end
 									end
@@ -182,7 +182,7 @@ function MirrorBar:SetNextTimer()
 				if self.timers[v].active then
 					nextTimer = k
 					break
-				end	
+				end
 			end
 			break
 		end
@@ -218,18 +218,18 @@ end
 function MirrorBar:OnUpdate(bar, elapsed)
 	self.loopElapsed = self.loopElapsed + elapsed
 	self.elapsed = self.elapsed + elapsed
-	
+
 	if self.elapsed < (1 / 30) then return end
 	self.elapsed = 0
-	
+
 	-- Update Timer values
 	for k,v in ipairs(self.timerList) do
 		if self.timers[v].active then
 			self.timers[v].value = self.timers[v].value + (self.timers[v].scale * ((GetTime() - self.timers[v].lastTime) * 1000))
 			self.timers[v].lastTime = GetTime()
-		end	
+		end
 	end
-	
+
 	-- Cycle through Timers
 	if self.loopElapsed >= 1 then
 		self.loopElapsed = 0
@@ -237,21 +237,21 @@ function MirrorBar:OnUpdate(bar, elapsed)
 		local color = self.timerColors[self.timerList[self.currentTimer]]
 		MBFrames.bar:SetStatusBarColor(color[1], color[2], color[3], 0.85)
 	end
-	
+
 	local curTimer = self.timers[self.timerList[self.currentTimer]]
-	
+
 	-- Active Timer?
 	if curTimer.paused then return end
 	if not curTimer.active then return end
-	
+
 	-- Time remaining
 	curTimer.timeRemaining = floor(curTimer.value / 1000)
 	curTimer.timeRemaining = nibRealUI:Clamp(curTimer.timeRemaining, 0, curTimer.max / 1000)
-	
+
 	-- Scale
 	local scale = (curTimer.max ~= 0) and (curTimer.value / curTimer.max) or 0
 	scale = nibRealUI:Clamp(scale, 0, 1)
-	
+
 	-- Update bar
 	local _,_,_,_,_, label = GetMirrorTimerInfo(self.currentTimer)
 	self:UpdateBar(scale, curTimer.timeRemaining or 0, label or "")
@@ -267,7 +267,7 @@ function MirrorBar:MIRROR_TIMER_STOP(event, timer)
 	self.timers[timer].active = false
 	self.timers[timer].current = 0
 	self.timers[timer].max = 1
-	
+
 	self:UpdateShown()
 end
 
@@ -279,7 +279,7 @@ function MirrorBar:MIRROR_TIMER_START(event, timer, value, maxValue, scale, paus
 	self.timers[timer].paused = (paused > 0)
 	self.timers[timer].label = label
 	self.timers[timer].lastTime = GetTime()
-	
+
 	self:UpdateShown()
 end
 
@@ -290,20 +290,14 @@ function MirrorBar:UpdateColors()
 	MBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
 end
 
--- Font
-function MirrorBar:UpdateFonts()
-	-- Text
-	MBFrames.text:SetFont(unpack(nibRealUI:Font()))
-end
-
 -- Position
 function MirrorBar:UpdatePosition()
 	-- BG + Border
 	MBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)
-	
+
 	MBFrames.bg:SetFrameStrata("MEDIUM")
 	MBFrames.bg:SetFrameLevel(1)
-	
+
 	MBFrames.bg:SetHeight(db.size.height)
 	MBFrames.bg:SetWidth(db.size.width)
 end
@@ -313,9 +307,8 @@ function MirrorBar:RefreshMod()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 
 	db = self.db.profile
-	
+
 	MirrorBar:UpdatePosition()
-	MirrorBar:UpdateFonts()
 	MirrorBar:UpdateColors()
 end
 
@@ -328,12 +321,12 @@ end
 function MirrorBar:CreateFrames()
 	-- BG + Border
 	MBFrames.bg = CreateFrame("Frame", "RealUI_MirrorBar", UIParent)
-	MBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)	
-	
+	MBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)
+
 	MBFrames.bg:SetBackdrop({
-		bgFile = nibRealUI.media.textures.plain, 
-		edgeFile = nibRealUI.media.textures.plain, 
-		tile = false, tileSize = 0, edgeSize = 1, 
+		bgFile = nibRealUI.media.textures.plain,
+		edgeFile = nibRealUI.media.textures.plain,
+		tile = false, tileSize = 0, edgeSize = 1,
 		insets = { left = 0, right = 0, top = 0, bottom = 0}
 	})
 
@@ -346,7 +339,7 @@ function MirrorBar:CreateFrames()
 
 	MBFrames.text = MBFrames.bar:CreateFontString(nil, "OVERLAY")
 	MBFrames.text:SetPoint("CENTER", MBFrames.bar, "CENTER", 1.5, -0.5)
-	MBFrames.text:SetFont(unpack(nibRealUI.font.pixel1))
+	MBFrames.text:SetFontObject(RealUIFont_Pixel)
 	MBFrames.text:SetTextColor(1, 1, 1, 1)
 
 	-- Update Power
@@ -354,7 +347,7 @@ function MirrorBar:CreateFrames()
 	MBFrames.bar:SetScript("OnUpdate", function(self, elapsed)
 		MirrorBar:OnUpdate(self, elapsed)
 	end)
-	
+
 	MBFrames.bg:Hide()
 end
 
@@ -384,10 +377,10 @@ function MirrorBar:OnInitialize()
 	})
 	db = self.db.profile
 	ndbc = nibRealUI.db.char
-	
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
-	
+
 	self:CreateFrames()
 end
 
@@ -413,10 +406,10 @@ function MirrorBar:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_START")
 	self:RegisterEvent("MIRROR_TIMER_STOP")
 	self:RegisterEvent("MIRROR_TIMER_PAUSE")
-	
+
 	-- Hide Default
 	UIParent:UnregisterEvent("MIRROR_TIMER_START")
-	
+
 	if LoggedIn then
 		MirrorBar:RefreshMod()
 	end
@@ -424,7 +417,7 @@ end
 
 function MirrorBar:OnDisable()
 	self:UnregisterAllEvents()
-	
+
 	MBFrames.bg:Hide()
 	UIParent:RegisterEvent("MIRROR_TIMER_START")
 end

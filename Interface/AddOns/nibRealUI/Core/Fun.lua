@@ -17,7 +17,7 @@ function FindSpellID(SpellName, unit, isDebuff)
             spellID = select(11, UnitAura(unit, SpellName))
         end
         if spellID then
-            print(SpellName..": #", spellID); 
+            print(SpellName..": #", spellID);
             f:UnregisterEvent("UNIT_AURA")
         end
     end)
@@ -35,16 +35,16 @@ function nibRealUI:MemoryDisplay()
     local addons, total = {}, 0
     UpdateAddOnMemoryUsage()
     local memory = gcinfo()
-    
+
     for i = 1, GetNumAddOns() do
         if ( IsAddOnLoaded(i) ) then
             table.insert(addons, { GetAddOnInfo(i), GetAddOnMemoryUsage(i) })
             total = total + GetAddOnMemoryUsage(i)
         end
     end
-    
+
     table.sort(addons, (function(a, b) return a[2] > b[2] end))
-    
+
     local userMem = format("|cff00ffffMemory usage: |r%.1f |cffff8030%s|r", total/1024, "MiB")
     print(userMem)
     print("-------------------------------")
@@ -55,20 +55,20 @@ function nibRealUI:MemoryDisplay()
     end
 end
 
+-- Display Dialog
+StaticPopupDialogs["PUDRUIRELOADUI"] = {
+    text = L["DoReloadUI"],
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        ReloadUI()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false,
+}
 function nibRealUI:ReloadUIDialog()
-    -- Display Dialog
-    StaticPopupDialogs["PUDRUIRELOADUI"] = {
-        text = L["DoReloadUI"],
-        button1 = "Yes",
-        button2 = "No",
-        OnAccept = function()
-            ReloadUI()
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        notClosableByLogout = false,
-    }
     StaticPopup_Show("PUDRUIRELOADUI")
 end
 
@@ -269,7 +269,7 @@ local function ReskinSlider(f)
     bd:SetPoint("BOTTOMRIGHT", 23, 0)
     bd:SetFrameStrata("BACKGROUND")
     bd:SetFrameLevel(f:GetFrameLevel()-1)
-    
+
     nibRealUI:CreateBD(bd, 0)
     f.bg = nibRealUI:CreateInnerBG(bd)
     f.bg:SetVertexColor(1, 1, 1, 0.6)
@@ -278,11 +278,11 @@ local function ReskinSlider(f)
     slider:SetTexture("Interface\\AddOns\\nibRealUI\\Media\\HuDConfig\\SliderPos")
     slider:SetSize(16, 16)
     slider:SetBlendMode("ADD")
-    
+
     for i = 1, f:GetNumRegions() do
         local region = select(i, f:GetRegions())
         if region:GetObjectType() == "FontString" then
-            region:SetFont(unpack(nibRealUI.font.pixel1))
+            region:SetFontObject(RealUIFont_PixelSmall)
             if region:GetText() == LOW then
                 region:ClearAllPoints()
                 region:SetPoint("BOTTOMLEFT", bd, "BOTTOMLEFT", 3.5, 4.5)
@@ -320,7 +320,7 @@ function nibRealUI:CreateSlider(name, parent, min, max, title, step)
     nibRealUI:CreateBD(sbg)
     sbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
     sbg:SetFrameLevel(f:GetFrameLevel() - 1)
-    
+
     ReskinSlider(f)
 
     return f
@@ -329,12 +329,12 @@ end
 function nibRealUI:CreateCheckbox(name, parent, label, side, size)
     local f = CreateFrame("CheckButton", name, parent, "ChatConfigCheckButtonTemplate")
     f:SetSize(size, size)
-    f:SetHitRectInsets(0,0,0,0) 
+    f:SetHitRectInsets(0,0,0,0)
     f:SetFrameLevel(parent:GetFrameLevel() + 2)
     f.type = "checkbox"
-    
+
     f.text = _G[f:GetName() .. "Text"]
-    f.text:SetFont(nibRealUI.font.standard, 11)
+    f.text:SetFontObject(RealUIFont_Normal)
     f.text:SetTextColor(1, 1, 1)
     f.text:SetText(label)
     f.text:ClearAllPoints()
@@ -345,14 +345,14 @@ function nibRealUI:CreateCheckbox(name, parent, label, side, size)
         f.text:SetPoint("LEFT", f, "RIGHT", 4, 0)
         f.text:SetJustifyH("LEFT")
     end
-    
+
     local cbg = CreateFrame("Frame", nil, f)
     cbg:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
     cbg:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
     nibRealUI:CreateBD(cbg)
     cbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
     cbg:SetFrameLevel(f:GetFrameLevel() - 1)
-    
+
     if Aurora and Aurora[1].ReskinCheck then
         Aurora[1].ReskinCheck(f)
     end
@@ -369,8 +369,8 @@ function nibRealUI:CreateTextButton(text, parent, template, width, height, small
 
     f:SetFrameLevel(parent:GetFrameLevel() + 2)
     if small then
-        f:SetNormalFontObject(RealUIStandardFont10)
-        f:SetHighlightFontObject(RealUIStandardFont10)
+        f:SetNormalFontObject(RealUIFont_Normal)
+        f:SetHighlightFontObject(RealUIFont_Normal)
     else
         f:SetNormalFontObject(GameFontHighlight)
         f:SetHighlightFontObject(GameFontHighlight)
@@ -383,7 +383,7 @@ function nibRealUI:CreateTextButton(text, parent, template, width, height, small
     if Aurora and Aurora[1].Reskin then
         Aurora[1].Reskin(f)
     end
-    
+
     return f
 end
 
@@ -399,7 +399,7 @@ function nibRealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hide
         else
             f:SetFrameLevel(5)
         end
-    
+
     if closeOnEsc then
         tinsert(UISpecialFrames, name)
         if not hideCloseButton then
@@ -426,9 +426,9 @@ function nibRealUI:AddButtonHighlight(button)
     highlight:SetWidth(button:GetWidth() - 2)
     highlight:SetHeight(button:GetHeight() - 2)
     highlight:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain, 
-        edgeFile = nibRealUI.media.textures.plain, 
-        tile = false, tileSize = 0, edgeSize = 1, 
+        bgFile = nibRealUI.media.textures.plain,
+        edgeFile = nibRealUI.media.textures.plain,
+        tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     highlight:SetBackdropColor(0,0,0,0)
@@ -458,9 +458,9 @@ end
 function nibRealUI:CreateBD(frame, alpha, stripes, windowColor)
     local bdColor
     frame:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain, 
-        edgeFile = nibRealUI.media.textures.plain, 
-        edgeSize = 1, 
+        bgFile = nibRealUI.media.textures.plain,
+        edgeFile = nibRealUI.media.textures.plain,
+        edgeSize = 1,
     })
     if windowColor then
         bdColor = {nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3], nibRealUI.media.window[4]}
@@ -553,32 +553,28 @@ function nibRealUI:AddStripeTex(parent)
     return stripeTex
 end
 
-function nibRealUI:CreateFS(parent, justify, ...)
+function nibRealUI:CreateFS(parent, justify, size)
     local f = parent:CreateFontString(nil, "OVERLAY")
 
-    local size = ... or "default"
-    f:SetFont(unpack(nibRealUI:Font(false, size)))
+    if size == "small" then
+        f:SetFontObject(RealUIFont_PixelSmall)
+    elseif size == "large" then
+        f:SetFontObject(RealUIFont_PixelLarge)
+    else
+        f:SetFontObject(RealUIFont_Pixel)
+    end
     f:SetShadowColor(0, 0, 0, 0)
     if justify then f:SetJustifyH(justify) end
 
-    if size == "small" then
-        tinsert(nibRealUI.fontStringsSmall, f)
-    elseif size == "large" then
-        tinsert(nibRealUI.fontStringsLarge, f)
-    else
-        tinsert(nibRealUI.fontStringsRegular, f)
-    end
-
     return f
 end
-
 
 -- Formatting
 function nibRealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
 
     local maxNameLength = maxLength or 12
-    local newName = (name:utf8len() > maxNameLength) and gsub(name, "%s?(.[\128-\191]*)%S+%s", "%1. ") or name
+    local newName = (name:utf8len() > maxNameLength) and gsub(name, "%s?(..[\128-\191]*)%S+%s", "%1. ") or name
 
     if (newName:utf8len() > maxNameLength) then
         newName = newName:utf8sub(1, maxNameLength)
@@ -623,9 +619,9 @@ end
 function nibRealUI:GetFont(fontID)
     local font = {}
     if (fontID == "small") or (fontID == "large") or (fontID == "numbers") or (fontID == "cooldown") then
-        font = {self:RetrieveFont(self.media.font.pixel[fontID][1]), self.media.font.pixel[fontID][2], self.media.font.pixel[fontID][3]}
+        font = {self.media.font.pixel[fontID][4], self.media.font.pixel[fontID][2], self.media.font.pixel[fontID][3]}
     else
-        font = self:RetrieveFont(self.media.font.standard[1])
+        font = self.media.font.standard[4]
     end
     return font
 end
@@ -643,7 +639,7 @@ end
 function nibRealUI:ValidateOffset(value, ...)
     local val = tonumber(value)
     local vmin, vmax = -5000, 5000
-    if ... then vmin, vmax = ... end    
+    if ... then vmin, vmax = ... end
     if val == nil then val = 0 end
     val = max(val, vmin)
     val = min(val, vmax)

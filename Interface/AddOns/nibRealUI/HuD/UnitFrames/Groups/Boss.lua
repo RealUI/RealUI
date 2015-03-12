@@ -59,7 +59,7 @@ local function AttachStatusBar(icon, unit)
     nibRealUI:CreateBD(sBarBG)
 
     local timeStr = icon:CreateFontString(nil, "OVERLAY")
-    timeStr:SetFont(unpack(nibRealUI.font.pixel1))
+    timeStr:SetFontObject(RealUIFont_PixelSmall)
     timeStr:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", (unit == "pet") and 0.5 or 1.5, (unit == "pet") and 5 or 4)
     timeStr:SetJustifyH("LEFT")
 
@@ -88,13 +88,13 @@ end
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.HealthValue:SetPoint("TOPLEFT", parent.Health, "TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFont(unpack(nibRealUI:Font()))
+    parent.HealthValue:SetFontObject(RealUIFont_Pixel)
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Name:SetPoint("TOPRIGHT", parent.Health, "TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFont(unpack(nibRealUI:Font()))
+    parent.Name:SetFontObject(RealUIFont_Pixel)
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
 end
@@ -191,7 +191,7 @@ local function CreateAuras(parent)
         button.border:SetBackdropColor(0, 0, 0, 0)
         button.border:SetBackdropBorderColor(0, 0, 0, 1)
 
-        button.count:SetFontObject(RealUIFontPixel)
+        button.count:SetFontObject(RealUIFont_PixelSmall)
         local countY = ndbc.resolution == 1 and -1.5 or -2.5
         button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
     end

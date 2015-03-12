@@ -37,7 +37,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Alt Power Bar module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 				end,
 				order = 30,
@@ -78,7 +78,7 @@ local function GetOptions()
 							AltPowerBar:UpdatePosition()
 						end,
 					},
-				},							
+				},
 			},
 			gap2 = {
 				name = " ",
@@ -125,7 +125,7 @@ local function GetOptions()
 							anchorto = {
 								type = "select",
 								name = "Anchor To",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorto then return k end
 									end
@@ -142,7 +142,7 @@ local function GetOptions()
 							anchorfrom = {
 								type = "select",
 								name = "Anchor From",
-								get = function(info) 
+								get = function(info)
 									for k,v in pairs(nibRealUI.globals.anchorPoints) do
 										if v == db.position.anchorfrom then return k end
 									end
@@ -182,25 +182,19 @@ function AltPowerBar:UpdateColors()
 	-- BG + Border
 	APBFrames.bg:SetBackdropColor(unpack(nibRealUI.media.background))
 	APBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
-	
+
 	-- Bar
 	APBFrames.bar:SetStatusBarColor(nibRealUI.media.colors.green[1], nibRealUI.media.colors.green[2], nibRealUI.media.colors.green[3], 0.85)
-end
-
--- Font
-function AltPowerBar:UpdateFonts()
-	-- Text
-	APBFrames.text:SetFont(unpack(nibRealUI:Font()))
 end
 
 -- Position
 function AltPowerBar:UpdatePosition()
 	-- BG + Border
 	APBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)
-	
+
 	APBFrames.bg:SetFrameStrata("MEDIUM")
 	APBFrames.bg:SetFrameLevel(1)
-	
+
 	APBFrames.bg:SetHeight(db.size.height)
 	APBFrames.bg:SetWidth(db.size.width)
 end
@@ -210,9 +204,8 @@ function AltPowerBar:RefreshMod()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
 
 	db = self.db.profile
-	
+
 	AltPowerBar:UpdatePosition()
-	AltPowerBar:UpdateFonts()
 	AltPowerBar:UpdateColors()
 end
 
@@ -229,15 +222,15 @@ function AltPowerBar:CreateFrames()
 		bar = nil,
 		text = nil,
 	}
-	
+
 	-- BG + Border
 	APBFrames.bg = CreateFrame("Frame", "nibRealUI_AltPowerBarBG", UIParent)
-	APBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)	
-	
+	APBFrames.bg:SetPoint(db.position.anchorfrom, UIParent, db.position.anchorto, db.position.x, db.position.y)
+
 	APBFrames.bg:SetBackdrop({
-		bgFile = nibRealUI.media.textures.plain, 
-		edgeFile = nibRealUI.media.textures.plain, 
-		tile = false, tileSize = 0, edgeSize = 1, 
+		bgFile = nibRealUI.media.textures.plain,
+		edgeFile = nibRealUI.media.textures.plain,
+		tile = false, tileSize = 0, edgeSize = 1,
 		insets = { left = 0, right = 0, top = 0, bottom = 0}
 	})
 
@@ -250,14 +243,14 @@ function AltPowerBar:CreateFrames()
 
 	APBFrames.text = APBFrames.bar:CreateFontString(nil, "OVERLAY")
 	APBFrames.text:SetPoint("CENTER", APBFrames.bar, "CENTER", 1.5, -0.5)
-	APBFrames.text:SetFont(unpack(nibRealUI.font.pixel1))
+	APBFrames.text:SetFontObject(RealUIFont_Pixel)
 	APBFrames.text:SetTextColor(1, 1, 1, 1)
 
 	-- Update Power
 	UpdateInterval = 0
 	APBFrames.bar:SetScript("OnUpdate", function(self, elapsed)
-		UpdateInterval = UpdateInterval + elapsed 
-		
+		UpdateInterval = UpdateInterval + elapsed
+
 		if UpdateInterval > 0.1 then
 			self:SetMinMaxValues(0, UnitPowerMax("player", ALTERNATE_POWER_INDEX))
 			local CurPower = UnitPower("player", ALTERNATE_POWER_INDEX)
@@ -271,7 +264,7 @@ function AltPowerBar:CreateFrames()
 			UpdateInterval = 0
 		end
 	end)
-	
+
 	APBFrames.bg:Hide()
 end
 
@@ -291,10 +284,10 @@ function AltPowerBar:OnInitialize()
 	})
 	db = self.db.profile
 	ndbc = nibRealUI.db.char
-	
+
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
-	
+
 	AltPowerBar:CreateFrames()
 end
 
@@ -303,10 +296,10 @@ function AltPowerBar:OnEnable()
 	self:RegisterEvent("UNIT_POWER", "PowerUpdate")
 	self:RegisterEvent("UNIT_POWER_BAR_SHOW", "PowerUpdate")
 	self:RegisterEvent("UNIT_POWER_BAR_HIDE", "PowerUpdate")
-	
+
 	-- Hide Default
 	PlayerPowerBarAlt:SetAlpha(0)
-	
+
 	if LoggedIn then
 		AltPowerBar:RefreshMod()
 		AltPowerBar:PowerUpdate()
@@ -318,7 +311,7 @@ function AltPowerBar:OnDisable()
 	self:UnregisterEvent("UNIT_POWER")
 	self:UnregisterEvent("UNIT_POWER_BAR_SHOW")
 	self:UnregisterEvent("UNIT_POWER_BAR_HIDE")
-	
+
 	APBFrames.bg:Hide()
 	PlayerPowerBarAlt:SetAlpha(1)
 end

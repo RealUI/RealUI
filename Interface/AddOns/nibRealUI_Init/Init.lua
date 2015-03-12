@@ -50,10 +50,11 @@ local function debug(...)
     if not debugger then
         CreateDebugFrame()
     end
-    local text = ""
+    local time = date("%H:%M:%S")
+    local text = "["..time.."] "
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        if (arg ~= nil) then 
+        if (arg ~= nil) then
             arg = tostring(arg)
         else
             arg = "nil"
@@ -177,7 +178,7 @@ function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
       Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
       Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
       BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
-      BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx 
+      BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx
       TRy = BRx
    else
       Bwid = cx - sx --((l * c) + (w * s)) * lineFactor

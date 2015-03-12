@@ -29,7 +29,7 @@ local function ReskinSlider(f)
     f:SetBackdrop(nil)
 
     f:SetHitRectInsets(0, 0, 0, 0)
-    
+
     local bd = CreateFrame("Frame", nil, f)
     bd:SetPoint("TOPLEFT", 0, 1)
     bd:SetPoint("BOTTOMRIGHT", 0, 0)
@@ -61,14 +61,14 @@ local function CreateSlider(parent, info, key)
     f:SetValueStep(step)
 
     f.label = f:CreateFontString()
-        f.label:SetFont(nibRealUI.font.standard, 10)
+        f.label:SetFontObject(RealUIFont_Normal)
         f.label:SetText(info[key].label or info[1].label)
         f.label:SetJustifyV("MIDDLE")
         f.label:SetJustifyH("LEFT")
         f.label:SetPoint("RIGHT", f, "LEFT", -6, 0)
 
     f.value = f:CreateFontString()
-        f.value:SetFont(nibRealUI.font.standard, 10)
+        f.value:SetFontObject(RealUIFont_Normal)
         f.value:SetText(floor(f:GetValue()))
         f.value:SetJustifyV("MIDDLE")
         f.value:SetJustifyH("LEFT")
@@ -196,7 +196,7 @@ function ConfigBar_GUI:CreateColorPicker(parent, info)
         checkers:SetVertexColor(1, 1, 1, 0.75)
 
     frame.label = frame:CreateFontString()
-        frame.label:SetFont(nibRealUI.font.standard, 10)
+        frame.label:SetFontObject(RealUIFont_Normal)
         frame.label:SetText(info.label)
         frame.label:SetJustifyV("MIDDLE")
         frame.label:SetJustifyH("LEFT")
@@ -264,7 +264,7 @@ function ConfigBar_GUI:CreateOptionList(element, direction, options)
 
         -- Label
         optionFrames[k].label = optionFrames[k]:CreateFontString()
-            optionFrames[k].label:SetFont(nibRealUI.font.standard, 10)
+            optionFrames[k].label:SetFontObject(RealUIFont_Normal)
             optionFrames[k].label:SetText(info.label)
             optionFrames[k].label:SetJustifyV("MIDDLE")
             optionFrames[k].label:SetJustifyH("LEFT")
@@ -273,7 +273,7 @@ function ConfigBar_GUI:CreateOptionList(element, direction, options)
 
         -- Desc
         optionFrames[k].desc = optionFrames[k]:CreateFontString()
-            optionFrames[k].desc:SetFont(nibRealUI.font.standard, 10)
+            optionFrames[k].desc:SetFontObject(RealUIFont_Normal)
             optionFrames[k].desc:SetText(info.desc)
             optionFrames[k].desc:SetJustifyV("MIDDLE")
             optionFrames[k].desc:SetJustifyH("LEFT")
@@ -296,7 +296,7 @@ function ConfigBar_GUI:CreateOptionList(element, direction, options)
             self.highlight:Hide()
             if info.tip then Element_OnLeave(self) end
         end)
-        optionFrames[k]:SetScript("OnMouseDown", function() 
+        optionFrames[k]:SetScript("OnMouseDown", function()
             if self.info and self.info.isDisabled then return end
             info.func()
         end)
@@ -330,7 +330,7 @@ function ConfigBar_GUI:CreateButtonList(element, direction, buttons)
 
         -- Label
         buttonFrames[k].label = buttonFrames[k]:CreateFontString()
-            buttonFrames[k].label:SetFont(nibRealUI.font.standard, 10)
+            buttonFrames[k].label:SetFontObject(RealUIFont_Normal)
             buttonFrames[k].label:SetText(info.label)
             buttonFrames[k].label:SetJustifyV("MIDDLE")
             local justifyH = info.justifyH or buttons[1].justifyH
@@ -398,7 +398,7 @@ function ConfigBar_GUI:CreateInput(element, info)
     input.label = input:CreateFontString()
     local label = input.label
         label:SetPoint("LEFT", input, "LEFT")
-        label:SetFont(nibRealUI.font.standard, 10)
+        label:SetFontObject(RealUIFont_Normal)
         label:SetText(info.label or "")
         label:SetJustifyH("LEFT")
 
@@ -439,7 +439,7 @@ function ConfigBar_GUI:CreateButton(element, info)
     local parent = element.window or element
     local button = nibRealUI:CreateTextButton(info.label, parent, info.template, info.width, info.height, true)
     button:SetPoint("TOPLEFT", parent, "TOPLEFT", info.x, info.y)
-    
+
     if info.macroText then
         button:SetAttribute("type", "macro")
         button:SetAttribute("macrotext", info.macroText)
@@ -460,8 +460,8 @@ function ConfigBar_GUI:CreateDropdown(element, info)
         dropdown:SetPoint("TOPLEFT", parent, "TOPLEFT", info.x, info.y)
         dropdown:SetFrameLevel(parent:GetFrameLevel() + 2)
         dropdown:SetSize(235, 18)
-        _G["RealUIConfigBar"..info.name.."Text"]:SetFont(nibRealUI.font.standard, 10)
-    
+        _G["RealUIConfigBar"..info.name.."Text"]:SetFontObject(RealUIFont_Normal)
+
     nibRealUI:CreateBGSection(parent, dropdown, dropdown, 14, -2, -16, 6)
     if Aurora then Aurora[1].ReskinDropDown(dropdown) end
 
@@ -477,7 +477,7 @@ function ConfigBar_GUI:CreateString(element, info)
     local parent = element.window or element
 
     local string = parent:CreateFontString()
-        string:SetFont(nibRealUI.font.standard, 10)
+        string:SetFontObject(RealUIFont_Normal)
         string:SetText(info.text)
         string:SetJustifyH(info.justify or "LEFT")
         string:SetSpacing(info.spacing or 1)
@@ -502,7 +502,7 @@ function ConfigBar_GUI:CreateSecondHeader(element, text, x, y, lineWidth)
 
     local header = parent:CreateFontString()
     tinsert(FontStringsOrange, header)
-        header:SetFont(nibRealUI.font.standard, 10)
+        header:SetFontObject(RealUIFont_Normal)
         header:SetText(text)
         header:SetTextColor(unpack(nibRealUI.media.colors.orange))
         header:SetJustifyH("LEFT")
@@ -529,7 +529,7 @@ function ConfigBar_GUI:CreateHeader(element, text, y)
             header:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, y - 32)
 
         local headerString = header:CreateFontString()
-            headerString:SetFont(nibRealUI.font.standard, 10)
+            headerString:SetFontObject(RealUIFont_Normal)
             headerString:SetText(text)
             headerString:SetJustifyH("LEFT")
             headerString:SetPoint("TOPLEFT", header, "TOPLEFT", 12, -6)
@@ -552,7 +552,7 @@ function ConfigBar_GUI:CreateHeader(element, text, y)
             headerLine:SetHeight(1)
             headerLine:SetPoint("TOPLEFT", headerEnd, "TOPRIGHT", -19, 0)
             headerLine:SetWidth(parent:GetWidth() - (headerTextWidth + 33))
-    
+
         return header
 
     else
@@ -629,7 +629,7 @@ function ConfigBar_GUI:CreateTabList(element, tabs, direction, point, x, y)
             end
         end
 
-        -- Two textures side by side    
+        -- Two textures side by side
         if info.texture2 then
             tabFrames[k].icon2 = tabFrames[k]:CreateTexture(nil, "ARTWORK")
             if info.texPosition2 then

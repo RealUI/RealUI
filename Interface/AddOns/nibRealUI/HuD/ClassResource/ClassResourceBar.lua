@@ -48,9 +48,6 @@ local BarWidth = {
     },
 }
 
-local FontStringsRegular = {}
-
-
 function ClassResourceBar:SetValue(side, value)
     AngleStatusBar:SetValue(self.parent[side].bar, value)
 end
@@ -110,20 +107,13 @@ end
 -----------------------
 ---- Frame Updates ----
 -----------------------
-function ClassResourceBar:UpdateFonts()
-    local font = nibRealUI:Font()
-    for k, fontString in pairs(FontStringsRegular) do
-        fontString:SetFont(unpack(font))
-    end
-end
-
 function ClassResourceBar:CreateResourceBar(size)
     self.parent = CreateFrame("Frame", nil, RealUIPositionersClassResource)
     local rBar = self.parent
         rBar:SetSize((BarWidth[size][layoutSize] * 2) + 1, 6)
         rBar:SetPoint("BOTTOM")
         -- rBar:Hide()
-    
+
     -- Left
     rBar.left = CreateFrame("Frame", nil, rBar)
         rBar.left:SetPoint("BOTTOMRIGHT", rBar, "BOTTOM", -1, 0)
@@ -147,10 +137,9 @@ function ClassResourceBar:CreateResourceBar(size)
 
         rBar.left.value = rBar.left:CreateFontString()
             rBar.left.value:SetPoint("BOTTOMLEFT", rBar.left, "TOPLEFT", -6.5, 1.5)
-            rBar.left.value:SetFont(unpack(nibRealUI:Font()))
+            rBar.left.value:SetFontObject(RealUIFont_Pixel)
             rBar.left.value:SetJustifyH("LEFT")
-            tinsert(FontStringsRegular, rBar.left.value)
-    
+
     -- Right
     rBar.right = CreateFrame("Frame", nil, rBar)
         rBar.right:SetPoint("BOTTOMLEFT", rBar, "BOTTOM", 0, 0)
@@ -176,9 +165,8 @@ function ClassResourceBar:CreateResourceBar(size)
 
         rBar.right.value = rBar.right:CreateFontString()
             rBar.right.value:SetPoint("BOTTOMRIGHT", rBar.right, "TOPRIGHT", 9.5, 1.5)
-            rBar.right.value:SetFont(unpack(nibRealUI:Font()))
+            rBar.right.value:SetFontObject(RealUIFont_Pixel)
             rBar.right.value:SetJustifyH("RIGHT")
-            tinsert(FontStringsRegular, rBar.right.value)
 
     -- Middle
     rBar.middle = rBar:CreateTexture(nil, "BACKGROUND")
@@ -188,9 +176,8 @@ function ClassResourceBar:CreateResourceBar(size)
 
     rBar.middle.value = rBar:CreateFontString()
         rBar.middle.value:SetPoint("BOTTOM", rBar, "TOP", 1.5, 3.5)
-        rBar.middle.value:SetFont(unpack(nibRealUI:Font()))
+        rBar.middle.value:SetFontObject(RealUIFont_Pixel)
         rBar.middle.value:SetJustifyH("CENTER")
-        tinsert(FontStringsRegular, rBar.middle.value)
 end
 
 function ClassResourceBar:New(size)

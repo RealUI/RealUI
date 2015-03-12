@@ -92,7 +92,7 @@ function ConfigBar_Appearance:ChangeTab(tabID, isInit)
 
 	self.tabPanels[tabID]:Show()
 	self.tabs[tabID].icon:SetVertexColor(1, 1, 1)
-	
+
 	self.currentTab = tabID
 
 	if tabID == 1 then
@@ -132,7 +132,7 @@ function ConfigBar_Appearance:SetupWindow()
 
 	self.tabPanels = {}
 	for k,v in pairs(tabs) do
-		self.tabPanels[k] = CreateFrame("Frame", nil, Element.window)	
+		self.tabPanels[k] = CreateFrame("Frame", nil, Element.window)
 			self.tabPanels[k]:SetAllPoints(Element.window)
 	end
 
@@ -246,7 +246,8 @@ function ConfigBar_Appearance:SetupWindow()
 			label = SMALL,
 			desc = L["Fonts_SmallDesc"],
 			func = function()
-				nibRealUI:StyleSetFont(1)
+				ndb.settings.fontStyle = 1
+				nibRealUI:ReloadUIDialog()
 				self:UpdateFontStyleOptions()
 			end,
 			checked = ndb.settings.fontStyle == 1,
@@ -259,7 +260,8 @@ function ConfigBar_Appearance:SetupWindow()
 			label = L["Fonts_Hybrid"],
 			desc = L["Fonts_HybridDesc"],
 			func = function()
-				nibRealUI:StyleSetFont(2)
+				ndb.settings.fontStyle = 2
+				nibRealUI:ReloadUIDialog()
 				self:UpdateFontStyleOptions()
 			end,
 			checked = ndb.settings.fontStyle == 2,
@@ -268,7 +270,8 @@ function ConfigBar_Appearance:SetupWindow()
 			label = LARGE,
 			desc = L["Fonts_LargeDesc"],
 			func = function()
-				nibRealUI:StyleSetFont(3)
+				ndb.settings.fontStyle = 3
+				nibRealUI:ReloadUIDialog()
 				self:UpdateFontStyleOptions()
 			end,
 			checked = ndb.settings.fontStyle == 3,
@@ -315,7 +318,7 @@ function ConfigBar_Appearance:SetupWindow()
 	}
 	local advButton = cbGUI:CreateButton(tabPanel2, button)
 	nibRealUI:CreateBGSection(tabPanel2, advButton, advButton)
-	
+
 	--------------------
 	------ Colors ------
 	--------------------

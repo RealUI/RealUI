@@ -22,24 +22,26 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 	if nibRealUICharacter.installStage ~= -1 then return end
 
 	-- Font
-	local font = nibRealUI.font.pixel1
 	for i = 1, 120 do
 		local button = _G["BT4Button"..i];
 		if button then
 			local name = button:GetName();
 			local count = _G[name.."Count"];
 			local hotkey = _G[name.."HotKey"];
-			
+			local macro = _G[name.."Name"];
+
 			if count then
-				count:SetFont(unpack(font))
+				count:SetFont(RealUIFont_PixelSmall:GetFont())
 			end
-			hotkey:SetFont(unpack(font))
+			hotkey:SetFont(RealUIFont_PixelSmall:GetFont())
+			macro:SetFont(RealUIFont_PixelSmall:GetFont())
+			macro:SetShadowColor(0, 0, 0, 0)
 		end
 	end
 	if ExtraActionButton1 then
-		ExtraActionButton1HotKey:SetFont(unpack(nibRealUI:Font(false, "small")))
+		ExtraActionButton1HotKey:SetFont(RealUIFont_PixelSmall:GetFont())
 		ExtraActionButton1HotKey:SetPoint("TOPLEFT", ExtraActionButton1, "TOPLEFT", 1.5, -1.5)
-		ExtraActionButton1Count:SetFont(unpack(nibRealUI.font.pixelCooldown))
+		ExtraActionButton1Count:SetFont(RealUIFont_PixelCooldown:GetFont())
 		ExtraActionButton1Count:SetPoint("BOTTOMRIGHT", ExtraActionButton1, "BOTTOMRIGHT", -2.5, 1.5)
 	end
 
@@ -47,8 +49,8 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 	-- Bar Settings
 	if not(nibRealUI:DoesAddonMove("Bartender4")) then return end
 	if InCombatLockdown() then return end
-	
-	
+
+
 	local prof = nibRealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
 	if not(Bar4 and Bartender4DB and Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
@@ -81,7 +83,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 		else
 			sidePositions = {[4] = "LEFT", [5] = "LEFT"}
 		end
-		
+
 		local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
 		local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
@@ -162,7 +164,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 
 				-- Bar Place
 				local barPlace
-				if i == 1 then 
+				if i == 1 then
 					if numTopBars > 0 then
 						barPlace = 1
 					else
@@ -341,7 +343,7 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 			if B4EAB then B4EAB:ApplyConfig() end
 		end
 	end
-	
+
 	----
 	-- Stance Bar
 	----

@@ -73,7 +73,7 @@ local function CreateHealthBar(parent)
     parent.Health:SetSize(texture.width, texture.height)
 
     parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
-    if ndb.settings.reverseUnitFrameBars then 
+    if ndb.settings.reverseUnitFrameBars then
         AngleStatusBar:SetReverseFill(parent.Health.bar, true)
     end
     UnitFrames:SetHealthColor(parent)
@@ -91,7 +91,7 @@ local function CreateHealthBar(parent)
 
     parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Health.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 0, 2)
-    parent.Health.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Health.text:SetFontObject(RealUIFont_Pixel)
     parent.Health.text:SetJustifyH("LEFT")
     parent:Tag(parent.Health.text, "[realui:healthPercent< - ][realui:health]")
 
@@ -177,7 +177,7 @@ local function CreatePowerBar(parent)
 
     parent.Power.text = parent.Power:CreateFontString(nil, "OVERLAY")
     parent.Power.text:SetPoint("TOPLEFT", parent.Power, "BOTTOMLEFT", 0, -3)
-    parent.Power.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Power.text:SetFontObject(RealUIFont_Pixel)
     parent:Tag(parent.Power.text, "[realui:power]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
@@ -254,7 +254,7 @@ local function CreateRange(parent)
     parent.Range.border:SetAllPoints(parent.Range)
 
     parent.Range.text = parent.overlay:CreateFontString(nil, "OVERLAY")
-    parent.Range.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Range.text:SetFontObject(RealUIFont_Pixel)
     parent.Range.text:SetJustifyH("right")
     parent.Range.text:SetPoint("BOTTOMRIGHT", parent.Range, "BOTTOMLEFT", 20.5, 4.5)
 
@@ -305,7 +305,7 @@ local function CreateThreat(parent)
     parent.Threat.border:SetAllPoints(parent.Threat)
 
     parent.Threat.text = parent.overlay:CreateFontString(nil, "OVERLAY")
-    parent.Threat.text:SetFont(unpack(nibRealUI:Font()))
+    parent.Threat.text:SetFontObject(RealUIFont_Pixel)
     parent.Threat.text:SetJustifyH("right")
     parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 14.5, 4.5)
 
@@ -373,10 +373,10 @@ UnitFrames["target"] = function(self)
     CreateThreat(self)
     CreateEndBox(self)
     CreatePowerStatus(self)
-    
+
     self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
-    self.Name:SetFont(unpack(nibRealUI:Font()))
+    self.Name:SetFontObject(RealUIFont_Pixel)
     self:Tag(self.Name, "[realui:level] [realui:name]")
 
     self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
@@ -457,4 +457,3 @@ tinsert(UnitFrames.units, function(...)
     target:RegisterEvent("UNIT_THREAT_LIST_UPDATE", target.Threat.Override)
     target:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", target.Class.Update)
 end)
-

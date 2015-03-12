@@ -74,7 +74,7 @@ local function UpdatePrep(self, event, ...)
             if (i <= numOpps) then
                 local specID, gender = GetArenaOpponentSpec(i)
                 --print("Opponent", i, "specID:", specID, "gender:", gender)
-                if (specID > 0) then 
+                if (specID > 0) then
                     local _, _, _, specIcon, _, _, class = GetSpecializationInfoByID(specID, gender)
                     opp.icon:SetTexture(specIcon)
                     opp:Show()
@@ -128,13 +128,13 @@ end
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.HealthValue:SetPoint("TOPLEFT", parent.Health, "TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFont(unpack(nibRealUI:Font()))
+    parent.HealthValue:SetFontObject(RealUIFont_Pixel)
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Name:SetPoint("TOPRIGHT", parent.Health, "TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFont(unpack(nibRealUI:Font()))
+    parent.Name:SetFontObject(RealUIFont_Pixel)
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
 end
@@ -207,7 +207,7 @@ local function CreateTrinket(parent)
     F.CreateBDFrame(trinket.timer)
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
-    trinket.text:SetFont(unpack(nibRealUI.font.pixel1))
+    trinket.text:SetFontObject(RealUIFont_PixelSmall)
     trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
     trinket.text:SetJustifyH("LEFT")
     parent.Trinket = trinket

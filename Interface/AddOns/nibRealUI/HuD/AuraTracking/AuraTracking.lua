@@ -32,7 +32,7 @@ local function GetOptions()
 				name = "Enabled",
 				desc = "Enable/Disable the Aura Tracking module.",
 				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
+				set = function(info, value)
 					nibRealUI:SetModuleEnabled(MODNAME, value)
 					nibRealUI:ReloadUIDialog()
 				end,
@@ -139,7 +139,7 @@ function AuraTracking:StaticIndicatorUpdate(frame)
 			IndicatorSlots[frame.slotSide][frame.slotIndex]:SetAlpha(1)
 		end
 	end
-	
+
 	-- Update Left indicator panel visibility
 	self.SideActiveStatic.LEFT = false
 	for k, indicator in pairs(StaticIndicatorsLeft) do
@@ -207,7 +207,7 @@ function AuraTracking:AssignFreeIndicators()
 			self:RemoveIndicatorFromSlot(indicator.frame, indicator.frame.slotSide, indicator.frame.slotIndex)
 		end
 	end
-	
+
 	-- Re-assign any active free indicators that have moved position
 	SideActiveFree = {LEFT = false, RIGHT = false}
 	local key, info, side, curSlotIndex, newSlotIndex
@@ -289,7 +289,7 @@ function AuraTracking:RefreshIndicatorAssignments()
 			IndicatorSlots[side][sI]:SetAlpha(1)
 		end
 	end
-	
+
 	for k, indicator in pairs(Indicators) do
 		local f = indicator.frame
 		if f.slotIndex then
@@ -438,9 +438,8 @@ function AuraTracking:UpdateStyle()
 end
 
 function AuraTracking:UpdateFonts()
-	local fontCD = nibRealUI.font.pixelCooldown
 	for k,fs in pairs(FontStringsCooldown) do
-		fs:SetFont(unpack(fontCD))
+		fs:SetFontObject(RealUIFont_PixelCooldown)
 	end
 end
 
@@ -553,7 +552,7 @@ function AuraTracking:ChangeTrackerSetting(index, key, value)
 end
 
 local SortTypes = function(a, b)
-	if a == "Aura" then 
+	if a == "Aura" then
 		return true
 	elseif a and b then
 		return a < b
@@ -662,7 +661,7 @@ function AuraTracking:OnEnable()
 	}
 	self:RegisterBucketEvent(CharUpdateEvents, 0.1, "CharacterUpdate")
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", "CharacterUpdate")
-	
+
 	if not IndicatorParents.LEFT then
 		self:CreateIndicatorParents()
 		self:CreateIndicatorSlots()
@@ -674,5 +673,5 @@ function AuraTracking:OnEnable()
 end
 
 function AuraTracking:OnDisable()
-	
+
 end

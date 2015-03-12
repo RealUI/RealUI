@@ -68,7 +68,7 @@ local function InitElementDropdown(dropdown, level)
 			info.value = entry
 			info.func = function(frame, ...)
 				UIDropDownMenu_SetSelectedValue(dropdown, entry)
-				for k,v in pairs(UIElements) do
+				for k, v in pairs(UIElements) do
 					if v == entry then
 						SelectedUIElement = UIElements[k]
 						HuDConfig_Positions:ShowElementPanel(SelectedUIElement)
@@ -103,6 +103,7 @@ local function CreatePositionSlider(cnt, info)
 			max = max,
 			step = step,
 			func = function(value)
+				nibRealUI.Debug("Update", label, posID, value)
 				HuDConfig_Positions:PositionSliderUpdate(posID, value + offset)
 			end,
 			value = ndb.positions[nibRealUI.cLayout][posID] - offset,
@@ -143,7 +144,7 @@ function HuDConfig_Positions:SetupWindow()
 	self.ddElement = cbGUI:CreateDropdown(Element, dropdown)
 	cbGUI:CreateString(Element, {text = "« "..L["HuD_ChooseElement"], x = 226, y = -38})
 	local str = cbGUI:CreateString(Element, {text = L["HuD_MouseWheelSliders"], x = 81, y = -72, color = "blue"})
-	str:SetFont(nibRealUI.font.standard, 9)
+	str:SetFontObject(RealUIFont_Normal)
 
 	-- Element Panels
 	self.elementPanels = {}

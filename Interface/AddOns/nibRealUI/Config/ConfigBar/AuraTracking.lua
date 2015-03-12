@@ -60,7 +60,7 @@ end
 function ConfigBar_AuraTracking:ToggleTrackerEnabled()
 	local selTracker = self.TrackingTable:GetSelection()
 	if not selTracker then
-		print("No tracker selected.") 
+		print("No tracker selected.")
 		return
 	end
 
@@ -98,7 +98,7 @@ function ConfigBar_AuraTracking:CreateNewPopUp()
 
 		-- Header
 		local header = nibRealUI:CreateFS(window, "CENTER", "small")
-			header:SetFont(nibRealUI.font.standard, 10)
+			header:SetFontObject(RealUIFont_Normal)
 			header:SetText(L["AuraTrack_ChooseType"])
 			header:SetPoint("TOP", window, "TOP", 0, -9)
 
@@ -126,7 +126,7 @@ function ConfigBar_AuraTracking:CreateNewPopUp()
 		window.cancel = nibRealUI:CreateTextButton(CANCEL, window, 100, 24)
 			window.cancel:SetPoint("BOTTOM", window, "BOTTOM", 51, 5)
 			window.cancel:SetScript("OnClick", function() window:Hide() end)
-		
+
 		nibRealUI:CreateBGSection(window, window.okay, window.cancel)
 
 	end
@@ -147,7 +147,7 @@ function ConfigBar_AuraTracking:ChangeTrackerSetting(key, value)
 		else
 			AuraTracking:ChangeTrackerSetting(selTracker, "order", 1)
 		end
-	
+
 	elseif key == "order" then
 		local order = tonumber(value)
 		AuraTracking:ChangeTrackerSetting(selTracker, "order", order)
@@ -246,7 +246,7 @@ function ConfigBar_AuraTracking:UpdateTrackerConfig()
 		self.buttons.toggleTracker:SetText(L["AuraTrack_Disable"])
 	end
 
-	
+
 	-- Get tracker info
 	-- Type
 	local indType = info.type or "Aura"
@@ -390,7 +390,7 @@ function ConfigBar_AuraTracking:GetTrackingDataSet()
 				-- Specs
 				local ignoreSpec = info.ignoreSpec
 				local indSpecs = info.specs
-				
+
 				indSpecString = ""
 				if ignoreSpec or not(indSpecs) then
 					indSpecString = "All"
@@ -500,7 +500,7 @@ function ConfigBar_AuraTracking:ChangeTab(tabID, isInit)
 
 	self.tabPanels[tabID]:Show()
 	self.tabs[tabID].icon:SetVertexColor(1, 1, 1)
-	
+
 	self.currentTab = tabID
 
 	if isInit then return end
@@ -537,7 +537,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 
 	self.tabPanels = {}
 	for k,v in pairs(tabs) do
-		self.tabPanels[k] = CreateFrame("Frame", nil, Element.window)	
+		self.tabPanels[k] = CreateFrame("Frame", nil, Element.window)
 			self.tabPanels[k]:SetAllPoints(Element.window)
 	end
 
@@ -559,18 +559,18 @@ function ConfigBar_AuraTracking:SetupWindow()
 	--     ["name"] = "Test 1",
 	--     ["width"] = 50,
 	--     ["align"] = "RIGHT",
-	--     ["color"] = { 
-	--         ["r"] = 0.5, 
-	--         ["g"] = 0.5, 
-	--         ["b"] = 1.0, 
-	--         ["a"] = 1.0 
+	--     ["color"] = {
+	--         ["r"] = 0.5,
+	--         ["g"] = 0.5,
+	--         ["b"] = 1.0,
+	--         ["a"] = 1.0
 	--     },
 	--     ["colorargs"] = nil,
 	--     ["bgcolor"] = {
-	--         ["r"] = 1.0, 
-	--         ["g"] = 0.0, 
-	--         ["b"] = 0.0, 
-	--         ["a"] = 1.0 
+	--         ["r"] = 1.0,
+	--         ["g"] = 0.0,
+	--         ["b"] = 0.0,
+	--         ["a"] = 1.0
 	--     }, -- red backgrounds, eww!
 	--     ["defaultsort"] = "dsc",
 	--     ["sortnext"]= 4,
@@ -671,7 +671,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	-- Header
 	self.trackerSettings.header = cbGUI:CreateHeader(tabPanel1, L["AuraTrack_TrackerOptions"], -248)
 
-	self.indicatorOptionsPanel = CreateFrame("Frame", nil, tabPanel1)	
+	self.indicatorOptionsPanel = CreateFrame("Frame", nil, tabPanel1)
 	local oP = self.indicatorOptionsPanel
 		oP:SetPoint("TOPLEFT", tabPanel1, "TOPLEFT", 12, -270)
 		oP:SetPoint("BOTTOMRIGHT", tabPanel1, "BOTTOMRIGHT", -12, 12)
@@ -715,7 +715,7 @@ function ConfigBar_AuraTracking:SetupWindow()
 	----
 	-- Aura panel
 	----
-	oP.aura = CreateFrame("Frame", nil, oP)	
+	oP.aura = CreateFrame("Frame", nil, oP)
 	local aP = oP.aura
 		aP:SetPoint("TOPLEFT", oP, "TOPLEFT", 0, -46)
 		aP:SetPoint("BOTTOMRIGHT", oP, "BOTTOMRIGHT", 0, 0)
