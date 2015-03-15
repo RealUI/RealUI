@@ -155,7 +155,8 @@ local function TalentUpdate(self, event, unit, initializing)
 	local oldInactive = self.inactive
 	self.inactive = false
 
-	if (nibRealUI.class ~= "ROGUE") or (UnitLevel("player") < MinLevel) then
+	local spec = GetSpecialization()
+	if (nibRealUI.class ~= "ROGUE") and (spec == 1) or (UnitLevel("player") < MinLevel) then
 		self:Hide()
 		self.inactive = true
 	else
@@ -214,7 +215,7 @@ function Rupture:SetIndicatorInfo(info)
 
 	f.side = "RIGHT"
 	f.unit = "target"
-	
+
 	f.isStatic = (info.order ~= nil)
 	if f.isStatic then
 		f.icon:SetDesaturated(1)
@@ -278,9 +279,9 @@ function Rupture:CreateIndicator()
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 

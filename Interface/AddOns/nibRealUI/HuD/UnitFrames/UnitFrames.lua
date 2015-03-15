@@ -39,7 +39,7 @@ local function GetOptions()
                 name = "Enabled",
                 desc = "Enable/Disable the Unit Frames module.",
                 get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
+                set = function(info, value)
                     nibRealUI:SetModuleEnabled(MODNAME, value)
                     nibRealUI:ReloadUIDialog()
                 end,
@@ -55,7 +55,7 @@ local function GetOptions()
                 name = "Click Set Focus",
                 desc = "Set focus by click+modifier on the Unit Frames.",
                 get = function() return db.misc.focusclick end,
-                set = function(info, value) 
+                set = function(info, value)
                     db.misc.focusclick = value
                 end,
                 order = 30,
@@ -87,7 +87,7 @@ local function GetOptions()
                 name = "Full Health on Target",
                 desc = "Always display the full health value on the Target frame.",
                 get = function() return db.misc.alwaysDisplayFullHealth end,
-                set = function(info, value) 
+                set = function(info, value)
                     db.misc.alwaysDisplayFullHealth = value
                 end,
                 order = 50,
@@ -134,7 +134,7 @@ local function GetOptions()
                                 name = "Show Player Auras",
                                 desc = "Show Buffs/Debuffs cast by you.",
                                 get = function() return db.boss.showPlayerAuras end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.boss.showPlayerAuras = value
                                 end,
                                 order = 10,
@@ -144,7 +144,7 @@ local function GetOptions()
                                 name = "Show NPC Auras",
                                 desc = "Show Buffs/Debuffs cast by NPCs.",
                                 get = function() return db.boss.showNPCAuras end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.boss.showNPCAuras = value
                                 end,
                                 order = 20,
@@ -178,7 +178,7 @@ local function GetOptions()
                                 name = "Enabled",
                                 desc = "Enable/Disable RealUI Arena Frames.",
                                 get = function() return db.arena.enabled end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.arena.enabled = value
                                 end,
                                 order = 10,
@@ -195,7 +195,7 @@ local function GetOptions()
                                         name = "Announce trinkets",
                                         desc = "Announce opponent trinket use to chat.",
                                         get = function() return db.arena.announceUse end,
-                                        set = function(info, value) 
+                                        set = function(info, value)
                                             db.arena.announceUse = value
                                         end,
                                         order = 10,
@@ -223,7 +223,7 @@ local function GetOptions()
                                         name = SHOW_ARENA_ENEMY_PETS_TEXT,
                                         desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_PETS,
                                         get = function() return db.arena.showPets end,
-                                        set = function(info, value) 
+                                        set = function(info, value)
                                             db.arena.showPets = value
                                         end,
                                         order = 30,
@@ -233,7 +233,7 @@ local function GetOptions()
                                         name = SHOW_ARENA_ENEMY_CASTBAR_TEXT,
                                         desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_CASTBAR,
                                         get = function() return db.arena.showCast end,
-                                        set = function(info, value) 
+                                        set = function(info, value)
                                             db.arena.showCast = value
                                         end,
                                         order = 40,
@@ -304,7 +304,7 @@ local function GetOptions()
                                 name = "Color Bars by Class",
                                 desc = "Color Health Bars based on the player's class.",
                                 get = function() return db.overlay.classColor end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.overlay.classColor = value
                                 end,
                                 order = 10,
@@ -314,7 +314,7 @@ local function GetOptions()
                                 name = "Color Names by Class",
                                 desc = "Color Player Names based on the player's class.",
                                 get = function() return db.overlay.classColorNames end,
-                                set = function(info, value) 
+                                set = function(info, value)
                                     db.overlay.classColorNames = value
                                 end,
                                 order = 11,
@@ -326,7 +326,7 @@ local function GetOptions()
         },
     }
     end
-    
+
     ---------------
     -- Positions --
     ---------------
@@ -367,10 +367,10 @@ local function GetOptions()
                     },
                 },
             };
-            
+
             Opts_PositionOrderCnt = Opts_PositionOrderCnt + 10
         end
-        
+
         PositionLayoutOpts["res"..size] = {
             type = "group",
             name = layout,
@@ -384,7 +384,7 @@ local function GetOptions()
     for key, val in next, PositionLayoutOpts do
         options.args.positions.args[key] = (type(val) == "function") and val() or val
     end
-    
+
     ------------
     -- Colors --
     ------------
@@ -407,7 +407,7 @@ local function GetOptions()
                 order = 10,
             };
         end
-        
+
         ColorGroupOpts[group] = {
             type = "group",
             inline = true,
@@ -547,10 +547,15 @@ function UnitFrames:OnInitialize()
                 },
             },
             units = {
-                -- Eventually, these setting will be used to adjust unit frame size.
+                -- Eventually, these settings will be used to adjust unit frame size.
                 player = {
                     size = {x = 259, y = 28},
-                    position = {x = 0, y = 0}, --maybe
+                    position = {x = 0, y = 0},
+                    healthHieght = 0.6, --percentage of the unit hieght used by the healthbar
+                },
+                target = {
+                    size = {x = 259, y = 28},
+                    position = {x = 0, y = 0},
                     healthHieght = 0.6, --percentage of the unit hieght used by the healthbar
                 },
             },

@@ -155,7 +155,7 @@ local function TalentUpdate(self, event, unit, initializing)
 	local oldInactive = self.inactive
 	self.inactive = false
 
-	if (nibRealUI.class ~= "ROGUE") or (UnitLevel("player") < MinLevel) then
+	if (nibRealUI.class ~= "ROGUE") or (UnitLevel("player") < MinLevel) or GetSpellInfo("Improved Slice and Dice") then -- Disable for Dreanor Perk
 		self:Hide()
 		self.inactive = true
 	else
@@ -214,7 +214,7 @@ function SliceAndDice:SetIndicatorInfo(info)
 
 	f.side = "LEFT"
 	f.unit = "player"
-	
+
 	f.isStatic = (info.order ~= nil)
 	if f.isStatic then
 		f.icon:SetDesaturated(1)
@@ -278,9 +278,9 @@ function SliceAndDice:CreateIndicator()
 		f.customCDTime:SetJustifyV("BOTTOM")
 		f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
 		AuraTracking:RegisterFont("cooldown", f.customCDTime)
-	
+
 	f.useCustomCD = AuraTracking:UseCustomCooldown()
-	
+
 	f.elapsed = 1
 	f:SetScript("OnUpdate", CustomCooldownUpdate)
 
