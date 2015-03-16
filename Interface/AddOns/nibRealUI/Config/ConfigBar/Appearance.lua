@@ -65,15 +65,6 @@ function ConfigBar_Appearance:UpdateGeneralColor(index, key, r, g, b, a)
 	self.colors.general[index].a = 1
 end
 
-function ConfigBar_Appearance:UpdateFontStyleOptions()
-	if not self.fontOptions then return end
-	self.fontOptions[1].check.highlight:SetAlpha(0)
-	self.fontOptions[2].check.highlight:SetAlpha(0)
-	self.fontOptions[3].check.highlight:SetAlpha(0)
-	self.fontOptions[ndb.settings.fontStyle].check.highlight:SetAlpha(1)
-	self.fontOptions[4].check.highlight:SetAlpha(ndb.settings.chatFontOutline and 1 or 0)
-end
-
 -- Tab Change
 function ConfigBar_Appearance:ChangeTab(tabID, isInit)
 	if isInit then
@@ -276,37 +267,8 @@ function ConfigBar_Appearance:SetupWindow()
 			end,
 			checked = ndb.settings.fontStyle == 3,
 		},
-		{
-			label = L["Fonts_ChatOutline"],
-			func = function()
-				ndb.settings.chatFontOutline = not(ndb.settings.chatFontOutline)
-				nibRealUI:StyleSetChatFont()
-				self:UpdateFontStyleOptions()
-			end,
-			checked = ndb.settings.chatFontOutline,
-		},
 	}
 	self.fontOptions = cbGUI:CreateOptionList(tabPanel2, "VERTICAL", options)
-
-	slider = {
-		{
-			label = L["Fonts_ChatSize"],
-			name = "AppearanceChatFontSize",
-			width = 260,
-			height = 20,
-			x = 36,
-			y = -98,
-			sliderWidth = 120,
-			min = 8,
-			max = 16,
-			func = function(value)
-				ndb.settings.chatFontSize = value
-				nibRealUI:StyleSetChatFont()
-			end,
-			value = ndb.settings.chatFontSize,
-		},
-	}
-	self.chatFont = cbGUI:CreateSliderList(tabPanel2, "VERTICAL", slider)[1]
 
 	local button = {
 		label = L["Fonts_AdvConfig"],

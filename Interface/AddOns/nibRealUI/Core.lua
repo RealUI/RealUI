@@ -276,12 +276,6 @@ local defaults = {
         settings = {
             powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
             fontStyle = 1,
-            chatFontSize = 12,
-            chatFontOutline = true,
-            chatFontCustom = {
-                enabled = false,
-                font = "Arial Narrow",
-            },
             infoLineBackground = true,
             stripeOpacity = 0.5,
             hudSize = 1,
@@ -374,32 +368,6 @@ function nibRealUI:StyleSetInfoLineBackground(val)
     db.settings.infoLineBackground = val
     local InfoLine = nibRealUI:GetModule("InfoLine", true)
     if InfoLine then InfoLine:SetBackground() end
-end
-
--- Style - Chat Font
-function nibRealUI:StyleSetChatFont()
-    --[[ local cfFont = not (db.settings.chatFontCustom.enabled) and db.media.font.chat or nibRealUI:RetrieveFont(db.settings.chatFontCustom.font)
-
-    for i = 1, NUM_CHAT_WINDOWS do
-        local cf = _G["ChatFrame" .. i]
-        local cfEditBox = _G["ChatFrame" .. i .. "EditBox"]
-
-        local shadowOffset = db.settings.chatFontOutline and 0 or 1
-
-        cf:SetFont(                     cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-        cf:SetShadowOffset(shadowOffset, -shadowOffset)
-        cfEditBox:SetFont(              cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-        cfEditBox:SetShadowOffset(shadowOffset, -shadowOffset)
-        cfEditBox.header:SetFont(       cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-        cfEditBox.header:SetShadowOffset(shadowOffset, -shadowOffset)
-        cfEditBox.headerSuffix:SetFont( cfFont, db.settings.chatFontSize, db.settings.chatFontOutline and "OUTLINE")
-        cfEditBox.headerSuffix:SetShadowOffset(shadowOffset, -shadowOffset)
-
-        for k = 6, 11 do
-            select(k, cfEditBox:GetRegions()):SetTexture(nil)
-        end
-    end]]
-
 end
 
 -- Style - Global Colors
@@ -565,9 +533,6 @@ function nibRealUI:UPDATE_PENDING_MAIL()
         ObjectiveTracker_Collapse()
         ObjectiveTracker_Expand()
     end
-
-    -- Update chat font after Chatter sets it (PLAYER_ENTERING_WORLD)
-    self:StyleSetChatFont()
 end
 
 local lastGarbageCollection = 0
@@ -684,7 +649,6 @@ function nibRealUI:PLAYER_LOGIN()
     -- Update styling
     self:StyleSetStripeOpacity()
     self:StyleSetWindowOpacity()
-    self:StyleSetChatFont()
 end
 
 -- To help position UI elements

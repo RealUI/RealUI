@@ -2,7 +2,8 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb, ndbc
 
 local MODNAME = "Fonts"
-local Fonts = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Fonts = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 local font
 local outlines = {
@@ -68,6 +69,7 @@ local function GetOptions()
                         end,
                         set = function(info, value)
                             font.standard[1] = value
+                            font.standard[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -115,36 +117,39 @@ local function GetOptions()
                 type = "description",
                 order = 31,
             },
-            chatFont = {
-                name = "Custom Chat Font",
+            chat = {
+                name = "Chat Font",
                 type = "group",
                 inline = true,
                 order = 35,
                 args = {
-                    enabled = {
-                        type = "toggle",
-                        name = "Use custom chat font",
-                        desc = "Use a font other than Standard for the Chat window.",
-                        get = function() return ndb.settings.chatFontCustom.enabled end,
-                        set = function(info, value)
-                            ndb.settings.chatFontCustom.enabled = value
-                            nibRealUI:StyleSetChatFont()
-                        end,
-                        order = 10,
-                    },
                     font = {
                         type = "select",
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return ndb.settings.chatFontCustom.font
+                            return font.chat[1]
                         end,
                         set = function(info, value)
-                            ndb.settings.chatFontCustom.font = value
-                            nibRealUI:StyleSetChatFont()
+                            font.chat[1] = value
+                            font.chat[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 20,
+                    },
+                    outline = {
+                        type = "select",
+                        name = "Outline",
+                        values = outlines,
+                        get = function()
+                            for k,v in pairs(outlines) do
+                                if v == font.chat[3] then return k end
+                            end
+                        end,
+                        set = function(info, value)
+                            font.chat[3] = outlines[value]
+                        end,
+                        order = 30,
                     },
                 },
             },
@@ -168,6 +173,7 @@ local function GetOptions()
                         end,
                         set = function(info, value)
                             font.pixel.small[1] = value
+                            font.pixel.small[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -218,6 +224,7 @@ local function GetOptions()
                         end,
                         set = function(info, value)
                             font.pixel.large[1] = value
+                            font.pixel.large[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -268,6 +275,7 @@ local function GetOptions()
                         end,
                         set = function(info, value)
                             font.pixel.numbers[1] = value
+                            font.pixel.numbers[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -314,10 +322,11 @@ local function GetOptions()
                         name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
-                            return nibRealUI.media.font.pixel.cooldown[1]
+                            return font.pixel.cooldown[1]
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.cooldown[1] = value
+                            font.pixel.cooldown[1] = value
+                            font.pixel.cooldown[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
                         order = 10,
@@ -326,9 +335,9 @@ local function GetOptions()
                         type = "range",
                         name = "Size",
                         min = 6, max = 28, step = 1,
-                        get = function(info) return nibRealUI.media.font.pixel.cooldown[2] end,
+                        get = function(info) return font.pixel.cooldown[2] end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.cooldown[2] = value
+                            font.pixel.cooldown[2] = value
                         end,
                         order = 20,
                     },
@@ -338,11 +347,11 @@ local function GetOptions()
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
-                                if v == nibRealUI.media.font.pixel.cooldown[3] then return k end
+                                if v == font.pixel.cooldown[3] then return k end
                             end
                         end,
                         set = function(info, value)
-                            nibRealUI.media.font.pixel.cooldown[3] = outlines[value]
+                            font.pixel.cooldown[3] = outlines[value]
                         end,
                         order = 30,
                     },
@@ -370,6 +379,7 @@ local function GetOptions()
 end
 
 local function SetFont(obj, font, size, style, color, shadow, x, y)
+    Fonts:debug("SetFont", font, size, style)
     if not obj then return end
     obj:SetFont(font, size + db.standard.sizeadjust, style)
     if shadow then obj:SetShadowColor(shadow[1], shadow[2], shadow[3], shadow[4]) end
@@ -605,6 +615,38 @@ function Fonts:OnInitialize()
 
     self:SetEnabledState(true)
     nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
+
+    if ndb.settings.chatFontCustom then
+        local chat = font.chat
+        chat[1] = ndb.settings.chatFontCustom.font or chat[1]
+        chat[2] = ndb.settings.chatFontSize or chat[2]
+        chat[3] = ndb.settings.chatFontOutline and "OUTLINE" or chat[3]
+
+        ndb.settings.chatFontCustom = nil
+        ndb.settings.chatFontSize = nil
+        ndb.settings.chatFontOutline = nil
+    end
+
+    for fontName, fontInfo in next, font do
+        local path
+        if type(fontInfo) == "table" then
+            if fontName == "pixel" then
+                for subName, subInfo in next, fontInfo do
+                    path = LSM:Fetch("font", subInfo[1], true)
+                    Fonts:debug(subInfo[1], path,  subInfo[4])
+                    if path and path ~= subInfo[4] then
+                        subInfo[4] = path
+                    end
+                end
+            else
+                path = LSM:Fetch("font", fontInfo[1], true)
+                Fonts:debug(fontInfo[1], path,  fontInfo[4])
+                if path and path ~= fontInfo[4] then
+                    fontInfo[4] = path
+                end
+            end
+        end
+    end
 
     self:UpdateUIFonts()
 end
