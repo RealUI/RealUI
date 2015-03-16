@@ -41,6 +41,8 @@ do
     local fonts = {
         standard = findFont(RealUIFont_Normal),
         chat = findFont(RealUIFont_Chat),
+        crit = findFont(RealUIFont_Crit),
+        header = findFont(RealUIFont_Header),
         pixel = {
             small =    findFont(RealUIFont_PixelSmall),
             large =    findFont(RealUIFont_PixelLarge),

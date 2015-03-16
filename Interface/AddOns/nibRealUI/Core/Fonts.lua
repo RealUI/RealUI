@@ -397,10 +397,10 @@ function Fonts:UpdateUIFonts()
     local CHAT   = font.chat[4]
 
     -- Crit Font: replaces skurri.ttf
-    local CRIT   = NORMAL --font.crit[4]
+    local CRIT   = font.crit[4]
 
     -- Header Font: replaces MORPHEUS.ttf
-    local HEADER = NORMAL --font.header[4]
+    local HEADER = font.header[4]
 
     STANDARD_TEXT_FONT = NORMAL
     UNIT_NAME_FONT     = NORMAL
