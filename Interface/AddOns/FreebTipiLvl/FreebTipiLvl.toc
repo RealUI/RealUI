@@ -1,7 +1,7 @@
 ## Interface: 60000
 ## Title: FreebTipiLvl
 ## Notes: Equipped iLevel for the GameTooltip
-## Version: 2.7.6
+## Version: 2.8
 ## Author: Freebaser
 
 libs\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml

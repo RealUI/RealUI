@@ -1,13 +1,12 @@
 ## Interface: 60100
 ## Title: FreebTip
 ## Notes: Custom GameTooltip
-## Version: 2.7.6
+## Version: 2.8
 ## Author: Freebaser
 ## RequiredDeps: nibRealUI
-## OptionalDeps: IDCard
+## OptionalDeps: IDCard, freebDebug
 ## SavedVariables: FreebTipDB
 
 tip.lua
 anchor.lua
-tipicons.lua
 FreebTip_Multi.xml

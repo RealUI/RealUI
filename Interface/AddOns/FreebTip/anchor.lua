@@ -12,13 +12,38 @@ do
 
 		local point, relativeTo, relativePoint, xOffset, yOffset = self:GetPoint()
 
+		local anchorTo
+		if(point:find("TOP") or point:find("BOTTOM")) then
+			if(point:find("LEFT") or point:find("RIGHT")) then
+				anchorTo = point
+			else
+				if(xOffset < 0) then
+					anchorTo = point.."LEFT"
+				else
+					anchorTo = point.."RIGHT"
+				end
+			end
+		else
+			local isCenter = (point == "CENTER") and true
+			if(yOffset > 0) then
+				if((isCenter and xOffset < 0) or (not isCenter and xOffset > 0)) then
+					anchorTo = "TOPLEFT"
+				else
+					anchorTo = "TOPRIGHT"
+				end
+			else
+				if((isCenter and xOffset < 0) or (not isCenter and xOffset > 0)) then
+					anchorTo = "BOTTOMLEFT"
+				else
+					anchorTo = "BOTTOMRIGHT"
+				end
+			end
+		end
+
 		_DB.point = point
+		_DB.anchorTo = anchorTo
 		_DB.x = xOffset
 		_DB.y = yOffset
-
-		if point == "CENTER" then
-			point = "BOTTOMRIGHT"
-		end
 
 		local tooltip = _G["GameTooltip"]
 		tooltip:ClearAllPoints()
@@ -90,10 +115,10 @@ do
 			if ns.cfg.cursor and frame == WorldFrame then
 				tooltip:SetOwner(parent, "ANCHOR_CURSOR")
 			else
-				local point = _anchor:GetPoint()
+				local anchorTo = _DB.anchorTo or _anchor:GetPoint()
 
-				if point == "CENTER" then
-					point = "BOTTOMRIGHT"
+				if(anchorTo == "CENTER") then
+					anchorTo = "BOTTOMRIGHT"
 				end
 
 				tooltip:ClearAllPoints()
@@ -102,7 +127,7 @@ do
 					local cfg = ns.cfg
 					tooltip:SetPoint(cfg.point[1], UIParent, cfg.point[1], cfg.point[2], cfg.point[3])
 				else
-					tooltip:SetPoint(point, _anchor, point)
+					tooltip:SetPoint(anchorTo, _anchor, anchorTo)
 				end
 			end
 		end)

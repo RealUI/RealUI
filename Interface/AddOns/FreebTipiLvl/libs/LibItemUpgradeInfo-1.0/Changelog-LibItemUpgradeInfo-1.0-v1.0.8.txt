@@ -1,0 +1,22 @@
+tag v1.0.8
+c82f04259229df8cd91a430823969751f84c9de9
+Kevin Ballard <kevin@sb.org>
+2014-11-29 01:19:24 -0800
+
+Tagging as v1.0.8
+
+
+--------------------
+
+Kevin Ballard:
+	- Get the "true" item level for heirlooms
+	This has to scan a tooltip for the heirloom, since there seems to be no
+	other way to get the item level. The results are cached for each item
+	link to avoid scanning tooltips unnecessarily. Only heirlooms are
+	scanned this way.
+	
+	A new function lib:GetHeirloomTrueLevel() can be used to get the "true"
+	item level for an heirloom, and lib:GetUpgradedItemLevel() was modified
+	to call this method.
+	
+	Bump version to v1.0.8.

@@ -2,47 +2,50 @@ local ADDON_NAME, ns = ...
 
 local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 local ITEM_LEVEL_ABBR = ITEM_LEVEL_ABBR
+local GetMouseFocus = GetMouseFocus
 local GameTooltip = GameTooltip
 local GetTime = GetTime
-
-local ilvlText = "|cffFFFFFF%d|r"
-local cacheTime = 900 --number of secs to cache each player's ilvl
+local UnitGUID = UnitGUID
 
 local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
 local LibInspect = LibStub("LibInspect")
 
+local maxage = 1800 --number of secs to cache each player
+LibInspect:SetMaxAge(maxage)
+
 local cache = {}
+local ilvlText = "|cffFFFFFF%d|r"
 
-local function ShowiLvl(self, unit, uGUID)
-	local cacheGUID = cache[uGUID]
-	if(cacheGUID and cacheGUID.gtime > GetTime()-cacheTime) then
+local function getUnit()
+	local mFocus = GetMouseFocus()
+	local unit = mFocus and (mFocus.unit or mFocus:GetAttribute("unit")) or "mouseover"
+	return unit
+end
 
-		if(not self.freebtipiLvlSet) then
-			self:AddDoubleLine(ITEM_LEVEL_ABBR, ilvlText:format(cacheGUID.ilvl), NORMAL_FONT_COLOR.r,
-			NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-
-			self.freebtipiLvlSet = true
-		end
-
-		self:Show()
-	elseif(not InspectFrame or (InspectFrame and not InspectFrame:IsShown())) then
-		cache[uGUID] = nil
-		local caninspect, unitfound, refreshing = LibInspect:RequestData("items", unit, true)
+local function ShowiLvl(score)
+	if(not GameTooltip.freebtipiLvlSet) then
+		GameTooltip:AddDoubleLine(ITEM_LEVEL_ABBR, ilvlText:format(score), NORMAL_FONT_COLOR.r,
+		NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+		GameTooltip.freebtipiLvlSet = true
+		GameTooltip:Show()
 	end
 end
 
-local updateiLvl = CreateFrame"Frame"
-updateiLvl:SetScript("OnUpdate", function(self, elapsed)
-	local unit = GetMouseFocus() and GetMouseFocus().unit or "mouseover"
+local iLvlUpdate = CreateFrame"Frame"
+iLvlUpdate:SetScript("OnUpdate", function(self, elapsed)
+	self.update = (self.update or 0) + elapsed
+	if(self.update < .1) then return end
 
-	local mGUID = UnitGUID(unit)
-	if(mGUID) then
-		ShowiLvl(GameTooltip, unit, mGUID)
+	local unit = getUnit()
+	local guid = UnitGUID(unit)
+	local cacheGUID = cache[guid]
+	if(cacheGUID) then
+		ShowiLvl(cacheGUID.score)
 	end
 
+	self.update = 0
 	self:Hide()
 end)
-updateiLvl:Hide()
 
 local slots = { "Back", "Chest", "Feet", "Finger0", "Finger1", "Hands", "Head", "Legs",
 "MainHand", "Neck", "SecondaryHand", "Shoulder", "Trinket0", "Trinket1", "Waist", "Wrist" }
@@ -57,8 +60,13 @@ for i, slot in next, slots do
 	end
 end
 
-local function getItems(uGUID, data, age)
-	if((uGUID and cache[uGUID]) or (data and type(data.items) ~= "table")) then return end
+local function getItems(guid, data, age)
+	if((not guid) or (data and type(data.items) ~= "table")) then return end
+
+	local cacheGUID = cache[guid]
+	if(cacheGUID and cacheGUID.time > (GetTime()-maxage)) then
+		return iLvlUpdate:Show()
+	end
 
 	local numItems = 0
 	local itemsTotal = 0
@@ -76,30 +84,17 @@ local function getItems(uGUID, data, age)
 
 	if(numItems > 0) then
 		local score = itemsTotal / numItems
-		cache[uGUID] = { ilvl = score, gtime = GetTime() }
-
-		-- delay output (prefer ilvl to be last in the tooltip)
-		updateiLvl:Show()
+		cache[guid] = { score = score, time = GetTime() }
+		iLvlUpdate:Show()
 	end
 end
-
 LibInspect:AddHook(ADDON_NAME, "items", function(...) getItems(...) end)
 
 local function OnSetUnit(self)
 	self.freebtipiLvlSet = false
 
-	local _, unit = self:GetUnit()
-	if(not unit) then
-		unit = GetMouseFocus() and GetMouseFocus().unit or nil
-	end
-
-	if(UnitExists(unit) and UnitIsPlayer(unit)) then
-		local canInspect = CanInspect(unit)
-
-		if(canInspect) then
-			updateiLvl:Show()
-		end
-	end
+	local unit = getUnit()
+	local caninspect = LibInspect:RequestData("items", unit)
+	iLvlUpdate:Show()
 end
-
 GameTooltip:HookScript("OnTooltipSetUnit", OnSetUnit)

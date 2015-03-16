@@ -2,70 +2,71 @@ local ADDON_NAME, ns = ...
 
 local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 local SPECIALIZATION = SPECIALIZATION
+local GetMouseFocus = GetMouseFocus
 local GameTooltip = GameTooltip
 local GetTime = GetTime
-
-local specText = "|cffFFFFFF%s|r"
-local cacheTime = 900 --number of secs to cache each player's spec
+local UnitGUID = UnitGUID
 
 local LibInspect = LibStub("LibInspect")
 
+local maxage = 1800 --number of secs to cache each player
+LibInspect:SetMaxAge(maxage)
+
 local cache = {}
+local specText = "|cffFFFFFF%s|r"
 
-local function ShowSpec(self, unit, uGUID)
-	local cacheGUID = cache[uGUID]
-	if(cacheGUID and cacheGUID.gtime > GetTime()-cacheTime) then
+local function getUnit()
+	local mFocus = GetMouseFocus()
+	local unit = mFocus and (mFocus.unit or mFocus:GetAttribute("unit")) or "mouseover"
+	return unit
+end
 
-		if(not self.freebtipSpecSet) then
-			self:AddDoubleLine(SPECIALIZATION, specText:format(cacheGUID.spec), NORMAL_FONT_COLOR.r,
-			NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-
-			self.freebtipSpecSet = true
-		end
-
-		self:Show()
-	elseif(not InspectFrame or (InspectFrame and not InspectFrame:IsShown())) then
-		cache[uGUID] = nil
-		local caninspect, unitfound, refreshing = LibInspect:RequestData("talents", unit, true)
+local function ShowSpec(spec)
+	if(not GameTooltip.freebtipSpecSet) then
+		GameTooltip:AddDoubleLine(SPECIALIZATION, specText:format(spec), NORMAL_FONT_COLOR.r,
+		NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+		GameTooltip.freebtipSpecSet = true
+		GameTooltip:Show()
 	end
 end
 
-local function getTalents(uGUID, data, age)
-	if((uGUID and cache[uGUID]) or (data and type(data.talents) ~= "table")) then return end
+local specUpdate = CreateFrame"Frame"
+specUpdate:SetScript("OnUpdate", function(self, elapsed)
+	self.update = (self.update or 0) + elapsed
+	if(self.update < .08) then return end
+
+	local unit = getUnit()
+	local guid = UnitGUID(unit)
+	local cacheGUID = cache[guid]
+	if(cacheGUID) then
+		ShowSpec(cacheGUID.spec)
+	end
+
+	self.update = 0
+	self:Hide()
+end)
+
+local function getTalents(guid, data, age)
+	if((not guid) or (data and type(data.talents) ~= "table")) then return end
+
+	local cacheGUID = cache[guid]
+	if(cacheGUID and cacheGUID.time > (GetTime()-maxage)) then
+		return specUpdate:Show()
+	end
 
 	local spec = data.talents.name
-
 	if(spec) then
-		cache[uGUID] = { spec = spec, gtime = GetTime() }
-
-		local unit = GetMouseFocus() and GetMouseFocus().unit or "mouseover"
-		local mGUID = UnitGUID(unit)
-
-		if(uGUID == mGUID) then
-			ShowSpec(GameTooltip, "mouseover", uGUID)
-		end
+		cache[guid] = { spec = spec, time = GetTime() }
+		specUpdate:Show()
 	end
 end
-
 LibInspect:AddHook(ADDON_NAME, "talents", function(...) getTalents(...) end)
 
 local function OnSetUnit(self)
 	self.freebtipSpecSet = false
 
-	local _, unit = self:GetUnit()
-	if(not unit) then
-		unit = GetMouseFocus() and GetMouseFocus().unit or nil
-	end
-
-	if(UnitExists(unit) and UnitIsPlayer(unit)) then
-		local level = UnitLevel(unit) or 0
-		local canInspect = CanInspect(unit)
-		local uGUID = UnitGUID(unit)
-
-		if(canInspect and level > 9) then
-			ShowSpec(self, unit, uGUID)
-		end
-	end
+	local unit = getUnit()
+	local caninspect = LibInspect:RequestData("items", unit)
+	specUpdate:Show()
 end
-
 GameTooltip:HookScript("OnTooltipSetUnit", OnSetUnit)

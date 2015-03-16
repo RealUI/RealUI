@@ -37,6 +37,7 @@
 		<Scripts>
 			<OnLoad>
 				GameTooltip_OnLoad(self)
+				self:SetPadding(16)
 				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnDragStart>
