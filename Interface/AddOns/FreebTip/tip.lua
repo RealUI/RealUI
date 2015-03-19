@@ -19,8 +19,8 @@ local cfg = {
     hidePvP = true,
 
     showFactionIcon = true,
-    factionIconSize = 44,
-    factionIconAlpha = .5,
+    factionIconSize = 32,
+    factionIconAlpha = 1,
 
     backdrop = {
         bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=],
@@ -407,11 +407,11 @@ local function OnSetUnit(self)
 
         if not (self.factionIcon) then
             self.factionIcon = self:CreateTexture(nil, "BORDER")
-            self.factionIcon:SetPoint("TOPRIGHT", 3, 3)
+            self.factionIcon:SetPoint("CENTER", GameTooltip, "LEFT", 0, 0) -- xRUI
         end
 
         local faction = UnitFactionGroup(unit)
-        if(cfg.showFactionIcon and faction and factionIcon[faction] and isPlayer) then
+        if cfg.showFactionIcon and (faction and factionIcon[faction]) and UnitIsPVP(unit) then -- xRUI
             self.factionIcon:SetTexture(factionIcon[faction])
             self.factionIcon:SetSize(cfg.factionIconSize,cfg.factionIconSize)
             self.factionIcon:SetAlpha(cfg.factionIconAlpha)

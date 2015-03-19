@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb, ndbc
 
 local MODNAME = "Fonts"
@@ -10,7 +11,7 @@ local outlines = {
 	"NONE",
 	"OUTLINE",
 	"THICKOUTLINE",
-	"MONOCHROMEOUTLINE"
+	"OUTLINE, MONOCHROME",
 }
 
 -- Options
@@ -18,51 +19,84 @@ local options
 local function GetOptions()
     if not options then options = {
         type = "group",
-        name = "Fonts",
-        desc = "Adjust the fonts used in RealUI.",
+        name = L["Fonts"],
+        desc = L["Fonts_Desc"],
         arg = MODNAME,
         order = 9106,
         args = {
-            header = {
+            title = {
                 type = "header",
-                name = "Fonts",
+                name = L["Fonts"],
                 order = 10,
             },
-            desc1 = {
+            desc = {
                 type = "description",
-                name = "Adjust the fonts used in RealUI.",
+                name = L["Fonts_Desc"],
                 fontSize = "medium",
                 order = 20,
             },
-            desc2 = {
+            gap1 = {
                 type = "description",
                 name = " ",
                 order = 21,
             },
-            desc3 = {
+            note = {
                 type = "description",
-                name = "Note: Some 3rd party addons (such as MSBT) will need fonts adjusted through their own configuration window.",
+                name = L["General_NoteReload"],
                 order = 22,
             },
-            desc4 = {
-                type = "description",
-                name = "Note2: You will need to reload the UI (/rl) for changes to take effect.",
-                order = 23,
-            },
-            gap1 = {
+            gap2 = {
                 name = " ",
                 type = "description",
-                order = 24,
+                order = 23,
             },
-            standard = {
-                name = "Standard",
+            general = {
+                name = L["Fonts_Standard"],
                 type = "group",
                 inline = true,
                 order = 30,
                 args = {
-                    font = {
+                    sizeadjust = {
+                        type = "range",
+                        name = L["Fonts_NormalOffset"],
+                        desc = L["Fonts_NormalOffsetDesc"],
+                        min = -6, max = 6, step = 1,
+                        get = function(info) return db.standard.sizeadjust end,
+                        set = function(info, value)
+                            db.standard.sizeadjust = value
+                        end,
+                        order = 10,
+                    },
+                    changeYellow = {
+                        type = "toggle",
+                        name = L["Fonts_ChangeYellow"],
+                        desc = L["Fonts_ChangeYellowDesc"],
+                        get = function() return db.standard.changeYellow end,
+                        set = function(info, value)
+                            db.standard.changeYellow = value
+                            --InfoLine:Refresh()
+                        end,
+                        order = 20,
+                    },
+                    yellowColor = {
+                        name = L["Fonts_YellowFont"],
+                        type = "color",
+                        hasAlpha = false,
+                        disabled = function() return not db.standard.changeYellow end,
+                        get = function(info,r,g,b)
+                            return db.standard.yellowColor[1], db.standard.yellowColor[2], db.standard.yellowColor[3]
+                        end,
+                        set = function(info,r,g,b)
+                            db.standard.yellowColor[1] = r
+                            db.standard.yellowColor[2] = g
+                            db.standard.yellowColor[3] = b
+                        end,
+                        order = 21,
+                    },
+                    normal = {
                         type = "select",
-                        name = "Font",
+                        name = L["Fonts_Normal"],
+                        desc = L["Fonts_NormalDesc"],
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.standard[1]
@@ -72,60 +106,32 @@ local function GetOptions()
                             font.standard[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
-                        order = 10,
-                    },
-                    sizeadjust = {
-                        type = "range",
-                        name = "Adjust Size",
-                        desc = "Increase/Decrease all UI Standard font sizes by this value.",
-                        min = -6, max = 6, step = 1,
-                        get = function(info) return db.standard.sizeadjust end,
-                        set = function(info, value)
-                            db.standard.sizeadjust = value
-                        end,
-                        order = 20,
-                    },
-                    changeYellow = {
-                        type = "toggle",
-                        name = "Adjust Yellow Fonts",
-                        desc = "Change the color of WoW's 'yellow' fonts.",
-                        get = function() return db.standard.changeYellow end,
-                        set = function(info, value)
-                            db.standard.changeYellow = value
-                            InfoLine:Refresh()
-                        end,
                         order = 30,
                     },
-                    yellowColor = {
-                        type = "color",
-                        name = "Yellow Font Color",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return db.standard.yellowColor[1], db.standard.yellowColor[2], db.standard.yellowColor[3]
+                    header = {
+                        name = L["Fonts_Header"],
+                        desc = L["Fonts_HeaderDesc"],
+                        type = "select",
+                        values = AceGUIWidgetLSMlists.font,
+                        get = function()
+                            return font.header[1]
                         end,
-                        set = function(info,r,g,b)
-                            db.standard.yellowColor[1] = r
-                            db.standard.yellowColor[2] = g
-                            db.standard.yellowColor[3] = b
+                        set = function(info, value)
+                            font.header[1] = value
+                            font.header[4] = LSM:Fetch("font", value)
                         end,
+                        dialogControl = "LSM30_Font",
                         order = 40,
                     },
-                },
-            },
-            gap2 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            chat = {
-                name = "Chat Font",
-                type = "group",
-                inline = true,
-                order = 35,
-                args = {
+                    gap = {
+                        name = "",
+                        type = "header",
+                        order = 41,
+                    },
                     font = {
+                        name = L["Fonts_Chat"],
+                        desc = L["Fonts_ChatDesc"],
                         type = "select",
-                        name = "Font",
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.chat[1]
@@ -135,11 +141,11 @@ local function GetOptions()
                             font.chat[4] = LSM:Fetch("font", value)
                         end,
                         dialogControl = "LSM30_Font",
-                        order = 20,
+                        order = 50,
                     },
                     outline = {
                         type = "select",
-                        name = "Outline",
+                        name = L["Fonts_Outline"],
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
@@ -149,24 +155,24 @@ local function GetOptions()
                         set = function(info, value)
                             font.chat[3] = outlines[value]
                         end,
-                        order = 30,
+                        order = 51,
                     },
                 },
             },
             gap3 = {
                 name = " ",
                 type = "description",
-                order = 36,
+                order = 31,
             },
             pixel_small = {
-                name = "Pixel (Small)",
+                name = L["Fonts_PixelSmall"],
                 type = "group",
                 inline = true,
                 order = 40,
                 args = {
                     font = {
                         type = "select",
-                        name = "Font",
+                        name = L["Fonts_Font"],
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.pixel.small[1]
@@ -180,7 +186,7 @@ local function GetOptions()
                     },
                     size = {
                         type = "range",
-                        name = "Size",
+                        name = FONT_SIZE,
                         min = 6, max = 28, step = 1,
                         get = function(info) return font.pixel.small[2] end,
                         set = function(info, value)
@@ -190,7 +196,7 @@ local function GetOptions()
                     },
                     outline = {
                         type = "select",
-                        name = "Outline",
+                        name = L["Fonts_Outline"],
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
@@ -210,14 +216,14 @@ local function GetOptions()
                 order = 41,
             },
             pixel_large = {
-                name = "Pixel (Large)",
+                name = L["Fonts_PixelLarge"],
                 type = "group",
                 inline = true,
                 order = 50,
                 args = {
                     font = {
                         type = "select",
-                        name = "Font",
+                        name = L["Fonts_Font"],
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.pixel.large[1]
@@ -231,7 +237,7 @@ local function GetOptions()
                     },
                     size = {
                         type = "range",
-                        name = "Size",
+                        name = FONT_SIZE,
                         min = 6, max = 28, step = 1,
                         get = function(info) return font.pixel.large[2] end,
                         set = function(info, value)
@@ -241,7 +247,7 @@ local function GetOptions()
                     },
                     outline = {
                         type = "select",
-                        name = "Outline",
+                        name = L["Fonts_Outline"],
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
@@ -261,14 +267,14 @@ local function GetOptions()
                 order = 51,
             },
             pixel_numbers = {
-                name = "Pixel (Numbers)",
+                name = L["Fonts_PixelNumbers"],
                 type = "group",
                 inline = true,
                 order = 60,
                 args = {
                     font = {
                         type = "select",
-                        name = "Font",
+                        name = L["Fonts_Font"],
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.pixel.numbers[1]
@@ -282,7 +288,7 @@ local function GetOptions()
                     },
                     size = {
                         type = "range",
-                        name = "Size",
+                        name = FONT_SIZE,
                         min = 6, max = 28, step = 1,
                         get = function(info) return font.pixel.numbers[2] end,
                         set = function(info, value)
@@ -292,7 +298,7 @@ local function GetOptions()
                     },
                     outline = {
                         type = "select",
-                        name = "Outline",
+                        name = L["Fonts_Outline"],
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
@@ -312,14 +318,14 @@ local function GetOptions()
                 order = 61,
             },
             pixel_cooldown = {
-                name = "Pixel (Cooldown)",
+                name = L["Fonts_PixelCooldown"],
                 type = "group",
                 inline = true,
-                order = 80,
+                order = 70,
                 args = {
                     font = {
                         type = "select",
-                        name = "Font",
+                        name = L["Fonts_Font"],
                         values = AceGUIWidgetLSMlists.font,
                         get = function()
                             return font.pixel.cooldown[1]
@@ -333,7 +339,7 @@ local function GetOptions()
                     },
                     size = {
                         type = "range",
-                        name = "Size",
+                        name = FONT_SIZE,
                         min = 6, max = 28, step = 1,
                         get = function(info) return font.pixel.cooldown[2] end,
                         set = function(info, value)
@@ -343,7 +349,7 @@ local function GetOptions()
                     },
                     outline = {
                         type = "select",
-                        name = "Outline",
+                        name = L["Fonts_Outline"],
                         values = outlines,
                         get = function()
                             for k,v in pairs(outlines) do
@@ -356,21 +362,6 @@ local function GetOptions()
                         order = 30,
                     },
                 },
-            },
-            gap7 = {
-                name = " ",
-                type = "description",
-                order = 81,
-            },
-            changeFCT = {
-                type = "toggle",
-                name = "Change Floating Combat Text",
-                desc = "Change the font of the default Floating Combat Text.",
-                get = function() return db.changeFCT end,
-                set = function(info, value)
-                    db.changeFCT = value
-                end,
-                order = 90,
             },
         },
     };
@@ -403,11 +394,9 @@ function Fonts:UpdateUIFonts()
     local HEADER = font.header[4]
 
     STANDARD_TEXT_FONT = NORMAL
-    UNIT_NAME_FONT     = NORMAL
-    -- NAMEPLATE_FONT will be changed indirectly through its defined font object.
-    if db.changeFCT then
-        DAMAGE_TEXT_FONT = NORMAL
-    end
+    UNIT_NAME_FONT = NORMAL
+    NAMEPLATE_FONT = "RealUIFont_Normal"
+    DAMAGE_TEXT_FONT = NORMAL
 
     -- RealUI Fonts
     SetFont(RealUIFont_Normal, font.standard[4], font.standard[2], font.standard[3])
@@ -447,7 +436,7 @@ function Fonts:UpdateUIFonts()
     SetFont(NumberFont_GameNormal,            NORMAL, 10, nil, nil, {0, 0, 0}, 1, -1)
     SetFont(NumberFont_Shadow_Small,            CHAT, 12, nil, nil, {0, 0, 0}, 1, -1)
     SetFont(NumberFont_OutlineThick_Mono_Small, CHAT, 12, "THICKOUTLINE, MONOCHROME")
-    SetFont(NumberFont_Shadow_Med,              CHAT, 14, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont(NumberFont_Shadow_Med,              CHAT, 14, font.chat[3], nil, {0, 0, 0}, 1, -1)
     SetFont(NumberFont_Normal_Med,              CHAT, 14)
     SetFont(NumberFont_Outline_Med,             CHAT, 14, "OUTLINE")
     SetFont(NumberFont_Outline_Large,           CHAT, 16, "OUTLINE")
@@ -598,7 +587,6 @@ function Fonts:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            changeFCT = true,
             standard = {
                 sizeadjust = 0,
                 changeYellow = true,
@@ -634,6 +622,7 @@ function Fonts:OnInitialize()
                 for subName, subInfo in next, fontInfo do
                     path = LSM:Fetch("font", subInfo[1], true)
                     Fonts:debug(subInfo[1], path,  subInfo[4])
+                    -- if path is nil, the chosen font is from another addon and hasn't been loaded yet.
                     if path and path ~= subInfo[4] then
                         subInfo[4] = path
                     end

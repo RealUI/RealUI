@@ -609,23 +609,6 @@ function nibRealUI:ReadableNumber(num, places)
     return ret
 end
 
--- Font Retrieval
-function nibRealUI:RetrieveFont(font)
-    local font = LSM:Fetch("font", font)
-    if font == nil then font = LSM:Fetch("font", "Arial Narrow") end
-    return font
-end
-
-function nibRealUI:GetFont(fontID)
-    local font = {}
-    if (fontID == "small") or (fontID == "large") or (fontID == "numbers") or (fontID == "cooldown") then
-        font = {self.media.font.pixel[fontID][4], self.media.font.pixel[fontID][2], self.media.font.pixel[fontID][3]}
-    else
-        font = self.media.font.standard[4]
-    end
-    return font
-end
-
 -- Opposite Faction
 function nibRealUI:OtherFaction(f)
     if (f == "Horde") then
