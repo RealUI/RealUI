@@ -1,0 +1,227 @@
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "zhCN")
+
+if L then
+
+-- General
+-- L["Alert_CombatLockdown"] = ""
+L["DoReloadUI"] = "你需要重载RealUI以使这些改变生效，是否立即重载？" -- Needs review
+-- L["Slash_Profile"] = ""
+L["Slash_RealUI"] = "输入%s配置UI的格局、位置和相关设置" -- Needs review
+-- L["Slash_Taint"] = ""
+L["Version"] = "版本" -- Needs review
+
+
+-- Install
+L["Install"] = "点击安装" -- Needs review
+L["Patch_DoApply"] = "是否愿意应用最新的RealUI设置？" -- Needs review
+L["Patch_MiniPatch"] = "RealUI小型补丁" -- Needs review
+
+
+-- Options
+L["Appearance_ClassColorHealth"] = "生命条按职业着色" -- Needs review
+L["Appearance_ClassColorNames"] = "姓名按职业着色" -- Needs review
+L["Appearance_InfoLineBG"] = "信息条背景" -- Needs review
+L["Appearance_StripeOpacity"] = "纹理透明度" -- Needs review
+L["Appearance_WinOpacity"] = "窗口透明度" -- Needs review
+L["Colors_Amber"] = "琥珀色" -- Needs review
+L["Colors_Blue"] = "蓝色" -- Needs review
+L["Colors_Cyan"] = "青绿色" -- Needs review
+L["Colors_Green"] = "绿色" -- Needs review
+L["Colors_Orange"] = "橙色" -- Needs review
+L["Colors_Purple"] = "紫色" -- Needs review
+L["Colors_Red"] = "红色" -- Needs review
+L["Colors_Yellow"] = "黄色" -- Needs review
+L["Fonts"] = "配置" -- Needs review
+L["Fonts_AdvConfig"] = "高级字体设置" -- Needs review
+-- L["Fonts_ChangeYellow"] = ""
+-- L["Fonts_ChangeYellowDesc"] = ""
+-- L["Fonts_Chat"] = ""
+-- L["Fonts_ChatDesc"] = ""
+-- L["Fonts_Desc"] = ""
+-- L["Fonts_Font"] = ""
+-- L["Fonts_Header"] = ""
+-- L["Fonts_HeaderDesc"] = ""
+L["Fonts_Hybrid"] = "混合" -- Needs review
+L["Fonts_HybridDesc"] = "使用大小字体混合型" -- Needs review
+L["Fonts_LargeDesc"] = "使用大字体" -- Needs review
+-- L["Fonts_Normal"] = ""
+-- L["Fonts_NormalDesc"] = ""
+-- L["Fonts_NormalOffset"] = ""
+-- L["Fonts_NormalOffsetDesc"] = ""
+-- L["Fonts_Outline"] = ""
+-- L["Fonts_PixelCooldown"] = ""
+-- L["Fonts_PixelLarge"] = ""
+-- L["Fonts_PixelNumbers"] = ""
+-- L["Fonts_PixelSmall"] = ""
+L["Fonts_SmallDesc"] = "使用小字体" -- Needs review
+-- L["Fonts_Standard"] = ""
+-- L["Fonts_YellowFont"] = ""
+L["General_Enabled"] = "可用" -- Needs review
+L["General_InvalidParent"] = "%s的父级框体不存在，输入/realadv并进入%s -> %s设定新的父级框体。" -- Needs review
+-- L["General_LoadDefaults"] = ""
+-- L["General_NoteParent"] = ""
+-- L["General_NoteReload"] = ""
+L["Layout_ApplyOOC"] = "离开战斗后将改变布局" -- Needs review
+L["Layout_DPSTank"] = "DPS/T" -- Needs review
+L["Layout_Healing"] = "治疗" -- Needs review
+-- L["Layout_Link"] = ""
+L["Layout_LinkDesc"] = "DPS/T和治疗界面采用相同布局" -- Needs review
+L["Power_Eco"] = "节能" -- Needs review
+L["Power_EcoDesc"] = "这种模式下图形更新速度将低于正常速度。" -- Needs review
+L["Power_Normal"] = "普通" -- Needs review
+L["Power_NormalDesc"] = "这种模式下图形更新速度为正常速度。" -- Needs review
+L["Power_PowerMode"] = "电源模式" -- Needs review
+L["Power_Turbo"] = [=[极速
+]=] -- Needs review
+L["Power_TurboDesc"] = "这种模式下图形更新速度将很快，UI的动画效果将变得很平滑。" -- Needs review
+L["Reset_Confirm"] = "是否确定需要重置RealUI设置？" -- Needs review
+L["Reset_SettingsLost"] = "所有用户设置都将丢失。" -- Needs review
+
+
+-- Config
+L["Alert_CantOpenInCombat"] = "战斗中无法开启RealUI设置" -- Needs review
+L["Appearance_DefaultColors"] = "使用默认颜色" -- Needs review
+L["Appearance_DefaultColorsDesc"] = "使用自定义颜色" -- Needs review
+L["AuraTrack_Buff"] = "Buff" -- Needs review
+L["AuraTrack_ChooseType"] = "选择监视类型" -- Needs review
+L["AuraTrack_Create"] = "创建新的光环监视" -- Needs review
+L["AuraTrack_Debuff"] = "Debuff" -- Needs review
+L["AuraTrack_Disable"] = "关闭所选择的光环监视" -- Needs review
+L["AuraTrack_DruidBear"] = "熊" -- Needs review
+L["AuraTrack_DruidCat"] = [=[猫
+控制台]=] -- Needs review
+L["AuraTrack_DruidHuman"] = "人形" -- Needs review
+L["AuraTrack_DruidMoonkin"] = "枭兽" -- Needs review
+L["AuraTrack_Enable"] = "启用所选择的光环监视" -- Needs review
+L["AuraTrack_HideOOC"] = "战斗外隐藏" -- Needs review
+L["AuraTrack_HideOOCDesc"] = "强制此监视在非战斗状态下隐藏，即便它处于激活状态。" -- Needs review
+-- L["AuraTrack_HideStack"] = ""
+-- L["AuraTrack_HideStackDesc"] = ""
+L["AuraTrack_HideTime"] = "隐藏时间" -- Needs review
+L["AuraTrack_HideTimeDesc"] = "监视图标上不显示剩余时间。" -- Needs review
+L["AuraTrack_IgnoreSpec"] = "忽略天赋" -- Needs review
+-- L["AuraTrack_IgnoreSpecDesc"] = ""
+L["AuraTrack_InactiveOpacity"] = "非激活状态指示器透明度" -- Needs review
+L["AuraTrack_MinLevel"] = "最小等级（0为忽略等级）" -- Needs review
+L["AuraTrack_NoteSpellID"] = [=[注意：技能名称或者ID必须与你需要监视的技能完全匹配，请注意大小写和空格。
+如果需要监视复数的技能，请使用技能ID并用逗号将它们隔开（比如 1122,2233,3344）]=] -- Needs review
+L["AuraTrack_Padding"] = "指示器填充纹理" -- Needs review
+L["AuraTrack_Reset"] = "确定要将所有监视信息重置为默认状态？" -- Needs review
+L["AuraTrack_ShowHostile"] = "存在敌对目标时显示" -- Needs review
+L["AuraTrack_ShowHostileDesc"] = "有可攻击目标时显示指示器" -- Needs review
+L["AuraTrack_ShowInCombat"] = "战斗中显示" -- Needs review
+L["AuraTrack_ShowInCombatDesc"] = "战斗中显示指示器" -- Needs review
+L["AuraTrack_ShowInPvE"] = "PvE中显示" -- Needs review
+L["AuraTrack_ShowInPvEDesc"] = "PvE环境下显示指示器" -- Needs review
+L["AuraTrack_ShowInPvP"] = "PvP中显示" -- Needs review
+L["AuraTrack_ShowInPvPDesc"] = "PvP环境下显示指示器" -- Needs review
+L["AuraTrack_Size"] = "指示器大小" -- Needs review
+L["AuraTrack_SpellNameID"] = "技能名称或者ID" -- Needs review
+-- L["AuraTrack_Static"] = ""
+-- L["AuraTrack_StaticDesc"] = ""
+L["AuraTrack_TrackerOptions"] = "追踪设置" -- Needs review
+L["AuraTrack_VerticalCD"] = "垂直冷却" -- Needs review
+L["AuraTrack_VerticalCDDesc"] = "使用垂直冷却指示器" -- Needs review
+L["Bars_Bottom"] = "底部" -- Needs review
+L["Bars_Buttons"] = "按键" -- Needs review
+L["Bars_Center"] = "中部" -- Needs review
+L["Bars_Control"] = "允许RealUI控制动作条" -- Needs review
+L["Bars_HintCtrlView"] = "按住Ctrl键以查看动作条" -- Needs review
+L["Bars_Left"] = "左部" -- Needs review
+L["Bars_MoveEAB"] = "移动额外动作条按键" -- Needs review
+L["Bars_MoveEABDesc"] = "检查是否允许RealUI控制额外动作条的位置。" -- Needs review
+L["Bars_MovePet"] = "移动宠物动作条" -- Needs review
+L["Bars_MovePetDesc"] = "检查是否允许RealUI控制宠物动作条的位置。" -- Needs review
+L["Bars_MoveStance"] = "移动姿态动作条" -- Needs review
+L["Bars_MoveStanceDesc"] = "检查是否允许RealUI控制姿态动作条的位置。" -- Needs review
+L["Bars_NoteAdvSettings"] = "注意：使用高级设置将打开BT动作条插件设置窗口。如果你想由更改RealUI控制的相关设置（包括位置，大小，按键，填充），请取消勾选|cff30d0ffRealUI控制 |r复选框。" -- Needs review
+L["Bars_NoteCheckUIElements"] = "注意：设置改变后请检查各个界面元素的位置以防它们相互重叠。" -- Needs review
+L["Bars_Padding"] = "填充" -- Needs review
+L["Bars_PetBar"] = "宠物动作条" -- Needs review
+L["Bars_Right"] = "右部" -- Needs review
+L["Bars_Sizes"] = "大小" -- Needs review
+L["Control_AddonControl"] = "插件控制" -- Needs review
+L["General_Position"] = "位置" -- Needs review
+L["General_Positions"] = "位置" -- Needs review
+L["HuD_AlertHuDChangeSize"] = "HuD大小变动可能会改变一些界面元素的位置，所以强烈建议在改变HuD大小后检查UI元素的位置。" -- Needs review
+L["HuD_ChooseElement"] = "选择UI界面元素以打开相关设置。" -- Needs review
+L["HuD_ElementSettings"] = "界面元素设置" -- Needs review
+L["HuD_Height"] = "高度" -- Needs review
+L["HuD_HideElements"] = "隐藏界面元素" -- Needs review
+L["HuD_Horizontal"] = "水平分布" -- Needs review
+L["HuD_Instructions"] = "命令" -- Needs review
+L["HuD_Instructions1"] = "|cffffa500Step 1:|r 单击 |cff30ff30以显示所有界面元素|r来帮助你重新设置他们的位置。" -- Needs review
+L["HuD_Instructions2"] = "|cffffa500第二步:|r 使用 |cff30ff30界面元素设置|r 窗口来改变单独界面元素的位置和大小。" -- Needs review
+L["HuD_Instructions3"] = "|cffffa500第三步:|r 完成后，单击|cff30ff30隐藏界面元素|r." -- Needs review
+L["HuD_Latency"] = "延迟" -- Needs review
+L["HuD_MouseWheelSliders"] = "（利用鼠标滚轮可以精确的调整滑块）" -- Needs review
+L["HuD_ReverseBars"] = "反向显示生命条和法力条" -- Needs review
+L["HuD_ShowElements"] = "显示界面元素" -- Needs review
+-- L["HuD_Uninterruptible"] = ""
+L["HuD_UseLarge"] = "使用大型HuD" -- Needs review
+L["HuD_UseLargeDesc"] = "增大主要的HuD元素（单位框体等）" -- Needs review
+L["HuD_Vertical"] = "垂直" -- Needs review
+L["HuD_Width"] = "宽度" -- Needs review
+L["Raid_30Width"] = "30人宽度" -- Needs review
+L["Raid_40Width"] = "40人宽度" -- Needs review
+L["Raid_ControlLayout"] = "允许RealUI控制%s的布局设置" -- Needs review
+L["Raid_ControlPosition"] = "允许RealUI控制%s的位置" -- Needs review
+L["Raid_ControlStyle"] = "允许RealUI改变%s外观（需要重载UI：/rl）" -- Needs review
+L["Raid_Layout"] = "布局" -- Needs review
+L["Raid_NoteAdvSettings"] = "注意：使用高级设置将打开GRID2插件设置窗口。如果你想更改由RealUI控制的相关设置（包括位置，布局，边框），请取消勾选|cff30d0ffRealUI控制 |r复选框。" -- Needs review
+L["Raid_ShowSolo"] = "单人下显示" -- Needs review
+L["Raid_Style"] = "格局" -- Needs review
+
+
+-- InfoLine
+L["Clock_CalenderInvites"] = "等待接受的邀请" -- Needs review
+L["Clock_Date"] = "日期" -- Needs review
+L["Clock_NoTBTime"] = "托尔巴拉德时间不可用" -- Needs review
+L["Clock_NoWGTime"] = "冬拥湖时间不可用" -- Needs review
+L["Clock_ShowCalendar"] = "单击此处显示日历" -- Needs review
+L["Clock_ShowTimer"] = "Shift+单击此处以显示时间" -- Needs review
+L["Clock_TBTime"] = "托尔巴拉德剩余时间" -- Needs review
+L["Clock_WGTime"] = "冬拥湖剩余时间" -- Needs review
+L["Currency_Cycle"] = "单击此处以切换显示各种货币。" -- Needs review
+L["Currency_EraseData"] = "Alt+单击以清楚高亮显示的角色数据。" -- Needs review
+-- L["Currency_NoteWeeklyReset"] = ""
+-- L["Currency_ResetCaps"] = ""
+-- L["Currency_TrackMore"] = ""
+L["Currency_UpdatedAbbr"] = "更新" -- Needs review
+L["Friend_WhisperInvite"] = "单击密语，Alt+单击邀请" -- Needs review
+L["Guild_WhisperInvite"] = "单击此处显示密语，Alt+单击发送邀请" -- Needs review
+L["InfoLine"] = "信息条" -- Needs review
+L["Layout_Change"] = "单击此处改变布局" -- Needs review
+L["Layout_Current"] = "当前布局：" -- Needs review
+L["Layout_LayoutChanger"] = "更改布局" -- Needs review
+L["Meters_Active"] = "激活统计插件：" -- Needs review
+L["Meters_Header"] = "统计插件切换" -- Needs review
+L["Meters_Toggle"] = "单击此处以切换统计插件。" -- Needs review
+L["Spec_ChangeSpec"] = "单击某一个专精以启用该专精。" -- Needs review
+L["Spec_Equip"] = "单击某一装备方案将装备该方案。" -- Needs review
+L["Spec_EquipAssignPrimary"] = "Ctrl+单击某一装备方案以将其设置为主天赋装备方案" -- Needs review
+L["Spec_EquipAssignSecondary"] = "Alt+单击某一装备方案以将其设置为副天赋装备方案" -- Needs review
+L["Spec_EquipUnassign"] = "Shift+单击某一装备方案将取消其分配。" -- Needs review
+L["Spec_SpecChanger"] = "专精切换" -- Needs review
+L["Spec_StatConfig"] = "单击状态以打开状态设置。" -- Needs review
+L["Spec_StatDisplay"] = "状态显示" -- Needs review
+L["Start"] = "开始" -- Needs review
+L["Start_Config"] = "RealUI设置" -- Needs review
+L["Sys_AverageAbbr"] = "平均" -- Needs review
+L["Sys_CurrentAbbr"] = "当前" -- Needs review
+L["Sys_FPS"] = "FPS" -- Needs review
+L["Sys_In"] = "下行" -- Needs review
+L["Sys_kbps"] = "kbps" -- Needs review
+L["Sys_Max"] = "最大" -- Needs review
+L["Sys_Min"] = "最小" -- Needs review
+L["Sys_ms"] = "ms" -- Needs review
+L["Sys_Out"] = "传出" -- Needs review
+L["Sys_Stat"] = "状态" -- Needs review
+L["Sys_SysInfo"] = "系统信息" -- Needs review
+L["XPRep"] = "经验/声望" -- Needs review
+L["XPRep_Current"] = "当前经验/声望值" -- Needs review
+L["XPRep_NoFaction"] = "未设置需要显示的经验条/声望条" -- Needs review
+L["XPRep_Remaining"] = "剩余" -- Needs review
+L["XPRep_Toggle"] = "单击此处在“经验”和“声望”之间切换" -- Needs review
+
+end
