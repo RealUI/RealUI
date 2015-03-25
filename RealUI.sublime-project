@@ -1,0 +1,26 @@
+{
+	"folders":
+	[
+		{
+			"path": "Interface\\AddOns\\!Aurora_RealUI"
+		},
+		{
+			"path": "Interface\\AddOns\\cargBags_Nivaya"
+		},
+		{
+			"path": "Interface\\AddOns\\EasyMail"
+		},
+		{
+			"path": "Interface\\AddOns\\FreebTip"
+		},
+		{
+			"path": "Interface\\AddOns\\nibRealUI"
+		},
+		{
+			"path": "Interface\\AddOns\\nibRealUI_Init"
+		},
+		{
+			"path": "Interface\\AddOns\\SharedMedia_MyMedia"
+		}
+	],
+}

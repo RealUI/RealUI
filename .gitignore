@@ -3,6 +3,11 @@
 *.ipr
 *.iml
 .idea/
+
+## Sublime Text ##
+*.sublime-workspace
+
+## AddOns ##
 DBM-*/
 DBM-*
 Blizzard_*/

@@ -1,17 +1,15 @@
 --[[
 Name: Astrolabe
-Revision: $Rev: 161 $
-$Date: 2014-10-14 22:59:04 -0700 (Tue, 14 Oct 2014) $
 Author(s): Esamynn (esamynn at wowinterface.com)
 Inspired By: Gatherer by Norganna
-			 MapLibrary by Kristofer Karlsson (krka at kth.se)
+             MapLibrary by Kristofer Karlsson (krka at kth.se)
 Documentation: http://wiki.esamynn.org/Astrolabe
 SVN: http://svn.esamynn.org/astrolabe/
 Description:
 	This is a library for the World of Warcraft UI system to place
-	icons accurately on both the Minimap and on Worldmaps.
-	This library also manages and updates the position of Minimap icons
-	automatically.
+	icons accurately on both the Minimap and on Worldmaps.  
+	This library also manages and updates the position of Minimap icons 
+	automatically.  
 
 Copyright (C) 2006-2012 James Carrothers
 
@@ -42,7 +40,7 @@ Note:
 -- DO NOT MAKE CHANGES TO THIS LIBRARY WITHOUT FIRST CHANGING THE LIBRARY_VERSION_MAJOR
 -- STRING (to something unique) OR ELSE YOU MAY BREAK OTHER ADDONS THAT USE THIS LIBRARY!!!
 local LIBRARY_VERSION_MAJOR = "Astrolabe-1.0"
-local LIBRARY_VERSION_MINOR = tonumber(string.match("$Revision: 199 $", "(%d+)") or 1)
+local LIBRARY_VERSION_MINOR = 162
 
 if not DongleStub then error(LIBRARY_VERSION_MAJOR .. " requires DongleStub.") end
 if not DongleStub:IsNewerVersion(LIBRARY_VERSION_MAJOR, LIBRARY_VERSION_MINOR) then return end
@@ -61,8 +59,8 @@ end
 -- Config Constants
 --------------------------------------------------------------------------------------------------------------
 
-local configConstants = {
-	MinimapUpdateMultiplier = true,
+local configConstants = { 
+	MinimapUpdateMultiplier = true, 
 }
 
 -- this constant is multiplied by the current framerate to determine
@@ -96,8 +94,8 @@ setmetatable(Astrolabe.EdgeRangeMultiplier,
 	}
 );
 
--- This variable indicates whether we know of a visible World Map or not.
--- The state of this variable is controlled by the AstrolabeMapMonitor library.
+-- This variable indicates whether we know of a visible World Map or not.  
+-- The state of this variable is controlled by the AstrolabeMapMonitor library.  
 Astrolabe.WorldMapVisible = false;
 
 local AddedOrUpdatedIcons = {}
@@ -125,7 +123,7 @@ local issecurevariable = issecurevariable
 local real_GetCurrentMapAreaID = GetCurrentMapAreaID
 local function GetCurrentMapAreaID()
 	local id = real_GetCurrentMapAreaID();
-	if ( id < 0 and GetCurrentMapContinent() == WORLDMAP_WORLD_ID ) then
+	if ( id < 0 and GetCurrentMapContinent() == WORLDMAP_AZEROTH_ID ) then
 		return 0;
 	end
 	return id;
@@ -143,12 +141,12 @@ local function assert(level,condition,message)
 end
 
 local function argcheck(value, num, ...)
-	assert(1, type(num) == "number", "Bad argument #2 to 'argcheck' (number expected, got " .. type(level) .. ")")
-
+	assert(1, type(num) == "number", "Bad argument #2 to 'argcheck' (number expected, got " .. type(num) .. ")")
+	
 	for i=1,select("#", ...) do
 		if type(value) == select(i, ...) then return end
 	end
-
+	
 	local types = strjoin(", ", ...)
 	local name = string.match(debugstack(2,2,0), ": in function [`<](.-)['>]")
 	error(string.format("Bad argument #%d to 'Astrolabe.%s' (%s expected, got %s)", num, name, types, type(value)), 3)
@@ -187,11 +185,11 @@ function Astrolabe:ComputeDistance( m1, f1, x1, y1, m2, f2, x2, y2 )
 	argcheck(x2, 8, "number");
 	argcheck(y2, 9, "number");
 	--]]
-
+	
 	if not ( m1 and m2 ) then return end;
 	f1 = f1 or min(#WorldMapSize[m1], 1);
 	f2 = f2 or min(#WorldMapSize[m2], 1);
-
+	
 	local dist, xDelta, yDelta;
 	if ( m1 == m2 and f1 == f2 ) then
 		-- points in the same zone on the same floor
@@ -201,7 +199,7 @@ function Astrolabe:ComputeDistance( m1, f1, x1, y1, m2, f2, x2, y2 )
 		end
 		xDelta = (x2 - x1) * mapData.width;
 		yDelta = (y2 - y1) * mapData.height;
-
+	
 	else
 		local map1 = WorldMapSize[m1];
 		local map2 = WorldMapSize[m2];
@@ -211,7 +209,7 @@ function Astrolabe:ComputeDistance( m1, f1, x1, y1, m2, f2, x2, y2 )
 			x2, y2 = getSystemPosition(map2, f2, x2, y2);
 			xDelta = (x2 - x1);
 			yDelta = (y2 - y1);
-
+		
 		else
 			local s1 = map1.system;
 			local s2 = map2.system;
@@ -228,15 +226,15 @@ function Astrolabe:ComputeDistance( m1, f1, x1, y1, m2, f2, x2, y2 )
 					-- translate up from system 2
 					local cont2 = WorldMapSize[0][s2];
 					x2 = (x2 - cont2.xOffset) * cont2.scale;
-					y2 = (y2 - cont2.yOffset) * cont2.scale;
+					y2 = (y2 - cont2.yOffset) * cont2.scale; 
 				end
-
+				
 				xDelta = x2 - x1;
 				yDelta = y2 - y1;
 			end
-
+		
 		end
-
+	
 	end
 	if ( xDelta and yDelta ) then
 		dist = sqrt(xDelta*xDelta + yDelta*yDelta);
@@ -253,18 +251,18 @@ function Astrolabe:TranslateWorldMapPosition( M, F, xPos, yPos, nM, nF )
 	argcheck(nM, 6, "number");
 	argcheck(nF, 7, "number", "nil");
 	--]]
-
+	
 	if not ( M and nM ) then return end;
 	F = F or min(#WorldMapSize[M], 1);
 	nF = nF or min(#WorldMapSize[nM], 1);
 	if ( nM < 0 ) then
 		return;
 	end
-
+	
 	local mapData;
 	if ( M == nM and F == nF ) then
 		return xPos, yPos;
-
+	
 	else
 		local map = WorldMapSize[M];
 		local nMap = WorldMapSize[nM];
@@ -275,7 +273,7 @@ function Astrolabe:TranslateWorldMapPosition( M, F, xPos, yPos, nM, nF )
 			if ( nF ~= 0 ) then
 				mapData = rawget(mapData, nF) or MicroDungeonSize[mapData.originSystem][nF];
 			end
-
+		
 		else
 			-- different continents, same world
 			local S = map.system;
@@ -300,26 +298,26 @@ function Astrolabe:TranslateWorldMapPosition( M, F, xPos, yPos, nM, nF )
 						mapData = rawget(mapData, nF) or MicroDungeonSize[mapData.originSystem][nF];
 					end
 				end
-
+			
 			else
 				return;
 			end
-
+		
 		end
 		-- need to account for the offset in the new system so we can
 		-- correctly translate into 0-1 style coordinates
 		xPos = xPos - mapData.xOffset;
 		yPos = yPos - mapData.yOffset;
-
+	
 	end
-
+	
 	return (xPos / mapData.width), (yPos / mapData.height);
 end
 
 --*****************************************************************************
--- This function will do its utmost to retrieve some sort of valid position
--- for the specified unit, including changing the current map zoom (if needed).
--- Map Zoom is returned to its previous setting before this function returns.
+-- This function will do its utmost to retrieve some sort of valid position 
+-- for the specified unit, including changing the current map zoom (if needed).  
+-- Map Zoom is returned to its previous setting before this function returns.  
 --*****************************************************************************
 function Astrolabe:GetUnitPosition( unit, noMapChange )
 	local x, y = GetPlayerMapPosition(unit);
@@ -336,10 +334,10 @@ function Astrolabe:GetUnitPosition( unit, noMapChange )
 			-- attempt to zoom out once - logic copied from WorldMapZoomOutButton_OnClick()
 				if ( ZoomOut() ) then
 					-- do nothing
-				elseif ( GetCurrentMapZone() ~= WORLDMAP_WORLD_ID ) then
+				elseif ( GetCurrentMapZone() ~= WORLDMAP_AZEROTH_ID ) then
 					SetMapZoom(GetCurrentMapContinent());
 				else
-					SetMapZoom(WORLDMAP_WORLD_ID);
+					SetMapZoom(WORLDMAP_AZEROTH_ID);
 				end
 			x, y = GetPlayerMapPosition(unit);
 			if ( x <= 0 and y <= 0 ) then
@@ -359,18 +357,18 @@ function Astrolabe:GetUnitPosition( unit, noMapChange )
 end
 
 --*****************************************************************************
--- This function will do its utmost to retrieve some sort of valid position
--- for the specified unit, including changing the current map zoom (if needed).
--- However, if a monitored WorldMapFrame (See AstrolabeMapMonitor.lua) is
--- visible, then will simply return nil if the current zoom does not provide
--- a valid position for the player unit.  Map Zoom is NOT returned to its previous
--- setting before this function returns, in order to provide better performance.
+-- This function will do its utmost to retrieve some sort of valid position 
+-- for the specified unit, including changing the current map zoom (if needed).  
+-- However, if a monitored WorldMapFrame (See AstrolabeMapMonitor.lua) is 
+-- visible, then will simply return nil if the current zoom does not provide 
+-- a valid position for the player unit.  Map Zoom is NOT returned to its previous 
+-- setting before this function returns, in order to provide better performance.  
 --*****************************************************************************
 function Astrolabe:GetCurrentPlayerPosition()
 	local x, y = GetPlayerMapPosition("player");
 	if ( x <= 0 and y <= 0 ) then
 		if ( self.WorldMapVisible ) then
-			-- we know there is a visible world map, so don't cause
+			-- we know there is a visible world map, so don't cause 
 			-- WORLD_MAP_UPDATE events by changing map zoom
 			return;
 		end
@@ -380,10 +378,10 @@ function Astrolabe:GetCurrentPlayerPosition()
 			-- attempt to zoom out once - logic copied from WorldMapZoomOutButton_OnClick()
 				if ( ZoomOut() ) then
 					-- do nothing
-				elseif ( GetCurrentMapZone() ~= WORLDMAP_WORLD_ID ) then
+				elseif ( GetCurrentMapZone() ~= WORLDMAP_AZEROTH_ID ) then
 					SetMapZoom(GetCurrentMapContinent());
 				else
-					SetMapZoom(WORLDMAP_WORLD_ID);
+					SetMapZoom(WORLDMAP_AZEROTH_ID);
 				end
 			x, y = GetPlayerMapPosition("player");
 			if ( x <= 0 and y <= 0 ) then
@@ -417,7 +415,7 @@ function Astrolabe:GetMapInfo( mapID, mapFloor )
 	argcheck(mapID, 2, "number");
 	assert(3, mapID >= 0, "GetMapInfo: Illegal map id to mapID: "..mapID);
 	argcheck(mapFloor, 3, "number", "nil");
-
+	
 	mapFloor = mapFloor or min(#WorldMapSize[mapID], 1);
 	local mapData = WorldMapSize[mapID];
 	local system, systemParent = mapData.system, WorldMapSize[0][mapData.system] and true or false
@@ -482,7 +480,7 @@ local function placeIconOnMinimap( minimap, minimapZoom, mapWidth, mapHeight, ic
 	local iconDiameter = ((icon:GetWidth() / 2) + 3) * xScale;
 	local iconOnEdge = nil;
 	local isRound = true;
-
+	
 	if ( minimapRotationEnabled ) then
 		local sinTheta = sin(minimapRotationOffset)
 		local cosTheta = cos(minimapRotationOffset)
@@ -492,19 +490,19 @@ local function placeIconOnMinimap( minimap, minimapZoom, mapWidth, mapHeight, ic
 			local dx, dy = xDist, -yDist
 			xDist = (dx * cosTheta) + (dy * sinTheta)
 			yDist = -((-dx * sinTheta) + (dy * cosTheta))
-
+		
 		This is because the origin for map coordinates is the top left corner
-		of the map, not the bottom left, and so we have to reverse the vertical
-		distance when doing the our rotation, and then reverse the result vertical
-		distance because this rotation formula gives us a result with the origin based
-		in the bottom left corner (of the (+, +) quadrant).
-		The actual code is a simplification of the above.
+		of the map, not the bottom left, and so we have to reverse the vertical 
+		distance when doing the our rotation, and then reverse the result vertical 
+		distance because this rotation formula gives us a result with the origin based 
+		in the bottom left corner (of the (+, +) quadrant).  
+		The actual code is a simplification of the above.  
 		]]
 		local dx, dy = xDist, yDist
 		xDist = (dx * cosTheta) - (dy * sinTheta)
 		yDist = (dx * sinTheta) + (dy * cosTheta)
 	end
-
+	
 	if ( minimapShape and not (xDist == 0 or yDist == 0) ) then
 		isRound = (xDist < 0) and 1 or 3;
 		if ( yDist < 0 ) then
@@ -513,7 +511,7 @@ local function placeIconOnMinimap( minimap, minimapZoom, mapWidth, mapHeight, ic
 			isRound = minimapShape[isRound + 1];
 		end
 	end
-
+	
 	-- for non-circular portions of the Minimap edge
 	if not ( isRound ) then
 		dist = max(abs(xDist), abs(yDist))
@@ -526,12 +524,12 @@ local function placeIconOnMinimap( minimap, minimapZoom, mapWidth, mapHeight, ic
 		xDist = xDist * factor;
 		yDist = yDist * factor;
 	end
-
+	
 	if ( Astrolabe.IconsOnEdge[icon] ~= iconOnEdge ) then
 		Astrolabe.IconsOnEdge[icon] = iconOnEdge;
 		Astrolabe.IconsOnEdgeChanged = true;
 	end
-
+	
 	icon:ClearAllPoints();
 	icon:SetPoint("CENTER", minimap, "CENTER", xDist/xScale, -yDist/yScale);
 end
@@ -544,7 +542,7 @@ function Astrolabe:PlaceIconOnMinimap( icon, mapID, mapFloor, xPos, yPos )
 	argcheck(mapFloor, 4, "number", "nil");
 	argcheck(xPos, 5, "number");
 	argcheck(yPos, 6, "number");
-
+	
 	-- if the positining system is currently active, just use the player position used by the last incremental (or full) update
 	-- otherwise, make sure we base our calculations off of the most recent player position (if one is available)
 	local lM, lF, lx, ly;
@@ -562,20 +560,20 @@ function Astrolabe:PlaceIconOnMinimap( icon, mapID, mapFloor, xPos, yPos )
 			lM, lF, lx, ly = unpack(self.LastPlayerPosition);
 		end
 	end
-
+	
 	local dist, xDist, yDist = self:ComputeDistance(lM, lF, lx, ly, mapID, mapFloor, xPos, yPos);
 	if not ( dist ) then
 		--icon's position has no meaningful position relative to the player's current location
 		return -1;
 	end
-
+	
 	local iconData = GetWorkingTable(icon);
 	if ( self.MinimapIcons[icon] ) then
 		self.MinimapIcons[icon] = nil;
 	else
 		self.MinimapIconCount = self.MinimapIconCount + 1
 	end
-
+	
 	AddedOrUpdatedIcons[icon] = iconData
 	iconData.mapID = mapID;
 	iconData.mapFloor = mapFloor;
@@ -584,15 +582,15 @@ function Astrolabe:PlaceIconOnMinimap( icon, mapID, mapFloor, xPos, yPos )
 	iconData.dist = dist;
 	iconData.xDist = xDist;
 	iconData.yDist = yDist;
-
+	
 	minimapRotationEnabled = GetCVar("rotateMinimap") ~= "0"
 	if ( minimapRotationEnabled ) then
 		minimapRotationOffset = GetPlayerFacing();
 	end
-
+	
 	-- check Minimap Shape
 	minimapShape = GetMinimapShape and ValidMinimapShapes[GetMinimapShape()];
-
+	
 	-- place the icon on the Minimap and :Show() it
 	local map = self.Minimap
 	placeIconOnMinimap(map, map:GetZoom(), map:GetWidth(), map:GetHeight(), icon, dist, xDist, yDist, self.EdgeRangeMultiplier[icon]);
@@ -614,10 +612,10 @@ function Astrolabe:PlaceIconOnMinimap( icon, mapID, mapFloor, xPos, yPos )
 		end
 	end
 	icon:Show()
-
-	-- We know this icon's position is valid, so we need to make sure the icon placement system is active.
+	
+	-- We know this icon's position is valid, so we need to make sure the icon placement system is active.  
 	self.processingFrame:Show()
-
+	
 	return 0;
 end
 
@@ -629,7 +627,7 @@ function Astrolabe:RemoveIconFromMinimap( icon )
 	self.MinimapIcons[icon] = nil;
 	self.IconsOnEdge[icon] = nil;
 	icon:Hide();
-
+	
 	local MinimapIconCount = self.MinimapIconCount - 1
 	if ( MinimapIconCount <= 0 ) then
 		-- no icons left to manage
@@ -637,7 +635,7 @@ function Astrolabe:RemoveIconFromMinimap( icon )
 		MinimapIconCount = 0 -- because I'm paranoid
 	end
 	self.MinimapIconCount = MinimapIconCount
-
+	
 	return 0;
 end
 
@@ -654,14 +652,14 @@ function Astrolabe:RemoveAllMinimapIcons( assocName )
 		end
 		self.MinimapIconCount = 0;
 		self.processingFrame:Hide();
-
+	
 	else -- remove just icons that match the specified association
 		for icon, iconAssoc in pairs(self.IconAssociations) do
 			if ( iconAssoc == assocName ) then
 				self:RemoveIconFromMinimap(icon)
 			end
 		end
-
+	
 	end
 end
 
@@ -677,34 +675,34 @@ do
 	-- local variables to track the incremental update coroutine
 	local incrementalUpdateCrashed = true
 	local incrementalUpdateThread
-
+	
 	local function UpdateMinimapIconPositions( self )
 		-- cache a reference to EdgeRangeMultiplier, for performance
 		local EdgeRangeMultiplier = self.EdgeRangeMultiplier;
 		yield()
-
+		
 		while ( true ) do
 			self:DumpNewIconsCache() -- put new/updated icons into the main datacache
-
+			
 			resetIncrementalUpdate = false -- by definition, the incremental update is reset if it is here
-
+			
 			local M, F, x, y = self:GetCurrentPlayerPosition();
 			if ( M and M >= 0 ) then
 				local Minimap = Astrolabe.Minimap;
 				local lastPosition = self.LastPlayerPosition;
 				local lM, lF, lx, ly = unpack(lastPosition);
-
+				
 				minimapRotationEnabled = GetCVar("rotateMinimap") ~= "0"
 				if ( minimapRotationEnabled ) then
 					minimapRotationOffset = GetPlayerFacing();
 				end
-
+				
 				-- check current frame rate
 				local numPerCycle = min(50, GetFramerate() * (self.MinimapUpdateMultiplier or 1))
-
+				
 				-- check Minimap Shape
 				minimapShape = GetMinimapShape and ValidMinimapShapes[GetMinimapShape()];
-
+				
 				if ( lM == M and lF == F and lx == x and ly == y ) then
 					-- player has not moved since the last update
 					if ( lastZoom ~= Minimap:GetZoom() or self.ForceNextUpdate or minimapRotationEnabled ) then
@@ -716,12 +714,12 @@ do
 						local count = 0
 						for icon, data in pairs(self.MinimapIcons) do
 							placeIconOnMinimap(Minimap, currentZoom, mapWidth, mapHeight, icon, data.dist, data.xDist, data.yDist, EdgeRangeMultiplier[icon]);
-
+							
 							count = count + 1
 							if ( count > numPerCycle ) then
 								count = 0
 								yield()
-								-- check if the incremental update cycle needs to be reset
+								-- check if the incremental update cycle needs to be reset 
 								-- because a full update has been run
 								if ( resetIncrementalUpdate ) then
 									break;
@@ -743,16 +741,16 @@ do
 							local yDist = data.yDist - yDelta;
 							local dist = sqrt(xDist*xDist + yDist*yDist);
 							placeIconOnMinimap(Minimap, currentZoom, mapWidth, mapHeight, icon, dist, xDist, yDist, EdgeRangeMultiplier[icon]);
-
+							
 							data.dist = dist;
 							data.xDist = xDist;
 							data.yDist = yDist;
-
+							
 							count = count + 1
 							if ( count >= numPerCycle ) then
 								count = 0
 								yield()
-								-- check if the incremental update cycle needs to be reset
+								-- check if the incremental update cycle needs to be reset 
 								-- because a full update has been run
 								if ( resetIncrementalUpdate ) then
 									break;
@@ -778,14 +776,14 @@ do
 					self.processingFrame:Hide();
 				end
 			end
-
+			
 			-- if we've been reset, then we want to start the new cycle immediately
 			if not ( resetIncrementalUpdate ) then
 				yield()
 			end
 		end
 	end
-
+	
 	function Astrolabe:UpdateMinimapIconPositions()
 		if ( fullUpdateInProgress ) then
 			-- if we're in the middle a a full update, we want to finish that first
@@ -807,18 +805,18 @@ do
 	-- local variables to track the full update coroutine
 	local fullUpdateCrashed = true
 	local fullUpdateThread
-
+	
 	local function CalculateMinimapIconPositions( self )
 		-- cache a reference to EdgeRangeMultiplier, for performance
 		local EdgeRangeMultiplier = self.EdgeRangeMultiplier;
 		yield()
-
+		
 		while ( true ) do
 			self:DumpNewIconsCache() -- put new/updated icons into the main datacache
-
+			
 			resetFullUpdate = false -- by definition, the full update is reset if it is here
 			fullUpdateInProgress = true -- set the flag the says a full update is in progress
-
+			
 			local M, F, x, y = self:GetCurrentPlayerPosition();
 			if ( M and M >= 0 ) then
 				local Minimap = Astrolabe.Minimap;
@@ -826,13 +824,13 @@ do
 				if ( minimapRotationEnabled ) then
 					minimapRotationOffset = GetPlayerFacing();
 				end
-
+				
 				-- check current frame rate
 				local numPerCycle = GetFramerate() * (self.MinimapUpdateMultiplier or 1) * 2
-
+				
 				-- check Minimap Shape
 				minimapShape = GetMinimapShape and ValidMinimapShapes[GetMinimapShape()];
-
+				
 				local currentZoom = Minimap:GetZoom();
 				lastZoom = currentZoom;
 				local mapWidth = Minimap:GetWidth();
@@ -842,14 +840,14 @@ do
 					local dist, xDist, yDist = self:ComputeDistance(M, F, x, y, data.mapID, data.mapFloor, data.xPos, data.yPos);
 					if ( dist ) then
 						placeIconOnMinimap(Minimap, currentZoom, mapWidth, mapHeight, icon, dist, xDist, yDist, EdgeRangeMultiplier[icon]);
-
+						
 						data.dist = dist;
 						data.xDist = xDist;
 						data.yDist = yDist;
 					else
 						self:RemoveIconFromMinimap(icon)
 					end
-
+					
 					count = count + 1
 					if ( count >= numPerCycle ) then
 						count = 0
@@ -860,14 +858,14 @@ do
 						end
 					end
 				end
-
+				
 				if not ( resetFullUpdate ) then
 					local lastPosition = self.LastPlayerPosition;
 					lastPosition[1] = M;
 					lastPosition[2] = F;
 					lastPosition[3] = x;
 					lastPosition[4] = y;
-
+					
 					resetIncrementalUpdate = true
 				end
 			else
@@ -875,7 +873,7 @@ do
 					self.processingFrame:Hide();
 				end
 			end
-
+			
 			-- if we've been reset, then we want to start the new cycle immediately
 			if not ( resetFullUpdate ) then
 				fullUpdateInProgress = false
@@ -883,7 +881,7 @@ do
 			end
 		end
 	end
-
+	
 	function Astrolabe:CalculateMinimapIconPositions( reset )
 		if ( fullUpdateCrashed ) then
 			fullUpdateThread = coroutine.wrap(CalculateMinimapIconPositions)
@@ -894,18 +892,18 @@ do
 		fullUpdateCrashed = true
 		fullUpdateThread()
 		fullUpdateCrashed = false
-
+		
 		-- return result flag
 		if ( fullUpdateInProgress ) then
 			return 1 -- full update started, but did not complete on this cycle
-
+		
 		else
 			if ( resetIncrementalUpdate ) then
 				return 0 -- update completed
 			else
 				return -1 -- full update did no occur for some reason
 			end
-
+		
 		end
 	end
 end
@@ -950,7 +948,7 @@ function Astrolabe:SetEdgeRangeMultiplier( multiplier, assocName )
 	argcheck(assocName, 3, "string", "nil");
 	assert(3, (multiplier or assocName), "Astrolabe:SetEdgeRangeMultiplier( multiplier, [assocName] ) - at least one argument must be specificed");
 	assert(3, (not multiplier or multiplier > 0), "Astrolabe:SetEdgeRangeMultiplier( multiplier, [assocName] ) - mutliplier must be greater than zero");
-
+	
 	local EdgeRangeMultiplier = self.EdgeRangeMultiplier;
 	local IconAssociations = self.IconAssociations;
 	if ( assocName == nil ) then
@@ -993,7 +991,7 @@ function Astrolabe:SetTargetMinimap( newMinimap )
 	assert(3, newMinimap.IsObjectType, "Astrolabe:SetTargetMinimap( newMinimap ) - argument is not a Minimap");
 	assert(3, type(newMinimap.IsObjectType) == "function", "Astrolabe:SetTargetMinimap( newMinimap ) - argument is not a Minimap");
 	assert(3, newMinimap:IsObjectType("Minimap"), "Astrolabe:SetTargetMinimap( newMinimap ) - argument is not a Minimap");
-
+	
 	local oldMinimap = self.Minimap;
 	self.processingFrame:SetParent(newMinimap);
 	self.Minimap = newMinimap;
@@ -1008,7 +1006,7 @@ function Astrolabe:SetTargetMinimap( newMinimap )
 			end
 		end
 	end
-
+	
 	for func in pairs(self.TargetMinimapChanged_Callbacks) do
 		pcall(func);
 	end
@@ -1017,7 +1015,7 @@ end
 function Astrolabe:Register_TargetMinimapChanged_Callback( func, ident )
 	-- check argument types
 	argcheck(func, 2, "function");
-
+	
 	self.TargetMinimapChanged_Callbacks[func] = ident;
 end
 
@@ -1051,10 +1049,10 @@ function Astrolabe:PlaceIconOnWorldMap( worldMapFrame, icon, mapID, mapFloor, xP
 	argcheck(mapFloor, 5, "number", "nil");
 	argcheck(xPos, 6, "number");
 	argcheck(yPos, 7, "number");
-
+	
 	local M, F = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel();
 	local nX, nY = self:TranslateWorldMapPosition(mapID, mapFloor, xPos, yPos, M, F);
-
+	
 	-- anchor and :Show() the icon if it is within the boundry of the current map, :Hide() it otherwise
 	if ( nX and nY and (0 < nX and nX <= 1) and (0 < nY and nY <= 1) ) then
 		icon:ClearAllPoints();
@@ -1089,31 +1087,31 @@ function Astrolabe:OnEvent( frame, event )
 			self.minimapOutside = false;
 		end
 		Minimap:SetZoom(curZoom);
-
+		
 		-- re-calculate all Minimap Icon positions
 		if ( frame:IsVisible() ) then
 			self:CalculateMinimapIconPositions(true);
 		end
-
+	
 	elseif ( event == "PLAYER_LEAVING_WORLD" ) then
 		frame:Hide(); -- yes, I know this is redunant
 		self:RemoveAllMinimapIcons(); --dump all minimap icons
 		-- TODO: when I uncouple the point buffer from Minimap drawing,
-		--	   I should consider updating LastPlayerPosition here
-
+		--       I should consider updating LastPlayerPosition here
+	
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		frame:Show();
 		if not ( frame:IsVisible() ) then
 			-- do the minimap recalculation anyways if the OnShow script didn't execute
-			-- this is done to ensure the accuracy of information about icons that were
+			-- this is done to ensure the accuracy of information about icons that were 
 			-- inserted while the Player was in the process of zoning
 			self:CalculateMinimapIconPositions(true);
 		end
-
+	
 	elseif ( event == "ZONE_CHANGED_NEW_AREA" ) then
 		frame:Hide();
 		frame:Show();
-
+	
 	end
 end
 
@@ -1125,7 +1123,7 @@ function Astrolabe:OnUpdate( frame, elapsed )
 			pcall(func);
 		end
 	end
-
+	
 	self:UpdateMinimapIconPositions();
 end
 
@@ -1139,7 +1137,7 @@ function Astrolabe:OnShow( frame )
 		frame:Hide();
 		return
 	end
-
+	
 	-- re-calculate minimap icon positions (if needed)
 	if ( next(self.MinimapIcons) ) then
 		self:CalculateMinimapIconPositions(true);
@@ -1147,7 +1145,7 @@ function Astrolabe:OnShow( frame )
 		-- needed so that the cycle doesn't overwrite an updated LastPlayerPosition
 		resetIncrementalUpdate = true;
 	end
-
+	
 	if ( self.MinimapIconCount <= 0 ) then
 		-- no icons left to manage
 		frame:Hide();
@@ -1217,7 +1215,7 @@ local function activate( newInstance, oldInstance )
 		-- print upgrade debug info
 		local _, oldVersion = oldInstance:GetVersion();
 		printError("Upgrading "..LIBRARY_VERSION_MAJOR.." from version "..oldVersion.." to version "..LIBRARY_VERSION_MINOR);
-
+		
 		if ( oldInstance.DumpNewIconsCache ) then
 			oldInstance:DumpNewIconsCache()
 		end
@@ -1232,10 +1230,10 @@ local function activate( newInstance, oldInstance )
 			iconCount = iconCount + 1
 		end
 		newInstance.MinimapIconCount = iconCount
-
+		
 		-- explicity carry over our Minimap reference, or create it if we don't already have one
 		newInstance.Minimap = oldInstance.Minimap or _G.Minimap
-
+		
 		Astrolabe = oldInstance;
 	else
 		newInstance.Minimap = _G.Minimap
@@ -1243,11 +1241,11 @@ local function activate( newInstance, oldInstance )
 		newInstance.processingFrame = frame;
 	end
 	configConstants = nil -- we don't need this anymore
-
+	
 	if not ( oldInstance and oldInstance.HarvestedMapData.VERSION == HARVESTED_DATA_VERSION ) then
 		newInstance.HarvestedMapData = { VERSION = HARVESTED_DATA_VERSION };
 		local HarvestedMapData = newInstance.HarvestedMapData;
-
+		
 		local continents = {GetMapContinents()};
 		newInstance.ContinentList = {};
 		for C = 1, (#continents / 2) do
@@ -1263,7 +1261,7 @@ local function activate( newInstance, oldInstance )
 				harvestMapData(HarvestedMapData);
 			end
 		end
-
+		
 		for _, id in ipairs(GetAreaMaps()) do
 			if not ( HarvestedMapData[id] ) then
 				if ( SetMapByID(id) ) then
@@ -1271,89 +1269,8 @@ local function activate( newInstance, oldInstance )
 				end
 			end
 		end
-
-		-- worldMapIDs who have the bit 2 flag set cannot be displayed via SetMapByID and therefore will get no information from the above code.
-		-- We work around this by remapping them where possible since their characteristics usually are based off another worldMapID anyway.
-		local HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS = {
-			[681] = HarvestedMapData[544], --["TheLostIsles_terrain1"] = "TheLostIsles",
-			[682] = HarvestedMapData[544], --["TheLostIsles_terrain2"] = "TheLostIsles",
-			[683] = HarvestedMapData[606], --["Hyjal_terrain1"] = "Hyjal",
-			[748] = HarvestedMapData[720], --["Uldum_terrain1"] = "Uldum",
-			[770] = HarvestedMapData[700], --["TwilightHighlands_terrain1"] = "TwilightHighlands",
-			[907] = HarvestedMapData[141], --["Dustwallow_terrain1"] = "Dustwallow",
-			[910] = HarvestedMapData[857], --["Krasarang_terrain1"] = "Krasarang",
-			-- In the following 2 cases, there is no existing map ID with these properties.
-			-- Additionally, the client can access this map by itself but only after a /reload (and only one of the two maps per faction of requesting character)
-			-- It is unknown why this is the case; it is probably a bug with the game.
-			[971] = {
-				["mapName"] = "garrisonsmvalliance",
-				["cont"] = 7,
-				["zone"] = 7,
-				["numFloors"] = 0,
-				[0] = {},
-			},
-			[976] = {
-				["mapName"] = "garrisonffhorde",
-				["cont"] = 7,
-				["zone"] = 3,
-				["numFloors"] = 0,
-				[0] = {},
-			},
-			[992] = HarvestedMapData[19], -- ["BlastedLands_terrain1"] = "BlastedLands",
-		}
-
-		-- While MapID 971 is not accessible by most of the API, we -can- get the coordinate info, so we don't have to hardcode that.
-		local _, _, _, TLx, BRx, TLy, BRy, _, _, _ = GetAreaMapInfo(971)
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971][0].TLx = TLx
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971][0].TLy = TLy
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971][0].BRx = BRx
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971][0].BRy = BRy
-
-		-- Alternate mapIDs for 971 (Alliance Garrison)
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[973] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[974] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[975] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[991] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[971]
-
-		-- While MapID 976 is not accessible by most of the API, we -can- get the coordinate info, so we don't have to hardcode that.
-		_, _, _, TLx, BRx, TLy, BRy, _, _, _ = GetAreaMapInfo(976)
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976][0].TLx = TLx
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976][0].TLy = TLy
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976][0].BRx = BRx
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976][0].BRy = BRy
-
-		-- Alternate mapIDs for 976 (Horde Garrison)
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[980] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[981] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[982] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976]
-		HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[990] = HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS[976]
-
-		-- Distribute hardcoded (and specially harvested in the case of 971/976) information to HarvestedMapData
-		for id, data in pairs(HARDCODED_MAP_INFORMATION_FOR_UNOBTAINABLE_MAPIDS) do
-			if not HarvestedMapData[id] then
-				-- Copy table contents
-				HarvestedMapData[id] = {}
-				HarvestedMapData[id].mapName = data.mapName
-				HarvestedMapData[id].cont = data.cont
-				HarvestedMapData[id].zone = data.zone
-				HarvestedMapData[id].numFloors = data.numFloors
-				HarvestedMapData[id].hiddenFloor = data.hiddenFloor
-				-- Copy floors
-				if ( data.numFloors ) then
-					for f = 0, data.numFloors do
-						if ( data[f] and data[f].TLx and data[f].TLy and data[f].BRx and data[f].BRy ) then
-							HarvestedMapData[id][f] = {}
-							HarvestedMapData[id][f].TLx = data[f].TLx
-							HarvestedMapData[id][f].TLy = data[f].TLy
-							HarvestedMapData[id][f].BRx = data[f].BRx
-							HarvestedMapData[id][f].BRy = data[f].BRy
-						end
-					end
-				end
-			end
-		end
 	end
-
+	
 	local Minimap = newInstance.Minimap
 	local frame = newInstance.processingFrame;
 	frame:Hide();
@@ -1383,7 +1300,7 @@ local function activate( newInstance, oldInstance )
 			Astrolabe:OnHide(frame);
 		end
 	);
-
+	
 	setmetatable(Astrolabe.MinimapIcons, MinimapIconsMetatable)
 end
 
@@ -1407,27 +1324,27 @@ MinimapSize = {
 	},
 	outdoor = {
 		[0] = 466 + 2/3, -- scale
-		[1] = 400,	   -- 7/6
+		[1] = 400,       -- 7/6
 		[2] = 333 + 1/3, -- 1.4
 		[3] = 266 + 2/6, -- 1.75
-		[4] = 200,	   -- 7/3
+		[4] = 200,       -- 7/3
 		[5] = 133 + 1/3, -- 3.5
 	},
 }
 
 ValidMinimapShapes = {
 	-- { upper-left, lower-left, upper-right, lower-right }
-	["SQUARE"]				= { false, false, false, false },
-	["CORNER-TOPLEFT"]		= { true,  false, false, false },
-	["CORNER-TOPRIGHT"]	   = { false, false, true,  false },
-	["CORNER-BOTTOMLEFT"]	 = { false, true,  false, false },
-	["CORNER-BOTTOMRIGHT"]	= { false, false, false, true },
-	["SIDE-LEFT"]			 = { true,  true,  false, false },
-	["SIDE-RIGHT"]			= { false, false, true,  true },
-	["SIDE-TOP"]			  = { true,  false, true,  false },
-	["SIDE-BOTTOM"]		   = { false, true,  false, true },
-	["TRICORNER-TOPLEFT"]	 = { true,  true,  true,  false },
-	["TRICORNER-TOPRIGHT"]	= { true,  false, true,  true },
+	["SQUARE"]                = { false, false, false, false },
+	["CORNER-TOPLEFT"]        = { true,  false, false, false },
+	["CORNER-TOPRIGHT"]       = { false, false, true,  false },
+	["CORNER-BOTTOMLEFT"]     = { false, true,  false, false },
+	["CORNER-BOTTOMRIGHT"]    = { false, false, false, true },
+	["SIDE-LEFT"]             = { true,  true,  false, false },
+	["SIDE-RIGHT"]            = { false, false, true,  true },
+	["SIDE-TOP"]              = { true,  false, true,  false },
+	["SIDE-BOTTOM"]           = { false, true,  false, true },
+	["TRICORNER-TOPLEFT"]     = { true,  true,  true,  false },
+	["TRICORNER-TOPRIGHT"]    = { true,  false, true,  true },
 	["TRICORNER-BOTTOMLEFT"]  = { true,  true,  false, true },
 	["TRICORNER-BOTTOMRIGHT"] = { false, true,  true,  true },
 }
@@ -1465,6 +1382,89 @@ WorldMapSize = {
 }
 
 MicroDungeonSize = {}
+
+-- SetMapByID does not work for mapID 971 or 976 during the first UI load since the client was started, so we have to hardcode their information.
+local HARDCODED_MAP_INFORMATION = {
+    [971] = {
+        ["mapName"] = "garrisonsmvalliance",
+        ["cont"] = 7,
+        ["zone"] = 7,
+        ["numFloors"] = 0,
+        [0] = {},
+    },
+    [976] = {
+        ["mapName"] = "garrisonffhorde",
+        ["cont"] = 7,
+        ["zone"] = 3,
+        ["numFloors"] = 0,
+        [0] = {},
+    },
+}
+-- Distribute data from hardcoding to their maps
+for mapID, data in pairs(HARDCODED_MAP_INFORMATION) do
+    -- Only distribute the information if we didn't get it through other means
+    if ( not Astrolabe.HarvestedMapData[mapID] ) then
+        -- Copy table contents
+        Astrolabe.HarvestedMapData[mapID] = {}
+        Astrolabe.HarvestedMapData[mapID].mapName = data.mapName
+        Astrolabe.HarvestedMapData[mapID].cont = data.cont
+        Astrolabe.HarvestedMapData[mapID].zone = data.zone
+        Astrolabe.HarvestedMapData[mapID].numFloors = data.numFloors
+        Astrolabe.HarvestedMapData[mapID].hiddenFloor = data.hiddenFloor
+        Astrolabe.HarvestedMapData[mapID][0] = {}
+        -- While these mapIDs are not accessible by most of the API, we -can- get base floor coordinate info, so we don't have to hardcode that.
+        local _, _, _, TLx, BRx, TLy, BRy, _, _, _ = GetAreaMapInfo(mapID)
+        Astrolabe.HarvestedMapData[mapID][0].TLx = TLx
+        Astrolabe.HarvestedMapData[mapID][0].TLy = TLy
+        Astrolabe.HarvestedMapData[mapID][0].BRx = BRx
+        Astrolabe.HarvestedMapData[mapID][0].BRy = BRy
+    end
+end
+
+-- worldMapIDs who have the bit 2 flag set cannot be displayed via SetMapByID and therefore will get no information from the above code.
+-- We work around this by remapping them where possible since their characteristics usually are based off another worldMapID anyway.
+local MAPS_TO_REMAP = {
+    [19] = {992}, -- BlastedLands_terrain1 = BlastedLands
+    [141] = {907}, -- Dustwallow = Dustwallow_terrain1
+    [544] = {681, 682}, -- TheLostIsles = TheLostIsles_terrain1, TheLostIsles_terrain2
+    [606] = {683}, -- Hyjal = Hyjal_terrain1
+    [700] = {770}, -- TwilightHighlands = TwilightHighlands_terrain1
+    [720] = {748}, -- Uldum = Uldum_terrain1
+    [857] = {910}, -- Krasarang = Krasarang_terrain1
+    [971] = {973, 974, 975, 991}, -- garrisonsmvalliance = garrisonsmvalliance_tier1, garrisonsmvalliance_tier3, garrisonsmvalliance_tier4, garrisonsmvalliance_tier2
+    [976] = {980, 981, 982, 990}, -- garrisonffhorde = garrisonffhorde_tier1, garrisonffhorde_tier3, garrisonffhorde_tier4, garrisonffhorde_tier2
+}
+-- Distribute data from valid maps to maps needing remapping
+for validMapID, remapMapIDs in pairs(MAPS_TO_REMAP) do
+    for _, currentRemapMapID in pairs(remapMapIDs) do
+        if ( Astrolabe.HarvestedMapData[validMapID] and not Astrolabe.HarvestedMapData[currentRemapMapID] ) then
+            -- Speed up accesses
+            local oldTable = Astrolabe.HarvestedMapData[validMapID]
+            Astrolabe.HarvestedMapData[currentRemapMapID] = {}
+            local newTable = Astrolabe.HarvestedMapData[currentRemapMapID]
+            
+            -- Copy table contents
+            newTable.mapName = oldTable.mapName
+            newTable.cont = oldTable.cont
+            newTable.zone = oldTable.zone
+            newTable.numFloors = oldTable.numFloors
+            newTable.hiddenFloor = oldTable.hiddenFloor
+            
+            -- Copy floors
+            if ( oldTable.numFloors ) then
+                for f = 0, oldTable.numFloors do
+                    if ( oldTable[f] and oldTable[f].TLx and oldTable[f].TLy and oldTable[f].BRx and oldTable[f].BRy ) then
+                        newTable[f] = {}
+                        newTable[f].TLx = oldTable[f].TLx
+                        newTable[f].TLy = oldTable[f].TLy
+                        newTable[f].BRx = oldTable[f].BRx
+                        newTable[f].BRy = oldTable[f].BRy
+                    end
+                end
+            end
+        end
+    end
+end
 
 
 --------------------------------------------------------------------------------------------------------------
@@ -1580,7 +1580,7 @@ for mapID, harvestedData in pairs(Astrolabe.HarvestedMapData) do
 			mapData.xOffset = mapData[1].xOffset
 			mapData.yOffset = mapData[1].yOffset
 		end
-
+	
 	else
 		local harvData = harvestedData[0]
 		if ( harvData ~= nil ) then
@@ -1624,10 +1624,10 @@ for mapID, harvestedData in pairs(Astrolabe.HarvestedMapData) do
 				printError("Astrolabe harvested a map with no data at all: ", mapID)
 			end
 		end
-
+	
 	end
-
-	-- if we don't have any data, we're gonna use zeroData, but we also need to
+	
+	-- if we don't have any data, we're gonna use zeroData, but we also need to 
 	-- setup the system and systemParent IDs so things don't get confused
 	if not ( next(mapData, nil) ) then
 		mapData = { xOffset = 0, height = 1, yOffset = 0, width = 1 };
@@ -1636,26 +1636,26 @@ for mapID, harvestedData in pairs(Astrolabe.HarvestedMapData) do
 			printError(("Astrolabe is missing data for world map %s [%d] (%d, %d)."):format(harvestedData.mapName, mapID, harvestedData.cont, harvestedData.zone));
 		end
 	end
-
+	
 	if not ( mapData.originSystem ) then
 		mapData.originSystem = originSystem;
 	end
-
+	
 	-- store the data in the WorldMapSize DB
 	WorldMapSize[mapID] = mapData;
-
-
+	
+	
 	if ( mapData and mapData ~= zeroData ) then
 		-- setup system IDs
 		if not ( mapData.system ) then
 			mapData.system = terrainMapID;
 		end
-
+		
 		-- determine terrainMapID for micro-dungeons
 		if ( harvestedData.cont > 0 and harvestedData.zone > 0 ) then
 			MicroDungeonSize[terrainMapID] = {}
 		end
-
+		
 		setmetatable(mapData, zeroData);
 	end
 end
@@ -1666,7 +1666,7 @@ Astrolabe.HarvestedMapData.VERSION = harvestedDataVersion
 -- micro dungeons
 for _, ID in ipairs(GetDungeonMaps()) do
 	local floorIndex, minX, maxX, minY, maxY, terrainMapID, parentWorldMapID, flags = GetDungeonMapInfo(ID);
-	if ( band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON ) then
+	if ( (WorldMapSize[parentWorldMapID] and not WorldMapSize[parentWorldMapID][floorIndex]) or (band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON) ) then
 		local TLx, TLy, BRx, BRy = -maxX, -maxY, -minX, -minY
 		-- apply any necessary transforms
 		local transformApplied = false
@@ -1700,6 +1700,11 @@ end
 -- done with Transforms data
 TRANSFORMS = nil
 
+-- Note: There is a potential bug that could come up here in the future.
+-- Example: ingame API returns mapID 857 floor 2 for a micro dungeon, while GetDungeonMapInfo lists the mapID as 910.
+-- Because Astrolabe sets up micro dungeon data using originSystems, there is no issue (857 and 910 share an originSystem) with any data at this point in time (Patch 6.1).
+-- However, the issue could surface in the future if Blizzard mislabeled an originSystem, hence the note placed here.
+
 for _, data in pairs(MicroDungeonSize) do
 	setmetatable(data, zeroData);
 end
@@ -1717,3 +1722,4 @@ setmetatable(WorldMapSize, zeroData); -- setup the metatable so that invalid map
 -- register this library with AstrolabeMapMonitor, this will cause a full update if PLAYER_LOGIN has already fired
 local AstrolabeMapMonitor = DongleStub("AstrolabeMapMonitor");
 AstrolabeMapMonitor:RegisterAstrolabeLibrary(Astrolabe, LIBRARY_VERSION_MAJOR);
+
