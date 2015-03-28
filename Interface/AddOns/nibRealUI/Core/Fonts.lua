@@ -615,27 +615,27 @@ function Fonts:OnInitialize()
         ndb.settings.chatFontOutline = nil
     end
 
-    for fontName, fontInfo in next, font do
-        if type(fontInfo) == "table" then
-            local name, path, pathLSM
-            if fontName == "pixel" then
-                for subName, subInfo in next, fontInfo do
-                    name = subInfo[1]
-                    path = subInfo[4]
-                end
-            else
-                name = fontInfo[1]
-                if name:find("%sRU") then
-                    name = name:sub(1, name:find("%sRU")-1)
-                end
-                path = fontInfo[4]
+    local function validateFont(fontInfo)
+        if fontInfo[1] then
+            local name, path = fontInfo[1], fontInfo[4]
+            if name:find("%sRU") then
+                name = name:sub(1, name:find("%sRU")-1)
             end
-            pathLSM = LSM:Fetch("font", name, true)
-            Fonts:debug(name, pathLSM,  path)
+            local pathLSM = LSM:Fetch("font", name, true)
+            Fonts:debug("SetInfo", name, pathLSM,  path)
             -- if pathLSM is nil, the chosen font is from another addon and hasn't been loaded yet.
             if pathLSM and pathLSM ~= path then
                 path = pathLSM
             end
+        else
+            for subName, subInfo in next, fontInfo do
+                validateFont(subInfo)
+            end
+        end
+    end
+    for fontName, fontInfo in next, font do
+        if type(fontInfo) == "table" then
+            validateFont(fontInfo)
         end
     end
 

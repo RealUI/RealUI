@@ -176,9 +176,9 @@ function nibRealUI:ShowConfigBar(val, skipSlide)
     end
     if val == nil or val then
         -- Watch for combat so we can hide window
-        self:RegisterEvent("PLAYER_REGEN_DISABLED")
+        ConfigBar:RegisterEvent("PLAYER_REGEN_DISABLED")
 
-        if not Bar then self:CreateBar() end
+        if not Bar then ConfigBar:CreateBar() end
         for k, eB in ipairs(ElementButtons) do
             eB.highlight:Hide()
             eB.element.active = false

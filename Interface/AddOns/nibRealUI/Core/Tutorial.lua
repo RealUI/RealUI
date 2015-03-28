@@ -408,7 +408,7 @@ function nibRealUI:InitTutorial()
 		btnOpen:Hide()
 		btnSkip:Hide()
 		tBG:Hide()
-		nibRealUI:LoadConfig(HuD)
+		nibRealUI:LoadConfig("HuD")
 		nibRealUI.db.global.tutorial.stage = -1
 	end)
 	nibRealUI:AddButtonHighlight(btnSkip)
