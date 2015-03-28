@@ -1,24 +1,20 @@
 Read this if adding/making changes to RealUI.
 
 AddOn modifications
---------
+-------------------
 
-  - Aurora
-    - Avoid making changes to this addon if possible. Quite a few modifications have been made already to make it compatible with RealUI.
+  - FreebTip
+    - All changes outside the config are tagged with xRUI
 
-  - Grid2\Modules\IndicatorText.lua (added code to hide Text shadow)
-    - function Text_Create
-      - Text:SetShadowOffset(0,0)
-  
   - EasyMail
-    - Textures modified with EasyMail Button Skin (http://www.wowinterface.com/downloads/info22145-EasyMailButtonSkin.html)
+    - Added Postmaster
 
 
 
 SavedVariables data
---------
+-------------------
 
-All SV data is stored in nibRealUI\Core\AddonData\
+All SV data is stored in `nibRealUI\Core\AddonData\`
 This data gets loaded upon first time install of RealUI
 
 If you need to make changes to SV data (ie You need to change a Grid2 setting), then use the MiniPatch system outlined below
@@ -26,7 +22,7 @@ If you need to make changes to SV data (ie You need to change a Grid2 setting), 
 
 
 Mini Patches
---------
+------------
 
 If changes are made straight to the nibRealUI code and no SV data needs to be changed, then a Mini Patch will not be required.
 
@@ -35,22 +31,18 @@ Mini Patches allow the modification of SV data without the user needing to updat
 Try to avoid SV changes / Mini Patches if possible. However, sometimes it needs to be done.
 
 
-
 To create a new Mini Patch:
-  1. nibRealUI\Core\Settings.lua
-    - add revision number to - local MiniPatches = {#,#,#,etc} 
-
-  2. nibRealUI\Core\MiniPatches.lua
-    - add data (see code for examples)
-    
+  1. Add a new function to `nibRealUI\Core\MiniPatches.lua`
+  2. Update addon versions (see Version Changes)
   3. Log in to WoW and test changes - you should get a Mini Patch prompt
 
 
 
 Version Changes
---------
+---------------
 
-  1. nibRealUI\nibRealUI.toc
-    - ## Version
-  2. nibRealUI\Core.lua
-    - nibRealUI.verinfo
+Every release needs to have the version updated.
+
+If you're on Windows Vista or newer, run update.ps1 and follow the prompt. Otherwise follow these steps:
+  1. Open update.ps1 in an editor, and look for "$addons = @(..."
+  2. Find each file and update the old version to the new version for each one.

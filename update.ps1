@@ -4,6 +4,7 @@ $addons = @(
     "version",
     "!Aurora_RealUI",
     "nibRealUI",
+    "nibRealUI_Config",
     "nibRealUI_Init"
 )
 
