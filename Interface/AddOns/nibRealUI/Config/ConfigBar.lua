@@ -169,12 +169,12 @@ function ConfigBar:PLAYER_REGEN_DISABLED()
 end
 
 -- Show/Hide Config Bar
-function ConfigBar:Toggle(val, skipSlide)
+function nibRealUI:ShowConfigBar(val, skipSlide)
     if InCombatLockdown() then
         nibRealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         return
     end
-    if val then
+    if val == nil or val then
         -- Watch for combat so we can hide window
         self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
@@ -215,9 +215,6 @@ function ConfigBar:Toggle(val, skipSlide)
         RealUIGridConfiguring = false
     end
 end
-function RealUIConfigBarToggle(val, skipSlide)
-    ConfigBar:Toggle(val, skipSlide)
-end
 
 function ConfigBar:PLAYER_ENTERING_WORLD()
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
@@ -226,7 +223,7 @@ function ConfigBar:PLAYER_ENTERING_WORLD()
             label = CLOSE,
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             iconRed = true,
-            openFunc = function() ConfigBar:Toggle(false) end,
+            openFunc = function() nibRealUI:ShowConfigBar(false) end,
             closeFunc = function() end,
         }
     }
@@ -246,8 +243,4 @@ function ConfigBar:OnInitialize()
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-end
-
-function nibRealUI:ShowConfigBar()
-    ConfigBar:Toggle(true)
 end

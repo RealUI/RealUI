@@ -567,7 +567,7 @@ end
 
 function ConfigBar_Appearance:PLAYER_ENTERING_WORLD()
 	if not InCombatLockdown() then
-		ConfigBar:Toggle(true, true)
+		nibRealUI:LoadConfig("HuD")
 		ConfigBar_Element_OnMouseDown(Element.button)
 	end
 end

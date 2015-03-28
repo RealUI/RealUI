@@ -510,7 +510,7 @@ end
 function ConfigBar_Grid:Grid2ChatCommand()
 	if not(Grid2 and Grid2Layout and Grid2Frame and Grid2DB) then return end
 	if not(Element.window) or not Element.window:IsShown() and not(InCombatLockdown()) then
-		ConfigBar:Toggle(true, true)
+		nibRealUI:LoadConfig("HuD")
 		ConfigBar_Element_OnMouseDown(Element.button)
 	end
 end

@@ -341,7 +341,7 @@ function RealUIHideTutorial()
 	RealUITutorialButtonClose:Hide()
 	UIFrameFadeOut(RealUITutorialBG, 0.3, 0.5, 0)
 	RealUITutorialLogo:Hide()
-	RealUIConfigBarToggle(true)
+	nibRealUI:LoadConfig("HuD")
 	nibRealUI.db.global.tutorial.stage = -1
 end
 
@@ -408,7 +408,7 @@ function nibRealUI:InitTutorial()
 		btnOpen:Hide()
 		btnSkip:Hide()
 		tBG:Hide()
-		RealUIConfigBarToggle(true)
+		nibRealUI:LoadConfig(HuD)
 		nibRealUI.db.global.tutorial.stage = -1
 	end)
 	nibRealUI:AddButtonHighlight(btnSkip)

@@ -666,7 +666,7 @@ end
 function ConfigBar_ActionBars:BarChatCommand()
 	if not(Element.window) or not Element.window:IsShown() then
 		if not InCombatLockdown() then
-			ConfigBar:Toggle(true, true)
+			nibRealUI:LoadConfig("HuD")
 			ConfigBar_Element_OnMouseDown(Element.button)
 		end
 	end
