@@ -95,6 +95,39 @@ functions.CreateGradient = function(f)
     return tex
 end
 
+local function colourButton(f)
+    if not f:IsEnabled() then return end
+    f.tex:SetVertexColor(r * 0.25, g * 0.25, b * 0.25)
+    f:SetBackdropBorderColor(r, g, b)
+end
+
+local function clearButton(f)
+    f.tex:SetVertexColor(buttonR, buttonG, buttonB, buttonA)
+    f:SetBackdropBorderColor(0, 0, 0)
+end
+
+functions.Reskin = function(f, noHighlight)
+    f:SetNormalTexture("")
+    f:SetHighlightTexture("")
+    f:SetPushedTexture("")
+    f:SetDisabledTexture("")
+
+    if f.Left then f.Left:SetAlpha(0) end
+    if f.Middle then f.Middle:SetAlpha(0) end
+    if f.Right then f.Right:SetAlpha(0) end
+    if f.LeftSeparator then f.LeftSeparator:Hide() end
+    if f.RightSeparator then f.RightSeparator:Hide() end
+
+    F.CreateBD(f, .0)
+
+    f.tex = F.CreateGradient(f)
+
+    if not noHighlight then
+        f:HookScript("OnEnter", colourButton)
+         f:HookScript("OnLeave", clearButton)
+    end
+end
+
 functions.CreateBDFrame = function(f, a)
     local frame
     if f:GetObjectType() == "Texture" then
@@ -116,14 +149,14 @@ functions.CreateBDFrame = function(f, a)
 end
 
 functions.ReskinIcon = function(icon)
-    RealUI.Debug("ReskinIcon", F, C, icon)
+    debug("ReskinIcon", F, C, icon)
     icon:SetTexCoord(.08, .92, .08, .92)
     return F.CreateBG(icon)
 end
 style.functions = functions
 
 style.initVars = function()
-    RealUI.Debug("initVars", Aurora, Aurora[1], Aurora[2])
+    debug("initVars", Aurora, Aurora[1], Aurora[2])
     F, C = unpack(Aurora)
     r, g, b = C.r, C.g, C.b
     buttonR, buttonG, buttonB, buttonA = .1, .1, .1, 1

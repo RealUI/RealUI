@@ -54,7 +54,7 @@ nibRealUI.minipatches = {
     end,
     [12] = function(ver)
         debug("r"..ver)
-        --[[ was supposed to be r11... oops
+        -- This was supposed to be r11... oops
         local Grid2DB = Grid2DB
         if IsAddOnLoaded("Grid2") and Grid2DB then
             if Grid2DB["profiles"]["RealUI-Healing"] then
@@ -74,7 +74,7 @@ nibRealUI.minipatches = {
         end
 
         -- r12
-        SetCVar("useCompactPartyFrames", 1)]]
+        SetCVar("useCompactPartyFrames", 1)
     end,
     [13] = function(ver)
         debug("r"..ver)

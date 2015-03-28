@@ -35,6 +35,12 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         end
     end
 
+    local function CreateBD(f, a)
+        F.CreateBD(f, a)
+        f:SetBackdropColor(0.05, 0.05, 0.05, a)
+        --f:SetBackdropBorderColor(0.05, 0.05, 0.05)
+    end
+
     local function skinLSM30(frame)
         frame.DLeft:SetAlpha(0)
         frame.DMiddle:SetAlpha(0)
@@ -209,17 +215,32 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE2 == "Pullout" then
             if not widget.skinned then
                 F.CreateBD(widget.frame)
+
+                local scrollFrame = widget.scrollFrame
+                scrollFrame:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 1, -12)
+        		scrollFrame:SetPoint("BOTTOMRIGHT", widget.frame, "BOTTOMRIGHT", -1, 12)
+
+                local itemFrame = widget.itemFrame
+                itemFrame:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT", 6, 0)
+        		itemFrame:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
                 widget.skinned = true
             end
 
         elseif TYPE2 == "Item" then
             if not widget.skinned then
-                widget.highlight:SetTexture(r, g, b, .2)
-                widget.highlight:ClearAllPoints()
-                widget.highlight:SetPoint("TOPLEFT", 0, 0)
-                widget.highlight:SetPoint("BOTTOMRIGHT", 0, 0)
+                local highlight = widget.highlight
+                highlight:SetTexture(r, g, b, .2)
+                highlight:ClearAllPoints()
+                highlight:SetPoint("LEFT", -6, 0)
+                highlight:SetPoint("RIGHT", 0, 0)
 
                 if TYPE3 == "Toggle" then
+                    local check = widget.check
+                    check:SetTexture(r, g, b, .8)
+                    check:SetSize(9, 9)
+                    check:SetPoint("LEFT", 3, 0)
+                    local bd = F.CreateBDFrame(check, 1)
+                    check:SetParent(bd)
 
                 elseif TYPE3 == "Menu" then
                     --
@@ -237,6 +258,14 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE == "Heading" then
             if not widget.skinned then
                 --
+                local left = widget.left
+                left:SetHeight(1)
+                left:SetTexture(r, g, b, .4)
+
+                local right = widget.right
+                right:SetHeight(1)
+                right:SetTexture(r, g, b, .4)
+
                 widget.skinned = true
             end
 
@@ -245,7 +274,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget["SetImage"] = function(self, path, ...)
                     local image = self.image
                     image:SetTexture(path)
-                    
+
                     if image:GetTexture() then
                         local n = select("#", ...)
                         if n == 4 or n == 8 then
@@ -417,7 +446,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         local frame = widget.content:GetParent()
         if TYPE == "DropdownGroup" then
             if not widget.skinned then
-                F.CreateBD(frame, alpha)
+                CreateBD(frame, alpha)
             end
 
         elseif TYPE == "Frame" then
@@ -453,7 +482,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         elseif TYPE == "InlineGroup" then
             if not widget.skinned then
-                F.CreateBD(frame, alpha)
+                CreateBD(frame, alpha)
             end
 
         elseif TYPE == "TabGroup" then
@@ -464,7 +493,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     StripTextures(tab)
                     return tab
                 end
-                F.CreateBD(frame, alpha)
+                CreateBD(frame, alpha)
             end
 
         elseif TYPE == "TreeGroup" then
@@ -472,7 +501,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 --print("TreeFrame!!!")
                 hooksecurefunc(widget, "RefreshTree", function(self, ...)
                     --print("RefreshTree", self)
-                    local buttons = self.buttons 
+                    local buttons = self.buttons
                     for i, v in next, buttons do
                         if not v.skinned then
                             local toggle = _G[v:GetName().."Toggle"]
@@ -491,13 +520,12 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                         tex:SetWidth(1)
                         tex:SetPoint("TOP", self.treeframe, "TOPRIGHT", 1, -1)
                         tex:SetPoint("BOTTOM", self.treeframe, "BOTTOMRIGHT", 1, 1)
-                        tex:SetTexture(C.media.backdrop)
-                        tex:SetVertexColor(r, g, b, .8)
+                        tex:SetTexture(r, g, b, .4)
                         self.skinned = true
                     end
                 end)
-                F.CreateBD(widget.treeframe, alpha)
-                F.CreateBD(frame, alpha)
+                CreateBD(widget.treeframe, alpha)
+                CreateBD(frame, alpha)
                 frame:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
             end
 
