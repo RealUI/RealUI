@@ -207,7 +207,6 @@ local defaults = {
             largeHuDOption = false,
         },
         verinfo = {},
-        minipatches = {},
     },
     char = {
         layout = {

@@ -1,9 +1,14 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local function debug(...)
+    nibRealUI.Debug("MiniPatch", ...)
+end
 
-function nibRealUI:MiniPatch(ver)
-    if ver == "81r1" then
+nibRealUI.minipatches = {
+    [1] = function(ver)
+        debug("r"..ver)
         SetCVar("countdownForCooldowns", 0)
         if IsAddOnLoaded("Aurora") then
+            local AuroraConfig = AuroraConfig
             if AuroraConfig then
                 AuroraConfig["useButtonGradientColour"] = false
                 AuroraConfig["chatBubbles"] = false
@@ -16,6 +21,7 @@ function nibRealUI:MiniPatch(ver)
             end
         end
         if IsAddOnLoaded("DBM-StatusBarTimers") then
+            local DBT_AllPersistentOptions = DBT_AllPersistentOptions
             if DBT_AllPersistentOptions and DBT_AllPersistentOptions["DBM"] then
                 DBT_AllPersistentOptions["DBM"]["HugeTimerY"] = 300
                 DBT_AllPersistentOptions["DBM"]["HugeBarXOffset"] = 0
@@ -36,13 +42,20 @@ function nibRealUI:MiniPatch(ver)
                 BugSackLDBIconDB["hide"] = false
             end
         end
-    elseif ver == "81r8" then
+    end,
+    [8] = function(ver)
+        debug("r"..ver)
+        local Bartender4DB = Bartender4DB
         if IsAddOnLoaded("Bartender4") and Bartender4DB then
             if Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] then
                 Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] = Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI"]
             end
         end
-    elseif ver == "81r11" then
+    end,
+    [12] = function(ver)
+        debug("r"..ver)
+        --[[ was supposed to be r11... oops
+        local Grid2DB = Grid2DB
         if IsAddOnLoaded("Grid2") and Grid2DB then
             if Grid2DB["profiles"]["RealUI-Healing"] then
                 Grid2DB["profiles"]["RealUI-Healing"]["indicators"]["health-deficit"]["reverseFill"] = true
@@ -55,8 +68,18 @@ function nibRealUI:MiniPatch(ver)
                 Grid2DB["profiles"]["RealUI"]["indicators"]["text-down"]["shadowDisabled"] = true
             end
         end
+        local AuroraConfig = AuroraConfig
         if IsAddOnLoaded("Aurora") and AuroraConfig then
             AuroraConfig["buttonSolidColour"] = {0.1, 0.1, 0.1, 1}
         end
-    end
-end
+
+        -- r12
+        SetCVar("useCompactPartyFrames", 1)]]
+    end,
+    [13] = function(ver)
+        debug("r"..ver)
+    end,
+    [14] = function(ver)
+        debug("r"..ver)
+    end,
+}
