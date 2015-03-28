@@ -7,7 +7,6 @@ local WildMushrooms = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
 local AuraTracking = nibRealUI:GetModule("AuraTracking")
 
 -- local ShroomID = 88747	-- Wild Mushrooms
-local ShroomDuration = 300
 local ShroomID = 145205	-- Wild Mushrooms
 local ShroomName = ""
 local BloomID = 102791	-- Wild Mushrooms: Bloom
@@ -16,23 +15,12 @@ local MaxHealthPercent = 2
 local OverHealPercent = 1
 local MinLevel = 84
 
-local function GetMushroomTime()
-	local time = 0
-	local currentTime = GetTotemTimeLeft(1)
-	if ( currentTime > 0 ) then
-		time = currentTime
-	else
-		time = nil
-	end
-	return time
-end
-
 local function AuraUpdate(self)
 	if self.inactive then return end
 
 	-- Update Info
 	if not(ShroomName) or not(self.texture) then
-		local name,_,icon = GetSpellInfo(ShroomID)
+		local name, _, icon = GetSpellInfo(ShroomID)
 		ShroomName = name
 		self.activeSpellName = name
 		self.texture = icon
@@ -40,17 +28,17 @@ local function AuraUpdate(self)
 	end
 
 	-- Update Frame
-	local shroomTime = GetMushroomTime()
-	if shroomTime and self.AreShroomsDown then
+	local haveTotem, _, startTime, duration = GetTotemInfo(1)
+	if haveTotem and self.AreShroomsDown then
 		self.isActive = true
 
 		-- Set Icon Desaturated
 		self.icon:SetDesaturated(nil)
 
 		-- Cooldown
-		-- self.cd:SetCooldown(GetTime() - (300 - shroomTime), 300)
-		-- self.cd:Show()
-		-- self.count:SetParent(self.cd)
+		self.cd:SetCooldown(startTime, duration)
+		self.cd:Show()
+		self.count:SetParent(self.cd)
 
 		-- Absorb
 		if self.CurrentOverheal and (self.CurrentOverheal > 0) then
@@ -78,8 +66,8 @@ local function AuraUpdate(self)
 			self.icon:SetDesaturated(1)
 		end
 
-		-- self.cd:Hide()
-		-- self.count:SetParent(self)
+		self.cd:Hide()
+		self.count:SetParent(self)
 		self.count:SetText("")
 
 		-- Hide frame
@@ -97,8 +85,8 @@ end
 -- Totem update
 -- Reset
 local function TotemUpdate(self)
-	local shroomTime = GetMushroomTime()
-	if not shroomTime then
+	local haveTotem = GetTotemInfo(1)
+	if not haveTotem then
 		self.CurrentOverheal = 0
 		self.AreShroomsDown = false
 	else
