@@ -44,5 +44,5 @@ Version Changes
 Every release needs to have the version updated.
 
 If you're on Windows Vista or newer, run update.ps1 and follow the prompt. Otherwise follow these steps:
-  1. Open update.ps1 in an editor, and look for "$addons = @(..."
+  1. Open update.ps1 in an editor, and look for `$addons = @(...`
   2. Find each file and update the old version to the new version for each one.
