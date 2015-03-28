@@ -52,52 +52,6 @@ do
     }
     nibRealUI.media.font = fonts
 end
---[[ do
-    nibRealUI.locale = GetLocale()
-    local StandardLanguageSupport = {
-        enUS = true,
-        enGB = true,
-        itIT = true,
-        frFR = true,
-        deDE = true,
-        esES = true,
-        esMX = true,
-        ptBR = true,
-    }
-    local defaultFonts
-    if not(nibRealUI.locale) or StandardLanguageSupport[nibRealUI.locale] then
-        defaultFonts = {
-            standard = {"Standard"},
-            pixel = {
-                small =     {"pixel_small",     8,  "MONOCHROMEOUTLINE"},
-                large =     {"pixel_large",     8,  "MONOCHROMEOUTLINE"},
-                numbers =   {"pixel_numbers",   16, "MONOCHROMEOUTLINE"},
-                cooldown =  {"pixel_cooldown",  16, "MONOCHROMEOUTLINE"},
-            }
-        }
-    elseif nibRealUI.locale == "ruRU" then
-        defaultFonts = {
-            standard = {"Standard RU"},
-            pixel = {
-                small =     {"Standard Regular RU", 10, "OUTLINE"},
-                large =     {"Standard Regular RU", 11, "OUTLINE"},
-                numbers =   {"pixel_numbers",   16, "MONOCHROMEOUTLINE"},
-                cooldown =  {"pixel_cooldown",  16, "MONOCHROMEOUTLINE"},
-            }
-        }
-    else
-        defaultFonts = {
-            standard = {"Arial Narrow"},
-            pixel = {
-                small =     {"Arial Narrow",    10, "OUTLINE"},
-                large =     {"Arial Narrow",    10, "OUTLINE"},
-                numbers =   {"pixel_numbers",   16, "MONOCHROMEOUTLINE"},
-                cooldown =  {"pixel_cooldown",  16, "MONOCHROMEOUTLINE"},
-            }
-        }
-    end
-    nibRealUI.media.font = defaultFonts
-end]]
 
 nibRealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
@@ -691,7 +645,7 @@ function nibRealUI:LoadConfig(mode, ...)
         configLoaded = true
         local loaded, reason = LoadAddOn("nibRealUI_Config")
         if not loaded then
-            print("Failed to load nibRealUI_Config:", reason)
+            --print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end

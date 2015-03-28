@@ -3,7 +3,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <FontFamily  name="RealUIFont_Normal" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\standard_medium.ttf" height="10"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="10"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf" height="10"/>
@@ -20,7 +20,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     </FontFamily>
     <FontFamily  name="RealUIFont_Chat" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\standard_medium.ttf" height="10" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\RobotoCondensed-Regular.ttf" height="10" outline="NORMAL"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf" height="10" outline="NORMAL"/>

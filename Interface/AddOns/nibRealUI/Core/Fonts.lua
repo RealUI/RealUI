@@ -616,23 +616,25 @@ function Fonts:OnInitialize()
     end
 
     for fontName, fontInfo in next, font do
-        local path
         if type(fontInfo) == "table" then
+            local name, path, pathLSM
             if fontName == "pixel" then
                 for subName, subInfo in next, fontInfo do
-                    path = LSM:Fetch("font", subInfo[1], true)
-                    Fonts:debug(subInfo[1], path,  subInfo[4])
-                    -- if path is nil, the chosen font is from another addon and hasn't been loaded yet.
-                    if path and path ~= subInfo[4] then
-                        subInfo[4] = path
-                    end
+                    name = subInfo[1]
+                    path = subInfo[4]
                 end
             else
-                path = LSM:Fetch("font", fontInfo[1], true)
-                Fonts:debug(fontInfo[1], path,  fontInfo[4])
-                if path and path ~= fontInfo[4] then
-                    fontInfo[4] = path
+                name = fontInfo[1]
+                if name:find("%sRU") then
+                    name = name:sub(1, name:find("%sRU")-1)
                 end
+                path = fontInfo[4]
+            end
+            pathLSM = LSM:Fetch("font", name, true)
+            Fonts:debug(name, pathLSM,  path)
+            -- if pathLSM is nil, the chosen font is from another addon and hasn't been loaded yet.
+            if pathLSM and pathLSM ~= path then
+                path = pathLSM
             end
         end
     end
