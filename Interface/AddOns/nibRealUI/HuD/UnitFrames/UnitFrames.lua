@@ -537,6 +537,7 @@ function UnitFrames:OnInitialize()
             misc = {
                 focusclick = true,
                 focuskey = "shift",
+                statusText = "perc",
                 alwaysDisplayFullHealth = true,
                 steppoints = {
                     ["default"] = {0.35, 0.25},

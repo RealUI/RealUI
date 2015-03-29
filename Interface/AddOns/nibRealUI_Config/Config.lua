@@ -226,15 +226,6 @@ end
 
 local unitframes
 do
-    local ModKeys = {
-        SHIFT_KEY_TEXT,
-        CTRL_KEY_TEXT,
-        ALT_KEY_TEXT,
-    }
-    local trinkChat = {
-        "GROUP",
-        "SAY",
-    }
     local db = nibRealUI.db:GetNamespace("UnitFrames").profile
     unitframes = {
         name = UNITFRAME_LABEL,
@@ -242,8 +233,8 @@ do
         childGroups = "tab",
         args = {
             enable = {
-                name = "Enable Unit Frames",
-                desc = "Enable/Disable Unit Frames",
+                name = L["General_Enabled"],
+                desc = L["General_EnabledDesc"]:format("RealUI"..UNITFRAME_LABEL),
                 type = "toggle",
                 get = function(info) return nibRealUI:GetModuleEnabled("UnitFrames") end,
                 set = function(info, value)
@@ -256,52 +247,76 @@ do
                 type = "group",
                 order = 10,
                 args = {
-                    focusclick = {
+                    classColor = {
+                        name = L["Appearance_ClassColorHealth"],
                         type = "toggle",
-                        name = "Click Set Focus",
-                        desc = "Set focus by click+modifier on the Unit Frames.",
+                        get = function() return db.overlay.classColor end,
+                        set = function(info, value)
+                            db.overlay.classColor = value
+                        end,
+                        order = 10,
+                    },
+                    classColorNames = {
+                        name = L["Appearance_ClassColorNames"],
+                        type = "toggle",
+                        get = function() return db.overlay.classColorNames end,
+                        set = function(info, value)
+                            db.overlay.classColorNames = value
+                        end,
+                        order = 20,
+                    },
+                    statusText = {
+                        name = STATUS_TEXT,
+                        desc = OPTION_TOOLTIP_STATUS_TEXT_DISPLAY,
+                        type = "select",
+                        values = function()
+                            return {
+                                both = STATUS_TEXT_BOTH,
+                                perc = STATUS_TEXT_PERCENT,
+                                value = STATUS_TEXT_VALUE,
+                            }
+                        end,
+                        get = function(info)
+                            return db.misc.statusText
+                        end,
+                        set = function(info, value)
+                            db.misc.statusText = value
+                        end,
+                        order = 30,
+                    },
+                    focusClick = {
+                        name = L["UnitFrames_SetFocus"],
+                        desc = L["UnitFrames_SetFocusDesc"],
+                        type = "toggle",
                         get = function() return db.misc.focusclick end,
                         set = function(info, value)
                             db.misc.focusclick = value
                         end,
-                        order = 10,
+                        order = 40,
                     },
-                    focuskey = {
+                    focusKey = {
+                        name = L["UnitFrames_ModifierKey"],
                         type = "select",
-                        name = "Modifier Key",
-                        values = ModKeys,
+                        values = function()
+                            return {
+                                shift = SHIFT_KEY_TEXT,
+                                ctrl = CTRL_KEY_TEXT,
+                                alt = ALT_KEY_TEXT,
+                            }
+                        end,
                         disabled = function() return not db.misc.focusclick end,
                         get = function(info)
-                            for i = 1, #ModKeys do
-                                if ModKeys[i] == db.misc.focuskey then
-                                    return i
-                                end
-                            end
+                            return db.misc.focuskey
                         end,
                         set = function(info, value)
-                            db.misc.focuskey = ModKeys[value]
+                            db.misc.focuskey = value
                         end,
-                        order = 20,
-                    },
-                    gap1 = {
-                        name = " ",
-                        type = "description",
-                        order = 21,
-                    },
-                    alwaysDisplayFullHealth = {
-                        type = "toggle",
-                        name = "Full Health on Target",
-                        desc = "Always display the full health value on the Target frame.",
-                        get = function() return db.misc.alwaysDisplayFullHealth end,
-                        set = function(info, value)
-                            db.misc.alwaysDisplayFullHealth = value
-                        end,
-                        order = 30,
+                        order = 41,
                     },
                 }
             },
             units = {
-                name = "Units",
+                name = L["UnitFrames_Units"],
                 type = "group",
                 childGroups = "select",
                 order = 20,
@@ -350,18 +365,152 @@ do
                 childGroups = "select",
                 order = 30,
                 args = {
-                    player = {
-                        name = ARENA,
+                    gap = {
+                        name = L["UnitFrames_Gap"],
+                        desc = L["UnitFrames_GapDesc"],
+                        type = "range",
+                        min = 0, max = 10, step = 1,
+                        get = function(info) return db.boss.gap end,
+                        set = function(info, value) db.boss.gap = value end,
+                        order = 10,
+                    },
+                    x = {
+                        name = L["UnitFrames_XOffset"],
+                        type = "input",
+                        order = 20,
+                        get = function(info) return tostring(db.positions[hudSize].boss.x) end,
+                        set = function(info, value)
+                            value = nibRealUI:ValidateOffset(value)
+                            position.x = value
+                        end,
+                    },
+                    y = {
+                        name = L["UnitFrames_YOffset"],
+                        type = "input",
+                        order = 30,
+                        get = function(info) return tostring(db.positions[hudSize].boss.y) end,
+                        set = function(info, value)
+                            value = nibRealUI:ValidateOffset(value)
+                            position.y = value
+                        end,
+                    },
+                    boss = {
+                        name = BOSS,
                         type = "group",
+                        order = 40,
                         args = {
+                            showPlayerAuras = {
+                                name = L["UnitFrames_PlayerAuras"],
+                                desc = L["UnitFrames_PlayerAurasDesc"],
+                                type = "toggle",
+                                get = function() return db.boss.showPlayerAuras end,
+                                set = function(info, value)
+                                    db.boss.showPlayerAuras = value
+                                end,
+                                order = 10,
+                            },
+                            showNPCAuras = {
+                                name = L["UnitFrames_NPCAuras"],
+                                desc = L["UnitFrames_NPCAurasDesc"],
+                                type = "toggle",
+                                get = function() return db.boss.showNPCAuras end,
+                                set = function(info, value)
+                                    db.boss.showNPCAuras = value
+                                end,
+                                order = 20,
+                            },
+                            buffCount = {
+                                name = L["UnitFrames_BuffCount"],
+                                type = "range",
+                                min = 1, max = 8, step = 1,
+                                get = function(info) return db.boss.buffCount end,
+                                set = function(info, value) db.boss.buffCount = value end,
+                                order = 30,
+                            },
+                            debuffCount = {
+                                name = L["UnitFrames_DebuffCount"],
+                                type = "range",
+                                min = 1, max = 8, step = 1,
+                                get = function(info) return db.boss.debuffCount end,
+                                set = function(info, value) db.boss.debuffCount = value end,
+                                order = 40,
+                            },
 
                         }
                     },
-                    target = {
-                        name = BOSS,
+                    arena = {
+                        name = ARENA,
                         type = "group",
+                        order = 50,
                         args = {
-
+                            enabled = {
+                                name = L["General_Enabled"],
+                                desc = L["General_EnabledDesc"]:format("RealUI"..SHOW_ARENA_ENEMY_FRAMES_TEXT),
+                                type = "toggle",
+                                get = function() return db.arena.enabled end,
+                                set = function(info, value)
+                                    db.arena.enabled = value
+                                end,
+                                order = 10,
+                            },
+                            options = {
+                                name = "",
+                                type = "group",
+                                inline = true,
+                                disabled = function() return not db.arena.enabled end,
+                                order = 20,
+                                args = {
+                                    announceUse = {
+                                        name = L["UnitFrames_AnnounceTrink"],
+                                        desc = L["UnitFrames_AnnounceTrinkDesc"],
+                                        type = "toggle",
+                                        get = function() return db.arena.announceUse end,
+                                        set = function(info, value)
+                                            db.arena.announceUse = value
+                                        end,
+                                        order = 10,
+                                    },
+                                    announceChat = {
+                                        name = CHAT,
+                                        desc = L["UnitFrames_AnnounceChatDesc"],
+                                        type = "select",
+                                        values = function()
+                                            return {
+                                                group = INSTANCE_CHAT,
+                                                say = CHAT_MSG_SAY,
+                                            }
+                                        end,
+                                        disabled = function() return not db.arena.announceUse end,
+                                        get = function(info)
+                                            return strlower(db.arena.announceChat)
+                                        end,
+                                        set = function(info, value)
+                                            db.arena.announceChat = value
+                                        end,
+                                        order = 20,
+                                    },
+                                    --[[showPets = {
+                                        name = SHOW_ARENA_ENEMY_PETS_TEXT,
+                                        desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_PETS,
+                                        type = "toggle",
+                                        get = function() return db.arena.showPets end,
+                                        set = function(info, value)
+                                            db.arena.showPets = value
+                                        end,
+                                        order = 30,
+                                    },
+                                    showCast = {
+                                        name = SHOW_ARENA_ENEMY_CASTBAR_TEXT,
+                                        desc = OPTION_TOOLTIP_SHOW_ARENA_ENEMY_CASTBAR,
+                                        type = "toggle",
+                                        get = function() return db.arena.showCast end,
+                                        set = function(info, value)
+                                            db.arena.showCast = value
+                                        end,
+                                        order = 40,
+                                    },]]
+                                },
+                            },
                         }
                     },
                 }
@@ -373,8 +522,8 @@ do
         local position = db.positions[hudSize][unitSlug]
         if unitSlug == "player" or unitSlug == "target" then
             unit.args.anchorWidth = {
-                name = "Anchor Width",
-                desc = "The amount of space between the Player frame and the Target frame.",
+                name = L["UnitFrames_AnchorWidth"],
+                desc = L["UnitFrames_AnchorWidthDesc"],
                 type = "range",
                 width = "double",
                 min = round(uiWidth * 0.1),
@@ -389,7 +538,7 @@ do
             }
         end
         unit.args.x = {
-            name = "X Offset",
+            name = L["UnitFrames_XOffset"],
             type = "input",
             order = 10,
             get = function(info) return tostring(position.x) end,
@@ -399,7 +548,7 @@ do
             end,
         }
         unit.args.y = {
-            name = "Y Offset",
+            name = L["UnitFrames_YOffset"],
             type = "input",
             order = 20,
             get = function(info) return tostring(position.y) end,
@@ -412,7 +561,7 @@ do
         local unitInfo = db.units[unitSlug]
         unit.args = {
             width = {
-                name = "Width",
+                name = L["HuD_Width"],
                 type = "input",
                 --width = "half",
                 order = 10,
@@ -424,7 +573,7 @@ do
                 usage = "You can only use whole numbers."
             },
             hieght = {
-                name = "Hieght",
+                name = L["HuD_Height"],
                 type = "input",
                 --width = "half",
                 order = 20,
@@ -451,7 +600,7 @@ do
                 end,
             },
             x = {
-                name = "X offset",
+                name = L["UnitFrames_XOffset"],
                 type = "range",
                 min = -100,
                 max = 50,
@@ -463,7 +612,7 @@ do
                 end,
             },
             y = {
-                name = "Y offset",
+                name = "L["UnitFrames_YOffset"],
                 type = "range",
                 min = -100,
                 max = 100,
@@ -488,12 +637,12 @@ options.HuD = {
         },
         unitframes = unitframes,
         castbars = {
-            name = "Cast Bars",
+            name = SHOW_ENEMY_CAST,
             type = "group",
             args = {
                 enable = {
-                    name = "Enable Cast Bars",
-                    desc = "Enables / disables Cast Bars",
+                    name = L["General_Enabled"],
+                    desc = L["General_EnabledDesc"]:format(SHOW_ENEMY_CAST),
                     type = "toggle",
                     set = function(info,val) end,
                     get = function(info) return end
@@ -501,7 +650,7 @@ options.HuD = {
             },
         },
         close = { -- This is for button creation
-            name = "Close",
+            name = CLOSE,
             type = "group",
             args = {
             },
