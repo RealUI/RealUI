@@ -70,7 +70,6 @@ end
 ]]
 local bFS
 function ItemButton:Create(tpl, parent)
-	local font = RealUI.font.pixel1
 	local impl = self.implementation
 	impl.numSlots = (impl.numSlots or 0) + 1
 	local name = ("%sSlot%d"):format(impl.name, impl.numSlots)
@@ -90,7 +89,7 @@ function ItemButton:Create(tpl, parent)
 	bFS = _G[button:GetName().."Count"]
 	bFS:ClearAllPoints()
 	bFS:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5);
-	bFS:SetFont(unpack(font))
+	bFS:SetFontObject(RealUIFont_PixelSmall)
 
 	return button
 end

@@ -75,7 +75,7 @@ local function CreateInfoString(button, position)
 		str:SetJustifyH("RIGHT")
 		str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
 	end	
-	str:SetFont(unpack(RealUI.font.pixel1))
+	str:SetFontObject(RealUIFont_PixelSmall)
 
 	return str
 end

@@ -10,7 +10,6 @@ local cbNivaya = cargBags:GetImplementation("Nivaya")
 
 do	--Replacement for UIDropDownMenu
 
-	local font = RealUI.font.pixel1
 	local frameHeight = 14
 	local defaultWidth = 120
 	local frameInset = 16
@@ -40,7 +39,7 @@ do	--Replacement for UIDropDownMenu
 		local fstr = button:CreateFontString()
 		fstr:SetJustifyH("LEFT")
 		fstr:SetJustifyV("MIDDLE")
-		fstr:SetFont(unpack(font))
+		fstr:SetFontObject(RealUIFont_PixelSmall)
 		fstr:SetPoint("LEFT", button, "LEFT", 0, 0)
 		button.Text = fstr
 		

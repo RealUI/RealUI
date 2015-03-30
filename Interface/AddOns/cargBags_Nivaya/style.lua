@@ -241,11 +241,11 @@ local UpdateDimensions = function(self)
 	end
 	if self.bagToggle then
 		local tBag = (self.name == "cBniv_Bag")
-		local extraHeight = (tBag and self.hintShown) and (RealUI.font.pixel1[2] + 4) or 0
+		local extraHeight = (tBag and self.hintShown) and (RealUI.media.font.pixel.small[2] + 4) or 0
 		height = height + 24 + extraHeight
 	end
 	if self.Caption then		-- Space for captions
-		height = height + RealUI.font.pixel1[2] + 12
+		height = height + RealUI.media.font.pixel.small[2] + 12
 	end
 	self:SetHeight(self.ContainerHeight + height)
 end
@@ -319,7 +319,6 @@ local createMoverButton = function (parent, texture, tag)
 end
 
 local createIconButton = function (name, parent, texture, point, hint, isBag)
-	local font = RealUI.font.pixel1
 	local button = CreateFrame("Button", nil, parent)
 	button:SetWidth(17)
 	button:SetHeight(17)
@@ -341,7 +340,7 @@ local createIconButton = function (name, parent, texture, point, hint, isBag)
 	
 	button.tooltip = button:CreateFontString()
 	-- button.tooltip:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", isBag and -76 or -59, 4.5)
-	button.tooltip:SetFont(unpack(font))
+	button.tooltip:SetFontObject(RealUIFont_PixelSmall)
 	button.tooltip:SetJustifyH("RIGHT")
 	button.tooltip:SetText(hint)
 	button.tooltip:SetTextColor(0.8, 0.8, 0.8)
@@ -404,8 +403,6 @@ end
 
 function MyContainer:OnCreate(name, settings)
 	--print("MyContainer:OnCreate", name)
-	local font = RealUI.font.pixel1
-	
 	settings = settings or {}
 	self.Settings = settings
 	self.name = name
@@ -471,7 +468,7 @@ function MyContainer:OnCreate(name, settings)
 
 	-- Caption, close button
 	local caption = background:CreateFontString(background, "OVERLAY", nil)
-	caption:SetFont(unpack(font))
+	caption:SetFontObject(RealUIFont_PixelSmall)
 	if(caption) then
 		local t = L.bagCaptions[self.name] or (tBankBags and strsub(self.name, 5))
 		if not t then t = self.name end
@@ -701,7 +698,7 @@ function MyContainer:OnCreate(name, settings)
 		self.DropTarget:SetScript("OnReceiveDrag", DropTargetProcessItem)
 		
 		local fs = self:CreateFontString(nil, "OVERLAY")
-		fs:SetFont(unpack(font))
+		fs:SetFontObject(RealUIFont_PixelSmall)
 		fs:SetJustifyH("LEFT")
 		fs:SetPoint("BOTTOMRIGHT", self.DropTarget, "BOTTOMRIGHT", 1.5, 1.5)
 		self.EmptySlotCounter = fs
@@ -736,7 +733,7 @@ function MyContainer:OnCreate(name, settings)
 		-- Hint
 		self.hint = background:CreateFontString(nil, "OVERLAY", nil)
 		self.hint:SetPoint("BOTTOMLEFT", infoFrame, -0.5, 31.5)
-		self.hint:SetFont(unpack(font))
+		self.hint:SetFontObject(RealUIFont_PixelSmall)
 		self.hint:SetTextColor(1, 1, 1, 0.4)
 		self.hint:SetText("Ctrl + Alt + Right Click an item to assign category")
 		self.hintShown = true
@@ -744,7 +741,7 @@ function MyContainer:OnCreate(name, settings)
 		-- The money display
 		local money = self:SpawnPlugin("TagDisplay", "[money]", self)
 		money:SetPoint("TOPRIGHT", self, -25.5, -2.5)
-		money:SetFont(unpack(font))
+		money:SetFontObject(RealUIFont_PixelSmall)
 		money:SetJustifyH("RIGHT")
 		money:SetShadowColor(0, 0, 0, 0)
 	end
