@@ -1,24 +1,22 @@
 $oldVersion = Get-Content "./version.txt"
-$newVersion = Read-Host "What is the current version?"
+$newVersion = Read-Host "Enter new version, or leave blank to use current version."
 $addons = @(
-    "version",
-    "!Aurora_RealUI",
-    "nibRealUI",
-    "nibRealUI_Config",
-    "nibRealUI_Init"
+    "./version.txt",
+    "./Interface/AddOns/!Aurora_RealUI/!Aurora_RealUI.toc",
+    "./Interface/AddOns/nibRealUI/nibRealUI.toc",
+    "./Interface/AddOns/nibRealUI_Config/nibRealUI_Config.toc",
+    "./Interface/AddOns/nibRealUI_Init/nibRealUI_Init.toc"
 )
 
 # replace version strings
-foreach ($addon in $addons) {
-    $path
-    if ($addon -eq "version") {
-        $path = "./version.txt"
-    } else {
-        $path = "./Interface/AddOns/" + $addon + "/" + $addon + ".toc"
+if ($newVersion -eq "") {
+    $newVersion = $oldVersion
+} else {
+    foreach ($path in $addons) {
+        (Get-Content $path) |
+        Foreach-Object {$_ -replace $oldVersion, $newVersion} |
+        Set-Content $path
     }
-    (Get-Content $path) |
-    Foreach-Object {$_ -replace $oldVersion, $newVersion} |
-    Set-Content $path
 }
 
 # Package to zip, this requires .Net 4.5
