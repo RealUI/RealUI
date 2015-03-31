@@ -110,10 +110,12 @@ function BagButton:Update()
     if(self.bagID > NUM_BAG_SLOTS) then
         if(self.bagID-NUM_BAG_SLOTS <= GetNumBankSlots()) then
             self.Icon:SetVertexColor(1, 1, 1)
+            self.tooltipText = BANK_BAG
             self.notBought = nil
         else
-            self.notBought = true
             self.Icon:SetVertexColor(1, 0, 0)
+            self.tooltipText = BANK_BAG_PURCHASE
+            self.notBought = true
         end
     end
 
