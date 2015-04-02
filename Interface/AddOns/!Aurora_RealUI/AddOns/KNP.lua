@@ -5,7 +5,7 @@ mods["PLAYER_LOGIN"]["Kui_Nameplates"] = function(self, F, C)
     local kuiNP = LibStub("AceAddon-3.0"):GetAddon("KuiNameplates", true)
 
     kuiNP.db.profile.fonts.options.font = RealUI:Font(true)
-    kuiNP.font = RealUI:Font()[1]
+    kuiNP.font = RealUI:Font()
     if kuiNP.db.profile then
         for _, frame in pairs(kuiNP.frameList) do
             if frame.kui then
@@ -25,7 +25,7 @@ mods["PLAYER_LOGIN"]["Kui_Nameplates"] = function(self, F, C)
                     if IsAddOnLoaded("Kui_Nameplates") then
                         if kuiNP.db.profile then
                             local screenHeight = string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
-                            local scale = ceil(((768 * (RealUI.font.pixel1[2] / kuiNP.defaultSizes.font.name)) / screenHeight) * 100) / 100
+                            local scale = ceil(((768 * (RealUI.font.pixel[2] / kuiNP.defaultSizes.font.name)) / screenHeight) * 100) / 100
 
                             kuiNP.db.profile.fonts.options.fontscale = scale
                             kuiNP:ScaleSizes("font")

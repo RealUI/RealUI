@@ -57,7 +57,7 @@ local function AttachStatusBar(icon, unit)
     sBarBG:SetPoint("TOPLEFT", sBar, -1, 1)
     sBarBG:SetPoint("BOTTOMRIGHT", sBar, 1, -1)
     sBarBG:SetFrameLevel(icon:GetFrameLevel() + 1)
-    nibRealUI:CreateBD(sBarBG)
+    F.CreateBD(sBarBG)
 
     local timeStr = icon:CreateFontString(nil, "OVERLAY")
     timeStr:SetFontObject(RealUIFont_PixelSmall)
@@ -82,7 +82,7 @@ local function CreateHealthBar(parent)
         end
     end
 
-    local healthBG = CreateBD(parent.Health, 0)
+    local healthBG = F.CreateBD(parent.Health, 0)
     healthBG:SetFrameStrata("LOW")
 end
 
@@ -113,7 +113,7 @@ local function CreatePowerBar(parent)
         bar:SetShown(max > 0)
     end
 
-    local powerBG = CreateBD(power, 0)
+    local powerBG = F.CreateBD(power, 0)
     powerBG:SetFrameStrata("LOW")
 
     parent.Power = power
@@ -132,7 +132,7 @@ local function CreateAltPowerBar(parent)
     -- 	bar:SetShown(max > 0)
     -- end
 
-    local altpowerBG = CreateBD(altPowerBar, 0)
+    local altpowerBG = F.CreateBD(altPowerBar, 0)
     altpowerBG:SetFrameStrata("LOW")
 
     parent.AltPowerBar = altPowerBar
@@ -240,7 +240,7 @@ end
 
 local function CreateBoss(self)
     self:SetSize(135, 22)
-    CreateBD(self, 0.7)
+    F.CreateBD(self, 0.7)
 
     CreateHealthBar(self)
     CreateTags(self)
