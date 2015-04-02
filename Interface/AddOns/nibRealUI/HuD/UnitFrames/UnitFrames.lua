@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local UnitFrames = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 local db, ndb, ndbc
 
 local oUF = oUFembed

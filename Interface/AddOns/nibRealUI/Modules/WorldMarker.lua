@@ -248,10 +248,6 @@ end
 local function CreateFrames()
     if InCombatLockdown() or FramesCreated then return end
     
-    if not IsAddOnLoaded("Blizzard_CompactRaidFrames") then
-        LoadAddOn("Blizzard_CompactRaidFrames")
-    end
-
     -- Parent Frame
     WMF.Parent = CreateFrame("Frame", "RealUI_WorldMarker", _G["Minimap"])
     
@@ -274,7 +270,7 @@ end
 
 ---------------
 function WorldMarker:RefreshMod()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not nibRealUI:GetModuleEnabled(MODNAME) or not IsAddOnLoaded("Blizzard_CompactRaidFrames") then return end
     
     db = self.db.profile
     

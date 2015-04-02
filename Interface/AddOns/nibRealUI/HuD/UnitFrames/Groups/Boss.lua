@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local F, C = Aurora[1], Aurora[2]
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:GetModule(MODNAME)
@@ -138,34 +139,33 @@ local function CreateAltPowerBar(parent)
 end
 
 local function CreateAuras(parent)
+    UnitFrames:debug("Boss:CreateAuras")
     local auras = CreateFrame("Frame", nil, parent)
     auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, -1)
     auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
     auras:SetHeight(22)
-    auras["size"] = 24
-    auras["spacing"] = 1
-    auras["numBuffs"] = db.boss.buffCount
-    auras["numDebuffs"] = db.boss.debuffCount
+    auras.size = 24
+    auras.spacing = 1
+    auras.numBuffs = db.boss.buffCount
+    auras.numDebuffs = db.boss.debuffCount
     auras["growth-x"] = "LEFT"
     auras.disableCooldown = true
     auras.CustomFilter = function(self, ...)
         --    unit, icon, name, rank, texture, count, dtype, duration, timeLeft, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
-        local _, icon, _, _, _, _, _, _, duration, timeLeft, caster, _, _, _, canApplyAura = ...
+        local _, icon, _, _, _, _, _, duration, timeLeft, caster = ...
         if not caster then return false end
-        --print("CustomFilter", self, icon, duration, timeLeft, caster, canApplyAura)
+        UnitFrames:debug("Boss:CustomFilter", self, icon, duration, timeLeft, caster)
 
         if (duration and duration > 0) then
             icon.startTime = timeLeft - duration
             icon.endTime = timeLeft
-            icon.timeLeft = timeLeft
         else
             icon.endTime = nil
-            icon.timeLeft = math.huge
         end
         icon.needsUpdate = true
 
         -- Cast by Player
-        if ((caster == "player") or (caster == "vehicle")) and canApplyAura and UnitFrames.db.profile.boss.showPlayerAuras then return true end
+        if icon.isPlayer and UnitFrames.db.profile.boss.showPlayerAuras then return true end
 
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then
@@ -178,7 +178,7 @@ local function CreateAuras(parent)
         end
     end
     auras.PostCreateIcon = function(self, button)
-        --print("PostCreateIcon", self, button)
+        UnitFrames:debug("Boss:PostCreateIcon", self, button)
         button.icon:SetTexCoord(.08, .92, .08, .92)
         button.border = CreateFrame("Frame", nil, button)
         button.border:SetAllPoints(button)
@@ -196,7 +196,7 @@ local function CreateAuras(parent)
         button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
     end
     auras.PostUpdateIcon = function(self, unit, icon, index)
-        --print("PostUpdateIcon", self, unit, icon, index)
+        UnitFrames:debug("Boss:PostUpdateIcon", self, unit, icon, index)
         if not icon.sCooldown then
             icon.sCooldown, icon.timeStr = AttachStatusBar(icon, unit)
 
