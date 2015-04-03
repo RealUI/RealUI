@@ -29,18 +29,6 @@ local function TimeFormat(t)
     return f
 end
 
-local function CreateBD(parent, alpha)
-    local bg = CreateFrame("Frame", nil, parent)
-    bg:SetFrameStrata("LOW")
-    bg:SetFrameLevel(parent:GetFrameLevel() - 1)
-    bg:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 1, -1)
-    bg:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 1)
-    bg:SetBackdrop({bgFile = nibRealUI.media.textures.plain, edgeFile = nibRealUI.media.textures.plain, edgeSize = 1, insets = {top = 0, bottom = 0, left = 0, right = 0}})
-    bg:SetBackdropColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], alpha or nibRealUI.media.background[4])
-    bg:SetBackdropBorderColor(0, 0, 0, 1)
-    return bg
-end
-
 local function AttachStatusBar(icon, unit)
     --print("AttachStatusBar")
     local sBar = CreateFrame("StatusBar", nil, icon)
@@ -70,8 +58,8 @@ end
 --[[ Parts ]]--
 local function CreateHealthBar(parent)
     parent.Health = CreateFrame("StatusBar", nil, parent)
-    parent.Health:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 3)
-    parent.Health:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
+    parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
+    parent.Health:SetPoint("TOPRIGHT", -1, -1)
     parent.Health:SetStatusBarTexture(nibRealUI.media.textures.plain)
     parent.Health:SetStatusBarColor(unpack(db.overlay.colors.health.normal))
     parent.Health.frequentUpdates = true
@@ -82,8 +70,6 @@ local function CreateHealthBar(parent)
         end
     end
 
-    local healthBG = F.CreateBD(parent.Health, 0)
-    healthBG:SetFrameStrata("LOW")
 end
 
 local function CreateTags(parent)
@@ -104,17 +90,13 @@ local function CreatePowerBar(parent)
     local power = CreateFrame("StatusBar", nil, parent)
     power:SetFrameStrata("MEDIUM")
     power:SetFrameLevel(6)
-    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
-    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
+    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 1)
+    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
     power:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    power:SetStatusBarColor(db.overlay.colors.power["MANA"][1], db.overlay.colors.power["MANA"][2], db.overlay.colors.power["MANA"][3])
     power.colorPower = true
     power.PostUpdate = function(bar, unit, min, max)
         bar:SetShown(max > 0)
     end
-
-    local powerBG = F.CreateBD(power, 0)
-    powerBG:SetFrameStrata("LOW")
 
     parent.Power = power
 end
@@ -123,17 +105,13 @@ local function CreateAltPowerBar(parent)
     local altPowerBar = CreateFrame("StatusBar", nil, parent)
     altPowerBar:SetFrameStrata("MEDIUM")
     altPowerBar:SetFrameLevel(6)
-    altPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 3)
-    altPowerBar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 5)
+    altPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 4)
+    altPowerBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 6)
     altPowerBar:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    -- altPowerBar:SetStatusBarColor(db.overlay.colors.power["ALTERNATE"][1], db.overlay.colors.power["ALTERNATE"][2], db.overlay.colors.power["ALTERNATE"][3])
     altPowerBar.colorPower = true
     -- altPowerBar.PostUpdate = function(bar, unit, min, max)
     -- 	bar:SetShown(max > 0)
     -- end
-
-    local altpowerBG = F.CreateBD(altPowerBar, 0)
-    altpowerBG:SetFrameStrata("LOW")
 
     parent.AltPowerBar = altPowerBar
 end
@@ -141,11 +119,11 @@ end
 local function CreateAuras(parent)
     UnitFrames:debug("Boss:CreateAuras")
     local auras = CreateFrame("Frame", nil, parent)
-    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, -1)
+    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, 1)
     auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
     auras:SetHeight(22)
-    auras.size = 24
-    auras.spacing = 1
+    auras.size = parent:GetHeight() - 2
+    auras.spacing = 3
     auras.numBuffs = db.boss.buffCount
     auras.numDebuffs = db.boss.debuffCount
     auras["growth-x"] = "LEFT"
@@ -179,18 +157,7 @@ local function CreateAuras(parent)
     end
     auras.PostCreateIcon = function(self, button)
         UnitFrames:debug("Boss:PostCreateIcon", self, button)
-        button.icon:SetTexCoord(.08, .92, .08, .92)
-        button.border = CreateFrame("Frame", nil, button)
-        button.border:SetAllPoints(button)
-        button.border:SetBackdrop({
-            bgFile = nibRealUI.media.textures.plain,
-            edgeFile = nibRealUI.media.textures.plain,
-            edgeSize = 1,
-            insets = {top = 1, bottom = -1, left = -1, right = 1}
-        })
-        button.border:SetBackdropColor(0, 0, 0, 0)
-        button.border:SetBackdropBorderColor(0, 0, 0, 1)
-
+        F.ReskinIcon(button.icon)
         button.count:SetFontObject(RealUIFont_PixelSmall)
         local countY = ndbc.resolution == 1 and -1.5 or -2.5
         button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
@@ -239,8 +206,8 @@ local function CreateAuras(parent)
 end
 
 local function CreateBoss(self)
-    self:SetSize(135, 22)
-    F.CreateBD(self, 0.7)
+    self:SetSize(135, 24)
+    F.CreateBD(self, nibRealUI.media.background[4])
 
     CreateHealthBar(self)
     CreateTags(self)

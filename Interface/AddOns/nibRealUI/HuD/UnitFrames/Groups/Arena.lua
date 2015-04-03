@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local debug = nibRealUI.Debug
+local F, C = Aurora[1], Aurora[2]
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:GetModule(MODNAME)
@@ -7,7 +7,6 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 local prepFrames = {}
-local F = Aurora[1]
 
 --[[ Utils ]]--
 local function TimeFormat(t)
@@ -31,23 +30,6 @@ local function TimeFormat(t)
     return f
 end
 
-local function CreateBD(parent, alpha)
-    local bg = CreateFrame("Frame", nil, parent)
-    bg:SetFrameStrata("LOW")
-    bg:SetFrameLevel(parent:GetFrameLevel() - 1)
-    bg:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 1, -1)
-    bg:SetPoint("TOPLEFT", parent, "TOPLEFT", -1, 1)
-    bg:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain,
-        edgeFile = nibRealUI.media.textures.plain,
-        edgeSize = 1,
-        insets = {top = 0, bottom = 0, left = 0, right = 0}
-    })
-    bg:SetBackdropColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], alpha or nibRealUI.media.background[4])
-    bg:SetBackdropBorderColor(0, 0, 0, 1)
-    return bg
-end
-
 local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
     --print(self.unit, event, unitID, spell, rank, lineID, spellID)
     if spellID == 59752 or spellID == 42292 then
@@ -65,9 +47,9 @@ local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
 end
 
 local function UpdatePrep(self, event, ...)
-    debug("----- UpdatePrep -----")
+    UnitFrames:debug("Arena:----- UpdatePrep -----")
     if event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS" then
-        debug(event)
+        UnitFrames:debug(event)
         local numOpps = GetNumArenaOpponentSpecs()
         for i = 1, 5 do
             local opp = prepFrames[i]
@@ -86,21 +68,21 @@ local function UpdatePrep(self, event, ...)
             end
         end
     else
-        debug(event, ...)
+        UnitFrames:debug(event, ...)
         local unit, status = ...
         -- filter arenapet*
         unit = unit:match("arena(%d)")
-        debug(unit, prepFrames[unit])
+        UnitFrames:debug(unit, prepFrames[unit])
         if unit then
             local opp = prepFrames[tonumber(unit)]
             if status == "seen" then
-                debug("Arena Opp Seen", unit, opp)
+                UnitFrames:debug("Arena Opp Seen", unit, opp)
                 opp:SetAlpha(1)
             elseif status == "destroyed" then
-                debug("Arena Opp Destroyed", unit, opp)
+                UnitFrames:debug("Arena Opp Destroyed", unit, opp)
                 opp:SetAlpha(0)
             elseif status == "cleared" then
-                debug("Arena Opp Cleared", unit, opp)
+                UnitFrames:debug("Arena Opp Cleared", unit, opp)
                 opp:Hide()
             end
         end
@@ -233,7 +215,7 @@ local function CreateArena(self)
 end
 
 local function SetupPrepFrames(index)
-    debug("SetupPrepFrames")
+    UnitFrames:debug("SetupPrepFrames")
     local prep = CreateFrame("Frame", nil, UIParent)
     if (index == 1) then
         prep:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
