@@ -118,4 +118,7 @@ end)
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
     -- These addons are loaded before !Aurora_RealUI.
     --mods["Blizzard_PetBattleUI"](F, C)
+    if IsAddOnLoaded("Blizzard_CompactRaidFrames") then
+        mods["Blizzard_CompactRaidFrames"](F, C)
+    end
 end)

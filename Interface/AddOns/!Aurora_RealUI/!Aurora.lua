@@ -148,6 +148,27 @@ functions.CreateBDFrame = function(f, a)
     return bg
 end
 
+functions.ReskinFilterButton = function(f)
+    f.TopLeft:Hide()
+    f.TopRight:Hide()
+    f.BottomLeft:Hide()
+    f.BottomRight:Hide()
+    f.TopMiddle:Hide()
+    f.MiddleLeft:Hide()
+    f.MiddleRight:Hide()
+    f.BottomMiddle:Hide()
+    f.MiddleMiddle:Hide()
+
+    F.Reskin(f)
+    if f.Icon then
+        f.Icon:SetTexture(C.media.arrowRight)
+
+        f.Text:SetPoint("CENTER")
+        f.Icon:SetPoint("RIGHT", f, "RIGHT", -5, 0)
+        f.Icon:SetSize(8, 8)
+    end
+end
+
 functions.ReskinIcon = function(icon)
     debug("ReskinIcon", F, C, icon)
     icon:SetTexCoord(.08, .92, .08, .92)
@@ -215,10 +236,8 @@ f:SetScript("OnEvent", function(self, event, addon)
                 moduleFunc(F, C)
             end
         else
-            if addonModule then
-                if type(addonModule) == "function" then
-                    addonModule(F, C)
-                end
+            if addonModule and type(addonModule) == "function" then
+                addonModule(F, C)
             end
         end
     end
