@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndbc, _
 
 local MODNAME = "MinimapAdv"
-local MinimapAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local MinimapAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Astrolabe = DongleStub("Astrolabe-1.0")
 
 RealUIMinimap = MinimapAdv
@@ -120,16 +120,26 @@ local function GetOptions()
                         end,
                         order = 40,
                     },
+                    hideRaidFilters = {
+                        type = "toggle",
+                        name = L["Tweaks_HideRaidFilter"],
+                        desc = L["Tweaks_HideRaidFilterDesc"],
+                        get = function(info) return db.information.hideRaidFilters end,
+                        set = function(info, value)
+                            db.information.hideRaidFilters = value
+                        end,
+                        order = 50,
+                    },
                     gap1 = {
                         name = " ",
                         type = "description",
-                        order = 41,
+                        order = 51,
                     },
                     position = {
                         name = "Position",
                         type = "group",
                         inline = true,
-                        order = 50,
+                        order = 60,
                         args = {
                             xoffset = {
                                 type = "input",
@@ -712,9 +722,6 @@ function MinimapAdv:UpdateInfoPosition()
     local isTop = NewMinimapPoints.isTop
     local isLeft = NewMinimapPoints.isLeft
 
-    local mm_width = Minimap:GetWidth()
-    local mm_height = Minimap:GetHeight()
-
     local xofs
     local yofs
     local yadj
@@ -729,7 +736,8 @@ function MinimapAdv:UpdateInfoPosition()
 
     local iHeight = (fontSize + db.information.gap) / scale
 
-    local numText = 0
+    self.numText = 0
+    local numText = self.numText
 
     if Minimap:IsVisible() and (ExpandedState == 0) then
         -- Set Offsets, Positions, Gaps
@@ -849,18 +857,37 @@ function MinimapAdv:UpdateInfoPosition()
             MMFrames.info.Squeue:Hide()
         end
 
-        -- if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
-        --  numText = numText + 1
-        --  CRFM = _G["CompactRaidFrameManager"]
-        --      --print("scale: "..scale)
-        --      --print("numText: "..numText)
-        --      --local ofsy = -41.5 - 149.4 * scale
-        --      MinimapAdv:AdjustCRFManager(CRFM, scale, mm_anchor, numText)
-        --  --end)
-        --  hooksecurefunc("CompactRaidFrameManager_Toggle", function(self)
-        --      MinimapAdv:AdjustCRFManager(self, scale, mm_anchor, numText)
-        --  end)
-        -- end
+        if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
+            numText = numText + 1
+            self:debug("InfoText", yofs, self.numText)
+            self:AdjustCRFManager(_G["CompactRaidFrameManager"], Minimap:GetHeight(), NewMinimapPoints)
+            if not self.hookedCRFM then
+                hooksecurefunc("CompactRaidFrameManager_Toggle", function(CRFM)
+                    self:AdjustCRFManager(CRFM, Minimap:GetHeight())
+                end)
+                if db.information.hideRaidFilters then
+                    hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(self)
+                        local container = self.displayFrame.optionsFlowContainer
+                        FlowContainer_PauseUpdates(container)
+
+                        FlowContainer_RemoveObject(container, self.displayFrame.profileSelector)
+                        self.displayFrame.profileSelector:Hide()
+                        FlowContainer_RemoveObject(container, self.displayFrame.filterOptions)
+                        self.displayFrame.filterOptions:Hide()
+                        FlowContainer_RemoveObject(container, self.displayFrame.lockedModeToggle)
+                        self.displayFrame.lockedModeToggle:Hide()
+                        FlowContainer_RemoveObject(container, self.displayFrame.hiddenModeToggle)
+                        self.displayFrame.hiddenModeToggle:Hide()
+
+                        FlowContainer_ResumeUpdates(container);
+                        
+                        local usedX, usedY = FlowContainer_GetUsedBounds(container);
+                        self:SetHeight(usedY + 40);
+                    end)
+                end
+                self.hookedCRFM = true
+            end
+        end
     else
         MMFrames.info.location:Hide()
         MMFrames.info.coords:Hide()
@@ -874,22 +901,19 @@ function MinimapAdv:UpdateInfoPosition()
     end
 end
 
-
-function MinimapAdv:AdjustCRFManager(self, scale, mm_anchor, numText)
-    -- yofs with 0 info lines:
-    -- -77 @ 50%
-    -- -140 (default yofs)
-    -- -154 @ 100%
-    -- -229 @ 150%
-    -- -301 @ 200%
-    local yofs = (-3.5 - 149.4 * scale) + (-numText * 13)
+function MinimapAdv:AdjustCRFManager(CRFM, height, mapPoints)
     if (InCombatLockdown()) then
         return;
     end
-    if ( self.collapsed ) and (mm_anchor == "TOPLEFT")then
-        CompactRaidFrameManager:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -182, yofs)
+    if not mapPoints then
+        mapPoints = GetPositionData()
+    end
+    local yofs = (-height * mapPoints.scale) + (-self.numText * 13)
+    local show = UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or not db.information.hideRaidFilters
+    if CRFM.collapsed and mapPoints.anchor == "TOPLEFT" then
+        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -182, yofs)
     else
-        CompactRaidFrameManager:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -7, yofs)
+        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -7 or -7, yofs)
     end
 end
 
@@ -1490,11 +1514,14 @@ end
     17 - "Looking For Raid" 10-25 Player
 ]]--
 function MinimapAdv:DungeonDifficultyUpdate()
+    self:debug("DungeonDifficultyUpdate")
     -- If in a Party/Raid then show Dungeon Difficulty text
     MMFrames.info.dungeondifficulty.text:SetText("")
-    local _, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
+    local instanceName, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
     local name, groupType, isHeroic, isChallengeMode = GetDifficultyInfo(difficulty)
-    if (instanceType ~= "none") then
+    self:debug("instanceType", instanceType)
+    local isInGarrison = instanceName:find("Garrison")
+    if instanceType ~= "none" and not instanceName:find("Garrison") then
         if (instanceType == "party" or instanceType == "scenario") and (maxPlayers <= 5) then
             self.DifficultyText = "D: "..maxPlayers
             if isChallengeMode then self.DifficultyText = self.DifficultyText.."+" end
@@ -1587,14 +1614,15 @@ function MinimapAdv:UpdateGuildPartyState(event, ...)
 end
 
 function MinimapAdv:InstanceDifficultyOnEvent(event, ...)
+    self:debug("InstanceDifficultyOnEvent", event, ...)
     self:DungeonDifficultyUpdate()
 end
 
 ---- Loot Specialization ----
 function MinimapAdv:LootSpecUpdate()
-    -- If in a Party/Raid with Loot Spec functionality then show Loot Spec
-    local _, instanceType, difficulty, _, maxPlayers = GetInstanceInfo()
-    if (instanceType == "party" or instanceType == "raid") and (difficulty == 14 or difficulty == 7) and not (maxPlayers == 5) then
+    -- If in a Dungeon, Raid or Garrison show Loot Spec
+    local _, instanceType = GetInstanceInfo()
+    if (instanceType == "party" or instanceType == "raid") then
         MMFrames.info.lootSpec.text:SetText("|cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)..LOOT..":|r "..nibRealUI:GetCurrentLootSpecName())
         MMFrames.info.lootSpec:SetWidth(MMFrames.info.lootSpec.text:GetStringWidth() + 12)
         InfoShown.lootSpec = true
@@ -2411,6 +2439,7 @@ function MinimapAdv:OnInitialize()
                 minimapbuttons = true,
                 coordDelayHide = true,
                 gap = 4,
+                hideRaidFilters = true,
             },
             poi = {
                 enabled = true,
