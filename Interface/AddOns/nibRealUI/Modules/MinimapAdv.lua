@@ -1,15 +1,14 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndbc, _
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Astrolabe = DongleStub("Astrolabe-1.0")
 
-RealUIMinimap = MinimapAdv
-
-local CRFM
 local strform = _G.string.format
 
+RealUIMinimap = MinimapAdv
 BINDING_HEADER_REALUIMINIMAP = "RealUI Minimap"
 BINDING_NAME_REALUIMINIMAPTOGGLE = "Toggle Minimap"
 BINDING_NAME_REALUIMINIMAPFARM = "Toggle Farm Mode"
@@ -27,6 +26,7 @@ local minimapAnchors = {
     "BOTTOMLEFT",
     "BOTTOMRIGHT",
 }
+local infoTexts = {}
 
 local options
 local function GetOptions()
@@ -103,6 +103,7 @@ local function GetOptions()
                         get = function(info) return db.information.location end,
                         set = function(info, value)
                             db.information.location = value
+                            infoTexts.Location.shown = value
                             MinimapAdv:UpdateInfoPosition()
                         end,
                         order = 30,
@@ -115,7 +116,6 @@ local function GetOptions()
                         get = function(info) return db.information.gap end,
                         set = function(info, value)
                             db.information.gap = value
-                            MinimapAdv:UpdateFonts()
                             MinimapAdv:UpdateInfoPosition()
                         end,
                         order = 40,
@@ -570,8 +570,6 @@ local function GetOptions()
     return options
 end
 
-local Font1, Font2 = CreateFont("MinimapFont1"), CreateFont("MinimapFont2")
-
 local Textures = {
     SquareMask = [[Interface\AddOns\nibRealUI\Media\Minimap\SquareMinimapMask]],
     Minimize = [[Interface\Addons\nibRealUI\Media\Minimap\Minimize]],
@@ -585,11 +583,7 @@ local Textures = {
 }
 
 local MMFrames = MinimapAdv.Frames
-local InfoShown = {
-    coords = false,
-    dungeondifficulty = false,
-    lootSpec = false,
-}
+
 local pois = {}
 MinimapAdv.pois = pois
 local POI_OnEnter, POI_OnLeave, POI_OnMouseUp, Arrow_OnUpdate
@@ -727,13 +721,7 @@ function MinimapAdv:UpdateInfoPosition()
     local yadj
     local ymulti
 
-    local font1 = {RealUIFont_PixelSmall:GetFont()}
-    local font2 = {RealUIFont_Pixel:GetFont()}
-    local fontSize
-    Font1:SetFont(font1[1], font1[2] / db.position.scale, font1[3])
-    Font2:SetFont(font2[1], font2[2] / db.position.scale, font2[3])
-    fontSize = font2[2]
-
+    local _, fontSize = RealUIFont_Pixel:GetFont()
     local iHeight = (fontSize + db.information.gap) / scale
 
     self.numText = 0
@@ -773,88 +761,30 @@ function MinimapAdv:UpdateInfoPosition()
             MMFrames.info.zoneIndicator:Hide()
         end
 
-        -- Coordinates
-        if InfoShown.coords then
-            MMFrames.info.coords:ClearAllPoints()
-            MMFrames.info.coords:SetPoint(Cpoint, "Minimap", Cpoint, 0, 0)
-            MMFrames.info.coords.text:SetFontObject("MinimapFont1")
-            MMFrames.info.coords.text:SetJustifyH("LEFT")
-
-            MMFrames.info.coords:Show()
-        else
-            MMFrames.info.coords:Hide()
-        end
-
         ---- Info List
-        -- Location
-        if db.information.location then
-            MMFrames.info.location:ClearAllPoints()
-            MMFrames.info.location:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.location.text:SetFontObject("MinimapFont2")
-            MMFrames.info.location:Show()
-            yofs = yofs + yadj
-        else
-            MMFrames.info.location:Hide()
-        end
-
-        -- Dungeon Difficulty
-        if InfoShown.dungeondifficulty and not(InfoShown.coords) then
-            MMFrames.info.dungeondifficulty:ClearAllPoints()
-            MMFrames.info.dungeondifficulty:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.dungeondifficulty.text:SetFontObject("MinimapFont2")
-            MMFrames.info.dungeondifficulty:Show()
-            yofs = yofs + yadj
-            numText = numText + 1
-        else
-            MMFrames.info.dungeondifficulty:Hide()
-        end
-
-        -- Loot Spec
-        if InfoShown.lootSpec then
-            MMFrames.info.lootSpec:ClearAllPoints()
-            MMFrames.info.lootSpec:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.lootSpec.text:SetFontObject("MinimapFont2")
-            MMFrames.info.lootSpec:Show()
-            yofs = yofs + yadj
-            numText = numText + 1
-        else
-            MMFrames.info.lootSpec:Hide()
-        end
-
-        -- Dungeon Finder Queue
-        if InfoShown.queue then
-            MMFrames.info.queue:ClearAllPoints()
-            MMFrames.info.queue:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.queue.text:SetFontObject("MinimapFont2")
-            MMFrames.info.queue:Show()
-            yofs = yofs + yadj
-            numText = numText + 1
-        else
-            MMFrames.info.queue:Hide()
-        end
-
-        -- Raid Finder Queue
-        if InfoShown.RFqueue then
-            MMFrames.info.RFqueue:ClearAllPoints()
-            MMFrames.info.RFqueue:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.RFqueue.text:SetFontObject("MinimapFont2")
-            MMFrames.info.RFqueue:Show()
-            yofs = yofs + yadj
-            numText = numText + 1
-        else
-            MMFrames.info.RFqueue:Hide()
-        end
-
-        -- Scenarios Queue
-        if InfoShown.Squeue then
-            MMFrames.info.Squeue:ClearAllPoints()
-            MMFrames.info.Squeue:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-            MMFrames.info.Squeue.text:SetFontObject("MinimapFont2")
-            MMFrames.info.Squeue:Show()
-            yofs = yofs + yadj
-            numText = numText + 1
-        else
-            MMFrames.info.Squeue:Hide()
+        for i = 1, #infoTexts do
+            local info = infoTexts[i]
+            local infoText = MMFrames.info[info.type]
+            if info.shown then
+                self:debug("Show", info.type, info.shown)
+                self:debug("Font", infoText.text:GetFont())
+                infoText:ClearAllPoints()
+                if info.type == "Coords" then
+                    self:debug("SetPoint", info.type, info.shown)
+                    infoText:SetPoint(Cpoint, "Minimap", Cpoint, 0, 0)
+                    infoText.text:SetJustifyH("LEFT")
+                else
+                    self:debug("SetPoint", info.type, info.shown)
+                    infoText:SetPoint(point, "Minimap", rpoint, xofs, yofs)
+                    yofs = yofs + yadj
+                    numText = numText + 1
+                end
+                infoText.text:SetPoint(isLeft and "LEFT" or "RIGHT", 0, 0)
+                infoText:Show()
+            else
+                self:debug("Hide", info.type, info.shown)
+                infoText:Hide()
+            end
         end
 
         if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
@@ -889,13 +819,14 @@ function MinimapAdv:UpdateInfoPosition()
             end
         end
     else
-        MMFrames.info.location:Hide()
-        MMFrames.info.coords:Hide()
-        MMFrames.info.dungeondifficulty:Hide()
-        MMFrames.info.lootSpec:Hide()
-        MMFrames.info.queue:Hide()
-        MMFrames.info.RFqueue:Hide()
-        MMFrames.info.Squeue:Hide()
+        MMFrames.info.Location:Hide()
+        MMFrames.info.Coords:Hide()
+        MMFrames.info.DungeonDifficulty:Hide()
+        MMFrames.info.LootSpec:Hide()
+        MMFrames.info.LFG:Hide()
+        MMFrames.info.Queue:Hide()
+        MMFrames.info.RFQueue:Hide()
+        MMFrames.info.SQueue:Hide()
         MMFrames.info.zoneIndicator:Hide()
         numText = 1
     end
@@ -1437,59 +1368,69 @@ function MinimapAdv:UpdatePOIEnabled()
     end
 end
 
-function MinimapAdv:GetLFGQueue()
-    for i=1, NUM_LE_LFG_CATEGORYS do
-        local mode, submode = GetLFGMode(i)
-        if ( mode ) then
-            self:QueueTimeUpdate(i)
-        end
-    end
-end
-
----- Queue Time ----
-function MinimapAdv:QueueTimeUpdate(category)
-    local mode, submode = GetLFGMode(category)
-    if mode == "queued" then
-        local queueStr = ""
-        local hasData, _, _, _, _, _, _, _, _, _, _, _, _, _, _, myWait, queuedTime = GetLFGQueueStats(category)
-
-        if not hasData then
-            queueStr = LESS_THAN_ONE_MINUTE
-        else
-            local elapsedTime = GetTime() - queuedTime
-            local tiqStr = strform("%s", ConvertSecondstoTime(elapsedTime))
-            local awtStr = strform("%s", myWait == -1 and TIME_UNKNOWN or SecondsToTime(myWait, false, false, 1))
-            queueStr = strform("%s |cffc0c0c0(%s)|r", tiqStr, awtStr)
-        end
-
-        local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
-        if category == 1 then -- Dungeon Finder
-            MMFrames.info.queue.text:SetText("|cff"..colorOrange.."DF:|r "..queueStr)
-            MMFrames.info.queue:SetWidth(MMFrames.info.queue.text:GetStringWidth() + 12)
-            InfoShown.queue = true
-        elseif category == 3 then -- Raid Finder
-            MMFrames.info.RFqueue.text:SetText("|cff"..colorOrange.."RF:|r "..queueStr)
-            MMFrames.info.RFqueue:SetWidth(MMFrames.info.RFqueue.text:GetStringWidth() + 12)
-            InfoShown.RFqueue = true
-        elseif category == 4 then -- Scenarios
-            MMFrames.info.Squeue.text:SetText("|cff"..colorOrange.."S:|r "..queueStr)
-            MMFrames.info.Squeue:SetWidth(MMFrames.info.Squeue.text:GetStringWidth() + 12)
-            InfoShown.Squeue = true
-        end
+function MinimapAdv:GetLFGList(event, arg)
+    self:debug("GetLFGList", event, arg)
+    if not arg then
+        infoTexts.LFG.shown = false
     else
-        -- Set to hide Queue time
-        InfoShown.queue = false
-        InfoShown.RFqueue = false
-        InfoShown.Squeue = false
+        local active, activityID, ilvl, name, comment, voiceChat, duration, autoAccept = C_LFGList.GetActiveEntryInfo()
+        local status
+        if autoAccept then
+            status = LFG_LIST_AUTO_ACCEPT
+        else
+            local _, numActiveApplicants = C_LFGList.GetNumApplicants()
+            status = strform(LFG_LIST_PENDING_APPLICANTS, numActiveApplicants)
+        end
+        local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
+        MMFrames.info.LFG.text:SetText("|cff"..colorOrange.."LFG:|r "..status)
+        MMFrames.info.LFG:SetWidth(MMFrames.info.LFG.text:GetStringWidth() + 12)
+        infoTexts.LFG.shown = true
     end
     if not UpdateProcessing then
         self:UpdateInfoPosition()
     end
 end
 
-function MinimapAdv:QueueTimeFrequentCheck()
-    if InfoShown.queue or InfoShown.RFqueue or InfoShown.Squeue then
-        self:GetLFGQueue()
+function MinimapAdv:GetLFGQueue()
+    self:debug("GetLFGQueue")
+    -- Reset shown status
+    infoTexts.Queue.shown = false
+    infoTexts.RFQueue.shown = false
+    infoTexts.SQueue.shown = false
+    for category = 1, NUM_LE_LFG_CATEGORYS do
+        local mode, submode = GetLFGMode(category)
+        self:debug("LFGQueue", category, mode)
+        if mode and mode == "queued" then
+            local queueStr = ""
+            local hasData, _, _, _, _, _, _, _, _, _, _, _, _, _, _, myWait, queuedTime = GetLFGQueueStats(category)
+
+            if not hasData then
+                queueStr = LESS_THAN_ONE_MINUTE
+            else
+                local elapsedTime = GetTime() - queuedTime
+                local tiqStr = strform("%s", ConvertSecondstoTime(elapsedTime))
+                local awtStr = strform("%s", myWait == -1 and TIME_UNKNOWN or SecondsToTime(myWait, false, false, 1))
+                queueStr = strform("%s |cffc0c0c0(%s)|r", tiqStr, awtStr)
+            end
+
+            local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
+            if category == 1 then -- Dungeon Finder
+                MMFrames.info.Queue.text:SetText("|cff"..colorOrange.."DF:|r "..queueStr)
+                MMFrames.info.Queue:SetWidth(MMFrames.info.Queue.text:GetStringWidth() + 12)
+                infoTexts.Queue.shown = true
+            elseif category == 3 then -- Raid Finder
+                MMFrames.info.RFQueue.text:SetText("|cff"..colorOrange.."RF:|r "..queueStr)
+                MMFrames.info.RFQueue:SetWidth(MMFrames.info.RFQueue.text:GetStringWidth() + 12)
+                infoTexts.RFQueue.shown = true
+            elseif category == 4 then -- Scenarios
+                MMFrames.info.SQueue.text:SetText("|cff"..colorOrange.."S:|r "..queueStr)
+                MMFrames.info.SQueue:SetWidth(MMFrames.info.SQueue.text:GetStringWidth() + 12)
+                infoTexts.SQueue.shown = true
+            end
+        end
+    end
+    if not UpdateProcessing then
+        self:UpdateInfoPosition()
     end
 end
 
@@ -1516,7 +1457,7 @@ end
 function MinimapAdv:DungeonDifficultyUpdate()
     self:debug("DungeonDifficultyUpdate")
     -- If in a Party/Raid then show Dungeon Difficulty text
-    MMFrames.info.dungeondifficulty.text:SetText("")
+    MMFrames.info.DungeonDifficulty.text:SetText("")
     local instanceName, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = GetInstanceInfo()
     local name, groupType, isHeroic, isChallengeMode = GetDifficultyInfo(difficulty)
     self:debug("instanceType", instanceType)
@@ -1557,36 +1498,36 @@ function MinimapAdv:DungeonDifficultyUpdate()
         if isHeroic then self.DifficultyText = self.DifficultyText.."+" end
 
         -- Update Frames
-        MMFrames.info.dungeondifficulty.text:SetText(self.DifficultyText.." ")
-        MMFrames.info.dungeondifficulty:EnableMouse(true)
-        MMFrames.info.dungeondifficulty:SetWidth(MMFrames.info.dungeondifficulty.text:GetStringWidth() + 12)
+        MMFrames.info.DungeonDifficulty.text:SetText(self.DifficultyText.." ")
+        MMFrames.info.DungeonDifficulty:EnableMouse(true)
+        MMFrames.info.DungeonDifficulty:SetWidth(MMFrames.info.DungeonDifficulty.text:GetStringWidth() + 12)
 
         -- Set to show DungeonDifficulty
-        InfoShown.dungeondifficulty = true
+        infoTexts.DungeonDifficulty.shown = true
     else
         self.DifficultyText = ""
         -- Set to hide DungeonDifficulty
-        InfoShown.dungeondifficulty = false
+        infoTexts.DungeonDifficulty.shown = false
     end
     if self.IsGuildGroup then
         self.DifficultyText = self.DifficultyText.."("..GUILD..")"
-        MMFrames.info.dungeondifficulty:SetScript("OnEnter", function(self)
+        MMFrames.info.DungeonDifficulty:SetScript("OnEnter", function(self)
             local guildName = GetGuildInfo("player")
             local _, instanceType, _, _, maxPlayers = GetInstanceInfo()
             local _, numGuildPresent, numGuildRequired = InGuildParty()
             if instanceType == "arena" then
                 maxPlayers = numGuildRequired
             end
-            GameTooltip:SetOwner(MMFrames.info.dungeondifficulty, "ANCHOR_RIGHT", 18)
+            GameTooltip:SetOwner(MMFrames.info.DungeonDifficulty, "ANCHOR_RIGHT", 18)
             GameTooltip:SetText(GUILD_GROUP, 1, 1, 1)
             GameTooltip:AddLine(strform(GUILD_ACHIEVEMENTS_ELIGIBLE, numGuildRequired, maxPlayers, guildName), nil, nil, nil, 1)
             GameTooltip:Show()
         end)
-        MMFrames.info.dungeondifficulty:SetScript("OnLeave", function()
+        MMFrames.info.DungeonDifficulty:SetScript("OnLeave", function()
             if GameTooltip:IsShown() then GameTooltip:Hide() end
         end)
     else
-        MMFrames.info.dungeondifficulty:SetScript("OnEnter", nil)
+        MMFrames.info.DungeonDifficulty:SetScript("OnEnter", nil)
     end
     if not UpdateProcessing then
         self:UpdateInfoPosition()
@@ -1623,12 +1564,12 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
-        MMFrames.info.lootSpec.text:SetText("|cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)..LOOT..":|r "..nibRealUI:GetCurrentLootSpecName())
-        MMFrames.info.lootSpec:SetWidth(MMFrames.info.lootSpec.text:GetStringWidth() + 12)
-        InfoShown.lootSpec = true
+        MMFrames.info.LootSpec.text:SetText("|cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)..LOOT..":|r "..nibRealUI:GetCurrentLootSpecName())
+        MMFrames.info.LootSpec:SetWidth(MMFrames.info.LootSpec.text:GetStringWidth() + 12)
+        infoTexts.LootSpec.shown = true
     else
-        MMFrames.info.lootSpec.text:SetText("")
-        InfoShown.lootSpec = false
+        MMFrames.info.LootSpec.text:SetText("")
+        infoTexts.LootSpec.shown = false
     end
 
     if not UpdateProcessing then
@@ -1641,19 +1582,19 @@ end
 local coords_int = 0.5
 function MinimapAdv:CoordsUpdate()
     if (IsInInstance() or not(Minimap:IsVisible()) or self.StationaryTime >= 10) then   -- Hide Coords
-        MMFrames.info.coords:SetScript("OnUpdate", nil)
-        InfoShown.coords = false
+        MMFrames.info.Coords:SetScript("OnUpdate", nil)
+        infoTexts.Coords.shown = false
     else    -- Show Coords
-        MMFrames.info.coords:SetScript("OnUpdate", function(self, elapsed)
+        MMFrames.info.Coords:SetScript("OnUpdate", function(self, elapsed)
             coords_int = coords_int - elapsed
             if (coords_int <= 0) then
                 local X, Y = GetPlayerMapPosition("player")
-                MMFrames.info.coords.text:SetText(strform("%.1f  %.1f", X*100, Y*100))
-                MMFrames.info.coords:SetWidth(MMFrames.info.coords.text:GetStringWidth())
+                MMFrames.info.Coords.text:SetText(strform("%.1f  %.1f", X*100, Y*100))
+                MMFrames.info.Coords:SetWidth(MMFrames.info.Coords.text:GetStringWidth())
                 coords_int = 0.5
             end
         end)
-        InfoShown.coords = true
+        infoTexts.Coords.shown = true
     end
     if not UpdateProcessing then self:UpdateInfoPosition() end
 end
@@ -1673,7 +1614,7 @@ function MinimapAdv:MovementUpdate()
     self.LastX = X
     self.LastY = Y
 
-    if ((self.StationaryTime >= 10) and (InfoShown.coords)) or ((self.StationaryTime < 10) and not(InfoShown.coords)) then
+    if ((self.StationaryTime >= 10) and (infoTexts.Coords.shown)) or ((self.StationaryTime < 10) and not(infoTexts.Coords.shown)) then
         self:CoordsUpdate()
     end
 end
@@ -2048,9 +1989,10 @@ function MinimapAdv:ZoneChange()
         zName = strsub(zName, 1, 20)..".."
     end
 
-    MMFrames.info.location.text:SetText(zName)
-    MMFrames.info.location.text:SetTextColor(r, g, b)
-    MMFrames.info.location:SetWidth(MMFrames.info.location.text:GetWidth() + 4)
+    MMFrames.info.Location.text:SetText(zName)
+    MMFrames.info.Location.text:SetTextColor(r, g, b)
+    MMFrames.info.Location:SetWidth(MMFrames.info.Location.text:GetWidth() + 4)
+    infoTexts.Location.shown = db.information.location
 
     RefreshMap = true
 end
@@ -2142,6 +2084,8 @@ function MinimapAdv:RegEvents()
     self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
     self:RegisterEvent("LFG_PROPOSAL_SHOW", "GetLFGQueue")
     self:RegisterEvent("LFG_QUEUE_STATUS_UPDATE", "GetLFGQueue")
+    self:RegisterEvent("LFG_LIST_APPLICANT_UPDATED", "GetLFGList")
+    self:RegisterEvent("LFG_LIST_ACTIVE_ENTRY_UPDATE", "GetLFGList")
 
     -- POI
     self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
@@ -2159,60 +2103,34 @@ function MinimapAdv:RegEvents()
     local function MovementTimerUpdate()
         MinimapAdv:MovementUpdate()
     end
-    self.coordsTicker = C_Timer.NewTicker(0.5, MovementTimerUpdate)
+    self.CoordsTicker = C_Timer.NewTicker(0.5, MovementTimerUpdate)
     -- end)
     -- self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
-        -- self.coordsTicker:Cancel()
+        -- self.CoordsTicker:Cancel()
     -- end)
 end
 
 --------------------------
 -- FRAME INITIALIZATION --
 --------------------------
--- Update Frame fonts
-function MinimapAdv:UpdateFonts()
-    -- Retrieve Font variables
-    local font1 = {RealUIFont_PixelSmall:GetFont()}
-    local font2 = {RealUIFont_Pixel:GetFont()}
-    local fontSize
-    Font1:SetFont(font1[1], font1[2] / db.position.scale, font1[3])
-    Font2:SetFont(font2[1], font2[2] / db.position.scale, font2[3])
-    fontSize = font2[2]
-
-    -- Set Info font
-    local fs
-    for k,v in pairs(MMFrames.info) do
-        fs = MMFrames.info[k].text
-        if fs then
-            fs:SetPoint("LEFT", MMFrames.info[k], "LEFT", 0.5, 0.5)
-            if fs.style == 1 then
-                fs:SetFontObject("MinimapFont1")
-            else
-                fs:SetFontObject("MinimapFont2")
-            end
-            fs:SetJustifyH("LEFT")
-            MMFrames.info[k]:SetHeight(fontSize)
-        end
-    end
-end
-
 -- Frame Template
 local function NewInfoFrame(name, parent, size2)
-    local NewFrame
-
-    NewFrame = CreateFrame("Frame", name, parent)
+    local NewFrame = CreateFrame("Frame", "MinimapAdv_"..name, parent)
     NewFrame:SetHeight(12)
     NewFrame:SetWidth(12)
     NewFrame:SetFrameStrata("LOW")
     NewFrame:SetFrameLevel(5)
 
-    NewFrame.text = NewFrame:CreateFontString(nil, "ARTWORK")
+    local text = NewFrame:CreateFontString(nil, "ARTWORK")
     if size2 then
-        NewFrame.text.style = 2
+        text:SetFontObject("RealUIFont_Pixel")
     else
-        NewFrame.text.style = 1
+        text:SetFontObject("RealUIFont_PixelSmall")
     end
+    NewFrame.text = text
 
+    infoTexts[name] = {type = name, shown = false}
+    tinsert(infoTexts, infoTexts[name])
     return NewFrame
 end
 
@@ -2262,7 +2180,7 @@ local function CreateFrames()
 
     MMFrames.buttonframe.tooltip = MMFrames.buttonframe:CreateFontString()
     MMFrames.buttonframe.tooltip:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 78.5, 4.5)
-    MMFrames.buttonframe.tooltip:SetFontObject("MinimapFont1")
+    MMFrames.buttonframe.tooltip:SetFontObject("RealUIFont_PixelSmall")
     MMFrames.buttonframe.tooltip:SetTextColor(0.8, 0.8, 0.8)
     MMFrames.buttonframe.tooltip:Hide()
 
@@ -2299,14 +2217,15 @@ local function CreateFrames()
     MMFrames.farm:SetScript("OnMouseDown", Farm_OnMouseDown)
 
     -- Info
-    MMFrames.info.location = NewInfoFrame("MinimapAdv_Location", Minimap, true)
-    MMFrames.info.coords = NewInfoFrame("MinimapAdv_Coords", Minimap)
-    MMFrames.info.coords:SetAlpha(0.75)
-    MMFrames.info.dungeondifficulty = NewInfoFrame("MinimapAdv_DungeonDifficulty", Minimap, true)
-    MMFrames.info.lootSpec = NewInfoFrame("MinimapAdv_LootSpec", Minimap, true)
-    MMFrames.info.queue = NewInfoFrame("MinimapAdv_Queue", Minimap, true)
-    MMFrames.info.RFqueue = NewInfoFrame("MinimapAdv_RFQueue", Minimap, true)
-    MMFrames.info.Squeue = NewInfoFrame("MinimapAdv_SQueue", Minimap, true)
+    MMFrames.info.Coords = NewInfoFrame("Coords", Minimap)
+    MMFrames.info.Coords:SetAlpha(0.75)
+    MMFrames.info.Location = NewInfoFrame("Location", Minimap, true)
+    MMFrames.info.LootSpec = NewInfoFrame("LootSpec", Minimap, true)
+    MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", Minimap, true)
+    MMFrames.info.LFG = NewInfoFrame("LFG", Minimap, true)
+    MMFrames.info.Queue = NewInfoFrame("Queue", Minimap, true)
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", Minimap, true)
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", Minimap, true)
 
     -- Zone Indicator
     MMFrames.info.zoneIndicator = CreateFrame("Frame", "MinimapAdv_Zone", Minimap)
@@ -2321,9 +2240,6 @@ local function CreateFrames()
     MMFrames.info.zoneIndicator.bg:SetTexture(Textures.ZoneIndicator)
     MMFrames.info.zoneIndicator.bg:SetVertexColor(0.5, 0.5, 0.5)
     MMFrames.info.zoneIndicator.bg:SetAllPoints(MMFrames.info.zoneIndicator)
-
-    -- Update Fonts
-    MinimapAdv:UpdateFonts()
 end
 
 -------------------
