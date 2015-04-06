@@ -5,7 +5,7 @@ local db, ndb
 local _
 local MODNAME = "ClassResource_ResolveBar"
 local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
-local ResolveBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local ResolveBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
 local class

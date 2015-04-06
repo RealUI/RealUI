@@ -3,7 +3,7 @@ local ndb
 
 local _
 local MODNAME = "HuDConfig_ActionBars"
-local HuDConfig_ActionBars = nibRealUI:NewModule(MODNAME)
+local HuDConfig_ActionBars = nibRealUI:CreateModule(MODNAME)
 
 local Bar4
 local buttonSizes = {

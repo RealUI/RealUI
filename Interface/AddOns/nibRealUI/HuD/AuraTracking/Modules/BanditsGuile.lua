@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local _
 local MODNAME = "AuraTracking_BanditsGuile"
-local BanditsGuile = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local BanditsGuile = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local AuraTracking = nibRealUI:GetModule("AuraTracking")
 

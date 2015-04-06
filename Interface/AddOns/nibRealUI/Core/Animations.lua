@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local ndb, ndbc
 
 local MODNAME = "Animations"
-local Animations = nibRealUI:NewModule(MODNAME)
+local Animations = nibRealUI:CreateModule(MODNAME)
 
 local function smooth(mode,x,y,z)
 	return mode == true and 1 or max((10 + abs(x - y)) / (88.88888 * z), .2) * 1.1

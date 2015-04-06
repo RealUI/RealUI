@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "Objectives Adv."
-local ObjectivesAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ObjectivesAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 

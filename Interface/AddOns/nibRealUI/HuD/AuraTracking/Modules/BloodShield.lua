@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local _
 local MODNAME = "AuraTracking_BloodShield"
-local BloodShield = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local BloodShield = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local AuraTracking = nibRealUI:GetModule("AuraTracking")
 

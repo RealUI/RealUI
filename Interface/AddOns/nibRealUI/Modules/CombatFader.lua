@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndbc
 
 local MODNAME = "CombatFader"
-local CombatFader = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local CombatFader = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local _
 

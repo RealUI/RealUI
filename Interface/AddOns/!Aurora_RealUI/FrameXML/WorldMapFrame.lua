@@ -1,7 +1,7 @@
 local _, mods = ...
 
 tinsert(mods["nibRealUI"], function(F, C)
-    RealUI.Debug("WorldMapFrame", F, C)
+    mods.debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
         WorldMapPlayerUpper:EnableMouse(false)

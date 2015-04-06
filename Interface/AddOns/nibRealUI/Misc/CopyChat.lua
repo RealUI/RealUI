@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "CopyChat"
-local CopyChat = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local CopyChat = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 local textDump = LibStub("LibTextDump-1.0")
 
 local select = select
@@ -23,7 +23,7 @@ local function GetChatLines(...)
     for i = select('#', ...), 1, -1 do
         local region = select(i, ...)
         if (region:GetObjectType() == 'FontString') then
-            nibRealUI.Debug("CopyChat", i, region:GetText())
+            CopyChat:debug("GetChatLines", i, region:GetText())
             dump:AddLine(region:GetText())
         end
     end

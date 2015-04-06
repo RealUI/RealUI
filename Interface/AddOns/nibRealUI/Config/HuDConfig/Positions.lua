@@ -10,7 +10,7 @@ local HuDConfig_ActionBars = nibRealUI:GetModule("HuDConfig_ActionBars")
 local HuDConfig_MSBT = nibRealUI:GetModule("HuDConfig_MSBT")
 
 local MODNAME = "HuDConfig_Positions"
-local HuDConfig_Positions = nibRealUI:NewModule(MODNAME)
+local HuDConfig_Positions = nibRealUI:CreateModule(MODNAME)
 
 local Element = {}
 
@@ -103,7 +103,7 @@ local function CreatePositionSlider(cnt, info)
 			max = max,
 			step = step,
 			func = function(value)
-				nibRealUI.Debug("Update", label, posID, value)
+				HuDConfig_Positions:debug("Update", label, posID, value)
 				HuDConfig_Positions:PositionSliderUpdate(posID, value + offset)
 			end,
 			value = ndb.positions[nibRealUI.cLayout][posID] - offset,

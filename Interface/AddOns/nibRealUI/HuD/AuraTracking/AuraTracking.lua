@@ -4,7 +4,7 @@ local db, ndb
 
 local _
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
 -- Options
 local options

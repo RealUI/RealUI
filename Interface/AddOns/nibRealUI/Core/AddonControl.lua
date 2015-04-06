@@ -3,7 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb, ndbc
 
 local MODNAME = "AddonControl"
-local AddonControl = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local AddonControl = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {

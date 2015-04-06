@@ -1,11 +1,10 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local debug = nibRealUI.Debug
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb
 
 local _
 local MODNAME = "CastBars"
-local CastBars = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local CastBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
@@ -925,7 +924,7 @@ local info = {
     },
 }
 function CastBars:CreateCastBars(self, unit)
-    debug("Castbar:", unit)
+    self:debug("CreateCastBars", unit)
     local width, height = round(self:GetWidth() * 0.91), round(self.Health:GetHeight() * 0.5)
     local info = info[unit]
     local color = db.colors[unit]

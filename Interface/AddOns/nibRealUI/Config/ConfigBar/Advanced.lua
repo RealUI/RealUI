@@ -7,7 +7,7 @@ local ConfigBar = nibRealUI:GetModule("ConfigBar")
 local cbGUI = nibRealUI:GetModule("ConfigBar_GUI")
 
 local MODNAME = "ConfigBar_Advanced"
-local ConfigBar_Advanced = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ConfigBar_Advanced = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local Element = {}
 local buttonCount = 3

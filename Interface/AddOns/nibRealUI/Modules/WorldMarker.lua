@@ -3,7 +3,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndbc
 
 local MODNAME = "WorldMarker"
-local WorldMarker = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local WorldMarker = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local LoggedIn = false
 

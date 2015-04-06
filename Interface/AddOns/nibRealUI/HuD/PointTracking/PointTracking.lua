@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "PointTracking"
-local PointTracking = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local PointTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndb
 

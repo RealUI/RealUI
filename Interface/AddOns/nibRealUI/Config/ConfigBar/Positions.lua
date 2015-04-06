@@ -9,7 +9,7 @@ local HuDConfig = nibRealUI:GetModule("HuDConfig")
 local HuDConfig_Positions = nibRealUI:GetModule("HuDConfig_Positions")
 
 local MODNAME = "ConfigBar_Positions"
-local ConfigBar_Positions = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
+local ConfigBar_Positions = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local Element = {}
 

@@ -1,9 +1,8 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local debug = nibRealUI.Debug
 local db, ndb, ndbc
 
 local MODNAME = "AngleStatusBar"
-local AngleStatusBar = nibRealUI:NewModule(MODNAME)
+local AngleStatusBar = nibRealUI:CreateModule(MODNAME)
 local oUF = oUFembed
 
 local min, max, abs, floor = math.min, math.max, math.abs, math.floor
@@ -265,7 +264,7 @@ end
 
 local function CreateAngleBG(self, width, height, parent, info)
     --print("CreateAngleBG", self.unit, width, height, parent, info)
-    debug("CreateAngleBG", parent:GetName())
+    AngleStatusBar:debug("CreateAngleBG", parent:GetName())
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
@@ -278,7 +277,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
     local bgColor = nibRealUI.media.background
 
-    debug("CreateBG", leftX, rightX)
+    AngleStatusBar:debug("CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
     top:SetTexture(0, 0, 0)
     top:SetHeight(1)
@@ -296,7 +295,7 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
     local maxCols = width - (height + 1) --width - maxRows
-    debug("CreateRows", maxRows, maxCols)
+    AngleStatusBar:debug("CreateRows", maxRows, maxCols)
     if maxRows <= maxCols then
         local row = {}
         for i = 1, maxRows do

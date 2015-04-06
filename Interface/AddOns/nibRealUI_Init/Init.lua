@@ -38,20 +38,20 @@ local defaults = {
     stripeOpacity = 0.5,
 }
 
-local debugger -- Only defined if needed.
-local function CreateDebugFrame()
-    if debugger then
+local debugger = {}
+local function CreateDebugFrame(mod)
+    if debugger[mod] then
         return
     end
-    debugger = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format("RealUI"), 640, 480)
+    debugger[mod] = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
 end
 
-local function debug(...)
-    if not debugger then
-        CreateDebugFrame()
+local function debug(mod, ...)
+    if not debugger[mod] then
+        CreateDebugFrame(mod)
     end
     local time = date("%H:%M:%S")
-    local text = "["..time.."] "
+    local text = ("[%s] %s "):format(time, mod)
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
         if (arg ~= nil) then
@@ -61,24 +61,25 @@ local function debug(...)
         end
         text = text .. arg .. " "
     end
-    debugger:AddLine(text)
+    debugger[mod]:AddLine(text)
 end
 RealUI.Debug = debug
 
 -- Slash Commands
 SLASH_REALUIINIT1 = "/realdebug"
-function SlashCmdList.REALUIINIT(msg, editBox)
-    if not debugger then
-        CreateDebugFrame()
+function SlashCmdList.REALUIINIT(mod, editBox)
+    print("/realdebug", mod, editBox)
+    if not debugger[mod] then
+        CreateDebugFrame(mod)
     end
-
-    if debugger:Lines() == 0 then
-        debugger:AddLine("Nothing to report.")
-        debugger:Display()
-        debugger:Clear()
+    local display = debugger[mod]
+    if display:Lines() == 0 then
+        display:AddLine("Nothing to report.")
+        display:Display()
+        display:Clear()
         return
     end
-    debugger:Display()
+    display:Display()
 end
 
 local f = CreateFrame("Frame")

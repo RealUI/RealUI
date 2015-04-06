@@ -5,7 +5,7 @@ local _
 local ConfigBar = nibRealUI:GetModule("ConfigBar")
 
 local MODNAME = "ConfigBar_GUI"
-local ConfigBar_GUI = nibRealUI:NewModule(MODNAME)
+local ConfigBar_GUI = nibRealUI:CreateModule(MODNAME)
 
 local FontStringsOrange = {}
 local FontStringsGreen = {}

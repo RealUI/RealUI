@@ -5,7 +5,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local MODNAME = "DragEmAll"
-local DragEmAll = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local DragEmAll = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Based on the frame list from NDragIt by Nemes.
 -- These frames are hooked on login.

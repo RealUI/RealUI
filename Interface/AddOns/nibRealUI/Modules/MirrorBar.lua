@@ -3,7 +3,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndbc
 
 local MODNAME = "MirrorBar"
-local MirrorBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local MirrorBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 

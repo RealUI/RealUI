@@ -3,7 +3,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndb
 
 local MODNAME = "Chat"
-local Chat = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Chat = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local options
 local function GetOptions()

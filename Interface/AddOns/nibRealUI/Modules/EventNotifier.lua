@@ -5,7 +5,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "EventNotifier"
-local EventNotifier = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local EventNotifier = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- For maps where we don't want notifications of vignettes
 local VignetteExclusionMapIDs = {

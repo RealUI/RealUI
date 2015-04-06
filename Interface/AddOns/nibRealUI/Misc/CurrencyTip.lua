@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "CurrencyTip"
-local CurrencyTip = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local CurrencyTip = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local DB, realmDB, charDB
 

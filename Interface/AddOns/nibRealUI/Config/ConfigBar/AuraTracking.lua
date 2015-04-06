@@ -8,7 +8,7 @@ local cbGUI = nibRealUI:GetModule("ConfigBar_GUI")
 local ScrollingTable = LibStub("ScrollingTable")
 
 local MODNAME = "ConfigBar_AuraTracking"
-local ConfigBar_AuraTracking = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ConfigBar_AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local AuraTracking = nibRealUI:GetModule("AuraTracking", true)
 

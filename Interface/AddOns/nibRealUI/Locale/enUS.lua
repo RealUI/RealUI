@@ -57,6 +57,7 @@ L["Fonts_SmallDesc"] = "Use small fonts"
 L["Fonts_Standard"] = "Standard Fonts"
 L["Fonts_YellowFont"] = "Yellow Font Color"
 L["General_Enabled"] = "Enabled"
+L["General_EnabledDesc"] = "Enable/Disable %s"
 L["General_InvalidParent"] = "The parent frame set for %s does not exist. Type /realadv and go to %s -> %s to set a new parent."
 L["General_LoadDefaults"] = "Load Defaults"
 L["General_NoteParent"] = "To find the name of a frame, type /fstack and hover over the frame you want to attach to. Use ALT to cycle the green highlight area"
@@ -77,6 +78,8 @@ L["Power_TurboDesc"] = [=[This mode will schedule graphical updates at a fast ra
 This will increase CPU usage.]=]
 L["Reset_Confirm"] = "Are you sure you wish to reset RealUI?"
 L["Reset_SettingsLost"] = "All user settings will be lost."
+L["Tweaks_HideRaidFilter"] = "Hide raid filters"
+L["Tweaks_HideRaidFilterDesc"] = "Hide the group filters for Blizzard's Compact Raid Frames"
 
 
 -- Config
@@ -177,7 +180,25 @@ L["Raid_NoteAdvSettings"] = [=[Note: Use Advanced Settings to open Grid2's confi
           that RealUI controls (position, layout, borders).]=]
 L["Raid_ShowSolo"] = "Show While Solo"
 L["Raid_Style"] = "Style"
-
+L["UnitFrames_AnchorWidth"] = "Anchor Width"
+L["UnitFrames_AnchorWidthDesc"] = "The amount of space between the Player frame and the Target frame."
+L["UnitFrames_AnnounceChatDesc"] = "Chat channel used for trinket announcement."
+L["UnitFrames_AnnounceTrink"] = "Announce trinkets"
+L["UnitFrames_AnnounceTrinkDesc"] = "Announce opponent trinket use to chat."
+L["UnitFrames_BuffCount"] = "Buff Count"
+L["UnitFrames_DebuffCount"] = "Debuff Count"
+L["UnitFrames_Gap"] = "Gap"
+L["UnitFrames_GapDesc"] = "Vertical distance between each unit."
+L["UnitFrames_ModifierKey"] = "Modifier Key"
+L["UnitFrames_NPCAuras"] = "Show NPC Auras"
+L["UnitFrames_NPCAurasDesc"] = "Show Buffs/Debuffs cast by NPCs."
+L["UnitFrames_PlayerAuras"] = "Show Player Auras"
+L["UnitFrames_PlayerAurasDesc"] = "Show Buffs/Debuffs cast by you."
+L["UnitFrames_SetFocus"] = "Click to set Focus"
+L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
+L["UnitFrames_Units"] = "Units"
+L["UnitFrames_YOffset"] = "Y Offset"
+L["UnitFrames_XOffset"] = "X Offset"
 
 -- InfoLine
 L["Clock_CalenderInvites"] = "Pending Invites:"

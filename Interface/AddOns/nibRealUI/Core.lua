@@ -1,7 +1,10 @@
 local nibRealUI = LibStub("AceAddon-3.0"):NewAddon(RealUI, "nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, dbc, dbg, _
-local debug = nibRealUI.Debug
+local function debug(...)
+    nibRealUI.Debug("Core", ...)
+end
+
 _G.RealUI = nibRealUI
 
 nibRealUI.verinfo = {}
@@ -741,7 +744,7 @@ end
 do
     local prototype = {
         debug = function(self, ...)
-            debug(self.moduleName, ...)
+            nibRealUI.Debug(self.moduleName, ...)
         end,
     }
     function nibRealUI:CreateModule(name, ...)

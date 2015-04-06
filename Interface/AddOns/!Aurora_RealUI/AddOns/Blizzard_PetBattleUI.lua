@@ -4,7 +4,7 @@
 local _, mods = ...
 
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    RealUI.Debug("Blizzard_PetBattleUI", F, C)
+    mods.debug("Blizzard_PetBattleUI", F, C)
     local RealUI = RealUI
     local r, g, b = C.r, C.g, C.b
 

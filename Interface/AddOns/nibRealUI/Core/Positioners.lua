@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb, ndbc
 
 local MODNAME = "Positioners"
-local Positioners = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Positioners = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local PF = {}
 

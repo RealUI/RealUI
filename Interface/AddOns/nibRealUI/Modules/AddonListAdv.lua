@@ -3,7 +3,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local dbc, dbk, dbg
 
 local MODNAME = "AddonListAdv"
-local AddonListAdv = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local AddonListAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 

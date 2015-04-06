@@ -3,7 +3,7 @@ local db
 
 local _
 local MODNAME = "SpellAlerts"
-local SpellAlerts = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local SpellAlerts = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Options
 local options

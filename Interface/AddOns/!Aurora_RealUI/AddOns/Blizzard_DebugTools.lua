@@ -1,7 +1,7 @@
 local _, mods = ...
 
 mods["Blizzard_DebugTools"] = function(F, C)
-    RealUI.Debug("Blizzard_DebugTools", F, C)
+    mods.debug("Blizzard_DebugTools", F, C)
 
     -- Fix ErrorFrame
     ScriptErrorsFrame:HookScript("OnShow", function()

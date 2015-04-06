@@ -4,7 +4,7 @@ local ndb, ndbc
 
 local _
 local MODNAME = "ConfigBar"
-local ConfigBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ConfigBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local Animations = nibRealUI:GetModule("Animations")
 

@@ -4,7 +4,7 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResource_BloodShield"
-local BloodShield = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local BloodShield = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")

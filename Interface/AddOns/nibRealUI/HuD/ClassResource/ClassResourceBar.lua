@@ -4,7 +4,7 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResourceBar"
-local ClassResourceBar = nibRealUI:NewModule(MODNAME)
+local ClassResourceBar = nibRealUI:CreateModule(MODNAME)
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 

@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "GridLayout"
-local GridLayout = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local GridLayout = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local NeedUpdate = false
 local raidGroupInUse = {

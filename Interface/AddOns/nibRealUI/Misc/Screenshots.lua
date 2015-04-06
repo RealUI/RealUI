@@ -3,7 +3,7 @@ local db
 
 local _
 local MODNAME = "AchievementScreenshots"
-local AchievementScreenshots = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local AchievementScreenshots = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Options
 local options

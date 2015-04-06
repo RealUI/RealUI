@@ -3,7 +3,7 @@ local Tablet20 = LibStub("Tablet-2.0")
 local db, ndb, ndbc
 
 local MODNAME = "ScreenSaver"
-local ScreenSaver = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ScreenSaver = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn
 

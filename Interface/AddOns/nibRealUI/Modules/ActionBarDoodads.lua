@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local ndb, db
 
 local MODNAME = "ActionBarDoodads"
-local ActionBarDoodads = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ActionBarDoodads = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local EnteredWorld = false
 local Bar4, Bar4Stance, Bar4Profile

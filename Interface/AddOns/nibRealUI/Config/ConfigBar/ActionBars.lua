@@ -8,7 +8,7 @@ local cbGUI = nibRealUI:GetModule("ConfigBar_GUI")
 local HuDConfig = nibRealUI:GetModule("HuDConfig")
 
 local MODNAME = "ConfigBar_ActionBars"
-local ConfigBar_ActionBars = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
+local ConfigBar_ActionBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local Element = {}
 

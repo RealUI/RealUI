@@ -3,7 +3,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndbc
 
 local MODNAME = "AltPowerBar"
-local AltPowerBar = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local AltPowerBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 

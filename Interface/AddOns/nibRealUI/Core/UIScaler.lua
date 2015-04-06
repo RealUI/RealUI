@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb, ndbg
 
 local MODNAME = "UIScaler"
-local UIScaler = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local UIScaler = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Options
 local options

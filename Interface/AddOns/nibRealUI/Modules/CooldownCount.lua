@@ -6,7 +6,7 @@ local db, ndb
 
 local _
 local MODNAME = "CooldownCount"
-local CooldownCount = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local CooldownCount = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 nibRealUI.CooldownCount = CooldownCount
 
 local Timer = {}

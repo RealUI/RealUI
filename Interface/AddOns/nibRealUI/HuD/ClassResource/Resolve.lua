@@ -1,6 +1,6 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local MODNAME = "ClassResource_Resolve"
-local Resolve = nibRealUI:NewModule(MODNAME)
+local Resolve = nibRealUI:CreateModule(MODNAME)
 
 Resolve.special = {
 	["DEATHKNIGHT"] = true,

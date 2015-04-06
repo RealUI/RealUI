@@ -4,7 +4,7 @@ local db, dbc, ndbc
 
 local _
 local MODNAME = "StatDisplay"
-local StatDisplay = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local StatDisplay = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local strform = string.format
 local StatUpdateTimer
@@ -666,7 +666,7 @@ function StatDisplay:CombatUpdate()
 end
 
 function StatDisplay:PLAYER_LOGIN()
-    nibRealUI.Debug("StatDisplay:PLAYER_LOGIN")
+    self:debug("StatDisplay:PLAYER_LOGIN")
     StatFrame[1] = RealUIPlayerFrame.Stats[1]
     StatFrame[2] = RealUIPlayerFrame.Stats[2]
 
@@ -814,7 +814,7 @@ end
 ----------
 
 function StatDisplay:OnInitialize()
-    nibRealUI.Debug("StatDisplay:OnInitialize")
+    self:debug("StatDisplay:OnInitialize")
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
@@ -840,7 +840,7 @@ function StatDisplay:OnInitialize()
 end
 
 function StatDisplay:OnEnable()
-    nibRealUI.Debug("StatDisplay:OnEnable")
+    self:debug("StatDisplay:OnEnable")
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "TalentUpdate")
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "TalentUpdate")
     self:RegisterEvent("PLAYER_TALENT_UPDATE", "TalentUpdate")
@@ -849,7 +849,7 @@ function StatDisplay:OnEnable()
 end
 
 function StatDisplay:OnDisable()
-    nibRealUI.Debug("StatDisplay:OnDisable")
+    self:debug("StatDisplay:OnDisable")
     self:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     self:UnregisterEvent("PLAYER_TALENT_UPDATE")

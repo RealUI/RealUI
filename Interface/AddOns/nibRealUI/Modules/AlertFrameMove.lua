@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "AlertFrameMove"
-local AlertFrameMove = nibRealUI:NewModule(MODNAME, "AceHook-3.0")
+local AlertFrameMove = nibRealUI:CreateModule(MODNAME, "AceHook-3.0")
 
 local options
 local function GetOptions()

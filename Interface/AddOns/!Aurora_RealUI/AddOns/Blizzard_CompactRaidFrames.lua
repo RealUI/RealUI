@@ -1,7 +1,7 @@
 local _, mods = ...
 
 mods["Blizzard_CompactRaidFrames"] = function(F, C)
-    RealUI.Debug("Blizzard_CompactRaidFrames", F, C)
+    mods.debug("Blizzard_CompactRaidFrames", F, C)
 
     local CompactRaidFrameManager = _G.CompactRaidFrameManager
     CompactRaidFrameManager:DisableDrawLayer("ARTWORK")

@@ -36,7 +36,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndbc
 
 local MODNAME = "Loot"
-local Loot = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Loot = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 local _
 local LoggedIn = false
 

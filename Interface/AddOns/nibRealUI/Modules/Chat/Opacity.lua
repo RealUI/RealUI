@@ -4,7 +4,7 @@ local db, ndb
 
 local Chat = nibRealUI:GetModule("Chat")
 local MODNAME = "Chat_Opacity"
-local Chat_Opacity = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Chat_Opacity = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 function Chat_Opacity:UpdateAlphas()
 	-- Set alphas

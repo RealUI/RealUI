@@ -4,7 +4,7 @@ local db, ndb, ndbc
 
 local _
 local MODNAME = "FrameMover"
-local FrameMover = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local FrameMover = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local EnteredWorld
 local FramesMoving

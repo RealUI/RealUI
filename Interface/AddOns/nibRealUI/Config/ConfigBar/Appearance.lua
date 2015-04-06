@@ -10,7 +10,7 @@ local UnitFrames = nibRealUI:GetModule("UnitFrames")
 local CastBars = nibRealUI:GetModule("CastBars")
 
 local MODNAME = "ConfigBar_Appearance"
-local ConfigBar_Appearance = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local ConfigBar_Appearance = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local Element = {}
 

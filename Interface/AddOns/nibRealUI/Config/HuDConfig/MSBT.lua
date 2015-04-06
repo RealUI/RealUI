@@ -3,7 +3,7 @@ local ndb
 
 local _
 local MODNAME = "HuDConfig_MSBT"
-local HuDConfig_MSBT = nibRealUI:NewModule(MODNAME)
+local HuDConfig_MSBT = nibRealUI:CreateModule(MODNAME)
 
 function HuDConfig_MSBT:UpdateFonts()
 	local prof = "RealUI"

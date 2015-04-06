@@ -1,7 +1,7 @@
 -- Concepts taken from !StopTheSpam
 
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local StopAddonSpam = nibRealUI:NewModule("StopAddonSpam", "AceEvent-3.0", "AceHook-3.0")
+local StopAddonSpam = nibRealUI:CreateModule("StopAddonSpam", "AceEvent-3.0", "AceHook-3.0")
 
 local ALLOW = 1
 local DENY  = 0

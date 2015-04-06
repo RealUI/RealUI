@@ -4,7 +4,7 @@ local db, ndb
 
 local Chat = nibRealUI:GetModule("Chat")
 local MODNAME = "Chat_Strings"
-local Chat_Strings = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Chat_Strings = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local _COPPER_AMOUNT
 local _SILVER_AMOUNT

@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "RuneDisplay"
-local RuneDisplay = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local RuneDisplay = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn
 local EventsRegistered

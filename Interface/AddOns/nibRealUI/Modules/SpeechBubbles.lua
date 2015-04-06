@@ -5,7 +5,7 @@ local db, ndb
 
 local _
 local MODNAME = "SpeechBubbles"
-local SpeechBubbles = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local SpeechBubbles = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 -- Options
 local options

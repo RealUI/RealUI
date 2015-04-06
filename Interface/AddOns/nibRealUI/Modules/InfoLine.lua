@@ -5,7 +5,7 @@ local Tablet20 = LibStub("Tablet-2.0")
 local qTip = LibStub("LibQTip-1.0")
 
 local MODNAME = "InfoLine"
-local InfoLine = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local InfoLine = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 local StatDisplay
 
 local _

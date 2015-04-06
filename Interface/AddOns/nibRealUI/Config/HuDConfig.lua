@@ -3,7 +3,7 @@ local ndb, ndbc
 
 local _
 local MODNAME = "HuDConfig"
-local HuDConfig = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local HuDConfig = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 -- local HuDConfig_Positions = nibRealUI:GetModule("HuDConfig_Positions")
 local HuDConfig_ActionBars = nibRealUI:GetModule("HuDConfig_ActionBars")

@@ -9,7 +9,7 @@ local cbGUI = nibRealUI:GetModule("ConfigBar_GUI")
 local rGridLayout = nibRealUI:GetModule("GridLayout")
 
 local MODNAME = "ConfigBar_Grid"
-local ConfigBar_Grid = nibRealUI:NewModule(MODNAME, "AceConsole-3.0")
+local ConfigBar_Grid = nibRealUI:CreateModule(MODNAME, "AceConsole-3.0")
 
 local Element = {}
 

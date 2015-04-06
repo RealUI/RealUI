@@ -9,6 +9,7 @@ REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
 local function debug(...)
     RealUI.Debug("!Aurora", ...)
 end
+mods.debug = debug
 
 -- Aurora API
 local F, C

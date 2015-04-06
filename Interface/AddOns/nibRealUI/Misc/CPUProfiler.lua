@@ -1,7 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "CPUProfiler"
-local CPUProfiler = nibRealUI:NewModule(MODNAME)
+local CPUProfiler = nibRealUI:CreateModule(MODNAME)
 
 local pow, max = math.pow, math.max
 local graphFrame

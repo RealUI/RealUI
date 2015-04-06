@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb
 
 local MODNAME = "Pitch"
-local Pitch = nibRealUI:NewModule(MODNAME, "AceEvent-3.0")
+local Pitch = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 

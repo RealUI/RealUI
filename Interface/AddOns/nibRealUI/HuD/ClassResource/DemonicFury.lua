@@ -4,7 +4,7 @@ local db, ndb
 
 local _
 local MODNAME = "ClassResource_DemonicFury"
-local DemonicFury = nibRealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local DemonicFury = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 
 local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 

@@ -1,7 +1,7 @@
 local _, mods = ...
 
 tinsert(mods["nibRealUI"], function(F, C)
-    RealUI.Debug("PaperDollFrame", F, C)
+    mods.debug("PaperDollFrame", F, C)
     local itemSlots = {
         {slot = "Head", hasDura = true},
         {slot = "Neck", hasDura = false},

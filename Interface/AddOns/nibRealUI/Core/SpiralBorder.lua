@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb, ndbc
 
 local MODNAME = "SpiralBorder"
-local SpiralBorder = nibRealUI:NewModule(MODNAME)
+local SpiralBorder = nibRealUI:CreateModule(MODNAME)
 
 local SpiralCount = 0
 local Spirals = {}
