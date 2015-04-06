@@ -148,7 +148,7 @@ functions.CreateBDFrame = function(f, a)
     return bg
 end
 
-functions.ReskinFilterButton = function(f)
+functions.ReskinFilterButton = function(f, noArrow)
     f.TopLeft:Hide()
     f.TopRight:Hide()
     f.BottomLeft:Hide()
@@ -160,7 +160,7 @@ functions.ReskinFilterButton = function(f)
     f.MiddleMiddle:Hide()
 
     F.Reskin(f)
-    if f.Icon then
+    if f.Icon and not noArrow then
         f.Icon:SetTexture(C.media.arrowRight)
 
         f.Text:SetPoint("CENTER")
