@@ -707,48 +707,34 @@ end
 
 -- Set Info text/button positions
 function MinimapAdv:UpdateInfoPosition()
-    local NewMinimapPoints = GetPositionData()
-
-    local mm_xofs = NewMinimapPoints.xofs
-    local mm_yofs = NewMinimapPoints.yofs
-    local mm_anchor = NewMinimapPoints.anchor
-    local scale = NewMinimapPoints.scale
-    local isTop = NewMinimapPoints.isTop
-    local isLeft = NewMinimapPoints.isLeft
-
-    local xofs
-    local yofs
-    local yadj
-    local ymulti
-
-    local _, fontSize = RealUIFont_Pixel:GetFont()
-    local iHeight = (fontSize + db.information.gap) / scale
-
-    self.numText = 0
-    local numText = self.numText
-
+    self.numText = 1
     if Minimap:IsVisible() and (ExpandedState == 0) then
-        -- Set Offsets, Positions, Gaps
-        ymulti = isTop and -1 or 1
-        xofs = isLeft and db.information.position.x or -db.information.position.x
-        yofs = (db.information.position.y + 11) * ymulti - (5 * scale * ymulti)
-        yadj = iHeight * ymulti
+        local NewMinimapPoints = GetPositionData()
+        local isTop = NewMinimapPoints.isTop
+        local isLeft = NewMinimapPoints.isLeft
+        local numText = self.numText
 
+        -- Set Offsets, Positions, Gaps
+        local yofs, justify
         local rpoint, point, Cpoint
         if isTop then
+            yofs = -db.information.gap
             point = "TOP"
             rpoint = "BOTTOM"
             Cpoint = "BOTTOM"
         else
+            yofs = db.information.gap
             point = "BOTTOM"
             rpoint = "TOP"
             Cpoint = "TOP"
         end
         if isLeft then
+            justify = "LEFT"
             point = point .. "LEFT"
             rpoint = rpoint .. "LEFT"
             Cpoint = Cpoint .. "LEFT"
         else
+            justify = "RIGHT"
             point = point .. "RIGHT"
             rpoint = rpoint .. "RIGHT"
             Cpoint = Cpoint .. "RIGHT"
@@ -762,38 +748,32 @@ function MinimapAdv:UpdateInfoPosition()
         end
 
         ---- Info List
+        local prevFrame = Minimap
         for i = 1, #infoTexts do
             local info = infoTexts[i]
             local infoText = MMFrames.info[info.type]
             if info.shown then
-                self:debug("Show", info.type, info.shown)
-                self:debug("Font", infoText.text:GetFont())
                 infoText:ClearAllPoints()
                 if info.type == "Coords" then
-                    self:debug("SetPoint", info.type, info.shown)
-                    infoText:SetPoint(Cpoint, "Minimap", Cpoint, 0, 0)
-                    infoText.text:SetJustifyH("LEFT")
+                    infoText:SetPoint(Cpoint, Minimap, Cpoint, 0, 0)
                 else
-                    self:debug("SetPoint", info.type, info.shown)
-                    infoText:SetPoint(point, "Minimap", rpoint, xofs, yofs)
-                    yofs = yofs + yadj
+                    infoText:SetPoint(point, prevFrame, rpoint, 0, yofs)
+                    prevFrame = infoText
                     numText = numText + 1
                 end
-                infoText.text:SetPoint(isLeft and "LEFT" or "RIGHT", 0, 0)
+                infoText.text:SetJustifyH(justify)
                 infoText:Show()
             else
-                self:debug("Hide", info.type, info.shown)
                 infoText:Hide()
             end
         end
+        MMFrames.info.lastFrame = prevFrame
 
-        if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) and (mm_anchor == "TOPLEFT") then
-            numText = numText + 1
-            self:debug("InfoText", yofs, self.numText)
-            self:AdjustCRFManager(_G["CompactRaidFrameManager"], Minimap:GetHeight(), NewMinimapPoints)
+        if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) then
+            self:AdjustCRFManager(_G["CompactRaidFrameManager"], NewMinimapPoints)
             if not self.hookedCRFM then
                 hooksecurefunc("CompactRaidFrameManager_Toggle", function(CRFM)
-                    self:AdjustCRFManager(CRFM, Minimap:GetHeight())
+                    self:AdjustCRFManager(CRFM, GetPositionData())
                 end)
                 if db.information.hideRaidFilters then
                     hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(self)
@@ -828,20 +808,18 @@ function MinimapAdv:UpdateInfoPosition()
         MMFrames.info.RFQueue:Hide()
         MMFrames.info.SQueue:Hide()
         MMFrames.info.zoneIndicator:Hide()
-        numText = 1
     end
 end
 
-function MinimapAdv:AdjustCRFManager(CRFM, height, mapPoints)
-    if (InCombatLockdown()) then
-        return;
+function MinimapAdv:AdjustCRFManager(CRFM, mapPoints)
+    if (InCombatLockdown() or mapPoints.anchor ~= "TOPLEFT") then
+        return
     end
-    if not mapPoints then
-        mapPoints = GetPositionData()
-    end
-    local yofs = (-height * mapPoints.scale) + (-self.numText * 13)
+    local screenH = UIParent:GetHeight()
     local show = UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or not db.information.hideRaidFilters
-    if CRFM.collapsed and mapPoints.anchor == "TOPLEFT" then
+    local yofs = ((MMFrames.info.lastFrame:GetBottom() * mapPoints.scale or screenH * 0.85) - screenH) - db.information.gap
+    self:debug("Bottom", MMFrames.info.lastFrame:GetBottom() / mapPoints.scale)
+    if CRFM.collapsed then
         CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -182, yofs)
     else
         CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -7 or -7, yofs)
@@ -1383,7 +1361,7 @@ function MinimapAdv:GetLFGList(event, arg)
         end
         local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
         MMFrames.info.LFG.text:SetText("|cff"..colorOrange.."LFG:|r "..status)
-        MMFrames.info.LFG:SetWidth(MMFrames.info.LFG.text:GetStringWidth() + 12)
+        MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
     end
     if not UpdateProcessing then
@@ -1416,15 +1394,15 @@ function MinimapAdv:GetLFGQueue()
             local colorOrange = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
             if category == 1 then -- Dungeon Finder
                 MMFrames.info.Queue.text:SetText("|cff"..colorOrange.."DF:|r "..queueStr)
-                MMFrames.info.Queue:SetWidth(MMFrames.info.Queue.text:GetStringWidth() + 12)
+                MMFrames.info.Queue:SetHeight(MMFrames.info.Queue.text:GetStringHeight())
                 infoTexts.Queue.shown = true
             elseif category == 3 then -- Raid Finder
                 MMFrames.info.RFQueue.text:SetText("|cff"..colorOrange.."RF:|r "..queueStr)
-                MMFrames.info.RFQueue:SetWidth(MMFrames.info.RFQueue.text:GetStringWidth() + 12)
+                MMFrames.info.RFQueue:SetHeight(MMFrames.info.RFQueue.text:GetStringHeight())
                 infoTexts.RFQueue.shown = true
             elseif category == 4 then -- Scenarios
                 MMFrames.info.SQueue.text:SetText("|cff"..colorOrange.."S:|r "..queueStr)
-                MMFrames.info.SQueue:SetWidth(MMFrames.info.SQueue.text:GetStringWidth() + 12)
+                MMFrames.info.SQueue:SetHeight(MMFrames.info.SQueue.text:GetStringHeight())
                 infoTexts.SQueue.shown = true
             end
         end
@@ -1500,7 +1478,7 @@ function MinimapAdv:DungeonDifficultyUpdate()
         -- Update Frames
         MMFrames.info.DungeonDifficulty.text:SetText(self.DifficultyText.." ")
         MMFrames.info.DungeonDifficulty:EnableMouse(true)
-        MMFrames.info.DungeonDifficulty:SetWidth(MMFrames.info.DungeonDifficulty.text:GetStringWidth() + 12)
+        MMFrames.info.DungeonDifficulty:SetHeight(MMFrames.info.DungeonDifficulty.text:GetStringHeight())
 
         -- Set to show DungeonDifficulty
         infoTexts.DungeonDifficulty.shown = true
@@ -1565,7 +1543,7 @@ function MinimapAdv:LootSpecUpdate()
     local _, instanceType = GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
         MMFrames.info.LootSpec.text:SetText("|cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)..LOOT..":|r "..nibRealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec:SetWidth(MMFrames.info.LootSpec.text:GetStringWidth() + 12)
+        MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
     else
         MMFrames.info.LootSpec.text:SetText("")
@@ -1590,7 +1568,7 @@ function MinimapAdv:CoordsUpdate()
             if (coords_int <= 0) then
                 local X, Y = GetPlayerMapPosition("player")
                 MMFrames.info.Coords.text:SetText(strform("%.1f  %.1f", X*100, Y*100))
-                MMFrames.info.Coords:SetWidth(MMFrames.info.Coords.text:GetStringWidth())
+                MMFrames.info.Coords:SetHeight(MMFrames.info.Coords.text:GetStringHeight())
                 coords_int = 0.5
             end
         end)
@@ -1983,15 +1961,12 @@ function MinimapAdv:ZoneChange()
         MMFrames.info.zoneIndicator:Hide()
     end
 
-    local oldName = GetMinimapZoneText()
-    local zName = (strlen(oldName) > 22) and gsub(oldName, "%s?(.[\128-\191]*)%S+%s", "%1.") or oldName
-    if strlen(zName) > 22 then
-        zName = strsub(zName, 1, 20)..".."
-    end
+    local zName = GetMinimapZoneText()
 
-    MMFrames.info.Location.text:SetText(zName)
-    MMFrames.info.Location.text:SetTextColor(r, g, b)
-    MMFrames.info.Location:SetWidth(MMFrames.info.Location.text:GetWidth() + 4)
+    local Location = MMFrames.info.Location
+    Location.text:SetText(zName)
+    Location.text:SetTextColor(r, g, b)
+    Location:SetHeight(Location.text:GetStringHeight())
     infoTexts.Location.shown = db.information.location
 
     RefreshMap = true
@@ -2116,12 +2091,13 @@ end
 -- Frame Template
 local function NewInfoFrame(name, parent, size2)
     local NewFrame = CreateFrame("Frame", "MinimapAdv_"..name, parent)
-    NewFrame:SetHeight(12)
-    NewFrame:SetWidth(12)
+    NewFrame:SetSize(Minimap:GetWidth(), 12)
     NewFrame:SetFrameStrata("LOW")
     NewFrame:SetFrameLevel(5)
 
     local text = NewFrame:CreateFontString(nil, "ARTWORK")
+    text:SetNonSpaceWrap(true)
+    text:SetAllPoints()
     if size2 then
         text:SetFontObject("RealUIFont_Pixel")
     else
