@@ -678,10 +678,10 @@ end
 -- Get size and position data
 local function GetPositionData()
     -- Get Normal or Expanded data
-    local NewMinimapPoints
+    local mapPoints
 
     if ExpandedState == 0 then
-        NewMinimapPoints = {
+        mapPoints = {
             xofs = db.position.x,
             yofs = db.position.y,
             anchor = db.position.anchorto,
@@ -691,7 +691,7 @@ local function GetPositionData()
             isLeft = db.position.anchorto:find("LEFT"),
         }
     else
-        NewMinimapPoints = {
+        mapPoints = {
             xofs = db.expand.position.x,
             yofs = db.expand.position.y,
             anchor = db.expand.position.anchorto,
@@ -702,16 +702,17 @@ local function GetPositionData()
         }
     end
 
-    return NewMinimapPoints
+    return mapPoints
 end
 
 -- Set Info text/button positions
 function MinimapAdv:UpdateInfoPosition()
+    self:debug("UpdateInfoPosition")
     self.numText = 1
     if Minimap:IsVisible() and (ExpandedState == 0) then
-        local NewMinimapPoints = GetPositionData()
-        local isTop = NewMinimapPoints.isTop
-        local isLeft = NewMinimapPoints.isLeft
+        local mapPoints = GetPositionData()
+        local isTop = mapPoints.isTop
+        local isLeft = mapPoints.isLeft
         local numText = self.numText
 
         -- Set Offsets, Positions, Gaps
@@ -769,8 +770,8 @@ function MinimapAdv:UpdateInfoPosition()
         end
         MMFrames.info.lastFrame = prevFrame
 
-        if (IsAddOnLoaded("Blizzard_CompactRaidFrames")) then
-            self:AdjustCRFManager(_G["CompactRaidFrameManager"], NewMinimapPoints)
+        if (IsAddOnLoaded("Blizzard_CompactRaidFrames") and mapPoints.anchor == "TOPLEFT") then
+            self:AdjustCRFManager(_G["CompactRaidFrameManager"], mapPoints)
             if not self.hookedCRFM then
                 hooksecurefunc("CompactRaidFrameManager_Toggle", function(CRFM)
                     self:AdjustCRFManager(CRFM, GetPositionData())
@@ -815,10 +816,10 @@ function MinimapAdv:AdjustCRFManager(CRFM, mapPoints)
     if (InCombatLockdown() or mapPoints.anchor ~= "TOPLEFT") then
         return
     end
+    self:debug("AdjustCRFManager")
     local screenH = UIParent:GetHeight()
     local show = UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or not db.information.hideRaidFilters
     local yofs = ((MMFrames.info.lastFrame:GetBottom() * mapPoints.scale or screenH * 0.85) - screenH) - db.information.gap
-    self:debug("Bottom", MMFrames.info.lastFrame:GetBottom() / mapPoints.scale)
     if CRFM.collapsed then
         CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -182, yofs)
     else
@@ -829,12 +830,13 @@ end
 
 -- Set Button positions
 function MinimapAdv:UpdateButtonsPosition()
-    local NewMinimapPoints = GetPositionData()
+    self:debug("UpdateButtonsPosition")
+    local mapPoints = GetPositionData()
 
-    local anchor = NewMinimapPoints.anchor
-    local scale = NewMinimapPoints.scale
-    local isTop = NewMinimapPoints.isTop
-    local isLeft = NewMinimapPoints.isLeft
+    local anchor = mapPoints.anchor
+    local scale = mapPoints.scale
+    local isTop = mapPoints.isTop
+    local isLeft = mapPoints.isLeft
     local frameOrder = {
         "toggle",
     }
@@ -917,15 +919,16 @@ end
 
 -- Set Minimap position
 function MinimapAdv:UpdateMinimapPosition()
-    local NewMinimapPoints = GetPositionData()
+    self:debug("UpdateMinimapPosition")
+    local mapPoints = GetPositionData()
 
-    local xofs = NewMinimapPoints.xofs
-    local yofs = NewMinimapPoints.yofs
-    local anchor = NewMinimapPoints.anchor
-    local scale = NewMinimapPoints.scale
-    local opacity = NewMinimapPoints.opacity
-    local isTop = NewMinimapPoints.isTop
-    local isLeft = NewMinimapPoints.isLeft
+    local xofs = mapPoints.xofs
+    local yofs = mapPoints.yofs
+    local anchor = mapPoints.anchor
+    local scale = mapPoints.scale
+    local opacity = mapPoints.opacity
+    local isTop = mapPoints.isTop
+    local isLeft = mapPoints.isLeft
 
     -- Set new size and position
     Minimap:SetFrameStrata("LOW")
@@ -1116,8 +1119,8 @@ local function POI_OnEnter(self)
     end
 
     -- Set Tooltip position
-    local NewMinimapPoints = GetPositionData()
-    local mm_anchor = NewMinimapPoints.anchor
+    local mapPoints = GetPositionData()
+    local mm_anchor = mapPoints.anchor
     if mm_anchor == "TOPLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
     elseif mm_anchor == "BOTTOMLEFT" then
@@ -1236,6 +1239,7 @@ end
 
 -- Update all POIs
 function MinimapAdv:POIUpdate(...)
+    self:debug("POIUpdate", ...)
     if ( (not db.poi.enabled) or (ExpandedState == 1 and db.expand.extras.hidepoi) ) then return end
     if IsAddOnLoaded("Carbonite") or IsAddOnLoaded("DugisGuideViewerZ") then return end
 
@@ -1369,8 +1373,8 @@ function MinimapAdv:GetLFGList(event, arg)
     end
 end
 
-function MinimapAdv:GetLFGQueue()
-    self:debug("GetLFGQueue")
+function MinimapAdv:GetLFGQueue(event, ...)
+    self:debug("GetLFGQueue", event, ...)
     -- Reset shown status
     infoTexts.Queue.shown = false
     infoTexts.RFQueue.shown = false
@@ -1507,15 +1511,17 @@ function MinimapAdv:DungeonDifficultyUpdate()
     else
         MMFrames.info.DungeonDifficulty:SetScript("OnEnter", nil)
     end
-    if not UpdateProcessing then
-        self:UpdateInfoPosition()
-    end
 
     -- Loot Spec
     self:LootSpecUpdate()
+
+    if not UpdateProcessing then
+        self:UpdateInfoPosition()
+    end
 end
 
 function MinimapAdv:UpdateGuildPartyState(event, ...)
+    self:debug("UpdateGuildPartyState", event, ...)
     -- Update Guild info and then update Dungeon Difficulty
     if event == "GUILD_PARTY_STATE_UPDATED" then
         local isGuildGroup = ...
@@ -1539,6 +1545,7 @@ end
 
 ---- Loot Specialization ----
 function MinimapAdv:LootSpecUpdate()
+    self:debug("LootSpecUpdate")
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
@@ -1549,16 +1556,13 @@ function MinimapAdv:LootSpecUpdate()
         MMFrames.info.LootSpec.text:SetText("")
         infoTexts.LootSpec.shown = false
     end
-
-    if not UpdateProcessing then
-        self:UpdateInfoPosition()
-    end
 end
 
 
 ---- Coordinates ----
 local coords_int = 0.5
 function MinimapAdv:CoordsUpdate()
+    self:debug("CoordsUpdate")
     if (IsInInstance() or not(Minimap:IsVisible()) or self.StationaryTime >= 10) then   -- Hide Coords
         MMFrames.info.Coords:SetScript("OnUpdate", nil)
         infoTexts.Coords.shown = false
@@ -1581,6 +1585,7 @@ end
 -- MINIMAP UPDATES --
 ---------------------
 function MinimapAdv:MovementUpdate()
+    self:debug("MovementUpdate")
     if not(db.information.coordDelayHide) or IsInInstance() or not(Minimap:IsVisible()) then return end
 
     local X, Y = GetPlayerMapPosition("player")
@@ -1650,8 +1655,8 @@ end
 -------------
 ---- Fade
 function MinimapAdv:FadeButtons()
-    local NewMinimapPoints = GetPositionData()
-    local scale = NewMinimapPoints.scale
+    local mapPoints = GetPositionData()
+    local scale = mapPoints.scale
 
     if Minimap:IsVisible() then
         if Minimap.mouseover or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
@@ -1936,7 +1941,8 @@ local hostilePvPTypes = {
     contested = true,
     combat = true,
 }
-function MinimapAdv:ZoneChange()
+function MinimapAdv:ZoneChange(event, ...)
+    self:debug("ZoneChange", event, ...)
     local r, g, b = 0.5, 0.5, 0.5
     local pvpType = GetZonePVPInfo()
     if pvpType == "sanctuary" then
@@ -1972,7 +1978,8 @@ function MinimapAdv:ZoneChange()
     RefreshMap = true
 end
 
-function MinimapAdv:ZONE_CHANGED_NEW_AREA()
+function MinimapAdv:ZONE_CHANGED_NEW_AREA(event, ...)
+    self:debug(event, ...)
     SetMapToCurrentZone()
     self:ZoneChange()
 
@@ -1980,22 +1987,21 @@ function MinimapAdv:ZONE_CHANGED_NEW_AREA()
     self:POIUpdate()
 end
 
-function MinimapAdv:MINIMAP_UPDATE_ZOOM()
+function MinimapAdv:MINIMAP_UPDATE_ZOOM(event, ...)
+    self:debug(event, ...)
     ZoomMinimapOut()
     self:UnregisterEvent("MINIMAP_UPDATE_ZOOM")
 end
 
-function MinimapAdv:PLAYER_ENTERING_WORLD()
+function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
+    self:debug(event, ...)
     -- Hide persistent Minimap elements
     GameTimeFrame:Hide()
     GameTimeFrame.Show = function() end
 
-    -- Update specific information
-    self:DungeonDifficultyUpdate()
-
     -- Update Minimap position and visible state
-    self:UpdateMinimapPosition()
     self:UpdateShownState() -- Will also call MinimapAdv:Update
+    self:UpdateMinimapPosition()
 
     -- Update POIs
     self:UpdatePOIEnabled()
@@ -2008,7 +2014,7 @@ end
 
 -- Hide default Clock Button
 function MinimapAdv:ADDON_LOADED(event, ...)
-    --print("MinimapAdv:", event, ...)
+    self:debug(event, ...)
     local addon = ...
     if addon == "Blizzard_TimeManager" then
         TimeManagerClockButton:HookScript("OnShow", function()
@@ -2018,7 +2024,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
     end
 end
 
-function MinimapAdv:PLAYER_LOGIN()
+function MinimapAdv:PLAYER_LOGIN(event, ...)
+    self:debug(event, ...)
     MMFrames.buttonframe.edge:SetTexture(unpack(nibRealUI.classColor))
 end
 
