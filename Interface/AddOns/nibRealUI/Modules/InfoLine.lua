@@ -3307,7 +3307,7 @@ function InfoLine:OnEnter(self)
         SetHighlightPosition(self)
     end
 
-    if not((not InCombatLockdown()) or db.other.icTips) then return end
+    if not db.other.icTips or InCombatLockdown() then return end
 
     if self.tag == "start" then
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
@@ -4142,7 +4142,7 @@ function InfoLine:OnInitialize()
     ndbc = nibRealUI.db.char
     ndbg = nibRealUI.db.global
 
-    self.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
+    nibRealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)

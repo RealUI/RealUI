@@ -1427,7 +1427,7 @@ local function AcquireFrame(self, registration, data, detachedData)
 		local old_tooltip_Show = tooltip.Show
 		tooltip.__Show = old_tooltip_Show
 		function tooltip:Show(tabletData)
-			if not((not InCombatLockdown()) or RealUI.InfoLineICTips) then return end
+			if not RealUI.InfoLineICTips or InCombatLockdown() then return end
 			if self.owner == nil or self.notInUse then
 				return
 			end
@@ -2378,7 +2378,7 @@ end
 frame_children = wrap(frame_children, "frame_children")
 
 function Tablet:Open(fakeParent, parent)
-	if not((not InCombatLockdown()) or RealUI.InfoLineICTips) then return end
+	if not RealUI.InfoLineICTips or InCombatLockdown() then return end
 	self:argCheck(fakeParent, 2, "table", "string")
 	self:argCheck(parent, 3, "nil", "table", "string")
 	if not parent then

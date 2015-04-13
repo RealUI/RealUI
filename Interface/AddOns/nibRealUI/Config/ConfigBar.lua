@@ -165,7 +165,7 @@ function ConfigBar:RegisterElement(element, order)
 end
 
 function ConfigBar:PLAYER_REGEN_DISABLED()
-    self:Toggle(false, true)
+    self:ShowConfigBar(false, true)
 end
 
 -- Show/Hide Config Bar

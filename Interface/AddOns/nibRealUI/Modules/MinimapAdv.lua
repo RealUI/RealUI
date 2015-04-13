@@ -777,23 +777,27 @@ function MinimapAdv:UpdateInfoPosition()
                     self:AdjustCRFManager(CRFM, GetPositionData())
                 end)
                 if db.information.hideRaidFilters then
-                    hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(self)
-                        local container = self.displayFrame.optionsFlowContainer
+                    hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(CRFM)
+                        self:debug("AdjustCRFManager", InCombatLockdown())
+                        if InCombatLockdown() then
+                            return
+                        end
+                        local container = CRFM.displayFrame.optionsFlowContainer
                         FlowContainer_PauseUpdates(container)
 
-                        FlowContainer_RemoveObject(container, self.displayFrame.profileSelector)
-                        self.displayFrame.profileSelector:Hide()
-                        FlowContainer_RemoveObject(container, self.displayFrame.filterOptions)
-                        self.displayFrame.filterOptions:Hide()
-                        FlowContainer_RemoveObject(container, self.displayFrame.lockedModeToggle)
-                        self.displayFrame.lockedModeToggle:Hide()
-                        FlowContainer_RemoveObject(container, self.displayFrame.hiddenModeToggle)
-                        self.displayFrame.hiddenModeToggle:Hide()
+                        FlowContainer_RemoveObject(container, CRFM.displayFrame.profileSelector)
+                        CRFM.displayFrame.profileSelector:Hide()
+                        FlowContainer_RemoveObject(container, CRFM.displayFrame.filterOptions)
+                        CRFM.displayFrame.filterOptions:Hide()
+                        FlowContainer_RemoveObject(container, CRFM.displayFrame.lockedModeToggle)
+                        CRFM.displayFrame.lockedModeToggle:Hide()
+                        FlowContainer_RemoveObject(container, CRFM.displayFrame.hiddenModeToggle)
+                        CRFM.displayFrame.hiddenModeToggle:Hide()
 
                         FlowContainer_ResumeUpdates(container);
                         
                         local usedX, usedY = FlowContainer_GetUsedBounds(container);
-                        self:SetHeight(usedY + 40);
+                        CRFM:SetHeight(usedY + 40);
                     end)
                 end
                 self.hookedCRFM = true
@@ -813,13 +817,15 @@ function MinimapAdv:UpdateInfoPosition()
 end
 
 function MinimapAdv:AdjustCRFManager(CRFM, mapPoints)
+    self:debug("AdjustCRFManager", (InCombatLockdown() or mapPoints.anchor ~= "TOPLEFT"))
     if (InCombatLockdown() or mapPoints.anchor ~= "TOPLEFT") then
         return
     end
-    self:debug("AdjustCRFManager")
     local screenH = UIParent:GetHeight()
+    local bottom = MMFrames.info.lastFrame:GetBottom()
     local show = UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or not db.information.hideRaidFilters
-    local yofs = ((MMFrames.info.lastFrame:GetBottom() * mapPoints.scale or screenH * 0.85) - screenH) - db.information.gap
+    self:debug("yOfs", bottom, mapPoints.scale, db.information.gap)
+    local yofs = ((bottom and bottom * mapPoints.scale or screenH * 0.85) - screenH) - db.information.gap
     if CRFM.collapsed then
         CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -182, yofs)
     else
