@@ -13,7 +13,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 local GUI = LibStub("AceGUI-3.0")
 
-local uiWidth, uiHieght = UIParent:GetSize()
+local uiWidth, uiHeight = UIParent:GetSize()
 local initialized = false
 local isHuDShown = false
 
@@ -27,14 +27,14 @@ local function InitializeOptions()
 
     nibRealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
-    ACD:SetDefaultSize("HuD", uiWidth * 0.3, uiHieght * 0.4)
+    ACD:SetDefaultSize("HuD", uiWidth * 0.3, uiHeight * 0.4)
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- The HuD Config bar
     local F, C = unpack(Aurora)
     local r, g, b = C.r, C.g, C.b
-    local size = floor(uiHieght * 0.05)
+    local size = floor(uiHeight * 0.05)
 
     local hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
     hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -500, 0)
@@ -69,7 +69,8 @@ local function InitializeOptions()
     hlAnim.hl = hl
 
     -- Buttons
-    local tabs = {
+    local tabs
+    tabs = {
         {
             slug = "toggle",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
@@ -79,6 +80,37 @@ local function InitializeOptions()
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         },
         {
+            slug = "auratracker",
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+            onclick = function(self, ...)
+                debug("OnClick", self.slug, self.ID, ...)
+                if not self.frame then
+                    local widget = GUI:Create("Frame")
+                    widget:SetTitle(self.text:GetText())
+                    widget:SetPoint("TOP", hudConfig, "BOTTOM")
+                    widget:SetWidth(uiWidth * 0.3)
+                    widget:SetHeight(uiHeight * 0.2)
+                    widget.frame:GetChildren():Hide()
+                    widget.frame:Hide()
+                    widget.titlebg:EnableMouse(false)
+                    self.frame = widget.frame
+                    tabs[self.ID].frame = widget.frame
+
+                    self.table = _G.LibStub("LibTextTable-1.1").New(nil, widget.frame)
+                    self.table:SetAllPoints()
+                end
+                if self.frame:IsShown() and highlight.clicked == self.ID then
+                    highlight.clicked = nil
+                    self.frame:Hide()
+                    ACD:Close("HuD")
+                else
+                    highlight.clicked = self.ID
+                    self.frame:Show()
+                    ACD:Close("HuD")
+                end
+            end,
+        },
+        {
             slug = "castbars",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         },
@@ -86,11 +118,32 @@ local function InitializeOptions()
             slug = "close",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             onclick = function(self, ...)
-                debug("onclick", ...)
+                debug("OnClick", self.slug, ...)
                 hudToggle()
             end,
         }
     }
+    local function tabOnClick(self, ...)
+        debug("OnClick", self.slug, ...)
+        if highlight.clicked and tabs[highlight.clicked].frame then
+            tabs[highlight.clicked].frame:Hide()
+        end
+        if ACD.OpenFrames["HuD"] and highlight.clicked == self.ID then
+            highlight.clicked = nil
+            ACD:Close("HuD")
+        else
+            highlight.clicked = self.ID
+            ACD:Open("HuD", self.slug)
+            local widget = ACD.OpenFrames["HuD"]
+            widget:ClearAllPoints()
+            widget:SetPoint("TOP", hudConfig, "BOTTOM")
+            widget:SetTitle(self.text:GetText())
+            -- the position will get reset via SetStatusTable, so we need to set our new positions there too.
+            local status = widget.status or widget.localstatus
+            status.top = widget.frame:GetTop()
+            status.left = widget.frame:GetLeft()
+        end
+    end
     local prevFrame, container
     debug("size", size)
     for i = 1, #tabs do
@@ -98,11 +151,13 @@ local function InitializeOptions()
         debug("iter tabs", i, tab.slug)
         local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
         btn.ID = i
+        btn.slug = tab.slug
         btn:SetSize(size, size)
         btn:SetScript("OnEnter", function(self, ...)
             if slideAnim:IsPlaying() then return end
             debug("OnEnter", tab.slug)
             if highlight:IsShown() then
+                debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= self.ID then
                     hl:SetOffset(size * (self.ID - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(hlAnim)
@@ -121,9 +176,10 @@ local function InitializeOptions()
             end
         end)
         btn:SetScript("OnLeave", function(self, ...)
-            debug("OnLeave hudConfig", ...)
             if hudConfig:IsMouseOver() then return end
+            debug("OnLeave hudConfig", ...)
             if highlight.clicked then
+                debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= highlight.clicked then
                     hl:SetOffset(size * (highlight.clicked - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(hlAnim)
@@ -157,24 +213,7 @@ local function InitializeOptions()
             ]])
         else
             btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
-
-            btn:SetScript("OnClick", tab.onclick or function(self, ...)
-                debug("OnClick", tab.slug, ...)
-                if ACD.OpenFrames["HuD"] and highlight.clicked == i then
-                    highlight.clicked = nil
-                    ACD:Close("HuD")
-                else
-                    highlight.clicked = i
-                    ACD:Open("HuD", tab.slug)
-                    local widget = ACD.OpenFrames["HuD"]
-                    widget:ClearAllPoints()
-                    widget:SetPoint("TOP", hudConfig, "BOTTOM")
-                    -- the position will get reset via SetStatusTable, so we need to set our new positions there too.
-                    local status = widget.status or widget.localstatus
-                    status.top = widget.frame:GetTop()
-                    status.left = widget.frame:GetLeft()
-                end
-            end)
+            btn:SetScript("OnClick", tab.onclick or tabOnClick)
 
             local icon = btn:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(tab.icon)
@@ -187,6 +226,7 @@ local function InitializeOptions()
         text:SetWidth(size * 0.9)
         text:SetPoint("BOTTOM", 0, size * 0.08)
         text:SetText(options.HuD.args[tab.slug].name)
+        btn.text = text
 
         hudConfig[i] = btn
         prevFrame = btn
@@ -572,7 +612,7 @@ do
                 pattern = "^(%d+)$",
                 usage = "You can only use whole numbers."
             },
-            hieght = {
+            height = {
                 name = L["HuD_Height"],
                 type = "input",
                 --width = "half",
@@ -584,9 +624,9 @@ do
                 pattern = "^(%d+)$",
                 usage = "You can only use whole numbers."
             },
-            healthHieght = {
-                name = "Health bar hieght",
-                desc = "The hieght of the health bar as a percentage of the total unit hieght",
+            healthHeight = {
+                name = "Health bar height",
+                desc = "The height of the health bar as a percentage of the total unit height",
                 type = "range",
                 width = "double",
                 min = 0,
@@ -594,9 +634,9 @@ do
                 step = .01,
                 isPercent = true,
                 order = 50,
-                get = function(info) return unitInfo.healthHieght end,
+                get = function(info) return unitInfo.healthHeight end,
                 set = function(info, value)
-                    unitInfo.healthHieght = value
+                    unitInfo.healthHeight = value
                 end,
             },
             x = {
@@ -626,6 +666,16 @@ do
         --]]
     end
 end
+local auratracker
+do
+    local db = nibRealUI.db:GetNamespace("AuraTracking").profile
+    auratracker = {
+        name = L["AuraTrack"],
+        type = "group",
+        childGroups = "tab",
+        args = {}
+    }
+end
 options.HuD = {
     type = "group",
     args = {
@@ -636,6 +686,7 @@ options.HuD = {
             },
         },
         unitframes = unitframes,
+        auratracker = auratracker,
         castbars = {
             name = SHOW_ENEMY_CAST,
             type = "group",

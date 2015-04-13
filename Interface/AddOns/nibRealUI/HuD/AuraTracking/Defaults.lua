@@ -1,5 +1,8 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
+local MODNAME = "AuraTracking"
+local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+
 --[[
 Auras
 {
@@ -22,7 +25,7 @@ Sort static buffs/debuffs by order whenever possible
 
 ]]--
 
-nibRealUI.auraTrackingDefaults = {
+AuraTracking.Defaults = {
 
 ["DEATHKNIGHT"] = { ------------------
 

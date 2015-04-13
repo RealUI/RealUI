@@ -4,7 +4,7 @@ local db, ndb
 
 local _
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local AuraTracking = nibRealUI:GetModule(MODNAME)
 
 -- Options
 local options
@@ -510,7 +510,7 @@ end
 ---- Config Panel Functions ----
 --------------------------------
 function AuraTracking:LoadDefaults()
-	local defaults = nibRealUI.auraTrackingDefaults
+	local defaults = self.Defaults
 	self.db:ResetProfile("RealUI")
 end
 
@@ -630,7 +630,7 @@ function AuraTracking:OnInitialize()
 				fadeOpacity = 0.75,
 				useCustomCD = true,
 			},
-			tracking = nibRealUI.auraTrackingDefaults,
+			tracking = self.Defaults,
 		},
 	})
 
