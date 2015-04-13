@@ -86,6 +86,7 @@ L["Tweaks_HideRaidFilterDesc"] = "Hide the group filters for Blizzard's Compact 
 L["Alert_CantOpenInCombat"] = "Cannot open RealUI Configuration while in combat."
 L["Appearance_DefaultColors"] = "Use default colors"
 L["Appearance_DefaultColorsDesc"] = "Disable to use custom colors"
+L["AuraTrack"] = "Aura Tracker"
 L["AuraTrack_Buff"] = "Buff"
 L["AuraTrack_ChooseType"] = "Choose Traker Type"
 L["AuraTrack_Create"] = "Create New Tracker"
@@ -197,8 +198,9 @@ L["UnitFrames_PlayerAurasDesc"] = "Show Buffs/Debuffs cast by you."
 L["UnitFrames_SetFocus"] = "Click to set Focus"
 L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
-L["UnitFrames_YOffset"] = "Y Offset"
 L["UnitFrames_XOffset"] = "X Offset"
+L["UnitFrames_YOffset"] = "Y Offset"
+
 
 -- InfoLine
 L["Clock_CalenderInvites"] = "Pending Invites:"

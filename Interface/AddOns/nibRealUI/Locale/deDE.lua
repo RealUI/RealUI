@@ -57,6 +57,7 @@ L["Fonts_SmallDesc"] = "Benutze kleine Schriftarten"
 -- L["Fonts_Standard"] = ""
 -- L["Fonts_YellowFont"] = ""
 L["General_Enabled"] = "Aktiviert"
+-- L["General_EnabledDesc"] = ""
 -- L["General_InvalidParent"] = ""
 -- L["General_LoadDefaults"] = ""
 -- L["General_NoteParent"] = ""
@@ -77,12 +78,15 @@ L["Power_TurboDesc"] = [=[Dieser Modus plant graphische Updates mit einer sehr h
 Erhöht die Nutzung der CPU.]=] -- Needs review
 L["Reset_Confirm"] = "Bist du sicher, dass du RealUI zurücksetzen möchtest?" -- Needs review
 L["Reset_SettingsLost"] = "Alle Benutzereinstellungen gehen verloren."
+-- L["Tweaks_HideRaidFilter"] = ""
+-- L["Tweaks_HideRaidFilterDesc"] = ""
 
 
 -- Config
 L["Alert_CantOpenInCombat"] = "Die RealUI-Konfiguration kann während des Kampfes nicht geöffnet werden."
 L["Appearance_DefaultColors"] = "Benutze die Standardfarben"
 L["Appearance_DefaultColorsDesc"] = "Deaktivieren, um benutzerdefinierte Farben zu nutzen" -- Needs review
+-- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Stärkungszauber"
 L["AuraTrack_ChooseType"] = "Wähle Trackerart" -- Needs review
 L["AuraTrack_Create"] = "Erzeuge einen neuen Tracker" -- Needs review
@@ -177,6 +181,25 @@ Wähle |cff30d0ffRealUI Control|r ab wenn du die Einstellungen ändern möchtest
 die RealUI kontrolliert (Position, Layout, Rahmen).]=] -- Needs review
 L["Raid_ShowSolo"] = "Anzeigen wenn Solo" -- Needs review
 L["Raid_Style"] = "Style" -- Needs review
+-- L["UnitFrames_AnchorWidth"] = ""
+-- L["UnitFrames_AnchorWidthDesc"] = ""
+-- L["UnitFrames_AnnounceChatDesc"] = ""
+-- L["UnitFrames_AnnounceTrink"] = ""
+-- L["UnitFrames_AnnounceTrinkDesc"] = ""
+-- L["UnitFrames_BuffCount"] = ""
+-- L["UnitFrames_DebuffCount"] = ""
+-- L["UnitFrames_Gap"] = ""
+-- L["UnitFrames_GapDesc"] = ""
+-- L["UnitFrames_ModifierKey"] = ""
+-- L["UnitFrames_NPCAuras"] = ""
+-- L["UnitFrames_NPCAurasDesc"] = ""
+-- L["UnitFrames_PlayerAuras"] = ""
+-- L["UnitFrames_PlayerAurasDesc"] = ""
+-- L["UnitFrames_SetFocus"] = ""
+-- L["UnitFrames_SetFocusDesc"] = ""
+-- L["UnitFrames_Units"] = ""
+-- L["UnitFrames_XOffset"] = ""
+-- L["UnitFrames_YOffset"] = ""
 
 
 -- InfoLine

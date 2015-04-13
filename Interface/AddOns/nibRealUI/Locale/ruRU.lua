@@ -57,6 +57,7 @@ L["Fonts_SmallDesc"] = "Маленькие шрифты" -- Needs review
 -- L["Fonts_Standard"] = ""
 -- L["Fonts_YellowFont"] = ""
 L["General_Enabled"] = "Включено" -- Needs review
+-- L["General_EnabledDesc"] = ""
 L["General_InvalidParent"] = "Указанного родительского фрейма для %s не существует." -- Needs review
 -- L["General_LoadDefaults"] = ""
 -- L["General_NoteParent"] = ""
@@ -77,6 +78,8 @@ L["Power_TurboDesc"] = [=[В этом режиме частота обновле
 Повышает нагрузку на ЦП.]=] -- Needs review
 L["Reset_Confirm"] = "Вы уверены, что хотите сбросить настройки RealUI?" -- Needs review
 L["Reset_SettingsLost"] = "Все пользовательские настройки будут потеряны." -- Needs review
+-- L["Tweaks_HideRaidFilter"] = ""
+-- L["Tweaks_HideRaidFilterDesc"] = ""
 
 
 -- Config
@@ -84,6 +87,7 @@ L["Alert_CantOpenInCombat"] = "Невозможно открыть конфиг�
 L["Appearance_DefaultColors"] = "По умолчанию"
 L["Appearance_DefaultColorsDesc"] = [=[Отключите для
 своего цвета]=]
+-- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Бафф" -- Needs review
 L["AuraTrack_ChooseType"] = "Выберите тип" -- Needs review
 L["AuraTrack_Create"] = "Добавить новый" -- Needs review
@@ -178,6 +182,25 @@ L["Raid_NoteAdvSettings"] = [=[Важно: нажмите |cffffa500Дополн
              контролируемые RealUI (расположение, размер и т. д.).]=]
 L["Raid_ShowSolo"] = "Показывать соло" -- Needs review
 L["Raid_Style"] = "Стиль" -- Needs review
+-- L["UnitFrames_AnchorWidth"] = ""
+-- L["UnitFrames_AnchorWidthDesc"] = ""
+-- L["UnitFrames_AnnounceChatDesc"] = ""
+-- L["UnitFrames_AnnounceTrink"] = ""
+-- L["UnitFrames_AnnounceTrinkDesc"] = ""
+-- L["UnitFrames_BuffCount"] = ""
+-- L["UnitFrames_DebuffCount"] = ""
+-- L["UnitFrames_Gap"] = ""
+-- L["UnitFrames_GapDesc"] = ""
+-- L["UnitFrames_ModifierKey"] = ""
+-- L["UnitFrames_NPCAuras"] = ""
+-- L["UnitFrames_NPCAurasDesc"] = ""
+-- L["UnitFrames_PlayerAuras"] = ""
+-- L["UnitFrames_PlayerAurasDesc"] = ""
+-- L["UnitFrames_SetFocus"] = ""
+-- L["UnitFrames_SetFocusDesc"] = ""
+-- L["UnitFrames_Units"] = ""
+-- L["UnitFrames_XOffset"] = ""
+-- L["UnitFrames_YOffset"] = ""
 
 
 -- InfoLine
