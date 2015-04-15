@@ -3307,7 +3307,7 @@ function InfoLine:OnEnter(self)
         SetHighlightPosition(self)
     end
 
-    if not db.other.icTips or InCombatLockdown() then return end
+    if InCombatLockdown() and not db.other.icTips then return end
 
     if self.tag == "start" then
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)

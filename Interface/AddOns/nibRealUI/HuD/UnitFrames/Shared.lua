@@ -334,7 +334,7 @@ function UnitFrames:PredictOverride(event, unit)
 
     if absorbBar.info then
         absorbBar.info.maxWidth = health.info.maxWidth - width
-        absorbBar:SetMinMaxValues(0, health.value)
+        absorbBar:SetMinMaxValues(0, healthCurr)
         absorbBar:SetValue(absorbTotal)
     else
         AngleStatusBar:SetValue(hp.absorbBar, 1 - absorbPer, true)
