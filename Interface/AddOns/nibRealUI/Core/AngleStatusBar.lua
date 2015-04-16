@@ -1,11 +1,12 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _G = _G
+local RealUI, CreateFrame = _G.RealUI, _G.CreateFrame
+local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
+local next, type = _G.next, _G.type
+
 local db, ndb, ndbc
-
 local MODNAME = "AngleStatusBar"
-local AngleStatusBar = nibRealUI:CreateModule(MODNAME)
+local AngleStatusBar = RealUI:CreateModule(MODNAME)
 local oUF = oUFembed
-
-local min, max, abs, floor = math.min, math.max, math.abs, math.floor
 
 local dontSmooth
 local smoothing = {}
@@ -52,7 +53,7 @@ end
 
 local smoothUpdateFrame = CreateFrame("Frame")
 smoothUpdateFrame:SetScript("OnUpdate", function()
-    local limit = 30 / GetFramerate()
+    local limit = 30 / _G.GetFramerate()
     for bar, per in next, smoothing do
         local maxWidth = bar.info and bar.info.maxWidth or bar.fullWidth
         local setPer = per * maxWidth
@@ -275,7 +276,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     --]]
 
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
-    local bgColor = nibRealUI.media.background
+    local bgColor = RealUI.media.background
 
     AngleStatusBar:debug("CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
@@ -312,7 +313,7 @@ local function CreateAngleBG(self, width, height, parent, info)
             else
                 tex:SetPoint("TOPRIGHT", top, "TOPRIGHT", (i - 1), -i)
             end
-            tinsert(row, tex)
+            _G.tinsert(row, tex)
         end
         bg.row = row
     else
@@ -336,7 +337,7 @@ local function CreateAngleBG(self, width, height, parent, info)
                 tex:SetVertexColor(0, 1, 1)
                 RealUI:DrawLine(tex, bg, 0, 0, -ofs, ofs, 16, "BOTTOMRIGHT")
             end]]
-            tinsert(col, tex)
+            _G.tinsert(col, tex)
         end
         bg.col = col
     end
@@ -475,8 +476,8 @@ oUF:RegisterMetaFunction("CreateAngleFrame", CreateAngleFrame) -- oUF magic
 
 -------------
 function AngleStatusBar:OnInitialize()
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
+    ndbc = RealUI.db.char
 
     if ndb.settings.powerMode == 2 then
         dontSmooth = true

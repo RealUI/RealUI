@@ -777,6 +777,9 @@ function MinimapAdv:UpdateInfoPosition()
                     self:AdjustCRFManager(CRFM, GetPositionData())
                 end)
                 if db.information.hideRaidFilters then
+                    -- These buttons are only relevant if using the Blizzard frames
+                    SetRaidProfileOption(GetActiveRaidProfile(), "shown", false); CompactRaidFrameManager_SetSetting("IsShown", false) -- Hide CRF
+                    SetRaidProfileOption(GetActiveRaidProfile(), "locked", true); CompactRaidFrameManager_SetSetting("Locked", true) -- Lock CRF
                     hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(CRFM)
                         self:debug("AdjustCRFManager", InCombatLockdown())
                         if InCombatLockdown() then
@@ -827,9 +830,9 @@ function MinimapAdv:AdjustCRFManager(CRFM, mapPoints)
     self:debug("yOfs", bottom, mapPoints.scale, db.information.gap)
     local yofs = ((bottom and bottom * mapPoints.scale or screenH * 0.85) - screenH) - db.information.gap
     if CRFM.collapsed then
-        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -182, yofs)
+        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -182 or -200, yofs)
     else
-        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -7 or -7, yofs)
+        CRFM:SetPoint("TOPLEFT", UIParent, "TOPLEFT", show and -7 or -200, yofs)
     end
 end
 

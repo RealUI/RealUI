@@ -1,14 +1,17 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _G = _G
+local RealUI = _G.RealUI
+local IsAddOnLoaded = _G.IsAddOnLoaded
+
 local function debug(...)
-    nibRealUI.Debug("MiniPatch", ...)
+    RealUI.Debug("MiniPatch", ...)
 end
 
-nibRealUI.minipatches = {
+RealUI.minipatches = {
     [1] = function(ver)
         debug("r"..ver)
-        SetCVar("countdownForCooldowns", 0)
+        _G.SetCVar("countdownForCooldowns", 0)
         if IsAddOnLoaded("Aurora") then
-            local AuroraConfig = AuroraConfig
+            local AuroraConfig = _G.AuroraConfig
             if AuroraConfig then
                 AuroraConfig["useButtonGradientColour"] = false
                 AuroraConfig["chatBubbles"] = false
@@ -21,7 +24,7 @@ nibRealUI.minipatches = {
             end
         end
         if IsAddOnLoaded("DBM-StatusBarTimers") then
-            local DBT_AllPersistentOptions = DBT_AllPersistentOptions
+            local DBT_AllPersistentOptions = _G.DBT_AllPersistentOptions
             if DBT_AllPersistentOptions and DBT_AllPersistentOptions["DBM"] then
                 DBT_AllPersistentOptions["DBM"]["HugeTimerY"] = 300
                 DBT_AllPersistentOptions["DBM"]["HugeBarXOffset"] = 0
@@ -38,14 +41,14 @@ nibRealUI.minipatches = {
             end
         end
         if IsAddOnLoaded("BugSack") then
-            if BugSackLDBIconDB then
-                BugSackLDBIconDB["hide"] = false
+            if _G.BugSackLDBIconDB then
+                _G.BugSackLDBIconDB["hide"] = false
             end
         end
     end,
     [8] = function(ver)
         debug("r"..ver)
-        local Bartender4DB = Bartender4DB
+        local Bartender4DB = _G.Bartender4DB
         if IsAddOnLoaded("Bartender4") and Bartender4DB then
             if Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] then
                 Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] = Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI"]
@@ -55,7 +58,7 @@ nibRealUI.minipatches = {
     [12] = function(ver)
         debug("r"..ver)
         -- This was supposed to be r11... oops
-        local Grid2DB = Grid2DB
+        local Grid2DB = _G.Grid2DB
         if IsAddOnLoaded("Grid2") and Grid2DB then
             if Grid2DB["profiles"]["RealUI-Healing"] then
                 Grid2DB["profiles"]["RealUI-Healing"]["indicators"]["health-deficit"]["reverseFill"] = true
@@ -68,18 +71,15 @@ nibRealUI.minipatches = {
                 Grid2DB["profiles"]["RealUI"]["indicators"]["text-down"]["shadowDisabled"] = true
             end
         end
-        local AuroraConfig = AuroraConfig
+        local AuroraConfig = _G.AuroraConfig
         if IsAddOnLoaded("Aurora") and AuroraConfig then
             AuroraConfig["buttonSolidColour"] = {0.1, 0.1, 0.1, 1}
         end
 
         -- r12
-        SetCVar("useCompactPartyFrames", 1)
+        _G.SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
     end,
-    [13] = function(ver)
-        debug("r"..ver)
-    end,
-    [14] = function(ver)
+    [99] = function(ver)
         debug("r"..ver)
     end,
 }
