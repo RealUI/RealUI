@@ -92,7 +92,7 @@ local function InitializeOptions()
                     widget:SetHeight(uiHeight * 0.2)
                     widget.frame:GetChildren():Hide()
                     widget.frame:Hide()
-                    widget.titlebg:EnableMouse(false)
+                    widget.titlebg:SetPoint("TOP", 0, 0)
                     self.frame = widget.frame
                     tabs[self.ID].frame = widget.frame
 
@@ -119,6 +119,7 @@ local function InitializeOptions()
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             onclick = function(self, ...)
                 debug("OnClick", self.slug, ...)
+                highlight:Hide()
                 hudToggle()
             end,
         }
@@ -128,16 +129,19 @@ local function InitializeOptions()
         if highlight.clicked and tabs[highlight.clicked].frame then
             tabs[highlight.clicked].frame:Hide()
         end
-        if ACD.OpenFrames["HuD"] and highlight.clicked == self.ID then
+        local widget = ACD.OpenFrames["HuD"]
+        if widget and highlight.clicked == self.ID then
             highlight.clicked = nil
+            widget.titlebg:SetPoint("TOP", 0, 12)
             ACD:Close("HuD")
         else
             highlight.clicked = self.ID
             ACD:Open("HuD", self.slug)
-            local widget = ACD.OpenFrames["HuD"]
+            widget = ACD.OpenFrames["HuD"]
             widget:ClearAllPoints()
             widget:SetPoint("TOP", hudConfig, "BOTTOM")
             widget:SetTitle(self.text:GetText())
+            widget.titlebg:SetPoint("TOP", 0, 0)
             -- the position will get reset via SetStatusTable, so we need to set our new positions there too.
             local status = widget.status or widget.localstatus
             status.top = widget.frame:GetTop()

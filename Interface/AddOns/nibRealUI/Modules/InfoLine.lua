@@ -2745,17 +2745,24 @@ local function Spec_OnEnter(self)
     self.text:SetTextColor(unpack(TextColorNormalVals))
 end
 
+local setEquipped = false
 function InfoLine:SpecUpdateEquip()
+    self:debug("SpecUpdateEquip start")
     -- Update Equipment Set
     local NewTG = GetActiveSpecGroup()
     if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
+        self:debug("SpecUpdateEquip", NewTG)
         EquipmentManager_EquipSet(GetEquipmentSetInfo(dbc.specgear.primary))
     elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
+        self:debug("SpecUpdateEquip", NewTG)
         EquipmentManager_EquipSet(GetEquipmentSetInfo(dbc.specgear.secondary))
     end
+    self:debug("SpecUpdateEquip end")
+    setEquipped = true
 end
 
 local function Spec_Update(self)
+    InfoLine:debug("Spec_Update")
     -- Talent Info
     wipe(TalentInfo)
     local numSpecGroups = GetNumSpecGroups()
@@ -2807,7 +2814,15 @@ local function Spec_Update(self)
     end
 
     if NeedSpecUpdate then
-        InfoLine:SpecUpdateEquip()
+        InfoLine:debug("NeedSpecUpdate")
+        if UnitCastingInfo("player") then
+            -- cant swap sets while casting
+            C_Timer.After(.25, function()
+                InfoLine:SpecUpdateEquip()
+            end)
+        else
+            InfoLine:SpecUpdateEquip()
+        end
 
         -- Update Layout
         local NewTG = GetActiveSpecGroup()
@@ -3893,13 +3908,24 @@ function InfoLine:CreateFrames()
     ILFrames.spec:RegisterEvent("UPDATE_PENDING_MAIL")
     ILFrames.spec:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     ILFrames.spec:RegisterEvent("EQUIPMENT_SETS_CHANGED")
+    ILFrames.spec:RegisterEvent("EQUIPMENT_SWAP_FINISHED")
     ILFrames.spec:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
     ILFrames.spec:SetScript("OnEvent", function(self, event)
+        InfoLine:debug("Spec OnEvent:", event)
         if not db.elements.specchanger then return end
         if event == "UPDATE_PENDING_MAIL" then
             ILFrames.spec:UnregisterEvent("UPDATE_PENDING_MAIL")
+        elseif event == "PLAYER_EQUIPMENT_CHANGED" then
+            if not setEquipped then
+                Spec_Update(self)
+            end
+        elseif event == "EQUIPMENT_SWAP_FINISHED" then
+            InfoLine:debug("Spec EQUIPMENT_SWAPED", setEquipped)
+            setEquipped = false
+            Spec_Update(self)
+        else
+            Spec_Update(self)
         end
-        Spec_Update(self)
     end)
 
     -- -- Layout Button

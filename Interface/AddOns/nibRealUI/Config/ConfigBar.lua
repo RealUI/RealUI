@@ -165,7 +165,7 @@ function ConfigBar:RegisterElement(element, order)
 end
 
 function ConfigBar:PLAYER_REGEN_DISABLED()
-    self:ShowConfigBar(false, true)
+    nibRealUI:ShowConfigBar(false, true)
 end
 
 -- Show/Hide Config Bar
