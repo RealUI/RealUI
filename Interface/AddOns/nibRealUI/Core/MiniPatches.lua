@@ -78,8 +78,12 @@ RealUI.minipatches = {
 
         -- r12
         _G.SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
+        local KuiNameplatesGDB = _G.KuiNameplatesGDB
+        if IsAddOnLoaded("Kui_Nameplates") and KuiNameplatesGDB then
+            KuiNameplatesGDB["profiles"]["RealUI"]["fonts"]["options"]["fontscale"] = 1
+        end
     end,
-    [99] = function(ver)
+    [99] = function(ver) -- test patch
         debug("r"..ver)
     end,
 }

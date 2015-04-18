@@ -387,24 +387,5 @@ function AddonControl:OnInitialize()
     ndb = nibRealUI.db.profile
     ndbc = nibRealUI.db.char
 
-    --[[ Convert Settings]]
-    local StyleAddOns = {
-        "Grid2",
-        "Kui_Nameplates",
-        "Raven",
-    }
-    -- Use this too because we omit the "_" for some reason, and I'm not about to hunt down every use and correct it.
-    local StyleAddOnsAlt = {
-        "Grid2",
-        "KuiNameplates",
-        "Raven",
-    }
-    for i = 1, #StyleAddOns do
-        if db.addonControl[StyleAddOnsAlt[i]].control.style ~= nil then
-            RealUI:SetModuleEnabled(StyleAddOns[i], nibRealUI:DoesAddonStyle(StyleAddOnsAlt[i]))
-            db.addonControl[StyleAddOnsAlt[i]].control.style = nil
-        end
-    end
-
     self:SetEnabledState(true)
 end

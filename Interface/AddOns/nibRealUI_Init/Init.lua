@@ -69,17 +69,23 @@ RealUI.Debug = debug
 SLASH_REALUIINIT1 = "/realdebug"
 function SlashCmdList.REALUIINIT(mod, editBox)
     print("/realdebug", mod, editBox)
-    if not debugger[mod] then
-        CreateDebugFrame(mod)
-    end
-    local display = debugger[mod]
-    if display:Lines() == 0 then
-        display:AddLine("Nothing to report.")
+    if mod == "" then
+        for k, v in next, debugger do
+            print(k)
+        end
+    else
+        if not debugger[mod] then
+            CreateDebugFrame(mod)
+        end
+        local display = debugger[mod]
+        if display:Lines() == 0 then
+            display:AddLine("Nothing to report.")
+            display:Display()
+            display:Clear()
+            return
+        end
         display:Display()
-        display:Clear()
-        return
     end
-    display:Display()
 end
 
 local f = CreateFrame("Frame")
