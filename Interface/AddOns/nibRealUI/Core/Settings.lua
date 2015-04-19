@@ -321,10 +321,11 @@ local function MiniPatchInstallation()
         debug("checking", i)
         if nibRealUI.minipatches[i] then
             -- This needs to be an array to ensure patches are applied sequentially.
-            patches[i - oldVer[3]] = nibRealUI.minipatches[i]
+            tinsert(patches, nibRealUI.minipatches[i])
         end
     end
 
+    debug("numPatches", #patches)
     if #patches > 0 then
         StaticPopupDialogs["PUDRUIMP"] = {
             text = "|cff85e0ff"..L["Patch_MiniPatch"].."|r\n\n|cffffffff"..L["Patch_DoApply"],
