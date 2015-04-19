@@ -1,5 +1,5 @@
 local MAJOR = "LibQTip-1.0"
-local MINOR = 43 -- Should be manually increased
+local MINOR = 44 -- Should be manually increased
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
@@ -45,6 +45,8 @@ lib.activeTooltips = lib.activeTooltips or {}
 lib.tooltipHeap = lib.tooltipHeap or {}
 lib.frameHeap = lib.frameHeap or {}
 lib.tableHeap = lib.tableHeap or {}
+
+lib.onReleaseHandlers = lib.onReleaseHandlers or {}
 
 local tipPrototype = lib.tipPrototype
 local tipMetatable = lib.tipMetatable
@@ -355,7 +357,15 @@ function ReleaseTooltip(tooltip)
 
 	tooltip:Hide()
 
-	if tooltip.OnRelease then
+	local releaseHandler = lib.onReleaseHandlers[tooltip]
+	if releaseHandler then
+		lib.onReleaseHandlers[tooltip] = nil
+
+		local success, errorMessage = pcall(releaseHandler, tooltip)
+		if not success then
+			geterrorhandler()(errorMessage)
+		end
+	elseif tooltip.OnRelease then
 		local success, errorMessage = pcall(tooltip.OnRelease, tooltip)
 		if not success then
 			geterrorhandler()(errorMessage)
@@ -1330,9 +1340,16 @@ end
 -- :SetAutoHideDelay(0.25) => hides after 0.25sec outside of the tooltip
 -- :SetAutoHideDelay(0.25, someFrame) => hides after 0.25sec outside of both the tooltip and someFrame
 -- :SetAutoHideDelay() => disable auto-hiding (default)
-function tipPrototype:SetAutoHideDelay(delay, alternateFrame)
+function tipPrototype:SetAutoHideDelay(delay, alternateFrame, releaseHandler)
 	local timerFrame = self.autoHideTimerFrame
 	delay = tonumber(delay) or 0
+
+	if releaseHandler then
+		if type(releaseHandler) ~= "function" then
+			error("releaseHandler must be a function", 2)
+		end
+		lib.onReleaseHandlers[self] = releaseHandler
+	end
 
 	if delay > 0 then
 		if not timerFrame then
