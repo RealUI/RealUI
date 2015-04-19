@@ -37,7 +37,7 @@ function GridLayout:Update()
     local NewLayout, NewHoriz, layoutSize
     local partyType = Grid2Layout.partyType
     local Grid2DB = Grid2Layout.db.profile
-    --print("partyType:", partyType)
+    self:debug("partyType:", partyType)
     
    
     -- Which RealUI Layout we're working on
@@ -46,7 +46,7 @@ function GridLayout:Update()
     -- Find new Grid Layout
     -- Solo - Adjust w/pets
     if partyType == "solo" then
-        --print("You are Solo")
+        self:debug("You are Solo")
         NewHoriz = LayoutDB.hGroups.normal
         if LayoutDB.showSolo then
             if UnitExists("pet") and LayoutDB.showPet then 
@@ -59,7 +59,7 @@ function GridLayout:Update()
         end
     -- Party / Arena - Adjust w/pets
     elseif (partyType == "arena") or (partyType == "party") then
-        --print("You are in a Party or Arena")
+        self:debug("You are in a Party or Arena")
         NewHoriz = LayoutDB.hGroups.normal
         local HasPet = UnitExists("pet") or UnitExists("partypet1") or UnitExists("partypet2") or UnitExists("partypet3") or UnitExists("partypet4")
         if HasPet and LayoutDB.showPet then 
@@ -69,7 +69,7 @@ function GridLayout:Update()
         end
     -- Raid
     elseif (partyType == "raid") then
-        --print("You are in a Raid")
+        self:debug("You are in a Raid")
         NewHoriz = LayoutDB.hGroups.raid
 
         -- reset the table
@@ -80,39 +80,35 @@ function GridLayout:Update()
         -- find what groups are in use
         for i = 1, MAX_RAID_MEMBERS do
             local name, _, subGroup = GetRaidRosterInfo(i)
-            --print(tostring(name)..", "..tostring(subGroup))
             if name and subGroup then
                 raidGroupInUse["group"..subGroup] = true
-            -- else
-                -- break
             end
         end
 
-        --print("NumHeaders", #Grid2Layout.groupsUsed)
         if (raidGroupInUse.group7 or raidGroupInUse.group8) then
-            --print("Group 7 and/or 8 in use")
+            self:debug("Group 7 and/or 8 in use")
             layoutSize = 40
         elseif raidGroupInUse.group6 then
-            --print("Group 6 in use")
+            self:debug("Group 6 in use")
             layoutSize = 30
         else
-            --print("Group 1 - 5 in use")
+            self:debug("Group 1 - 5 in use")
             layoutSize = "normal"
         end
     end
     
     -- Change Grid Layout
     if (NewHoriz ~= Grid2DB.horizontal) then
-        --print("Apply horizontal:", NewHoriz)
+        self:debug("Apply horizontal:", NewHoriz)
         Grid2DB.horizontal = NewHoriz
     end
 
     -- Adjust Grid Frame Width
     if (LayoutDB.width[layoutSize]) and not NewHoriz then
-        --print("layoutWidth: small", layoutSize)
+        self:debug("layoutWidth: small", layoutSize)
         Grid2Frame.db.profile.frameWidth = LayoutDB.width[layoutSize]
     else
-        --print("layoutWidth: normal", layoutSize)
+        self:debug("layoutWidth: normal", layoutSize)
         Grid2Frame.db.profile.frameWidth = LayoutDB.width["normal"]
     end
 
@@ -126,7 +122,7 @@ function GridLayout:Update()
 end
 
 function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
-    --print("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
+    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
     if key3 then
         db[key1][key2][key3] = value
     else
@@ -136,7 +132,7 @@ function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
 end
 
 function nibRealUI:GetGridLayoutSettings(key1, key2, key3)
-    -- print("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
+    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
     if key3 then
         return db[key1][key2][key3]
     else
@@ -188,10 +184,10 @@ function GridLayout:OnInitialize()
 end
 
 function GridLayout:OnEnable()
+    self:debug("OnEnable")
     if not(Grid2 and Grid2Layout and Grid2Frame) then return end
     local Grid2GroupChanged = Grid2.GroupChanged
     function Grid2:GroupChanged(...)
-        --print("GridLayout: Grid_GroupTypeChanged")
         GridLayout:Update()
         Grid2GroupChanged(self, ...)
     end
@@ -200,5 +196,6 @@ function GridLayout:OnEnable()
 end
 
 function GridLayout:OnDisable()
+    self:debug("OnDisable")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 end

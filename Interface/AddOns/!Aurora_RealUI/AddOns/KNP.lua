@@ -9,6 +9,5 @@ mods["PLAYER_LOGIN"]["Kui_Nameplates"] = function(self, F, C)
 
     local pixelFont = RealUI:Font(true)
     kuiNP.db.profile.fonts.options.font = pixelFont
-    --kuiNP:LSMMediaRegistered(msg, "font", pixelFont)
-    kuiNP.font = RealUI:Font()
+    kuiNP:LSMMediaRegistered(msg, "font", pixelFont)
 end
