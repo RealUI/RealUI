@@ -25,6 +25,8 @@ local colours = {
 	glowPartial  = {  0,   0,   0, .3 },
 	glowAnti     = {  1,  .1,  .1, .8 }
 }
+local sizes = {}
+local defaultSizes = {}
 
 local function ComboPointsUpdate(self)
 	if self.points and self.points > 0 then
@@ -87,9 +89,8 @@ function mod:UNIT_COMBO_POINTS(event,unit)
 	-- only works for player > target
 	if unit ~= 'player' then return end
 
-	local guid, name = UnitGUID('target'), UnitName('target')
-	local f = addon:GetNameplate(guid, name)
-	
+	local f = addon:GetUnitPlate('target')
+
 	if f and f.combopoints then
 		local points = GetComboPoints('player', 'target')
 		local stacks
@@ -128,15 +129,12 @@ function mod:CreateComboPoints(msg, frame)
 	local i, pcp
 	for i=0,4 do
 		-- create individual combo point icons
+        -- size and position of first icon is set in ScaleComboPoints
 		local cp = frame.combopoints:CreateTexture(nil, 'ARTWORK')
 		cp:SetDrawLayer('ARTWORK', 2)
 		cp:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\combopoint-round')
-		cp:SetSize(addon.sizes.tex.combopoints, addon.sizes.tex.combopoints)
 
-		if i == 0 then
-			cp:SetPoint('BOTTOM', frame.overlay, 'BOTTOM',
-				-(addon.sizes.tex.combopoints+ICON_SPACING)*2, -3)
-		else
+		if i > 0 then
 			cp:SetPoint('LEFT', pcp, 'RIGHT', ICON_SPACING, 0)
 		end
 
@@ -148,13 +146,28 @@ function mod:CreateComboPoints(msg, frame)
 
 		glow:SetDrawLayer('ARTWORK',1)
 		glow:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\combopoint-glow')
-		glow:SetSize(addon.sizes.tex.combopoints+8,addon.sizes.tex.combopoints+8)
 		glow:SetPoint('CENTER',cp)
 
 		tinsert(frame.combopoints.glows, i+1, glow)
 	end
 
+    self:ScaleComboPoints(frame)
 	frame.combopoints.Update = ComboPointsUpdate
+end
+-- update/set frame sizes ------------------------------------------------------
+function mod:ScaleComboPoints(frame)
+    local i,cp
+    for i,cp in ipairs(frame.combopoints) do
+		cp:SetSize(sizes.combopoints, sizes.combopoints)
+
+        if i == 1 then
+            -- place first icon to offset others to center
+			cp:SetPoint('BOTTOM', frame.overlay, 'BOTTOM',
+				-(sizes.combopoints+ICON_SPACING)*2, -3)
+        end
+
+        frame.combopoints.glows[i]:SetSize(sizes.combopoints + 8, sizes.combopoints + 8)
+    end
 end
 ------------------------------------------------------------------------ Hide --
 function mod:HideComboPoints(msg, frame)
@@ -171,6 +184,13 @@ mod.configChangedFuncs.runOnce.enabled = function(val)
 	else
 		mod:Disable()
 	end
+end
+
+mod.configChangedFuncs.runOnce.scale = function(val)
+    sizes.combopoints = defaultSizes.combopoints * val
+end
+mod.configChangedFuncs.scale = function(frame, val)
+    mod:ScaleComboPoints(frame)
 end
 
 -------------------------------------------------------------------- Register --
@@ -205,10 +225,11 @@ function mod:OnInitialize()
 	-- fetch the localised name of anticipation
 	ANTICIPATION_NAME = GetSpellInfo(ANTICIPATION_ID) or 'Anticipation'
 
-	addon:RegisterSize('tex', 'combopoints', 4.5 * self.db.profile.scale)
-	addon:RegisterSize('tex', 'cpGlowWidth', 30 * self.db.profile.scale)
-	addon:RegisterSize('tex', 'cpGlowHeight', 15 * self.db.profile.scale)
-	
+    defaultSizes.combopoints = 6.5
+
+    -- scale size with user option
+    self.configChangedFuncs.runOnce.scale(self.db.profile.scale)
+
 	addon:InitModuleOptions(self)
 	mod:SetEnabledState(self.db.profile.enabled)
 end

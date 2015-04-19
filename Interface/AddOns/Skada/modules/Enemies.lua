@@ -73,21 +73,22 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 		local spellid, spellname,_,amount,overheal,absorb,crit = ...
 		local healing = math.max(0,amount - overheal) -- omit absorbs, which players inflict to mitigate healing
 		set.mobhdone = set.mobhdone + healing
-		local smob = find_mob(set,dmg.srcName)
+
+		if dmg.srcName then -- some enemy HoT's omit the true src (eg Cauterizing Bolt) 
+			local smob = find_mob(set,dmg.srcName)
+			smob.hdone = smob.hdone + healing
+			log_healspell(smob, "hdonespell", spellname, healing, overheal, crit)
+		end
+
 		local dmob = find_mob(set,dmg.dstName)
-
-		smob.hdone = smob.hdone + healing
 		dmob.htaken = dmob.htaken + healing
-
-		log_healspell(smob, "hdonespell", spellname, healing, overheal, crit)
 		log_healspell(dmob, "htakenspell", spellname, healing, overheal, crit)
-
 	end
 
 	local dmg = {}
 
 	local function Healing(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcName and dstName then
+		if dstName then -- we allow missing src (for some enemy HoTs)
 			dmg.dstName = dstName
 			dmg.srcName = srcName
 			log_healing(Skada.current, dmg, ...)
@@ -355,9 +356,9 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 		hdone.metadata		= {click1 = hdonespells}
 		htaken.metadata		= {click1 = htakenspells}
 
-		Skada:RegisterForCL(Healing, 'SPELL_HEAL', {src_is_not_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(Healing, 'SPELL_PERIODIC_HEAL', {src_is_not_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(Healing, 'SPELL_BUILDING_HEAL', {src_is_not_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(Healing, 'SPELL_HEAL', {dst_is_not_interesting = true})
+		Skada:RegisterForCL(Healing, 'SPELL_PERIODIC_HEAL', {dst_is_not_interesting = true})
+		Skada:RegisterForCL(Healing, 'SPELL_BUILDING_HEAL', {dst_is_not_interesting = true})
 
 		Skada:AddMode(self)
 	end

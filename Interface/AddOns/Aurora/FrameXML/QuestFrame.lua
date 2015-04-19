@@ -28,6 +28,13 @@ tinsert(C.themes["Aurora"], function()
 	QuestFrameProgressPanelMaterialBotLeft:SetAlpha(0)
 	QuestFrameProgressPanelMaterialBotRight:SetAlpha(0)
 
+	hooksecurefunc("QuestFrame_SetMaterial", function(frame)
+		_G[frame:GetName().."MaterialTopLeft"]:Hide()
+		_G[frame:GetName().."MaterialTopRight"]:Hide()
+		_G[frame:GetName().."MaterialBotLeft"]:Hide()
+		_G[frame:GetName().."MaterialBotRight"]:Hide()
+	end)
+
 	local line = QuestFrameGreetingPanel:CreateTexture()
 	line:SetTexture(1, 1, 1, .2)
 	line:SetSize(256, 1)

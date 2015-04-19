@@ -348,6 +348,7 @@ L["When possible, bars will be colored according to player class."] = "Quand cel
 L["When possible, bar text will be colored according to player class."] = "Quand cela est possible, le texte des barres sera colorié selon la classe du joueur représenté."
 L["When your threat reaches this level, relative to tank, warnings are shown."] = "Quand votre menace atteint ce niveau par rapport au tank, les avertissements sont affichés."
 L["Whisper"] = "Chuchoter"
+-- L["Whisper Target"] = ""
 L["Window"] = "Fenêtre"
 L["Window height"] = "Hauteur de la fenêtre"
 L["Windows"] = "Fenêtres"

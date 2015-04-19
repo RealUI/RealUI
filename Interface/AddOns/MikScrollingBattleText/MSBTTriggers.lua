@@ -553,7 +553,7 @@ local function DisplayTrigger(triggerSettings, sourceName, sourceClass, recipien
   local formattedAmount = amount
   if (currentProfile.shortenNumbers) then
    formattedAmount = ShortenNumber(formattedAmount, currentProfile.shortenNumberPrecision)
-  elseif (currentProfile.separateNumbers) then
+  elseif (currentProfile.groupNumbers) then
    formattedAmount = SeparateNumber(formattedAmount)
   end
   message = string_gsub(message, "%%a", formattedAmount)

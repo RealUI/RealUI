@@ -7,7 +7,7 @@ Grid2Options:RegisterStatusOptions("range", "target", function(self, status, opt
 	end
 	options.default = {
 		type = "range",
-		order = 5,
+		order = 55,
 		name = L["Out of range alpha"],
 		desc = L["Alpha value when units are way out of range."],
 		min = 0,
@@ -18,7 +18,7 @@ Grid2Options:RegisterStatusOptions("range", "target", function(self, status, opt
 	}
 	options.update = {
 		type = "range",
-		order = 6,
+		order = 56,
 		name = L["Update rate"],
 		desc = L["Rate at which the status gets updated"],
 		min = 0,
@@ -30,7 +30,7 @@ Grid2Options:RegisterStatusOptions("range", "target", function(self, status, opt
 	}
 	options.range = {
 		type = "select",
-		order = 7,
+		order = 57,
 		name = L["Range"],
 		desc = L["Range in yards beyond which the status will be lost."],
 		get = function () return status.dbx.range and tostring(status.dbx.range) or "38" end,
@@ -39,7 +39,7 @@ Grid2Options:RegisterStatusOptions("range", "target", function(self, status, opt
 	}
 	options.separation = {
 		type = "header",
-		order = 9,
+		order = 20,
 		name = "",
 	}
 	self:MakeStatusColorOptions(status, options, { 

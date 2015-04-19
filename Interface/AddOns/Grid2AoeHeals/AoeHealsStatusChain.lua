@@ -1,5 +1,5 @@
 -- Status: Chain Heals
-
+--[[
 local AOEM = Grid2:GetModule("Grid2AoeHeals")
 if AOEM.playerClass ~= "SHAMAN" then return end
 
@@ -136,4 +136,4 @@ Grid2:DbSetStatusDefaultValue( "aoe-ChainHeal", { type = "aoe-ChainHeal",
 	healthDeficit = 10000, minPlayers = 4, maxSolutions = 5, radius = 12.5, keepPrevHeals = true,
 	color1 = {r=0, g=1, b=0, a=1}, 
 })
-		
+--]]		

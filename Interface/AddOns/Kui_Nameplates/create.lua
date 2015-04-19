@@ -2,56 +2,73 @@
 -- Kui_Nameplates
 -- By Kesava at curse.com
 -- All rights reserved
---
--- This file essentially creates "my" core layout. The eventual idea is to split
--- this into a seperate addon. That will come after a few necessary things are
--- ported to support that capability, such as the ability to theme cast bars.
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local kui = LibStub('Kui-1.0')
 
+local side_coords = {
+    left =   {  0,  .04,  0,   1 },
+    right =  { .96,  1,   0,   1 },
+    top =    { .05, .95,  0,  .24 },
+    bottom = { .05, .95, .76,  1 }
+}
+
 ------------------------------------------------------------------ Background --
 function addon:CreateBackground(frame, f)
     -- frame glow
-    --f.bg:SetParent(f)
-    f.bg = f:CreateTexture(nil, 'ARTWORK')
-    f.bg:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\FrameGlow')
-    f.bg:SetTexCoord(0, .469, 0, .625)
-    f.bg:SetVertexColor(0, 0, 0, .9)
+    f.bg = { sides = {} }
 
     -- solid background
-    f.bg.fill = f:CreateTexture(nil, 'BACKGROUND')
+    f.bg.fill = f:CreateTexture(nil, 'ARTWORK', nil, 1)
     f.bg.fill:SetTexture(kui.m.t.solid)
     f.bg.fill:SetVertexColor(0, 0, 0, .8)
-    f.bg.fill:SetDrawLayer('ARTWORK', 1) -- 1 sub-layer above .bg
+
+    -- create frame glow sides
+    -- not using frame backdrop as it seems to cause a lot of lag on frames
+    -- which update very often (such as nameplates)
+    for side,coords in pairs(side_coords) do
+        f.bg.sides[side] = f:CreateTexture(nil,'ARTWORK',nil,0)
+        side = f.bg.sides[side]
+
+        side:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\FrameGlow')
+        side:SetTexCoord(unpack(coords))
+    end
+
+    local of = self.sizes.frame.bgOffset + 1
+
+    f.bg.sides.top:SetPoint('BOTTOMLEFT', f.bg.fill, 'TOPLEFT', 1, -1)
+    f.bg.sides.top:SetPoint('BOTTOMRIGHT', f.bg.fill, 'TOPRIGHT', -1, -1)
+    f.bg.sides.top:SetHeight(of)
+
+    f.bg.sides.bottom:SetPoint('TOPLEFT', f.bg.fill, 'BOTTOMLEFT', 1, 1)
+    f.bg.sides.bottom:SetPoint('TOPRIGHT', f.bg.fill, 'BOTTOMRIGHT', -1, 1)
+    f.bg.sides.bottom:SetHeight(of)
+
+    f.bg.sides.left:SetPoint('TOPRIGHT', f.bg.sides.top, 'TOPLEFT')
+    f.bg.sides.left:SetPoint('BOTTOMRIGHT', f.bg.sides.bottom, 'BOTTOMLEFT')
+    f.bg.sides.left:SetWidth(of)
+
+    f.bg.sides.right:SetPoint('TOPLEFT', f.bg.sides.top, 'TOPRIGHT')
+    f.bg.sides.right:SetPoint('BOTTOMLEFT', f.bg.sides.bottom, 'BOTTOMRIGHT')
+    f.bg.sides.right:SetWidth(of)
+
+    function f.bg:SetVertexColor(r,g,b,a)
+        for _,side in pairs(self.sides) do
+            side:SetVertexColor(r,g,b,a)
+        end
+    end
 end
 function addon:UpdateBackground(f, trivial)
-    f.bg:ClearAllPoints()
     f.bg.fill:ClearAllPoints()
 
     if trivial then
         -- switch to trivial sizes
         f.bg.fill:SetSize(self.sizes.frame.twidth, self.sizes.frame.theight)
         f.bg.fill:SetPoint('BOTTOMLEFT', f.x, f.y)
-
-        f.bg:SetPoint('BOTTOMLEFT', f.bg.fill, 'BOTTOMLEFT',
-            -self.sizes.frame.bgOffset/2,
-            -self.sizes.frame.bgOffset/2)
-        f.bg:SetPoint('TOPRIGHT', f.bg.fill, 'TOPRIGHT',
-            self.sizes.frame.bgOffset/2,
-            self.sizes.frame.bgOffset/2)
     elseif not trivial then
         -- switch back to normal sizes
         f.bg.fill:SetSize(self.sizes.frame.width, self.sizes.frame.height)
-
         f.bg.fill:SetPoint('BOTTOMLEFT', f.x, f.y)
-
-        f.bg:SetPoint('BOTTOMLEFT', f.bg.fill, 'BOTTOMLEFT',
-            -self.sizes.frame.bgOffset,
-            -self.sizes.frame.bgOffset)
-        f.bg:SetPoint('TOPRIGHT', f.bg.fill, 'TOPRIGHT',
-            self.sizes.frame.bgOffset,
-            self.sizes.frame.bgOffset)
     end
 end
 ------------------------------------------------------------------ Health bar --
@@ -169,19 +186,14 @@ function addon:CreateLevel(frame, f)
     f.level:SetHeight(10)
     f.level:ClearAllPoints()
 
-    f.level.enabled = true
+    if self.db.profile.text.level then
+        f.level.enabled = true
+    end
 end
 function addon:UpdateLevel(f, trivial)
-    if not f.level.enabled then
-        f.level:Hide()
-        f.level:SetWidth(.1)
-        return
-    end
-
     if trivial then
         f.level:Hide()
     else
-        f.level:Show()
         f.level:SetPoint('TOPLEFT', f.health, 'BOTTOMLEFT',
                          2.5, self.db.profile.text.healthoffset + 4)
     end
@@ -245,12 +257,12 @@ function addon:CreateTargetArrows(f)
     local arrowSize = floor(self.sizes.tex.targetArrow)
     local ta = CreateFrame('Frame',nil,f.overlay)
 
-    ta.left = ta:CreateTexture(nil,'ARTWORK')
+    ta.left = ta:CreateTexture(nil,'ARTWORK',nil,1)
     ta.left:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
     ta.left:SetPoint('RIGHT',f.overlay,'LEFT',14,-1)
     ta.left:SetSize(arrowSize,arrowSize)
 
-    ta.right = ta:CreateTexture(nil,'ARTWORK')
+    ta.right = ta:CreateTexture(nil,'ARTWORK',nil,1)
     ta.right:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
     ta.right:SetTexCoord(1,0,0,1)
     ta.right:SetPoint('LEFT',f.overlay,'RIGHT',-14,-1)

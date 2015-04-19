@@ -349,6 +349,7 @@ L["When possible, bars will be colored according to player class."] = "바를 �
 L["When possible, bar text will be colored according to player class."] = "바의 문자를 플레이어의 직업 색상으로 표시합니다."
 L["When your threat reaches this level, relative to tank, warnings are shown."] = "탱커와 비교하여 위협 수준이 해당 레벨에 도달하면 경고를 표시합니다."
 L["Whisper"] = "귓속말"
+-- L["Whisper Target"] = ""
 L["Window"] = "창"
 L["Window height"] = "창 높이"
 L["Windows"] = "창"

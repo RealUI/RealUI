@@ -20,6 +20,8 @@ do
         ['TOOLTIP'] = '6. TOOLTIP',
     }
 
+    local globalConfigChangedListeners = {}
+
     local handlers = {}
     local handlerProto = {}
     local handlerMeta = { __index = handlerProto }
@@ -39,17 +41,41 @@ do
             mod.configChangedFuncs.runOnce[key](profile[key])
         end
 
+        -- find and call global config changed listeners
+        local voyeurs = {}
+        if  globalConfigChangedListeners[mod:GetName()] and
+            globalConfigChangedListeners[mod:GetName()][key]
+        then
+            for _,voyeur in ipairs(globalConfigChangedListeners[mod:GetName()][key]) do
+                voyeur = addon:GetModule(voyeur)
+
+                if voyeur.configChangedFuncs.global.runOnce[key] then
+                    voyeur.configChangedFuncs.global.runOnce[key](profile[key])
+                end
+
+                if voyeur.configChangedFuncs.global[key] then
+                    -- also call when iterating frames
+                    tinsert(voyeurs, voyeur)
+                end
+            end
+        end
+
         if mod.configChangedFuncs[key] then
             -- iterate frames and call
             for _, frame in pairs(addon.frameList) do
                 mod.configChangedFuncs[key](frame.kui, profile[key])
+
+                for _,voyeur in ipairs(voyeurs) do
+                    voyeur.configChangedFuncs.global[key](frame.kui, profile[key])
+                end
             end
         end
+
     end
 
     function handlerProto:ResolveInfo(info)
         local p = self.dbPath.db.profile
-    
+
         local child, k
         for i = 1, #info do
             k = info[i]
@@ -68,6 +94,7 @@ do
 
     function handlerProto:Get(info, ...)
         local p, k = self:ResolveInfo(info)
+        if not p[k] then return end
 
         if info.type == 'color' then
             return unpack(p[k])
@@ -230,46 +257,22 @@ do
                         values = AceGUIWidgetLSMlists.statusbar,
                         order = 25,
                     },
-                    strata = { 
+                    strata = {
                         name = 'Frame strata',
                         desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 10.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
                         type = 'select',
                         values = StrataSelectList,
                         order = 27
                     },
-					reactioncolours = {
-						name = 'Reaction colours',
-						type = 'group',
-						inline = true,
-						order = 30,
-						args = {
-							hatedcol = {
-								name = 'Hostile',
-								type = 'color',
-								order = 1
-							},
-							neutralcol = {
-								name = 'Neutral',
-								type = 'color',
-								order = 2
-							},
-							friendlycol = {
-								name = 'Friendly',
-								type = 'color',
-								order = 3
-							},
-							tappedcol = {
-								name = 'Tapped',
-								type = 'color',
-								order = 4
-							},
-							playercol = {
-								name = 'Friendly player',
-								type = 'color',
-								order = 5
-							}
-						}
-					},
+                    lowhealthval = {
+                        name = 'Low health value',
+                        desc = 'Low health value used by some modules, such as frame fading.',
+                        type = 'range',
+                        min = 1,
+                        max = 100,
+                        bigStep = 1,
+                        order = 50
+                    },
                 }
             },
             fade = {
@@ -283,6 +286,7 @@ do
                         type = 'range',
                         min = 0,
                         max = 1,
+                        bigStep = .01,
                         isPercent = true,
                         order = 4
                     },
@@ -323,27 +327,15 @@ do
                         args = {
                             avoidhostilehp = {
                                 name = 'Don\'t fade hostile units at low health',
-                                desc = 'Avoid fading hostile units which are at or below a health value, determined by low health value.',
+                                desc = 'Avoid fading hostile units which are at or below a health value, determined by low health value under general display options.',
                                 type = 'toggle',
                                 order = 1
                             },
                             avoidfriendhp = {
                                 name = 'Don\'t fade friendly units at low health',
-                                desc = 'Avoid fading friendly units which are at or below a health value, determined by low health value.',
+                                desc = 'Avoid fading friendly units which are at or below a health value, determined by low health value under general display options.',
                                 type = 'toggle',
                                 order = 2
-                            },
-                            avoidhpval = {
-                                name = 'Low health value',
-                                desc = 'The health percentage at which to keep nameplates faded in.',
-                                type = 'range',
-                                min = 1,
-                                max = 100,
-                                step = 1,
-                                disabled = function(info)
-                                    return not addon.db.profile.fade.rules.avoidhostilehp and not addon.db.profile.fade.rules.avoidfriendhp
-                                end,
-                                order = 3
                             },
                             avoidcast = {
                                 name = 'Don\'t fade casting units',
@@ -371,7 +363,7 @@ do
                         desc = 'Offset of the text on the top and bottom of the health bar: level, name, standard health and contextual health. The offset is reversed for contextual health.\n'..
                                'Note that the default values end in .5 as this prevents jittering text, but only if "fix aliasing" is also enabled.',
                         type = 'range',
-                        step = .5,
+                        bigStep = .5,
                         softMin = -5,
                         softMax = 10,
                         order = 1
@@ -389,39 +381,72 @@ do
                 type = 'group',
                 order = 4,
                 args = {
+                    reactioncolours = {
+                        name = 'Reaction colours',
+                        type = 'group',
+                        inline = true,
+                        order = 1,
+                        args = {
+                            hatedcol = {
+                                name = 'Hostile',
+                                type = 'color',
+                                order = 1
+                            },
+                            neutralcol = {
+                                name = 'Neutral',
+                                type = 'color',
+                                order = 2
+                            },
+                            friendlycol = {
+                                name = 'Friendly',
+                                type = 'color',
+                                order = 3
+                            },
+                            tappedcol = {
+                                name = 'Tapped',
+                                type = 'color',
+                                order = 4
+                            },
+                            playercol = {
+                                name = 'Friendly player',
+                                type = 'color',
+                                order = 5
+                            }
+                        }
+                    },
                     showalt = {
                         name = 'Show contextual health',
                         desc = 'Show alternate (contextual) health values as well as main values',
                         type = 'toggle',
-                        order = 1
+                        order = 10
                     },
                     mouseover = {
                         name = 'Show on mouse over',
                         desc = 'Show health only on mouse over or on the targeted plate',
                         type = 'toggle',
-                        order = 2
+                        order = 20
                     },
                     smooth = {
                         name = 'Smooth health bar',
                         desc = 'Smoothly animate health bar value updates',
                         type = 'toggle',
                         width = 'full',
-                        order = 3
+                        order = 30
                     },
                     friendly = {
                         name = 'Friendly health format',
                         desc = 'The health display pattern for friendly units',
                         type = 'input',
                         pattern = '([<=]:[dmcpb];)',
-                        order = 5
+                        order = 40
                     },
                     hostile = {
                         name = 'Hostile health format',
                         desc = 'The health display pattern for hostile or neutral units',
                         type = 'input',
                         pattern = '([<=]:[dmcpb];)',
-                        order = 6
-                    }
+                        order = 50
+                    },
                 }
             },
             fonts = {
@@ -446,7 +471,7 @@ do
                                 desc = 'The scale of all fonts displayed on nameplates',
                                 type = 'range',
                                 min = 0.01,
-                                softMax = 2,
+                                softMax = 3,
                                 order = 1
                             },
                             outline = {
@@ -487,6 +512,26 @@ do
         }
     }
 
+    local function RegisterForConfigChanged(module, target_module, key)
+        -- this module wants to listen for another module's (or the addon's)
+        -- configChanged calls
+        local mod_name = module:GetName()
+
+        if not target_module or target_module == 'addon' then
+            target_module = 'KuiNameplates'
+        end
+
+        if not globalConfigChangedListeners[target_module] then
+            globalConfigChangedListeners[target_module] = {}
+        end
+
+        if not globalConfigChangedListeners[target_module][key] then
+            globalConfigChangedListeners[target_module][key] = {}
+        end
+
+        tinsert(globalConfigChangedListeners[target_module][key], mod_name)
+    end
+
     -- create module.ConfigChanged function
     -- TODO cycle these when changing profiles (or something)
     function addon:CreateConfigChangedListener(module)
@@ -507,6 +552,7 @@ do
         local name = module.uiName or module.moduleName
 
         self:CreateConfigChangedListener(module)
+        module.RegisterForConfigChanged = RegisterForConfigChanged
 
         options.args[name] = {
             name = name,

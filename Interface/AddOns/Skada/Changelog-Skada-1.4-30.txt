@@ -1,0 +1,42 @@
+------------------------------------------------------------------------
+r613 | zarnivoop | 2015-03-14 16:50:00 +0000 (Sat, 14 Mar 2015) | 1 line
+Changed paths:
+   A /tags/1.4-30 (from /trunk:612)
+
+Tagging as 1.4-30
+------------------------------------------------------------------------
+r612 | zarnivoop | 2015-03-13 15:10:02 +0000 (Fri, 13 Mar 2015) | 1 line
+Changed paths:
+   M /trunk/BarDisplay.lua
+   M /trunk/lib/SpecializedLibBars-1.0/SpecializedLibBars-1.0.lua
+
+fix for new weird word wrapping issue - may need a bit of testing
+------------------------------------------------------------------------
+r611 | zarnivoop | 2015-03-13 14:51:57 +0000 (Fri, 13 Mar 2015) | 1 line
+Changed paths:
+   M /trunk/Menus.lua
+   M /trunk/locale/enUS.lua
+
+localization fix
+------------------------------------------------------------------------
+r610 | oscarucb | 2015-03-03 22:16:19 +0000 (Tue, 03 Mar 2015) | 3 lines
+Changed paths:
+   M /trunk/modules/Enemies.lua
+
+Fix Enemy healing module to include enemy HoTs with a nil source unit (eg Cauterizing Bolt on Thogar). 
+Previously these heals were completely omitted from tracking, now they are shown on Enemy Healing Taken (but we still have no way in general to correctly attribute them for Enemy Healing Done).
+
+------------------------------------------------------------------------
+r608 | funkydude | 2015-02-25 04:42:44 +0000 (Wed, 25 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+   M /trunk/Skada.toc
+
+change wav path to ogg, bump toc.
+------------------------------------------------------------------------
+r607 | ananhaid | 2015-02-12 11:11:01 +0000 (Thu, 12 Feb 2015) | 1 line
+Changed paths:
+   M /trunk/Skada.toc
+
+- zhCN desc update.
+------------------------------------------------------------------------

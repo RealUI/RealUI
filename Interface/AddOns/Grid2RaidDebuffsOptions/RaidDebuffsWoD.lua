@@ -199,13 +199,17 @@ RDDB["Warlords of Draenor"] = {
 		162663, -- Tormenta eléctrica
 		162748, -- Disparo de dispersión
 		162761, -- Trampa de hielo
-		1604, -- Atontado
 		174773, -- Vapores de combustión
 		160260, -- Bomba de Fuego
 		160109, -- Intimidación
 		163126, -- Capón
 		177891, -- Patada ascendente ardiente
 		177855, -- Ascuas en el viento
+		175765, -- Machaque aereo
+		175752, -- Aliento de escoria
+		175603, -- Escoria atenazante
+		156345, -- Ignicion
+		175624, -- Heridas mortalmente graves
 		},
 	},
 	-- world bosses

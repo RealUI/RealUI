@@ -47,7 +47,6 @@ local Grid2Options = {
 function Grid2Options:Initialize()
 
 	self.db = Grid2.db:RegisterNamespace("Grid2Options",  { profile = { L = { indicators = {} } } } )
-	self.LI = self.db.profile.L.indicators
 	
 	self:EnableLoadOnDemand(not Grid2.db.global.LoadOnDemandDisabled)
 
@@ -65,6 +64,7 @@ end
 
 -- Called from Grid2 core if profile changes
 function Grid2Options:MakeOptions()
+	self.LI = self.db.profile.L.indicators
 	self:MakeStatusesOptions(self.statusOptions)
 	self:MakeIndicatorsOptions(self.indicatorOptions)
 	collectgarbage("collect")

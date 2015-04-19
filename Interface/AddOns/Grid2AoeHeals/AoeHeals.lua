@@ -16,7 +16,7 @@
 		curMask          Bitmask of the current unit, each roster[index] element has a bitmask of 2^(index-1)
 --]]
 
-local AOEM = Grid2:NewModule("Grid2AoeHeals")
+local AOEM = Grid2:NewModule( "Grid2AoeHeals", "AceEvent-3.0")
 
 AOEM.defaultDB = {
 	profile = {

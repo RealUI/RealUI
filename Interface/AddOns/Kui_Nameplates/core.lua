@@ -9,35 +9,30 @@ local LSM = LibStub('LibSharedMedia-3.0')
 
 addon.font = ''
 addon.uiscale = nil
-addon.sizes = { frame = {}, font = {}, tex = {} }
-addon.defaultSizes = { frame = {}, font = {}, tex = {} }
 
 addon.frameList = {}
 addon.numFrames = 0
 
 -- sizes of frame elements
--- TODO these should be set in create.lua
-addon.defaultSizes = {
+-- some populated by UpdateSizesTable & ScaleFontSizes
+addon.sizes = {
     frame = {
-        width    = 100,
-        height   = 10,
-        twidth   = 55, -- trivial unit width
-        theight  = 7,  -- "            height
-        bgOffset = 4   -- inset of the frame glow
-    },
-    font = {
-        large     = 9,
-        spellname = 8,
-        name      = 8,
-        small     = 7
+        bgOffset = 8   -- inset of the frame glow
     },
     tex = {
-        raidicon = 18,
-        targetGlowW = 106,
-        ttargetGlowW = 50, -- target glow width on trivial units
-        targetGlowH = 5,
-        targetArrow = 25,
-    }
+        raidicon = 23,
+        targetGlowH = 7,
+        targetArrow = 33,
+    },
+    font = {}
+}
+
+-- as these are scaled with the user option we need to store the default
+addon.defaultFontSizes = {
+    large     = 12,
+    spellname = 11,
+    name      = 11,
+    small     = 9
 }
 
 -- add latin-only fonts to LSM
@@ -66,20 +61,14 @@ local defaults = {
             targetglow  = true,
             targetglowcolour = { .3, .7, 1, 1 },
             targetarrows = false,
-            hheight     = 10,
-            thheight    = 7,
-            width       = 100,
-            twidth      = 55, 
+            hheight     = 13,
+            thheight    = 9,
+            width       = 130,
+            twidth      = 72,
             leftie      = false,
             glowshadow  = true,
             strata      = 'BACKGROUND',
-			reactioncolours = {
-				hatedcol    = { .7, .2, .1 },
-				neutralcol  = {  1, .8,  0 },
-				friendlycol = { .2, .6, .1 },
-				tappedcol   = { .5, .5, .5 },
-				playercol   = { .2, .5, .9 }
-			},
+            lowhealthval = 20,
         },
         fade = {
             smooth      = true, -- smoothy fade plates
@@ -90,7 +79,6 @@ local defaults = {
             rules = {
                 avoidhostilehp = false,
                 avoidfriendhp  = false,
-                avoidhpval  = 20,
                 avoidcast   = false,
                 avoidraidicon = true,
             },
@@ -100,6 +88,13 @@ local defaults = {
             healthoffset = 2.5,
         },
         hp = {
+            reactioncolours = {
+                hatedcol    = { .7, .2, .1 },
+                neutralcol  = {  1, .8,  0 },
+                friendlycol = { .2, .6, .1 },
+                tappedcol   = { .5, .5, .5 },
+                playercol   = { .2, .5, .9 }
+            },
             friendly  = '<:d;', -- health display pattern for friendly units
             hostile   = '<:p;', -- health display pattern for enemy units
             showalt   = false, -- show alternate health values
@@ -130,9 +125,22 @@ do
     local knownGUIDs = {} -- GUIDs that we can relate to names (i.e. players)
     local knownIndex = {}
 
+    function addon:StoreNameWithGUID(name,guid)
+        -- used to provide aggressive name -> guid matching
+        -- should only be used for players
+        if not name or not guid then return end
+        knownGUIDs[name] = guid
+        tinsert(knownIndex, name)
+
+        -- purging index > 100 names
+        if #knownIndex > 100 then
+            knownGUIDs[tremove(knownIndex, 1)] = nil
+        end
+    end
+
     function addon:GetGUID(f)
         -- give this frame a guid if we think we already know it
-        if knownGUIDs[f.name.text] then
+        if f.player and knownGUIDs[f.name.text] then
             f.guid = knownGUIDs[f.name.text]
             loadedGUIDs[f.guid] = f
         end
@@ -157,13 +165,7 @@ do
         if UnitIsPlayer(unit) then
             -- we can probably assume this unit has a unique name
             -- nevertheless, overwrite this each time. just in case.
-            knownGUIDs[f.name.text] = guid
-            tinsert(knownIndex, f.name.text)
-
-            -- and start purging > 100 names
-            if #knownIndex > 100 then
-                knownGUIDs[tremove(knownIndex, 1)] = nil
-            end
+            self:StoreNameWithGUID(f.name.text, guid)
         elseif loadedNames[f.name.text] == f then
             -- force the registered f for this name to change
             loadedNames[f.name.text] = nil
@@ -204,6 +206,26 @@ do
             return nf
         else
             return nil
+        end
+    end
+
+    -- return the given unit's nameplate
+    function addon:GetUnitPlate(unit)
+        local name,realm = UnitName(unit)
+
+        if realm and UnitRealmRelationship(unit) == LE_REALM_RELATION_COALESCED then
+            name = name .. ' (*)'
+        end
+
+        return self:GetNameplate(UnitGUID(unit), name)
+    end
+
+    function addon:UPDATE_MOUSEOVER_UNIT(event)
+        if not UnitIsPlayer('mouseover') then return end
+        -- if mouseover is a player, we can -probably- assign its' GUID
+        local f = self:GetUnitPlate('mouseover')
+        if f and f.player then
+            self:StoreGUID(f, 'mouseover')
         end
     end
 end
@@ -259,7 +281,7 @@ local function CreateFontString(self, parent, obj)
     -- correctly. Used by SetFontSize.
     local sizeKey
 
-    obj = obj or {} 
+    obj = obj or {}
     obj.mono = addon.db.profile.fonts.options.monochrome
     obj.outline = addon.db.profile.fonts.options.outline
     obj.size = (addon.db.profile.fonts.options.onesize and 'name') or obj.size or 'name'
@@ -280,6 +302,7 @@ local function CreateFontString(self, parent, obj)
     local fs = kui.CreateFontString(parent, obj)
     fs.size = sizeKey
     fs.SetFontSize = SetFontSize
+    fs:SetWordWrap(false)
 
     tinsert(self.fontObjects, fs)
     return fs
@@ -287,61 +310,48 @@ end
 
 addon.CreateFontString = CreateFontString
 ----------------------------------------------------------- scaling functions --
--- scale a frame/font size to keep it relatively the same with any uiscale
-local function ScaleFrameSize(key)
-    local size = addon.defaultSizes.frame[key]
-    addon.sizes.frame[key] = (addon.uiscale and floor(size/addon.uiscale) or size)
-end
-
-local function ScaleTextureSize(key)
-    -- texture sizes don't need to be rounded
-    local size = addon.defaultSizes.tex[key]
-    addon.sizes.tex[key] = (addon.uiscale and size/addon.uiscale or size)
-end
-
+-- scale font sizes with the fontscale option
 local function ScaleFontSize(key)
-    -- neither do fonts, but they need to be scaled with the fontscale option
-    local size = addon.defaultSizes.font[key]
+    local size = addon.defaultFontSizes[key]
     addon.sizes.font[key] = size * addon.db.profile.fonts.options.fontscale
-        
-    if addon.uiscale then
-        addon.sizes.font[key] = addon.sizes.font[key] / addon.uiscale
-    end
 end
 
-local scaleFuncs = {
-    frame = ScaleFrameSize,
-    tex   = ScaleTextureSize,
-    font  = ScaleFontSize
-}
-
-function addon:ScaleSizes(type)
+local function ScaleFontSizes()
     local key,_
-    for key,_ in pairs(addon.defaultSizes[type]) do
-        scaleFuncs[type](key)
+    for key,_ in pairs(addon.defaultFontSizes) do
+        ScaleFontSize(key)
     end
 end
 
-function addon:ScaleAllSizes()
-    local type,_
-    for type,_ in pairs(addon.defaultSizes) do
-        self:ScaleSizes(type)
-    end
+-- modules should use this to add font sizes which scale correctly with the
+-- fontscale option
+-- keys must be unique
+function addon:RegisterFontSize(key, size)
+    addon.defaultFontSizes[key] = size
+    ScaleFontSize(key)
 end
 
--- modules must use this to add correctly scaled sizes
--- scaled sizes are stored in addon.sizes
--- font sizes can then be called as a key in addon.CreateFontString
+-- once upon a time, equivalent logic was necessary for all frame sizes
 function addon:RegisterSize(type, key, size)
-    if not addon.defaultSizes[type] then return end
-    addon.defaultSizes[type][key] = size
-    scaleFuncs[type](key)
+    error('deprecated function call: RegisterSize '..(type or 'nil')..' '..(key or 'nil')..' '..(size or 'nil'))
+end
+
+local function UpdateSizesTable()
+    -- populate sizes table with profile values
+    addon.sizes.frame.height = addon.db.profile.general.hheight
+    addon.sizes.frame.theight = addon.db.profile.general.thheight
+    addon.sizes.frame.width = addon.db.profile.general.width
+    addon.sizes.frame.twidth = addon.db.profile.general.twidth
+
+    addon.sizes.tex.healthOffset = addon.db.profile.text.healthoffset
+    addon.sizes.tex.targetGlowW = addon.sizes.frame.width - 5
+    addon.sizes.tex.ttargetGlowW = addon.sizes.frame.twidth - 5
 end
 ---------------------------------------------------- Post db change functions --
 -- n.b. this is absolutely terrible and horrible and i hate it
 addon.configChangedFuncs = { runOnce = {} }
 addon.configChangedFuncs.runOnce.fontscale = function(val)
-    addon:ScaleSizes('font')
+    ScaleFontSizes()
 end
 addon.configChangedFuncs.fontscale = function(frame, val)
     local _, fontObject
@@ -377,7 +387,7 @@ end
 addon.configChangedFuncs.onesize = addon.configChangedFuncs.fontscale
 
 addon.configChangedFuncs.runOnce.healthoffset = function(val)
-    addon:RegisterSize('tex', 'healthOffset', val)
+    addon.sizes.tex.healthOffset = addon.db.profile.text.healthoffset
 end
 addon.configChangedFuncs.healthoffset = function(frame, val)
     addon:UpdateHealthText(frame, frame.trivial)
@@ -419,6 +429,25 @@ end
 addon.configChangedFuncs.strata = function(frame,val)
     frame:SetFrameStrata(val)
 end
+
+do
+    local function UpdateFrameSize(frame)
+        addon:UpdateBackground(frame, frame.trivial)
+        addon:UpdateHealthBar(frame, frame.trivial)
+        addon:UpdateName(frame, frame.trivial)
+        frame:SetCentre()
+    end
+
+    addon.configChangedFuncs.runOnce.width    = UpdateSizesTable
+    addon.configChangedFuncs.runOnce.twidth   = UpdateSizesTable
+    addon.configChangedFuncs.runOnce.hheight  = UpdateSizesTable
+    addon.configChangedFuncs.runOnce.thheight = UpdateSizesTable
+
+    addon.configChangedFuncs.width    = UpdateFrameSize
+    addon.configChangedFuncs.twidth   = UpdateFrameSize
+    addon.configChangedFuncs.hheight  = UpdateFrameSize
+    addon.configChangedFuncs.thheight = UpdateFrameSize
+end
 ------------------------------------------- Listen for LibSharedMedia changes --
 function addon:LSMMediaRegistered(msg, mediatype, key)
     if mediatype == LSM.MediaType.FONT then
@@ -443,9 +472,23 @@ function addon:OnInitialize()
     -- enable ace3 profiles
     LibStub('AceConfig-3.0'):RegisterOptionsTable('kuinameplates-profiles', LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db))
     LibStub('AceConfigDialog-3.0'):AddToBlizOptions('kuinameplates-profiles', 'Profiles', 'Kui Nameplates')
-    
+
     self.db.RegisterCallback(self, 'OnProfileChanged', 'ProfileChanged')
     LSM.RegisterCallback(self, 'LibSharedMedia_Registered', 'LSMMediaRegistered')
+
+    -- move old reactioncolours config
+    if self.db.profile.general.reactioncolours then
+        local rc = self.db.profile.general.reactioncolours
+        local nrc = self.db.profile.hp.reactioncolours
+
+        if rc.hatedcol then nrc.hatedcol = rc.hatedcol end
+        if rc.neutralcol then nrc.neutralcol = rc.neutralcol end
+        if rc.friendlycol then nrc.friendlycol = rc.friendlycol end
+        if rc.tappedcol then nrc.tappedcol = rc.tappedcol end
+        if rc.playercol then nrc.playercol = rc.playercol end
+
+        self.db.profile.general.reactioncolours = nil
+    end
 
     addon:CreateConfigChangedListener(addon)
 end
@@ -454,7 +497,7 @@ function addon:OnEnable()
     -- get font and status bar texture from LSM
     self.font = LSM:Fetch(LSM.MediaType.FONT, self.db.profile.fonts.options.font)
     self.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.profile.general.bartexture)
-    
+
     -- handle deleted or invalid files
     if not self.font then
         self.font = LSM:Fetch(LSM.MediaType.FONT, DEFAULT_FONT)
@@ -463,20 +506,16 @@ function addon:OnEnable()
         self.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, DEFAULT_BAR)
     end
 
-    if self.db.profile.general.fixaa then
-        addon.uiscale = UIParent:GetEffectiveScale()
+    addon.uiscale = UIParent:GetEffectiveScale()
+
+    UpdateSizesTable()
+    ScaleFontSizes()
+
+    -- FIXME frame size warning (just for this version)
+    if not KuiNameplatesGDB.ReadSizeWarning then
+        print('Kui|cff9966ffNameplates|r: Due to changes in version 251, any customised frame sizes and the font scale option will need to be updated to remain consistent with their pre-update size. This message will go away next release but you can remove it now by running:')
+        print('/run KuiNameplatesGDB.ReadSizeWarning = true')
     end
-
-    self.defaultSizes.frame.height = self.db.profile.general.hheight
-    self.defaultSizes.frame.theight = self.db.profile.general.thheight
-    self.defaultSizes.frame.width = self.db.profile.general.width
-    self.defaultSizes.frame.twidth = self.db.profile.general.twidth
-
-    self.defaultSizes.tex.healthOffset = self.db.profile.text.healthoffset
-    self.defaultSizes.tex.targetGlowW = self.defaultSizes.frame.width - 5
-    self.defaultSizes.tex.ttargetGlowW = self.defaultSizes.frame.twidth - 5
-
-    self:ScaleAllSizes()
 
     -------------------------------------- Health bar smooth update functions --
     -- (spoon-fed by oUF_Smooth)
@@ -500,7 +539,7 @@ function addon:OnEnable()
 
         f:SetScript('OnUpdate', function()
             local limit = 30/GetFramerate()
-            
+
             for bar, value in pairs(smoothing) do
                 local cur = bar:GetValue()
                 local new = cur + min((value-cur)/3, max(value-cur, limit))
@@ -518,6 +557,8 @@ function addon:OnEnable()
             end
         end)
     end
+
+    addon:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
 
     self:ToggleCombatEvents(self.db.profile.general.combat)
     addon:ScheduleRepeatingTimer('OnUpdate', .1)

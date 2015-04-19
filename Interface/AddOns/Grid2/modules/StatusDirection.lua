@@ -6,6 +6,7 @@ local PI= math.pi
 local PI2 = PI*2
 local floor = math.floor
 local atan2 = math.atan2
+local sqrt  = math.sqrt
 local GetPlayerFacing = GetPlayerFacing
 local UnitPosition = UnitPosition
 local UnitIsUnit= UnitIsUnit
@@ -19,7 +20,8 @@ local f_env = {
 }
 
 local timer
-local directions= {}
+local distances
+local directions = {}
 local UnitCheck
 local mouseover = ""
 
@@ -27,16 +29,23 @@ local function UpdateDirections()
 	local x1,y1, _, map1 = UnitPosition("player")
 	if not x1 then Direction:ClearDirections() return end
 	local facing = GetPlayerFacing()
-	for unit,_ in Grid2:IterateRosterUnits() do
-		local direction
+	for unit in Grid2:IterateRosterUnits() do
+		local update, direction, distance
 		if not UnitIsUnit(unit, "player") and UnitCheck(unit, mouseover) then
 			local x2,y2, _, map2 = UnitPosition(unit)
 			if (map1 == map2) then
-				direction = floor( (atan2(y2 - y1, x2 - x1)-facing) / PI2 * 32 + 0.5) % 32
+				local dx, dy = x2 - x1, y2 - y1
+				direction = floor((atan2(dy,dx)-facing) / PI2 * 32 + 0.5) % 32
+				if distances then distance = floor( ((dx*dx+dy*dy)^0.5)/10 ) + 1 end	
 			end
 		end	
+		if distances and distances[unit] ~= distance then
+			distances[unit], update = distance, true
+		end
 		if direction ~= directions[unit] then
-			directions[unit]= direction
+			directions[unit], update = direction, true
+		end	
+		if update then	
 			Direction:UpdateIndicators(unit)
 		end
 	end
@@ -99,7 +108,7 @@ do
 	end
 end
 
-function Direction:UpdateDB()	
+function Direction:UpdateDB()
 	local isRestr
 	t= {}
 	t[1] = "return function(unit) return "
@@ -124,6 +133,19 @@ function Direction:UpdateDB()
 	SetMouseoverHooks((isRestr or self.dbx.showOnlyStickyUnits) and self.dbx.StickyMouseover)
 	UnitCheck = assert(loadstring(table.concat(t)))()
 	setfenv(UnitCheck, f_env)
+	--
+	local count = self.dbx.colorCount or 1
+	if count>1 then
+		distances = distances or {}
+		self.GetVertexColor = Direction.GetDistanceColor
+		self.colors = self.colors or {}
+		for i=1,count do
+			self.colors[i] = self.dbx["color"..i]
+		end
+	else
+		distances = nil
+		self.GetVertexColor = Grid2.statusLibrary.GetColor
+	end
 end
 
 function Direction:OnEnable()
@@ -148,7 +170,11 @@ function Direction:GetTexCoord(unit)
 	return 0.05, 0.95, y+0.0015625, y+0.028125
 end
 
-Direction.GetVertexColor = Grid2.statusLibrary.GetColor
+function Direction:GetDistanceColor(unit)
+	local distance = distances[unit]
+	local color = distance and self.colors[distance] or self.colors[5]
+	return color.r, color.g, color.b, color.a
+end
 
 local function Create(baseKey, dbx)
 	Grid2:RegisterStatus(Direction, {"icon"}, baseKey, dbx)

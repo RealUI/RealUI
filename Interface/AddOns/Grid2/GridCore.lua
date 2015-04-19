@@ -154,47 +154,6 @@ function Grid2:LoadConfig()
 	self:Setup()	
 end
 
-function Grid2:InitializeOptions()
-	self:RegisterChatCommand("grid2", "OnChatCommand")
-	self:RegisterChatCommand("gr2", "OnChatCommand")
-	local optionsFrame= CreateFrame( "Frame", nil, UIParent );
-	optionsFrame.name = "Grid2"
-	InterfaceOptions_AddCategory(optionsFrame)
-	optionsFrame:SetScript("OnShow", function (self, ...)
-		if not Grid2Options then Grid2:LoadGrid2Options() end
-		self:SetScript("OnShow", nil)
-	end)
-	self.optionsFrame = optionsFrame
-	self.InitializeOptions = nil
-end
-
-function Grid2:OnChatCommand(input)
-    if not Grid2Options then
-		Grid2:LoadGrid2Options()
-	end		
-	if Grid2Options then
-		Grid2Options:OnChatCommand(input)
-	end	
-end
-
-function Grid2:LoadGrid2Options()
-	if not IsAddOnLoaded("Grid2Options") then
-		LoadAddOn("Grid2Options")
-	end
-	if Grid2Options then
-		self:LoadOptions()
-		self.LoadGrid2Options = nil
-	else
-		Grid2:Print("You need Grid2Options addon enabled to be able to configure Grid2.")
-	end
-end
-
--- Hook this to load any options addon (see RaidDebuffs & AoeHeals modules)
-function Grid2:LoadOptions() 
-	Grid2Options:Initialize()
-	Grid2Options.LoadOptions = nil
-end
-
 function Grid2:ProfileShutdown()
 	self:Debug("Shutdown profile (", self.db:GetCurrentProfile(),")")
 	self:SetupShutdown()
@@ -210,3 +169,43 @@ function Grid2:ProfileChanged()
 		Grid2Options:MakeOptions()
 	end	
 end
+
+-- Options
+function Grid2:InitializeOptions()
+	self:RegisterChatCommand("grid2", "OnChatCommand")
+	self:RegisterChatCommand("gr2", "OnChatCommand")
+	local optionsFrame= CreateFrame( "Frame", nil, UIParent );
+	optionsFrame.name = "Grid2"
+	InterfaceOptions_AddCategory(optionsFrame)
+	optionsFrame:SetScript("OnShow", function (self, ...)
+		if not Grid2Options then Grid2:LoadGrid2Options() end
+		self:SetScript("OnShow", nil)
+	end)
+	self.optionsFrame = optionsFrame
+	self.InitializeOptions = nil
+end
+
+function Grid2:LoadGrid2Options()
+	if not IsAddOnLoaded("Grid2Options") then
+		LoadAddOn("Grid2Options")
+	end
+	if Grid2Options then
+		self:LoadOptions()
+		self.LoadGrid2Options = function() return true end
+		return true
+	end
+	Grid2:Print("You need Grid2Options addon enabled to be able to configure Grid2.")
+end
+
+function Grid2:OnChatCommand(input)
+	if Grid2:LoadGrid2Options() then
+		Grid2Options:OnChatCommand(input)
+	end	
+end
+
+-- Hook this to load any options addon (see RaidDebuffs & AoeHeals modules)
+function Grid2:LoadOptions() 
+	Grid2Options:Initialize()
+	Grid2.LoadOptions = nil
+end
+

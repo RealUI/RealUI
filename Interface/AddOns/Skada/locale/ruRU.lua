@@ -350,6 +350,7 @@ L["When possible, bars will be colored according to player class."] = "Когд�
 L["When possible, bar text will be colored according to player class."] = "Когда это возможно, текст полос будет окрашен в соответствии с классом игрока."
 L["When your threat reaches this level, relative to tank, warnings are shown."] = "При достижении угрозы до этого уровня, по сравнению с танком, будут показаны предупреждения."
 L["Whisper"] = "Шепот"
+-- L["Whisper Target"] = ""
 L["Window"] = "Окно"
 L["Window height"] = "Высота окна"
 L["Windows"] = "Окна"

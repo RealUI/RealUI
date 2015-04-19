@@ -40,12 +40,6 @@ BadBoyConfig:SetScript("OnEvent", function(frame, evt, addon)
 			"rape",
 		}
 	end
-	-- XXX temp cleanup
-	for i=1, #BADBOY_CCLEANER do
-		if BADBOY_CCLEANER[i] == "murloc" or BADBOY_CCLEANER[i] == "dirge" then
-			tremove(BADBOY_CCLEANER, i)
-		end
-	end
 
 	local Ambiguate, gsub, prevLineId, result, modify, BADBOY_CCLEANER = Ambiguate, gsub, 0, nil, nil, BADBOY_CCLEANER
 

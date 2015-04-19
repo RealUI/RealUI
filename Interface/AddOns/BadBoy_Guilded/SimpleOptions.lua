@@ -1,6 +1,6 @@
 
 do
-	BadBoyGuildedConfigTitle:SetText("BadBoy_Guilded r233-release") --wowace magic, replaced with tag version
+	BadBoyGuildedConfigTitle:SetText("BadBoy_Guilded r241-release") --wowace magic, replaced with tag version
 
 	local guildedWhispers = CreateFrame("CheckButton", nil, BadBoyConfig, "OptionsBaseCheckButtonTemplate")
 	guildedWhispers:SetPoint("TOPLEFT", BadBoyConfigPopupButton, "BOTTOMLEFT", 0, -67)
@@ -30,13 +30,13 @@ do
 	elseif L == "zhTW" then
 		guildedWhispersText:SetText("Remove guild invite whispers")
 	elseif L == "zhCN" then
-		guildedWhispersText:SetText("Remove guild invite whispers")
+		guildedWhispersText:SetText("移除公会邀请密语")
 	elseif L == "esES" then
 		guildedWhispersText:SetText("Remove guild invite whispers")
 	elseif L == "esMX" then
 		guildedWhispersText:SetText("Remove guild invite whispers")
 	elseif L == "ruRU" then
-		guildedWhispersText:SetText("Remove guild invite whispers")
+		guildedWhispersText:SetText("Блокировать личные сообщения, содержащие приглашения в гильдию")
 	elseif L == "koKR" then
 		guildedWhispersText:SetText("Remove guild invite whispers")
 	elseif L == "ptBR" then

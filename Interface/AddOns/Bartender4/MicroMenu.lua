@@ -16,8 +16,6 @@ local pairs, setmetatable, table_insert = pairs, setmetatable, table.insert
 -- GLOBALS: LFDMicroButton, CollectionsMicroButton, EJMicroButton, MainMenuMicroButton
 -- GLOBALS: HasVehicleActionBar, UnitVehicleSkin, HasOverrideActionBar, GetOverrideBarSkin
 
-local Is61 = select(4, GetBuildInfo()) >= 60100
-
 -- create prototype information
 local MicroMenuBar = setmetatable({}, {__index = ButtonBar})
 
@@ -43,33 +41,17 @@ function MicroMenuMod:OnEnable()
 		self.bar = setmetatable(Bartender4.ButtonBar:Create("MicroMenu", self.db.profile, L["Micro Menu"]), {__index = MicroMenuBar})
 		local buttons = {}
 
-		if Is61 then
-			table_insert(buttons, CharacterMicroButton)
-			table_insert(buttons, SpellbookMicroButton)
-			table_insert(buttons, TalentMicroButton)
-			table_insert(buttons, AchievementMicroButton)
-			table_insert(buttons, QuestLogMicroButton)
-			table_insert(buttons, GuildMicroButton)
-			table_insert(buttons, LFDMicroButton)
-			table_insert(buttons, CollectionsMicroButton)
-			table_insert(buttons, EJMicroButton)
-			table_insert(buttons, StoreMicroButton)
-			table_insert(buttons, MainMenuMicroButton)
-		else
-			table_insert(buttons, CharacterMicroButton)
-			table_insert(buttons, SpellbookMicroButton)
-			table_insert(buttons, TalentMicroButton)
-			table_insert(buttons, AchievementMicroButton)
-			table_insert(buttons, QuestLogMicroButton)
-			table_insert(buttons, GuildMicroButton)
-			table_insert(buttons, PVPMicroButton)
-			table_insert(buttons, LFDMicroButton)
-			table_insert(buttons, CompanionsMicroButton)
-			table_insert(buttons, EJMicroButton)
-			table_insert(buttons, StoreMicroButton)
-			table_insert(buttons, MainMenuMicroButton)
-			table_insert(buttons, HelpMicroButton)
-		end
+		table_insert(buttons, CharacterMicroButton)
+		table_insert(buttons, SpellbookMicroButton)
+		table_insert(buttons, TalentMicroButton)
+		table_insert(buttons, AchievementMicroButton)
+		table_insert(buttons, QuestLogMicroButton)
+		table_insert(buttons, GuildMicroButton)
+		table_insert(buttons, LFDMicroButton)
+		table_insert(buttons, CollectionsMicroButton)
+		table_insert(buttons, EJMicroButton)
+		table_insert(buttons, StoreMicroButton)
+		table_insert(buttons, MainMenuMicroButton)
 		self.bar.buttons = buttons
 
 		MicroMenuMod.button_count = #buttons
@@ -132,9 +114,13 @@ end
 
 function MicroMenuBar:UpdateButtonLayout()
 	ButtonBar.UpdateButtonLayout(self)
-	-- If the StoreButton is hidden we want to slide the remaining buttons down.
+	-- If the StoreButton is hidden we want to replace it with the Help button
 	if not StoreMicroButton:IsShown() then
-		HelpMicroButton:ClearSetPoint(MainMenuMicroButton:GetPoint())
-		MainMenuMicroButton:ClearSetPoint(StoreMicroButton:GetPoint())
+		HelpMicroButton:Show()
+		HelpMicroButton:ClearAllPoints()
+		HelpMicroButton:SetAllPoints(StoreMicroButton)
+	else
+		HelpMicroButton:Hide()
+		HelpMicroButton:ClearAllPoints()
 	end
 end

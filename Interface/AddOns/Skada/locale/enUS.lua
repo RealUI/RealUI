@@ -420,3 +420,5 @@ L["Role icons"] = true
 L["Use role icons where applicable."] = true
 
 L["Overhealing spells"] = true
+
+L["Whisper Target"] = true

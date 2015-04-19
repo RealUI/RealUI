@@ -3,7 +3,7 @@
 ## Title: Kui |cff9966ffNameplates|r
 ## Notes: Prettier nameplates.
 ## SavedVariables: KuiNameplatesGDB
-## X-Curse-Packaged-Version: 248
+## X-Curse-Packaged-Version: 251
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline
@@ -15,9 +15,13 @@ config.lua
 create.lua
 layout.lua
 
-tankmode.lua
-castbar.lua
-castwarnings.lua
-combopoints.lua
+modules\arena.lua
+modules\castbar.lua
+modules\castwarnings.lua
+modules\classcolours.lua
+modules\combopoints.lua
+modules\tankmode.lua
+modules\lowhealth.lua
+modules\nemesis.lua
 
 custom.lua

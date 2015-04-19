@@ -1,11 +1,42 @@
 local L = Grid2Options.L
 
 Grid2Options:RegisterStatusOptions( "direction", "target", function(self, status, options)
-	self:MakeStatusStandardOptions(status, options)
+	local mask = L["%d yards"]
+	self:MakeStatusColorOptions( status, options, status.dbx.colorCount and { 
+		color1 = string.format( mask, 10), 
+		color2 = string.format( mask, 20), 
+		color3 = string.format( mask, 30), 
+		color4 = string.format( mask, 40), 
+		color5 = string.format( "+"..mask, 40), 
+	} or nil )
+	options.colorCount = {
+		type = "toggle",
+		order = 80,
+		name = "Color by distance",
+		get = function () return status.dbx.colorCount~=nil end,
+		set = function (_, v)
+			if v then
+				status.dbx.colorCount = 5
+				status.dbx.color2 = { r=0,g=1  ,b=0.6,a=1 }
+				status.dbx.color3 = { r=1,g=0.9,b=0  ,a=1 }
+				status.dbx.color4 = { r=1,g=0.5,b=0  ,a=1 }
+				status.dbx.color5 = { r=1,g=0  ,b=0  ,a=1 }
+			else
+				status.dbx.colorCount = nil
+			end
+			self:MakeStatusOptions(status)
+			status:UpdateDB()
+		end,
+	}
+	options.colorSpacer = {
+		type = "header",
+		order = 50,
+		name = "",
+	}
 	options.updateRate = {
 		type = "range",
 		order = 90,
-		width = "double",
+		width = "normal",
 		name = L["Update rate"],
 		desc = L["Rate at which the status gets updated"],
 		min = 0.05,

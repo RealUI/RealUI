@@ -1,0 +1,15 @@
+tag 4.6.8
+625930e0583e9b74018ac8324a4dbe3ec4324d94
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-03-23 16:47:18 +0100
+
+Tag as 4.6.8
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Remove cooldown hookery, the Blizzard bug was fixed in 6.1
+	- Properly replace the store button with the help button if the store is disabled
+	This matches default UI behavior.
+	- Remove pre-6.1 compat code

@@ -6,24 +6,22 @@ local GetTime = GetTime
 local min = min
 
 local AlignPoints = Grid2.AlignPoints
+local defaultBackColor = { r=0, g=0, b=0, a=1 }
 
 local function Bar_CreateHH(self, parent)
 	local bar = self:CreateFrame("StatusBar", parent)
 	bar:SetStatusBarColor(0,0,0,0)
 	bar:SetMinMaxValues(0, 1)
 	bar:SetValue(0)
-	if self.backColor then
-		bar.bgBar = bar.bgBar or CreateFrame("StatusBar", nil, parent)
-		bar.bgBar:SetMinMaxValues(0, 1)
-		bar.bgBar:SetValue(1)
-		bar.bgBar:Show()
-	end
 	bar:Show()
+	if self.backColor then
+		bar.bgTex = bar.bgTex or bar:CreateTexture()
+	end
 end
 
 local function Bar_Layout(self, parent)
 	local Bar    = parent[self.name]
-	local bgBar  = Bar.bgBar
+	local bgTex  = Bar.bgTex
 	local orient = self.orientation or Grid2Frame.db.profile.orientation
 	local points = AlignPoints[orient][not self.reverseFill]
 	local level  = parent:GetFrameLevel() + self.frameLevel
@@ -34,30 +32,37 @@ local function Bar_Layout(self, parent)
 	local barParent = self.barParent
 	if barParent then
 		local PBar = parent[barParent.name]
-		Bar:SetFrameLevel(PBar:GetFrameLevel()+ (barParent.backColor and 1 or 0) )
+		Bar:SetFrameLevel( PBar:GetFrameLevel() )
 		Bar:SetSize( PBar:GetWidth(), PBar:GetHeight() )
 		Bar:SetPoint( points[1], PBar:GetStatusBarTexture(), points[2], 0, 0)
 		Bar:SetPoint( points[3], PBar:GetStatusBarTexture(), points[4], 0, 0)
-		if bgBar then bgBar:Hide() end
+		if bgTex then bgTex:Hide() end
 	else
 		local w = self.width  or parent.container:GetWidth()
 		local h = self.height or parent.container:GetHeight()	
 		Bar:SetFrameLevel(level)
-		Bar:SetSize(w, h)	
+		Bar:SetSize(w, h)
 		Bar:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)			
-		if self.backColor then
-			local color = self.backColor 
-			bgBar:SetStatusBarTexture(self.texture)
-			bgBar:SetStatusBarColor(color.r,color.g,color.b,color.a)
-			bgBar:SetOrientation(orient)
-			bgBar:SetFrameLevel(level)
-			bgBar:ClearAllPoints()
-			bgBar:SetPoint( points[1], Bar:GetStatusBarTexture(), points[2], 0, 0)
-			bgBar:SetPoint( points[3], Bar:GetStatusBarTexture(), points[4], 0, 0)
-			bgBar:SetPoint( points[2], Bar, points[2], 0, 0)
-			bgBar:SetPoint( points[4], Bar, points[4], 0, 0)
-			bgBar:Show()
-		elseif bgBar then bgBar:Hide() end				
+		local color = self.backColor
+		if color then
+			local tex = Bar:GetStatusBarTexture()
+			local layer, sublayer = tex:GetDrawLayer()
+			bgTex:SetDrawLayer(layer, sublayer-1)
+			bgTex:SetTexture(self.texture)
+			bgTex:ClearAllPoints()
+			if self.dbx.invertColor then
+				bgTex:SetAllPoints(Bar)				
+			else	
+				bgTex:SetPoint( points[1], tex, points[2], 0, 0)
+				bgTex:SetPoint( points[3], tex, points[4], 0, 0)
+				bgTex:SetPoint( points[2], Bar, points[2], 0, 0)
+				bgTex:SetPoint( points[4], Bar, points[4], 0, 0)
+				bgTex:SetVertexColor( color.r, color.g, color.b, color.a )				
+			end
+			bgTex:Show()
+		elseif bgTex then 
+			bgTex:Hide() 
+		end
 	end
 end
 
@@ -144,7 +149,6 @@ end
 local function Bar_Disable(self, parent)
 	local bar = parent[self.name]
 	bar:Hide()
-	if bar.bgBar then bar.bgBar:Hide() end
 	self.Layout   = nil
 	self.OnUpdate = nil
 end
@@ -162,7 +166,7 @@ local function Bar_UpdateDB(self, dbx)
 	self.height         = dbx.height
 	self.orientation    = dbx.orientation
 	self.reverseFill    = dbx.reverseFill	
-	self.backColor      = dbx.backColor
+	self.backColor      = dbx.backColor or (dbx.invertColor and defaultBackColor) or nil
 	self.Create         = Bar_CreateHH
 	self.GetBlinkFrame  = Bar_GetBlinkFrame
 	self.OnUpdate       = Bar_OnUpdate
@@ -197,19 +201,22 @@ local function BarColor_SetBarColor(self, parent, r, g, b, a)
 end
 
 local function BarColor_SetBarColorInverted(self, parent, r, g, b, a)
-	parent[self.BarName]:SetStatusBarColor(0, 0, 0, min(self.opacity, 0.8) )
-	if not self.dbx.anchorTo then
-		parent.container:SetVertexColor(r, g, b, a)
-	end	
+	local bar   = parent[self.BarName]
+	local color = self.backColor
+	bar:SetStatusBarColor(color.r, color.g, color.b, min(self.opacity, 0.8))
+ 	if not self.dbx.anchorTo then
+		bar.bgTex:SetVertexColor(r, g, b, (a or 1)*color.a)
+	end
 end
 
 local function BarColor_UpdateDB(self)
 	if self.dbx.invertColor then
+		self.backColor   = self.dbx.backColor or defaultBackColor
 		self.SetBarColor = BarColor_SetBarColorInverted
 	else
 		self.SetBarColor = BarColor_SetBarColor
 	end
-	self.opacity= self.dbx.opacity or 1
+	self.opacity = self.dbx.opacity or 1
 end
 
 local function Create(indicatorKey, dbx)

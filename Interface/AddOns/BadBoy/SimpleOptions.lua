@@ -36,7 +36,7 @@ do
 		locNoReportDesc = "Por favor, no use esta! Informes de spam son cómo las malas cuentas se bloquean, y los reinos se limpian. Además, si muchas personas informan el spam, el remitente del spam es bloqueado el uso del chat, y no puede enviar más spam. Esto beneficia a todos, especialmente los jugadores sin BadBoy."
 		locManualReport = "Mostrar popup de informar (mostrando el spam) en lugar de mensaje en chat"
 	elseif L == "ruRU" then
-		locNoReportMsg = "Прятать сообщение 'Cпам блокирован', спрашивающее Вас о донесении на игрока."
+		locNoReportMsg = "Прятать сообщение 'Cпам блокирован', спрашивающее вас о жалобе на игрока."
 		locNoReportDesc = "Пожалуйста, не используйте эту функцию. Донесения о спаме это то, что заставляет ГМ закрывать взломанные спамерами аккаунты и очищать игровой мир. Также, если многие люди смогут сообщать о спамерах, то спамеры теряют возможность писать в чат, что выгодно всем, особенно людям не использующим BadBoy."
 		locManualReport = "Показать всплывающее окно с отчетом о игроке (показывающее собственно спам) вместо показа сообщения в чате."
 	elseif L == "koKR" then
@@ -56,7 +56,7 @@ badboy:Hide()
 badboy.name = "BadBoy"
 local title = badboy:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", 16, -16)
-title:SetText("BadBoy v12.521") -- wowace magic, replaced with tag version
+title:SetText("BadBoy v12.557") -- wowace magic, replaced with tag version
 InterfaceOptions_AddCategory(badboy)
 
 --[[ No Report Chat Message Checkbox ]]--

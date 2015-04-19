@@ -446,7 +446,7 @@ function Skada:CreateReportWindow(window)
 
 	local channellist = {
 		whisper 	= { L["Whisper"], "whisper"},
-		target		= { "Whisper Target", "whisper"},
+		target		= { L["Whisper Target"], "whisper"},
 		say			= { L["Say"], "preset"},
 		raid 		= { L["Raid"], "preset"},
 		party 		= { L["Party"], "preset"},
@@ -489,7 +489,7 @@ function Skada:CreateReportWindow(window)
 	frame:AddChild(lines)
 
 	local whisperbox = AceGUI:Create("EditBox")
-	whisperbox:SetLabel("Whisper Target")
+	whisperbox:SetLabel(L["Whisper Target"])
 	whisperbox:SetText(Skada.db.profile.report.target)
 	whisperbox:SetCallback("OnEnterPressed", function(box, event, text) Skada.db.profile.report.target = text; frame.button.frame:Click() end)
 	whisperbox:SetCallback("OnTextChanged", function(box, event, text) Skada.db.profile.report.target = text end)

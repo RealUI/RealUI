@@ -351,6 +351,7 @@ L["When possible, bars will be colored according to player class."] = "依照玩
 L["When possible, bar text will be colored according to player class."] = "依照玩家職業來調整計量條文字的顏色。"
 L["When your threat reaches this level, relative to tank, warnings are shown."] = "當你的威脅值與坦克相同時顯示警告。"
 L["Whisper"] = "悄悄話"
+L["Whisper Target"] = "悄悄話目標"
 L["Window"] = "視窗"
 L["Window height"] = "視窗的高度"
 L["Windows"] = "視窗"

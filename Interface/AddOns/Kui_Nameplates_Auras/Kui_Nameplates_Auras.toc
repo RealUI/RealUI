@@ -4,7 +4,7 @@
 ## Notes: Aura display plugin for Kui Nameplates
 ## Dependencies: Kui_Nameplates
 ## SavedVariables: KuiSpellListCustom
-## X-Curse-Packaged-Version: 248
+## X-Curse-Packaged-Version: 251
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline

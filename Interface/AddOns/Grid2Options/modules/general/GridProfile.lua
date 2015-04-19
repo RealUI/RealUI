@@ -22,6 +22,6 @@ Grid2Options:AddGeneralOptions("Profiles", nil, {
 	desc = L["Options for %s."]:format(name),
 	args = {
 		general  = profileOptions or {},
-		advanced = Grid2Options.ExportImportOptions or {},
+		advanced = Grid2Options.AdvancedProfileOptions or {},
 	},	
 } )

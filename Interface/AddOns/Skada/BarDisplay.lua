@@ -55,6 +55,7 @@ function mod:Create(window)
 	window.bargroup.button:SetScript("OnClick", function(win, button) if IsShiftKeyDown() then Skada:OpenMenu(window) elseif button == "RightButton" then window:RightClick() end end)
 	window.bargroup:HideIcon()
 
+    window.bargroup.button:GetFontString():SetWordWrap(false);
 	window.bargroup.button:GetFontString():SetPoint("LEFT", window.bargroup.button, "LEFT", 5, 1)
 	window.bargroup.button:GetFontString():SetJustifyH("LEFT")
 	window.bargroup.button:SetHeight(window.db.title.height or 15)

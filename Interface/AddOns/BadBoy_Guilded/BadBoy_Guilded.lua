@@ -80,7 +80,7 @@ local prevLineId, result, triggers = 0, nil, {
 	"guild.*active.*social", --Hello, are you looking for a guild that is active for real? We "*" have events each night of the week, a HC 10m team, a 25m normal team, a RBG team, and enough social events to enjoy:) if you are social and mature, we can fit you in:)
 	"guild.*members.*community", --* new PvP guild, has already 150+members and great leaders we will shortly become the best pvp guild for the long term on * if you are 2.4+ cr/ RBG 2.4+ or hero pm me - already has alot of good players and good community
 	"team.*raid.*visit", --<*> 12HC LF Skilled , Dedicated & Exceptional HC raiders for our team to expand for SoO/WoD 20m. We advocate patience, respect & communication - working together to provide a strong & enjoyable raid experience! Visit our site or /w me
-	"guild.*players.*info", --{rt8} * {rt8} Persian 14/14 HC guild, switching to 25-man raiding for final resets of MOP, need more DPS players.9 HCs+25man HC raiding XP required, Times: Wed, Fri, Sun, Tues 18:30 - 22:00. /w for more - info
+	"guild.*player.*info", --{rt8} * {rt8} Persian 14/14 HC guild, switching to 25-man raiding for final resets of MOP, need more DPS players.9 HCs+25man HC raiding XP required, Times: Wed, Fri, Sun, Tues 18:30 - 22:00. /w for more - info
 	"le?ve?l%d+.*progress.*whisp", --<*> <lvl 25> <14/14 n soo> we are in need of dps and healers to increase to 25 man we raid wed/sun/mon 8pm please be 560 item level and have 14/14 progress to start hc. we in need of mage and warlock the most.please whisper.
 	"looking.*raiders.*interest", --{rt6} * (lvl25) {rt6} is currently looking for serious Raiders for our WoD team. We need R-Dps(mage,druid), Tank(monk), Healer(priest,shaman). If you interested /w me and let's have a chat !
 	"guild.*missing.*info", --Guild {rt1} <*> (10M) Have Downed 7/14 Hc , We are Re-Building Again, We are Missing 2 tanks and 2RDps (Hunter) And 1 dps With Os heal) Have atleast 570+ And atleast 6/14 Hc exp , We Raid At Wed-Thurs-Mon 6 To 9:00 ST /W For more Info
@@ -95,6 +95,13 @@ local prevLineId, result, triggers = 0, nil, {
 	"team.*social.*welcome", --<*> Lfm for fresh raid team starting with highmaul normal , ts3 , mondays at 8:30pm to 10:30pm realm time. socials also welcome  ,whisper me for info/invite.
 	--* is looking for more experienced and willing DPS and a tank or healer for our second raid team, your dps and movement needs to be brilliant:) All we ask is mature and positive behaviour. Please /w me if interested
 	"looking.*experi[ae]nced.*raid", --"*" 7/7 N - 6/7 HC. is curently Looking for more raid experianced ppl For moving Mythic were kinda low on warlocks and a good boomkin might do wonders :D We raid Mon/Tues and Thursdays 19.30 server time. Have a nice game :)
+	"dedicated.*player.*looking", --<*> Currently 7/7 HC HM and 7/10 HC BRF. Searching for mature and dedicated players to join our ranks! Raid times; Wed, Thu, Sun 2000-2400 (Sevrer time.) Looking for 1 Tank (Pref BM), 1 Resto druid and DPS
+	"need.*casual.*guild.*", --* 9/10 NM 2/10 HC is in need of a tank (DK pref.), A good mix of some ranged and meellee dps - and a healer (no priest)! We are a fun, casual raiding guild, with a weird sense of humor! Come and join the funhouse :D!
+	"looking.*require.*raid", --<*>  BRF 9/10 HC are currently looking for a MW monk, uh dk, ele shaman, and a warr, for our prog in  BRF,We do require that you are 18+ and can raid wednes-, sun- and mondays 20.00-23:00 and have min 670 ilvl req
+	"join.*team.*player", --{rt8} * {rt8} Want you to join our core raid team! LF 670+ players who want a softcore raid team. We raid Fri 20-23 and Sun 20-23 (Sat as alternative day) To fulfill the core team, LF Healers and ranged DPS pref you being 7/10 HC BRF.
+	"friendly.*team.*whisp", --Apart from that, we want a friendly, helpful environment in order to be able to work as a team, not individuals. Everything from Farming Honorable Kills for The Bloodthirsty title to Glory of The Raider achievements. Whisper me for a chat, thank you.
+	"looking.*team.*info", --* is looking for more strong DPS and a strong healer for our main team. For our second team, DPS and healing spots are open, Our main team is 7/10 HC, our second team 8/10 N and 3/10 HC. If you are interested please /w me for more info
+	"searching.*raid.*info", --<*>  (6/7M HM) (6/10 BRF M) We are Searching For an Exceptional Tank + Mage/Ele/Rogue/Moonkin! We raid wed,thurs,sun (19:30-23:00) Head over to [http://www.*.com/] or wisp me for info!
 
 	--Dutch
 	"guild.*zoek naar.*social", -- [25] Nederlands sprekende Guild <*> zijn op zoek naar Tanks: Geen / Melee dps: Warrior / Ranger dps: warlock, Mage / Healers: Paladin / raid tijden ma, di ,do van 20:00ST tot 23:00ST, social invite is ook mogelijk whisper voor meer info.
@@ -152,7 +159,7 @@ local prevLineId, result, triggers = 0, nil, {
 	"guild.*aranıyor", --Guildimize beraber lvl kasmak isteyen arkadaşlar aranıyor. 1lvl %50 deyiz......
 	--* [25] 5/8 HC  Progressimize Düzenli katilim saglayacan Heroic deneyimi olan Mage,Lock aramaktadir.Social alimi da gerceklestirilmektedir . Detayli bilgi icin /w
 	"progres.*so[cs][iy]al", --* [25 Lvl]10M5/8 HC Progresimizi ilerletmeye yardimci olabilecek HC Tecrubesi olan Mage Lock sp alimi yapilacaktir. Ayrica sosyal alimimiz da vardir
-	"progres.*arıyor", --* (25 lvl) 6/8 hc progress, Spine ve Madness progressine katkıda bulunabilecek online süresi yüksek yeterli gear ve oyunculuk seviyesine sahip 1 melee dps arıyor. Bilgi için /w
+	"progres.*ar[iı]+yor", --* (25 lvl) 6/8 hc progress, Spine ve Madness progressine katkıda bulunabilecek online süresi yüksek yeterli gear ve oyunculuk seviyesine sahip 1 melee dps arıyor. Bilgi için /w
 	"progres.*aran?maktadır", --*/10m  5/8 HC  ACIL OLARAK, PROGRESS ekibi için en az 3 boss HC deneyimi olan 395-400 arasında ilvl a sahip, raidlere düzenli takılabilecek ELEM SHMY, BLANCE DRUID ve LOCK oyuncular aranmaktadır. Basvuru ve bilgi icin /w.
 	"progres.*gu[iı]+ld", --8:30 da basliycak olan hc progresimize 1 burst dps gerek! guild run 6/8 hc progresimiz war Spine hc icin sabırlı 1 dps lazim ''*'' !!! Spine dan baslanıcak!!!
 	"aran?maktadır.*progres", --*  - * yeni transfer olmustur ve suanki tier ve MOP icin kadrosuna classina hakim oyuncular aramaktadır ,Suanki 1/8 HC progressimiz devam ettirmek istiyoruz oncelikli Tank ve Healer alimi vardir.
@@ -166,18 +173,20 @@ local prevLineId, result, triggers = 0, nil, {
 	"guild.*%d%dm.*bilgi", ---*- Semi-Hardcore Guildimizi 25man e cevirmek amaclı classına hakim online suresi yuksek raider arkadaslara ihtiyac duyulmaktadır.Gerekli bilgi icin lutfen ulasın.Tesekkurler..
 	"gu[iı]+ld.*progres", --(*) Guıdimize 10 man progresi crsm cuma  ve cmts gunlerı raıd e katılcak gear duzeyı ıyı olan karekterıne hakım  arkadasları beklıyoruz ( TANK VE HEALER  )
 	"ar[iı]+yoruz.*günleri.*bilgi", --<*> (13/14 Hc  10m) 6.0 SoO Mythic ve  WOD için Healer (Priest , Monk)  ve Dps ( Rogue , Warlock ) arıyoruz.   Raid günleri [Perşembe-Cuma-P.tesi] 21:30 - 00:30. Bilgi için /w
+	"dps.*oyuncu.*ar[iı]+yor", --{rt1}{rt1}*{rt1}{rt1} BRF Heroic Kadrosuna yetenek fakiri olmayıp, yeri geldiginde atesden kacacak,yeri geldiginde dispel atacak.. ya ben neden ölüp duruyorum demeyip loglara bakabilecek,bu arada da dps \heal yapabilecek oyuncular ariyoruz.
 
 	--Croatian
 	"le?ve?l.*primamo.*igrace", -- * (lvl25) za sve one koji ovo razumeju. Primamo sve zainteresovane igrace 85lvl koji igru pre svega shvataju kao zabavu a ne obavezu. Za vise informacija/w
 	"guild.*trazimo ljude", --* je balkanski guild lvl25 i trazimo ljude za pvp a i ostali clanovi su dobrodosli, trenutni fokus je na rbg i arenama, a i pravit ce se tim za pve progress,Clanova: 104 atm Svi  su dobrodosli{rt8}
 
 	--Hungarian
-	"guild.*játékosokat keres", --* Guild játékosokat keres.Létszámtól függően Old Dungeon,RBG,Content Raid szervezése.Fejlödö szintü karaktereket is várunk.
+	"guild.*játékos.*keres", --* Guild játékosokat keres.Létszámtól függően Old Dungeon,RBG,Content Raid szervezése.Fejlödö szintü karaktereket is várunk.
 	"guild.*info.*wh?isp", --Hali ! * lvl 25 guild tagfelvételt hirdet minden class számára! Raidek szombaton és vasárnap délután MOP-tól! További info wisp: *
 	"klán.*raid.*karakter", --A * klán (lvl25) felnött vagy felnött gondolkodású embereket keres raidezésre, pvp-re és egyéb szórakozásokra. Nem számít a karakter vagy a felszerelés szintje, csak az igény a könnyed, stresszmentes szórakozásra.
 	"klán.*jelentkezését", --* lvl 25-ös klán újra aktív. Aktív játékosok jelentkezését várjuk, akik Pandaria altt is raidelni szeretnénke majd. Infóért írjatok rám nyugodtan.
 	"guild.*keress?ünk", --* guild tagfelvételt hírdet, amit keresünk az heal( pap,Shaman) és dps( rugó, Hunter,)! Célunk az aktuális content minél elöbbi kitakarítása normálban(ill. hcban)! Részletek whispben.
-	"guild.*keres.*játékost", --<*> Frissen alakult Magyar guild tagokat keres. Várunk szeretettel minden játékost szint/gear megkötés nélkül! Ha szeretnél tagja lenni egy aktív csapatnak írj bátran nekem, vagy Woolfie-nak!
+	--<*>  (7/7 HC HM , 9/10 norm , 4/10 HC  BRF ) guild összeszokott raidcsapattal  keres raidelésre aktív játékosokat. Részletek whispben :-)
+	"guild.*keres.*játékos", --<*> Frissen alakult Magyar guild tagokat keres. Várunk szeretettel minden játékost szint/gear megkötés nélkül! Ha szeretnél tagja lenni egy aktív csapatnak írj bátran nekem, vagy Woolfie-nak!
 	"raider.*keres.*info", --* [14/16] aktív raider jelentkezöket keres 10 fös csapatába! Bövebb információk a www.*.in weblapon.
 	"guild.*keres.*szivesen", --* guild keres olyan playereket akik már a WoD-ra készülnek.Célunk WoDra egy ütőképes társaság kialakítása.A maradék MoP időben fun raid.A klán magja 10/14HC expel rendelkezik. Mindenkit szivesen látunk :)
 	"keresi.*aktív", --Sziasztok! Az * keresi aktív, raidelni vágyó játékosait a jelenlegi contentre és a következõ kiegre! Tapasztalt, jól müködõ, jó hangulatú csapat vagyunk! Mindenkit szeretettel várunk! infoért /w me!
@@ -186,6 +195,8 @@ local prevLineId, result, triggers = 0, nil, {
 	"klán.*h[íi]+rdet", --* pve klán tgf-et hírdet! Elsösorban egy Roguenak vagy egy Monk dpsnek. Raid napjaink: Szerda, csütörtök és vasárnap! Infóért /w.
 	"guild.*hírdet", --* (Pve/Pvp) Guild Általános TGF-et hírdet. Level és Gear nem számít. Szeretettel várunk mindenkit.
 	"hirdet.*info", --* tagfelvételt hirdet! Ha kezdõ vagy és segítségre van szülséged, esetleg raidelni is szeretnél de még nincs kivel és hol akkor itt a helyed. Normal dungeon, hc, raid, transmog farm, pvp és minden egyéb sok röhögéssel! info /w
+	"guild.*keres.*tagjait", --A * PVP guild keresi magyar tagjait arénázásra, rbg-zésre,Mivel új guild igy kialakult fix rbg teamünk nincs, minden spot open. Ha lenne valami kérdésed bátran whisp!
+	"hirdet.*csapat", --A <*> felvételt hirdet elsősorban tankok számára, de mindent meghallgatunk. Összeszokott progress csapat (HM HC 7/7, BRF norm 9/10, BRF HC 4/10), jó hangulat.
 
 	--Polish
 	"gildia.*szuka", --Polska gildia RP-PvE szuka graczy do wspolnej zabawy. Chcemy stworzyc porzadna ekipe do gry zarówno PvE jak i PvP! Jednoczesnie chcemy aby w "*" panowała miła atmosfera. Gildia stworzona przez ludzi z duzym doswiadczeniem w WoW i innych grach MMO

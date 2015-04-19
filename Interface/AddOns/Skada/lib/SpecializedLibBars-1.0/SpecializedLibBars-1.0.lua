@@ -1048,6 +1048,7 @@ do
 		self.iconFrame:SetAllPoints(self.icon)
 
 		self.label = self.label or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+        self.label:SetWordWrap(false);
 		self.label:SetText(text)
 		self.label:ClearAllPoints()
 		self.label:SetPoint("LEFT", self, "LEFT", 3, 0)

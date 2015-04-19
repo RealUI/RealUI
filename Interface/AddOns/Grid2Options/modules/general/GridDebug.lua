@@ -25,3 +25,4 @@ Grid2Options:AddModuleDebugMenu("Grid2", Grid2 )
 for name, module in Grid2:IterateModules() do
 	Grid2Options:AddModuleDebugMenu(name, module)
 end
+

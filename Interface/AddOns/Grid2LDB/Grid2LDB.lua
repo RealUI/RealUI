@@ -41,10 +41,10 @@ end
 --
 do
 	local menuFrame
-	local menuTable
 	local partyType
 	local instType
 	local layoutName
+	local menuTable = {}
 	local function SetLayout(self)
 		if not InCombatLockdown() then
 			layoutName = self.value
@@ -59,27 +59,17 @@ do
 		layoutName = Grid2Layout.layoutName
 		if partyType~=Grid2Layout.partyType or instType~=Grid2Layout.instType then
 			local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Grid2")
-			partyType= Grid2Layout.partyType
+			partyType = Grid2Layout.partyType
 			instType = Grid2Layout.instType
-			local index= 2
-			if not menuTable then menuTable= { { text = L["Select Layout"],  notCheckable= true, isTitle = true} } end
+			wipe(menuTable)
+			menuTable[1] = { text = L["Select Layout"],  notCheckable= true, isTitle = true }
 			for name, layout in pairs(Grid2Layout.layoutSettings) do
 				if layout.meta[partyType] and name~="None" then
-					local option= menuTable[index] 
-					if not option then 
-						option= { func= SetLayout, checked= function() return name == layoutName end }
-						menuTable[index]= option 
-					end
-					option.text= L[name]
-					option.value= name
-					index= index + 1
+					menuTable[#menuTable+1] = { func= SetLayout, text = L[name], value = name, checked = function() return name == layoutName end }
 				end
 			end
-			while index<=#menuTable do
-				wipe(menuTable[index])
-			end	
 			sort(menuTable, function(a,b) if a.isTitle then return true elseif b.isTitle then return false else return a.text<b.text end end )
-	end
+		end
 	end
 	MenuLayoutsShow= function()
 		menuFrame= menuFrame or CreateFrame("Frame", "Grid2LDBLayoutsMenu", UIParent, "UIDropDownMenuTemplate") 

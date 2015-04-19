@@ -1,4 +1,64 @@
 ------------------------------------------------------------------------
+r773 | michaelspain | 2015-03-13 18:26:49 +0000 (Fri, 13 Mar 2015) | 1 line
+Changed paths:
+   M /trunk/LDB/Grid2LDB.lua
+
+Fixed possible infinite loop in minimapicon layouts menu.
+------------------------------------------------------------------------
+r772 | michaelspain | 2015-03-12 23:27:09 +0000 (Thu, 12 Mar 2015) | 1 line
+Changed paths:
+   M /trunk/README.txt
+
+No changes
+------------------------------------------------------------------------
+r771 | michaelspain | 2015-03-10 21:57:49 +0000 (Tue, 10 Mar 2015) | 2 lines
+Changed paths:
+   M /trunk/GridCore.lua
+   M /trunk/Options/GridCore.lua
+   M /trunk/Options/modules/general/GridExportImport.lua
+   M /trunk/Options/modules/statuses/StatusDirection.lua
+   M /trunk/Options/modules/statuses/StatusRange.lua
+
+Profile export/import, added renamed indicators table.
+
+------------------------------------------------------------------------
+r770 | michaelspain | 2015-03-04 00:51:43 +0000 (Wed, 04 Mar 2015) | 2 lines
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusDirection.lua
+   M /trunk/modules/StatusDirection.lua
+
+Direction status: Added an option to colorize the status by distance.
+Added a button in Profiles>Advanced to clean current profile database (removes obsolete/unused/wrong statuses,indicators,etc)
+------------------------------------------------------------------------
+r769 | michaelspain | 2015-03-03 21:12:43 +0000 (Tue, 03 Mar 2015) | 2 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+   M /trunk/AoeHeals/AoeHealsOptions.lua
+   M /trunk/AoeHeals/AoeHealsStatusChain.lua
+   M /trunk/AoeHeals/AoeHealsStatusOutgoing.lua
+   M /trunk/Options/modules/general/GridDebug.lua
+   M /trunk/Options/modules/general/GridExportImport.lua
+   M /trunk/Options/modules/general/GridProfile.lua
+   M /trunk/modules/IndicatorBar.lua
+
+- Disabled aoe-Chain Heals status, due to changes in the chain heals mechanics, this status has no utility anymore, a aoe-neighbors status can be used instead to track clustered people.
+- Some bug fixes and improvements in aoe-heals status
+------------------------------------------------------------------------
+r768 | michaelspain | 2015-03-02 21:04:10 +0000 (Mon, 02 Mar 2015) | 4 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHealsOptions.lua
+   M /trunk/AoeHeals/AoeHealsStatusOutgoing.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/general/GridTestIndicators.lua
+   M /trunk/Options/modules/statuses/Status.lua
+   M /trunk/RaidDebuffsOptions/RaidDebuffsWoD.lua
+   M /trunk/modules/IndicatorBar.lua
+
+-Bar Indicator: Improved "invert color" option, now is usable by more than one bar, see ticket #420
+-Renamed aoe-OutoingHeals status to aoe-heals, enhancements:
+* Now can track heals casted by any player.
+* Several aoe-heals statuses can be created to track different heals, for example, a shaman resto could setup one status to track units affected by his Healing Rain, and another status of the same type to track the usage of all Raid heal cooldowns: Tranquility, Tide Totem, Himn, etc.
+------------------------------------------------------------------------
 r767 | michaelspain | 2015-02-28 04:23:07 +0000 (Sat, 28 Feb 2015) | 2 lines
 Changed paths:
    M /trunk/GridLayout.lua
@@ -175,96 +235,4 @@ Changed paths:
    M /trunk/modules/StatusAuras.lua
 
 Fixed a crash in statusauras module with boss debuffs.
-------------------------------------------------------------------------
-r755 | michaelspain | 2015-02-06 19:13:33 +0000 (Fri, 06 Feb 2015) | 4 lines
-Changed paths:
-   M /trunk/GridFrame.lua
-   M /trunk/Options/GridStatuses.lua
-   M /trunk/Options/locales/esES.lua
-   M /trunk/Options/media/indicator-icons.tga
-   M /trunk/Options/modules/general/GridTestIndicators.lua
-   M /trunk/Options/modules/indicators/Indicator.lua
-   M /trunk/Options/modules/indicators/IndicatorIcons.lua
-   M /trunk/Options/modules/indicators/NewIndicator.lua
-   M /trunk/Options/modules/statuses/StatusAura.lua
-   M /trunk/modules/IndicatorBar.lua
-   M /trunk/modules/IndicatorIcons.lua
-   M /trunk/modules/IndicatorMultiBar.lua
-   M /trunk/modules/StatusAuras.lua
-
-- Fixed Indicator Tests crash with multibars. Ticket #410
-- Fixed "Icons" creation indicator crash when an invalid anchor point was selected.
-- Changed "Icons" indicator behaviour, now will display all statuses linked to the indicator, not only the first active indicator.
-
-------------------------------------------------------------------------
-r754 | michaelspain | 2015-02-05 00:10:19 +0000 (Thu, 05 Feb 2015) | 1 line
-Changed paths:
-   M /trunk/Options/GridIndicators.lua
-   M /trunk/Options/locales/esES.lua
-   A /trunk/Options/media/indicator-icons.tga
-   A /trunk/Options/modules/indicators/IndicatorIcons.lua
-   M /trunk/Options/modules/indicators/NewIndicator.lua
-   M /trunk/Options/modules.xml
-   A /trunk/modules/IndicatorIcons.lua
-   M /trunk/modules/StatusAuras.lua
-   M /trunk/modules.xml
-
-Added a new indicator "icons".  Groups of buffs or debuffs can be assigned to this indicator, and in theory the indicator will spawn several icons, one icon for each active buff/debuff.
-------------------------------------------------------------------------
-r753 | michaelspain | 2015-02-02 17:25:04 +0000 (Mon, 02 Feb 2015) | 10 lines
-Changed paths:
-   M /trunk
-   M /trunk/GridUtils.lua
-   M /trunk/Options/GridStatuses.lua
-   M /trunk/Options/GridUtils.lua
-   M /trunk/Options/locales/enUS.lua
-   M /trunk/Options/locales/esES.lua
-   M /trunk/Options/modules/indicators/IndicatorMultiBar.lua
-   M /trunk/Options/modules/statuses/StatusAura.lua
-   M /trunk/Options/modules/statuses/StatusAuraNew.lua
-   M /trunk/Options/modules/statuses/StatusAuraNewPredictor.lua
-   M /trunk/Options/modules/statuses/StatusAuraNewSpells.lua
-   M /trunk/modules/IndicatorBar.lua
-   M /trunk/modules/StatusAuras.lua
-   D /trunk/modules/StatusPurgatory.lua
-   M /trunk/modules.xml
-
-- Now buffs&debuffs statuses can be configured to monitorize and display an additional value.
-Not all auras have extra values, examples of auras providing additional info are:
-All priest shields, for example buff Power Word:Shield can be configured now to 
-track the remaining amount of the shield. The value can be displayed in a text, bar or in a 
-square indicator configuring several colors/thresholds.
-
-- Removed dk-purgatory status, it's not necessary anymore, a standard debuff can be created to
-track the same information, create a purgatory debuff and configure the debuff to track Value1.
-
-- Updated buffs and debuffs displayed in the create buff/debuff drop down list.
-------------------------------------------------------------------------
-r752 | michaelspain | 2015-01-31 12:31:51 +0000 (Sat, 31 Jan 2015) | 1 line
-Changed paths:
-   M /trunk/modules/StatusHealth.lua
-
-Fixed incoming-heals status: include player heals option was not working (ticket #407)
-------------------------------------------------------------------------
-r750 | michaelspain | 2015-01-29 06:34:15 +0000 (Thu, 29 Jan 2015) | 5 lines
-Changed paths:
-   M /trunk/GridLayoutLayouts.lua
-   M /trunk/LDB/Grid2LDB.lua
-   M /trunk/Options/modules/general/GridFrame.lua
-   M /trunk/modules/IndicatorMultiBar.lua
-
-Fixed By Class Layout.
-Fixed a Grid2LDB issue.
-Little optimization in multibar indicator.
-Removed upper limit for frames width and height configuration.
-
-------------------------------------------------------------------------
-r749 | michaelspain | 2015-01-26 04:12:49 +0000 (Mon, 26 Jan 2015) | 3 lines
-Changed paths:
-   M /trunk/Options/modules/statuses/StatusAura.lua
-   M /trunk/modules/StatusAuras.lua
-
-StatusAuras:
-- Fixed typeDebuffs crash when a duration threshold was configured. Ticket #374.
-- Removed a workaround to druid wildgrowth expiration time bug (it seems blizzard fixed the issue time ago).
 ------------------------------------------------------------------------
