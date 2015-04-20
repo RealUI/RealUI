@@ -60,15 +60,19 @@ RealUI.minipatches = {
         -- This was supposed to be r11... oops
         local Grid2DB = _G.Grid2DB
         if IsAddOnLoaded("Grid2") and Grid2DB then
-            if Grid2DB["profiles"]["RealUI-Healing"] then
-                Grid2DB["profiles"]["RealUI-Healing"]["indicators"]["health-deficit"]["reverseFill"] = true
-                Grid2DB["profiles"]["RealUI-Healing"]["indicators"]["text-up"]["shadowDisabled"] = true
-                Grid2DB["profiles"]["RealUI-Healing"]["indicators"]["text-down"]["shadowDisabled"] = true
-            end
-            if Grid2DB["profiles"]["RealUI"] then
-                Grid2DB["profiles"]["RealUI"]["indicators"]["health-deficit"]["reverseFill"] = true
-                Grid2DB["profiles"]["RealUI"]["indicators"]["text-up"]["shadowDisabled"] = true
-                Grid2DB["profiles"]["RealUI"]["indicators"]["text-down"]["shadowDisabled"] = true
+            for i, key in next, {"RealUI-Healing", "RealUI"} do
+                local profile = Grid2DB["profiles"][key]
+                if profile then
+                    if profile["indicators"]["health-deficit"] then
+                        profile["indicators"]["health-deficit"]["reverseFill"] = true
+                    end
+                    if profile["indicators"]["text-up"] then
+                        profile["indicators"]["text-up"]["shadowDisabled"] = true
+                    end
+                    if profile["indicators"]["text-down"] then
+                        profile["indicators"]["text-down"]["shadowDisabled"] = true
+                    end
+                end
             end
         end
         local AuroraConfig = _G.AuroraConfig

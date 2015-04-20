@@ -26,7 +26,7 @@ nibRealUI.LoadAddOnData_Kui_Nameplates = function()
 						["font"] = "pixel_small",
 						["onesize"] = true,
 						["monochrome"] = true,
-						["fontscale"] = 0.6243767738342285,
+						["fontscale"] = 1,
 					},
 				},
 				["general"] = {
