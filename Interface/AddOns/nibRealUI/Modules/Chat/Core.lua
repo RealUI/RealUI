@@ -132,4 +132,11 @@ end
 
 function Chat:OnEnable() 
 	self:RegisterEvent("PLAYER_LOGIN")
+
+	for i = 1, NUM_CHAT_WINDOWS do
+		local editbox = _G["ChatFrame"..i.."EditBox"]
+		for k = 6, 11 do
+			select(k, editbox:GetRegions()):SetTexture(nil)
+		end
+	end
 end
