@@ -21,33 +21,35 @@ if ($newVersion -eq "") {
     }
 }
 
-# Package to zip, this requires .Net 4.5
 $zipName = "RealUI " + $newVersion + ".zip"
-Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -Path "Ionic.Zip.dll"
 # Create the zip file
 Write-Host "Creating zip file"
-[System.IO.Compression.ZipFile]::CreateFromDirectory("./Interface", $zipName)
-$zipFile = [System.IO.Compression.ZipFile]::Open($zipName, "Update")
+$zipFile = new-object Ionic.Zip.ZipFile
+$interface = $zipFile.AddDirectory("./Interface", "Interface")
 # Add the README as a txt file
-[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipFile, "README.md", "README.txt")
+$readme = $zipFile.AddFile("./README.md")
+$readme.FileName = "README.txt"
 
 #Exclude files
 $remove = @(
-    "AddOns\nibRealUI_Config"
+    "Interface/AddOns/nibRealUI_Config"
 )
 # Collect entries to remove
 $toRemove = {@()}.Invoke()
 Write-Host "Remove excluded files"
 foreach ($entry in $zipFile.Entries) {
     foreach ($file in $remove) {
-        if ($entry.FullName.Contains($file)) {
+        if ($entry.FileName.Contains($file)) {
             $toRemove.Add($entry)
         }
     }
 }
 # Remove entries
 foreach ($entry in $toRemove) {
-    $entry.Delete()
+    Write-Host $entry.FileName
+    $zipFile.RemoveEntry($entry)
 }
 
+$zipFile.Save($zipName)
 $zipFile.Dispose()
