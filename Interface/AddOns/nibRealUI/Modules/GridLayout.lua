@@ -105,10 +105,10 @@ function GridLayout:Update()
 
     -- Adjust Grid Frame Width
     if (LayoutDB.width[layoutSize]) and not NewHoriz then
-        self:debug("layoutWidth: small", layoutSize)
+        self:debug("layout: Vert", layoutSize) --small
         Grid2Frame.db.profile.frameWidth = LayoutDB.width[layoutSize]
     else
-        self:debug("layoutWidth: normal", layoutSize)
+        self:debug("layout: Horiz") --normal
         Grid2Frame.db.profile.frameWidth = LayoutDB.width["normal"]
     end
 

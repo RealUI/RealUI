@@ -54,47 +54,6 @@ tags.Methods["realui:level"] = function(unit)
 end
 tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
--- Health
-tags.Methods["realui:health"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
-
-    return nibRealUI:ReadableNumber(UnitHealth(unit))
-end
-tags.Events["realui:health"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
-
--- Health %
-tags.Methods["realui:healthPercent"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
-
-    local percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
-    if unit == "target" or unit == "player" then
-        if percent > 90 then 
-            return
-        end
-    end
-    return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
-end
-tags.Events["realui:healthPercent"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
-
--- Smart Health
-tags.Methods["realui:smartHealth"] = function(unit)
-    local healthPer = tags.Methods["realui:healthPercent"](unit)
-    if healthPer then
-        return healthPer
-    else
-        return tags.Methods["realui:health"](unit)
-    end
-end
-tags.Events["realui:smartHealth"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
-
--- Power
-tags.Methods["realui:power"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
-
-    return nibRealUI:ReadableNumber(UnitPower(unit))
-end
-tags.Events["realui:power"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_TARGETABLE_CHANGED"
-
 -- PvP Timer
 tags.Methods["realui:pvptimer"] = function(unit)
     --print("Tag:pvptimer", unit)
@@ -103,3 +62,73 @@ tags.Methods["realui:pvptimer"] = function(unit)
     return nibRealUI:ConvertSecondstoTime(floor(GetPVPTimer() / 1000))
 end
 tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
+
+
+
+-- Health AbsValue
+tags.Methods["realui:healthValue"] = function(unit)
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+
+    return nibRealUI:ReadableNumber(UnitHealth(unit))
+end
+tags.Events["realui:healthValue"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+
+-- Health %
+tags.Methods["realui:healthPercent"] = function(unit)
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+
+    local percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
+    return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
+end
+tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
+
+-- Health
+tags.Methods["realui:health"] = function(unit)
+    local statusText = UnitFrames.db.profile.misc.statusText
+    if statusText == "both" then
+        return tags.Methods["realui:healthPercent"](unit).." - "..tags.Methods["realui:healthValue"](unit)
+    elseif statusText == "perc" then
+        return tags.Methods["realui:healthPercent"](unit)
+    else
+        return tags.Methods["realui:healthValue"](unit)
+    end
+end
+tags.Events["realui:health"] = tags.Events["realui:healthValue"]
+
+
+
+-- Power AbsValue
+tags.Methods["realui:powerValue"] = function(unit)
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+
+    return nibRealUI:ReadableNumber(UnitPower(unit))
+end
+tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_TARGETABLE_CHANGED"
+
+-- Power %
+tags.Methods["realui:powerPercent"] = function(unit)
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+
+    local _, ptoken = UnitPowerType(unit)
+    local percent = UnitPower(unit) / UnitPowerMax(unit) * 100
+    return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(oUF.colors.power[ptoken]))
+end
+tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]
+
+-- Power
+tags.Methods["realui:power"] = function(unit)
+    local _, ptoken = UnitPowerType(unit)
+    local statusText, power = UnitFrames.db.profile.misc.statusText
+    if ptoken == "MANA" then
+        if statusText == "both" then
+            return tags.Methods["realui:powerPercent"](unit).." - "..tags.Methods["realui:powerValue"](unit)
+        elseif statusText == "perc" then
+            return tags.Methods["realui:powerPercent"](unit)
+        else
+            return tags.Methods["realui:powerValue"](unit)
+        end
+    else
+        return tags.Methods["realui:powerValue"](unit)
+    end
+end
+tags.Events["realui:power"] = tags.Events["realui:powerValue"]

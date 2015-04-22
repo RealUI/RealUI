@@ -56,7 +56,7 @@ local function CreateHealthBar(parent)
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
     health.text:SetFontObject(RealUIFont_Pixel)
-    parent:Tag(health.text, "[realui:smartHealth]")
+    parent:Tag(health.text, "[realui:health]")
 
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     local stepHeight = round(height / 2)
@@ -150,6 +150,35 @@ local function CreatePowerBar(parent)
     power.PostUpdate = UnitFrames.UpdateSteps
     --power.Override = UnitFrames.PowerOverride
     parent.Power = power
+
+    --[[ Druid Mana ]]--
+    if nibRealUI.class == "DRUID" then
+        local druidMana = CreateFrame("StatusBar", nil, power)
+        druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+        druidMana:SetStatusBarColor(0, 0, 0, 0.75)
+        druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
+        druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
+        druidMana:SetHeight(1)
+
+        function druidMana:PostUpdate(min, max)
+            if min == max then
+                self:Hide()
+            end
+        end
+
+        --[[ test 
+        druidMana:SetMinMaxValues(0, 1)
+        druidMana:SetValue(0.75)
+        druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+        ]]
+        -- Add a background
+        local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
+        bg:SetAllPoints(druidMana)
+        bg:SetTexture(.2, .2, 1)
+
+        parent.DruidMana = druidMana
+        parent.DruidMana.bg = bg
+    end
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
@@ -267,6 +296,9 @@ UnitFrames["player"] = function(self)
         local power = self.Power
         local _, powerType = UnitPowerType(self.unit)
         --power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
+        if self.DruidMana then
+            self.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+        end
         power:SetReversePercent(UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
         power.enabled = true
 
