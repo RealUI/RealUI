@@ -214,6 +214,20 @@ f:SetScript("OnEvent", function(self, event, addon)
         if addon == "Aurora" then
             F, C = unpack(Aurora)
 
+            F.colorTex = function(f)
+                if f:IsEnabled() then
+                    for _, tex in pairs(f.tex) do
+                        tex:SetVertexColor(r, g, b)
+                    end
+                end
+            end
+
+            F.clearTex = function(f)
+                for _, tex in pairs(f.tex) do
+                    tex:SetVertexColor(1, 1, 1)
+                end
+            end
+
             F.ReskinAtlas = function(f, atlas, is8Point)
                 --debug("ReskinAtlas")
                 if not atlas then atlas = f:GetAtlas() end

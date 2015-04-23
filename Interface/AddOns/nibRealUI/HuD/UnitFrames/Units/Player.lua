@@ -160,7 +160,7 @@ local function CreatePowerBar(parent)
         druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
         druidMana:SetHeight(1)
 
-        function druidMana:PostUpdate(min, max)
+        function druidMana:PostUpdate(unit, min, max)
             if min == max then
                 self:Hide()
             end

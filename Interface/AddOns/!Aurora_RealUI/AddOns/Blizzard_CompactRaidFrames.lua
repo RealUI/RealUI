@@ -10,18 +10,34 @@ mods["Blizzard_CompactRaidFrames"] = function(F, C)
     local toggleButton = CompactRaidFrameManager.toggleButton
     toggleButton:DisableDrawLayer("OVERLAY")
     toggleButton:SetPoint("RIGHT", -1, 0)
-    toggleButton:HookScript("OnEnter", F.colourArrow)
-    toggleButton:HookScript("OnLeave", F.clearArrow)
+    toggleButton:HookScript("OnEnter", F.colorTex)
+    toggleButton:HookScript("OnLeave", F.clearTex)
 
-    local tex = toggleButton:CreateTexture(nil, "ARTWORK")
-    tex:SetTexture([[Interface\AddOns\Aurora\media\arrow-right-active]])
-    tex:SetAllPoints()
-    toggleButton.tex = tex
+    toggleButton.tex = {}
+    for i = 1, 2 do
+        local tex = toggleButton:CreateTexture(nil, "ARTWORK")
+        tex:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\triangle.blp]])
+        tex:SetVertexColor(1, 1, 1)
+
+        local height = toggleButton:GetHeight() * 0.5
+        if i == 1 then
+            tex:SetPoint("TOPLEFT", 3, 0)
+            tex:SetPoint("BOTTOMRIGHT", -2, height)
+            tex:SetTexCoord(0, 1, 0, 0, 1, 1, 1, 0)
+        elseif i == 2 then
+            tex:SetPoint("TOPLEFT", 3, -height)
+            tex:SetPoint("BOTTOMRIGHT", -2, 0)
+        end
+        tinsert(toggleButton.tex, tex)
+    end
     hooksecurefunc("CompactRaidFrameManager_Toggle", function(self)
+        local height = toggleButton:GetHeight()
         if self.collapsed then
-            tex:SetTexture([[Interface\AddOns\Aurora\media\arrow-right-active]])
+            toggleButton.tex[1]:SetTexCoord(0, 1, 0, 0, 1, 1, 1, 0)
+            toggleButton.tex[2]:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
         else
-            tex:SetTexture([[Interface\AddOns\Aurora\media\arrow-left-active]])
+            toggleButton.tex[1]:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
+            toggleButton.tex[2]:SetTexCoord(1, 0, 1, 1, 0, 0, 0, 1)
         end
     end)
 

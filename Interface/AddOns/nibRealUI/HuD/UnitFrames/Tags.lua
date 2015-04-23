@@ -103,7 +103,7 @@ tags.Methods["realui:powerValue"] = function(unit)
 
     return nibRealUI:ReadableNumber(UnitPower(unit))
 end
-tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_TARGETABLE_CHANGED"
+tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
 
 -- Power %
 tags.Methods["realui:powerPercent"] = function(unit)

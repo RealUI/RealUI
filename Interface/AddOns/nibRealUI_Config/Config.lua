@@ -315,7 +315,6 @@ do
                         type = "select",
                         values = function()
                             return {
-                                smart = L["UnitFrames_StatusSmart"],
                                 both = STATUS_TEXT_BOTH,
                                 perc = STATUS_TEXT_PERCENT,
                                 value = STATUS_TEXT_VALUE,
