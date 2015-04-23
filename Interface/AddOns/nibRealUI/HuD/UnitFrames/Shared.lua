@@ -205,7 +205,7 @@ UnitFrames.textures = {
     },
 }
 
-UnitFrames.ReversePowers = {
+nibRealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
     ["POWER_TYPE_SUN_POWER"] = true,
@@ -564,6 +564,7 @@ local function Shared(self, unit)
 
     -- Create a proxy frame for the CombatFader to avoid taint city.
     self.overlay = CreateFrame("Frame", nil, self)
+    nibRealUI:RegisterFrameForFade("UnitFrames", self.overlay)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
     UnitFrames[unit](self)

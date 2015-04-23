@@ -726,140 +726,6 @@ local PlayerInInstance
 local SmartHideConditions
 local ValidClasses
 
--- Combat Fader
-local CFFrame = CreateFrame("Frame")
-local FadeTime = 0.25
-local CFStatus = nil
-
--- Power 'Full' check
-local power_check = {
-    MANA = function()
-        return UnitMana("player") < UnitManaMax("player")
-    end,
-    RAGE = function()
-        return UnitMana("player") > 0
-    end,
-    ENERGY = function()
-        return UnitMana("player") < UnitManaMax("player")
-    end,
-    RUNICPOWER = function()
-        return UnitMana("player") > 0
-    end,
-}
-
--- Fade frame
-local function FadeIt(self, NewOpacity)
-    local CurrentOpacity = self:GetAlpha()
-    if NewOpacity > CurrentOpacity then
-        UIFrameFadeIn(self, FadeTime, CurrentOpacity, NewOpacity)
-    elseif NewOpacity < CurrentOpacity then
-        UIFrameFadeOut(self, FadeTime, CurrentOpacity, NewOpacity)
-    end
-end
-
--- Determine new opacity values for frames
-function PointTracking:FadeFrames()
-    for ic,vc in pairs(Types) do
-        for it,vt in ipairs(Types[ic].points) do
-            local NewOpacity
-            local tid = Types[ic].points[it].id
-            -- Retrieve opacity/visibility for current status
-            NewOpacity = 1
-            if db.combatfader.enabled then
-                if CFStatus == "DISABLED" then
-                    NewOpacity = 1
-                elseif CFStatus == "INCOMBAT" then
-                    NewOpacity = db.combatfader.opacity.incombat
-                elseif CFStatus == "TARGET" then
-                    NewOpacity = db.combatfader.opacity.target
-                elseif CFStatus == "HURT" then
-                    NewOpacity = db.combatfader.opacity.hurt
-                elseif CFStatus == "OUTOFCOMBAT" then
-                    NewOpacity = db.combatfader.opacity.outofcombat
-                end
-
-                -- Fade Frame
-                FadeIt(Frames[ic][tid].bgpanel.frame, NewOpacity)
-            else
-                -- Combat Fader disabled for this frame
-                if Frames[ic][tid].bgpanel.frame:GetAlpha() < 1 then
-                    FadeIt(Frames[ic][tid].bgpanel.frame, NewOpacity)
-                end
-            end
-        end
-    end
-    PointTracking:UpdatePointTracking("ENABLE")
-end
-
-function PointTracking:UpdateCFStatus()
-    local OldStatus = CFStatus
-    
-    -- Combat Fader based on status
-    if UnitAffectingCombat("player") then
-        CFStatus = "INCOMBAT"
-    elseif UnitExists("target") then
-        CFStatus = "TARGET"
-    elseif UnitHealth("player") < UnitHealthMax("player") then
-        CFStatus = "HURT"
-    else
-        local _, power_token = UnitPowerType("player")
-        local func = power_check[power_token]
-        if func and func() then
-            CFStatus = "HURT"
-        else
-            CFStatus = "OUTOFCOMBAT"
-        end
-    end
-    if CFStatus ~= OldStatus then PointTracking:FadeFrames() end
-end
-
-function PointTracking:UpdateCombatFader()
-    CFStatus = nil
-    PointTracking:UpdateCFStatus()
-end
-
--- On combat state change
-function PointTracking:CombatFaderCombatState()
-    -- If in combat, then don't worry about health/power events
-    if UnitAffectingCombat("player") then
-        CFFrame:UnregisterEvent("UNIT_HEALTH")
-        CFFrame:UnregisterEvent("UNIT_POWER")
-        CFFrame:UnregisterEvent("UNIT_DISPLAYPOWER")
-    else
-        CFFrame:RegisterEvent("UNIT_HEALTH")
-        CFFrame:RegisterEvent("UNIT_POWER")
-        CFFrame:RegisterEvent("UNIT_DISPLAYPOWER")
-    end
-end
-
--- Register events for Combat Fader status
-function PointTracking:UpdateCombatFaderEnabled()
-    CFFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    CFFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-    CFFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    CFFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-    
-    CFFrame:SetScript("OnEvent", function(self, event, ...)
-        if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
-            PointTracking:CombatFaderCombatState()
-            PointTracking:UpdateCFStatus()
-        elseif event == "UNIT_HEALTH" or event == "UNIT_POWER" or event == "UNIT_DISPLAYPOWER" then
-            local unit = ...
-            if unit == "player" then
-                PointTracking:UpdateCFStatus()
-            end
-        elseif event == "PLAYER_TARGET_CHANGED" then
-            PointTracking:UpdateCFStatus()
-        elseif event == "PLAYER_ENTERING_WORLD" then
-            PointTracking:CombatFaderCombatState()
-            PointTracking:UpdateCombatFader()
-        end
-    end)
-    
-    PointTracking:UpdateCombatFader()
-    PointTracking:FadeFrames()
-end
-
 -- Update Point Bars
 local PBTex = {}
 local ebColors = {
@@ -1003,7 +869,7 @@ function PointTracking:GetPoints(CurClass, CurType)
     if CurClass == "GENERAL" then
         -- Combo Points
         if CurType == "cp" then
-            NewPoints = GetComboPoints(UnitHasVehicleUI("player") and "vehicle" or "player", "target")
+            NewPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
         end
     -- Monk
     elseif CurClass == "MONK" then
@@ -1239,6 +1105,7 @@ local function CreateFrames(config)
             -- BG Panel
             local FrameName = "PointTracking_Frames_"..tid
             Frames[ic][tid].bgpanel.frame = CreateFrame("Frame", FrameName, UIParent)
+            nibRealUI:RegisterFrameForFade(MODNAME, Frames[ic][tid].bgpanel.frame)
             
             Frames[ic][tid].bgpanel.bg = Frames[ic][tid].bgpanel.frame:CreateTexture(nil, "ARTWORK")
             Frames[ic][tid].bgpanel.bg:SetAllPoints(Frames[ic][tid].bgpanel.frame)
@@ -1309,7 +1176,6 @@ end
 -- Refresh PointTracking
 function PointTracking:Refresh()
     self:UpdateSpec()
-    self:UpdateCombatFaderEnabled()
     self:GetTextures()
     self:UpdatePosition()
     self:UpdatePoints("ENABLE")
@@ -1453,6 +1319,7 @@ function PointTracking:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    nibRealUI:RegisterModForFade(MODNAME, db.combatfader)
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     nibRealUI:RegisterConfigModeModule(self)
 end

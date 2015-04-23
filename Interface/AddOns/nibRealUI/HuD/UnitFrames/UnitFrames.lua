@@ -546,6 +546,16 @@ function UnitFrames:OnInitialize()
                     ["WARLOCK"] = {0.35, 0.2},
                     ["WARRIOR"] = {0.35, 0.2},
                 },
+                combatfade = {
+                    enabled = true,
+                    opacity = {
+                        incombat = 1,
+                        hurt = 0.85,
+                        target = 0.85,
+                        harmtarget = 0.75,
+                        outofcombat = 0.25,
+                    },
+                },
             },
             units = {
                 -- Eventually, these settings will be used to adjust unit frame size.
@@ -666,5 +676,6 @@ function UnitFrames:OnEnable()
         mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
 
+    nibRealUI:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()
 end

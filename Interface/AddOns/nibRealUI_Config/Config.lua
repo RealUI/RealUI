@@ -357,6 +357,55 @@ do
                         end,
                         order = 41,
                     },
+                    --[[incombat = {
+                        type = "range",
+                        name = "In-combat",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        get = function(info) return db.elements[ke].opacity.incombat end,
+                        set = function(info, value)
+                            db.elements[ke].opacity.incombat = value
+                            CombatFader:OptionsRefresh()
+                        end,
+                        order = 10,
+                    },
+                    hurt = {
+                        type = "range",
+                        name = "Hurt",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        get = function(info) return db.elements[ke].opacity.hurt end,
+                        set = function(info, value) 
+                            db.elements[ke].opacity.hurt = value
+                            CombatFader:OptionsRefresh()
+                        end,
+                        order = 20,
+                    },
+                    target = {
+                        type = "range",
+                        name = "Target-selected",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        get = function(info) return db.elements[ke].opacity.target end,
+                        set = function(info, value)
+                            db.elements[ke].opacity.target = value
+                            CombatFader:OptionsRefresh()
+                        end,
+                        order = 30,
+                    },
+                    outofcombat = {
+                        type = "range",
+                        name = "Out-of-combat",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        get = function(info) return db.elements[ke].opacity.outofcombat end,
+                        set = function(info, value)
+                            --print("OutCombat Inv", ke)
+                            db.elements[ke].opacity.outofcombat = value
+                            CombatFader:OptionsRefresh()
+                        end,
+                        order = 40,
+                    },]]
                 }
             },
             units = {

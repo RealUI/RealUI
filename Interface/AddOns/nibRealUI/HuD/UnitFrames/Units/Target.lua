@@ -420,7 +420,7 @@ UnitFrames["target"] = function(self)
 
         -- Reverse power
         local oldReverse = self.Power.bar.reverse
-        local newReverse = UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars)
+        local newReverse = nibRealUI.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars)
         AngleStatusBar:SetReverseFill(self.Power.bar, newReverse)
 
         -- If reverse is different from old target to new target then do an instant SetValue on power bar

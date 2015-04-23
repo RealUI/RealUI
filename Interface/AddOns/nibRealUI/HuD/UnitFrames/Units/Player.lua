@@ -299,7 +299,7 @@ UnitFrames["player"] = function(self)
         if self.DruidMana then
             self.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
         end
-        power:SetReversePercent(UnitFrames.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
+        power:SetReversePercent(nibRealUI.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
         power.enabled = true
 
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
