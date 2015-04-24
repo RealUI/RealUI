@@ -34,7 +34,7 @@ function GridLayout:Update()
     end
     NeedUpdate = false
     
-    local NewLayout, NewHoriz, layoutSize
+    local NewLayout, isHoriz, layoutSize
     local partyType = Grid2Layout.partyType
     local Grid2DB = Grid2Layout.db.profile
     self:debug("partyType:", partyType)
@@ -47,7 +47,7 @@ function GridLayout:Update()
     -- Solo - Adjust w/pets
     if partyType == "solo" then
         self:debug("You are Solo")
-        NewHoriz = LayoutDB.hGroups.normal
+        isHoriz = LayoutDB.hGroups.normal
         if LayoutDB.showSolo then
             if UnitExists("pet") and LayoutDB.showPet then 
                 NewLayout = "Solo w/Pets"
@@ -60,7 +60,7 @@ function GridLayout:Update()
     -- Party / Arena - Adjust w/pets
     elseif (partyType == "arena") or (partyType == "party") then
         self:debug("You are in a Party or Arena")
-        NewHoriz = LayoutDB.hGroups.normal
+        isHoriz = LayoutDB.hGroups.normal
         local HasPet = UnitExists("pet") or UnitExists("partypet1") or UnitExists("partypet2") or UnitExists("partypet3") or UnitExists("partypet4")
         if HasPet and LayoutDB.showPet then 
             NewLayout = "Party w/Pets"
@@ -70,7 +70,7 @@ function GridLayout:Update()
     -- Raid
     elseif (partyType == "raid") then
         self:debug("You are in a Raid")
-        NewHoriz = LayoutDB.hGroups.raid
+        isHoriz = LayoutDB.hGroups.raid
 
         -- reset the table
         for k,v in pairs(raidGroupInUse) do
@@ -98,13 +98,13 @@ function GridLayout:Update()
     end
     
     -- Change Grid Layout
-    if (NewHoriz ~= Grid2DB.horizontal) then
-        self:debug("Apply horizontal:", NewHoriz)
-        Grid2DB.horizontal = NewHoriz
+    self:debug("Check horizontal:", isHoriz, Grid2DB.horizontal)
+    if (isHoriz ~= Grid2DB.horizontal) then
+        Grid2DB.horizontal = isHoriz
     end
 
     -- Adjust Grid Frame Width
-    if (LayoutDB.width[layoutSize]) and not NewHoriz then
+    if (LayoutDB.width[layoutSize]) and not isHoriz then
         self:debug("layout: Vert", layoutSize) --small
         Grid2Frame.db.profile.frameWidth = LayoutDB.width[layoutSize]
     else
@@ -112,13 +112,7 @@ function GridLayout:Update()
         Grid2Frame.db.profile.frameWidth = LayoutDB.width["normal"]
     end
 
-    Grid2Frame:LayoutFrames()
-
-    --[[ FrameMover
-    if nibRealUI:GetModuleEnabled("FrameMover") then
-        local FM = nibRealUI:GetModule("FrameMover", true)
-        if FM then FM:MoveAddons() end
-    end]]
+    Grid2Layout:ReloadLayout(true)
 end
 
 function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
