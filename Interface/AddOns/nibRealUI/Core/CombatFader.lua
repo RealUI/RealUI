@@ -31,6 +31,7 @@ local function FadeIt(self, newOpacity, instant)
         UIFrameFadeOut(self, FadeTime, currentOpacity, newOpacity)
     end
 end
+CombatFader.FadeIt = FadeIt
 
 -- Determine new opacity values for frames
 function CombatFader:FadeFrames()
@@ -39,12 +40,17 @@ function CombatFader:FadeFrames()
         local options = module.options
         if options.enabled then
             -- Retrieve opacity for current status
-            local newOpacity = options.opacity[status] or 1
+            local newOpacity = options.opacity[status]
 
             -- do fade
             for i = 1, #module.frames do
-                self:debug("do fade", modName, newOpacity, status)
-                FadeIt(module.frames[i], newOpacity)
+                local frame = module.frames[i]
+                self:debug("do fade", modName, status, newOpacity, frame.special)
+                if frame.special and (status ~= "target" and status ~= "harmtarget" and status ~= "incombat" or not newOpacity) then
+                    -- frame.special is equal to "harm", but allows for just that frame to change
+                    newOpacity = frame.special
+                end
+                FadeIt(frame, newOpacity or options.opacity.outofcombat)
             end
         end
     end
@@ -112,7 +118,7 @@ end
 --- Register a module to fade based on combat state.
 -- @param mod The name of the mod registering
 -- @param options A table detailing what level of opacity for each state.
-function nibRealUI:RegisterModForFade(mod, options)
+function CombatFader:RegisterModForFade(mod, options)
     modules[mod] = {
         options = options,
         frames = {},
@@ -121,7 +127,7 @@ end
 --- Register a frame to fade based on combat state.
 -- @param mod The name of the mod it belongs to
 -- @param frame The frame to be registered
-function nibRealUI:RegisterFrameForFade(mod, frame)
+function CombatFader:RegisterFrameForFade(mod, frame)
     assert(modules[mod], mod.." has not yet been registered.")
     tinsert(modules[mod].frames, frame)
     CombatFader:RefreshMod()

@@ -3,6 +3,7 @@ local db
 
 local MODNAME = "Objectives Adv."
 local ObjectivesAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local CombatFader = nibRealUI:GetModule("CombatFader")
 
 local LoggedIn = false
 
@@ -508,8 +509,8 @@ function ObjectivesAdv:OnInitialize()
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 
-    nibRealUI:RegisterModForFade(MODNAME, db.hidden.combatfade)
-    nibRealUI:RegisterFrameForFade(MODNAME, ObjectiveTrackerFrame)
+    CombatFader:RegisterModForFade(MODNAME, db.hidden.combatfade)
+    CombatFader:RegisterFrameForFade(MODNAME, ObjectiveTrackerFrame)
 
     self:RegisterEvent("PLAYER_LOGIN")
 end

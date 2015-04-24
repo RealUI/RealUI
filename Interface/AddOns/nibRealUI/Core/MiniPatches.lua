@@ -87,6 +87,14 @@ RealUI.minipatches = {
             KuiNameplatesGDB["profiles"]["RealUI"]["fonts"]["options"]["fontscale"] = 1
         end
     end,
+    [13] = function(ver)
+        debug("r"..ver)
+        local nibRealUIDB = _G.nibRealUIDB
+        if nibRealUIDB["RuneDisplay"]["profiles"] then
+            local profile = nibRealUIDB["RuneDisplay"]["profiles"]["RealUI"]
+            profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
+        end
+    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,

@@ -2,6 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "PointTracking"
 local PointTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local CombatFader = nibRealUI:GetModule("CombatFader")
 local LSM = LibStub("LibSharedMedia-3.0")
 local db, ndb
 
@@ -1105,7 +1106,7 @@ local function CreateFrames(config)
             -- BG Panel
             local FrameName = "PointTracking_Frames_"..tid
             Frames[ic][tid].bgpanel.frame = CreateFrame("Frame", FrameName, UIParent)
-            nibRealUI:RegisterFrameForFade(MODNAME, Frames[ic][tid].bgpanel.frame)
+            CombatFader:RegisterFrameForFade(MODNAME, Frames[ic][tid].bgpanel.frame)
             
             Frames[ic][tid].bgpanel.bg = Frames[ic][tid].bgpanel.frame:CreateTexture(nil, "ARTWORK")
             Frames[ic][tid].bgpanel.bg:SetAllPoints(Frames[ic][tid].bgpanel.frame)
@@ -1319,7 +1320,7 @@ function PointTracking:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModForFade(MODNAME, db.combatfader)
+    CombatFader:RegisterModForFade(MODNAME, db.combatfader)
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     nibRealUI:RegisterConfigModeModule(self)
 end

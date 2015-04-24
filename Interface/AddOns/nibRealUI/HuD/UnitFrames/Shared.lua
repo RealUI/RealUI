@@ -2,6 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local UnitFrames = nibRealUI:GetModule("UnitFrames")
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
+local CombatFader = nibRealUI:GetModule("CombatFader")
 local db, ndb, ndbc
 
 local oUF = oUFembed
@@ -564,7 +565,7 @@ local function Shared(self, unit)
 
     -- Create a proxy frame for the CombatFader to avoid taint city.
     self.overlay = CreateFrame("Frame", nil, self)
-    nibRealUI:RegisterFrameForFade("UnitFrames", self.overlay)
+    CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
     UnitFrames[unit](self)

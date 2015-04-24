@@ -2,6 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local CombatFader = nibRealUI:GetModule("CombatFader")
 local db, ndb, ndbc
 
 local oUF = oUFembed
@@ -676,6 +677,6 @@ function UnitFrames:OnEnable()
         mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
 
-    nibRealUI:RegisterModForFade(MODNAME, db.misc.combatfade)
+    CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()
 end
