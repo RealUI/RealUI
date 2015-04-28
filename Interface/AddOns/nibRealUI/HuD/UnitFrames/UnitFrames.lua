@@ -551,9 +551,9 @@ function UnitFrames:OnInitialize()
                     enabled = true,
                     opacity = {
                         incombat = 1,
-                        hurt = 0.85,
-                        target = 0.85,
-                        harmtarget = 0.75,
+                        harmtarget = 0.85,
+                        target = 0.75,
+                        hurt = 0.6,
                         outofcombat = 0.25,
                     },
                 },

@@ -73,7 +73,7 @@ end
 
 function PrintScreenSize()
     print("The current screen resolution is", ({GetScreenResolutions()})[GetCurrentResolution()])
-    print("The current screen size is", floor(GetScreenWidth()), "x", floor(GetScreenHeight()))
+    print("The current screen size is", floor(GetScreenWidth()+0.5), "x", floor(GetScreenHeight()+0.5))
 end
 
 -- UI Scaler

@@ -67,7 +67,7 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
 -- Health AbsValue
 tags.Methods["realui:healthValue"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
 
     return nibRealUI:ReadableNumber(UnitHealth(unit))
 end
@@ -75,9 +75,10 @@ tags.Events["realui:healthValue"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TA
 
 -- Health %
 tags.Methods["realui:healthPercent"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
 
     local percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
+    UnitFrames:debug("realui:healthPercent", percent)
     return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
 end
 tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]

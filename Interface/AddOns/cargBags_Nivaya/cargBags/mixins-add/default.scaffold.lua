@@ -26,6 +26,7 @@ DEPENDENCIES
 ]]
 local addon, ns = ...
 local cargBags = ns.cargBags
+local L = cargBags:GetLocalizedTypes()
 
 local function noop() end
 
@@ -105,7 +106,7 @@ end
 	@param item <table> The itemTable holding information, see Implementation:GetItemInfo()
 	@callback OnUpdate(item)
 ]]
-local ilvlTypes = {Armor = true, Weapon = true}
+local ilvlTypes = {[L["Armor"]] = true, [L["Weapon"]] = true}
 local function ItemButton_Update(self, item)
 	if item.texture then
 		self.Icon:SetTexture(item.texture or ((cBnivCfg.CompressEmpty and self.bgTex) or unpack({1,1,1,0.1})))

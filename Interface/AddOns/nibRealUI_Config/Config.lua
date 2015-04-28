@@ -268,9 +268,10 @@ function nibRealUI:ToggleConfig(mode, ...)
     end
 end
 
-local unitframes
-do
-    local db = nibRealUI.db:GetNamespace("UnitFrames").profile
+local unitframes do
+    local CombatFader = nibRealUI:GetModule("CombatFader")
+    local UnitFrames = nibRealUI:GetModule("UnitFrames")
+    local db = UnitFrames.db.profile
     unitframes = {
         name = UNITFRAME_LABEL,
         type = "group",
@@ -325,6 +326,7 @@ do
                         end,
                         set = function(info, value)
                             db.misc.statusText = value
+                            UnitFrames:RefreshUnits("StatusText")
                         end,
                         order = 30,
                     },
@@ -357,55 +359,75 @@ do
                         end,
                         order = 41,
                     },
-                    --[[incombat = {
-                        type = "range",
-                        name = "In-combat",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.elements[ke].opacity.incombat end,
-                        set = function(info, value)
-                            db.elements[ke].opacity.incombat = value
-                            CombatFader:OptionsRefresh()
-                        end,
-                        order = 10,
-                    },
-                    hurt = {
-                        type = "range",
-                        name = "Hurt",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.elements[ke].opacity.hurt end,
-                        set = function(info, value) 
-                            db.elements[ke].opacity.hurt = value
-                            CombatFader:OptionsRefresh()
-                        end,
-                        order = 20,
-                    },
-                    target = {
-                        type = "range",
-                        name = "Target-selected",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.elements[ke].opacity.target end,
-                        set = function(info, value)
-                            db.elements[ke].opacity.target = value
-                            CombatFader:OptionsRefresh()
-                        end,
-                        order = 30,
-                    },
-                    outofcombat = {
-                        type = "range",
-                        name = "Out-of-combat",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.elements[ke].opacity.outofcombat end,
-                        set = function(info, value)
-                            --print("OutCombat Inv", ke)
-                            db.elements[ke].opacity.outofcombat = value
-                            CombatFader:OptionsRefresh()
-                        end,
-                        order = 40,
-                    },]]
+                    combatFade = {
+                        name = L["CombatFade"],
+                        type = "group",
+                        inline = true,
+                        disabled = function() return not db.misc.combatfade.enabled end,
+                        order = 50,
+                        args = {
+                            incombat = {
+                                name = L["CombatFade_InCombat"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.misc.combatfade.opacity.incombat end,
+                                set = function(info, value)
+                                    db.misc.combatfade.opacity.incombat = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 10,
+                            },
+                            harmtarget = {
+                                name = L["CombatFade_HarmTarget"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.misc.combatfade.opacity.harmtarget end,
+                                set = function(info, value)
+                                    db.misc.combatfade.opacity.harmtarget = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 20,
+                            },
+                            target = {
+                                name = L["CombatFade_Target"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.misc.combatfade.opacity.target end,
+                                set = function(info, value)
+                                    db.misc.combatfade.opacity.target = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 30,
+                            },
+                            hurt = {
+                                name = L["CombatFade_Hurt"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.misc.combatfade.opacity.hurt end,
+                                set = function(info, value)
+                                    db.misc.combatfade.opacity.hurt = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 40,
+                            },
+                            outofcombat = {
+                                name = L["CombatFade_NoCombat"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.misc.combatfade.opacity.outofcombat end,
+                                set = function(info, value)
+                                    db.misc.combatfade.opacity.outofcombat = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 50,
+                            },
+                        }
+                    }
                 }
             },
             units = {
@@ -719,8 +741,7 @@ do
         --]]
     end
 end
-local auratracker
-do
+local auratracker do
     local db = nibRealUI.db:GetNamespace("AuraTracking").profile
     auratracker = {
         name = L["AuraTrack"],
