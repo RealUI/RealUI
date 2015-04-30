@@ -100,7 +100,7 @@ tags.Events["realui:health"] = tags.Events["realui:healthValue"]
 
 -- Power AbsValue
 tags.Methods["realui:powerValue"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
 
     return nibRealUI:ReadableNumber(UnitPower(unit))
 end
@@ -108,7 +108,7 @@ tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPL
 
 -- Power %
 tags.Methods["realui:powerPercent"] = function(unit)
-    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
 
     local _, ptoken = UnitPowerType(unit)
     local percent = UnitPower(unit) / UnitPowerMax(unit) * 100

@@ -121,4 +121,12 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     if IsAddOnLoaded("Blizzard_CompactRaidFrames") then
         mods["Blizzard_CompactRaidFrames"](F, C)
     end
+
 end)
+
+mods["Blizzard_AuctionUI"] = function(F, C)
+    WowTokenGameTimeTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
+
+    StoreButton:SetSize(149, 26)
+    StoreButton:SetPoint("TOPLEFT", WowTokenGameTimeTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
+end
