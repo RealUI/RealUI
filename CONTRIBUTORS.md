@@ -11,6 +11,15 @@ AddOn modifications
 
 
 
+Git
+---
+
+RealUI uses the [GitFlow](http://danielkummer.github.io/git-flow-cheatsheet/) workflow, please be familiar with this before making changes.
+
+For Mac and Windows users, [SourceTree](http://www.sourcetreeapp.com/) has built-in support for GitFlow.
+
+
+
 SavedVariables data
 -------------------
 
