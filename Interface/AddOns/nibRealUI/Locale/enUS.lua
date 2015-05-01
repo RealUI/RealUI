@@ -112,6 +112,7 @@ L["AuraTrack_HideTimeDesc"] = "Don't show time remaining on this tracker."
 L["AuraTrack_IgnoreSpec"] = "Ignore Spec"
 L["AuraTrack_IgnoreSpecDesc"] = "Show tracker regardless of current specialization"
 L["AuraTrack_InactiveOpacity"] = "Inactive indicator opacity"
+L["AuraTrack_InvalidName"] = "Spell name or ID could not be found."
 L["AuraTrack_MinLevel"] = "Min Level (0 = ignore)"
 L["AuraTrack_NoteSpellID"] = [=[Note: Spell Name or ID must match the spell you wish to track exactly.
 Capitalization and spaces matter.

@@ -193,7 +193,7 @@ local function UpdateSpellInfo(self)
 			self.spellNames[k] = (GetSpellInfo(v))
 		end
 	else
-		self.spellName = self.info.spell
+		self.spellName = self.info.spell or "none"
 	end
 end
 

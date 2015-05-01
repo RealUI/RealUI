@@ -1,6 +1,13 @@
 local NAME, config = ...
 local options = {}
 
+-- Up values
+local _G = _G
+local tostring = _G.tostring
+local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
+
 -- RealUI
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
@@ -32,10 +39,7 @@ local function InitializeOptions()
     initialized = true
 
     -- The HuD Config bar
-    local F, C = unpack(Aurora)
-    local r, g, b = C.r, C.g, C.b
-    local size = floor(uiHeight * 0.05)
-
+    local size = _G.floor(uiHeight * 0.05)
     local hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
     hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -500, 0)
     F.CreateBD(hudConfig)
@@ -82,33 +86,6 @@ local function InitializeOptions()
         {
             slug = "auratracker",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
-            onclick = function(self, ...)
-                debug("OnClick", self.slug, self.ID, ...)
-                if not self.frame then
-                    local widget = GUI:Create("Frame")
-                    widget:SetTitle(self.text:GetText())
-                    widget:SetPoint("TOP", hudConfig, "BOTTOM")
-                    widget:SetWidth(uiWidth * 0.3)
-                    widget:SetHeight(uiHeight * 0.2)
-                    widget.frame:GetChildren():Hide()
-                    widget.frame:Hide()
-                    widget.titlebg:SetPoint("TOP", 0, 0)
-                    self.frame = widget.frame
-                    tabs[self.ID].frame = widget.frame
-
-                    self.table = _G.LibStub("LibTextTable-1.1").New(nil, widget.frame)
-                    self.table:SetAllPoints()
-                end
-                if self.frame:IsShown() and highlight.clicked == self.ID then
-                    highlight.clicked = nil
-                    self.frame:Hide()
-                    ACD:Close("HuD")
-                else
-                    highlight.clicked = self.ID
-                    self.frame:Show()
-                    ACD:Close("HuD")
-                end
-            end,
         },
         {
             slug = "castbars",
@@ -206,7 +183,7 @@ local function InitializeOptions()
             check:SetHitRectInsets(-10, -10, -1, -21)
             check:SetPoint("CENTER", 0, 10)
             check:SetAttribute("type1", "macro")
-            SecureHandlerWrapScript(check, "OnClick", check, [[
+            _G.SecureHandlerWrapScript(check, "OnClick", check, [[
                 if self:GetID() == 1 then
                     self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
                     self:SetID(0)
@@ -226,7 +203,7 @@ local function InitializeOptions()
         end
 
         local text = btn:CreateFontString()
-        text:SetFontObject(GameFontHighlightSmall)
+        text:SetFontObject(_G.GameFontHighlightSmall)
         text:SetWidth(size * 0.9)
         text:SetPoint("BOTTOM", 0, size * 0.08)
         text:SetText(options.HuD.args[tab.slug].name)
@@ -279,7 +256,7 @@ local unitframes do
         args = {
             enable = {
                 name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format("RealUI"..UNITFRAME_LABEL),
+                desc = L["General_EnabledDesc"]:format("RealUI "..UNITFRAME_LABEL),
                 type = "toggle",
                 get = function(info) return nibRealUI:GetModuleEnabled("UnitFrames") end,
                 set = function(info, value)
@@ -316,9 +293,9 @@ local unitframes do
                         type = "select",
                         values = function()
                             return {
-                                both = STATUS_TEXT_BOTH,
-                                perc = STATUS_TEXT_PERCENT,
-                                value = STATUS_TEXT_VALUE,
+                                both = _G.STATUS_TEXT_BOTH,
+                                perc = _G.STATUS_TEXT_PERCENT,
+                                value = _G.STATUS_TEXT_VALUE,
                             }
                         end,
                         get = function(info)
@@ -345,9 +322,9 @@ local unitframes do
                         type = "select",
                         values = function()
                             return {
-                                shift = SHIFT_KEY_TEXT,
-                                ctrl = CTRL_KEY_TEXT,
-                                alt = ALT_KEY_TEXT,
+                                shift = _G.SHIFT_KEY_TEXT,
+                                ctrl = _G.CTRL_KEY_TEXT,
+                                alt = _G.ALT_KEY_TEXT,
                             }
                         end,
                         disabled = function() return not db.misc.focusclick end,
@@ -495,8 +472,7 @@ local unitframes do
                         order = 20,
                         get = function(info) return tostring(db.positions[hudSize].boss.x) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
-                            position.x = value
+                            db.positions[hudSize].boss.x = nibRealUI:ValidateOffset(value)
                         end,
                     },
                     y = {
@@ -505,8 +481,7 @@ local unitframes do
                         order = 30,
                         get = function(info) return tostring(db.positions[hudSize].boss.y) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
-                            position.y = value
+                            db.positions[hudSize].boss.y = nibRealUI:ValidateOffset(value)
                         end,
                     },
                     boss = {
@@ -591,13 +566,13 @@ local unitframes do
                                         type = "select",
                                         values = function()
                                             return {
-                                                group = INSTANCE_CHAT,
-                                                say = CHAT_MSG_SAY,
+                                                group = _G.INSTANCE_CHAT,
+                                                say = _G.CHAT_MSG_SAY,
                                             }
                                         end,
                                         disabled = function() return not db.arena.announceUse end,
                                         get = function(info)
-                                            return strlower(db.arena.announceChat)
+                                            return _G.strlower(db.arena.announceChat)
                                         end,
                                         set = function(info, value)
                                             db.arena.announceChat = value
@@ -742,13 +717,85 @@ local unitframes do
     end
 end
 local auratracker do
-    local db = nibRealUI.db:GetNamespace("AuraTracking").profile
+    local AuraTracking = nibRealUI:GetModule("AuraTracking")
+    local db = AuraTracking.db.profile
+    local trackingData = db.tracking[nibRealUI.class]
+    local function createTraker(spell)
+        return {
+            name = GetSpellInfo(spell.spell) or L["AuraTrack_SpellNameID"],
+            type = "group",
+            args = {
+                name = {
+                    name = L["AuraTrack_SpellNameID"],
+                    type = "input",
+                    validate = function(info, value)
+                        debug("Validate Spellname", info[#info-1], auratracker.args[info[#info-1]].name)
+                        return _G.GetSpellInfo(value) and true or L["AuraTrack_InvalidName"]
+                    end,
+                    get = function(info) return tostring(spell.spell) end,
+                    set = function(info, value)
+                        debug("Set Spellname", info[#info-1], auratracker.args[info[#info-1]].name)
+                        spell.spell = value
+                        auratracker.args[info[#info-1]].name = value
+                    end,
+                }
+            }
+        }
+    end
     auratracker = {
         name = L["AuraTrack"],
         type = "group",
-        childGroups = "tab",
-        args = {}
+        args = {
+            new = {
+                name = L["AuraTrack_Create"],
+                type = "execute",
+                order = 10,
+                func = function(info, ...)
+                    debug("Create New", info[#info], info[#info-1], ...)
+                    tinsert(trackingData, {})
+                    local id = #trackingData
+                    debug("New id:", #trackingData)
+                    auratracker.args["spell"..id] = createTraker(trackingData[id])
+                end,
+            },
+            enable = {
+                name = L["General_Enabled"],
+                desc = L["General_EnabledDesc"]:format(L["AuraTrack"]),
+                type = "toggle",
+                order = 20,
+                get = function(info) return nibRealUI:GetModuleEnabled("AuraTracking") end,
+                set = function(info, value)
+                    nibRealUI:SetModuleEnabled("AuraTracking", value)
+                    nibRealUI:ReloadUIDialog()
+                end,
+            },
+        }
     }
+    for i = 1, #trackingData do
+        auratracker.args["spell"..i] = createTraker(trackingData[i])
+        --[[local type
+        if spell.auraType == "debuff" then
+            type = string.format("|cffff3030%s|r", L["AuraTrack_Debuff"])
+        else
+            type = string.format("|cff30ff30%s|r", L["AuraTrack_Buff"])
+        end
+        local spec
+        if spell.forms then
+            --
+        elseif spell.specs then
+            for i = 1, #spell.specs do
+                if spell.specs[i] then
+                    local _, name = _G.GetSpecializationInfo(i)
+                    spec = spec and spec..", "..name or name
+                end
+            end
+        else
+            spec = _G.ACHIEVEMENTFRAME_FILTER_ALL
+        end
+        local row = table:AddRow(nil, spell.order or "~", type, GetSpellInfo(spell.spell), spec)
+        row:SetHighlightTexture(C.media.backdrop)
+        row:GetHighlightTexture():SetVertexColor(r, g, b, 0.5)]]
+    end
 end
 options.HuD = {
     type = "group",
