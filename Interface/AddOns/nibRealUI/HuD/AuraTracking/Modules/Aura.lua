@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 
 local _
 local MODNAME = "AuraTracking_Aura"
@@ -193,7 +194,8 @@ local function UpdateSpellInfo(self)
 			self.spellNames[k] = (GetSpellInfo(v))
 		end
 	else
-		self.spellName = self.info.spell or "none"
+		self.info.spell = self.info.spell or L["AuraTrack_SpellNameID"]
+		self.spellName = self.info.spell
 	end
 end
 

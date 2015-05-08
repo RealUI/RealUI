@@ -517,11 +517,11 @@ end
 function AuraTracking:CreateNewTracker()
 	-- Insert new basic tracker
 	local newTracker = {
-		spell = "- Enter Spell Here -",
+		spell = L["AuraTrack_SpellNameID"],
 		minLevel = 90,
 	}
-	local newIndex = #db.tracking[nibRealUI.class] + 1
 	tinsert(db.tracking[nibRealUI.class], newTracker)
+	local newIndex = #db.tracking[nibRealUI.class]
 
 	-- Create Indicator
 	self:CreateIndicator(newIndex, newTracker)

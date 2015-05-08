@@ -633,7 +633,6 @@ function nibRealUI:ADDON_LOADED(event, addon)
 
     -- Open before login to stop taint
     ToggleFrame(SpellBookFrame)
-    PetJournal_LoadUI()
 end
 
 function nibRealUI:ChatCommand_Config()

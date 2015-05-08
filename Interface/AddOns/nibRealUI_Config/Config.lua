@@ -720,14 +720,17 @@ local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = db.tracking[nibRealUI.class]
-    local function createTraker(spell)
+    local function createTraker(id)
+        local spell = trackingData[id]
         return {
             name = GetSpellInfo(spell.spell) or L["AuraTrack_SpellNameID"],
             type = "group",
             args = {
                 name = {
                     name = L["AuraTrack_SpellNameID"],
+                    desc = L["AuraTrack_NoteSpellID"],
                     type = "input",
+                    order = 10,
                     validate = function(info, value)
                         debug("Validate Spellname", info[#info-1], auratracker.args[info[#info-1]].name)
                         return _G.GetSpellInfo(value) and true or L["AuraTrack_InvalidName"]
@@ -738,7 +741,31 @@ local auratracker do
                         spell.spell = value
                         auratracker.args[info[#info-1]].name = value
                     end,
-                }
+                },
+                enable = {
+                    name = L["General_Enabled"],
+                    desc = L["General_EnabledDesc"]:format(L["AuraTrack_Selected"]),
+                    type = "toggle",
+                    order = 20,
+                    get = function(info)
+                        return nibRealUI:GetModuleEnabled("AuraTracking")
+                    end,
+                    set = function(info, value)
+                        nibRealUI:SetModuleEnabled("AuraTracking", value)
+                        nibRealUI:ReloadUIDialog()
+                    end,
+                },
+                remove = {
+                    name = L["AuraTrack_Remove"],
+                    type = "execute",
+                    order = 30,
+                    func = function(info, ...)
+                        debug("Remove", info[#info], info[#info-1], ...)
+                        debug("Removed ID", id, trackingData[id].spell)
+                        tremove(trackingData, id)
+                        nibRealUI:ReloadUIDialog()
+                    end,
+                },
             }
         }
     end
@@ -752,10 +779,9 @@ local auratracker do
                 order = 10,
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
-                    tinsert(trackingData, {})
-                    local id = #trackingData
-                    debug("New id:", #trackingData)
-                    auratracker.args["spell"..id] = createTraker(trackingData[id])
+                    local id = AuraTracking:CreateNewTracker()
+                    debug("New id:", id)
+                    auratracker.args["spell"..id] = createTraker(id)
                 end,
             },
             enable = {
@@ -772,7 +798,7 @@ local auratracker do
         }
     }
     for i = 1, #trackingData do
-        auratracker.args["spell"..i] = createTraker(trackingData[i])
+        auratracker.args["spell"..i] = createTraker(i)
         --[[local type
         if spell.auraType == "debuff" then
             type = string.format("|cffff3030%s|r", L["AuraTrack_Debuff"])
