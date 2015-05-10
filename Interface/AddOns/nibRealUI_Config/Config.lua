@@ -721,12 +721,30 @@ local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = db.tracking[nibRealUI.class]
+    local function getNameOrder(spellData)
+        local order, pos, name = 70, "", _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"]
+
+        if spellData.order and spellData.order > 0 then
+            order = spellData.order * 10
+            pos = spellData.order.." "
+        end
+        if spellData.auraType == "debuff" then
+            order = order + 1
+            name = (pos.."|cff%s%s|r"):format("ff0000", name)
+        else
+            name = (pos.."|cff%s%s|r"):format("00ff00", name)
+        end
+        return name, order
+    end
     local function createTraker(id)
         local spellData = trackingData[id]
         local spellOptions = auratracker.args.options
+        local name, order = getNameOrder(spellData)
+
         return {
-            name = _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"],
+            name = name,
             type = "group",
+            order = order,
             args = {
                 name = {
                     name = L["AuraTrack_SpellNameID"],
@@ -776,6 +794,9 @@ local auratracker do
                     end,
                     set = function(info, value)
                         spellData.auraType = value
+                        
+                        local spellOptions = spellOptions.args[info[#info-1]]
+                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 30,
                 },
@@ -787,6 +808,9 @@ local auratracker do
                     get = function(info) return spellData.order or 0 end,
                     set = function(info, value)
                         spellData.order = value
+
+                        local spellOptions = spellOptions.args[info[#info-1]]
+                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 40,
                 },
@@ -927,7 +951,7 @@ local auratracker do
                         set = function(info, value)
                             db.style.padding = value
                         end,
-                        order = 10,
+                        order = 20,
                     },
                     inactiveOpacity = {
                         name = L["AuraTrack_InactiveOpacity"],
@@ -938,7 +962,7 @@ local auratracker do
                         set = function(info, value)
                             db.indicators.fadeOpacity = value
                         end,
-                        order = 10,
+                        order = 30,
                     },
                     verticalCD = {
                         name = L["AuraTrack_VerticalCD"],
@@ -948,7 +972,7 @@ local auratracker do
                         set = function(info, value)
                             db.indicators.useCustomCD = value
                         end,
-                        order = 10,
+                        order = 40,
                     },
                     visibility = {
                         name = L["AuraTrack_Visibility"],

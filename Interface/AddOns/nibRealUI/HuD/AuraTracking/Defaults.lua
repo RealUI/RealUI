@@ -216,8 +216,8 @@ AuraTracking.Defaults = {
         order = 1,
         specs = {false, false, true}
     },
-    {   -- Thrill of the Hunt (Talent)
-        spell = 34720,
+    {   -- Steady Focus (Talent)
+        spell = 177668,
         order = 2,
     },
 -- Static Debuffs
@@ -231,7 +231,6 @@ AuraTracking.Defaults = {
     {spell = 34720},    -- Thrill of the Hunt (Talent)
     {spell = 82692},    -- Focus Fire
     {spell = 19574},    -- Bestial Wrath
-    {spell = 53301},    -- Explosive Shot (buff or debuff?)
     {spell = 19263},    -- Deterrence
     {spell = 53480},    -- Roar of Sacrifice (Cunning)
     {spell = 51755},    -- Camouflage

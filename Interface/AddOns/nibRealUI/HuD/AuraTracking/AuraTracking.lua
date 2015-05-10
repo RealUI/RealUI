@@ -556,6 +556,8 @@ function AuraTracking:CreateNewTracker()
 	local newTracker = {
 		spell = L["AuraTrack_SpellNameID"],
 		minLevel = 90,
+		useSpec = false,
+		specs = {}
 	}
 	tinsert(db.tracking[nibRealUI.class], newTracker)
 	local newIndex = #db.tracking[nibRealUI.class]
