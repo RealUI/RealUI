@@ -34,13 +34,13 @@ local function InitializeOptions()
 
     nibRealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
-    ACD:SetDefaultSize("HuD", uiWidth * 0.35, uiHeight * 0.4)
+    ACD:SetDefaultSize("HuD", 600, 480)
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- The HuD Config bar
-    local height = _G.floor(uiHeight * 0.05)
-    local width = height * 1.3
+    local height = round(uiHeight * 0.05)
+    local width = round(height * 1.3)
     hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
     hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -500, 0)
     F.CreateBD(hudConfig)
@@ -762,6 +762,7 @@ local auratracker do
                 },
                 type = {
                     name = L["AuraTrack_Type"],
+                    desc = L["AuraTrack_TypeDesc"],
                     type = "select",
                     style = "radio",
                     values = function()
@@ -796,7 +797,6 @@ local auratracker do
                         return {
                             player = _G.PLAYER,
                             target = _G.TARGET,
-                            focus = _G.FOCUS,
                             pet = _G.PET,
                         }
                     end,
@@ -810,12 +810,12 @@ local auratracker do
                 },
                 useSpec = {
                     name = _G.SPECIALIZATION,
-                    desc = L["General_Tristate"..tostring(spellData.ignoreSpec)].."\n"..
-                        L["AuraTrack_TristateSpec"..tostring(spellData.ignoreSpec)],
+                    desc = L["General_Tristate"..tostring(spellData.useSpec)].."\n"..
+                        L["AuraTrack_TristateSpec"..tostring(spellData.useSpec)],
                     type = "toggle",
                     tristate = true,
                     get = function(info)
-                        return spellData.ignoreSpec
+                        return spellData.useSpec
                     end,
                     set = function(info, value)
                         local spellOptions = spellOptions.args[info[#info-1]].args
@@ -825,19 +825,18 @@ local auratracker do
                         elseif value == true then
                             spellOptions.spec.disabled = false
                         else
-                            spellData.specs = spellData.specs or {}
                             spellOptions.spec.type = "multiselect"
                         end
                         spellOptions.useSpec.desc = L["General_Tristate"..tostring(value)].."\n"..
                             L["AuraTrack_TristateSpec"..tostring(value)]
-                        spellData.ignoreSpec = value
+                        spellData.useSpec = value
                     end,
                     order = 30,
                 },
                 spec = {
                     name = _G.SPECIALIZATION,
-                    type = (spellData.specs and spellData.ignoreSpec == nil) and "multiselect" or "select",
-                    disabled = function() return spellData.ignoreSpec == false end,
+                    type = (spellData.useSpec == nil) and "multiselect" or "select",
+                    disabled = function() return spellData.useSpec == false end,
                     values = function()
                         local table = {}
                         for i = 1, _G.GetNumSpecializations() do
@@ -851,12 +850,16 @@ local auratracker do
                         if key then
                             return spellData.specs[key]
                         else
-                            return 1
+                            for i = 1, #spellData.specs do
+                                if spellData.specs[i] then
+                                    return i
+                                end
+                            end
                         end
                     end,
                     set = function(info, key, value, ...)
                         debug("Spec set", key, value, ...)
-                        spellData.specs[key] = value ~= nil and value or true
+                        spellData.specs[key] = value == nil and true or value
                     end,
                     order = 30,
                 },

@@ -408,8 +408,42 @@ function AuraTracking:SetupIndicators()
 
 	wipe(Indicators)
 	numIndicators = 0
+
 	if not db.tracking[nibRealUI.class] then return end
 	for k, info in ipairs(db.tracking[nibRealUI.class]) do
+		-- Convert settings
+		if info.ignoreSpec ~= nil then
+			info.useSpec = not info.ignoreSpec
+			info.ignoreSpec = nil
+		end
+
+		if not info.unit then
+			if info.auraType == "debuff" then
+				info.unit = "target"
+			else
+				info.unit = "player"
+			end
+		end
+
+		if info.specs then
+			local numSpecs = 0
+			for i = 1, #info.specs do
+				if info.specs[i] then
+					numSpecs = numSpecs + 1
+				end
+			end
+			if numSpecs == 0 then
+				info.useSpec = false
+			elseif numSpecs == 1 then
+				info.useSpec = true
+			else
+				info.useSpec = nil
+			end
+		else
+			info.specs = {}
+			info.useSpec = false
+		end
+
 		if not info.isDisabled then
 			self:CreateIndicator(k, info)
 		end

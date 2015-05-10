@@ -2,6 +2,9 @@ local NAME, ns = ...
 local RealUI = RealUI or ns
 _G.RealUI = RealUI
 
+local uiWidth, uiHeight = UIParent:GetSize()
+RealUI.EM = floor(uiHeight * 0.0125 + 0.5)
+
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
     background =    {0.085, 0.085, 0.085, 0.9},

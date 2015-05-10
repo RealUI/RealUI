@@ -102,7 +102,7 @@ AuraTracking.Defaults = {
         spell = 16886,
         minLevel = 10,
         order = 1,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, false, true, false} -- Show in Moonkin form
     },]]
     {   -- Savage Roar (Feral)
@@ -113,7 +113,7 @@ AuraTracking.Defaults = {
         spell = 62606,
         minLevel = 10,
         order = 1,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, true, false, false} -- Show in Bear form
     },
 -- Static Debuffs
@@ -121,49 +121,49 @@ AuraTracking.Defaults = {
         spell = 1822,
         auraType = "debuff",
         order = 1,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {true, false, false, false} -- Show in Cat form
     },
     {   -- Rip (Feral)
         spell = 1079,
         auraType = "debuff",
         order = 2,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {true, false, false, false} -- Show in Cat form
     },
     {   -- Thrash (Feral)
         spell = 106832,
         auraType = "debuff",
         order = 3,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {true, false, false, false} -- Show in Cat form
     },
     {   -- Lacerate (Guardian)
         spell = 33745,
         auraType = "debuff",
         order = 1,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, true, false, false} -- Show in Bear form
     },
     {   -- Thrash (Guardian)
         spell = 106832,
         auraType = "debuff",
         order = 2,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, true, false, false} -- Show in Bear form
     },
     {   -- Sunfire (Balance)
         spell = 93402,
         auraType = "debuff",
         order = 1,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, false, true, false} -- Show in Moonkin form
     },
     {   -- Moonfire (Balance)
         spell = 8921,
         auraType = "debuff",
         order = 2,
-        ignoreSpec = true,
+        useSpec = false,
         forms = {false, false, true, false} -- Show in Moonkin form
     },
 -- Free Buffs
@@ -183,7 +183,7 @@ AuraTracking.Defaults = {
     {   -- Lacerate (Feral)
         spell = 33745,
         auraType = "debuff",
-        ignoreSpec = true,
+        useSpec = false,
         forms = {true, false, false, false}
     },
 -- Static Buffs
