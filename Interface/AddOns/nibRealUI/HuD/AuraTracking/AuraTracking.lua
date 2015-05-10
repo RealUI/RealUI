@@ -475,6 +475,9 @@ function AuraTracking:CreateIndicatorSlots()
 			IndicatorSlots[side][sI] = slot
 
 			if sI <= 6 then
+				slot.count = slot:CreateFontString()
+				slot.count:SetFontObject(RealUIFont_PixelCooldown)
+				slot.count:SetPoint("CENTER")
 				slot.bg = nibRealUI:CreateBDFrame(slot)
 				slot.bg:Hide()
 			end
@@ -600,9 +603,13 @@ function AuraTracking:ToggleConfigMode(val)
 	if self.configMode == val then return end
 	self.configMode = val
 
-	for sI = 1, 6 do
-		IndicatorSlots.LEFT[sI].bg:SetShown(val)
-		IndicatorSlots.RIGHT[sI].bg:SetShown(val)
+	for idx = 1, 6 do
+		for _, side in next, IndicatorSlots do
+			local slot = side[idx]
+
+			slot.count:SetText(val and idx or "")
+			slot.bg:SetShown(val)
+		end
 	end
 	self:UpdateVisibility()
 end

@@ -717,7 +717,6 @@ AuraTracking.Defaults = {
     {spell = 12294, auraType = "debuff"},   -- Mortal Strike
     {spell = 64382, auraType = "debuff"},   -- Shattering Throw
     {spell = 6552, auraType = "debuff"},    -- Pummel
-    {spell = 1715, auraType = "debuff"},    -- Hamstring
     
 },  -- WARRIOR ------------------
 
