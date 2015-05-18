@@ -794,7 +794,7 @@ local auratracker do
                     end,
                     set = function(info, value)
                         spellData.auraType = value
-                        
+
                         local spellOptions = spellOptions.args[info[#info-1]]
                         spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
@@ -855,7 +855,7 @@ local auratracker do
                             L["AuraTrack_TristateSpec"..tostring(value)]
                         spellData.useSpec = value
                     end,
-                    order = 30,
+                    order = 60,
                 },
                 spec = {
                     name = _G.SPECIALIZATION,
@@ -885,7 +885,21 @@ local auratracker do
                         debug("Spec set", key, value, ...)
                         spellData.specs[key] = value == nil and true or value
                     end,
-                    order = 30,
+                    order = 70,
+                },
+                minLvl = {
+                    name = L["AuraTrack_MinLevel"],
+                    type = "input",
+                    validate = function(info, value)
+                        debug("Validate minLvl", info[#info-1], value)
+                        value = _G.tonumber(value)
+                        return value >= 0 and value <= _G.MAX_PLAYER_LEVEL
+                    end,
+                    get = function(info) return _G.tostring(spellData.minLevel or 0) end,
+                    set = function(info, value)
+                        spellData.minLevel = value
+                    end,
+                    order = 80,
                 },
                 remove = {
                     name = L["AuraTrack_Remove"],
@@ -1026,7 +1040,11 @@ local auratracker do
         }
     }
     for id = 1, #trackingData do
-        auratracker.args.options.args["spell"..id] = createTraker(id)
+        local tracker = createTraker(id)
+        if GetNumShapeshiftForms() > 1 then
+            --tracker.
+        end
+        auratracker.args.options.args["spell"..id] = tracker
         --[[local type
         if spell.auraType == "debuff" then
             type = string.format("|cffff3030%s|r", L["AuraTrack_Debuff"])

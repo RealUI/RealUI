@@ -356,7 +356,7 @@ AuraTracking.Defaults = {
         spell = 107428,
         auraType = "debuff",
         order = 1,
-        specs = {false, false, true},
+        specs = {false, true, true},
     },
 -- Free Buffs
     {spell = 120954},   -- Fortifying Brew
