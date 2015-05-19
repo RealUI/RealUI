@@ -34,7 +34,7 @@ local function InitializeOptions()
 
     nibRealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
-    ACD:SetDefaultSize("HuD", 600, 480)
+    ACD:SetDefaultSize("HuD", 620, 480)
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
@@ -864,8 +864,9 @@ local auratracker do
                     values = function()
                         local table = {}
                         for i = 1, _G.GetNumSpecializations() do
-                            local _, name = _G.GetSpecializationInfo(i)
-                            table[i] = name
+                            local _, name, _, icon = _G.GetSpecializationInfo(i)
+                            print(icon)
+                            table[i] = "|T"..icon..":0:0:0:0:64:64:4:60:4:60|t "..name
                         end
                         return table
                     end,

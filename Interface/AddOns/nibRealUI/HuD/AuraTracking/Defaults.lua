@@ -13,7 +13,6 @@ Auras
     auraType = "buff" or "debuff"           (default = "buff")
     unit = unitID                           (default = "player")
     specs = {spec1, spec2, spec3, spec4}    (default = true for all specs)
-    forms = {cat, bear, moonkin}            (default = nil)
     order = #                               (if not specified indicator will be Free, otherwise Static)
     side = "LEFT" or "RIGHT"                (default = "LEFT" for "buff" and "RIGHT" for "debuff")
     hideStacks = true or false              (default = false - hide stack count [useful for buffs with a passive 1 stack])
@@ -91,19 +90,17 @@ AuraTracking.Defaults = {
 ["DRUID"] = { ------------------
 
 -- Static Buffs
-    {   -- Harmony (Resto)
+    {   -- Harmony (Resto Mastery) gained by casting direct heals
         spell = 100977,
         minLevel = 80,
         order = 1,
         specs = {false, false, false, true},
-        forms = {false, false, false, true} -- Show in Human form
     },
     --[[{   -- Nature's Grace (Balance)
         spell = 16886,
         minLevel = 10,
         order = 1,
-        useSpec = false,
-        forms = {false, false, true, false} -- Show in Moonkin form
+        specs = {true, false, false, false}
     },]]
     {   -- Savage Roar (Feral)
         type = "SavageRoar",
@@ -113,58 +110,50 @@ AuraTracking.Defaults = {
         spell = 62606,
         minLevel = 10,
         order = 1,
-        useSpec = false,
-        forms = {false, true, false, false} -- Show in Bear form
+        specs = {false, false, true, false}
     },
 -- Static Debuffs
     {   -- Rake (Feral)
         spell = 1822,
         auraType = "debuff",
         order = 1,
-        useSpec = false,
-        forms = {true, false, false, false} -- Show in Cat form
+        specs = {false, true, false, false}
     },
     {   -- Rip (Feral)
         spell = 1079,
         auraType = "debuff",
         order = 2,
-        useSpec = false,
-        forms = {true, false, false, false} -- Show in Cat form
+        specs = {false, true, false, false}
     },
     {   -- Thrash (Feral)
         spell = 106832,
         auraType = "debuff",
         order = 3,
-        useSpec = false,
-        forms = {true, false, false, false} -- Show in Cat form
+        specs = {false, true, false, false}
     },
     {   -- Lacerate (Guardian)
         spell = 33745,
         auraType = "debuff",
         order = 1,
-        useSpec = false,
-        forms = {false, true, false, false} -- Show in Bear form
+        specs = {false, false, true, false}
     },
     {   -- Thrash (Guardian)
         spell = 106832,
         auraType = "debuff",
         order = 2,
-        useSpec = false,
-        forms = {false, true, false, false} -- Show in Bear form
+        specs = {false, true, false, false}
     },
     {   -- Sunfire (Balance)
         spell = 93402,
         auraType = "debuff",
         order = 1,
-        useSpec = false,
-        forms = {false, false, true, false} -- Show in Moonkin form
+        specs = {true, false, false, false}
     },
     {   -- Moonfire (Balance)
         spell = 8921,
         auraType = "debuff",
         order = 2,
-        useSpec = false,
-        forms = {false, false, true, false} -- Show in Moonkin form
+        specs = {true, false, false, false}
     },
 -- Free Buffs
     {spell = 22812},    -- Barkskin
@@ -183,8 +172,7 @@ AuraTracking.Defaults = {
     {   -- Lacerate (Feral)
         spell = 33745,
         auraType = "debuff",
-        useSpec = false,
-        forms = {true, false, false, false}
+        specs = {false, true, false, false}
     },
 -- Static Buffs
     {   -- Wild Mushrooms (Resto)
