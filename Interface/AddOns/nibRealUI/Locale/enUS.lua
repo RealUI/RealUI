@@ -113,7 +113,8 @@ L["AuraTrack_IgnoreSpec"] = "Ignore Spec"
 L["AuraTrack_IgnoreSpecDesc"] = "Show tracker regardless of current specialization"
 L["AuraTrack_InactiveOpacity"] = "Inactive indicator opacity"
 L["AuraTrack_InvalidName"] = "Spell name or ID could not be found."
-L["AuraTrack_MinLevel"] = "Min Level (0 = ignore)"
+L["AuraTrack_MinLevel"] = "Minimum Level"
+L["AuraTrack_MinLevelDesc"] = "Set 0 to ignore this setting."
 L["AuraTrack_NoteSpellID"] = [=[Note: Spell Name or ID must match the spell you wish to track exactly.
 Capitalization and spaces matter.
 To track multiple spells, use Spell IDs and separate via commas (i.e 1122,2233,3344).]=]
@@ -133,7 +134,7 @@ L["AuraTrack_ShowInPvPDesc"] = "Show Indicators when you are in a PvP instance"
 L["AuraTrack_Size"] = "Indicator size"
 L["AuraTrack_SpellNameID"] = "Spell Name or ID"
 L["AuraTrack_Static"] = "Static"
-L["AuraTrack_StaticDesc"] = "When set to greater than zero, the tracker will always be in the same location."
+L["AuraTrack_StaticDesc"] = "When set to greater than 0, the tracker will always be in the same location."
 L["AuraTrack_TrackerOptions"] = "Tracker Options"
 L["AuraTrack_TristateSpecfalse"] = "Show tracker regardless of current specialization."
 L["AuraTrack_TristateSpecnil"] = "Show this tracker for multiple specs."

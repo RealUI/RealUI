@@ -889,6 +889,7 @@ local auratracker do
                 },
                 minLvl = {
                     name = L["AuraTrack_MinLevel"],
+                    desc = L["AuraTrack_MinLevelDesc"],
                     type = "input",
                     validate = function(info, value)
                         debug("Validate minLvl", info[#info-1], value)
@@ -900,6 +901,44 @@ local auratracker do
                         spellData.minLevel = value
                     end,
                     order = 80,
+                },
+                visibility = {
+                    name = L["AuraTrack_Visibility"],
+                    type = "group",
+                    inline = true,
+                    order = 90,
+                    args = {
+                        hideOOC = {
+                            name = L["AuraTrack_HideOOC"],
+                            desc = L["AuraTrack_HideOOCDesc"],
+                            type = "toggle",
+                            get = function(info) return spellData.hideOOC end,
+                            set = function(info, value)
+                                spellData.hideOOC = value
+                            end,
+                            order = 10,
+                        },
+                        hideTime = {
+                            name = L["AuraTrack_HideTime"],
+                            desc = L["AuraTrack_HideTimeDesc"],
+                            type = "toggle",
+                            get = function(info) return spellData.hideTime end,
+                            set = function(info, value)
+                                spellData.hideTime = value
+                            end,
+                            order = 20,
+                        },
+                        hideStacks = {
+                            name = L["AuraTrack_HideStack"],
+                            desc = L["AuraTrack_HideStackDesc"],
+                            type = "toggle",
+                            get = function(info) return spellData.hideStacks end,
+                            set = function(info, value)
+                                spellData.hideStacks = value
+                            end,
+                            order = 30,
+                        }
+                    }
                 },
                 remove = {
                     name = L["AuraTrack_Remove"],
@@ -1041,9 +1080,6 @@ local auratracker do
     }
     for id = 1, #trackingData do
         local tracker = createTraker(id)
-        if GetNumShapeshiftForms() > 1 then
-            --tracker.
-        end
         auratracker.args.options.args["spell"..id] = tracker
         --[[local type
         if spell.auraType == "debuff" then
