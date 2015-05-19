@@ -154,7 +154,7 @@ end
 local function CreateInstallWindow()
     -- To help with debugging
     local bdAlpha, ibSizeOffs = 0.9, 0
-    if nibRealUI.key == "Real - Zul'jin" then
+    if nibRealUI.isDev then
         bdAlpha = 0.5
         ibSizeOffs = 300
     end

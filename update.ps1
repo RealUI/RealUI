@@ -33,6 +33,7 @@ $readme.FileName = "README.txt"
 
 #Exclude files
 $remove = @(
+    "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Config"
 )
 # Collect entries to remove

@@ -17,6 +17,9 @@
 			"path": "Interface\\AddOns\\nibRealUI"
 		},
 		{
+			"path": "Interface\\AddOns\\nibRealUI_Dev"
+		},
+		{
 			"path": "Interface\\AddOns\\nibRealUI_Config"
 		},
 		{

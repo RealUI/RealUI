@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "enUS", true)
+local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "enUS", true, RealUI.isDev)
 
 if L then
 
