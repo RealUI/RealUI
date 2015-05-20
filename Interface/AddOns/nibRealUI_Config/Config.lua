@@ -726,11 +726,12 @@ local auratracker do
 
         if type(spellData.spell) == "table" then
             for i = 1, #spellData.spell do
-                local spellName = _G.GetSpellInfo(spellData.spell[i])
-                name = name..(i==1 and "" or ", ")..spellName
-                if spellName == _G.GetSpellInfo(spellData.spell[i+1]) then
-                    -- If two spells have the same name only display one.
-                    i = i + 1
+                debug("iter spell table", i)
+                local spellName, next = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
+                if spellName ~= next then
+                    debug("These two have the same name", i, spellName)
+                    -- If two spells have the same name, only display one.
+                    name = name..(next and ", " or "")..spellName
                 end
             end
         else

@@ -347,14 +347,22 @@ AuraTracking.Defaults = {
         specs = {false, true, true},
     },
 -- Free Buffs
+    {   -- Guard (Brewmaster)
+        spell = 115295,
+        specs = {true, false, false},
+    },
+    {   -- Touch of Karma (Windwalker)
+        spell = 125174,
+        specs = {false, false, true},
+    },
+    {   -- Mana Tea (Mistweaver)
+        spell = 115294,
+        specs = {false, true, false},
+    },
     {spell = 120954},   -- Fortifying Brew
     {spell = 122783},   -- Diffuse Magic
     {spell = 122278},   -- Dampen Harm
-    {spell = 116849},   -- Life Cocoon
-    {spell = 125174},   -- Touch of Karma
     {spell = 116841},   -- Tiger's Lust
-    {spell = 115294},   -- Mana Tea
-    {spell = 115295},   -- Guard
     {spell = 152173},   -- Serenity
 -- Free Debuffs
     {spell = 115804, auraType = "debuff"}, -- Mortal Wounds
