@@ -310,7 +310,7 @@ AuraTracking.Defaults = {
         specs = {true, false, false},
     },
     {   -- Elusive Brew (Brewmaster)
-        spell = 128939, --115308
+        spell = {115308,128939}, -- Effect buff, Stacking buff
         minLevel = 10,
         order = 2,
         specs = {true, false, false},
@@ -334,7 +334,7 @@ AuraTracking.Defaults = {
         specs = {false, false, true},
     },
     {   -- Tigereye Brew (Windwalker)
-        spell = 116740,
+        spell = {116740,125195}, -- Effect buff, Stacking buff
         minLevel = 56,
         order = 2,
         specs = {false, false, true},

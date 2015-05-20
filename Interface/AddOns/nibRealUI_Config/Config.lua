@@ -722,7 +722,20 @@ local auratracker do
     local db = AuraTracking.db.profile
     local trackingData = db.tracking[nibRealUI.class]
     local function getNameOrder(spellData)
-        local order, pos, name = 70, "", _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"]
+        local order, pos, name = 70, "", ""
+
+        if type(spellData.spell) == "table" then
+            for i = 1, #spellData.spell do
+                local spellName = _G.GetSpellInfo(spellData.spell[i])
+                name = name..(i==1 and "" or ", ")..spellName
+                if spellName == _G.GetSpellInfo(spellData.spell[i+1]) then
+                    -- If two spells have the same name only display one.
+                    i = i + 1
+                end
+            end
+        else
+            name = _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"]
+        end
 
         if spellData.order and spellData.order > 0 then
             order = spellData.order * 10
@@ -750,15 +763,43 @@ local auratracker do
                     name = L["AuraTrack_SpellNameID"],
                     desc = L["AuraTrack_NoteSpellID"],
                     type = "input",
-                    validate = function(info, value)
-                        debug("Validate Spellname", info[#info-1], spellOptions.args[info[#info-1]].name)
-                        return _G.GetSpellInfo(value) and true or L["AuraTrack_InvalidName"]
+                    validate = function(info, value) --,158300
+                        debug("Validate Spellname", info[#info-1], value)
+                        local isSpell
+                        if string.find(value, ",") then
+                            debug("Multi-spell")
+                            value = { strsplit(",", value) }
+                            for i = 1, #value do
+                                isSpell = _G.GetSpellInfo(value[i]) and true or false
+                                debug("Value "..i, value[i], isSpell)
+                            end
+                        else
+                            isSpell = _G.GetSpellInfo(value) and true or false
+                            debug("One spell", isSpell)
+                        end
+                        return isSpell or L["AuraTrack_InvalidName"]
                     end,
-                    get = function(info) return tostring(spellData.spell) end,
+                    get = function(info)
+                        local value = ""
+                        if type(spellData.spell) == "table" then
+                            for i = 1, #spellData.spell do
+                                value = value..(i==1 and "" or ",")..spellData.spell[i]
+                            end
+                        else
+                            value = tostring(spellData.spell)
+                        end
+                        return value
+                    end,
                     set = function(info, value)
-                        debug("Set Spellname", info[#info-1], spellOptions.args[info[#info-1]].name)
+                        debug("Set Spellname", info[#info-1], value)
+                        if string.find(value, ",") then
+                            debug("Multi-spell")
+                            value = { strsplit(",", value) }
+                        end
                         spellData.spell = value
-                        spellOptions.args[info[#info-1]].name = value
+
+                        local spellOptions = spellOptions.args[info[#info-1]]
+                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 10,
                 },
@@ -865,7 +906,6 @@ local auratracker do
                         local table = {}
                         for i = 1, _G.GetNumSpecializations() do
                             local _, name, _, icon = _G.GetSpecializationInfo(i)
-                            print(icon)
                             table[i] = "|T"..icon..":0:0:0:0:64:64:4:60:4:60|t "..name
                         end
                         return table
