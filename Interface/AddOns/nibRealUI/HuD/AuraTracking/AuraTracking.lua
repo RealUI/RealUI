@@ -420,6 +420,7 @@ function AuraTracking:SetupIndicators()
 			info.specs[1] = info.forms[3] -- Balance = Moonkin
 			info.specs[2] = info.forms[1] -- Feral = Cat
 			info.specs[3] = info.forms[2] -- Guardian = Bear
+			info.forms = nil
 		end
 		
 
