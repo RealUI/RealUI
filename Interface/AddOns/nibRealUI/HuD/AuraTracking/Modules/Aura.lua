@@ -43,15 +43,19 @@ end
 
 -- Aura update
 local function GetAuraInfo(self, index)
-	local remaining
 	local spellName = index and self.spellNames[index] or self.spellName
 	local spellID = index and self.spellIDs[index] or self.spellID
-	--print("GetAuraInfo", spellID, spellName)
+	AuraTracking:debug("GetAuraInfo", spellID, spellName)
 	local buffFilter = (self.isBuff and "HELPFUL" or "HARMFUL") .. (self.anyone and "" or "|PLAYER")
 
-	local name, rank, texture, count, type, duration, endTime, unitCaster, _, _, curSpellID = UnitAura(self.unit, spellName, nil, buffFilter)
+	local _, name, duration, remaining, count, texture, endTime, curSpellID
+	local i = 1 repeat
+		name, _, texture, count, _, duration, endTime, _, _, _, curSpellID = UnitAura(self.unit, i, buffFilter)
+		i = i + 1
+	until (spellID == curSpellID) or (not name)
+	AuraTracking:debug("UnitAura", curSpellID, name)
 
-	if (spellID and (curSpellID == spellID)) or (name == spellName) then
+	if (spellID == curSpellID) then
 		if endTime then
 			remaining = endTime - GetTime()
 		end
@@ -60,6 +64,7 @@ local function GetAuraInfo(self, index)
 end
 
 local function AuraUpdate(self, event, unit)
+	AuraTracking:debug("AuraUpdate", event, unit)
 	if self.inactive and not self.isStatic then
 		self:Hide()
 		AuraTracking:FreeIndicatorUpdate(self, false)
@@ -72,7 +77,9 @@ local function AuraUpdate(self, event, unit)
 		name, duration, remaining, count, texture, endTime = GetAuraInfo(self)
 	else
 		for k,v in ipairs(self.spellIDs) do
+			AuraTracking:debug("spellIDs", k, v)
 			name, duration, remaining, count, texture, endTime = GetAuraInfo(self, k)
+			AuraTracking:debug("spell name", name)
 			if name then break end
 		end
 	end
@@ -89,10 +96,10 @@ local function AuraUpdate(self, event, unit)
 			self.icon:SetTexture(texture)
 		end
 		if not name then
-			self.icon:SetDesaturated(1)
+			self.icon:SetDesaturated(true)
 			self.isActive = false
 		else
-			self.icon:SetDesaturated(nil)
+			self.icon:SetDesaturated(false)
 			if not self.hideOOC then
 				self.isActive = true
 			end
