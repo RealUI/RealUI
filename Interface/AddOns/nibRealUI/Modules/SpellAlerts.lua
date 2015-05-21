@@ -5,45 +5,6 @@ local _
 local MODNAME = "SpellAlerts"
 local SpellAlerts = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Spell Alerts",
-		desc = "Modify the position and size of the Spell Alert system.",
-		arg = MODNAME,
-		-- order = 1916,
-		args = {
-			header = {
-				type = "header",
-				name = "Spell Alerts",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Modify the position and size of the Spell Alert system.",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Spell Alerts module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-					nibRealUI:ReloadUIDialog()
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	
-	return options
-end
-
 function SpellAlerts:UpdatePosition()
 	-- Spell Alert frame
 	SpellActivationOverlayFrame:SetScale(0.65)
@@ -69,7 +30,6 @@ end
 ----------
 function SpellAlerts:OnInitialize()
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function SpellAlerts:OnEnable()

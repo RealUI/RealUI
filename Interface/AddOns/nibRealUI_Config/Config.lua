@@ -86,11 +86,15 @@ local function InitializeOptions()
         },
         {
             slug = "castbars",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
         },
         {
             slug = "auratracker",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+        },
+        {
+            slug = "misc",
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
         },
         {
             slug = "close",
@@ -611,23 +615,6 @@ local unitframes do
     local units = unitframes.args.units.args
     for unitSlug, unit in next, units do
         local position = db.positions[hudSize][unitSlug]
-        if unitSlug == "player" or unitSlug == "target" then
-            unit.args.anchorWidth = {
-                name = L["UnitFrames_AnchorWidth"],
-                desc = L["UnitFrames_AnchorWidthDesc"],
-                type = "range",
-                width = "double",
-                min = round(uiWidth * 0.1),
-                max = round(uiWidth * 0.5),
-                step = 2,
-                order = 5,
-                get = function(info) return ndb.positions[nibRealUI.cLayout]["UFHorizontal"] end,
-                set = function(info, value)
-                    ndb.positions[nibRealUI.cLayout]["UFHorizontal"] = value
-                    nibRealUI:UpdatePositioners()
-                end,
-            }
-        end
         unit.args.x = {
             name = L["UnitFrames_XOffset"],
             type = "input",
@@ -648,6 +635,24 @@ local unitframes do
                 position.y = value
             end,
         }
+        if unitSlug == "player" or unitSlug == "target" then
+            unit.args.anchorWidth = {
+                name = L["UnitFrames_AnchorWidth"],
+                desc = L["UnitFrames_AnchorWidthDesc"],
+                type = "range",
+                width = "double",
+                min = round(uiWidth * 0.1),
+                max = round(uiWidth * 0.5),
+                step = 1,
+                bigStep = 4,
+                order = 30,
+                get = function(info) return ndb.positions[nibRealUI.cLayout]["UFHorizontal"] end,
+                set = function(info, value)
+                    ndb.positions[nibRealUI.cLayout]["UFHorizontal"] = value
+                    nibRealUI:UpdatePositioners()
+                end,
+            }
+        end
         --[[ future times
         local unitInfo = db.units[unitSlug]
         unit.args = {
@@ -721,12 +726,12 @@ local castbars do
     local CastBars = nibRealUI:GetModule("CastBars")
     local db = CastBars.db.profile
     castbars = {
-        name = L["HuD_CastBars"],
+        name = L["CastBars"],
         type = "group",
         args = {
             enable = {
                 name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format(L["HuD_CastBars"]),
+                desc = L["General_EnabledDesc"]:format(L["CastBars"]),
                 type = "toggle",
                 get = function(info) return nibRealUI:GetModuleEnabled("CastBars") end,
                 set = function(info, value)
@@ -793,7 +798,86 @@ local castbars do
                     },
                 },
             },
-        },
+            position = {
+                name = L["General_Position"],
+                type = "group",
+                inline = true,
+                args = {
+                    player = {
+                        name = PLAYER,
+                        type = "group",
+                        args = {
+                            horizontal = {
+                                name = L["HuD_Horizontal"],
+                                type = "range",
+                                width = "double",
+                                min = -round(uiWidth * 0.2),
+                                max = round(uiWidth * 0.2),
+                                step = 1,
+                                bigStep = 4,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarPlayerX"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CastBarPlayerX"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 10,
+                            },
+                            vertical = {
+                                name = L["HuD_Vertical"],
+                                type = "range",
+                                width = "double",
+                                min = -round(uiHeight * 0.2),
+                                max = round(uiHeight * 0.2),
+                                step = 1,
+                                bigStep = 2,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarPlayerY"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CastBarPlayerY"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 20,
+                            }
+                        }
+                    },
+                    target = {
+                        name = TARGET,
+                        type = "group",
+                        args = {
+                            horizontal = {
+                                name = L["HuD_Horizontal"],
+                                type = "range",
+                                width = "double",
+                                min = -round(uiWidth * 0.2),
+                                max = round(uiWidth * 0.2),
+                                step = 1,
+                                bigStep = 4,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarTargetX"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CastBarTargetX"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 10,
+                            },
+                            vertical = {
+                                name = L["HuD_Vertical"],
+                                type = "range",
+                                width = "double",
+                                min = -round(uiHeight * 0.2),
+                                max = round(uiHeight * 0.2),
+                                step = 1,
+                                bigStep = 2,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarTargetY"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CastBarTargetY"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 20,
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 end
 local auratracker do
@@ -1152,6 +1236,7 @@ local auratracker do
                         name = L["AuraTrack_Visibility"],
                         type = "group",
                         inline = true,
+                        order = 50,
                         args = {
                             showCombat = {
                                 name = L["AuraTrack_ShowInCombat"],
@@ -1194,6 +1279,85 @@ local auratracker do
                                 order = 40,
                             },
                         }
+                    },
+                    position = {
+                        name = L["General_Position"],
+                        type = "group",
+                        inline = true,
+                        args = {
+                            player = {
+                                name = PLAYER,
+                                type = "group",
+                                args = {
+                                    horizontal = {
+                                        name = L["HuD_Horizontal"],
+                                        type = "range",
+                                        width = "double",
+                                        min = -round(uiWidth * 0.2),
+                                        max = round(uiWidth * 0.2),
+                                        step = 1,
+                                        bigStep = 4,
+                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasLeftX"] end,
+                                        set = function(info, value)
+                                            ndb.positions[nibRealUI.cLayout]["CTAurasLeftX"] = value
+                                            nibRealUI:UpdatePositioners()
+                                        end,
+                                        order = 10,
+                                    },
+                                    vertical = {
+                                        name = L["HuD_Vertical"],
+                                        type = "range",
+                                        width = "double",
+                                        min = -round(uiHeight * 0.2),
+                                        max = round(uiHeight * 0.2),
+                                        step = 1,
+                                        bigStep = 2,
+                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasLeftY"] end,
+                                        set = function(info, value)
+                                            ndb.positions[nibRealUI.cLayout]["CTAurasLeftY"] = value
+                                            nibRealUI:UpdatePositioners()
+                                        end,
+                                        order = 20,
+                                    }
+                                }
+                            },
+                            target = {
+                                name = TARGET,
+                                type = "group",
+                                args = {
+                                    horizontal = {
+                                        name = L["HuD_Horizontal"],
+                                        type = "range",
+                                        width = "double",
+                                        min = -round(uiWidth * 0.2),
+                                        max = round(uiWidth * 0.2),
+                                        step = 1,
+                                        bigStep = 4,
+                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasRightX"] end,
+                                        set = function(info, value)
+                                            ndb.positions[nibRealUI.cLayout]["CTAurasRightX"] = value
+                                            nibRealUI:UpdatePositioners()
+                                        end,
+                                        order = 10,
+                                    },
+                                    vertical = {
+                                        name = L["HuD_Vertical"],
+                                        type = "range",
+                                        width = "double",
+                                        min = -round(uiHeight * 0.2),
+                                        max = round(uiHeight * 0.2),
+                                        step = 1,
+                                        bigStep = 2,
+                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasRightY"] end,
+                                        set = function(info, value)
+                                            ndb.positions[nibRealUI.cLayout]["CTAurasRightY"] = value
+                                            nibRealUI:UpdatePositioners()
+                                        end,
+                                        order = 20,
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1202,29 +1366,61 @@ local auratracker do
     for id = 1, #trackingData do
         local tracker = createTraker(id)
         auratracker.args.options.args["spell"..id] = tracker
-        --[[local type
-        if spell.auraType == "debuff" then
-            type = string.format("|cffff3030%s|r", L["AuraTrack_Debuff"])
-        else
-            type = string.format("|cff30ff30%s|r", L["AuraTrack_Buff"])
-        end
-        local spec
-        if spell.forms then
-            --
-        elseif spell.specs then
-            for i = 1, #spell.specs do
-                if spell.specs[i] then
-                    local _, name = _G.GetSpecializationInfo(i)
-                    spec = spec and spec..", "..name or name
-                end
-            end
-        else
-            spec = _G.ACHIEVEMENTFRAME_FILTER_ALL
-        end
-        local row = table:AddRow(nil, spell.order or "~", type, GetSpellInfo(spell.spell), spec)
-        row:SetHighlightTexture(C.media.backdrop)
-        row:GetHighlightTexture():SetVertexColor(r, g, b, 0.5)]]
     end
+end
+local misc do
+    misc = {
+        name = MISCELLANEOUS,
+        type = "group",
+        args = {
+            spellalert = {
+                type = "group",
+                name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
+                desc = L["Misc_SpellAlertsDesc"],
+                arg = MODNAME,
+                -- order = 1916,
+                args = {
+                    header = {
+                        type = "header",
+                        name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
+                        order = 10,
+                    },
+                    desc = {
+                        type = "description",
+                        name = L["Misc_SpellAlertsDesc"],
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = L["General_Enabled"],
+                        desc = L["General_EnabledDesc"]:format(COMBAT_TEXT_SHOW_REACTIVES_TEXT),
+                        type = "toggle",
+                        get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value) 
+                            nibRealUI:SetModuleEnabled(MODNAME, value)
+                            nibRealUI:ReloadUIDialog()
+                        end,
+                        order = 30,
+                    },
+                    position = {
+                        name = L["HuD_Width"],
+                        type = "range",
+                        width = "double",
+                        min = round(uiWidth * 0.1),
+                        max = round(uiWidth * 0.5),
+                        step = 1,
+                        bigStep = 4,
+                        order = 30,
+                        get = function(info) return ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] end,
+                        set = function(info, value)
+                            ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] = value
+                            nibRealUI:UpdatePositioners()
+                        end,
+                    }
+                },
+            }
+        }
+    }
 end
 options.HuD = {
     type = "group",
@@ -1238,6 +1434,7 @@ options.HuD = {
         unitframes = unitframes,
         castbars = castbars,
         auratracker = auratracker,
+        misc = misc,
         close = { -- This is for button creation
             name = CLOSE,
             type = "group",
