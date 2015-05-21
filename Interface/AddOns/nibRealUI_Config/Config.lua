@@ -85,11 +85,11 @@ local function InitializeOptions()
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         },
         {
-            slug = "auratracker",
+            slug = "castbars",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         },
         {
-            slug = "castbars",
+            slug = "auratracker",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         },
         {
@@ -717,6 +717,85 @@ local unitframes do
         --]]
     end
 end
+local castbars do
+    local CastBars = nibRealUI:GetModule("CastBars")
+    local db = CastBars.db.profile
+    castbars = {
+        name = L["HuD_CastBars"],
+        type = "group",
+        args = {
+            enable = {
+                name = L["General_Enabled"],
+                desc = L["General_EnabledDesc"]:format(L["HuD_CastBars"]),
+                type = "toggle",
+                get = function(info) return nibRealUI:GetModuleEnabled("CastBars") end,
+                set = function(info, value)
+                    nibRealUI:SetModuleEnabled("CastBars", value)
+                    nibRealUI:ReloadUIDialog()
+                end,
+                order = 10,
+            },
+            reverse = {
+                name = L["HuD_ReverseBars"],
+                type = "group",
+                inline = true,
+                order = 20,
+                args = {
+                    player = {
+                        name = PLAYER,
+                        type = "toggle",
+                        get = function() return db.reverse.player end,
+                        set = function(info, value)
+                            db.reverse.player = value
+                            CastBars:UpdateAnchors()
+                        end,
+                        order = 10,
+                    },
+                    target = {
+                        name = TARGET,
+                        type = "toggle",
+                        get = function() return db.reverse.target end,
+                        set = function(info, value)
+                            db.reverse.target = value
+                            CastBars:UpdateAnchors()
+                        end,
+                        order = 10,
+                    },
+                },
+            },
+            text = {
+                name = LOCALE_TEXT_LABEL,
+                type = "group",
+                inline = true,
+                order = 50,
+                args = {
+                    horizontal = {
+                        name = L["CastBars_Inside"],
+                        desc = L["CastBars_InsideDesc"],
+                        type = "toggle",
+                        get = function() return db.text.textInside end,
+                        set = function(info, value)
+                            db.text.textInside = value
+                            CastBars:UpdateAnchors()
+                        end,
+                        order = 10,
+                    },
+                    vertical = {
+                        name = L["CastBars_Bottom"],
+                        desc = L["CastBars_BottomDesc"],
+                        type = "toggle",
+                        get = function() return db.text.textOnBottom end,
+                        set = function(info, value)
+                            db.text.textOnBottom = value
+                            CastBars:UpdateAnchors()
+                        end,
+                        order = 20,
+                    },
+                },
+            },
+        },
+    }
+end
 local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
@@ -1157,20 +1236,8 @@ options.HuD = {
             },
         },
         unitframes = unitframes,
+        castbars = castbars,
         auratracker = auratracker,
-        castbars = {
-            name = L["HuD_CastBars"],
-            type = "group",
-            args = {
-                enable = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L["HuD_CastBars"]),
-                    type = "toggle",
-                    set = function(info,val) end,
-                    get = function(info) return end
-                },
-            },
-        },
         close = { -- This is for button creation
             name = CLOSE,
             type = "group",
