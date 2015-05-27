@@ -112,6 +112,10 @@ AuraTracking.Defaults = {
         order = 1,
         specs = {false, false, true, false}
     },
+    {   -- Wild Mushrooms (Resto)
+        type = "WildMushrooms",
+        order = 2,
+    },
 -- Static Debuffs
     {   -- Rake (Feral)
         spell = 1822,
@@ -173,11 +177,6 @@ AuraTracking.Defaults = {
         spell = 33745,
         auraType = "debuff",
         specs = {false, true, false, false}
-    },
--- Static Buffs
-    {   -- Wild Mushrooms (Resto)
-        type = "WildMushrooms",
-        order = 2,
     },
 
 },  -- DRUID -------------------

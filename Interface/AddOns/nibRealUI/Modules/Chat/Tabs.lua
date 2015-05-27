@@ -97,6 +97,7 @@ function Chat_Tabs:HookFCF()
 	local Orig_FCF_Tab_OnClick = FCF_Tab_OnClick
 	FCF_Tab_OnClick = function(...)
 		-- Click the Tab
+		Chat_Tabs:debug("FCF_Tab_OnClick", ...)
 		Orig_FCF_Tab_OnClick(...)
 		-- Update Tabs
 		Chat_Tabs:UpdateTabs(true)

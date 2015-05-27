@@ -81,6 +81,10 @@ local function InitializeOptions()
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         },
         {
+            slug = "other",
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
+        },
+        {
             slug = "unitframes",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         },
@@ -91,10 +95,6 @@ local function InitializeOptions()
         {
             slug = "auratracker",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
-        },
-        {
-            slug = "misc",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
         },
         {
             slug = "close",
@@ -250,6 +250,68 @@ function nibRealUI:ToggleConfig(mode, ...)
     end
 end
 
+local other do
+    other = {
+        name = BINDING_HEADER_OTHER,
+        type = "group",
+        args = {
+            general = {
+                name = GENERAL,
+                type = "group",
+                order = 10,
+                args = {
+                    -- Link Layouts
+                    -- HuD size
+                    -- HuD Vertical
+                }
+            },
+            spellalert = {
+                name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
+                desc = L["Misc_SpellAlertsDesc"],
+                type = "group",
+                args = {
+                    header = {
+                        type = "header",
+                        name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
+                        order = 10,
+                    },
+                    desc = {
+                        type = "description",
+                        name = L["Misc_SpellAlertsDesc"],
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = L["General_Enabled"],
+                        desc = L["General_EnabledDesc"]:format(COMBAT_TEXT_SHOW_REACTIVES_TEXT),
+                        type = "toggle",
+                        get = function() return nibRealUI:GetModuleEnabled("SpellAlerts") end,
+                        set = function(info, value) 
+                            nibRealUI:SetModuleEnabled("SpellAlerts", value)
+                            nibRealUI:ReloadUIDialog()
+                        end,
+                        order = 30,
+                    },
+                    position = {
+                        name = L["HuD_Width"],
+                        type = "range",
+                        width = "double",
+                        min = round(uiWidth * 0.1),
+                        max = round(uiWidth * 0.5),
+                        step = 1,
+                        bigStep = 4,
+                        order = 30,
+                        get = function(info) return ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] end,
+                        set = function(info, value)
+                            ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] = value
+                            nibRealUI:UpdatePositioners()
+                        end,
+                    }
+                },
+            }
+        }
+    }
+end
 local unitframes do
     local CombatFader = nibRealUI:GetModule("CombatFader")
     local UnitFrames = nibRealUI:GetModule("UnitFrames")
@@ -1368,60 +1430,6 @@ local auratracker do
         auratracker.args.options.args["spell"..id] = tracker
     end
 end
-local misc do
-    misc = {
-        name = MISCELLANEOUS,
-        type = "group",
-        args = {
-            spellalert = {
-                type = "group",
-                name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
-                desc = L["Misc_SpellAlertsDesc"],
-                arg = MODNAME,
-                -- order = 1916,
-                args = {
-                    header = {
-                        type = "header",
-                        name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
-                        order = 10,
-                    },
-                    desc = {
-                        type = "description",
-                        name = L["Misc_SpellAlertsDesc"],
-                        fontSize = "medium",
-                        order = 20,
-                    },
-                    enabled = {
-                        name = L["General_Enabled"],
-                        desc = L["General_EnabledDesc"]:format(COMBAT_TEXT_SHOW_REACTIVES_TEXT),
-                        type = "toggle",
-                        get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                        set = function(info, value) 
-                            nibRealUI:SetModuleEnabled(MODNAME, value)
-                            nibRealUI:ReloadUIDialog()
-                        end,
-                        order = 30,
-                    },
-                    position = {
-                        name = L["HuD_Width"],
-                        type = "range",
-                        width = "double",
-                        min = round(uiWidth * 0.1),
-                        max = round(uiWidth * 0.5),
-                        step = 1,
-                        bigStep = 4,
-                        order = 30,
-                        get = function(info) return ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] end,
-                        set = function(info, value)
-                            ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] = value
-                            nibRealUI:UpdatePositioners()
-                        end,
-                    }
-                },
-            }
-        }
-    }
-end
 options.HuD = {
     type = "group",
     args = {
@@ -1431,10 +1439,10 @@ options.HuD = {
             args = {
             },
         },
+        other = other,
         unitframes = unitframes,
         castbars = castbars,
         auratracker = auratracker,
-        misc = misc,
         close = { -- This is for button creation
             name = CLOSE,
             type = "group",
