@@ -477,7 +477,7 @@ local unitframes do
             units = {
                 name = L["UnitFrames_Units"],
                 type = "group",
-                childGroups = "select",
+                childGroups = "tab",
                 order = 20,
                 args = {
                     player = {
@@ -521,40 +521,13 @@ local unitframes do
             groups = {
                 name = GROUPS,
                 type = "group",
-                childGroups = "select",
+                childGroups = "tab",
                 order = 30,
                 args = {
-                    gap = {
-                        name = L["UnitFrames_Gap"],
-                        desc = L["UnitFrames_GapDesc"],
-                        type = "range",
-                        min = 0, max = 10, step = 1,
-                        get = function(info) return db.boss.gap end,
-                        set = function(info, value) db.boss.gap = value end,
-                        order = 10,
-                    },
-                    x = {
-                        name = L["UnitFrames_XOffset"],
-                        type = "input",
-                        order = 20,
-                        get = function(info) return tostring(db.positions[hudSize].boss.x) end,
-                        set = function(info, value)
-                            db.positions[hudSize].boss.x = nibRealUI:ValidateOffset(value)
-                        end,
-                    },
-                    y = {
-                        name = L["UnitFrames_YOffset"],
-                        type = "input",
-                        order = 30,
-                        get = function(info) return tostring(db.positions[hudSize].boss.y) end,
-                        set = function(info, value)
-                            db.positions[hudSize].boss.y = nibRealUI:ValidateOffset(value)
-                        end,
-                    },
                     boss = {
                         name = BOSS,
                         type = "group",
-                        order = 40,
+                        order = 10,
                         args = {
                             showPlayerAuras = {
                                 name = L["UnitFrames_PlayerAuras"],
@@ -598,7 +571,7 @@ local unitframes do
                     arena = {
                         name = ARENA,
                         type = "group",
-                        order = 50,
+                        order = 20,
                         args = {
                             enabled = {
                                 name = L["General_Enabled"],
@@ -666,6 +639,41 @@ local unitframes do
                                         end,
                                         order = 40,
                                     },]]
+                                },
+                            },
+                        }
+                    },
+                    raid = {
+                        name = RAID,
+                        type = "group",
+                        order = 30,
+                        args = {
+                            layout = {
+                                name = L["Control_Layout"],
+                                desc = L["Control_LayoutDesc"]:format("Grid2"),
+                                type = "toggle",
+                                get = function() return db.arena.enabled end,
+                                set = function(info, value)
+                                    db.arena.enabled = value
+                                end,
+                                order = 10,
+                            },
+                            position = {
+                                name = L["General_Position"],
+                                desc = L["Control_PositionDesc"]:format("Grid2"),
+                                        type = "toggle",
+                                get = function() return db.arena.enabled end,
+                                        set = function(info, value)
+                                    db.arena.enabled = value
+                                        end,
+                                        order = 20,
+                                    },
+                            options = {
+                                name = "",
+                                type = "group",
+                                inline = true,
+                                        order = 30,
+                                args = {
                                 },
                             },
                         }
@@ -782,6 +790,39 @@ local unitframes do
                 end,
             },
         --]]
+    end
+    local groups = unitframes.args.groups.args
+    for groupSlug, group in next, groups do
+        if groupSlug == "boss" or groupSlug == "arena" then
+            local args = groupSlug == "boss" and group.args or group.args.options.args
+            args.gap = {
+                name = L["UnitFrames_Gap"],
+                desc = L["UnitFrames_GapDesc"],
+                type = "range",
+                min = 0, max = 10, step = 1,
+                get = function(info) return db.boss.gap end,
+                set = function(info, value) db.boss.gap = value end,
+                order = 2,
+            }
+            args.x = {
+                name = L["UnitFrames_XOffset"],
+                type = "input",
+                order = 4,
+                get = function(info) return tostring(db.positions[hudSize].boss.x) end,
+                set = function(info, value)
+                    db.positions[hudSize].boss.x = nibRealUI:ValidateOffset(value)
+                end,
+            }
+            args.y = {
+                name = L["UnitFrames_YOffset"],
+                type = "input",
+                order = 6,
+                get = function(info) return tostring(db.positions[hudSize].boss.y) end,
+                set = function(info, value)
+                    db.positions[hudSize].boss.y = nibRealUI:ValidateOffset(value)
+                end,
+            }
+        end
     end
 end
 local castbars do
