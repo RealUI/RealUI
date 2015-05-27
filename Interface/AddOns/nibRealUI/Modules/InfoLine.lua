@@ -592,6 +592,16 @@ local function GetOptions()
                         end,
                         order = 10,
                     },
+                    showBG = {
+                        type = "toggle",
+                        name = L["InfoLine_ShowBG"],
+                        get = function() return ndb.settings.infoLineBackground end,
+                        set = function(info, value)
+                            ndb.settings.infoLineBackground = value
+                            InfoLine:SetBackground()
+                        end,
+                        order = 10,
+                    },
                     clock = {
                         type = "group",
                         name = "Clock",

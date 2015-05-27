@@ -322,12 +322,6 @@ function nibRealUI:StyleSetStripeOpacity()
     end
 end
 
-function nibRealUI:StyleSetInfoLineBackground(val)
-    db.settings.infoLineBackground = val
-    local InfoLine = nibRealUI:GetModule("InfoLine", true)
-    if InfoLine then InfoLine:SetBackground() end
-end
-
 -- Style - Global Colors
 function nibRealUI:StyleUpdateColors()
     for k, mod in self:IterateModules() do
