@@ -28,6 +28,18 @@ local function debug(...)
     nibRealUI.Debug("Config", ...)
 end
 
+StaticPopupDialogs["RUI_ChangeHuDSize"] = {
+    text = L["HuD_AlertHuDChangeSize"],
+    button1 = OKAY,
+    OnAccept = function()
+        nibRealUI:ReloadUIDialog()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false,
+}
+
 local hudConfig, hudToggle
 local function InitializeOptions()
     debug("Init")
@@ -260,9 +272,50 @@ local other do
                 type = "group",
                 order = 10,
                 args = {
-                    -- Link Layouts
-                    -- HuD size
-                    -- HuD Vertical
+                    linkLayout = {
+                        name = L["Layout_Link"],
+                        desc = L["Layout_LinkDesc"],
+                        type = "toggle",
+                        get = function() return ndb.positionsLink end,
+                        set = function(info, value) 
+                            ndb.positionsLink = value
+
+                            nibRealUI.cLayout = ndbc.layout.current
+                            nibRealUI.ncLayout = nibRealUI.cLayout == 1 and 2 or 1
+
+                            if value then
+                                ndb.positions[nibRealUI.ncLayout] = nibRealUI:DeepCopy(ndb.positions[nibRealUI.cLayout])
+                            end
+                        end,
+                        order = 30,
+                    },
+                    useLarge = {
+                        name = L["HuD_UseLarge"],
+                        desc = L["HuD_UseLargeDesc"],
+                        type = "toggle",
+                        get = function() return ndb.settings.hudSize == 2 end,
+                        set = function(info, value) 
+                            ndb.settings.hudSize = value and 2 or 1
+                            StaticPopup_Show("RUI_ChangeHuDSize")
+                        end,
+                        order = 30,
+                    },
+                    hudVert = {
+                        name = L["HuD_Vertical"],
+                        desc = L["HuD_VerticalDesc"],
+                        type = "range",
+                        width = "double",
+                        min = -round(uiHeight * 0.3),
+                        max = round(uiHeight * 0.3),
+                        step = 1,
+                        bigStep = 4,
+                        order = 30,
+                        get = function(info) return ndb.positions[nibRealUI.cLayout]["HuDY"] end,
+                        set = function(info, value)
+                            ndb.positions[nibRealUI.cLayout]["HuDY"] = value
+                            nibRealUI:UpdatePositioners()
+                        end,
+                    }
                 }
             },
             spellalert = {
@@ -294,6 +347,7 @@ local other do
                     },
                     position = {
                         name = L["HuD_Width"],
+                        name = L["Misc_SpellAlertsWidthDesc"],
                         type = "range",
                         width = "double",
                         min = round(uiWidth * 0.1),
@@ -307,7 +361,7 @@ local other do
                             nibRealUI:UpdatePositioners()
                         end,
                     }
-                },
+                }
             }
         }
     }
@@ -661,18 +715,18 @@ local unitframes do
                             position = {
                                 name = L["General_Position"],
                                 desc = L["Control_PositionDesc"]:format("Grid2"),
-                                        type = "toggle",
+                                type = "toggle",
                                 get = function() return db.arena.enabled end,
-                                        set = function(info, value)
+                                set = function(info, value)
                                     db.arena.enabled = value
-                                        end,
-                                        order = 20,
-                                    },
+                                end,
+                                order = 20,
+                            },
                             options = {
                                 name = "",
                                 type = "group",
                                 inline = true,
-                                        order = 30,
+                                order = 30,
                                 args = {
                                 },
                             },
