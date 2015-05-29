@@ -55,7 +55,7 @@ local function InitializeOptions()
     local height = round(uiHeight * 0.05)
     local width = round(height * 1.3)
     hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
-    hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -500, 0)
+    hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -580, 0)
     F.CreateBD(hudConfig)
 
     local slideAnim = hudConfig:CreateAnimationGroup()
@@ -63,9 +63,9 @@ local function InitializeOptions()
         local x, y = self.slide:GetOffset()
         hudConfig:ClearAllPoints()
         if y < 0 then
-            hudConfig:SetPoint("TOP", UIParent, "TOP", -500, 0)
+            hudConfig:SetPoint("TOP", UIParent, "TOP", -580, 0)
         else
-            hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -500, 1)
+            hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -580, 1)
         end
     end)
     local slide = slideAnim:CreateAnimation("Translation")
@@ -268,6 +268,14 @@ local other do
         name = BINDING_HEADER_OTHER,
         type = "group",
         args = {
+            advanced = {
+                name = ADVANCED_OPTIONS,
+                type = "execute",
+                func = function(info, ...)
+                    nibRealUI:LoadConfig("nibRealUI")
+                end,
+                order = 0,
+            },
             general = {
                 name = GENERAL,
                 type = "group",
@@ -323,6 +331,7 @@ local other do
                 name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
                 desc = L["Misc_SpellAlertsDesc"],
                 type = "group",
+                order = 20,
                 args = {
                     header = {
                         type = "header",
@@ -1217,7 +1226,7 @@ local auratracker do
                     order = 60,
                 },
                 spec = {
-                    name = _G.SPECIALIZATION,
+                    name = "",
                     type = (spellData.useSpec == nil) and "multiselect" or "select",
                     disabled = function() return spellData.useSpec == false end,
                     values = function()
