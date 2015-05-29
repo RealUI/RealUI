@@ -1186,9 +1186,7 @@ local auratracker do
                             pet = _G.PET,
                         }
                     end,
-                    get = function(info)
-                        return spellData.unit
-                    end,
+                    get = function(info) return spellData.unit end,
                     set = function(info, value)
                         spellData.unit = value
                     end,
@@ -1200,9 +1198,7 @@ local auratracker do
                         L["AuraTrack_TristateSpec"..tostring(spellData.useSpec)],
                     type = "toggle",
                     tristate = true,
-                    get = function(info)
-                        return spellData.useSpec
-                    end,
+                    get = function(info) return spellData.useSpec end,
                     set = function(info, value)
                         local spellOptions = spellOptions.args[info[#info-1]].args
                         if value == false then
@@ -1515,7 +1511,16 @@ local auratracker do
                                 }
                             }
                         }
-                    }
+                    },
+                    reset = {
+                        name = RESET_TO_DEFAULT,
+                        type = "execute",
+                        func = function(info, ...)
+                            AuraTracking.db:ResetProfile("RealUI")
+                            nibRealUI:ReloadUIDialog()
+                        end,
+                        order = -1,
+                    },
                 }
             }
         }

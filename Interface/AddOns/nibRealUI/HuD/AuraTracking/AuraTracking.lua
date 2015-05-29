@@ -379,7 +379,7 @@ end
 function AuraTracking:CharacterUpdate()
 	-- Update Talent/Level information on Indicators
 	for k, indicator in pairs(Indicators) do
-		if indicator.TalentRefresh and indicator.frame.isStatic then
+		if indicator.TalentRefresh then
 			indicator:TalentRefresh()
 		end
 		indicator:SetUpdates()

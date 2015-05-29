@@ -252,7 +252,6 @@ local function CheckSpellValidity(self)
 end
 
 -- Show/Hide based on Talent spec
-local formIDs = {[CAT_FORM] = 1, [BEAR_FORM] = 2, [MOONKIN_FORM] = 3}   -- Cat, Bear, Moonkin
 local function TalentUpdate(self, event, unit, initializing)
     local oldInactive = self.inactive
 
@@ -260,19 +259,6 @@ local function TalentUpdate(self, event, unit, initializing)
     if self.info.useSpec then
         local spec = GetSpecialization()
         self.inactive = not(self.specs[spec])
-    end
-
-    -- Check shapeshift forms
-    if not(self.inactive) and self.forms and (nibRealUI.class == "DRUID") then
-        local form = GetShapeshiftFormID()
-
-        if not(self.forms[1] or self.forms[2] or self.forms[3]) then
-            -- No forms, test for Human mode
-            if form ~= nil then self.inactive = true end
-        else
-            -- Check for current form
-            if not self.forms[formIDs[form]] then self.inactive = true end
-        end
     end
 
     -- Check Spell validity
