@@ -211,10 +211,32 @@ local function GetOptions()
 		desc = "Toggle skinning of UI frames.",
 		type = "group",
 		args = {
+            windowOpacity = {
+                name = L["Appearance_WinOpacity"],
+                type = "range",
+                isPercent = true,
+                min = 0, max = 1, step = 0.05,
+                get = function(info) return nibRealUI.media.window[4] end,
+                set = function(info, value)
+                    nibRealUI.media.window[4] = value
+                end,
+                order = 10,
+            },
+            stripeOpacity = {
+                name = L["Appearance_StripeOpacity"],
+                type = "range",
+                isPercent = true,
+                min = 0, max = 1, step = 0.05,
+                get = function(info) return RealUI_InitDB.stripeOpacity end,
+                set = function(info, value)
+                    RealUI_InitDB.stripeOpacity = value
+                end,
+                order = 20,
+            },
 			header = {
 				type = "header",
 				name = "Skins",
-				order = 10,
+				order = 30,
 			},
 		},
 	}
@@ -229,7 +251,7 @@ local function GetOptions()
 				nibRealUI:SetModuleEnabled(name, value)
 				nibRealUI:ReloadUIDialog()
 			end,
-			order = 20,
+			order = 40,
 		}
 	end
 end

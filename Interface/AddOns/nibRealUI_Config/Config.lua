@@ -12,6 +12,7 @@ local r, g, b = C.r, C.g, C.b
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local ndb = nibRealUI.db.profile
+local ndbc = nibRealUI.db.char
 local hudSize = ndb.settings.hudSize
 local round = nibRealUI.Round
 

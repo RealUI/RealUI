@@ -233,7 +233,7 @@ local defaults = {
         -- Dynamic UI settings
         settings = {
             powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-            fontStyle = 1,
+            fontStyle = 2,
             infoLineBackground = true,
             stripeOpacity = 0.5,
             hudSize = 1,

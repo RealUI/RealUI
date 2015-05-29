@@ -604,6 +604,9 @@ function Fonts:OnInitialize()
     self:SetEnabledState(true)
     nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
 
+    if ndb.settings.fontStyle ~= 2 then
+        ndb.settings.fontStyle = 2
+    end
     if ndb.settings.chatFontCustom then
         local chat = font.chat
         chat[1] = ndb.settings.chatFontCustom.font or chat[1]
