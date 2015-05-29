@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "GridLayout"
-local GridLayout = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local GridLayout = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local NeedUpdate = false
 local raidGroupInUse = {
@@ -134,6 +134,13 @@ function nibRealUI:GetGridLayoutSettings(key1, key2, key3)
     end
 end
 
+function GridLayout:Grid2ChatCommand()
+    if not(Grid2 and Grid2Layout and Grid2Frame and Grid2DB) then return end
+    if not InCombatLockdown() then
+        nibRealUI:LoadConfig("HuD", "unitframes", "groups", "raid")
+    end
+end
+
 function GridLayout:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -154,25 +161,6 @@ function GridLayout:OnInitialize()
     })
     db = self.db.profile
 
-    -- Remove after some time.
-    if type(db.dps.width) == "number" then
-        db.dps.width = {
-            normal = db.dps.width
-        }
-    end
-    if db.dps.sWidth then
-        db.dps.width[40] = db.dps.sWidth
-        db.dps.sWidth = nil
-    end
-    if type(db.healing.width) == "number" then
-        db.healing.width = {
-            normal = db.healing.width
-        }
-    end
-    if db.healing.sWidth then
-        db.healing.width[40] = db.healing.sWidth
-        db.healing.sWidth = nil
-    end
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 end
@@ -186,10 +174,19 @@ function GridLayout:OnEnable()
         Grid2GroupChanged(self, ...)
     end
     
+    Grid2:UnregisterChatCommand("grid2")
+    self:RegisterChatCommand("grid", "Grid2ChatCommand")
+    self:RegisterChatCommand("grid2", "Grid2ChatCommand")
+
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 end
 
 function GridLayout:OnDisable()
     self:debug("OnDisable")
+
+    self:UnregisterChatCommand("grid")
+    self:UnregisterChatCommand("grid2")
+    Grid2:RegisterChatCommand("grid2", "OnChatCommand")
+
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 end

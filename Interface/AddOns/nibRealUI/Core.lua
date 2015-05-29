@@ -635,7 +635,7 @@ function nibRealUI:ChatCommand_Config()
 end
 
 local configLoaded, configFailed = false, false
-function nibRealUI:LoadConfig(mode, ...)
+function nibRealUI:LoadConfig(app, section, ...)
     if not configLoaded then
         configLoaded = true
         local loaded, reason = LoadAddOn("nibRealUI_Config")
@@ -644,17 +644,17 @@ function nibRealUI:LoadConfig(mode, ...)
             configFailed = true
         end
     end
-    if not configFailed then return self:ToggleConfig(mode, ...) end
+    if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
     nibRealUI:SetUpOptions()
-    if mode == "HuD" and not ... then
+    if app == "HuD" and not ... then
         return nibRealUI:ShowConfigBar()
     end
-    if LibStub("AceConfigDialog-3.0").OpenFrames[mode] then
-        LibStub("AceConfigDialog-3.0"):Close(mode)
+    if LibStub("AceConfigDialog-3.0").OpenFrames[app] then
+        LibStub("AceConfigDialog-3.0"):Close(app)
     else
-        LibStub("AceConfigDialog-3.0"):Open(mode, ...)
+        LibStub("AceConfigDialog-3.0"):Open(app, section, ...)
     end
 end
 

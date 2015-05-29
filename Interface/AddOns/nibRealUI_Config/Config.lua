@@ -79,6 +79,7 @@ local function InitializeOptions()
     highlight:SetBackdropColor(r, g, b, 0.3)
     highlight:SetBackdropBorderColor(r, g, b)
     highlight:Hide()
+    hudConfig.highlight = highlight
 
     local hlAnim = highlight:CreateAnimationGroup()
     local hl = hlAnim:CreateAnimation("Translation")
@@ -232,8 +233,13 @@ local function InitializeOptions()
     end
     hudConfig:SetSize(#tabs * width, height)
 
-    hudToggle = function( ... )
+    hudToggle = function(skipAnim)
         if isHuDShown then
+            -- hide highlight
+            highlight:Hide()
+            highlight.hover = nil
+            highlight.clicked = nil
+
             ACD:Close("HuD")
             -- slide out
             slide:SetOffset(0, height)
@@ -241,25 +247,48 @@ local function InitializeOptions()
             isHuDShown = false
         else
             -- slide in
-            slide:SetOffset(0, -height)
-            slideAnim:Play()
+            if skipAnim then
+                hudConfig:ClearAllPoints()
+                hudConfig:SetPoint("TOP", UIParent, "TOP", -580, 0)
+            else
+                slide:SetOffset(0, -height)
+                slideAnim:Play()
+            end
             isHuDShown = true
         end
     end
 end
 
-function nibRealUI:ToggleConfig(mode, ...)
-    debug("Toggle", mode, ...)
+function nibRealUI:ToggleConfig(app, section, ...)
+    debug("Toggle", app, section, ...)
     if not initialized then InitializeOptions() end
-    if mode == "HuD" and not ... then
-        nibRealUI:ShowConfigBar() -- Old
-        return hudToggle()
+    if app == "HuD" then
+        if not isHuDShown then
+            nibRealUI:ShowConfigBar() -- Old
+            hudToggle(section)
+        end
+        if section then
+            debug("Highlight", section, #hudConfig)
+            for i = 1, #hudConfig do
+                local tab = hudConfig[i]
+                if tab.slug == section then
+                    tab:GetScript("OnClick")(tab)
+                    hudConfig.highlight.hover = i
+                    hudConfig.highlight:SetAllPoints(tab)
+                    hudConfig.highlight:Show()
+                end
+            end
+        end
     end
-    --if not mode:match("RealUI") then mode = "RealUI" end
-    if ACD.OpenFrames[mode] then
-        ACD:Close(mode)
-    else
-        ACD:Open(mode, ...)
+    --if not app:match("RealUI") then app = "RealUI" end
+    if ACD.OpenFrames[app] and not section then
+        ACD:Close(app)
+    elseif section or app ~= "HuD" then
+        ACD:Open(app, section)
+    end
+
+    if ... then
+        ACD:SelectGroup(app, section, ...)
     end
 end
 
@@ -710,6 +739,7 @@ local unitframes do
                     raid = {
                         name = RAID,
                         type = "group",
+                        disabled = not Grid2,
                         order = 30,
                         args = {
                             layout = {
@@ -731,6 +761,14 @@ local unitframes do
                                     db.arena.enabled = value
                                 end,
                                 order = 20,
+                            },
+                            advanced = {
+                                name = ADVANCED_OPTIONS,
+                                type = "execute",
+                                func = function(info, ...)
+                                    nibRealUI:LoadConfig("nibRealUI")
+                                end,
+                                order = 0,
                             },
                             options = {
                                 name = "",

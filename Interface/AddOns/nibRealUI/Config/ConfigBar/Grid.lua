@@ -537,6 +537,4 @@ function ConfigBar_Grid:OnInitialize()
 	ndbc = nibRealUI.db.char
 
 	self:Register()
-
-	self:SetUpChatCommands()
 end
