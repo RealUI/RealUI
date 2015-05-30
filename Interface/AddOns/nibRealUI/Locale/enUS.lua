@@ -202,10 +202,14 @@ L["Misc_SpellAlertsDesc"] = "Modify the position and size of the Spell Alerts."
 L["Misc_SpellAlertsWidthDesc"] = "Adjust the distance between the left and right Spell Alert Overlays."
 L["Raid_30Width"] = "30 Player Width"
 L["Raid_40Width"] = "40 Player Width"
+L["Raid_LargeGroup"] = "Large groups"
+L["Raid_LargeGroupDesc"] = "Use horizontal groups while in large groups like raids or battlegrounds"
 L["Raid_NoteAdvSettings"] = [=[Note: Use Advanced Settings to open Grid2's configuration window.
           Untick |cff30d0ffRealUI Control|r settings if you want to change settings
           that RealUI controls (position, layout, borders).]=]
 L["Raid_ShowSolo"] = "Show While Solo"
+L["Raid_SmallGroup"] = "Small groups"
+L["Raid_SmallGroupDesc"] = "Use horizontal groups while in small groups like dungeons or arenas"
 L["UnitFrames_AnchorWidth"] = "Anchor Width"
 L["UnitFrames_AnchorWidthDesc"] = "The amount of space between the Player frame and the Target frame."
 L["UnitFrames_AnnounceChatDesc"] = "Chat channel used for trinket announcement."

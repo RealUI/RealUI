@@ -739,16 +739,25 @@ local unitframes do
                     raid = {
                         name = RAID,
                         type = "group",
+                        childGroups = "tab",
                         disabled = not Grid2,
                         order = 30,
                         args = {
+                            advanced = {
+                                name = ADVANCED_OPTIONS,
+                                type = "execute",
+                                func = function(info, ...)
+                                    Grid2:OnChatCommand("")
+                                end,
+                                order = 0,
+                            },
                             layout = {
                                 name = L["Control_Layout"],
                                 desc = L["Control_LayoutDesc"]:format("Grid2"),
                                 type = "toggle",
-                                get = function() return db.arena.enabled end,
+                                get = function() return nibRealUI:GetModuleEnabled("GridLayout") end,
                                 set = function(info, value)
-                                    db.arena.enabled = value
+                                    nibRealUI:SetModuleEnabled("GridLayout", value)
                                 end,
                                 order = 10,
                             },
@@ -756,27 +765,23 @@ local unitframes do
                                 name = L["General_Position"],
                                 desc = L["Control_PositionDesc"]:format("Grid2"),
                                 type = "toggle",
-                                get = function() return db.arena.enabled end,
+                                get = function() return nibRealUI:DoesAddonMove("Grid2") end,
                                 set = function(info, value)
-                                    db.arena.enabled = value
+                                    nibRealUI:ToggleAddonPositionControl("Grid2", value)
                                 end,
                                 order = 20,
                             },
-                            advanced = {
-                                name = ADVANCED_OPTIONS,
-                                type = "execute",
-                                func = function(info, ...)
-                                    nibRealUI:LoadConfig("nibRealUI")
-                                end,
-                                order = 0,
-                            },
-                            options = {
-                                name = "",
+                            dps = {
+                                name = L["Layout_DPSTank"],
                                 type = "group",
-                                inline = true,
                                 order = 30,
-                                args = {
-                                },
+                                args = {}
+                            },
+                            healing = {
+                                name = L["Layout_Healing"],
+                                type = "group",
+                                order = 40,
+                                args = {}
                             },
                         }
                     },
@@ -924,6 +929,114 @@ local unitframes do
                     db.positions[hudSize].boss.y = nibRealUI:ValidateOffset(value)
                 end,
             }
+        else
+            local GridLayout = nibRealUI:GetModule("GridLayout")
+            local db = GridLayout.db.profile
+            for i, type in next, {"dps", "healing"} do
+                local args = group.args[type].args
+                args.horizGroups = {
+                    name = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS,
+                    type = "group",
+                    inline = true,
+                    order = 10,
+                    args = {
+                        smallGroups = {
+                            name = L["Raid_SmallGroup"],
+                            desc = L["Raid_SmallGroupDesc"],
+                            type = "toggle",
+                            get = function() return db[type].hGroups.normal end,
+                            set = function(info, value)
+                                db[type].hGroups.normal = value
+                                GridLayout:SettingsUpdate()
+                            end,
+                            order = 10,
+                        },
+                        largeGroups = {
+                            name = L["Raid_LargeGroup"],
+                            desc = L["Raid_LargeGroupDesc"],
+                            type = "toggle",
+                            get = function() return db[type].hGroups.raid end,
+                            set = function(info, value)
+                                db[type].hGroups.raid = value
+                                GridLayout:SettingsUpdate()
+                            end,
+                            order = 20,
+                        },
+                    },
+                }
+                args.showPets = {
+                    name = SHOW_PARTY_PETS_TEXT,
+                    type = "toggle",
+                    get = function() return db[type].showPet end,
+                    set = function(info, value)
+                        db[type].showPet = value
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 20,
+                }
+                args.showSolo = {
+                    name = L["Raid_ShowSolo"],
+                    type = "toggle",
+                    get = function() return db[type].showSolo end,
+                    set = function(info, value)
+                        db[type].showSolo = value
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 30,
+                }
+                local prof = (type == "dps") and "RealUI" or "RealUI-Healing"
+                local Grid2DB = Grid2DB and Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
+                args.height = {
+                    name = RAID_FRAMES_HEIGHT,
+                    type = "range",
+                    min = 20, max = 80, step = 1,
+                    get = function(info)
+                        debug("Get Grid Height", Grid2DB, Grid2DB and Grid2DB["frameHeight"])
+                        return Grid2DB and Grid2DB["frameHeight"]
+                    end,
+                    set = function(info, value)
+                        debug("Set Grid Height", Grid2DB, Grid2DB and Grid2DB["frameHeight"])
+                        if Grid2DB and Grid2DB["frameHeight"] then
+                            Grid2DB["frameHeight"] = value
+                        end
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 40,
+                }
+                args.width = {
+                    name = RAID_FRAMES_WIDTH,
+                    type = "range",
+                    min = 40, max = 110, step = 1,
+                    get = function(info) return db[type].width.normal end,
+                    set = function(info, value)
+                        db[type].width.normal = value
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 40,
+                }
+                args.width30 = {
+                    name = L["Raid_30Width"],
+                    type = "range",
+                    min = 40, max = 110, step = 1,
+                    get = function(info) return db[type].width[30] end,
+                    set = function(info, value)
+                        db[type].width[30] = value
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 40,
+                }
+                args.width40 = {
+                    name = L["Raid_40Width"],
+                    type = "range",
+                    min = 40, max = 110, step = 1,
+                    get = function(info) return db[type].width[40] end,
+                    set = function(info, value)
+                        db[type].width[40] = value
+                        GridLayout:SettingsUpdate()
+                    end,
+                    order = 40,
+                }
+            end
         end
     end
 end
