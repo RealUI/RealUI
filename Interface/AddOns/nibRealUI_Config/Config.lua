@@ -902,6 +902,36 @@ local unitframes do
     for groupSlug, group in next, groups do
         if groupSlug == "boss" or groupSlug == "arena" then
             local args = groupSlug == "boss" and group.args or group.args.options.args
+            args.horizontal = {
+                name = L["HuD_Horizontal"],
+                type = "range",
+                width = "double",
+                min = -round(uiWidth * 0.85),
+                max = -30,
+                step = 1,
+                bigStep = 4,
+                get = function(info) return ndb.positions[nibRealUI.cLayout]["BossX"] end,
+                set = function(info, value)
+                    ndb.positions[nibRealUI.cLayout]["BossX"] = value
+                    nibRealUI:UpdatePositioners()
+                end,
+                order = 2,
+            }
+            args.vertical = {
+                name = L["HuD_Vertical"],
+                type = "range",
+                width = "double",
+                min = -round(uiHeight * 0.4),
+                max = round(uiHeight * 0.4),
+                step = 1,
+                bigStep = 2,
+                get = function(info) return ndb.positions[nibRealUI.cLayout]["BossY"] end,
+                set = function(info, value)
+                    ndb.positions[nibRealUI.cLayout]["BossY"] = value
+                    nibRealUI:UpdatePositioners()
+                end,
+                order = 4,
+            }
             args.gap = {
                 name = L["UnitFrames_Gap"],
                 desc = L["UnitFrames_GapDesc"],
@@ -909,33 +939,49 @@ local unitframes do
                 min = 0, max = 10, step = 1,
                 get = function(info) return db.boss.gap end,
                 set = function(info, value) db.boss.gap = value end,
-                order = 2,
-            }
-            args.x = {
-                name = L["UnitFrames_XOffset"],
-                type = "input",
-                order = 4,
-                get = function(info) return tostring(db.positions[hudSize].boss.x) end,
-                set = function(info, value)
-                    db.positions[hudSize].boss.x = nibRealUI:ValidateOffset(value)
-                end,
-            }
-            args.y = {
-                name = L["UnitFrames_YOffset"],
-                type = "input",
                 order = 6,
-                get = function(info) return tostring(db.positions[hudSize].boss.y) end,
-                set = function(info, value)
-                    db.positions[hudSize].boss.y = nibRealUI:ValidateOffset(value)
-                end,
             }
         else
             local GridLayout = nibRealUI:GetModule("GridLayout")
             local db = GridLayout.db.profile
             for i, type in next, {"dps", "healing"} do
                 local args = group.args[type].args
+                local anchor = (type == "dps") and "Bottom" or "Top"
+                args.horizontal = {
+                    name = L["HuD_Horizontal"],
+                    disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
+                    type = "range",
+                    width = "double",
+                    min = -round(uiWidth * 0.4),
+                    max = round(uiWidth * 0.4),
+                    step = 1,
+                    bigStep = 4,
+                    get = function(info) return ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."X"] end,
+                    set = function(info, value)
+                        ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."X"] = value
+                        nibRealUI:UpdatePositioners()
+                    end,
+                    order = 4,
+                }
+                args.vertical = {
+                    name = L["HuD_Vertical"],
+                    disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
+                    type = "range",
+                    width = "double",
+                    min = type == "dps" and 0 or -round(uiWidth * 0.2),
+                    max = round(uiHeight * 0.5),
+                    step = 1,
+                    bigStep = 2,
+                    get = function(info) return ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."Y"] end,
+                    set = function(info, value)
+                        ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."Y"] = value
+                        nibRealUI:UpdatePositioners()
+                    end,
+                    order = 6,
+                }
                 args.horizGroups = {
                     name = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS,
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "group",
                     inline = true,
                     order = 10,
@@ -966,6 +1012,7 @@ local unitframes do
                 }
                 args.showPets = {
                     name = SHOW_PARTY_PETS_TEXT,
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
                     get = function() return db[type].showPet end,
                     set = function(info, value)
@@ -976,6 +1023,7 @@ local unitframes do
                 }
                 args.showSolo = {
                     name = L["Raid_ShowSolo"],
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
                     get = function() return db[type].showSolo end,
                     set = function(info, value)
@@ -988,6 +1036,7 @@ local unitframes do
                 local Grid2DB = Grid2DB and Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
                 args.height = {
                     name = RAID_FRAMES_HEIGHT,
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 20, max = 80, step = 1,
                     get = function(info)
@@ -1005,6 +1054,7 @@ local unitframes do
                 }
                 args.width = {
                     name = RAID_FRAMES_WIDTH,
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
                     get = function(info) return db[type].width.normal end,
@@ -1016,6 +1066,7 @@ local unitframes do
                 }
                 args.width30 = {
                     name = L["Raid_30Width"],
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
                     get = function(info) return db[type].width[30] end,
@@ -1027,6 +1078,7 @@ local unitframes do
                 }
                 args.width40 = {
                     name = L["Raid_40Width"],
+                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
                     get = function(info) return db[type].width[40] end,
