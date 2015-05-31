@@ -1259,7 +1259,13 @@ function PointTracking:PLAYER_LOGIN()
     LSM:Register("background", "Soul_Shard_BG", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]])
     LSM:Register("background", "Soul_Shard_Surround", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]])
     
-    HolyPowerTexture = {[[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]}
+    HolyPowerTexture = {
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
+    }
     
     -- Get Spell Info
     -- Death Knight

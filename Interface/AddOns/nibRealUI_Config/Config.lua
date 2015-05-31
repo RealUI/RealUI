@@ -1319,8 +1319,8 @@ local auratracker do
                 local spellName, next = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
                 if spellName ~= next then
                     debug("These two have the same name", i, spellName)
-                    -- If two spells have the same name, only display one.
-                    name = name..(next and ", " or "")..spellName
+                    -- Only add a spell if the next one is different.
+                    name = name..spellName..(next and ", " or "")
                 end
             end
         else
@@ -1821,6 +1821,24 @@ local classresource do
                     end,
                     order = 10,
                 },
+                runes = {
+                    name = RUNES,
+                    type = "group",
+                    hidden = nibRealUI.class ~= "DEATHKNIGHT",
+                    disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                    order = 20,
+                    args = {
+                        hideempty = {
+                            type = "toggle",
+                            name = "Hide unused points/stacks",
+                            desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
+                            get = function(info) return end,
+                            set = function(info, value) 
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
                 bars = {
                     name = bars,
                     type = "group",
@@ -1841,6 +1859,7 @@ local classresource do
                 },
             }
         }
+        power = power or {}
         for i = 1, #power do
             local options = db[class].types[power[i].id]
             local pointName = CombatLog_String_PowerType(_G[power[i].type])
@@ -1852,8 +1871,8 @@ local classresource do
                 args = {
                     hideempty = {
                         type = "toggle",
-                        name = "Hide unused points/stacks",
-                        desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
+                        name = L["Resource_HideUnused"]:format(pointName),
+                        desc = L["Resource_HideUnusedDesc"]:format(pointName),
                         get = function(info) return options.general.hideempty end,
                         set = function(info, value) 
                             options.general.hideempty = value
@@ -1861,22 +1880,10 @@ local classresource do
                         end,
                         order = 20,
                     },
-                    smarthide = {
-                        type = "toggle",
-                        name = "Smart hide",
-                        desc = "Hide while solo, ungrouped, not in an instance. Will still show if you have an attackable target selected or are in combat.",
-                        get = function(info) return options.general.smarthide end,
-                        set = function(info, value) 
-                            options.general.smarthide = value
-                            PointTracking:UpdateSmartHideConditions()
-                            PointTracking:UpdatePointTracking()
-                        end,
-                        order = 30,
-                    },
                     reverse = {
                         type = "toggle",
-                        name = "Reverse orientation",
-                        desc = string.format("Reverse the orientation of the %s display.", pointName),
+                        name = L["Resource_Reverse"],
+                        desc = L["Resource_ReverseDesc"]:format(pointName),
                         get = function(info) return options.general.direction.reverse end,
                         set = function(info, value) 
                             options.general.direction.reverse = value
