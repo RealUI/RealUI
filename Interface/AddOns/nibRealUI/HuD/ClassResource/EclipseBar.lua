@@ -315,7 +315,7 @@ function EclipseBar:OnEnable()
     self.configMode = false
 
     if not self.eBar then 
-        self.eBar = ClassResourceBar:New("short")
+        self.eBar = ClassResourceBar:New("short", L["Resource_Eclipse"])
     end
 
     local updateSpeed

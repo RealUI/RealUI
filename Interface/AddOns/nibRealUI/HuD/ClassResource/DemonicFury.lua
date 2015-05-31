@@ -147,7 +147,7 @@ function DemonicFury:OnEnable()
     MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)
 
     if not self.dfBar then 
-        self.dfBar = ClassResourceBar:New("short")
+        self.dfBar = ClassResourceBar:New("short", L["Resource_DemonicFury"])
         self.dfBar:SetEndBoxShown("left", false)
         self.dfBar:SetEndBoxShown("right", false)
         self.dfBar:SetBoxColor("middle", nibRealUI.classColor)

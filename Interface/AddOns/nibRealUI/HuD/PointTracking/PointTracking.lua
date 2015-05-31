@@ -727,6 +727,22 @@ local PlayerInInstance
 local SmartHideConditions
 local ValidClasses
 
+function PointTracking:GetResource()
+    if PlayerClass == "ROGUE" then
+        return {{type = "SPELL_POWER_COMBO_POINTS", id = "cp"}}, "GENERAL"
+    elseif PlayerClass == "DRUID" then
+        return {{type = "SPELL_POWER_COMBO_POINTS", id = "cp"}}, "GENERAL"
+    elseif PlayerClass == "MONK" then
+        return {{type = "SPELL_POWER_CHI", id = "chi"}}, PlayerClass
+    elseif PlayerClass == "PALADIN" then
+        return {{type = "SPELL_POWER_HOLY_POWER", id = "hp"}}, PlayerClass
+    elseif PlayerClass == "PRIEST" then
+        return {{type = "SPELL_POWER_SHADOW_ORBS", id = "so"}}, PlayerClass
+    elseif PlayerClass == "WARLOCK" then
+        return {{type = "SPELL_POWER_SOUL_SHARDS", id = "ss"}, {type = "SPELL_POWER_BURNING_EMBERS", id = "be"}}, PlayerClass
+    end
+end
+
 -- Update Point Bars
 local PBTex = {}
 local ebColors = {

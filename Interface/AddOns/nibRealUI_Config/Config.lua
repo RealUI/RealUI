@@ -111,6 +111,10 @@ local function InitializeOptions()
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         },
         {
+            slug = "classresource",
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+        },
+        {
             slug = "close",
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             onclick = function(self, ...)
@@ -149,89 +153,91 @@ local function InitializeOptions()
     for i = 1, #tabs do
         local tab = tabs[i]
         debug("iter tabs", i, tab.slug)
-        local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
-        btn.ID = i
-        btn.slug = tab.slug
-        btn:SetSize(width, height)
-        btn:SetScript("OnEnter", function(self, ...)
-            if slideAnim:IsPlaying() then return end
-            debug("OnEnter", tab.slug)
-            if highlight:IsShown() then
-                debug(highlight.hover, highlight.clicked)
-                if highlight.hover ~= self.ID then
-                    hl:SetOffset(width * (self.ID - highlight.hover), 0)
-                    hlAnim:SetScript("OnFinished", function(hlAnim)
-                        highlight.hover = i
-                        highlight:SetAllPoints(self)
-                    end)
-                    hlAnim:Play()
-                elseif hlAnim:IsPlaying() then
-                    debug("Stop Playing")
-                    hlAnim:Stop()
-                end
-            else
-                highlight.hover = i
-                highlight:SetAllPoints(self)
-                highlight:Show()
-            end
-        end)
-        btn:SetScript("OnLeave", function(self, ...)
-            if hudConfig:IsMouseOver() then return end
-            debug("OnLeave hudConfig", ...)
-            if highlight.clicked then
-                debug(highlight.hover, highlight.clicked)
-                if highlight.hover ~= highlight.clicked then
-                    hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
-                    hlAnim:SetScript("OnFinished", function(hlAnim)
-                        highlight.hover = highlight.clicked
-                        highlight:SetAllPoints(hudConfig[highlight.clicked])
-                    end)
-                    hlAnim:Play()
-                elseif hlAnim:IsPlaying() then
-                    debug("Stop Playing")
-                    hlAnim:Stop()
-                end
-            else
-                highlight:Hide()
-            end
-        end)
-
-        if i == 1 then
-            btn:SetPoint("TOPLEFT")
-            local check = CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
-            check:SetHitRectInsets(-10, -10, -1, -21)
-            check:SetPoint("CENTER", 0, 10)
-            check:SetAttribute("type1", "macro")
-            _G.SecureHandlerWrapScript(check, "OnClick", check, [[
-                if self:GetID() == 1 then
-                    self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
-                    self:SetID(0)
+        if options.HuD.args[tab.slug] then
+            local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
+            btn.ID = i
+            btn.slug = tab.slug
+            btn:SetSize(width, height)
+            btn:SetScript("OnEnter", function(self, ...)
+                if slideAnim:IsPlaying() then return end
+                debug("OnEnter", tab.slug)
+                if highlight:IsShown() then
+                    debug(highlight.hover, highlight.clicked)
+                    if highlight.hover ~= self.ID then
+                        hl:SetOffset(width * (self.ID - highlight.hover), 0)
+                        hlAnim:SetScript("OnFinished", function(hlAnim)
+                            highlight.hover = i
+                            highlight:SetAllPoints(self)
+                        end)
+                        hlAnim:Play()
+                    elseif hlAnim:IsPlaying() then
+                        debug("Stop Playing")
+                        hlAnim:Stop()
+                    end
                 else
-                    self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUIHuDTestMode(true)"))
-                    self:SetID(1)
+                    highlight.hover = i
+                    highlight:SetAllPoints(self)
+                    highlight:Show()
                 end
-            ]])
-        else
-            btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
-            btn:SetScript("OnClick", tab.onclick or tabOnClick)
+            end)
+            btn:SetScript("OnLeave", function(self, ...)
+                if hudConfig:IsMouseOver() then return end
+                debug("OnLeave hudConfig", ...)
+                if highlight.clicked then
+                    debug(highlight.hover, highlight.clicked)
+                    if highlight.hover ~= highlight.clicked then
+                        hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
+                        hlAnim:SetScript("OnFinished", function(hlAnim)
+                            highlight.hover = highlight.clicked
+                            highlight:SetAllPoints(hudConfig[highlight.clicked])
+                        end)
+                        hlAnim:Play()
+                    elseif hlAnim:IsPlaying() then
+                        debug("Stop Playing")
+                        hlAnim:Stop()
+                    end
+                else
+                    highlight:Hide()
+                end
+            end)
 
-            local icon = btn:CreateTexture(nil, "ARTWORK")
-            icon:SetTexture(tab.icon)
-            icon:SetSize(height * 0.5, height * 0.5)
-            icon:SetPoint("TOP", 0, -(height * 0.15))
+            if i == 1 then
+                btn:SetPoint("TOPLEFT")
+                local check = CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
+                check:SetHitRectInsets(-10, -10, -1, -21)
+                check:SetPoint("CENTER", 0, 10)
+                check:SetAttribute("type1", "macro")
+                _G.SecureHandlerWrapScript(check, "OnClick", check, [[
+                    if self:GetID() == 1 then
+                        self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
+                        self:SetID(0)
+                    else
+                        self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUIHuDTestMode(true)"))
+                        self:SetID(1)
+                    end
+                ]])
+            else
+                btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
+                btn:SetScript("OnClick", tab.onclick or tabOnClick)
+
+                local icon = btn:CreateTexture(nil, "ARTWORK")
+                icon:SetTexture(tab.icon)
+                icon:SetSize(height * 0.5, height * 0.5)
+                icon:SetPoint("TOP", 0, -(height * 0.15))
+            end
+
+            local text = btn:CreateFontString()
+            text:SetFontObject(_G.GameFontHighlightSmall)
+            text:SetWidth(width * 0.9)
+            text:SetPoint("BOTTOM", 0, width * 0.08)
+            text:SetText(options.HuD.args[tab.slug].name)
+            btn.text = text
+
+            tinsert(hudConfig, btn)
+            prevFrame = btn
         end
-
-        local text = btn:CreateFontString()
-        text:SetFontObject(_G.GameFontHighlightSmall)
-        text:SetWidth(width * 0.9)
-        text:SetPoint("BOTTOM", 0, width * 0.08)
-        text:SetText(options.HuD.args[tab.slug].name)
-        btn.text = text
-
-        hudConfig[i] = btn
-        prevFrame = btn
     end
-    hudConfig:SetSize(#tabs * width, height)
+    hudConfig:SetSize(#hudConfig * width, height)
 
     hudToggle = function(skipAnim)
         if isHuDShown then
@@ -1793,6 +1799,130 @@ local auratracker do
         auratracker.args.options.args["spell"..id] = tracker
     end
 end
+local classresource do
+    local PointTracking = nibRealUI:GetModule("PointTracking")
+    local db = PointTracking.db.profile
+    local power, class = PointTracking:GetResource()
+    local bars = nibRealUI:GetResourceBar()
+    if power or bars then
+        classresource = {
+            name = L["Resource"],
+            type = "group",
+            childGroups = "tab",
+            args = {
+                enable = {
+                    name = L["General_Enabled"],
+                    desc = L["General_EnabledDesc"]:format(L["Resource"]),
+                    type = "toggle",
+                    get = function(info) return nibRealUI:GetModuleEnabled("PointTracking") end,
+                    set = function(info, value)
+                        nibRealUI:SetModuleEnabled("PointTracking", value)
+                        nibRealUI:ReloadUIDialog()
+                    end,
+                    order = 10,
+                },
+                bars = {
+                    name = bars,
+                    type = "group",
+                    hidden = bars == nil,
+                    disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                    order = 30,
+                    args = {
+                        hideempty = {
+                            type = "toggle",
+                            name = "Hide unused points/stacks",
+                            desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
+                            get = function(info) return end,
+                            set = function(info, value) 
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
+            }
+        }
+        for i = 1, #power do
+            local options = db[class].types[power[i].id]
+            local pointName = CombatLog_String_PowerType(_G[power[i].type])
+            local points = {
+                name = pointName,
+                type = "group",
+                disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                order = 20,
+                args = {
+                    hideempty = {
+                        type = "toggle",
+                        name = "Hide unused points/stacks",
+                        desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
+                        get = function(info) return options.general.hideempty end,
+                        set = function(info, value) 
+                            options.general.hideempty = value
+                            PointTracking:UpdatePoints("ENABLE")
+                        end,
+                        order = 20,
+                    },
+                    smarthide = {
+                        type = "toggle",
+                        name = "Smart hide",
+                        desc = "Hide while solo, ungrouped, not in an instance. Will still show if you have an attackable target selected or are in combat.",
+                        get = function(info) return options.general.smarthide end,
+                        set = function(info, value) 
+                            options.general.smarthide = value
+                            PointTracking:UpdateSmartHideConditions()
+                            PointTracking:UpdatePointTracking()
+                        end,
+                        order = 30,
+                    },
+                    reverse = {
+                        type = "toggle",
+                        name = "Reverse orientation",
+                        desc = string.format("Reverse the orientation of the %s display.", pointName),
+                        get = function(info) return options.general.direction.reverse end,
+                        set = function(info, value) 
+                            options.general.direction.reverse = value
+                            PointTracking:UpdatePosition()
+                        end,
+                        order = 20,
+                    },
+                    position = {
+                        name = "Position",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if options.enabled then return false else return true end end,
+                        order = 80,
+                        args = {
+                            xoffset = {
+                                type = "input",
+                                name = "X Offset",
+                                width = "half",
+                                order = 10,
+                                get = function(info) return tostring(options.position.x) end,
+                                set = function(info, value)
+                                    value = nibRealUI:ValidateOffset(value)
+                                    options.position.x = value
+                                    PointTracking:UpdatePosition()
+                                end,
+                            },
+                            yoffset = {
+                                type = "input",
+                                name = "Y Offset",
+                                width = "half",
+                                order = 20,
+                                get = function(info) return tostring(options.position.y) end,
+                                set = function(info, value)
+                                    value = nibRealUI:ValidateOffset(value)
+                                    options.position.y = value
+                                    PointTracking:UpdatePosition()
+                                end,
+                            },
+                        },
+                    },
+                },
+            }
+            classresource.args["point"..i] = points
+        end
+    end
+end
 options.HuD = {
     type = "group",
     args = {
@@ -1806,6 +1936,7 @@ options.HuD = {
         unitframes = unitframes,
         castbars = castbars,
         auratracker = auratracker,
+        classresource = classresource,
         close = { -- This is for button creation
             name = CLOSE,
             type = "group",

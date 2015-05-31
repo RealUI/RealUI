@@ -175,7 +175,7 @@ function BloodShield:OnEnable()
 	BloodShieldName = GetSpellInfo(BloodShieldID)
 
 	if not self.bsBar then 
-		self.bsBar = ClassResourceBar:New("long")
+		self.bsBar = ClassResourceBar:New("long", L["Resource_BloodShield"])
 		self.bsBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 	self:UpdateMax()

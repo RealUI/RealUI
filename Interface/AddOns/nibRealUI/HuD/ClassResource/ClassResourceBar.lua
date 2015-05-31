@@ -8,7 +8,7 @@ local ClassResourceBar = nibRealUI:CreateModule(MODNAME)
 
 local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
 
-local layoutSize
+local layoutSize, currentResource
 
 local Textures = {
     short = {
@@ -47,6 +47,10 @@ local BarWidth = {
         [2] = 128,
     },
 }
+
+function nibRealUI:GetResourceBar()
+    return currentResource
+end
 
 function ClassResourceBar:SetValue(side, value)
     AngleStatusBar:SetValue(self.parent[side].bar, value)
@@ -180,11 +184,12 @@ function ClassResourceBar:CreateResourceBar(size)
         rBar.middle.value:SetJustifyH("CENTER")
 end
 
-function ClassResourceBar:New(size)
+function ClassResourceBar:New(size, name)
     local ResourceBar = {}
     setmetatable(ResourceBar, {__index = self})
 
     ResourceBar:CreateResourceBar(size)
+    currentResource = name
 
     return ResourceBar
 end
