@@ -77,7 +77,7 @@ AuraTracking.Defaults = {
         specs = {true, false, false},
     },
     {   -- Dancing Rune Weapon (Blood)
-        spell = 87256,
+        spell = 81256,
         specs = {true, false, false},
     },
     {   -- Bone Shield (Blood)
