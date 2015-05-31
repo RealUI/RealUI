@@ -386,7 +386,7 @@ local other do
                     },
                     position = {
                         name = L["HuD_Width"],
-                        name = L["Misc_SpellAlertsWidthDesc"],
+                        desc = L["Misc_SpellAlertsWidthDesc"],
                         type = "range",
                         width = "double",
                         min = round(uiWidth * 0.1),
@@ -400,6 +400,56 @@ local other do
                             nibRealUI:UpdatePositioners()
                         end,
                     }
+                }
+            },
+            actionbars = {
+                name = ACTIONBAR_LABEL,
+                desc = L["ActionBars_ActionBarsDesc"],
+                type = "group",
+                order = 20,
+                args = {
+                    header = {
+                        name = ACTIONBAR_LABEL,
+                        type = "header",
+                        order = 0,
+                    },
+                    desc = {
+                        name = L["ActionBars_ActionBarsDesc"],
+                        type = "description",
+                        fontSize = "medium",
+                        order = 1,
+                    },
+                    enabled = {
+                        name = L["General_Enabled"],
+                        desc = L["General_EnabledDesc"]:format(ACTIONBAR_LABEL),
+                        type = "toggle",
+                        get = function() return nibRealUI:GetModuleEnabled("SpellAlerts") end,
+                        set = function(info, value) 
+                            nibRealUI:SetModuleEnabled("SpellAlerts", value)
+                            nibRealUI:ReloadUIDialog()
+                        end,
+                        order = 10,
+                    },
+                    layout = {
+                        name = L["Control_Layout"],
+                        desc = L["Control_LayoutDesc"]:format("Bartender4"),
+                        type = "toggle",
+                        get = function() return nibRealUI:GetModuleEnabled("GridLayout") end,
+                        set = function(info, value)
+                            nibRealUI:SetModuleEnabled("GridLayout", value)
+                        end,
+                        order = 20,
+                    },
+                    position = {
+                        name = L["Control_Position"],
+                        desc = L["Control_PositionDesc"]:format("Bartender4"),
+                        type = "toggle",
+                        get = function() return nibRealUI:DoesAddonMove("Bartender4") end,
+                        set = function(info, value)
+                            nibRealUI:ToggleAddonPositionControl("Bartender4", value)
+                        end,
+                        order = 30,
+                    },
                 }
             }
         }
@@ -762,7 +812,7 @@ local unitframes do
                                 order = 10,
                             },
                             position = {
-                                name = L["General_Position"],
+                                name = L["Control_Position"],
                                 desc = L["Control_PositionDesc"]:format("Grid2"),
                                 type = "toggle",
                                 get = function() return nibRealUI:DoesAddonMove("Grid2") end,

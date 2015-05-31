@@ -158,11 +158,11 @@ nibRealUI.defaultActionBarSettings = {
         -- stanceBar = {position = "BOTTOM", padding = 1},
         petBar = {padding = 1},
         bars = {
-            [1] = {buttons = 10, padding = 1},
+            [1] = {buttons = 12, padding = 1},
             [2] = {buttons = 12, padding = 1},
             [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1}
+            [4] = {buttons = 12, padding = 1},
+            [5] = {buttons = 12, padding = 1}
         },
         moveBars = {
             stance = true,
@@ -176,11 +176,11 @@ nibRealUI.defaultActionBarSettings = {
         -- stanceBar = {position = "BOTTOM", padding = 1},
         petBar = {padding = 1},
         bars = {
-            [1] = {buttons = 10, padding = 1},
+            [1] = {buttons = 12, padding = 1},
             [2] = {buttons = 12, padding = 1},
             [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1},
+            [4] = {buttons = 12, padding = 1},
+            [5] = {buttons = 12, padding = 1}
         },
         moveBars = {
             stance = true,
