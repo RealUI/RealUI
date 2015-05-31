@@ -98,7 +98,7 @@ local function GetOptions()
     local Opts_ClassOrderCnt = 40
     local Opts_TypeOrderCnt = 10
     
-    for ic,vc in pairs(Types) do
+    for ic, vc in pairs(Types) do
         local ClassID = Types[ic].name
         
         wipe(TypeOpts)
@@ -727,6 +727,14 @@ local PlayerInInstance
 local SmartHideConditions
 local ValidClasses
 
+local idToPower = {
+    cp = SPELL_POWER_COMBO_POINTS,
+    chi = SPELL_POWER_CHI,
+    hp = SPELL_POWER_HOLY_POWER,
+    so = SPELL_POWER_SHADOW_ORBS,
+    ss = SPELL_POWER_SOUL_SHARDS,
+    be = SPELL_POWER_BURNING_EMBERS
+}
 function PointTracking:GetResource()
     if PlayerClass == "ROGUE" then
         return {{type = "SPELL_POWER_COMBO_POINTS", id = "cp"}}, "GENERAL"
@@ -833,12 +841,15 @@ function PointTracking:UpdatePointTracking(...)
             -- Update the Display
                 -- Update Bars if their Points have changed
                 if PointsChanged[tid] then
+                    local max = UnitPowerMax("player", idToPower[tid])
                     for i = 1, Types[ic].points[it].barcount do
                         if Points[tid] == nil then Points[tid] = 0 end
                         if Points[tid] >= i then
                         -- Show bar and set textures to "Full"
                             Frames[ic][tid].bars[i].frame:Show()
                             SetPointBarTextures(true, ic, it, tid, i)
+                        elseif i > max then
+                            Frames[ic][tid].bars[i].frame:Hide()
                         else
                             if db[ic].types[tid].general.hideempty then
                             -- Hide "empty" bar
@@ -882,44 +893,11 @@ end
 
 function PointTracking:GetPoints(CurClass, CurType)
     local NewPoints
-    -- General
-    if CurClass == "GENERAL" then
-        -- Combo Points
-        if CurType == "cp" then
-            NewPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
-        end
-    -- Monk
-    elseif CurClass == "MONK" then
-        -- Chi
-        if CurType == "chi" then
-            NewPoints = UnitPower("player", SPELL_POWER_CHI)
-        end
-    -- Priest
-    elseif CurClass == "PALADIN" then
-        -- Holy Power
-        if CurType == "hp" then
-            NewPoints = UnitPower("player", SPELL_POWER_HOLY_POWER)
-        end
-    -- Priest
-    elseif CurClass == "PRIEST" then
-        if CurType == "so" then
-            NewPoints = UnitPower("player", SPELL_POWER_SHADOW_ORBS)
-        end
-    -- Rogue
-    elseif CurClass == "ROGUE" then
+    if CurType == "ap" then
         -- Anticipation Points
-        if CurType == "ap" then
-            NewPoints = GetBuffCount(SpellInfo[CurType])
-        end
-    -- Warlock
-    elseif CurClass == "WARLOCK" then
-        -- Soul Shards
-        if CurType == "ss" and PlayerTalent == 1 then
-            NewPoints = UnitPower("player", SPELL_POWER_SOUL_SHARDS)
-        -- Burning Embers
-        elseif CurType == "be" and PlayerTalent == 3 then
-            NewPoints = UnitPower("player", SPELL_POWER_BURNING_EMBERS)
-        end
+        NewPoints = GetBuffCount(SpellInfo[CurType])
+    else
+        NewPoints = UnitPower("player", idToPower[CurType])
     end
     Points[CurType] = NewPoints
 end
