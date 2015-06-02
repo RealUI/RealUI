@@ -50,7 +50,9 @@ function RealUIHuDTestMode(toggle)
 
 	-- RealUI Modules
 	for k, mod in pairs(nibRealUI.configModeModules) do
-		mod.ToggleConfigMode(mod, toggle)
+		if nibRealUI:GetModuleEnabled(mod.moduleName) then 
+			mod.ToggleConfigMode(mod, toggle)
+		end
 	end
 
 	-- Boss Frames

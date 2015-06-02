@@ -1044,19 +1044,19 @@ function PointTracking:UpdatePosition()
 end
 
 function PointTracking:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    for ic,vc in pairs(ValidClasses) do
-        for it,vt in ipairs(Types[ic].points) do
-            local tid = Types[ic].points[it].id
-            db[ic].types[tid].configmode.enabled = val
+    local power, class = self:GetResource()
+    if nibRealUI:GetModuleEnabled(MODNAME) and power then
+        for i = 1, #power do
+            local tid = power[i].id
+            db[class].types[tid].configmode.enabled = val
             if val then
-                db[ic].types[tid].configmode.count = Types[ic].points[it].barcount
+                db[class].types[tid].configmode.count = Types[class].points[i].barcount
             else
-                db[ic].types[tid].configmode.count = 2
+                db[class].types[tid].configmode.count = 2
             end
         end
+        self:UpdatePoints("ENABLE")
     end
-    self:UpdatePoints("ENABLE")
 end
 
 -- Retrieve SharedMedia backgound

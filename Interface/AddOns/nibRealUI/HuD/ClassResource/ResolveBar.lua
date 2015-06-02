@@ -9,6 +9,12 @@ local ResolveBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
 local class
+local classes = {
+    ["DRUID"] = true,
+    ["PALADIN"] = true,
+    ["WARRIOR"] = true,
+}
+
 local MinLevel = 10
 
 -- Options
@@ -107,8 +113,7 @@ end
 ------------
 function ResolveBar:ToggleConfigMode(val)
     --print("UpdateShown", val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if Resolve.special[class] then return end
+    if not nibRealUI:GetModuleEnabled(MODNAME) and not classes[class] then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -131,7 +136,6 @@ function ResolveBar:OnInitialize()
 end
 
 function ResolveBar:OnEnable()
-    if Resolve.special[class] then return end
     self.configMode = false
 
     if not self.rBar then 

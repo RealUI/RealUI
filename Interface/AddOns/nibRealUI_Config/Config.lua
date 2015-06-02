@@ -1828,15 +1828,36 @@ local classresource do
                     disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
                     order = 20,
                     args = {
-                        hideempty = {
-                            type = "toggle",
-                            name = "Hide unused points/stacks",
-                            desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
-                            get = function(info) return end,
-                            set = function(info, value) 
+                        horizontal = {
+                            name = L["HuD_Horizontal"],
+                            type = "range",
+                            width = "double",
+                            min = -round(uiWidth * 0.2),
+                            max = round(uiWidth * 0.2),
+                            step = 1,
+                            bigStep = 4,
+                            get = function(info) return ndb.positions[nibRealUI.cLayout]["RunesX"] end,
+                            set = function(info, value)
+                                ndb.positions[nibRealUI.cLayout]["RunesX"] = value
+                                nibRealUI:UpdatePositioners()
+                            end,
+                            order = 10,
+                        },
+                        vertical = {
+                            name = L["HuD_Vertical"],
+                            type = "range",
+                            width = "double",
+                            min = -round(uiHeight * 0.2),
+                            max = round(uiHeight * 0.2),
+                            step = 1,
+                            bigStep = 2,
+                            get = function(info) return ndb.positions[nibRealUI.cLayout]["RunesY"] end,
+                            set = function(info, value)
+                                ndb.positions[nibRealUI.cLayout]["RunesY"] = value
+                                nibRealUI:UpdatePositioners()
                             end,
                             order = 20,
-                        },
+                        }
                     },
                 },
                 bars = {
@@ -1846,15 +1867,36 @@ local classresource do
                     disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
                     order = 30,
                     args = {
-                        hideempty = {
-                            type = "toggle",
-                            name = "Hide unused points/stacks",
-                            desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
-                            get = function(info) return end,
-                            set = function(info, value) 
+                        horizontal = {
+                            name = L["HuD_Horizontal"],
+                            type = "range",
+                            width = "double",
+                            min = -round(uiWidth * 0.2),
+                            max = round(uiWidth * 0.2),
+                            step = 1,
+                            bigStep = 4,
+                            get = function(info) return ndb.positions[nibRealUI.cLayout]["ClassResourceX"] end,
+                            set = function(info, value)
+                                ndb.positions[nibRealUI.cLayout]["ClassResourceX"] = value
+                                nibRealUI:UpdatePositioners()
+                            end,
+                            order = 10,
+                        },
+                        vertical = {
+                            name = L["HuD_Vertical"],
+                            type = "range",
+                            width = "double",
+                            min = -round(uiHeight * 0.2),
+                            max = round(uiHeight * 0.2),
+                            step = 1,
+                            bigStep = 2,
+                            get = function(info) return ndb.positions[nibRealUI.cLayout]["ClassResourceY"] end,
+                            set = function(info, value)
+                                ndb.positions[nibRealUI.cLayout]["ClassResourceY"] = value
+                                nibRealUI:UpdatePositioners()
                             end,
                             order = 20,
-                        },
+                        }
                     },
                 },
             }
@@ -1898,6 +1940,38 @@ local classresource do
                         disabled = function() if options.enabled then return false else return true end end,
                         order = 80,
                         args = {
+                            horizontal = {
+                                name = L["HuD_Width"],
+                                type = "range",
+                                hidden = nibRealUI.class == "PALADIN",
+                                width = "double",
+                                min = round(uiWidth * 0.1),
+                                max = round(uiWidth * 0.5),
+                                step = 1,
+                                bigStep = 4,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 10,
+                            },
+                            vertical = {
+                                name = L["HuD_Height"],
+                                type = "range",
+                                hidden = nibRealUI.class ~= "PALADIN",
+                                width = "double",
+                                min = -round(uiHeight * 0.2),
+                                max = round(uiHeight * 0.2),
+                                step = 1,
+                                bigStep = 2,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] = value
+                                    nibRealUI:UpdatePositioners()
+                                end,
+                                order = 20,
+                            },
                             xoffset = {
                                 type = "input",
                                 name = "X Offset",
