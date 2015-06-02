@@ -17,43 +17,6 @@ local classes = {
 
 local MinLevel = 10
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Resolve",
-        desc = "Resolve tracker for Druids, Paladins and Warriors.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Resolve",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Resolve tracker for Druids, Paladins and Warriors.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Resolve module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
 ---------------------------
 ---- Resolve Updates ----
 ---------------------------
@@ -131,7 +94,6 @@ function ResolveBar:OnInitialize()
     class = nibRealUI.class
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
     nibRealUI:RegisterConfigModeModule(self)
 end
 

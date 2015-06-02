@@ -11,43 +11,6 @@ local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local MetamorphosisSpellID = 103958
 local MetamorphosisSpellName
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Demonic Fury",
-        desc = "Warlock Demonic Fury tracker.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Demonic Fury",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Warlock Demonic Fury tracker.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Demonic Fury module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
 ------------------------------
 ---- Demonic Fury Updates ----
 ------------------------------
@@ -135,7 +98,6 @@ function DemonicFury:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
     nibRealUI:RegisterConfigModeModule(self)
 end
 

@@ -8,100 +8,6 @@ local EclipseBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0
 
 local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Eclipse Bar",
-        desc = "Balance (Druid) Eclipse tracker.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Eclipse Bar",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Balance (Druid) Eclipse tracker.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Eclipse Bar module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            visibility = {
-                name = "Visibility",
-                type = "group",
-                inline = true,
-                order = 40,
-                args = {
-                    showCombat = {
-                        type = "toggle",
-                        name = "Only In combat",
-                        desc = "Only show the Eclipse Bar when you are in combat.",
-                        get = function() return db.visibility.showCombat end,
-                        set = function(info, value) 
-                            db.visibility.showCombat = value
-                            EclipseBar:UpdateVisibility()
-                        end,
-                        order = 10,
-                    },
-                    showHostile = {
-                        type = "toggle",
-                        name = "Attackable target",
-                        desc = "Show the Eclipse Bar when you have a target selected that you can attack.",
-                        get = function() return db.visibility.showHostile end,
-                        set = function(info, value) 
-                            db.visibility.showHostile = value
-                            EclipseBar:UpdateVisibility()
-                        end,
-                        order = 20,
-                    },
-                    showPvP = {
-                        type = "toggle",
-                        name = "In PvP",
-                        desc = "Always show the Eclipse Bar when you are in an Arena or Battleground.",
-                        get = function() return db.visibility.showPvP end,
-                        set = function(info, value) 
-                            db.visibility.showPvP = value
-                            EclipseBar:UpdateVisibility()
-                        end,
-                        order = 30,
-                    },
-                    showPvE = {
-                        type = "toggle",
-                        name = "In PvE",
-                        desc = "Always show the Eclipse Bar when you are in a Scenario, Dungeon or Raid.",
-                        get = function() return db.visibility.showPvE end,
-                        set = function(info, value) 
-                            db.visibility.showPvE = value
-                            EclipseBar:UpdateVisibility()
-                        end,
-                        order = 40,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 -------------------------
 ---- Eclipse Updates ----
 -------------------------
@@ -305,7 +211,6 @@ function EclipseBar:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
     nibRealUI:RegisterConfigModeModule(self)
 end
 

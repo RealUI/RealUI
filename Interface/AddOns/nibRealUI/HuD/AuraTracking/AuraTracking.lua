@@ -6,45 +6,6 @@ local _
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Aura Tracking",
-		desc = "Graphical display of important Buffs/Debuffs.",
-		arg = MODNAME,
-		childGroups = "tab",
-		args = {
-			header = {
-				type = "header",
-				name = "Aura Tracking",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Graphical display of important Buffs/Debuffs.",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Aura Tracking module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value)
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-					nibRealUI:ReloadUIDialog()
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	return options
-end
-
---------------------------
 local modules = {}
 
 local FontStringsCooldown = {}
@@ -688,7 +649,6 @@ function AuraTracking:OnInitialize()
 	ndb = nibRealUI.db.profile
 
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
 	nibRealUI:RegisterConfigModeModule(self)
 
 	self.SideActiveStatic = {LEFT = false, RIGHT = false}

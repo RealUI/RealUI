@@ -14,43 +14,6 @@ local BloodShieldName
 local MinLevel = 10
 local maxHealth
 
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Blood Shield",
-		desc = "Deathknight Blood Shield tracker (+ Resolve).",
-		arg = MODNAME,
-		childGroups = "tab",
-		args = {
-			header = {
-				type = "header",
-				name = "Blood Shield",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Deathknight Blood Shield tracker (+ Resolve).",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Blood Shield module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	return options
-end
-
 -----------------
 ---- Updates ----
 -----------------
@@ -163,7 +126,6 @@ function BloodShield:OnInitialize()
 	ndb = nibRealUI.db.profile
 	
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 
