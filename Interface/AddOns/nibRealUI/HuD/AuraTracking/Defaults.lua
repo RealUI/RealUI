@@ -226,7 +226,7 @@ AuraTracking.Defaults = {
         specs = {false, true, false, false}
     },
     {   -- Thrash (Feral)
-        spell = 33745,
+        spell = 106832,
         auraType = "debuff",
         specs = {false, true, false, false}
     },

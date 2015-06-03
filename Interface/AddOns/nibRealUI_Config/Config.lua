@@ -1318,7 +1318,7 @@ local auratracker do
                 debug("iter spell table", i)
                 local spellName, next = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
                 if spellName ~= next then
-                    debug("These two have the same name", i, spellName)
+                    debug("These two are different", i, spellName)
                     -- Only add a spell if the next one is different.
                     name = name..spellName..(next and ", " or "")
                 end
@@ -1326,6 +1326,7 @@ local auratracker do
         else
             name = _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"]
         end
+        debug("Name:", name, spellData.spell)
 
         if spellData.order and spellData.order > 0 then
             order = spellData.order * 10
