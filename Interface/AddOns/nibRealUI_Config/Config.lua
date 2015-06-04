@@ -348,7 +348,7 @@ local other do
                         name = L["HuD_Vertical"],
                         desc = L["HuD_VerticalDesc"],
                         type = "range",
-                        width = "double",
+                        width = "full",
                         min = -round(uiHeight * 0.3),
                         max = round(uiHeight * 0.3),
                         step = 1,
@@ -394,7 +394,7 @@ local other do
                         name = L["HuD_Width"],
                         desc = L["Misc_SpellAlertsWidthDesc"],
                         type = "range",
-                        width = "double",
+                        width = "full",
                         min = round(uiWidth * 0.1),
                         max = round(uiWidth * 0.5),
                         step = 1,
@@ -724,7 +724,7 @@ local unitframes do
                         args = {
                             enabled = {
                                 name = L["General_Enabled"],
-                                desc = L["General_EnabledDesc"]:format("RealUI"..SHOW_ARENA_ENEMY_FRAMES_TEXT),
+                                desc = L["General_EnabledDesc"]:format("RealUI "..SHOW_ARENA_ENEMY_FRAMES_TEXT),
                                 type = "toggle",
                                 get = function() return db.arena.enabled end,
                                 set = function(info, value)
@@ -873,7 +873,7 @@ local unitframes do
                 name = L["UnitFrames_AnchorWidth"],
                 desc = L["UnitFrames_AnchorWidthDesc"],
                 type = "range",
-                width = "double",
+                width = "full",
                 min = round(uiWidth * 0.1),
                 max = round(uiWidth * 0.5),
                 step = 1,
@@ -961,7 +961,7 @@ local unitframes do
             args.horizontal = {
                 name = L["HuD_Horizontal"],
                 type = "range",
-                width = "double",
+                width = "full",
                 min = -round(uiWidth * 0.85),
                 max = -30,
                 step = 1,
@@ -976,7 +976,7 @@ local unitframes do
             args.vertical = {
                 name = L["HuD_Vertical"],
                 type = "range",
-                width = "double",
+                width = "full",
                 min = -round(uiHeight * 0.4),
                 max = round(uiHeight * 0.4),
                 step = 1,
@@ -1007,7 +1007,7 @@ local unitframes do
                     name = L["HuD_Horizontal"],
                     disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
                     type = "range",
-                    width = "double",
+                    width = "full",
                     min = -round(uiWidth * 0.4),
                     max = round(uiWidth * 0.4),
                     step = 1,
@@ -1023,7 +1023,7 @@ local unitframes do
                     name = L["HuD_Vertical"],
                     disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
                     type = "range",
-                    width = "double",
+                    width = "full",
                     min = type == "dps" and 0 or -round(uiWidth * 0.2),
                     max = round(uiHeight * 0.5),
                     step = 1,
@@ -1236,7 +1236,7 @@ local castbars do
                             horizontal = {
                                 name = L["HuD_Horizontal"],
                                 type = "range",
-                                width = "double",
+                                width = "full",
                                 min = -round(uiWidth * 0.2),
                                 max = round(uiWidth * 0.2),
                                 step = 1,
@@ -1251,7 +1251,7 @@ local castbars do
                             vertical = {
                                 name = L["HuD_Vertical"],
                                 type = "range",
-                                width = "double",
+                                width = "full",
                                 min = -round(uiHeight * 0.2),
                                 max = round(uiHeight * 0.2),
                                 step = 1,
@@ -1272,7 +1272,7 @@ local castbars do
                             horizontal = {
                                 name = L["HuD_Horizontal"],
                                 type = "range",
-                                width = "double",
+                                width = "full",
                                 min = -round(uiWidth * 0.2),
                                 max = round(uiWidth * 0.2),
                                 step = 1,
@@ -1287,7 +1287,7 @@ local castbars do
                             vertical = {
                                 name = L["HuD_Vertical"],
                                 type = "range",
-                                width = "double",
+                                width = "full",
                                 min = -round(uiHeight * 0.2),
                                 max = round(uiHeight * 0.2),
                                 step = 1,
@@ -1715,7 +1715,7 @@ local auratracker do
                                     horizontal = {
                                         name = L["HuD_Horizontal"],
                                         type = "range",
-                                        width = "double",
+                                        width = "full",
                                         min = -round(uiWidth * 0.2),
                                         max = round(uiWidth * 0.2),
                                         step = 1,
@@ -1730,7 +1730,7 @@ local auratracker do
                                     vertical = {
                                         name = L["HuD_Vertical"],
                                         type = "range",
-                                        width = "double",
+                                        width = "full",
                                         min = -round(uiHeight * 0.2),
                                         max = round(uiHeight * 0.2),
                                         step = 1,
@@ -1751,7 +1751,7 @@ local auratracker do
                                     horizontal = {
                                         name = L["HuD_Horizontal"],
                                         type = "range",
-                                        width = "double",
+                                        width = "full",
                                         min = -round(uiWidth * 0.2),
                                         max = round(uiWidth * 0.2),
                                         step = 1,
@@ -1766,7 +1766,7 @@ local auratracker do
                                     vertical = {
                                         name = L["HuD_Vertical"],
                                         type = "range",
-                                        width = "double",
+                                        width = "full",
                                         min = -round(uiHeight * 0.2),
                                         max = round(uiHeight * 0.2),
                                         step = 1,
@@ -1832,7 +1832,7 @@ local classresource do
                         horizontal = {
                             name = L["HuD_Horizontal"],
                             type = "range",
-                            width = "double",
+                            width = "full",
                             min = -round(uiWidth * 0.2),
                             max = round(uiWidth * 0.2),
                             step = 1,
@@ -1847,7 +1847,7 @@ local classresource do
                         vertical = {
                             name = L["HuD_Vertical"],
                             type = "range",
-                            width = "double",
+                            width = "full",
                             min = -round(uiHeight * 0.2),
                             max = round(uiHeight * 0.2),
                             step = 1,
@@ -1871,7 +1871,7 @@ local classresource do
                         horizontal = {
                             name = L["HuD_Horizontal"],
                             type = "range",
-                            width = "double",
+                            width = "full",
                             min = -round(uiWidth * 0.2),
                             max = round(uiWidth * 0.2),
                             step = 1,
@@ -1886,7 +1886,7 @@ local classresource do
                         vertical = {
                             name = L["HuD_Vertical"],
                             type = "range",
-                            width = "double",
+                            width = "full",
                             min = -round(uiHeight * 0.2),
                             max = round(uiHeight * 0.2),
                             step = 1,
@@ -1941,11 +1941,45 @@ local classresource do
                         disabled = function() if options.enabled then return false else return true end end,
                         order = 80,
                         args = {
+                            xoffset = {
+                                type = "input",
+                                name = "X Offset",
+                                order = 10,
+                                get = function(info) return tostring(options.position.x) end,
+                                set = function(info, value)
+                                    value = nibRealUI:ValidateOffset(value)
+                                    options.position.x = value
+                                    PointTracking:UpdatePosition()
+                                end,
+                            },
+                            yoffset = {
+                                type = "input",
+                                name = "Y Offset",
+                                order = 20,
+                                get = function(info) return tostring(options.position.y) end,
+                                set = function(info, value)
+                                    value = nibRealUI:ValidateOffset(value)
+                                    options.position.y = value
+                                    PointTracking:UpdatePosition()
+                                end,
+                            },
+                            gap = {
+                                name = L["Resource_Gap"],
+                                desc = L["Resource_GapDesc"]:format(pointName),
+                                type = "input",
+                                order = 30,
+                                get = function(info) return tostring(options.bars.position.gap) end,
+                                set = function(info, value)
+                                    value = nibRealUI:ValidateOffset(value)
+                                    options.bars.position.gap = value
+                                    PointTracking:UpdatePosition()
+                                end,
+                            },
                             horizontal = {
                                 name = L["HuD_Width"],
                                 type = "range",
                                 hidden = nibRealUI.class == "PALADIN",
-                                width = "double",
+                                width = "full",
                                 min = round(uiWidth * 0.1),
                                 max = round(uiWidth * 0.5),
                                 step = 1,
@@ -1961,7 +1995,7 @@ local classresource do
                                 name = L["HuD_Height"],
                                 type = "range",
                                 hidden = nibRealUI.class ~= "PALADIN",
-                                width = "double",
+                                width = "full",
                                 min = -round(uiHeight * 0.2),
                                 max = round(uiHeight * 0.2),
                                 step = 1,
@@ -1972,30 +2006,6 @@ local classresource do
                                     nibRealUI:UpdatePositioners()
                                 end,
                                 order = 20,
-                            },
-                            xoffset = {
-                                type = "input",
-                                name = "X Offset",
-                                width = "half",
-                                order = 10,
-                                get = function(info) return tostring(options.position.x) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    options.position.x = value
-                                    PointTracking:UpdatePosition()
-                                end,
-                            },
-                            yoffset = {
-                                type = "input",
-                                name = "Y Offset",
-                                width = "half",
-                                order = 20,
-                                get = function(info) return tostring(options.position.y) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    options.position.y = value
-                                    PointTracking:UpdatePosition()
-                                end,
                             },
                         },
                     },
