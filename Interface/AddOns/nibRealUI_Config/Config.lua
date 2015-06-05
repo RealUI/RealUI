@@ -3,7 +3,7 @@ local options = {}
 
 -- Up values
 local _G = _G
-local tostring = _G.tostring
+local tostring, next = _G.tostring, _G.next
 local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
@@ -88,42 +88,20 @@ local function InitializeOptions()
     hlAnim.hl = hl
 
     -- Buttons
-    local tabs
-    tabs = {
-        {
-            slug = "toggle",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
-        },
-        {
-            slug = "other",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
-        },
-        {
-            slug = "unitframes",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
-        },
-        {
-            slug = "castbars",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
-        },
-        {
-            slug = "auratracker",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
-        },
-        {
-            slug = "classresource",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
-        },
-        {
-            slug = "close",
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
-            onclick = function(self, ...)
+    local tabs = {}
+    for slug, tab in next, options.HuD.args do
+        tinsert(tabs, tab.order + 2, {
+            slug = slug,
+            name = tab.name,
+            icon = tab.icon,
+            onclick = tab.order == -1 and function(self, ...)
                 debug("OnClick", self.slug, ...)
                 highlight:Hide()
                 hudToggle()
-            end,
-        }
-    }
+            end or nil,
+        })
+    end
+    tinsert(tabs, tremove(tabs, 1)) -- Move close to the end
     local function tabOnClick(self, ...)
         debug("OnClick", self.slug, ...)
         if highlight.clicked and tabs[highlight.clicked].frame then
@@ -153,89 +131,87 @@ local function InitializeOptions()
     for i = 1, #tabs do
         local tab = tabs[i]
         debug("iter tabs", i, tab.slug)
-        if options.HuD.args[tab.slug] then
-            local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
-            btn.ID = i
-            btn.slug = tab.slug
-            btn:SetSize(width, height)
-            btn:SetScript("OnEnter", function(self, ...)
-                if slideAnim:IsPlaying() then return end
-                debug("OnEnter", tab.slug)
-                if highlight:IsShown() then
-                    debug(highlight.hover, highlight.clicked)
-                    if highlight.hover ~= self.ID then
-                        hl:SetOffset(width * (self.ID - highlight.hover), 0)
-                        hlAnim:SetScript("OnFinished", function(hlAnim)
-                            highlight.hover = i
-                            highlight:SetAllPoints(self)
-                        end)
-                        hlAnim:Play()
-                    elseif hlAnim:IsPlaying() then
-                        debug("Stop Playing")
-                        hlAnim:Stop()
-                    end
-                else
-                    highlight.hover = i
-                    highlight:SetAllPoints(self)
-                    highlight:Show()
+        local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
+        btn.ID = i
+        btn.slug = tab.slug
+        btn:SetSize(width, height)
+        btn:SetScript("OnEnter", function(self, ...)
+            if slideAnim:IsPlaying() then return end
+            debug("OnEnter", tab.slug)
+            if highlight:IsShown() then
+                debug(highlight.hover, highlight.clicked)
+                if highlight.hover ~= self.ID then
+                    hl:SetOffset(width * (self.ID - highlight.hover), 0)
+                    hlAnim:SetScript("OnFinished", function(hlAnim)
+                        highlight.hover = i
+                        highlight:SetAllPoints(self)
+                    end)
+                    hlAnim:Play()
+                elseif hlAnim:IsPlaying() then
+                    debug("Stop Playing")
+                    hlAnim:Stop()
                 end
-            end)
-            btn:SetScript("OnLeave", function(self, ...)
-                if hudConfig:IsMouseOver() then return end
-                debug("OnLeave hudConfig", ...)
-                if highlight.clicked then
-                    debug(highlight.hover, highlight.clicked)
-                    if highlight.hover ~= highlight.clicked then
-                        hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
-                        hlAnim:SetScript("OnFinished", function(hlAnim)
-                            highlight.hover = highlight.clicked
-                            highlight:SetAllPoints(hudConfig[highlight.clicked])
-                        end)
-                        hlAnim:Play()
-                    elseif hlAnim:IsPlaying() then
-                        debug("Stop Playing")
-                        hlAnim:Stop()
-                    end
-                else
-                    highlight:Hide()
-                end
-            end)
-
-            if i == 1 then
-                btn:SetPoint("TOPLEFT")
-                local check = CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
-                check:SetHitRectInsets(-10, -10, -1, -21)
-                check:SetPoint("CENTER", 0, 10)
-                check:SetAttribute("type1", "macro")
-                _G.SecureHandlerWrapScript(check, "OnClick", check, [[
-                    if self:GetID() == 1 then
-                        self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
-                        self:SetID(0)
-                    else
-                        self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUIHuDTestMode(true)"))
-                        self:SetID(1)
-                    end
-                ]])
             else
-                btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
-                btn:SetScript("OnClick", tab.onclick or tabOnClick)
-
-                local icon = btn:CreateTexture(nil, "ARTWORK")
-                icon:SetTexture(tab.icon)
-                icon:SetSize(height * 0.5, height * 0.5)
-                icon:SetPoint("TOP", 0, -(height * 0.15))
+                highlight.hover = i
+                highlight:SetAllPoints(self)
+                highlight:Show()
             end
+        end)
+        btn:SetScript("OnLeave", function(self, ...)
+            if hudConfig:IsMouseOver() then return end
+            debug("OnLeave hudConfig", ...)
+            if highlight.clicked then
+                debug(highlight.hover, highlight.clicked)
+                if highlight.hover ~= highlight.clicked then
+                    hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
+                    hlAnim:SetScript("OnFinished", function(hlAnim)
+                        highlight.hover = highlight.clicked
+                        highlight:SetAllPoints(hudConfig[highlight.clicked])
+                    end)
+                    hlAnim:Play()
+                elseif hlAnim:IsPlaying() then
+                    debug("Stop Playing")
+                    hlAnim:Stop()
+                end
+            else
+                highlight:Hide()
+            end
+        end)
 
-            local text = btn:CreateFontString()
-            text:SetFontObject(_G.GameFontHighlightSmall)
-            text:SetWidth(width * 0.9)
-            text:SetPoint("BOTTOM", 0, width * 0.08)
-            text:SetText(options.HuD.args[tab.slug].name)
-            btn.text = text
+        if i == 1 then
+            btn:SetPoint("TOPLEFT")
+            local check = CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
+            check:SetHitRectInsets(-10, -10, -1, -21)
+            check:SetPoint("CENTER", 0, 10)
+            check:SetAttribute("type1", "macro")
+            _G.SecureHandlerWrapScript(check, "OnClick", check, [[
+                if self:GetID() == 1 then
+                    self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
+                    self:SetID(0)
+                else
+                    self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUIHuDTestMode(true)"))
+                    self:SetID(1)
+                end
+            ]])
+        else
+            btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
+            btn:SetScript("OnClick", tab.onclick or tabOnClick)
 
-            tinsert(hudConfig, btn)
-            prevFrame = btn
+            local icon = btn:CreateTexture(nil, "ARTWORK")
+            icon:SetTexture(tab.icon)
+            icon:SetSize(height * 0.5, height * 0.5)
+            icon:SetPoint("TOP", 0, -(height * 0.15))
         end
+
+        local text = btn:CreateFontString()
+        text:SetFontObject(_G.GameFontHighlightSmall)
+        text:SetWidth(width * 0.9)
+        text:SetPoint("BOTTOM", 0, width * 0.08)
+        text:SetText(tab.name)
+        btn.text = text
+
+        tinsert(hudConfig, btn)
+        prevFrame = btn
     end
     hudConfig:SetSize(#hudConfig * width, height)
 
@@ -676,7 +652,9 @@ local other do
     end
     other = {
         name = BINDING_HEADER_OTHER,
+        icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
         type = "group",
+        order = 1,
         args = {
             advanced = {
                 name = ADVANCED_OPTIONS,
@@ -862,6 +840,7 @@ local unitframes do
         icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         type = "group",
         childGroups = "tab",
+        order = 2,
         args = {
             enable = {
                 name = L["General_Enabled"],
@@ -1546,7 +1525,9 @@ local castbars do
     local db = CastBars.db.profile
     castbars = {
         name = L["CastBars"],
+        icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
         type = "group",
+        order = 3,
         args = {
             enable = {
                 name = L["General_Enabled"],
@@ -1979,7 +1960,9 @@ local auratracker do
     end
     auratracker = {
         name = L["AuraTrack"],
+        icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         type = "group",
+        order = 4,
         args = {
             new = {
                 name = L["AuraTrack_Create"],
@@ -2201,8 +2184,10 @@ local classresource do
     if power or bars then
         classresource = {
             name = L["Resource"],
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
             type = "group",
             childGroups = "tab",
+            order = 5,
             args = {
                 enable = {
                     name = L["General_Enabled"],
@@ -2414,6 +2399,7 @@ options.HuD = {
         toggle = { -- This is for button creation
             name = L["HuD_ShowElements"],
             type = "group",
+            order = 0,
             args = {
             },
         },
@@ -2424,7 +2410,9 @@ options.HuD = {
         classresource = classresource,
         close = { -- This is for button creation
             name = CLOSE,
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             type = "group",
+            order = -1,
             args = {
             },
         },
