@@ -425,9 +425,9 @@ function HuDConfig_ActionBars:ApplySettings(tag)
 		end
 	end
 
-	-- ActionBar Doodads
-	if nibRealUI:GetModuleEnabled("ActionBarDoodads") then
-		local ABD = nibRealUI:GetModule("ActionBarDoodads", true)
+	-- ActionBars Doodads
+	if nibRealUI:GetModuleEnabled("ActionBars") then
+		local ABD = nibRealUI:GetModule("ActionBars", true)
 		if ABD then ABD:RefreshMod() end
 	end
 end

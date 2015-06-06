@@ -2840,9 +2840,9 @@ local function Spec_Update(self)
         Layout_Update(ILFrames.layout)
         nibRealUI:UpdateLayout()
 
-        -- ActionBar Doodads
-        if nibRealUI:GetModuleEnabled("ActionBarDoodads") then
-            local ABD = nibRealUI:GetModule("ActionBarDoodads", true)
+        -- ActionBars
+        if nibRealUI:GetModuleEnabled("ActionBars") then
+            local ABD = nibRealUI:GetModule("ActionBars", true)
             if ABD then ABD:RefreshMod() end
         end
 
