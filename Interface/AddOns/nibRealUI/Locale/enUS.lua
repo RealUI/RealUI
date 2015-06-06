@@ -13,7 +13,7 @@ L["Version"] = "Version"
 
 -- Install
 L["Install"] = "CLICK TO INSTALL"
-L["Patch_DoApply"] = "Do you wish to apply the latest RealUI settings?"
+L["Patch_DoApply"] = "A patch has been applied, the UI must be reloaded for the changes to take affect."
 L["Patch_MiniPatch"] = "RealUI Mini Patch"
 
 

@@ -329,7 +329,7 @@ local function MiniPatchInstallation()
     if #patches > 0 then
         StaticPopupDialogs["PUDRUIMP"] = {
             text = "|cff85e0ff"..L["Patch_MiniPatch"].."|r\n\n|cffffffff"..L["Patch_DoApply"],
-            button1 = "Yes",
+            button1 = OKAY,
             OnAccept = function()
                 ApplyMiniPatches(patches)
                 ReloadUI()
