@@ -19,62 +19,14 @@ local Textures = {
 }
 
 local Doodads
-
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Action Bar Indicators",
-        desc = "Adds some extra features to the Action Bars.",
-        arg = MODNAME,
-        childGroups = "tab",
-        disabled = function() return not(IsAddOnLoaded("Bartender4")) end,
-        -- order = 103,
-        args = {
-            header = {
-                type = "header",
-                name = "Action Bar Indicators",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Adds indicators to highlight location of Stance and Pet Bars.",
-                fontSize = "medium",
-                order = 20,
-            },
-            desc2 = {
-                type = "description",
-                name = " ",
-                order = 21,
-            },
-            desc3 = {
-                type = "description",
-                name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
-                order = 22,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Action Bar Extras module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                    nibRealUI:ReloadUIDialog()
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
---
 local buttonSizes = {
     bars = 26,
     petBar = 22,
     stanceBar = 22,
+}
+local fixedSettings = {
+    padding = 1,
+    buttons = 12
 }
 local function IsOdd(val)
     return val % 2 == 1 and true or false
@@ -161,8 +113,8 @@ function ActionBars:ApplyABSettings(tag)
             local isRightBar = isVertBar and sidePositions[i] == "RIGHT"
             local isTopBar = not(isVertBar) and topBars[i] == true
             local isBottomBar = not(isVertBar) and not(isTopBar)
-            local numButtons = barSettings.bars[i].buttons
-            local padding = barSettings.bars[i].padding
+            local numButtons = fixedSettings.buttons
+            local padding = fixedSettings.padding
 
             BarSizes[i] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
 
@@ -208,7 +160,7 @@ function ActionBars:ApplyABSettings(tag)
                     end
                 else
                     y = (BarSizes[i] / 2) + 10
-                    if not(IsOdd(BarPadding.sides[i])) or IsOdd(barSettings.bars[i].buttons) then y = y + 0.5 end
+                    if not(IsOdd(BarPadding.sides[i])) or IsOdd(fixedSettings.buttons) then y = y + 0.5 end
                 end
 
                 BarPositions[i] = sidePositions[i]
@@ -216,13 +168,13 @@ function ActionBars:ApplyABSettings(tag)
             -- Top/Bottom Bars
             else
                 x = -((BarSizes[i] / 2) + 10)
-                -- if IsOdd(barSettings.bars[i].buttons) then x = x + 0.5 end
+                -- if IsOdd(fixedSettings.buttons) then x = x + 0.5 end
 
                 -- Extra on X for pixel perfection
                 if isTopBar then
-                    if not(IsOdd(BarPadding.top[i])) or IsOdd(barSettings.bars[i].buttons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.top[i])) or IsOdd(fixedSettings.buttons) then x = x + 0.5 end
                 else
-                    if not(IsOdd(BarPadding.bottom[i])) or IsOdd(barSettings.bars[i].buttons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.bottom[i])) or IsOdd(fixedSettings.buttons) then x = x + 0.5 end
                 end
 
                 -- Bar Place
@@ -279,16 +231,17 @@ function ActionBars:ApplyABSettings(tag)
         end
 
         -- Profile Data
-        if Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"] then
+        local profileActionBars = Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]
+        if profileActionBars["actionbars"] then
             for i = 1, 5 do
-                local point
+                local bar, point = profileActionBars["actionbars"][i]
                 if i <= 3 then
                     point = BarPositions[i] == "TOP" and "CENTER" or "BOTTOM"
                 else
                     point = BarPositions[i]
                 end
 
-                Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][i]["position"] = {
+                bar["position"] = {
                     ["x"] = BarPoints[i].x,
                     ["y"] = BarPoints[i].y,
                     ["point"] = point,
@@ -296,13 +249,13 @@ function ActionBars:ApplyABSettings(tag)
                     ["growHorizontal"] = "RIGHT",
                     ["growVertical"] = "DOWN",
                 }
-                Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][i]["buttons"] = barSettings.bars[i].buttons
-                Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][i]["padding"] = barSettings.bars[i].padding - 10
+                bar["buttons"] = fixedSettings.buttons
+                bar["padding"] = fixedSettings.padding - 10
 
                 if i < 4 then
-                    Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][i]["flyoutDirection"] = sidePositions[i] == "UP"
+                    bar["flyoutDirection"] = sidePositions[i] == "UP"
                 else
-                    Bartender4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][i]["flyoutDirection"] = sidePositions[i] == "LEFT" and "RIGHT" or "LEFT"
+                    bar["flyoutDirection"] = sidePositions[i] == "LEFT" and "RIGHT" or "LEFT"
                 end
             end
         end
@@ -317,13 +270,12 @@ function ActionBars:ApplyABSettings(tag)
         ----
         -- Vehicle Bar
         ----
-        local vbX, vbY
-        vbX = -36
-        vbY = -59.5
+        local vbX, vbY = -36, -59.5
 
         -- Set Position
-        if Bartender4DB["namespaces"]["Vehicle"]["profiles"][prof] then
-            Bartender4DB["namespaces"]["Vehicle"]["profiles"][prof]["position"] = {
+        local profileVehicle = Bartender4DB["namespaces"]["Vehicle"]["profiles"][prof]
+        if profileVehicle then
+            profileVehicle["position"] = {
                 ["x"] = vbX,
                 ["y"] = vbY,
                 ["point"] = "TOPRIGHT",
@@ -342,7 +294,7 @@ function ActionBars:ApplyABSettings(tag)
             -- if nibRealUI.cLayout == 1 then
                 local numPetBarButtons = 10
                 local pbX, pbY, pbPoint
-                local pbP = barSettings.petBar.padding
+                local pbP = fixedSettings.padding
                 local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
 
                 -- Calculate X
@@ -358,8 +310,9 @@ function ActionBars:ApplyABSettings(tag)
                 pbY = (pbH / 2) + 10
 
                 -- Set Position
-                if Bartender4DB["namespaces"]["PetBar"]["profiles"][prof] then
-                    Bartender4DB["namespaces"]["PetBar"]["profiles"][prof]["position"] = {
+                local profilePetBar = Bartender4DB["namespaces"]["PetBar"]["profiles"][prof]
+                if profilePetBar then
+                    profilePetBar["position"] = {
                         ["x"] = pbX,
                         ["y"] = pbY,
                         ["point"] = "LEFT",
@@ -367,7 +320,7 @@ function ActionBars:ApplyABSettings(tag)
                         ["growHorizontal"] = "RIGHT",
                         ["growVertical"] = "DOWN",
                     }
-                    Bartender4DB["namespaces"]["PetBar"]["profiles"][prof]["padding"] = pbP - 8
+                    profilePetBar["padding"] = pbP - 8
                 end
                 local B4PetBar = Bar4:GetModule("PetBar", true)
                 if B4PetBar then B4PetBar:ApplyConfig() end
@@ -392,8 +345,9 @@ function ActionBars:ApplyABSettings(tag)
                 eabX = max(BarSizes[2], BarSizes[3]) / 2 - 4
             end
 
-            if Bartender4DB["namespaces"]["ExtraActionBar"]["profiles"][prof] then
-                Bartender4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]["position"] = {
+            local profileEAB = Bartender4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
+            if profileEAB then
+                profileEAB["position"] = {
                     ["y"] = eabY,
                     ["x"] = eabX,
                     ["point"] = "BOTTOM",
@@ -425,8 +379,9 @@ function ActionBars:ApplyABSettings(tag)
             end
 
             -- Set Position
-            if Bartender4DB["namespaces"]["StanceBar"]["profiles"][prof] then
-                Bartender4DB["namespaces"]["StanceBar"]["profiles"][prof]["position"] = {
+            local profileStanceBar = Bartender4DB["namespaces"]["StanceBar"]["profiles"][prof]
+            if profileStanceBar then
+                profileStanceBar["position"] = {
                     ["x"] = sbX,
                     ["y"] = sbY,
                     ["scale"] = 1,
@@ -451,7 +406,7 @@ end
 function ActionBars:ToggleStanceBar()
     if not(Doodads and Doodads.stance) then return end
     
-    if ( Bar4Stance and Bar4Stance:IsEnabled() and nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.stance and nibRealUI:GetModuleEnabled(MODNAME) and not UnitInVehicle("player")) then
+    if ( Bar4Stance and Bar4Stance:IsEnabled() and nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.stance and db.showDoodads and not UnitInVehicle("player")) then
         Doodads.stance:Show()
     else
         Doodads.stance:Hide()
@@ -487,7 +442,7 @@ end
 function ActionBars:TogglePetBar()
     if not(Doodads and Doodads.pet) then return end
     
-    if ( nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet and nibRealUI:GetModuleEnabled(MODNAME) and (UnitExists("pet") and not UnitInVehicle("player")) ) then
+    if ( nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet and db.showDoodads and (UnitExists("pet") and not UnitInVehicle("player")) ) then
         Doodads.pet:Show()
     else
         Doodads.pet:Hide()
@@ -644,7 +599,6 @@ function ActionBars:OnInitialize()
     end
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function ActionBars:OnEnable()  

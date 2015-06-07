@@ -413,6 +413,16 @@ local other do
                         end,
                         order = 10,
                     },
+                    showDoodads = {
+                        name = L["ActionBars_ShowDoodads"],
+                        desc = L["ActionBars_ShowDoodadsDesc"],
+                        type = "toggle",
+                        get = function() return ActionBars.db.showDoodads end,
+                        set = function(info, value)
+                            ActionBars.db.showDoodads = value
+                        end,
+                        order = 20,
+                    },
                     layout = {
                         name = L["Control_Layout"],
                         desc = L["Control_LayoutDesc"]:format("Bartender4"),
@@ -421,7 +431,7 @@ local other do
                         set = function(info, value)
                             nibRealUI:ToggleAddonLayoutControl("Bartender4", value)
                         end,
-                        order = 20,
+                        order = 30,
                     },
                     position = {
                         name = L["Control_Position"],
@@ -431,18 +441,16 @@ local other do
                         set = function(info, value)
                             nibRealUI:ToggleAddonPositionControl("Bartender4", value)
                         end,
-                        order = 30,
+                        order = 40,
                     },
                     vertical = {
                         name = L["HuD_Vertical"],
                         desc = L["HuD_VerticalDesc"],
                         type = "range",
                         width = "full",
-                        min = -round(uiHeight * 0.3),
-                        max = round(uiHeight * 0.3),
-                        step = 1,
-                        bigStep = 4,
-                        order = 30,
+                        min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
+                        step = 1, bigStep = 4,
+                        order = 50,
                         get = function(info) return ndb.positions[nibRealUI.cLayout]["ActionBarsY"] end,
                         set = function(info, value)
                             ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value - .5
