@@ -405,32 +405,21 @@ local other do
                         fontSize = "medium",
                         order = 1,
                     },
-                    enabled = {
-                        name = L["General_Enabled"],
-                        desc = L["General_EnabledDesc"]:format(ACTIONBAR_LABEL),
-                        type = "toggle",
-                        get = function() return nibRealUI:GetModuleEnabled("SpellAlerts") end,
-                        set = function(info, value) 
-                            nibRealUI:SetModuleEnabled("SpellAlerts", value)
-                            nibRealUI:ReloadUIDialog()
-                        end,
-                        order = 10,
-                    },
                     advanced = {
                         name = "Bartender 4",
                         type = "execute",
                         func = function(info, ...)
                             ACD:Open("Bartender4")
                         end,
-                        order = 0,
+                        order = 10,
                     },
                     layout = {
                         name = L["Control_Layout"],
                         desc = L["Control_LayoutDesc"]:format("Bartender4"),
                         type = "toggle",
-                        get = function() return nibRealUI:GetModuleEnabled("GridLayout") end,
+                        get = function() return nibRealUI:DoesAddonLayout("Bartender4") end,
                         set = function(info, value)
-                            nibRealUI:SetModuleEnabled("GridLayout", value)
+                            nibRealUI:ToggleAddonLayoutControl("Bartender4", value)
                         end,
                         order = 20,
                     },
@@ -451,12 +440,12 @@ local other do
                         width = "full",
                         min = -round(uiHeight * 0.3),
                         max = round(uiHeight * 0.3),
-                        step = .5,
-                        bigStep = 4.5,
+                        step = 1,
+                        bigStep = 4,
                         order = 30,
                         get = function(info) return ndb.positions[nibRealUI.cLayout]["ActionBarsY"] end,
                         set = function(info, value)
-                            ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value
+                            ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value - .5
                             nibRealUI:UpdatePositioners()
                             ActionBars:ApplyABSettings()
                         end,
@@ -807,7 +796,7 @@ local unitframes do
                         order = 30,
                         args = {
                             advanced = {
-                                name = ADVANCED_OPTIONS,
+                                name = "Grid 2",
                                 type = "execute",
                                 func = function(info, ...)
                                     Grid2:OnChatCommand("")

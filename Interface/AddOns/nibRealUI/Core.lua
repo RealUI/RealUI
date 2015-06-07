@@ -151,45 +151,6 @@ nibRealUI.hudSizeOffsets = {
     },
 }
 
-nibRealUI.defaultActionBarSettings = {
-    [1] = {     -- DPS/Tank
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 12, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 12, padding = 1},
-            [5] = {buttons = 12, padding = 1}
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-    [2] = {     -- Healing
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 12, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 12, padding = 1},
-            [5] = {buttons = 12, padding = 1}
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-}
-
 -- Default Options
 local defaults = {
     global = {
@@ -229,7 +190,6 @@ local defaults = {
         positions = nibRealUI.defaultPositions,
         -- Action Bar settings
         abSettingsLink = false,
-        actionBarSettings = nibRealUI.defaultActionBarSettings,
         -- Dynamic UI settings
         settings = {
             powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
