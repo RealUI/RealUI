@@ -417,9 +417,10 @@ local other do
                         name = L["ActionBars_ShowDoodads"],
                         desc = L["ActionBars_ShowDoodadsDesc"],
                         type = "toggle",
-                        get = function() return ActionBars.db.showDoodads end,
+                        get = function() return ActionBars.db.profile.showDoodads end,
                         set = function(info, value)
-                            ActionBars.db.showDoodads = value
+                            ActionBars.db.profile.showDoodads = value
+                            ActionBars:RefreshDoodads()
                         end,
                         order = 20,
                     },

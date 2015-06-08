@@ -18,7 +18,7 @@ local Textures = {
     },
 }
 
-local Doodads
+local Doodads = {}
 local buttonSizes = {
     bars = 26,
     petBar = 22,
@@ -36,29 +36,6 @@ function ActionBars:ApplyABSettings(tag)
     if not nibRealUICharacter then return end
     if nibRealUICharacter.installStage ~= -1 then return end
 
-    -- Font
-    for i = 1, 120 do
-        local button = _G["BT4Button"..i];
-        if button then
-            local name = button:GetName();
-            local count = _G[name.."Count"];
-            local hotkey = _G[name.."HotKey"];
-            local macro = _G[name.."Name"];
-
-            if count then
-                count:SetFont(RealUIFont_PixelSmall:GetFont())
-            end
-            hotkey:SetFont(RealUIFont_PixelSmall:GetFont())
-            macro:SetFont(RealUIFont_PixelSmall:GetFont())
-            macro:SetShadowColor(0, 0, 0, 0)
-        end
-    end
-    if ExtraActionButton1 then
-        ExtraActionButton1HotKey:SetFont(RealUIFont_PixelSmall:GetFont())
-        ExtraActionButton1HotKey:SetPoint("TOPLEFT", ExtraActionButton1, "TOPLEFT", 1.5, -1.5)
-        ExtraActionButton1Count:SetFont(RealUIFont_PixelCooldown:GetFont())
-        ExtraActionButton1Count:SetPoint("BOTTOMRIGHT", ExtraActionButton1, "BOTTOMRIGHT", -2.5, 1.5)
-    end
 
 
     -- Bar Settings
@@ -102,18 +79,23 @@ function ActionBars:ApplyABSettings(tag)
         local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
         local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
-        ----
-        -- Calculate Width/Height of bars and their corresponding Left/Top points
-        ----
         local BarSizes = {}
+        local BarPoints = {}
+        local BarPositions = {}
         local CenterBarVertPadding = {}
         local BarPadding = {top = {}, bottom = {}, sides = {}}
         for i = 1, 5 do
+            ----
+            -- Calculate Width/Height of bars and their corresponding Left/Top points
+            ----
+            local BTBar = _G["BT4Bar"..i]
             local isVertBar = i > 3
             local isRightBar = isVertBar and sidePositions[i] == "RIGHT"
+            local isLeftBar = isVertBar and not(isRightBar)
             local isTopBar = not(isVertBar) and topBars[i] == true
             local isBottomBar = not(isVertBar) and not(isTopBar)
-            local numButtons = fixedSettings.buttons
+
+            local numButtons = BTBar.numbuttons
             local padding = fixedSettings.padding
 
             BarSizes[i] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
@@ -131,20 +113,10 @@ function ActionBars:ApplyABSettings(tag)
             if isTopBar or isBottomBar then
                 CenterBarVertPadding[i] = padding / 2
             end
-        end
 
-        ----
-        -- Calculate bars X and Y positions
-        ----
-        local BarPoints = {}
-        local BarPositions = {}
-        for i = 1, 5 do
-            local isVertBar = i > 3
-            local isRightBar = isVertBar and sidePositions[i] == "RIGHT"
-            local isLeftBar = isVertBar and not(isRightBar)
-            local isTopBar = not(isVertBar) and topBars[i] == true
-            local isBottomBar = not(isVertBar) and not(isTopBar)
-
+            ----
+            -- Calculate bars X and Y positions
+            ----
             local x, y
 
             -- Side Bars
@@ -160,7 +132,7 @@ function ActionBars:ApplyABSettings(tag)
                     end
                 else
                     y = (BarSizes[i] / 2) + 10
-                    if not(IsOdd(BarPadding.sides[i])) or IsOdd(fixedSettings.buttons) then y = y + 0.5 end
+                    if not(IsOdd(BarPadding.sides[i])) or IsOdd(numButtons) then y = y + 0.5 end
                 end
 
                 BarPositions[i] = sidePositions[i]
@@ -168,13 +140,13 @@ function ActionBars:ApplyABSettings(tag)
             -- Top/Bottom Bars
             else
                 x = -((BarSizes[i] / 2) + 10)
-                -- if IsOdd(fixedSettings.buttons) then x = x + 0.5 end
+                -- if IsOdd(numButtons) then x = x + 0.5 end
 
                 -- Extra on X for pixel perfection
                 if isTopBar then
-                    if not(IsOdd(BarPadding.top[i])) or IsOdd(fixedSettings.buttons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.top[i])) or IsOdd(numButtons) then x = x + 0.5 end
                 else
-                    if not(IsOdd(BarPadding.bottom[i])) or IsOdd(fixedSettings.buttons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.bottom[i])) or IsOdd(numButtons) then x = x + 0.5 end
                 end
 
                 -- Bar Place
@@ -396,7 +368,7 @@ function ActionBars:ApplyABSettings(tag)
 
     -- ActionBars
     if nibRealUI:GetModuleEnabled(MODNAME) then
-        self:RefreshMod()
+        self:RefreshDoodads()
     end
 end
 
@@ -404,9 +376,10 @@ end
 -- StanceBar functions
 ----
 function ActionBars:ToggleStanceBar()
-    if not(Doodads and Doodads.stance) then return end
-    
-    if ( Bar4Stance and Bar4Stance:IsEnabled() and nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.stance and db.showDoodads and not UnitInVehicle("player")) then
+    if not Doodads.stance then return end
+    ActionBars:debug("ToggleStanceBar")
+
+    if ( Bar4Stance and Bar4Stance:IsEnabled() and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.stance and db.showDoodads and not UnitInVehicle("player")) then
         Doodads.stance:Show()
     else
         Doodads.stance:Hide()
@@ -414,8 +387,10 @@ function ActionBars:ToggleStanceBar()
 end
 
 function ActionBars:UpdateStanceBar()
-    if not(Doodads and Doodads.stance and Bar4Stance and nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.stance) then return end
-    
+    ActionBars:debug("UpdatePetBar Check", Doodads.pet, nibRealUI:DoesAddonMove("Bartender4"), db[nibRealUI.cLayout].moveBars.pet)
+    if not (Doodads.stance and Bar4Stance and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.stance) then return end
+    ActionBars:debug("UpdateStanceBar")
+
     -- Color
     -- Doodads.stance.sides:SetVertexColor(unpack(nibRealUI.classColor))
     Doodads.stance.sides:SetVertexColor(0.5, 0.5, 0.5)
@@ -423,7 +398,7 @@ function ActionBars:UpdateStanceBar()
     -- Size/Position
     local Bar4Profile = Bartender4DB["profileKeys"][nibRealUI.key]
     local NumStances = GetNumShapeshiftForms()
-    local sbP = 1--ndb.actionBarSettings[nibRealUI.cLayout].stanceBar.padding
+    local sbP = 1--db[nibRealUI.cLayout].stanceBar.padding
     local sbW = (NumStances * 22) + ((NumStances - 1) * sbP)
     local sbX = Bartender4DB["namespaces"]["StanceBar"]["profiles"][Bar4Profile]["position"]["x"] - floor((sbW / 2)) + 11.5
 
@@ -440,9 +415,10 @@ end
 -- PetBar functions
 ----
 function ActionBars:TogglePetBar()
-    if not(Doodads and Doodads.pet) then return end
+    if not Doodads.pet then return end
+    ActionBars:debug("TogglePetBar")
     
-    if ( nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet and db.showDoodads and (UnitExists("pet") and not UnitInVehicle("player")) ) then
+    if ( nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.pet and db.showDoodads and (UnitExists("pet") and not UnitInVehicle("player")) ) then
         Doodads.pet:Show()
     else
         Doodads.pet:Hide()
@@ -450,7 +426,9 @@ function ActionBars:TogglePetBar()
 end
 
 function ActionBars:UpdatePetBar()
-    if not(Doodads and Doodads.pet and nibRealUI:DoesAddonMove("Bartender4") and ndb.actionBarSettings[nibRealUI.cLayout].moveBars.pet) then return end
+    ActionBars:debug("UpdatePetBar Check", Doodads.pet, nibRealUI:DoesAddonMove("Bartender4"), db[nibRealUI.cLayout].moveBars.pet)
+    if not (Doodads.pet and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.pet) then return end
+    ActionBars:debug("UpdatePetBar")
     
     -- Color
     Doodads.pet.sides:SetVertexColor(unpack(nibRealUI.classColor))
@@ -474,7 +452,7 @@ end
 -- Frame Creation
 ----
 function ActionBars:CreateDoodads()
-    Doodads = {}
+    ActionBars:debug("CreateDoodads")
 
     -- PetBar
     Doodads.pet = CreateFrame("Frame", "RealUIActionBarDoodadsPet", UIParent)
@@ -514,11 +492,12 @@ function ActionBars:CreateDoodads()
 end
 
 ----
-function ActionBars:RefreshMod()
-    if not(nibRealUI:GetModuleEnabled(MODNAME) and Bar4) then return end
+function ActionBars:RefreshDoodads()
+    if not (nibRealUI:GetModuleEnabled(MODNAME) and Bar4) then return end
+    ActionBars:debug("RefreshDoodads")
     db = self.db.profile
     
-    if not Doodads then self:CreateDoodads() end
+    if not Doodads.pet then self:CreateDoodads() end
 
     self:UpdatePetBar()
     self:TogglePetBar()
@@ -537,7 +516,7 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     
     self:RegisterEvent("UNIT_PET")
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
-    self:RefreshMod()
+    self:RefreshDoodads()
     
     EnteredWorld = true
 end
@@ -546,6 +525,30 @@ function ActionBars:PLAYER_LOGIN()
     if IsAddOnLoaded("Bartender4") and Bartender4 then
         Bar4 = LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
         Bar4Stance = Bar4:GetModule("StanceBar", true)
+
+        -- Font
+        for i = 1, 120 do
+            local button = _G["BT4Button"..i];
+            if button then
+                local name = button:GetName();
+                local count = _G[name.."Count"];
+                local hotkey = _G[name.."HotKey"];
+                local macro = _G[name.."Name"];
+
+                if count then
+                    count:SetFont(RealUIFont_PixelSmall:GetFont())
+                end
+                hotkey:SetFont(RealUIFont_PixelSmall:GetFont())
+                macro:SetFont(RealUIFont_PixelSmall:GetFont())
+                macro:SetShadowColor(0, 0, 0, 0)
+            end
+        end
+        if ExtraActionButton1 then
+            ExtraActionButton1HotKey:SetFont(RealUIFont_PixelSmall:GetFont())
+            ExtraActionButton1HotKey:SetPoint("TOPLEFT", ExtraActionButton1, "TOPLEFT", 1.5, -1.5)
+            ExtraActionButton1Count:SetFont(RealUIFont_PixelCooldown:GetFont())
+            ExtraActionButton1Count:SetPoint("BOTTOMRIGHT", ExtraActionButton1, "BOTTOMRIGHT", -2.5, 1.5)
+        end
     end
 end
 
@@ -606,7 +609,7 @@ function ActionBars:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     
     if EnteredWorld then 
-        self:RefreshMod()
+        self:RefreshDoodads()
     end
 end
 
