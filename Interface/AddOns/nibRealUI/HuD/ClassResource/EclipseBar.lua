@@ -181,14 +181,12 @@ end
 -----------------------
 function EclipseBar:UpdateGlobalColors()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "DRUID" then return end
     self:ECLIPSE_DIRECTION_CHANGE()
 end
 
 ------------
 function EclipseBar:ToggleConfigMode(val)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "DRUID" then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -210,13 +208,11 @@ function EclipseBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DRUID")
     nibRealUI:RegisterConfigModeModule(self)
 end
 
 function EclipseBar:OnEnable()
-    if nibRealUI.class ~= "DRUID" then return end
-
     self.configMode = false
 
     if not self.eBar then 

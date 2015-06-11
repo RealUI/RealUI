@@ -72,7 +72,6 @@ end
 -----------------------
 function DemonicFury:UpdateGlobalColors()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "WARLOCK" then return end
 
     self.dfBar:SetBarColor("left", nibRealUI.media.colors.purple)
     self.dfBar:SetBarColor("right", nibRealUI.media.colors.purple)
@@ -82,7 +81,6 @@ end
 ------------
 function DemonicFury:ToggleConfigMode(val)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "WARLOCK" then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -97,13 +95,11 @@ function DemonicFury:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "WARLOCK")
     nibRealUI:RegisterConfigModeModule(self)
 end
 
 function DemonicFury:OnEnable()
-    if nibRealUI.class ~= "WARLOCK" then return end
-
     self.configMode = false
 
     MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)

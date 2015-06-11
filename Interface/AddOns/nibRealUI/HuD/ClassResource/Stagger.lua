@@ -100,7 +100,6 @@ end
 
 function Stagger:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "MONK" then return end
 	self.sBar:SetBarColor("right", nibRealUI.media.colors.orange)
 	self:UpdateAuras()
 end
@@ -108,7 +107,6 @@ end
 ------------
 function Stagger:ToggleConfigMode(val)
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "MONK" then return end
 	if self.configMode == val then return end
 
 	self.configMode = val
@@ -123,13 +121,11 @@ function Stagger:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "MONK")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 
 function Stagger:OnEnable()
-	if nibRealUI.class ~= "MONK" then return end
-
 	self.configMode = false
 
 	if not self.sBar then 

@@ -50,7 +50,9 @@ function RealUIHuDTestMode(toggle)
 
 	-- RealUI Modules
 	for k, mod in pairs(nibRealUI.configModeModules) do
-		if nibRealUI:GetModuleEnabled(mod.moduleName) then 
+		HuDConfig:debug("Config Test", mod.moduleName)
+		if mod:IsEnabled() then
+			HuDConfig:debug("Is enabled")
 			mod.ToggleConfigMode(mod, toggle)
 		end
 	end

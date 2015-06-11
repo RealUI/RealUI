@@ -101,7 +101,6 @@ end
 -----------------------
 function BloodShield:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
 	self.bsBar:SetBarColor("left", nibRealUI.media.colors.red)
 	self.bsBar:SetBarColor("right", nibRealUI.media.colors.orange)
 	self:UpdateAuras()
@@ -110,7 +109,6 @@ end
 ------------
 function BloodShield:ToggleConfigMode(val)
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
 	if self.configMode == val then return end
 
 	self.configMode = val
@@ -125,13 +123,11 @@ function BloodShield:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 
 function BloodShield:OnEnable()
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
-
 	self.configMode = false
 
 	BloodShieldName = GetSpellInfo(BloodShieldID)

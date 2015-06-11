@@ -8,7 +8,6 @@ local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local ResolveBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
-local class
 local classes = {
     ["DRUID"] = true,
     ["PALADIN"] = true,
@@ -47,7 +46,7 @@ function ResolveBar:UpdateAuras(units)
 end
 
 function ResolveBar:UpdateShown()
-    --print("UpdateShown")
+    ResolveBar:debug("UpdateShown")
 
     if self.configMode then
         self.rBar:Show()
@@ -75,8 +74,8 @@ end
 
 ------------
 function ResolveBar:ToggleConfigMode(val)
-    --print("UpdateShown", val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) and not classes[class] then return end
+    ResolveBar:debug("ToggleConfigMode", val)
+    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -91,9 +90,7 @@ function ResolveBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
 
-    class = nibRealUI.class
-    
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and classes[nibRealUI.class] ~= nil)
     nibRealUI:RegisterConfigModeModule(self)
 end
 
