@@ -346,6 +346,7 @@ end
 
 local other do
     local ActionBars = nibRealUI:GetModule("ActionBars")
+    local dbActionBars = ActionBars.db.profile
     local Bar4 = LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
     other = {
         name = BINDING_HEADER_OTHER,
@@ -360,6 +361,14 @@ local other do
                     nibRealUI:LoadConfig("nibRealUI")
                 end,
                 order = 0,
+            },
+            addon = {
+                name = L["Control_AddonControl"],
+                type = "execute",
+                func = function(info, ...)
+                    nibRealUI:GetModule("AddonControl"):ShowOptionsWindow()
+                end,
+                order = 2,
             },
             general = {
                 name = GENERAL,
@@ -485,14 +494,14 @@ local other do
                         name = L["ActionBars_ShowDoodads"],
                         desc = L["ActionBars_ShowDoodadsDesc"],
                         type = "toggle",
-                        get = function() return ActionBars.db.profile.showDoodads end,
+                        get = function() return dbActionBars.showDoodads end,
                         set = function(info, value)
-                            ActionBars.db.profile.showDoodads = value
+                            dbActionBars.showDoodads = value
                             ActionBars:RefreshDoodads()
                         end,
                         order = 20,
                     },
-                    layout = {
+                    controlLayout = {
                         name = L["Control_Layout"],
                         desc = L["Control_LayoutDesc"]:format("Bartender4"),
                         type = "toggle",
@@ -502,30 +511,120 @@ local other do
                         end,
                         order = 30,
                     },
-                    position = {
+                    controlPosition = {
                         name = L["Control_Position"],
                         desc = L["Control_PositionDesc"]:format("Bartender4"),
                         type = "toggle",
                         get = function() return nibRealUI:DoesAddonMove("Bartender4") end,
                         set = function(info, value)
                             nibRealUI:ToggleAddonPositionControl("Bartender4", value)
+                            if value then
+                                ActionBars:ApplyABSettings()
+                            end
                         end,
                         order = 40,
                     },
-                    vertical = {
-                        name = L["HuD_Vertical"],
-                        desc = L["HuD_VerticalDesc"],
-                        type = "range",
-                        width = "full",
-                        min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
-                        step = 1, bigStep = 4,
-                        order = 50,
-                        get = function(info) return ndb.positions[nibRealUI.cLayout]["ActionBarsY"] end,
-                        set = function(info, value)
-                            ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value - .5
-                            nibRealUI:UpdatePositioners()
-                            ActionBars:ApplyABSettings()
-                        end,
+                    position = {
+                        name = L["General_Position"],
+                        type = "group",
+                        disabled = function() return not nibRealUI:DoesAddonMove("Bartender4") end,
+                        inline = true,
+                        args = {
+                            moveStance = {
+                                name = L["ActionBars_Move"]:format(L["ActionBars_Stance"]),
+                                desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Stance"]),
+                                type = "toggle",
+                                get = function() return dbActionBars[nibRealUI.cLayout].moveBars.stance end,
+                                set = function(info, value)
+                                    dbActionBars[nibRealUI.cLayout].moveBars.stance = value
+                                    ActionBars:ApplyABSettings()
+                                end,
+                                order = 10,
+                            },
+                            movePet = {
+                                name = L["ActionBars_Move"]:format(L["ActionBars_Pet"]),
+                                desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Pet"]),
+                                type = "toggle",
+                                get = function() return dbActionBars[nibRealUI.cLayout].moveBars.pet end,
+                                set = function(info, value)
+                                    dbActionBars[nibRealUI.cLayout].moveBars.pet = value
+                                    ActionBars:ApplyABSettings()
+                                end,
+                                order = 20,
+                            },
+                            moveEAB = {
+                                name = L["ActionBars_Move"]:format(L["ActionBars_EAB"]),
+                                desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_EAB"]),
+                                type = "toggle",
+                                get = function() return dbActionBars[nibRealUI.cLayout].moveBars.eab end,
+                                set = function(info, value)
+                                    dbActionBars[nibRealUI.cLayout].moveBars.eab = value
+                                    ActionBars:ApplyABSettings()
+                                end,
+                                order = 30,
+                            },
+                            space = {
+                                name = " ",
+                                type = "description",
+                                order = 31,
+                            },
+                            center = {
+                                name = L["ActionBars_Center"],
+                                desc = L["ActionBars_CenterDesc"],
+                                type = "select",
+                                values = function()
+                                    return {
+                                        L["ActionBars_CenterOption"]:format(0, 3),
+                                        L["ActionBars_CenterOption"]:format(1, 2),
+                                        L["ActionBars_CenterOption"]:format(2, 1),
+                                        L["ActionBars_CenterOption"]:format(3, 0),
+                                    }
+                                end,
+                                get = function(info)
+                                    return dbActionBars[nibRealUI.cLayout].centerPositions
+                                end,
+                                set = function(info, value)
+                                    dbActionBars[nibRealUI.cLayout].centerPositions = value
+                                    ActionBars:ApplyABSettings()
+                                end,
+                                order = 40,
+                            },
+                            side = {
+                                name = L["ActionBars_Sides"],
+                                desc = L["ActionBars_SidesDesc"],
+                                type = "select",
+                                values = function()
+                                    return {
+                                        L["ActionBars_SidesOption"]:format(0, 2),
+                                        L["ActionBars_SidesOption"]:format(1, 1),
+                                        L["ActionBars_SidesOption"]:format(2, 0),
+                                    }
+                                end,
+                                get = function(info)
+                                    return dbActionBars[nibRealUI.cLayout].sidePositions
+                                end,
+                                set = function(info, value)
+                                    dbActionBars[nibRealUI.cLayout].sidePositions = value
+                                    ActionBars:ApplyABSettings()
+                                end,
+                                order = 40,
+                            },
+                            vertical = {
+                                name = L["HuD_Vertical"],
+                                desc = L["HuD_VerticalDesc"],
+                                type = "range",
+                                width = "full",
+                                min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
+                                step = 1, bigStep = 4,
+                                order = -1,
+                                get = function(info) return ndb.positions[nibRealUI.cLayout]["ActionBarsY"] end,
+                                set = function(info, value)
+                                    ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value - .5
+                                    nibRealUI:UpdatePositioners()
+                                    ActionBars:ApplyABSettings()
+                                end,
+                            }
+                        }
                     }
                 }
             }

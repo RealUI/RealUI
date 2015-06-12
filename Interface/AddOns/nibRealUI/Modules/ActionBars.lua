@@ -82,7 +82,8 @@ function ActionBars:ApplyABSettings(tag)
         local BarSizes = {}
         local BarPoints = {}
         local BarPositions = {}
-        local CenterBarVertPadding = {}
+        local padding = fixedSettings.padding
+        local centerPadding = padding / 2
         local BarPadding = {top = {}, bottom = {}, sides = {}}
         for i = 1, 5 do
             ----
@@ -94,10 +95,9 @@ function ActionBars:ApplyABSettings(tag)
             local isLeftBar = isVertBar and not(isRightBar)
             local isTopBar = not(isVertBar) and topBars[i] == true
             local isBottomBar = not(isVertBar) and not(isTopBar)
+            ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
 
             local numButtons = BTBar.numbuttons
-            local padding = fixedSettings.padding
-
             BarSizes[i] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
 
             -- Create Padding table
@@ -107,11 +107,6 @@ function ActionBars:ApplyABSettings(tag)
                 BarPadding.bottom[i] = padding
             else
                 BarPadding.sides[i] = padding
-            end
-
-            -- Calculate vertical padding of Center bars
-            if isTopBar or isBottomBar then
-                CenterBarVertPadding[i] = padding / 2
             end
 
             ----
@@ -178,14 +173,14 @@ function ActionBars:ApplyABSettings(tag)
                     end
                 elseif barPlace == 2 then
                     if isTopBar then
-                        local padding = ceil(CenterBarVertPadding[1] + CenterBarVertPadding[2])
+                        local padding = ceil(centerPadding + centerPadding)
                         y = -(buttonSizes.bars + padding) + HuDY + ABY
                     else
-                        local padding = ceil(CenterBarVertPadding[2] + CenterBarVertPadding[3])
+                        local padding = ceil(centerPadding + centerPadding)
                         y = buttonSizes.bars + padding + 37
                     end
                 else
-                    local padding = ceil(CenterBarVertPadding[1] + (CenterBarVertPadding[2] * 2) + CenterBarVertPadding[3])
+                    local padding = ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
                         y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
                     else
@@ -511,6 +506,7 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     
     self:TogglePetBar()
     self:ToggleStanceBar()
+    self:ApplyABSettings()
     
     if EnteredWorld then return end
     
@@ -608,7 +604,7 @@ function ActionBars:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     
-    if EnteredWorld then 
+    if EnteredWorld then
         self:RefreshDoodads()
     end
 end
