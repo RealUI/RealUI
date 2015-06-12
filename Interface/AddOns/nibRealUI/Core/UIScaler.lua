@@ -93,11 +93,11 @@ function UIScaler:UpdateUIScale()
     if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
     -- Set Scale (WoW CVar can't go below .64)
-    --print("UpdateUIScale", scale, GetCVar("uiScale"))
+    UIScaler:debug("UpdateUIScale", scale, GetCVar("uiScale"))
     if scale < .64 then
         UIParent:SetScale(scale)
     elseif scale ~= tonumber(GetCVar("uiScale")) then
-        --print("SetCVar", scale)
+        UIScaler:debug("SetCVar", scale)
         SetCVar("useUiScale", 1)
         SetCVar("uiScale", scale)
     end

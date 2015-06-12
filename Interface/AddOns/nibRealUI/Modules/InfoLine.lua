@@ -2843,7 +2843,7 @@ local function Spec_Update(self)
         -- ActionBars
         if nibRealUI:GetModuleEnabled("ActionBars") then
             local ABD = nibRealUI:GetModule("ActionBars", true)
-            if ABD then ABD:RefreshMod() end
+            if ABD then ABD:RefreshDoodads() end
         end
 
         -- No longer need Equip/Layout update on Spec change
