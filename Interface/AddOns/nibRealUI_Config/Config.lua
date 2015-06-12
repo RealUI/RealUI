@@ -28,6 +28,75 @@ local function debug(...)
     nibRealUI.Debug("Config", ...)
 end
 
+local RavenInTestMode = false
+function nibRealUI:HuDTestMode(doTestMode)
+    -- Toggle Test Modes
+    -- Raven
+    local Raven = _G.Raven
+    if Raven then
+        if doTestMode then
+            if RavenInTestMode then
+                Raven:TestBarGroups()
+                Raven:TestBarGroups()
+            else
+                Raven:TestBarGroups()
+            end
+        else
+            if RavenInTestMode then
+                Raven:TestBarGroups()
+            end
+        end
+    end
+
+    nibRealUI:ToggleGridTestMode(doTestMode)
+
+    -- RealUI Modules
+    for k, mod in next, nibRealUI.configModeModules do
+        debug("Config Test", mod.moduleName)
+        if mod:IsEnabled() then
+            debug("Is enabled")
+            mod.ToggleConfigMode(mod, doTestMode)
+        end
+    end
+
+    -- Boss Frames
+    _G.RealUIUFBossConfig(doTestMode)
+
+    -- Spell Alerts
+    local sAlert = {
+        id = 17941,
+        texture = "TEXTURES\\SPELLACTIVATIONOVERLAYS\\NIGHTFALL.BLP",
+        positions = "Left + Right (Flipped)",
+        scale = 1,
+        r = 255, g = 255, b = 255,
+    }
+    if doTestMode then
+        _G.SpellActivationOverlay_ShowAllOverlays(_G.SpellActivationOverlayFrame, sAlert.id, sAlert.texture, sAlert.positions, sAlert.scale, sAlert.r, sAlert.g, sAlert.b);
+    else
+        _G.SpellActivationOverlay_HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id)
+    end
+
+    -- Extra Action Button
+    local EABFrame = _G.ExtraActionBarFrame
+    if not EABFrame:IsShown() then
+        if doTestMode then
+            EABFrame.button:Show()
+            EABFrame:Show()
+            EABFrame.outro:Stop()
+            EABFrame.intro:Play()
+            if not EABFrame.button.icon:GetTexture() then
+                EABFrame.button.icon:SetTexture("Interface\\ICONS\\ABILITY_SEAL")
+                EABFrame.button.icon:Show()
+            end
+        else
+            EABFrame:Hide()
+            EABFrame.button:Hide()
+            EABFrame.intro:Stop()
+            EABFrame.outro:Play()
+        end
+    end
+end
+
 StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     text = L["HuD_AlertHuDChangeSize"],
     button1 = OKAY,
@@ -187,10 +256,10 @@ local function InitializeOptions()
             check:SetAttribute("type1", "macro")
             _G.SecureHandlerWrapScript(check, "OnClick", check, [[
                 if self:GetID() == 1 then
-                    self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUIHuDTestMode(false)"))
+                    self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUI:HuDTestMode(false)"))
                     self:SetID(0)
                 else
-                    self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUIHuDTestMode(true)"))
+                    self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUI:HuDTestMode(true)"))
                     self:SetID(1)
                 end
             ]])
