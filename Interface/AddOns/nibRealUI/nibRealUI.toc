@@ -19,6 +19,5 @@ Config.lua
 Core.xml
 Modules.xml
 HuD.xml
-Config.xml
 
 Bindings.xml
