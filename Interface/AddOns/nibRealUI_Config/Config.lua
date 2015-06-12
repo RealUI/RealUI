@@ -4,7 +4,6 @@ local options = {}
 -- Up values
 local _G = _G
 local tostring, next = _G.tostring, _G.next
-local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 
@@ -44,6 +43,8 @@ StaticPopupDialogs["RUI_ChangeHuDSize"] = {
 local hudConfig, hudToggle
 local function InitializeOptions()
     debug("Init")
+    local tinsert = _G.table.insert
+    local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
 
     nibRealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
@@ -101,7 +102,7 @@ local function InitializeOptions()
             end or nil,
         })
     end
-    tinsert(tabs, tremove(tabs, 1)) -- Move close to the end
+    tinsert(tabs, _G.tremove(tabs, 1)) -- Move close to the end
     local function tabOnClick(self, ...)
         debug("OnClick", self.slug, ...)
         if highlight.clicked and tabs[highlight.clicked].frame then
@@ -346,7 +347,6 @@ local other do
                 name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
                 desc = L["Misc_SpellAlertsDesc"],
                 type = "group",
-                order = 20,
                 args = {
                     header = {
                         type = "header",
@@ -392,7 +392,6 @@ local other do
                 name = ACTIONBAR_LABEL,
                 desc = L["ActionBars_ActionBarsDesc"],
                 type = "group",
-                order = 20,
                 args = {
                     header = {
                         name = ACTIONBAR_LABEL,
@@ -1988,13 +1987,12 @@ local classresource do
                             },
                             horizontal = {
                                 name = L["HuD_Width"],
+                                desc = L["Resource_WidthDesc"],
                                 type = "range",
                                 hidden = nibRealUI.class == "PALADIN",
                                 width = "full",
-                                min = round(uiWidth * 0.1),
-                                max = round(uiWidth * 0.5),
-                                step = 1,
-                                bigStep = 4,
+                                min = round(uiWidth * 0.1), max = round(uiWidth * 0.5),
+                                step = 1, bigStep = 4,
                                 get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] end,
                                 set = function(info, value)
                                     ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] = value
@@ -2004,13 +2002,12 @@ local classresource do
                             },
                             vertical = {
                                 name = L["HuD_Height"],
+                                desc = L["Resource_HeightDesc"],
                                 type = "range",
                                 hidden = nibRealUI.class ~= "PALADIN",
                                 width = "full",
-                                min = -round(uiHeight * 0.2),
-                                max = round(uiHeight * 0.2),
-                                step = 1,
-                                bigStep = 2,
+                                min = -round(uiHeight * 0.2), max = round(uiHeight * 0.2),
+                                step = 1, bigStep = 2,
                                 get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] end,
                                 set = function(info, value)
                                     ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] = value
