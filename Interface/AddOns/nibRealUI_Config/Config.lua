@@ -1776,7 +1776,7 @@ local auratracker do
     end
     auratracker = {
         name = L["AuraTrack"],
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+        icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
         type = "group",
         order = 4,
         args = {
