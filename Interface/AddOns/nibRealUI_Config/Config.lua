@@ -59,6 +59,9 @@ function nibRealUI:HuDTestMode(doTestMode)
         end
     end
 
+    if not ObjectiveTrackerFrame.collapsed then
+        ObjectiveTrackerFrame:SetShown(not doTestMode)
+    end
     -- Boss Frames
     _G.RealUIUFBossConfig(doTestMode)
 
@@ -1776,7 +1779,7 @@ local auratracker do
     end
     auratracker = {
         name = L["AuraTrack"],
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
+        icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
         type = "group",
         order = 4,
         args = {
@@ -2001,7 +2004,7 @@ local classresource do
     if power or bars then
         classresource = {
             name = L["Resource"],
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
             type = "group",
             childGroups = "tab",
             order = 5,
