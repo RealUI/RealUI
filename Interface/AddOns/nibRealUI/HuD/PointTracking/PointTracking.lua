@@ -827,8 +827,7 @@ function PointTracking:UpdatePointTracking(...)
                 or ((PlayerClass == "WARLOCK") and (PlayerTalent == 1) and (tid == "be")) --
                 or ((PlayerClass == "WARLOCK") and (PlayerTalent == 3) and (tid == "ss")) --    
                 or (db[ic].types[tid].general.hidein.vehicle and UnitHasVehicleUI("player")) 
-                or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec)
-                or (SmartHideConditions))
+                or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec))
                 and not db[ic].types[tid].configmode.enabled then
                     -- Hide Display 
                     Frames[ic][tid].bgpanel.frame:Hide()
@@ -1320,7 +1319,7 @@ function PointTracking:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    CombatFader:RegisterModForFade(MODNAME, db.combatfader)
+    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
     nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     nibRealUI:RegisterConfigModeModule(self)
 end

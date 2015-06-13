@@ -28,21 +28,21 @@ local function debug(...)
     nibRealUI.Debug("Config", ...)
 end
 
-local RavenInTestMode = false
+local isInTestMode, RavenTimer = false
 function nibRealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
     local Raven = _G.Raven
     if Raven then
         if doTestMode then
-            if RavenInTestMode then
+            Raven:TestBarGroups()
+            RavenTimer = _G.C_Timer.NewTicker(51, function()
                 Raven:TestBarGroups()
-                Raven:TestBarGroups()
-            else
-                Raven:TestBarGroups()
-            end
+            end)
         else
-            if RavenInTestMode then
+            if isInTestMode then
+                RavenTimer:Cancel()
+                RavenTimer = nil
                 Raven:TestBarGroups()
             end
         end
@@ -95,6 +95,7 @@ function nibRealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Play()
         end
     end
+    isInTestMode = doTestMode
 end
 
 StaticPopupDialogs["RUI_ChangeHuDSize"] = {
@@ -125,7 +126,7 @@ local function InitializeOptions()
     local height = round(uiHeight * 0.05)
     local width = round(height * 1.3)
     hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
-    hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -580, 0)
+    hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
     F.CreateBD(hudConfig)
 
     local slideAnim = hudConfig:CreateAnimationGroup()
@@ -133,9 +134,9 @@ local function InitializeOptions()
         local x, y = self.slide:GetOffset()
         hudConfig:ClearAllPoints()
         if y < 0 then
-            hudConfig:SetPoint("TOP", UIParent, "TOP", -580, 0)
+            hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
         else
-            hudConfig:SetPoint("BOTTOM", UIParent, "TOP", -580, 1)
+            hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 1)
         end
     end)
     local slide = slideAnim:CreateAnimation("Translation")
@@ -254,6 +255,7 @@ local function InitializeOptions()
             check:SetHitRectInsets(-10, -10, -1, -21)
             check:SetPoint("CENTER", 0, 10)
             check:SetAttribute("type1", "macro")
+            F.ReskinCheck(check)
             _G.SecureHandlerWrapScript(check, "OnClick", check, [[
                 if self:GetID() == 1 then
                     self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUI:HuDTestMode(false)"))
@@ -301,7 +303,7 @@ local function InitializeOptions()
             -- slide in
             if skipAnim then
                 hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("TOP", UIParent, "TOP", -580, 0)
+                hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
             else
                 slide:SetOffset(0, -height)
                 slideAnim:Play()
@@ -316,7 +318,6 @@ function nibRealUI:ToggleConfig(app, section, ...)
     if not initialized then InitializeOptions() end
     if app == "HuD" then
         if not isHuDShown then
-            nibRealUI:ShowConfigBar() -- Old
             hudToggle(section)
         end
         if section then
@@ -724,8 +725,23 @@ local unitframes do
                         end,
                         order = 41,
                     },
-                    combatFade = {
+                    headerFade = {
                         name = L["CombatFade"],
+                        type = "header",
+                        order = 45,
+                    },
+                    enableFade = {
+                        name = L["General_Enabled"],
+                        desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
+                        type = "toggle",
+                        get = function(info) return db.misc.combatfade.enabled end,
+                        set = function(info, value)
+                            db.misc.combatfade.enabled = value
+                        end,
+                        order = 49,
+                    },
+                    combatFade = {
+                        name = "",
                         type = "group",
                         inline = true,
                         disabled = function() return not db.misc.combatfade.enabled end,
@@ -1021,7 +1037,7 @@ local unitframes do
     for unitSlug, unit in next, units do
         local position = db.positions[hudSize][unitSlug]
         unit.args.x = {
-            name = L["UnitFrames_XOffset"],
+            name = L["General_XOffset"],
             type = "input",
             order = 10,
             get = function(info) return tostring(position.x) end,
@@ -1031,7 +1047,7 @@ local unitframes do
             end,
         }
         unit.args.y = {
-            name = L["UnitFrames_YOffset"],
+            name = L["General_YOffset"],
             type = "input",
             order = 20,
             get = function(info) return tostring(position.y) end,
@@ -1101,7 +1117,7 @@ local unitframes do
                 end,
             },
             x = {
-                name = L["UnitFrames_XOffset"],
+                name = L["General_XOffset"],
                 type = "range",
                 min = -100,
                 max = 50,
@@ -1113,7 +1129,7 @@ local unitframes do
                 end,
             },
             y = {
-                name = "L["UnitFrames_YOffset"],
+                name = "L["General_YOffset"],
                 type = "range",
                 min = -100,
                 max = 100,
@@ -1977,6 +1993,7 @@ local auratracker do
     end
 end
 local classresource do
+    local CombatFader = nibRealUI:GetModule("CombatFader")
     local PointTracking = nibRealUI:GetModule("PointTracking")
     local db = PointTracking.db.profile
     local power, class = PointTracking:GetResource()
@@ -2099,7 +2116,7 @@ local classresource do
                             options.general.hideempty = value
                             PointTracking:UpdatePoints("ENABLE")
                         end,
-                        order = 20,
+                        order = 10,
                     },
                     reverse = {
                         type = "toggle",
@@ -2112,16 +2129,93 @@ local classresource do
                         end,
                         order = 20,
                     },
-                    position = {
-                        name = "Position",
+                    headerFade = {
+                        name = L["CombatFade"],
+                        type = "header",
+                        order = 25,
+                    },
+                    enableFade = {
+                        name = L["General_Enabled"],
+                        desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
+                        type = "toggle",
+                        get = function(info) return db.combatfade.enabled end,
+                        set = function(info, value)
+                            db.combatfade.enabled = value
+                            CombatFader:RefreshMod()
+                        end,
+                        order = 29,
+                    },
+                    combatFade = {
+                        name = "",
                         type = "group",
                         inline = true,
-                        disabled = function() if options.enabled then return false else return true end end,
+                        disabled = function() return not db.combatfade.enabled end,
+                        order = 30,
+                        args = {
+                            incombat = {
+                                name = L["CombatFade_InCombat"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.combatfade.opacity.incombat end,
+                                set = function(info, value)
+                                    db.combatfade.opacity.incombat = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 10,
+                            },
+                            hurt = {
+                                name = L["CombatFade_Hurt"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.combatfade.opacity.hurt end,
+                                set = function(info, value)
+                                    db.combatfade.opacity.hurt = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 20,
+                            },
+                            target = {
+                                name = L["CombatFade_Target"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.combatfade.opacity.target end,
+                                set = function(info, value)
+                                    db.combatfade.opacity.target = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 30,
+                            },
+                            outofcombat = {
+                                name = L["CombatFade_NoCombat"],
+                                type = "range",
+                                isPercent = true,
+                                min = 0, max = 1, step = 0.05,
+                                get = function(info) return db.combatfade.opacity.outofcombat end,
+                                set = function(info, value)
+                                    db.combatfade.opacity.outofcombat = value
+                                    CombatFader:RefreshMod()
+                                end,
+                                order = 40,
+                            },
+                        },
+                    },
+                    headerPos = {
+                        name = L["General_Position"],
+                        type = "header",
+                        order = 75,
+                    },
+                    position = {
+                        name = "",
+                        type = "group",
+                        inline = true,
                         order = 80,
                         args = {
                             xoffset = {
                                 type = "input",
-                                name = "X Offset",
+                                name = L["General_XOffset"],
                                 order = 10,
                                 get = function(info) return tostring(options.position.x) end,
                                 set = function(info, value)
@@ -2132,7 +2226,7 @@ local classresource do
                             },
                             yoffset = {
                                 type = "input",
-                                name = "Y Offset",
+                                name = L["General_YOffset"],
                                 order = 20,
                                 get = function(info) return tostring(options.position.y) end,
                                 set = function(info, value)

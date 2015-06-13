@@ -160,6 +160,8 @@ L["Control_Style"] = "Control Style"
 L["Control_StyleDesc"] = "Allow RealUI to style %s (requires UI reload: /rl)"
 L["General_Position"] = "Position"
 L["General_Positions"] = "Positions"
+L["General_XOffset"] = "X Offset"
+L["General_YOffset"] = "Y Offset"
 L["HuD_AlertHuDChangeSize"] = "Changing the HuD size may alter the positions of some elements, therefore it is recommended to check UI Element positions once the changes have taken effect."
 L["HuD_ChooseElement"] = "Choose UI element to configure."
 L["HuD_ElementSettings"] = "Element Settings"
@@ -223,8 +225,6 @@ L["UnitFrames_PlayerAurasDesc"] = "Show Buffs/Debuffs cast by you."
 L["UnitFrames_SetFocus"] = "Click to set Focus"
 L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
-L["UnitFrames_XOffset"] = "X Offset"
-L["UnitFrames_YOffset"] = "Y Offset"
 
 
 -- InfoLine
