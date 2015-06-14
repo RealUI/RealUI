@@ -16,6 +16,7 @@ Aurora = core
 AuroraConfig = {}
 
 local F, C = unpack(select(2, ...))
+C.toc = select(4, GetBuildInfo())
 
 -- [[ Constants and settings ]]
 
@@ -1573,8 +1574,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		HelpFrameAccountSecurityOpenTicket.text:SetFont(C.media.font, 14)
 		HelpFrameOpenTicketHelpOpenTicket.text:SetFont(C.media.font, 14)
-		HelpFrameOpenTicketHelpTopIssues.text:SetFont(C.media.font, 14)
-		HelpFrameOpenTicketHelpItemRestoration.text:SetFont(C.media.font, 14)
 
 		HelpFrameCharacterStuckHearthstone:SetSize(56, 56)
 		F.CreateBG(HelpFrameCharacterStuckHearthstone)

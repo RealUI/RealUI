@@ -453,7 +453,14 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	MissionPage.CloseButton:ClearAllPoints()
 	MissionPage.CloseButton:SetPoint("TOPRIGHT", -10, -5)
 
-	hooksecurefunc("GarrisonMissionPage_UpdateStartButton", function(missionPage)
+	local table, func = _G
+	if C.toc <= 60100 then
+		func = "GarrisonMissionPage_UpdateStartButton"
+	else
+		table = GarrisonMission
+		func = "UpdateStartButton"
+	end
+	hooksecurefunc(table, func, function(missionPage)
 		missionPage.StartMissionButton.FlashAnim:Stop()
 	end)
 
@@ -461,7 +468,8 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		select(i, MissionPage.Stage:GetRegions()):Hide()
 	end
 	for i = 19, 21 do
-		select(i, MissionPage.Stage:GetRegions()):Hide()
+		local region = select(i, MissionPage.Stage:GetRegions())
+		if region then region:Hide() end
 	end
 
 	do
@@ -476,7 +484,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		overlay:SetAllPoints(bg)
 		overlay:SetTexture(0, 0, 0, .5)
 
-		local iconbg = MissionPage.Stage.IconBG
+		local iconbg = C.toc <= 60100 and MissionPage.Stage.IconBG or MissionPage.IconBG
 		iconbg:ClearAllPoints()
 		iconbg:SetPoint("TOPLEFT", 3, -1)
 	end
@@ -489,14 +497,26 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		F.CreateBD(follower, .25)
 	end
 
-	hooksecurefunc("GarrisonMissionPage_SetFollower", function(frame)
+	if C.toc <= 60100 then
+		func = "GarrisonMissionPage_SetFollower"
+	else
+		table = GarrisonFollowerMission
+		func = "AssignFollowerToMission"
+	end
+	hooksecurefunc(table, func, function(frame)
 		local portrait = frame.PortraitFrame
 
 		portrait.LevelBorder:SetTexture(0, 0, 0, .5)
 		portrait.LevelBorder:SetSize(44, 11)
 	end)
 
-	hooksecurefunc("GarrisonMissionPage_ClearFollower", function(frame)
+	if C.toc <= 60100 then
+		func = "GarrisonMissionPage_ClearFollower"
+	else
+		table = GarrisonFollowerMission
+		func = "RemoveFollowerFromMission"
+	end
+	hooksecurefunc(table, func, function(frame)
 		local portrait = frame.PortraitFrame
 
 		portrait.LevelBorder:SetTexture(0, 0, 0, .5)
@@ -695,9 +715,14 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	end
 
 	-- [[ Shared templates ]]
-
-	hooksecurefunc("GarrisonFollowerList_Update", function(self)
-		local followerFrame = self
+	if C.toc <= 60100 then
+		func = "GarrisonFollowerList_Update"
+	else
+		table = GarrisonFollowerList
+		func = "UpdateData"
+	end
+	hooksecurefunc(table, func, function(self)
+		local followerFrame = C.toc <= 60100 and self or self:GetParent()
 		local followers = followerFrame.FollowerList.followers
 		local followersList = followerFrame.FollowerList.followersList
 		local numFollowers = #followersList
@@ -764,7 +789,13 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		end
 	end)
 
-	hooksecurefunc("GarrisonFollowerPage_ShowFollower", function(self, followerID)
+	if C.toc <= 60100 then
+		func = "GarrisonFollowerPage_ShowFollower"
+	else
+		table = GarrisonFollowerList
+		func = "ShowFollower"
+	end
+	hooksecurefunc(table, func, function(self, followerID)
 		local abilities = self.AbilitiesFrame.Abilities
 
 		if self.numAbilitiesStyled == nil then

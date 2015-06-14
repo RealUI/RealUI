@@ -226,6 +226,16 @@ function AlertFrameMove:AlertFrame_SetGarrisonMissionAlertFrameAnchors(alertAnch
     end
 end
 
+function AlertFrameMove:AlertFrame_SetGarrisonShipMissionAlertFrameAnchors(alertAnchor)
+    --print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
+    local frame = GarrisonShipMissionAlertFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
+    end
+end
+
 function AlertFrameMove:AlertFrame_SetGarrisonFollowerAlertFrameAnchors(alertAnchor)
     --print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
     local frame = GarrisonFollowerAlertFrame
@@ -236,6 +246,15 @@ function AlertFrameMove:AlertFrame_SetGarrisonFollowerAlertFrameAnchors(alertAnc
     end
 end
 
+function AlertFrameMove:AlertFrame_SetGarrisonShipFollowerAlertFrameAnchors(alertAnchor)
+    --print("AlertFrame_SetGarrisonFollowerAlertFrameAnchors", IsMoving)
+    local frame = GarrisonShipFollowerAlertFrame
+    if frame and frame:IsShown() then
+        frame:ClearAllPoints()
+        frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+        alertAnchor = frame
+    end
+end
 local brfMoving = false
 local function BonusRollFrame_SetPoint()
     if brfMoving then return end

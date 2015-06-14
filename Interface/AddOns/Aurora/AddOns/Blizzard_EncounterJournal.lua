@@ -388,7 +388,9 @@ C.themes["Blizzard_EncounterJournal"] = function()
 	F.Reskin(EncounterJournalEncounterFrameInfoDifficulty)
 	F.Reskin(EncounterJournalEncounterFrameInfoResetButton)
 	F.Reskin(EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggle)
-	F.ReskinArrow(EncounterJournalInstanceSelectScrollDownButton, "down")
+	if C.toc <= 60100 then
+		F.ReskinArrow(EncounterJournalInstanceSelectScrollDownButton, "down")
+	end
 	F.ReskinClose(EncounterJournalCloseButton)
 	F.ReskinInput(EncounterJournalSearchBox)
 	F.ReskinScroll(EncounterJournalInstanceSelectScrollFrameScrollBar)
