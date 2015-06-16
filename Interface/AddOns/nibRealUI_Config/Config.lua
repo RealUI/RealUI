@@ -81,7 +81,7 @@ function nibRealUI:HuDTestMode(doTestMode)
 
     -- Extra Action Button
     local EABFrame = _G.ExtraActionBarFrame
-    if not EABFrame:IsShown() then
+    if not HasExtraActionBar() then
         if doTestMode then
             EABFrame.button:Show()
             EABFrame:Show()
