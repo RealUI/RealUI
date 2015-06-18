@@ -196,7 +196,7 @@ function AlertFrameMove:AlertMovers()
 
     -- test
     self:RegisterEvent("GARRISON_MISSION_FINISHED", function(...)
-        print("Event Test", ...)
+        AlertFrameMove:debug("Event Test", ...)
     end)
 end
 

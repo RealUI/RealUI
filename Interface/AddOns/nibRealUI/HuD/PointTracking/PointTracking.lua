@@ -62,7 +62,6 @@ local BG = {}
 -- Points
 local Points = {}
 local PointsChanged = {}
-local EBPoints = 0  -- Elusive Brew
 
 local HolyPowerTexture
 local SoulShardBG
@@ -102,11 +101,6 @@ end
 
 -- Update Point Bars
 local PBTex = {}
-local ebColors = {
-    [1] = {1, 1, 1},
-    [2] = {1, 1, 0},
-    [0] = {1, 0, 0}
-}
 local function SetPointBarTextures(shown, ic, it, tid, i)
     if tid == "hp" and db[ic].types[tid].bars.custom then
         PBTex.empty = nil
@@ -127,11 +121,13 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
         if tid == "ap" or tid == "cp" then  -- Anticipation Point stack coloring
             if Points["ap"] > 0 then
                 for api = 1, Points["ap"] do
-                    if api > Points["cp"] then
-                        Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(db["ROGUE"].types["ap"].bars.bg.full.color.r, db["ROGUE"].types["ap"].bars.bg.full.color.g, db["ROGUE"].types["ap"].bars.bg.full.color.b, db["ROGUE"].types["ap"].bars.bg.full.color.a)
+                    local color
+                    if api < Points["cp"] then
+                        color = db["ROGUE"].types["ap"].bars.bg.full.color
                     else
-                        Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(db["ROGUE"].types["ap"].bars.bg.full.maxcolor.r, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.g, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.b, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.a)
+                        color = db["ROGUE"].types["ap"].bars.bg.full.maxcolor
                     end
+                    Frames["GENERAL"]["cp"].bars[api].bg:SetVertexColor(color.r, color.g, color.b, color.a)
                 end
             end
 
@@ -168,7 +164,7 @@ function PointTracking:UpdatePointTracking(...)
         -- Cycle through all Point Displays in current Type
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
-            
+
             -- Do we hide the Display
             if ((Points[tid] == 0)
                 or (ic ~= PlayerClass and ic ~= "GENERAL") 
@@ -216,6 +212,11 @@ function PointTracking:UpdatePointTracking(...)
                     -- Flag as having been changed
                     PointsChanged[tid] = false
                 end
+            end
+            
+            if tid == "ap" then
+                -- never show Anticipation frames
+                Frames[ic][tid].bgpanel.frame:Hide()
             end
         end
     end
@@ -287,9 +288,9 @@ function PointTracking:UpdatePoints(...)
             local tid = Types[ic].points[it].id
             if ( db[ic].types[tid].enabled and not db[ic].types[tid].configmode.enabled ) then
                 -- Retrieve new point count
-                local OldPoints = (tid == "eb") and EBPoints or Points[tid]
+                local OldPoints = Points[tid]
                 PointTracking:GetPoints(ic, tid)
-                local NewPoints = (tid == "eb") and EBPoints or Points[tid]
+                local NewPoints = Points[tid]
                 if NewPoints ~= OldPoints then
                     -- Points have changed, flag for updating
                     HasChanged = true

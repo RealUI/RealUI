@@ -2060,7 +2060,7 @@ local classresource do
                     },
                 },
                 bars = {
-                    name = bars,
+                    name = bars or "",
                     type = "group",
                     hidden = bars == nil,
                     disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
