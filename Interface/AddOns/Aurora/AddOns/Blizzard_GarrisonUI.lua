@@ -461,7 +461,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		func = "UpdateStartButton"
 	end
 	hooksecurefunc(table, func, function(missionPage)
-		missionPage.StartMissionButton.FlashAnim:Stop()
+		--missionPage.StartMissionButton.FlashAnim:Stop()
 	end)
 
 	for i = 4, 8 do
