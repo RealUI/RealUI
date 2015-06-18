@@ -303,12 +303,6 @@ function nibRealUI:SetLayout()
     -- Set Positioners
     self:UpdatePositioners()
 
-    -- HuD Config
-    self:GetModule("ConfigBar_Positions"):UpdateHeader()
-    self:GetModule("ConfigBar_ActionBars"):RefreshDisplay()
-    self:GetModule("HuDConfig"):RegisterForUpdate("AB")
-    self:GetModule("HuDConfig"):RegisterForUpdate("MSBT")
-    self:GetModule("HuDConfig_Positions"):Refresh()
 
     if RealUIGridConfiguring then
         self:ScheduleTimer(function()
@@ -317,10 +311,11 @@ function nibRealUI:SetLayout()
         end, 0.5)
     end
 
-    -- ActionBarExtras
-    if self:GetModuleEnabled("ActionBarExtras") then
-        local ABE = self:GetModule("ActionBarExtras", true)
-        if ABE then ABE:RefreshMod() end
+    -- ActionBars
+    if self:GetModuleEnabled("ActionBars") then
+        local AB = self:GetModule("ActionBars", true)
+        AB:RefreshDoodads()
+        AB:ApplyABSettings()
     end
 
     -- Grid Layout changer

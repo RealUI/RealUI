@@ -831,8 +831,6 @@ function StatDisplay:OnInitialize()
     
     if nibRealUI:GetModuleEnabled("UnitFrames") then
         self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-        nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
-
         self:RegisterEvent("PLAYER_LOGIN")
     else
         self:SetEnabledState(false)
