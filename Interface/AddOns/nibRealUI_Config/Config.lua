@@ -130,7 +130,13 @@ local function InitializeOptions()
     local width = round(height * 1.3)
     hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
     hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
+    _G.RealUIUINotifications:SetPoint("TOP", hudConfig, "BOTTOM")
     F.CreateBD(hudConfig)
+    hudConfig:SetScript("OnEvent", function(self, event, ...)
+        if event == "PLAYER_REGEN_DISABLED" then
+            hudToggle(true)
+        end
+    end)
 
     local slideAnim = hudConfig:CreateAnimationGroup()
     slideAnim:SetScript("OnFinished", function(self)
@@ -299,8 +305,14 @@ local function InitializeOptions()
 
             ACD:Close("HuD")
             -- slide out
-            slide:SetOffset(0, height)
-            slideAnim:Play()
+            if skipAnim then
+                hudConfig:ClearAllPoints()
+                hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
+            else
+                slide:SetOffset(0, height)
+                slideAnim:Play()
+            end
+            hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
             isHuDShown = false
         else
             -- slide in
@@ -311,6 +323,7 @@ local function InitializeOptions()
                 slide:SetOffset(0, -height)
                 slideAnim:Play()
             end
+            hudConfig:RegisterEvent("PLAYER_REGEN_DISABLED")
             isHuDShown = true
         end
     end
@@ -318,6 +331,10 @@ end
 
 function nibRealUI:ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
+    if _G.InCombatLockdown() then
+        nibRealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        return
+    end
     if not initialized then InitializeOptions() end
     if app == "HuD" then
         if not isHuDShown then
