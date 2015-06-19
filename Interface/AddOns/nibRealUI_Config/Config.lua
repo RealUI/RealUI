@@ -312,6 +312,7 @@ local function InitializeOptions()
                 slide:SetOffset(0, height)
                 slideAnim:Play()
             end
+            nibRealUI:HuDTestMode(false)
             hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
             isHuDShown = false
         else

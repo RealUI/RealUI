@@ -51,7 +51,6 @@ AuraTracking.Defaults = {
 -- Static Debuffs
     {   -- Necrotic Plague (Talent)
         spell = 155159,
-        minLevel = 68,
         auraType = "debuff",
         order = 1,
     },
@@ -59,12 +58,14 @@ AuraTracking.Defaults = {
         spell = 55078,
         minLevel = 55,
         auraType = "debuff",
+        replace = 155159,
         order = 1,
     },
     {   -- Frost Fever
         spell = 55095,
         minLevel = 55,
         auraType = "debuff",
+        replace = 155159,
         order = 2,
     },
 -- Free Buffs
