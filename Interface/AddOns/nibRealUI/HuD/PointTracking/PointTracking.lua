@@ -102,6 +102,7 @@ end
 -- Update Point Bars
 local PBTex = {}
 local function SetPointBarTextures(shown, ic, it, tid, i)
+    PointTracking:debug("SetPointBarTextures", shown, ic, it, tid, i)
     if tid == "hp" and db[ic].types[tid].bars.custom then
         PBTex.empty = nil
         PBTex.full = HolyPowerTexture[i]
@@ -118,28 +119,28 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
         Frames[ic][tid].bars[i].bg:SetTexture(PBTex.full)
         
         -- Custom Colors
+        local bars, color = db[ic].types[tid].bars
         if tid == "ap" or tid == "cp" then  -- Anticipation Point stack coloring
             if Points["ap"] > 0 then
                 for api = 1, Points["ap"] do
-                    local color
+                    bars = db["ROGUE"].types["ap"].bars
                     if api < Points["cp"] then
-                        color = db["ROGUE"].types["ap"].bars.bg.full.color
+                        color = bars.bg.full.color
                     else
-                        color = db["ROGUE"].types["ap"].bars.bg.full.maxcolor
+                        color = bars.bg.full.maxcolor
                     end
-                    Frames["GENERAL"]["cp"].bars[api].bg:SetVertexColor(color.r, color.g, color.b, color.a)
+                    Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(color.r, color.g, color.b, color.a)
                 end
             end
-
-        -- Normal Colors
-        else
+        else -- Normal Colors
             if Points[tid] < Types[ic].points[it].barcount then
-                Frames[ic][tid].bars[i].bg:SetVertexColor(db[ic].types[tid].bars.bg.full.color.r, db[ic].types[tid].bars.bg.full.color.g, db[ic].types[tid].bars.bg.full.color.b, db[ic].types[tid].bars.bg.full.color.a)
+                color = bars.bg.full.color
             else
-                Frames[ic][tid].bars[i].bg:SetVertexColor(db[ic].types[tid].bars.bg.full.maxcolor.r, db[ic].types[tid].bars.bg.full.maxcolor.g, db[ic].types[tid].bars.bg.full.maxcolor.b, db[ic].types[tid].bars.bg.full.maxcolor.a)
+                color = bars.bg.full.maxcolor
             end
+            Frames[ic][tid].bars[i].bg:SetVertexColor(color.r, color.g, color.b, color.a)
         end
-        Frames[ic][tid].bars[i].surround:SetVertexColor(db[ic].types[tid].bars.surround.color.r, db[ic].types[tid].bars.surround.color.g, db[ic].types[tid].bars.surround.color.b, db[ic].types[tid].bars.surround.color.a)
+        Frames[ic][tid].bars[i].surround:SetVertexColor(bars.surround.color.r, bars.surround.color.g, bars.surround.color.b, bars.surround.color.a)
         
     -- Empty Bar
     else
@@ -151,6 +152,7 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
 end
 
 function PointTracking:UpdatePointTracking(...)
+    PointTracking:debug("UpdatePointTracking", ...)
     local UpdateList
     if ... == "ENABLE" then
         -- Update everything
@@ -164,6 +166,7 @@ function PointTracking:UpdatePointTracking(...)
         -- Cycle through all Point Displays in current Type
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
+            PointTracking:debug("Type", tid, Points[tid])
 
             -- Do we hide the Display
             if ((Points[tid] == 0)
@@ -213,11 +216,6 @@ function PointTracking:UpdatePointTracking(...)
                     PointsChanged[tid] = false
                 end
             end
-            
-            if tid == "ap" then
-                -- never show Anticipation frames
-                Frames[ic][tid].bgpanel.frame:Hide()
-            end
         end
     end
 end
@@ -233,6 +231,7 @@ local function GetDebuffCount(SpellID, ...)
 end
 
 local function GetBuffCount(SpellID, ...)
+    PointTracking:debug("GetBuffCount", SpellID, ...)
     if not SpellID then return end
     local unit = ... or "player"
     local _,_,_,count = UnitAura(unit, SpellID)
@@ -241,6 +240,7 @@ local function GetBuffCount(SpellID, ...)
 end
 
 function PointTracking:GetPoints(CurClass, CurType)
+    PointTracking:debug("GetPoints", CurClass, CurType)
     local NewPoints
     if CurType == "ap" then
         -- Anticipation Points
@@ -252,7 +252,8 @@ function PointTracking:GetPoints(CurClass, CurType)
 end
 
 -- Update all valid Point Displays
-function PointTracking:UpdatePoints(...)    
+function PointTracking:UpdatePoints(...)
+    PointTracking:debug("UpdatePoints", ...)
     local HasChanged = false
     local Enable = ...
     
@@ -286,11 +287,13 @@ function PointTracking:UpdatePoints(...)
         -- Cycle through point types for current class
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
+            PointTracking:debug("Type", tid)
             if ( db[ic].types[tid].enabled and not db[ic].types[tid].configmode.enabled ) then
                 -- Retrieve new point count
                 local OldPoints = Points[tid]
                 PointTracking:GetPoints(ic, tid)
                 local NewPoints = Points[tid]
+                PointTracking:debug("HasChanged", NewPoints, OldPoints)
                 if NewPoints ~= OldPoints then
                     -- Points have changed, flag for updating
                     HasChanged = true
@@ -324,6 +327,13 @@ function PointTracking:UpdatePosition()
     for ic,vc in pairs(Types) do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
+
+            if tid == "ap" then
+                db[ic].types[tid].bars.position.side = db["GENERAL"].types["cp"].bars.position.side
+                db[ic].types[tid].bars.position.x = db["GENERAL"].types["cp"].bars.position.x
+                db[ic].types[tid].bars.position.y = db["GENERAL"].types["cp"].bars.position.y
+                db[ic].types[tid].bars.position.gap = db["GENERAL"].types["cp"].bars.position.gap
+            end
 
             ---- BG Panel
             local Parent = RealUIPositionersCTPoints
@@ -398,11 +408,7 @@ function PointTracking:ToggleConfigMode(val)
         for i = 1, #power do
             local tid = power[i].id
             db[class].types[tid].configmode.enabled = val
-            if val then
-                db[class].types[tid].configmode.count = Types[class].points[i].barcount
-            else
-                db[class].types[tid].configmode.count = 2
-            end
+            db[class].types[tid].configmode.count = Types[class].points[i].barcount
         end
         self:UpdatePoints("ENABLE")
     end

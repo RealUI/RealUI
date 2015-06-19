@@ -55,7 +55,7 @@ function nibRealUI:HuDTestMode(doTestMode)
         debug("Config Test", mod.moduleName)
         if mod:IsEnabled() then
             debug("Is enabled")
-            mod.ToggleConfigMode(mod, doTestMode)
+            mod:ToggleConfigMode(doTestMode)
         end
     end
 
