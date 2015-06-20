@@ -540,14 +540,14 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	end
 
 	local function onAssignFollowerToMission(self, frame)
-		local portrait = frame.PortraitFrame
+		local portrait = C.toc == 60200 and frame.PortraitFrame or self.PortraitFrame
 
 		portrait.LevelBorder:SetTexture(0, 0, 0, .5)
 		portrait.LevelBorder:SetSize(44, 11)
 	end
 
 	local function onRemoveFollowerFromMission(self, frame)
-		local portrait = frame.PortraitFrame
+		local portrait = C.toc == 60200 and frame.PortraitFrame or self.PortraitFrame
 
 		portrait.LevelBorder:SetTexture(0, 0, 0, .5)
 		portrait.LevelBorder:SetSize(44, 11)
