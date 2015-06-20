@@ -224,7 +224,9 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	F.ReskinClose(GarrisonLandingPage.CloseButton)
 	F.ReskinTab(GarrisonLandingPageTab1)
 	F.ReskinTab(GarrisonLandingPageTab2)
-	F.ReskinTab(GarrisonLandingPageTab3)
+	if C.toc == 60200 then
+		F.ReskinTab(GarrisonLandingPageTab3)
+	end
 
 	GarrisonLandingPageTab1:ClearAllPoints()
 	GarrisonLandingPageTab1:SetPoint("TOPLEFT", GarrisonLandingPage, "BOTTOMLEFT", 70, 2)
@@ -313,16 +315,18 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	-- Ship follower list
 
-	local FollowerList = GarrisonLandingPage.ShipFollowerList
+	if C.toc == 60200 then
+		local FollowerList = GarrisonLandingPage.ShipFollowerList
 
-	FollowerList:GetRegions():Hide()
-	select(2, FollowerList:GetRegions()):Hide()
+		FollowerList:GetRegions():Hide()
+		select(2, FollowerList:GetRegions()):Hide()
 
-	F.ReskinInput(FollowerList.SearchBox)
+		F.ReskinInput(FollowerList.SearchBox)
 
-	local scrollFrame = FollowerList.listScroll
+		local scrollFrame = FollowerList.listScroll
 
-	F.ReskinScroll(scrollFrame.scrollBar)
+		F.ReskinScroll(scrollFrame.scrollBar)
+	end
 
 	-- Follower tab
 
@@ -343,33 +347,35 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	-- Ship follower tab
 
-	local FollowerTab = GarrisonLandingPage.ShipFollowerTab
+	if C.toc == 60200 then
+		local FollowerTab = GarrisonLandingPage.ShipFollowerTab
 
-	do
-		local xpBar = FollowerTab.XPBar
+		do
+			local xpBar = FollowerTab.XPBar
 
-		select(1, xpBar:GetRegions()):Hide()
-		xpBar.XPLeft:Hide()
-		xpBar.XPRight:Hide()
-		select(4, xpBar:GetRegions()):Hide()
+			select(1, xpBar:GetRegions()):Hide()
+			xpBar.XPLeft:Hide()
+			xpBar.XPRight:Hide()
+			select(4, xpBar:GetRegions()):Hide()
 
-		xpBar:SetStatusBarTexture(C.media.backdrop)
+			xpBar:SetStatusBarTexture(C.media.backdrop)
 
-		F.CreateBDFrame(xpBar)
-	end
+			F.CreateBDFrame(xpBar)
+		end
 
-	for i = 1, 2 do
-		local trait = FollowerTab.Traits[i]
+		for i = 1, 2 do
+			local trait = FollowerTab.Traits[i]
 
-		trait.Border:Hide()
-		F.ReskinIcon(trait.Portrait)
+			trait.Border:Hide()
+			F.ReskinIcon(trait.Portrait)
 
-		local equipment = FollowerTab.EquipmentFrame.Equipment[i]
+			local equipment = FollowerTab.EquipmentFrame.Equipment[i]
 
-		equipment.BG:Hide()
-		equipment.Border:Hide()
+			equipment.BG:Hide()
+			equipment.Border:Hide()
 
-		F.ReskinIcon(equipment.Icon)
+			F.ReskinIcon(equipment.Icon)
+		end
 	end
 
 	-- [[ Mission UI ]]
@@ -487,12 +493,14 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local MissionPage = MissionTab.MissionPage
 
-	for i = 1, 15 do
+	for i = 1, C.toc == 60200 and 15 or 11 do
 		select(i, MissionPage:GetRegions()):Hide()
 	end
-	select(18, MissionPage:GetRegions()):Hide()
-	select(19, MissionPage:GetRegions()):Hide()
-	select(20, MissionPage:GetRegions()):Hide()
+	if C.toc == 60200 then
+		select(18, MissionPage:GetRegions()):Hide()
+		select(19, MissionPage:GetRegions()):Hide()
+		select(20, MissionPage:GetRegions()):Hide()
+	end
 	MissionPage.StartMissionButton.Flash:SetTexture("")
 
 	F.Reskin(MissionPage.StartMissionButton)
@@ -501,8 +509,10 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	MissionPage.CloseButton:ClearAllPoints()
 	MissionPage.CloseButton:SetPoint("TOPRIGHT", -10, -5)
 
-	select(4, MissionPage.Stage:GetRegions()):Hide()
-	select(5, MissionPage.Stage:GetRegions()):Hide()
+	if C.toc == 60200 then
+		select(4, MissionPage.Stage:GetRegions()):Hide()
+		select(5, MissionPage.Stage:GetRegions()):Hide()
+	end
 
 	do
 		local bg = CreateFrame("Frame", nil, MissionPage.Stage)
@@ -516,7 +526,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		overlay:SetAllPoints(bg)
 		overlay:SetTexture(0, 0, 0, .5)
 
-		local iconbg = select(16, MissionPage:GetRegions())
+		local iconbg = C.toc == 60200 and select(16, MissionPage:GetRegions()) or MissionPage.Stage.IconBG
 		iconbg:ClearAllPoints()
 		iconbg:SetPoint("TOPLEFT", 3, -1)
 	end
@@ -545,8 +555,13 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		if portrait.squareBG then portrait.squareBG:SetBackdropBorderColor(0, 0, 0) end
 	end
 
-	hooksecurefunc(GarrisonMissionFrame, "AssignFollowerToMission", onAssignFollowerToMission)
-	hooksecurefunc(GarrisonMissionFrame, "RemoveFollowerFromMission", onRemoveFollowerFromMission)
+	if C.toc == 60200 then
+		hooksecurefunc(GarrisonMissionFrame, "AssignFollowerToMission", onAssignFollowerToMission)
+		hooksecurefunc(GarrisonMissionFrame, "RemoveFollowerFromMission", onRemoveFollowerFromMission)
+	else
+		hooksecurefunc("GarrisonMissionPage_SetFollower", onAssignFollowerToMission)
+		hooksecurefunc("GarrisonMissionPage_ClearFollower", onRemoveFollowerFromMission)
+	end
 
 	for i = 1, 10 do
 		select(i, MissionPage.RewardsFrame:GetRegions()):Hide()
@@ -719,7 +734,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	-- [[ Shared templates ]]
 
 	local function onUpdateData(self)
-		local followerFrame = self:GetParent()
+		local followerFrame = C.toc == 60200 and self:GetParent() or self
 		local followers = followerFrame.FollowerList.followers
 		local followersList = followerFrame.FollowerList.followersList
 		local numFollowers = #followersList
@@ -772,8 +787,12 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		end
 	end
 
-	hooksecurefunc(GarrisonMissionFrameFollowers, "UpdateData", onUpdateData)
-	hooksecurefunc(GarrisonLandingPageFollowerList, "UpdateData", onUpdateData)
+	if C.toc == 60200 then
+		hooksecurefunc(GarrisonMissionFrameFollowers, "UpdateData", onUpdateData)
+		hooksecurefunc(GarrisonLandingPageFollowerList, "UpdateData", onUpdateData)
+	else
+		hooksecurefunc("GarrisonFollowerList_Update", onUpdateData)
+	end
 
 	hooksecurefunc("GarrisonFollowerButton_AddAbility", function(self, index)
 		local ability = self.Abilities[index]
@@ -791,7 +810,9 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local function onShowFollower(self, followerId)
 		local followerList = self
-		local self = self.followerTab
+		if C.toc == 60200 then
+			self = self.followerTab
+		end
 
 		local abilities = self.AbilitiesFrame.Abilities
 
@@ -816,31 +837,37 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		self.numAbilitiesStyled = numAbilitiesStyled
 	end
 
-	hooksecurefunc(GarrisonMissionFrame.FollowerList, "ShowFollower", onShowFollower)
-	hooksecurefunc(GarrisonLandingPageFollowerList, "ShowFollower", onShowFollower)
+	if C.toc == 60200 then
+		hooksecurefunc(GarrisonMissionFrame.FollowerList, "ShowFollower", onShowFollower)
+		hooksecurefunc(GarrisonLandingPageFollowerList, "ShowFollower", onShowFollower)
+	else
+		hooksecurefunc("GarrisonFollowerPage_ShowFollower", onShowFollower)
+	end
 
 	-- [[ Shipyard ]]
 
-	if AuroraConfig.tooltips then
-		F.CreateBD(GarrisonShipyardMapMissionTooltip)
-	end
+	if C.toc == 60200 then
+		if AuroraConfig.tooltips then
+			F.CreateBD(GarrisonShipyardMapMissionTooltip)
+		end
 
-	-- Follower tab
+		-- Follower tab
 
-	local FollowerTab = GarrisonShipyardFrame.FollowerTab
+		local FollowerTab = GarrisonShipyardFrame.FollowerTab
 
-	for i = 1, 2 do
-		local trait = FollowerTab.Traits[i]
+		for i = 1, 2 do
+			local trait = FollowerTab.Traits[i]
 
-		trait.Border:Hide()
-		F.ReskinIcon(trait.Portrait)
+			trait.Border:Hide()
+			F.ReskinIcon(trait.Portrait)
 
-		local equipment = FollowerTab.EquipmentFrame.Equipment[i]
+			local equipment = FollowerTab.EquipmentFrame.Equipment[i]
 
-		equipment.BG:Hide()
-		equipment.Border:Hide()
+			equipment.BG:Hide()
+			equipment.Border:Hide()
 
-		F.ReskinIcon(equipment.Icon)
+			F.ReskinIcon(equipment.Icon)
+		end
 	end
 
 	-- [[ Master plan support ]]
