@@ -408,7 +408,7 @@ function PointTracking:ToggleConfigMode(val)
         for i = 1, #power do
             local tid = power[i].id
             db[class].types[tid].configmode.enabled = val
-            db[class].types[tid].configmode.count = Types[class].points[i].barcount
+            db[class].types[tid].configmode.count = UnitPowerMax("player", idToPower[tid])
         end
         self:UpdatePoints("ENABLE")
     end
