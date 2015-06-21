@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local ndb, db
 
 local MODNAME = "ActionBars"
-local ActionBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local ActionBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local EnteredWorld = false
 local Bar4, Bar4Stance, Bar4Profile
@@ -216,7 +216,6 @@ function ActionBars:ApplyABSettings(tag)
                     ["growHorizontal"] = "RIGHT",
                     ["growVertical"] = "DOWN",
                 }
-                bar["buttons"] = fixedSettings.buttons
                 bar["padding"] = fixedSettings.padding - 10
 
                 if i < 4 then
@@ -548,6 +547,13 @@ function ActionBars:PLAYER_LOGIN()
     end
 end
 
+function ActionBars:BarChatCommand()
+    if not (Bartender4) then return end
+    if not InCombatLockdown() then
+        nibRealUI:LoadConfig("HuD", "other", "actionbars")
+    end
+end
+
 function ActionBars:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -600,10 +606,23 @@ function ActionBars:OnInitialize()
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 end
 
-function ActionBars:OnEnable()  
+function ActionBars:OnEnable()
+    if not (Bartender4) then return end
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     
+    Bartender4:UnregisterChatCommand("bar")
+    Bartender4:UnregisterChatCommand("bt")
+    Bartender4:UnregisterChatCommand("bt4")
+    Bartender4:UnregisterChatCommand("bartender")
+    Bartender4:UnregisterChatCommand("bartender4")
+
+    self:RegisterChatCommand("bar", "BarChatCommand")
+    self:RegisterChatCommand("bt", "BarChatCommand")
+    self:RegisterChatCommand("bt4", "BarChatCommand")
+    self:RegisterChatCommand("bartender", "BarChatCommand")
+    self:RegisterChatCommand("bartender4", "BarChatCommand")
+
     if EnteredWorld then
         self:RefreshDoodads()
     end
@@ -611,4 +630,16 @@ end
 
 function ActionBars:OnDisable()
     self:TogglePetBar()
+
+    self:UnregisterChatCommand("bar")
+    self:UnregisterChatCommand("bt")
+    self:UnregisterChatCommand("bt4")
+    self:UnregisterChatCommand("bartender")
+    self:UnregisterChatCommand("bartender4")
+
+    Bartender4:RegisterChatCommand("bar", "ChatCommand")
+    Bartender4:RegisterChatCommand("bt", "ChatCommand")
+    Bartender4:RegisterChatCommand("bt4", "ChatCommand")
+    Bartender4:RegisterChatCommand("bartender", "ChatCommand")
+    Bartender4:RegisterChatCommand("bartender4", "ChatCommand")
 end

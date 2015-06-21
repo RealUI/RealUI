@@ -595,7 +595,7 @@ function nibRealUI:LoadConfig(app, section, ...)
         configLoaded = true
         local loaded, reason = LoadAddOn("nibRealUI_Config")
         if not loaded then
-            --print("Failed to load nibRealUI_Config:", reason)
+            print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end
