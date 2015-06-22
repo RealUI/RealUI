@@ -244,6 +244,10 @@ local function CheckSpellValidity(self)
             isValid = true
         end
 
+    elseif self.replace then
+        -- Some spells get fully replaced with others
+        isValid = IsPlayerSpell(self.replace)
+
     else
         -- Fallback
         isValid = true
@@ -380,7 +384,7 @@ function Aura:SetIndicatorInfo(info)
     end
 
     f.specs = info.specs or {true, true, true, true}
-    f.forms = info.forms
+    f.replace = info.replace
     f.minLevel = info.minLevel or 0
 
     f.anyone = info.anyone

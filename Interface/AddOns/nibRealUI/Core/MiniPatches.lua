@@ -94,18 +94,16 @@ RealUI.minipatches = {
             local profile = nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"]["RealUI"]
             profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
         end
-        local defaults = RealUI:GetPointTrackingDefaults()
+        local defaults = RealUI:GetPointTrackingDefaults().profile
         if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
             local defaultDB = defaults["**"].types["**"]
             local profile = nibRealUIDB["namespaces"]["PointTracking"]["profiles"]["RealUI"]
-            local function setSettings(newDB, oldDB, defaultDB)
-                for setting, value in next, newDB do
+            local function setSettings(classSV, classDB, defaultDB)
+                for setting, value in next, classSV do
                     if type(value) == "table" then
-                        setSettings(value, oldDB[setting], defaultDB[setting])
+                        setSettings(value, classDB and classDB[setting] or nil, defaultDB[setting])
                     else
-                        if oldDB and oldDB[setting] ~= nil then
-                            newDB[setting] = oldDB[setting] or defaultDB[setting]
-                        end
+                        classSV[setting] = classDB and classDB[setting] or defaultDB[setting]
                     end
                 end
             end

@@ -2,7 +2,6 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 function nibRealUI:GetPointTrackingDefaults()
     local defaults = {
-    
         profile = {
             updatespeed = 8,
             combatfade = {

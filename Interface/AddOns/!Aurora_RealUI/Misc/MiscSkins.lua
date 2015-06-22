@@ -125,8 +125,15 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
 end)
 
 mods["Blizzard_AuctionUI"] = function(F, C)
-    WowTokenGameTimeTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
+    local tokenTutorial = WowTokenGameTimeTutorial
+    tokenTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
+    F.ReskinAtlas(tokenTutorial.Tutorial, "token-info-background")
+
+    for _, side in next, {"LeftDisplay", "RightDisplay"} do
+        tokenTutorial[side].Label:SetTextColor(1, 1, 1)
+        tokenTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
+    end
 
     StoreButton:SetSize(149, 26)
-    StoreButton:SetPoint("TOPLEFT", WowTokenGameTimeTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
+    StoreButton:SetPoint("TOPLEFT", tokenTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
 end

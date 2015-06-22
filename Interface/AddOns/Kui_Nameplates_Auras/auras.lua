@@ -32,12 +32,14 @@ local REMOVAL_EVENTS = {
 }
 local ADDITION_EVENTS = {
     ['SPELL_AURA_APPLIED'] = true,
-}
-local MOUSEOVER_EVENTS = {
+    ['SPELL_AURA_REFRESH'] = true,
     ['SPELL_AURA_REMOVED_DOSE'] = true,
     ['SPELL_AURA_APPLIED_DOSE'] = true,
-    ['SPELL_AURA_REFRESH'] = true,
 }
+
+-- stored spell id durations
+-- used for giving timers to aura icons when they're added by the combat log
+local stored_spells = {}
 
 local function debug_print(msg)
     print(GetTime()..': '..msg)
@@ -124,7 +126,7 @@ local function OnAuraUpdate(self, elapsed)
     self.elapsed = self.elapsed - elapsed
 
     if self.elapsed <= 0 then
-        local timeLeft = self.expirationTime - GetTime()
+        local timeLeft = (self.expirationTime or 0) - GetTime()
 
         if db_display.pulsate then
             if self.doPulsate and timeLeft > FADE_THRESHOLD then
@@ -191,7 +193,7 @@ local function OnAuraShow(self)
     local parent = self:GetParent()
     parent:ArrangeButtons()
 
-    addon:SendMessage('KuiNameplates_PostAuraShow', parent.frame, self.spellid)
+    addon:SendMessage('KuiNameplates_PostAuraShow', parent.frame, self.spellId)
 end
 local function OnAuraHide(self)
     local parent = self:GetParent()
@@ -208,8 +210,36 @@ local function OnAuraHide(self)
 
     parent:ArrangeButtons()
 
-    addon:SendMessage('KuiNameplates_PostAuraHide', parent.frame, self.spellid)
+    addon:SendMessage('KuiNameplates_PostAuraHide', parent.frame, self.spellId)
     self.spellId = nil
+end
+local function UpdateButtonDuration(button, duration)
+    if duration then
+        -- set duration & expire time to given value
+        button.duration = duration
+        button.expirationTime = GetTime() + duration
+    end
+
+    if not button.expirationTime or not button.duration or button.duration == 0 then
+        -- hide time on timeless auras
+        button:SetScript('OnUpdate', nil)
+        button.time:Hide()
+    else
+        button:SetScript('OnUpdate', OnAuraUpdate)
+    end
+
+    if db_display.sort then
+        -- sort by expiration time
+        table.sort(button:GetParent().buttons, function(a,b)
+            if a.expirationTime and b.expirationTime then
+                return a.expirationTime > b.expirationTime
+            else
+                return a.expirationTime and not b.expirationTime
+            end
+        end)
+
+        button:GetParent():ArrangeButtons()
+    end
 end
 local function GetAuraButton(self, spellId, icon, count, duration, expirationTime)
     local button
@@ -283,24 +313,21 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
         button.count:Hide()
     end
 
-    if duration == 0 then
-        -- hide time on timeless auras
-        button:SetScript('OnUpdate', nil)
-        button.time:Hide()
-    else
-        button:SetScript('OnUpdate', OnAuraUpdate)
-    end
-
     button.duration = duration
     button.expirationTime = expirationTime
     button.spellId = spellId
     button.elapsed = 0
 
+    UpdateButtonDuration(button)
+
+    -- store this spell's original duration
+    stored_spells[spellId] = duration or 0
+
     self.spellIds[spellId] = button
 
     return button
 end
-function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
+local function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
     --debug_print('aura application of '..name)
     name = strlower(name) or nil
     if not name then return end
@@ -310,6 +337,16 @@ function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
     then
         -- not in whitelist
         return
+    end
+
+    -- apply duration from spell store
+    if not duration then
+        duration = stored_spells[spellid]
+
+        if duration then
+            expirationTime = GetTime() + duration
+        end
+        -- otherwise, this is a timeless aura
     end
 
     if duration and duration > 0 and duration < db_display.lengthMin then
@@ -385,8 +422,7 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
     local event = select(2,...)
 
     if  REMOVAL_EVENTS[event] or
-        ADDITION_EVENTS[event] or
-        MOUSEOVER_EVENTS[event]
+        (db_behav.showSecondary and ADDITION_EVENTS[event])
     then
         local destGUID = select(8,...)
 
@@ -394,14 +430,11 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         -- some other units will fire twice too, but this catches the majority
         if destGUID == UnitGUID('target') then return end
 
-        if UnitGUID('mouseover') == destGUID then
+        if destGUID == UnitGUID('mouseover') then
             -- event on the mouseover unit - update directly
             self:UNIT_AURA('UNIT_AURA','mouseover')
             return
         end
-
-        -- only want dose applications/removals for mouseover
-        if MOUSEOVER_EVENTS[event] then return end
 
         local castTime,_,_,_,name,_,_,_,destName = ...
 
@@ -421,10 +454,13 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
                 f.auras.spellIds[spId]:Hide()
             end
         elseif ADDITION_EVENTS[event] then
-            -- show a placeholder button with no timer when possible
-            if not f.auras.spellIds[spId] then
+            if f.auras.spellIds[spId] then
+                -- reset timer to original duration
+                UpdateButtonDuration(f.auras.spellIds[spId], stored_spells[spId])
+            else
+                -- show a placeholder button with no timer when possible
                 local spellName,_,icon = GetSpellInfo(spId)
-                f.auras:DisplayAura(spId, spellName, icon, 1,0,0)
+                f.auras:DisplayAura(spId, spellName, icon, 1)
             end
         end
     end
@@ -541,11 +577,18 @@ function mod:GetOptions()
                     type = 'toggle',
                     order = 8,
                 },
+                sort = {
+                    name = 'Sort auras by time remaining',
+                    desc = 'Increases memory usage.',
+                    type = 'toggle',
+                    order = 10,
+                    width = 'double',
+                },
                 timerThreshold = {
                     name = 'Timer threshold (s)',
                     desc = 'Timer text will be displayed on auras when their remaining length is less than or equal to this value. -1 to always display timer.',
                     type = 'range',
-                    order = 10,
+                    order = 15,
                     min = -1,
                     softMax = 180,
                     step = 1
@@ -586,6 +629,12 @@ function mod:GetOptions()
                     type = 'toggle',
                     order = 0,
                 },
+                showSecondary = {
+                    name = 'Show on secondary targets',
+                    desc = 'Attempt to show and refresh auras on secondary targets - i.e. nameplates which do not have a visible unit frame on the default UI. Particularly useful when tanking.',
+                    type = 'toggle',
+                    order = 10
+                }
             }
         }
     }
@@ -598,12 +647,14 @@ function mod:OnInitialize()
             display = {
                 pulsate = true,
                 decimal = true,
+                sort = false,
                 timerThreshold = 60,
                 lengthMin = 0,
                 lengthMax = -1,
             },
             behav = {
                 useWhitelist = true,
+                showSecondary = true,
             }
         }
     })
@@ -633,6 +684,9 @@ function mod:OnEnable()
     self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
     self:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
+
+    -- get guid immediately if enabled while in game
+    self:PLAYER_ENTERING_WORLD()
 
     local _, frame
     for _, frame in pairs(addon.frameList) do
