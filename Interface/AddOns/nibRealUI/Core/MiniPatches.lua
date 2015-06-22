@@ -90,9 +90,39 @@ RealUI.minipatches = {
     [13] = function(ver)
         debug("r"..ver)
         local nibRealUIDB = _G.nibRealUIDB
-        if nibRealUIDB["RuneDisplay"]["profiles"] then
-            local profile = nibRealUIDB["RuneDisplay"]["profiles"]["RealUI"]
+        if nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"] then
+            local profile = nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"]["RealUI"]
             profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
+        end
+        local defaults = RealUI:GetPointTrackingDefaults().profile
+        if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
+            local defaultDB = defaults["**"].types["**"]
+            local profile = nibRealUIDB["namespaces"]["PointTracking"]["profiles"]["RealUI"]
+            local function setSettings(classSV, classDB, defaultDB)
+                for setting, value in next, classSV do
+                    if type(value) == "table" then
+                        setSettings(value, classDB and classDB[setting] or nil, defaultDB[setting])
+                    else
+                        classSV[setting] = classDB and classDB[setting] or defaultDB[setting]
+                    end
+                end
+            end
+            for class, classInfo in next, profile do
+                if type(classInfo) == "table" and classInfo.types then
+                    for pointType, pointInfo in next, classInfo.types do
+                        if pointInfo.bars then
+                            setSettings(pointInfo.bars, defaults[class].types[pointType].bars, defaultDB.bars)
+                        end
+                    end
+                end
+            end
+        end
+        local RavenDB = _G.RavenDB
+        if IsAddOnLoaded("Raven") and RavenDB then
+            if RavenDB["profiles"]["RealUI"] then
+                RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
+                RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
+            end
         end
     end,
     [99] = function(ver) -- test patch

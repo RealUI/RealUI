@@ -137,36 +137,6 @@ function CombatFader:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            elements = {
-                ["**"] = {
-                    enabled = true,
-                    opacity = {
-                        incombat = 1,
-                        hurt = 0.85,
-                        target = 0.85,
-                        harmtarget = 0.75,
-                        outofcombat = 0.25,
-                    },
-                },
-                unitframes = {
-                    name = "Unit Frames",
-                    frames = {
-                        ["RealUIPlayerFrame"] = true,
-                        ["RealUITargetFrame"] = true,
-                        ["RealUIFocusFrame"] = true,
-                        ["RealUIFocusTargetFrame"] = true,
-                        ["RealUITargetTargetFrame"] = true,
-                        ["RealUIPetFrame"] = true,
-                    },
-                },
-                objectives = {
-                    name = "Objective Tracker",
-                    inverse = true,
-                    frames = {
-                        ["ObjectiveTrackerFrame"] = true,
-                    },
-                },
-            },
         },
     })
     db = self.db.profile

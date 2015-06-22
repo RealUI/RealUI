@@ -14,43 +14,6 @@ local BloodShieldName
 local MinLevel = 10
 local maxHealth
 
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Blood Shield",
-		desc = "Deathknight Blood Shield tracker (+ Resolve).",
-		arg = MODNAME,
-		childGroups = "tab",
-		args = {
-			header = {
-				type = "header",
-				name = "Blood Shield",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Deathknight Blood Shield tracker (+ Resolve).",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Blood Shield module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	return options
-end
-
 -----------------
 ---- Updates ----
 -----------------
@@ -138,7 +101,6 @@ end
 -----------------------
 function BloodShield:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
 	self.bsBar:SetBarColor("left", nibRealUI.media.colors.red)
 	self.bsBar:SetBarColor("right", nibRealUI.media.colors.orange)
 	self:UpdateAuras()
@@ -147,7 +109,6 @@ end
 ------------
 function BloodShield:ToggleConfigMode(val)
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
 	if self.configMode == val then return end
 
 	self.configMode = val
@@ -162,20 +123,17 @@ function BloodShield:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
+	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 
 function BloodShield:OnEnable()
-	if nibRealUI.class ~= "DEATHKNIGHT" then return end
-
 	self.configMode = false
 
 	BloodShieldName = GetSpellInfo(BloodShieldID)
 
 	if not self.bsBar then 
-		self.bsBar = ClassResourceBar:New("long")
+		self.bsBar = ClassResourceBar:New("long", L["Resource_BloodShield"])
 		self.bsBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 	self:UpdateMax()

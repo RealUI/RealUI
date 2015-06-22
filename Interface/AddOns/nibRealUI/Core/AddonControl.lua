@@ -279,6 +279,10 @@ function nibRealUI:ToggleAddonPositionControl(addon, val)
     db.addonControl[addon].control.position = val
 end
 
+function nibRealUI:ToggleAddonLayoutControl(addon, val)
+    db.addonControl[addon].profiles.layout.use = val
+end
+
 function nibRealUI:GetAddonControlSettings(addon)
     return {
         position = db.addonControl[addon].control.position,
@@ -288,6 +292,10 @@ end
 
 function nibRealUI:DoesAddonMove(addon)
     return db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use
+end
+
+function nibRealUI:DoesAddonLayout(addon)
+    return db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use
 end
 
 function nibRealUI:DoesAddonStyle(addon)

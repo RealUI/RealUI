@@ -78,113 +78,6 @@ local ChannelingTicks = {
     [GetSpellInfo(108371)] = 6, -- Harvest Life
 }
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Cast Bars",
-        desc = "Player, Target and Focus casting bars.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Cast Bars",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Player, Target and Focus casting bars.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Cast Bars module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value)
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            reverse = {
-                name = "Direction",
-                type = "group",
-                inline = true,
-                order = 40,
-                args = {
-                    player = {
-                        type = "toggle",
-                        name = "Reverse Player",
-                        desc = "Reverse direction of Player cast bar.",
-                        get = function() return db.reverse.player end,
-                        set = function(info, value)
-                            db.reverse.player = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 10,
-                    },
-                    target = {
-                        type = "toggle",
-                        name = "Reverse Target",
-                        desc = "Reverse direction of Target cast bar.",
-                        get = function() return db.reverse.target end,
-                        set = function(info, value)
-                            db.reverse.target = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 10,
-                    },
-                },
-            },
-            gap2 = {
-                name = " ",
-                type = "description",
-                order = 41,
-            },
-            text = {
-                name = "Text",
-                type = "group",
-                inline = true,
-                order = 50,
-                args = {
-                    textInside = {
-                        type = "toggle",
-                        name = "Inside",
-                        desc = "Spell Name and Time text displayed on the inside.",
-                        get = function() return db.text.textInside end,
-                        set = function(info, value)
-                            db.text.textInside = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 10,
-                    },
-                    textOnBottom = {
-                        type = "toggle",
-                        name = "On Bottom",
-                        desc = "Spell Name and Time text displayed below the cast bars.",
-                        get = function() return db.text.textOnBottom end,
-                        set = function(info, value)
-                            db.text.textOnBottom = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 20,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 local MaxNameLengths = {
     player = 26,
     vehicle = 26,
@@ -1073,7 +966,6 @@ function CastBars:OnInitialize()
     layoutSize = ndb.settings.hudSize
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
     nibRealUI:RegisterConfigModeModule(self)
 end
 

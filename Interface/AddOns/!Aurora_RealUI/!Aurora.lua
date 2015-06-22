@@ -3,6 +3,10 @@ mods["Aurora"] = {}
 mods["nibRealUI"] = {}
 mods["PLAYER_LOGIN"] = {}
 
+-- Upvalues
+local _G = _G
+local RealUI = _G.RealUI
+
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
 REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}

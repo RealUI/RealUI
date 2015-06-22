@@ -2,6 +2,9 @@ local NAME, ns = ...
 local RealUI = RealUI or ns
 _G.RealUI = RealUI
 
+local uiWidth, uiHeight = UIParent:GetSize()
+RealUI.EM = floor(uiHeight * 0.0125 + 0.5)
+
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
     background =    {0.085, 0.085, 0.085, 0.9},
@@ -51,7 +54,7 @@ local function debug(mod, ...)
         CreateDebugFrame(mod)
     end
     local time = date("%H:%M:%S")
-    local text = ("[%s] %s "):format(time, mod)
+    local text = ("[%s] %s"):format(time, mod)
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
         if (arg ~= nil) then
@@ -59,7 +62,7 @@ local function debug(mod, ...)
         else
             arg = "nil"
         end
-        text = text .. arg .. " "
+        text = text .. "     " .. arg
     end
     debugger[mod]:AddLine(text)
 end

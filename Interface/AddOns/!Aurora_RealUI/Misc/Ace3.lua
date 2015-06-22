@@ -138,18 +138,18 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     if disabled then
                         self.frame:Disable()
                         self.text:SetTextColor(0.5, 0.5, 0.5)
-                        --SetDesaturation(self.check, true)
+                        self.check:SetVertexColor(1, 1, 1)
                         if self.desc then
                             self.desc:SetTextColor(0.5, 0.5, 0.5)
                         end
                     else
                         self.frame:Enable()
                         self.text:SetTextColor(1, 1, 1)
-                        --[[if self.tristate and self.checked == nil then
-                            SetDesaturation(self.check, true)
+                        if self.tristate and self.checked == nil then
+                            self.check:SetVertexColor(1, 1, 1)
                         else
-                            SetDesaturation(self.check, false)
-                        end]]
+                            self.check:SetVertexColor(r, g, b)
+                        end
                         if self.desc then
                             self.desc:SetTextColor(1, 1, 1)
                         end
@@ -159,16 +159,16 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     local check = self.check
                     self.checked = value
                     if value then
-                        --SetDesaturation(self.check, false)
-                        self.check:Show()
+                        check:SetVertexColor(r, g, b)
+                        check:Show()
                     else
                         --Nil is the unknown tristate value
                         if self.tristate and value == nil then
-                            --SetDesaturation(self.check, true)
-                            self.check:Show()
+                            check:SetVertexColor(1, 1, 1)
+                            check:Show()
                         else
-                            --SetDesaturation(self.check, false)
-                            self.check:Hide()
+                            check:SetVertexColor(r, g, b)
+                            check:Hide()
                         end
                     end
                     self:SetDisabled(self.disabled)

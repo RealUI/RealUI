@@ -151,45 +151,6 @@ nibRealUI.hudSizeOffsets = {
     },
 }
 
-nibRealUI.defaultActionBarSettings = {
-    [1] = {     -- DPS/Tank
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 10, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1}
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-    [2] = {     -- Healing
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 10, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1},
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-}
-
 -- Default Options
 local defaults = {
     global = {
@@ -229,11 +190,10 @@ local defaults = {
         positions = nibRealUI.defaultPositions,
         -- Action Bar settings
         abSettingsLink = false,
-        actionBarSettings = nibRealUI.defaultActionBarSettings,
         -- Dynamic UI settings
         settings = {
             powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-            fontStyle = 1,
+            fontStyle = 2,
             infoLineBackground = true,
             stripeOpacity = 0.5,
             hudSize = 1,
@@ -322,12 +282,6 @@ function nibRealUI:StyleSetStripeOpacity()
     end
 end
 
-function nibRealUI:StyleSetInfoLineBackground(val)
-    db.settings.infoLineBackground = val
-    local InfoLine = nibRealUI:GetModule("InfoLine", true)
-    if InfoLine then InfoLine:SetBackground() end
-end
-
 -- Style - Global Colors
 function nibRealUI:StyleUpdateColors()
     for k, mod in self:IterateModules() do
@@ -349,12 +303,6 @@ function nibRealUI:SetLayout()
     -- Set Positioners
     self:UpdatePositioners()
 
-    -- HuD Config
-    self:GetModule("ConfigBar_Positions"):UpdateHeader()
-    self:GetModule("ConfigBar_ActionBars"):RefreshDisplay()
-    self:GetModule("HuDConfig"):RegisterForUpdate("AB")
-    self:GetModule("HuDConfig"):RegisterForUpdate("MSBT")
-    self:GetModule("HuDConfig_Positions"):Refresh()
 
     if RealUIGridConfiguring then
         self:ScheduleTimer(function()
@@ -363,10 +311,11 @@ function nibRealUI:SetLayout()
         end, 0.5)
     end
 
-    -- ActionBarExtras
-    if self:GetModuleEnabled("ActionBarExtras") then
-        local ABE = self:GetModule("ActionBarExtras", true)
-        if ABE then ABE:RefreshMod() end
+    -- ActionBars
+    if self:GetModuleEnabled("ActionBars") then
+        local AB = self:GetModule("ActionBars", true)
+        AB:RefreshDoodads()
+        AB:ApplyABSettings()
     end
 
     -- Grid Layout changer
@@ -633,7 +582,6 @@ function nibRealUI:ADDON_LOADED(event, addon)
 
     -- Open before login to stop taint
     ToggleFrame(SpellBookFrame)
-    PetJournal_LoadUI()
 end
 
 function nibRealUI:ChatCommand_Config()
@@ -642,26 +590,26 @@ function nibRealUI:ChatCommand_Config()
 end
 
 local configLoaded, configFailed = false, false
-function nibRealUI:LoadConfig(mode, ...)
+function nibRealUI:LoadConfig(app, section, ...)
     if not configLoaded then
         configLoaded = true
         local loaded, reason = LoadAddOn("nibRealUI_Config")
         if not loaded then
-            --print("Failed to load nibRealUI_Config:", reason)
+            print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end
-    if not configFailed then return self:ToggleConfig(mode, ...) end
+    if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
     nibRealUI:SetUpOptions()
-    if mode == "HuD" and not ... then
+    if app == "HuD" and not ... then
         return nibRealUI:ShowConfigBar()
     end
-    if LibStub("AceConfigDialog-3.0").OpenFrames[mode] then
-        LibStub("AceConfigDialog-3.0"):Close(mode)
+    if LibStub("AceConfigDialog-3.0").OpenFrames[app] then
+        LibStub("AceConfigDialog-3.0"):Close(app)
     else
-        LibStub("AceConfigDialog-3.0"):Open(mode, ...)
+        LibStub("AceConfigDialog-3.0"):Open(app, section, ...)
     end
 end
 

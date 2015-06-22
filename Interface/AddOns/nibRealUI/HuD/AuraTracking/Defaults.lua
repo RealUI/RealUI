@@ -13,7 +13,6 @@ Auras
     auraType = "buff" or "debuff"           (default = "buff")
     unit = unitID                           (default = "player")
     specs = {spec1, spec2, spec3, spec4}    (default = true for all specs)
-    forms = {cat, bear, moonkin}            (default = nil)
     order = #                               (if not specified indicator will be Free, otherwise Static)
     side = "LEFT" or "RIGHT"                (default = "LEFT" for "buff" and "RIGHT" for "debuff")
     hideStacks = true or false              (default = false - hide stack count [useful for buffs with a passive 1 stack])
@@ -30,12 +29,6 @@ AuraTracking.Defaults = {
 ["DEATHKNIGHT"] = { ------------------
 
 -- Static Buffs
-    {   -- Shadow Infusion (Unholy)
-        spell = 91342,
-        minLevel = 60,
-        order = 1,
-        specs = {false, false, true}
-    },
     {   -- Scent of Blood (Blood)
         spell = 50421,
         minLevel = 62,
@@ -48,10 +41,16 @@ AuraTracking.Defaults = {
         order = 2,
         specs = {true, false, false}
     },
+    {   -- Shadow Infusion, Dark Transformation (Unholy)
+        spell = {91342,63560},
+        minLevel = 60,
+        unit = "pet",
+        order = 1,
+        specs = {false, false, true},
+    },
 -- Static Debuffs
-    {   -- Necrotic Plague
+    {   -- Necrotic Plague (Talent)
         spell = 155159,
-        minLevel = 68,
         auraType = "debuff",
         order = 1,
     },
@@ -59,30 +58,56 @@ AuraTracking.Defaults = {
         spell = 55078,
         minLevel = 55,
         auraType = "debuff",
+        replace = 155159,
         order = 1,
     },
     {   -- Frost Fever
         spell = 55095,
         minLevel = 55,
         auraType = "debuff",
+        replace = 155159,
         order = 2,
     },
 -- Free Buffs
-    {spell = 114851},   -- Blood Charge
-    {spell = 51124},    -- Killing Machine
-    {spell = 51271},    -- Pillar of Frost
-    {spell = 49039},    -- Lichborne
+    {   -- Crimson Scourge (Blood)
+        spell = 81141,
+        specs = {true, false, false},
+    },
+    {   -- Vampiric Blood (Blood)
+        spell = 55233,
+        specs = {true, false, false},
+    },
+    {   -- Dancing Rune Weapon (Blood)
+        spell = 81256,
+        specs = {true, false, false},
+    },
+    {   -- Bone Shield (Blood)
+        spell = 49222,
+        specs = {true, false, false},
+    },
+    {   -- Killing Machine (Frost)
+        spell = 51124,
+        specs = {false, true, false},
+    },
+    {   -- Pillar of Frost (Frost)
+        spell = 51271,
+        specs = {false, true, false},
+    },
+    {   -- Freezing Fog (Frost, from Rime)
+        spell = 59052,
+        specs = {false, true, false},
+    },
+    {   -- Sudden Doom (Unholy)
+        spell = 81340,
+        specs = {false, false, true},
+    },
     {spell = 48792},    -- Icebound Fortitude
     {spell = 22744},    -- Chains of Ice
-    {spell = 59052},    -- Freezing Fog
-    {spell = 55233},    -- Vampiric Blood
     {spell = 48707},    -- Anti-Magic Shell
-    {spell = 87256},    -- Dancing Rune Weapon
-    {spell = 49222},    -- Bone Shield
-    {spell = 50461},    -- Anti-Magic Zone
-    {spell = 96268},    -- Death's Advance
-    {spell = 81340},    -- Sudden Doom
-    {spell = 63560, unit = "pet"},  -- Dark Transformation
+    {spell = 49039},    -- Lichborne (Talent)
+    {spell = 50461},    -- Anti-Magic Zone (Talent)
+    {spell = 96268},    -- Death's Advance (Talent)
+    {spell = 114851},   -- Blood Charge (used for Blood Tap, Talent)
 -- Free Debuffs
 
 },  -- DEATHKNIGHT ------------------
@@ -91,20 +116,6 @@ AuraTracking.Defaults = {
 ["DRUID"] = { ------------------
 
 -- Static Buffs
-    {   -- Harmony (Resto)
-        spell = 100977,
-        minLevel = 80,
-        order = 1,
-        specs = {false, false, false, true},
-        forms = {false, false, false, true} -- Show in Human form
-    },
-    --[[{   -- Nature's Grace (Balance)
-        spell = 16886,
-        minLevel = 10,
-        order = 1,
-        ignoreSpec = true,
-        forms = {false, false, true, false} -- Show in Moonkin form
-    },]]
     {   -- Savage Roar (Feral)
         type = "SavageRoar",
         order = 1,
@@ -113,83 +124,132 @@ AuraTracking.Defaults = {
         spell = 62606,
         minLevel = 10,
         order = 1,
-        ignoreSpec = true,
-        forms = {false, true, false, false} -- Show in Bear form
+        specs = {false, false, true, false}
+    },
+    {   -- Harmony (Resto Mastery) gained by casting direct heals
+        spell = 100977,
+        minLevel = 80,
+        order = 1,
+        specs = {false, false, false, true},
+    },
+    {   -- Wild Mushrooms (Resto)
+        type = "WildMushrooms",
+        order = 2,
     },
 -- Static Debuffs
-    {   -- Rake (Feral)
-        spell = 1822,
-        auraType = "debuff",
-        order = 1,
-        ignoreSpec = true,
-        forms = {true, false, false, false} -- Show in Cat form
-    },
-    {   -- Rip (Feral)
-        spell = 1079,
-        auraType = "debuff",
-        order = 2,
-        ignoreSpec = true,
-        forms = {true, false, false, false} -- Show in Cat form
-    },
-    {   -- Thrash (Feral)
-        spell = 106832,
-        auraType = "debuff",
-        order = 3,
-        ignoreSpec = true,
-        forms = {true, false, false, false} -- Show in Cat form
-    },
-    {   -- Lacerate (Guardian)
-        spell = 33745,
-        auraType = "debuff",
-        order = 1,
-        ignoreSpec = true,
-        forms = {false, true, false, false} -- Show in Bear form
-    },
-    {   -- Thrash (Guardian)
-        spell = 106832,
-        auraType = "debuff",
-        order = 2,
-        ignoreSpec = true,
-        forms = {false, true, false, false} -- Show in Bear form
-    },
     {   -- Sunfire (Balance)
         spell = 93402,
         auraType = "debuff",
         order = 1,
-        ignoreSpec = true,
-        forms = {false, false, true, false} -- Show in Moonkin form
+        specs = {true, false, false, false}
     },
     {   -- Moonfire (Balance)
         spell = 8921,
         auraType = "debuff",
         order = 2,
-        ignoreSpec = true,
-        forms = {false, false, true, false} -- Show in Moonkin form
+        specs = {true, false, false, false}
+    },
+    {   -- Rake (Feral)
+        spell = 1822,
+        auraType = "debuff",
+        order = 1,
+        specs = {false, true, false, false}
+    },
+    {   -- Rip (Feral)
+        spell = 1079,
+        auraType = "debuff",
+        order = 2,
+        specs = {false, true, false, false}
+    },
+    {   -- Thrash (Guardian)
+        spell = 106832,
+        auraType = "debuff",
+        order = 1,
+        specs = {false, false, true, false}
+    },
+    {   -- Lacerate (Guardian)
+        spell = 33745,
+        auraType = "debuff",
+        order = 2,
+        specs = {false, false, true, false}
     },
 -- Free Buffs
-    {spell = 22812},    -- Barkskin
-    {spell = 50322},    -- Survival Instincts
+    {   -- Lunar/Solar Empowerment (Balance)
+        spell = {164547,164545},
+        specs = {true, false, false, false}
+    },
+    {   -- Lunar/Solar Peak (Balance)
+        spell = {171743,171744},
+        specs = {true, false, false, false}
+    },
+    {   -- Celestial Alignment (Balance)
+        spell = 112071,
+        specs = {true, false, false, false}
+    },
+    {   -- Incarnation: Chosen of Elune (Talent, Balance)
+        spell = 102560,
+        specs = {true, false, false, false}
+    },
+    {   -- Predatory Swiftness (Feral)
+        spell = 69369,
+        specs = {false, true, false, false}
+    },
+    {   -- Tiger's Fury (Feral)
+        spell = 5217,
+        specs = {false, true, false, false}
+    },
+    {   -- Barkskin (Guardian)
+        spell = 22812,
+        specs = {false, false, true, false}
+    },
+    {   -- Tooth and Claw (Guardian)
+        spell = 135286,
+        specs = {false, false, true, false}
+    },
+    {   -- Survival Instincts (Guardian)
+        spell = 50322,
+        specs = {false, false, true, false}
+    },
+    {   -- Pulverize (Talent, Guardian)
+        spell = 158792,
+        specs = {false, false, true, false}
+    },
+    {   -- Clearcasting (Resto)
+        spell = 16870,
+        specs = {false, false, false, true}
+    },
     {spell = 5211},     -- Dash
-    {spell = 69369},    -- Predator's Swiftness
-    {spell = 33831},    -- Force of Nature
-    {spell = 135700},   -- Clearcasting
-    {spell = 5217},     -- Tiger's Fury
-    {spell = 135286},   -- Tooth and Claw
+    {spell = 33831},    -- Force of Nature (Talent)
 -- Free Debuffs
-    {spell = 50334, auraType = "debuff"},   -- Berserk
-    {spell = 22570, auraType = "debuff"},   -- Maim
-    {spell = 770, auraType = "debuff"},     -- Faerie Fire
-    {spell = 58180, auraType = "debuff"},   -- Infected Wounds
     {   -- Lacerate (Feral)
         spell = 33745,
         auraType = "debuff",
-        ignoreSpec = true,
-        forms = {true, false, false, false}
+        specs = {false, true, false, false}
     },
--- Static Buffs
-    {   -- Wild Mushrooms (Resto)
-        type = "WildMushrooms",
-        order = 2,
+    {   -- Thrash (Feral)
+        spell = 106832,
+        auraType = "debuff",
+        specs = {false, true, false, false}
+    },
+    {   -- Maim (Feral)
+        spell = 22570,
+        auraType = "debuff",
+        specs = {false, true, false, false}
+    },
+    {   -- Faerie Fire (Feral, Guardian)
+        spell = 770,
+        auraType = "debuff",
+        specs = {false, true, true, false}
+    },
+    {   -- Infected Wounds (Feral, Guardian)
+        spell = 58180,
+        auraType = "debuff",
+        specs = {false, true, true, false}
+    },
+    {   -- Berserk (Feral, Guardian)
+        spell = 50334,
+        auraType = "debuff",
+        specs = {false, true, true, false}
     },
 
 },  -- DRUID -------------------
@@ -199,6 +259,13 @@ AuraTracking.Defaults = {
 -- Static Buffs
     {   -- Frenzy (BM)
         spell = 19623,
+        minLevel = 30,
+        unit = "pet",
+        order = 1,
+        specs = {true, false, false}
+    },
+    {   -- Focus Fire (BM)
+        spell = 82692,
         minLevel = 30,
         order = 1,
         specs = {true, false, false}
@@ -216,8 +283,8 @@ AuraTracking.Defaults = {
         order = 1,
         specs = {false, false, true}
     },
-    {   -- Thrill of the Hunt (Talent)
-        spell = 34720,
+    {   -- Steady Focus (Talent)
+        spell = 177668,
         order = 2,
     },
 -- Static Debuffs
@@ -228,24 +295,39 @@ AuraTracking.Defaults = {
         specs = {false, false, true}
     },
 -- Free Buffs
-    {spell = 34720},    -- Thrill of the Hunt (Talent)
-    {spell = 82692},    -- Focus Fire
-    {spell = 19574},    -- Bestial Wrath
-    {spell = 53301},    -- Explosive Shot (buff or debuff?)
+    {   -- Beast Cleave (BM)
+        spell = 118455,
+        unit = "pet",
+        specs = {true, false, false}
+    },
+    {   -- Bestial Wrath (BM)
+        spell = 19574,
+        specs = {true, false, false}
+    },
+    {   -- Rapid Fire (MM)
+        spell = 3045,
+        specs = {false, true, false}
+    },
     {spell = 19263},    -- Deterrence
-    {spell = 53480},    -- Roar of Sacrifice (Cunning)
     {spell = 51755},    -- Camouflage
     {spell = 54216},    -- Master's Call
-    {spell = 3045},     -- Rapid Fire
-    {spell = 90355},    -- Ancient Hysteria
-    {spell = 90361},    -- Spirit Mend
+    {spell = 53480},    -- Roar of Sacrifice (Cunning)
+    {spell = 34720},    -- Thrill of the Hunt (Talent)
 -- Free Debuffs
-    {spell = 3674, auraType = "debuff"},    -- Black Arrow
-    {spell = 53301, auraType = "debuff"},   -- Explosive Shot
+    {   -- Black Arrow (SV)
+        spell = 3674,
+        auraType = "debuff",
+        specs = {false, false, true}
+    },
+    {   -- Explosive Shot (SV)
+        spell = 53301,
+        auraType = "debuff",
+        specs = {false, false, true}
+    },
     {spell = 13812, auraType = "debuff"},   -- Explosive Trap
     {spell = 3355, auraType = "debuff"},    -- Freezing Trap
     {spell = 13810, auraType = "debuff"},   -- Ice Trap
-    {spell = 131894, auraType = "debuff"},  -- A Murder of Crows
+    {spell = 131894, auraType = "debuff"},  -- A Murder of Crows (Talent)
 
 },  -- HUNTER -------------------
 
@@ -288,22 +370,38 @@ AuraTracking.Defaults = {
         specs = {false, true, false},
     },
 -- Free Buffs
-    {spell = 12043},    -- Presence of Mind
-    {spell = 1463},     -- Incanter's Ward
-    {spell = 116267},   -- Incanter's Absorption
-    {spell = 12472},    -- Icy Veins
-    {spell = 12042},    -- Arcane Power
-    {spell = 48108},    -- Hot Streak
+    {   -- Arcane Power (Arcane)
+        spell = 12042,
+        specs = {true, false, false},
+    },
+    {   -- Presence of Mind (Arcane)
+        spell = 12043,
+        specs = {true, false, false},
+    },
+    {   -- Evocation (Arcane)
+        spell = 12051,
+        specs = {true, false, false},
+    },
+    {   -- Pyroblast!, Heating Up (Fire)
+        spell = {48108,48107},
+        specs = {false, true, false},
+    },
+    {   -- Icy Veins (Frost)
+        spell = 12472,
+        specs = {false, false, true},
+    },
+    {   -- Brain Freeze (Frost)
+        spell = 57761,
+        specs = {false, false, true},
+    },
     {spell = 55342},    -- Mirror Image
-    {spell = 115610},   -- Temporal Shield
-    {spell = 110909},   -- Alter Time
-    {spell = 12051},    -- Evocation
-    {spell = 80353},    -- Time Warp
-    {spell = 32612},    -- Invisibility
-    {spell = 110960},   -- Greater Invisibility
-    {spell = 108839},   -- Ice Flows
-    {spell = 111264},   -- Ice Ward
-    {spell = 108843},   -- Blazing Speed
+    {spell = 108843},   -- Blazing Speed (Talent)
+    {spell = 108839},   -- Ice Floes (Talent)
+    {spell = 110909},   -- Alter Time (Talent)
+    {spell = 111264},   -- Ice Ward (Talent)
+    {spell = 116014},   -- Rune of Power (Talent)
+    {spell = 116267},   -- Incanter's Flow (Talent)
+    {spell = {32612,113862}},   -- Invisibility, Greater Invisibility (Talent)
 -- Free Debuffs
     {spell = 31589, auraType = "debuff"},   -- Slow
     {spell = 116, auraType = "debuff"},     -- Frostbolt
@@ -323,7 +421,7 @@ AuraTracking.Defaults = {
         specs = {true, false, false},
     },
     {   -- Elusive Brew (Brewmaster)
-        spell = 128939, --115308
+        spell = {115308,128939}, -- Effect buff, Stacking buff
         minLevel = 10,
         order = 2,
         specs = {true, false, false},
@@ -334,22 +432,16 @@ AuraTracking.Defaults = {
         order = 1,
         specs = {false, true, false},
     },
-    {   -- Serpent's Zeal (Mistweaver)
+    {   -- Crane's Zeal (Mistweaver)
         spell = 127722,
         minLevel = 10,
         order = 2,
         specs = {false, true, false},
     },
-    {   -- Tiger Power (Windwalker)
-        spell = 125359,
-        minLevel = 10,
-        order = 1,
-        specs = {false, false, true},
-    },
     {   -- Tigereye Brew (Windwalker)
-        spell = 116740,
+        spell = {116740,125195}, -- Effect buff, Stacking buff
         minLevel = 56,
-        order = 2,
+        order = 1,
         specs = {false, false, true},
     },
 -- Static Debuff
@@ -357,18 +449,31 @@ AuraTracking.Defaults = {
         spell = 107428,
         auraType = "debuff",
         order = 1,
-        specs = {false, false, true},
+        specs = {false, true, true},
     },
 -- Free Buffs
+    {   -- Guard (Brewmaster)
+        spell = 115295,
+        specs = {true, false, false},
+    },
+    {   -- Touch of Karma (Windwalker)
+        spell = 125174,
+        specs = {false, false, true},
+    },
+    {   -- Energizing Brew (Windwalker)
+        spell = 115288,
+        specs = {false, false, true},
+    },
+    {   -- Mana Tea (Mistweaver)
+        spell = 115294,
+        specs = {false, true, false},
+    },
+    {spell = 125359},   -- Tiger Power
     {spell = 120954},   -- Fortifying Brew
-    {spell = 122783},   -- Diffuse Magic
-    {spell = 122278},   -- Dampen Harm
-    {spell = 116849},   -- Life Cocoon
-    {spell = 125174},   -- Touch of Karma
-    {spell = 116841},   -- Tiger's Lust
-    {spell = 115294},   -- Mana Tea
-    {spell = 115295},   -- Guard
-    {spell = 152173},   -- Serenity
+    {spell = 122783},   -- Diffuse Magic (Talent)
+    {spell = 122278},   -- Dampen Harm (Talent)
+    {spell = 116841},   -- Tiger's Lust (Talent)
+    {spell = 152173},   -- Serenity (Talent)
 -- Free Debuffs
     {spell = 115804, auraType = "debuff"}, -- Mortal Wounds
 
@@ -717,7 +822,6 @@ AuraTracking.Defaults = {
     {spell = 12294, auraType = "debuff"},   -- Mortal Strike
     {spell = 64382, auraType = "debuff"},   -- Shattering Throw
     {spell = 6552, auraType = "debuff"},    -- Pummel
-    {spell = 1715, auraType = "debuff"},    -- Hamstring
     
 },  -- WARRIOR ------------------
 

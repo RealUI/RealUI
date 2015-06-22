@@ -5,6 +5,7 @@
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local mod = addon:NewModule('TankMode', 'AceEvent-3.0')
+local class
 
 mod.uiName = 'Threat'
 
@@ -16,7 +17,14 @@ function mod:Update()
 	if self.db.profile.enabled == 1 then
 		-- smart - judge by spec
 		local spec = GetSpecialization()
-		local role = spec and GetSpecializationRole(spec) or nil
+		local role
+
+        if class == 'WARRIOR' and GetShapeshiftForm() == 4 then
+            -- no tank for gladiator stance
+            role = nil
+        else
+            role = spec and GetSpecializationRole(spec) or nil
+        end
 
 		if role == 'TANK' then
 			addon.TankMode = true
@@ -33,9 +41,15 @@ function mod:Toggle()
 		-- smart tank mode, listen for spec changes
 		self:RegisterEvent('PLAYER_TALENT_UPDATE', 'Update')
 		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Update')
+
+        -- on a warrior, watch for gladiator stance
+        if class == 'WARRIOR' then
+            self:RegisterEvent('UPDATE_SHAPESHIFT_FORM', 'Update')
+        end
 	else
 		self:UnregisterEvent('PLAYER_TALENT_UPDATE')
 		self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED')
+		self:UnregisterEvent('UPDATE_SHAPESHIFT_FORM')
 	end
 
 	self:Update()
@@ -93,6 +107,8 @@ function mod:OnInitialize()
 end
 
 function mod:OnEnable()
+    class = select(2,UnitClass('player'))
+
 	addon.TankModule = self
 	self:Toggle()
 end

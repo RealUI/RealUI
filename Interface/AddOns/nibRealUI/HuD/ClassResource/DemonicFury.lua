@@ -11,43 +11,6 @@ local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local MetamorphosisSpellID = 103958
 local MetamorphosisSpellName
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Demonic Fury",
-        desc = "Warlock Demonic Fury tracker.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Demonic Fury",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Warlock Demonic Fury tracker.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Demonic Fury module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
 ------------------------------
 ---- Demonic Fury Updates ----
 ------------------------------
@@ -109,7 +72,6 @@ end
 -----------------------
 function DemonicFury:UpdateGlobalColors()
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "WARLOCK" then return end
 
     self.dfBar:SetBarColor("left", nibRealUI.media.colors.purple)
     self.dfBar:SetBarColor("right", nibRealUI.media.colors.purple)
@@ -119,7 +81,6 @@ end
 ------------
 function DemonicFury:ToggleConfigMode(val)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "WARLOCK" then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -134,20 +95,17 @@ function DemonicFury:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "WARLOCK")
     nibRealUI:RegisterConfigModeModule(self)
 end
 
 function DemonicFury:OnEnable()
-    if nibRealUI.class ~= "WARLOCK" then return end
-
     self.configMode = false
 
     MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)
 
     if not self.dfBar then 
-        self.dfBar = ClassResourceBar:New("short")
+        self.dfBar = ClassResourceBar:New("short", L["Resource_DemonicFury"])
         self.dfBar:SetEndBoxShown("left", false)
         self.dfBar:SetEndBoxShown("right", false)
         self.dfBar:SetBoxColor("middle", nibRealUI.classColor)

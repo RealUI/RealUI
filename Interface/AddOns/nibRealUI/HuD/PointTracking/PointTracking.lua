@@ -50,657 +50,6 @@ local Types = {
     },
 }
 
------------------
----- Options ----
------------------
-local table_Orientation = {
-    "Horizontal",
-    "Vertical",
-}
-
-local table_Specs = {
-    "None",
-    "Primary",
-    "Secondary",
-}
-
--- Return the Options table
-local options = nil
-local function GetOptions()
-    if not options then
-        options = {
-            type = "group",
-            name = "Point Display",
-            arg = MODNAME,
-            order = 1615,
-            args = {
-                header = {
-                    type = "header",
-                    name = "Point Display",
-                    order = 10,
-                },
-                enabled = {
-                    type = "toggle",
-                    name = "Enabled",
-                    desc = "Enable/Disable the Point Display module.",
-                    get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
-                        nibRealUI:SetModuleEnabled(MODNAME, value)
-                        nibRealUI:ReloadUIDialog()
-                    end,
-                    order = 20,
-                },
-            },
-        }
-    end
-    
-    local ClassOpts, TypeOpts, BarOpts = {}, {}, {}
-    local Opts_ClassOrderCnt = 40
-    local Opts_TypeOrderCnt = 10
-    
-    for ic,vc in pairs(Types) do
-        local ClassID = Types[ic].name
-        
-        wipe(TypeOpts)
-        for it,vt in ipairs(Types[ic].points) do
-            local tid = Types[ic].points[it].id         
-            local TypeDesc = Types[ic].points[it].name
-            
-            TypeOpts[tid] = {
-                type = "group",
-                name = TypeDesc,
-                childGroups = "tab",
-                order = Opts_TypeOrderCnt,
-                args = {
-                    header = {
-                        type = "header",
-                        name = string.format("%s - %s", ClassID, TypeDesc),
-                        order = 10,
-                    },
-                    enabled = {
-                        type = "toggle",
-                        name = "Enabled",
-                        desc = string.format("Enable/Disable the %s display.", TypeDesc),
-                        get = function() return db[ic].types[tid].enabled end,
-                        set = function(info, value) 
-                            db[ic].types[tid].enabled = value
-                            db[ic].types[tid].configmode.enabled = false
-                            if not value then
-                                PointTracking:DisablePointTracking(ic, tid)
-                            else
-                                PointTracking:EnablePointTracking(ic, tid)
-                            end
-                        end,
-                        order = 20,                 
-                    },
-                    sep = {
-                        type = "description",
-                        name = " ",
-                        order = 22,
-                    },
-                    config = {
-                        name = "Configuration",
-                        type = "group",
-                        order = 30,
-                        disabled = function() if db[ic].types[tid].enabled then return false else return true end end,
-                        args = {
-                            configmode = {
-                                type = "toggle",
-                                name = "Configuration Mode",
-                                get = function(info) return db[ic].types[tid].configmode.enabled end,
-                                set = function(info, value) 
-                                    db[ic].types[tid].configmode.enabled = value
-                                    PointTracking:UpdatePoints("ENABLE")
-                                end,
-                                order = 10,
-                            },
-                            configmodecount = {
-                                type = "range",
-                                name = "Config Mode point count",
-                                min = 0, max = Types[ic].points[it].barcount, step = 1,
-                                get = function(info) return db[ic].types[tid].configmode.count end,
-                                set = function(info, value) 
-                                    db[ic].types[tid].configmode.count = value
-                                    PointTracking:UpdatePoints("ENABLE")
-                                end,
-                                disabled = function() if db[ic].types[tid].configmode.enabled and db[ic].types[tid].enabled then return false else return true end end,
-                                order = 20,
-                            },
-                        },
-                    },              
-                    general = {
-                        name = "General Settings",
-                        type = "group",
-                        order = 70,
-                        disabled = function() if db[ic].types[tid].enabled then return false else return true end end,
-                        args = {
-                            appearance = {
-                                name = "Appearance",
-                                type = "group",
-                                order = 10,
-                                inline = true,
-                                args = {
-                                    hideui = {
-                                        type = "toggle",
-                                        name = "Hide default UI display",
-                                        desc = "Note: A UI reload (/reload ui) is required to make the default UI display visible again if you have it hidden.",
-                                        width = "full",
-                                        get = function(info) return db[ic].types[tid].general.hideui end,
-                                        set = function(info, value) 
-                                            db[ic].types[tid].general.hideui = value
-                                            PointTracking:HideUIElements()
-                                        end,
-                                        order = 10,
-                                        disabled = function() if (tid == "cp" or tid == "hp" or tid == "ss") then return false else return true end end,
-                                    },
-                                    hideempty = {
-                                        type = "toggle",
-                                        name = "Hide unused points/stacks",
-                                        desc = "Only show used the number of points/stacks you have. IE. If you have 4 Combo Points, the 5th Combo Point bar will remain hidden.",
-                                        width = "full",
-                                        get = function(info) return db[ic].types[tid].general.hideempty end,
-                                        set = function(info, value) 
-                                            db[ic].types[tid].general.hideempty = value
-                                            PointTracking:UpdatePoints("ENABLE")
-                                        end,
-                                        order = 20,
-                                    },
-                                    smarthide = {
-                                        type = "toggle",
-                                        name = "Smart hide",
-                                        desc = "Hide while solo, ungrouped, not in an instance. Will still show if you have an attackable target selected or are in combat.",
-                                        width = "full",
-                                        get = function(info) return db[ic].types[tid].general.smarthide end,
-                                        set = function(info, value) 
-                                            db[ic].types[tid].general.smarthide = value
-                                            PointTracking:UpdateSmartHideConditions()
-                                            PointTracking:UpdatePointTracking()
-                                        end,
-                                        order = 30,
-                                    },
-                                    hidein = {
-                                        type = "group",
-                                        name = "Hide in",
-                                        inline = true,
-                                        order = 40,
-                                        args = {
-                                            vehicle = {
-                                                type = "toggle",
-                                                name = "Vehicle",
-                                                desc = "Hide when in a Vehicle.",
-                                                width = "full",
-                                                get = function(info) return db[ic].types[tid].general.hidein.vehicle end,
-                                                set = function(info, value) 
-                                                    db[ic].types[tid].general.hidein.vehicle = value
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                                order = 10,
-                                            },
-                                            spec = {
-                                                type = "select",
-                                                name = "Spec",
-                                                get = function(info)
-                                                    return db[ic].types[tid].general.hidein.spec
-                                                end,
-                                                set = function(info, value)
-                                                    db[ic].types[tid].general.hidein.spec = value
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                                style = "dropdown",
-                                                width = nil,
-                                                values = table_Specs,
-                                                order = 30,
-                                            },
-                                        },
-                                    },
-                                    direction = {
-                                        type = "group",
-                                        name = "Direction",
-                                        inline = true,
-                                        order = 40,
-                                        args = {
-                                            reverse = {
-                                                type = "toggle",
-                                                name = "Reverse orientation",
-                                                desc = string.format("Reverse the orientation of the %s display.", TypeDesc),
-                                                width = "full",
-                                                get = function(info) return db[ic].types[tid].general.direction.reverse end,
-                                                set = function(info, value) 
-                                                    db[ic].types[tid].general.direction.reverse = value
-                                                    PointTracking:UpdatePosition()
-                                                end,
-                                                order = 20,
-                                            },
-                                        },
-                                    },                                  
-                                },
-                            },
-                        },
-                    },
-                    position = {
-                        type = "group",
-                        name = "Position",
-                        order = 80,
-                        disabled = function() if db[ic].types[tid].enabled then return false else return true end end,
-                        args = {
-                            position = {
-                                name = "Position",
-                                type = "group",
-                                inline = true,
-                                order = 20,
-                                args = {
-                                    xoffset = {
-                                        type = "input",
-                                        name = "X Offset",
-                                        width = "half",
-                                        order = 10,
-                                        get = function(info) return tostring(db[ic].types[tid].position.x) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db[ic].types[tid].position.x = value
-                                            PointTracking:UpdatePosition()
-                                        end,
-                                    },
-                                    yoffset = {
-                                        type = "input",
-                                        name = "Y Offset",
-                                        width = "half",
-                                        order = 20,
-                                        get = function(info) return tostring(db[ic].types[tid].position.y) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db[ic].types[tid].position.y = value
-                                            PointTracking:UpdatePosition()
-                                        end,
-                                    },
-                                },
-                            },
-                            framelevel = {
-                                type = "group",
-                                name = "Strata",
-                                inline = true,
-                                order = 30,
-                                args = {
-                                    strata = {
-                                        type = "select",
-                                        name = "Strata",
-                                        get = function(info) 
-                                            for k,v in pairs(nibRealUI.globals.stratas) do
-                                                if v == db[ic].types[tid].position.framelevel.strata then return k end
-                                            end
-                                        end,
-                                        set = function(info, value)
-                                            db[ic].types[tid].position.framelevel.strata = nibRealUI.globals.stratas[value]
-                                            PointTracking:UpdatePosition()
-                                        end,
-                                        style = "dropdown",
-                                        width = nil,
-                                        values = nibRealUI.globals.stratas,
-                                        order = 10,
-                                    },
-                                    level = {
-                                        type = "range",
-                                        name = "Frame Level",
-                                        min = 1, max = 50, step = 1,
-                                        get = function(info) return db[ic].types[tid].position.framelevel.level end,
-                                        set = function(info, value) 
-                                            db[ic].types[tid].position.framelevel.level = value
-                                            PointTracking:UpdatePosition()
-                                        end,
-                                        order = 20,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    bars = {
-                        name = "Point Bars",
-                        type = "group",
-                        childGroups = "tab",
-                        order = 90,
-                        disabled = function() if db[ic].types[tid].enabled then return false else return true end end,                  
-                        args = {
-                            usecustom = {
-                                type = "toggle",
-                                name = "Use Custom RealUI Textures",
-                                width = "double",
-                                disabled = function() return tid ~= "hp" end,
-                                get = function(info) return db[ic].types[tid].bars.custom end,
-                                set = function(info, value) 
-                                    db[ic].types[tid].bars.custom = value
-                                    PointTracking:UpdatePoints("ENABLE")
-                                end,
-                                order = 10,
-                            },
-                            positionsize = {
-                                name = "Position/Size",
-                                type = "group",
-                                order = 20,
-                                args = {
-                                    size = {
-                                        type = "group",
-                                        name = "Size",
-                                        inline = true,
-                                        order = 10,
-                                        args = {
-                                            width = {
-                                                type = "input",
-                                                name = "Width",
-                                                width = "half",
-                                                order = 10,
-                                                get = function(info) return tostring(db[ic].types[tid].bars.size.width) end,
-                                                set = function(info, value)
-                                                    value = nibRealUI:ValidateOffset(value)
-                                                    db[ic].types[tid].bars.size.width = value
-                                                    PointTracking:UpdatePosition()
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                            },
-                                            height = {
-                                                type = "input",
-                                                name = "Height",
-                                                width = "half",
-                                                order = 20,
-                                                get = function(info) return tostring(db[ic].types[tid].bars.size.height) end,
-                                                set = function(info, value)
-                                                    value = nibRealUI:ValidateOffset(value)
-                                                    db[ic].types[tid].bars.size.height = value
-                                                    PointTracking:UpdatePosition()
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                            },
-                                        },                          
-                                    },
-                                    position = {
-                                        name = "Position",
-                                        type = "group",
-                                        inline = true,
-                                        order = 20,
-                                        args = {
-                                            gap = {
-                                                type = "input",
-                                                name = "Gap",
-                                                desc = "Set the space between each Bar. Negative values bring them closer together. Positive values push them further apart.",
-                                                width = "half",
-                                                order = 30,
-                                                get = function(info) return tostring(db[ic].types[tid].bars.position.gap) end,
-                                                set = function(info, value)
-                                                    value = nibRealUI:ValidateOffset(value)
-                                                    db[ic].types[tid].bars.position.gap = value
-                                                    PointTracking:UpdatePosition()
-                                                end,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            background = {
-                                name = "Background",
-                                type = "group",
-                                -- disabled = function() return db[ic].types[tid].bars.custom end,
-                                order = 30,
-                                args = {
-                                    empty = {
-                                        name = "Empty",
-                                        type = "group",
-                                        inline = true,
-                                        order = 10,
-                                        args = {
-                                            texture = {
-                                                type = "select",
-                                                name = "Texture",
-                                                values = AceGUIWidgetLSMlists.background,
-                                                get = function()
-                                                    return db[ic].types[tid].bars.bg.empty.texture
-                                                end,
-                                                set = function(info, value)
-                                                    db[ic].types[tid].bars.bg.empty.texture = value
-                                                    PointTracking:GetTextures()
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                                dialogControl='LSM30_Background',
-                                                order = 10,
-                                            },
-                                            color = {
-                                                type = "color",
-                                                name = "Color",
-                                                hasAlpha = true,
-                                                get = function(info,r,g,b,a)
-                                                    return db[ic].types[tid].bars.bg.empty.color.r, db[ic].types[tid].bars.bg.empty.color.g, db[ic].types[tid].bars.bg.empty.color.b, db[ic].types[tid].bars.bg.empty.color.a
-                                                end,
-                                                set = function(info,r,g,b,a)
-                                                    db[ic].types[tid].bars.bg.empty.color.r = r
-                                                    db[ic].types[tid].bars.bg.empty.color.g = g
-                                                    db[ic].types[tid].bars.bg.empty.color.b = b
-                                                    db[ic].types[tid].bars.bg.empty.color.a = a
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                                order = 20,
-                                            },
-                                        },
-                                    },
-                                    full = {
-                                        name = "Full",
-                                        type = "group",
-                                        inline = true,
-                                        order = 20,
-                                        args = {
-                                            texture = {
-                                                type = "select",
-                                                name = "Texture",
-                                                values = AceGUIWidgetLSMlists.background,
-                                                get = function()
-                                                    return db[ic].types[tid].bars.bg.full.texture
-                                                end,
-                                                set = function(info, value)
-                                                    db[ic].types[tid].bars.bg.full.texture = value
-                                                    PointTracking:GetTextures()
-                                                    PointTracking:UpdatePoints("ENABLE")
-                                                end,
-                                                dialogControl='LSM30_Background',
-                                                order = 10,
-                                            },
-                                            colors = {
-                                                type = "group",
-                                                name = "Colors",
-                                                inline = true,
-                                                order = 20,
-                                                args = {
-                                                    color = {
-                                                        type = "color",
-                                                        name = "Normal",
-                                                        hasAlpha = true,
-                                                        get = function(info,r,g,b,a)
-                                                            return db[ic].types[tid].bars.bg.full.color.r, db[ic].types[tid].bars.bg.full.color.g, db[ic].types[tid].bars.bg.full.color.b, db[ic].types[tid].bars.bg.full.color.a
-                                                        end,
-                                                        set = function(info,r,g,b,a)
-                                                            db[ic].types[tid].bars.bg.full.color.r = r
-                                                            db[ic].types[tid].bars.bg.full.color.g = g
-                                                            db[ic].types[tid].bars.bg.full.color.b = b
-                                                            db[ic].types[tid].bars.bg.full.color.a = a
-                                                            PointTracking:UpdatePoints("ENABLE")
-                                                        end,
-                                                        order = 10,
-                                                    },
-                                                    maxcolor = {
-                                                        type = "color",
-                                                        name = "Max Points",
-                                                        desc = string.format("%s %s %s", "Set the background color of this Bar when", TypeDesc, "reaches it's maximum stacks."),
-                                                        hasAlpha = true,
-                                                        get = function(info,r,g,b,a)
-                                                            return db[ic].types[tid].bars.bg.full.maxcolor.r, db[ic].types[tid].bars.bg.full.maxcolor.g, db[ic].types[tid].bars.bg.full.maxcolor.b, db[ic].types[tid].bars.bg.full.maxcolor.a
-                                                        end,
-                                                        set = function(info,r,g,b,a)
-                                                            db[ic].types[tid].bars.bg.full.maxcolor.r = r
-                                                            db[ic].types[tid].bars.bg.full.maxcolor.g = g
-                                                            db[ic].types[tid].bars.bg.full.maxcolor.b = b
-                                                            db[ic].types[tid].bars.bg.full.maxcolor.a = a
-                                                            PointTracking:UpdatePoints("ENABLE")
-                                                        end,
-                                                        order = 20,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            surround = {
-                                name = "Surround",
-                                type = "group",
-                                disabled = function() return db[ic].types[tid].bars.custom end,
-                                order = 40,
-                                args = {
-                                    texture = {
-                                        type = "select",
-                                        name = "Texture",
-                                        values = AceGUIWidgetLSMlists.background,
-                                        get = function()
-                                            return db[ic].types[tid].bars.surround.texture
-                                        end,
-                                        set = function(info, value)
-                                            db[ic].types[tid].bars.surround.texture = value
-                                            PointTracking:GetTextures()
-                                            PointTracking:UpdatePoints("ENABLE")
-                                        end,
-                                        dialogControl='LSM30_Background',
-                                        order = 10,
-                                    },
-                                    color = {
-                                        type = "color",
-                                        name = "Color",
-                                        hasAlpha = true,
-                                        get = function(info,r,g,b,a)
-                                            return db[ic].types[tid].bars.surround.color.r, db[ic].types[tid].bars.surround.color.g, db[ic].types[tid].bars.surround.color.b, db[ic].types[tid].bars.surround.color.a
-                                        end,
-                                        set = function(info,r,g,b,a)
-                                            db[ic].types[tid].bars.surround.color.r = r
-                                            db[ic].types[tid].bars.surround.color.g = g
-                                            db[ic].types[tid].bars.surround.color.b = b
-                                            db[ic].types[tid].bars.surround.color.a = a
-                                            PointTracking:UpdatePoints("ENABLE")
-                                        end,
-                                        order = 20,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            
-            Opts_TypeOrderCnt = Opts_TypeOrderCnt + 10
-        end
-        
-        -- Create new Class table
-        ClassOpts[ic] = {
-            name = ClassID,
-            type = "group",
-            order = Opts_ClassOrderCnt,
-            args = {},
-        }
-        -- Fill out new Class table with it's Types
-        for key, val in pairs(TypeOpts) do
-            ClassOpts[ic].args[key] = (type(val) == "function") and val() or val
-        end
-        
-        Opts_ClassOrderCnt = Opts_ClassOrderCnt + 10
-    end
-    
-    -- Combat Fader
-    local Opts_CombatFader = {
-        ["combatfader"] = {
-            type = "group",
-            name = "Combat Fader",
-            childGroups = "tab",
-            order = 5,
-            args = {
-                header = {
-                    type = "header",
-                    name = "Combat Fader",
-                    order = 10,
-                },
-                desc = {
-                    type = "description",
-                    name = "Controls the fading of the Point Displays based on player status.",
-                    order = 20,
-                },
-                enabled = {
-                    type = "toggle",
-                    name = "Enabled",
-                    desc = "Enable/Disable combat fading.",
-                    get = function() return db.combatfader.enabled end,
-                    set = function(info, value) 
-                        db.combatfader.enabled = value
-                        PointTracking:UpdateCombatFader()
-                    end,
-                    order = 30,
-                },
-                sep = {
-                    type = "description",
-                    name = " ",
-                    order = 40,
-                },
-                opacity = {
-                    type = "group",
-                    name = "Opacity",
-                    inline = true,
-                    disabled = function() if db.combatfader.enabled then return false else return true end end,
-                    order = 60,
-                    args = {
-                        incombat = {
-                            type = "range",
-                            name = "In-combat",
-                            min = 0, max = 1, step = 0.05,
-                            isPercent = true,
-                            get = function(info) return db.combatfader.opacity.incombat end,
-                            set = function(info, value) db.combatfader.opacity.incombat = value; PointTracking:UpdateCombatFader(); end,
-                            order = 10,
-                        },
-                        hurt = {
-                            type = "range",
-                            name = "Hurt",
-                            min = 0, max = 1, step = 0.05,
-                            isPercent = true,
-                            get = function(info) return db.combatfader.opacity.hurt end,
-                            set = function(info, value) db.combatfader.opacity.hurt = value; PointTracking:UpdateCombatFader(); end,
-                            order = 20,
-                        },
-                        target = {
-                            type = "range",
-                            name = "Target-selected",
-                            min = 0, max = 1, step = 0.05,
-                            isPercent = true,
-                            get = function(info) return db.combatfader.opacity.target end,
-                            set = function(info, value) db.combatfader.opacity.target = value; PointTracking:UpdateCombatFader(); end,
-                            order = 30,
-                        },
-                        outofcombat = {
-                            type = "range",
-                            name = "Out-of-combat",
-                            min = 0, max = 1, step = 0.05,
-                            isPercent = true,
-                            get = function(info) return db.combatfader.opacity.outofcombat end,
-                            set = function(info, value) db.combatfader.opacity.outofcombat = value; PointTracking:UpdateCombatFader(); end,
-                            order = 40,
-                        },
-                    },
-                },
-            },
-        },
-    }
-    for k, v in pairs(Opts_CombatFader) do
-        ClassOpts[k] = (type(v) == "function") and v() or v
-    end
-    
-    -- Fill out Options table with all Classes
-    for key, val in pairs(ClassOpts) do
-        options.args[key] = (type(val) == "function") and val() or val
-    end
-    
-    return options
-end
-
 ---- Spell Info table
 local SpellInfo = {
     ["ap"] = nil,
@@ -713,7 +62,6 @@ local BG = {}
 -- Points
 local Points = {}
 local PointsChanged = {}
-local EBPoints = 0  -- Elusive Brew
 
 local HolyPowerTexture
 local SoulShardBG
@@ -727,14 +75,34 @@ local PlayerInInstance
 local SmartHideConditions
 local ValidClasses
 
+local idToPower = {
+    cp = SPELL_POWER_COMBO_POINTS,
+    chi = SPELL_POWER_CHI,
+    hp = SPELL_POWER_HOLY_POWER,
+    so = SPELL_POWER_SHADOW_ORBS,
+    ss = SPELL_POWER_SOUL_SHARDS,
+    be = SPELL_POWER_BURNING_EMBERS
+}
+function PointTracking:GetResource()
+    if PlayerClass == "ROGUE" then
+        return {{type = "SPELL_POWER_COMBO_POINTS", id = "cp"}}, "GENERAL"
+    elseif PlayerClass == "DRUID" then
+        return {{type = "SPELL_POWER_COMBO_POINTS", id = "cp"}}, "GENERAL"
+    elseif PlayerClass == "MONK" then
+        return {{type = "SPELL_POWER_CHI", id = "chi"}}, PlayerClass
+    elseif PlayerClass == "PALADIN" then
+        return {{type = "SPELL_POWER_HOLY_POWER", id = "hp"}}, PlayerClass
+    elseif PlayerClass == "PRIEST" then
+        return {{type = "SPELL_POWER_SHADOW_ORBS", id = "so"}}, PlayerClass
+    elseif PlayerClass == "WARLOCK" then
+        return {{type = "SPELL_POWER_SOUL_SHARDS", id = "ss"}, {type = "SPELL_POWER_BURNING_EMBERS", id = "be"}}, PlayerClass
+    end
+end
+
 -- Update Point Bars
 local PBTex = {}
-local ebColors = {
-    [1] = {1, 1, 1},
-    [2] = {1, 1, 0},
-    [0] = {1, 0, 0}
-}
 local function SetPointBarTextures(shown, ic, it, tid, i)
+    PointTracking:debug("SetPointBarTextures", shown, ic, it, tid, i)
     if tid == "hp" and db[ic].types[tid].bars.custom then
         PBTex.empty = nil
         PBTex.full = HolyPowerTexture[i]
@@ -751,26 +119,28 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
         Frames[ic][tid].bars[i].bg:SetTexture(PBTex.full)
         
         -- Custom Colors
+        local bars, color = db[ic].types[tid].bars
         if tid == "ap" or tid == "cp" then  -- Anticipation Point stack coloring
             if Points["ap"] > 0 then
                 for api = 1, Points["ap"] do
-                    if api > Points["cp"] then
-                        Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(db["ROGUE"].types["ap"].bars.bg.full.color.r, db["ROGUE"].types["ap"].bars.bg.full.color.g, db["ROGUE"].types["ap"].bars.bg.full.color.b, db["ROGUE"].types["ap"].bars.bg.full.color.a)
+                    bars = db["ROGUE"].types["ap"].bars
+                    if api < Points["cp"] then
+                        color = bars.bg.full.color
                     else
-                        Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(db["ROGUE"].types["ap"].bars.bg.full.maxcolor.r, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.g, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.b, db["ROGUE"].types["ap"].bars.bg.full.maxcolor.a)
+                        color = bars.bg.full.maxcolor
                     end
+                    Frames["ROGUE"]["ap"].bars[api].bg:SetVertexColor(color.r, color.g, color.b, color.a)
                 end
             end
-
-        -- Normal Colors
-        else
+        else -- Normal Colors
             if Points[tid] < Types[ic].points[it].barcount then
-                Frames[ic][tid].bars[i].bg:SetVertexColor(db[ic].types[tid].bars.bg.full.color.r, db[ic].types[tid].bars.bg.full.color.g, db[ic].types[tid].bars.bg.full.color.b, db[ic].types[tid].bars.bg.full.color.a)
+                color = bars.bg.full.color
             else
-                Frames[ic][tid].bars[i].bg:SetVertexColor(db[ic].types[tid].bars.bg.full.maxcolor.r, db[ic].types[tid].bars.bg.full.maxcolor.g, db[ic].types[tid].bars.bg.full.maxcolor.b, db[ic].types[tid].bars.bg.full.maxcolor.a)
+                color = bars.bg.full.maxcolor
             end
+            Frames[ic][tid].bars[i].bg:SetVertexColor(color.r, color.g, color.b, color.a)
         end
-        Frames[ic][tid].bars[i].surround:SetVertexColor(db[ic].types[tid].bars.surround.color.r, db[ic].types[tid].bars.surround.color.g, db[ic].types[tid].bars.surround.color.b, db[ic].types[tid].bars.surround.color.a)
+        Frames[ic][tid].bars[i].surround:SetVertexColor(bars.surround.color.r, bars.surround.color.g, bars.surround.color.b, bars.surround.color.a)
         
     -- Empty Bar
     else
@@ -782,6 +152,7 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
 end
 
 function PointTracking:UpdatePointTracking(...)
+    PointTracking:debug("UpdatePointTracking", ...)
     local UpdateList
     if ... == "ENABLE" then
         -- Update everything
@@ -795,7 +166,8 @@ function PointTracking:UpdatePointTracking(...)
         -- Cycle through all Point Displays in current Type
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
-            
+            PointTracking:debug("Type", tid, Points[tid])
+
             -- Do we hide the Display
             if ((Points[tid] == 0)
                 or (ic ~= PlayerClass and ic ~= "GENERAL") 
@@ -803,8 +175,7 @@ function PointTracking:UpdatePointTracking(...)
                 or ((PlayerClass == "WARLOCK") and (PlayerTalent == 1) and (tid == "be")) --
                 or ((PlayerClass == "WARLOCK") and (PlayerTalent == 3) and (tid == "ss")) --    
                 or (db[ic].types[tid].general.hidein.vehicle and UnitHasVehicleUI("player")) 
-                or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec)
-                or (db[ic].types[tid].general.smarthide and SmartHideConditions))
+                or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec))
                 and not db[ic].types[tid].configmode.enabled then
                     -- Hide Display 
                     Frames[ic][tid].bgpanel.frame:Hide()
@@ -817,12 +188,15 @@ function PointTracking:UpdatePointTracking(...)
             -- Update the Display
                 -- Update Bars if their Points have changed
                 if PointsChanged[tid] then
+                    local max = UnitPowerMax("player", idToPower[tid])
                     for i = 1, Types[ic].points[it].barcount do
                         if Points[tid] == nil then Points[tid] = 0 end
                         if Points[tid] >= i then
                         -- Show bar and set textures to "Full"
                             Frames[ic][tid].bars[i].frame:Show()
                             SetPointBarTextures(true, ic, it, tid, i)
+                        elseif i > max then
+                            Frames[ic][tid].bars[i].frame:Hide()
                         else
                             if db[ic].types[tid].general.hideempty then
                             -- Hide "empty" bar
@@ -857,6 +231,7 @@ local function GetDebuffCount(SpellID, ...)
 end
 
 local function GetBuffCount(SpellID, ...)
+    PointTracking:debug("GetBuffCount", SpellID, ...)
     if not SpellID then return end
     local unit = ... or "player"
     local _,_,_,count = UnitAura(unit, SpellID)
@@ -865,51 +240,20 @@ local function GetBuffCount(SpellID, ...)
 end
 
 function PointTracking:GetPoints(CurClass, CurType)
+    PointTracking:debug("GetPoints", CurClass, CurType)
     local NewPoints
-    -- General
-    if CurClass == "GENERAL" then
-        -- Combo Points
-        if CurType == "cp" then
-            NewPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
-        end
-    -- Monk
-    elseif CurClass == "MONK" then
-        -- Chi
-        if CurType == "chi" then
-            NewPoints = UnitPower("player", SPELL_POWER_CHI)
-        end
-    -- Priest
-    elseif CurClass == "PALADIN" then
-        -- Holy Power
-        if CurType == "hp" then
-            NewPoints = UnitPower("player", SPELL_POWER_HOLY_POWER)
-        end
-    -- Priest
-    elseif CurClass == "PRIEST" then
-        if CurType == "so" then
-            NewPoints = UnitPower("player", SPELL_POWER_SHADOW_ORBS)
-        end
-    -- Rogue
-    elseif CurClass == "ROGUE" then
+    if CurType == "ap" then
         -- Anticipation Points
-        if CurType == "ap" then
-            NewPoints = GetBuffCount(SpellInfo[CurType])
-        end
-    -- Warlock
-    elseif CurClass == "WARLOCK" then
-        -- Soul Shards
-        if CurType == "ss" and PlayerTalent == 1 then
-            NewPoints = UnitPower("player", SPELL_POWER_SOUL_SHARDS)
-        -- Burning Embers
-        elseif CurType == "be" and PlayerTalent == 3 then
-            NewPoints = UnitPower("player", SPELL_POWER_BURNING_EMBERS)
-        end
+        NewPoints = GetBuffCount(SpellInfo[CurType])
+    else
+        NewPoints = UnitPower("player", idToPower[CurType])
     end
     Points[CurType] = NewPoints
 end
 
 -- Update all valid Point Displays
-function PointTracking:UpdatePoints(...)    
+function PointTracking:UpdatePoints(...)
+    PointTracking:debug("UpdatePoints", ...)
     local HasChanged = false
     local Enable = ...
     
@@ -943,11 +287,13 @@ function PointTracking:UpdatePoints(...)
         -- Cycle through point types for current class
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
+            PointTracking:debug("Type", tid)
             if ( db[ic].types[tid].enabled and not db[ic].types[tid].configmode.enabled ) then
                 -- Retrieve new point count
-                local OldPoints = (tid == "eb") and EBPoints or Points[tid]
+                local OldPoints = Points[tid]
                 PointTracking:GetPoints(ic, tid)
-                local NewPoints = (tid == "eb") and EBPoints or Points[tid]
+                local NewPoints = Points[tid]
+                PointTracking:debug("HasChanged", NewPoints, OldPoints)
                 if NewPoints ~= OldPoints then
                     -- Points have changed, flag for updating
                     HasChanged = true
@@ -981,6 +327,13 @@ function PointTracking:UpdatePosition()
     for ic,vc in pairs(Types) do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
+
+            if tid == "ap" then
+                db[ic].types[tid].bars.position.side = db["GENERAL"].types["cp"].bars.position.side
+                db[ic].types[tid].bars.position.x = db["GENERAL"].types["cp"].bars.position.x
+                db[ic].types[tid].bars.position.y = db["GENERAL"].types["cp"].bars.position.y
+                db[ic].types[tid].bars.position.gap = db["GENERAL"].types["cp"].bars.position.gap
+            end
 
             ---- BG Panel
             local Parent = RealUIPositionersCTPoints
@@ -1050,19 +403,15 @@ function PointTracking:UpdatePosition()
 end
 
 function PointTracking:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    for ic,vc in pairs(ValidClasses) do
-        for it,vt in ipairs(Types[ic].points) do
-            local tid = Types[ic].points[it].id
-            db[ic].types[tid].configmode.enabled = val
-            if val then
-                db[ic].types[tid].configmode.count = Types[ic].points[it].barcount
-            else
-                db[ic].types[tid].configmode.count = 2
-            end
+    local power, class = self:GetResource()
+    if nibRealUI:GetModuleEnabled(MODNAME) and power then
+        for i = 1, #power do
+            local tid = power[i].id
+            db[class].types[tid].configmode.enabled = val
+            db[class].types[tid].configmode.count = UnitPowerMax("player", idToPower[tid])
         end
+        self:UpdatePoints("ENABLE")
     end
-    self:UpdatePoints("ENABLE")
 end
 
 -- Retrieve SharedMedia backgound
@@ -1265,7 +614,13 @@ function PointTracking:PLAYER_LOGIN()
     LSM:Register("background", "Soul_Shard_BG", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]])
     LSM:Register("background", "Soul_Shard_Surround", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]])
     
-    HolyPowerTexture = {[[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]], [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]}
+    HolyPowerTexture = {
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
+    }
     
     -- Get Spell Info
     -- Death Knight
@@ -1320,8 +675,7 @@ function PointTracking:OnInitialize()
     ndb = nibRealUI.db.profile
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    CombatFader:RegisterModForFade(MODNAME, db.combatfader)
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
+    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
     nibRealUI:RegisterConfigModeModule(self)
 end
 

@@ -6,45 +6,6 @@ local _
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Aura Tracking",
-		desc = "Graphical display of important Buffs/Debuffs.",
-		arg = MODNAME,
-		childGroups = "tab",
-		args = {
-			header = {
-				type = "header",
-				name = "Aura Tracking",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Graphical display of important Buffs/Debuffs.",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Aura Tracking module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value)
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-					nibRealUI:ReloadUIDialog()
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	return options
-end
-
---------------------------
 local modules = {}
 
 local FontStringsCooldown = {}
@@ -379,7 +340,7 @@ end
 function AuraTracking:CharacterUpdate()
 	-- Update Talent/Level information on Indicators
 	for k, indicator in pairs(Indicators) do
-		if indicator.TalentRefresh and indicator.frame.isStatic then
+		if indicator.TalentRefresh then
 			indicator:TalentRefresh()
 		end
 		indicator:SetUpdates()
@@ -408,8 +369,49 @@ function AuraTracking:SetupIndicators()
 
 	wipe(Indicators)
 	numIndicators = 0
+
 	if not db.tracking[nibRealUI.class] then return end
 	for k, info in ipairs(db.tracking[nibRealUI.class]) do
+		-- Convert settings
+		if info.ignoreSpec ~= nil then
+			info.useSpec = not info.ignoreSpec
+			info.ignoreSpec = nil
+		end
+		if info.forms then
+			info.specs[1] = info.forms[3] -- Balance = Moonkin
+			info.specs[2] = info.forms[1] -- Feral = Cat
+			info.specs[3] = info.forms[2] -- Guardian = Bear
+			info.forms = nil
+		end
+		
+
+		if not info.unit then
+			if info.auraType == "debuff" then
+				info.unit = "target"
+			else
+				info.unit = "player"
+			end
+		end
+
+		if info.specs then
+			local numSpecs = 0
+			for i = 1, #info.specs do
+				if info.specs[i] then
+					numSpecs = numSpecs + 1
+				end
+			end
+			if numSpecs == 0 then
+				info.useSpec = false
+			elseif numSpecs == 1 then
+				info.useSpec = true
+			else
+				info.useSpec = nil
+			end
+		else
+			info.specs = {}
+			info.useSpec = false
+		end
+
 		if not info.isDisabled then
 			self:CreateIndicator(k, info)
 		end
@@ -475,6 +477,9 @@ function AuraTracking:CreateIndicatorSlots()
 			IndicatorSlots[side][sI] = slot
 
 			if sI <= 6 then
+				slot.count = slot:CreateFontString()
+				slot.count:SetFontObject(RealUIFont_PixelCooldown)
+				slot.count:SetPoint("CENTER")
 				slot.bg = nibRealUI:CreateBDFrame(slot)
 				slot.bg:Hide()
 			end
@@ -517,11 +522,13 @@ end
 function AuraTracking:CreateNewTracker()
 	-- Insert new basic tracker
 	local newTracker = {
-		spell = "- Enter Spell Here -",
+		spell = L["AuraTrack_SpellNameID"],
 		minLevel = 90,
+		useSpec = false,
+		specs = {}
 	}
-	local newIndex = #db.tracking[nibRealUI.class] + 1
 	tinsert(db.tracking[nibRealUI.class], newTracker)
+	local newIndex = #db.tracking[nibRealUI.class]
 
 	-- Create Indicator
 	self:CreateIndicator(newIndex, newTracker)
@@ -600,9 +607,13 @@ function AuraTracking:ToggleConfigMode(val)
 	if self.configMode == val then return end
 	self.configMode = val
 
-	for sI = 1, 6 do
-		IndicatorSlots.LEFT[sI].bg:SetShown(val)
-		IndicatorSlots.RIGHT[sI].bg:SetShown(val)
+	for idx = 1, 6 do
+		for _, side in next, IndicatorSlots do
+			local slot = side[idx]
+
+			slot.count:SetText(val and idx or "")
+			slot.bg:SetShown(val)
+		end
 	end
 	self:UpdateVisibility()
 end
@@ -638,7 +649,6 @@ function AuraTracking:OnInitialize()
 	ndb = nibRealUI.db.profile
 
 	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions)
 	nibRealUI:RegisterConfigModeModule(self)
 
 	self.SideActiveStatic = {LEFT = false, RIGHT = false}

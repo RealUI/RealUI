@@ -592,6 +592,16 @@ local function GetOptions()
                         end,
                         order = 10,
                     },
+                    showBG = {
+                        type = "toggle",
+                        name = L["InfoLine_ShowBG"],
+                        get = function() return ndb.settings.infoLineBackground end,
+                        set = function(info, value)
+                            ndb.settings.infoLineBackground = value
+                            InfoLine:SetBackground()
+                        end,
+                        order = 10,
+                    },
                     clock = {
                         type = "group",
                         name = "Clock",
@@ -2830,10 +2840,10 @@ local function Spec_Update(self)
         Layout_Update(ILFrames.layout)
         nibRealUI:UpdateLayout()
 
-        -- ActionBar Doodads
-        if nibRealUI:GetModuleEnabled("ActionBarDoodads") then
-            local ABD = nibRealUI:GetModule("ActionBarDoodads", true)
-            if ABD then ABD:RefreshMod() end
+        -- ActionBars
+        if nibRealUI:GetModuleEnabled("ActionBars") then
+            local ABD = nibRealUI:GetModule("ActionBars", true)
+            if ABD then ABD:RefreshDoodads() end
         end
 
         -- No longer need Equip/Layout update on Spec change

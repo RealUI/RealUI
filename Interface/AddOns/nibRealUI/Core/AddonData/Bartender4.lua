@@ -52,7 +52,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["version"] = 3,
 								["fadeoutalpha"] = 0,
 								["position"] = {
@@ -252,7 +252,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["padding"] = -9,
 								["version"] = 3,
 								["position"] = {
@@ -316,7 +316,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["padding"] = -9,
 								["version"] = 3,
 								["position"] = {
@@ -608,7 +608,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["version"] = 3,
 								["fadeoutalpha"] = 0,
 								["position"] = {
@@ -808,7 +808,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["hidemacrotext"] = true,
 								["version"] = 3,
 								["position"] = {
@@ -872,7 +872,7 @@ nibRealUI.LoadAddOnData_Bartender4 = function()
 									["ID"] = "PixelSkin",
 									["Backdrop"] = false,
 								},
-								["buttons"] = 10,
+								["buttons"] = 12,
 								["hidemacrotext"] = true,
 								["fadeoutalpha"] = 0,
 								["position"] = {

@@ -30,12 +30,6 @@ local Options = {
 	settings = nil,
 	modules = {},
 }
--- HuD
-local HuDOptions = {
-	settings = nil,
-	modules = {},
-	ClassResource = {},
-}
 -- Modules
 local ModuleOptions = {
 	settings = nil,
@@ -170,28 +164,6 @@ local function GetOptions()
 		Options.settings.args[key] = (type(val) == "function") and val() or val
 	end
 
-	-- HuD
-	if not HuDOptions.settings then HuDOptions.settings = {
-		type = "group",
-		name = "HuD",
-		desc = "Unit Frames, Class Tracking, Combat Information",
-		childGroups = "tree",
-		args = {
-			ClassResource = {
-				type = "group",
-				name = "Class Resource",
-				args = {},
-			},
-		},
-	}
-	end
-	for key, val in pairs(HuDOptions.modules) do
-		HuDOptions.settings.args[key] = (type(val) == "function") and val() or val
-	end
-	for key, val in pairs(HuDOptions.ClassResource) do
-		HuDOptions.settings.args.ClassResource.args[key] = (type(val) == "function") and val() or val
-	end
-
 	-- Modules
 	if not ModuleOptions.settings then ModuleOptions.settings = {
 		type = "group",
@@ -211,10 +183,32 @@ local function GetOptions()
 		desc = "Toggle skinning of UI frames.",
 		type = "group",
 		args = {
+            windowOpacity = {
+                name = L["Appearance_WinOpacity"],
+                type = "range",
+                isPercent = true,
+                min = 0, max = 1, step = 0.05,
+                get = function(info) return nibRealUI.media.window[4] end,
+                set = function(info, value)
+                    nibRealUI.media.window[4] = value
+                end,
+                order = 10,
+            },
+            stripeOpacity = {
+                name = L["Appearance_StripeOpacity"],
+                type = "range",
+                isPercent = true,
+                min = 0, max = 1, step = 0.05,
+                get = function(info) return RealUI_InitDB.stripeOpacity end,
+                set = function(info, value)
+                    RealUI_InitDB.stripeOpacity = value
+                end,
+                order = 20,
+            },
 			header = {
 				type = "header",
 				name = "Skins",
-				order = 10,
+				order = 30,
 			},
 		},
 	}
@@ -229,7 +223,7 @@ local function GetOptions()
 				nibRealUI:SetModuleEnabled(name, value)
 				nibRealUI:ReloadUIDialog()
 			end,
-			order = 20,
+			order = 40,
 		}
 	end
 end
@@ -243,9 +237,6 @@ function nibRealUI:SetUpOptions()
 
 	-- Fill out Options table
 	GetOptions()
-
-	Options.settings.args.hud = HuDOptions.settings
-	Options.settings.args.hud.order = 9000
 
 	Options.settings.args.modules = ModuleOptions.settings
 	Options.settings.args.modules.order = 9001
@@ -266,14 +257,6 @@ end
 
 function nibRealUI:RegisterPlainOptions(name, optionTbl)
 	Options.modules[name] = optionTbl
-end
-
-function nibRealUI:RegisterHuDOptions(name, optionTbl, group)
-	if group and HuDOptions[group] then
-		HuDOptions[group][name] = optionTbl
-	else
-		HuDOptions.modules[name] = optionTbl
-	end
 end
 
 function nibRealUI:RegisterModuleOptions(name, optionTbl)

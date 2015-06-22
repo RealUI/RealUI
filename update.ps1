@@ -22,7 +22,7 @@ if ($newVersion -eq "") {
 }
 
 $zipName = "RealUI " + $newVersion + ".zip"
-Add-Type -Path "Ionic.Zip.dll"
+Add-Type -Path "utils/Ionic.Zip.dll"
 # Create the zip file
 Write-Host "Creating zip file"
 $zipFile = new-object Ionic.Zip.ZipFile
@@ -33,6 +33,7 @@ $readme.FileName = "README.txt"
 
 #Exclude files
 $remove = @(
+    "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Config"
 )
 # Collect entries to remove

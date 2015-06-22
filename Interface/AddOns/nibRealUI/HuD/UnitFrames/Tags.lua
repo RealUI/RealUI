@@ -67,7 +67,7 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
 -- Health AbsValue
 tags.Methods["realui:healthValue"] = function(unit)
-    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return 0 end
 
     return nibRealUI:ReadableNumber(UnitHealth(unit))
 end
@@ -75,9 +75,13 @@ tags.Events["realui:healthValue"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TA
 
 -- Health %
 tags.Methods["realui:healthPercent"] = function(unit)
-    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    local percent
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then
+        percent = 0
+    else
+        percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
+    end
 
-    local percent = UnitHealth(unit) / UnitHealthMax(unit) * 100
     UnitFrames:debug("realui:healthPercent", percent)
     return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
 end
@@ -100,7 +104,7 @@ tags.Events["realui:health"] = tags.Events["realui:healthValue"]
 
 -- Power AbsValue
 tags.Methods["realui:powerValue"] = function(unit)
-    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return 0 end
 
     return nibRealUI:ReadableNumber(UnitPower(unit))
 end
@@ -108,10 +112,14 @@ tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPL
 
 -- Power %
 tags.Methods["realui:powerPercent"] = function(unit)
-    if UnitIsGhost(unit) or not(UnitIsConnected(unit)) then return end
+    local percent
+    if UnitIsDead(unit) or UnitIsGhost(unit) or not(UnitIsConnected(unit)) then
+        percent = 0
+    else
+        percent = UnitPower(unit) / UnitPowerMax(unit) * 100
+    end
 
     local _, ptoken = UnitPowerType(unit)
-    local percent = UnitPower(unit) / UnitPowerMax(unit) * 100
     return ("%.1f|cff%s%%|r"):format(percent, nibRealUI:ColorTableToStr(oUF.colors.power[ptoken]))
 end
 tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]

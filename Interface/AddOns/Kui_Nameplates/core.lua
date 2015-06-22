@@ -462,9 +462,6 @@ function addon:LSMMediaRegistered(msg, mediatype, key)
         end
     end
 end
--------------------------------------------------- Listen for profile changes --
-function addon:ProfileChanged()
-end
 ------------------------------------------------------------------------ init --
 function addon:OnInitialize()
     self.db = LibStub('AceDB-3.0'):New('KuiNameplatesGDB', defaults)
@@ -506,16 +503,10 @@ function addon:OnEnable()
         self.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, DEFAULT_BAR)
     end
 
-    addon.uiscale = UIParent:GetEffectiveScale()
+    self.uiscale = UIParent:GetEffectiveScale()
 
     UpdateSizesTable()
     ScaleFontSizes()
-
-    -- FIXME frame size warning (just for this version)
-    if not KuiNameplatesGDB.ReadSizeWarning then
-        print('Kui|cff9966ffNameplates|r: Due to changes in version 251, any customised frame sizes and the font scale option will need to be updated to remain consistent with their pre-update size. This message will go away next release but you can remove it now by running:')
-        print('/run KuiNameplatesGDB.ReadSizeWarning = true')
-    end
 
     -------------------------------------- Health bar smooth update functions --
     -- (spoon-fed by oUF_Smooth)
@@ -523,7 +514,7 @@ function addon:OnEnable()
         local f, smoothing, GetFramerate, min, max, abs
             = CreateFrame('Frame'), {}, GetFramerate, math.min, math.max, math.abs
 
-        function addon.SetValueSmooth(self, value)
+        function self.SetValueSmooth(self, value)
             local _, maxv = self:GetMinMaxValues()
 
             if value == self:GetValue() or (self.prevMax and self.prevMax ~= maxv) then
@@ -558,8 +549,11 @@ function addon:OnEnable()
         end)
     end
 
-    addon:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+    -- FIXME this may/may not fix #34
+    self:configChangedListener()
+
+    self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
 
     self:ToggleCombatEvents(self.db.profile.general.combat)
-    addon:ScheduleRepeatingTimer('OnUpdate', .1)
+    self:ScheduleRepeatingTimer('OnUpdate', .1)
 end

@@ -23,8 +23,8 @@ local cfg = {
     factionIconAlpha = 1,
 
     backdrop = {
-        bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=],
-        edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=],
+        bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], --]]
+        edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=], --]]
         edgeSize = 1,
         insets = {top = 1, left = 1, bottom = 1, right = 1},
     },
@@ -71,7 +71,7 @@ local LEVEL = LEVEL
 local CHAT_FLAG_AFK = CHAT_FLAG_AFK
 local CHAT_FLAG_DND = CHAT_FLAG_DND
 local ICON_LIST = ICON_LIST
-local targettext = TARGET
+local TARGET = TARGET
 local DEAD = DEAD
 local BOSS = BOSS
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
@@ -83,12 +83,8 @@ local FOREIGN_SERVER_LABEL = FOREIGN_SERVER_LABEL
 local COALESCED_REALM_TOOLTIP1 = string.split(FOREIGN_SERVER_LABEL, COALESCED_REALM_TOOLTIP)
 local INTERACTIVE_REALM_TOOLTIP1 = string.split(INTERACTIVE_SERVER_LABEL, INTERACTIVE_REALM_TOOLTIP)
 
-if(freebDebug) then
-    ns.Debug = function(...)
-        freebDebug:Stuff(ADDON_NAME, ...)
-    end
-else
-    ns.Debug = function() end
+ns.Debug = function(...)
+    RealUI.Debug(ADDON_NAME, ...)
 end
 
 local colors = {power = {}}
@@ -349,7 +345,7 @@ end
 local function SetStatusBar(self, unit)
     if(gtSB:IsShown()) then
         if(cfg.hideHealthbar) then
-            GameTooltipStatusBar:Hide()
+            gtSB:Hide()
             return
         end
 
@@ -361,18 +357,18 @@ local function SetStatusBar(self, unit)
 
         local gtsbHeight = gtSB:GetHeight()
         if(GameTooltipFreebTipPowerBar and GameTooltipFreebTipPowerBar:IsShown()) then
-            GameTooltipStatusBar:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, ((gtsbHeight)*2)+7)
-            GameTooltipStatusBar:SetPoint("BOTTOMRIGHT", self, -10, 0)
+            gtSB:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, ((gtsbHeight)*2)+7)
+            gtSB:SetPoint("BOTTOMRIGHT", self, -10, 0)
         else
-            GameTooltipStatusBar:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, gtsbHeight+3)
-            GameTooltipStatusBar:SetPoint("BOTTOMRIGHT", self, -10, 0)
+            gtSB:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, gtsbHeight+3)
+            gtSB:SetPoint("BOTTOMRIGHT", self, -10, 0)
         end
     end
 
     if(unit) then
-        GameTooltipStatusBar:SetStatusBarColor(GameTooltip_UnitColor(unit))
+        gtSB:SetStatusBarColor(GameTooltip_UnitColor(unit))
     else
-        GameTooltipStatusBar:SetStatusBarColor(0, .9, 0)
+        gtSB:SetStatusBarColor(0, .9, 0)
     end
 end
 
@@ -384,17 +380,8 @@ local function getTarget(unit)
     end
 end
 
-local function ShowTarget(self, unit)
-    if(UnitExists(unit.."target")) then
-        local tarRicon = GetRaidTargetIndex(unit.."target")
-        local tar = ("%s%s"):format((tarRicon and ICON_LIST[tarRicon].."10|t") or "", getTarget(unit.."target"))
-
-        self:AddDoubleLine(targettext, tar, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
-        GameTooltip_UnitColor(unit.."target"))
-    end
-end
-
 local function OnSetUnit(self)
+    ns.Debug("--- OnSetUnit ---")
     if(cfg.combathide and InCombatLockdown()) then
         return self:Hide()
     end
@@ -402,6 +389,7 @@ local function OnSetUnit(self)
     hideLines(self)
 
     local unit = getUnit(self)
+    ns.Debug("unit:", unit)
     if(UnitExists(unit)) then
         local isPlayer = UnitIsPlayer(unit)
 
@@ -423,37 +411,36 @@ local function OnSetUnit(self)
         local color = unitColor(unit)
         local unitGuild, unitRank
 
-        if(isPlayer) then
+        if (isPlayer) then
             PlayerTitle(self, unit)
             unitGuild, unitRank = GetGuildInfo(unit)
             PlayerGuild(self, unit, unitGuild, unitRank)
         end
 
-        local ricon = GetRaidTargetIndex(unit)
-        if(ricon) then
-            local text = GameTooltipTextLeft1:GetText()
-            GameTooltipTextLeft1:SetFormattedText(("%s %s"), ICON_LIST[ricon]..cfg.fontsize.."|t", text)
-        end
-
         local line1 = GameTooltipTextLeft1:GetText()
+
+        local ricon = GetRaidTargetIndex(unit)
+        ns.Debug("ricon:", ricon, ICON_LIST[ricon])
+        if (ricon and ICON_LIST[ricon]) then -- ricon can be > 8, which is outside ICON_LIST's index
+            line1 = ("%s %s"):format(ICON_LIST[ricon]..cfg.fontsize.."|t", line1)
+        end
         GameTooltipTextLeft1:SetFormattedText(("%s"), hex(color)..line1)
         GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
-        local alive = not UnitIsDeadOrGhost(unit)
-
         local level
-        if(UnitIsWildBattlePet(unit) or UnitIsBattlePetCompanion(unit)) then
+        if (UnitIsWildBattlePet(unit) or UnitIsBattlePetCompanion(unit)) then
             level = UnitBattlePetLevel(unit)
         else
             level = UnitLevel(unit)
         end
 
-        if(level) then
+        local dead = UnitIsDeadOrGhost(unit)
+        if (level) then
             local unitClass = isPlayer and ("%s %s"):format((UnitRace(unit) or ""), hex(color)..(UnitClass(unit) or "").."|r") or ""
             local creature = not isPlayer and UnitCreatureType(unit) or ""
 
             local diff
-            if(level == -1) then
+            if (level == -1) then
                 level = "??"
                 diff = qqColor
             else
@@ -474,16 +461,25 @@ local function OnSetUnit(self)
                 end
             end
 
-            if(tiptextLevel) then
+            if (tiptextLevel) then
                 tiptextLevel:SetFormattedText(("%s %s%s %s"), textLevel, creature, unitClass,
-                (not alive and "|cffCCCCCC"..DEAD.."|r" or ""))
+                (dead and "|cffCCCCCC"..DEAD.."|r" or ""))
             end
         end
 
-        ShowTarget(self, unit)
+        if (UnitExists(unit.."target")) then
+            local tarRicon, text = GetRaidTargetIndex(unit.."target")
+            ns.Debug("tarRicon:", tarRicon, ICON_LIST[tarRicon])
+            if (tarRicon and ICON_LIST[tarRicon]) then
+                text = ("%s %s"):format(ICON_LIST[tarRicon].."10|t", getTarget(unit.."target"))
+            end
 
-        if(not alive) then
-            GameTooltipStatusBar:Hide()
+            self:AddDoubleLine(TARGET, text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
+            GameTooltip_UnitColor(unit.."target"))
+        end
+
+        if (dead) then
+            gtSB:Hide()
         end
     end
 
@@ -507,7 +503,7 @@ GameTooltip:HookScript("OnTooltipCleared", tipCleared)
 gtSB:SetStatusBarTexture(cfg.tex)
 gtSB:SetHeight(9)
 local bg = gtSB:CreateTexture(nil, "BACKGROUND")
-bg:SetAllPoints(GameTooltipStatusBar)
+bg:SetAllPoints(gtSB)
 bg:SetTexture(cfg.tex)
 bg:SetVertexColor(0.3, 0.3, 0.3, 0.5)
 
@@ -523,7 +519,7 @@ local function gtSBValChange(self, value)
     if(not self.text) then
         -- xRUI
         self.text = self:CreateFontString(nil, "OVERLAY")
-        self.text:SetPoint("CENTER", GameTooltipStatusBar)
+        self.text:SetPoint("CENTER", gtSB)
         self.text:SetFontObject(RealUIFont_PixelSmall)
     end
     self.text:Show()
@@ -595,8 +591,6 @@ end
 local itemEvent = CreateFrame"Frame"
 itemEvent:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 itemEvent:SetScript("OnEvent", function(self, event, arg1)
-    ns.Debug("item info received: ", arg1)
-
     for k in next, itemTips do
         local tip = _G[k]
         if(tip and tip:IsShown()) then
@@ -637,7 +631,6 @@ frameload:SetScript("OnEvent", function(self)
 
     for i, tip in ipairs(tooltips) do
         frame = _G[tip]
-        --ns.Debug(i.. " | ", frame)
 
         if(frame) then
             frame:HookScript("OnShow", function(self)
