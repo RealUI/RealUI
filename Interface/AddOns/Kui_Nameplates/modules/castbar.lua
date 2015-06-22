@@ -104,7 +104,11 @@ end
 ---------------------------------------------------------------------- create --
 -- update castbar height and icon size
 local function UpdateCastbar(frame)
-    frame.castbar.bg:SetHeight(sizes.cbheight)
+    if not frame.castbar then return end
+
+    if frame.castbar.bg then
+        frame.castbar.bg:SetHeight(sizes.cbheight)
+    end
 
     if frame.castbar.icon then
         frame.castbar.icon.bg:SetSize(sizes.icon, sizes.icon)
@@ -140,7 +144,7 @@ function mod:CreateCastbar(msg, frame)
     frame.castbar.spark = frame.castbar.bar:CreateTexture(nil, 'ARTWORK')
     frame.castbar.spark:SetDrawLayer('ARTWORK', 6)
     frame.castbar.spark:SetVertexColor(1,1,.8)
-    frame.castbar.spark:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\spark')
+    frame.castbar.spark:SetTexture('Interface\\AddOns\\Kui_Media\\t\\spark')
     frame.castbar.spark:SetPoint('CENTER', frame.castbar.bar:GetRegions(), 'RIGHT', 1, 0)
     frame.castbar.spark:SetSize(6, sizes.cbheight + 6)
 

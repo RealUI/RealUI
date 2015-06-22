@@ -820,9 +820,9 @@ function addon:ToggleCombatEvents(io)
     end
 end
 
-addon.configChangedListener = function(self)
+function addon:configChangedListener()
     -- cache values used often to reduce table lookup
-    profile = self.db.profile
+    profile = addon.db.profile
     profile_fade = profile.fade
     profile_fade_rules = profile_fade.rules
     profile_lowhealthval = profile.general.lowhealthval

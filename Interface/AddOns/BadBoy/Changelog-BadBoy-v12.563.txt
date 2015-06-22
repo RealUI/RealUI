@@ -1,9 +1,30 @@
 ------------------------------------------------------------------------
-r1297 | funkydude | 2015-04-14 21:30:25 +0000 (Tue, 14 Apr 2015) | 1 line
+r1301 | funkydude | 2015-05-13 15:21:43 +0000 (Wed, 13 May 2015) | 1 line
 Changed paths:
-   A /tags/v12.557 (from /trunk:1296)
+   A /tags/v12.563 (from /trunk:1300)
 
-Tagging as v12.557
+Tagging as v12.563
+------------------------------------------------------------------------
+r1300 | funkydude | 2015-05-13 12:36:07 +0000 (Wed, 13 May 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1299 | funkydude | 2015-05-10 20:04:37 +0000 (Sun, 10 May 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1298 | funkydude | 2015-04-19 11:45:38 +0000 (Sun, 19 Apr 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
 ------------------------------------------------------------------------
 r1296 | funkydude | 2015-04-14 21:12:23 +0000 (Tue, 14 Apr 2015) | 1 line
 Changed paths:
@@ -13,27 +34,6 @@ Changed paths:
 anti-spam update
 ------------------------------------------------------------------------
 r1295 | funkydude | 2015-03-17 14:57:09 +0000 (Tue, 17 Mar 2015) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1294 | funkydude | 2015-03-17 14:15:18 +0000 (Tue, 17 Mar 2015) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1293 | funkydude | 2015-03-15 18:47:03 +0000 (Sun, 15 Mar 2015) | 1 line
-Changed paths:
-   M /trunk/BadBoy.lua
-   M /trunk/BadBoy.toc
-
-anti-spam update
-------------------------------------------------------------------------
-r1291 | funkydude | 2015-03-14 20:28:24 +0000 (Sat, 14 Mar 2015) | 1 line
 Changed paths:
    M /trunk/BadBoy.lua
    M /trunk/BadBoy.toc
