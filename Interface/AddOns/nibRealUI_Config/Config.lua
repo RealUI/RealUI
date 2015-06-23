@@ -1730,7 +1730,7 @@ local auratracker do
                     end,
                     get = function(info) return _G.tostring(spellData.minLevel or 0) end,
                     set = function(info, value)
-                        spellData.minLevel = value
+                        spellData.minLevel = _G.tonumber(value)
                     end,
                     order = 80,
                 },
