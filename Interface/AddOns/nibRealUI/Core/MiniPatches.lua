@@ -120,8 +120,12 @@ RealUI.minipatches = {
         local RavenDB = _G.RavenDB
         if IsAddOnLoaded("Raven") and RavenDB then
             if RavenDB["profiles"]["RealUI"] then
-                RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
-                RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
+                if RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"] then
+                    RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
+                end
+                if RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"] then
+                    RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
+                end
             end
         end
     end,
