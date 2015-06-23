@@ -92,7 +92,9 @@ RealUI.minipatches = {
         local nibRealUIDB = _G.nibRealUIDB
         if nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"] then
             local profile = nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"]["RealUI"]
-            profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
+            if profile then
+                profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
+            end
         end
         local defaults = RealUI:GetPointTrackingDefaults().profile
         if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
@@ -120,8 +122,12 @@ RealUI.minipatches = {
         local RavenDB = _G.RavenDB
         if IsAddOnLoaded("Raven") and RavenDB then
             if RavenDB["profiles"]["RealUI"] then
-                RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
-                RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
+                if RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"] then
+                    RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
+                end
+                if RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"] then
+                    RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
+                end
             end
         end
     end,

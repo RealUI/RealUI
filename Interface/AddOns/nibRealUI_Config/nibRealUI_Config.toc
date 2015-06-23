@@ -1,8 +1,8 @@
-## Interface: 60100
+## Interface: 60200
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Config
 ## Notes: RealUI Configuration
 ## Author: Gethe
-## Version: 8.1 r13
+## Version: 8.1 r13b
 ## Dependencies: nibRealUI
 ## LoadOnDemand: 1
 
