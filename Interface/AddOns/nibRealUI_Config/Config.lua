@@ -113,7 +113,7 @@ StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     notClosableByLogout = false,
 }
 
-local hudConfig, hudToggle
+local hudConfig, hudToggle, CloseHuDWindow
 local function InitializeOptions()
     debug("Init")
     local tinsert = _G.table.insert
@@ -296,14 +296,18 @@ local function InitializeOptions()
     end
     hudConfig:SetSize(#hudConfig * width, height)
 
+    CloseHuDWindow = function()
+        -- hide highlight
+        highlight:Hide()
+        highlight.hover = nil
+        highlight.clicked = nil
+
+        ACD:Close("HuD")
+    end
     hudToggle = function(skipAnim)
         if isHuDShown then
-            -- hide highlight
-            highlight:Hide()
-            highlight.hover = nil
-            highlight.clicked = nil
+            CloseHuDWindow()
 
-            ACD:Close("HuD")
             -- slide out
             if skipAnim then
                 hudConfig:ClearAllPoints()
@@ -658,6 +662,7 @@ local unitframes do
                 get = function(info) return nibRealUI:GetModuleEnabled("UnitFrames") end,
                 set = function(info, value)
                     nibRealUI:SetModuleEnabled("UnitFrames", value)
+                    CloseHuDWindow()
                     nibRealUI:ReloadUIDialog()
                 end,
             },
@@ -681,6 +686,15 @@ local unitframes do
                         get = function() return db.overlay.classColorNames end,
                         set = function(info, value)
                             db.overlay.classColorNames = value
+                        end,
+                        order = 15,
+                    },
+                    reverseBars = {
+                        name = L["HuD_ReverseBars"],
+                        type = "toggle",
+                        get = function() return ndb.settings.reverseUnitFrameBars end,
+                        set = function(info, value)
+                            ndb.settings.reverseUnitFrameBars = value
                         end,
                         order = 20,
                     },
@@ -1360,6 +1374,7 @@ local castbars do
                 get = function(info) return nibRealUI:GetModuleEnabled("CastBars") end,
                 set = function(info, value)
                     nibRealUI:SetModuleEnabled("CastBars", value)
+                    CloseHuDWindow()
                     nibRealUI:ReloadUIDialog()
                 end,
                 order = 10,
@@ -1781,6 +1796,7 @@ local auratracker do
                         debug("Remove", info[#info], info[#info-1], ...)
                         debug("Removed ID", id, trackingData[id].spell)
                         tremove(trackingData, id)
+                        CloseHuDWindow()
                         nibRealUI:ReloadUIDialog()
                     end,
                     order = -1,
@@ -1812,6 +1828,7 @@ local auratracker do
                 get = function(info) return nibRealUI:GetModuleEnabled("AuraTracking") end,
                 set = function(info, value)
                     nibRealUI:SetModuleEnabled("AuraTracking", value)
+                    CloseHuDWindow()
                     nibRealUI:ReloadUIDialog()
                 end,
                 order = 20,
@@ -1999,6 +2016,7 @@ local auratracker do
                         type = "execute",
                         func = function(info, ...)
                             AuraTracking.db:ResetProfile("RealUI")
+                            CloseHuDWindow()
                             nibRealUI:ReloadUIDialog()
                         end,
                         order = -1,
@@ -2033,6 +2051,7 @@ local classresource do
                     get = function(info) return nibRealUI:GetModuleEnabled("PointTracking") end,
                     set = function(info, value)
                         nibRealUI:SetModuleEnabled("PointTracking", value)
+                        CloseHuDWindow()
                         nibRealUI:ReloadUIDialog()
                     end,
                     order = 10,
