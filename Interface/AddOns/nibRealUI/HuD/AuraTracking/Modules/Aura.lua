@@ -238,15 +238,15 @@ local function CheckSpellValidity(self)
             end
         end
 
+    elseif self.replace then
+        -- Some spells get fully replaced with others
+        isValid = not IsPlayerSpell(self.replace)
+
     elseif (self.minLevel > 0) then
         -- Min Level specified, are we high enough level?
         if UnitLevel("player") >= self.minLevel then
             isValid = true
         end
-
-    elseif self.replace then
-        -- Some spells get fully replaced with others
-        isValid = IsPlayerSpell(self.replace)
 
     else
         -- Fallback
@@ -385,7 +385,7 @@ function Aura:SetIndicatorInfo(info)
 
     f.specs = info.specs or {true, true, true, true}
     f.replace = info.replace
-    f.minLevel = info.minLevel or 0
+    f.minLevel = tonumber(info.minLevel or 0)
 
     f.anyone = info.anyone
     if f.isTrinket then f.anyone = true end
