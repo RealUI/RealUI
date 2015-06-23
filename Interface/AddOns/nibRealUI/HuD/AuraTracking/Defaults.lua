@@ -138,20 +138,23 @@ AuraTracking.Defaults = {
     },
 -- Static Debuffs
     {   -- Sunfire (Balance)
-        spell = 93402,
+        spell = 164815,
         auraType = "debuff",
+        minLevel = 10,
         order = 1,
         specs = {true, false, false, false}
     },
     {   -- Moonfire (Balance)
-        spell = 8921,
+        spell = 164812,
         auraType = "debuff",
+        minLevel = 10,
         order = 2,
         specs = {true, false, false, false}
     },
     {   -- Rake (Feral)
-        spell = 1822,
+        spell = 155722,
         auraType = "debuff",
+        minLevel = 10,
         order = 1,
         specs = {false, true, false, false}
     },
@@ -162,8 +165,9 @@ AuraTracking.Defaults = {
         specs = {false, true, false, false}
     },
     {   -- Thrash (Guardian)
-        spell = 106832,
+        spell = 77758,
         auraType = "debuff",
+        minLevel = 14,
         order = 1,
         specs = {false, false, true, false}
     },
@@ -227,7 +231,7 @@ AuraTracking.Defaults = {
         specs = {false, true, false, false}
     },
     {   -- Thrash (Feral)
-        spell = 106832,
+        spell = 106830,
         auraType = "debuff",
         specs = {false, true, false, false}
     },
@@ -258,7 +262,7 @@ AuraTracking.Defaults = {
 ["HUNTER"] = { ------------------
 -- Static Buffs
     {   -- Frenzy (BM)
-        spell = 19623,
+        spell = 19615,
         minLevel = 30,
         unit = "pet",
         order = 1,
@@ -289,8 +293,9 @@ AuraTracking.Defaults = {
     },
 -- Static Debuffs
     {   -- Serpent Sting (SV)
-        spell = 87935,
+        spell = 118253,
         auraType = "debuff",
+        minLevel = 68,
         order = 1,
         specs = {false, false, true}
     },
@@ -552,8 +557,9 @@ AuraTracking.Defaults = {
         specs = {false, false, true},
     },
     {   -- Devouring Plague (Shadow)
-        spell = 2944,
+        spell = 158831,
         auraType = "debuff",
+        minLevel = 21,
         order = 3,
         specs = {false, false, true},
     },
@@ -610,7 +616,8 @@ AuraTracking.Defaults = {
     },
     {   -- Find Weakness (Sub)
         auraType = "debuff",
-        spell = 91023,
+        spell = 91021,
+        minLevel = 10,
         order = 2,
         specs = {false, false, true},
     },
@@ -702,9 +709,8 @@ AuraTracking.Defaults = {
 ["WARLOCK"] = { ------------------
 
 -- Static Buffs
-    {spell = 104773},   -- Unending Resolve
     {   -- Molten Core (Demo)
-        spell = 122351,
+        spell = {140074, 122355}, -- Green Fire, Normal
         minLevel = 69,
         order = 1,
         specs = {false, true, false}
@@ -715,8 +721,9 @@ AuraTracking.Defaults = {
     },
 -- Static Debuffs
     {   -- Corruption (Aff, Demo)
-        spell = 172,
+        spell = 146739,
         auraType = "debuff",
+        minLevel = 3,
         order = 1,
         specs = {true, true, false}
     },
@@ -742,8 +749,9 @@ AuraTracking.Defaults = {
         specs = {true, false, false}
     },
     {   -- Immolate (Dest)
-        spell = 348,
+        spell = 157736,
         auraType = "debuff",
+        minLevel = 12,
         order = 1,
         specs = {false, false, true}
     },
@@ -755,6 +763,7 @@ AuraTracking.Defaults = {
     {spell = 113861},   -- Dark Soul: Knowledge
     {spell = 113858},   -- Dark Soul: Instability
     {spell = 88448},    -- Demonic Rebirth
+    {spell = 104773},   -- Unending Resolve
 
 -- Free Debuffs
     {spell = 27243, auraType = "debuff"},   -- Seed of Corruption
@@ -776,12 +785,6 @@ AuraTracking.Defaults = {
         minLevel = 14,
         order = 1,
         specs = {true, true, false},
-    },
-    {   -- Taste for Blood (Arms)
-        spell = 56636,
-        minLevel = 30,
-        order = 2,
-        specs = {true, false, false},
     },
     {   -- Raging Blow! (Fury)
         spell = 131116,

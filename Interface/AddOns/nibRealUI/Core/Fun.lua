@@ -5,6 +5,7 @@ local F
 
 -- Misc Functions
 -- FindSpellID("Spell", "player", false)
+-- FindSpellID("Spell", "target", true)
 function FindSpellID(SpellName, unit, isDebuff)
     print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
     local f = CreateFrame("FRAME")
