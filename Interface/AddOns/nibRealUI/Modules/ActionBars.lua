@@ -588,7 +588,7 @@ function ActionBars:OnInitialize()
         local function setSettings(newDB, oldDB)
             for setting, value in next, newDB do
                 if type(value) == "table" then
-                    setSettings(value, oldDB[setting])
+                    setSettings(value, oldDB and oldDB[setting])
                 else
                     if oldDB and oldDB[setting] ~= nil then
                         newDB[setting] = oldDB[setting]
