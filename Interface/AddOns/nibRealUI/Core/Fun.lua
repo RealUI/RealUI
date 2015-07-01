@@ -6,11 +6,11 @@ local F
 -- Misc Functions
 -- FindSpellID("Spell", "player", false)
 -- FindSpellID("Spell", "target", true)
+local spellFinder = CreateFrame("FRAME")
 function FindSpellID(SpellName, unit, isDebuff)
     print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
-    local f = CreateFrame("FRAME")
-    f:RegisterUnitEvent("UNIT_AURA", unit)
-    f:SetScript("OnEvent", function(self, event, unit)
+    spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
+    spellFinder:SetScript("OnEvent", function(self, event, unit)
         local spellID
         if isDebuff then
             spellID = select(11, UnitDebuff(unit, SpellName))
@@ -19,7 +19,7 @@ function FindSpellID(SpellName, unit, isDebuff)
         end
         if spellID then
             print(SpellName..": #", spellID);
-            f:UnregisterEvent("UNIT_AURA")
+            spellFinder:UnregisterEvent("UNIT_AURA")
         end
     end)
 end
