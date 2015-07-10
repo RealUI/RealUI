@@ -14,12 +14,12 @@ local round = nibRealUI.Round
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
+local debug = true
 
 -- Libs --
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 local LibWin = LibStub("LibWindow-1.1")
-
 
 
 local maxSlots, maxStaticSlots = 10, 6
@@ -39,12 +39,12 @@ function AuraTracking:Createslots()
         parent:RestorePosition()
         side.parent = parent
 
-        ---[[ debug 
-        local bg = parent:CreateTexture()
-        local color = sideID == "left" and 1 or 0
-        bg:SetTexture(color, color, color, 0.5)
-        bg:SetAllPoints(parent)
-        --]]
+        if debug then
+            local bg = parent:CreateTexture()
+            local color = sideID == "left" and 1 or 0
+            bg:SetTexture(color, color, color, 0.5)
+            bg:SetAllPoints(parent)
+        end
 
         local point = sideID == "left" and "RIGHT" or "LEFT"
         local xMod = sideID == "left" and -1 or 1
@@ -228,7 +228,7 @@ local function ApplySpellToSlot(slot, spellData)
         else
             name, duration, remaining, count, texture, endTime = GetAuraInfo(spellData)
         end
-        if duration > 0 and endTime then
+        if endTime and duration > 0 then
             AuraTracking:debug("cooldown", GetTime(), endTime - duration, endTime, duration)
             self.cd:Show()
             self.cd:SetCooldown(endTime - duration, duration)
