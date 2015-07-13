@@ -1528,7 +1528,7 @@ end
 local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
-    local trackingData = db.tracking[nibRealUI.class]
+    local trackingData = AuraTracking.db.class
     local function getNameOrder(spellData)
         local order, pos, name = 70, "", ""
 
@@ -2015,7 +2015,7 @@ local auratracker do
                         name = RESET_TO_DEFAULT,
                         type = "execute",
                         func = function(info, ...)
-                            AuraTracking.db:ResetProfile("RealUI")
+                            nibRealUIDB.namespaces.AuraTracking.class[nibRealUI.class] = nil
                             CloseHuDWindow()
                             nibRealUI:ReloadUIDialog()
                         end,

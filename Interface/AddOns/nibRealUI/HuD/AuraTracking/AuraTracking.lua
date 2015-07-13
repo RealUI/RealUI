@@ -154,7 +154,7 @@ function AuraTracking:SetupSpellData()
                     numSpecs = numSpecs + 1
                 end
             end
-            if numSpecs == 0 then
+            if numSpecs == #spellData.specs then
                 spellData.useSpec = false
             elseif numSpecs == 1 then
                 spellData.useSpec = true
@@ -253,7 +253,7 @@ function AuraTracking:UpdateSlotAssignments()
         for ID, spellData in next, side do
             self:debug("Spell", spellData.spell)
             local _, _, icon = GetSpellInfo(spellData.spell)
-            if spellData.order then
+            if spellData.order > 0 then
                 local slot = slots[sideID][spellData.order]
                 activeSlots[sideID][spellData.order] = slot
                 ApplySpellToSlot(slot, spellData)
@@ -343,6 +343,7 @@ end
 function AuraTracking:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
+        class = self.Defaults[nibRealUI.class],
         profile = {
             position = {
                 left = {
@@ -371,13 +372,16 @@ function AuraTracking:OnInitialize()
                 fadeOpacity = 0.75,
                 useCustomCD = true,
             },
-            tracking = self.Defaults,
         },
     })
 
     db = self.db.profile
     ndb = nibRealUI.db.profile
-    trackingData = db.tracking[nibRealUI.class]
+    trackingData = self.db.class
+
+    if db.tracking then
+        db.tracking = nil
+    end
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     nibRealUI:RegisterConfigModeModule(self)
