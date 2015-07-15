@@ -58,10 +58,8 @@ function AuraTracking:Createslots()
             end
             side[slotID] = slot
 
-            local cd = CreateFrame("Cooldown", nil, slot)
-            --cd:SetAllPoints(slot)
-            cd:SetPoint("TOPLEFT", -5, 5)
-            cd:SetPoint("BOTTOMRIGHT", 5, -5)
+            local cd = CreateFrame("Cooldown", nil, slot, "CooldownFrameTemplate")
+            cd:SetAllPoints(slot)
             slot.cd = cd
 
             local icon = slot:CreateTexture(nil, "BACKGROUND")
