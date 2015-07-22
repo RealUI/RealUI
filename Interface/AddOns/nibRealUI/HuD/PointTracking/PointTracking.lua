@@ -124,7 +124,7 @@ local function SetPointBarTextures(shown, ic, it, tid, i)
             if Points["ap"] > 0 then
                 for api = 1, Points["ap"] do
                     bars = db["ROGUE"].types["ap"].bars
-                    if api < Points["cp"] then
+                    if api <= Points["cp"] then
                         color = bars.bg.full.color
                     else
                         color = bars.bg.full.maxcolor
@@ -177,19 +177,21 @@ function PointTracking:UpdatePointTracking(...)
                 or (db[ic].types[tid].general.hidein.vehicle and UnitHasVehicleUI("player")) 
                 or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec))
                 and not db[ic].types[tid].configmode.enabled then
-                    -- Hide Display 
+                    PointTracking:debug("Hide Display")
                     Frames[ic][tid].bgpanel.frame:Hide()
+                    Frames[ic][tid].bgpanel.frame.realUIHidden = true
 
                     -- Anticipation Points refresh on 0 Combo Points
                     if tid == "cp" and Points["ap"] > 0 then
                         SetPointBarTextures(true, "ROGUE", 1, "ap", Points["ap"])
                     end
             else
-            -- Update the Display
                 -- Update Bars if their Points have changed
                 if PointsChanged[tid] then
                     local max = UnitPowerMax("player", idToPower[tid])
+                    PointTracking:debug("Update Display", max)
                     for i = 1, Types[ic].points[it].barcount do
+                        PointTracking:debug("Update point", i)
                         if Points[tid] == nil then Points[tid] = 0 end
                         if Points[tid] >= i then
                         -- Show bar and set textures to "Full"
@@ -211,6 +213,7 @@ function PointTracking:UpdatePointTracking(...)
                     end
                     -- Show the Display
                     Frames[ic][tid].bgpanel.frame:Show()
+                    Frames[ic][tid].bgpanel.frame.realUIHidden = false
                     
                     -- Flag as having been changed
                     PointsChanged[tid] = false
@@ -571,18 +574,20 @@ function PointTracking:UpdateSmartHideConditions()
     self:UpdatePoints("ENABLE")
 end
 
-function PointTracking:PLAYER_TARGET_CHANGED()
+function PointTracking:PLAYER_TARGET_CHANGED(...)
+    PointTracking:debug("------", ...)
     PlayerTargetHostile = (UnitIsEnemy("player", "target") or UnitCanAttack("player", "target"))
     self:UpdateSmartHideConditions()
-    self:UpdatePoints()
 end
 
-function PointTracking:PLAYER_REGEN_DISABLED()
+function PointTracking:PLAYER_REGEN_DISABLED(...)
+    PointTracking:debug("------", ...)
     PlayerInCombat = true
     self:UpdateSmartHideConditions()
 end
 
-function PointTracking:PLAYER_REGEN_ENABLED()
+function PointTracking:PLAYER_REGEN_ENABLED(...)
+    PointTracking:debug("------", ...)
     PlayerInCombat = false
     self:UpdateSmartHideConditions()
 end
