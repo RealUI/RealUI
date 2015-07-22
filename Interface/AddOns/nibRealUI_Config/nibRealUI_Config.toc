@@ -9,3 +9,5 @@
 embeds.xml
 
 Config.lua
+ConfigBar.lua
+Advanced.lua
