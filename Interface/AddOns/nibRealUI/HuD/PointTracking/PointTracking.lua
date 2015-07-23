@@ -172,8 +172,8 @@ function PointTracking:UpdatePointTracking(...)
             if ((Points[tid] == 0)
                 or (ic ~= PlayerClass and ic ~= "GENERAL") 
                 or ((PlayerClass ~= "ROGUE") and (PlayerClass ~= "DRUID") and (ic == "GENERAL") and not UnitHasVehicleUI("player"))
-                or ((PlayerClass == "WARLOCK") and (PlayerTalent == 1) and (tid == "be")) --
-                or ((PlayerClass == "WARLOCK") and (PlayerTalent == 3) and (tid == "ss")) --    
+                or ((PlayerClass == "WARLOCK") and (tid == "ss") and not (PlayerTalent == 1))
+                or ((PlayerClass == "WARLOCK") and (tid == "be") and not (PlayerTalent == 3))
                 or (db[ic].types[tid].general.hidein.vehicle and UnitHasVehicleUI("player")) 
                 or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec))
                 and not db[ic].types[tid].configmode.enabled then
@@ -565,6 +565,12 @@ function PointTracking:UpdateSpec()
     PlayerTalent = GetSpecialization()
 end
 
+function PointTracking:ACTIVE_TALENT_GROUP_CHANGED(...)
+    PointTracking:debug("------", ...)
+    PointTracking:UpdateSpec()
+    self:UpdatePoints("ENABLE")
+end
+
 function PointTracking:UpdateSmartHideConditions()
     if PlayerInCombat or PlayerTargetHostile or PlayerInInstance then
         SmartHideConditions = false
@@ -592,7 +598,8 @@ function PointTracking:PLAYER_REGEN_ENABLED(...)
     self:UpdateSmartHideConditions()
 end
 
-function PointTracking:PLAYER_ENTERING_WORLD()
+function PointTracking:PLAYER_ENTERING_WORLD(...)
+    PointTracking:debug("------", ...)
     -- GreenFire = IsSpellKnown(WARLOCK_GREEN_FIRE)
     PlayerInInstance = IsInInstance()
     self:UpdateSpec()
@@ -698,7 +705,7 @@ function PointTracking:OnEnable()
     
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "UpdateSpec")
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
