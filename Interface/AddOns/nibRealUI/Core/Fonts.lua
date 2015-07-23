@@ -529,60 +529,6 @@ function Fonts:UpdateUIFonts()
     end
 end
 
-function nibRealUI:Font(isLSM, size)
-    size = size or "default"
-    if size == "default" then
-        if ndb.settings.fontStyle == 1 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        else
-            if isLSM then
-                return font.pixel.large[1]
-            else
-                return font.pixel.large[4]
-            end
-        end
-
-    elseif size == "small" then
-        if ndb.settings.fontStyle == 1 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        elseif ndb.settings.fontStyle == 2 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        elseif ndb.settings.fontStyle == 3 then
-            if isLSM then
-                return font.pixel.large[1]
-            else
-                return font.pixel.large[4]
-            end
-        end
-
-    elseif size == "large" then
-        if isLSM then
-            return font.pixel.large[1]
-        else
-            return font.pixel.large[4]
-        end
-
-    elseif size == "tiny" then
-        if isLSM then
-            return font.pixel.small[1]
-        else
-            return font.pixel.small[4]
-        end
-    end
-end
-
 function Fonts:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
