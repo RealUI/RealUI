@@ -238,10 +238,6 @@ local function CheckSpellValidity(self)
             end
         end
 
-    elseif self.replace then
-        -- Some spells get fully replaced with others
-        isValid = not IsPlayerSpell(self.replace)
-
     elseif (self.minLevel > 0) then
         -- Min Level specified, are we high enough level?
         if UnitLevel("player") >= self.minLevel then
@@ -263,6 +259,25 @@ local function TalentUpdate(self, event, unit, initializing)
     if self.info.useSpec then
         local spec = GetSpecialization()
         self.inactive = not(self.specs[spec])
+    end
+
+    -- Check talents
+    if self.talent then
+        local specGroup, _, selected = GetActiveSpecGroup()
+        AuraTracking:debug("Check talents", specGroup)
+        for tier, talentIDs in next, self.talent do
+            AuraTracking:debug("tier", tier, #talentIDs)
+            if tier <= GetMaxTalentTier() then
+                for i = 1, #talentIDs do
+                    _, _, _, selected = GetTalentInfoByID(talentIDs[i], specGroup)
+                    AuraTracking:debug("talent", talentIDs[i], selected)
+                    if selected then 
+                        break
+                    end
+                end
+                self.inactive = not selected
+            end
+        end
     end
 
     -- Check Spell validity
@@ -331,7 +346,7 @@ end
 function Aura:SetUpdates()
     local f = self.frame
     f:UnregisterAllEvents()
-    AuraTracking:debug("SetUpdates", f.inactive)
+    AuraTracking:debug("SetUpdates", f.info.spell, f.inactive)
 
     local isValid = CheckSpellValidity(f)
     if not isValid then
@@ -384,7 +399,7 @@ function Aura:SetIndicatorInfo(info)
     end
 
     f.specs = info.specs or {true, true, true, true}
-    f.replace = info.replace
+    f.talent = info.talent
     f.minLevel = tonumber(info.minLevel or 0)
 
     f.anyone = info.anyone
