@@ -115,21 +115,13 @@ StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     notClosableByLogout = false,
 }
 
-local hudConfig, hudToggle
-local function InitializeOptions()
-    debug("Init")
+local height = round(uiHeight * 0.05)
+local width = round(height * 1.3)
+local hudConfig, hudToggle do
     local tinsert = _G.table.insert
     local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
 
-    nibRealUI:SetUpOptions() -- Old
-    ACR:RegisterOptionsTable("HuD", options.HuD)
-    ACD:SetDefaultSize("HuD", 620, 480)
-    ACR:RegisterOptionsTable("RealUI", options.RealUI)
-    initialized = true
-
     -- The HuD Config bar
-    local height = round(uiHeight * 0.05)
-    local width = round(height * 1.3)
     hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
     hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
     _G.RealUIUINotifications:SetPoint("TOP", hudConfig, "BOTTOM")
@@ -150,6 +142,8 @@ local function InitializeOptions()
             hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 1)
         end
     end)
+    hudConfig.slideAnim = slideAnim
+
     local slide = slideAnim:CreateAnimation("Translation")
     slide:SetDuration(1)
     slide:SetSmoothing("OUT")
@@ -164,10 +158,66 @@ local function InitializeOptions()
     hudConfig.highlight = highlight
 
     local hlAnim = highlight:CreateAnimationGroup()
+    highlight.hlAnim = hlAnim
     local hl = hlAnim:CreateAnimation("Translation")
     hl:SetDuration(0.2)
     hl:SetSmoothing("OUT")
     hlAnim.hl = hl
+
+    local CloseHuDWindow = function()
+        -- hide highlight
+        highlight:Hide()
+        highlight.hover = nil
+        highlight.clicked = nil
+
+        ACD:Close("HuD")
+    end
+    private.CloseHuDWindow = CloseHuDWindow
+    hudToggle = function(skipAnim)
+        if isHuDShown then
+            CloseHuDWindow()
+
+            -- slide out
+            if skipAnim then
+                hudConfig:ClearAllPoints()
+                hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
+            else
+                slide:SetOffset(0, height)
+                slideAnim:Play()
+            end
+            nibRealUI:HuDTestMode(false)
+            hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
+            isHuDShown = false
+        else
+            -- slide in
+            if skipAnim then
+                hudConfig:ClearAllPoints()
+                hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
+            else
+                slide:SetOffset(0, -height)
+                slideAnim:Play()
+            end
+            hudConfig:RegisterEvent("PLAYER_REGEN_DISABLED")
+            isHuDShown = true
+        end
+    end
+end
+
+local function InitializeOptions()
+    debug("Init")
+    local tinsert = _G.table.insert
+    local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
+
+    local slideAnim = hudConfig.slideAnim
+    local highlight = hudConfig.highlight
+    local hlAnim = highlight.hlAnim
+    local hl = hlAnim.hl
+
+    nibRealUI:SetUpOptions() -- Old
+    ACR:RegisterOptionsTable("HuD", options.HuD)
+    ACD:SetDefaultSize("HuD", 620, 480)
+    ACR:RegisterOptionsTable("RealUI", options.RealUI)
+    initialized = true
 
     -- Buttons
     local tabs = {}
@@ -297,44 +347,6 @@ local function InitializeOptions()
         prevFrame = btn
     end
     hudConfig:SetSize(#hudConfig * width, height)
-
-    local CloseHuDWindow = function()
-        -- hide highlight
-        highlight:Hide()
-        highlight.hover = nil
-        highlight.clicked = nil
-
-        ACD:Close("HuD")
-    end
-    private.CloseHuDWindow = CloseHuDWindow
-    hudToggle = function(skipAnim)
-        if isHuDShown then
-            CloseHuDWindow()
-
-            -- slide out
-            if skipAnim then
-                hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
-            else
-                slide:SetOffset(0, height)
-                slideAnim:Play()
-            end
-            nibRealUI:HuDTestMode(false)
-            hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
-            isHuDShown = false
-        else
-            -- slide in
-            if skipAnim then
-                hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
-            else
-                slide:SetOffset(0, -height)
-                slideAnim:Play()
-            end
-            hudConfig:RegisterEvent("PLAYER_REGEN_DISABLED")
-            isHuDShown = true
-        end
-    end
 end
 
 function nibRealUI:ToggleConfig(app, section, ...)
