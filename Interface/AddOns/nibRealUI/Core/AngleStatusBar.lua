@@ -17,14 +17,15 @@ local function SetBarPosition(self, value)
         local width
         if self.reverse then
             -- This will take the raw value, percent or exact, and adjust it to within the bounds of the bar.
-            width = (((value - self.minVal) * (info.maxWidth - info.minWidth)) / (self.maxVal - self.minVal)) + info.minWidth
-        else
             width = (((value - self.minVal) * (info.minWidth - info.maxWidth)) / (self.maxVal - self.minVal)) + info.maxWidth
+        else
+            width = (((value - self.minVal) * (info.maxWidth - info.minWidth)) / (self.maxVal - self.minVal)) + info.minWidth
         end
         self.bar:SetWidth(width)
+        --print("width", width, "value", value)
 
         value = floor(value * self.maxVal) / self.maxVal
-        --print("Floored", self:GetParent():GetParent().unit, self.reverse, value)
+        --print("Floored", self:GetParent():GetParent().unit, self.reverse, value, self.maxVal)
         self.bar:SetShown((not(self.reverse) and (value < self.maxVal)) or (self.reverse and (value > self.minVal)))
     else
         if not self.reverse then
@@ -227,6 +228,10 @@ function ASB:SetMinMaxValues(minVal, maxVal)
     self.minVal = minVal
     self.maxVal = maxVal
 end
+function ASB:GetMinMaxValues()
+    --print("GetMinMaxValues", minVal, maxVal)
+    return self.minVal, self.maxVal
+end
 
 -- This should except a percentage or discrete value.
 function ASB:SetValue(value, ignoreSmooth)
@@ -242,16 +247,18 @@ end
 -- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
 -- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
 function ASB:SetReverseFill(val)
-    --print("SetReverseFill", reverse)
+    AngleStatusBar:debug("SetReverseFill", self, self.bar, val)
     if val then
-        self.growDirection = (self.growDirection == "LEFT") and "RIGHT" or "LEFT"
         self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.endPoint, self:GetParent())
+        self.bar:SetPoint(self.info.endPoint, self)
     else
-        self.growDirection = self.origDirection
         self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.startPoint, self:GetParent())
+        self.bar:SetPoint(self.info.startPoint, self)
     end
+end
+function ASB:GetReverseFill()
+    AngleStatusBar:debug("GetReverseFill", self.bar:GetPoint())
+    return self.bar:GetPoint() == self.info.endPoint
 end
 
 -- Setting this to true will make the bars show full when at 0%.
@@ -387,17 +394,18 @@ local function CreateAngleBar(self, width, height, parent, info)
     --print("CreateAngleBar", self.unit, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
-    info.maxWidth, info.minWidth, info.origDirection = width - 4, height - 2, info.growDirection
-    info.startPoint = (info.growDirection == "LEFT") and "TOPRIGHT" or "TOPLEFT"
-    info.endPoint = (info.startPoint == "TOPRIGHT") and "TOPLEFT" or "TOPRIGHT"
+    info.maxWidth, info.minWidth = width - 4, height - 2
+    info.startPoint = "TOPLEFT"
+    info.endPoint = "TOPRIGHT"
 
     local bar = CreateFrame("Frame", nil, parent)
+    AngleStatusBar:debug("CreateAngleBar", bar, parent)
     bar:SetPoint(info.startPoint, parent)
     bar:SetHeight(info.minWidth)
 
-    --[[
+    ---[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    test:SetTexture(1, 1, 1, 0.5)
+    test:SetTexture(1, 1, 1, 0.1)
     test:SetAllPoints(bar)
     --]]
  
@@ -415,8 +423,8 @@ local function CreateAngleBar(self, width, height, parent, info)
         row[i] = parent:CreateTexture(nil, "ARTWORK")
         row[i]:SetHeight(1)
         if i == 1 then
-            row[i]:SetPoint("TOPLEFT", bar, leftX - 2, -1)
-            row[i]:SetPoint("TOPRIGHT", bar, rightX - 2, -1)
+            row[i]:SetPoint("TOPLEFT", bar, leftX - 1, -1)
+            row[i]:SetPoint("TOPRIGHT", bar, rightX - 1, -1)
         else
             if leftX == 0 then
                 row[i]:SetPoint("TOPLEFT", prevRow, 1, -1)
