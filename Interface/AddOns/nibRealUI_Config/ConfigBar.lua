@@ -1045,7 +1045,7 @@ local castbars do
                         get = function() return db.reverse.player end,
                         set = function(info, value)
                             db.reverse.player = value
-                            CastBars:UpdateAnchors()
+                            CastBars["player"]:SetReverseFill(value)
                         end,
                         order = 10,
                     },
@@ -1055,7 +1055,7 @@ local castbars do
                         get = function() return db.reverse.target end,
                         set = function(info, value)
                             db.reverse.target = value
-                            CastBars:UpdateAnchors()
+                            CastBars["target"]:SetReverseFill(value)
                         end,
                         order = 10,
                     },

@@ -570,7 +570,7 @@ local function Shared(self, unit)
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
     UnitFrames[unit](self)
     if unit == "player" or unit == "target" or unit == "focus" then
-        --nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+        nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
 end
 
