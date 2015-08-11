@@ -1,4 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 
 local MODNAME = "UnitFrames"
 local UnitFrames = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
@@ -98,7 +99,7 @@ hooksecurefunc("UnitPopup_OnClick",function(self)
             StaticPopup1:Hide()
         end
         if db.misc.focusclick then
-            nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+            nibRealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focusclick), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         end
     elseif button == "PET_DISMISS" then
         if StaticPopup1 then
