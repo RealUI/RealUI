@@ -10,6 +10,14 @@ local oUF = oUFembed
 
 local dontSmooth
 local smoothing = {}
+local function debug(self, ...)
+    if self.debug then
+        -- self.debug should be a string describing what the bar is.
+        -- eg. "playerHealth", "targetAbsorbs", etc
+        AngleStatusBar:debug(self.debug, ...)
+    end
+end
+
 local function SetBarPosition(self, value)
     self.value = value
     if self.info then
@@ -22,11 +30,16 @@ local function SetBarPosition(self, value)
             width = (((value - self.minVal) * (info.maxWidth - info.minWidth)) / (self.maxVal - self.minVal)) + info.minWidth
         end
         self.bar:SetWidth(width)
-        --print("width", width, "value", value)
+        debug(self, "width", width, info.minWidth, info.maxWidth)
+        debug(self, "value", value, self.minVal, self.maxVal)
 
         value = floor(value * self.maxVal) / self.maxVal
-        --print("Floored", self:GetParent():GetParent().unit, self.reverse, value, self.maxVal)
-        self.bar:SetShown((not(self.reverse) and (value < self.maxVal)) or (self.reverse and (value > self.minVal)))
+        debug(self, "Floored", value, self.reverse)
+        if self.reverse then
+            self.bar:SetShown(value < self.maxVal)
+        else
+            self.bar:SetShown(value > self.minVal)
+        end
     else
         if not self.reverse then
             self:SetWidth(self.fullWidth * (1 - value))
@@ -35,7 +48,7 @@ local function SetBarPosition(self, value)
         end
 
         value = floor(value * 100) / 100
-        --print("Floored", self:GetParent():GetParent().unit, reverse, value)
+        debug(self, "Floored", self:GetParent():GetParent().unit, self.reverse, value)
         self:SetShown((not(self.reverse) and (value < 1)) or (self.reverse and (value > 0)))
     end
 end
@@ -224,12 +237,12 @@ end
 
 -- If SetMinMaxValues is not called, default to minVal = 0, maxVal = 1.
 function ASB:SetMinMaxValues(minVal, maxVal)
-    --print("SetMinMaxValues", minVal, maxVal)
+    debug(self, "SetMinMaxValues", minVal, maxVal)
     self.minVal = minVal
     self.maxVal = maxVal
 end
 function ASB:GetMinMaxValues()
-    --print("GetMinMaxValues", minVal, maxVal)
+    debug(self, "GetMinMaxValues")
     return self.minVal, self.maxVal
 end
 
@@ -263,7 +276,7 @@ end
 
 -- Setting this to true will make the bars show full when at 0%.
 function ASB:SetReversePercent(reverse)
-    --print("SetReversePercent", reverse)
+    debug(self, "SetReversePercent", reverse)
     self.reverse = reverse
     self:SetValue(self.value, true)
 end
@@ -271,7 +284,7 @@ end
 --[[ Frame Construction ]]--
 
 local function CreateAngleBG(self, width, height, parent, info)
-    --print("CreateAngleBG", self.unit, width, height, parent, info)
+    debug(self, "CreateAngleBG", self.unit, width, height, parent, info)
     AngleStatusBar:debug("CreateAngleBG", parent:GetName())
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
@@ -391,10 +404,10 @@ local function CreateAngleBG(self, width, height, parent, info)
 end
 
 local function CreateAngleBar(self, width, height, parent, info)
-    --print("CreateAngleBar", self.unit, info)
+    debug(self, "CreateAngleBar", self.unit, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
-    info.maxWidth, info.minWidth = width - 4, height - 2
+    info.maxWidth, info.minWidth = width - 2, height - 2
     info.startPoint = "TOPLEFT"
     info.endPoint = "TOPRIGHT"
 
@@ -403,7 +416,7 @@ local function CreateAngleBar(self, width, height, parent, info)
     bar:SetPoint(info.startPoint, parent)
     bar:SetHeight(info.minWidth)
 
-    ---[[
+    --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
     test:SetTexture(1, 1, 1, 0.1)
     test:SetAllPoints(bar)
@@ -423,18 +436,26 @@ local function CreateAngleBar(self, width, height, parent, info)
         row[i] = parent:CreateTexture(nil, "ARTWORK")
         row[i]:SetHeight(1)
         if i == 1 then
-            row[i]:SetPoint("TOPLEFT", bar, leftX - 1, -1)
-            row[i]:SetPoint("TOPRIGHT", bar, rightX - 1, -1)
-        else
             if leftX == 0 then
-                row[i]:SetPoint("TOPLEFT", prevRow, 1, -1)
+                row[i]:SetPoint("TOPLEFT", bar, leftX + 0, -1) -- \
             else
-                row[i]:SetPoint("TOPLEFT", prevRow, -1, -1)
+                row[i]:SetPoint("TOPLEFT", bar, leftX - 2, -1) -- /
             end
             if rightX == 0 then
-                row[i]:SetPoint("TOPRIGHT", prevRow, -1, -1)
+                row[i]:SetPoint("TOPRIGHT", bar, rightX - 2, -1) -- /
             else
-                row[i]:SetPoint("TOPRIGHT", prevRow, 1, -1)
+                row[i]:SetPoint("TOPRIGHT", bar, rightX + 0, -1) -- \
+            end
+        else
+            if leftX == 0 then
+                row[i]:SetPoint("TOPLEFT", prevRow, 1, -1) -- \
+            else
+                row[i]:SetPoint("TOPLEFT", prevRow, -1, -1) -- /
+            end
+            if rightX == 0 then
+                row[i]:SetPoint("TOPRIGHT", prevRow, -1, -1) -- /
+            else
+                row[i]:SetPoint("TOPRIGHT", prevRow, 1, -1) -- \
             end
         end
         prevRow = row[i]
