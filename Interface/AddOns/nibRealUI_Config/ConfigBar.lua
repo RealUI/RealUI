@@ -349,6 +349,7 @@ local unitframes do
                         get = function() return ndb.settings.reverseUnitFrameBars end,
                         set = function(info, value)
                             ndb.settings.reverseUnitFrameBars = value
+                            UnitFrames:RefreshUnits("ReverseBars")
                         end,
                         order = 20,
                     },

@@ -11,19 +11,16 @@ local info = {
     health = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        growDirection = "LEFT",
         smooth = true,
     },
     predict = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        growDirection = "LEFT",
         smooth = true,
     },
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        growDirection = "LEFT",
         smooth = true,
     },
     [1] = {
@@ -45,12 +42,15 @@ local info = {
 }
 
 local function CreateHealthBar(parent)
-    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHieght)
+    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHeight)
     local info = info.health
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
-    if ndb.settings.reverseUnitFrameBars then
+    health:SetReverseFill(true)
+    if not ndb.settings.reverseUnitFrameBars then
         health:SetReversePercent(true)
+    elseif health.reverse then
+        health:SetReversePercent(false)
     end
 
     health.text = health:CreateFontString(nil, "OVERLAY")
@@ -65,14 +65,14 @@ local function CreateHealthBar(parent)
     for i = 1, 2 do
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
         health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
-        local xOfs = round(stepPoints[i] * health.info.maxWidth)
+        local xOfs = round(stepPoints[i] * (width - 15)) --86 60
         if health.reverse then
-            health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
-            health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
-        else
-            xOfs = xOfs + health.info.minWidth
+            xOfs = xOfs + height
             health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
             health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
+        else
+            health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
+            health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
         end
         health.step[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
         health.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
@@ -93,11 +93,11 @@ local function CreatePredictBar(parent)
     local info = info.predict
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-    absorbBar:SetReversePercent(true)
 
     parent.HealPrediction = {
-        absorbBar = absorbBar,
         frequentUpdates = true,
+        maxOverflow = 1,
+        absorbBar = absorbBar,
         Override = UnitFrames.PredictOverride,
     }
 end
@@ -122,11 +122,11 @@ local function CreatePvPStatus(parent)
 end
 
 local function CreatePowerBar(parent)
-    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHieght))
+    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHeight))
     local info = info.power
-    --print("Create Power bar")
     local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
+    power:SetReverseFill(true)
 
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
@@ -144,8 +144,28 @@ local function CreatePowerBar(parent)
         power.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
-    power.colorPower = true
+    function power:PositionSteps()
+        local _, powerType = UnitPowerType(parent.unit)
+        if nibRealUI.ReversePowers[powerType] or not ndb.settings.reverseUnitFrameBars then
+            self:SetReversePercent(true)
+        end
+        self.enabled = true
 
+        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+        for i = 1, 2 do
+            local xOfs = round(stepPoints[i] * (width - 15))
+            if self.reverse then
+                xOfs = xOfs + height
+                self.step[i]:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", xOfs, 0)
+                self.warn[i]:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", xOfs, 0)
+            else
+                self.step[i]:SetPoint("BOTTOMRIGHT", self, -xOfs, 0)
+                self.warn[i]:SetPoint("BOTTOMRIGHT", self, -xOfs, 0)
+            end
+        end
+    end
+
+    power.colorPower = true
     power.frequentUpdates = true
     power.PostUpdate = UnitFrames.UpdateSteps
     --power.Override = UnitFrames.PowerOverride
@@ -292,27 +312,9 @@ UnitFrames["player"] = function(self)
 
     function self:PostUpdate(event)
         self.endBox.Update(self, event)
-
-        local power = self.Power
-        local _, powerType = UnitPowerType(self.unit)
-        --power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
+        self.Power:PositionSteps()
         if self.DruidMana then
             self.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-        end
-        power:SetReversePercent(nibRealUI.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
-        power.enabled = true
-
-        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-        for i = 1, 2 do
-            local xOfs = floor(stepPoints[i] * power.info.maxWidth)
-            if power.reverse then
-                power.step[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
-                power.warn[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
-            else
-                xOfs = xOfs + power.info.minWidth
-                power.step[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
-                power.warn[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
-            end
         end
     end
 end

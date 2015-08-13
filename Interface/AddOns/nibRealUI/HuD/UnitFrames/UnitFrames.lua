@@ -144,12 +144,12 @@ function UnitFrames:OnInitialize()
                 player = {
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
-                    healthHieght = 0.6, --percentage of the unit hieght used by the healthbar
+                    healthHeight = 0.6, --percentage of the unit height used by the healthbar
                 },
                 target = {
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
-                    healthHieght = 0.6, --percentage of the unit hieght used by the healthbar
+                    healthHeight = 0.6, --percentage of the unit height used by the healthbar
                 },
             },
             arena = {
