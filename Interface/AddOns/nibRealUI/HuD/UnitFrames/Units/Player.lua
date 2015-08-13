@@ -49,7 +49,7 @@ local function CreateHealthBar(parent)
     health:SetReverseFill(true)
     if not ndb.settings.reverseUnitFrameBars then
         health:SetReversePercent(true)
-    elseif health.reverse then
+    else
         health:SetReversePercent(false)
     end
     --health.debug = "playerHealth"
@@ -67,7 +67,7 @@ local function CreateHealthBar(parent)
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
         health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
         local xOfs = round(stepPoints[i] * (width - 15)) --86 60
-        if health.reverse then
+        if health:GetReversePercent() then
             xOfs = xOfs + height
             health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
             health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
@@ -156,7 +156,7 @@ local function CreatePowerBar(parent)
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
         for i = 1, 2 do
             local xOfs = round(stepPoints[i] * (width - 15))
-            if self.reverse then
+            if self:GetReversePercent() then
                 xOfs = xOfs + height
                 self.step[i]:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", xOfs, 0)
                 self.warn[i]:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", xOfs, 0)

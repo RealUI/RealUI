@@ -8,7 +8,8 @@ local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
 local oUF = oUFembed
 
-local dontSmooth
+local bars = {}
+local dontSmooth, smooth
 local smoothing = {}
 local function debug(self, ...)
     if self.debug then
@@ -19,28 +20,29 @@ local function debug(self, ...)
 end
 
 local function SetBarPosition(self, value)
-    self.value = value
-    if self.info then
-        local info = self.info
+    local metadata = bars[self]
+    if metadata then
+        metadata.value = value
         local width
-        if self.reverse then
+        if metadata.reverse then
             -- This will take the raw value, percent or exact, and adjust it to within the bounds of the bar.
-            width = (((value - self.minVal) * (info.minWidth - info.maxWidth)) / (self.maxVal - self.minVal)) + info.maxWidth
+            width = (((value - metadata.minVal) * (metadata.minWidth - metadata.maxWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.maxWidth
         else
-            width = (((value - self.minVal) * (info.maxWidth - info.minWidth)) / (self.maxVal - self.minVal)) + info.minWidth
+            width = (((value - metadata.minVal) * (metadata.maxWidth - metadata.minWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.minWidth
         end
         self.bar:SetWidth(width)
-        debug(self, "width", width, info.minWidth, info.maxWidth)
-        debug(self, "value", value, self.minVal, self.maxVal)
+        debug(self, "width", width, metadata.minWidth, metadata.maxWidth)
+        debug(self, "value", value, metadata.minVal, metadata.maxVal)
 
-        value = floor(value * self.maxVal) / self.maxVal
-        debug(self, "Floored", value, self.reverse)
-        if self.reverse then
-            self.bar:SetShown(value < self.maxVal)
+        value = floor(value * metadata.maxVal) / metadata.maxVal
+        debug(self, "Floored", value, metadata.reverse)
+        if metadata.reverse then
+            self.bar:SetShown(value < metadata.maxVal)
         else
-            self.bar:SetShown(value > self.minVal)
+            self.bar:SetShown(value > metadata.minVal)
         end
     else
+        self.value = value
         if not self.reverse then
             self:SetWidth(self.fullWidth * (1 - value))
         else
@@ -54,14 +56,22 @@ local function SetBarPosition(self, value)
 end
 
 local function SetBarValue(self, value)
-    if not self.info then
-        value = value + (1 / self.fullWidth)
-    end
-    if value ~= self.value then
-        smoothing[self] = value
+    local metadata = bars[self]
+    if metadata then
+        if value ~= metadata.value then
+            smoothing[self] = value
+        else
+            SetBarPosition(self, value)
+            smoothing[self] = nil
+        end
     else
-        SetBarPosition(self, value)
-        smoothing[self] = nil
+        value = value + (1 / self.fullWidth)
+        if value ~= self.value then
+            smoothing[self] = value
+        else
+            SetBarPosition(self, value)
+            smoothing[self] = nil
+        end
     end
 end
 
@@ -69,9 +79,10 @@ local smoothUpdateFrame = CreateFrame("Frame")
 smoothUpdateFrame:SetScript("OnUpdate", function()
     local limit = 30 / _G.GetFramerate()
     for bar, per in next, smoothing do
-        local maxWidth = bar.info and bar.info.maxWidth or bar.fullWidth
+        local metadata = bars[bar]
+        local maxWidth = metadata and metadata.maxWidth or bar.fullWidth
         local setPer = per * maxWidth
-        local setCur = bar.value * maxWidth
+        local setCur = (metadata and metadata.value or bar.value) * maxWidth
         local new = setCur + min((setPer - setCur) / 2, max(setPer - setCur, limit * maxWidth))
         if new ~= new then
             new = per * maxWidth
@@ -235,50 +246,57 @@ function ASB:SetBackgroundColor(r, g, b, a)
     end
 end
 
--- If SetMinMaxValues is not called, default to minVal = 0, maxVal = 1.
 function ASB:SetMinMaxValues(minVal, maxVal)
     debug(self, "SetMinMaxValues", minVal, maxVal)
-    self.minVal = minVal
-    self.maxVal = maxVal
+    local metadata = bars[self]
+    metadata.minVal = minVal
+    metadata.maxVal = maxVal
 end
 function ASB:GetMinMaxValues()
     debug(self, "GetMinMaxValues")
-    return self.minVal, self.maxVal
+    local metadata = bars[self]
+    return metadata.minVal, metadata.maxVal
 end
 
 -- This should except a percentage or discrete value.
 function ASB:SetValue(value, ignoreSmooth)
-    if not self.minVal then self:SetMinMaxValues(0, 1) end
-    if value > self.maxVal then value = self.maxVal end
-    if self.info.smooth and not(dontSmooth) and not(ignoreSmooth) then
+    local metadata = bars[self]
+    if not metadata.minVal then self:SetMinMaxValues(0, value) end
+    if value > metadata.maxVal then value = metadata.maxVal end
+    if smooth and not(ignoreSmooth) then
         SetBarValue(self, value)
     else
         SetBarPosition(self, value)
     end
 end
 
--- In Blizz's API, SetReverseFill() is functionaly the same as our ReverseBarDirection.
--- Thus, in an effort to emulate the Blizz API as much as posible ReverseBarDirection has taken that name.
+-- Setting this to true will make the bars fill from right to left
 function ASB:SetReverseFill(val)
     AngleStatusBar:debug("SetReverseFill", self, self.bar, val)
+    local metadata = bars[self]
     if val then
         self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.info.endPoint, self)
+        self.bar:SetPoint(metadata.endPoint, self)
     else
         self.bar:ClearAllPoints()
-        self.bar:SetPoint(self.info.startPoint, self)
+        self.bar:SetPoint(metadata.startPoint, self)
     end
 end
 function ASB:GetReverseFill()
     AngleStatusBar:debug("GetReverseFill", self.bar:GetPoint())
-    return self.bar:GetPoint() == self.info.endPoint
+    return self.bar:GetPoint() == bars[self].endPoint
 end
 
 -- Setting this to true will make the bars show full when at 0%.
 function ASB:SetReversePercent(reverse)
     debug(self, "SetReversePercent", reverse)
-    self.reverse = reverse
-    self:SetValue(self.value, true)
+    local metadata = bars[self]
+    metadata.reverse = reverse
+    self:SetValue(metadata.value, true)
+end
+function ASB:GetReversePercent()
+    AngleStatusBar:debug("GetReversePercent", self.bar:GetPoint())
+    return bars[self].reverse
 end
 
 --[[ Frame Construction ]]--
@@ -424,12 +442,6 @@ local function CreateAngleBar(self, width, height, parent, info)
  
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
 
-    if leftX == 0 then
-        rightX = rightX --+ 3
-    else
-        leftX = leftX -- 3
-    end
-
     local row, prevRow = {}
     for i = 1, info.minWidth do
         -- Created from "parent" to ensure proper layering
@@ -496,8 +508,17 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     end
 
     status.bar = bar
-    status.info = info
-    status.value = 0
+    ---[[
+    bars[status] = {
+        minWidth = info.minWidth,
+        maxWidth = info.maxWidth,
+        startPoint = info.startPoint,
+        endPoint = info.endPoint,
+        value = 0
+    }
+    --]]
+    --status.info = info
+    --status.value = 0
     status:SetValue(0, true)
     return status
 end
@@ -509,6 +530,9 @@ function AngleStatusBar:OnInitialize()
     ndbc = RealUI.db.char
 
     if ndb.settings.powerMode == 2 then
+        smooth = false
         dontSmooth = true
+    else
+        smooth = true
     end
 end

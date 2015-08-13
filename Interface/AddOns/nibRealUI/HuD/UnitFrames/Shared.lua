@@ -217,7 +217,7 @@ function UnitFrames:UpdateSteps(unit, min, max)
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
         --print(percent, unit, min, max, self.colorClass)
-        if self.reverse then
+        if self:GetReversePercent() then
             --print("step reverse")
             if percent > stepPoints[i] then
                 self.step[i]:SetAlpha(1)
@@ -314,7 +314,7 @@ function UnitFrames:HealthOverride(event, unit)
     end
     local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, self.Health)
-    if self.Health.info then
+    if self.Health.SetValue then
         self.Health:SetMinMaxValues(0, healthMax)
         self.Health:SetValue(healthCurr)
     else
@@ -418,7 +418,7 @@ function UnitFrames:PredictOverride(event, unit)
             if atMax then
                 hp.absorbBar:SetPoint("TOPRIGHT", healthBar, 0, 0)
             else
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.info.minWidth, 0)
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.bar:GetHeight(), 0)
             end
             if overAbsorb then
                 hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, 0)
@@ -449,7 +449,7 @@ function UnitFrames:PowerOverride(event, unit, powerType)
 
     local powerPer, powerCurr, powerMax = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
-    if self.Power.info then
+    if self.Power.SetValue then
         self.Power:SetMinMaxValues(0, powerMax)
         self.Power:SetValue(powerCurr)
     else
