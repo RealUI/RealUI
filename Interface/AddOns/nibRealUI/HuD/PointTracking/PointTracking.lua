@@ -608,7 +608,6 @@ function PointTracking:PLAYER_ENTERING_WORLD(...)
 end
 
 function PointTracking:PLAYER_LOGIN()
-    PlayerClass = nibRealUI.class
     
     -- Build Class list to run updates on
     ValidClasses = {
@@ -685,6 +684,7 @@ function PointTracking:OnInitialize()
     
     db = self.db.profile
     ndb = nibRealUI.db.profile
+    PlayerClass = nibRealUI.class
     
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
