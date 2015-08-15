@@ -16,7 +16,6 @@ Aurora = core
 AuroraConfig = {}
 
 local F, C = unpack(select(2, ...))
-C.toc = select(4, GetBuildInfo())
 
 -- [[ Constants and settings ]]
 
