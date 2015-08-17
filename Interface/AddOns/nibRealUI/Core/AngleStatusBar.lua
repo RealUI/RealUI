@@ -218,6 +218,7 @@ local function DrawLine(tex, anchor, x, ofs, leftX, rightX)
         end
     end
 end
+
 --[[ API Functions ]]--
 -- This should be converted to AngleStatusBar once everything is finalized.
 local ASB = {}
@@ -260,6 +261,7 @@ end
 
 -- This should except a percentage or discrete value.
 function ASB:SetValue(value, ignoreSmooth)
+    debug(self, "SetValue", value, ignoreSmooth)
     local metadata = bars[self]
     if not metadata.minVal then self:SetMinMaxValues(0, value) end
     if value > metadata.maxVal then value = metadata.maxVal end
@@ -272,7 +274,7 @@ end
 
 -- Setting this to true will make the bars fill from right to left
 function ASB:SetReverseFill(val)
-    AngleStatusBar:debug("SetReverseFill", self, self.bar, val)
+    debug(self, "SetReverseFill", self, self.bar, val)
     local metadata = bars[self]
     if val then
         self.bar:ClearAllPoints()
@@ -283,7 +285,7 @@ function ASB:SetReverseFill(val)
     end
 end
 function ASB:GetReverseFill()
-    AngleStatusBar:debug("GetReverseFill", self.bar:GetPoint())
+    debug(self, "GetReverseFill", self.bar:GetPoint())
     return self.bar:GetPoint() == bars[self].endPoint
 end
 
@@ -295,15 +297,14 @@ function ASB:SetReversePercent(reverse)
     self:SetValue(metadata.value, true)
 end
 function ASB:GetReversePercent()
-    AngleStatusBar:debug("GetReversePercent", self.bar:GetPoint())
+    debug(self, "GetReversePercent", self.bar:GetPoint())
     return bars[self].reverse
 end
 
 --[[ Frame Construction ]]--
 
 local function CreateAngleBG(self, width, height, parent, info)
-    debug(self, "CreateAngleBG", self.unit, width, height, parent, info)
-    AngleStatusBar:debug("CreateAngleBG", parent:GetName())
+    debug(info, "CreateAngleBG", width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
@@ -316,7 +317,7 @@ local function CreateAngleBG(self, width, height, parent, info)
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
     local bgColor = RealUI.media.background
 
-    AngleStatusBar:debug("CreateBG", leftX, rightX)
+    debug(info, "CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
     top:SetTexture(0, 0, 0)
     top:SetHeight(1)
@@ -334,7 +335,7 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
     local maxCols = width - (height + 1) --width - maxRows
-    AngleStatusBar:debug("CreateRows", maxRows, maxCols)
+    debug(info, "CreateRows", maxRows, maxCols)
     if maxRows <= maxCols then
         local row = {}
         for i = 1, maxRows do
@@ -379,20 +380,25 @@ local function CreateAngleBG(self, width, height, parent, info)
         end
         bg.col = col
     end
+
+    local ofs = maxRows + 1
     local bottom = bg:CreateTexture(nil, "BORDER")
     bottom:SetTexture(0, 0, 0)
     bottom:SetHeight(1)
+    if leftX == -rightX then
+        if leftX == 0 then -- \ /
+            bottom:SetPoint("BOTTOMLEFT", ofs, 0)
+            bottom:SetPoint("BOTTOMRIGHT", -ofs, 0)
+        else -- / \
+            bottom:SetPoint("BOTTOMLEFT", 0, 0)
+            bottom:SetPoint("BOTTOMRIGHT", 0, 0)
+        end
+    else
     bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
     bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
-    --[=[
-    --bottom:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    bottom:SetVertexColor(0, 0, 0)
-    RealUI:DrawLine(bottom, bg, -rightX, 0, (width - leftX), 0, 8, "BOTTOMLEFT")
-    --DrawRouteLine(bottom, bg, -rightX, 0, (width - leftX), 0, 8, "BOTTOMLEFT")
-    ]=]
+    end
     bg.bottom = bottom
 
-    local ofs = maxRows + 1
     local left = bg:CreateTexture(nil, "BORDER")
     left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
     left:SetVertexColor(0, 0, 0)
@@ -422,7 +428,7 @@ local function CreateAngleBG(self, width, height, parent, info)
 end
 
 local function CreateAngleBar(self, width, height, parent, info)
-    debug(self, "CreateAngleBar", self.unit, info)
+    debug(info, "CreateAngleBar", width, height, parent, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
     info.maxWidth, info.minWidth = width - 2, height - 2
@@ -430,7 +436,7 @@ local function CreateAngleBar(self, width, height, parent, info)
     info.endPoint = "TOPRIGHT"
 
     local bar = CreateFrame("Frame", nil, parent)
-    AngleStatusBar:debug("CreateAngleBar", bar, parent)
+    debug(info, "CreateBar", bar, parent)
     bar:SetPoint(info.startPoint, parent)
     bar:SetHeight(info.minWidth)
 
@@ -449,7 +455,7 @@ local function CreateAngleBar(self, width, height, parent, info)
         row[i]:SetHeight(1)
         if i == 1 then
             if leftX == 0 then
-                row[i]:SetPoint("TOPLEFT", bar, leftX + 0, -1) -- \
+                row[i]:SetPoint("TOPLEFT", bar, leftX + 2, -1) -- \
             else
                 row[i]:SetPoint("TOPLEFT", bar, leftX - 2, -1) -- /
             end
@@ -508,7 +514,7 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     end
 
     status.bar = bar
-    ---[[
+    status.debug = info.debug
     bars[status] = {
         minWidth = info.minWidth,
         maxWidth = info.maxWidth,
@@ -516,10 +522,7 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
         endPoint = info.endPoint,
         value = 0
     }
-    --]]
-    --status.info = info
-    --status.value = 0
-    status:SetValue(0, true)
+    --status:SetValue(0, true)
     return status
 end
 oUF:RegisterMetaFunction("CreateAngleFrame", CreateAngleFrame) -- oUF magic
