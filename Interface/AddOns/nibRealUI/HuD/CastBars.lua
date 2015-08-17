@@ -802,20 +802,17 @@ local info = {
     player = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        growDirection = "LEFT",
-        smooth = true,
+        debug = "playerCast"
     },
     target = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        growDirection = "RIGHT",
-        smooth = true,
+        debug = "targetCast"
     },
     focus = {
         leftAngle = [[\]],
         rightAngle = [[/]],
-        growDirection = "LEFT",
-        smooth = true,
+        debug = "focusCast"
     },
 }
 
@@ -826,10 +823,10 @@ local updateSafeZone = function(self)
     local _, _, _, ms = GetNetStats()
 
     -- Guard against GetNetStats returning latencies of 0.
-    if(ms ~= 0) then
+    if (ms ~= 0) then
         -- MADNESS!
         local safeZonePercent = (width / self.max) * (ms / 1e5)
-        if(safeZonePercent > 1) then safeZonePercent = 1 end
+        if (safeZonePercent > 1) then safeZonePercent = 1 end
         sz:SetWidth(width * safeZonePercent)
         sz:Show()
     else
@@ -841,11 +838,13 @@ local function PostCastStart(self, unit, ...)
     CastBars:debug("PostCastStart", unit, ...)
     local sz = self.safeZone
     sz:ClearAllPoints()
-    sz:SetPoint("TOP")
-    sz:SetPoint("BOTTOM")
-    local szSide = self:GetReverseFill() and "LEFT" or "RIGHT"
-    CastBars:debug("szSide", szSide)
-    sz:SetPoint(szSide)
+    local point, x
+    if self:GetReverseFill() then
+        point, x = "TOPLEFT", 2
+    else
+        point, x = "TOPRIGHT", -0
+    end
+    sz:SetPoint(point, self, x, 0)
     updateSafeZone(self)
 end
 local function PostCastFailed(self, unit, ...)
@@ -880,6 +879,16 @@ end
 
 local function PostChannelStart(self, unit, ...)
     CastBars:debug("PostChannelStart", unit, ...)
+    local sz = self.safeZone
+    sz:ClearAllPoints()
+    local point, x
+    if self:GetReverseFill() then
+        point, x = "TOPRIGHT", -1
+    else
+        point, x = "TOPLEFT", 1
+    end
+    sz:SetPoint(point, self, x, 0)
+    updateSafeZone(self)
 end
 local function PostChannelUpdate(self, unit, ...)
     CastBars:debug("PostChannelUpdate", unit, ...)
@@ -899,9 +908,10 @@ end
 
 function CastBars:CreateCastBars(self, unit)
     CastBars:debug("CreateCastBars", unit)
-    local width, height = round(self:GetWidth() * 0.91), round(self.Health:GetHeight() * 0.5)
-    local info = info[unit]
-    local color = db.colors[unit]
+    local info, unitDB = info[unit], db[unit]
+    local size, color = db.size[layoutSize], db.colors[unit]
+    local width, height = size[unit] and size[unit].width or size.width, size[unit] and size[unit].height or size.height
+    if not unitDB.debug then info.debug = nil end
     local Castbar = self:CreateAngleFrame("Status", width, height, self.overlay, info)
     Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
     if db.reverse[unit] then
@@ -910,7 +920,7 @@ function CastBars:CreateCastBars(self, unit)
 
     local Icon = Castbar:CreateTexture(nil, "OVERLAY")
     Castbar.Icon = Icon
-    Icon:SetSize(28, 28)
+    Icon:SetSize(unitDB.icon, unitDB.icon)
     Aurora[1].ReskinIcon(Icon)
 
     local Text = Castbar:CreateFontString(nil, "OVERLAY")
@@ -928,20 +938,23 @@ function CastBars:CreateCastBars(self, unit)
     safeZone:SetFrameLevel(Castbar:GetFrameLevel() + 1)
 
     if unit == "player" then
+        CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPRIGHT", RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
         Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT", -1, -2)
         Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
         Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
     elseif unit == "target" then
+        CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
         Icon:SetPoint("TOPLEFT", Castbar, "BOTTOMLEFT", 1, -2)
-        Text:SetPoint("TOPLEFT", Icon, "TOPRIGHT")
-        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT")
+        Text:SetPoint("TOPLEFT", Icon, "TOPRIGHT", 2, 0)
+        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT", 2, 0)
     elseif unit == "focus" then
-        Castbar:SetPoint("BOTTOMRIGHT", self.overlay, "TOPRIGHT", 0, 9)
-        Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT")
-        Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
-        Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
+        CastBars:debug("Set positions", unit)
+        Castbar:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 5, 1)
+        Icon:SetPoint("BOTTOMLEFT", Castbar, "BOTTOMRIGHT", 2, 1)
+        Text:SetPoint("BOTTOMRIGHT", Castbar, "TOPRIGHT", 0, 2)
+        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT", 2, 0)
     end
 
     local flashAnim = Castbar:CreateAnimationGroup()
@@ -965,19 +978,20 @@ function CastBars:CreateCastBars(self, unit)
     end)
 
     Castbar.PostCastStart = PostCastStart
-    Castbar.PostCastFailed = PostCastFailed
+    --Castbar.PostCastFailed = PostCastFailed
     Castbar.PostCastInterrupted = PostCastInterrupted
-    Castbar.PostCastInterruptible = PostCastInterruptible
-    Castbar.PostCastNotInterruptible = PostCastNotInterruptible
-    Castbar.PostCastDelayed = PostCastDelayed
-    Castbar.PostCastStop = PostCastStop
+    --Castbar.PostCastInterruptible = PostCastInterruptible
+    --Castbar.PostCastNotInterruptible = PostCastNotInterruptible
+    --Castbar.PostCastDelayed = PostCastDelayed
+    --Castbar.PostCastStop = PostCastStop
 
     Castbar.PostChannelStart = PostChannelStart
-    Castbar.PostChannelUpdate = PostChannelUpdate
-    Castbar.PostChannelStop = PostChannelStop
+    --Castbar.PostChannelUpdate = PostChannelUpdate
+    --Castbar.PostChannelStop = PostChannelStop
 
     Castbar.CustomDelayText = CustomDelayText
     Castbar.CustomTimeText = CustomTimeText
+
     self.Castbar = Castbar
     CastBars[unit] = Castbar
 end
@@ -1035,23 +1049,41 @@ function CastBars:OnInitialize()
                 player = true,
                 target = false,
             },
+            player = {
+                size = {x = 230, y = 28},
+                position = {x = 0, y = 0},
+                icon = 28,
+                debug = false
+            },
+            target = {
+                size = {x = 230, y = 28},
+                position = {x = 0, y = 0},
+                icon = 28,
+                debug = false
+            },
+            focus = {
+                size = {x = 146, y = 28},
+                position = {x = 0, y = 0},
+                icon = 16,
+                debug = true
+            },
             size = {
                 [1] = {
                     width = 200,
-                    height = 4,
+                    height = 6,
                     focus = {
                         width = 126,
-                        height = 3,
+                        height = 4,
                         x = 3,
                         y = 6,
                     },
                 },
                 [2] = {
                     width = 230,
-                    height = 5,
+                    height = 8,
                     focus = {
                         width = 146,
-                        height = 4,
+                        height = 5,
                         x = 4,
                         y = 7,
                     },
