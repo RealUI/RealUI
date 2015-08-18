@@ -189,8 +189,7 @@ end
 
 -- New Status bars WIP
 
---[[ Internal functions ]]--
-
+--[[ Internal Functions ]]--
 local function GetOffSets(leftAngle, rightAngle, height)
     local leftX, rightX = 0, 0
     -- These conditions keep the textures within the frame.
@@ -220,10 +219,8 @@ local function DrawLine(tex, anchor, x, ofs, leftX, rightX)
 end
 
 --[[ API Functions ]]--
--- This should be converted to AngleStatusBar once everything is finalized.
-local ASB = {}
-
-function ASB:SetStatusBarColor(r, g, b, a)
+local api = {
+    SetStatusBarColor = function(self, r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
@@ -231,9 +228,8 @@ function ASB:SetStatusBarColor(r, g, b, a)
     for i = 1, #row do
         row[i]:SetTexture(r, g, b, a or 1)
     end
-end
-
-function ASB:SetBackgroundColor(r, g, b, a)
+    end,
+    SetBackgroundColor = function(self, r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
@@ -245,22 +241,22 @@ function ASB:SetBackgroundColor(r, g, b, a)
             tex[i]:SetTexture(r, g, b, a or 1)
         end
     end
-end
+    end,
 
-function ASB:SetMinMaxValues(minVal, maxVal)
+    SetMinMaxValues = function(self, minVal, maxVal)
     debug(self, "SetMinMaxValues", minVal, maxVal)
     local metadata = bars[self]
     metadata.minVal = minVal
     metadata.maxVal = maxVal
-end
-function ASB:GetMinMaxValues()
+    end,
+    GetMinMaxValues = function(self)
     debug(self, "GetMinMaxValues")
     local metadata = bars[self]
     return metadata.minVal, metadata.maxVal
-end
+    end,
 
 -- This should except a percentage or discrete value.
-function ASB:SetValue(value, ignoreSmooth)
+    SetValue = function(self, value, ignoreSmooth)
     debug(self, "SetValue", value, ignoreSmooth)
     local metadata = bars[self]
     if not metadata.minVal then self:SetMinMaxValues(0, value) end
@@ -270,10 +266,10 @@ function ASB:SetValue(value, ignoreSmooth)
     else
         SetBarPosition(self, value)
     end
-end
+    end,
 
 -- Setting this to true will make the bars fill from right to left
-function ASB:SetReverseFill(val)
+    SetReverseFill = function(self, val)
     debug(self, "SetReverseFill", self, self.bar, val)
     local metadata = bars[self]
     if val then
@@ -283,26 +279,26 @@ function ASB:SetReverseFill(val)
         self.bar:ClearAllPoints()
         self.bar:SetPoint(metadata.startPoint, self)
     end
-end
-function ASB:GetReverseFill()
+    end,
+    GetReverseFill = function(self)
     debug(self, "GetReverseFill", self.bar:GetPoint())
     return self.bar:GetPoint() == bars[self].endPoint
-end
+    end,
 
 -- Setting this to true will make the bars show full when at 0%.
-function ASB:SetReversePercent(reverse)
+    SetReversePercent = function(self, reverse)
     debug(self, "SetReversePercent", reverse)
     local metadata = bars[self]
     metadata.reverse = reverse
     self:SetValue(metadata.value, true)
-end
-function ASB:GetReversePercent()
+    end,
+    GetReversePercent = function(self)
     debug(self, "GetReversePercent", self.bar:GetPoint())
     return bars[self].reverse
 end
+}
 
 --[[ Frame Construction ]]--
-
 local function CreateAngleBG(self, width, height, parent, info)
     debug(info, "CreateAngleBG", width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
@@ -498,7 +494,7 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     local status, bar
     if frameType == "Frame" then
         status = CreateAngleBG(self, width, height, parent, info)
-        status.SetBackgroundColor = ASB.SetBackgroundColor
+        status.SetBackgroundColor = api.SetBackgroundColor
         return status
     elseif frameType == "Bar" then
         bar, info = CreateAngleBar(self, width, height, parent, info)
@@ -509,7 +505,7 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
         bar, info = CreateAngleBar(self, width, height, status, info)
     end
 
-    for key, func in next, ASB do
+    for key, func in next, api do
         status[key] = func
     end
 
