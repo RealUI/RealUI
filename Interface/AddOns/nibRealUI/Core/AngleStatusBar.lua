@@ -523,6 +523,60 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
 end
 oUF:RegisterMetaFunction("CreateAngleFrame", CreateAngleFrame) -- oUF magic
 
+local testBars -- /run RealUI:TestASB()
+function RealUI:TestASB(reverseFill, reversePer)
+    testBars = {}
+    local info = {
+        {
+            leftAngle = [[\]],
+            rightAngle = [[\]],
+            debug = "testLeftLeft"
+        },
+        {
+            leftAngle = [[\]],
+            rightAngle = [[/]],
+            debug = "testLeftRight"
+        },
+        {
+            leftAngle = [[/]],
+            rightAngle = [[\]],
+            debug = "testRightLeft"
+        },
+        {
+            leftAngle = [[/]],
+            rightAngle = [[/]],
+            debug = "testRightRight"
+        },
+    }
+    for i = 1, #info do
+        local barInfo = info[i]
+        local test = CreateAngleFrame(UIParent, "Status", 200, 8, UIParent, barInfo)
+        test:SetMinMaxValues(0, 200)
+        test:SetValue(150, true)
+        test:SetStatusBarColor(1, 0, 0, 1)
+        if reverseFill then
+            test:SetReverseFill(true)
+        end
+        if reversePer then
+            test:SetReversePercent(true)
+        end
+        test:SetPoint("TOP", UIParent, "CENTER", 0, -(10 * i))
+        tinsert(testBars, test)
+        test:Show()
+        test.bar:Show()
+    end
+end
+
+-- /run RealUI:TestASBSet("Value", 200)
+-- /run RealUI:TestASBSet("ReverseFill", true)
+-- /run RealUI:TestASBSet("ReversePercent", true)
+function RealUI:TestASBSet(method, ...)
+    for i = 1, #testBars do
+        local bar = testBars[i]
+        bar["Set"..method](bar, ...)
+    end
+end
+
 -------------
 function AngleStatusBar:OnInitialize()
     ndb = RealUI.db.profile
