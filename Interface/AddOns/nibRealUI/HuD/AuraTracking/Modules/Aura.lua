@@ -377,6 +377,7 @@ end
 function Aura:SetIndicatorInfo(info)
     local f = self.frame
     f.info = info
+    info.type = "Aura"
 
     f.auraType = info.auraType or "buff"
     f.isBuff = (f.auraType == "buff")

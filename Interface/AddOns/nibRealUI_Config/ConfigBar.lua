@@ -1445,6 +1445,7 @@ local auratracker do
                 remove = {
                     name = L["AuraTrack_Remove"],
                     type = "execute",
+                    disabled = spellData.type ~= "Aura",
                     confirm = true,
                     confirmText = L["AuraTrack_RemoveConfirm"],
                     func = function(info, ...)
