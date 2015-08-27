@@ -91,6 +91,13 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, F, C)
                     F.ReskinInput(option)
                 elseif option:GetName():find("DropDown") then
                     F.ReskinDropDown(option)
+                    local name = option:GetName()
+                    local button, bg = option:GetChildren()
+                    bg:SetPoint("TOPLEFT", _G[name.."Left"], 18, -20)
+                    bg:SetPoint("BOTTOMRIGHT", _G[name.."Right"], -16, 24)
+
+                    button:ClearAllPoints()
+                    button:SetPoint("RIGHT", bg, 0, 0)
                 elseif objType == "Button" then
                     F.Reskin(option)
                 elseif objType == "Frame" then
