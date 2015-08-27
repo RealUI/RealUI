@@ -261,7 +261,7 @@ local api = {
         local metadata = bars[self]
         if not metadata.minVal then self:SetMinMaxValues(0, value) end
         if value > metadata.maxVal then value = metadata.maxVal end
-        if smooth and not(ignoreSmooth) then
+        if metadata.smooth and not(ignoreSmooth) then
             SetBarValue(self, value)
         else
             SetBarPosition(self, value)
@@ -504,10 +504,11 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     status.bar = bar
     status.debug = info.debug
     bars[status] = {
-        minWidth = info.minWidth,
-        maxWidth = info.maxWidth,
+        smooth = info.smooth ~= nil and info.smooth or smooth,
         startPoint = info.startPoint,
         endPoint = info.endPoint,
+        minWidth = info.minWidth,
+        maxWidth = info.maxWidth,
         value = 0
     }
     --status:SetValue(0, true)
@@ -574,7 +575,7 @@ function AngleStatusBar:OnInitialize()
     ndb = RealUI.db.profile
     ndbc = RealUI.db.char
 
-    if ndb.settings.powerMode == 2 then
+    if ndb.settings.powerMode == 2 then -- Economy
         smooth = false
         dontSmooth = true
     else
