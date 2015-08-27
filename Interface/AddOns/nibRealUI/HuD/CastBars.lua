@@ -838,13 +838,11 @@ local function PostCastStart(self, unit, ...)
     CastBars:debug("PostCastStart", unit, ...)
     local sz = self.safeZone
     sz:ClearAllPoints()
-    local point, x
     if self:GetReverseFill() then
-        point, x = "TOPLEFT", 2
+        sz:SetPoint("TOPLEFT", self, -2, 0)
     else
-        point, x = "TOPRIGHT", -0
+        sz:SetPoint("TOPRIGHT", self, 2, 0)
     end
-    sz:SetPoint(point, self, x, 0)
     updateSafeZone(self)
 end
 local function PostCastFailed(self, unit, ...)
@@ -1053,7 +1051,7 @@ function CastBars:OnInitialize()
                 size = {x = 230, y = 28},
                 position = {x = 0, y = 0},
                 icon = 28,
-                debug = false
+                debug = true
             },
             target = {
                 size = {x = 230, y = 28},

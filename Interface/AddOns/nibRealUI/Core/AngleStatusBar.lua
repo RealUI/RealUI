@@ -272,11 +272,10 @@ local api = {
     SetReverseFill = function(self, val)
         debug(self, "SetReverseFill", self, self.bar, val)
         local metadata = bars[self]
+        self.bar:ClearAllPoints()
         if val then
-            self.bar:ClearAllPoints()
             self.bar:SetPoint(metadata.endPoint, self, -2, 0)
         else
-            self.bar:ClearAllPoints()
             self.bar:SetPoint(metadata.startPoint, self, 2, 0)
         end
     end,

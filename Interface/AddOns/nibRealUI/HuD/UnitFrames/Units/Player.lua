@@ -11,17 +11,14 @@ local info = {
     health = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        smooth = true,
     },
     predict = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        smooth = true,
     },
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        smooth = true,
     },
     [1] = {
         x = 222,
@@ -47,11 +44,7 @@ local function CreateHealthBar(parent)
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     health:SetReverseFill(true)
-    if not ndb.settings.reverseUnitFrameBars then
-        health:SetReversePercent(true)
-    else
-        health:SetReversePercent(false)
-    end
+    health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
     --health.debug = "playerHealth"
 
     health.text = health:CreateFontString(nil, "OVERLAY")
@@ -148,9 +141,7 @@ local function CreatePowerBar(parent)
 
     function power:PositionSteps()
         local _, powerType = UnitPowerType(parent.unit)
-        if nibRealUI.ReversePowers[powerType] or not ndb.settings.reverseUnitFrameBars then
-            self:SetReversePercent(true)
-        end
+        self:SetReversePercent((not nibRealUI.ReversePowers[powerType]) or ndb.settings.reverseUnitFrameBars)
         self.enabled = true
 
         local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
