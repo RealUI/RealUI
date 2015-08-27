@@ -34,8 +34,8 @@ local function SetBarPosition(self, value)
         debug(self, "width", width, metadata.minWidth, metadata.maxWidth)
         debug(self, "value", value, metadata.minVal, metadata.maxVal)
 
-        value = floor(value * metadata.maxVal) / metadata.maxVal
-        debug(self, "Floored", value, metadata.reverse)
+        --value = floor(value * metadata.maxVal) / metadata.maxVal
+        --debug(self, "Floored", value, metadata.reverse)
         if metadata.reverse then
             self.bar:SetShown(value < metadata.maxVal)
         else
@@ -221,81 +221,81 @@ end
 --[[ API Functions ]]--
 local api = {
     SetStatusBarColor = function(self, r, g, b, a)
-    if type(r) == "table" then
-        r, g, b, a = r[1], r[2], r[3], r[4]
-    end
-    local row = self.bar.row
-    for i = 1, #row do
-        row[i]:SetTexture(r, g, b, a or 1)
-    end
+        if type(r) == "table" then
+            r, g, b, a = r[1], r[2], r[3], r[4]
+        end
+        local row = self.bar.row
+        for i = 1, #row do
+            row[i]:SetTexture(r, g, b, a or 1)
+        end
     end,
     SetBackgroundColor = function(self, r, g, b, a)
-    if type(r) == "table" then
-        r, g, b, a = r[1], r[2], r[3], r[4]
-    end
-    local tex = self.col or self.row
-    for i = 1, #tex do
-        if self.col then
-            tex[i]:SetVertexColor(r, g, b, a or 1)
-        else
-            tex[i]:SetTexture(r, g, b, a or 1)
+        if type(r) == "table" then
+            r, g, b, a = r[1], r[2], r[3], r[4]
         end
-    end
+        local tex = self.col or self.row
+        for i = 1, #tex do
+            if self.col then
+                tex[i]:SetVertexColor(r, g, b, a or 1)
+            else
+                tex[i]:SetTexture(r, g, b, a or 1)
+            end
+        end
     end,
 
     SetMinMaxValues = function(self, minVal, maxVal)
-    debug(self, "SetMinMaxValues", minVal, maxVal)
-    local metadata = bars[self]
-    metadata.minVal = minVal
-    metadata.maxVal = maxVal
+        debug(self, "SetMinMaxValues", minVal, maxVal)
+        local metadata = bars[self]
+        metadata.minVal = minVal
+        metadata.maxVal = maxVal
     end,
     GetMinMaxValues = function(self)
-    debug(self, "GetMinMaxValues")
-    local metadata = bars[self]
-    return metadata.minVal, metadata.maxVal
+        debug(self, "GetMinMaxValues")
+        local metadata = bars[self]
+        return metadata.minVal, metadata.maxVal
     end,
 
--- This should except a percentage or discrete value.
+    -- This should except a percentage or discrete value.
     SetValue = function(self, value, ignoreSmooth)
-    debug(self, "SetValue", value, ignoreSmooth)
-    local metadata = bars[self]
-    if not metadata.minVal then self:SetMinMaxValues(0, value) end
-    if value > metadata.maxVal then value = metadata.maxVal end
-    if smooth and not(ignoreSmooth) then
-        SetBarValue(self, value)
-    else
-        SetBarPosition(self, value)
-    end
+        debug(self, "SetValue", value, ignoreSmooth)
+        local metadata = bars[self]
+        if not metadata.minVal then self:SetMinMaxValues(0, value) end
+        if value > metadata.maxVal then value = metadata.maxVal end
+        if smooth and not(ignoreSmooth) then
+            SetBarValue(self, value)
+        else
+            SetBarPosition(self, value)
+        end
     end,
 
--- Setting this to true will make the bars fill from right to left
+    -- Setting this to true will make the bars fill from right to left
     SetReverseFill = function(self, val)
-    debug(self, "SetReverseFill", self, self.bar, val)
-    local metadata = bars[self]
-    if val then
-        self.bar:ClearAllPoints()
-        self.bar:SetPoint(metadata.endPoint, self)
-    else
-        self.bar:ClearAllPoints()
-        self.bar:SetPoint(metadata.startPoint, self)
-    end
+        debug(self, "SetReverseFill", self, self.bar, val)
+        local metadata = bars[self]
+        if val then
+            self.bar:ClearAllPoints()
+            self.bar:SetPoint(metadata.endPoint, self, -2, 0)
+        else
+            self.bar:ClearAllPoints()
+            self.bar:SetPoint(metadata.startPoint, self, 2, 0)
+        end
     end,
     GetReverseFill = function(self)
-    debug(self, "GetReverseFill", self.bar:GetPoint())
-    return self.bar:GetPoint() == bars[self].endPoint
+        debug(self, "GetReverseFill", self.bar:GetPoint())
+        return self.bar:GetPoint() == bars[self].endPoint
     end,
 
--- Setting this to true will make the bars show full when at 0%.
+    -- Setting this to true will make the bars show full when at 0%.
     SetReversePercent = function(self, reverse)
-    debug(self, "SetReversePercent", reverse)
-    local metadata = bars[self]
-    metadata.reverse = reverse
-    self:SetValue(metadata.value, true)
+        debug(self, "SetReversePercent", reverse)
+        local metadata = bars[self]
+        metadata.reverse = reverse
+        self:SetValue(metadata.value, true)
     end,
     GetReversePercent = function(self)
-    debug(self, "GetReversePercent", self.bar:GetPoint())
-    return bars[self].reverse
-end
+        debug(self, "GetReversePercent", self.bar:GetPoint())
+        return bars[self].reverse
+    end
 }
 
 --[[ Frame Construction ]]--
@@ -390,8 +390,8 @@ local function CreateAngleBG(self, width, height, parent, info)
             bottom:SetPoint("BOTTOMRIGHT", 0, 0)
         end
     else
-    bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
-    bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
+        bottom:SetPoint("BOTTOMLEFT", -rightX, 0)
+        bottom:SetPoint("BOTTOMRIGHT", -leftX, 0)
     end
     bg.bottom = bottom
 
@@ -427,13 +427,13 @@ local function CreateAngleBar(self, width, height, parent, info)
     debug(info, "CreateAngleBar", width, height, parent, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
-    info.maxWidth, info.minWidth = width - 2, height - 2
+    info.maxWidth, info.minWidth = width - 4, height - 2
     info.startPoint = "TOPLEFT"
     info.endPoint = "TOPRIGHT"
 
     local bar = CreateFrame("Frame", nil, parent)
     debug(info, "CreateBar", bar, parent)
-    bar:SetPoint(info.startPoint, parent)
+    bar:SetPoint(info.startPoint, parent, 2, 0)
     bar:SetHeight(info.minWidth)
 
     --[[
@@ -442,7 +442,7 @@ local function CreateAngleBar(self, width, height, parent, info)
     test:SetAllPoints(bar)
     --]]
  
-    local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
+    local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, info.minWidth)
 
     local row, prevRow = {}
     for i = 1, info.minWidth do
@@ -450,16 +450,8 @@ local function CreateAngleBar(self, width, height, parent, info)
         row[i] = parent:CreateTexture(nil, "ARTWORK")
         row[i]:SetHeight(1)
         if i == 1 then
-            if leftX == 0 then
-                row[i]:SetPoint("TOPLEFT", bar, leftX + 2, -1) -- \
-            else
-                row[i]:SetPoint("TOPLEFT", bar, leftX - 2, -1) -- /
-            end
-            if rightX == 0 then
-                row[i]:SetPoint("TOPRIGHT", bar, rightX - 2, -1) -- /
-            else
-                row[i]:SetPoint("TOPRIGHT", bar, rightX + 0, -1) -- \
-            end
+            row[i]:SetPoint("TOPLEFT", bar, leftX, -1)
+            row[i]:SetPoint("TOPRIGHT", bar, rightX, -1)
         else
             if leftX == 0 then
                 row[i]:SetPoint("TOPLEFT", prevRow, 1, -1) -- \
