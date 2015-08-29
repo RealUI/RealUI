@@ -89,22 +89,17 @@ local UpdateSpeed = 1/60
 
 -- Chanelling Ticks
 function CastBars:ClearTicks()
+    CastBars:debug("ClearTicks")
     for i = 1, MaxTicks do
-        self.player.tick[i]:Hide()
+        self.tick[i]:Hide()
     end
 end
 
-function CastBars:SetTick(index, per)
-    self.player.tick[index]:SetPoint("TOPRIGHT", self.player, "TOPRIGHT", floor(-(db.size[layoutSize].width * per)), 0)
-    self.player.tick[index]:Show()
-end
-
 function CastBars:SetBarTicks(ticks)
-    self:ClearTicks()
-    if ticks and ticks > 0 then
-        for i = 1, ticks do
-            self:SetTick(i, (i-1) / ticks)
-        end
+    CastBars:debug("SetBarTicks", ticks)
+    for i = 1, ticks do
+        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / ticks))), 0)
+        self.tick[i]:Show()
     end
 end
 
@@ -844,6 +839,10 @@ local function PostCastStart(self, unit, ...)
         sz:SetPoint("TOPRIGHT", self, -2, 0)
     end
     updateSafeZone(self)
+
+    if self.ClearTicks then
+        self:ClearTicks()
+    end
 end
 local function PostCastFailed(self, unit, ...)
     CastBars:debug("PostCastFailed", unit, ...)
@@ -875,8 +874,8 @@ local function PostCastStop(self, unit, ...)
     CastBars:debug("PostCastStop", unit, ...)
 end
 
-local function PostChannelStart(self, unit, ...)
-    CastBars:debug("PostChannelStart", unit, ...)
+local function PostChannelStart(self, unit, spellName)
+    CastBars:debug("PostChannelStart", unit, spellName)
     local sz = self.safeZone
     sz:ClearAllPoints()
     local point, x
@@ -887,6 +886,10 @@ local function PostChannelStart(self, unit, ...)
     end
     sz:SetPoint(point, self, x, 0)
     updateSafeZone(self)
+
+    if self.SetBarTicks then
+        self:SetBarTicks(ChannelingTicks[spellName])
+    end
 end
 local function PostChannelUpdate(self, unit, ...)
     CastBars:debug("PostChannelUpdate", unit, ...)
@@ -941,6 +944,18 @@ function CastBars:CreateCastBars(self, unit)
         Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT", -1, -2)
         Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
         Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
+
+        Castbar.tick = {}
+        for i = 1, MaxTicks do
+            local tick = self:CreateAngleFrame("Bar", width, height, Castbar, info)
+            tick:SetStatusBarColor(0, 0, 0, 0.5)
+            tick:SetWidth(round(width * 0.08))
+            tick:ClearAllPoints()
+            --tick:SetFrameLevel(7)
+            Castbar.tick[i] = tick
+        end
+        Castbar.ClearTicks = CastBars.ClearTicks
+        Castbar.SetBarTicks = CastBars.SetBarTicks
     elseif unit == "target" then
         CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
