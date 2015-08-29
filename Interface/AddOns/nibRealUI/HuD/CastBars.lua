@@ -839,9 +839,9 @@ local function PostCastStart(self, unit, ...)
     local sz = self.safeZone
     sz:ClearAllPoints()
     if self:GetReverseFill() then
-        sz:SetPoint("TOPLEFT", self, -2, 0)
+        sz:SetPoint("TOPLEFT", self, 2, 0)
     else
-        sz:SetPoint("TOPRIGHT", self, 2, 0)
+        sz:SetPoint("TOPRIGHT", self, -2, 0)
     end
     updateSafeZone(self)
 end

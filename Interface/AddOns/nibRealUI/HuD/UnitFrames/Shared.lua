@@ -213,6 +213,8 @@ nibRealUI.ReversePowers = {
 }
 
 function UnitFrames:UpdateSteps(unit, min, max)
+    --min = max * .25
+    --self:SetValue(min)
     local percent = nibRealUI:GetSafeVals(min, max)
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
@@ -416,9 +418,9 @@ function UnitFrames:PredictOverride(event, unit)
         hp.absorbBar:ClearAllPoints()
         if unit == "player" then
             if atMax then
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, 0, 0)
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, -2, 0)
             else
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.bar:GetHeight(), 0)
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.bar:GetHeight() - 2, 0)
             end
             if overAbsorb then
                 hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, 0)
