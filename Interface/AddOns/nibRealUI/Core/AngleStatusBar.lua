@@ -445,8 +445,7 @@ local function CreateAngleBar(self, width, height, parent, info)
 
     local row, prevRow = {}
     for i = 1, info.minWidth do
-        -- Created from "parent" to ensure proper layering
-        row[i] = parent:CreateTexture(nil, "ARTWORK")
+        row[i] = bar:CreateTexture(nil, "ARTWORK")
         row[i]:SetHeight(1)
         if i == 1 then
             row[i]:SetPoint("TOPLEFT", bar, leftX, -1)
@@ -486,14 +485,18 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     if frameType == "Frame" then
         status = CreateAngleBG(self, width, height, parent, info)
         status.SetBackgroundColor = api.SetBackgroundColor
+        status:SetFrameLevel(5)
         return status
     elseif frameType == "Bar" then
         bar, info = CreateAngleBar(self, width, height, parent, info)
         -- Do this to maintain a consistant hierarchy without having to use self.bar for direct manipulation.
         status = bar
+        status:SetFrameLevel(4)
     elseif frameType == "Status" then
         status = CreateAngleBG(self, width, height, parent, info)
         bar, info = CreateAngleBar(self, width, height, status, info)
+        status:SetFrameLevel(2)
+        bar:SetFrameLevel(3)
     end
 
     for key, func in next, api do

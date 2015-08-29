@@ -653,6 +653,7 @@ local function Shared(self, unit)
 
     -- Create a proxy frame for the CombatFader to avoid taint city.
     self.overlay = CreateFrame("Frame", nil, self)
+    self.overlay:SetFrameStrata("BACKGROUND")
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
