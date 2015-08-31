@@ -211,12 +211,13 @@ do
 			width = "half",
 			name = L["Texture"],
 			desc = L["Select bar texture."],
-			get = function (info) return indicator.dbx.texture end,
+			get = function (info) return indicator.dbx.texture or "Gradient" end,
 			set = function (info, v)
 				indicator.dbx.texture = v or nil
 				self:RefreshIndicator(indicator, "Layout")
 			end,
 			values = AceGUIWidgetLSMlists.statusbar,
+			hidden = function() return indicator.dbx.reverseMainBar end
 		}
 		options.barMainTextureColor = {
 			type = "color",
@@ -240,28 +241,43 @@ do
 				self:RefreshIndicator(indicator, "Layout")
 			end,		
 			hasAlpha = true,
-			hidden = function() return indicator.dbx.textureColor == nil end
+			hidden = function() return (indicator.dbx.textureColor == nil) or indicator.dbx.reverseMainBar end
 		}
+		options.barMainReverse = {
+			type = "toggle",
+			name = L["Reverse"],
+			desc = L["Fill bar in reverse"],
+			width = "half",
+			order = 53,
+			tristate = false,
+			get = function () return indicator.dbx.reverseMainBar end,
+			set = function (_, v) 
+				indicator.dbx.reverseMainBar = v or nil
+				self:RefreshIndicator(indicator, "Layout", "Update" )
+			end,
+			hidden = function() return indicator.dbx.textureColor == nil end,
+		}		
 		options.barStatusesColorize = {
 			type = "toggle",
-			name = L["Dynamic color"],
+			name = L["Status Color"],
 			desc = L["Specify a list of statuses to Colorize the bar"],
 			width = "normal",
-			order = 53,
+			order = 54,
 			tristate = false,
 			get = function () return indicator.dbx.textureColor == nil  end,
 			set = function (_, v)
 				if v then
 					indicator.dbx.textureColor = nil
+					indicator.dbx.reverseMainBar = nil
 				else
 					UnregisterAllStatuses(indicator.sideKick)
-					indicator.dbx.textureColor = { r=0,g=0,b=0, a=1}
+					indicator.dbx.textureColor = { r=0,g=0,b=0,a=1 }
 				end
 				self:RefreshIndicator(indicator, "Layout", "Update" )
 				self:MakeIndicatorOptions(indicator)
 			end,
+			hidden = function() return indicator.dbx.reverseMainBar end
 		}
-
 		for i=1,(indicator.dbx.barCount or 0) do
 			options["barSep"..i] = { type = "header", order = 50+i*5,  name = L["Extra Bar"] .. " "..i }
 			options["Status"..i] = {
@@ -287,7 +303,7 @@ do
 				width = "half",
 				name = L["Texture"],
 				desc = L["Select bar texture."],
-				get = function (info) return GetBarValue(indicator, i, "texture") or indicator.dbx.texture end,
+				get = function (info) return GetBarValue(indicator, i, "texture") or indicator.dbx.texture or "Gradient" end,
 				set = function (info, v)
 					SetBarValue(indicator, i, "texture", v~=indicator.dbx.texture and v or nil)
 					self:RefreshIndicator(indicator, "Layout")

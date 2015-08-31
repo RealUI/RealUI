@@ -1413,7 +1413,9 @@ local tentativehandle= nil
 function Skada:StartCombat()
     -- Reset automatic stop on wipe variables
     deathcounter = 0
-    _, startingmembers = self:GetGroupTypeAndCount()
+    local _, members = self:GetGroupTypeAndCount()
+    
+    startingmembers = members
     
 	-- Cancel cancelling combat if needed.
 	if tentativehandle ~= nil then

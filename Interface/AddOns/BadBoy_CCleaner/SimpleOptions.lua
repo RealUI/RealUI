@@ -1,6 +1,6 @@
 
 do
-	BadBoyCCleanerConfigTitle:SetText("BadBoy_CCleaner r92-release") --wowace magic, replaced with tag version
+	BadBoyCCleanerConfigTitle:SetText("BadBoy_CCleaner r97-release") --wowace magic, replaced with tag version
 
 	local ccleanerNoIcons = CreateFrame("CheckButton", nil, BadBoyConfig, "OptionsBaseCheckButtonTemplate")
 	ccleanerNoIcons:SetPoint("TOPLEFT", BadBoyConfigPopupButton, "BOTTOMLEFT", 0, -135)
@@ -30,13 +30,13 @@ do
 	elseif L == "zhTW" then
 		noIconsMsgText:SetText("Remove raid icons from public chat")
 	elseif L == "zhCN" then
-		noIconsMsgText:SetText("Remove raid icons from public chat")
+		noIconsMsgText:SetText("從公共頻道中移除團隊標記圖示")
 	elseif L == "esES" then
 		noIconsMsgText:SetText("Remove raid icons from public chat")
 	elseif L == "esMX" then
 		noIconsMsgText:SetText("Remove raid icons from public chat")
 	elseif L == "ruRU" then
-		noIconsMsgText:SetText("Remove raid icons from public chat")
+		noIconsMsgText:SetText("Убирать из чата рейдовые метки (квадрат, череп и тому подобные)")
 	elseif L == "koKR" then
 		noIconsMsgText:SetText("Remove raid icons from public chat")
 	elseif L == "ptBR" then
@@ -51,7 +51,7 @@ do
 	ccleanerInput:EnableMouse(true)
 	ccleanerInput:SetWidth(250)
 	ccleanerInput:SetHeight(20)
-	ccleanerInput:SetMaxLetters(30)
+	ccleanerInput:SetMaxLetters(100)
 	ccleanerInput:SetScript("OnEscapePressed", function(frame)
 		frame:SetText("")
 		frame:ClearFocus()

@@ -322,6 +322,9 @@ function Bar:SetConfigAlpha(alpha)
 	end
 	if not self.faded then
 		self:SetAlpha(self.config.alpha)
+		if self.ForAll then
+			self:ForAll("UpdateAlpha")
+		end
 	end
 end
 
@@ -369,6 +372,9 @@ function Bar:SetFadeOutAlpha(fadealpha)
 	end
 	if self.faded then
 		self:SetAlpha(self.config.fadeoutalpha)
+		if self.ForAll then
+			self:ForAll("UpdateAlpha")
+		end
 	end
 end
 
@@ -403,6 +409,9 @@ function Bar:ControlFadeOut()
 			self:SetAlpha(self.config.fadeoutalpha or 0)
 		end
 		self.faded = true
+	end
+	if self.ForAll then
+		self:ForAll("UpdateAlpha")
 	end
 end
 

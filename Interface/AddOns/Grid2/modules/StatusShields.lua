@@ -45,7 +45,7 @@ local function GetPercentCustomMax(self, unit)
 end
 -- Use unit maximum health as max shield value (used by bar indicators)
 local function GetPercentHealthMax(_, unit)
-	return (UnitGetTotalAbsorbs(unit) or 0) / UnitHealthMax(unit) 
+	return (UnitGetTotalAbsorbs(unit) or 0) / UnitHealthMax(unit)
 end
 
 local function IsActiveNormal(_, unit)

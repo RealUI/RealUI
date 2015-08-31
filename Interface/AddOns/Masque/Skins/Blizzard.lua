@@ -3,7 +3,7 @@
 	please see the included License.txt file.
 
 	* File.....: Skins\Blizzard.lua
-	* Revision.: 407
+	* Revision.: 409
 	* Author...: Blizzard Entertainment
 
 	'Blizzard' skin for Masque.
@@ -14,8 +14,8 @@ local _, Core = ...
 -- Improved Blizzard skin. Thanks to Maul for the reference!
 Core:AddSkin("Blizzard", {
 	Author = "Blizzard Entertainment",
-	Version = "6.1.0",
-	Masque_Version = 60100,
+	Version = "6.2.0",
+	Masque_Version = 60200,
 	Shape = "Square",
 	Backdrop = {
 		Width = 32,

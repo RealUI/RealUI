@@ -1,5 +1,5 @@
 --
--- $Id: BugGrabber.lua 207 2014-11-30 01:36:45Z funkydude $
+-- $Id: BugGrabber.lua 213 2015-08-23 19:16:24Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
 -- Current Developer: Funkydude
@@ -181,17 +181,6 @@ local function printErrorObject(err)
 	end
 end
 
--- Re-enabled until someone complains and demands that they go away again.
-local function registerAddonActionEvents()
-	frame:RegisterEvent("ADDON_ACTION_BLOCKED")
-	frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
-end
-
-local function unregisterAddonActionEvents()
-	frame:UnregisterEvent("ADDON_ACTION_BLOCKED")
-	frame:UnregisterEvent("ADDON_ACTION_FORBIDDEN")
-end
-
 -----------------------------------------------------------------------
 -- Slash handler
 --
@@ -234,7 +223,7 @@ do
 		local found = nil
 		-- First see if it's a library
 		if LibStub then
-			local lib, minor = LibStub(object, true)
+			local _, minor = LibStub(object, true)
 			found = minor
 		end
 		-- Then see if we can get some addon metadata
@@ -263,11 +252,6 @@ do
 			self[object] = found
 			return found
 		end
-	end })
-	local escapeCache = setmetatable({}, { __index = function(self, key)
-		local escaped = key:gsub("([%.%-%(%)%+])", "%%%1")
-		self[key] = escaped
-		return escaped
 	end })
 
 	local tmp = {}
@@ -447,7 +431,7 @@ function addon:GetDB() return db or loadErrors end
 function addon:GetSessionId() return BugGrabberDB and BugGrabberDB.session or -1 end
 function addon:IsPaused() return paused end
 
-function addon:HandleBugLink(player, id, link)
+function addon:HandleBugLink(player, id)
 	local errorObject = self:GetErrorByPlayerAndID(player, id)
 	if errorObject then
 		printErrorObject(errorObject)
@@ -525,7 +509,7 @@ do
 		-- dumping them to the chat frame.
 		_G.Swatter = {
 			IsEnabled = function() return true end,
-			OnError = function(msg, frame, stack, etype, ...)
+			OnError = function(msg, _, stack)
 				grabError(tostring(msg) .. tostring(stack))
 			end,
 			isFake = true,
@@ -589,7 +573,8 @@ frame.ADDON_ACTION_BLOCKED = frame.ADDON_ACTION_FORBIDDEN -- XXX Unused?
 frame:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_LOGIN")
-registerAddonActionEvents()
+frame:RegisterEvent("ADDON_ACTION_BLOCKED")
+frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
 
 real_seterrorhandler(grabError)
 function seterrorhandler() --[[ noop ]] end
