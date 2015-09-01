@@ -134,6 +134,7 @@ local updateSafeZone = function(self)
     if (ms ~= 0) then
         -- MADNESS!
         local safeZonePercent = (width / self.max) * (ms / 1e5)
+        CastBars:debug("updateSafeZone", safeZonePercent, ms)
         if (safeZonePercent > 1) then safeZonePercent = 1 end
         sz:SetWidth(width * safeZonePercent)
         sz:Show()
@@ -230,6 +231,91 @@ local function CustomTimeText(self, duration, ...)
     self.Time:SetFormattedText("%.1f", duration)
 end
 
+local function OnUpdate(self, elapsed)
+    CastBars:debug("OnUpdate", self.__owner.unit, elapsed)
+    if (self.casting or self.config) then
+        CastBars:debug("Casting", self.config)
+        local duration = self.duration + elapsed
+        if (duration >= self.max) then
+            CastBars:debug("Duration", duration, self.max)
+            if self.config then
+                duration = 0
+            else
+                self.casting = nil
+                self:Hide()
+
+                if (self.PostCastStop) then self:PostCastStop(self.__owner.unit) end
+                return
+            end
+        end
+
+        if (self.Time) then
+            if(self.delay ~= 0) then
+                if(self.CustomDelayText) then
+                    self:CustomDelayText(duration)
+                else
+                    self.Time:SetFormattedText("%.1f|cffff0000-%.1f|r", duration, self.delay)
+                end
+            else
+                if(self.CustomTimeText) then
+                    self:CustomTimeText(duration)
+                else
+                    self.Time:SetFormattedText("%.1f", duration)
+                end
+            end
+        end
+
+        self.duration = duration
+        self:SetValue(duration)
+
+        if (self.Spark) then
+            self.Spark:SetPoint("CENTER", self, "LEFT", (duration / self.max) * self:GetWidth(), 0)
+        end
+    elseif (self.channeling) then
+        local duration = self.duration - elapsed
+
+        if (duration <= 0) then
+            self.channeling = nil
+            self:Hide()
+
+            if (self.PostChannelStop) then self:PostChannelStop(self.__owner.unit) end
+            return
+        end
+
+        if (self.Time) then
+            if (self.delay ~= 0) then
+                if (self.CustomDelayText) then
+                    self:CustomDelayText(duration)
+                else
+                    self.Time:SetFormattedText("%.1f|cffff0000-%.1f|r", duration, self.delay)
+                end
+            else
+                if (self.CustomTimeText) then
+                    self:CustomTimeText(duration)
+                else
+                    self.Time:SetFormattedText("%.1f", duration)
+                end
+            end
+        end
+
+        self.duration = duration
+        self:SetValue(duration)
+        if(self.Spark) then
+            self.Spark:SetPoint("CENTER", self, "LEFT", (duration / self.max) * self:GetWidth(), 0)
+        end
+    elseif (self.flashAnim:IsPlaying()) then
+        self:SetValue(self.max)
+    else
+        self.unitName = nil
+        self.casting = nil
+        self.castid = nil
+        self.channeling = nil
+
+        self:SetValue(1)
+        self:Hide()
+    end
+end
+
 function CastBars:CreateCastBars(self, unit)
     CastBars:debug("CreateCastBars", unit)
     local info, unitDB = info[unit], db[unit]
@@ -305,12 +391,6 @@ function CastBars:CreateCastBars(self, unit)
     flash:SetDuration(1)
     flash:SetSmoothing("OUT")
 
-    Castbar:SetScript("OnHide", function(self, ...)
-        if flashAnim:IsPlaying() then
-            self:Show()
-        end
-    end)
-
     Castbar.PostCastStart = PostCastStart
     Castbar.PostCastFailed = PostCastFailed
     Castbar.PostCastInterrupted = PostCastInterrupted
@@ -326,6 +406,8 @@ function CastBars:CreateCastBars(self, unit)
     Castbar.CustomDelayText = CustomDelayText
     Castbar.CustomTimeText = CustomTimeText
 
+    Castbar.OnUpdate = OnUpdate
+
     self.Castbar = Castbar
     CastBars[unit] = Castbar
 end
@@ -339,20 +421,31 @@ function CastBars:SetUpdateSpeed()
     end
 end
 
-function CastBars:ToggleConfigMode(val)
-    if self.configMode == val then return end
+function CastBars:ToggleConfigMode(isConfigMode)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    self.configMode = val
+    if self.configMode == isConfigMode then return end
+    CastBars:debug("ToggleConfigMode", isConfigMode)
+    self.configMode = isConfigMode
 
-    if val then
-        for _, unit in next, {"player", "target", "focus"} do
-            local castbar = CastBars[unit]
-            castbar.casting = true
-            castbar.duration, castbar.max = castbar:GetMinMaxValues()
-            CastBars:debug("Fake minmax", castbar.duration, castbar.max)
-            castbar:Show()
+    --local castbar
+    for _, unit in next, {"player", "target", "focus"} do
+        CastBars:debug("Set config cast", unit)
+        local castbar = CastBars[unit]
+        castbar.config = isConfigMode
+        if isConfigMode then
+            CastBars:debug("Setup bar", castbar.__owner.unit, castbar.config)
+            castbar.duration, castbar.max = 0, 10
+            castbar:SetMinMaxValues(castbar.duration, castbar.max)
+            castbar.Text:SetText(SPELL_CASTING)
+            castbar.Icon:SetTexture([[Interface\Icons\INV_Misc_Dice_02]])
+            castbar.safeZone:Hide()
+
+            -- We need to wait a bit for the game to register that we have a target and focus
+            C_Timer.After(0.1, function()
+                castbar:Show()
+            end)
+            CastBars:debug("IsShown", castbar:IsShown())
         end
-    else
     end
 end
 
