@@ -797,16 +797,19 @@ local info = {
     player = {
         leftAngle = [[\]],
         rightAngle = [[\]],
+        smooth = false,
         debug = "playerCast"
     },
     target = {
         leftAngle = [[/]],
         rightAngle = [[/]],
+        smooth = false,
         debug = "targetCast"
     },
     focus = {
         leftAngle = [[\]],
         rightAngle = [[/]],
+        smooth = false,
         debug = "focusCast"
     },
 }
@@ -844,9 +847,11 @@ local function PostCastStart(self, unit, ...)
         self:ClearTicks()
     end
 end
+--[==[
 local function PostCastFailed(self, unit, ...)
     CastBars:debug("PostCastFailed", unit, ...)
 end
+]==]
 local function PostCastInterrupted(self, unit, ...)
     CastBars:debug("PostCastInterrupted", unit, ...)
     self.castid = nil
@@ -863,16 +868,22 @@ local function PostCastInterrupted(self, unit, ...)
 end
 local function PostCastInterruptible(self, unit, ...)
     CastBars:debug("PostCastInterruptible", unit, ...)
+    local color = db.colors[unit]
+    self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
 local function PostCastNotInterruptible(self, unit, ...)
     CastBars:debug("PostCastNotInterruptible", unit, ...)
+    local color = db.colors.uninterruptible
+    self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
+--[==[
 local function PostCastDelayed(self, unit, ...)
     CastBars:debug("PostCastDelayed", unit, ...)
 end
 local function PostCastStop(self, unit, ...)
     CastBars:debug("PostCastStop", unit, ...)
 end
+]==]
 
 local function PostChannelStart(self, unit, spellName)
     CastBars:debug("PostChannelStart", unit, spellName)
@@ -891,19 +902,21 @@ local function PostChannelStart(self, unit, spellName)
         self:SetBarTicks(ChannelingTicks[spellName])
     end
 end
+--[==[
 local function PostChannelUpdate(self, unit, ...)
     CastBars:debug("PostChannelUpdate", unit, ...)
 end
 local function PostChannelStop(self, unit, ...)
     CastBars:debug("PostChannelStop", unit, ...)
 end
+]==]
 
 local function CustomDelayText(self, duration, ...)
     CastBars:debug("CustomDelayText", duration, ...)
     self.Time:SetFormattedText("%.1f", duration)
 end
 local function CustomTimeText(self, duration, ...)
-    --CastBars:debug("CustomTimeText", duration, ...)
+    CastBars:debug("CustomTimeText", duration, ...)
     self.Time:SetFormattedText("%.1f", duration)
 end
 
@@ -932,11 +945,10 @@ function CastBars:CreateCastBars(self, unit)
     Castbar.Time = Time
     Time:SetFontObject(RealUIFont_PixelNumbers)
 
-    local safeZone = self:CreateAngleFrame("Bar", width, height, Castbar, info)
+    local safeZone, color = self:CreateAngleFrame("Bar", width, height, Castbar, info), db.colors.latency
     Castbar.safeZone = safeZone
     safeZone:SetValue(1, true)
-    safeZone:SetStatusBarColor(1, 0, 0, 1)
-    safeZone:SetFrameLevel(Castbar:GetFrameLevel() + 1)
+    safeZone:SetStatusBarColor(color[1], color[2], color[3], color[4])
 
     if unit == "player" then
         CastBars:debug("Set positions", unit)
@@ -951,7 +963,6 @@ function CastBars:CreateCastBars(self, unit)
             tick:SetStatusBarColor(0, 0, 0, 0.5)
             tick:SetWidth(round(width * 0.08))
             tick:ClearAllPoints()
-            --tick:SetFrameLevel(7)
             Castbar.tick[i] = tick
         end
         Castbar.ClearTicks = CastBars.ClearTicks
@@ -991,12 +1002,12 @@ function CastBars:CreateCastBars(self, unit)
     end)
 
     Castbar.PostCastStart = PostCastStart
-    --Castbar.PostCastFailed = PostCastFailed
+    Castbar.PostCastFailed = PostCastFailed
     Castbar.PostCastInterrupted = PostCastInterrupted
-    --Castbar.PostCastInterruptible = PostCastInterruptible
-    --Castbar.PostCastNotInterruptible = PostCastNotInterruptible
-    --Castbar.PostCastDelayed = PostCastDelayed
-    --Castbar.PostCastStop = PostCastStop
+    Castbar.PostCastInterruptible = PostCastInterruptible
+    Castbar.PostCastNotInterruptible = PostCastNotInterruptible
+    Castbar.PostCastDelayed = PostCastDelayed
+    Castbar.PostCastStop = PostCastStop
 
     Castbar.PostChannelStart = PostChannelStart
     --Castbar.PostChannelUpdate = PostChannelUpdate
