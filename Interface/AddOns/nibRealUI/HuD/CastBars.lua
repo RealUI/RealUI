@@ -200,6 +200,15 @@ end
 
 local function PostCastStart(self, unit, ...)
     CastBars:debug("PostCastStart", unit, ...)
+
+    if self.interrupt then
+        local color = db.colors.uninterruptible
+        self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    else
+        local color = db.colors[unit]
+        self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    end
+
     local sz = self.safeZone
     sz:ClearAllPoints()
     if self:GetReverseFill() then
