@@ -6,34 +6,31 @@ local Grid2 = Grid2
 local UnitIsUnit = UnitIsUnit
 local UnitGUID = UnitGUID
 
-local curTarget
+local curTarget, oldTarget
+local function UpdateTarget()
+	oldTarget = curTarget
+	local guid = UnitGUID("target")
+	curTarget = guid and Grid2:GetUnitidByGUID( guid )
+end
 
 function Target:OnEnable()
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
+	UpdateTarget()
 end
 
-function Target:PLAYER_TARGET_CHANGED(event)
-	if curTarget then 
-		self:UpdateIndicators(curTarget) 
-	end
-	local guid = UnitGUID("target")
-	if guid then
-		curTarget = Grid2:GetUnitidByGUID( guid )
-		if curTarget then 
-			self:UpdateIndicators(curTarget) 
-		end
-	else
-		curTarget= nil
-	end	
+function Target:PLAYER_TARGET_CHANGED()
+	UpdateTarget()
+	if oldTarget then self:UpdateIndicators(oldTarget) end
+	if curTarget then self:UpdateIndicators(curTarget) end
 end
 
 function Target:OnDisable()
 	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-	curTarget = nil
+	curTarget, oldTarget = nil, nil
 end
 
 function Target:IsActive(unit)
-	return UnitIsUnit(unit, "target")
+	return curTarget and UnitIsUnit(unit, curTarget)
 end
 
 local text = L["target"]

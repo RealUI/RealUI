@@ -49,7 +49,7 @@ function Grid2Options:MakeStatusAuraMissingOptions(status, options, optionParams
 				status.dbx.valueIndex = nil
 			end
 			status:UpdateDB()
-			status:UpdateAllIndicators()
+			Grid2:RefreshAuras() 
 			self:MakeStatusOptions(status)
 		end,
 	}

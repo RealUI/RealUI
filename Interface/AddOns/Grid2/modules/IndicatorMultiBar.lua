@@ -32,7 +32,11 @@ local function Bar_OnFrameUpdate(bar)
 	local valueTo     = myValues[1] or 0
 	local valueMax    = valueTo
 	local maxIndex    = 0
-	bar:SetValue(valueTo)
+	if self.reverse then
+		valueMax, valueTo = 0, -valueTo
+	else
+		bar:SetValue(valueTo)
+	end
 	for i=2,bar.myMaxIndex do
 		local texture = myTextures[i]
 		local value = myValues[i] or 0
@@ -136,7 +140,8 @@ local function Bar_Layout(self, parent)
 	barTexture:SetDrawLayer("ARTWORK", 0)
 	if color then bar:SetStatusBarColor(color.r, color.g, color.b, min(self.opacity, color.a or 1) ) end	
 	bar:SetSize(width, height)
-	bar:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)	
+	bar:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)
+	if self.reverse then bar:SetValue(0) end
 	-- extra bars
 	local textures = bar.myTextures or { barTexture }
 	for i=1,self.barCount do
@@ -204,6 +209,7 @@ local function Bar_UpdateDB(self, dbx)
 	self.backColor      = dbx.backColor
 	self.backMainAnchor = dbx.backMainAnchor
 	self.opacity        = dbx.opacity or 1
+	self.reverse        = dbx.reverseMainBar
 	self.backTexture    = Grid2:MediaFetch("statusbar", dbx.backTexture, "Gradient") 
 	self.texture        = Grid2:MediaFetch("statusbar", dbx.texture, "Gradient")
 	self.textureSublayer= 0
