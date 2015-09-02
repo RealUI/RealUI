@@ -103,6 +103,61 @@ function CastBars:SetBarTicks(ticks)
     end
 end
 
+function CastBars:SetAnchors(castbar, unit)
+    CastBars:debug("Set config cast", unit)
+
+    local xOfs, x, y = 0, 3, -2
+    local iconPoint, iconRelPoint = "TOP", "BOTTOM"
+    local textPoint, textRelPoint = "TOP", "TOP"
+    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
+    if not db.text.textOnBottom then
+        iconPoint, iconRelPoint = "BOTTOM", "TOP"
+        y = -y
+    end
+
+    castbar.Time:ClearAllPoints()
+    castbar.Text:ClearAllPoints()
+    castbar.Icon:ClearAllPoints()
+
+    local horizPoint, horizRelPoint
+    if unit == "player" then
+        if db.text.textInside then
+            castbar.Text:SetJustifyH("RIGHT")
+            horizPoint, horizRelPoint = "RIGHT", "LEFT"
+            x = -x
+        else
+            horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            --xOfs = 4
+        end
+        castbar.Text:SetJustifyH(horizPoint)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+    elseif unit == "target" then
+        if db.text.textInside then
+            horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            --xOfs = 4
+        else
+            horizPoint, horizRelPoint = "RIGHT", "LEFT"
+            x = -x
+        end
+        castbar.Text:SetJustifyH(horizPoint)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+    elseif unit == "focus" then
+        castbar.Icon:SetPoint("BOTTOMLEFT", castbar, "BOTTOMRIGHT", 2, 1)
+        castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)
+        castbar.Time:SetPoint("BOTTOMLEFT", castbar.Icon, "BOTTOMRIGHT", 2, 0)
+    end
+end
+
+function CastBars:UpdateAnchors()
+    for _, unit in next, {"player", "target"} do
+        self:SetAnchors(CastBars[unit], unit)
+    end
+end
+
 local info = {
     player = {
         leftAngle = [[\]],
@@ -349,9 +404,6 @@ function CastBars:CreateCastBars(self, unit)
     if unit == "player" then
         CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPRIGHT", RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
-        Icon:SetPoint("TOPRIGHT", Castbar, "BOTTOMRIGHT", -1, -2)
-        Text:SetPoint("TOPRIGHT", Icon, "TOPLEFT")
-        Time:SetPoint("BOTTOMRIGHT", Icon, "BOTTOMLEFT")
 
         Castbar.tick = {}
         for i = 1, MaxTicks do
@@ -366,16 +418,11 @@ function CastBars:CreateCastBars(self, unit)
     elseif unit == "target" then
         CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
-        Icon:SetPoint("TOPLEFT", Castbar, "BOTTOMLEFT", 1, -2)
-        Text:SetPoint("TOPLEFT", Icon, "TOPRIGHT", 2, 0)
-        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT", 2, 0)
     elseif unit == "focus" then
         CastBars:debug("Set positions", unit)
         Castbar:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 5, 1)
-        Icon:SetPoint("BOTTOMLEFT", Castbar, "BOTTOMRIGHT", 2, 1)
-        Text:SetPoint("BOTTOMRIGHT", Castbar, "TOPRIGHT", 0, 2)
-        Time:SetPoint("BOTTOMLEFT", Icon, "BOTTOMRIGHT", 2, 0)
     end
+    CastBars:SetAnchors(Castbar, unit)
 
     local flashAnim = Castbar:CreateAnimationGroup()
     Castbar.flashAnim = flashAnim
@@ -427,7 +474,6 @@ function CastBars:ToggleConfigMode(isConfigMode)
     CastBars:debug("ToggleConfigMode", isConfigMode)
     self.configMode = isConfigMode
 
-    --local castbar
     for _, unit in next, {"player", "target", "focus"} do
         CastBars:debug("Set config cast", unit)
         local castbar = CastBars[unit]
@@ -441,10 +487,10 @@ function CastBars:ToggleConfigMode(isConfigMode)
             castbar.safeZone:Hide()
 
             -- We need to wait a bit for the game to register that we have a target and focus
-            C_Timer.After(0.1, function()
+            C_Timer.After(0.2, function()
                 castbar:Show()
+                CastBars:debug("IsShown", unit, castbar:IsShown())
             end)
-            CastBars:debug("IsShown", castbar:IsShown())
         end
     end
 end
