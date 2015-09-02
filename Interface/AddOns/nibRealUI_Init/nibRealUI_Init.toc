@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Init
 ## Notes: Initialization for RealUI
 ## Author: Gethe
-## Version: 8.1 r14
+## Version: 8.1 r14a
 ## SavedVariables: RealUI_InitDB
 
 libs\libs.xml
