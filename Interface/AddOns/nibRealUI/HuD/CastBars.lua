@@ -98,7 +98,7 @@ end
 function CastBars:SetBarTicks(ticks)
     CastBars:debug("SetBarTicks", ticks)
     if not ticks then return end
-    for i = 1, #ticks do
+    for i = 1, ticks do
         self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / ticks))), 0)
         self.tick[i]:Show()
     end
