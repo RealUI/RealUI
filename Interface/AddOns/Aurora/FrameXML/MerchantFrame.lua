@@ -84,9 +84,12 @@ tinsert(C.themes["Aurora"], function()
 				local name = _G["MerchantItem"..i.."Name"]
 				if bu.link then
 					local _, _, quality = GetItemInfo(bu.link)
-					local r, g, b = GetItemQualityColor(quality)
-
-					name:SetTextColor(r, g, b)
+					if quality then
+						local r, g, b = GetItemQualityColor(quality)
+						name:SetTextColor(r, g, b)
+					else
+						name:SetTextColor(1, 1, 1)
+					end
 				else
 					name:SetTextColor(1, 1, 1)
 				end

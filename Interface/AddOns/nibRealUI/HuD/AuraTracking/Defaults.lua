@@ -51,22 +51,24 @@ AuraTracking.Defaults = {
 -- Static Debuffs
     {   -- Necrotic Plague (Talent)
         spell = 155159,
+        minLevel = 100,
         auraType = "debuff",
         order = 1,
+        talent = {[7] = {21207}}
     },
     {   -- Blood Plague
         spell = 55078,
         minLevel = 55,
         auraType = "debuff",
-        replace = 155159,
         order = 1,
+        talent = {[7] = {21208, 21209}},
     },
     {   -- Frost Fever
         spell = 55095,
         minLevel = 55,
         auraType = "debuff",
-        replace = 155159,
         order = 2,
+        talent = {[7] = {21208, 21209}},
     },
 -- Free Buffs
     {   -- Crimson Scourge (Blood)
@@ -451,8 +453,9 @@ AuraTracking.Defaults = {
     },
 -- Static Debuff
     {   -- Rising Sun Kick (Windwalker)
-        spell = 107428,
+        spell = 130320,
         auraType = "debuff",
+        minLevel = 56,
         order = 1,
         specs = {false, true, true},
     },

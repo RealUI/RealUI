@@ -85,8 +85,9 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
 
     -- Skin Fonts
     local RavenDefaults = Raven.db.global.Defaults
-    RavenDefaults.timeFont = RealUI:Font(true)
-    RavenDefaults.labelFont = RealUI:Font(true)
-    RavenDefaults.iconFont = RealUI:Font(true)
+    local pixelFont = RealUI.media.font.pixel.large[1]
+    RavenDefaults.timeFont = pixelFont
+    RavenDefaults.labelFont = pixelFont
+    RavenDefaults.iconFont = pixelFont
     Raven:UpdateAllBarGroups()
 end

@@ -48,6 +48,7 @@ end
 
 local function UpdatePrep(self, event, ...)
     UnitFrames:debug("Arena:----- UpdatePrep -----")
+    local notVisible = UnitAffectingCombat("player") and "SetAlpha" or "Hide"
     if event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS" then
         UnitFrames:debug(event)
         local numOpps = GetNumArenaOpponentSpecs()
@@ -64,7 +65,7 @@ local function UpdatePrep(self, event, ...)
                     opp:Hide()
                 end
             else
-                opp:Hide()
+                opp[notVisible](opp, 0)
             end
         end
     else
@@ -83,7 +84,7 @@ local function UpdatePrep(self, event, ...)
                 opp:SetAlpha(0)
             elseif status == "cleared" then
                 UnitFrames:debug("Arena Opp Cleared", unit, opp)
-                opp:Hide()
+                opp[notVisible](opp, 0)
             end
         end
     end

@@ -442,6 +442,7 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         -- fetch the subject's nameplate
         local f = addon:GetNameplate(destGUID, destName)
         if not f or not f.auras then return end
+        if f.trivial and not self.db.profile.showtrivial then return end
 
         --debug_print('COMBAT_LOG_EVENT fired on '..f.name.text)
 

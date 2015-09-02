@@ -84,7 +84,7 @@ local defaults = {
             },
         },
         text = {
-            level        = true, -- display levels
+            level        = false, -- display levels
             healthoffset = 2.5,
         },
         hp = {

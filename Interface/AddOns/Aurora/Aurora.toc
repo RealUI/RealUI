@@ -1,8 +1,8 @@
-## Interface: 60100
+## Interface: 60200
 ## Title: Aurora
 ## Notes: Minimalistic window theme.
 ## Author: Haleth/Lightsword
-## Version: 6.2.3
+## Version: 6.3b
 ## SavedVariables: AuroraConfig
 
 aurora.lua

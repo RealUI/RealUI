@@ -174,19 +174,28 @@ end
 function Grid2:InitializeOptions()
 	self:RegisterChatCommand("grid2", "OnChatCommand")
 	self:RegisterChatCommand("gr2", "OnChatCommand")
-	local optionsFrame= CreateFrame( "Frame", nil, UIParent );
+	local optionsFrame = CreateFrame( "Frame", nil, UIParent )
 	optionsFrame.name = "Grid2"
-	InterfaceOptions_AddCategory(optionsFrame)
-	optionsFrame:SetScript("OnShow", function (self, ...)
-		if not Grid2Options then Grid2:LoadGrid2Options() end
-		self:SetScript("OnShow", nil)
+	local button = CreateFrame("BUTTON", nil, optionsFrame, "UIPanelButtonTemplate")
+	button:SetText("Open Grid2 Options")
+	button:SetSize(200,32)
+	button:SetPoint('TOPLEFT', optionsFrame, 'TOPLEFT', 20, -20)
+	button:SetScript("OnClick", function(self) 
+		HideUIPanel(InterfaceOptionsFrame) 
+		HideUIPanel(GameMenuFrame) 
+		Grid2:OnChatCommand()
 	end)
+	InterfaceOptions_AddCategory(optionsFrame)
 	self.optionsFrame = optionsFrame
 	self.InitializeOptions = nil
 end
 
 function Grid2:LoadGrid2Options()
 	if not IsAddOnLoaded("Grid2Options") then
+		if InCombatLockdown() then
+			Grid2:Print("Grid2Options cannot be loaded in combat.")
+			return
+		end
 		LoadAddOn("Grid2Options")
 	end
 	if Grid2Options then

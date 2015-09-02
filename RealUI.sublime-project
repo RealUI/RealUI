@@ -24,9 +24,6 @@
 		},
 		{
 			"path": "Interface\\AddOns\\nibRealUI_Init"
-		},
-		{
-			"path": "Interface\\AddOns\\SharedMedia_MyMedia"
 		}
 	]
 }

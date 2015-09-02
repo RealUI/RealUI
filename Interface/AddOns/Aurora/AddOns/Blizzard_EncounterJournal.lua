@@ -45,11 +45,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		self:GetFontString():SetTextColor(1, 1, 1)
 	end
 
-	local tabs = {"EncounterJournalInstanceSelectDungeonTab", "EncounterJournalInstanceSelectRaidTab"}
-	if C.toc == 60200 then
-		tinsert(tabs, "EncounterJournalInstanceSelectSuggestTab")
-	end
-	for _, tabName in pairs(tabs) do
+	for _, tabName in pairs({"EncounterJournalInstanceSelectSuggestTab", "EncounterJournalInstanceSelectDungeonTab", "EncounterJournalInstanceSelectRaidTab"}) do
 		local tab = _G[tabName]
 		local text = tab:GetFontString()
 
@@ -76,9 +72,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		F.Reskin(tab)
 	end
 
-	if C.toc == 60200 then
-		EncounterJournalInstanceSelectSuggestTab:SetBackdropColor(r, g, b, .2)
-	end
+	EncounterJournalInstanceSelectSuggestTab:SetBackdropColor(r, g, b, .2)
 
 	-- [[ Side tabs ]]
 
@@ -110,9 +104,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 
 	-- [[ Instance select ]]
 
-	if C.toc == 60200 then
-		F.ReskinDropDown(EncounterJournalInstanceSelectTierDropDown)
-	end
+	F.ReskinDropDown(EncounterJournalInstanceSelectTierDropDown)
 
 	local index = 1
 
@@ -202,7 +194,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 				header.button.expandedIcon:SetTextColor(1, 1, 1)
 				header.button.expandedIcon.SetTextColor = F.dummy
 
-				F.Reskin(header.button, true)
+				F.Reskin(header.button)
 
 				header.button.abilityIcon:SetTexCoord(.08, .92, .08, .92)
 				header.button.bg = F.CreateBG(header.button.abilityIcon)
@@ -237,7 +229,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 			header.button.expandedIcon:SetTextColor(1, 1, 1)
 			header.button.expandedIcon.SetTextColor = F.dummy
 
-			F.Reskin(header.button, true)
+			F.Reskin(header.button)
 
 			header.styled = true
 		end
@@ -409,98 +401,112 @@ C.themes["Blizzard_EncounterJournal"] = function()
 
 	-- [[ Suggest frame ]]
 
-	if C.toc == 60200 then
-		local suggestFrame = EncounterJournal.suggestFrame
+	local suggestFrame = EncounterJournal.suggestFrame
 
-		-- Tooltip
+	-- Tooltip
 
-		local EncounterJournalTooltip = EncounterJournalTooltip
+	local EncounterJournalTooltip = EncounterJournalTooltip
 
-		F.CreateBD(EncounterJournalTooltip)
+	F.CreateBD(EncounterJournalTooltip)
 
-		EncounterJournalTooltip.Item1.newBg = F.ReskinIcon(EncounterJournalTooltip.Item1.icon)
-		EncounterJournalTooltip.Item2.newBg = F.ReskinIcon(EncounterJournalTooltip.Item2.icon)
+	EncounterJournalTooltip.Item1.newBg = F.ReskinIcon(EncounterJournalTooltip.Item1.icon)
+	EncounterJournalTooltip.Item2.newBg = F.ReskinIcon(EncounterJournalTooltip.Item2.icon)
 
-		local function rewardOnEnter()
-			for i = 1, 2 do
-				local item = EncounterJournalTooltip["Item"..i]
-				if item:IsShown() then
-					if item.IconBorder:IsShown() then
-						item.newBg:SetVertexColor(item.IconBorder:GetVertexColor())
-						item.IconBorder:Hide()
-					else
-						item.newBg:SetVertexColor(0, 0, 0)
-					end
+	local function rewardOnEnter()
+		for i = 1, 2 do
+			local item = EncounterJournalTooltip["Item"..i]
+			if item:IsShown() then
+				if item.IconBorder:IsShown() then
+					item.newBg:SetVertexColor(item.IconBorder:GetVertexColor())
+					item.IconBorder:Hide()
+				else
+					item.newBg:SetVertexColor(0, 0, 0)
 				end
 			end
 		end
+	end
 
-		-- Suggestion 1
+	-- Suggestion 1
 
-		local suggestion = suggestFrame.Suggestion1
+	local suggestion = suggestFrame.Suggestion1
+
+	suggestion.bg:Hide()
+
+	F.CreateBD(suggestion, .25)
+
+	suggestion.icon:SetPoint("TOPLEFT", 135, -15)
+	F.CreateBG(suggestion.icon)
+
+	local centerDisplay = suggestion.centerDisplay
+
+	centerDisplay.title.text:SetTextColor(1, 1, 1)
+	centerDisplay.description.text:SetTextColor(.9, .9, .9)
+
+	F.Reskin(suggestion.button)
+
+	local reward = suggestion.reward
+
+	reward:HookScript("OnEnter", rewardOnEnter)
+	reward.text:SetTextColor(.9, .9, .9)
+	reward.iconRing:Hide()
+	reward.iconRingHighlight:SetTexture("")
+	F.CreateBG(reward.icon)
+
+	F.ReskinArrow(suggestion.prevButton, "left")
+	F.ReskinArrow(suggestion.nextButton, "right")
+
+	-- Suggestion 2 and 3
+
+	for i = 2, 3 do
+		local suggestion = suggestFrame["Suggestion"..i]
 
 		suggestion.bg:Hide()
 
 		F.CreateBD(suggestion, .25)
 
-		suggestion.icon:SetPoint("TOPLEFT", 135, -15)
+		suggestion.icon:SetPoint("TOPLEFT", 10, -10)
 		F.CreateBG(suggestion.icon)
 
 		local centerDisplay = suggestion.centerDisplay
 
+		centerDisplay:ClearAllPoints()
+		centerDisplay:SetPoint("TOPLEFT", 85, -10)
 		centerDisplay.title.text:SetTextColor(1, 1, 1)
 		centerDisplay.description.text:SetTextColor(.9, .9, .9)
 
-		F.Reskin(suggestion.button)
+		F.Reskin(centerDisplay.button)
 
 		local reward = suggestion.reward
 
 		reward:HookScript("OnEnter", rewardOnEnter)
-		reward.text:SetTextColor(.9, .9, .9)
 		reward.iconRing:Hide()
 		reward.iconRingHighlight:SetTexture("")
 		F.CreateBG(reward.icon)
+	end
 
-		F.ReskinArrow(suggestion.prevButton, "left")
-		F.ReskinArrow(suggestion.nextButton, "right")
+	-- Hook functions
 
-		-- Suggestion 2 and 3
+	hooksecurefunc("EJSuggestFrame_RefreshDisplay", function()
+		local self = suggestFrame
 
-		for i = 2, 3 do
-			local suggestion = suggestFrame["Suggestion"..i]
+		if #self.suggestions > 0 then
+			local suggestion = self.Suggestion1
+			local data = self.suggestions[1]
 
-			suggestion.bg:Hide()
+			suggestion.iconRing:Hide()
 
-			F.CreateBD(suggestion, .25)
-
-			suggestion.icon:SetPoint("TOPLEFT", 10, -10)
-			F.CreateBG(suggestion.icon)
-
-			local centerDisplay = suggestion.centerDisplay
-
-			centerDisplay:ClearAllPoints()
-			centerDisplay:SetPoint("TOPLEFT", 85, -10)
-			centerDisplay.title.text:SetTextColor(1, 1, 1)
-			centerDisplay.description.text:SetTextColor(.9, .9, .9)
-
-			F.Reskin(centerDisplay.button)
-
-			local reward = suggestion.reward
-
-			reward:HookScript("OnEnter", rewardOnEnter)
-			reward.iconRing:Hide()
-			reward.iconRingHighlight:SetTexture("")
-			F.CreateBG(reward.icon)
+			if data.iconPath then
+				suggestion.icon:SetMask(nil)
+				suggestion.icon:SetTexCoord(.08, .92, .08, .92)
+			end
 		end
 
-		-- Hook functions
+		if #self.suggestions > 1 then
+			for i = 2, #self.suggestions do
+				local suggestion = self["Suggestion"..i]
+				if not suggestion then break end
 
-		hooksecurefunc("EJSuggestFrame_RefreshDisplay", function()
-			local self = suggestFrame
-
-			if #self.suggestions > 0 then
-				local suggestion = self.Suggestion1
-				local data = self.suggestions[1]
+				local data = self.suggestions[i]
 
 				suggestion.iconRing:Hide()
 
@@ -509,29 +515,13 @@ C.themes["Blizzard_EncounterJournal"] = function()
 					suggestion.icon:SetTexCoord(.08, .92, .08, .92)
 				end
 			end
+		end
+	end)
 
-			if #self.suggestions > 1 then
-				for i = 2, #self.suggestions do
-					local suggestion = self["Suggestion"..i]
-					if not suggestion then break end
-
-					local data = self.suggestions[i]
-
-					suggestion.iconRing:Hide()
-
-					if data.iconPath then
-						suggestion.icon:SetMask(nil)
-						suggestion.icon:SetTexCoord(.08, .92, .08, .92)
-					end
-				end
-			end
-		end)
-
-		hooksecurefunc("EJSuggestFrame_UpdateRewards", function(suggestion)
-			if suggestion.reward.data then
-				suggestion.reward.icon:SetMask(nil)
-				suggestion.reward.icon:SetTexCoord(.08, .92, .08, .92)
-			end
-		end)
-	end
+	hooksecurefunc("EJSuggestFrame_UpdateRewards", function(suggestion)
+		if suggestion.reward.data then
+			suggestion.reward.icon:SetMask(nil)
+			suggestion.reward.icon:SetTexCoord(.08, .92, .08, .92)
+		end
+	end)
 end

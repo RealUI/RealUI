@@ -1,8 +1,8 @@
-## Interface: 60100
-## Version: 12.563
+## Interface: 60200
+## Version: 12.831
 ## Title: BadBoy
 ## Notes: A simple spam blocker & reporter.
-## Notes-deDE: A simple spam blocker & reporter.
+## Notes-deDE: Ein einfacher Spam-Blocker & Melder.
 ## Notes-ruRU: Простой блокировщик и осведомитель игровых мастеров о спаме.
 ## Notes-zhCN: 一个简单的垃圾信息过滤和自动举报的插件
 ## Notes-zhTW: 一個簡單的垃圾廣告訊息阻擋&舉報工具
@@ -13,11 +13,11 @@
 ## Notes-ptBR: A simple spam blocker & reporter.
 ## Notes-itIT: Un semplice blocco spam che segnala le spam alla Blizzard.
 ## Author: Funkydude
-## SavedVariables: BADBOY_POPUP, BADBOY_NOREPORT, BADBOY_BLACKLIST
+## SavedVariables: BADBOY_POPUP, BADBOY_NOLINK, BADBOY_BLACKLIST
 ## X-Credits: Shadowed(API hunting), Ellipsis(remembering odd things), Anea(original SpamSentry blacklist in BadBoy v1), WoW Community(for reporting spam)
 ## X-Category: Chat/Communication
 ## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: v12.563
+## X-Curse-Packaged-Version: v12.831
 ## X-Curse-Project-Name: BadBoy: Spam Blocker & Reporter
 ## X-Curse-Project-ID: bad-boy
 ## X-Curse-Repository-ID: wow/bad-boy/mainline

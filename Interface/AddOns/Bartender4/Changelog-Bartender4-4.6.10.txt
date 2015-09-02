@@ -1,0 +1,14 @@
+tag 4.6.10
+3d232bad487dab4101763a637b6f5f9be170daa6
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-06-29 21:55:56 +0200
+
+Tag as 4.6.10
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Add hard-coded spell overrides for wild charge bear and cat variants
+	These are otherwise only visible when being in that form, and may not register properly.
+	- Re-Add UpdateAlpha hooks

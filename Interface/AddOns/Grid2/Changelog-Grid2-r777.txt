@@ -1,0 +1,29 @@
+------------------------------------------------------------------------
+r777 | michaelspain | 2015-06-24 15:48:49 +0000 (Wed, 24 Jun 2015) | 3 lines
+Changed paths:
+   M /trunk/AoeHeals/Grid2AoeHeals.toc
+   M /trunk/Grid2.toc
+   M /trunk/GridDefaults.lua
+   M /trunk/LDB/Grid2LDB.toc
+   M /trunk/Options/Grid2Options.toc
+   M /trunk/Options/modules/indicators/NewIndicator.lua
+   M /trunk/RaidDebuffs/Grid2RaidDebuffs.toc
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+   M /trunk/modules/StatusBanzai.lua
+   M /trunk/modules/StatusTarget.lua
+
+TOC Update
+Target status fix to ensure only one target is enabled.
+Banzai status fix.
+------------------------------------------------------------------------
+r776 | michaelspain | 2015-03-23 23:30:41 +0000 (Mon, 23 Mar 2015) | 2 lines
+Changed paths:
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/general/GridLayoutsEditor.lua
+   M /trunk/Options/modules/indicators/IndicatorMultiBar.lua
+   M /trunk/modules/IndicatorMultiBar.lua
+   M /trunk/modules/StatusShields.lua
+
+Multibar Indicator: Added a "Reverse" option for the MainBar.
+Added a confirm dialog to the Layouts Editor delete button.
+------------------------------------------------------------------------
