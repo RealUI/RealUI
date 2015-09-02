@@ -95,11 +95,11 @@ function CastBars:ClearTicks()
     end
 end
 
-function CastBars:SetBarTicks(ticks)
-    CastBars:debug("SetBarTicks", ticks)
-    if not ticks then return end
-    for i = 1, ticks do
-        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / ticks))), 0)
+function CastBars:SetBarTicks(numTicks)
+    CastBars:debug("SetBarTicks", numTicks)
+    if not numTicks then return end
+    for i = 1, numTicks do
+        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
         self.tick[i]:Show()
     end
 end
