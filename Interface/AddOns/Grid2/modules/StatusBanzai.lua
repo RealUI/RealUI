@@ -141,14 +141,16 @@ function Banzai:Update()
 	for g,func in next, bsrc do	-- Search new banzais
 		local unit = tguids[g]
 		if unit then
-			local ico,_,et = select(4, func(sguids[g]) )
-			et         = et and et/1000 or ct+0.25 
-			bgid[g]    = unit
-			buni[unit] = g
-			bdur[unit] = et - ct
-			bexp[unit] = et
-			bico[unit] = ico or "Interface\\ICONS\\Ability_Creature_Cursed_02"
-			self:UpdateIndicators(unit)
+			local name, _,_, ico,_,et = func(sguids[g])
+			if name then
+				et         = et and et/1000 or ct+0.25 
+				bgid[g]    = unit
+				buni[unit] = g
+				bdur[unit] = et - ct
+				bexp[unit] = et
+				bico[unit] = ico or "Interface\\ICONS\\Ability_Creature_Cursed_02"
+				self:UpdateIndicators(unit)
+			end	
 		end
 	end	
 	wipe(bsrc)

@@ -697,11 +697,13 @@ local function SetAuraTimeLeft(b) if b[5] > 0 then b[2] = b[10] - GetTime() if b
 
 -- Check if a GUID belongs to a boss per LibBossIDs
 function MOD.CheckLibBossIDs(guid)
-	local _, id
-	_, _, _, _, _, id = string.match(guid, "(%a+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)")
-	if id then
-		id = tonumber(id)
-		if id and MOD.LibBossIDs.BossIDs[id] then return true end
+	if type(guid) == "string" then
+		local _, id
+		_, _, _, _, _, id = string.match(guid, "(%a+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)%-(%d+)")
+		if id then
+			id = tonumber(id)
+			if id and MOD.LibBossIDs.BossIDs[id] then return true end
+		end
 	end
 	return false
 end

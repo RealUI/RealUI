@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 11
+local MAJOR, MINOR = 'KuiSpellList-1.0', 15
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
 local _
 
@@ -59,11 +59,10 @@ local auras = {
     HUNTER = {
         HELPFUL = {
             [34477] = true, -- misdirection
-            [172106] = true, -- aspect of the fox
             [13159] = true, -- aspect of the pack
         },
         HARMFUL = {
-            [1130] = true, -- hunter's mark
+            [1130] = true, -- hunter's arrow
             [3674] = true, -- black arrow
             [53301] = true, -- explosive shot
             [118253] = true, -- serpent sting
@@ -135,7 +134,8 @@ local auras = {
             [43265] = true, -- death and decay
             [55095] = true, -- frost fever
             [55078] = true, -- blood plague
-            [114866] = true, -- soul reaper
+            [114866] = true, -- soul reaper (blood)
+            [130735] = true, -- soul reaper (frost)
             [155159] = true, -- necrotic plague
         },
         CONTROL = {
@@ -232,6 +232,7 @@ local auras = {
             [348] = true,    -- immolate
             [108686] = true, -- immolate (aoe)
             [157736] = true, -- immolate (green?)
+            [27243] = true,  -- immolate (green?)
             [27243] = true,  -- seed of corruption
             [114790] = true, -- seed of corruption (soulburn)
             [30108] = true,  -- unstable affliction
@@ -462,4 +463,3 @@ KuiSpellList.GetImportantSpells = function(class)
 
     return list
 end
-

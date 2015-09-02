@@ -209,6 +209,9 @@ local prevLineId, result, triggers = 0, nil, {
 	--Lithuanian
 	"gu?ildija.*iesko", --Gildija * ruosiasi WoD'ui ir ta proga iesko daugiau zmoniu mythic raidinimui. Del daugiau info pm *, *, *, *.
 	"gu?ildija.*aktyviu", --*-Nauja Lietuviu guildija ieskanti aktyviu nariu! Naujame expansione planuojame surinkti groupa ir valyti raidus draugiskoje aplinkoje. Priimam visus be issimciu!
+
+	--Bulgarian
+	"набира.*членове.*нуждаем", --* набира нови членове от всички класове и специализации за прогрес на BRF Mythic,най-вече се нуждаем от Танк (Warrior, Paladin, Monk).
 }
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,_,_,_,_,chanId,_,_,_,lineId)

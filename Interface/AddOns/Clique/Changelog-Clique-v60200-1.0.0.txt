@@ -1,0 +1,12 @@
+tag v60200-1.0.0
+9cc1c16d36d8ec34602bac4ee78cf1247944eecf
+Jim Whitehead <jnwhiteh@gmail.com>
+2015-06-27 10:41:28 +0200
+
+Tagged v60200-1.0.0
+
+
+--------------------
+
+Jim Whitehead:
+	- Update TOC for 6.2.0

@@ -33,8 +33,13 @@ local function OnHealthValueChanged(oldHealth,current)
     end
 end
 
-function mod:PostCreate(msg, frame)
+function mod:PostCreate(msg,frame)
     frame.oldHealth:HookScript('OnValueChanged',OnHealthValueChanged)
+end
+
+function mod:PostShow(msg,frame)
+    -- call our hook onshow, too
+    OnHealthValueChanged(frame.oldHealth,frame.oldHealth:GetValue())
 end
 
 mod.configChangedFuncs = { runOnce = {} }
@@ -102,8 +107,10 @@ end
 
 function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_PostCreate', 'PostCreate')
+    self:RegisterMessage('KuiNameplates_PostShow', 'PostShow')
 end
 function mod:OnDisable()
     self:UnregisterMessage('KuiNameplates_PostCreate', 'PostCreate')
+    self:UnregisterMessage('KuiNameplates_PostShow', 'PostShow')
 end
 

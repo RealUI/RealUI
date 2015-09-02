@@ -364,6 +364,7 @@ function Grid2Options:MakeLayoutsEditorOptions()
 				options.selectLayout.values = GetAvailableLayouts()
 			end,
 			hidden= function() return not GetCustomLayout(layoutName) end,
+			confirm = function() return L["Are you sure?"] end,
 		},
 		refresh = {
 			type = "execute",
