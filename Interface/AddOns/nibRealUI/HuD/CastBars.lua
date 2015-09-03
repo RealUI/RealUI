@@ -387,7 +387,7 @@ function CastBars:CreateCastBars(self, unit)
     local size, color = db.size[layoutSize], db.colors[unit]
     local width, height = size[unit] and size[unit].width or size.width, size[unit] and size[unit].height or size.height
     if not unitDB.debug then info.debug = nil end
-    local Castbar = self:CreateAngleFrame("Status", width, height, self.overlay, info)
+    local Castbar = self:CreateAngleFrame("Status", width, height, self, info)
     Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
     if db.reverse[unit] then
         Castbar:SetReverseFill(true)
