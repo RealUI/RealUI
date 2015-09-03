@@ -7,6 +7,7 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
+local round = nibRealUI.Round
 UnitFrames.textures = {
     [1] = {
         F1 = { -- Player / Target Frames
@@ -212,6 +213,23 @@ nibRealUI.ReversePowers = {
     ["POWER_TYPE_SUN_POWER"] = true,
 }
 
+function UnitFrames:PositionSteps(vert)
+    UnitFrames:debug("PositionSteps")
+    local width, height = self:GetSize()
+    local point, relPoint = vert.."RIGHT", vert.."LEFT"
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    for i = 1, 2 do
+        local xOfs = round(stepPoints[i] * (width - 10))
+        if self:GetReversePercent() then
+            xOfs = xOfs + height
+            self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
+            self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
+        else
+            self.step[i]:SetPoint(point, self, -xOfs, 0)
+            self.warn[i]:SetPoint(point, self, -xOfs, 0)
+        end
+    end
+end
 function UnitFrames:UpdateSteps(unit, min, max)
     --min = max * .25
     --self:SetValue(min)
@@ -310,17 +328,20 @@ local function updateSteps(unit, type, percent, frame)
 end
 
 function UnitFrames:HealthOverride(event, unit)
-    --print("Health Override", self, event, unit)
-    if event == "ClassColorBars" or event == "UpdateUnitFramesHealthColor" then
+    UnitFrames:debug("Health Override", self, event, unit)
+    local health = self.Health
+    if event == "ClassColorBars" then
         UnitFrames:SetHealthColor(self)
+    elseif event == "ReverseBars" then
+        AngleStatusBar:SetReverseFill(health.bar, ndb.settings.reverseUnitFrameBars)
     end
     local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
-    updateSteps(unit, "health", healthPer, self.Health)
-    if self.Health.SetValue then
-        self.Health:SetMinMaxValues(0, healthMax)
-        self.Health:SetValue(healthCurr)
+    updateSteps(unit, "health", healthPer, health)
+    if health.SetValue then
+        health:SetMinMaxValues(0, healthMax)
+        health:SetValue(healthCurr)
     else
-        AngleStatusBar:SetValue(self.Health.bar, healthPer)
+        AngleStatusBar:SetValue(health.bar, healthPer)
     end
 end
 
@@ -446,7 +467,7 @@ end
 
 
 function UnitFrames:PowerOverride(event, unit, powerType)
-    -- print("Power Override", self, event, unit, powerType)
+    UnitFrames:debug("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
 
     local powerPer, powerCurr, powerMax = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
@@ -460,7 +481,7 @@ function UnitFrames:PowerOverride(event, unit, powerType)
 end
 
 function UnitFrames:PvPOverride(event, unit)
-    --print("PvP Override", self, event, unit, IsPVPTimerRunning())
+    UnitFrames:debug("PvP Override", self, event, unit, IsPVPTimerRunning())
     local color = nibRealUI.media.background
     local setColor = (self.PvP.row or self.PvP.col) and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
     if UnitIsPVP(unit) then
@@ -479,13 +500,13 @@ function UnitFrames:PvPOverride(event, unit)
 end
 
 function UnitFrames:UpdateClassification(event)
-    --print("Classification", self.unit, event, UnitClassification(self.unit))
+    UnitFrames:debug("Classification", self.unit, event, UnitClassification(self.unit))
     local color = db.overlay.colors.status[UnitClassification(self.unit)] or nibRealUI.media.background
     self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
 end
 
 function UnitFrames:UpdateStatus(event, ...)
-    --print("UpdateStatus", self, event, ...)
+    UnitFrames:debug("UpdateStatus", self, event, ...)
     local unit = self.unit
     local color = nibRealUI.media.background
     if UnitIsAFK(unit) then
@@ -540,7 +561,7 @@ function UnitFrames:UpdateStatus(event, ...)
 end
 
 function UnitFrames:UpdateEndBox(...)
-    --print("UpdateEndBox", self and self.unit, ...)
+    UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit, nil
     local _, class = UnitClass(unit)
     if UnitIsPlayer(unit) then
