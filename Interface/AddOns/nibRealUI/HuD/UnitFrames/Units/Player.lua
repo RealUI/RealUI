@@ -115,7 +115,11 @@ local function CreatePowerBar(parent)
     local _, powerType = UnitPowerType(parent.unit)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
     power:SetReverseFill(true)
-    power:SetReversePercent((not ndb.settings.reverseUnitFrameBars) and (not nibRealUI.ReversePowers[powerType]))
+    if ndb.settings.reverseUnitFrameBars then
+        power:SetReversePercent(nibRealUI.ReversePowers[powerType])
+    else
+        power:SetReversePercent(not nibRealUI.ReversePowers[powerType])
+    end
 
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
