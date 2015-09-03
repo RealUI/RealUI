@@ -482,20 +482,20 @@ end
 
 function UnitFrames:PvPOverride(event, unit)
     UnitFrames:debug("PvP Override", self, event, unit, IsPVPTimerRunning())
-    local color = nibRealUI.media.background
-    local setColor = (self.PvP.row or self.PvP.col) and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
+    local pvp, color = self.PvP, nibRealUI.media.background
+    local setColor = (pvp.row or pvp.col) and pvp.SetBackgroundColor or pvp.SetVertexColor
     if UnitIsPVP(unit) then
         if UnitIsFriend("player", unit) then
             --print("Friend")
             color = db.overlay.colors.status.pvpFriendly
-            setColor(self.PvP, color[1], color[2], color[3], color[4])
+            setColor(pvp, color[1], color[2], color[3], color[4])
         else
             --print("Enemy")
             color = db.overlay.colors.status.pvpEnemy
-            setColor(self.PvP, color[1], color[2], color[3], color[4])
+            setColor(pvp, color[1], color[2], color[3], color[4])
         end
     else
-        setColor(self.PvP, color[1], color[2], color[3], color[4])
+        setColor(pvp, color[1], color[2], color[3], color[4])
     end
 end
 
@@ -678,6 +678,21 @@ local function Shared(self, unit)
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
+    --[[ Idea:
+        local info = info[unit]
+        CreateHealthBar(self, info.health)
+        CreatePvPStatus(self, info.health)
+        if info.predict then
+            CreatePredictBar(self, info.health)
+        end
+        if info.power then
+            CreatePowerBar(self, info.power)
+        end
+        CreatePowerStatus(self, info.power or info.health)
+        CreateEndBox(self, info.health)
+    ]]
+
+    -- This would be all unit specific stuff, eg. Totems, stats, threat
     UnitFrames[unit](self)
 
     if nibRealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then

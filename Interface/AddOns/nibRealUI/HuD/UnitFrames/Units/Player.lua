@@ -69,9 +69,7 @@ local function CreateHealthBar(parent)
 
     health.PositionSteps = UnitFrames.PositionSteps
     health.PostUpdate = UnitFrames.UpdateSteps
-    --health.Override = UnitFrames.HealthOverride
     parent.Health = health
-    UnitFrames:SetHealthColor(parent)
 end
 
 local function CreatePredictBar(parent)
@@ -142,7 +140,6 @@ local function CreatePowerBar(parent)
 
     power.PositionSteps = UnitFrames.PositionSteps
     power.PostUpdate = UnitFrames.UpdateSteps
-    --power.Override = UnitFrames.PowerOverride
     parent.Power = power
 
     --[[ Druid Mana ]]--
