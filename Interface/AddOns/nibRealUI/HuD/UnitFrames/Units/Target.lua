@@ -419,8 +419,12 @@ UnitFrames["target"] = function(self)
         AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
 
         -- Reverse power
-        local oldReverse = self.Power.bar.reverse
-        local newReverse = nibRealUI.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars)
+        local oldReverse, newReverse = self.Power.bar.reverse
+        if ndb.settings.reverseUnitFrameBars then
+            newReverse = not nibRealUI.ReversePowers[powerType]
+        else
+            newReverse = nibRealUI.ReversePowers[powerType]
+        end
         AngleStatusBar:SetReverseFill(self.Power.bar, newReverse)
 
         -- If reverse is different from old target to new target then do an instant SetValue on power bar
