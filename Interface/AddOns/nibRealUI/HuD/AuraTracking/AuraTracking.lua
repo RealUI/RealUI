@@ -134,9 +134,7 @@ end
 
 function AuraTracking:SetupSpellData()
     if not trackingData then return end
-    for i = 1, #trackingData do
-        local spellData = trackingData[i]
-
+    for id, spellData in next, trackingData do
         if not spellData.unit then
             if spellData.auraType == "debuff" then
                 spellData.unit = "target"
@@ -164,7 +162,7 @@ function AuraTracking:SetupSpellData()
             spellData.useSpec = false
         end
 
-        UpdateSpellStatus(spellData, i)
+        UpdateSpellStatus(spellData, id)
     end
 end
 

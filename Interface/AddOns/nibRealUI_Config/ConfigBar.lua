@@ -1453,8 +1453,6 @@ local auratracker do
                         debug("Remove", info[#info], info[#info-1], ...)
                         debug("Removed ID", id, trackingData[id].spell)
                         tremove(trackingData, id)
-                        CloseHuDWindow()
-                        nibRealUI:ReloadUIDialog()
                     end,
                     order = -1,
                 },
@@ -1682,9 +1680,9 @@ local auratracker do
             }
         }
     }
-    for id = 1, #trackingData do
+    for id, spellData in next, trackingData do
         local tracker = createTraker(id)
-        auratracker.args.options.args["spell"..id] = tracker
+        auratracker.args.options.args[id] = tracker
     end
 end
 local classresource do
