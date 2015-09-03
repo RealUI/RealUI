@@ -331,6 +331,7 @@ local unitframes do
                         get = function() return db.overlay.classColor end,
                         set = function(info, value)
                             db.overlay.classColor = value
+                            UnitFrames:RefreshUnits("ClassColorBars")
                         end,
                         order = 10,
                     },
