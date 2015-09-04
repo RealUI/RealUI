@@ -771,11 +771,11 @@ AuraTracking.Defaults = {
     ["WARRIOR"] = {
         ["**"] = defaultTracker,
         -- Static Buffs
-            ["1-be149d0a"] = {   -- Enrage (Arms, Fury)
+            ["1-be149d0a"] = {   -- Enrage (Fury)
                 spell = 12880,
                 minLevel = 14,
                 order = 1,
-                specs = {true, true, false},
+                specs = {false, true, false},
             },
             ["1-88616b14"] = {   -- Raging Blow! (Fury)
                 spell = 131116,
@@ -783,25 +783,51 @@ AuraTracking.Defaults = {
                 order = 2,
                 specs = {false, true, false},
             },
+            ["1-8d6897d2"] = {   -- Shield Block, Shield Charge (Prot)
+                spell = {132404, 169667},
+                minLevel = 18,
+                order = 1,
+                specs = {false, false, true},
+            },
         -- Static Debuffs
+            ["1-9256f2b1"] = {   -- Rend (Arms)
+                spell = 772,
+                minLevel = 10,
+                order = 1,
+                specs = {true, false, false},
+            },
         -- Free Buffs
-            ["1-a216ed2a"] = {spell = 169686},   -- Unyielding Strikes
+            ["1-9d8e1b35"] = {   -- Bloodsurge (Fury)
+                spell = 46916,
+                specs = {false, true, false},
+            },
+            ["1-bf917422"] = {   -- Enrage (Prot)
+                spell = 12880,
+                specs = {false, false, true},
+            },
+            ["1-8ede1252"] = {   -- Ultimatum (Prot)
+                spell = 122510,
+                specs = {false, false, true},
+            },
+            ["1-bb0caec6"] = {   -- Sword and Board (Prot)
+                spell = 50227,
+                specs = {false, false, true},
+            },
             ["1-9ca47424"] = {spell = 118038},   -- Die by the Sword
-            ["1-849c1974"] = {spell = 55694},    -- Enraged Regeneration
-            ["1-8d6897d2"] = {spell = 97463},    -- Rallying Cry
             ["1-ae88cb34"] = {spell = 12975},    -- Last Stand
-            ["1-9d8e1b35"] = {spell = 114029},   -- Safeguard
             ["1-bc105857"] = {spell = 871},      -- Shield Wall
-            ["1-9b003d2d"] = {spell = 114030},   -- Vigilance
             ["1-bb6869cd"] = {spell = 18499},    -- Berserker Rage
             ["1-95b80fdf"] = {spell = 1719},     -- Recklessness
             ["1-af01758e"] = {spell = 23920},    -- Spell Reflection
-            ["1-89e46112"] = {spell = 114028},   -- Mass Spell Reflection
-            ["1-b8a217f8"] = {spell = 46924},    -- Bladestorm
-            ["1-bb0caec6"] = {spell = 3411},     -- Intervene
-            ["1-bc751f32"] = {spell = 107574},   -- Avatar
-            ["1-a26f3820"] = {spell = 12292},    -- Bloodbath
-            ["1-8c2242a0"] = {spell = 12950},    -- Meat Cleaver
+            ["1-8c2242a0"] = {spell = 85739},    -- Meat Cleaver
+            
+            ["1-849c1974"] = {spell = 55694},    -- Enraged Regeneration (Talent)
+            ["1-9b003d2d"] = {spell = 52437},    -- Sudden Death (Talent)
+            ["1-a216ed2a"] = {spell = 169686},   -- Unyielding Strikes (Talent)
+            ["1-89e46112"] = {spell = 114028},   -- Mass Spell Reflection (Talent)
+            ["1-bc751f32"] = {spell = 107574},   -- Avatar (Talent)
+            ["1-a26f3820"] = {spell = 12292},    -- Bloodbath (Talent)
+            ["1-b8a217f8"] = {spell = 46924},    -- Bladestorm (Talent)
         -- Free Debuffs
             ["1-bbd999f7"] = {spell = 86346, auraType = "debuff"},   -- Colossus Smash
             ["1-96c7609f"] = {spell = 1160, auraType = "debuff"},    -- Demoralizing Shout
