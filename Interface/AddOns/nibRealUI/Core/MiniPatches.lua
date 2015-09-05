@@ -136,8 +136,8 @@ RealUI.minipatches = {
         local nibRealUIDB = _G.nibRealUIDB
         if nibRealUIDB["namespaces"]["AuraTracking"]["profiles"] then
             local profile = nibRealUIDB["namespaces"]["AuraTracking"]["profiles"]["RealUI"]
-            if profile then
-                local DK = profile["tracking"]["DEATHKNIGHT"]
+            local DK = profile and profile["tracking"]["DEATHKNIGHT"]
+            if DK then
                 for i = #DK, 1, -1 do
                     local tracker = DK[i]
                     if not tracker.spell and tracker.unit == "target" then
