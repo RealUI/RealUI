@@ -54,19 +54,21 @@ function Chat_Tabs:UpdateTabs(SimpleUpdate)
 	local chat, tab, flash
 	local maxTabs = ChatFrame11Tab and 11 or NUM_CHAT_WINDOWS
 	for i = 1, maxTabs do
-		chat = _G["ChatFrame"..i]
-		tab = _G["ChatFrame"..i.."Tab"]
-		flash = _G["ChatFrame"..i.."TabFlash"]
+		local chatName = "ChatFrame"..i
+		chat = _G[chatName]
+		tab = _G[chatName.."Tab"]
+		flash = _G[chatName.."TabFlash"]
+		if not (chat and tab and flash) then return end
 
 		if not SimpleUpdate then
 			-- Hide regular Chat Tab textures
-			_G["ChatFrame"..i.."TabLeft"]:Hide()
-			_G["ChatFrame"..i.."TabMiddle"]:Hide()
-			_G["ChatFrame"..i.."TabRight"]:Hide()
-			_G["ChatFrame"..i.."TabHighlightLeft"]:Hide()
-			_G["ChatFrame"..i.."TabHighlightMiddle"]:Hide()
-			_G["ChatFrame"..i.."TabHighlightRight"]:Hide()
-			tab.text = _G["ChatFrame"..i.."TabText"]
+			_G[chatName.."TabLeft"]:Hide()
+			_G[chatName.."TabMiddle"]:Hide()
+			_G[chatName.."TabRight"]:Hide()
+			_G[chatName.."TabHighlightLeft"]:Hide()
+			_G[chatName.."TabHighlightMiddle"]:Hide()
+			_G[chatName.."TabHighlightRight"]:Hide()
+			tab.text = _G[chatName.."TabText"]
 
 			-- Hook Tab
 			tab:SetScript("OnEnter", ChatTab_OnEnter)
@@ -74,9 +76,9 @@ function Chat_Tabs:UpdateTabs(SimpleUpdate)
 		end
 
 		-- Update Selected
-		_G["ChatFrame"..i.."TabSelectedLeft"]:Hide()
-		_G["ChatFrame"..i.."TabSelectedMiddle"]:Hide()
-		_G["ChatFrame"..i.."TabSelectedRight"]:Hide()
+		_G[chatName.."TabSelectedLeft"]:Hide()
+		_G[chatName.."TabSelectedMiddle"]:Hide()
+		_G[chatName.."TabSelectedRight"]:Hide()
 
 		-- Update Tab Appearance
 		if chat == SELECTED_CHAT_FRAME then

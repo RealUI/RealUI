@@ -321,7 +321,7 @@ function nibRealUI:SetLayout()
     -- Grid Layout changer
     if self:GetModuleEnabled("GridLayout") then
         local GL = self:GetModule("GridLayout", true)
-        if GL then GL:Update() end
+        if GL then GL:SettingsUpdate("nibRealUI:SetLayout") end
     end
 
     -- Layout Button (For Installation)
