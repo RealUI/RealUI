@@ -7,10 +7,12 @@ local Positioners = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 local PF = {}
 
 local function GetHuDSizeOffset(key)
+	Positioners:debug("GetHuDSizeOffset", key)
 	return nibRealUI.hudSizeOffsets[ndb.settings.hudSize][key] or 0
 end
 
 local function GetPositionData(pT)
+	Positioners:debug("GetPositionData", pT)
 	local point, parent, rPoint, x, y, width, height, xKeyTable, yKeyTable, widthKeyTable, heightKeyTable =
 			pT[1], pT[2], pT[3], pT[4], pT[5], pT[6], pT[7], pT[8], pT[9], pT[10], pT[11]
 
@@ -45,12 +47,13 @@ local function GetPositionData(pT)
 end
 
 function nibRealUI:UpdatePositioners()
-	self.Debug("UpdatePositioners")
+	Positioners:debug("UpdatePositioners")
 	local positioners = {}
 	for k, v in pairs(db.positioners) do
 		positioners[k] = v
 	end
 	for k, v in pairs(positioners) do
+		Positioners:debug("iter positioners", k, v)
 		local point, parent, rPoint, x, y, width, height = GetPositionData(v)
 		PF[k]:ClearAllPoints()
 		PF[k]:SetPoint(point, parent, rPoint, x, y)
@@ -59,6 +62,7 @@ function nibRealUI:UpdatePositioners()
 end
 
 local function CreatePositionerFrame(point, parent, rpoint, x, y, w, h, name)
+	Positioners:debug("CreatePositionerFrame", name)
 	local frame = CreateFrame("Frame", name, _G[parent])
 	frame:SetPoint(point, _G[parent], rpoint, x, y)
 	frame:SetHeight(h)
@@ -72,6 +76,7 @@ local function CreatePositionerFrame(point, parent, rpoint, x, y, w, h, name)
 end
 
 local function CreatePositioners()
+	Positioners:debug("CreatePositioners")
 	local positioners = {}
 	for k, v in pairs(db.positioners) do
 		positioners[k] = v

@@ -36,7 +36,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
         return
     end
     NeedUpdate = false
-    
+
     local NewLayout, isHoriz, layoutSize
     local Grid2DB = Grid2Layout.db.profile
     self:debug("groupType:", groupType, Grid2Layout)
@@ -103,7 +103,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
     
     -- Change Grid Layout
     self:debug("Check horizontal:", isHoriz, Grid2DB.horizontal)
-    if (isHoriz ~= Grid2DB.horizontal) then
+    if isHoriz ~= nil and (isHoriz ~= Grid2DB.horizontal) then
         Grid2DB.horizontal = isHoriz
     end
     self:debug("Check layout:", NewLayout, Grid2DB.layouts[groupType])
@@ -123,28 +123,9 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
     --Grid2Layout:ReloadLayout(true)
 end
 
-function GridLayout:SettingsUpdate()
-    self:Update("SettingsUpdate", groupType, instType, instMaxPlayers)
+function GridLayout:SettingsUpdate(event)
+    self:Update(event or "SettingsUpdate", groupType, instType, instMaxPlayers)
     Grid2Layout:ReloadLayout(true)
-end
-
-function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
-    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
-    if key3 then
-        db[key1][key2][key3] = value
-    else
-        db[key1][key2] = value
-    end
-    GridLayout:Update()
-end
-
-function nibRealUI:GetGridLayoutSettings(key1, key2, key3)
-    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
-    if key3 then
-        return db[key1][key2][key3]
-    else
-        return db[key1][key2]
-    end
 end
 
 function GridLayout:Grid2ChatCommand()
@@ -180,8 +161,8 @@ end
 
 function GridLayout:OnEnable()
     self:debug("OnEnable")
-    if not(Grid2 and Grid2Layout and Grid2Frame) then return end
-    GridLayout:Update()
+    if not (Grid2 and Grid2Layout and Grid2Frame) then return end
+
     local Grid2LayoutGroupChanged = Grid2Layout.Grid_GroupTypeChanged
     function Grid2Layout:Grid_GroupTypeChanged(...)
         GridLayout:debug("Grid_GroupTypeChanged", ...)
