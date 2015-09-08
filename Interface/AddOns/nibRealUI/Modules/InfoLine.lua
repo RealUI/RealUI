@@ -557,7 +557,7 @@ local function GetOptions()
                         end,
                         order = 90,
                     },
-                    blue1 = {
+                    blue2 = {
                         type = "color",
                         name = "Header 3",
                         hasAlpha = false,

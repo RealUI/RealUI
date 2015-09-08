@@ -8,6 +8,7 @@
 ## RequiredDeps: !Aurora_RealUI
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Bartender4, Grid2, Raven, SharedMedia
 ## X-oUF: oUFembed
+## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
 
 Libs\Embeds.xml
 

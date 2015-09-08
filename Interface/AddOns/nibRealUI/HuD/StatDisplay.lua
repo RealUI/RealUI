@@ -199,7 +199,7 @@ local function GetOptions()
                     },
                 },
             },
-            gap2 = {
+            gap4 = {
                 name = " ",
                 type = "description",
                 order = 61,
