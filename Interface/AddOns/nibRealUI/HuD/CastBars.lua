@@ -201,6 +201,9 @@ end
 
 local function PostCastStart(self, unit, ...)
     CastBars:debug("PostCastStart", unit, ...)
+    if self.flashAnim:IsPlaying() then
+        self.flashAnim:Stop()
+    end
 
     if self.interrupt then
         local color = db.colors.uninterruptible
