@@ -2,52 +2,11 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
 local db, ndb
 
-local _
 local MODNAME = "CastBars"
 local CastBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-
 local layoutSize
 local round = nibRealUI.Round
-
-local Textures = {
-    [1] = {
-        player = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Bar]],
-            tick = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Tick]],
-        },
-        target = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Bar]],
-        },
-        focus = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Small_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\1\CastBar_Small_Bar]],
-        },
-    },
-    [2] = {
-        player = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Bar]],
-            tick = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Tick]],
-        },
-        target = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Bar]],
-        },
-        focus = {
-            surround = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Small_Surround]],
-            bar = [[Interface\AddOns\nibRealUI\Media\CastBars\2\CastBar_Small_Bar]],
-        },
-    },
-}
-
-local CastBarXOffset = {
-    [1] = 5,
-    [2] = 6,
-}
 
 local MaxTicks = 10
 local ChannelingTicks = {
@@ -76,13 +35,6 @@ local ChannelingTicks = {
     [GetSpellInfo(4629)] = 6,   -- Rain of Fire
     [GetSpellInfo(103103)] = 6, -- Drain Soul
     [GetSpellInfo(108371)] = 6, -- Harvest Life
-}
-
-local MaxNameLengths = {
-    player = 26,
-    vehicle = 26,
-    target = 26,
-    focus = 20,
 }
 
 local UpdateSpeed = 1/60
