@@ -2,7 +2,7 @@
 ## Title: !Aurora |cffffffffReal|r|cffbf3333UI|r
 ## Notes: A custom Aurora skin for RealUI
 ## Author: Gethe
-## Version: 8.1 r14e
+## Version: 8.1 r14f
 ## RequiredDeps: nibRealUI_Init
 ## OptionalDeps: !BugGrabber
 
