@@ -1,11 +1,21 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+-- Lua Globals --
+local _G = _G
+local next = _G.next
 
-local _
-local MODNAME = "AuraTracking_Aura"
-local Aura = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+-- WoW Globals --
+local UIParent = _G.UIParent
+local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
 
-local AuraTracking = nibRealUI:GetModule("AuraTracking")
+-- RealUI --
+local nibRealUI = _G.RealUI
+local round = nibRealUI.Round
+
+local MODNAME = "AuraTracking"
+local AuraTracking = nibRealUI:GetModule(MODNAME)
+
+-- Libs --
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
 
 -- Custom Cooldown
 local function CustomCooldownUpdate(self, elapsed)
@@ -202,7 +212,7 @@ local function UpdateSpellInfo(self)
             self.spellNames[k] = (GetSpellInfo(v))
         end
     else
-        self.info.spell = self.info.spell or L["AuraTrack_SpellNameID"]
+        self.info.spell = self.info.spell
         self.spellName = self.info.spell
     end
 end
@@ -325,12 +335,26 @@ local function PetUpdate(self)
     end
 end
 
+--[[ Event Functions]]--
+local events = {}
+
+function events.UNIT_AURA(self, ...)
+end
+
+function events.PLAYER_TARGET_CHANGED(self, ...)
+end
+
+function events.UNIT_PET(self, ...)
+end
+
+--[[ API Functions ]]--
+local api = {}
 -- Refresh Functions
-function Aura:TalentRefresh()
+function api:TalentRefresh()
     TalentUpdate(self.frame, nil, nil, true)
 end
 
-function Aura:AuraRefresh()
+function api:AuraRefresh()
     AuraUpdate(self.frame, nil, self.unit)
 
     if self.frame.isStatic then
@@ -343,7 +367,7 @@ function Aura:AuraRefresh()
 end
 
 -- Register updates
-function Aura:SetUpdates()
+function api:SetUpdates()
     local f = self.frame
     f:UnregisterAllEvents()
     AuraTracking:debug("SetUpdates", f.info.spell, f.inactive)
@@ -354,27 +378,11 @@ function Aura:SetUpdates()
         return
     end
 
-    -- Register Events
-    f:RegisterUnitEvent("UNIT_AURA", f.unit)
-    if f.unit == "target" then
-        f:RegisterEvent("PLAYER_TARGET_CHANGED")
-    elseif f.unit == "pet" then
-        f:RegisterEvent("UNIT_PET")
-    end
 
-    f:SetScript("OnEvent", function(self, event, unit)
-        if (event == "UNIT_AURA") then
-            AuraUpdate(self, event, unit)
-        elseif (event == "PLAYER_TARGET_CHANGED") then
-            TargetChanged(self)
-        elseif (event == "UNIT_PET") then
-            PetUpdate(self)
-        end
-    end)
 end
 
 -- Set Indicator info
-function Aura:SetIndicatorInfo(info)
+function api:SetIndicatorInfo(info)
     local f = self.frame
     f.info = info
     info.type = "Aura"
@@ -445,13 +453,27 @@ function Aura:SetIndicatorInfo(info)
     -- AuraUpdate(f, nil, f.unit)
 end
 
+function api:Enable()
+    self:RegisterUnitEvent("UNIT_AURA", f.unit)
+    if f.unit == "target" then
+        self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    elseif f.unit == "pet" then
+        self:RegisterEvent("UNIT_PET")
+    end
+    self.isEnabled = true
+end
+
+function api:Disable()
+    self:UnregisterAllEvents()
+    self.isEnabled = false
+end
+
 -- Tooltips
 local function OnLeave(self)
     if self.auraIndex then
         GameTooltip:Hide()
     end
 end
-
 local function OnEnter(self)
     if not self.activeSpellName then return end
     local buffFilter = (self.isBuff and "HELPFUL" or "HARMFUL") .. (self.anyone and "" or "|PLAYER")
@@ -472,52 +494,43 @@ local function OnEnter(self)
 end
 
 -- Create Indicator frame
-function Aura:CreateIndicator()
-    self.frame = CreateFrame("Button", nil, UIParent)
-    local f = self.frame
+function AuraTracking:CreateAuraIcon(id, spellData)
+    local side = spellData.unit == "target" and "left" or "right"
+    local tracker = CreateFrame("Frame", nil, AuraTracking[side])
+    tracker.side = side
+    tracker.id = id
 
-    f.cd = CreateFrame("Cooldown", nil, f)
-        f.cd:SetAllPoints(f)
-    f.icon = f:CreateTexture(nil, "BACKGROUND")
-        f.icon:SetAllPoints(f)
-        f.icon:SetTexCoord(.08, .92, .08, .92)
-    f.count = f:CreateFontString()
-        f.count:SetFontObject(RealUIFont_PixelCooldown)
-        f.count:SetJustifyH("RIGHT")
-        f.count:SetJustifyV("TOP")
-        f.count:SetPoint("TOPRIGHT", f, "TOPRIGHT", 1.5, 2.5)
-        AuraTracking:RegisterFont("cooldown", f.count)
-    f.customCD = f:CreateTexture(nil, "ARTWORK")
-        f.customCD:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT")
-        f.customCD:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT")
-        f.customCD:SetHeight(0)
-        f.customCD:SetTexture(0, 0, 0, 0.75)
-    f.customCDTime = f:CreateFontString()
-        f.customCDTime:SetFontObject(RealUIFont_PixelCooldown)
-        f.customCDTime:SetJustifyH("LEFT")
-        f.customCDTime:SetJustifyV("BOTTOM")
-        f.customCDTime:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1.5, 0.5)
-        AuraTracking:RegisterFont("cooldown", f.customCDTime)
+    local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
+    cd:SetAllPoints(tracker)
+    tracker.cd = cd
 
-    f.useCustomCD = AuraTracking:UseCustomCooldown()
+    local icon = tracker:CreateTexture(nil, "BACKGROUND")
+    icon:SetAllPoints(tracker)
+    icon:SetTexture([[Interface/Icons/Inv_Misc_QuestionMark]])
+    tracker.icon = icon
 
-    f.elapsed = 1
-    f:SetScript("OnUpdate", CustomCooldownUpdate)
-    f:SetScript("OnEnter", OnEnter)
-    f:SetScript("OnLeave", OnLeave)
+    local bg = F.ReskinIcon(icon)
+    tracker.bg = bg
 
-    nibRealUI:CreateBDFrame(f, 0)
+    local count = tracker:CreateFontString()
+    count:SetFontObject(_G.RealUIFont_PixelCooldown)
+    count:SetJustifyH("RIGHT")
+    count:SetJustifyV("TOP")
+    count:SetPoint("TOPRIGHT", tracker, "TOPRIGHT", 1.5, 2.5)
+    tracker.count = count
+
+    tracker:SetScript("OnEnter", OnEnter)
+    tracker:SetScript("OnLeave", OnLeave)
+    tracker:SetScript("OnEvent", function(self, event, ...)
+        events[event](self, ...)
+    end)
+
+    for key, func in next, api do
+        tracker[key] = func
+    end
+
+    tracker:SetIndicatorInfo(spellData)
+    tracker:Hide()
+
+    return tracker
 end
-
--- Create new instance
-function Aura:New(info)
-    local Indicator = {}
-    setmetatable(Indicator, {__index = self})
-
-    Indicator:CreateIndicator()
-    Indicator:SetIndicatorInfo(info)
-
-    return Indicator
-end
-
-AuraTracking:RegisterModule(Aura, "Aura")

@@ -37,7 +37,7 @@ function AuraTracking:Createslots()
         parent:SetSize(db.style.slotSize * maxStaticSlots, db.style.slotSize)
         parent:RegisterConfig(db.position[sideID])
         parent:RestorePosition()
-        side.parent = parent
+        self[side] = parent
 
         if debug then
             local bg = parent:CreateTexture()
@@ -48,43 +48,10 @@ function AuraTracking:Createslots()
 
         local point = sideID == "left" and "RIGHT" or "LEFT"
         local xMod = sideID == "left" and -1 or 1
-        for slotID = 1, maxSlots do
-            local slot = CreateFrame("Frame", nil, parent)
-            slot:SetSize(db.style.slotSize, db.style.slotSize)
-            if slotID == 1 then
-                slot:SetPoint(point, parent, 0, 0)
-            else
-                slot:SetPoint(point, side[slotID - 1], _G.strupper(sideID), (db.style.padding + 2) * xMod, 0)
-            end
-            side[slotID] = slot
-
-            local cd = CreateFrame("Cooldown", nil, slot, "CooldownFrameTemplate")
-            cd:SetAllPoints(slot)
-            slot.cd = cd
-
-            local icon = slot:CreateTexture(nil, "BACKGROUND")
-            icon:SetAllPoints(slot)
-            icon:SetTexture([[Interface/Icons/Inv_Misc_QuestionMark]])
-            slot.icon = icon
-
-            local bg = F.ReskinIcon(icon)
-            slot.bg = bg
-
-            local count = slot:CreateFontString()
-            count:SetFontObject(_G.RealUIFont_PixelCooldown)
-            count:SetJustifyH("RIGHT")
-            count:SetJustifyV("TOP")
-            count:SetPoint("TOPRIGHT", slot, "TOPRIGHT", 1.5, 2.5)
-            slot.count = count
-
-            slot:Hide()
+        for id, spellData in next, trackingData do
+        	local tracker = self:CreateAuraIcon(id, spellData)
         end
     end
-
-    function AuraTracking_MoveTrackers()
-        
-    end
-
     --self:UpdateStyle()
 end
 
@@ -374,6 +341,7 @@ function AuraTracking:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     trackingData = self.db.class
+    self.Defaults = nil
 
     if db.tracking then
         db.tracking = nil
