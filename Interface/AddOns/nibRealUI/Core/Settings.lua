@@ -36,7 +36,6 @@ local function SetDefaultCVars()
     -- Controls
     SetCVar("deselectOnClick", 1)                   -- Turn off Sticky Targeting (inverted)
     -- Combat
-    SetCVar("useCompactPartyFrames", 1)             -- Raid-style party frames
     SetCVar("displaySpellActivationOverlays", 1)    -- Turn on Spell Alerts
     SetCVar("spellActivationOverlayOpacity", 0.75)  -- Spell Alert Opacity
     -- Display
@@ -93,6 +92,9 @@ local function InitialSettings()
     -- Make Chat windows transparent
     SetChatWindowAlpha(1, 0)
     SetChatWindowAlpha(2, 0)
+
+    -- Char specific CVars
+    SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
 
     -- Initial Settings done
     nibRealUICharacter.initialized = true

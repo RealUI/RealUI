@@ -73,6 +73,7 @@ SLASH_REALUIINIT1 = "/realdebug"
 function SlashCmdList.REALUIINIT(mod, editBox)
     print("/realdebug", mod, editBox)
     if mod == "" then
+        -- TODO: Make this show a frame w/ buttons to specific debugs
         for k, v in next, debugger do
             print(k)
         end

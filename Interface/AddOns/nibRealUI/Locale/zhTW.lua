@@ -90,6 +90,7 @@ if L then
 -- L["ActionBars_SidesOption"] = ""
 -- L["ActionBars_Stance"] = ""
 -- L["Alert_CantOpenInCombat"] = ""
+-- L["Alert_UseClickToSetFocus"] = ""
 -- L["AuraTrack"] = ""
 -- L["AuraTrack_Buff"] = ""
 -- L["AuraTrack_Create"] = ""
