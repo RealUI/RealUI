@@ -91,6 +91,7 @@ L["Reset_SettingsLost"] = "所有用户设置都将丢失。" -- Needs review
 -- L["ActionBars_SidesOption"] = ""
 -- L["ActionBars_Stance"] = ""
 L["Alert_CantOpenInCombat"] = "战斗中无法开启RealUI设置"
+-- L["Alert_UseClickToSetFocus"] = ""
 -- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Buff"
 L["AuraTrack_Create"] = "创建新的光环监视" -- Needs review

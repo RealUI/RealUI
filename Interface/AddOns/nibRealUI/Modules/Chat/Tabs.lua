@@ -6,148 +6,153 @@ local Chat = nibRealUI:GetModule("Chat")
 local MODNAME = "Chat_Tabs"
 local Chat_Tabs = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
 
+local maxTabs = NUM_CHAT_WINDOWS
+
 -- Tab Style update
 local TStyleColors = {}
 local function UpdateTabStyle(self, style)
-	Chat_Tabs:debug("UpdateTabStyle", self.text, style)
-	-- Retrieve FontString of tab
-	self = self.text or self:GetParent().text
+    Chat_Tabs:debug("UpdateTabStyle", self, self:GetName(), self.UpdateTabs, style)
+    local text = _G[self:GetName().."Text"]
 
-	--local font, size, outline = RealUIFont_PixelSmall:GetFont()
-	self:SetFont(RealUIFont_PixelSmall:GetFont())
-	self:SetShadowColor(0, 0, 0, 0)
+    text:SetFont(RealUIFont_PixelSmall:GetFont())
+    text:SetShadowColor(0, 0, 0, 0)
 
-	-- Color
-	if style == "selected" then style = "highlight" end
-	if ((style == "highlight") and db.colors.classcolorhighlight) then
-		self:SetTextColor(unpack(nibRealUI.classColor))
-	else
-		self:SetTextColor(unpack(db.colors[style]))
-	end
-end
+    -- Update Tab Appearance
+    if not style then
+        if self.alerting then
+            style = "flash"
+        else
+            style = "normal"
+        end
+    end
 
--- Chat Window creation
-local function ChatWindowCreated()
-	Chat_Tabs:UpdateTabs(false)
+    -- Color
+    if ((style == "highlight") and db.colors.classcolorhighlight) or
+        style == "selected" then
+        text:SetTextColor(unpack(nibRealUI.classColor))
+    else
+        text:SetTextColor(unpack(db.colors[style]))
+    end
 end
 
 -- Chat Tab mouse-events
 local function ChatTab_OnLeave(self)
-	Chat_Tabs:UpdateTabs(true)
+    Chat_Tabs:debug("ChatTab_OnLeave", self)
+    Chat_Tabs:UpdateTab("ChatFrame"..self:GetID())
 end
-
 local function ChatTab_OnEnter(self)
-	UpdateTabStyle(self, "highlight")
+    Chat_Tabs:debug("ChatTab_OnEnter", self)
+    UpdateTabStyle(self, "highlight")
 end
 
-local function ChatTabFlash_OnHide(self)
-	UpdateTabStyle(self, "normal")
-end
+function Chat_Tabs:UpdateTab(chatName, chatTabText)
+    Chat_Tabs:debug("UpdateTab", chatName, chatTabText)
+    local chat = _G[chatName]
+    local tab = _G[chatName.."Tab"]
 
-local function ChatTabFlash_OnShow(self)
-	UpdateTabStyle(self, "flash")
-	UIFrameFlashStop(self.glow)
+    if not tab.skinned then
+        -- Hide Chat Tab textures
+        tab.leftTexture:Hide()
+        tab.middleTexture:Hide()
+        tab.rightTexture:Hide()
+
+        tab.leftSelectedTexture:Hide()
+        tab.middleSelectedTexture:Hide()
+        tab.rightSelectedTexture:Hide()
+
+        tab.leftHighlightTexture:Hide()
+        tab.middleHighlightTexture:Hide()
+        tab.rightHighlightTexture:Hide()
+
+        -- Hook Tab
+        tab:SetScript("OnEnter", ChatTab_OnEnter)
+        tab:SetScript("OnLeave", ChatTab_OnLeave)
+        
+        if chatTabText then
+            FCF_SetWindowName(chat, chatTabText)
+        end
+
+        tab.skinned = true
+    end
+
+    -- Update Tab Appearance
+    UpdateTabStyle(tab, chat == SELECTED_CHAT_FRAME and "selected")
+
+    chat:SetSpacing(1)
 end
 
 -- Tab update
-function Chat_Tabs:UpdateTabs(SimpleUpdate)
-	local chat, tab, flash
-	local maxTabs = ChatFrame11Tab and 11 or NUM_CHAT_WINDOWS
-	for i = 1, maxTabs do
-		local chatName = "ChatFrame"..i
-		chat = _G[chatName]
-		tab = _G[chatName.."Tab"]
-		flash = _G[chatName.."TabFlash"]
-		if not (chat and tab and flash) then return end
+function Chat_Tabs:UpdateTabs()
+    Chat_Tabs:debug("UpdateTabs")
+    for i = 1, maxTabs do
+        local chatName = "ChatFrame"..i
 
-		if not SimpleUpdate then
-			-- Hide regular Chat Tab textures
-			_G[chatName.."TabLeft"]:Hide()
-			_G[chatName.."TabMiddle"]:Hide()
-			_G[chatName.."TabRight"]:Hide()
-			_G[chatName.."TabHighlightLeft"]:Hide()
-			_G[chatName.."TabHighlightMiddle"]:Hide()
-			_G[chatName.."TabHighlightRight"]:Hide()
-			tab.text = _G[chatName.."TabText"]
-
-			-- Hook Tab
-			tab:SetScript("OnEnter", ChatTab_OnEnter)
-			tab:SetScript("OnLeave", ChatTab_OnLeave)
-		end
-
-		-- Update Selected
-		_G[chatName.."TabSelectedLeft"]:Hide()
-		_G[chatName.."TabSelectedMiddle"]:Hide()
-		_G[chatName.."TabSelectedRight"]:Hide()
-
-		-- Update Tab Appearance
-		if chat == SELECTED_CHAT_FRAME then
-			UpdateTabStyle(tab, "selected")
-		elseif tab.alerting then
-			UpdateTabStyle(tab, "flash")
-		else
-			UpdateTabStyle(tab, "normal")
-		end
-
-		chat:SetSpacing(1)
-	end
+        self:UpdateTab(chatName)
+    end
 end
 
 -- Hook FCF
 function Chat_Tabs:HookFCF()
-	-- Tab Click
-	local Orig_FCF_Tab_OnClick = FCF_Tab_OnClick
-	FCF_Tab_OnClick = function(...)
-		-- Click the Tab
-		Chat_Tabs:debug("FCF_Tab_OnClick", ...)
-		Orig_FCF_Tab_OnClick(...)
-		-- Update Tabs
-		Chat_Tabs:UpdateTabs(true)
-	end
+    hooksecurefunc("FCF_Tab_OnClick", function(chatFrame, button)
+        Chat_Tabs:debug("FCF_Tab_OnClick", chatFrame, button)
+        Chat_Tabs:UpdateTabs()
+    end)
 
-	-- New Window
-	hooksecurefunc("FCF_OpenNewWindow", ChatWindowCreated)
+    hooksecurefunc("FCF_OpenNewWindow", function(chatTabText)
+        Chat_Tabs:debug("FCF_OpenNewWindow", chatTabText)
+        Chat_Tabs:UpdateTabs()
+    end)
+    hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType, chatTarget, sourceChatFrame, selectWindow)
+        Chat_Tabs:debug("FCF_OpenTemporaryWindow", chatType, chatTarget, sourceChatFrame, selectWindow)
+        maxTabs = maxTabs + 1
+        if chatType == "WHISPER" then
+            chatTarget = Ambiguate(chatTarget, "none")
+        end
+        Chat_Tabs:UpdateTab("ChatFrame"..maxTabs, chatTarget)
+    end)
 
-	-- Window Close
-	hooksecurefunc("FCF_Close", function(self, fallback)
-		local frame = fallback or self
-		UIParent.Hide(_G[frame:GetName().."Tab"])
-		FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
-	end)
+    hooksecurefunc("FCF_Close", function(chatFrame, fallback)
+        Chat_Tabs:debug("FCF_Close", chatFrame, chatFrame:GetName(), fallback)
+        if chatFrame.isTemporary then
+            maxTabs = maxTabs - 1
+        end
+        local frame = fallback or chatFrame
+        UIParent.Hide(_G[frame:GetName().."Tab"])
+        FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
+    end)
 
-	-- Flash
-	-- Start
-	hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
-		ChatTabFlash_OnShow(_G[chatFrame:GetName().."Tab"])
-	end)
-	-- Stop
-	hooksecurefunc("FCF_StopAlertFlash", function(chatFrame)
-		ChatTabFlash_OnHide(_G[chatFrame:GetName().."Tab"])
-	end)
+    hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
+        Chat_Tabs:debug("FCF_StartAlertFlash", chatFrame, chatFrame:GetName())
+        UpdateTabStyle(_G[chatFrame:GetName().."Tab"], "flash")
+    end)
+    hooksecurefunc("FCF_StopAlertFlash", function(chatFrame)
+        Chat_Tabs:debug("FCF_StopAlertFlash", chatFrame, chatFrame:GetName())
+        UpdateTabStyle(_G[chatFrame:GetName().."Tab"], "normal")
+    end)
 
-	-- New UpdateColors function, stop it!
-	FCFTab_UpdateColors = function(...) end
+    -- New UpdateColors function, stop it!
+    FCFTab_UpdateColors = function(...) end
 end
 
 -- Style Pet Tab when it appears
 function Chat_Tabs:PET_BATTLE_OPENING_START()
-	self:UpdateTabs(false)
+    self:UpdateTabs()
 end
 
 function Chat_Tabs:PLAYER_LOGIN()
-	self:HookFCF()
-	self:UpdateTabs(false)
+    self:HookFCF()
+    self:UpdateTabs()
 end
 
 ------------
 function Chat_Tabs:OnInitialize()
-	db = Chat.db.profile.modules.tabs
-	ndb = nibRealUI.db.profile
+    db = Chat.db.profile.modules.tabs
+    ndb = nibRealUI.db.profile
 
-	self:SetEnabledState(db.enabled and nibRealUI:GetModuleEnabled("Chat"))
+    self:SetEnabledState(db.enabled and nibRealUI:GetModuleEnabled("Chat"))
 end
 
 function Chat_Tabs:OnEnable()
-	self:RegisterEvent("PLAYER_LOGIN")
-	self:RegisterEvent("PET_BATTLE_OPENING_START")
+    self:RegisterEvent("PLAYER_LOGIN")
+    self:RegisterEvent("PET_BATTLE_OPENING_START")
 end

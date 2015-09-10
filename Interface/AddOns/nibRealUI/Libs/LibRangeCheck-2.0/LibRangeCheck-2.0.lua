@@ -1,6 +1,6 @@
 --[[
 Name: LibRangeCheck-2.0
-Revision: $Revision: 158 $
+Revision: $Revision: 164 $
 Author(s): mitch0
 Website: http://www.wowace.com/projects/librangecheck-2-0/
 Description: A range checking library based on interact distances and spell ranges
@@ -41,7 +41,7 @@ License: Public Domain
 -- @class file
 -- @name LibRangeCheck-2.0
 local MAJOR_VERSION = "LibRangeCheck-2.0"
-local MINOR_VERSION = tonumber(("$Revision: 158 $"):match("%d+")) + 100000
+local MINOR_VERSION = tonumber(("$Revision: 164 $"):match("%d+")) + 100000
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -188,6 +188,9 @@ local FriendItems  = {
     [5] = {
         37727, -- Ruby Acorn
     },
+    [6] = {
+        63427, -- Worgsaw
+    },
     [8] = {
         34368, -- Attuned Crystal Cores
         33278, -- Burning Torch
@@ -237,9 +240,15 @@ local FriendItems  = {
     [45] = {
         32698, -- Wrangling Rope
     },
+    [50] = {
+        116139, -- Haunting Memento
+    },
     [60] = {
         32825, -- Soul Cannon
         37887, -- Seeds of Nature's Wrath
+    },
+    [70] = {
+        41265, -- Eyesore Blaster
     },
     [80] = {
         35278, -- Reinforced Net
@@ -249,6 +258,9 @@ local FriendItems  = {
 local HarmItems = {
     [5] = {
         37727, -- Ruby Acorn
+    },
+    [6] = {
+        63427, -- Worgsaw
     },
     [8] = {
         34368, -- Attuned Crystal Cores
@@ -284,12 +296,21 @@ local HarmItems = {
 --        32698, -- Wrangling Rope
         23836, -- Goblin Rocket Launcher
     },
+    [50] = {
+        116139, -- Haunting Memento
+    },
     [60] = {
         32825, -- Soul Cannon
         37887, -- Seeds of Nature's Wrath
     },
+    [70] = {
+        41265, -- Eyesore Blaster
+    },
     [80] = {
         35278, -- Reinforced Net
+    },
+    [100] = {
+        33119, -- Malister's Frost Wand
     },
 }
 
