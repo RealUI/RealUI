@@ -92,6 +92,7 @@ L["Reset_SettingsLost"] = "Alle Benutzereinstellungen gehen verloren."
 -- L["ActionBars_SidesOption"] = ""
 -- L["ActionBars_Stance"] = ""
 L["Alert_CantOpenInCombat"] = "Die RealUI-Konfiguration kann während des Kampfes nicht geöffnet werden."
+-- L["Alert_UseClickToSetFocus"] = ""
 -- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Stärkungszauber"
 L["AuraTrack_Create"] = "Erzeuge einen neuen Tracker" -- Needs review

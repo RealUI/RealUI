@@ -92,6 +92,7 @@ L["Reset_SettingsLost"] = "Все пользовательские настро�
 -- L["ActionBars_SidesOption"] = ""
 -- L["ActionBars_Stance"] = ""
 L["Alert_CantOpenInCombat"] = "Невозможно открыть конфигурацию RealUI в бою." -- Needs review
+-- L["Alert_UseClickToSetFocus"] = ""
 -- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Бафф" -- Needs review
 L["AuraTrack_Create"] = "Добавить новый" -- Needs review
