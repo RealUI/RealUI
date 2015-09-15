@@ -1,6 +1,10 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "enUS", true, RealUI.isDev)
+local ADDON_NAME, private = ...
 
-if L then
+-- RealUI --
+local RealUI = RealUI
+local L = {}
+
+RealUI.locale = GAME_LOCALE or GetLocale()
 
 -- General
 L["Alert_CombatLockdown"] = "Combat Lockdown"
@@ -259,4 +263,4 @@ L["XPRep_NoFaction"] = "Faction not set"
 L["XPRep_Remaining"] = "Remaining"
 L["XPRep_Toggle"] = "<Click> to toggle XP/Rep"
 
-end
+RealUI.L = L
