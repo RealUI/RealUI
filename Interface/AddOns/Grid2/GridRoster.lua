@@ -26,7 +26,7 @@ local pet_of_unit = {}
 local owner_of_unit = {}
 
 -- populate unit tables
-do 	
+do
 	local function register_unit(tbl, unit, pet)
 		table.insert(tbl, unit)
 		pet_of_unit[unit] = pet
@@ -106,7 +106,7 @@ function Grid2:IterateRosterUnits()
 end
 
 -- Events to track raid type changes
-do 
+do
 	local groupType, instType, instMaxPlayers
 	function Grid2:PLAYER_ENTERING_WORLD()
 		-- this is needed to trigger an update when switching from one BG directly to another
@@ -116,15 +116,15 @@ do
 		if self.db.profile.hideBlizzardRaidFrames then
 			Grid2:HideBlizzardRaidFrames()
 		end
-	end	
+	end
 	-- partyTypes = solo party arena raid
 	-- instTypes  = none pvp lfr flex mythic other
 	function Grid2:GroupChanged(event)
 		local newGroupType
 		local InInstance, newInstType = IsInInstance()
-		local _, _, difficultyID, _, maxPlayers = GetInstanceInfo()		
-		
-		if newInstType == "arena" then		
+		local _, _, difficultyID, _, maxPlayers = GetInstanceInfo()
+
+		if newInstType == "arena" then
 			-- arena@arena instances
 			newGroupType = newInstType
 			maxPlayers = 5
@@ -141,13 +141,13 @@ do
 						-- raid@lfr / Looking for Raid instances (but not LFR especial events instances)
 						newInstType = "lfr"
 					elseif difficultyID == 16 then
-						-- raid@mythic / Mythic instance      
+						-- raid@mythic / Mythic instance
 						newInstType = "mythic"
 					elseif maxPlayers == 30 then
 						-- raid@flex / Flexible instances normal/heroic (but no LFR)
 						newInstType = "flex"
 					else
-						-- raid@other / Other instances: old raids/garrison/especial instances/unknow instances
+						-- raid@other / Other instances: 5man/garrison/unknow instances
 						newInstType = "other"
 					end
 				else
@@ -160,7 +160,7 @@ do
 			else
 				newGroupType, newInstType, maxPlayers = "solo", "other", 1
 			end
-		end		
+		end
 		maxPlayers = maxPlayers or 40
 		self:Debug("GroupChanged", groupType, instType, "=>", newGroupType, newInstType, maxPlayers)
 		if groupType ~= newGroupType or instType ~= newInstType or instMaxPlayers ~= maxPlayers then
@@ -262,7 +262,7 @@ do
 		local old_realm = roster_realms[unit]
 
 		units_to_remove[unit] = nil
-		
+
 		if not old_name then
 			units_added[unit] = guid
 		elseif old_name ~= name or old_realm ~= realm then
@@ -273,7 +273,7 @@ do
 		roster_realms[unit] = realm
 		roster_guids[unit] = guid
 		roster_units[guid] = unit
-		
+
 		if (oldGuid and guid ~= oldGuid) then
 			local oldUnit = roster_units[oldGuid]
 			if (not UnitExists(oldUnit)) or (UnitGUID(oldUnit) ~= oldGuid) then
@@ -281,13 +281,13 @@ do
 			end
 		end
 	end
-	
+
 	function Grid2:UpdateRoster()
 		roster_guids, units_to_remove = units_to_remove, roster_guids
-		
+
 		local units = IsInRaid() and raid_units or party_units
 
-		for i= 1,#units do	
+		for i= 1,#units do
 			local unit = units[i]
 			if not UnitExists(unit) then break end
 			UpdateUnit(unit)
@@ -312,21 +312,21 @@ do
 			self:SendMessage("Grid_UnitLeft", unit, guid)
 			units_to_remove[unit] = nil
 		end
-		
+
 		for unit, guid in pairs(units_added) do
 			updated = true
 			self:SendMessage("Grid_UnitJoined", unit, guid)
 			units_updated[unit] = guid
 			units_added[unit] = nil
 		end
-		
+
 		for unit, guid in pairs(units_changed) do
 			updated = true
 			self:SendMessage("Grid_UnitChanged", unit, guid)
 			units_updated[unit] = guid
 			units_changed[unit] = nil
 		end
-		
+
 		for unit, guid in pairs(units_updated) do
 			self:SendMessage("Grid_UnitUpdated", unit, guid) -- Used by some statuses
 			self:SendMessage("Grid_UnitUpdate", unit, guid) --  Used internally by Grid2Frame to update indicators.

@@ -116,8 +116,10 @@ function mod:UNIT_COMBO_POINTS(event,unit)
 	end
 end
 ---------------------------------------------------------------------- Target --
-function mod:OnFrameTarget(msg, frame)
-	self:UNIT_COMBO_POINTS(nil, 'player')
+function mod:OnFrameTarget(msg, frame, is_target)
+    if is_target then
+        self:UNIT_COMBO_POINTS(nil, 'player')
+    end
 end
 ---------------------------------------------------------------------- Create --
 function mod:CreateComboPoints(msg, frame)

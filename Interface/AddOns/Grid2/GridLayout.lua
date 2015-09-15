@@ -97,9 +97,9 @@ function GridLayoutHeaderClass.prototype:SetLayoutAttribute(name, value)
    self:SetAttribute(name, value)
 end
 
-function GridLayoutHeaderClass.prototype:ClearChildrenPoints() 
+function GridLayoutHeaderClass.prototype:ClearChildrenPoints()
       local count = 1
-      local uframe = self:GetAttribute("child1") 
+      local uframe = self:GetAttribute("child1")
       while uframe do
          uframe:ClearAllPoints()
          count = count + 1
@@ -120,7 +120,8 @@ Grid2Layout.defaultDB = {
 					arena = "By Group w/Pets",
 					raid  = "By Group w/Pets",
 		},
-		layoutScales= {},
+		layoutScales = {},
+		layoutBySize = {},
 		horizontal = true,
 		clamp = true,
 		FrameLock = false,
@@ -145,13 +146,13 @@ Grid2Layout.defaultDB = {
 	},
 }
 
-Grid2Layout.groupFilters =  { 
-	{ groupFilter = "1" }, { groupFilter = "2" }, { groupFilter = "3" }, {	groupFilter = "4" }, 
+Grid2Layout.groupFilters =  {
+	{ groupFilter = "1" }, { groupFilter = "2" }, { groupFilter = "3" }, {	groupFilter = "4" },
 	{ groupFilter = "5" }, { groupFilter = "6" }, {	groupFilter = "7" }, {	groupFilter = "8" },
 }
 
-Grid2Layout.frameBackdrop = { 
-	 bgFile = "Interface\\ChatFrame\\ChatFrameBackground", 
+Grid2Layout.frameBackdrop = {
+	 bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
 	 tile = true, tileSize = 16, edgeSize = 16,
 	 insets = {left = 4, right = 4, top = 4, bottom = 4},
 }
@@ -184,7 +185,7 @@ function Grid2Layout:OnModuleEnable()
 	self:RestorePosition()
 	if self.layoutName then
 		self:ReloadLayout(true)
-	end	
+	end
 	self:RegisterMessage("Grid_GroupTypeChanged")
 	self:RegisterMessage("Grid_UpdateLayoutSize", "UpdateSize")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -202,7 +203,7 @@ end
 local reloadLayoutQueued, updateSizeQueued, restorePositionQueued
 function Grid2Layout:PLAYER_REGEN_ENABLED()
 	if reloadLayoutQueued then return self:ReloadLayout(true) end
-	if restorePositionQueued then return self:RestorePosition() end	
+	if restorePositionQueued then return self:RestorePosition() end
 	if updateSizeQueued then return self:UpdateSizeQueued() end
 end
 
@@ -299,8 +300,8 @@ function Grid2Layout:PlaceGroup(frame, groupNumber)
 	local spacing    = settings.Spacing
 	local anchor     = settings.groupAnchor
 	local relPoint   = relativePoints[vertical][anchor]
-	local xMult      = relativePoints.xMult[anchor] 
-	local yMult      = relativePoints.yMult[anchor] 
+	local xMult      = relativePoints.xMult[anchor]
+	local yMult      = relativePoints.yMult[anchor]
 	frame:ClearAllPoints()
 	frame:SetParent(self.frame)
 	if groupNumber == 1 then
@@ -314,8 +315,6 @@ function Grid2Layout:PlaceGroup(frame, groupNumber)
 	previousFrame = frame
 end
 
-
-
 function Grid2Layout:AddLayout(layoutName, layout)
 	self.layoutSettings[layoutName] = layout
 end
@@ -326,17 +325,17 @@ end
 
 function Grid2Layout:ReloadLayout(force)
 	reloadLayoutQueued = false
+	local p          = self.db.profile
 	local partyType  = self.partyType or "solo"
 	local instType   = self.instType or ""
-	local layouts    = self.db.profile.layouts
-	local layoutName = layouts[partyType.."@"..instType] or layouts[partyType]
+	local layoutName = p.layoutBySize[self.instMaxGroups] or p.layouts[partyType.."@"..instType] or p.layouts[partyType]
 	if self.layoutName ~= layoutName or force then
 		if InCombatLockdown() then
 			reloadLayoutQueued = true
 		else
 			self:LoadLayout( layoutName )
 		end
-	end	
+	end
 end
 
 local groupFilters = { "1", "1,2", "1,2,3", "1,2,3,4", "1,2,3,4,5", "1,2,3,4,5,6", "1,2,3,4,5,6,7", "1,2,3,4,5,6,7,8" }
@@ -364,10 +363,10 @@ local function SetAllAttributes(header, p, list, fix)
 			header:SetLayoutAttribute("useOwnerUnit", false)
 			header:SetLayoutAttribute("unitsuffix", nil)
 		end
-		if not header:GetAttribute("unitsPerColumn") then 
+		if not header:GetAttribute("unitsPerColumn") then
 			header:SetLayoutAttribute("unitsPerColumn", 5)
-		end	
-	end	
+		end
+	end
 end
 
 -- Precreate frames to avoid a blizzard bug that prevents initializing unit frames in combat
@@ -383,7 +382,7 @@ local function ForceFramesCreation(header)
 		header:SetAttribute("startingIndex", 1-maxFrames )
 		header:SetAttribute("startingIndex", startingIndex)
 		header.FrameCount= maxFrames
-	end	
+	end
 end
 
 local function AddLayoutHeader(self, profile, defaults, header, visualIndex)
@@ -396,13 +395,13 @@ local function AddLayoutHeader(self, profile, defaults, header, visualIndex)
 		headers[index] = group
 	end
 	self.indexes[type] = index
-	if defaults then 
-		SetAllAttributes(group, profile, defaults)	
+	if defaults then
+		SetAllAttributes(group, profile, defaults)
 	end
 	SetAllAttributes(group, profile, header, true)
 	ForceFramesCreation(group)
 	group:SetOrientation(profile.horizontal)
-	self.groupsUsed[#self.groupsUsed+1] = group		
+	self.groupsUsed[#self.groupsUsed+1] = group
 	self:PlaceGroup(group, visualIndex)
 	group:Show()
 	self.layoutMaxColumns = self.layoutMaxColumns + (group:GetAttribute("maxColumns") or 1)
@@ -414,7 +413,7 @@ local function GenerateLayoutHeaders(self, profile, defaults, index)
 	for i=1,self.instMaxGroups do
 		AddLayoutHeader( self, profile, defaults, self.groupFilters[i], index )
 		index = index + 1
-	end	
+	end
 	return index
 end
 
@@ -424,9 +423,9 @@ function Grid2Layout:LoadLayout(layoutName)
 
 	self:Debug("LoadLayout", layoutName)
 
-	self.layoutName = layoutName	
+	self.layoutName = layoutName
 	self:Scale()
-	
+
 	self.layoutMaxColumns = 0
 	self.layoutMaxRows = 0
 	wipe(self.groupsUsed)
@@ -439,19 +438,19 @@ function Grid2Layout:LoadLayout(layoutName)
 
 	local profile = self.db.profile
 	local defaults = layout.defaults
-	
+
 	if layout[1] then
 		local i = 1
 		for _, header in ipairs(layout) do
 			if header=="auto" then
 				i = GenerateLayoutHeaders(self, profile, defaults, i)
 			else
-				i = AddLayoutHeader(self, profile, defaults, header, i)	
+				i = AddLayoutHeader(self, profile, defaults, header, i)
 			end
 		end
 	elseif not layout.empty then
 		GenerateLayoutHeaders(self, profile, defaults, 1)
-	end	
+	end
 
 	self:UpdateDisplay()
 end
@@ -460,7 +459,22 @@ function Grid2Layout:UpdateDisplay()
 	self:UpdateTextures()
 	self:UpdateColor()
 	self:CheckVisibility()
+	self:UpdateFramesSize()
 	self:UpdateSize()
+end
+
+function Grid2Layout:UpdateFramesSize()
+	local nw,nh = Grid2Frame:GetFrameSize()
+	local ow = self.layoutFrameWidth  or nw
+	local oh = self.layoutFrameHeight or nh
+	if nw~=ow or nh~=oh then
+		self.layoutFrameWidth  = nw
+		self.layoutFrameHeight = nh
+		Grid2Frame:LayoutFrames()
+		self:UpdateHeadersSize()
+	end
+	self.layoutFrameWidth  = nw
+	self.layoutFrameHeight = nh
 end
 
 function Grid2Layout:UpdateSize()
@@ -482,7 +496,7 @@ function Grid2Layout:UpdateSize()
 end
 
 function Grid2Layout:SetSize(w,h)
-	self.frameBack:SetSize(w,h)	
+	self.frameBack:SetSize(w,h)
 	if InCombatLockdown() then
 		updateSizeQueued = true
 	else
@@ -494,7 +508,6 @@ function Grid2Layout:UpdateSizeQueued()
 	self.frame:SetSize( self.frameBack:GetSize() )
 	updateSizeQueued = false
 end
-
 
 function Grid2Layout:UpdateTextures()
 	local f = self.frameBack
@@ -514,7 +527,7 @@ end
 function Grid2Layout:UpdateColor()
 	local settings = self.db.profile
 	local frame    = self.frameBack
-	local visible  = settings.BorderA~=0 or settings.BackgroundA~=0	
+	local visible  = settings.BorderA~=0 or settings.BackgroundA~=0
 	frame:SetBackdropBorderColor(settings.BorderR, settings.BorderG, settings.BorderB, settings.BorderA)
 	frame:SetBackdropColor(settings.BackgroundR, settings.BackgroundG, settings.BackgroundB, settings.BackgroundA)
 	frame.texture:SetGradientAlpha("VERTICAL", .1, .1, .1, 0, .2, .2, .2, settings.BackgroundA/2 )
@@ -522,6 +535,17 @@ function Grid2Layout:UpdateColor()
 		frame:Show()
 	else
 		frame:Hide()
+	end
+end
+
+-- Force GridLayoutHeaders size refresh, without this g:GetWidth/g:GetHeight in UpdateSize() return old values.
+function Grid2Layout:UpdateHeadersSize()
+	for type, headers in pairs(self.groups) do
+		for i = 1, self.indexes[type] do
+			local g = headers[i]
+			g:Hide()
+			g:Show()
+		end
 	end
 end
 
@@ -538,7 +562,7 @@ end
 
 function Grid2Layout:SavePosition()
 	local f = self.frame
-	if f:GetLeft() and f:GetWidth() then 
+	if f:GetLeft() and f:GetWidth() then
 		local a = self.db.profile.anchor
 		local s = f:GetEffectiveScale()
 		local t = UIParent:GetEffectiveScale()
@@ -551,7 +575,7 @@ function Grid2Layout:SavePosition()
 		self.db.profile.PosX = x
 		self.db.profile.PosY = y
 		self:Debug("Saved Position", anchor, x, y)
-	end	
+	end
 end
 
 function Grid2Layout:ResetPosition()
@@ -572,13 +596,14 @@ function Grid2Layout:RestorePosition()
 	local f = self.frame
 	local b = self.frameBack
 	local s = f:GetEffectiveScale()
-	local x = self.db.profile.PosX / s
-	local y = self.db.profile.PosY / s
-	local a = self.db.profile.anchor
+	local p = self.db.profile
+	local x = p.PosX / s
+	local y = p.PosY / s
+	local a = p.anchor
 	f:ClearAllPoints()
 	f:SetPoint(a, x, y)
 	b:ClearAllPoints()
-	b:SetPoint(a, 0, 0)
+	b:SetPoint(p.groupAnchor) -- Using groupAnchor instead of anchor, see ticket #442.
 	self:Debug("Restored Position", a, x, y)
 end
 

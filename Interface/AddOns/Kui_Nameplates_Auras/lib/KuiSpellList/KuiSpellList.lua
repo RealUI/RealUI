@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 15
+local MAJOR, MINOR = 'KuiSpellList-1.0', 16
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
 local _
 
@@ -21,6 +21,7 @@ local auras = {
             [774] = true, -- rejuvenation
             [8936] = true, -- regrowth
             [33763] = true, -- lifebloom
+            [188550] = true, -- lifebloom (HFC 4-set bonus)
             [48438] = true, -- wild growth
             [102342] = true, -- ironbark
             [155777] = true, -- rejuvenation (germination)

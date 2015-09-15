@@ -466,8 +466,10 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         end
     end
 end
-function mod:PLAYER_TARGET_CHANGED()
-    self:UNIT_AURA('UNIT_AURA', 'target')
+function mod:PostTarget(msg,frame,is_target)
+    if is_target then
+        self:UNIT_AURA('UNIT_AURA', 'target')
+    end
 end
 function mod:UPDATE_MOUSEOVER_UNIT()
     self:UNIT_AURA('UNIT_AURA', 'mouseover')
@@ -679,7 +681,7 @@ function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_PostShow', 'Show')
     self:RegisterMessage('KuiNameplates_PostHide', 'Hide')
     self:RegisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
-    self:RegisterMessage('KuiNameplates_PostTarget', 'PLAYER_TARGET_CHANGED')
+    self:RegisterMessage('KuiNameplates_PostTarget', 'PostTarget')
 
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
@@ -699,7 +701,7 @@ end
 function mod:OnDisable()
     self:UnregisterMessage('KuiNameplates_PostShow', 'Show')
     self:UnregisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
-    self:UnregisterMessage('KuiNameplates_PostTarget', 'PLAYER_TARGET_CHANGED')
+    self:UnregisterMessage('KuiNameplates_PostTarget', 'PostTarget')
 
     self:UnregisterEvent('UNIT_AURA')
     self:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')

@@ -267,6 +267,8 @@ local api = {
     SetValue = function(self, value, ignoreSmooth)
         debug(self, "SetValue", value, ignoreSmooth)
         local metadata = bars[self]
+        if value == metadata.value then return end
+        
         if not metadata.minVal then self:SetMinMaxValues(0, value) end
         if value > metadata.maxVal then value = metadata.maxVal end
         if metadata.smooth and not(ignoreSmooth) then
