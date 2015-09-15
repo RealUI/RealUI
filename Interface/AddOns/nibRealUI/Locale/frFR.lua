@@ -1,6 +1,10 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "frFR")
+local ADDON_NAME, private = ...
 
-if L then
+-- RealUI --
+local RealUI = RealUI
+local L = RealUI.L
+
+if RealUI.locale == "frFR" then
 
 -- General
 -- L["Alert_CombatLockdown"] = ""

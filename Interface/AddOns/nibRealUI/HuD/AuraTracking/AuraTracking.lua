@@ -8,7 +8,7 @@ local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetS
 
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndb, trackingData
 local round = nibRealUI.Round
 

@@ -1,11 +1,11 @@
-﻿Copyright © 2010-2013 Real/Nibelheim ( http://www.wowinterface.com/forums/member.php?u=225161 )
+﻿Copyright © 2010-2015 The RealUI Team (http://www.wowinterface.com/downloads/fileinfo.php?id=16068)
 
 The contents of this addon, excluding third-party resources, are
 copyrighted to its authors with all rights reserved.
 
 The author of this addon hereby grants you the following rights:
 
-1. 	You may make modifications to this addon for private use only except
+1. 	You may make modifications to this addon for private use only, except
 	if you have been granted explicit permission by the author.
 
 2. 	Do not modify the name of this addon, including the addon folders.

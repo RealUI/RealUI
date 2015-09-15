@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndbc, _
 
 local MODNAME = "MinimapAdv"

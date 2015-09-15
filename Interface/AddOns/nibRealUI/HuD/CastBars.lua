@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndb
 
 local MODNAME = "CastBars"
@@ -391,13 +391,16 @@ function CastBars:CreateCastBars(self, unit)
 
     local flashAnim = Castbar:CreateAnimationGroup()
     Castbar.flashAnim = flashAnim
-    flashAnim:SetScript("OnFinished", function(self, ...)
+    local function PostFlash(self, ...)
         CastBars:debug("flashAnim:OnFinished", ...)
-        Castbar:SetAlpha(-(Castbar.flash:GetChange()))
+        Castbar:SetAlpha(1)
         Castbar.Text:SetTextColor(1, 1, 1, 1)
         Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
         Castbar:Hide()
-    end)
+    end
+    flashAnim:SetScript("OnFinished", PostFlash)
+    flashAnim:SetScript("OnStop", PostFlash)
+
     local flash = flashAnim:CreateAnimation("Alpha")
     Castbar.flash = flash
     flash:SetDuration(1)

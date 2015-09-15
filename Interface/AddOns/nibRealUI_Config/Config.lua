@@ -2,24 +2,24 @@ local ADDON_NAME, private = ...
 local options = {}
 private.options = options
 
--- Up values
+-- Lua Globals --
 local _G = _G
 local tostring, next = _G.tostring, _G.next
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
 
--- RealUI
+-- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
-local ndb = nibRealUI.db.profile
-local ndbc = nibRealUI.db.char
+local L = nibRealUI.L
+local ndb, ndbc= nibRealUI.db.profile, nibRealUI.db.char
+
 local hudSize = ndb.settings.hudSize
 local round = nibRealUI.Round
 
--- Ace
+-- Libs --
 local ACR = LibStub("AceConfigRegistry-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 local GUI = LibStub("AceGUI-3.0")
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
 
 local uiWidth, uiHeight = UIParent:GetSize()
 local initialized = false

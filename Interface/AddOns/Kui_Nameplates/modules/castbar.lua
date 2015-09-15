@@ -19,6 +19,12 @@ end
 
 local sizes = {}
 
+local function SetCVars()
+    -- force these to true as the module hides them anyway
+    SetCVar('showVKeyCastbar',true)
+    SetCVar('showVKeyCastbarSpellName',true)
+    SetCVar('showVKeyCastbarOnlyOnTarget',mod.db.profile.onlyontarget)
+end
 ------------------------------------------------------------- Script handlers --
 local function OnDefaultCastbarShow(self)
     if not mod.enabledState then return end
@@ -119,10 +125,11 @@ function mod:CreateCastbar(msg, frame)
     if frame.castbar then return end
     -- container ---------------------------------------------------------------
     frame.castbar = CreateFrame('Frame', nil, frame)
+    frame.castbar:SetFrameLevel(1)
     frame.castbar:Hide()
 
     -- background --------------------------------------------------------------
-    frame.castbar.bg = frame.castbar:CreateTexture(nil, 'BACKGROUND')
+    frame.castbar.bg = frame.castbar:CreateTexture(nil,'ARTWORK',nil,1)
     frame.castbar.bg:SetTexture(kui.m.t.solid)
     frame.castbar.bg:SetVertexColor(0, 0, 0, .8)
 
@@ -132,12 +139,12 @@ function mod:CreateCastbar(msg, frame)
     -- cast bar ------------------------------------------------------------
     frame.castbar.bar = CreateFrame("StatusBar", nil, frame.castbar)
     frame.castbar.bar:SetStatusBarTexture(addon.bartexture)
+    frame.castbar.bar:GetStatusBarTexture():SetDrawLayer('ARTWORK',2)
 
     frame.castbar.bar:SetPoint('TOPLEFT', frame.castbar.bg, 'TOPLEFT', 1, -1)
     frame.castbar.bar:SetPoint('BOTTOMLEFT', frame.castbar.bg, 'BOTTOMLEFT', 1, 1)
     frame.castbar.bar:SetPoint('RIGHT', frame.castbar.bg, 'RIGHT', -1, 0)
 
-    frame.castbar.bar:SetFrameLevel(frame.castbar:GetFrameLevel() + 1)
     frame.castbar.bar:SetMinMaxValues(0, 1)
 
     -- spark
@@ -235,6 +242,10 @@ mod.configChangedFuncs.runOnce.enabled = function(val)
     end
 end
 
+mod.configChangedFuncs.runOnce.onlyontarget = function(val)
+    SetCVars()
+end
+
 mod.configChangedFuncs.shieldbarcolour = function(frame, val)
     frame.castbar.shield:SetVertexColor(unpack(val))
 end
@@ -260,11 +271,21 @@ function mod:GetOptions()
             order = 0,
             disabled = false
         },
+        onlyontarget = {
+            name = 'Only on target',
+            desc = 'Only show the castbar on your current target',
+            type = 'toggle',
+            order = 5,
+            disabled = function()
+                return not self.db.profile.enabled
+            end
+        },
         display = {
             name = 'Display',
             type = 'group',
             inline = true,
-            disabled = function(info)
+            order = 10,
+            disabled = function()
                 return not self.db.profile.enabled
             end,
             args = {
@@ -311,11 +332,11 @@ function mod:GetOptions()
         }
     }
 end
-
 function mod:OnInitialize()
     self.db = addon.db:RegisterNamespace(self.moduleName, {
         profile = {
-            enabled   = true,
+            enabled = true,
+            onlyontarget = false,
             display = {
                 casttime        = false,
                 spellname       = true,
@@ -341,8 +362,23 @@ function mod:OnInitialize()
     self:RegisterForConfigChanged('addon', 'hheight')
 
     self:SetEnabledState(self.db.profile.enabled)
-end
 
+    -- handle default interface cvars & checkboxes
+    InterfaceOptionsCombatPanel:HookScript('OnShow', function()
+        InterfaceOptionsCombatPanelEnemyCastBarsOnNameplates:SetChecked(true)
+        InterfaceOptionsCombatPanelEnemyCastBarsNameplateSpellNames:SetChecked(true)
+        InterfaceOptionsCombatPanelEnemyCastBarsOnOnlyTargetNameplates:SetChecked(mod.db.profile.onlyontarget)
+        InterfaceOptionsCombatPanelEnemyCastBarsOnNameplates:Disable()
+        InterfaceOptionsCombatPanelEnemyCastBarsOnOnlyTargetNameplates:Disable()
+        InterfaceOptionsCombatPanelEnemyCastBarsNameplateSpellNames:Disable()
+    end)
+    InterfaceOptionsFrame:HookScript('OnHide', function()
+        -- ensure our options stay applied
+        SetCVars()
+    end)
+
+    SetCVars()
+end
 function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_PostCreate', 'CreateCastbar')
     self:RegisterMessage('KuiNameplates_PostHide', 'HideCastbar')
@@ -354,7 +390,6 @@ function mod:OnEnable()
         end
     end
 end
-
 function mod:OnDisable()
     local _,frame
     for _, frame in pairs(addon.frameList) do

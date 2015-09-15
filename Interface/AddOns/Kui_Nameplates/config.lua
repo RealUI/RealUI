@@ -20,6 +20,14 @@ do
         ['TOOLTIP'] = '6. TOOLTIP',
     }
 
+    local HealthTextSelectList = {
+        'Current |cff888888(145k)',
+        'Maximum |cff888888(156k)',
+        'Percent |cff888888(93)',
+        'Deficit |cff888888(-10.9k)',
+        'Blank |cff888888(  )'
+    }
+
     local globalConfigChangedListeners = {}
 
     local handlers = {}
@@ -143,41 +151,53 @@ do
                 type = 'group',
                 order = 1,
                 args = {
-                    combat = {
-                        name = 'Auto toggle in combat',
-                        desc = 'Automatically toggle on/off hostile nameplates upon entering/leaving combat',
-                        type = 'toggle',
+                    combataction_hostile = {
+                        name = 'Combat action: hostile',
+                        desc = 'Automatically toggle hostile nameplates when entering/leaving combat. Setting will be inverted upon leaving combat.',
+                        type = 'select',
+                        values = {
+                            'Do nothing', 'Hide enemies', 'Show enemies'
+                        },
                         order = 0
+                    },
+                    combataction_friendly = {
+                        name = 'Combat action: friendly',
+                        desc = 'Automatically toggle friendly nameplates when entering/leaving combat. Setting will be inverted upon leaving combat.',
+                        type = 'select',
+                        values = {
+                            'Do nothing', 'Hide friendlies', 'Show friendlies'
+                        },
+                        order = 1
                     },
                     fixaa = {
                         name = 'Fix aliasing',
                         desc = 'Attempt to make plates appear sharper. Has a positive effect on FPS, but will make plates appear a bit "loose", especially at low frame rates. Works best when uiscale is disabled and at larger resolutions (lower resolutions automatically downscale the interface regardless of uiscale setting).'..RELOAD_HINT,
                         type = 'toggle',
-                        order = 1
+                        order = 10
                     },
                     compatibility = {
                         name = 'Stereo compatibility',
                         desc = 'Fix compatibility with stereo video. This has a negative effect on performance when many nameplates are visible.'..RELOAD_HINT,
                         type = 'toggle',
-                        order = 2
+                        order = 20
                     },
                     leftie = {
                         name = 'Use leftie layout',
                         desc = 'Use left-aligned text layout (similar to the pre-223 layout). Note that this layout truncates long names. But maybe you prefer that.'..RELOAD_HINT,
                         type = 'toggle',
-                        order = 3,
+                        order = 30
                     },
                     highlight = {
                         name = 'Highlight',
                         desc = 'Highlight plates on mouse over.',
                         type = 'toggle',
-                        order = 4
+                        order = 40
                     },
                     highlight_target = {
                         name = 'Highlight target',
                         desc = 'Also highlight the current target.',
                         type = 'toggle',
-                        order = 5,
+                        order = 50,
                         disabled = function(info)
                             return not addon.db.profile.general.highlight
                         end
@@ -186,19 +206,19 @@ do
                         name = 'Use glow as shadow',
                         desc = 'The frame glow is used to indicate threat. It becomes black when a unit has no threat status. Disabling this option will make it transparent instead.',
                         type = 'toggle',
-                        order = 7,
+                        order = 70,
                         width = 'double'
                     },
                     targetglow = {
                         name = 'Show target glow',
                         desc = 'Make your target\'s nameplate glow',
                         type = 'toggle',
-                        order = 8
+                        order = 80
                     },
                     targetglowcolour = {
                         name = 'Target glow colour',
                         type = 'color',
-                        order = 9,
+                        order = 90,
                         hasAlpha = true,
                         disabled = function(info)
                             return not addon.db.profile.general.targetglow and not addon.db.profile.general.targetarrows
@@ -208,13 +228,13 @@ do
                         name = 'Show target arrows',
                         desc = 'Show arrows around your target\'s nameplate. They will inherit the colour of the target glow, set above.',
                         type = 'toggle',
-                        order = 10,
+                        order = 100,
                         width = 'double'
                     },
                     hheight = {
                         name = 'Health bar height',
                         desc = 'Note that these values do not affect the size or shape of the click-box, which cannot be changed.',
-                        order = 20,
+                        order = 110,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -224,7 +244,7 @@ do
                     thheight = {
                         name = 'Trivial health bar height',
                         desc = 'Height of the health bar of trivial (small, low maximum health) units.',
-                        order = 21,
+                        order = 120,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -233,7 +253,7 @@ do
                     },
                     width = {
                         name = 'Frame width',
-                        order = 22,
+                        order = 130,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -242,7 +262,7 @@ do
                     },
                     twidth = {
                         name = 'Trivial frame width',
-                        order = 24,
+                        order = 140,
                         type = 'range',
                         step = 1,
                         min = 1,
@@ -255,14 +275,14 @@ do
                         type = 'select',
                         dialogControl = 'LSM30_Statusbar',
                         values = AceGUIWidgetLSMlists.statusbar,
-                        order = 25,
+                        order = 150,
                     },
                     strata = {
                         name = 'Frame strata',
-                        desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 10.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
+                        desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 3.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
                         type = 'select',
                         values = StrataSelectList,
-                        order = 27
+                        order = 160
                     },
                     lowhealthval = {
                         name = 'Low health value',
@@ -271,7 +291,7 @@ do
                         min = 1,
                         max = 100,
                         bigStep = 1,
-                        order = 50
+                        order = 170
                     },
                 }
             },
@@ -414,17 +434,62 @@ do
                             }
                         }
                     },
-                    showalt = {
-                        name = 'Show contextual health',
-                        desc = 'Show alternate (contextual) health values as well as main values',
-                        type = 'toggle',
-                        order = 10
-                    },
-                    mouseover = {
-                        name = 'Show on mouse over',
-                        desc = 'Show health only on mouse over or on the targeted plate',
-                        type = 'toggle',
-                        order = 20
+                    text = {
+                        name = 'Health text',
+                        type = 'group',
+                        inline = true,
+                        order = 10,
+                        disabled = function(info)
+                            return addon.db.profile.hp.text.hp_text_disabled
+                        end,
+                        args = {
+                            hp_text_disabled = {
+                                name = 'Never show health text',
+                                type = 'toggle',
+                                order = 0,
+                                disabled = false
+                            },
+                            mouseover = {
+                                name = 'Mouseover & target only',
+                                desc = 'Only show health text upon mouseover or on the current target',
+                                type = 'toggle',
+                                order = 10
+                            },
+                            hp_friend_max = {
+                                name = 'Max. health friend',
+                                desc = 'Health text to show on maximum health friendly units',
+                                type = 'select',
+                                values = HealthTextSelectList,
+                                order = 20
+                            },
+                            hp_friend_low = {
+                                name = 'Damaged friend',
+                                desc = 'Health text to show on damaged friendly units',
+                                type = 'select',
+                                values = HealthTextSelectList,
+                                order = 30
+                            },
+                            hp_hostile_max = {
+                                name = 'Max. health hostile',
+                                desc = 'Health text to show on maximum health hostile units',
+                                type = 'select',
+                                values = HealthTextSelectList,
+                                order = 40
+                            },
+                            hp_hostile_low = {
+                                name = 'Damaged hostile',
+                                desc = 'Health text to show on damaged hostile units',
+                                type = 'select',
+                                values = HealthTextSelectList,
+                                order = 50
+                            },
+                            hp_warning = {
+                                name = '\n|cffff8888Due to limitations introduced in patch 6.2.2, the precise health values of nameplates is not known until the first mouseover/target of that frame. This value is cached, but it may not be entirely accurate.\n\nPercentage will be used as a fallback where health is not yet known.',
+                                type = 'description',
+                                fontSize = 'medium',
+                                order = 60
+                            }
+                        }
                     },
                     smooth = {
                         name = 'Smooth health bar',
@@ -432,20 +497,6 @@ do
                         type = 'toggle',
                         width = 'full',
                         order = 30
-                    },
-                    friendly = {
-                        name = 'Friendly health format',
-                        desc = 'The health display pattern for friendly units',
-                        type = 'input',
-                        pattern = '([<=]:[dmcpb];)',
-                        order = 40
-                    },
-                    hostile = {
-                        name = 'Hostile health format',
-                        desc = 'The health display pattern for hostile or neutral units',
-                        type = 'input',
-                        pattern = '([<=]:[dmcpb];)',
-                        order = 50
                     },
                 }
             },

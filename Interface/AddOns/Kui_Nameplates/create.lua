@@ -2,6 +2,7 @@
 -- Kui_Nameplates
 -- By Kesava at curse.com
 -- All rights reserved
+-- Frame element creation/update functions
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local kui = LibStub('Kui-1.0')
@@ -74,8 +75,11 @@ end
 ------------------------------------------------------------------ Health bar --
 function addon:CreateHealthBar(frame, f)
     f.health = CreateFrame('StatusBar', nil, f)
+    f.health:SetFrameLevel(1)
     f.health:SetStatusBarTexture(addon.bartexture)
 	f.health.percent = 100
+
+    f.health:GetStatusBarTexture():SetDrawLayer('ARTWORK',-8)
 
     if self.SetValueSmooth then
         -- smooth bar
@@ -119,7 +123,8 @@ function addon:CreateHealthText(frame, f)
     f.health.p:SetJustifyH('RIGHT')
     f.health.p:SetJustifyV('BOTTOM')
 
-    if self.db.profile.hp.mouseover then
+    if self.db.profile.hp.text.mouseover then
+        -- hide initially
         f.health.p:Hide()
     end
 end
@@ -127,7 +132,7 @@ function addon:UpdateHealthText(f, trivial)
     if trivial then
         f.health.p:Hide()
     else
-        if not self.db.profile.hp.mouseover then
+        if not self.db.profile.hp.text.mouseover then
             f.health.p:Show()
         end
 
@@ -137,36 +142,6 @@ function addon:UpdateHealthText(f, trivial)
         else
             f.health.p:SetPoint('TOPRIGHT', f.health, 'BOTTOMRIGHT',
                                 -2.5, self.db.profile.text.healthoffset + 4)
-        end
-    end
-end
-------------------------------------------------------------- Alt health text --
-function addon:CreateAltHealthText(frame, f)
-    f.health.mo = f:CreateFontString(f.overlay, {
-        font = self.font, size = 'small', alpha = .6, outline = "OUTLINE" })
-
-    f.health.mo:SetHeight(10)
-    f.health.mo:SetJustifyH('RIGHT')
-    f.health.mo:SetJustifyV('BOTTOM')
-
-    if self.db.profile.hp.mouseover then
-        f.health.mo:Hide()
-    end
-end
-function addon:UpdateAltHealthText(f, trivial)
-    if not f.health.mo then return end
-    if trivial then
-        f.health.mo:Hide()
-    else
-        if not self.db.profile.hp.mouseover then
-            f.health.mo:Show()
-        end
-
-        if self.db.profile.general.leftie then
-            f.health.mo:SetPoint('TOPRIGHT', f.health, 'BOTTOMRIGHT',
-                                 -2.5, self.db.profile.text.healthoffset + 3)
-        else
-            f.health.mo:SetPoint('BOTTOMRIGHT', f.health.p, 'BOTTOMLEFT',0, 0)
         end
     end
 end
@@ -251,26 +226,4 @@ function addon:UpdateTargetGlow(f, trivial)
     else
         f.targetGlow:SetSize(self.sizes.tex.targetGlowW, self.sizes.tex.targetGlowH)
     end
-end
----------------------------------------------------------------- Target arrow --
-function addon:CreateTargetArrows(f)
-    local arrowSize = floor(self.sizes.tex.targetArrow)
-    local ta = CreateFrame('Frame',nil,f.overlay)
-
-    ta.left = ta:CreateTexture(nil,'ARTWORK',nil,1)
-    ta.left:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
-    ta.left:SetPoint('RIGHT',f.overlay,'LEFT',14,-1)
-    ta.left:SetSize(arrowSize,arrowSize)
-
-    ta.right = ta:CreateTexture(nil,'ARTWORK',nil,1)
-    ta.right:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
-    ta.right:SetTexCoord(1,0,0,1)
-    ta.right:SetPoint('LEFT',f.overlay,'RIGHT',-14,-1)
-    ta.right:SetSize(arrowSize,arrowSize)
-
-    ta.left:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
-    ta.right:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
-
-    ta:Hide()
-    f.targetArrows = ta
 end

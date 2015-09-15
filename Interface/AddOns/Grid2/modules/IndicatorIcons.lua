@@ -13,16 +13,15 @@ local function Icon_Create(self, parent)
 	f.visibleCount = 0
 end
 
-
 -- Warning: This is an overrided indicator:Update() NOT the standard indicator:OnUpdate()
 local function Icon_OnFrameUpdate(f)
-	local self   = f.myIndicator
-	local parent = f.myFrame
-	local unit   = parent.unit
-	local max    = self.maxIcons
-	local auras  = f.auras
+	local unit = f.myFrame.unit
+	if not unit then return end
+	local self = f.myIndicator
+	local max = self.maxIcons
+	local auras = f.auras
 	local showStack = self.showStack
-	local showCool  = self.showCooldown
+	local showCool = self.showCooldown
 	local useStatus = self.useStatusColor
 	local i = 1
 	for _, status in ipairs(self.statuses) do
@@ -35,11 +34,11 @@ local function Icon_OnFrameUpdate(f)
 					aura.icon:SetTexture(textures[j])
 					if showStack then
 						local count = counts[j]
-						aura.text:SetText(count>1 and count or "") 
+						aura.text:SetText(count>1 and count or "")
 					end
 					if showCool then
 						local expiration, duration = expirations[j], durations[j]
-						aura.cooldown:SetCooldown(expiration - duration, duration) 
+						aura.cooldown:SetCooldown(expiration - duration, duration)
 					end
 					if useStatus then
 						local c = colors[j]
@@ -52,13 +51,15 @@ local function Icon_OnFrameUpdate(f)
 			else
 				local aura = auras[i]
 				aura.icon:SetTexture(status:GetIcon(unit))
-				if showStack then 
+				aura.icon:SetTexCoord(status:GetTexCoord(unit))
+				aura.icon:SetVertexColor(status:GetVertexColor(unit))
+				if showStack then
 					local count = status:GetCount(unit)
-					aura.text:SetText(count>1 and count or "") 
+					aura.text:SetText(count>1 and count or "")
 				end
-				if showCool then 
+				if showCool then
 					local expiration, duration = status:GetExpirationTime(unit) or 0, status:GetDuration(unit) or 0
-					aura.cooldown:SetCooldown(expiration - duration, duration) 
+					aura.cooldown:SetCooldown(expiration - duration, duration)
 				end
 				if useStatus then
 					local r,g,b,a = status:GetColor(unit)
@@ -66,10 +67,10 @@ local function Icon_OnFrameUpdate(f)
 				end
 				aura:Show()
 				i = i + 1
-			end	
-			if i>max then break end			
-		end	
-	end	
+			end
+			if i>max then break end
+		end
+	end
 	for j=i,f.visibleCount do
 		auras[j]:Hide()
 	end
@@ -111,7 +112,7 @@ local function Icon_Layout(self, parent)
 		if not frame then
 			frame = CreateFrame("Frame", nil, f)
 			frame.icon = frame:CreateTexture(nil, "ARTWORK")
-			frame.text = frame:CreateFontString(nil, "OVERLAY")	
+			frame.text = frame:CreateFontString(nil, "OVERLAY")
 			frame.cooldown = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
 			frame.cooldown:SetHideCountdownNumbers(true)
 			auras[i] = frame
@@ -124,7 +125,7 @@ local function Icon_Layout(self, parent)
 			frame:SetBackdropBorderColor(c.r,c.g,c.b,c.a)
 		else
 			frame:SetBackdrop(nil)
-		end	
+		end
 		frame:ClearAllPoints()
 		frame:SetPoint( self.anchorIcon, f, self.anchorIcon, (x*ux+y*vx)*size, (x*uy+y*vy)*size )
 		-- stack count text
@@ -144,7 +145,7 @@ local function Icon_Layout(self, parent)
 			text:SetPoint("LEFT" , justifyH=="LEFT"  and 0 or -self.iconSize, 0)
 			text:SetPoint("RIGHT", justifyH=="RIGHT" and 2 or  self.iconSize+2, 0)
 			text:Show()
-		else	
+		else
 			frame.text:Hide()
 		end
 		-- cooldown animation
@@ -154,7 +155,7 @@ local function Icon_Layout(self, parent)
 			frame.cooldown:Show()
 		else
 			frame.cooldown:Hide()
-		end	
+		end
 		-- icon texture
 		frame.icon:SetPoint("TOPLEFT",     frame ,"TOPLEFT",  self.borderSize, -self.borderSize)
 		frame.icon:SetPoint("BOTTOMRIGHT", frame ,"BOTTOMRIGHT", -self.borderSize, self.borderSize)
@@ -193,7 +194,7 @@ local function Icon_UpdateDB(self, dbx)
 	self.maxIcons       = dbx.maxIcons or 6
 	self.maxIconsPerRow = dbx.maxIconsPerRow or 3
 	self.iconTotSize    = self.iconSize + self.iconSpacing
-	local maxRows = math.floor(self.maxIcons/self.maxIconsPerRow) + (self.maxIcons%self.maxIconsPerRow==0 and 0 or 1) 
+	local maxRows = math.floor(self.maxIcons/self.maxIconsPerRow) + (self.maxIcons%self.maxIconsPerRow==0 and 0 or 1)
 	self.uy     = 0
 	self.vx     = 0
 	self.ux     = pointsX[self.anchorIcon]
@@ -224,8 +225,8 @@ local function Icon_UpdateDB(self, dbx)
 		backdrop.insets.right  = self.borderSize
 		backdrop.insets.top    = self.borderSize
 		backdrop.insets.bottom = self.borderSize
-		self.backdrop          = backdrop	
-	end	
+		self.backdrop          = backdrop
+	end
 	-- methods
 	self.Create        = Icon_Create
 	self.Layout        = Icon_Layout

@@ -11,7 +11,7 @@ local r, g, b = C.r, C.g, C.b
 
 -- RealUI
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local ndb = nibRealUI.db.profile
 local ndbc = nibRealUI.db.char
 local hudSize = ndb.settings.hudSize

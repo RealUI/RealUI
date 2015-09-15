@@ -8,14 +8,19 @@ local statusTypes = { "color", "icon", "icons", "percent", "text" }
 
 -- Called from StatusAuras.lua
 local function status_UpdateState(self, unit, texture, count, duration, expiration, _, _, debuffType)
-	self.states[unit] = true
-	self.textures[unit] = texture
-	self.durations[unit] = duration
-	self.expirations[unit] = expiration
-	self.counts[unit] = count~=0 and count or 1
-	self.types[unit] = debuffType
-	self.tracker[unit] = 1
-	self.seen = 1
+	if count==0 then count = 1 end
+	if self.states[unit]==nil or self.counts[unit] ~= count or expiration~=self.expirations[unit] then 
+		self.states[unit] = true
+		self.textures[unit] = texture
+		self.durations[unit] = duration
+		self.expirations[unit] = expiration
+		self.counts[unit] = count
+		self.types[unit] = debuffType
+		self.tracker[unit] = 1
+		self.seen = 1
+	else	
+		self.seen = -1
+	end	
 end
 
 local function status_UpdateStateFilter(self, unit, name, texture, count, duration, expiration, caster, isBossDebuff, debuffType)

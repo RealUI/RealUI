@@ -1,8 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local Tablet20 = LibStub("Tablet-2.0")
-local qTip = LibStub("LibQTip-1.0")
 
 local MODNAME = "InfoLine"
 local InfoLine = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
