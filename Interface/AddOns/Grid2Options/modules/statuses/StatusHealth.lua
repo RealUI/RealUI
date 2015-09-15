@@ -1,5 +1,20 @@
 local L = Grid2Options.L
 
+Grid2Options:RegisterStatusCategoryOptions("health", {
+	specialVelhariFix = {
+		type = "toggle",
+		name = L["HFC Tyrant Velhari Encounter maximum health Fix"],
+		desc = L["Adjust players maximum health according to Aura of Contempt debuff in HellFire Citadel Tyrant Velhari Encounter. This adjust affects statuses displayed in bar indicators."],
+		width = "full",
+		order = 200,
+		get = function () return Grid2.db.profile.HfcVelhariHealthFix end,
+		set = function (_, v)
+			Grid2.db.profile.HfcVelhariHealthFix = v or nil
+			Grid2Utils:FixVelhariEncounterHealth(v)
+		end,
+	}
+} )
+
 Grid2Options:RegisterStatusOptions("health-current", "health", function(self, status, options, optionParams)
 	self:MakeStatusColorOptions(status, options, optionParams)
 	self:MakeSpacerOptions(options, 30)

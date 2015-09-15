@@ -52,7 +52,8 @@ local latin  = (locale ~= 'zhCN' and locale ~= 'zhTW' and locale ~= 'koKR' and l
 local defaults = {
     profile = {
         general = {
-            combat      = false, -- automatically show hostile plates upon entering combat
+            combataction_hostile = 1,
+            combataction_friendly = 1,
             highlight   = true, -- highlight plates on mouse-over
             highlight_target = false,
             fixaa       = true, -- attempt to make plates appear sharper
@@ -95,11 +96,15 @@ local defaults = {
                 tappedcol   = { .5, .5, .5 },
                 playercol   = { .2, .5, .9 }
             },
-            friendly  = '<:d;', -- health display pattern for friendly units
-            hostile   = '<:p;', -- health display pattern for enemy units
-            showalt   = false, -- show alternate health values
-            mouseover = false, -- hide health values until mouseover/target
-            smooth    = true -- smoothly animate health bar changes
+            text = {
+                hp_text_disabled = false,
+                mouseover = false,
+                hp_friend_max = 5,
+                hp_friend_low = 4,
+                hp_hostile_max = 5,
+                hp_hostile_low = 3
+            },
+            smooth = true
         },
         fonts = {
             options = {
@@ -143,6 +148,8 @@ do
         if f.player and knownGUIDs[f.name.text] then
             f.guid = knownGUIDs[f.name.text]
             loadedGUIDs[f.guid] = f
+
+            addon:SendMessage('KuiNameplates_GUIDAssumed', f)
         end
     end
     function addon:StoreGUID(f, unit)
@@ -391,7 +398,6 @@ addon.configChangedFuncs.runOnce.healthoffset = function(val)
 end
 addon.configChangedFuncs.healthoffset = function(frame, val)
     addon:UpdateHealthText(frame, frame.trivial)
-    addon:UpdateAltHealthText(frame, frame.trivial)
     addon:UpdateLevel(frame, frame.trivial)
     addon:UpdateName(frame, frame.trivial)
 end
@@ -509,7 +515,6 @@ function addon:OnEnable()
     ScaleFontSizes()
 
     -------------------------------------- Health bar smooth update functions --
-    -- (spoon-fed by oUF_Smooth)
     if self.db.profile.hp.smooth then
         local f, smoothing, GetFramerate, min, max, abs
             = CreateFrame('Frame'), {}, GetFramerate, math.min, math.max, math.abs
@@ -541,7 +546,7 @@ function addon:OnEnable()
 
                 bar:OrigSetValue(new)
 
-                if cur == value or abs(new - value) < 2 then
+                if cur == value or abs(new - value) < .005 then
                     bar:OrigSetValue(value)
                     smoothing[bar] = nil
                 end
@@ -549,11 +554,11 @@ function addon:OnEnable()
         end)
     end
 
-    -- FIXME this may/may not fix #34
     self:configChangedListener()
 
     self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+    self:RegisterEvent('PLAYER_REGEN_ENABLED')
+    self:RegisterEvent('PLAYER_REGEN_DISABLED')
 
-    self:ToggleCombatEvents(self.db.profile.general.combat)
     self:ScheduleRepeatingTimer('OnUpdate', .1)
 end

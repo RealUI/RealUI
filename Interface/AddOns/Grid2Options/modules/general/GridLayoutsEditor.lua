@@ -265,7 +265,7 @@ local function LoadLayoutGeneralOptions(name)
 		type = "range",
 		name = L["Scale"],
 		desc = L["Adjust Grid scale."],
-		order = 2,
+		order = 2.2,
 		softMin = 0.5,
 		softMax = 2.0,
 		step = 0.05,
@@ -276,6 +276,42 @@ local function LoadLayoutGeneralOptions(name)
 		set = function (_, v)
 				Grid2Layout.db.profile.layoutScales[name]= (v~=1) and v or nil
 			    Grid2Layout:Scale()
+			  end,
+	}
+	args.frameWidth = {
+		type = "range",
+		name = L["Frame Width"],
+		desc = L["Select zero to use default Frame Width"],
+		order = 2,
+		softMin = 0,
+		softMax = 100,
+		step = 1,
+		get = function ()
+				  return Grid2Frame.db.profile.frameWidths[name] or 0
+			  end,
+		set = function (_, v)
+				Grid2Frame.db.profile.frameWidths[name]= (v~=0) and v or nil
+				if name==Grid2Layout.layoutName then 
+					Grid2Layout:UpdateDisplay()
+				end
+			  end,
+	}
+	args.frameHeight = {
+		type = "range",
+		name = L["Frame Height"],
+		desc = L["Select zero to use default Frame Height"],
+		order = 2.1,
+		softMin = 0,
+		softMax = 100,
+		step = 1,
+		get = function ()
+				  return Grid2Frame.db.profile.frameHeights[name] or 0
+			  end,
+		set = function (_, v)
+				Grid2Frame.db.profile.frameHeights[name]= (v~=0) and v or nil
+				if name==Grid2Layout.layoutName then 
+					Grid2Layout:UpdateDisplay()
+				end
 			  end,
 	}
 	if isCustom then

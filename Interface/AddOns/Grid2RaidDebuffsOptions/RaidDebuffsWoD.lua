@@ -212,6 +212,158 @@ RDDB["Warlords of Draenor"] = {
 		175624, -- Heridas mortalmente graves
 		},
 	},
+	[1026] = {
+		["Hellfire Assault"] = {
+		order = 1, ejid = 1426,
+		184243, -- Slam
+		185806, -- Conducted Shock Pulse
+		184379, -- Howling Axe
+		184238, -- Cower (movement)
+		180022, -- Bore (frontal cone damage)
+		185157, -- Burn (cone dot)
+		180079, -- Felfire Munitions (carrying, dot)		
+		},
+		["Iron Reaver"] = {
+		order = 2, ejid = 1425,		
+		182001, -- Orbe inestable
+		182074, -- Inmolation
+		179897, -- Blitz (carry, silence, not dispellable)
+		182022, -- Pounding
+		182280, -- Artillery
+		182003, -- Fuel Streak (movement)		
+		},
+		["Kormrok"] = {
+		order = 3, ejid = 1392,
+		181306, -- Explosive Burst	
+		181321, -- Fel Touch
+		180244, -- Pound
+		187819, -- Crush
+		188081, -- Crush (dot)
+		181345, -- Foul Crush (tank dot)
+		186559, -- Fiery Pool (standing in pool)
+		185519, -- Fiery Globule (dot)
+		181082, -- Shadowy Pool (standing in pool)
+		180270, -- Shadow Globule (dot)
+		186560, -- Foul Pool (standing in pool)
+		185521, -- Foul Globule (dot)		
+		},
+		["Hellfire High Council"] = {
+		order = 4, ejid = 1432,
+		184450, -- Mark of the Necromancer (dot, dispellable)
+		184358, -- Fel Rage (aggro target)
+		184355, -- Bloodboil (dot, stacks)
+		184847, -- Acidic Wound (tank dot, stacks)
+		184357, -- Tainted Blood (debuff, stacks)
+		184652, -- Reap (standing in puddle?)		
+		},
+		["Kilrogg Deadeye"] = {
+		order = 5, ejid = 1396,	
+		180372, -- Heart Seeker
+		182159, -- Fel Corruption
+		180200, -- Shredded Armor
+		180224, -- Death Throes
+		},
+		["Gorefiend"] = {
+		order = 6, ejid = 1372,
+		179864, -- Shadow of Death
+		179978, -- Touch of Doom
+		179909, -- Shared Fate
+		180148, -- Hunger for Life
+		},
+		["Shadow-Lord Iskar"] = {
+		order = 7, ejid = 1433,
+		179202,  -- Eye of Anzu
+		181956,  -- Phantasmal Winds
+		182323,  -- Phantasmal Wounds
+		182173,  -- Fel Chakram
+		181753,  -- Fel Bomb
+		185747,  -- Fel Beam Fixate
+		182600,  -- Fel Fire
+		179218,  -- Phantasmal Obliteration
+		185239,  -- Radiance-of-anzu
+		},
+		["Socrethar the Eternal"] = {
+		order = 8, ejid = 1427,	
+		182038, -- Shattered Defenses
+		182635, -- Reverberating Blow
+		184239, -- Shadow Word Agony
+		136913, -- Overwhelming Power
+		184124, -- Gift of the Man'ari
+		182769, -- Ghastly Fixation		
+		},
+		["Fel Lord Zakuun"] = {
+		order = 9, ejid = 1391,	
+		181508, -- Seed of destruction
+		189260, -- Cloven Soul		
+		179711, -- Befouled
+		182008, -- Latent Energy
+		179620, -- Fel Crystal
+		189030, -- BEFOULEDRED
+		189031, -- BEFOULEDORANGE
+		189032, -- BEFOULEDGREEN		
+		},
+		["Xhul'horac"] = {
+		order = 10, ejid = 1447,	
+		186490, -- Chains of Fel
+		186546, -- Black Hole
+		186407, -- Fel Surge
+		186073, -- Felsinged
+		186134, -- Feltouched
+		185656, -- Shadowfel Annihilation		
+		186333, -- Void Surge
+		186063, -- Wasting Void
+		186135, -- Voidtouched		
+		186448, -- Felblaze Flurry		
+		},
+		["Tyrant Velhari"] = {
+		order = 11, ejid = 1394,
+		180166, -- Touch of Harm
+		180128, -- Edict of Condemnation
+		179999, -- Seal of decay
+		180300, -- Infernal tempest
+		180526, -- Font of corruption
+		180533, -- Tainted Shadows
+		180569, -- Tainted Shadows
+		180604, -- Despoiled Ground		
+		},
+		["Mannoroth"] = {
+		order = 12, ejid = 1395,
+		181099, -- Mark of Doom
+		181597, -- Mannoroth's Gaze	
+		181359, -- Massive Blast	
+		184252, -- Puncture Wound	
+		181116, -- Doom Spike
+		181275, -- Curse of the Legion
+		186362, -- Wrath of Gul'dan
+		186350, -- Gripping Shadows		
+		181841, -- Shadowforce
+		182088, -- Empowered Shadowforce		
+		},
+		["Archimonde"] = {
+		order = 13, ejid = 1438,
+		189891, -- Nether Tear
+		186952, -- Nether Banish		
+		185590, -- Desecrate
+		183864, -- Shadow Blast
+		183828, -- Death Brand
+		184931, -- Shackled Torment		
+		182879, -- Doomfire Fixate
+		183586, -- Doomfire
+		186123, -- Wrought Chaos		
+		183634, -- Shadowfel Burst
+		187047, -- Devour Life
+		185014, -- Focused Chaos		
+		190341, -- Nether Corruption
+		183963, -- Light of the Naaru
+		189895, -- Void Star Fixate
+		187255, -- Nether Storm		
+		},
+		["Trash"] = {
+		order = 50, ejid = nil,
+		184621, -- Hellfire Blast
+		184587, -- Touch of Mortality		
+		},
+	},
 	-- world bosses
 	[949] = { -- Gorgrond
 		["Drov the Ruiner"] = {

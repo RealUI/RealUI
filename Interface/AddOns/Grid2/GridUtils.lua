@@ -1,5 +1,7 @@
 -- Misc functions
 
+local Grid2Utils = Grid2:NewModule("Grid2Utils")
+
 local Grid2 = Grid2
 
 function Grid2.Dummy()
@@ -101,3 +103,59 @@ Grid2.AlignPoints= {
 	}	
 }
 
+-- Cheap method to hook/change on the fly some globals
+-- Used by health/shields statuses to retrieve global UnitHealthMax function (see StatusShields.lua)
+-- Needed to change the behavior of UnitHealthMax function in HFC Velhari encounter.
+do
+	local _g = {}
+	Grid2.Globals = setmetatable( {}, { 
+		__index    = function (t,k) return _g[k] or _G[k] end,
+		__newindex = function (t,k,v) _g[k] = v; Grid2:SendMessage("Grid2_Update_"..k, v or _G[k]) end,
+	} )
+end
+
+-- Hellfire Citadel Velhari Encounter Health Fix
+-- Grid2Utils:FixVelhariEncounterHealth(true | false)
+do
+	local CONTEMPT_AURA = GetSpellInfo(179986)
+	local velhari_fix = false
+	local velhari_percent = -1
+	local floor = math.floor
+	local select = select
+	local UnitAura = UnitAura
+	local UnitHealthMax = UnitHealthMax
+	local function VelhariHealthMax(unit)
+		return floor( UnitHealthMax(unit) * velhari_percent )
+	end
+	local function VelhariUpdate()
+		if velhari_percent~=-1 then
+			local p = select(15, UnitAura("boss1", CONTEMPT_AURA))
+			p = p and p/100 or 1
+			if velhari_percent ~= p then
+				velhari_percent = p
+				Grid2.Globals.UnitHealthMax = VelhariHealthMax
+			end
+			C_Timer.After(1, VelhariUpdate)
+		end	
+	end
+	function Grid2Utils:FixVelhariEncounterHealth(v)
+		if v ~= velhari_fix then
+			if v then
+				self:RegisterEvent( "ENCOUNTER_START", function(_,ID) if ID == 1784 then velhari_percent = 1; VelhariUpdate() end end )
+				self:RegisterEvent( "ENCOUNTER_END",   function() velhari_percent = -1; Grid2.Globals.UnitHealthMax = nil end )
+				self:Debug("HFC Tyrant Velhari Encounter Max Health Fix: ENABLED")
+			else
+				self:UnregisterEvent( "ENCOUNTER_START" )
+				self:UnregisterEvent( "ENCOUNTER_END" )
+				self:Debug("HFC Tyrant Velhari Encounter Max Health Fix: DISABLED")				
+			end 	
+			velhari_fix = v
+		end
+	end
+end
+
+function Grid2Utils:OnModuleEnable()
+	self:FixVelhariEncounterHealth( Grid2.db.profile.HfcVelhariHealthFix )
+end
+
+_G.Grid2Utils = Grid2Utils

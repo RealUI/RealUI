@@ -73,9 +73,7 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 		end,
 		set = function (_, v)
 			Grid2Frame.db.profile.frameWidth = v
-			Grid2Frame:LayoutFrames()
-			Grid2Layout:UpdateHeadersSize()
-			Grid2Layout:UpdateSize()
+			Grid2Layout:UpdateDisplay()
 			if Grid2Options.LayoutTestRefresh then Grid2Options:LayoutTestRefresh() end
 		end,
 		disabled = InCombatLockdown,
@@ -92,9 +90,7 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 		end,
 		set = function (_, v)
 			Grid2Frame.db.profile.frameHeight = v
-			Grid2Frame:LayoutFrames()
-			Grid2Layout:UpdateHeadersSize()
-			Grid2Layout:UpdateSize()
+			Grid2Layout:UpdateDisplay()
 			if Grid2Options.LayoutTestRefresh then Grid2Options:LayoutTestRefresh() end
 		end,
 		disabled = InCombatLockdown,
@@ -158,16 +154,4 @@ Grid2Options:AddGeneralOptions("General", "Frames", { orientation = {
 		end,
 },} )
 
--- Force GridLayoutHeaders size recalculation. Called from Grid2Options when frames width or height changes. 
--- Without this, UpdateSize calculates wrong layout size because g:GetWidth/g:GetHeight dont return correct values.
--- TODO: A better way to fix this issue ?
-function Grid2Layout:UpdateHeadersSize()
-	for type, headers in pairs(self.groups) do
-		for i = 1, self.indexes[type] do
-			local g = headers[i]
-			g:Hide()
-			g:Show()
-		end
-	end
-end
 

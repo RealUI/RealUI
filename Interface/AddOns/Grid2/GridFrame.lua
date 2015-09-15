@@ -38,20 +38,20 @@ do
 	UIDropDownMenu_Initialize(frame, function()
 		if unit then
 			local menu,raid
-			if     UnitIsUnit(unit, "player") then menu = "SELF" 
+			if     UnitIsUnit(unit, "player") then menu = "SELF"
 			elseif UnitIsUnit(unit, "pet")    then menu = "PET"
 			elseif Grid2:UnitIsPet(unit)      then menu = "RAID_TARGET_ICON"
-			elseif Grid2:UnitIsParty(unit) 	  then menu = "PARTY" 
-			elseif Grid2:UnitIsRaid(unit) 	  then menu,raid = "RAID_PLAYER", UnitInRaid(unit) 
+			elseif Grid2:UnitIsParty(unit) 	  then menu = "PARTY"
+			elseif Grid2:UnitIsRaid(unit) 	  then menu,raid = "RAID_PLAYER", UnitInRaid(unit)
 			else return end
 			UnitPopup_ShowMenu(frame, menu, unit, nil, raid)
-		end	
+		end
 	end, "MENU")
 	ToggleUnitMenu = function(self)
 		unit = self.unit
 		ToggleDropDownMenu(1, nil, frame, "cursor")
 	end
-end	
+end
 --}}}
 
 -- {{ Precalculated backdrop table, shared by all frames
@@ -78,7 +78,7 @@ function GridFrameEvents:OnAttributeChanged(name, value)
 				Grid2Frame:Debug("updated", self:GetName(), name, value, unit)
 				self.unit = unit
 				Grid2:SetFrameUnit(self, unit)
-				self:UpdateIndicators()				
+				self:UpdateIndicators()
 			end
 		elseif self.unit then
 			Grid2Frame:Debug("removed", self:GetName(), name, self.unit)
@@ -121,16 +121,15 @@ end
 
 function GridFramePrototype:Layout()
 	local dbx = Grid2Frame.db.profile
-	local w = dbx.frameWidth 
-	local h = dbx.frameHeight
+	local w, h = Grid2Frame:GetFrameSize()
 	-- external border controlled by the border indicator
-	local r,g,b,a = self:GetBackdropBorderColor() 
+	local r,g,b,a = self:GetBackdropBorderColor()
 	self:SetBackdrop( frameBackdrop )
 	self:SetBackdropBorderColor(r, g, b, a)
 	-- inner border color (sure that is the inner border)
 	local cf = dbx.frameColor
 	self:SetBackdropColor( cf.r, cf.g, cf.b, cf.a )
-	-- visible background 
+	-- visible background
 	local container= self.container
 	container:SetPoint("CENTER", self, "CENTER")
 	-- visible background color
@@ -167,7 +166,7 @@ function GridFramePrototype:UpdateIndicators()
 		for i=1,#indicators do
 			indicators[i]:Update(self, unit)
 		end
-	end	
+	end
 end
 --}}}
 
@@ -190,8 +189,10 @@ Grid2Frame.defaultDB = {
 		orientation = "VERTICAL",
 		textOrientation = "VERTICAL",
 		intensity = 0.5,
-		blinkType = "Flash", 
+		blinkType = "Flash",
 		blinkFrequency = 2,
+		frameWidths  = {},
+		frameHeights = {},
 	}
 }
 
@@ -260,7 +261,9 @@ end
 
 function Grid2Frame:GetFrameSize()
 	local p = self.db.profile
-	return p.frameWidth, p.frameHeight
+	local l = Grid2Layout.layoutName or "NoLayout"
+	local m = Grid2Layout.instMaxPlayers or 0
+	return p.frameWidths[l] or p.frameWidths[m] or p.frameWidth, p.frameHeights[l] or p.frameHeights[m] or p.frameHeight
 end
 
 -- Grid2Frame:WithAllFrames()
@@ -284,9 +287,9 @@ end
 
 -- shows the default unit tooltip
 do
-	local TooltipCheck= { 	
-		Always = function() return false end, 
-		Never  = function() return true end, 
+	local TooltipCheck= {
+		Always = function() return false end,
+		Never  = function() return true end,
 		OOC    = InCombatLockdown,
 	}
 	function Grid2Frame:OnFrameEnter(frame)
@@ -305,25 +308,25 @@ end
 do
 	local blinkDuration
 	function Grid2Frame:SetBlinkEffect(frame, enabled)
-		local anim = frame.blinkAnim 
+		local anim = frame.blinkAnim
 		if enabled then
 			if not anim then
 				anim = frame:CreateAnimationGroup()
 				local alpha = anim:CreateAnimation("Alpha")
-				alpha:SetOrder(1) 
+				alpha:SetOrder(1)
 				alpha:SetChange(-0.9)
 				anim:SetLooping("REPEAT")
-				anim.alpha = alpha			
+				anim.alpha = alpha
 				frame.blinkAnim = anim
 			end
-			if not anim:IsPlaying() then 
+			if not anim:IsPlaying() then
 				anim.alpha:SetDuration(blinkDuration)
-				anim:Play() 
+				anim:Play()
 			end
 		elseif anim then
 			anim:Stop()
-		end		
-	end	
+		end
+	end
 	function Grid2Frame:UpdateBlink()
 		local indicator = Grid2.indicatorPrototype
 		indicator.Update = self.db.profile.blinkType~="None" and indicator.UpdateBlink or indicator.UpdateNoBlink

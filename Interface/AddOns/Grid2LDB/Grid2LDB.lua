@@ -31,11 +31,11 @@ local Grid2LDB = DataBroker:NewDataObject("Grid2", {
 })
 
 local icon = LibStub("LibDBIcon-1.0")
-if icon then 
-	icon:Register("Grid2", Grid2LDB, Grid2Layout.db.profile.minimapIcon) 
+if icon then
+	icon:Register("Grid2", Grid2LDB, Grid2Layout.db.profile.minimapIcon)
 	Grid2Layout.minimapIcon = icon
-end	
-	
+end
+
 --
 -- Layouts popup menu
 --
@@ -47,13 +47,17 @@ do
 	local menuTable = {}
 	local function SetLayout(self)
 		if not InCombatLockdown() then
-			layoutName = self.value
-			local layouts = Grid2Layout.db.profile.layouts		
-			local key = partyType.."@"..instType
-			if not layouts[key] then key = partyType end
+			layoutName    = self.value
+			local key     = Grid2Layout.instMaxPlayers
+			local layouts = Grid2Layout.db.profile.layoutBySize
+			if not layouts[key] then
+				layouts = Grid2Layout.db.profile.layouts
+				key = partyType.."@"..instType
+				if not layouts[key] then key = partyType end
+			end
 			layouts[key] = layoutName
 			Grid2Layout:ReloadLayout()
-		end	
+		end
 	end
 	local function CreateMenuTable()
 		layoutName = Grid2Layout.layoutName
@@ -72,8 +76,8 @@ do
 		end
 	end
 	MenuLayoutsShow= function()
-		menuFrame= menuFrame or CreateFrame("Frame", "Grid2LDBLayoutsMenu", UIParent, "UIDropDownMenuTemplate") 
+		menuFrame= menuFrame or CreateFrame("Frame", "Grid2LDBLayoutsMenu", UIParent, "UIDropDownMenuTemplate")
 		CreateMenuTable()
 		EasyMenu(menuTable, menuFrame, "cursor", 0 , 0, "MENU", 1)
-	end	
-end	
+	end
+end
