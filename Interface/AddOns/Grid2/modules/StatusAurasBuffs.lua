@@ -7,13 +7,18 @@ local myUnits = { player = true, pet = true, vehicle = true }
 
 -- Called from StatusAuras.lua
 local function status_UpdateState(self, unit, texture, count, duration, expiration)
-	self.states[unit] = true
-	self.textures[unit] = texture
-	self.durations[unit] = duration
-	self.expirations[unit] = expiration
-	self.counts[unit] = count~=0 and count or 1
-	self.tracker[unit] = 1
-	self.seen = 1
+	if count==0 then count = 1 end
+	if self.states[unit]==nil or count ~= self.counts[unit] or expiration ~= self.expirations[unit] then 
+		self.states[unit] = true
+		self.textures[unit] = texture
+		self.durations[unit] = duration
+		self.expirations[unit] = expiration
+		self.counts[unit] = count
+		self.tracker[unit] = 1
+		self.seen = 1
+	else
+		self.seen = -1
+	end	
 end
 
 local function status_UpdateStateMine(self, unit, texture, count, duration, expiration, _, isMine)

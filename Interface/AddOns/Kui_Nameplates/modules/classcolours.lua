@@ -14,12 +14,14 @@ local cache_index = {}
 
 mod.uiName = "Class colours"
 
+local function SetCVars()
+    SetCVar('ShowClassColorInNameplate',mod.db.profile.enemy)
+end
 -- functions ###################################################################
 function mod:SetClassColour(frame, cc)
     frame.name.class_coloured = true
     frame.name:SetTextColor(cc.r,cc.g,cc.b)
 end
-
 -- message handlers ############################################################
 function mod:GUIDStored(msg, f, unit)
     -- get colour from unit definition and override cache
@@ -38,7 +40,6 @@ function mod:GUIDStored(msg, f, unit)
         end
     end
 end
-
 function mod:PostShow(msg, f)
     if not (f.friend and f.player) then return end
     if cache[f.name.text] then
@@ -50,12 +51,10 @@ function mod:PostShow(msg, f)
         f.name:SetTextColor(.7,.7,.7)
     end
 end
-
 function mod:PostHide(msg, f)
     f.name.class_coloured = nil
     f.name:SetTextColor(1,1,1,1)
 end
-
 -- config changed hooks ########################################################
 mod.configChangedFuncs = { runOnce = {} }
 mod.configChangedFuncs.runOnce.friendly = function(v)
@@ -65,7 +64,6 @@ mod.configChangedFuncs.runOnce.friendly = function(v)
         mod:Disable()
     end
 end
-
 mod.configChangedFuncs.friendly = function(f,v)
     if v then
         mod:PostShow(nil, f)
@@ -73,7 +71,9 @@ mod.configChangedFuncs.friendly = function(f,v)
         mod:PostHide(nil, f)
     end
 end
-
+mod.configChangedFuncs.runOnce.enemy = function(v)
+    SetCVars()
+end
 -- config hooks ################################################################
 function mod:GetOptions()
     return {
@@ -85,32 +85,44 @@ function mod:GetOptions()
             order = 10
         },
         enemy = {
-            name = "The option to toggle class colours on enemy players' health bars can be found in the default interface options. Click the 'Game' tab at the top left of this window, click 'Names' in the list on the left and check or uncheck the 'Class Colors in Nameplates' option at the bottom right.",
-            type = 'description',
-            fontSize = 'medium'
+            name = 'Class colour hostile players\' health bars',
+            desc = 'Class colour the health bars of hostile players, where they are attackable. This is a default interface option.',
+            type = 'toggle',
+            width = 'double',
+            order = 20
         }
     }
 end
-
 function mod:OnInitialize()
     cc_table = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 
     self.db = addon.db:RegisterNamespace(self.moduleName, {
         profile = {
-            friendly = true
+            friendly = true,
+            enemy = true,
         }
     })
 
     addon:InitModuleOptions(self)
     self:SetEnabledState(self.db.profile.friendly)
-end
 
+    -- handle default interface cvars & checkboxes
+    InterfaceOptionsNamesPanel:HookScript('OnShow', function()
+        InterfaceOptionsNamesPanelUnitNameplatesNameplateClassColors:Disable()
+        InterfaceOptionsNamesPanelUnitNameplatesNameplateClassColors:SetChecked(mod.db.profile.enemy)
+    end)
+    InterfaceOptionsFrame:HookScript('OnHide', function()
+        -- ensure our options stay applied
+        SetCVars()
+    end)
+
+    SetCVars()
+end
 function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
     self:RegisterMessage('KuiNameplates_PostShow', 'PostShow')
     self:RegisterMessage('KuiNameplates_PostHide', 'PostHide')
 end
-
 function mod:OnDisable()
     self:UnregisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
     self:UnregisterMessage('KuiNameplates_PostShow', 'PostShow')

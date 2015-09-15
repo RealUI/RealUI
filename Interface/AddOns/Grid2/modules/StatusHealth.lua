@@ -13,17 +13,17 @@ local MyHeals = Grid2.statusPrototype:new("my-heals-incoming", false)
 local Death = Grid2.statusPrototype:new("death", true)
 
 local Grid2 = Grid2
+local next = next
+local fmt = string.format
+local select = select
 local GetTime = GetTime
 local UnitHealth = UnitHealth
-local UnitHealthMax = UnitHealthMax
 local UnitIsDead = UnitIsDead
 local UnitIsGhost = UnitIsGhost
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsFeignDeath = UnitIsFeignDeath
 local UnitGetIncomingHeals = UnitGetIncomingHeals
-local fmt = string.format
-local select = select
-local next = next
+local UnitHealthMax = Grid2.Globals.UnitHealthMax
 
 -- Health statuses update function
 local statuses = {} 
@@ -122,6 +122,13 @@ do
 end
 
 -- Functions shared by several Health statuses
+local function UpdateHealthMax(_, func)
+	UnitHealthMax = func
+	for status in next, statuses do
+		status:UpdateAllIndicators()
+	end
+end
+
 local function Health_RegisterEvents()
 	RegisterEvent("UNIT_HEALTH", UpdateIndicators )	
 	RegisterEvent("UNIT_MAXHEALTH", UpdateIndicators )
@@ -129,11 +136,13 @@ local function Health_RegisterEvents()
 		RegisterEvent("UNIT_HEALTH_FREQUENT", UpdateIndicators )
 	end	
 	EnableQuickHealth()
+	Death:RegisterMessage("Grid2_Update_UnitHealthMax", UpdateHealthMax) -- Using Death status because it has AceEvent embeded
 end
 
 local function Health_UnregisterEvents()
 	UnregisterEvent( "UNIT_HEALTH", "UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH" )
 	DisableQuickHealth() 
+	Death:UnregisterMessage("Grid2_Update_UnitHealthMax")
 end
 
 local function Health_UpdateStatuses()

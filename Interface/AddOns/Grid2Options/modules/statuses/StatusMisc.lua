@@ -44,22 +44,3 @@ Grid2Options:RegisterStatusOptions("resurrection", "combat", nil, {
 	titleIcon = "Interface\\RaidFrame\\Raid-Icon-Rez",
 })
 
-Grid2Options:RegisterStatusOptions("dk-purgatory", "misc", nil, {
-	titleIcon = "Interface\\ICONS\\INV_Misc_ShadowEgg"
-})
-
-Grid2Options:RegisterStatusOptions("tortos-crystal-shell", "misc", nil, {
-	titleIcon = "Interface\\ICONS\\INV_DataCrystal01"
-})
-
-Grid2Options:RegisterStatusOptions("absorb-below-maxHP", "health", nil, {
-	titleIcon = "Interface\\ICONS\\Spell_Priest_AngelicBulwark",
-})
-
-Grid2Options:RegisterStatusOptions("absorb-above-maxHP", "health", nil, {
-	titleIcon = "Interface\\ICONS\\Spell_Priest_AngelicBulwark",
-})
-
-Grid2Options:RegisterStatusOptions("absorb-total", "health", nil, {
-	titleIcon = "Interface\\ICONS\\Spell_Priest_AngelicBulwark",
-})
