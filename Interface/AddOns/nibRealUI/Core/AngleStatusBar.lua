@@ -1,11 +1,19 @@
+-- Lua Globals --
 local _G = _G
-local RealUI, CreateFrame = _G.RealUI, _G.CreateFrame
 local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
 local next, type = _G.next, _G.type
 
+-- WoW Globals --
+local CreateFrame = _G.CreateFrame
+
+-- RealUI --
+local RealUI =  _G.RealUI
 local db, ndb, ndbc
+
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
+
+-- Libs --
 local oUF = oUFembed
 
 local bars = {}

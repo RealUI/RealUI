@@ -1,5 +1,4 @@
-local NAME, ns = ...
-local RealUI = RealUI or ns
+local NAME, RealUI = ...
 _G.RealUI = RealUI
 
 local uiWidth, uiHeight = UIParent:GetSize()
