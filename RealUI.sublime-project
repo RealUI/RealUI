@@ -24,6 +24,12 @@
 		},
 		{
 			"path": "Interface\\AddOns\\nibRealUI_Init"
+		},
+		{
+			"path": ".",
+			"name": "Docs",
+			"folder_exclude_patterns": [".idea", "Interface", "utils"],
+			"file_include_patterns": ["*.md", "*.lua", "*.ps1"]
 		}
 	]
 }
