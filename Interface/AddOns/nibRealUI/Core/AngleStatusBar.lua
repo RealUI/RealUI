@@ -6,15 +6,15 @@ local next, type = _G.next, _G.type
 -- WoW Globals --
 local CreateFrame = _G.CreateFrame
 
+-- Libs --
+local oUF = oUFembed
+
 -- RealUI --
 local RealUI =  _G.RealUI
 local db, ndb, ndbc
 
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
-
--- Libs --
-local oUF = oUFembed
 
 local bars = {}
 local dontSmooth, smooth
