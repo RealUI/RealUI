@@ -8,6 +8,9 @@ local next, type = _G.next, _G.type
 -- WoW Globals --
 local CreateFrame = _G.CreateFrame
 
+-- Libs --
+local LCS = LibStub("LibCoolStuff")
+
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
@@ -15,6 +18,3 @@ local db, ndb, ndbc
 
 local MODNAME = "TemplateMod"
 local TemplateMod = RealUI:CreateModule(MODNAME)
-
--- Libs --
-local LCS = LibStub("LibCoolStuff")
