@@ -6,16 +6,18 @@ local next = _G.next
 local UIParent = _G.UIParent
 local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
 
+-- Libs --
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
+
 -- RealUI --
-local nibRealUI = _G.RealUI
+local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local round = nibRealUI.Round
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
--- Libs --
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local icons = {}
 
 -- Custom Cooldown
 local function CustomCooldownUpdate(self, elapsed)
@@ -77,7 +79,8 @@ local function GetAuraInfo(self, index)
 end
 
 local function AuraUpdate(self, event, unit)
-    AuraTracking:debug("AuraUpdate", self.info.spell, self.inactive)
+    local spellData = icons[self]
+    AuraTracking:debug("AuraUpdate", spellData.spell, self.inactive)
     if self.inactive and not self.isStatic then
         self:Hide()
         AuraTracking:FreeIndicatorUpdate(self, false)
@@ -200,20 +203,21 @@ end
 
 -- Retrieve Spell Info
 local function UpdateSpellInfo(self)
-    if tonumber(self.info.spell) then
-        self.spellID = self.info.spell
-        self.spellName = (GetSpellInfo(self.info.spell))
-    elseif type(self.info.spell) == "table" then
+    local spellData = icons[self]
+    if tonumber(spellData.spell) then
+        self.spellID = spellData.spell
+        self.spellName = (GetSpellInfo(spellData.spell))
+    elseif type(spellData.spell) == "table" then
         self.trackMultiple = true
         self.spellIDs = {}
         self.spellNames = {}
-        for k,v in ipairs(self.info.spell) do
+        for k,v in ipairs(spellData.spell) do
             self.spellIDs[k] = v
             self.spellNames[k] = (GetSpellInfo(v))
         end
     else
-        self.info.spell = self.info.spell
-        self.spellName = self.info.spell
+        spellData.spell = spellData.spell
+        self.spellName = spellData.spell
     end
 end
 
@@ -264,9 +268,10 @@ end
 -- Show/Hide based on Talent spec
 local function TalentUpdate(self, event, unit, initializing)
     local oldInactive = self.inactive
+    local spellData = icons[self]
 
     -- Check specs
-    if self.info.useSpec then
+    if spellData.useSpec then
         local spec = GetSpecialization()
         self.inactive = not(self.specs[spec])
     end
@@ -383,81 +388,77 @@ end
 
 -- Set Indicator info
 function api:SetIndicatorInfo(info)
-    local f = self.frame
-    f.info = info
-    info.type = "Aura"
+    self.auraType = info.auraType or "buff"
+    self.isBuff = (self.auraType == "buff")
+    self.isTrinket = info.unit and info.unit == "trinket"
 
-    f.auraType = info.auraType or "buff"
-    f.isBuff = (f.auraType == "buff")
-    f.isTrinket = info.unit and info.unit == "trinket"
-
-    if f.isBuff then
-        f.unit = info.unit or "player"
+    if self.isBuff then
+        self.unit = info.unit or "player"
     else
-        f.unit = info.unit or "target"
+        self.unit = info.unit or "target"
     end
-    if f.unit == "trinket" then f.unit = "player" end
+    if self.unit == "trinket" then self.unit = "player" end
 
-    f.side = info.side
-    if not f.side then
-        if f.unit == "player" or f.unit == "pet" or f.unit == "trinket" then
-            f.side = "LEFT"
+    self.side = info.side
+    if not self.side then
+        if self.unit == "player" or self.unit == "pet" or self.unit == "trinket" then
+            self.side = "LEFT"
         else
-            f.side = "RIGHT"
+            self.side = "RIGHT"
         end
     end
 
-    f.specs = info.specs or {true, true, true, true}
-    f.talent = info.talent
-    f.minLevel = tonumber(info.minLevel or 0)
+    self.specs = info.specs or {true, true, true, true}
+    self.talent = info.talent
+    self.minLevel = tonumber(info.minLevel or 0)
 
-    f.anyone = info.anyone
-    if f.isTrinket then f.anyone = true end
+    self.anyone = info.anyone
+    if self.isTrinket then self.anyone = true end
 
-    UpdateSpellInfo(f)
+    UpdateSpellInfo(self)
 
     if not info.order then
-        f.isStatic = false
+        self.isStatic = false
     elseif info.order < 1 then
-        f.isStatic = false
+        self.isStatic = false
     else
-        f.isStatic = true
+        self.isStatic = true
     end
 
-    f.texture = ""
-    if f.isStatic then
-        if f.trackMultiple then
-            f.texture = select(3, GetSpellInfo(f.spellIDs[1]))
+    self.texture = ""
+    if self.isStatic then
+        if self.trackMultiple then
+            self.texture = select(3, GetSpellInfo(self.spellIDs[1]))
         else
-            f.texture = select(3, GetSpellInfo(f.spellID or f.spellName))
+            self.texture = select(3, GetSpellInfo(self.spellID or self.spellName))
         end
-        f.icon:SetTexture(f.texture)
-        f.icon:SetDesaturated(1)
+        self.icon:SetTexture(self.texture)
+        self.icon:SetDesaturated(1)
     else
-        f:Hide()
+        self:Hide()
     end
 
     if info.checkKnown then
-        f.checkKnown = info.checkKnown
+        self.checkKnown = info.checkKnown
     else
-        f.checkKnown = (f.isStatic and not(f.isTrinket)) and true or false
+        self.checkKnown = (self.isStatic and not(self.isTrinket)) and true or false
     end
 
-    f.hideOOC = info.hideOOC
-    f.hideStacks = info.hideStacks
-    f.hideTime = info.hideTime
+    self.hideOOC = info.hideOOC
+    self.hideStacks = info.hideStacks
+    self.hideTime = info.hideTime
 
-    f.ignoreRaven = info.ignoreRaven
+    self.ignoreRaven = info.ignoreRaven
 
     -- TalentUpdate(f)
-    -- AuraUpdate(f, nil, f.unit)
+    -- AuraUpdate(f, nil, self.unit)
 end
 
 function api:Enable()
-    self:RegisterUnitEvent("UNIT_AURA", f.unit)
-    if f.unit == "target" then
+    self:RegisterUnitEvent("UNIT_AURA", self.unit)
+    if self.unit == "target" then
         self:RegisterEvent("PLAYER_TARGET_CHANGED")
-    elseif f.unit == "pet" then
+    elseif self.unit == "pet" then
         self:RegisterEvent("UNIT_PET")
     end
     self.isEnabled = true
@@ -528,6 +529,8 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     for key, func in next, api do
         tracker[key] = func
     end
+
+    icons[tracker] = spellData
 
     tracker:SetIndicatorInfo(spellData)
     tracker:Hide()

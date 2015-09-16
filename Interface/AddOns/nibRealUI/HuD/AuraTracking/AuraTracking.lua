@@ -6,6 +6,11 @@ local next = _G.next
 local UIParent = _G.UIParent
 local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
 
+-- Libs --
+local LibWin = LibStub("LibWindow-1.1")
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
+
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
@@ -15,12 +20,6 @@ local round = nibRealUI.Round
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 local debug = true
-
--- Libs --
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
-local LibWin = LibStub("LibWindow-1.1")
-
 
 local maxSlots, maxStaticSlots = 10, 6
 local activeSlots = {left = {}, right = {}}
