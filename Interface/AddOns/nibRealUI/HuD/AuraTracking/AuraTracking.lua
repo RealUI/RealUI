@@ -307,8 +307,11 @@ function AuraTracking:OnEnable()
         self:Createslots()
     end
 
-    for id, spellData in next, trackingData do
+    for trackerID, spellData in next, trackingData do
+        local classID, id, isDefault = _G.strsplit("-", trackerID)
         local tracker = self:CreateAuraIcon(id, spellData)
+        tracker.classID = classID
+        tracker.isDefault = isDefault and true or false
         if tracker.unit == "player" then
             tracker:Enable()
         end
