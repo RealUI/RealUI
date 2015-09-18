@@ -46,14 +46,17 @@ local function CreateDebugFrame(mod)
         return
     end
     debugger[mod] = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
+    debugger[mod].numDuped = 1
+    debugger[mod].prevLine = ""
+    return debugger[mod]
 end
 
 local function debug(mod, ...)
-    if not debugger[mod] then
-        CreateDebugFrame(mod)
+    local modDebug = debugger[mod]
+    if not modDebug then
+        modDebug = CreateDebugFrame(mod)
     end
-    local time = date("%H:%M:%S")
-    local text = ("[%s] %s"):format(time, mod)
+    local text = mod
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
         if (arg ~= nil) then
@@ -63,7 +66,17 @@ local function debug(mod, ...)
         end
         text = text .. "     " .. arg
     end
-    debugger[mod]:AddLine(text)
+    if modDebug.prevLine == text then
+        modDebug.numDuped = modDebug.numDuped + 1
+    else
+        if modDebug.numDuped > 1 then
+            modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
+            modDebug.numDuped = 1
+        end
+        local time = date("%H:%M:%S")
+        modDebug:AddLine(("[%s] %s"):format(time, text))
+        modDebug.prevLine = text
+    end
 end
 RealUI.Debug = debug
 
@@ -77,17 +90,17 @@ function SlashCmdList.REALUIINIT(mod, editBox)
             print(k)
         end
     else
-        if not debugger[mod] then
-            CreateDebugFrame(mod)
+        local modDebug = debugger[mod]
+        if not modDebug then
+            modDebug = CreateDebugFrame(mod)
         end
-        local display = debugger[mod]
-        if display:Lines() == 0 then
-            display:AddLine("Nothing to report.")
-            display:Display()
-            display:Clear()
+        if modDebug:Lines() == 0 then
+            modDebug:AddLine("Nothing to report.")
+            modDebug:Display()
+            modDebug:Clear()
             return
         end
-        display:Display()
+        modDebug:Display()
     end
 end
 
