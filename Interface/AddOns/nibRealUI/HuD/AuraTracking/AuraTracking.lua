@@ -23,6 +23,7 @@ local AuraTracking = nibRealUI:GetModule(MODNAME)
 local debug = true
 
 local maxSlots, maxStaticSlots = 10, 6
+local numActive = {left = 0, right = 0}
 local playerLevel, playerSpec
 
 function AuraTracking:Createslots()
@@ -69,61 +70,77 @@ function AuraTracking:Createslots()
 end
 
 function AuraTracking:AddTracker(tracker, slotID)
-    self:debug("AddTracker", tracker.id)
-    local side, slot = self[tracker.side]
-    if slotID then
-        slot = side["slot"..slotID]
-    elseif tracker.order > 0 then
-        slot = side["slot"..tracker.order]
-        tracker.slotID = tracker.order
+    self:debug("AddTracker", tracker.id, tracker.slotID)
+    local numActive = numActive[tracker.side]
+    if tracker.slotID then
+        if tracker.order > 0 then
+            tracker.icon:SetDesaturated(false)
+            numActive = numActive + 1
+        end
     else
-        for slotID = 1, maxSlots do
+        numActive = numActive + 1
+        local side, slot = self[tracker.side]
+        if slotID then
             slot = side["slot"..slotID]
-            if not slot.isActive then
-                tracker.slotID = slotID
-                break
+        elseif tracker.order > 0 then
+            slot = side["slot"..tracker.order]
+            tracker.slotID = tracker.order
+        else
+            for slotID = 1, maxSlots do
+                slot = side["slot"..slotID]
+                if not slot.isActive then
+                    tracker.slotID = slotID
+                    break
+                end
             end
         end
+        slot.tracker = tracker
+        slot.isActive = true
+        tracker:SetAllPoints(slot)
+        tracker:Show()
     end
-    slot.tracker = tracker
-    slot.isActive = true
-    tracker:SetAllPoints(slot)
-    tracker:Show()
 end
-function AuraTracking:RemoveTracker(tracker)
+function AuraTracking:RemoveTracker(tracker, isStatic)
     self:debug("RemoveTracker", tracker.id)
-    local side, emptySlot = self[tracker.side], tracker.slotID
-    local currSlot = side["slot"..emptySlot]
-    currSlot.tracker = nil
-    currSlot.isActive = false
+    local numActive = numActive[tracker.side]
+    if isStatic then
+        tracker.icon:SetDesaturated(true)
+        numActive = numActive - 1
+    else
+        numActive = numActive - 1
+        local side, emptySlot = self[tracker.side], tracker.slotID
+        local currSlot = side["slot"..emptySlot]
+        currSlot.tracker = nil
+        currSlot.isActive = false
 
-    tracker.slotID = nil
-    tracker:ClearAllPoints()
-    tracker:Hide()
+        tracker.slotID = nil
+        tracker:ClearAllPoints()
+        tracker:Hide()
 
-    local nextSlot = side["slot"..emptySlot+1]
-    if nextSlot.isActive then
-        local movedTracker = nextSlot.tracker
-        self:RemoveTracker(movedTracker)
-        self:AddTracker(movedTracker, emptySlot)
-    end
-
-    --[[ 
-    for slotID = emptySlot, maxSlots do
-        local nextSlot = side["slot"..slotID+1]
+        local nextSlot = side["slot"..emptySlot+1]
         if nextSlot.isActive then
-            currSlot.tracker = nextSlot.tracker
-            currSlot.isActive = true
-
-            nextSlot.tracker:ClearAllPoints()
-            nextSlot.tracker:SetAllPoints(currSlot)
-            nextSlot.tracker.slotID = slotID
-
-            nextSlot.tracker = nil
-            nextSlot.isActive = false
+            local movedTracker = nextSlot.tracker
+            self:RemoveTracker(movedTracker)
+            self:AddTracker(movedTracker, emptySlot)
         end
+
+        --[[ 
+        for slotID = emptySlot, maxSlots do
+            local nextSlot = side["slot"..slotID+1]
+            if nextSlot.isActive then
+                currSlot.tracker = nextSlot.tracker
+                currSlot.isActive = true
+
+                nextSlot.tracker:ClearAllPoints()
+                nextSlot.tracker:SetAllPoints(currSlot)
+                nextSlot.tracker.slotID = slotID
+
+                nextSlot.tracker = nil
+                nextSlot.isActive = false
+            end
+        end
+        --]]
     end
-    --]]
 end
 
 function AuraTracking:UpdateVisibility()
@@ -136,7 +153,7 @@ function AuraTracking:UpdateVisibility()
         self.left:Show()
         self.right:Show()
     else
-        self.left:SetShown(true)
+        self.left:SetShown(numActive["left"] > 0)
         self.right:Hide()
     end
 end
@@ -188,8 +205,8 @@ function AuraTracking:PLAYER_REGEN_DISABLED()
     self.inCombat = true
 end
 
-function AuraTracking:UpdateTargetAndPet(unit, event, ...)
-    self:debug("UpdateTargetAndPet", unit, event, ...)
+function AuraTracking:TargetAndPetUpdate(unit, event, ...)
+    self:debug("TargetAndPetUpdate", unit, event, ...)
     local unitExists = _G.UnitExists(unit)
     if unit == "target" then
         self.targetHostile = unitExists and _G.UnitCanAttack("player", "target") and not _G.UnitIsDeadOrGhost("target")
@@ -291,8 +308,8 @@ function AuraTracking:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
-    self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateTargetAndPet", "target")
-    self:RegisterEvent("UNIT_PET", "UpdateTargetAndPet", "pet")
+    self:RegisterEvent("PLAYER_TARGET_CHANGED", "TargetAndPetUpdate", "target")
+    self:RegisterEvent("UNIT_PET", "TargetAndPetUpdate", "pet")
 
     local CharUpdateEvents = {
         "ACTIVE_TALENT_GROUP_CHANGED",

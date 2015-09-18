@@ -67,21 +67,13 @@ auras:SetScript("OnEvent", function(self, event, unit)
                 tracker.cd:Show()
                 tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
                 tracker.icon:SetTexture(aura.texture)
-                if tracker.order > 0 then
-                    tracker.icon:SetDesaturated(false)
-                elseif not tracker.slotID then
-                    AuraTracking:AddTracker(tracker)
-                end
+                AuraTracking:AddTracker(tracker)
             else
                 tracker.auraIndex = aura.index
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
                 tracker.icon:SetTexture(aura.texture)
-                if tracker.order > 0 then
-                    tracker.icon:SetDesaturated(true)
-                elseif tracker.slotID then
-                    AuraTracking:RemoveTracker(tracker)
-                end
+                AuraTracking:RemoveTracker(tracker, tracker.order > 0)
             end
         end
     end
