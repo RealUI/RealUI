@@ -70,7 +70,7 @@ function AuraTracking:Createslots()
 end
 
 function AuraTracking:AddTracker(tracker, slotID)
-    self:debug("AddTracker", tracker.id, tracker.slotID)
+    self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
     local numActive = numActive[tracker.side]
     if tracker.slotID then
         if tracker.order > 0 then
@@ -82,26 +82,25 @@ function AuraTracking:AddTracker(tracker, slotID)
         local side, slot = self[tracker.side]
         if slotID then
             slot = side["slot"..slotID]
-        elseif tracker.order > 0 then
-            slot = side["slot"..tracker.order]
-            tracker.slotID = tracker.order
         else
-            for slotID = 1, maxSlots do
-                slot = side["slot"..slotID]
+            for i = 1, maxSlots do
+                slot = side["slot"..i]
                 if not slot.isActive then
-                    tracker.slotID = slotID
+                    slotID = i
                     break
                 end
             end
         end
         slot.tracker = tracker
         slot.isActive = true
+
+        tracker.slotID = slotID
         tracker:SetAllPoints(slot)
         tracker:Show()
     end
 end
 function AuraTracking:RemoveTracker(tracker, isStatic)
-    self:debug("RemoveTracker", tracker.id)
+    self:debug("RemoveTracker", tracker.id, isStatic)
     local numActive = numActive[tracker.side]
     if isStatic then
         tracker.icon:SetDesaturated(true)
@@ -168,6 +167,16 @@ end
 function AuraTracking:PLAYER_LOGIN()
     self:debug("PLAYER_LOGIN")
     self:RefreshMod()
+    for trackerID, spellData in next, trackingData do
+        local classID, id, isDefault = _G.strsplit("-", trackerID)
+        self:debug("Init tracker", classID, id, isDefault)
+        local tracker = self:CreateAuraIcon(id, spellData)
+        tracker.classID = classID
+        tracker.isDefault = isDefault and true or false
+        if tracker.unit == "player" and tracker.specs[playerSpec] and tracker.minLevel <= playerLevel then
+            tracker:Enable()
+        end
+    end
     self.loggedIn = true
 end
 function AuraTracking:PLAYER_ENTERING_WORLD()
@@ -322,16 +331,6 @@ function AuraTracking:OnEnable()
 
     if not self.left then
         self:Createslots()
-    end
-
-    for trackerID, spellData in next, trackingData do
-        local classID, id, isDefault = _G.strsplit("-", trackerID)
-        local tracker = self:CreateAuraIcon(id, spellData)
-        tracker.classID = classID
-        tracker.isDefault = isDefault and true or false
-        if tracker.unit == "player" then
-            tracker:Enable()
-        end
     end
 
     if self.loggedIn then self:RefreshMod() end
