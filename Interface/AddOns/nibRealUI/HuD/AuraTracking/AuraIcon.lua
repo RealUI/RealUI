@@ -24,15 +24,23 @@ local isValidUnit = {
     target = false,
     pet = false
 }
+local function debug(isDebug, ...)
+    if isDebug then
+        -- self.debug should be a string describing what the bar is.
+        -- eg. "playerHealth", "targetAbsorbs", etc
+        AuraTracking:debug(isDebug, ...)
+    end
+end
 
-local function FindSpellMatch(spell, unit, filter)
-    AuraTracking:debug("FindSpellMatch", spell, unit, filter)
+local function FindSpellMatch(spell, unit, filter, isDebug)
+    debug(isDebug, "FindSpellMatch", spell, unit, filter)
     local aura = {}
     for auraIndex = 1, 40 do
         local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
-        AuraTracking:debug("Aura", auraIndex, name, ID)
+        debug(isDebug, "Aura", auraIndex, name, ID)
         if spell == name or spell == ID then
-            aura.texture, aura.count, aura.duration, aura.endTime, aura.index = texture, count, duration, endTime, auraIndex
+            aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
+            aura.count = count > 0 and count or ""
             return true, aura
         end
 
@@ -51,20 +59,21 @@ auras:SetScript("OnEvent", function(self, event, unit)
 
     for tracker in AuraTracking:IterateTrackers() do
         if tracker.unit == unit and tracker.isEnabled then
-            local spell = icons[tracker].spell
-            local spellMatch, aura = false
-            AuraTracking:debug("IterateTrackers", tracker.id, spell)
+            local spellData, aura = icons[tracker]
+            local spell, spellMatch = spellData.spell, false
+            debug(spellData.debug, "IterateTrackers", tracker.id, spell)
 
             if type(spell) == "table" then
                 for index = 1, #spell do
-                    spellMatch, aura = FindSpellMatch(spell[index], tracker.unit, tracker.filter)
+                    spellMatch, aura = FindSpellMatch(spell[index], tracker.unit, tracker.filter, spellData.debug)
+                    if spellMatch then break end
                 end
             else
-                spellMatch, aura = FindSpellMatch(spell, tracker.unit, tracker.filter)
+                spellMatch, aura = FindSpellMatch(spell, tracker.unit, tracker.filter, spellData.debug)
             end
 
             if spellMatch then
-                AuraTracking:debug("Tracker", tracker.id, spell)
+                debug(spellData.debug, "Tracker", tracker.id, spell)
                 tracker.auraIndex = aura.index
                 tracker.cd:Show()
                 tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
@@ -75,6 +84,7 @@ auras:SetScript("OnEvent", function(self, event, unit)
                 tracker.auraIndex = aura.index
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
+                tracker.count:SetText("")
                 AuraTracking:RemoveTracker(tracker, tracker.order > 0)
             end
         end
@@ -146,6 +156,17 @@ function AuraTracking:CreateAuraIcon(id, spellData)
             _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
             GameTooltip:SetUnitAura(tracker.unit, tracker.auraIndex, self.filter)
             GameTooltip:Show()
+        else
+            local spell = spellData.spell
+            if type(spell) == "table" then
+                spell = spell[1]
+            end
+
+            if type(spell) == "number" then
+                _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+                GameTooltip:SetSpellByID(spell)
+                GameTooltip:Show()
+            end
         end
     end)
     tracker:SetScript("OnLeave", function(tracker)

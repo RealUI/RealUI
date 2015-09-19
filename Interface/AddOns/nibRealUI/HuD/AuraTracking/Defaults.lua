@@ -33,7 +33,8 @@ local defaultTracker = {
     order = 0, -- Tracker will be static if greater than 0
     hideStacks = false, -- hide stack count (useful for buffs with a passive 1 stack)
     hideOOC = false, -- hide out-of-combat even if active
-    ignoreRaven = false -- don't add this aura to Raven's filter lists
+    ignoreRaven = false, -- don't add this aura to Raven's filter lists
+    debug = false
 }
 
 AuraTracking.Defaults = {
