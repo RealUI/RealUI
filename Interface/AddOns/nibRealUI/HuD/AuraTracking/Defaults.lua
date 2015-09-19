@@ -4,34 +4,15 @@ local L = nibRealUI.L
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
---[[
-Auras
-{
-    type = "Aura",                          (default)
-    spell = spellID or spell name
-    minLevel = level
-    checkKnown = true or false              (default = false for Free, true for Static)
-    auraType = "buff" or "debuff"           (default = "buff")
-    unit = unitID                           (default = "player")
-    specs = {spec1, spec2, spec3, spec4}    (default = true for all specs)
-    order = #                               (if not specified indicator will be Free, otherwise Static)
-    side = "LEFT" or "RIGHT"                (default = "LEFT" for "buff" and "RIGHT" for "debuff")
-    hideStacks = true or false              (default = false - hide stack count [useful for buffs with a passive 1 stack])
-    hideOOC = true or false                 (default = false - hide out-of-combat even if active)
-    ignoreRaven = true or false             (default = false - don't add this aura to Raven's filter lists)
-}
-
-Sort static buffs/debuffs by order whenever possible
-
-]]--
 local defaultTracker = {
     spell = L["AuraTrack_SpellNameID"],
     minLevel = 1,
     auraType = "buff", -- buff|debuff
     unit = "player", -- player|target|pet
     specs = {true, true, true, GetSpecializationInfo(4) and true}, -- {spec1, spec2, spec3[, spec4]}
+    talent = {},
     order = 0, -- Tracker will be static if greater than 0
-    hideStacks = false, -- hide stack count (useful for buffs with a passive 1 stack)
+    hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
     hideOOC = false, -- hide out-of-combat even if active
     ignoreRaven = false, -- don't add this aura to Raven's filter lists
     debug = false
@@ -40,47 +21,51 @@ local defaultTracker = {
 AuraTracking.Defaults = {
     ["DEATHKNIGHT"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["6-b6cce35c-1"] = {   -- Scent of Blood (Blood)
                 spell = 50421,
                 minLevel = 62,
+                specs = {true, false, false},
                 order = 1,
-                specs = {true, false, false}
             },
             ["6-987a58fe-1"] = {   -- Blood Shield (Blood)
                 spell = 77535,
                 minLevel = 80,
+                specs = {true, false, false},
                 order = 2,
-                specs = {true, false, false}
             },
             ["6-ab29032c-1"] = {   -- Shadow Infusion, Dark Transformation (Unholy)
                 spell = {91342,63560},
                 minLevel = 60,
                 unit = "pet",
-                order = 1,
                 specs = {false, false, true},
+                order = 1,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["6-8621f38d-1"] = {   -- Necrotic Plague (Talent)
                 spell = 155159,
                 auraType = "debuff",
+                unit = "target",
+                talent = {[7] = {21207}},
                 order = 1,
             },
             ["6-a4a87f4c-1"] = {   -- Blood Plague
                 spell = 55078,
                 minLevel = 55,
                 auraType = "debuff",
-                replace = 155159,
+                unit = "target",
+                talent = {[7] = {21208, 21209}},
                 order = 1,
             },
             ["6-ac6e45ce-1"] = {   -- Frost Fever
                 spell = 55095,
                 minLevel = 55,
                 auraType = "debuff",
-                replace = 155159,
+                unit = "target",
+                talent = {[7] = {21208, 21209}},
                 order = 2,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["6-8f813ae5-1"] = {   -- Crimson Scourge (Blood)
                 spell = 81141,
                 specs = {true, false, false},
@@ -120,12 +105,12 @@ AuraTracking.Defaults = {
             ["6-83cbafac-1"] = {spell = 50461},    -- Anti-Magic Zone (Talent)
             ["6-8281137d-1"] = {spell = 96268},    -- Death's Advance (Talent)
             ["6-ac02f3e2-1"] = {spell = 114851},   -- Blood Charge (used for Blood Tap, Talent)
-        -- Free Debuffs
+        -- Free Target Auras
     },
 
     ["DRUID"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
                 type = "SavageRoar",
                 order = 1,
@@ -133,61 +118,67 @@ AuraTracking.Defaults = {
             ["11-86ed5897-1"] = {   -- Savage Defense (Guardian)
                 spell = 62606,
                 minLevel = 10,
+                specs = {false, false, true, false},
                 order = 1,
-                specs = {false, false, true, false}
             },
             ["11-a18c4f9e-1"] = {   -- Harmony (Resto Mastery) gained by casting direct heals
                 spell = 100977,
                 minLevel = 80,
-                order = 1,
                 specs = {false, false, false, true},
+                order = 1,
             },
             ["11-aa0bdedd-1"] = {   -- Wild Mushrooms (Resto)
                 type = "WildMushrooms",
                 order = 2,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["11-bbefa72d-1"] = {   -- Sunfire (Balance)
                 spell = 164815,
-                auraType = "debuff",
                 minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false, false},
                 order = 1,
-                specs = {true, false, false, false}
             },
             ["11-b1a3a3b5-1"] = {   -- Moonfire (Balance)
                 spell = 164812,
-                auraType = "debuff",
                 minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false, false},
                 order = 2,
-                specs = {true, false, false, false}
             },
             ["11-931a3a8f-1"] = {   -- Rake (Feral)
                 spell = 155722,
-                auraType = "debuff",
                 minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false},
                 order = 1,
-                specs = {false, true, false, false}
             },
             ["11-98b179f7-1"] = {   -- Rip (Feral)
                 spell = 1079,
                 auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false},
                 order = 2,
-                specs = {false, true, false, false}
             },
             ["11-9d6059d3-1"] = {   -- Thrash (Guardian)
                 spell = 77758,
-                auraType = "debuff",
                 minLevel = 14,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true, false},
                 order = 1,
-                specs = {false, false, true, false}
             },
             ["11-a774b290-1"] = {   -- Lacerate (Guardian)
                 spell = 33745,
                 auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true, false},
                 order = 2,
-                specs = {false, false, true, false}
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["11-9baa529a-1"] = {   -- Lunar/Solar Empowerment (Balance)
                 spell = {164547,164545},
                 specs = {true, false, false, false}
@@ -234,81 +225,88 @@ AuraTracking.Defaults = {
             },
             ["11-9a94211a-1"] = {spell = 5211},     -- Dash
             ["11-94516e94-1"] = {spell = 33831},    -- Force of Nature (Talent)
-        -- Free Debuffs
+        -- Free Target Auras
             ["11-ac72ea83-1"] = {   -- Lacerate (Feral)
                 spell = 33745,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, false, false}
             },
             ["11-a6d635ba-1"] = {   -- Thrash (Feral)
                 spell = 106830,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, false, false}
             },
             ["11-b5e260cc-1"] = {   -- Maim (Feral)
                 spell = 22570,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, false, false}
             },
             ["11-91db07fb-1"] = {   -- Faerie Fire (Feral, Guardian)
                 spell = 770,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, true, false}
             },
             ["11-87d1164a-1"] = {   -- Infected Wounds (Feral, Guardian)
                 spell = 58180,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, true, false}
             },
             ["11-b2007cb7-1"] = {   -- Berserk (Feral, Guardian)
                 spell = 50334,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, true, false}
             },
     },
 
     ["HUNTER"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["3-8998954e-1"] = {   -- Frenzy (BM)
                 spell = 19615,
                 minLevel = 30,
                 unit = "pet",
+                specs = {true, false, false},
                 order = 1,
-                specs = {true, false, false}
             },
             ["3-9298993d-1"] = {   -- Focus Fire (BM)
                 spell = 82692,
                 minLevel = 30,
+                specs = {true, false, false},
                 order = 1,
-                specs = {true, false, false}
             },
             ["3-81e273d4-1"] = {   -- Sniper Training (MM)
                 spell = 168811,
                 minLevel = 80,
+                specs = {false, true, false},
                 order = 1,
                 hideOOC = true,
-                specs = {false, true, false}
             },
             ["3-9e5da04c-1"] = {   -- Lock and Load (SV)
                 spell = 168980,
                 minLevel = 43,
+                specs = {false, false, true},
                 order = 1,
-                specs = {false, false, true}
             },
             ["3-ad43391a-1"] = {   -- Steady Focus (Talent)
                 spell = 177668,
                 order = 2,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["3-bb365636-1"] = {   -- Serpent Sting (SV)
                 spell = 118253,
-                auraType = "debuff",
                 minLevel = 68,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
                 order = 1,
-                specs = {false, false, true}
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["3-a280664b-1"] = {   -- Beast Cleave (BM)
                 spell = 118455,
                 unit = "pet",
@@ -322,66 +320,85 @@ AuraTracking.Defaults = {
                 spell = 3045,
                 specs = {false, true, false}
             },
-            ["3-9bca201a-1"] = {spell = 19263},    -- Deterrence
-            ["3-89b90044-1"] = {spell = 51755},    -- Camouflage
-            ["3-ad25aea5-1"] = {spell = 54216},    -- Master's Call
-            ["3-b228dae3-1"] = {spell = 53480},    -- Roar of Sacrifice (Cunning)
-            ["3-9bd8be3e-1"] = {spell = 34720},    -- Thrill of the Hunt (Talent)
-        -- Free Debuffs
+            ["3-9bca201a-1"] = {spell = 19263},   -- Deterrence
+            ["3-89b90044-1"] = {spell = 51755},   -- Camouflage
+            ["3-ad25aea5-1"] = {spell = 54216},   -- Master's Call
+            ["3-b228dae3-1"] = {spell = 53480},   -- Roar of Sacrifice (Cunning)
+            ["3-9bd8be3e-1"] = {spell = 34720},   -- Thrill of the Hunt (Talent)
+        -- Free Target Auras
             ["3-ae78fcd9-1"] = {   -- Black Arrow (SV)
                 spell = 3674,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, false, true}
             },
             ["3-afe5d9ac-1"] = {   -- Explosive Shot (SV)
                 spell = 53301,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, false, true}
             },
-            ["3-bc4972cd-1"] = {spell = 13812, auraType = "debuff"},   -- Explosive Trap
-            ["3-ba699a82-1"] = {spell = 3355, auraType = "debuff"},    -- Freezing Trap
-            ["3-a0b8d817-1"] = {spell = 13810, auraType = "debuff"},   -- Ice Trap
-            ["3-a0d6a726-1"] = {spell = 131894, auraType = "debuff"},  -- A Murder of Crows (Talent)
+            ["3-bc4972cd-1"] = {   -- Explosive Trap
+                spell = 13812,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["3-ba699a82-1"] = {   -- Freezing Trap
+                spell = 3355,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["3-a0b8d817-1"] = {   -- Ice Trap
+                spell = 13810,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["3-a0d6a726-1"] = {   -- A Murder of Crows (Talent)
+                spell = 131894,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["MAGE"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["8-860b9d97-1"] = {   -- Arcane Missiles! (Arcane)
                 spell = 79683,
                 minLevel = 24,
-                order = 1,
                 specs = {true, false, false},
+                order = 1,
+            },
+            ["8-aeb77dff-1"] = {   -- Arcane Charge (Arcane)
+                spell = 36032,
+                minLevel = 10,
+                auraType = "debuff",
+                specs = {true, false, false},
+                order = 2,
             },
             ["8-9f01a933-1"] = {   -- Fingers of Frost (Frost)
                 spell = 44544,
                 minLevel = 12,
-                order = 1,
                 specs = {false, false, true},
-            },
-        -- Static Debuff
-            ["8-aeb77dff-1"] = {   -- Arcane Charge (Arcane)
-                spell = 36032,
-                auraType = "debuff",
-                minLevel = 10,
-                unit = "player",
                 order = 1,
-                specs = {true, false, false},
             },
+        -- Static Target Auras
             ["8-bc5837f7-1"] = {   -- Ignite (Fire)
                 spell = 12654,
-                auraType = "debuff",
                 minLevel = 12,
-                order = 1,
+                auraType = "debuff",
+                unit = "target",
                 specs = {false, true, false},
+                order = 1,
             },
             ["8-bf27cce4-1"] = {   -- Pyroblast (Fire)
                 spell = 11366,
                 auraType = "debuff",
-                order = 2,
+                unit = "target",
                 specs = {false, true, false},
+                order = 2,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["8-bf568893-1"] = {   -- Arcane Power (Arcane)
                 spell = 12042,
                 specs = {true, false, false},
@@ -414,55 +431,72 @@ AuraTracking.Defaults = {
             ["8-8ab5ea50-1"] = {spell = 116014},   -- Rune of Power (Talent)
             ["8-bcbae5c4-1"] = {spell = 116267},   -- Incanter's Flow (Talent)
             ["8-b3901232-1"] = {spell = {32612,113862}},   -- Invisibility, Greater Invisibility (Talent)
-        -- Free Debuffs
-            ["8-a0ef0e74-1"] = {spell = 31589, auraType = "debuff"},   -- Slow
-            ["8-a297de89-1"] = {spell = 116, auraType = "debuff"},     -- Frostbolt
-            ["8-a34a80e5-1"] = {spell = 44614, auraType = "debuff"},   -- Frostfire Bolt
-            ["8-8864aa74-1"] = {spell = 44457, auraType = "debuff"},   -- Living Bomb
+        -- Free Target Auras
+            ["8-a0ef0e74-1"] = {   -- Slow
+                spell = 31589,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["8-a297de89-1"] = {   -- Frostbolt
+                spell = 116,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["8-a34a80e5-1"] = {   -- Frostfire Bolt
+                spell = 44614,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["8-8864aa74-1"] = {   -- Living Bomb
+                spell = 44457,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["MONK"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["10-a53c4a0d-1"] = {   -- Shuffle (Brewmaster)
                 spell = 115307,
                 minLevel = 10,
-                order = 1,
                 specs = {true, false, false},
+                order = 1,
             },
             ["10-b95a8d44-1"] = {   -- Elusive Brew (Brewmaster)
                 spell = {115308,128939}, -- Effect buff, Stacking buff
                 minLevel = 10,
-                order = 2,
                 specs = {true, false, false},
+                order = 2,
             },
             ["10-88e98dfb-1"] = {   -- Vital Mists (Mistweaver)
                 spell = 118674,
                 minLevel = 10,
-                order = 1,
                 specs = {false, true, false},
+                order = 1,
             },
             ["10-9500074b-1"] = {   -- Crane's Zeal (Mistweaver)
                 spell = 127722,
                 minLevel = 10,
-                order = 2,
                 specs = {false, true, false},
+                order = 2,
             },
             ["10-b87137e0-1"] = {   -- Tigereye Brew (Windwalker)
                 spell = {116740,125195}, -- Effect buff, Stacking buff
                 minLevel = 56,
-                order = 1,
                 specs = {false, false, true},
+                order = 1,
             },
         -- Static Debuff
             ["10-83b91fd2-1"] = {   -- Rising Sun Kick (Windwalker)
                 spell = 130320,
-                auraType = "debuff",
                 minLevel = 56,
-                order = 1,
+                auraType = "debuff",
+                unit = "target",
                 specs = {false, true, true},
+                order = 1,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["10-9cc09bbe-1"] = {   -- Guard (Brewmaster)
                 spell = 115295,
                 specs = {true, false, false},
@@ -485,20 +519,24 @@ AuraTracking.Defaults = {
             ["10-871ccaed-1"] = {spell = 122278},   -- Dampen Harm (Talent)
             ["10-8082e169-1"] = {spell = 116841},   -- Tiger's Lust (Talent)
             ["10-ab86d9e3-1"] = {spell = 152173},   -- Serenity (Talent)
-        -- Free Debuffs
-            ["10-b561c6be-1"] = {spell = 115804, auraType = "debuff"}, -- Mortal Wounds
+        -- Free Target Auras
+            ["10-b561c6be-1"] = { -- Mortal Wounds
+                spell = 115804,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["PALADIN"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["2-bdba8989-1"] = {   -- Avenging Wrath (Ret)
                 spell = 31884,
-                order = 1,
                 specs = {false, false, true},
+                order = 1,
             },
-        -- Static Debuff
-        -- Free Buffs
+        -- Static Target Auras
+        -- Free Player Auras
             ["2-a0c9223c-1"] = {   -- Avenging Wrath (Holy, Prot)
                 spell = 31884,
                 specs = {true, true, false},
@@ -518,54 +556,69 @@ AuraTracking.Defaults = {
             ["2-93d2a558-1"] = {spell = 53563},    -- Beacon of Light
             ["2-9ab78043-1"] = {spell = 85499},    -- Speed of Light
             ["2-a73a3586-1"] = {spell = 31850},    -- Ardent Defender
-        -- Free Debuffs
-            ["2-901cef84-1"] = {spell = 31935, auraType = "debuff"}, -- Avenger's Shield
-            ["2-857dac62-1"] = {spell = 26573, auraType = "debuff"}, -- Concecration
-            ["2-919f1d2c-1"] = {spell = 31803, auraType = "debuff"}, -- Censure
+        -- Free Target Auras
+            ["2-901cef84-1"] = {   -- Avenger's Shield
+                spell = 31935,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["2-857dac62-1"] = {   -- Concecration
+                spell = 26573,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["2-919f1d2c-1"] = {   -- Censure
+                spell = 31803,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["PRIEST"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["5-9678bff1-1"] = {   -- Evangelism (Disc)
                 spell = 81661,
                 minLevel = 44,
-                order = 1,
                 specs = {true, false, false},
+                order = 1,
             },
             ["5-80ee0623-1"] = {   -- Borrowed Time (Disc)
                 spell = 59889,
                 minLevel = 62,
-                order = 2,
                 specs = {true, false, false},
+                order = 2,
             },
             ["5-b917679d-1"] = {   -- Serendipity (Holy)
                 spell = 63735,
                 minLevel = 34,
-                order = 1,
                 specs = {false, true, false},
+                order = 1,
             },
-        -- Static Debuff
+        -- Static Target Auras
             ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
                 spell = 34914,
                 auraType = "debuff",
-                order = 1,
+                unit = "target",
                 specs = {false, false, true},
+                order = 1,
             },
             ["5-9ee1ee3e-1"] = {   -- SW:P (Shadow)
                 spell = 589,
                 auraType = "debuff",
-                order = 2,
+                unit = "target",
                 specs = {false, false, true},
+                order = 2,
             },
             ["5-b1df8034-1"] = {   -- Devouring Plague (Shadow)
                 spell = 158831,
-                auraType = "debuff",
                 minLevel = 21,
-                order = 3,
+                auraType = "debuff",
+                unit = "target",
                 specs = {false, false, true},
+                order = 3,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["5-a4b0b5d4-1"] = {spell = 109964},   -- Spirit Shell
             ["5-aaf9a60f-1"] = {spell = 47585},    -- Dispersion
             ["5-9e14c42b-1"] = {spell = 15286},    -- Vampiric Embrace
@@ -577,14 +630,22 @@ AuraTracking.Defaults = {
             ["5-ab8e3ab7-1"] = {spell = 114239},   -- Phantasm
             ["5-b255a230-1"] = {spell = 119032},   -- Spectral Guise
             ["5-8636c202-1"] = {spell = 27827},    -- Spirit of Redemption
-        -- Free Debuffs
-            ["5-a88338ed-1"] = {spell = 14914, auraType = "debuff"}, -- Holy Fire
-            ["5-86b717fe-1"] = {spell = 64044, auraType = "debuff"}, -- Psychic Horror
+        -- Free Target Auras
+            ["5-a88338ed-1"] = {   -- Holy Fire
+                spell = 14914,
+                auraType = "debuff",
+                unit = "target",
+                },
+            ["5-86b717fe-1"] = {   -- Psychic Horror
+                spell = 64044,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["ROGUE"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["4-a4347749-1"] = {   -- Slice and Dice
                 type = "SliceAndDice",
                 order = 1,
@@ -595,15 +656,15 @@ AuraTracking.Defaults = {
             },
             ["4-a5abd891-1"] = {   -- Shadow Dance (Sub)
                 spell = 51713,
-                order = 2,
                 specs = {false, false, true},
+                order = 2,
             },
             ["4-b590c8e6-1"] = {   -- Envenom (Ass)
                 spell = 32645,
                 specs = {true, false, false},
                 order = 2,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["4-b2b390d7-1"] = {   -- Rupture
                 type = "Rupture",
                 order = 1,
@@ -611,17 +672,19 @@ AuraTracking.Defaults = {
             ["4-ac22ce84-1"] = {   -- Revealing Strike (Comb)
                 spell = 84617,
                 auraType = "debuff",
+                unit = "target",
                 specs = {false, true, false},
                 order = 2,
             },
             ["4-8301b93a-1"] = {   -- Find Weakness (Sub)
-                auraType = "debuff",
                 spell = 91021,
                 minLevel = 10,
-                order = 2,
+                auraType = "debuff",
+                unit = "target",
                 specs = {false, false, true},
+                order = 2,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["4-bcbb4a21-1"] = {spell = 73651},    -- Recuperate
             ["4-bd56d2d6-1"] = {spell = 108212},   -- Burst of Speed
             ["4-bf8be102-1"] = {spell = 13750},    -- Adrenaline Rush
@@ -639,47 +702,65 @@ AuraTracking.Defaults = {
             ["4-a45b83a3-1"] = {spell = 137619},   -- Marked for Death
             ["4-a0c86712-1"] = {spell = 1966},     -- Feint
             ["4-b7bc86f8-1"] = {spell = 74002},    -- Combat Insight
-        -- Free Debuffs
-            ["4-9b960b7a-1"] = {spell = 16511, auraType = "debuff"},   -- Hemorrhage
-            ["4-8c6900cc-1"] = {spell = 79140, auraType = "debuff"},   -- Vendetta
-            ["4-8856069f-1"] = {spell = 703, auraType = "debuff"},     -- Garrote
-            ["4-b4b6abe1-1"] = {spell = 108210, auraType = "debuff"},  -- Nerve Strike
+        -- Free Target Auras
+            ["4-9b960b7a-1"] = {   -- Hemorrhage
+                spell = 16511,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["4-8c6900cc-1"] = {   -- Vendetta
+                spell = 79140,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["4-8856069f-1"] = {   -- Garrote
+                spell = 703,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["4-b4b6abe1-1"] = {   -- Nerve Strike
+                spell = 108210,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["SHAMAN"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["7-98774f14-1"] = {   -- Maelstrom Weapon (Enh)
                 spell = 65986,
                 minLevel = 83,
+                specs = {false, true, false},
                 order = 1,
-                specs = {false, true, false}
             },
             ["7-a7dc8a98-1"] = {   -- Tidal Waves (Resto)
                 spell = 53390,
                 minLevel = 50,
+                specs = {false, false, true},
                 order = 1,
-                specs = {false, false, true}
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["7-8ef35823-1"] = {   -- Flame Shock (Enh, Ele)
                 spell = 8050,
                 auraType = "debuff",
+                unit = "target",
+                specs = {true, true, false},
                 order = 1,
-                specs = {true, true, false}
             },
             ["7-bd97988f-1"] = {   -- Frost Shock (Enh, Ele)
                 spell = 8056,
                 auraType = "debuff",
+                unit = "target",
+                specs = {true, true, false},
                 order = 2,
-                specs = {true, true, false}
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["7-8065f89b-1"] = {   -- Lightning Shield (Ele) (Fulmination)
                 spell = 324,
                 minLevel = 20,
+                specs = {true, false, false},
                 hideOOC = true,
-                specs = {true, false, false}
             },
             ["7-b7881104-1"] = {spell = 30823},    -- Shamanistic Rage
             ["7-80768995-1"] = {spell = 73683},    -- Unleash Flame
@@ -696,62 +777,81 @@ AuraTracking.Defaults = {
             ["7-b5ebf41b-1"] = {spell = 16166},    -- Elemental Mastery (talent)
             ["7-b9209d3d-1"] = {spell = 114896},   -- Windwalk Totem
             ["7-b2a0a61d-1"] = {spell = 114049},   -- Ascendance
-        -- Free Debuffs
-            ["7-9f7d9c17-1"] = {spell = 8050, auraType = "debuff", specs = {false, false, true}},  -- Flame Shock (Resto)
-            ["7-803045b0-1"] = {spell = 8056, auraType = "debuff", specs = {false, false, true}},  -- Frost Shock (Resto)
-            ["7-be08b458-1"] = {spell = 17364, auraType = "debuff"},   -- Stormstrike
+        -- Free Target Auras
+            ["7-9f7d9c17-1"] = {   -- Flame Shock (Resto)
+                spell = 8050,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+            },
+            ["7-803045b0-1"] = {   -- Frost Shock (Resto)
+                spell = 8056,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+            },
+            ["7-be08b458-1"] = {   -- Stormstrike
+                spell = 17364,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["WARLOCK"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["9-9f916aed-1"] = {   -- Molten Core (Demo)
                 spell = {140074, 122355}, -- Green Fire, Normal
                 minLevel = 69,
+                specs = {false, true, false},
                 order = 1,
-                specs = {false, true, false}
             },
             ["9-a6a32ca3-1"] = {   -- Burning Embers (Dest)
                 type = "BurningEmbers",
                 order = 1,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["9-be413012-1"] = {   -- Corruption (Aff, Demo)
                 spell = 146739,
-                auraType = "debuff",
                 minLevel = 3,
-                order = 1,
-                specs = {true, true, false}
-            },
-            ["9-b2aa6f2d-1"] = {   -- Doom (Demo)
-                spell = 603,
                 auraType = "debuff",
-                minLevel = 36,
-                order = 2,
-                specs = {false, true, false}
+                unit = "target",
+                specs = {true, true, false},
+                order = 1,
             },
             ["9-bcf57e20-1"] = {   -- Unstable Affliction (Aff)
                 spell = 30108,
-                auraType = "debuff",
                 minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
                 order = 2,
-                specs = {true, false, false}
             },
             ["9-9d46aea7-1"] = {   -- Agony, Doom (Aff)
                 spell = {980,603},
-                auraType = "debuff",
                 minLevel = 36,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
                 order = 3,
-                specs = {true, false, false}
+            },
+            ["9-b2aa6f2d-1"] = {   -- Doom (Demo)
+                spell = 603,
+                minLevel = 36,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                order = 2,
             },
             ["9-be90eb3d-1"] = {   -- Immolate (Dest)
                 spell = 157736,
-                auraType = "debuff",
                 minLevel = 12,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
                 order = 1,
-                specs = {false, false, true}
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["9-bd74da2c-1"] = {spell = 110913},   -- Dark Bargain
             ["9-911df4e4-1"] = {spell = 108359},   -- Dark Regeneration
             ["9-82ad155e-1"] = {spell = 113860},   -- Dark Soul: Misery
@@ -759,45 +859,75 @@ AuraTracking.Defaults = {
             ["9-87bd1ea8-1"] = {spell = 113858},   -- Dark Soul: Instability
             ["9-bb5f0433-1"] = {spell = 88448},    -- Demonic Rebirth
             ["9-9e083577-1"] = {spell = 104773},   -- Unending Resolve
-        -- Free Debuffs
-            ["9-869d9949-1"] = {spell = 27243, auraType = "debuff"},   -- Seed of Corruption
-            ["9-8072e1ae-1"] = {spell = 48181, auraType = "debuff"},   -- Haunt
-            ["9-bfee421b-1"] = {spell = 80270, auraType = "debuff"},   -- Shadowflame
-            ["9-81347abb-1"] = {spell = 17962, auraType = "debuff"},   -- Conflagrate
-            ["9-858bed5f-1"] = {spell = 80240, auraType = "debuff"},   -- Havoc
-            ["9-bc1debbb-1"] = {spell = 17877, auraType = "debuff"},   -- Shadowburn
-            ["9-aa9fcbad-1"] = {spell = 108505, auraType = "debuff"},  -- Archimonde's Vengeance
+        -- Free Target Auras
+            ["9-869d9949-1"] = {   -- Seed of Corruption
+                spell = 27243,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-8072e1ae-1"] = {   -- Haunt
+                spell = 48181,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-bfee421b-1"] = {   -- Shadowflame
+                spell = 80270,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-81347abb-1"] = {   -- Conflagrate
+                spell = 17962,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-858bed5f-1"] = {   -- Havoc
+                spell = 80240,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-bc1debbb-1"] = {   -- Shadowburn
+                spell = 17877,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["9-aa9fcbad-1"] = {   -- Archimonde's Vengeance
+                spell = 108505,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 
     ["WARRIOR"] = {
         ["**"] = defaultTracker,
-        -- Static Buffs
+        -- Static Player Auras
             ["1-be149d0a-1"] = {   -- Enrage (Fury)
                 spell = 12880,
                 minLevel = 14,
-                order = 1,
                 specs = {false, true, false},
+                order = 1,
             },
             ["1-88616b14-1"] = {   -- Raging Blow! (Fury)
                 spell = 131116,
                 minLevel = 30,
-                order = 2,
                 specs = {false, true, false},
+                order = 2,
             },
             ["1-8d6897d2-1"] = {   -- Shield Block, Shield Charge (Prot)
                 spell = {132404, 169667},
                 minLevel = 18,
-                order = 1,
                 specs = {false, false, true},
+                order = 1,
             },
-        -- Static Debuffs
+        -- Static Target Auras
             ["1-9256f2b1-1"] = {   -- Rend (Arms)
                 spell = 772,
                 minLevel = 10,
-                order = 1,
+                auraType = "debuff",
+                unit = "target",
                 specs = {true, false, false},
+                order = 1,
             },
-        -- Free Buffs
+        -- Free Player Auras
             ["1-9d8e1b35-1"] = {   -- Bloodsurge (Fury)
                 spell = 46916,
                 specs = {false, true, false},
@@ -829,12 +959,36 @@ AuraTracking.Defaults = {
             ["1-bc751f32-1"] = {spell = 107574},   -- Avatar (Talent)
             ["1-a26f3820-1"] = {spell = 12292},    -- Bloodbath (Talent)
             ["1-b8a217f8-1"] = {spell = 46924},    -- Bladestorm (Talent)
-        -- Free Debuffs
-            ["1-bbd999f7-1"] = {spell = 86346, auraType = "debuff"},   -- Colossus Smash
-            ["1-96c7609f-1"] = {spell = 1160, auraType = "debuff"},    -- Demoralizing Shout
-            ["1-80e6917a-1"] = {spell = 1715, auraType = "debuff"},    -- Hamstring
-            ["1-b9d2c83a-1"] = {spell = 12294, auraType = "debuff"},   -- Mortal Strike
-            ["1-803da340-1"] = {spell = 64382, auraType = "debuff"},   -- Shattering Throw
-            ["1-a17f11f4-1"] = {spell = 6552, auraType = "debuff"},    -- Pummel
+        -- Free Target Auras
+            ["1-bbd999f7-1"] = {   -- Colossus Smash
+                spell = 86346,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["1-96c7609f-1"] = {   -- Demoralizing Shout
+                spell = 1160,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["1-80e6917a-1"] = {   -- Hamstring
+                spell = 1715,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["1-b9d2c83a-1"] = {   -- Mortal Strike
+                spell = 12294,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["1-803da340-1"] = {   -- Shattering Throw
+                spell = 64382,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["1-a17f11f4-1"] = {   -- Pummel
+                spell = 6552,
+                auraType = "debuff",
+                unit = "target",
+            },
     },
 }
