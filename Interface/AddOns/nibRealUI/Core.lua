@@ -624,7 +624,7 @@ function nibRealUI:OnInitialize()
     -- Vars
     self.realm = GetRealmName()
     self.faction = UnitFactionGroup("player")
-    self.classLocale, self.class = UnitClass("player")
+    self.classLocale, self.class, self.classID = UnitClass("player")
     self.classColor = nibRealUI:GetClassColor(self.class)
     self.name = UnitName("player")
     self.key = string.format("%s - %s", self.name, self.realm)

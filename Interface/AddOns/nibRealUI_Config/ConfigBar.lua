@@ -1215,10 +1215,26 @@ local auratracker do
         end
         return name, order
     end
-    local function createTraker(id)
+    local function useSpec(spellData)
+        local numSpecs = 0
+        for i = 1, #spellData.specs do
+            if spellData.specs[i] then
+                numSpecs = numSpecs + 1
+            end
+        end
+        if numSpecs == 0 then
+            return false
+        elseif numSpecs == 1 then
+            return true
+        else
+            return nil
+        end
+    end
+    local function createTracker(id)
         local spellData = trackingData[id]
         local spellOptions = auratracker.args.options
         local name, order = getNameOrder(spellData)
+        local useSpec = useSpec(spellData)
 
         return {
             name = name,
@@ -1339,11 +1355,11 @@ local auratracker do
                 },
                 useSpec = {
                     name = _G.SPECIALIZATION,
-                    desc = L["General_Tristate"..tostring(spellData.useSpec)].."\n"..
-                        L["AuraTrack_TristateSpec"..tostring(spellData.useSpec)],
+                    desc = L["General_Tristate"..tostring(useSpec)].."\n"..
+                        L["AuraTrack_TristateSpec"..tostring(useSpec)],
                     type = "toggle",
                     tristate = true,
-                    get = function(info) return spellData.useSpec end,
+                    get = function(info) return useSpec end,
                     set = function(info, value)
                         local spellOptions = spellOptions.args[info[#info-1]].args
                         if value == false then
@@ -1356,14 +1372,14 @@ local auratracker do
                         end
                         spellOptions.useSpec.desc = L["General_Tristate"..tostring(value)].."\n"..
                             L["AuraTrack_TristateSpec"..tostring(value)]
-                        spellData.useSpec = value
+                        useSpec = value
                     end,
                     order = 60,
                 },
                 spec = {
                     name = "",
-                    type = (spellData.useSpec == nil) and "multiselect" or "select",
-                    disabled = function() return spellData.useSpec == false end,
+                    type = (useSpec == nil) and "multiselect" or "select",
+                    disabled = function() return useSpec == false end,
                     values = function()
                         local table = {}
                         for i = 1, _G.GetNumSpecializations() do
@@ -1470,9 +1486,9 @@ local auratracker do
                 type = "execute",
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
-                    local id = AuraTracking:CreateNewTracker()
-                    debug("New id:", id)
-                    auratracker.args.options.args["spell"..id] = createTraker(id)
+                    local trackerID = AuraTracking:CreateNewTracker()
+                    debug("New id:", trackerID)
+                    auratracker.args.options.args[trackerID] = createTracker(trackerID)
                 end,
                 order = 10,
             },
@@ -1680,9 +1696,9 @@ local auratracker do
             }
         }
     }
-    for id, spellData in next, trackingData do
-        local tracker = createTraker(id)
-        auratracker.args.options.args[id] = tracker
+    for trackerID, spellData in next, trackingData do
+        local tracker = createTracker(trackerID)
+        auratracker.args.options.args[trackerID] = tracker
     end
 end
 local classresource do

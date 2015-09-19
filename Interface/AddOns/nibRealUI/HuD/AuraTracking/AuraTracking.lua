@@ -1,6 +1,6 @@
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, random = _G.next, _G.math.random
 
 -- WoW Globals --
 local UIParent = _G.UIParent
@@ -139,6 +139,35 @@ function AuraTracking:RemoveTracker(tracker, isStatic)
             end
         end
         --]]
+    end
+end
+do
+    local template = "yxxxxxxx"
+    local function generateGUID()
+        return _G.gsub(template, "[xy]", function (c)
+            local v = (c == "x") and random(0, 0xf) or random(0, 7)
+            return _G.format("%x", v)
+        end)
+    end
+    function AuraTracking:CreateNewTracker()
+        local newID
+        repeat
+            newID = generateGUID()
+            local isDupe = false
+            for trackerID, spellData in next, trackingData do
+                local classID, id, isDefault = _G.strsplit("-", trackerID)
+                if newID == id then
+                    isDupe = true
+                    break
+                end
+            end
+        until not isDupe
+
+        local newTrackerID = _G.format("%d-%s", nibRealUI.classID, newID)
+        trackingData[newTrackerID] = {}
+        local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
+        tracker.classID = nibRealUI.classID
+        tracker.isDefault = false
     end
 end
 
