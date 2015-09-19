@@ -26,6 +26,7 @@ local isValidUnit = {
 }
 
 local function FindSpellMatch(spell, unit, filter)
+    AuraTracking:debug("FindSpellMatch", spell, unit, filter)
     local aura = {}
     for auraIndex = 1, 40 do
         local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
@@ -36,7 +37,7 @@ local function FindSpellMatch(spell, unit, filter)
         end
 
         if name == nil then
-            aura.texture, aura.index = texture, auraIndex
+            aura.index = auraIndex
             return false, aura
         end
     end
@@ -52,6 +53,7 @@ auras:SetScript("OnEvent", function(self, event, unit)
         if tracker.unit == unit and tracker.isEnabled then
             local spell = icons[tracker].spell
             local spellMatch, aura = false
+            AuraTracking:debug("IterateTrackers", tracker.id, spell)
 
             if type(spell) == "table" then
                 for index = 1, #spell do
@@ -68,11 +70,10 @@ auras:SetScript("OnEvent", function(self, event, unit)
                 tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
                 tracker.icon:SetTexture(aura.texture)
                 AuraTracking:AddTracker(tracker)
-            else
+            elseif tracker.slotID then
                 tracker.auraIndex = aura.index
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
-                tracker.icon:SetTexture(aura.texture)
                 AuraTracking:RemoveTracker(tracker, tracker.order > 0)
             end
         end
@@ -108,8 +109,16 @@ end
 function AuraTracking:CreateAuraIcon(id, spellData)
     local side = spellData.unit == "target" and "right" or "left"
     local tracker = CreateFrame("Frame", nil, self[side])
+    self[side][id] = tracker
     tracker.side = side
     tracker.id = id
+
+    local _, _, texture
+    if type(spellData.spell) == "table" then
+        _, _, texture = GetSpellInfo(spellData.spell[1])
+    else
+        _, _, texture = GetSpellInfo(spellData.spell)
+    end
 
     local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
     cd:SetAllPoints(tracker)
@@ -117,7 +126,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
 
     local icon = tracker:CreateTexture(nil, "BACKGROUND")
     icon:SetAllPoints(tracker)
-    icon:SetTexture([[Interface/Icons/Inv_Misc_QuestionMark]])
+    icon:SetTexture(texture)
     tracker.icon = icon
 
     local bg = F.ReskinIcon(icon)
