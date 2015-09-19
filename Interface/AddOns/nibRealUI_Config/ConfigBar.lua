@@ -1215,10 +1215,10 @@ local auratracker do
         end
         return name, order
     end
-    local function useSpec(spellData)
+    local function useSpec(specs)
         local numSpecs = 0
-        for i = 1, #spellData.specs do
-            if spellData.specs[i] then
+        for i = 1, #specs do
+            if specs[i] then
                 numSpecs = numSpecs + 1
             end
         end
@@ -1230,11 +1230,12 @@ local auratracker do
             return nil
         end
     end
-    local function createTracker(id)
-        local spellData = trackingData[id]
+    local function createTracker(trackerID)
+        local classID, trackerID, isDefault = _G.strsplit("-", trackerID)
+        local spellData = trackingData[trackerID]
         local spellOptions = auratracker.args.options
         local name, order = getNameOrder(spellData)
-        local useSpec = useSpec(spellData)
+        local useSpec = useSpec(spellData.specs)
 
         return {
             name = name,
@@ -1294,9 +1295,9 @@ local auratracker do
                     end,
                     set = function(info, value)
                         if spellData.isDisabled then
-                            AuraTracking:EnableTracker(id)
+                            AuraTracking:EnableTracker(trackerID)
                         else
-                            AuraTracking:DisableTracker(id)
+                            AuraTracking:DisableTracker(trackerID)
                         end
                     end,
                     order = 20,
@@ -1462,13 +1463,13 @@ local auratracker do
                 remove = {
                     name = L["AuraTrack_Remove"],
                     type = "execute",
-                    disabled = spellData.type ~= "Aura",
+                    disabled = isDefault and true or false,
                     confirm = true,
                     confirmText = L["AuraTrack_RemoveConfirm"],
                     func = function(info, ...)
                         debug("Remove", info[#info], info[#info-1], ...)
-                        debug("Removed ID", id, trackingData[id].spell)
-                        tremove(trackingData, id)
+                        debug("Removed ID", trackerID, trackingData[trackerID].spell)
+                        trackingData[trackerID] = nil
                     end,
                     order = -1,
                 },
@@ -1487,7 +1488,7 @@ local auratracker do
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
                     local trackerID = AuraTracking:CreateNewTracker()
-                    debug("New id:", trackerID)
+                    debug("New trackerID:", trackerID)
                     auratracker.args.options.args[trackerID] = createTracker(trackerID)
                 end,
                 order = 10,
