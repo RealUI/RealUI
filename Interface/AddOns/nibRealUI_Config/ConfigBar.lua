@@ -1231,7 +1231,7 @@ local auratracker do
         end
     end
     local function createTracker(trackerID)
-        local classID, trackerID, isDefault = _G.strsplit("-", trackerID)
+        local classID, id, isDefault = _G.strsplit("-", trackerID)
         local spellData = trackingData[trackerID]
         local spellOptions = auratracker.args.options
         local name, order = getNameOrder(spellData)
@@ -1470,6 +1470,7 @@ local auratracker do
                         debug("Remove", info[#info], info[#info-1], ...)
                         debug("Removed ID", trackerID, trackingData[trackerID].spell)
                         trackingData[trackerID] = nil
+                        spellOptions.args[info[#info-1]] = nil
                     end,
                     order = -1,
                 },

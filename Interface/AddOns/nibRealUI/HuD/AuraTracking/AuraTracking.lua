@@ -148,10 +148,10 @@ do
         until not isDupe
 
         local newTrackerID = _G.format("%d-%s", nibRealUI.classID, newID)
-        trackingData[newTrackerID] = {}
         local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
         tracker.classID = nibRealUI.classID
         tracker.isDefault = false
+        return newTrackerID
     end
 end
 
