@@ -24,7 +24,7 @@ local debug = true
 
 local maxSlots, maxStaticSlots = 10, 6
 local numActive = {left = 0, right = 0}
-local playerLevel, playerSpec
+local playerLevel, playerSpec, iterUnits
 
 function AuraTracking:Createslots()
     for i, side in next, {"left", "right"} do
@@ -116,29 +116,13 @@ function AuraTracking:RemoveTracker(tracker, isStatic)
         tracker:ClearAllPoints()
         tracker:Hide()
 
+        if iterUnits then return end
         local nextSlot = side["slot"..emptySlot+1]
         if nextSlot.isActive then
             local movedTracker = nextSlot.tracker
             self:RemoveTracker(movedTracker)
             self:AddTracker(movedTracker, emptySlot)
         end
-
-        --[[ 
-        for slotID = emptySlot, maxSlots do
-            local nextSlot = side["slot"..slotID+1]
-            if nextSlot.isActive then
-                currSlot.tracker = nextSlot.tracker
-                currSlot.isActive = true
-
-                nextSlot.tracker:ClearAllPoints()
-                nextSlot.tracker:SetAllPoints(currSlot)
-                nextSlot.tracker.slotID = slotID
-
-                nextSlot.tracker = nil
-                nextSlot.isActive = false
-            end
-        end
-        --]]
     end
 end
 do
@@ -252,7 +236,9 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     if unitExists then
         AuraTracking:EnableUnit(unit)
     else
+        iterUnits = true
         AuraTracking:DisableUnit(unit)
+        iterUnits = false
     end
     self:UpdateVisibility()
 end

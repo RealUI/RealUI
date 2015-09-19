@@ -487,7 +487,7 @@ AuraTracking.Defaults = {
                 specs = {false, false, true},
                 order = 1,
             },
-        -- Static Debuff
+        -- Static Target Auras
             ["10-83b91fd2-1"] = {   -- Rising Sun Kick (Windwalker)
                 spell = 130320,
                 minLevel = 56,

@@ -54,7 +54,7 @@ end
 local auras = CreateFrame("Frame")
 auras:RegisterUnitEvent("UNIT_AURA")
 auras:SetScript("OnEvent", function(self, event, unit)
-    AuraTracking:debug("UNIT_AURA", unit)
+    AuraTracking:debug("auras:OnEvent", event, unit)
     if not isValidUnit[unit] then return end
 
     for tracker in AuraTracking:IterateTrackers() do
@@ -114,6 +114,9 @@ end
 function api:Disable()
     AuraTracking:debug("Tracker:Disable", self.id)
     self.isEnabled = false
+    if self.slotID then
+        AuraTracking:RemoveTracker(self)
+    end
 end
 
 --[[ External Functions ]]--
@@ -192,17 +195,18 @@ function AuraTracking:EnableUnit(unit)
     self:debug("EnableUnit", unit)
     isValidUnit[unit] = true
     for tracker in self:IterateTrackers() do
-        if tracker.unit == unit and self.isEnabled then
+        if tracker.unit == unit and not tracker.isEnabled then
             tracker:Enable()
         end
     end
+    auras:GetScript("OnEvent")(auras, "FORCED_UNIT_AURA", unit)
 end
 function AuraTracking:DisableUnit(unit)
     if not isValidUnit[unit] then return end
     self:debug("DisableUnit", unit)
     isValidUnit[unit] = false
     for tracker in self:IterateTrackers() do
-        if tracker.unit == unit and self.isEnabled then
+        if tracker.unit == unit and tracker.isEnabled then
             tracker:Disable()
         end
     end
