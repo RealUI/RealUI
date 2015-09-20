@@ -156,17 +156,21 @@ do
 end
 
 function AuraTracking:UpdateVisibility()
-    local targetCondition = db.visibility.showHostile and self.targetHostile
-    local pvpCondition = db.visibility.showPvP and self.inPvP
-    local pveCondition = db.visibility.showPvE and self.inPvE
-    local combatCondition = (db.visibility.showCombat and self.inCombat) or not(db.visibility.showCombat)
+    self:debug("UpdateVisibility")
+    local visibility = db.visibility
+    local targetCondition = visibility.showHostile and self.targetHostile
+    local combatCondition = (visibility.showCombat and self.inCombat) or not(visibility.showCombat)
+    local instType = self.inPvP and "PvP" or "PvE"
 
-    if self.configMode or targetCondition or pvpCondition or pveCondition or combatCondition then
+    if self.configMode then
         self.left:Show()
         self.right:Show()
+    elseif self["in"..instType] then
+        self.left:SetShown(visibility["show"..instType] and (combatCondition or targetCondition))
+        self.right:SetShown(visibility["show"..instType] and targetCondition)
     else
-        self.left:SetShown(numActive["left"] > 0)
-        self.right:Hide()
+        self.left:SetShown(targetCondition or numActive["left"] > 0)
+        self.right:SetShown(targetCondition)
     end
 end
 function AuraTracking:RefreshMod()
@@ -204,17 +208,19 @@ function AuraTracking:PLAYER_ENTERING_WORLD()
     self.targetHostile = false
 
     C_TimerAfter(1, function()
-        local _, instanceType = _G.GetInstanceInfo()
-        if instanceType ~= "none" then
+        local instanceName, instanceType = _G.GetInstanceInfo()
+        self:debug("UpdateLocation", instanceName, instanceType)
+        if instanceType == "none" or instanceName:find("Garrison") then
             self.inPvP = false
             self.inPvE = false
         elseif (instanceType == "pvp") or (instanceType == "arena") then
             self.inPvP = true
             self.inPvE = false
         elseif (instanceType == "party") or (instanceType == "raid") or (instanceType == "scenario") then
-            self.inPvE = true
             self.inPvP = false
+            self.inPvE = true
         end
+        self:UpdateVisibility()
     end)
 end
 
