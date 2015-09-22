@@ -1,8 +1,53 @@
+-- Lua Globals --
+local _G = _G
+local next, type = _G.next, _G.type
+
+-- WoW Globals --
+local UnitPower = _G.UnitPower
+
+-- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+
+--[[ Rogues ]]--
+local SliceAndDice do
+    -- Shows predicted buff duration based on current CPs.
+    local gapPerComboPoint = 6
+    local maxComboPoints = 5
+    local baseSnDDuration = 12
+    local maxSnDDuration = 36
+
+    function SliceAndDice(self, spellData)
+        local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
+
+        if (comboPoints > 0) then
+            local potentialSnD = baseSnDDuration + ((comboPoints - 1) * gapPerComboPoint)
+            self.count:SetText(potentialSnD)
+            if potentialSnD == maxSnDDuration then
+                self.count:SetTextColor(0, 1, 0)
+            else
+                self.count:SetTextColor(1, 1, 1)
+            end
+        else
+            self.count:SetText("")
+        end
+    end
+end
+local BanditsGuile do
+    -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
+    local bgSwingCount = 0
+
+    function BanditsGuile(self, spellData, spellID)
+        if (bgSwingCount > 0) and (spellID ~= spellData.spell[3]) then
+            self.count:SetText(bgSwingCount)
+        else
+            self.count:SetText()
+        end
+    end
+end
 
 local defaultTracker = {
     spell = L["AuraTrack_SpellNameID"],
@@ -646,22 +691,29 @@ AuraTracking.Defaults = {
     ["ROGUE"] = {
         ["**"] = defaultTracker,
         -- Static Player Auras
-            ["4-a4347749-1"] = {   -- Slice and Dice
-                type = "SliceAndDice",
+            ["4-a4347749-1"] = {   -- Slice and Dice (Combat, Sub)
+                spell = 5171,
+                minLevel = 14,
+                specs = {true, false, true}, -- Passive for Assas via Dreanor Perk
                 order = 1,
-            },
-            ["4-b8faafc6-1"] = {   -- Bandit's Guile (Combat)
-                type = "BanditsGuile",
-                order = 2,
-            },
-            ["4-a5abd891-1"] = {   -- Shadow Dance (Sub)
-                spell = 51713,
-                specs = {false, false, true},
-                order = 2,
+                postUnitAura = SliceAndDice
             },
             ["4-b590c8e6-1"] = {   -- Envenom (Ass)
                 spell = 32645,
                 specs = {true, false, false},
+                order = 1,
+            },
+            ["4-b8faafc6-1"] = {   -- Bandit's Guile (Combat)
+                spell = {84745, 84746, 84747}, -- Shallow, Moderate, Deep Insight
+                minLevel = 60,
+                specs = {false, true, false},
+                order = 2,
+                customName = _G.GetSpellInfo(84654),
+                postUnitAura = BanditsGuile
+            },
+            ["4-a5abd891-1"] = {   -- Shadow Dance (Sub)
+                spell = 51713,
+                specs = {false, false, true},
                 order = 2,
             },
         -- Static Target Auras

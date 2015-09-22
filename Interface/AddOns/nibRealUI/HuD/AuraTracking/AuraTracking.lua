@@ -20,7 +20,7 @@ local round = nibRealUI.Round
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
-local debug = true
+local debug = false
 
 local maxSlots, maxStaticSlots = 10, 6
 local numActive = {left = 0, right = 0}

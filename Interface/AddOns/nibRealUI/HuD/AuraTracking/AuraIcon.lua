@@ -40,6 +40,7 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
         debug(isDebug, "Aura", auraIndex, name, ID)
         if spell == name or spell == ID then
             aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
+            aura.name, aura.ID = name, ID
             aura.count = count > 0 and count or ""
             return true, aura
         end
@@ -87,6 +88,9 @@ auras:SetScript("OnEvent", function(self, event, unit)
                 tracker.count:SetText("")
                 AuraTracking:RemoveTracker(tracker, tracker.order > 0)
             end
+            if self.postUnitAura then
+                self:postUnitAura(spellData, aura.ID)
+            end
         end
     end
 end)
@@ -101,6 +105,7 @@ function api:UpdateSpellData()
     self.filter = (spellData.auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
     self.specs = spellData.specs
     self.minLevel = spellData.minLevel
+    self.postUnitAura = spellData.postUnitAura
 end
 
 function api:Enable()

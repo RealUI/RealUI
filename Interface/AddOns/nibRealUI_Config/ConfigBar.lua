@@ -1188,7 +1188,9 @@ local auratracker do
     local function getNameOrder(spellData)
         local order, pos, name = 70, "", ""
 
-        if type(spellData.spell) == "table" then
+        if spellData.customName then
+            name = spellData.customName
+        elseif type(spellData.spell) == "table" then
             for i = 1, #spellData.spell do
                 debug("iter spell table", i)
                 local spellName, next = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
