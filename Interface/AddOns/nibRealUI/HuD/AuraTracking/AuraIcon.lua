@@ -19,101 +19,23 @@ local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
 local icons = {}
-local isValidUnit = {
-    player = true,
-    target = false,
-    pet = false
-}
-local function debug(isDebug, ...)
-    if isDebug then
-        -- self.debug should be a string describing what the bar is.
-        -- eg. "playerHealth", "targetAbsorbs", etc
-        AuraTracking:debug(isDebug, ...)
-    end
-end
-
-local function FindSpellMatch(spell, unit, filter, isDebug)
-    debug(isDebug, "FindSpellMatch", spell, unit, filter)
-    local aura = {}
-    for auraIndex = 1, 40 do
-        local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
-        debug(isDebug, "Aura", auraIndex, name, ID)
-        if spell == name or spell == ID then
-            aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
-            aura.name, aura.ID = name, ID
-            aura.count = count > 0 and count or ""
-            return true, aura
-        end
-
-        if name == nil then
-            aura.index = auraIndex
-            return false, aura
-        end
-    end
-end
-
-local auras = CreateFrame("Frame")
-auras:RegisterUnitEvent("UNIT_AURA")
-auras:SetScript("OnEvent", function(self, event, unit)
-    AuraTracking:debug("auras:OnEvent", event, unit)
-    if not isValidUnit[unit] then return end
-
-    for tracker in AuraTracking:IterateTrackers() do
-        if tracker.unit == unit and tracker.isEnabled then
-            local spellData, aura = icons[tracker]
-            local spell, spellMatch = spellData.spell, false
-            debug(spellData.debug, "IterateTrackers", tracker.id, spell)
-
-            if type(spell) == "table" then
-                for index = 1, #spell do
-                    spellMatch, aura = FindSpellMatch(spell[index], tracker.unit, tracker.filter, spellData.debug)
-                    if spellMatch then break end
-                end
-            else
-                spellMatch, aura = FindSpellMatch(spell, tracker.unit, tracker.filter, spellData.debug)
-            end
-
-            if spellMatch then
-                debug(spellData.debug, "Tracker", tracker.id, spell)
-                tracker.auraIndex = aura.index
-                tracker.cd:Show()
-                tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
-                tracker.icon:SetTexture(aura.texture)
-                tracker.count:SetText(aura.count)
-                AuraTracking:AddTracker(tracker)
-            elseif tracker.slotID then
-                tracker.auraIndex = aura.index
-                tracker.cd:SetCooldown(0, 0)
-                tracker.cd:Hide()
-                tracker.count:SetText("")
-                AuraTracking:RemoveTracker(tracker, tracker.order > 0)
-            end
-            if self.postUnitAura then
-                self:postUnitAura(spellData, aura.ID)
-            end
-        end
-    end
-end)
 
 --[[ API Functions ]]--
 local api = {}
 function api:UpdateSpellData()
     local spellData = icons[self]
-    self.unit = spellData.unit
-    self.order = spellData.order
-    self.ignoreRaven = spellData.ignoreRaven
+    self.isStatic = spellData.order > 0
     self.filter = (spellData.auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
-    self.specs = spellData.specs
-    self.minLevel = spellData.minLevel
     self.postUnitAura = spellData.postUnitAura
 end
 
 function api:Enable()
     AuraTracking:debug("Tracker:Enable", self.id)
+    local spellData = icons[self]
     self.isEnabled = true
-    if self.order > 0 then
+    if self.isStatic then
         self.icon:SetDesaturated(true)
-        AuraTracking:AddTracker(self, self.order)
+        AuraTracking:AddTracker(self, spellData.order)
     end
 end
 function api:Disable()
@@ -162,7 +84,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
         if not tracker.isEnabled then return end
         if tracker.auraIndex then
             _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetUnitAura(tracker.unit, tracker.auraIndex, self.filter)
+            GameTooltip:SetUnitAura(spellData.unit, tracker.auraIndex, self.filter)
             GameTooltip:Show()
         else
             local spell = spellData.spell
@@ -195,32 +117,9 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     return tracker
 end
 
-function AuraTracking:EnableUnit(unit)
-    if isValidUnit[unit] then return end
-    self:debug("EnableUnit", unit)
-    isValidUnit[unit] = true
-    for tracker in self:IterateTrackers() do
-        if tracker.unit == unit and not tracker.isEnabled then
-            tracker:Enable()
-        end
-    end
-    auras:GetScript("OnEvent")(auras, "FORCED_UNIT_AURA", unit)
-end
-function AuraTracking:DisableUnit(unit)
-    if not isValidUnit[unit] then return end
-    self:debug("DisableUnit", unit)
-    isValidUnit[unit] = false
-    for tracker in self:IterateTrackers() do
-        if tracker.unit == unit and tracker.isEnabled then
-            tracker:Disable()
-        end
-    end
-end
-
 do
     local function iter(_, id)
-        -- don't expose spellData
-        return (next(icons, id))
+        return next(icons, id)
     end
 
     function AuraTracking:IterateTrackers()
