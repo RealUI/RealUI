@@ -253,7 +253,7 @@ function AuraTracking:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, subEvent, hi
                         tracker.cd:SetCooldown(0, 0)
                         tracker.cd:Hide()
                         tracker.count:SetText("")
-                        AuraTracking:RemoveTracker(tracker, spellData.order > 0)
+                        AuraTracking:RemoveTracker(tracker, tracker.isStatic)
                     end
                     if self.postUnitAura then
                         self:postUnitAura(spellData, spellID)
@@ -294,7 +294,7 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
                 tracker.count:SetText("")
-                AuraTracking:RemoveTracker(tracker, spellData.order > 0)
+                AuraTracking:RemoveTracker(tracker, tracker.isStatic)
             end
             if self.postUnitAura then
                 self:postUnitAura(spellData, aura.ID)
@@ -397,18 +397,14 @@ function AuraTracking:CharacterUpdate(units)
         playerSpec = _G.GetSpecialization()
 
         for tracker, spellData in self:IterateTrackers() do
+            tracker:Disable()
             for i = 1, #spellData.specs do
                 if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
                     tracker.shouldTrack = true
-                    if not tracker.isEnabled then
-                        tracker:Enable()
-                    end
+                    tracker:Enable()
                     break
                 else
                     tracker.shouldTrack = false
-                    if tracker.isEnabled then
-                        tracker:Disable()
-                    end
                 end
             end
         end
