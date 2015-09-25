@@ -22,7 +22,6 @@ local round = nibRealUI.Round
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
-local debug = false
 
 local maxSlots, maxStaticSlots = 10, 6
 local numActive = {left = 0, right = 0}
@@ -80,6 +79,7 @@ function AuraTracking:AddTracker(tracker, slotID)
     if tracker.slotID then
         if tracker.isStatic then
             tracker.icon:SetDesaturated(false)
+            tracker:SetAlpha(1)
             numActive = numActive + 1
         end
     else
@@ -109,6 +109,7 @@ function AuraTracking:RemoveTracker(tracker, isStatic)
     local numActive = numActive[tracker.side]
     if isStatic then
         tracker.icon:SetDesaturated(true)
+        tracker:SetAlpha(db.indicators.fadeOpacity)
         numActive = numActive - 1
     else
         numActive = numActive - 1
@@ -156,7 +157,7 @@ do -- AuraTracking:CreateNewTracker()
         local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
         tracker.classID = nibRealUI.classID
         tracker.isDefault = false
-        return newTrackerID
+        return tracker
     end
 end
 
@@ -176,6 +177,73 @@ function AuraTracking:UpdateVisibility()
     else
         self.left:SetShown(targetCondition or numActive["left"] > 0)
         self.right:SetShown(targetCondition)
+    end
+end
+function AuraTracking:Lock()
+    if not db.locked then
+        db.locked = true
+        for i, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:EnableMouse(false)
+            parent.bg:Hide()
+        end
+    end
+    if not nibRealUI.isInTestMode then
+        self:ToggleConfigMode(false)
+    end
+end
+function AuraTracking:Unlock()
+    if db.locked then
+        db.locked = false
+        for i, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:EnableMouse(true)
+            parent.bg:Show()
+        end
+    end
+    if not nibRealUI.isInTestMode then
+        self:ToggleConfigMode(true)
+    end
+end
+function AuraTracking:SettingsUpdate(event)
+    if event == "slotSize" then
+        local size = db.style.slotSize - 2
+        for _, side in next, {"left", "right"} do
+            for slotID = 1, maxSlots do
+                local slot = self[side]["slot"..slotID]
+                slot:SetSize(size, size)
+            end
+        end
+    elseif event == "padding" then
+        local padding = db.style.padding
+        for _, side in next, {"left", "right"} do
+            local point = side == "left" and "RIGHT" or "LEFT"
+            local xMod = side == "left" and -1 or 1
+            for slotID = 1, maxSlots do
+                local parent = self[side]
+                local slot = parent["slot"..slotID]
+                if slotID == 1 then
+                    slot:SetPoint(point, parent, 0, 0)
+                else
+                    slot:SetPoint(point, parent["slot"..slotID - 1], _G.strupper(side), (padding + 2) * xMod, 0)
+                end
+            end
+        end
+    elseif event == "fadeOpacity" then
+        local fadeOpacity = db.indicators.fadeOpacity
+        for _, side in next, {"left", "right"} do
+            for slotID = 1, maxSlots do
+                local slot = self[side]["slot"..slotID]
+                if slot.tracker then
+                    slot.tracker:SetAlpha(db.indicators.fadeOpacity)
+                end
+            end
+        end
+    elseif event == "position" then
+        for _, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:RestorePosition()
+        end
     end
 end
 
@@ -312,10 +380,11 @@ function AuraTracking:PLAYER_LOGIN()
         local tracker = self:CreateAuraIcon(id, spellData)
         tracker.classID = classID
         tracker.isDefault = isDefault and true or false
-        if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
+        if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
             tracker.shouldTrack = true
             if spellData.unit == "player" then
                 tracker:Enable()
+                tracker:SetAlpha(db.indicators.fadeOpacity)
             end
         end
     end
@@ -390,16 +459,16 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     end
     self:UpdateVisibility()
 end
-function AuraTracking:CharacterUpdate(units)
+function AuraTracking:CharacterUpdate(units, force)
     self:debug("CharacterUpdate", units.player)
-    if units.player then
+    if units.player or force then
         playerLevel = _G.UnitLevel("player")
         playerSpec = _G.GetSpecialization()
 
         for tracker, spellData in self:IterateTrackers() do
-            tracker:Disable()
+            tracker:Disable() -- Reset incase there are any auras still active
             for i = 1, #spellData.specs do
-                if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
+                if spellData.shouldLoad and spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
                     tracker.shouldTrack = true
                     tracker:Enable()
                     break
@@ -416,24 +485,34 @@ end
 function AuraTracking:Createslots()
     for i, side in next, {"left", "right"} do
         local parent = CreateFrame("Frame", "AuraTracker"..side, UIParent)
-        LibWin:Embed(parent)
         parent:SetSize(db.style.slotSize * maxStaticSlots, db.style.slotSize)
-        parent:RegisterConfig(db.position[side])
-        parent:RestorePosition()
         self[side] = parent
 
-        if debug then
-            local bg = parent:CreateTexture()
-            local color = side == "left" and 1 or 0
-            bg:SetTexture(color, color, color, 0.5)
-            bg:SetAllPoints(parent)
-        end
+        LibWin:Embed(parent)
+        parent:RegisterConfig(db.position[side])
+        parent:RestorePosition()
+        parent:SetMovable(true)
+        parent:RegisterForDrag("LeftButton")
+        parent:SetScript("OnDragStart", function(...)
+            LibWin.OnDragStart(...)
+        end)
+        parent:SetScript("OnDragStop", function(...)
+            LibWin.OnDragStop(...)
+        end)
+
+        local bg = parent:CreateTexture()
+        local color = i - 1
+        bg:SetTexture(color, color, color, 0.5)
+        bg:SetAllPoints(parent)
+        bg:Hide()
+        parent.bg = bg
 
         local point = side == "left" and "RIGHT" or "LEFT"
         local xMod = side == "left" and -1 or 1
+        local size = db.style.slotSize - 2
         for slotID = 1, maxSlots do
             local slot = CreateFrame("Frame", nil, parent)
-            slot:SetSize(db.style.slotSize, db.style.slotSize)
+            slot:SetSize(size, size)
             if slotID == 1 then
                 slot:SetPoint(point, parent, 0, 0)
             else
@@ -441,7 +520,7 @@ function AuraTracking:Createslots()
             end
             parent["slot"..slotID] = slot
 
-            F.CreateBD(slot)
+            F.CreateBG(slot)
 
             local count = slot:CreateFontString()
             count:SetFontObject(_G.RealUIFont_PixelCooldown)
@@ -465,8 +544,12 @@ function AuraTracking:ToggleConfigMode(val)
         for slotID = 1, maxStaticSlots do
             local slot = self[side]["slot"..slotID]
             slot:SetAlpha(val and 1 or 0)
+            if slot.tracker then
+                slot.tracker:EnableMouse(not val)
+            end
         end
     end
+    self:UpdateVisibility()
 end
 
 function AuraTracking:RefreshMod()
@@ -480,6 +563,7 @@ function AuraTracking:OnInitialize()
     self.db:RegisterDefaults({
         class = self.Defaults[nibRealUI.class],
         profile = {
+            locked = true,
             position = {
                 left = {
                     x = -98, -- ((db.style.slotSize * maxStaticSlots) / 2) + 2
@@ -505,7 +589,6 @@ function AuraTracking:OnInitialize()
             indicators = {
                 fadeInactive = true,
                 fadeOpacity = 0.75,
-                useCustomCD = true,
             },
         },
     })

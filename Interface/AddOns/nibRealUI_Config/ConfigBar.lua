@@ -1209,7 +1209,7 @@ local auratracker do
             order = spellData.order * 10
             pos = spellData.order.." "
         end
-        if spellData.auraType == "debuff" then
+        if spellData.unit == "target" then
             order = order + 1
             name = (pos.."|cff%s%s|r"):format("ff0000", name)
         else
@@ -1232,10 +1232,8 @@ local auratracker do
             return nil
         end
     end
-    local function createTracker(trackerID)
-        local classID, id, isDefault = _G.strsplit("-", trackerID)
-        local spellData = trackingData[trackerID]
-        local spellOptions = auratracker.args.options
+    local function createTrackerSettings(tracker, spellData)
+        local spellOptions = auratracker.args[tracker.shouldTrack and "active" or "inactive"]
         local name, order = getNameOrder(spellData)
         local useSpec = useSpec(spellData.specs)
 
@@ -1293,14 +1291,26 @@ local auratracker do
                     desc = L["General_EnabledDesc"]:format(L["AuraTrack_Selected"]),
                     type = "toggle",
                     get = function(info)
-                        return not spellData.isDisabled
+                        return spellData.shouldLoad
                     end,
                     set = function(info, value)
-                        if spellData.isDisabled then
-                            AuraTracking:EnableTracker(trackerID)
+                        if value then
+                            tracker:Enable()
                         else
-                            AuraTracking:DisableTracker(trackerID)
+                            tracker:Disable()
                         end
+                        spellData.shouldLoad = value
+
+                        AuraTracking:CharacterUpdate({}, true)
+                        local oldSpellOptions = spellOptions.args[info[#info-1]]
+                        if tracker.shouldTrack then
+                            auratracker.args.active.args[tracker.id] = oldSpellOptions
+                            spellOptions = auratracker.args.active
+                        else
+                            auratracker.args.inactive.args[tracker.id] = oldSpellOptions
+                            spellOptions = auratracker.args.inactive
+                        end
+                        oldSpellOptions = nil
                     end,
                     order = 20,
                 },
@@ -1462,16 +1472,28 @@ local auratracker do
                         }
                     }
                 },
+                debug = {
+                    name = L["General_Debug"],
+                    desc = L["General_DebugDesc"],
+                    type = "toggle",
+                    get = function(info)
+                        return spellData.debug
+                    end,
+                    set = function(info, value)
+                        spellData.debug = value
+                    end,
+                    order = 100,
+                },
                 remove = {
                     name = L["AuraTrack_Remove"],
                     type = "execute",
-                    disabled = isDefault and true or false,
+                    disabled = tracker.isDefault,
                     confirm = true,
                     confirmText = L["AuraTrack_RemoveConfirm"],
                     func = function(info, ...)
                         debug("Remove", info[#info], info[#info-1], ...)
-                        debug("Removed ID", trackerID, trackingData[trackerID].spell)
-                        trackingData[trackerID] = nil
+                        debug("Removed ID", tracker.id, spellData.spell)
+                        spellData = nil
                         spellOptions.args[info[#info-1]] = nil
                     end,
                     order = -1,
@@ -1490,9 +1512,9 @@ local auratracker do
                 type = "execute",
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
-                    local trackerID = AuraTracking:CreateNewTracker()
-                    debug("New trackerID:", trackerID)
-                    auratracker.args.options.args[trackerID] = createTracker(trackerID)
+                    local tracker = AuraTracking:CreateNewTracker()
+                    debug("New trackerID:", tracker.id)
+                    auratracker.args.active.args[tracker.id] = createTrackerSettings(tracker)
                 end,
                 order = 10,
             },
@@ -1508,9 +1530,21 @@ local auratracker do
                 end,
                 order = 20,
             },
+            lock = {
+                name = L["AuraTrack_Lock"],
+                desc = L["AuraTrack_LockDesc"],
+                type = "toggle",
+                get = function(info) return db.locked end,
+                set = function(info, value)
+                    AuraTracking[value and "Lock" or "Unlock"](AuraTracking)
+                end,
+                order = 30,
+            },
             options = {
                 name = L["AuraTrack_TrackerOptions"],
                 type = "group",
+                childGroups = "tab",
+                order = 40,
                 args = {
                     size = {
                         name = L["AuraTrack_Size"],
@@ -1519,6 +1553,7 @@ local auratracker do
                         get = function(info) return db.style.slotSize end,
                         set = function(info, value)
                             db.style.slotSize = value
+                            AuraTracking:SettingsUpdate("slotSize")
                         end,
                         order = 10,
                     },
@@ -1529,6 +1564,7 @@ local auratracker do
                         get = function(info) return db.style.padding end,
                         set = function(info, value)
                             db.style.padding = value
+                            AuraTracking:SettingsUpdate("padding")
                         end,
                         order = 20,
                     },
@@ -1540,24 +1576,15 @@ local auratracker do
                         get = function(info) return db.indicators.fadeOpacity end,
                         set = function(info, value)
                             db.indicators.fadeOpacity = value
+                            AuraTracking:SettingsUpdate("fadeOpacity")
                         end,
                         order = 30,
-                    },
-                    verticalCD = {
-                        name = L["AuraTrack_VerticalCD"],
-                        desc = L["AuraTrack_VerticalCDDesc"],
-                        type = "toggle",
-                        get = function(info) return db.indicators.useCustomCD end,
-                        set = function(info, value)
-                            db.indicators.useCustomCD = value
-                        end,
-                        order = 40,
                     },
                     visibility = {
                         name = L["AuraTrack_Visibility"],
                         type = "group",
                         inline = true,
-                        order = 50,
+                        order = 40,
                         args = {
                             showCombat = {
                                 name = L["AuraTrack_ShowInCombat"],
@@ -1601,90 +1628,22 @@ local auratracker do
                             },
                         }
                     },
-                    header = {
+                    position = {
                         name = L["General_Position"],
                         type = "header",
-                        order = 59,
+                        order = 49,
                     },
-                    position = {
-                        name = "",
+                    left = {
+                        name = PLAYER,
                         type = "group",
-                        inline = true,
-                        order = 60,
-                        args = {
-                            player = {
-                                name = PLAYER,
-                                type = "group",
-                                args = {
-                                    horizontal = {
-                                        name = L["HuD_Horizontal"],
-                                        type = "range",
-                                        width = "full",
-                                        min = -round(uiWidth * 0.2),
-                                        max = round(uiWidth * 0.2),
-                                        step = 1,
-                                        bigStep = 4,
-                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasLeftX"] end,
-                                        set = function(info, value)
-                                            ndb.positions[nibRealUI.cLayout]["CTAurasLeftX"] = value
-                                            nibRealUI:UpdatePositioners()
-                                        end,
-                                        order = 10,
-                                    },
-                                    vertical = {
-                                        name = L["HuD_Vertical"],
-                                        type = "range",
-                                        width = "full",
-                                        min = -round(uiHeight * 0.2),
-                                        max = round(uiHeight * 0.2),
-                                        step = 1,
-                                        bigStep = 2,
-                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasLeftY"] end,
-                                        set = function(info, value)
-                                            ndb.positions[nibRealUI.cLayout]["CTAurasLeftY"] = value
-                                            nibRealUI:UpdatePositioners()
-                                        end,
-                                        order = 20,
-                                    }
-                                }
-                            },
-                            target = {
-                                name = TARGET,
-                                type = "group",
-                                args = {
-                                    horizontal = {
-                                        name = L["HuD_Horizontal"],
-                                        type = "range",
-                                        width = "full",
-                                        min = -round(uiWidth * 0.2),
-                                        max = round(uiWidth * 0.2),
-                                        step = 1,
-                                        bigStep = 4,
-                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasRightX"] end,
-                                        set = function(info, value)
-                                            ndb.positions[nibRealUI.cLayout]["CTAurasRightX"] = value
-                                            nibRealUI:UpdatePositioners()
-                                        end,
-                                        order = 10,
-                                    },
-                                    vertical = {
-                                        name = L["HuD_Vertical"],
-                                        type = "range",
-                                        width = "full",
-                                        min = -round(uiHeight * 0.2),
-                                        max = round(uiHeight * 0.2),
-                                        step = 1,
-                                        bigStep = 2,
-                                        get = function(info) return ndb.positions[nibRealUI.cLayout]["CTAurasRightY"] end,
-                                        set = function(info, value)
-                                            ndb.positions[nibRealUI.cLayout]["CTAurasRightY"] = value
-                                            nibRealUI:UpdatePositioners()
-                                        end,
-                                        order = 20,
-                                    }
-                                }
-                            }
-                        }
+                        order = 50,
+                        args = {}
+                    },
+                    right = {
+                        name = TARGET,
+                        type = "group",
+                        order = 55,
+                        args = {}
                     },
                     reset = {
                         name = RESET_TO_DEFAULT,
@@ -1697,12 +1656,72 @@ local auratracker do
                         order = -1,
                     },
                 }
+            },
+            active = {
+                name = L["AuraTrack_ActiveTrackers"],
+                type = "group",
+                order = 50,
+                args = {
+                }
+            },
+            inactive = {
+                name = L["AuraTrack_InactiveTrackers"],
+                type = "group",
+                order = 50,
+                args = {
+                }
             }
         }
     }
-    for trackerID, spellData in next, trackingData do
-        local tracker = createTracker(trackerID)
-        auratracker.args.options.args[trackerID] = tracker
+    for _, side in next, {"left", "right"} do
+        local settings = auratracker.args.options.args[side]
+        local position = db.position[side]
+        --[[
+        settings.args.point = {
+            order = 10,
+            type = "select",
+            name = L["Anchor"],
+            desc = L["Change the current anchor point of the bar."],
+            values = validAnchors,
+            get = function(info) return position.point end,
+            set = function(info, value)
+                position.point = value
+                AuraTracking:SettingsUpdate("position")
+            end,
+        }
+        ]]
+        settings.args.x = {
+            name = L["General_XOffset"],
+            desc = L["General_XOffsetDesc"],
+            type = "input",
+            dialogControl = "NumberEditBox",
+            get = function(info) return tostring(position.x) end,
+            set = function(info, value)
+                position.x = round(tonumber(value))
+                AuraTracking:SettingsUpdate("position")
+            end,
+            order = 20,
+        }
+        settings.args.y = {
+            name = L["General_YOffset"],
+            desc = L["General_YOffsetDesc"],
+            type = "input",
+            dialogControl = "NumberEditBox",
+            get = function(info) return tostring(position.y) end,
+            set = function(info, value)
+                position.y = round(tonumber(value))
+                AuraTracking:SettingsUpdate("position")
+            end,
+            order = 30,
+        }
+    end
+    for tracker, spellData in AuraTracking:IterateTrackers() do
+        local settings = createTrackerSettings(tracker, spellData)
+        if tracker.shouldTrack then
+            auratracker.args.active.args[tracker.id] = settings
+        else
+            auratracker.args.inactive.args[tracker.id] = settings
+        end
     end
 end
 local classresource do

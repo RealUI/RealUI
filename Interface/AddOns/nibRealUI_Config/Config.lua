@@ -30,7 +30,7 @@ local function debug(...)
 end
 private.debug = debug
 
-local isInTestMode, RavenTimer = false
+local RavenTimer
 function nibRealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
@@ -42,7 +42,7 @@ function nibRealUI:HuDTestMode(doTestMode)
                 Raven:TestBarGroups()
             end)
         else
-            if isInTestMode then
+            if self.isInTestMode then
                 RavenTimer:Cancel()
                 RavenTimer = nil
                 Raven:TestBarGroups()
@@ -100,7 +100,7 @@ function nibRealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Play()
         end
     end
-    isInTestMode = doTestMode
+    self.isInTestMode = doTestMode
 end
 
 StaticPopupDialogs["RUI_ChangeHuDSize"] = {

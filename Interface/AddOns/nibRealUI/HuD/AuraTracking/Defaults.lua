@@ -57,9 +57,11 @@ local defaultTracker = {
     specs = {true, true, true, GetSpecializationInfo(4) and true}, -- {spec1, spec2, spec3[, spec4]}
     talent = {},
     order = 0, -- Tracker will be static if greater than 0
-    hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
     hideOOC = false, -- hide out-of-combat even if active
+    hideTime = false, -- hide timer text
+    hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
     ignoreRaven = false, -- don't add this aura to Raven's filter lists
+    shouldLoad = true,
     debug = false
 }
 
