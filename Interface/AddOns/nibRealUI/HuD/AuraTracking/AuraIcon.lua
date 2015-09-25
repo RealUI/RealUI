@@ -104,6 +104,14 @@ function AuraTracking:CreateAuraIcon(id, spellData)
             GameTooltip:Hide()
         end
     end)
+    tracker:SetScript("OnEvent", function(tracker, event, ...)
+        tracker[event](tracker, ...)
+    end)
+    if spellData.combatUpdate then
+        tracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        tracker.COMBAT_LOG_EVENT_UNFILTERED = spellData.combatUpdate
+    end
+
 
     for key, func in next, api do
         tracker[key] = func

@@ -249,7 +249,7 @@ end
 
 
 -- Events --
-function AuraTracking:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, subEvent, hideCaster, dstGUID, srcName, srcFlags, srcRaidFlags, dstGUID, dstName, dstFlags, dstRaidFlags, ...)
+function AuraTracking:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, subEvent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstGUID, dstName, dstFlags, dstRaidFlags, ...)
     local unit
     if dstGUID == self.playerGUID then
         unit = "player"
