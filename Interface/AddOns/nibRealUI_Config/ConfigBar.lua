@@ -1233,7 +1233,6 @@ local auratracker do
         end
     end
     local function createTrackerSettings(tracker, spellData)
-        local spellOptions = auratracker.args[tracker.shouldTrack and "active" or "inactive"]
         local name, order = getNameOrder(spellData)
         local useSpec = useSpec(spellData.specs)
 
@@ -1274,14 +1273,14 @@ local auratracker do
                         return value
                     end,
                     set = function(info, value)
-                        debug("Set Spellname", info[#info-1], value)
+                        debug("Set Spellname", info[#info-2], info[#info-1], value)
                         if string.find(value, ",") then
                             debug("Multi-spell")
                             value = { strsplit(",", value) }
                         end
                         spellData.spell = value
 
-                        local spellOptions = spellOptions.args[info[#info-1]]
+                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
                         spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 10,
@@ -1294,6 +1293,7 @@ local auratracker do
                         return spellData.shouldLoad
                     end,
                     set = function(info, value)
+                        debug("Set Enable", info[#info-2], info[#info-1], value)
                         if value then
                             tracker:Enable()
                         else
@@ -1302,15 +1302,16 @@ local auratracker do
                         spellData.shouldLoad = value
 
                         AuraTracking:CharacterUpdate({}, true)
-                        local oldSpellOptions = spellOptions.args[info[#info-1]]
-                        if tracker.shouldTrack then
-                            auratracker.args.active.args[tracker.id] = oldSpellOptions
-                            spellOptions = auratracker.args.active
-                        else
-                            auratracker.args.inactive.args[tracker.id] = oldSpellOptions
-                            spellOptions = auratracker.args.inactive
+                        local parent, key = info[#info-2], info[#info-1]
+                        local spellOptions = auratracker.args[parent].args[key]
+                        if tracker.shouldTrack and parent ~= "active" then
+                            debug("Enable")
+                            auratracker.args.active.args[key] = spellOptions
+                        elseif parent ~= "inactive" then
+                            debug("Disable")
+                            auratracker.args.inactive.args[key] = spellOptions
                         end
-                        oldSpellOptions = nil
+                        auratracker.args[parent].args[key] = nil
                     end,
                     order = 20,
                 },
@@ -1331,7 +1332,7 @@ local auratracker do
                     set = function(info, value)
                         spellData.auraType = value
 
-                        local spellOptions = spellOptions.args[info[#info-1]]
+                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
                         spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 30,
@@ -1345,7 +1346,7 @@ local auratracker do
                     set = function(info, value)
                         spellData.order = value
 
-                        local spellOptions = spellOptions.args[info[#info-1]]
+                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
                         spellOptions.name, spellOptions.order = getNameOrder(spellData)
                     end,
                     order = 40,
@@ -1374,7 +1375,7 @@ local auratracker do
                     tristate = true,
                     get = function(info) return useSpec end,
                     set = function(info, value)
-                        local spellOptions = spellOptions.args[info[#info-1]].args
+                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]].args
                         if value == false then
                             spellOptions.spec.type = "select"
                             spellOptions.spec.disabled = true
@@ -1491,10 +1492,10 @@ local auratracker do
                     confirm = true,
                     confirmText = L["AuraTrack_RemoveConfirm"],
                     func = function(info, ...)
-                        debug("Remove", info[#info], info[#info-1], ...)
+                        debug("Remove", info[#info-2], info[#info-1], ...)
                         debug("Removed ID", tracker.id, spellData.spell)
-                        spellData = nil
-                        spellOptions.args[info[#info-1]] = nil
+                        trackingData[tracker.classID.."-"..tracker.id] = nil
+                        auratracker.args[info[#info-2]].args[info[#info-1]] = nil
                     end,
                     order = -1,
                 },
@@ -1512,9 +1513,9 @@ local auratracker do
                 type = "execute",
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
-                    local tracker = AuraTracking:CreateNewTracker()
+                    local tracker, spellData = AuraTracking:CreateNewTracker()
                     debug("New trackerID:", tracker.id)
-                    auratracker.args.active.args[tracker.id] = createTrackerSettings(tracker)
+                    auratracker.args.active.args[tracker.id] = createTrackerSettings(tracker, spellData)
                 end,
                 order = 10,
             },

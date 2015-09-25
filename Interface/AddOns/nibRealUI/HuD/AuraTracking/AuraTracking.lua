@@ -157,7 +157,7 @@ do -- AuraTracking:CreateNewTracker()
         local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
         tracker.classID = nibRealUI.classID
         tracker.isDefault = false
-        return tracker
+        return tracker, trackingData[newTrackerID]
     end
 end
 
