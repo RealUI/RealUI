@@ -86,11 +86,14 @@ function AuraTracking:AddTracker(tracker, slotID)
         numActive = numActive + 1
         local side, slot = self[tracker.side]
         if slotID then
+            self:debug("Place in slot", slotID)
             slot = side["slot"..slotID]
         else
+            self:debug("Find empty slot")
             for i = 1, maxSlots do
                 slot = side["slot"..i]
                 if not slot.isActive then
+                    self:debug("Found slot", slotID)
                     slotID = i
                     break
                 end
