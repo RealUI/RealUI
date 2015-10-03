@@ -12,10 +12,11 @@ local L = nibRealUI.L
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
+local _, class = UnitClass("player")
 local SavageRoar, WildMushrooms
 local BanditsGuile, Rupture, SliceAndDice
 local BurningEmbers
-if nibRealUI.class == "DRUID" then
+if class == "DRUID" then
     do -- SavageRoar
         -- Shows predicted buff duration based on current CPs.
         function SavageRoar(self, spellData)
@@ -26,7 +27,7 @@ if nibRealUI.class == "DRUID" then
         function WildMushrooms(self, spellData)
         end
     end
-elseif nibRealUI.class == "ROGUE" then
+elseif class == "ROGUE" then
     local function predictDuration(tracker, gap, base, max)
         local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
 
@@ -53,15 +54,19 @@ elseif nibRealUI.class == "ROGUE" then
             [84747] = true  -- Deep Insight
         }
 
-        function BanditsGuile(self, ...)
-            local _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID = ...
+        function BanditsGuile(self, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
             if (srcGUID ~= AuraTracking.playerGUID) then return end
 
             if (subEvent == "SPELL_DAMAGE") and (spellID == SinisterStrikeID) then
-                swingCount = swingCount + 1
-                self.count:SetText(swingCount)
+                local _,_,_,_,_,_,_,_,_,_, isMultistrike = ...
+                AuraTracking:debug("BanditsGuile:SPELL_DAMAGE", isMultistrike)
+                if not isMultistrike then
+                    swingCount = swingCount + 1
+                    self.count:SetText(swingCount)
+                end
 
             elseif ((subEvent == "SPELL_AURA_REMOVED") or (subEvent == "SPELL_AURA_APPLIED")) and (bgSpellIDs[spellID]) then
+                AuraTracking:debug("BanditsGuile:SPELL_AURA")
                 swingCount = 0
                 self.count:SetText("")
             end
@@ -69,17 +74,21 @@ elseif nibRealUI.class == "ROGUE" then
     end
     do -- Rupture
         -- Shows predicted debuff duration based on current CPs.
-        function Rupture(self, spellData)
+        function Rupture(self, unit, powerType)
+            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
+            AuraTracking:debug("Rupture", self, unit, powerType)
             predictDuration(self, 4, 8, 24)
         end
     end
     do -- SliceAndDice
         -- Shows predicted buff duration based on current CPs.
-        function SliceAndDice(self, spellData)
+        function SliceAndDice(self, unit, powerType)
+            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
+            AuraTracking:debug("SliceAndDice", self, unit, powerType)
             predictDuration(self, 6, 12, 36)
         end
     end
-elseif nibRealUI.class == "WARLOCK" then
+elseif class == "WARLOCK" then
     do -- BurningEmbers
         -- Shows predicted buff duration based on current CPs.
         function BurningEmbers(self, spellData)
@@ -736,7 +745,11 @@ AuraTracking.Defaults = {
                 minLevel = 14,
                 specs = {true, false, true}, -- Passive for Assas via Dreanor Perk
                 order = 1,
-                postUnitAura = SliceAndDice
+                debug = "Slice and Dice",
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = SliceAndDice
+                }
             },
             ["4-b590c8e6-1"] = {   -- Envenom (Ass)
                 spell = 32645,
@@ -749,7 +762,10 @@ AuraTracking.Defaults = {
                 specs = {false, true, false},
                 order = 2,
                 customName = _G.GetSpellInfo(84654),
-                combatUpdate = BanditsGuile
+                eventUpdate = {
+                    event = "COMBAT_LOG_EVENT_UNFILTERED",
+                    func = BanditsGuile
+                }
             },
             ["4-a5abd891-1"] = {   -- Shadow Dance (Sub)
                 spell = 51713,
@@ -762,7 +778,10 @@ AuraTracking.Defaults = {
                 minLevel = 46,
                 specs = {true, false, false}, -- Passive for Assas via Dreanor Perk
                 order = 1,
-                postUnitAura = Rupture
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = Rupture
+                }
             },
             ["4-ac22ce84-1"] = {   -- Revealing Strike (Comb)
                 spell = 84617,

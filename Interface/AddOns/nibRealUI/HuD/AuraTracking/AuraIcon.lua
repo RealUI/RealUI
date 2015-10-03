@@ -26,13 +26,17 @@ function api:UpdateSpellData()
     local spellData = icons[self]
     self.isStatic = spellData.order > 0
     self.filter = (spellData.auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
-    self.postUnitAura = spellData.postUnitAura
 end
 
 function api:Enable()
     AuraTracking:debug("Tracker:Enable", self.id)
     local spellData = icons[self]
     self.isEnabled = true
+    if spellData.eventUpdate then
+        local eventUpdate = spellData.eventUpdate
+        self:RegisterEvent(eventUpdate.event)
+        self[eventUpdate.event] = eventUpdate.func
+    end
     if self.isStatic then
         self.icon:SetDesaturated(true)
         AuraTracking:AddTracker(self, spellData.order)
@@ -41,6 +45,7 @@ end
 function api:Disable()
     AuraTracking:debug("Tracker:Disable", self.id)
     self.isEnabled = false
+    self:UnregisterAllEvents()
     if self.slotID then
         AuraTracking:RemoveTracker(self)
     end
@@ -107,11 +112,6 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     tracker:SetScript("OnEvent", function(tracker, event, ...)
         tracker[event](tracker, ...)
     end)
-    if spellData.combatUpdate then
-        tracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        tracker.COMBAT_LOG_EVENT_UNFILTERED = spellData.combatUpdate
-    end
-
 
     for key, func in next, api do
         tracker[key] = func

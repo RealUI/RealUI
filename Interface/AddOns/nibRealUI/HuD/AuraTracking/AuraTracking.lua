@@ -367,8 +367,9 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.count:SetText("")
                 AuraTracking:RemoveTracker(tracker, tracker.isStatic)
             end
-            if self.postUnitAura then
-                self:postUnitAura(spellData, aura.ID)
+            debug(spellData.debug, spellData.postUnitAura)
+            if spellData.postUnitAura then
+                spellData.postUnitAura(tracker, spellData, aura.ID)
             end
         end
     end
