@@ -16,30 +16,40 @@ local _, class = UnitClass("player")
 local SavageRoar, WildMushrooms
 local BanditsGuile, Rupture, SliceAndDice
 local BurningEmbers
-if class == "DRUID" then
-    do -- SavageRoar
-        -- Shows predicted buff duration based on current CPs.
-        function SavageRoar(self, spellData)
+local function predictDuration(tracker, gap, base, max)
+    local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
+
+    local potential, color = "", {1, 1, 1}
+    if (comboPoints > 0) then
+        potential = base + ((comboPoints - 1) * gap)
+        if potential == max then
+            color = {0, 1, 0}
         end
     end
-    do -- WildMushrooms
-        -- Shows predicted debuff duration based on current CPs.
-        function WildMushrooms(self, spellData)
+    return potential, color
+end
+
+if class == "DRUID" then
+    do -- SavageRoar
+        local potential, color
+        local function postUnitAura(self)
+            self.count:SetText(potential)
+            self.count:SetTextColor(color[1], color[2], color[3])
+        end
+
+        -- Shows predicted buff duration based on current CPs.
+        function SavageRoar(self, unit, powerType)
+            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
+            AuraTracking:debug("Rupture", self, unit, powerType)
+            potential, color = predictDuration(self, 6, 18, 42)
+            postUnitAura(self)
+
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
+            end
         end
     end
 elseif class == "ROGUE" then
-    local function predictDuration(tracker, gap, base, max)
-        local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
-
-        local potential, color = "", {1, 1, 1}
-        if (comboPoints > 0) then
-            potential = base + ((comboPoints - 1) * gap)
-            if potential == max then
-                color = {0, 1, 0}
-            end
-        end
-        return potential, color
-    end
 
     do -- BanditsGuile
         -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
@@ -242,8 +252,14 @@ AuraTracking.Defaults = {
         ["**"] = defaultTracker,
         -- Static Player Auras
             ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
-                type = "SavageRoar",
+                spell = 52610,
+                minLevel = 18,
+                specs = {false, true, false, false}, -- Passive for Assas via Dreanor Perk
                 order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = SavageRoar
+                }
             },
             ["11-86ed5897-1"] = {   -- Savage Defense (Guardian)
                 spell = 62606,
@@ -256,10 +272,6 @@ AuraTracking.Defaults = {
                 minLevel = 80,
                 specs = {false, false, false, true},
                 order = 1,
-            },
-            ["11-aa0bdedd-1"] = {   -- Wild Mushrooms (Resto)
-                type = "WildMushrooms",
-                order = 2,
             },
         -- Static Target Auras
             ["11-bbefa72d-1"] = {   -- Sunfire (Balance)
