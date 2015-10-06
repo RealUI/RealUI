@@ -252,88 +252,6 @@ end
 
 
 -- Events --
-function AuraTracking:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, subEvent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstGUID, dstName, dstFlags, dstRaidFlags, ...)
-    local unit
-    if dstGUID == self.playerGUID then
-        unit = "player"
-    elseif dstGUID == self.targetGUID then
-        unit = "target"
-    elseif dstGUID == self.petGUID then
-        unit = "pet"
-    end
-    if unit then
-        AuraTracking:debug("Combat Event", unit, subEvent, ...)
-        if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent:find("DOSE") then
-            local spellID, spellName, spellSchool, auraType, amount = ...
-            AuraTracking:debug("Aura Applied", unit, ...)
-            for tracker, spellData in AuraTracking:IterateTrackers() do
-                if spellData.unit == unit and tracker.isEnabled then
-                    local spell, spellMatch = spellData.spell, false
-                    debug(spellData.debug, "IterateTrackers", tracker.id, spell)
-
-                    if type(spell) == "table" then
-                        for index = 1, #spell do
-                            if spell == spellName or spell == spellID then
-                                spellMatch = true
-                            end
-                            if spellMatch then break end
-                        end
-                    else
-                        if spell == spellName or spell == spellID then
-                            spellMatch = true
-                        end
-                    end
-
-                    if spellMatch then
-                        local auraIndex, texture, count, duration, endTime = FindAura(spellID, spellData.unit, tracker.filter, spellData.debug)
-                        debug(spellData.debug, "Tracker", tracker.id, spell)
-                        tracker.auraIndex = auraIndex
-                        tracker.cd:Show()
-                        tracker.cd:SetCooldown(endTime - duration, duration)
-                        tracker.icon:SetTexture(texture)
-                        tracker.count:SetText(count)
-                        AuraTracking:AddTracker(tracker)
-                    end
-                    if self.postUnitAura then
-                        self:postUnitAura(spellData, spellID)
-                    end
-                end
-            end
-        elseif subEvent == "SPELL_AURA_REMOVED" then
-            local spellID, spellName, spellSchool, auraType, amount = ...
-            AuraTracking:debug("Aura Removed", unit, spellID, spellName)
-            for tracker, spellData in AuraTracking:IterateTrackers() do
-                if spellData.unit == unit and tracker.isEnabled then
-                    local spell, spellMatch = spellData.spell, false
-                    debug(spellData.debug, "IterateTrackers", tracker.id, spell)
-
-                    if type(spell) == "table" then
-                        for index = 1, #spell do
-                            if spell == spellName or spell == spellID then
-                                spellMatch = true
-                            end
-                            if spellMatch then break end
-                        end
-                    else
-                        if spell == spellName or spell == spellID then
-                            spellMatch = true
-                        end
-                    end
-
-                    if spellMatch then
-                        tracker.cd:SetCooldown(0, 0)
-                        tracker.cd:Hide()
-                        tracker.count:SetText("")
-                        AuraTracking:RemoveTracker(tracker, tracker.isStatic)
-                    end
-                    if self.postUnitAura then
-                        self:postUnitAura(spellData, spellID)
-                    end
-                end
-            end
-        end
-    end
-end
 function AuraTracking:UNIT_AURA(event, unit)
     AuraTracking:debug("UNIT_AURA", unit)
     if not isValidUnit[unit] then return end
@@ -367,9 +285,9 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.count:SetText("")
                 AuraTracking:RemoveTracker(tracker, tracker.isStatic)
             end
-            debug(spellData.debug, spellData.postUnitAura)
-            if spellData.postUnitAura then
-                spellData.postUnitAura(tracker, spellData, aura.ID)
+            debug(spellData.debug, "postUnitAura", tracker.postUnitAura)
+            if tracker.postUnitAura then
+                tracker:postUnitAura(spellData, aura.ID)
             end
         end
     end
@@ -613,7 +531,6 @@ end
 function AuraTracking:OnEnable()
     self:debug("OnEnable")
     self:RegisterEvent("UNIT_AURA")
-    --self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")

@@ -31,61 +31,97 @@ elseif class == "ROGUE" then
     local function predictDuration(tracker, gap, base, max)
         local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
 
+        local potential, color = "", {1, 1, 1}
         if (comboPoints > 0) then
-            local potential = base + ((comboPoints - 1) * gap)
-            tracker.count:SetText(potential)
+            potential = base + ((comboPoints - 1) * gap)
             if potential == max then
-                tracker.count:SetTextColor(0, 1, 0)
-            else
-                tracker.count:SetTextColor(1, 1, 1)
+                color = {0, 1, 0}
             end
-        else
-            tracker.count:SetText("")
         end
+        return potential, color
     end
 
     do -- BanditsGuile
         -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
         local SinisterStrikeID = 1752
         local swingCount = 0
-        local bgSpellIDs = {
-            [84745] = true, -- Shallow Insight
-            [84746] = true, -- Moderate Insight
-            [84747] = true  -- Deep Insight
-        }
+        local bgSpellIDs, bgState = {
+            [84745] = 1, -- Shallow Insight
+            [84746] = 2, -- Moderate Insight
+            [84747] = 3  -- Deep Insight
+        }, 0
+
+        local function postUnitAura(self)
+            if (swingCount > 0) and (bgState < 3) then
+                self.count:SetText(swingCount)
+            else
+                self.count:SetText()
+            end
+        end
 
         function BanditsGuile(self, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
             if (srcGUID ~= AuraTracking.playerGUID) then return end
+            AuraTracking:debug("BanditsGuile", bgState)
 
             if (subEvent == "SPELL_DAMAGE") and (spellID == SinisterStrikeID) then
                 local _,_,_,_,_,_,_,_,_,_, isMultistrike = ...
-                AuraTracking:debug("BanditsGuile:SPELL_DAMAGE", isMultistrike)
-                if not isMultistrike then
+                if not isMultistrike and bgState < 3 then
                     swingCount = swingCount + 1
-                    self.count:SetText(swingCount)
+                    AuraTracking:debug("BanditsGuile:SPELL_DAMAGE", swingCount)
                 end
 
             elseif ((subEvent == "SPELL_AURA_REMOVED") or (subEvent == "SPELL_AURA_APPLIED")) and (bgSpellIDs[spellID]) then
-                AuraTracking:debug("BanditsGuile:SPELL_AURA")
+                AuraTracking:debug("BanditsGuile:"..subEvent, spellID)
+                if bgState < 3 then
+                    bgState = bgSpellIDs[spellID]
+                else
+                    bgState = 0
+                end
                 swingCount = 0
-                self.count:SetText("")
+            end
+            postUnitAura(self)
+
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
             end
         end
     end
     do -- Rupture
+        local potential, color
+        local function postUnitAura(self)
+            self.count:SetText(potential)
+            self.count:SetTextColor(color[1], color[2], color[3])
+        end
+
         -- Shows predicted debuff duration based on current CPs.
         function Rupture(self, unit, powerType)
             if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
             AuraTracking:debug("Rupture", self, unit, powerType)
-            predictDuration(self, 4, 8, 24)
+            potential, color = predictDuration(self, 4, 8, 24)
+            postUnitAura(self)
+
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
+            end
         end
     end
     do -- SliceAndDice
+        local potential, color
+        local function postUnitAura(self)
+            self.count:SetText(potential)
+            self.count:SetTextColor(color[1], color[2], color[3])
+        end
+        
         -- Shows predicted buff duration based on current CPs.
         function SliceAndDice(self, unit, powerType)
             if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
             AuraTracking:debug("SliceAndDice", self, unit, powerType)
-            predictDuration(self, 6, 12, 36)
+            potential, color = predictDuration(self, 6, 12, 36)
+            postUnitAura(self)
+
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
+            end
         end
     end
 elseif class == "WARLOCK" then
