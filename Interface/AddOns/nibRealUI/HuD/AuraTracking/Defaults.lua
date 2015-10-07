@@ -23,7 +23,7 @@ end
 
 local _, class = UnitClass("player")
 local SavageRoar
-local BanditsGuile, Rupture, SliceAndDice
+local BanditsGuile, Envenom, Rupture, SliceAndDice
 local BurningEmbers
 local function predictDuration(tracker, gap, base, max)
     local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
@@ -104,6 +104,27 @@ elseif class == "ROGUE" then
 
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
+            end
+        end
+    end
+    do -- Envenom
+        local potential, color
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", potential, color[1])
+            self.count:SetText(potential)
+            self.count:SetTextColor(color[1], color[2], color[3])
+        end
+
+        -- Shows predicted debuff duration based on current CPs.
+        function Envenom(self, spellData, unit, powerType)
+            if unit == "player" and powerType == "COMBO_POINTS" then
+                debug(spellData.debug, "Main", unit, powerType)
+                potential, color = predictDuration(self, 1, 2, 6)
+                postUnitAura(self, spellData)
+
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+                end
             end
         end
     end
@@ -860,8 +881,13 @@ AuraTracking.Defaults = {
             },
             ["4-b590c8e6-1"] = {   -- Envenom (Ass)
                 spell = 32645,
+                minLevel = 20,
                 specs = {true, false, false},
                 order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = Envenom
+                }
             },
             ["4-b8faafc6-1"] = {   -- Bandit's Guile (Combat)
                 spell = {84745, 84746, 84747}, -- Shallow, Moderate, Deep Insight
