@@ -170,6 +170,9 @@ function AuraTracking:UpdateVisibility()
     local targetCondition = visibility.showHostile and self.targetHostile
     local combatCondition = (visibility.showCombat and self.inCombat) or not(visibility.showCombat)
     local instType = self.inPvP and "PvP" or "PvE"
+    self:debug("targetCondition", visibility.showHostile, self.targetHostile, targetCondition)
+    self:debug("combatCondition", visibility.showCombat, self.inCombat, combatCondition)
+    self:debug("instType", self.inPvP, self.inPvE, instType)
 
     if self.configMode then
         self.left:Show()
@@ -358,18 +361,18 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     end
     if unitExists then
         self[unit.."GUID"] = _G.UnitGUID(unit)
-        if isValidUnit[unit] then return end
-        self:debug("EnableUnit", unit)
-        isValidUnit[unit] = true
-        for tracker, spellData in self:IterateTrackers() do
-            if spellData.unit == unit and tracker.shouldTrack and not tracker.isEnabled then
-                tracker:Enable()
+        if not isValidUnit[unit] then
+            self:debug("EnableUnit", unit)
+            isValidUnit[unit] = true
+            for tracker, spellData in self:IterateTrackers() do
+                if spellData.unit == unit and tracker.shouldTrack and not tracker.isEnabled then
+                    tracker:Enable()
+                end
             end
+            self:UNIT_AURA("FORCED_UNIT_AURA", unit)
         end
-        self:UNIT_AURA("FORCED_UNIT_AURA", unit)
-    else
+    elseif isValidUnit[unit] then
         iterUnits = true
-        if not isValidUnit[unit] then return end
         self:debug("DisableUnit", unit)
         isValidUnit[unit] = false
         for tracker, spellData in self:IterateTrackers() do
