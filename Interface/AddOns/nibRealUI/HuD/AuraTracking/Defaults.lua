@@ -4,6 +4,7 @@ local next, type = _G.next, _G.type
 
 -- WoW Globals --
 local UnitPower = _G.UnitPower
+local SPELL_POWER_COMBO_POINTS, SPELL_POWER_BURNING_EMBERS = _G.SPELL_POWER_COMBO_POINTS, _G.SPELL_POWER_BURNING_EMBERS
 
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
@@ -12,12 +13,20 @@ local L = nibRealUI.L
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
+local function debug(isDebug, ...)
+    if isDebug then
+        -- self.debug should be a string describing what the bar is.
+        -- eg. "playerHealth", "targetAbsorbs", etc
+        AuraTracking:debug(isDebug, ...)
+    end
+end
+
 local _, class = UnitClass("player")
-local SavageRoar, WildMushrooms
+local SavageRoar
 local BanditsGuile, Rupture, SliceAndDice
 local BurningEmbers
 local function predictDuration(tracker, gap, base, max)
-    local comboPoints = UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
+    local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
 
     local potential, color = "", {1, 1, 1}
     if (comboPoints > 0) then
@@ -32,17 +41,18 @@ end
 if class == "DRUID" then
     do -- SavageRoar
         local potential, color
-        local function postUnitAura(self)
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", potential, color[1])
             self.count:SetText(potential)
             self.count:SetTextColor(color[1], color[2], color[3])
         end
 
         -- Shows predicted buff duration based on current CPs.
-        function SavageRoar(self, unit, powerType)
+        function SavageRoar(self, spellData, unit, powerType)
             if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
             AuraTracking:debug("Rupture", self, unit, powerType)
             potential, color = predictDuration(self, 6, 18, 42)
-            postUnitAura(self)
+            postUnitAura(self, spellData)
 
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
@@ -61,7 +71,8 @@ elseif class == "ROGUE" then
             [84747] = 3  -- Deep Insight
         }, 0
 
-        local function postUnitAura(self)
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", swingCount, bgState)
             if (swingCount > 0) and (bgState < 3) then
                 self.count:SetText(swingCount)
             else
@@ -69,7 +80,7 @@ elseif class == "ROGUE" then
             end
         end
 
-        function BanditsGuile(self, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
+        function BanditsGuile(self, spellData, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
             if (srcGUID ~= AuraTracking.playerGUID) then return end
             AuraTracking:debug("BanditsGuile", bgState)
 
@@ -89,7 +100,7 @@ elseif class == "ROGUE" then
                 end
                 swingCount = 0
             end
-            postUnitAura(self)
+            postUnitAura(self, spellData)
 
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
@@ -98,41 +109,45 @@ elseif class == "ROGUE" then
     end
     do -- Rupture
         local potential, color
-        local function postUnitAura(self)
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", potential, color[1])
             self.count:SetText(potential)
             self.count:SetTextColor(color[1], color[2], color[3])
         end
 
         -- Shows predicted debuff duration based on current CPs.
-        function Rupture(self, unit, powerType)
-            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
-            AuraTracking:debug("Rupture", self, unit, powerType)
+        function Rupture(self, spellData, unit, powerType)
+            if unit == "player" and powerType == "COMBO_POINTS" then
+                debug(spellData.debug, "Main", unit, powerType)
             potential, color = predictDuration(self, 4, 8, 24)
-            postUnitAura(self)
+                postUnitAura(self, spellData)
 
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
             end
         end
     end
+    end
     do -- SliceAndDice
         local potential, color
-        local function postUnitAura(self)
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", potential, color[1])
             self.count:SetText(potential)
             self.count:SetTextColor(color[1], color[2], color[3])
         end
         
         -- Shows predicted buff duration based on current CPs.
-        function SliceAndDice(self, unit, powerType)
-            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
-            AuraTracking:debug("SliceAndDice", self, unit, powerType)
+        function SliceAndDice(self, spellData, unit, powerType)
+            if unit == "player" and powerType == "COMBO_POINTS" then
+                debug(spellData.debug, "Main", unit, powerType)
             potential, color = predictDuration(self, 6, 12, 36)
-            postUnitAura(self)
+                postUnitAura(self, spellData)
 
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
             end
         end
+    end
     end
 elseif class == "WARLOCK" then
     do -- BurningEmbers

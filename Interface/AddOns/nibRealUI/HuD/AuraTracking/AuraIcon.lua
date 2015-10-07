@@ -110,7 +110,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
         end
     end)
     tracker:SetScript("OnEvent", function(tracker, event, ...)
-        tracker[event](tracker, ...)
+        tracker[event](tracker, spellData, ...)
     end)
 
     for key, func in next, api do
