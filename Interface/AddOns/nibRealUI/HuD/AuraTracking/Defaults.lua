@@ -119,14 +119,14 @@ elseif class == "ROGUE" then
         function Rupture(self, spellData, unit, powerType)
             if unit == "player" and powerType == "COMBO_POINTS" then
                 debug(spellData.debug, "Main", unit, powerType)
-            potential, color = predictDuration(self, 4, 8, 24)
+                potential, color = predictDuration(self, 4, 8, 24)
                 postUnitAura(self, spellData)
 
-            if not self.postUnitAura then
-                self.postUnitAura = postUnitAura
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+                end
             end
         end
-    end
     end
     do -- SliceAndDice
         local potential, color
@@ -140,19 +140,64 @@ elseif class == "ROGUE" then
         function SliceAndDice(self, spellData, unit, powerType)
             if unit == "player" and powerType == "COMBO_POINTS" then
                 debug(spellData.debug, "Main", unit, powerType)
-            potential, color = predictDuration(self, 6, 12, 36)
+                potential, color = predictDuration(self, 6, 12, 36)
                 postUnitAura(self, spellData)
 
-            if not self.postUnitAura then
-                self.postUnitAura = postUnitAura
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+                end
             end
         end
     end
-    end
 elseif class == "WARLOCK" then
     do -- BurningEmbers
-        -- Shows predicted buff duration based on current CPs.
-        function BurningEmbers(self, spellData)
+        local power
+        local minVal, maxVal = 0, 10
+        local function FindOffset(value, minWidth, maxWidth)
+            return (((value - minVal) * (maxWidth - minWidth)) / (maxVal - minVal)) + minWidth
+        end
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", power)
+            if power > 0 then
+                local modPower = power % 10
+                if modPower > 0 then
+                    self.count:SetText(modPower)
+
+                    local right = FindOffset(modPower, .08, .92)
+                    debug(spellData.debug, "right", right)
+                    self.status:SetTexCoord(.08, right, .08, .92)
+
+                    local xOfs = FindOffset(modPower, -(self.icon:GetWidth()), 0)
+                    debug(spellData.debug, "xOfs", xOfs)
+                    self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
+                else
+                    self.count:SetText(10)
+                    self.status:SetTexCoord(.08, .92, .08, .92)
+                    self.status:SetPoint("BOTTOMRIGHT")
+                end
+            else
+                self.count:SetText()
+            end
+        end
+
+        -- Shows partial Burning Embers.
+        function BurningEmbers(self, spellData, unit, powerType)
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
+
+                local status = self:CreateTexture(nil, "BACKGROUND")
+                status:SetTexture(self.icon:GetTexture())
+                status:SetTexCoord(.08, .92, .08, .92)
+                status:SetPoint("TOPLEFT")
+                status:SetPoint("BOTTOMRIGHT")
+                self.status = status
+            end
+
+            if unit == "player" and powerType == "BURNING_EMBERS" then
+                debug(spellData.debug, "Main", unit, powerType)
+                power = UnitPower("player", SPELL_POWER_BURNING_EMBERS, true)
+                postUnitAura(self, spellData)
+            end
         end
     end
 end
@@ -808,7 +853,6 @@ AuraTracking.Defaults = {
                 minLevel = 14,
                 specs = {true, false, true}, -- Passive for Assas via Dreanor Perk
                 order = 1,
-                debug = "Slice and Dice",
                 eventUpdate = {
                     event = "UNIT_POWER_FREQUENT",
                     func = SliceAndDice
@@ -984,8 +1028,15 @@ AuraTracking.Defaults = {
                 order = 1,
             },
             ["9-a6a32ca3-1"] = {   -- Burning Embers (Dest)
-                type = "BurningEmbers",
+                spell = 108647,
+                minLevel = 42,
+                specs = {false, false, true},
                 order = 1,
+                debug = "Burning Embers",
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = BurningEmbers
+                }
             },
         -- Static Target Auras
             ["9-be413012-1"] = {   -- Corruption (Aff, Demo)
