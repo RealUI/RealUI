@@ -872,7 +872,7 @@ AuraTracking.Defaults = {
             ["4-a4347749-1"] = {   -- Slice and Dice (Combat, Sub)
                 spell = 5171,
                 minLevel = 14,
-                specs = {true, false, true}, -- Passive for Assas via Dreanor Perk
+                specs = {false, true, true}, -- Passive for Assas via Dreanor Perk
                 order = 1,
                 eventUpdate = {
                     event = "UNIT_POWER_FREQUENT",
@@ -909,7 +909,9 @@ AuraTracking.Defaults = {
             ["4-b2b390d7-1"] = {   -- Rupture (Combat)
                 spell = 1943,
                 minLevel = 46,
-                specs = {true, false, false}, -- Passive for Assas via Dreanor Perk
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false}, -- Passive for Assas via Dreanor Perk
                 order = 1,
                 eventUpdate = {
                     event = "UNIT_POWER_FREQUENT",
@@ -934,7 +936,7 @@ AuraTracking.Defaults = {
         -- Free Player Auras
             ["4-bcbb4a21-1"] = {spell = 73651},    -- Recuperate
             ["4-bd56d2d6-1"] = {spell = 108212},   -- Burst of Speed
-            ["4-bf8be102-1"] = {spell = 13750},    -- Adrenaline Rush
+            ["4-bf8be102-1"] = {spell = 13750},    -- Adrenaline Rush (com)
             ["4-9040a7b9-1"] = {spell = 13877},    -- Blade Flurry
             ["4-965917ad-1"] = {spell = 2983},     -- Sprint
             ["4-9f332190-1"] = {spell = 5277},     -- Evasion
@@ -945,20 +947,22 @@ AuraTracking.Defaults = {
             ["4-851514ee-1"] = {spell = 31224},    -- Cloak of Shadows
             ["4-a758c6b8-1"] = {spell = 45182},    -- Cheating Death
             ["4-a758d1b3-1"] = {spell = 114018},   -- Shroud of Concealment
-            ["4-80b0f420-1"] = {spell = 11327},    -- Vanish
+            ["4-80b0f420-1"] = {spell = {11327,115193}},    -- Vanish
             ["4-a45b83a3-1"] = {spell = 137619},   -- Marked for Death
             ["4-a0c86712-1"] = {spell = 1966},     -- Feint
             ["4-b7bc86f8-1"] = {spell = 74002},    -- Combat Insight
         -- Free Target Auras
-            ["4-9b960b7a-1"] = {   -- Hemorrhage
+            ["4-9b960b7a-1"] = {   -- Hemorrhage (Sub)
                 spell = 16511,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
             },
-            ["4-8c6900cc-1"] = {   -- Vendetta
+            ["4-8c6900cc-1"] = {   -- Vendetta (Ass)
                 spell = 79140,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, false, false},
             },
             ["4-8856069f-1"] = {   -- Garrote
                 spell = 703,
