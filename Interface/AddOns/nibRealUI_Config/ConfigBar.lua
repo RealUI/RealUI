@@ -3,24 +3,31 @@ local options = private.options
 local CloseHuDWindow = private.CloseHuDWindow
 local debug = private.debug
 
--- Up values
+-- Lua Globals --
 local _G = _G
-local tostring, next = _G.tostring, _G.next
+local next = _G.next
+local tostring, tonumber = _G.tostring, _G.tonumber
+
+-- WoW Globals --
+local UIParent = _G.UIParent
+local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
+local C_TimerAfter = _G.C_Timer.After
+local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
+
+-- Libs --
+local ACR = LibStub("AceConfigRegistry-3.0")
+local ACD = LibStub("AceConfigDialog-3.0")
+local GUI = LibStub("AceGUI-3.0")
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 
--- RealUI
+-- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
 local ndb = nibRealUI.db.profile
 local ndbc = nibRealUI.db.char
 local hudSize = ndb.settings.hudSize
 local round = nibRealUI.Round
-
--- Ace
-local ACR = LibStub("AceConfigRegistry-3.0")
-local ACD = LibStub("AceConfigDialog-3.0")
-local GUI = LibStub("AceGUI-3.0")
 
 local uiWidth, uiHeight = UIParent:GetSize()
 
@@ -1185,6 +1192,19 @@ local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = AuraTracking.db.class
+    local function swapParentGroup(tracker, info)
+        AuraTracking:CharacterUpdate({}, true)
+        local parent, key = info[#info-2], info[#info-1]
+        local spellOptions = auratracker.args[parent].args[key]
+        if tracker.shouldTrack and parent ~= "active" then
+            debug("Enable")
+            auratracker.args.active.args[key] = spellOptions
+        elseif parent ~= "inactive" then
+            debug("Disable")
+            auratracker.args.inactive.args[key] = spellOptions
+        end
+        auratracker.args[parent].args[key] = nil
+    end
     local function getNameOrder(spellData)
         local order, pos, name = 70, "", ""
 
@@ -1277,8 +1297,11 @@ local auratracker do
                         if string.find(value, ",") then
                             debug("Multi-spell")
                             value = { strsplit(",", value) }
+                        elseif tonumber(value) then
+                            spellData.spell = tonumber(value)
+                        else
+                            spellData.spell = value
                         end
-                        spellData.spell = value
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
                         spellOptions.name, spellOptions.order = getNameOrder(spellData)
@@ -1301,17 +1324,7 @@ local auratracker do
                         end
                         spellData.shouldLoad = value
 
-                        AuraTracking:CharacterUpdate({}, true)
-                        local parent, key = info[#info-2], info[#info-1]
-                        local spellOptions = auratracker.args[parent].args[key]
-                        if tracker.shouldTrack and parent ~= "active" then
-                            debug("Enable")
-                            auratracker.args.active.args[key] = spellOptions
-                        elseif parent ~= "inactive" then
-                            debug("Disable")
-                            auratracker.args.inactive.args[key] = spellOptions
-                        end
-                        auratracker.args[parent].args[key] = nil
+                        swapParentGroup(tracker, info)
                     end,
                     order = 20,
                 },
@@ -1417,6 +1430,7 @@ local auratracker do
                     set = function(info, key, value, ...)
                         debug("Spec set", key, value, ...)
                         spellData.specs[key] = value == nil and true or value
+                        swapParentGroup(tracker, info)
                     end,
                     order = 70,
                 },
@@ -1481,7 +1495,7 @@ local auratracker do
                         return spellData.debug
                     end,
                     set = function(info, value)
-                        spellData.debug = value
+                        spellData.debug = auratracker.args[info[#info-2]].args[info[#info-1]].name
                     end,
                     order = 100,
                 },

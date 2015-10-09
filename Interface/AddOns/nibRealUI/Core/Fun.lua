@@ -4,7 +4,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local F
 
 -- Misc Functions
--- FindSpellID("Spell", "player", false)
+-- /run FindSpellID("Spell", "player", false)
 -- FindSpellID("Spell", "target", true)
 local spellFinder = CreateFrame("FRAME")
 function FindSpellID(SpellName, unit, isDebuff)

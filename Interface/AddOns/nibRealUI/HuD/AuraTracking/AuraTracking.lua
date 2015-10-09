@@ -46,6 +46,7 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
         local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
         debug(isDebug, "Aura", auraIndex, name, ID)
         if spell == name or spell == ID then
+            debug(isDebug, "Match found")
             aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
             aura.name, aura.ID = name, ID
             aura.count = count > 0 and count or ""
@@ -56,20 +57,6 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
             aura.index = auraIndex
             return false, aura
         end
-    end
-end
-local function FindAura(spellID, unit, filter, isDebug)
-    debug(isDebug, "FindSpellMatch", spellID, unit, filter)
-    local aura = {}
-    for auraIndex = 1, 40 do
-        local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
-        if name == nil then break end
-        debug(isDebug, "Aura", auraIndex, name, ID)
-        if spellID == ID then
-            count = count > 0 and count or ""
-            return auraIndex, texture, count, duration, endTime
-        end
-
     end
 end
 
