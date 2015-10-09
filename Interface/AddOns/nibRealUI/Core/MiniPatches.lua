@@ -131,22 +131,6 @@ RealUI.minipatches = {
             end
         end
     end,
-    [14] = function(ver)
-        debug("r"..ver)
-        local AuraTracking = _G.nibRealUIDB.namespaces.AuraTracking
-        if AuraTracking.profiles and not AuraTracking.class then
-            local profile = AuraTracking.profiles.RealUI
-            local DK = profile and profile.tracking.DEATHKNIGHT
-            if DK then
-                for i = #DK, 1, -1 do
-                    local tracker = DK[i]
-                    if not tracker.spell and tracker.unit == "target" then
-                        tracker = nil
-                    end
-                end
-            end
-        end
-    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,
