@@ -934,21 +934,26 @@ AuraTracking.Defaults = {
                 order = 2,
             },
         -- Free Player Auras
+            ["4-bf8be102-1"] = {   -- Adrenaline Rush (Comb)
+                spell = {13750},
+                specs = {false, true, false},
+            },
+            ["4-9f580e91-1"] = {   -- Master of Subtlety (Sub)
+                spell = {31665, 31666, 31223},
+                specs = {false, false, true},
+            },
             ["4-bcbb4a21-1"] = {spell = 73651},    -- Recuperate
-            ["4-bd56d2d6-1"] = {spell = 108212},   -- Burst of Speed
-            ["4-bf8be102-1"] = {spell = 13750},    -- Adrenaline Rush (com)
+            ["4-bd56d2d6-1"] = {spell = 137573},   -- Burst of Speed
             ["4-9040a7b9-1"] = {spell = 13877},    -- Blade Flurry
             ["4-965917ad-1"] = {spell = 2983},     -- Sprint
             ["4-9f332190-1"] = {spell = 5277},     -- Evasion
             ["4-82cf4c29-1"] = {spell = 108208},   -- Subterfuge
             ["4-b697e402-1"] = {spell = 121153},   -- Blindside
             ["4-a5bdd6b2-1"] = {spell = 57933},    -- TotT
-            ["4-9f580e91-1"] = {spell = 31223},    -- Master of Subtlety
             ["4-851514ee-1"] = {spell = 31224},    -- Cloak of Shadows
             ["4-a758c6b8-1"] = {spell = 45182},    -- Cheating Death
             ["4-a758d1b3-1"] = {spell = 114018},   -- Shroud of Concealment
             ["4-80b0f420-1"] = {spell = {11327,115193}},    -- Vanish
-            ["4-a45b83a3-1"] = {spell = 137619},   -- Marked for Death
             ["4-a0c86712-1"] = {spell = 1966},     -- Feint
             ["4-b7bc86f8-1"] = {spell = 74002},    -- Combat Insight
         -- Free Target Auras
