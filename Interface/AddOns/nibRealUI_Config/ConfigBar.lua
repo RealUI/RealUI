@@ -7,6 +7,7 @@ local debug = private.debug
 local _G = _G
 local next = _G.next
 local tostring, tonumber = _G.tostring, _G.tonumber
+local tinsert = _G.table.insert
 
 -- WoW Globals --
 local UIParent = _G.UIParent
@@ -1268,7 +1269,7 @@ local auratracker do
                     validate = function(info, value) --,158300
                         debug("Validate Spellname", info[#info-1], value)
                         local isSpell
-                        if string.find(value, ",") then
+                        if value:find(",") then
                             debug("Multi-spell")
                             value = { strsplit(",", value) }
                             for i = 1, #value do
@@ -1294,9 +1295,15 @@ local auratracker do
                     end,
                     set = function(info, value)
                         debug("Set Spellname", info[#info-2], info[#info-1], value)
-                        if string.find(value, ",") then
+                        if value:find(",") then
                             debug("Multi-spell")
-                            value = { strsplit(",", value) }
+                            for spell in value:gmatch("(%d+)") do
+                                if tonumber(spell) then
+                                    tinsert(spellData.spell, tonumber(spell))
+                                else
+                                    tinsert(spellData.spell, spell)
+                                end
+                            end
                         elseif tonumber(value) then
                             spellData.spell = tonumber(value)
                         else
