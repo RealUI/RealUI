@@ -45,7 +45,7 @@ local function CreateDebugFrame(mod)
     if debugger[mod] then
         return
     end
-    debugger[mod] = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
+    debugger[mod] = LibStub("RealUI_LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
     debugger[mod].numDuped = 1
     debugger[mod].prevLine = ""
     return debugger[mod]
@@ -87,12 +87,19 @@ function SlashCmdList.REALUIINIT(mod, editBox)
     if mod == "" then
         -- TODO: Make this show a frame w/ buttons to specific debugs
         for k, v in next, debugger do
-            print(k)
+            print(k, debugger[k]:Lines())
         end
     else
         local modDebug = debugger[mod]
         if not modDebug then
             modDebug = CreateDebugFrame(mod)
+        end
+        if mod == "test" then
+            print("Generating test...")
+            for i = 1, 2000 do
+                --modDebug:AddLine("Test line "..i.." ......................................................................................")
+                modDebug:AddLine("Test line "..i)
+            end
         end
         if modDebug:Lines() == 0 then
             modDebug:AddLine("Nothing to report.")

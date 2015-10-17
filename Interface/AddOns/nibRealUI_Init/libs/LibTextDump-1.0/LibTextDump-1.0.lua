@@ -10,13 +10,14 @@ local type = _G.type
 
 -- Libraries
 local table = _G.table
+local coroutine = _G.coroutine
 
 
 -----------------------------------------------------------------------
 -- Library namespace.
 -----------------------------------------------------------------------
 local LibStub = _G.LibStub
-local MAJOR = "LibTextDump-1.0"
+local MAJOR = "RealUI_LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
@@ -36,6 +37,7 @@ lib.metatable = lib.metatable or { __index = lib.prototype }
 
 lib.buffers = lib.buffers or {}
 lib.frames = lib.frames or {}
+lib.length = lib.length or {}
 
 lib.num_frames = lib.num_frames or 0
 
@@ -48,6 +50,7 @@ local metatable = lib.metatable
 
 local buffers = lib.buffers
 local frames = lib.frames
+local length = lib.length
 
 local METHOD_USAGE_FORMAT = MAJOR .. ":%s() - %s."
 
@@ -243,6 +246,7 @@ function prototype:InsertLine(position, text)
 	if type(text) ~= "string" or text == "" then
 		error(METHOD_USAGE_FORMAT:format("InsertLine", "text must be a non-empty string."), 2)
 	end
+	length[self] = (length[self] or 0) + text:len()
 	table.insert(buffers[self], position, text)
 end
 
@@ -258,5 +262,55 @@ function prototype:String(separator)
 	if sep_type ~= "nil" and sep_type ~= "string" then
 		error(METHOD_USAGE_FORMAT:format("String", "separator must be nil or a string."), 2)
 	end
-	return table.concat(buffers[self], separator or "\n")
+
+	separator = separator or "\n"
+	local buffer, output = buffers[self], ""
+
+	local avg = math.floor(length[self]/#buffer)
+	local minVal, maxVal = 1, math.max(150, avg)
+	local minWidth, maxWidth = 1, 5000
+	--local treshold, co = math.floor(((length[self]/#buffer)/-1)*17 + #buffer)
+	local treshold, co = (((avg - minVal) * (minWidth - maxWidth)) / (maxVal - minVal)) + maxWidth
+	print("Buffer stats", avg, treshold, length[self], #buffer)
+	if treshold > #buffer then
+		print("Do normal output")
+		output = table.concat(buffer, separator)
+	elseif type(co) ~= "thread" or coroutine.status(co) == "dead" then
+		print("Throttle via coroutine")
+		local isRunning, start, stop = nil, 1, treshold
+
+		local frame, update, chunks = frames[self], 1, {}
+		frame:SetScript("OnUpdate", function(frame, elapsed)
+			update = update + elapsed
+			if (type(co) == "thread" and coroutine.status(co) == "suspended" and update > 0.1) or update == 1 then
+				update = 0
+				if stop > #buffer then
+					print("Truncate stop")
+					stop = #buffer
+				end
+				print("Resume coroutine", start, stop)
+				isRunning, start, stop = coroutine.resume(co, frame, buffer, separator, start, stop)
+			end
+		end)
+
+		co = coroutine.create(function (frame, buffer, separator, start, stop)
+			print("Start coroutine", start, stop)
+			while start <= #buffer do
+				local chunk = table.concat(buffer, separator, start, stop)
+				table.insert(chunks, chunk)
+				
+				print("Yield coroutine", start, stop)
+				frame, buffer, separator, start, stop = coroutine.yield(stop+1, stop+treshold)
+			end
+			frame:SetScript("OnUpdate", nil)
+			frame.edit_box:SetText(table.concat(chunks, separator))
+			print("End coroutine")
+		end)
+
+		output = table.concat(buffer, separator, start, stop)
+		table.insert(chunks, output)
+		start, stop = stop+1, stop+treshold
+	end
+	print("Send output")
+	return output
 end
