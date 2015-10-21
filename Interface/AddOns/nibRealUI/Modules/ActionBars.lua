@@ -608,10 +608,20 @@ function ActionBars:OnInitialize()
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 end
 
+local BT4_EnableBar
 function ActionBars:OnEnable()
     if not (Bartender4) then return end
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+    BT4_EnableBar = BT4ActionBars.EnableBar
+    BT4ActionBars.EnableBar = function(id)
+        id = tonumber(id)
+        BT4_EnableBar(id)
+        if id <= 5 then
+            ActionBars:ApplyABSettings()
+        end
+    end
     
     Bartender4:UnregisterChatCommand("bar")
     Bartender4:UnregisterChatCommand("bt")
@@ -632,6 +642,10 @@ end
 
 function ActionBars:OnDisable()
     self:TogglePetBar()
+
+    if BT4_EnableBar then
+        BT4ActionBars.EnableBar = BT4_EnableBar
+    end
 
     self:UnregisterChatCommand("bar")
     self:UnregisterChatCommand("bt")
