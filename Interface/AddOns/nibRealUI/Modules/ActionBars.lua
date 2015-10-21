@@ -86,115 +86,117 @@ function ActionBars:ApplyABSettings(tag)
         local centerPadding = padding / 2
         local BarPadding = {top = {}, bottom = {}, sides = {}}
         for i = 1, 5 do
-            ----
-            -- Calculate Width/Height of bars and their corresponding Left/Top points
-            ----
             local BTBar = _G["BT4Bar"..i]
-            local isVertBar = i > 3
-            local isRightBar = isVertBar and sidePositions[i] == "RIGHT"
-            local isLeftBar = isVertBar and not(isRightBar)
-            local isTopBar = not(isVertBar) and topBars[i] == true
-            local isBottomBar = not(isVertBar) and not(isTopBar)
-            ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
+            if BTBar and not BTBar.disabled then
+                ----
+                -- Calculate Width/Height of bars and their corresponding Left/Top points
+                ----
+                local isVertBar = i > 3
+                local isRightBar = isVertBar and sidePositions[i] == "RIGHT"
+                local isLeftBar = isVertBar and not(isRightBar)
+                local isTopBar = not(isVertBar) and topBars[i] == true
+                local isBottomBar = not(isVertBar) and not(isTopBar)
+                ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
 
-            local numButtons = BTBar.numbuttons
-            BarSizes[i] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
+                local numButtons = BTBar.numbuttons
+                BarSizes[i] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
 
-            -- Create Padding table
-            if isTopBar then
-                BarPadding.top[i] = padding
-            elseif isBottomBar then
-                BarPadding.bottom[i] = padding
-            else
-                BarPadding.sides[i] = padding
-            end
-
-            ----
-            -- Calculate bars X and Y positions
-            ----
-            local x, y
-
-            -- Side Bars
-            if isVertBar then
-                x = isRightBar and -36 or -8
-
-                if sidePositions[4] == sidePositions[5] then
-                    -- Link Side Bar settings
-                    if i == 4 then
-                        y = BarSizes[4] + BarPadding.sides[4] + 10.5
-                    else
-                        y = 10.5
-                    end
-                else
-                    y = (BarSizes[i] / 2) + 10
-                    if not(IsOdd(BarPadding.sides[i])) or IsOdd(numButtons) then y = y + 0.5 end
-                end
-
-                BarPositions[i] = sidePositions[i]
-
-            -- Top/Bottom Bars
-            else
-                x = -((BarSizes[i] / 2) + 10)
-                -- if IsOdd(numButtons) then x = x + 0.5 end
-
-                -- Extra on X for pixel perfection
+                -- Create Padding table
                 if isTopBar then
-                    if not(IsOdd(BarPadding.top[i])) or IsOdd(numButtons) then x = x + 0.5 end
+                    BarPadding.top[i] = padding
+                elseif isBottomBar then
+                    BarPadding.bottom[i] = padding
                 else
-                    if not(IsOdd(BarPadding.bottom[i])) or IsOdd(numButtons) then x = x + 0.5 end
+                    BarPadding.sides[i] = padding
                 end
 
-                -- Bar Place
-                local barPlace
-                if i == 1 then
-                    if numTopBars > 0 then
-                        barPlace = 1
+                ----
+                -- Calculate bars X and Y positions
+                ----
+                local x, y
+
+                -- Side Bars
+                if isVertBar then
+                    x = isRightBar and -36 or -8
+
+                    if sidePositions[4] == sidePositions[5] then
+                        -- Link Side Bar settings
+                        if i == 4 then
+                            y = BarSizes[4] + BarPadding.sides[4] + 10.5
+                        else
+                            y = 10.5
+                        end
                     else
-                        barPlace = 3 - numTopBars   -- Want Bottom Bars stacking Top->Down
+                        y = (BarSizes[i] / 2) + 10
+                        if not(IsOdd(BarPadding.sides[i])) or IsOdd(numButtons) then y = y + 0.5 end
                     end
 
-                elseif i == 2 then
-                    barPlace = 2
+                    BarPositions[i] = sidePositions[i]
 
-                elseif i == 3 then
-                    if isTopBar then
-                        barPlace = 3
-                    else
-                        barPlace = 1
-                    end
-                end
-
-                -- y Offset
-                if barPlace == 1 then
-                    if isTopBar then
-                        y = HuDY + ABY
-                    else
-                        y = 37
-                    end
-                elseif barPlace == 2 then
-                    if isTopBar then
-                        local padding = ceil(centerPadding + centerPadding)
-                        y = -(buttonSizes.bars + padding) + HuDY + ABY
-                    else
-                        local padding = ceil(centerPadding + centerPadding)
-                        y = buttonSizes.bars + padding + 37
-                    end
+                -- Top/Bottom Bars
                 else
-                    local padding = ceil(centerPadding + (centerPadding * 2) + centerPadding)
+                    x = -((BarSizes[i] / 2) + 10)
+                    -- if IsOdd(numButtons) then x = x + 0.5 end
+
+                    -- Extra on X for pixel perfection
                     if isTopBar then
-                        y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
+                        if not(IsOdd(BarPadding.top[i])) or IsOdd(numButtons) then x = x + 0.5 end
                     else
-                        y = (buttonSizes.bars * 2) + padding + 37
+                        if not(IsOdd(BarPadding.bottom[i])) or IsOdd(numButtons) then x = x + 0.5 end
                     end
+
+                    -- Bar Place
+                    local barPlace
+                    if i == 1 then
+                        if numTopBars > 0 then
+                            barPlace = 1
+                        else
+                            barPlace = 3 - numTopBars   -- Want Bottom Bars stacking Top->Down
+                        end
+
+                    elseif i == 2 then
+                        barPlace = 2
+
+                    elseif i == 3 then
+                        if isTopBar then
+                            barPlace = 3
+                        else
+                            barPlace = 1
+                        end
+                    end
+
+                    -- y Offset
+                    if barPlace == 1 then
+                        if isTopBar then
+                            y = HuDY + ABY
+                        else
+                            y = 37
+                        end
+                    elseif barPlace == 2 then
+                        if isTopBar then
+                            local padding = ceil(centerPadding + centerPadding)
+                            y = -(buttonSizes.bars + padding) + HuDY + ABY
+                        else
+                            local padding = ceil(centerPadding + centerPadding)
+                            y = buttonSizes.bars + padding + 37
+                        end
+                    else
+                        local padding = ceil(centerPadding + (centerPadding * 2) + centerPadding)
+                        if isTopBar then
+                            y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
+                        else
+                            y = (buttonSizes.bars * 2) + padding + 37
+                        end
+                    end
+
+                    BarPositions[i] = isTopBar and "TOP" or "BOTTOM"
                 end
 
-                BarPositions[i] = isTopBar and "TOP" or "BOTTOM"
+                BarPoints[i] = {
+                    x = x,
+                    y = y
+                }
             end
-
-            BarPoints[i] = {
-                x = x,
-                y = y
-            }
         end
 
         -- Profile Data
