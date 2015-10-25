@@ -4,6 +4,7 @@
 ## Author: Gethe
 ## Version: 8.1 r14g
 ## SavedVariables: RealUI_InitDB
+## SavedVariablesPerCharacter: RealUI_Debug
 
 libs\libs.xml
 Fonts.xml

@@ -10,7 +10,6 @@ local type = _G.type
 
 -- Libraries
 local table = _G.table
-local coroutine = _G.coroutine
 
 
 -----------------------------------------------------------------------
@@ -37,7 +36,6 @@ lib.metatable = lib.metatable or { __index = lib.prototype }
 
 lib.buffers = lib.buffers or {}
 lib.frames = lib.frames or {}
-lib.length = lib.length or {}
 
 lib.num_frames = lib.num_frames or 0
 
@@ -50,12 +48,13 @@ local metatable = lib.metatable
 
 local buffers = lib.buffers
 local frames = lib.frames
-local length = lib.length
 
 local METHOD_USAGE_FORMAT = MAJOR .. ":%s() - %s."
 
 local DEFAULT_FRAME_WIDTH = 750
 local DEFAULT_FRAME_HEIGHT = 600
+
+local _, LINE_HEIGHT = ChatFontNormal:GetFont()
 
 -----------------------------------------------------------------------
 -- Helper functions.
@@ -117,33 +116,27 @@ local function NewInstance(width, height)
 	footer:SetPoint("CENTER", footer_frame, "CENTER", 0, 0)
 
 
-	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "UIPanelScrollFrameTemplate")
+	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "FauxScrollFrameTemplate")
 	scroll_area:SetPoint("TOPLEFT", 5, -24)
 	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
 
-	scroll_area:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self.ScrollBar)
-	end)
-
-	scroll_area.ScrollBar:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self)
-	end)
+	copy_frame.scroll_area = scroll_area
 
 
-	local edit_box = _G.CreateFrame("EditBox", nil, copy_frame)
+	local edit_box = _G.CreateFrame("EditBox", ("%sScrollChildFrame"):format(frame_name), copy_frame)
 	edit_box:SetMultiLine(true)
 	edit_box:SetMaxLetters(0)
 	edit_box:EnableMouse(true)
 	edit_box:SetAutoFocus(false)
 	edit_box:SetFontObject("ChatFontNormal")
-	edit_box:SetSize(scroll_area:GetSize())
+	edit_box:SetPoint("TOPLEFT", 5, -24)
+	edit_box:SetPoint("BOTTOMRIGHT", -28, 29)
 
 	edit_box:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copy_frame)
 	end)
 
 	copy_frame.edit_box = edit_box
-	scroll_area:SetScrollChild(edit_box)
 
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
@@ -156,6 +149,8 @@ local function NewInstance(width, height)
 
 		edit_box:HighlightText(0)
 		edit_box:SetFocus()
+
+		copy_frame:RegisterEvent("PLAYER_LOGOUT")
 	end)
 
 	highlight_button:SetScript("OnMouseDown", function(self, button)
@@ -180,7 +175,9 @@ local function NewInstance(width, height)
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copy_frame
-	buffers[instance] = {}
+	buffers[instance] = {
+		max_display_lines = _G.floor(edit_box:GetHeight() / LINE_HEIGHT)
+	}
 
 	return instance
 end
@@ -189,7 +186,7 @@ end
 -----------------------------------------------------------------------
 -- Library methods.
 -----------------------------------------------------------------------
-function lib:New(frame_title, width, height)
+function lib:New(frame_title, width, height, save)
 	local title_type = type(frame_title)
 
 	if title_type ~= "nil" and title_type ~= "string" then
@@ -205,8 +202,20 @@ function lib:New(frame_title, width, height)
 	if height_type ~= "nil" and height_type ~= "number" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame height must be nil or a number."))
 	end
+	local save_type = type(save)
+
+	if save_type ~= "nil" and save_type ~= "function" then
+		error(METHOD_USAGE_FORMAT:format("New", "save must be nil or a function."))
+	end
 	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT)
-	frames[instance].title:SetText(frame_title)
+	local frame = frames[instance]
+	frame.title:SetText(frame_title)
+
+	if save then
+		frame:SetScript("OnEvent", function(event, ...)
+			save(buffers[instance])
+		end)
+	end
 
 	return instance
 end
@@ -231,10 +240,11 @@ function prototype:Display(separator)
 	if display_text == "" then
 		error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
 	end
-	local frame = frames[self]
+	local buffer, frame = buffers[self], frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
 	_G.ShowUIPanel(frame)
+	_G.FauxScrollFrame_Update(frame.scroll_area, #buffer, _G.min(#buffer, buffer.max_display_lines), LINE_HEIGHT, nil, nil, nil, nil, nil, nil, true )
 end
 
 
@@ -246,7 +256,6 @@ function prototype:InsertLine(position, text)
 	if type(text) ~= "string" or text == "" then
 		error(METHOD_USAGE_FORMAT:format("InsertLine", "text must be a non-empty string."), 2)
 	end
-	length[self] = (length[self] or 0) + text:len()
 	table.insert(buffers[self], position, text)
 end
 
@@ -264,53 +273,23 @@ function prototype:String(separator)
 	end
 
 	separator = separator or "\n"
-	local buffer, output = buffers[self], ""
+	local buffer, output = buffers[self]
+	local max_display_lines = buffer.max_display_lines
 
-	local avg = math.floor(length[self]/#buffer)
-	local minVal, maxVal = 1, math.max(150, avg)
-	local minWidth, maxWidth = 1, 5000
-	--local treshold, co = math.floor(((length[self]/#buffer)/-1)*17 + #buffer)
-	local treshold, co = (((avg - minVal) * (minWidth - maxWidth)) / (maxVal - minVal)) + maxWidth
-	print("Buffer stats", avg, treshold, length[self], #buffer)
-	if treshold > #buffer then
-		print("Do normal output")
+	if max_display_lines > #buffer then
 		output = table.concat(buffer, separator)
-	elseif type(co) ~= "thread" or coroutine.status(co) == "dead" then
-		print("Throttle via coroutine")
-		local isRunning, start, stop = nil, 1, treshold
+	else
+		local frame = frames[self]
+		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
+			local scrollbar = _G[scroll_area:GetName().."ScrollBar"];
+			scrollbar:SetValue(value);
+			local offset = _G.floor((value / LINE_HEIGHT) + 0.5);
 
-		local frame, update, chunks = frames[self], 1, {}
-		frame:SetScript("OnUpdate", function(frame, elapsed)
-			update = update + elapsed
-			if (type(co) == "thread" and coroutine.status(co) == "suspended" and update > 0.1) or update == 1 then
-				update = 0
-				if stop > #buffer then
-					print("Truncate stop")
-					stop = #buffer
-				end
-				print("Resume coroutine", start, stop)
-				isRunning, start, stop = coroutine.resume(co, frame, buffer, separator, start, stop)
-			end
+			local text = table.concat(buffer, separator, offset + 1, offset + max_display_lines)
+			frame.edit_box:SetText(text)
 		end)
 
-		co = coroutine.create(function (frame, buffer, separator, start, stop)
-			print("Start coroutine", start, stop)
-			while start <= #buffer do
-				local chunk = table.concat(buffer, separator, start, stop)
-				table.insert(chunks, chunk)
-				
-				print("Yield coroutine", start, stop)
-				frame, buffer, separator, start, stop = coroutine.yield(stop+1, stop+treshold)
-			end
-			frame:SetScript("OnUpdate", nil)
-			frame.edit_box:SetText(table.concat(chunks, separator))
-			print("End coroutine")
-		end)
-
-		output = table.concat(buffer, separator, start, stop)
-		table.insert(chunks, output)
-		start, stop = stop+1, stop+treshold
+		output = table.concat(buffer, separator, 1, max_display_lines)
 	end
-	print("Send output")
 	return output
 end

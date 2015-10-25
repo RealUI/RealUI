@@ -45,7 +45,10 @@ local function CreateDebugFrame(mod)
     if debugger[mod] then
         return
     end
-    debugger[mod] = LibStub("RealUI_LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
+    local function save(buffer)
+        RealUI_Debug[mod] = buffer
+    end
+    debugger[mod] = LibStub("RealUI_LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 473, save)
     debugger[mod].numDuped = 1
     debugger[mod].prevLine = ""
     return debugger[mod]
@@ -122,6 +125,7 @@ f:SetScript("OnEvent", function(self, event, addon)
     elseif event == "ADDON_LOADED" then
         if addon == NAME then
             RealUI_InitDB = RealUI_InitDB or defaults
+            RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
             Aurora = {}
