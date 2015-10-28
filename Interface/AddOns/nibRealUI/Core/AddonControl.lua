@@ -277,10 +277,16 @@ SLASH_AC1 = "/ac"
 
 function nibRealUI:ToggleAddonPositionControl(addon, val)
     db.addonControl[addon].control.position = val
+    if val then
+        db.addonControl[addon].profiles.base.use = val
+    end
 end
 
 function nibRealUI:ToggleAddonLayoutControl(addon, val)
     db.addonControl[addon].profiles.layout.use = val
+    if val then
+        db.addonControl[addon].profiles.base.use = val
+    end
 end
 
 function nibRealUI:GetAddonControlSettings(addon)

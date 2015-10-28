@@ -48,16 +48,8 @@ local function IsOdd(val)
     return val % 2 == 1 and true or false
 end
 function ActionBars:ApplyABSettings(tag)
-    if not _G.IsAddOnLoaded("Bartender4") then return end
     if not _G.nibRealUICharacter then return end
     if _G.nibRealUICharacter.installStage ~= -1 then return end
-
-
-
-    -- Bar Settings
-    if not(nibRealUI:DoesAddonMove("Bartender4")) then return end
-    if _G.InCombatLockdown() then return end
-
 
     local prof = nibRealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
@@ -65,292 +57,274 @@ function ActionBars:ApplyABSettings(tag)
     local barSettings = db[nibRealUI.cLayout]
 
     local topBars, numTopBars, bottomBars, sidePositions
-    if not tag then
-        -- Convert settings to tables
-        if barSettings.centerPositions == 1 then
-            topBars = {false, false, false}
-            bottomBars = {true, true, true}
-            numTopBars = 0
-        elseif barSettings.centerPositions == 2 then
-            topBars = {true, false, false}
-            bottomBars = {false, true, true}
-            numTopBars = 1
-        elseif barSettings.centerPositions == 3 then
-            topBars = {true, true, false}
-            bottomBars = {false, false, true}
-            numTopBars = 2
-        else
-            topBars = {true, true, true}
-            bottomBars = {false, false, false}
-            numTopBars = 3
-        end
-        if barSettings.sidePositions == 1 then
-            sidePositions = {[4] = "RIGHT", [5] = "RIGHT"}
-        elseif barSettings.sidePositions == 2 then
-            sidePositions = {[4] = "RIGHT", [5] = "LEFT"}
-        else
-            sidePositions = {[4] = "LEFT", [5] = "LEFT"}
-        end
+    -- Convert settings to tables
+    if barSettings.centerPositions == 1 then
+        topBars = {false, false, false}
+        bottomBars = {true, true, true}
+        numTopBars = 0
+    elseif barSettings.centerPositions == 2 then
+        topBars = {true, false, false}
+        bottomBars = {false, true, true}
+        numTopBars = 1
+    elseif barSettings.centerPositions == 3 then
+        topBars = {true, true, false}
+        bottomBars = {false, false, true}
+        numTopBars = 2
+    else
+        topBars = {true, true, true}
+        bottomBars = {false, false, false}
+        numTopBars = 3
+    end
+    if barSettings.sidePositions == 1 then
+        sidePositions = {[4] = "RIGHT", [5] = "RIGHT"}
+    elseif barSettings.sidePositions == 2 then
+        sidePositions = {[4] = "RIGHT", [5] = "LEFT"}
+    else
+        sidePositions = {[4] = "LEFT", [5] = "LEFT"}
+    end
 
-        local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
-        local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
+    local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
+    local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
-        local BarSizes = {}
-        local BarPoints = {}
-        local BarPositions = {}
-        local padding = fixedSettings.padding
-        local centerPadding = padding / 2
-        local BarPadding = {top = {}, bottom = {}, sides = {}}
-        for id = 1, 5 do
-            local BTBar = BT4ActionBars.actionbars[id]
-            if BTBar and not BTBar.disabled then
-                ----
-                -- Calculate Width/Height of bars and their corresponding Left/Top points
-                ----
-                local isVertBar = id > 3
-                local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
-                local isLeftBar = isVertBar and not(isRightBar)
-                local isTopBar = not(isVertBar) and topBars[id] == true
-                local isBottomBar = not(isVertBar) and not(isTopBar)
-                ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
+    local BarSizes = {}
+    local padding = fixedSettings.padding
+    local centerPadding = padding / 2
+    local BarPadding = {top = {}, bottom = {}, sides = {}}
+    for id = 1, 5 do
+        ActionBars:debug("Calculate points", id)
+        local BTBar = BT4ActionBars.actionbars[id]
+        if BTBar and not BTBar.disabled then
+            ----
+            -- Calculate Width/Height of bars and their corresponding Left/Top points
+            ----
+            local isVertBar = id > 3
+            local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
+            local isLeftBar = isVertBar and not(isRightBar)
+            local isTopBar = not(isVertBar) and topBars[id] == true
+            local isBottomBar = not(isVertBar) and not(isTopBar)
+            ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
 
-                local numButtons = BTBar.numbuttons
-                BarSizes[id] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
+            local numButtons = BTBar.numbuttons
+            BarSizes[id] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
 
-                -- Create Padding table
-                if isTopBar then
-                    BarPadding.top[id] = padding
-                elseif isBottomBar then
-                    BarPadding.bottom[id] = padding
-                else
-                    BarPadding.sides[id] = padding
-                end
-
-                ----
-                -- Calculate bars X and Y positions
-                ----
-                local x, y
-
-                -- Side Bars
-                if isVertBar then
-                    x = isRightBar and -36 or -8
-
-                    if sidePositions[4] == sidePositions[5] then
-                        -- Link Side Bar settings
-                        if id == 4 then
-                            y = BarSizes[4] + BarPadding.sides[4] + 10.5
-                        else
-                            y = 10.5
-                        end
-                    else
-                        y = (BarSizes[id] / 2) + 10
-                        if not(IsOdd(BarPadding.sides[id])) or IsOdd(numButtons) then y = y + 0.5 end
-                    end
-
-                    BarPositions[id] = sidePositions[id]
-
-                -- Top/Bottom Bars
-                else
-                    x = -((BarSizes[id] / 2) + 10)
-                    -- if IsOdd(numButtons) then x = x + 0.5 end
-
-                    -- Extra on X for pixel perfection
-                    if isTopBar then
-                        if not(IsOdd(BarPadding.top[id])) or IsOdd(numButtons) then x = x + 0.5 end
-                    else
-                        if not(IsOdd(BarPadding.bottom[id])) or IsOdd(numButtons) then x = x + 0.5 end
-                    end
-
-                    -- Bar Place
-                    local barPlace
-                    if id == 1 then
-                        if numTopBars > 0 then
-                            barPlace = 1
-                        else
-                            barPlace = 3 - numTopBars   -- Want Bottom Bars stacking Top->Down
-                        end
-
-                    elseif id == 2 then
-                        barPlace = 2
-
-                    elseif id == 3 then
-                        if isTopBar then
-                            barPlace = 3
-                        else
-                            barPlace = 1
-                        end
-                    end
-
-                    -- y Offset
-                    if barPlace == 1 then
-                        if isTopBar then
-                            y = HuDY + ABY
-                        else
-                            y = 37
-                        end
-                    elseif barPlace == 2 then
-                        if isTopBar then
-                            local padding = math.ceil(centerPadding + centerPadding)
-                            y = -(buttonSizes.bars + padding) + HuDY + ABY
-                        else
-                            local padding = math.ceil(centerPadding + centerPadding)
-                            y = buttonSizes.bars + padding + 37
-                        end
-                    else
-                        local padding = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
-                        if isTopBar then
-                            y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
-                        else
-                            y = (buttonSizes.bars * 2) + padding + 37
-                        end
-                    end
-
-                    BarPositions[id] = isTopBar and "TOP" or "BOTTOM"
-                end
-
-                BarPoints[id] = {
-                    x = x,
-                    y = y
-                }
+            -- Create Padding table
+            if isTopBar then
+                BarPadding.top[id] = padding
+            elseif isBottomBar then
+                BarPadding.bottom[id] = padding
+            else
+                BarPadding.sides[id] = padding
             end
-        end
 
-        -- Profile Data
-        local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
-        if profileActionBars["actionbars"] then
-            for i = 1, 5 do
-                local bar, point = profileActionBars["actionbars"][i]
-                if i <= 3 then
-                    point = BarPositions[i] == "TOP" and "CENTER" or "BOTTOM"
+            ----
+            -- Calculate bars X and Y positions
+            ----
+            local x, y
+
+            -- Side Bars
+            local BarPositions = {}
+            if isVertBar then
+                x = isRightBar and -36 or -8
+
+                if sidePositions[4] == sidePositions[5] then
+                    -- Link Side Bar settings
+                    if id == 4 then
+                        y = BarSizes[4] + BarPadding.sides[4] + 10.5
+                    else
+                        y = 10.5
+                    end
                 else
-                    point = BarPositions[i]
+                    y = (BarSizes[id] / 2) + 10
+                    if not(IsOdd(BarPadding.sides[id])) or IsOdd(numButtons) then y = y + 0.5 end
                 end
 
-                bar["position"] = {
-                    ["x"] = BarPoints[i].x,
-                    ["y"] = BarPoints[i].y,
-                    ["point"] = point,
+                BarPositions[id] = sidePositions[id]
+
+            -- Top/Bottom Bars
+            else
+                x = -((BarSizes[id] / 2) + 10)
+                -- if IsOdd(numButtons) then x = x + 0.5 end
+
+                -- Extra on X for pixel perfection
+                if isTopBar then
+                    if not(IsOdd(BarPadding.top[id])) or IsOdd(numButtons) then x = x + 0.5 end
+                else
+                    if not(IsOdd(BarPadding.bottom[id])) or IsOdd(numButtons) then x = x + 0.5 end
+                end
+
+                -- Bar Place
+                local barPlace
+                if id == 1 then
+                    if numTopBars > 0 then
+                        barPlace = 1
+                    else
+                        barPlace = 3 - numTopBars   -- Want Bottom Bars stacking Top->Down
+                    end
+
+                elseif id == 2 then
+                    barPlace = 2
+
+                elseif id == 3 then
+                    if isTopBar then
+                        barPlace = 3
+                    else
+                        barPlace = 1
+                    end
+                end
+
+                -- y Offset
+                if barPlace == 1 then
+                    if isTopBar then
+                        y = HuDY + ABY
+                    else
+                        y = 37
+                    end
+                elseif barPlace == 2 then
+                    if isTopBar then
+                        local padding = math.ceil(centerPadding + centerPadding)
+                        y = -(buttonSizes.bars + padding) + HuDY + ABY
+                    else
+                        local padding = math.ceil(centerPadding + centerPadding)
+                        y = buttonSizes.bars + padding + 37
+                    end
+                else
+                    local padding = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
+                    if isTopBar then
+                        y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
+                    else
+                        y = (buttonSizes.bars * 2) + padding + 37
+                    end
+                end
+
+                BarPositions[id] = isTopBar and "TOP" or "BOTTOM"
+            end
+
+            ActionBars:debug("Setup profile", id)
+            local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
+            local bar, point = profileActionBars["actionbars"][id]
+            if id <= 3 then
+                point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
+            else
+                point = BarPositions[id]
+            end
+
+            bar["position"] = {
+                ["x"] = x,
+                ["y"] = y,
+                ["point"] = point,
+                ["scale"] = 1,
+                ["growHorizontal"] = "RIGHT",
+                ["growVertical"] = "DOWN",
+            }
+            bar["padding"] = fixedSettings.padding - 10
+
+            if id < 4 then
+                bar["flyoutDirection"] = sidePositions[id] == "UP"
+            else
+                bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
+            end
+            BTBar:SetButtons()
+        end
+    end
+
+    ----
+    -- Vehicle Bar
+    ----
+    local vbX, vbY = -36, -59.5
+
+    -- Set Position
+    local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
+    if profileVehicle then
+        profileVehicle["position"] = {
+            ["x"] = vbX,
+            ["y"] = vbY,
+            ["point"] = "TOPRIGHT",
+            ["scale"] = 0.84,
+            ["growHorizontal"] = "RIGHT",
+            ["growVertical"] = "DOWN",
+        }
+    end
+    local BT4Vehicle = BT4:GetModule("Vehicle", true)
+    if BT4Vehicle then BT4Vehicle:ApplyConfig() end
+
+    ----
+    -- Pet Bar
+    ----
+    if barSettings.moveBars.pet then
+        -- if nibRealUI.cLayout == 1 then
+            local numPetBarButtons = 10
+            local pbX, pbY, pbPoint
+            local pbP = fixedSettings.padding
+            local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
+
+            -- Calculate X
+            if (sidePositions[4] == "LEFT") and (sidePositions[5] == "LEFT") then
+                pbX = buttonSizes.bars + math.ceil((BarPadding.sides[4] * 2) + (pbP / 2)) - 9
+            elseif (sidePositions[5] == "LEFT") then
+                pbX = buttonSizes.bars + math.ceil((BarPadding.sides[5] * 2) + (pbP / 2)) - 9
+            else
+                pbX = math.ceil(pbP / 2) - 9
+            end
+
+            -- Calculate Y
+            pbY = (pbH / 2) + 10
+
+            -- Set Position
+            local profilePetBar = BT4DB["namespaces"]["PetBar"]["profiles"][prof]
+            if profilePetBar then
+                profilePetBar["position"] = {
+                    ["x"] = pbX,
+                    ["y"] = pbY,
+                    ["point"] = "LEFT",
                     ["scale"] = 1,
                     ["growHorizontal"] = "RIGHT",
                     ["growVertical"] = "DOWN",
                 }
-                bar["padding"] = fixedSettings.padding - 10
-
-                if i < 4 then
-                    bar["flyoutDirection"] = sidePositions[i] == "UP"
-                else
-                    bar["flyoutDirection"] = sidePositions[i] == "LEFT" and "RIGHT" or "LEFT"
-                end
+                profilePetBar["padding"] = pbP - 8
             end
-        end
-        local B4Bars = BT4:GetModule("ActionBars", true)
-        if B4Bars then B4Bars:ApplyConfig() end
-        for i = 1, 5 do
-            if B4Bars.actionbars[i] then
-                B4Bars.actionbars[i].SetButtons(B4Bars.actionbars[i])
-            end
+            local BT4PetBar = BT4:GetModule("PetBar", true)
+            if BT4PetBar then BT4PetBar:ApplyConfig() end
+        -- end
+    end
+
+    ----
+    -- Extra Action Bar
+    ----
+    if barSettings.moveBars.eab then
+        local eabX, eabY
+
+        -- Calculate Y
+        eabY = 61
+
+        -- Calculate X
+        if numTopBars == 3 then
+            eabX = -32
+        elseif numTopBars == 2 then
+            eabX = BarSizes[3] / 2 - 4
+        else
+            eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
         end
 
-        ----
-        -- Vehicle Bar
-        ----
-        local vbX, vbY = -36, -59.5
-
-        -- Set Position
-        local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
-        if profileVehicle then
-            profileVehicle["position"] = {
-                ["x"] = vbX,
-                ["y"] = vbY,
-                ["point"] = "TOPRIGHT",
-                ["scale"] = 0.84,
+        local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
+        if profileEAB then
+            profileEAB["position"] = {
+                ["y"] = eabY,
+                ["x"] = eabX,
+                ["point"] = "BOTTOM",
+                ["scale"] = 0.985,
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
         end
-        local B4Vehicle = BT4:GetModule("Vehicle", true)
-        if B4Vehicle then B4Vehicle:ApplyConfig() end
-
-        ----
-        -- Pet Bar
-        ----
-        if barSettings.moveBars.pet then
-            -- if nibRealUI.cLayout == 1 then
-                local numPetBarButtons = 10
-                local pbX, pbY, pbPoint
-                local pbP = fixedSettings.padding
-                local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
-
-                -- Calculate X
-                if (sidePositions[4] == "LEFT") and (sidePositions[5] == "LEFT") then
-                    pbX = buttonSizes.bars + math.ceil((BarPadding.sides[4] * 2) + (pbP / 2)) - 9
-                elseif (sidePositions[5] == "LEFT") then
-                    pbX = buttonSizes.bars + math.ceil((BarPadding.sides[5] * 2) + (pbP / 2)) - 9
-                else
-                    pbX = math.ceil(pbP / 2) - 9
-                end
-
-                -- Calculate Y
-                pbY = (pbH / 2) + 10
-
-                -- Set Position
-                local profilePetBar = BT4DB["namespaces"]["PetBar"]["profiles"][prof]
-                if profilePetBar then
-                    profilePetBar["position"] = {
-                        ["x"] = pbX,
-                        ["y"] = pbY,
-                        ["point"] = "LEFT",
-                        ["scale"] = 1,
-                        ["growHorizontal"] = "RIGHT",
-                        ["growVertical"] = "DOWN",
-                    }
-                    profilePetBar["padding"] = pbP - 8
-                end
-                local B4PetBar = BT4:GetModule("PetBar", true)
-                if B4PetBar then B4PetBar:ApplyConfig() end
-            -- end
-        end
-
-        ----
-        -- Extra Action Bar
-        ----
-        if barSettings.moveBars.eab then
-            local eabX, eabY
-
-            -- Calculate Y
-            eabY = 61
-
-            -- Calculate X
-            if numTopBars == 3 then
-                eabX = -32
-            elseif numTopBars == 2 then
-                eabX = BarSizes[3] / 2 - 4
-            else
-                eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-            end
-
-            local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
-            if profileEAB then
-                profileEAB["position"] = {
-                    ["y"] = eabY,
-                    ["x"] = eabX,
-                    ["point"] = "BOTTOM",
-                    ["scale"] = 0.985,
-                    ["growHorizontal"] = "RIGHT",
-                    ["growVertical"] = "DOWN",
-                }
-            end
-            local B4EAB = BT4:GetModule("ExtraActionBar", true)
-            if B4EAB then B4EAB:ApplyConfig() end
-        end
+        local BT4EAB = BT4:GetModule("ExtraActionBar", true)
+        if BT4EAB then BT4EAB:ApplyConfig() end
     end
 
     -- Stance Bar
     if barSettings.moveBars.stance then
-        local B4Stance = BT4:GetModule("StanceBar", true)
         local NumStances = _G.GetNumShapeshiftForms()
         if NumStances > 0 then
-            if B4Stance and not(B4Stance:IsEnabled()) then B4Stance:Enable() end
+            if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
 
             local sbX, sbY
 
@@ -374,7 +348,7 @@ function ActionBars:ApplyABSettings(tag)
                     ["point"] = "BOTTOMRIGHT"
                 }
             end
-            if B4Stance then B4Stance:ApplyConfig() end
+            if BT4Stance then BT4Stance:ApplyConfig() end
         end
     end
 
@@ -530,14 +504,16 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
     self:RefreshDoodads()
     
-    --[[BT4AB_EnableBar = function(self, id)
+    ---[[
+    BT4AB_EnableBar = function(self, id)
         self:debug("BT4AB_EnableBar", id)
         id = _G.tonumber(id)
-        if id <= 5 then
-            ActionBars:ApplyABSettings()
+        if id <= 5 and not _G.InCombatLockdown() then
+            ActionBars:ApplyABSettings(id)
         end
     end
-    _G.hooksecurefunc(BT4ActionBars, "EnableBar", BT4AB_EnableBar)]]
+    --_G.hooksecurefunc(BT4ActionBars, "EnableBar", BT4AB_EnableBar)
+    --]]
     
     EnteredWorld = true
 end
@@ -632,21 +608,23 @@ function ActionBars:OnInitialize()
         abSettings = nil
     end
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and (nibRealUI:DoesAddonMove("Bartender4") or nibRealUI:DoesAddonLayout("Bartender4")))
 end
 
 function ActionBars:OnEnable()
-    self:debug("OnEnable")
-
     BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
+    self:debug("OnEnable", BT4)
+
     if EnteredWorld then
+        self:debug("Post EnteredWorld")
         self:RefreshDoodads()
     elseif BT4 then
+        self:debug("Pre EnteredWorld")
         BT4DB = _G.Bartender4DB
         BT4Profile = BT4DB["profileKeys"][nibRealUI.key]
 
         BT4Stance = BT4:GetModule("StanceBar", true)
-        BT4ActionBars = BT4:GetModule("ActionBars")
+        BT4ActionBars = BT4:GetModule("ActionBars", true)
 
         --self:RegisterEvent("PLAYER_LOGIN")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -699,6 +677,8 @@ function ActionBars:OnDisable()
         if BT4AB_EnableBar then
             BT4AB_EnableBar = _G.nop
         end
+
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
         self:UnregisterChatCommand("bar")
         self:UnregisterChatCommand("bt")
