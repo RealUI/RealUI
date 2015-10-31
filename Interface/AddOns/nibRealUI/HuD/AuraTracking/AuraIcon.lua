@@ -29,7 +29,7 @@ function api:UpdateSpellData()
 end
 
 function api:Enable()
-    AuraTracking:debug("Tracker:Enable", self.id)
+    AuraTracking:debug("Tracker:Enable", self.id, self.isStatic)
     local spellData = icons[self]
     self.isEnabled = true
     if spellData.eventUpdate then
@@ -43,7 +43,7 @@ function api:Enable()
     end
 end
 function api:Disable()
-    AuraTracking:debug("Tracker:Disable", self.id)
+    AuraTracking:debug("Tracker:Disable", self.id, self.isStatic)
     self.isEnabled = false
     self:UnregisterAllEvents()
     if self.slotID then

@@ -116,7 +116,8 @@ function AuraTracking:RemoveTracker(tracker, isStatic)
         local nextSlot = side["slot"..emptySlot+1]
         if nextSlot.isActive then
             local movedTracker = nextSlot.tracker
-            self:RemoveTracker(movedTracker)
+            self:debug("Shift", movedTracker.id, movedTracker.isStatic, emptySlot)
+            self:RemoveTracker(movedTracker, movedTracker.isStatic)
             self:AddTracker(movedTracker, emptySlot)
         end
     end
@@ -243,8 +244,8 @@ end
 
 -- Events --
 function AuraTracking:UNIT_AURA(event, unit)
-    AuraTracking:debug("UNIT_AURA", unit)
     if not isValidUnit[unit] then return end
+    AuraTracking:debug("UNIT_AURA", unit)
 
     for tracker, spellData in AuraTracking:IterateTrackers() do
         if spellData.unit == unit and tracker.isEnabled then
@@ -372,19 +373,23 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     self:UpdateVisibility()
 end
 function AuraTracking:CharacterUpdate(units, force)
-    self:debug("CharacterUpdate", units.player)
-    if units.player or force then
-        playerLevel = _G.UnitLevel("player")
-        playerSpec = _G.GetSpecialization()
+    self:debug("CharacterUpdate", units.player, force)
+    local newPlayerLevel = _G.UnitLevel("player")
+    local newPlayerSpec = _G.GetSpecialization()
+    if units.player and (newPlayerLevel ~= playerLevel or newPlayerSpec ~= playerSpec) or force then
+        playerLevel = newPlayerLevel
+        playerSpec = newPlayerSpec
 
         for tracker, spellData in self:IterateTrackers() do
             tracker:Disable() -- Reset incase there are any auras still active
             for i = 1, #spellData.specs do
                 if spellData.shouldLoad and spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
+                    self:debug("Track", tracker.id)
                     tracker.shouldTrack = true
                     tracker:Enable()
                     break
                 else
+                    self:debug("Don't Track", tracker.id)
                     tracker.shouldTrack = false
                 end
             end
