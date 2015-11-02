@@ -155,11 +155,6 @@ function AddonControl:CreateOptionsFrame()
         ["Grid2"] = true,
         ["mikScrollingBattleText"] = true,
     }
-    local StyleAddOns = {
-        ["Grid2"] = true,
-        ["Kui_Nameplates"] = true,
-        ["Raven"] = true,
-    }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
         ["KuiNameplates"] = "Kui_Nameplates"
