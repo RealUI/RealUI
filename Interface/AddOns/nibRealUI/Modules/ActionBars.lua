@@ -91,7 +91,7 @@ function ActionBars:ApplyABSettings(tag)
     local centerPadding = padding / 2
     local BarPadding = {top = {}, bottom = {}, sides = {}}
     for id = 1, 5 do
-        ActionBars:debug("Calculate points", id)
+        ActionBars:debug(id, "Calculate points")
         local BTBar = BT4ActionBars.actionbars[id]
         if BTBar and not BTBar.disabled then
             ----
@@ -102,7 +102,7 @@ function ActionBars:ApplyABSettings(tag)
             local isLeftBar = isVertBar and not(isRightBar)
             local isTopBar = not(isVertBar) and topBars[id] == true
             local isBottomBar = not(isVertBar) and not(isTopBar)
-            ActionBars:debug("Stats", isVertBar, isRightBar, isLeftBar, isTopBar, isBottomBar)
+            ActionBars:debug(id, "Stats", isTopBar, isBottomBar, isLeftBar, isRightBar)
 
             local numButtons = BTBar.numbuttons
             BarSizes[id] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
@@ -171,8 +171,10 @@ function ActionBars:ApplyABSettings(tag)
                         barPlace = 1
                     end
                 end
+                ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
+                ActionBars:debug(id, "Y Offset", HuDY, ABY)
                 if barPlace == 1 then
                     if isTopBar then
                         y = HuDY + ABY
@@ -199,7 +201,6 @@ function ActionBars:ApplyABSettings(tag)
                 BarPositions[id] = isTopBar and "TOP" or "BOTTOM"
             end
 
-            ActionBars:debug("Setup profile", id)
             local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
             local bar, point = profileActionBars["actionbars"][id]
             if id <= 3 then
@@ -208,6 +209,7 @@ function ActionBars:ApplyABSettings(tag)
                 point = BarPositions[id]
             end
 
+            ActionBars:debug(id, "Points", x, y, point)
             bar["position"] = {
                 ["x"] = x,
                 ["y"] = y,
@@ -226,6 +228,7 @@ function ActionBars:ApplyABSettings(tag)
             BTBar:SetButtons()
         end
     end
+    if BT4ActionBars then BT4ActionBars:ApplyConfig() end
 
     ----
     -- Vehicle Bar
