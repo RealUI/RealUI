@@ -19,12 +19,10 @@ local RealUIAddOns = {
 }
 local RealUIAddOnsOrder = {
     "DBM",
-    "KuiNameplates",
     "Masque",
     "mikScrollingBattleText",
     "Bartender4",
     "Grid2",
-    "Raven",
     "Skada",
 }
 
@@ -155,14 +153,8 @@ function AddonControl:CreateOptionsFrame()
         ["Grid2"] = true,
         ["mikScrollingBattleText"] = true,
     }
-    local StyleAddOns = {
-        ["Grid2"] = true,
-        ["Kui_Nameplates"] = true,
-        ["Raven"] = true,
-    }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
-        ["KuiNameplates"] = "Kui_Nameplates"
     }
     local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevReset
     local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}, {}
@@ -277,10 +269,16 @@ SLASH_AC1 = "/ac"
 
 function nibRealUI:ToggleAddonPositionControl(addon, val)
     db.addonControl[addon].control.position = val
+    if val then
+        db.addonControl[addon].profiles.base.use = val
+    end
 end
 
 function nibRealUI:ToggleAddonLayoutControl(addon, val)
     db.addonControl[addon].profiles.layout.use = val
+    if val then
+        db.addonControl[addon].profiles.base.use = val
+    end
 end
 
 function nibRealUI:GetAddonControlSettings(addon)

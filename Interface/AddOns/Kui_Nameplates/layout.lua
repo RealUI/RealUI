@@ -23,6 +23,21 @@ local profile_fade, profile_fade_rules, profile_lowhealthval, profile_hp
 local select, strfind, strsplit, pairs, ipairs, unpack, tinsert, type, floor
     = select, strfind, strsplit, pairs, ipairs, unpack, tinsert, type, floor
 local UnitExists=UnitExists
+-- non-laggy, pixel perfect positioning (Semlar's) #############################
+local function SizerOnSizeChanged(self,x,y)
+    -- because :Hide bubbles up and triggers the OnHide script of any elements
+    -- that might use it, we set MOVING to let them know they should ignore
+    -- that invocation
+    -- Hiding frames before moving them significantly increases FPS for some
+    -- reason, so I thought this was better than nothing
+    self.f.MOVING=true
+    self.f:Hide()
+    self.f:SetPoint('CENTER',WorldFrame,'BOTTOMLEFT',
+        floor(x),
+        floor(y))
+    self.f:Show()
+    self.f.MOVING=nil
+end
 ------------------------------------------------------------- Frame functions --
 local function SetFrameCentre(f)
     -- using CENTER breaks pixel-perfectness with oddly sized frames
@@ -70,7 +85,7 @@ local function SetHealthColour(self,sticky,r,g,b)
     then
         -- store the default colour
         self.health.r, self.health.g, self.health.b = r, g, b
-        self.health.reset, self.friend, self.player, self.tapped = nil, nil, nil, nil
+        self.health.reset, self.player, self.tapped = nil, nil, nil, nil
 
         if g > .9 and r == 0 and b == 0 then
             -- friendly NPC
@@ -83,16 +98,20 @@ local function SetHealthColour(self,sticky,r,g,b)
             r, g, b = unpack(profile_hp.reactioncolours.playercol)
         elseif r > .9 and g == 0 and b == 0 then
             -- enemy NPC
+            self.friend = nil
             r, g, b = unpack(profile_hp.reactioncolours.hatedcol)
         elseif (r + g) > 1.8 and b == 0 then
             -- neutral NPC
+            self.friend = nil
             r, g, b = unpack(profile_hp.reactioncolours.neutralcol)
         elseif r < .6 and (r+g) == (r+b) then
             -- tapped NPC
+            -- keep previous self.friend value
             self.tapped = true
             r, g, b = unpack(profile_hp.reactioncolours.tappedcol)
         else
             -- enemy player, use default UI colour
+            self.friend = nil
             self.player = true
         end
 
@@ -208,30 +227,23 @@ do
             end
         end
     end
-    OnHealthValueChanged = function(oldBar, curr)
-        if oldBar.oldHealth then
-            -- allow calling this as a function of the frame
-            oldBar = oldBar.oldHealth
-            curr = oldBar:GetValue()
-        end
-
-        local frame = oldBar.kuiParent.kui
-        frame.health.percent = oldBar:GetValue() * 100
+    OnHealthValueChanged = function(frame)
+        frame.health.percent = frame.oldHealth:GetValue() * 100
 
         -- store values for external access
         if frame.health.health_max_snapshot then
             -- 6.2.2 workaround values
             frame.health.min = 0
             frame.health.max = frame.health.health_max_snapshot
-            frame.health.curr = floor(frame.health.health_max_snapshot * oldBar:GetValue())
+            frame.health.curr = floor(frame.health.health_max_snapshot * frame.oldHealth:GetValue())
         else
             -- fallback values
             frame.health.min, frame.health.max = 0,1
-            frame.health.curr = curr
+            frame.health.curr = frame.oldHealth:GetValue()
         end
 
         frame.health:SetMinMaxValues(0,1)
-        frame.health:SetValue(curr)
+        frame.health:SetValue(frame.oldHealth:GetValue())
 
         SetHealthText(frame)
     end
@@ -327,9 +339,9 @@ local function OnFrameShow(self)
     -- reset glow colour
     f:SetGlowColour()
 
-    f.DoShow = true
     -- dispatch the PostShow message after the first UpdateFrame
     f.DispatchPostShow = true
+    f.DoShow = true
 end
 local function OnFrameHide(self)
     local f = self.kui
@@ -347,6 +359,7 @@ local function OnFrameHide(self)
     -- if there are name duplicates, this will be recreated in an onupdate
     addon:ClearName(f)
 
+    f.active    = nil
     f.lastAlpha = nil
     f.fadingTo  = nil
     f.hasThreat = nil
@@ -360,37 +373,34 @@ local function OnFrameHide(self)
         f.highlight:Hide()
     end
 
+    if addon.Castbar then
+        addon.Castbar:HideCastbar(f)
+        f.castbar_ignore_frame = nil
+    end
+
+    -- despite being a default element, this doesn't hide correctly if it was
+    -- shown when the frame is hidden
+    f.glow:Hide()
+
     -- unset stored health bar colours
     f.health.r, f.health.g, f.health.b, f.health.reset
         = nil, nil, nil, nil
+    f.friend = nil
 
     addon:SendMessage('KuiNameplates_PostHide', f)
 end
 -- stuff that needs to be updated every frame
 local function OnFrameUpdate(self, e)
     local f = self.kui
-
     f.elapsed   = f.elapsed - e
     f.critElap  = f.critElap - e
 
-    if f.fixaa then
-        -- Set position manually
-        -- Otherwise, position is set by SetAllPoints
-        local x,y = f.firstChild:GetCenter()
-        local scale = f.firstChild:GetScale()
-
-        f:SetPoint('CENTER', UIParent, 'BOTTOMLEFT',
-            floor((x / addon.uiscale) * scale),
-            floor((y / addon.uiscale) * scale))
-    end
-
-    -- show the frame after it's been moved so it doesn't flash
+    -- Show during first update to prevent flashyness
     -- .DoShow is set OnFrameShow
     if f.DoShow then
         f:Show()
         f.DoShow = nil
     end
-
     ------------------------------------------------------------------- Alpha --
     f.defaultAlpha = self:GetAlpha()
     f.currentAlpha = GetDesiredAlpha(f)
@@ -448,15 +458,21 @@ local function UpdateFrame(self)
     -- reset/update health bar colour
     self:SetHealthColour()
 
+    if select(2,self.oldName:GetTextColor()) == 0 then
+        self.active = true
+    else
+        self.active = nil
+    end
+
     if self.DispatchPostShow then
         -- force initial health update, which relies on health colour
         self:OnHealthValueChanged()
 
-        -- return guid to an assumed unique name
-        addon:GetGUID(self)
-
         addon:SendMessage('KuiNameplates_PostShow', self)
         self.DispatchPostShow = nil
+
+        -- return guid to an assumed unique name
+        addon:GetGUID(self)
     end
 end
 
@@ -468,14 +484,9 @@ local function UpdateFrameCritical(self)
         self.glow.wasVisible = true
         self.glow.r, self.glow.g, self.glow.b = self.glow:GetVertexColor()
 
-        if not self.friend and addon.TankModule and addon.TankMode then
-            self.hasThreat = true
-            -- in tank mode; handoff to tank module
+        if addon.TankModule then
+            -- handoff to tank module
             addon.TankModule:ThreatUpdate(self)
-        elseif not self.targetGlow or not self.target then
-            -- not in tank mode, so set glow to default ui's current colour
-            -- only when this isn't the current target
-            self:SetGlowColour(self.glow.r, self.glow.g, self.glow.b)
         end
     elseif self.glow.wasVisible then
         self.glow.wasVisible = nil
@@ -596,6 +607,10 @@ local function UpdateFrameCritical(self)
             self.nametext:SetText((self.nametext:GetText() or '')..' [target]')
         end
 
+        if self.active then
+            self.nametext:SetText((self.nametext:GetText() or '')..' [active]')
+        end
+
         if self.friend then
             self.isfriend:SetText('friendly')
         else
@@ -618,7 +633,6 @@ function addon:IsNameplate(frame)
         return frame.ArtContainer and true
     end
 end
-
 function addon:InitFrame(frame)
     -- container for kui objects!
     frame.kui = CreateFrame('Frame', nil,
@@ -728,7 +742,11 @@ function addon:InitFrame(frame)
         end
         --@end-debug@]===]
 
-        f.fixaa = true
+        local sizer = CreateFrame('Frame',nil,f)
+        sizer:SetPoint('BOTTOMLEFT',WorldFrame)
+        sizer:SetPoint('TOPRIGHT',frame,'CENTER')
+        sizer:SetScript('OnSizeChanged',SizerOnSizeChanged)
+        sizer.f = f
     else
         f:SetAllPoints(frame)
     end
@@ -754,21 +772,26 @@ function addon:InitFrame(frame)
     self:CreateLevel(frame, f)
     self:CreateName(frame, f)
 
+    -- castbar #################################################################
+    if self.Castbar and self.Castbar.db.profile.enabled then
+        self.Castbar:CreateCastbar(f)
+    end
+
     -- target highlight --------------------------------------------------------
     if profile.general.targetglow then
         self:CreateTargetGlow(f)
     end
 
     -- raid icon ---------------------------------------------------------------
-    f.icon:SetParent(f.overlay)
-    f.icon:SetSize(addon.sizes.tex.raidicon, addon.sizes.tex.raidicon)
-    f.icon:ClearAllPoints()
-    f.icon:SetPoint('LEFT',f.overlay,'RIGHT',8,0)
+    self:UpdateRaidIcon(f)
 
     --[===[@debug@
     if _G['KuiNameplatesDrawFrames'] then
         frame:SetBackdrop({bgFile=kui.m.t.solid})
         frame:SetBackdropColor(1, 1, 1, .5)
+
+        f.overlay:SetBackdrop({ bgFile = kui.m.t.solid })
+        f.overlay:SetBackdropColor(1,1,1)
     end
 
     if _G['KuiNameplatesDebug'] then
@@ -788,7 +811,9 @@ function addon:InitFrame(frame)
     frame:HookScript('OnUpdate', OnFrameUpdate)
 
     f.oldHealth.kuiParent = frame
-    f.oldHealth:HookScript('OnValueChanged', OnHealthValueChanged)
+    f.oldHealth:HookScript('OnValueChanged', function()
+        f:OnHealthValueChanged()
+    end)
     ------------------------------------------------------------ Finishing up --
     addon:SendMessage('KuiNameplates_PostCreate', f)
 
@@ -822,26 +847,6 @@ function addon:PLAYER_REGEN_ENABLED()
     end
 end
 ------------------------------------------------------------- Script handlers --
-do
-    local WorldFrame = WorldFrame
-    function addon:OnUpdate()
-        local frames = select('#', WorldFrame:GetChildren())
-
-        if frames ~= self.numFrames then
-            local i, f
-
-            for i = 1, frames do
-                f = select(i, WorldFrame:GetChildren())
-                if self:IsNameplate(f) and not f.kui then
-                    self:InitFrame(f)
-                    tinsert(self.frameList, f)
-                end
-            end
-
-            self.numFrames = frames
-        end
-    end
-end
 function addon:configChangedListener()
     -- cache values used often to reduce table lookup
     profile = addon.db.profile

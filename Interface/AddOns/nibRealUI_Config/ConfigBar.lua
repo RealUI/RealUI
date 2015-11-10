@@ -175,6 +175,7 @@ local other do
                         get = function() return nibRealUI:DoesAddonLayout("Bartender4") end,
                         set = function(info, value)
                             nibRealUI:ToggleAddonLayoutControl("Bartender4", value)
+                            ActionBars:SetEnabledState(nibRealUI:GetModuleEnabled("ActionBars") and nibRealUI:DoesAddonLayout("Bartender4"))
                         end,
                         order = 30,
                     },
@@ -190,6 +191,7 @@ local other do
                         get = function() return nibRealUI:DoesAddonMove("Bartender4") end,
                         set = function(info, value)
                             nibRealUI:ToggleAddonPositionControl("Bartender4", value)
+                            ActionBars:SetEnabledState(nibRealUI:GetModuleEnabled("ActionBars") and nibRealUI:DoesAddonMove("Bartender4"))
                             if value then
                                 ActionBars:ApplyABSettings()
                             end

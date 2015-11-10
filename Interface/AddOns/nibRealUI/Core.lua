@@ -540,15 +540,38 @@ function nibRealUI:PLAYER_LOGIN()
             -- This part should be in the bag addon
             if IsAddOnLoaded("cargBags_Nivaya") then
                 hooksecurefunc(Nivaya, "OnShow", function()
-                    if RealUI.db.global.messages.resetNew then return end
+                    if nibRealUI.db.global.messages.resetNew then return end
                     nibRealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                    RealUI.db.global.messages.resetNew = true
+                    nibRealUI.db.global.messages.resetNew = true
                 end)
             end
         end
         if not LOCALE_enUS then
-            print("Help localize RealUI to your language. Go to http://wow.curseforge.com/addons/realui-localization/localization/")
+            print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
         end
+    end
+
+    if not nibRealUI.db.global.messages.AuraTrackerReset and nibRealUI.verinfo[3] <= 14 then
+        StaticPopupDialogs["RUI_AURATRACKER_RESET"] = {
+            text = "In the next revision update (r15), Aura Tracker settings will be reset. See this thread for details.",
+            button1 = OKAY,
+            OnAccept = function()
+                nibRealUI.db.global.messages.AuraTrackerReset = true
+            end,
+            whileDead = true,
+            hideOnEscape = true,
+            hasEditBox = true,
+            OnShow = function(self)
+                self.editBox:SetFocus()
+                self.editBox:SetText("http://www.wowinterface.com/forums/showthread.php?t=52754")
+                self.editBox:HighlightText()
+            end,
+            EditBoxOnEscapePressed = function(self)
+                self:GetParent():Hide()
+                ClearCursor()
+            end
+        }
+        StaticPopup_Show("RUI_AURATRACKER_RESET")
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on

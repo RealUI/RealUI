@@ -24,6 +24,7 @@ local function Icon_Create(self, parent)
 			local i,j = parent:GetName():match("Grid2LayoutHeader(%d+)UnitButton(%d+)")
 			Cooldown = f.Cooldown or CreateFrame("Cooldown", fmt("Grid2%s%02d%02d",name,i,j) , f, "CooldownFrameTemplate")
 			Cooldown.noCooldownCount = nil
+			Cooldown:SetDrawEdge(false) -- Without this omnicc uses only "Recharges color"
 		end
 		Cooldown:SetReverse(self.dbx.reverseCooldown)
 		Cooldown:SetHideCountdownNumbers(true)

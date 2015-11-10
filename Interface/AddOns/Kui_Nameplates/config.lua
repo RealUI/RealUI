@@ -4,6 +4,9 @@
 -- All rights reserved
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
+local kui = LibStub('Kui-1.0')
+local LSM = LibStub('LibSharedMedia-3.0')
+local category = 'Kui |cff9966ffNameplates|r'
 ------------------------------------------------------------------ Ace config --
 local AceConfig = LibStub('AceConfig-3.0')
 local AceConfigDialog = LibStub('AceConfigDialog-3.0')
@@ -35,18 +38,75 @@ do
     local handlerMeta = { __index = handlerProto }
 
     -- called by handler:Set when configuration is changed
-    local function ConfigChangedSkeleton(mod, key, profile)
+    local function ConfigChangedSkeleton(mod, info, profile)
         if mod.configChangedListener then
             -- notify that any option has changed
             mod:configChangedListener()
         end
 
-        -- call option specific callbacks
-        if mod.configChangedFuncs.runOnce and
-           mod.configChangedFuncs.runOnce[key]
-        then
-            -- call runOnce function
-            mod.configChangedFuncs.runOnce[key](profile[key])
+        if mod.configChangedFuncs then
+            -- legacy support
+            local key = info[#info]
+
+            if mod.configChangedFuncs.NEW then
+                -- new ConfigChanged support (TODO: voyeurs)
+                local cc_table,gcc_table,k
+                for i=1,#info do
+                    k = info[i]
+
+                    if not cc_table then
+                        cc_table = mod.configChangedFuncs
+                    end
+
+                    if not gcc_table then
+                        gcc_table = globalConfigChangedListeners[mod:GetName()]
+                    end
+
+                    -- call the modules functions..
+                    if cc_table and cc_table[k] then
+                        cc_table = cc_table[k]
+
+                        if type(cc_table.ro) == 'function' then
+                            cc_table.ro(profile[key])
+                        end
+
+                        if type(cc_table.pf) == 'function' then
+                            for _,frame in pairs(addon.frameList) do
+                                cc_table.pf(frame.kui,profile[key])
+                            end
+                        end
+                    end
+
+                    -- call any voyeur's functions..
+                    if gcc_table and gcc_table[k] then
+                        gcc_table = gcc_table[k]
+
+                        if gcc_table.ro then
+                            for _,voyeur in ipairs(gcc_table.ro) do
+                                voyeur(profile[key])
+                            end
+                        end
+
+                        if gcc_table.pf then
+                            for _,voyeur in ipairs(gcc_table.pf) do
+                                for _,frame in pairs(addon.frameList) do
+                                    voyeur(frame.kui,profile[key])
+                                end
+                            end
+                        end
+                    end
+                end
+
+                return
+            end
+
+            -- call option specific callbacks
+            if mod.configChangedFuncs.runOnce and
+               mod.configChangedFuncs.runOnce[key]
+            then
+                -- call runOnce function
+                mod.configChangedFuncs.runOnce[key](profile[key])
+            end
         end
 
         -- find and call global config changed listeners
@@ -68,36 +128,118 @@ do
             end
         end
 
-        if mod.configChangedFuncs[key] then
-            -- iterate frames and call
-            for _, frame in pairs(addon.frameList) do
+        -- iterate frames and call
+        for _, frame in pairs(addon.frameList) do
+            if mod.configChangedFuncs and mod.configChangedFuncs[key] then
                 mod.configChangedFuncs[key](frame.kui, profile[key])
+            end
 
-                for _,voyeur in ipairs(voyeurs) do
-                    voyeur.configChangedFuncs.global[key](frame.kui, profile[key])
-                end
+            for _,voyeur in ipairs(voyeurs) do
+                voyeur.configChangedFuncs.global[key](frame.kui, profile[key])
             end
         end
+    end
 
+    local function ResolveKeys(mod,keys,ro,pf,g,global)
+        if not g then
+            g = mod.configChangedFuncs
+        end
+
+        if type(keys) == 'table' then
+            for _,key in ipairs(keys) do
+                if not g[key] then
+                    g[key] = {}
+                end
+
+                g = g[key]
+            end
+        elseif type(keys) == 'string' then
+            if not g[keys] then
+                g[keys] = {}
+            end
+
+            g = g[keys]
+        else
+            return
+        end
+
+        if not global then
+            if g.ro or g.pf then
+                kui.print('ConfigChanged callback overwritten in '..(mod:GetName() or 'nil'))
+            end
+
+            g.ro = ro
+            g.pf = pf
+        else
+            if ro then
+                if not g.ro then g.ro = {} end
+                tinsert(g.ro, ro)
+            end
+            if pf then
+                if not g.pf then g.pf = {} end
+                tinsert(g.pf, pf)
+            end
+        end
+    end
+
+    local function AddConfigChanged(mod,key_groups,ro,pf)
+        if not mod.configChangedFuncs then
+            mod.configChangedFuncs = {}
+        end
+        mod.configChangedFuncs.NEW = true
+
+        if type(key_groups) == 'table' and type(key_groups[1]) == 'table' then
+            -- multiple key groups
+            for _,keys in ipairs(key_groups) do
+                ResolveKeys(mod,keys,ro,pf)
+            end
+        else
+            -- one key group, or a string
+            ResolveKeys(mod,key_groups,ro,pf)
+        end
+    end
+
+    local function AddGlobalConfigChanged(mod,target_module,key_groups,ro,pf)
+        if not globalConfigChangedListeners then
+            globalConfigChangedListeners = {}
+        end
+
+        if not target_module or target_module == 'addon' then
+            target_module = 'KuiNameplates'
+        end
+
+        if not globalConfigChangedListeners[target_module] then
+            globalConfigChangedListeners[target_module] = {}
+        end
+
+        local target_table = globalConfigChangedListeners[target_module]
+
+        if type(key_groups) == 'table' and type(key_groups[1]) == 'table' then
+            for _,keys in ipairs(key_groups) do
+                ResolveKeys(mod,keys,ro,pf,target_table,true)
+            end
+        else
+            ResolveKeys(mod,key_groups,ro,pf,target_table,true)
+        end
     end
 
     function handlerProto:ResolveInfo(info)
-        local p = self.dbPath.db.profile
-
+        local profile = self.dbPath.db.profile
         local child, k
+
         for i = 1, #info do
             k = info[i]
 
             if i < #info then
                 if not child then
-                    child = p[k]
+                    child = profile[k]
                 else
                     child = child[k]
                 end
             end
         end
 
-        return child or p, k
+        return child or profile, k
     end
 
     function handlerProto:Get(info, ...)
@@ -122,7 +264,7 @@ do
 
         if self.dbPath.ConfigChanged then
             -- inform module of configuration change
-            self.dbPath:ConfigChanged(k, p)
+            self.dbPath:ConfigChanged(info,p)
         end
     end
 
@@ -143,13 +285,19 @@ do
         args = {
             header = {
                 type = 'header',
-                name = '|cffff4444Many options currently require a UI reload to take effect.|r',
+                name = '|cffff6666Many options currently require a UI reload to take effect',
                 order = 0
+            },
+            reload = {
+                name = 'Reload UI',
+                type = 'execute',
+                order = 1,
+                func = ReloadUI
             },
             general = {
                 name = 'General display',
                 type = 'group',
-                order = 1,
+                order = 10,
                 args = {
                     combataction_hostile = {
                         name = 'Combat action: hostile',
@@ -169,9 +317,41 @@ do
                         },
                         order = 1
                     },
+                    bartexture = {
+                        name = 'Status bar texture',
+                        desc = 'The texture used for both the health and cast bars.',
+                        type = 'select',
+                        dialogControl = 'LSM30_Statusbar',
+                        values = AceGUIWidgetLSMlists.statusbar,
+                        order = 5
+                    },
+                    strata = {
+                        name = 'Frame strata',
+                        desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 3.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
+                        type = 'select',
+                        values = StrataSelectList,
+                        order = 6
+                    },
+                    raidicon_size = {
+                        name = 'Raid icon size',
+                        desc = 'Size of the raid marker texture on nameplates (skull, cross, etc)',
+                        order = 7,
+                        type = 'range',
+                        bigStep = 1,
+                        min = 1,
+                        softMin = 10,
+                        softMax = 100
+                    },
+                    raidicon_side = {
+                        name = 'Raid icon position',
+                        desc = 'Which side of the nameplate the raid icon should be displayed on',
+                        type = 'select',
+                        values = { 'LEFT', 'TOP', 'RIGHT', 'BOTTOM' },
+                        order = 8
+                    },
                     fixaa = {
                         name = 'Fix aliasing',
-                        desc = 'Attempt to make plates appear sharper. Has a positive effect on FPS, but will make plates appear a bit "loose", especially at low frame rates. Works best when uiscale is disabled and at larger resolutions (lower resolutions automatically downscale the interface regardless of uiscale setting).'..RELOAD_HINT,
+                        desc = 'Attempt to make plates appear sharper.\nWorks best when WoW\'s UI Scale system option is disabled and at larger resolutions.\n\n|cff88ff88This has a positive effect on performance.|r'..RELOAD_HINT,
                         type = 'toggle',
                         order = 10
                     },
@@ -180,12 +360,6 @@ do
                         desc = 'Fix compatibility with stereo video. This has a negative effect on performance when many nameplates are visible.'..RELOAD_HINT,
                         type = 'toggle',
                         order = 20
-                    },
-                    leftie = {
-                        name = 'Use leftie layout',
-                        desc = 'Use left-aligned text layout (similar to the pre-223 layout). Note that this layout truncates long names. But maybe you prefer that.'..RELOAD_HINT,
-                        type = 'toggle',
-                        order = 30
                     },
                     highlight = {
                         name = 'Highlight',
@@ -207,7 +381,7 @@ do
                         desc = 'The frame glow is used to indicate threat. It becomes black when a unit has no threat status. Disabling this option will make it transparent instead.',
                         type = 'toggle',
                         order = 70,
-                        width = 'double'
+                        width = 'full'
                     },
                     targetglow = {
                         name = 'Show target glow',
@@ -229,7 +403,7 @@ do
                         desc = 'Show arrows around your target\'s nameplate. They will inherit the colour of the target glow, set above.',
                         type = 'toggle',
                         order = 100,
-                        width = 'double'
+                        width = 'full'
                     },
                     hheight = {
                         name = 'Health bar height',
@@ -269,21 +443,6 @@ do
                         softMin = 25,
                         softMax = 220
                     },
-                    bartexture = {
-                        name = 'Status bar texture',
-                        desc = 'The texture used for both the health and cast bars.',
-                        type = 'select',
-                        dialogControl = 'LSM30_Statusbar',
-                        values = AceGUIWidgetLSMlists.statusbar,
-                        order = 150,
-                    },
-                    strata = {
-                        name = 'Frame strata',
-                        desc = 'The frame strata used by all frames, which determines what "layer" of the UI the frame is on. Untargeted frames are displayed at frame level 0 of this strata. Targeted frames are bumped to frame level 3.\n\nThis does not and can not affect the click-box of the frames, only their visibility.',
-                        type = 'select',
-                        values = StrataSelectList,
-                        order = 160
-                    },
                     lowhealthval = {
                         name = 'Low health value',
                         desc = 'Low health value used by some modules, such as frame fading.',
@@ -298,46 +457,25 @@ do
             fade = {
                 name = 'Frame fading',
                 type = 'group',
-                order = 2,
+                order = 20,
                 args = {
-                    fadedalpha = {
-                        name = 'Faded alpha',
-                        desc = 'The alpha value to which plates fade out to',
-                        type = 'range',
-                        min = 0,
-                        max = 1,
-                        bigStep = .01,
-                        isPercent = true,
-                        order = 4
-                    },
-                    fademouse = {
-                        name = 'Fade in with mouse',
-                        desc = 'Fade plates in on mouse-over',
-                        type = 'toggle',
-                        order = 1
-                    },
-                    fadeall = {
-                        name = 'Fade all frames',
-                        desc = 'Fade out all frames by default (rather than in)',
-                        type = 'toggle',
-                        order = 2
-                    },
                     smooth = {
                         name = 'Smoothly fade',
                         desc = 'Smoothly fade plates in/out (fading is instant when disabled)',
                         type = 'toggle',
                         order = 0
                     },
-                    fadespeed = {
-                        name = 'Smooth fade speed',
-                        desc = 'Fade animation speed modifier (lower is faster)',
-                        type = 'range',
-                        min = 0,
-                        softMax = 5,
-                        order = 3,
-                        disabled = function(info)
-                            return not addon.db.profile.fade.smooth
-                        end
+                    fademouse = {
+                        name = 'Fade in with mouse',
+                        desc = 'Fade plates in on mouse-over',
+                        type = 'toggle',
+                        order = 5
+                    },
+                    fadeall = {
+                        name = 'Fade all frames',
+                        desc = 'Fade out all frames by default (rather than in)',
+                        type = 'toggle',
+                        order = 10
                     },
                     rules = {
                         name = 'Fading rules',
@@ -371,35 +509,57 @@ do
                             },
                         },
                     },
+                    fadedalpha = {
+                        name = 'Faded alpha',
+                        desc = 'The alpha value to which plates fade out to',
+                        type = 'range',
+                        min = 0,
+                        max = 1,
+                        bigStep = .01,
+                        isPercent = true,
+                        order = 30
+                    },
+                    fadespeed = {
+                        name = 'Smooth fade speed',
+                        desc = 'Fade animation speed modifier (lower is faster)',
+                        type = 'range',
+                        min = 0,
+                        softMax = 5,
+                        order = 40,
+                        disabled = function(info)
+                            return not addon.db.profile.fade.smooth
+                        end
+                    },
                 }
             },
             text = {
                 name = 'Text',
                 type = 'group',
-                order = 3,
+                order = 30,
                 args = {
-                    healthoffset = {
-                        name = 'Health bar text offset',
-                        desc = 'Offset of the text on the top and bottom of the health bar: level, name, standard health and contextual health. The offset is reversed for contextual health.\n'..
-                               'Note that the default values end in .5 as this prevents jittering text, but only if "fix aliasing" is also enabled.',
-                        type = 'range',
-                        bigStep = .5,
-                        softMin = -5,
-                        softMax = 10,
-                        order = 1
-                    },
                     level = {
                         name = 'Show levels',
                         desc = 'Show levels on nameplates',
+                        width = 'full',
                         type = 'toggle',
-                        order = 2
+                        order = 0
+                    },
+                    healthoffset = {
+                        name = 'Health bar text offset',
+                        desc = 'Vertical offset of the text on the top and bottom of the health bar: level, name and health.\n'..
+                               'Note that the default value ends in .5 as this prevents jittering text.',
+                        type = 'range',
+                        bigStep = .5,
+                        softMin = -10,
+                        softMax = 20,
+                        order = 10
                     },
                 }
             },
             hp = {
                 name = 'Health display',
                 type = 'group',
-                order = 4,
+                order = 40,
                 args = {
                     reactioncolours = {
                         name = 'Reaction colours',
@@ -503,6 +663,7 @@ do
             fonts = {
                 name = 'Fonts',
                 type = 'group',
+                order = 50,
                 args = {
                     options = {
                         name = 'Global font settings',
@@ -553,35 +714,8 @@ do
                     },
                 }
             },
-            reload = {
-                name = 'Reload UI',
-                type = 'execute',
-                width = 'triple',
-                order = 99,
-                func = ReloadUI
-            },
         }
     }
-
-    local function RegisterForConfigChanged(module, target_module, key)
-        -- this module wants to listen for another module's (or the addon's)
-        -- configChanged calls
-        local mod_name = module:GetName()
-
-        if not target_module or target_module == 'addon' then
-            target_module = 'KuiNameplates'
-        end
-
-        if not globalConfigChangedListeners[target_module] then
-            globalConfigChangedListeners[target_module] = {}
-        end
-
-        if not globalConfigChangedListeners[target_module][key] then
-            globalConfigChangedListeners[target_module][key] = {}
-        end
-
-        tinsert(globalConfigChangedListeners[target_module][key], mod_name)
-    end
 
     function addon:ProfileChanged()
         -- call all configChangedListeners
@@ -596,17 +730,21 @@ do
         end
     end
 
-    -- create module.ConfigChanged function
-    function addon:CreateConfigChangedListener(module)
-        if module.configChangedFuncs and not module.ConfigChanged then
-            module.ConfigChanged = ConfigChangedSkeleton
-        end
-
-        if module.configChangedListener then
-            -- run listener upon initialisation
-            module:configChangedListener()
+    local function ToggleModule(mod,v)
+        if v then
+            mod:Enable()
+        else
+            mod:Disable()
         end
     end
+
+    -- module prototype
+    addon.Prototype = {
+        ConfigChanged = ConfigChangedSkeleton,
+        AddConfigChanged = AddConfigChanged,
+        AddGlobalConfigChanged = AddGlobalConfigChanged,
+        Toggle = ToggleModule,
+    }
 
     -- create an options table for the given module
     function addon:InitModuleOptions(module)
@@ -614,8 +752,18 @@ do
         local opts = module:GetOptions()
         local name = module.uiName or module.moduleName
 
-        self:CreateConfigChangedListener(module)
-        module.RegisterForConfigChanged = RegisterForConfigChanged
+        if module.configChangedListener then
+            -- run listener upon initialisation
+            module:configChangedListener()
+        end
+
+        if not module.ConfigChanged then
+            -- this module wasn't created with the prototype, so mix it in now
+            -- (legacy support)
+            for k,v in pairs(addon.Prototype) do
+                module[k] = v
+            end
+        end
 
         options.args[name] = {
             name = name,
@@ -628,16 +776,148 @@ do
         }
     end
 
-    AceConfig:RegisterOptionsTable('kuinameplates', options)
-    AceConfigDialog:AddToBlizOptions('kuinameplates', 'Kui Nameplates')
-end
+    function addon:FinalizeOptions()
+        options.args['profiles'] = LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db)
+        options.args.profiles.order = -1
 
+        AceConfig:RegisterOptionsTable('kuinameplates', options)
+        AceConfigDialog:AddToBlizOptions('kuinameplates', category)
+
+        self.FinalizeOptions = nil
+    end
+
+    -- apply prototype to addon
+    for k,v in pairs(addon.Prototype) do
+        addon[k] = v
+    end
+end
 --------------------------------------------------------------- Slash command --
 SLASH_KUINAMEPLATES1 = '/kuinameplates'
 SLASH_KUINAMEPLATES2 = '/knp'
 
 function SlashCmdList.KUINAMEPLATES()
     -- twice to workaround an issue introduced with 5.3
-    InterfaceOptionsFrame_OpenToCategory('Kui Nameplates')
-    InterfaceOptionsFrame_OpenToCategory('Kui Nameplates')
+    InterfaceOptionsFrame_OpenToCategory(category)
+    InterfaceOptionsFrame_OpenToCategory(category)
+end
+-- config handlers #############################################################
+do
+    -- cycle all frames and reset the health and castbar status bar textures
+    local function UpdateAllBars()
+        local _,frame
+        for _,frame in pairs(addon.frameList) do
+            if frame.kui.health then
+                frame.kui.health:SetStatusBarTexture(addon.bartexture)
+            end
+
+            if frame.kui.highlight then
+                frame.kui.highlight:SetTexture(addon.bartexture)
+            end
+
+            if frame.kui.castbar then
+                frame.kui.castbar.bar:SetStatusBarTexture(addon.bartexture)
+            end
+        end
+    end
+
+    -- post db change hooks ####################################################
+    -- n.b. this is better
+    addon:AddConfigChanged({'fonts','font'}, function(v)
+        addon.font = LSM:Fetch(LSM.MediaType.FONT, v)
+        addon:UpdateAllFonts()
+    end)
+
+    addon:AddConfigChanged({'fonts','outline'}, nil, function(f,v)
+        for _, fontObject in pairs(f.fontObjects) do
+            kui.ModifyFontFlags(fontObject, v, 'OUTLINE')
+        end
+    end)
+
+    addon:AddConfigChanged({'fonts','monochrome'}, nil, function(f,v)
+        for _, fontObject in pairs(f.fontObjects) do
+            kui.ModifyFontFlags(fontObject, v, 'MONOCHROME')
+        end
+    end)
+
+    addon:AddConfigChanged(
+        {
+            {'fonts','fontscale'},
+            {'fonts','onesize'}
+        },
+        function()
+            addon:ScaleFontSizes()
+        end,
+        function(f)
+            for _, fontObject in pairs(f.fontObjects) do
+                if fontObject.size then
+                    fontObject:SetFontSize(fontObject.size)
+                end
+            end
+        end
+    )
+
+    addon:AddConfigChanged({'text','healthoffset'},
+        function()
+            addon.sizes.tex.healthOffset = addon.db.profile.text.healthoffset
+        end,
+        function(f)
+            addon:UpdateHealthText(f, f.trivial)
+            addon:UpdateLevel(f, f.trivial)
+            addon:UpdateName(f, f.trivial)
+        end
+    )
+
+    addon:AddConfigChanged({'hp','text'}, nil, function(f)
+        if f:IsShown() then
+            f:OnHealthValueChanged()
+        end
+    end)
+    addon:AddConfigChanged({'hp','text','mouseover'}, nil, function(f,v)
+        if not v and f.health and f.health.p then
+            f.health.p:Show()
+        end
+    end)
+
+    addon:AddConfigChanged({'general','bartexture'}, function(v)
+        addon.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, v)
+        UpdateAllBars()
+    end)
+
+    addon:AddConfigChanged({'general','targetglowcolour'}, nil, function(f,v)
+        if f.targetGlow then
+            f.targetGlow:SetVertexColor(unpack(v))
+        end
+
+        if f.targetArrows then
+            f.targetArrows.left:SetVertexColor(unpack(v))
+            f.targetArrows.right:SetVertexColor(unpack(v))
+        end
+    end)
+
+    addon:AddConfigChanged({'general','strata'}, nil, function(f,v)
+        f:SetFrameStrata(v)
+    end)
+
+    do
+        local function UpdateFrameSize(frame)
+            addon:UpdateBackground(frame, frame.trivial)
+            addon:UpdateHealthBar(frame, frame.trivial)
+            addon:UpdateName(frame, frame.trivial)
+            addon:UpdateRaidIcon(frame)
+            frame:SetCentre()
+        end
+
+        addon:AddConfigChanged(
+            {
+                {'general','width'},
+                {'general','twidth'},
+                {'general','hheight'},
+                {'general','thheight'},
+                {'general','raidicon_size'},
+                {'general','raidicon_side'},
+            },
+            addon.UpdateSizesTable,
+            UpdateFrameSize
+        )
+    end
 end

@@ -329,7 +329,7 @@ local instantReportList = {
 	"^wt[bst]cs%.?goskin", --WTB CS GO skins /w for more infomation
 	"^wt[bst]csgokey", --{rt1} WTB CS:GO KEYS & SKINS FOR GOLD {rt1}
 	"^wt[bst]csgoacc", --WTS CS GO ACC UNRANK
-	"^wt[bst]csgoknife", --WTSCS GO knife M9 Bayonet Stained in (minimal wear) /w and give me offer
+	"^wt[bst]csgokni[fv]e", --WTSCS GO knife M9 Bayonet Stained in (minimal wear) /w and give me offer
 	"^wt[bst]csgoitem", --WTB CS:GO Items for Gold! /W me your items!!
 	"^wt[bst]csgocase", --WTB Cs Go Case keys or a Knife .
 	"^wt[bst]anycsgoskin", --{rt1} WTB ANY CS:GO SKINS FOR WOW GOLD {rt1}
@@ -337,6 +337,7 @@ local instantReportList = {
 	"^buyingcs%.?g[0o]skin", --{rt1}{rt3} Buying CS:GO Skins & Keys for WoW Gold | Paying good  {rt3}{rt1}
 	"^buyingcheapcsgoskin", --Buying cheap CS:GO skins (1-5 eu each) I can go first!
 	"^buyingcsgokey", --{rt3}Buying Cs:Go Key's for {rt4}4k{rt4} Per key! Buying high amount! Whisper for more information!{rt3}
+	"^buyingcsgokni[fv]e", --Buying CS:GO Knives and Skins! Trusted trader with feedback! /w me for more info. Serious people only please.
 	"^sellingcsgoskin", --Selling CS:GO skins for wow gold!
 	"^sellingsomecsgocase", --Selling some CS:GO cases! PM ME!
 	"^sellingcsgocase", --Selling CS:GO cases! PM ME!
@@ -366,6 +367,7 @@ local instantReportList = {
 	--[[  Steam  ]]--
 	"^wtssteamaccount", --WTS Steam account with 31 games (full valve pack+more) /w me with offers
 	"^sellingborderlands2", --Selling Borderlands 2 cd-key cheap for gold (I bought it twice by mistake. Can send pictures of both confirmations emails without the cd-keys, if you dont trust me)
+	"^wtssteamwalletcode", --WTS Steam wallet codes/CS GO skins /W
 
 	--[[  League of Legends  ]]--
 	"^wt[bs]lolacc$", --WTB LoL acc
@@ -615,11 +617,21 @@ local instantReportList = {
 	--
 
 	--[[  RBG/boosting  ]]--
+	"gold.*shadowboost.*info", --▲Hello! We are helping with PVE RAIDS  Heroic Hellfire Citadel ▲ Huge amounts of Loot ▲ EVERYDAY RAIDS ▲ Challenge mode - GOLD ▲ ON https://shadowboost.com ▲ /w for more information▲
+	"gold.*skype.*brbwow", --WTS [Challenge Warlord: Gold] . Skype: brbwow
+	"gift.*boostinglive", --Get the best gear in game, and receive a gift. All news on http://boostinglive.com
+	"buybooster.*discount", --buybooster.com - 30% discount on HFC mythic today! Also WTS HFC/BRF/HM. Raids everyday. Leveling/CM/Glories and more! skype: "buybooster"
+	"helping.*fast.*shadowboost[%.,]com", --Helping you with your PvE progress. HFC or BRF, it doesn't matter. Fast and smooth. Join us now and become more powerful than your friends. See us at shadowboost.com
+	--Arena Ratings 2200/2400/2700, selfplay, Big Conquest Cap, Honor gear, HFC normal/Herioc, /w me !
+	"arena.*2200.*selfplay.*conquest.*normal", --Arena Ratings 2200/2400/2700, selfplay, Conquest Cap, Coaching with pro, Honor gear, HFC normal/Herioc, /w me !
+	"gold.*fbmteam[%.,]c", --Challenge Warlord: Gold from pro team with great experience (more than 6000 dungeons) on fbmteam.com ;)
 	"selfplay.*feedback.*ownedcore", --WTS[Challenge Warlord: Gold]Get Awesome Weapon Xmog/Yeti Mount/Titul!Self-Play!Team Is Ready To Start!Many Feedbacks with Ownedcore{square}
-	"helping.*2200.*selfplay.*challenge.*conquest", --Helping with 1800/2000/2200/2400/2600! Selfplay, Challenge Modes, 100 wins,BIG CONQUEST POINTS CAP! /w
+	"helping.*arena.*selfplay.*challenge.*con[gq]uest", --Helping with Arena Rating, Selfplay, Challenge Modes, 100 wins, BIG conguest CAP! /w
+	"helping.*2200.*selfplay.*challenge.*con[gq]uest", --Helping with 1800/2000/2200/2400/2600! Selfplay, Challenge Modes, 100 wins,BIG CONQUEST POINTS CAP! /w
 	"info.*cubeboost[%.,]c", --Wanna more info?  -> http://cubeboost.com
 	"company.*dantum[%.,]gg", --We are a new boosting company DANTUM! We will help you with Arena, RBGS, PVE. Come visit our website [DANTUM.GG] for more information
 	"rocketgaming.*glad.*challenge", --{rt3} ROCKETGAMING {rt3} Excellent players help you reach your 2k - #R1/ Gladiator achievement in 2s/3s/5s/Rbg! We also provide level-, honor-, capservice. Challenge Mode 8/8 Gold is going to be played everyday.
+	"client.*info.*boomboost[%.,]com", --525+ clients was happy, more info here -> boom-boost.com
 	"pro.*boomboost[%.,]com", --Arena 2000/2400/Glad, Honor Gear, Leveling 90-100. Big cap with glads, Want to play with Pro? boom-boost,сoм
 	"wts.*arena.*rbg.*coaching.*info", --{skull} WTS Arena 2200/2400/2700/glad/r1, Rbg 2200/HotA, 100wins,Big CQ CAPS, Coaching(playing with glad){skull} /w for more info
 	"wingsb{circle}{circle}st.*info", --{skull}WTS Heroic HFC lootrun today 8pm realmtime, 2spots for now, more info wingsb{circle}{circle}st.com {skull}/w for more info
@@ -673,11 +685,13 @@ local instantReportList = {
 	--#Team PL FR Défis de donjon OR 8/8 || Cognefort HM || Fonderie NM/HM 10/10 || RBG & Arène 0-2400+ || Tigre Spectral Gangredrake Poulet Magique || CPP 60 jours / WOD || http://wow-st0re.com
 	"rbg.*wowst[o0]re[%.,]com", --#Team de pl FR | Défis de donjon Or 8/8 | Cognefort normal héroïque mythique | Boost Arène & RBG 0-2400+ | Tigre spectral rapide Gangredrake Poulet magique ... || http://wow-st0re.com
 	"wowst[o0]re[%.,]com.*rbg", --wow-st0re.com Le n°1 du pl français depuis 2013 - SoO 25 NM/HM - PvP Arène / RBG côte - Bastonneurs - Armes Légendaires - [Défi d'or 9/9 à seulement 70k po!] http://wow-st0re.com 100% FR
+	"encore.*wowst[o0]re[%.,]com", --Tigre Spectral Rapide - Poulet Magique - Annihilateur en Gangracier - Invincible - Al'ar - Yéti de guerre du prétendant - Destructeur Sabot-de-Fer - et plus encore sur www.wow-st0re.com Plateforme FR référence depuis 2013.
 	"boost.*skype.*tridon", --WTS Big conquest cap Boost / Contact me Skype: Tridon.boosting
 	"help.*gold.*week.*skype", --{rt6}We help you with [Challenge Conqueror: Gold], CM's shutting down in less than a week. Right now available. Skype: CMhotBOOT{rt6}
 	"hurry.*draenor.*loot.*mount.*price.*info", --{rt1}{rt1} Hurry up! Draenor is coming {rt1}{rt1} Loot-Raids, Mount and Heirloom from Garrosh! Low price!!! {rt1}{rt1} /w for info {rt1}{rt1}
 	"elitistgaming[%.,]com.*gold.*best", --Elitist-gaming,com Selling CM:Gold 8/8 and normal,heroic,mythic Highmaul and Blackrock Foundry. Individual Blackhand kills or with the Ironhoof Destroyer mount! Done by some of the best players in the world! Everything is updated for Wod!
 	"^wts.*curve.*raid.*selfplay.*skype", --{square}{square} WTS[Ahead of the Curve: Imperator's Fall] {cross}Highmaul — Heroic Loot Run 7/7 {cross}. Raid today.SELFPLAY. Skype: ozyboost{square}
+	"gold.*skype.*ozyboost", --WTS [Challenge Warlord: Gold]. SKYPE - OZYBOOST
 	"rocketgaming.*service.*quality", --{rt3} ROCKETGAMING {rt3} Excellent players help you reach your 2k - #R1/ Gladiator success in RBG/2s/3s/5s! We offer you a serious service with quality as our priority!
 	"mount.*price.*leprest[o0]re", --{square}{square} Great RAID offers for you! Blackrock Foundry [Heroic] and [Mythic]! Play yourself with pro’s and get full gear and Ironhoof destroyer (mount from Blackhand). Awesome prices and tons of feedbacks - leprest0re.c0m {square}{square}
 	"leprestore.*gold.*sale", --{rt7}{rt7} Best deals on [Leprestore.com!] Blackrock Foundry and HighMaul. Challenge Modes:Gold. Raider glories and other achievements!Great {rt2} deals!Almost everything is on sale! More info and many feedbacks on [Leprestore.com] {rt7}{rt7}
@@ -867,6 +881,8 @@ local instantReportList = {
 	--"titaniumbay.*versand", ---= TitaniumBay =- Bekommen 40% gold Gratis! 15 minuten Versand! Preis prüfen!
 	--TitвaniumBay - Erhalten Sie 40% mehr Gold in 15 Minuten! Das beste Angebot in der Stadt!
 	"titaniumbay.*minut[eo]", --TitaniumBay - Erhalten Sie 40% mehr Gold in 15 Minuten! Das beste Angebot in der Stadt!
+	---= TitaniumBay =- Erhalten Sie 30% mehr Gold im Vergleich zu WoW-Marke
+	"titaniumbay.*gold", -- -= TitaniumBay =- Get up to 30% more gold compared to WoW Token
 	--"titaniumbay.*verifiez", ---= TitaniumBay =- Obtenez 40 % d'or Gratuit! Dans 15 Minutes! Verifiez le prix!
 	--"titaniumbay.*preis", ---= TitaniumBay =- 40% gold bekommen sie Gratis! Versand dauert 15 Minuten! Sie haben die Möglichkeit den Preis zu prüfen!
 	--"titaniumbay.*oro.*precio", ---= TitaniumBay =- Obtenga 40% de oro Gratis! dentro de 15 Minutos! Vea precio!
@@ -876,7 +892,7 @@ local instantReportList = {
 local repTbl = {
 	--Symbol & space removal
 	["[%*%-%(%)\"`'_%+#%%%^&;:~{} ]"]="",
-	["¨"]="", ["”"]="", ["“"]="", ["█"]="", ["▓"]="", ["▲"]="", ["◄"]="", ["►"]="", ["▼"]="", ["♥"]="", ["♫"]="", ["●"]="", ["■"]="",
+	["¨"]="", ["”"]="", ["“"]="", ["█"]="", ["▓"]="", ["▲"]="", ["◄"]="", ["►"]="", ["▼"]="", ["♥"]="", ["♫"]="", ["●"]="", ["■"]="", ["☼"]="",
 
 	--This is the replacement table. It serves to deobfuscate words by replacing letters with their English "equivalents".
 	["а"]="a", ["à"]="a", ["á"]="a", ["ä"]="a", ["â"]="a", ["ã"]="a", ["å"]="a", --First letter is Russian "\208\176". Convert > \97
