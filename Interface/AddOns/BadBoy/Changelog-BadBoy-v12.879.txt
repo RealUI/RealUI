@@ -1,0 +1,35 @@
+------------------------------------------------------------------------
+r1354 | funkydude | 2015-11-04 14:49:16 +0000 (Wed, 04 Nov 2015) | 1 line
+Changed paths:
+   A /tags/v12.879 (from /trunk:1353)
+
+Tagging as v12.879
+------------------------------------------------------------------------
+r1353 | funkydude | 2015-11-04 14:40:56 +0000 (Wed, 04 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1352 | funkydude | 2015-11-04 14:32:12 +0000 (Wed, 04 Nov 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1350 | funkydude | 2015-10-09 12:56:11 +0000 (Fri, 09 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
+r1349 | funkydude | 2015-09-16 18:00:23 +0000 (Wed, 16 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy.lua
+   M /trunk/BadBoy.toc
+
+anti-spam update
+------------------------------------------------------------------------
