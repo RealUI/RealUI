@@ -150,6 +150,8 @@ local function Icon_Layout(self, parent)
 		end
 		-- cooldown animation
 		if self.showCooldown then
+			frame.cooldown:SetDrawEdge(self.dbx.disableOmniCC~=nil)
+			frame.cooldown.noCooldownCount = self.dbx.disableOmniCC		
 			frame.cooldown:SetReverse(self.dbx.reverseCooldown)
 			frame.cooldown:SetAllPoints()
 			frame.cooldown:Show()

@@ -1,0 +1,14 @@
+tag 4.6.11
+d3f467b3ea619a4074f18f626bd8b12f555d9203
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-09-24 11:30:55 +0200
+
+Tag as 4.6.11
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Show the stance visibility options on all classes
+	Fixes issue #1172
+	- Rename option key to avoid conflicts

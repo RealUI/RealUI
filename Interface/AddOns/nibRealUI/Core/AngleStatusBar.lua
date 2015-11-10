@@ -32,8 +32,9 @@ local function SetBarPosition(self, value)
     if metadata then
         metadata.value = value
         local width
+        -- Take the value, and adjust it to within the bounds of the bar.
         if metadata.reverse then
-            -- This will take the raw value, percent or exact, and adjust it to within the bounds of the bar.
+            -- This makes `width` smaller when `value` gets larger and vice versa.
             width = (((value - metadata.minVal) * (metadata.minWidth - metadata.maxWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.maxWidth
         else
             width = (((value - metadata.minVal) * (metadata.maxWidth - metadata.minWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.minWidth

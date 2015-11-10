@@ -472,8 +472,11 @@ local function OnSetUnit(self)
             ns.Debug("tarRicon:", tarRicon, ICON_LIST[tarRicon])
             if (tarRicon and ICON_LIST[tarRicon]) then
                 text = ("%s %s"):format(ICON_LIST[tarRicon].."10|t", getTarget(unit.."target"))
+            else
+                text = getTarget(unit.."target")
             end
 
+            ns.Debug("target:", text)
             self:AddDoubleLine(TARGET, text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
             GameTooltip_UnitColor(unit.."target"))
         end
