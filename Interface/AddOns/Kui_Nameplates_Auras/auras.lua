@@ -8,7 +8,7 @@
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local spelllist = LibStub('KuiSpellList-1.0')
 local kui = LibStub('Kui-1.0')
-local mod = addon:NewModule('Auras', 'AceEvent-3.0')
+local mod = addon:NewModule('Auras', addon.Prototype, 'AceEvent-3.0')
 local whitelist, _
 
 local GetTime, floor, ceil, format = GetTime, floor, ceil, format
@@ -17,6 +17,8 @@ local UnitExists,UnitGUID=UnitExists,UnitGUID
 local PLAYER_GUID
 
 local sizes = {}
+local num_per_column,trivial_num_per_column
+local size_ratio,icon_ratio
 
 -- store profiles to reduce lookup in OnAuraUpdate
 local db_display,db_behav
@@ -37,13 +39,82 @@ local ADDITION_EVENTS = {
     ['SPELL_AURA_APPLIED_DOSE'] = true,
 }
 
+local function UpdateSizes()
+    -- Update size/position related variables
+    size_ratio = mod.db.profile.icons.squareness
+    sizes.auraWidth = mod.db.profile.icons.icon_size
+    sizes.tauraWidth = mod.db.profile.icons.trivial_icon_size
+
+    sizes.auraHeight = floor(sizes.auraWidth * size_ratio)
+    sizes.tauraHeight = floor(sizes.tauraWidth * size_ratio)
+
+    -- used by SetTexCoord
+    icon_ratio = (1 - (sizes.auraHeight / sizes.auraWidth)) / 2
+
+    sizes.aurasOffset = 14
+    sizes.taurasOffset = 14
+
+    -- calculate width of container & number of icons per column
+    local normal_width = addon.db.profile.general.width
+    num_per_column = floor(normal_width / (sizes.auraWidth + 1))
+    sizes.container_width = (sizes.auraWidth * num_per_column) + (1 * (num_per_column - 1))
+    sizes.container_offset = (normal_width - sizes.container_width) / 2
+
+    -- and the trivial version...
+    local trivial_width = addon.db.profile.general.twidth
+    trivial_num_per_column = floor(trivial_width / (sizes.tauraWidth + 1))
+    sizes.trivial_container_width = (sizes.tauraWidth * trivial_num_per_column) + (1 * (trivial_num_per_column - 1))
+    sizes.trivial_container_offset = (trivial_width - sizes.trivial_container_width) / 2
+end
+local function UpdateButtonSize(self,button)
+    -- Set size of an aura icon
+    -- Used whenever a button is requested to be shown
+    button.icon:SetTexCoord(.1, .9, .1+icon_ratio, .9-icon_ratio)
+
+    if self.frame.trivial then
+        -- shrink icons for trivial frames!
+        button:SetHeight(sizes.tauraHeight)
+        button:SetWidth(sizes.tauraWidth)
+    else
+        -- normal size!
+        button:SetHeight(sizes.auraHeight)
+        button:SetWidth(sizes.auraWidth)
+    end
+
+    if button:GetWidth() <= 21 then
+        -- use small text for small icons
+        button.time:SetFontSize('small')
+        button.count:SetFontSize('small')
+    else
+        button.time:SetFontSize('name')
+        button.count:SetFontSize('name')
+    end
+end
+local function UpdateContainerSize(frame)
+    -- Set size and position of the container frame
+    -- Used OnFrameShow
+    local v_offset = frame.trivial and sizes.taurasOffset or sizes.aurasOffset
+    frame.auras.num_per_column = frame.trivial and trivial_num_per_column or num_per_column
+
+    frame.auras:SetWidth(frame.trivial and sizes.trivial_container_width or sizes.container_width)
+    frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'TOPLEFT',
+        -1 + (frame.trivial and sizes.trivial_container_offset or sizes.container_offset), v_offset)
+end
+local function UpdateAllButtons(frame)
+    -- Update the container and button sizes
+    -- Used only by configChangedFuncs
+    UpdateContainerSize(frame)
+
+    for k,b in ipairs(frame.auras.buttons) do
+        UpdateButtonSize(frame.auras,b)
+    end
+
+    frame.auras:ArrangeButtons()
+end
+
 -- stored spell id durations
 -- used for giving timers to aura icons when they're added by the combat log
 local stored_spells = {}
-
-local function debug_print(msg)
-    print(GetTime()..': '..msg)
-end
 
 local function ArrangeButtons(self)
     local pv, pc
@@ -56,7 +127,7 @@ local function ArrangeButtons(self)
             b:ClearAllPoints()
 
             if pv then
-                if (self.visible-1) % (self.frame.trivial and 3 or 5) == 0 then
+                if (self.visible-1) % self.num_per_column == 0 then
                     -- start of row
                     b:SetPoint('BOTTOMLEFT', pc, 'TOPLEFT', 0, 1)
                     pc = b
@@ -191,12 +262,14 @@ local function OnAuraUpdate(self, elapsed)
 end
 local function OnAuraShow(self)
     local parent = self:GetParent()
+    if not parent or parent.frame.MOVING then return end
     parent:ArrangeButtons()
 
     addon:SendMessage('KuiNameplates_PostAuraShow', parent.frame, self.spellId)
 end
 local function OnAuraHide(self)
     local parent = self:GetParent()
+    if not parent or parent.frame.MOVING then return end
 
     if parent.spellIds[self.spellId] == self then
         -- remove spell id from parent list
@@ -264,14 +337,12 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
 
         button.icon = button:CreateTexture(nil, 'ARTWORK')
 
-        button.time = self.frame:CreateFontString(button,{
-            size = 'large' })
+        button.time = self.frame:CreateFontString(button)
         button.time:SetJustifyH('LEFT')
-        button.time:SetPoint('TOPLEFT', -2, 4)
+        button.time:SetPoint('TOPLEFT', -1, 1)
         button.time:Hide()
 
-        button.count = self.frame:CreateFontString(button, {
-            outline = 'OUTLINE'})
+        button.count = self.frame:CreateFontString(button)
         button.count:SetJustifyH('RIGHT')
         button.count:SetPoint('BOTTOMRIGHT', 2, -2)
         button.count:Hide()
@@ -282,26 +353,10 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
         button.icon:SetPoint('TOPLEFT', 1, -1)
         button.icon:SetPoint('BOTTOMRIGHT', -1, 1)
 
-        button.icon:SetTexCoord(.1, .9, .2, .8)
-
         tinsert(self.buttons, button)
 
         button:SetScript('OnHide', OnAuraHide)
         button:SetScript('OnShow', OnAuraShow)
-    end
-
-    if self.frame.trivial then
-        -- shrink icons for trivial frames!
-        button:SetHeight(sizes.tauraHeight)
-        button:SetWidth(sizes.tauraWidth)
-        button.time = self.frame:CreateFontString(button.time, {
-            reset = true, size = 'small' })
-    else
-        -- normal size!
-        button:SetHeight(sizes.auraHeight)
-        button:SetWidth(sizes.auraWidth)
-        button.time = self.frame:CreateFontString(button.time, {
-            reset = true, size = 'large' })
     end
 
     button.icon:SetTexture(icon)
@@ -318,6 +373,7 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
     button.spellId = spellId
     button.elapsed = 0
 
+    UpdateButtonSize(self,button)
     UpdateButtonDuration(button)
 
     -- store this spell's original duration
@@ -328,7 +384,7 @@ local function GetAuraButton(self, spellId, icon, count, duration, expirationTim
     return button
 end
 local function DisplayAura(self,spellid,name,icon,count,duration,expirationTime)
-    --debug_print('aura application of '..name)
+    --kui.print('aura application of '..name)
     name = strlower(name) or nil
     if not name then return end
 
@@ -372,9 +428,8 @@ function mod:Create(msg, frame)
     frame.auras = CreateFrame('Frame', nil, frame)
     frame.auras.frame = frame
 
-    -- BOTTOMLEFT is set OnShow
-    frame.auras:SetPoint('BOTTOMRIGHT', frame.health, 'TOPRIGHT', -3, 0)
-    frame.auras:SetHeight(50)
+    -- Position and size is set OnShow (below)
+    frame.auras:SetHeight(10)
     frame.auras:Hide()
 
     frame.auras.visible = 0
@@ -385,6 +440,7 @@ function mod:Create(msg, frame)
     frame.auras.DisplayAura    = DisplayAura
 
     frame.auras:SetScript('OnHide', function(self)
+        if self.frame.MOVING then return end
         for k,b in pairs(self.buttons) do
             b:Hide()
         end
@@ -393,16 +449,7 @@ function mod:Create(msg, frame)
     end)
 end
 function mod:Show(msg, frame)
-    -- set vertical position of the container frame
-    if frame.trivial then
-        frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
-            3, sizes.taurasOffset)
-    else
-        frame.auras:SetPoint('BOTTOMLEFT', frame.health, 'BOTTOMLEFT',
-            3, sizes.aurasOffset)
-    end
-
-    -- TODO calculate size of auras & num per column here
+    UpdateContainerSize(frame)
 end
 function mod:Hide(msg, frame)
     if frame.auras then
@@ -444,7 +491,7 @@ function mod:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         if not f or not f.auras then return end
         if f.trivial and not self.db.profile.showtrivial then return end
 
-        --debug_print('COMBAT_LOG_EVENT fired on '..f.name.text)
+        --kui.print('COMBAT_LOG_EVENT fired on '..f.name.text)
 
         local spId = select(12, ...)
         if not spId then return end
@@ -485,7 +532,7 @@ function mod:UNIT_AURA(event, unit, frame)
     if frame.trivial and not self.db.profile.showtrivial then return end
     --unit = 'player' -- DEBUG
 
-    --debug_print('UNIT_AURA fired on '..frame.name.text)
+    --kui.print('UNIT_AURA fired on '..frame.name.text)
 
     local filter = 'PLAYER '
     if UnitIsFriend(unit, 'player') then
@@ -532,14 +579,20 @@ mod.configChangedListener = function(self)
     end
 end
 
-mod.configChangedFuncs = { runOnce = {} }
-mod.configChangedFuncs.runOnce.enabled = function(val)
-    if val then
-        mod:Enable()
-    else
-        mod:Disable()
-    end
-end
+mod:AddConfigChanged('enabled', function(v)
+    mod:Toggle(v)
+end)
+
+mod:AddConfigChanged('icons', UpdateSizes, UpdateAllButtons)
+
+mod:AddGlobalConfigChanged('addon',
+    {
+        {'general','width'},
+        {'general','twidth'}
+    },
+    UpdateSizes,
+    UpdateAllButtons
+)
 ---------------------------------------------------- initialisation functions --
 function mod:GetOptions()
     return {
@@ -558,6 +611,29 @@ function mod:GetOptions()
             disabled = function()
                 return not self.db.profile.enabled
             end,
+        },
+        behav = {
+            name = 'Behaviour',
+            type = 'group',
+            inline = true,
+            disabled = function()
+                return not self.db.profile.enabled
+            end,
+            order = 5,
+            args = {
+                useWhitelist = {
+                    name = 'Use whitelist',
+                    desc = 'Only display spells which your class needs to keep track of for PVP or an effective DPS rotation. Most passive effects are excluded.\n\n|cff00ff00You can use KuiSpellListConfig from Curse.com to customise this list.',
+                    type = 'toggle',
+                    order = 0,
+                },
+                showSecondary = {
+                    name = 'Show on secondary targets',
+                    desc = 'Attempt to show and refresh auras on secondary targets - i.e. nameplates which do not have a visible unit frame on the default UI. Particularly useful when tanking.',
+                    type = 'toggle',
+                    order = 10
+                }
+            }
         },
         display = {
             name = 'Display',
@@ -585,7 +661,7 @@ function mod:GetOptions()
                     desc = 'Increases memory usage.',
                     type = 'toggle',
                     order = 10,
-                    width = 'double',
+                    width = 'full',
                 },
                 timerThreshold = {
                     name = 'Timer threshold (s)',
@@ -617,26 +693,43 @@ function mod:GetOptions()
 
             }
         },
-        behav = {
-            name = 'Behaviour',
+        icons = {
+            name = 'Icons',
             type = 'group',
             inline = true,
             disabled = function()
                 return not self.db.profile.enabled
             end,
-            order = 5,
+            order = 20,
             args = {
-                useWhitelist = {
-                    name = 'Use whitelist',
-                    desc = 'Only display spells which your class needs to keep track of for PVP or an effective DPS rotation. Most passive effects are excluded.\n\n|cff00ff00You can use KuiSpellListConfig from Curse.com to customise this list.',
-                    type = 'toggle',
-                    order = 0,
+                icon_size = {
+                    name = 'Size',
+                    desc = 'Aura icon size on normal frames',
+                    type = 'range',
+                    order = 10,
+                    min = 1,
+                    softMin = 10,
+                    softMax = 50,
+                    step = 1
                 },
-                showSecondary = {
-                    name = 'Show on secondary targets',
-                    desc = 'Attempt to show and refresh auras on secondary targets - i.e. nameplates which do not have a visible unit frame on the default UI. Particularly useful when tanking.',
-                    type = 'toggle',
-                    order = 10
+                trivial_icon_size = {
+                    name = 'Size (trivial)',
+                    desc = 'Aura icon size on trivial frames',
+                    type = 'range',
+                    order = 20,
+                    min = 5,
+                    softMax = 50,
+                    step = 1
+                },
+                squareness = {
+                    name = 'Squareness',
+                    desc = 'Where 1 is completely square and .5 is completely rectangular',
+                    type = 'range',
+                    order = 30,
+                    min = .1,
+                    softMin = .5,
+                    max = 1,
+                    step = .1
                 }
             }
         }
@@ -647,6 +740,10 @@ function mod:OnInitialize()
         profile = {
             enabled = true,
             showtrivial = false,
+            behav = {
+                useWhitelist = true,
+                showSecondary = true,
+            },
             display = {
                 pulsate = true,
                 decimal = true,
@@ -655,23 +752,18 @@ function mod:OnInitialize()
                 lengthMin = 0,
                 lengthMax = -1,
             },
-            behav = {
-                useWhitelist = true,
-                showSecondary = true,
+            icons = {
+                icon_size = 25,
+                trivial_icon_size = 20,
+                squareness = .7
             }
         }
     })
 
-    sizes.auraHeight = 18
-    sizes.auraWidth = 26
-    sizes.tauraHeight = 12
-    sizes.tauraWidth = 20
-
-    sizes.aurasOffset = 26
-    sizes.taurasOffset = 17
-
     addon:InitModuleOptions(self)
     mod:SetEnabledState(self.db.profile.enabled)
+
+    UpdateSizes()
 
     self:WhitelistChanged()
     spelllist.RegisterChanged(self, 'WhitelistChanged')

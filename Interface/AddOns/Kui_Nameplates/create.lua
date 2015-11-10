@@ -58,6 +58,18 @@ function addon:CreateBackground(frame, f)
             side:SetVertexColor(r,g,b,a)
         end
     end
+    function f.bg:Hide()
+        self.fill:Hide()
+        for _,side in pairs(self.sides) do
+            side:Hide()
+        end
+    end
+    function f.bg:Show()
+        self.fill:Show()
+        for _,side in pairs(self.sides) do
+            side:Show()
+        end
+    end
 end
 function addon:UpdateBackground(f, trivial)
     f.bg.fill:ClearAllPoints()
@@ -77,7 +89,7 @@ function addon:CreateHealthBar(frame, f)
     f.health = CreateFrame('StatusBar', nil, f)
     f.health:SetFrameLevel(1)
     f.health:SetStatusBarTexture(addon.bartexture)
-	f.health.percent = 100
+    f.health.percent = 100
 
     f.health:GetStatusBarTexture():SetDrawLayer('ARTWORK',-8)
 
@@ -115,7 +127,7 @@ end
 function addon:CreateHealthText(frame, f)
     f.health.p = f:CreateFontString(f.overlay, {
         font = self.font,
-        size = self.db.profile.general.leftie and 'large' or 'name',
+        size = 'name',
         alpha = 1,
         outline = "OUTLINE" })
 
@@ -136,13 +148,10 @@ function addon:UpdateHealthText(f, trivial)
             f.health.p:Show()
         end
 
-        if self.db.profile.general.leftie then
-            f.health.p:SetPoint('BOTTOMRIGHT', f.health, 'TOPRIGHT',
-                                -2.5, -self.db.profile.text.healthoffset)
-        else
-            f.health.p:SetPoint('TOPRIGHT', f.health, 'BOTTOMRIGHT',
-                                -2.5, self.db.profile.text.healthoffset + 4)
-        end
+        f.health.p:SetPoint(
+            'TOPRIGHT', f.health, 'BOTTOMRIGHT',
+            -2.5, self.db.profile.text.healthoffset + 4
+        )
     end
 end
 ------------------------------------------------------------------ Level text --
@@ -177,37 +186,24 @@ end
 function addon:CreateName(frame, f)
     f.name = f:CreateFontString(f.overlay, {
         font = self.font, size = 'name', outline = 'OUTLINE' })
-    f.name:SetJustifyV('BOTTOM')
     f.name:SetHeight(10)
 end
 function addon:UpdateName(f, trivial)
     f.name:ClearAllPoints()
-
-	-- silly hacky way of fixing horizontal jitter with center aligned texts
-	local offset
-	if trivial or not self.db.profile.general.leftie then
-		local swidth = f.name:GetStringWidth()
-		swidth = swidth - abs(swidth)
-		offset = (swidth > .7 or swidth < .2) and .5 or 0
-	end
+    f.name:SetJustifyV('BOTTOM')
+    f.name:SetJustifyH('CENTER')
+    f.name:SetWidth(0)
 
     if trivial then
-        f.name:SetPoint('BOTTOM', f.health, 'TOP', offset, -self.db.profile.text.healthoffset)
-		f.name:SetWidth(addon.sizes.frame.twidth * 2)
-		f.name:SetJustifyH('CENTER')
+        f.name:SetPoint('BOTTOM', f.health, 'TOP', .5, -self.db.profile.text.healthoffset)
+        f.name:SetWidth(addon.sizes.frame.twidth * 2)
+        f.name:SetJustifyH('CENTER')
     else
-        if self.db.profile.general.leftie then
-            f.name:SetPoint('BOTTOMLEFT', f.health, 'TOPLEFT',
-                            2.5, -self.db.profile.text.healthoffset)
-
-            f.name:SetPoint('RIGHT', f.health.p, 'LEFT')
-            f.name:SetJustifyH('LEFT')
-        else
-            -- move to top center
-            f.name:SetPoint('BOTTOM', f.health, 'TOP',
-                            offset, -self.db.profile.text.healthoffset)
-			f.name:SetWidth(addon.sizes.frame.width * 2)
-        end
+        -- move to top center
+        f.name:SetPoint('BOTTOM', f.health, 'TOP',
+                        .5, -self.db.profile.text.healthoffset)
+        f.name:SetWidth(addon.sizes.frame.width * 2)
+        f.name:SetJustifyH('CENTER')
     end
 end
 ----------------------------------------------------------------- Target glow --
@@ -226,4 +222,18 @@ function addon:UpdateTargetGlow(f, trivial)
     else
         f.targetGlow:SetSize(self.sizes.tex.targetGlowW, self.sizes.tex.targetGlowH)
     end
+end
+-- raid icon ###################################################################
+local PositionRaidIcon = {
+    function(f) return f.icon:SetPoint('RIGHT',f.overlay,'LEFT',-8,0) end,
+    function(f) return f.icon:SetPoint('BOTTOM',f.overlay,'TOP',0,12) end,
+    function(f) return f.icon:SetPoint('LEFT',f.overlay,'RIGHT',8,0) end,
+    function(f) return f.icon:SetPoint('TOP',f.overlay,'BOTTOM',0,-8) end,
+}
+function addon:UpdateRaidIcon(f)
+    f.icon:SetParent(f.overlay)
+    f.icon:SetSize(addon.sizes.tex.raidicon, addon.sizes.tex.raidicon)
+
+    f.icon:ClearAllPoints()
+    PositionRaidIcon[addon.db.profile.general.raidicon_side](f)
 end

@@ -5,7 +5,7 @@
 -- changes colour of health bars based on health percentage
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
-local mod = addon:NewModule('LowHealthColours', 'AceEvent-3.0')
+local mod = addon:NewModule('LowHealthColours', addon.Prototype, 'AceEvent-3.0')
 
 mod.uiName = 'Low health colour'
 
@@ -42,27 +42,27 @@ function mod:PostShow(msg,frame)
     OnHealthValueChanged(frame.oldHealth,frame.oldHealth:GetValue())
 end
 
-mod.configChangedFuncs = { runOnce = {} }
-mod.configChangedFuncs.runOnce.enabled = function(v)
-    mod:SetEnabledState(v)
-end
-mod.configChangedFuncs.runOnce.colour = function(v)
+-- config changed hooks ########################################################
+mod:AddConfigChanged('enabled', function(v)
+    mod:Toggle(v)
+end)
+mod:AddConfigChanged('colour', function(v)
     LOW_HEALTH_COLOR = v
-end
-mod.configChangedFuncs.runOnce.over_tankmode = function(v)
+end)
+mod:AddConfigChanged('over_tankmode', function(v)
     PRIORITY = v and 15 or 5
-end
-mod.configChangedFuncs.runOnce.over_classcolour = function(v)
+end)
+mod:AddConfigChanged('over_classcolour', function(v)
     OVER_CLASSCOLOUR = v
-end
-
+end)
+-- config hooks ################################################################
 function mod:GetOptions()
     return {
         enabled = {
             name = 'Change colour of health bars at low health',
             desc = 'Change the colour of low health units\' health bars. "Low health" is determined by the "Low health value" option under "General display".',
             type = 'toggle',
-            width = 'double',
+            width = 'full',
             order = 10
         },
         over_tankmode = {
@@ -85,7 +85,6 @@ function mod:GetOptions()
         }
     }
 end
-
 function mod:OnInitialize()
     self.db = addon.db:RegisterNamespace(self.moduleName, {
         profile = {
@@ -104,7 +103,6 @@ function mod:OnInitialize()
 
     self:SetEnabledState(self.db.profile.enabled)
 end
-
 function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_PostCreate', 'PostCreate')
     self:RegisterMessage('KuiNameplates_PostShow', 'PostShow')
@@ -113,4 +111,3 @@ function mod:OnDisable()
     self:UnregisterMessage('KuiNameplates_PostCreate', 'PostCreate')
     self:UnregisterMessage('KuiNameplates_PostShow', 'PostShow')
 end
-
