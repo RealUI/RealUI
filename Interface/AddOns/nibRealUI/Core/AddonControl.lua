@@ -19,12 +19,10 @@ local RealUIAddOns = {
 }
 local RealUIAddOnsOrder = {
     "DBM",
-    "KuiNameplates",
     "Masque",
     "mikScrollingBattleText",
     "Bartender4",
     "Grid2",
-    "Raven",
     "Skada",
 }
 
@@ -157,7 +155,6 @@ function AddonControl:CreateOptionsFrame()
     }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
-        ["KuiNameplates"] = "Kui_Nameplates"
     }
     local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevReset
     local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}, {}
