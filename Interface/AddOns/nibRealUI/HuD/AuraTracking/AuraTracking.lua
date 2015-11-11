@@ -59,6 +59,26 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
         end
     end
 end
+local function shouldTrack(spellData)
+    if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
+        local talent = spellData.talent
+        debug(spellData.debug, "Check for talents", talent.mustHave)
+        if talent.ID then
+            local _, talentID = _G.GetTalentRowSelectionInfo(talent.tier)
+            debug(spellData.debug, "Find talent", talentID, talent.ID)
+            if talent.mustHave then
+                return talent.ID == talentID
+            else
+                return talent.ID ~= talentID
+            end
+        else
+            return true
+        end
+    else
+        debug(spellData.debug, "Don't Track")
+        return false
+    end
+end
 
 function AuraTracking:AddTracker(tracker, slotID)
     self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
@@ -293,12 +313,10 @@ function AuraTracking:PLAYER_LOGIN()
         local tracker = self:CreateAuraIcon(id, spellData)
         tracker.classID = classID
         tracker.isDefault = isDefault and true or false
-        if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
-            tracker.shouldTrack = true
-            if spellData.unit == "player" then
-                tracker:Enable()
-                tracker:SetAlpha(db.indicators.fadeOpacity)
-            end
+        tracker.shouldTrack = shouldTrack(spellData)
+        if tracker.shouldTrack and spellData.unit == "player" then
+            tracker:Enable()
+            tracker:SetAlpha(db.indicators.fadeOpacity)
         end
     end
     self.loggedIn = true
@@ -382,16 +400,12 @@ function AuraTracking:CharacterUpdate(units, force)
 
         for tracker, spellData in self:IterateTrackers() do
             tracker:Disable() -- Reset incase there are any auras still active
-            for i = 1, #spellData.specs do
-                if spellData.shouldLoad and spellData.specs[playerSpec] and spellData.minLevel <= playerLevel then
-                    self:debug("Track", tracker.id)
-                    tracker.shouldTrack = true
-                    tracker:Enable()
-                    break
-                else
-                    self:debug("Don't Track", tracker.id)
-                    tracker.shouldTrack = false
-                end
+            tracker.shouldTrack = shouldTrack(spellData)
+            if tracker.shouldTrack then
+                self:debug("Track", tracker.id)
+                tracker:Enable()
+            else
+                self:debug("Don't Track", tracker.id)
             end
         end
     end
@@ -534,10 +548,10 @@ function AuraTracking:OnEnable()
 
     self:RegisterEvent("PLAYER_TARGET_CHANGED", "TargetAndPetUpdate", "target")
     self:RegisterEvent("UNIT_PET", "TargetAndPetUpdate", "pet")
+    self:RegisterEvent("PLAYER_TALENT_UPDATE", "CharacterUpdate", "talents")
     self:RegisterBucketEvent({
         "ACTIVE_TALENT_GROUP_CHANGED",
         "PLAYER_SPECIALIZATION_CHANGED",
-        "PLAYER_TALENT_UPDATE",
         "PLAYER_LEVEL_UP",
     }, 0.1, "CharacterUpdate")
 

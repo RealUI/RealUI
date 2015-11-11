@@ -267,7 +267,11 @@ AuraTracking.Defaults = {
                 spell = 155159,
                 auraType = "debuff",
                 unit = "target",
-                talent = {[7] = {21207}},
+                talent = {
+                    tier = 7,
+                    ID = 21207,
+                    mustHave = true,
+                },
                 order = 1,
             },
             ["6-a4a87f4c-1"] = {   -- Blood Plague
@@ -275,7 +279,11 @@ AuraTracking.Defaults = {
                 minLevel = 55,
                 auraType = "debuff",
                 unit = "target",
-                talent = {[7] = {21208, 21209}},
+                talent = {
+                    tier = 7,
+                    ID = 21207,
+                    mustHave = false,
+                },
                 order = 1,
             },
             ["6-ac6e45ce-1"] = {   -- Frost Fever
@@ -283,7 +291,11 @@ AuraTracking.Defaults = {
                 minLevel = 55,
                 auraType = "debuff",
                 unit = "target",
-                talent = {[7] = {21208, 21209}},
+                talent = {
+                    tier = 7,
+                    ID = 21207,
+                    mustHave = false,
+                },
                 order = 2,
             },
         -- Free Player Auras
@@ -326,6 +338,14 @@ AuraTracking.Defaults = {
             ["6-83cbafac-1"] = {spell = 50461},    -- Anti-Magic Zone (Talent)
             ["6-8281137d-1"] = {spell = 96268},    -- Death's Advance (Talent)
             ["6-ac02f3e2-1"] = {spell = 114851},   -- Blood Charge (used for Blood Tap, Talent)
+        -- Free Target Auras
+    },
+
+    ["DEMONHUNTER"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
         -- Free Target Auras
     },
 
