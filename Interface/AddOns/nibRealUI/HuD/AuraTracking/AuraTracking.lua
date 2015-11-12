@@ -60,22 +60,26 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
     end
 end
 local function shouldTrack(spellData)
+    local isDebug = spellData.debug
     if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
         local talent = spellData.talent
-        debug(spellData.debug, "Check for talents", talent.mustHave)
+        debug(isDebug, "Check for talents", talent.mustHave)
         if talent.ID then
             local _, talentID = _G.GetTalentRowSelectionInfo(talent.tier)
-            debug(spellData.debug, "Find talent", talentID, talent.ID)
+            AuraTracking:debug("Find talent", talent.tier, talent.ID, talentID)
             if talent.mustHave then
+                debug(isDebug, "Must have")
                 return talent.ID == talentID
             else
+                debug(isDebug, "Must not have")
                 return talent.ID ~= talentID
             end
         else
+            debug(isDebug, "Do Track")
             return true
         end
     else
-        debug(spellData.debug, "Don't Track")
+        debug(isDebug, "Don't Track")
         return false
     end
 end
@@ -309,7 +313,8 @@ function AuraTracking:PLAYER_LOGIN()
     self:RefreshMod()
     for trackerID, spellData in next, trackingData do
         local classID, id, isDefault = _G.strsplit("-", trackerID)
-        self:debug("Init tracker", classID, id, isDefault)
+        --self:debug("c|"..id.."Init tracker|r ", id, isDefault)
+        self:debug("Init tracker", id, isDefault)
         local tracker = self:CreateAuraIcon(id, spellData)
         tracker.classID = classID
         tracker.isDefault = isDefault and true or false
@@ -395,8 +400,8 @@ function AuraTracking:CharacterUpdate(units, force)
     local newPlayerLevel = _G.UnitLevel("player")
     local newPlayerSpec = _G.GetSpecialization()
     if units.player and (newPlayerLevel ~= playerLevel or newPlayerSpec ~= playerSpec) or force then
-        playerLevel = newPlayerLevel
-        playerSpec = newPlayerSpec
+        playerLevel, playerSpec = newPlayerLevel, newPlayerSpec
+        self:debug("Level", playerLevel, "Spec", playerSpec)
 
         for tracker, spellData in self:IterateTrackers() do
             tracker:Disable() -- Reset incase there are any auras still active
@@ -486,6 +491,7 @@ end
 function AuraTracking:RefreshMod()
     playerLevel = _G.UnitLevel("player")
     playerSpec = _G.GetSpecialization()
+    self:debug("Level", playerLevel, "Spec", playerSpec)
 
     self:UpdateVisibility()
 end
@@ -514,8 +520,8 @@ function AuraTracking:OnInitialize()
             visibility = {
                 showCombat = true,
                 showHostile = true,
-                showPvE = false,
-                showPvP = false,
+                showPvE = true,
+                showPvP = true,
             },
             indicators = {
                 fadeInactive = true,

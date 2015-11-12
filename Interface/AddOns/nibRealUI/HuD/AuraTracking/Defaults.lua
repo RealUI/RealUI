@@ -238,6 +238,13 @@ local defaultTracker = {
     shouldLoad = true,
     debug = false
 }
+--[[ Retired IDs
+b6ea7743
+bb656491
+
+
+
+]]
 
 AuraTracking.Defaults = {
     ["DEATHKNIGHT"] = {
@@ -773,6 +780,21 @@ AuraTracking.Defaults = {
     ["PALADIN"] = {
         ["**"] = defaultTracker,
         -- Static Player Auras
+            ["2-aaddc099-1"] = {   -- Daybreak (Holy)
+                spell = 88819,
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["2-bc41e225-1"] = {   -- Infusion of Light (Holy)
+                spell = 54149,
+                specs = {true, false, false},
+                order = 2,
+            },
+            ["2-8f8a7deb-1"] = {   -- Enhanced Holy Shock (Holy)
+                spell = 160002,
+                specs = {true, false, false},
+                order = 3,
+            },
             ["2-bdba8989-1"] = {   -- Avenging Wrath (Ret)
                 spell = 31884,
                 specs = {false, false, true},
@@ -784,19 +806,38 @@ AuraTracking.Defaults = {
                 spell = 31884,
                 specs = {true, true, false},
             },
+            ["2-93d2a558-1"] = {   -- Selfless Healer (Talent)
+                spell = 114250,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 17581,
+                    mustHave = true,
+                },
+            },
+            ["2-9434af38-1"] = {   -- Holy Avenger (Talent)
+                spell = 105809,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 17597,
+                    mustHave = true,
+                },
+            },
+            ["2-ab20fc1d-1"] = {   -- Divine Purpose (Talent)
+                spell = 90174,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 17601,
+                    mustHave = true,
+                },
+            },
             ["2-bb2a51e1-1"] = {spell = 498},      -- Divine Protection
-            ["2-9434af38-1"] = {spell = 105809},   -- Holy Avenger
             ["2-be248ad3-1"] = {spell = 86659},    -- Guardian
-            ["2-aaddc099-1"] = {spell = 1044},     -- Hand of Freedom
-            ["2-bc41e225-1"] = {spell = 1022},     -- Hand of Protection
             ["2-96a15d91-1"] = {spell = 6940},     -- Hand of Sacrifice
-            ["2-bb656491-1"] = {spell = 1038},     -- Hand of Salvation
-            ["2-b6ea7743-1"] = {spell = 642},      -- Divine Shield
             ["2-8942b773-1"] = {spell = 20925},    -- Holy Shield
             ["2-b2420e4c-1"] = {spell = 31842},    -- Divine Favor
-            ["2-ab20fc1d-1"] = {spell = 114039},   -- Hand of Purity
-            ["2-8f8a7deb-1"] = {spell = 31821},    -- Devotion Aura
-            ["2-93d2a558-1"] = {spell = 53563},    -- Beacon of Light
             ["2-9ab78043-1"] = {spell = 85499},    -- Speed of Light
             ["2-a73a3586-1"] = {spell = 31850},    -- Ardent Defender
         -- Free Target Auras
