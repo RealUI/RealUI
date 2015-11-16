@@ -313,8 +313,7 @@ function AuraTracking:PLAYER_LOGIN()
     self:RefreshMod()
     for trackerID, spellData in next, trackingData do
         local classID, id, isDefault = _G.strsplit("-", trackerID)
-        --self:debug("c|"..id.."Init tracker|r ", id, isDefault)
-        self:debug("Init tracker", id, isDefault)
+        self:debug("|c"..id.."Init tracker|r ", id, isDefault)
         local tracker = self:CreateAuraIcon(id, spellData)
         tracker.classID = classID
         tracker.isDefault = isDefault and true or false

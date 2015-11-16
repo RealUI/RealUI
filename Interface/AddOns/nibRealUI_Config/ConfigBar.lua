@@ -1504,7 +1504,11 @@ local auratracker do
                         return spellData.debug
                     end,
                     set = function(info, value)
-                        spellData.debug = auratracker.args[info[#info-2]].args[info[#info-1]].name
+                        if value then
+                            spellData.debug = auratracker.args[info[#info-2]].args[info[#info-1]].name
+                        else
+                            spellData.debug = false
+                        end
                     end,
                     order = 100,
                 },
