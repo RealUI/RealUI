@@ -1,5 +1,15 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+-- Lua Globals --
+local _G = _G
+local unpack = _G.unpack
+
+-- WoW Globals --
+local hooksecurefunc = _G.hooksecurefunc
+
+-- Libs --
 local LSM = LibStub("LibSharedMedia-3.0")
+
+-- RealUI --
+local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db, ndb
 
 local Chat = nibRealUI:GetModule("Chat")
@@ -14,7 +24,7 @@ local function UpdateTabStyle(self, style)
     Chat_Tabs:debug("UpdateTabStyle", self, self:GetName(), self.UpdateTabs, style)
     local text = _G[self:GetName().."Text"]
 
-    text:SetFont(RealUIFont_PixelSmall:GetFont())
+    text:SetFont(_G.RealUIFont_PixelSmall:GetFont())
     text:SetShadowColor(0, 0, 0, 0)
 
     -- Update Tab Appearance
@@ -27,12 +37,13 @@ local function UpdateTabStyle(self, style)
     end
 
     -- Color
-    if ((style == "highlight") and db.colors.classcolorhighlight) or
-        style == "selected" then
-        text:SetTextColor(unpack(nibRealUI.classColor))
+    local color
+    if ((style == "highlight") and db.colors.classcolorhighlight) or style == "selected" then
+        color = nibRealUI.classColor
     else
-        text:SetTextColor(unpack(db.colors[style]))
+        color = db.colors[style]
     end
+    text:SetTextColor(color[1], color[2], color[3], color[4])
 end
 
 -- Chat Tab mouse-events
@@ -69,14 +80,14 @@ function Chat_Tabs:UpdateTab(chatName, chatTabText)
         tab:SetScript("OnLeave", ChatTab_OnLeave)
         
         if chatTabText then
-            FCF_SetWindowName(chat, chatTabText)
+            _G.FCF_SetWindowName(chat, chatTabText)
         end
 
         tab.skinned = true
     end
 
     -- Update Tab Appearance
-    UpdateTabStyle(tab, chat == SELECTED_CHAT_FRAME and "selected")
+    UpdateTabStyle(tab, chat == _G.SELECTED_CHAT_FRAME and "selected")
 
     chat:SetSpacing(1)
 end
@@ -104,11 +115,15 @@ function Chat_Tabs:HookFCF()
     end)
     hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType, chatTarget, sourceChatFrame, selectWindow)
         Chat_Tabs:debug("FCF_OpenTemporaryWindow", chatType, chatTarget, sourceChatFrame, selectWindow)
-        maxTabs = maxTabs + 1
-        if chatType == "WHISPER" then
-            chatTarget = Ambiguate(chatTarget, "none")
+        local chatName = "ChatFrame"..(maxTabs + 1)
+        if _G[chatName] then
+            Chat_Tabs:debug("bump maxTabs", maxTabs)
+            maxTabs = maxTabs + 1
+            if chatType == "WHISPER" then
+                chatTarget = _G.Ambiguate(chatTarget, "none")
+            end
+            Chat_Tabs:UpdateTab(chatName, chatTarget)
         end
-        Chat_Tabs:UpdateTab("ChatFrame"..maxTabs, chatTarget)
     end)
 
     hooksecurefunc("FCF_Close", function(chatFrame, fallback)
@@ -117,8 +132,8 @@ function Chat_Tabs:HookFCF()
             maxTabs = maxTabs - 1
         end
         local frame = fallback or chatFrame
-        UIParent.Hide(_G[frame:GetName().."Tab"])
-        FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
+        _G.UIParent.Hide(_G[frame:GetName().."Tab"])
+        _G.FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
     end)
 
     hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
@@ -131,7 +146,7 @@ function Chat_Tabs:HookFCF()
     end)
 
     -- New UpdateColors function, stop it!
-    FCFTab_UpdateColors = function(...) end
+    _G.FCFTab_UpdateColors = function(...) end
 end
 
 -- Style Pet Tab when it appears
