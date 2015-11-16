@@ -521,39 +521,6 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     EnteredWorld = true
 end
 
-function ActionBars:PLAYER_LOGIN()
-    self:debug("PLAYER_LOGIN")
-    if _G.IsAddOnLoaded("Bartender4") and BT4 then
-        BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
-        BT4Stance = BT4:GetModule("StanceBar", true)
-
-        -- Font
-        for i = 1, 120 do
-            local button = _G["BT4Button"..i];
-            if button then
-                local name = button:GetName();
-                local count = _G[name.."Count"];
-                local hotkey = _G[name.."HotKey"];
-                local macro = _G[name.."Name"];
-
-                if count then
-                    count:SetFont(RealUIFont_PixelSmall:GetFont())
-                end
-                hotkey:SetFont(RealUIFont_PixelSmall:GetFont())
-                macro:SetFont(RealUIFont_PixelSmall:GetFont())
-                macro:SetShadowColor(0, 0, 0, 0)
-            end
-        end
-        local ExtraActionButton1 = _G.ExtraActionButton1
-        if ExtraActionButton1 then
-            _G.ExtraActionButton1HotKey:SetFont(RealUIFont_PixelSmall:GetFont())
-            _G.ExtraActionButton1HotKey:SetPoint("TOPLEFT", ExtraActionButton1, "TOPLEFT", 1.5, -1.5)
-            _G.ExtraActionButton1Count:SetFont(RealUIFont_PixelCooldown:GetFont())
-            _G.ExtraActionButton1Count:SetPoint("BOTTOMRIGHT", ExtraActionButton1, "BOTTOMRIGHT", -2.5, 1.5)
-        end
-    end
-end
-
 function ActionBars:BarChatCommand()
     if not (BT4) then return end
     if not _G.InCombatLockdown() then
@@ -629,9 +596,7 @@ function ActionBars:OnEnable()
         BT4Stance = BT4:GetModule("StanceBar", true)
         BT4ActionBars = BT4:GetModule("ActionBars", true)
 
-        --self:RegisterEvent("PLAYER_LOGIN")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
-
         
         BT4:UnregisterChatCommand("bar")
         BT4:UnregisterChatCommand("bt")
@@ -644,31 +609,6 @@ function ActionBars:OnEnable()
         self:RegisterChatCommand("bt4", "BarChatCommand")
         self:RegisterChatCommand("bartender", "BarChatCommand")
         self:RegisterChatCommand("bartender4", "BarChatCommand")
-
-        -- Font
-        for i = 1, 120 do
-            local button = _G["BT4Button"..i];
-            if button then
-                local name = button:GetName();
-                local count = _G[name.."Count"];
-                local hotkey = _G[name.."HotKey"];
-                local macro = _G[name.."Name"];
-
-                if count then
-                    count:SetFont(RealUIFont_PixelSmall:GetFont())
-                end
-                hotkey:SetFont(RealUIFont_PixelSmall:GetFont())
-                macro:SetFont(RealUIFont_PixelSmall:GetFont())
-                macro:SetShadowColor(0, 0, 0, 0)
-            end
-        end
-        local ExtraActionButton1 = _G.ExtraActionButton1
-        if ExtraActionButton1 then
-            _G.ExtraActionButton1HotKey:SetFont(RealUIFont_PixelSmall:GetFont())
-            _G.ExtraActionButton1HotKey:SetPoint("TOPLEFT", ExtraActionButton1, "TOPLEFT", 1.5, -1.5)
-            _G.ExtraActionButton1Count:SetFont(RealUIFont_PixelCooldown:GetFont())
-            _G.ExtraActionButton1Count:SetPoint("BOTTOMRIGHT", ExtraActionButton1, "BOTTOMRIGHT", -2.5, 1.5)
-        end
     end
 end
 
