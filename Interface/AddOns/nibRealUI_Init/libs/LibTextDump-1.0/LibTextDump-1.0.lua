@@ -230,7 +230,9 @@ end
 
 
 function prototype:Clear()
+	local max_display_lines = buffers[self].max_display_lines
 	table.wipe(buffers[self])
+	buffers[self].max_display_lines = max_display_lines
 end
 
 
