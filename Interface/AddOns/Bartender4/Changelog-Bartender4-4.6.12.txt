@@ -1,0 +1,15 @@
+tag 4.6.12
+e406bf25a6ac359f37020c37d56a61b97bbd8c94
+Hendrik Leppkes <h.leppkes@gmail.com>
+2015-11-17 20:16:20 +0100
+
+Tag as 4.6.12
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Properly refresh the fade value on bars with a custom visibility conditional
+	- Signal the proper number of stance buttons
+	Fixes ticket 1207
+	- Rename <bar>.numbuttons to .button_count

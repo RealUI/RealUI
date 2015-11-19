@@ -108,7 +108,7 @@ do
 	function barOnUpdateFunc(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
 		if self.elapsed > self.config.fadeoutdelay then
-			self:ControlFadeOut(self.elapsed)
+			self:ControlFadeOut()
 			self.elapsed = 0
 		end
 	end
@@ -117,7 +117,7 @@ do
 		if attribute == "fade" then
 			if value then
 				self:SetScript("OnUpdate", barOnUpdateFunc)
-				self:ControlFadeOut()
+				self:ControlFadeOut(true)
 			else
 				self:SetScript("OnUpdate", nil)
 				self.faded = nil
@@ -396,11 +396,13 @@ local function MouseIsOverBar(bar)
 	return false
 end
 
-function Bar:ControlFadeOut()
+function Bar:ControlFadeOut(refresh)
+	local changed = false
 	if self.faded and MouseIsOverBar(self) then
 		self:SetAlpha(self.config.alpha)
 		self.faded = nil
-	elseif not self.faded and not MouseIsOverBar(self) then
+		changed = true
+	elseif (not self.faded or refresh) and not MouseIsOverBar(self) then
 		local fade = self:GetAttribute("fade")
 		if tonumber(fade) then
 			fade = min(max(fade, 0), 100) / 100
@@ -409,8 +411,9 @@ function Bar:ControlFadeOut()
 			self:SetAlpha(self.config.fadeoutalpha or 0)
 		end
 		self.faded = true
+		changed = true
 	end
-	if self.ForAll then
+	if changed and self.ForAll then
 		self:ForAll("UpdateAlpha")
 	end
 end
