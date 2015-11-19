@@ -1,4 +1,15 @@
 local NAME, RealUI = ...
+
+-- Lua Globals --
+local _G = _G
+local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
+local next, print, select = _G.next, _G.print, _G.select
+local tostring, date = _G.tostring, _G.date
+
+-- Libs --
+local LTD = LibStub("RealUI_LibTextDump-1.0")
+
+-- RealUI --
 _G.RealUI = RealUI
 
 local uiWidth, uiHeight = UIParent:GetSize()
@@ -46,9 +57,9 @@ local function CreateDebugFrame(mod)
         return
     end
     local function save(buffer)
-        RealUI_Debug[mod] = buffer
+        _G.RealUI_Debug[mod] = buffer
     end
-    debugger[mod] = LibStub("RealUI_LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 473, save)
+    debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
     debugger[mod].numDuped = 1
     debugger[mod].prevLine = ""
     return debugger[mod]
@@ -84,7 +95,7 @@ end
 RealUI.Debug = debug
 
 -- Slash Commands
-SLASH_REALUIINIT1 = "/realdebug"
+_G.SLASH_REALUIINIT1 = "/realdebug"
 function SlashCmdList.REALUIINIT(mod, editBox)
     print("/realdebug", mod, editBox)
     if mod == "" then
@@ -124,20 +135,20 @@ f:SetScript("OnEvent", function(self, event, addon)
         --f:UnregisterEvent("ADDON_LOADED")
     elseif event == "ADDON_LOADED" then
         if addon == NAME then
-            RealUI_InitDB = RealUI_InitDB or defaults
-            RealUI_Debug = {}
+            _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
+            _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
-            Aurora = {}
-            Aurora[1] = {} -- F, functions
-            Aurora[2] = {} -- C, constants/config
-            local F, C = unpack(Aurora)
+            local Aurora = {{},{}}
+            _G.Aurora = Aurora
+            local F = Aurora[1] -- F, functions
+            local C = Aurora[2] -- C, constants/config
 
             -- Setup __index to catch other addons using functions if Aurora is disabled.
             -- This way I don't have to add the entire API.
-            setmetatable(F, {__index = function(table, key)
+            _G.setmetatable(F, {__index = function(table, key)
                 debug("Aurora: __index", key, table)
-                if not rawget(table, key) then
+                if not _G.rawget(table, key) then
                     table[key] = function(...)
                         debug("Aurora: function:", key, "args:", ...)
                     end
@@ -148,7 +159,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             F.dummy = function() end
 
             -- load RealUI overrides into Aurora namespace
-            local auroraStyle = AURORA_CUSTOM_STYLE
+            local auroraStyle = _G.AURORA_CUSTOM_STYLE
 
             for name, func in next, auroraStyle.functions do
                 if auroraStyle.copy[name] then
@@ -160,7 +171,7 @@ f:SetScript("OnEvent", function(self, event, addon)
 
             if auroraStyle.classcolors then
                 C.classcolours = auroraStyle.classcolors
-                local _, class = UnitClass("player")
+                local _, class = _G.UnitClass("player")
 
                 local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
                 C.r, C.g, C.b = r, g, b
@@ -192,7 +203,7 @@ function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
    end
 
    -- Calculate actual length of line
-   local l = sqrt((dx * dx) + (dy * dy))
+   local l = _G.sqrt((dx * dx) + (dy * dy))
 
    -- Quick escape if it's zero length
    if (l == 0) then
@@ -235,7 +246,7 @@ end
 -- Math
 RealUI.Round = function(value, places)
     local mult = 10 ^ (places or 0)
-    return math.floor(value * mult + 0.5) / mult
+    return floor(value * mult + 0.5) / mult
 end
 
 function RealUI:GetSafeVals(vCur, vMax)
@@ -258,7 +269,7 @@ end
 
 -- Colors
 function RealUI:ColorTableToStr(vals)
-    return string.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
+    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
 end
 
 function RealUI:GetDurabilityColor(percent)
