@@ -259,6 +259,7 @@ function StanceBar:UpdateStanceButtons()
 		buttons[i]:Hide()
 	end
 
+	self.button_count = num_stances
 	StanceBarMod.button_count = num_stances
 	if StanceBarMod.optionobject then
 		StanceBarMod.optionobject.table.general.args.rows.max = num_stances

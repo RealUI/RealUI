@@ -1965,6 +1965,7 @@ local clientString = {
     [BNET_CLIENT_SC2] = "SC2",
     [BNET_CLIENT_WTCG] = "HS",
     [BNET_CLIENT_HEROES] = "HotS",
+    [BNET_CLIENT_OVERWATCH] = "OW",
 }
 
 local function Friends_Update(self)
@@ -2055,7 +2056,7 @@ local function Friends_Update(self)
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 
             local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
-
+            InfoLine:debug("BNet: not in WoW", toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
             toonName = BNet_GetValidatedCharacterName(toonName, battleTag, client)
             client = clientString[client] or client
             curFriendsOnline = curFriendsOnline + 1
