@@ -104,7 +104,7 @@ function ActionBars:ApplyABSettings(tag)
             local isBottomBar = not(isVertBar) and not(isTopBar)
             ActionBars:debug(id, "Stats", isTopBar, isBottomBar, isLeftBar, isRightBar)
 
-            local numButtons = BTBar.numbuttons
+            local numButtons = BTBar.numbuttons or BTBar.button_count
             BarSizes[id] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
 
             -- Create Padding table
