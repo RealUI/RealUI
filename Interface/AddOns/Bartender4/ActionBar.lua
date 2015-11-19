@@ -221,7 +221,7 @@ function ActionBar:UpdateButtons(numbuttons)
 		buttons[i]:SetAttribute("statehidden", true)
 	end
 
-	self.numbuttons = numbuttons
+	self.button_count = numbuttons
 	self.buttons = buttons
 
 	self:UpdateButtonLayout()
