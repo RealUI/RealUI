@@ -1,7 +1,7 @@
 -- Lua Globals --
 local _G = _G
 local next, random, type = _G.next, _G.math.random, _G.type
-local bit_band = _G.bit.band
+local bit_band, tinsert = _G.bit.band, _G.table.insert
 
 -- WoW Globals --
 local UIParent = _G.UIParent
@@ -81,6 +81,16 @@ local function shouldTrack(spellData)
     else
         debug(isDebug, "Don't Track")
         return false
+    end
+end
+local function AddToSpellList(spellData, spellList)
+    local spell = spellData.spell
+    if type(spell) == "table" then
+        for index = 1, #spell do
+            tinsert(spellList, spell[index])
+        end
+    else
+        tinsert(spellList, spell)
     end
 end
 
@@ -311,6 +321,7 @@ end
 function AuraTracking:PLAYER_LOGIN()
     self:debug("PLAYER_LOGIN")
     self:RefreshMod()
+    local playerSpellList = {}
     for trackerID, spellData in next, trackingData do
         local classID, id, isDefault = _G.strsplit("-", trackerID)
         self:debug("|c"..id.."Init tracker|r ", id, isDefault)
@@ -321,8 +332,10 @@ function AuraTracking:PLAYER_LOGIN()
         if tracker.shouldTrack and spellData.unit == "player" then
             tracker:Enable()
             tracker:SetAlpha(db.indicators.fadeOpacity)
+            AddToSpellList(spellData, playerSpellList)
         end
     end
+    _G.Raven:RegisterSpellList("PlayerExclusions", playerSpellList, true)
     self.loggedIn = true
 end
 function AuraTracking:PLAYER_ENTERING_WORLD()
@@ -366,7 +379,9 @@ end
 function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     self:debug("TargetAndPetUpdate", unit, event, ...)
     local unitExists = _G.UnitExists(unit)
+    local targetSpellList
     if unit == "target" then
+        targetSpellList = {}
         self.targetHostile = unitExists and _G.UnitCanAttack("player", "target") and not _G.UnitIsDeadOrGhost("target")
     end
     if unitExists then
@@ -377,9 +392,15 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
             for tracker, spellData in self:IterateTrackers() do
                 if spellData.unit == unit and tracker.shouldTrack and not tracker.isEnabled then
                     tracker:Enable()
+                    if targetSpellList then
+                        AddToSpellList(spellData, targetSpellList)
+                    end
                 end
             end
             self:UNIT_AURA("FORCED_UNIT_AURA", unit)
+            if targetSpellList then
+                _G.Raven:RegisterSpellList("TargetExclusions", targetSpellList, true)
+            end
         end
     elseif isValidUnit[unit] then
         iterUnits = true
@@ -402,16 +423,19 @@ function AuraTracking:CharacterUpdate(units, force)
         playerLevel, playerSpec = newPlayerLevel, newPlayerSpec
         self:debug("Level", playerLevel, "Spec", playerSpec)
 
+        local playerSpellList = {}
         for tracker, spellData in self:IterateTrackers() do
             tracker:Disable() -- Reset incase there are any auras still active
             tracker.shouldTrack = shouldTrack(spellData)
             if tracker.shouldTrack then
                 self:debug("Track", tracker.id)
                 tracker:Enable()
+                AddToSpellList(spellData, playerSpellList)
             else
                 self:debug("Don't Track", tracker.id)
             end
         end
+        _G.Raven:RegisterSpellList("PlayerExclusions", playerSpellList, true)
     end
 end
 
