@@ -127,6 +127,14 @@ local qqColor = { r=1, g=0, b=0 }
 local nilcolor = { r=1, g=1, b=1 }
 local tapped = { r=.6, g=.6, b=.6 }
 
+local UnitIsTapDenied
+if RealUI.TOC < 70000 then
+    UnitIsTapDenied = function(unit)
+        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
+    end
+else
+    UnitIsTapDenied = _G.UnitIsTapDenied
+end
 local function unitColor(unit)
     local color
 
@@ -135,7 +143,7 @@ local function unitColor(unit)
             local colors = RAID_CLASS_COLORS
             local _, class = UnitClass(unit)
             color = colors[class]
-        elseif(UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) then
+        elseif UnitIsTapDenied(unit) then
             color = tapped
         else
             local reaction = UnitReaction(unit, "player")

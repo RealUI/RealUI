@@ -31,6 +31,7 @@ C.classcolours = {
 	["SHAMAN"] = { r = 0, g = 0.6, b = 0.6 };
 	["WARRIOR"] = { r = 0.9, g = 0.65, b = 0.45 },
 	["DEATHKNIGHT"] = { r = 0.77, g = 0.12 , b = 0.23 },
+    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
 }
 
 C.media = {
@@ -62,6 +63,8 @@ C.defaults = {
 }
 
 C.frames = {}
+
+C.TOC = select(4, GetBuildInfo())
 
 -- [[ Cached variables ]]
 
@@ -1826,8 +1829,10 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GuildRegistrarFrameBottom:Hide()
 		GuildRegistrarFrameMiddle:Hide()
 		select(19, GuildRegistrarFrame:GetRegions()):Hide()
-		select(6, GuildRegistrarFrameEditBox:GetRegions()):Hide()
-		select(7, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+		if C.TOC < 70000 then
+			select(6, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+			select(7, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+		end
 
 		GuildRegistrarFrameEditBox:SetHeight(20)
 
