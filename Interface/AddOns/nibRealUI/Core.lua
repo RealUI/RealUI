@@ -6,6 +6,7 @@ local function debug(...)
 end
 
 _G.RealUI = nibRealUI
+nibRealUI.TOC = select(4, GetBuildInfo())
 
 nibRealUI.verinfo = {}
 for word in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
@@ -22,8 +23,13 @@ nibRealUI.configModeModules = {}
 do
     local LSM = LibStub("LibSharedMedia-3.0")
     local lsmFonts = LSM:List("font")
-    local function findFont(font)
+    local function findFont(font, backup)
         local fontPath, fontSize, fontArgs = font:GetFont()
+        if not fontPath then
+            debug("Font not loaded, set backup")
+            fontPath, fontSize, fontArgs = backup:GetFont()
+            font:SetFont(fontPath, fontSize, fontArgs)
+        end
         local fontName, path
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
@@ -42,15 +48,15 @@ do
         end
     end
     local fonts = {
-        standard = findFont(RealUIFont_Normal),
-        chat = findFont(RealUIFont_Chat),
-        crit = findFont(RealUIFont_Crit),
-        header = findFont(RealUIFont_Header),
+        standard = findFont(RealUIFont_Normal, SystemFont_Small),
+        chat = findFont(RealUIFont_Chat, NumberFont_Normal_Med),
+        crit = findFont(RealUIFont_Crit, NumberFont_Outline_Huge),
+        header = findFont(RealUIFont_Header, QuestFont_Huge),
         pixel = {
-            small =    findFont(RealUIFont_PixelSmall),
-            large =    findFont(RealUIFont_PixelLarge),
-            numbers =  findFont(RealUIFont_PixelNumbers),
-            cooldown = findFont(RealUIFont_PixelCooldown),
+            small =    findFont(RealUIFont_PixelSmall, SystemFont_Small),
+            large =    findFont(RealUIFont_PixelLarge, SystemFont_Med1),
+            numbers =  findFont(RealUIFont_PixelNumbers, SystemFont_Large),
+            cooldown = findFont(RealUIFont_PixelCooldown, SystemFont_Large),
         }
     }
     nibRealUI.media.font = fonts
