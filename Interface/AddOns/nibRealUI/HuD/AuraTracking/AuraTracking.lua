@@ -93,6 +93,11 @@ local function AddToSpellList(spellData, spellList)
         tinsert(spellList, spell)
     end
 end
+local function RegisterSpellList(unitExclusions, spellList)
+    if _G.Raven then
+        _G.Raven:RegisterSpellList(unitExclusions, spellList, true)
+    end
+end
 
 function AuraTracking:AddTracker(tracker, slotID)
     self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
@@ -335,7 +340,7 @@ function AuraTracking:PLAYER_LOGIN()
             AddToSpellList(spellData, playerSpellList)
         end
     end
-    _G.Raven:RegisterSpellList("PlayerExclusions", playerSpellList, true)
+    RegisterSpellList("PlayerExclusions", playerSpellList)
     self.loggedIn = true
 end
 function AuraTracking:PLAYER_ENTERING_WORLD()
@@ -399,7 +404,7 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
             end
             self:UNIT_AURA("FORCED_UNIT_AURA", unit)
             if targetSpellList then
-                _G.Raven:RegisterSpellList("TargetExclusions", targetSpellList, true)
+                RegisterSpellList("TargetExclusions", targetSpellList)
             end
         end
     elseif isValidUnit[unit] then
@@ -435,7 +440,7 @@ function AuraTracking:CharacterUpdate(units, force)
                 self:debug("Don't Track", tracker.id)
             end
         end
-        _G.Raven:RegisterSpellList("PlayerExclusions", playerSpellList, true)
+        RegisterSpellList("PlayerExclusions", playerSpellList)
     end
 end
 
