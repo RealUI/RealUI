@@ -560,6 +560,15 @@ function UnitFrames:UpdateStatus(event, ...)
     end
 end
 
+local UnitIsTapDenied
+if nibRealUI.TOC < 70000 then
+    UnitIsTapDenied = function(unit)
+        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
+    end
+else
+    UnitIsTapDenied = _G.UnitIsTapDenied
+end
+
 function UnitFrames:UpdateEndBox(...)
     UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit, nil
@@ -567,7 +576,7 @@ function UnitFrames:UpdateEndBox(...)
     if UnitIsPlayer(unit) then
         color = nibRealUI:GetClassColor(class)
     else
-        if ( not UnitPlayerControlled(unit) and UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) ) then
+        if ( not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
             color = db.overlay.colors.status.tapped
         elseif UnitIsEnemy("player", unit) then
             color = db.overlay.colors.status.hostile

@@ -26,6 +26,7 @@ style.skipSplashScreen = true
 --style.highlightColor = {r = 0, g = 1, b = 0}
 style.classcolors = {
     ["DEATHKNIGHT"] = { r = 0.77, g = 0.12, b = 0.23 },
+    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
     ["DRUID"]       = { r = 1.00, g = 0.49, b = 0.04 },
     ["HUNTER"]      = { r = 0.67, g = 0.83, b = 0.45 },
     ["MAGE"]        = { r = 0.41, g = 0.80, b = 0.94 },

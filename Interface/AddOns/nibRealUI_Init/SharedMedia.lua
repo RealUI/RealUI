@@ -13,6 +13,10 @@ LSM:Register("font", "pixel_numbers", [[Interface\AddOns\nibRealUI\Fonts\pixel_n
 LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\nibRealUI\Fonts\pixel_cooldown.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\nibRealUI\Fonts\pixel_crits.ttf]])
 
+-- LSM dosn't include the US version of these fonts, we need them for font backups.
+LSM:Register("font", "Skurri US", [[Fonts\skurri.ttf]])
+LSM:Register("font", "Morpheus US", [[Fonts\MORPHEUS.ttf]])
+
 -- Russian + Latin char languages
 LOCALE_MASK = LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
 LSM:Register("font", "Roboto", [[Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf]], LOCALE_MASK)

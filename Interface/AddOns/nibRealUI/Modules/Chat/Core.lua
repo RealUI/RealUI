@@ -136,7 +136,10 @@ function Chat:OnEnable()
 	for i = 1, NUM_CHAT_WINDOWS do
 		local editbox = _G["ChatFrame"..i.."EditBox"]
 		for k = 6, 11 do
-			select(k, editbox:GetRegions()):SetTexture(nil)
+			local tex = select(k, editbox:GetRegions())
+			if tex and tex:GetObjectType() == "texture" then
+				tex:SetTexture(nil)
+			end
 		end
 	end
 end
