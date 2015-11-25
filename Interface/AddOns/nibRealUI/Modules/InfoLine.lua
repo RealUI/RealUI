@@ -5,7 +5,6 @@ local Tablet20 = LibStub("Tablet-2.0")
 
 local MODNAME = "InfoLine"
 local InfoLine = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
-local StatDisplay
 
 local _
 local min = math.min
@@ -2463,10 +2462,6 @@ local function SpecLootClickFunc(self, spec)
     SetLootSpecialization(LootSpecIDs[spec])
 end
 
-local function SpecStatClickFunc(self, spec)
-    nibRealUI:GetModule("StatDisplay"):ShowOptionsWindow()
-end
-
 local function SpecAddLootSpecToCat(self, cat)
     local numSpecs = GetNumSpecializations()
     local specNames = {}
@@ -2649,57 +2644,6 @@ local function Spec_UpdateTablet(self)
         SpecAddLootSpecToCat(self, SpecSection["loot"].cat)
     end
 
-    ---- Stat Display
-    if not StatDisplay then
-        StatDisplay = nibRealUI:GetModule("StatDisplay", true)
-    end
-    if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
-        if GetSpecialization() then
-            AddBlankTabLine(SpecSection["loot"].cat, 8)
-        elseif numEquipSets > 0 then
-            AddBlankTabLine(SpecSection["equipment"].equipCat, 8)
-        else
-            AddBlankTabLine(SpecSection["specs"].talentCat, 8)
-        end
-        SpecSection["stats"] = {}
-        SpecSection["stats"].cat = Tablets.spec:AddCategory()
-        SpecSection["stats"].cat:AddLine("text", L["Spec_StatDisplay"], "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
-        AddBlankTabLine(SpecSection["stats"].cat, 2)
-
-        if numSpecGroups == 2 then Cols = {PRIMARY, SECONDARY, " "} else Cols = {PRIMARY, " "} end
-        SpecSection["stats"].statCat = Tablets.spec:AddCategory("columns", #Cols)
-        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "LEFT"})
-        SpecSection["stats"].statCat:AddLine(lineHeader)
-        AddBlankTabLine(SpecSection["stats"].statCat, 1)
-
-        local watchedStatTexts = StatDisplay:GetCharStatTexts()
-        local line = {}
-        for r = 1, 2 do
-            wipe(line)
-            for s = 1, numSpecGroups do
-                if s == 1 then
-                    line["text"] = watchedStatTexts[s][r]
-                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"] = "LEFT"
-                    line["textR"] = 0.9
-                    line["textG"] = 0.9
-                    line["textB"] = 0.9
-                    line["indentation"] = 12.5
-                    line["func"] = function() SpecStatClickFunc(self, s) end
-                elseif s == 2 then
-                    line["text2"] = watchedStatTexts[s][r]
-                    line["size2"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify2"] = "LEFT"
-                    line["text2R"] = 0.9
-                    line["text2G"] = 0.9
-                    line["text2B"] = 0.9
-                end
-            end
-            line["text"..(numSpecGroups + 1)] = " "
-            SpecSection["stats"].statCat:AddLine(line)
-        end
-    end
-
     -- Hint
     local hintStr = ""
     if numSpecGroups > 1 then
@@ -2712,10 +2656,6 @@ local function Spec_UpdateTablet(self)
         else
             hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
         end
-    end
-    if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
-        if hintStr ~= "" then hintStr = hintStr .. "\n" end
-        hintStr = hintStr .. L["Spec_StatConfig"]
     end
     Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
 end
