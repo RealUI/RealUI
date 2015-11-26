@@ -12,6 +12,7 @@ local oUF = oUFembed
 -- RealUI --
 local RealUI =  _G.RealUI
 local db, ndb, ndbc
+local isTest = RealUI.isTest
 
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
@@ -235,7 +236,11 @@ local api = {
         end
         local row = self.bar.row
         for i = 1, #row do
-            row[i]:SetTexture(r, g, b, a or 1)
+            if isTest then
+                row[i]:SetColorTexture(r, g, b, a or 1)
+            else
+                row[i]:SetTexture(r, g, b, a or 1)
+            end
         end
     end,
     SetBackgroundColor = function(self, r, g, b, a)
@@ -247,7 +252,11 @@ local api = {
             if self.col then
                 tex[i]:SetVertexColor(r, g, b, a or 1)
             else
-                tex[i]:SetTexture(r, g, b, a or 1)
+                if isTest then
+                    tex[i]:SetColorTexture(r, g, b, a or 1)
+                else
+                    tex[i]:SetTexture(r, g, b, a or 1)
+                end
             end
         end
     end,
@@ -325,7 +334,11 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     debug(info, "CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
-    top:SetTexture(0, 0, 0)
+    if isTest then
+        top:SetColorTexture(0, 0, 0)
+    else
+        top:SetTexture(0, 0, 0)
+    end
     top:SetHeight(1)
     top:SetPoint("TOPLEFT", leftX, 0)
     top:SetPoint("TOPRIGHT", rightX, 0)
@@ -346,7 +359,12 @@ local function CreateAngleBG(self, width, height, parent, info)
         local row = {}
         for i = 1, maxRows do
             local tex = bg:CreateTexture(nil, "BACKGROUND")
-            tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            -- tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            if isTest then
+                tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            else
+                tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            end
             tex:SetHeight(1)
             if leftX == 0 then
                 tex:SetPoint("TOPLEFT", top, "TOPLEFT", (i + 1), -i)
@@ -389,7 +407,11 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     local ofs = maxRows + 1
     local bottom = bg:CreateTexture(nil, "BORDER")
-    bottom:SetTexture(0, 0, 0)
+    if isTest then
+        bottom:SetColorTexture(0, 0, 0)
+    else
+        bottom:SetTexture(0, 0, 0)
+    end
     bottom:SetHeight(1)
     if leftX == -rightX then
         if leftX == 0 then -- \ /
@@ -405,30 +427,60 @@ local function CreateAngleBG(self, width, height, parent, info)
     end
     bg.bottom = bottom
 
-    local left = bg:CreateTexture(nil, "BORDER")
-    left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    left:SetVertexColor(0, 0, 0)
-    if leftX == 0 then
-        --left:SetVertexColor(1, 0, 0)
-        RealUI:DrawLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
-        --DrawRouteLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
-    else
-        --left:SetVertexColor(1, 1, 0)
-        RealUI:DrawLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
-        --DrawRouteLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
-    end
+    if isTest then
+        local left = bg:CreateLine(nil, "BORDER")
+        left:SetColorTexture(0, 0, 0)
+        left:SetThickness(16)
+        if leftX == 0 then
+            --left:SetColorTexture(1, 0, 0)
+            left:SetStartPoint("TOPLEFT", 1, -1)
+            left:SetEndPoint("TOPLEFT", ofs, -ofs)
+        else
+            --left:SetColorTexture(1, 1, 0)
+            left:SetStartPoint("BOTTOMLEFT", 1, 1)
+            left:SetEndPoint("BOTTOMLEFT", ofs, ofs)
+        end
+        left:Show()
 
-    local right = bg:CreateTexture(nil, "BORDER")
-    right:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    right:SetVertexColor(0, 0, 0)
-    if rightX == 0 then
-        --right:SetVertexColor(0, 1, 0)
-        RealUI:DrawLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
-        --DrawRouteLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+        local right = bg:CreateLine(nil, "BORDER")
+        right:SetColorTexture(0, 0, 0)
+        right:SetThickness(16)
+        if rightX == 0 then
+            --right:SetColorTexture(0, 1, 0)
+            right:SetStartPoint("TOPRIGHT", -1, -1)
+            right:SetEndPoint("TOPRIGHT", -ofs, -ofs)
+        else
+            --right:SetColorTexture(0, 1, 1)
+            right:SetStartPoint("BOTTOMRIGHT", -1, 1)
+            right:SetEndPoint("BOTTOMRIGHT", -ofs, ofs)
+        end
+        right:Show()
     else
-        --right:SetVertexColor(0, 1, 1)
-        RealUI:DrawLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
-        --DrawRouteLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+        local left = bg:CreateTexture(nil, "BORDER")
+        left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+        left:SetVertexColor(0, 0, 0)
+        if leftX == 0 then
+            --left:SetVertexColor(1, 0, 0)
+            RealUI:DrawLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
+            --DrawRouteLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
+        else
+            --left:SetVertexColor(1, 1, 0)
+            RealUI:DrawLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
+            --DrawRouteLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
+        end
+
+        local right = bg:CreateTexture(nil, "BORDER")
+        right:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+        right:SetVertexColor(0, 0, 0)
+        if rightX == 0 then
+            --right:SetVertexColor(0, 1, 0)
+            RealUI:DrawLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+            --DrawRouteLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+        else
+            --right:SetVertexColor(0, 1, 1)
+            RealUI:DrawLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+            --DrawRouteLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+        end
     end
     return bg
 end
@@ -448,7 +500,11 @@ local function CreateAngleBar(self, width, height, parent, info)
 
     --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    test:SetTexture(1, 1, 1, 0.1)
+    if isTest then
+        test:SetColorTexture(1, 1, 1, 0.1)
+    else
+        test:SetTexture(1, 1, 1, 0.1)
+    end
     test:SetAllPoints(bar)
     --]]
  

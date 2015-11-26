@@ -7,6 +7,7 @@ end
 
 _G.RealUI = nibRealUI
 nibRealUI.TOC = select(4, GetBuildInfo())
+nibRealUI.isTest = nibRealUI.TOC >= 70000
 
 nibRealUI.verinfo = {}
 for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do

@@ -73,12 +73,7 @@ local function debug(mod, ...)
     local text = mod
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        if (arg ~= nil) then
-            arg = tostring(arg)
-        else
-            arg = "nil"
-        end
-        text = text .. "     " .. arg
+        text = text .. "     " .. tostring(arg)
     end
     if modDebug.prevLine == text then
         modDebug.numDuped = modDebug.numDuped + 1

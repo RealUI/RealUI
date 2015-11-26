@@ -17,6 +17,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Include file="AceHook-3.0\AceHook-3.0.xml"/>
     <Include file="Astrolabe\Load.xml"/>
     <Script file="LibRangeCheck-2.0\LibRangeCheck-2.0.lua"/>
+    <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
     <Include file="TabletLib\Tablet-2.0.xml" />
     <Include file="oUF\oUF.xml"/>
     <Include file="SpecializedLibBars-1.0\lib.xml"/>
