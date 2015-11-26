@@ -81,7 +81,7 @@ functions.CreateBG = function(frame)
     local f = frame
     if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
 
-    local bg = f:CreateTexture(nil, "BACKGROUND")
+    local bg = f:CreateTexture(nil, "BACKGROUND", nil, -8)
     bg:SetPoint("TOPLEFT", frame, -1, 1)
     bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
     bg:SetTexture(RealUI.media.textures.plain)

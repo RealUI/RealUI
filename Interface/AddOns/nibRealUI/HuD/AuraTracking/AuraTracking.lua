@@ -1,685 +1,600 @@
+-- Lua Globals --
+local _G = _G
+local next, random, type = _G.next, _G.math.random, _G.type
+local bit_band, tinsert = _G.bit.band, _G.table.insert
+
+-- WoW Globals --
+local UIParent = _G.UIParent
+local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
+local C_TimerAfter = _G.C_Timer.After
+local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
+
+-- Libs --
+local LibWin = LibStub("LibWindow-1.1")
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
+
+-- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
-local db, ndb
+local db, ndb, trackingData
+local round = nibRealUI.Round
 
-local _
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
-local modules = {}
+local maxSlots, maxStaticSlots = 10, 6
+local numActive = {left = 0, right = 0}
+local playerLevel, playerSpec, iterUnits
+local isValidUnit = {
+    player = true,
+    target = false,
+    pet = false
+}
 
-local FontStringsCooldown = {}
+local function debug(isDebug, ...)
+    if isDebug then
+        -- self.debug should be a string describing what the bar is.
+        -- eg. "playerHealth", "targetAbsorbs", etc
+        AuraTracking:debug(isDebug, ...)
+    end
+end
+local function FindSpellMatch(spell, unit, filter, isDebug)
+    debug(isDebug, "FindSpellMatch", spell, unit, filter)
+    local aura = {}
+    for auraIndex = 1, 40 do
+        local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
+        debug(isDebug, "Aura", auraIndex, name, ID)
+        if spell == name or spell == ID then
+            debug(isDebug, "Match found")
+            aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
+            aura.name, aura.ID = name, ID
+            aura.count = count > 0 and count or ""
+            return true, aura
+        end
 
-local Indicators = {}
-local numIndicators
-
-local numStaticIndicators
-local numFreeIndicators
-local ActiveFreeIndicatorKeys = {}
-local ActiveFreeIndicatorTimes = {}
-
-local IndicatorParents = {}
-local IndicatorSlots = {}
-
-local SideActiveFree = {}
-local StaticIndicatorsLeft = {}
-
-local maxSlots = 24
-
--------------------
----- Functions ----
--------------------
-local round = nibRealUI.Round
-
-local DAY, HOUR, MINUTE = 86400, 3600, 60 --used for formatting text
-local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for formatting text at transition points
-function AuraTracking:GetTimeText(s)
-	--format text as seconds when at 90 seconds or below
-	if s < MINUTEISH then
-		return round(s)
-	--format text as minutes when below an hour
-	elseif s < HOURISH then
-		return round(s/MINUTE), "m"
-	--format text as hours when below a day
-	else
-		return round(s/HOUR), "h"
-	end
+        if name == nil then
+            aura.index = auraIndex
+            return false, aura
+        end
+    end
+end
+local function shouldTrack(spellData)
+    local isDebug = spellData.debug
+    if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
+        local talent = spellData.talent
+        debug(isDebug, "Check for talents", talent.mustHave)
+        if talent.ID then
+            local _, talentID = _G.GetTalentRowSelectionInfo(talent.tier)
+            AuraTracking:debug("Find talent", talent.tier, talent.ID, talentID)
+            if talent.mustHave then
+                debug(isDebug, "Must have")
+                return talent.ID == talentID
+            else
+                debug(isDebug, "Must not have")
+                return talent.ID ~= talentID
+            end
+        else
+            debug(isDebug, "Do Track")
+            return true
+        end
+    else
+        debug(isDebug, "Don't Track")
+        return false
+    end
+end
+local function AddToSpellList(spellData, spellList)
+    local spell = spellData.spell
+    if type(spell) == "table" then
+        for index = 1, #spell do
+            tinsert(spellList, spell[index])
+        end
+    else
+        tinsert(spellList, spell)
+    end
+end
+local function RegisterSpellList(unitExclusions, spellList)
+    if _G.Raven then
+        _G.Raven:RegisterSpellList(unitExclusions, spellList, true)
+    end
 end
 
----------------------------
----- Raven Spell Lists ----
----------------------------
-local RavenBuffSpellList = "PlayerExclusions"
-local RavenDebuffSpellList = "TargetExclusions"
-function AuraTracking:ResetRavenSpellLists()
-	if IsAddOnLoaded("Raven") and RavenDB then
-		if RavenDB["global"]["SpellLists"] then
-			RavenDB["global"]["SpellLists"][RavenBuffSpellList] = {}
-			RavenDB["global"]["SpellLists"][RavenDebuffSpellList] = {}
-		end
-	end
+function AuraTracking:AddTracker(tracker, slotID)
+    self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
+    local numActive = numActive[tracker.side]
+    if tracker.slotID then
+        if tracker.isStatic then
+            tracker.icon:SetDesaturated(false)
+            tracker:SetAlpha(1)
+            numActive = numActive + 1
+        end
+    else
+        numActive = numActive + 1
+        local side, slot = self[tracker.side]
+        if slotID then
+            self:debug("Place in slot", slotID)
+            slot = side["slot"..slotID]
+        else
+            self:debug("Find empty slot")
+            for i = 1, maxSlots do
+                slot = side["slot"..i]
+                if not slot.isActive then
+                    self:debug("Found slot", slotID)
+                    slotID = i
+                    break
+                end
+            end
+        end
+        slot.tracker = tracker
+        slot.isActive = true
+
+        tracker.slotID = slotID
+        tracker:SetAllPoints(slot)
+        tracker:Show()
+    end
+end
+function AuraTracking:RemoveTracker(tracker, isStatic)
+    self:debug("RemoveTracker", tracker.id, isStatic)
+    local numActive = numActive[tracker.side]
+    if isStatic then
+        tracker.icon:SetDesaturated(true)
+        tracker:SetAlpha(db.indicators.fadeOpacity)
+        numActive = numActive - 1
+    else
+        numActive = numActive - 1
+        local side, emptySlot = self[tracker.side], tracker.slotID
+        local currSlot = side["slot"..emptySlot]
+        currSlot.tracker = nil
+        currSlot.isActive = false
+
+        tracker.slotID = nil
+        tracker:ClearAllPoints()
+        tracker:Hide()
+
+        if iterUnits then return end
+        local nextSlot = side["slot"..emptySlot+1]
+        if nextSlot.isActive then
+            local movedTracker = nextSlot.tracker
+            self:debug("Shift", movedTracker.id, movedTracker.isStatic, emptySlot)
+            self:RemoveTracker(movedTracker, movedTracker.isStatic)
+            self:AddTracker(movedTracker, emptySlot)
+        end
+    end
+end
+do -- AuraTracking:CreateNewTracker()
+    local template = "yxxxxxxx"
+    local function generateGUID()
+        return _G.gsub(template, "[xy]", function (c)
+            local v = (c == "x") and random(0, 0xf) or random(0, 7)
+            return _G.format("%x", v)
+        end)
+    end
+    function AuraTracking:CreateNewTracker()
+        local newID
+        repeat
+            newID = generateGUID()
+            local isDupe = false
+            for trackerID, spellData in next, trackingData do
+                local classID, id, isDefault = _G.strsplit("-", trackerID)
+                if newID == id then
+                    isDupe = true
+                    break
+                end
+            end
+        until not isDupe
+
+        local newTrackerID = _G.format("%d-%s", nibRealUI.classID, newID)
+        local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
+        tracker.classID = nibRealUI.classID
+        tracker.isDefault = false
+        return tracker, trackingData[newTrackerID]
+    end
 end
 
-function AuraTracking:ToggleRavenAura(ignoreRaven, auraType, aura, val)
-	local RavenSpellList = auraType == "buff" and RavenBuffSpellList or RavenDebuffSpellList
-	if IsAddOnLoaded("Raven") and RavenDB then
-		if RavenDB["global"]["SpellLists"][RavenSpellList] then
-			RavenDB["global"]["SpellLists"][RavenSpellList][aura] = ignoreRaven and false or val
-		end
-	end
-end
-
-
----------------------------
----- Indicator Updates ----
----------------------------
-function AuraTracking:RemoveIndicatorFromSlot(frame, side, index)
-	IndicatorSlots[side][index].key = nil
-	frame:SetParent(nil)
-	frame:ClearAllPoints()
-	frame.slotSide = nil
-	frame.slotIndex = nil
-	frame:Hide()
-end
-
-function AuraTracking:AssignIndicatorToSlot(frame, key, side, index)
-	IndicatorSlots[side][index].key = key
-	frame:SetParent(IndicatorSlots[side][index])
-	frame:ClearAllPoints()
-	frame:SetAllPoints()
-	frame.slotSide = side
-	frame.slotIndex = index
-end
-
-function AuraTracking:StaticIndicatorUpdate(frame)
-	-- Fade inactive
-	if db.indicators.fadeInactive then
-		if not(frame.isActive) then
-			IndicatorSlots[frame.slotSide][frame.slotIndex]:SetAlpha(db.indicators.fadeOpacity)
-		else
-			IndicatorSlots[frame.slotSide][frame.slotIndex]:SetAlpha(1)
-		end
-	end
-
-	-- Update Left indicator panel visibility
-	self.SideActiveStatic.LEFT = false
-	for k, indicator in pairs(StaticIndicatorsLeft) do
-		if indicator.frame.isActive then
-			self.SideActiveStatic.LEFT = true
-		end
-	end
-	self:UpdateVisibility()
-end
-
-local SortIndicators = function(a, b)
-	if a.endTime and b.endTime then
-		return a.endTime < b.endTime
-	elseif a then
-		return true
-	end
-end
-
-function AuraTracking:RegisterFreeIndicatorUpdate()
-	if not self.freeIndicatorUpdateTimer then
-		self.freeIndicatorUpdateTimer = self:ScheduleTimer("AssignFreeIndicators", 1/60)
-	end
-end
-
-function AuraTracking:FreeIndicatorUpdate(frame, visible)
-	if visible then
-		if not ActiveFreeIndicatorKeys[frame.key] then
-			-- Assign to Active Free Indicators
-			ActiveFreeIndicatorKeys[frame.key] = true
-
-			-- Set End Time
-			tinsert(ActiveFreeIndicatorTimes, {key = frame.key, endTime = frame.auraEndTime})
-		else
-			-- Update End Time
-			for i = 1, #ActiveFreeIndicatorTimes do
-				if ActiveFreeIndicatorTimes[i].key == frame.key then
-					ActiveFreeIndicatorTimes[i].endTime = frame.auraEndTime
-				end
-			end
-		end
-	else
-		-- Remove from Active Free Indicators
-		if ActiveFreeIndicatorKeys[frame.key] then
-			ActiveFreeIndicatorKeys[frame.key] = nil
-		end
-		for k,v in pairs(ActiveFreeIndicatorTimes) do
-			if not(ActiveFreeIndicatorKeys[v.key]) then
-				tremove(ActiveFreeIndicatorTimes, k)
-			end
-		end
-	end
-
-	-- Sort by time left
-	table.sort(ActiveFreeIndicatorTimes, SortIndicators)
-
-	-- Refresh Slot assignments
-	self:RegisterFreeIndicatorUpdate()
-end
-
--- Assign Free Indicators to slots
-function AuraTracking:AssignFreeIndicators()
-	-- Un-assign inactive free indicators
-	for k, indicator in pairs(Indicators) do
-		if indicator.frame.slotIndex and not(indicator.frame.isStatic) and not(ActiveFreeIndicatorKeys[indicator.frame.key]) then
-			self:RemoveIndicatorFromSlot(indicator.frame, indicator.frame.slotSide, indicator.frame.slotIndex)
-		end
-	end
-
-	-- Re-assign any active free indicators that have moved position
-	SideActiveFree = {LEFT = false, RIGHT = false}
-	local key, info, side, curSlotIndex, newSlotIndex
-	local curIndex = {LEFT = 0, RIGHT = 0}
-	for k, v in ipairs(ActiveFreeIndicatorTimes) do
-		key = v.key
-		info = Indicators[key].info
-		side = info.side or Indicators[key].frame.side
-		curIndex[side] = curIndex[side] + 1
-		newSlotIndex = curIndex[side] + numStaticIndicators[side]
-
-		if not SideActiveFree[side] then
-			SideActiveFree[side] = not(info.hideOOC) and true or false
-		end
-
-		if ActiveFreeIndicatorKeys[key] and (Indicators[key].frame.slotIndex ~= newSlotIndex) then
-			self:AssignIndicatorToSlot(Indicators[key].frame, key, side, newSlotIndex)
-		end
-	end
-
-	self:UpdateVisibility()
-	self.freeIndicatorUpdateTimer = nil
-end
-
--- Assign Static Indicators to slots and register into StaticIndicator tables
-local SortStatic = function(a, b)
-	if a.order ~= b.order then
-		return a.order < b.order
-	else
-		return a.key < b.key
-	end
-end
-
-function AuraTracking:AssignStaticIndicators()
-	numStaticIndicators = {LEFT = 0, RIGHT = 0}
-	wipe(StaticIndicatorsLeft)
-
-	-- Create Static side tables
-	local Static = {LEFT = {}, RIGHT = {}}
-	for k, indicator in pairs(Indicators) do
-		local info = indicator.info
-		if info.order and (info.order > 0) and not(indicator.frame.inactive) then
-			local side = info.side or indicator.frame.side
-
-			tinsert(Static[side], {order = info.order, key = k})
-		end
-	end
-
-	-- Sort Static side tables by order
-	table.sort(Static.LEFT, SortStatic)
-	table.sort(Static.RIGHT, SortStatic)
-
-	-- Assign Static indicators to slots
-	for side, _ in pairs(Static) do
-		for k, v in ipairs(Static[side]) do
-			local indicator = Indicators[v.key]
-			numStaticIndicators[side] = numStaticIndicators[side] + 1
-			self:AssignIndicatorToSlot(indicator.frame, v.key, side, numStaticIndicators[side])--info.order)
-			if side == "LEFT" then
-				tinsert(StaticIndicatorsLeft, indicator)
-			end
-		end
-	end
-end
-
--- Refresh all Indicator aura status
-function AuraTracking:RefreshIndicatorStatus()
-	for k, indicator in pairs(Indicators) do
-		if indicator.AuraRefresh then
-			indicator:AuraRefresh()
-		end
-	end
-end
-
--- Un-assign then Re-assign all Indicators
-function AuraTracking:RefreshIndicatorAssignments()
-	for sI = 1, maxSlots do
-		for side, _ in pairs(IndicatorSlots) do
-			IndicatorSlots[side][sI]:SetAlpha(1)
-		end
-	end
-
-	for k, indicator in pairs(Indicators) do
-		local f = indicator.frame
-		if f.slotIndex then
-			self:RemoveIndicatorFromSlot(f, f.slotSide, f.slotIndex)
-		end
-	end
-	self:AssignStaticIndicators()
-	self:AssignFreeIndicators()
-end
-
-
---------------------
----- Visibility ----
---------------------
 function AuraTracking:UpdateVisibility()
-	local targetCondition = db.visibility.showHostile and self.targetHostile
-	local pvpCondition = db.visibility.showPvP and self.inPvP
-	local pveCondition = db.visibility.showPvE and self.inPvE
-	local combatCondition = (db.visibility.showCombat and self.inCombat) or not(db.visibility.showCombat)
+    self:debug("UpdateVisibility")
+    local visibility = db.visibility
+    local targetCondition = visibility.showHostile and self.targetHostile
+    local combatCondition = (visibility.showCombat and self.inCombat) or not(visibility.showCombat)
+    local instType = self.inPvP and "PvP" or "PvE"
+    self:debug("targetCondition", visibility.showHostile, self.targetHostile, targetCondition)
+    self:debug("combatCondition", visibility.showCombat, self.inCombat, combatCondition)
+    self:debug("instType", self.inPvP, self.inPvE, instType)
 
-	if self.configMode or targetCondition or pvpCondition or pveCondition or combatCondition then
-		IndicatorParents.LEFT:Show()
-		IndicatorParents.RIGHT:Show()
-	else
-		IndicatorParents.LEFT:SetShown(SideActiveFree.LEFT or self.SideActiveStatic.LEFT)
-		IndicatorParents.RIGHT:Hide()
-	end
+    if self.configMode then
+        self.left:Show()
+        self.right:Show()
+    elseif self["in"..instType] then
+        self.left:SetShown(visibility["show"..instType] and (combatCondition or targetCondition))
+        self.right:SetShown(visibility["show"..instType] and targetCondition)
+    else
+        self.left:SetShown(targetCondition or numActive["left"] > 0)
+        self.right:SetShown(targetCondition)
+    end
+end
+function AuraTracking:Lock()
+    if not db.locked then
+        db.locked = true
+        for i, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:EnableMouse(false)
+            parent.bg:Hide()
+        end
+    end
+    if not nibRealUI.isInTestMode then
+        self:ToggleConfigMode(false)
+    end
+end
+function AuraTracking:Unlock()
+    if db.locked then
+        db.locked = false
+        for i, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:EnableMouse(true)
+            parent.bg:Show()
+        end
+    end
+    if not nibRealUI.isInTestMode then
+        self:ToggleConfigMode(true)
+    end
+end
+function AuraTracking:SettingsUpdate(event)
+    if event == "slotSize" then
+        local size = db.style.slotSize - 2
+        for _, side in next, {"left", "right"} do
+            for slotID = 1, maxSlots do
+                local slot = self[side]["slot"..slotID]
+                slot:SetSize(size, size)
+            end
+        end
+    elseif event == "padding" then
+        local padding = db.style.padding
+        for _, side in next, {"left", "right"} do
+            local point = side == "left" and "RIGHT" or "LEFT"
+            local xMod = side == "left" and -1 or 1
+            for slotID = 1, maxSlots do
+                local parent = self[side]
+                local slot = parent["slot"..slotID]
+                if slotID == 1 then
+                    slot:SetPoint(point, parent, 0, 0)
+                else
+                    slot:SetPoint(point, parent["slot"..slotID - 1], _G.strupper(side), (padding + 2) * xMod, 0)
+                end
+            end
+        end
+    elseif event == "fadeOpacity" then
+        local fadeOpacity = db.indicators.fadeOpacity
+        for _, side in next, {"left", "right"} do
+            for slotID = 1, maxSlots do
+                local slot = self[side]["slot"..slotID]
+                if slot.tracker then
+                    slot.tracker:SetAlpha(db.indicators.fadeOpacity)
+                end
+            end
+        end
+    elseif event == "position" then
+        for _, side in next, {"left", "right"} do
+            local parent = self[side]
+            parent:RestorePosition()
+        end
+    end
 end
 
-function AuraTracking:UpdatePlayerLocation()
-	local _, instanceType = GetInstanceInfo()
-	if instanceType ~= "none" then
-		self.inPvP = false
-		self.inPvE = false
-	elseif (instanceType == "pvp") or (instanceType == "arena") then
-		self.inPvP = true
-		self.inPvE = false
-	elseif (instanceType == "party") or (instanceType == "raid") or (instanceType == "scenario") then
-		self.inPvE = true
-		self.inPvP = false
-	end
-	self:UpdateVisibility()
-end
 
-function AuraTracking:PLAYER_TARGET_CHANGED(skipUpdate)
-	self.oldTargetHostile = self.targetHostile
-	self.targetHostile = UnitExists("target") and (UnitIsEnemy("player", "target") or UnitCanAttack("player", "target")) and not(UnitIsDeadOrGhost("target"))
-	if not(skipUpdate) and (self.oldTargetHostile ~= self.targetHostile) then
-		self:UpdateVisibility()
-	end
-end
+-- Events --
+function AuraTracking:UNIT_AURA(event, unit)
+    if not isValidUnit[unit] then return end
+    AuraTracking:debug("UNIT_AURA", unit)
 
-function AuraTracking:PLAYER_REGEN_DISABLED()
-	self.inCombat = true
-	self:UpdateVisibility()
-end
+    for tracker, spellData in AuraTracking:IterateTrackers() do
+        if spellData.unit == unit and tracker.isEnabled then
+            local spell, spellMatch, aura = spellData.spell, false, {}
+            debug(spellData.debug, "IterateTrackers", tracker.id, spell)
 
-function AuraTracking:PLAYER_REGEN_ENABLED()
-	self.inCombat = false
-	self:UpdateVisibility()
-end
+            if type(spell) == "table" then
+                for index = 1, #spell do
+                    spellMatch, aura = FindSpellMatch(spell[index], spellData.unit, tracker.filter, spellData.debug)
+                    if spellMatch then break end
+                end
+            else
+                spellMatch, aura = FindSpellMatch(spell, spellData.unit, tracker.filter, spellData.debug)
+            end
 
-function AuraTracking:PLAYER_ENTERING_WORLD()
-	self.playerGUID = UnitGUID("player")
-	self:RefreshIndicatorStatus()
-	self:PLAYER_TARGET_CHANGED(true)
-	if UnitAffectingCombat("player") then
-		self.inCombat = true
-	else
-		self.inCombat = false
-	end
-	self:ScheduleTimer("UpdatePlayerLocation", 1)
-end
-
-
------------------
----- Refresh ----
------------------
--- Cooldown style changed
-function AuraTracking:RefreshCooldownStyle()
-	for k, indicator in pairs(Indicators) do
-		indicator.frame.useCustomCD = db.indicators.useCustomCD
-	end
-end
-
--- Player Level or Spec changed
-function AuraTracking:CharacterUpdate()
-	-- Update Talent/Level information on Indicators
-	for k, indicator in pairs(Indicators) do
-		if indicator.TalentRefresh then
-			indicator:TalentRefresh()
-		end
-		indicator:SetUpdates()
-	end
-	-- Re-assign all indicators
-	self:RefreshIndicatorAssignments()
-	-- Refresh Aura status of Indicators
-	self:RefreshIndicatorStatus()
-end
-
--- Create Indicators and register into Indicators table
-function AuraTracking:CreateIndicator(index, info)
-	Indicators[index] = modules[info.type or "Aura"]:New(info)
-	Indicators[index]:SetUpdates()
-	Indicators[index]:TalentRefresh()
-
-	Indicators[index].info = info
-	Indicators[index].key = index
-	Indicators[index].frame.key = index
-
-	numIndicators = numIndicators + 1
-end
-
-function AuraTracking:SetupIndicators()
-	local curSpec = GetSpecialization()
-
-	wipe(Indicators)
-	numIndicators = 0
-
-	if not db.tracking[nibRealUI.class] then return end
-	for k, info in ipairs(db.tracking[nibRealUI.class]) do
-		-- Convert settings
-		if info.ignoreSpec ~= nil then
-			info.useSpec = not info.ignoreSpec
-			info.ignoreSpec = nil
-		end
-		if info.forms then
-			info.specs[1] = info.forms[3] -- Balance = Moonkin
-			info.specs[2] = info.forms[1] -- Feral = Cat
-			info.specs[3] = info.forms[2] -- Guardian = Bear
-			info.forms = nil
-		end
-		
-
-		if not info.unit then
-			if info.auraType == "debuff" then
-				info.unit = "target"
-			else
-				info.unit = "player"
-			end
-		end
-
-		if info.specs then
-			local numSpecs = 0
-			for i = 1, #info.specs do
-				if info.specs[i] then
-					numSpecs = numSpecs + 1
-				end
-			end
-			if numSpecs == 0 then
-				info.useSpec = false
-			elseif numSpecs == 1 then
-				info.useSpec = true
-			else
-				info.useSpec = nil
-			end
-		else
-			info.specs = {}
-			info.useSpec = false
-		end
-
-		if not info.isDisabled then
-			self:CreateIndicator(k, info)
-		end
-	end
-end
-
-function AuraTracking:UpdateStyle()
-	for sI = 1, maxSlots do
-		for side, _ in pairs(IndicatorSlots) do
-			local slot = IndicatorSlots[side][sI]
-
-			slot:SetSize(db.style.slotSize - 2, db.style.slotSize - 2)
-
-			local point = side == "LEFT" and "BOTTOMRIGHT" or "BOTTOMLEFT"
-			local rPoint = side == "LEFT" and "BOTTOMLEFT" or "BOTTOMRIGHT"
-			local xMod = side == "LEFT" and -1 or 1
-
-			slot:ClearAllPoints()
-			if sI == 1 then
-				slot:SetPoint(point, IndicatorParents[side], side, xMod, 0)
-			else
-				slot:SetPoint(point, IndicatorSlots[side][sI - 1], rPoint, (db.style.padding + 2) * xMod, 0)
-			end
-		end
-	end
-end
-
-function AuraTracking:UpdateFonts()
-	for k,fs in pairs(FontStringsCooldown) do
-		fs:SetFontObject(RealUIFont_PixelCooldown)
-	end
-end
-
-function AuraTracking:RegisterFont(type, fs)
-	if type == "cooldown" then
-		tinsert(FontStringsCooldown, fs)
-	end
-end
-
-function AuraTracking:RefreshMod()
-	self:SetupIndicators()
-	self:RefreshIndicatorAssignments()
-	self:RefreshIndicatorStatus()
-	self:RefreshCooldownStyle()
-	self:UpdateVisibility()
+            if spellMatch then
+                debug(spellData.debug, "Tracker", tracker.id, spell)
+                tracker.auraIndex = aura.index
+                tracker.cd:Show()
+                tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
+                tracker.icon:SetTexture(aura.texture)
+                tracker.count:SetText(aura.count)
+                AuraTracking:AddTracker(tracker)
+            elseif tracker.slotID then
+                tracker.auraIndex = aura.index
+                tracker.cd:SetCooldown(0, 0)
+                tracker.cd:Hide()
+                tracker.count:SetText("")
+                AuraTracking:RemoveTracker(tracker, tracker.isStatic)
+            end
+            debug(spellData.debug, "postUnitAura", tracker.postUnitAura)
+            if tracker.postUnitAura then
+                tracker:postUnitAura(spellData)
+            end
+        end
+    end
 end
 
 function AuraTracking:PLAYER_LOGIN()
-	self:RefreshMod()
-	self.loggedIn = true
+    self:debug("PLAYER_LOGIN")
+    self:RefreshMod()
+    local playerSpellList = {}
+    for trackerID, spellData in next, trackingData do
+        local classID, id, isDefault = _G.strsplit("-", trackerID)
+        self:debug("|c"..id.."Init tracker|r ", id, isDefault)
+        local tracker = self:CreateAuraIcon(id, spellData)
+        tracker.classID = classID
+        tracker.isDefault = isDefault and true or false
+        tracker.shouldTrack = shouldTrack(spellData)
+        if tracker.shouldTrack and spellData.unit == "player" then
+            tracker:Enable()
+            tracker:SetAlpha(db.indicators.fadeOpacity)
+            AddToSpellList(spellData, playerSpellList)
+        end
+    end
+    RegisterSpellList("PlayerExclusions", playerSpellList)
+    self.loggedIn = true
+end
+function AuraTracking:PLAYER_ENTERING_WORLD()
+    self:debug("PLAYER_ENTERING_WORLD")
+    self.playerGUID = _G.UnitGUID("player")
+    self.petGUID = _G.UnitGUID("pet")
+    if _G.UnitAffectingCombat("player") then
+        self.inCombat = true
+    else
+        self.inCombat = false
+    end
+
+    self.targetHostile = false
+
+    C_TimerAfter(1, function()
+        local instanceName, instanceType = _G.GetInstanceInfo()
+        self:debug("UpdateLocation", instanceName, instanceType)
+        if instanceType == "none" or instanceName:find("Garrison") then
+            self.inPvP = false
+            self.inPvE = false
+        elseif (instanceType == "pvp") or (instanceType == "arena") then
+            self.inPvP = true
+            self.inPvE = false
+        elseif (instanceType == "party") or (instanceType == "raid") or (instanceType == "scenario") then
+            self.inPvP = false
+            self.inPvE = true
+        end
+        self:UpdateVisibility()
+    end)
+end
+
+function AuraTracking:PLAYER_REGEN_ENABLED()
+    self:debug("PLAYER_REGEN_ENABLED")
+    self.inCombat = false
+end
+function AuraTracking:PLAYER_REGEN_DISABLED()
+    self:debug("PLAYER_REGEN_DISABLED")
+    self.inCombat = true
+end
+
+function AuraTracking:TargetAndPetUpdate(unit, event, ...)
+    self:debug("TargetAndPetUpdate", unit, event, ...)
+    local unitExists = _G.UnitExists(unit)
+    local targetSpellList
+    if unit == "target" then
+        targetSpellList = {}
+        self.targetHostile = unitExists and _G.UnitCanAttack("player", "target") and not _G.UnitIsDeadOrGhost("target")
+    end
+    if unitExists then
+        self[unit.."GUID"] = _G.UnitGUID(unit)
+        if not isValidUnit[unit] then
+            self:debug("EnableUnit", unit)
+            isValidUnit[unit] = true
+            for tracker, spellData in self:IterateTrackers() do
+                if spellData.unit == unit and tracker.shouldTrack and not tracker.isEnabled then
+                    tracker:Enable()
+                    if targetSpellList then
+                        AddToSpellList(spellData, targetSpellList)
+                    end
+                end
+            end
+            self:UNIT_AURA("FORCED_UNIT_AURA", unit)
+            if targetSpellList then
+                RegisterSpellList("TargetExclusions", targetSpellList)
+            end
+        end
+    elseif isValidUnit[unit] then
+        iterUnits = true
+        self:debug("DisableUnit", unit)
+        isValidUnit[unit] = false
+        for tracker, spellData in self:IterateTrackers() do
+            if spellData.unit == unit and tracker.isEnabled then
+                tracker:Disable()
+            end
+        end
+        iterUnits = false
+    end
+    self:UpdateVisibility()
+end
+function AuraTracking:CharacterUpdate(units, force)
+    self:debug("CharacterUpdate", units.player, force)
+    local newPlayerLevel = _G.UnitLevel("player")
+    local newPlayerSpec = _G.GetSpecialization()
+    if units.player and (newPlayerLevel ~= playerLevel or newPlayerSpec ~= playerSpec) or force then
+        playerLevel, playerSpec = newPlayerLevel, newPlayerSpec
+        self:debug("Level", playerLevel, "Spec", playerSpec)
+
+        local playerSpellList = {}
+        for tracker, spellData in self:IterateTrackers() do
+            tracker:Disable() -- Reset incase there are any auras still active
+            tracker.shouldTrack = shouldTrack(spellData)
+            if tracker.shouldTrack then
+                self:debug("Track", tracker.id)
+                tracker:Enable()
+                AddToSpellList(spellData, playerSpellList)
+            else
+                self:debug("Don't Track", tracker.id)
+            end
+        end
+        RegisterSpellList("PlayerExclusions", playerSpellList)
+    end
 end
 
 
-----------------
----- Set Up ----
------------------
--- Create slots that Indicators can be assigned to
-function AuraTracking:CreateIndicatorSlots()
-	IndicatorSlots = {LEFT = {}, RIGHT = {}}
-	for sI = 1, maxSlots do
-		for side, _ in pairs(IndicatorSlots) do
-			local slot = CreateFrame("Frame", nil, IndicatorParents[side])
-			IndicatorSlots[side][sI] = slot
+-- Init --
+function AuraTracking:Createslots()
+    for i, side in next, {"left", "right"} do
+        local parent = CreateFrame("Frame", "AuraTracker"..side, UIParent)
+        parent:SetSize(db.style.slotSize * maxStaticSlots, db.style.slotSize)
+        self[side] = parent
 
-			if sI <= 6 then
-				slot.count = slot:CreateFontString()
-				slot.count:SetFontObject(RealUIFont_PixelCooldown)
-				slot.count:SetPoint("CENTER")
-				slot.bg = nibRealUI:CreateBDFrame(slot)
-				slot.bg:Hide()
-			end
-		end
-	end
+        LibWin:Embed(parent)
+        parent:RegisterConfig(db.position[side])
+        parent:RestorePosition()
+        parent:SetMovable(true)
+        parent:RegisterForDrag("LeftButton")
+        parent:SetScript("OnDragStart", function(...)
+            LibWin.OnDragStart(...)
+        end)
+        parent:SetScript("OnDragStop", function(...)
+            LibWin.OnDragStop(...)
+        end)
 
-	self:UpdateStyle()
+        local bg = parent:CreateTexture()
+        local color = i - 1
+        bg:SetTexture(color, color, color, 0.5)
+        bg:SetAllPoints(parent)
+        bg:Hide()
+        parent.bg = bg
+
+        local point = side == "left" and "RIGHT" or "LEFT"
+        local xMod = side == "left" and -1 or 1
+        local size = db.style.slotSize - 2
+        for slotID = 1, maxSlots do
+            local slot = CreateFrame("Frame", nil, parent)
+            slot:SetSize(size, size)
+            if slotID == 1 then
+                slot:SetPoint(point, parent, 0, 0)
+            else
+                slot:SetPoint(point, parent["slot"..slotID - 1], _G.strupper(side), (db.style.padding + 2) * xMod, 0)
+            end
+            parent["slot"..slotID] = slot
+
+            F.CreateBG(slot)
+
+            local count = slot:CreateFontString()
+            count:SetFontObject(_G.RealUIFont_PixelCooldown)
+            count:SetJustifyH("RIGHT")
+            count:SetJustifyV("TOP")
+            count:SetPoint("TOPRIGHT", slot, "TOPRIGHT", 1.5, 2.5)
+            count:SetText(slotID)
+            slot.count = count
+
+            slot:SetAlpha(0)
+        end
+    end
 end
 
--- Create frames to anchor Slots to
-function AuraTracking:CreateIndicatorParents()
-	-- Parent Frames to anchor Slots from
-	IndicatorParents.LEFT = CreateFrame("Frame", nil, UIParent)
-	local ipLeft = IndicatorParents.LEFT
-		ipLeft:SetPoint("BOTTOMRIGHT", RealUIPositionersCTAurasLeft, "BOTTOMLEFT", 0, 0)
-		ipLeft:SetSize(2, 2)
-		ipLeft:SetFrameStrata("MEDIUM")
-		ipLeft:SetFrameLevel(1)
-
-	IndicatorParents.RIGHT = CreateFrame("Frame", nil, UIParent)
-	local ipRight = IndicatorParents.RIGHT
-		ipRight:SetPoint("BOTTOMLEFT", RealUIPositionersCTAurasRight, "BOTTOMRIGHT", 0, 0)
-		ipRight:SetSize(2, 2)
-		ipRight:SetFrameStrata("MEDIUM")
-		ipRight:SetFrameLevel(1)
-end
-
-function AuraTracking:UseCustomCooldown()
-	return db.indicators.useCustomCD
-end
-
---------------------------------
----- Config Panel Functions ----
---------------------------------
-function AuraTracking:LoadDefaults()
-	local defaults = self.Defaults
-	self.db:ResetProfile("RealUI")
-end
-
-function AuraTracking:CreateNewTracker()
-	-- Insert new basic tracker
-	local newTracker = {
-		spell = L["AuraTrack_SpellNameID"],
-		minLevel = 90,
-		useSpec = false,
-		specs = {}
-	}
-	tinsert(db.tracking[nibRealUI.class], newTracker)
-	local newIndex = #db.tracking[nibRealUI.class]
-
-	-- Create Indicator
-	self:CreateIndicator(newIndex, newTracker)
-
-	-- Refresh Indicators
-	self:CharacterUpdate()
-
-	-- Let Config know of new tracker's index
-	return newIndex
-end
-
-function AuraTracking:EnableTracker(key)
-	db.tracking[nibRealUI.class][key].isDisabled = false
-end
-
-function AuraTracking:DisableTracker(key)
-	db.tracking[nibRealUI.class][key].isDisabled = true
-end
-
-function AuraTracking:ChangeTrackerSetting(index, key, value)
-	db.tracking[nibRealUI.class][index][key] = value
-	if Indicators[index].SetIndicatorInfo then
-		Indicators[index]:SetIndicatorInfo(db.tracking[nibRealUI.class][index])
-	end
-
-	-- Refresh Indicators
-	self:CharacterUpdate()
-end
-
-local SortTypes = function(a, b)
-	if a == "Aura" then
-		return true
-	elseif a and b then
-		return a < b
-	elseif a then
-		return true
-	end
-end
-function AuraTracking:GetTrackerTypes()
-	local trackerTypes = {}
-	for k,v in pairs(modules) do
-		tinsert(trackerTypes, k)
-	end
-	table.sort(trackerTypes, SortTypes)
-	return trackerTypes
-end
-
-function AuraTracking:GetTrackingData(index)
-	if index then
-		return db.tracking[nibRealUI.class][index]
-	else
-		return db.tracking[nibRealUI.class]
-	end
-end
-
-function AuraTracking:GetSettings()
-	return db
-end
-
-function AuraTracking:SetSetting(key1, key2, value)
-	db[key1][key2] = value
-
-	self:UpdateStyle()
-	self:UpdateVisibility()
-	self:RefreshIndicatorStatus()
-	if (key1 == "indicators") and (key2 == "useCustomCD") then
-		self:RefreshCooldownStyle()
-	end
-end
-
-------------------------
----- Initialization ----
-------------------------
 function AuraTracking:ToggleConfigMode(val)
-	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if self.configMode == val then return end
-	self.configMode = val
+    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if self.configMode == val then return end
+    self.configMode = val
 
-	for idx = 1, 6 do
-		for _, side in next, IndicatorSlots do
-			local slot = side[idx]
-
-			slot.count:SetText(val and idx or "")
-			slot.bg:SetShown(val)
-		end
-	end
-	self:UpdateVisibility()
+    for _, side in next, {"left", "right"} do
+        for slotID = 1, maxStaticSlots do
+            local slot = self[side]["slot"..slotID]
+            slot:SetAlpha(val and 1 or 0)
+            if slot.tracker then
+                slot.tracker:EnableMouse(not val)
+            end
+        end
+    end
+    self:UpdateVisibility()
 end
 
-function AuraTracking:RegisterModule(module, type)
-	modules[type] = module
-end
+function AuraTracking:RefreshMod()
+    playerLevel = _G.UnitLevel("player")
+    playerSpec = _G.GetSpecialization()
+    self:debug("Level", playerLevel, "Spec", playerSpec)
 
+    self:UpdateVisibility()
+end
 function AuraTracking:OnInitialize()
-	self.db = nibRealUI.db:RegisterNamespace(MODNAME)
-	self.db:RegisterDefaults({
-		profile = {
-			style = {
-				slotSize = 32,
-				padding = 1,
-			},
-			visibility = {
-				showCombat = true,
-				showHostile = true,
-				showPvE = false,
-				showPvP = false,
-			},
-			indicators = {
-				fadeInactive = true,
-				fadeOpacity = 0.75,
-				useCustomCD = true,
-			},
-			tracking = self.Defaults,
-		},
-	})
+    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db:RegisterDefaults({
+        class = self.Defaults[nibRealUI.class],
+        profile = {
+            locked = true,
+            position = {
+                left = {
+                    x = -98, -- ((db.style.slotSize * maxStaticSlots) / 2) + 2
+                    y = -128,
+                    point = "CENTER",
+                },
+                right = {
+                    x = 98,
+                    y = -128,
+                    point = "CENTER",
+                },
+            },
+            style = {
+                slotSize = 32,
+                padding = 1,
+            },
+            visibility = {
+                showCombat = true,
+                showHostile = true,
+                showPvE = true,
+                showPvP = true,
+            },
+            indicators = {
+                fadeInactive = true,
+                fadeOpacity = 0.75,
+            },
+        },
+    })
 
-	db = self.db.profile
-	ndb = nibRealUI.db.profile
+    db = self.db.profile
+    ndb = nibRealUI.db.profile
+    trackingData = self.db.class
+    self.Defaults = nil
 
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterConfigModeModule(self)
+    if db.tracking then
+        db.tracking = nil
+    end
 
-	self.SideActiveStatic = {LEFT = false, RIGHT = false}
-	self:ResetRavenSpellLists()
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    nibRealUI:RegisterConfigModeModule(self)
 end
 
 function AuraTracking:OnEnable()
-	self:RegisterEvent("PLAYER_LOGIN")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("PLAYER_TARGET_CHANGED")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:debug("OnEnable")
+    self:RegisterEvent("UNIT_AURA")
 
-	local CharUpdateEvents = {
-		"ACTIVE_TALENT_GROUP_CHANGED",
-		"PLAYER_SPECIALIZATION_CHANGED",
-		"PLAYER_TALENT_UPDATE",
-		"PLAYER_LEVEL_UP",
+    self:RegisterEvent("PLAYER_LOGIN")
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
-	}
-	self:RegisterBucketEvent(CharUpdateEvents, 0.1, "CharacterUpdate")
-	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", "CharacterUpdate")
+    self:RegisterEvent("PLAYER_TARGET_CHANGED", "TargetAndPetUpdate", "target")
+    self:RegisterEvent("UNIT_PET", "TargetAndPetUpdate", "pet")
+    self:RegisterEvent("PLAYER_TALENT_UPDATE", "CharacterUpdate", "talents")
+    self:RegisterBucketEvent({
+        "ACTIVE_TALENT_GROUP_CHANGED",
+        "PLAYER_SPECIALIZATION_CHANGED",
+        "PLAYER_LEVEL_UP",
+    }, 0.1, "CharacterUpdate")
 
-	if not IndicatorParents.LEFT then
-		self:CreateIndicatorParents()
-		self:CreateIndicatorSlots()
-	end
+    if not self.left then
+        self:Createslots()
+    end
 
-	if self.loggedIn then self:RefreshMod() end
-
-	self.configMode = false
+    if self.loggedIn then self:RefreshMod() end
+    self.configMode = false
 end
 
 function AuraTracking:OnDisable()

@@ -9,8 +9,13 @@ _G.RealUI = nibRealUI
 nibRealUI.TOC = select(4, GetBuildInfo())
 
 nibRealUI.verinfo = {}
-for word in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
-    tinsert(nibRealUI.verinfo, tonumber(word))
+for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do
+    if tonumber(word) then
+        tinsert(nibRealUI.verinfo, tonumber(word))
+    end
+    if letter ~= "" then
+        tinsert(nibRealUI.verinfo, letter)
+    end
 end
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -391,10 +396,11 @@ end
 
 -- Version info retrieval
 function nibRealUI:GetVerString(returnLong)
+    local verinfo = nibRealUI.verinfo
     if returnLong then
-        return string.format("|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange).."%s|r.|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue).."%s|r |cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.green).."r%s|r", nibRealUI.verinfo[1], nibRealUI.verinfo[2], nibRealUI.verinfo[3])
+        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4])
     else
-        return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
+        return string.format("%s.%s", verinfo[1], verinfo[2])
     end
 end
 function nibRealUI:MajorVerChange(oldVer, curVer)
@@ -653,7 +659,7 @@ function nibRealUI:OnInitialize()
     -- Vars
     self.realm = GetRealmName()
     self.faction = UnitFactionGroup("player")
-    self.classLocale, self.class = UnitClass("player")
+    self.classLocale, self.class, self.classID = UnitClass("player")
     self.classColor = nibRealUI:GetClassColor(self.class)
     self.name = UnitName("player")
     self.key = string.format("%s - %s", self.name, self.realm)

@@ -16,7 +16,7 @@ local table = _G.table
 -- Library namespace.
 -----------------------------------------------------------------------
 local LibStub = _G.LibStub
-local MAJOR = "LibTextDump-1.0"
+local MAJOR = "RealUI_LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
@@ -53,6 +53,8 @@ local METHOD_USAGE_FORMAT = MAJOR .. ":%s() - %s."
 
 local DEFAULT_FRAME_WIDTH = 750
 local DEFAULT_FRAME_HEIGHT = 600
+
+local _, LINE_HEIGHT = ChatFontNormal:GetFont()
 
 -----------------------------------------------------------------------
 -- Helper functions.
@@ -114,33 +116,27 @@ local function NewInstance(width, height)
 	footer:SetPoint("CENTER", footer_frame, "CENTER", 0, 0)
 
 
-	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "UIPanelScrollFrameTemplate")
+	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "FauxScrollFrameTemplate")
 	scroll_area:SetPoint("TOPLEFT", 5, -24)
 	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
 
-	scroll_area:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self.ScrollBar)
-	end)
-
-	scroll_area.ScrollBar:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self)
-	end)
+	copy_frame.scroll_area = scroll_area
 
 
-	local edit_box = _G.CreateFrame("EditBox", nil, copy_frame)
+	local edit_box = _G.CreateFrame("EditBox", ("%sScrollChildFrame"):format(frame_name), copy_frame)
 	edit_box:SetMultiLine(true)
 	edit_box:SetMaxLetters(0)
 	edit_box:EnableMouse(true)
 	edit_box:SetAutoFocus(false)
 	edit_box:SetFontObject("ChatFontNormal")
-	edit_box:SetSize(scroll_area:GetSize())
+	edit_box:SetPoint("TOPLEFT", 5, -24)
+	edit_box:SetPoint("BOTTOMRIGHT", -28, 29)
 
 	edit_box:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copy_frame)
 	end)
 
 	copy_frame.edit_box = edit_box
-	scroll_area:SetScrollChild(edit_box)
 
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
@@ -153,6 +149,8 @@ local function NewInstance(width, height)
 
 		edit_box:HighlightText(0)
 		edit_box:SetFocus()
+
+		copy_frame:RegisterEvent("PLAYER_LOGOUT")
 	end)
 
 	highlight_button:SetScript("OnMouseDown", function(self, button)
@@ -177,7 +175,9 @@ local function NewInstance(width, height)
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copy_frame
-	buffers[instance] = {}
+	buffers[instance] = {
+		max_display_lines = _G.floor(edit_box:GetHeight() / LINE_HEIGHT)
+	}
 
 	return instance
 end
@@ -186,7 +186,7 @@ end
 -----------------------------------------------------------------------
 -- Library methods.
 -----------------------------------------------------------------------
-function lib:New(frame_title, width, height)
+function lib:New(frame_title, width, height, save)
 	local title_type = type(frame_title)
 
 	if title_type ~= "nil" and title_type ~= "string" then
@@ -202,8 +202,20 @@ function lib:New(frame_title, width, height)
 	if height_type ~= "nil" and height_type ~= "number" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame height must be nil or a number."))
 	end
+	local save_type = type(save)
+
+	if save_type ~= "nil" and save_type ~= "function" then
+		error(METHOD_USAGE_FORMAT:format("New", "save must be nil or a function."))
+	end
 	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT)
-	frames[instance].title:SetText(frame_title)
+	local frame = frames[instance]
+	frame.title:SetText(frame_title)
+
+	if save then
+		frame:SetScript("OnEvent", function(event, ...)
+			save(buffers[instance])
+		end)
+	end
 
 	return instance
 end
@@ -218,7 +230,9 @@ end
 
 
 function prototype:Clear()
+	local max_display_lines = buffers[self].max_display_lines
 	table.wipe(buffers[self])
+	buffers[self].max_display_lines = max_display_lines
 end
 
 
@@ -228,10 +242,11 @@ function prototype:Display(separator)
 	if display_text == "" then
 		error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
 	end
-	local frame = frames[self]
+	local buffer, frame = buffers[self], frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
 	_G.ShowUIPanel(frame)
+	_G.FauxScrollFrame_Update(frame.scroll_area, #buffer, _G.min(#buffer, buffer.max_display_lines), LINE_HEIGHT, nil, nil, nil, nil, nil, nil, true )
 end
 
 
@@ -258,5 +273,25 @@ function prototype:String(separator)
 	if sep_type ~= "nil" and sep_type ~= "string" then
 		error(METHOD_USAGE_FORMAT:format("String", "separator must be nil or a string."), 2)
 	end
-	return table.concat(buffers[self], separator or "\n")
+
+	separator = separator or "\n"
+	local buffer, output = buffers[self]
+	local max_display_lines = buffer.max_display_lines
+
+	if max_display_lines > #buffer then
+		output = table.concat(buffer, separator)
+	else
+		local frame = frames[self]
+		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
+			local scrollbar = _G[scroll_area:GetName().."ScrollBar"];
+			scrollbar:SetValue(value);
+			local offset = _G.floor((value / LINE_HEIGHT) + 0.5);
+
+			local text = table.concat(buffer, separator, offset + 1, offset + max_display_lines)
+			frame.edit_box:SetText(text)
+		end)
+
+		output = table.concat(buffer, separator, 1, max_display_lines)
+	end
+	return output
 end

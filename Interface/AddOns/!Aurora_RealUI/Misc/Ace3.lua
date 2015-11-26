@@ -1,12 +1,19 @@
 local _, mods = ...
+local _G = _G
 
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    --print("AceGUI")
-    local AceGUI = LibStub("AceGUI-3.0", true)
-    if not AceGUI then return end
-    --print("AceGUI-3.0")
+    -- Lua Globals --
+    local next, select = _G.next, _G.select
+    local strsplit = _G.strsplit
 
-    local HiddenFrame = CreateFrame("Frame", nil, UIParent)
+    -- WoW Globals --
+    local CreateFrame, hooksecurefunc = _G.CreateFrame, _G.hooksecurefunc
+
+    -- Libs --
+    local AceGUI = _G.LibStub("AceGUI-3.0", true)
+    if not AceGUI then return end
+
+    local HiddenFrame = CreateFrame("Frame", nil, _G.UIParent)
     HiddenFrame:Hide()
 
     local r, g, b = C.r, C.g, C.b
@@ -95,8 +102,8 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         local TYPE = widget.type
         local _, TYPE2, TYPE3 = strsplit("-", TYPE)
         local MODULE, MODULETYPE = strsplit("_", TYPE)
-        --print("Widget:", MODULE or TYPE)
-        --print("Subtype", TYPE2 or MODULETYPE, TYPE3)
+        mods.debug("Widget:", MODULE or TYPE)
+        mods.debug("Subtype", TYPE2 or MODULETYPE, TYPE3)
 
         if TYPE == "Button" then
             if not widget.skinned then
@@ -314,6 +321,25 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget.skinned = true
             end
 
+        elseif TYPE == "NumberEditBox" then
+            if not widget.skinned then
+                F.ReskinInput(widget.editbox)
+                F.Reskin(widget.button)
+
+                for _, type in next, {"minus", "plus"} do
+                    local btn = widget[type]
+                    F.ReskinExpandOrCollapse(btn)
+
+                    local point, anchor, relPoint, x, y = btn:GetPoint()
+                    btn:SetPoint(point, anchor, relPoint, x + 2, y)
+                    btn:SetText("")
+                    btn:SetSize(17, 17)
+                end
+                widget.minus.plus:Hide()
+
+                widget.skinned = true
+            end
+
         elseif TYPE == "Slider" then
             if not widget.skinned then
                 local frame = widget.slider
@@ -388,7 +414,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         local WA = {TYPE:find("WeakAuras")}
         if WA[1] then
             local WATYPE = TYPE:sub(WA[2] + 1)
-            --print("WeakAura:", WATYPE)
+            mods.debug("WeakAura:", WATYPE)
             if WATYPE == "DisplayButton" then
                 if not widget.skinned then
                     skinWeakAuras(widget)
@@ -441,7 +467,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     local oldRegisterAsContainer = AceGUI.RegisterAsContainer
     AceGUI.RegisterAsContainer = function(self, widget)
         local TYPE = widget.type
-        --print("Container:", TYPE)
+        mods.debug("Container:", TYPE)
 
         local frame = widget.content:GetParent()
         if TYPE == "DropdownGroup" then
@@ -498,9 +524,9 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         elseif TYPE == "TreeGroup" then
             if not widget.skinned then
-                --print("TreeFrame!!!")
+                mods.debug("TreeFrame!!!")
                 hooksecurefunc(widget, "RefreshTree", function(self, ...)
-                    --print("RefreshTree", self)
+                    mods.debug("RefreshTree", self)
                     local buttons = self.buttons
                     for i, v in next, buttons do
                         if not v.skinned then
@@ -511,7 +537,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                         end
                     end
                     if not self.skinned then
-                        --print("Skin Tree!!!!")
+                        mods.debug("Skin Tree!!!!")
                         F.ReskinScroll(self.scrollbar)
                         self.dragger:SetAlpha(0)
                         self.dragger:SetScript("OnEnter", function(dragger) dragger:SetAlpha(1) end)
