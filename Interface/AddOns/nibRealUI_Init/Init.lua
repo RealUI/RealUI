@@ -105,9 +105,9 @@ function SlashCmdList.REALUIINIT(mod, editBox)
         end
         if mod == "test" then
             print("Generating test...")
-            for i = 1, 2000 do
-                --modDebug:AddLine("Test line "..i.." ......................................................................................")
-                modDebug:AddLine("Test line "..i)
+            for i = 1, 3 do
+                modDebug:AddLine("Test line "..i.." WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+                --modDebug:AddLine("Test line "..i)
             end
         end
         if modDebug:Lines() == 0 then

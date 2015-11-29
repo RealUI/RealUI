@@ -54,11 +54,13 @@ local METHOD_USAGE_FORMAT = MAJOR .. ":%s() - %s."
 local DEFAULT_FRAME_WIDTH = 750
 local DEFAULT_FRAME_HEIGHT = 600
 
-local _, LINE_HEIGHT = ChatFontNormal:GetFont()
-
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
+local function round(number)
+	return _G.floor(number + 0.5)
+end
+
 local function NewInstance(width, height)
 	lib.num_frames = lib.num_frames + 1
 
@@ -138,6 +140,15 @@ local function NewInstance(width, height)
 
 	copy_frame.edit_box = edit_box
 
+	local line_dummy = copy_frame:CreateFontString()
+	line_dummy:SetJustifyH("LEFT")
+	line_dummy:SetNonSpaceWrap(true)
+	line_dummy:SetFontObject("ChatFontNormal")
+	line_dummy:SetPoint("TOPLEFT", 5, 100)
+	line_dummy:SetPoint("BOTTOMRIGHT", copy_frame, "TOPRIGHT", -28, 0)
+	line_dummy:Hide()
+	copy_frame.line_dummy = line_dummy
+
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
 	highlight_button:SetSize(16, 16)
@@ -175,11 +186,35 @@ local function NewInstance(width, height)
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copy_frame
-	buffers[instance] = {
-		max_display_lines = _G.floor(edit_box:GetHeight() / LINE_HEIGHT)
-	}
+	buffers[instance] = {}
 
 	return instance
+end
+
+local function GetTextLineBounds(start, frame, buffer)
+	--print("GetTextLineBounds", start, #buffer)
+	local line_dummy = frame.line_dummy
+	local _, line_height = line_dummy:GetFont()
+	local max_display_lines = round(frame.edit_box:GetHeight() / line_height)
+	print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
+
+	local i, lines = start - 1, 0
+	repeat
+	    i = i + 1
+		line_dummy:SetText(buffer[i])
+		local wrap_lines = round(line_dummy:GetStringHeight() / line_height)
+		lines = lines + wrap_lines
+		print("Line:", i, lines, wrap_lines, line_dummy:GetStringHeight())
+	until lines > max_display_lines
+	local stop = i - 1
+	print("repeat", start, stop, line_height, max_display_lines)
+
+	--print("Pre FauxScrollFrame_Update", start, stop)
+	frame.isUpdating = true
+	_G.FauxScrollFrame_Update(frame.scroll_area, #buffer, stop - start, line_height, nil, nil, nil, nil, nil, nil, true )
+	--print("Post FauxScrollFrame_Update", start, stop)
+	frame.isUpdating = nil
+	return start, stop, line_height, max_display_lines
 end
 
 
@@ -230,9 +265,7 @@ end
 
 
 function prototype:Clear()
-	local max_display_lines = buffers[self].max_display_lines
 	table.wipe(buffers[self])
-	buffers[self].max_display_lines = max_display_lines
 end
 
 
@@ -246,7 +279,6 @@ function prototype:Display(separator)
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
 	_G.ShowUIPanel(frame)
-	_G.FauxScrollFrame_Update(frame.scroll_area, #buffer, _G.min(#buffer, buffer.max_display_lines), LINE_HEIGHT, nil, nil, nil, nil, nil, nil, true )
 end
 
 
@@ -275,23 +307,55 @@ function prototype:String(separator)
 	end
 
 	separator = separator or "\n"
-	local buffer, output = buffers[self]
-	local max_display_lines = buffer.max_display_lines
+	local buffer, frame, output = buffers[self], frames[self]
+	local start, stop, line_height, max_display_lines = GetTextLineBounds(1, frame, buffer)
+	frame.prev_stop = stop
 
-	if max_display_lines > #buffer then
+	if stop == max_display_lines and max_display_lines > #buffer then
+		--print("Simple", start, stop)
 		output = table.concat(buffer, separator)
 	else
-		local frame = frames[self]
+		--print("Overflow", start, stop)
 		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
-			local scrollbar = _G[scroll_area:GetName().."ScrollBar"];
-			scrollbar:SetValue(value);
-			local offset = _G.floor((value / LINE_HEIGHT) + 0.5);
+			if frame.isUpdating then return end
+			local new_value, value = round(frame.prev_stop * line_height), round(value)
+			--print("OnVerticalScroll", value, new_value)
+			local scrollbar = scroll_area.ScrollBar
+			local min, max = scrollbar:GetMinMaxValues()
+			--print("Min", min, max)
+			if new_value < value then
+				--print("Update value", value, new_value)
+				scrollbar:SetValue(new_value)
+				-- Changing the value here forces another run of this script.
+				-- End it so we dont calculate things twice.
+				return
+			elseif value == max and new_value > value then
+				--print("at end", value, new_value)
+				local diff = #buffer - frame.prev_stop
+				new_value = new_value - diff * line_height
+				frame.prev_stop = frame.prev_stop - diff
+				scrollbar:SetMinMaxValues(min, new_value)
 
-			local text = table.concat(buffer, separator, offset + 1, offset + max_display_lines)
+				--print("Update value", value, new_value)
+				scrollbar:SetValue(new_value)
+				-- Changing the value here forces another run of this script.
+				-- End it so we dont calculate things twice.
+				return
+			else
+				--print("Set value", value, new_value)
+				scrollbar:SetValue(value)
+			end
+			local offset = round(value / line_height)
+			--print("Current position", value, offset)
+			local start, stop = GetTextLineBounds(_G.max(offset, 1), frame, buffer)
+
+			--print("Concat", start, stop)
+			local text = table.concat(buffer, separator, start, stop)
 			frame.edit_box:SetText(text)
+			frame.prev_stop = stop
 		end)
 
-		output = table.concat(buffer, separator, 1, max_display_lines)
+		output = table.concat(buffer, separator, start, stop)
 	end
 	return output
 end
