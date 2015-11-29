@@ -196,7 +196,7 @@ local function GetTextLineBounds(start, frame, buffer)
 	local line_dummy = frame.line_dummy
 	local _, line_height = line_dummy:GetFont()
 	local max_display_lines = round(frame.edit_box:GetHeight() / line_height)
-	print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
+	--print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
 
 	local i, lines = start - 1, 0
 	repeat
@@ -204,10 +204,10 @@ local function GetTextLineBounds(start, frame, buffer)
 		line_dummy:SetText(buffer[i])
 		local wrap_lines = round(line_dummy:GetStringHeight() / line_height)
 		lines = lines + wrap_lines
-		print("Line:", i, lines, wrap_lines, line_dummy:GetStringHeight())
+		--print("Line:", i, lines, wrap_lines, line_dummy:GetStringHeight())
 	until lines > max_display_lines
 	local stop = i - 1
-	print("repeat", start, stop, line_height, max_display_lines)
+	--print("repeat", start, stop, line_height, max_display_lines)
 
 	--print("Pre FauxScrollFrame_Update", start, stop)
 	frame.isUpdating = true
