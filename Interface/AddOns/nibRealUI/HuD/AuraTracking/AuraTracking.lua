@@ -532,12 +532,12 @@ function AuraTracking:OnInitialize()
             position = {
                 left = {
                     x = -98, -- ((db.style.slotSize * maxStaticSlots) / 2) + 2
-                    y = -128,
+                    y = -150,
                     point = "CENTER",
                 },
                 right = {
                     x = 98,
-                    y = -128,
+                    y = -150,
                     point = "CENTER",
                 },
             },
