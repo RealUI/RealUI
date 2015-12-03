@@ -15,7 +15,7 @@ local BT4ActionBars, BT4AB_EnableBar, BT4Stance
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
-local db, ndb
+local db, ndb, ndbc
 local RealUIFont_PixelSmall, RealUIFont_PixelCooldown = _G.RealUIFont_PixelSmall, _G.RealUIFont_PixelCooldown
 
 local MODNAME = "ActionBars"
@@ -48,8 +48,8 @@ local function IsOdd(val)
     return val % 2 == 1 and true or false
 end
 function ActionBars:ApplyABSettings(tag)
-    if not _G.nibRealUICharacter then return end
-    if _G.nibRealUICharacter.installStage ~= -1 then return end
+    if not ndbc then return end
+    if ndbc.installStage ~= -1 or not nibRealUI:DoesAddonMove("Bartender4") then return end
 
     local prof = nibRealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
@@ -556,6 +556,7 @@ function ActionBars:OnInitialize()
     })
     db = self.db.profile
     ndb = nibRealUI.db.profile
+    ndbc = _G.nibRealUICharacter
 
     -- Migratre settings from ndb
     local abSettings = _G.nibRealUIDB.profiles.RealUI.actionBarSettings
