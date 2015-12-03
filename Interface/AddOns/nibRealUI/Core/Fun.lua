@@ -4,21 +4,20 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local F
 
 -- Misc Functions
--- /run FindSpellID("Spell", "player", false)
--- FindSpellID("Spell", "target", true)
 local spellFinder = CreateFrame("FRAME")
-function FindSpellID(SpellName, unit, isDebuff)
-    print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
+function nibRealUI:FindSpellID(input)
+    local spellName, unit, isDebuff = self:GetArgs(input, 3)
+    print("|cffffff20 SpellID tracking active. When |r|cffffffff"..spellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
     spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
     spellFinder:SetScript("OnEvent", function(self, event, unit)
         local spellID
         if isDebuff then
-            spellID = select(11, UnitDebuff(unit, SpellName))
+            spellID = select(11, UnitDebuff(unit, spellName))
         else
-            spellID = select(11, UnitAura(unit, SpellName))
+            spellID = select(11, UnitAura(unit, spellName))
         end
         if spellID then
-            print(SpellName..": #", spellID);
+            print(spellName..": #", spellID);
             spellFinder:UnregisterEvent("UNIT_AURA")
         end
     end)

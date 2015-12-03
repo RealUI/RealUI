@@ -688,6 +688,7 @@ function nibRealUI:OnInitialize()
     self:RegisterChatCommand("rl", function() ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand("findSpell", "FindSpellID") -- /findSpell "Spell Name" player|target isDebuff(true|nil)
     GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings
