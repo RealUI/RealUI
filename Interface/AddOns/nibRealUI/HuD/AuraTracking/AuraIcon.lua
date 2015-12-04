@@ -85,11 +85,11 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     count:SetPoint("TOPRIGHT", tracker, "TOPRIGHT", 1.5, 2.5)
     tracker.count = count
 
-    tracker:SetScript("OnEnter", function(tracker)
-        if not tracker.isEnabled then return end
-        if tracker.auraIndex then
+    tracker:SetScript("OnEnter", function(trakr)
+        if not trakr.isEnabled then return end
+        if trakr.auraIndex then
             _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetUnitAura(spellData.unit, tracker.auraIndex, self.filter)
+            GameTooltip:SetUnitAura(spellData.unit, trakr.auraIndex, trakr.filter)
             GameTooltip:Show()
         else
             local spell = spellData.spell
@@ -97,20 +97,19 @@ function AuraTracking:CreateAuraIcon(id, spellData)
                 spell = spell[1]
             end
 
-            if type(spell) == "number" then
-                _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                GameTooltip:SetSpellByID(spell)
-                GameTooltip:Show()
-            end
+            spell = _G.tonumber(spell)
+            _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:SetSpellByID(spell)
+            GameTooltip:Show()
         end
     end)
-    tracker:SetScript("OnLeave", function(tracker)
-        if tracker.auraIndex then
+    tracker:SetScript("OnLeave", function(trakr)
+        if trakr.auraIndex then
             GameTooltip:Hide()
         end
     end)
-    tracker:SetScript("OnEvent", function(tracker, event, ...)
-        tracker[event](tracker, spellData, ...)
+    tracker:SetScript("OnEvent", function(trakr, event, ...)
+        trakr[event](trakr, spellData, ...)
     end)
 
     for key, func in next, api do

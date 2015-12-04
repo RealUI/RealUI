@@ -309,7 +309,7 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.count:SetText(aura.count)
                 AuraTracking:AddTracker(tracker)
             elseif tracker.slotID then
-                tracker.auraIndex = aura.index
+                tracker.auraIndex = nil
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
                 tracker.count:SetText("")
