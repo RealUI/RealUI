@@ -7,7 +7,15 @@ local F
 local spellFinder = CreateFrame("FRAME")
 function nibRealUI:FindSpellID(input)
     local spellName, unit, isDebuff = self:GetArgs(input, 3)
-    print("|cffffff20 SpellID tracking active. When |r|cffffffff"..spellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
+    assert(type(spellName) == "string", "A spell name must be provided")
+    unit = unit or "player"
+    if isDebuff == nil then
+        -- Default this to false for player, true for target.
+        isDebuff = unit == "target"
+    end
+
+
+    print(("RealUI is now looking for %s %s: %s."):format(unit, isDebuff and "debuff" or "buff", spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
     spellFinder:SetScript("OnEvent", function(self, event, unit)
         local spellID
@@ -17,7 +25,7 @@ function nibRealUI:FindSpellID(input)
             spellID = select(11, UnitAura(unit, spellName))
         end
         if spellID then
-            print(spellName..": #", spellID);
+            print(("The spellID for %s is %d"):format(spellName, spellID));
             spellFinder:UnregisterEvent("UNIT_AURA")
         end
     end)
