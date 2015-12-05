@@ -201,11 +201,11 @@ local function GetTextLineBounds(start, frame, buffer)
 	local i, lines = start - 1, 0
 	repeat
 	    i = i + 1
-		line_dummy:SetText(buffer[i])
+		line_dummy:SetText(buffer[i] or " ")
 		local wrap_lines = round(line_dummy:GetStringHeight() / line_height)
 		lines = lines + wrap_lines
 		--print("Line:", i, lines, wrap_lines, line_dummy:GetStringHeight())
-	until lines > max_display_lines
+	until lines > max_display_lines or not buffer[i]
 	local stop = i - 1
 	--print("repeat", start, stop, line_height, max_display_lines)
 
@@ -325,10 +325,9 @@ function prototype:String(separator)
 			--print("Min", min, max)
 			if new_value < value then
 				--print("Update value", value, new_value)
-				scrollbar:SetValue(new_value)
+				return scrollbar:SetValue(new_value)
 				-- Changing the value here forces another run of this script.
 				-- End it so we dont calculate things twice.
-				return
 			elseif value == max and new_value > value then
 				--print("at end", value, new_value)
 				local diff = #buffer - frame.prev_stop
@@ -337,10 +336,9 @@ function prototype:String(separator)
 				scrollbar:SetMinMaxValues(min, new_value)
 
 				--print("Update value", value, new_value)
-				scrollbar:SetValue(new_value)
+				return scrollbar:SetValue(new_value)
 				-- Changing the value here forces another run of this script.
 				-- End it so we dont calculate things twice.
-				return
 			else
 				--print("Set value", value, new_value)
 				scrollbar:SetValue(value)
