@@ -186,35 +186,24 @@ local function NewInstance(width, height)
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copy_frame
-	buffers[instance] = {}
+	buffers[instance] = {
+		wrapped_lines = {}
+	}
 
 	return instance
 end
 
-local function GetTextLineBounds(start, frame, buffer)
-	--print("GetTextLineBounds", start, #buffer)
-	local line_dummy = frame.line_dummy
-	local _, line_height = line_dummy:GetFont()
-	local max_display_lines = round(frame.edit_box:GetHeight() / line_height)
-	--print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
-
+local function GetDisplayLines(start, wrapped_lines, max_display_lines)
+	--print("GetDisplayLines", start, line_height, max_display_lines)
 	local i, lines = start - 1, 0
 	repeat
 	    i = i + 1
-		line_dummy:SetText(buffer[i] or " ")
-		local wrap_lines = round(line_dummy:GetStringHeight() / line_height)
-		lines = lines + wrap_lines
-		--print("Line:", i, lines, wrap_lines, line_dummy:GetStringHeight())
-	until lines > max_display_lines or not buffer[i]
+		lines = lines + (wrapped_lines[i] or 0)
+		--print("Line:", i, lines, line_dummy:GetStringHeight())
+	until lines > max_display_lines or not wrapped_lines[i]
 	local stop = i - 1
 	--print("repeat", start, stop, line_height, max_display_lines)
-
-	--print("Pre FauxScrollFrame_Update", start, stop)
-	frame.isUpdating = true
-	_G.FauxScrollFrame_Update(frame.scroll_area, #buffer, stop - start, line_height, nil, nil, nil, nil, nil, nil, true )
-	--print("Post FauxScrollFrame_Update", start, stop)
-	frame.isUpdating = nil
-	return start, stop, line_height, max_display_lines
+	return start, stop, lines
 end
 
 
@@ -265,7 +254,10 @@ end
 
 
 function prototype:Clear()
+	local wrapped_lines = buffers[self].wrapped_lines
 	table.wipe(buffers[self])
+	buffers[self].wrapped_lines = wrapped_lines
+	wrapped_lines = nil
 end
 
 
@@ -308,44 +300,35 @@ function prototype:String(separator)
 
 	separator = separator or "\n"
 	local buffer, frame, output = buffers[self], frames[self]
-	local start, stop, line_height, max_display_lines = GetTextLineBounds(1, frame, buffer)
-	frame.prev_stop = stop
+	local line_dummy, wrapped_lines = frame.line_dummy, buffer.wrapped_lines
 
-	if stop == max_display_lines and max_display_lines > #buffer then
+	local _, line_height = line_dummy:GetFont()
+	local max_display_lines, all_wrapped_lines = round(frame.edit_box:GetHeight() / line_height), 0
+	--print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
+	table.wipe(wrapped_lines)
+	for i = 1, #buffer do
+		line_dummy:SetText(buffer[i])
+		wrapped_lines[i] = round(line_dummy:GetStringHeight() / line_height)
+		all_wrapped_lines = all_wrapped_lines + wrapped_lines[i]
+	end
+
+	local start, stop, lines = GetDisplayLines(1, wrapped_lines, max_display_lines)
+	_G.FauxScrollFrame_Update(frame.scroll_area, all_wrapped_lines, lines, line_height, nil, nil, nil, nil, nil, nil, true )
+
+	if all_wrapped_lines <= max_display_lines then
 		--print("Simple", start, stop)
 		output = table.concat(buffer, separator)
 	else
 		--print("Overflow", start, stop)
 		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
-			if frame.isUpdating then return end
-			local new_value, value = round(frame.prev_stop * line_height), round(value)
-			--print("OnVerticalScroll", value, new_value)
+			--print("OnVerticalScroll", value)
 			local scrollbar = scroll_area.ScrollBar
-			local min, max = scrollbar:GetMinMaxValues()
-			--print("Min", min, max)
-			if new_value < value then
-				--print("Update value", value, new_value)
-				return scrollbar:SetValue(new_value)
-				-- Changing the value here forces another run of this script.
-				-- End it so we dont calculate things twice.
-			elseif value == max and new_value > value then
-				--print("at end", value, new_value)
-				local diff = #buffer - frame.prev_stop
-				new_value = new_value - diff * line_height
-				frame.prev_stop = frame.prev_stop - diff
-				scrollbar:SetMinMaxValues(min, new_value)
-
-				--print("Update value", value, new_value)
-				return scrollbar:SetValue(new_value)
-				-- Changing the value here forces another run of this script.
-				-- End it so we dont calculate things twice.
-			else
-				--print("Set value", value, new_value)
-				scrollbar:SetValue(value)
-			end
-			local offset = round(value / line_height)
+			local scroll_min, scroll_max = scrollbar:GetMinMaxValues()
+            local offset = round((((value - scroll_min) * (#buffer - 1)) / (scroll_max - scroll_min)) + 1)
 			--print("Current position", value, offset)
-			local start, stop = GetTextLineBounds(_G.max(offset, 1), frame, buffer)
+
+			local start, stop, lines = GetDisplayLines(offset, wrapped_lines, max_display_lines)
+			_G.FauxScrollFrame_Update(frame.scroll_area, all_wrapped_lines, lines, line_height, nil, nil, nil, nil, nil, nil, true )
 
 			--print("Concat", start, stop)
 			local text = table.concat(buffer, separator, start, stop)
