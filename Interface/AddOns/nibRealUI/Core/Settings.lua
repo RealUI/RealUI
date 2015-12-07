@@ -238,12 +238,8 @@ local function CreateInstallWindow()
         IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
         local fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
         fade:SetDuration(1)
-        if nibRealUI.TOC < 70000 then
-            fade:SetChange(-0.5)
-        else
-            fade:SetFromAlpha(1)
-            fade:SetToAlpha(0.5)
-        end
+        fade:SetFromAlpha(1)
+        fade:SetToAlpha(0.5)
         fade:SetOrder(1)
         fade:SetSmoothing("IN_OUT")
         IWF.installTextFrame.fade = fade

@@ -193,7 +193,8 @@ local function PostCastInterrupted(self, unit, ...)
         self.Text:SetTextColor(1, 0, 0, 1)
         self:SetStatusBarColor(1, 0, 0, 1)
         self:Show()
-        self.flash:SetChange(-(self:GetAlpha()))
+        self.flash:SetFromAlpha(self:GetAlpha())
+        self.flash:SetToAlpha(0)
         self.flashAnim:Play()
     end
 end

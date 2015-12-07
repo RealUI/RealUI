@@ -199,7 +199,7 @@ local function GetDisplayLines(start, wrapped_lines, max_display_lines)
 	repeat
 	    i = i + 1
 		lines = lines + (wrapped_lines[i] or 0)
-		--print("Line:", i, lines, line_dummy:GetStringHeight())
+		--print("Line:", i, lines, wrapped_lines[i])
 	until lines > max_display_lines or not wrapped_lines[i]
 	local stop = i - 1
 	--print("repeat", start, stop, line_height, max_display_lines)
@@ -308,7 +308,7 @@ function prototype:String(separator)
 	table.wipe(wrapped_lines)
 	for i = 1, #buffer do
 		line_dummy:SetText(buffer[i])
-		wrapped_lines[i] = round(line_dummy:GetStringHeight() / line_height)
+		wrapped_lines[i] = line_dummy:GetNumLines()
 		all_wrapped_lines = all_wrapped_lines + wrapped_lines[i]
 	end
 
