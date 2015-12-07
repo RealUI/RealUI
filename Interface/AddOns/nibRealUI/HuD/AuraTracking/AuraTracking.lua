@@ -65,14 +65,18 @@ local function shouldTrack(spellData)
         local talent = spellData.talent
         debug(isDebug, "Check for talents", talent.mustHave)
         if talent.ID then
-            local _, talentID = _G.GetTalentRowSelectionInfo(talent.tier)
-            AuraTracking:debug("Find talent", talent.tier, talent.ID, talentID)
+            local _, selectedTalent = _G.GetTalentRowSelectionInfo(talent.tier)
+            local trackerTalent = talent.ID
+            if type(trackerTalent) == "table" then
+                trackerTalent = trackerTalent[playerSpec]
+            end
+            AuraTracking:debug("Find talent", talent.tier, trackerTalent, selectedTalent)
             if talent.mustHave then
                 debug(isDebug, "Must have")
-                return talent.ID == talentID
+                return trackerTalent == selectedTalent
             else
                 debug(isDebug, "Must not have")
-                return talent.ID ~= talentID
+                return (trackerTalent or selectedTalent) ~= selectedTalent
             end
         else
             debug(isDebug, "Do Track")

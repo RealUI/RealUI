@@ -239,8 +239,8 @@ local defaultTracker = {
     debug = false
 }
 --[[ Retired IDs
-b6ea7743
-bb656491
+9ab78043
+857dac62
 
 
 
@@ -795,6 +795,16 @@ AuraTracking.Defaults = {
                 specs = {true, false, false},
                 order = 3,
             },
+            ["2-96a15d91-1"] = {   -- Bastion of Glory (Prot)
+                spell = 114637,
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["2-b2420e4c-1"] = {   -- Shield of the Righteous (Prot)
+                spell = 132403,
+                specs = {false, true, false},
+                order = 2,
+            },
             ["2-bdba8989-1"] = {   -- Avenging Wrath (Ret)
                 spell = 31884,
                 specs = {false, false, true},
@@ -802,9 +812,25 @@ AuraTracking.Defaults = {
             },
         -- Static Target Auras
         -- Free Player Auras
-            ["2-a0c9223c-1"] = {   -- Avenging Wrath (Holy, Prot)
-                spell = 31884,
-                specs = {true, true, false},
+            ["2-a0c9223c-1"] = {   -- Avenging Wrath (Holy)
+                spell = 31842,
+                specs = {true, false, false},
+            },
+            ["2-a73a3586-1"] = {   -- Ardent Defender (Prot)
+                spell = 31850,
+                specs = {false, true, false},
+            },
+            ["2-b6ea7743-1"] = {   -- Grand Crusader (Prot)
+                spell = 85416,
+                specs = {false, true, false},
+            },
+            ["2-be248ad3-1"] = {   -- Guardian of Ancient Kings (Prot)
+                spell = 86659,
+                specs = {false, true, false},
+            },
+            ["2-901cef84-1"] = {   -- Divine Crusader (Ret)
+                spell = 144595,
+                specs = {false, false, true},
             },
             ["2-93d2a558-1"] = {   -- Selfless Healer (Talent)
                 spell = 114250,
@@ -812,6 +838,15 @@ AuraTracking.Defaults = {
                 talent = {
                     tier = 3,
                     ID = 17581,
+                    mustHave = true,
+                },
+            },
+            ["2-8942b773-1"] = {   -- Sacred Shield (Talent)
+                spell = {20925, 148039}, -- Holy, Prot/Ret
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = {21810,21811,21811}, -- Holy, Prot, Ret
                     mustHave = true,
                 },
             },
@@ -833,29 +868,28 @@ AuraTracking.Defaults = {
                     mustHave = true,
                 },
             },
-            ["2-bb2a51e1-1"] = {spell = 498},      -- Divine Protection
-            ["2-be248ad3-1"] = {spell = 86659},    -- Guardian
-            ["2-96a15d91-1"] = {spell = 6940},     -- Hand of Sacrifice
-            ["2-8942b773-1"] = {spell = 20925},    -- Holy Shield
-            ["2-b2420e4c-1"] = {spell = 31842},    -- Divine Favor
-            ["2-9ab78043-1"] = {spell = 85499},    -- Speed of Light
-            ["2-a73a3586-1"] = {spell = 31850},    -- Ardent Defender
+            ["2-bb656491-1"] = {   -- Seraphim (Talent) (Prot, Ret)
+                spell = 152262,
+                minLevel = 100,
+                specs = {false, true, true},
+                talent = {
+                    tier = 7,
+                    ID = 21202,
+                    mustHave = true,
+                },
+            },
+            ["2-919f1d2c-1"] = {   -- Final Verdict (Talent) (Ret)
+                spell = 157048,
+                minLevel = 100,
+                specs = {false, false, true},
+                talent = {
+                    tier = 7,
+                    ID = 21672,
+                    mustHave = true,
+                },
+            },
+            ["2-bb2a51e1-1"] = {spell = 498},   -- Divine Protection
         -- Free Target Auras
-            ["2-901cef84-1"] = {   -- Avenger's Shield
-                spell = 31935,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["2-857dac62-1"] = {   -- Concecration
-                spell = 26573,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["2-919f1d2c-1"] = {   -- Censure
-                spell = 31803,
-                auraType = "debuff",
-                unit = "target",
-            },
     },
 
     ["PRIEST"] = {
