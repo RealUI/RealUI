@@ -7,6 +7,7 @@ local db, ndb, ndbc
 
 local oUF = oUFembed
 
+local round = nibRealUI.Round
 UnitFrames.textures = {
     [1] = {
         F1 = { -- Player / Target Frames
@@ -212,12 +213,31 @@ nibRealUI.ReversePowers = {
     ["POWER_TYPE_SUN_POWER"] = true,
 }
 
+function UnitFrames:PositionSteps(vert)
+    UnitFrames:debug("PositionSteps")
+    local width, height = self:GetSize()
+    local point, relPoint = vert.."RIGHT", vert.."LEFT"
+    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    for i = 1, 2 do
+        local xOfs = round(stepPoints[i] * (width - 10))
+        if self:GetReversePercent() then
+            xOfs = xOfs + height
+            self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
+            self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
+        else
+            self.step[i]:SetPoint(point, self, -xOfs, 0)
+            self.warn[i]:SetPoint(point, self, -xOfs, 0)
+        end
+    end
+end
 function UnitFrames:UpdateSteps(unit, min, max)
+    --min = max * .25
+    --self:SetValue(min)
     local percent = nibRealUI:GetSafeVals(min, max)
     local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
         --print(percent, unit, min, max, self.colorClass)
-        if self.reverse then
+        if self:GetReversePercent() then
             --print("step reverse")
             if percent > stepPoints[i] then
                 self.step[i]:SetAlpha(1)
@@ -308,62 +328,151 @@ local function updateSteps(unit, type, percent, frame)
 end
 
 function UnitFrames:HealthOverride(event, unit)
-    --print("Health Override", self, event, unit)
-    if event == "ClassColorBars" or event == "UpdateUnitFramesHealthColor" then
+    UnitFrames:debug("Health Override", self, event, unit)
+    local health = self.Health
+    if event == "ClassColorBars" then
         UnitFrames:SetHealthColor(self)
+    elseif event == "ReverseBars" then
+        AngleStatusBar:SetReverseFill(health.bar, ndb.settings.reverseUnitFrameBars)
     end
     local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
-    updateSteps(unit, "health", healthPer, self.Health)
-    if self.Health.info then
-        self.Health:SetMinMaxValues(0, healthMax)
-        self.Health:SetValue(healthCurr)
+    updateSteps(unit, "health", healthPer, health)
+    if health.SetValue then
+        health:SetMinMaxValues(0, healthMax)
+        health:SetValue(healthCurr)
     else
-        AngleStatusBar:SetValue(self.Health.bar, healthPer)
+        AngleStatusBar:SetValue(health.bar, healthPer)
     end
 end
 
 function UnitFrames:PredictOverride(event, unit)
-    --print("Predict Override", self, event, unit)
+    if(self.unit ~= unit) then return end
+    UnitFrames:debug("PredictOverride", self, event, unit)
+    
+    local reverseUnitFrameBars = ndb.settings.reverseUnitFrameBars
     local hp = self.HealPrediction
-    local absorbBar = hp.absorbBar
-    local health = self.Health
-    local width = floor(health.bar:GetWidth())
+    local healthBar = self.Health
 
-    local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
-    local absorbTotal = UnitGetTotalAbsorbs(unit)
-    local absorbPer = math.min(absorbTotal, healthCurr) / healthMax
+    local myIncomingHeal = UnitGetIncomingHeals(unit, 'player') or 0
+    local allIncomingHeal = UnitGetIncomingHeals(unit) or 0
+    local totalAbsorb = UnitGetTotalAbsorbs(unit) or 0
+    local myCurrentHealAbsorb = UnitGetTotalHealAbsorbs(unit) or 0
+    local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
 
-    if absorbBar.info then
-        absorbBar.info.maxWidth = health.info.maxWidth - width
-        absorbBar:SetMinMaxValues(0, healthCurr)
-        absorbBar:SetValue(absorbTotal)
-    else
-        AngleStatusBar:SetValue(hp.absorbBar, 1 - absorbPer, true)
+    local overHealAbsorb = false
+    if (health < myCurrentHealAbsorb) then
+        overHealAbsorb = true
+        myCurrentHealAbsorb = health
     end
-    --print("absorb", absorbTotal, absorbPer, 1 - absorbPer)
-    local atMax = (not (ndb.settings.reverseUnitFrameBars) and (healthCurr == healthMax))
-    if unit == "player" then
-        if atMax then
-            absorbBar:SetPoint("TOPRIGHT", health, -2, 0)
-        else
-            absorbBar:SetPoint("TOPRIGHT", health.bar, "TOPLEFT", health.info.minWidth - 1, 0)
+
+    if (health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * hp.maxOverflow) then
+        allIncomingHeal = maxHealth * hp.maxOverflow - health + myCurrentHealAbsorb
+    end
+
+    local otherIncomingHeal = 0
+    if (allIncomingHeal < myIncomingHeal) then
+        myIncomingHeal = allIncomingHeal
+    else
+        otherIncomingHeal = allIncomingHeal - myIncomingHeal
+    end
+
+    local overAbsorb = false
+    if reverseUnitFrameBars then
+        UnitFrames:debug("reverseUnitFrameBars")
+        if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
+            UnitFrames:debug("Check over absorb", totalAbsorb)
+            if (totalAbsorb > 0) then
+                overAbsorb = true
+            end
+
+            if (allIncomingHeal > myCurrentHealAbsorb) then
+                totalAbsorb = max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
+            else
+                totalAbsorb = max(0, maxHealth - health)
+            end
         end
     else
-        if atMax then
-            absorbBar:SetPoint("TOPLEFT", health, 2, 0)
-        else
-            absorbBar:SetPoint("TOPLEFT", health.bar, "TOPRIGHT", 0, 0)
+        UnitFrames:debug("not reverseUnitFrameBars")
+        if (totalAbsorb >= health) then
+            UnitFrames:debug("Check over absorb", totalAbsorb)
+            overAbsorb = true
+
+            if (allIncomingHeal > myCurrentHealAbsorb) then
+                totalAbsorb = max(0, health - myCurrentHealAbsorb + allIncomingHeal)
+            else
+                totalAbsorb = max(0, health)
+            end
         end
+    end
+
+    if (myCurrentHealAbsorb > allIncomingHeal) then
+        myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
+    else
+        myCurrentHealAbsorb = 0
+    end
+
+    local atMax
+    if reverseUnitFrameBars then
+        --atMax = false
+    else
+        atMax = health == maxHealth
+    end
+
+    if (hp.myBar) then
+        hp.myBar:SetMinMaxValues(0, maxHealth)
+        hp.myBar:SetValue(myIncomingHeal)
+    end
+
+    if (hp.otherBar) then
+        hp.otherBar:SetMinMaxValues(0, maxHealth)
+        hp.otherBar:SetValue(otherIncomingHeal)
+    end
+
+    if (hp.absorbBar) then
+        UnitFrames:debug("Update absorbBar", maxHealth, totalAbsorb, overAbsorb, atMax)
+        if hp.absorbBar.SetValue then
+            hp.absorbBar:SetMinMaxValues(0, maxHealth)
+            hp.absorbBar:SetValue(totalAbsorb)
+        else
+            AngleStatusBar:SetValue(hp.absorbBar, 1 - (min(totalAbsorb, health) / maxHealth), true)
+        end
+        hp.absorbBar:ClearAllPoints()
+        if unit == "player" then
+            if atMax then
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, -2, 0)
+            else
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.bar:GetHeight() - 2, 0)
+            end
+            if overAbsorb then
+                hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, 0)
+            else
+            end
+        else
+            if atMax then
+                hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, -1)
+            else
+                hp.absorbBar:SetPoint("TOPLEFT", healthBar.bar, "TOPRIGHT", 0, 0)
+            end
+            if overAbsorb then
+                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, 2, -1)
+            end
+        end
+    end
+
+    if (hp.healAbsorbBar) then
+        hp.healAbsorbBar:SetMinMaxValues(0, maxHealth)
+        hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
     end
 end
 
+
 function UnitFrames:PowerOverride(event, unit, powerType)
-    -- print("Power Override", self, event, unit, powerType)
+    UnitFrames:debug("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
 
     local powerPer, powerCurr, powerMax = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
-    if self.Power.info then
+    if self.Power.SetValue then
         self.Power:SetMinMaxValues(0, powerMax)
         self.Power:SetValue(powerCurr)
     else
@@ -372,32 +481,32 @@ function UnitFrames:PowerOverride(event, unit, powerType)
 end
 
 function UnitFrames:PvPOverride(event, unit)
-    --print("PvP Override", self, event, unit, IsPVPTimerRunning())
-    local color = nibRealUI.media.background
-    local setColor = (self.PvP.row or self.PvP.col) and self.PvP.SetBackgroundColor or self.PvP.SetVertexColor
+    UnitFrames:debug("PvP Override", self, event, unit, IsPVPTimerRunning())
+    local pvp, color = self.PvP, nibRealUI.media.background
+    local setColor = (pvp.row or pvp.col) and pvp.SetBackgroundColor or pvp.SetVertexColor
     if UnitIsPVP(unit) then
         if UnitIsFriend("player", unit) then
             --print("Friend")
             color = db.overlay.colors.status.pvpFriendly
-            setColor(self.PvP, color[1], color[2], color[3], color[4])
+            setColor(pvp, color[1], color[2], color[3], color[4])
         else
             --print("Enemy")
             color = db.overlay.colors.status.pvpEnemy
-            setColor(self.PvP, color[1], color[2], color[3], color[4])
+            setColor(pvp, color[1], color[2], color[3], color[4])
         end
     else
-        setColor(self.PvP, color[1], color[2], color[3], color[4])
+        setColor(pvp, color[1], color[2], color[3], color[4])
     end
 end
 
 function UnitFrames:UpdateClassification(event)
-    --print("Classification", self.unit, event, UnitClassification(self.unit))
+    UnitFrames:debug("Classification", self.unit, event, UnitClassification(self.unit))
     local color = db.overlay.colors.status[UnitClassification(self.unit)] or nibRealUI.media.background
     self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
 end
 
 function UnitFrames:UpdateStatus(event, ...)
-    --print("UpdateStatus", self, event, ...)
+    UnitFrames:debug("UpdateStatus", self, event, ...)
     local unit = self.unit
     local color = nibRealUI.media.background
     if UnitIsAFK(unit) then
@@ -451,14 +560,23 @@ function UnitFrames:UpdateStatus(event, ...)
     end
 end
 
+local UnitIsTapDenied
+if nibRealUI.TOC < 70000 then
+    UnitIsTapDenied = function(unit)
+        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
+    end
+else
+    UnitIsTapDenied = _G.UnitIsTapDenied
+end
+
 function UnitFrames:UpdateEndBox(...)
-    --print("UpdateEndBox", self and self.unit, ...)
+    UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit, nil
     local _, class = UnitClass(unit)
     if UnitIsPlayer(unit) then
         color = nibRealUI:GetClassColor(class)
     else
-        if ( not UnitPlayerControlled(unit) and UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) ) then
+        if ( not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
             color = db.overlay.colors.status.tapped
         elseif UnitIsEnemy("player", unit) then
             color = db.overlay.colors.status.hostile
@@ -565,12 +683,29 @@ local function Shared(self, unit)
 
     -- Create a proxy frame for the CombatFader to avoid taint city.
     self.overlay = CreateFrame("Frame", nil, self)
+    self.overlay:SetFrameStrata("BACKGROUND")
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
     -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
+    --[[ Idea:
+        local info = info[unit]
+        CreateHealthBar(self, info.health)
+        CreatePvPStatus(self, info.health)
+        if info.predict then
+            CreatePredictBar(self, info.health)
+        end
+        if info.power then
+            CreatePowerBar(self, info.power)
+        end
+        CreatePowerStatus(self, info.power or info.health)
+        CreateEndBox(self, info.health)
+    ]]
+
+    -- This would be all unit specific stuff, eg. Totems, stats, threat
     UnitFrames[unit](self)
-    if unit == "player" or unit == "target" or unit == "focus" then
-        --nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+
+    if nibRealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
+        nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
 end
 

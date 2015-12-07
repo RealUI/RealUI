@@ -1,24 +1,32 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local F
 
 -- Misc Functions
--- FindSpellID("Spell", "player", false)
-function FindSpellID(SpellName, unit, isDebuff)
-    print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
-    local f = CreateFrame("FRAME")
-    f:RegisterUnitEvent("UNIT_AURA", unit)
-    f:SetScript("OnEvent", function(self, event, unit)
+local spellFinder = CreateFrame("FRAME")
+function nibRealUI:FindSpellID(input)
+    local spellName, unit, isDebuff = self:GetArgs(input, 3)
+    assert(type(spellName) == "string", "A spell name must be provided")
+    unit = unit or "player"
+    if isDebuff == nil then
+        -- Default this to false for player, true for target.
+        isDebuff = unit == "target"
+    end
+
+
+    print(("RealUI is now looking for %s %s: %s."):format(unit, isDebuff and "debuff" or "buff", spellName))
+    spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
+    spellFinder:SetScript("OnEvent", function(self, event, unit)
         local spellID
         if isDebuff then
-            spellID = select(11, UnitDebuff(unit, SpellName))
+            spellID = select(11, UnitDebuff(unit, spellName))
         else
-            spellID = select(11, UnitAura(unit, SpellName))
+            spellID = select(11, UnitAura(unit, spellName))
         end
         if spellID then
-            print(SpellName..": #", spellID);
-            f:UnregisterEvent("UNIT_AURA")
+            print(("The spellID for %s is %d"):format(spellName, spellID));
+            spellFinder:UnregisterEvent("UNIT_AURA")
         end
     end)
 end

@@ -1,13 +1,14 @@
-## Interface: 60100
+## Interface: 60200
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: RealUI Core
 ## Author: Nibelheim, Gethe
-## Version: 8.1 r12
+## Version: 8.1 r14k
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## RequiredDeps: !Aurora_RealUI
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Bartender4, Grid2, Raven, SharedMedia
 ## X-oUF: oUFembed
+## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
 
 Libs\Embeds.xml
 
@@ -19,6 +20,5 @@ Config.lua
 Core.xml
 Modules.xml
 HuD.xml
-Config.xml
 
 Bindings.xml

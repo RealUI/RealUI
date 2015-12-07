@@ -7,7 +7,7 @@ mods["PLAYER_LOGIN"]["Kui_Nameplates"] = function(self, F, C)
     -- When the onesize option is on, all fonts use the "name" size.
     kuiNP:RegisterFontSize("name", 8)
 
-    local pixelFont = RealUI:Font(true)
+    local pixelFont = RealUI.media.font.pixel.large[1]
     kuiNP.db.profile.fonts.options.font = pixelFont
     kuiNP:LSMMediaRegistered(msg, "font", pixelFont)
 end

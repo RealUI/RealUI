@@ -1,15 +1,22 @@
 local nibRealUI = LibStub("AceAddon-3.0"):NewAddon(RealUI, "nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, dbc, dbg, _
 local function debug(...)
     nibRealUI.Debug("Core", ...)
 end
 
 _G.RealUI = nibRealUI
+nibRealUI.TOC = select(4, GetBuildInfo())
+nibRealUI.isTest = nibRealUI.TOC >= 70000
 
 nibRealUI.verinfo = {}
-for word in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
-    tinsert(nibRealUI.verinfo, tonumber(word))
+for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do
+    if tonumber(word) then
+        tinsert(nibRealUI.verinfo, tonumber(word))
+    end
+    if letter ~= "" then
+        tinsert(nibRealUI.verinfo, letter)
+    end
 end
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -22,8 +29,13 @@ nibRealUI.configModeModules = {}
 do
     local LSM = LibStub("LibSharedMedia-3.0")
     local lsmFonts = LSM:List("font")
-    local function findFont(font)
+    local function findFont(font, backup)
         local fontPath, fontSize, fontArgs = font:GetFont()
+        if not fontPath then
+            debug("Font not loaded, set backup")
+            fontPath, fontSize, fontArgs = backup:GetFont()
+            font:SetFont(fontPath, fontSize, fontArgs)
+        end
         local fontName, path
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
@@ -42,15 +54,15 @@ do
         end
     end
     local fonts = {
-        standard = findFont(RealUIFont_Normal),
-        chat = findFont(RealUIFont_Chat),
-        crit = findFont(RealUIFont_Crit),
-        header = findFont(RealUIFont_Header),
+        standard = findFont(RealUIFont_Normal, SystemFont_Small),
+        chat = findFont(RealUIFont_Chat, NumberFont_Normal_Med),
+        crit = findFont(RealUIFont_Crit, NumberFont_Outline_Huge),
+        header = findFont(RealUIFont_Header, QuestFont_Huge),
         pixel = {
-            small =    findFont(RealUIFont_PixelSmall),
-            large =    findFont(RealUIFont_PixelLarge),
-            numbers =  findFont(RealUIFont_PixelNumbers),
-            cooldown = findFont(RealUIFont_PixelCooldown),
+            small =    findFont(RealUIFont_PixelSmall, SystemFont_Small),
+            large =    findFont(RealUIFont_PixelLarge, SystemFont_Med1),
+            numbers =  findFont(RealUIFont_PixelNumbers, SystemFont_Large),
+            cooldown = findFont(RealUIFont_PixelCooldown, SystemFont_Large),
         }
     }
     nibRealUI.media.font = fonts
@@ -151,45 +163,6 @@ nibRealUI.hudSizeOffsets = {
     },
 }
 
-nibRealUI.defaultActionBarSettings = {
-    [1] = {     -- DPS/Tank
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 10, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1}
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-    [2] = {     -- Healing
-        centerPositions = 2,    -- 1 top, 2 bottom
-        sidePositions = 1,      -- 2 Right, 0 Left
-        -- stanceBar = {position = "BOTTOM", padding = 1},
-        petBar = {padding = 1},
-        bars = {
-            [1] = {buttons = 10, padding = 1},
-            [2] = {buttons = 12, padding = 1},
-            [3] = {buttons = 12, padding = 1},
-            [4] = {buttons = 10, padding = 1},
-            [5] = {buttons = 10, padding = 1},
-        },
-        moveBars = {
-            stance = true,
-            pet = true,
-            eab = true,
-        },
-    },
-}
-
 -- Default Options
 local defaults = {
     global = {
@@ -229,11 +202,10 @@ local defaults = {
         positions = nibRealUI.defaultPositions,
         -- Action Bar settings
         abSettingsLink = false,
-        actionBarSettings = nibRealUI.defaultActionBarSettings,
         -- Dynamic UI settings
         settings = {
             powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-            fontStyle = 1,
+            fontStyle = 2,
             infoLineBackground = true,
             stripeOpacity = 0.5,
             hudSize = 1,
@@ -322,12 +294,6 @@ function nibRealUI:StyleSetStripeOpacity()
     end
 end
 
-function nibRealUI:StyleSetInfoLineBackground(val)
-    db.settings.infoLineBackground = val
-    local InfoLine = nibRealUI:GetModule("InfoLine", true)
-    if InfoLine then InfoLine:SetBackground() end
-end
-
 -- Style - Global Colors
 function nibRealUI:StyleUpdateColors()
     for k, mod in self:IterateModules() do
@@ -349,12 +315,6 @@ function nibRealUI:SetLayout()
     -- Set Positioners
     self:UpdatePositioners()
 
-    -- HuD Config
-    self:GetModule("ConfigBar_Positions"):UpdateHeader()
-    self:GetModule("ConfigBar_ActionBars"):RefreshDisplay()
-    self:GetModule("HuDConfig"):RegisterForUpdate("AB")
-    self:GetModule("HuDConfig"):RegisterForUpdate("MSBT")
-    self:GetModule("HuDConfig_Positions"):Refresh()
 
     if RealUIGridConfiguring then
         self:ScheduleTimer(function()
@@ -363,16 +323,17 @@ function nibRealUI:SetLayout()
         end, 0.5)
     end
 
-    -- ActionBarExtras
-    if self:GetModuleEnabled("ActionBarExtras") then
-        local ABE = self:GetModule("ActionBarExtras", true)
-        if ABE then ABE:RefreshMod() end
+    -- ActionBars
+    if self:GetModuleEnabled("ActionBars") then
+        local AB = self:GetModule("ActionBars", true)
+        AB:RefreshDoodads()
+        AB:ApplyABSettings()
     end
 
     -- Grid Layout changer
     if self:GetModuleEnabled("GridLayout") then
         local GL = self:GetModule("GridLayout", true)
-        if GL then GL:Update() end
+        if GL then GL:SettingsUpdate("nibRealUI:SetLayout") end
     end
 
     -- Layout Button (For Installation)
@@ -436,10 +397,11 @@ end
 
 -- Version info retrieval
 function nibRealUI:GetVerString(returnLong)
+    local verinfo = nibRealUI.verinfo
     if returnLong then
-        return string.format("|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange).."%s|r.|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue).."%s|r |cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.green).."r%s|r", nibRealUI.verinfo[1], nibRealUI.verinfo[2], nibRealUI.verinfo[3])
+        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4])
     else
-        return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
+        return string.format("%s.%s", verinfo[1], verinfo[2])
     end
 end
 function nibRealUI:MajorVerChange(oldVer, curVer)
@@ -585,15 +547,38 @@ function nibRealUI:PLAYER_LOGIN()
             -- This part should be in the bag addon
             if IsAddOnLoaded("cargBags_Nivaya") then
                 hooksecurefunc(Nivaya, "OnShow", function()
-                    if RealUI.db.global.messages.resetNew then return end
+                    if nibRealUI.db.global.messages.resetNew then return end
                     nibRealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                    RealUI.db.global.messages.resetNew = true
+                    nibRealUI.db.global.messages.resetNew = true
                 end)
             end
         end
         if not LOCALE_enUS then
-            print("Help localize RealUI to your language. Go to http://wow.curseforge.com/addons/realui-localization/localization/")
+            print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
         end
+    end
+
+    if not nibRealUI.db.global.messages.AuraTrackerReset and nibRealUI.verinfo[3] <= 14 then
+        StaticPopupDialogs["RUI_AURATRACKER_RESET"] = {
+            text = "In the next revision update (r15), Aura Tracker settings will be reset. See this thread for details.",
+            button1 = OKAY,
+            OnAccept = function()
+                nibRealUI.db.global.messages.AuraTrackerReset = true
+            end,
+            whileDead = true,
+            hideOnEscape = true,
+            hasEditBox = true,
+            OnShow = function(self)
+                self.editBox:SetFocus()
+                self.editBox:SetText("http://www.wowinterface.com/forums/showthread.php?t=52754")
+                self.editBox:HighlightText()
+            end,
+            EditBoxOnEscapePressed = function(self)
+                self:GetParent():Hide()
+                ClearCursor()
+            end
+        }
+        StaticPopup_Show("RUI_AURATRACKER_RESET")
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
@@ -633,7 +618,6 @@ function nibRealUI:ADDON_LOADED(event, addon)
 
     -- Open before login to stop taint
     ToggleFrame(SpellBookFrame)
-    PetJournal_LoadUI()
 end
 
 function nibRealUI:ChatCommand_Config()
@@ -642,26 +626,26 @@ function nibRealUI:ChatCommand_Config()
 end
 
 local configLoaded, configFailed = false, false
-function nibRealUI:LoadConfig(mode, ...)
+function nibRealUI:LoadConfig(app, section, ...)
     if not configLoaded then
         configLoaded = true
         local loaded, reason = LoadAddOn("nibRealUI_Config")
         if not loaded then
-            --print("Failed to load nibRealUI_Config:", reason)
+            print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end
-    if not configFailed then return self:ToggleConfig(mode, ...) end
+    if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
     nibRealUI:SetUpOptions()
-    if mode == "HuD" and not ... then
+    if app == "HuD" and not ... then
         return nibRealUI:ShowConfigBar()
     end
-    if LibStub("AceConfigDialog-3.0").OpenFrames[mode] then
-        LibStub("AceConfigDialog-3.0"):Close(mode)
+    if LibStub("AceConfigDialog-3.0").OpenFrames[app] then
+        LibStub("AceConfigDialog-3.0"):Close(app)
     else
-        LibStub("AceConfigDialog-3.0"):Open(mode, ...)
+        LibStub("AceConfigDialog-3.0"):Open(app, section, ...)
     end
 end
 
@@ -676,7 +660,7 @@ function nibRealUI:OnInitialize()
     -- Vars
     self.realm = GetRealmName()
     self.faction = UnitFactionGroup("player")
-    self.classLocale, self.class = UnitClass("player")
+    self.classLocale, self.class, self.classID = UnitClass("player")
     self.classColor = nibRealUI:GetClassColor(self.class)
     self.name = UnitName("player")
     self.key = string.format("%s - %s", self.name, self.realm)
@@ -704,6 +688,7 @@ function nibRealUI:OnInitialize()
     self:RegisterChatCommand("rl", function() ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand("findSpell", "FindSpellID") -- /findSpell "Spell Name" player|target isDebuff(true|nil)
     GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings

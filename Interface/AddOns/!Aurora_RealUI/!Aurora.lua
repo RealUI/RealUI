@@ -3,6 +3,10 @@ mods["Aurora"] = {}
 mods["nibRealUI"] = {}
 mods["PLAYER_LOGIN"] = {}
 
+-- Upvalues
+local _G = _G
+local RealUI = _G.RealUI
+
 -- RealUI skin hook
 REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
 REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
@@ -22,6 +26,7 @@ style.skipSplashScreen = true
 --style.highlightColor = {r = 0, g = 1, b = 0}
 style.classcolors = {
     ["DEATHKNIGHT"] = { r = 0.77, g = 0.12, b = 0.23 },
+    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
     ["DRUID"]       = { r = 1.00, g = 0.49, b = 0.04 },
     ["HUNTER"]      = { r = 0.67, g = 0.83, b = 0.45 },
     ["MAGE"]        = { r = 0.41, g = 0.80, b = 0.94 },
@@ -76,7 +81,7 @@ functions.CreateBG = function(frame)
     local f = frame
     if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
 
-    local bg = f:CreateTexture(nil, "BACKGROUND")
+    local bg = f:CreateTexture(nil, "BACKGROUND", nil, -8)
     bg:SetPoint("TOPLEFT", frame, -1, 1)
     bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
     bg:SetTexture(RealUI.media.textures.plain)

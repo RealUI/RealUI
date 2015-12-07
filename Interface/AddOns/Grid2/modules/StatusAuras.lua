@@ -309,6 +309,8 @@ do
 		status.GetText     = GetText		
 		status.GetPercent  = dbx.valueMax and GetPercentMax or GetPercentHealth
 		if dbx.missing then
+			local spell = dbx.auras and dbx.auras[1] or dbx.spellName
+			status.missingTexture = spell and select(3,GetSpellInfo(spell)) or "Interface\\ICONS\\Achievement_General"
 			status.GetIcon  = GetIconMissing
 			status.GetCount = GetCountMissing
 			status.GetExpirationTime = GetExpirationTimeMissing

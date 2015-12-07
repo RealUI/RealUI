@@ -13,7 +13,7 @@ tinsert(mods["nibRealUI"], function(F, C)
             if region:GetObjectType() == "Texture" then
                 region:SetTexture(nil)
             elseif region:GetObjectType() == "FontString" then
-                region:SetFont(unpack(RealUI:Font(false, "small")))
+                region:SetFontObject(RealUIFont_PixelSmall)
                 region:SetShadowColor(0, 0, 0, 0)
             end
         end

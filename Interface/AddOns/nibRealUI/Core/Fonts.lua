@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndb, ndbc
 
 local MODNAME = "Fonts"
@@ -529,60 +529,6 @@ function Fonts:UpdateUIFonts()
     end
 end
 
-function nibRealUI:Font(isLSM, size)
-    size = size or "default"
-    if size == "default" then
-        if ndb.settings.fontStyle == 1 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        else
-            if isLSM then
-                return font.pixel.large[1]
-            else
-                return font.pixel.large[4]
-            end
-        end
-
-    elseif size == "small" then
-        if ndb.settings.fontStyle == 1 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        elseif ndb.settings.fontStyle == 2 then
-            if isLSM then
-                return font.pixel.small[1]
-            else
-                return font.pixel.small[4]
-            end
-        elseif ndb.settings.fontStyle == 3 then
-            if isLSM then
-                return font.pixel.large[1]
-            else
-                return font.pixel.large[4]
-            end
-        end
-
-    elseif size == "large" then
-        if isLSM then
-            return font.pixel.large[1]
-        else
-            return font.pixel.large[4]
-        end
-
-    elseif size == "tiny" then
-        if isLSM then
-            return font.pixel.small[1]
-        else
-            return font.pixel.small[4]
-        end
-    end
-end
-
 function Fonts:OnInitialize()
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -604,6 +550,9 @@ function Fonts:OnInitialize()
     self:SetEnabledState(true)
     nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
 
+    if ndb.settings.fontStyle ~= 2 then
+        ndb.settings.fontStyle = 2
+    end
     if ndb.settings.chatFontCustom then
         local chat = font.chat
         chat[1] = ndb.settings.chatFontCustom.font or chat[1]

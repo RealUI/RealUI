@@ -515,11 +515,17 @@ function CooldownCount:OnEnable()
 	local ActionBarButtonEventsFrame = _G["ActionBarButtonEventsFrame"]
 	if ActionBarButtonEventsFrame then
 		if ActionBarButtonEventsFrame.frames then
-			for i, frame in pairs(ActionBarButtonEventsFrame.frames) do
+			for i, frame in next, ActionBarButtonEventsFrame.frames do
 				actionButton_Register(frame)
 			end
 		end
 		hooksecurefunc("ActionBarButtonEventsFrame_RegisterFrame", actionButton_Register)
 		self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
 	end
+	SetCVar("countdownForCooldowns", 0)
+end
+
+function CooldownCount:OnDisable()
+	self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
+	SetCVar("countdownForCooldowns", 1)
 end

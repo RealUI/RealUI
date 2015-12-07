@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local db
 
 local MODNAME = "GridLayout"
-local GridLayout = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local GridLayout = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local NeedUpdate = false
 local raidGroupInUse = {
@@ -26,18 +26,20 @@ function GridLayout:UpdateLockdown(...)
 end
 
 -- Update Grid Layout
-function GridLayout:Update()
+local groupType, instType, instMaxPlayers
+function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
+    self:debug("Update", _, newGroupType, newInstType, maxPlayers)
+    groupType, instType, instMaxPlayers = newGroupType, newInstType, maxPlayers
     -- Combat Lockdown checking
     if InCombatLockdown() then
         NeedUpdate = true
         return
     end
     NeedUpdate = false
-    
+
     local NewLayout, isHoriz, layoutSize
-    local partyType = Grid2Layout.partyType
     local Grid2DB = Grid2Layout.db.profile
-    self:debug("partyType:", partyType)
+    self:debug("groupType:", groupType, Grid2Layout)
     
    
     -- Which RealUI Layout we're working on
@@ -45,31 +47,33 @@ function GridLayout:Update()
     
     -- Find new Grid Layout
     -- Solo - Adjust w/pets
-    if partyType == "solo" then
-        self:debug("You are Solo")
+    if groupType == "solo" then
         isHoriz = LayoutDB.hGroups.normal
         if LayoutDB.showSolo then
+            self:debug("Show frames")
             if UnitExists("pet") and LayoutDB.showPet then 
+                self:debug("with pets")
                 NewLayout = "Solo w/Pets"
             else
                 NewLayout = "Solo"
             end
         else
+            self:debug("Don't show frames")
             NewLayout = "None"
         end
     -- Party / Arena - Adjust w/pets
-    elseif (partyType == "arena") or (partyType == "party") then
-        self:debug("You are in a Party or Arena")
+    elseif (groupType == "arena") or (groupType == "party") then
         isHoriz = LayoutDB.hGroups.normal
         local HasPet = UnitExists("pet") or UnitExists("partypet1") or UnitExists("partypet2") or UnitExists("partypet3") or UnitExists("partypet4")
         if HasPet and LayoutDB.showPet then 
+            self:debug("Show pets")
             NewLayout = "Party w/Pets"
         else
+            self:debug("Don't show pets")
             NewLayout = "Party"
         end
     -- Raid
-    elseif (partyType == "raid") then
-        self:debug("You are in a Raid")
+    elseif (groupType == "raid") then
         isHoriz = LayoutDB.hGroups.raid
 
         -- reset the table
@@ -99,8 +103,12 @@ function GridLayout:Update()
     
     -- Change Grid Layout
     self:debug("Check horizontal:", isHoriz, Grid2DB.horizontal)
-    if (isHoriz ~= Grid2DB.horizontal) then
+    if isHoriz ~= nil and (isHoriz ~= Grid2DB.horizontal) then
         Grid2DB.horizontal = isHoriz
+    end
+    self:debug("Check layout:", NewLayout, Grid2DB.layouts[groupType])
+    if NewLayout and (NewLayout ~= Grid2DB.layouts[groupType]) then
+        Grid2DB.layouts[groupType] = NewLayout
     end
 
     -- Adjust Grid Frame Width
@@ -112,25 +120,18 @@ function GridLayout:Update()
         Grid2Frame.db.profile.frameWidth = LayoutDB.width["normal"]
     end
 
+    --Grid2Layout:ReloadLayout(true)
+end
+
+function GridLayout:SettingsUpdate(event)
+    self:Update(event or "SettingsUpdate", groupType, instType, instMaxPlayers)
     Grid2Layout:ReloadLayout(true)
 end
 
-function nibRealUI:SetGridLayoutSettings(value, key1, key2, key3)
-    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
-    if key3 then
-        db[key1][key2][key3] = value
-    else
-        db[key1][key2] = value
-    end
-    GridLayout:Update()
-end
-
-function nibRealUI:GetGridLayoutSettings(key1, key2, key3)
-    GridLayout:debug("GetGridLayoutSettings", key1, key2, key3, type(db[key1][key2]))
-    if key3 then
-        return db[key1][key2][key3]
-    else
-        return db[key1][key2]
+function GridLayout:Grid2ChatCommand()
+    if not(Grid2 and Grid2Layout and Grid2Frame and Grid2DB) then return end
+    if not InCombatLockdown() then
+        nibRealUI:LoadConfig("HuD", "unitframes", "groups", "raid")
     end
 end
 
@@ -140,13 +141,13 @@ function GridLayout:OnInitialize()
         profile = {
             dps = {
                 width = {normal = 65, [30] = 54, [40] = 40},
-                hGroups = {normal = true, raid = false, bg = false},
+                hGroups = {normal = true, raid = false},
                 showPet = true,
                 showSolo = false,
             },
             healing = {
                 width = {normal = 65, [30] = 54, [40] = 40},
-                hGroups = {normal = false, raid = false, bg = false},
+                hGroups = {normal = false, raid = false},
                 showPet = true,
                 showSolo = false,
             },
@@ -154,42 +155,34 @@ function GridLayout:OnInitialize()
     })
     db = self.db.profile
 
-    -- Remove after some time.
-    if type(db.dps.width) == "number" then
-        db.dps.width = {
-            normal = db.dps.width
-        }
-    end
-    if db.dps.sWidth then
-        db.dps.width[40] = db.dps.sWidth
-        db.dps.sWidth = nil
-    end
-    if type(db.healing.width) == "number" then
-        db.healing.width = {
-            normal = db.healing.width
-        }
-    end
-    if db.healing.sWidth then
-        db.healing.width[40] = db.healing.sWidth
-        db.healing.sWidth = nil
-    end
 
     self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
 end
 
 function GridLayout:OnEnable()
     self:debug("OnEnable")
-    if not(Grid2 and Grid2Layout and Grid2Frame) then return end
-    local Grid2GroupChanged = Grid2.GroupChanged
-    function Grid2:GroupChanged(...)
-        GridLayout:Update()
-        Grid2GroupChanged(self, ...)
+    if not (Grid2 and Grid2Layout and Grid2Frame) then return end
+
+    local Grid2LayoutGroupChanged = Grid2Layout.Grid_GroupTypeChanged
+    function Grid2Layout:Grid_GroupTypeChanged(...)
+        GridLayout:debug("Grid_GroupTypeChanged", ...)
+        GridLayout:Update(...)
+        Grid2LayoutGroupChanged(self, ...)
     end
     
+    Grid2:UnregisterChatCommand("grid2")
+    self:RegisterChatCommand("grid", "Grid2ChatCommand")
+    self:RegisterChatCommand("grid2", "Grid2ChatCommand")
+
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 end
 
 function GridLayout:OnDisable()
     self:debug("OnDisable")
+
+    self:UnregisterChatCommand("grid")
+    self:UnregisterChatCommand("grid2")
+    Grid2:RegisterChatCommand("grid2", "OnChatCommand")
+
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 end

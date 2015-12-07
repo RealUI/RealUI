@@ -2,6 +2,7 @@
 -- Kui_Nameplates
 -- By Kesava at curse.com
 -- All rights reserved
+-- Frame element creation/update functions
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 local kui = LibStub('Kui-1.0')
@@ -57,6 +58,18 @@ function addon:CreateBackground(frame, f)
             side:SetVertexColor(r,g,b,a)
         end
     end
+    function f.bg:Hide()
+        self.fill:Hide()
+        for _,side in pairs(self.sides) do
+            side:Hide()
+        end
+    end
+    function f.bg:Show()
+        self.fill:Show()
+        for _,side in pairs(self.sides) do
+            side:Show()
+        end
+    end
 end
 function addon:UpdateBackground(f, trivial)
     f.bg.fill:ClearAllPoints()
@@ -74,8 +87,11 @@ end
 ------------------------------------------------------------------ Health bar --
 function addon:CreateHealthBar(frame, f)
     f.health = CreateFrame('StatusBar', nil, f)
+    f.health:SetFrameLevel(1)
     f.health:SetStatusBarTexture(addon.bartexture)
-	f.health.percent = 100
+    f.health.percent = 100
+
+    f.health:GetStatusBarTexture():SetDrawLayer('ARTWORK',-8)
 
     if self.SetValueSmooth then
         -- smooth bar
@@ -111,7 +127,7 @@ end
 function addon:CreateHealthText(frame, f)
     f.health.p = f:CreateFontString(f.overlay, {
         font = self.font,
-        size = self.db.profile.general.leftie and 'large' or 'name',
+        size = 'name',
         alpha = 1,
         outline = "OUTLINE" })
 
@@ -119,7 +135,8 @@ function addon:CreateHealthText(frame, f)
     f.health.p:SetJustifyH('RIGHT')
     f.health.p:SetJustifyV('BOTTOM')
 
-    if self.db.profile.hp.mouseover then
+    if self.db.profile.hp.text.mouseover then
+        -- hide initially
         f.health.p:Hide()
     end
 end
@@ -127,47 +144,14 @@ function addon:UpdateHealthText(f, trivial)
     if trivial then
         f.health.p:Hide()
     else
-        if not self.db.profile.hp.mouseover then
+        if not self.db.profile.hp.text.mouseover then
             f.health.p:Show()
         end
 
-        if self.db.profile.general.leftie then
-            f.health.p:SetPoint('BOTTOMRIGHT', f.health, 'TOPRIGHT',
-                                -2.5, -self.db.profile.text.healthoffset)
-        else
-            f.health.p:SetPoint('TOPRIGHT', f.health, 'BOTTOMRIGHT',
-                                -2.5, self.db.profile.text.healthoffset + 4)
-        end
-    end
-end
-------------------------------------------------------------- Alt health text --
-function addon:CreateAltHealthText(frame, f)
-    f.health.mo = f:CreateFontString(f.overlay, {
-        font = self.font, size = 'small', alpha = .6, outline = "OUTLINE" })
-
-    f.health.mo:SetHeight(10)
-    f.health.mo:SetJustifyH('RIGHT')
-    f.health.mo:SetJustifyV('BOTTOM')
-
-    if self.db.profile.hp.mouseover then
-        f.health.mo:Hide()
-    end
-end
-function addon:UpdateAltHealthText(f, trivial)
-    if not f.health.mo then return end
-    if trivial then
-        f.health.mo:Hide()
-    else
-        if not self.db.profile.hp.mouseover then
-            f.health.mo:Show()
-        end
-
-        if self.db.profile.general.leftie then
-            f.health.mo:SetPoint('TOPRIGHT', f.health, 'BOTTOMRIGHT',
-                                 -2.5, self.db.profile.text.healthoffset + 3)
-        else
-            f.health.mo:SetPoint('BOTTOMRIGHT', f.health.p, 'BOTTOMLEFT',0, 0)
-        end
+        f.health.p:SetPoint(
+            'TOPRIGHT', f.health, 'BOTTOMRIGHT',
+            -2.5, self.db.profile.text.healthoffset + 4
+        )
     end
 end
 ------------------------------------------------------------------ Level text --
@@ -202,37 +186,24 @@ end
 function addon:CreateName(frame, f)
     f.name = f:CreateFontString(f.overlay, {
         font = self.font, size = 'name', outline = 'OUTLINE' })
-    f.name:SetJustifyV('BOTTOM')
     f.name:SetHeight(10)
 end
 function addon:UpdateName(f, trivial)
     f.name:ClearAllPoints()
-
-	-- silly hacky way of fixing horizontal jitter with center aligned texts
-	local offset
-	if trivial or not self.db.profile.general.leftie then
-		local swidth = f.name:GetStringWidth()
-		swidth = swidth - abs(swidth)
-		offset = (swidth > .7 or swidth < .2) and .5 or 0
-	end
+    f.name:SetJustifyV('BOTTOM')
+    f.name:SetJustifyH('CENTER')
+    f.name:SetWidth(0)
 
     if trivial then
-        f.name:SetPoint('BOTTOM', f.health, 'TOP', offset, -self.db.profile.text.healthoffset)
-		f.name:SetWidth(addon.sizes.frame.twidth * 2)
-		f.name:SetJustifyH('CENTER')
+        f.name:SetPoint('BOTTOM', f.health, 'TOP', .5, -self.db.profile.text.healthoffset)
+        f.name:SetWidth(addon.sizes.frame.twidth * 2)
+        f.name:SetJustifyH('CENTER')
     else
-        if self.db.profile.general.leftie then
-            f.name:SetPoint('BOTTOMLEFT', f.health, 'TOPLEFT',
-                            2.5, -self.db.profile.text.healthoffset)
-
-            f.name:SetPoint('RIGHT', f.health.p, 'LEFT')
-            f.name:SetJustifyH('LEFT')
-        else
-            -- move to top center
-            f.name:SetPoint('BOTTOM', f.health, 'TOP',
-                            offset, -self.db.profile.text.healthoffset)
-			f.name:SetWidth(addon.sizes.frame.width * 2)
-        end
+        -- move to top center
+        f.name:SetPoint('BOTTOM', f.health, 'TOP',
+                        .5, -self.db.profile.text.healthoffset)
+        f.name:SetWidth(addon.sizes.frame.width * 2)
+        f.name:SetJustifyH('CENTER')
     end
 end
 ----------------------------------------------------------------- Target glow --
@@ -252,25 +223,17 @@ function addon:UpdateTargetGlow(f, trivial)
         f.targetGlow:SetSize(self.sizes.tex.targetGlowW, self.sizes.tex.targetGlowH)
     end
 end
----------------------------------------------------------------- Target arrow --
-function addon:CreateTargetArrows(f)
-    local arrowSize = floor(self.sizes.tex.targetArrow)
-    local ta = CreateFrame('Frame',nil,f.overlay)
+-- raid icon ###################################################################
+local PositionRaidIcon = {
+    function(f) return f.icon:SetPoint('RIGHT',f.overlay,'LEFT',-8,0) end,
+    function(f) return f.icon:SetPoint('BOTTOM',f.overlay,'TOP',0,12) end,
+    function(f) return f.icon:SetPoint('LEFT',f.overlay,'RIGHT',8,0) end,
+    function(f) return f.icon:SetPoint('TOP',f.overlay,'BOTTOM',0,-8) end,
+}
+function addon:UpdateRaidIcon(f)
+    f.icon:SetParent(f.overlay)
+    f.icon:SetSize(addon.sizes.tex.raidicon, addon.sizes.tex.raidicon)
 
-    ta.left = ta:CreateTexture(nil,'ARTWORK',nil,1)
-    ta.left:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
-    ta.left:SetPoint('RIGHT',f.overlay,'LEFT',14,-1)
-    ta.left:SetSize(arrowSize,arrowSize)
-
-    ta.right = ta:CreateTexture(nil,'ARTWORK',nil,1)
-    ta.right:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-arrow')
-    ta.right:SetTexCoord(1,0,0,1)
-    ta.right:SetPoint('LEFT',f.overlay,'RIGHT',-14,-1)
-    ta.right:SetSize(arrowSize,arrowSize)
-
-    ta.left:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
-    ta.right:SetVertexColor(unpack(self.db.profile.general.targetglowcolour))
-
-    ta:Hide()
-    f.targetArrows = ta
+    f.icon:ClearAllPoints()
+    PositionRaidIcon[addon.db.profile.general.raidicon_side](f)
 end

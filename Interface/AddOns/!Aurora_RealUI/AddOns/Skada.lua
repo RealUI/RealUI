@@ -31,7 +31,6 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
             F.CreateBDFrame(skada.button)
         end
 
-        -- skada:SetFont(unpack(RealUI:Font(false, "small")))
         skada:SetTexture(RealUI.media.textures.plain80)
         skada:SetSpacing(0)
         skada:SetFrameLevel(5)

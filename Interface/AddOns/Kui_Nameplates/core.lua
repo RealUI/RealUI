@@ -7,6 +7,10 @@ local addon = LibStub('AceAddon-3.0'):NewAddon('KuiNameplates', 'AceEvent-3.0', 
 local kui = LibStub('Kui-1.0')
 local LSM = LibStub('LibSharedMedia-3.0')
 
+local group_update
+local GROUP_UPDATE_INTERVAL = 1
+local group_update_elapsed
+
 addon.font = ''
 addon.uiscale = nil
 
@@ -20,7 +24,6 @@ addon.sizes = {
         bgOffset = 8   -- inset of the frame glow
     },
     tex = {
-        raidicon = 23,
         targetGlowH = 7,
         targetArrow = 33,
     },
@@ -52,7 +55,8 @@ local latin  = (locale ~= 'zhCN' and locale ~= 'zhTW' and locale ~= 'koKR' and l
 local defaults = {
     profile = {
         general = {
-            combat      = false, -- automatically show hostile plates upon entering combat
+            combataction_hostile = 1,
+            combataction_friendly = 1,
             highlight   = true, -- highlight plates on mouse-over
             highlight_target = false,
             fixaa       = true, -- attempt to make plates appear sharper
@@ -65,10 +69,11 @@ local defaults = {
             thheight    = 9,
             width       = 130,
             twidth      = 72,
-            leftie      = false,
             glowshadow  = true,
             strata      = 'BACKGROUND',
             lowhealthval = 20,
+            raidicon_size = 30,
+            raidicon_side = 3,
         },
         fade = {
             smooth      = true, -- smoothy fade plates
@@ -84,7 +89,7 @@ local defaults = {
             },
         },
         text = {
-            level        = true, -- display levels
+            level        = false, -- display levels
             healthoffset = 2.5,
         },
         hp = {
@@ -95,11 +100,15 @@ local defaults = {
                 tappedcol   = { .5, .5, .5 },
                 playercol   = { .2, .5, .9 }
             },
-            friendly  = '<:d;', -- health display pattern for friendly units
-            hostile   = '<:p;', -- health display pattern for enemy units
-            showalt   = false, -- show alternate health values
-            mouseover = false, -- hide health values until mouseover/target
-            smooth    = true -- smoothly animate health bar changes
+            text = {
+                hp_text_disabled = false,
+                mouseover = false,
+                hp_friend_max = 5,
+                hp_friend_low = 4,
+                hp_hostile_max = 5,
+                hp_hostile_low = 3
+            },
+            smooth = true
         },
         fonts = {
             options = {
@@ -107,7 +116,8 @@ local defaults = {
                 fontscale  = 1,
                 outline    = true,
                 monochrome = false,
-                noalpha    = false,
+                onesize    = false,
+                noalpha    = false
             },
             sizes = {
                 combopoints = 13,
@@ -121,14 +131,17 @@ local defaults = {
 }
 ------------------------------------------ GUID/name storage functions --
 do
-    local loadedGUIDs, loadedNames = {}, {}
     local knownGUIDs = {} -- GUIDs that we can relate to names (i.e. players)
     local knownIndex = {}
+
+    -- loaded = visible frames that currently possess this key
+    local loadedGUIDs, loadedNames = {}, {}
 
     function addon:StoreNameWithGUID(name,guid)
         -- used to provide aggressive name -> guid matching
         -- should only be used for players
         if not name or not guid then return end
+        if knownGUIDs[name] then return end
         knownGUIDs[name] = guid
         tinsert(knownIndex, name)
 
@@ -136,6 +149,10 @@ do
         if #knownIndex > 100 then
             knownGUIDs[tremove(knownIndex, 1)] = nil
         end
+
+        --[===[@debug@
+        --print('cached name: '..name..' ['..guid..'], total: '..(knownIndex and #knownIndex or 'nil'))
+        --@end-debug@]===]
     end
 
     function addon:GetGUID(f)
@@ -143,12 +160,16 @@ do
         if f.player and knownGUIDs[f.name.text] then
             f.guid = knownGUIDs[f.name.text]
             loadedGUIDs[f.guid] = f
+
+            addon:SendMessage('KuiNameplates_GUIDAssumed', f)
         end
     end
-    function addon:StoreGUID(f, unit)
+    function addon:StoreGUID(f,unit,guid)
         if not unit then return end
-        local guid = UnitGUID(unit)
-        if not guid then return end
+        if not guid then
+            guid = UnitGUID(unit)
+            if not guid then return end
+        end
 
         if f.guid and loadedGUIDs[f.guid] then
             if f.guid ~= guid then
@@ -211,27 +232,77 @@ do
 
     -- return the given unit's nameplate
     function addon:GetUnitPlate(unit)
-        local name,realm = UnitName(unit)
+        return self:GetNameplate(UnitGUID(unit), GetUnitName(unit))
+    end
 
-        if realm and UnitRealmRelationship(unit) == LE_REALM_RELATION_COALESCED then
-            name = name .. ' (*)'
+    -- store an assumed unique name with its guid before it becomes visible
+    local function StoreUnit(unit)
+        if not unit then return end
+        if not UnitIsPlayer(unit) then return end
+
+        local guid = UnitGUID(unit)
+        if not guid then return end
+        if loadedGUIDs[guid] then return end
+
+        local name = GetUnitName(unit)
+        if not name or knownGUIDs[name] then return end
+        addon:StoreNameWithGUID(name,guid)
+
+        -- also send GUIDStored if the frame currently exists
+        local f = addon:GetNameplate(guid,name)
+        if f then
+            addon:StoreGUID(f,unit,guid)
+        else
+            -- equivalent to GUIDStored, but with no currently-visible frame
+            addon:SendMessage('KuiNameplates_UnitStored', unit, name, guid)
         end
-
-        return self:GetNameplate(UnitGUID(unit), name)
     end
 
     function addon:UPDATE_MOUSEOVER_UNIT(event)
-        if not UnitIsPlayer('mouseover') then return end
-        -- if mouseover is a player, we can -probably- assign its' GUID
-        local f = self:GetUnitPlate('mouseover')
-        if f and f.player then
-            self:StoreGUID(f, 'mouseover')
+        StoreUnit('mouseover')
+    end
+
+    local unit_prefix,max_members
+    function addon:GroupUpdate()
+        group_update = nil
+        if GetNumGroupMembers() <= 0 then return end
+
+        if IsInRaid() then
+            unit_prefix = 'raid'
+            max_members = 40
+        else
+            unit_prefix = 'party'
+            max_members = 5
         end
+
+        for i=1,max_members do
+            StoreUnit(unit_prefix..i)
+        end
+    end
+end
+function addon:QueueGroupUpdate()
+    group_update = true
+    group_update_elapsed = 0
+end
+---------------------------------------------------------------------- events --
+do
+    -- hide friendly nameplates when in a pet battle
+    -- (and restore them after)
+    local was_in_battle, prev_state
+    function addon:PetBattleUpdate(event)
+        local in_battle = C_PetBattles.IsInBattle()
+        if in_battle and not was_in_battle then
+            prev_state = GetCVarBool('nameplateShowFriends')
+            SetCVar('nameplateShowFriends',false)
+        elseif prev_state and not in_battle and was_in_battle then
+            SetCVar('nameplateShowFriends',prev_state and true)
+        end
+        was_in_battle = in_battle
     end
 end
 ------------------------------------------------------------ helper functions --
 -- cycle all frames' fontstrings and reset the font
-local function UpdateAllFonts()
+function addon:UpdateAllFonts()
     local _,frame
     for _,frame in pairs(addon.frameList) do
         local _,fs
@@ -242,24 +313,7 @@ local function UpdateAllFonts()
     end
 end
 
--- cycle all frames and reset the health and castbar status bar textures
-local function UpdateAllBars()
-    local _,frame
-    for _,frame in pairs(addon.frameList) do
-        if frame.kui.health then
-            frame.kui.health:SetStatusBarTexture(addon.bartexture)
-        end
-
-        if frame.kui.highlight then
-            frame.kui.highlight:SetTexture(addon.bartexture)
-        end
-
-        if frame.kui.castbar then
-            frame.kui.castbar.bar:SetStatusBarTexture(addon.bartexture)
-        end
-    end
-end
-
+-- given to fontstrings created with frame:CreateFontString (below)
 local function SetFontSize(fs, size)
     if addon.db.profile.fonts.options.onesize then
         size = 'name'
@@ -276,6 +330,7 @@ local function SetFontSize(fs, size)
     fs:SetFont(font, size, flags)
 end
 
+-- given to frames
 local function CreateFontString(self, parent, obj)
     -- store size as a key of addon.fontSizes so that it can be recalled & scaled
     -- correctly. Used by SetFontSize.
@@ -311,186 +366,93 @@ end
 addon.CreateFontString = CreateFontString
 ----------------------------------------------------------- scaling functions --
 -- scale font sizes with the fontscale option
-local function ScaleFontSize(key)
-    local size = addon.defaultFontSizes[key]
-    addon.sizes.font[key] = size * addon.db.profile.fonts.options.fontscale
+function addon:ScaleFontSize(key)
+    local size = self.defaultFontSizes[key]
+    self.sizes.font[key] = size * self.db.profile.fonts.options.fontscale
 end
-
-local function ScaleFontSizes()
+-- the same, for all registered sizes
+function addon:ScaleFontSizes()
     local key,_
-    for key,_ in pairs(addon.defaultFontSizes) do
-        ScaleFontSize(key)
+    for key,_ in pairs(self.defaultFontSizes) do
+        self:ScaleFontSize(key)
     end
 end
-
 -- modules should use this to add font sizes which scale correctly with the
 -- fontscale option
 -- keys must be unique
 function addon:RegisterFontSize(key, size)
     addon.defaultFontSizes[key] = size
-    ScaleFontSize(key)
+    self:ScaleFontSize(key)
 end
-
 -- once upon a time, equivalent logic was necessary for all frame sizes
 function addon:RegisterSize(type, key, size)
     error('deprecated function call: RegisterSize '..(type or 'nil')..' '..(key or 'nil')..' '..(size or 'nil'))
 end
 
-local function UpdateSizesTable()
+function addon:UpdateSizesTable()
     -- populate sizes table with profile values
     addon.sizes.frame.height = addon.db.profile.general.hheight
     addon.sizes.frame.theight = addon.db.profile.general.thheight
     addon.sizes.frame.width = addon.db.profile.general.width
     addon.sizes.frame.twidth = addon.db.profile.general.twidth
 
+    addon.sizes.tex.raidicon = addon.db.profile.general.raidicon_size
     addon.sizes.tex.healthOffset = addon.db.profile.text.healthoffset
     addon.sizes.tex.targetGlowW = addon.sizes.frame.width - 5
     addon.sizes.tex.ttargetGlowW = addon.sizes.frame.twidth - 5
-end
----------------------------------------------------- Post db change functions --
--- n.b. this is absolutely terrible and horrible and i hate it
-addon.configChangedFuncs = { runOnce = {} }
-addon.configChangedFuncs.runOnce.fontscale = function(val)
-    ScaleFontSizes()
-end
-addon.configChangedFuncs.fontscale = function(frame, val)
-    local _, fontObject
-    for _, fontObject in pairs(frame.fontObjects) do
-        if type(fontObject.size) == 'string' then
-            fontObject:SetFontSize(addon.sizes.font[fontObject.size])
-        end
-    end
-end
-
-addon.configChangedFuncs.outline = function(frame, val)
-    local _, fontObject
-    for _, fontObject in pairs(frame.fontObjects) do
-        kui.ModifyFontFlags(fontObject, val, 'OUTLINE')
-    end
-end
-
-addon.configChangedFuncs.monochrome = function(frame, val)
-    local _, fontObject
-    for _, fontObject in pairs(frame.fontObjects) do
-        kui.ModifyFontFlags(fontObject, val, 'MONOCHROME')
-    end
-end
-
-addon.configChangedFuncs.fontscale = function(frame, val)
-    local _, fontObject
-    for _, fontObject in pairs(frame.fontObjects) do
-        if fontObject.size then
-            fontObject:SetFontSize(fontObject.size)
-        end
-    end
-end
-addon.configChangedFuncs.onesize = addon.configChangedFuncs.fontscale
-
-addon.configChangedFuncs.runOnce.healthoffset = function(val)
-    addon.sizes.tex.healthOffset = addon.db.profile.text.healthoffset
-end
-addon.configChangedFuncs.healthoffset = function(frame, val)
-    addon:UpdateHealthText(frame, frame.trivial)
-    addon:UpdateAltHealthText(frame, frame.trivial)
-    addon:UpdateLevel(frame, frame.trivial)
-    addon:UpdateName(frame, frame.trivial)
-end
-
-addon.configChangedFuncs.Health = function(frame)
-    if frame:IsShown() then
-        -- update health display
-        frame:OnHealthValueChanged()
-    end
-end
-addon.configChangedFuncs.friendly = addon.configChangedFuncs.Health
-addon.configChangedFuncs.hostile = addon.configChangedFuncs.Health
-
-addon.configChangedFuncs.runOnce.bartexture = function(val)
-    addon.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, val)
-    UpdateAllBars()
-end
-
-addon.configChangedFuncs.runOnce.font = function(val)
-    addon.font = LSM:Fetch(LSM.MediaType.FONT, val)
-    UpdateAllFonts()
-end
-
-addon.configChangedFuncs.targetglowcolour = function(frame, val)
-    if frame.targetGlow then
-        frame.targetGlow:SetVertexColor(unpack(val))
-    end
-
-    if frame.targetArrows then
-        frame.targetArrows.left:SetVertexColor(unpack(val))
-        frame.targetArrows.right:SetVertexColor(unpack(val))
-    end
-end
-
-addon.configChangedFuncs.strata = function(frame,val)
-    frame:SetFrameStrata(val)
-end
-
-do
-    local function UpdateFrameSize(frame)
-        addon:UpdateBackground(frame, frame.trivial)
-        addon:UpdateHealthBar(frame, frame.trivial)
-        addon:UpdateName(frame, frame.trivial)
-        frame:SetCentre()
-    end
-
-    addon.configChangedFuncs.runOnce.width    = UpdateSizesTable
-    addon.configChangedFuncs.runOnce.twidth   = UpdateSizesTable
-    addon.configChangedFuncs.runOnce.hheight  = UpdateSizesTable
-    addon.configChangedFuncs.runOnce.thheight = UpdateSizesTable
-
-    addon.configChangedFuncs.width    = UpdateFrameSize
-    addon.configChangedFuncs.twidth   = UpdateFrameSize
-    addon.configChangedFuncs.hheight  = UpdateFrameSize
-    addon.configChangedFuncs.thheight = UpdateFrameSize
 end
 ------------------------------------------- Listen for LibSharedMedia changes --
 function addon:LSMMediaRegistered(msg, mediatype, key)
     if mediatype == LSM.MediaType.FONT then
         if key == self.db.profile.fonts.options.font then
             self.font = LSM:Fetch(mediatype, key)
-            UpdateAllFonts()
+            addon:UpdateAllFonts()
         end
     elseif mediatype == LSM.MediaType.STATUSBAR then
         if key == self.db.profile.general.bartexture then
             self.bartexture = LSM:Fetch(mediatype, key)
-            UpdateAllFonts()
+            addon:UpdateAllFonts()
         end
     end
 end
--------------------------------------------------- Listen for profile changes --
-function addon:ProfileChanged()
+------------------------------------------------------------ main update loop --
+do
+    local WorldFrame,tinsert,select = WorldFrame,tinsert,select
+    function addon:OnUpdate()
+        -- find new nameplates
+        local frames = select('#', WorldFrame:GetChildren())
+        if frames ~= self.numFrames then
+            local i, f
+            for i = 1, frames do
+                f = select(i, WorldFrame:GetChildren())
+                if self:IsNameplate(f) and not f.kui then
+                    self:InitFrame(f)
+                    tinsert(self.frameList, f)
+                end
+            end
+            self.numFrames = frames
+        end
+        -- process group update queue
+        if group_update then
+            group_update_elapsed = group_update_elapsed + .1
+            if group_update_elapsed > GROUP_UPDATE_INTERVAL then
+                self:GroupUpdate()
+            end
+        end
+    end
 end
 ------------------------------------------------------------------------ init --
 function addon:OnInitialize()
     self.db = LibStub('AceDB-3.0'):New('KuiNameplatesGDB', defaults)
-
-    -- enable ace3 profiles
-    LibStub('AceConfig-3.0'):RegisterOptionsTable('kuinameplates-profiles', LibStub('AceDBOptions-3.0'):GetOptionsTable(self.db))
-    LibStub('AceConfigDialog-3.0'):AddToBlizOptions('kuinameplates-profiles', 'Profiles', 'Kui Nameplates')
+    self:FinalizeOptions()
 
     self.db.RegisterCallback(self, 'OnProfileChanged', 'ProfileChanged')
     LSM.RegisterCallback(self, 'LibSharedMedia_Registered', 'LSMMediaRegistered')
 
-    -- move old reactioncolours config
-    if self.db.profile.general.reactioncolours then
-        local rc = self.db.profile.general.reactioncolours
-        local nrc = self.db.profile.hp.reactioncolours
-
-        if rc.hatedcol then nrc.hatedcol = rc.hatedcol end
-        if rc.neutralcol then nrc.neutralcol = rc.neutralcol end
-        if rc.friendlycol then nrc.friendlycol = rc.friendlycol end
-        if rc.tappedcol then nrc.tappedcol = rc.tappedcol end
-        if rc.playercol then nrc.playercol = rc.playercol end
-
-        self.db.profile.general.reactioncolours = nil
-    end
-
-    addon:CreateConfigChangedListener(addon)
+    -- we treat these like built in elements rather than having them rely
+    -- on messages
+    addon.Castbar = addon:GetModule('Castbar')
+    addon.TankModule = addon:GetModule('TankMode')
 end
 ---------------------------------------------------------------------- enable --
 function addon:OnEnable()
@@ -506,24 +468,17 @@ function addon:OnEnable()
         self.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, DEFAULT_BAR)
     end
 
-    addon.uiscale = UIParent:GetEffectiveScale()
+    self.uiscale = UIParent:GetEffectiveScale()
 
-    UpdateSizesTable()
-    ScaleFontSizes()
-
-    -- FIXME frame size warning (just for this version)
-    if not KuiNameplatesGDB.ReadSizeWarning then
-        print('Kui|cff9966ffNameplates|r: Due to changes in version 251, any customised frame sizes and the font scale option will need to be updated to remain consistent with their pre-update size. This message will go away next release but you can remove it now by running:')
-        print('/run KuiNameplatesGDB.ReadSizeWarning = true')
-    end
+    self:UpdateSizesTable()
+    self:ScaleFontSizes()
 
     -------------------------------------- Health bar smooth update functions --
-    -- (spoon-fed by oUF_Smooth)
     if self.db.profile.hp.smooth then
         local f, smoothing, GetFramerate, min, max, abs
             = CreateFrame('Frame'), {}, GetFramerate, math.min, math.max, math.abs
 
-        function addon.SetValueSmooth(self, value)
+        function self.SetValueSmooth(self, value)
             local _, maxv = self:GetMinMaxValues()
 
             if value == self:GetValue() or (self.prevMax and self.prevMax ~= maxv) then
@@ -550,7 +505,7 @@ function addon:OnEnable()
 
                 bar:OrigSetValue(new)
 
-                if cur == value or abs(new - value) < 2 then
+                if cur == value or abs(new - value) < .005 then
                     bar:OrigSetValue(value)
                     smoothing[bar] = nil
                 end
@@ -558,8 +513,16 @@ function addon:OnEnable()
         end)
     end
 
-    addon:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+    self:configChangedListener()
 
-    self:ToggleCombatEvents(self.db.profile.general.combat)
-    addon:ScheduleRepeatingTimer('OnUpdate', .1)
+    self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+    self:RegisterEvent('PLAYER_REGEN_ENABLED')
+    self:RegisterEvent('PLAYER_REGEN_DISABLED')
+    self:RegisterEvent('GROUP_ROSTER_UPDATE', 'QueueGroupUpdate')
+
+    self:RegisterEvent('PET_BATTLE_OPENING_START', 'PetBattleUpdate')
+    self:RegisterEvent('PET_BATTLE_OPENING_DONE', 'PetBattleUpdate')
+    self:RegisterEvent('PET_BATTLE_CLOSE', 'PetBattleUpdate')
+
+    self:ScheduleRepeatingTimer('OnUpdate',.1)
 end

@@ -6,7 +6,7 @@
 -- nemesis quest.
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
-local mod = addon:NewModule('NemesisHelper', 'AceEvent-3.0')
+local mod = addon:NewModule('NemesisHelper', addon.Prototype, 'AceEvent-3.0')
 local kui = LibStub('Kui-1.0')
 local _
 
@@ -107,7 +107,7 @@ function mod:PostCreate(msg, frame)
     ribg:SetPoint('BOTTOMRIGHT', ri)
     ribg:SetVertexColor(0,0,0)
 
-	rig:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\combopoint-glow')
+    rig:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\combopoint-glow')
     rig:SetPoint('TOPLEFT', ri, -sizes.glow, sizes.glow)
     rig:SetPoint('BOTTOMRIGHT', ri, sizes.glow+1, -sizes.glow-1)
     rig:SetVertexColor(1,0,0)
@@ -191,6 +191,7 @@ function mod:SoftDisable()
     -- stop watching combat/quest log but still create elements
     -- still watch PLAYER_ENTERING_WORLD to reactivate upon entering draenor
     self:UnregisterMessage('KuiNameplates_GUIDStored')
+    self:UnregisterMessage('KuiNameplates_GUIDAssumed')
     self:UnregisterMessage('KuiNameplates_PostShow')
     self:UnregisterMessage('KuiNameplates_PostHide')
 
@@ -200,6 +201,7 @@ function mod:SoftDisable()
 end
 function mod:SoftEnable()
     self:RegisterMessage('KuiNameplates_GUIDStored', 'GUIDStored')
+    self:RegisterMessage('KuiNameplates_GUIDAssumed', 'GUIDStored')
     self:RegisterMessage('KuiNameplates_PostShow', 'PostShow')
     self:RegisterMessage('KuiNameplates_PostHide', 'PostHide')
 
@@ -209,14 +211,9 @@ function mod:SoftEnable()
 end
 
 -- post db change functions ####################################################
-mod.configChangedFuncs = { runOnce = {} }
-mod.configChangedFuncs.runOnce.enabled = function(val)
-	if val then
-		mod:Enable()
-	else
-		mod:Disable()
-	end
-end
+mod:AddConfigChanged('enabled', function(v)
+    mod:Toggle(v)
+end)
 
 -- initialise ##################################################################
 function mod:GetOptions()
@@ -224,7 +221,7 @@ function mod:GetOptions()
         enabled = {
             name = 'Show race icons on nemesis targets',
             desc = 'Show race icons besides the nameplates of your current nemesis targets. This is only active while in the open world of Draenor and while you have an active nemesis quest (kill 500...).',
-            width = 'double',
+            width = 'full',
             type = 'toggle',
             order = 1,
             disabled = false
@@ -250,12 +247,12 @@ function mod:OnEnable()
     self:RegisterMessage('KuiNameplates_PostCreate', 'PostCreate')
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
 
-	local _, frame
-	for _, frame in pairs(addon.frameList) do
-		if not frame.kui.raceIcon then
-			self:PostCreate(nil, frame.kui)
-		end
-	end
+    local _, frame
+    for _, frame in pairs(addon.frameList) do
+        if not frame.kui.raceIcon then
+            self:PostCreate(nil, frame.kui)
+        end
+    end
 
     self:SoftEnable()
 end
@@ -269,10 +266,10 @@ function mod:OnDisable()
     wipe(storeIndex)
     wipe(activeNemesis)
 
-	local _, frame
-	for _, frame in pairs(addon.frameList) do
-		if frame.kui.raceIcon then
-			self:PostHide(nil, frame.kui)
-		end
-	end
+    local _, frame
+    for _, frame in pairs(addon.frameList) do
+        if frame.kui.raceIcon then
+            self:PostHide(nil, frame.kui)
+        end
+    end
 end

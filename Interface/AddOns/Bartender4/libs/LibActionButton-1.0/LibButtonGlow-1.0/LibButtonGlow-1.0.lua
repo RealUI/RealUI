@@ -28,7 +28,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]]
 local MAJOR_VERSION = "LibButtonGlow-1.0"
-local MINOR_VERSION = 4
+local MINOR_VERSION = 5
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
@@ -210,6 +210,7 @@ function lib.ShowOverlayGlow(frame)
 		local overlay = GetOverlayGlow()
 		local frameWidth, frameHeight = frame:GetSize()
 		overlay:SetParent(frame)
+		overlay:SetFrameLevel(frame:GetFrameLevel() + 5)
 		overlay:ClearAllPoints()
 		--Make the height/width available before the next frame:
 		overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4)

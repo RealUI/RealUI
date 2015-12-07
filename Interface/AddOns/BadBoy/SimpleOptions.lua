@@ -1,5 +1,5 @@
 
--- GLOBALS: BADBOY_NOREPORT, BADBOY_POPUP, InterfaceOptionsFrame_OpenToCategory, PlaySound, SLASH_BADBOY1
+-- GLOBALS: BADBOY_NOLINK, BADBOY_POPUP, InterfaceOptionsFrame_OpenToCategory, PlaySound, SLASH_BADBOY1
 
 --[[ Slash Handler ]]--
 SlashCmdList["BADBOY"] = function() InterfaceOptionsFrame_OpenToCategory("BadBoy") end
@@ -16,8 +16,8 @@ do
 		locNoReportDesc = "Veuillez ne PAS utiliser ceci. Le signalement du spam permet aux comptes piratés utilisés par les spammeurs d'être fermés et de nettoyer les royaumes. De plus, si beaucoup de joueurs signalent un spammeur, ce dernier perd la possibilité de discuter et donc de spammer, ce qui est bénéfique pour tous, en particulier pour ceux qui n'utilisent pas BadBoy."
 		locManualReport = "Afficher un popup de signalement du joueur au lieu de l'indiquer dans la fenêtre de chat"
 	elseif L == "deDE" then
-		locNoReportMsg = "Verstecke die 'Spam geblockt' Meldung die dich bittet den Spam zu melden"
-		locNoReportDesc = "Bitte NICHT nutzen. Spam zu melden hilft die Anzahl der gehackten Accounts die Spammer nutzen zu reduzieren und säubert die Server. Wenn viele Leute einen Spammer melden, verlieren diese ihre Möglichkeit den Chat zu nutzen. Davon profitieren alle, vor allem Leute die BadBoy nicht nutzen."
+		locNoReportMsg = "Verstecke die 'Spam geblockt' Meldung, die dich bittet, den Spam zu melden"
+		locNoReportDesc = "Bitte NICHT nutzen. Spam zu melden hilft die Anzahl der gehackten Accounts, die Spammer nutzen, zu reduzieren und säubert die Server. Wenn viele Leute einen Spammer melden, verlieren diese die Möglichkeit den Chat zu nutzen. Davon profitieren alle, vor allem Leute die BadBoy nicht nutzen."
 		locManualReport = "Zeige ein PopUp (zeigt den Spam) anstatt es im Chatfenster anzuzeigen"
 	elseif L == "zhTW" then
 		locNoReportMsg = "隱藏要你舉報的 '垃圾阻擋' 訊息"
@@ -56,7 +56,7 @@ badboy:Hide()
 badboy.name = "BadBoy"
 local title = badboy:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", 16, -16)
-title:SetText("BadBoy v12.557") -- wowace magic, replaced with tag version
+title:SetText("BadBoy v12.879") -- wowace magic, replaced with tag version
 InterfaceOptions_AddCategory(badboy)
 
 --[[ No Report Chat Message Checkbox ]]--
@@ -65,14 +65,14 @@ btnNoReportMsg:SetPoint("TOPLEFT", 16, -35)
 btnNoReportMsg:SetScript("OnClick", function(frame)
 	if frame:GetChecked() then
 		PlaySound("igMainMenuOptionCheckBoxOn")
-		BADBOY_NOREPORT = true
+		BADBOY_NOLINK = true
 	else
 		PlaySound("igMainMenuOptionCheckBoxOff")
-		BADBOY_NOREPORT = nil
+		BADBOY_NOLINK = nil
 	end
 end)
 btnNoReportMsg:SetScript("OnShow", function(frame)
-	frame:SetChecked(BADBOY_NOREPORT)
+	frame:SetChecked(BADBOY_NOLINK)
 end)
 local btnNoReportMsgText = btnNoReportMsg:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 btnNoReportMsgText:SetPoint("LEFT", btnNoReportMsg, "RIGHT", 0, 1)

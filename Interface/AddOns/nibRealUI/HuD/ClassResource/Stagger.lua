@@ -1,5 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+if nibRealUI.isTest then return end
+
+local L = nibRealUI.L
 local db, ndb
 
 local _
@@ -11,43 +13,6 @@ local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
 local MinLevel = 10
 local maxHealth
-
--- Options
-local options
-local function GetOptions()
-	if not options then options = {
-		type = "group",
-		name = "Stagger",
-		desc = "Monk Stagger tracker (+ Resolve).",
-		arg = MODNAME,
-		childGroups = "tab",
-		args = {
-			header = {
-				type = "header",
-				name = "Stagger",
-				order = 10,
-			},
-			desc = {
-				type = "description",
-				name = "Monk Stagger tracker (+ Resolve).",
-				fontSize = "medium",
-				order = 20,
-			},
-			enabled = {
-				type = "toggle",
-				name = "Enabled",
-				desc = "Enable/Disable the Stagger module.",
-				get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-				set = function(info, value) 
-					nibRealUI:SetModuleEnabled(MODNAME, value)
-				end,
-				order = 30,
-			},
-		},
-	}
-	end
-	return options
-end
 
 -----------------
 ---- Updates ----
@@ -137,7 +102,6 @@ end
 
 function Stagger:UpdateGlobalColors()
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "MONK" then return end
 	self.sBar:SetBarColor("right", nibRealUI.media.colors.orange)
 	self:UpdateAuras()
 end
@@ -145,7 +109,6 @@ end
 ------------
 function Stagger:ToggleConfigMode(val)
 	if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-	if nibRealUI.class ~= "MONK" then return end
 	if self.configMode == val then return end
 
 	self.configMode = val
@@ -160,18 +123,15 @@ function Stagger:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-	nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
+	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "MONK")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 
 function Stagger:OnEnable()
-	if nibRealUI.class ~= "MONK" then return end
-
 	self.configMode = false
 
 	if not self.sBar then 
-		self.sBar = ClassResourceBar:New("long")
+		self.sBar = ClassResourceBar:New("long", L["Resource_Stagger"])
 		self.sBar:SetBoxColor("middle", nibRealUI.classColor)
 	end
 

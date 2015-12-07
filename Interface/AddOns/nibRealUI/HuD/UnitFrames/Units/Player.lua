@@ -11,20 +11,14 @@ local info = {
     health = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        growDirection = "LEFT",
-        smooth = true,
     },
     predict = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        growDirection = "LEFT",
-        smooth = true,
     },
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        growDirection = "LEFT",
-        smooth = true,
     },
     [1] = {
         x = 222,
@@ -45,13 +39,13 @@ local info = {
 }
 
 local function CreateHealthBar(parent)
-    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHieght)
+    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHeight)
     local info = info.health
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
-    if ndb.settings.reverseUnitFrameBars then
-        health:SetReversePercent(true)
-    end
+    health:SetReverseFill(true)
+    health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+    --health.debug = "playerHealth"
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
@@ -65,27 +59,17 @@ local function CreateHealthBar(parent)
     for i = 1, 2 do
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
         health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
-        local xOfs = round(stepPoints[i] * health.info.maxWidth)
-        if health.reverse then
-            health.step[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
-            health.warn[i]:SetPoint("TOPRIGHT", health, -xOfs, 0)
-        else
-            xOfs = xOfs + health.info.minWidth
-            health.step[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
-            health.warn[i]:SetPoint("TOPRIGHT", health, "TOPLEFT", xOfs, 0)
-        end
         health.step[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
         health.warn[i]:SetBackgroundColor(.5, .5, .5, nibRealUI.media.background[4])
     end
 
     health.colorClass = db.overlay.classColor
     health.colorHealth = true
-
     health.frequentUpdates = true
+
+    health.PositionSteps = UnitFrames.PositionSteps
     health.PostUpdate = UnitFrames.UpdateSteps
-    --health.Override = UnitFrames.HealthOverride
     parent.Health = health
-    UnitFrames:SetHealthColor(parent)
 end
 
 local function CreatePredictBar(parent)
@@ -93,11 +77,12 @@ local function CreatePredictBar(parent)
     local info = info.predict
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-    absorbBar:SetReversePercent(true)
+    absorbBar.debug = "playerAbsorbs"
 
     parent.HealPrediction = {
-        absorbBar = absorbBar,
         frequentUpdates = true,
+        maxOverflow = 1,
+        absorbBar = absorbBar,
         Override = UnitFrames.PredictOverride,
     }
 end
@@ -122,11 +107,17 @@ local function CreatePvPStatus(parent)
 end
 
 local function CreatePowerBar(parent)
-    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHieght))
+    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHeight))
     local info = info.power
-    --print("Create Power bar")
     local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
+    local _, powerType = UnitPowerType(parent.unit)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
+    power:SetReverseFill(true)
+    if ndb.settings.reverseUnitFrameBars then
+        power:SetReversePercent(nibRealUI.ReversePowers[powerType])
+    else
+        power:SetReversePercent(not nibRealUI.ReversePowers[powerType])
+    end
 
     power.text = power:CreateFontString(nil, "OVERLAY")
     power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
@@ -145,10 +136,10 @@ local function CreatePowerBar(parent)
     end
 
     power.colorPower = true
-
     power.frequentUpdates = true
+
+    power.PositionSteps = UnitFrames.PositionSteps
     power.PostUpdate = UnitFrames.UpdateSteps
-    --power.Override = UnitFrames.PowerOverride
     parent.Power = power
 
     --[[ Druid Mana ]]--
@@ -208,25 +199,6 @@ local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     end
 end
 
-local function CreateStats(parent)
-    parent.Stats = {}
-    for i = 1, 2 do
-        parent.Stats[i] = {}
-        parent.Stats[i].icon = parent.overlay:CreateTexture(nil, "OVERLAY")
-        parent.Stats[i].icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
-        parent.Stats[i].icon:SetSize(16, 16)
-        if i == 1 then
-            parent.Stats[i].icon:SetPoint("BOTTOMLEFT", parent.Health, "BOTTOMRIGHT", 10, 0)
-        else
-            parent.Stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 15, 5)
-        end
-
-        parent.Stats[i].text = parent.overlay:CreateFontString(nil, "OVERLAY")
-        parent.Stats[i].text:SetFontObject(RealUIFont_Pixel)
-        parent.Stats[i].text:SetPoint("BOTTOMLEFT", parent.Stats[i].icon, "BOTTOMRIGHT", 0, 0)
-    end
-end
-
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = info[UnitFrames.layoutSize].endBox
@@ -282,7 +254,6 @@ UnitFrames["player"] = function(self)
     CreatePvPStatus(self)
     CreatePowerBar(self)
     CreatePowerStatus(self)
-    CreateStats(self)
     CreateEndBox(self)
     CreateTotems(self)
 
@@ -290,30 +261,22 @@ UnitFrames["player"] = function(self)
     self.RaidIcon:SetSize(20, 20)
     self.RaidIcon:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
 
-    function self:PostUpdate(event)
-        self.endBox.Update(self, event)
-
-        local power = self.Power
-        local _, powerType = UnitPowerType(self.unit)
-        --power:SetStatusBarColor(UnitFrames.PowerColors[powerType])
-        if self.DruidMana then
-            self.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-        end
-        power:SetReversePercent(nibRealUI.ReversePowers[powerType] or (ndb.settings.reverseUnitFrameBars))
-        power.enabled = true
-
-        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-        for i = 1, 2 do
-            local xOfs = floor(stepPoints[i] * power.info.maxWidth)
-            if power.reverse then
-                power.step[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
-                power.warn[i]:SetPoint("BOTTOMRIGHT", power, -xOfs, 0)
-            else
-                xOfs = xOfs + power.info.minWidth
-                power.step[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
-                power.warn[i]:SetPoint("BOTTOMRIGHT", power, "BOTTOMLEFT", xOfs, 0)
+    function self:PreUpdate(event)
+        if event == "ClassColorBars" then
+            self.Health.colorClass = db.overlay.classColor
+        elseif event == "ReverseBars" then
+            self.Health:SetReversePercent(not self.Health:GetReversePercent())
+            self.Power:SetReversePercent(not self.Power:GetReversePercent())
+            if self.DruidMana then
+                self.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
             end
         end
+    end
+
+    function self:PostUpdate(event)
+        self.endBox.Update(self, event)
+        self.Health:PositionSteps("TOP")
+        self.Power:PositionSteps("BOTTOM")
     end
 end
 

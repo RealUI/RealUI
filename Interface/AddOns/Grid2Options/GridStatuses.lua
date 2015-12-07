@@ -224,6 +224,8 @@ function Grid2Options:MakeStatusesOptions(options)
 	options = options or self.statusOptions; wipe(options)
 	-- title for statuses section
 	self:MakeTitleOptions(options, L["statuses"], L["available statuses"], nil, "Interface\\Addons\\Grid2\\media\\icon")
+	-- statuses general options
+	if self.MakeNewStatusOptions then self:MakeNewStatusOptions() end	
 	-- make categories options
 	for key,category in pairs(self.categories) do
 		self:AddStatusCategoryOptions( key, category )

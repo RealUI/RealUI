@@ -1,6 +1,10 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "ruRU")
+﻿local ADDON_NAME, private = ...
 
-if L then
+-- RealUI --
+local RealUI = RealUI
+local L = RealUI.L
+
+if RealUI.locale == "ruRU" then
 
 -- General
 L["Alert_CombatLockdown"] = "Блокировка в бою" -- Needs review
@@ -20,19 +24,15 @@ L["Patch_MiniPatch"] = "Мини-обновление RealUI" -- Needs review
 -- Options
 L["Appearance_ClassColorHealth"] = "Здоровье по цвету класса" -- Needs review
 L["Appearance_ClassColorNames"] = "Имена по цвету класса" -- Needs review
-L["Appearance_InfoLineBG"] = "Фон инфо-панели" -- Needs review
 L["Appearance_StripeOpacity"] = "Непрозр. полосы"
 L["Appearance_WinOpacity"] = "Непрозр. окна"
-L["Colors_Amber"] = "Янтарный" -- Needs review
-L["Colors_Blue"] = "Синий" -- Needs review
-L["Colors_Cyan"] = "Голубой" -- Needs review
-L["Colors_Green"] = "Зеленый" -- Needs review
-L["Colors_Orange"] = "Оранжевый" -- Needs review
-L["Colors_Purple"] = "Фиолетовый" -- Needs review
-L["Colors_Red"] = "Красный" -- Needs review
-L["Colors_Yellow"] = "Желтый" -- Needs review
+-- L["CombatFade"] = ""
+-- L["CombatFade_HarmTarget"] = ""
+-- L["CombatFade_Hurt"] = ""
+-- L["CombatFade_InCombat"] = ""
+-- L["CombatFade_NoCombat"] = ""
+-- L["CombatFade_Target"] = ""
 L["Fonts"] = "Шрифты" -- Needs review
-L["Fonts_AdvConfig"] = "Дополнительно"
 -- L["Fonts_ChangeYellow"] = ""
 -- L["Fonts_ChangeYellowDesc"] = ""
 -- L["Fonts_Chat"] = ""
@@ -41,9 +41,6 @@ L["Fonts_AdvConfig"] = "Дополнительно"
 -- L["Fonts_Font"] = ""
 -- L["Fonts_Header"] = ""
 -- L["Fonts_HeaderDesc"] = ""
-L["Fonts_Hybrid"] = "Смешанные" -- Needs review
-L["Fonts_HybridDesc"] = "Большие и маленькие шрифты" -- Needs review
-L["Fonts_LargeDesc"] = "Большие шрифты" -- Needs review
 -- L["Fonts_Normal"] = ""
 -- L["Fonts_NormalDesc"] = ""
 -- L["Fonts_NormalOffset"] = ""
@@ -53,15 +50,16 @@ L["Fonts_LargeDesc"] = "Большие шрифты" -- Needs review
 -- L["Fonts_PixelLarge"] = ""
 -- L["Fonts_PixelNumbers"] = ""
 -- L["Fonts_PixelSmall"] = ""
-L["Fonts_SmallDesc"] = "Маленькие шрифты" -- Needs review
 -- L["Fonts_Standard"] = ""
 -- L["Fonts_YellowFont"] = ""
 L["General_Enabled"] = "Включено" -- Needs review
 -- L["General_EnabledDesc"] = ""
 L["General_InvalidParent"] = "Указанного родительского фрейма для %s не существует." -- Needs review
--- L["General_LoadDefaults"] = ""
 -- L["General_NoteParent"] = ""
 -- L["General_NoteReload"] = ""
+-- L["General_Tristatefalse"] = ""
+-- L["General_Tristatenil"] = ""
+-- L["General_Tristatetrue"] = ""
 L["Layout_ApplyOOC"] = "Раскладка будет изменена после окончания боя." -- Needs review
 L["Layout_DPSTank"] = "Боец/Танк" -- Needs review
 L["Layout_Healing"] = "Лекарь" -- Needs review
@@ -83,21 +81,26 @@ L["Reset_SettingsLost"] = "Все пользовательские настро�
 
 
 -- Config
+-- L["ActionBars_ActionBarsDesc"] = ""
+-- L["ActionBars_Center"] = ""
+-- L["ActionBars_CenterDesc"] = ""
+-- L["ActionBars_CenterOption"] = ""
+-- L["ActionBars_EAB"] = ""
+-- L["ActionBars_Move"] = ""
+-- L["ActionBars_MoveDesc"] = ""
+-- L["ActionBars_Pet"] = ""
+-- L["ActionBars_ShowDoodads"] = ""
+-- L["ActionBars_ShowDoodadsDesc"] = ""
+-- L["ActionBars_Sides"] = ""
+-- L["ActionBars_SidesDesc"] = ""
+-- L["ActionBars_SidesOption"] = ""
+-- L["ActionBars_Stance"] = ""
 L["Alert_CantOpenInCombat"] = "Невозможно открыть конфигурацию RealUI в бою." -- Needs review
-L["Appearance_DefaultColors"] = "По умолчанию"
-L["Appearance_DefaultColorsDesc"] = [=[Отключите для
-своего цвета]=]
+-- L["Alert_UseClickToSetFocus"] = ""
 -- L["AuraTrack"] = ""
 L["AuraTrack_Buff"] = "Бафф" -- Needs review
-L["AuraTrack_ChooseType"] = "Выберите тип" -- Needs review
 L["AuraTrack_Create"] = "Добавить новый" -- Needs review
 L["AuraTrack_Debuff"] = "Дебафф" -- Needs review
-L["AuraTrack_Disable"] = "Отключить выделенный" -- Needs review
-L["AuraTrack_DruidBear"] = "Медведь" -- Needs review
-L["AuraTrack_DruidCat"] = "Кошка" -- Needs review
-L["AuraTrack_DruidHuman"] = "Человек" -- Needs review
-L["AuraTrack_DruidMoonkin"] = "Совух" -- Needs review
-L["AuraTrack_Enable"] = "Включить выделенный" -- Needs review
 L["AuraTrack_HideOOC"] = "Скрывать вне боя" -- Needs review
 L["AuraTrack_HideOOCDesc"] = "Принудительно скрывать вне боя, даже если индикатор активен."
 L["AuraTrack_HideStack"] = "Скрывать стаки"
@@ -107,12 +110,17 @@ L["AuraTrack_HideTimeDesc"] = "Не показывать оставшееся в
 L["AuraTrack_IgnoreSpec"] = "Все"
 L["AuraTrack_IgnoreSpecDesc"] = "Показывать индикатор независимо от специализации" -- Needs review
 L["AuraTrack_InactiveOpacity"] = "Непрозрачность"
+-- L["AuraTrack_InvalidName"] = ""
 L["AuraTrack_MinLevel"] = "Мин. уровень (0 = все)"
+-- L["AuraTrack_MinLevelDesc"] = ""
 L["AuraTrack_NoteSpellID"] = [=[Важно: название или ID заклинания должно точно соответствовать тому,
 которое вы хотите отслеживать.
 Для отслеживания нескольких заклинаний введите их ID через запятую (1122,2233).]=]
 L["AuraTrack_Padding"] = "Отступ"
+-- L["AuraTrack_Remove"] = ""
+-- L["AuraTrack_RemoveConfirm"] = ""
 L["AuraTrack_Reset"] = "Вы уверены, что хотите сбросить настойки отслеживания?" -- Needs review
+-- L["AuraTrack_Selected"] = ""
 L["AuraTrack_ShowHostile"] = "Показывать для цели"
 L["AuraTrack_ShowHostileDesc"] = "Отображать индикаторы, когда можно атаковать цель" -- Needs review
 L["AuraTrack_ShowInCombat"] = "Показывать в бою" -- Needs review
@@ -126,62 +134,63 @@ L["AuraTrack_SpellNameID"] = "Название или ID"
 L["AuraTrack_Static"] = "Статичный" -- Needs review
 L["AuraTrack_StaticDesc"] = "Статичные индикаторы отображаются всегда и на одной позиции" -- Needs review
 L["AuraTrack_TrackerOptions"] = "Настройки индикатора" -- Needs review
+-- L["AuraTrack_TristateSpecfalse"] = ""
+-- L["AuraTrack_TristateSpecnil"] = ""
+-- L["AuraTrack_TristateSpectrue"] = ""
+-- L["AuraTrack_Type"] = ""
+-- L["AuraTrack_TypeDesc"] = ""
+-- L["AuraTrack_Unit"] = ""
 L["AuraTrack_VerticalCD"] = "Вертикальный кулдаун" -- Needs review
 L["AuraTrack_VerticalCDDesc"] = "Вертикальный кулдаун вместо спирального" -- Needs review
-L["Bars_Bottom"] = "низ" -- Needs review
-L["Bars_Buttons"] = "Кнопок" -- Needs review
-L["Bars_Center"] = "центр" -- Needs review
-L["Bars_Control"] = "Разрешить RealUI управлять панелями команд." -- Needs review
-L["Bars_HintCtrlView"] = "Нажмите Ctrl для отображения панелей" -- Needs review
-L["Bars_Left"] = "слева" -- Needs review
-L["Bars_MoveEAB"] = "Доп. кнопка"
-L["Bars_MoveEABDesc"] = "RealUI управляет расположением дополнительной кнопки действия."
-L["Bars_MovePet"] = "Панель питомца"
-L["Bars_MovePetDesc"] = "RealUI управляет расположением панели питомца."
-L["Bars_MoveStance"] = "Панель стоек"
-L["Bars_MoveStanceDesc"] = "RealUI управляет расположением панели стоек."
-L["Bars_NoteAdvSettings"] = [=[Важно: нажмите |cffffa500Дополнительные Параметры|r для конфигурации Bartender.
-             Отключите |cff30d0ffКонтроль RealUI,|r если хотите изменить настройки,
-             контролируемые RealUI (расположение, размер и т. д.).]=]
-L["Bars_NoteCheckUIElements"] = [=[Важно: после изменения настроек здесь убедитесь, что элементы
-             интерфейса не перекрывают друг друга.]=]
-L["Bars_Padding"] = "Отступ" -- Needs review
-L["Bars_PetBar"] = "Панель питомца" -- Needs review
-L["Bars_Right"] = "справа" -- Needs review
-L["Bars_Sizes"] = "Размеры" -- Needs review
+-- L["AuraTrack_Visibility"] = ""
+-- L["CastBars"] = ""
+-- L["CastBars_Bottom"] = ""
+-- L["CastBars_BottomDesc"] = ""
+-- L["CastBars_Inside"] = ""
+-- L["CastBars_InsideDesc"] = ""
 L["Control_AddonControl"] = "Контроль RealUI"
+-- L["Control_Layout"] = ""
+-- L["Control_LayoutDesc"] = ""
+-- L["Control_Position"] = ""
+-- L["Control_PositionDesc"] = ""
 L["General_Position"] = "Позиция"
 L["General_Positions"] = "Расположение" -- Needs review
+-- L["General_XOffset"] = ""
+-- L["General_YOffset"] = ""
 L["HuD_AlertHuDChangeSize"] = "После изменения размера интерфейса может измениться расположение некоторых элементов. Проверьте расположение после применения изменений." -- Needs review
-L["HuD_ChooseElement"] = "Выберите элемент для изменения." -- Needs review
-L["HuD_ElementSettings"] = "Настройки"
 L["HuD_Height"] = "Высота" -- Needs review
-L["HuD_HideElements"] = "Скрыть интерфейс"
 L["HuD_Horizontal"] = "Горизонталь"
-L["HuD_Instructions"] = "Подсказка"
-L["HuD_Instructions1"] = "|cffffa500Шаг 1:|r нажмите |cff30ff30Показать интерфейс|r для отображения элементов."
-L["HuD_Instructions2"] = "|cffffa500Шаг 2:|r выберите в |cff30ff30Настройках|r элемент для изменения."
-L["HuD_Instructions3"] = "|cffffa500Шаг 3:|r нажмите |cff30ff30Скрыть интерфейс|r после окончания настройки."
-L["HuD_Latency"] = "Задержка" -- Needs review
-L["HuD_MouseWheelSliders"] = "(используйте колесико мыши для точной настройки)" -- Needs review
 L["HuD_ReverseBars"] = "Обратное направление полос" -- Needs review
 L["HuD_ShowElements"] = "Показать интерфейс"
 L["HuD_Uninterruptible"] = "Непрерываемое" -- Needs review
 L["HuD_UseLarge"] = "Увеличить" -- Needs review
 L["HuD_UseLargeDesc"] = "Увеличенный размер ключевых элементов (здоровье и т. д.)." -- Needs review
 L["HuD_Vertical"] = "Вертикаль"
+-- L["HuD_VerticalDesc"] = ""
 L["HuD_Width"] = "Ширина" -- Needs review
+-- L["Misc_SpellAlertsDesc"] = ""
+-- L["Misc_SpellAlertsWidthDesc"] = ""
 L["Raid_30Width"] = "Ширина 30 игроков"
 L["Raid_40Width"] = "Ширина 40 игроков"
-L["Raid_ControlLayout"] = "Управляет раскладкой %s."
-L["Raid_ControlPosition"] = "Управляет расположением %s."
-L["Raid_ControlStyle"] = "Стилизует %s (требуется перезагрузка интерфейса)."
-L["Raid_Layout"] = "Раскладка" -- Needs review
-L["Raid_NoteAdvSettings"] = [=[Важно: нажмите |cffffa500Дополнительные Параметры|r для конфигурации Grid2.
-             Отключите |cff30d0ffКонтроль RealUI,|r если хотите изменить настройки,
-             контролируемые RealUI (расположение, размер и т. д.).]=]
+-- L["Raid_LargeGroup"] = ""
+-- L["Raid_LargeGroupDesc"] = ""
 L["Raid_ShowSolo"] = "Показывать соло" -- Needs review
-L["Raid_Style"] = "Стиль" -- Needs review
+-- L["Raid_SmallGroup"] = ""
+-- L["Raid_SmallGroupDesc"] = ""
+-- L["Resource"] = ""
+-- L["Resource_BloodShield"] = ""
+-- L["Resource_DemonicFury"] = ""
+-- L["Resource_Eclipse"] = ""
+-- L["Resource_Gap"] = ""
+-- L["Resource_GapDesc"] = ""
+-- L["Resource_HeightDesc"] = ""
+-- L["Resource_HideUnused"] = ""
+-- L["Resource_HideUnusedDesc"] = ""
+-- L["Resource_Resolve"] = ""
+-- L["Resource_Reverse"] = ""
+-- L["Resource_ReverseDesc"] = ""
+-- L["Resource_Stagger"] = ""
+-- L["Resource_WidthDesc"] = ""
 -- L["UnitFrames_AnchorWidth"] = ""
 -- L["UnitFrames_AnchorWidthDesc"] = ""
 -- L["UnitFrames_AnnounceChatDesc"] = ""
@@ -199,8 +208,6 @@ L["Raid_Style"] = "Стиль" -- Needs review
 -- L["UnitFrames_SetFocus"] = ""
 -- L["UnitFrames_SetFocusDesc"] = ""
 -- L["UnitFrames_Units"] = ""
--- L["UnitFrames_XOffset"] = ""
--- L["UnitFrames_YOffset"] = ""
 
 
 -- InfoLine
@@ -221,6 +228,7 @@ L["Currency_UpdatedAbbr"] = "Обн." -- Needs review
 L["Friend_WhisperInvite"] = "<ЛКМ> для шепота, <Alt+ЛКМ> для приглашения." -- Needs review
 L["Guild_WhisperInvite"] = "<ЛКМ> для шепота, <Alt+ЛКМ> для приглашения." -- Needs review
 L["InfoLine"] = "Инфо-панель" -- Needs review
+-- L["InfoLine_ShowBG"] = ""
 L["Layout_Change"] = "<ЛКМ> для смены раскладки." -- Needs review
 L["Layout_Current"] = "Текущая раскладка:" -- Needs review
 L["Layout_LayoutChanger"] = "Смена раскладки" -- Needs review

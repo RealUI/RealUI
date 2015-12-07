@@ -1,0 +1,6 @@
+## Interface: 60100
+## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
+## Notes: RealUI dev tweaks
+## LoadWith: nibRealUI_Init
+
+nibRealUI_Dev.lua

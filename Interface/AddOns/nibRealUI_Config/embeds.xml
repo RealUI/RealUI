@@ -5,4 +5,5 @@
     <Include file="Libs\AceConfig-3.0\AceConfigDialog-3.0\AceConfigDialog-3.0.xml"/>
     <Include file="Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
     <Include file="Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
+    <Include file="Libs\AceGUI-3.0-Custom\AceGUI-3.0-Custom.xml"/>
 </Ui>

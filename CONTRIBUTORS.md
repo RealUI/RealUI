@@ -11,6 +11,17 @@ AddOn modifications
 
 
 
+Git
+---
+
+RealUI uses the [GitFlow](http://danielkummer.github.io/git-flow-cheatsheet/) workflow, please be familiar with this before making changes.
+
+The goal for this setup is to ensure that `master` is always representative of what is up on WoW Interface. It allows for "hotfixes" to `master` without having to maneuver around buggy/unfinished features.
+
+For Mac and Windows users, [SourceTree](http://www.sourcetreeapp.com/) has built-in support for GitFlow.
+
+
+
 SavedVariables data
 -------------------
 

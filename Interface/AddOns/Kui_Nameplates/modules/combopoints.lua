@@ -4,7 +4,7 @@
 -- All rights reserved
 ]]
 local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
-local mod = addon:NewModule('ComboPoints', 'AceEvent-3.0')
+local mod = addon:NewModule('ComboPoints', addon.Prototype, 'AceEvent-3.0')
 local _
 
 mod.uiName = 'Combo points'
@@ -116,8 +116,10 @@ function mod:UNIT_COMBO_POINTS(event,unit)
 	end
 end
 ---------------------------------------------------------------------- Target --
-function mod:OnFrameTarget(msg, frame)
-	self:UNIT_COMBO_POINTS(nil, 'player')
+function mod:OnFrameTarget(msg, frame, is_target)
+    if is_target then
+        self:UNIT_COMBO_POINTS(nil, 'player')
+    end
 end
 ---------------------------------------------------------------------- Create --
 function mod:CreateComboPoints(msg, frame)
@@ -177,22 +179,17 @@ function mod:HideComboPoints(msg, frame)
 	end
 end
 ---------------------------------------------------- Post db change functions --
-mod.configChangedFuncs = { runOnce = {} }
-mod.configChangedFuncs.runOnce.enabled = function(val)
-	if val then
-		mod:Enable()
-	else
-		mod:Disable()
-	end
-end
-
-mod.configChangedFuncs.runOnce.scale = function(val)
-    sizes.combopoints = defaultSizes.combopoints * val
-end
-mod.configChangedFuncs.scale = function(frame, val)
-    mod:ScaleComboPoints(frame)
-end
-
+mod:AddConfigChanged('enabled', function(v)
+    mod:Toggle(v)
+end)
+mod:AddConfigChanged('scale',
+    function(v)
+        sizes.combopoints = defaultSizes.combopoints * v
+    end,
+    function(f,v)
+        mod:ScaleComboPoints(f)
+    end
+)
 -------------------------------------------------------------------- Register --
 function mod:GetOptions()
 	return {
@@ -228,7 +225,7 @@ function mod:OnInitialize()
     defaultSizes.combopoints = 6.5
 
     -- scale size with user option
-    self.configChangedFuncs.runOnce.scale(self.db.profile.scale)
+    self.configChangedFuncs.scale.ro(self.db.profile.scale)
 
 	addon:InitModuleOptions(self)
 	mod:SetEnabledState(self.db.profile.enabled)

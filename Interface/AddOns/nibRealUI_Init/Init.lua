@@ -1,6 +1,19 @@
-local NAME, ns = ...
-local RealUI = RealUI or ns
+local NAME, RealUI = ...
+
+-- Lua Globals --
+local _G = _G
+local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
+local next, print, select = _G.next, _G.print, _G.select
+local tostring, date = _G.tostring, _G.date
+
+-- Libs --
+local LTD = LibStub("RealUI_LibTextDump-1.0")
+
+-- RealUI --
 _G.RealUI = RealUI
+
+local uiWidth, uiHeight = UIParent:GetSize()
+RealUI.EM = floor(uiHeight * 0.0125 + 0.5)
 
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
@@ -43,48 +56,67 @@ local function CreateDebugFrame(mod)
     if debugger[mod] then
         return
     end
-    debugger[mod] = LibStub("LibTextDump-1.0"):New(("%s Debug Output"):format(mod), 640, 480)
+    local function save(buffer)
+        _G.RealUI_Debug[mod] = buffer
+    end
+    debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
+    debugger[mod].numDuped = 1
+    debugger[mod].prevLine = ""
+    return debugger[mod]
 end
 
 local function debug(mod, ...)
-    if not debugger[mod] then
-        CreateDebugFrame(mod)
+    local modDebug = debugger[mod]
+    if not modDebug then
+        modDebug = CreateDebugFrame(mod)
     end
-    local time = date("%H:%M:%S")
-    local text = ("[%s] %s "):format(time, mod)
+    local text = mod
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        if (arg ~= nil) then
-            arg = tostring(arg)
-        else
-            arg = "nil"
-        end
-        text = text .. arg .. " "
+        text = text .. "     " .. tostring(arg)
     end
-    debugger[mod]:AddLine(text)
+    if modDebug.prevLine == text then
+        modDebug.numDuped = modDebug.numDuped + 1
+    else
+        if modDebug.numDuped > 1 then
+            modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
+            modDebug.numDuped = 1
+        end
+        local time = date("%H:%M:%S")
+        modDebug:AddLine(("[%s] %s"):format(time, text))
+        modDebug.prevLine = text
+    end
 end
 RealUI.Debug = debug
 
 -- Slash Commands
-SLASH_REALUIINIT1 = "/realdebug"
+_G.SLASH_REALUIINIT1 = "/realdebug"
 function SlashCmdList.REALUIINIT(mod, editBox)
     print("/realdebug", mod, editBox)
     if mod == "" then
+        -- TODO: Make this show a frame w/ buttons to specific debugs
         for k, v in next, debugger do
-            print(k)
+            print(k, debugger[k]:Lines())
         end
     else
-        if not debugger[mod] then
-            CreateDebugFrame(mod)
+        local modDebug = debugger[mod]
+        if not modDebug then
+            modDebug = CreateDebugFrame(mod)
         end
-        local display = debugger[mod]
-        if display:Lines() == 0 then
-            display:AddLine("Nothing to report.")
-            display:Display()
-            display:Clear()
+        if mod == "test" then
+            print("Generating test...")
+            for i = 1, 100 do
+                modDebug:AddLine("Test line "..i.." WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+                --modDebug:AddLine("Test line "..i)
+            end
+        end
+        if modDebug:Lines() == 0 then
+            modDebug:AddLine("Nothing to report.")
+            modDebug:Display()
+            modDebug:Clear()
             return
         end
-        display:Display()
+        modDebug:Display()
     end
 end
 
@@ -98,19 +130,20 @@ f:SetScript("OnEvent", function(self, event, addon)
         --f:UnregisterEvent("ADDON_LOADED")
     elseif event == "ADDON_LOADED" then
         if addon == NAME then
-            RealUI_InitDB = RealUI_InitDB or defaults
+            _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
+            _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
-            Aurora = {}
-            Aurora[1] = {} -- F, functions
-            Aurora[2] = {} -- C, constants/config
-            local F, C = unpack(Aurora)
+            local Aurora = {{},{}}
+            _G.Aurora = Aurora
+            local F = Aurora[1] -- F, functions
+            local C = Aurora[2] -- C, constants/config
 
             -- Setup __index to catch other addons using functions if Aurora is disabled.
             -- This way I don't have to add the entire API.
-            setmetatable(F, {__index = function(table, key)
+            _G.setmetatable(F, {__index = function(table, key)
                 debug("Aurora: __index", key, table)
-                if not rawget(table, key) then
+                if not _G.rawget(table, key) then
                     table[key] = function(...)
                         debug("Aurora: function:", key, "args:", ...)
                     end
@@ -121,7 +154,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             F.dummy = function() end
 
             -- load RealUI overrides into Aurora namespace
-            local auroraStyle = AURORA_CUSTOM_STYLE
+            local auroraStyle = _G.AURORA_CUSTOM_STYLE
 
             for name, func in next, auroraStyle.functions do
                 if auroraStyle.copy[name] then
@@ -133,7 +166,7 @@ f:SetScript("OnEvent", function(self, event, addon)
 
             if auroraStyle.classcolors then
                 C.classcolours = auroraStyle.classcolors
-                local _, class = UnitClass("player")
+                local _, class = _G.UnitClass("player")
 
                 local r, g, b = C.classcolours[class].r, C.classcolours[class].g, C.classcolours[class].b
                 C.r, C.g, C.b = r, g, b
@@ -165,7 +198,7 @@ function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
    end
 
    -- Calculate actual length of line
-   local l = sqrt((dx * dx) + (dy * dy))
+   local l = _G.sqrt((dx * dx) + (dy * dy))
 
    -- Quick escape if it's zero length
    if (l == 0) then
@@ -208,7 +241,7 @@ end
 -- Math
 RealUI.Round = function(value, places)
     local mult = 10 ^ (places or 0)
-    return math.floor(value * mult + 0.5) / mult
+    return floor(value * mult + 0.5) / mult
 end
 
 function RealUI:GetSafeVals(vCur, vMax)
@@ -231,7 +264,7 @@ end
 
 -- Colors
 function RealUI:ColorTableToStr(vals)
-    return string.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
+    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
 end
 
 function RealUI:GetDurabilityColor(percent)

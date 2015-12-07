@@ -1,0 +1,14 @@
+------------------------------------------------------------------------
+r786 | michaelspain | 2015-10-11 00:39:07 +0000 (Sun, 11 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/modules/IndicatorIcon.lua
+   M /trunk/modules/IndicatorIcons.lua
+
+Fixed some issues with OmniCC.
+------------------------------------------------------------------------
+r785 | michaelspain | 2015-09-08 15:33:43 +0000 (Tue, 08 Sep 2015) | 1 line
+Changed paths:
+   M /trunk/README.txt
+
+Release
+------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+if nibRealUI.isTest then return end
+
+local L = nibRealUI.L
 local db, ndb
 
 local _
@@ -8,45 +10,13 @@ local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
 local ResolveBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
 
-local class
-local MinLevel = 10
+local classes = {
+    ["DRUID"] = true,
+    ["PALADIN"] = true,
+    ["WARRIOR"] = true,
+}
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Resolve",
-        desc = "Resolve tracker for Druids, Paladins and Warriors.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Resolve",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Resolve tracker for Druids, Paladins and Warriors.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Resolve module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
+local MinLevel = 10
 
 ---------------------------
 ---- Resolve Updates ----
@@ -78,7 +48,7 @@ function ResolveBar:UpdateAuras(units)
 end
 
 function ResolveBar:UpdateShown()
-    --print("UpdateShown")
+    ResolveBar:debug("UpdateShown")
 
     if self.configMode then
         self.rBar:Show()
@@ -106,9 +76,8 @@ end
 
 ------------
 function ResolveBar:ToggleConfigMode(val)
-    --print("UpdateShown", val)
+    ResolveBar:debug("ToggleConfigMode", val)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if Resolve.special[class] then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -123,19 +92,15 @@ function ResolveBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
 
-    class = nibRealUI.class
-    
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterHuDOptions(MODNAME, GetOptions, "ClassResource")
+    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and classes[nibRealUI.class] ~= nil)
     nibRealUI:RegisterConfigModeModule(self)
 end
 
 function ResolveBar:OnEnable()
-    if Resolve.special[class] then return end
     self.configMode = false
 
     if not self.rBar then 
-        self.rBar = ClassResourceBar:New("short")
+        self.rBar = ClassResourceBar:New("short", L["Resource_Resolve"])
         self.rBar:SetEndBoxShown("left", false)
         self.rBar:SetEndBoxShown("right", false)
     end

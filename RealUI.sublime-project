@@ -5,6 +5,9 @@
 			"path": "Interface\\AddOns\\!Aurora_RealUI"
 		},
 		{
+			"path": "Interface\\AddOns\\Aurora"
+		},
+		{
 			"path": "Interface\\AddOns\\cargBags_Nivaya"
 		},
 		{
@@ -17,13 +20,29 @@
 			"path": "Interface\\AddOns\\nibRealUI"
 		},
 		{
+			"path": "Interface\\AddOns\\nibRealUI_Dev"
+		},
+		{
 			"path": "Interface\\AddOns\\nibRealUI_Config"
 		},
 		{
 			"path": "Interface\\AddOns\\nibRealUI_Init"
 		},
 		{
-			"path": "Interface\\AddOns\\SharedMedia_MyMedia"
+			"file_include_patterns":
+			[
+				"*.md",
+				"*.lua",
+				"*.ps1"
+			],
+			"folder_exclude_patterns":
+			[
+				".idea",
+				"Interface",
+				"utils"
+			],
+			"name": "Docs",
+			"path": "."
 		}
 	]
 }

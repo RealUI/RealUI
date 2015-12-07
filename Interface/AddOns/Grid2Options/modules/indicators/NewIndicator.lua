@@ -26,7 +26,7 @@ local function NewIndicator()
 			dbx.level = 7
 			dbx.textlength= defaults.text.textlength
 			dbx.fontSize= defaults.text.fontSize
-			dbx.font= defaults.text.font
+			-- dbx.font= defaults.text.font
 			Grid2:DbSetIndicator( newIndicatorName.."-color" , { type="text-color" })
 		elseif (newIndicatorValues.type == "bar") then
 			dbx.level = 3

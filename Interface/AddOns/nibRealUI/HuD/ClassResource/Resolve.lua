@@ -1,11 +1,9 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+if nibRealUI.isTest then return end
+
 local MODNAME = "ClassResource_Resolve"
 local Resolve = nibRealUI:CreateModule(MODNAME)
 
-Resolve.special = {
-	["DEATHKNIGHT"] = true,
-	["MONK"] = true,
-}
 Resolve.base = 0
 ------------------------
 ---- Resolve Scan ----

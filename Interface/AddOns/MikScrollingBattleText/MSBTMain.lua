@@ -1458,7 +1458,9 @@ end
 -- Create map of power types that are handled uniquely.
 uniquePowerTypes[powerTypes["HOLY_POWER"]] = true
 uniquePowerTypes[powerTypes["CHI"]] = true
-uniquePowerTypes[powerTypes["SHADOW_ORBS"]] = true
+if MikSBT.CLIENT_VERSION < 70000 then
+  uniquePowerTypes[powerTypes["SHADOW_ORBS"]] = true
+end
 
 -- Create damage type and damage color profile maps.
 CreateDamageMaps()
@@ -1468,10 +1470,13 @@ if (string_find(GetLocale(), "en..")) then isEnglish = true end
  
 -- Add auras to always ignore.
 ignoreAuras[SPELL_BLINK] = true
-ignoreAuras[SPELL_BLIZZARD] = true
-ignoreAuras[SPELL_HELLFIRE] = true
 ignoreAuras[SPELL_HURRICANE] = true
 ignoreAuras[SPELL_RAIN_OF_FIRE] = true
+if MikSBT.CLIENT_VERSION < 70000 then
+  ignoreAuras[SPELL_HELLFIRE] = true
+  ignoreAuras[SPELL_BLIZZARD] = true
+end
+
 
 -- Get localized off-hand trailer and convert to a lua search pattern.
 if (SPELL_BLOOD_STRIKE ~= UNKNOWN and SPELL_BLOOD_STRIKE_OFF_HAND ~= UNKNOWN) then

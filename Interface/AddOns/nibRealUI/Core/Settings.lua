@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local db, dbc, dbg
 local function debug(...)
@@ -36,7 +36,6 @@ local function SetDefaultCVars()
     -- Controls
     SetCVar("deselectOnClick", 1)                   -- Turn off Sticky Targeting (inverted)
     -- Combat
-    SetCVar("useCompactPartyFrames", 1)             -- Raid-style party frames
     SetCVar("displaySpellActivationOverlays", 1)    -- Turn on Spell Alerts
     SetCVar("spellActivationOverlayOpacity", 0.75)  -- Spell Alert Opacity
     -- Display
@@ -93,6 +92,9 @@ local function InitialSettings()
     -- Make Chat windows transparent
     SetChatWindowAlpha(1, 0)
     SetChatWindowAlpha(2, 0)
+
+    -- Char specific CVars
+    SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
 
     -- Initial Settings done
     nibRealUICharacter.initialized = true
@@ -154,7 +156,7 @@ end
 local function CreateInstallWindow()
     -- To help with debugging
     local bdAlpha, ibSizeOffs = 0.9, 0
-    if nibRealUI.key == "Real - Zul'jin" then
+    if nibRealUI.isDev then
         bdAlpha = 0.5
         ibSizeOffs = 300
     end
@@ -234,11 +236,13 @@ local function CreateInstallWindow()
         IWF.installTextFrame:SetSize(2,2)
     IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup()
         IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
-        IWF.installTextFrame.fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
-        IWF.installTextFrame.fade:SetDuration(1)
-        IWF.installTextFrame.fade:SetChange(-0.5)
-        IWF.installTextFrame.fade:SetOrder(1)
-        IWF.installTextFrame.fade:SetSmoothing("IN_OUT")
+        local fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
+        fade:SetDuration(1)
+        fade:SetFromAlpha(1)
+        fade:SetToAlpha(0.5)
+        fade:SetOrder(1)
+        fade:SetSmoothing("IN_OUT")
+        IWF.installTextFrame.fade = fade
     IWF.installTextFrame.aniGroup:Play()
 
     IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
@@ -317,11 +321,13 @@ local function MiniPatchInstallation()
     -- Find out which Mini Patches are needed
     local patches = {}
     debug("minipatch", oldVer[3], curVer[3])
-    for i = oldVer[3] + 1, curVer[3] do
-        debug("checking", i)
-        if nibRealUI.minipatches[i] then
-            -- This needs to be an array to ensure patches are applied sequentially.
-            tinsert(patches, nibRealUI.minipatches[i])
+    if oldVer[3] then
+        for i = oldVer[3] + 1, curVer[3] do
+            debug("checking", i)
+            if nibRealUI.minipatches[i] then
+                -- This needs to be an array to ensure patches are applied sequentially.
+                tinsert(patches, nibRealUI.minipatches[i])
+            end
         end
     end
 
@@ -329,7 +335,7 @@ local function MiniPatchInstallation()
     if #patches > 0 then
         StaticPopupDialogs["PUDRUIMP"] = {
             text = "|cff85e0ff"..L["Patch_MiniPatch"].."|r\n\n|cffffffff"..L["Patch_DoApply"],
-            button1 = "Yes",
+            button1 = OKAY,
             OnAccept = function()
                 ApplyMiniPatches(patches)
                 ReloadUI()

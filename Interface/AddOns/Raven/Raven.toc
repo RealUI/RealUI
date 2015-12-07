@@ -1,12 +1,12 @@
-## Interface: 60000
+## Interface: 60200
 ## Title: Raven
 ## Notes: Monitors buffs, debuffs and cooldowns and provides timer bars and icons plus helpful notifications
 ## Author: Tomber
 ## DefaultState: enabled
 ## OptionalDependencies: Masque
 ## SavedVariables: RavenDB
-## Version: r336
-## X-Curse-Packaged-Version: r336
+## Version: r337
+## X-Curse-Packaged-Version: r337
 ## X-Curse-Project-Name: Raven
 ## X-Curse-Project-ID: raven
 ## X-Curse-Repository-ID: wow/raven/mainline
@@ -25,6 +25,7 @@ Cancel.lua
 Nest.lua
 
 Presets\DeathKnight.lua
+Presets\DemonHunter.lua
 Presets\Druid.lua
 Presets\Hunter.lua
 Presets\Mage.lua

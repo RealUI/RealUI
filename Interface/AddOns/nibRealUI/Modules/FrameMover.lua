@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndb, ndbc
 
 local _
@@ -96,6 +96,7 @@ end
 
 -- Move a single Addon/UIFrame group from saved variables
 local function MoveFrameGroup(FramesTable, DBTable)
+    FrameMover:debug("MoveFrameGroup")
     local FrameDB = {}
     for idx = 1, #FramesTable do
         FramesMoving = true
@@ -596,6 +597,7 @@ end
 
 -- Move all Addons
 function FrameMover:MoveAddons(addonName)
+    FrameMover:debug("MoveAddons", addonName)
     local FrameDB = {}
     for addonSlug, addon in next, FrameList.addons do
         local addonInfo = db.addons[addonSlug]
@@ -603,6 +605,7 @@ function FrameMover:MoveAddons(addonName)
         if (addonName and addonSlug == addonName) or (addonName == nil) then
             if ((addonSlug ~= "grid2") and addonInfo.move) or ((addonSlug == "grid2") and nibRealUI:DoesAddonMove("Grid2")) then
                 local IsHealing = ( addon.hashealing and addonInfo.healing and nibRealUI.cLayout == 2 )
+                FrameMover:debug("IsHealing", IsHealing)
                 
                 if IsHealing then
                     -- Healing Layout
@@ -673,8 +676,10 @@ end
 -- Grid2 - Top stop LayoutFrame re-anchoring itself to UIParent
 local function Hook_Grid2()
     if not Grid2LayoutFrame then return end
-    hooksecurefunc(Grid2LayoutFrame, "SetPoint", function()
+    hooksecurefunc(Grid2LayoutFrame, "SetPoint", function(...)
+        FrameMover:debug("Grid2LayoutFrame:SetPoint")
         if FramesMoving then return end
+        FrameMover:debug("SetPoint", ...)
         FrameMover:MoveAddons("grid2")
     end)
 end
