@@ -13,7 +13,7 @@ local LDB = LibStub("LibDataBroker-1.1")
 local qTip = LibStub("LibQTip-1.0")
 local LIF = LibStub("LibIconFonts-1.0")
 local octicons = LIF:GetIconFont("octicons", "v2.x")
-octicons.path = [[Interface\AddOns\nibRealUI\Fonts\octicons-local.ttf]]
+octicons.path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local.ttf]]
 
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")

@@ -38,10 +38,10 @@ function IconFontTest()
     print("IconFontTest")
     local octicons = {}
     octicons[2] = lib:GetIconFont("octicons", "v2.x")
-    octicons[2].path = [[Interface\AddOns\nibRealUI\Fonts\octicons-local-v2.4.1.ttf]]
+    octicons[2].path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local-v2.4.1.ttf]]
 
     octicons[3] = lib:GetIconFont("octicons", "v3.x")
-    octicons[3].path = [[Interface\AddOns\nibRealUI\Fonts\octicons-local.ttf]]
+    octicons[3].path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local.ttf]]
 
     local frame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplate")
     frame:SetSize(600, 400)

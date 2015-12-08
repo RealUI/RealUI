@@ -19,10 +19,10 @@ LSM:Register("font", "Morpheus US", [[Fonts\MORPHEUS.ttf]])
 
 -- Russian + Latin char languages
 LOCALE_MASK = LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
-LSM:Register("font", "Roboto", [[Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf]], LOCALE_MASK)
-LSM:Register("font", "Roboto Bold-Italic", [[Interface\AddOns\nibRealUI\Fonts\Roboto-BoldItalic.ttf]], LOCALE_MASK)
-LSM:Register("font", "Roboto Condensed", [[Interface\AddOns\nibRealUI\Fonts\RobotoCondensed-Regular.ttf]], LOCALE_MASK)
-LSM:Register("font", "Roboto Slab", [[Interface\AddOns\nibRealUI\Fonts\RobotoSlab-Regular.ttf]], LOCALE_MASK)
+LSM:Register("font", "Roboto", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf]], LOCALE_MASK)
+LSM:Register("font", "Roboto Bold-Italic", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]], LOCALE_MASK)
+LSM:Register("font", "Roboto Condensed", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]], LOCALE_MASK)
+LSM:Register("font", "Roboto Slab", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]], LOCALE_MASK)
 
 LSM:Register("font", "Standard", [[Interface\AddOns\nibRealUI\Fonts\standard.ttf]], LOCALE_MASK)
 LSM:Register("font", "Standard Regular", [[Interface\AddOns\nibRealUI\Fonts\standard_regular.ttf]], LOCALE_MASK)
