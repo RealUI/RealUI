@@ -31,6 +31,7 @@
 		{
 			"file_include_patterns":
 			[
+				"*.git*",
 				"*.md",
 				"*.lua",
 				"*.ps1"
