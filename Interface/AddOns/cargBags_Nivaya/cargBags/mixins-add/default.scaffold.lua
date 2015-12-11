@@ -31,22 +31,7 @@ local L = cargBags:GetLocalizedTypes()
 local function noop() end
 
 -- Upgrade Level retrieval
-local S_UPGRADE_LEVEL = "^" .. gsub(ITEM_UPGRADE_TOOLTIP_FORMAT, "%%d", "(%%d+)")	-- Search pattern
-local scantip = CreateFrame("GameTooltip", "ItemUpgradeScanTooltip", nil, "GameTooltipTemplate")
-scantip:SetOwner(UIParent, "ANCHOR_NONE")
-
-local function GetItemUpgradeLevel(itemLink)
-	scantip:SetHyperlink(itemLink)
-	for i = 2, scantip:NumLines() do -- Line 1 = name so skip
-		local text = _G["ItemUpgradeScanTooltipTextLeft"..i]:GetText()
-		if text and text ~= "" then
-			local currentUpgradeLevel, maxUpgradeLevel = strmatch(text, S_UPGRADE_LEVEL)
-			if currentUpgradeLevel then
-				return currentUpgradeLevel, maxUpgradeLevel
-			end
-		end
-	end
-end
+local LIU = LibStub("LibItemUpgradeInfo-1.0")
 
 local function Round(num, idp)
 	local mult = 10^(idp or 0)
@@ -142,17 +127,11 @@ local function ItemButton_Update(self, item)
 	local _,_,_,_,_,_,itemLink = GetContainerItemInfo(item.bagID, item.slotID)
 	if itemLink then
 		local _,_,itemRarity,itemLevel,_,itemType = GetItemInfo(itemLink)
+		if LIU then
+			itemLevel = LIU:GetUpgradedItemLevel(itemLink)
+		end
 
-		if itemType and itemLevel and ilvlTypes[itemType] and itemLevel > 0 then
-			local currentUpgradeLevel, maxUpgradeLevel = GetItemUpgradeLevel(itemLink)
-			if (currentUpgradeLevel and maxUpgradeLevel) then
-				if itemRarity <= 3 then
-					itemLevel = itemLevel + (tonumber(currentUpgradeLevel) * 8)
-				else
-					itemLevel = itemLevel + (tonumber(currentUpgradeLevel) * 4)
-				end
-			end
-
+		if (itemType and ilvlTypes[itemType]) and (itemLevel and itemLevel > 0) then
 			self.BottomString:SetText(itemLevel)
 			self.BottomString:SetTextColor(GetItemQualityColor(itemRarity))
 		else

@@ -2,6 +2,8 @@ local _, mods = ...
 
 tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("PaperDollFrame", F, C)
+    local LIU = LibStub("LibItemUpgradeInfo-1.0")
+
     local itemSlots = {
         {slot = "Head", hasDura = true},
         {slot = "Neck", hasDura = false},
@@ -116,7 +118,9 @@ tinsert(mods["nibRealUI"], function(F, C)
                 local itemSlot = _G["Character" .. item.slot .. "Slot"]
                 local itemLink = GetInventoryItemLink("player", slotID)
                 if itemLink then
-                    local _, _, itemRarity, itemLevel = GetItemInfo(itemLink)
+                    local _, _, itemRarity = GetItemInfo(itemLink)
+                    local itemLevel = LIU:GetUpgradedItemLevel(itemLink)
+                    mods.debug("PaperDollFrame", item.slot, itemLevel)
 
                     if itemLevel and itemLevel > 0 then
                         itemSlot.ilvl:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
