@@ -542,6 +542,11 @@ AuraTracking.Defaults = {
             },
             ["3-ad43391a-1"] = {   -- Steady Focus (Talent)
                 spell = 177668,
+                talent = {
+                    tier = 4,
+                    ID = 19352,
+                    mustHave = true,
+                },
                 order = 2,
             },
         -- Static Target Auras
@@ -567,11 +572,18 @@ AuraTracking.Defaults = {
                 spell = 3045,
                 specs = {false, true, false}
             },
+            ["3-9bd8be3e-1"] = {   -- Thrill of the Hunt (Talent)
+                spell = 34720,
+                talent = {
+                    tier = 4,
+                    ID = 19365,
+                    mustHave = true,
+                },
+            },
             ["3-9bca201a-1"] = {spell = 19263},   -- Deterrence
             ["3-89b90044-1"] = {spell = 51755},   -- Camouflage
             ["3-ad25aea5-1"] = {spell = 54216},   -- Master's Call
             ["3-b228dae3-1"] = {spell = 53480},   -- Roar of Sacrifice (Cunning)
-            ["3-9bd8be3e-1"] = {spell = 34720},   -- Thrill of the Hunt (Talent)
         -- Free Target Auras
             ["3-ae78fcd9-1"] = {   -- Black Arrow (SV)
                 spell = 3674,
@@ -604,6 +616,11 @@ AuraTracking.Defaults = {
                 spell = 131894,
                 auraType = "debuff",
                 unit = "target",
+                talent = {
+                    tier = 5,
+                    ID = 19360,
+                    mustHave = true,
+                },
             },
     },
 
