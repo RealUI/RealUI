@@ -1,6 +1,5 @@
 -- Death Knight
 
-print("Set Raven DK presets")
 Raven.runeSpells = {
 	["Army of the Dead"] = { blood = true, frost = true, unholy = true, id = 42650 },
 	["Chains of Ice"] = { frost = true, id = 45524 },
