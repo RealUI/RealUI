@@ -231,10 +231,8 @@ local defaultTracker = {
     specs = {true, true, true, GetSpecializationInfo(4) and true}, -- {spec1, spec2, spec3[, spec4]}
     talent = {},
     order = 0, -- Tracker will be static if greater than 0
-    hideOOC = false, -- hide out-of-combat even if active
-    hideTime = false, -- hide timer text
     hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
-    ignoreRaven = false, -- don't add this aura to Raven's filter lists
+    noExclude = false, -- don't add this aura to Raven's filter lists
     shouldLoad = true,
     debug = false
 }
@@ -535,7 +533,6 @@ AuraTracking.Defaults = {
                 minLevel = 80,
                 specs = {false, true, false},
                 order = 1,
-                hideOOC = true,
             },
             ["3-9e5da04c-1"] = {   -- Lock and Load (SV)
                 spell = 168980,
@@ -1111,7 +1108,6 @@ AuraTracking.Defaults = {
                 spell = 324,
                 minLevel = 20,
                 specs = {true, false, false},
-                hideOOC = true,
             },
             ["7-b7881104-1"] = {spell = 30823},    -- Shamanistic Rage
             ["7-80768995-1"] = {spell = 73683},    -- Unleash Flame

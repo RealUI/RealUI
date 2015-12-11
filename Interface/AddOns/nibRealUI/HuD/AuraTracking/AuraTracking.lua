@@ -88,6 +88,7 @@ local function shouldTrack(spellData)
     end
 end
 local function AddToSpellList(spellData, spellList)
+    if spellData.noExclude then return end
     local spell = spellData.spell
     if type(spell) == "table" then
         for index = 1, #spell do
@@ -236,8 +237,8 @@ function AuraTracking:Unlock()
             local parent = self[side]
             parent:EnableMouse(true)
             parent.bg:Show()
+            end
         end
-    end
     if not nibRealUI.isInTestMode then
         self:ToggleConfigMode(true)
     end
@@ -310,7 +311,9 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.cd:Show()
                 tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
                 tracker.icon:SetTexture(aura.texture)
-                tracker.count:SetText(aura.count)
+                if not spellData.hideStacks then
+                    tracker.count:SetText(aura.count)
+                end
                 AuraTracking:AddTracker(tracker)
             elseif tracker.slotID then
                 tracker.auraIndex = nil
