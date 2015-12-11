@@ -224,6 +224,10 @@ function AuraTracking:Lock()
             local parent = self[side]
             parent:EnableMouse(false)
             parent.bg:Hide()
+            for slotID = 1, maxStaticSlots do
+                local slot = self[side]["slot"..slotID]
+                slot:SetAlpha(nibRealUI.isInTestMode and 1 or 0)
+            end
         end
     end
     if not nibRealUI.isInTestMode then
@@ -231,16 +235,20 @@ function AuraTracking:Lock()
     end
 end
 function AuraTracking:Unlock()
+    if not nibRealUI.isInTestMode then
+        self:ToggleConfigMode(true)
+    end
     if db.locked then
         db.locked = false
         for i, side in next, {"left", "right"} do
             local parent = self[side]
             parent:EnableMouse(true)
             parent.bg:Show()
+            for slotID = 1, maxStaticSlots do
+                local slot = self[side]["slot"..slotID]
+                slot:SetAlpha(0.2)
             end
         end
-    if not nibRealUI.isInTestMode then
-        self:ToggleConfigMode(true)
     end
 end
 function AuraTracking:SettingsUpdate(event)
@@ -472,7 +480,7 @@ function AuraTracking:Createslots()
         end)
 
         local bg = parent:CreateTexture()
-        local color = i - 1
+        local color = i / 2
         bg:SetTexture(color, color, color, 0.5)
         bg:SetAllPoints(parent)
         bg:Hide()
