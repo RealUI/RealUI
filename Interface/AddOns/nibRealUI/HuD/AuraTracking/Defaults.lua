@@ -235,10 +235,22 @@ local defaultTracker = {
     noExclude = false, -- don't add this aura to Raven's filter lists
     shouldLoad = true,
     debug = false
+    --[[
+    customName = _G.GetSpellInfo(12345),
+    eventUpdate = {
+        event = "UNIT_POWER_FREQUENT",
+        func = SpecialFunc
+    }
+    ]]
 }
 --[[ Retired IDs
 9ab78043
 857dac62
+99868b0a
+9f2335ea
+817d87de
+90be0e2a
+
 
 
 
@@ -928,19 +940,13 @@ AuraTracking.Defaults = {
                 order = 1,
             },
         -- Static Target Auras
-            ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
-                spell = 34914,
+            ["5-9ee1ee3e-1"] = {   -- Shadow Word:Pain (Shadow)
+                spell = 589,
+                minLevel = 3,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
                 order = 1,
-            },
-            ["5-9ee1ee3e-1"] = {   -- SW:P (Shadow)
-                spell = 589,
-                auraType = "debuff",
-                unit = "target",
-                specs = {false, false, true},
-                order = 2,
             },
             ["5-b1df8034-1"] = {   -- Devouring Plague (Shadow)
                 spell = 158831,
@@ -948,28 +954,58 @@ AuraTracking.Defaults = {
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
+                order = 2,
+            },
+            ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
+                spell = 34914,
+                minLevel = 28,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
                 order = 3,
             },
         -- Free Player Auras
-            ["5-a4b0b5d4-1"] = {spell = 109964},   -- Spirit Shell
-            ["5-aaf9a60f-1"] = {spell = 47585},    -- Dispersion
-            ["5-9e14c42b-1"] = {spell = 15286},    -- Vampiric Embrace
-            ["5-90be0e2a-1"] = {spell = 33206},    -- Pain Suppression
-            ["5-8ead482d-1"] = {spell = 10060},    -- Power Infusion
-            ["5-817d87de-1"] = {spell = 47788},    -- Guardian Spirit
-            ["5-9f2335ea-1"] = {spell = 62618},    -- Power Word: Barrier
-            ["5-99868b0a-1"] = {spell = 6346},     -- Fear Ward
-            ["5-ab8e3ab7-1"] = {spell = 114239},   -- Phantasm
-            ["5-b255a230-1"] = {spell = 119032},   -- Spectral Guise
-            ["5-8636c202-1"] = {spell = 27827},    -- Spirit of Redemption
+            ["5-8636c202-1"] = {   -- Archangel (Disc)
+                spell = 81700,
+                minLevel = 44,
+                specs = {true, false, false},
+            },
+            ["5-aaf9a60f-1"] = {   -- Dispersion (Shadow)
+                spell = 47585,
+                minLevel = 60,
+                specs = {false, false, true},
+            },
+            ["5-9e14c42b-1"] = {   -- Vampiric Embrace (Shadow)
+                spell = 15286,
+                minLevel = 78,
+                specs = {false, false, true},
+            },
+            ["5-b255a230-1"] = {   -- Spectral Guise (Talent)
+                spell = 119032,
+                minLevel = 15,
+            },
+            ["5-ab8e3ab7-1"] = {   -- Surge of Light (Talent) (Disc, Holy)
+                spell = 114255,
+                minLevel = 45,
+                specs = {true, true, false},
+            },
+            ["5-8ead482d-1"] = {   -- Power Infusion (Talent)
+                spell = 10060,
+                minLevel = 75,
+            },
+            ["5-a4b0b5d4-1"] = {   -- Divine Insight (Talent) (Holy)
+                spell = 123267,
+                minLevel = 75,
+                specs = {false, true, false},
+            },
+            ["5-86b717fe-1"] = {   -- Words of Mending (Talent) (Disc, Holy)
+                spell = 155362,
+                minLevel = 100,
+                specs = {true, true, false},
+            },
         -- Free Target Auras
-            ["5-a88338ed-1"] = {   -- Holy Fire
+            ["5-a88338ed-1"] = {   -- Holy Fire (Disc, Holy)
                 spell = 14914,
-                auraType = "debuff",
-                unit = "target",
-                },
-            ["5-86b717fe-1"] = {   -- Psychic Horror
-                spell = 64044,
                 auraType = "debuff",
                 unit = "target",
             },
