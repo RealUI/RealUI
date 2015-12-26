@@ -538,7 +538,7 @@ AuraTracking.Defaults = {
                 spell = 82692,
                 minLevel = 30,
                 specs = {true, false, false},
-                order = 1,
+                order = 2,
             },
             ["3-81e273d4-1"] = {   -- Sniper Training (MM)
                 spell = 168811,
@@ -554,12 +554,13 @@ AuraTracking.Defaults = {
             },
             ["3-ad43391a-1"] = {   -- Steady Focus (Talent)
                 spell = 177668,
+                minLevel = 60,
                 talent = {
                     tier = 4,
                     ID = 19352,
                     mustHave = true,
                 },
-                order = 2,
+                order = 3,
             },
         -- Static Target Auras
             ["3-bb365636-1"] = {   -- Serpent Sting (SV)
@@ -948,17 +949,17 @@ AuraTracking.Defaults = {
                 specs = {false, false, true},
                 order = 1,
             },
-            ["5-b1df8034-1"] = {   -- Devouring Plague (Shadow)
-                spell = 158831,
-                minLevel = 21,
+            ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
+                spell = 34914,
+                minLevel = 28,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
                 order = 2,
             },
-            ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
-                spell = 34914,
-                minLevel = 28,
+            ["5-b1df8034-1"] = {   -- Devouring Plague (Shadow)
+                spell = 158831,
+                minLevel = 21,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},

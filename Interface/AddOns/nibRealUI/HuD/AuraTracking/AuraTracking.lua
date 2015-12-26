@@ -23,7 +23,7 @@ local round = nibRealUI.Round
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
-local maxSlots, maxStaticSlots = 10, 6
+local MAX_SLOTS, MAX_STATIC_SLOTS = 10, 6
 local numActive = {left = 0, right = 0}
 local playerLevel, playerSpec, iterUnits
 local isValidUnit = {
@@ -104,68 +104,92 @@ local function RegisterSpellList(unitExclusions, spellList)
     end
 end
 
-function AuraTracking:AddTracker(tracker, slotID)
-    self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
-    local numActive = numActive[tracker.side]
-    if tracker.slotID then
-        if tracker.isStatic then
-            tracker.icon:SetDesaturated(false)
-            tracker:SetAlpha(1)
-            numActive = numActive + 1
-        end
-    else
-        numActive = numActive + 1
-        local side, slot = self[tracker.side]
-        if slotID then
-            self:debug("Place in slot", slotID)
-            slot = side["slot"..slotID]
-        else
-            self:debug("Find empty slot")
-            for i = 1, maxSlots do
-                slot = side["slot"..i]
-                if not slot.isActive then
-                    self:debug("Found slot", slotID)
-                    slotID = i
-                    break
-                end
-            end
-        end
+do 
+    local function AddTrackerToSlot(tracker, slot)
+        AuraTracking:debug("AddTrackerToSlot", tracker.id, slot:GetID())
         slot.tracker = tracker
         slot.isActive = true
 
-        tracker.slotID = slotID
+        tracker.slotID = slot:GetID()
         tracker:SetAllPoints(slot)
         tracker:Show()
     end
-end
-function AuraTracking:RemoveTracker(tracker, isStatic)
-    self:debug("RemoveTracker", tracker.id, isStatic)
-    local numActive = numActive[tracker.side]
-    if isStatic then
-        tracker.icon:SetDesaturated(true)
-        tracker:SetAlpha(db.indicators.fadeOpacity)
-        numActive = numActive - 1
-    else
-        numActive = numActive - 1
-        local side, emptySlot = self[tracker.side], tracker.slotID
-        local currSlot = side["slot"..emptySlot]
-        currSlot.tracker = nil
-        currSlot.isActive = false
+    local function RemoveTrackerFromSlot(tracker, slot)
+        AuraTracking:debug("RemoveTrackerFromSlot", tracker.id, slot:GetID())
+        slot.tracker = nil
+        slot.isActive = false
 
         tracker.slotID = nil
         tracker:ClearAllPoints()
         tracker:Hide()
+    end
 
-        if iterUnits then return end
-        local nextSlot = side["slot"..emptySlot+1]
-        if nextSlot.isActive then
-            local movedTracker = nextSlot.tracker
-            self:debug("Shift", movedTracker.id, movedTracker.isStatic, emptySlot)
-            self:RemoveTracker(movedTracker, movedTracker.isStatic)
-            self:AddTracker(movedTracker, emptySlot)
+    function AuraTracking:AddTracker(tracker, slotID, enforceSlot)
+        self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
+        local numActive = numActive[tracker.side]
+        if tracker.slotID then
+            if tracker.isStatic then
+                tracker.icon:SetDesaturated(false)
+                tracker:SetAlpha(1)
+                numActive = numActive + 1
+            end
+        else
+            numActive = numActive + 1
+            local side, slot = self[tracker.side]
+            if enforceSlot then
+                self:debug("Place in slot", slotID)
+                AddTrackerToSlot(tracker, side["slot"..slotID])
+            else
+                local maxSlots = slotID or MAX_SLOTS
+                self:debug("Find first empty slot until:", maxSlots)
+                for i = 1, maxSlots do
+                    slot = side["slot"..i]
+                    if i == maxSlots and slot.isActive and i < MAX_SLOTS then
+                        self:ShiftTracker(slot.tracker, i, i + 1)
+                    end
+
+                    if not slot.isActive then
+                        self:debug("Found slot", i)
+                        AddTrackerToSlot(tracker, slot)
+                        break
+                    end
+                end
+            end
+        end
+    end
+    function AuraTracking:RemoveTracker(tracker, isStatic)
+        self:debug("RemoveTracker", tracker.id, isStatic)
+        local numActive = numActive[tracker.side]
+        if isStatic then
+            tracker.icon:SetDesaturated(true)
+            tracker:SetAlpha(db.indicators.fadeOpacity)
+            numActive = numActive - 1
+        else
+            numActive = numActive - 1
+            local side, emptySlot = self[tracker.side], tracker.slotID
+            RemoveTrackerFromSlot(tracker, side["slot"..emptySlot])
+
+            if iterUnits then return end
+            local nextSlot = side["slot"..emptySlot+1]
+            if nextSlot.isActive then
+                self:ShiftTracker(nextSlot.tracker, emptySlot + 1, emptySlot)
+            end
+        end
+    end
+    function AuraTracking:ShiftTracker(tracker, fromSlotID, toSlotID)
+        self:debug("Shift", tracker.id, tracker.isStatic, fromSlotID, toSlotID)
+        local side = self[tracker.side]
+        RemoveTrackerFromSlot(tracker, side["slot"..fromSlotID])
+        if toSlotID <= MAX_SLOTS then
+            local toSlot = side["slot"..toSlotID]
+            if toSlot.isActive then
+                self:ShiftTracker(toSlot.tracker, toSlotID, toSlotID + (toSlotID - fromSlotID))
+            end
+            AddTrackerToSlot(tracker, toSlot)
         end
     end
 end
+
 do -- AuraTracking:CreateNewTracker()
     local template = "yxxxxxxx"
     local function generateGUID()
@@ -224,7 +248,7 @@ function AuraTracking:Lock()
             local parent = self[side]
             parent:EnableMouse(false)
             parent.bg:Hide()
-            for slotID = 1, maxStaticSlots do
+            for slotID = 1, MAX_STATIC_SLOTS do
                 local slot = self[side]["slot"..slotID]
                 slot:SetAlpha(nibRealUI.isInTestMode and 1 or 0)
             end
@@ -244,7 +268,7 @@ function AuraTracking:Unlock()
             local parent = self[side]
             parent:EnableMouse(true)
             parent.bg:Show()
-            for slotID = 1, maxStaticSlots do
+            for slotID = 1, MAX_STATIC_SLOTS do
                 local slot = self[side]["slot"..slotID]
                 slot:SetAlpha(0.2)
             end
@@ -255,7 +279,7 @@ function AuraTracking:SettingsUpdate(event)
     if event == "slotSize" then
         local size = db.style.slotSize - 2
         for _, side in next, {"left", "right"} do
-            for slotID = 1, maxSlots do
+            for slotID = 1, MAX_SLOTS do
                 local slot = self[side]["slot"..slotID]
                 slot:SetSize(size, size)
             end
@@ -265,7 +289,7 @@ function AuraTracking:SettingsUpdate(event)
         for _, side in next, {"left", "right"} do
             local point = side == "left" and "RIGHT" or "LEFT"
             local xMod = side == "left" and -1 or 1
-            for slotID = 1, maxSlots do
+            for slotID = 1, MAX_SLOTS do
                 local parent = self[side]
                 local slot = parent["slot"..slotID]
                 if slotID == 1 then
@@ -278,7 +302,7 @@ function AuraTracking:SettingsUpdate(event)
     elseif event == "fadeOpacity" then
         local fadeOpacity = db.indicators.fadeOpacity
         for _, side in next, {"left", "right"} do
-            for slotID = 1, maxSlots do
+            for slotID = 1, MAX_SLOTS do
                 local slot = self[side]["slot"..slotID]
                 if slot.tracker then
                     slot.tracker:SetAlpha(db.indicators.fadeOpacity)
@@ -464,7 +488,7 @@ end
 function AuraTracking:Createslots()
     for i, side in next, {"left", "right"} do
         local parent = CreateFrame("Frame", "AuraTracker"..side, UIParent)
-        parent:SetSize(db.style.slotSize * maxStaticSlots, db.style.slotSize)
+        parent:SetSize(db.style.slotSize * MAX_STATIC_SLOTS, db.style.slotSize)
         self[side] = parent
 
         LibWin:Embed(parent)
@@ -489,9 +513,10 @@ function AuraTracking:Createslots()
         local point = side == "left" and "RIGHT" or "LEFT"
         local xMod = side == "left" and -1 or 1
         local size = db.style.slotSize - 2
-        for slotID = 1, maxSlots do
+        for slotID = 1, MAX_SLOTS do
             local slot = CreateFrame("Frame", nil, parent)
             slot:SetSize(size, size)
+            slot:SetID(slotID)
             if slotID == 1 then
                 slot:SetPoint(point, parent, 0, 0)
             else
@@ -520,7 +545,7 @@ function AuraTracking:ToggleConfigMode(val)
     self.configMode = val
 
     for _, side in next, {"left", "right"} do
-        for slotID = 1, maxStaticSlots do
+        for slotID = 1, MAX_STATIC_SLOTS do
             local slot = self[side]["slot"..slotID]
             slot:SetAlpha(val and 1 or 0)
             if slot.tracker then
@@ -546,7 +571,7 @@ function AuraTracking:OnInitialize()
             locked = true,
             position = {
                 left = {
-                    x = -98, -- ((db.style.slotSize * maxStaticSlots) / 2) + 2
+                    x = -98, -- ((db.style.slotSize * MAX_STATIC_SLOTS) / 2) + 2
                     y = -150,
                     point = "CENTER",
                 },
