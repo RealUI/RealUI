@@ -247,9 +247,9 @@ local defaultTracker = {
 9ab78043
 857dac62
 99868b0a
-9f2335ea
-817d87de
-90be0e2a
+
+
+
 
 
 
@@ -947,6 +947,11 @@ AuraTracking.Defaults = {
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
+                talent = {
+                    tier = 7,
+                    ID = 21637,
+                    mustHave = false,
+                },
                 order = 1,
             },
             ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
@@ -955,6 +960,11 @@ AuraTracking.Defaults = {
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
+                talent = {
+                    tier = 7,
+                    ID = 21637,
+                    mustHave = false,
+                },
                 order = 2,
             },
             ["5-b1df8034-1"] = {   -- Devouring Plague (Shadow)
@@ -964,6 +974,19 @@ AuraTracking.Defaults = {
                 unit = "target",
                 specs = {false, false, true},
                 order = 3,
+            },
+            ["5-9f2335ea-1"] = {   -- Void Entropy (Shadow)
+                spell = 155361,
+                minLevel = 100,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                talent = {
+                    tier = 7,
+                    ID = 21644,
+                    mustHave = true,
+                },
+                order = 4,
             },
         -- Free Player Auras
             ["5-8636c202-1"] = {   -- Archangel (Disc)
@@ -984,31 +1007,77 @@ AuraTracking.Defaults = {
             ["5-b255a230-1"] = {   -- Spectral Guise (Talent)
                 spell = 119032,
                 minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 19753,
+                    mustHave = true,
+                },
             },
             ["5-ab8e3ab7-1"] = {   -- Surge of Light (Talent) (Disc, Holy)
                 spell = 114255,
                 minLevel = 45,
                 specs = {true, true, false},
+                talent = {
+                    tier = 3,
+                    ID = {19759, 21750},
+                    mustHave = true,
+                },
+            },
+            ["5-86b717fe-1"] = {   -- Surge of Darkness (Talent) (Shadow)
+                spell = 87160,
+                minLevel = 45,
+                specs = {false, false, true},
+                talent = {
+                    tier = 3,
+                    ID = 21751,
+                    mustHave = true,
+                },
+            },
+            ["5-90be0e2a-1"] = {   -- Insanity (Talent) (Shadow)
+                spell = 114255,
+                minLevel = 45,
+                specs = {false, false, true},
+                talent = {
+                    tier = 3,
+                    ID = {19759, 21750},
+                    mustHave = true,
+                },
             },
             ["5-8ead482d-1"] = {   -- Power Infusion (Talent)
                 spell = 10060,
                 minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 19765,
+                    mustHave = true,
+                },
             },
             ["5-a4b0b5d4-1"] = {   -- Divine Insight (Talent) (Holy)
                 spell = 123267,
                 minLevel = 75,
                 specs = {false, true, false},
+                talent = {
+                    tier = 5,
+                    ID = 19766,
+                    mustHave = true,
+                },
             },
-            ["5-86b717fe-1"] = {   -- Words of Mending (Talent) (Disc, Holy)
-                spell = 155362,
-                minLevel = 100,
-                specs = {true, true, false},
+            ["5-817d87de-1"] = {   -- Shadowy Insight (Talent) (Shadow)
+                spell = 124430,
+                minLevel = 75,
+                specs = {false, false, true},
+                talent = {
+                    tier = 5,
+                    ID = 21755,
+                    mustHave = true,
+                },
             },
         -- Free Target Auras
             ["5-a88338ed-1"] = {   -- Holy Fire (Disc, Holy)
                 spell = 14914,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, true, false},
             },
     },
 

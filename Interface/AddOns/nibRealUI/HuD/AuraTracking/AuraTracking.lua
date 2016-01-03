@@ -89,12 +89,15 @@ local function shouldTrack(spellData)
 end
 local function AddToSpellList(spellData, spellList)
     if spellData.noExclude then return end
+    AuraTracking:debug("AddToSpellList", spellData, spellList)
     local spell = spellData.spell
     if type(spell) == "table" then
         for index = 1, #spell do
+            AuraTracking:debug("Spell", index, spell[index])
             tinsert(spellList, spell[index])
         end
     else
+        AuraTracking:debug("Spell", spell)
         tinsert(spellList, spell)
     end
 end
@@ -467,9 +470,16 @@ function AuraTracking:CharacterUpdate(units, force)
         playerLevel, playerSpec = newPlayerLevel, newPlayerSpec
         self:debug("Level", playerLevel, "Spec", playerSpec)
 
+        iterUnits = true
+        self:debug("Disable all trackers")
+        for tracker, spellData in self:IterateTrackers() do
+            tracker:Disable()
+        end
+        iterUnits = false
+
+        self:debug("Enable needed trackers")
         local playerSpellList = {}
         for tracker, spellData in self:IterateTrackers() do
-            tracker:Disable() -- Reset incase there are any auras still active
             tracker.shouldTrack = shouldTrack(spellData)
             if tracker.shouldTrack then
                 self:debug("Track", tracker.id)
