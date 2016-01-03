@@ -60,8 +60,8 @@ function UnitFrames:SetoUFColors()
     oUF.colors.health = colors.health.normal
     for eclass, _ in next, RAID_CLASS_COLORS do
         local color = nibRealUI:GetClassColor(eclass)
-        color = nibRealUI:ColorDarken(color, 0.15)
-        color = nibRealUI:ColorDesaturate(color, 0.2)
+        color = nibRealUI:ColorDarken(0.15, color)
+        color = nibRealUI:ColorDesaturate(0.2, color)
         oUF.colors.class[eclass] = color
     end
 end

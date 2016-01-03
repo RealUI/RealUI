@@ -3,6 +3,7 @@ local _G = _G
 
 tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("PaperDollFrame", F, C)
+    local r, g, b = C.r, C.g, C.b
 
     -- Lua Globals --
     local next, floor, strsplit = _G.next, _G.floor, _G.strsplit
@@ -188,11 +189,10 @@ tinsert(mods["nibRealUI"], function(F, C)
                         itemSlot.upgradeBG:SetShown(cur and cur > 0)
                         for i, tex in next, itemSlot.upgrade do
                             if cur and i <= cur then
-                                local color = _G.oUFembed.colors.class[RealUI.class]
                                 if RealUI.isTest then
-                                    tex:SetColorTexture(color[1], color[2], color[3], color[4])
+                                    tex:SetColorTexture(r, g, b)
                                 else
-                                    tex:SetTexture(color[1], color[2], color[3], color[4])
+                                    tex:SetTexture(r, g, b)
                                 end
                                 tex:SetHeight((itemSlot:GetHeight() / max) - (i < max and 1 or 0))
                                 --tex:SetPoint("TOPLEFT", -1 + ((dotSize*.75)*(i-1)), 1)

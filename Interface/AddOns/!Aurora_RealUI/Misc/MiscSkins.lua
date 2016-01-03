@@ -1,15 +1,24 @@
 local _, mods = ...
+local _G = _G
 
 -- This is for small modifications that are not yet worth having thier own file.
 -- Or to make modifications to a frame that Aurora modified.
 tinsert(mods["Aurora"], function(F, C)
-    --print("MiscSkins")
+    mods.debug("MiscSkins", F, C)
     local r, g, b = C.r, C.g, C.b
+
+    -- Lua Globals --
+    local next, floor, strsplit = _G.next, _G.floor, _G.strsplit
+
+    -- WoW Globals --
+    local CreateFrame, hooksecurefunc = _G.CreateFrame, _G.hooksecurefunc
+    local FriendsFrame, SplashFrame, ObjectiveTrackerFrame = _G.FriendsFrame, _G.SplashFrame, _G.ObjectiveTrackerFrame
+    local SPLASH_SCREENS = _G.SPLASH_SCREENS
 
     -- Re-add Travel Pass
     FriendsFrame:HookScript("OnShow", function()
         if not FriendsFrame.skinned then
-            for i = 1, FRIENDS_TO_DISPLAY do
+            for i = 1, _G.FRIENDS_TO_DISPLAY do
                 local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
 
                 --local frame = CreateFrame("frame", nil, bu)
@@ -37,7 +46,7 @@ tinsert(mods["Aurora"], function(F, C)
     end)
 
     local function UpdateScroll()
-        for i = 1, FRIENDS_TO_DISPLAY do
+        for i = 1, _G.FRIENDS_TO_DISPLAY do
             local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
             local en = bu.travelPassButton:IsEnabled()
             --print("UpdateScroll", i, en)
@@ -56,7 +65,7 @@ tinsert(mods["Aurora"], function(F, C)
         end
     end
     hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
-    hooksecurefunc(FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
+    hooksecurefunc(_G.FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
     -- Splash Frame
     F.CreateBD(SplashFrame, nil, true)
@@ -80,6 +89,17 @@ tinsert(mods["Aurora"], function(F, C)
 
     -- Objective Tracker
     F.ReskinExpandOrCollapse(ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
+    for _, headerName in next, {"QuestHeader", "AchievementHeader", "ScenarioHeader"} do
+        local header = ObjectiveTrackerFrame.BlocksFrame[headerName]
+        header.Background:Hide()
+
+        local bg = header:CreateTexture(nil, "ARTWORK")
+        bg:SetTexture([[Interface\LFGFrame\UI-LFG-SEPARATOR]])
+        bg:SetTexCoord(0, 0.6640625, 0, 0.3125)
+        bg:SetVertexColor(r * 0.7, g * 0.7, b * 0.7)
+        bg:SetPoint("BOTTOMLEFT", -30, -4)
+        bg:SetSize(210, 30)
+    end
 
     -- Scroll to bottom
     for i = 1, 10 do
@@ -101,31 +121,40 @@ tinsert(mods["Aurora"], function(F, C)
     end
 
     -- World State Frame
-    F.Reskin(WorldStateScoreFrameQueueButton)
-    for i = 1, MAX_WORLDSTATE_SCORE_BUTTONS do
+    F.Reskin(_G.WorldStateScoreFrameQueueButton)
+    for i = 1, _G.MAX_WORLDSTATE_SCORE_BUTTONS do
         local scoreBtn = _G["WorldStateScoreButton" .. i]
         scoreBtn.factionLeft:SetTexture(C.media.backdrop)
         scoreBtn.factionLeft:SetBlendMode("ADD")
         scoreBtn.factionRight:SetTexture(C.media.backdrop)
         scoreBtn.factionRight:SetBlendMode("ADD")
     end
-    WorldStateScoreWinnerFrameLeft:SetTexture(C.media.backdrop)
-    WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
-    WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
-    WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
+    _G.WorldStateScoreWinnerFrameLeft:SetTexture(C.media.backdrop)
+    _G.WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
+    _G.WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
+    _G.WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
 end)
 
 tinsert(mods["PLAYER_LOGIN"], function(F, C)
+    mods.debug("PLAYER_LOGIN - Misc", F, C)
     -- These addons are loaded before !Aurora_RealUI.
+
     --mods["Blizzard_PetBattleUI"](F, C)
-    if IsAddOnLoaded("Blizzard_CompactRaidFrames") then
+    if _G.IsAddOnLoaded("Blizzard_CompactRaidFrames") then
         mods["Blizzard_CompactRaidFrames"](F, C)
     end
 
 end)
 
 mods["Blizzard_AuctionUI"] = function(F, C)
-    local tokenTutorial = WowTokenGameTimeTutorial
+    mods.debug("Blizzard_AuctionUI", F, C)
+
+    -- Lua Globals --
+    local next = _G.next
+
+    -- WoW Globals --
+    local tokenTutorial, StoreButton = _G.tokenTutorial, _G.StoreButton
+
     tokenTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
     F.ReskinAtlas(tokenTutorial.Tutorial, "token-info-background")
 

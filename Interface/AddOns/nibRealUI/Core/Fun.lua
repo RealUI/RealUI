@@ -664,7 +664,7 @@ function nibRealUI:GetClassColor(class, ...)
     end
 end
 
-function nibRealUI:ColorToRgb(h, s, l, a)
+function nibRealUI:HSLToRGB(h, s, l, a)
     if s<=0 then return l,l,l,a end
     h, s, l = h*6, s, l
     local c = (1-math.abs(2*l-1))*s
@@ -679,8 +679,10 @@ function nibRealUI:ColorToRgb(h, s, l, a)
     end return (r+m),(g+m),(b+m),a
 end
 
-function nibRealUI:ColorToHsl(color)
-    local r, g, b = color[1], color[2], color[3]
+function nibRealUI:RGBToHSL(r, g, b)
+    if type(r) == "table" then
+        r, g, b = r.r or r[1], r.g or r[2], r.b or r[3]
+    end
     local min, max = math.min(r, g, b), math.max(r, g, b)
     local h, s, l = 0, 0, (max + min) / 2
     if max ~= min then
@@ -700,25 +702,55 @@ function nibRealUI:ColorToHsl(color)
     return h, s, l
 end
 
-function nibRealUI:ColorShift(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb((((h + delta) * 255) % 255), s, l)}
+function nibRealUI:ColorShift(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2 = self:HSLToRGB((((h + delta) * 255) % 255), s, l)
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorLighten(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb(h, s, nibRealUI:Clamp(l + delta, 0, 1))}
+function nibRealUI:ColorLighten(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2, a = self:HSLToRGB(h, s, self:Clamp(l + delta, 0, 1))
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorSaturate(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb(h, nibRealUI:Clamp(s + delta, 0, 1), l)}
+function nibRealUI:ColorSaturate(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2, a = self:HSLToRGB(h, self:Clamp(s + delta, 0, 1), l)
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorDarken(color, delta)
-    return nibRealUI:ColorLighten(color, -delta)
+function nibRealUI:ColorDarken(delta, r, g, b)
+    return self:ColorLighten(-delta, r, g, b)
 end
 
-function nibRealUI:ColorDesaturate(color, delta)
-    return nibRealUI:ColorSaturate(color, -delta)
+function nibRealUI:ColorDesaturate(delta, r, g, b)
+    return self:ColorSaturate(-delta, r, g, b)
 end
