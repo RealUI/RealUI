@@ -25,33 +25,27 @@ local _, class = UnitClass("player")
 local SavageRoar
 local BanditsGuile, Envenom, Rupture, SliceAndDice
 local BurningEmbers
-local function predictDuration(tracker, gap, base, max)
-    local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
-
-    local potential, color = "", {1, 1, 1}
-    if (comboPoints > 0) then
-        potential = base + ((comboPoints - 1) * gap)
-        if potential == max then
-            color = {0, 1, 0}
-        end
+local function PredictDuration(gap, base, max)
+    local potential, color = "", {}
+    local function postUnitAura(self, spellData)
+        debug(spellData.debug, "postUnitAura", potential, color[1])
+        self.count:SetText(potential)
+        self.count:SetTextColor(color[1], color[2], color[3])
     end
-    return potential, color
-end
 
-if class == "DRUID" then
-    do -- SavageRoar
-        local potential, color
-        local function postUnitAura(self, spellData)
-            debug(spellData.debug, "postUnitAura", potential, color[1])
-            self.count:SetText(potential)
-            self.count:SetTextColor(color[1], color[2], color[3])
-        end
+    -- Shows predicted debuff duration based on current CPs.
+    return function(self, spellData, unit, powerType)
+        if unit == "player" and powerType == "COMBO_POINTS" then
+            debug(spellData.debug, "Main", unit, powerType)
+            local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
 
-        -- Shows predicted buff duration based on current CPs.
-        function SavageRoar(self, spellData, unit, powerType)
-            if unit ~= "player" and powerType ~= "COMBO_POINTS" then return end
-            AuraTracking:debug("Rupture", self, unit, powerType)
-            potential, color = predictDuration(self, 6, 18, 42)
+            potential, color[1], color[2], color[3] = "", 1, 1, 1
+            if (comboPoints > 0) then
+                potential = base + ((comboPoints - 1) * gap)
+                if potential == max then
+                    color[1], color[2], color[3] = 0, 1, 0
+                end
+            end
             postUnitAura(self, spellData)
 
             if not self.postUnitAura then
@@ -59,8 +53,11 @@ if class == "DRUID" then
             end
         end
     end
-elseif class == "ROGUE" then
+end
 
+if class == "DRUID" then
+    SavageRoar = PredictDuration(6, 18, 42)
+elseif class == "ROGUE" then
     do -- BanditsGuile
         -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
         local SinisterStrikeID = 1752
@@ -107,69 +104,9 @@ elseif class == "ROGUE" then
             end
         end
     end
-    do -- Envenom
-        local potential, color
-        local function postUnitAura(self, spellData)
-            debug(spellData.debug, "postUnitAura", potential, color[1])
-            self.count:SetText(potential)
-            self.count:SetTextColor(color[1], color[2], color[3])
-        end
-
-        -- Shows predicted debuff duration based on current CPs.
-        function Envenom(self, spellData, unit, powerType)
-            if unit == "player" and powerType == "COMBO_POINTS" then
-                debug(spellData.debug, "Main", unit, powerType)
-                potential, color = predictDuration(self, 1, 2, 6)
-                postUnitAura(self, spellData)
-
-                if not self.postUnitAura then
-                    self.postUnitAura = postUnitAura
-                end
-            end
-        end
-    end
-    do -- Rupture
-        local potential, color
-        local function postUnitAura(self, spellData)
-            debug(spellData.debug, "postUnitAura", potential, color[1])
-            self.count:SetText(potential)
-            self.count:SetTextColor(color[1], color[2], color[3])
-        end
-
-        -- Shows predicted debuff duration based on current CPs.
-        function Rupture(self, spellData, unit, powerType)
-            if unit == "player" and powerType == "COMBO_POINTS" then
-                debug(spellData.debug, "Main", unit, powerType)
-                potential, color = predictDuration(self, 4, 8, 24)
-                postUnitAura(self, spellData)
-
-                if not self.postUnitAura then
-                    self.postUnitAura = postUnitAura
-                end
-            end
-        end
-    end
-    do -- SliceAndDice
-        local potential, color
-        local function postUnitAura(self, spellData)
-            debug(spellData.debug, "postUnitAura", potential, color[1])
-            self.count:SetText(potential)
-            self.count:SetTextColor(color[1], color[2], color[3])
-        end
-        
-        -- Shows predicted buff duration based on current CPs.
-        function SliceAndDice(self, spellData, unit, powerType)
-            if unit == "player" and powerType == "COMBO_POINTS" then
-                debug(spellData.debug, "Main", unit, powerType)
-                potential, color = predictDuration(self, 6, 12, 36)
-                postUnitAura(self, spellData)
-
-                if not self.postUnitAura then
-                    self.postUnitAura = postUnitAura
-                end
-            end
-        end
-    end
+    Envenom = PredictDuration(1, 2, 6)
+    Rupture = PredictDuration(4, 8, 24)
+    SliceAndDice = PredictDuration(6, 12, 36)
 elseif class == "WARLOCK" then
     do -- BurningEmbers
         local power
