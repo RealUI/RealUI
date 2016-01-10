@@ -1021,17 +1021,7 @@ AuraTracking.Defaults = {
     ["ROGUE"] = {
         ["**"] = defaultTracker,
         -- Static Player Auras
-            ["4-a4347749-1"] = {   -- Slice and Dice (Combat, Sub)
-                spell = 5171,
-                minLevel = 14,
-                specs = {false, true, true}, -- Passive for Assas via Dreanor Perk
-                order = 1,
-                eventUpdate = {
-                    event = "UNIT_POWER_FREQUENT",
-                    func = SliceAndDice
-                }
-            },
-            ["4-b590c8e6-1"] = {   -- Envenom (Ass)
+            ["4-b590c8e6-1"] = {   -- Envenom (Assas)
                 spell = 32645,
                 minLevel = 20,
                 specs = {true, false, false},
@@ -1041,7 +1031,17 @@ AuraTracking.Defaults = {
                     func = Envenom
                 }
             },
-            ["4-b8faafc6-1"] = {   -- Bandit's Guile (Combat)
+            ["4-a4347749-1"] = {   -- Slice and Dice (Outlaw, Sub)
+                spell = 5171,
+                minLevel = 14,
+                specs = {false, true, true}, -- Passive for Assas via Dreanor Perk
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = SliceAndDice
+                }
+            },
+            ["4-b8faafc6-1"] = {   -- Bandit's Guile (Outlaw)
                 spell = {84745, 84746, 84747}, -- Shallow, Moderate, Deep Insight
                 minLevel = 60,
                 specs = {false, true, false},
@@ -1058,19 +1058,19 @@ AuraTracking.Defaults = {
                 order = 2,
             },
         -- Static Target Auras
-            ["4-b2b390d7-1"] = {   -- Rupture (Combat)
+            ["4-b2b390d7-1"] = {   -- Rupture (Assas, Outlaw)
                 spell = 1943,
                 minLevel = 46,
                 auraType = "debuff",
                 unit = "target",
-                specs = {false, true, false}, -- Passive for Assas via Dreanor Perk
+                specs = {true, true, false},
                 order = 1,
                 eventUpdate = {
                     event = "UNIT_POWER_FREQUENT",
                     func = Rupture
                 }
             },
-            ["4-ac22ce84-1"] = {   -- Revealing Strike (Comb)
+            ["4-ac22ce84-1"] = {   -- Revealing Strike (Outlaw)
                 spell = 84617,
                 auraType = "debuff",
                 unit = "target",
@@ -1086,7 +1086,11 @@ AuraTracking.Defaults = {
                 order = 2,
             },
         -- Free Player Auras
-            ["4-bf8be102-1"] = {   -- Adrenaline Rush (Comb)
+            ["4-b697e402-1"] = {   -- Blindside (Assas)
+                spell = 121153,
+                specs = {true, false, false},
+            },
+            ["4-bf8be102-1"] = {   -- Adrenaline Rush (Outlaw)
                 spell = {13750},
                 specs = {false, true, false},
             },
@@ -1100,7 +1104,6 @@ AuraTracking.Defaults = {
             ["4-965917ad-1"] = {spell = 2983},     -- Sprint
             ["4-9f332190-1"] = {spell = 5277},     -- Evasion
             ["4-82cf4c29-1"] = {spell = 108208},   -- Subterfuge
-            ["4-b697e402-1"] = {spell = 121153},   -- Blindside
             ["4-a5bdd6b2-1"] = {spell = 57933},    -- TotT
             ["4-851514ee-1"] = {spell = 31224},    -- Cloak of Shadows
             ["4-a758c6b8-1"] = {spell = 45182},    -- Cheating Death
@@ -1115,7 +1118,7 @@ AuraTracking.Defaults = {
                 unit = "target",
                 specs = {false, false, true},
             },
-            ["4-8c6900cc-1"] = {   -- Vendetta (Ass)
+            ["4-8c6900cc-1"] = {   -- Vendetta (Assas)
                 spell = 79140,
                 auraType = "debuff",
                 unit = "target",
