@@ -183,7 +183,7 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = SPELLBOOK_ABILITIES_BUTTON,
-        func = function() ToggleFrame(SpellBookFrame) end,
+        func = function() ToggleSpellBook(BOOKTYPE_SPELL) end,
         notCheckable = true
     },
     {text = TALENTS_BUTTON,
