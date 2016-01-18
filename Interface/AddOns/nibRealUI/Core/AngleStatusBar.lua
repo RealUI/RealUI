@@ -1,10 +1,10 @@
 -- Lua Globals --
 local _G = _G
 local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
-local next, type = _G.next, _G.type
+local tinsert, next, type = _G.table.insert, _G.next, _G.type
 
 -- WoW Globals --
-local CreateFrame = _G.CreateFrame
+local CreateFrame, UIParent = _G.CreateFrame, _G.UIParent
 
 -- Libs --
 local oUF = oUFembed
@@ -310,7 +310,7 @@ local api = {
         debug(self, "SetReversePercent", reverse)
         local metadata = bars[self]
         metadata.reverse = reverse
-        self:SetValue(metadata.value, true)
+        SetBarPosition(self, metadata.value)
     end,
     GetReversePercent = function(self)
         debug(self, "GetReversePercent", self.bar:GetPoint())
@@ -615,7 +615,7 @@ function RealUI:TestASB(reverseFill, reversePer)
         local barInfo = info[i]
         local test = CreateAngleFrame(UIParent, "Status", 200, 8, UIParent, barInfo)
         test:SetMinMaxValues(0, 200)
-        test:SetValue(150, true)
+        test:SetValue(10, true)
         test:SetStatusBarColor(1, 0, 0, 1)
         if reverseFill then
             test:SetReverseFill(true)

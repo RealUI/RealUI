@@ -43,6 +43,7 @@ local function CreateHealthBar(parent)
     local info = info.health
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
+    health:SetMinMaxValues(0, 1)
     health:SetReverseFill(true)
     health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
     --health.debug = "playerHealth"
@@ -112,6 +113,7 @@ local function CreatePowerBar(parent)
     local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     local _, powerType = UnitPowerType(parent.unit)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
+    power:SetMinMaxValues(0, 1)
     power:SetReverseFill(true)
     if ndb.settings.reverseUnitFrameBars then
         power:SetReversePercent(nibRealUI.ReversePowers[powerType])
