@@ -201,6 +201,10 @@ function nibRealUI:GetLootSpecData()
 end
 
 -- Math
+function nibRealUI.Lerp(startValue, endValue, amount)
+    return (1 - amount) * startValue + amount * endValue;
+end
+
 function nibRealUI:Clamp(value, min, max)
     if value < min then
         value = min

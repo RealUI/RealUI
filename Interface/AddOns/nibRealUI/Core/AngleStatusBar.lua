@@ -13,6 +13,7 @@ local oUF = oUFembed
 local RealUI =  _G.RealUI
 local db, ndb, ndbc
 local isTest = RealUI.isTest
+local Lerp = RealUI.Lerp
 
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
@@ -36,9 +37,9 @@ local function SetBarPosition(self, value)
         -- Take the value, and adjust it to within the bounds of the bar.
         if metadata.reverse then
             -- This makes `width` smaller when `value` gets larger and vice versa.
-            width = (((value - metadata.minVal) * (metadata.minWidth - metadata.maxWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.maxWidth
+            width = Lerp(metadata.maxWidth, metadata.minWidth, (value / metadata.maxVal))
         else
-            width = (((value - metadata.minVal) * (metadata.maxWidth - metadata.minWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.minWidth
+            width = Lerp(metadata.minWidth, metadata.maxWidth, (value / metadata.maxVal))
         end
         self.bar:SetWidth(width)
         debug(self, "width", width, metadata.minWidth, metadata.maxWidth)

@@ -9,6 +9,7 @@ local SPELL_POWER_COMBO_POINTS, SPELL_POWER_BURNING_EMBERS = _G.SPELL_POWER_COMB
 -- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
+local Lerp = RealUI.Lerp
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
@@ -111,9 +112,6 @@ elseif class == "WARLOCK" then
     do -- BurningEmbers
         local power
         local minVal, maxVal = 0, 10
-        local function FindOffset(value, minWidth, maxWidth)
-            return (((value - minVal) * (maxWidth - minWidth)) / (maxVal - minVal)) + minWidth
-        end
         local function postUnitAura(self, spellData)
             debug(spellData.debug, "postUnitAura", power)
             if power > 0 then
@@ -121,11 +119,11 @@ elseif class == "WARLOCK" then
                 if modPower > 0 then
                     self.count:SetText(modPower)
 
-                    local right = FindOffset(modPower, .08, .92)
+                    local right = Lerp(.08, .92, (modPower / maxVal))
                     debug(spellData.debug, "right", right)
                     self.status:SetTexCoord(.08, right, .08, .92)
 
-                    local xOfs = FindOffset(modPower, -(self.icon:GetWidth()), 0)
+                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, (modPower / maxVal))
                     debug(spellData.debug, "xOfs", xOfs)
                     self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
                 else
