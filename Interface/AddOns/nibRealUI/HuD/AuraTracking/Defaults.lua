@@ -36,6 +36,7 @@ local function PredictDuration(gap, base, max)
 
     -- Shows predicted debuff duration based on current CPs.
     return function(self, spellData, unit, powerType)
+        debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
         if unit == "player" and powerType == "COMBO_POINTS" then
             debug(spellData.debug, "Main", unit, powerType)
             local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
@@ -79,6 +80,7 @@ elseif class == "ROGUE" then
         end
 
         function BanditsGuile(self, spellData, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
+            debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, srcGUID, spellID)
             if (srcGUID ~= AuraTracking.playerGUID) then return end
             AuraTracking:debug("BanditsGuile", bgState)
 
@@ -138,20 +140,22 @@ elseif class == "WARLOCK" then
 
         -- Shows partial Burning Embers.
         function BurningEmbers(self, spellData, unit, powerType)
-            if not self.postUnitAura then
-                self.postUnitAura = postUnitAura
-
-                local status = self:CreateTexture(nil, "BACKGROUND")
-                status:SetTexture(self.icon:GetTexture())
-                status:SetTexCoord(.08, .92, .08, .92)
-                status:SetPoint("TOPLEFT")
-                status:SetPoint("BOTTOMRIGHT")
-                self.status = status
-            end
-
+            debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
             if unit == "player" and powerType == "BURNING_EMBERS" then
                 debug(spellData.debug, "Main", unit, powerType)
                 power = UnitPower("player", SPELL_POWER_BURNING_EMBERS, true)
+
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+
+                    local status = self:CreateTexture(nil, "BACKGROUND")
+                    status:SetTexture(self.icon:GetTexture())
+                    status:SetTexCoord(.08, .92, .08, .92)
+                    status:SetPoint("TOPLEFT")
+                    status:SetPoint("BOTTOMRIGHT")
+                    self.status = status
+                end
+
                 postUnitAura(self, spellData)
             end
         end

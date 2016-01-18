@@ -32,8 +32,8 @@ function api:Enable()
     AuraTracking:debug("Tracker:Enable", self.id, self.isStatic)
     local spellData = icons[self]
     self.isEnabled = true
-    if spellData.eventUpdate then
-        local eventUpdate = spellData.eventUpdate
+    local eventUpdate = spellData.eventUpdate
+    if eventUpdate then
         self:RegisterEvent(eventUpdate.event)
         self[eventUpdate.event] = eventUpdate.func
     end
