@@ -162,26 +162,35 @@ elseif class == "WARLOCK" then
     end
 end
 
-local defaultTracker = {
-    spell = L["AuraTrack_SpellNameID"],
-    minLevel = 1,
-    auraType = "buff", -- buff|debuff
-    unit = "player", -- player|target|pet
-    specs = {true, true, true, GetSpecializationInfo(4) and true}, -- {spec1, spec2, spec3[, spec4]}
-    talent = {},
-    order = 0, -- Tracker will be static if greater than 0
-    hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
-    noExclude = false, -- don't add this aura to Raven's filter lists
-    shouldLoad = true,
-    debug = false
-    --[[
-    customName = _G.GetSpellInfo(12345),
-    eventUpdate = {
-        event = "UNIT_POWER_FREQUENT",
-        func = SpecialFunc
+local defaultTracker do
+    local specs = {}
+    for i = 1, GetNumSpecializations() do
+        specs[i] = true
+    end
+    defaultTracker = {
+        spell = L["AuraTrack_SpellNameID"],
+        minLevel = 1,
+        auraType = "buff", -- buff|debuff
+        unit = "player", -- player|target|pet
+        specs = specs, -- Default to true for all specs
+        talent = {},
+        order = 0, -- Tracker will be static if greater than 0
+        hideStacks = false, -- hide stack count (useful for auras with a passive 1 stack)
+        noExclude = false, -- Don't add this aura to Raven's exclution lists
+        shouldLoad = true,
+        debug = false
+        --[[
+        customName = _G.GetSpellInfo(12345),
+        eventUpdate = {
+            event = "UNIT_POWER_FREQUENT",
+            func = SpecialFunc
+        }
+        ]]
     }
-    ]]
-}
+end
+
+if not RealUI.isTest then
+
 --[[ Retired IDs
 9ab78043
 857dac62
@@ -294,14 +303,6 @@ AuraTracking.Defaults = {
             ["6-83cbafac-1"] = {spell = 50461},    -- Anti-Magic Zone (Talent)
             ["6-8281137d-1"] = {spell = 96268},    -- Death's Advance (Talent)
             ["6-ac02f3e2-1"] = {spell = 114851},   -- Blood Charge (used for Blood Tap, Talent)
-        -- Free Target Auras
-    },
-
-    ["DEMONHUNTER"] = {
-        ["**"] = defaultTracker,
-        -- Static Player Auras
-        -- Static Target Auras
-        -- Free Player Auras
         -- Free Target Auras
     },
 
@@ -1411,3 +1412,108 @@ AuraTracking.Defaults = {
             },
     },
 }
+
+else
+
+--[[ Retired IDs
+]]
+
+AuraTracking.Defaults = {
+    ["DEATHKNIGHT"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["DEMONHUNTER"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["DRUID"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["HUNTER"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["MAGE"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["MONK"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["PALADIN"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["PRIEST"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["ROGUE"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["SHAMAN"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["WARLOCK"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+
+    ["WARRIOR"] = {
+        ["**"] = defaultTracker,
+        -- Static Player Auras
+        -- Static Target Auras
+        -- Free Player Auras
+        -- Free Target Auras
+    },
+}
+
+end
