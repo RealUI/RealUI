@@ -22,24 +22,15 @@ local L = nibRealUI.L
 
 -- Misc Functions
 local spellFinder = CreateFrame("FRAME")
-function nibRealUI:FindSpellID(input)
-    local spellName, unit, isDebuff = self:GetArgs(input, 3)
-    _G.assert(type(spellName) == "string", "A spell name must be provided")
-    unit = unit or "player"
-    if isDebuff == nil then
-        -- Default this to false for player, true for target.
-        isDebuff = unit == "target"
-    end
-
-
-    print(("RealUI is now looking for %s %s: %s."):format(unit, isDebuff and "debuff" or "buff", spellName))
+function nibRealUI:FindSpellID(spellName, unit, auraType)
+    print(("RealUI is now looking for %s %s: %s."):format(unit, auraType, spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
     spellFinder:SetScript("OnEvent", function(self, event, unit)
         local spellID
-        if isDebuff then
+        if auraType == "debuff" then
             spellID = select(11, _G.UnitDebuff(unit, spellName))
         else
-            spellID = select(11, _G.UnitAura(unit, spellName))
+            spellID = select(11, _G.UnitBuff(unit, spellName))
         end
         if spellID then
             print(("The spellID for %s is %d"):format(spellName, spellID));

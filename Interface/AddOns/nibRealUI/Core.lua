@@ -688,7 +688,17 @@ function nibRealUI:OnInitialize()
     self:RegisterChatCommand("rl", function() ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
-    self:RegisterChatCommand("findSpell", "FindSpellID") -- /findSpell "Spell Name" player|target isDebuff(true|nil)
+    self:RegisterChatCommand("findSpell", function(input)
+        -- /findSpell "Spell Name" (player)|target (buff)|debuff
+        local spellName, unit, auraType = self:GetArgs(input, 3)
+        _G.assert(type(spellName) == "string", "A spell name must be provided")
+        unit = unit or "player"
+        if auraType == nil then
+            -- Default this to false for player, true for target.
+            auraType = unit == "target" and "debuff" or "buff"
+        end
+        self:FindSpellID(spellName, unit, auraType)
+    end)
     GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings
