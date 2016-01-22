@@ -1199,14 +1199,14 @@ local auratracker do
         AuraTracking:CharacterUpdate({}, true)
         local parent, key = info[#info-2], info[#info-1]
         local spellOptions = auratracker.args[parent].args[key]
-        if tracker.shouldTrack and parent ~= "active" then
-            debug("Enable")
+        auratracker.args[parent].args[key] = nil
+        if tracker.shouldTrack then
+            debug("Set to active")
             auratracker.args.active.args[key] = spellOptions
-        elseif parent ~= "inactive" then
-            debug("Disable")
+        else
+            debug("Set to inactive")
             auratracker.args.inactive.args[key] = spellOptions
         end
-        auratracker.args[parent].args[key] = nil
     end
     local function getNameOrder(spellData)
         local order, pos, name = 70, "", ""
