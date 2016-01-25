@@ -1423,8 +1423,24 @@ classDefaults = {
 
     ["DEMONHUNTER"] = {
         -- Static Player Auras
+            [""] = {   -- Blur
+            },
+            [""] = {   -- Demon Spikes (Veng)
+                specs = {false, true},
+            },
         -- Static Target Auras
+            [""] = {   -- Fiery Brand (Veng)
+                specs = {false, true},
+            },
         -- Free Player Auras
+            [""] = {   -- Metamorphosis
+            },
+            [""] = {   -- Nemesis (Veng)
+                specs = {false, true},
+                eventUpdate = {
+                    -- Change the icon to denote the creature type
+                }
+            },
         -- Free Target Auras
     },
 
