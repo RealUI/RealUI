@@ -1209,7 +1209,7 @@ local auratracker do
         end
     end
     local function getNameOrder(spellData)
-        local order, pos, name = 70, "", ""
+        local order, pos, name, color = 1, "", ""
 
         if spellData.customName then
             name = spellData.customName
@@ -1228,16 +1228,20 @@ local auratracker do
         end
         debug("Name:", name, spellData.spell)
 
-        if spellData.order and spellData.order > 0 then
-            order = spellData.order * 10
-            pos = spellData.order.." "
-        end
         if spellData.unit == "target" then
             order = order + 1
-            name = (pos.."|cff%s%s|r"):format("ff0000", name)
+            color = "ff0000"
         else
-            name = (pos.."|cff%s%s|r"):format("00ff00", name)
+            color = "00ff00"
         end
+        if spellData.order and spellData.order > 0 then
+            order = order * 10 + spellData.order
+            pos = spellData.order.." "
+        else
+            order = 69 + order
+        end
+
+        name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
     local function useSpec(specs)
