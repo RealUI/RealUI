@@ -53,6 +53,7 @@ end
 
 --[[ External Functions ]]--
 function AuraTracking:CreateAuraIcon(id, spellData)
+    AuraTracking:debug("CreateAuraIcon", id, spellData.unit)
     local side = spellData.unit == "target" and "right" or "left"
     local tracker = CreateFrame("Frame", nil, self[side])
     self[side][id] = tracker

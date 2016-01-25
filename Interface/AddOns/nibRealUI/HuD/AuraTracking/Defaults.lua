@@ -3,16 +3,16 @@ local _G = _G
 local next, type = _G.next, _G.type
 
 -- WoW Globals --
-local UnitPower = _G.UnitPower
+local UnitPower, GetTime, GetNumSpecializationsForClassID = _G.UnitPower, _G.GetTime, _G.GetNumSpecializationsForClassID
 local SPELL_POWER_COMBO_POINTS, SPELL_POWER_BURNING_EMBERS = _G.SPELL_POWER_COMBO_POINTS, _G.SPELL_POWER_BURNING_EMBERS
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
+local RealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local L = RealUI.L
 local Lerp = RealUI.Lerp
 
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local AuraTracking = RealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
 local function debug(isDebug, ...)
     if isDebug then
@@ -22,7 +22,7 @@ local function debug(isDebug, ...)
     end
 end
 
-local _, class = UnitClass("player")
+local _, class, classID = UnitClass("player")
 local SavageRoar
 local BanditsGuile, Envenom, Rupture, SliceAndDice
 local BurningEmbers
@@ -162,12 +162,16 @@ elseif class == "WARLOCK" then
     end
 end
 
-local defaultTracker do
+local classDefaults
+function AuraTracking:SetupDefaultTracker()
+    self:debug("Setup default tracker")
     local specs = {}
-    for i = 1, GetNumSpecializations() do
+    for i = 1, GetNumSpecializationsForClassID(classID) do
+        AuraTracking:debug("Specs", i)
         specs[i] = true
     end
-    defaultTracker = {
+    local classTrackers = classDefaults[class]
+    classTrackers["**"] = {
         spell = L["AuraTrack_SpellNameID"],
         minLevel = 1,
         auraType = "buff", -- buff|debuff
@@ -187,6 +191,8 @@ local defaultTracker do
         }
         ]]
     }
+    classDefaults = nil
+    return classTrackers
 end
 
 if not RealUI.isTest then
@@ -204,9 +210,8 @@ if not RealUI.isTest then
 
 ]]
 
-AuraTracking.Defaults = {
+classDefaults = {
     ["DEATHKNIGHT"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["6-b6cce35c-1"] = {   -- Scent of Blood (Blood)
                 spell = 50421,
@@ -307,7 +312,6 @@ AuraTracking.Defaults = {
     },
 
     ["DRUID"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
                 spell = 52610,
@@ -465,7 +469,6 @@ AuraTracking.Defaults = {
     },
 
     ["HUNTER"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["3-8998954e-1"] = {   -- Frenzy (BM)
                 spell = 19615,
@@ -578,7 +581,6 @@ AuraTracking.Defaults = {
     },
 
     ["MAGE"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["8-860b9d97-1"] = {   -- Arcane Missiles! (Arcane)
                 spell = 79683,
@@ -672,7 +674,6 @@ AuraTracking.Defaults = {
     },
 
     ["MONK"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["10-a53c4a0d-1"] = {   -- Shuffle (Brewmaster)
                 spell = 115307,
@@ -745,7 +746,6 @@ AuraTracking.Defaults = {
     },
 
     ["PALADIN"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["2-aaddc099-1"] = {   -- Daybreak (Holy)
                 spell = 88819,
@@ -860,7 +860,6 @@ AuraTracking.Defaults = {
     },
 
     ["PRIEST"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["5-9678bff1-1"] = {   -- Evangelism (Disc)
                 spell = 81661,
@@ -1022,7 +1021,6 @@ AuraTracking.Defaults = {
     },
 
     ["ROGUE"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["4-b590c8e6-1"] = {   -- Envenom (Assas)
                 spell = 32645,
@@ -1140,7 +1138,6 @@ AuraTracking.Defaults = {
     },
 
     ["SHAMAN"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["7-98774f14-1"] = {   -- Maelstrom Weapon (Enh)
                 spell = 65986,
@@ -1211,7 +1208,6 @@ AuraTracking.Defaults = {
     },
 
     ["WARLOCK"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["9-9f916aed-1"] = {   -- Molten Core (Demo)
                 spell = {140074, 122355}, -- Green Fire, Normal
@@ -1318,7 +1314,6 @@ AuraTracking.Defaults = {
     },
 
     ["WARRIOR"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
             ["1-be149d0a-1"] = {   -- Enrage (Fury)
                 spell = 12880,
@@ -1418,9 +1413,8 @@ else
 --[[ Retired IDs
 ]]
 
-AuraTracking.Defaults = {
+classDefaults = {
     ["DEATHKNIGHT"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1428,7 +1422,6 @@ AuraTracking.Defaults = {
     },
 
     ["DEMONHUNTER"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1436,7 +1429,6 @@ AuraTracking.Defaults = {
     },
 
     ["DRUID"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1444,7 +1436,6 @@ AuraTracking.Defaults = {
     },
 
     ["HUNTER"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1452,7 +1443,6 @@ AuraTracking.Defaults = {
     },
 
     ["MAGE"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1460,7 +1450,6 @@ AuraTracking.Defaults = {
     },
 
     ["MONK"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1468,7 +1457,6 @@ AuraTracking.Defaults = {
     },
 
     ["PALADIN"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1476,7 +1464,6 @@ AuraTracking.Defaults = {
     },
 
     ["PRIEST"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1484,7 +1471,6 @@ AuraTracking.Defaults = {
     },
 
     ["ROGUE"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1492,7 +1478,6 @@ AuraTracking.Defaults = {
     },
 
     ["SHAMAN"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1500,7 +1485,6 @@ AuraTracking.Defaults = {
     },
 
     ["WARLOCK"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras
@@ -1508,7 +1492,6 @@ AuraTracking.Defaults = {
     },
 
     ["WARRIOR"] = {
-        ["**"] = defaultTracker,
         -- Static Player Auras
         -- Static Target Auras
         -- Free Player Auras

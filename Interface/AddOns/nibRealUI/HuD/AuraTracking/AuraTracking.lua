@@ -61,6 +61,7 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
 end
 local function shouldTrack(spellData)
     local isDebug = spellData.debug
+    debug(isDebug, "shouldTrack", spellData.specs[playerSpec], spellData.minLevel, spellData.shouldLoad)
     if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
         local talent = spellData.talent
         debug(isDebug, "Check for talents", talent.mustHave)
@@ -574,9 +575,12 @@ function AuraTracking:RefreshMod()
     self:UpdateVisibility()
 end
 function AuraTracking:OnInitialize()
+    self:debug("OnInitialize")
+    local classTrackers = AuraTracking:SetupDefaultTracker()
+
     self.db = nibRealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
-        class = self.Defaults[nibRealUI.class],
+        class = classTrackers,
         profile = {
             locked = true,
             position = {
@@ -611,7 +615,6 @@ function AuraTracking:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     trackingData = self.db.class
-    self.Defaults = nil
 
     if db.tracking then
         db.tracking = nil
