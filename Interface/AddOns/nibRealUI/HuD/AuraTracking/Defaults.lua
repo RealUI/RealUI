@@ -24,7 +24,7 @@ end
 
 local _, class, classID = UnitClass("player")
 local SavageRoar
-local BanditsGuile, Envenom, Rupture, SliceAndDice
+local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local BurningEmbers
 local function PredictDuration(gap, base, max)
     local potential, color = "", {}
@@ -110,6 +110,47 @@ elseif class == "ROGUE" then
     Envenom = PredictDuration(1, 2, 6)
     Rupture = PredictDuration(4, 8, 24)
     SliceAndDice = PredictDuration(6, 12, 36)
+    do -- ShadowReflection
+        -- Modifies the tracker icon to show when the reflection is or isn't attaking.
+        local isWatching, hasAura = false, false
+        local start, duration = 0, 8
+
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", isWatching, hasAura)
+            self.icon:SetDesaturated(isWatching)
+            self.cd:SetCooldown(start, duration)
+            self.cd:SetReverse(isWatching)
+            debug(spellData.debug, "CD times", self.cd:GetCooldownTimes())
+            --debug(spellData.debug, "CD", self.cd:GetCooldown())
+            debug(spellData.debug, "spell CD", _G.GetSpellCooldown(spellData.spell))
+            if isWatching then
+            end
+        end
+
+        function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
+            if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
+                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), _G.GetTime())
+
+                if subEvent == "SPELL_AURA_APPLIED" and not hasAura then
+                    AuraTracking:debug("ShadowReflection", isWatching, hasAura)
+                    isWatching, hasAura = true, true
+                    start = _G.GetTime()
+                    _G.C_Timer.After(duration, function()
+                        isWatching = false
+                        start = _G.GetTime()
+                        postUnitAura(self, spellData)
+                    end)
+                elseif subEvent == "SPELL_AURA_REMOVED" and hasAura then
+                    hasAura = false
+                end
+                postUnitAura(self, spellData)
+
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+                end
+            end
+        end
+    end
 elseif class == "WARLOCK" then
     do -- BurningEmbers
         local power
@@ -201,9 +242,9 @@ if not RealUI.isTest then
 9ab78043
 857dac62
 99868b0a
-
-
-
+bd56d2d6
+965917ad
+a5bdd6b2
 
 
 
@@ -1084,7 +1125,7 @@ classDefaults = {
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
-                order = 2,
+                order = 1,
             },
         -- Free Player Auras
             ["4-b697e402-1"] = {   -- Blindside (Assas)
@@ -1095,45 +1136,91 @@ classDefaults = {
                 spell = {13750},
                 specs = {false, true, false},
             },
+            ["4-9040a7b9-1"] = {   -- Blade Flurry (Outlaw)
+                spell = 13877,
+                specs = {false, true, false},
+            },
             ["4-9f580e91-1"] = {   -- Master of Subtlety (Sub)
                 spell = {31665, 31666, 31223},
                 specs = {false, false, true},
             },
+            ["4-82cf4c29-1"] = {   -- Subterfuge (Talent)
+                spell = 115192,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 19234,
+                    mustHave = true,
+                },
+            },
+            ["4-b7bc86f8-1"] = {   -- Combat Readiness (Talent)
+                spell = 74002,
+                minLevel = 30,
+                talent = {
+                    tier = 2,
+                    ID = 19238,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(74001),
+            },
+            ["4-a758c6b8-1"] = {   -- Cheat Death (Talent)
+                spell = 45182,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 19239,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(31230),
+            },
+            ["4-a758d1b3-1"] = {   -- Shadow Reflection (Talent)
+                spell = 152151,
+                minLevel = 100,
+                talent = {
+                    tier = 7,
+                    ID = 21187,
+                    mustHave = true,
+                },
+                eventUpdate = {
+                    event = "COMBAT_LOG_EVENT_UNFILTERED",
+                    func = ShadowReflection
+                }
+            },
             ["4-bcbb4a21-1"] = {spell = 73651},    -- Recuperate
-            ["4-bd56d2d6-1"] = {spell = 137573},   -- Burst of Speed
-            ["4-9040a7b9-1"] = {spell = 13877},    -- Blade Flurry
-            ["4-965917ad-1"] = {spell = 2983},     -- Sprint
             ["4-9f332190-1"] = {spell = 5277},     -- Evasion
-            ["4-82cf4c29-1"] = {spell = 108208},   -- Subterfuge
-            ["4-a5bdd6b2-1"] = {spell = 57933},    -- TotT
             ["4-851514ee-1"] = {spell = 31224},    -- Cloak of Shadows
-            ["4-a758c6b8-1"] = {spell = 45182},    -- Cheating Death
-            ["4-a758d1b3-1"] = {spell = 114018},   -- Shroud of Concealment
             ["4-80b0f420-1"] = {spell = {11327,115193}},    -- Vanish
             ["4-a0c86712-1"] = {spell = 1966},     -- Feint
-            ["4-b7bc86f8-1"] = {spell = 74002},    -- Combat Insight
         -- Free Target Auras
+            ["4-8c6900cc-1"] = {   -- Vendetta (Assas)
+                spell = 79140,
+                minLevel = 80,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+            },
             ["4-9b960b7a-1"] = {   -- Hemorrhage (Sub)
                 spell = 16511,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
             },
-            ["4-8c6900cc-1"] = {   -- Vendetta (Assas)
-                spell = 79140,
-                auraType = "debuff",
-                unit = "target",
-                specs = {true, false, false},
-            },
             ["4-8856069f-1"] = {   -- Garrote
                 spell = 703,
+                minLevel = 48,
                 auraType = "debuff",
                 unit = "target",
             },
             ["4-b4b6abe1-1"] = {   -- Nerve Strike
                 spell = 108210,
+                minLevel = 30,
                 auraType = "debuff",
                 unit = "target",
+                talent = {
+                    tier = 2,
+                    ID = 19237,
+                    mustHave = true,
+                },
             },
     },
 
