@@ -371,16 +371,21 @@ function AuraTracking:PLAYER_LOGIN()
     self:RefreshMod()
     local playerSpellList = {}
     for trackerID, spellData in next, trackingData do
-        local classID, id, isDefault = _G.strsplit("-", trackerID)
-        self:debug("|c"..id.."Init tracker|r ", id, isDefault)
-        local tracker = self:CreateAuraIcon(id, spellData)
-        tracker.classID = classID
-        tracker.isDefault = isDefault and true or false
-        tracker.shouldTrack = shouldTrack(spellData)
-        if tracker.shouldTrack and spellData.unit == "player" then
-            tracker:Enable()
-            tracker:SetAlpha(db.indicators.fadeOpacity)
-            AddToSpellList(spellData, playerSpellList)
+        if spellData.spell ~= L["AuraTrack_SpellNameID"] then
+            local classID, id, isDefault = _G.strsplit("-", trackerID)
+            self:debug("|c"..id.."Init tracker|r ", id, isDefault)
+            local tracker = self:CreateAuraIcon(id, spellData)
+            tracker.classID = classID
+            tracker.isDefault = isDefault and true or false
+            tracker.shouldTrack = shouldTrack(spellData)
+            if tracker.shouldTrack and spellData.unit == "player" then
+                tracker:Enable()
+                tracker:SetAlpha(db.indicators.fadeOpacity)
+                AddToSpellList(spellData, playerSpellList)
+            end
+        else
+            self:debug("Empty tracker", trackerID)
+            --trackingData[trackerID] = nil
         end
     end
     RegisterSpellList("PlayerExclusions", playerSpellList)
@@ -401,15 +406,13 @@ function AuraTracking:PLAYER_ENTERING_WORLD()
     C_TimerAfter(1, function()
         local instanceName, instanceType = _G.GetInstanceInfo()
         self:debug("UpdateLocation", instanceName, instanceType)
-        if instanceType == "none" or instanceName:find("Garrison") then
-            self.inPvP = false
-            self.inPvE = false
-        elseif (instanceType == "pvp") or (instanceType == "arena") then
-            self.inPvP = true
-            self.inPvE = false
-        elseif (instanceType == "party") or (instanceType == "raid") or (instanceType == "scenario") then
-            self.inPvP = false
-            self.inPvE = true
+        self.inPvP, self.inPvE = false, false
+        if not instanceName:find("Garrison") then
+            if (instanceType == "pvp") or (instanceType == "arena") then
+                self.inPvP = true
+            elseif (instanceType == "party") or (instanceType == "raid") or (instanceType == "scenario") then
+                self.inPvE = true
+            end
         end
         self:UpdateVisibility()
     end)
