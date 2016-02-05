@@ -245,6 +245,11 @@ if not RealUI.isTest then
 bd56d2d6
 965917ad
 a5bdd6b2
+8975b89c
+a121bb73
+bb4c75ca
+b409da56
+a8874fa3
 
 
 
@@ -357,7 +362,7 @@ classDefaults = {
             ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
                 spell = 52610,
                 minLevel = 18,
-                specs = {false, true, false, false}, -- Passive for Assas via Dreanor Perk
+                specs = {false, true, false, false},
                 order = 1,
                 eventUpdate = {
                     event = "UNIT_POWER_FREQUENT",
@@ -1226,9 +1231,15 @@ classDefaults = {
 
     ["SHAMAN"] = {
         -- Static Player Auras
+            ["7-8065f89b-1"] = {   -- Lightning Shield (Ele)
+                spell = 324,
+                minLevel = 8,
+                specs = {true, false, false},
+                order = 1,
+            },
             ["7-98774f14-1"] = {   -- Maelstrom Weapon (Enh)
-                spell = 65986,
-                minLevel = 83,
+                spell = 53817,
+                minLevel = 50,
                 specs = {false, true, false},
                 order = 1,
             },
@@ -1239,56 +1250,99 @@ classDefaults = {
                 order = 1,
             },
         -- Static Target Auras
-            ["7-8ef35823-1"] = {   -- Flame Shock (Enh, Ele)
+            ["7-8ef35823-1"] = {   -- Flame Shock (Ele, Enh)
                 spell = 8050,
+                minLevel = 12,
                 auraType = "debuff",
                 unit = "target",
                 specs = {true, true, false},
                 order = 1,
             },
-            ["7-bd97988f-1"] = {   -- Frost Shock (Enh, Ele)
+            ["7-bd97988f-1"] = {   -- Frost Shock (Enh)
                 spell = 8056,
+                minLevel = 22,
                 auraType = "debuff",
                 unit = "target",
-                specs = {true, true, false},
+                specs = {false, true, false},
                 order = 2,
             },
         -- Free Player Auras
-            ["7-8065f89b-1"] = {   -- Lightning Shield (Ele) (Fulmination)
-                spell = 324,
-                minLevel = 20,
-                specs = {true, false, false},
+            ["7-8ffd47c0-1"] = {   -- Spirit Walk (Enh)
+                spell = 58875,
+                minLevel = 60,
+                specs = {false, true, false},
             },
-            ["7-b7881104-1"] = {spell = 30823},    -- Shamanistic Rage
-            ["7-80768995-1"] = {spell = 73683},    -- Unleash Flame
-            ["7-93c0c50d-1"] = {spell = 73681},    -- Unleash Wind
-            ["7-9725fc0f-1"] = {spell = 79206},    -- Spiritwalker's Grace
-            ["7-8975b89c-1"] = {spell = 61295},    -- Riptide
-            ["7-a121bb73-1"] = {spell = 98007},    -- Spirit Link Totem
-            ["7-b44b958f-1"] = {spell = 108271},   -- Astral Shift
-            ["7-bb4c75ca-1"] = {spell = 16188},    -- Ancestral Swiftness
-            ["7-b409da56-1"] = {spell = 2825},     -- Bloodlust
-            ["7-a8874fa3-1"] = {spell = 8178},     -- Grounding Totem Effect
-            ["7-8ffd47c0-1"] = {spell = 58875},    -- Spirit Walk
-            ["7-80da6a44-1"] = {spell = 108281},   -- Ancestral Guidance
-            ["7-b5ebf41b-1"] = {spell = 16166},    -- Elemental Mastery (talent)
-            ["7-b9209d3d-1"] = {spell = 114896},   -- Windwalk Totem
-            ["7-b2a0a61d-1"] = {spell = 114049},   -- Ascendance
+            ["7-80768995-1"] = {   -- Unleash Flame (Enh)
+                spell = 73683,
+                minLevel = 81,
+                specs = {false, true, false},
+            },
+            ["7-93c0c50d-1"] = {   -- Unleash Wind (Enh)
+                spell = 73681,
+                minLevel = 81,
+                specs = {false, true, false},
+            },
+            ["7-b7881104-1"] = {   -- Shamanistic Rage (Ele, Enh)
+                spell = 30823,
+                minLevel = 65,
+                specs = {true, true, false},
+            },
+            ["7-9725fc0f-1"] = {   -- Spiritwalker's Grace (Ele, Resto)
+                spell = 79206,
+                minLevel = 85,
+                specs = {true, false, true},
+            },
+            ["7-b2a0a61d-1"] = {   -- Ascendance
+                spell = {114050, 114051, 114052},
+                minLevel = 87,
+            },
+            ["7-b44b958f-1"] = {   -- Astral Shift (Talent)
+                spell = 108271,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["7-b5ebf41b-1"] = {   -- Elemental Mastery (Talent)
+                spell = 16166,
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    ID = 19271,
+                    mustHave = true,
+                },
+            },
+            ["7-80da6a44-1"] = {   -- Ancestral Guidance (Talent)
+                spell = 108281,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 19269,
+                    mustHave = true,
+                },
+            },
+            ["7-b9209d3d-1"] = {   -- Elemental Blast (Talent)
+                spell = {118522, 173183, 173184, 173185, 173186, 173187}, -- Crit, Haste, Mast, Mult, Agi, Spirit
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 19267,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
             ["7-9f7d9c17-1"] = {   -- Flame Shock (Resto)
                 spell = 8050,
-                auraType = "debuff",
-                unit = "target",
-                specs = {false, false, true},
-            },
-            ["7-803045b0-1"] = {   -- Frost Shock (Resto)
-                spell = 8056,
+                minLevel = 12,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true},
             },
             ["7-be08b458-1"] = {   -- Stormstrike
                 spell = 17364,
+                minLevel = 26,
                 auraType = "debuff",
                 unit = "target",
             },

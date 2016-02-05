@@ -293,7 +293,7 @@ function ActionBars:ApplyABSettings(tag)
     ----
     -- Extra Action Bar
     ----
-    if barSettings.moveBars.eab then
+    if barSettings.moveBars.eab and BarSizes[2] and BarSizes[3] then
         local eabX, eabY
 
         -- Calculate Y
