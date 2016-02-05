@@ -1,20 +1,21 @@
 local _, mods = ...
+local _G = _G
 
 mods["Masque"] = function(F, C)
     --print("Masque", F, C)
-    local Button = ExtraActionButton1
+    local Button = _G.ExtraActionButton1
     Button:SetNormalTexture("")
 
-    local Masque = LibStub("AceAddon-3.0"):GetAddon("Masque", true)
-    hooksecurefunc(Masque, "OnInitialize", function()
-        local MSQ = LibStub("Masque", true)
+    local Masque = _G.LibStub("AceAddon-3.0"):GetAddon("Masque", true)
+    _G.hooksecurefunc(Masque, "OnInitialize", function()
+        local MSQ = _G.LibStub("Masque", true)
 
         -- RealUI
         MSQ:AddSkin("RealUI", {
             Author = "Nibelheim",
-            Version = "7",
+            Version = "8.1",
             Shape = "Square",
-            Masque_Version = 60000,
+            Masque_Version = 60201,
             Backdrop = {
                 Width = 32,
                 Height = 32,
@@ -35,6 +36,10 @@ mods["Masque"] = function(F, C)
                 Width = 26,
                 Height = 26,
             },
+            ChargeCooldown = {
+                Width = 26, 
+                Height = 26, 
+            }, 
             Pushed = {
                 Width = 32,
                 Height = 32,
@@ -108,7 +113,7 @@ mods["Masque"] = function(F, C)
                 Height = 10,
                 OffsetY = -2,
             },
-            AutoCast = {
+            Shine = {
                 Width = 26,
                 Height = 26,
                 OffsetX = 1,
