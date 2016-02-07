@@ -224,6 +224,16 @@ function AuraTracking:SetupDefaultTracker()
         noExclude = false, -- Don't add this aura to Raven's exclution lists
         shouldLoad = true,
         debug = false
+        --[[ Possible Spec specific settings
+        specs = {
+            ["**"] = defaultSpec,
+            [1] = {   
+                talent = {},
+                order = 0,
+            },
+            [3] = false
+        }
+        ]]
         --[[
         customName = _G.GetSpellInfo(12345),
         eventUpdate = {
@@ -249,7 +259,7 @@ a5bdd6b2
 a121bb73
 bb4c75ca
 b409da56
-a8874fa3
+
 
 
 
@@ -1350,6 +1360,18 @@ classDefaults = {
 
     ["WARLOCK"] = {
         -- Static Player Auras
+            ["9-a8874fa3-1"] = {   -- Soulburn: Haunt (Aff)
+                spell = 157698,
+                minLevel = 100,
+                specs = {true, false, false},
+                talent = {
+                    tier = 7,
+                    ID = 19264,
+                    mustHave = true,
+                },
+                order = 1,
+                customName = _G.GetSpellInfo(152109),
+            },
             ["9-9f916aed-1"] = {   -- Molten Core (Demo)
                 spell = {140074, 122355}, -- Green Fire, Normal
                 minLevel = 69,
@@ -1368,25 +1390,25 @@ classDefaults = {
                 }
             },
         -- Static Target Auras
+            ["9-9d46aea7-1"] = {   -- Agony (Aff)
+                spell = 980,
+                minLevel = 36,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 1,
+            },
             ["9-be413012-1"] = {   -- Corruption (Aff, Demo)
                 spell = 146739,
                 minLevel = 3,
                 auraType = "debuff",
                 unit = "target",
                 specs = {true, true, false},
-                order = 1,
+                order = 2,
             },
             ["9-bcf57e20-1"] = {   -- Unstable Affliction (Aff)
                 spell = 30108,
                 minLevel = 10,
-                auraType = "debuff",
-                unit = "target",
-                specs = {true, false, false},
-                order = 2,
-            },
-            ["9-9d46aea7-1"] = {   -- Agony, Doom (Aff)
-                spell = {980,603},
-                minLevel = 36,
                 auraType = "debuff",
                 unit = "target",
                 specs = {true, false, false},
@@ -1398,7 +1420,7 @@ classDefaults = {
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, true, false},
-                order = 2,
+                order = 3,
             },
             ["9-be90eb3d-1"] = {   -- Immolate (Dest)
                 spell = 157736,
@@ -1409,48 +1431,99 @@ classDefaults = {
                 order = 1,
             },
         -- Free Player Auras
-            ["9-bd74da2c-1"] = {spell = 110913},   -- Dark Bargain
-            ["9-911df4e4-1"] = {spell = 108359},   -- Dark Regeneration
-            ["9-82ad155e-1"] = {spell = 113860},   -- Dark Soul: Misery
-            ["9-8ef292f7-1"] = {spell = 113861},   -- Dark Soul: Knowledge
-            ["9-87bd1ea8-1"] = {spell = 113858},   -- Dark Soul: Instability
+            ["9-82ad155e-1"] = {   -- Dark Soul: Misery (Aff)
+                spell = 113860,
+                minLevel = 84,
+                specs = {true, false, false},
+            },
+            ["9-aa9fcbad-1"] = {   -- Metamorphosis (Demo)
+                spell = 103958,
+                minLevel = 10,
+                specs = {false, true, false},
+            },
+            ["9-8ef292f7-1"] = {   -- Dark Soul: Knowledge (Demo)
+                spell = 113861,
+                minLevel = 84,
+                specs = {false, true, false},
+            },
+            ["9-87bd1ea8-1"] = {   -- Dark Soul: Instability (Destro)
+                spell = 113858,
+                minLevel = 84,
+                specs = {false, false, true},
+            },
+            ["9-8ef292f7-1"] = {   -- Demonbolt (Talent) (Demo)
+                spell = 157695,
+                minLevel = 100,
+                auraType = "debuff",
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["9-911df4e4-1"] = {   -- Dark Regeneration (Talent)
+                spell = 108359,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["9-bd74da2c-1"] = {   -- Dark Bargain (Talent)
+                spell = 110913,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
             ["9-bb5f0433-1"] = {spell = 88448},    -- Demonic Rebirth
             ["9-9e083577-1"] = {spell = 104773},   -- Unending Resolve
         -- Free Target Auras
-            ["9-869d9949-1"] = {   -- Seed of Corruption
-                spell = 27243,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["9-8072e1ae-1"] = {   -- Haunt
+            ["9-8072e1ae-1"] = {   -- Haunt (Aff)
                 spell = 48181,
+                minLevel = 60,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, false, false},
             },
-            ["9-bfee421b-1"] = {   -- Shadowflame
-                spell = 80270,
+            ["9-869d9949-1"] = {   -- Seed of Corruption (Aff)
+                spell = 27243,
+                minLevel = 21,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, false, false},
             },
-            ["9-81347abb-1"] = {   -- Conflagrate
+            ["9-bfee421b-1"] = {   -- Hand of Gul'dan (Demo)
+                spell = 47960,
+                minLevel = 19,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+            },
+            ["9-81347abb-1"] = {   -- Conflagrate (Destro)
                 spell = 17962,
+                minLevel = 10,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
             },
-            ["9-858bed5f-1"] = {   -- Havoc
+            ["9-858bed5f-1"] = {   -- Havoc (Destro)
                 spell = 80240,
+                minLevel = 36,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
             },
-            ["9-bc1debbb-1"] = {   -- Shadowburn
+            ["9-bc1debbb-1"] = {   -- Shadowburn (Destro)
                 spell = 17877,
+                minLevel = 47,
                 auraType = "debuff",
                 unit = "target",
-            },
-            ["9-aa9fcbad-1"] = {   -- Archimonde's Vengeance
-                spell = 108505,
-                auraType = "debuff",
-                unit = "target",
+                specs = {false, false, true},
             },
     },
 
