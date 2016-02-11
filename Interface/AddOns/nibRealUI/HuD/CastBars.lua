@@ -116,19 +116,16 @@ local info = {
         leftAngle = [[\]],
         rightAngle = [[\]],
         smooth = false,
-        debug = "playerCast"
     },
     target = {
         leftAngle = [[/]],
         rightAngle = [[/]],
         smooth = false,
-        debug = "targetCast"
     },
     focus = {
         leftAngle = [[\]],
         rightAngle = [[/]],
         smooth = false,
-        debug = "focusCast"
     },
 }
 

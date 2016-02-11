@@ -46,7 +46,6 @@ local function CreateHealthBar(parent)
     health:SetMinMaxValues(0, 1)
     health:SetReverseFill(true)
     health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
-    --health.debug = "playerHealth"
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
@@ -78,7 +77,6 @@ local function CreatePredictBar(parent)
     local info = info.predict
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-    absorbBar.debug = "playerAbsorbs"
 
     parent.HealPrediction = {
         frequentUpdates = true,
