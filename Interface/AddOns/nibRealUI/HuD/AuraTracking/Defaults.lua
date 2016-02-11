@@ -259,7 +259,7 @@ a5bdd6b2
 a121bb73
 bb4c75ca
 b409da56
-
+89e46112
 
 
 
@@ -1557,42 +1557,115 @@ classDefaults = {
                 order = 1,
             },
         -- Free Player Auras
+            ["1-9ca47424-1"] = {   -- Die by the Sword (Arms, Fury)
+                spell = 118038,
+                minLevel = 56,
+                specs = {true, true, false},
+            },
+            ["1-95b80fdf-1"] = {   -- Recklessness (Arms, Fury)
+                spell = 1719,
+                minLevel = 87,
+                specs = {true, true, false},
+            },
             ["1-9d8e1b35-1"] = {   -- Bloodsurge (Fury)
                 spell = 46916,
+                minLevel = 10,
                 specs = {false, true, false},
             },
-            ["1-bf917422-1"] = {   -- Enrage (Prot)
+            ["1-8c2242a0-1"] = {   -- Meat Cleaver (Fury)
+                spell = 85739,
+                minLevel = 58,
+                specs = {false, true, false},
+            },
+            ["1-bf917422-1"] = {   -- Enrage (Fury, Prot)
                 spell = 12880,
-                specs = {false, false, true},
+                minLevel = 14,
+                specs = {false, true, true},
             },
             ["1-8ede1252-1"] = {   -- Ultimatum (Prot)
                 spell = 122510,
+                minLevel = 10,
                 specs = {false, false, true},
             },
             ["1-bb0caec6-1"] = {   -- Sword and Board (Prot)
                 spell = 50227,
+                minLevel = 10,
                 specs = {false, false, true},
             },
-            ["1-9ca47424-1"] = {spell = 118038},   -- Die by the Sword
-            ["1-ae88cb34-1"] = {spell = 12975},    -- Last Stand
-            ["1-bc105857-1"] = {spell = 871},      -- Shield Wall
+            ["1-bc105857-1"] = {   -- Shield Wall (Prot)
+                spell = 871,
+                minLevel = 48,
+                specs = {false, false, true},
+            },
+            ["1-ae88cb34-1"] = {   -- Last Stand (Prot)
+                spell = 12975,
+                minLevel = 38,
+                specs = {false, false, true},
+            },
             ["1-bb6869cd-1"] = {spell = 18499},    -- Berserker Rage
-            ["1-95b80fdf-1"] = {spell = 1719},     -- Recklessness
             ["1-af01758e-1"] = {spell = 23920},    -- Spell Reflection
-            ["1-8c2242a0-1"] = {spell = 85739},    -- Meat Cleaver
             
-            ["1-849c1974-1"] = {spell = 55694},    -- Enraged Regeneration (Talent)
-            ["1-9b003d2d-1"] = {spell = 52437},    -- Sudden Death (Talent)
-            ["1-a216ed2a-1"] = {spell = 169686},   -- Unyielding Strikes (Talent)
-            ["1-89e46112-1"] = {spell = 114028},   -- Mass Spell Reflection (Talent)
-            ["1-bc751f32-1"] = {spell = 107574},   -- Avatar (Talent)
-            ["1-a26f3820-1"] = {spell = 12292},    -- Bloodbath (Talent)
-            ["1-b8a217f8-1"] = {spell = 46924},    -- Bladestorm (Talent)
+            ["1-849c1974-1"] = {   -- Enraged Regeneration (Talent)
+                spell = 55694,
+                minLevel = 30,
+                talent = {
+                    tier = 2,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["1-9b003d2d-1"] = {   -- Sudden Death (Talent)
+                spell = 52437,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["1-a216ed2a-1"] = {   -- Unyielding Strikes (Talent) (Prot)
+                spell = 169686,
+                minLevel = 45,
+                specs = {false, false, true},
+                talent = {
+                    tier = 3,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["1-bc751f32-1"] = {   -- Avatar (Talent)
+                spell = 107574,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["1-a26f3820-1"] = {   -- Bloodbath (Talent)
+                spell = 12292,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
+            ["1-b8a217f8-1"] = {   -- Bladestorm (Talent)
+                spell = 46924,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 19264,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
-            ["1-bbd999f7-1"] = {   -- Colossus Smash
+            ["1-bbd999f7-1"] = {   -- Colossus Smash (Arms)
                 spell = 86346,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, false, false},
             },
             ["1-96c7609f-1"] = {   -- Demoralizing Shout
                 spell = 1160,
