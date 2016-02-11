@@ -1572,10 +1572,10 @@ classDefaults = {
                 minLevel = 58,
                 specs = {false, true, false},
             },
-            ["1-bf917422-1"] = {   -- Enrage (Fury, Prot)
+            ["1-bf917422-1"] = {   -- Enrage (Prot)
                 spell = 12880,
                 minLevel = 14,
-                specs = {false, true, true},
+                specs = {false, false, true},
             },
             ["1-8ede1252-1"] = {   -- Ultimatum (Prot)
                 spell = 122510,
@@ -1598,14 +1598,14 @@ classDefaults = {
                 specs = {false, false, true},
             },
             ["1-bb6869cd-1"] = {spell = 18499},    -- Berserker Rage
-            ["1-af01758e-1"] = {spell = 23920},    -- Spell Reflection
+            ["1-af01758e-1"] = {spell = {23920, 114028}},    -- Spell Reflection
             
             ["1-849c1974-1"] = {   -- Enraged Regeneration (Talent)
                 spell = 55694,
                 minLevel = 30,
                 talent = {
                     tier = 2,
-                    ID = 19264,
+                    ID = 16036,
                     mustHave = true,
                 },
             },
@@ -1614,7 +1614,7 @@ classDefaults = {
                 minLevel = 45,
                 talent = {
                     tier = 3,
-                    ID = 19264,
+                    ID = 15769,
                     mustHave = true,
                 },
             },
@@ -1624,7 +1624,7 @@ classDefaults = {
                 specs = {false, false, true},
                 talent = {
                     tier = 3,
-                    ID = 19264,
+                    ID = 21792,
                     mustHave = true,
                 },
             },
@@ -1633,7 +1633,7 @@ classDefaults = {
                 minLevel = 90,
                 talent = {
                     tier = 6,
-                    ID = 19264,
+                    ID = 19138,
                     mustHave = true,
                 },
             },
@@ -1642,7 +1642,7 @@ classDefaults = {
                 minLevel = 90,
                 talent = {
                     tier = 6,
-                    ID = 19264,
+                    ID = 19139,
                     mustHave = true,
                 },
             },
@@ -1651,13 +1651,13 @@ classDefaults = {
                 minLevel = 90,
                 talent = {
                     tier = 6,
-                    ID = 19264,
+                    ID = 19140,
                     mustHave = true,
                 },
             },
         -- Free Target Auras
             ["1-bbd999f7-1"] = {   -- Colossus Smash (Arms)
-                spell = 86346,
+                spell = 167105,
                 auraType = "debuff",
                 unit = "target",
                 specs = {true, false, false},
