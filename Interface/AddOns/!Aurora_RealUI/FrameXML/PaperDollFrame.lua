@@ -49,7 +49,7 @@ tinsert(mods["nibRealUI"], function(F, C)
             itemSlot.ilvl = iLvl
 
             local upgradeBG = itemSlot:CreateTexture(nil, "OVERLAY", -8)
-            if RealUI.isTest then
+            if RealUI.isBeta then
                 upgradeBG:SetColorTexture(0, 0, 0, 1)
             else
                 upgradeBG:SetTexture(0, 0, 0, 1)
@@ -189,7 +189,7 @@ tinsert(mods["nibRealUI"], function(F, C)
                         itemSlot.upgradeBG:SetShown(cur and cur > 0)
                         for i, tex in next, itemSlot.upgrade do
                             if cur and i <= cur then
-                                if RealUI.isTest then
+                                if RealUI.isBeta then
                                     tex:SetColorTexture(r, g, b)
                                 else
                                     tex:SetTexture(r, g, b)

@@ -12,7 +12,7 @@ local oUF = oUFembed
 -- RealUI --
 local RealUI =  _G.RealUI
 local db, ndb, ndbc
-local isTest = RealUI.isTest
+local isBeta = RealUI.isBeta
 local Lerp = RealUI.Lerp
 
 local MODNAME = "AngleStatusBar"
@@ -238,7 +238,7 @@ function api:SetStatusBarColor(r, g, b, a)
     end
     local row = self.bar.row
     for i = 1, #row do
-        if isTest then
+        if isBeta then
             row[i]:SetColorTexture(r, g, b, a or 1)
         else
             row[i]:SetTexture(r, g, b, a or 1)
@@ -254,7 +254,7 @@ function api:SetBackgroundColor(r, g, b, a)
         if self.col then
             tex[i]:SetVertexColor(r, g, b, a or 1)
         else
-            if isTest then
+            if isBeta then
                 tex[i]:SetColorTexture(r, g, b, a or 1)
             else
                 tex[i]:SetTexture(r, g, b, a or 1)
@@ -335,7 +335,7 @@ local function CreateAngleBG(width, height, parent, info)
 
     debug(info.debug, "CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
-    if isTest then
+    if isBeta then
         top:SetColorTexture(0, 0, 0)
     else
         top:SetTexture(0, 0, 0)
@@ -361,7 +361,7 @@ local function CreateAngleBG(width, height, parent, info)
         for i = 1, maxRows do
             local tex = bg:CreateTexture(nil, "BACKGROUND")
             -- tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
-            if isTest then
+            if isBeta then
                 tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
             else
                 tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
@@ -408,7 +408,7 @@ local function CreateAngleBG(width, height, parent, info)
 
     local ofs = maxRows + 1
     local bottom = bg:CreateTexture(nil, "BORDER")
-    if isTest then
+    if isBeta then
         bottom:SetColorTexture(0, 0, 0)
     else
         bottom:SetTexture(0, 0, 0)
@@ -428,7 +428,7 @@ local function CreateAngleBG(width, height, parent, info)
     end
     bg.bottom = bottom
 
-    if isTest then
+    if isBeta then
         local left = bg:CreateLine(nil, "BORDER")
         left:SetColorTexture(0, 0, 0)
         left:SetThickness(16)
@@ -501,7 +501,7 @@ local function CreateAngleBar(width, height, parent, info)
 
     --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    if isTest then
+    if isBeta then
         test:SetColorTexture(1, 1, 1, 0.1)
     else
         test:SetTexture(1, 1, 1, 0.1)

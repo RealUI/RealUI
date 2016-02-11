@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-if nibRealUI.isTest then return end
+if nibRealUI.isBeta then return end
 
 local L = nibRealUI.L
 local db, ndb
