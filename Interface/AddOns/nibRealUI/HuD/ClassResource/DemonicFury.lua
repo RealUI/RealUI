@@ -108,6 +108,7 @@ function DemonicFury:OnEnable()
 
     if not self.dfBar then 
         self.dfBar = ClassResourceBar:New("short", L["Resource_DemonicFury"])
+        self.dfBar:ReverseBar("left", true)
         self.dfBar:SetEndBoxShown("left", false)
         self.dfBar:SetEndBoxShown("right", false)
         self.dfBar:SetBoxColor("middle", nibRealUI.classColor)

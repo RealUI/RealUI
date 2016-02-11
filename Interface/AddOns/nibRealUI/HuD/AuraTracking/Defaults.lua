@@ -246,7 +246,7 @@ function AuraTracking:SetupDefaultTracker()
     return classTrackers
 end
 
-if not RealUI.isTest then
+if not RealUI.isBeta then
 
 --[[ Retired IDs
 9ab78043
@@ -259,7 +259,7 @@ a5bdd6b2
 a121bb73
 bb4c75ca
 b409da56
-89e46112
+aa9fcbad
 
 
 
@@ -1366,7 +1366,7 @@ classDefaults = {
                 specs = {true, false, false},
                 talent = {
                     tier = 7,
-                    ID = 19264,
+                    ID = 21180,
                     mustHave = true,
                 },
                 order = 1,
@@ -1436,11 +1436,6 @@ classDefaults = {
                 minLevel = 84,
                 specs = {true, false, false},
             },
-            ["9-aa9fcbad-1"] = {   -- Metamorphosis (Demo)
-                spell = 103958,
-                minLevel = 10,
-                specs = {false, true, false},
-            },
             ["9-8ef292f7-1"] = {   -- Dark Soul: Knowledge (Demo)
                 spell = 113861,
                 minLevel = 84,
@@ -1451,23 +1446,12 @@ classDefaults = {
                 minLevel = 84,
                 specs = {false, false, true},
             },
-            ["9-8ef292f7-1"] = {   -- Demonbolt (Talent) (Demo)
-                spell = 157695,
-                minLevel = 100,
-                auraType = "debuff",
-                specs = {false, true, false},
-                talent = {
-                    tier = 1,
-                    ID = 19264,
-                    mustHave = true,
-                },
-            },
             ["9-911df4e4-1"] = {   -- Dark Regeneration (Talent)
                 spell = 108359,
                 minLevel = 15,
                 talent = {
                     tier = 1,
-                    ID = 19264,
+                    ID = 19279,
                     mustHave = true,
                 },
             },
@@ -1476,7 +1460,18 @@ classDefaults = {
                 minLevel = 45,
                 talent = {
                     tier = 3,
-                    ID = 19264,
+                    ID = 19289,
+                    mustHave = true,
+                },
+            },
+            ["9-89e46112-1"] = {   -- Demonbolt (Talent) (Demo)
+                spell = 157695,
+                minLevel = 100,
+                auraType = "debuff",
+                specs = {false, true, false},
+                talent = {
+                    tier = 7,
+                    ID = 21694,
                     mustHave = true,
                 },
             },
