@@ -1967,6 +1967,13 @@ local clientString = {
     [BNET_CLIENT_OVERWATCH] = "OW",
 }
 
+local BNGetGameAccountInfo = _G.BNGetGameAccountInfo
+if not BNGetGameAccountInfo then
+    BNGetGameAccountInfo = function(...)
+        return BNGetToonInfo(...)
+    end
+end
+
 local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
@@ -2005,11 +2012,11 @@ local function Friends_Update(self)
     for t = 1, BNGetNumFriends() do
         local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, _, noteText = BNGetFriendInfo(t)
         -- WoW friends
-        if ( isOnline and client=="WoW" ) then
+        if ( isOnline and client == BNET_CLIENT_WOW ) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
 
-            local _, characterName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetToonInfo and BNGetToonInfo(bnetIDGameAccount) or BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
             curFriendsOnline = curFriendsOnline + 1
 
             if (realmName == nibRealUI.realm) then
@@ -2053,7 +2060,7 @@ local function Friends_Update(self)
         elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 
-            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo and BNGetToonInfo(bnetIDGameAccount) or BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
             InfoLine:debug("BNet: not in WoW", characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
             characterName = BNet_GetValidatedCharacterName(characterName, battleTag, client)
             client = clientString[client] or client
