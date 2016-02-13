@@ -260,8 +260,8 @@ a121bb73
 bb4c75ca
 b409da56
 aa9fcbad
-
-
+83cbafac
+827cfea6
 
 
 ]]
@@ -269,15 +269,15 @@ aa9fcbad
 classDefaults = {
     ["DEATHKNIGHT"] = {
         -- Static Player Auras
-            ["6-b6cce35c-1"] = {   -- Scent of Blood (Blood)
-                spell = 50421,
-                minLevel = 62,
-                specs = {true, false, false},
-                order = 1,
-            },
             ["6-987a58fe-1"] = {   -- Blood Shield (Blood)
                 spell = 77535,
                 minLevel = 80,
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["6-9eeb4ba5-1"] = {   -- Bone Shield (Blood)
+                spell = 49222,
+                minLevel = 55,
                 specs = {true, false, false},
                 order = 2,
             },
@@ -327,43 +327,74 @@ classDefaults = {
         -- Free Player Auras
             ["6-8f813ae5-1"] = {   -- Crimson Scourge (Blood)
                 spell = 81141,
+                minLevel = 55,
                 specs = {true, false, false},
             },
-            ["6-80713fed-1"] = {   -- Vampiric Blood (Blood)
-                spell = 55233,
+            ["6-b6cce35c-1"] = {   -- Scent of Blood (Blood)
+                spell = 50421,
+                minLevel = 62,
                 specs = {true, false, false},
             },
             ["6-986c8a80-1"] = {   -- Dancing Rune Weapon (Blood)
                 spell = 81256,
+                minLevel = 74,
                 specs = {true, false, false},
             },
-            ["6-9eeb4ba5-1"] = {   -- Bone Shield (Blood)
-                spell = 49222,
+            ["6-80713fed-1"] = {   -- Vampiric Blood (Blood)
+                spell = 55233,
+                minLevel = 76,
                 specs = {true, false, false},
+            },
+            ["6-9dae73fe-1"] = {   -- Freezing Fog (Frost)
+                spell = 59052,
+                minLevel = 58,
+                specs = {false, true, false},
             },
             ["6-a27ed53e-1"] = {   -- Killing Machine (Frost)
                 spell = 51124,
+                minLevel = 63,
                 specs = {false, true, false},
             },
             ["6-9af9ad7e-1"] = {   -- Pillar of Frost (Frost)
                 spell = 51271,
-                specs = {false, true, false},
-            },
-            ["6-9dae73fe-1"] = {   -- Freezing Fog (Frost, from Rime)
-                spell = 59052,
+                minLevel = 68,
                 specs = {false, true, false},
             },
             ["6-8ea694c4-1"] = {   -- Sudden Doom (Unholy)
                 spell = 81340,
+                minLevel = 64,
                 specs = {false, false, true},
             },
+            ["6-8c2b1f08-1"] = {   -- Lichborne (Talent)
+                spell = 49039,
+                minLevel = 57,
+                talent = {
+                    tier = 2,
+                    ID = 19218,
+                    mustHave = true,
+                },
+            },
+            ["6-8281137d-1"] = {   -- Death's Advance (Talent)
+                spell = 96268,
+                minLevel = 58,
+                talent = {
+                    tier = 3,
+                    ID = 19221,
+                    mustHave = true,
+                },
+            },
+            ["6-ac02f3e2-1"] = {   -- Blood Tap (Talent)
+                spell = 114851,  -- Blood Charge
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    ID = 19224,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(45529),
+            },
             ["6-9334862e-1"] = {spell = 48792},    -- Icebound Fortitude
-            ["6-827cfea6-1"] = {spell = 22744},    -- Chains of Ice
             ["6-a543932b-1"] = {spell = 48707},    -- Anti-Magic Shell
-            ["6-8c2b1f08-1"] = {spell = 49039},    -- Lichborne (Talent)
-            ["6-83cbafac-1"] = {spell = 50461},    -- Anti-Magic Zone (Talent)
-            ["6-8281137d-1"] = {spell = 96268},    -- Death's Advance (Talent)
-            ["6-ac02f3e2-1"] = {spell = 114851},   -- Blood Charge (used for Blood Tap, Talent)
         -- Free Target Auras
     },
 
