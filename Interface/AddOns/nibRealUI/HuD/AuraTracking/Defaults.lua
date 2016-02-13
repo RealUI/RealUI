@@ -256,8 +256,8 @@ bd56d2d6
 965917ad
 a5bdd6b2
 8975b89c
-
-
+ba699a82
+a0b8d817
 
 
 
@@ -706,19 +706,23 @@ classDefaults = {
         -- Free Player Auras
             ["3-a280664b-1"] = {   -- Beast Cleave (BM)
                 spell = 118455,
+                minLevel = 24,
                 unit = "pet",
                 specs = {true, false, false}
             },
             ["3-9a8eacb4-1"] = {   -- Bestial Wrath (BM)
                 spell = 19574,
+                minLevel = 40,
                 specs = {true, false, false}
             },
             ["3-a08d9a86-1"] = {   -- Rapid Fire (MM)
                 spell = 3045,
+                minLevel = 68,
                 specs = {false, true, false}
             },
             ["3-9bd8be3e-1"] = {   -- Thrill of the Hunt (Talent)
                 spell = 34720,
+                minLevel = 60,
                 talent = {
                     tier = 4,
                     ID = 19365,
@@ -732,33 +736,27 @@ classDefaults = {
         -- Free Target Auras
             ["3-ae78fcd9-1"] = {   -- Black Arrow (SV)
                 spell = 3674,
+                minLevel = 68,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true}
             },
             ["3-afe5d9ac-1"] = {   -- Explosive Shot (SV)
                 spell = 53301,
+                minLevel = 68,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, false, true}
             },
             ["3-bc4972cd-1"] = {   -- Explosive Trap
                 spell = 13812,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["3-ba699a82-1"] = {   -- Freezing Trap
-                spell = 3355,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["3-a0b8d817-1"] = {   -- Ice Trap
-                spell = 13810,
+                minLevel = 38,
                 auraType = "debuff",
                 unit = "target",
             },
             ["3-a0d6a726-1"] = {   -- A Murder of Crows (Talent)
                 spell = 131894,
+                minLevel = 75,
                 auraType = "debuff",
                 unit = "target",
                 talent = {
