@@ -4,16 +4,14 @@ local next, type = _G.next, _G.type
 
 -- WoW Globals --
 local UIParent, GameTooltip = _G.UIParent, _G.GameTooltip
-local CreateFrame, GetTime = _G.CreateFrame, _G.GetTime
-local UnitAura, GetSpellInfo = _G.UnitAura, _G.GetSpellInfo
+local CreateFrame = _G.CreateFrame
+local GetSpellInfo = _G.GetSpellInfo
 
 -- Libs --
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local F = _G.Aurora[1]
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local round = nibRealUI.Round
+local nibRealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
@@ -130,7 +128,7 @@ do
         return next(icons, id)
     end
 
-    function AuraTracking:IterateTrackers()
+    function AuraTracking.IterateTrackers()
         return iter, nil, nil
     end
 end

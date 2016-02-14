@@ -33,7 +33,7 @@
 			[
 				"*.git*",
 				"*.md",
-				"*.lua",
+				"*.lua*",
 				"*.ps1"
 			],
 			"folder_exclude_patterns":

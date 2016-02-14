@@ -1,30 +1,27 @@
 -- Lua Globals --
 local _G = _G
 local next, random, type = _G.next, _G.math.random, _G.type
-local bit_band, tinsert = _G.bit.band, _G.table.insert
+local tinsert = _G.table.insert
 
 -- WoW Globals --
 local UIParent = _G.UIParent
-local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
+local CreateFrame, UnitAura = _G.CreateFrame, _G.UnitAura
 local C_TimerAfter = _G.C_Timer.After
-local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
 
 -- Libs --
-local LibWin = LibStub("LibWindow-1.1")
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local LibWin = _G.LibStub("LibWindow-1.1")
+local F = _G.Aurora[1]
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local nibRealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = nibRealUI.L
-local db, ndb, trackingData
-local round = nibRealUI.Round
+local db, trackingData
 
 local MODNAME = "AuraTracking"
 local AuraTracking = nibRealUI:GetModule(MODNAME)
 
 local MAX_SLOTS, MAX_STATIC_SLOTS = 10, 6
-local numActive = {left = 0, right = 0}
+local activeTrackers = {left = 0, right = 0}
 local playerLevel, playerSpec, iterUnits
 local isValidUnit = {
     player = true,
@@ -130,15 +127,15 @@ do
 
     function AuraTracking:AddTracker(tracker, slotID, enforceSlot)
         self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
-        local numActive = numActive[tracker.side]
+        local numActive = activeTrackers[tracker.side]
         if tracker.slotID then
             if tracker.isStatic then
                 tracker.icon:SetDesaturated(false)
                 tracker:SetAlpha(1)
-                numActive = numActive + 1
+                activeTrackers[tracker.side] = numActive + 1
             end
         else
-            numActive = numActive + 1
+            activeTrackers[tracker.side] = numActive + 1
             local side, slot = self[tracker.side]
             if enforceSlot then
                 self:debug("Place in slot", slotID)
@@ -163,13 +160,13 @@ do
     end
     function AuraTracking:RemoveTracker(tracker, isStatic)
         self:debug("RemoveTracker", tracker.id, isStatic)
-        local numActive = numActive[tracker.side]
+        local numActive = activeTrackers[tracker.side]
         if isStatic then
             tracker.icon:SetDesaturated(true)
             tracker:SetAlpha(db.indicators.fadeOpacity)
-            numActive = numActive - 1
+            activeTrackers[tracker.side] = numActive - 1
         else
-            numActive = numActive - 1
+            activeTrackers[tracker.side] = numActive - 1
             local side, emptySlot = self[tracker.side], tracker.slotID
             RemoveTrackerFromSlot(tracker, side["slot"..emptySlot])
 
@@ -207,8 +204,8 @@ do -- AuraTracking:CreateNewTracker()
         repeat
             newID = generateGUID()
             local isDupe = false
-            for trackerID, spellData in next, trackingData do
-                local classID, id, isDefault = _G.strsplit("-", trackerID)
+            for trackerID in next, trackingData do
+                local _, id = _G.strsplit("-", trackerID)
                 if newID == id then
                     isDupe = true
                     break
@@ -241,14 +238,14 @@ function AuraTracking:UpdateVisibility()
         self.left:SetShown(visibility["show"..instType] and (combatCondition or targetCondition))
         self.right:SetShown(visibility["show"..instType] and targetCondition)
     else
-        self.left:SetShown(targetCondition or numActive["left"] > 0)
+        self.left:SetShown(targetCondition or activeTrackers["left"] > 0)
         self.right:SetShown(targetCondition)
     end
 end
 function AuraTracking:Lock()
     if not db.locked then
         db.locked = true
-        for i, side in next, {"left", "right"} do
+        for _, side in next, {"left", "right"} do
             local parent = self[side]
             parent:EnableMouse(false)
             parent.bg:Hide()
@@ -268,7 +265,7 @@ function AuraTracking:Unlock()
     end
     if db.locked then
         db.locked = false
-        for i, side in next, {"left", "right"} do
+        for _, side in next, {"left", "right"} do
             local parent = self[side]
             parent:EnableMouse(true)
             parent.bg:Show()
@@ -304,7 +301,6 @@ function AuraTracking:SettingsUpdate(event)
             end
         end
     elseif event == "fadeOpacity" then
-        local fadeOpacity = db.indicators.fadeOpacity
         for _, side in next, {"left", "right"} do
             for slotID = 1, MAX_SLOTS do
                 local slot = self[side]["slot"..slotID]
@@ -325,9 +321,9 @@ end
 -- Events --
 function AuraTracking:UNIT_AURA(event, unit)
     if not isValidUnit[unit] then return end
-    AuraTracking:debug("UNIT_AURA", unit)
+    self:debug("UNIT_AURA", event, unit)
 
-    for tracker, spellData in AuraTracking:IterateTrackers() do
+    for tracker, spellData in self:IterateTrackers() do
         if spellData.unit == unit and tracker.isEnabled then
             local spell, spellMatch, aura = spellData.spell, false, {}
             debug(spellData.debug, "IterateTrackers", tracker.id, spell)
@@ -350,13 +346,13 @@ function AuraTracking:UNIT_AURA(event, unit)
                 if not spellData.hideStacks then
                     tracker.count:SetText(aura.count)
                 end
-                AuraTracking:AddTracker(tracker)
+                self:AddTracker(tracker)
             elseif tracker.slotID then
                 tracker.auraIndex = nil
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
                 tracker.count:SetText("")
-                AuraTracking:RemoveTracker(tracker, tracker.isStatic)
+                self:RemoveTracker(tracker, tracker.isStatic)
             end
             debug(spellData.debug, "do postUnitAura", tracker.postUnitAura)
             if tracker.postUnitAura then
@@ -476,7 +472,7 @@ function AuraTracking:CharacterUpdate(units, force)
 
         iterUnits = true
         self:debug("Disable all trackers")
-        for tracker, spellData in self:IterateTrackers() do
+        for tracker in self:IterateTrackers() do
             tracker:Disable()
         end
         iterUnits = false
@@ -616,7 +612,6 @@ function AuraTracking:OnInitialize()
     })
 
     db = self.db.profile
-    ndb = nibRealUI.db.profile
     trackingData = self.db.class
 
     if db.tracking then
@@ -631,7 +626,6 @@ function AuraTracking:OnEnable()
     self:debug("OnEnable")
     self:RegisterEvent("UNIT_AURA")
 
-    self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -649,10 +643,21 @@ function AuraTracking:OnEnable()
         self:Createslots()
     end
 
-    if self.loggedIn then self:RefreshMod() end
+    if self.loggedIn then
+        self:RefreshMod()
+    else
+        self:RegisterEvent("PLAYER_LOGIN")
+    end
     self.configMode = false
 end
 
 function AuraTracking:OnDisable()
+    self:debug("OnDisable")
 
+    self:UnregisterAllEvents()
+    self:UnregisterAllBuckets()
+
+    for _, side in next, {"left", "right"} do
+        self[side]:Hide()
+    end
 end

@@ -1,13 +1,12 @@
 -- Lua Globals --
 local _G = _G
-local next, type = _G.next, _G.type
 
 -- WoW Globals --
 local UnitPower, GetTime, GetNumSpecializationsForClassID = _G.UnitPower, _G.GetTime, _G.GetNumSpecializationsForClassID
 local SPELL_POWER_COMBO_POINTS, SPELL_POWER_BURNING_EMBERS = _G.SPELL_POWER_COMBO_POINTS, _G.SPELL_POWER_BURNING_EMBERS
 
 -- RealUI --
-local RealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local RealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 local L = RealUI.L
 local Lerp = RealUI.Lerp
 
@@ -22,7 +21,7 @@ local function debug(isDebug, ...)
     end
 end
 
-local _, class, classID = UnitClass("player")
+local _, class, classID = _G.UnitClass("player")
 local SavageRoar
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local BurningEmbers
@@ -123,11 +122,9 @@ elseif class == "ROGUE" then
             debug(spellData.debug, "CD times", self.cd:GetCooldownTimes())
             --debug(spellData.debug, "CD", self.cd:GetCooldown())
             debug(spellData.debug, "spell CD", _G.GetSpellCooldown(spellData.spell))
-            if isWatching then
-            end
         end
 
-        function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_, ...)
+        function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID)
             if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
                 debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), GetTime())
 
@@ -153,20 +150,19 @@ elseif class == "ROGUE" then
     end
 elseif class == "WARLOCK" then
     do -- BurningEmbers
-        local power
-        local minVal, maxVal = 0, 10
+        local maxVal, power = 10
         local function postUnitAura(self, spellData)
             debug(spellData.debug, "postUnitAura", power)
             if power > 0 then
-                local modPower = power % 10
-                if modPower > 0 then
-                    self.count:SetText(modPower)
+                local powerMod = power % 10
+                if powerMod > 0 then
+                    self.count:SetText(powerMod)
 
-                    local right = Lerp(.08, .92, (modPower / maxVal))
+                    local right = Lerp(.08, .92, (powerMod / maxVal))
                     debug(spellData.debug, "right", right)
                     self.status:SetTexCoord(.08, right, .08, .92)
 
-                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, (modPower / maxVal))
+                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, (powerMod / maxVal))
                     debug(spellData.debug, "xOfs", xOfs)
                     self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
                 else
