@@ -385,6 +385,7 @@ function AuraTracking:PLAYER_LOGIN()
         end
     end
     RegisterSpellList("PlayerExclusions", playerSpellList)
+    RegisterSpellList("PlayerDebuffExclusions", playerSpellList)
     self.loggedIn = true
 end
 function AuraTracking:PLAYER_ENTERING_WORLD()
@@ -490,6 +491,7 @@ function AuraTracking:CharacterUpdate(units, force)
             end
         end
         RegisterSpellList("PlayerExclusions", playerSpellList)
+        RegisterSpellList("PlayerDebuffExclusions", playerSpellList)
     end
 end
 
