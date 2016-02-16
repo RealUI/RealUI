@@ -32,8 +32,12 @@ function api:Enable()
     self.isEnabled = true
     local eventUpdate = spellData.eventUpdate
     if eventUpdate then
-        self:RegisterEvent(eventUpdate.event)
-        self[eventUpdate.event] = eventUpdate.func
+        if eventUpdate.event == "UNIT_AURA" then
+            eventUpdate.func(self)
+        else
+            self:RegisterEvent(eventUpdate.event)
+            self[eventUpdate.event] = eventUpdate.func
+        end
     end
     if self.isStatic then
         self.icon:SetDesaturated(true)
@@ -69,7 +73,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     cd:SetAllPoints(tracker)
     tracker.cd = cd
 
-    local icon = tracker:CreateTexture(nil, "BACKGROUND")
+    local icon = tracker:CreateTexture(nil, "BACKGROUND", nil, -7)
     icon:SetAllPoints(tracker)
     icon:SetTexture(texture)
     tracker.icon = icon

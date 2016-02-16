@@ -356,7 +356,7 @@ function AuraTracking:UNIT_AURA(event, unit)
             end
             debug(spellData.debug, "do postUnitAura", tracker.postUnitAura)
             if tracker.postUnitAura then
-                tracker:postUnitAura(spellData)
+                tracker:postUnitAura(spellData, aura)
             end
         end
     end
