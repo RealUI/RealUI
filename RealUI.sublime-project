@@ -29,12 +29,9 @@
 			"path": "Interface\\AddOns\\nibRealUI_Init"
 		},
 		{
-			"file_include_patterns":
+			"file_exclude_patterns":
 			[
-				"*.git*",
-				"*.md",
-				"*.lua*",
-				"*.ps1"
+				"*.sublime*",
 			],
 			"folder_exclude_patterns":
 			[
