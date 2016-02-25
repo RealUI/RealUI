@@ -195,7 +195,7 @@ function ScreenSaver:ToggleWarning(val)
 			
 			-- Play warning sound if Screen Saver is active and you get put into combat
 			if UnitAffectingCombat("player") and db.general.combatwarning then
-				PlaySoundFile([[Interface\AddOns\nibRealUI\Media\ScreenSaver\ZingAlarm.mp3]])
+				PlaySoundKitID(15262) -- Aggro_Enter_Warning_State
 			end
 		end
 	else

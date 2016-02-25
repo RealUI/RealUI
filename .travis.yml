@@ -13,4 +13,4 @@ install:
   - luarocks install luacheck
 
 script:
-  - luacheck *.lua Interface
+  - luacheck Interface

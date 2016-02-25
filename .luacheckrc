@@ -10,4 +10,13 @@ exclude_files = {
     "Interface/AddOns/nibRealUI/Libs/**",
     "Interface/AddOns/nibRealUI_Config/Libs/**",
     "Interface/AddOns/nibRealUI_Init/libs/**",
+    "**/*.blp",
+    "**/*.BLP",
+    "**/*.ttf",
+    "**/*.toc",
+    "**/*.txt",
+    "**/*.xml",
 }
+
+self = false
+unused = false

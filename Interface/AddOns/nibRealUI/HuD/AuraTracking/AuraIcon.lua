@@ -132,7 +132,7 @@ do
         return next(icons, id)
     end
 
-    function AuraTracking.IterateTrackers()
+    function AuraTracking:IterateTrackers()
         return iter, nil, nil
     end
 end
