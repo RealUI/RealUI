@@ -23,6 +23,7 @@ end
 
 local _, class, classID = _G.UnitClass("player")
 local SavageRoar
+local MirrorImage, IncantersFlow
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local BurningEmbers
 local function PredictDuration(gap, base, max)
@@ -58,6 +59,68 @@ end
 
 if class == "DRUID" then
     SavageRoar = PredictDuration(6, 18, 42)
+elseif class == "MAGE" then
+    do -- MirrorImage
+        local hasAura = false
+        local start, duration = 0, 40
+
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", hasAura)
+            self.cd:SetCooldown(start, duration)
+
+            if hasAura and not self.slotID then
+                AuraTracking:AddTracker(self)
+            elseif not hasAura and self.slotID then
+                AuraTracking:RemoveTracker(self)
+            end
+        end
+
+        -- Shows Mirror Image progress.
+        function MirrorImage(self, spellData, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID)
+            if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
+                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, GetTime())
+
+                if subEvent == "SPELL_AURA_APPLIED" and not hasAura then
+                    AuraTracking:debug("MirrorImage", hasAura)
+                    hasAura = true
+                    start = GetTime()
+                elseif subEvent == "SPELL_AURA_REMOVED" and hasAura then
+                    hasAura = false
+                end
+                postUnitAura(self, spellData)
+
+                if not self.postUnitAura then
+                    self.postUnitAura = postUnitAura
+                end
+            end
+        end
+    end
+    do -- IncantersFlow
+        local flowMax = 5
+        local function postUnitAura(self, spellData, aura)
+            debug(spellData.debug, "postUnitAura", aura.count)
+            local flow = aura.count or 0
+            if flow > 0 then
+                self.count:SetText(flow * 4)
+
+                local xOfs = Lerp(0, self.icon:GetWidth(), (flow / flowMax))
+                debug(spellData.debug, "xOfs", xOfs)
+                self.status:SetPoint("TOPLEFT", self, xOfs, 0)
+            end
+        end
+
+        -- Shows Incanter's Flow progress.
+        function IncantersFlow(self)
+            self.postUnitAura = postUnitAura
+
+            local status = self:CreateTexture(nil, "BACKGROUND", nil, 0)
+            status:SetTexture(0, 0, 0, 0.9)
+            status:SetPoint("TOPLEFT")
+            status:SetPoint("BOTTOMRIGHT")
+            status:SetDesaturated(true)
+            self.status = status
+        end
+    end
 elseif class == "ROGUE" then
     do -- BanditsGuile
         -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
@@ -124,7 +187,7 @@ elseif class == "ROGUE" then
             debug(spellData.debug, "spell CD", _G.GetSpellCooldown(spellData.spell))
         end
 
-        function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID)
+        function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_)
             if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
                 debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), GetTime())
 
@@ -726,7 +789,6 @@ classDefaults = {
                 },
             },
             ["3-9bca201a-1"] = {spell = 19263},   -- Deterrence
-            ["3-89b90044-1"] = {spell = 51755},   -- Camouflage
             ["3-ad25aea5-1"] = {spell = 54216},   -- Master's Call
             ["3-b228dae3-1"] = {spell = 53480},   -- Roar of Sacrifice (Cunning)
         -- Free Target Auras
@@ -772,7 +834,7 @@ classDefaults = {
                 order = 1,
             },
             ["8-aeb77dff-1"] = {   -- Arcane Charge (Arcane)
-                spell = 36032,
+                spell = {48108, 36032},
                 minLevel = 10,
                 auraType = "debuff",
                 specs = {true, false, false},
@@ -784,8 +846,30 @@ classDefaults = {
                 specs = {false, false, true},
                 order = 1,
             },
+            ["8-8ab5ea50-1"] = {   -- Rune of Power (Talent)
+                spell = 116014,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 16032,
+                    mustHave = true,
+                },
+                order = 3,
+            },
         -- Static Target Auras
-            ["8-bc5837f7-1"] = {   -- Ignite (Fire)
+            ["8-89b90044-1"] = {   -- Nether Tempest (Talent) (Arcane)
+                spell = 114923,
+                minLevel = 75,
+                auraType = "debuff",
+                unit = "target",
+                talent = {
+                    tier = 5,
+                    ID = 19299,
+                    mustHave = true,
+                },
+                order = 3,
+            },
+            ["8-bc5837f7-1"] = {   -- Mastery: Ignite (Fire)
                 spell = 12654,
                 minLevel = 12,
                 auraType = "debuff",
@@ -795,44 +879,119 @@ classDefaults = {
             },
             ["8-bf27cce4-1"] = {   -- Pyroblast (Fire)
                 spell = 11366,
+                minLevel = 10,
                 auraType = "debuff",
                 unit = "target",
                 specs = {false, true, false},
                 order = 2,
             },
         -- Free Player Auras
-            ["8-bf568893-1"] = {   -- Arcane Power (Arcane)
-                spell = 12042,
-                specs = {true, false, false},
-            },
             ["8-95ae39d1-1"] = {   -- Presence of Mind (Arcane)
                 spell = 12043,
+                minLevel = 22,
                 specs = {true, false, false},
             },
-            ["8-93a9a908-1"] = {   -- Evocation (Arcane)
-                spell = 12051,
+            ["8-bf568893-1"] = {   -- Arcane Power (Arcane)
+                spell = 12042,
+                minLevel = 62,
                 specs = {true, false, false},
             },
             ["8-a3050e9c-1"] = {   -- Pyroblast!, Heating Up (Fire)
                 spell = {48108,48107},
+                minLevel = 10,
                 specs = {false, true, false},
             },
             ["8-be277caf-1"] = {   -- Icy Veins (Frost)
                 spell = 12472,
+                minLevel = 36,
                 specs = {false, false, true},
             },
             ["8-84e5eb74-1"] = {   -- Brain Freeze (Frost)
                 spell = 57761,
+                minLevel = 77,
                 specs = {false, false, true},
             },
-            ["8-b1d9be24-1"] = {spell = 55342},    -- Mirror Image
-            ["8-83a223f0-1"] = {spell = 108843},   -- Blazing Speed (Talent)
-            ["8-817ae191-1"] = {spell = 108839},   -- Ice Floes (Talent)
-            ["8-97643e93-1"] = {spell = 110909},   -- Alter Time (Talent)
-            ["8-86dc5f08-1"] = {spell = 111264},   -- Ice Ward (Talent)
-            ["8-8ab5ea50-1"] = {spell = 116014},   -- Rune of Power (Talent)
-            ["8-bcbae5c4-1"] = {spell = 116267},   -- Incanter's Flow (Talent)
-            ["8-b3901232-1"] = {spell = {32612,113862}},   -- Invisibility, Greater Invisibility (Talent)
+            ["8-93a9a908-1"] = {   -- Invisibility
+                spell = 32612,
+                minLevel = 56,
+                talent = {
+                    tier = 4,
+                    ID = 16027,
+                    mustHave = false,
+                },
+            },
+            ["8-83a223f0-1"] = {   -- Blazing Speed (Talent)
+                spell = 108843,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 16012,
+                    mustHave = true,
+                },
+            },
+            ["8-817ae191-1"] = {   -- Ice Floes (Talent)
+                spell = 108839,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    ID = 16013,
+                    mustHave = true,
+                },
+            },
+            ["8-97643e93-1"] = {   -- Alter Time (Talent)
+                spell = 110909,
+                minLevel = 30,
+                talent = {
+                    tier = 2,
+                    ID = 16023,
+                    mustHave = true,
+                },
+            },
+            ["8-86dc5f08-1"] = {   -- Ice Ward (Talent)
+                spell = 111264,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 16020,
+                    mustHave = true,
+                },
+            },
+            ["8-b3901232-1"] = {   -- Greater Invisibility (Talent)
+                spell = 113862,
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    ID = 16027,
+                    mustHave = true,
+                },
+            },
+            ["8-b1d9be24-1"] = {   -- Mirror Image (Talent)
+                spell = 55342,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 16031,
+                    mustHave = true,
+                },
+                eventUpdate = {
+                    event = "COMBAT_LOG_EVENT_UNFILTERED",
+                    func = MirrorImage
+                },
+            },
+            ["8-bcbae5c4-1"] = {   -- Incanter's Flow (Talent)
+                spell = {156150, 116267},
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    ID = 16033,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(116267),
+                eventUpdate = {
+                    event = "UNIT_AURA",
+                    func = IncantersFlow
+                },
+            },
         -- Free Target Auras
             ["8-a0ef0e74-1"] = {   -- Slow
                 spell = 31589,
