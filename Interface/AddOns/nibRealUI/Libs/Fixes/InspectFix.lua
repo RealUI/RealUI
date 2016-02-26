@@ -1,7 +1,3 @@
--- Modified InspectFix
--- Download original from http://www.wowace.com/addons/inspectfix/
--- Original coded by oscarucb
-
 InspectFix = CreateFrame("Button", "InspectFixHiddenFrame", UIParent)
 local addonName = "InspectFix"
 local revision = tonumber(("$Revision: 57 $"):match("%d+"))
