@@ -70,7 +70,7 @@ function nibRealUI:HuDTestMode(doTestMode)
     -- Spell Alerts
     local sAlert = {
         id = 17941,
-        texture = "TEXTURES\\SPELLACTIVATIONOVERLAYS\\NIGHTFALL.BLP",
+        texture = [[TEXTURES\SPELLACTIVATIONOVERLAYS\NIGHTFALL]],
         positions = "Left + Right (Flipped)",
         scale = 1,
         r = 255, g = 255, b = 255,
@@ -90,7 +90,7 @@ function nibRealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Stop()
             EABFrame.intro:Play()
             if not EABFrame.button.icon:GetTexture() then
-                EABFrame.button.icon:SetTexture("Interface\\ICONS\\ABILITY_SEAL")
+                EABFrame.button.icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
                 EABFrame.button.icon:Show()
             end
         else
@@ -103,9 +103,9 @@ function nibRealUI:HuDTestMode(doTestMode)
     self.isInTestMode = doTestMode
 end
 
-StaticPopupDialogs["RUI_ChangeHuDSize"] = {
+_G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     text = L["HuD_AlertHuDChangeSize"],
-    button1 = OKAY,
+    button1 = _G.OKAY,
     OnAccept = function()
         nibRealUI:ReloadUIDialog()
     end,

@@ -22,10 +22,10 @@ local L = nibRealUI.L
 
 -- Misc Functions
 local spellFinder = CreateFrame("FRAME")
-function nibRealUI:FindSpellID(spellName, unit, auraType)
-    print(("RealUI is now looking for %s %s: %s."):format(unit, auraType, spellName))
-    spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
-    spellFinder:SetScript("OnEvent", function(self, event, unit)
+function nibRealUI:FindSpellID(spellName, affectedUnit, auraType)
+    print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
+    spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
+    spellFinder:SetScript("OnEvent", function(frame, event, unit)
         local spellID
         if auraType == "debuff" then
             spellID = select(11, _G.UnitDebuff(unit, spellName))
@@ -34,7 +34,7 @@ function nibRealUI:FindSpellID(spellName, unit, auraType)
         end
         if spellID then
             print(("The spellID for %s is %d"):format(spellName, spellID));
-            spellFinder:UnregisterEvent("UNIT_AURA")
+            frame:UnregisterEvent("UNIT_AURA")
         end
     end)
 end

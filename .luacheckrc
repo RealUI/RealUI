@@ -19,4 +19,4 @@ exclude_files = {
 }
 
 self = false
-unused = false
+unused_args = false
