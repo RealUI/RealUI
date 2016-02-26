@@ -206,7 +206,7 @@ elseif class == "ROGUE" then
                 postUnitAura(self, spellData)
 
                 if not self.postUnitAura then
-                    self.postUnitAura = postUnitAura
+                    self.postUnitAura = postUnitAura 
                 end
             end
         end
@@ -293,13 +293,14 @@ function AuraTracking:SetupDefaultTracker()
             [3] = false
         }
         ]]
-        --[[
+        --[=[
+        customIcon = [[Interface\Icons\Spell_Fire_Fireball02]],
         customName = _G.GetSpellInfo(12345),
         eventUpdate = {
             event = "UNIT_POWER_FREQUENT",
             func = SpecialFunc
         }
-        ]]
+        ]=]
     }
     classDefaults = nil
     return classTrackers
@@ -315,8 +316,8 @@ bd56d2d6
 965917ad
 a5bdd6b2
 8975b89c
-ba699a82
-a0b8d817
+
+
 
 
 
@@ -862,6 +863,7 @@ classDefaults = {
                 minLevel = 75,
                 auraType = "debuff",
                 unit = "target",
+                specs = {true, false, false},
                 talent = {
                     tier = 5,
                     ID = 19299,
@@ -885,6 +887,19 @@ classDefaults = {
                 specs = {false, true, false},
                 order = 2,
             },
+            ["8-8864aa74-1"] = {   -- Living Bomb
+                spell = 44457,
+                minLevel = 75,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 5,
+                    ID = 21690,
+                    mustHave = true,
+                },
+                order = 3,
+            },
         -- Free Player Auras
             ["8-95ae39d1-1"] = {   -- Presence of Mind (Arcane)
                 spell = 12043,
@@ -896,10 +911,16 @@ classDefaults = {
                 minLevel = 62,
                 specs = {true, false, false},
             },
-            ["8-a3050e9c-1"] = {   -- Pyroblast!, Heating Up (Fire)
-                spell = {48108,48107},
+            ["8-a3050e9c-1"] = {   -- Heating Up (Fire)
+                spell = 48107,
                 minLevel = 10,
                 specs = {false, true, false},
+            },
+            ["8-a0b8d817-1"] = {   -- Pyroblast! (Fire)
+                spell = 48108,
+                minLevel = 10,
+                specs = {false, true, false},
+                customIcon = [[Interface\Icons\Spell_Fire_Fireball02]]
             },
             ["8-be277caf-1"] = {   -- Icy Veins (Frost)
                 spell = 12472,
@@ -910,6 +931,10 @@ classDefaults = {
                 spell = 57761,
                 minLevel = 77,
                 specs = {false, false, true},
+            },
+            ["8-ba699a82-1"] = {   -- Ice Block
+                spell = 45438,
+                minLevel = 15,
             },
             ["8-93a9a908-1"] = {   -- Invisibility
                 spell = 32612,
@@ -993,25 +1018,29 @@ classDefaults = {
                 },
             },
         -- Free Target Auras
-            ["8-a0ef0e74-1"] = {   -- Slow
-                spell = 31589,
-                auraType = "debuff",
-                unit = "target",
-            },
-            ["8-a297de89-1"] = {   -- Frostbolt
+            ["8-a297de89-1"] = {   -- Frostbolt (Frost)
                 spell = 116,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
             },
-            ["8-a34a80e5-1"] = {   -- Frostfire Bolt
+            ["8-a34a80e5-1"] = {   -- Frostfire Bolt (Frost)
                 spell = 44614,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
             },
-            ["8-8864aa74-1"] = {   -- Living Bomb
-                spell = 44457,
+            ["8-a0ef0e74-1"] = {   -- Frost Bomb (Frost)
+                spell = 112948,
+                minLevel = 75,
                 auraType = "debuff",
                 unit = "target",
+                specs = {false, false, true},
+                talent = {
+                    tier = 5,
+                    ID = 21691,
+                    mustHave = true,
+                },
             },
     },
 

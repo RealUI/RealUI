@@ -342,7 +342,7 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.auraIndex = aura.index
                 tracker.cd:Show()
                 tracker.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
-                tracker.icon:SetTexture(aura.texture)
+                tracker.icon:SetTexture(spellData.customIcon or aura.texture)
                 if not spellData.hideStacks then
                     tracker.count:SetText(aura.count)
                 end

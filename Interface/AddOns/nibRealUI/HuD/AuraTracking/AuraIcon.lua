@@ -62,16 +62,18 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     tracker.side = side
     tracker.id = id
 
-    local _, _, texture
-    if type(spellData.spell) == "table" then
+    local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
+    cd:SetAllPoints(tracker)
+    tracker.cd = cd
+
+    local _, texture
+    if spellData.customIcon then
+        texture = spellData.customIcon
+    elseif type(spellData.spell) == "table" then
         _, _, texture = GetSpellInfo(spellData.spell[1])
     else
         _, _, texture = GetSpellInfo(spellData.spell)
     end
-
-    local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
-    cd:SetAllPoints(tracker)
-    tracker.cd = cd
 
     local icon = tracker:CreateTexture(nil, "BACKGROUND", nil, -7)
     icon:SetAllPoints(tracker)
