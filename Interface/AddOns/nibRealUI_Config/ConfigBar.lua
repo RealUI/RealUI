@@ -11,9 +11,6 @@ local tinsert = _G.table.insert
 
 -- WoW Globals --
 local UIParent = _G.UIParent
-local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
-local C_TimerAfter = _G.C_Timer.After
-local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
 
 -- Libs --
 local ACR = LibStub("AceConfigRegistry-3.0")
@@ -1244,7 +1241,7 @@ local auratracker do
         name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
-    local function useSpec(specs)
+    local function getSpec(specs)
         local numSpecs = 0
         for i = 1, #specs do
             if specs[i] then
@@ -1261,7 +1258,7 @@ local auratracker do
     end
     local function createTrackerSettings(tracker, spellData)
         local name, order = getNameOrder(spellData)
-        local useSpec = useSpec(spellData.specs)
+        local useSpec = getSpec(spellData.specs)
 
         return {
             name = name,
@@ -1651,6 +1648,18 @@ local auratracker do
                             },
                         }
                     },
+                    reset = {
+                        name = L["AuraTrack_ResetTrackers"]:format(nibRealUI.classLocale),
+                        desc = L["AuraTrack_ResetTrackersDesc"]:format(nibRealUI.classLocale),
+                        type = "execute",
+                        confirmText = L["AuraTrack_ResetConfirm"],
+                        func = function(info, ...)
+                            nibRealUIDB.namespaces.AuraTracking.class[nibRealUI.class] = nil
+                            CloseHuDWindow()
+                            nibRealUI:ReloadUIDialog()
+                        end,
+                        order = 45,
+                    },
                     position = {
                         name = L["General_Position"],
                         type = "header",
@@ -1667,16 +1676,6 @@ local auratracker do
                         type = "group",
                         order = 55,
                         args = {}
-                    },
-                    reset = {
-                        name = RESET_TO_DEFAULT,
-                        type = "execute",
-                        func = function(info, ...)
-                            nibRealUIDB.namespaces.AuraTracking.class[nibRealUI.class] = nil
-                            CloseHuDWindow()
-                            nibRealUI:ReloadUIDialog()
-                        end,
-                        order = -1,
                     },
                 }
             },
