@@ -2,19 +2,19 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Skins\Dream.lua
-	* Revision.: 409
-	* Author...: JJSheets, StormFX
+	* File...: Skins\Dream.lua
+	* Date...: 2015-12-16T18:57:09Z
+	* Hash...: 8b83b42
+	* Author.: StormFX, JJSheets
 
-	'Dream' skin for Masque.
 ]]
 
 local _, Core = ...
 
 Core:AddSkin("Dream", {
 	Author = "JJSheets, StormFX",
-	Version = "6.2.0",
-	Masque_Version = 60200,
+	Version = "6.2.1",
+	Masque_Version = 60201,
 	Shape = "Square",
 	Backdrop = {
 		Width = 36,
@@ -34,6 +34,10 @@ Core:AddSkin("Dream", {
 		Texture = [[Interface\Buttons\UI-QuickslotRed]],
 	},
 	Cooldown = {
+		Width = 30,
+		Height = 30,
+	},
+	ChargegCooldown = {
 		Width = 30,
 		Height = 30,
 	},
@@ -99,7 +103,7 @@ Core:AddSkin("Dream", {
 		Height = 10,
 		OffsetY = -2,
 	},
-	AutoCast = {
+	Shine = {
 		Width = 28,
 		Height = 28,
 		OffsetX = 0.5,

@@ -2,24 +2,28 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Masque.lua
-	* Revision.: 409
-	* Author...: StormFX
+	* File...: Masque.lua
+	* Date...: 2016-02-04T02:42:15Z
+	* Hash...: e2d9853
+	* Author.: StormFX
 
-	Add-On Setup
 ]]
 
 local MASQUE, Core = ...
+
+-- Lua Functions
 local print = print
 
 ----------------------------------------
 -- Libraries, etc.
 ----------------------------------------
 
-local LibStub = assert(LibStub, "Masque requires LibStub.")
+-- GLOBALS: LibStub
+
+assert(LibStub, "Masque requires LibStub.")
 local Masque = LibStub("AceAddon-3.0"):NewAddon(MASQUE)
 
-Core.API = LibStub:NewLibrary(MASQUE, 60200)
+Core.API = LibStub:NewLibrary(MASQUE, 60201)
 
 local ACR = LibStub("AceConfigRegistry-3.0")
 

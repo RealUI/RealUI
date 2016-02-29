@@ -31,6 +31,12 @@ do
         'Blank |cff888888(  )'
     }
 
+    local HealthAnimationSelectList = {
+        'None',
+        'Smooth',
+        'Cutaway'
+    }
+
     local globalConfigChangedListeners = {}
 
     local handlers = {}
@@ -594,11 +600,26 @@ do
                             }
                         }
                     },
+                    bar = {
+                        name = 'Health bar',
+                        type = 'group',
+                        inline = true,
+                        order = 20,
+                        args = {
+                            animation = {
+                                name = 'Animation',
+                                desc = 'Health bar animation style.'..RELOAD_HINT,
+                                type = 'select',
+                                values = HealthAnimationSelectList,
+                                order = 0
+                            }
+                        }
+                    },
                     text = {
                         name = 'Health text',
                         type = 'group',
                         inline = true,
-                        order = 10,
+                        order = 30,
                         disabled = function(info)
                             return addon.db.profile.hp.text.hp_text_disabled
                         end,
@@ -650,14 +671,7 @@ do
                                 order = 60
                             }
                         }
-                    },
-                    smooth = {
-                        name = 'Smooth health bar',
-                        desc = 'Smoothly animate health bar value updates',
-                        type = 'toggle',
-                        width = 'full',
-                        order = 30
-                    },
+                    }
                 }
             },
             fonts = {
@@ -669,6 +683,7 @@ do
                         name = 'Global font settings',
                         type = 'group',
                         inline = true,
+                        order = 10,
                         args = {
                             font = {
                                 name = 'Font',
@@ -712,8 +727,62 @@ do
                             },
                         }
                     },
+                    sizes = {
+                        name = 'Font sizes',
+                        type = 'group',
+                        inline = true,
+                        order = 20,
+                        disabled = function()
+                            return addon.db.profile.fonts.options.onesize
+                        end,
+                        args = {
+                            desc = {
+                                name = 'These are the default font sizes used by various modules. Their names may or may not match what they actually change.',
+                                type = 'description',
+                                fontSize = 'medium',
+                                order = 1
+                            },
+                            name = {
+                                name = 'Name',
+                                type = 'range',
+                                order = 10,
+                                step = 1,
+                                min = 1,
+                                softMin = 1,
+                                softMax = 30,
+                                disabled = false
+                            },
+                            spellname = {
+                                name = 'Spell name',
+                                type = 'range',
+                                order = 20,
+                                step = 1,
+                                min = 1,
+                                softMin = 1,
+                                softMax = 30
+                            },
+                            large = {
+                                name = 'Large',
+                                type = 'range',
+                                order = 30,
+                                step = 1,
+                                min = 1,
+                                softMin = 1,
+                                softMax = 30
+                            },
+                            small = {
+                                name = 'Small',
+                                type = 'range',
+                                order = 40,
+                                step = 1,
+                                min = 1,
+                                softMin = 1,
+                                softMax = 30
+                            },
+                        },
+                    }
                 }
-            },
+            }
         }
     }
 
@@ -822,18 +891,18 @@ do
 
     -- post db change hooks ####################################################
     -- n.b. this is better
-    addon:AddConfigChanged({'fonts','font'}, function(v)
+    addon:AddConfigChanged({'fonts','options','font'}, function(v)
         addon.font = LSM:Fetch(LSM.MediaType.FONT, v)
         addon:UpdateAllFonts()
     end)
 
-    addon:AddConfigChanged({'fonts','outline'}, nil, function(f,v)
+    addon:AddConfigChanged({'fonts','options','outline'}, nil, function(f,v)
         for _, fontObject in pairs(f.fontObjects) do
             kui.ModifyFontFlags(fontObject, v, 'OUTLINE')
         end
     end)
 
-    addon:AddConfigChanged({'fonts','monochrome'}, nil, function(f,v)
+    addon:AddConfigChanged({'fonts','options','monochrome'}, nil, function(f,v)
         for _, fontObject in pairs(f.fontObjects) do
             kui.ModifyFontFlags(fontObject, v, 'MONOCHROME')
         end
@@ -841,8 +910,9 @@ do
 
     addon:AddConfigChanged(
         {
-            {'fonts','fontscale'},
-            {'fonts','onesize'}
+            {'fonts','options','fontscale'},
+            {'fonts','options','onesize'},
+            {'fonts','sizes'}
         },
         function()
             addon:ScaleFontSizes()

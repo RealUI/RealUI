@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2015, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2016, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 local _, Bartender4 = ...
@@ -259,7 +259,7 @@ function StanceBar:UpdateStanceButtons()
 		buttons[i]:Hide()
 	end
 
-	self.button_count = num_stances
+	self.numbuttons = num_stances
 	StanceBarMod.button_count = num_stances
 	if StanceBarMod.optionobject then
 		StanceBarMod.optionobject.table.general.args.rows.max = num_stances

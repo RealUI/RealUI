@@ -94,9 +94,10 @@ function addon:CreateHealthBar(frame, f)
     f.health:GetStatusBarTexture():SetDrawLayer('ARTWORK',-8)
 
     if self.SetValueSmooth then
-        -- smooth bar
         f.health.OrigSetValue = f.health.SetValue
         f.health.SetValue = self.SetValueSmooth
+    elseif self.CutawayBar then
+        self.CutawayBar(f.health)
     end
 end
 function addon:UpdateHealthBar(f, trivial)

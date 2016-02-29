@@ -2,16 +2,19 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Core\Button.lua
-	* Revision.: 398
-	* Author...: StormFX, JJSheets
+	* File...: Core\Button.lua
+	* Date...: 2015-12-16T19:28:52Z
+	* Hash...: 3bd8938
+	* Author.: StormFX, JJSheets
 
-	Button Core
 ]]
 
 local _, Core = ...
+
+-- Lua Functions
 local error, hooksecurefunc, pairs, random, type = error, hooksecurefunc, pairs, random, type
-local InCombatLockdown = InCombatLockdown
+
+-- GLOBALS: InCombatLockdown
 
 local Skins = Core.Skins
 local __MTT = {}
@@ -406,6 +409,28 @@ local function SkinFrame(Button, Region, Skin, xScale, yScale)
 end
 
 ---------------------------------------------
+-- Charge Cooldown
+---------------------------------------------
+
+-- Skins the ChargeCooldown.
+local function UpdateCharge(Button)
+	local Charge = Button.chargeCooldown
+	local Skin = Button.__MSQ_ChargeSkin
+	if not Charge or not Charge.parent or not Skin then return end
+	local xScale, yScale = GetScale(Button)
+	SkinFrame(Button, Charge, Skin, xScale, yScale)
+end
+hooksecurefunc("StartChargeCooldown", UpdateCharge)
+
+-- API: Allows add-ons to call the update when not using the native API.
+function Core.API:UpdateCharge(Button)
+	if type(Button) ~= "table" then
+		return
+	end
+	UpdateCharge(Button)
+end
+
+---------------------------------------------
 -- Spell Alert
 ---------------------------------------------
 
@@ -506,8 +531,8 @@ do
 		if Button.__MSQ_Cooldown then
 			Button.__MSQ_Cooldown:SetFrameLevel(base - 1)
 		end
-		if Button.__MSQ_AutoCast then
-			Button.__MSQ_AutoCast:SetFrameLevel(base + 1)
+		if Button.__MSQ_Shine then
+			Button.__MSQ_Shine:SetFrameLevel(base + 1)
 		end
 	end
 
@@ -563,11 +588,17 @@ do
 			Button.__MSQ_Cooldown = Cooldown
 			SkinFrame(Button, Cooldown, Skin.Cooldown, xScale, yScale)
 		end
-		-- AutoCast
-		local AutoCast = ButtonData.AutoCast
-		if AutoCast then
-			Button.__MSQ_AutoCast = AutoCast
-			SkinFrame(Button, AutoCast, Skin.AutoCast, xScale, yScale)
+		-- Charge Cooldown
+		local Charge = Button.chargeCooldown
+		Button.__MSQ_ChargeSkin = Skin.ChargeCooldown or Skin.Cooldown
+		if Charge then
+			SkinFrame(Button, Charge, Button.__MSQ_ChargeSkin, xScale, yScale)
+		end
+		-- Shine (AutoCast)
+		local Shine = ButtonData.Shine
+		if Shine then
+			Button.__MSQ_Shine = Shine
+			SkinFrame(Button, Shine, Skin.Shine, xScale, yScale)
 		end
 		-- Spell Alert
 		Button.__MSQ_Shape = Skin.Shape

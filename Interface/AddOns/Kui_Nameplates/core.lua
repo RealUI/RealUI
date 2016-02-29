@@ -100,6 +100,9 @@ local defaults = {
                 tappedcol   = { .5, .5, .5 },
                 playercol   = { .2, .5, .9 }
             },
+            bar = {
+                animation = 2
+            },
             text = {
                 hp_text_disabled = false,
                 mouseover = false,
@@ -108,7 +111,6 @@ local defaults = {
                 hp_hostile_max = 5,
                 hp_hostile_low = 3
             },
-            smooth = true
         },
         fonts = {
             options = {
@@ -120,11 +122,10 @@ local defaults = {
                 noalpha    = false
             },
             sizes = {
-                combopoints = 13,
-                large       = 10,
-                spellname   = 9,
-                name        = 9,
-                small       = 8
+                large       = 12,
+                spellname   = 11,
+                name        = 11,
+                small       = 9
             },
         }
     }
@@ -367,7 +368,16 @@ addon.CreateFontString = CreateFontString
 ----------------------------------------------------------- scaling functions --
 -- scale font sizes with the fontscale option
 function addon:ScaleFontSize(key)
-    local size = self.defaultFontSizes[key]
+    local size
+
+    if self.db.profile.fonts.sizes and
+       self.db.profile.fonts.sizes[key]
+    then
+        size = self.db.profile.fonts.sizes[key]
+    else
+        size = self.defaultFontSizes[key]
+    end
+
     self.sizes.font[key] = size * self.db.profile.fonts.options.fontscale
 end
 -- the same, for all registered sizes
@@ -381,6 +391,7 @@ end
 -- fontscale option
 -- keys must be unique
 function addon:RegisterFontSize(key, size)
+    -- TODO should add an option to the interface
     addon.defaultFontSizes[key] = size
     self:ScaleFontSize(key)
 end
@@ -456,6 +467,9 @@ function addon:OnInitialize()
 end
 ---------------------------------------------------------------------- enable --
 function addon:OnEnable()
+    -- force enable threat on nameplates - this is a hidden CVar
+    SetCVar('threatWarning',3)
+
     -- get font and status bar texture from LSM
     self.font = LSM:Fetch(LSM.MediaType.FONT, self.db.profile.fonts.options.font)
     self.bartexture = LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.profile.general.bartexture)
@@ -474,7 +488,7 @@ function addon:OnEnable()
     self:ScaleFontSizes()
 
     -------------------------------------- Health bar smooth update functions --
-    if self.db.profile.hp.smooth then
+    if self.db.profile.hp.bar.animation == 2 then
         local f, smoothing, GetFramerate, min, max, abs
             = CreateFrame('Frame'), {}, GetFramerate, math.min, math.max, math.abs
 
@@ -511,6 +525,55 @@ function addon:OnEnable()
                 end
             end
         end)
+    elseif self.db.profile.hp.bar.animation == 3 then
+        local select = select
+        local SetValueCutaway = function(self,value)
+            if value < self:GetValue() then
+                if not kui.frameIsFading(self.KuiFader) then
+                    self.KuiFader:SetPoint(
+                        'RIGHT', self, 'LEFT',
+                        (self:GetValue() / select(2,self:GetMinMaxValues())) * self:GetWidth(), 0
+                    )
+
+                    -- store original rightmost value
+                    self.KuiFader.right = self:GetValue()
+                end
+
+                kui.frameFade(self.KuiFader, {
+                    mode = 'OUT',
+                    timeToFade = .3
+                })
+            end
+
+            if self.KuiFader.right and value > self.KuiFader.right then
+                -- stop animation if new value overlaps old end point
+                kui.frameFadeRemoveFrame(self.KuiFader)
+                self.KuiFader:SetAlpha(0)
+            end
+
+            self:orig_SetValue(value)
+        end
+        local SetColour = function(self,...)
+            self:orig_SetStatusBarColor(...)
+            self.KuiFader:SetVertexColor(...)
+        end
+
+        function self.CutawayBar(bar)
+            bar.KuiFader = bar:CreateTexture(nil,'ARTWORK')
+            bar.KuiFader:SetTexture(kui.m.t.solid)
+            bar.KuiFader:SetVertexColor(bar:GetStatusBarColor())
+            bar.KuiFader:SetAlpha(0)
+
+            bar.KuiFader:SetPoint('TOP')
+            bar.KuiFader:SetPoint('BOTTOM')
+            bar.KuiFader:SetPoint('LEFT',bar:GetStatusBarTexture(),'RIGHT')
+
+            bar.orig_SetValue = bar.SetValue
+            bar.SetValue = SetValueCutaway
+
+            bar.orig_SetStatusBarColor = bar.SetStatusBarColor
+            bar.SetStatusBarColor = SetColour
+        end
     end
 
     self:configChangedListener()

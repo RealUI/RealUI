@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2015, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2016, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 local _, Bartender4 = ...
@@ -221,7 +221,7 @@ function ActionBar:UpdateButtons(numbuttons)
 		buttons[i]:SetAttribute("statehidden", true)
 	end
 
-	self.button_count = numbuttons
+	self.numbuttons = numbuttons
 	self.buttons = buttons
 
 	self:UpdateButtonLayout()
