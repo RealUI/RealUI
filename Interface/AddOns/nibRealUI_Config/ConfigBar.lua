@@ -1649,10 +1649,10 @@ local auratracker do
                         }
                     },
                     reset = {
-                        name = L["AuraTrack_ResetTrackers"]:format(nibRealUI.classLocale),
+                        name = L["AuraTrack_ResetTrackers"],
                         desc = L["AuraTrack_ResetTrackersDesc"]:format(nibRealUI.classLocale),
                         type = "execute",
-                        confirmText = L["AuraTrack_ResetConfirm"],
+                        confirmText = L["AuraTrack_ResetConfirm"]:format(nibRealUI.classLocale),
                         func = function(info, ...)
                             nibRealUIDB.namespaces.AuraTracking.class[nibRealUI.class] = nil
                             CloseHuDWindow()

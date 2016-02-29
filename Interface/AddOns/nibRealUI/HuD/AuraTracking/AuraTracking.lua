@@ -29,13 +29,8 @@ local isValidUnit = {
     pet = false
 }
 
-local function debug(isDebug, ...)
-    if isDebug then
-        -- self.debug should be a string describing what the bar is.
-        -- eg. "playerHealth", "targetAbsorbs", etc
-        AuraTracking:debug(isDebug, ...)
-    end
-end
+local debug = AuraTracking.trackerDebug
+
 local function FindSpellMatch(spell, unit, filter, isDebug)
     debug(isDebug, "FindSpellMatch", spell, unit, filter)
     local aura = {}
@@ -87,7 +82,7 @@ local function shouldTrack(spellData)
 end
 local function AddToSpellList(spellData, spellList)
     if spellData.noExclude then return end
-    AuraTracking:debug("AddToSpellList", spellData, spellList)
+    AuraTracking:debug("AddToSpellList", spellData.spell, spellList)
     local spell = spellData.spell
     if type(spell) == "table" then
         for index = 1, #spell do
@@ -114,6 +109,7 @@ do
         tracker.slotID = slot:GetID()
         tracker:SetAllPoints(slot)
         tracker:Show()
+        activeTrackers[tracker.side] = activeTrackers[tracker.side] + 1
     end
     local function RemoveTrackerFromSlot(tracker, slot)
         AuraTracking:debug("RemoveTrackerFromSlot", tracker.id, slot:GetID())
@@ -123,19 +119,18 @@ do
         tracker.slotID = nil
         tracker:ClearAllPoints()
         tracker:Hide()
+        activeTrackers[tracker.side] = activeTrackers[tracker.side] - 1
     end
 
     function AuraTracking:AddTracker(tracker, slotID, enforceSlot)
         self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
-        local numActive = activeTrackers[tracker.side]
         if tracker.slotID then
             if tracker.isStatic then
                 tracker.icon:SetDesaturated(false)
                 tracker:SetAlpha(1)
-                activeTrackers[tracker.side] = numActive + 1
+                activeTrackers[tracker.side] = activeTrackers[tracker.side] + 1
             end
         else
-            activeTrackers[tracker.side] = numActive + 1
             local side, slot = self[tracker.side]
             if enforceSlot then
                 self:debug("Place in slot", slotID)
@@ -145,8 +140,12 @@ do
                 self:debug("Find first empty slot until:", maxSlots)
                 for i = 1, maxSlots do
                     slot = side["slot"..i]
-                    if i == maxSlots and slot.isActive and i < MAX_SLOTS then
-                        self:ShiftTracker(slot.tracker, i, i + 1)
+                    self:debug("Slot:", i, slot.isActive, slot.tracker and slot.tracker.isStatic)
+                    if slot.isActive then
+                        if (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
+                            -- Make sure static trackers have priority placement on earlier slots
+                            self:ShiftTracker(slot.tracker, i, i + 1)
+                        end
                     end
 
                     if not slot.isActive then
@@ -160,13 +159,11 @@ do
     end
     function AuraTracking:RemoveTracker(tracker, isStatic)
         self:debug("RemoveTracker", tracker.id, isStatic)
-        local numActive = activeTrackers[tracker.side]
         if isStatic then
             tracker.icon:SetDesaturated(true)
             tracker:SetAlpha(db.indicators.fadeOpacity)
-            activeTrackers[tracker.side] = numActive - 1
+            activeTrackers[tracker.side] = activeTrackers[tracker.side] - 1
         else
-            activeTrackers[tracker.side] = numActive - 1
             local side, emptySlot = self[tracker.side], tracker.slotID
             RemoveTrackerFromSlot(tracker, side["slot"..emptySlot])
 
@@ -230,6 +227,7 @@ function AuraTracking:UpdateVisibility()
     self:debug("targetCondition", visibility.showHostile, self.targetHostile, targetCondition)
     self:debug("combatCondition", visibility.showCombat, self.inCombat, combatCondition)
     self:debug("instType", self.inPvP, self.inPvE, instType)
+    self:debug("activeTrackers", activeTrackers["left"], activeTrackers["right"])
 
     if self.configMode then
         self.left:Show()
@@ -325,19 +323,22 @@ function AuraTracking:UNIT_AURA(event, unit)
 
     for tracker, spellData in self:IterateTrackers() do
         if spellData.unit == unit and tracker.isEnabled then
-            local spell, spellMatch, aura = spellData.spell, false, {}
+            local spell, hasAura, aura = spellData.spell, false, {}
             debug(spellData.debug, "IterateTrackers", tracker.id, spell)
 
             if type(spell) == "table" then
                 for index = 1, #spell do
-                    spellMatch, aura = FindSpellMatch(spell[index], spellData.unit, tracker.filter, spellData.debug)
-                    if spellMatch then break end
+                    hasAura, aura = FindSpellMatch(spell[index], spellData.unit, tracker.filter, spellData.debug)
+                    if hasAura then break end
                 end
             else
-                spellMatch, aura = FindSpellMatch(spell, spellData.unit, tracker.filter, spellData.debug)
+                hasAura, aura = FindSpellMatch(spell, spellData.unit, tracker.filter, spellData.debug)
             end
 
-            if spellMatch then
+            debug(spellData.debug, "do postUnitAura", tracker.postUnitAura)
+            if tracker.postUnitAura then
+                tracker:postUnitAura(spellData, aura, hasAura)
+            elseif hasAura then
                 debug(spellData.debug, "Tracker", tracker.id, spell)
                 tracker.auraIndex = aura.index
                 tracker.cd:Show()
@@ -353,10 +354,6 @@ function AuraTracking:UNIT_AURA(event, unit)
                 tracker.cd:Hide()
                 tracker.count:SetText("")
                 self:RemoveTracker(tracker, tracker.isStatic)
-            end
-            debug(spellData.debug, "do postUnitAura", tracker.postUnitAura)
-            if tracker.postUnitAura then
-                tracker:postUnitAura(spellData, aura)
             end
         end
     end
@@ -381,11 +378,12 @@ function AuraTracking:PLAYER_LOGIN()
             end
         else
             self:debug("Empty tracker", trackerID)
-            --trackingData[trackerID] = nil
+            trackingData[trackerID] = nil
         end
     end
     RegisterSpellList("PlayerExclusions", playerSpellList)
     RegisterSpellList("PlayerDebuffExclusions", playerSpellList)
+    self:UNIT_AURA("FORCED_UNIT_AURA", "player")
     self.loggedIn = true
 end
 function AuraTracking:PLAYER_ENTERING_WORLD()

@@ -20,10 +20,12 @@ local function debug(isDebug, ...)
         AuraTracking:debug(isDebug, ...)
     end
 end
+AuraTracking.trackerDebug = debug
 
 local _, class, classID = _G.UnitClass("player")
 local SavageRoar
 local MirrorImage, IncantersFlow
+local PowerStrikes
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local BurningEmbers
 local function PredictDuration(gap, base, max)
@@ -119,6 +121,69 @@ elseif class == "MAGE" then
             status:SetPoint("BOTTOMRIGHT")
             status:SetDesaturated(true)
             self.status = status
+        end
+    end
+elseif class == "MONK" then
+    do -- PowerStrikes
+        local hadAura = false
+        local start, duration = 0, 15
+        local inCombat, timer
+
+        local function updateTime(self, spellData)
+            debug(spellData.debug, "updateTime", inCombat, timer)
+            start = GetTime()
+            self.cd:SetCooldown(start, duration)
+        end
+
+        local function postUnitAura(self, spellData, aura, hasAura)
+            debug(spellData.debug, "postUnitAura", self.id, hasAura)
+
+            if AuraTracking:TimeLeft(timer) > 0 then
+                if hasAura and hadAura ~= hasAura then
+                    debug(spellData.debug, "reset timer", AuraTracking:TimeLeft(timer))
+                    AuraTracking:CancelTimer(timer)
+                    start = GetTime()
+                    timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, self, spellData)
+                end
+
+            end
+
+            if hasAura then
+                self.auraIndex = aura.index
+                self.icon:SetTexture(aura.texture)
+                if not spellData.hideStacks then
+                    self.count:SetText(aura.count)
+                end
+            end
+
+            hadAura = hasAura
+            self.cd:SetCooldown(start, duration)
+            self.icon:SetDesaturated(not hasAura)
+        end
+
+        -- Shows Power Strikes progress.
+        function PowerStrikes(tracker)
+            tracker:RegisterEvent("PLAYER_REGEN_DISABLED")
+            tracker:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+            function tracker:PLAYER_REGEN_DISABLED(spellData, ...)
+                debug(spellData.debug, "Start timer", inCombat, timer)
+                inCombat = true
+                start = GetTime()
+                self.cd:Show()
+                self.cd:SetCooldown(start, duration)
+                timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, spellData)
+            end
+            function tracker:PLAYER_REGEN_ENABLED(spellData, ...)
+                debug(spellData.debug, "Cancel timer", inCombat, timer)
+                inCombat = false
+                self.cd:Hide()
+                AuraTracking:CancelTimer(timer)
+                timer = nil
+            end
+
+            tracker.postUnitAura = postUnitAura
+            AuraTracking:AddTracker(tracker)
         end
     end
 elseif class == "ROGUE" then
@@ -315,7 +380,7 @@ if not RealUI.isBeta then
 bd56d2d6
 965917ad
 a5bdd6b2
-8975b89c
+
 
 
 
@@ -1088,26 +1153,76 @@ classDefaults = {
         -- Free Player Auras
             ["10-9cc09bbe-1"] = {   -- Guard (Brewmaster)
                 spell = 115295,
+                minLevel = 26,
                 specs = {true, false, false},
+            },
+            ["10-9b76a592-1"] = {   -- Mana Tea (Mistweaver)
+                spell = 115867,
+                minLevel = 56,
+                specs = {false, true, false},
             },
             ["10-8cf143c1-1"] = {   -- Touch of Karma (Windwalker)
                 spell = 125174,
+                minLevel = 22,
                 specs = {false, false, true},
             },
             ["10-a42fc1fd-1"] = {   -- Energizing Brew (Windwalker)
                 spell = 115288,
+                minLevel = 36,
                 specs = {false, false, true},
-            },
-            ["10-9b76a592-1"] = {   -- Mana Tea (Mistweaver)
-                spell = 115294,
-                specs = {false, true, false},
             },
             ["10-862a1e93-1"] = {spell = 125359},   -- Tiger Power
             ["10-a84fc108-1"] = {spell = 120954},   -- Fortifying Brew
-            ["10-9372460a-1"] = {spell = 122783},   -- Diffuse Magic (Talent)
-            ["10-871ccaed-1"] = {spell = 122278},   -- Dampen Harm (Talent)
-            ["10-8082e169-1"] = {spell = 116841},   -- Tiger's Lust (Talent)
-            ["10-ab86d9e3-1"] = {spell = 152173},   -- Serenity (Talent)
+
+            ["10-8975b89c-1"] = {   -- Zen Sphere (Talent)
+                spell = 124081,
+                minLevel = 30,
+                talent = {
+                    tier = 2,
+                    ID = 19820,
+                    mustHave = true,
+                },
+            },
+            ["10-8082e169-1"] = {   -- Power Strikes (Talent)
+                spell = 129914,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    ID = 19992,
+                    mustHave = true,
+                },
+                eventUpdate = {
+                    event = "UNIT_AURA",
+                    func = PowerStrikes
+                },
+            },
+            ["10-871ccaed-1"] = {   -- Dampen Harm (Talent)
+                spell = 122278,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 20175,
+                    mustHave = true,
+                },
+            },
+            ["10-9372460a-1"] = {   -- Diffuse Magic (Talent)
+                spell = 122783,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    ID = 20173,
+                    mustHave = true,
+                },
+            },
+            ["10-ab86d9e3-1"] = {   -- Serenity (Talent)
+                spell = 152173,
+                minLevel = 100,
+                talent = {
+                    tier = 7,
+                    ID = 21191,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
             ["10-b561c6be-1"] = { -- Mortal Wounds
                 spell = 115804,
