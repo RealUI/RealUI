@@ -11,6 +11,7 @@ nibRealUI.isBeta = nibRealUI.TOC >= 70000
 
 nibRealUI.verinfo = {}
 for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do
+    debug(word, letter)
     if tonumber(word) then
         tinsert(nibRealUI.verinfo, tonumber(word))
     end
@@ -399,7 +400,7 @@ end
 function nibRealUI:GetVerString(returnLong)
     local verinfo = nibRealUI.verinfo
     if returnLong then
-        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4])
+        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4] or "")
     else
         return string.format("%s.%s", verinfo[1], verinfo[2])
     end
