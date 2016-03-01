@@ -30,10 +30,22 @@ local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local BurningEmbers
 local function PredictDuration(gap, base, max)
     local potential, color = "", {}
-    local function postUnitAura(self, spellData)
-        debug(spellData.debug, "postUnitAura", potential, color[1])
+    local function postUnitAura(self, spellData, aura, hasAura)
+        debug(spellData.debug, "postUnitAura", potential, color[1], hasAura)
         self.count:SetText(potential)
         self.count:SetTextColor(color[1], color[2], color[3])
+        if hasAura then
+            self.auraIndex = aura.index
+            self.cd:Show()
+            self.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
+            self.icon:SetTexture(aura.texture)
+            AuraTracking:AddTracker(self)
+        elseif hasAura ~= nil then
+            self.auraIndex = nil
+            self.cd:SetCooldown(0, 0)
+            self.cd:Hide()
+            AuraTracking:RemoveTracker(self, self.isStatic)
+        end
     end
 
     -- Shows predicted debuff duration based on current CPs.
@@ -99,15 +111,27 @@ elseif class == "MAGE" then
     end
     do -- IncantersFlow
         local flowMax = 5
-        local function postUnitAura(self, spellData, aura)
+        local function postUnitAura(self, spellData, aura, hasAura)
             debug(spellData.debug, "postUnitAura", aura.count)
-            local flow = aura.count or 0
-            if flow > 0 then
+            if hasAura then
+                self.auraIndex = aura.index
+                self.cd:Show()
+                self.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
+                self.icon:SetTexture(spellData.customIcon or aura.texture)
+
+                local flow = aura.count
                 self.count:SetText(flow * 4)
 
                 local xOfs = Lerp(0, self.icon:GetWidth(), (flow / flowMax))
-                debug(spellData.debug, "xOfs", xOfs)
                 self.status:SetPoint("TOPLEFT", self, xOfs, 0)
+
+                AuraTracking:AddTracker(self)
+            elseif self.slotID then
+                self.auraIndex = nil
+                self.cd:SetCooldown(0, 0)
+                self.cd:Hide()
+                self.count:SetText("")
+                AuraTracking:RemoveTracker(self, self.isStatic)
             end
         end
 
@@ -197,12 +221,24 @@ elseif class == "ROGUE" then
             [84747] = 3  -- Deep Insight
         }, 0
 
-        local function postUnitAura(self, spellData)
+        local function postUnitAura(self, spellData, aura, hasAura)
             debug(spellData.debug, "postUnitAura", swingCount, bgState)
             if (swingCount > 0) and (bgState < 3) then
                 self.count:SetText(swingCount)
             else
                 self.count:SetText()
+            end
+            if hasAura then
+                self.auraIndex = aura.index
+                self.cd:Show()
+                self.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
+                self.icon:SetTexture(aura.texture)
+                AuraTracking:AddTracker(self)
+            elseif hasAura ~= nil and self.slotID then
+                self.auraIndex = nil
+                self.cd:SetCooldown(0, 0)
+                self.cd:Hide()
+                AuraTracking:RemoveTracker(self, self.isStatic)
             end
         end
 
@@ -239,34 +275,43 @@ elseif class == "ROGUE" then
     SliceAndDice = PredictDuration(6, 12, 36)
     do -- ShadowReflection
         -- Modifies the tracker icon to show when the reflection is or isn't attaking.
-        local isWatching, hasAura = false, false
-        local start, duration = 0, 8
+        local isWatching = false
+        local start, duration = 0, 8.5
 
-        local function postUnitAura(self, spellData)
+        local function postUnitAura(self, spellData, aura, hasAura)
             debug(spellData.debug, "postUnitAura", isWatching, hasAura)
-            self.icon:SetDesaturated(isWatching)
+
             self.cd:SetCooldown(start, duration)
             self.cd:SetReverse(isWatching)
-            debug(spellData.debug, "CD times", self.cd:GetCooldownTimes())
-            --debug(spellData.debug, "CD", self.cd:GetCooldown())
-            debug(spellData.debug, "spell CD", _G.GetSpellCooldown(spellData.spell))
+            self.icon:SetDesaturated(isWatching)
+
+            if hasAura then
+                self.auraIndex = aura.index
+                self.cd:Show()
+                self.icon:SetTexture(aura.texture)
+                AuraTracking:AddTracker(self)
+            elseif hasAura ~= nil and self.slotID then
+                self.auraIndex = nil
+                self.cd:SetCooldown(0, 0)
+                self.cd:Hide()
+                self.count:SetText("")
+                AuraTracking:RemoveTracker(self, self.isStatic)
+            end
         end
 
         function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_)
             if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
                 debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), GetTime())
 
-                if subEvent == "SPELL_AURA_APPLIED" and not hasAura then
-                    AuraTracking:debug("ShadowReflection", isWatching, hasAura)
-                    isWatching, hasAura = true, true
+                if subEvent == "SPELL_AURA_APPLIED" then
+                    AuraTracking:debug("ShadowReflection", isWatching)
+                    isWatching = true
                     start = GetTime()
                     _G.C_Timer.After(duration, function()
                         isWatching = false
                         start = GetTime()
                         postUnitAura(self, spellData)
                     end)
-                elseif subEvent == "SPELL_AURA_REMOVED" and hasAura then
-                    hasAura = false
                 end
                 postUnitAura(self, spellData)
 
