@@ -33,7 +33,7 @@ function api:Enable()
     local eventUpdate = spellData.eventUpdate
     if eventUpdate then
         if eventUpdate.event == "UNIT_AURA" then
-            eventUpdate.func(self)
+            eventUpdate.func(self, spellData)
         else
             self:RegisterEvent(eventUpdate.event)
             self[eventUpdate.event] = eventUpdate.func
@@ -48,6 +48,9 @@ function api:Disable()
     AuraTracking:debug("Tracker:Disable", self.id, self.isStatic)
     self.isEnabled = false
     self:UnregisterAllEvents()
+    if self.timer then
+        AuraTracking:CancelTimer(self.timer)
+    end
     if self.slotID then
         AuraTracking:RemoveTracker(self)
     end
