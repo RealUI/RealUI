@@ -151,63 +151,52 @@ elseif class == "MONK" then
     do -- PowerStrikes
         local hadAura = false
         local start, duration = 0, 15
-        local inCombat, timer
+        local numNotUsed, threshold = 0, 2
 
         local function updateTime(self, spellData)
-            debug(spellData.debug, "updateTime", inCombat, timer)
+            debug(spellData.debug, "updateTime", hadAura, numNotUsed)
             start = GetTime()
             self.cd:SetCooldown(start, duration)
+            if hadAura then
+                -- didn't use before refresh
+                numNotUsed = numNotUsed + 1
+            end
         end
 
         local function postUnitAura(self, spellData, aura, hasAura)
-            debug(spellData.debug, "postUnitAura", self.id, hasAura)
+            debug(spellData.debug, "postUnitAura", self.id, hadAura, hasAura)
 
-            if AuraTracking:TimeLeft(timer) > 0 then
-                if hasAura and hadAura ~= hasAura then
+            if not hadAura and hasAura then
+                local timer = self.timer
+                if AuraTracking:TimeLeft(timer) > 0.5 then
                     debug(spellData.debug, "reset timer", AuraTracking:TimeLeft(timer))
                     AuraTracking:CancelTimer(timer)
-                    start = GetTime()
-                    timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, self, spellData)
+                    updateTime(self, spellData)
+                    self.timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, self, spellData)
                 end
-
+            elseif hadAura and not hasAura then
+                -- Just used, reset count
+                numNotUsed = 0
             end
 
-            if hasAura then
+            debug(spellData.debug, "numNotUsed", numNotUsed)
+            if numNotUsed <= threshold then
                 self.auraIndex = aura.index
-                self.icon:SetTexture(aura.texture)
-                if not spellData.hideStacks then
-                    self.count:SetText(aura.count)
-                end
+                AuraTracking:AddTracker(self)
+            elseif numNotUsed > threshold and self.slotID then
+                -- Hide the tracker if the buff isn't used twice in a row
+                AuraTracking:RemoveTracker(self, self.isStatic)
             end
 
             hadAura = hasAura
-            self.cd:SetCooldown(start, duration)
             self.icon:SetDesaturated(not hasAura)
         end
 
-        -- Shows Power Strikes progress.
-        function PowerStrikes(tracker)
-            tracker:RegisterEvent("PLAYER_REGEN_DISABLED")
-            tracker:RegisterEvent("PLAYER_REGEN_ENABLED")
-
-            function tracker:PLAYER_REGEN_DISABLED(spellData, ...)
-                debug(spellData.debug, "Start timer", inCombat, timer)
-                inCombat = true
-                start = GetTime()
-                self.cd:Show()
-                self.cd:SetCooldown(start, duration)
-                timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, spellData)
-            end
-            function tracker:PLAYER_REGEN_ENABLED(spellData, ...)
-                debug(spellData.debug, "Cancel timer", inCombat, timer)
-                inCombat = false
-                self.cd:Hide()
-                AuraTracking:CancelTimer(timer)
-                timer = nil
-            end
+        -- Shows the current Power Strikes ICD.
+        function PowerStrikes(tracker, spellData)
+            tracker.timer = AuraTracking:ScheduleRepeatingTimer(updateTime, duration, tracker, spellData)
 
             tracker.postUnitAura = postUnitAura
-            AuraTracking:AddTracker(tracker)
         end
     end
 elseif class == "ROGUE" then
