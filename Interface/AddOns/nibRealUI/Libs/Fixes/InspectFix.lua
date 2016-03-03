@@ -375,12 +375,12 @@ function InspectFix:Load()
   if not revstr or string.find(revstr, "@") then
     revstr = "r"..tostring(revision)
   end
-  print("InspectFix "..revstr.." loaded.")
+  --print("InspectFix "..revstr.." loaded.")
 end
 
 function InspectFix:Unload()
   loaded = false
-  print("InspectFix unloaded.")
+  --print("InspectFix unloaded.")
 end
 
 InspectFix:Load()
