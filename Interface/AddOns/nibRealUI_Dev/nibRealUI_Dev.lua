@@ -1,2 +1,2 @@
-RealUI.isDev = true
+_G.RealUI.isDev = true
 --GAME_LOCALE = "deDE"

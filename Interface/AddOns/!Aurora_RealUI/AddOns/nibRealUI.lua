@@ -1,7 +1,8 @@
 local _, mods = ...
+local _G = _G
 
-tinsert(mods["PLAYER_LOGIN"], function(F, C)
+_G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     --print("HELLO nibRealUI!!!", F, C)
     --VideoOptions
-    F.Reskin(RealUIScaleBtn)
+    F.Reskin(_G.RealUIScaleBtn)
 end)

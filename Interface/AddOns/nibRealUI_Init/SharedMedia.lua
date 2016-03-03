@@ -1,4 +1,4 @@
-local LSM = LibStub("LibSharedMedia-3.0")
+local LSM = _G.LibStub("LibSharedMedia-3.0")
 
 --[[ Backgrounds ]]--
 LSM:Register("background", "Plain", [[Interface\AddOns\nibRealUI\Media\Plain]])

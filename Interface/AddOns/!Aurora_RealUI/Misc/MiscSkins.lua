@@ -1,23 +1,16 @@
 local _, mods = ...
 local _G = _G
+local next = _G.next
 
 -- This is for small modifications that are not yet worth having thier own file.
 -- Or to make modifications to a frame that Aurora modified.
-tinsert(mods["Aurora"], function(F, C)
+_G.tinsert(mods["Aurora"], function(F, C)
     mods.debug("MiscSkins", F, C)
     local r, g, b = C.r, C.g, C.b
 
-    -- Lua Globals --
-    local next, floor, strsplit = _G.next, _G.floor, _G.strsplit
-
-    -- WoW Globals --
-    local CreateFrame, hooksecurefunc = _G.CreateFrame, _G.hooksecurefunc
-    local FriendsFrame, SplashFrame, ObjectiveTrackerFrame = _G.FriendsFrame, _G.SplashFrame, _G.ObjectiveTrackerFrame
-    local SPLASH_SCREENS = _G.SPLASH_SCREENS
-
     -- Re-add Travel Pass
-    FriendsFrame:HookScript("OnShow", function()
-        if not FriendsFrame.skinned then
+    _G.FriendsFrame:HookScript("OnShow", function()
+        if not _G.FriendsFrame.skinned then
             for i = 1, _G.FRIENDS_TO_DISPLAY do
                 local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
 
@@ -41,7 +34,7 @@ tinsert(mods["Aurora"], function(F, C)
                 bu.inv:SetPoint("TOPRIGHT", 1, -4)
                 bu.inv:SetSize(22, 22)
             end
-            FriendsFrame.skinned = true
+            _G.FriendsFrame.skinned = true
         end
     end)
 
@@ -64,33 +57,33 @@ tinsert(mods["Aurora"], function(F, C)
             end
         end
     end
-    hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
-    hooksecurefunc(_G.FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
+    _G.hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
+    _G.hooksecurefunc(_G.FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
     -- Splash Frame
-    F.CreateBD(SplashFrame, nil, true)
-    hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
+    F.CreateBD(_G.SplashFrame, nil, true)
+    _G.hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
         --print("SplashFrame", tag, showStartButton)
-        SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
-        F.ReskinAtlas(SplashFrame.LeftTexture, SPLASH_SCREENS[tag].leftTex)
+        _G.SplashFrame.LeftTexture:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(_G.SplashFrame.LeftTexture, _G.SPLASH_SCREENS[tag].leftTex)
 
-        SplashFrame.RightTexture:SetDrawLayer("BACKGROUND", 7)
-        F.ReskinAtlas(SplashFrame.RightTexture, SPLASH_SCREENS[tag].rightTex)
+        _G.SplashFrame.RightTexture:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(_G.SplashFrame.RightTexture, _G.SPLASH_SCREENS[tag].rightTex)
 
-        SplashFrame.BottomTexture:SetDrawLayer("BACKGROUND", 7)
-        local left, right, top, bottom = F.ReskinAtlas(SplashFrame.BottomTexture, SPLASH_SCREENS[tag].bottomTex, true)
-        SplashFrame.BottomTexture:SetTexCoord(right, top, left, top, right, bottom, left, bottom)
+        _G.SplashFrame.BottomTexture:SetDrawLayer("BACKGROUND", 7)
+        local left, right, top, bottom = F.ReskinAtlas(_G.SplashFrame.BottomTexture, _G.SPLASH_SCREENS[tag].bottomTex, true)
+        _G.SplashFrame.BottomTexture:SetTexCoord(right, top, left, top, right, bottom, left, bottom)
 
-        SplashFrame.Label:SetTextColor(1, 1, 1)
+        _G.SplashFrame.Label:SetTextColor(1, 1, 1)
 
-        SplashFrame.BottomLine:SetDrawLayer("BACKGROUND", 7)
-        F.ReskinAtlas(SplashFrame.BottomLine, "splash-botleft")
+        _G.SplashFrame.BottomLine:SetDrawLayer("BACKGROUND", 7)
+        F.ReskinAtlas(_G.SplashFrame.BottomLine, "splash-botleft")
     end)
 
     -- Objective Tracker
-    F.ReskinExpandOrCollapse(ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
+    F.ReskinExpandOrCollapse(_G.ObjectiveTrackerFrame.HeaderMenu.MinimizeButton)
     for _, headerName in next, {"QuestHeader", "AchievementHeader", "ScenarioHeader"} do
-        local header = ObjectiveTrackerFrame.BlocksFrame[headerName]
+        local header = _G.ObjectiveTrackerFrame.BlocksFrame[headerName]
         header.Background:Hide()
 
         local bg = header:CreateTexture(nil, "ARTWORK")
@@ -135,7 +128,7 @@ tinsert(mods["Aurora"], function(F, C)
     _G.WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
 end)
 
-tinsert(mods["PLAYER_LOGIN"], function(F, C)
+_G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     mods.debug("PLAYER_LOGIN - Misc", F, C)
     -- These addons are loaded before !Aurora_RealUI.
 
@@ -149,20 +142,14 @@ end)
 mods["Blizzard_AuctionUI"] = function(F, C)
     mods.debug("Blizzard_AuctionUI", F, C)
 
-    -- Lua Globals --
-    local next = _G.next
-
-    -- WoW Globals --
-    local tokenTutorial, StoreButton = _G.tokenTutorial, _G.StoreButton
-
-    tokenTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
-    F.ReskinAtlas(tokenTutorial.Tutorial, "token-info-background")
+   _G. tokenTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
+    F.ReskinAtlas(_G.tokenTutorial.Tutorial, "token-info-background")
 
     for _, side in next, {"LeftDisplay", "RightDisplay"} do
-        tokenTutorial[side].Label:SetTextColor(1, 1, 1)
-        tokenTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
+        _G.tokenTutorial[side].Label:SetTextColor(1, 1, 1)
+        _G.tokenTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
     end
 
-    StoreButton:SetSize(149, 26)
-    StoreButton:SetPoint("TOPLEFT", tokenTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
+    _G.StoreButton:SetSize(149, 26)
+    _G.StoreButton:SetPoint("TOPLEFT", _G.tokenTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
 end

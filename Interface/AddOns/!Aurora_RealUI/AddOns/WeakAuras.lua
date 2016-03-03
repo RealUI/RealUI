@@ -1,6 +1,7 @@
 local _, mods = ...
+local _G = _G
 
-mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, F, C)
+mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
     --print("WeakAuras", F, C)
     --[[ Skin regions
     local function SkinAura(region)
@@ -53,11 +54,10 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, F, C)
         -- Skin options frame
         local function skin(...)
             --print("Options opened", ...)
-            local frame = WeakAuras.OptionsFrame()
+            local frame = _G.WeakAuras.OptionsFrame()
             if frame.skinned then return end
 
             local r, g, b = C.r, C.g, C.b
-            local alpha = 0.25
             local children = {frame:GetChildren()}
 
             -- Close button
@@ -106,11 +106,9 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, F, C)
             sizer[3]:SetPoint("BOTTOMLEFT", sizer[1], "BOTTOMRIGHT", 4, 0)
 
             -- Tutorial
-            local _, _, _, enabled, loadable = GetAddOnInfo("WeakAurasTutorials")
+            --children[6]
+            local _, _, _, enabled = _G.GetAddOnInfo("WeakAurasTutorials")
             local tutOfs = enabled and 1 or 0
-            if enabled then
-                --children[6]
-            end
 
             --[[ Ace groups
                 children[6+tutOfs] container
@@ -159,7 +157,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, F, C)
             F.CreateBD(moversizer, .01)
 
             -- Search
-            F.ReskinInput(WeakAurasFilterInput)
+            F.ReskinInput(_G.WeakAurasFilterInput)
 
             -- Remove Title BG
             StripTextures(frame)
@@ -168,7 +166,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, F, C)
             F.CreateBD(frame)
             frame.skinned = true
         end
-        hooksecurefunc(WeakAuras, "ShowOptions", skin)
+        _G.hooksecurefunc(_G.WeakAuras, "ShowOptions", skin)
     end
 end
 

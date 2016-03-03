@@ -3,13 +3,16 @@ mods["Aurora"] = {}
 mods["nibRealUI"] = {}
 mods["PLAYER_LOGIN"] = {}
 
--- Upvalues
+-- Lua Globals --
 local _G = _G
+local tinsert = _G.table.insert
+
+-- RealUI --
 local RealUI = _G.RealUI
 
 -- RealUI skin hook
-REALUI_STRIPE_TEXTURES = REALUI_STRIPE_TEXTURES or {}
-REALUI_WINDOW_FRAMES = REALUI_WINDOW_FRAMES or {}
+_G.REALUI_STRIPE_TEXTURES = _G.REALUI_STRIPE_TEXTURES or {}
+_G.REALUI_WINDOW_FRAMES = _G.REALUI_WINDOW_FRAMES or {}
 local function debug(...)
     RealUI.Debug("!Aurora", ...)
 end
@@ -64,13 +67,13 @@ functions.CreateBD = function(f, a)
         f:SetBackdropColor(unpack(RealUI.media.window))
         f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
         f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-        f.tex:SetAlpha(RealUI_InitDB.stripeOpacity)
+        f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         f.tex:SetAllPoints()
         f.tex:SetHorizTile(true)
         f.tex:SetVertTile(true)
         f.tex:SetBlendMode("ADD")
-        tinsert(REALUI_WINDOW_FRAMES, f)
-        tinsert(REALUI_STRIPE_TEXTURES, f.tex)
+        tinsert(_G.REALUI_WINDOW_FRAMES, f)
+        tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
     else
         --print("CreateBD: alpha", a)
         f:SetBackdropColor(0, 0, 0, a)
@@ -144,7 +147,7 @@ functions.CreateBDFrame = function(f, a)
 
     local lvl = frame:GetFrameLevel()
 
-    local bg = CreateFrame("Frame", nil, frame)
+    local bg = _G.CreateFrame("Frame", nil, frame)
     bg:SetPoint("TOPLEFT", f, -1, 1)
     bg:SetPoint("BOTTOMRIGHT", f, 1, -1)
     bg:SetFrameLevel(lvl == 0 and 1 or lvl - 1)
@@ -183,24 +186,24 @@ end
 style.functions = functions
 
 style.initVars = function()
-    debug("initVars", Aurora, Aurora[1], Aurora[2])
-    F, C = unpack(Aurora)
+    debug("initVars", _G.Aurora, _G.Aurora[1], _G.Aurora[2])
+    F, C = unpack(_G.Aurora)
     r, g, b = C.r, C.g, C.b
     buttonR, buttonG, buttonB, buttonA = .1, .1, .1, 1
 end
 
-AURORA_CUSTOM_STYLE = style
+_G.AURORA_CUSTOM_STYLE = style
 
-local f = CreateFrame("Frame")
-f:RegisterEvent("ADDON_LOADED")
-f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function(self, event, addon)
-    if event == "PLAYER_LOGIN" and IsAddOnLoaded("Aurora") then
-        F, C = unpack(Aurora)
+local frame = _G.CreateFrame("Frame")
+frame:RegisterEvent("ADDON_LOADED")
+frame:RegisterEvent("PLAYER_LOGIN")
+frame:SetScript("OnEvent", function(self, event, addon)
+    if event == "PLAYER_LOGIN" and _G.IsAddOnLoaded("Aurora") then
+        F, C = unpack(_G.Aurora)
         -- some skins need to be deferred till after all other addons.
         for addonName, func in next, mods[event] do
             if type(addonName) == "string" then
-                if IsAddOnLoaded(addonName) then
+                if _G.IsAddOnLoaded(addonName) then
                     -- Create skin modules for addon so they can be individually disabled.
                     local skin = RealUI:RegisterSkin(addonName)
                     if RealUI:GetModuleEnabled(addonName) then
@@ -212,12 +215,12 @@ f:SetScript("OnEvent", function(self, event, addon)
                 func(F, C)
             end
         end
-        f:UnregisterEvent("PLAYER_LOGIN")
+        frame:UnregisterEvent("PLAYER_LOGIN")
     elseif event == "ADDON_LOADED" then
         local addonModule = mods[addon]
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
-            F, C = unpack(Aurora)
+            F, C = unpack(_G.Aurora)
 
             F.colorTex = function(f)
                 if f:IsEnabled() then
@@ -236,7 +239,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             F.ReskinAtlas = function(f, atlas, is8Point)
                 --debug("ReskinAtlas")
                 if not atlas then atlas = f:GetAtlas() end
-                local file, _, _, left, right, top, bottom = GetAtlasInfo(atlas)
+                local file, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
                 file = file:sub(10) -- cut off "Interface"
                 f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
                 if is8Point then

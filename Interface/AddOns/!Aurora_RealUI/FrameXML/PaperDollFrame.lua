@@ -1,7 +1,7 @@
 local _, mods = ...
 local _G = _G
 
-tinsert(mods["nibRealUI"], function(F, C)
+_G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("PaperDollFrame", F, C)
     local r, g, b = C.r, C.g, C.b
 
