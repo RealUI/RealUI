@@ -43,9 +43,9 @@ local function CreateHealthBar(parent)
     local info = info.health
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
+    health:SetMinMaxValues(0, 1)
     health:SetReverseFill(true)
     health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
-    --health.debug = "playerHealth"
 
     health.text = health:CreateFontString(nil, "OVERLAY")
     health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
@@ -77,7 +77,6 @@ local function CreatePredictBar(parent)
     local info = info.predict
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-    absorbBar.debug = "playerAbsorbs"
 
     parent.HealPrediction = {
         frequentUpdates = true,
@@ -112,6 +111,7 @@ local function CreatePowerBar(parent)
     local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     local _, powerType = UnitPowerType(parent.unit)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
+    power:SetMinMaxValues(0, 1)
     power:SetReverseFill(true)
     if ndb.settings.reverseUnitFrameBars then
         power:SetReversePercent(nibRealUI.ReversePowers[powerType])
@@ -199,25 +199,6 @@ local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     end
 end
 
-local function CreateStats(parent)
-    parent.Stats = {}
-    for i = 1, 2 do
-        parent.Stats[i] = {}
-        parent.Stats[i].icon = parent.overlay:CreateTexture(nil, "OVERLAY")
-        parent.Stats[i].icon:SetTexture(nibRealUI.media.icons.DoubleArrow)
-        parent.Stats[i].icon:SetSize(16, 16)
-        if i == 1 then
-            parent.Stats[i].icon:SetPoint("BOTTOMLEFT", parent.Health, "BOTTOMRIGHT", 10, 0)
-        else
-            parent.Stats[i].icon:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", 15, 5)
-        end
-
-        parent.Stats[i].text = parent.overlay:CreateFontString(nil, "OVERLAY")
-        parent.Stats[i].text:SetFontObject(RealUIFont_Pixel)
-        parent.Stats[i].text:SetPoint("BOTTOMLEFT", parent.Stats[i].icon, "BOTTOMRIGHT", 0, 0)
-    end
-end
-
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = info[UnitFrames.layoutSize].endBox
@@ -273,7 +254,6 @@ UnitFrames["player"] = function(self)
     CreatePvPStatus(self)
     CreatePowerBar(self)
     CreatePowerStatus(self)
-    CreateStats(self)
     CreateEndBox(self)
     CreateTotems(self)
 

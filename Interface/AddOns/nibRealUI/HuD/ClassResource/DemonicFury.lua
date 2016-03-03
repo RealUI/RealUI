@@ -1,5 +1,7 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+if nibRealUI.isBeta then return end
+
+local L = nibRealUI.L
 local db, ndb
 
 local _
@@ -106,6 +108,7 @@ function DemonicFury:OnEnable()
 
     if not self.dfBar then 
         self.dfBar = ClassResourceBar:New("short", L["Resource_DemonicFury"])
+        self.dfBar:ReverseBar("left", true)
         self.dfBar:SetEndBoxShown("left", false)
         self.dfBar:SetEndBoxShown("right", false)
         self.dfBar:SetBoxColor("middle", nibRealUI.classColor)

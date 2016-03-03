@@ -2,24 +2,24 @@ local ADDON_NAME, private = ...
 local options = {}
 private.options = options
 
--- Up values
+-- Lua Globals --
 local _G = _G
 local tostring, next = _G.tostring, _G.next
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
 
--- RealUI
+-- RealUI --
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
-local ndb = nibRealUI.db.profile
-local ndbc = nibRealUI.db.char
+local L = nibRealUI.L
+local ndb, ndbc= nibRealUI.db.profile, nibRealUI.db.char
+
 local hudSize = ndb.settings.hudSize
 local round = nibRealUI.Round
 
--- Ace
+-- Libs --
 local ACR = LibStub("AceConfigRegistry-3.0")
 local ACD = LibStub("AceConfigDialog-3.0")
 local GUI = LibStub("AceGUI-3.0")
+local F, C = _G.Aurora[1], _G.Aurora[2]
+local r, g, b = C.r, C.g, C.b
 
 local uiWidth, uiHeight = UIParent:GetSize()
 local initialized = false
@@ -30,7 +30,7 @@ local function debug(...)
 end
 private.debug = debug
 
-local isInTestMode, RavenTimer = false
+local RavenTimer
 function nibRealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
@@ -42,7 +42,7 @@ function nibRealUI:HuDTestMode(doTestMode)
                 Raven:TestBarGroups()
             end)
         else
-            if isInTestMode then
+            if self.isInTestMode then
                 RavenTimer:Cancel()
                 RavenTimer = nil
                 Raven:TestBarGroups()
@@ -70,7 +70,7 @@ function nibRealUI:HuDTestMode(doTestMode)
     -- Spell Alerts
     local sAlert = {
         id = 17941,
-        texture = "TEXTURES\\SPELLACTIVATIONOVERLAYS\\NIGHTFALL.BLP",
+        texture = [[TEXTURES\SPELLACTIVATIONOVERLAYS\NIGHTFALL]],
         positions = "Left + Right (Flipped)",
         scale = 1,
         r = 255, g = 255, b = 255,
@@ -90,7 +90,7 @@ function nibRealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Stop()
             EABFrame.intro:Play()
             if not EABFrame.button.icon:GetTexture() then
-                EABFrame.button.icon:SetTexture("Interface\\ICONS\\ABILITY_SEAL")
+                EABFrame.button.icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
                 EABFrame.button.icon:Show()
             end
         else
@@ -100,12 +100,12 @@ function nibRealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Play()
         end
     end
-    isInTestMode = doTestMode
+    self.isInTestMode = doTestMode
 end
 
-StaticPopupDialogs["RUI_ChangeHuDSize"] = {
+_G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     text = L["HuD_AlertHuDChangeSize"],
-    button1 = OKAY,
+    button1 = _G.OKAY,
     OnAccept = function()
         nibRealUI:ReloadUIDialog()
     end,

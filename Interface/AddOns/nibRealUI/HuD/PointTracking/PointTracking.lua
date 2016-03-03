@@ -561,14 +561,17 @@ function PointTracking:HideUIElements()
 end
 
 function PointTracking:UpdateSpec()
-    PlayerSpec = GetActiveSpecGroup()
-    PlayerTalent = GetSpecialization()
+    local oldSpec, oldTalent = PlayerSpec, PlayerTalent
+    PlayerSpec, PlayerTalent = GetActiveSpecGroup(), GetSpecialization()
+    return oldSpec ~= PlayerSpec or oldTalent ~= PlayerTalent
 end
 
-function PointTracking:ACTIVE_TALENT_GROUP_CHANGED(...)
+function PointTracking:PLAYER_TALENT_UPDATE(...)
     PointTracking:debug("------", ...)
-    PointTracking:UpdateSpec()
-    self:UpdatePoints("ENABLE")
+    local hasChanged = PointTracking:UpdateSpec()
+    if hasChanged then
+        self:UpdatePoints("ENABLE")
+    end
 end
 
 function PointTracking:UpdateSmartHideConditions()
@@ -705,7 +708,7 @@ function PointTracking:OnEnable()
     
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:RegisterEvent("PLAYER_TALENT_UPDATE")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("PLAYER_TARGET_CHANGED")

@@ -1,21 +1,31 @@
+-- Lua Globals --
 local _G = _G
-local RealUI, CreateFrame = _G.RealUI, _G.CreateFrame
 local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
-local next, type = _G.next, _G.type
+local tinsert, next, type = _G.table.insert, _G.next, _G.type
 
+-- WoW Globals --
+local CreateFrame, UIParent = _G.CreateFrame, _G.UIParent
+
+-- Libs --
+local oUF = oUFembed
+
+-- RealUI --
+local RealUI =  _G.RealUI
 local db, ndb, ndbc
+local isBeta = RealUI.isBeta
+local Lerp = RealUI.Lerp
+
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:CreateModule(MODNAME)
-local oUF = oUFembed
 
 local bars = {}
 local dontSmooth, smooth
 local smoothing = {}
-local function debug(self, ...)
-    if self.debug then
-        -- self.debug should be a string describing what the bar is.
+local function debug(isDebug, ...)
+    if isDebug then
+        -- isDebug should be a string describing what the bar is.
         -- eg. "playerHealth", "targetAbsorbs", etc
-        AngleStatusBar:debug(self.debug, ...)
+        AngleStatusBar:debug(isDebug, ...)
     end
 end
 
@@ -27,16 +37,16 @@ local function SetBarPosition(self, value)
         -- Take the value, and adjust it to within the bounds of the bar.
         if metadata.reverse then
             -- This makes `width` smaller when `value` gets larger and vice versa.
-            width = (((value - metadata.minVal) * (metadata.minWidth - metadata.maxWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.maxWidth
+            width = Lerp(metadata.maxWidth, metadata.minWidth, (value / metadata.maxVal))
         else
-            width = (((value - metadata.minVal) * (metadata.maxWidth - metadata.minWidth)) / (metadata.maxVal - metadata.minVal)) + metadata.minWidth
+            width = Lerp(metadata.minWidth, metadata.maxWidth, (value / metadata.maxVal))
         end
         self.bar:SetWidth(width)
-        debug(self, "width", width, metadata.minWidth, metadata.maxWidth)
-        debug(self, "value", value, metadata.minVal, metadata.maxVal)
+        debug(self.debug, "width", width, metadata.minWidth, metadata.maxWidth)
+        debug(self.debug, "value", value, metadata.minVal, metadata.maxVal)
 
         --value = floor(value * metadata.maxVal) / metadata.maxVal
-        --debug(self, "Floored", value, metadata.reverse)
+        --debug(self.debug, "Floored", value, metadata.reverse)
         if metadata.reverse then
             self.bar:SetShown(value < metadata.maxVal)
         else
@@ -51,7 +61,7 @@ local function SetBarPosition(self, value)
         end
 
         value = floor(value * 100) / 100
-        debug(self, "Floored", self:GetParent():GetParent().unit, self.reverse, value)
+        debug(self.debug, "Floored", self:GetParent():GetParent().unit, self.reverse, value)
         self:SetShown((not(self.reverse) and (value < 1)) or (self.reverse and (value > 0)))
     end
 end
@@ -220,89 +230,97 @@ local function DrawLine(tex, anchor, x, ofs, leftX, rightX)
 end
 
 --[[ API Functions ]]--
-local api = {
-    SetStatusBarColor = function(self, r, g, b, a)
-        if type(r) == "table" then
-            r, g, b, a = r[1], r[2], r[3], r[4]
-        end
-        local row = self.bar.row
-        for i = 1, #row do
+local api = {}
+
+function api:SetStatusBarColor(r, g, b, a)
+    if type(r) == "table" then
+        r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    local row = self.bar.row
+    for i = 1, #row do
+        if isBeta then
+            row[i]:SetColorTexture(r, g, b, a or 1)
+        else
             row[i]:SetTexture(r, g, b, a or 1)
         end
-    end,
-    SetBackgroundColor = function(self, r, g, b, a)
-        if type(r) == "table" then
-            r, g, b, a = r[1], r[2], r[3], r[4]
-        end
-        local tex = self.col or self.row
-        for i = 1, #tex do
-            if self.col then
-                tex[i]:SetVertexColor(r, g, b, a or 1)
+    end
+end
+function api:SetBackgroundColor(r, g, b, a)
+    if type(r) == "table" then
+        r, g, b, a = r[1], r[2], r[3], r[4]
+    end
+    local tex = self.col or self.row
+    for i = 1, #tex do
+        if self.col then
+            tex[i]:SetVertexColor(r, g, b, a or 1)
+        else
+            if isBeta then
+                tex[i]:SetColorTexture(r, g, b, a or 1)
             else
                 tex[i]:SetTexture(r, g, b, a or 1)
             end
         end
-    end,
-
-    SetMinMaxValues = function(self, minVal, maxVal)
-        debug(self, "SetMinMaxValues", minVal, maxVal)
-        local metadata = bars[self]
-        metadata.minVal = minVal
-        metadata.maxVal = maxVal
-    end,
-    GetMinMaxValues = function(self)
-        debug(self, "GetMinMaxValues")
-        local metadata = bars[self]
-        return metadata.minVal, metadata.maxVal
-    end,
-
-    -- This should except a percentage or discrete value.
-    SetValue = function(self, value, ignoreSmooth)
-        debug(self, "SetValue", value, ignoreSmooth)
-        local metadata = bars[self]
-        if value == metadata.value then return end
-        
-        if not metadata.minVal then self:SetMinMaxValues(0, value) end
-        if value > metadata.maxVal then value = metadata.maxVal end
-        if metadata.smooth and not(ignoreSmooth) then
-            SetBarValue(self, value)
-        else
-            SetBarPosition(self, value)
-        end
-    end,
-
-    -- Setting this to true will make the bars fill from right to left
-    SetReverseFill = function(self, val)
-        debug(self, "SetReverseFill", self, self.bar, val)
-        local metadata = bars[self]
-        self.bar:ClearAllPoints()
-        if val then
-            self.bar:SetPoint(metadata.endPoint, self, -2, 0)
-        else
-            self.bar:SetPoint(metadata.startPoint, self, 2, 0)
-        end
-    end,
-    GetReverseFill = function(self)
-        debug(self, "GetReverseFill", self.bar:GetPoint())
-        return self.bar:GetPoint() == bars[self].endPoint
-    end,
-
-    -- Setting this to true will make the bars show full when at 0%.
-    SetReversePercent = function(self, reverse)
-        debug(self, "SetReversePercent", reverse)
-        local metadata = bars[self]
-        metadata.reverse = reverse
-        self:SetValue(metadata.value, true)
-    end,
-    GetReversePercent = function(self)
-        debug(self, "GetReversePercent", self.bar:GetPoint())
-        return bars[self].reverse
     end
-}
+end
+
+function api:SetMinMaxValues(minVal, maxVal)
+    debug(self.debug, "SetMinMaxValues", minVal, maxVal)
+    local metadata = bars[self]
+    metadata.minVal = minVal
+    metadata.maxVal = maxVal
+end
+function api:GetMinMaxValues()
+    debug(self.debug, "GetMinMaxValues")
+    local metadata = bars[self]
+    return metadata.minVal, metadata.maxVal
+end
+
+-- This should except a percentage or discrete value.
+function api:SetValue(value, ignoreSmooth)
+    debug(self.debug, "SetValue", value, ignoreSmooth)
+    local metadata = bars[self]
+    if value == metadata.value then return end
+    
+    if not metadata.minVal then self:SetMinMaxValues(0, value) end
+    if value > metadata.maxVal then value = metadata.maxVal end
+    if metadata.smooth and not(ignoreSmooth) then
+        SetBarValue(self, value)
+    else
+        SetBarPosition(self, value)
+    end
+end
+
+-- Setting this to true will make the bars fill from right to left
+function api:SetReverseFill(val)
+    debug(self.debug, "SetReverseFill", self, self.bar, val)
+    local metadata = bars[self]
+    self.bar:ClearAllPoints()
+    if val then
+        self.bar:SetPoint(metadata.endPoint, self, -2, 0)
+    else
+        self.bar:SetPoint(metadata.startPoint, self, 2, 0)
+    end
+end
+function api:GetReverseFill()
+    debug(self.debug, "GetReverseFill", self.bar:GetPoint())
+    return self.bar:GetPoint() == bars[self].endPoint
+end
+
+-- Setting this to true will make the bars show full when at 0%.
+function api:SetReversePercent(reverse)
+    debug(self.debug, "SetReversePercent", reverse)
+    local metadata = bars[self]
+    metadata.reverse = reverse
+    SetBarPosition(self, metadata.value)
+end
+function api:GetReversePercent()
+    debug(self.debug, "GetReversePercent", self.bar:GetPoint())
+    return bars[self].reverse
+end
 
 --[[ Frame Construction ]]--
-local function CreateAngleBG(self, width, height, parent, info)
-    debug(info, "CreateAngleBG", width, height, parent, info)
+local function CreateAngleBG(width, height, parent, info)
+    debug(info.debug, "CreateAngleBG", width, height, parent, info)
     local bg = CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
@@ -315,9 +333,13 @@ local function CreateAngleBG(self, width, height, parent, info)
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, height)
     local bgColor = RealUI.media.background
 
-    debug(info, "CreateBG", leftX, rightX)
+    debug(info.debug, "CreateBG", leftX, rightX)
     local top = bg:CreateTexture(nil, "BORDER")
-    top:SetTexture(0, 0, 0)
+    if isBeta then
+        top:SetColorTexture(0, 0, 0)
+    else
+        top:SetTexture(0, 0, 0)
+    end
     top:SetHeight(1)
     top:SetPoint("TOPLEFT", leftX, 0)
     top:SetPoint("TOPRIGHT", rightX, 0)
@@ -333,12 +355,17 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
     local maxCols = width - (height + 1) --width - maxRows
-    debug(info, "CreateRows", maxRows, maxCols)
+    debug(info.debug, "CreateRows", maxRows, maxCols)
     if maxRows <= maxCols then
         local row = {}
         for i = 1, maxRows do
             local tex = bg:CreateTexture(nil, "BACKGROUND")
-            tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            -- tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            if isBeta then
+                tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            else
+                tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+            end
             tex:SetHeight(1)
             if leftX == 0 then
                 tex:SetPoint("TOPLEFT", top, "TOPLEFT", (i + 1), -i)
@@ -381,7 +408,11 @@ local function CreateAngleBG(self, width, height, parent, info)
 
     local ofs = maxRows + 1
     local bottom = bg:CreateTexture(nil, "BORDER")
-    bottom:SetTexture(0, 0, 0)
+    if isBeta then
+        bottom:SetColorTexture(0, 0, 0)
+    else
+        bottom:SetTexture(0, 0, 0)
+    end
     bottom:SetHeight(1)
     if leftX == -rightX then
         if leftX == 0 then -- \ /
@@ -397,36 +428,66 @@ local function CreateAngleBG(self, width, height, parent, info)
     end
     bg.bottom = bottom
 
-    local left = bg:CreateTexture(nil, "BORDER")
-    left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    left:SetVertexColor(0, 0, 0)
-    if leftX == 0 then
-        --left:SetVertexColor(1, 0, 0)
-        RealUI:DrawLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
-        --DrawRouteLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
-    else
-        --left:SetVertexColor(1, 1, 0)
-        RealUI:DrawLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
-        --DrawRouteLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
-    end
+    if isBeta then
+        local left = bg:CreateLine(nil, "BORDER")
+        left:SetColorTexture(0, 0, 0)
+        left:SetThickness(16)
+        if leftX == 0 then
+            --left:SetColorTexture(1, 0, 0)
+            left:SetStartPoint("TOPLEFT", 1, -1)
+            left:SetEndPoint("TOPLEFT", ofs, -ofs)
+        else
+            --left:SetColorTexture(1, 1, 0)
+            left:SetStartPoint("BOTTOMLEFT", 1, 1)
+            left:SetEndPoint("BOTTOMLEFT", ofs, ofs)
+        end
+        left:Show()
 
-    local right = bg:CreateTexture(nil, "BORDER")
-    right:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-    right:SetVertexColor(0, 0, 0)
-    if rightX == 0 then
-        --right:SetVertexColor(0, 1, 0)
-        RealUI:DrawLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
-        --DrawRouteLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+        local right = bg:CreateLine(nil, "BORDER")
+        right:SetColorTexture(0, 0, 0)
+        right:SetThickness(16)
+        if rightX == 0 then
+            --right:SetColorTexture(0, 1, 0)
+            right:SetStartPoint("TOPRIGHT", -1, -1)
+            right:SetEndPoint("TOPRIGHT", -ofs, -ofs)
+        else
+            --right:SetColorTexture(0, 1, 1)
+            right:SetStartPoint("BOTTOMRIGHT", -1, 1)
+            right:SetEndPoint("BOTTOMRIGHT", -ofs, ofs)
+        end
+        right:Show()
     else
-        --right:SetVertexColor(0, 1, 1)
-        RealUI:DrawLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
-        --DrawRouteLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+        local left = bg:CreateTexture(nil, "BORDER")
+        left:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+        left:SetVertexColor(0, 0, 0)
+        if leftX == 0 then
+            --left:SetVertexColor(1, 0, 0)
+            RealUI:DrawLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
+            --DrawRouteLine(left, bg, 1, -1, ofs, -ofs, 16, "TOPLEFT")
+        else
+            --left:SetVertexColor(1, 1, 0)
+            RealUI:DrawLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
+            --DrawRouteLine(left, bg, 1, 1, ofs, ofs, 16, "BOTTOMLEFT")
+        end
+
+        local right = bg:CreateTexture(nil, "BORDER")
+        right:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+        right:SetVertexColor(0, 0, 0)
+        if rightX == 0 then
+            --right:SetVertexColor(0, 1, 0)
+            RealUI:DrawLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+            --DrawRouteLine(right, bg, -1, -1, -ofs, -ofs, 16, "TOPRIGHT")
+        else
+            --right:SetVertexColor(0, 1, 1)
+            RealUI:DrawLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+            --DrawRouteLine(right, bg, -1, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
+        end
     end
     return bg
 end
 
-local function CreateAngleBar(self, width, height, parent, info)
-    debug(info, "CreateAngleBar", width, height, parent, info)
+local function CreateAngleBar(width, height, parent, info)
+    debug(info.debug, "CreateAngleBar", width, height, parent, info)
 
     -- info is meta data for the status bar itself, regardles of what it's used for.
     info.maxWidth, info.minWidth = width - 4, height - 2
@@ -434,13 +495,17 @@ local function CreateAngleBar(self, width, height, parent, info)
     info.endPoint = "TOPRIGHT"
 
     local bar = CreateFrame("Frame", nil, parent)
-    debug(info, "CreateBar", bar, parent)
+    debug(info.debug, "CreateBar", bar, parent)
     bar:SetPoint(info.startPoint, parent, 2, 0)
     bar:SetHeight(info.minWidth)
 
     --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    test:SetTexture(1, 1, 1, 0.1)
+    if isBeta then
+        test:SetColorTexture(1, 1, 1, 0.1)
+    else
+        test:SetTexture(1, 1, 1, 0.1)
+    end
     test:SetAllPoints(bar)
     --]]
  
@@ -483,21 +548,21 @@ local function CreateAngleBar(self, width, height, parent, info)
     return bar, info
 end
 
-local function CreateAngleFrame(self, frameType, width, height, parent, info)
+function AngleStatusBar:CreateAngleFrame(frameType, width, height, parent, info)
     local status, bar
     if frameType == "Frame" then
-        status = CreateAngleBG(self, width, height, parent, info)
+        status = CreateAngleBG(width, height, parent, info)
         status.SetBackgroundColor = api.SetBackgroundColor
         status:SetFrameLevel(5)
         return status
     elseif frameType == "Bar" then
-        bar, info = CreateAngleBar(self, width, height, parent, info)
+        bar, info = CreateAngleBar(width, height, parent, info)
         -- Do this to maintain a consistant hierarchy without having to use self.bar for direct manipulation.
         status = bar
         status:SetFrameLevel(4)
     elseif frameType == "Status" then
-        status = CreateAngleBG(self, width, height, parent, info)
-        bar, info = CreateAngleBar(self, width, height, status, info)
+        status = CreateAngleBG(width, height, parent, info)
+        bar, info = CreateAngleBar(width, height, status, info)
         status:SetFrameLevel(2)
         bar:SetFrameLevel(3)
     end
@@ -519,7 +584,7 @@ local function CreateAngleFrame(self, frameType, width, height, parent, info)
     --status:SetValue(0, true)
     return status
 end
-oUF:RegisterMetaFunction("CreateAngleFrame", CreateAngleFrame) -- oUF magic
+oUF:RegisterMetaFunction("CreateAngleFrame", AngleStatusBar.CreateAngleFrame) -- oUF magic
 
 local testBars -- /run RealUI:TestASB()
 function RealUI:TestASB(reverseFill, reversePer)
@@ -548,9 +613,9 @@ function RealUI:TestASB(reverseFill, reversePer)
     }
     for i = 1, #info do
         local barInfo = info[i]
-        local test = CreateAngleFrame(UIParent, "Status", 200, 8, UIParent, barInfo)
+        local test = AngleStatusBar:CreateAngleFrame("Status", 200, 8, UIParent, barInfo)
         test:SetMinMaxValues(0, 200)
-        test:SetValue(150, true)
+        test:SetValue(10, true)
         test:SetStatusBarColor(1, 0, 0, 1)
         if reverseFill then
             test:SetReverseFill(true)

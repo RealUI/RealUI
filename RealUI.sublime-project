@@ -5,6 +5,9 @@
 			"path": "Interface\\AddOns\\!Aurora_RealUI"
 		},
 		{
+			"path": "Interface\\AddOns\\Aurora"
+		},
+		{
 			"path": "Interface\\AddOns\\cargBags_Nivaya"
 		},
 		{
@@ -24,6 +27,20 @@
 		},
 		{
 			"path": "Interface\\AddOns\\nibRealUI_Init"
+		},
+		{
+			"file_exclude_patterns":
+			[
+				"*.sublime*",
+			],
+			"folder_exclude_patterns":
+			[
+				".idea",
+				"Interface",
+				"utils"
+			],
+			"name": "Docs",
+			"path": "."
 		}
 	]
 }

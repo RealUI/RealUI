@@ -25,6 +25,7 @@ Cancel.lua
 Nest.lua
 
 Presets\DeathKnight.lua
+Presets\DemonHunter.lua
 Presets\Druid.lua
 Presets\Hunter.lua
 Presets\Mage.lua

@@ -66,7 +66,7 @@ Callbacks:
 ]]
 
 -- Start the lib
-local lib = LibStub:NewLibrary('LibInspect', 5);
+local lib = LibStub:NewLibrary('LibInspect', 6);
 if not lib then return end
 if not lib.frame then lib.frame = CreateFrame("Frame"); end
 
@@ -391,17 +391,19 @@ function lib:GetTalents(target, guid)
         };
         
         -- Glyphs
-        for socket = 1, NUM_GLYPH_SLOTS do
-           local enabled, glyphType, glyphTooltipIndex, glyphSpell, iconFilename, glyphID = GetGlyphSocketInfo(socket, nil, true, target)
-           talents.glyphs[socket] = {
-              enabled = enabled,
-              glyphType = glyphType,
-              glyphTooltipIndex = glyphTooltipIndex,
-              glyphSpell = glyphSpell,
-              iconFilename = iconFilename,
-              glyphID = glyphID,
-           }
-           
+        if select(4, GetBuildInfo()) < 70000 then
+            for socket = 1, NUM_GLYPH_SLOTS do
+               local enabled, glyphType, glyphTooltipIndex, glyphSpell, iconFilename, glyphID = GetGlyphSocketInfo(socket, nil, true, target)
+               talents.glyphs[socket] = {
+                  enabled = enabled,
+                  glyphType = glyphType,
+                  glyphTooltipIndex = glyphTooltipIndex,
+                  glyphSpell = glyphSpell,
+                  iconFilename = iconFilename,
+                  glyphID = glyphID,
+               }
+               
+            end
         end
 
         -- Talents

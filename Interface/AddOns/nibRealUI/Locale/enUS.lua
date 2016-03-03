@@ -1,6 +1,10 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("nibRealUI", "enUS", true, RealUI.isDev)
+local ADDON_NAME, private = ...
 
-if L then
+-- RealUI --
+local RealUI = RealUI
+local L = {}
+
+RealUI.locale = GAME_LOCALE or GetLocale()
 
 -- General
 L["Alert_CombatLockdown"] = "Combat Lockdown"
@@ -48,6 +52,8 @@ L["Fonts_PixelNumbers"] = "Pixel (Numbers)"
 L["Fonts_PixelSmall"] = "Pixel (Small)"
 L["Fonts_Standard"] = "Standard Fonts"
 L["Fonts_YellowFont"] = "Yellow Font Color"
+L["General_Debug"] = "Debug"
+L["General_DebugDesc"] = "Provides extra debugging information"
 L["General_Enabled"] = "Enabled"
 L["General_EnabledDesc"] = "Enable/Disable %s"
 L["General_InvalidParent"] = "The parent frame set for %s does not exist. Type /realadv and go to %s -> %s to set a new parent."
@@ -94,28 +100,32 @@ L["ActionBars_Stance"] = "Stance Bar"
 L["Alert_CantOpenInCombat"] = "Cannot open RealUI Configuration while in combat."
 L["Alert_UseClickToSetFocus"] = "Use %s+click to set Focus."
 L["AuraTrack"] = "Aura Tracker"
+L["AuraTrack_ActiveTrackers"] = "Active Trackers"
 L["AuraTrack_Buff"] = "Buff"
 L["AuraTrack_Create"] = "Create New Tracker"
 L["AuraTrack_Debuff"] = "Debuff"
-L["AuraTrack_HideOOC"] = "Hide Out-Of-Combat"
-L["AuraTrack_HideOOCDesc"] = "Force this Tracker to hide while not in combat, even if it's active."
 L["AuraTrack_HideStack"] = "Hide Stack Count"
 L["AuraTrack_HideStackDesc"] = "Don't show stack counts on this tracker."
-L["AuraTrack_HideTime"] = "Hide Time"
-L["AuraTrack_HideTimeDesc"] = "Don't show time remaining on this tracker."
 L["AuraTrack_IgnoreSpec"] = "Ignore Spec"
 L["AuraTrack_IgnoreSpecDesc"] = "Show tracker regardless of current specialization"
-L["AuraTrack_InactiveOpacity"] = "Inactive indicator opacity"
+L["AuraTrack_InactiveOpacity"] = "Inactive tracker opacity"
+L["AuraTrack_InactiveTrackers"] = "Inactive Trackers"
 L["AuraTrack_InvalidName"] = "Spell name or ID could not be found."
+L["AuraTrack_Lock"] = "Locked"
+L["AuraTrack_LockDesc"] = "Toggle to move or lock frame position."
 L["AuraTrack_MinLevel"] = "Minimum Level"
 L["AuraTrack_MinLevelDesc"] = "Set 0 to ignore this setting."
+L["AuraTrack_NoExclude"] = "No Exclude"
+L["AuraTrack_NoExcludeDesc"] = "Don't add this tracker to Raven's exclusion list."
 L["AuraTrack_NoteSpellID"] = [=[Note: Spell Name or ID must match the spell you wish to track exactly.
 Capitalization and spaces matter.
 To track multiple spells, use Spell IDs and separate via commas (i.e 1122,2233,3344).]=]
 L["AuraTrack_Padding"] = "Indicator padding"
 L["AuraTrack_Remove"] = "Remove Tracker"
 L["AuraTrack_RemoveConfirm"] = "Are you sure you want to remove this tracker?"
-L["AuraTrack_Reset"] = "Are you sure you wish to reset tracked auras to defaults?"
+L["AuraTrack_ResetTrackers"] = "Reset Trackers"
+L["AuraTrack_ResetTrackersDesc"] = "Reset all %s trackers to defaults."
+L["AuraTrack_ResetConfirm"] = "Are you sure you want to reset all %s trackers to defaults? This will also remove any custom trackers."
 L["AuraTrack_Selected"] = "Selected Tracker"
 L["AuraTrack_ShowHostile"] = "Show with hostile target"
 L["AuraTrack_ShowHostileDesc"] = "Show Indicators when you have an attackable target"
@@ -136,8 +146,6 @@ L["AuraTrack_TristateSpectrue"] = "Only show this tracker for one specific spec.
 L["AuraTrack_Type"] = "Tracker Type"
 L["AuraTrack_TypeDesc"] = "Buffs cast on your self, or Debuffs cast on your Target."
 L["AuraTrack_Unit"] = "Unit"
-L["AuraTrack_VerticalCD"] = "Vertical Cooldown"
-L["AuraTrack_VerticalCDDesc"] = "Use vertical cooldown indicator instead of spiral"
 L["AuraTrack_Visibility"] = "Visibility"
 L["CastBars"] = "Cast Bars"
 L["CastBars_Bottom"] = "Bottom"
@@ -152,7 +160,9 @@ L["Control_PositionDesc"] = "Allow RealUI to control %s's position."
 L["General_Position"] = "Position"
 L["General_Positions"] = "Positions"
 L["General_XOffset"] = "X Offset"
+L["General_XOffsetDesc"] = "Offset in X direction (horizontal) from the given anchor point."
 L["General_YOffset"] = "Y Offset"
+L["General_YOffsetDesc"] = "Offset in Y direction (vertical) from the given anchor point."
 L["HuD_AlertHuDChangeSize"] = "Changing the HuD size may alter the positions of some elements, therefore it is recommended to check UI Element positions once the changes have taken effect."
 L["HuD_Height"] = "Height"
 L["HuD_Horizontal"] = "Horizontal"
@@ -259,4 +269,4 @@ L["XPRep_NoFaction"] = "Faction not set"
 L["XPRep_Remaining"] = "Remaining"
 L["XPRep_Toggle"] = "<Click> to toggle XP/Rep"
 
-end
+RealUI.L = L

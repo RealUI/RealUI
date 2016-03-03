@@ -11,7 +11,6 @@ local _
 local len = string.len
 local utf8sub = LibStub('Kui-1.0').utf8sub
 local orig_SetName
-local hooked
 
 local colour_friendly
 
@@ -235,7 +234,10 @@ function mod:GetOptions()
                     step = 1,
                     min = 1,
                     softMin = 1,
-                    softMax = 30
+                    softMax = 30,
+                    disabled = function()
+                        return addon.db.profile.fonts.options.onesize
+                    end,
                 },
                 fontsizetrivial = {
                     name = 'Trivial font size',
@@ -244,7 +246,10 @@ function mod:GetOptions()
                     step = 1,
                     min = 1,
                     softMin = 1,
-                    softMax = 30
+                    softMax = 30,
+                    disabled = function()
+                        return addon.db.profile.fonts.options.onesize
+                    end,
                 }
             }
         },

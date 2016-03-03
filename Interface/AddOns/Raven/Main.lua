@@ -39,6 +39,7 @@ MOD.updateActions = true -- action bar changed
 MOD.updateDispels = true -- need to update dispel types
 MOD.knownGlyphs = {} -- cache of known glyphs
 MOD.activeGlyphs = {} -- cache of active glyphs
+MOD.TOC = select(4, GetBuildInfo())
 
 local doUpdate = true -- set by any event that can change bars (used to throttle major updates)
 local forceUpdate = false -- set to cause immediate update (reserved for critical changes like to player's target or focus)
@@ -515,6 +516,7 @@ end
 
 -- Initialize cache of glyph info
 local function InitializeGlyphs()
+	if MOD.TOC >= 70000 then return end
 	table.wipe(MOD.knownGlyphs)
 	table.wipe(MOD.activeGlyphs)
 	local count = GetNumGlyphs()
@@ -596,14 +598,16 @@ local function CheckBlizzFrames()
 	else
 		if not visible then BuffFrame:Show(); TemporaryEnchantFrame:Show(); BuffFrame:RegisterEvent("UNIT_AURA") end
 	end
-	visible = ConsolidatedBuffs:IsShown()
-	if MOD.db.profile.hideConsolidated or (GetNumGroupMembers() == 0) then -- make sure hide when solo
-		if visible then ConsolidatedBuffs:Hide() end
---	else
---		if not visible then if GetCVarBool("consolidateBuffs") then ConsolidatedBuffs:Show() end end
-	elseif GetCVarBool("consolidateBuffs") then
-		if not visible then ConsolidatedBuffs:Show() end
-		RaidBuffTray_Update()
+	if MOD.TOC < 70000 then
+		visible = ConsolidatedBuffs:IsShown()
+		if MOD.db.profile.hideConsolidated or (GetNumGroupMembers() == 0) then -- make sure hide when solo
+			if visible then ConsolidatedBuffs:Hide() end
+	--	else
+	--		if not visible then if GetCVarBool("consolidateBuffs") then ConsolidatedBuffs:Show() end end
+		elseif GetCVarBool("consolidateBuffs") then
+			if not visible then ConsolidatedBuffs:Show() end
+			RaidBuffTray_Update()
+		end
 	end
 	visible = RuneFrame:IsShown()
 	if MOD.db.profile.hideRunes then

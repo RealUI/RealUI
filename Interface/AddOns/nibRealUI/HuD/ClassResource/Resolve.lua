@@ -1,4 +1,6 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+if nibRealUI.isBeta then return end
+
 local MODNAME = "ClassResource_Resolve"
 local Resolve = nibRealUI:CreateModule(MODNAME)
 

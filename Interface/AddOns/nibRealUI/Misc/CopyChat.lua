@@ -2,7 +2,7 @@ local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
 
 local MODNAME = "CopyChat"
 local CopyChat = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
-local textDump = LibStub("LibTextDump-1.0")
+local textDump = LibStub("RealUI_LibTextDump-1.0")
 
 local select = select
 local tostring = tostring

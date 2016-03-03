@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local db, dbc, dbg
 local function debug(...)
@@ -236,11 +236,13 @@ local function CreateInstallWindow()
         IWF.installTextFrame:SetSize(2,2)
     IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup()
         IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
-        IWF.installTextFrame.fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
-        IWF.installTextFrame.fade:SetDuration(1)
-        IWF.installTextFrame.fade:SetChange(-0.5)
-        IWF.installTextFrame.fade:SetOrder(1)
-        IWF.installTextFrame.fade:SetSmoothing("IN_OUT")
+        local fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
+        fade:SetDuration(1)
+        fade:SetFromAlpha(1)
+        fade:SetToAlpha(0.5)
+        fade:SetOrder(1)
+        fade:SetSmoothing("IN_OUT")
+        IWF.installTextFrame.fade = fade
     IWF.installTextFrame.aniGroup:Play()
 
     IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
@@ -319,11 +321,13 @@ local function MiniPatchInstallation()
     -- Find out which Mini Patches are needed
     local patches = {}
     debug("minipatch", oldVer[3], curVer[3])
-    for i = oldVer[3] + 1, curVer[3] do
-        debug("checking", i)
-        if nibRealUI.minipatches[i] then
-            -- This needs to be an array to ensure patches are applied sequentially.
-            tinsert(patches, nibRealUI.minipatches[i])
+    if oldVer[3] then
+        for i = oldVer[3] + 1, curVer[3] do
+            debug("checking", i)
+            if nibRealUI.minipatches[i] then
+                -- This needs to be an array to ensure patches are applied sequentially.
+                tinsert(patches, nibRealUI.minipatches[i])
+            end
         end
     end
 

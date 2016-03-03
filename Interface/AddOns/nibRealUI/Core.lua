@@ -1,15 +1,23 @@
 local nibRealUI = LibStub("AceAddon-3.0"):NewAddon(RealUI, "nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, dbc, dbg, _
 local function debug(...)
     nibRealUI.Debug("Core", ...)
 end
 
 _G.RealUI = nibRealUI
+nibRealUI.TOC = select(4, GetBuildInfo())
+nibRealUI.isBeta = nibRealUI.TOC >= 70000
 
 nibRealUI.verinfo = {}
-for word in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "%d+") do
-    tinsert(nibRealUI.verinfo, tonumber(word))
+for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do
+    debug(word, letter)
+    if tonumber(word) then
+        tinsert(nibRealUI.verinfo, tonumber(word))
+    end
+    if letter ~= "" then
+        tinsert(nibRealUI.verinfo, letter)
+    end
 end
 
 if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
@@ -22,8 +30,13 @@ nibRealUI.configModeModules = {}
 do
     local LSM = LibStub("LibSharedMedia-3.0")
     local lsmFonts = LSM:List("font")
-    local function findFont(font)
+    local function findFont(font, backup)
         local fontPath, fontSize, fontArgs = font:GetFont()
+        if not fontPath then
+            debug("Font not loaded, set backup")
+            fontPath, fontSize, fontArgs = backup:GetFont()
+            font:SetFont(fontPath, fontSize, fontArgs)
+        end
         local fontName, path
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
@@ -42,15 +55,15 @@ do
         end
     end
     local fonts = {
-        standard = findFont(RealUIFont_Normal),
-        chat = findFont(RealUIFont_Chat),
-        crit = findFont(RealUIFont_Crit),
-        header = findFont(RealUIFont_Header),
+        standard = findFont(RealUIFont_Normal, SystemFont_Small),
+        chat = findFont(RealUIFont_Chat, NumberFont_Normal_Med),
+        crit = findFont(RealUIFont_Crit, NumberFont_Outline_Huge),
+        header = findFont(RealUIFont_Header, QuestFont_Huge),
         pixel = {
-            small =    findFont(RealUIFont_PixelSmall),
-            large =    findFont(RealUIFont_PixelLarge),
-            numbers =  findFont(RealUIFont_PixelNumbers),
-            cooldown = findFont(RealUIFont_PixelCooldown),
+            small =    findFont(RealUIFont_PixelSmall, SystemFont_Small),
+            large =    findFont(RealUIFont_PixelLarge, SystemFont_Med1),
+            numbers =  findFont(RealUIFont_PixelNumbers, SystemFont_Large),
+            cooldown = findFont(RealUIFont_PixelCooldown, SystemFont_Large),
         }
     }
     nibRealUI.media.font = fonts
@@ -385,10 +398,11 @@ end
 
 -- Version info retrieval
 function nibRealUI:GetVerString(returnLong)
+    local verinfo = nibRealUI.verinfo
     if returnLong then
-        return string.format("|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange).."%s|r.|cFF"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue).."%s|r |cff"..nibRealUI:ColorTableToStr(nibRealUI.media.colors.green).."r%s|r", nibRealUI.verinfo[1], nibRealUI.verinfo[2], nibRealUI.verinfo[3])
+        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4] or "")
     else
-        return string.format("%s.%s", nibRealUI.verinfo[1], nibRealUI.verinfo[2])
+        return string.format("%s.%s", verinfo[1], verinfo[2])
     end
 end
 function nibRealUI:MajorVerChange(oldVer, curVer)
@@ -647,7 +661,7 @@ function nibRealUI:OnInitialize()
     -- Vars
     self.realm = GetRealmName()
     self.faction = UnitFactionGroup("player")
-    self.classLocale, self.class = UnitClass("player")
+    self.classLocale, self.class, self.classID = UnitClass("player")
     self.classColor = nibRealUI:GetClassColor(self.class)
     self.name = UnitName("player")
     self.key = string.format("%s - %s", self.name, self.realm)
@@ -675,6 +689,17 @@ function nibRealUI:OnInitialize()
     self:RegisterChatCommand("rl", function() ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand("findSpell", function(input)
+        -- /findSpell "Spell Name" (player)|target (buff)|debuff
+        local spellName, unit, auraType = self:GetArgs(input, 3)
+        _G.assert(type(spellName) == "string", "A spell name must be provided")
+        unit = unit or "player"
+        if auraType == nil then
+            -- Default this to false for player, true for target.
+            auraType = unit == "target" and "debuff" or "buff"
+        end
+        self:FindSpellID(spellName, unit, auraType)
+    end)
     GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings

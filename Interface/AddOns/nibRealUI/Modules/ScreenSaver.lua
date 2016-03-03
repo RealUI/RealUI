@@ -195,7 +195,7 @@ function ScreenSaver:ToggleWarning(val)
 			
 			-- Play warning sound if Screen Saver is active and you get put into combat
 			if UnitAffectingCombat("player") and db.general.combatwarning then
-				PlaySoundFile([[Interface\AddOns\nibRealUI\Media\ScreenSaver\ZingAlarm.mp3]])
+				PlaySoundKitID(15262) -- Aggro_Enter_Warning_State
 			end
 		end
 	else
@@ -378,8 +378,8 @@ function ScreenSaver:CreateFrames()
 	-- Timer
 	self.timeLabel = nibRealUI:CreateFS(self.panel, "CENTER")
 		self.timeLabel:SetPoint("RIGHT", self.panel, "CENTER", 15, 0)
-		self.timeLabel:SetText("|cffffffffAFK |r|cff"..nibRealUI:ColorTableToStr(nibRealUI.classColor).."TIME:")
 		self.timeLabel:SetFontObject(RealUIFont_PixelSmall)
+		self.timeLabel:SetText("|cffffffffAFK |r|cff"..nibRealUI:ColorTableToStr(nibRealUI.classColor).."TIME:")
 	
 	self.time = nibRealUI:CreateFS(self.panel, "LEFT")
 		self.time:SetPoint("LEFT", self.panel, "CENTER", 17, 0)

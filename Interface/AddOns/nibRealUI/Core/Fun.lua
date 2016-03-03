@@ -1,25 +1,40 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+-- Lua Globals --
+local _G = _G
+local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
+local tinsert, tsort = _G.table.insert, _G.table.sort
+local next, type, select = _G.next, _G.type, _G.select
+local print, tonumber = _G.print, _G.tonumber
+
+-- WoW Globals --
+local CreateFrame, GameFontHighlight = _G.CreateFrame, _G.GameFontHighlight
+local ITEM_QUALITY_COLORS, RAID_CLASS_COLORS = _G.ITEM_QUALITY_COLORS, _G.RAID_CLASS_COLORS
+
+-- Libs --
 local LSM = LibStub("LibSharedMedia-3.0")
-local F
+local F = Aurora[1]
+
+-- RealUI --
+local nibRealUI =  LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local RealUIFont_PixelSmall, RealUIFont_PixelLarge = _G.RealUIFont_PixelSmall, _G.RealUIFont_PixelLarge
+local RealUIFont_Normal, RealUIFont_Pixel = _G.RealUIFont_Normal, _G.RealUIFont_Pixel
+local L = nibRealUI.L
+
 
 -- Misc Functions
--- FindSpellID("Spell", "player", false)
--- FindSpellID("Spell", "target", true)
 local spellFinder = CreateFrame("FRAME")
-function FindSpellID(SpellName, unit, isDebuff)
-    print("|cffffff20 SpellID tracking active. When |r|cffffffff"..SpellName.."|r|cffffff20 next activates, the SpellID will be printed in the chat window.|r")
-    spellFinder:RegisterUnitEvent("UNIT_AURA", unit)
-    spellFinder:SetScript("OnEvent", function(self, event, unit)
+function nibRealUI:FindSpellID(spellName, affectedUnit, auraType)
+    print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
+    spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
+    spellFinder:SetScript("OnEvent", function(frame, event, unit)
         local spellID
-        if isDebuff then
-            spellID = select(11, UnitDebuff(unit, SpellName))
+        if auraType == "debuff" then
+            spellID = select(11, _G.UnitDebuff(unit, spellName))
         else
-            spellID = select(11, UnitAura(unit, SpellName))
+            spellID = select(11, _G.UnitBuff(unit, spellName))
         end
         if spellID then
-            print(SpellName..": #", spellID);
-            spellFinder:UnregisterEvent("UNIT_AURA")
+            print(("The spellID for %s is %d"):format(spellName, spellID));
+            frame:UnregisterEvent("UNIT_AURA")
         end
     end)
 end
@@ -27,29 +42,30 @@ end
 -- Memory Display
 local function FormatMem(memory)
     if ( memory > 999 ) then
-        return format("%.1f |cff%s%s|r", memory/1024, "ff8030", "MiB")
+        return ("%.1f |cff%s%s|r"):format(memory/1024, "ff8030", "MiB")
     else
-        return format("%.1f |cff%s%s|r", memory, "80ff30", "KB")
+        return ("%.1f |cff%s%s|r"):format(memory, "80ff30", "KB")
     end
 end
 function nibRealUI:MemoryDisplay()
     local addons, total = {}, 0
-    UpdateAddOnMemoryUsage()
-    local memory = gcinfo()
+    _G.UpdateAddOnMemoryUsage()
+    local memory = _G.gcinfo()
 
-    for i = 1, GetNumAddOns() do
-        if ( IsAddOnLoaded(i) ) then
-            table.insert(addons, { GetAddOnInfo(i), GetAddOnMemoryUsage(i) })
-            total = total + GetAddOnMemoryUsage(i)
+    for i = 1, _G.GetNumAddOns() do
+        if ( _G.IsAddOnLoaded(i) ) then
+            local memUsage = _G.GetAddOnMemoryUsage(i)
+            tinsert(addons, { _G.GetAddOnInfo(i), memUsage })
+            total = total + memUsage
         end
     end
 
-    table.sort(addons, (function(a, b) return a[2] > b[2] end))
+    tsort(addons, (function(a, b) return a[2] > b[2] end))
 
-    local userMem = format("|cff00ffffMemory usage: |r%.1f |cffff8030%s|r", total/1024, "MiB")
+    local userMem = ("|cff00ffffMemory usage: |r%.1f |cffff8030%s|r"):format(total/1024, "MiB")
     print(userMem)
     print("-------------------------------")
-    for key, val in pairs(addons) do
+    for key, val in next, addons do
         if ( key <= 20 ) then
             print(FormatMem(val[2]).."  -  "..val[1])
         end
@@ -62,7 +78,7 @@ StaticPopupDialogs["PUDRUIRELOADUI"] = {
     button1 = "Yes",
     button2 = "No",
     OnAccept = function()
-        ReloadUI()
+        _G.ReloadUI()
     end,
     timeout = 0,
     whileDead = true,
@@ -70,14 +86,14 @@ StaticPopupDialogs["PUDRUIRELOADUI"] = {
     notClosableByLogout = false,
 }
 function nibRealUI:ReloadUIDialog()
-    StaticPopup_Show("PUDRUIRELOADUI")
+    _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
 -- Screen Height + Width
 function nibRealUI:GetResolutionVals()
-    local resStr = GetCVar("gxResolution")
-    local resHeight = tonumber(string.match(resStr, "%d+x(%d+)"))
-    local resWidth = tonumber(string.match(resStr, "(%d+)x%d+"))
+    local resStr = _G.GetCVar("gxResolution")
+    local resHeight = tonumber(resStr:match("%d+x(%d+)"))
+    local resWidth = tonumber(resStr:match("(%d+)x%d+"))
 
     if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
         resHeight = resHeight / 2
@@ -98,23 +114,23 @@ function nibRealUI:DeepCopy(object)
         end
         local new_table = {}
         lookup_table[object] = new_table
-        for index, value in pairs(object) do
+        for index, value in next, object do
             new_table[_copy(index)] = _copy(value)
         end
-        return setmetatable(new_table, getmetatable(object))
+        return _G.setmetatable(new_table, _G.getmetatable(object))
     end
     return _copy(object)
 end
 
 -- Loot Spec
 function nibRealUI:GetCurrentLootSpecName()
-    local lsID = GetLootSpecialization()
-    local sID, specName = GetSpecializationInfo(GetSpecialization())
+    local lsID = _G.GetLootSpecialization()
+    local sID, specName = _G.GetSpecializationInfo(_G.GetSpecialization())
 
     if (lsID == 0) then
         return specName
     else
-        local _, spName = GetSpecializationInfoByID(lsID)
+        local _, spName = _G.GetSpecializationInfoByID(lsID)
         return spName
     end
 end
@@ -122,7 +138,7 @@ end
 function nibRealUI:GetLootSpecData()
     local LootSpecIDs = {}
     local LootSpecClass
-    local _, _, idClass = UnitClass("player")
+    local _, _, idClass = _G.UnitClass("player")
     if (idClass == 1) then
         LootSpecIDs[1] = 71
         LootSpecIDs[2] = 72
@@ -194,6 +210,10 @@ function nibRealUI:GetLootSpecData()
 end
 
 -- Math
+function nibRealUI.Lerp(startValue, endValue, amount)
+    return (1 - amount) * startValue + amount * endValue;
+end
+
 function nibRealUI:Clamp(value, min, max)
     if value < min then
         value = min
@@ -215,18 +235,18 @@ function nibRealUI:ConvertSecondstoTime(value, onlyOne)
 
     if ( hours > 0 ) then
         if onlyOne then
-            return string.format("%dh", hours)
+            return ("%dh"):format(hours)
         else
-            return string.format("%dh %dm", hours, minutes)
+            return ("%dh %dm"):format(hours, minutes)
         end
     elseif ( minutes > 0 ) then
         if ( minutes >= 10 ) or onlyOne then
-            return string.format("%dm", minutes)
+            return ("%dm"):format(minutes)
         else
-            return string.format("%dm %ds", minutes, seconds)
+            return ("%dm %ds"):format(minutes, seconds)
         end
     else
-        return string.format("%ds", seconds)
+        return ("%ds"):format(seconds)
     end
 end
 
@@ -284,12 +304,12 @@ local function ReskinSlider(f)
         local region = select(i, f:GetRegions())
         if region:GetObjectType() == "FontString" then
             region:SetFontObject(RealUIFont_PixelSmall)
-            if region:GetText() == LOW then
+            if region:GetText() == _G.LOW then
                 region:ClearAllPoints()
                 region:SetPoint("BOTTOMLEFT", bd, "BOTTOMLEFT", 3.5, 4.5)
                 region:SetTextColor(0.75, 0.75, 0.75)
                 region:SetShadowColor(0, 0, 0, 0)
-            elseif region:GetText() == HIGH then
+            elseif region:GetText() == _G.HIGH then
                 region:ClearAllPoints()
                 region:SetPoint("BOTTOMRIGHT", bd, "BOTTOMRIGHT", 1.5, 4.5)
                 region:SetTextColor(0.75, 0.75, 0.75)
@@ -354,8 +374,8 @@ function nibRealUI:CreateCheckbox(name, parent, label, side, size)
     cbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
     cbg:SetFrameLevel(f:GetFrameLevel() - 1)
 
-    if Aurora and Aurora[1].ReskinCheck then
-        Aurora[1].ReskinCheck(f)
+    if F and F.ReskinCheck then
+        F.ReskinCheck(f)
     end
 
     return f
@@ -381,16 +401,16 @@ function nibRealUI:CreateTextButton(text, parent, template, width, height, small
     end
     f:SetText(text)
 
-    if Aurora and Aurora[1].Reskin then
-        Aurora[1].Reskin(f)
+    if F and F.Reskin then
+        F.Reskin(f)
     end
 
     return f
 end
 
 function nibRealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hideCloseButton)
-    local f = CreateFrame("Frame", name, UIParent)
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    local f = CreateFrame("Frame", name, _G.UIParent)
+        f:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         f:SetSize(width, height)
         f:SetFrameStrata("DIALOG")
         if draggable then
@@ -402,20 +422,18 @@ function nibRealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hide
         end
 
     if closeOnEsc then
-        tinsert(UISpecialFrames, name)
+        tinsert(_G.UISpecialFrames, name)
         if not hideCloseButton then
             f.close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
-                f.close:SetPoint("TOPRIGHT", 6, 4)
-                f.close:SetScript("OnClick", function(self) self:GetParent():Hide() end)
+            f.close:SetPoint("TOPRIGHT", 6, 4)
+            f.close:SetScript("OnClick", function(self) self:GetParent():Hide() end)
+            if F and F.ReskinClose then
+                F.ReskinClose(f.close)
+            end
         end
     end
 
     nibRealUI:CreateBD(f, nil, true, true)
-
-    if Aurora and Aurora[1].ReskinClose then
-        -- Aurora[1].SetBD(f)
-        if closeOnEsc and f.close then Aurora[1].ReskinClose(f.close) end
-    end
 
     return f
 end
@@ -433,7 +451,7 @@ function nibRealUI:AddButtonHighlight(button)
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     highlight:SetBackdropColor(0,0,0,0)
-    highlight:SetBackdropBorderColor(unpack(self.classColor))
+    highlight:SetBackdropBorderColor(self.classColor[1], self.classColor[2], self.classColor[3], self.classColor[4])
 end
 
 function nibRealUI:SkinButton(button, icon, border)
@@ -464,12 +482,12 @@ function nibRealUI:CreateBD(frame, alpha, stripes, windowColor)
         edgeSize = 1,
     })
     if windowColor then
-        bdColor = {nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3], nibRealUI.media.window[4]}
-        tinsert(REALUI_WINDOW_FRAMES, frame)
+        bdColor = nibRealUI.media.window
+        tinsert(_G.REALUI_WINDOW_FRAMES, frame)
     else
-        bdColor = {nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], alpha or nibRealUI.media.background[4]}
+        bdColor = nibRealUI.media.background
     end
-    frame:SetBackdropColor(unpack(bdColor))
+    frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
     frame:SetBackdropBorderColor(0, 0, 0)
 
     if stripes then
@@ -544,12 +562,12 @@ function nibRealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
         stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
-        stripeTex:SetAlpha(RealUI_InitDB.stripeOpacity)
+        stripeTex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         stripeTex:SetHorizTile(true)
         stripeTex:SetVertTile(true)
         stripeTex:SetBlendMode("ADD")
 
-    tinsert(REALUI_STRIPE_TEXTURES, stripeTex)
+    tinsert(_G.REALUI_STRIPE_TEXTURES, stripeTex)
 
     return stripeTex
 end
@@ -558,7 +576,7 @@ function nibRealUI:CreateFS(parent, justify, size)
     local f = parent:CreateFontString(nil, "OVERLAY")
 
     if size == "small" then
-        f:SetFontObject(RealUIFont_PixelSmall)
+        f:SetFontObject(_G.RealUIFont_PixelSmall)
     elseif size == "large" then
         f:SetFontObject(RealUIFont_PixelLarge)
     else
@@ -575,7 +593,7 @@ function nibRealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
 
     local maxNameLength = maxLength or 12
-    local newName = (name:utf8len() > maxNameLength) and gsub(name, "%s?(..[\128-\191]*)%S+%s", "%1. ") or name
+    local newName = (name:utf8len() > maxNameLength) and name:gsub("%s?(..[\128-\191]*)%S+%s", "%1. ") or name
 
     if (newName:utf8len() > maxNameLength) then
         newName = newName:utf8sub(1, maxNameLength)
@@ -649,7 +667,7 @@ end
 
 function nibRealUI:GetClassColor(class, ...)
     if not RAID_CLASS_COLORS[class] then return {1, 1, 1} end
-    local classColors = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
+    local classColors = (_G.CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
     if ... then
         return {r = classColors.r, g = classColors.g, b = classColors.b}
     else
@@ -657,11 +675,11 @@ function nibRealUI:GetClassColor(class, ...)
     end
 end
 
-function nibRealUI:ColorToRgb(h, s, l, a)
+function nibRealUI:HSLToRGB(h, s, l, a)
     if s<=0 then return l,l,l,a end
     h, s, l = h*6, s, l
-    local c = (1-math.abs(2*l-1))*s
-    local x = (1-math.abs(h%2-1))*c
+    local c = (1-abs(2*l-1))*s
+    local x = (1-abs(h%2-1))*c
     local m,r,g,b = (l-.5*c), 0,0,0
     if h < 1     then r,g,b = c,x,0
     elseif h < 2 then r,g,b = x,c,0
@@ -672,9 +690,11 @@ function nibRealUI:ColorToRgb(h, s, l, a)
     end return (r+m),(g+m),(b+m),a
 end
 
-function nibRealUI:ColorToHsl(color)
-    local r, g, b = color[1], color[2], color[3]
-    local min, max = math.min(r, g, b), math.max(r, g, b)
+function nibRealUI:RGBToHSL(r, g, b)
+    if type(r) == "table" then
+        r, g, b = r.r or r[1], r.g or r[2], r.b or r[3]
+    end
+    local min, max = min(r, g, b), max(r, g, b)
     local h, s, l = 0, 0, (max + min) / 2
     if max ~= min then
         local d = max - min
@@ -693,25 +713,55 @@ function nibRealUI:ColorToHsl(color)
     return h, s, l
 end
 
-function nibRealUI:ColorShift(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb((((h + delta) * 255) % 255), s, l)}
+function nibRealUI:ColorShift(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2 = self:HSLToRGB((((h + delta) * 255) % 255), s, l)
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorLighten(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb(h, s, nibRealUI:Clamp(l + delta, 0, 1))}
+function nibRealUI:ColorLighten(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2, a = self:HSLToRGB(h, s, self:Clamp(l + delta, 0, 1))
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorSaturate(color, delta)
-    local h, s, l = nibRealUI:ColorToHsl(color)
-    return {nibRealUI:ColorToRgb(h, nibRealUI:Clamp(s + delta, 0, 1), l)}
+function nibRealUI:ColorSaturate(delta, r, g, b)
+    local h, s, l = self:RGBToHSL(r, g, b)
+    local r2, g2, b2, a = self:HSLToRGB(h, self:Clamp(s + delta, 0, 1), l)
+    if type(r) == "table" then
+        if r.r then
+            r.r, r.g, r.b = r2, g2, b2
+        else
+            r[1], r[2], r[3] = r2, g2, b2
+        end
+        return r
+    else
+        return r2, g2, b2
+    end
 end
 
-function nibRealUI:ColorDarken(color, delta)
-    return nibRealUI:ColorLighten(color, -delta)
+function nibRealUI:ColorDarken(delta, r, g, b)
+    return self:ColorLighten(-delta, r, g, b)
 end
 
-function nibRealUI:ColorDesaturate(color, delta)
-    return nibRealUI:ColorSaturate(color, -delta)
+function nibRealUI:ColorDesaturate(delta, r, g, b)
+    return self:ColorSaturate(-delta, r, g, b)
 end

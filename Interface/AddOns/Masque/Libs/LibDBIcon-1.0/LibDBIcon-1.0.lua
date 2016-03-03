@@ -19,7 +19,7 @@ lib.callbackRegistered = lib.callbackRegistered or nil
 lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 lib.notCreated = lib.notCreated or {}
 
-function lib:IconCallback(event, name, key, value, dataobj)
+function lib:IconCallback(event, name, key, value)
 	if lib.objects[name] then
 		if key == "icon" then
 			lib.objects[name].icon:SetTexture(value)
@@ -75,7 +75,7 @@ end
 
 --------------------------------------------------------------------------------
 
-local onClick, onMouseUp, onMouseDown, onDragStart, onDragStop, onDragEnd, updatePosition
+local onClick, onMouseUp, onMouseDown, onDragStart, onDragStop, updatePosition
 
 do
 	local minimapShapes = {

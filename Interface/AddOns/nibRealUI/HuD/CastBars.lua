@@ -1,5 +1,5 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local db, ndb
 
 local MODNAME = "CastBars"
@@ -16,12 +16,12 @@ local ChannelingTicks = {
     [GetSpellInfo(740)] = 4,    -- Tranquility
     -- Mage
     [GetSpellInfo(5143)] = 5,   -- Arcane Missiles
-    [GetSpellInfo(10)] = 8,     -- Blizzard
+    [GetSpellInfo(10) or "gone"] = 8,     -- Blizzard
     [GetSpellInfo(12051)] = 3,  -- Evocation
     -- Monk
     [GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
     [GetSpellInfo(115175)] = 8,  -- Soothing Mist
-    [GetSpellInfo(115294)] = 6,  -- Mana Tea
+    [GetSpellInfo(115294) or "gone"] = 6,  -- Mana Tea
     [GetSpellInfo(113656)] = 4,  -- Fists of Fury
     -- Priest
     [GetSpellInfo(64843)] = 4,  -- Divine Hymn
@@ -33,8 +33,8 @@ local ChannelingTicks = {
     [GetSpellInfo(689)] = 6,    -- Drain Life
     [GetSpellInfo(755)] = 6,    -- Health Funnel
     [GetSpellInfo(4629)] = 6,   -- Rain of Fire
-    [GetSpellInfo(103103)] = 6, -- Drain Soul
-    [GetSpellInfo(108371)] = 6, -- Harvest Life
+    [GetSpellInfo(103103) or "gone"] = 6, -- Drain Soul
+    [GetSpellInfo(108371) or "gone"] = 6, -- Harvest Life
 }
 
 local UpdateSpeed = 1/60
@@ -47,11 +47,11 @@ function CastBars:ClearTicks()
     end
 end
 
-function CastBars:SetBarTicks(ticks)
-    CastBars:debug("SetBarTicks", ticks)
-    if not ticks then return end
-    for i = 1, ticks do
-        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / ticks))), 0)
+function CastBars:SetBarTicks(numTicks)
+    CastBars:debug("SetBarTicks", numTicks)
+    if not numTicks then return end
+    for i = 1, numTicks do
+        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
         self.tick[i]:Show()
     end
 end
@@ -116,19 +116,16 @@ local info = {
         leftAngle = [[\]],
         rightAngle = [[\]],
         smooth = false,
-        debug = "playerCast"
     },
     target = {
         leftAngle = [[/]],
         rightAngle = [[/]],
         smooth = false,
-        debug = "targetCast"
     },
     focus = {
         leftAngle = [[\]],
         rightAngle = [[/]],
         smooth = false,
-        debug = "focusCast"
     },
 }
 
@@ -193,7 +190,8 @@ local function PostCastInterrupted(self, unit, ...)
         self.Text:SetTextColor(1, 0, 0, 1)
         self:SetStatusBarColor(1, 0, 0, 1)
         self:Show()
-        self.flash:SetChange(-(self:GetAlpha()))
+        self.flash:SetFromAlpha(self:GetAlpha())
+        self.flash:SetToAlpha(0)
         self.flashAnim:Play()
     end
 end

@@ -16,7 +16,7 @@ local table = _G.table
 -- Library namespace.
 -----------------------------------------------------------------------
 local LibStub = _G.LibStub
-local MAJOR = "LibTextDump-1.0"
+local MAJOR = "RealUI_LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
@@ -57,6 +57,11 @@ local DEFAULT_FRAME_HEIGHT = 600
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
+local function round(number, places)
+	local mult = 10 ^ (places or 0)
+	return _G.floor(number * mult + 0.5) / mult
+end
+
 local function NewInstance(width, height)
 	lib.num_frames = lib.num_frames + 1
 
@@ -114,33 +119,90 @@ local function NewInstance(width, height)
 	footer:SetPoint("CENTER", footer_frame, "CENTER", 0, 0)
 
 
-	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "UIPanelScrollFrameTemplate")
+	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "FauxScrollFrameTemplate")
 	scroll_area:SetPoint("TOPLEFT", 5, -24)
 	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
 
-	scroll_area:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self.ScrollBar)
-	end)
+	function scroll_area:Update(start, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+		--print("Scroll:Update", start, line_height, max_display_lines)
+		local i, linesToDisplay = start - 1, 0
+		repeat
+			i = i + 1
+			linesToDisplay = linesToDisplay + (wrapped_lines[i] or 0)
+			--print("Line:", i, linesToDisplay, wrapped_lines[i])
+		until linesToDisplay > max_display_lines or not wrapped_lines[i]
+		local stop = i - 1
+		--print("repeat", start, stop, line_height, max_display_lines)
 
-	scroll_area.ScrollBar:SetScript("OnMouseWheel", function(self, delta)
-		_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self)
-	end)
+		self:Show()
+		local frameName = self:GetName()
+		local scrollBar = _G[frameName .. "ScrollBar"]
+		scrollBar:SetStepsPerPage(linesToDisplay - 1)
+
+		if all_wrapped_lines and line_height then
+			--[[ This block should not be run OnVerticalScroll because posible variations in linesToDisplay from
+			scroll to scroll will affect the height of the scroll frame. This will then result in inconsistent 
+			scrolling behaviour. ]]
+			local scrollChildFrame = _G[frameName .. "ScrollChildFrame"]
+			local scrollFrameHeight = 0
+			local scrollChildHeight = 0
+
+			scrollFrameHeight = (all_wrapped_lines - linesToDisplay) * line_height
+			scrollChildHeight = all_wrapped_lines * line_height
+			if ( scrollFrameHeight < 0 ) then
+				scrollFrameHeight = 0
+			end
+			self.height = scrollFrameHeight
+			scrollChildFrame:Show()
+			scrollChildFrame:SetHeight(scrollChildHeight)
+
+			scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
+			scrollBar:SetValueStep(line_height)
+		end
+		
+		-- Arrow button handling
+		local scrollUpButton = _G[frameName .. "ScrollBarScrollUpButton"]
+		local scrollDownButton = _G[frameName .. "ScrollBarScrollDownButton"]
+
+		if ( scrollBar:GetValue() == 0 ) then
+			scrollUpButton:Disable()
+		else
+			scrollUpButton:Enable()
+		end
+		if ((scrollBar:GetValue() - self.height) == 0) then
+			scrollDownButton:Disable()
+		else
+			scrollDownButton:Enable()
+		end
+		return start, stop
+	end
+
+	copy_frame.scroll_area = scroll_area
 
 
-	local edit_box = _G.CreateFrame("EditBox", nil, copy_frame)
+	local edit_box = _G.CreateFrame("EditBox", ("%sScrollChildFrame"):format(frame_name), copy_frame)
 	edit_box:SetMultiLine(true)
 	edit_box:SetMaxLetters(0)
 	edit_box:EnableMouse(true)
 	edit_box:SetAutoFocus(false)
 	edit_box:SetFontObject("ChatFontNormal")
-	edit_box:SetSize(scroll_area:GetSize())
+	edit_box:SetPoint("TOPLEFT", 5, -24)
+	edit_box:SetPoint("BOTTOMRIGHT", -28, 29)
 
 	edit_box:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copy_frame)
 	end)
 
 	copy_frame.edit_box = edit_box
-	scroll_area:SetScrollChild(edit_box)
+
+	local line_dummy = copy_frame:CreateFontString()
+	line_dummy:SetJustifyH("LEFT")
+	line_dummy:SetNonSpaceWrap(true)
+	line_dummy:SetFontObject("ChatFontNormal")
+	line_dummy:SetPoint("TOPLEFT", 5, 100)
+	line_dummy:SetPoint("BOTTOMRIGHT", copy_frame, "TOPRIGHT", -28, 0)
+	line_dummy:Hide()
+	copy_frame.line_dummy = line_dummy
 
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
@@ -153,6 +215,8 @@ local function NewInstance(width, height)
 
 		edit_box:HighlightText(0)
 		edit_box:SetFocus()
+
+		copy_frame:RegisterEvent("PLAYER_LOGOUT")
 	end)
 
 	highlight_button:SetScript("OnMouseDown", function(self, button)
@@ -177,16 +241,31 @@ local function NewInstance(width, height)
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copy_frame
-	buffers[instance] = {}
+	buffers[instance] = {
+		wrapped_lines = {}
+	}
 
 	return instance
+end
+
+local function GetDisplayLines(start, wrapped_lines, max_display_lines)
+	--print("GetDisplayLines", start, line_height, max_display_lines)
+	local i, lines = start - 1, 0
+	repeat
+		i = i + 1
+		lines = lines + (wrapped_lines[i] or 0)
+		--print("Line:", i, lines, wrapped_lines[i])
+	until lines > max_display_lines or not wrapped_lines[i]
+	local stop = i - 1
+	--print("repeat", start, stop, line_height, max_display_lines)
+	return start, stop, lines
 end
 
 
 -----------------------------------------------------------------------
 -- Library methods.
 -----------------------------------------------------------------------
-function lib:New(frame_title, width, height)
+function lib:New(frame_title, width, height, save)
 	local title_type = type(frame_title)
 
 	if title_type ~= "nil" and title_type ~= "string" then
@@ -202,8 +281,20 @@ function lib:New(frame_title, width, height)
 	if height_type ~= "nil" and height_type ~= "number" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame height must be nil or a number."))
 	end
+	local save_type = type(save)
+
+	if save_type ~= "nil" and save_type ~= "function" then
+		error(METHOD_USAGE_FORMAT:format("New", "save must be nil or a function."))
+	end
 	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT)
-	frames[instance].title:SetText(frame_title)
+	local frame = frames[instance]
+	frame.title:SetText(frame_title)
+
+	if save then
+		frame:SetScript("OnEvent", function(event, ...)
+			save(buffers[instance])
+		end)
+	end
 
 	return instance
 end
@@ -218,7 +309,10 @@ end
 
 
 function prototype:Clear()
+	local wrapped_lines = buffers[self].wrapped_lines
 	table.wipe(buffers[self])
+	buffers[self].wrapped_lines = wrapped_lines
+	wrapped_lines = nil
 end
 
 
@@ -228,7 +322,7 @@ function prototype:Display(separator)
 	if display_text == "" then
 		error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
 	end
-	local frame = frames[self]
+	local buffer, frame = buffers[self], frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
 	_G.ShowUIPanel(frame)
@@ -258,5 +352,47 @@ function prototype:String(separator)
 	if sep_type ~= "nil" and sep_type ~= "string" then
 		error(METHOD_USAGE_FORMAT:format("String", "separator must be nil or a string."), 2)
 	end
-	return table.concat(buffers[self], separator or "\n")
+
+	separator = separator or "\n"
+	local buffer, frame, output = buffers[self], frames[self]
+	local line_dummy, wrapped_lines = frame.line_dummy, buffer.wrapped_lines
+
+	local _, line_height = line_dummy:GetFont()
+	local max_display_lines, all_wrapped_lines = round(frame.edit_box:GetHeight() / line_height), 0
+	--print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
+	table.wipe(wrapped_lines)
+	for i = 1, #buffer do
+		line_dummy:SetText(buffer[i])
+		wrapped_lines[i] = line_dummy:GetNumLines()
+		all_wrapped_lines = all_wrapped_lines + wrapped_lines[i]
+	end
+
+	local start, stop = frame.scroll_area:Update(1, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+
+	if all_wrapped_lines <= max_display_lines then
+		--print("Simple", start, stop)
+		output = table.concat(buffer, separator)
+	else
+		--print("Overflow", start, stop)
+		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
+			--print("OnVerticalScroll", value)
+			local scrollbar = scroll_area.ScrollBar
+			local scroll_min, scroll_max = scrollbar:GetMinMaxValues()
+			--print("Min/Max", scroll_min, scroll_max)
+			local scroll_per = round(value / scroll_max, 2)
+			local offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
+
+			--print("Current position", value, offset, scroll_per)
+
+			local start, stop = scroll_area:Update(offset, wrapped_lines, max_display_lines)
+
+			--print("Concat", start, stop)
+			local text = table.concat(buffer, separator, start, stop)
+			frame.edit_box:SetText(text)
+			frame.prev_stop = stop
+		end)
+
+		output = table.concat(buffer, separator, start, stop)
+	end
+	return output
 end

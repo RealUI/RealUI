@@ -1,11 +1,10 @@
 local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = LibStub("AceLocale-3.0"):GetLocale("nibRealUI")
+local L = nibRealUI.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local Tablet20 = LibStub("Tablet-2.0")
 
 local MODNAME = "InfoLine"
 local InfoLine = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
-local StatDisplay
 
 local _
 local min = math.min
@@ -184,7 +183,7 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = SPELLBOOK_ABILITIES_BUTTON,
-        func = function() ToggleFrame(SpellBookFrame) end,
+        func = function() ToggleSpellBook(BOOKTYPE_SPELL) end,
         notCheckable = true
     },
     {text = TALENTS_BUTTON,
@@ -556,7 +555,7 @@ local function GetOptions()
                         end,
                         order = 90,
                     },
-                    blue1 = {
+                    blue2 = {
                         type = "color",
                         name = "Header 3",
                         hasAlpha = false,
@@ -1836,8 +1835,8 @@ local FriendsTabletData
 local FriendsTabletDataNames
 local FriendsOnline = 0
 
-local function Friends_TabletClickFunc(name, iname, presenceID)
-    --print("Name: "..name.." iName: "..iname.." presenceID: "..presenceID)
+local function Friends_TabletClickFunc(name, iname, bnetIDAccount)
+    --print("Name: "..name.." iName: "..iname.." bnetIDAccount: "..bnetIDAccount)
     if not name then return end
     if IsAltKeyDown() then
         if iname == "" then
@@ -1845,8 +1844,8 @@ local function Friends_TabletClickFunc(name, iname, presenceID)
         else
             InviteUnit(iname)
         end
-    elseif presenceID then
-        SetItemRef("BNplayer:"..name..":"..presenceID, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
+    elseif bnetIDAccount then
+        SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
     else
         SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
     end
@@ -1968,6 +1967,13 @@ local clientString = {
     [BNET_CLIENT_OVERWATCH] = "OW",
 }
 
+local BNGetGameAccountInfo = _G.BNGetGameAccountInfo
+if not BNGetGameAccountInfo then
+    BNGetGameAccountInfo = function(...)
+        return BNGetToonInfo(...)
+    end
+end
+
 local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
@@ -2004,18 +2010,17 @@ local function Friends_Update(self)
 
     -- Battle.net Friends
     for t = 1, BNGetNumFriends() do
-        local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(t)
+        local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, _, noteText = BNGetFriendInfo(t)
         -- WoW friends
-        if ( isOnline and client=="WoW" ) then
+        if ( isOnline and client == BNET_CLIENT_WOW ) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
 
-            local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
-            local _, toonName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetToonInfo(toonID)
+            local _, characterName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
             curFriendsOnline = curFriendsOnline + 1
 
             if (realmName == nibRealUI.realm) then
-                FriendsTabletDataNames[toonName] = true
+                FriendsTabletDataNames[characterName] = true
             end
 
             -- Class
@@ -2028,36 +2033,36 @@ local function Friends_Update(self)
                 cname = strform(
                     "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc)|r",
                     FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                    presenceName,
+                    accountName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
-                    toonName
+                    characterName
                 )
             else
                 -- On Another Realm
                 cname = strform(
                     "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc-%s)|r",
                     FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                    presenceName,
+                    accountName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
-                    toonName,
+                    characterName,
                     realmName
                 )
             end
-            if (isAFK and toonName ) then
+            if (isAFK and characterName ) then
                 cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-            elseif(isDND and toonName) then
+            elseif(isDND and characterName) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
 
             -- Add Friend to list
-            tinsert(FriendsTabletData, { cname, level, zoneName, faction, client, presenceName, noteText, toonName, presenceID })
+            tinsert(FriendsTabletData, { cname, level, zoneName, faction, client, accountName, noteText, characterName, bnetIDAccount })
         -- Friends in other games
         elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 
-            local _, toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(toonID)
-            InfoLine:debug("BNet: not in WoW", toonName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
-            toonName = BNet_GetValidatedCharacterName(toonName, battleTag, client)
+            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
+            InfoLine:debug("BNet: not in WoW", characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
+            characterName = BNet_GetValidatedCharacterName(characterName, battleTag, client)
             client = clientString[client] or client
             curFriendsOnline = curFriendsOnline + 1
 
@@ -2066,17 +2071,17 @@ local function Friends_Update(self)
             cname = strform(
                 "|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
                 FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
-                presenceName,
-                toonName
+                accountName,
+                characterName
             )
-            if ( isAFK and toonName ) then
+            if ( isAFK and characterName ) then
                 cname = strform("%s %s", CHAT_FLAG_AFK, cname)
-            elseif ( isDND and toonName ) then
+            elseif ( isDND and characterName ) then
                 cname = strform("%s %s", CHAT_FLAG_DND, cname)
             end
 
             -- Add Friend to list
-            tinsert(FriendsTabletData, {cname, level, gameText, class, client, presenceName, noteText, "", presenceID})
+            tinsert(FriendsTabletData, {cname, level, gameText, class, client, accountName, noteText, "", bnetIDAccount})
         end
     end
 
@@ -2463,10 +2468,6 @@ local function SpecLootClickFunc(self, spec)
     SetLootSpecialization(LootSpecIDs[spec])
 end
 
-local function SpecStatClickFunc(self, spec)
-    nibRealUI:GetModule("StatDisplay"):ShowOptionsWindow()
-end
-
 local function SpecAddLootSpecToCat(self, cat)
     local numSpecs = GetNumSpecializations()
     local specNames = {}
@@ -2649,57 +2650,6 @@ local function Spec_UpdateTablet(self)
         SpecAddLootSpecToCat(self, SpecSection["loot"].cat)
     end
 
-    ---- Stat Display
-    if not StatDisplay then
-        StatDisplay = nibRealUI:GetModule("StatDisplay", true)
-    end
-    if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
-        if GetSpecialization() then
-            AddBlankTabLine(SpecSection["loot"].cat, 8)
-        elseif numEquipSets > 0 then
-            AddBlankTabLine(SpecSection["equipment"].equipCat, 8)
-        else
-            AddBlankTabLine(SpecSection["specs"].talentCat, 8)
-        end
-        SpecSection["stats"] = {}
-        SpecSection["stats"].cat = Tablets.spec:AddCategory()
-        SpecSection["stats"].cat:AddLine("text", L["Spec_StatDisplay"], "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
-        AddBlankTabLine(SpecSection["stats"].cat, 2)
-
-        if numSpecGroups == 2 then Cols = {PRIMARY, SECONDARY, " "} else Cols = {PRIMARY, " "} end
-        SpecSection["stats"].statCat = Tablets.spec:AddCategory("columns", #Cols)
-        lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 12, {"LEFT", "LEFT"})
-        SpecSection["stats"].statCat:AddLine(lineHeader)
-        AddBlankTabLine(SpecSection["stats"].statCat, 1)
-
-        local watchedStatTexts = StatDisplay:GetCharStatTexts()
-        local line = {}
-        for r = 1, 2 do
-            wipe(line)
-            for s = 1, numSpecGroups do
-                if s == 1 then
-                    line["text"] = watchedStatTexts[s][r]
-                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"] = "LEFT"
-                    line["textR"] = 0.9
-                    line["textG"] = 0.9
-                    line["textB"] = 0.9
-                    line["indentation"] = 12.5
-                    line["func"] = function() SpecStatClickFunc(self, s) end
-                elseif s == 2 then
-                    line["text2"] = watchedStatTexts[s][r]
-                    line["size2"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify2"] = "LEFT"
-                    line["text2R"] = 0.9
-                    line["text2G"] = 0.9
-                    line["text2B"] = 0.9
-                end
-            end
-            line["text"..(numSpecGroups + 1)] = " "
-            SpecSection["stats"].statCat:AddLine(line)
-        end
-    end
-
     -- Hint
     local hintStr = ""
     if numSpecGroups > 1 then
@@ -2712,10 +2662,6 @@ local function Spec_UpdateTablet(self)
         else
             hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
         end
-    end
-    if nibRealUI:GetModuleEnabled("StatDisplay") and StatDisplay then
-        if hintStr ~= "" then hintStr = hintStr .. "\n" end
-        hintStr = hintStr .. L["Spec_StatConfig"]
     end
     Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
 end

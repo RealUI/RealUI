@@ -31,6 +31,7 @@ C.classcolours = {
 	["SHAMAN"] = { r = 0, g = 0.6, b = 0.6 };
 	["WARRIOR"] = { r = 0.9, g = 0.65, b = 0.45 },
 	["DEATHKNIGHT"] = { r = 0.77, g = 0.12 , b = 0.23 },
+    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
 }
 
 C.media = {
@@ -62,6 +63,8 @@ C.defaults = {
 }
 
 C.frames = {}
+
+C.TOC = select(4, GetBuildInfo())
 
 -- [[ Cached variables ]]
 
@@ -839,7 +842,10 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 			end
 		end
 
-		local lightbds = {"SecondaryProfession1", "SecondaryProfession2", "SecondaryProfession3", "SecondaryProfession4", "ChatConfigChatSettingsClassColorLegend", "ChatConfigChannelSettingsClassColorLegend", "FriendsFriendsList", "HelpFrameGM_ResponseScrollFrame1", "HelpFrameGM_ResponseScrollFrame2", "FriendsFriendsNoteFrame", "AddFriendNoteFrame", "ScrollOfResurrectionSelectionFrameList", "HelpFrameReportBugScrollFrame", "HelpFrameSubmitSuggestionScrollFrame", "ReportPlayerNameDialogCommentFrame", "ReportCheatingDialogCommentFrame"}
+		local lightbds = {"SecondaryProfession1", "SecondaryProfession2", "SecondaryProfession3", "SecondaryProfession4", "ChatConfigChatSettingsClassColorLegend", "ChatConfigChannelSettingsClassColorLegend", "FriendsFriendsList", "HelpFrameGM_ResponseScrollFrame1", "HelpFrameGM_ResponseScrollFrame2", "AddFriendNoteFrame", "ScrollOfResurrectionSelectionFrameList", "HelpFrameReportBugScrollFrame", "HelpFrameSubmitSuggestionScrollFrame", "ReportPlayerNameDialogCommentFrame", "ReportCheatingDialogCommentFrame"}
+		if FriendsFriendsNoteFrame then
+			tinsert(lightbds, "FriendsFriendsNoteFrame")
+		end
 		for i = 1, #lightbds do
 			local bd = _G[lightbds[i]]
 			if bd then
@@ -1784,16 +1790,18 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- BN conversation
 
-		BNConversationInviteDialogHeader:SetTexture("")
+		if BNConversationInviteDialog then
+			BNConversationInviteDialogHeader:SetTexture("")
 
-		F.CreateBD(BNConversationInviteDialog)
-		F.CreateBD(BNConversationInviteDialogList, .25)
+			F.CreateBD(BNConversationInviteDialog)
+			F.CreateBD(BNConversationInviteDialogList, .25)
 
-		F.Reskin(BNConversationInviteDialogInviteButton)
-		F.Reskin(BNConversationInviteDialogCancelButton)
-		F.ReskinScroll(BNConversationInviteDialogListScrollFrameScrollBar)
-		for i = 1, BN_CONVERSATION_INVITE_NUM_DISPLAYED do
-			F.ReskinCheck(_G["BNConversationInviteDialogListFriend"..i].checkButton)
+			F.Reskin(BNConversationInviteDialogInviteButton)
+			F.Reskin(BNConversationInviteDialogCancelButton)
+			F.ReskinScroll(BNConversationInviteDialogListScrollFrameScrollBar)
+			for i = 1, BN_CONVERSATION_INVITE_NUM_DISPLAYED do
+				F.ReskinCheck(_G["BNConversationInviteDialogListFriend"..i].checkButton)
+			end
 		end
 
 		-- Tabard frame
@@ -1826,8 +1834,10 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GuildRegistrarFrameBottom:Hide()
 		GuildRegistrarFrameMiddle:Hide()
 		select(19, GuildRegistrarFrame:GetRegions()):Hide()
-		select(6, GuildRegistrarFrameEditBox:GetRegions()):Hide()
-		select(7, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+		if C.TOC < 70000 then
+			select(6, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+			select(7, GuildRegistrarFrameEditBox:GetRegions()):Hide()
+		end
 
 		GuildRegistrarFrameEditBox:SetHeight(20)
 
@@ -2172,7 +2182,9 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		RaidInfoDetailCorner:Hide()
 		RaidInfoFrameHeader:Hide()
 		for i = 1, 9 do
-			select(i, FriendsFriendsNoteFrame:GetRegions()):Hide()
+			if FriendsFriendsNoteFrame then
+				select(i, FriendsFriendsNoteFrame:GetRegions()):Hide()
+			end
 			select(i, AddFriendNoteFrame:GetRegions()):Hide()
 			select(i, ReportPlayerNameDialogCommentFrame:GetRegions()):Hide()
 			select(i, ReportCheatingDialogCommentFrame:GetRegions()):Hide()

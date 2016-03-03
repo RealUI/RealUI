@@ -236,17 +236,30 @@ local function GroupLootOnEvent(self, event, rollId)
 	Loot:UpdateGroupLoot()
 end
 
-local function GroupLootFrameOnEvent(self, event, rollId)
-	if (self.rollId and rollId==self.rollId) then
-		for index, value in next, grouplootlist do
-			if(self.rollId==value.rollId) then
-				tremove(grouplootlist, index)
-				break
+local function GroupLootFrameOnEvent(self, event, ...)
+	if event == "CANCEL_LOOT_ROLL" then
+		local rollId = ...
+		if (self.rollId and rollId==self.rollId) then
+			for index, value in next, grouplootlist do
+				if(self.rollId==value.rollId) then
+					tremove(grouplootlist, index)
+					break
+				end
+			end
+			StaticPopup_Hide("CONFIRM_LOOT_ROLL", self.rollId)
+			self.rollId = nil
+			Loot:UpdateGroupLoot()
+		end
+	elseif event == "MODIFIER_STATE_CHANGED" then
+		local key, state = ...
+		if (key == "LSHIFT" or key == "RSHIFT") and not GameTooltip:IsEquippedItem() then
+			if state == 1 then
+				GameTooltip_ShowCompareItem()
+			else
+				ShoppingTooltip1:Hide()
+				ShoppingTooltip2:Hide()
 			end
 		end
-		StaticPopup_Hide("CONFIRM_LOOT_ROLL", self.rollId)
-		self.rollId = nil
-		Loot:UpdateGroupLoot()
 	end
 end
 
@@ -289,6 +302,7 @@ function Loot:UpdateGroupLoot()
 			frame:SetHeight(24)
 			frame:SetPoint("BOTTOM", RealUIGroupLootFrame, 0, ((index-1)*(GroupLootIconSize+3)))
 			frame:RegisterEvent("CANCEL_LOOT_ROLL")
+			frame:RegisterEvent("MODIFIER_STATE_CHANGED")
 			frame:SetScript("OnEvent", GroupLootFrameOnEvent)
 			frame:SetScript("OnMouseUp", GroupLootFrameOnClick)
 			frame:SetScript("OnLeave", GroupLootFrameOnLeave)
