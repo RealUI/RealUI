@@ -130,15 +130,16 @@ function Chat:OnInitialize()
 	nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
-function Chat:OnEnable() 
+function Chat:OnEnable()
+	self:debug("OnEnable")
 	self:RegisterEvent("PLAYER_LOGIN")
 
 	for i = 1, NUM_CHAT_WINDOWS do
 		local editbox = _G["ChatFrame"..i.."EditBox"]
 		for k = 6, 11 do
 			local tex = select(k, editbox:GetRegions())
-			if tex and tex:GetObjectType() == "texture" then
-				tex:SetTexture(nil)
+			if tex:GetObjectType() == "Texture" then
+				tex:SetTexture("")
 			end
 		end
 	end
