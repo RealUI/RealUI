@@ -229,11 +229,11 @@ function AuraTracking:UpdateVisibility()
     self:debug("instType", self.inPvP, self.inPvE, instType)
     self:debug("activeTrackers", activeTrackers["left"], activeTrackers["right"])
 
-    if self.configMode then
+    if self.configMode or combatCondition then
         self.left:Show()
         self.right:Show()
     elseif self["in"..instType] then
-        self.left:SetShown(visibility["show"..instType] and (combatCondition or targetCondition))
+        self.left:SetShown(visibility["show"..instType] and targetCondition)
         self.right:SetShown(visibility["show"..instType] and targetCondition)
     else
         self.left:SetShown(targetCondition or activeTrackers["left"] > 0)
@@ -424,14 +424,22 @@ end
 
 function AuraTracking:TargetAndPetUpdate(unit, event, ...)
     self:debug("TargetAndPetUpdate", unit, event, ...)
-    local unitExists = _G.UnitExists(unit)
+    local unitExists, unitGUIDKey = _G.UnitExists(unit), unit.."GUID"
     local targetSpellList
     if unit == "target" then
         targetSpellList = {}
         self.targetHostile = unitExists and _G.UnitCanAttack("player", "target") and not _G.UnitIsDeadOrGhost("target")
     end
     if unitExists then
-        self[unit.."GUID"] = _G.UnitGUID(unit)
+        local newGUID = _G.UnitGUID(unit)
+        if self[unitGUIDKey] then
+            if self[unitGUIDKey] ~= newGUID then
+                self:debug("Unit Changed", unit, isValidUnit[unit])
+            end
+        else
+            self:debug("Unit Added", unit, isValidUnit[unit])
+        end
+        self[unitGUIDKey] = newGUID
         if not isValidUnit[unit] then
             self:debug("EnableUnit", unit)
             isValidUnit[unit] = true
@@ -443,21 +451,25 @@ function AuraTracking:TargetAndPetUpdate(unit, event, ...)
                     end
                 end
             end
-            self:UNIT_AURA("FORCED_UNIT_AURA", unit)
             if targetSpellList then
                 RegisterSpellList("TargetExclusions", targetSpellList)
             end
         end
-    elseif isValidUnit[unit] then
-        iterUnits = true
-        self:debug("DisableUnit", unit)
-        isValidUnit[unit] = false
-        for tracker, spellData in self:IterateTrackers() do
-            if spellData.unit == unit and tracker.isEnabled then
-                tracker:Disable()
+        self:UNIT_AURA("FORCED_UNIT_AURA", unit)
+    else
+        self:debug("Unit Removed", unit, isValidUnit[unit])
+        if isValidUnit[unit] then
+            self:debug("DisableUnit", unit)
+            iterUnits = true
+            for tracker, spellData in self:IterateTrackers() do
+                if spellData.unit == unit and tracker.isEnabled then
+                    tracker:Disable()
+                end
             end
+            iterUnits = false
+            self[unitGUIDKey] = nil
+            isValidUnit[unit] = false
         end
-        iterUnits = false
     end
     self:UpdateVisibility()
 end
