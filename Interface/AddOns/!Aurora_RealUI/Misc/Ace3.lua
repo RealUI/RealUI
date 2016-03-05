@@ -4,16 +4,12 @@ local _G = _G
 _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     -- Lua Globals --
     local next, select = _G.next, _G.select
-    local strsplit = _G.strsplit
-
-    -- WoW Globals --
-    local CreateFrame, hooksecurefunc = _G.CreateFrame, _G.hooksecurefunc
 
     -- Libs --
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
 
-    local HiddenFrame = CreateFrame("Frame", nil, _G.UIParent)
+    local HiddenFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     HiddenFrame:Hide()
 
     local r, g, b = C.r, C.g, C.b
@@ -53,7 +49,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         frame.DMiddle:SetAlpha(0)
         frame.DRight:SetAlpha(0)
 
-        local bg = CreateFrame("Frame", nil, frame)
+        local bg = _G.CreateFrame("Frame", nil, frame)
         bg:SetPoint("TOPLEFT", 0, -18)
         bg:SetPoint("BOTTOMRIGHT", 0, 6)
         bg:SetFrameLevel(frame:GetFrameLevel()-1)
@@ -100,8 +96,8 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
     AceGUI.RegisterAsWidget = function(gui, widget)
         local TYPE = widget.type
-        local _, TYPE2, TYPE3 = strsplit("-", TYPE)
-        local MODULE, MODULETYPE = strsplit("_", TYPE)
+        local _, TYPE2, TYPE3 = _G.strsplit("-", TYPE)
+        local MODULE, MODULETYPE = _G.strsplit("_", TYPE)
         mods.debug("Widget:", MODULE or TYPE)
         mods.debug("Subtype", TYPE2 or MODULETYPE, TYPE3)
 
@@ -525,7 +521,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE == "TreeGroup" then
             if not widget.skinned then
                 mods.debug("TreeFrame!!!")
-                hooksecurefunc(widget, "RefreshTree", function(self, ...)
+                _G.hooksecurefunc(widget, "RefreshTree", function(self, ...)
                     mods.debug("RefreshTree", self)
                     local buttons = self.buttons
                     for i, v in next, buttons do

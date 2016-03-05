@@ -6,12 +6,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     local r, g, b = C.r, C.g, C.b
 
     -- Lua Globals --
-    local next, floor, strsplit = _G.next, _G.floor, _G.strsplit
-
-    -- WoW Globals --
-    local CreateFrame, UnitLevel = _G.CreateFrame, _G.UnitLevel
-    local PaperDollFrame, CharacterFrame, GameTooltip = _G.PaperDollFrame, _G.CharacterFrame, _G.GameTooltip
-    local ITEM_QUALITY_COLORS = _G.ITEM_QUALITY_COLORS
+    local next, floor = _G.next, _G.floor
 
     -- Libs --
     local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
@@ -80,7 +75,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                 itemSlot.upgrade[i] = tex
             end
             if item.hasDura then
-                local dura = CreateFrame("StatusBar", nil, itemSlot)
+                local dura = _G.CreateFrame("StatusBar", nil, itemSlot)
                 
                 if item.slot == "SecondaryHand" then
                     dura:SetPoint("TOPLEFT", itemSlot, "TOPRIGHT", 2, 0)
@@ -102,9 +97,9 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         end
     end
 
-    PaperDollFrame.ilvl = PaperDollFrame:CreateFontString("ARTWORK")
-    PaperDollFrame.ilvl:SetFontObject(_G.SystemFont_Small)
-    PaperDollFrame.ilvl:SetPoint("TOP", PaperDollFrame, "TOP", 0, -20)
+    _G.PaperDollFrame.ilvl = _G.PaperDollFrame:CreateFontString("ARTWORK")
+    _G.PaperDollFrame.ilvl:SetFontObject(_G.SystemFont_Small)
+    _G.PaperDollFrame.ilvl:SetPoint("TOP", _G.PaperDollFrame, "TOP", 0, -20)
 
     -- Toggle Helm and Cloak
     local helmcloak = {
@@ -114,7 +109,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     for slot, item in next, helmcloak do
         local isShown = _G["Showing" .. item]
         local itemSlot = _G["Character" .. slot .. "Slot"]
-        local check = CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
+        local check = _G.CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
         check:SetSize(18, 18)
         check:SetPoint("TOPLEFT", itemSlot, -4, 4)
         F.ReskinCheck(check)
@@ -128,13 +123,13 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         end)
 
         check:SetScript("OnEnter", function(self) 
-            GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
-            GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
-            GameTooltip:Show()
+            _G.GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
+            _G.GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
+            _G.GameTooltip:Show()
         end)
 
         check:SetScript("OnLeave", function() 
-            GameTooltip:Hide()
+            _G.GameTooltip:Hide()
         end)
     end
 
@@ -144,13 +139,13 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             ilvlLimits = (lvl - 91) * 9 + 510
         end
         if ilvl >= ilvlLimits + 28 then
-            return ITEM_QUALITY_COLORS[4] -- epic
+            return _G.ITEM_QUALITY_COLORS[4] -- epic
         elseif ilvl >= ilvlLimits + 14 then
-            return ITEM_QUALITY_COLORS[3] -- rare
+            return _G.ITEM_QUALITY_COLORS[3] -- rare
         elseif ilvl >= ilvlLimits then
-            return ITEM_QUALITY_COLORS[2] -- uncommon
+            return _G.ITEM_QUALITY_COLORS[2] -- uncommon
         else
-            return ITEM_QUALITY_COLORS[1] -- common
+            return _G.ITEM_QUALITY_COLORS[1] -- common
         end
     end
 
@@ -163,9 +158,9 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     end
 
     -- Update Item display
-    local f, timer = CreateFrame("Frame")
+    local f, timer = _G.CreateFrame("Frame")
     local function UpdateItems()
-        if not CharacterFrame:IsVisible() then return end
+        if not _G.CharacterFrame:IsVisible() then return end
         
         for slotID = 1, #itemSlots do
             local item = itemSlots[slotID]
@@ -176,10 +171,10 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                     local _, _, itemRarity = _G.GetItemInfo(itemLink)
                     local itemLevel = LIU:GetUpgradedItemLevel(itemLink)
                     mods.debug("PaperDollFrame", item.slot, itemLevel)
-                    mods.debug(strsplit("|", itemLink))
+                    mods.debug(_G.strsplit("|", itemLink))
 
                     if itemLevel and itemLevel > 0 then
-                        itemSlot.ilvl:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
+                        itemSlot.ilvl:SetTextColor(_G.ITEM_QUALITY_COLORS[itemRarity].r, _G.ITEM_QUALITY_COLORS[itemRarity].g, _G.ITEM_QUALITY_COLORS[itemRarity].b)
                         itemSlot.ilvl:SetText(itemLevel)
 
                         -- item:itemID:0:0:0:0:0:0:uniqueID:linkLevel:specializationID:upgradeTypeID:0:numBonusIDs:bonusID1:bonusID2:...:upgradeID"
@@ -222,11 +217,11 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         end
 
         local avgItemLevel, avgItemLevelEquipped = _G.GetAverageItemLevel()
-        local aILColor = GetILVLColor(UnitLevel("player"), avgItemLevel)["hex"]
-        local aILEColor = GetILVLColor(UnitLevel("player"), avgItemLevelEquipped)["hex"]
+        local aILColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevel)["hex"]
+        local aILEColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevelEquipped)["hex"]
         avgItemLevel = floor(avgItemLevel)
         avgItemLevelEquipped = floor(avgItemLevelEquipped)
-        PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
+        _G.PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
         timer = false
     end
 
@@ -236,13 +231,13 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             timer = true
         end
     end)
-    CharacterFrame:HookScript("OnShow", function()
+    _G.CharacterFrame:HookScript("OnShow", function()
         f:RegisterEvent("UNIT_INVENTORY_CHANGED")
         f:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
         f:RegisterEvent("ITEM_UPGRADE_MASTER_UPDATE")
         UpdateItems()
     end)
-    CharacterFrame:HookScript("OnHide", function()
+    _G.CharacterFrame:HookScript("OnHide", function()
         f:UnregisterEvent("UNIT_INVENTORY_CHANGED")
         f:UnregisterEvent("UPDATE_INVENTORY_DURABILITY")
         f:UnregisterEvent("ITEM_UPGRADE_MASTER_UPDATE")
