@@ -210,7 +210,7 @@ function EclipseBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DRUID")
+    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DRUID")
     nibRealUI:RegisterConfigModeModule(self)
 end
 

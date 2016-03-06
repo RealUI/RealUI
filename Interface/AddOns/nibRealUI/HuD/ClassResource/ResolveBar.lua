@@ -92,7 +92,7 @@ function ResolveBar:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and classes[nibRealUI.class] ~= nil)
+    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and classes[nibRealUI.class] ~= nil)
     nibRealUI:RegisterConfigModeModule(self)
 end
 
