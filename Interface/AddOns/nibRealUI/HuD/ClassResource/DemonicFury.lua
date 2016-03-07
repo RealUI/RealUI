@@ -97,7 +97,7 @@ function DemonicFury:OnInitialize()
     db = self.db.profile
     ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "WARLOCK")
+    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "WARLOCK")
     nibRealUI:RegisterConfigModeModule(self)
 end
 
