@@ -142,14 +142,14 @@ end)
 mods["Blizzard_AuctionUI"] = function(F, C)
     mods.debug("Blizzard_AuctionUI", F, C)
 
-   _G. tokenTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
-    F.ReskinAtlas(_G.tokenTutorial.Tutorial, "token-info-background")
+   _G.WowTokenGameTimeTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
+    F.ReskinAtlas(_G.WowTokenGameTimeTutorial.Tutorial, "token-info-background")
 
     for _, side in next, {"LeftDisplay", "RightDisplay"} do
-        _G.tokenTutorial[side].Label:SetTextColor(1, 1, 1)
-        _G.tokenTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
+        _G.WowTokenGameTimeTutorial[side].Label:SetTextColor(1, 1, 1)
+        _G.WowTokenGameTimeTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
     end
 
     _G.StoreButton:SetSize(149, 26)
-    _G.StoreButton:SetPoint("TOPLEFT", _G.tokenTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
+    _G.StoreButton:SetPoint("TOPLEFT", _G.WowTokenGameTimeTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
 end

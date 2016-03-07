@@ -125,7 +125,7 @@ function BloodShield:OnInitialize()
 	db = self.db.profile
 	ndb = nibRealUI.db.profile
 	
-	self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
+	self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
 	nibRealUI:RegisterConfigModeModule(self)
 end
 

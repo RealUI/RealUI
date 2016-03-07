@@ -680,7 +680,6 @@ end
 ---- CORE
 function RuneDisplay:ToggleConfigMode(val)
     if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    if nibRealUI.class ~= "DEATHKNIGHT" then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -692,7 +691,7 @@ function RuneDisplay:ToggleConfigMode(val)
 end
 
 function RuneDisplay:RefreshMod()
-    if ( (not nibRealUI:GetModuleEnabled(MODNAME)) or (select(2, UnitClass("player")) ~= "DEATHKNIGHT") ) then return end
+    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
     
     db = self.db.profile
     
@@ -757,7 +756,7 @@ function RuneDisplay:OnInitialize()
 
     layoutSize = nibRealUI.db.profile.settings.hudSize
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
     
     if nibRealUI.class == "DEATHKNIGHT" then
         nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
@@ -771,8 +770,6 @@ function RuneDisplay:OnInitialize()
 end
 
 function RuneDisplay:OnEnable()
-    if (nibRealUI.class ~= "DEATHKNIGHT") then return end
-
     self.configMode = false
     
     if nibRealUI.db.profile.settings.powerMode == 1 then
