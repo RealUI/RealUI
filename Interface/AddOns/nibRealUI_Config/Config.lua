@@ -6,30 +6,29 @@ private.options = options
 local _G = _G
 local next = _G.next
 
--- RealUI --
-local nibRealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local round = nibRealUI.Round
-
-local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
-
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
 local ACD = _G.LibStub("AceConfigDialog-3.0")
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 
+-- RealUI --
+local RealUI = _G.RealUI
+local L = RealUI.L
+local round = RealUI.Round
+
+local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
 local _, uiHeight = _G.UIParent:GetSize()
 local initialized = false
 local isHuDShown = false
 
 local function debug(...)
-    nibRealUI.Debug(MOD_NAME, ...)
+    RealUI.Debug(MOD_NAME, ...)
 end
 private.debug = debug
 
 local RavenTimer
-function nibRealUI:HuDTestMode(doTestMode)
+function RealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
     local Raven = _G.Raven
@@ -48,10 +47,10 @@ function nibRealUI:HuDTestMode(doTestMode)
         end
     end
 
-    nibRealUI:ToggleGridTestMode(doTestMode)
+    RealUI:ToggleGridTestMode(doTestMode)
 
     -- RealUI Modules
-    for k, mod in next, nibRealUI.configModeModules do
+    for k, mod in next, RealUI.configModeModules do
         debug("Config Test", mod.moduleName)
         if mod:IsEnabled() then
             debug("Is enabled")
@@ -105,7 +104,7 @@ _G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     text = L["HuD_AlertHuDChangeSize"],
     button1 = _G.OKAY,
     OnAccept = function()
-        nibRealUI:ReloadUIDialog()
+        RealUI:ReloadUIDialog()
     end,
     timeout = 0,
     whileDead = true,
@@ -180,7 +179,7 @@ local hudConfig, hudToggle do
                 slide:SetOffset(0, height)
                 slideAnim:Play()
             end
-            nibRealUI:HuDTestMode(false)
+            RealUI:HuDTestMode(false)
             hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
             isHuDShown = false
         else
@@ -205,7 +204,7 @@ local function InitializeOptions()
     local hlAnim = highlight.hlAnim
     local hl = hlAnim.hl
 
-    nibRealUI:SetUpOptions() -- Old
+    RealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
@@ -341,10 +340,10 @@ local function InitializeOptions()
     hudConfig:SetSize(#hudConfig * width, height)
 end
 
-function nibRealUI:ToggleConfig(app, section, ...)
+function RealUI:ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
     if _G.InCombatLockdown() then
-        nibRealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         return
     end
     if not initialized then InitializeOptions() end
