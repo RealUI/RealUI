@@ -1,8 +1,14 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndb, ndbg
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+local db, ndbg
 
 local MODNAME = "UIScaler"
-local UIScaler = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local UIScaler = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 -- Options
 local options
@@ -48,19 +54,19 @@ local function GetOptions()
                 get = function() return ndbg.tags.retinaDisplay.set end,
                 set = function(info, value) 
                     ndbg.tags.retinaDisplay.set = value
-                    nibRealUI:ReloadUIDialog()
+                    RealUI:ReloadUIDialog()
                 end,
                 order = 40,
             },
             customScale = {
                 type = "input",
-                name = "Custom "..UI_SCALE,
+                name = "Custom ".._G.UI_SCALE,
                 desc = "Set a custom UI scale (0.48 to 1.00). Note: UI elements may lose their sharp appearance.",
                 order = 50,
                 disabled = function() return db.pixelPerfect end,
-                get = function() return tostring(db.customScale) end,
+                get = function() return _G.tostring(db.customScale) end,
                 set = function(info, value) 
-                    db.customScale = nibRealUI:ValidateOffset(tonumber(value), 0.48, 1)
+                    db.customScale = RealUI:ValidateOffset(_G.tonumber(value), 0.48, 1)
                     UIScaler:UpdateUIScale()
                 end,
             },
@@ -71,13 +77,12 @@ local function GetOptions()
     return options
 end
 
-function PrintScreenSize()
-    print("The current screen resolution is", ({GetScreenResolutions()})[GetCurrentResolution()])
-    print("The current screen size is", floor(GetScreenWidth()+0.5), "x", floor(GetScreenHeight()+0.5))
+function RealUI:PrintScreenSize()
+    _G.print("The current screen resolution is", ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()])
+    _G.print("The current screen size is", _G.floor(_G.GetScreenWidth()+0.5), "x", _G.floor(_G.GetScreenHeight()+0.5))
 end
 
 -- UI Scaler
-local ScaleOptionsHidden
 function UIScaler:UpdateUIScale()
     if self.uiScaleChanging then return end
     self.uiScaleChanging = true
@@ -85,7 +90,7 @@ function UIScaler:UpdateUIScale()
     -- Get Scale
     local scale
     if db.pixelPerfect then 
-        scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+        scale = 768 / ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("%d+x(%d+)")
         db.customScale = scale
     else
         scale = db.customScale
@@ -93,13 +98,13 @@ function UIScaler:UpdateUIScale()
     if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
     -- Set Scale (WoW CVar can't go below .64)
-    UIScaler:debug("UpdateUIScale", scale, GetCVar("uiScale"))
+    UIScaler:debug("UpdateUIScale", scale, _G.GetCVar("uiScale"))
     if scale < .64 then
-        UIParent:SetScale(scale)
-    elseif scale ~= tonumber(GetCVar("uiScale")) then
+        _G.UIParent:SetScale(scale)
+    elseif scale ~= _G.tonumber(_G.GetCVar("uiScale")) then
         UIScaler:debug("SetCVar", scale)
-        SetCVar("useUiScale", 1)
-        SetCVar("uiScale", scale)
+        _G.SetCVar("useUiScale", 1)
+        _G.SetCVar("uiScale", scale)
     end
     self.uiScaleChanging = false
 end
@@ -114,7 +119,7 @@ function UIScaler:PLAYER_ENTERING_WORLD()
 end
 
 function UIScaler:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             pixelPerfect = true,
@@ -122,20 +127,19 @@ function UIScaler:OnInitialize()
         }
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    ndbg = nibRealUI.db.global
+    ndbg = RealUI.db.global
 
-    nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
+    RealUI:RegisterPlainOptions(MODNAME, GetOptions)
     
     -- Keep WoW UI Scale slider hidden and replace with RealUI button
     _G["Advanced_UseUIScale"]:Hide()
     _G["Advanced_UIScaleSlider"]:Hide()
 
-    local scaleBtn = CreateFrame("Button", "RealUIScaleBtn", Advanced_, "UIPanelButtonTemplate") --nibRealUI:CreateTextButton("RealUI UI Scaler", _G["Advanced_UIScaleSlider"]:GetParent(), 200, 24)
+    local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate") --RealUI:CreateTextButton("RealUI UI Scaler", _G["Advanced_UIScaleSlider"]:GetParent(), 200, 24)
     scaleBtn:SetSize(200, 24)
     scaleBtn:SetText("RealUI UI Scaler")
-    scaleBtn:SetPoint("TOPLEFT", Advanced_UIScaleSlider, 20, 0)
-    scaleBtn:SetScript("OnClick", function() nibRealUI:LoadConfig("nibRealUI", "UIScaler") end)
+    scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)
+    scaleBtn:SetScript("OnClick", function() RealUI:LoadConfig("nibRealUI", "UIScaler") end)
 
     -- CVar "uiScale" doesn't exist until late in the loading process
     self:RegisterEvent("PLAYER_ENTERING_WORLD")

@@ -57,8 +57,9 @@ local DEFAULT_FRAME_HEIGHT = 600
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
-local function round(number)
-	return _G.floor(number + 0.5)
+local function round(number, places)
+	local mult = 10 ^ (places or 0)
+	return _G.floor(number * mult + 0.5) / mult
 end
 
 local function NewInstance(width, height)
@@ -121,6 +122,60 @@ local function NewInstance(width, height)
 	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "FauxScrollFrameTemplate")
 	scroll_area:SetPoint("TOPLEFT", 5, -24)
 	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
+
+	function scroll_area:Update(start, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+		--print("Scroll:Update", start, line_height, max_display_lines)
+		local i, linesToDisplay = start - 1, 0
+		repeat
+			i = i + 1
+			linesToDisplay = linesToDisplay + (wrapped_lines[i] or 0)
+			--print("Line:", i, linesToDisplay, wrapped_lines[i])
+		until linesToDisplay > max_display_lines or not wrapped_lines[i]
+		local stop = i - 1
+		--print("repeat", start, stop, line_height, max_display_lines)
+
+		self:Show()
+		local frameName = self:GetName()
+		local scrollBar = _G[frameName .. "ScrollBar"]
+		scrollBar:SetStepsPerPage(linesToDisplay - 1)
+
+		if all_wrapped_lines and line_height then
+			--[[ This block should not be run OnVerticalScroll because posible variations in linesToDisplay from
+			scroll to scroll will affect the height of the scroll frame. This will then result in inconsistent 
+			scrolling behaviour. ]]
+			local scrollChildFrame = _G[frameName .. "ScrollChildFrame"]
+			local scrollFrameHeight = 0
+			local scrollChildHeight = 0
+
+			scrollFrameHeight = (all_wrapped_lines - linesToDisplay) * line_height
+			scrollChildHeight = all_wrapped_lines * line_height
+			if ( scrollFrameHeight < 0 ) then
+				scrollFrameHeight = 0
+			end
+			self.height = scrollFrameHeight
+			scrollChildFrame:Show()
+			scrollChildFrame:SetHeight(scrollChildHeight)
+
+			scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
+			scrollBar:SetValueStep(line_height)
+		end
+		
+		-- Arrow button handling
+		local scrollUpButton = _G[frameName .. "ScrollBarScrollUpButton"]
+		local scrollDownButton = _G[frameName .. "ScrollBarScrollDownButton"]
+
+		if ( scrollBar:GetValue() == 0 ) then
+			scrollUpButton:Disable()
+		else
+			scrollUpButton:Enable()
+		end
+		if ((scrollBar:GetValue() - self.height) == 0) then
+			scrollDownButton:Disable()
+		else
+			scrollDownButton:Enable()
+		end
+		return start, stop
+	end
 
 	copy_frame.scroll_area = scroll_area
 
@@ -197,7 +252,7 @@ local function GetDisplayLines(start, wrapped_lines, max_display_lines)
 	--print("GetDisplayLines", start, line_height, max_display_lines)
 	local i, lines = start - 1, 0
 	repeat
-	    i = i + 1
+		i = i + 1
 		lines = lines + (wrapped_lines[i] or 0)
 		--print("Line:", i, lines, wrapped_lines[i])
 	until lines > max_display_lines or not wrapped_lines[i]
@@ -312,8 +367,7 @@ function prototype:String(separator)
 		all_wrapped_lines = all_wrapped_lines + wrapped_lines[i]
 	end
 
-	local start, stop, lines = GetDisplayLines(1, wrapped_lines, max_display_lines)
-	_G.FauxScrollFrame_Update(frame.scroll_area, all_wrapped_lines, lines, line_height, nil, nil, nil, nil, nil, nil, true )
+	local start, stop = frame.scroll_area:Update(1, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
 
 	if all_wrapped_lines <= max_display_lines then
 		--print("Simple", start, stop)
@@ -324,11 +378,13 @@ function prototype:String(separator)
 			--print("OnVerticalScroll", value)
 			local scrollbar = scroll_area.ScrollBar
 			local scroll_min, scroll_max = scrollbar:GetMinMaxValues()
-            local offset = round((((value - scroll_min) * (#buffer - 1)) / (scroll_max - scroll_min)) + 1)
-			--print("Current position", value, offset)
+			--print("Min/Max", scroll_min, scroll_max)
+			local scroll_per = round(value / scroll_max, 2)
+			local offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
 
-			local start, stop, lines = GetDisplayLines(offset, wrapped_lines, max_display_lines)
-			_G.FauxScrollFrame_Update(frame.scroll_area, all_wrapped_lines, lines, line_height, nil, nil, nil, nil, nil, nil, true )
+			--print("Current position", value, offset, scroll_per)
+
+			local start, stop = scroll_area:Update(offset, wrapped_lines, max_display_lines)
 
 			--print("Concat", start, stop)
 			local text = table.concat(buffer, separator, start, stop)

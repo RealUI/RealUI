@@ -4,34 +4,31 @@ private.options = options
 
 -- Lua Globals --
 local _G = _G
-local tostring, next = _G.tostring, _G.next
-
--- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local ndb, ndbc= nibRealUI.db.profile, nibRealUI.db.char
-
-local hudSize = ndb.settings.hudSize
-local round = nibRealUI.Round
+local next = _G.next
 
 -- Libs --
-local ACR = LibStub("AceConfigRegistry-3.0")
-local ACD = LibStub("AceConfigDialog-3.0")
-local GUI = LibStub("AceGUI-3.0")
+local ACR = _G.LibStub("AceConfigRegistry-3.0")
+local ACD = _G.LibStub("AceConfigDialog-3.0")
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 
-local uiWidth, uiHeight = UIParent:GetSize()
+-- RealUI --
+local RealUI = _G.RealUI
+local L = RealUI.L
+local round = RealUI.Round
+
+local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
+local _, uiHeight = _G.UIParent:GetSize()
 local initialized = false
 local isHuDShown = false
 
 local function debug(...)
-    nibRealUI.Debug("Config", ...)
+    RealUI.Debug(MOD_NAME, ...)
 end
 private.debug = debug
 
 local RavenTimer
-function nibRealUI:HuDTestMode(doTestMode)
+function RealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
     local Raven = _G.Raven
@@ -50,10 +47,10 @@ function nibRealUI:HuDTestMode(doTestMode)
         end
     end
 
-    nibRealUI:ToggleGridTestMode(doTestMode)
+    RealUI:ToggleGridTestMode(doTestMode)
 
     -- RealUI Modules
-    for k, mod in next, nibRealUI.configModeModules do
+    for k, mod in next, RealUI.configModeModules do
         debug("Config Test", mod.moduleName)
         if mod:IsEnabled() then
             debug("Is enabled")
@@ -61,16 +58,16 @@ function nibRealUI:HuDTestMode(doTestMode)
         end
     end
 
-    if not ObjectiveTrackerFrame.collapsed then
-        ObjectiveTrackerFrame:SetShown(not doTestMode)
+    if not _G.ObjectiveTrackerFrame.collapsed then
+        _G.ObjectiveTrackerFrame:SetShown(not doTestMode)
     end
     -- Boss Frames
-    _G.RealUIUFBossConfig(doTestMode)
+    RealUI:BossConfig(doTestMode)
 
     -- Spell Alerts
     local sAlert = {
         id = 17941,
-        texture = "TEXTURES\\SPELLACTIVATIONOVERLAYS\\NIGHTFALL.BLP",
+        texture = [[TEXTURES\SPELLACTIVATIONOVERLAYS\NIGHTFALL]],
         positions = "Left + Right (Flipped)",
         scale = 1,
         r = 255, g = 255, b = 255,
@@ -83,14 +80,14 @@ function nibRealUI:HuDTestMode(doTestMode)
 
     -- Extra Action Button
     local EABFrame = _G.ExtraActionBarFrame
-    if not HasExtraActionBar() then
+    if not _G.HasExtraActionBar() then
         if doTestMode then
             EABFrame.button:Show()
             EABFrame:Show()
             EABFrame.outro:Stop()
             EABFrame.intro:Play()
             if not EABFrame.button.icon:GetTexture() then
-                EABFrame.button.icon:SetTexture("Interface\\ICONS\\ABILITY_SEAL")
+                EABFrame.button.icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
                 EABFrame.button.icon:Show()
             end
         else
@@ -103,11 +100,11 @@ function nibRealUI:HuDTestMode(doTestMode)
     self.isInTestMode = doTestMode
 end
 
-StaticPopupDialogs["RUI_ChangeHuDSize"] = {
+_G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     text = L["HuD_AlertHuDChangeSize"],
-    button1 = OKAY,
+    button1 = _G.OKAY,
     OnAccept = function()
-        nibRealUI:ReloadUIDialog()
+        RealUI:ReloadUIDialog()
     end,
     timeout = 0,
     whileDead = true,
@@ -118,12 +115,9 @@ StaticPopupDialogs["RUI_ChangeHuDSize"] = {
 local height = round(uiHeight * 0.05)
 local width = round(height * 1.3)
 local hudConfig, hudToggle do
-    local tinsert = _G.table.insert
-    local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
-
     -- The HuD Config bar
-    hudConfig = CreateFrame("Frame", "RealUIHuDConfig", UIParent)
-    hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
+    hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
+    hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 0)
     _G.RealUIUINotifications:SetPoint("TOP", hudConfig, "BOTTOM")
     F.CreateBD(hudConfig)
     hudConfig:SetScript("OnEvent", function(self, event, ...)
@@ -134,12 +128,12 @@ local hudConfig, hudToggle do
 
     local slideAnim = hudConfig:CreateAnimationGroup()
     slideAnim:SetScript("OnFinished", function(self)
-        local x, y = self.slide:GetOffset()
+        local _, y = self.slide:GetOffset()
         hudConfig:ClearAllPoints()
         if y < 0 then
-            hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
+            hudConfig:SetPoint("TOP", _G.UIParent, "TOP", 0, 0)
         else
-            hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 1)
+            hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 1)
         end
     end)
     hudConfig.slideAnim = slideAnim
@@ -150,7 +144,7 @@ local hudConfig, hudToggle do
     slideAnim.slide = slide
 
     -- Highlight frame
-    local highlight = CreateFrame("Frame", "RealUIHuDConfig", hudConfig)
+    local highlight = _G.CreateFrame("Frame", "RealUIHuDConfig", hudConfig)
     F.CreateBD(highlight, 0.0)
     highlight:SetBackdropColor(r, g, b, 0.3)
     highlight:SetBackdropBorderColor(r, g, b)
@@ -180,19 +174,19 @@ local hudConfig, hudToggle do
             -- slide out
             if skipAnim then
                 hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("BOTTOM", UIParent, "TOP", 0, 0)
+                hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 0)
             else
                 slide:SetOffset(0, height)
                 slideAnim:Play()
             end
-            nibRealUI:HuDTestMode(false)
+            RealUI:HuDTestMode(false)
             hudConfig:UnregisterEvent("PLAYER_REGEN_DISABLED")
             isHuDShown = false
         else
             -- slide in
             if skipAnim then
                 hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("TOP", UIParent, "TOP", 0, 0)
+                hudConfig:SetPoint("TOP", _G.UIParent, "TOP", 0, 0)
             else
                 slide:SetOffset(0, -height)
                 slideAnim:Play()
@@ -205,24 +199,21 @@ end
 
 local function InitializeOptions()
     debug("Init")
-    local tinsert = _G.table.insert
-    local UIParent, CreateFrame = _G.UIParent, _G.CreateFrame
-
     local slideAnim = hudConfig.slideAnim
     local highlight = hudConfig.highlight
     local hlAnim = highlight.hlAnim
     local hl = hlAnim.hl
 
-    nibRealUI:SetUpOptions() -- Old
+    RealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
-    ACR:RegisterOptionsTable("RealUI", options.RealUI)
+    --ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- Buttons
     local tabs = {}
     for slug, tab in next, options.HuD.args do
-        tinsert(tabs, tab.order + 2, {
+        _G.tinsert(tabs, tab.order + 2, {
             slug = slug,
             name = tab.name,
             icon = tab.icon,
@@ -233,7 +224,7 @@ local function InitializeOptions()
             end or nil,
         })
     end
-    tinsert(tabs, _G.tremove(tabs, 1)) -- Move close to the end
+    _G.tinsert(tabs, _G.tremove(tabs, 1)) -- Move close to the end
     local function tabOnClick(self, ...)
         debug("OnClick", self.slug, ...)
         if highlight.clicked and tabs[highlight.clicked].frame then
@@ -258,12 +249,12 @@ local function InitializeOptions()
             status.left = widget.frame:GetLeft()
         end
     end
-    local prevFrame, container
+    local prevFrame
     debug("size", width, height)
     for i = 1, #tabs do
         local tab = tabs[i]
         debug("iter tabs", i, tab.slug)
-        local btn = CreateFrame("Button", "$parentBtn"..i, hudConfig)
+        local btn = _G.CreateFrame("Button", "$parentBtn"..i, hudConfig)
         btn.ID = i
         btn.slug = tab.slug
         btn:SetSize(width, height)
@@ -274,7 +265,7 @@ local function InitializeOptions()
                 debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= self.ID then
                     hl:SetOffset(width * (self.ID - highlight.hover), 0)
-                    hlAnim:SetScript("OnFinished", function(hlAnim)
+                    hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = i
                         highlight:SetAllPoints(self)
                     end)
@@ -296,7 +287,7 @@ local function InitializeOptions()
                 debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= highlight.clicked then
                     hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
-                    hlAnim:SetScript("OnFinished", function(hlAnim)
+                    hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = highlight.clicked
                         highlight:SetAllPoints(hudConfig[highlight.clicked])
                     end)
@@ -312,7 +303,7 @@ local function InitializeOptions()
 
         if i == 1 then
             btn:SetPoint("TOPLEFT")
-            local check = CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
+            local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
             check:SetHitRectInsets(-10, -10, -1, -21)
             check:SetPoint("CENTER", 0, 10)
             check:SetAttribute("type1", "macro")
@@ -343,16 +334,16 @@ local function InitializeOptions()
         text:SetText(tab.name)
         btn.text = text
 
-        tinsert(hudConfig, btn)
+        _G.tinsert(hudConfig, btn)
         prevFrame = btn
     end
     hudConfig:SetSize(#hudConfig * width, height)
 end
 
-function nibRealUI:ToggleConfig(app, section, ...)
+function RealUI:ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
     if _G.InCombatLockdown() then
-        nibRealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         return
     end
     if not initialized then InitializeOptions() end

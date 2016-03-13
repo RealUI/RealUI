@@ -1,9 +1,19 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local db, ndb, ndbc
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- Libs --
+local ace = _G.LibStub("AceAddon-3.0")
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db
 
 local MODNAME = "AddonControl"
-local AddonControl = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {
@@ -40,18 +50,18 @@ local function GetProfileInfo(addon)
 
     local profileKey = profiles.base.key
     if profiles.layout.use then
-        if (nibRealUI.cLayout == 2) then profileKey = profiles.base.key .. "-" .. profiles.layout.key end
+        if (RealUI.cLayout == 2) then profileKey = profiles.base.key .. "-" .. profiles.layout.key end
     end
 
     return profileKey
 end
 
 -- Set Profile Keys of all AddOns
-function nibRealUI:SetProfileKeys()
+function RealUI:SetProfileKeys()
     -- Refresh Key
-    self.key = string.format("%s - %s", UnitName("player"), GetRealmName())
+    self.key = ("%s - %s"):format(_G.UnitName("player"), _G.GetRealmName())
 
-    for addon, data in pairs(RealUIAddOns) do
+    for addon, data in next, RealUIAddOns do
         if db.addonControl[addon].profiles.base.use then
             -- Set Addon profiles
             local profile = GetProfileInfo(addon)
@@ -67,12 +77,12 @@ function nibRealUI:SetProfileKeys()
 end
 
 -- Change Profile on AddOns using a Layout profile
-function nibRealUI:SetProfileLayout()
-    if InCombatLockdown() then return end
-    for addon, data in pairs(RealUIAddOns) do
+function RealUI:SetProfileLayout()
+    if _G.InCombatLockdown() then return end
+    for addon, data in next, RealUIAddOns do
         if db.addonControl[addon].profiles.base.use and db.addonControl[addon].profiles.layout.use and data.isAce then
             local profile = GetProfileInfo(addon)
-            local aceAddon = LibStub("AceAddon-3.0"):GetAddon(addon, true)
+            local aceAddon = ace:GetAddon(addon, true)
             if aceAddon then
                 aceAddon.db:SetProfile(profile)
             end
@@ -87,59 +97,60 @@ end
 function AddonControl:CreateOptionsFrame()
     if self.options then return end
 
-    local F
-    if Aurora then F = Aurora[1] end
+    local C
+    if _G.Aurora then C = _G.Aurora[2] end
 
-    self.options = nibRealUI:CreateWindow("RealUIAddonControlOptions", 330, 240, true, true)
+    self.options = RealUI:CreateWindow("RealUIAddonControlOptions", 330, 240, true, true)
     local acO = self.options
-        acO:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         acO:Hide()
 
-    acO.okay = nibRealUI:CreateTextButton(OKAY, acO, 100, 24, true)
+    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24, true)
         acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
-        acO.okay:SetScript("OnClick", function() RealUIAddonControlOptions:Hide() end)
+        acO.okay:SetScript("OnClick", function() self.options:Hide() end)
 
-    acO.reloadui = nibRealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
+    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
-        acO.reloadui:SetScript("OnClick", function() ReloadUI() end)
+        acO.reloadui:SetScript("OnClick", function() _G.ReloadUI() end)
 
-    nibRealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
+    RealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
 
     -- Header
-    local header = nibRealUI:CreateFS(acO, "CENTER", "small")
+    local header = RealUI:CreateFS(acO, "CENTER", "small")
         header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
 
     -- Label AddOn
-    local lAddon = nibRealUI:CreateFS(acO, "LEFT", "small")
+    local lAddon = RealUI:CreateFS(acO, "LEFT", "small")
         lAddon:SetPoint("TOPLEFT", acO, "TOPLEFT", 12, -30)
         lAddon:SetText("AddOn")
         lAddon:SetWidth(130)
-        lAddon:SetTextColor(unpack(nibRealUI.classColor))
+        lAddon:SetTextColor(C.r, C.g, C.b)
 
     -- Label Base
-    local lBase = nibRealUI:CreateFS(acO, "CENTER", "small")
+    local lBase = RealUI:CreateFS(acO, "CENTER", "small")
         lBase:SetPoint("LEFT", lAddon, "RIGHT", 0, 0)
         lBase:SetText("Base")
         lBase:SetWidth(40)
-        lBase:SetTextColor(unpack(nibRealUI.classColor))
+        lBase:SetTextColor(C.r, C.g, C.b)
 
     -- Label Layout
-    local lLayout = nibRealUI:CreateFS(acO, "CENTER", "small")
+    local lLayout = RealUI:CreateFS(acO, "CENTER", "small")
         lLayout:SetPoint("LEFT", lBase, "RIGHT", 0, 0)
         lLayout:SetText("Layout")
         lLayout:SetWidth(40)
-        lLayout:SetTextColor(unpack(nibRealUI.classColor))
+        lLayout:SetTextColor(C.r, C.g, C.b)
 
     -- Label Position
-    local lPosition = nibRealUI:CreateFS(acO, "CENTER", "small")
+    local lPosition = RealUI:CreateFS(acO, "CENTER", "small")
         lPosition:SetPoint("LEFT", lLayout, "RIGHT", 0, 0)
         lPosition:SetText("Pos")
         lPosition:SetWidth(40)
-        lPosition:SetTextColor(unpack(nibRealUI.classColor))
+        lPosition:SetTextColor(C.r, C.g, C.b)
 
-    local acAddonSect = nibRealUI:CreateBDFrame(acO)
-    acAddonSect:SetBackdropColor(unpack(nibRealUI.media.background))
+    local acAddonSect = RealUI:CreateBDFrame(acO)
+    local bgColor = RealUI.media.background
+    acAddonSect:SetBackdropColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
     acAddonSect:SetPoint("BOTTOMRIGHT", acO, "BOTTOMRIGHT", -6, 36)
 
@@ -157,15 +168,15 @@ function AddonControl:CreateOptionsFrame()
         ["DBM"] = "DBM-StatusBarTimers",
     }
     local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevReset
-    local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}, {}
+    local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}
     local cnt = 0
-    for k, addon in pairs(RealUIAddOnsOrder) do
-        if IsAddOnLoaded(addon) or (altAddOnTable[addon] and IsAddOnLoaded(altAddOnTable[addon])) then
+    for k, addon in next, RealUIAddOnsOrder do
+        if _G.IsAddOnLoaded(addon) or (altAddOnTable[addon] and _G.IsAddOnLoaded(altAddOnTable[addon])) then
             cnt = cnt + 1
 
             -- AddOn name
             local fs = acO:CreateFontString(nil, "OVERLAY")
-            fs:SetFontObject(RealUIFont_Normal)
+            fs:SetFontObject(_G.RealUIFont_Normal)
             fs:SetText(addon)
             if not prevLabel then
                 fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -9.5)
@@ -175,7 +186,7 @@ function AddonControl:CreateOptionsFrame()
             prevLabel = fs
 
             -- Base Checkboxes
-            cbBase[cnt] = nibRealUI:CreateCheckbox("RealUIAddonControlBase"..cnt, acAddonSect, "", "LEFT", 21)
+            cbBase[cnt] = RealUI:CreateCheckbox("RealUIAddonControlBase"..cnt, acAddonSect, "", "LEFT", 21)
             cbBase[cnt].addon = addon
             cbBase[cnt].id = cnt
             if not prevCBBase then
@@ -184,16 +195,16 @@ function AddonControl:CreateOptionsFrame()
                 cbBase[cnt]:SetPoint("TOPLEFT", prevCBBase, "BOTTOMLEFT", 0, 2)
             end
             cbBase[cnt]:SetChecked(db.addonControl[addon].profiles.base.use)
-            cbBase[cnt]:SetScript("OnClick", function(self)
-                db.addonControl[self.addon].profiles.base.use = self:GetChecked() and true or false
-                cbLayout[self.id]:SetShown(LayoutAddOns[self.addon] and self:GetChecked())
-                cbPosition[self.id]:SetShown(PositionAddOns[self.addon] and self:GetChecked())
+            cbBase[cnt]:SetScript("OnClick", function(checkBtn)
+                db.addonControl[checkBtn.addon].profiles.base.use = checkBtn:GetChecked() and true or false
+                cbLayout[checkBtn.id]:SetShown(LayoutAddOns[checkBtn.addon] and checkBtn:GetChecked())
+                cbPosition[checkBtn.id]:SetShown(PositionAddOns[checkBtn.addon] and checkBtn:GetChecked())
             end)
             cbBase[cnt].tooltip = "Allow |cff0099ffRealUI|r to change |cffffffff"..addon.."'s|r profile."
             prevCBBase = cbBase[cnt]
 
             -- Layout Checkboxes
-            cbLayout[cnt] = nibRealUI:CreateCheckbox("RealUIAddonControlLayout"..cnt, acAddonSect, "", "LEFT", 21)
+            cbLayout[cnt] = RealUI:CreateCheckbox("RealUIAddonControlLayout"..cnt, acAddonSect, "", "LEFT", 21)
             cbLayout[cnt].addon = addon
             cbLayout[cnt].id = cnt
             if not prevCBLayout then
@@ -203,14 +214,14 @@ function AddonControl:CreateOptionsFrame()
             end
             if not(LayoutAddOns[addon]) or not(db.addonControl[addon].profiles.base.use) then cbLayout[cnt]:Hide() end
             cbLayout[cnt]:SetChecked(db.addonControl[addon].profiles.layout.use)
-            cbLayout[cnt]:SetScript("OnClick", function(self)
-                db.addonControl[self.addon].profiles.layout.use = self:GetChecked() and true or false
+            cbLayout[cnt]:SetScript("OnClick", function(checkBtn)
+                db.addonControl[checkBtn.addon].profiles.layout.use = checkBtn:GetChecked() and true or false
             end)
             cbLayout[cnt].tooltip = "Allow |cff0099ffRealUI|r to change |cffffffff"..addon.."'s|r profile based on current |cff0099ffLayout|r |cff999999(DPS/Tank or Healing)|r."
             prevCBLayout = cbLayout[cnt]
 
             -- Position Checkboxes
-            cbPosition[cnt] = nibRealUI:CreateCheckbox("RealUIAddonControlPosition"..cnt, acAddonSect, "", "LEFT", 21)
+            cbPosition[cnt] = RealUI:CreateCheckbox("RealUIAddonControlPosition"..cnt, acAddonSect, "", "LEFT", 21)
             cbPosition[cnt].addon = addon
             cbPosition[cnt].id = cnt
             if not prevCBPosition then
@@ -220,14 +231,14 @@ function AddonControl:CreateOptionsFrame()
             end
             if not(PositionAddOns[addon]) or not(db.addonControl[addon].profiles.base.use) then cbPosition[cnt]:Hide() end
             cbPosition[cnt]:SetChecked(db.addonControl[addon].control.position)
-            cbPosition[cnt]:SetScript("OnClick", function(self)
-                db.addonControl[self.addon].control.position = self:GetChecked() and true or false
+            cbPosition[cnt]:SetScript("OnClick", function(checkBtn)
+                db.addonControl[checkBtn.addon].control.position = checkBtn:GetChecked() and true or false
             end)
             cbPosition[cnt].tooltip = "Allow |cff0099ffRealUI|r to dynamically control |cffffffff"..addon.."'s|r position."
             prevCBPosition = cbPosition[cnt]
 
             -- Reset
-            bReset[cnt] = nibRealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
+            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
             bReset[cnt].addon = altAddOnTable[addon] or addon
             bReset[cnt].id = cnt
             if not prevReset then
@@ -237,23 +248,23 @@ function AddonControl:CreateOptionsFrame()
                 bReset[cnt]:SetPoint("TOPRIGHT", prevReset, "BOTTOMRIGHT", 0, -1)
                 acAddonSect.lastReset = bReset[cnt]
             end
-            bReset[cnt]:SetScript("OnClick", function(self)
-                nibRealUI:LoadSpecificAddOnData(self.addon)
+            bReset[cnt]:SetScript("OnClick", function(button)
+                RealUI:LoadSpecificAddOnData(button.addon)
             end)
-            bReset[cnt]:SetScript("OnEnter", function(self)
-                --print("OnEnter", self.addon)
-                GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 64, 4)
-                GameTooltip:AddLine("Reset |cffffffff"..addon.."'s|r data to defaults.\nThis will erase any changes you've\nmade to this AddOn's settings.")
-                GameTooltip:Show()
+            bReset[cnt]:SetScript("OnEnter", function(button)
+                --print("OnEnter", button.addon)
+                _G.GameTooltip:SetOwner(button, "ANCHOR_TOPLEFT", 64, 4)
+                _G.GameTooltip:AddLine("Reset |cffffffff"..addon.."'s|r data to defaults.\nThis will erase any changes you've\nmade to this AddOn's settings.")
+                _G.GameTooltip:Show()
             end)
-            bReset[cnt]:SetScript("OnLeave", function(self)
-                if GameTooltip:IsShown() then GameTooltip:Hide() end
+            bReset[cnt]:SetScript("OnLeave", function(button)
+                if _G.GameTooltip:IsShown() then _G.GameTooltip:Hide() end
             end)
             prevReset = bReset[cnt]
         end
     end
     acO:SetHeight(84 + (cnt * 19.25))
-    nibRealUI:CreateBGSection(acAddonSect, acAddonSect.firstReset, acAddonSect.lastReset)
+    RealUI:CreateBGSection(acAddonSect, acAddonSect.firstReset, acAddonSect.lastReset)
 
     acO:Show()
 end
@@ -262,47 +273,47 @@ function AddonControl:ShowOptionsWindow()
     if not AddonControl.options then self:CreateOptionsFrame() end
     AddonControl.options:Show()
 end
-SlashCmdList.AC = function()
+_G.SlashCmdList.AC = function()
     AddonControl:ShowOptionsWindow()
 end
-SLASH_AC1 = "/ac"
+_G.SLASH_AC1 = "/ac"
 
-function nibRealUI:ToggleAddonPositionControl(addon, val)
+function RealUI:ToggleAddonPositionControl(addon, val)
     db.addonControl[addon].control.position = val
     if val then
         db.addonControl[addon].profiles.base.use = val
     end
 end
 
-function nibRealUI:ToggleAddonLayoutControl(addon, val)
+function RealUI:ToggleAddonLayoutControl(addon, val)
     db.addonControl[addon].profiles.layout.use = val
     if val then
         db.addonControl[addon].profiles.base.use = val
     end
 end
 
-function nibRealUI:GetAddonControlSettings(addon)
+function RealUI:GetAddonControlSettings(addon)
     return {
         position = db.addonControl[addon].control.position,
         base = db.addonControl[addon].profiles.base.use,
     }
 end
 
-function nibRealUI:DoesAddonMove(addon)
+function RealUI:DoesAddonMove(addon)
     return db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use
 end
 
-function nibRealUI:DoesAddonLayout(addon)
+function RealUI:DoesAddonLayout(addon)
     return db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use
 end
 
-function nibRealUI:DoesAddonStyle(addon)
+function RealUI:DoesAddonStyle(addon)
     return db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use
 end
 
 -------------
 function AddonControl:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             addonControl = {
@@ -390,8 +401,6 @@ function AddonControl:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
 
     self:SetEnabledState(true)
 end

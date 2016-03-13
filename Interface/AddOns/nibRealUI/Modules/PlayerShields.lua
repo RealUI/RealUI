@@ -1,10 +1,18 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local db, ndb, ndbc
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, ndb
+
+local SpiralBorder = RealUI:GetModule("SpiralBorder")
 
 local MODNAME = "PlayerShields"
-local PlayerShields = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
-local SpiralBorder = nibRealUI:GetModule("SpiralBorder")
+local PlayerShields = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local shields = {
     { -- Power Word: Shield
@@ -36,7 +44,7 @@ local shields = {
 local shieldIDs = {}
 for i = 1, #shields do
     local shield = shields[i]
-    table.insert(shieldIDs, shield.spellID, shield)
+    _G.tinsert(shieldIDs, shield.spellID, shield)
     shieldIDs[shield.spellID].index = i
 end
 
@@ -73,9 +81,9 @@ local function GetOptions()
                 type = "toggle",
                 name = "Enabled",
                 desc = "Enable/Disable the Player Shields module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
+                    RealUI:SetModuleEnabled(MODNAME, value)
                 end,
                 order = 30,
             },
@@ -88,7 +96,7 @@ local function GetOptions()
                 name = "Show",
                 type = "group",
                 inline = true,
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 40,
                 args = {
                     solo = {
@@ -152,7 +160,7 @@ local function GetOptions()
                 name = "Size/Position",
                 type = "group",
                 inline = true,
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 50,
                 args = {
                     parent = {
@@ -161,7 +169,7 @@ local function GetOptions()
                         desc = L["General_NoteParent"],
                         width = "double",
                         order = 10,
-                        get = function(info) return tostring(db.position.parent) end,
+                        get = function(info) return _G.tostring(db.position.parent) end,
                         set = function(info, value)
                             db.position.parent = value
                         end,
@@ -175,32 +183,32 @@ local function GetOptions()
                         type = "select",
                         name = "Anchor To",
                         get = function(info)
-                            for k,v in pairs(nibRealUI.globals.anchorPoints) do
+                            for k,v in next, RealUI.globals.anchorPoints do
                                 if v == db.position.rPoint then return k end
                             end
                         end,
                         set = function(info, value)
-                            db.position.rPoint = nibRealUI.globals.anchorPoints[value]
+                            db.position.rPoint = RealUI.globals.anchorPoints[value]
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 20,
                     },
                     point = {
                         type = "select",
                         name = "Anchor From",
                         get = function(info)
-                            for k,v in pairs(nibRealUI.globals.anchorPoints) do
+                            for k,v in next, RealUI.globals.anchorPoints do
                                 if v == db.position.point then return k end
                             end
                         end,
                         set = function(info, value)
-                            db.position.point = nibRealUI.globals.anchorPoints[value]
+                            db.position.point = RealUI.globals.anchorPoints[value]
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 30,
                     },
                     x = {
@@ -208,9 +216,9 @@ local function GetOptions()
                         name = "X",
                         width = "half",
                         order = 40,
-                        get = function(info) return tostring(db.position.x) end,
+                        get = function(info) return _G.tostring(db.position.x) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             db.position.x = value
                         end,
                     },
@@ -219,9 +227,9 @@ local function GetOptions()
                         name = "Y",
                         width = "half",
                         order = 50,
-                        get = function(info) return tostring(db.position.y) end,
+                        get = function(info) return _G.tostring(db.position.y) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             db.position.y = value
                         end,
                     },
@@ -234,79 +242,79 @@ local function GetOptions()
 end
 
 local function TimeFormat(t)
-    local h, m, hplus, mplus, s, ts, f
+    local h, m, hplus, mplus, s, f
 
-    h = math.floor(t / 3600)
-    m = math.floor((t - (h * 3600)) / 60)
-    s = math.floor(t - (h * 3600) - (m * 60))
+    h = _G.floor(t / 3600)
+    m = _G.floor((t - (h * 3600)) / 60)
+    s = _G.floor(t - (h * 3600) - (m * 60))
 
-    hplus = math.floor((t + 3599.99) / 3600)
-    mplus = math.floor((t - (h * 3600) + 59.99) / 60) -- provides compatibility with tooltips
+    hplus = _G.floor((t + 3599.99) / 3600)
+    mplus = _G.floor((t - (h * 3600) + 59.99) / 60) -- provides compatibility with tooltips
 
     if t >= 3600 then
-        f = string.format("%.0fh", hplus)
+        f = ("%.0fh"):format(hplus)
     elseif t >= 60 then
-        f = string.format("%.0fm", mplus)
+        f = ("%.0fm"):format(mplus)
     else
-        f = string.format("%.0fs", s)
+        f = ("%.0fs"):format(s)
     end
 
     return f
 end
 
 function PlayerShields:CreateButton(i)
-    local btn = CreateFrame("Frame", "RealUIPlayerShields"..i, self.psF)
-        nibRealUI:CreateBDFrame(btn)
-        btn:SetHeight(23)
-        btn:SetWidth(23)
+    local button = _G.CreateFrame("Frame", "RealUIPlayerShields"..i, self.psF)
+        RealUI:CreateBDFrame(button)
+        button:SetHeight(23)
+        button:SetWidth(23)
 
-    btn.bg = btn:CreateTexture(nil, "BACKGROUND")
-        btn.bg:SetAllPoints(btn)
-        btn.bg:SetTexture(shields[i].icon)
-        btn.bg:SetTexCoord(.08, .92, .08, .92)
+    button.bg = button:CreateTexture(nil, "BACKGROUND")
+        button.bg:SetAllPoints(button)
+        button.bg:SetTexture(shields[i].icon)
+        button.bg:SetTexCoord(.08, .92, .08, .92)
 
-    btn.absorbBar = CreateFrame("StatusBar", nil, btn)
-        btn.absorbBar:SetMinMaxValues(0, 1)
-        btn.absorbBar:SetValue(0)
-        btn.absorbBar:SetStatusBarTexture(nibRealUI.media.textures.plain)
-        btn.absorbBar:SetStatusBarColor(0, 0, 0, 0.75)
-        btn.absorbBar:SetReverseFill(true)
-        btn.absorbBar:SetAllPoints(btn)
-        btn.absorbBar:SetFrameLevel(btn:GetFrameLevel() + 1)
+    button.absorbBar = _G.CreateFrame("StatusBar", nil, button)
+        button.absorbBar:SetMinMaxValues(0, 1)
+        button.absorbBar:SetValue(0)
+        button.absorbBar:SetStatusBarTexture(RealUI.media.textures.plain)
+        button.absorbBar:SetStatusBarColor(0, 0, 0, 0.75)
+        button.absorbBar:SetReverseFill(true)
+        button.absorbBar:SetAllPoints(button)
+        button.absorbBar:SetFrameLevel(button:GetFrameLevel() + 1)
 
-    btn.timeStr = btn:CreateFontString(nil, "OVERLAY")
-        btn.timeStr:SetFontObject(RealUIFont_PixelSmall)
-        btn.timeStr:SetJustifyH("LEFT")
-        btn.timeStr:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0.5, 0.5)
-        btn.timeStr:SetParent(btn.absorbBar)
+    button.timeStr = button:CreateFontString(nil, "OVERLAY")
+        button.timeStr:SetFontObject(_G.RealUIFont_PixelSmall)
+        button.timeStr:SetJustifyH("LEFT")
+        button.timeStr:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0.5, 0.5)
+        button.timeStr:SetParent(button.absorbBar)
 
-    btn.elapsed = 0
-    btn.interval = 1/4
-    btn:SetScript("OnUpdate", function(self, elapsed)
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= self.interval then
-            self.elapsed = 0
-            if self.startTime and self.endTime then
-                self.timeStr:SetText(TimeFormat(ceil(self.endTime - GetTime())))
+    button.elapsed = 0
+    button.interval = 1/4
+    button:SetScript("OnUpdate", function(btn, elapsed)
+        btn.elapsed = btn.elapsed + elapsed
+        if btn.elapsed >= btn.interval then
+            btn.elapsed = 0
+            if btn.startTime and btn.endTime then
+                btn.timeStr:SetText(TimeFormat(_G.ceil(btn.endTime - _G.GetTime())))
             else
-                self.timeStr:SetText()
+                btn.timeStr:SetText()
             end
         end
     end)
 
-    btn:Show()
+    button:Show()
 
-    return btn
+    return button
 end
 
 function PlayerShields:CreateFrames()
-    self.psF = CreateFrame("Frame", "RealUIPlayerShields", UIParent)
+    self.psF = _G.CreateFrame("Frame", "RealUIPlayerShields", _G.UIParent)
 
     if _G[db.position.parent] then
         self.psF:SetParent(db.position.parent)
         self.psF:SetPoint(db.position.point, db.position.parent, db.position.rPoint, db.position.x, db.position.y)
     else
-        print(L["General_InvalidParent"]:format(MODNAME, "Modules", MODNAME))
+        _G.print(L["General_InvalidParent"]:format(MODNAME, "Modules", MODNAME))
     end
     self.psF:SetFrameStrata("MEDIUM")
     self.psF:SetFrameLevel(5)
@@ -318,7 +326,7 @@ function PlayerShields:CreateFrames()
         self.psF[i] = self:CreateButton(i)
         self.psF[i]:Hide()
         self.psF[i].absorbAmount = 0
-        self.psF[i].absorbMax = math.huge
+        self.psF[i].absorbMax = _G.math.huge
         self.psF[i].needMaxUpdate = true
 
         if i == 1 then
@@ -331,19 +339,19 @@ function PlayerShields:CreateFrames()
     end
 
     self.psF.strTotal = self.psF:CreateFontString(nil, "OVERLAY")
-        local font, size, outline = RealUIFont_PixelSmall:GetFont()
+        local font, size, outline = _G.RealUIFont_PixelSmall:GetFont()
         self.psF.strTotal:SetFont(font, size * 2, outline)
         self.psF.strTotal:SetJustifyH("RIGHT")
         self.psF.strTotal:SetPoint("BOTTOMRIGHT", self.psF, "BOTTOMLEFT", 2.5, -2.5)
 
     self.psF.strTotalPer = self.psF:CreateFontString(nil, "OVERLAY")
-        self.psF.strTotalPer:SetFontObject(RealUIFont_PixelSmall)
+        self.psF.strTotalPer:SetFontObject(_G.RealUIFont_PixelSmall)
         self.psF.strTotalPer:SetJustifyH("RIGHT")
         self.psF.strTotalPer:SetPoint("TOPRIGHT", self.psF, "TOPLEFT", 2.5, -6.5)
 
     self.psF.visible = false
 
-    if nibRealUI:GetModuleEnabled(MODNAME) then
+    if RealUI:GetModuleEnabled(MODNAME) then
         self:GroupUpdate()
     end
 end
@@ -355,8 +363,8 @@ function PlayerShields:UpdateAbsorbDisplay()
         self.psF.absorbTotal = self.psF.absorbTotal + self.psF[i].absorbAmount
     end
     if self.psF.absorbTotal > 0 and self.psF.active then
-        self.psF.strTotal:SetText(nibRealUI:ReadableNumber(self.psF.absorbTotal))
-        self.psF.strTotalPer:SetText(string.format("%.0f%%", (self.psF.absorbTotal / UnitHealthMax("player")) * 100))
+        self.psF.strTotal:SetText(RealUI:ReadableNumber(self.psF.absorbTotal))
+        self.psF.strTotalPer:SetFormattedText("%.0f%%", (self.psF.absorbTotal / _G.UnitHealthMax("player")) * 100)
         if not(self.psF.visible) then self:UpdateVisibility() end
     else
         self.psF.strTotal:SetText()
@@ -371,7 +379,7 @@ local function GetShieldInfo()
         shields[i].info = {}
     end
     for i = 1, 40 do
-        local name,_,_,_,_, duration, expirationTime,_,_,_, spellID,_,_,_, absorb = UnitAura("player", i)
+        local name,_,_,_,_, duration, expirationTime,_,_,_, spellID,_,_,_, absorb = _G.UnitAura("player", i)
         if not name then break end
         if shieldIDs[spellID] then
             PlayerShields:debug("GetShieldInfo", name, duration, expirationTime, absorb)
@@ -466,7 +474,7 @@ end
 
 function PlayerShields:UpdateVisibility()
     local show
-    if (db.show.onlySpec) and not (tankSpecs[nibRealUI.class] == (self.psF.spec)) or
+    if (db.show.onlySpec) and not (tankSpecs[RealUI.class] == (self.psF.spec)) or
             (db.show.onlyRole) and not (self.psF.tankRole) then
         show = false
     elseif (db.show.solo) or (db.show.pve and self.psF.pve) or (db.show.pvp and self.psF.pvp) then
@@ -501,8 +509,8 @@ function PlayerShields:UpdateVisibility()
 end
 
 function PlayerShields:RoleCheck()
-    if  (UnitGroupRolesAssigned("player") == "TANK") or GetPartyAssignment("MAINTANK", "player") or
-            GetPartyAssignment("MAINASSIST", "player") then
+    if  (_G.UnitGroupRolesAssigned("player") == "TANK") or _G.GetPartyAssignment("MAINTANK", "player") or
+            _G.GetPartyAssignment("MAINASSIST", "player") then
         self.psF.tankRole = true
     else
         self.psF.tankRole = false
@@ -510,20 +518,20 @@ function PlayerShields:RoleCheck()
 end
 
 function PlayerShields:GroupUpdate()
-    self.psF.inGroup = GetNumGroupMembers() > 0
+    self.psF.inGroup = _G.GetNumGroupMembers() > 0
     self:RoleCheck()
     self:UpdateVisibility()
 end
 
 function PlayerShields:SpecUpdate()
-    self.psF.spec = GetSpecialization() or 0
+    self.psF.spec = _G.GetSpecialization() or 0
     self:UpdateVisibility()
 end
 
 function PlayerShields:PLAYER_ENTERING_WORLD()
-    self.guid = UnitGUID("player")
+    self.guid = _G.UnitGUID("player")
 
-    local Inst, InstType = IsInInstance()
+    local _, InstType = _G.IsInInstance()
     if (InstType == "pvp") or (InstType == "arena") then
         self.psF.pvp = true
     elseif (InstType == "party") or (InstType == "raid") then
@@ -541,7 +549,7 @@ function PlayerShields:PLAYER_LOGIN()
     self.guid = 0
     self:CreateFrames()
 
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
     local auraUpdateSpeed
     if ndb.settings.powerMode == 1 then
@@ -560,11 +568,11 @@ function PlayerShields:PLAYER_LOGIN()
 end
 
 function PlayerShields:ToggleRaven(val)
-    if IsAddOnLoaded("Raven") and RavenDB then
-        if RavenDB["global"]["SpellLists"]["PlayerExclusions"] then
+    if _G.IsAddOnLoaded("Raven") and _G.RavenDB then
+        if _G.RavenDB["global"]["SpellLists"]["PlayerExclusions"] then
             for i = 1, #shields do
                 local shield = shields[i]
-                RavenDB["global"]["SpellLists"]["PlayerExclusions"]["#"..shield.spellID] = val
+                _G.RavenDB["global"]["SpellLists"]["PlayerExclusions"]["#"..shield.spellID] = val
             end
         end
     end
@@ -572,7 +580,7 @@ end
 
 ----
 function PlayerShields:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             show = {
@@ -592,11 +600,10 @@ function PlayerShields:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
 
     self:RegisterEvent("PLAYER_LOGIN")
 end

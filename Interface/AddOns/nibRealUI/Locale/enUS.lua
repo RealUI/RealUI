@@ -1,10 +1,13 @@
-local ADDON_NAME, private = ...
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = {}
 
-RealUI.locale = GAME_LOCALE or GetLocale()
+RealUI.locale = _G.GAME_LOCALE or _G.GetLocale()
 
 -- General
 L["Alert_CombatLockdown"] = "Combat Lockdown"
@@ -104,12 +107,8 @@ L["AuraTrack_ActiveTrackers"] = "Active Trackers"
 L["AuraTrack_Buff"] = "Buff"
 L["AuraTrack_Create"] = "Create New Tracker"
 L["AuraTrack_Debuff"] = "Debuff"
-L["AuraTrack_HideOOC"] = "Hide Out-Of-Combat"
-L["AuraTrack_HideOOCDesc"] = "Force this Tracker to hide while not in combat, even if it's active."
 L["AuraTrack_HideStack"] = "Hide Stack Count"
 L["AuraTrack_HideStackDesc"] = "Don't show stack counts on this tracker."
-L["AuraTrack_HideTime"] = "Hide Time"
-L["AuraTrack_HideTimeDesc"] = "Don't show time remaining on this tracker."
 L["AuraTrack_IgnoreSpec"] = "Ignore Spec"
 L["AuraTrack_IgnoreSpecDesc"] = "Show tracker regardless of current specialization"
 L["AuraTrack_InactiveOpacity"] = "Inactive tracker opacity"
@@ -119,13 +118,17 @@ L["AuraTrack_Lock"] = "Locked"
 L["AuraTrack_LockDesc"] = "Toggle to move or lock frame position."
 L["AuraTrack_MinLevel"] = "Minimum Level"
 L["AuraTrack_MinLevelDesc"] = "Set 0 to ignore this setting."
+L["AuraTrack_NoExclude"] = "No Exclude"
+L["AuraTrack_NoExcludeDesc"] = "Don't add this tracker to Raven's exclusion list."
 L["AuraTrack_NoteSpellID"] = [=[Note: Spell Name or ID must match the spell you wish to track exactly.
 Capitalization and spaces matter.
 To track multiple spells, use Spell IDs and separate via commas (i.e 1122,2233,3344).]=]
 L["AuraTrack_Padding"] = "Indicator padding"
 L["AuraTrack_Remove"] = "Remove Tracker"
 L["AuraTrack_RemoveConfirm"] = "Are you sure you want to remove this tracker?"
-L["AuraTrack_Reset"] = "Are you sure you wish to reset tracked auras to defaults?"
+L["AuraTrack_ResetConfirm"] = "Are you sure you want to reset all %s trackers to defaults? This will also remove any custom trackers."
+L["AuraTrack_ResetTrackers"] = "Reset Trackers"
+L["AuraTrack_ResetTrackersDesc"] = "Reset all %s trackers to defaults."
 L["AuraTrack_Selected"] = "Selected Tracker"
 L["AuraTrack_ShowHostile"] = "Show with hostile target"
 L["AuraTrack_ShowHostileDesc"] = "Show Indicators when you have an attackable target"
@@ -246,8 +249,6 @@ L["Spec_EquipAssignPrimary"] = "<Equip Ctl+Click> to assign to Primary"
 L["Spec_EquipAssignSecondary"] = "<Equip Alt+Click> to assign to Secondary"
 L["Spec_EquipUnassign"] = "<Equip Shift+Click> to unassign."
 L["Spec_SpecChanger"] = "Spec Changer"
-L["Spec_StatConfig"] = "<Stat Click> to configure."
-L["Spec_StatDisplay"] = "Stat Display"
 L["Start"] = "Start"
 L["Start_Config"] = "RealUI Config"
 L["Sys_AverageAbbr"] = "Avg"

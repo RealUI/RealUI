@@ -2,11 +2,10 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Core\Locales.lua
-	* Revision.: 405
-	* Author...: StormFX
-
-	Localization
+	* File...: Core\Locales.lua
+	* Date...: 2015-10-21T22:43:12Z
+	* Hash...: 829af9f
+	* Author.: StormFX
 
 	[ Notes ]
 
@@ -86,56 +85,56 @@ do
 	local LOC = GetLocale()
 	if LOC == "deDE" then
 L["Addons"] = "Addons"
--- L["Adjust the skin of all buttons registered to %s: %s."] = ""
+L["Adjust the skin of all buttons registered to %s: %s."] = "Passe den Skin von allen Buttons, die auf %s: %s registriert sind, an." -- Needs review
 -- L["Adjust the skin of all buttons registered to %s. This will overwrite any per-group settings."] = ""
 -- L["Adjust the skin of all registered buttons. This will overwrite any per-add-on settings."] = ""
 L["Backdrop Settings"] = "Hintergrund Einstellungen"
--- L["Causes Masque to preload its options instead of having them loaded on demand."] = ""
--- L["Causes Masque to throw Lua errors whenever it encounters a problem with an add-on or skin."] = ""
+L["Causes Masque to preload its options instead of having them loaded on demand."] = "Veranlasst Masque, die Optionen im voraus zu laden, anstatt bei Bedarf." -- Needs review
+L["Causes Masque to throw Lua errors whenever it encounters a problem with an add-on or skin."] = "Veranlasst Masque Lua Fehler auszugeben, wann immer es ein Problem mit einem Addon gibt." -- Needs review
 L["Checked"] = "Ausgewählt"
--- L["Click this button to load Masque's options. You can also use the %s or %s chat command."] = ""
--- L["Click to open Masque's options window."] = ""
+L["Click this button to load Masque's options. You can also use the %s or %s chat command."] = "Klicken um die Masque Optionen zu laden. Du kannst auch %s oder %s als Chat Befehl verwenden."
+L["Click to open Masque's options window."] = "Klicken um das Masque Optionen Fenster zu öffnen."
 L["Color"] = "Farbe"
 L["Colors"] = "Farben"
--- L["Debug Mode"] = ""
+L["Debug Mode"] = "Debugmodus"
 L["Disable"] = "Deaktivieren"
 L["Disabled"] = "Deaktiviert"
--- L["Disable the skinning of this group."] = ""
+L["Disable the skinning of this group."] = "Deaktiviere die Oberflächen dieser Gruppe."
 L["Enable"] = "Aktivieren"
 -- L["Enable fonts provided by skins."] = ""
 L["Enable the backdrop texture."] = "Die Hintergrundtextur aktivieren."
 L["Enable the minimap icon."] = "Das Minimap-Symbol aktivieren"
 L["Flash"] = "Leuchten"
--- L["General"] = ""
+L["General"] = "Allgemein"
 L["Global"] = "Global"
 L["Gloss Settings"] = "Glanz Einstellung"
 L["Highlight"] = "Hervorheben"
 L["Loading Masque Options..."] = "Lädt Masque-Optionen..."
 L["Load Masque Options"] = "Masque-Optionen laden"
--- L["Masque debug mode disabled."] = ""
--- L["Masque debug mode enabled."] = ""
--- L["Masque is a dynamic button skinning add-on."] = ""
+L["Masque debug mode disabled."] = "Masque Debugmodus deaktiviert."
+L["Masque debug mode enabled."] = "Masque Debugmodus aktiviert."
+L["Masque is a dynamic button skinning add-on."] = "Masque ist ein Addon zum anpassen der Button-Oberflächen."
 L["Minimap Icon"] = "Minimap-Symbol"
 L["Normal"] = "Normal"
 L["Opacity"] = "Transparenz"
--- L["Preload Options"] = ""
+L["Preload Options"] = "Optionen vorladen." -- Needs review
 L["Profiles"] = "Profile"
 L["Pushed"] = "Gedrückt"
 L["Reset all skin options to the defaults."] = "Alle Farben auf Standard zurücksetzen."
 L["Reset Skin"] = "Alle Farben zurücksetzen"
--- L["Set the color of the backdrop texture."] = ""
-L["Set the color of the checked texture."] = "Tooltip-Farbe - Markiert"
-L["Set the color of the disabled texture."] = "Tooltip-Farbe - Ausgeschaltet"
-L["Set the color of the flash texture."] = "Tooltip-Farbe - Leuchten"
+L["Set the color of the backdrop texture."] = "Setze die Farbe der Hintergrundtextur."
+L["Set the color of the checked texture."] = "Tooltip-Farbe - Markiert" -- Needs review
+L["Set the color of the disabled texture."] = "Tooltip-Farbe - Ausgeschaltet" -- Needs review
+L["Set the color of the flash texture."] = "Tooltip-Farbe - Leuchten" -- Needs review
 L["Set the color of the gloss texture."] = "Farbe der glänzenden Textur einstellen"
 L["Set the color of the highlight texture."] = "Farbe der Textur zum Hervorheben einstellen"
 L["Set the color of the normal texture."] = "Farbe der normalen Textur einstellen"
-L["Set the color of the pushed texture."] = "Tooltip-Farbe - Gedrückt"
--- L["Set the intensity of the gloss color."] = ""
--- L["Set the skin for this group."] = ""
+L["Set the color of the pushed texture."] = "Tooltip-Farbe - Gedrückt" -- Needs review
+L["Set the intensity of the gloss color."] = "Setze die Intensität des Farbenglanz."
+L["Set the skin for this group."] = "Setze die Oberfläche für diese Gruppe."
 L["Skin"] = "Skin"
--- L["This section will allow you to skin the buttons of the add-ons and add-on groups registered with Masque."] = ""
--- L["ToC/A dynamic button skinning add-on."] = ""
+L["This section will allow you to skin the buttons of the add-ons and add-on groups registered with Masque."] = "Dieser Abschnitt erlaubt es dir die Oberflächen von Buttons der Addons und Addongruppen anzupassen die mit Masque verbunden sind." -- Needs review
+L["ToC/A dynamic button skinning add-on."] = "Ein dynamisches Button-Skin-Addon" -- Needs review
 
 	elseif LOC == "esES" or LOC == "esMX" then
 L["Addons"] = "Botones"
@@ -265,7 +264,7 @@ L["Enable fonts provided by skins."] = "스킨에 의해 제공되는 글꼴을 
 L["Enable the backdrop texture."] = "바탕 텍스쳐를 활성화합니다."
 L["Enable the minimap icon."] = "미니맵 아이콘을 활성화 합니다."
 L["Flash"] = "번쩍임"
--- L["General"] = ""
+L["General"] = "일반" -- Needs review
 L["Global"] = "공통 옵션"
 L["Gloss Settings"] = "광택 효과 설정"
 L["Highlight"] = "강조된 버튼"
@@ -297,57 +296,57 @@ L["This section will allow you to skin the buttons of the add-ons and add-on gro
 L["ToC/A dynamic button skinning add-on."] = "동적인 버튼 스킨 입히기 애드온 입니다."
 
 	elseif LOC == "ruRU" then
-L["Addons"] = "Кнопки" -- Needs review
--- L["Adjust the skin of all buttons registered to %s: %s."] = ""
--- L["Adjust the skin of all buttons registered to %s. This will overwrite any per-group settings."] = ""
--- L["Adjust the skin of all registered buttons. This will overwrite any per-add-on settings."] = ""
+L["Addons"] = "Аддоны" -- Needs review
+L["Adjust the skin of all buttons registered to %s: %s."] = "Позволяет редактировать скины всех панелей, под управлением %s: %s." -- Needs review
+L["Adjust the skin of all buttons registered to %s. This will overwrite any per-group settings."] = "Позволяет редактировать скины всех панелей, под управлением %s. Это переопределит все групповые настройки." -- Needs review
+L["Adjust the skin of all registered buttons. This will overwrite any per-add-on settings."] = "Позволяет редактировать скины всех доступных панелей. Это переопределит все настройки отдельных аддонов." -- Needs review
 L["Backdrop Settings"] = "Настройки фона" -- Needs review
--- L["Causes Masque to preload its options instead of having them loaded on demand."] = ""
--- L["Causes Masque to throw Lua errors whenever it encounters a problem with an add-on or skin."] = ""
-L["Checked"] = "Проверенный" -- Needs review
-L["Click this button to load Masque's options. You can also use the %s or %s chat command."] = "Нажмите эту кнопку, чтобы загрузить настройки Masque's. Вы также можете использовать %s or %s как команту в чате" -- Needs review
--- L["Click to open Masque's options window."] = ""
+L["Causes Masque to preload its options instead of having them loaded on demand."] = "Заставляет Masque загружать настройки при старте игры, вместо загрузки по запросу." -- Needs review
+L["Causes Masque to throw Lua errors whenever it encounters a problem with an add-on or skin."] = "Заставляет Masque выдавать ошибки Lua, с чем бы они не были связаны: аддоном или скином." -- Needs review
+L["Checked"] = "При выделении" -- Needs review
+L["Click this button to load Masque's options. You can also use the %s or %s chat command."] = "Нажмите эту кнопку, чтобы загрузить настройки Masque. Также можно использовать команды %s или %s." -- Needs review
+L["Click to open Masque's options window."] = "ЛКМ для открытия настроек Masque." -- Needs review
 L["Color"] = "Цвет"
 L["Colors"] = "Цвета" -- Needs review
-L["Debug Mode"] = "Режим Отладки" -- Needs review
+L["Debug Mode"] = "Режим отладки" -- Needs review
 L["Disable"] = "Отключить" -- Needs review
-L["Disabled"] = "Отключить края" -- Needs review
--- L["Disable the skinning of this group."] = ""
+L["Disabled"] = "Отключенный" -- Needs review
+L["Disable the skinning of this group."] = "Отключить скины для этой группы." -- Needs review
 L["Enable"] = "Включить"
--- L["Enable fonts provided by skins."] = ""
--- L["Enable the backdrop texture."] = ""
--- L["Enable the minimap icon."] = ""
+L["Enable fonts provided by skins."] = "Использовать шрифты, прикрепленные к скинам." -- Needs review
+L["Enable the backdrop texture."] = "Включить настройки фона текстуры." -- Needs review
+L["Enable the minimap icon."] = "Отображать иконку у миникарты." -- Needs review
 L["Flash"] = "Сверкание" -- Needs review
--- L["General"] = ""
--- L["Global"] = ""
-L["Gloss Settings"] = "Настройки глянеца" -- Needs review
-L["Highlight"] = "Выделение" -- Needs review
--- L["Loading Masque Options..."] = ""
-L["Load Masque Options"] = "Загрузить настройки Masque" -- Needs review
--- L["Masque debug mode disabled."] = ""
--- L["Masque debug mode enabled."] = ""
--- L["Masque is a dynamic button skinning add-on."] = ""
-L["Minimap Icon"] = "Иконка Миникарты" -- Needs review
-L["Normal"] = "Нормальные края" -- Needs review
-L["Opacity"] = "Прозрачность"
--- L["Preload Options"] = ""
+L["General"] = "Общее" -- Needs review
+L["Global"] = "Общее" -- Needs review
+L["Gloss Settings"] = "Настройки глянца" -- Needs review
+L["Highlight"] = "При наведении" -- Needs review
+L["Loading Masque Options..."] = "Загрузка настроек..." -- Needs review
+L["Load Masque Options"] = "Загрузить настройки" -- Needs review
+L["Masque debug mode disabled."] = "Режим отладки Masque отключен." -- Needs review
+L["Masque debug mode enabled."] = "Режим отладки Masque включен." -- Needs review
+L["Masque is a dynamic button skinning add-on."] = "Masque - аддон, позволяющий добавлять скины к панелям команд." -- Needs review
+L["Minimap Icon"] = "Иконка у миникарты" -- Needs review
+L["Normal"] = "Нормальный" -- Needs review
+L["Opacity"] = "Непрозрачность" -- Needs review
+L["Preload Options"] = "Загрузка настроек при запуске" -- Needs review
 L["Profiles"] = "Профили"
-L["Pushed"] = "Вдавленные края" -- Needs review
-L["Reset all skin options to the defaults."] = "Сбросить все цвета на значения по умолчанию." -- Needs review
-L["Reset Skin"] = "Сбросить цвета" -- Needs review
--- L["Set the color of the backdrop texture."] = ""
-L["Set the color of the checked texture."] = "Установить цвет отмеченной текстуры." -- Needs review
+L["Pushed"] = "При нажатии" -- Needs review
+L["Reset all skin options to the defaults."] = "Установить значения цветов по умолчанию." -- Needs review
+L["Reset Skin"] = "Сбросить цвета"
+L["Set the color of the backdrop texture."] = "Установить цвет фона текстуры." -- Needs review
+L["Set the color of the checked texture."] = "Установить цвет текстуры при выделении." -- Needs review
 L["Set the color of the disabled texture."] = "Установить цвет отключенной текстуры." -- Needs review
-L["Set the color of the flash texture."] = "Установить цвет подсвеченной текстуры." -- Needs review
-L["Set the color of the gloss texture."] = "Задать цвет для глянецых текстур." -- Needs review
-L["Set the color of the highlight texture."] = "Установить цвет выделенной текстуры." -- Needs review
-L["Set the color of the normal texture."] = "Установить цвет нормальной текстуры." -- Needs review
-L["Set the color of the pushed texture."] = "Установить цвет нажатой текстуры." -- Needs review
--- L["Set the intensity of the gloss color."] = ""
--- L["Set the skin for this group."] = ""
-L["Skin"] = "Шкурки"
--- L["This section will allow you to skin the buttons of the add-ons and add-on groups registered with Masque."] = ""
--- L["ToC/A dynamic button skinning add-on."] = ""
+L["Set the color of the flash texture."] = "Установить цвет текстуры с подсветкой." -- Needs review
+L["Set the color of the gloss texture."] = "Задать цвет для глянца текстур." -- Needs review
+L["Set the color of the highlight texture."] = "Установить цвет текстуры при наведении." -- Needs review
+L["Set the color of the normal texture."] = "Установить нормальный цвет текстуры." -- Needs review
+L["Set the color of the pushed texture."] = "Установить цвет текстуры при нажатии." -- Needs review
+L["Set the intensity of the gloss color."] = "Установить интенсивность глянца." -- Needs review
+L["Set the skin for this group."] = "Установить скин для данной группы." -- Needs review
+L["Skin"] = "Скины" -- Needs review
+L["This section will allow you to skin the buttons of the add-ons and add-on groups registered with Masque."] = "Этот раздел позволяет настроить скины для панелей команд аддонов и групп аддонов, использующих Masque." -- Needs review
+L["ToC/A dynamic button skinning add-on."] = "Аддон для добавления скинов к панелям команд." -- Needs review
 
 	elseif LOC == "zhCN" then
 L["Addons"] = "插件"

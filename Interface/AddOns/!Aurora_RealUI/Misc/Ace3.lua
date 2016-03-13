@@ -1,19 +1,17 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
-tinsert(mods["PLAYER_LOGIN"], function(F, C)
+_G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     -- Lua Globals --
     local next, select = _G.next, _G.select
-    local strsplit = _G.strsplit
-
-    -- WoW Globals --
-    local CreateFrame, hooksecurefunc = _G.CreateFrame, _G.hooksecurefunc
 
     -- Libs --
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
 
-    local HiddenFrame = CreateFrame("Frame", nil, _G.UIParent)
+    local HiddenFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     HiddenFrame:Hide()
 
     local r, g, b = C.r, C.g, C.b
@@ -34,7 +32,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
             local region = select(i, object:GetRegions())
             if region:GetObjectType() == "Texture" then
                 if kill then
-                    region:Kill()
+                    Kill(region)
                 else
                     region:SetTexture(nil)
                 end
@@ -53,7 +51,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         frame.DMiddle:SetAlpha(0)
         frame.DRight:SetAlpha(0)
 
-        local bg = CreateFrame("Frame", nil, frame)
+        local bg = _G.CreateFrame("Frame", nil, frame)
         bg:SetPoint("TOPLEFT", 0, -18)
         bg:SetPoint("BOTTOMRIGHT", 0, 6)
         bg:SetFrameLevel(frame:GetFrameLevel()-1)
@@ -98,10 +96,10 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
     end
 
     local oldRegisterAsWidget = AceGUI.RegisterAsWidget
-    AceGUI.RegisterAsWidget = function(self, widget)
+    AceGUI.RegisterAsWidget = function(gui, widget)
         local TYPE = widget.type
-        local _, TYPE2, TYPE3 = strsplit("-", TYPE)
-        local MODULE, MODULETYPE = strsplit("_", TYPE)
+        local _, TYPE2, TYPE3 = _G.strsplit("-", TYPE)
+        local MODULE, MODULETYPE = _G.strsplit("_", TYPE)
         mods.debug("Widget:", MODULE or TYPE)
         mods.debug("Subtype", TYPE2 or MODULETYPE, TYPE3)
 
@@ -185,7 +183,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     widget.bg = F.CreateBDFrame(widget.checkbg)
                     widget.bg:SetPoint('TOPLEFT', widget.checkbg, 4, -4)
                     widget.bg:SetPoint('BOTTOMRIGHT', widget.checkbg, -4, 4)
-                    local tex = F.CreateGradient(widget.bg)
+                    F.CreateGradient(widget.bg)
                     widget.check:SetParent(widget.bg)
                 end
 
@@ -249,7 +247,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     local bd = F.CreateBDFrame(check, 1)
                     check:SetParent(bd)
 
-                elseif TYPE3 == "Menu" then
+                --elseif TYPE3 == "Menu" then
                     --
                 end
                 widget.skinned = true
@@ -390,7 +388,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
                     widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
 
-                elseif MODULETYPE == "Font" then
+                --elseif MODULETYPE == "Font" then
                     --
 
                 elseif MODULETYPE == "Sound" then
@@ -461,11 +459,11 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 end
             end
         end
-        return oldRegisterAsWidget(self, widget)
+        return oldRegisterAsWidget(gui, widget)
     end
 
     local oldRegisterAsContainer = AceGUI.RegisterAsContainer
-    AceGUI.RegisterAsContainer = function(self, widget)
+    AceGUI.RegisterAsContainer = function(gui, widget)
         local TYPE = widget.type
         mods.debug("Container:", TYPE)
 
@@ -525,7 +523,7 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE == "TreeGroup" then
             if not widget.skinned then
                 mods.debug("TreeFrame!!!")
-                hooksecurefunc(widget, "RefreshTree", function(self, ...)
+                _G.hooksecurefunc(widget, "RefreshTree", function(self, ...)
                     mods.debug("RefreshTree", self)
                     local buttons = self.buttons
                     for i, v in next, buttons do
@@ -560,10 +558,11 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 F.ReskinScroll(widget.scrollbar)
             end
 
-        elseif TYPE == "SimpleGroup" then
+        
+        --[[elseif TYPE == "SimpleGroup" then
             if not widget.skinned then
                 --
-            end
+            end]]
 
         elseif TYPE == "Window" then
             if not widget.skinned then
@@ -593,6 +592,6 @@ tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 F.CreateBD(frame)
             end
         end
-        return oldRegisterAsContainer(self, widget)
+        return oldRegisterAsContainer(gui, widget)
     end
 end)

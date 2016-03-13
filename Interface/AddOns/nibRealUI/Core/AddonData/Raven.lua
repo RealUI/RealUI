@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Raven = function()
-	RavenDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Raven = function()
+	_G.RavenDB = {
 		["profileKeys"] = {
 			["Real - Zul'jin"] = "RealUI",
 		},

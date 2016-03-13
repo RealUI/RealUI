@@ -2,11 +2,11 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Skins\Skins.lua
-	* Revision.: 381
-	* Author...: StormFX
+	* File...: Skins\Skins.lua
+	* Date...: 2015-12-16T19:22:26Z
+	* Hash...: 00937e6
+	* Author.: StormFX
 
-	Skin API
 ]]
 
 local _, Core = ...
@@ -38,7 +38,7 @@ local Layers = {
 	"Count",
 	"HotKey",
 	"Duration",
-	"AutoCast",
+	"Shine",
 }
 
 -- Hidden Layer
@@ -51,7 +51,11 @@ function Core:AddSkin(SkinID, SkinData)
 	for i = 1, #Layers do
 		local Layer = Layers[i]
 		if type(SkinData[Layer]) ~= "table" then
-			SkinData[Layer] = Hidden
+			if Layer == "Shine" and type(SkinData.AutoCast) == "table" then
+				SkinData[Layer] = SkinData.AutoCast
+			else
+				SkinData[Layer] = Hidden
+			end
 		end
 	end
 	Skins[SkinID] = SkinData

@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_mikScrollingBattleText = function()
-	MSBTProfiles_SavedVars = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_mikScrollingBattleText = function()
+	_G.MSBTProfiles_SavedVars = {
 		["profiles"] = {
 			["RealUI"] = {
 				["critFontName"] = "pixel_crits",
@@ -599,7 +605,7 @@ nibRealUI.LoadAddOnData_mikScrollingBattleText = function()
 			},
 		},
 	}
-	MSBT_SavedMedia = {
+	_G.MSBT_SavedMedia = {
 		["fonts"] = {
 		},
 		["sounds"] = {

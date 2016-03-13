@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: RealUI Core
 ## Author: Nibelheim, Gethe
-## Version: 8.1 r14k
+## Version: 8.1 r15b
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## RequiredDeps: !Aurora_RealUI
@@ -11,6 +11,8 @@
 ## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
 
 Libs\Embeds.xml
+
+Init.lua
 
 Locale.xml
 

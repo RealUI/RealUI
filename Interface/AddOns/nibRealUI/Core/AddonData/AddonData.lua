@@ -1,6 +1,12 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.AddOns = {
+-- Lua Globals --
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.AddOns = {
     "Aurora",
     "BugGrabber",
     "BugSack",
@@ -15,16 +21,16 @@ nibRealUI.AddOns = {
     "Skada",
 }
 
-function nibRealUI:LoadAddonData()
-    for k, a in pairs(self.AddOns) do
+function RealUI:LoadAddonData()
+    for k, a in next, self.AddOns do
         if self["LoadAddOnData_"..a] then
             self["LoadAddOnData_"..a]()
         end
     end
 end
 
-function nibRealUI:LoadSpecificAddOnData(addon, skipReload)
-    --print("nibRealUI:LoadSpecificAddOnData", addon, skipReload, self["LoadAddOnData_"..addon])
+function RealUI:LoadSpecificAddOnData(addon, skipReload)
+    --print("RealUI:LoadSpecificAddOnData", addon, skipReload, self["LoadAddOnData_"..addon])
     if self["LoadAddOnData_"..addon] then
         self["LoadAddOnData_"..addon]()
         --setProfile

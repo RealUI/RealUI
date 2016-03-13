@@ -1,28 +1,34 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
+    <!-- Libs -->
     <Script file="LibStub\LibStub.lua"/>
-    <Include file="CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
-    <Include file="AceAddon-3.0\AceAddon-3.0.xml"/>
+    <Script file="LibChatAnims\LibChatAnims.lua"/>
+    <Script file="LibStrataFix\LibStrataFix.lua"/>
+    <Script file="CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+    <Script file="LibSharedMedia-3.0\LibSharedMedia-3.0.lua"/>
+    <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
     <Include file="AceGUI-3.0\AceGUI-3.0.xml"/>
-    <Include file="LibSharedMedia-3.0\lib.xml"/>
     <Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
     <Include file="AceConfig-3.0\AceConfig-3.0.xml"/>
-    <Include file="AceConsole-3.0\AceConsole-3.0.xml"/>
-    <Include file="AceDB-3.0\AceDB-3.0.xml"/>
-    <Include file="AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
-    <Include file="AceEvent-3.0\AceEvent-3.0.xml"/>
-    <Include file="AceTimer-3.0\AceTimer-3.0.xml"/>
-    <Include file="AceBucket-3.0\AceBucket-3.0.xml"/>
-    <Include file="AceHook-3.0\AceHook-3.0.xml"/>
-    <Include file="Astrolabe\Load.xml"/>
+    <Script file="AceConsole-3.0\AceConsole-3.0.lua"/>
+    <Script file="AceDB-3.0\AceDB-3.0.lua"/>
+    <Script file="AceDBOptions-3.0\AceDBOptions-3.0.lua"/>
+    <Script file="AceEvent-3.0\AceEvent-3.0.lua"/>
+    <Script file="AceTimer-3.0\AceTimer-3.0.lua"/>
+    <Script file="AceBucket-3.0\AceBucket-3.0.lua"/>
+    <Script file="AceHook-3.0\AceHook-3.0.lua"/>
     <Script file="LibRangeCheck-2.0\LibRangeCheck-2.0.lua"/>
     <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
+    <Script file="SpecializedLibBars-1.0\SpecializedLibBars-1.0.lua"/>
     <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
     <Include file="LibIconFonts-1.0\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
-    <Include file="lib-st\lib-st.xml"/>
     <Include file="LibTextTable-1.1\Lib.xml" />
     <Include file="oUF\oUF.xml"/>
-    <Include file="SpecializedLibBars-1.0\lib.xml"/>
+    <Include file="Astrolabe\Load.xml"/>
+
+    <!-- Fixes -->
+    <Script file="Fixes\InspectFix.lua"/>
+    <Script file="Fixes\BlizzBugsSuck.lua"/>
 </Ui>

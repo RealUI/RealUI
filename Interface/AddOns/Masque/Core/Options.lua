@@ -2,11 +2,11 @@
 	This file is part of 'Masque', an add-on for World of Warcraft. For license information,
 	please see the included License.txt file.
 
-	* File.....: Core\Options.lua
-	* Revision.: 404
-	* Author...: StormFX
+	* File...: Core\Options.lua
+	* Date...: 2015-10-21T22:43:12Z
+	* Hash...: 829af9f
+	* Author.: StormFX
 
-	Options Setup
 ]]
 
 local MASQUE, Core = ...

@@ -1,29 +1,32 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+
 mods["Blizzard_DebugTools"] = function(F, C)
     mods.debug("Blizzard_DebugTools", F, C)
 
     -- Fix ErrorFrame
-    ScriptErrorsFrame:HookScript("OnShow", function()
-        ScriptErrorsFrame:SetScale(tonumber(GetCVar("uiScale")))
-        ScriptErrorsFrame:SetSize(384, 260)
+    _G.ScriptErrorsFrame:HookScript("OnShow", function()
+        _G.ScriptErrorsFrame:SetScale(_G.tonumber(_G.GetCVar("uiScale")))
+        _G.ScriptErrorsFrame:SetSize(384, 260)
     end)
 
     -- EventTrace
-    for i = 1, EventTraceFrame:GetNumRegions() do
-        local region = select(i, EventTraceFrame:GetRegions())
+    for i = 1, _G.EventTraceFrame:GetNumRegions() do
+        local region = _G.select(i, _G.EventTraceFrame:GetRegions())
         if region:GetObjectType() == "Texture" then
             region:SetTexture(nil)
         end
     end
-    EventTraceFrame:SetHeight(600)
-    F.CreateBD(EventTraceFrame)
+    _G.EventTraceFrame:SetHeight(600)
+    F.CreateBD(_G.EventTraceFrame)
 
-    EventTraceFrameScrollBG:Hide()
-    local thumb = EventTraceFrameScroll.thumb
+    _G.EventTraceFrameScrollBG:Hide()
+    local thumb = _G.EventTraceFrameScroll.thumb
     thumb:SetAlpha(0)
     thumb:SetWidth(17)
-    thumb.bg = CreateFrame("Frame", nil, EventTraceFrameScroll)
+    thumb.bg = _G.CreateFrame("Frame", nil, _G.EventTraceFrameScroll)
     thumb.bg:SetPoint("TOPLEFT", thumb, 0, 0)
     thumb.bg:SetPoint("BOTTOMRIGHT", thumb, 0, 0)
     F.CreateBD(thumb.bg, 0)
@@ -31,5 +34,5 @@ mods["Blizzard_DebugTools"] = function(F, C)
     thumb.tex:SetPoint("TOPLEFT", thumb.bg, 1, -1)
     thumb.tex:SetPoint("BOTTOMRIGHT", thumb.bg, -1, 1)
 
-    F.ReskinClose(EventTraceFrameCloseButton)
+    F.ReskinClose(_G.EventTraceFrameCloseButton)
 end

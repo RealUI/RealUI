@@ -1,0 +1,36 @@
+Copyright (c) 2008-2015 JJSheets, StormFX.  All rights reserved.
+
+The contents of this software (the "add-on"), excluding third-party resources, 
+fall under the aforementioned copyright. The author(s) of this add-on hereby grant
+the following permissions:
+
+* Permission to use, read or otherwise interpret this add-on for personal use,
+  without restrictions.
+
+* Permission to modify or reuse portions of this add-on and to distribute such
+  derivative works as long as the name of this add-on and/or its authors are not
+  used in the works in such a way that conflicts with this add-on or its author(s),
+  outside of attributing credit.
+
+* Permission to include this add-on with other works not derived from this add-on
+  for the purpose of creating "user interface compilations" or "addon packs" for
+  the "World of Warcraft" game client and to distribute such collective works on
+  websites operated by "Curse, Inc" or "ZAM Network, LLC" (including curse.com,
+  curseforge.com, wowace.com and wowinterface.com) as long as the add-on is
+  distributed intact and unmodified.
+
+* This add-on may not be redistributed by itself or in any other way, in whole
+  or in part, modified or unmodified, without specific prior written permission
+  from the author(s) of this add-on.
+
+* The names of this add-on and/or its author(s) may not be used to promote or
+  endorse works derived from this add-on without specific prior written permission
+  from the author(s) of this add-on.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR(S) OR COPYRIGHT HOLDER(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

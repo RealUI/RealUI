@@ -1,10 +1,14 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local LSM = LibStub("LibSharedMedia-3.0")
-local db, dbc, dbg
-local function debug(...)
-    nibRealUI.Debug("Settings", ...)
-end
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, dbg
+local debug = private.debug("Settings")
 
 local nibRealUICharacter_defaults = {
     installStage = 0,
@@ -17,58 +21,79 @@ local Textures = {
 }
 local IWF = {}
 
+local accountCVars = {
+    -- Sound
+    ["Sound_EnableErrorSpeech"] = 0,
+
+    -- Nameplates
+    ["bloatTest"] = 0,
+    ["bloatnameplates"] = 0,
+    ["bloatthreat"] = 0,
+
+    -- Screenshots
+    ["screenshotFormat"] = "jpg",              -- JPG format
+    ["screenshotQuality"] = "10",              -- Highest quality
+
+    -- Help
+    ["showGameTips"] = 0,                      -- Turn off Loading Screen Tips
+    ["showTutorials"] = 0,                     -- Turn off Tutorials
+    ["UberTooltips"] = 1,                      -- Turn on Enhanced Tooltips
+    ["scriptErrors"] = 1,                      -- Turn on Display Lua Errors
+
+    -- Controls
+    ["deselectOnClick"] = 1,                   -- Turn off Sticky Targeting (inverted)
+
+    -- Combat
+    ["displaySpellActivationOverlays"] = 1,    -- Turn on Spell Alerts
+    ["spellActivationOverlayOpacity"] = 0.75,  -- Spell Alert Opacity
+
+    -- Display
+    ["emphasizeMySpellEffects"] = 0,           -- Turn off Emphasize My Spell Effects
+    ["SpellTooltip_DisplayAvgValues"] = 0,     -- Turn off Display Points As Average
+
+    -- Social
+    ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
+    ["chatBubblesParty"] = 0,                  -- Turn off Party Chat Bubbles
+    ["chatStyle"] = "classic",                 -- Chat Style = "Classic"
+    ["conversationMode"] = "inline",           -- Conversation Mode = "In-line"
+
+    -- ActionBars
+    ["countdownForCooldowns"] = 0,             -- Disable Blizz cooldown count
+
+    -- Quests
+    ["autoQuestWatch"] = 1,                    -- Auto Track Quests
+
+    -- Names
+    ["UnitNameNPC"] = 1,                       -- Turn on NPC Names
+    ["UnitNamePlayerPVPTitle"] = 0,            -- Turn off PvP Player Titles
+    ["UnitNameEnemyGuardianName"] = 1,         -- Turn on Enemy Pet Names
+    ["UnitNameEnemyTotemName"] = 1,            -- Turn on Enemy Totem Names
+    ["nameplateMotion"] = 1,                   -- Stacking Nameplates
+
+    -- Camera
+    ["cameraYawSmoothSpeed"] = 210,
+    ["cameraView"] = 1,                        -- Camera Stlye
+    ["cameraDistanceMax"] = 50,                -- Camera Max Distance
+    ["cameraDistanceMaxFactor"] = 2,           -- Camera Follow Speed
+
+    -- Quality of Life
+    ["guildShowOffline"] = 0,                  -- Hide Offline Guild Members
+    ["profanityFilter"] = 0,                   -- Turn off Profanity Filter
+}
+local characterCVars = {
+    ["useCompactPartyFrames"] = 1,    -- Raid-style party frames
+}
+
 -- CVars
 local function SetDefaultCVars()
-    -- Sound
-    SetCVar("Sound_EnableErrorSpeech", 0)
-    -- Nameplates
-    SetCVar("bloatTest", 0)
-    SetCVar("bloatnameplates", 0)
-    SetCVar("bloatthreat", 0)
-    -- Screenshots
-    SetCVar("screenshotFormat", "jpg")              -- JPG format
-    SetCVar("screenshotQuality", "10")              -- Highest quality
-    -- Help
-    SetCVar("showGameTips", 0)                      -- Turn off Loading Screen Tips
-    SetCVar("showTutorials", 0)                     -- Turn off Tutorials
-    SetCVar("UberTooltips", 1)                      -- Turn on Enhanced Tooltips
-    SetCVar("scriptErrors", 1)                      -- Turn on Display Lua Errors
-    -- Controls
-    SetCVar("deselectOnClick", 1)                   -- Turn off Sticky Targeting (inverted)
-    -- Combat
-    SetCVar("displaySpellActivationOverlays", 1)    -- Turn on Spell Alerts
-    SetCVar("spellActivationOverlayOpacity", 0.75)  -- Spell Alert Opacity
-    -- Display
-    SetCVar("emphasizeMySpellEffects", 0)           -- Turn off Emphasize My Spell Effects
-    SetCVar("SpellTooltip_DisplayAvgValues", 0)     -- Turn off Display Points As Average
-    -- Social
-    SetCVar("chatBubbles", 0)                       -- Turn off Chat Bubbles
-    SetCVar("chatBubblesParty", 0)                  -- Turn off Party Chat Bubbles
-    SetCVar("chatStyle", "classic")                 -- Chat Style = "Classic"
-    SetCVar("conversationMode", "inline")           -- Conversation Mode = "In-line"
-    -- ActionBars
-    SetCVar("countdownForCooldowns", 0)             -- Disable Blizz cooldown count
-    -- Quests
-    SetCVar("autoQuestWatch", 1)                    -- Auto Track Quests
-    -- Names
-    SetCVar("UnitNameNPC", 1)                       -- Turn on NPC Names
-    SetCVar("UnitNamePlayerPVPTitle", 0)            -- Turn off PvP Player Titles
-    SetCVar("UnitNameEnemyGuardianName", 1)         -- Turn on Enemy Pet Names
-    SetCVar("UnitNameEnemyTotemName", 1)            -- Turn on Enemy Totem Names
-    SetCVar("nameplateMotion", 1)                   -- Stacking Nameplates
-    -- Camera
-    SetCVar("cameraYawSmoothSpeed", 210)
-    SetCVar("cameraView", 1)                        -- Camera Stlye
-    SetCVar("cameraDistanceMax", 50)                -- Camera Max Distance
-    SetCVar("cameraDistanceMaxFactor", 2)           -- Camera Follow Speed
-    -- Quality of Life
-    SetCVar("guildShowOffline", 0)                  -- Hide Offline Guild Members
-    SetCVar("profanityFilter", 0)                   -- Turn off Profanity Filter
-    -- Combat Text
-    if IsAddOnLoaded("MikScrollingBattleText") then
-        SetCVar("enableCombatText", 0)              -- Turn off Combat Text
-        SetCVar("CombatDamage", 0)                  -- Turn off Combat Text - Damage
-        SetCVar("CombatHealing", 0)                 -- Turn off Combat Text - Healing
+    if _G.IsAddOnLoaded("MikScrollingBattleText") then
+        accountCVars["enableCombatText"] = 0   -- Turn off Combat Text
+        accountCVars["CombatDamage"] = 0       -- Turn off Combat Text - Damage
+        accountCVars["CombatHealing"] = 0      -- Turn off Combat Text - Healing
+    end
+
+    for cvar, value in next, accountCVars do
+        _G.SetCVar(cvar, value)
     end
 end
 
@@ -78,32 +103,34 @@ local function InitialSettings()
     -- Lock chat frames
     for i = 1, 10 do
         local cf = _G["ChatFrame"..i]
-        if cf then FCF_SetLocked(cf, 1) end
+        if cf then _G.FCF_SetLocked(cf, 1) end
     end
 
     -- Set all chat channels to color player names by class
-    for k, v in pairs(CHAT_CONFIG_CHAT_LEFT) do
-        ToggleChatColorNamesByClassGroup(true, v.type)
+    for k, v in next, _G.CHAT_CONFIG_CHAT_LEFT do
+        _G.ToggleChatColorNamesByClassGroup(true, v.type)
     end
     for iCh = 1, 15 do
-        ToggleChatColorNamesByClassGroup(true, "CHANNEL"..iCh)
+        _G.ToggleChatColorNamesByClassGroup(true, "CHANNEL"..iCh)
     end
 
     -- Make Chat windows transparent
-    SetChatWindowAlpha(1, 0)
-    SetChatWindowAlpha(2, 0)
+    _G.SetChatWindowAlpha(1, 0)
+    _G.SetChatWindowAlpha(2, 0)
 
     -- Char specific CVars
-    SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
+    for cvar, value in next, characterCVars do
+        _G.SetCVar(cvar, value)
+    end
 
     -- Initial Settings done
-    nibRealUICharacter.initialized = true
+    _G.nibRealUICharacter.initialized = true
 end
 
 ---- Primary Installation
 ---- Stage 1
-function RealUI_RunStage1()
-    nibRealUICharacter.installStage = -1
+local function RunStage1()
+    _G.nibRealUICharacter.installStage = -1
 
     if dbg.tags.firsttime then
         dbg.tags.firsttime = false
@@ -111,35 +138,35 @@ function RealUI_RunStage1()
 
         ---- Addon Data
         -- Initialize Grid2
-        if Grid2 and Grid2.LoadConfig then
-            Grid2:LoadConfig()
+        if _G.Grid2 and _G.Grid2.LoadConfig then
+            _G.Grid2:LoadConfig()
         end
 
         -- Addon settings
-        nibRealUI:LoadAddonData()
+        RealUI:LoadAddonData()
 
         ---- Extra addon tweaks
         -- Grid - Healing frame height
-        local resWidth, resHeight = nibRealUI:GetResolutionVals()
+        local _, resHeight = RealUI:GetResolutionVals()
         if resHeight < 900 then
-            if Grid2DB and Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"] then
-                Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"]["frameHeight"] = 25
+            if _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"] then
+                _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"]["frameHeight"] = 25
             end
         end
     end
 
     -- Make Chat windows transparent (again)
-    SetChatWindowAlpha(1, 0)
-    SetChatWindowAlpha(2, 0)
+    _G.SetChatWindowAlpha(1, 0)
+    _G.SetChatWindowAlpha(2, 0)
 
     -- Addon Profiles
-    nibRealUI:SetProfileKeys()
+    RealUI:SetProfileKeys()
 end
 
 local function CreateIWTextureFrame(texture, width, height, position, color)
-    local frame = CreateFrame("Frame", nil, IWF)
+    local frame = _G.CreateFrame("Frame", nil, IWF)
     frame:SetParent(IWF)
-    frame:SetPoint(unpack(position))
+    frame:SetPoint(_G.unpack(position))
     frame:SetFrameStrata("DIALOG")
     frame:SetFrameLevel(IWF:GetFrameLevel() + 1)
     frame:SetWidth(width)
@@ -148,7 +175,7 @@ local function CreateIWTextureFrame(texture, width, height, position, color)
     frame.bg = frame:CreateTexture()
     frame.bg:SetAllPoints(frame)
     frame.bg:SetTexture(texture)
-    frame.bg:SetVertexColor(unpack(color))
+    frame.bg:SetVertexColor(_G.unpack(color))
 
     return frame
 end
@@ -156,23 +183,23 @@ end
 local function CreateInstallWindow()
     -- To help with debugging
     local bdAlpha, ibSizeOffs = 0.9, 0
-    if nibRealUI.isDev then
+    if RealUI.isDev then
         bdAlpha = 0.5
         ibSizeOffs = 300
     end
 
     -- Background
-    IWF = CreateFrame("Frame", nil, UIParent)
+    IWF = _G.CreateFrame("Frame", nil, _G.UIParent)
     IWF:Hide()
-        IWF:SetParent(UIParent)
-        IWF:SetAllPoints(UIParent)
+        IWF:SetParent(_G.UIParent)
+        IWF:SetAllPoints(_G.UIParent)
         IWF:SetFrameStrata("DIALOG")
         IWF:SetFrameLevel(0)
     IWF:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain,
+        bgFile = RealUI.media.textures.plain,
     })
     IWF:SetBackdropColor(0, 0, 0, bdAlpha)
-    nibRealUI:AddStripeTex(IWF)
+    RealUI:AddStripeTex(IWF)
 
     -- Logo
     IWF.logo = CreateIWTextureFrame(Textures.Logo, 256, 256, {"BOTTOM", IWF, "CENTER", 0, 0}, {1, 1, 1, 1})
@@ -183,12 +210,12 @@ local function CreateInstallWindow()
     line:SetPoint("TOPLEFT", IWF, "LEFT", 0, 0)
     line:SetPoint("BOTTOMRIGHT", IWF, "RIGHT", 0, -1)
     line:SetTexture(1, 1, 1, 0.2)
-    line.squareTravelLength = UIParent:GetWidth() + moverLength * 2
+    line.squareTravelLength = _G.UIParent:GetWidth() + moverLength * 2
 
     -- Moving Line Squares
     local lineSquares = {}
     for i = 1, numMovers do
-        lineSquares[i] = CreateFrame("Frame", nil, IWF)
+        lineSquares[i] = _G.CreateFrame("Frame", nil, IWF)
         local lS = lineSquares[i]
 
         lS:SetSize(moverLength, 1)
@@ -196,9 +223,9 @@ local function CreateInstallWindow()
             lS.bg:SetAllPoints()
             lS.bg:SetTexture(1, 1, 1, 0.3)
 
-        lS.curX = random(0, line.squareTravelLength) - (line.squareTravelLength / 2)
+        lS.curX = _G.random(0, line.squareTravelLength) - (line.squareTravelLength / 2)
         lS.direction = i > (numMovers / 2) and -1 or 1
-        lS.speed = random(minSpeed, minSpeed + numMovers)
+        lS.speed = _G.random(minSpeed, minSpeed + numMovers)
         if (i > 1) and (lS.speed == lineSquares[i - 1].speed) then
             lS.speed = lS.speed + 1
         end
@@ -216,23 +243,23 @@ local function CreateInstallWindow()
 
     -- Version string
     IWF.verStr = IWF:CreateFontString(nil, "OVERLAY")
-        IWF.verStr:SetFont(RealUIFont_Normal:GetFont(), 18)
-        IWF.verStr:SetText(L["Version"].." "..nibRealUI:GetVerString(true))
+        IWF.verStr:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
+        IWF.verStr:SetText(L["Version"].." "..RealUI:GetVerString(true))
         IWF.verStr:SetPoint("TOP", IWF, "CENTER", 0, -12)
 
     -- Button
-    IWF.install = CreateFrame("Button", "RealUI_Install", IWF, "SecureActionButtonTemplate")
+    IWF.install = _G.CreateFrame("Button", "RealUI_Install", IWF, "SecureActionButtonTemplate")
         IWF.install:SetPoint("CENTER")
-        IWF.install:SetSize(UIParent:GetWidth() - ibSizeOffs, UIParent:GetHeight() - ibSizeOffs)
+        IWF.install:SetSize(_G.UIParent:GetWidth() - ibSizeOffs, _G.UIParent:GetHeight() - ibSizeOffs)
     IWF.install:RegisterForClicks("LeftButtonUp")
     IWF.install:SetScript("OnClick", function()
-        RealUI_RunStage1()
-        ReloadUI()
+        RunStage1()
+        _G.ReloadUI()
     end)
 
     -- Click To Install frame + string
-    IWF.installTextFrame = CreateFrame("Frame", nil, IWF)
-        IWF.installTextFrame:SetPoint("BOTTOM", 0, UIParent:GetHeight() / 4)
+    IWF.installTextFrame = _G.CreateFrame("Frame", nil, IWF)
+        IWF.installTextFrame:SetPoint("BOTTOM", 0, _G.UIParent:GetHeight() / 4)
         IWF.installTextFrame:SetSize(2,2)
     IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup()
         IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
@@ -247,7 +274,7 @@ local function CreateInstallWindow()
 
     IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
         IWF.installText:SetPoint("BOTTOM")
-        IWF.installText:SetFont(RealUIFont_Normal:GetFont(), 18)
+        IWF.installText:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
         IWF.installText:SetText("[ "..L["Install"].." ]")
 
     -- Combat Check
@@ -256,12 +283,12 @@ local function CreateInstallWindow()
     IWF:RegisterEvent("PLAYER_REGEN_DISABLED")
     IWF:SetScript("OnEvent", function(self, event)
         if event == "PLAYER_ENTERING_WORLD" then
-            if not(InCombatLockdown()) then
+            if not(_G.InCombatLockdown()) then
                 IWF:Show()
             end
         elseif event == "PLAYER_REGEN_DISABLED" then
             IWF:Hide()
-            print("|cffff0000RealUI Installation paused until you leave combat.|r")
+            _G.print("|cffff0000RealUI Installation paused until you leave combat.|r")
         else
             IWF:Show()
         end
@@ -279,22 +306,22 @@ local function InstallationStage1()
     end
 
     -- Initial Character Settings
-    if not nibRealUICharacter.initialized then
+    if not _G.nibRealUICharacter.initialized then
         InitialSettings()
     end
 
     -- Set version info
     dbg.verinfo = {}
-    for k,v in next, nibRealUI.verinfo do
+    for k,v in next, RealUI.verinfo do
         dbg.verinfo[k] = v
     end
 
-    DEFAULT_CHATFRAME_ALPHA = 0
+    _G.DEFAULT_CHATFRAME_ALPHA = 0
 end
 
 ---- Process
 local function PrimaryInstallation()
-    if nibRealUICharacter.installStage > -1 then
+    if _G.nibRealUICharacter.installStage > -1 then
         InstallationStage1()
     end
 end
@@ -309,13 +336,13 @@ local function ApplyMiniPatches(patches)
 
     -- Set version info
     dbg.verinfo = {}
-    for k,v in next, nibRealUI.verinfo do
+    for k,v in next, RealUI.verinfo do
         dbg.verinfo[k] = v
     end
 end
 
 local function MiniPatchInstallation()
-    local curVer = nibRealUI.verinfo
+    local curVer = RealUI.verinfo
     local oldVer = dbg.verinfo
 
     -- Find out which Mini Patches are needed
@@ -324,61 +351,60 @@ local function MiniPatchInstallation()
     if oldVer[3] then
         for i = oldVer[3] + 1, curVer[3] do
             debug("checking", i)
-            if nibRealUI.minipatches[i] then
+            if RealUI.minipatches[i] then
                 -- This needs to be an array to ensure patches are applied sequentially.
-                tinsert(patches, nibRealUI.minipatches[i])
+                _G.tinsert(patches, RealUI.minipatches[i])
             end
         end
     end
 
     debug("numPatches", #patches)
     if #patches > 0 then
-        StaticPopupDialogs["PUDRUIMP"] = {
+        _G.StaticPopupDialogs["PUDRUIMP"] = {
             text = "|cff85e0ff"..L["Patch_MiniPatch"].."|r\n\n|cffffffff"..L["Patch_DoApply"],
-            button1 = OKAY,
+            button1 = _G.OKAY,
             OnAccept = function()
                 ApplyMiniPatches(patches)
-                ReloadUI()
+                _G.ReloadUI()
             end,
             timeout = 0,
             whileDead = true,
             hideOnEscape = false,
             notClosableByLogout = false,
         }
-        StaticPopup_Show("PUDRUIMP")
+        _G.StaticPopup_Show("PUDRUIMP")
     end
 end
 
 -- Install Procedure
-function nibRealUI:InstallProcedure()
+function RealUI:InstallProcedure()
     db = self.db.profile
-    dbc = self.db.char
     dbg = self.db.global
 
     ---- Version checking
-    local curVer = nibRealUI.verinfo
-    local oldVer = (dbg.verinfo[1] and dbg.verinfo) or nibRealUI.verinfo
-    local newVer = nibRealUI:MajorVerChange(oldVer, curVer)
+    local curVer = RealUI.verinfo
+    local oldVer = (dbg.verinfo[1] and dbg.verinfo) or RealUI.verinfo
+    local newVer = RealUI:MajorVerChange(oldVer, curVer)
 
     -- Reset DB if new Major version
     if newVer == "major" then
-        nibRealUI.db:ResetDB("RealUI")
-        if StaticPopup1 then
-            StaticPopup1:Hide()
+        RealUI.db:ResetDB("RealUI")
+        if _G.StaticPopup1 then
+            _G.StaticPopup1:Hide()
         end
     end
 
     -- Set Char defaults
-    if not(db.registeredChars[self.key]) or not (nibRealUICharacter) or (newVer == "major") or not(nibRealUICharacter.installStage) then
-        nibRealUICharacter = nibRealUICharacter_defaults
+    if not(db.registeredChars[self.key]) or not (_G.nibRealUICharacter) or (newVer == "major") or not(_G.nibRealUICharacter.installStage) then
+        _G.nibRealUICharacter = nibRealUICharacter_defaults
         db.registeredChars[self.key] = true
-    elseif not dbg.verinfo[1] or newVer == "minor" then
+    --elseif not dbg.verinfo[1] or newVer == "minor" then
         --
     end
     dbg.minipatches = nil
 
     -- Primary Stages
-    if nibRealUICharacter.installStage > -1 then
+    if _G.nibRealUICharacter.installStage > -1 then
         PrimaryInstallation()
 
     -- Mini Patch

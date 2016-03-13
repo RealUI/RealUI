@@ -1,36 +1,40 @@
-L_POPUP_ARMORY = "Armory"
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+_G.L_POPUP_ARMORY = "Armory"
 
 ----------------------------------------------------------------------------------------
 --  Armory link on right click player name in chat
 ----------------------------------------------------------------------------------------
-local function urlencode(obj)
-    local currentIndex = 1
-    local charArray = {}
-    while currentIndex <= #obj do
-        local char = string.byte(obj, currentIndex)
-        charArray[currentIndex] = char
-        currentIndex = currentIndex + 1
+local function urlencode(str)
+    if (str) then
+        str = str:gsub("\n", "\r\n")
+        str = str:gsub("([^%w %-%_%.%~])", function (c)
+            return ("%%%02X"):format(c:byte())
+        end)
+        str = str:gsub(" ", "+")
     end
-    local converchar = ""
-    for _, char in ipairs(charArray) do
-        converchar = converchar..string.format("%%%X", char)
-    end
-    return converchar
+    return str    
 end
 
 -- Find the Realm and Region
-local realmName = string.lower(GetRealmName())
+local realmName = RealUI.realm:lower()
 realmName = realmName:gsub("'", "")
 realmName = realmName:gsub("-", "")
 realmName = realmName:gsub(" ", "-")
 local myserver = realmName:gsub("-", "")
 
-local region = string.lower(GetCVar("portal"))
+local region = _G.GetCVar("portal"):lower()
 if region == "ru" then region = "eu" end
 
-StaticPopupDialogs.LINK_COPY_DIALOG = {
-    text = L_POPUP_ARMORY,
-    button1 = OKAY,
+_G.StaticPopupDialogs.LINK_COPY_DIALOG = {
+    text = _G.L_POPUP_ARMORY,
+    button1 = _G.OKAY,
     timeout = 0,
     whileDead = true,
     hasEditBox = true,
@@ -43,22 +47,22 @@ StaticPopupDialogs.LINK_COPY_DIALOG = {
 
 -- Dropdown menu link
 local linkurl
-hooksecurefunc("UnitPopup_OnClick", function(self)
-    local dropdownFrame = UIDROPDOWNMENU_INIT_MENU
+_G.hooksecurefunc("UnitPopup_OnClick", function(self)
+    local dropdownFrame = _G.UIDROPDOWNMENU_INIT_MENU
     local name = dropdownFrame.name
     local server = dropdownFrame.server
 
     if not server then
         server = myserver
     else
-        server = string.lower(server:gsub("'", ""))
+        server = server:gsub("'", ""):lower()
         server = server:gsub(" ", "-")
     end
     
     if name and self.value == "ARMORYLINK" then
-        local inputBox = StaticPopup_Show("LINK_COPY_DIALOG")
+        local inputBox = _G.StaticPopup_Show("LINK_COPY_DIALOG")
         if region == "us" or region == "eu" or region == "tw" or region == "kr" then
-            local locale = GetLocale():sub(0, 2)
+            local locale = RealUI.locale:sub(0, 2)
             if server == myserver then
                 linkurl = "http://"..region..".battle.net/wow/"..locale.."/character/"..realmName.."/"..name.."/advanced"
             else
@@ -68,24 +72,24 @@ hooksecurefunc("UnitPopup_OnClick", function(self)
             inputBox.editBox:HighlightText()
             return
         elseif region == "cn" then
-            local n, r = name:match"(.*)-(.*)"
+            local n, r = name:match("(.*)-(.*)")
             n = n or name
-            r = r or GetRealmName()
+            r = r or RealUI.realm
             
-            linkurl = "http://www.battlenet.com.cn/wow/character/"..urlencode(r).."/"..urlencode(n).."/advanced"
+            linkurl = "http://www.battlenet.com.cn/wow/zh/character/"..urlencode(r).."/"..urlencode(n).."/advanced"
             inputBox.editBox:SetText(linkurl)
             inputBox.editBox:HighlightText()
             return
         else
-            print("|cFFFFFF00Unsupported realm location:|r" .. region)
-            StaticPopup_Hide("LINK_COPY_DIALOG")
+            _G.print("|cFFFFFF00Unsupported realm location:|r" .. region)
+            _G.StaticPopup_Hide("LINK_COPY_DIALOG")
             return
         end
     end
 end)
 
-UnitPopupButtons["ARMORYLINK"] = {text = L_POPUP_ARMORY, dist = 0, func = UnitPopup_OnClick}
-tinsert(UnitPopupMenus["FRIEND"], #UnitPopupMenus["FRIEND"] - 1, "ARMORYLINK")
-tinsert(UnitPopupMenus["PARTY"], #UnitPopupMenus["PARTY"] - 1, "ARMORYLINK")
-tinsert(UnitPopupMenus["RAID"], #UnitPopupMenus["RAID"] - 1, "ARMORYLINK")
-tinsert(UnitPopupMenus["PLAYER"], #UnitPopupMenus["PLAYER"] - 1, "ARMORYLINK")
+_G.UnitPopupButtons["ARMORYLINK"] = {text = _G.L_POPUP_ARMORY, dist = 0, func = _G.UnitPopup_OnClick}
+_G.tinsert(_G.UnitPopupMenus["FRIEND"], #_G.UnitPopupMenus["FRIEND"] - 1, "ARMORYLINK")
+_G.tinsert(_G.UnitPopupMenus["PARTY"], #_G.UnitPopupMenus["PARTY"] - 1, "ARMORYLINK")
+_G.tinsert(_G.UnitPopupMenus["RAID"], #_G.UnitPopupMenus["RAID"] - 1, "ARMORYLINK")
+_G.tinsert(_G.UnitPopupMenus["PLAYER"], #_G.UnitPopupMenus["PLAYER"] - 1, "ARMORYLINK")

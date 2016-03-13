@@ -1,25 +1,20 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
-local unpack = _G.unpack
-
--- WoW Globals --
-local hooksecurefunc = _G.hooksecurefunc
-
--- Libs --
-local LSM = LibStub("LibSharedMedia-3.0")
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndb
+local RealUI = private.RealUI
+local db
 
-local Chat = nibRealUI:GetModule("Chat")
+local Chat = RealUI:GetModule("Chat")
+
 local MODNAME = "Chat_Tabs"
-local Chat_Tabs = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local Chat_Tabs = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local maxTabs = NUM_CHAT_WINDOWS
+local maxTabs = _G.NUM_CHAT_WINDOWS
 
 -- Tab Style update
-local TStyleColors = {}
 local function UpdateTabStyle(self, style)
     Chat_Tabs:debug("UpdateTabStyle", self, self:GetName(), self.UpdateTabs, style)
     local text = _G[self:GetName().."Text"]
@@ -39,7 +34,7 @@ local function UpdateTabStyle(self, style)
     -- Color
     local color
     if ((style == "highlight") and db.colors.classcolorhighlight) or style == "selected" then
-        color = nibRealUI.classColor
+        color = RealUI.classColor
     else
         color = db.colors[style]
     end
@@ -104,16 +99,16 @@ end
 
 -- Hook FCF
 function Chat_Tabs:HookFCF()
-    hooksecurefunc("FCF_Tab_OnClick", function(chatFrame, button)
+    _G.hooksecurefunc("FCF_Tab_OnClick", function(chatFrame, button)
         Chat_Tabs:debug("FCF_Tab_OnClick", chatFrame, button)
         Chat_Tabs:UpdateTabs()
     end)
 
-    hooksecurefunc("FCF_OpenNewWindow", function(chatTabText)
+    _G.hooksecurefunc("FCF_OpenNewWindow", function(chatTabText)
         Chat_Tabs:debug("FCF_OpenNewWindow", chatTabText)
         Chat_Tabs:UpdateTabs()
     end)
-    hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType, chatTarget, sourceChatFrame, selectWindow)
+    _G.hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType, chatTarget, sourceChatFrame, selectWindow)
         Chat_Tabs:debug("FCF_OpenTemporaryWindow", chatType, chatTarget, sourceChatFrame, selectWindow)
         local chatName = "ChatFrame"..(maxTabs + 1)
         if _G[chatName] then
@@ -126,7 +121,7 @@ function Chat_Tabs:HookFCF()
         end
     end)
 
-    hooksecurefunc("FCF_Close", function(chatFrame, fallback)
+    _G.hooksecurefunc("FCF_Close", function(chatFrame, fallback)
         Chat_Tabs:debug("FCF_Close", chatFrame, chatFrame:GetName(), fallback)
         if chatFrame.isTemporary then
             maxTabs = maxTabs - 1
@@ -136,11 +131,11 @@ function Chat_Tabs:HookFCF()
         _G.FCF_Tab_OnClick(_G["ChatFrame1Tab"], "LeftButton")
     end)
 
-    hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
+    _G.hooksecurefunc("FCF_StartAlertFlash", function(chatFrame)
         Chat_Tabs:debug("FCF_StartAlertFlash", chatFrame, chatFrame:GetName())
         UpdateTabStyle(_G[chatFrame:GetName().."Tab"], "flash")
     end)
-    hooksecurefunc("FCF_StopAlertFlash", function(chatFrame)
+    _G.hooksecurefunc("FCF_StopAlertFlash", function(chatFrame)
         Chat_Tabs:debug("FCF_StopAlertFlash", chatFrame, chatFrame:GetName())
         UpdateTabStyle(_G[chatFrame:GetName().."Tab"], "normal")
     end)
@@ -162,9 +157,8 @@ end
 ------------
 function Chat_Tabs:OnInitialize()
     db = Chat.db.profile.modules.tabs
-    ndb = nibRealUI.db.profile
 
-    self:SetEnabledState(db.enabled and nibRealUI:GetModuleEnabled("Chat"))
+    self:SetEnabledState(db.enabled and RealUI:GetModuleEnabled("Chat"))
 end
 
 function Chat_Tabs:OnEnable()

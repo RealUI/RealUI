@@ -1,0 +1,26 @@
+﻿## Interface: 60200
+## Title: Lib: StrataFix
+## Description: Fixes strata bugs in UI windows
+## Notes: Fixes strata bugs in UI windows
+## Author: oscarucb
+## Credits:
+## Version: r37
+## X-Build: 37
+## X-ReleaseDate: 2015-06-24T21:31:55Z
+## X-Revision: $Revision: 37 $
+## X-Category: Libraries
+## Dependencies:
+## X-Embeds: LibStub
+## OptionalDeps: LibStub
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## X-Curse-Packaged-Version: r37
+## X-Curse-Project-Name: LibStrataFix
+## X-Curse-Project-ID: libstratafix
+## X-Curse-Repository-ID: wow/libstratafix/mainline
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+#@end-no-lib-strip@
+
+lib.xml

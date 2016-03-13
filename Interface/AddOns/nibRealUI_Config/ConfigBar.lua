@@ -1,53 +1,42 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 local options = private.options
 local CloseHuDWindow = private.CloseHuDWindow
 local debug = private.debug
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, type = _G.next, _G.type
 local tostring, tonumber = _G.tostring, _G.tonumber
 local tinsert = _G.table.insert
 
--- WoW Globals --
-local UIParent = _G.UIParent
-local CreateFrame, UnitAura, GetSpellInfo = _G.CreateFrame, _G.UnitAura, _G.GetSpellInfo
-local C_TimerAfter = _G.C_Timer.After
-local COMBATLOG_FILTER_ME = _G.COMBATLOG_FILTER_ME
-
 -- Libs --
-local ACR = LibStub("AceConfigRegistry-3.0")
-local ACD = LibStub("AceConfigDialog-3.0")
-local GUI = LibStub("AceGUI-3.0")
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local ACD = _G.LibStub("AceConfigDialog-3.0")
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local ndb = nibRealUI.db.profile
-local ndbc = nibRealUI.db.char
+local RealUI = _G.RealUI
+local L = RealUI.L
+local ndb = RealUI.db.profile
+local ndbc = RealUI.db.char
 local hudSize = ndb.settings.hudSize
-local round = nibRealUI.Round
+local round = RealUI.Round
 
-local uiWidth, uiHeight = UIParent:GetSize()
+local uiWidth, uiHeight = _G.UIParent:GetSize()
 
 local other do
-    local ActionBars = nibRealUI:GetModule("ActionBars")
+    local ActionBars = RealUI:GetModule("ActionBars")
     local dbActionBars = ActionBars.db.profile
-    local Bar4 = LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
     other = {
-        name = BINDING_HEADER_OTHER,
+        name = _G.BINDING_HEADER_OTHER,
         icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
         type = "group",
         childGroups = "tab",
         order = 1,
         args = {
             advanced = {
-                name = ADVANCED_OPTIONS,
+                name = _G.ADVANCED_OPTIONS,
                 type = "execute",
                 func = function(info, ...)
-                    nibRealUI:LoadConfig("nibRealUI")
+                    RealUI:LoadConfig("nibRealUI")
                 end,
                 order = 0,
             },
@@ -55,12 +44,12 @@ local other do
                 name = L["Control_AddonControl"],
                 type = "execute",
                 func = function(info, ...)
-                    nibRealUI:GetModule("AddonControl"):ShowOptionsWindow()
+                    RealUI:GetModule("AddonControl"):ShowOptionsWindow()
                 end,
                 order = 2,
             },
             general = {
-                name = GENERAL,
+                name = _G.GENERAL,
                 type = "group",
                 order = 10,
                 args = {
@@ -72,11 +61,11 @@ local other do
                         set = function(info, value) 
                             ndb.positionsLink = value
 
-                            nibRealUI.cLayout = ndbc.layout.current
-                            nibRealUI.ncLayout = nibRealUI.cLayout == 1 and 2 or 1
+                            RealUI.cLayout = ndbc.layout.current
+                            RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
 
                             if value then
-                                ndb.positions[nibRealUI.ncLayout] = nibRealUI:DeepCopy(ndb.positions[nibRealUI.cLayout])
+                                ndb.positions[RealUI.ncLayout] = RealUI:DeepCopy(ndb.positions[RealUI.cLayout])
                             end
                         end,
                         order = 30,
@@ -88,7 +77,7 @@ local other do
                         get = function() return ndb.settings.hudSize == 2 end,
                         set = function(info, value) 
                             ndb.settings.hudSize = value and 2 or 1
-                            StaticPopup_Show("RUI_ChangeHuDSize")
+                            _G.StaticPopup_Show("RUI_ChangeHuDSize")
                         end,
                         order = 30,
                     },
@@ -102,27 +91,27 @@ local other do
                         step = 1,
                         bigStep = 4,
                         order = 30,
-                        get = function(info) return ndb.positions[nibRealUI.cLayout]["HuDY"] end,
+                        get = function(info) return ndb.positions[RealUI.cLayout]["HuDY"] end,
                         set = function(info, value)
-                            ndb.positions[nibRealUI.cLayout]["HuDY"] = value
-                            nibRealUI:UpdatePositioners()
+                            ndb.positions[RealUI.cLayout]["HuDY"] = value
+                            RealUI:UpdatePositioners()
                         end,
                     }
                 }
             },
             spellalert = {
-                name = COMBAT_TEXT_SHOW_REACTIVES_TEXT,
+                name = _G.COMBAT_TEXT_SHOW_REACTIVES_TEXT,
                 desc = L["Misc_SpellAlertsDesc"],
                 type = "group",
                 args = {
                     enabled = {
                         name = L["General_Enabled"],
-                        desc = L["General_EnabledDesc"]:format(COMBAT_TEXT_SHOW_REACTIVES_TEXT),
+                        desc = L["General_EnabledDesc"]:format(_G.COMBAT_TEXT_SHOW_REACTIVES_TEXT),
                         type = "toggle",
-                        get = function() return nibRealUI:GetModuleEnabled("SpellAlerts") end,
+                        get = function() return RealUI:GetModuleEnabled("SpellAlerts") end,
                         set = function(info, value) 
-                            nibRealUI:SetModuleEnabled("SpellAlerts", value)
-                            nibRealUI:ReloadUIDialog()
+                            RealUI:SetModuleEnabled("SpellAlerts", value)
+                            RealUI:ReloadUIDialog()
                         end,
                         order = 30,
                     },
@@ -136,16 +125,16 @@ local other do
                         step = 1,
                         bigStep = 4,
                         order = 30,
-                        get = function(info) return ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] end,
+                        get = function(info) return ndb.positions[RealUI.cLayout]["SpellAlertWidth"] end,
                         set = function(info, value)
-                            ndb.positions[nibRealUI.cLayout]["SpellAlertWidth"] = value
-                            nibRealUI:UpdatePositioners()
+                            ndb.positions[RealUI.cLayout]["SpellAlertWidth"] = value
+                            RealUI:UpdatePositioners()
                         end,
                     }
                 }
             },
             actionbars = {
-                name = ACTIONBAR_LABEL,
+                name = _G.ACTIONBAR_LABEL,
                 desc = L["ActionBars_ActionBarsDesc"],
                 type = "group",
                 args = {
@@ -172,10 +161,10 @@ local other do
                         name = L["Control_Layout"],
                         desc = L["Control_LayoutDesc"]:format("Bartender4"),
                         type = "toggle",
-                        get = function() return nibRealUI:DoesAddonLayout("Bartender4") end,
+                        get = function() return RealUI:DoesAddonLayout("Bartender4") end,
                         set = function(info, value)
-                            nibRealUI:ToggleAddonLayoutControl("Bartender4", value)
-                            ActionBars:SetEnabledState(nibRealUI:GetModuleEnabled("ActionBars") and nibRealUI:DoesAddonLayout("Bartender4"))
+                            RealUI:ToggleAddonLayoutControl("Bartender4", value)
+                            ActionBars:SetEnabledState(RealUI:GetModuleEnabled("ActionBars") and RealUI:DoesAddonLayout("Bartender4"))
                         end,
                         order = 30,
                     },
@@ -188,10 +177,10 @@ local other do
                         name = L["Control_Position"],
                         desc = L["Control_PositionDesc"]:format("Bartender4"),
                         type = "toggle",
-                        get = function() return nibRealUI:DoesAddonMove("Bartender4") end,
+                        get = function() return RealUI:DoesAddonMove("Bartender4") end,
                         set = function(info, value)
-                            nibRealUI:ToggleAddonPositionControl("Bartender4", value)
-                            ActionBars:SetEnabledState(nibRealUI:GetModuleEnabled("ActionBars") and nibRealUI:DoesAddonMove("Bartender4"))
+                            RealUI:ToggleAddonPositionControl("Bartender4", value)
+                            ActionBars:SetEnabledState(RealUI:GetModuleEnabled("ActionBars") and RealUI:DoesAddonMove("Bartender4"))
                             if value then
                                 ActionBars:ApplyABSettings()
                             end
@@ -201,7 +190,7 @@ local other do
                     position = {
                         name = "",
                         type = "group",
-                        disabled = function() return not nibRealUI:DoesAddonMove("Bartender4") end,
+                        disabled = function() return not RealUI:DoesAddonMove("Bartender4") end,
                         inline = true,
                         args = {
                             move = {
@@ -214,9 +203,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Stance"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Stance"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[nibRealUI.cLayout].moveBars.stance end,
+                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.stance end,
                                         set = function(info, value)
-                                            dbActionBars[nibRealUI.cLayout].moveBars.stance = value
+                                            dbActionBars[RealUI.cLayout].moveBars.stance = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 10,
@@ -225,9 +214,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Pet"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Pet"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[nibRealUI.cLayout].moveBars.pet end,
+                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.pet end,
                                         set = function(info, value)
-                                            dbActionBars[nibRealUI.cLayout].moveBars.pet = value
+                                            dbActionBars[RealUI.cLayout].moveBars.pet = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 20,
@@ -236,9 +225,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_EAB"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_EAB"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[nibRealUI.cLayout].moveBars.eab end,
+                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.eab end,
                                         set = function(info, value)
-                                            dbActionBars[nibRealUI.cLayout].moveBars.eab = value
+                                            dbActionBars[RealUI.cLayout].moveBars.eab = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 30,
@@ -258,10 +247,10 @@ local other do
                                     }
                                 end,
                                 get = function(info)
-                                    return dbActionBars[nibRealUI.cLayout].centerPositions
+                                    return dbActionBars[RealUI.cLayout].centerPositions
                                 end,
                                 set = function(info, value)
-                                    dbActionBars[nibRealUI.cLayout].centerPositions = value
+                                    dbActionBars[RealUI.cLayout].centerPositions = value
                                     ActionBars:ApplyABSettings()
                                 end,
                                 order = 20,
@@ -278,10 +267,10 @@ local other do
                                     }
                                 end,
                                 get = function(info)
-                                    return dbActionBars[nibRealUI.cLayout].sidePositions
+                                    return dbActionBars[RealUI.cLayout].sidePositions
                                 end,
                                 set = function(info, value)
-                                    dbActionBars[nibRealUI.cLayout].sidePositions = value
+                                    dbActionBars[RealUI.cLayout].sidePositions = value
                                     ActionBars:ApplyABSettings()
                                 end,
                                 order = 30,
@@ -294,10 +283,10 @@ local other do
                                 min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
                                 step = 1, bigStep = 4,
                                 order = -1,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["ActionBarsY"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["ActionBarsY"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["ActionBarsY"] = value - .5
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
+                                    RealUI:UpdatePositioners()
                                     ActionBars:ApplyABSettings()
                                 end,
                             }
@@ -309,11 +298,11 @@ local other do
     }
 end
 local unitframes do
-    local CombatFader = nibRealUI:GetModule("CombatFader")
-    local UnitFrames = nibRealUI:GetModule("UnitFrames")
+    local CombatFader = RealUI:GetModule("CombatFader")
+    local UnitFrames = RealUI:GetModule("UnitFrames")
     local db = UnitFrames.db.profile
     unitframes = {
-        name = UNITFRAME_LABEL,
+        name = _G.UNITFRAME_LABEL,
         icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
         type = "group",
         childGroups = "tab",
@@ -321,17 +310,17 @@ local unitframes do
         args = {
             enable = {
                 name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format("RealUI "..UNITFRAME_LABEL),
+                desc = L["General_EnabledDesc"]:format("RealUI ".._G.UNITFRAME_LABEL),
                 type = "toggle",
-                get = function(info) return nibRealUI:GetModuleEnabled("UnitFrames") end,
+                get = function(info) return RealUI:GetModuleEnabled("UnitFrames") end,
                 set = function(info, value)
-                    nibRealUI:SetModuleEnabled("UnitFrames", value)
+                    RealUI:SetModuleEnabled("UnitFrames", value)
                     CloseHuDWindow()
-                    nibRealUI:ReloadUIDialog()
+                    RealUI:ReloadUIDialog()
                 end,
             },
             general = {
-                name = GENERAL,
+                name = _G.GENERAL,
                 type = "group",
                 order = 10,
                 args = {
@@ -365,8 +354,8 @@ local unitframes do
                         order = 20,
                     },
                     statusText = {
-                        name = STATUS_TEXT,
-                        desc = OPTION_TOOLTIP_STATUS_TEXT_DISPLAY,
+                        name = _G.STATUS_TEXT,
+                        desc = _G.OPTION_TOOLTIP_STATUS_TEXT_DISPLAY,
                         type = "select",
                         values = function()
                             return {
@@ -506,37 +495,37 @@ local unitframes do
                 order = 20,
                 args = {
                     player = {
-                        name = PLAYER,
+                        name = _G.PLAYER,
                         type = "group",
                         order = 10,
                         args = {}
                     },
                     pet = {
-                        name = PET,
+                        name = _G.PET,
                         type = "group",
                         order = 20,
                         args = {}
                     },
                     target = {
-                        name = TARGET,
+                        name = _G.TARGET,
                         type = "group",
                         order = 30,
                         args = {}
                     },
                     targettarget = {
-                        name = SHOW_TARGET_OF_TARGET_TEXT,
+                        name = _G.SHOW_TARGET_OF_TARGET_TEXT,
                         type = "group",
                         order = 40,
                         args = {}
                     },
                     focus = {
-                        name = FOCUS,
+                        name = _G.FOCUS,
                         type = "group",
                         order = 50,
                         args = {}
                     },
                     focustarget = {
-                        name = BINDING_NAME_FOCUSTARGET,
+                        name = _G.BINDING_NAME_FOCUSTARGET,
                         type = "group",
                         order = 60,
                         args = {}
@@ -544,13 +533,13 @@ local unitframes do
                 }
             },
             groups = {
-                name = GROUPS,
+                name = _G.GROUPS,
                 type = "group",
                 childGroups = "tab",
                 order = 30,
                 args = {
                     boss = {
-                        name = BOSS,
+                        name = _G.BOSS,
                         type = "group",
                         order = 10,
                         args = {
@@ -594,13 +583,13 @@ local unitframes do
                         }
                     },
                     arena = {
-                        name = ARENA,
+                        name = _G.ARENA,
                         type = "group",
                         order = 20,
                         args = {
                             enabled = {
                                 name = L["General_Enabled"],
-                                desc = L["General_EnabledDesc"]:format("RealUI "..SHOW_ARENA_ENEMY_FRAMES_TEXT),
+                                desc = L["General_EnabledDesc"]:format("RealUI ".._G.SHOW_ARENA_ENEMY_FRAMES_TEXT),
                                 type = "toggle",
                                 get = function() return db.arena.enabled end,
                                 set = function(info, value)
@@ -626,7 +615,7 @@ local unitframes do
                                         order = 10,
                                     },
                                     announceChat = {
-                                        name = CHAT,
+                                        name = _G.CHAT,
                                         desc = L["UnitFrames_AnnounceChatDesc"],
                                         type = "select",
                                         values = function()
@@ -669,17 +658,17 @@ local unitframes do
                         }
                     },
                     raid = {
-                        name = RAID,
+                        name = _G.RAID,
                         type = "group",
                         childGroups = "tab",
-                        disabled = not Grid2,
+                        disabled = not _G.Grid2,
                         order = 30,
                         args = {
                             advanced = {
                                 name = "Grid 2",
                                 type = "execute",
                                 func = function(info, ...)
-                                    Grid2:OnChatCommand("")
+                                    _G.Grid2:OnChatCommand("")
                                 end,
                                 order = 0,
                             },
@@ -687,9 +676,9 @@ local unitframes do
                                 name = L["Control_Layout"],
                                 desc = L["Control_LayoutDesc"]:format("Grid2"),
                                 type = "toggle",
-                                get = function() return nibRealUI:GetModuleEnabled("GridLayout") end,
+                                get = function() return RealUI:GetModuleEnabled("GridLayout") end,
                                 set = function(info, value)
-                                    nibRealUI:SetModuleEnabled("GridLayout", value)
+                                    RealUI:SetModuleEnabled("GridLayout", value)
                                 end,
                                 order = 10,
                             },
@@ -697,9 +686,9 @@ local unitframes do
                                 name = L["Control_Position"],
                                 desc = L["Control_PositionDesc"]:format("Grid2"),
                                 type = "toggle",
-                                get = function() return nibRealUI:DoesAddonMove("Grid2") end,
+                                get = function() return RealUI:DoesAddonMove("Grid2") end,
                                 set = function(info, value)
-                                    nibRealUI:ToggleAddonPositionControl("Grid2", value)
+                                    RealUI:ToggleAddonPositionControl("Grid2", value)
                                 end,
                                 order = 20,
                             },
@@ -730,7 +719,7 @@ local unitframes do
             order = 10,
             get = function(info) return tostring(position.x) end,
             set = function(info, value)
-                value = nibRealUI:ValidateOffset(value)
+                value = RealUI:ValidateOffset(value)
                 position.x = value
             end,
         }
@@ -740,7 +729,7 @@ local unitframes do
             order = 20,
             get = function(info) return tostring(position.y) end,
             set = function(info, value)
-                value = nibRealUI:ValidateOffset(value)
+                value = RealUI:ValidateOffset(value)
                 position.y = value
             end,
         }
@@ -755,10 +744,10 @@ local unitframes do
                 step = 1,
                 bigStep = 4,
                 order = 30,
-                get = function(info) return ndb.positions[nibRealUI.cLayout]["UFHorizontal"] end,
+                get = function(info) return ndb.positions[RealUI.cLayout]["UFHorizontal"] end,
                 set = function(info, value)
-                    ndb.positions[nibRealUI.cLayout]["UFHorizontal"] = value
-                    nibRealUI:UpdatePositioners()
+                    ndb.positions[RealUI.cLayout]["UFHorizontal"] = value
+                    RealUI:UpdatePositioners()
                 end,
             }
         end
@@ -842,10 +831,10 @@ local unitframes do
                 max = -30,
                 step = 1,
                 bigStep = 4,
-                get = function(info) return ndb.positions[nibRealUI.cLayout]["BossX"] end,
+                get = function(info) return ndb.positions[RealUI.cLayout]["BossX"] end,
                 set = function(info, value)
-                    ndb.positions[nibRealUI.cLayout]["BossX"] = value
-                    nibRealUI:UpdatePositioners()
+                    ndb.positions[RealUI.cLayout]["BossX"] = value
+                    RealUI:UpdatePositioners()
                 end,
                 order = 2,
             }
@@ -857,10 +846,10 @@ local unitframes do
                 max = round(uiHeight * 0.4),
                 step = 1,
                 bigStep = 2,
-                get = function(info) return ndb.positions[nibRealUI.cLayout]["BossY"] end,
+                get = function(info) return ndb.positions[RealUI.cLayout]["BossY"] end,
                 set = function(info, value)
-                    ndb.positions[nibRealUI.cLayout]["BossY"] = value
-                    nibRealUI:UpdatePositioners()
+                    ndb.positions[RealUI.cLayout]["BossY"] = value
+                    RealUI:UpdatePositioners()
                 end,
                 order = 4,
             }
@@ -874,46 +863,46 @@ local unitframes do
                 order = 6,
             }
         else
-            local GridLayout = nibRealUI:GetModule("GridLayout")
-            local db = GridLayout.db.profile
-            for i, type in next, {"dps", "healing"} do
-                local args = group.args[type].args
-                local anchor = (type == "dps") and "Bottom" or "Top"
+            local GridLayout = RealUI:GetModule("GridLayout")
+            db = GridLayout.db.profile
+            for i, layout in next, {"dps", "healing"} do
+                local args = group.args[layout].args
+                local anchor = (layout == "dps") and "Bottom" or "Top"
                 args.horizontal = {
                     name = L["HuD_Horizontal"],
-                    disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
+                    disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
                     type = "range",
                     width = "full",
                     min = -round(uiWidth * 0.4),
                     max = round(uiWidth * 0.4),
                     step = 1,
                     bigStep = 4,
-                    get = function(info) return ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."X"] end,
+                    get = function(info) return ndb.positions[RealUI.cLayout]["Grid"..anchor.."X"] end,
                     set = function(info, value)
-                        ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."X"] = value
-                        nibRealUI:UpdatePositioners()
+                        ndb.positions[RealUI.cLayout]["Grid"..anchor.."X"] = value
+                        RealUI:UpdatePositioners()
                     end,
                     order = 4,
                 }
                 args.vertical = {
                     name = L["HuD_Vertical"],
-                    disabled = function() return not nibRealUI:DoesAddonMove("Grid2") end,
+                    disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
                     type = "range",
                     width = "full",
-                    min = type == "dps" and 0 or -round(uiWidth * 0.2),
+                    min = layout == "dps" and 0 or -round(uiWidth * 0.2),
                     max = round(uiHeight * 0.5),
                     step = 1,
                     bigStep = 2,
-                    get = function(info) return ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."Y"] end,
+                    get = function(info) return ndb.positions[RealUI.cLayout]["Grid"..anchor.."Y"] end,
                     set = function(info, value)
-                        ndb.positions[nibRealUI.cLayout]["Grid"..anchor.."Y"] = value
-                        nibRealUI:UpdatePositioners()
+                        ndb.positions[RealUI.cLayout]["Grid"..anchor.."Y"] = value
+                        RealUI:UpdatePositioners()
                     end,
                     order = 6,
                 }
                 args.horizGroups = {
-                    name = COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS,
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    name = _G.COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "group",
                     inline = true,
                     order = 10,
@@ -922,9 +911,9 @@ local unitframes do
                             name = L["Raid_SmallGroup"],
                             desc = L["Raid_SmallGroupDesc"],
                             type = "toggle",
-                            get = function() return db[type].hGroups.normal end,
+                            get = function() return db[layout].hGroups.normal end,
                             set = function(info, value)
-                                db[type].hGroups.normal = value
+                                db[layout].hGroups.normal = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 10,
@@ -933,9 +922,9 @@ local unitframes do
                             name = L["Raid_LargeGroup"],
                             desc = L["Raid_LargeGroupDesc"],
                             type = "toggle",
-                            get = function() return db[type].hGroups.raid end,
+                            get = function() return db[layout].hGroups.raid end,
                             set = function(info, value)
-                                db[type].hGroups.raid = value
+                                db[layout].hGroups.raid = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 20,
@@ -943,32 +932,32 @@ local unitframes do
                     },
                 }
                 args.showPets = {
-                    name = SHOW_PARTY_PETS_TEXT,
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    name = _G.SHOW_PARTY_PETS_TEXT,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[type].showPet end,
+                    get = function() return db[layout].showPet end,
                     set = function(info, value)
-                        db[type].showPet = value
+                        db[layout].showPet = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 20,
                 }
                 args.showSolo = {
                     name = L["Raid_ShowSolo"],
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[type].showSolo end,
+                    get = function() return db[layout].showSolo end,
                     set = function(info, value)
-                        db[type].showSolo = value
+                        db[layout].showSolo = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 30,
                 }
-                local prof = (type == "dps") and "RealUI" or "RealUI-Healing"
-                local Grid2DB = Grid2DB and Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
+                local prof = (layout == "dps") and "RealUI" or "RealUI-Healing"
+                local Grid2DB = _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
                 args.height = {
-                    name = RAID_FRAMES_HEIGHT,
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    name = _G.RAID_FRAMES_HEIGHT,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 20, max = 80, step = 1,
                     get = function(info)
@@ -985,37 +974,37 @@ local unitframes do
                     order = 40,
                 }
                 args.width = {
-                    name = RAID_FRAMES_WIDTH,
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    name = _G.RAID_FRAMES_WIDTH,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width.normal end,
+                    get = function(info) return db[layout].width.normal end,
                     set = function(info, value)
-                        db[type].width.normal = value
+                        db[layout].width.normal = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
                 }
                 args.width30 = {
                     name = L["Raid_30Width"],
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width[30] end,
+                    get = function(info) return db[layout].width[30] end,
                     set = function(info, value)
-                        db[type].width[30] = value
+                        db[layout].width[30] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
                 }
                 args.width40 = {
                     name = L["Raid_40Width"],
-                    disabled = function() return not nibRealUI:GetModuleEnabled("GridLayout") end,
+                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width[40] end,
+                    get = function(info) return db[layout].width[40] end,
                     set = function(info, value)
-                        db[type].width[40] = value
+                        db[layout].width[40] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -1025,7 +1014,7 @@ local unitframes do
     end
 end
 local castbars do
-    local CastBars = nibRealUI:GetModule("CastBars")
+    local CastBars = RealUI:GetModule("CastBars")
     local db = CastBars.db.profile
     castbars = {
         name = L["CastBars"],
@@ -1037,11 +1026,11 @@ local castbars do
                 name = L["General_Enabled"],
                 desc = L["General_EnabledDesc"]:format(L["CastBars"]),
                 type = "toggle",
-                get = function(info) return nibRealUI:GetModuleEnabled("CastBars") end,
+                get = function(info) return RealUI:GetModuleEnabled("CastBars") end,
                 set = function(info, value)
-                    nibRealUI:SetModuleEnabled("CastBars", value)
+                    RealUI:SetModuleEnabled("CastBars", value)
                     CloseHuDWindow()
-                    nibRealUI:ReloadUIDialog()
+                    RealUI:ReloadUIDialog()
                 end,
                 order = 10,
             },
@@ -1052,7 +1041,7 @@ local castbars do
                 order = 20,
                 args = {
                     player = {
-                        name = PLAYER,
+                        name = _G.PLAYER,
                         type = "toggle",
                         get = function() return db.reverse.player end,
                         set = function(info, value)
@@ -1062,7 +1051,7 @@ local castbars do
                         order = 10,
                     },
                     target = {
-                        name = TARGET,
+                        name = _G.TARGET,
                         type = "toggle",
                         get = function() return db.reverse.target end,
                         set = function(info, value)
@@ -1074,7 +1063,7 @@ local castbars do
                 },
             },
             text = {
-                name = LOCALE_TEXT_LABEL,
+                name = _G.LOCALE_TEXT_LABEL,
                 type = "group",
                 inline = true,
                 order = 50,
@@ -1115,7 +1104,7 @@ local castbars do
                 order = 60,
                 args = {
                     player = {
-                        name = PLAYER,
+                        name = _G.PLAYER,
                         type = "group",
                         args = {
                             horizontal = {
@@ -1126,10 +1115,10 @@ local castbars do
                                 max = round(uiWidth * 0.2),
                                 step = 1,
                                 bigStep = 4,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarPlayerX"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarPlayerX"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CastBarPlayerX"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CastBarPlayerX"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 10,
                             },
@@ -1141,17 +1130,17 @@ local castbars do
                                 max = round(uiHeight * 0.2),
                                 step = 1,
                                 bigStep = 2,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarPlayerY"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarPlayerY"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CastBarPlayerY"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CastBarPlayerY"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 20,
                             }
                         }
                     },
                     target = {
-                        name = TARGET,
+                        name = _G.TARGET,
                         type = "group",
                         args = {
                             horizontal = {
@@ -1162,10 +1151,10 @@ local castbars do
                                 max = round(uiWidth * 0.2),
                                 step = 1,
                                 bigStep = 4,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarTargetX"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarTargetX"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CastBarTargetX"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CastBarTargetX"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 10,
                             },
@@ -1177,10 +1166,10 @@ local castbars do
                                 max = round(uiHeight * 0.2),
                                 step = 1,
                                 bigStep = 2,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CastBarTargetY"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarTargetY"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CastBarTargetY"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CastBarTargetY"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 20,
                             }
@@ -1192,35 +1181,35 @@ local castbars do
     }
 end
 local auratracker do
-    local AuraTracking = nibRealUI:GetModule("AuraTracking")
+    local AuraTracking = RealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = AuraTracking.db.class
     local function swapParentGroup(tracker, info)
         AuraTracking:CharacterUpdate({}, true)
         local parent, key = info[#info-2], info[#info-1]
         local spellOptions = auratracker.args[parent].args[key]
-        if tracker.shouldTrack and parent ~= "active" then
-            debug("Enable")
+        auratracker.args[parent].args[key] = nil
+        if tracker.shouldTrack then
+            debug("Set to active")
             auratracker.args.active.args[key] = spellOptions
-        elseif parent ~= "inactive" then
-            debug("Disable")
+        else
+            debug("Set to inactive")
             auratracker.args.inactive.args[key] = spellOptions
         end
-        auratracker.args[parent].args[key] = nil
     end
     local function getNameOrder(spellData)
-        local order, pos, name = 70, "", ""
+        local order, pos, name, color = 1, "", ""
 
         if spellData.customName then
             name = spellData.customName
         elseif type(spellData.spell) == "table" then
             for i = 1, #spellData.spell do
                 debug("iter spell table", i)
-                local spellName, next = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
-                if spellName ~= next then
+                local spellName, nextSpell = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
+                if spellName ~= nextSpell then
                     debug("These two are different", i, spellName)
-                    -- Only add a spell if the next one is different.
-                    name = name..spellName..(next and ", " or "")
+                    -- Only add a spell if nextSpell is different.
+                    name = name..spellName..(nextSpell and ", " or "")
                 end
             end
         else
@@ -1228,19 +1217,23 @@ local auratracker do
         end
         debug("Name:", name, spellData.spell)
 
-        if spellData.order and spellData.order > 0 then
-            order = spellData.order * 10
-            pos = spellData.order.." "
-        end
         if spellData.unit == "target" then
             order = order + 1
-            name = (pos.."|cff%s%s|r"):format("ff0000", name)
+            color = "ff0000"
         else
-            name = (pos.."|cff%s%s|r"):format("00ff00", name)
+            color = "00ff00"
         end
+        if spellData.order and spellData.order > 0 then
+            order = order * 10 + spellData.order
+            pos = spellData.order.." "
+        else
+            order = 69 + order
+        end
+
+        name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
-    local function useSpec(specs)
+    local function getSpec(specs)
         local numSpecs = 0
         for i = 1, #specs do
             if specs[i] then
@@ -1257,7 +1250,7 @@ local auratracker do
     end
     local function createTrackerSettings(tracker, spellData)
         local name, order = getNameOrder(spellData)
-        local useSpec = useSpec(spellData.specs)
+        local useSpec = getSpec(spellData.specs)
 
         return {
             name = name,
@@ -1273,7 +1266,7 @@ local auratracker do
                         local isSpell
                         if value:find(",") then
                             debug("Multi-spell")
-                            value = { strsplit(",", value) }
+                            value = { _G.strsplit(",", value) }
                             for i = 1, #value do
                                 isSpell = _G.GetSpellInfo(value[i]) and true or false
                                 debug("Value "..i, value[i], isSpell)
@@ -1419,8 +1412,8 @@ local auratracker do
                     values = function()
                         local table = {}
                         for i = 1, _G.GetNumSpecializations() do
-                            local _, name, _, icon = _G.GetSpecializationInfo(i)
-                            table[i] = "|T"..icon..":0:0:0:0:64:64:4:60:4:60|t "..name
+                            local _, specName, _, specIcon = _G.GetSpecializationInfo(i)
+                            table[i] = "|T"..specIcon..":0:0:0:0:64:64:4:60:4:60|t "..specName
                         end
                         return table
                     end,
@@ -1464,26 +1457,6 @@ local auratracker do
                     inline = true,
                     order = 90,
                     args = {
-                        hideOOC = {
-                            name = L["AuraTrack_HideOOC"],
-                            desc = L["AuraTrack_HideOOCDesc"],
-                            type = "toggle",
-                            get = function(info) return spellData.hideOOC end,
-                            set = function(info, value)
-                                spellData.hideOOC = value
-                            end,
-                            order = 10,
-                        },
-                        hideTime = {
-                            name = L["AuraTrack_HideTime"],
-                            desc = L["AuraTrack_HideTimeDesc"],
-                            type = "toggle",
-                            get = function(info) return spellData.hideTime end,
-                            set = function(info, value)
-                                spellData.hideTime = value
-                            end,
-                            order = 20,
-                        },
                         hideStacks = {
                             name = L["AuraTrack_HideStack"],
                             desc = L["AuraTrack_HideStackDesc"],
@@ -1492,8 +1465,19 @@ local auratracker do
                             set = function(info, value)
                                 spellData.hideStacks = value
                             end,
-                            order = 30,
-                        }
+                            order = 10,
+                        },
+                        noExclude = {
+                            name = L["AuraTrack_NoExclude"],
+                            desc = L["AuraTrack_NoExcludeDesc"],
+                            type = "toggle",
+                            hidden = not _G.Raven,
+                            get = function(info) return spellData.noExclude end,
+                            set = function(info, value)
+                                spellData.noExclude = value
+                            end,
+                            order = 20,
+                        },
                     }
                 },
                 debug = {
@@ -1550,11 +1534,11 @@ local auratracker do
                 name = L["General_Enabled"],
                 desc = L["General_EnabledDesc"]:format(L["AuraTrack"]),
                 type = "toggle",
-                get = function(info) return nibRealUI:GetModuleEnabled("AuraTracking") end,
+                get = function(info) return RealUI:GetModuleEnabled("AuraTracking") end,
                 set = function(info, value)
-                    nibRealUI:SetModuleEnabled("AuraTracking", value)
+                    RealUI:SetModuleEnabled("AuraTracking", value)
                     CloseHuDWindow()
-                    nibRealUI:ReloadUIDialog()
+                    RealUI:ReloadUIDialog()
                 end,
                 order = 20,
             },
@@ -1656,32 +1640,34 @@ local auratracker do
                             },
                         }
                     },
+                    reset = {
+                        name = L["AuraTrack_ResetTrackers"],
+                        desc = L["AuraTrack_ResetTrackersDesc"]:format(RealUI.classLocale),
+                        type = "execute",
+                        confirmText = L["AuraTrack_ResetConfirm"]:format(RealUI.classLocale),
+                        func = function(info, ...)
+                            _G.nibRealUIDB.namespaces.AuraTracking.class[RealUI.class] = nil
+                            CloseHuDWindow()
+                            RealUI:ReloadUIDialog()
+                        end,
+                        order = 45,
+                    },
                     position = {
                         name = L["General_Position"],
                         type = "header",
                         order = 49,
                     },
                     left = {
-                        name = PLAYER,
+                        name = _G.PLAYER,
                         type = "group",
                         order = 50,
                         args = {}
                     },
                     right = {
-                        name = TARGET,
+                        name = _G.TARGET,
                         type = "group",
                         order = 55,
                         args = {}
-                    },
-                    reset = {
-                        name = RESET_TO_DEFAULT,
-                        type = "execute",
-                        func = function(info, ...)
-                            nibRealUIDB.namespaces.AuraTracking.class[nibRealUI.class] = nil
-                            CloseHuDWindow()
-                            nibRealUI:ReloadUIDialog()
-                        end,
-                        order = -1,
                     },
                 }
             },
@@ -1753,11 +1739,11 @@ local auratracker do
     end
 end
 local classresource do
-    local CombatFader = nibRealUI:GetModule("CombatFader")
-    local PointTracking = nibRealUI:GetModule("PointTracking")
+    local CombatFader = RealUI:GetModule("CombatFader")
+    local PointTracking = RealUI:GetModule("PointTracking")
     local db = PointTracking.db.profile
     local power, class = PointTracking:GetResource()
-    local bars = nibRealUI:GetResourceBar()
+    local bars = RealUI:GetResourceBar()
     if power or bars then
         classresource = {
             name = L["Resource"],
@@ -1770,19 +1756,19 @@ local classresource do
                     name = L["General_Enabled"],
                     desc = L["General_EnabledDesc"]:format(L["Resource"]),
                     type = "toggle",
-                    get = function(info) return nibRealUI:GetModuleEnabled("PointTracking") end,
+                    get = function(info) return RealUI:GetModuleEnabled("PointTracking") end,
                     set = function(info, value)
-                        nibRealUI:SetModuleEnabled("PointTracking", value)
+                        RealUI:SetModuleEnabled("PointTracking", value)
                         CloseHuDWindow()
-                        nibRealUI:ReloadUIDialog()
+                        RealUI:ReloadUIDialog()
                     end,
                     order = 10,
                 },
                 runes = {
-                    name = RUNES,
+                    name = _G.RUNES,
                     type = "group",
-                    hidden = nibRealUI.class ~= "DEATHKNIGHT",
-                    disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                    hidden = RealUI.class ~= "DEATHKNIGHT",
+                    disabled = function() return not RealUI:GetModuleEnabled("PointTracking") end,
                     order = 20,
                     args = {
                         horizontal = {
@@ -1793,10 +1779,10 @@ local classresource do
                             max = round(uiWidth * 0.2),
                             step = 1,
                             bigStep = 4,
-                            get = function(info) return ndb.positions[nibRealUI.cLayout]["RunesX"] end,
+                            get = function(info) return ndb.positions[RealUI.cLayout]["RunesX"] end,
                             set = function(info, value)
-                                ndb.positions[nibRealUI.cLayout]["RunesX"] = value
-                                nibRealUI:UpdatePositioners()
+                                ndb.positions[RealUI.cLayout]["RunesX"] = value
+                                RealUI:UpdatePositioners()
                             end,
                             order = 10,
                         },
@@ -1808,10 +1794,10 @@ local classresource do
                             max = round(uiHeight * 0.2),
                             step = 1,
                             bigStep = 2,
-                            get = function(info) return ndb.positions[nibRealUI.cLayout]["RunesY"] end,
+                            get = function(info) return ndb.positions[RealUI.cLayout]["RunesY"] end,
                             set = function(info, value)
-                                ndb.positions[nibRealUI.cLayout]["RunesY"] = value
-                                nibRealUI:UpdatePositioners()
+                                ndb.positions[RealUI.cLayout]["RunesY"] = value
+                                RealUI:UpdatePositioners()
                             end,
                             order = 20,
                         }
@@ -1821,7 +1807,7 @@ local classresource do
                     name = bars or "",
                     type = "group",
                     hidden = bars == nil,
-                    disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                    disabled = function() return not RealUI:GetModuleEnabled("PointTracking") end,
                     order = 30,
                     args = {
                         horizontal = {
@@ -1832,10 +1818,10 @@ local classresource do
                             max = round(uiWidth * 0.2),
                             step = 1,
                             bigStep = 4,
-                            get = function(info) return ndb.positions[nibRealUI.cLayout]["ClassResourceX"] end,
+                            get = function(info) return ndb.positions[RealUI.cLayout]["ClassResourceX"] end,
                             set = function(info, value)
-                                ndb.positions[nibRealUI.cLayout]["ClassResourceX"] = value
-                                nibRealUI:UpdatePositioners()
+                                ndb.positions[RealUI.cLayout]["ClassResourceX"] = value
+                                RealUI:UpdatePositioners()
                             end,
                             order = 10,
                         },
@@ -1847,10 +1833,10 @@ local classresource do
                             max = round(uiHeight * 0.2),
                             step = 1,
                             bigStep = 2,
-                            get = function(info) return ndb.positions[nibRealUI.cLayout]["ClassResourceY"] end,
+                            get = function(info) return ndb.positions[RealUI.cLayout]["ClassResourceY"] end,
                             set = function(info, value)
-                                ndb.positions[nibRealUI.cLayout]["ClassResourceY"] = value
-                                nibRealUI:UpdatePositioners()
+                                ndb.positions[RealUI.cLayout]["ClassResourceY"] = value
+                                RealUI:UpdatePositioners()
                             end,
                             order = 20,
                         }
@@ -1860,21 +1846,21 @@ local classresource do
         }
         power = power or {}
         for i = 1, #power do
-            local options = db[class].types[power[i].id]
-            local pointName = CombatLog_String_PowerType(_G[power[i].type])
+            local pointOptions = db[class].types[power[i].id]
+            local pointName = _G.CombatLog_String_PowerType(_G[power[i].type])
             local points = {
                 name = pointName,
                 type = "group",
-                disabled = function() return not nibRealUI:GetModuleEnabled("PointTracking") end,
+                disabled = function() return not RealUI:GetModuleEnabled("PointTracking") end,
                 order = 20,
                 args = {
                     hideempty = {
                         type = "toggle",
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
-                        get = function(info) return options.general.hideempty end,
+                        get = function(info) return pointOptions.general.hideempty end,
                         set = function(info, value) 
-                            options.general.hideempty = value
+                            pointOptions.general.hideempty = value
                             PointTracking:UpdatePoints("ENABLE")
                         end,
                         order = 10,
@@ -1883,9 +1869,9 @@ local classresource do
                         type = "toggle",
                         name = L["Resource_Reverse"],
                         desc = L["Resource_ReverseDesc"]:format(pointName),
-                        get = function(info) return options.general.direction.reverse end,
+                        get = function(info) return pointOptions.general.direction.reverse end,
                         set = function(info, value) 
-                            options.general.direction.reverse = value
+                            pointOptions.general.direction.reverse = value
                             PointTracking:UpdatePosition()
                         end,
                         order = 20,
@@ -1978,10 +1964,10 @@ local classresource do
                                 type = "input",
                                 name = L["General_XOffset"],
                                 order = 10,
-                                get = function(info) return tostring(options.position.x) end,
+                                get = function(info) return tostring(pointOptions.position.x) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    options.position.x = value
+                                    value = RealUI:ValidateOffset(value)
+                                    pointOptions.position.x = value
                                     PointTracking:UpdatePosition()
                                 end,
                             },
@@ -1989,10 +1975,10 @@ local classresource do
                                 type = "input",
                                 name = L["General_YOffset"],
                                 order = 20,
-                                get = function(info) return tostring(options.position.y) end,
+                                get = function(info) return tostring(pointOptions.position.y) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    options.position.y = value
+                                    value = RealUI:ValidateOffset(value)
+                                    pointOptions.position.y = value
                                     PointTracking:UpdatePosition()
                                 end,
                             },
@@ -2001,10 +1987,10 @@ local classresource do
                                 desc = L["Resource_GapDesc"]:format(pointName),
                                 type = "input",
                                 order = 30,
-                                get = function(info) return tostring(options.bars.position.gap) end,
+                                get = function(info) return tostring(pointOptions.bars.position.gap) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    options.bars.position.gap = value
+                                    value = RealUI:ValidateOffset(value)
+                                    pointOptions.bars.position.gap = value
                                     PointTracking:UpdatePosition()
                                 end,
                             },
@@ -2012,14 +1998,14 @@ local classresource do
                                 name = L["HuD_Width"],
                                 desc = L["Resource_WidthDesc"],
                                 type = "range",
-                                hidden = nibRealUI.class == "PALADIN",
+                                hidden = RealUI.class == "PALADIN",
                                 width = "full",
                                 min = round(uiWidth * 0.1), max = round(uiWidth * 0.5),
                                 step = 1, bigStep = 4,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CTPointsWidth"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CTPointsWidth"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CTPointsWidth"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 10,
                             },
@@ -2027,14 +2013,14 @@ local classresource do
                                 name = L["HuD_Height"],
                                 desc = L["Resource_HeightDesc"],
                                 type = "range",
-                                hidden = nibRealUI.class ~= "PALADIN",
+                                hidden = RealUI.class ~= "PALADIN",
                                 width = "full",
                                 min = -round(uiHeight * 0.2), max = round(uiHeight * 0.2),
                                 step = 1, bigStep = 2,
-                                get = function(info) return ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] end,
+                                get = function(info) return ndb.positions[RealUI.cLayout]["CTPointsHeight"] end,
                                 set = function(info, value)
-                                    ndb.positions[nibRealUI.cLayout]["CTPointsHeight"] = value
-                                    nibRealUI:UpdatePositioners()
+                                    ndb.positions[RealUI.cLayout]["CTPointsHeight"] = value
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 20,
                             },
@@ -2062,7 +2048,7 @@ options.HuD = {
         auratracker = auratracker,
         classresource = classresource,
         close = { -- This is for button creation
-            name = CLOSE,
+            name = _G.CLOSE,
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
             type = "group",
             order = -1,

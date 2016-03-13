@@ -1,22 +1,17 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
 local next, type = _G.next, _G.type
 
--- WoW Globals --
-local UIParent, GameTooltip = _G.UIParent, _G.GameTooltip
-local CreateFrame, GetTime = _G.CreateFrame, _G.GetTime
-local UnitAura, GetSpellInfo = _G.UnitAura, _G.GetSpellInfo
-
 -- Libs --
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local F = _G.Aurora[1]
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local round = nibRealUI.Round
+local RealUI = private.RealUI
 
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:GetModule(MODNAME)
+local AuraTracking = RealUI:GetModule(MODNAME)
 
 local icons = {}
 
@@ -32,10 +27,14 @@ function api:Enable()
     AuraTracking:debug("Tracker:Enable", self.id, self.isStatic)
     local spellData = icons[self]
     self.isEnabled = true
-    if spellData.eventUpdate then
-        local eventUpdate = spellData.eventUpdate
-        self:RegisterEvent(eventUpdate.event)
-        self[eventUpdate.event] = eventUpdate.func
+    local eventUpdate = spellData.eventUpdate
+    if eventUpdate then
+        if eventUpdate.event == "UNIT_AURA" then
+            eventUpdate.func(self, spellData)
+        else
+            self:RegisterEvent(eventUpdate.event)
+            self[eventUpdate.event] = eventUpdate.func
+        end
     end
     if self.isStatic then
         self.icon:SetDesaturated(true)
@@ -46,6 +45,9 @@ function api:Disable()
     AuraTracking:debug("Tracker:Disable", self.id, self.isStatic)
     self.isEnabled = false
     self:UnregisterAllEvents()
+    if self.timer then
+        AuraTracking:CancelTimer(self.timer)
+    end
     if self.slotID then
         AuraTracking:RemoveTracker(self)
     end
@@ -53,24 +55,27 @@ end
 
 --[[ External Functions ]]--
 function AuraTracking:CreateAuraIcon(id, spellData)
+    AuraTracking:debug("CreateAuraIcon", id, spellData.unit)
     local side = spellData.unit == "target" and "right" or "left"
-    local tracker = CreateFrame("Frame", nil, self[side])
+    local tracker = _G.CreateFrame("Frame", nil, self[side])
     self[side][id] = tracker
     tracker.side = side
     tracker.id = id
 
-    local _, _, texture
-    if type(spellData.spell) == "table" then
-        _, _, texture = GetSpellInfo(spellData.spell[1])
-    else
-        _, _, texture = GetSpellInfo(spellData.spell)
-    end
-
-    local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
+    local cd = _G.CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
     cd:SetAllPoints(tracker)
     tracker.cd = cd
 
-    local icon = tracker:CreateTexture(nil, "BACKGROUND")
+    local _, texture
+    if spellData.customIcon then
+        texture = spellData.customIcon
+    elseif type(spellData.spell) == "table" then
+        _, _, texture = _G.GetSpellInfo(spellData.spell[1])
+    else
+        _, _, texture = _G.GetSpellInfo(spellData.spell)
+    end
+
+    local icon = tracker:CreateTexture(nil, "BACKGROUND", nil, -7)
     icon:SetAllPoints(tracker)
     icon:SetTexture(texture)
     tracker.icon = icon
@@ -88,9 +93,9 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     tracker:SetScript("OnEnter", function(trakr)
         if not trakr.isEnabled then return end
         if trakr.auraIndex then
-            _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetUnitAura(spellData.unit, trakr.auraIndex, trakr.filter)
-            GameTooltip:Show()
+            _G.GameTooltip_SetDefaultAnchor(_G.GameTooltip, _G.UIParent)
+            _G.GameTooltip:SetUnitAura(spellData.unit, trakr.auraIndex, trakr.filter)
+            _G.GameTooltip:Show()
         else
             local spell = spellData.spell
             if type(spell) == "table" then
@@ -98,14 +103,14 @@ function AuraTracking:CreateAuraIcon(id, spellData)
             end
 
             spell = _G.tonumber(spell)
-            _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetSpellByID(spell)
-            GameTooltip:Show()
+            _G.GameTooltip_SetDefaultAnchor(_G.GameTooltip, _G.UIParent)
+            _G.GameTooltip:SetSpellByID(spell)
+            _G.GameTooltip:Show()
         end
     end)
     tracker:SetScript("OnLeave", function(trakr)
         if trakr.auraIndex then
-            GameTooltip:Hide()
+            _G.GameTooltip:Hide()
         end
     end)
     tracker:SetScript("OnEvent", function(trakr, event, ...)

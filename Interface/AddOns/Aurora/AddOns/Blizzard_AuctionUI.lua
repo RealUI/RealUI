@@ -200,7 +200,7 @@ C.themes["Blizzard_AuctionUI"] = function()
 	local auctionhandler = CreateFrame("Frame")
 	auctionhandler:RegisterEvent("NEW_AUCTION_UPDATE")
 	auctionhandler:SetScript("OnEvent", function()
-		local AuctionsItemButtonIconTexture = select(14, AuctionsItemButton:GetRegions())
+		local AuctionsItemButtonIconTexture = AuctionsItemButton:GetNormalTexture()
 		if AuctionsItemButtonIconTexture then
 			AuctionsItemButtonIconTexture:SetTexCoord(.08, .92, .08, .92)
 			AuctionsItemButtonIconTexture:SetPoint("TOPLEFT", 1, -1)

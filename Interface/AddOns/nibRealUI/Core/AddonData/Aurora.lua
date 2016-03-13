@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Aurora = function()
-    AuroraConfig = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Aurora = function()
+    _G.AuroraConfig = {
         ["useButtonGradientColour"] = false,
         ["chatBubbles"] = false,
         ["bags"] = false,

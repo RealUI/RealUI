@@ -1,7 +1,8 @@
-## Interface: 60100
+## Interface: 60200
 ## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
 ## Author: Luzzifus (Modified by Nibelheim)
-## OptionalDeps: nibRealUI, ItemRack, Outfitter
+## RequiredDeps: nibRealUI
+## OptionalDeps: ItemRack, Outfitter
 ## SavedVariables: cBnivCfg, cB_CustomBags, cBniv_CatInfo
 ## SavedVariablesPerCharacter: cB_KnownItems, cBniv
 

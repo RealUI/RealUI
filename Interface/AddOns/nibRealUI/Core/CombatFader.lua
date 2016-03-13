@@ -1,21 +1,27 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local db, ndbc
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
 
 local MODNAME = "CombatFader"
-local CombatFader = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local CombatFader = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local LoggedIn = false
 local FirstLog = true
 
-local FadeTime = 0.20
+local FADE_TIME = 0.20
 local status = "incombat"
 local modules = {}
 
 local function isFullPower(token)
-    if nibRealUI.ReversePowers[token] then
-        return UnitPower("player") > 0
+    if RealUI.ReversePowers[token] then
+        return _G.UnitPower("player") > 0
     else
-        return UnitPower("player") < UnitPowerMax("player")
+        return _G.UnitPower("player") < _G.UnitPowerMax("player")
     end
 end
 
@@ -24,11 +30,11 @@ local function FadeIt(self, newOpacity, instant)
     CombatFader:debug("FadeIt", newOpacity, instant)
     if self.realUIHidden then return end
     local currentOpacity = self:GetAlpha()
-    local FadeTime = instant and 0 or FadeTime
+    local fadeTime = instant and 0 or FADE_TIME
     if newOpacity > currentOpacity then
-        UIFrameFadeIn(self, FadeTime, currentOpacity, newOpacity)
+        _G.UIFrameFadeIn(self, fadeTime, currentOpacity, newOpacity)
     elseif newOpacity < currentOpacity and self:IsShown() then
-        UIFrameFadeOut(self, FadeTime, currentOpacity, newOpacity)
+        _G.UIFrameFadeOut(self, fadeTime, currentOpacity, newOpacity)
     end
 end
 CombatFader.FadeIt = FadeIt
@@ -60,18 +66,18 @@ end
 function CombatFader:UpdateStatus(force)
     self:debug("UpdateStatus", force)
     local OldStatus = status
-    if UnitAffectingCombat("player") then
+    if _G.UnitAffectingCombat("player") then
         status = "incombat"                 -- InCombat - Priority 1
-    elseif UnitExists("target") then
-        if UnitCanAttack("player", "target") then
+    elseif _G.UnitExists("target") then
+        if _G.UnitCanAttack("player", "target") then
             status = "harmtarget"           -- HarmTarget - Priority 2
         else
             status = "target"               -- Target - Priority 3
         end
-    elseif UnitHealth("player") < UnitHealthMax("player") then
+    elseif _G.UnitHealth("player") < _G.UnitHealthMax("player") then
         status = "hurt"                     -- Hurt - Priority 4
     else
-        local _, powerToken = UnitPowerType("player")
+        local _, powerToken = _G.UnitPowerType("player")
         if isFullPower(powerToken) then
             status = "hurt"
         else
@@ -88,7 +94,7 @@ end
 -- On combat state change
 function CombatFader:UpdateCombatState(event)
     -- If in combat, then don't worry about health/power events
-    if UnitAffectingCombat("player") and not FirstLog then
+    if _G.UnitAffectingCombat("player") and not FirstLog then
         self:UnregisterAllBuckets()
     else
         self:RegisterBucketEvent({"UNIT_HEALTH", "UNIT_POWER", "UNIT_DISPLAYPOWER"}, 0.1, "HurtEvent")
@@ -128,21 +134,17 @@ end
 -- @param mod The name of the mod it belongs to
 -- @param frame The frame to be registered
 function CombatFader:RegisterFrameForFade(mod, frame)
-    assert(modules[mod], mod.." has not yet been registered.")
-    tinsert(modules[mod].frames, frame)
+    _G.assert(modules[mod], mod.." has not yet been registered.")
+    _G.tinsert(modules[mod].frames, frame)
     CombatFader:RefreshMod()
 end
 
 function CombatFader:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
         },
     })
-    db = self.db.profile
-    ndbc = nibRealUI.db.char
-
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function CombatFader:OnEnable()

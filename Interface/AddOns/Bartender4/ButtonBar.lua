@@ -1,5 +1,5 @@
 --[[
-	Copyright (c) 2009-2015, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
+	Copyright (c) 2009-2016, Hendrik "Nevcairiel" Leppkes < h.leppkes at gmail dot com >
 	All rights reserved.
 ]]
 --[[ Generic Template for a Bar which contains Buttons ]]
@@ -185,7 +185,7 @@ function ButtonBar:UpdateButtonLayout()
 	local buttons = self.buttons
 	local pad = self:GetPadding()
 
-	local numbuttons = self.button_count or #buttons
+	local numbuttons = self.numbuttons or #buttons
 
 	-- bail out if the bar has no buttons, for whatever reason
 	-- (eg. stanceless class, or no stances learned yet, etc.)

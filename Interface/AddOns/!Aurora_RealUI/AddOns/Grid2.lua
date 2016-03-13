@@ -1,9 +1,13 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
 mods["PLAYER_LOGIN"]["Grid2"] = function(self, F, C)
     --print("Grid2", F, C)
-    hooksecurefunc(Grid2Layout, "UpdateSize", function()
-        for k, frame in pairs(Grid2Frame.registeredFrames) do
+    _G.hooksecurefunc(_G.Grid2Layout, "UpdateSize", function()
+        for k, frame in next, _G.Grid2Frame.registeredFrames do
             if not frame.realUISkinned then
                 -- Border
                 if not frame.newBorder then

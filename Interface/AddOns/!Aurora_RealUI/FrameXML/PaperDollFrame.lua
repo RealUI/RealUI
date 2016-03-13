@@ -1,7 +1,21 @@
 local _, mods = ...
 
-tinsert(mods["nibRealUI"], function(F, C)
+-- Lua Globals --
+local _G = _G
+
+_G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("PaperDollFrame", F, C)
+    local r, g, b = C.r, C.g, C.b
+
+    -- Lua Globals --
+    local next, floor = _G.next, _G.floor
+
+    -- Libs --
+    local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
+
+    local RealUI = _G.RealUI
+    local maxUpgrades = 6
+
     local itemSlots = {
         {slot = "Head", hasDura = true},
         {slot = "Neck", hasDura = false},
@@ -27,11 +41,43 @@ tinsert(mods["nibRealUI"], function(F, C)
         if item.slot then
             local itemSlot = _G["Character" .. item.slot .. "Slot"]
             local iLvl = itemSlot:CreateFontString(item.slot .. "ItemLevel", "OVERLAY")
-            iLvl:SetFontObject(SystemFont_Outline_Small) --SetFont(unpack(RealUI.font.pixel1))
-            iLvl:SetPoint("BOTTOMRIGHT", itemSlot, "BOTTOMRIGHT", 2, 1.5)
+            iLvl:SetFontObject(_G.SystemFont_Outline_Small) --SetFont(unpack(RealUI.font.pixel1))
+            iLvl:SetPoint("BOTTOMRIGHT", 2, 1.5)
             itemSlot.ilvl = iLvl
+
+            local upgradeBG = itemSlot:CreateTexture(nil, "OVERLAY", -8)
+            if RealUI.isBeta then
+                upgradeBG:SetColorTexture(0, 0, 0, 1)
+            else
+                upgradeBG:SetTexture(0, 0, 0, 1)
+            end
+            if item.slot == "SecondaryHand" then
+                upgradeBG:SetPoint("TOPRIGHT", itemSlot, "TOPLEFT", 1, 0)
+                upgradeBG:SetPoint("BOTTOMLEFT", itemSlot, "BOTTOMLEFT", -1, 0)
+            else
+                upgradeBG:SetPoint("TOPLEFT", itemSlot, "TOPRIGHT", -1, 0)
+                upgradeBG:SetPoint("BOTTOMRIGHT", itemSlot, "BOTTOMRIGHT", 1, 0)
+            end
+            itemSlot.upgradeBG = upgradeBG
+
+            itemSlot.upgrade = {}
+            for i = 1, maxUpgrades do
+                local tex = itemSlot:CreateTexture(nil, "OVERLAY")
+                tex:SetWidth(1)
+                if i == 1 then
+                    if item.slot == "SecondaryHand" then
+                        tex:SetPoint("TOPRIGHT", itemSlot, "TOPLEFT", 0, 0)
+                    else
+                        tex:SetPoint("TOPLEFT", itemSlot, "TOPRIGHT", 0, 0)
+                    end
+                else
+                    tex:SetPoint("TOPLEFT", itemSlot.upgrade[i-1], "BOTTOMLEFT", 0, -1)
+                end
+                itemSlot["Upgrade"..i] = tex
+                itemSlot.upgrade[i] = tex
+            end
             if item.hasDura then
-                local dura = CreateFrame("StatusBar", nil, itemSlot)
+                local dura = _G.CreateFrame("StatusBar", nil, itemSlot)
                 
                 if item.slot == "SecondaryHand" then
                     dura:SetPoint("TOPLEFT", itemSlot, "TOPRIGHT", 2, 0)
@@ -53,9 +99,9 @@ tinsert(mods["nibRealUI"], function(F, C)
         end
     end
 
-    PaperDollFrame.ilvl = PaperDollFrame:CreateFontString("ARTWORK")
-    PaperDollFrame.ilvl:SetFontObject(SystemFont_Small)
-    PaperDollFrame.ilvl:SetPoint("TOP", PaperDollFrame, "TOP", 0, -20)
+    _G.PaperDollFrame.ilvl = _G.PaperDollFrame:CreateFontString("ARTWORK")
+    _G.PaperDollFrame.ilvl:SetFontObject(_G.SystemFont_Small)
+    _G.PaperDollFrame.ilvl:SetPoint("TOP", _G.PaperDollFrame, "TOP", 0, -20)
 
     -- Toggle Helm and Cloak
     local helmcloak = {
@@ -65,7 +111,7 @@ tinsert(mods["nibRealUI"], function(F, C)
     for slot, item in next, helmcloak do
         local isShown = _G["Showing" .. item]
         local itemSlot = _G["Character" .. slot .. "Slot"]
-        local check = CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
+        local check = _G.CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
         check:SetSize(18, 18)
         check:SetPoint("TOPLEFT", itemSlot, -4, 4)
         F.ReskinCheck(check)
@@ -79,13 +125,13 @@ tinsert(mods["nibRealUI"], function(F, C)
         end)
 
         check:SetScript("OnEnter", function(self) 
-            GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
-            GameTooltip:AddLine(_G["SHOW_" .. strupper(item)])
-            GameTooltip:Show()
+            _G.GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
+            _G.GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
+            _G.GameTooltip:Show()
         end)
 
         check:SetScript("OnLeave", function() 
-            GameTooltip:Hide()
+            _G.GameTooltip:Hide()
         end)
     end
 
@@ -95,40 +141,71 @@ tinsert(mods["nibRealUI"], function(F, C)
             ilvlLimits = (lvl - 91) * 9 + 510
         end
         if ilvl >= ilvlLimits + 28 then
-            return ITEM_QUALITY_COLORS[4] -- epic
+            return _G.ITEM_QUALITY_COLORS[4] -- epic
         elseif ilvl >= ilvlLimits + 14 then
-            return ITEM_QUALITY_COLORS[3] -- rare
+            return _G.ITEM_QUALITY_COLORS[3] -- rare
         elseif ilvl >= ilvlLimits then
-            return ITEM_QUALITY_COLORS[2] -- uncommon
+            return _G.ITEM_QUALITY_COLORS[2] -- uncommon
         else
-            return ITEM_QUALITY_COLORS[1] -- common
+            return _G.ITEM_QUALITY_COLORS[1] -- common
+        end
+    end
+
+    local function HideItemLevelInfo(itemSlot)
+        itemSlot.ilvl:SetText("")
+        itemSlot.upgradeBG:Hide()
+        for i, tex in next, itemSlot.upgrade do
+            tex:Hide()
         end
     end
 
     -- Update Item display
-    local f, timer = CreateFrame("Frame")
+    local f, timer = _G.CreateFrame("Frame")
     local function UpdateItems()
-        if not CharacterFrame:IsVisible() then return end
+        if not _G.CharacterFrame:IsVisible() then return end
         
         for slotID = 1, #itemSlots do
             local item = itemSlots[slotID]
             if item.slot then
                 local itemSlot = _G["Character" .. item.slot .. "Slot"]
-                local itemLink = GetInventoryItemLink("player", slotID)
+                local itemLink = _G.GetInventoryItemLink("player", slotID)
                 if itemLink then
-                    local _, _, itemRarity, itemLevel = GetItemInfo(itemLink)
+                    local _, _, itemRarity = _G.GetItemInfo(itemLink)
+                    local itemLevel = LIU:GetUpgradedItemLevel(itemLink)
+                    mods.debug("PaperDollFrame", item.slot, itemLevel)
+                    mods.debug(_G.strsplit("|", itemLink))
 
                     if itemLevel and itemLevel > 0 then
-                        itemSlot.ilvl:SetTextColor(ITEM_QUALITY_COLORS[itemRarity].r, ITEM_QUALITY_COLORS[itemRarity].g, ITEM_QUALITY_COLORS[itemRarity].b)
+                        itemSlot.ilvl:SetTextColor(_G.ITEM_QUALITY_COLORS[itemRarity].r, _G.ITEM_QUALITY_COLORS[itemRarity].g, _G.ITEM_QUALITY_COLORS[itemRarity].b)
                         itemSlot.ilvl:SetText(itemLevel)
+
+                        -- item:itemID:0:0:0:0:0:0:uniqueID:linkLevel:specializationID:upgradeTypeID:0:numBonusIDs:bonusID1:bonusID2:...:upgradeID"
+                        -- itemLink = "item:105385:0:0:0:0:0:0:1293870592:100:268:4:0:0:50"..(5 + (slotID % 2))
+                        local cur, max, delta = LIU:GetItemUpgradeInfo(itemLink)
+                        mods.debug("ItemUpgradeInfo", cur, max, delta, LIU:GetUpgradeID(itemLink))
+                        itemSlot.upgradeBG:SetShown(cur and cur > 0)
+                        for i, tex in next, itemSlot.upgrade do
+                            if cur and i <= cur then
+                                if RealUI.isBeta then
+                                    tex:SetColorTexture(r, g, b)
+                                else
+                                    tex:SetTexture(r, g, b)
+                                end
+                                tex:SetHeight((itemSlot:GetHeight() / max) - (i < max and 1 or 0))
+                                --tex:SetPoint("TOPLEFT", -1 + ((dotSize*.75)*(i-1)), 1)
+                                tex:Show()
+                            else
+                                tex:Hide()
+                            end
+                        end
                     else
-                        itemSlot.ilvl:SetText("")
+                        HideItemLevelInfo(itemSlot)
                     end
                 else
-                    itemSlot.ilvl:SetText("")
+                    HideItemLevelInfo(itemSlot)
                 end
                 if item.hasDura then
-                    local min, max = GetInventoryItemDurability(slotID)
+                    local min, max = _G.GetInventoryItemDurability(slotID)
                     if max then
                         local percent = RealUI:GetSafeVals(min, max)
                         itemSlot.dura:SetValue(percent)
@@ -141,28 +218,30 @@ tinsert(mods["nibRealUI"], function(F, C)
             end
         end
 
-        local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel()
-        local aILColor = GetILVLColor(UnitLevel("player"), avgItemLevel)["hex"]
-        local aILEColor = GetILVLColor(UnitLevel("player"), avgItemLevelEquipped)["hex"]
+        local avgItemLevel, avgItemLevelEquipped = _G.GetAverageItemLevel()
+        local aILColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevel)["hex"]
+        local aILEColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevelEquipped)["hex"]
         avgItemLevel = floor(avgItemLevel)
         avgItemLevelEquipped = floor(avgItemLevelEquipped)
-        PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
+        _G.PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
         timer = false
     end
 
     f:SetScript("OnEvent", function(self, event, ...)
         if not timer then
-            C_Timer.After(.25, UpdateItems)
+            _G.C_Timer.After(.25, UpdateItems)
             timer = true
         end
     end)
-    CharacterFrame:HookScript("OnShow", function()
+    _G.CharacterFrame:HookScript("OnShow", function()
         f:RegisterEvent("UNIT_INVENTORY_CHANGED")
         f:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
+        f:RegisterEvent("ITEM_UPGRADE_MASTER_UPDATE")
         UpdateItems()
     end)
-    CharacterFrame:HookScript("OnHide", function()
+    _G.CharacterFrame:HookScript("OnHide", function()
         f:UnregisterEvent("UNIT_INVENTORY_CHANGED")
         f:UnregisterEvent("UPDATE_INVENTORY_DURABILITY")
+        f:UnregisterEvent("ITEM_UPGRADE_MASTER_UPDATE")
     end)
 end)

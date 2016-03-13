@@ -1,6 +1,6 @@
 ﻿## Interface: 60200
 ## Title: Masque
-## Version: 6.2.0
+## Version: 6.2.1
 ## Author: StormFX, JJSheets
 ## Notes: A dynamic button skinning engine.
 ## Notes-frFR: Un add-on de skinnage dynamique des boutons.
@@ -13,7 +13,7 @@
 ## X-WoWI-ID: 12097
 ## OptionalDeps: Ace3
 ## SavedVariables: MasqueDB
-## X-Curse-Packaged-Version: v6.2.0
+## X-Curse-Packaged-Version: 6.2.1
 ## X-Curse-Project-Name: Masque
 ## X-Curse-Project-ID: masque
 ## X-Curse-Repository-ID: wow/masque/mainline
@@ -46,4 +46,3 @@ Skins\Zoomed.lua
 Core\Button.lua
 Core\Groups.lua
 Core\Options.lua
-

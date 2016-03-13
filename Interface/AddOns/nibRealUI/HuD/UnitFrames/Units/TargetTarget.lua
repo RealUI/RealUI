@@ -1,14 +1,20 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:GetModule(MODNAME)
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-local db, ndb, ndbc
+-- Lua Globals --
+local _G = _G
 
-local oUF = oUFembed
+-- Libs --
+local oUF = _G.oUFembed
+
+-- RealUI --
+local RealUI = private.RealUI
+local db, ndb
+
+local UnitFrames = RealUI:GetModule("UnitFrames")
+local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 
 local F2
-local coords = {
+local texCoords = {
     [1] = {
         health = {1, 0.546875, 0.4375, 1},
         status = {1, 0, 0, 1},
@@ -21,8 +27,8 @@ local coords = {
 
 local function CreateHealthBar(parent)
     local texture = F2.health
-    local coords = coords[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent.overlay)
+    local coords = texCoords[UnitFrames.layoutSize].health
+    parent.Health = _G.CreateFrame("Frame", nil, parent.overlay)
     parent.Health:SetPoint("BOTTOMRIGHT", parent, 0, 0)
     parent.Health:SetAllPoints(parent)
 
@@ -35,7 +41,7 @@ local function CreateHealthBar(parent)
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
     parent.Health.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-    parent.Health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Health.bg:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
     parent.Health.bg:SetAllPoints(parent.Health)
 
     parent.Health.border = parent.Health:CreateTexture(nil, "BORDER")
@@ -43,17 +49,17 @@ local function CreateHealthBar(parent)
     parent.Health.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
     parent.Health.border:SetAllPoints(parent.Health)
 
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     parent.Health.steps = {}
     for i = 1, 2 do
         parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
         parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
         parent.Health.steps[i]:SetSize(16, 16)
-        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width)), 0)
+        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(_G.floor(stepPoints[i] * texture.width)), 0)
         if not parent.Health.bar.reverse then
-        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width)), 0)
+        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(_G.floor(stepPoints[i] * texture.width)), 0)
         else
-            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width), 0)
+            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, _G.floor(stepPoints[i] * texture.width), 0)
         end
     end
 
@@ -62,7 +68,7 @@ end
 
 local function CreateHealthStatus(parent) -- PvP/Classification
     local texture = F2.healthBox
-    local coords = coords[UnitFrames.layoutSize].status
+    local coords = texCoords[UnitFrames.layoutSize].status
     local status = {}
     for i = 1, 2 do
         status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
@@ -89,7 +95,7 @@ end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = F2.statusBox
-    local coords = coords[UnitFrames.layoutSize].status
+    local coords = texCoords[UnitFrames.layoutSize].status
     local status = {}
     for i = 1, 2 do
         status.bg = parent.Health:CreateTexture(nil, "BORDER")
@@ -119,7 +125,7 @@ end
 
 local function CreateEndBox(parent)
     local texture = F2.endBox
-    local coords = coords[UnitFrames.layoutSize].status
+    local coords = texCoords[UnitFrames.layoutSize].status
     parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
     parent.endBox:SetTexture(texture.bar)
     parent.endBox:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
@@ -143,21 +149,20 @@ UnitFrames["targettarget"] = function(self)
 
     self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -5, 2 - UnitFrames.layoutSize)
-    self.Name:SetFontObject(RealUIFont_Pixel)
+    self.Name:SetFontObject(_G.RealUIFont_Pixel)
     self:Tag(self.Name, "[realui:name]")
 
-    function self:PostUpdate(event)
-        self.Class.Update(self, event)
-        self.endBox.Update(self, event)
-        UnitFrames:SetHealthColor(self)
+    function self.PostUpdate(frame, event)
+        frame.Class.Update(frame, event)
+        frame.endBox.Update(frame, event)
+        UnitFrames:SetHealthColor(frame)
     end
 end
 
 -- Init
-tinsert(UnitFrames.units, function(...)
+_G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
     F2 = UnitFrames.textures[UnitFrames.layoutSize].F2
 
     local targettarget = oUF:Spawn("targettarget", "RealUITargetTargetFrame")
