@@ -1,9 +1,17 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
 local db
 
+local CombatFader = RealUI:GetModule("CombatFader")
+
 local MODNAME = "RuneDisplay"
-local RuneDisplay = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
-local CombatFader = nibRealUI:GetModule("CombatFader")
+local RuneDisplay = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn
 local EventsRegistered
@@ -18,11 +26,7 @@ local gcdNextDuration = 1.0
 local gcdEnd = 0
 
 local updateSpeed = 1/25
-
 local layoutSize
-
--- CombatFader
-local FadeTime = 0.20
 
 local RuneFull = {
     [1] = true,
@@ -43,7 +47,7 @@ local function GetOptions()
         name = "Rune Display",
         desc = "Rune display for Death Knights.",
         childGroups = "tab",
-        disabled = function() if (select(2, UnitClass("player")) ~= "DEATHKNIGHT") then return true end end,
+        disabled = function() if (_G.select(2, _G.UnitClass("player")) ~= "DEATHKNIGHT") then return true end end,
         arg = MODNAME,
         -- order = 1821,
         args = {
@@ -62,9 +66,9 @@ local function GetOptions()
                 type = "toggle",
                 name = "Enabled",
                 desc = "Enable/Disable the Rune Display module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
+                    RealUI:SetModuleEnabled(MODNAME, value)
                 end,
                 order = 30,
             },
@@ -76,7 +80,7 @@ local function GetOptions()
             position = {
                 name = "Position",
                 type = "group",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 40,
                 args = {
                     xoffset = {
@@ -84,9 +88,9 @@ local function GetOptions()
                         name = "X Offset",
                         width = "half",
                         order = 10,
-                        get = function(info) return tostring(db.position.x) end,
+                        get = function(info) return _G.tostring(db.position.x) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             db.position.x = value
                             RuneDisplay:UpdateSettings()
                         end,
@@ -96,9 +100,9 @@ local function GetOptions()
                         name = "Y Offset",
                         width = "half",
                         order = 20,
-                        get = function(info) return tostring(db.position.y) end,
+                        get = function(info) return _G.tostring(db.position.y) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             db.position.y = value
                             RuneDisplay:UpdateSettings()
                         end,
@@ -107,34 +111,34 @@ local function GetOptions()
                         type = "select",
                         name = "Anchor To",
                         get = function(info) 
-                            for k,v in pairs(nibRealUI.globals.anchorPoints) do
+                            for k,v in next, RealUI.globals.anchorPoints do
                                 if v == db.position.anchorto then return k end
                             end
                         end,
                         set = function(info, value)
-                            db.position.anchorto = nibRealUI.globals.anchorPoints[value]
+                            db.position.anchorto = RealUI.globals.anchorPoints[value]
                             RuneDisplay:UpdateSettings()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 30,
                     },
                     anchorfrom = {
                         type = "select",
                         name = "Anchor From",
                         get = function(info) 
-                            for k,v in pairs(nibRealUI.globals.anchorPoints) do
+                            for k,v in next, RealUI.globals.anchorPoints do
                                 if v == db.position.anchorfrom then return k end
                             end
                         end,
                         set = function(info, value)
-                            db.position.anchorfrom = nibRealUI.globals.anchorPoints[value]
+                            db.position.anchorfrom = RealUI.globals.anchorPoints[value]
                             RuneDisplay:UpdateSettings()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 40,
                     },
                 },
@@ -147,24 +151,24 @@ local function GetOptions()
             framelevel = {
                 type = "group",
                 name = "Strata",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 50,
                 args = {
                     strata = {
                         type = "select",
                         name = "Strata",
                         get = function(info) 
-                            for k_ts,v_ts in pairs(nibRealUI.globals.stratas) do
+                            for k_ts,v_ts in next, RealUI.globals.stratas do
                                 if v_ts == db.framelevel.strata then return k_ts end
                             end
                         end,
                         set = function(info, value)
-                            db.framelevel.strata = nibRealUI.globals.stratas[value]
+                            db.framelevel.strata = RealUI.globals.stratas[value]
                             RuneDisplay:UpdateSettings()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.stratas,
+                        values = RealUI.globals.stratas,
                         order = 10,
                     },
                     level = {
@@ -188,7 +192,7 @@ local function GetOptions()
             appearance = {
                 type = "group",
                 name = "Appearance",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 60,
                 args = {
                     opacity = {
@@ -213,7 +217,7 @@ local function GetOptions()
                 type = "group",
                 name = "Runes",
                 childGroups = "tab",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 70,
                 args = {
                     size = {
@@ -226,9 +230,9 @@ local function GetOptions()
                                 name = "Width",
                                 width = "half",
                                 order = 10,
-                                get = function(info) return tostring(db.runes.size.width) end,
+                                get = function(info) return _G.tostring(db.runes.size.width) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
+                                    value = RealUI:ValidateOffset(value)
                                     db.runes.size.width = value
                                     RuneDisplay:UpdateSettings()
                                 end,
@@ -238,9 +242,9 @@ local function GetOptions()
                                 name = "Height",
                                 width = "half",
                                 order = 20,
-                                get = function(info) return tostring(db.runes.size.height) end,
+                                get = function(info) return _G.tostring(db.runes.size.height) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
+                                    value = RealUI:ValidateOffset(value)
                                     db.runes.size.height = value
                                     RuneDisplay:UpdateSettings()
                                 end,
@@ -250,9 +254,9 @@ local function GetOptions()
                                 name = "Padding",
                                 width = "half",
                                 order = 20,
-                                get = function(info) return tostring(db.runes.size.padding) end,
+                                get = function(info) return _G.tostring(db.runes.size.padding) end,
                                 set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
+                                    value = RealUI:ValidateOffset(value)
                                     db.runes.size.padding = value
                                     RuneDisplay:UpdateSettings()
                                 end,
@@ -481,7 +485,7 @@ end
 ---- RUNES
 -- Events
 function RuneDisplay.OnUpdate()
-    local time = GetTime()
+    local time = _G.GetTime()
     
     if time > RuneDisplay.LastTime + updateSpeed then   -- Update 25 times a second
         -- Update Rune Bars
@@ -489,10 +493,10 @@ function RuneDisplay.OnUpdate()
         local start, duration, runeReady
         for rune = 1, 6 do
             RuneBar = RuneDisplay.Frames.RuneBars[rune]
-            start, duration, runeReady = GetRuneCooldown(rune)
+            start, duration, runeReady = _G.GetRuneCooldown(rune)
 
             if RuneBar ~= nil then
-                if runeReady or UnitIsDead("player") or UnitIsGhost("player") then
+                if runeReady or _G.UnitIsDead("player") or _G.UnitIsGhost("player") then
                     if ( db.combatfader.enabled and (not RuneFull[rune]) and (not RunesAreReady) ) then
                         RuneFull[rune] = runeReady
                         UpdateRuneStatus()
@@ -509,7 +513,7 @@ function RuneDisplay.OnUpdate()
                     
                     RuneBar.StatusBarBG:SetHeight((((db.runes.size.height + (layoutSize == 1 and 0 or 3))) * ((time - start) / duration)) + db.runes.border.size * 2)
                     RuneBar.BottomStatusBar:SetValue((time - start) / duration)
-                    RuneBar.TopStatusBar:SetValue(math.max((time - (start + duration - gcdNextDuration)) / gcdNextDuration, 0.0))
+                    RuneBar.TopStatusBar:SetValue(_G.math.max((time - (start + duration - gcdNextDuration)) / gcdNextDuration, 0.0))
                 end
             end
         end
@@ -519,10 +523,10 @@ function RuneDisplay.OnUpdate()
 end
 
 function RuneDisplay:RuneTextureUpdate(rune)
-    RuneBar = RuneDisplay.Frames.RuneBars[rune]
+    local RuneBar = RuneDisplay.Frames.RuneBars[rune]
     if not RuneBar then return end
     
-    local RuneType = GetRuneType(rune)
+    local RuneType = _G.GetRuneType(rune)
     if RuneType then
         RuneBar.BottomStatusBar.bg:SetTexture(db.runes.colors.bright[RuneType].r * db.runes.colors.dimfactor, db.runes.colors.bright[RuneType].g * db.runes.colors.dimfactor, db.runes.colors.bright[RuneType].b * db.runes.colors.dimfactor)
         RuneBar.TopStatusBar.bg:SetTexture(db.runes.colors.bright[RuneType].r, db.runes.colors.bright[RuneType].g, db.runes.colors.bright[RuneType].b)
@@ -544,23 +548,23 @@ function RuneDisplay:PLAYER_ENTERING_WORLD()
 end
 
 function RuneDisplay:RUNE_TYPE_UPDATE(event, rune)
-    if not rune or tonumber(rune) ~= rune or rune < 1 or rune > 6 then
+    if not rune or _G.tonumber(rune) ~= rune or rune < 1 or rune > 6 then
         return
     end
 
     -- Update Rune colors
-    local _,_,runeReady = GetRuneCooldown(rune)
+    local _,_,runeReady = _G.GetRuneCooldown(rune)
     RuneDisplay:RuneTextureUpdate(rune, runeReady)
 end
 
 function RuneDisplay:ACTIONBAR_UPDATE_COOLDOWN()
     -- Update Global Cooldown
-    local gcdStart, gcdDuration, gcdIsEnabled = GetShapeshiftFormCooldown(1)
+    local gcdStart, gcdDuration, gcdIsEnabled = _G.GetShapeshiftFormCooldown(1)
     gcdEnd = gcdIsEnabled and gcdDuration > 0 and gcdStart + gcdDuration or gcdEnd
 end
 
 function RuneDisplay:SetupEvents()
-    if ( (not nibRealUI:GetModuleEnabled(MODNAME)) and EventsRegistered) then
+    if ( (not RealUI:GetModuleEnabled(MODNAME)) and EventsRegistered) then
         self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
         self:UnregisterEvent("RUNE_TYPE_UPDATE")
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
@@ -585,7 +589,7 @@ end
 function RuneDisplay:UpdateSettings()
     RuneDisplay.Frames.Parent:SetFrameStrata(db.framelevel.strata)
     RuneDisplay.Frames.Parent:SetFrameLevel(db.framelevel.level)
-    RuneDisplay.Frames.Parent:SetPoint(db.position.anchorfrom, RealUIPositionersRunes, db.position.anchorto, db.position.x, db.position.y)
+    RuneDisplay.Frames.Parent:SetPoint(db.position.anchorfrom, _G.RealUIPositionersRunes, db.position.anchorto, db.position.x, db.position.y)
     RuneDisplay.Frames.Parent:SetHeight((db.runes.size.height + (layoutSize == 1 and 0 or 3)) + db.runes.size.padding * 2)
     RuneDisplay.Frames.Parent:SetWidth((db.runes.size.width + (layoutSize == 1 and 0 or 1)) * 6 + db.runes.size.padding * 7)
     
@@ -630,12 +634,12 @@ function RuneDisplay:CreateFrames()
     RuneDisplay.Frames = {}
     
     -- Parent frame
-    RuneDisplay.Frames.Parent = CreateFrame("Frame", "RealUI_RuneDisplay", RealUIPositionersRunes)
+    RuneDisplay.Frames.Parent = _G.CreateFrame("Frame", "RealUI_RuneDisplay", _G.RealUIPositionersRunes)
     RuneDisplay.Frames.Parent.special = db.combatfader.opacity.outofcombat
     CombatFader:RegisterFrameForFade(MODNAME, RuneDisplay.Frames.Parent)
     
     -- Create main frame
-    RuneDisplay.Frames.Main = CreateFrame("Frame", nil, RuneDisplay.Frames.Parent)
+    RuneDisplay.Frames.Main = _G.CreateFrame("Frame", nil, RuneDisplay.Frames.Parent)
     RuneDisplay.Frames.Main:SetParent(RuneDisplay.Frames.Parent)
     
     -- Rune Bars
@@ -646,13 +650,13 @@ function RuneDisplay:CreateFrames()
         RuneBar = RuneDisplay.Frames.RuneBars[i]
 
         -- Create Rune Bar
-        RuneBar.frame = CreateFrame("Frame", nil, RuneDisplay.Frames.Main)
+        RuneBar.frame = _G.CreateFrame("Frame", nil, RuneDisplay.Frames.Main)
         
         -- Status Bar BG (Border)
         RuneBar.StatusBarBG = RuneBar.frame:CreateTexture()
 
         -- Bottom Status Bar
-        RuneBar.BottomStatusBar = CreateFrame("StatusBar", nil, RuneBar.frame)
+        RuneBar.BottomStatusBar = _G.CreateFrame("StatusBar", nil, RuneBar.frame)
             RuneBar.BottomStatusBar:SetOrientation("VERTICAL")
             RuneBar.BottomStatusBar:SetMinMaxValues(0, 1)
             RuneBar.BottomStatusBar:SetValue(1)
@@ -664,7 +668,7 @@ function RuneDisplay:CreateFrames()
             RuneBar.BottomStatusBar:SetStatusBarTexture(RuneBar.BottomStatusBar.bg)
 
         -- Top Status Bar
-        RuneBar.TopStatusBar = CreateFrame("StatusBar", nil, RuneBar.frame)
+        RuneBar.TopStatusBar = _G.CreateFrame("StatusBar", nil, RuneBar.frame)
             RuneBar.TopStatusBar:SetOrientation("VERTICAL")
             RuneBar.TopStatusBar:SetMinMaxValues(0, 1)
             RuneBar.TopStatusBar:SetValue(1)
@@ -679,7 +683,7 @@ end
 
 ---- CORE
 function RuneDisplay:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -691,7 +695,7 @@ function RuneDisplay:ToggleConfigMode(val)
 end
 
 function RuneDisplay:RefreshMod()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     
     db = self.db.profile
     
@@ -707,7 +711,7 @@ end
 
 ----
 function RuneDisplay:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             position = {
@@ -754,13 +758,13 @@ function RuneDisplay:OnInitialize()
     })
     db = self.db.profile
 
-    layoutSize = nibRealUI.db.profile.settings.hudSize
+    layoutSize = RealUI.db.profile.settings.hudSize
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DEATHKNIGHT")
+    self:SetEnabledState(RealUI:GetModuleEnabled("PointTracking") and RealUI:GetModuleEnabled(MODNAME) and RealUI.class == "DEATHKNIGHT")
     
-    if nibRealUI.class == "DEATHKNIGHT" then
-        nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
-        nibRealUI:RegisterConfigModeModule(self)
+    if RealUI.class == "DEATHKNIGHT" then
+        RealUI:RegisterModuleOptions(MODNAME, GetOptions)
+        RealUI:RegisterConfigModeModule(self)
         CombatFader:RegisterModForFade(MODNAME, db.combatfader)
         
         self:CreateFrames()
@@ -772,9 +776,9 @@ end
 function RuneDisplay:OnEnable()
     self.configMode = false
     
-    if nibRealUI.db.profile.settings.powerMode == 1 then
+    if RealUI.db.profile.settings.powerMode == 1 then
         updateSpeed = 1/25
-    elseif nibRealUI.db.profile.settings.powerMode == 2 then
+    elseif RealUI.db.profile.settings.powerMode == 2 then
         updateSpeed = 1/20
     else
         updateSpeed = 1/30
@@ -791,9 +795,9 @@ function RuneDisplay:OnEnable()
     end
     
     -- Disable default rune frame
-    RuneFrame:UnregisterAllEvents()
-    RuneFrame:Hide()
-    RuneFrame.Show = function() end
+    _G.RuneFrame:UnregisterAllEvents()
+    _G.RuneFrame:Hide()
+    _G.RuneFrame.Show = function() end
     
     -- Show RuneDisplay
     self.Frames.Parent:Show()

@@ -62,7 +62,7 @@ function RealUI:HuDTestMode(doTestMode)
         _G.ObjectiveTrackerFrame:SetShown(not doTestMode)
     end
     -- Boss Frames
-    _G.RealUIUFBossConfig(doTestMode)
+    RealUI:BossConfig(doTestMode)
 
     -- Spell Alerts
     local sAlert = {
@@ -207,7 +207,7 @@ local function InitializeOptions()
     RealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
-    ACR:RegisterOptionsTable("RealUI", options.RealUI)
+    --ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- Buttons

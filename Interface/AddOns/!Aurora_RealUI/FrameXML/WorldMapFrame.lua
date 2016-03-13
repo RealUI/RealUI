@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 _G.tinsert(mods["nibRealUI"], function(F, C)
@@ -55,7 +57,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         playerY = round(100 * playerY, 1)
 
         if playerX ~= 0 and playerY ~= 0 then
-            coords.player:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, _G.PLAYER, playerX, playerY))
+            coords.player:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.PLAYER, playerX, playerY))
         else
             coords.player:SetText("")
         end
@@ -72,7 +74,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         if (adjustedX >= 0  and adjustedY >= 0 and adjustedX <= 1 and adjustedY <= 1) then
             adjustedX = round(100 * adjustedX, 1)
             adjustedY = round(100 * adjustedY, 1)
-            coords.mouse:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, _G.MOUSE_LABEL, adjustedX, adjustedY))
+            coords.mouse:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.MOUSE_LABEL, adjustedX, adjustedY))
         else
             coords.mouse:SetText("")
         end

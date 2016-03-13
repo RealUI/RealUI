@@ -1,8 +1,10 @@
 -- Code from FreeUI by the awesome Haleth
 -- http://www.wowinterface.com/downloads/info17892-FreeUI.html
-
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
+local next = _G.next
 
 _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     mods.debug("Blizzard_PetBattleUI", F, C)
@@ -20,7 +22,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
     -- Tooltips
     local tooltips = {_G.PetBattlePrimaryAbilityTooltip, _G.PetBattlePrimaryUnitTooltip, _G.FloatingBattlePetTooltip, _G.BattlePetTooltip, _G.FloatingPetBattleAbilityTooltip}
-    for _, f in pairs(tooltips) do
+    for _, f in next, tooltips do
         f:DisableDrawLayer("BACKGROUND")
         local bg = _G.CreateFrame("Frame", nil, f)
         bg:SetAllPoints()
@@ -52,7 +54,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     _G.PetBattlePrimaryUnitTooltip.XPBG:SetTexture("")
     _G.PetBattlePrimaryUnitTooltip.Border:Hide()
 
-    for _, f in pairs({_G.PetBattlePrimaryUnitTooltip.ActualHealthBar, _G.PetBattlePrimaryUnitTooltip.XPBar}) do
+    for _, f in next, {_G.PetBattlePrimaryUnitTooltip.ActualHealthBar, _G.PetBattlePrimaryUnitTooltip.XPBar} do
         local bg = _G.CreateFrame("Frame", nil, f:GetParent())
         bg:SetPoint("TOPLEFT", f, -1, 1)
         bg:SetPoint("BOTTOMLEFT", f, -1, -1)
@@ -90,7 +92,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
     local units = {frame.ActiveAlly, frame.ActiveEnemy}
 
-    for index, unit in pairs(units) do
+    for index, unit in next, units do
         unit.healthBarWidth = 300
 
         unit.Border:SetDrawLayer("ARTWORK", 0)
@@ -160,7 +162,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         frame.Enemy3
     }
 
-    for index, unit in pairs(extraUnits) do
+    for index, unit in next, extraUnits do
         unit.healthBarWidth = 36
 
         unit:SetSize(36, 36)
@@ -337,7 +339,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     turnTimer.ArtFrame2:SetTexture("")
     bf.FlowFrame.LeftEndCap:Hide()
     bf.FlowFrame.RightEndCap:Hide()
-    select(3, bf.FlowFrame:GetRegions()):Hide()
+    _G.select(3, bf.FlowFrame:GetRegions()):Hide()
     bf.MicroButtonFrame:Hide()
     _G.PetBattleFrameXPBarLeft:Hide()
     _G.PetBattleFrameXPBarRight:Hide()
@@ -375,7 +377,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     F.CreateBDFrame(bf.xpBar, 0)
 
     for i = 7, 12 do
-        select(i, bf.xpBar:GetRegions()):Hide()
+        _G.select(i, bf.xpBar:GetRegions()):Hide()
     end
 
     _G.hooksecurefunc("PetBattlePetSelectionFrame_Show", function()

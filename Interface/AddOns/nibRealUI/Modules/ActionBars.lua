@@ -1,25 +1,20 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
 local _G = _G
 local next = _G.next
 local math = _G.math
 
--- WoW Globals --
-local CreateFrame = _G.CreateFrame
-
 -- Libs --
 local BT4, BT4DB, BT4Profile
 local BT4ActionBars, BT4AB_EnableBar, BT4Stance
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
+local RealUI = private.RealUI
 local db, ndb, ndbc
-local RealUIFont_PixelSmall, RealUIFont_PixelCooldown = _G.RealUIFont_PixelSmall, _G.RealUIFont_PixelCooldown
 
 local MODNAME = "ActionBars"
-local ActionBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
+local ActionBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceConsole-3.0")
 
 local EnteredWorld = false
 
@@ -49,30 +44,26 @@ local function IsOdd(val)
 end
 function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
-    if ndbc.installStage ~= -1 or not nibRealUI:DoesAddonMove("Bartender4") then return end
+    if ndbc.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
 
-    local prof = nibRealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
+    local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
-    local barSettings = db[nibRealUI.cLayout]
+    local barSettings = db[RealUI.cLayout]
 
-    local topBars, numTopBars, bottomBars, sidePositions
+    local topBars, numTopBars, sidePositions
     -- Convert settings to tables
     if barSettings.centerPositions == 1 then
         topBars = {false, false, false}
-        bottomBars = {true, true, true}
         numTopBars = 0
     elseif barSettings.centerPositions == 2 then
         topBars = {true, false, false}
-        bottomBars = {false, true, true}
         numTopBars = 1
     elseif barSettings.centerPositions == 3 then
         topBars = {true, true, false}
-        bottomBars = {false, false, true}
         numTopBars = 2
     else
         topBars = {true, true, true}
-        bottomBars = {false, false, false}
         numTopBars = 3
     end
     if barSettings.sidePositions == 1 then
@@ -83,8 +74,8 @@ function ActionBars:ApplyABSettings(tag)
         sidePositions = {[4] = "LEFT", [5] = "LEFT"}
     end
 
-    local HuDY = ndb.positions[nibRealUI.cLayout]["HuDY"]
-    local ABY = ndb.positions[nibRealUI.cLayout]["ActionBarsY"] + (nibRealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
+    local HuDY = ndb.positions[RealUI.cLayout]["HuDY"]
+    local ABY = ndb.positions[RealUI.cLayout]["ActionBarsY"] + (RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
     local BarSizes = {}
     local padding = fixedSettings.padding
@@ -183,18 +174,18 @@ function ActionBars:ApplyABSettings(tag)
                     end
                 elseif barPlace == 2 then
                     if isTopBar then
-                        local padding = math.ceil(centerPadding + centerPadding)
-                        y = -(buttonSizes.bars + padding) + HuDY + ABY
+                        local pad = math.ceil(centerPadding + centerPadding)
+                        y = -(buttonSizes.bars + pad) + HuDY + ABY
                     else
-                        local padding = math.ceil(centerPadding + centerPadding)
-                        y = buttonSizes.bars + padding + 37
+                        local pad = math.ceil(centerPadding + centerPadding)
+                        y = buttonSizes.bars + pad + 37
                     end
                 else
-                    local padding = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
+                    local pad = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
-                        y = -((buttonSizes.bars * 2) + padding) + HuDY + ABY
+                        y = -((buttonSizes.bars * 2) + pad) + HuDY + ABY
                     else
-                        y = (buttonSizes.bars * 2) + padding + 37
+                        y = (buttonSizes.bars * 2) + pad + 37
                     end
                 end
 
@@ -254,9 +245,9 @@ function ActionBars:ApplyABSettings(tag)
     -- Pet Bar
     ----
     if barSettings.moveBars.pet then
-        -- if nibRealUI.cLayout == 1 then
+        -- if RealUI.cLayout == 1 then
             local numPetBarButtons = 10
-            local pbX, pbY, pbPoint
+            local pbX, pbY
             local pbP = fixedSettings.padding
             local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
 
@@ -356,7 +347,7 @@ function ActionBars:ApplyABSettings(tag)
     end
 
     -- ActionBars
-    if nibRealUI:GetModuleEnabled(MODNAME) then
+    if RealUI:GetModuleEnabled(MODNAME) then
         self:RefreshDoodads()
     end
 end
@@ -368,7 +359,7 @@ function ActionBars:ToggleStanceBar()
     if not Doodads.stance then return end
     ActionBars:debug("ToggleStanceBar")
 
-    if ( BT4Stance and BT4Stance:IsEnabled() and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.stance and db.showDoodads and not _G.UnitInVehicle("player")) then
+    if ( BT4Stance and BT4Stance:IsEnabled() and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.stance and db.showDoodads and not _G.UnitInVehicle("player")) then
         Doodads.stance:Show()
     else
         Doodads.stance:Hide()
@@ -376,17 +367,17 @@ function ActionBars:ToggleStanceBar()
 end
 
 function ActionBars:UpdateStanceBar()
-    ActionBars:debug("UpdatePetBar Check", Doodads.pet, nibRealUI:DoesAddonMove("Bartender4"), db[nibRealUI.cLayout].moveBars.pet)
-    if not (Doodads.stance and BT4Stance and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.stance) then return end
+    ActionBars:debug("UpdatePetBar Check", Doodads.pet, RealUI:DoesAddonMove("Bartender4"), db[RealUI.cLayout].moveBars.pet)
+    if not (Doodads.stance and BT4Stance and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.stance) then return end
     ActionBars:debug("UpdateStanceBar")
 
     -- Color
-    -- Doodads.stance.sides:SetVertexColor(unpack(nibRealUI.classColor))
+    -- Doodads.stance.sides:SetVertexColor(unpack(RealUI.classColor))
     Doodads.stance.sides:SetVertexColor(0.5, 0.5, 0.5)
     
     -- Size/Position
     local NumStances = _G.GetNumShapeshiftForms()
-    local sbP = 1--db[nibRealUI.cLayout].stanceBar.padding
+    local sbP = 1--db[RealUI.cLayout].stanceBar.padding
     local sbW = (NumStances * 22) + ((NumStances - 1) * sbP)
     local sbX = BT4DB["namespaces"]["StanceBar"]["profiles"][BT4Profile]["position"]["x"] - math.floor((sbW / 2)) + 11.5
 
@@ -406,7 +397,7 @@ function ActionBars:TogglePetBar()
     if not Doodads.pet then return end
     ActionBars:debug("TogglePetBar")
     
-    if ( nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.pet and db.showDoodads and (_G.UnitExists("pet") and not _G.UnitInVehicle("player")) ) then
+    if ( RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet and db.showDoodads and (_G.UnitExists("pet") and not _G.UnitInVehicle("player")) ) then
         Doodads.pet:Show()
     else
         Doodads.pet:Hide()
@@ -414,12 +405,12 @@ function ActionBars:TogglePetBar()
 end
 
 function ActionBars:UpdatePetBar()
-    ActionBars:debug("UpdatePetBar Check", Doodads.pet, nibRealUI:DoesAddonMove("Bartender4"), db[nibRealUI.cLayout].moveBars.pet)
-    if not (Doodads.pet and nibRealUI:DoesAddonMove("Bartender4") and db[nibRealUI.cLayout].moveBars.pet) then return end
+    ActionBars:debug("UpdatePetBar Check", Doodads.pet, RealUI:DoesAddonMove("Bartender4"), db[RealUI.cLayout].moveBars.pet)
+    if not (Doodads.pet and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet) then return end
     ActionBars:debug("UpdatePetBar")
     
     -- Color
-    Doodads.pet.sides:SetVertexColor(_G.unpack(nibRealUI.classColor))
+    Doodads.pet.sides:SetVertexColor(_G.unpack(RealUI.classColor))
     
     -- Size/Position
     local pbX = BT4DB["namespaces"]["PetBar"]["profiles"][BT4Profile]["position"]["x"]
@@ -442,7 +433,7 @@ function ActionBars:CreateDoodads()
     ActionBars:debug("CreateDoodads")
 
     -- PetBar
-    Doodads.pet = CreateFrame("Frame", "RealUIActionBarDoodadsPet", _G.UIParent)
+    Doodads.pet = _G.CreateFrame("Frame", "RealUIActionBarDoodadsPet", _G.UIParent)
     local dP = Doodads.pet
     
     dP:SetFrameStrata("BACKGROUND")
@@ -461,7 +452,7 @@ function ActionBars:CreateDoodads()
     dP:Hide()
 
     -- Stance Bar
-    Doodads.stance = CreateFrame("Frame", "RealUIActionBarDoodadsStance", _G.UIParent)
+    Doodads.stance = _G.CreateFrame("Frame", "RealUIActionBarDoodadsStance", _G.UIParent)
     local dS = Doodads.stance
     
     dS:SetFrameStrata("LOW")
@@ -480,7 +471,7 @@ end
 
 ----
 function ActionBars:RefreshDoodads()
-    if not (nibRealUI:GetModuleEnabled(MODNAME) and BT4) then return end
+    if not (RealUI:GetModuleEnabled(MODNAME) and BT4) then return end
     ActionBars:debug("RefreshDoodads")
     db = self.db.profile
     
@@ -508,7 +499,7 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     self:RefreshDoodads()
     
     ---[[
-    BT4AB_EnableBar = function(self, id)
+    BT4AB_EnableBar = function(BT4AB, id)
         self:debug("BT4AB_EnableBar", id)
         id = _G.tonumber(id)
         if id <= 5 and not _G.InCombatLockdown() then
@@ -524,13 +515,13 @@ end
 function ActionBars:BarChatCommand()
     if not (BT4) then return end
     if not _G.InCombatLockdown() then
-        nibRealUI:LoadConfig("HuD", "other", "actionbars")
+        RealUI:LoadConfig("HuD", "other", "actionbars")
     end
 end
 
 function ActionBars:OnInitialize()
     self:debug("OnInitialize")
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             showDoodads = true,
@@ -555,7 +546,7 @@ function ActionBars:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
+    ndb = RealUI.db.profile
     ndbc = _G.nibRealUICharacter
 
     -- Migratre settings from ndb
@@ -576,10 +567,10 @@ function ActionBars:OnInitialize()
         for i = 1, 2 do
             setSettings(db[i], abSettings[i])
         end
-        abSettings = nil
+        _G.nibRealUIDB.profiles.RealUI.actionBarSettings = nil
     end
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME) and (nibRealUI:DoesAddonMove("Bartender4") or nibRealUI:DoesAddonLayout("Bartender4")))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and (RealUI:DoesAddonMove("Bartender4") or RealUI:DoesAddonLayout("Bartender4")))
 end
 
 function ActionBars:OnEnable()
@@ -592,7 +583,7 @@ function ActionBars:OnEnable()
     elseif BT4 then
         self:debug("Pre EnteredWorld")
         BT4DB = _G.Bartender4DB
-        BT4Profile = BT4DB["profileKeys"][nibRealUI.key]
+        BT4Profile = BT4DB["profileKeys"][RealUI.key]
 
         BT4Stance = BT4:GetModule("StanceBar", true)
         BT4ActionBars = BT4:GetModule("ActionBars", true)

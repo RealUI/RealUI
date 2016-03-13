@@ -1,12 +1,18 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:GetModule(MODNAME)
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-local RC = LibStub("LibRangeCheck-2.0")
-local db, ndb, ndbc
+-- Lua Globals --
+local _G = _G
 
-local oUF = oUFembed
+-- Libs --
+local oUF = _G.oUFembed
+local RC = _G.LibStub("LibRangeCheck-2.0")
+
+-- RealUI --
+local RealUI = private.RealUI
+local db, ndb
+
+local UnitFrames = RealUI:GetModule("UnitFrames")
+local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 
 local positions = {
     [1] = {
@@ -68,7 +74,7 @@ local positions = {
 local function CreateHealthBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = positions[UnitFrames.layoutSize].health
-    parent.Health = CreateFrame("Frame", nil, parent.overlay)
+    parent.Health = _G.CreateFrame("Frame", nil, parent.overlay)
     parent.Health:SetPoint("TOPLEFT", parent, 0, 0)
     parent.Health:SetSize(texture.width, texture.height)
 
@@ -81,7 +87,7 @@ local function CreateHealthBar(parent)
     parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
     parent.Health.bg:SetTexture(texture.bar)
     parent.Health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Health.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Health.bg:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
     parent.Health.bg:SetAllPoints(parent.Health)
 
     parent.Health.border = parent.Health:CreateTexture(nil, "BORDER")
@@ -91,20 +97,20 @@ local function CreateHealthBar(parent)
 
     parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Health.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 0, 2)
-    parent.Health.text:SetFontObject(RealUIFont_Pixel)
+    parent.Health.text:SetFontObject(_G.RealUIFont_Pixel)
     parent.Health.text:SetJustifyH("LEFT")
     parent:Tag(parent.Health.text, "[realui:health]")
 
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     parent.Health.steps = {}
     for i = 1, 2 do
         parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
         parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
         parent.Health.steps[i]:SetSize(16, 16)
         if not parent.Health.bar.reverse then
-        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(floor(stepPoints[i] * texture.width) - 6), 0)
+        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(_G.floor(stepPoints[i] * texture.width) - 6), 0)
         else
-            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, floor(stepPoints[i] * texture.width) - 6, 0)
+            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, _G.floor(stepPoints[i] * texture.width) - 6, 0)
         end
     end
 
@@ -156,7 +162,7 @@ end
 local function CreatePowerBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
     local pos = positions[UnitFrames.layoutSize].power
-    parent.Power = CreateFrame("Frame", nil, parent.overlay)
+    parent.Power = _G.CreateFrame("Frame", nil, parent.overlay)
     parent.Power:SetPoint("BOTTOMLEFT", parent, 5, 0)
     parent.Power:SetSize(texture.width, texture.height)
 
@@ -166,7 +172,7 @@ local function CreatePowerBar(parent)
     parent.Power.bg = parent.Power:CreateTexture(nil, "BACKGROUND")
     parent.Power.bg:SetTexture(texture.bar)
     parent.Power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Power.bg:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+    parent.Power.bg:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
     parent.Power.bg:SetAllPoints(parent.Power)
     ---]]
 
@@ -177,10 +183,9 @@ local function CreatePowerBar(parent)
 
     parent.Power.text = parent.Power:CreateFontString(nil, "OVERLAY")
     parent.Power.text:SetPoint("TOPLEFT", parent.Power, "BOTTOMLEFT", 0, -3)
-    parent.Power.text:SetFontObject(RealUIFont_Pixel)
+    parent.Power.text:SetFontObject(_G.RealUIFont_Pixel)
     parent:Tag(parent.Power.text, "[realui:power]")
 
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
     parent.Power.steps = {}
     for i = 1, 2 do
         parent.Power.steps[i] = parent.Power:CreateTexture(nil, "OVERLAY")
@@ -226,16 +231,16 @@ end
 
 local function CreateRange(parent)
     local RangeColors = {
-        [5] = nibRealUI.media.colors.green,
-        [30] = nibRealUI.media.colors.yellow,
-        [35] = nibRealUI.media.colors.amber,
-        [40] = nibRealUI.media.colors.orange,
-        [50] = nibRealUI.media.colors.red,
-        [100] = nibRealUI.media.colors.red,
+        [5] = RealUI.media.colors.green,
+        [30] = RealUI.media.colors.yellow,
+        [35] = RealUI.media.colors.amber,
+        [40] = RealUI.media.colors.orange,
+        [50] = RealUI.media.colors.red,
+        [100] = RealUI.media.colors.red,
     }
 
     -- parent.Range = parent.Health:CreateTexture(nil, "OVERLAY")
-    -- parent.Range:SetTexture(nibRealUI.media.icons.DoubleArrow)
+    -- parent.Range:SetTexture(RealUI.media.icons.DoubleArrow)
     -- parent.Range:SetSize(16, 16)
     -- parent.Range:SetPoint("BOTTOMRIGHT", parent.Health, "BOTTOMLEFT", -5, 0)
 
@@ -254,7 +259,7 @@ local function CreateRange(parent)
     parent.Range.border:SetAllPoints(parent.Range)
 
     parent.Range.text = parent.overlay:CreateFontString(nil, "OVERLAY")
-    parent.Range.text:SetFontObject(RealUIFont_Pixel)
+    parent.Range.text:SetFontObject(_G.RealUIFont_Pixel)
     parent.Range.text:SetJustifyH("right")
     parent.Range.text:SetPoint("BOTTOMRIGHT", parent.Range, "BOTTOMLEFT", 20.5, 4.5)
 
@@ -262,7 +267,7 @@ local function CreateRange(parent)
         --print("Range Override", self, status)
         local minRange, maxRange = RC:GetRange("target")
 
-        if (UnitIsUnit("player", "target")) or (minRange and minRange > 80) then maxRange = nil end
+        if (_G.UnitIsUnit("player", "target")) or (minRange and minRange > 80) then maxRange = nil end
         local section
         if maxRange and not(self.Threat.isActive) then
             if maxRange <= 5 then
@@ -305,7 +310,7 @@ local function CreateThreat(parent)
     parent.Threat.border:SetAllPoints(parent.Threat)
 
     parent.Threat.text = parent.overlay:CreateFontString(nil, "OVERLAY")
-    parent.Threat.text:SetFontObject(RealUIFont_Pixel)
+    parent.Threat.text:SetFontObject(_G.RealUIFont_Pixel)
     parent.Threat.text:SetJustifyH("right")
     parent.Threat.text:SetPoint("BOTTOMRIGHT", parent.Threat, "BOTTOMLEFT", 14.5, 4.5)
 
@@ -313,14 +318,14 @@ local function CreateThreat(parent)
 
     parent.Threat.Override = function(self, event, unit)
         --print("Threat Override", self, event, unit)
-        local isTanking, status, _, rawPercentage = UnitDetailedThreatSituation("player", "target")
+        local isTanking, status, _, rawPercentage = _G.UnitDetailedThreatSituation("player", "target")
 
-        if (rawPercentage and (rawPercentage >= 0.8)) and not(UnitIsDeadOrGhost(unit)) and (GetNumGroupMembers() > 0) then
+        if (rawPercentage and (rawPercentage >= 0.8)) and not(_G.UnitIsDeadOrGhost(unit)) and (_G.GetNumGroupMembers() > 0) then
             local r, g, b
             if (status and status > 0) then
-                r, g, b = GetThreatStatusColor(status)
+                r, g, b = _G.GetThreatStatusColor(status)
             elseif rawPercentage >= 0.9 then
-                r, g, b = GetThreatStatusColor(0)
+                r, g, b = _G.GetThreatStatusColor(0)
             else
                 r, g, b = 0, 1, 0
             end
@@ -329,7 +334,7 @@ local function CreateThreat(parent)
 
             local tankLead
             if isTanking then
-                tankLead = UnitThreatPercentageOfLead("player", "target")
+                tankLead = _G.UnitThreatPercentageOfLead("player", "target")
             end
             self.Threat.text:SetFormattedText("%d%%", tankLead or rawPercentage)
 
@@ -376,7 +381,7 @@ UnitFrames["target"] = function(self)
 
     self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
     self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
-    self.Name:SetFontObject(RealUIFont_Pixel)
+    self.Name:SetFontObject(_G.RealUIFont_Pixel)
     self:Tag(self.Name, "[realui:level] [realui:name]")
 
     self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
@@ -385,76 +390,75 @@ UnitFrames["target"] = function(self)
 
     self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
 
-    function self:PreUpdate(event)
-        --self.Combat.Override(self, event)
-        self.Class.Update(self, event)
-        self.endBox.Update(self, event)
-        self.Threat.Override(self, event, self.unit)
-        self.Range.Override(self)
-        UnitFrames:SetHealthColor(self)
+    function self.PreUpdate(frame, event)
+        --frame.Combat.Override(frame, event)
+        frame.Class.Update(frame, event)
+        frame.endBox.Update(frame, event)
+        frame.Threat.Override(frame, event, frame.unit)
+        frame.Range.Override(frame)
+        UnitFrames:SetHealthColor(frame)
 
-        if UnitPowerMax(self.unit) > 0 then
+        if _G.UnitPowerMax(frame.unit) > 0 then
             --print("Has power")
-            if not self.Power.enabled then
+            if not frame.Power.enabled then
                 --print("Enable power")
-                self.Power.enabled = true
-                --self.Power.bar:Show()
-                self.Power.text:Show()
+                frame.Power.enabled = true
+                --frame.Power.bar:Show()
+                frame.Power.text:Show()
                 for i = 1, 2 do
-                    self.Power.steps[i]:Show()
+                    frame.Power.steps[i]:Show()
                 end
             end
         else
             --print("Disable power")
-            self.Power.enabled = false
-            --self.Power.bar:Hide()
-            self.Power.text:Hide()
+            frame.Power.enabled = false
+            --frame.Power.bar:Hide()
+            frame.Power.text:Hide()
             for i = 1, 2 do
-                self.Power.steps[i]:Hide()
+                frame.Power.steps[i]:Hide()
             end
             --return
         end
-        local _, powerType = UnitPowerType(self.unit)
+        local _, powerType = _G.UnitPowerType(frame.unit)
 
-        AngleStatusBar:SetBarColor(self.Power.bar, db.overlay.colors.power[powerType])
+        AngleStatusBar:SetBarColor(frame.Power.bar, db.overlay.colors.power[powerType])
 
         -- Reverse power
-        local oldReverse, newReverse = self.Power.bar.reverse
+        local oldReverse, newReverse = frame.Power.bar.reverse
         if ndb.settings.reverseUnitFrameBars then
-            newReverse = not nibRealUI.ReversePowers[powerType]
+            newReverse = not RealUI.ReversePowers[powerType]
         else
-            newReverse = nibRealUI.ReversePowers[powerType]
+            newReverse = RealUI.ReversePowers[powerType]
         end
-        AngleStatusBar:SetReverseFill(self.Power.bar, newReverse)
+        AngleStatusBar:SetReverseFill(frame.Power.bar, newReverse)
 
         -- If reverse is different from old target to new target then do an instant SetValue on power bar
         -- (stops power bar appearing unneccesarily when changing from, for example, a DK at no power (no bar shown) to a Mage at full power (no bar shown))
         if oldReverse ~= newReverse then
-            local powerPer = nibRealUI:GetSafeVals(UnitPower(self.unit), UnitPowerMax(self.unit))
-            AngleStatusBar:SetValue(self.Power.bar, powerPer, true)
+            local powerPer = RealUI:GetSafeVals(_G.UnitPower(frame.unit), _G.UnitPowerMax(frame.unit))
+            AngleStatusBar:SetValue(frame.Power.bar, powerPer, true)
         end
 
         local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
-        local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
-        if self.Power.bar.reverse then
+        local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
+        if frame.Power.bar.reverse then
             for i = 1, 2 do
-                self.Power.steps[i]:ClearAllPoints()
-                self.Power.steps[i]:SetPoint("BOTTOMLEFT", self.Power, floor(stepPoints[i] * texture.width) - 6, 0)
+                frame.Power.steps[i]:ClearAllPoints()
+                frame.Power.steps[i]:SetPoint("BOTTOMLEFT", frame.Power, _G.floor(stepPoints[i] * texture.width) - 6, 0)
             end
         else
             for i = 1, 2 do
-                self.Power.steps[i]:ClearAllPoints()
-                self.Power.steps[i]:SetPoint("BOTTOMRIGHT", self.Power, -(floor(stepPoints[i] * texture.width) - 6), 0)
+                frame.Power.steps[i]:ClearAllPoints()
+                frame.Power.steps[i]:SetPoint("BOTTOMRIGHT", frame.Power, -(_G.floor(stepPoints[i] * texture.width) - 6), 0)
             end
         end
     end
 end
 
 -- Init
-tinsert(UnitFrames.units, function(...)
+_G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
 
     local target = oUF:Spawn("target", "RealUITargetFrame")
     target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT", db.positions[UnitFrames.layoutSize].target.x, db.positions[UnitFrames.layoutSize].target.y)

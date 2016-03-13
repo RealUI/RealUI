@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 _G.tinsert(mods["nibRealUI"], function(F, C)

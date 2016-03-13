@@ -1,7 +1,7 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = RealUI.L
 
 if RealUI.locale == "koKR" then
@@ -12,7 +12,7 @@ if RealUI.locale == "koKR" then
 -- L["Slash_Profile"] = ""
 -- L["Slash_RealUI"] = ""
 -- L["Slash_Taint"] = ""
--- L["Version"] = ""
+L["Version"] = "번역"
 
 
 -- Install

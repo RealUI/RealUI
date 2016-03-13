@@ -1,7 +1,7 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = RealUI.L
 
 if RealUI.locale == "itIT" then
@@ -12,7 +12,7 @@ if RealUI.locale == "itIT" then
 -- L["Slash_Profile"] = ""
 -- L["Slash_RealUI"] = ""
 -- L["Slash_Taint"] = ""
--- L["Version"] = ""
+L["Version"] = "Versione"
 
 
 -- Install

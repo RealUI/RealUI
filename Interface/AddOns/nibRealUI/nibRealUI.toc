@@ -12,6 +12,8 @@
 
 Libs\Embeds.xml
 
+Init.lua
+
 Locale.xml
 
 Core.lua

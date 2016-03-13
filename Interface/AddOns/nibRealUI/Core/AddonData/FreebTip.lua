@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_FreebTip = function()
-	FreebTipDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_FreebTip = function()
+	_G.FreebTipDB = {
 		["y"] = 192,
 		["x"] = -31,
 		["point"] = "BOTTOMRIGHT",

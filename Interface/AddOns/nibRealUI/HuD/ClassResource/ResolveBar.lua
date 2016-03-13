@@ -1,14 +1,18 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-if nibRealUI.isBeta then return end
+local _, private = ...
+if private.RealUI.isBeta then return end
 
-local L = nibRealUI.L
-local db, ndb
+-- Lua Globals --
+local _G = _G
 
-local _
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+
+local ClassResourceBar = RealUI:GetModule("ClassResourceBar")
+local Resolve = RealUI:GetModule("ClassResource_Resolve")
+
 local MODNAME = "ClassResource_ResolveBar"
-local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
-local ResolveBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
-local Resolve = nibRealUI:GetModule("ClassResource_Resolve")
+local ResolveBar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local classes = {
     ["DRUID"] = true,
@@ -32,7 +36,7 @@ function ResolveBar:UpdateAuras(units)
 
     Resolve:UpdateCurrent()
 
-    self.rBar:SetText("middle", nibRealUI:ReadableNumber(Resolve.current, 0))
+    self.rBar:SetText("middle", RealUI:ReadableNumber(Resolve.current, 0))
     if Resolve.percent < 0.5 then
         self.rBar:SetValue("left", Resolve.percent * 2)
         self.rBar:SetValue("right", 0)
@@ -41,8 +45,8 @@ function ResolveBar:UpdateAuras(units)
         self.rBar:SetValue("left", 1)
     end
 
-    if ((Resolve.current > floor(Resolve.base)) and not(self.rBar:IsShown())) or
-        ((Resolve.current <= floor(Resolve.base)) and self.rBar:IsShown()) then
+    if ((Resolve.current > _G.floor(Resolve.base)) and not(self.rBar:IsShown())) or
+        ((Resolve.current <= _G.floor(Resolve.base)) and self.rBar:IsShown()) then
             self:UpdateShown()
     end
 end
@@ -55,7 +59,7 @@ function ResolveBar:UpdateShown()
         return
     end
 
-    if ( (Resolve.current and (Resolve.current > floor(Resolve.base))) and not(UnitIsDeadOrGhost("player")) and (UnitLevel("player") >= MinLevel) ) then
+    if ( (Resolve.current and (Resolve.current > _G.floor(Resolve.base))) and not(_G.UnitIsDeadOrGhost("player")) and (_G.UnitLevel("player") >= MinLevel) ) then
         self.rBar:Show()
     else
         self.rBar:Hide()
@@ -63,21 +67,21 @@ function ResolveBar:UpdateShown()
 end
 
 function ResolveBar:PLAYER_ENTERING_WORLD()
-    self.guid = UnitGUID("player")
+    self.guid = _G.UnitGUID("player")
     self:UpdateAuras()
     self:UpdateShown()
 end
 
 function ResolveBar:UpdateGlobalColors()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
-    self.rBar:SetBarColor("left", nibRealUI.media.colors.orange)
-    self.rBar:SetBarColor("right", nibRealUI.media.colors.orange)
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    self.rBar:SetBarColor("left", RealUI.media.colors.orange)
+    self.rBar:SetBarColor("right", RealUI.media.colors.orange)
 end
 
 ------------
 function ResolveBar:ToggleConfigMode(val)
     ResolveBar:debug("ToggleConfigMode", val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -85,15 +89,13 @@ function ResolveBar:ToggleConfigMode(val)
 end
 
 function ResolveBar:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {},
     })
-    db = self.db.profile
-    ndb = nibRealUI.db.profile
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and classes[nibRealUI.class] ~= nil)
-    nibRealUI:RegisterConfigModeModule(self)
+    self:SetEnabledState(RealUI:GetModuleEnabled("PointTracking") and RealUI:GetModuleEnabled(MODNAME) and classes[RealUI.class] ~= nil)
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function ResolveBar:OnEnable()
@@ -108,9 +110,9 @@ function ResolveBar:OnEnable()
     self:UpdateGlobalColors()
 
     local updateSpeed
-    if nibRealUI.db.profile.settings.powerMode == 1 then
+    if RealUI.db.profile.settings.powerMode == 1 then
         updateSpeed = 1/6
-    elseif nibRealUI.db.profile.settings.powerMode == 2 then
+    elseif RealUI.db.profile.settings.powerMode == 2 then
         updateSpeed = 1/4
     else
         updateSpeed = 1/8

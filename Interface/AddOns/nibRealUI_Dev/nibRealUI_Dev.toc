@@ -1,6 +1,6 @@
 ## Interface: 60200
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
 ## Notes: RealUI dev tweaks
-## LoadWith: nibRealUI_Init
+## LoadWith: Blizzard_CompactRaidFrames
 
 nibRealUI_Dev.lua

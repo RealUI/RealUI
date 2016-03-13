@@ -1,7 +1,7 @@
-﻿local ADDON_NAME, private = ...
+﻿local _, private = ...
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = RealUI.L
 
 if RealUI.locale == "zhCN" then

@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 mods["PLAYER_LOGIN"]["Clique"] = function(self, F, C)
@@ -17,5 +19,5 @@ mods["PLAYER_LOGIN"]["Clique"] = function(self, F, C)
     bg:SetFrameLevel(tab:GetFrameLevel()-1)
     F.CreateBD(bg)
 
-    select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
+    _G.select(6, tab:GetRegions()):SetTexCoord(.08, .92, .08, .92)
 end

@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 mods["Blizzard_DebugTools"] = function(F, C)
@@ -6,13 +8,13 @@ mods["Blizzard_DebugTools"] = function(F, C)
 
     -- Fix ErrorFrame
     _G.ScriptErrorsFrame:HookScript("OnShow", function()
-        _G.ScriptErrorsFrame:SetScale(tonumber(_G.GetCVar("uiScale")))
+        _G.ScriptErrorsFrame:SetScale(_G.tonumber(_G.GetCVar("uiScale")))
         _G.ScriptErrorsFrame:SetSize(384, 260)
     end)
 
     -- EventTrace
     for i = 1, _G.EventTraceFrame:GetNumRegions() do
-        local region = select(i, _G.EventTraceFrame:GetRegions())
+        local region = _G.select(i, _G.EventTraceFrame:GetRegions())
         if region:GetObjectType() == "Texture" then
             region:SetTexture(nil)
         end

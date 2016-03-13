@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Kui_Nameplates = function()
-	KuiNameplatesGDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Kui_Nameplates = function()
+	_G.KuiNameplatesGDB = {
 		["namespaces"] = {
 			["CastBar"] = {
 			},

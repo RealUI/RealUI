@@ -1,9 +1,16 @@
 -- Credit to Sylvanaar's ACP for much of this code.
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next, table = _G.next, _G.table
+
+-- RealUI --
+local RealUI = private.RealUI
 local dbc, dbk, dbg
 
 local MODNAME = "AddonListAdv"
-local AddonListAdv = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
+local AddonListAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 
@@ -32,9 +39,9 @@ local function GetOptions()
                 type = "toggle",
                 name = "Enabled",
                 desc = "Enable/Disable the Addon List Adv. module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
+                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
+                    RealUI:SetModuleEnabled(MODNAME, value)
                     AddonListAdv:RefreshMod()
                 end,
                 order = 30,
@@ -60,10 +67,10 @@ local function OnSaveAs(self)
     popup:Hide()
 end
 
-StaticPopupDialogs["ALA_SaveAs"] = {
+_G.StaticPopupDialogs["ALA_SaveAs"] = {
     text = "Enter the name for this set.",
-    button1 = YES,
-    button2 = CANCEL,
+    button1 = _G.YES,
+    button2 = _G.CANCEL,
     OnAccept = OnSaveAs,
     EditBoxOnEnterPressed = OnSaveAs,
     EditBoxOnEscapePressed = function(self)
@@ -83,9 +90,9 @@ StaticPopupDialogs["ALA_SaveAs"] = {
 local function GetSet(name)
     --print("GetSet", name)
     local set, db
-    if name == nibRealUI.classLocale then
+    if name == RealUI.classLocale then
         if not dbk[1] then
-            dbk[1] = {["name"] = nibRealUI.classLocale}
+            dbk[1] = {["name"] = RealUI.classLocale}
         end
         set = dbk[1]
     else
@@ -125,39 +132,38 @@ function AddonListAdv:SaveSet(name, newName)
         table.remove(set, i)
     end
 
-    local name, enabled, _
-    for i = 1, GetNumAddOns() do
-        name, _, _, enabled = GetAddOnInfo(i)
-        --print("SaveSet4", name, enabled)
+    for i = 1, _G.GetNumAddOns() do
+        local addonName, _, _, enabled = _G.GetAddOnInfo(i)
+        --print("SaveSet4", addonName, enabled)
         if enabled then
-            table.insert(set, name)
+            table.insert(set, addonName)
         end
     end
 
-    print(("Set [%s] Saved."):format(set.name))
+    _G.print(("Set [%s] Saved."):format(set.name))
 end
 
 function AddonListAdv:UnloadSet(set)
     --print("UnloadSet", set)
-    if type(set) ~= "table" then
+    if _G.type(set) ~= "table" then
         set = GetSet(set)
     end
 
     for i = 1, #set do
         --print("UnloadSet:", set[i])
-        if GetAddOnInfo(set[i]) then
-            DisableAddOn(set[i])
+        if _G.GetAddOnInfo(set[i]) then
+            _G.DisableAddOn(set[i])
         end
     end
 
-    print(string.format("Set [%s] Unloaded.", set.name))
-    AddonList_Update()
+    _G.print(("Set [%s] Unloaded."):format(set.name))
+    _G.AddonList_Update()
 end
 
 function AddonListAdv:DeleteSet(set)
     --print("DeleteSet", set)
     local db
-    if type(set) ~= "table" then
+    if _G.type(set) ~= "table" then
         set, db = GetSet(set)
     end
 
@@ -168,72 +174,72 @@ function AddonListAdv:DeleteSet(set)
         end
     end
 
-    print(string.format("Set [%s] Deleted.", setName))
+    _G.print(("Set [%s] Deleted."):format(setName))
 end
 
 function AddonListAdv:ClearSelectionAndLoadSet(name)
     --print("ClearSelectionAndLoadSet", name)
     local set = GetSet(name)
 
-    DisableAllAddOns()
+    _G.DisableAllAddOns()
     self:LoadSet(set)
 end
 
 function AddonListAdv:LoadSet(set)
     --print("LoadSet", set)
-    if type(set) ~= "table" then
+    if _G.type(set) ~= "table" then
         set = GetSet(set)
     end
 
     for i = 1, #set do
         --print("LoadSet: name", set[i])
-        if GetAddOnInfo(set[i]) then
-            EnableAddOn(set[i])
+        if _G.GetAddOnInfo(set[i]) then
+            _G.EnableAddOn(set[i])
         end
     end
 
-    print(string.format("Set [%s] Loaded.", set.name))
-    AddonList_Update()
+    _G.print(("Set [%s] Loaded."):format(set.name))
+    _G.AddonList_Update()
 end
 function AddonListAdv:RenameSet(set, name)
     local oldName = set.name
     set.name = name
 
-    print(string.format("Set [%s] renamed to [%s].", oldName, set.name))
+    _G.print(("Set [%s] renamed to [%s]."):format(oldName, set.name))
 end
 
 function AddonListAdv:SetsOnClick(btn)
     --print("SetsOnClick", self, self.GetName and self:GetName())
-    if not AddonList.setsDD then
+    if not _G.AddonList.setsDD then
         --print("Create setsDD")
-        AddonList.setsDD = CreateFrame("Frame", "ALAdvSetsDD", nil, "UIDropDownMenuTemplate")
-        UIDropDownMenu_Initialize(AddonList.setsDD, AddonListAdv.SetDropDown_Populate, "MENU")--
+        _G.AddonList.setsDD = _G.CreateFrame("Frame", "ALAdvSetsDD", nil, "UIDropDownMenuTemplate")
+        _G.UIDropDownMenu_Initialize(_G.AddonList.setsDD, AddonListAdv.SetDropDown_Populate, "MENU")--
         --UIDropDownMenu_SetAnchor(AddonList.setsDD, "TOPLEFT", "BOTTOMLEFT")
     end
-    ToggleDropDownMenu(1, nil, AddonList.setsDD, AddonList.sets, 0, 0)
+    _G.ToggleDropDownMenu(1, nil, _G.AddonList.setsDD, _G.AddonList.sets, 0, 0)
 end
 function AddonListAdv:Skin()
-    if not AddonList.sets then 
-        AddonList.sets = nibRealUI:CreateTextButton("Sets", AddonList, 100, 22)
-        AddonList.sets:SetPoint("LEFT", AddonCharacterDropDownButton, "RIGHT", 10, 0)
-        AddonList.sets:SetScript("OnClick", self.SetsOnClick)
+    if not _G.AddonList.sets then 
+        _G.AddonList.sets = RealUI:CreateTextButton("Sets", _G.AddonList, 100, 22)
+        _G.AddonList.sets:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
+        _G.AddonList.sets:SetScript("OnClick", self.SetsOnClick)
     end
 end
 
-function AddonListAdv:SetDropDown_Populate(level)
+function AddonListAdv.SetDropDown_Populate(menu, level)
     --print("SetDropDown_Populate", level)
-    self = AddonListAdv
+    local self = AddonListAdv
     local info
 
     if level == 1 then
-        info = UIDropDownMenu_CreateInfo()
+        info = _G.UIDropDownMenu_CreateInfo()
         info.notCheckable = true
 
         --[[ Account Sets ]]
         info.isTitle = true
         info.hasArrow = false
         info.text = "Account Sets"
-        UIDropDownMenu_AddButton(info)
+        _G.UIDropDownMenu_AddButton(info)
 
         info.isTitle = false
         info.disabled = false
@@ -248,9 +254,9 @@ function AddonListAdv:SetDropDown_Populate(level)
                 count = 0
             end
 
-            info.text = string.format("%s (%d)", dbg[i].name, count)
+            info.text = ("%s (%d)"):format(dbg[i].name, count)
             info.value = dbg[i].name
-            UIDropDownMenu_AddButton(info)
+            _G.UIDropDownMenu_AddButton(info)
 
             if i == 1 then
                 -- insert class set after RealUI
@@ -260,9 +266,9 @@ function AddonListAdv:SetDropDown_Populate(level)
                     count = 0
                 end
 
-                info.text = string.format("%s (%d)", nibRealUI.classLocale, count)
-                info.value = nibRealUI.classLocale
-                UIDropDownMenu_AddButton(info)
+                info.text = ("%s (%d)"):format(RealUI.classLocale, count)
+                info.value = RealUI.classLocale
+                _G.UIDropDownMenu_AddButton(info)
             end
         end
 
@@ -270,7 +276,7 @@ function AddonListAdv:SetDropDown_Populate(level)
         info.isTitle = true
         info.hasArrow = false
         info.text = "Character Sets"
-        UIDropDownMenu_AddButton(info)
+        _G.UIDropDownMenu_AddButton(info)
 
         info.isTitle = false
         info.disabled = false
@@ -283,61 +289,61 @@ function AddonListAdv:SetDropDown_Populate(level)
                 count = 0
             end
 
-            info.text = string.format("%s (%d)", dbc[i].name, count)
+            info.text = ("%s (%d)"):format(dbc[i].name, count)
             info.value = dbc[i].name
-            UIDropDownMenu_AddButton(info)
+            _G.UIDropDownMenu_AddButton(info)
         end
 
         -- New set.
         info.text = "Create a new set"
         info.hasArrow = false
         info.func = function()
-            StaticPopup_Show("ALA_SaveAs")
+            _G.StaticPopup_Show("ALA_SaveAs")
         end
-        UIDropDownMenu_AddButton(info)
+        _G.UIDropDownMenu_AddButton(info)
     elseif level == 2 then
-        info = UIDropDownMenu_CreateInfo()
-        local setName = UIDROPDOWNMENU_MENU_VALUE
+        info = _G.UIDropDownMenu_CreateInfo()
+        local setName = _G.UIDROPDOWNMENU_MENU_VALUE
         info.text = setName
         info.isTitle = true
         info.notCheckable = true
-        UIDropDownMenu_AddButton(info, level)
+        _G.UIDropDownMenu_AddButton(info, level)
 
-        info = UIDropDownMenu_CreateInfo()
+        info = _G.UIDropDownMenu_CreateInfo()
         info.notCheckable = true
 
-        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" then
+        if _G.UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" then
             info.text = "Save"
             info.func = function() self:SaveSet(setName) end
-            UIDropDownMenu_AddButton(info, level)
+            _G.UIDropDownMenu_AddButton(info, level)
         end
 
         info.text = "Load"
-        info.func = function() self:ClearSelectionAndLoadSet(UIDROPDOWNMENU_MENU_VALUE) end
-        UIDropDownMenu_AddButton(info, level)
+        info.func = function() self:ClearSelectionAndLoadSet(_G.UIDROPDOWNMENU_MENU_VALUE) end
+        _G.UIDropDownMenu_AddButton(info, level)
 
 
         info.text = "Add to current selection"
-        info.func = function() self:LoadSet(UIDROPDOWNMENU_MENU_VALUE) end
-        UIDropDownMenu_AddButton(info, level)
+        info.func = function() self:LoadSet(_G.UIDROPDOWNMENU_MENU_VALUE) end
+        _G.UIDropDownMenu_AddButton(info, level)
 
 
         info.text = "Remove from current selection"
-        info.func = function() self:UnloadSet(UIDROPDOWNMENU_MENU_VALUE) end
-        UIDropDownMenu_AddButton(info, level)
+        info.func = function() self:UnloadSet(_G.UIDROPDOWNMENU_MENU_VALUE) end
+        _G.UIDropDownMenu_AddButton(info, level)
 
-        if UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and UIDROPDOWNMENU_MENU_VALUE ~= nibRealUI.classLocale then
+        if _G.UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.UIDROPDOWNMENU_MENU_VALUE ~= RealUI.classLocale then
             info.text = "Delete"
-            info.func = function() self:DeleteSet(UIDROPDOWNMENU_MENU_VALUE) end
-            UIDropDownMenu_AddButton(info, level)
+            info.func = function() self:DeleteSet(_G.UIDROPDOWNMENU_MENU_VALUE) end
+            _G.UIDropDownMenu_AddButton(info, level)
 
             info.text = "Rename"
             info.func = function()
-                self.savingSet = UIDROPDOWNMENU_MENU_VALUE
-                StaticPopup_Show("ALA_SaveAs", setName)
-                CloseDropDownMenus(1)
+                self.savingSet = _G.UIDROPDOWNMENU_MENU_VALUE
+                _G.StaticPopup_Show("ALA_SaveAs", setName)
+                _G.CloseDropDownMenus(1)
             end
-            UIDropDownMenu_AddButton(info, level)
+            _G.UIDropDownMenu_AddButton(info, level)
         end
     end
 end
@@ -345,7 +351,7 @@ end
 
 -----------------------
 function AddonListAdv:RefreshMod()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
     self:Skin()
 end
@@ -360,7 +366,7 @@ function AddonListAdv:PLAYER_LOGIN()
 end
 
 function AddonListAdv:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
         },
@@ -403,8 +409,8 @@ function AddonListAdv:OnInitialize()
     dbk = self.db.class
     dbg = self.db.global
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
 
     self:RegisterEvent("PLAYER_LOGIN")
 end

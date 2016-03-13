@@ -1,17 +1,15 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
 
--- WoW Globals --
-local UnitPower, GetTime, GetNumSpecializationsForClassID = _G.UnitPower, _G.GetTime, _G.GetNumSpecializationsForClassID
-local SPELL_POWER_COMBO_POINTS, SPELL_POWER_BURNING_EMBERS = _G.SPELL_POWER_COMBO_POINTS, _G.SPELL_POWER_BURNING_EMBERS
-
 -- RealUI --
-local RealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local RealUI = private.RealUI
 local L = RealUI.L
 local Lerp = RealUI.Lerp
 
 local MODNAME = "AuraTracking"
-local AuraTracking = RealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local AuraTracking = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 
 local function debug(isDebug, ...)
     if isDebug then
@@ -53,7 +51,7 @@ local function PredictDuration(gap, base, max)
         debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
         if unit == "player" and powerType == "COMBO_POINTS" then
             debug(spellData.debug, "Main", unit, powerType)
-            local comboPoints = UnitPower("player", SPELL_POWER_COMBO_POINTS)
+            local comboPoints = _G.UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
 
             potential, color[1], color[2], color[3] = "", 1, 1, 1
             if (comboPoints > 0) then
@@ -92,12 +90,12 @@ elseif class == "MAGE" then
         -- Shows Mirror Image progress.
         function MirrorImage(self, spellData, _, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID)
             if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
-                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, GetTime())
+                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, _G.GetTime())
 
                 if subEvent == "SPELL_AURA_APPLIED" and not hasAura then
                     AuraTracking:debug("MirrorImage", hasAura)
                     hasAura = true
-                    start = GetTime()
+                    start = _G.GetTime()
                 elseif subEvent == "SPELL_AURA_REMOVED" and hasAura then
                     hasAura = false
                 end
@@ -155,7 +153,7 @@ elseif class == "MONK" then
 
         local function updateTime(self, spellData)
             debug(spellData.debug, "updateTime", hadAura, numNotUsed)
-            start = GetTime()
+            start = _G.GetTime()
             self.cd:SetCooldown(start, duration)
             if hadAura then
                 -- didn't use before refresh
@@ -290,15 +288,15 @@ elseif class == "ROGUE" then
 
         function ShadowReflection(self, spellData, timestamp, subEvent, _, srcGUID, _,_,_,_,_,_,_, spellID, _,_)
             if srcGUID == AuraTracking.playerGUID and spellID == spellData.spell then
-                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), GetTime())
+                debug(spellData.debug, "COMBAT_LOG_EVENT_UNFILTERED", subEvent, timestamp, _G.time(), _G.GetTime())
 
                 if subEvent == "SPELL_AURA_APPLIED" then
                     AuraTracking:debug("ShadowReflection", isWatching)
                     isWatching = true
-                    start = GetTime()
+                    start = _G.GetTime()
                     _G.C_Timer.After(duration, function()
                         isWatching = false
-                        start = GetTime()
+                        start = _G.GetTime()
                         postUnitAura(self, spellData)
                     end)
                 end
@@ -342,7 +340,7 @@ elseif class == "WARLOCK" then
             debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
             if unit == "player" and powerType == "BURNING_EMBERS" then
                 debug(spellData.debug, "Main", unit, powerType)
-                power = UnitPower("player", SPELL_POWER_BURNING_EMBERS, true)
+                power = _G.UnitPower("player", _G.SPELL_POWER_BURNING_EMBERS, true)
 
                 if not self.postUnitAura then
                     self.postUnitAura = postUnitAura
@@ -365,7 +363,7 @@ local classDefaults
 function AuraTracking:SetupDefaultTracker()
     self:debug("Setup default tracker")
     local specs = {}
-    for i = 1, GetNumSpecializationsForClassID(classID) do
+    for i = 1, _G.GetNumSpecializationsForClassID(classID) do
         AuraTracking:debug("Specs", i)
         specs[i] = true
     end

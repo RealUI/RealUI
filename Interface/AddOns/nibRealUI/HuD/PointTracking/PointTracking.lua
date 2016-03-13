@@ -1,12 +1,21 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-local MODNAME = "PointTracking"
-local PointTracking = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
-local CombatFader = nibRealUI:GetModule("CombatFader")
-local LSM = LibStub("LibSharedMedia-3.0")
+-- Lua Globals --
+local _G = _G
+local next, ipairs = _G.next, _G.ipairs
+local tinsert = _G.table.insert
+
+-- Libs --
+local LSM = _G.LibStub("LibSharedMedia-3.0")
+
+-- RealUI --
+local RealUI = private.RealUI
 local db, ndb
 
-local floor = math.floor
+local CombatFader = RealUI:GetModule("CombatFader")
+
+local MODNAME = "PointTracking"
+local PointTracking = RealUI:GetModule(MODNAME)
 
 -- local GreenFire
 
@@ -64,7 +73,6 @@ local Points = {}
 local PointsChanged = {}
 
 local HolyPowerTexture
-local SoulShardBG
 
 local PlayerClass
 local PlayerSpec
@@ -72,16 +80,16 @@ local PlayerTalent = 0
 local PlayerInCombat
 local PlayerTargetHostile
 local PlayerInInstance
-local SmartHideConditions
+local SmartHideConditions -- luacheck: ignore
 local ValidClasses
 
 local idToPower = {
-    cp = SPELL_POWER_COMBO_POINTS,
-    chi = SPELL_POWER_CHI,
-    hp = SPELL_POWER_HOLY_POWER,
-    so = SPELL_POWER_SHADOW_ORBS,
-    ss = SPELL_POWER_SOUL_SHARDS,
-    be = SPELL_POWER_BURNING_EMBERS
+    cp = _G.SPELL_POWER_COMBO_POINTS,
+    chi = _G.SPELL_POWER_CHI,
+    hp = _G.SPELL_POWER_HOLY_POWER,
+    so = _G.SPELL_POWER_SHADOW_ORBS,
+    ss = _G.SPELL_POWER_SOUL_SHARDS,
+    be = _G.SPELL_POWER_BURNING_EMBERS
 }
 function PointTracking:GetResource()
     if PlayerClass == "ROGUE" then
@@ -162,19 +170,19 @@ function PointTracking:UpdatePointTracking(...)
     end
     
     -- Cycle through all Types that need updating
-    for ic,vc in pairs(UpdateList) do
+    for ic,vc in next, UpdateList do
         -- Cycle through all Point Displays in current Type
-        for it,vt in ipairs(Types[ic].points) do
+        for it, vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
             PointTracking:debug("Type", tid, Points[tid])
 
             -- Do we hide the Display
             if ((Points[tid] == 0)
                 or (ic ~= PlayerClass and ic ~= "GENERAL") 
-                or ((PlayerClass ~= "ROGUE") and (PlayerClass ~= "DRUID") and (ic == "GENERAL") and not UnitHasVehicleUI("player"))
+                or ((PlayerClass ~= "ROGUE") and (PlayerClass ~= "DRUID") and (ic == "GENERAL") and not _G.UnitHasVehicleUI("player"))
                 or ((PlayerClass == "WARLOCK") and (tid == "ss") and not (PlayerTalent == 1))
                 or ((PlayerClass == "WARLOCK") and (tid == "be") and not (PlayerTalent == 3))
-                or (db[ic].types[tid].general.hidein.vehicle and UnitHasVehicleUI("player")) 
+                or (db[ic].types[tid].general.hidein.vehicle and _G.UnitHasVehicleUI("player")) 
                 or ((db[ic].types[tid].general.hidein.spec - 1) == PlayerSpec))
                 and not db[ic].types[tid].configmode.enabled then
                     PointTracking:debug("Hide Display")
@@ -188,7 +196,7 @@ function PointTracking:UpdatePointTracking(...)
             else
                 -- Update Bars if their Points have changed
                 if PointsChanged[tid] then
-                    local max = UnitPowerMax("player", idToPower[tid])
+                    local max = _G.UnitPowerMax("player", idToPower[tid])
                     PointTracking:debug("Update Display", max)
                     for i = 1, Types[ic].points[it].barcount do
                         PointTracking:debug("Update point", i)
@@ -224,20 +232,11 @@ function PointTracking:UpdatePointTracking(...)
 end
 
 -- Point retrieval
-local function GetDebuffCount(SpellID, ...)
-    if not SpellID then return end
-    local unit = ... or "target"
-    local _,_,_,count,_,_,_,caster = UnitDebuff(unit, SpellID)
-    if count == nil then count = 0 end
-    if caster ~= "player" then count = 0 end    -- Only show Debuffs cast by me
-    return count
-end
-
 local function GetBuffCount(SpellID, ...)
     PointTracking:debug("GetBuffCount", SpellID, ...)
     if not SpellID then return end
     local unit = ... or "player"
-    local _,_,_,count = UnitAura(unit, SpellID)
+    local _,_,_,count = _G.UnitAura(unit, SpellID)
     if count == nil then count = 0 end
     return count
 end
@@ -249,7 +248,7 @@ function PointTracking:GetPoints(CurClass, CurType)
         -- Anticipation Points
         NewPoints = GetBuffCount(SpellInfo[CurType])
     else
-        NewPoints = UnitPower("player", idToPower[CurType])
+        NewPoints = _G.UnitPower("player", idToPower[CurType])
     end
     Points[CurType] = NewPoints
 end
@@ -271,7 +270,7 @@ function PointTracking:UpdatePoints(...)
     -- ENABLE update: Config Mode / Reset displays
     if Enable == "ENABLE" then
         HasChanged = true
-        for ic,vc in pairs(Types) do
+        for ic,vc in next, Types do
             for it,vt in ipairs(Types[ic].points) do
                 local tid = Types[ic].points[it].id
                 PointsChanged[tid] = true
@@ -286,7 +285,7 @@ function PointTracking:UpdatePoints(...)
     end
     
     -- Normal update: Cycle through valid classes
-    for ic,vc in pairs(UpdateList) do
+    for ic,vc in next, UpdateList do
         -- Cycle through point types for current class
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
@@ -327,7 +326,7 @@ end
 
 -- Update frame positions/sizes
 function PointTracking:UpdatePosition()
-    for ic,vc in pairs(Types) do
+    for ic,vc in next, Types do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
 
@@ -339,7 +338,7 @@ function PointTracking:UpdatePosition()
             end
 
             ---- BG Panel
-            local Parent = RealUIPositionersCTPoints
+            local Parent = _G.RealUIPositionersCTPoints
             
             Frames[ic][tid].bgpanel.frame:SetParent(Parent)
             Frames[ic][tid].bgpanel.frame:ClearAllPoints()
@@ -351,13 +350,12 @@ function PointTracking:UpdatePosition()
             
             ---- Point Bars
             local IsRev = db[ic].types[tid].general.direction.reverse
-            local XPos, YPos, CPRatio, TWidth, THeight
+            local XPos, YPos, TWidth
             local Positions = {}
             local CPSize = {}
             
             -- Get total Width and Height of Point Display, and the size of each Bar
             TWidth = 0
-            THeight = 0
             for i = 1, Types[ic].points[it].barcount do
                 CPSize[i] = db[ic].types[tid].bars.size.width + db[ic].types[tid].bars.position.gap
                 TWidth = TWidth + db[ic].types[tid].bars.size.width + db[ic].types[tid].bars.position.gap
@@ -366,7 +364,6 @@ function PointTracking:UpdatePosition()
             -- Calculate position of each Bar
             for i = 1, Types[ic].points[it].barcount do
                 local CurPos = 0
-                local TVal = TWidth
                 
                 -- Add up position of each Bar in sequence
                 if i == 1 then
@@ -407,11 +404,11 @@ end
 
 function PointTracking:ToggleConfigMode(val)
     local power, class = self:GetResource()
-    if nibRealUI:GetModuleEnabled(MODNAME) and power then
+    if RealUI:GetModuleEnabled(MODNAME) and power then
         for i = 1, #power do
             local tid = power[i].id
             db[class].types[tid].configmode.enabled = val
-            db[class].types[tid].configmode.count = UnitPowerMax("player", idToPower[tid])
+            db[class].types[tid].configmode.count = _G.UnitPowerMax("player", idToPower[tid])
         end
         self:UpdatePoints("ENABLE")
     end
@@ -425,11 +422,11 @@ end
 
 local function VerifyBackground(background)
     local newbackground = ""
-    if background and strlen(background) > 0 then 
+    if background and background:len() > 0 then 
         newbackground = RetrieveBackground(background)
         if background ~= "None" then
             if not newbackground then
-                print("Background "..background.." was not found in SharedMedia.")
+                _G.print("Background "..background.." was not found in SharedMedia.")
                 newbackground = ""
             end
         end
@@ -439,7 +436,7 @@ end
 
 -- Retrieve Background textures and store in tables
 function PointTracking:GetTextures()
-    for ic,vc in pairs(Types) do
+    for ic,vc in next, Types do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
             BG[ic][tid].bars.empty = VerifyBackground(db[ic].types[tid].bars.bg.empty.texture)
@@ -451,13 +448,13 @@ end
 
 -- Frame Creation
 local function CreateFrames(config)
-    for ic,vc in pairs(Types) do
+    for ic,vc in next, Types do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
             
             -- BG Panel
             local FrameName = "PointTracking_Frames_"..tid
-            Frames[ic][tid].bgpanel.frame = CreateFrame("Frame", FrameName, UIParent)
+            Frames[ic][tid].bgpanel.frame = _G.CreateFrame("Frame", FrameName, _G.UIParent)
             CombatFader:RegisterFrameForFade(MODNAME, Frames[ic][tid].bgpanel.frame)
             
             Frames[ic][tid].bgpanel.bg = Frames[ic][tid].bgpanel.frame:CreateTexture(nil, "ARTWORK")
@@ -467,8 +464,8 @@ local function CreateFrames(config)
             
             -- Point bars
             for i = 1, Types[ic].points[it].barcount do
-                local BarFrameName = "PointTracking_Frames_"..tid.."_bar"..tostring(i)
-                Frames[ic][tid].bars[i].frame = CreateFrame("Frame", BarFrameName, UIParent)
+                local BarFrameName = "PointTracking_Frames_"..tid.."_bar".._G.tostring(i)
+                Frames[ic][tid].bars[i].frame = _G.CreateFrame("Frame", BarFrameName, _G.UIParent)
                 
                 Frames[ic][tid].bars[i].bg = Frames[ic][tid].bars[i].frame:CreateTexture(nil, "ARTWORK")
                 Frames[ic][tid].bars[i].bg:SetAllPoints(Frames[ic][tid].bars[i].frame)
@@ -485,12 +482,12 @@ end
 -- Table creation
 local function CreateTables(config)
     -- Frames
-    wipe(Frames)
-    wipe(BG)
-    wipe(Points)
-    wipe(PointsChanged)
+    _G.wipe(Frames)
+    _G.wipe(BG)
+    _G.wipe(Points)
+    _G.wipe(PointsChanged)
     
-    for ic,vc in pairs(Types) do
+    for ic,vc in next, Types do
         -- Insert Class header
         tinsert(Frames, ic)
         Frames[ic] = {}
@@ -539,7 +536,7 @@ function PointTracking:HideUIElements()
     if db["GENERAL"].types["cp"].enabled and db["GENERAL"].types["cp"].general.hideui then
         for i = 1,5 do
             _G["ComboPoint"..i]:Hide()
-            _G["ComboPoint"..i]:SetScript("OnShow", function(self) self:Hide() end)
+            _G["ComboPoint"..i]:SetScript("OnShow", function(point) point:Hide() end)
         end
     end
     
@@ -547,7 +544,7 @@ function PointTracking:HideUIElements()
         local HPF = _G["PaladinPowerBar"]
         if HPF then
             HPF:Hide()
-            HPF:SetScript("OnShow", function(self) self:Hide() end)
+            HPF:SetScript("OnShow", function(point) point:Hide() end)
         end
     end
     
@@ -555,14 +552,14 @@ function PointTracking:HideUIElements()
         local SSF = _G["ShardBarFrame"]
         if SSF then
             SSF:Hide()
-            SSF:SetScript("OnShow", function(self) self:Hide() end)
+            SSF:SetScript("OnShow", function(point) point:Hide() end)
         end
     end
 end
 
 function PointTracking:UpdateSpec()
     local oldSpec, oldTalent = PlayerSpec, PlayerTalent
-    PlayerSpec, PlayerTalent = GetActiveSpecGroup(), GetSpecialization()
+    PlayerSpec, PlayerTalent = _G.GetActiveSpecGroup(), _G.GetSpecialization()
     return oldSpec ~= PlayerSpec or oldTalent ~= PlayerTalent
 end
 
@@ -585,7 +582,7 @@ end
 
 function PointTracking:PLAYER_TARGET_CHANGED(...)
     PointTracking:debug("------", ...)
-    PlayerTargetHostile = (UnitIsEnemy("player", "target") or UnitCanAttack("player", "target"))
+    PlayerTargetHostile = (_G.UnitIsEnemy("player", "target") or _G.UnitCanAttack("player", "target"))
     self:UpdateSmartHideConditions()
 end
 
@@ -604,7 +601,7 @@ end
 function PointTracking:PLAYER_ENTERING_WORLD(...)
     PointTracking:debug("------", ...)
     -- GreenFire = IsSpellKnown(WARLOCK_GREEN_FIRE)
-    PlayerInInstance = IsInInstance()
+    PlayerInInstance = _G.IsInInstance()
     self:UpdateSpec()
     self:UpdatePosition()
     self:UpdateSmartHideConditions()
@@ -616,7 +613,7 @@ function PointTracking:PLAYER_LOGIN()
     ValidClasses = {
         ["GENERAL"] = true,
         [PlayerClass] = Types[PlayerClass],
-    },
+    }
     
     -- Register Media
     LSM:Register("background", "Round_Large_BG", [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]])
@@ -638,14 +635,14 @@ function PointTracking:PLAYER_LOGIN()
     
     -- Get Spell Info
     -- Death Knight
-    SpellInfo["bs"] = GetSpellInfo(49222)       -- Bone Shield
+    SpellInfo["bs"] = _G.GetSpellInfo(49222)       -- Bone Shield
     -- Druid
     -- Hunter
     -- Mage
     -- Monk
     -- Priest
     -- Rogue    
-    SpellInfo["ap"] = GetSpellInfo(114015)      -- Anticipation Points
+    SpellInfo["ap"] = _G.GetSpellInfo(114015)      -- Anticipation Points
     -- Shaman
     -- Warlock
     -- Warrior
@@ -682,16 +679,16 @@ function PointTracking:PLAYER_LOGIN()
 end
 
 function PointTracking:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
-    self.db:RegisterDefaults(nibRealUI:GetPointTrackingDefaults())
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
+    self.db:RegisterDefaults(PointTracking.defaults)
     
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    PlayerClass = nibRealUI.class
+    ndb = RealUI.db.profile
+    PlayerClass = RealUI.class
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
-    nibRealUI:RegisterConfigModeModule(self)
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function PointTracking:OnEnable()
@@ -699,7 +696,7 @@ function PointTracking:OnEnable()
     CreateFrames()
     
     -- Turn off Config Mode
-    for ic,vc in pairs(Types) do
+    for ic,vc in next, Types do
         for it,vt in ipairs(Types[ic].points) do
             local tid = Types[ic].points[it].id
             db[ic].types[tid].configmode.enabled = false

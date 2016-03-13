@@ -1,20 +1,17 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
 local next, type = _G.next, _G.type
-
--- WoW Globals --
-local UIParent, GameTooltip = _G.UIParent, _G.GameTooltip
-local CreateFrame = _G.CreateFrame
-local GetSpellInfo = _G.GetSpellInfo
 
 -- Libs --
 local F = _G.Aurora[1]
 
 -- RealUI --
-local nibRealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local RealUI = private.RealUI
 
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:GetModule(MODNAME)
+local AuraTracking = RealUI:GetModule(MODNAME)
 
 local icons = {}
 
@@ -60,12 +57,12 @@ end
 function AuraTracking:CreateAuraIcon(id, spellData)
     AuraTracking:debug("CreateAuraIcon", id, spellData.unit)
     local side = spellData.unit == "target" and "right" or "left"
-    local tracker = CreateFrame("Frame", nil, self[side])
+    local tracker = _G.CreateFrame("Frame", nil, self[side])
     self[side][id] = tracker
     tracker.side = side
     tracker.id = id
 
-    local cd = CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
+    local cd = _G.CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
     cd:SetAllPoints(tracker)
     tracker.cd = cd
 
@@ -73,9 +70,9 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     if spellData.customIcon then
         texture = spellData.customIcon
     elseif type(spellData.spell) == "table" then
-        _, _, texture = GetSpellInfo(spellData.spell[1])
+        _, _, texture = _G.GetSpellInfo(spellData.spell[1])
     else
-        _, _, texture = GetSpellInfo(spellData.spell)
+        _, _, texture = _G.GetSpellInfo(spellData.spell)
     end
 
     local icon = tracker:CreateTexture(nil, "BACKGROUND", nil, -7)
@@ -96,9 +93,9 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     tracker:SetScript("OnEnter", function(trakr)
         if not trakr.isEnabled then return end
         if trakr.auraIndex then
-            _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetUnitAura(spellData.unit, trakr.auraIndex, trakr.filter)
-            GameTooltip:Show()
+            _G.GameTooltip_SetDefaultAnchor(_G.GameTooltip, _G.UIParent)
+            _G.GameTooltip:SetUnitAura(spellData.unit, trakr.auraIndex, trakr.filter)
+            _G.GameTooltip:Show()
         else
             local spell = spellData.spell
             if type(spell) == "table" then
@@ -106,14 +103,14 @@ function AuraTracking:CreateAuraIcon(id, spellData)
             end
 
             spell = _G.tonumber(spell)
-            _G.GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetSpellByID(spell)
-            GameTooltip:Show()
+            _G.GameTooltip_SetDefaultAnchor(_G.GameTooltip, _G.UIParent)
+            _G.GameTooltip:SetSpellByID(spell)
+            _G.GameTooltip:Show()
         end
     end)
     tracker:SetScript("OnLeave", function(trakr)
         if trakr.auraIndex then
-            GameTooltip:Hide()
+            _G.GameTooltip:Hide()
         end
     end)
     tracker:SetScript("OnEvent", function(trakr, event, ...)

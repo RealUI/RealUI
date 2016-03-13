@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Bartender4 = function()
-	Bartender4DB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Bartender4 = function()
+	_G.Bartender4DB = {
 		["namespaces"] = {
 			["ActionBars"] = {
 				["profiles"] = {

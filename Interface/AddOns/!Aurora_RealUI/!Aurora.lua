@@ -5,6 +5,7 @@ mods["PLAYER_LOGIN"] = {}
 
 -- Lua Globals --
 local _G = _G
+local next = _G.next
 local tinsert = _G.table.insert
 
 -- RealUI --
@@ -64,7 +65,7 @@ functions.CreateBD = function(f, a)
     f:SetBackdropBorderColor(0, 0, 0)
     if not a then
         --print("CreateSD")
-        f:SetBackdropColor(unpack(RealUI.media.window))
+        f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
         f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
         f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
         f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
@@ -187,7 +188,7 @@ style.functions = functions
 
 style.initVars = function()
     debug("initVars", _G.Aurora, _G.Aurora[1], _G.Aurora[2])
-    F, C = unpack(_G.Aurora)
+    F, C = _G.Aurora[1], _G.Aurora[2]
     r, g, b = C.r, C.g, C.b
     buttonR, buttonG, buttonB, buttonA = .1, .1, .1, 1
 end
@@ -199,10 +200,10 @@ frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" and _G.IsAddOnLoaded("Aurora") then
-        F, C = unpack(_G.Aurora)
+        F, C = _G.Aurora[1], _G.Aurora[2]
         -- some skins need to be deferred till after all other addons.
         for addonName, func in next, mods[event] do
-            if type(addonName) == "string" then
+            if _G.type(addonName) == "string" then
                 if _G.IsAddOnLoaded(addonName) then
                     -- Create skin modules for addon so they can be individually disabled.
                     local skin = RealUI:RegisterSkin(addonName)
@@ -220,18 +221,18 @@ frame:SetScript("OnEvent", function(self, event, addon)
         local addonModule = mods[addon]
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
-            F, C = unpack(_G.Aurora)
+            F, C = _G.Aurora[1], _G.Aurora[2]
 
             F.colorTex = function(f)
                 if f:IsEnabled() then
-                    for _, tex in pairs(f.tex) do
+                    for _, tex in next, f.tex do
                         tex:SetVertexColor(r, g, b)
                     end
                 end
             end
 
             F.clearTex = function(f)
-                for _, tex in pairs(f.tex) do
+                for _, tex in next, f.tex do
                     tex:SetVertexColor(1, 1, 1)
                 end
             end
@@ -249,17 +250,17 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
 
-            for _, moduleFunc in pairs(addonModule) do
+            for _, moduleFunc in next, addonModule do
                 F.AddPlugin(function()
                     moduleFunc(F, C)
                 end)
             end
         elseif addon == "nibRealUI" then
-            for _, moduleFunc in pairs(addonModule) do
+            for _, moduleFunc in next, addonModule do
                 moduleFunc(F, C)
             end
         else
-            if addonModule and type(addonModule) == "function" then
+            if addonModule and _G.type(addonModule) == "function" then
                 addonModule(F, C)
             end
         end

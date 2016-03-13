@@ -1,10 +1,16 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local db, ndb, ndbc
+local _, private = ...
 
-local _
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db
+
 local MODNAME = "FrameMover"
-local FrameMover = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local FrameMover = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local EnteredWorld
 local FramesMoving
@@ -74,15 +80,6 @@ local FrameList = {
 }
 
 -- Hide a Frame 
-local function HideFrame(FrameName)
-    local frame = _G[FrameName]
-    if not frame then return end
-    
-    frame:UnregisterAllEvents()
-    frame:Hide()    
-    frame:SetScript("OnShow", function(self) self:Hide() end)
-end
-
 local function HideFrameGroup(FramesTable)
     for _, info in next, FramesTable do
         local frame = _G[info.name]
@@ -97,7 +94,7 @@ end
 -- Move a single Addon/UIFrame group from saved variables
 local function MoveFrameGroup(FramesTable, DBTable)
     FrameMover:debug("MoveFrameGroup")
-    local FrameDB = {}
+    local FrameDB
     for idx = 1, #FramesTable do
         FramesMoving = true
 
@@ -109,7 +106,7 @@ local function MoveFrameGroup(FramesTable, DBTable)
         if _G[FrameDB.parent] then
             frame:SetPoint(FrameDB.point, FrameDB.parent, FrameDB.rpoint, FrameDB.x, FrameDB.y)
         else
-            print(L["General_InvalidParent"]:format(FramesTable[idx].name, MODNAME, "Addons -> Raven"))
+            _G.print(L["General_InvalidParent"]:format(FramesTable[idx].name, MODNAME, "Addons -> Raven"))
         end
         
         if FrameDB.scale then frame:SetScale(FrameDB.scale) end
@@ -146,7 +143,7 @@ local function GetOptions()
     local addonOpts = {
         name = "Addons",
         type = "group",
-        disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
         order = 50,
         args = {},
     }
@@ -159,26 +156,26 @@ local function GetOptions()
             name = addon.name,
             childGroups = "tab",
             order = addonOrderCnt,
-            disabled = function() return not(IsAddOnLoaded(addon.name) and nibRealUI:GetModuleEnabled(MODNAME)) end,
+            disabled = function() return not(_G.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
             args = {
                 header = {
                     type = "header",
-                    name = string.format("Frame Mover - Addons - %s", addon.name),
+                    name = ("Frame Mover - Addons - %s"):format(addon.name),
                     order = 10,
                 },
                 enabled = {
                     type = "toggle",
-                    name = string.format("Move %s", addon.name),
+                    name = ("Move %s"):format(addon.name),
                     get = function(info)
                         if addonSlug == "grid2" then
-                            return nibRealUI:DoesAddonMove("Grid2")
+                            return RealUI:DoesAddonMove("Grid2")
                         else
                             return addonInfo.move
                         end
                     end,
                     set = function(info, value) 
                         if addonSlug == "grid2" then
-                            if nibRealUI:DoesAddonMove("Grid2") then
+                            if RealUI:DoesAddonMove("Grid2") then
                                 FrameMover:MoveAddons()
                             end
                         else
@@ -227,7 +224,7 @@ local function GetOptions()
         }
         local normalFrameOrderCnt = 10
         for i = 1, #addon.frames do
-            normalFrameOpts.args[tostring(i)] = {
+            normalFrameOpts.args[_G.tostring(i)] = {
                 type = "group",
                 name = addon.frames[i].name,
                 inline = true,
@@ -238,9 +235,9 @@ local function GetOptions()
                         name = "X Offset",
                         width = "half",
                         order = 10,
-                        get = function(info) return tostring(addonInfo.frames[i].x) end,
+                        get = function(info) return _G.tostring(addonInfo.frames[i].x) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             addonInfo.frames[i].x = value
                             FrameMover:MoveAddons()
                         end,
@@ -250,9 +247,9 @@ local function GetOptions()
                         name = "Y Offset",
                         width = "half",
                         order = 20,
-                        get = function(info) return tostring(addonInfo.frames[i].y) end,
+                        get = function(info) return _G.tostring(addonInfo.frames[i].y) end,
                         set = function(info, value)
-                            value = nibRealUI:ValidateOffset(value)
+                            value = RealUI:ValidateOffset(value)
                             addonInfo.frames[i].y = value
                             FrameMover:MoveAddons()
                         end,
@@ -261,34 +258,34 @@ local function GetOptions()
                         type = "select",
                         name = "Anchor To",
                         get = function(info) 
-                            for idx, point in next, nibRealUI.globals.anchorPoints do
+                            for idx, point in next, RealUI.globals.anchorPoints do
                                 if point == addonInfo.frames[i].rpoint then return idx end
                             end
                         end,
                         set = function(info, value)
-                            addonInfo.frames[i].rpoint = nibRealUI.globals.anchorPoints[value]
+                            addonInfo.frames[i].rpoint = RealUI.globals.anchorPoints[value]
                             FrameMover:MoveAddons()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 30,
                     },
                     anchorfrom = {
                         type = "select",
                         name = "Anchor From",
                         get = function(info) 
-                            for idx, point in next, nibRealUI.globals.anchorPoints do
+                            for idx, point in next, RealUI.globals.anchorPoints do
                                 if point == addonInfo.frames[i].point then return idx end
                             end
                         end,
                         set = function(info, value)
-                            addonInfo.frames[i].point = nibRealUI.globals.anchorPoints[value]
+                            addonInfo.frames[i].point = RealUI.globals.anchorPoints[value]
                             FrameMover:MoveAddons()
                         end,
                         style = "dropdown",
                         width = nil,
-                        values = nibRealUI.globals.anchorPoints,
+                        values = RealUI.globals.anchorPoints,
                         order = 40,
                     },
                     parent = {
@@ -322,7 +319,7 @@ local function GetOptions()
             }
             local normalHealingFrameOrderCnt = 10       
             for i = 1, #addon.frameshealing do
-                normalHealingFrameOpts.args[tostring(i)] = {
+                normalHealingFrameOpts.args[_G.tostring(i)] = {
                     type = "group",
                     name = addon.frameshealing[i].name,
                     inline = true,
@@ -333,9 +330,9 @@ local function GetOptions()
                             name = "X Offset",
                             width = "half",
                             order = 10,
-                            get = function(info) return tostring(addonInfo.frameshealing[i].x) end,
+                            get = function(info) return _G.tostring(addonInfo.frameshealing[i].x) end,
                             set = function(info, value)
-                                value = nibRealUI:ValidateOffset(value)
+                                value = RealUI:ValidateOffset(value)
                                 addonInfo.frameshealing[i].x = value
                                 FrameMover:MoveAddons()
                             end,
@@ -345,9 +342,9 @@ local function GetOptions()
                             name = "Y Offset",
                             width = "half",
                             order = 20,
-                            get = function(info) return tostring(addonInfo.frameshealing[i].y) end,
+                            get = function(info) return _G.tostring(addonInfo.frameshealing[i].y) end,
                             set = function(info, value)
-                                value = nibRealUI:ValidateOffset(value)
+                                value = RealUI:ValidateOffset(value)
                                 addonInfo.frameshealing[i].y = value
                                 FrameMover:MoveAddons()
                             end,
@@ -356,34 +353,34 @@ local function GetOptions()
                             type = "select",
                             name = "Anchor To",
                             get = function(info) 
-                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                for idx, point in next, RealUI.globals.anchorPoints do
                                     if point == addonInfo.frameshealing[i].rpoint then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                addonInfo.frameshealing[i].rpoint = nibRealUI.globals.anchorPoints[value]
+                                addonInfo.frameshealing[i].rpoint = RealUI.globals.anchorPoints[value]
                                 FrameMover:MoveAddons()
                             end,
                             style = "dropdown",
                             width = nil,
-                            values = nibRealUI.globals.anchorPoints,
+                            values = RealUI.globals.anchorPoints,
                             order = 30,
                         },
                         anchorfrom = {
                             type = "select",
                             name = "Anchor From",
                             get = function(info) 
-                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                for idx, point in next, RealUI.globals.anchorPoints do
                                     if point == addonInfo.frameshealing[i].point then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                addonInfo.frameshealing[i].point = nibRealUI.globals.anchorPoints[value]
+                                addonInfo.frameshealing[i].point = RealUI.globals.anchorPoints[value]
                                 FrameMover:MoveAddons()
                             end,
                             style = "dropdown",
                             width = nil,
-                            values = nibRealUI.globals.anchorPoints,
+                            values = RealUI.globals.anchorPoints,
                             order = 40,
                         },
                         parent = {
@@ -416,7 +413,7 @@ local function GetOptions()
     local uiframesopts = {
         name = "UI Frames",
         type = "group",
-        disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
         order = 60,
         args = {},
     }
@@ -431,12 +428,12 @@ local function GetOptions()
             args = {
                 header = {
                     type = "header",
-                    name = string.format("Frame Mover - UI Frames - %s", ui.name),
+                    name = ("Frame Mover - UI Frames - %s"):format(ui.name),
                     order = 10,
                 },
                 enabled = {
                     type = "toggle",
-                    name = string.format("Move %s", ui.name),
+                    name = ("Move %s"):format(ui.name),
                     get = function(info) return uiInfo.move end,
                     set = function(info, value) 
                         uiInfo.move = value 
@@ -459,7 +456,7 @@ local function GetOptions()
             }
             local FrameOrderCnt = 10
             for i = 1, #ui.frames do
-                frameopts.args[tostring(i)] = {
+                frameopts.args[_G.tostring(i)] = {
                     type = "group",
                     name = ui.frames[i].name,
                     inline = true,
@@ -470,9 +467,9 @@ local function GetOptions()
                             name = "X Offset",
                             width = "half",
                             order = 10,
-                            get = function(info) return tostring(uiInfo.frames[i].x) end,
+                            get = function(info) return _G.tostring(uiInfo.frames[i].x) end,
                             set = function(info, value)
-                                value = nibRealUI:ValidateOffset(value)
+                                value = RealUI:ValidateOffset(value)
                                 uiInfo.frames[i].x = value
                                 MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
@@ -482,9 +479,9 @@ local function GetOptions()
                             name = "Y Offset",
                             width = "half",
                             order = 20,
-                            get = function(info) return tostring(uiInfo.frames[i].y) end,
+                            get = function(info) return _G.tostring(uiInfo.frames[i].y) end,
                             set = function(info, value)
-                                value = nibRealUI:ValidateOffset(value)
+                                value = RealUI:ValidateOffset(value)
                                 uiInfo.frames[i].y = value
                                 MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
@@ -493,34 +490,34 @@ local function GetOptions()
                             type = "select",
                             name = "Anchor To",
                             get = function(info) 
-                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                for idx, point in next, RealUI.globals.anchorPoints do
                                     if point == uiInfo.frames[i].rpoint then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                uiInfo.frames[i].rpoint = nibRealUI.globals.anchorPoints[value]
+                                uiInfo.frames[i].rpoint = RealUI.globals.anchorPoints[value]
                                 MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                             style = "dropdown",
                             width = nil,
-                            values = nibRealUI.globals.anchorPoints,
+                            values = RealUI.globals.anchorPoints,
                             order = 30,
                         },
                         anchorfrom = {
                             type = "select",
                             name = "Anchor From",
                             get = function(info) 
-                                for idx, point in next, nibRealUI.globals.anchorPoints do
+                                for idx, point in next, RealUI.globals.anchorPoints do
                                     if point == uiInfo.frames[i].point then return idx end
                                 end
                             end,
                             set = function(info, value)
-                                uiInfo.frames[i].point = nibRealUI.globals.anchorPoints[value]
+                                uiInfo.frames[i].point = RealUI.globals.anchorPoints[value]
                                 MoveFrameGroup(ui.frames, uiInfo.frames)
                             end,
                             style = "dropdown",
                             width = nil,
-                            values = nibRealUI.globals.anchorPoints,
+                            values = RealUI.globals.anchorPoints,
                             order = 40,
                         },
                     },
@@ -538,12 +535,12 @@ local function GetOptions()
     local hideopts = {
         name = "Hide Frames",
         type = "group",
-        disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
         order = 70,
         args = {
             header = {
                 type = "header",
-                name = string.format("Frame Mover - Hide Frames"),
+                name = "Frame Mover - Hide Frames",
                 order = 10,
             },
             sep = {
@@ -579,7 +576,7 @@ local function GetOptions()
                 if hideInfo.hide then
                     FrameMover:HideFrames()
                 else
-                    nibRealUI:ReloadUIDialog()
+                    RealUI:ReloadUIDialog()
                 end
             end,
             order = hideordercnt,
@@ -598,13 +595,12 @@ end
 -- Move all Addons
 function FrameMover:MoveAddons(addonName)
     FrameMover:debug("MoveAddons", addonName)
-    local FrameDB = {}
     for addonSlug, addon in next, FrameList.addons do
         local addonInfo = db.addons[addonSlug]
         --print("MoveAddons", addonSlug, addon, addonName)
         if (addonName and addonSlug == addonName) or (addonName == nil) then
-            if ((addonSlug ~= "grid2") and addonInfo.move) or ((addonSlug == "grid2") and nibRealUI:DoesAddonMove("Grid2")) then
-                local IsHealing = ( addon.hashealing and addonInfo.healing and nibRealUI.cLayout == 2 )
+            if ((addonSlug ~= "grid2") and addonInfo.move) or ((addonSlug == "grid2") and RealUI:DoesAddonMove("Grid2")) then
+                local IsHealing = ( addon.hashealing and addonInfo.healing and RealUI.cLayout == 2 )
                 FrameMover:debug("IsHealing", IsHealing)
                 
                 if IsHealing then
@@ -621,7 +617,6 @@ end
 
 -- Move all UI Frames
 function FrameMover:MoveUIFrames()
-    local FrameDB = {}
     for uiSlug, ui in next, FrameList.uiframes do
         if db.uiframes[uiSlug].move and ui.frames then
             MoveFrameGroup(ui.frames, db.uiframes[uiSlug].frames)
@@ -631,7 +626,7 @@ end
 
 -- Hide all UI Frames
 function FrameMover:HideFrames()
-    for hideSlug, hide in pairs(FrameList.hide) do
+    for hideSlug, hide in next, FrameList.hide do
         if db.hide[hideSlug].hide then
             HideFrameGroup(hide.frames)
         end
@@ -641,8 +636,8 @@ end
 ---- Hook into addons to display PopUpMessage and reposition frames
 -- VSI
 local function Hook_VSI()
-    hooksecurefunc(VehicleSeatIndicator, "SetPoint", function(_, _, parent)
-        if nibRealUI:GetModuleEnabled(MODNAME) and db.uiframes.vsi.move then
+    _G.hooksecurefunc(_G.VehicleSeatIndicator, "SetPoint", function(_, _, parent)
+        if RealUI:GetModuleEnabled(MODNAME) and db.uiframes.vsi.move then
             if (parent == "MinimapCluster") or (parent == _G["MinimapCluster"]) then
                 MoveFrameGroup(FrameList.uiframes.vsi.frames, db.uiframes.vsi.frames)
             end
@@ -652,9 +647,9 @@ end
 
 -- Raven - To stop bars repositioning themselves
 local function Hook_Raven()
-    if not IsAddOnLoaded("Raven") then return end
+    if not _G.IsAddOnLoaded("Raven") then return end
     
-    local t = CreateFrame("Frame")
+    local t = _G.CreateFrame("Frame")
     t:Hide()
     t.e = 0
     t:SetScript("OnUpdate", function(s, e)
@@ -666,17 +661,17 @@ local function Hook_Raven()
         end
     end) 
     
-    hooksecurefunc(Raven, "Nest_SetAnchorPoint", function()
+    _G.hooksecurefunc(_G.Raven, "Nest_SetAnchorPoint", function()
         t:Show()
     end)
 
-    if RavenBarGroupBuffs then RavenBarGroupBuffs:SetClampedToScreen(false) end
+    if _G.RavenBarGroupBuffs then _G.RavenBarGroupBuffs:SetClampedToScreen(false) end
 end
 
 -- Grid2 - Top stop LayoutFrame re-anchoring itself to UIParent
 local function Hook_Grid2()
-    if not Grid2LayoutFrame then return end
-    hooksecurefunc(Grid2LayoutFrame, "SetPoint", function(...)
+    if not _G.Grid2LayoutFrame then return end
+    _G.hooksecurefunc(_G.Grid2LayoutFrame, "SetPoint", function(...)
         FrameMover:debug("Grid2LayoutFrame:SetPoint")
         if FramesMoving then return end
         FrameMover:debug("SetPoint", ...)
@@ -691,7 +686,7 @@ function FrameMover:RefreshMod()
 end
 
 function FrameMover:PLAYER_ENTERING_WORLD()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     
     if not EnteredWorld then
         Hook_Grid2()
@@ -707,7 +702,7 @@ end
 
 ----
 function FrameMover:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             addons = {
@@ -789,11 +784,9 @@ function FrameMover:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterPlainOptions(MODNAME, GetOptions)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:RegisterPlainOptions(MODNAME, GetOptions)
 end
 
 function FrameMover:OnEnable()

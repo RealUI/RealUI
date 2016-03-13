@@ -1,10 +1,17 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local db, dbc, dbg
+local ADDON_NAME, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next, type = _G.next, _G.type
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, dbc
 
 -- Global tables
-nibRealUI.globals = {}
-nibRealUI.globals.anchorPoints = {
+RealUI.globals = {}
+RealUI.globals.anchorPoints = {
 	"BOTTOM",
 	"BOTTOMLEFT",
 	"BOTTOMRIGHT",
@@ -16,7 +23,7 @@ nibRealUI.globals.anchorPoints = {
 	"TOPRIGHT"
 }
 
-nibRealUI.globals.stratas = {
+RealUI.globals.stratas = {
 	"BACKGROUND",
 	"LOW",
 	"MEDIUM",
@@ -46,32 +53,32 @@ local CoreOptions = {
 }
 
 -- Re-install RealUI
-function nibRealUI:ReInstall()
-	StaticPopupDialogs["PUDRUIRESETUI"] = {
+function RealUI:ReInstall()
+	_G.StaticPopupDialogs["PUDRUIRESETUI"] = {
 		text = L["Reset_Confirm"] .. L["Reset_SettingsLost"],
 		button1 = "Yes",
 		button2 = "No",
 		OnAccept = function()
-			nibRealUICharacter = nil
-			nibRealUI.db:ResetDB("RealUI")
+			_G.nibRealUICharacter = nil
+			RealUI.db:ResetDB("RealUI")
 		end,
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
 		notClosableByLogout = false,
 	}
-	StaticPopup_Show("PUDRUIRESETUI")
+	_G.StaticPopup_Show("PUDRUIRESETUI")
 end
 
 -- Re-initialize Character
 local function ResetChar()
 	-- Set all Char settings to default
-	nibRealUICharacter = nil
+	_G.nibRealUICharacter = nil
 	dbc.layout.current = 1
 
 	-- Run Install Procedure
-	LibStub("AceConfigDialog-3.0"):Close("nibRealUI")
-	nibRealUI:InstallProcedure()
+	_G.LibStub("AceConfigDialog-3.0"):Close(ADDON_NAME)
+	RealUI:InstallProcedure()
 end
 
 -- Options
@@ -80,7 +87,7 @@ local function GetOptions()
 	if not Options.settings then
 		Options.settings = {
 			type = "group",
-			name = "|cffffffffRealUI|r "..nibRealUI:GetVerString(true),
+			name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
 			childGroups = "tree",
 			args = {},
 		}
@@ -111,7 +118,7 @@ local function GetOptions()
 			reinstall = {
 				type = "execute",
 				name = "Reset RealUI",
-				func = function() nibRealUI:ReInstall() end,
+				func = function() RealUI:ReInstall() end,
 				order = 40,
 			},
 			sep2 = {
@@ -160,7 +167,7 @@ local function GetOptions()
 	end
 
 	-- Plain Options
-	for key, val in pairs(Options.modules) do
+	for key, val in next, Options.modules do
 		Options.settings.args[key] = (type(val) == "function") and val() or val
 	end
 
@@ -173,7 +180,7 @@ local function GetOptions()
 		args = {},
 	}
 	end
-	for key, val in pairs(ModuleOptions.modules) do
+	for key, val in next, ModuleOptions.modules do
 		ModuleOptions.settings.args[key] = (type(val) == "function") and val() or val
 	end
 
@@ -188,9 +195,9 @@ local function GetOptions()
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return nibRealUI.media.window[4] end,
+                get = function(info) return RealUI.media.window[4] end,
                 set = function(info, value)
-                    nibRealUI.media.window[4] = value
+                    RealUI.media.window[4] = value
                 end,
                 order = 10,
             },
@@ -199,9 +206,9 @@ local function GetOptions()
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return RealUI_InitDB.stripeOpacity end,
+                get = function(info) return _G.RealUI_InitDB.stripeOpacity end,
                 set = function(info, value)
-                    RealUI_InitDB.stripeOpacity = value
+                    _G.RealUI_InitDB.stripeOpacity = value
                 end,
                 order = 20,
             },
@@ -218,21 +225,20 @@ local function GetOptions()
 		SkinsOptions.settings.args[name] = {
 			type = "toggle",
 			name = name,
-			get = function() return nibRealUI:GetModuleEnabled(name) end,
+			get = function() return RealUI:GetModuleEnabled(name) end,
 			set = function(info, value)
-				nibRealUI:SetModuleEnabled(name, value)
-				nibRealUI:ReloadUIDialog()
+				RealUI:SetModuleEnabled(name, value)
+				RealUI:ReloadUIDialog()
 			end,
 			order = 40,
 		}
 	end
 end
 
-function nibRealUI:SetUpOptions()
+function RealUI:SetUpOptions()
 	if Options.settings then return end
 	db = self.db.profile
 	dbc = self.db.char
-	dbg = self.db.global
 	self.media = db.media
 
 	-- Fill out Options table
@@ -247,25 +253,25 @@ function nibRealUI:SetUpOptions()
 	Options.settings.args.core = CoreOptions.settings
 	Options.settings.args.core.order = 9500
 
-	Options.settings.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	Options.settings.args.profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	Options.settings.args.profiles.order = -1
 
 	-- Create RealUI Options window
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("nibRealUI", Options.settings)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("nibRealUI", 870, 600)
+	_G.LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(ADDON_NAME, Options.settings)
+	_G.LibStub("AceConfigDialog-3.0"):SetDefaultSize(ADDON_NAME, 870, 600)
 end
 
-function nibRealUI:RegisterPlainOptions(name, optionTbl)
+function RealUI:RegisterPlainOptions(name, optionTbl)
 	Options.modules[name] = optionTbl
 end
 
-function nibRealUI:RegisterModuleOptions(name, optionTbl)
+function RealUI:RegisterModuleOptions(name, optionTbl)
 	ModuleOptions.modules[name] = optionTbl
 end
 
-function nibRealUI:RegisterSkin(name)
-	local skin = self:CreateModule(name, "AceEvent-3.0")
+function RealUI:RegisterSkin(name)
+	local skin = self:NewModule(name, "AceEvent-3.0")
 	skin:SetEnabledState(self:GetModuleEnabled(name))
-	tinsert(SkinsOptions.modules, name)
+	_G.tinsert(SkinsOptions.modules, name)
 	return skin
 end

@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_BugGrabber = function()
-	BugGrabberDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_BugGrabber = function()
+	_G.BugGrabberDB = {
 		["stopnag"] = 50001,
 		["throttle"] = true,
 		["limit"] = 50,

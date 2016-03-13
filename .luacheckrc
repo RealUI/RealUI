@@ -20,3 +20,7 @@ exclude_files = {
 
 self = false
 unused_args = false
+std = "none"
+globals = {
+    "_G"
+}

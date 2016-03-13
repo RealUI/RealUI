@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
@@ -40,7 +42,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
         --print("WeakAurasOptions", F, C)
         local function StripTextures(object, kill)
             for i = 1, object:GetNumRegions() do
-                local region = select(i, object:GetRegions())
+                local region = _G.select(i, object:GetRegions())
                 if region:GetObjectType() == "Texture" then
                     if kill then
                         region:Kill()

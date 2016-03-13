@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Skada = function()
-	SkadaDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Skada = function()
+	_G.SkadaDB = {
 		["namespaces"] = {
 			["LibDualSpec-1.0"] = {
 			},

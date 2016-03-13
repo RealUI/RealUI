@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI["LoadAddOnData_DBM-StatusBarTimers"] = function()
-    DBT_AllPersistentOptions = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI["LoadAddOnData_DBM-StatusBarTimers"] = function()
+    _G.DBT_AllPersistentOptions = {
         ["Default"] = {
             ["DBM"] = {
                 ["HugeTimerY"] = 300,

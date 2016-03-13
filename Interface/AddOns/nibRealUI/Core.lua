@@ -1,34 +1,38 @@
-local nibRealUI = LibStub("AceAddon-3.0"):NewAddon(RealUI, "nibRealUI", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
-local L = nibRealUI.L
-local db, dbc, dbg, _
-local function debug(...)
-    nibRealUI.Debug("Core", ...)
-end
+local ADDON_NAME, private = ...
 
-_G.RealUI = nibRealUI
-nibRealUI.TOC = select(4, GetBuildInfo())
-nibRealUI.isBeta = nibRealUI.TOC >= 70000
+-- Lua Globals --
+local _G = _G
+local next, type = _G.next, _G.type
 
-nibRealUI.verinfo = {}
-for word, letter in string.gmatch(GetAddOnMetadata("nibRealUI", "Version"), "(%d+)(%a*)") do
+-- Libs --
+local C = _G.Aurora[2]
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, dbc, dbg
+local debug = private.debug("Core")
+
+RealUI.verinfo = {}
+for word, letter in _G.GetAddOnMetadata(ADDON_NAME, "Version"):gmatch("(%d+)(%a*)") do
     debug(word, letter)
-    if tonumber(word) then
-        tinsert(nibRealUI.verinfo, tonumber(word))
+    if _G.tonumber(word) then
+        _G.tinsert(RealUI.verinfo, _G.tonumber(word))
     end
     if letter ~= "" then
-        tinsert(nibRealUI.verinfo, letter)
+        _G.tinsert(RealUI.verinfo, letter)
     end
 end
 
-if not REALUI_STRIPE_TEXTURES then REALUI_STRIPE_TEXTURES = {} end
-if not REALUI_WINDOW_FRAMES then REALUI_WINDOW_FRAMES = {} end
+if not _G.REALUI_STRIPE_TEXTURES then _G.REALUI_STRIPE_TEXTURES = {} end
+if not _G.REALUI_WINDOW_FRAMES then _G.REALUI_WINDOW_FRAMES = {} end
 
-nibRealUI.oocFunctions = {}
-nibRealUI.configModeModules = {}
+RealUI.oocFunctions = {}
+RealUI.configModeModules = {}
 
 -- Localized Fonts
 do
-    local LSM = LibStub("LibSharedMedia-3.0")
+    local LSM = _G.LibStub("LibSharedMedia-3.0")
     local lsmFonts = LSM:List("font")
     local function findFont(font, backup)
         local fontPath, fontSize, fontArgs = font:GetFont()
@@ -55,21 +59,21 @@ do
         end
     end
     local fonts = {
-        standard = findFont(RealUIFont_Normal, SystemFont_Small),
-        chat = findFont(RealUIFont_Chat, NumberFont_Normal_Med),
-        crit = findFont(RealUIFont_Crit, NumberFont_Outline_Huge),
-        header = findFont(RealUIFont_Header, QuestFont_Huge),
+        standard = findFont(_G.RealUIFont_Normal, _G.SystemFont_Small),
+        chat = findFont(_G.RealUIFont_Chat, _G.NumberFont_Normal_Med),
+        crit = findFont(_G.RealUIFont_Crit, _G.NumberFont_Outline_Huge),
+        header = findFont(_G.RealUIFont_Header, _G.QuestFont_Huge),
         pixel = {
-            small =    findFont(RealUIFont_PixelSmall, SystemFont_Small),
-            large =    findFont(RealUIFont_PixelLarge, SystemFont_Med1),
-            numbers =  findFont(RealUIFont_PixelNumbers, SystemFont_Large),
-            cooldown = findFont(RealUIFont_PixelCooldown, SystemFont_Large),
+            small =    findFont(_G.RealUIFont_PixelSmall, _G.SystemFont_Small),
+            large =    findFont(_G.RealUIFont_PixelLarge, _G.SystemFont_Med1),
+            numbers =  findFont(_G.RealUIFont_PixelNumbers, _G.SystemFont_Large),
+            cooldown = findFont(_G.RealUIFont_PixelCooldown, _G.SystemFont_Large),
         }
     }
-    nibRealUI.media.font = fonts
+    RealUI.media.font = fonts
 end
 
-nibRealUI.defaultPositions = {
+RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
         ["Nothing"] = 0,
         ["HuDX"] = 0,
@@ -131,7 +135,7 @@ nibRealUI.defaultPositions = {
 }
 
 -- Offset some UI Elements for Large/Small HuD size settings
-nibRealUI.hudSizeOffsets = {
+RealUI.hudSizeOffsets = {
     [1] = {
         ["UFHorizontal"] = 0,
         ["SpellAlertWidth"] = 0,
@@ -200,7 +204,7 @@ local defaults = {
         registeredChars = {},
         -- HuD positions
         positionsLink = true,
-        positions = nibRealUI.defaultPositions,
+        positions = RealUI.defaultPositions,
         -- Action Bar settings
         abSettingsLink = false,
         -- Dynamic UI settings
@@ -212,52 +216,52 @@ local defaults = {
             hudSize = 1,
             reverseUnitFrameBars = false,
         },
-        media = nibRealUI.media
+        media = RealUI.media
     },
 }
 --------------------------------------------------------
 
 -- Toggle Grid2's "Test Layout"
-function nibRealUI:ToggleGridTestMode(show)
-    if not Grid2 then return end
+function RealUI:ToggleGridTestMode(show)
+    if not _G.Grid2 then return end
     if show then
-        if RealUIGridConfiguring then return end
-        if not Grid2Options then Grid2:LoadGrid2Options() end
-        Grid2Options.LayoutTestEnable(Grid2Options, "By Group 20")
-        RealUIGridConfiguring = true
+        if _G.RealUIGridConfiguring then return end
+        if not _G.Grid2Options then _G.Grid2:LoadGrid2Options() end
+        _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group 20")
+        _G.RealUIGridConfiguring = true
     else
-        RealUIGridConfiguring = false
-        if Grid2Options then
-            Grid2Options.LayoutTestEnable(Grid2Options)
+        _G.RealUIGridConfiguring = false
+        if _G.Grid2Options then
+            _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
         end
     end
 end
 
 -- Move HuD Up if using a Low Resolution display
-function nibRealUI:SetLowResOptimizations(...)
+function RealUI:SetLowResOptimizations(...)
     local dbp, dp = db.positions, self.defaultPositions
-    if (dbp[nibRealUI.cLayout]["HuDY"] == dp[nibRealUI.cLayout]["HuDY"]) then
-        dbp[nibRealUI.cLayout]["HuDY"] = -5
+    if (dbp[RealUI.cLayout]["HuDY"] == dp[RealUI.cLayout]["HuDY"]) then
+        dbp[RealUI.cLayout]["HuDY"] = -5
     end
-    if (dbp[nibRealUI.ncLayout]["HuDY"] == dp[nibRealUI.ncLayout]["HuDY"]) then
-        dbp[nibRealUI.ncLayout]["HuDY"] = -5
+    if (dbp[RealUI.ncLayout]["HuDY"] == dp[RealUI.ncLayout]["HuDY"]) then
+        dbp[RealUI.ncLayout]["HuDY"] = -5
     end
 
-    nibRealUI:UpdateLayout()
+    RealUI:UpdateLayout()
 
     dbg.tags.lowResOptimized = true
 end
 
-function nibRealUI:LowResOptimizationCheck(...)
-    local resWidth, resHeight = nibRealUI:GetResolutionVals()
+function RealUI:LowResOptimizationCheck(...)
+    local _, resHeight = RealUI:GetResolutionVals()
     if (resHeight < 900) and not(dbg.tags.lowResOptimized) then
-        nibRealUI:SetLowResOptimizations(...)
+        RealUI:SetLowResOptimizations(...)
     end
 end
 
 -- Check if user is using a Retina Display
-function nibRealUI:RetinaDisplayCheck()
-    local resWidth, resHeight = nibRealUI:GetResolutionVals()
+function RealUI:RetinaDisplayCheck()
+    local resWidth, resHeight = RealUI:GetResolutionVals()
     if (resWidth > 2560) and (resHeight > 1600) then
         return true
     else
@@ -268,7 +272,7 @@ function nibRealUI:RetinaDisplayCheck()
 end
 
 -- Power Mode
-function nibRealUI:SetPowerMode(val)
+function RealUI:SetPowerMode(val)
     -- Core\SpiralBorder, HuD\UnitFrames, Modules\PlayerShields, Modules\RaidDebuffs, Modules\Pitch
     db.settings.powerMode = val
     for k, mod in self:IterateModules() do
@@ -279,24 +283,25 @@ function nibRealUI:SetPowerMode(val)
 end
 
 ---- Style Updates ----
-function nibRealUI:StyleSetWindowOpacity()
-    for k, frame in pairs(REALUI_WINDOW_FRAMES) do
+function RealUI:StyleSetWindowOpacity()
+    local color = RealUI.media.window
+    for k, frame in next, _G.REALUI_WINDOW_FRAMES do
         if frame.SetBackdropColor then
-            frame:SetBackdropColor(unpack(nibRealUI.media.window))
+            frame:SetBackdropColor(color[1], color[2], color[3], color[4])
         end
     end
 end
 
-function nibRealUI:StyleSetStripeOpacity()
-    for k, tex in pairs(REALUI_STRIPE_TEXTURES) do
+function RealUI:StyleSetStripeOpacity()
+    for k, tex in next, _G.REALUI_STRIPE_TEXTURES do
         if tex.SetAlpha then
-            tex:SetAlpha(RealUI_InitDB.stripeOpacity)
+            tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         end
     end
 end
 
 -- Style - Global Colors
-function nibRealUI:StyleUpdateColors()
+function RealUI:StyleUpdateColors()
     for k, mod in self:IterateModules() do
         if self:GetModuleEnabled(k) and mod.UpdateGlobalColors and type(mod.UpdateGlobalColors) == "function" then
             mod:UpdateGlobalColors()
@@ -305,7 +310,7 @@ function nibRealUI:StyleUpdateColors()
 end
 
 -- Layout Updates
-function nibRealUI:SetLayout()
+function RealUI:SetLayout()
     -- Set Current and Not-Current layout variables
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
@@ -317,7 +322,7 @@ function nibRealUI:SetLayout()
     self:UpdatePositioners()
 
 
-    if RealUIGridConfiguring then
+    if _G.RealUIGridConfiguring then
         self:ScheduleTimer(function()
             self:ToggleGridTestMode(false)
             self:ToggleGridTestMode(true)
@@ -334,7 +339,7 @@ function nibRealUI:SetLayout()
     -- Grid Layout changer
     if self:GetModuleEnabled("GridLayout") then
         local GL = self:GetModule("GridLayout", true)
-        if GL then GL:SettingsUpdate("nibRealUI:SetLayout") end
+        if GL then GL:SettingsUpdate("RealUI:SetLayout") end
     end
 
     -- Layout Button (For Installation)
@@ -351,11 +356,11 @@ function nibRealUI:SetLayout()
 
     dbc.layout.needchanged = false
 end
-function nibRealUI:UpdateLayout()
-    if InCombatLockdown() then
+function RealUI:UpdateLayout()
+    if _G.InCombatLockdown() then
         -- Register to update once combat ends
         if not self.oocFunctions["SetLayout"] then
-            self:RegisterLockdownUpdate("SetLayout", function() nibRealUI:SetLayout() end)
+            self:RegisterLockdownUpdate("SetLayout", function() RealUI:SetLayout() end)
             dbc.layout.needchanged = true
         end
         self:Notification("RealUI", true, L["Layout_ApplyOOC"])
@@ -367,10 +372,10 @@ function nibRealUI:UpdateLayout()
 end
 
 -- Lockdown check, out-of-combat updates
-function nibRealUI:LockdownUpdates()
-    if not InCombatLockdown() then
+function RealUI:LockdownUpdates()
+    if not _G.InCombatLockdown() then
         local stillProcessing
-        for k, fun in pairs(self.oocFunctions) do
+        for k, fun in next, self.oocFunctions do
             self.oocFunctions[k] = nil
             if type(fun) == "function" then
                 fun()
@@ -384,11 +389,11 @@ function nibRealUI:LockdownUpdates()
         end
     end
 end
-function nibRealUI:UpdateLockdown(...)
+function RealUI:UpdateLockdown(...)
     if not self.lockdownTimer then self.lockdownTimer = self:ScheduleRepeatingTimer("LockdownUpdates", 0.5) end
 end
-function nibRealUI:RegisterLockdownUpdate(id, fun, ...)
-    if not InCombatLockdown() then
+function RealUI:RegisterLockdownUpdate(id, fun, ...)
+    if not _G.InCombatLockdown() then
         self.oocFunctions[id] = nil
         fun(...)
     else
@@ -397,25 +402,25 @@ function nibRealUI:RegisterLockdownUpdate(id, fun, ...)
 end
 
 -- Version info retrieval
-function nibRealUI:GetVerString(returnLong)
-    local verinfo = nibRealUI.verinfo
+function RealUI:GetVerString(returnLong)
+    local verinfo = RealUI.verinfo
     if returnLong then
-        return string.format("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r", verinfo[1], verinfo[2], verinfo[3], verinfo[4] or "")
+        return ("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r"):format(verinfo[1], verinfo[2], verinfo[3], verinfo[4] or "")
     else
-        return string.format("%s.%s", verinfo[1], verinfo[2])
+        return ("%s.%s"):format(verinfo[1], verinfo[2])
     end
 end
-function nibRealUI:MajorVerChange(oldVer, curVer)
+function RealUI:MajorVerChange(oldVer, curVer)
     return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
 end
 
 -- Events
-function nibRealUI:VARIABLES_LOADED()
+function RealUI:VARIABLES_LOADED()
     ---- Blizzard Bug Fixes
     -- No Map emote
-    hooksecurefunc("DoEmote", function(emote)
-        if emote == "READ" and WorldMapFrame:IsShown() then
-            CancelEmote()
+    _G.hooksecurefunc("DoEmote", function(emote)
+        if emote == "READ" and _G.WorldMapFrame:IsShown() then
+            _G.CancelEmote()
         end
     end)
 
@@ -427,16 +432,16 @@ function nibRealUI:VARIABLES_LOADED()
     -- end)
 
     -- Fix Regeant shift+clicking in TradeSkill window
-    LoadAddOn("Blizzard_TradeSkillUI")
-    local function TradeSkillReagent_OnClick(self)
-        local link, name = GetTradeSkillReagentItemLink(TradeSkillFrame.selectedSkill, self:GetID())
+    _G.LoadAddOn("Blizzard_TradeSkillUI")
+    local function TradeSkillReagent_OnClick(button)
+        local link = _G.GetTradeSkillReagentItemLink(_G.TradeSkillFrame.selectedSkill, button:GetID())
         if not link then
-            name, link = GameTooltip:GetItem()
-            if name ~= self.name:GetText() then
+            local name = _G.GameTooltip:GetItem()
+            if name ~= button.name:GetText() then
                 return
             end
         end
-        HandleModifiedItemClick(link)
+        _G.HandleModifiedItemClick(link)
     end
     for i = 1, 8 do
         _G["TradeSkillReagent"..i]:SetScript("OnClick", TradeSkillReagent_OnClick)
@@ -444,75 +449,75 @@ function nibRealUI:VARIABLES_LOADED()
 end
 
 -- Delayed updates
-function nibRealUI:UPDATE_PENDING_MAIL()
+function RealUI:UPDATE_PENDING_MAIL()
     self:UnregisterEvent("UPDATE_PENDING_MAIL")
 
-    CancelEmote()   -- Cancel Map Holding animation
+    _G.CancelEmote()   -- Cancel Map Holding animation
 
     -- Refresh WatchFrame lines and positioning
-    if ObjectiveTrackerFrame and ObjectiveTrackerFrame.collapsed then
-        ObjectiveTracker_Collapse()
-        ObjectiveTracker_Expand()
+    if _G.ObjectiveTrackerFrame and _G.ObjectiveTrackerFrame.collapsed then
+        _G.ObjectiveTracker_Collapse()
+        _G.ObjectiveTracker_Expand()
     end
 end
 
 local lastGarbageCollection = 0
-function nibRealUI:PLAYER_ENTERING_WORLD()
+function RealUI:PLAYER_ENTERING_WORLD()
     self:LockdownUpdates()
 
     -- Modify Main Menu
-    for i = 1, GameMenuFrame:GetNumRegions() do
-        local region = select(i, GameMenuFrame:GetRegions())
+    for i = 1, _G.GameMenuFrame:GetNumRegions() do
+        local region =  _G.select(i, _G.GameMenuFrame:GetRegions())
         if region:GetObjectType() == "FontString" then
-            if region:GetText() == MAINMENU_BUTTON then
-                region:SetFontObject(RealUIFont_PixelSmall)
-                region:SetTextColor(unpack(nibRealUI.classColor))
+            if region:GetText() == _G.MAINMENU_BUTTON then
+                region:SetFontObject(_G.RealUIFont_PixelSmall)
+                region:SetTextColor(C.r, C.g, C.b)
                 region:SetShadowColor(0, 0, 0, 0)
-                region:SetPoint("TOP", GameMenuFrame, "TOP", 0, -10.5)
+                region:SetPoint("TOP", _G.GameMenuFrame, "TOP", 0, -10.5)
             end
         end
     end
 
-    GameMenuButtonStore:SetScale(0.00001)
-    GameMenuButtonStore:SetAlpha(0)
+    _G.GameMenuButtonStore:SetScale(0.00001)
+    _G.GameMenuButtonStore:SetAlpha(0)
 
     -- RealUI Control
-    local ConfigStr = string.format("|cffffffffReal|r|cff%sUI|r Config", nibRealUI:ColorTableToStr(nibRealUI.media.colors.red))
-    GameMenuFrame.realuiControl = nibRealUI:CreateTextButton(ConfigStr, GameMenuFrame, "GameMenuButtonTemplate")
-    GameMenuFrame.realuiControl:SetPoint("TOP", GameMenuButtonContinue, "BOTTOM", 0, -16)
-    GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() nibRealUI:LoadConfig("HuD"); HideUIPanel(GameMenuFrame) end)
+    local ConfigStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
+    _G.GameMenuFrame.realuiControl = RealUI:CreateTextButton(ConfigStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    _G.GameMenuFrame.realuiControl:SetPoint("TOP", _G.GameMenuButtonContinue, "BOTTOM", 0, -16)
+    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() RealUI:LoadConfig("HuD"); _G.HideUIPanel(_G.GameMenuFrame) end)
 
     -- Button Backgrounds
-    nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonHelp, GameMenuButtonWhatsNew)
-    nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonOptions, GameMenuButtonAddons)
+    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
+    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonOptions, _G.GameMenuButtonAddons)
 
-    nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonLogout, GameMenuButtonQuit)
-    nibRealUI:CreateBGSection(GameMenuFrame, GameMenuButtonContinue, GameMenuButtonContinue)
-    nibRealUI:CreateBGSection(GameMenuFrame, GameMenuFrame.realuiControl, GameMenuFrame.realuiControl)
+    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonLogout, _G.GameMenuButtonQuit)
+    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonContinue, _G.GameMenuButtonContinue)
+    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuFrame.realuiControl, _G.GameMenuFrame.realuiControl)
 
     -- >= 10 minute garbage collection
     self:ScheduleTimer(function()
-        local now = GetTime()
+        local now = _G.GetTime()
         if now >= lastGarbageCollection + 600 then
-            collectgarbage("collect")
+             _G.collectgarbage("collect")
             lastGarbageCollection = now
         end
     end, 1)
 
     -- Position Chat Frame
-    if nibRealUICharacter.needchatmoved then
-        ChatFrame1:ClearAllPoints()
-        ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
-        ChatFrame1:SetFrameLevel(15)
-        ChatFrame1:SetHeight(145)
-        ChatFrame1:SetWidth(400)
-        ChatFrame1:SetUserPlaced(true)
-        FCF_SavePositionAndDimensions(ChatFrame1)
-        nibRealUICharacter.needchatmoved = false
+    if _G.nibRealUICharacter.needchatmoved then
+        _G.ChatFrame1:ClearAllPoints()
+        _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
+        _G.ChatFrame1:SetFrameLevel(15)
+        _G.ChatFrame1:SetHeight(145)
+        _G.ChatFrame1:SetWidth(400)
+        _G.ChatFrame1:SetUserPlaced(true)
+        _G.FCF_SavePositionAndDimensions(_G.ChatFrame1)
+        _G.nibRealUICharacter.needchatmoved = false
     end
 end
 
-function nibRealUI:PLAYER_LOGIN()
+function RealUI:PLAYER_LOGIN()
     -- Retina Display check
     if not(dbg.tags.retinaDisplay.checked) and self:RetinaDisplayCheck() then
         self:InitRetinaDisplayOptions()
@@ -520,12 +525,12 @@ function nibRealUI:PLAYER_LOGIN()
     end
 
     -- Low Res optimization check
-    if (nibRealUICharacter and nibRealUICharacter.installStage == -1) then
+    if (_G.nibRealUICharacter and _G.nibRealUICharacter.installStage == -1) then
         self:LowResOptimizationCheck()
     end
 
     -- Tutorial
-    if (nibRealUICharacter and nibRealUICharacter.installStage == -1) then
+    if (_G.nibRealUICharacter and _G.nibRealUICharacter.installStage == -1) then
         if (dbg.tutorial.stage == 0) then
             self:InitTutorial()
         end
@@ -536,58 +541,58 @@ function nibRealUI:PLAYER_LOGIN()
 
     -- Do we need a Layout change?
     if dbc.layout.needchanged then
-        nibRealUI:UpdateLayout()
+        RealUI:UpdateLayout()
     end
 
     -- Helpful messages
-    local blue = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
-    local red = nibRealUI:ColorTableToStr(nibRealUI.media.colors.red)
+    local blue = RealUI:ColorTableToStr(RealUI.media.colors.blue)
+    local red = RealUI:ColorTableToStr(RealUI.media.colors.red)
 
-    if (nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
+    if (_G.nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then
             -- This part should be in the bag addon
-            if IsAddOnLoaded("cargBags_Nivaya") then
-                hooksecurefunc(Nivaya, "OnShow", function()
-                    if nibRealUI.db.global.messages.resetNew then return end
-                    nibRealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                    nibRealUI.db.global.messages.resetNew = true
+            if _G.IsAddOnLoaded("cargBags_Nivaya") then
+                _G.hooksecurefunc(_G.Nivaya, "OnShow", function()
+                    if RealUI.db.global.messages.resetNew then return end
+                    RealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
+                    RealUI.db.global.messages.resetNew = true
                 end)
             end
         end
-        if not LOCALE_enUS then
-            print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+        if not _G.LOCALE_enUS then
+             _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
         end
     end
 
-    if not nibRealUI.db.global.messages.AuraTrackerReset and nibRealUI.verinfo[3] <= 14 then
-        StaticPopupDialogs["RUI_AURATRACKER_RESET"] = {
+    if not RealUI.db.global.messages.AuraTrackerReset and RealUI.verinfo[3] <= 14 then
+        _G.StaticPopupDialogs["RUI_AURATRACKER_RESET"] = {
             text = "In the next revision update (r15), Aura Tracker settings will be reset. See this thread for details.",
-            button1 = OKAY,
+            button1 = _G.OKAY,
             OnAccept = function()
-                nibRealUI.db.global.messages.AuraTrackerReset = true
+                RealUI.db.global.messages.AuraTrackerReset = true
             end,
             whileDead = true,
             hideOnEscape = true,
             hasEditBox = true,
-            OnShow = function(self)
-                self.editBox:SetFocus()
-                self.editBox:SetText("http://www.wowinterface.com/forums/showthread.php?t=52754")
-                self.editBox:HighlightText()
+            OnShow = function(frame)
+                frame.editBox:SetFocus()
+                frame.editBox:SetText("http://www.wowinterface.com/forums/showthread.php?t=52754")
+                frame.editBox:HighlightText()
             end,
-            EditBoxOnEscapePressed = function(self)
-                self:GetParent():Hide()
-                ClearCursor()
+            EditBoxOnEscapePressed = function(button)
+                button:GetParent():Hide()
+                _G.ClearCursor()
             end
         }
-        StaticPopup_Show("RUI_AURATRACKER_RESET")
+        _G.StaticPopup_Show("RUI_AURATRACKER_RESET")
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
-    if GetCVar("scriptProfile") == "1" then
-        print(format(L["Slash_Profile"], red, blue))
+    if _G.GetCVar("scriptProfile") == "1" then
+         _G.print(L["Slash_Profile"]:format(red, blue))
     end
-    if GetCVar("taintLog") ~= "0" then
-        print(format(L["Slash_Taint"], red, blue))
+    if _G.GetCVar("taintLog") ~= "0" then
+         _G.print(L["Slash_Taint"]:format(red, blue))
     end
 
     -- Update styling
@@ -596,75 +601,72 @@ function nibRealUI:PLAYER_LOGIN()
 end
 
 -- To help position UI elements
-function RealUI_TestRaidWarnings()
-    nibRealUI:ScheduleRepeatingTimer(function()
-        RaidNotice_AddMessage(RaidWarningFrame, CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
-        RaidNotice_AddMessage(RaidBossEmoteFrame, CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
+function _G.RealUI_TestRaidWarnings()
+    RealUI:ScheduleRepeatingTimer(function()
+        _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
+        _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
     end, 5)
 end
 
-function nibRealUI:CPU_Profiling_Toggle()
-    SetCVar("scriptProfile", (GetCVar("scriptProfile") == "1") and "0" or "1")
-    ReloadUI()
+function RealUI:CPU_Profiling_Toggle()
+    _G.SetCVar("scriptProfile", (_G.GetCVar("scriptProfile") == "1") and "0" or "1")
+    _G.ReloadUI()
 end
 
-function nibRealUI:Taint_Logging_Toggle()
-    local taintLog = GetCVar("taintLog")
-    SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
-    ReloadUI()
+function RealUI:Taint_Logging_Toggle()
+    local taintLog = _G.GetCVar("taintLog")
+    _G.SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
+    _G.ReloadUI()
 end
 
-function nibRealUI:ADDON_LOADED(event, addon)
-    if addon ~= "nibRealUI" then return end
+function RealUI:ADDON_LOADED(event, addon)
+    if addon ~= ADDON_NAME then return end
 
     -- Open before login to stop taint
-    ToggleFrame(SpellBookFrame)
+    _G.ToggleFrame(_G.SpellBookFrame)
 end
 
-function nibRealUI:ChatCommand_Config()
+function RealUI:ChatCommand_Config()
     dbg.tags.slashRealUITyped = true
-    nibRealUI:LoadConfig("HuD")
+    RealUI:LoadConfig("HuD")
 end
 
 local configLoaded, configFailed = false, false
-function nibRealUI:LoadConfig(app, section, ...)
+function RealUI:LoadConfig(app, section, ...)
     if not configLoaded then
         configLoaded = true
-        local loaded, reason = LoadAddOn("nibRealUI_Config")
+        local loaded, reason = _G.LoadAddOn("nibRealUI_Config")
         if not loaded then
-            print("Failed to load nibRealUI_Config:", reason)
+             _G.print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end
     if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
-    nibRealUI:SetUpOptions()
+    RealUI:SetUpOptions()
     if app == "HuD" and not ... then
-        return nibRealUI:ShowConfigBar()
+        return RealUI:ShowConfigBar()
     end
-    if LibStub("AceConfigDialog-3.0").OpenFrames[app] then
-        LibStub("AceConfigDialog-3.0"):Close(app)
+    local ACD = _G.LibStub("AceConfigDialog-3.0")
+    if ACD.OpenFrames[app] then
+        ACD:Close(app)
     else
-        LibStub("AceConfigDialog-3.0"):Open(app, section, ...)
+        ACD:Open(app, section, ...)
     end
 end
 
-function nibRealUI:OnInitialize()
+function RealUI:OnInitialize()
     -- Initialize settings, options, slash commands
-    self.db = LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
+    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
     self.media = db.media
 
     -- Vars
-    self.realm = GetRealmName()
-    self.faction = UnitFactionGroup("player")
-    self.classLocale, self.class, self.classID = UnitClass("player")
-    self.classColor = nibRealUI:GetClassColor(self.class)
-    self.name = UnitName("player")
-    self.key = string.format("%s - %s", self.name, self.realm)
+    self.classColor = RealUI:GetClassColor(self.class)
+    self.key = ("%s - %s"):format(self.name, self.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
@@ -684,9 +686,9 @@ function nibRealUI:OnInitialize()
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function() nibRealUI:LoadConfig("nibRealUI") end)
+    self:RegisterChatCommand("realadv", function() RealUI:LoadConfig(ADDON_NAME) end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
-    self:RegisterChatCommand("rl", function() ReloadUI() end)
+    self:RegisterChatCommand("rl", function() _G.ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
@@ -700,18 +702,18 @@ function nibRealUI:OnInitialize()
         end
         self:FindSpellID(spellName, unit, auraType)
     end)
-    GameMenuFrame:HookScript("OnShow", function() GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + 27) end)
+    _G.GameMenuFrame:HookScript("OnShow", function() _G.GameMenuFrame:SetHeight(_G.GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings
     if dbg.tags.firsttime then
-        SetCVar("synchronizeSettings", 1)
-        SetCVar("synchronizeConfig", 1)
-        SetCVar("synchronizeBindings", 1)
-        SetCVar("synchronizeMacros", 1)
+        _G.SetCVar("synchronizeSettings", 1)
+        _G.SetCVar("synchronizeConfig", 1)
+        _G.SetCVar("synchronizeBindings", 1)
+        _G.SetCVar("synchronizeMacros", 1)
     end
 
     if db.settings.stripeOpacity then
-        RealUI_InitDB.stripeOpacity = db.settings.stripeOpacity
+        _G.RealUI_InitDB.stripeOpacity = db.settings.stripeOpacity
         db.settings.stripeOpacity = nil
     end
 
@@ -725,34 +727,32 @@ function nibRealUI:OnInitialize()
     --end)
 
     -- Done
-    print(format("RealUI %s loaded.", nibRealUI:GetVerString(true)))
-    if not(dbg.tags.slashRealUITyped) and nibRealUICharacter and (nibRealUICharacter.installStage == -1) then
-        print(string.format(L["Slash_RealUI"], "|cFFFF8000/realui|r"))
+     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
+    if not(dbg.tags.slashRealUITyped) and _G.nibRealUICharacter and (_G.nibRealUICharacter.installStage == -1) then
+         _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
 end
 
-function nibRealUI:RegisterConfigModeModule(module)
+function RealUI:RegisterConfigModeModule(module)
     if module and module.ToggleConfigMode and type(module.ToggleConfigMode) == "function" then
-        tinsert(self.configModeModules, module)
+        _G.tinsert(self.configModeModules, module)
     end
 end
 
 do
     local prototype = {
         debug = function(self, ...)
-            nibRealUI.Debug(self.moduleName, ...)
+            RealUI.Debug(self.moduleName, ...)
         end,
     }
-    function nibRealUI:CreateModule(name, ...)
-        return self:NewModule(name, prototype, ...)
-    end
+    RealUI:SetDefaultModulePrototype(prototype)
 end
 
-function nibRealUI:GetModuleEnabled(module)
+function RealUI:GetModuleEnabled(module)
     return db.modules[module]
 end
 
-function nibRealUI:SetModuleEnabled(module, value)
+function RealUI:SetModuleEnabled(module, value)
     local old = db.modules[module]
     db.modules[module] = value
     if old ~= value then
@@ -765,6 +765,6 @@ function nibRealUI:SetModuleEnabled(module, value)
     end
 end
 
-function nibRealUI:Refresh()
-    nibRealUI:ReloadUIDialog()
+function RealUI:Refresh()
+    RealUI:ReloadUIDialog()
 end

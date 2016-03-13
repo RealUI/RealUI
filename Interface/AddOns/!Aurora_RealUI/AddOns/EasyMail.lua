@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)

@@ -1,4 +1,6 @@
 local _, mods = ...
+
+-- Lua Globals --
 local _G = _G
 
 mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
@@ -9,8 +11,8 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
     local function FormatValues(value, enabled, ...)
         if value == nil then
             return
-        elseif ( type(value) == "number" or ( type(value) == "string" and value:match("^[-+]?[%d.,]+$") )) and tonumber(value) > 1000 then
-            value = _G.Skada:FormatNumber(tonumber(value))
+        elseif ( _G.type(value) == "number" or ( _G.type(value) == "string" and value:match("^[-+]?[%d.,]+$") )) and _G.tonumber(value) > 1000 then
+            value = _G.Skada:FormatNumber(_G.tonumber(value))
         end
         return value, enabled, FormatValues(...)
     end
@@ -42,7 +44,7 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
         end
     end
 
-    for _, window in ipairs(_G.Skada:GetWindows()) do
+    for _, window in _G.ipairs(_G.Skada:GetWindows()) do
         window:UpdateDisplay()
     end
 end

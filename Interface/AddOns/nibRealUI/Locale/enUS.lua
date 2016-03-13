@@ -1,10 +1,13 @@
-local ADDON_NAME, private = ...
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = {}
 
-RealUI.locale = GAME_LOCALE or GetLocale()
+RealUI.locale = _G.GAME_LOCALE or _G.GetLocale()
 
 -- General
 L["Alert_CombatLockdown"] = "Combat Lockdown"

@@ -5,7 +5,7 @@ local debug = private.debug
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, type = _G.next, _G.type
 local tostring, tonumber = _G.tostring, _G.tonumber
 local tinsert = _G.table.insert
 
@@ -865,9 +865,9 @@ local unitframes do
         else
             local GridLayout = RealUI:GetModule("GridLayout")
             db = GridLayout.db.profile
-            for i, type in next, {"dps", "healing"} do
-                local args = group.args[type].args
-                local anchor = (type == "dps") and "Bottom" or "Top"
+            for i, layout in next, {"dps", "healing"} do
+                local args = group.args[layout].args
+                local anchor = (layout == "dps") and "Bottom" or "Top"
                 args.horizontal = {
                     name = L["HuD_Horizontal"],
                     disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
@@ -889,7 +889,7 @@ local unitframes do
                     disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
                     type = "range",
                     width = "full",
-                    min = type == "dps" and 0 or -round(uiWidth * 0.2),
+                    min = layout == "dps" and 0 or -round(uiWidth * 0.2),
                     max = round(uiHeight * 0.5),
                     step = 1,
                     bigStep = 2,
@@ -911,9 +911,9 @@ local unitframes do
                             name = L["Raid_SmallGroup"],
                             desc = L["Raid_SmallGroupDesc"],
                             type = "toggle",
-                            get = function() return db[type].hGroups.normal end,
+                            get = function() return db[layout].hGroups.normal end,
                             set = function(info, value)
-                                db[type].hGroups.normal = value
+                                db[layout].hGroups.normal = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 10,
@@ -922,9 +922,9 @@ local unitframes do
                             name = L["Raid_LargeGroup"],
                             desc = L["Raid_LargeGroupDesc"],
                             type = "toggle",
-                            get = function() return db[type].hGroups.raid end,
+                            get = function() return db[layout].hGroups.raid end,
                             set = function(info, value)
-                                db[type].hGroups.raid = value
+                                db[layout].hGroups.raid = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 20,
@@ -935,9 +935,9 @@ local unitframes do
                     name = _G.SHOW_PARTY_PETS_TEXT,
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[type].showPet end,
+                    get = function() return db[layout].showPet end,
                     set = function(info, value)
-                        db[type].showPet = value
+                        db[layout].showPet = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 20,
@@ -946,14 +946,14 @@ local unitframes do
                     name = L["Raid_ShowSolo"],
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[type].showSolo end,
+                    get = function() return db[layout].showSolo end,
                     set = function(info, value)
-                        db[type].showSolo = value
+                        db[layout].showSolo = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 30,
                 }
-                local prof = (type == "dps") and "RealUI" or "RealUI-Healing"
+                local prof = (layout == "dps") and "RealUI" or "RealUI-Healing"
                 local Grid2DB = _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
                 args.height = {
                     name = _G.RAID_FRAMES_HEIGHT,
@@ -978,9 +978,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width.normal end,
+                    get = function(info) return db[layout].width.normal end,
                     set = function(info, value)
-                        db[type].width.normal = value
+                        db[layout].width.normal = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -990,9 +990,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width[30] end,
+                    get = function(info) return db[layout].width[30] end,
                     set = function(info, value)
-                        db[type].width[30] = value
+                        db[layout].width[30] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -1002,9 +1002,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[type].width[40] end,
+                    get = function(info) return db[layout].width[40] end,
                     set = function(info, value)
-                        db[type].width[40] = value
+                        db[layout].width[40] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -1747,7 +1747,7 @@ local classresource do
     if power or bars then
         classresource = {
             name = L["Resource"],
-            icon = [[Interface\AddOns\RealUI\Media\Config\Advanced]],
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
             type = "group",
             childGroups = "tab",
             order = 5,
