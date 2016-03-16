@@ -505,6 +505,7 @@ local function CreateNewBlock(name, dataObj)
     InfoLine:debug("CreateNewBlock", name, dataObj)
     local block = _G.CreateFrame("Button", "InfoLine_" .. name, InfoLine.frame)
     block.dataObj = dataObj
+    dataObj.block = block
     block.name = name
     local width, space = 0, 4
     
@@ -518,7 +519,7 @@ local function CreateNewBlock(name, dataObj)
     text:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
     text:SetPoint("RIGHT", 0, 0)
     text:SetText(dataObj.text)
-    if dataObj.value and (dataObj.suffix ~= "" or dataObj.suffix ~= nil) then
+    if dataObj.suffix and dataObj.suffix ~= "" then
         text:SetText(dataObj.value .. " " .. dataObj.suffix)
     else
         text:SetText(dataObj.value or dataObj.text)
@@ -644,7 +645,7 @@ do
     end
 
     function InfoLine:RemoveBlock(name, blockInfo)
-        self:debug("AddBlock:", name, blockInfo.index, blockInfo.side)
+        self:debug("RemoveBlock:", name, blockInfo.index, blockInfo.side)
         local active, nextBlock, oldBlock = self.frame[blockInfo.side]
         for index, block in ipairs(active) do
             if name == block.name then
@@ -671,7 +672,7 @@ function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate
         blockInfo = db.blocks.realui[name]
         self:debug("RealUI object", blockInfo.enabled)
         if blockInfo.enabled then
-            CreateNewBlock(name, dataObj)
+            InfoLine:AddBlock(name, dataObj, blockInfo)
         end
     elseif dataObj.type == "data source" then
         blockInfo = db.blocks.others[name]
@@ -684,7 +685,32 @@ function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate
         end
     end
 end
-
+function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
+    self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
+    local block = dataObj.block
+    if block then
+        if attr == "value" or attr == "suffix" or attr == "text" then
+            local blockWidth = block:GetWidth()
+            local oldStringWidth = block.text:GetStringWidth()
+            if dataObj.suffix and dataObj.suffix ~= "" then
+                block.text:SetText(dataObj.value .. " " .. dataObj.suffix)
+            else
+                block.text:SetText(dataObj.value or dataObj.text)
+            end
+            local newStringWidth = block.text:GetStringWidth()
+            block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
+        end
+        if attr:find("icon") then
+            block.icon:SetTexture(value)
+            if dataObj.iconR then
+                block.icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
+            end
+            if dataObj.iconCoords then
+                block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+            end
+        end
+    end
+end
 --------------------
 -- Initialization --
 --------------------
@@ -785,5 +811,6 @@ function InfoLine:OnEnable()
     end
 
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
+    LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
     self:CreateBlocks()
 end

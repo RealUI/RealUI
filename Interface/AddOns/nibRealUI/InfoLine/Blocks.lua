@@ -1,699 +1,648 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
-local next, type = _G.next, _G.type
-
--- WoW Globals --
-local CreateFrame = _G.CreateFrame
+local ipairs = _G.ipairs
 
 -- Libs --
-local LDB = LibStub("LibDataBroker-1.1")
-local qTip = LibStub("LibQTip-1.0")
-local LIF = LibStub("LibIconFonts-1.0")
+local LDB = _G.LibStub("LibDataBroker-1.1")
+local qTip = _G.LibStub("LibQTip-1.0")
+local LTT = _G.LibStub("LibTextTable-1.1")
+local LIF = _G.LibStub("LibIconFonts-1.0")
 local octicons = LIF:GetIconFont("octicons", "v2.x")
 octicons.path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local.ttf]]
 
 -- RealUI --
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local RealUI = private.RealUI
+local round = RealUI.Round
 local L = RealUI.L
+local ndb
 
 local MODNAME = "InfoLine"
-local InfoLine = nibRealUI:GetModule(MODNAME)
+local InfoLine = RealUI:GetModule(MODNAME)
 
-local round = nibRealUI.Round
+local MAX_ROWS = 11
+local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
+function TextTableCellPrototype:InitializeCell()
+    InfoLine:debug("CellProto:InitializeCell")
 
---[[ template 
-    local test = LDB:NewDataObject("test", {
+    if not self.textTable then
+        local textTable = LTT.New(nil, self, "RealUIFont_Crit", "RealUIFont_Normal")
+        textTable:SetPoint("TOPLEFT", self, "TOPLEFT")
+        textTable:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
+
+        self.textTable = textTable
+    end
+end
+
+function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
+    InfoLine:debug("CellProto:SetupCell")
+    local textTable = self.textTable
+    for rowIndex, rowData in ipairs(data) do
+        InfoLine:debug(rowIndex, rowData.type, _G.unpack(rowData.info))
+        if rowData.type == "header" then
+            textTable:SetHeader(_G.unpack(rowData.info))
+            textTable:SetSortHandlers(true, true, true, true, true, true, true)
+            textTable:SetSortColumn(1)
+        else
+            textTable:AddRow(nil, _G.unpack(rowData.info))
+        end
+    end
+    textTable:Resize()
+    textTable:Show()
+
+    local heightMod = #data <= MAX_ROWS and #data or MAX_ROWS
+    return 200, textTable.Header:GetHeight() * heightMod + 4
+end
+
+function TextTableCellPrototype:ReleaseCell()
+    InfoLine:debug("CellProto:ReleaseCell")
+    if self.textTable then
+        self.textTable:Clear()
+        self.textTable:Hide()
+    end
+end
+
+function TextTableCellPrototype:getContentHeight()
+    InfoLine:debug("CellProto:getContentHeight")
+    return self.textTable:GetHeight()
+end
+
+
+--[[ 
+do -- template 
+    blocks["test"] = {
         type = "RealUI",
         text = "TEST 1 test",
         value = 1,
         suffix = "test",
         label = "TEST"
         icon = Icons[layoutSize].guild
-    })
+    }
+end
 ]]
 
-function InfoLine:CreateBlocks(dbc, ndb)
+--[=[]=]
+function InfoLine:CreateBlocks()
+    ndb = RealUI.db.profile
+
     --[[ Left ]]--
-    -- Start
-    local startMenu = CreateFrame("Frame", "RealUIStartDropDown", UIParent, "UIDropDownMenuTemplate")
-    local menuList = {
-        {text = L["Start_Config"],
-            func = function() nibRealUI:LoadConfig("HuD") end,
-            notCheckable = true,
-        },
-        {text = L["Power_PowerMode"],
-            notCheckable = true,
-            hasArrow = true,
-            menuList = {
-                {
-                    text = L["Power_Eco"],
-                    tooltipTitle = L["Power_Eco"],
-                    tooltipText = L["Power_EcoDesc"],
-                    tooltipOnButton = 1,
-                    func = function() 
-                        nibRealUI:SetPowerMode(2)
-                        nibRealUI:ReloadUIDialog()
-                    end,
-                    checked = function() return ndb.settings.powerMode == 2 end,
-                },
-                {
-                    text = L["Power_Normal"],
-                    tooltipTitle = L["Power_Normal"],
-                    tooltipText = L["Power_NormalDesc"],
-                    tooltipOnButton = 1,
-                    func = function()
-                        nibRealUI:SetPowerMode(1)
-                        nibRealUI:ReloadUIDialog()
-                    end,
-                    checked = function() return ndb.settings.powerMode == 1 end,
-                },
-                {
-                    text = L["Power_Turbo"],
-                    tooltipTitle = L["Power_Turbo"],
-                    tooltipText = L["Power_TurboDesc"],
-                    tooltipOnButton = 1,
-                    func = function()
-                        nibRealUI:SetPowerMode(3)
-                        nibRealUI:ReloadUIDialog()
-                    end,
-                    checked = function() return ndb.settings.powerMode == 3 end,
+    do  -- Start
+        local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "UIDropDownMenuTemplate")
+        local menuList = {
+            {text = L["Start_Config"],
+                func = function() RealUI:LoadConfig("HuD") end,
+                notCheckable = true,
+            },
+            {text = L["Power_PowerMode"],
+                notCheckable = true,
+                hasArrow = true,
+                menuList = {
+                    {
+                        text = L["Power_Eco"],
+                        tooltipTitle = L["Power_Eco"],
+                        tooltipText = L["Power_EcoDesc"],
+                        tooltipOnButton = 1,
+                        func = function() 
+                            RealUI:SetPowerMode(2)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        checked = function() return ndb.settings.powerMode == 2 end,
+                    },
+                    {
+                        text = L["Power_Normal"],
+                        tooltipTitle = L["Power_Normal"],
+                        tooltipText = L["Power_NormalDesc"],
+                        tooltipOnButton = 1,
+                        func = function()
+                            RealUI:SetPowerMode(1)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        checked = function() return ndb.settings.powerMode == 1 end,
+                    },
+                    {
+                        text = L["Power_Turbo"],
+                        tooltipTitle = L["Power_Turbo"],
+                        tooltipText = L["Power_TurboDesc"],
+                        tooltipOnButton = 1,
+                        func = function()
+                            RealUI:SetPowerMode(3)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        checked = function() return ndb.settings.powerMode == 3 end,
+                    },
                 },
             },
-        },
-        {text = "",
-            notCheckable = true,
-            disabled = true,
-        },
-        {text = CHARACTER_BUTTON,
-            func = function() ToggleCharacter("PaperDollFrame") end,
-            notCheckable = true,
-        },
-        {text = SPELLBOOK_ABILITIES_BUTTON,
-            func = function() ToggleFrame(SpellBookFrame) end,
-            notCheckable = true,
-        },
-        {text = TALENTS_BUTTON,
-            func = function() 
-                if not PlayerTalentFrame then 
-                    TalentFrame_LoadUI()
-                end 
+            {text = "",
+                notCheckable = true,
+                disabled = true,
+            },
+            {text = _G.CHARACTER_BUTTON,
+                func = function() _G.ToggleCharacter("PaperDollFrame") end,
+                notCheckable = true,
+            },
+            {text = _G.SPELLBOOK_ABILITIES_BUTTON,
+                func = function() _G.ToggleSpellBook(_G.BOOKTYPE_SPELL) end,
+                notCheckable = true,
+            },
+            {text = _G.TALENTS_BUTTON,
+                func = function() 
+                    if not _G.PlayerTalentFrame then 
+                        _G.TalentFrame_LoadUI()
+                    end 
 
-                ShowUIPanel(PlayerTalentFrame)
-            end,
-            notCheckable = true,
-            disabled = UnitLevel("player") < SHOW_SPEC_LEVEL,
-        },
-        {text = ACHIEVEMENT_BUTTON,
-            func = function() ToggleAchievementFrame() end,
-            notCheckable = true,
-        },
-        {text = QUESTLOG_BUTTON,
-            func = function() ToggleQuestLog() end,
-            notCheckable = true,
-        },
-        {text = IsInGuild() and GUILD or LOOKINGFORGUILD,
-            func = function() 
-                if IsInGuild() then 
-                    if not GuildFrame then GuildFrame_LoadUI() end 
-                    GuildFrame_Toggle() 
-                else 
-                    if not LookingForGuildFrame then LookingForGuildFrame_LoadUI() end 
-                    LookingForGuildFrame_Toggle() 
-                end
-            end,
-            notCheckable = true,
-            disabled = IsTrialAccount(),
-        },
-        {text = SOCIAL_BUTTON,
-            func = function() ToggleFriendsFrame(1) end,
-            notCheckable = true,
-        },
-        {text = DUNGEONS_BUTTON,
-            func = function() PVEFrame_ToggleFrame() end,
-            notCheckable = true,
-            disabled = UnitLevel("player") < math.min(SHOW_LFD_LEVEL, SHOW_PVP_LEVEL),
-        },
-        {text = COLLECTIONS,
-            func = function() ToggleCollectionsJournal() end,
-            notCheckable = true,
-        },
-        {text = ADVENTURE_JOURNAL,
-            func = function() ToggleEncounterJournal() end,
-            disabled = UnitLevel("player") < SHOW_EJ_LEVEL,
-            notCheckable = true,
-        },  
-        {text = BLIZZARD_STORE,
-            func = function() ToggleStoreUI() end,
-            notCheckable = true,
-        },
-        {text = HELP_BUTTON,
-            func = function() ToggleHelpFrame() end,
-            notCheckable = true,
-        },  
-        {text = "",
-            notCheckable = true,
-            disabled = true,
-        },
-        {text = CANCEL,
-            func = function() CloseDropDownMenus() end,
-            notCheckable = true,
-        },
-    }
+                    _G.ShowUIPanel(_G.PlayerTalentFrame)
+                end,
+                notCheckable = true,
+                disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
+            },
+            {text = _G.ACHIEVEMENT_BUTTON,
+                func = function() _G.ToggleAchievementFrame() end,
+                notCheckable = true,
+            },
+            {text = _G.QUESTLOG_BUTTON,
+                func = function() _G.ToggleQuestLog() end,
+                notCheckable = true,
+            },
+            {text = _G.IsInGuild() and _G.GUILD or _G.LOOKINGFORGUILD,
+                func = function() 
+                    if _G.IsInGuild() then 
+                        if not _G.GuildFrame then _G.GuildFrame_LoadUI() end 
+                        _G.GuildFrame_Toggle() 
+                    else 
+                        if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end 
+                        _G.LookingForGuildFrame_Toggle() 
+                    end
+                end,
+                notCheckable = true,
+                disabled = _G.IsTrialAccount(),
+            },
+            {text = _G.SOCIAL_BUTTON,
+                func = function() _G.ToggleFriendsFrame(1) end,
+                notCheckable = true,
+            },
+            {text = _G.DUNGEONS_BUTTON,
+                func = function() _G.PVEFrame_ToggleFrame() end,
+                notCheckable = true,
+                disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
+            },
+            {text = _G.COLLECTIONS,
+                func = function() _G.ToggleCollectionsJournal() end,
+                notCheckable = true,
+            },
+            {text = _G.ADVENTURE_JOURNAL,
+                func = function() _G.ToggleEncounterJournal() end,
+                disabled = _G.UnitLevel("player") < _G.SHOW_EJ_LEVEL,
+                notCheckable = true,
+            },  
+            {text = _G.BLIZZARD_STORE,
+                func = function() _G.ToggleStoreUI() end,
+                notCheckable = true,
+            },
+            {text = _G.HELP_BUTTON,
+                func = function() _G.ToggleHelpFrame() end,
+                notCheckable = true,
+            },  
+            {text = "",
+                notCheckable = true,
+                disabled = true,
+            },
+            {text = _G.CANCEL,
+                func = function() _G.CloseDropDownMenus() end,
+                notCheckable = true,
+            },
+        }
 
-    local start = LDB:NewDataObject(L["Start"], {
-        type = "RealUI",
-        text = L["Start"],
-        side = "left",
-        index = 1,
-        OnClick = function(self, ...)
-            InfoLine:debug("Start: OnClick", self.side, ...)
-        end,
-        OnEnter = function(self, ...)
-            InfoLine:debug("Start: OnEnter", self.side, ...)
-            EasyMenu(menuList, RealUIStartDropDown, self, 0, 0, "MENU", 2)
-        end,
-        OnLeave = function(self, ...)
-            InfoLine:debug("Start: OnLeave", self.side, ...)
-            --CloseDropDownMenus()
-        end,
-    })
-    UIDropDownMenu_SetAnchor(RealUIStartDropDown, 0, 0, "BOTTOMLEFT", InfoLine_Start, "TOPLEFT")
+        LDB:NewDataObject(L["Start"], {
+            type = "RealUI",
+            text = L["Start"],
+            side = "left",
+            index = 1,
+            OnClick = function(block, ...)
+                InfoLine:debug("Start: OnClick", block.side, ...)
+            end,
+            OnEnter = function(block, ...)
+                InfoLine:debug("Start: OnEnter", block.side, ...)
+                _G.EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 2)
+            end,
+            OnLeave = function(block, ...)
+                InfoLine:debug("Start: OnLeave", block.side, ...)
+                --CloseDropDownMenus()
+            end,
+        })
+        _G.UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
+    end
 
     -- Mail
 
-    -- Guild Roster
-    local guild = LDB:NewDataObject(GUILD, {
-        type = "RealUI",
-        label = octicons["alignment-unalign"],
-        labelFont = {octicons.path, InfoLine.barHeight * .6, "OUTLINE"},
-        text = 1,
-        value = 1,
-        suffix = "",
-        side = "left",
-        index = 2,
-        OnClick = function(self, ...)
-            --InfoLine:debug("Guild: OnClick", self.side, ...)
-            if not InCombatLockdown() then
-                ToggleGuildFrame()
-            end
-        end,
-        OnEnter = function(self, ...)
-            if qTip:IsAcquired(self) then return end
-            --InfoLine:debug("Guild: OnEnter", self.side, ...)
-            local canOffNote = CanViewOfficerNote()
+    do  -- Guild Roster
+        local RemoteChatStatus = {
+            [0] = [[|TInterface\ChatFrame\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:74:176:74|t]],
+            [1] = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t",
+            [2] = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t",
+        }
+        local PlayerStatus = {
+            [1] = _G.FRIENDS_TEXTURE_AFK,
+            [2] = _G.FRIENDS_TEXTURE_DND,
+        }
 
-            local tooltip = qTip:Acquire(self, canOffNote and 6 or 5, "LEFT", "CENTER", "LEFT", "LEFT", "LEFT", canOffNote and "LEFT" or nil)
-            local r, g, b = nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3]
-            tooltip:SetHighlightTexture(r, g, b, 0.2)
-            local lineNum, colNum
-
-            lineNum, colNum = tooltip:AddHeader()
-            local gname = GetGuildInfo("player")
-            tooltip:SetCell(lineNum, colNum, gname, nil, nil, canOffNote and 6 or 5, nil, nil, nil, 100)
-
-            local gmotd = GetGuildRosterMOTD()
-            if gmotd ~= "" then
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, gmotd, nil, nil, canOffNote and 6 or 5, nil, nil, nil, 500)
-            end
-            tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-            tooltip:AddLine(" ")
-
-            if canOffNote then
-                lineNum, colNum = tooltip:AddHeader(NAME, LEVEL_ABBR, ZONE, RANK, LABEL_NOTE, OFFICER_NOTE_COLON)
-            else
-                lineNum, colNum = tooltip:AddHeader(NAME, LEVEL_ABBR, ZONE, RANK, LABEL_NOTE)
-            end
-            local color = nibRealUI.media.colors.orange
-            tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
-
-            for i = 1, GetNumGuildMembers() do
-                local name, rank, _, lvl, _class, zone, note, offnote, isOnline, status, class, _, _, isMobile = GetGuildRosterInfo(i)
-                if isOnline or isMobile then
-                    -- Remove server from name
-                    local displayName = Ambiguate(name, "guild")
-
-                    -- Status tag
-                    local curStatus = ""
-                    if status > 0 then
-                        curStatus = PlayerStatusValToStr[status]
-                        displayName = curStatus .. displayName
-                    end
-
-                    -- Mobile tag
-                    if isMobile and (not isOnline) then
-                        displayName = REMOTE_CHAT_ICON .. displayName
-                        zone = REMOTE_CHAT
-                    end
-
-                    if canOffNote then
-                        lineNum, colNum = tooltip:AddLine(displayName, lvl, zone, rank, note, offnote)
-                    else
-                        lineNum = tooltip:AddLine(displayName, lvl, zone, rank, note)
-                    end
-
-                    -- Class color names
-                    color = nibRealUI:GetClassColor(class)
-                    tooltip:SetCellTextColor(lineNum, 1, color[1], color[2], color[3])
-
-                    -- Difficulty color levels
-                    color = GetQuestDifficultyColor(lvl)
-                    tooltip:SetCellTextColor(lineNum, 2, color.r, color.g, color.b)
-
-                    -- Mouse functions
-                    tooltip:SetLineScript(lineNum, "OnMouseDown", function(...)
-                        InfoLine:debug("Guild: OnMouseDown", self.side, ...)
-                        if not name then return end
-                        if IsAltKeyDown() then
-                            InviteUnit(name)
-                        else
-                            SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
-                        end
-                    end)
+        LDB:NewDataObject(_G.GUILD, {
+            type = "RealUI",
+            label = octicons["alignment-unalign"],
+            labelFont = {octicons.path, InfoLine.barHeight * .6, "OUTLINE"},
+            text = 1,
+            value = 1,
+            suffix = "",
+            side = "left",
+            index = 2,
+            OnClick = function(block, ...)
+                --InfoLine:debug("Guild: OnClick", block.side, ...)
+                if not _G.InCombatLockdown() then
+                    _G.ToggleGuildFrame()
                 end
-            end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("Guild: OnEnter", block.side, ...)
 
-            tooltip:AddLine(" ")
+                local tooltip = qTip:Acquire(block, 1, "LEFT")
+                local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
+                tooltip:SetHighlightTexture(r, g, b, 0.2)
+                local lineNum, colNum
 
-            lineNum, colNum = tooltip:AddLine()
-            tooltip:SetCell(lineNum, colNum, L["Guild_WhisperInvite"], nil, nil, canOffNote and 6 or 5, nil, nil, nil, 500)
-            tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                local gname = _G.GetGuildInfo("player")
+                tooltip:AddHeader(gname)
 
-            tooltip:SmartAnchorTo(self)
-            tooltip:SetAutoHideDelay(0.10, self)
+                local gmotd = _G.GetGuildRosterMOTD()
+                if gmotd ~= "" then
+                    lineNum, colNum = tooltip:AddLine(gmotd)
+                    tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                end
 
-            tooltip:Show()
-            self.tooltip = tooltip
-        end,
-        OnEvent = function(self, event, ...)
-            --InfoLine:debug("Guild: OnEvent", event, ...)
-            local _, online, onlineAndMobile = GetNumGuildMembers()
-            self.dataObj.value = online
-            if online == onlineAndMobile then
-                self.dataObj.suffix = ""
-            else
-                self.dataObj.suffix = "(".. onlineAndMobile - online ..")"
-            end
-            InfoLine:UpdateElementWidth(self)
-        end,
-        events = {
-            "GUILD_ROSTER_UPDATE",
-            "GUILD_MOTD",
-        },
-    })
+                local color = RealUI.media.colors.orange
+                local guildData = {}
+                guildData[1] = {type = "header",
+                    r = color[1], g = color[2], b = color[3],
+                    info = {
+                        _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
+                    }
+                }
+                self:debug(guildData[1].info[1], guildData[1].info[2], guildData[1].info[3], guildData[1].info[4])
+                
+                for i = 1, _G.GetNumGuildMembers() do
+                    local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
+                    if isOnline or isMobile then
+                        -- Remove server from name
+                        name = _G.Ambiguate(name, "guild")
+
+                        -- Class color names
+                        color = RealUI:GetClassColor(class, "hex")
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+
+                        -- Tags
+                        if isMobile then
+                            zone = _G.REMOTE_CHAT
+                            name = RemoteChatStatus[status] .. name
+                        elseif status > 0 then
+                            name = PlayerStatus[status] .. name
+                        end
+
+                        -- Difficulty color levels
+                        color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl))
+                        lvl = ("%s%d|r"):format(color, lvl)
+
+                        --[[ Mouse functions
+                        tooltip:SetLineScript(lineNum, "OnMouseDown", function(...)
+                            InfoLine:debug("Guild: OnMouseDown", self.side, ...)
+                            if not name then return end
+                            if IsAltKeyDown() then
+                                InviteUnit(name)
+                            else
+                                SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
+                            end
+                        end)]]
+                        if note == "" then note = nil end
+                        if offnote == "" then offnote = nil end
+
+                        _G.tinsert(guildData, {type = "row",
+                            r = color[1], g = color[2], b = color[3],
+                            info = {
+                                name, lvl, zone, rank, note, offnote
+                            }
+                        })
+                    end
+                end
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
+
+                lineNum, colNum = tooltip:AddLine(L["Guild_WhisperInvite"])
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
+
+                tooltip:Show()
+                block.tooltip = tooltip
+            end,
+            OnEvent = function(block, event, ...)
+                --InfoLine:debug("Guild: OnEvent", event, ...)
+                local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                block.dataObj.value = online
+                if online == onlineAndMobile then
+                    block.dataObj.suffix = ""
+                else
+                    block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
+                end
+            end,
+            events = {
+                "GUILD_ROSTER_UPDATE",
+                "GUILD_MOTD",
+            },
+        })
+    end
 
     -- Friends
 
-    -- Durability
-    local itemSlots = {
-        {slot = "Head", hasDura = true},
-        {slot = "Neck", hasDura = false},
-        {slot = "Shoulder", hasDura = true},
-        {}, -- shirt
-        {slot = "Chest", hasDura = true},
-        {slot = "Waist", hasDura = true},
-        {slot = "Legs", hasDura = true},
-        {slot = "Feet", hasDura = true},
-        {slot = "Wrist", hasDura = true},
-        {slot = "Hands", hasDura = true},
-        {slot = "Finger0", hasDura = false},
-        {slot = "Finger1", hasDura = false},
-        {slot = "Trinket0", hasDura = false},
-        {slot = "Trinket1", hasDura = false},
-        {slot = "Back", hasDura = false},
-        {slot = "MainHand", hasDura = true},
-        {slot = "SecondaryHand", hasDura = true},
-    }
-    local dura = LDB:NewDataObject(DURABILITY, {
-        type = "RealUI",
-        text = 1,
-        side = "left",
-        index = 3,
-        OnClick = function(self, ...)
-            InfoLine:debug("Durability: OnClick", self.side, ...)
-            if not InCombatLockdown() then
-                ToggleCharacter("PaperDollFrame")
-            end
-        end,
-        OnEnter = function(self, ...)
-            if qTip:IsAcquired(self) then return end
-            InfoLine:debug("Durability: OnEnter", self.side, ...)
+    do  -- Durability
+        local itemSlots = {
+            {slot = "Head", hasDura = true},
+            {slot = "Neck", hasDura = false},
+            {slot = "Shoulder", hasDura = true},
+            {}, -- shirt
+            {slot = "Chest", hasDura = true},
+            {slot = "Waist", hasDura = true},
+            {slot = "Legs", hasDura = true},
+            {slot = "Feet", hasDura = true},
+            {slot = "Wrist", hasDura = true},
+            {slot = "Hands", hasDura = true},
+            {slot = "Finger0", hasDura = false},
+            {slot = "Finger1", hasDura = false},
+            {slot = "Trinket0", hasDura = false},
+            {slot = "Trinket1", hasDura = false},
+            {slot = "Back", hasDura = false},
+            {slot = "MainHand", hasDura = true},
+            {slot = "SecondaryHand", hasDura = true},
+        }
 
-            local tooltip = qTip:Acquire(self, 2, "LEFT", "RIGHT")
-            self.tooltip = tooltip
-            local lineNum, colNum
-
-            lineNum, colNum = tooltip:AddHeader()
-            tooltip:SetCell(lineNum, colNum, DURABILITY, nil, 2)
-
-            for slotID = 1, #itemSlots do
-                local item = itemSlots[slotID]
-                if item.hasDura and item.dura then
-                    tooltip:AddLine(item.slot, round(item.dura * 100) .. "%")
+        LDB:NewDataObject(_G.DURABILITY, {
+            type = "RealUI",
+            text = 1,
+            side = "left",
+            index = 3,
+            OnClick = function(block, ...)
+                InfoLine:debug("Durability: OnClick", block.side, ...)
+                if not _G.InCombatLockdown() then
+                    _G.ToggleCharacter("PaperDollFrame")
                 end
-            end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                InfoLine:debug("Durability: OnEnter", block.side, ...)
 
-            tooltip:SmartAnchorTo(self)
-            tooltip:SetAutoHideDelay(0.10, self)
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
+                block.tooltip = tooltip
+                local lineNum, colNum
 
-            tooltip:Show()
-        end,
-        OnEvent = function(self, event, ...)
-            InfoLine:debug("Durability1: OnEvent", event, self.timer, ...)
-            if event == "UPDATE_INVENTORY_DURABILITY" then
-                if self.timer then return end
-                InfoLine:debug("Make timer")
-                self.timer = InfoLine:ScheduleTimer(self.dataObj.OnEvent, 1, self)
-                return
-            end
-            InfoLine:debug("Durability2: OnEvent", event, self.timer, ...)
-            local lowest = 1
-            for slotID = 1, #itemSlots do
-                local item = itemSlots[slotID]
-                if item.hasDura then
-                    local min, max = GetInventoryItemDurability(slotID)
-                    if max then
-                        local per = nibRealUI:GetSafeVals(min, max)
-                        item.dura = per
-                        lowest = per < lowest and per or lowest
-                        InfoLine:debug(slotID, item.slot, round(per, 3), round(lowest, 3))
+                lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetCell(lineNum, colNum, _G.DURABILITY, nil, 2)
+
+                for slotID = 1, #itemSlots do
+                    local item = itemSlots[slotID]
+                    if item.hasDura and item.dura then
+                        tooltip:AddLine(item.slot, round(item.dura * 100) .. "%")
                     end
                 end
-            end
-            if not self.alert then
-                self.alert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
-            end
-            local alert = self.alert
-            if lowest < 0.1 and not alert.isHidden then
-                alert:SetSize(177, alert.Text:GetHeight() + 42);
-                alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
-                alert:SetPoint("BOTTOM", self, "TOP", 30, 18)
-                alert.CloseButton:SetScript("OnClick", function(self)
+
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("Durability1: OnEvent", event, block.timer, ...)
+                if event == "UPDATE_INVENTORY_DURABILITY" then
+                    if block.timer then return end
+                    InfoLine:debug("Make timer")
+                    block.timer = InfoLine:ScheduleTimer(block.dataObj.OnEvent, 1, block)
+                    return
+                end
+                InfoLine:debug("Durability2: OnEvent", event, block.timer, ...)
+                local lowest = 1
+                for slotID = 1, #itemSlots do
+                    local item = itemSlots[slotID]
+                    if item.hasDura then
+                        local min, max = _G.GetInventoryItemDurability(slotID)
+                        if max then
+                            local per = RealUI:GetSafeVals(min, max)
+                            item.dura = per
+                            lowest = per < lowest and per or lowest
+                            InfoLine:debug(slotID, item.slot, round(per, 3), round(lowest, 3))
+                        end
+                    end
+                end
+                if not block.alert then
+                    block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                end
+                local alert = block.alert
+                if lowest < 0.1 and not alert.isHidden then
+                    alert:SetSize(177, alert.Text:GetHeight() + 42);
+                    alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
+                    alert:SetPoint("BOTTOM", block, "TOP", 30, 18)
+                    alert.CloseButton:SetScript("OnClick", function(btn)
+                        alert:Hide()
+                        alert.isHidden = true
+                    end);
+                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, lowest)
+                    alert.Text:SetWidth(145);
+                    alert:Show();
+                    alert.isHidden = false
+                else
                     alert:Hide()
-                    alert.isHidden = true
-                end);
-                alert.Text:SetFormattedText("%s %d%%", DURABILITY, lowest)
-                alert.Text:SetWidth(145);
-                alert:Show();
-                alert.isHidden = false
-            else
-                alert:Hide()
-            end
-            self.dataObj.text = round(lowest * 100) .. "%"
-            self.timer = false
-            InfoLine:UpdateElementWidth(self)
-        end,
-        events = {
-            "UPDATE_INVENTORY_DURABILITY",
-            "PLAYER_ENTERING_WORLD",
-        },
-    })
+                end
+                block.dataObj.text = round(lowest * 100) .. "%"
+                block.timer = false
+            end,
+            events = {
+                "UPDATE_INVENTORY_DURABILITY",
+                "PLAYER_ENTERING_WORLD",
+            },
+        })
+    end
 
     -- Bag space
 
     -- Currency
 
-    -- Progress Watch
-    local watch = LDB:NewDataObject(L["XPRep"], {
-        type = "RealUI",
-        label = XP,
-        text = 1,
-        value = 1,
-        suffix = "",
-        side = "left",
-        index = 4,
-        OnClick = function(self, ...)
-            InfoLine:debug("XP / Rep: OnClick", self.side, ...)
-            dbc.xrstate = (dbc.xrstate == "x") and "r" or "x"
-            if UnitLevel("player") == MAX_PLAYER_LEVEL and not InCombatLockdown() then
-                ToggleCharacter("ReputationFrame")
-            end
-            self.dataObj.OnEvent(self, "OnClick", ...)
-        end,
-        OnEnter = function(self, ...)
-            if qTip:IsAcquired(self) then return end
-            InfoLine:debug("XP / Rep: OnEnter", self.side, ...)
-
-            local tooltip = qTip:Acquire(self, 2, "LEFT", "RIGHT")
-            self.tooltip = tooltip
-            local lineNum, colNum
-
-            -- XP
-            if UnitLevel("player") < MAX_PLAYER_LEVEL then
-                local xpCurr, xpMax = UnitXP("player"), UnitXPMax("player")
-                local xpRest = GetXPExhaustion() or 0
-
-                lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, colNum, EXPERIENCE_COLON, nil, 2)
-
-                lineNum, colNum = tooltip:AddLine(L["XPRep_Current"], nibRealUI:ReadableNumber(xpCurr))
-                if IsXPUserDisabled() then
-                    tooltip:SetCellTextColor(lineNum, 2, 0.5, 0.5, 0.5)
-                end
-
-                lineNum, colNum = tooltip:AddLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(xpMax - xpCurr))
-                if IsXPUserDisabled() then
-                    tooltip:SetCellTextColor(lineNum, 2, 0.5, 0.5, 0.5)
-                end
-
-                lineNum, colNum = tooltip:AddLine(TUTORIAL_TITLE26, nibRealUI:ReadableNumber(xpRest))
-                tooltip:AddLine(" ")
-            end
-
-            -- Rep
-            local name, standing, repMin, repMax, value, factionID = GetWatchedFactionInfo()
-
-            lineNum, colNum = tooltip:AddHeader()
-            tooltip:SetCell(lineNum, colNum, REPUTATION..":", nil, 2)
-
-            tooltip:AddLine(FACTION, name or "None Selected")
-            if name then
-                lineNum, colNum = tooltip:AddLine(STATUS, _G["FACTION_STANDING_LABEL"..standing])
-                tooltip:SetCellTextColor(lineNum, 2, FACTION_BAR_COLORS[standing].r, FACTION_BAR_COLORS[standing].g, FACTION_BAR_COLORS[standing].b)
-                tooltip:AddLine(L["XPRep_Current"], nibRealUI:ReadableNumber(value - repMin))
-                tooltip:AddLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(repMax - (value - repMin)))
-            end
-
-            tooltip:AddLine(" ")
-
-            lineNum, colNum = tooltip:AddLine()
-            tooltip:SetCell(lineNum, 1, L["XPRep_Toggle"], nil, 2)
-            tooltip:SetCellTextColor(lineNum, 1, 0, 1, 0)
-
-            tooltip:SmartAnchorTo(self)
-            tooltip:SetAutoHideDelay(0.10, self)
-
-            tooltip:Show()
-        end,
-        OnEvent = function(self, event, ...)
-            InfoLine:debug("XP / Rep: OnEvent", event, ...)
-            local isMaxLvl = (UnitLevel("player") == MAX_PLAYER_LEVEL)
-            if ( (dbc.xrstate == "x") and not isMaxLvl and not (IsXPUserDisabled()) ) then
-                local xpPer, _, xpMax = nibRealUI:GetSafeVals(UnitXP("player"), UnitXPMax("player"))
-                local xpRest = nibRealUI:GetSafeVals(GetXPExhaustion() or 0, xpMax)
-
-                self.dataObj.label = XP
-                self.dataObj.value = round(xpPer * 100) .. "%"
-                if xpRest > 0 then
-                    self.dataObj.suffix = "(".. round(xpRest * 100) .. "%)"
-                else
-                    self.dataObj.suffix = ""
-                end
-            else
-                dbc.xrstate = "r"
-                local name, standing, repMin, repMax, value, factionID = GetWatchedFactionInfo()
-                local repPer = nibRealUI:GetSafeVals((value - repMin), repMax)
-
-                self.dataObj.label = "Rep"
-                if name then
-                    self.dataObj.value = round(repPer * 100) .. "%"
-                else
-                    self.dataObj.value = "---"
-                end
-                self.dataObj.suffix = ""
-            end
-            InfoLine:UpdateElementWidth(self)
-        end,
-        events = {
-            "PLAYER_XP_UPDATE",
-            "DISABLE_XP_GAIN",
-            "ENABLE_XP_GAIN",
-            "UPDATE_FACTION",
-            "PLAYER_ENTERING_WORLD",
-        },
-    })
 
     --[[ Right ]]--
-    -- Clock
-    local function RetrieveTime(isMilitary, isLocal)
-        local timeFormat, hour, min, suffix
-        if isLocal then
-            hour, min = tonumber(date("%H")), tonumber(date("%M"))
-        else
-            hour, min = GetGameTime()
-        end
-        if isMilitary then
-            timeFormat = TIMEMANAGER_TICKER_24HOUR
-            suffix = ""
-        else
-            timeFormat = TIMEMANAGER_TICKER_12HOUR
-            if hour >= 12 then 
-                suffix = TIMEMANAGER_PM
-                if hour > 12 then
-                    hour = hour - 12
-                end
+    do  -- Clock
+        local function RetrieveTime(isMilitary, isLocal)
+            local timeFormat, hour, min, suffix
+            if isLocal then
+                hour, min = _G.tonumber(_G.date("%H")), _G.tonumber(_G.date("%M"))
             else
-                suffix = TIMEMANAGER_AM
-                if hour == 0 then
-                    hour = 12
-                end
+                hour, min = _G.GetGameTime()
             end
-        end
-        return timeFormat, hour, min, suffix
-    end
-    local function setTimeOptions(self)
-        self.isMilitary = GetCVar("timeMgrUseMilitaryTime") == "1"
-        self.isLocal = GetCVar("timeMgrUseLocalTime") == "1"
-    end
-    local clock = LDB:NewDataObject(TIMEMANAGER_TITLE, {
-        type = "RealUI",
-        text = 1,
-        value = 1,
-        suffix = "",
-        side = "right",
-        index = 1,
-        OnClick = function(self, ...)
-            --InfoLine:debug("Clock: OnClick", self.side, ...)
-            if IsShiftKeyDown() then
-                ToggleTimeManager()
+            if isMilitary then
+                timeFormat = _G.TIMEMANAGER_TICKER_24HOUR
+                suffix = ""
             else
-                if IsAddOnLoaded("GroupCalendar5") then
-                    if GroupCalendar.UI.Window:IsShown() then
-                        HideUIPanel(GroupCalendar.UI.Window)
-                    else
-                        ShowUIPanel(GroupCalendar.UI.Window)
+                timeFormat = _G.TIMEMANAGER_TICKER_12HOUR
+                if hour >= 12 then 
+                    suffix = _G.TIMEMANAGER_PM
+                    if hour > 12 then
+                        hour = hour - 12
                     end
                 else
-                    ToggleCalendar()
-                end
-            end
-        end,
-        OnEnter = function(self, ...)
-            if qTip:IsAcquired(self) then return end
-            --InfoLine:debug("Clock: OnEnter", self.side, ...)
-
-            local tooltip = qTip:Acquire(self, 3, "LEFT", "CENTER", "RIGHT")
-            self.tooltip = tooltip
-            local lineNum, colNum
-
-            lineNum, colNum = tooltip:AddHeader(TIMEMANAGER_TOOLTIP_TITLE)
-            --tooltip:SetCell(lineNum, colNum, , nil, 2)
-
-            -- Realm time
-            local timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, false)
-            tooltip:AddLine(TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
-
-            -- Local time
-            timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, true)
-            tooltip:AddLine(TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
-
-            -- Date
-            lineNum, colNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
-            tooltip:SetCell(lineNum, 1, L["Clock_Date"])
-            tooltip:SetCell(lineNum, 2, date("%b %d (%a)"), "RIGHT", 2)
-
-            -- PvP zones
-            if UnitLevel("player") >= 90 then
-                tooltip:AddLine(" ")
-                for i = 1, 2 do -- 1 == Wintergrasp, 2 == Tol Barad, 3 == Ashran
-                    local _, zone, _, _, startTime = GetWorldPVPAreaInfo(i)
-                    if startTime then
-                        lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, 1, L["Clock_PvPTime"]:format(zone))
-                        tooltip:SetCell(lineNum, 2, format(SecondsToTimeAbbrev(startTime)), "RIGHT", 2)
-                    else
-                        lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, 1, L["Clock_NoPvPTime"]:format(zone), "LEFT", 2)
+                    suffix = _G.TIMEMANAGER_AM
+                    if hour == 0 then
+                        hour = 12
                     end
                 end
             end
+            return timeFormat, hour, min, suffix
+        end
+        local function setTimeOptions(block)
+            block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
+            block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
+        end
 
-            -- Invites
-            if self.invites and self.invites > 0 then
+        LDB:NewDataObject(_G.TIMEMANAGER_TITLE, {
+            type = "RealUI",
+            text = 1,
+            value = 1,
+            suffix = "",
+            side = "right",
+            index = 1,
+            OnClick = function(block, ...)
+                --InfoLine:debug("Clock: OnClick", block.side, ...)
+                if _G.IsShiftKeyDown() then
+                    _G.ToggleTimeManager()
+                else
+                    if _G.IsAddOnLoaded("GroupCalendar5") then
+                        if _G.GroupCalendar.UI.Window:IsShown() then
+                            _G.HideUIPanel(_G.GroupCalendar.UI.Window)
+                        else
+                            _G.ShowUIPanel(_G.GroupCalendar.UI.Window)
+                        end
+                    else
+                        _G.ToggleCalendar()
+                    end
+                end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("Clock: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
+                block.tooltip = tooltip
+                local lineNum, colNum
+
+                tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
+                --tooltip:SetCell(lineNum, colNum, , nil, 2)
+
+                -- Realm time
+                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+
+                -- Local time
+                timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+
+                -- Date
+                lineNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
+                tooltip:SetCell(lineNum, 1, L["Clock_Date"])
+                tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
+
+                -- PvP zones
+                if _G.UnitLevel("player") >= 90 then
+                    tooltip:AddLine(" ")
+                    for i = 1, 2 do -- 1 == Wintergrasp, 2 == Tol Barad, 3 == Ashran
+                        local _, zone, _, _, startTime = _G.GetWorldPVPAreaInfo(i)
+                        if startTime then
+                            lineNum = tooltip:AddLine()
+                            tooltip:SetCell(lineNum, 1, L["Clock_PvPTime"]:format(zone))
+                            tooltip:SetCell(lineNum, 2, _G.format(_G.SecondsToTimeAbbrev(startTime)), "RIGHT", 2)
+                        else
+                            lineNum = tooltip:AddLine()
+                            tooltip:SetCell(lineNum, 1, L["Clock_NoPvPTime"]:format(zone), "LEFT", 2)
+                        end
+                    end
+                end
+
+                -- Invites
+                if block.invites and block.invites > 0 then
+                    tooltip:AddLine(" ")
+                    lineNum, colNum = tooltip:AddLine()
+                    tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], block.invites, 2)
+                end
+
+                -- World Bosses
+                local numSavedBosses = _G.GetNumSavedWorldBosses()
+                if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
+                    tooltip:AddLine(" ")
+                    lineNum, colNum = tooltip:AddHeader()
+                    tooltip:SetCell(lineNum, colNum, _G.LFG_LIST_BOSSES_DEFEATED, nil, 2)
+                    for i = 1, numSavedBosses do
+                        local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
+                        tooltip:AddLine(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
+                    end
+                end
+
                 tooltip:AddLine(" ")
+
                 lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], self.invites, 2)
-            end
+                tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
 
-            -- World Bosses
-            local numSavedBosses = GetNumSavedWorldBosses()
-            if (UnitLevel("player") >= 90) and (numSavedBosses > 0) then
-                tooltip:AddLine(" ")
-                lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, colNum, LFG_LIST_BOSSES_DEFEATED, nil, 2)
-                for i = 1, numSavedBosses do
-                    local bossName, bossID, bossReset = GetSavedWorldBossInfo(i)
-                    tooltip:AddLine(bossName, format(SecondsToTimeAbbrev(bossReset)))
-                end
-            end
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
 
-            tooltip:AddLine(" ")
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
 
-            lineNum, colNum = tooltip:AddLine()
-            tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-            tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-            lineNum, colNum = tooltip:AddLine()
-            tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-            tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-            tooltip:SmartAnchorTo(self)
-            tooltip:SetAutoHideDelay(0.10, self)
-
-            tooltip:Show()
-        end,
-        OnEvent = function(self, event, ...)
-            --InfoLine:debug("Clock: OnEvent", event, ...)
-            if event then
-                if event == "PLAYER_ENTERING_WORLD" then
-                    self.alert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
-                    InfoLine:ScheduleRepeatingTimer(self.dataObj.OnEvent, 1, self)
-                    hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
-                    hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
-                    setTimeOptions(self)
-                end
-                local alert = self.alert
-                self.invites = CalendarGetNumPendingInvites()
-                if self.invites > 0 and not alert.isHidden then
-                    alert:SetSize(177, alert.Text:GetHeight() + 42);
-                    alert:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 18)
-                    alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
-                    alert.CloseButton:SetScript("OnClick", function(self)
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                --InfoLine:debug("Clock: OnEvent", event, ...)
+                if event then
+                    if event == "PLAYER_ENTERING_WORLD" then
+                        block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                        InfoLine:ScheduleRepeatingTimer(block.dataObj.OnEvent, 1, block)
+                        _G.hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
+                        _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
+                        setTimeOptions(block)
+                    end
+                    local alert = block.alert
+                    block.invites = _G.CalendarGetNumPendingInvites()
+                    if block.invites > 0 and not alert.isHidden then
+                        alert:SetSize(177, alert.Text:GetHeight() + 42);
+                        alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
+                        alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                        alert.CloseButton:SetScript("OnClick", function(btn)
+                            alert:Hide()
+                            alert.isHidden = true
+                        end)
+                        alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
+                        alert.Text:SetWidth(145)
+                        alert:Show()
+                        alert.isHidden = false
+                    else
                         alert:Hide()
-                        alert.isHidden = true
-                    end)
-                    alert.Text:SetText(GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                    alert.Text:SetWidth(145)
-                    alert:Show()
-                    alert.isHidden = false
-                else
-                    alert:Hide()
+                    end
                 end
-            end
-            local timeFormat, hour, min, suffix = RetrieveTime(self.isMilitary, self.isLocal)
-            self.dataObj.value = timeFormat:format(hour, min)
-            self.dataObj.suffix = suffix
-            InfoLine:UpdateElementWidth(self)
-        end,
-        events = {
-            "CALENDAR_UPDATE_EVENT_LIST",
-            "PLAYER_ENTERING_WORLD",
-        },
-    })
+                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
+                block.dataObj.value = timeFormat:format(hour, min)
+                block.dataObj.suffix = suffix
+            end,
+            events = {
+                "CALENDAR_UPDATE_EVENT_LIST",
+                "PLAYER_ENTERING_WORLD",
+            },
+        })
+    end
 
     -- Meters
 
