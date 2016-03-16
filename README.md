@@ -1,4 +1,4 @@
-RealUI
+RealUI [![Build Status](https://travis-ci.org/RealUI/RealUI.svg?branch=develop)](https://travis-ci.org/RealUI/RealUI)
 ======
 
 RealUI is a minimalistic UI designed to be functional, yet also efficient and elegant.
