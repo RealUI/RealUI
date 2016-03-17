@@ -42,7 +42,7 @@ function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r,
         InfoLine:debug(rowIndex, rowData.type, _G.unpack(rowData.info))
         if rowData.type == "header" then
             textTable:SetHeader(_G.unpack(rowData.info))
-            textTable:SetSortHandlers(true, true, true, true, true, true, true)
+            textTable:SetSortHandlers(_G.unpack(rowData.sort))
             textTable:SetSortColumn(1)
         else
             textTable:AddRow(nil, _G.unpack(rowData.info))
@@ -236,15 +236,42 @@ function InfoLine:CreateBlocks()
     -- Mail
 
     do  -- Guild Roster
+        local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]];
         local RemoteChatStatus = {
             [0] = [[|TInterface\ChatFrame\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:74:176:74|t]],
-            [1] = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t",
-            [2] = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t",
+            [1] = inlineTexture:format([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-AwayMobile]]),
+            [2] = inlineTexture:format([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-BusyMobile]]),
         }
         local PlayerStatus = {
-            [1] = _G.FRIENDS_TEXTURE_AFK,
-            [2] = _G.FRIENDS_TEXTURE_DND,
+            [1] = inlineTexture:format(_G.FRIENDS_TEXTURE_AFK),
+            [2] = inlineTexture:format(_G.FRIENDS_TEXTURE_DND),
         }
+
+        local NameSort do
+            local nameMatch = [[.*[|t]*|cff%x%x%x%x%x%x(.*)]]
+            
+            function NameSort(Val1, Val2)
+                InfoLine:debug("NameSort", _G.strsplit("|", Val1))
+                InfoLine:debug("match", Val1:match(nameMatch))
+                Val1 = Val1:match(nameMatch)
+                Val2 = Val2:match(nameMatch)
+                if Val1 ~= Val2 then
+                    return Val1 < Val2
+                end
+            end
+        end
+        local RankSort do
+            local rankTable = {}
+            for i = 1, _G.GuildControlGetNumRanks() do
+                rankTable[_G.GuildControlGetRankName(i)] = i
+            end
+
+            function RankSort(Val1, Val2)
+                if Val1 ~= Val2 then
+                    return rankTable[Val1] < rankTable[Val2]
+                end
+            end
+        end
 
         LDB:NewDataObject(_G.GUILD, {
             type = "RealUI",
@@ -283,6 +310,9 @@ function InfoLine:CreateBlocks()
                 local guildData = {}
                 guildData[1] = {type = "header",
                     r = color[1], g = color[2], b = color[3],
+                    sort = {
+                        NameSort, true, true, RankSort, true, true
+                    },
                     info = {
                         _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
                     }
