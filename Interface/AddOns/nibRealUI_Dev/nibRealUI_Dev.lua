@@ -1,6 +1,9 @@
 -- Lua Globals --
 local _G = _G
 
+-- RealUI --
+local RealUI = _G.RealUI
+
 local debug = {}
 --_G.GAME_LOCALE ="deDE"
 
@@ -81,7 +84,7 @@ frame:SetScript("OnEvent", function(self, event, addonName)
     end
     if addonName == "nibRealUI" then
         for i = 1, #debug do
-            _G.RealUI.Debug("Dev", debug[i])
+            RealUI.Debug("Dev", debug[i])
             self:UnregisterEvent("ADDON_LOADED")
         end
     end

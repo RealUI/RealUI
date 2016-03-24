@@ -73,7 +73,7 @@ local function PostAlertMove(screenQuadrant)
     end
     local height = _G.GroupLootContainer:GetHeight()
     if (height > 10) then
-        AlertFrameMove:debug("Adjust loot")
+        AlertFrameMove:debug("Adjust loot", height)
         -- This is to prevent the alert frames from creeping down the screen.
         _G.GroupLootContainer:SetHeight(1)
     end
@@ -183,12 +183,12 @@ function AlertFrameMove:AlertMovers()
         AlertFrameMove:debug("Set hook", funcName)
         if _G.type(func) ~= "function" then
             local frame = func
-            func = function(alertAnchor)
+            function func(alertAnchor)
                 if frame and frame:IsShown() then
                     AlertFrameMove:debug(name..": IsShown", AFPosition, AFAnchor, AFYOffset)
                     frame:ClearAllPoints()
                     frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
-                    _G.alertAnchor = frame
+                    alertAnchor = frame  -- luacheck: ignore
                 end
             end
         end
