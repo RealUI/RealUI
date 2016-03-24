@@ -27,9 +27,14 @@ Add-Type -Path "utils/Ionic.Zip.dll"
 Write-Host "Creating zip file"
 $zipFile = new-object Ionic.Zip.ZipFile
 $interface = $zipFile.AddDirectory("./Interface", "Interface")
+
 # Add the README as a txt file
 $readme = $zipFile.AddFile("./README.md")
 $readme.FileName = "README.txt"
+
+# Add the LICENSE as a txt file
+$readme = $zipFile.AddFile("./LICENSE.md")
+$readme.FileName = "LICENSE.txt"
 
 #Exclude files
 $remove = @(
