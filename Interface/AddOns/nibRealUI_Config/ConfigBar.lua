@@ -1259,6 +1259,7 @@ local auratracker do
     local function createTrackerSettings(tracker, spellData)
         local name, order = getNameOrder(spellData)
         local useSpec = getSpec(spellData.specs)
+        local namePattern = "[,%s*]?(%a[%a:'%s]+)"
 
         return {
             name = name,
@@ -1274,16 +1275,20 @@ local auratracker do
                         local isSpell
                         if value:find(",") then
                             debug("Multi-spell")
-                            value = { strsplit(",", value) }
+                            value = { _G.strsplit(",", value) } 
                             for i = 1, #value do
-                                isSpell = _G.GetSpellInfo(value[i]) and true or false
-                                debug("Value "..i, value[i], isSpell)
+                                local spell = _G.strtrim(value[i])
+                                isSpell = _G.GetSpellInfo(spell) and true or false 
+                                debug("Value "..i, spell, isSpell) 
+                                if not isSpell then
+                                    return L["AuraTrack_InvalidName"]:format(spell)
+                                end
                             end
                         else
                             isSpell = _G.GetSpellInfo(value) and true or false
                             debug("One spell", isSpell)
                         end
-                        return isSpell or L["AuraTrack_InvalidName"]
+                        return isSpell or L["AuraTrack_InvalidName"]:format(value)
                     end,
                     get = function(info)
                         local value = ""
@@ -1300,17 +1305,17 @@ local auratracker do
                         debug("Set Spellname", info[#info-2], info[#info-1], value)
                         if value:find(",") then
                             debug("Multi-spell")
-                            for spell in value:gmatch("(%d+)") do
-                                if tonumber(spell) then
-                                    tinsert(spellData.spell, tonumber(spell))
-                                else
-                                    tinsert(spellData.spell, spell)
-                                end
+                            if type(spellData.spell) ~= "table" then
+                                spellData.spell = {}
                             end
-                        elseif tonumber(value) then
-                            spellData.spell = tonumber(value)
+                            _G.wipe(spellData.spell)
+                            value = { _G.strsplit(",", value) } 
+                            for i = 1, #value do
+                                local spell = _G.strtrim(value[i])
+                                tinsert(spellData.spell, tonumber(spell) or spell)
+                            end
                         else
-                            spellData.spell = value
+                            spellData.spell = tonumber(value) or value
                         end
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
