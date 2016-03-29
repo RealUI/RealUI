@@ -1241,24 +1241,23 @@ local auratracker do
         name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
-    local function GetUseSpec(specs) 
-        local numSpecs = 0
-        for i = 1, #specs do
-            if specs[i] then
-                numSpecs = numSpecs + 1
-            end
-        end
-        if numSpecs == 0 then
-            return false
-        elseif numSpecs == 1 then
-            return true
-        else
-            return nil
-        end
-    end
     local function CreateTrackerSettings(tracker, spellData)
         local name, order = GetNameOrder(spellData)
-        local useSpec = GetUseSpec(spellData.specs) 
+        local specCache, useSpec = {}
+        do
+            local numSpecs = 0
+            for i = 1, #spellData.specs do
+                specCache[i] = spellData.specs[i]
+                if spellData.specs[i] then
+                    numSpecs = numSpecs + 1
+                end
+            end
+            if numSpecs == #spellData.specs then
+                useSpec = false
+            elseif numSpecs == 1 then
+                useSpec = true
+            end
+        end
 
         return {
             name = name,
@@ -1402,12 +1401,19 @@ local auratracker do
                     tristate = true,
                     get = function(info) return useSpec end,
                     set = function(info, value)
+                        debug("useSpec set", value)
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]].args
                         if value == false then
                             spellOptions.spec.type = "select"
                             spellOptions.spec.disabled = true
+                            for i = 1, #spellData.specs do
+                                spellData.specs[i] = true
+                            end
                         elseif value == true then
                             spellOptions.spec.disabled = false
+                            for i = 1, #spellData.specs do
+                                spellData.specs[i] = specCache[i]
+                            end
                         else
                             spellOptions.spec.type = "multiselect"
                         end
@@ -1429,21 +1435,32 @@ local auratracker do
                         end
                         return table
                     end,
-                    get = function(info, key, ...)
-                        debug("Spec get", key, ...)
+                    get = function(info, key)
+                        debug("Spec get", key)
                         if key then
                             return spellData.specs[key]
                         else
                             for i = 1, #spellData.specs do
+                                debug("Check", i, spellData.specs[i])
                                 if spellData.specs[i] then
                                     return i
                                 end
                             end
                         end
                     end,
-                    set = function(info, key, value, ...)
-                        debug("Spec set", key, value, ...)
-                        spellData.specs[key] = value == nil and true or value
+                    set = function(info, key, value)
+                        local specs = spellData.specs
+                        debug("Spec set", key, value, specs[key])
+                        if value == nil then
+                            for i = 1, #specs do
+                                debug("Apply", i, i == key)
+                                specs[i] = (i == key)
+                                specCache[i] = specs[i]
+                            end
+                        else
+                            specs[key] = value
+                            specCache[key] = value
+                        end
                         SwapParentGroup(tracker, info)
                     end,
                     order = 70,
