@@ -12,7 +12,6 @@ local _, PhanxChat = ...
 local ChatTypeInfo = getmetatable(ChatTypeInfo).__index -- WTF Blizz?
 
 local StickyChannels = {
-	BN_CONVERSATION	= ChatTypeInfo.BN_CONVERSATION.sticky,	-- 1
 	BN_WHISPER		= ChatTypeInfo.BN_WHISPER.sticky,		-- 1
 	CHANNEL			= ChatTypeInfo.CHANNEL.sticky,			-- 1
 	EMOTE 			= ChatTypeInfo.EMOTE.sticky,			-- 0

@@ -102,7 +102,8 @@ L.WhoStatus_PlayingOtherGame = "%s is currently playing %s."
 
 ------------------------------------------------------------------------
 --	German
--- Contributors: ac3r, bigx2, staratnight
+-- Contributors: ac3r, bigx2, staratnight, Tumbleweed_DSA
+-- Last updated: 2015-01-05
 ------------------------------------------------------------------------
 
 if LOCALE == "deDE" then
@@ -148,7 +149,7 @@ L.All = "Alle"
 L.Default = "Standard"
 L.EnableArrows = "Pfeiltasten aktivieren"
 L.EnableArrows_Desc = "Aktiviere die Pfeiltasten im Eingabefeld des Chats."
-L.EnableResizeEdges = "Alle Ecken veränderbar"
+L.EnableResizeEdges = "An alle Ecken veränderbar"
 L.EnableResizeEdges_Desc = "Aktivieren um die Größe des Chatfenster an allen Ecken zu verändern, anstatt nur in der unteren rechten Ecke."
 L.EnableSticky = "Channel merken"
 L.EnableSticky_Desc = "Festlegen, welche Channels gemerkt werden sollen."
@@ -157,43 +158,43 @@ L.FadeTime_Desc = "Zeit bis zum Ausblenden des Textes in Minuten (0 = deaktivier
 L.FontSize = "Schriftgröße"
 L.FontSize_Desc = "Schriftgröße für alle Chatfenster festlegen."
 L.FontSize_Note = "Beachte, dass dies nur eine Kurzform zum Konfigurieren jedes einzelne Chatfenster durch die Blizzard Chatoptionen ist."
-L.HideButtons = "Buttons verstecken"
-L.HideButtons_Desc = "Verstecke das Chat Menü und die Scroll Buttons."
-L.HideFlash = "Blinken der Tabs verhindern"
-L.HideFlash_Desc = "Deaktiviere das Blinken der Chat Tabs, bei dennen eine neue Nachricht erhalten wurde."
-L.HideNotices = "Meldungen verhindern"
-L.HideNotices_Desc = "Channel-Meldungen unterdrücken"
+L.HideButtons = "Buttons verbergen"
+L.HideButtons_Desc = "Verstecke das Chat-Menü und die Scroll-Buttons."
+L.HideFlash = "Blinken der Tabs verbergen"
+L.HideFlash_Desc = "Deaktiviere das Blinken der Chat Tabs, bei denen eine neue Nachricht erhalten wurde."
+L.HideNotices = "Meldungen verbergen"
+L.HideNotices_Desc = "Channel-Meldungen verbergen."
 L.HidePetCombatLog = "Haustierkampflog deactivieren"
 L.HidePetCombatLog_Desc = "Verhindere, dass ein neues Kampflog-Fenster für Haustierkämpfe geöffnet wird."
-L.HideRepeats = "Wiederholungen verhindern"
-L.HideRepeats_Desc = "Unterdrücke Nachrichten die in öffentlichen Channels wiederholt werden."
-L.HideTextures = "Extra Texturen verstecken"
-L.HideTextures_Desc = "Verstecke die Extra-Texturen der Chat Tabs und dem Chat Eingabefeld, die in Patch 3.3.5 hinzugefügt wurden."
+L.HideRepeats = "Wiederholungen verbergen"
+L.HideRepeats_Desc = "Verberge Nachrichten, die in öffentlichen Channels wiederholt werden."
+L.HideTextures = "Extra-Texturen verbergen"
+L.HideTextures_Desc = "Verberge die Extra-Texturen der Chat Tabs und dem Chat Eingabefeld, die in Patch 3.3.5 hinzugefügt wurden."
 L.LinkURLs = "URLs verlinken"
 L.LinkURLs_Desc = "URLs im Chat für einfaches Kopieren anklickbar machen."
-L.LockTabs = "Tabs sperren"
+L.LockTabs = "Angedockte Tabs sperren"
 L.LockTabs_Desc = "Verhindert, dass fixierte Tabs verschoben werden. Zum Verschieben die ALT-Taste gedrückt halten."
 L.MoveEditBox = "Eingabefeld verschieben"
 L.MoveEditBox_Desc = "Das Eingabefeld über dem Chatfenster anzeigen."
 L.None = "Keine"
-L.OptionLocked = "Diese Option wurde von PhanxChat gesperrt. Benutze die %q Option in PhanxChat stattdessen."
-L.OptionLockedConditional = "Diese Option ist in PhanxChat gesperrt. Wenn du sie ändern möchtest, musst du zunächst die Option %q in PhanxChat deaktivieren."
+L.OptionLocked = "Diese Option ist von PhanxChat gesperrt. Benutze stattdessen die %q-Option in PhanxChat."
+L.OptionLockedConditional = "Diese Option ist von PhanxChat gesperrt. Wenn du sie ändern möchtest, musst du zunächst die %q-Option in PhanxChat deaktivieren."
 L.RemoveRealmNames = "Servernamen entfernen"
 L.RemoveRealmNames_Desc = "Kürze die Spielernamen, indem der Servername entfernt werden."
-L.ReplaceRealNames = "Echte Namen ersetzen"
-L.ReplaceRealNames_Desc = "Ersetzt die echten Namen mit den Charakternamen."
+L.ReplaceRealNames = "Realnamen ersetzen"
+L.ReplaceRealNames_Desc = "Ersetzt, wenn möglich, die Real-ID-Namen und BattleTags mit den WoW-Charakternamen."
 L.ShortenChannelNames = "Channelnamen abkürzen"
 L.ShortenChannelNames_Desc = "Abkürzen der Channelnamen und Chat-Bezeichnungen."
-L.ShortenRealNames = "Echter Namen abkürzen"
-L.ShortenRealNames_Desc = "Wählen, um Real ID Namen abzukürzen."
-L.ShortenRealNames_UseBattleTag = "Ersetzt mit BattleTag"
-L.ShortenRealNames_UseFirstName = "Anzeigt nur die Vornamen "
-L.ShortenRealNames_UseFullName = "Erhaltet der volle Name"
+L.ShortenRealNames = "Realnamen abkürzen"
+L.ShortenRealNames_Desc = "Wähle, wie Real-ID-Namen gekürzt werden."
+L.ShortenRealNames_UseBattleTag = "Ersetzt mit dem BattleTag"
+L.ShortenRealNames_UseFirstName = "Anzeigt nur den Vornamen"
+L.ShortenRealNames_UseFullName = "Beibehaltet den vollständigen Namen"
 L.ShowClassColors = "Klassenfarben anzeigen"
 L.ShowClassColors_Desc = "Klassenfarben in allen Chatkanälen anzeigen."
 L.Whisper_BadTarget = "Du kannst dieses Ziel nicht anflüstern!"
 L.Whisper_NoTarget = "Du hast kein Ziel zum anflüstern!"
-L.WhoStatus_Battlenet = "%s ist zur Zeit in der Battle.net-Software."
+L.WhoStatus_Battlenet = "%s befindet sich zur Zeit in der Battle.net-Software."
 L.WhoStatus_Offline = "%s ist zur Zeit offline."
 L.WhoStatus_PlayingOtherGame = "%s spielt zur Zeit %s."
 
@@ -796,7 +797,8 @@ return end
 
 ------------------------------------------------------------------------
 --	Simplified Chinese
--- Contributors: tss1398383123
+-- Contributors: tss1398383123, bone_cures
+-- Last updated: 2015-01-05
 ------------------------------------------------------------------------
 
 if LOCALE == "zhCN" then
@@ -857,8 +859,8 @@ L.HideFlash = "隐藏标签闪烁"
 L.HideFlash_Desc = "禁用聊天框收到消息后标签的闪烁效果。"
 L.HideNotices = "隐藏警告"
 L.HideNotices_Desc = "隐藏聊天框内的警告信息。"
---L.HidePetCombatLog = "Disable pet battle log"
---L.HidePetCombatLog_Desc = "Prevent the chat frame from opening a combat log for pet battles."
+L.HidePetCombatLog = "禁用宠物战斗纪录"
+L.HidePetCombatLog_Desc = "阻止聊天框为一场宠物战斗开启战斗纪录。"
 L.HideRepeats = "屏蔽重复信息"
 L.HideRepeats_Desc = "屏蔽公共频道中的重复刷屏信息。"
 L.HideTextures = "隐藏额外材质"

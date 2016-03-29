@@ -560,7 +560,7 @@ classDefaults = {
     ["DRUID"] = {
         -- Static Player Auras
             ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
-                spell = 52610,
+                spell = {52610, 174544}, -- Normal, Glyph
                 minLevel = 18,
                 specs = {false, true, false, false},
                 order = 1,
