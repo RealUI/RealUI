@@ -1192,7 +1192,7 @@ local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = AuraTracking.db.class
-    local function swapParentGroup(tracker, info)
+    local function SwapParentGroup(tracker, info)
         AuraTracking:CharacterUpdate({}, true)
         local parent, key = info[#info-2], info[#info-1]
         local spellOptions = auratracker.args[parent].args[key]
@@ -1205,7 +1205,7 @@ local auratracker do
             auratracker.args.inactive.args[key] = spellOptions
         end
     end
-    local function getNameOrder(spellData)
+    local function GetNameOrder(spellData)
         local order, pos, name, color = 1, "", ""
 
         if spellData.customName then
@@ -1241,7 +1241,7 @@ local auratracker do
         name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
-    local function getSpec(specs)
+    local function GetUseSpec(specs) 
         local numSpecs = 0
         for i = 1, #specs do
             if specs[i] then
@@ -1256,10 +1256,9 @@ local auratracker do
             return nil
         end
     end
-    local function createTrackerSettings(tracker, spellData)
-        local name, order = getNameOrder(spellData)
-        local useSpec = getSpec(spellData.specs)
-        local namePattern = "[,%s*]?(%a[%a:'%s]+)"
+    local function CreateTrackerSettings(tracker, spellData)
+        local name, order = GetNameOrder(spellData)
+        local useSpec = GetUseSpec(spellData.specs) 
 
         return {
             name = name,
@@ -1319,7 +1318,7 @@ local auratracker do
                         end
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 10,
                 },
@@ -1339,7 +1338,7 @@ local auratracker do
                         end
                         spellData.shouldLoad = value
 
-                        swapParentGroup(tracker, info)
+                        SwapParentGroup(tracker, info)
                     end,
                     order = 20,
                 },
@@ -1361,7 +1360,7 @@ local auratracker do
                         spellData.auraType = value
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 30,
                 },
@@ -1375,7 +1374,7 @@ local auratracker do
                         spellData.order = value
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 40,
                 },
@@ -1445,7 +1444,7 @@ local auratracker do
                     set = function(info, key, value, ...)
                         debug("Spec set", key, value, ...)
                         spellData.specs[key] = value == nil and true or value
-                        swapParentGroup(tracker, info)
+                        SwapParentGroup(tracker, info)
                     end,
                     order = 70,
                 },
@@ -1539,7 +1538,7 @@ local auratracker do
                     debug("Create New", info[#info], info[#info-1], ...)
                     local tracker, spellData = AuraTracking:CreateNewTracker()
                     debug("New trackerID:", tracker.id)
-                    auratracker.args.active.args[tracker.id] = createTrackerSettings(tracker, spellData)
+                    auratracker.args.active.args[tracker.id] = CreateTrackerSettings(tracker, spellData)
                 end,
                 order = 10,
             },
@@ -1743,7 +1742,7 @@ local auratracker do
         }
     end
     for tracker, spellData in AuraTracking:IterateTrackers() do
-        local settings = createTrackerSettings(tracker, spellData)
+        local settings = CreateTrackerSettings(tracker, spellData)
         if tracker.shouldTrack then
             auratracker.args.active.args[tracker.id] = settings
         else
