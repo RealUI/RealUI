@@ -51,7 +51,7 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
         end
     end
 end
-local function shouldTrack(spellData)
+local function GetShouldTrack(spellData)
     local isDebug = spellData.debug
     debug(isDebug, "shouldTrack", spellData.specs[playerSpec], spellData.minLevel, spellData.shouldLoad)
     if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
@@ -370,7 +370,8 @@ function AuraTracking:PLAYER_LOGIN()
             local tracker = self:CreateAuraIcon(id, spellData)
             tracker.classID = classID
             tracker.isDefault = isDefault and true or false
-            tracker.shouldTrack = shouldTrack(spellData)
+            tracker.shouldTrack = GetShouldTrack(spellData)
+
             if tracker.shouldTrack and spellData.unit == "player" then
                 tracker:Enable()
                 tracker:SetAlpha(db.indicators.fadeOpacity)
@@ -491,7 +492,7 @@ function AuraTracking:CharacterUpdate(units, force)
         self:debug("Enable needed trackers")
         local playerSpellList = {}
         for tracker, spellData in self:IterateTrackers() do
-            tracker.shouldTrack = shouldTrack(spellData)
+            tracker.shouldTrack = GetShouldTrack(spellData)
             if tracker.shouldTrack then
                 self:debug("Track", tracker.id)
                 tracker:Enable()

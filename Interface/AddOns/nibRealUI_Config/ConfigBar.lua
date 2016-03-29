@@ -1192,7 +1192,7 @@ local auratracker do
     local AuraTracking = nibRealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = AuraTracking.db.class
-    local function swapParentGroup(tracker, info)
+    local function SwapParentGroup(tracker, info)
         AuraTracking:CharacterUpdate({}, true)
         local parent, key = info[#info-2], info[#info-1]
         local spellOptions = auratracker.args[parent].args[key]
@@ -1205,7 +1205,7 @@ local auratracker do
             auratracker.args.inactive.args[key] = spellOptions
         end
     end
-    local function getNameOrder(spellData)
+    local function GetNameOrder(spellData)
         local order, pos, name, color = 1, "", ""
 
         if spellData.customName then
@@ -1241,24 +1241,23 @@ local auratracker do
         name = (pos.."|cff%s%s|r"):format(color, name)
         return name, order
     end
-    local function getSpec(specs)
-        local numSpecs = 0
-        for i = 1, #specs do
-            if specs[i] then
-                numSpecs = numSpecs + 1
+    local function CreateTrackerSettings(tracker, spellData)
+        local name, order = GetNameOrder(spellData)
+        local specCache, useSpec = {}
+        do
+            local numSpecs = 0
+            for i = 1, #spellData.specs do
+                specCache[i] = spellData.specs[i]
+                if spellData.specs[i] then
+                    numSpecs = numSpecs + 1
+                end
+            end
+            if numSpecs == #spellData.specs then
+                useSpec = false
+            elseif numSpecs == 1 then
+                useSpec = true
             end
         end
-        if numSpecs == 0 then
-            return false
-        elseif numSpecs == 1 then
-            return true
-        else
-            return nil
-        end
-    end
-    local function createTrackerSettings(tracker, spellData)
-        local name, order = getNameOrder(spellData)
-        local useSpec = getSpec(spellData.specs)
 
         return {
             name = name,
@@ -1274,16 +1273,20 @@ local auratracker do
                         local isSpell
                         if value:find(",") then
                             debug("Multi-spell")
-                            value = { strsplit(",", value) }
+                            value = { _G.strsplit(",", value) } 
                             for i = 1, #value do
-                                isSpell = _G.GetSpellInfo(value[i]) and true or false
-                                debug("Value "..i, value[i], isSpell)
+                                local spell = _G.strtrim(value[i])
+                                isSpell = _G.GetSpellInfo(spell) and true or false 
+                                debug("Value "..i, spell, isSpell) 
+                                if not isSpell then
+                                    return L["AuraTrack_InvalidName"]:format(spell)
+                                end
                             end
                         else
                             isSpell = _G.GetSpellInfo(value) and true or false
                             debug("One spell", isSpell)
                         end
-                        return isSpell or L["AuraTrack_InvalidName"]
+                        return isSpell or L["AuraTrack_InvalidName"]:format(value)
                     end,
                     get = function(info)
                         local value = ""
@@ -1300,21 +1303,21 @@ local auratracker do
                         debug("Set Spellname", info[#info-2], info[#info-1], value)
                         if value:find(",") then
                             debug("Multi-spell")
-                            for spell in value:gmatch("(%d+)") do
-                                if tonumber(spell) then
-                                    tinsert(spellData.spell, tonumber(spell))
-                                else
-                                    tinsert(spellData.spell, spell)
-                                end
+                            if type(spellData.spell) ~= "table" then
+                                spellData.spell = {}
                             end
-                        elseif tonumber(value) then
-                            spellData.spell = tonumber(value)
+                            _G.wipe(spellData.spell)
+                            value = { _G.strsplit(",", value) } 
+                            for i = 1, #value do
+                                local spell = _G.strtrim(value[i])
+                                tinsert(spellData.spell, tonumber(spell) or spell)
+                            end
                         else
-                            spellData.spell = value
+                            spellData.spell = tonumber(value) or value
                         end
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 10,
                 },
@@ -1334,7 +1337,7 @@ local auratracker do
                         end
                         spellData.shouldLoad = value
 
-                        swapParentGroup(tracker, info)
+                        SwapParentGroup(tracker, info)
                     end,
                     order = 20,
                 },
@@ -1356,7 +1359,7 @@ local auratracker do
                         spellData.auraType = value
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 30,
                 },
@@ -1370,7 +1373,7 @@ local auratracker do
                         spellData.order = value
 
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = getNameOrder(spellData)
+                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
                     end,
                     order = 40,
                 },
@@ -1398,12 +1401,19 @@ local auratracker do
                     tristate = true,
                     get = function(info) return useSpec end,
                     set = function(info, value)
+                        debug("useSpec set", value)
                         local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]].args
                         if value == false then
                             spellOptions.spec.type = "select"
                             spellOptions.spec.disabled = true
+                            for i = 1, #spellData.specs do
+                                spellData.specs[i] = true
+                            end
                         elseif value == true then
                             spellOptions.spec.disabled = false
+                            for i = 1, #spellData.specs do
+                                spellData.specs[i] = specCache[i]
+                            end
                         else
                             spellOptions.spec.type = "multiselect"
                         end
@@ -1425,22 +1435,33 @@ local auratracker do
                         end
                         return table
                     end,
-                    get = function(info, key, ...)
-                        debug("Spec get", key, ...)
+                    get = function(info, key)
+                        debug("Spec get", key)
                         if key then
                             return spellData.specs[key]
                         else
                             for i = 1, #spellData.specs do
+                                debug("Check", i, spellData.specs[i])
                                 if spellData.specs[i] then
                                     return i
                                 end
                             end
                         end
                     end,
-                    set = function(info, key, value, ...)
-                        debug("Spec set", key, value, ...)
-                        spellData.specs[key] = value == nil and true or value
-                        swapParentGroup(tracker, info)
+                    set = function(info, key, value)
+                        local specs = spellData.specs
+                        debug("Spec set", key, value, specs[key])
+                        if value == nil then
+                            for i = 1, #specs do
+                                debug("Apply", i, i == key)
+                                specs[i] = (i == key)
+                                specCache[i] = specs[i]
+                            end
+                        else
+                            specs[key] = value
+                            specCache[key] = value
+                        end
+                        SwapParentGroup(tracker, info)
                     end,
                     order = 70,
                 },
@@ -1534,7 +1555,7 @@ local auratracker do
                     debug("Create New", info[#info], info[#info-1], ...)
                     local tracker, spellData = AuraTracking:CreateNewTracker()
                     debug("New trackerID:", tracker.id)
-                    auratracker.args.active.args[tracker.id] = createTrackerSettings(tracker, spellData)
+                    auratracker.args.active.args[tracker.id] = CreateTrackerSettings(tracker, spellData)
                 end,
                 order = 10,
             },
@@ -1738,7 +1759,7 @@ local auratracker do
         }
     end
     for tracker, spellData in AuraTracking:IterateTrackers() do
-        local settings = createTrackerSettings(tracker, spellData)
+        local settings = CreateTrackerSettings(tracker, spellData)
         if tracker.shouldTrack then
             auratracker.args.active.args[tracker.id] = settings
         else

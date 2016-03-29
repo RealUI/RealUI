@@ -12,27 +12,27 @@ _G.tinsert(mods["Aurora"], function(F, C)
     _G.FriendsFrame:HookScript("OnShow", function()
         if not _G.FriendsFrame.skinned then
             for i = 1, _G.FRIENDS_TO_DISPLAY do
-                local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
+                local btn = _G["FriendsFrameFriendsScrollFrameButton"..i]
 
-                --local frame = CreateFrame("frame", nil, bu)
+                --local frame = CreateFrame("frame", nil, btn)
                 --frame:SetSize(60, 32)
 
-                F.Reskin(bu.travelPassButton)
-                bu.travelPassButton:SetAlpha(1)
-                bu.travelPassButton:EnableMouse(true)
-                bu.travelPassButton:SetSize(20, 32)
+                F.Reskin(btn.travelPassButton)
+                btn.travelPassButton:SetAlpha(1)
+                btn.travelPassButton:EnableMouse(true)
+                btn.travelPassButton:SetSize(20, 32)
 
-                bu.bg:SetSize(bu.gameIcon:GetWidth()+2, bu.gameIcon:GetHeight()+2)
-                bu.bg:ClearAllPoints()
-                bu.bg:SetPoint("TOPLEFT", bu.gameIcon, -1, 1)
-                bu.gameIcon:SetParent(bu.bg)
-                bu.gameIcon:SetPoint("TOPRIGHT", bu.travelPassButton, "TOPLEFT", -2, -5)
-                bu.gameIcon.SetPoint = function() end
+                btn.bg:SetSize(btn.gameIcon:GetWidth()+2, btn.gameIcon:GetHeight()+2)
+                btn.bg:ClearAllPoints()
+                btn.bg:SetPoint("TOPLEFT", btn.gameIcon, -1, 1)
+                btn.gameIcon:SetParent(btn.bg)
+                btn.gameIcon:SetPoint("TOPRIGHT", btn.travelPassButton, "TOPLEFT", -2, -5)
+                btn.gameIcon.SetPoint = function() end
 
-                bu.inv = bu.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
-                bu.inv:SetTexture("Interface\\FriendsFrame\\PlusManz-PlusManz")
-                bu.inv:SetPoint("TOPRIGHT", 1, -4)
-                bu.inv:SetSize(22, 22)
+                btn.inv = btn.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
+                btn.inv:SetTexture([[Interface\FriendsFrame\PlusManz-PlusManz]])
+                btn.inv:SetPoint("TOPRIGHT", 1, -4)
+                btn.inv:SetSize(22, 22)
             end
             _G.FriendsFrame.skinned = true
         end
@@ -40,20 +40,13 @@ _G.tinsert(mods["Aurora"], function(F, C)
 
     local function UpdateScroll()
         for i = 1, _G.FRIENDS_TO_DISPLAY do
-            local bu = _G["FriendsFrameFriendsScrollFrameButton"..i]
-            local en = bu.travelPassButton:IsEnabled()
-            --print("UpdateScroll", i, en)
+            local btn = _G["FriendsFrameFriendsScrollFrameButton"..i]
+            local isEnabled = btn.travelPassButton:IsEnabled()
+            --print("UpdateScroll", i, isEnabled)
 
-            if en then
-                bu.inv:SetAlpha(0.7)
-            else
-                bu.inv:SetAlpha(0.3)
-            end
-
-            if bu.gameIcon:IsShown() then
-                bu.bg:Show()
-            else
-                bu.bg:Hide()
+            if btn.inv then
+                btn.inv:SetAlpha(isEnabled and 0.7 or 0.3)
+                btn.bg:SetShown(btn.gameIcon:IsShown())
             end
         end
     end
