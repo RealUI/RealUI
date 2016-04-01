@@ -1,11 +1,17 @@
 -- Lua Globals --
 local _G = _G
+local select, tostring = _G.select, _G.tostring
 
--- RealUI --
-local RealUI = _G.RealUI
-
-local debug = {}
 --_G.GAME_LOCALE ="deDE"
+local debugStack = {}
+local function debug(...)
+    local text = ""
+    for i = 1, select("#", ...) do
+        local arg = select(i, ...)
+        text = text .. "     " .. tostring(arg)
+    end
+    _G.tinsert(debugStack, text)
+end
 
 local BlizzAddons = {
     -- Not LoD, in order of load
@@ -71,21 +77,33 @@ local BlizzAddons = {
 for i = 1, #BlizzAddons do
     local loaded = _G.IsAddOnLoaded(BlizzAddons[i])
     if loaded then
-        _G.tinsert(debug, "Pre-loaded: "..BlizzAddons[i])
+        debug("Pre-loaded:", BlizzAddons[i])
     end
 end
 
 
 local frame = _G.CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, addonName)
-    if addonName:match("Blizzard") or addonName:match("RealUI") then
-        _G.tinsert(debug, "Loaded: "..addonName)
-    end
-    if addonName == "nibRealUI" then
-        for i = 1, #debug do
-            RealUI.Debug("Dev", debug[i])
+frame:RegisterAllEvents()
+frame:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" then
+        local addonName = ...
+        if addonName:match("Blizzard") or addonName:match("RealUI") then
+            debug("Loaded:", addonName)
+        end
+        if addonName == "nibRealUI" then
+            debug = function (...)
+                _G.RealUI.Debug("Dev", ...)
+            end
+            for i = 1, #debugStack do
+                debug(debugStack[i])
+            end
+            _G.wipe(debugStack)
             self:UnregisterEvent("ADDON_LOADED")
         end
+    else
+        debug(event, ...)
+        debug("GetScreenHeight", _G.GetScreenHeight())
+        debug("UIParent:GetSize", _G.UIParent:GetSize())
+        self:UnregisterEvent(event)
     end
 end)

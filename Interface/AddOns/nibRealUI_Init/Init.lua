@@ -12,8 +12,6 @@ local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
 -- RealUI --
 _G.RealUI = RealUI
 
-local _, uiHeight = _G.UIParent:GetSize()
-RealUI.EM = floor(uiHeight * 0.0125 + 0.5)
 
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
@@ -65,7 +63,7 @@ local function CreateDebugFrame(mod)
     return debugger[mod]
 end
 
-local function debug(mod, ...)
+local function Debug(mod, ...)
     local modDebug = debugger[mod]
     if not modDebug then
         modDebug = CreateDebugFrame(mod)
@@ -87,7 +85,10 @@ local function debug(mod, ...)
         modDebug.prevLine = text
     end
 end
-RealUI.Debug = debug
+RealUI.Debug = Debug
+local function debug(...)
+    Debug("Init", ...)
+end
 
 -- Slash Commands
 _G.SLASH_REALUIINIT1 = "/realdebug"
@@ -123,11 +124,25 @@ end
 local f = _G.CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("UI_SCALE_CHANGED")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- Do stuff at login
         f:UnregisterEvent("PLAYER_LOGIN")
         --f:UnregisterEvent("ADDON_LOADED")
+    elseif event == "UI_SCALE_CHANGED" then
+        local scrHeight = _G.GetScreenHeight()
+        scrHeight = floor(scrHeight + 0.5)
+        debug("scrHeight", scrHeight)
+        local EM = scrHeight * 0.0125
+        debug("EM", EM, RealUI.EM)
+
+        if not RealUI.EM then
+            debug("Set EM")
+            RealUI.EM = EM
+        elseif EM ~= RealUI.EM then
+            debug("Recalc EM")
+        end
     elseif event == "ADDON_LOADED" then
         if addon == NAME then
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
