@@ -3,15 +3,40 @@ local _G = _G
 local select, tostring = _G.select, _G.tostring
 
 --_G.GAME_LOCALE ="deDE"
-local debugStack = {}
+local isInGlue = _G.InGlue()
+
+local debugFrame
+if isInGlue then
+    local width, hieght = _G.GlueParent:GetSize()
+    local UIParent = _G.CreateFrame("Frame", "UIParent", _G.GlueParent)
+    UIParent:SetWidth(width / 2.5)
+    UIParent:SetPoint("TOPLEFT")
+    UIParent:SetPoint("BOTTOMLEFT")
+
+    debugFrame = _G.LibStub("RealUI_LibTextDump-1.0"):New("Debug Output", width/3, hieght/1.5)
+end
+
+local debugStack, hasTimer = {}
 local function debug(...)
     local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
         text = text .. "     " .. tostring(arg)
     end
-    _G.tinsert(debugStack, text)
+    if isInGlue then
+        debugFrame:AddLine(text)
+        if not hasTimer then
+            hasTimer = true
+            _G.C_Timer.After(1, function()
+                debugFrame:Display()
+                hasTimer = false
+            end)
+        end
+    else
+        _G.tinsert(debugStack, text)
+    end
 end
+debug("InGlue", isInGlue)
 
 local BlizzAddons = {
     -- Not LoD, in order of load
@@ -20,7 +45,7 @@ local BlizzAddons = {
     "Blizzard_CUFProfiles",
     "Blizzard_PetBattleUI",
     "Blizzard_TokenUI",
-    "Blizzard_StoreUI",
+    "Blizzard_StoreUI", -- can be loaded in GlueXML
     "Blizzard_AuthChallengeUI", -- can be loaded in GlueXML
     "Blizzard_ObjectiveTracker",
     "Blizzard_WowTokenUI",
@@ -37,6 +62,7 @@ local BlizzAddons = {
     "Blizzard_BattlefieldMinimap",
     "Blizzard_BindingUI",
     "Blizzard_BlackMarketUI",
+    "Blizzard_BoostTutorial",
     "Blizzard_Calendar",
     "Blizzard_ChallengesUI",
     "Blizzard_Collections",
@@ -57,12 +83,14 @@ local BlizzAddons = {
     "Blizzard_ItemUpgradeUI",
     "Blizzard_LookingForGuildUI",
     "Blizzard_MacroUI",
+    "Blizzard_MapCanvas",
     "Blizzard_MovePad",
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
+    "Blizzard_SharedMapDataProviders",
     "Blizzard_SocialUI",
     "Blizzard_TalentUI",
     "Blizzard_TalkingHeadUI",
@@ -103,7 +131,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
     else
         debug(event, ...)
         debug("GetScreenHeight", _G.GetScreenHeight())
-        debug("UIParent:GetSize", _G.UIParent:GetSize())
-        self:UnregisterEvent(event)
+        if not isInGlue then
+            debug("UIParent:GetSize", _G.UIParent:GetSize())
+            self:UnregisterEvent(event)
+        end
     end
 end)
