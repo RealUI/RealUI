@@ -15,11 +15,3 @@ RealUI.name = _G.UnitName("player")
 RealUI.realm = _G.GetRealmName()
 RealUI.faction = _G.UnitFactionGroup("player")
 RealUI.classLocale, RealUI.class, RealUI.classID = _G.UnitClass("player")
-
-function private.debug(mod)
-    return function (...)
-        private.RealUI.Debug(mod, ...)
-    end
-end
-
-

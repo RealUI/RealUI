@@ -11,7 +11,7 @@ local C = _G.Aurora[2]
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, dbc, dbg
-local debug = private.debug("Core")
+local debug = RealUI.GetDebug("Core")
 
 RealUI.verinfo = {}
 for word, letter in _G.GetAddOnMetadata(ADDON_NAME, "Version"):gmatch("(%d+)(%a*)") do

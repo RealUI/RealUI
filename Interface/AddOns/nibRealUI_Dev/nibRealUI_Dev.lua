@@ -119,9 +119,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             debug("Loaded:", addonName)
         end
         if addonName == "nibRealUI" then
-            debug = function (...)
-                _G.RealUI.Debug("Dev", ...)
-            end
+            debug = _G.RealUI.GetDebug("Dev")
             for i = 1, #debugStack do
                 debug(debugStack[i])
             end

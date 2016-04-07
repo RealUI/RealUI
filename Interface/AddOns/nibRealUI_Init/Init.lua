@@ -86,6 +86,11 @@ local function Debug(mod, ...)
     end
 end
 RealUI.Debug = Debug
+function RealUI.GetDebug(mod)
+    return function (...)
+        Debug(mod, ...)
+    end
+end
 local function debug(...)
     Debug("Init", ...)
 end

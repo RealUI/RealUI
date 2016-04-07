@@ -83,9 +83,7 @@ local FOREIGN_SERVER_LABEL = FOREIGN_SERVER_LABEL
 local COALESCED_REALM_TOOLTIP1 = string.split(FOREIGN_SERVER_LABEL, COALESCED_REALM_TOOLTIP)
 local INTERACTIVE_REALM_TOOLTIP1 = string.split(INTERACTIVE_SERVER_LABEL, INTERACTIVE_REALM_TOOLTIP)
 
-ns.Debug = function(...)
-    RealUI.Debug(ADDON_NAME, ...)
-end
+ns.Debug = RealUI.GetDebug(ADDON_NAME)
 
 local colors = {power = {}}
 for power, color in next, PowerBarColor do

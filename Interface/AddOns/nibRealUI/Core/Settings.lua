@@ -8,7 +8,7 @@ local next = _G.next
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, dbg
-local debug = private.debug("Settings")
+local debug = RealUI.GetDebug("Settings")
 
 local nibRealUICharacter_defaults = {
     installStage = 0,
