@@ -864,7 +864,7 @@ local unitframes do
             }
         else
             local GridLayout = RealUI:GetModule("GridLayout")
-            db = GridLayout.db.profile
+            local glDB = GridLayout.db.profile
             for i, layout in next, {"dps", "healing"} do
                 local args = group.args[layout].args
                 local anchor = (layout == "dps") and "Bottom" or "Top"
@@ -911,9 +911,9 @@ local unitframes do
                             name = L["Raid_SmallGroup"],
                             desc = L["Raid_SmallGroupDesc"],
                             type = "toggle",
-                            get = function() return db[layout].hGroups.normal end,
+                            get = function() return glDB[layout].hGroups.normal end,
                             set = function(info, value)
-                                db[layout].hGroups.normal = value
+                                glDB[layout].hGroups.normal = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 10,
@@ -922,9 +922,9 @@ local unitframes do
                             name = L["Raid_LargeGroup"],
                             desc = L["Raid_LargeGroupDesc"],
                             type = "toggle",
-                            get = function() return db[layout].hGroups.raid end,
+                            get = function() return glDB[layout].hGroups.raid end,
                             set = function(info, value)
-                                db[layout].hGroups.raid = value
+                                glDB[layout].hGroups.raid = value
                                 GridLayout:SettingsUpdate()
                             end,
                             order = 20,
@@ -935,9 +935,9 @@ local unitframes do
                     name = _G.SHOW_PARTY_PETS_TEXT,
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[layout].showPet end,
+                    get = function() return glDB[layout].showPet end,
                     set = function(info, value)
-                        db[layout].showPet = value
+                        glDB[layout].showPet = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 20,
@@ -946,9 +946,9 @@ local unitframes do
                     name = L["Raid_ShowSolo"],
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "toggle",
-                    get = function() return db[layout].showSolo end,
+                    get = function() return glDB[layout].showSolo end,
                     set = function(info, value)
-                        db[layout].showSolo = value
+                        glDB[layout].showSolo = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 30,
@@ -978,9 +978,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[layout].width.normal end,
+                    get = function(info) return glDB[layout].width.normal end,
                     set = function(info, value)
-                        db[layout].width.normal = value
+                        glDB[layout].width.normal = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -990,9 +990,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[layout].width[30] end,
+                    get = function(info) return glDB[layout].width[30] end,
                     set = function(info, value)
-                        db[layout].width[30] = value
+                        glDB[layout].width[30] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
@@ -1002,9 +1002,9 @@ local unitframes do
                     disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
                     type = "range",
                     min = 40, max = 110, step = 1,
-                    get = function(info) return db[layout].width[40] end,
+                    get = function(info) return glDB[layout].width[40] end,
                     set = function(info, value)
-                        db[layout].width[40] = value
+                        glDB[layout].width[40] = value
                         GridLayout:SettingsUpdate()
                     end,
                     order = 40,
