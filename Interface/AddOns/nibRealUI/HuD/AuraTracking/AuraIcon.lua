@@ -64,6 +64,8 @@ function AuraTracking:CreateAuraIcon(id, spellData)
 
     local cd = _G.CreateFrame("Cooldown", nil, tracker, "CooldownFrameTemplate")
     cd:SetAllPoints(tracker)
+    cd:SetDrawEdge(false)
+    cd:SetReverse(true)
     tracker.cd = cd
 
     local _, texture
@@ -83,7 +85,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     local bg = F.ReskinIcon(icon)
     tracker.bg = bg
 
-    local count = tracker:CreateFontString()
+    local count = cd:CreateFontString()
     count:SetFontObject(_G.RealUIFont_PixelCooldown)
     count:SetJustifyH("RIGHT")
     count:SetJustifyV("TOP")
