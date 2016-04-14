@@ -381,9 +381,9 @@ function Loot:UpdateGroupLoot()
         if Needable then frame.need:Enable() else frame.need:Disable() end
         if Greedable then frame.greed:Enable() else frame.greed:Disable() end
 
-        frame.disenchant:GetNormalTexture():SetDesaturation(not Disenchantable)
-        frame.need:GetNormalTexture():SetDesaturation(not Needable)
-        frame.greed:GetNormalTexture():SetDesaturation(not Greedable)
+        frame.disenchant:GetNormalTexture():SetDesaturated(not Disenchantable);
+        frame.need:GetNormalTexture():SetDesaturated(not Needable);
+        frame.greed:GetNormalTexture():SetDesaturated(not Greedable);
 
         frame.text:SetText(_G.ITEM_QUALITY_COLORS[quality].hex..name)
 

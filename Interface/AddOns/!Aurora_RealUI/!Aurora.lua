@@ -14,9 +14,7 @@ local RealUI = _G.RealUI
 -- RealUI skin hook
 _G.REALUI_STRIPE_TEXTURES = _G.REALUI_STRIPE_TEXTURES or {}
 _G.REALUI_WINDOW_FRAMES = _G.REALUI_WINDOW_FRAMES or {}
-local function debug(...)
-    RealUI.Debug("!Aurora", ...)
-end
+local debug = RealUI.GetDebug("!Aurora")
 mods.debug = debug
 
 -- Aurora API

@@ -1,8 +1,42 @@
 -- Lua Globals --
 local _G = _G
+local select, tostring = _G.select, _G.tostring
 
-local debug = {}
 --_G.GAME_LOCALE ="deDE"
+local isInGlue = _G.InGlue()
+
+local debugFrame
+if isInGlue then
+    local width, hieght = _G.GlueParent:GetSize()
+    local UIParent = _G.CreateFrame("Frame", "UIParent", _G.GlueParent)
+    UIParent:SetWidth(width / 2.5)
+    UIParent:SetPoint("TOPLEFT")
+    UIParent:SetPoint("BOTTOMLEFT")
+
+    debugFrame = _G.LibStub("RealUI_LibTextDump-1.0"):New("Debug Output", width/3, hieght/1.5)
+end
+
+local debugStack, hasTimer = {}
+local function debug(...)
+    local text = ""
+    for i = 1, select("#", ...) do
+        local arg = select(i, ...)
+        text = text .. "     " .. tostring(arg)
+    end
+    if isInGlue then
+        debugFrame:AddLine(text)
+        if not hasTimer then
+            hasTimer = true
+            _G.C_Timer.After(1, function()
+                debugFrame:Display()
+                hasTimer = false
+            end)
+        end
+    else
+        _G.tinsert(debugStack, text)
+    end
+end
+debug("InGlue", isInGlue)
 
 local BlizzAddons = {
     -- Not LoD, in order of load
@@ -11,7 +45,7 @@ local BlizzAddons = {
     "Blizzard_CUFProfiles",
     "Blizzard_PetBattleUI",
     "Blizzard_TokenUI",
-    "Blizzard_StoreUI",
+    "Blizzard_StoreUI", -- can be loaded in GlueXML
     "Blizzard_AuthChallengeUI", -- can be loaded in GlueXML
     "Blizzard_ObjectiveTracker",
     "Blizzard_WowTokenUI",
@@ -28,6 +62,7 @@ local BlizzAddons = {
     "Blizzard_BattlefieldMinimap",
     "Blizzard_BindingUI",
     "Blizzard_BlackMarketUI",
+    "Blizzard_BoostTutorial",
     "Blizzard_Calendar",
     "Blizzard_ChallengesUI",
     "Blizzard_Collections",
@@ -48,12 +83,14 @@ local BlizzAddons = {
     "Blizzard_ItemUpgradeUI",
     "Blizzard_LookingForGuildUI",
     "Blizzard_MacroUI",
+    "Blizzard_MapCanvas",
     "Blizzard_MovePad",
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
+    "Blizzard_SharedMapDataProviders",
     "Blizzard_SocialUI",
     "Blizzard_TalentUI",
     "Blizzard_TalkingHeadUI",
@@ -68,21 +105,33 @@ local BlizzAddons = {
 for i = 1, #BlizzAddons do
     local loaded = _G.IsAddOnLoaded(BlizzAddons[i])
     if loaded then
-        _G.tinsert(debug, "Pre-loaded: "..BlizzAddons[i])
+        debug("Pre-loaded:", BlizzAddons[i])
     end
 end
 
 
 local frame = _G.CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, addonName)
-    if addonName:match("Blizzard") or addonName:match("RealUI") then
-        _G.tinsert(debug, "Loaded: "..addonName)
-    end
-    if addonName == "nibRealUI" then
-        for i = 1, #debug do
-            _G.RealUI.Debug("Dev", debug[i])
+frame:RegisterAllEvents()
+frame:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" then
+        local addonName = ...
+        if addonName:match("Blizzard") or addonName:match("RealUI") then
+            debug("Loaded:", addonName)
+        end
+        if addonName == "nibRealUI" then
+            debug = _G.RealUI.GetDebug("Dev")
+            for i = 1, #debugStack do
+                debug(debugStack[i])
+            end
+            _G.wipe(debugStack)
             self:UnregisterEvent("ADDON_LOADED")
+        end
+    else
+        debug(event, ...)
+        debug("GetScreenHeight", _G.GetScreenHeight())
+        if not isInGlue then
+            debug("UIParent:GetSize", _G.UIParent:GetSize())
+            self:UnregisterEvent(event)
         end
     end
 end)

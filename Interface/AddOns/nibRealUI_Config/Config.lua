@@ -22,9 +22,7 @@ local _, uiHeight = _G.UIParent:GetSize()
 local initialized = false
 local isHuDShown = false
 
-local function debug(...)
-    RealUI.Debug(MOD_NAME, ...)
-end
+local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer

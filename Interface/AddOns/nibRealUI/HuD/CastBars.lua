@@ -63,14 +63,16 @@ end
 function CastBars:SetAnchors(castbar, unit)
     CastBars:debug("Set config cast", unit)
 
-    local xOfs, x, y = 0, 3, -2
+    local iconX, iconY = 3, -2
     local iconPoint, iconRelPoint = "TOP", "BOTTOM"
-    local textPoint, textRelPoint = "TOP", "TOP"
-    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
     if not db.text.textOnBottom then
         iconPoint, iconRelPoint = "BOTTOM", "TOP"
-        y = -y
+        iconY = -iconY
     end
+
+    local textX, textY = 0, -2
+    local textPoint, textRelPoint = "TOP", "TOP"
+    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
 
     castbar.Time:ClearAllPoints()
     castbar.Text:ClearAllPoints()
@@ -81,27 +83,25 @@ function CastBars:SetAnchors(castbar, unit)
         if db.text.textInside then
             castbar.Text:SetJustifyH("RIGHT")
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            x = -x
+            iconX = -iconX
         else
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            --xOfs = 4
         end
         castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
     elseif unit == "target" then
         if db.text.textInside then
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            --xOfs = 4
         else
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            x = -x
+            iconX = -iconX
         end
         castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
     elseif unit == "focus" then
         castbar.Icon:SetPoint("BOTTOMLEFT", castbar, "BOTTOMRIGHT", 2, 1)
         castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)

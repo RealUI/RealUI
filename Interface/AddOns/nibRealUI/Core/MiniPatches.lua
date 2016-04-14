@@ -6,7 +6,7 @@ local next, type = _G.next, _G.type
 
 -- RealUI --
 local RealUI = private.RealUI
-local debug = private.debug("MiniPatch")
+local debug = RealUI.GetDebug("MiniPatch")
 
 RealUI.minipatches = {
     [1] = function(ver)
