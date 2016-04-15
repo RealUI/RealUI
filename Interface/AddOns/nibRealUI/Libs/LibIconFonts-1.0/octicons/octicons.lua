@@ -33,7 +33,7 @@ local function octicons(version)
         ["cloud-download"] = "", -- f00b
         ["cloud-upload"] = "", -- f00c
         ["code"] = "", -- f05f
-        ["color-mode"] = "", -- f065
+        ["color-mode"] = "", -- f065  Removed in 3.4
         ["comment"] = "", -- f02b
         ["comment-discussion"] = "", -- f04f
         ["credit-card"] = "", -- f045
@@ -133,8 +133,8 @@ local function octicons(version)
         ["rocket"] = "", -- f033
         ["rss"] = "", -- f034
         ["ruby"] = "", -- f047
-        ["screen-full"] = "", -- f066
-        ["screen-normal"] = "", -- f067
+        ["screen-full"] = "", -- f066  Removed in 3.2
+        ["screen-normal"] = "", -- f067  Removed in 3.2
         ["search"] = "", -- f02e
         ["server"] = "", -- f097
         ["settings"] = "", -- f07c
@@ -201,7 +201,26 @@ local function octicons(version)
 
         font["microscope"] = font["beaker"]
         font["clone"] = font["desktop-download"]
-    elseif version == "v2.x" then
+
+        -- Added in 3.1
+        font["shield"] = "" -- f0e1
+
+        -- Added in 3.2
+        font["bold"] = "" -- f0e2
+        font["italic"] = "" -- f0e4
+        font["tasklist"] = "" -- f0e5
+        font["text-size"] = "" -- f0e3
+
+        -- Added in 3.3
+        font["logo-gist"] = "" -- f0ad
+
+        -- Added in 3.4
+        font["smiley"] = "" -- f0e7
+        font["verified"] = "" -- f0e6
+
+        -- Added in 3.5
+        font["unverified"] = "" -- f0e8
+    elseif version == "v2.4" then
         font["alignment-align"] = "" -- f08a
         font["alignment-aligned-to"] = "" -- f08e
         font["alignment-unalign"] = "" -- f08b

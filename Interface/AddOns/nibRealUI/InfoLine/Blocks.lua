@@ -275,7 +275,7 @@ function InfoLine:CreateBlocks()
 
         LDB:NewDataObject(_G.GUILD, {
             type = "RealUI",
-            label = octicons["alignment-unalign"],
+            label = octicons["organization"],
             labelFont = {octicons.path, InfoLine.barHeight * .6, "OUTLINE"},
             text = 1,
             value = 1,
