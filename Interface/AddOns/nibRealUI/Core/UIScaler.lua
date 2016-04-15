@@ -139,7 +139,7 @@ function UIScaler:OnInitialize()
     scaleBtn:SetSize(200, 24)
     scaleBtn:SetText("RealUI UI Scaler")
     scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)
-    scaleBtn:SetScript("OnClick", function() RealUI:LoadConfig("nibRealUI", "UIScaler") end)
+    scaleBtn:SetScript("OnClick", function() RealUI:LoadConfig("RealUI", "UIScaler") end)
 
     -- CVar "uiScale" doesn't exist until late in the loading process
     self:RegisterEvent("PLAYER_ENTERING_WORLD")

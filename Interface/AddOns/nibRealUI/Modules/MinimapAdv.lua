@@ -1746,7 +1746,7 @@ end
 
 ---- Config Button ----
 local function Config_OnMouseDown()
-    RealUI:LoadConfig("nibRealUI", "modules", "MinimapAdv")
+    RealUI:LoadConfig("RealUI", "modules", "MinimapAdv")
 
     if _G.DropDownList1 then _G.DropDownList1:Hide() end
     if _G.DropDownList2 then _G.DropDownList2:Hide() end

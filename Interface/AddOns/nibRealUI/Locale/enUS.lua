@@ -81,6 +81,9 @@ L["Power_TurboDesc"] = [=[This mode will schedule graphical updates at a fast ra
 This will increase CPU usage.]=]
 L["Reset_Confirm"] = "Are you sure you wish to reset RealUI?"
 L["Reset_SettingsLost"] = "All user settings will be lost."
+L["Tweaks_AddonList"] = "Addon List Adv"
+L["Tweaks_CooldownCount"] = "Cooldown Count"
+L["Tweaks_CooldownCountDesc"] = "Modifies the countdown text on cooldown swipes"
 L["Tweaks_HideRaidFilter"] = "Hide raid filters"
 L["Tweaks_HideRaidFilterDesc"] = "Hide the group filters for Blizzard's Compact Raid Frames"
 

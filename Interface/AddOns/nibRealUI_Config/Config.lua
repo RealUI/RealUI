@@ -202,10 +202,10 @@ local function InitializeOptions()
     local hlAnim = highlight.hlAnim
     local hl = hlAnim.hl
 
-    RealUI:SetUpOptions() -- Old
+    --RealUI:SetUpOptions() -- Old
+    ACR:RegisterOptionsTable("RealUI", options.RealUI)
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
-    --ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- Buttons

@@ -36,7 +36,7 @@ local other do
                 name = _G.ADVANCED_OPTIONS,
                 type = "execute",
                 func = function(info, ...)
-                    RealUI:LoadConfig("nibRealUI")
+                    RealUI:LoadConfig("RealUI")
                 end,
                 order = 0,
             },

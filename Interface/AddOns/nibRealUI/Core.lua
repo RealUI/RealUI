@@ -644,7 +644,7 @@ function RealUI:LoadConfig(app, section, ...)
     if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
-    RealUI:SetUpOptions()
+    --RealUI:SetUpOptions()
     if app == "HuD" and not ... then
         return RealUI:ShowConfigBar()
     end
@@ -686,7 +686,7 @@ function RealUI:OnInitialize()
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function() RealUI:LoadConfig(ADDON_NAME) end)
+    self:RegisterChatCommand("realadv", function() RealUI:LoadConfig("RealUI") end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", function() _G.ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
