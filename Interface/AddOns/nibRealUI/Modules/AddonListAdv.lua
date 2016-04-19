@@ -371,7 +371,7 @@ function AddonListAdv:OnInitialize()
     dbk = self.db.class
     dbg = self.db.global
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(true)
     self:RegisterEvent("PLAYER_LOGIN")
 end
 

@@ -1,6 +1,6 @@
 local _, private = ...
 local options = private.options
-local debug = private.debug
+--local debug = private.debug
 
 -- Lua Globals --
 local _G = _G
@@ -107,6 +107,11 @@ local skins do
         type = "group",
         order = order,
         args = {
+            header = {
+                type = "header",
+                name = "Skins",
+                order = 0,
+            },
             windowOpacity = {
                 name = L["Appearance_WinOpacity"],
                 type = "range",
@@ -129,11 +134,6 @@ local skins do
                 end,
                 order = 20,
             },
-            header = {
-                type = "header",
-                name = "Skins",
-                order = 30,
-            },
         }
     }
 end
@@ -150,12 +150,12 @@ local uiTweaks do
             type = "group",
             args = {
                 header = {
-                    name = "Cooldown Count",
+                    name = L["Tweaks_CooldownCount"],
                     type = "header",
                     order = 10,
                 },
                 desc3 = {
-                    name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                    name = L["General_NoteReload"],
                     type = "description",
                     order = 22,
                 },
@@ -163,17 +163,7 @@ local uiTweaks do
                     name = L["General_Enabled"],
                     desc = L["General_EnabledDesc"]:format(L["Tweaks_CooldownCount"]),
                     type = "toggle",
-                    get = function(info)
-                        for key, value in next, info do
-                            debug("CD enabled", key, value)
-                            if _G.type(value) == "table" then
-                                for k, v in next, value do
-                                    debug(key, k, v)
-                                end
-                            end
-                        end
-                        return RealUI:GetModuleEnabled(cooldown.arg)
-                    end,
+                    get = function(info) return RealUI:GetModuleEnabled(cooldown.arg) end,
                     set = function(info, value)
                         RealUI:SetModuleEnabled(cooldown.arg, value)
                         RealUI:ReloadUIDialog()
@@ -235,9 +225,8 @@ local uiTweaks do
                     order = 90,
                     args = {
                         expiring = {
-                            type = "color",
                             name = "Expiring",
-                            hasAlpha = false,
+                            type = "color",
                             get = function(info,r,g,b)
                                 return db.colors.expiring[1], db.colors.expiring[2], db.colors.expiring[3]
                             end,
@@ -249,9 +238,8 @@ local uiTweaks do
                             order = 10,
                         },
                         seconds = {
-                            type = "color",
                             name = "Seconds",
-                            hasAlpha = false,
+                            type = "color",
                             get = function(info,r,g,b)
                                 return db.colors.seconds[1], db.colors.seconds[2], db.colors.seconds[3]
                             end,
@@ -263,9 +251,8 @@ local uiTweaks do
                             order = 20,
                         },
                         minutes = {
-                            type = "color",
                             name = "Minutes",
-                            hasAlpha = false,
+                            type = "color",
                             get = function(info,r,g,b)
                                 return db.colors.minutes[1], db.colors.minutes[2], db.colors.minutes[3]
                             end,
@@ -277,9 +264,8 @@ local uiTweaks do
                             order = 30,
                         },
                         hours = {
-                            type = "color",
                             name = "Hours",
-                            hasAlpha = false,
+                            type = "color",
                             get = function(info,r,g,b)
                                 return db.colors.hours[1], db.colors.hours[2], db.colors.hours[3]
                             end,
@@ -291,9 +277,8 @@ local uiTweaks do
                             order = 40,
                         },
                         days = {
-                            type = "color",
                             name = "days",
-                            hasAlpha = false,
+                            type = "color",
                             get = function(info,r,g,b)
                                 return db.colors.days[1], db.colors.days[2], db.colors.days[3]
                             end,
@@ -377,33 +362,732 @@ local uiTweaks do
             },
         }
     end
+    local minimap do
+        local MinimapAdv = RealUI:GetModule("MinimapAdv")
+        local db = MinimapAdv.db.profile
+        local minimapOffsets = {
+            {x = 7, y = -7},
+            {x = -7, y = -7},
+            {x = 7, y = 28},
+            {x = -7, y = 28},
+        }
+        local minimapAnchors = {
+            "TOPLEFT",
+            "TOPRIGHT",
+            "BOTTOMLEFT",
+            "BOTTOMRIGHT",
+        }
+        minimap = {
+            type = "group",
+            name = "Minimap",
+            desc = "Advanced, minimalistic Minimap.",
+            arg = "MinimapAdv",
+            childGroups = "tab",
+            args = {
+                header = {
+                    type = "header",
+                    name = "Minimap",
+                    order = 10,
+                },
+                desc = {
+                    type = "description",
+                    name = "Advanced, minimalistic Minimap.",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    type = "toggle",
+                    name = "Enabled",
+                    desc = "Enable/Disable the Minimap module.",
+                    get = function() return RealUI:GetModuleEnabled(minimap.arg) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(minimap.arg, value)
+                        RealUI:ReloadUIDialog()
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                information = {
+                    name = "Information",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    order = 40,
+                    args = {
+                        coordDelayHide = {
+                            type = "toggle",
+                            name = "Fade out Coords",
+                            desc = "Hide the Coordinate display when you haven't moved for 10 seconds.",
+                            get = function(info) return db.information.coordDelayHide end,
+                            set = function(info, value)
+                                db.information.coordDelayHide = value
+                                MinimapAdv.StationaryTime = 0
+                                MinimapAdv.LastX = 0
+                                MinimapAdv.LastY = 0
+                                MinimapAdv:CoordsUpdate()
+                            end,
+                            order = 10,
+                        },
+                        minimapbuttons = {
+                            type = "toggle",
+                            name = "Hide Minimap Buttons",
+                            desc = "Moves buttons attached to the Minimap to underneath and shows them on mouse-over.",
+                            get = function(info) return db.information.minimapbuttons end,
+                            set = function(info, value)
+                                db.information.minimapbuttons = value
+                                RealUI:ReloadUIDialog()
+                            end,
+                            order = 20,
+                        },
+                        location = {
+                            type = "toggle",
+                            name = "Location Name",
+                            desc = "Show the name of your current location underneath the Minimap.",
+                            get = function(info) return db.information.location end,
+                            set = function(info, value)
+                                db.information.location = value
+                                MinimapAdv:UpdateInfoPosition()
+                            end,
+                            order = 30,
+                        },
+                        gap = {
+                            type = "range",
+                            name = "Gap",
+                            desc = "Amount of space between each information element.",
+                            min = 1, max = 28, step = 1,
+                            get = function(info) return db.information.gap end,
+                            set = function(info, value)
+                                db.information.gap = value
+                                MinimapAdv:UpdateInfoPosition()
+                            end,
+                            order = 40,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 51,
+                        },
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 60,
+                            args = {
+                                xoffset = {
+                                    type = "input",
+                                    name = "X Offset",
+                                    width = "half",
+                                    order = 10,
+                                    get = function(info) return _G.tostring(db.information.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.information.position.x = value
+                                        MinimapAdv:UpdateInfoPosition()
+                                    end,
+                                },
+                                yoffset = {
+                                    type = "input",
+                                    name = "Y Offset",
+                                    width = "half",
+                                    order = 20,
+                                    get = function(info) return _G.tostring(db.information.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.information.position.y = value
+                                        MinimapAdv:UpdateInfoPosition()
+                                    end,
+                                },
+                            },
+                        },
+                    },
+                },
+                hidden = {
+                    name = "Automatic Hide/Show",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    order = 50,
+                    args = {
+                        enabled = {
+                            type = "toggle",
+                            name = "Enabled",
+                            get = function(info) return db.hidden.enabled end,
+                            set = function(info, value) db.hidden.enabled = value end,
+                            order = 10,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 11,
+                        },
+                        zones = {
+                            type = "group",
+                            name = "Hide in..",
+                            inline = true,
+                            disabled = function()
+                                return not(db.hidden.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                            end,
+                            order = 20,
+                            args = {
+                                arena = {
+                                    type = "toggle",
+                                    name = "Arenas",
+                                    get = function(info) return db.hidden.zones.arena end,
+                                    set = function(info, value) db.hidden.zones.arena = value end,
+                                    order = 10,
+                                },
+                                pvp = {
+                                    type = "toggle",
+                                    name = _G.BATTLEGROUNDS,
+                                    get = function(info) return db.hidden.zones.pvp end,
+                                    set = function(info, value) db.hidden.zones.pvp = value end,
+                                    order = 200,
+                                },
+                                party = {
+                                    type = "toggle",
+                                    name = _G.DUNGEONS,
+                                    get = function(info) return db.hidden.zones.party end,
+                                    set = function(info, value) db.hidden.zones.party = value end,
+                                    order = 30,
+                                },
+                                raid = {
+                                    type = "toggle",
+                                    name = _G.RAIDS,
+                                    get = function(info) return db.hidden.zones.raid end,
+                                    set = function(info, value) db.hidden.zones.raid = value end,
+                                    order = 40,
+                                },
+                            },
+                        },
+                    },
+                },
+                sizeposition = {
+                    name = "Position",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    order = 60,
+                    args = {
+                        size = {
+                            type = "range",
+                            name = "Size",
+                            desc = "Note: Minimap will refresh to fit the new size upon player movement.",
+                            min = 134,
+                            max = 164,
+                            step = 1,
+                            get = function(info) return db.position.size end,
+                            set = function(info, value)
+                                db.position.size = value
+                                MinimapAdv:UpdateMinimapPosition()
+                            end,
+                            order = 10,
+                        },
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 20,
+                            args = {
+                                scale = {
+                                    type = "range",
+                                    name = "Scale",
+                                    min = 0.5,
+                                    max = 2,
+                                    step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.position.scale end,
+                                    set = function(info, value)
+                                        db.position.scale = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 10,
+                                },
+                                xoffset = {
+                                    type = "input",
+                                    name = "X Offset",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.x = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 20,
+                                },
+                                yoffset = {
+                                    type = "input",
+                                    name = "Y Offset",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.y = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 30,
+                                },
+                                anchorto = {
+                                    type = "select",
+                                    name = "Anchor To",
+                                    get = function(info)
+                                        for k,v in next, minimapAnchors do
+                                            if v == db.position.anchorto then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        --print("Set Anchor", info.option, value)
+                                        db.position.anchorto = minimapAnchors[value]
+                                        db.position.x = minimapOffsets[value].x
+                                        db.position.y = minimapOffsets[value].y
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = minimapAnchors,
+                                    order = 40,
+                                },
+                            },
+                        },
+                    },
+                },
+                expand = {
+                    name = "Farm Mode",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    order = 70,
+                    args = {
+                        appearance = {
+                            name = _G.APPEARANCE_LABEL,
+                            type = "group",
+                            inline = true,
+                            order = 10,
+                            args = {
+                                scale = {
+                                    type = "range",
+                                    name = "Scale",
+                                    min = 0.5,
+                                    max = 2,
+                                    step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.expand.appearance.scale end,
+                                    set = function(info, value)
+                                        db.expand.appearance.scale = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 10,
+                                },
+                                opacity = {
+                                    type = "range",
+                                    name = "Opacity",
+                                    min = 0,
+                                    max = 1,
+                                    step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.expand.appearance.opacity end,
+                                    set = function(info, value)
+                                        db.expand.appearance.opacity = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 20,
+                                },
+                            },
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 21,
+                        },
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 30,
+                            args = {
+                                xoffset = {
+                                    type = "input",
+                                    name = "X Offset",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.expand.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.expand.position.x = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 10,
+                                },
+                                yoffset = {
+                                    type = "input",
+                                    name = "Y Offset",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.expand.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.expand.position.y = value
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    order = 20,
+                                },
+                                anchorto = {
+                                    type = "select",
+                                    name = "Anchor To",
+                                    get = function(info)
+                                        for k, v in next, minimapAnchors do
+                                            if v == db.expand.position.anchorto then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.expand.position.anchorto = minimapAnchors[value]
+                                        db.expand.position.x = minimapOffsets[value].x
+                                        db.expand.position.y = minimapOffsets[value].y
+                                        MinimapAdv:UpdateMinimapPosition()
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = minimapAnchors,
+                                    order = 30,
+                                },
+                            },
+                        },
+                        gap2 = {
+                            name = " ",
+                            type = "description",
+                            order = 31,
+                        },
+                        extras = {
+                            name = "Extras",
+                            type = "group",
+                            inline = true,
+                            order = 40,
+                            args = {
+                                gatherertoggle = {
+                                    type = "toggle",
+                                    name = "Gatherer toggle",
+                                    disabled = function() if not _G.Gatherer then return true else return false end end,
+                                    desc = "If you have Gatherer installed, then MinimapAdv will automatically disable Gatherer's minimap icons and HUD while not in Farm Mode, and enable them while in Farm Mode.",
+                                    get = function(info) return db.expand.extras.gatherertoggle end,
+                                    set = function(info, value)
+                                        db.expand.extras.gatherertoggle = value
+                                        MinimapAdv:ToggleGatherer()
+                                    end,
+                                    order = 10,
+                                },
+                                clickthrough = {
+                                    type = "toggle",
+                                    name = "Clickthrough",
+                                    desc = "Make the Minimap clickthrough (won't respond to mouse clicks) while in Farm Mode.",
+                                    get = function(info) return db.expand.extras.clickthrough end,
+                                    set = function(info, value)
+                                        db.expand.extras.clickthrough = value
+                                        MinimapAdv:UpdateClickthrough()
+                                    end,
+                                    order = 20,
+                                },
+                                hidepoi = {
+                                    type = "toggle",
+                                    name = "Hide POI icons",
+                                    get = function(info) return db.expand.extras.hidepoi end,
+                                    set = function(info, value)
+                                        db.expand.extras.hidepoi = value
+                                        MinimapAdv:UpdateFarmModePOI()
+                                    end,
+                                    order = 30,
+                                },
+                            },
+                        },
+                    },
+                },
+                poi = {
+                    name = "POI",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    order = 80,
+                    args = {
+                        enabled = {
+                            type = "toggle",
+                            name = "Enabled",
+                            desc = "Enable/Disable the displaying of POI icons on the minimap.",
+                            get = function(info) return db.poi.enabled end,
+                            set = function(info, value)
+                                db.poi.enabled = value
+                                MinimapAdv:UpdatePOIEnabled()
+                            end,
+                            order = 10,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 11,
+                        },
+                        general = {
+                            type = "group",
+                            name = "General Settings",
+                            inline = true,
+                            disabled = function()
+                                return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                            end,
+                            order = 20,
+                            args = {
+                                watchedOnly = {
+                                    type = "toggle",
+                                    name = "Watched Only",
+                                    desc = "Only show POI icons for watched quests.",
+                                    get = function(info) return db.poi.watchedOnly end,
+                                    set = function(info, value)
+                                        db.poi.watchedOnly = value
+                                        MinimapAdv:POIUpdate()
+                                    end,
+                                    order = 10,
+                                },
+                                fadeEdge = {
+                                    type = "toggle",
+                                    name = "Fade at Edge",
+                                    desc = "Fade icons when they go off the edge of the minimap.",
+                                    get = function(info) return db.poi.fadeEdge end,
+                                    set = function(info, value)
+                                        db.poi.fadeEdge = value
+                                        MinimapAdv:POIUpdate()
+                                    end,
+                                    order = 10,
+                                },
+                            },
+                        },
+                        gap2 = {
+                            name = " ",
+                            type = "description",
+                            order = 21,
+                        },
+                        icons = {
+                            type = "group",
+                            name = "Icon Settings",
+                            inline = true,
+                            disabled = function()
+                                return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                            end,
+                            order = 30,
+                            args = {
+                                scale = {
+                                    type = "range",
+                                    name = "Scale",
+                                    min = 0.1,
+                                    max = 1.5,
+                                    step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.poi.icons.scale end,
+                                    set = function(info, value)
+                                        db.poi.icons.scale = value
+                                        MinimapAdv:POIUpdate()
+                                    end,
+                                    order = 10,
+                                },
+                                opacity = {
+                                    type = "range",
+                                    name = "Opacity",
+                                    min = 0.1,
+                                    max = 1,
+                                    step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.poi.icons.opacity end,
+                                    set = function(info, value)
+                                        db.poi.icons.opacity = value
+                                        MinimapAdv:POIUpdate()
+                                    end,
+                                    order = 10,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local powerBar do
+        local AltPowerBar = RealUI:GetModule("AltPowerBar")
+        local db = AltPowerBar.db.profile
+        powerBar = {
+            type = "group",
+            name = "Alt Power Bar",
+            arg = "Alt Power Bar",
+            childGroups = "tab",
+            args = {
+                header = {
+                    type = "header",
+                    name = "Alt Power Bar",
+                    order = 10,
+                },
+                desc = {
+                    type = "description",
+                    name = "Replacement of the default Alternate Power Bar.",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    type = "toggle",
+                    name = "Enabled",
+                    desc = "Enable/Disable the Alt Power Bar module.",
+                    get = function() return RealUI:GetModuleEnabled(powerBar.arg) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(powerBar.arg, value)
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                size = {
+                    name = "Size",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
+                    inline = true,
+                    order = 50,
+                    args = {
+                        width = {
+                            type = "input",
+                            name = "Width",
+                            width = "half",
+                            order = 10,
+                            get = function(info) return _G.tostring(db.size.width) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.size.width = value
+                                powerBar:UpdatePosition()
+                            end,
+                        },
+                        height = {
+                            type = "input",
+                            name = "Height",
+                            width = "half",
+                            order = 20,
+                            get = function(info) return _G.tostring(db.size.height) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.size.height = value
+                                powerBar:UpdatePosition()
+                            end,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 51,
+                },
+                position = {
+                    name = "Position",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
+                    inline = true,
+                    order = 60,
+                    args = {
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 10,
+                            args = {
+                                xoffset = {
+                                    type = "input",
+                                    name = "X Offset",
+                                    width = "half",
+                                    order = 10,
+                                    get = function(info) return _G.tostring(db.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.x = value
+                                        powerBar:UpdatePosition()
+                                    end,
+                                },
+                                yoffset = {
+                                    type = "input",
+                                    name = "Y Offset",
+                                    width = "half",
+                                    order = 20,
+                                    get = function(info) return _G.tostring(db.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.y = value
+                                        powerBar:UpdatePosition()
+                                    end,
+                                },
+                                anchorto = {
+                                    type = "select",
+                                    name = "Anchor To",
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorto then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorto = RealUI.globals.anchorPoints[value]
+                                        powerBar:UpdatePosition()
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = RealUI.globals.anchorPoints,
+                                    order = 30,
+                                },
+                                anchorfrom = {
+                                    type = "select",
+                                    name = "Anchor From",
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorfrom then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorfrom = RealUI.globals.anchorPoints[value]
+                                        powerBar:UpdatePosition()
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = RealUI.globals.anchorPoints,
+                                    order = 40,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    end
+    --[[local function CreateToggleOption(mod)
+        local modObj = RealUI:GetModule(mod)
+        return {
+            name = L["Tweaks_"..mod],
+            desc = L["General_EnabledDesc"]:format(L["Tweaks_"..mod]),
+            type = "toggle",
+            get = function() return RealUI:GetModuleEnabled(mod) end,
+            set = function(info, value)
+                RealUI:SetModuleEnabled(mod, value)
+                if modObj.RefreshMod then
+                    modObj:RefreshMod()
+                end
+            end,
+        }
+    end]]
     uiTweaks = {
-        name = "UI Tweaks",
-        desc = "Minor functional tweaks for the default UI",
+        name = L["Tweaks_UITweaks"],
+        desc = L["Tweaks_UITweaksDesc"],
         type = "group",
         order = order,
         args = {
-            addonList = {
-                name = L["Tweaks_AddonList"],
-                desc = L["General_EnabledDesc"]:format(L["Tweaks_AddonList"]),
-                type = "toggle",
-                get = function() return RealUI:GetModuleEnabled("AddonListAdv") end,
-                set = function(info, value)
-                    RealUI:SetModuleEnabled("AddonListAdv", value)
-                    RealUI:GetModule("AddonListAdv"):RefreshMod()
-                end,
+            header = {
+                name = L["Tweaks_UITweaks"],
+                type = "header",
+                order = 0,
             },
-            cooldown = cooldown
+            powerBar = powerBar,
+            cooldown = cooldown,
+            minimap = minimap,
         }
     }
-end
-local profiles do
-    profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db)
-    profiles.order = -1
 end
 
 --[[
 local core do
+    order = order + 1
     core = {
         name = "Skins",
         desc = "Toggle skinning of UI frames.",
@@ -412,7 +1096,6 @@ local core do
         args = {
         }
     }
-    order = order + 1
 end
 ]]
 
@@ -422,6 +1105,6 @@ options.RealUI = {
         core = core,
         skins = skins,
         uiTweaks = uiTweaks,
-        profiles = profiles,
+        profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }
 }

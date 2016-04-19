@@ -710,6 +710,20 @@ local unitframes do
             },
         },
     }
+    do -- import hideRaidFilters from minimap
+        local MinimapAdv = RealUI:GetModule("MinimapAdv")
+        local mmDB = MinimapAdv.db.profile
+        unitframes.args.groups.args.raid.args.hideRaidFilters = {
+            type = "toggle",
+            name = L["Raid_HideRaidFilter"],
+            desc = L["Raid_HideRaidFilterDesc"],
+            get = function(info) return mmDB.information.hideRaidFilters end,
+            set = function(info, value)
+                mmDB.information.hideRaidFilters = value
+            end,
+            order = 50,
+        }
+    end
     local units = unitframes.args.units.args
     for unitSlug, unit in next, units do
         local position = db.positions[hudSize][unitSlug]
