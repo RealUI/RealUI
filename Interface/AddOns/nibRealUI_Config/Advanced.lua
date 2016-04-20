@@ -12,7 +12,7 @@ local ACD = _G.LibStub("AceConfigDialog-3.0")
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
---local ndb = RealUI.db.profile
+local ndb = RealUI.db.profile
 local ndbc = RealUI.db.char
 
 local order = 0
@@ -101,6 +101,315 @@ local core do
 end
 local skins do
     order = order + 1
+    local fonts do
+        local LSM = _G.LibStub("LibSharedMedia-3.0")
+        local Fonts = RealUI:GetModule("Fonts")
+        local db = Fonts.db.profile
+        local font = ndb.media.font
+        local outlines = {
+            "NONE",
+            "OUTLINE",
+            "THICKOUTLINE",
+            "OUTLINE, MONOCHROME",
+        }
+        fonts = {
+            name = L["Fonts"],
+            type = "group",
+            childGroups = "select",
+            order = 40,
+            args = {
+                stdFonts = {
+                    name = L["Fonts_Standard"],
+                    type = "group",
+                    inline = true,
+                    order = 30,
+                    args = {
+                        sizeadjust = {
+                            type = "range",
+                            name = L["Fonts_NormalOffset"],
+                            desc = L["Fonts_NormalOffsetDesc"],
+                            min = -6, max = 6, step = 1,
+                            get = function(info) return db.standard.sizeadjust end,
+                            set = function(info, value)
+                                db.standard.sizeadjust = value
+                            end,
+                            order = 10,
+                        },
+                        changeYellow = {
+                            type = "toggle",
+                            name = L["Fonts_ChangeYellow"],
+                            desc = L["Fonts_ChangeYellowDesc"],
+                            get = function() return db.standard.changeYellow end,
+                            set = function(info, value)
+                                db.standard.changeYellow = value
+                                --InfoLine:Refresh()
+                            end,
+                            order = 20,
+                        },
+                        yellowColor = {
+                            name = L["Fonts_YellowFont"],
+                            type = "color",
+                            hasAlpha = false,
+                            disabled = function() return not db.standard.changeYellow end,
+                            get = function(info,r,g,b)
+                                return db.standard.yellowColor[1], db.standard.yellowColor[2], db.standard.yellowColor[3]
+                            end,
+                            set = function(info,r,g,b)
+                                db.standard.yellowColor[1] = r
+                                db.standard.yellowColor[2] = g
+                                db.standard.yellowColor[3] = b
+                            end,
+                            order = 21,
+                        },
+                        normal = {
+                            type = "select",
+                            name = L["Fonts_Normal"],
+                            desc = L["Fonts_NormalDesc"],
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.standard[1]
+                            end,
+                            set = function(info, value)
+                                font.standard[1] = value
+                                font.standard[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 30,
+                        },
+                        header = {
+                            name = L["Fonts_Header"],
+                            desc = L["Fonts_HeaderDesc"],
+                            type = "select",
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.header[1]
+                            end,
+                            set = function(info, value)
+                                font.header[1] = value
+                                font.header[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 40,
+                        },
+                        gap = {
+                            name = "",
+                            type = "header",
+                            order = 41,
+                        },
+                        font = {
+                            name = L["Fonts_Chat"],
+                            desc = L["Fonts_ChatDesc"],
+                            type = "select",
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.chat[1]
+                            end,
+                            set = function(info, value)
+                                font.chat[1] = value
+                                font.chat[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 50,
+                        },
+                        outline = {
+                            type = "select",
+                            name = L["Fonts_Outline"],
+                            values = outlines,
+                            get = function()
+                                for k,v in next, outlines do
+                                    if v == font.chat[3] then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                font.chat[3] = outlines[value]
+                            end,
+                            order = 51,
+                        },
+                    },
+                },
+                small = {
+                    name = L["Fonts_PixelSmall"],
+                    type = "group",
+                    order = 10,
+                    args = {
+                        font = {
+                            type = "select",
+                            name = L["Fonts_Font"],
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.pixel.small[1]
+                            end,
+                            set = function(info, value)
+                                font.pixel.small[1] = value
+                                font.pixel.small[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 10,
+                        },
+                        size = {
+                            type = "range",
+                            name = _G.FONT_SIZE,
+                            min = 6, max = 28, step = 1,
+                            get = function(info) return font.pixel.small[2] end,
+                            set = function(info, value)
+                                font.pixel.small[2] = value
+                            end,
+                            order = 20,
+                        },
+                        outline = {
+                            type = "select",
+                            name = L["Fonts_Outline"],
+                            values = outlines,
+                            get = function()
+                                for k,v in next, outlines do
+                                    if v == font.pixel.small[3] then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                font.pixel.small[3] = outlines[value]
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                large = {
+                    name = L["Fonts_PixelLarge"],
+                    type = "group",
+                    order = 20,
+                    args = {
+                        font = {
+                            type = "select",
+                            name = L["Fonts_Font"],
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.pixel.large[1]
+                            end,
+                            set = function(info, value)
+                                font.pixel.large[1] = value
+                                font.pixel.large[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 10,
+                        },
+                        size = {
+                            type = "range",
+                            name = _G.FONT_SIZE,
+                            min = 6, max = 28, step = 1,
+                            get = function(info) return font.pixel.large[2] end,
+                            set = function(info, value)
+                                font.pixel.large[2] = value
+                            end,
+                            order = 20,
+                        },
+                        outline = {
+                            type = "select",
+                            name = L["Fonts_Outline"],
+                            values = outlines,
+                            get = function()
+                                for k,v in next, outlines do
+                                    if v == font.pixel.large[3] then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                font.pixel.large[3] = outlines[value]
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                numbers = {
+                    name = L["Fonts_PixelNumbers"],
+                    type = "group",
+                    order = 30,
+                    args = {
+                        font = {
+                            type = "select",
+                            name = L["Fonts_Font"],
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.pixel.numbers[1]
+                            end,
+                            set = function(info, value)
+                                font.pixel.numbers[1] = value
+                                font.pixel.numbers[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 10,
+                        },
+                        size = {
+                            type = "range",
+                            name = _G.FONT_SIZE,
+                            min = 6, max = 28, step = 1,
+                            get = function(info) return font.pixel.numbers[2] end,
+                            set = function(info, value)
+                                font.pixel.numbers[2] = value
+                            end,
+                            order = 20,
+                        },
+                        outline = {
+                            type = "select",
+                            name = L["Fonts_Outline"],
+                            values = outlines,
+                            get = function()
+                                for k,v in next, outlines do
+                                    if v == font.pixel.numbers[3] then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                font.pixel.numbers[3] = outlines[value]
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                cooldown = {
+                    name = L["Fonts_PixelCooldown"],
+                    type = "group",
+                    order = 40,
+                    args = {
+                        font = {
+                            type = "select",
+                            name = L["Fonts_Font"],
+                            values = _G.AceGUIWidgetLSMlists.font,
+                            get = function()
+                                return font.pixel.cooldown[1]
+                            end,
+                            set = function(info, value)
+                                font.pixel.cooldown[1] = value
+                                font.pixel.cooldown[4] = LSM:Fetch("font", value)
+                            end,
+                            dialogControl = "LSM30_Font",
+                            order = 10,
+                        },
+                        size = {
+                            type = "range",
+                            name = _G.FONT_SIZE,
+                            min = 6, max = 28, step = 1,
+                            get = function(info) return font.pixel.cooldown[2] end,
+                            set = function(info, value)
+                                font.pixel.cooldown[2] = value
+                            end,
+                            order = 20,
+                        },
+                        outline = {
+                            type = "select",
+                            name = L["Fonts_Outline"],
+                            values = outlines,
+                            get = function()
+                                for k,v in next, outlines do
+                                    if v == font.pixel.cooldown[3] then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                font.pixel.cooldown[3] = outlines[value]
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+            }
+        }
+    end
     skins = {
         name = "Skins",
         desc = "Toggle skinning of UI frames.",
@@ -136,6 +445,7 @@ local skins do
                 end,
                 order = 20,
             },
+            fonts = fonts,
             addons = {
                 name = _G.ADDONS,
                 type = "group",
