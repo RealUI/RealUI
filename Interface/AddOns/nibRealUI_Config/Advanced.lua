@@ -120,6 +120,7 @@ local skins do
                 get = function(info) return RealUI.media.window[4] end,
                 set = function(info, value)
                     RealUI.media.window[4] = value
+                    RealUI:StyleSetWindowOpacity()
                 end,
                 order = 10,
             },
@@ -131,11 +132,32 @@ local skins do
                 get = function(info) return _G.RealUI_InitDB.stripeOpacity end,
                 set = function(info, value)
                     _G.RealUI_InitDB.stripeOpacity = value
+                    RealUI:StyleSetStripeOpacity()
                 end,
                 order = 20,
             },
+            addons = {
+                name = _G.ADDONS,
+                type = "group",
+                args = {
+                }
+            }
         }
     }
+    local addonSkins = RealUI:GetAddOnSkins()
+    for i = 1, #addonSkins do
+        local name = addonSkins[i]
+        skins.args.addons.args[name] = {
+            type = "toggle",
+            name = name,
+            get = function() return RealUI:GetModuleEnabled(name) end,
+            set = function(info, value)
+                RealUI:SetModuleEnabled(name, value)
+                RealUI:ReloadUIDialog()
+            end,
+            order = 40,
+        }
+    end
 end
 local uiTweaks do
     order = order + 1
@@ -1100,6 +1122,7 @@ end
 ]]
 
 options.RealUI = {
+    name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
     type = "group",
     args = {
         core = core,

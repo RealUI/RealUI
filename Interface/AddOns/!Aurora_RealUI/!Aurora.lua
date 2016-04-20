@@ -204,7 +204,7 @@ frame:SetScript("OnEvent", function(self, event, addon)
             if _G.type(addonName) == "string" then
                 if _G.IsAddOnLoaded(addonName) then
                     -- Create skin modules for addon so they can be individually disabled.
-                    local skin = RealUI:RegisterSkin(addonName)
+                    local skin = RealUI:RegisterAddOnSkin(addonName)
                     if RealUI:GetModuleEnabled(addonName) then
                         func(skin, F, C)
                     end

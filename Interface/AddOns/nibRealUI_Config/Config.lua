@@ -210,6 +210,8 @@ local function InitializeOptions()
 
     --RealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
+    ACD:SetDefaultSize("HuD", 870, 600)
+    
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
     initialized = true

@@ -738,6 +738,16 @@ function RealUI:RegisterConfigModeModule(module)
         _G.tinsert(self.configModeModules, module)
     end
 end
+local addonSkins = {}
+function RealUI:RegisterAddOnSkin(name)
+    local skin = self:NewModule(name, "AceEvent-3.0")
+    skin:SetEnabledState(self:GetModuleEnabled(name))
+    _G.tinsert(addonSkins, name)
+    return skin
+end
+function RealUI:GetAddOnSkins()
+    return addonSkins
+end
 
 do
     local prototype = {
