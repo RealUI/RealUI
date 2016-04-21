@@ -35,35 +35,35 @@ local core do
         order = 0,
         args = {
             header = {
-                type = "header",
                 name = "RealUI Core",
+                type = "header",
                 order = 10,
             },
             corenote = {
-                type = "description",
                 name = "Note: Only use these features if you need to. They may change or revert settings.",
+                type = "description",
                 fontSize = "medium",
                 order = 20,
             },
             sep1 = {
-                type = "description",
                 name = " ",
+                type = "description",
                 order = 30,
             },
             reinstall = {
-                type = "execute",
                 name = "Reset RealUI",
+                type = "execute",
                 func = function() RealUI:ReInstall() end,
                 order = 40,
             },
             sep2 = {
-                type = "description",
                 name = " ",
+                type = "description",
                 order = 41,
             },
             resetnote = {
-                type = "description",
                 name = "This will erase all user changes and install a fresh copy of RealUI.",
+                type = "description",
                 fontSize = "medium",
                 order = 42,
             },
@@ -73,25 +73,25 @@ local core do
                 order = 43,
             },
             character = {
-                type = "group",
                 name = "Character",
+                type = "group",
                 inline = true,
                 order = 50,
                 args = {
                     resetchar = {
-                        type = "execute",
                         name = "Re-initialize Character",
+                        type = "execute",
                         func = ResetChar,
                         order = 10,
                     },
                     sep = {
-                        type = "description",
                         name = " ",
+                        type = "description",
                         order = 20,
                     },
                     resetnote = {
-                        type = "description",
                         name = "This will flag the current Character as being new to RealUI, and RealUI will run through the initial installation procedure for this Character. Use only if you experienced a faulty installation for this character. Not guaranteed to actually fix anything.",
+                        type = "description",
                         fontSize = "medium",
                         order = 30,
                     },
@@ -418,8 +418,8 @@ local skins do
         order = order,
         args = {
             header = {
-                type = "header",
                 name = "Skins",
+                type = "header",
                 order = 0,
             },
             windowOpacity = {
@@ -521,8 +521,8 @@ local uiTweaks do
         cooldown = {
             name = L["Tweaks_CooldownCount"],
             desc = L["Tweaks_CooldownCountDesc"],
-            arg = "CooldownCount",
             type = "group",
+            arg = "CooldownCount",
             args = {
                 header = {
                     name = L["Tweaks_CooldownCount"],
@@ -554,13 +554,13 @@ local uiTweaks do
                     name = "Min Scale",
                     desc = "The minimum scale we want to show cooldown counts at, anything below this will be hidden.",
                     type = "range",
-                    min = 0, max = 1, step = 0.05,
                     isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     get = function(info) return db.minScale end,
                     set = function(info, value)
                         db.minScale = value
                     end,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     order = 60,
                 },
                 minDuration = {
@@ -568,11 +568,11 @@ local uiTweaks do
                     desc = "The minimum number of seconds a cooldown's duration must be to display text.",
                     type = "range",
                     min = 0, max = 30, step = 1,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     get = function(info) return db.minDuration end,
                     set = function(info, value)
                         db.minDuration = value
                     end,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     order = 70,
                 },
                 expiringDuration = {
@@ -580,11 +580,11 @@ local uiTweaks do
                     desc = "The minimum number of seconds a cooldown must be to display in the expiring format.",
                     type = "range",
                     min = 0, max = 30, step = 1,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     get = function(info) return db.expiringDuration end,
                     set = function(info, value)
                         db.expiringDuration = value
                     end,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
                     order = 80,
                 },
                 gap2 = {
@@ -679,8 +679,9 @@ local uiTweaks do
                     order = 100,
                     args = {
                         point = {
-                            type = "select",
                             name = "Anchor",
+                            type = "select",
+                            values = RealUI.globals.anchorPoints,
                             get = function(info)
                                 for k,v in next, RealUI.globals.anchorPoints do
                                     if v == db.position.point then return k end
@@ -689,36 +690,34 @@ local uiTweaks do
                             set = function(info, value)
                                 db.position.point = RealUI.globals.anchorPoints[value]
                             end,
-                            style = "dropdown",
-                            width = nil,
-                            values = RealUI.globals.anchorPoints,
                             order = 10,
                         },
                         x = {
-                            type = "input",
                             name = "X",
+                            type = "input",
                             width = "half",
-                            order = 20,
                             get = function(info) return _G.tostring(db.position.x) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.position.x = value
                             end,
+                            order = 20,
                         },
                         y = {
-                            type = "input",
                             name = "Y",
+                            type = "input",
                             width = "half",
-                            order = 30,
                             get = function(info) return _G.tostring(db.position.y) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.position.y = value
                             end,
+                            order = 30,
                         },
                         justify = {
-                            type = "select",
                             name = "Text Justification",
+                            type = "select",
+                            values = table_Justify,
                             get = function(info)
                                 for k,v in next, table_Justify do
                                     if v == db.position.justify then return k end
@@ -727,9 +726,6 @@ local uiTweaks do
                             set = function(info, value)
                                 db.position.justify = table_Justify[value]
                             end,
-                            style = "dropdown",
-                            width = nil,
-                            values = table_Justify,
                             order = 40,
                         },
                     },
@@ -760,20 +756,20 @@ local uiTweaks do
             childGroups = "tab",
             args = {
                 header = {
-                    type = "header",
                     name = "Minimap",
+                    type = "header",
                     order = 10,
                 },
                 desc = {
-                    type = "description",
                     name = "Advanced, minimalistic Minimap.",
+                    type = "description",
                     fontSize = "medium",
                     order = 20,
                 },
                 enabled = {
-                    type = "toggle",
                     name = "Enabled",
                     desc = "Enable/Disable the Minimap module.",
+                    type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(minimap.arg) end,
                     set = function(info, value)
                         RealUI:SetModuleEnabled(minimap.arg, value)
@@ -793,9 +789,9 @@ local uiTweaks do
                     order = 40,
                     args = {
                         coordDelayHide = {
-                            type = "toggle",
                             name = "Fade out Coords",
                             desc = "Hide the Coordinate display when you haven't moved for 10 seconds.",
+                            type = "toggle",
                             get = function(info) return db.information.coordDelayHide end,
                             set = function(info, value)
                                 db.information.coordDelayHide = value
@@ -807,9 +803,9 @@ local uiTweaks do
                             order = 10,
                         },
                         minimapbuttons = {
-                            type = "toggle",
                             name = "Hide Minimap Buttons",
                             desc = "Moves buttons attached to the Minimap to underneath and shows them on mouse-over.",
+                            type = "toggle",
                             get = function(info) return db.information.minimapbuttons end,
                             set = function(info, value)
                                 db.information.minimapbuttons = value
@@ -818,9 +814,9 @@ local uiTweaks do
                             order = 20,
                         },
                         location = {
-                            type = "toggle",
                             name = "Location Name",
                             desc = "Show the name of your current location underneath the Minimap.",
+                            type = "toggle",
                             get = function(info) return db.information.location end,
                             set = function(info, value)
                                 db.information.location = value
@@ -829,9 +825,9 @@ local uiTweaks do
                             order = 30,
                         },
                         gap = {
-                            type = "range",
                             name = "Gap",
                             desc = "Amount of space between each information element.",
+                            type = "range",
                             min = 1, max = 28, step = 1,
                             get = function(info) return db.information.gap end,
                             set = function(info, value)
@@ -852,28 +848,28 @@ local uiTweaks do
                             order = 60,
                             args = {
                                 xoffset = {
-                                    type = "input",
                                     name = "X Offset",
+                                    type = "input",
                                     width = "half",
-                                    order = 10,
                                     get = function(info) return _G.tostring(db.information.position.x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.information.position.x = value
                                         MinimapAdv:UpdateInfoPosition()
                                     end,
+                                    order = 10,
                                 },
                                 yoffset = {
-                                    type = "input",
                                     name = "Y Offset",
+                                    type = "input",
                                     width = "half",
-                                    order = 20,
                                     get = function(info) return _G.tostring(db.information.position.y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.information.position.y = value
                                         MinimapAdv:UpdateInfoPosition()
                                     end,
+                                    order = 20,
                                 },
                             },
                         },
@@ -886,8 +882,8 @@ local uiTweaks do
                     order = 50,
                     args = {
                         enabled = {
-                            type = "toggle",
                             name = "Enabled",
+                            type = "toggle",
                             get = function(info) return db.hidden.enabled end,
                             set = function(info, value) db.hidden.enabled = value end,
                             order = 10,
@@ -898,8 +894,8 @@ local uiTweaks do
                             order = 11,
                         },
                         zones = {
-                            type = "group",
                             name = "Hide in..",
+                            type = "group",
                             inline = true,
                             disabled = function()
                                 return not(db.hidden.enabled and RealUI:GetModuleEnabled(minimap.arg))
@@ -907,29 +903,29 @@ local uiTweaks do
                             order = 20,
                             args = {
                                 arena = {
-                                    type = "toggle",
                                     name = "Arenas",
+                                    type = "toggle",
                                     get = function(info) return db.hidden.zones.arena end,
                                     set = function(info, value) db.hidden.zones.arena = value end,
                                     order = 10,
                                 },
                                 pvp = {
-                                    type = "toggle",
                                     name = _G.BATTLEGROUNDS,
+                                    type = "toggle",
                                     get = function(info) return db.hidden.zones.pvp end,
                                     set = function(info, value) db.hidden.zones.pvp = value end,
                                     order = 200,
                                 },
                                 party = {
-                                    type = "toggle",
                                     name = _G.DUNGEONS,
+                                    type = "toggle",
                                     get = function(info) return db.hidden.zones.party end,
                                     set = function(info, value) db.hidden.zones.party = value end,
                                     order = 30,
                                 },
                                 raid = {
-                                    type = "toggle",
                                     name = _G.RAIDS,
+                                    type = "toggle",
                                     get = function(info) return db.hidden.zones.raid end,
                                     set = function(info, value) db.hidden.zones.raid = value end,
                                     order = 40,
@@ -945,12 +941,10 @@ local uiTweaks do
                     order = 60,
                     args = {
                         size = {
-                            type = "range",
                             name = "Size",
                             desc = "Note: Minimap will refresh to fit the new size upon player movement.",
-                            min = 134,
-                            max = 164,
-                            step = 1,
+                            type = "range",
+                            min = 134, max = 164, step = 1,
                             get = function(info) return db.position.size end,
                             set = function(info, value)
                                 db.position.size = value
@@ -965,12 +959,10 @@ local uiTweaks do
                             order = 20,
                             args = {
                                 scale = {
-                                    type = "range",
                                     name = "Scale",
-                                    min = 0.5,
-                                    max = 2,
-                                    step = 0.05,
+                                    type = "range",
                                     isPercent = true,
+                                    min = 0.5, max = 2, step = 0.05,
                                     get = function(info) return db.position.scale end,
                                     set = function(info, value)
                                         db.position.scale = value
@@ -979,8 +971,8 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 xoffset = {
-                                    type = "input",
                                     name = "X Offset",
+                                    type = "input",
                                     width = "half",
                                     get = function(info) return _G.tostring(db.position.x) end,
                                     set = function(info, value)
@@ -991,8 +983,8 @@ local uiTweaks do
                                     order = 20,
                                 },
                                 yoffset = {
-                                    type = "input",
                                     name = "Y Offset",
+                                    type = "input",
                                     width = "half",
                                     get = function(info) return _G.tostring(db.position.y) end,
                                     set = function(info, value)
@@ -1003,8 +995,9 @@ local uiTweaks do
                                     order = 30,
                                 },
                                 anchorto = {
-                                    type = "select",
                                     name = "Anchor To",
+                                    type = "select",
+                                    values = minimapAnchors,
                                     get = function(info)
                                         for k,v in next, minimapAnchors do
                                             if v == db.position.anchorto then return k end
@@ -1017,9 +1010,6 @@ local uiTweaks do
                                         db.position.y = minimapOffsets[value].y
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
-                                    style = "dropdown",
-                                    width = nil,
-                                    values = minimapAnchors,
                                     order = 40,
                                 },
                             },
@@ -1039,12 +1029,10 @@ local uiTweaks do
                             order = 10,
                             args = {
                                 scale = {
-                                    type = "range",
                                     name = "Scale",
-                                    min = 0.5,
-                                    max = 2,
-                                    step = 0.05,
+                                    type = "range",
                                     isPercent = true,
+                                    min = 0.5, max = 2, step = 0.05,
                                     get = function(info) return db.expand.appearance.scale end,
                                     set = function(info, value)
                                         db.expand.appearance.scale = value
@@ -1053,12 +1041,10 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 opacity = {
-                                    type = "range",
                                     name = "Opacity",
-                                    min = 0,
-                                    max = 1,
-                                    step = 0.05,
+                                    type = "range",
                                     isPercent = true,
+                                    min = 0, max = 1, step = 0.05,
                                     get = function(info) return db.expand.appearance.opacity end,
                                     set = function(info, value)
                                         db.expand.appearance.opacity = value
@@ -1080,8 +1066,8 @@ local uiTweaks do
                             order = 30,
                             args = {
                                 xoffset = {
-                                    type = "input",
                                     name = "X Offset",
+                                    type = "input",
                                     width = "half",
                                     get = function(info) return _G.tostring(db.expand.position.x) end,
                                     set = function(info, value)
@@ -1092,8 +1078,8 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 yoffset = {
-                                    type = "input",
                                     name = "Y Offset",
+                                    type = "input",
                                     width = "half",
                                     get = function(info) return _G.tostring(db.expand.position.y) end,
                                     set = function(info, value)
@@ -1104,8 +1090,9 @@ local uiTweaks do
                                     order = 20,
                                 },
                                 anchorto = {
-                                    type = "select",
                                     name = "Anchor To",
+                                    type = "select",
+                                    values = minimapAnchors,
                                     get = function(info)
                                         for k, v in next, minimapAnchors do
                                             if v == db.expand.position.anchorto then return k end
@@ -1117,9 +1104,6 @@ local uiTweaks do
                                         db.expand.position.y = minimapOffsets[value].y
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
-                                    style = "dropdown",
-                                    width = nil,
-                                    values = minimapAnchors,
                                     order = 30,
                                 },
                             },
@@ -1136,10 +1120,10 @@ local uiTweaks do
                             order = 40,
                             args = {
                                 gatherertoggle = {
-                                    type = "toggle",
                                     name = "Gatherer toggle",
-                                    disabled = function() if not _G.Gatherer then return true else return false end end,
                                     desc = "If you have Gatherer installed, then MinimapAdv will automatically disable Gatherer's minimap icons and HUD while not in Farm Mode, and enable them while in Farm Mode.",
+                                    type = "toggle",
+                                    disabled = function() if not _G.Gatherer then return true else return false end end,
                                     get = function(info) return db.expand.extras.gatherertoggle end,
                                     set = function(info, value)
                                         db.expand.extras.gatherertoggle = value
@@ -1148,9 +1132,9 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 clickthrough = {
-                                    type = "toggle",
                                     name = "Clickthrough",
                                     desc = "Make the Minimap clickthrough (won't respond to mouse clicks) while in Farm Mode.",
+                                    type = "toggle",
                                     get = function(info) return db.expand.extras.clickthrough end,
                                     set = function(info, value)
                                         db.expand.extras.clickthrough = value
@@ -1159,8 +1143,8 @@ local uiTweaks do
                                     order = 20,
                                 },
                                 hidepoi = {
-                                    type = "toggle",
                                     name = "Hide POI icons",
+                                    type = "toggle",
                                     get = function(info) return db.expand.extras.hidepoi end,
                                     set = function(info, value)
                                         db.expand.extras.hidepoi = value
@@ -1179,9 +1163,9 @@ local uiTweaks do
                     order = 80,
                     args = {
                         enabled = {
-                            type = "toggle",
                             name = "Enabled",
                             desc = "Enable/Disable the displaying of POI icons on the minimap.",
+                            type = "toggle",
                             get = function(info) return db.poi.enabled end,
                             set = function(info, value)
                                 db.poi.enabled = value
@@ -1195,8 +1179,8 @@ local uiTweaks do
                             order = 11,
                         },
                         general = {
-                            type = "group",
                             name = "General Settings",
+                            type = "group",
                             inline = true,
                             disabled = function()
                                 return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
@@ -1204,9 +1188,9 @@ local uiTweaks do
                             order = 20,
                             args = {
                                 watchedOnly = {
-                                    type = "toggle",
                                     name = "Watched Only",
                                     desc = "Only show POI icons for watched quests.",
+                                    type = "toggle",
                                     get = function(info) return db.poi.watchedOnly end,
                                     set = function(info, value)
                                         db.poi.watchedOnly = value
@@ -1215,9 +1199,9 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 fadeEdge = {
-                                    type = "toggle",
                                     name = "Fade at Edge",
                                     desc = "Fade icons when they go off the edge of the minimap.",
+                                    type = "toggle",
                                     get = function(info) return db.poi.fadeEdge end,
                                     set = function(info, value)
                                         db.poi.fadeEdge = value
@@ -1233,8 +1217,8 @@ local uiTweaks do
                             order = 21,
                         },
                         icons = {
-                            type = "group",
                             name = "Icon Settings",
+                            type = "group",
                             inline = true,
                             disabled = function()
                                 return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
@@ -1242,12 +1226,10 @@ local uiTweaks do
                             order = 30,
                             args = {
                                 scale = {
-                                    type = "range",
                                     name = "Scale",
-                                    min = 0.1,
-                                    max = 1.5,
-                                    step = 0.05,
+                                    type = "range",
                                     isPercent = true,
+                                    min = 0.1, max = 1.5, step = 0.05,
                                     get = function(info) return db.poi.icons.scale end,
                                     set = function(info, value)
                                         db.poi.icons.scale = value
@@ -1256,12 +1238,10 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 opacity = {
-                                    type = "range",
                                     name = "Opacity",
-                                    min = 0.1,
-                                    max = 1,
-                                    step = 0.05,
+                                    type = "range",
                                     isPercent = true,
+                                    min = 0.1, max = 1, step = 0.05,
                                     get = function(info) return db.poi.icons.opacity end,
                                     set = function(info, value)
                                         db.poi.icons.opacity = value
@@ -1280,26 +1260,26 @@ local uiTweaks do
         local AltPowerBar = RealUI:GetModule("AltPowerBar")
         local db = AltPowerBar.db.profile
         powerBar = {
-            type = "group",
             name = "Alt Power Bar",
-            arg = "Alt Power Bar",
+            type = "group",
             childGroups = "tab",
+            arg = "Alt Power Bar",
             args = {
                 header = {
-                    type = "header",
                     name = "Alt Power Bar",
+                    type = "header",
                     order = 10,
                 },
                 desc = {
-                    type = "description",
                     name = "Replacement of the default Alternate Power Bar.",
+                    type = "description",
                     fontSize = "medium",
                     order = 20,
                 },
                 enabled = {
-                    type = "toggle",
                     name = "Enabled",
                     desc = "Enable/Disable the Alt Power Bar module.",
+                    type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(powerBar.arg) end,
                     set = function(info, value)
                         RealUI:SetModuleEnabled(powerBar.arg, value)
@@ -1314,33 +1294,33 @@ local uiTweaks do
                 size = {
                     name = "Size",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
                     inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
                     order = 50,
                     args = {
                         width = {
-                            type = "input",
                             name = "Width",
+                            type = "input",
                             width = "half",
-                            order = 10,
                             get = function(info) return _G.tostring(db.size.width) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.size.width = value
                                 powerBar:UpdatePosition()
                             end,
+                            order = 10,
                         },
                         height = {
-                            type = "input",
                             name = "Height",
+                            type = "input",
                             width = "half",
-                            order = 20,
                             get = function(info) return _G.tostring(db.size.height) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.size.height = value
                                 powerBar:UpdatePosition()
                             end,
+                            order = 20,
                         },
                     },
                 },
@@ -1352,8 +1332,8 @@ local uiTweaks do
                 position = {
                     name = "Position",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
                     inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
                     order = 60,
                     args = {
                         position = {
@@ -1363,32 +1343,33 @@ local uiTweaks do
                             order = 10,
                             args = {
                                 xoffset = {
-                                    type = "input",
                                     name = "X Offset",
+                                    type = "input",
                                     width = "half",
-                                    order = 10,
                                     get = function(info) return _G.tostring(db.position.x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.x = value
                                         powerBar:UpdatePosition()
                                     end,
+                                    order = 10,
                                 },
                                 yoffset = {
-                                    type = "input",
                                     name = "Y Offset",
+                                    type = "input",
                                     width = "half",
-                                    order = 20,
                                     get = function(info) return _G.tostring(db.position.y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.y = value
                                         powerBar:UpdatePosition()
                                     end,
+                                    order = 20,
                                 },
                                 anchorto = {
-                                    type = "select",
                                     name = "Anchor To",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
                                     get = function(info)
                                         for k,v in next, RealUI.globals.anchorPoints do
                                             if v == db.position.anchorto then return k end
@@ -1398,14 +1379,12 @@ local uiTweaks do
                                         db.position.anchorto = RealUI.globals.anchorPoints[value]
                                         powerBar:UpdatePosition()
                                     end,
-                                    style = "dropdown",
-                                    width = nil,
-                                    values = RealUI.globals.anchorPoints,
                                     order = 30,
                                 },
                                 anchorfrom = {
-                                    type = "select",
                                     name = "Anchor From",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
                                     get = function(info)
                                         for k,v in next, RealUI.globals.anchorPoints do
                                             if v == db.position.anchorfrom then return k end
@@ -1415,9 +1394,6 @@ local uiTweaks do
                                         db.position.anchorfrom = RealUI.globals.anchorPoints[value]
                                         powerBar:UpdatePosition()
                                     end,
-                                    style = "dropdown",
-                                    width = nil,
-                                    values = RealUI.globals.anchorPoints,
                                     order = 40,
                                 },
                             },
