@@ -14,6 +14,7 @@ local RealUI = _G.RealUI
 local L = RealUI.L
 local ndb = RealUI.db.profile
 local ndbc = RealUI.db.char
+local ndbg = RealUI.db.global
 
 local order = 0
 
@@ -454,18 +455,60 @@ local skins do
             }
         }
     }
+    do --[[ UI Scale ]]--
+        local UIScaler = RealUI:GetModule("UIScaler")
+        local db = UIScaler.db.profile
+        skins.args.uiScale = {
+            name = _G.UI_SCALE,
+            type = "header",
+            order = 29,
+        }
+        skins.args.retinaDisplay = {
+            name = "Retina Display",
+            desc = "Warning: Only activate if on a really high-resolution display (such as a Retina display).\n\nDouble UI scaling so that UI elements are easier to see.",
+            type = "toggle",
+            get = function() return ndbg.tags.retinaDisplay.set end,
+            set = function(info, value) 
+                ndbg.tags.retinaDisplay.set = value
+                RealUI:ReloadUIDialog()
+            end,
+            order = 30,
+        }
+        skins.args.pixelPerfect = {
+            name = "Pixel Perfect",
+            desc = "Recommended: Automatically sets the scale of the UI so that UI elements appear pixel-perfect.",
+            type = "toggle",
+            get = function() return db.pixelPerfect end,
+            set = function(info, value) 
+                db.pixelPerfect = value
+                UIScaler:UpdateUIScale()
+            end,
+            order = 40,
+        }
+        skins.args.customScale = {
+            name = "Custom ".._G.UI_SCALE,
+            desc = "Set a custom UI scale (0.48 to 1.00). Note: UI elements may lose their sharp appearance.",
+            type = "input",
+            disabled = function() return db.pixelPerfect end,
+            get = function() return _G.tostring(db.customScale) end,
+            set = function(info, value) 
+                db.customScale = RealUI:ValidateOffset(_G.tonumber(value), 0.48, 1)
+                UIScaler:UpdateUIScale()
+            end,
+            order = 50,
+        }
+    end
     local addonSkins = RealUI:GetAddOnSkins()
     for i = 1, #addonSkins do
         local name = addonSkins[i]
         skins.args.addons.args[name] = {
-            type = "toggle",
             name = name,
+            type = "toggle",
             get = function() return RealUI:GetModuleEnabled(name) end,
             set = function(info, value)
                 RealUI:SetModuleEnabled(name, value)
                 RealUI:ReloadUIDialog()
             end,
-            order = 40,
         }
     end
 end
