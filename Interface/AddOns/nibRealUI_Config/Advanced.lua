@@ -733,6 +733,468 @@ local uiTweaks do
             },
         }
     end
+    local frameMover do
+        local MODNAME = "FrameMover"
+        local FrameMover = RealUI:GetModule(MODNAME)
+        local db = FrameMover.db.profile
+
+        local FrameList = FrameMover.FrameList
+        local MoveFrameGroup = FrameMover.MoveFrameGroup
+        
+        -- Create Addons options table
+        local addonOpts do
+            addonOpts = {
+                name = "Addons",
+                type = "group",
+                childGroups = "tab",
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                order = 50,
+                args = {},
+            }
+            local addonOrderCnt = 10
+            for addonSlug, addon in next, FrameList.addons do
+                local addonInfo = db.addons[addonSlug]
+                -- Create base options for Addons
+                addonOpts.args[addonSlug] = {
+                    name = addon.name,
+                    type = "group",
+                    childGroups = "tab",
+                    disabled = function() return not(_G.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
+                    order = addonOrderCnt,
+                    args = {
+                        header = {
+                            name = ("Frame Mover - Addons - %s"):format(addon.name),
+                            type = "header",
+                            order = 10,
+                        },
+                        enabled = {
+                            name = ("Move %s"):format(addon.name),
+                            type = "toggle",
+                            get = function(info)
+                                if addonSlug == "grid2" then
+                                    return RealUI:DoesAddonMove("Grid2")
+                                else
+                                    return addonInfo.move
+                                end
+                            end,
+                            set = function(info, value) 
+                                if addonSlug == "grid2" then
+                                    if RealUI:DoesAddonMove("Grid2") then
+                                        FrameMover:MoveAddons()
+                                    end
+                                else
+                                    addonInfo.move = value
+                                    if addonInfo.move then
+                                        FrameMover:MoveAddons()
+                                    end
+                                end
+                            end,
+                            order = 20,
+                        },
+                    },
+                }
+                
+                -- Create options table for Frames
+                local normalFrameOpts = {
+                    name = "Frames",
+                    type = "group",
+                    disabled = function() if addonInfo.move then return false else return true end end,
+                    order = 10,
+                    args = {},
+                }
+                local normalFrameOrderCnt = 10
+                for i = 1, #addon.frames do
+                    normalFrameOpts.args[_G.tostring(i)] = {
+                        name = addon.frames[i].name,
+                        type = "group",
+                        inline = true,
+                        order = normalFrameOrderCnt,
+                        args = {
+                            x = {
+                                type = "input",
+                                name = "X Offset",
+                                width = "half",
+                                get = function(info) return _G.tostring(addonInfo.frames[i].x) end,
+                                set = function(info, value)
+                                    value = RealUI:ValidateOffset(value)
+                                    addonInfo.frames[i].x = value
+                                    FrameMover:MoveAddons()
+                                end,
+                                order = 10,
+                            },
+                            yoffset = {
+                                name = "Y Offset",
+                                type = "input",
+                                width = "half",
+                                get = function(info) return _G.tostring(addonInfo.frames[i].y) end,
+                                set = function(info, value)
+                                    value = RealUI:ValidateOffset(value)
+                                    addonInfo.frames[i].y = value
+                                    FrameMover:MoveAddons()
+                                end,
+                                order = 20,
+                            },
+                            anchorto = {
+                                name = "Anchor To",
+                                type = "select",
+                                values = RealUI.globals.anchorPoints,
+                                get = function(info) 
+                                    for idx, point in next, RealUI.globals.anchorPoints do
+                                        if point == addonInfo.frames[i].rpoint then return idx end
+                                    end
+                                end,
+                                set = function(info, value)
+                                    addonInfo.frames[i].rpoint = RealUI.globals.anchorPoints[value]
+                                    FrameMover:MoveAddons()
+                                end,
+                                order = 30,
+                            },
+                            anchorfrom = {
+                                name = "Anchor From",
+                                type = "select",
+                                values = RealUI.globals.anchorPoints,
+                                get = function(info) 
+                                    for idx, point in next, RealUI.globals.anchorPoints do
+                                        if point == addonInfo.frames[i].point then return idx end
+                                    end
+                                end,
+                                set = function(info, value)
+                                    addonInfo.frames[i].point = RealUI.globals.anchorPoints[value]
+                                    FrameMover:MoveAddons()
+                                end,
+                                order = 40,
+                            },
+                            parent = {
+                                name = "Parent",
+                                desc = L["General_NoteParent"],
+                                type = "input",
+                                width = "double",
+                                get = function(info) return addonInfo.frames[i].parent end,
+                                set = function(info, value)
+                                    if not _G[value] then value = "UIParent" end
+                                    addonInfo.frames[i].parent = value
+                                    FrameMover:MoveAddons()
+                                end,
+                                order = 50,
+                            },
+                        },
+                    }
+                    normalFrameOrderCnt = normalFrameOrderCnt + 10
+                end
+                addonOpts.args[addonSlug].args.frames = normalFrameOpts
+                
+                if addon.hashealing then
+                    -- Healing Enable option
+                    addonOpts.args[addonSlug].args.healingenabled = {
+                        name = "Enable Healing Layout",
+                        type = "toggle",
+                        get = function(info) return addonInfo.healing end,
+                        set = function(info, value) 
+                            addonInfo.healing = value 
+                            if addonInfo.move then
+                                FrameMover:MoveAddons()
+                            end
+                        end,
+                        order = 30,
+                    }
+
+                    -- Create options table for Healing Frames
+                    local normalHealingFrameOpts = {
+                        name = "Healing Layout Frames",
+                        type = "group",
+                        disabled = function() return not ( addonInfo.move and addonInfo.healing ) end,
+                        order = 50,
+                        args = {},
+                    }
+                    local normalHealingFrameOrderCnt = 10       
+                    for i = 1, #addon.frameshealing do
+                        normalHealingFrameOpts.args[_G.tostring(i)] = {
+                            name = addon.frameshealing[i].name,
+                            type = "group",
+                            inline = true,
+                            order = normalHealingFrameOrderCnt,
+                            args = {
+                                x = {
+                                    name = "X Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(addonInfo.frameshealing[i].x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        addonInfo.frameshealing[i].x = value
+                                        FrameMover:MoveAddons()
+                                    end,
+                                    order = 10,
+                                },
+                                yoffset = {
+                                    name = "Y Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(addonInfo.frameshealing[i].y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        addonInfo.frameshealing[i].y = value
+                                        FrameMover:MoveAddons()
+                                    end,
+                                    order = 20,
+                                },
+                                anchorto = {
+                                    name = "Anchor To",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info) 
+                                        for idx, point in next, RealUI.globals.anchorPoints do
+                                            if point == addonInfo.frameshealing[i].rpoint then return idx end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        addonInfo.frameshealing[i].rpoint = RealUI.globals.anchorPoints[value]
+                                        FrameMover:MoveAddons()
+                                    end,
+                                    order = 30,
+                                },
+                                anchorfrom = {
+                                    name = "Anchor From",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info) 
+                                        for idx, point in next, RealUI.globals.anchorPoints do
+                                            if point == addonInfo.frameshealing[i].point then return idx end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        addonInfo.frameshealing[i].point = RealUI.globals.anchorPoints[value]
+                                        FrameMover:MoveAddons()
+                                    end,
+                                    order = 40,
+                                },
+                                parent = {
+                                    name = "Parent",
+                                    desc = L["General_NoteParent"],
+                                    type = "input",
+                                    width = "double",
+                                    get = function(info) return addonInfo.frameshealing[i].parent end,
+                                    set = function(info, value)
+                                        if not _G[value] then value = "UIParent" end
+                                        addonInfo.frameshealing[i].parent = value
+                                        FrameMover:MoveAddons()
+                                    end,
+                                    order = 50,
+                                },
+                            },
+                        }
+                        normalHealingFrameOrderCnt = normalHealingFrameOrderCnt + 10
+                    end
+                    addonOpts.args[addonSlug].args.healingframes = normalHealingFrameOpts
+                end
+                
+                addonOrderCnt = addonOrderCnt + 10  
+            end
+        end
+        
+        -- Create UIFrames options table
+        local uiFramesOpts do
+            uiFramesOpts = {
+                name = "UI Frames",
+                type = "group",
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                order = 60,
+                args = {},
+            }
+            local uiFramesOrderCnt = 10 
+            for uiSlug, ui in next, FrameList.uiframes do
+                local uiInfo = db.uiframes[uiSlug]
+                -- Create base options for UIFrames
+                uiFramesOpts.args[uiSlug] = {
+                    type = "group",
+                    name = ui.name,
+                    order = uiFramesOrderCnt,
+                    args = {
+                        header = {
+                            type = "header",
+                            name = ("Frame Mover - UI Frames - %s"):format(ui.name),
+                            order = 10,
+                        },
+                        enabled = {
+                            type = "toggle",
+                            name = ("Move %s"):format(ui.name),
+                            get = function(info) return uiInfo.move end,
+                            set = function(info, value) 
+                                uiInfo.move = value 
+                                if uiInfo.move and ui.frames then MoveFrameGroup(ui.frames, uiInfo.frames) end
+                            end,
+                            order = 20,
+                        },
+                    },
+                }
+                
+                -- Create options table for Frames
+                if ui.frames then
+                    local frameopts = {
+                        name = "Frames",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if uiInfo.move then return false else return true end end,
+                        order = 30,
+                        args = {},
+                    }
+                    local FrameOrderCnt = 10
+                    for i = 1, #ui.frames do
+                        frameopts.args[_G.tostring(i)] = {
+                            type = "group",
+                            name = ui.frames[i].name,
+                            inline = true,
+                            order = FrameOrderCnt,
+                            args = {
+                                x = {
+                                    type = "input",
+                                    name = "X Offset",
+                                    width = "half",
+                                    order = 10,
+                                    get = function(info) return _G.tostring(uiInfo.frames[i].x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        uiInfo.frames[i].x = value
+                                        MoveFrameGroup(ui.frames, uiInfo.frames)
+                                    end,
+                                },
+                                yoffset = {
+                                    type = "input",
+                                    name = "Y Offset",
+                                    width = "half",
+                                    order = 20,
+                                    get = function(info) return _G.tostring(uiInfo.frames[i].y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        uiInfo.frames[i].y = value
+                                        MoveFrameGroup(ui.frames, uiInfo.frames)
+                                    end,
+                                },
+                                anchorto = {
+                                    type = "select",
+                                    name = "Anchor To",
+                                    get = function(info) 
+                                        for idx, point in next, RealUI.globals.anchorPoints do
+                                            if point == uiInfo.frames[i].rpoint then return idx end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        uiInfo.frames[i].rpoint = RealUI.globals.anchorPoints[value]
+                                        MoveFrameGroup(ui.frames, uiInfo.frames)
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = RealUI.globals.anchorPoints,
+                                    order = 30,
+                                },
+                                anchorfrom = {
+                                    type = "select",
+                                    name = "Anchor From",
+                                    get = function(info) 
+                                        for idx, point in next, RealUI.globals.anchorPoints do
+                                            if point == uiInfo.frames[i].point then return idx end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        uiInfo.frames[i].point = RealUI.globals.anchorPoints[value]
+                                        MoveFrameGroup(ui.frames, uiInfo.frames)
+                                    end,
+                                    style = "dropdown",
+                                    width = nil,
+                                    values = RealUI.globals.anchorPoints,
+                                    order = 40,
+                                },
+                            },
+                        }
+                        FrameOrderCnt = FrameOrderCnt + 10
+                    end
+                    
+                    -- Add Frames to UI Frames options
+                    uiFramesOpts.args[uiSlug].args.frames = frameopts
+                    uiFramesOrderCnt = uiFramesOrderCnt + 10
+                end
+            end
+        end
+        
+        -- Create Hide options table
+        local hideOpts do
+            hideOpts = {
+                name = "Hide Frames",
+                type = "group",
+                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                order = 70,
+                args = {
+                    header = {
+                        type = "header",
+                        name = "Frame Mover - Hide Frames",
+                        order = 10,
+                    },
+                    sep = {
+                        type = "description",
+                        name = " ",
+                        order = 20,
+                    },
+                    note = {
+                        type = "description",
+                        name = "Note: To make a frame visible again after it has been hidden, you will need to reload the UI (type: /rl).",
+                        order = 30,
+                    },
+                    hideframes = {
+                        type = "group",
+                        name = "Hide",
+                        inline = true,
+                        order = 40,
+                        args = {},
+                    },
+                },
+            }
+            -- Add all frames to Hide Frames options
+            local hideOrderCnt = 10 
+            for hideSlug, hide in next, FrameList.hide do
+                local hideInfo = db.hide [hideSlug]
+                -- Create base options for Hide
+                hideOpts.args.hideframes.args[hideSlug] = {
+                    type = "toggle",
+                    name = hide.name,
+                    get = function(info) return hideInfo.hide end,
+                    set = function(info, value) 
+                        hideInfo.hide = value 
+                        if hideInfo.hide then
+                            FrameMover:HideFrames()
+                        else
+                            RealUI:ReloadUIDialog()
+                        end
+                    end,
+                    order = hideOrderCnt,
+                }
+
+                hideOrderCnt = hideOrderCnt + 10        
+            end
+        end
+
+        -- Add extra options to Options table
+        frameMover = {
+            name = "Frame Mover",
+            desc = "Automatically Move/Hide certain AddOns/Frames.",
+            type = "group",
+            args = {
+                header = {
+                    type = "header",
+                    name = "Frame Mover/Hider",
+                    order = 10,
+                },
+                desc = {
+                    type = "description",
+                    name = "Automatically Move/Hide certain AddOns/Frames.",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                addons = addonOpts,
+                uiframes = uiFramesOpts,
+                hide = hideOpts,
+            },
+        }
+    end
     local minimap do
         local MinimapAdv = RealUI:GetModule("MinimapAdv")
         local db = MinimapAdv.db.profile
@@ -1429,8 +1891,9 @@ local uiTweaks do
                 type = "header",
                 order = 0,
             },
-            powerBar = powerBar,
             cooldown = cooldown,
+            frameMover = frameMover,
+            powerBar = powerBar,
             minimap = minimap,
         }
     }
