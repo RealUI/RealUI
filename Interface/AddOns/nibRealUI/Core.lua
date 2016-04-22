@@ -432,19 +432,21 @@ function RealUI:VARIABLES_LOADED()
     -- end)
 
     -- Fix Regeant shift+clicking in TradeSkill window
+    if not RealUI.isBeta then
     _G.LoadAddOn("Blizzard_TradeSkillUI")
-    local function TradeSkillReagent_OnClick(button)
-        local link = _G.GetTradeSkillReagentItemLink(_G.TradeSkillFrame.selectedSkill, button:GetID())
-        if not link then
-            local name = _G.GameTooltip:GetItem()
-            if name ~= button.name:GetText() then
-                return
+        local function TradeSkillReagent_OnClick(button)
+            local link = _G.GetTradeSkillReagentItemLink(_G.TradeSkillFrame.selectedSkill, button:GetID())
+            if not link then
+                local name = _G.GameTooltip:GetItem()
+                if name ~= button.name:GetText() then
+                    return
+                end
             end
+            _G.HandleModifiedItemClick(link)
         end
-        _G.HandleModifiedItemClick(link)
-    end
-    for i = 1, 8 do
-        _G["TradeSkillReagent"..i]:SetScript("OnClick", TradeSkillReagent_OnClick)
+        for i = 1, 8 do
+            _G["TradeSkillReagent"..i]:SetScript("OnClick", TradeSkillReagent_OnClick)
+        end
     end
 end
 

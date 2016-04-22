@@ -11,12 +11,14 @@ local _, PhanxChat = ...
 local L = PhanxChat.L
 local hooks = PhanxChat.hooks
 
-InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
-	if PhanxChat.db.MoveEditBox then
-		GameTooltip:AddLine(format(L.OptionLockedConditional, L.MoveEditBox), 1, 1, 1, true)
-		GameTooltip:Show()
-	end
-end)
+if InterfaceOptionsSocialPanelChatStyle then
+	InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
+		if PhanxChat.db.MoveEditBox then
+			GameTooltip:AddLine(format(L.OptionLockedConditional, L.MoveEditBox), 1, 1, 1, true)
+			GameTooltip:Show()
+		end
+	end)
+end
 
 local function Insert(editBox, text)
 	-- Remove annoying prepended spaces on shift-clicked links
@@ -40,20 +42,24 @@ function PhanxChat:MoveEditBox(frame)
 		editBox:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", -5, 2)
 		editBox:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 5, 2)
 
-		SetCVar("chatStyle", "classic")
-		InterfaceOptionsSocialPanelChatStyle_SetChatStyle("classic")
+		if InterfaceOptionsSocialPanelChatStyle then
+			SetCVar("chatStyle", "classic")
+			InterfaceOptionsSocialPanelChatStyle_SetChatStyle("classic")
 
-		InterfaceOptionsSocialPanelChatStyleButton:Disable()
-		InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
-		InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+			InterfaceOptionsSocialPanelChatStyleButton:Disable()
+			InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+			InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+		end
 	else
 		editBox:ClearAllPoints()
 		editBox:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", -5, -2)
 		editBox:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 5, -2)
 
-		InterfaceOptionsSocialPanelChatStyleButton:Enable()
-		InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-		InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+		if InterfaceOptionsSocialPanelChatStyle then
+			InterfaceOptionsSocialPanelChatStyleButton:Enable()
+			InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+			InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+		end
 	end
 end
 

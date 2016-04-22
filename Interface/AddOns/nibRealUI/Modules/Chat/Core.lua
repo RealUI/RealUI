@@ -138,9 +138,15 @@ function Chat:OnEnable()
     self:debug("OnEnable")
     self:RegisterEvent("PLAYER_LOGIN")
 
+    local start, stop
+    if RealUI.isBeta then
+        start, stop = 3, 8
+    else
+        start, stop = 6, 11
+    end
     for i = 1, _G.NUM_CHAT_WINDOWS do
         local editbox = _G["ChatFrame"..i.."EditBox"]
-        for k = 6, 11 do
+        for k = start, stop do
             local tex = _G.select(k, editbox:GetRegions())
             if tex:GetObjectType() == "Texture" then
                 tex:SetTexture("")

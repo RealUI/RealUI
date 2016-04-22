@@ -10,6 +10,8 @@ local RealUI = private.RealUI
 local MODNAME = "AlertFrameMove"
 local AlertFrameMove = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
+if RealUI.isBeta then return end
+
 local AlertFrameHolder = _G.CreateFrame("Frame", "AlertFrameHolder", _G.UIParent)
 AlertFrameHolder:SetWidth(180)
 AlertFrameHolder:SetHeight(20)
@@ -236,15 +238,6 @@ local alertTest = {
                     type = "execute",
                     func = function()
                         _G.GuildChallengeAlertFrame_ShowAlert(1, 2, 5)
-                    end,
-                },
-                challenge = {
-                    name = "Challenge Mode",
-                    desc = "ChallengeModeAlertFrame_ShowAlert",
-                    disabled = not _G.GetChallengeModeCompletionInfo(),
-                    type = "execute",
-                    func = function()
-                        _G.ChallengeModeAlertFrame_ShowAlert()
                     end,
                 },
             },

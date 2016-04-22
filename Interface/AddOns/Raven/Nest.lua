@@ -1617,7 +1617,7 @@ function MOD.Nest_Initialize()
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
 	if GetCVar("useUiScale") == "1" then
-		pixelScale = 768 / string.match(GetCVar("gxResolution"), "%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+        pixelScale = 768 / ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
 	else
 		pixelScale = 1
 	end

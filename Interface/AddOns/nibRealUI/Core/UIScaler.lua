@@ -22,8 +22,9 @@ function UIScaler:UpdateUIScale()
 
     -- Get Scale
     local scale
-    if db.pixelPerfect then 
-        scale = 768 / ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("%d+x(%d+)")
+    if db.pixelPerfect then
+        local _, height = RealUI:GetResolutionVals(true)
+        scale = 768 / height
         db.customScale = scale
     else
         scale = db.customScale

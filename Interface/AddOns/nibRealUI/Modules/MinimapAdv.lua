@@ -5,7 +5,8 @@ local _G = _G
 local next = _G.next
 
 -- Libs --
-local Astrolabe = _G.DongleStub("Astrolabe-1.0")
+local HBD = _G.LibStub("HereBeDragons-1.0")
+local HBDP = _G.LibStub("HereBeDragons-Pins-1.0")
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -618,10 +619,10 @@ end
 
 -- Find closest POI
 function MinimapAdv:ClosestPOI(all)
-    local closest, closest_distance, poi_distance
+    local _, closest, closest_distance, poi_distance
     for k, poi in next, self.pois do
         if poi.active then
-            poi_distance = Astrolabe:GetDistanceToIcon(poi)
+            _, poi_distance = HBDP:GetVectorToIcon(poi)
 
             if closest then
                 if ( poi_distance and closest_distance and (poi_distance < closest_distance) ) then
@@ -658,7 +659,7 @@ end
 function MinimapAdv:UpdatePOIEdges()
     for id, poi in next, pois do
         if poi.active then
-            if Astrolabe:IsIconOnEdge(poi) then
+            if HBDP:IsMinimapIconOnEdge(poi) then
                 poi.poiButton:Show()
                 poi.poiButton:SetAlpha(db.poi.icons.opacity * (db.poi.fadeEdge and 0.6 or 1))
             else
@@ -689,7 +690,7 @@ end
 
 function MinimapAdv:RemoveAllPOIs()
     for i, poi in next, pois do
-        Astrolabe:RemoveIconFromMinimap(poi)
+        HBDP:RemoveMinimapIcon(poi)
         if poi.poiButton then
             poi.poiButton:Hide()
             poi.poiButton:SetParent(_G.Minimap)
@@ -707,10 +708,10 @@ function MinimapAdv:POIUpdate(...)
 
     self:RemoveAllPOIs()
 
-    local c,z,x,y = Astrolabe:GetCurrentPlayerPosition()
+    local mapID, mapFloor = HBD:GetPlayerZone()
 
     -- Update was probably triggered by World Map browsing. Don't update any POIs.
-    if not (c and z and x and y) then return end
+    if not (mapID and mapFloor) then return end
 
     _G.QuestPOIUpdateIcons()
 
@@ -764,15 +765,15 @@ function MinimapAdv:POIUpdate(...)
                 poi.index = i
                 poi.questID = questID
                 poi.questLogIndex = questLogIndex
-                poi.c = c
-                poi.z = z
+                poi.mapID = mapID
+                poi.mapFloor = mapFloor
                 poi.x = posX
                 poi.y = posY
                 poi.title = title
                 poi.active = true
                 poi.complete = isComplete
 
-                Astrolabe:PlaceIconOnMinimap(poi, c, z, posX, posY)
+                HBDP:AddMinimapIconMF(self, poi, mapID, mapFloor, posX, posY, true)
 
                 pois[i] = poi
             end
@@ -783,11 +784,6 @@ function MinimapAdv:POIUpdate(...)
 end
 
 function MinimapAdv:InitializePOI()
-    -- This would be needed for switching to a different look when icons are on the edge of the minimap.
-    Astrolabe:Register_OnEdgeChanged_Callback(function(...)
-        self:UpdatePOIEdges()
-    end, "MinimapAdv")
-
     -- Update POI timer
     local GlowTimer = _G.CreateFrame("Frame")
     GlowTimer.elapsed = 0

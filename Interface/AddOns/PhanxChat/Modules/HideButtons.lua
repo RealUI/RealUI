@@ -67,7 +67,7 @@ function PhanxChat:HideButtons(frame)
 			bottomButton:SetScript("OnClick", BottomButton_OnClick)
 		end
 
-		if not InterfaceOptionsSocialPanelChatStyle.orig_value then
+		if InterfaceOptionsSocialPanelChatStyle and not InterfaceOptionsSocialPanelChatStyle.orig_value then
 			InterfaceOptionsSocialPanelChatStyle.orig_value = GetCVar("chatMouseScroll")
 			InterfaceOptionsSocialPanelChatStyle.orig_tooltip = InterfaceOptionsSocialPanelChatStyle.tooltip
 
@@ -98,7 +98,7 @@ function PhanxChat:HideButtons(frame)
 			self.hooks[bottomButton].OnClick = nil
 		end
 
-		if InterfaceOptionsSocialPanelChatStyle.value_orig then
+		if InterfaceOptionsSocialPanelChatStyle and InterfaceOptionsSocialPanelChatStyle.value_orig then
 			SetCVar("chatMouseScroll", InterfaceOptionsSocialPanelChatStyle.value_orig)
 			InterfaceOptionsSocialPanelChatMouseScroll_SetScrolling(InterfaceOptionsSocialPanelChatStyle.value_orig)
 			InterfaceOptionsSocialPanelChatMouseScroll:Enable()
