@@ -1,0 +1,15 @@
+------------------------------------------------------------------------
+r216 | funkydude | 2016-03-09 15:38:27 +0000 (Wed, 09 Mar 2016) | 1 line
+Changed paths:
+   A /tags/r216-release (from /trunk:215)
+
+Tagging as r216-release
+------------------------------------------------------------------------
+r215 | nevcairiel | 2016-03-07 19:26:46 +0000 (Mon, 07 Mar 2016) | 3 lines
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Fix the stack level when storing local variables in the error dump (augments r177)
+
+Fixes issue 62
+------------------------------------------------------------------------

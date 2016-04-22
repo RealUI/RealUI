@@ -14,13 +14,15 @@ function addon:LoadTranslations(locale, L)
 	if locale == "koKR" then
 L["ADDON_CALL_PROTECTED"] = "[%s] 애드온 '%s' 보호된 함수 호출 '%s'."
 L["ADDON_CALL_PROTECTED_MATCH"] = "^%[(.*)%] (애드온 '.*' 보호된 함수 호출 '.*'.)$"
-L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r와 |cffffff7f%s|r는 함께 공존할 수 없습니다. |cffffff7f%s|r에 의해 중지되었습니다. 만약 당신이 원하면, 접속을 종료한 후, |cffffff7fBugGrabber|r를 중지하고 |cffffff7f%s|r를 재활성하세요." -- Needs review
-L["BUGGRABBER_STOPPED"] = "이것은 초당 %d개 이상의 오류를 발견하였기에 |cffffff7fBugGrabber|r의 오류 캡쳐가 중지되었으며, 캡쳐는 %d초 후 재개됩니다." -- Needs review
-L["NO_DISPLAY_1"] = "|cffff4411당신은 미표시 애드온과 함께 !BugGrabber를 실행할 것으로 보입니다. !BugGrabber는 게임 오류 확인을 위한 슬래시 명령어를 제공하고 있지만, 표시 애드온은 당신이 더 편리한 방법으로 이러한 오류를 관리할 수 있습니다.|r" -- Needs review
-L["NO_DISPLAY_2"] = "|cffff4411표준 !BugGrabber 표시는|r |cff44ff44BugSack|r|cffff4411으로 불러오며, 그리고 아마도 당신은 !BugGrabber를 발견한 동일 사이트에서 찾을 수 있습니다.|r" -- Needs review
-L["NO_DISPLAY_STOP"] = "|cffff4411만약 당신이 이것에 대해 다시 떠올리고 싶지 않다면, |cff44ff44/stopnag|r|cffff4411를 실행하세요.|r" -- Needs review
-L["STOP_NAG"] = "|cffff4411!BugGrabber는 오류에 관해 성가시게 하지 않으며 |r|cff44ff44BugSack|r|cffff4411의 다음 패치때까지만 입니다.|r" -- Needs review
-L["USAGE"] = "사용법: /buggrabber <1-%d>." -- Needs review
+L["ADDON_DISABLED"] = "|cffffff00!BugGrabber|r와 %s|1은;는; 함께 사용할 수 없습니다; %s|1은;는; 강제로 중지되었습니다. 만약 당신이 원하면, 접속을 종료한 후, !BugGrabber를 비활성하고 %s|1을;를; 활성화하세요.|r"
+L["BUGGRABBER_STOPPED"] = "|cffffff00당신의 UI에 매우 많은 오류가 있습니다. 결과적으로, 당신의 게임 환경은 타락했습니다. 이 메시지를 다시 보지 않으려면 오류가 있는 애드온을 비활성하거나 업데이트하세요.|r"
+L["ERROR_DETECTED"] = "%s |cffffff00수집됨, 자세한 정보는 링크를 클릭하세요.|r"
+L["ERROR_UNABLE"] = "|cffffff00!BugGrabber는 다른 플레이어의 오류는 발견할 수 없습니다. 이런 기능을 지원하는 BugSack이나 비슷한 디스플레이 애드온을 설치해주세요.|r"
+L["NO_DISPLAY_1"] = "|cffffff00당신은 !BugGrabber를 디스플레이 애드온 없이 실행한 것 같습니다. !BugGrabber는 게임 오류 확인을 위한 슬래시 명령어를 제공하고 있지만, 표시 애드온은 당신이 더 편리한 방법으로 이러한 오류를 관리할 수 있게 도와줍니다.|r"
+L["NO_DISPLAY_2"] = "|cffffff00표준 디스플레이는 BugSack으로 불리며, 아마도 당신은 !BugGrabber를 발견한 동일 사이트에서 찾을 수 있습니다.|r"
+L["NO_DISPLAY_STOP"] = "|cffffff00만약 당신이 이것에 대해 다시 떠올리고 싶지 않다면, /stopnag 를 실행하세요.|r"
+L["STOP_NAG"] = "|cffffff00다음 패치때까지 !BugGrabber는 디스플레이 애드온이 없는 것에 대해 성가시게 하지 않습니다.|r"
+L["USAGE"] = "|cffffff00사용법: /buggrabber <1-%d>.|r"
 
 	elseif locale == "deDE" then
 L["ADDON_CALL_PROTECTED"] = "[%s] AddOn '%s' hat versucht die geschützte Funktion '%s' aufzurufen."
@@ -127,7 +129,7 @@ L["USAGE"] = "Uso: /buggraber <1-%d>" -- Needs review
 L["ADDON_CALL_PROTECTED"] = "[%s] AddOn '%s' ha cercato di chiamare la funzione protetta '%s'."
 L["ADDON_CALL_PROTECTED_MATCH"] = "^%[(.*)%] (AddOn '.*' ha cercato di chiamare la funzione protetta '.*'.)$"
 L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r e %s non possono essere contemporaneamente installati. %s è stato quindi disabilitato. Se vuoi, puoi uscire dal gioco, disabilitare !BugGrabber e riattivare %s."
-L["BUGGRABBER_STOPPED"] = "|cffffff00Ci sono troppi errori nella tua UI. Di conseguenza, la tua esperienza di gioco potrebbe essere non completamente appagante. Disabilita o aggirna l'addon che genera così tanti avvisi se non vuoi più vedere questo messaggio.|r"
+L["BUGGRABBER_STOPPED"] = "|cffffff00Ci sono troppi errori nella tua UI. Di conseguenza, la tua esperienza di gioco potrebbe essere non completamente appagante. Disabilita o aggiorna l'addon che genera così tanti avvisi se non vuoi più vedere questo messaggio.|r"
 L["ERROR_DETECTED"] = "%s |cffffff00catturato, clicca sul link per maggiori informazioni.|r"
 L["ERROR_UNABLE"] = "|cffffff00!BugGrabber non è capace di rivelare errori dovuti ad altri giocatori. Per favore, installa BugSack o un'addon equivalente per poter visualizzare anche questo tipo di errori.|r"
 L["NO_DISPLAY_1"] = "lcffff4411Sembra che tu stia eseguendo !BugGrabber senza alcun addon che ne visualizzi gli errori. Anche se !BugGrabber ha un comando per visualizzarli nella chat, un addon aggiuntivo per visualizzarli potrebbe esserti utile.|r"
