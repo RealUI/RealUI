@@ -57,6 +57,8 @@ local ClassPowerID, ClassPowerType
 local ClassPowerEnable, ClassPowerDisable
 local RequireSpec, RequireSpell
 
+local isBetaClient = oUF.Private.isBetaClient
+
 local UpdateTexture = function(element)
 	local red, green, blue, desaturated
 	if(PlayerClass == 'MONK') then
@@ -205,11 +207,19 @@ do
 	if(PlayerClass == 'MONK') then
 		ClassPowerID = SPELL_POWER_CHI
 		ClassPowerType = "CHI"
+
+		if(isBetaClient) then
+			RequireSpec = SPEC_MONK_WINDWALKER
+		end
 	elseif(PlayerClass == 'PALADIN') then
 		ClassPowerID = SPELL_POWER_HOLY_POWER
 		ClassPowerType = "HOLY_POWER"
 		RequireSpell = 85673 -- Word of Glory
-	elseif(PlayerClass == 'PRIEST') then
+
+		if(isBetaClient) then
+			RequireSpec = SPEC_PALADIN_RETRIBUTION
+		end
+	elseif(PlayerClass == 'PRIEST' and not isBetaClient) then
 		ClassPowerID = SPELL_POWER_SHADOW_ORBS
 		ClassPowerType = "SHADOW_ORBS"
 		RequireSpec = SPEC_PRIEST_SHADOW
@@ -217,8 +227,18 @@ do
 	elseif(PlayerClass == 'WARLOCK') then
 		ClassPowerID = SPELL_POWER_SOUL_SHARDS
 		ClassPowerType = "SOUL_SHARDS"
-		RequireSpec = SPEC_WARLOCK_AFFLICTION
-		RequireSpell = WARLOCK_SOULBURN
+
+		if(not isBetaClient) then
+			RequireSpec = SPEC_WARLOCK_AFFLICTION
+			RequireSpell = WARLOCK_SOULBURN
+		end
+	elseif(isBetaClient and (PlayerClass == 'ROGUE' or PlayerClass == 'DRUID')) then
+		ClassPowerID = SPELL_POWER_COMBO_POINTS
+		ClassPowerType = 'COMBO_POINTS'
+	elseif(isBetaClient and PlayerClass == 'MAGE') then
+		ClassPowerID = SPELL_POWER_ARCANE_CHARGES
+		ClassPowerType = 'ARCANE_CHARGES'
+		RequireSpec = SPEC_MAGE_ARCANE
 	end
 end
 
