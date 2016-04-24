@@ -7,15 +7,20 @@ local tinsert = _G.table.insert
 
 -- Libs --
 local LSM = _G.LibStub("LibSharedMedia-3.0")
+local LibWin = _G.LibStub("LibWindow-1.1")
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
-
-local CombatFader = RealUI:GetModule("CombatFader")
+local db, ndb, iconData
 
 local MODNAME = "PointTracking"
 local PointTracking = RealUI:GetModule(MODNAME)
+
+--local classIcons = PointTracking:SetupDefaultIcon()
+
+--if not classIcons then return end
+
+local CombatFader = RealUI:GetModule("CombatFader")
 
 -- local GreenFire
 
@@ -74,7 +79,7 @@ local PointsChanged = {}
 
 local HolyPowerTexture
 
-local PlayerClass
+local PlayerClass = RealUI.class
 local PlayerSpec
 local PlayerTalent = 0
 local PlayerInCombat
@@ -402,18 +407,6 @@ function PointTracking:UpdatePosition()
     end
 end
 
-function PointTracking:ToggleConfigMode(val)
-    local power, class = self:GetResource()
-    if RealUI:GetModuleEnabled(MODNAME) and power then
-        for i = 1, #power do
-            local tid = power[i].id
-            db[class].types[tid].configmode.enabled = val
-            db[class].types[tid].configmode.count = _G.UnitPowerMax("player", idToPower[tid])
-        end
-        self:UpdatePoints("ENABLE")
-    end
-end
-
 -- Retrieve SharedMedia backgound
 local function RetrieveBackground(background)
     background = LSM:Fetch("background", background, true)
@@ -625,13 +618,6 @@ function PointTracking:PLAYER_LOGIN()
     LSM:Register("background", "Soul_Shard_BG", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]])
     LSM:Register("background", "Soul_Shard_Surround", [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]])
     
-    HolyPowerTexture = {
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
-    }
     
     -- Get Spell Info
     -- Death Knight
@@ -678,20 +664,214 @@ function PointTracking:PLAYER_LOGIN()
     PointTracking:Refresh()
 end
 
+local textures = {
+    circle = {
+        coords = {0.125, 0.9375, 0.0625, 0.875},
+        width = 13, height = 13,
+        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]],
+        border = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_Surround]]
+    },
+    shard = {
+        coords = {0.0625, 0.8125, 0.0625, 0.875},
+        width = 24, height = 13,
+        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]],
+        border = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]]
+    },
+    holyPower = {
+        width = 64, height = 64,
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
+    }
+}
+
+local UpdateTexture do 
+    function UpdateTexture(ClassIcons)
+        local texture, color
+        if (PlayerClass == "MAGE") then
+            texture = textures.circle
+            color = _G.PowerBarColor["ARCANE_CHARGES"]
+        elseif (PlayerClass == "MONK") then
+            texture = textures.circle
+            color = _G.PowerBarColor["CHI"]
+        elseif (PlayerClass == "PRIEST") then
+            texture = textures.circle
+            color = {r = 0.40, g = 0, b = 0.80}
+        elseif (PlayerClass == "PALADIN") then
+            texture = textures.holyPower
+        elseif (PlayerClass == "WARLOCK") then
+            texture = textures.shard
+            color = _G.PowerBarColor["SOUL_SHARDS"]
+        end
+
+        for i = 1, #ClassIcons do
+            local icon = ClassIcons[i]
+            icon:SetSize(texture.width, texture.height)
+
+            if texture.bg then
+                local coords = texture.coords
+                icon.bg:SetTexture(texture.bg)
+                icon.bg:SetVertexColor(color.r, color.g, color.b)
+                icon.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+                icon.border:SetTexture(texture.border)
+                icon.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+            else
+                icon.bg:SetTexture(texture[i])
+            end
+        end
+    end
+end
+
+function PointTracking:CreateClassIcons(unitFrame, unit)
+    self:debug("CreateClassIcons", unit)
+    local ClassIcons = _G.CreateFrame("Frame", nil, _G.UIParent)
+    ClassIcons:SetSize(16, 16)
+
+    LibWin:Embed(ClassIcons)
+    ClassIcons:RegisterConfig(iconData.position)
+    ClassIcons:RestorePosition()
+    ClassIcons:SetMovable(true)
+    ClassIcons:RegisterForDrag("LeftButton")
+    ClassIcons:SetScript("OnDragStart", function(...)
+        LibWin.OnDragStart(...)
+    end)
+    ClassIcons:SetScript("OnDragStop", function(...)
+        LibWin.OnDragStop(...)
+    end)
+
+    local point = iconData.reverse and "RIGHT" or "LEFT"
+    local gap = iconData.reverse and -(iconData.gap) or iconData.gap
+    for index = 1, 6 do
+        local Icon = _G.CreateFrame("Frame", nil, ClassIcons)
+        if PlayerClass == "PALADIN" then
+            Icon:SetPoint("CENTER")
+        else
+            if index == 1 then
+                Icon:SetPoint(point)
+            else
+                Icon:SetPoint(point, ClassIcons[index-1], iconData.reverse and "LEFT" or "RIGHT", gap, 0)
+            end
+        end
+
+        local bg = Icon:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+
+        local border = Icon:CreateTexture(nil, "BORDER")
+        border:SetAllPoints()
+
+        Icon.bg = bg
+        Icon.border = border
+        ClassIcons[index] = Icon
+    end
+    ClassIcons.UpdateTexture = UpdateTexture
+
+    if not RealUI.isBeta and PlayerClass == "WARLOCK" then
+        local info = {
+            leftAngle = [[\]],
+            rightAngle = [[\]],
+            smooth = false,
+        }
+        local color
+        if _G.IsSpellKnown(_G.WARLOCK_GREEN_FIRE) then
+            color = {0.2, 0.8, 0.2}
+        else
+            color = {0.8, 0.2, 0.2}
+        end
+
+        local BurningEmbers = _G.CreateFrame("Frame", nil, _G.UIParent)
+        BurningEmbers:SetAllPoints(ClassIcons)
+        for index = 1, 4 do
+            local ember = unitFrame:CreateAngleFrame("Status", 28, 11, unitFrame, info)
+            ember:SetStatusBarColor(color[1], color[2], color[3])
+            if index == 1 then
+                ember:SetPoint(point, BurningEmbers)
+            else
+                ember:SetPoint(point, BurningEmbers[index-1], iconData.reverse and "LEFT" or "RIGHT", gap, 0)
+            end
+            BurningEmbers[index] = ember
+        end
+        unitFrame.BurningEmbers = BurningEmbers
+    end
+
+    -- Register with oUF
+    unitFrame.ClassIcons = ClassIcons
+end
+
+function PointTracking:ToggleConfigMode(val)
+    local power, class = self:GetResource()
+    if RealUI:GetModuleEnabled(MODNAME) and power then
+        for i = 1, #power do
+            local tid = power[i].id
+            db[class].types[tid].configmode.enabled = val
+            db[class].types[tid].configmode.count = _G.UnitPowerMax("player", idToPower[tid])
+        end
+        self:UpdatePoints("ENABLE")
+    end
+end
+
 function PointTracking:OnInitialize()
+    self:debug("OnInitialize")
     self.db = RealUI.db:RegisterNamespace(MODNAME)
-    self.db:RegisterDefaults(PointTracking.defaults)
+    self.db:RegisterDefaults({
+        profile = {
+            updatespeed = 8,
+            combatfade = {
+                enabled = true,
+                opacity = {
+                    incombat = 1,
+                    hurt = .8,
+                    target = .8,
+                    outofcombat = .3,
+                }
+            }
+        },
+        class = {
+            ["**"] = {
+                hideempty = true, -- Only show used icons
+                reverse = false, -- Points start on the right
+                gap = 2,
+                position = {
+                    x = -180,
+                    y = -5.5,
+                    point = "CENTER",
+                },
+            },
+            ["DRUID"] = {
+            },
+            ["MAGE"] = {
+            },
+            ["MONK"] = {
+            },
+            ["PALADIN"] = {
+                position = {
+                    x = 0,
+                    y = -150,
+                    point = "CENTER",
+                },
+            },
+            ["PRIEST"] = {
+            },
+            ["ROGUE"] = {
+            },
+            ["WARLOCK"] = {
+                gap = -5,
+            },
+        }
+    })
     
     db = self.db.profile
+    iconData = self.db.class[PlayerClass]
     ndb = RealUI.db.profile
-    PlayerClass = RealUI.class
-    
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
     RealUI:RegisterConfigModeModule(self)
 end
 
 function PointTracking:OnEnable()
+    --[[
     CreateTables()
     CreateFrames()
     
@@ -708,5 +888,5 @@ function PointTracking:OnEnable()
     self:RegisterEvent("PLAYER_TALENT_UPDATE")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
-    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    self:RegisterEvent("PLAYER_TARGET_CHANGED")]]
 end

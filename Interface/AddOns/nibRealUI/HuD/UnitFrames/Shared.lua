@@ -708,6 +708,9 @@ local function Shared(self, unit)
     if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
+    if RealUI:GetModuleEnabled("PointTracking") and unit == "player" then
+        RealUI:GetModule("PointTracking"):CreateClassIcons(self, unit)
+    end
 end
 
 function UnitFrames:InitializeLayout()

@@ -133,6 +133,18 @@ RealUI.minipatches = {
             end
         end
     end,
+    [16] = function(ver)
+        debug("r"..ver)
+        local nibRealUIDB = _G.nibRealUIDB
+        if nibRealUIDB.namespaces.PointTracking.profiles then
+            --local classDB = nibRealUIDB.namespaces.PointTracking.class
+            local profile = nibRealUIDB.namespaces.PointTracking.profiles.RealUI
+            for class, classInfo in next, profile do
+                _G.print(class, classInfo)
+            end
+        end
+        --
+    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,

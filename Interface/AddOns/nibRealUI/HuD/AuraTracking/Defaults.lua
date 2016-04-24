@@ -20,7 +20,7 @@ local function debug(isDebug, ...)
 end
 AuraTracking.trackerDebug = debug
 
-local _, class, classID = _G.UnitClass("player")
+local class, classID = RealUI.class, RealUI.classID
 local SavageRoar
 local MirrorImage, IncantersFlow
 local PowerStrikes
