@@ -10,24 +10,20 @@ local LibWin = _G.LibStub("LibWindow-1.1")
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, iconData
+local isBeta = RealUI.isBeta
+local db
+
+local CombatFader = RealUI:GetModule("CombatFader")
 
 local MODNAME = "PointTracking"
 local PointTracking = RealUI:GetModule(MODNAME)
-local isBeta = RealUI.isBeta
-
---local classIcons = PointTracking:SetupDefaultIcon()
-
---if not classIcons then return end
-
-local CombatFader = RealUI:GetModule("CombatFader")
 
 local PlayerClass = RealUI.class
 local ClassPowerID, ClassPowerType
 local iconFrames = {}
 
 function PointTracking:GetResource()
-    if ClassPowerID and  ClassPowerType then
+    if ClassPowerID and ClassPowerType then
         if PlayerClass == "WARLOCK" then
             return {{type = ClassPowerType, id = ClassPowerID}, {type = "BURNING_EMBERS", id = _G.SPELL_POWER_BURNING_EMBERS}}
         else
@@ -40,18 +36,15 @@ local UpdateTexture do
     local textures = {
         circle = {
             coords = {0.125, 0.9375, 0.0625, 0.875},
-            width = 13, height = 13,
             bg = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]],
             border = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_Surround]]
         },
         shard = {
             coords = {0.0625, 0.8125, 0.0625, 0.875},
-            width = 24, height = 13,
             bg = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]],
             border = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]]
         },
         holyPower = {
-            width = 64, height = 64,
             [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
             [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
             [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
@@ -83,8 +76,6 @@ local UpdateTexture do
 
         for i = 1, #ClassIcons do
             local icon = ClassIcons[i]
-            icon:SetSize(texture.width, texture.height)
-
             if texture.bg then
                 local coords = texture.coords
                 icon.bg:SetTexture(texture.bg)
@@ -156,7 +147,7 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
     ClassIcons:SetSize(16, 16)
 
     LibWin:Embed(ClassIcons)
-    ClassIcons:RegisterConfig(iconData.position)
+    ClassIcons:RegisterConfig(db.position)
     ClassIcons:RestorePosition()
     ClassIcons:SetMovable(true)
     ClassIcons:RegisterForDrag("LeftButton")
@@ -167,17 +158,18 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
         LibWin.OnDragStop(...)
     end)
 
-    local point = iconData.reverse and "RIGHT" or "LEFT"
-    local gap = iconData.reverse and -(iconData.gap) or iconData.gap
+    local point, size = db.reverse and "RIGHT" or "LEFT", db.size
+    local gap = db.reverse and -(size.gap) or size.gap
     for index = 1, (isBeta and 8 or 6) do
         local Icon = _G.CreateFrame("Frame", nil, ClassIcons)
+        Icon:SetSize(size.width, size.height)
         if PlayerClass == "PALADIN" then
             Icon:SetPoint("CENTER")
         else
             if index == 1 then
                 Icon:SetPoint(point)
             else
-                Icon:SetPoint(point, ClassIcons[index-1], iconData.reverse and "LEFT" or "RIGHT", gap, 0)
+                Icon:SetPoint(point, ClassIcons[index-1], db.reverse and "LEFT" or "RIGHT", gap, 0)
             end
         end
 
@@ -251,42 +243,46 @@ function PointTracking:OnInitialize()
         classDB = {
             hideempty = true, -- Only show used icons
             reverse = false, -- Points start on the right
-            gap = 2,
+            size = {
+                width = 13,
+                height = 13,
+                gap = 2,
+            },
             position = {
                 x = -160,
                 y = -40.5,
                 point = "CENTER",
             },
+            combatfade = {
+                enabled = true,
+                opacity = {
+                    incombat = 1,
+                    harmtarget = .8,
+                    target = .8,
+                    hurt = .5,
+                    outofcombat = .3,
+                }
+            }
         }
 
         if PlayerClass == "PALADIN" then
+            classDB.size.width = 64
+            classDB.size.height = 64
+
             classDB.position.x = 0
             classDB.position.y = -115
         elseif PlayerClass == "WARLOCK" then
-            classDB.gap = -5
+            classDB.size.width = 24
+            classDB.size.height = 13
+            classDB.size.gap = -5
         end
     end
 
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
-        profile = {
-            updatespeed = 8,
-            combatfade = {
-                enabled = true,
-                opacity = {
-                    incombat = 1,
-                    hurt = .8,
-                    target = .8,
-                    outofcombat = .3,
-                }
-            }
-        },
         class = classDB
     })
-    
-
-    db = self.db.profile
-    iconData = self.db.class
+    db = self.db.class
 
     if (PlayerClass == "MONK") then
         ClassPowerType = "CHI"

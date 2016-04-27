@@ -1776,8 +1776,7 @@ end
 local classresource do
     local CombatFader = RealUI:GetModule("CombatFader")
     local PointTracking = RealUI:GetModule("PointTracking")
-    local db = PointTracking.db.profile
-    local iconData = PointTracking.db.class
+    local db = PointTracking.db.class
     local power = PointTracking:GetResource()
     local bars = RealUI:GetResourceBar()
     if power or bars then
@@ -1893,9 +1892,9 @@ local classresource do
                         type = "toggle",
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
-                        get = function(info) return iconData.hideempty end,
+                        get = function(info) return db.hideempty end,
                         set = function(info, value) 
-                            iconData.hideempty = value
+                            db.hideempty = value
                         end,
                         order = 10,
                     },
@@ -1903,9 +1902,9 @@ local classresource do
                         type = "toggle",
                         name = L["Resource_Reverse"],
                         desc = L["Resource_ReverseDesc"]:format(pointName),
-                        get = function(info) return iconData.reverse end,
+                        get = function(info) return db.reverse end,
                         set = function(info, value) 
-                            iconData.reverse = value
+                            db.reverse = value
                         end,
                         order = 20,
                     },
@@ -1914,10 +1913,10 @@ local classresource do
                         desc = L["Resource_GapDesc"]:format(pointName),
                         type = "input",
                         order = 30,
-                        get = function(info) return tostring(iconData.gap) end,
+                        get = function(info) return tostring(db.size.gap) end,
                         set = function(info, value)
                             value = RealUI:ValidateOffset(value)
-                            iconData.gap = value
+                            db.gap = value
                             PointTracking:UpdatePosition()
                         end,
                     },
@@ -2020,9 +2019,9 @@ local classresource do
                                 desc = L["General_XOffsetDesc"],
                                 type = "input",
                                 dialogControl = "NumberEditBox",
-                                get = function(info) return tostring(iconData.position.x) end,
+                                get = function(info) return tostring(db.position.x) end,
                                 set = function(info, value)
-                                    iconData.position.x = round(tonumber(value))
+                                    db.position.x = round(tonumber(value))
                                     PointTracking:SettingsUpdate("position")
                                 end,
                                 order = 10,
@@ -2032,9 +2031,9 @@ local classresource do
                                 desc = L["General_YOffsetDesc"],
                                 type = "input",
                                 dialogControl = "NumberEditBox",
-                                get = function(info) return tostring(iconData.position.y) end,
+                                get = function(info) return tostring(db.position.y) end,
                                 set = function(info, value)
-                                    iconData.position.y = round(tonumber(value))
+                                    db.position.y = round(tonumber(value))
                                     PointTracking:SettingsUpdate("position")
                                 end,
                                 order = 20,
