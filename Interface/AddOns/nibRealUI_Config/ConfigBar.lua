@@ -1777,7 +1777,8 @@ local classresource do
     local CombatFader = RealUI:GetModule("CombatFader")
     local PointTracking = RealUI:GetModule("PointTracking")
     local db = PointTracking.db.profile
-    local power, class = PointTracking:GetResource()
+    local iconData = PointTracking.db.class
+    local power = PointTracking:GetResource()
     local bars = RealUI:GetResourceBar()
     if power or bars then
         classresource = {
@@ -1881,8 +1882,7 @@ local classresource do
         }
         power = power or {}
         for i = 1, #power do
-            local pointOptions = db[class].types[power[i].id]
-            local pointName = _G.CombatLog_String_PowerType(_G[power[i].type])
+            local pointName = _G.CombatLog_String_PowerType(power[i].id)
             local points = {
                 name = pointName,
                 type = "group",
@@ -1893,10 +1893,9 @@ local classresource do
                         type = "toggle",
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
-                        get = function(info) return pointOptions.general.hideempty end,
+                        get = function(info) return iconData.hideempty end,
                         set = function(info, value) 
-                            pointOptions.general.hideempty = value
-                            PointTracking:UpdatePoints("ENABLE")
+                            iconData.hideempty = value
                         end,
                         order = 10,
                     },
@@ -1904,17 +1903,28 @@ local classresource do
                         type = "toggle",
                         name = L["Resource_Reverse"],
                         desc = L["Resource_ReverseDesc"]:format(pointName),
-                        get = function(info) return pointOptions.general.direction.reverse end,
+                        get = function(info) return iconData.reverse end,
                         set = function(info, value) 
-                            pointOptions.general.direction.reverse = value
-                            PointTracking:UpdatePosition()
+                            iconData.reverse = value
                         end,
                         order = 20,
+                    },
+                    gap = {
+                        name = L["Resource_Gap"],
+                        desc = L["Resource_GapDesc"]:format(pointName),
+                        type = "input",
+                        order = 30,
+                        get = function(info) return tostring(iconData.gap) end,
+                        set = function(info, value)
+                            value = RealUI:ValidateOffset(value)
+                            iconData.gap = value
+                            PointTracking:UpdatePosition()
+                        end,
                     },
                     headerFade = {
                         name = L["CombatFade"],
                         type = "header",
-                        order = 25,
+                        order = 35,
                     },
                     enableFade = {
                         name = L["General_Enabled"],
@@ -1925,14 +1935,14 @@ local classresource do
                             db.combatfade.enabled = value
                             CombatFader:RefreshMod()
                         end,
-                        order = 29,
+                        order = 39,
                     },
                     combatFade = {
                         name = "",
                         type = "group",
                         inline = true,
                         disabled = function() return not db.combatfade.enabled end,
-                        order = 30,
+                        order = 40,
                         args = {
                             incombat = {
                                 name = L["CombatFade_InCombat"],
@@ -1995,67 +2005,37 @@ local classresource do
                         inline = true,
                         order = 80,
                         args = {
-                            xoffset = {
-                                type = "input",
+                            lock = {
+                                name = L["AuraTrack_Lock"],
+                                desc = L["AuraTrack_LockDesc"],
+                                type = "toggle",
+                                get = function(info) return db.locked end,
+                                set = function(info, value)
+                                    PointTracking[value and "Lock" or "Unlock"](PointTracking)
+                                end,
+                                order = 0,
+                            },
+                            x = {
                                 name = L["General_XOffset"],
-                                order = 10,
-                                get = function(info) return tostring(pointOptions.position.x) end,
-                                set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
-                                    pointOptions.position.x = value
-                                    PointTracking:UpdatePosition()
-                                end,
-                            },
-                            yoffset = {
+                                desc = L["General_XOffsetDesc"],
                                 type = "input",
+                                dialogControl = "NumberEditBox",
+                                get = function(info) return tostring(iconData.position.x) end,
+                                set = function(info, value)
+                                    iconData.position.x = round(tonumber(value))
+                                    PointTracking:SettingsUpdate("position")
+                                end,
+                                order = 10,
+                            },
+                            y = {
                                 name = L["General_YOffset"],
-                                order = 20,
-                                get = function(info) return tostring(pointOptions.position.y) end,
-                                set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
-                                    pointOptions.position.y = value
-                                    PointTracking:UpdatePosition()
-                                end,
-                            },
-                            gap = {
-                                name = L["Resource_Gap"],
-                                desc = L["Resource_GapDesc"]:format(pointName),
+                                desc = L["General_YOffsetDesc"],
                                 type = "input",
-                                order = 30,
-                                get = function(info) return tostring(pointOptions.bars.position.gap) end,
+                                dialogControl = "NumberEditBox",
+                                get = function(info) return tostring(iconData.position.y) end,
                                 set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
-                                    pointOptions.bars.position.gap = value
-                                    PointTracking:UpdatePosition()
-                                end,
-                            },
-                            horizontal = {
-                                name = L["HuD_Width"],
-                                desc = L["Resource_WidthDesc"],
-                                type = "range",
-                                hidden = RealUI.class == "PALADIN",
-                                width = "full",
-                                min = round(uiWidth * 0.1), max = round(uiWidth * 0.5),
-                                step = 1, bigStep = 4,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CTPointsWidth"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CTPointsWidth"] = value
-                                    RealUI:UpdatePositioners()
-                                end,
-                                order = 10,
-                            },
-                            vertical = {
-                                name = L["HuD_Height"],
-                                desc = L["Resource_HeightDesc"],
-                                type = "range",
-                                hidden = RealUI.class ~= "PALADIN",
-                                width = "full",
-                                min = -round(uiHeight * 0.2), max = round(uiHeight * 0.2),
-                                step = 1, bigStep = 2,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CTPointsHeight"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CTPointsHeight"] = value
-                                    RealUI:UpdatePositioners()
+                                    iconData.position.y = round(tonumber(value))
+                                    PointTracking:SettingsUpdate("position")
                                 end,
                                 order = 20,
                             },
