@@ -232,7 +232,7 @@ do
 			RequireSpec = SPEC_WARLOCK_AFFLICTION
 			RequireSpell = WARLOCK_SOULBURN
 		end
-	elseif(isBetaClient and (PlayerClass == 'ROGUE' or PlayerClass == 'DRUID')) then
+	elseif (PlayerClass == 'ROGUE' or PlayerClass == 'DRUID') then
 		ClassPowerID = SPELL_POWER_COMBO_POINTS
 		ClassPowerType = 'COMBO_POINTS'
 	elseif(isBetaClient and PlayerClass == 'MAGE') then

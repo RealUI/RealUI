@@ -99,43 +99,52 @@ local UpdateTexture do
     end
 end
 
-local function PostUpdate(ClassIcons, cur, max, hasMaxChanged, event)
-    if not isBeta and PlayerClass == "ROGUE" then
-        local index, id = 1, 115189
-        local points = 0
-        repeat
-            local _, _, _, count, _, _, _, _, _, _, spellID = _G.UnitAura("player", index, 'HELPFUL')
-            if(spellID == id) then
-                points = count
-            end
+local function GetAnticipation(unitFrame)
+    local ClassIcons = unitFrame.ClassIcons
+    local index, id = 1, 115189
+    local points = 0
+    repeat
+        local name, _, _, count, _, _, _, _, _, _, spellID = _G.UnitAura("player", index, "HELPFUL")
+        PointTracking:debug("Spell", index, name, spellID, count)
+        if (spellID == id) then
+            points = count
+        end
 
-            index = index + 1
-        until(not spellID)
+        index = index + 1
+    until(not spellID)
 
-        local color
-        for i = 1, max do
-            local icon = ClassIcons[i]
-            if i <= cur then
-                -- This is an active combo point
-                if i <= points then
-                    -- Has AP; Change color to dark red
-                    color = {r = 0.8, g = 0.2, b = 0.2}
-                else
-                    -- Does not have AP; Revert color
-                    color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
-                end
+    local cur, max = _G.UnitPower("player", ClassPowerID), _G.UnitPowerMax("player", ClassPowerID)
+    PointTracking:debug("points", points)
+    for i = 1, max do
+        local icon = ClassIcons[i]
+        if i <= cur then
+            PointTracking:debug("Active", i)
+            -- This is an active combo point
+            if i <= points then
+                PointTracking:debug("isAP")
+                -- Has AP; Change color to dark red
+                icon.bg:SetVertexColor(0.7, 0, 0)
             else
-                -- This is not an active combo point
-                if i <= points then
-                    -- Has AP; Show and change color to light red
-                    icon:Show()
-                    color = {r = 1.0, g = 0.5, b = 0.5}
-                else
-                    -- Does not have AP; Hide
-                    icon:Hide()
-                end
+                PointTracking:debug("not isAP")
+                -- Does not have AP; Revert color
+                local color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
+                icon.bg:SetVertexColor(color.r, color.g, color.b)
             end
-            icon.bg:SetVertexColor(color.r, color.g, color.b)
+        else
+            PointTracking:debug("Inactive", i)
+            -- This is not an active combo point
+            if i <= points then
+                PointTracking:debug("isAP")
+                -- Has AP; Show and change color to light red
+                icon:Show()
+                icon.bg:SetVertexColor(1.0, 0.5, 0.5)
+            else
+                PointTracking:debug("not isAP")
+                -- Does not have AP; Revert color and Hide
+                local color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
+                icon.bg:SetVertexColor(color.r, color.g, color.b)
+                icon:Hide()
+            end
         end
     end
 end
@@ -182,7 +191,6 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
         Icon.border = border
         ClassIcons[index] = Icon
     end
-    ClassIcons.PostUpdate = PostUpdate
     ClassIcons.UpdateTexture = UpdateTexture
     unitFrame.ClassIcons = ClassIcons
     iconFrames.ClassIcons = ClassIcons
@@ -216,6 +224,9 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
         unitFrame.BurningEmbers = BurningEmbers
         iconFrames.BurningEmbers = BurningEmbers
     end
+    if not isBeta and PlayerClass == "ROGUE" then
+        unitFrame:RegisterEvent("UNIT_AURA", GetAnticipation)
+    end
 end
 
 function PointTracking:ToggleConfigMode(val)
@@ -242,15 +253,15 @@ function PointTracking:OnInitialize()
             reverse = false, -- Points start on the right
             gap = 2,
             position = {
-                x = -180,
-                y = -5.5,
+                x = -160,
+                y = -40.5,
                 point = "CENTER",
             },
         }
 
         if PlayerClass == "PALADIN" then
             classDB.position.x = 0
-            classDB.position.y = -150
+            classDB.position.y = -115
         elseif PlayerClass == "WARLOCK" then
             classDB.gap = -5
         end
