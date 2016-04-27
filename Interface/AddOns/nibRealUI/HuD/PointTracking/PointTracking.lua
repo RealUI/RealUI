@@ -187,38 +187,84 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
     unitFrame.ClassIcons = ClassIcons
     iconFrames.ClassIcons = ClassIcons
 
-    if not isBeta and PlayerClass == "WARLOCK" then
-        local info = {
-            leftAngle = [[\]],
-            rightAngle = [[\]],
-            smooth = false,
-        }
-        local color
-        if _G.IsSpellKnown(_G.WARLOCK_GREEN_FIRE) then
-            color = {0.2, 0.8, 0.2}
-        else
-            color = {0.8, 0.2, 0.2}
-        end
-
-        local BurningEmbers = _G.CreateFrame("Frame", nil, _G.UIParent)
-        CombatFader:RegisterFrameForFade(MODNAME, BurningEmbers)
-        BurningEmbers:SetAllPoints(ClassIcons)
-        for index = 1, 4 do
-            local ember = unitFrame:CreateAngleFrame("Status", 28, 11, unitFrame, info)
-            ember:SetStatusBarColor(color[1], color[2], color[3])
-            if index == 1 then
-                ember:SetPoint(point, BurningEmbers)
-            else
-                ember:SetPoint(point, BurningEmbers[index-1], iconData.reverse and "LEFT" or "RIGHT", gap, 0)
-            end
-            BurningEmbers[index] = ember
-        end
-        unitFrame.BurningEmbers = BurningEmbers
-        iconFrames.BurningEmbers = BurningEmbers
-    end
     if not isBeta and PlayerClass == "ROGUE" then
         unitFrame:RegisterEvent("UNIT_AURA", GetAnticipation)
     end
+end
+
+function PointTracking:CreateRunes(unitFrame, unit)
+    self:debug("CreateRunes", unit)
+    local Runes = _G.CreateFrame("Frame", nil, _G.UIParent)
+    CombatFader:RegisterFrameForFade(MODNAME, Runes)
+    Runes:SetSize(16, 16)
+
+    LibWin:Embed(Runes)
+    Runes:RegisterConfig(db.position)
+    Runes:RestorePosition()
+    Runes:SetMovable(true)
+    Runes:RegisterForDrag("LeftButton")
+    Runes:SetScript("OnDragStart", function(...)
+        LibWin.OnDragStart(...)
+    end)
+    Runes:SetScript("OnDragStop", function(...)
+        LibWin.OnDragStop(...)
+    end)
+
+    local size = db.size
+    for index = 1, 6 do
+        local Rune = _G.CreateFrame("StatusBar", nil, Runes)
+        Rune:SetOrientation("VERTICAL")
+        Rune:SetSize(size.width, size.height)
+        Rune:SetPoint("CENTER", (size.width + (size.gap + 2)) * (index - 3.5), 0)
+
+        local tex = Rune:CreateTexture()
+        tex:SetTexture(0.8, 0.8, 0.8)
+        Rune:SetStatusBarTexture(tex)
+
+        local bg = Rune:CreateTexture()
+        bg:SetTexture(0, 0, 0)
+        bg:SetPoint("TOPLEFT", tex, -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", tex, 1, -1)
+
+        Runes[index] = Rune
+    end
+
+    unitFrame.Runes = Runes
+end
+
+function PointTracking:CreateBurningEmbers(unitFrame, unit)
+    self:debug("CreateBurningEmbers", unit)
+    local info = {
+        leftAngle = [[\]],
+        rightAngle = [[\]],
+        smooth = false,
+    }
+    local color
+    if _G.IsSpellKnown(_G.WARLOCK_GREEN_FIRE) then
+        color = {0.2, 0.8, 0.2}
+    else
+        color = {0.8, 0.2, 0.2}
+    end
+
+    local BurningEmbers = _G.CreateFrame("Frame", nil, _G.UIParent)
+    BurningEmbers:SetAllPoints(unitFrame.ClassIcons)
+    CombatFader:RegisterFrameForFade(MODNAME, BurningEmbers)
+
+    local size, sizeMod = db.size, 2
+    local gap = db.reverse and -(size.gap) or size.gap
+    for index = 1, 4 do
+        local ember = unitFrame:CreateAngleFrame("Status", size.width + sizeMod, size.height - sizeMod, unitFrame, info)
+        ember:SetStatusBarColor(color[1], color[2], color[3])
+        local point, _, relPoint = unitFrame.ClassIcons[index]:GetPoint()
+        if index == 1 then
+            ember:SetPoint(point, BurningEmbers)
+        else
+            ember:SetPoint(point, BurningEmbers[index-1], relPoint, gap, 0)
+        end
+        BurningEmbers[index] = ember
+    end
+    unitFrame.BurningEmbers = BurningEmbers
+    iconFrames.BurningEmbers = BurningEmbers
 end
 
 function PointTracking:ToggleConfigMode(val)
@@ -265,7 +311,16 @@ function PointTracking:OnInitialize()
             }
         }
 
-        if PlayerClass == "PALADIN" then
+        if PlayerClass == "DEATHKNIGHT" then
+            classDB.size.width = 9
+            classDB.size.height = 38
+            classDB.size.gap = 1
+
+            classDB.position.x = 0
+            classDB.position.y = -110
+
+            classDB.combatfade.opacity.outofcombat = 0
+        elseif PlayerClass == "PALADIN" then
             classDB.size.width = 64
             classDB.size.height = 64
 
@@ -284,7 +339,9 @@ function PointTracking:OnInitialize()
     })
     db = self.db.class
 
-    if (PlayerClass == "MONK") then
+    if (PlayerClass == "DEATHKNIGHT") then
+        ClassPowerType = "RUNES"
+    elseif (PlayerClass == "MONK") then
         ClassPowerType = "CHI"
     elseif (PlayerClass == "PALADIN") then
         ClassPowerType = "HOLY_POWER"

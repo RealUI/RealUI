@@ -91,9 +91,9 @@ local UpdateRune = function(self, event, rid)
 	local runes = self.Runes
 	local rune
 	if(isBetaClient) then
-		rune = runes[i]
+		rune = runes[rid]
 	else
-		rune = runes[runemap[i]]
+		rune = runes[runemap[rid]]
 	end
 
 	if(not rune) then return end
