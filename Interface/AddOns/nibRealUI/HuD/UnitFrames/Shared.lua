@@ -562,12 +562,12 @@ function UnitFrames:UpdateStatus(event, ...)
 end
 
 local UnitIsTapDenied
-if RealUI.TOC < 70000 then
+if RealUI.isBeta then
+    UnitIsTapDenied = _G.UnitIsTapDenied
+else
     UnitIsTapDenied = function(unit)
         return _G.UnitIsTapped(unit) and not _G.UnitIsTappedByPlayer(unit) and not _G.UnitIsTappedByAllThreatList(unit)
     end
-else
-    UnitIsTapDenied = _G.UnitIsTapDenied
 end
 
 function UnitFrames:UpdateEndBox(...)

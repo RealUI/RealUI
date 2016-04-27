@@ -126,12 +126,12 @@ local nilcolor = { r=1, g=1, b=1 }
 local tapped = { r=.6, g=.6, b=.6 }
 
 local UnitIsTapDenied
-if RealUI.TOC < 70000 then
+if RealUI.isBeta then
+    UnitIsTapDenied = _G.UnitIsTapDenied
+else
     UnitIsTapDenied = function(unit)
         return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
     end
-else
-    UnitIsTapDenied = _G.UnitIsTapDenied
 end
 local function unitColor(unit)
     local color
