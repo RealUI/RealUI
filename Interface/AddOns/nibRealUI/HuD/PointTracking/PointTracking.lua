@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
---local next, ipairs = _G.next, _G.ipairs
+local next = _G.next
 --local tinsert = _G.table.insert
 
 -- Libs --
@@ -22,6 +22,8 @@ local PlayerClass = RealUI.class
 local ClassPowerID, ClassPowerType
 local iconFrames = {}
 
+local MAX_RUNES = 6
+
 function PointTracking:GetResource()
     if ClassPowerID and ClassPowerType then
         if PlayerClass == "WARLOCK" then
@@ -29,6 +31,77 @@ function PointTracking:GetResource()
         else
             return {{type = ClassPowerType, id = ClassPowerID}}
         end
+    end
+end
+
+do
+    local locked = true
+    function PointTracking:Lock()
+        if not locked then
+            locked = true
+            local frame = iconFrames.Runes or iconFrames.ClassIcons
+            frame:EnableMouse(false)
+            frame.bg:Hide()
+        end
+        if not RealUI.isInTestMode then
+            self:ToggleConfigMode(false)
+        end
+    end
+    function PointTracking:Unlock()
+        if not RealUI.isInTestMode then
+            self:ToggleConfigMode(true)
+        end
+        if locked then
+            locked = false
+            local frame = iconFrames.Runes or iconFrames.ClassIcons
+            frame:EnableMouse(true)
+            frame.bg:Show()
+        end
+    end
+end
+function PointTracking:SettingsUpdate(event)
+    self:debug("SettingsUpdate", event)
+    if event == "gap" then
+        local size = db.size
+        for element, frame in next, iconFrames do
+            self:debug("element", element, #frame)
+            for i = 1, #frame do
+                local icon = frame[i]
+                if element == "Runes" then
+                    local gap = size.gap + 2
+                    self:debug("rune", i, gap)
+                    if i == 1 then
+                        icon:SetPoint("LEFT", -(size.width * MAX_RUNES + gap * (MAX_RUNES - 1)) / 2, 0)
+                    else
+                        icon:SetPoint("LEFT", frame[i-1], "RIGHT", gap, 0)
+                    end
+                elseif element == "BurningEmbers" then
+                    if i == 1 then
+                        icon:SetPoint("LEFT")
+                    else
+                        icon:SetPoint("LEFT", frame[i-1], "RIGHT", size.gap, 0)
+                    end
+                elseif element == "ClassIcons" then
+                    local gap = db.reverse and -(size.gap) or size.gap
+                    local point, _, relPoint = icon:GetPoint()
+                    if i == 1 then
+                        icon:SetPoint(point)
+                    else
+                        icon:SetPoint(point, frame[i-1], relPoint, gap, 0)
+                    end
+                end
+            end
+        end
+    elseif event == "size" then
+        for element, frame in next, iconFrames do
+            for i = 1, #frame do
+                local icon = frame[i]
+                icon:SetSize(db.size.width, db.size.height)
+            end
+        end
+    elseif event == "position" then
+        local frame = iconFrames.Runes or iconFrames.ClassIcons
+        frame:RestorePosition()
     end
 end
 
@@ -211,17 +284,23 @@ function PointTracking:CreateRunes(unitFrame, unit)
     end)
 
     local size = db.size
-    for index = 1, 6 do
+    for index = 1, MAX_RUNES do
         local Rune = _G.CreateFrame("StatusBar", nil, Runes)
         Rune:SetOrientation("VERTICAL")
         Rune:SetSize(size.width, size.height)
-        Rune:SetPoint("CENTER", (size.width + (size.gap + 2)) * (index - 3.5), 0)
 
-        local tex = Rune:CreateTexture()
+        local gap = size.gap + 2
+        if index == 1 then
+            Rune:SetPoint("LEFT", -(size.width * MAX_RUNES + gap * (MAX_RUNES - 1)) / 2, 0)
+        else
+            Rune:SetPoint("LEFT", Runes[index-1], "RIGHT", gap, 0)
+        end
+
+        local tex = Rune:CreateTexture(nil, "ARTWORK")
         tex:SetTexture(0.8, 0.8, 0.8)
         Rune:SetStatusBarTexture(tex)
 
-        local bg = Rune:CreateTexture()
+        local bg = Rune:CreateTexture(nil, "BACKGROUND")
         bg:SetTexture(0, 0, 0)
         bg:SetPoint("TOPLEFT", tex, -1, 1)
         bg:SetPoint("BOTTOMRIGHT", tex, 1, -1)
@@ -230,6 +309,7 @@ function PointTracking:CreateRunes(unitFrame, unit)
     end
 
     unitFrame.Runes = Runes
+    iconFrames.Runes = Runes
 end
 
 function PointTracking:CreateBurningEmbers(unitFrame, unit)
@@ -251,15 +331,13 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     CombatFader:RegisterFrameForFade(MODNAME, BurningEmbers)
 
     local size, sizeMod = db.size, 2
-    local gap = db.reverse and -(size.gap) or size.gap
     for index = 1, 4 do
-        local ember = unitFrame:CreateAngleFrame("Status", size.width + sizeMod, size.height - sizeMod, unitFrame, info)
+        local ember = unitFrame:CreateAngleFrame("Status", size.width + sizeMod, size.height - sizeMod, BurningEmbers, info)
         ember:SetStatusBarColor(color[1], color[2], color[3])
-        local point, _, relPoint = unitFrame.ClassIcons[index]:GetPoint()
         if index == 1 then
-            ember:SetPoint(point, BurningEmbers)
+            ember:SetPoint("LEFT")
         else
-            ember:SetPoint(point, BurningEmbers[index-1], relPoint, gap, 0)
+            ember:SetPoint("LEFT", BurningEmbers[index-1], "RIGHT", size.gap, 0)
         end
         BurningEmbers[index] = ember
     end
@@ -317,7 +395,7 @@ function PointTracking:OnInitialize()
             classDB.size.gap = 1
 
             classDB.position.x = 0
-            classDB.position.y = -110
+            classDB.position.y = -115
 
             classDB.combatfade.opacity.outofcombat = 0
         elseif PlayerClass == "PALADIN" then
@@ -325,7 +403,7 @@ function PointTracking:OnInitialize()
             classDB.size.height = 64
 
             classDB.position.x = 0
-            classDB.position.y = -115
+            classDB.position.y = -110
         elseif PlayerClass == "WARLOCK" then
             classDB.size.width = 24
             classDB.size.height = 13

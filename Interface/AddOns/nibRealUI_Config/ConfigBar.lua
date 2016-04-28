@@ -1889,22 +1889,46 @@ local classresource do
                 order = 20,
                 args = {
                     hideempty = {
-                        type = "toggle",
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
+                        type = "toggle",
                         get = function(info) return db.hideempty end,
                         set = function(info, value) 
                             db.hideempty = value
                         end,
-                        order = 10,
+                        order = 5,
                     },
                     reverse = {
-                        type = "toggle",
                         name = L["Resource_Reverse"],
                         desc = L["Resource_ReverseDesc"]:format(pointName),
+                        type = "toggle",
+                        hidden = power[i].type ~= "COMBO_POINTS",
                         get = function(info) return db.reverse end,
                         set = function(info, value) 
                             db.reverse = value
+                            PointTracking:SettingsUpdate("gap")
+                        end,
+                        order = 10,
+                    },
+                    width = {
+                        name = L["HuD_Width"],
+                        type = "input",
+                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        get = function(info) return tostring(db.size.width) end,
+                        set = function(info, value) 
+                            db.size.width = value
+                            PointTracking:SettingsUpdate("size")
+                        end,
+                        order = 15,
+                    },
+                    height = {
+                        name = L["HuD_Height"],
+                        type = "input",
+                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        get = function(info) return tostring(db.size.height) end,
+                        set = function(info, value) 
+                            db.size.height = value
+                            PointTracking:SettingsUpdate("size")
                         end,
                         order = 20,
                     },
@@ -1912,18 +1936,19 @@ local classresource do
                         name = L["Resource_Gap"],
                         desc = L["Resource_GapDesc"]:format(pointName),
                         type = "input",
-                        order = 30,
+                        hidden = RealUI.class == "PALADIN",
                         get = function(info) return tostring(db.size.gap) end,
                         set = function(info, value)
                             value = RealUI:ValidateOffset(value)
-                            db.gap = value
-                            PointTracking:UpdatePosition()
+                            db.size.gap = value
+                            PointTracking:SettingsUpdate("gap")
                         end,
+                        order = 25,
                     },
                     headerFade = {
                         name = L["CombatFade"],
                         type = "header",
-                        order = 35,
+                        order = 55,
                     },
                     enableFade = {
                         name = L["General_Enabled"],
@@ -1934,14 +1959,14 @@ local classresource do
                             db.combatfade.enabled = value
                             CombatFader:RefreshMod()
                         end,
-                        order = 39,
+                        order = 59,
                     },
                     combatFade = {
                         name = "",
                         type = "group",
                         inline = true,
                         disabled = function() return not db.combatfade.enabled end,
-                        order = 40,
+                        order = 60,
                         args = {
                             incombat = {
                                 name = L["CombatFade_InCombat"],
