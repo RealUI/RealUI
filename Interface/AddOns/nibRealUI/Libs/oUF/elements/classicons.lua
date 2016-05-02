@@ -60,27 +60,19 @@ local RequireSpec, RequireSpell
 local isBetaClient = oUF.Private.isBetaClient
 
 local UpdateTexture = function(element)
-	local red, green, blue, desaturated
-	if(PlayerClass == 'MONK') then
-		red, green, blue = 0, 1, .59
-		desaturated = true
-	elseif(PlayerClass == 'WARLOCK') then
-		red, green, blue = 1, .5, 1
-		desaturated = true
-	elseif(PlayerClass == 'PRIEST') then
-		red, green, blue = 1, 1, 1
-	elseif(PlayerClass == 'PALADIN') then
-		red, green, blue = 1, .96, .41
-		desaturated = true
+	local color = oUF.colors.power[ClassPowerType]
+	if not isBetaClient and ClassPowerType == "COMBO_POINTS" then
+		-- COMBO_POINTS don't have a color pre-Legion so we need to supply that color
+		color = {1.00, 0.96, 0.41}
 	end
 
 	for i = 1, #element do
 		local icon = element[i]
 		if(icon.SetDesaturated) then
-			icon:SetDesaturated(desaturated)
+			icon:SetDesaturated(PlayerClass ~= 'PRIEST')
 		end
 
-		icon:SetVertexColor(red, green, blue)
+		icon:SetVertexColor(color[1], color[2], color[3])
 	end
 end
 
@@ -214,10 +206,11 @@ do
 	elseif(PlayerClass == 'PALADIN') then
 		ClassPowerID = SPELL_POWER_HOLY_POWER
 		ClassPowerType = "HOLY_POWER"
-		RequireSpell = 85673 -- Word of Glory
 
 		if(isBetaClient) then
 			RequireSpec = SPEC_PALADIN_RETRIBUTION
+		else
+			RequireSpell = 85673 -- Word of Glory
 		end
 	elseif(PlayerClass == 'PRIEST' and not isBetaClient) then
 		ClassPowerID = SPELL_POWER_SHADOW_ORBS
@@ -232,12 +225,12 @@ do
 			RequireSpec = SPEC_WARLOCK_AFFLICTION
 			RequireSpell = WARLOCK_SOULBURN
 		end
-	elseif (PlayerClass == 'ROGUE' or PlayerClass == 'DRUID') then
+	elseif(PlayerClass == 'ROGUE' or PlayerClass == 'DRUID') then
 		ClassPowerID = SPELL_POWER_COMBO_POINTS
-		ClassPowerType = 'COMBO_POINTS'
+		ClassPowerType = "COMBO_POINTS"
 	elseif(isBetaClient and PlayerClass == 'MAGE') then
 		ClassPowerID = SPELL_POWER_ARCANE_CHARGES
-		ClassPowerType = 'ARCANE_CHARGES'
+		ClassPowerType = "ARCANE_CHARGES"
 		RequireSpec = SPEC_MAGE_ARCANE
 	end
 end

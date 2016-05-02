@@ -286,7 +286,7 @@ local tagStrings = {
 	end]],
 
 	['holypower'] = [[function()
-		if(isBetaClient and GetSpecialization() == SPEC_PALADIN_RETRIBUTION) then
+		if(isBetaClient and GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION) then
 			return
 		end
 

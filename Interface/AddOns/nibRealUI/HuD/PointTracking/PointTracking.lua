@@ -23,6 +23,35 @@ local ClassPowerID, ClassPowerType
 local iconFrames = {}
 
 local MAX_RUNES = 6
+local classPowers = {
+    DEATHKNIGHT = "RUNES",
+    DRUID = "COMBO_POINTS",
+    MAGE = isBeta and "ARCANE_CHARGES",
+    MONK = "CHI",
+    PALADIN = "HOLY_POWER",
+    PRIEST = not isBeta and "SHADOW_ORBS",
+    ROGUE = "COMBO_POINTS",
+    WARLOCK = "SOUL_SHARDS",
+}
+local powerTextures = {
+    circle = {
+        coords = {0.125, 0.9375, 0.0625, 0.875},
+        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]],
+        border = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_Surround]]
+    },
+    SOUL_SHARDS = {
+        coords = {0.0625, 0.8125, 0.0625, 0.875},
+        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]],
+        border = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]]
+    },
+    HOLY_POWER = {
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
+        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
+    }
+}
 
 function PointTracking:GetResource()
     if ClassPowerID and ClassPowerType then
@@ -105,64 +134,6 @@ function PointTracking:SettingsUpdate(event)
     end
 end
 
-local UpdateTexture do 
-    local textures = {
-        circle = {
-            coords = {0.125, 0.9375, 0.0625, 0.875},
-            bg = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]],
-            border = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_Surround]]
-        },
-        shard = {
-            coords = {0.0625, 0.8125, 0.0625, 0.875},
-            bg = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]],
-            border = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]]
-        },
-        holyPower = {
-            [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
-            [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
-            [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
-            [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
-            [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
-        }
-    }
-
-    function UpdateTexture(ClassIcons)
-        local texture, color
-        if (PlayerClass == "MAGE") then
-            texture = textures.circle
-            color = _G.PowerBarColor["ARCANE_CHARGES"]
-        elseif (PlayerClass == "MONK") then
-            texture = textures.circle
-            color = _G.PowerBarColor["CHI"]
-        elseif (PlayerClass == "PRIEST") then
-            texture = textures.circle
-            color = {r = 0.40, g = 0, b = 0.80}
-        elseif (PlayerClass == "PALADIN") then
-            texture = textures.holyPower
-        elseif (PlayerClass == "WARLOCK") then
-            texture = textures.shard
-            color = _G.PowerBarColor["SOUL_SHARDS"]
-        else
-            texture = textures.circle
-            color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
-        end
-
-        for i = 1, #ClassIcons do
-            local icon = ClassIcons[i]
-            if texture.bg then
-                local coords = texture.coords
-                icon.bg:SetTexture(texture.bg)
-                icon.bg:SetVertexColor(color.r, color.g, color.b)
-                icon.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-                icon.border:SetTexture(texture.border)
-                icon.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-            else
-                icon.bg:SetTexture(texture[i])
-            end
-        end
-    end
-end
-
 local function GetAnticipation(unitFrame)
     local ClassIcons = unitFrame.ClassIcons
     local index, id = 1, 115189
@@ -187,12 +158,12 @@ local function GetAnticipation(unitFrame)
             if i <= points then
                 PointTracking:debug("isAP")
                 -- Has AP; Change color to dark red
-                icon.bg:SetVertexColor(0.7, 0, 0)
+                icon:SetVertexColor(0.7, 0, 0)
             else
                 PointTracking:debug("not isAP")
                 -- Does not have AP; Revert color
                 local color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
-                icon.bg:SetVertexColor(color.r, color.g, color.b)
+                icon:SetVertexColor(color.r, color.g, color.b)
             end
         else
             PointTracking:debug("Inactive", i)
@@ -201,12 +172,12 @@ local function GetAnticipation(unitFrame)
                 PointTracking:debug("isAP")
                 -- Has AP; Show and change color to light red
                 icon:Show()
-                icon.bg:SetVertexColor(1.0, 0.5, 0.5)
+                icon:SetVertexColor(1.0, 0.5, 0.5)
             else
                 PointTracking:debug("not isAP")
                 -- Does not have AP; Revert color and Hide
                 local color = _G.PowerBarColor["COMBO_POINTS"] or {r = 1.00, g = 0.96, b = 0.41}
-                icon.bg:SetVertexColor(color.r, color.g, color.b)
+                icon:SetVertexColor(color.r, color.g, color.b)
                 icon:Hide()
             end
         end
@@ -231,32 +202,43 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
         LibWin.OnDragStop(...)
     end)
 
+    local texture = powerTextures[ClassPowerType] or powerTextures.circle
     local point, size = db.reverse and "RIGHT" or "LEFT", db.size
     local gap = db.reverse and -(size.gap) or size.gap
     for index = 1, (isBeta and 8 or 6) do
-        local Icon = _G.CreateFrame("Frame", nil, ClassIcons)
+        local Icon = _G.CreateFrame("Frame", "ClassIcon"..index, ClassIcons)
         Icon:SetSize(size.width, size.height)
+
+        local bg = Icon:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+
         if PlayerClass == "PALADIN" then
             Icon:SetPoint("CENTER")
+            bg:SetTexture(texture[index])
         else
             if index == 1 then
                 Icon:SetPoint(point)
             else
                 Icon:SetPoint(point, ClassIcons[index-1], db.reverse and "LEFT" or "RIGHT", gap, 0)
             end
+
+            local coords = texture.coords
+            bg:SetTexture(texture.bg)
+            bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+
+            local border = Icon:CreateTexture(nil, "BORDER")
+            border:SetAllPoints()
+            border:SetTexture(texture.border)
+            border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
         end
 
-        local bg = Icon:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
+        function Icon:SetVertexColor(r, g, b)
+            PointTracking:debug("Icon:SetVertexColor", index, r, g, b)
+            bg:SetVertexColor(r, g, b)
+        end
 
-        local border = Icon:CreateTexture(nil, "BORDER")
-        border:SetAllPoints()
-
-        Icon.bg = bg
-        Icon.border = border
         ClassIcons[index] = Icon
     end
-    ClassIcons.UpdateTexture = UpdateTexture
     unitFrame.ClassIcons = ClassIcons
     iconFrames.ClassIcons = ClassIcons
 
@@ -417,47 +399,14 @@ function PointTracking:OnInitialize()
     })
     db = self.db.class
 
-    if (PlayerClass == "DEATHKNIGHT") then
-        ClassPowerType = "RUNES"
-    elseif (PlayerClass == "MONK") then
-        ClassPowerType = "CHI"
-    elseif (PlayerClass == "PALADIN") then
-        ClassPowerType = "HOLY_POWER"
-    elseif (not isBeta and PlayerClass == "PRIEST") then
-        ClassPowerType = "SHADOW_ORBS"
-    elseif (PlayerClass == "WARLOCK") then
-        ClassPowerType = "SOUL_SHARDS"
-    elseif (PlayerClass == "ROGUE" or PlayerClass == "DRUID") then
-        ClassPowerType = "COMBO_POINTS"
-    elseif (isBeta and PlayerClass == "MAGE") then
-        ClassPowerType = "ARCANE_CHARGES"
-    end
-    if ClassPowerType then
-        ClassPowerID = _G["SPELL_POWER_"..ClassPowerType]
-    end
-
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
-    RealUI:RegisterConfigModeModule(self)
+    ClassPowerType = classPowers[PlayerClass]
+    self:SetEnabledState(ClassPowerType and RealUI:GetModuleEnabled(MODNAME))
 end
 
 function PointTracking:OnEnable()
-    --[[
-    CreateTables()
-    CreateFrames()
-    
-    -- Turn off Config Mode
-    for ic,vc in next, Types do
-        for it,vt in ipairs(Types[ic].points) do
-            local tid = Types[ic].points[it].id
-            db[ic].types[tid].configmode.enabled = false
-        end
-    end
-    
-    self:RegisterEvent("PLAYER_LOGIN")
-    self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("PLAYER_TALENT_UPDATE")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED")
-    self:RegisterEvent("PLAYER_REGEN_DISABLED")
-    self:RegisterEvent("PLAYER_TARGET_CHANGED")]]
+    self:debug("OnEnable")
+    ClassPowerID = _G["SPELL_POWER_"..ClassPowerType]
+
+    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
+    RealUI:RegisterConfigModeModule(self)
 end
