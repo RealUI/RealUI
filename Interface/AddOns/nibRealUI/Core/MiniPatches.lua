@@ -137,11 +137,26 @@ RealUI.minipatches = {
         debug("r"..ver)
         local nibRealUIDB = _G.nibRealUIDB
         if nibRealUIDB.namespaces.PointTracking.profiles then
-            --local classDB = nibRealUIDB.namespaces.PointTracking.class
+            local classDB = {}
             local profile = nibRealUIDB.namespaces.PointTracking.profiles.RealUI
             for class, classInfo in next, profile do
-                _G.print(class, classInfo)
+                debug(class, classInfo)
+                if classInfo.types then
+                    classDB[class] = {}
+                    for typePower, typeInfo in next, classInfo.types do
+                        debug(typePower, typeInfo)
+                        if typeInfo.general then
+                            debug("hideempty", typeInfo.general.hideempty)
+                            classDB[class].hideempty = typeInfo.general.hideempty
+                            if typeInfo.general.direction then
+                                debug("reverse", typeInfo.general.direction.reverse)
+                                classDB[class].reverse = typeInfo.general.direction.reverse
+                            end
+                        end
+                    end
+                end
             end
+            nibRealUIDB.namespaces.PointTracking.class = classDB
         end
         --
     end,
