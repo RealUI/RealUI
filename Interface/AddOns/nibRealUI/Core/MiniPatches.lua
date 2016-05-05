@@ -157,8 +157,14 @@ RealUI.minipatches = {
                 end
             end
             nibRealUIDB.namespaces.PointTracking.class = classDB
+            nibRealUIDB.namespaces.PointTracking.profiles = nil
         end
-        --
+        if nibRealUIDB.namespaces.AuraTracking then
+            if nibRealUIDB.namespaces.AuraTracking.class.WARLOCK then
+                -- Remove Burning Embers tracker
+                nibRealUIDB.namespaces.AuraTracking.class.WARLOCK["9-a6a32ca3-1"] = nil
+            end
+        end
     end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
