@@ -1892,6 +1892,7 @@ local classresource do
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
                         type = "toggle",
+                        hidden = RealUI.class == "DEATHKNIGHT",
                         get = function(info) return db.hideempty end,
                         set = function(info, value) 
                             db.hideempty = value
@@ -2000,6 +2001,7 @@ local classresource do
                                 get = function(info) return db.combatfade.opacity.target end,
                                 set = function(info, value)
                                     db.combatfade.opacity.target = value
+                                    db.combatfade.opacity.harmtarget = value
                                     CombatFader:RefreshMod()
                                 end,
                                 order = 30,

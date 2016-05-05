@@ -88,6 +88,18 @@ do
         end
     end
 end
+
+local function PositionRune(rune, index)
+    local size = db.size
+    local gap, middle, mod = size.gap + 2, (MAX_RUNES / 2) + 0.5
+    if index < middle then
+        mod = index - _G.min(middle)
+    else
+        mod = index - _G.max(middle)
+    end
+    rune:SetPoint("CENTER", (size.width + gap) * mod, 0)
+end
+
 function PointTracking:SettingsUpdate(event)
     self:debug("SettingsUpdate", event)
     if event == "gap" then
@@ -97,13 +109,7 @@ function PointTracking:SettingsUpdate(event)
             for i = 1, #frame do
                 local icon = frame[i]
                 if element == "Runes" then
-                    local gap = size.gap + 2
-                    self:debug("rune", i, gap)
-                    if i == 1 then
-                        icon:SetPoint("LEFT", -(size.width * MAX_RUNES + gap * (MAX_RUNES - 1)) / 2, 0)
-                    else
-                        icon:SetPoint("LEFT", frame[i-1], "RIGHT", gap, 0)
-                    end
+                    PositionRune(frame[i], i)
                 elseif element == "BurningEmbers" then
                     if i == 1 then
                         icon:SetPoint("LEFT")
@@ -126,6 +132,9 @@ function PointTracking:SettingsUpdate(event)
             for i = 1, #frame do
                 local icon = frame[i]
                 icon:SetSize(db.size.width, db.size.height)
+                if element == "Runes" then
+                    PositionRune(frame[i], i)
+                end
             end
         end
     elseif event == "position" then
@@ -267,16 +276,10 @@ function PointTracking:CreateRunes(unitFrame, unit)
 
     local size = db.size
     for index = 1, MAX_RUNES do
-        local Rune = _G.CreateFrame("StatusBar", nil, Runes)
+        local Rune = _G.CreateFrame("StatusBar", "Rune"..index, Runes)
         Rune:SetOrientation("VERTICAL")
         Rune:SetSize(size.width, size.height)
-
-        local gap = size.gap + 2
-        if index == 1 then
-            Rune:SetPoint("LEFT", -(size.width * MAX_RUNES + gap * (MAX_RUNES - 1)) / 2, 0)
-        else
-            Rune:SetPoint("LEFT", Runes[index-1], "RIGHT", gap, 0)
-        end
+        PositionRune(Rune, index)
 
         local tex = Rune:CreateTexture(nil, "ARTWORK")
         tex:SetTexture(0.8, 0.8, 0.8)
@@ -377,7 +380,7 @@ function PointTracking:OnInitialize()
             classDB.size.gap = 1
 
             classDB.position.x = 0
-            classDB.position.y = -115
+            classDB.position.y = -110
 
             classDB.combatfade.opacity.outofcombat = 0
         elseif PlayerClass == "PALADIN" then
