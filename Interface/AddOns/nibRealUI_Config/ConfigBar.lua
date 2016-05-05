@@ -1799,51 +1799,12 @@ local classresource do
                     end,
                     order = 10,
                 },
-                runes = {
-                    name = _G.RUNES,
-                    type = "group",
-                    hidden = RealUI.class ~= "DEATHKNIGHT",
-                    disabled = function() return not RealUI:GetModuleEnabled("PointTracking") end,
-                    order = 20,
-                    args = {
-                        horizontal = {
-                            name = L["HuD_Horizontal"],
-                            type = "range",
-                            width = "full",
-                            min = -round(uiWidth * 0.2),
-                            max = round(uiWidth * 0.2),
-                            step = 1,
-                            bigStep = 4,
-                            get = function(info) return ndb.positions[RealUI.cLayout]["RunesX"] end,
-                            set = function(info, value)
-                                ndb.positions[RealUI.cLayout]["RunesX"] = value
-                                RealUI:UpdatePositioners()
-                            end,
-                            order = 10,
-                        },
-                        vertical = {
-                            name = L["HuD_Vertical"],
-                            type = "range",
-                            width = "full",
-                            min = -round(uiHeight * 0.2),
-                            max = round(uiHeight * 0.2),
-                            step = 1,
-                            bigStep = 2,
-                            get = function(info) return ndb.positions[RealUI.cLayout]["RunesY"] end,
-                            set = function(info, value)
-                                ndb.positions[RealUI.cLayout]["RunesY"] = value
-                                RealUI:UpdatePositioners()
-                            end,
-                            order = 20,
-                        }
-                    },
-                },
                 bars = {
                     name = bars or "",
                     type = "group",
                     hidden = bars == nil,
                     disabled = function() return not RealUI:GetModuleEnabled("PointTracking") end,
-                    order = 30,
+                    order = 20,
                     args = {
                         horizontal = {
                             name = L["HuD_Horizontal"],
