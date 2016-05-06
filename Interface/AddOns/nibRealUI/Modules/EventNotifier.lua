@@ -19,78 +19,6 @@ local VignetteExclusionMapIDs = {
 }
 
 
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Event Notifier",
-        desc = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = "Event Notifier",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Event Notifier module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                    RealUI:ReloadUIDialog()
-                end,
-                order = 30,
-            },
-            events = {
-                type = "group",
-                name = "Events",
-                inline = true,
-                order = 40,
-                args = {
-                    checkEvents = {
-                        type = "toggle",
-                        name = "Calender Invites",
-                        get = function() return db.checkEvents end,
-                        set = function(info, value) 
-                            db.checkEvents = value
-                        end,
-                        order = 10,
-                    },
-                    checkGuildEvents = {
-                        type = "toggle",
-                        name = "Guild Events",
-                        get = function() return db.checkGuildEvents end,
-                        set = function(info, value) 
-                            db.checkGuildEvents = value
-                        end,
-                        order = 20,
-                    },
-                    checkMinimapRares = {
-                        type = "toggle",
-                        name = _G.MINIMAP_LABEL.." ".._G.ITEM_QUALITY3_DESC,
-                        get = function() return db.checkMinimapRares end,
-                        set = function(info, value) 
-                            db.checkMinimapRares = value
-                        end,
-                        order = 30,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 -- Addon itself
 local numInvites = 0 -- store amount of invites to compare later, and only show banner when invites differ; events fire multiple times
 
@@ -209,10 +137,8 @@ function EventNotifier:OnInitialize()
     })
     db = self.db.profile
     
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
-
     self.lastMinimapRare = {time = 0, id = nil}
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function EventNotifier:OnEnable()

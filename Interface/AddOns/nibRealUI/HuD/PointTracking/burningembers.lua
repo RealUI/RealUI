@@ -1,5 +1,8 @@
-local parent, ns = ...
+local _, ns = ...
 local oUF = ns.oUF
+
+-- Lua Globals --
+local _G = _G
 
 local function UNIT_POWER(self, event, unit, powerType)
 	if(self.unit ~= unit or (event == 'UNIT_POWER_FREQUENT' and powerType ~= 'BURNING_EMBERS')) then
@@ -8,8 +11,7 @@ local function UNIT_POWER(self, event, unit, powerType)
 
 	local element = self.BurningEmbers
 
-	local total = UnitPower('player', SPELL_POWER_BURNING_EMBERS, true)
-	local max = UnitPowerMax('player', SPELL_POWER_BURNING_EMBERS, true)
+	local total = _G.UnitPower('player', _G.SPELL_POWER_BURNING_EMBERS, true)
 
 	local cur = total
 	for index = 1, 4 do
@@ -22,11 +24,11 @@ local function UPDATE_VISIBILITY(self)
 	local element = self.BurningEmbers
 
 	local showElement
-	if(IsPlayerSpell(WARLOCK_BURNING_EMBERS)) then
+	if(_G.IsPlayerSpell(_G.WARLOCK_BURNING_EMBERS)) then
 		showElement = true
 	end
 
-	if(UnitHasVehicleUI('player')) then
+	if(_G.UnitHasVehicleUI('player')) then
 		showElement = false
 	end
 
