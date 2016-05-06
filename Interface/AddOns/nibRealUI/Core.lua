@@ -45,9 +45,9 @@ do
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
             path = LSM:Fetch("font", fontName)
-            debug("Fonts|", fontName, "|", path, "|", fontPath)
+            --debug("Fonts |", fontName, "|", path, "|", fontPath)
             if path == fontPath then
-                debug("Fonts Equal|", fontName, "|", fontSize, "|", fontArgs)
+                debug("Fonts Equal |", fontName, "|", fontSize, "|", fontArgs)
                 local tab = {
                     fontName,
                     fontSize,
@@ -169,6 +169,11 @@ RealUI.hudSizeOffsets = {
 }
 
 -- Default Options
+local charInit = {
+    installStage = 0,
+    initialized = false,
+    needchatmoved = true,
+}
 local defaults = {
     global = {
         tutorial = {
@@ -190,6 +195,7 @@ local defaults = {
         verinfo = {},
     },
     char = {
+        init = charInit,
         layout = {
             current = 1,    -- 1 = DPS/Tank, 2 = Healing
             needchanged = false,
@@ -201,7 +207,6 @@ local defaults = {
             ['*'] = true,
             ["AchievementScreenshots"] = false,
         },
-        registeredChars = {},
         -- HuD positions
         positionsLink = true,
         positions = RealUI.defaultPositions,
@@ -507,7 +512,7 @@ function RealUI:PLAYER_ENTERING_WORLD()
     end, 1)
 
     -- Position Chat Frame
-    if _G.nibRealUICharacter.needchatmoved then
+    if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
         _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
         _G.ChatFrame1:SetFrameLevel(15)
@@ -515,11 +520,12 @@ function RealUI:PLAYER_ENTERING_WORLD()
         _G.ChatFrame1:SetWidth(400)
         _G.ChatFrame1:SetUserPlaced(true)
         _G.FCF_SavePositionAndDimensions(_G.ChatFrame1)
-        _G.nibRealUICharacter.needchatmoved = false
+        dbc.init.needchatmoved = false
     end
 end
 
 function RealUI:PLAYER_LOGIN()
+    debug("PLAYER_LOGIN", dbc.init.installStage)
     -- Retina Display check
     if not(dbg.tags.retinaDisplay.checked) and self:RetinaDisplayCheck() then
         self:InitRetinaDisplayOptions()
@@ -527,12 +533,12 @@ function RealUI:PLAYER_LOGIN()
     end
 
     -- Low Res optimization check
-    if (_G.nibRealUICharacter and _G.nibRealUICharacter.installStage == -1) then
+    if (dbc.init.installStage == -1) then
         self:LowResOptimizationCheck()
     end
 
     -- Tutorial
-    if (_G.nibRealUICharacter and _G.nibRealUICharacter.installStage == -1) then
+    if (dbc.init.installStage == -1) then
         if (dbg.tutorial.stage == 0) then
             self:InitTutorial()
         end
@@ -550,7 +556,7 @@ function RealUI:PLAYER_LOGIN()
     local blue = RealUI:ColorTableToStr(RealUI.media.colors.blue)
     local red = RealUI:ColorTableToStr(RealUI.media.colors.red)
 
-    if (_G.nibRealUICharacter.installStage == -1) and (dbg.tutorial.stage == -1) then
+    if (dbc.init.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then
             -- This part should be in the bag addon
             if _G.IsAddOnLoaded("cargBags_Nivaya") then
@@ -659,12 +665,19 @@ function RealUI:LoadConfig(app, section, ...)
 end
 
 function RealUI:OnInitialize()
-    -- Initialize settings, options, slash commands
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
+    debug("OnInitialize", self.db.char.init.installStage)
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
     self.media = db.media
+
+    if _G.nibRealUICharacter then
+        dbc.init.installStage = _G.nibRealUICharacter.installStage
+        dbc.init.initialized = _G.nibRealUICharacter.initialized
+        dbc.init.needchatmoved = _G.nibRealUICharacter.needchatmoved
+        _G.nibRealUICharacter = nil
+    end
 
     -- Vars
     self.classColor = RealUI:GetClassColor(self.class)
@@ -673,9 +686,15 @@ function RealUI:OnInitialize()
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
     -- Profile change
-    self.db.RegisterCallback(self, "OnProfileChanged", "Refresh")
-    self.db.RegisterCallback(self, "OnProfileCopied", "Refresh")
-    self.db.RegisterCallback(self, "OnProfileReset", "Refresh")
+    debug("Char", dbc.init.installStage)
+    self.db.RegisterCallback(self, "OnProfileChanged", "ReloadUIDialog")
+    self.db.RegisterCallback(self, "OnProfileCopied", "ReloadUIDialog")
+    self.db.RegisterCallback(self, "OnProfileReset", function()
+        debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI.db.char.init = charInit
+        debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI:ReloadUIDialog()
+    end)
 
     -- Register events
     self:RegisterEvent("ADDON_LOADED")
@@ -730,7 +749,7 @@ function RealUI:OnInitialize()
 
     -- Done
      _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-    if not(dbg.tags.slashRealUITyped) and _G.nibRealUICharacter and (_G.nibRealUICharacter.installStage == -1) then
+    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
          _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
 end
@@ -777,6 +796,3 @@ function RealUI:SetModuleEnabled(module, value)
     end
 end
 
-function RealUI:Refresh()
-    RealUI:ReloadUIDialog()
-end

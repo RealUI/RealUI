@@ -36,7 +36,6 @@ function RealUI:ReInstall()
 		button1 = "Yes",
 		button2 = "No",
 		OnAccept = function()
-			_G.nibRealUICharacter = nil
 			RealUI.db:ResetDB("RealUI")
 		end,
 		timeout = 0,
