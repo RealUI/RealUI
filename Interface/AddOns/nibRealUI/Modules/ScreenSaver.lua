@@ -11,113 +11,6 @@ local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn
-
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Screen Saver",
-        desc = "Dims the screen when you are AFK.",
-        childGroups = "tab",
-        arg = MODNAME,
-        -- order = 1903,
-        args = {
-            header = {
-                type = "header",
-                name = "Screen Saver",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Dims the screen when you are AFK.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Screen Saver module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value)
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            general = {
-                type = "group",
-                name = "General",
-                inline = true,
-                order = 40,
-                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                args = {
-                    opacity1 = {
-                        type = "range",
-                        name = "Initial Dim",
-                        desc = "How dark to set the gameworld when you go AFK.",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.general.opacity1 end,
-                        set = function(info, value) db.general.opacity1 = value end,
-                        order = 10,
-                    },
-                    opacity2 = {
-                        type = "range",
-                        name = "5min+ Dim",
-                        desc = "How dark to set the gameworld after 5 minutes of being AFK.",
-                        min = 0, max = 1, step = 0.05,
-                        isPercent = true,
-                        get = function(info) return db.general.opacity2 end,
-                        set = function(info, value) db.general.opacity2 = value end,
-                        order = 20,
-                    },
-                    combatwarning = {
-                        type = "toggle",
-                        name = "Combat Warning",
-                        desc = "Play a warning sound if you enter combat while AFK.",
-                        get = function() return db.general.combatwarning end,
-                        set = function(info, value)
-                            db.general.combatwarning = value
-                        end,
-                        order = 30,
-                    },
-                },
-            },
-            gap2 = {
-                name = " ",
-                type = "description",
-                order = 41,
-            },
-            panel = {
-                type = "group",
-                name = "Panel",
-                inline = true,
-                order = 50,
-                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                args = {
-                    automove = {
-                        type = "toggle",
-                        name = "Auto Move",
-                        desc = "Reposition the Panel up and down the screen once every minute.",
-                        get = function() return db.panel.automove end,
-                        set = function(info, value)
-                            db.panel.automove = value
-                        end,
-                        order = 20,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 local SecToMin = 1/60
 local SecToHour = SecToMin * SecToMin
 
@@ -410,8 +303,6 @@ function ScreenSaver:OnInitialize()
     ndbc = RealUI.db.char
     
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
-
     ScreenSaver:CreateFrames()
     
     self:RegisterEvent("PLAYER_LOGIN")

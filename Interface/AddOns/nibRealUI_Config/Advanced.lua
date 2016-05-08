@@ -4,99 +4,1029 @@ local options = private.options
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, tostring = _G.next, _G.tostring
 
 -- Libs --
-local ACD = _G.LibStub("AceConfigDialog-3.0")
+--local ACD = _G.LibStub("AceConfigDialog-3.0")
 
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
 local ndb = RealUI.db.profile
-local ndbc = RealUI.db.char
+--local ndbc = RealUI.db.char
 local ndbg = RealUI.db.global
 
 local order = 0
 
-local core do
-    local function ResetChar()
-        -- Set all Char settings to default
-        _G.nibRealUICharacter = nil
-        ndbc.layout.current = 1
-
-        -- Run Install Procedure
-        ACD:Close("RealUI")
-        RealUI:InstallProcedure()
+--[[
+local uiTweaks do
+    order = order + 1
+    local eventNotify do
+        local MODNAME = "EventNotifier"
+        local EventNotifier = RealUI:GetModule(MODNAME)
+        local db = EventNotifier.db.profile
     end
-    core = {
-        name = "Core",
-        desc = "Core RealUI functions.",
+
+    uiTweaks = {
+        name = L["Tweaks_UITweaks"],
+        desc = L["Tweaks_UITweaksDesc"],
         type = "group",
-        order = 0,
+        order = order,
         args = {
-            header = {
-                name = "RealUI Core",
-                type = "header",
-                order = 10,
-            },
-            corenote = {
-                name = "Note: Only use these features if you need to. They may change or revert settings.",
-                type = "description",
-                fontSize = "medium",
-                order = 20,
-            },
-            sep1 = {
-                name = " ",
-                type = "description",
-                order = 30,
-            },
-            reinstall = {
-                name = "Reset RealUI",
-                type = "execute",
-                func = function() RealUI:ReInstall() end,
-                order = 40,
-            },
-            sep2 = {
-                name = " ",
-                type = "description",
-                order = 41,
-            },
-            resetnote = {
-                name = "This will erase all user changes and install a fresh copy of RealUI.",
-                type = "description",
-                fontSize = "medium",
-                order = 42,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 43,
-            },
-            character = {
-                name = "Character",
-                type = "group",
-                inline = true,
-                order = 50,
-                args = {
-                    resetchar = {
-                        name = "Re-initialize Character",
-                        type = "execute",
-                        func = ResetChar,
-                        order = 10,
+        }
+    }
+end
+]]
+
+local core do
+    local infoLine do
+        local blocks = {
+            start =         {L["Start"]},
+            mail =          {_G.MAIL_LABEL},
+            guild =         {_G.ACHIEVEMENTS_GUILD_TAB},
+            friends =       {_G.QUICKBUTTON_NAME_FRIENDS},
+            durability =    {_G.DURABILITY},
+            bag =           {_G.INVTYPE_BAG},
+            currency =      {_G.BONUS_ROLL_REWARD_CURRENCY},
+            xprep =         {L["XPRep"]},
+            clock =         {_G.TIMEMANAGER_TITLE},
+            pc =            {L["Sys_SysInfo"]},
+            specchanger =   {L["Spec_SpecChanger"]},
+            layoutchanger = {L["Layout_LayoutChanger"]},
+            metertoggle =   {L["Meters_Header"]},
+        }
+
+        local MODNAME = "InfoLine"
+        local InfoLine = RealUI:GetModule(MODNAME)
+        local db = InfoLine.db.profile
+        infoLine = {
+            name = L["InfoLine"],
+            desc = "Information / Button display.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = L["InfoLine"],
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Information / Button display.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                position = {
+                    name = "Position/Size",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 50,
+                    args = {
+                        parent = {
+                            name = "Parent",
+                            type = "group",
+                            inline = true,
+                            order = 10,
+                            args = {
+                                xleft = {
+                                    name = "X Left",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.xleft) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.xleft = value
+                                        InfoLine:UpdatePositions()
+                                    end,
+                                    order = 10,
+                                },
+                                xright = {
+                                    name = "X Right",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.xright) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.xright = value
+                                        InfoLine:UpdatePositions()
+                                    end,
+                                    order = 20,
+                                },
+                                y = {
+                                    name = "Y",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.y = value
+                                        InfoLine:UpdatePositions()
+                                        InfoLine:SetBackground()
+                                    end,
+                                    order = 30,
+                                },
+                                xgap = {
+                                    name = "Padding",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.xgap) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.xgap = value
+                                        InfoLine:UpdatePositions()
+                                    end,
+                                    order = 40,
+                                },
+                            },
+                        },
+                        text = {
+                            name = "Text",
+                            type = "group",
+                            inline = true,
+                            order = 20,
+                            args = {
+                                yoffset = {
+                                    name = "Y Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.text.yoffset) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.text.yoffset = value
+                                        InfoLine:UpdatePositions()
+                                    end,
+                                    order = 10,
+                                },
+                                tablets = {
+                                    name = "Tablet Font Sizes",
+                                    type = "group",
+                                    inline = true,
+                                    order = 20,
+                                    args = {
+                                        headersize = {
+                                            name = "Header",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.text.tablets.headersize) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.text.tablets.headersize = value
+                                                InfoLine:Refresh()
+                                            end,
+                                            order = 10,
+                                        },
+                                        columnsize = {
+                                            name = "Column Titles",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.text.tablets.columnsize) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.text.tablets.columnsize = value
+                                                InfoLine:Refresh()
+                                            end,
+                                            order = 20,
+                                        },
+                                        normalsize = {
+                                            name = "Normal",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.text.tablets.normalsize) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.text.tablets.normalsize = value
+                                                InfoLine:Refresh()
+                                            end,
+                                            order = 30,
+                                        },
+                                        hintsize = {
+                                            name = "Hint",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.text.tablets.hintsize) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.text.tablets.hintsize = value
+                                                InfoLine:Refresh()
+                                            end,
+                                            order = 40,
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
-                    sep = {
-                        name = " ",
-                        type = "description",
-                        order = 20,
+                },
+                colors = {
+                    name = "Colors",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 60,
+                    args = {
+                        normal = {
+                            name = "Normal",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return db.colors.normal[1], db.colors.normal[2], db.colors.normal[3]
+                            end,
+                            set = function(info,r,g,b)
+                                db.colors.normal[1] = r
+                                db.colors.normal[2] = g
+                                db.colors.normal[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 10,
+                        },
+                        sep1 = {
+                            name = " ",
+                            type = "description",
+                            order = 20,
+                        },
+                        highlight = {
+                            name = "Highlight",
+                            type = "color",
+                            disabled = function()
+                                if db.colors.classcolorhighlight then return true else return false end
+                            end,
+                            get = function(info,r,g,b)
+                                return db.colors.highlight[1], db.colors.highlight[2], db.colors.highlight[3]
+                            end,
+                            set = function(info,r,g,b)
+                                db.colors.highlight[1] = r
+                                db.colors.highlight[2] = g
+                                db.colors.highlight[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 30,
+                        },
+                        classcolorhighlight = {
+                            name = "Class Color Highlight",
+                            desc = "Use your Class Color for the highlight.",
+                            type = "toggle",
+                            get = function() return db.colors.classcolorhighlight end,
+                            set = function(info, value)
+                                db.colors.classcolorhighlight = value
+                                InfoLine:Refresh()
+                            end,
+                            order = 40,
+                        },
+                        sep2 = {
+                            name = " ",
+                            type = "description",
+                            order = 50,
+                        },
+                        disabled = {
+                            name = "Disabled",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return db.colors.disabled[1], db.colors.disabled[2], db.colors.disabled[3]
+                            end,
+                            set = function(info,r,g,b)
+                                db.colors.disabled[1] = r
+                                db.colors.disabled[2] = g
+                                db.colors.disabled[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 60,
+                        },
+                        ttheader = {
+                            name = "Tooltip Header 1",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return db.colors.ttheader[1], db.colors.ttheader[2], db.colors.ttheader[3]
+                            end,
+                            set = function(info,r,g,b)
+                                db.colors.ttheader[1] = r
+                                db.colors.ttheader[2] = g
+                                db.colors.ttheader[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 70,
+                        },
+                        orange1 = {
+                            name = "Header 1",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return RealUI.media.colors.orange[1], RealUI.media.colors.orange[2], RealUI.media.colors.orange[3]
+                            end,
+                            set = function(info,r,g,b)
+                                RealUI.media.colors.orange[1] = r
+                                RealUI.media.colors.orange[2] = g
+                                RealUI.media.colors.orange[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 80,
+                        },
+                        blue1 = {
+                            name = "Header 2",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
+                            end,
+                            set = function(info,r,g,b)
+                                RealUI.media.colors.blue[1] = r
+                                RealUI.media.colors.blue[2] = g
+                                RealUI.media.colors.blue[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 90,
+                        },
+                        blue2 = {
+                            name = "Header 3",
+                            type = "color",
+                            get = function(info,r,g,b)
+                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
+                            end,
+                            set = function(info,r,g,b)
+                                RealUI.media.colors.blue[1] = r
+                                RealUI.media.colors.blue[2] = g
+                                RealUI.media.colors.blue[3] = b
+                                InfoLine:Refresh()
+                            end,
+                            order = 100,
+                        },
                     },
-                    resetnote = {
-                        name = "This will flag the current Character as being new to RealUI, and RealUI will run through the initial installation procedure for this Character. Use only if you experienced a faulty installation for this character. Not guaranteed to actually fix anything.",
-                        type = "description",
-                        fontSize = "medium",
-                        order = 30,
+                },
+                other = {
+                    name = "Other",
+                    type = "group",
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 70,
+                    args = {
+                        icTips = {
+                            name = "In Combat Tooltips",
+                            desc = "Show the tooltips in combat.",
+                            type = "toggle",
+                            get = function() return db.other.icTips end,
+                            set = function(info, value)
+                                db.other.icTips = value
+                                RealUI.InfoLineICTips = value        -- Tablet-2.0 use
+                                InfoLine:Refresh()
+                            end,
+                            order = 10,
+                        },
+                        showBG = {
+                            name = L["InfoLine_ShowBG"],
+                            type = "toggle",
+                            get = function() return ndb.settings.infoLineBackground end,
+                            set = function(info, value)
+                                ndb.settings.infoLineBackground = value
+                                InfoLine:SetBackground()
+                            end,
+                            order = 10,
+                        },
+                        clock = {
+                            name = "Clock",
+                            type = "group",
+                            inline = true,
+                            order = 20,
+                            args = {
+                                clock24 = {
+                                    name = "24 hour clock",
+                                    desc = "Show the time in 24 hour format.",
+                                    type = "toggle",
+                                    get = function() return db.other.clock.hr24 end,
+                                    set = function(info, value)
+                                        db.other.clock.hr24 = value
+                                        InfoLine:Refresh()
+                                    end,
+                                    order = 10,
+                                },
+                                clocklocal = {
+                                    name = "Use local time",
+                                    desc = "Show the time at your home.",
+                                    type = "toggle",
+                                    get = function() return db.other.clock.uselocal end,
+                                    set = function(info, value)
+                                        db.other.clock.uselocal = value
+                                        InfoLine:Refresh()
+                                    end,
+                                    order = 20,
+                                },
+                            },
+                        },
+                        tablets = {
+                            name = "Info Displays",
+                            type = "group",
+                            inline = true,
+                            order = 30,
+                            args = {
+                                maxheight = {
+                                    name = "Max Height",
+                                    desc = "Maximum height of the Info Displays. May require a UI reload (/rl) to take effect.",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.other.tablets.maxheight) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.other.tablets.maxheight = value
+                                    end,
+                                    order = 10,
+                                },
+                            },
+                        },
                     },
                 },
             },
+        }
+
+        -- Create blocks options table
+        local elementopts = {
+            name = "Blocks",
+            type = "group",
+            disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+            order = 40,
+            args = {},
+        }
+        local elementordercnt = 10
+        for k_e, v_e in next, blocks do
+            -- Create base options for blocks
+            elementopts.args[k_e] = {
+                name = blocks[k_e][1],
+                desc = "Enable the "..blocks[k_e][1].." block.",
+                type = "toggle",
+                get = function() return db.elements[k_e] end,
+                set = function(info, value)
+                    db.elements[k_e] = value
+                    InfoLine:Refresh()
+                end,
+                order = elementordercnt,
+            }
+            elementordercnt = elementordercnt + 10
+        end
+        infoLine.args.elements = elementopts
+    end
+    local pitch do
+        local MODNAME = "Pitch"
+        local Pitch = RealUI:GetModule(MODNAME)
+        local db = Pitch.db.profile
+        pitch = {
+            name = "Pitch Display",
+            desc = "Graphical display of Flight/Swimming pitch.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Pitch Display",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Graphical display of Flight/Swimming pitch.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Pitch Display module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value) 
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                visibility = {
+                    name = "Visibility",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 40,
+                    args = {
+                        flying = {
+                            name = "Flying",
+                            desc = "Show the Pitch display while flying.",
+                            type = "toggle",
+                            get = function() return db.visibility.flying end,
+                            set = function(info, value) 
+                                db.visibility.flying = value
+                            end,
+                            order = 10,
+                        },
+                        swimming = {
+                            name = "Swimming",
+                            desc = "Show the Pitch display while swimming.",
+                            type = "toggle",
+                            get = function() return db.visibility.swimming end,
+                            set = function(info, value) 
+                                db.visibility.swimming = value
+                            end,
+                            order = 20,
+                        },
+                        combat = {
+                            name = "Combat",
+                            desc = "Show the Pitch display while in combat.",
+                            type = "toggle",
+                            get = function() return db.visibility.combat end,
+                            set = function(info, value) 
+                                db.visibility.combat = value
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                position = {
+                    name = "Position",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 50,
+                    args = {
+                        x = {
+                            name = "X Offset",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return _G.tostring(db.position.x) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.position.x = value
+                                Pitch:UpdatePosition()
+                            end,
+                            order = 10,
+                        },
+                        y = {
+                            name = "Y Offset",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return _G.tostring(db.position.y) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.position.y = value
+                                Pitch:UpdatePosition()
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
+                gap3 = {
+                    name = " ",
+                    type = "description",
+                    order = 51,
+                },
+                animation = {
+                    name = "Animation",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 60,
+                    args = {
+                        fadetime = {
+                            name = "Fade-Out Time",
+                            desc = "Time to wait until fading out the Pitch display.",
+                            type = "range",
+                            min = 0, max = 10, step = 0.25,
+                            get = function(info) return db.animation.fadetime end,
+                            set = function(info, value) 
+                                db.animation.fadetime = value
+                            end,
+                            order = 10,
+                        },
+                    },
+                },
+                gap4 = {
+                    name = " ",
+                    type = "description",
+                    order = 61,
+                },
+                appearance = {
+                    name = "Appearance",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 70,
+                    args = {
+                        oapcity = {
+                            name = "Opacity",
+                            type = "group",
+                            inline = true,
+                            order = 10,
+                            args = {
+                                surround = {
+                                    name = "Surround",
+                                    type = "range",
+                                    isPercent = true,
+                                    min = 0, max = 1, step = 0.05,
+                                    get = function(info) return db.appearance.opacity.surround end,
+                                    set = function(info, value) 
+                                        db.appearance.opacity.surround = value
+                                        Pitch:UpdateColors()
+                                    end,
+                                    order = 10,
+                                },
+                                background = {
+                                    name = "Background",
+                                    type = "range",
+                                    isPercent = true,
+                                    min = 0, max = 1, step = 0.05,
+                                    get = function(info) return db.appearance.opacity.background end,
+                                    set = function(info, value) 
+                                        db.appearance.opacity.background = value
+                                        Pitch:UpdateColors()
+                                    end,
+                                    order = 20,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local playerShields do
+        local MODNAME = "PlayerShields"
+        local PlayerShields = RealUI:GetModule(MODNAME)
+        local db = PlayerShields.db.profile
+        playerShields = {
+            name = "Player Shields",
+            desc = "Tracks absorbs/shields on the player.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Player Shields",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Tracks absorbs/shields on the player.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Player Shields module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                show = {
+                    name = "Show",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 40,
+                    args = {
+                        solo = {
+                            name = "While Solo",
+                            type = "toggle",
+                            get = function(info) return db.show.solo end,
+                            set = function(info, value)
+                                db.show.solo = value
+                                PlayerShields:UpdateVisibility()
+                            end,
+                            order = 10,
+                        },
+                        pve = {
+                            name = "In PvE",
+                            type = "toggle",
+                            get = function(info) return db.show.pve end,
+                            set = function(info, value)
+                                db.show.pve = value
+                                PlayerShields:UpdateVisibility()
+                            end,
+                            order = 20,
+                        },
+                        pvp = {
+                            name = "In PvP",
+                            type = "toggle",
+                            get = function(info) return db.show.pvp end,
+                            set = function(info, value)
+                                db.show.pvp = value
+                                PlayerShields:UpdateVisibility()
+                            end,
+                            order = 30,
+                        },
+                        onlyTank = {
+                            name = "Only Role = Tank",
+                            type = "toggle",
+                            get = function(info) return db.show.onlyTank end,
+                            set = function(info, value)
+                                db.show.onlyTank = value
+                                PlayerShields:UpdateVisibility()
+                            end,
+                            order = 40,
+                        },
+                        onlySpec = {
+                            name = "Only Spec = Tank",
+                            type = "toggle",
+                            get = function(info) return db.show.onlySpec end,
+                            set = function(info, value)
+                                db.show.onlySpec = value
+                                PlayerShields:UpdateVisibility()
+                            end,
+                            order = 50,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                sizeposition = {
+                    name = "Size/Position",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 50,
+                    args = {
+                        parent = {
+                            name = "Parent",
+                            desc = L["General_NoteParent"],
+                            type = "input",
+                            width = "double",
+                            get = function(info) return _G.tostring(db.position.parent) end,
+                            set = function(info, value)
+                                db.position.parent = value
+                            end,
+                            order = 10,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 11,
+                        },
+                        rPoint = {
+                            name = "Anchor To",
+                            type = "select",
+                            style = "dropdown",
+                            values = RealUI.globals.anchorPoints,
+                            get = function(info)
+                                for k,v in next, RealUI.globals.anchorPoints do
+                                    if v == db.position.rPoint then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                db.position.rPoint = RealUI.globals.anchorPoints[value]
+                            end,
+                            order = 20,
+                        },
+                        point = {
+                            name = "Anchor From",
+                            type = "select",
+                            style = "dropdown",
+                            values = RealUI.globals.anchorPoints,
+                            get = function(info)
+                                for k,v in next, RealUI.globals.anchorPoints do
+                                    if v == db.position.point then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                db.position.point = RealUI.globals.anchorPoints[value]
+                            end,
+                            order = 30,
+                        },
+                        x = {
+                            name = "X",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return _G.tostring(db.position.x) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.position.x = value
+                            end,
+                            order = 40,
+                        },
+                        y = {
+                            name = "Y",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return _G.tostring(db.position.y) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.position.y = value
+                            end,
+                            order = 50,
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local screenSaver do
+        local MODNAME = "ScreenSaver"
+        local ScreenSaver = RealUI:GetModule(MODNAME)
+        local db = ScreenSaver.db.profile
+        screenSaver = {
+            name = "Screen Saver",
+            desc = "Dims the screen when you are AFK.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Screen Saver",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Dims the screen when you are AFK.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Screen Saver module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                general = {
+                    name = "General",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 40,
+                    args = {
+                        opacity1 = {
+                            name = "Initial Dim",
+                            desc = "How dark to set the gameworld when you go AFK.",
+                            type = "range",
+                            isPercent = true,
+                            min = 0, max = 1, step = 0.05,
+                            get = function(info) return db.general.opacity1 end,
+                            set = function(info, value) db.general.opacity1 = value end,
+                            order = 10,
+                        },
+                        opacity2 = {
+                            name = "5min+ Dim",
+                            desc = "How dark to set the gameworld after 5 minutes of being AFK.",
+                            type = "range",
+                            isPercent = true,
+                            min = 0, max = 1, step = 0.05,
+                            get = function(info) return db.general.opacity2 end,
+                            set = function(info, value) db.general.opacity2 = value end,
+                            order = 20,
+                        },
+                        combatwarning = {
+                            name = "Combat Warning",
+                            desc = "Play a warning sound if you enter combat while AFK.",
+                            type = "toggle",
+                            get = function() return db.general.combatwarning end,
+                            set = function(info, value)
+                                db.general.combatwarning = value
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                panel = {
+                    name = "Panel",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 50,
+                    args = {
+                        automove = {
+                            name = "Auto Move",
+                            desc = "Reposition the Panel up and down the screen once every minute.",
+                            type = "toggle",
+                            get = function() return db.panel.automove end,
+                            set = function(info, value)
+                                db.panel.automove = value
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local worldMarker do
+        local MODNAME = "WorldMarker"
+        local WorldMarker = RealUI:GetModule(MODNAME)
+        local db = WorldMarker.db.profile
+        worldMarker = {
+            name = "World Marker",
+            desc = "Quick access to World Markers.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "World Marker",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Quick access to World Markers.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the WorldMarker module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value) 
+                        if not _G.InCombatLockdown() then
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                        else
+                            _G.print("|cff0099ffRealUI: |r World Marker can't be enabled or disabled during combat.")
+                        end
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                visibility = {
+                    name = "Show the World Marker in..",
+                    type = "group",
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 40,
+                    args = {
+                        arena = {
+                            name = "Arenas",
+                            type = "toggle",
+                            get = function(info) return db.visibility.arena end,
+                            set = function(info, value) 
+                                db.visibility.arena = value
+                                WorldMarker:UpdateVisibility()
+                            end,
+                            order = 10,
+                        },
+                        pvp = {
+                            name = "Battlegrounds",
+                            type = "toggle",
+                            get = function(info) return db.visibility.pvp end,
+                            set = function(info, value)
+                                db.visibility.pvp = value
+                                WorldMarker:UpdateVisibility()
+                            end,
+                            order = 20,
+                        },
+                        party = {
+                            name = "5 Man Dungeons",
+                            type = "toggle",
+                            get = function(info) return db.visibility.party end,
+                            set = function(info, value) 
+                                db.visibility.party = value
+                                WorldMarker:UpdateVisibility()
+                            end,
+                            order = 30,
+                        },
+                        raid = {
+                            name = "Raid Dungeons",
+                            type = "toggle",
+                            get = function(info) return db.visibility.raid end,
+                            set = function(info, value) 
+                                db.visibility.raid = value 
+                                WorldMarker:UpdateVisibility()
+                            end,
+                            order = 40,
+                        },
+                    },
+                },
+            },
+        }
+    end
+    core = {
+        name = "Core",
+        desc = "Core RealUI modules.",
+        type = "group",
+        order = 0,
+        args = {
+            infoLine = infoLine,
+            pitch = pitch,
+            playerShields = playerShields,
+            screenSaver = screenSaver,
+            worldMarker = worldMarker,
         },
     }
 end
@@ -126,9 +1056,9 @@ local skins do
                     order = 30,
                     args = {
                         sizeadjust = {
-                            type = "range",
                             name = L["Fonts_NormalOffset"],
                             desc = L["Fonts_NormalOffsetDesc"],
+                            type = "range",
                             min = -6, max = 6, step = 1,
                             get = function(info) return db.standard.sizeadjust end,
                             set = function(info, value)
@@ -137,9 +1067,9 @@ local skins do
                             order = 10,
                         },
                         changeYellow = {
-                            type = "toggle",
                             name = L["Fonts_ChangeYellow"],
                             desc = L["Fonts_ChangeYellowDesc"],
+                            type = "toggle",
                             get = function() return db.standard.changeYellow end,
                             set = function(info, value)
                                 db.standard.changeYellow = value
@@ -150,7 +1080,6 @@ local skins do
                         yellowColor = {
                             name = L["Fonts_YellowFont"],
                             type = "color",
-                            hasAlpha = false,
                             disabled = function() return not db.standard.changeYellow end,
                             get = function(info,r,g,b)
                                 return db.standard.yellowColor[1], db.standard.yellowColor[2], db.standard.yellowColor[3]
@@ -163,9 +1092,10 @@ local skins do
                             order = 21,
                         },
                         normal = {
-                            type = "select",
                             name = L["Fonts_Normal"],
                             desc = L["Fonts_NormalDesc"],
+                            type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.standard[1]
@@ -174,13 +1104,13 @@ local skins do
                                 font.standard[1] = value
                                 font.standard[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 30,
                         },
                         header = {
                             name = L["Fonts_Header"],
                             desc = L["Fonts_HeaderDesc"],
                             type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.header[1]
@@ -189,7 +1119,6 @@ local skins do
                                 font.header[1] = value
                                 font.header[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 40,
                         },
                         gap = {
@@ -201,6 +1130,7 @@ local skins do
                             name = L["Fonts_Chat"],
                             desc = L["Fonts_ChatDesc"],
                             type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.chat[1]
@@ -209,12 +1139,11 @@ local skins do
                                 font.chat[1] = value
                                 font.chat[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 50,
                         },
                         outline = {
-                            type = "select",
                             name = L["Fonts_Outline"],
+                            type = "select",
                             values = outlines,
                             get = function()
                                 for k,v in next, outlines do
@@ -234,8 +1163,9 @@ local skins do
                     order = 10,
                     args = {
                         font = {
-                            type = "select",
                             name = L["Fonts_Font"],
+                            type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.pixel.small[1]
@@ -244,12 +1174,11 @@ local skins do
                                 font.pixel.small[1] = value
                                 font.pixel.small[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 10,
                         },
                         size = {
-                            type = "range",
                             name = _G.FONT_SIZE,
+                            type = "range",
                             min = 6, max = 28, step = 1,
                             get = function(info) return font.pixel.small[2] end,
                             set = function(info, value)
@@ -258,8 +1187,8 @@ local skins do
                             order = 20,
                         },
                         outline = {
-                            type = "select",
                             name = L["Fonts_Outline"],
+                            type = "select",
                             values = outlines,
                             get = function()
                                 for k,v in next, outlines do
@@ -279,8 +1208,9 @@ local skins do
                     order = 20,
                     args = {
                         font = {
-                            type = "select",
                             name = L["Fonts_Font"],
+                            type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.pixel.large[1]
@@ -289,12 +1219,11 @@ local skins do
                                 font.pixel.large[1] = value
                                 font.pixel.large[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 10,
                         },
                         size = {
-                            type = "range",
                             name = _G.FONT_SIZE,
+                            type = "range",
                             min = 6, max = 28, step = 1,
                             get = function(info) return font.pixel.large[2] end,
                             set = function(info, value)
@@ -303,8 +1232,8 @@ local skins do
                             order = 20,
                         },
                         outline = {
-                            type = "select",
                             name = L["Fonts_Outline"],
+                            type = "select",
                             values = outlines,
                             get = function()
                                 for k,v in next, outlines do
@@ -324,8 +1253,9 @@ local skins do
                     order = 30,
                     args = {
                         font = {
-                            type = "select",
                             name = L["Fonts_Font"],
+                            type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.pixel.numbers[1]
@@ -334,12 +1264,11 @@ local skins do
                                 font.pixel.numbers[1] = value
                                 font.pixel.numbers[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 10,
                         },
                         size = {
-                            type = "range",
                             name = _G.FONT_SIZE,
+                            type = "range",
                             min = 6, max = 28, step = 1,
                             get = function(info) return font.pixel.numbers[2] end,
                             set = function(info, value)
@@ -348,8 +1277,8 @@ local skins do
                             order = 20,
                         },
                         outline = {
-                            type = "select",
                             name = L["Fonts_Outline"],
+                            type = "select",
                             values = outlines,
                             get = function()
                                 for k,v in next, outlines do
@@ -369,8 +1298,9 @@ local skins do
                     order = 40,
                     args = {
                         font = {
-                            type = "select",
                             name = L["Fonts_Font"],
+                            type = "select",
+                            dialogControl = "LSM30_Font",
                             values = _G.AceGUIWidgetLSMlists.font,
                             get = function()
                                 return font.pixel.cooldown[1]
@@ -379,12 +1309,11 @@ local skins do
                                 font.pixel.cooldown[1] = value
                                 font.pixel.cooldown[4] = LSM:Fetch("font", value)
                             end,
-                            dialogControl = "LSM30_Font",
                             order = 10,
                         },
                         size = {
-                            type = "range",
                             name = _G.FONT_SIZE,
+                            type = "range",
                             min = 6, max = 28, step = 1,
                             get = function(info) return font.pixel.cooldown[2] end,
                             set = function(info, value)
@@ -393,8 +1322,8 @@ local skins do
                             order = 20,
                         },
                         outline = {
-                            type = "select",
                             name = L["Fonts_Outline"],
+                            type = "select",
                             values = outlines,
                             get = function()
                                 for k,v in next, outlines do
@@ -490,7 +1419,7 @@ local skins do
             desc = "Set a custom UI scale (0.48 to 1.00). Note: UI elements may lose their sharp appearance.",
             type = "input",
             disabled = function() return db.pixelPerfect end,
-            get = function() return _G.tostring(db.customScale) end,
+            get = function() return tostring(db.customScale) end,
             set = function(info, value) 
                 db.customScale = RealUI:ValidateOffset(_G.tonumber(value), 0.48, 1)
                 UIScaler:UpdateUIScale()
@@ -514,15 +1443,234 @@ local skins do
 end
 local uiTweaks do
     order = order + 1
+    local altPowerBar do
+        local MODNAME = "AltPowerBar"
+        local AltPowerBar = RealUI:GetModule(MODNAME)
+        local db = AltPowerBar.db.profile
+        altPowerBar = {
+            name = "Alt Power Bar",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Alt Power Bar",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Replacement of the default Alternate Power Bar.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Alt Power Bar module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                size = {
+                    name = "Size",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 50,
+                    args = {
+                        width = {
+                            name = "Width",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return tostring(db.size.width) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.size.width = value
+                                altPowerBar:UpdatePosition()
+                            end,
+                            order = 10,
+                        },
+                        height = {
+                            name = "Height",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return tostring(db.size.height) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.size.height = value
+                                altPowerBar:UpdatePosition()
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 51,
+                },
+                position = {
+                    name = "Position",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 60,
+                    args = {
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 10,
+                            args = {
+                                xoffset = {
+                                    name = "X Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.x = value
+                                        altPowerBar:UpdatePosition()
+                                    end,
+                                    order = 10,
+                                },
+                                yoffset = {
+                                    name = "Y Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return tostring(db.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.y = value
+                                        altPowerBar:UpdatePosition()
+                                    end,
+                                    order = 20,
+                                },
+                                anchorto = {
+                                    name = "Anchor To",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorto then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorto = RealUI.globals.anchorPoints[value]
+                                        altPowerBar:UpdatePosition()
+                                    end,
+                                    order = 30,
+                                },
+                                anchorfrom = {
+                                    name = "Anchor From",
+                                    type = "select",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorfrom then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorfrom = RealUI.globals.anchorPoints[value]
+                                        altPowerBar:UpdatePosition()
+                                    end,
+                                    order = 40,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local chat do
+        local MODNAME = "Chat"
+        local Chat = RealUI:GetModule(MODNAME)
+        local db = Chat.db.profile
+        chat = {
+            name = "Chat Extras",
+            desc = "Extra modifications to the Chat window.",
+            type = "group",
+            args = {
+                header = {
+                    name = "Chat Extras",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Extra modifications to the Chat window.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 11,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Chat Extras module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value) 
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                    end,
+                    order = 20,
+                },
+                desc3 = {
+                    name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                    type = "description",
+                    order = 21,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 22,
+                },
+                modules = {
+                    name = "Modules",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
+                    order = 30,
+                    args = {
+                        tabs = {
+                            name = "Chat Tabs",
+                            desc = "Skins the Chat Tabs.",
+                            type = "toggle",
+                            get = function() return db.modules.tabs.enabled end,
+                            set = function(info, value) 
+                                db.modules.tabs.enabled = value
+                            end,
+                            order = 10,
+                        },
+                        opacity = {
+                            name = "Opacity",
+                            desc = "Adjusts the opacity of the Chat Frame, and controls how fast the frame and tabs fade in/out.",
+                            type = "toggle",
+                            get = function() return db.modules.opacity.enabled end,
+                            set = function(info, value) 
+                                db.modules.opacity.enabled = value
+                            end,
+                            order = 20,
+                        },
+                    },
+                },
+            },
+        }
+    end
     local cooldown do
-        local CooldownCount = RealUI:GetModule("CooldownCount")
+        local MODNAME = "CooldownCount"
+        local CooldownCount = RealUI:GetModule(MODNAME)
         local db = CooldownCount.db.profile
         local table_Justify = {"LEFT", "CENTER", "RIGHT"}
         cooldown = {
             name = L["Tweaks_CooldownCount"],
             desc = L["Tweaks_CooldownCountDesc"],
             type = "group",
-            arg = "CooldownCount",
             args = {
                 header = {
                     name = L["Tweaks_CooldownCount"],
@@ -538,9 +1686,9 @@ local uiTweaks do
                     name = L["General_Enabled"],
                     desc = L["General_EnabledDesc"]:format(L["Tweaks_CooldownCount"]),
                     type = "toggle",
-                    get = function(info) return RealUI:GetModuleEnabled(cooldown.arg) end,
+                    get = function(info) return RealUI:GetModuleEnabled(MODNAME) end,
                     set = function(info, value)
-                        RealUI:SetModuleEnabled(cooldown.arg, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
                         RealUI:ReloadUIDialog()
                     end,
                     order = 30,
@@ -556,7 +1704,7 @@ local uiTweaks do
                     type = "range",
                     isPercent = true,
                     min = 0, max = 1, step = 0.05,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
                     get = function(info) return db.minScale end,
                     set = function(info, value)
                         db.minScale = value
@@ -568,7 +1716,7 @@ local uiTweaks do
                     desc = "The minimum number of seconds a cooldown's duration must be to display text.",
                     type = "range",
                     min = 0, max = 30, step = 1,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
                     get = function(info) return db.minDuration end,
                     set = function(info, value)
                         db.minDuration = value
@@ -580,7 +1728,7 @@ local uiTweaks do
                     desc = "The minimum number of seconds a cooldown must be to display in the expiring format.",
                     type = "range",
                     min = 0, max = 30, step = 1,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
                     get = function(info) return db.expiringDuration end,
                     set = function(info, value)
                         db.expiringDuration = value
@@ -596,7 +1744,7 @@ local uiTweaks do
                     name = "Colors",
                     type = "group",
                     inline = true,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(cooldown.arg) end,
+                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
                     order = 90,
                     args = {
                         expiring = {
@@ -675,7 +1823,7 @@ local uiTweaks do
                     name = "Position",
                     type = "group",
                     inline = true,
-                    disabled = function(info) if RealUI:GetModuleEnabled(cooldown.arg) then return false else return true end end,
+                    disabled = function(info) if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 100,
                     args = {
                         point = {
@@ -696,7 +1844,7 @@ local uiTweaks do
                             name = "X",
                             type = "input",
                             width = "half",
-                            get = function(info) return _G.tostring(db.position.x) end,
+                            get = function(info) return tostring(db.position.x) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.position.x = value
@@ -707,7 +1855,7 @@ local uiTweaks do
                             name = "Y",
                             type = "input",
                             width = "half",
-                            get = function(info) return _G.tostring(db.position.y) end,
+                            get = function(info) return tostring(db.position.y) end,
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.position.y = value
@@ -738,9 +1886,9 @@ local uiTweaks do
         local ErrorHider = RealUI:GetModule(MODNAME)
         local db = ErrorHider.db.profile
         errorHider = {
-            type = "group",
             name = "Error Hider",
             desc = "Hide specific error messages.",
+            type = "group",
             args = {
                 header = {
                     name = "Error Hider",
@@ -817,27 +1965,26 @@ local uiTweaks do
         local EventNotifier = RealUI:GetModule(MODNAME)
         local db = EventNotifier.db.profile
         eventNotify = {
-            type = "group",
             name = "Event Notifier",
             desc = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
-            arg = MODNAME,
+            type = "group",
             childGroups = "tab",
             args = {
                 header = {
-                    type = "header",
                     name = "Event Notifier",
+                    type = "header",
                     order = 10,
                 },
                 desc = {
-                    type = "description",
                     name = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
+                    type = "description",
                     fontSize = "medium",
                     order = 20,
                 },
                 enabled = {
-                    type = "toggle",
                     name = "Enabled",
                     desc = "Enable/Disable the Event Notifier module.",
+                    type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                     set = function(info, value) 
                         RealUI:SetModuleEnabled(MODNAME, value)
@@ -846,14 +1993,14 @@ local uiTweaks do
                     order = 30,
                 },
                 events = {
-                    type = "group",
                     name = "Events",
+                    type = "group",
                     inline = true,
                     order = 40,
                     args = {
                         checkEvents = {
-                            type = "toggle",
                             name = "Calender Invites",
+                            type = "toggle",
                             get = function() return db.checkEvents end,
                             set = function(info, value) 
                                 db.checkEvents = value
@@ -861,8 +2008,8 @@ local uiTweaks do
                             order = 10,
                         },
                         checkGuildEvents = {
-                            type = "toggle",
                             name = "Guild Events",
+                            type = "toggle",
                             get = function() return db.checkGuildEvents end,
                             set = function(info, value) 
                                 db.checkGuildEvents = value
@@ -870,8 +2017,8 @@ local uiTweaks do
                             order = 20,
                         },
                         checkMinimapRares = {
-                            type = "toggle",
                             name = _G.MINIMAP_LABEL.." ".._G.ITEM_QUALITY3_DESC,
+                            type = "toggle",
                             get = function() return db.checkMinimapRares end,
                             set = function(info, value) 
                                 db.checkMinimapRares = value
@@ -954,7 +2101,7 @@ local uiTweaks do
                 }
                 local normalFrameOrderCnt = 10
                 for i = 1, #addon.frames do
-                    normalFrameOpts.args[_G.tostring(i)] = {
+                    normalFrameOpts.args[tostring(i)] = {
                         name = addon.frames[i].name,
                         type = "group",
                         inline = true,
@@ -964,7 +2111,7 @@ local uiTweaks do
                                 type = "input",
                                 name = "X Offset",
                                 width = "half",
-                                get = function(info) return _G.tostring(addonInfo.frames[i].x) end,
+                                get = function(info) return tostring(addonInfo.frames[i].x) end,
                                 set = function(info, value)
                                     value = RealUI:ValidateOffset(value)
                                     addonInfo.frames[i].x = value
@@ -976,7 +2123,7 @@ local uiTweaks do
                                 name = "Y Offset",
                                 type = "input",
                                 width = "half",
-                                get = function(info) return _G.tostring(addonInfo.frames[i].y) end,
+                                get = function(info) return tostring(addonInfo.frames[i].y) end,
                                 set = function(info, value)
                                     value = RealUI:ValidateOffset(value)
                                     addonInfo.frames[i].y = value
@@ -1058,7 +2205,7 @@ local uiTweaks do
                     }
                     local normalHealingFrameOrderCnt = 10       
                     for i = 1, #addon.frameshealing do
-                        normalHealingFrameOpts.args[_G.tostring(i)] = {
+                        normalHealingFrameOpts.args[tostring(i)] = {
                             name = addon.frameshealing[i].name,
                             type = "group",
                             inline = true,
@@ -1068,7 +2215,7 @@ local uiTweaks do
                                     name = "X Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(addonInfo.frameshealing[i].x) end,
+                                    get = function(info) return tostring(addonInfo.frameshealing[i].x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         addonInfo.frameshealing[i].x = value
@@ -1080,7 +2227,7 @@ local uiTweaks do
                                     name = "Y Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(addonInfo.frameshealing[i].y) end,
+                                    get = function(info) return tostring(addonInfo.frameshealing[i].y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         addonInfo.frameshealing[i].y = value
@@ -1190,7 +2337,7 @@ local uiTweaks do
                     }
                     local FrameOrderCnt = 10
                     for i = 1, #ui.frames do
-                        frameopts.args[_G.tostring(i)] = {
+                        frameopts.args[tostring(i)] = {
                             type = "group",
                             name = ui.frames[i].name,
                             inline = true,
@@ -1201,7 +2348,7 @@ local uiTweaks do
                                     name = "X Offset",
                                     width = "half",
                                     order = 10,
-                                    get = function(info) return _G.tostring(uiInfo.frames[i].x) end,
+                                    get = function(info) return tostring(uiInfo.frames[i].x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         uiInfo.frames[i].x = value
@@ -1213,7 +2360,7 @@ local uiTweaks do
                                     name = "Y Offset",
                                     width = "half",
                                     order = 20,
-                                    get = function(info) return _G.tostring(uiInfo.frames[i].y) end,
+                                    get = function(info) return tostring(uiInfo.frames[i].y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         uiInfo.frames[i].y = value
@@ -1233,7 +2380,6 @@ local uiTweaks do
                                         MoveFrameGroup(ui.frames, uiInfo.frames)
                                     end,
                                     style = "dropdown",
-                                    width = nil,
                                     values = RealUI.globals.anchorPoints,
                                     order = 30,
                                 },
@@ -1250,7 +2396,6 @@ local uiTweaks do
                                         MoveFrameGroup(ui.frames, uiInfo.frames)
                                     end,
                                     style = "dropdown",
-                                    width = nil,
                                     values = RealUI.globals.anchorPoints,
                                     order = 40,
                                 },
@@ -1345,8 +2490,186 @@ local uiTweaks do
             },
         }
     end
+    local loot do
+        local MODNAME = "Loot"
+        local Loot = RealUI:GetModule(MODNAME)
+        local db = Loot.db.profile
+        loot = {
+            name = "Loot",
+            desc = "Modifies the appearance of the Loot windows.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Loot",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Modifies the appearance of the Loot windows.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Loot module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value) 
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                        RealUI:ReloadUIDialog()
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                loot = {
+                    name = "Loot Window",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 40,
+                    args = {
+                        enabled = {
+                            name = "Enabled",
+                            desc = "Skins the Loot window.",
+                            type = "toggle",
+                            get = function() return db.loot.enabled end,
+                            set = function(info, value) 
+                                db.loot.enabled = value
+                                RealUI:ReloadUIDialog()
+                            end,
+                            order = 10,
+                        },
+                        position = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            order = 20,
+                            args = {
+                                cursor = {
+                                    name = "Position at Cursor",
+                                    type = "toggle",
+                                    get = function() return db.loot.cursor end,
+                                    set = function(info, value) 
+                                        db.loot.cursor = value
+                                        Loot:UpdateLootPosition()
+                                    end,
+                                    order = 10,
+                                },
+                                position = {
+                                    name = "Custom Position",
+                                    type = "group",
+                                    inline = true,
+                                    disabled = function() return db.loot.cursor end,
+                                    order = 20,
+                                    args = {
+                                        x = {
+                                            name = "Padding",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.loot.static.x) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.loot.static.x = value
+                                                Loot:UpdateLootPosition()
+                                            end,
+                                            order = 10,
+                                        },
+                                        y = {
+                                            name = "Y Offset",
+                                            type = "input",
+                                            width = "half",
+                                            get = function(info) return tostring(db.loot.static.y) end,
+                                            set = function(info, value)
+                                                value = RealUI:ValidateOffset(value)
+                                                db.loot.static.y = value
+                                                Loot:UpdateLootPosition()
+                                            end,
+                                            order = 20,
+                                        },
+                                        anchor = {
+                                            name = "Anchor From",
+                                            type = "select",
+                                            style = "dropdown",
+                                            values = RealUI.globals.anchorPoints,
+                                            get = function(info) 
+                                                for k,v in next, RealUI.globals.anchorPoints do
+                                                    if v == db.loot.static.anchor then return k end
+                                                end
+                                            end,
+                                            set = function(info, value)
+                                                db.loot.static.anchor = RealUI.globals.anchorPoints[value]
+                                                Loot:UpdateLootPosition()
+                                            end,
+                                            order = 30,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                roll = {
+                    name = "Group Loot",
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 50,
+                    args = {
+                        enabled = {
+                            name = "Enabled",
+                            desc = "Skins the Group Loot frames.",
+                            type = "toggle",
+                            width = "full",
+                            get = function() return db.roll.enabled end,
+                            set = function(info, value) 
+                                db.roll.enabled = value
+                                RealUI:ReloadUIDialog()
+                            end,
+                            order = 10,
+                        },
+                        vertical = {
+                            name = "Y Offset",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return tostring(db.roll.vertical) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.roll.vertical = value
+                                Loot:GroupLootPosition()
+                            end,
+                            order = 20,
+                        },
+                        horizontal = {
+                            name = "X Offset",
+                            type = "input",
+                            width = "half",
+                            get = function(info) return tostring(db.roll.horizontal) end,
+                            set = function(info, value)
+                                value = RealUI:ValidateOffset(value)
+                                db.roll.horizontal = value
+                                Loot:GroupLootPosition()
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+            },
+        }
+    end
     local minimap do
-        local MinimapAdv = RealUI:GetModule("MinimapAdv")
+        local MODNAME = "MinimapAdv"
+        local MinimapAdv = RealUI:GetModule(MODNAME)
         local db = MinimapAdv.db.profile
         local minimapOffsets = {
             {x = 7, y = -7},
@@ -1361,10 +2684,9 @@ local uiTweaks do
             "BOTTOMRIGHT",
         }
         minimap = {
-            type = "group",
             name = "Minimap",
             desc = "Advanced, minimalistic Minimap.",
-            arg = "MinimapAdv",
+            type = "group",
             childGroups = "tab",
             args = {
                 header = {
@@ -1382,9 +2704,9 @@ local uiTweaks do
                     name = "Enabled",
                     desc = "Enable/Disable the Minimap module.",
                     type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(minimap.arg) end,
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                     set = function(info, value)
-                        RealUI:SetModuleEnabled(minimap.arg, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
                         RealUI:ReloadUIDialog()
                     end,
                     order = 30,
@@ -1397,7 +2719,7 @@ local uiTweaks do
                 information = {
                     name = "Information",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 40,
                     args = {
                         coordDelayHide = {
@@ -1463,7 +2785,7 @@ local uiTweaks do
                                     name = "X Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.information.position.x) end,
+                                    get = function(info) return tostring(db.information.position.x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.information.position.x = value
@@ -1475,7 +2797,7 @@ local uiTweaks do
                                     name = "Y Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.information.position.y) end,
+                                    get = function(info) return tostring(db.information.position.y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.information.position.y = value
@@ -1490,7 +2812,7 @@ local uiTweaks do
                 hidden = {
                     name = "Automatic Hide/Show",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
                         enabled = {
@@ -1510,7 +2832,7 @@ local uiTweaks do
                             type = "group",
                             inline = true,
                             disabled = function()
-                                return not(db.hidden.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                                return not(db.hidden.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
                             order = 20,
                             args = {
@@ -1549,7 +2871,7 @@ local uiTweaks do
                 sizeposition = {
                     name = "Position",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
                         size = {
@@ -1586,7 +2908,7 @@ local uiTweaks do
                                     name = "X Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.position.x) end,
+                                    get = function(info) return tostring(db.position.x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.x = value
@@ -1598,7 +2920,7 @@ local uiTweaks do
                                     name = "Y Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.position.y) end,
+                                    get = function(info) return tostring(db.position.y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.y = value
@@ -1631,7 +2953,7 @@ local uiTweaks do
                 expand = {
                     name = "Farm Mode",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 70,
                     args = {
                         appearance = {
@@ -1681,7 +3003,7 @@ local uiTweaks do
                                     name = "X Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.expand.position.x) end,
+                                    get = function(info) return tostring(db.expand.position.x) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.expand.position.x = value
@@ -1693,7 +3015,7 @@ local uiTweaks do
                                     name = "Y Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return _G.tostring(db.expand.position.y) end,
+                                    get = function(info) return tostring(db.expand.position.y) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.expand.position.y = value
@@ -1771,7 +3093,7 @@ local uiTweaks do
                 poi = {
                     name = "POI",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(minimap.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 80,
                     args = {
                         enabled = {
@@ -1795,7 +3117,7 @@ local uiTweaks do
                             type = "group",
                             inline = true,
                             disabled = function()
-                                return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                                return not(db.poi.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
                             order = 20,
                             args = {
@@ -1833,7 +3155,7 @@ local uiTweaks do
                             type = "group",
                             inline = true,
                             disabled = function()
-                                return not(db.poi.enabled and RealUI:GetModuleEnabled(minimap.arg))
+                                return not(db.poi.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
                             order = 30,
                             args = {
@@ -1868,33 +3190,34 @@ local uiTweaks do
             },
         }
     end
-    local powerBar do
-        local AltPowerBar = RealUI:GetModule("AltPowerBar")
-        local db = AltPowerBar.db.profile
-        powerBar = {
-            name = "Alt Power Bar",
+    local mirrorBar do
+        local MODNAME = "MirrorBar"
+        local MirrorBar = RealUI:GetModule(MODNAME)
+        local db = MirrorBar.db.profile
+        mirrorBar = {
+            name = "Mirror Bar",
+            desc = "Display of Breath, Exhaustion and Feign Death.",
             type = "group",
             childGroups = "tab",
-            arg = "Alt Power Bar",
             args = {
                 header = {
-                    name = "Alt Power Bar",
+                    name = "Mirror Bar",
                     type = "header",
                     order = 10,
                 },
                 desc = {
-                    name = "Replacement of the default Alternate Power Bar.",
+                    name = "Display of Breath, Exhaustion and Feign Death.",
                     type = "description",
                     fontSize = "medium",
                     order = 20,
                 },
                 enabled = {
                     name = "Enabled",
-                    desc = "Enable/Disable the Alt Power Bar module.",
+                    desc = "Enable/Disable the Mirror Bar module.",
                     type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(powerBar.arg) end,
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                     set = function(info, value)
-                        RealUI:SetModuleEnabled(powerBar.arg, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
                     end,
                     order = 30,
                 },
@@ -1907,7 +3230,7 @@ local uiTweaks do
                     name = "Size",
                     type = "group",
                     inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
                         width = {
@@ -1918,7 +3241,7 @@ local uiTweaks do
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.size.width = value
-                                powerBar:UpdatePosition()
+                                MirrorBar:UpdatePosition()
                             end,
                             order = 10,
                         },
@@ -1930,7 +3253,7 @@ local uiTweaks do
                             set = function(info, value)
                                 value = RealUI:ValidateOffset(value)
                                 db.size.height = value
-                                powerBar:UpdatePosition()
+                                MirrorBar:UpdatePosition()
                             end,
                             order = 20,
                         },
@@ -1945,7 +3268,7 @@ local uiTweaks do
                     name = "Position",
                     type = "group",
                     inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(powerBar.arg) then return false else return true end end,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
                         position = {
@@ -1962,7 +3285,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.x = value
-                                        powerBar:UpdatePosition()
+                                        MirrorBar:UpdatePosition()
                                     end,
                                     order = 10,
                                 },
@@ -1974,13 +3297,14 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.y = value
-                                        powerBar:UpdatePosition()
+                                        MirrorBar:UpdatePosition()
                                     end,
                                     order = 20,
                                 },
                                 anchorto = {
                                     name = "Anchor To",
                                     type = "select",
+                                    style = "dropdown",
                                     values = RealUI.globals.anchorPoints,
                                     get = function(info)
                                         for k,v in next, RealUI.globals.anchorPoints do
@@ -1989,13 +3313,14 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorto = RealUI.globals.anchorPoints[value]
-                                        powerBar:UpdatePosition()
+                                        MirrorBar:UpdatePosition()
                                     end,
                                     order = 30,
                                 },
                                 anchorfrom = {
                                     name = "Anchor From",
                                     type = "select",
+                                    style = "dropdown",
                                     values = RealUI.globals.anchorPoints,
                                     get = function(info)
                                         for k,v in next, RealUI.globals.anchorPoints do
@@ -2004,11 +3329,489 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                        powerBar:UpdatePosition()
+                                        MirrorBar:UpdatePosition()
                                     end,
                                     order = 40,
                                 },
                             },
+                        },
+                    },
+                },
+            },
+        }
+    end
+    local objectives do
+        local MODNAME = "Objectives Adv."
+        local ObjectivesAdv = RealUI:GetModule(MODNAME)
+        local db = ObjectivesAdv.db.profile
+        objectives = {
+            name = "Objectives Adv.",
+            desc = "Reposition the Objective Tracker.",
+            type = "group",
+            childGroups = "tab",
+            args = {
+                header = {
+                    name = "Objectives Adv.",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Reposition the Objective Tracker.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Objectives Adv. module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                        ObjectivesAdv:RefreshMod()
+                    end,
+                    order = 30,
+                },
+                sizeposition = {
+                    name = "Size/Position",
+                    type = "group",
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 40,
+                    args = {
+                        header = {
+                            name = "Adjust size and position.",
+                            type = "description",
+                            order = 10,
+                        },
+                        enabled = {
+                            name = "Enabled",
+                            type = "toggle",
+                            get = function(info) return db.position.enabled end,
+                            set = function(info, value)
+                                db.position.enabled = value
+                                ObjectivesAdv:UpdatePosition()
+                                RealUI:ReloadUIDialog()
+                            end,
+                            order = 20,
+                        },
+                        note1 = {
+                            name = "Note: Enabling/disabling the size/position adjustments will require a UI Reload to take full effect.",
+                            type = "description",
+                            order = 30,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 31,
+                        },
+                        offsets = {
+                            name = "Offsets",
+                            type = "group",
+                            inline = true,
+                            disabled = function() return not(db.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                            order = 40,
+                            args = {
+                                xoffset = {
+                                    name = "X Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.position.x) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.x = value
+                                        ObjectivesAdv:UpdatePosition()
+                                    end,
+                                    order = 10,
+                                },
+                                yoffset = {
+                                    name = "Y Offset",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.position.y) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.y = value
+                                        ObjectivesAdv:UpdatePosition()
+                                    end,
+                                    order = 20,
+                                },
+                                negheightoffset = {
+                                    name = "Height Offset",
+                                    desc = "How much shorter than screen height to make the Quest Watch Frame.",
+                                    type = "input",
+                                    width = "half",
+                                    get = function(info) return _G.tostring(db.position.negheightofs) end,
+                                    set = function(info, value)
+                                        value = RealUI:ValidateOffset(value)
+                                        db.position.negheightofs = value
+                                        ObjectivesAdv:UpdatePosition()
+                                    end,
+                                    order = 30,
+                                },
+                            },
+                        },
+                        gap2 = {
+                            name = " ",
+                            type = "description",
+                            order = 41,
+                        },
+                        anchor = {
+                            name = "Position",
+                            type = "group",
+                            inline = true,
+                            disabled = function() return not(db.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                            order = 50,
+                            args = {
+                                anchorto = {
+                                    name = "Anchor To",
+                                    type = "select",
+                                    style = "dropdown",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorto then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorto = RealUI.globals.anchorPoints[value]
+                                        ObjectivesAdv:UpdatePosition()
+                                    end,
+                                    order = 10,
+                                },
+                                anchorfrom = {
+                                    name = "Anchor From",
+                                    type = "select",
+                                    style = "dropdown",
+                                    values = RealUI.globals.anchorPoints,
+                                    get = function(info)
+                                        for k,v in next, RealUI.globals.anchorPoints do
+                                            if v == db.position.anchorfrom then return k end
+                                        end
+                                    end,
+                                    set = function(info, value)
+                                        db.position.anchorfrom = RealUI.globals.anchorPoints[value]
+                                        ObjectivesAdv:UpdatePosition()
+                                    end,
+                                    order = 20,
+                                },
+                            },
+                        },
+                    },
+                },
+                hidden = {
+                    name = "Automatic Collapse/Hide",
+                    type = "group",
+                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                    order = 60,
+                    args = {
+                        header = {
+                            name = "Automatically collapse the Quest Watch Frame in certain zones.",
+                            type = "description",
+                            order = 10,
+                        },
+                        enabled = {
+                            name = "Enabled",
+                            type = "toggle",
+                            get = function(info) return db.hidden.enabled end,
+                            set = function(info, value)
+                                db.hidden.enabled = value
+                                ObjectivesAdv:UpdateCollapseState()
+                            end,
+                            order = 20,
+                        },
+                        gap1 = {
+                            name = " ",
+                            type = "description",
+                            order = 21,
+                        },
+                        collapse = {
+                            name = "Collapse the Quest Watch Frame in..",
+                            type = "group",
+                            inline = true,
+                            disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and db.hidden.enabled) end,
+                            order = 30,
+                            args = {
+                                arena = {
+                                    name = "Arenas",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.collapse.arena end,
+                                    set = function(info, value)
+                                        db.hidden.collapse.arena = value
+                                        ObjectivesAdv:UpdateCollapseState()
+                                    end,
+                                    order = 10,
+                                },
+                                pvp = {
+                                    name = "Battlegrounds",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.collapse.pvp end,
+                                    set = function(info, value)
+                                        db.hidden.collapse.pvp = value
+                                        ObjectivesAdv:UpdateCollapseState()
+                                    end,
+                                    order = 20,
+                                },
+                                party = {
+                                    name = "5 Man Dungeons",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.collapse.party end,
+                                    set = function(info, value)
+                                        db.hidden.collapse.party = value
+                                        ObjectivesAdv:UpdateCollapseState()
+                                    end,
+                                    order = 30,
+                                },
+                                raid = {
+                                    name = "Raid Dungeons",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.collapse.raid end,
+                                    set = function(info, value)
+                                        db.hidden.collapse.raid = value
+                                        ObjectivesAdv:UpdateCollapseState()
+                                    end,
+                                    order = 40,
+                                },
+                            },
+                        },
+                        gap2 = {
+                            name = " ",
+                            type = "description",
+                            order = 31,
+                        },
+                        hide = {
+                            name = "Hide the Quest Watch Frame completely in..",
+                            type = "group",
+                            inline = true,
+                            disabled = function() return not(db.hidden.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                            order = 40,
+                            args = {
+                                arena = {
+                                    name = "Arenas",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.hide.arena end,
+                                    set = function(info, value)
+                                        db.hidden.hide.arena = value
+                                        ObjectivesAdv:UpdateHideState()
+                                    end,
+                                    order = 10,
+                                },
+                                pvp = {
+                                    name = "Battlegrounds",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.hide.pvp end,
+                                    set = function(info, value)
+                                        db.hidden.hide.pvp = value
+                                        ObjectivesAdv:UpdateHideState()
+                                    end,
+                                    order = 20,
+                                },
+                                party = {
+                                    name = "5 Man Dungeons",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.hide.party end,
+                                    set = function(info, value)
+                                        db.hidden.hide.party = value
+                                        ObjectivesAdv:UpdateHideState()
+                                    end,
+                                    order = 30,
+                                },
+                                raid = {
+                                    name = "Raid Dungeons",
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.hide.raid end,
+                                    set = function(info, value)
+                                        db.hidden.hide.raid = value
+                                        ObjectivesAdv:UpdateHideState()
+                                    end,
+                                    order = 40,
+                                },
+                            },
+                        },
+                        --[[fade = {
+                            type = "group",
+                            name = L["General_CombatFade"],
+                            inline = true,
+                            order = 40,
+                            args = {
+                                incombat = {
+                                    type = "range",
+                                    name = "In-combat",
+                                    min = 0, max = 1, step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.elements[ke].opacity.outofcombat end,
+                                    set = function(info, value)
+                                        db.elements[ke].opacity.outofcombat = value
+                                        CombatFader:OptionsRefresh()
+                                    end,
+                                    order = 10,
+                                },
+                                harmtarget = {
+                                    type = "range",
+                                    name = "Attackable Target",
+                                    min = 0, max = 1, step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.elements[ke].opacity.harmtarget end,
+                                    set = function(info, value)
+                                        db.elements[ke].opacity.harmtarget = value
+                                        CombatFader:OptionsRefresh()
+                                    end,
+                                    order = 20,
+                                },
+                                outofcombat = {
+                                    type = "range",
+                                    name = "Out-of-combat",
+                                    min = 0, max = 1, step = 0.05,
+                                    isPercent = true,
+                                    get = function(info) return db.elements[ke].opacity.incombat end,
+                                    set = function(info, value)
+                                        --print("OutCombat", ke)
+                                        db.elements[ke].opacity.incombat = value
+                                        CombatFader:OptionsRefresh()
+                                    end,
+                                    order = 30,
+                                },
+                            },
+                        },]]
+                    },
+                },
+            },
+        }
+    end
+    local speechBubbles do
+        local MODNAME = "SpeechBubbles"
+        local SpeechBubbles = RealUI:GetModule(MODNAME)
+        local db = SpeechBubbles.db.profile
+        speechBubbles = {
+            name = "Speech Bubbles",
+            desc = "Skins the speech bubbles.",
+            type = "group",
+            args = {
+                header = {
+                    name = "Speech Bubbles",
+                    type = "header",
+                    order = 10,
+                },
+                desc = {
+                    name = "Skins the speech bubbles.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                enabled = {
+                    name = "Enabled",
+                    desc = "Enable/Disable the Speech Bubbles module.",
+                    type = "toggle",
+                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled(MODNAME, value)
+                        RealUI:ReloadUIDialog()
+                    end,
+                    order = 30,
+                },
+                desc2 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                desc3 = {
+                    name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                    type = "description",
+                    order = 32,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 33,
+                },
+                general = {
+                    name = "General",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 40,
+                    args = {
+                        sendersize = {
+                            name = "Sender Name Size",
+                            type = "range",
+                            min = 6, max = 32, step = 1,
+                            get = function(info) return db.sendersize end,
+                            set = function(info, value)
+                                db.sendersize = value
+                            end,
+                            order = 10,
+                        },
+                        hideSender = {
+                            name = "Hide Sender Name",
+                            type = "toggle",
+                            get = function() return db.hideSender end,
+                            set = function(info, value)
+                                db.hideSender = value
+                            end,
+                            order = 11,
+                        },
+                        messagesize = {
+                            name = "Message Size",
+                            type = "range",
+                            min = 6, max = 32, step = 1,
+                            get = function(info) return db.messagesize end,
+                            set = function(info, value)
+                                db.messagesize = value
+                            end,
+                            order = 20,
+                        },
+                        edgesize = {
+                            name = "Edge Size",
+                            type = "range",
+                            min = 0, max = 20, step = 1,
+                            get = function(info) return db.edgesize end,
+                            set = function(info, value)
+                                db.edgesize = value
+                            end,
+                            order = 30,
+                        },
+                    },
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                colors = {
+                    name = "Colors",
+                    type = "group",
+                    inline = true,
+                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                    order = 50,
+                    args = {
+                        background = {
+                            name = "Background",
+                            type = "color",
+                            hasAlpha = true,
+                            get = function(info,r,g,b,a)
+                                return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
+                            end,
+                            set = function(info,r,g,b,a)
+                                db.colors.bg[1] = r
+                                db.colors.bg[2] = g
+                                db.colors.bg[3] = b
+                                db.colors.bg[4] = a
+                            end,
+                            order = 10,
+                        },
+                        border = {
+                            name = "Border",
+                            type = "color",
+                            hasAlpha = true,
+                            get = function(info,r,g,b,a)
+                                return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
+                            end,
+                            set = function(info,r,g,b,a)
+                                db.colors.border[1] = r
+                                db.colors.border[2] = g
+                                db.colors.border[3] = b
+                                db.colors.border[4] = a
+                            end,
+                            order = 10,
                         },
                     },
                 },
@@ -2042,12 +3845,17 @@ local uiTweaks do
                 type = "header",
                 order = 0,
             },
+            altPowerBar = altPowerBar,
+            chat = chat,
             cooldown = cooldown,
             errorHider = errorHider,
             eventNotify = eventNotify,
             frameMover = frameMover,
+            loot = loot,
             minimap = minimap,
-            powerBar = powerBar,
+            mirrorBar = mirrorBar,
+            objectives = objectives,
+            speechBubbles = speechBubbles,
         }
     }
 end
