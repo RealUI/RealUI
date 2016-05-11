@@ -37,6 +37,21 @@ local uiTweaks do
     }
 end
 ]]
+local function CreateToggleOption(slug, name)
+    local modObj = RealUI:GetModule(slug)
+    return {
+        name = name,
+        desc = L["General_EnabledDesc"]:format(name),
+        type = "toggle",
+        get = function() return RealUI:GetModuleEnabled(slug) end,
+        set = function(info, value)
+            RealUI:SetModuleEnabled(slug, value)
+            if modObj.RefreshMod then
+                modObj:RefreshMod()
+            end
+        end
+    }
+end
 
 local core do
     local infoLine do
@@ -3819,21 +3834,6 @@ local uiTweaks do
         }
     end
 
-    --[[local function CreateToggleOption(mod)
-        local modObj = RealUI:GetModule(mod)
-        return {
-            name = L["Tweaks_"..mod],
-            desc = L["General_EnabledDesc"]:format(L["Tweaks_"..mod]),
-            type = "toggle",
-            get = function() return RealUI:GetModuleEnabled(mod) end,
-            set = function(info, value)
-                RealUI:SetModuleEnabled(mod, value)
-                if modObj.RefreshMod then
-                    modObj:RefreshMod()
-                end
-            end,
-        }
-    end]]
     uiTweaks = {
         name = L["Tweaks_UITweaks"],
         desc = L["Tweaks_UITweaksDesc"],
@@ -3845,6 +3845,7 @@ local uiTweaks do
                 type = "header",
                 order = 0,
             },
+            screenshot = CreateToggleOption("AchievementScreenshots", "Achievement Screenshots"),
             altPowerBar = altPowerBar,
             chat = chat,
             cooldown = cooldown,
