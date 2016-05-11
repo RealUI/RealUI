@@ -396,9 +396,7 @@ function RealUI:InstallProcedure()
         end
     end
 
-    if db.registeredChars then
-        db.registeredChars = nil
-    end
+    db.registeredChars[self.key] = true
     dbg.minipatches = nil
 
     -- Primary Stages

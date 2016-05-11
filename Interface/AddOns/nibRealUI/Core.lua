@@ -207,6 +207,7 @@ local defaults = {
             ['*'] = true,
             ["AchievementScreenshots"] = false,
         },
+        registeredChars = {},
         -- HuD positions
         positionsLink = true,
         positions = RealUI.defaultPositions,
@@ -652,7 +653,6 @@ function RealUI:LoadConfig(app, section, ...)
     if not configFailed then return self:ToggleConfig(app, section, ...) end
 
     -- For compat until new config is finished
-    --RealUI:SetUpOptions()
     if app == "HuD" and not ... then
         return RealUI:ShowConfigBar()
     end
@@ -666,24 +666,27 @@ end
 
 function RealUI:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
-    debug("OnInitialize", self.db.char.init.installStage)
+    debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
     self.media = db.media
-
-    if _G.nibRealUICharacter then
-        dbc.init.installStage = _G.nibRealUICharacter.installStage
-        dbc.init.initialized = _G.nibRealUICharacter.initialized
-        dbc.init.needchatmoved = _G.nibRealUICharacter.needchatmoved
-        _G.nibRealUICharacter = nil
-    end
 
     -- Vars
     self.classColor = RealUI:GetClassColor(self.class)
     self.key = ("%s - %s"):format(self.name, self.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
+
+    if _G.nibRealUICharacter then
+        debug("Keys", self.db.keys.char, _G.nibRealUIDB.profileKeys[self.db.keys.char])
+        if db.registeredChars[self.key] then
+            dbc.init.installStage = _G.nibRealUICharacter.installStage
+            dbc.init.initialized = _G.nibRealUICharacter.initialized
+            dbc.init.needchatmoved = _G.nibRealUICharacter.needchatmoved
+        end
+        _G.nibRealUICharacter = nil
+    end
 
     -- Profile change
     debug("Char", dbc.init.installStage)
