@@ -17,8 +17,6 @@ Init.lua
 Locale.xml
 
 Core.lua
-Config.lua
-
 Core.xml
 Modules.xml
 HuD.xml

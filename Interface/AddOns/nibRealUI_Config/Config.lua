@@ -208,7 +208,6 @@ local function InitializeOptions()
     local hlAnim = highlight.hlAnim
     local hl = hlAnim.hl
 
-    --RealUI:SetUpOptions() -- Old
     ACR:RegisterOptionsTable("RealUI", options.RealUI)
     ACD:SetDefaultSize("RealUI", 800, 600)
 
