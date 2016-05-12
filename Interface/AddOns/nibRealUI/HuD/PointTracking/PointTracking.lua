@@ -20,7 +20,6 @@ local PointTracking = RealUI:GetModule(MODNAME)
 
 local PlayerClass = RealUI.class
 local ClassPowerID, ClassPowerType
-local iconFrames = {}
 
 local MAX_RUNES = 6
 local classPowers = {
@@ -63,29 +62,26 @@ function PointTracking:GetResource()
     end
 end
 
-do
-    local locked = true
-    function PointTracking:Lock()
-        if not locked then
-            locked = true
-            local frame = iconFrames.Runes or iconFrames.ClassIcons
-            frame:EnableMouse(false)
-            frame.bg:Hide()
-        end
-        if not RealUI.isInTestMode then
-            self:ToggleConfigMode(false)
-        end
+function PointTracking:Lock()
+    if not db.locked then
+        db.locked = true
+        local frame = self.Runes or self.ClassIcons
+        frame:EnableMouse(false)
+        frame.bg:Hide()
     end
-    function PointTracking:Unlock()
-        if not RealUI.isInTestMode then
-            self:ToggleConfigMode(true)
-        end
-        if locked then
-            locked = false
-            local frame = iconFrames.Runes or iconFrames.ClassIcons
-            frame:EnableMouse(true)
-            frame.bg:Show()
-        end
+    if not RealUI.isInTestMode then
+        self:ToggleConfigMode(false)
+    end
+end
+function PointTracking:Unlock()
+    if not RealUI.isInTestMode then
+        self:ToggleConfigMode(true)
+    end
+    if db.locked then
+        db.locked = false
+        local frame = self.Runes or self.ClassIcons
+        frame:EnableMouse(true)
+        frame.bg:Show()
     end
 end
 
@@ -99,12 +95,22 @@ local function PositionRune(rune, index)
     end
     rune:SetPoint("CENTER", (size.width + gap) * mod, 0)
 end
+local function PositionIcon(icon, index, prevIcon)
+    local point, size = db.reverse and "RIGHT" or "LEFT", db.size
+    local gap = db.reverse and -(size.gap) or size.gap
+    if index == 1 then
+        icon:SetPoint(point)
+    else
+        icon:SetPoint(point, prevIcon, db.reverse and "LEFT" or "RIGHT", gap, 0)
+    end
+end
 
 function PointTracking:SettingsUpdate(event)
     self:debug("SettingsUpdate", event)
     if event == "gap" then
         local size = db.size
-        for element, frame in next, iconFrames do
+        for _, element in next, {"Runes", "BurningEmbers", "ClassIcons"} do
+            local frame = self[element]
             self:debug("element", element, #frame)
             for i = 1, #frame do
                 local icon = frame[i]
@@ -117,18 +123,14 @@ function PointTracking:SettingsUpdate(event)
                         icon:SetPoint("LEFT", frame[i-1], "RIGHT", size.gap, 0)
                     end
                 elseif element == "ClassIcons" then
-                    local gap = db.reverse and -(size.gap) or size.gap
-                    local point, _, relPoint = icon:GetPoint()
-                    if i == 1 then
-                        icon:SetPoint(point)
-                    else
-                        icon:SetPoint(point, frame[i-1], relPoint, gap, 0)
-                    end
+                    icon:ClearAllPoints()
+                    PositionIcon(icon, i, frame[i-1])
                 end
             end
         end
     elseif event == "size" then
-        for element, frame in next, iconFrames do
+        for _, element in next, {"Runes", "BurningEmbers", "ClassIcons"} do
+            local frame = self[element]
             for i = 1, #frame do
                 local icon = frame[i]
                 icon:SetSize(db.size.width, db.size.height)
@@ -138,7 +140,7 @@ function PointTracking:SettingsUpdate(event)
             end
         end
     elseif event == "position" then
-        local frame = iconFrames.Runes or iconFrames.ClassIcons
+        local frame = self.Runes or self.ClassIcons
         frame:RestorePosition()
     end
 end
@@ -211,45 +213,59 @@ function PointTracking:CreateClassIcons(unitFrame, unit)
         LibWin.OnDragStop(...)
     end)
 
-    local texture = powerTextures[ClassPowerType] or powerTextures.circle
-    local point, size = db.reverse and "RIGHT" or "LEFT", db.size
-    local gap = db.reverse and -(size.gap) or size.gap
-    for index = 1, (isBeta and 8 or 6) do
-        local Icon = _G.CreateFrame("Frame", "ClassIcon"..index, ClassIcons)
-        Icon:SetSize(size.width, size.height)
+    local bg = ClassIcons:CreateTexture()
+    bg:SetTexture(1, 1, 1, 0.5)
+    bg:SetAllPoints(ClassIcons)
+    bg:Hide()
+    ClassIcons.bg = bg
 
-        local bg = Icon:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
+    function ClassIcons:PostUpdate(cur, max, hasMaxChanged, event)
+        PointTracking:debug("ClassIcons:PostUpdate", cur, max, hasMaxChanged, event, db.hideempty, PointTracking.configMode)
+        if not db.hideempty or (event == "ForceUpdate" or PointTracking.configMode) then
+            for i = 1, max or 0 do -- max will be nil when the icon is disabled
+                local iconBG = self[i].bg
+                local alpha = RealUI.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, self:GetAlpha())
+                iconBG:SetDesaturated(i > cur)
+                iconBG:SetAlpha(iconBG:IsDesaturated() and alpha or 1)
+                self[i]:SetShown(PointTracking.configMode or not db.hideempty)
+            end
+        end
+    end
+
+    local texture, size = powerTextures[ClassPowerType] or powerTextures.circle, db.size
+    for index = 1, (isBeta and 8 or 6) do
+        local icon = _G.CreateFrame("Frame", "ClassIcon"..index, ClassIcons)
+        icon:SetSize(size.width, size.height)
+
+        local iconBG = icon:CreateTexture(nil, "BACKGROUND")
+        iconBG:SetAllPoints()
+        icon.bg = iconBG
 
         if PlayerClass == "PALADIN" then
-            Icon:SetPoint("CENTER")
-            bg:SetTexture(texture[index])
+            icon:SetPoint("CENTER")
+            iconBG:SetTexture(texture[index])
         else
-            if index == 1 then
-                Icon:SetPoint(point)
-            else
-                Icon:SetPoint(point, ClassIcons[index-1], db.reverse and "LEFT" or "RIGHT", gap, 0)
-            end
+            PositionIcon(icon, index, ClassIcons[index-1])
 
             local coords = texture.coords
-            bg:SetTexture(texture.bg)
-            bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+            iconBG:SetTexture(texture.bg)
+            iconBG:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
 
-            local border = Icon:CreateTexture(nil, "BORDER")
+            local border = icon:CreateTexture(nil, "BORDER")
             border:SetAllPoints()
             border:SetTexture(texture.border)
             border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
         end
 
-        function Icon:SetVertexColor(r, g, b)
-            PointTracking:debug("Icon:SetVertexColor", index, r, g, b)
-            bg:SetVertexColor(r, g, b)
+        function icon:SetVertexColor(r, g, b)
+            PointTracking:debug("icon:SetVertexColor", index, r, g, b)
+            iconBG:SetVertexColor(r, g, b)
         end
 
-        ClassIcons[index] = Icon
+        ClassIcons[index] = icon
     end
     unitFrame.ClassIcons = ClassIcons
-    iconFrames.ClassIcons = ClassIcons
+    PointTracking.ClassIcons = ClassIcons
 
     if not isBeta and PlayerClass == "ROGUE" then
         unitFrame:RegisterEvent("UNIT_AURA", GetAnticipation)
@@ -274,6 +290,12 @@ function PointTracking:CreateRunes(unitFrame, unit)
         LibWin.OnDragStop(...)
     end)
 
+    local bg = Runes:CreateTexture()
+    bg:SetTexture(1, 1, 1, 0.5)
+    bg:SetAllPoints(Runes)
+    bg:Hide()
+    Runes.bg = bg
+
     local size = db.size
     for index = 1, MAX_RUNES do
         local Rune = _G.CreateFrame("StatusBar", "Rune"..index, Runes)
@@ -285,16 +307,16 @@ function PointTracking:CreateRunes(unitFrame, unit)
         tex:SetTexture(0.8, 0.8, 0.8)
         Rune:SetStatusBarTexture(tex)
 
-        local bg = Rune:CreateTexture(nil, "BACKGROUND")
-        bg:SetTexture(0, 0, 0)
-        bg:SetPoint("TOPLEFT", tex, -1, 1)
-        bg:SetPoint("BOTTOMRIGHT", tex, 1, -1)
+        local runeBG = Rune:CreateTexture(nil, "BACKGROUND")
+        runeBG:SetTexture(0, 0, 0)
+        runeBG:SetPoint("TOPLEFT", tex, -1, 1)
+        runeBG:SetPoint("BOTTOMRIGHT", tex, 1, -1)
 
         Runes[index] = Rune
     end
 
     unitFrame.Runes = Runes
-    iconFrames.Runes = Runes
+    self.Runes = Runes
 end
 
 function PointTracking:CreateBurningEmbers(unitFrame, unit)
@@ -315,6 +337,24 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     BurningEmbers:SetAllPoints(unitFrame.ClassIcons)
     CombatFader:RegisterFrameForFade(MODNAME, BurningEmbers)
 
+    function BurningEmbers:PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
+        PointTracking:debug("BurningEmbers:PostUpdate", curFull, curRaw, maxFull, maxRaw, event, db.hideempty, PointTracking.configMode)
+        for i = 1, (maxFull or 0) do
+            local ember, showEmpty = self[i], not db.hideempty or (event == "ForceUpdate" or PointTracking.configMode)
+            local alpha = RealUI.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, self:GetAlpha())
+            if i <= curFull then
+                ember:SetStatusBarColor(color[1] * 2, color[2] * 2, color[3] * 2)
+                ember:Show()
+            elseif i == curFull+1 then
+                ember:SetStatusBarColor(color[1], color[2], color[3], alpha * 2)
+                ember:Show()
+            else
+                ember:SetStatusBarColor(color[1], color[2], color[3], showEmpty and alpha)
+                ember:SetShown(showEmpty)
+            end
+        end
+    end
+
     local size, sizeMod = db.size, 2
     for index = 1, 4 do
         local ember = unitFrame:CreateAngleFrame("Status", size.width + sizeMod, size.height - sizeMod, BurningEmbers, info)
@@ -327,22 +367,16 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
         BurningEmbers[index] = ember
     end
     unitFrame.BurningEmbers = BurningEmbers
-    iconFrames.BurningEmbers = BurningEmbers
+    self.BurningEmbers = BurningEmbers
 end
 
 function PointTracking:ToggleConfigMode(val)
-    local powerID, iconFrame
-    if not isBeta and (PlayerClass == "WARLOCK" and _G.GetSpecialization() == _G.SPEC_WARLOCK_DESTRUCTION) then
-        powerID = _G.SPELL_POWER_BURNING_EMBERS
-        iconFrame = iconFrames.BurningEmbers
-    else
-        powerID = ClassPowerID
-        iconFrame = iconFrames.ClassIcons
-    end
-    if RealUI:GetModuleEnabled(MODNAME) then
-        for i = 1, _G.UnitPowerMax("player", powerID) do
-            iconFrame[i]:SetShown(val)
-        end
+    if self.configMode == val then return end
+    self.configMode = val
+
+    local iconFrame = self.ClassIcons
+    if iconFrame then
+        iconFrame:ForceUpdate()
     end
 end
 
@@ -352,6 +386,7 @@ function PointTracking:OnInitialize()
         classDB = {
             hideempty = true, -- Only show used icons
             reverse = false, -- Points start on the right
+            locked = true,
             size = {
                 width = 13,
                 height = 13,

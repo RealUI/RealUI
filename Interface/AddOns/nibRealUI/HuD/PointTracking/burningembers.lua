@@ -12,11 +12,29 @@ local function UNIT_POWER(self, event, unit, powerType)
 	local element = self.BurningEmbers
 
 	local total = _G.UnitPower('player', _G.SPELL_POWER_BURNING_EMBERS, true)
+	local max = _G.UnitPowerMax('player', _G.SPELL_POWER_BURNING_EMBERS, true) 
 
 	local cur = total
 	for index = 1, 4 do
 		element[index]:SetValue(cur)
 		cur = cur - 10
+	end
+
+	--[[ :PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
+
+	 Called after the element has been updated
+
+	 Arguments
+
+	 self          - The BurningEmbers element
+	 curFull       - The current amount of full embers
+	 curRaw        - The current raw amount of embers
+	 maxFull       - The maximum amount of full embers
+	 maxRaw        - The maximum raw amount of embers
+	 event         - The event, which the update happened for
+	]]
+	if(element.PostUpdate) then
+		return element:PostUpdate(_G.floor(total/10), total, _G.floor(max/10), max, event)
 	end
 end
 

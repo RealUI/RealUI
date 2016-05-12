@@ -1853,10 +1853,16 @@ local classresource do
                         name = L["Resource_HideUnused"]:format(pointName),
                         desc = L["Resource_HideUnusedDesc"]:format(pointName),
                         type = "toggle",
-                        hidden = RealUI.class == "DEATHKNIGHT",
+                        hidden = RealUI.class == "DEATHKNIGHT" or (not RealUI.isBeta and power[i].type == "COMBO_POINTS"),
                         get = function(info) return db.hideempty end,
                         set = function(info, value) 
                             db.hideempty = value
+                            if PointTracking.ClassIcons then
+                                PointTracking.ClassIcons:ForceUpdate()
+                            end
+                            if PointTracking.BurningEmbers then
+                                PointTracking.BurningEmbers:ForceUpdate()
+                            end
                         end,
                         order = 5,
                     },
