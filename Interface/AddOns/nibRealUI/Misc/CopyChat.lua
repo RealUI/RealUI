@@ -46,7 +46,7 @@ local function copyChat(self)
     _G.FCF_SetChatWindowFontSize(self, chat, fontSize)
     
     if (lineCount > 0) then
-        dump.frame.title:SetText(chat:GetName() .. " Copy Frame")
+        dump.frame.TitleText:SetText(chat:GetName() .. " Copy Frame")
         
         dump:Display()
     end
