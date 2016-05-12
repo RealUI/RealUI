@@ -119,7 +119,11 @@ function AngleStatusBar:SetBarColor(bar, r, g, b, a)
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
     for i = 1, #bar.row do
-        bar.row[i]:SetTexture(r, g, b, a or 1)
+        if isBeta then
+            bar.row[i]:SetColorTexture(r, g, b, a or 1)
+        else
+            bar.row[i]:SetTexture(r, g, b, a or 1)
+        end
     end
 end
 
