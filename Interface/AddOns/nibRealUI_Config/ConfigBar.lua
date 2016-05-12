@@ -1857,12 +1857,7 @@ local classresource do
                         get = function(info) return db.hideempty end,
                         set = function(info, value) 
                             db.hideempty = value
-                            if PointTracking.ClassIcons then
-                                PointTracking.ClassIcons:ForceUpdate()
-                            end
-                            if PointTracking.BurningEmbers then
-                                PointTracking.BurningEmbers:ForceUpdate()
-                            end
+                            PointTracking:ForceUpdate()
                         end,
                         order = 5,
                     },

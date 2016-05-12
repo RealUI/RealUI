@@ -340,12 +340,12 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     function BurningEmbers:PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
         PointTracking:debug("BurningEmbers:PostUpdate", curFull, curRaw, maxFull, maxRaw, event, db.hideempty, PointTracking.configMode)
         for i = 1, (maxFull or 0) do
-            local ember, showEmpty = self[i], not db.hideempty or (event == "ForceUpdate" or PointTracking.configMode)
+            local ember, showEmpty = self[i], not db.hideempty or (event == "ForceUpdate" and PointTracking.configMode)
             local alpha = RealUI.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, self:GetAlpha())
             if i <= curFull then
                 ember:SetStatusBarColor(color[1] * 2, color[2] * 2, color[3] * 2)
                 ember:Show()
-            elseif i == curFull+1 then
+            elseif i == curFull+1 and curRaw % 10 > 0 then
                 ember:SetStatusBarColor(color[1], color[2], color[3], alpha * 2)
                 ember:Show()
             else
@@ -358,7 +358,6 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     local size, sizeMod = db.size, 2
     for index = 1, 4 do
         local ember = unitFrame:CreateAngleFrame("Status", size.width + sizeMod, size.height - sizeMod, BurningEmbers, info)
-        ember:SetStatusBarColor(color[1], color[2], color[3])
         if index == 1 then
             ember:SetPoint("LEFT")
         else
@@ -370,14 +369,20 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     self.BurningEmbers = BurningEmbers
 end
 
+function PointTracking:ForceUpdate()
+    if self.ClassIcons then
+        self.ClassIcons:ForceUpdate()
+    end
+    if self.BurningEmbers then
+        self.BurningEmbers:ForceUpdate()
+    end
+end
+
 function PointTracking:ToggleConfigMode(val)
     if self.configMode == val then return end
     self.configMode = val
 
-    local iconFrame = self.ClassIcons
-    if iconFrame then
-        iconFrame:ForceUpdate()
-    end
+    self:ForceUpdate()
 end
 
 function PointTracking:OnInitialize()
