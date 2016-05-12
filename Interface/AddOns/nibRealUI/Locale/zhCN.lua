@@ -77,8 +77,10 @@ L["Power_Turbo"] = [=[极速
 L["Power_TurboDesc"] = "这种模式下图形更新速度将很快，UI的动画效果将变得很平滑。" -- Needs review
 L["Reset_Confirm"] = "是否确定需要重置RealUI设置？"
 L["Reset_SettingsLost"] = "所有用户设置都将丢失。" -- Needs review
--- L["Tweaks_HideRaidFilter"] = ""
--- L["Tweaks_HideRaidFilterDesc"] = ""
+-- L["Tweaks_CooldownCount"] = ""
+-- L["Tweaks_CooldownCountDesc"] = ""
+-- L["Tweaks_UITweaks"] = ""
+-- L["Tweaks_UITweaksDesc"] = ""
 
 
 -- Config
@@ -176,6 +178,8 @@ L["HuD_Width"] = "宽度" -- Needs review
 -- L["Misc_SpellAlertsWidthDesc"] = ""
 L["Raid_30Width"] = "30人宽度" -- Needs review
 L["Raid_40Width"] = "40人宽度" -- Needs review
+-- L["Raid_HideRaidFilter"] = ""
+-- L["Raid_HideRaidFilterDesc"] = ""
 -- L["Raid_LargeGroup"] = ""
 -- L["Raid_LargeGroupDesc"] = ""
 L["Raid_ShowSolo"] = "单人下显示" -- Needs review
