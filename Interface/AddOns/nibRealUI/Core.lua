@@ -646,22 +646,11 @@ function RealUI:LoadConfig(app, section, ...)
         configLoaded = true
         local loaded, reason = _G.LoadAddOn("nibRealUI_Config")
         if not loaded then
-             _G.print("Failed to load nibRealUI_Config:", reason)
+            _G.print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
     end
     if not configFailed then return self:ToggleConfig(app, section, ...) end
-
-    -- For compat until new config is finished
-    if app == "HuD" and not ... then
-        return RealUI:ShowConfigBar()
-    end
-    local ACD = _G.LibStub("AceConfigDialog-3.0")
-    if ACD.OpenFrames[app] then
-        ACD:Close(app)
-    else
-        ACD:Open(app, section, ...)
-    end
 end
 
 function RealUI:OnInitialize()
