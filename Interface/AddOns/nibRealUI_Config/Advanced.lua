@@ -1898,82 +1898,84 @@ local uiTweaks do
     end
     local errorHider do
         local MODNAME = "ErrorHider"
-        local ErrorHider = RealUI:GetModule(MODNAME)
-        local db = ErrorHider.db.profile
-        errorHider = {
-            name = "Error Hider",
-            desc = "Hide specific error messages.",
-            type = "group",
-            args = {
-                header = {
-                    name = "Error Hider",
-                    type = "header",
-                    order = 10,
+        local ErrorHider = RealUI:GetModule(MODNAME, true)
+        if ErrorHider then
+            local db = ErrorHider.db.profile
+            errorHider = {
+                name = "Error Hider",
+                desc = "Hide specific error messages.",
+                type = "group",
+                args = {
+                    header = {
+                        name = "Error Hider",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Hide specific error messages.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Error Hider module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value) 
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                        end,
+                        order = 30,
+                    },
+                    gap1 = {
+                        name = " ",
+                        type = "description",
+                        order = 31,
+                    },
                 },
-                desc = {
-                    name = "Hide specific error messages.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Error Hider module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-            },
-        }
-        -- Create Filter List options table
-        local filteropts = {
-            name = "Filter List",
-            type = "group",
-            inline = true,
-            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            order = 40,
-            args = {
-                hideall = {
-                    name = "Hide All",
-                    desc = "Hide all error messages.",
-                    type = "toggle",
-                    get = function() return db.hideall end,
-                    set = function(info, value) 
-                        db.hideall = value
-                    end,
-                    order = 20,
-                },
-                sep = {
-                    name = " ",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 30,
-                },
-            },
-        }
-        for errorText, isHidden in next, db.filterlist do
-            -- Create base options for Addons
-            filteropts.args[errorText] = {
-                name = errorText,
-                type = "toggle",
-                disabled = function() return db.hideall or (not RealUI:GetModuleEnabled(MODNAME)) end,
-                width = "full",
-                get = function(info) return db.filterlist[errorText] end,
-                set = function(info, value)
-                    db.filterlist[errorText] = value
-                end,
-                order = 40
             }
+            -- Create Filter List options table
+            local filteropts = {
+                name = "Filter List",
+                type = "group",
+                inline = true,
+                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                order = 40,
+                args = {
+                    hideall = {
+                        name = "Hide All",
+                        desc = "Hide all error messages.",
+                        type = "toggle",
+                        get = function() return db.hideall end,
+                        set = function(info, value) 
+                            db.hideall = value
+                        end,
+                        order = 20,
+                    },
+                    sep = {
+                        name = " ",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 30,
+                    },
+                },
+            }
+            for errorText, isHidden in next, db.filterlist do
+                -- Create base options for Addons
+                filteropts.args[errorText] = {
+                    name = errorText,
+                    type = "toggle",
+                    disabled = function() return db.hideall or (not RealUI:GetModuleEnabled(MODNAME)) end,
+                    width = "full",
+                    get = function(info) return db.filterlist[errorText] end,
+                    set = function(info, value)
+                        db.filterlist[errorText] = value
+                    end,
+                    order = 40
+                }
+            end
+            errorHider.args.filterlist = filteropts
         end
-        errorHider.args.filterlist = filteropts
     end
     local eventNotify do
         local MODNAME = "EventNotifier"
