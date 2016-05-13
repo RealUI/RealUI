@@ -2,7 +2,6 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -12,165 +11,8 @@ local MODNAME = "AltPowerBar"
 local AltPowerBar = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
-
 local APBFrames = {}
-
 local UpdateInterval = 0
-
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Alt Power Bar",
-        arg = MODNAME,
-        childGroups = "tab",
-        -- order = 112,
-        args = {
-            header = {
-                type = "header",
-                name = "Alt Power Bar",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Replacement of the default Alternate Power Bar.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Alt Power Bar module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value)
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            size = {
-                name = "Size",
-                type = "group",
-                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                inline = true,
-                order = 50,
-                args = {
-                    width = {
-                        type = "input",
-                        name = "Width",
-                        width = "half",
-                        order = 10,
-                        get = function(info) return _G.tostring(db.size.width) end,
-                        set = function(info, value)
-                            value = RealUI:ValidateOffset(value)
-                            db.size.width = value
-                            AltPowerBar:UpdatePosition()
-                        end,
-                    },
-                    height = {
-                        type = "input",
-                        name = "Height",
-                        width = "half",
-                        order = 20,
-                        get = function(info) return _G.tostring(db.size.height) end,
-                        set = function(info, value)
-                            value = RealUI:ValidateOffset(value)
-                            db.size.height = value
-                            AltPowerBar:UpdatePosition()
-                        end,
-                    },
-                },
-            },
-            gap2 = {
-                name = " ",
-                type = "description",
-                order = 51,
-            },
-            position = {
-                name = "Position",
-                type = "group",
-                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                inline = true,
-                order = 60,
-                args = {
-                    position = {
-                        name = "Position",
-                        type = "group",
-                        inline = true,
-                        order = 10,
-                        args = {
-                            xoffset = {
-                                type = "input",
-                                name = "X Offset",
-                                width = "half",
-                                order = 10,
-                                get = function(info) return _G.tostring(db.position.x) end,
-                                set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
-                                    db.position.x = value
-                                    AltPowerBar:UpdatePosition()
-                                end,
-                            },
-                            yoffset = {
-                                type = "input",
-                                name = "Y Offset",
-                                width = "half",
-                                order = 20,
-                                get = function(info) return _G.tostring(db.position.y) end,
-                                set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
-                                    db.position.y = value
-                                    AltPowerBar:UpdatePosition()
-                                end,
-                            },
-                            anchorto = {
-                                type = "select",
-                                name = "Anchor To",
-                                get = function(info)
-                                    for k,v in next, RealUI.globals.anchorPoints do
-                                        if v == db.position.anchorto then return k end
-                                    end
-                                end,
-                                set = function(info, value)
-                                    db.position.anchorto = RealUI.globals.anchorPoints[value]
-                                    AltPowerBar:UpdatePosition()
-                                end,
-                                style = "dropdown",
-                                width = nil,
-                                values = RealUI.globals.anchorPoints,
-                                order = 30,
-                            },
-                            anchorfrom = {
-                                type = "select",
-                                name = "Anchor From",
-                                get = function(info)
-                                    for k,v in next, RealUI.globals.anchorPoints do
-                                        if v == db.position.anchorfrom then return k end
-                                    end
-                                end,
-                                set = function(info, value)
-                                    db.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                    AltPowerBar:UpdatePosition()
-                                end,
-                                style = "dropdown",
-                                width = nil,
-                                values = RealUI.globals.anchorPoints,
-                                order = 40,
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
 
 -- Events
 function AltPowerBar:PowerUpdate()
@@ -293,7 +135,6 @@ function AltPowerBar:OnInitialize()
     db = self.db.profile
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
 
     AltPowerBar:CreateFrames()
 end

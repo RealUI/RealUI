@@ -7,14 +7,8 @@ local next = _G.next
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
-local db, dbg
+local db, dbc, dbg
 local debug = RealUI.GetDebug("Settings")
-
-local nibRealUICharacter_defaults = {
-    installStage = 0,
-    initialized = false,
-    needchatmoved = true,
-}
 
 local Textures = {
     Logo = [[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]],
@@ -86,6 +80,7 @@ local characterCVars = {
 
 -- CVars
 local function SetDefaultCVars()
+    debug("SetDefaultCVars")
     if _G.IsAddOnLoaded("MikScrollingBattleText") then
         accountCVars["enableCombatText"] = 0   -- Turn off Combat Text
         accountCVars["CombatDamage"] = 0       -- Turn off Combat Text - Damage
@@ -99,6 +94,7 @@ end
 
 -- Initial Settings
 local function InitialSettings()
+    debug("InitialSettings")
     ---- Chat
     -- Lock chat frames
     for i = 1, 10 do
@@ -124,13 +120,13 @@ local function InitialSettings()
     end
 
     -- Initial Settings done
-    _G.nibRealUICharacter.initialized = true
+    dbc.init.initialized = true
 end
 
 ---- Primary Installation
 ---- Stage 1
 local function RunStage1()
-    _G.nibRealUICharacter.installStage = -1
+    dbc.init.installStage = -1
 
     if dbg.tags.firsttime then
         dbg.tags.firsttime = false
@@ -181,6 +177,7 @@ local function CreateIWTextureFrame(texture, width, height, position, color)
 end
 
 local function CreateInstallWindow()
+    debug("CreateInstallWindow")
     -- To help with debugging
     local bdAlpha, ibSizeOffs = 0.9, 0
     if RealUI.isDev then
@@ -296,6 +293,7 @@ local function CreateInstallWindow()
 end
 
 local function InstallationStage1()
+    debug("InstallationStage1")
     -- Create Installation Window
     CreateInstallWindow()
 
@@ -306,7 +304,7 @@ local function InstallationStage1()
     end
 
     -- Initial Character Settings
-    if not _G.nibRealUICharacter.initialized then
+    if not dbc.init.initialized then
         InitialSettings()
     end
 
@@ -321,7 +319,8 @@ end
 
 ---- Process
 local function PrimaryInstallation()
-    if _G.nibRealUICharacter.installStage > -1 then
+    debug("PrimaryInstallation", dbc.init.installStage)
+    if dbc.init.installStage > -1 then
         InstallationStage1()
     end
 end
@@ -378,13 +377,16 @@ end
 
 -- Install Procedure
 function RealUI:InstallProcedure()
+    debug("InstallProcedure", RealUI.db.char.init.installStage)
     db = self.db.profile
+    dbc = self.db.char
     dbg = self.db.global
 
     ---- Version checking
     local curVer = RealUI.verinfo
     local oldVer = (dbg.verinfo[1] and dbg.verinfo) or RealUI.verinfo
     local newVer = RealUI:MajorVerChange(oldVer, curVer)
+    debug("Version", curVer, oldVer, newVer)
 
     -- Reset DB if new Major version
     if newVer == "major" then
@@ -394,17 +396,12 @@ function RealUI:InstallProcedure()
         end
     end
 
-    -- Set Char defaults
-    if not(db.registeredChars[self.key]) or not (_G.nibRealUICharacter) or (newVer == "major") or not(_G.nibRealUICharacter.installStage) then
-        _G.nibRealUICharacter = nibRealUICharacter_defaults
-        db.registeredChars[self.key] = true
-    --elseif not dbg.verinfo[1] or newVer == "minor" then
-        --
-    end
+    db.registeredChars[self.key] = true
     dbg.minipatches = nil
 
     -- Primary Stages
-    if _G.nibRealUICharacter.installStage > -1 then
+    debug("Stage", dbc.init.installStage)
+    if dbc.init.installStage > -1 then
         PrimaryInstallation()
 
     -- Mini Patch

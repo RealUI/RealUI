@@ -81,8 +81,10 @@ L["Power_TurboDesc"] = [=[This mode will schedule graphical updates at a fast ra
 This will increase CPU usage.]=]
 L["Reset_Confirm"] = "Are you sure you wish to reset RealUI?"
 L["Reset_SettingsLost"] = "All user settings will be lost."
-L["Tweaks_HideRaidFilter"] = "Hide raid filters"
-L["Tweaks_HideRaidFilterDesc"] = "Hide the group filters for Blizzard's Compact Raid Frames"
+L["Tweaks_CooldownCount"] = "Cooldown Count"
+L["Tweaks_CooldownCountDesc"] = "Modifies the countdown text on cooldown swipes"
+L["Tweaks_UITweaks"] = "UI Tweaks"
+L["Tweaks_UITweaksDesc"] = "Minor functional tweaks for the default UI"
 
 
 -- Config
@@ -181,6 +183,8 @@ L["Misc_SpellAlertsDesc"] = "Modify the position and size of the Spell Alerts."
 L["Misc_SpellAlertsWidthDesc"] = "Adjust the distance between the left and right Spell Alert Overlays."
 L["Raid_30Width"] = "30 Player Width"
 L["Raid_40Width"] = "40 Player Width"
+L["Raid_HideRaidFilter"] = "Hide raid filters"
+L["Raid_HideRaidFilterDesc"] = "Hide the group filters for Blizzard's Raid Frame Manager"
 L["Raid_LargeGroup"] = "Large groups"
 L["Raid_LargeGroupDesc"] = "Use horizontal groups while in large groups like raids or battlegrounds"
 L["Raid_ShowSolo"] = "Show While Solo"

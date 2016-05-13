@@ -12,7 +12,7 @@ if RealUI.locale == "esMX" then
 -- L["Slash_Profile"] = ""
 -- L["Slash_RealUI"] = ""
 -- L["Slash_Taint"] = ""
-L["Version"] = "Versión"
+L["Version"] = "Versión" -- Needs review
 
 
 -- Install
@@ -76,8 +76,10 @@ L["Version"] = "Versión"
 -- L["Power_TurboDesc"] = ""
 -- L["Reset_Confirm"] = ""
 -- L["Reset_SettingsLost"] = ""
--- L["Tweaks_HideRaidFilter"] = ""
--- L["Tweaks_HideRaidFilterDesc"] = ""
+-- L["Tweaks_CooldownCount"] = ""
+-- L["Tweaks_CooldownCountDesc"] = ""
+-- L["Tweaks_UITweaks"] = ""
+-- L["Tweaks_UITweaksDesc"] = ""
 
 
 -- Config
@@ -174,6 +176,8 @@ L["Version"] = "Versión"
 -- L["Misc_SpellAlertsWidthDesc"] = ""
 -- L["Raid_30Width"] = ""
 -- L["Raid_40Width"] = ""
+-- L["Raid_HideRaidFilter"] = ""
+-- L["Raid_HideRaidFilterDesc"] = ""
 -- L["Raid_LargeGroup"] = ""
 -- L["Raid_LargeGroupDesc"] = ""
 -- L["Raid_ShowSolo"] = ""

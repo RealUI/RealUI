@@ -10,43 +10,6 @@ local RealUI = private.RealUI
 local MODNAME = "AchievementScreenshots"
 local AchievementScreenshots = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Achievement Screenshots",
-        desc = "Takes a screenshot whenever an achievement is earned.",
-        arg = MODNAME,
-        -- order = 1916,
-        args = {
-            header = {
-                type = "header",
-                name = "Achievement Screenshots",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Takes a screenshot whenever an achievement is earned.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Achievement Screenshots module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
 ----------------------------------------------------------------------------------------
 --  Take screenshots of Achievements(Based on Achievement Screenshotter by Blamdarot)
 ----------------------------------------------------------------------------------------
@@ -89,7 +52,6 @@ function AchievementScreenshots:OnInitialize()
     })
     
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function AchievementScreenshots:OnEnable()

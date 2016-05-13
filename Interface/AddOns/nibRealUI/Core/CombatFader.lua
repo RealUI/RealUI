@@ -17,11 +17,11 @@ local FADE_TIME = 0.20
 local status = "incombat"
 local modules = {}
 
-local function isFullPower(token)
+local function isPowerRested(token)
     if RealUI.ReversePowers[token] then
-        return _G.UnitPower("player") > 0
+        return _G.UnitPower("player") == 0
     else
-        return _G.UnitPower("player") < _G.UnitPowerMax("player")
+        return _G.UnitPower("player") == _G.UnitPowerMax("player")
     end
 end
 
@@ -66,6 +66,7 @@ end
 function CombatFader:UpdateStatus(force)
     self:debug("UpdateStatus", force)
     local OldStatus = status
+    local _, powerToken = _G.UnitPowerType("player")
     if _G.UnitAffectingCombat("player") then
         status = "incombat"                 -- InCombat - Priority 1
     elseif _G.UnitExists("target") then
@@ -74,15 +75,10 @@ function CombatFader:UpdateStatus(force)
         else
             status = "target"               -- Target - Priority 3
         end
-    elseif _G.UnitHealth("player") < _G.UnitHealthMax("player") then
+    elseif (_G.UnitHealth("player") < _G.UnitHealthMax("player")) or not isPowerRested(powerToken) then
         status = "hurt"                     -- Hurt - Priority 4
     else
-        local _, powerToken = _G.UnitPowerType("player")
-        if isFullPower(powerToken) then
-            status = "hurt"
-        else
-            status = "outofcombat"          -- OutOfCombat - Priority 5
-        end
+        status = "outofcombat"          -- OutOfCombat - Priority 5
     end
     if force or status ~= OldStatus then self:FadeFrames() end  
 end

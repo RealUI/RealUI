@@ -12,7 +12,7 @@ if RealUI.locale == "zhTW" then
 -- L["Slash_Profile"] = ""
 -- L["Slash_RealUI"] = ""
 -- L["Slash_Taint"] = ""
-L["Version"] = "版"
+L["Version"] = "版" -- Needs review
 
 
 -- Install
@@ -76,8 +76,10 @@ L["Version"] = "版"
 -- L["Power_TurboDesc"] = ""
 -- L["Reset_Confirm"] = ""
 -- L["Reset_SettingsLost"] = ""
--- L["Tweaks_HideRaidFilter"] = ""
--- L["Tweaks_HideRaidFilterDesc"] = ""
+-- L["Tweaks_CooldownCount"] = ""
+-- L["Tweaks_CooldownCountDesc"] = ""
+-- L["Tweaks_UITweaks"] = ""
+-- L["Tweaks_UITweaksDesc"] = ""
 
 
 -- Config
@@ -174,6 +176,8 @@ L["Version"] = "版"
 -- L["Misc_SpellAlertsWidthDesc"] = ""
 -- L["Raid_30Width"] = ""
 -- L["Raid_40Width"] = ""
+-- L["Raid_HideRaidFilter"] = ""
+-- L["Raid_HideRaidFilterDesc"] = ""
 -- L["Raid_LargeGroup"] = ""
 -- L["Raid_LargeGroupDesc"] = ""
 -- L["Raid_ShowSolo"] = ""

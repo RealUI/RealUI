@@ -133,6 +133,62 @@ RealUI.minipatches = {
             end
         end
     end,
+    [16] = function(ver)
+        debug("r"..ver)
+        local nibRealUIDB = _G.nibRealUIDB
+        if nibRealUIDB.namespaces.PointTracking.profiles then
+            local classDB = {}
+            local profile = nibRealUIDB.namespaces.PointTracking.profiles.RealUI
+            for class, classInfo in next, profile do
+                debug(class, classInfo)
+                if classInfo.types then
+                    classDB[class] = {}
+                    for typePower, typeInfo in next, classInfo.types do
+                        debug(typePower, typeInfo)
+                        if typeInfo.general then
+                            debug("hideempty", typeInfo.general.hideempty)
+                            classDB[class].hideempty = typeInfo.general.hideempty
+                            if typeInfo.general.direction then
+                                debug("reverse", typeInfo.general.direction.reverse)
+                                classDB[class].reverse = typeInfo.general.direction.reverse
+                            end
+                        end
+                    end
+                end
+            end
+            nibRealUIDB.namespaces.PointTracking.class = classDB
+            nibRealUIDB.namespaces.PointTracking.profiles = nil
+        end
+        if nibRealUIDB.namespaces.AuraTracking then
+            if nibRealUIDB.namespaces.AuraTracking.class.WARLOCK then
+                -- Remove Burning Embers tracker
+                nibRealUIDB.namespaces.AuraTracking.class.WARLOCK["9-a6a32ca3-1"] = nil
+            end
+        end
+
+        -- Remove some trash
+        for charName, charInfo in next, nibRealUIDB.char do
+            if charInfo.addonProfiles then
+                charInfo.addonProfiles = nil
+            end
+        end
+        local trash = {
+            "ActionBarDoodads",
+            "PetBattles",
+            "RaidDebuffs",
+            "RaidUtility",
+            "RavenBorders",
+            "RuneDisplay",
+            "SkinDBM",
+            "SkinDXE",
+            "StatDisplay",
+        }
+        for index, namespace in next, trash do
+            if nibRealUIDB.namespaces[namespace] then
+                nibRealUIDB.namespaces[namespace] = nil
+            end
+        end
+    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,

@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: RealUI Core
 ## Author: Nibelheim, Gethe
-## Version: 8.1 r15c
+## Version: 8.1 r16
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## RequiredDeps: !Aurora_RealUI
@@ -17,8 +17,6 @@ Init.lua
 Locale.xml
 
 Core.lua
-Config.lua
-
 Core.xml
 Modules.xml
 HuD.xml

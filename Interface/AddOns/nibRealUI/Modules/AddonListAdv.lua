@@ -14,44 +14,6 @@ local AddonListAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Addon List Adv.",
-        desc = "Enhances the Addon List.",
-        childGroups = "tab",
-        arg = MODNAME,
-        args = {
-            header = {
-                type = "header",
-                name = "Addon List Adv.",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Enhances the Addon List.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Addon List Adv. module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value)
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                    AddonListAdv:RefreshMod()
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    return options
-end
-
 local function OnSaveAs(self)
     local popup;
     if self:GetParent():GetName() == "UIParent" then
@@ -409,9 +371,7 @@ function AddonListAdv:OnInitialize()
     dbk = self.db.class
     dbg = self.db.global
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
-
+    self:SetEnabledState(true)
     self:RegisterEvent("PLAYER_LOGIN")
 end
 

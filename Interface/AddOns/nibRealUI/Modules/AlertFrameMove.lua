@@ -10,42 +10,7 @@ local RealUI = private.RealUI
 local MODNAME = "AlertFrameMove"
 local AlertFrameMove = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Alert Frame Mover",
-        desc = "Move the Blizzard Alert Frame and all attached frames.",
-        arg = MODNAME,
-        -- order = 112,
-        args = {
-            header = {
-                type = "header",
-                name = "Alert Frame Mover",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Move the Blizzard Alert Frame and all attached frames.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Alert Frame Mover module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    RealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 30,
-            },
-        },
-    }
-    end
-    
-    return options
-end
+if RealUI.isBeta then return end
 
 local AlertFrameHolder = _G.CreateFrame("Frame", "AlertFrameHolder", _G.UIParent)
 AlertFrameHolder:SetWidth(180)
@@ -275,15 +240,6 @@ local alertTest = {
                         _G.GuildChallengeAlertFrame_ShowAlert(1, 2, 5)
                     end,
                 },
-                challenge = {
-                    name = "Challenge Mode",
-                    desc = "ChallengeModeAlertFrame_ShowAlert",
-                    disabled = not _G.GetChallengeModeCompletionInfo(),
-                    type = "execute",
-                    func = function()
-                        _G.ChallengeModeAlertFrame_ShowAlert()
-                    end,
-                },
             },
         },
         lootAlerts = {
@@ -417,8 +373,7 @@ local alertTest = {
 
 ----------
 function AlertFrameMove:OnInitialize()
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(true)
 
     local AceConfig = _G.LibStub("AceConfig-3.0")
     AceConfig:RegisterOptionsTable("alertTest", alertTest, {"/alertTest"})

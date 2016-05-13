@@ -104,35 +104,37 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     _G.PaperDollFrame.ilvl:SetPoint("TOP", _G.PaperDollFrame, "TOP", 0, -20)
 
     -- Toggle Helm and Cloak
-    local helmcloak = {
-        Head = "Helm",
-        Back = "Cloak",
-    }
-    for slot, item in next, helmcloak do
-        local isShown = _G["Showing" .. item]
-        local itemSlot = _G["Character" .. slot .. "Slot"]
-        local check = _G.CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
-        check:SetSize(18, 18)
-        check:SetPoint("TOPLEFT", itemSlot, -4, 4)
-        F.ReskinCheck(check)
+    if not RealUI.isBeta then
+        local helmcloak = {
+            Head = "Helm",
+            Back = "Cloak",
+        }
+        for slot, item in next, helmcloak do
+            local isShown = _G["Showing" .. item]
+            local itemSlot = _G["Character" .. slot .. "Slot"]
+            local check = _G.CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
+            check:SetSize(18, 18)
+            check:SetPoint("TOPLEFT", itemSlot, -4, 4)
+            F.ReskinCheck(check)
 
-        check:SetScript("OnShow", function(self) 
-            self:SetChecked(isShown())
-        end)
+            check:SetScript("OnShow", function(self) 
+                self:SetChecked(isShown())
+            end)
 
-        check:SetScript("OnClick", function() 
-            _G["Show" .. item](not isShown()) 
-        end)
+            check:SetScript("OnClick", function() 
+                _G["Show" .. item](not isShown()) 
+            end)
 
-        check:SetScript("OnEnter", function(self) 
-            _G.GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
-            _G.GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
-            _G.GameTooltip:Show()
-        end)
+            check:SetScript("OnEnter", function(self) 
+                _G.GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
+                _G.GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
+                _G.GameTooltip:Show()
+            end)
 
-        check:SetScript("OnLeave", function() 
-            _G.GameTooltip:Hide()
-        end)
+            check:SetScript("OnLeave", function() 
+                _G.GameTooltip:Hide()
+            end)
+        end
     end
 
     local ilvlLimits = 385

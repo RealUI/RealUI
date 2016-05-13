@@ -44,7 +44,7 @@ local function IsOdd(val)
 end
 function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
-    if ndbc.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
+    if ndbc.init.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
 
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
@@ -547,7 +547,7 @@ function ActionBars:OnInitialize()
     })
     db = self.db.profile
     ndb = RealUI.db.profile
-    ndbc = _G.nibRealUICharacter
+    ndbc = RealUI.db.char
 
     -- Migratre settings from ndb
     local abSettings = _G.nibRealUIDB.profiles.RealUI.actionBarSettings

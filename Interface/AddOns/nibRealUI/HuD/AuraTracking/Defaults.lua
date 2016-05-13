@@ -20,12 +20,11 @@ local function debug(isDebug, ...)
 end
 AuraTracking.trackerDebug = debug
 
-local _, class, classID = _G.UnitClass("player")
+local class, classID = RealUI.class, RealUI.classID
 local SavageRoar
 local MirrorImage, IncantersFlow
 local PowerStrikes
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
-local BurningEmbers
 local function PredictDuration(gap, base, max)
     local potential, color = "", {}
     local function postUnitAura(self, spellData, aura, hasAura)
@@ -308,55 +307,6 @@ elseif class == "ROGUE" then
             end
         end
     end
-elseif class == "WARLOCK" then
-    do -- BurningEmbers
-        local maxVal, power = 10
-        local function postUnitAura(self, spellData)
-            debug(spellData.debug, "postUnitAura", power)
-            if power > 0 then
-                local powerMod = power % 10
-                if powerMod > 0 then
-                    self.count:SetText(powerMod)
-
-                    local right = Lerp(.08, .92, (powerMod / maxVal))
-                    debug(spellData.debug, "right", right)
-                    self.status:SetTexCoord(.08, right, .08, .92)
-
-                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, (powerMod / maxVal))
-                    debug(spellData.debug, "xOfs", xOfs)
-                    self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
-                else
-                    self.count:SetText(10)
-                    self.status:SetTexCoord(.08, .92, .08, .92)
-                    self.status:SetPoint("BOTTOMRIGHT")
-                end
-            else
-                self.count:SetText()
-            end
-        end
-
-        -- Shows partial Burning Embers.
-        function BurningEmbers(self, spellData, unit, powerType)
-            debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
-            if unit == "player" and powerType == "BURNING_EMBERS" then
-                debug(spellData.debug, "Main", unit, powerType)
-                power = _G.UnitPower("player", _G.SPELL_POWER_BURNING_EMBERS, true)
-
-                if not self.postUnitAura then
-                    self.postUnitAura = postUnitAura
-
-                    local status = self:CreateTexture(nil, "BACKGROUND")
-                    status:SetTexture(self.icon:GetTexture())
-                    status:SetTexCoord(.08, .92, .08, .92)
-                    status:SetPoint("TOPLEFT")
-                    status:SetPoint("BOTTOMRIGHT")
-                    self.status = status
-                end
-
-                postUnitAura(self, spellData)
-            end
-        end
-    end
 end
 
 local classDefaults
@@ -414,13 +364,8 @@ bd56d2d6
 a5bdd6b2
 
 
-
-
-
-
-
-
-
+-- Used
+a6a32ca3
 
 ]]
 
@@ -1839,17 +1784,6 @@ classDefaults = {
                 minLevel = 69,
                 specs = {false, true, false},
                 order = 1,
-            },
-            ["9-a6a32ca3-1"] = {   -- Burning Embers (Dest)
-                spell = 108647,
-                minLevel = 42,
-                specs = {false, false, true},
-                order = 1,
-                debug = "Burning Embers",
-                eventUpdate = {
-                    event = "UNIT_POWER_FREQUENT",
-                    func = BurningEmbers
-                }
             },
         -- Static Target Auras
             ["9-9d46aea7-1"] = {   -- Agony (Aff)

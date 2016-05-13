@@ -219,6 +219,7 @@ RealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
     ["POWER_TYPE_SUN_POWER"] = true,
+    ["PAIN"] = true
 }
 
 function UnitFrames:PositionSteps(vert)
@@ -562,12 +563,12 @@ function UnitFrames:UpdateStatus(event, ...)
 end
 
 local UnitIsTapDenied
-if RealUI.TOC < 70000 then
+if RealUI.isBeta then
+    UnitIsTapDenied = _G.UnitIsTapDenied
+else
     UnitIsTapDenied = function(unit)
         return _G.UnitIsTapped(unit) and not _G.UnitIsTappedByPlayer(unit) and not _G.UnitIsTappedByAllThreatList(unit)
     end
-else
-    UnitIsTapDenied = _G.UnitIsTapDenied
 end
 
 function UnitFrames:UpdateEndBox(...)
@@ -663,7 +664,7 @@ _G.UIDropDownMenu_Initialize(dropdown, init, "MENU")
 
 -- Init
 local function Shared(self, unit)
-    --print("Shared", self, self.unit, unit)
+    UnitFrames:debug("Shared", self, self.unit, unit)
     self.menu = menu
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
@@ -707,6 +708,17 @@ local function Shared(self, unit)
 
     if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    end
+    local PointTracking = RealUI:GetModule("PointTracking")
+    if PointTracking:IsEnabled() and unit == "player" then
+        if RealUI.class == "DEATHKNIGHT" then
+            PointTracking:CreateRunes(self, unit)
+        else
+            PointTracking:CreateClassIcons(self, unit)
+            if not RealUI.isBeta and RealUI.class == "WARLOCK" then
+                PointTracking:CreateBurningEmbers(self, unit)
+            end
+        end
     end
 end
 

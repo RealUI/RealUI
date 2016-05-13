@@ -21,12 +21,13 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="LibRangeCheck-2.0\LibRangeCheck-2.0.lua"/>
     <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
     <Script file="SpecializedLibBars-1.0\SpecializedLibBars-1.0.lua"/>
+    <Script file="HereBeDragons-1.0\HereBeDragons-1.0.lua"/>
+    <Script file="HereBeDragons-1.0\HereBeDragons-Pins-1.0.lua"/>
     <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
     <Include file="LibIconFonts-1.0\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
     <Include file="LibTextTable-1.1\Lib.xml" />
     <Include file="oUF\oUF.xml"/>
-    <Include file="Astrolabe\Load.xml"/>
 
     <!-- Fixes -->
     <Script file="Fixes\InspectFix.lua"/>

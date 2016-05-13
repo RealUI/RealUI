@@ -1,5 +1,5 @@
 local _, private = ...
-if private.RealUI.isBeta then return end
+
 
 -- Lua Globals --
 local _G = _G
@@ -8,12 +8,19 @@ local _G = _G
 local RealUI = private.RealUI
 local ndb
 
+local currentResource
+function RealUI:GetResourceBar()
+    return currentResource
+end
+
+if RealUI.isBeta then return end
+
 local MODNAME = "ClassResourceBar"
 local ClassResourceBar = RealUI:NewModule(MODNAME)
 
 local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 
-local layoutSize, currentResource
+local layoutSize
 
 local Textures = {
     short = {
@@ -52,10 +59,6 @@ local BarWidth = {
         [2] = 128,
     },
 }
-
-function RealUI:GetResourceBar()
-    return currentResource
-end
 
 function ClassResourceBar:SetValue(side, value)
     AngleStatusBar:SetValue(self.parent[side].bar, value)

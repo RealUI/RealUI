@@ -15,12 +15,18 @@ local r, g, b = C.r, C.g, C.b
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
-local round = RealUI.Round
+--local round = RealUI.Round
 
 local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
-local _, uiHeight = _G.UIParent:GetSize()
 local initialized = false
 local isHuDShown = false
+
+local screenResolutions = {_G.GetScreenResolutions()}
+local uiHieght = screenResolutions[_G.GetCurrentResolution()]:match("%d+x(%d+)")
+local uiMod = (uiHieght / 768)
+local function ModValue(value)
+    return _G.floor(value * uiMod + 0.5)
+end
 
 local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
@@ -110,8 +116,8 @@ _G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     notClosableByLogout = false,
 }
 
-local height = round(uiHeight * 0.05)
-local width = round(height * 1.3)
+local height = ModValue(50)
+local width = ModValue(65)
 local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
@@ -202,10 +208,11 @@ local function InitializeOptions()
     local hlAnim = highlight.hlAnim
     local hl = hlAnim.hl
 
-    RealUI:SetUpOptions() -- Old
+    ACR:RegisterOptionsTable("RealUI", options.RealUI)
+    ACD:SetDefaultSize("RealUI", 800, 600)
+
     ACR:RegisterOptionsTable("HuD", options.HuD)
     ACD:SetDefaultSize("HuD", 620, 480)
-    --ACR:RegisterOptionsTable("RealUI", options.RealUI)
     initialized = true
 
     -- Buttons
@@ -321,14 +328,14 @@ local function InitializeOptions()
 
             local icon = btn:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(tab.icon)
-            icon:SetSize(height * 0.5, height * 0.5)
-            icon:SetPoint("TOP", 0, -(height * 0.15))
+            icon:SetSize(ModValue(25), ModValue(25))
+            icon:SetPoint("TOP", 0, -ModValue(8))
         end
 
         local text = btn:CreateFontString()
         text:SetFontObject(_G.GameFontHighlightSmall)
-        text:SetWidth(width * 0.9)
-        text:SetPoint("BOTTOM", 0, width * 0.08)
+        text:SetWidth(ModValue(58))
+        text:SetPoint("BOTTOM", 0, ModValue(5))
         text:SetText(tab.name)
         btn.text = text
 

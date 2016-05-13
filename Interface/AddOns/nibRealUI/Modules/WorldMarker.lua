@@ -31,101 +31,6 @@ local MarkerColors = {
     {0.3,  0.3,  0.3,  0.8}, --Clear all
 }
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "World Marker",
-        desc = "Quick access to World Markers.",
-        childGroups = "tab",
-        arg = MODNAME,
-        -- order = 2315,
-        args = {
-            header = {
-                type = "header",
-                name = "World Marker",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Quick access to World Markers.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the WorldMarker module.",
-                get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    if not _G.InCombatLockdown() then
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    else
-                        _G.print("|cff0099ffRealUI: |r World Marker can't be enabled or disabled during combat.")
-                    end
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            visibility = {
-                name = "Show the World Marker in..",
-                type = "group",
-                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                order = 40,
-                args = {
-                    arena = {
-                        type = "toggle",
-                        name = "Arenas",
-                        get = function(info) return db.visibility.arena end,
-                        set = function(info, value) 
-                            db.visibility.arena = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 10,
-                    },
-                    pvp = {
-                        type = "toggle",
-                        name = "Battlegrounds",
-                        get = function(info) return db.visibility.pvp end,
-                        set = function(info, value)
-                            db.visibility.pvp = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 20,
-                    },
-                    party = {
-                        type = "toggle",
-                        name = "5 Man Dungeons",
-                        get = function(info) return db.visibility.party end,
-                        set = function(info, value) 
-                            db.visibility.party = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 30,
-                    },
-                    raid = {
-                        type = "toggle",
-                        name = "Raid Dungeons",
-                        get = function(info) return db.visibility.raid end,
-                        set = function(info, value) 
-                            db.visibility.raid = value 
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 40,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 -- OnLeave
 local function ButtonOnLeave(index)
     WMF.Buttons[index].mouseover = false
@@ -324,7 +229,6 @@ function WorldMarker:OnInitialize()
     db = self.db.profile
     
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterModuleOptions(MODNAME, GetOptions)
 end
 
 function WorldMarker:OnEnable()

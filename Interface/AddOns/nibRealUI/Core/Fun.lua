@@ -83,18 +83,23 @@ function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
--- Screen Height + Width
-function RealUI:GetResolutionVals()
-    local resStr = _G.GetCVar("gxResolution")
-    local resHeight = tonumber(resStr:match("%d+x(%d+)"))
-    local resWidth = tonumber(resStr:match("(%d+)x%d+"))
+do -- Screen Height + Width
+    local screenRes = {_G.GetScreenResolutions()}
+    function RealUI:GetResolutionVals(raw)
+        local resWidth, resHeight = screenRes[_G.GetCurrentResolution()]:match("(%d+)x(%d+)")
+        resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
 
-    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
-        resHeight = resHeight / 2
-        resWidth = resWidth / 2
+        if raw then
+            return resWidth, resHeight
+        end
+
+        if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+            resHeight = resHeight / 2
+            resWidth = resWidth / 2
+        end
+
+        return resWidth, resHeight
     end
-
-    return resWidth, resHeight
 end
 
 -- Deep Copy table
