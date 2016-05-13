@@ -78,8 +78,10 @@ L["Power_TurboDesc"] = [=[Dieser Modus plant graphische Updates mit einer sehr h
 Erhöht die Nutzung der CPU.]=] -- Needs review
 L["Reset_Confirm"] = "Bist du sicher, dass du RealUI zurücksetzen möchtest?" -- Needs review
 L["Reset_SettingsLost"] = "Alle Benutzereinstellungen gehen verloren."
--- L["Tweaks_HideRaidFilter"] = ""
--- L["Tweaks_HideRaidFilterDesc"] = ""
+-- L["Tweaks_CooldownCount"] = ""
+-- L["Tweaks_CooldownCountDesc"] = ""
+-- L["Tweaks_UITweaks"] = ""
+-- L["Tweaks_UITweaksDesc"] = ""
 
 
 -- Config
@@ -178,6 +180,8 @@ L["HuD_Width"] = "Breite"
 -- L["Misc_SpellAlertsWidthDesc"] = ""
 L["Raid_30Width"] = "30 Spieler Breite" -- Needs review
 L["Raid_40Width"] = "40 Spieler Breite" -- Needs review
+-- L["Raid_HideRaidFilter"] = ""
+-- L["Raid_HideRaidFilterDesc"] = ""
 -- L["Raid_LargeGroup"] = ""
 -- L["Raid_LargeGroupDesc"] = ""
 L["Raid_ShowSolo"] = "Anzeigen wenn Solo" -- Needs review

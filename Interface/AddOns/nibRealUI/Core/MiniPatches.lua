@@ -165,6 +165,29 @@ RealUI.minipatches = {
                 nibRealUIDB.namespaces.AuraTracking.class.WARLOCK["9-a6a32ca3-1"] = nil
             end
         end
+
+        -- Remove some trash
+        for charName, charInfo in next, nibRealUIDB.char do
+            if charInfo.addonProfiles then
+                charInfo.addonProfiles = nil
+            end
+        end
+        local trash = {
+            "ActionBarDoodads",
+            "PetBattles",
+            "RaidDebuffs",
+            "RaidUtility",
+            "RavenBorders",
+            "RuneDisplay",
+            "SkinDBM",
+            "SkinDXE",
+            "StatDisplay",
+        }
+        for index, namespace in next, trash do
+            if nibRealUIDB.namespaces[namespace] then
+                nibRealUIDB.namespaces[namespace] = nil
+            end
+        end
     end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
