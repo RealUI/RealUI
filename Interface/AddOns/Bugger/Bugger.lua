@@ -365,6 +365,7 @@ function Bugger:SetupFrame()
 	self.editBox     = ScriptErrorsFrameScrollFrameText
 	self.title       = self.frame.title
 	self.indexLabel  = self.frame.indexLabel
+	self.reload      = self.frame.reload
 	self.previous    = self.frame.previous
 	self.next        = self.frame.next
 	self.clear       = self.frame.close
@@ -389,6 +390,7 @@ function Bugger:SetupFrame()
 
 	self.clear:ClearAllPoints()
 	self.clear:SetPoint("BOTTOMLEFT", 12, 12)
+	self.clear:SetPoint("LEFT", self.reload, "RIGHT", 4, 0)
 	self.clear:SetText(CLEAR_ALL)
 	self.clear:SetWidth(self.clear:GetFontString():GetStringWidth() + 20)
 	self.clear:SetScript("OnClick", function()
@@ -396,15 +398,11 @@ function Bugger:SetupFrame()
 		self:ShowError()
 	end)
 
-	local pnwidth = max(self.previous:GetFontString():GetStringWidth(), self.next:GetFontString():GetStringWidth()) + 20
-
 	self.next:ClearAllPoints()
 	self.next:SetPoint("BOTTOMRIGHT", -10, 12)
-	self.next:SetWidth(pnwidth)
 
 	self.previous:ClearAllPoints()
 	self.previous:SetPoint("RIGHT", self.next, "LEFT", -4, 0)
-	self.previous:SetWidth(pnwidth)
 
 	self.showLocals = CreateFrame("Button", nil, self.frame, "UIPanelButtonTemplate")
 	self.showLocals:SetPoint("RIGHT", self.previous, "LEFT", -4, 0)

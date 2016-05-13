@@ -1,7 +1,7 @@
-﻿local ADDON_NAME, private = ...
+﻿local _, private = ...
 
 -- RealUI --
-local RealUI = RealUI
+local RealUI = private.RealUI
 local L = RealUI.L
 
 if RealUI.locale == "esES" then
@@ -12,7 +12,7 @@ if RealUI.locale == "esES" then
 -- L["Slash_Profile"] = ""
 -- L["Slash_RealUI"] = ""
 -- L["Slash_Taint"] = ""
--- L["Version"] = ""
+L["Version"] = "Versión" -- Needs review
 
 
 -- Install
@@ -76,8 +76,10 @@ if RealUI.locale == "esES" then
 -- L["Power_TurboDesc"] = ""
 -- L["Reset_Confirm"] = ""
 -- L["Reset_SettingsLost"] = ""
--- L["Tweaks_HideRaidFilter"] = ""
--- L["Tweaks_HideRaidFilterDesc"] = ""
+-- L["Tweaks_CooldownCount"] = ""
+-- L["Tweaks_CooldownCountDesc"] = ""
+-- L["Tweaks_UITweaks"] = ""
+-- L["Tweaks_UITweaksDesc"] = ""
 
 
 -- Config
@@ -174,6 +176,8 @@ if RealUI.locale == "esES" then
 -- L["Misc_SpellAlertsWidthDesc"] = ""
 -- L["Raid_30Width"] = ""
 -- L["Raid_40Width"] = ""
+-- L["Raid_HideRaidFilter"] = ""
+-- L["Raid_HideRaidFilterDesc"] = ""
 -- L["Raid_LargeGroup"] = ""
 -- L["Raid_LargeGroupDesc"] = ""
 -- L["Raid_ShowSolo"] = ""

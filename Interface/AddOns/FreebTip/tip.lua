@@ -83,9 +83,7 @@ local FOREIGN_SERVER_LABEL = FOREIGN_SERVER_LABEL
 local COALESCED_REALM_TOOLTIP1 = string.split(FOREIGN_SERVER_LABEL, COALESCED_REALM_TOOLTIP)
 local INTERACTIVE_REALM_TOOLTIP1 = string.split(INTERACTIVE_SERVER_LABEL, INTERACTIVE_REALM_TOOLTIP)
 
-ns.Debug = function(...)
-    RealUI.Debug(ADDON_NAME, ...)
-end
+ns.Debug = RealUI.GetDebug(ADDON_NAME)
 
 local colors = {power = {}}
 for power, color in next, PowerBarColor do
@@ -128,12 +126,12 @@ local nilcolor = { r=1, g=1, b=1 }
 local tapped = { r=.6, g=.6, b=.6 }
 
 local UnitIsTapDenied
-if RealUI.TOC < 70000 then
+if RealUI.isBeta then
+    UnitIsTapDenied = _G.UnitIsTapDenied
+else
     UnitIsTapDenied = function(unit)
         return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
     end
-else
-    UnitIsTapDenied = _G.UnitIsTapDenied
 end
 local function unitColor(unit)
     local color

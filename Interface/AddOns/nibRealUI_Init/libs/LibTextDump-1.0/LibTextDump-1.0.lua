@@ -66,7 +66,10 @@ local function NewInstance(width, height)
 	lib.num_frames = lib.num_frames + 1
 
 	local frame_name = ("%s_CopyFrame%d"):format(MAJOR, lib.num_frames)
-	local copy_frame = _G.CreateFrame("Frame", frame_name, _G.UIParent, "BaseBasicFrameTemplate")
+	local copy_frame = _G.CreateFrame("Frame", frame_name, _G.UIParent, "ButtonFrameTemplate")
+	_G.ButtonFrameTemplate_HidePortrait(copy_frame)
+	_G.ButtonFrameTemplate_HideAttic(copy_frame)
+	_G.ButtonFrameTemplate_HideButtonBar(copy_frame)
 	copy_frame:SetSize(width, height)
 	copy_frame:SetPoint("CENTER", _G.UIParent, "CENTER")
 	copy_frame:SetFrameStrata("DIALOG")
@@ -74,29 +77,12 @@ local function NewInstance(width, height)
 	copy_frame:SetMovable(true)
 	copy_frame:SetToplevel(true)
 
-	table.insert(_G.UISpecialFrames, frame_name)
-	_G.HideUIPanel(copy_frame)
+	copy_frame:Hide()
 
 
-	local title_bg = copy_frame:CreateTexture(nil, "BACKGROUND", "_UI-Frame-TitleTileBg")
-	title_bg:SetPoint("TOPLEFT", 2, -3)
-	title_bg:SetPoint("BOTTOMRIGHT", copy_frame.TopRightCorner, "BOTTOMLEFT", 7, 13)
-
-
-	local dialog_bg = copy_frame:CreateTexture(nil, "BACKGROUND")
-	dialog_bg:SetTexture([[Interface\Tooltips\UI-Tooltip-Background]])
-	dialog_bg:SetVertexColor(0, 0, 0, 0.75)
-	dialog_bg:SetPoint("TOPLEFT", 2, -21)
-	dialog_bg:SetPoint("BOTTOMRIGHT", -2, 21)
-
-
-	-- assign template title region to old var
-	local title = copy_frame.TitleText
-	copy_frame.title = title
-
-
+	local title_bg = _G[frame_name.."TitleBg"]
 	local drag_frame = _G.CreateFrame("Frame", nil, copy_frame)
-	drag_frame:SetPoint("TOPLEFT", title_bg)
+	drag_frame:SetPoint("TOPLEFT", title_bg, 16, 0)
 	drag_frame:SetPoint("BOTTOMRIGHT", title_bg)
 	drag_frame:EnableMouse(true)
 
@@ -109,19 +95,9 @@ local function NewInstance(width, height)
 	end)
 
 
-	local footer_frame = _G.CreateFrame("Frame", nil, copy_frame, "InsetFrameTemplate")
-	footer_frame:SetHeight(24)
-	footer_frame:SetPoint("BOTTOMLEFT", copy_frame, "BOTTOMLEFT", 2, 4)
-	footer_frame:SetPoint("BOTTOMRIGHT", copy_frame, "BOTTOMRIGHT", -4, 4)
-
-
-	local footer = footer_frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-	footer:SetPoint("CENTER", footer_frame, "CENTER", 0, 0)
-
-
 	local scroll_area = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frame_name), copy_frame, "FauxScrollFrameTemplate")
-	scroll_area:SetPoint("TOPLEFT", 5, -24)
-	scroll_area:SetPoint("BOTTOMRIGHT", -28, 29)
+	scroll_area:SetPoint("TOPLEFT", copy_frame.Inset, 5, -5)
+	scroll_area:SetPoint("BOTTOMRIGHT", copy_frame.Inset, -27, 6)
 
 	function scroll_area:Update(start, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
 		--print("Scroll:Update", start, line_height, max_display_lines)
@@ -185,9 +161,8 @@ local function NewInstance(width, height)
 	edit_box:SetMaxLetters(0)
 	edit_box:EnableMouse(true)
 	edit_box:SetAutoFocus(false)
-	edit_box:SetFontObject("ChatFontNormal")
-	edit_box:SetPoint("TOPLEFT", 5, -24)
-	edit_box:SetPoint("BOTTOMRIGHT", -28, 29)
+	edit_box:SetFontObject("SystemFont_Small")
+	edit_box:SetAllPoints(scroll_area)
 
 	edit_box:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copy_frame)
@@ -198,7 +173,7 @@ local function NewInstance(width, height)
 	local line_dummy = copy_frame:CreateFontString()
 	line_dummy:SetJustifyH("LEFT")
 	line_dummy:SetNonSpaceWrap(true)
-	line_dummy:SetFontObject("ChatFontNormal")
+	line_dummy:SetFontObject("SystemFont_Small")
 	line_dummy:SetPoint("TOPLEFT", 5, 100)
 	line_dummy:SetPoint("BOTTOMRIGHT", copy_frame, "TOPRIGHT", -28, 0)
 	line_dummy:Hide()
@@ -207,7 +182,7 @@ local function NewInstance(width, height)
 
 	local highlight_button = _G.CreateFrame("Button", nil, copy_frame)
 	highlight_button:SetSize(16, 16)
-	highlight_button:SetPoint("BOTTOMRIGHT", -8, 8)
+	highlight_button:SetPoint("TOPLEFT", title_bg)
 
 	highlight_button:SetScript("OnMouseUp", function(self, button)
 		self.texture:ClearAllPoints()
@@ -288,7 +263,7 @@ function lib:New(frame_title, width, height, save)
 	end
 	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT)
 	local frame = frames[instance]
-	frame.title:SetText(frame_title)
+	frame.TitleText:SetText(frame_title)
 
 	if save then
 		frame:SetScript("OnEvent", function(event, ...)
@@ -325,7 +300,7 @@ function prototype:Display(separator)
 	local buffer, frame = buffers[self], frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
-	_G.ShowUIPanel(frame)
+	frame:Show()
 end
 
 

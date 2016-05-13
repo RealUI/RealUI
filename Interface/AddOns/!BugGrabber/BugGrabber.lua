@@ -1,5 +1,5 @@
 --
--- $Id: BugGrabber.lua 213 2015-08-23 19:16:24Z funkydude $
+-- $Id: BugGrabber.lua 215 2016-03-07 19:26:46Z nevcairiel $
 --
 -- The BugSack and !BugGrabber team is:
 -- Current Developer: Funkydude
@@ -352,7 +352,7 @@ do
 			errorObject = {
 				message = sanitizedMessage,
 				stack = table.concat(tmp, "\n"),
-				locals = inCombat and "" or debuglocals(4),
+				locals = inCombat and "" or debuglocals(3),
 				session = addon:GetSessionId(),
 				time = date("%Y/%m/%d %H:%M:%S"),
 				counter = 1,

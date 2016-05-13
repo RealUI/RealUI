@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Masque = function()
-	MasqueDB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Masque = function()
+	_G.MasqueDB = {
 		["namespaces"] = {
 			["LibDualSpec-1.0"] = {
 			},

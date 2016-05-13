@@ -1,8 +1,11 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+
 mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
     --print("Raven", F, C)
-    local SpiralBorder = RealUI:GetModule("SpiralBorder")
+    local SpiralBorder = _G.RealUI:GetModule("SpiralBorder")
 
     local iconInset = 3
     local barFrames = {
@@ -26,14 +29,14 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
             bar.frame.bd.lastGroup = ""
 
             -- Truncate bar names
-            hooksecurefunc(bar.labelText, "SetText", function(self)
-                if self.inHook then return end
-                self.inHook = true
-                local label = self:GetText()
-                if strlen(label) > 22 then
-                    self:SetText(strsub(label, 1, 21).."..")
+            _G.hooksecurefunc(bar.labelText, "SetText", function(labelText)
+                if labelText.inHook then return end
+                labelText.inHook = true
+                local label = labelText:GetText()
+                if label:len() > 22 then
+                    labelText:SetText(label:sub(1, 21).."..")
                 end
-                self.inHook = false
+                labelText.inHook = false
             end)
         else
             bar.frame.bd:Show()
@@ -49,8 +52,8 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
     end
 
     -- Hook Raven frame creation
-    local Nest_CreateBar_ = Raven.Nest_CreateBar
-    Raven.Nest_CreateBar = function(bg, name)
+    local Nest_CreateBar_ = _G.Raven.Nest_CreateBar
+    _G.Raven.Nest_CreateBar = function(bg, name)
         local bar = Nest_CreateBar_(bg, name)
         bar.frame:Show()
         bar.container:Show()
@@ -72,8 +75,8 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
         return bar
     end
     
-    local Nest_DeleteBar_ = Raven.Nest_DeleteBar
-    Raven.Nest_DeleteBar = function(bg, bar)
+    local Nest_DeleteBar_ = _G.Raven.Nest_DeleteBar
+    _G.Raven.Nest_DeleteBar = function(bg, bar)
         -- Would be nice to keep them attached, but Raven recycles frames for Icons AND Bars and intermixes them
         if bar.frame.ssID then SpiralBorder:RemoveSpiral(bar, bar.frame.ssID, true) end
         bar.endTime = nil
@@ -84,10 +87,10 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
     end
 
     -- Skin Fonts
-    local RavenDefaults = Raven.db.global.Defaults
-    local pixelFont = RealUI.media.font.pixel.large[1]
+    local RavenDefaults = _G.Raven.db.global.Defaults
+    local pixelFont = _G.RealUI.media.font.pixel.large[1]
     RavenDefaults.timeFont = pixelFont
     RavenDefaults.labelFont = pixelFont
     RavenDefaults.iconFont = pixelFont
-    Raven:UpdateAllBarGroups()
+    _G.Raven:UpdateAllBarGroups()
 end

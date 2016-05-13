@@ -1,48 +1,28 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-if nibRealUI.isBeta then return end
+local _, private = ...
+if private.RealUI.isBeta then return end
 
-local L = nibRealUI.L
-local db, ndb
+-- Lua Globals --
+local _G = _G
 
-local _
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db
+
 local MODNAME = "ClassResource_EclipseBar"
-local EclipseBar = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local EclipseBar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 
-local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
+local ClassResourceBar = RealUI:GetModule("ClassResourceBar")
 
 -------------------------
 ---- Eclipse Updates ----
 -------------------------
-local retval = {}
-local spellIDs = {
-    [ECLIPSE_BAR_SOLAR_BUFF_ID] = 1,
-    [ECLIPSE_BAR_LUNAR_BUFF_ID] = 2,
-}
-local function HasEclipseBuffs()
-    retval[1] = false
-    retval[2] = false
-
-    local i = 1
-    local name, _, texture, applications, _, _, _, _, _, _, auraID = UnitAura("player", i)
-    while name do
-        if spellIDs[auraID] then
-            retval[spellIDs[auraID]] = applications == 0 and true or applications
-            break
-        end
-
-        i = i + 1
-        name, _, texture, applications, _, _, _, _, _, _, auraID = UnitAura("player", i)
-    end
-
-    return retval
-end
-
 function EclipseBar:OnUpdate(event, unit, powerType)
     --print("EclipseBar:OnUpdate", unit, powerType)
     if unit ~= "player" or powerType ~= "ECLIPSE" then return end
     -- Power Text
-    local power = UnitPower("player", SPELL_POWER_ECLIPSE)
-    local maxPower = UnitPowerMax("player", SPELL_POWER_ECLIPSE)
+    local power = _G.UnitPower("player", _G.SPELL_POWER_ECLIPSE)
+    local maxPower = _G.UnitPowerMax("player", _G.SPELL_POWER_ECLIPSE)
     --print("EclipseBar:Power", power, maxPower)
     
     if maxPower <= 0 or power > maxPower then
@@ -59,19 +39,19 @@ function EclipseBar:OnUpdate(event, unit, powerType)
         else
             self.eBar:SetValue("right", 0)
             self.eBar:SetValue("left", 0)
-            self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
+            self:ECLIPSE_DIRECTION_CHANGE(event, _G.GetEclipseDirection())
         end
 
     elseif self.direction == "moon" then
         --print("EclipseBar:Moon", power)
 
         if power < 0 then
-            self.eBar:SetValue("left", abs(power / 100))
+            self.eBar:SetValue("left", _G.abs(power / 100))
             self.eBar:SetValue("right", 0)
         else
             self.eBar:SetValue("right", 0)
             self.eBar:SetValue("left", 0)
-            self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
+            self:ECLIPSE_DIRECTION_CHANGE(event, _G.GetEclipseDirection())
         end
 
     else
@@ -79,10 +59,10 @@ function EclipseBar:OnUpdate(event, unit, powerType)
 
         self.eBar:SetValue("left", 0)
         self.eBar:SetValue("right", 0)
-        self:ECLIPSE_DIRECTION_CHANGE(event, GetEclipseDirection())
+        self:ECLIPSE_DIRECTION_CHANGE(event, _G.GetEclipseDirection())
     end
 
-    self.eBar:SetText("middle", abs(power))
+    self.eBar:SetText("middle", _G.abs(power))
 end
 
 function EclipseBar:UpdateAuras(units)
@@ -90,10 +70,10 @@ function EclipseBar:UpdateAuras(units)
 
     -- Middle Arrow colors
     if self.direction == "sun" then
-        self.eBar:SetBoxColor("middle", nibRealUI.media.colors.orange)
+        self.eBar:SetBoxColor("middle", RealUI.media.colors.orange)
 
     elseif self.direction == "moon" then
-        self.eBar:SetBoxColor("middle", nibRealUI.media.colors.blue)
+        self.eBar:SetBoxColor("middle", RealUI.media.colors.blue)
 
     else
         self.eBar:SetBoxColor("middle", {0.2, 0.2, 0.2, 1})
@@ -106,14 +86,14 @@ function EclipseBar:ECLIPSE_DIRECTION_CHANGE(event, ...)
 
     -- End Box colors and Bar colors
     if self.direction == "sun" then
-        self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
-        self.eBar:SetBoxColor("left", nibRealUI.media.background)
+        self.eBar:SetBoxColor("right", RealUI.media.colors.orange)
+        self.eBar:SetBoxColor("left", RealUI.media.background)
     elseif self.direction == "moon" then
-        self.eBar:SetBoxColor("right", nibRealUI.media.background)
-        self.eBar:SetBoxColor("left", nibRealUI.media.colors.blue)
+        self.eBar:SetBoxColor("right", RealUI.media.background)
+        self.eBar:SetBoxColor("left", RealUI.media.colors.blue)
     else
-        self.eBar:SetBoxColor("right", nibRealUI.media.colors.orange)
-        self.eBar:SetBoxColor("left", nibRealUI.media.colors.blue)
+        self.eBar:SetBoxColor("right", RealUI.media.colors.orange)
+        self.eBar:SetBoxColor("left", RealUI.media.colors.blue)
         self.eBar:ReverseBar("left", false)
         self.eBar:ReverseBar("right", false)
     end
@@ -130,13 +110,13 @@ function EclipseBar:UpdateVisibility(event, unit)
         return
     end
 
-    local targetCondition = (UnitExists("target") and not(UnitIsDeadOrGhost("target"))) and (db.visibility.showHostile and (UnitIsEnemy("player", "target") or UnitCanAttack("player", "target")))
+    local targetCondition = (_G.UnitExists("target") and not(_G.UnitIsDeadOrGhost("target"))) and (db.visibility.showHostile and (_G.UnitIsEnemy("player", "target") or _G.UnitCanAttack("player", "target")))
     local pvpCondition = db.visibility.showPvP and self.inPvP
     local pveCondition = db.visibility.showPvE and self.inPvE
     local combatCondition = (db.visibility.showCombat and self.inCombat) or not(db.visibility.showCombat)
 
-    local form = GetShapeshiftFormID()
-    if ((not(form) or (form and (form == MOONKIN_FORM))) and (GetSpecialization() == 1) and not(UnitInVehicle("player")) and not(UnitIsDeadOrGhost("player"))) and 
+    local form = _G.GetShapeshiftFormID()
+    if ((not(form) or (form and (form == _G.MOONKIN_FORM))) and (_G.GetSpecialization() == 1) and not(_G.UnitInVehicle("player")) and not(_G.UnitIsDeadOrGhost("player"))) and 
         (targetCondition or combatCondition or pvpCondition or pveCondition) then
             self.eBar:Show()
     else
@@ -157,7 +137,7 @@ function EclipseBar:PLAYER_REGEN_ENABLED(event, ...)
 end
 
 function EclipseBar:UpdatePlayerLocation()
-    local Inst, InstType = IsInInstance()
+    local Inst, InstType = _G.IsInInstance()
     if not(Inst and InstType) then
         self.inPvP = false
         self.inPvE = false
@@ -182,13 +162,13 @@ end
 ---- Frame Updates ----
 -----------------------
 function EclipseBar:UpdateGlobalColors()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     self:ECLIPSE_DIRECTION_CHANGE()
 end
 
 ------------
 function EclipseBar:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -196,7 +176,7 @@ function EclipseBar:ToggleConfigMode(val)
 end
 
 function EclipseBar:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             visibility = {
@@ -208,10 +188,9 @@ function EclipseBar:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "DRUID")
-    nibRealUI:RegisterConfigModeModule(self)
+    self:SetEnabledState(RealUI:GetModuleEnabled("PointTracking") and RealUI:GetModuleEnabled(MODNAME) and RealUI.class == "DRUID")
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function EclipseBar:OnEnable()
@@ -222,9 +201,9 @@ function EclipseBar:OnEnable()
     end
 
     local updateSpeed
-    if nibRealUI.db.profile.settings.powerMode == 1 then
+    if RealUI.db.profile.settings.powerMode == 1 then
         updateSpeed = 1/8
-    elseif nibRealUI.db.profile.settings.powerMode == 2 then
+    elseif RealUI.db.profile.settings.powerMode == 2 then
         updateSpeed = 1/5
     else
         updateSpeed = 1/10

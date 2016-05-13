@@ -1,43 +1,47 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- RealUI --
+local RealUI = private.RealUI
+local round = RealUI.Round
 local db, ndb
 
 local MODNAME = "CastBars"
-local CastBars = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local layoutSize
-local round = nibRealUI.Round
 
 local MaxTicks = 10
 local ChannelingTicks = {
     -- Druid
-    [GetSpellInfo(16914)] = 10, -- Hurricane
-    [GetSpellInfo(106996)] = 10,-- Astral Storm
-    [GetSpellInfo(740)] = 4,    -- Tranquility
+    [_G.GetSpellInfo(16914)] = 10, -- Hurricane
+    [_G.GetSpellInfo(106996) or "gone"] = 10,-- Astral Storm
+    [_G.GetSpellInfo(740)] = 4,    -- Tranquility
     -- Mage
-    [GetSpellInfo(5143)] = 5,   -- Arcane Missiles
-    [GetSpellInfo(10) or "gone"] = 8,     -- Blizzard
-    [GetSpellInfo(12051)] = 3,  -- Evocation
+    [_G.GetSpellInfo(5143)] = 5,   -- Arcane Missiles
+    [_G.GetSpellInfo(10) or "gone"] = 8,     -- Blizzard
+    [_G.GetSpellInfo(12051)] = 3,  -- Evocation
     -- Monk
-    [GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
-    [GetSpellInfo(115175)] = 8,  -- Soothing Mist
-    [GetSpellInfo(115294) or "gone"] = 6,  -- Mana Tea
-    [GetSpellInfo(113656)] = 4,  -- Fists of Fury
+    [_G.GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
+    [_G.GetSpellInfo(115175)] = 8,  -- Soothing Mist
+    [_G.GetSpellInfo(115294) or "gone"] = 6,  -- Mana Tea
+    [_G.GetSpellInfo(113656)] = 4,  -- Fists of Fury
     -- Priest
-    [GetSpellInfo(64843)] = 4,  -- Divine Hymn
-    [GetSpellInfo(15407)] = 3,  -- Mind Flay
-    [GetSpellInfo(129197)] = 3, -- Mind Flay (Insanity)
-    [GetSpellInfo(48045)] = 5,  -- Mind Sear
-    [GetSpellInfo(47540)] = 2,  -- Penance
+    [_G.GetSpellInfo(64843)] = 4,  -- Divine Hymn
+    [_G.GetSpellInfo(15407)] = 3,  -- Mind Flay
+    [_G.GetSpellInfo(129197) or "gone"] = 3, -- Mind Flay (Insanity)
+    [_G.GetSpellInfo(48045)] = 5,  -- Mind Sear
+    [_G.GetSpellInfo(47540)] = 2,  -- Penance
     -- Warlock
-    [GetSpellInfo(689)] = 6,    -- Drain Life
-    [GetSpellInfo(755)] = 6,    -- Health Funnel
-    [GetSpellInfo(4629)] = 6,   -- Rain of Fire
-    [GetSpellInfo(103103) or "gone"] = 6, -- Drain Soul
-    [GetSpellInfo(108371) or "gone"] = 6, -- Harvest Life
+    [_G.GetSpellInfo(689)] = 6,    -- Drain Life
+    [_G.GetSpellInfo(755)] = 6,    -- Health Funnel
+    [_G.GetSpellInfo(4629)] = 6,   -- Rain of Fire
+    [_G.GetSpellInfo(103103) or "gone"] = 6, -- Drain Soul
+    [_G.GetSpellInfo(108371) or "gone"] = 6, -- Harvest Life
 }
-
-local UpdateSpeed = 1/60
 
 -- Chanelling Ticks
 function CastBars:ClearTicks()
@@ -51,7 +55,7 @@ function CastBars:SetBarTicks(numTicks)
     CastBars:debug("SetBarTicks", numTicks)
     if not numTicks then return end
     for i = 1, numTicks do
-        self.tick[i]:SetPoint("TOPRIGHT", -(floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
+        self.tick[i]:SetPoint("TOPRIGHT", -(_G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
         self.tick[i]:Show()
     end
 end
@@ -59,14 +63,16 @@ end
 function CastBars:SetAnchors(castbar, unit)
     CastBars:debug("Set config cast", unit)
 
-    local xOfs, x, y = 0, 3, -2
+    local iconX, iconY = 3, -2
     local iconPoint, iconRelPoint = "TOP", "BOTTOM"
-    local textPoint, textRelPoint = "TOP", "TOP"
-    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
     if not db.text.textOnBottom then
         iconPoint, iconRelPoint = "BOTTOM", "TOP"
-        y = -y
+        iconY = -iconY
     end
+
+    local textX, textY = 0, -2
+    local textPoint, textRelPoint = "TOP", "TOP"
+    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
 
     castbar.Time:ClearAllPoints()
     castbar.Text:ClearAllPoints()
@@ -77,27 +83,25 @@ function CastBars:SetAnchors(castbar, unit)
         if db.text.textInside then
             castbar.Text:SetJustifyH("RIGHT")
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            x = -x
+            iconX = -iconX
         else
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            --xOfs = 4
         end
         castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
     elseif unit == "target" then
         if db.text.textInside then
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            --xOfs = 4
         else
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            x = -x
+            iconX = -iconX
         end
         castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, x, y)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, xOfs, -2)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, xOfs, -2)
+        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
+        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
+        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
     elseif unit == "focus" then
         castbar.Icon:SetPoint("BOTTOMLEFT", castbar, "BOTTOMRIGHT", 2, 1)
         castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)
@@ -111,7 +115,7 @@ function CastBars:UpdateAnchors()
     end
 end
 
-local info = {
+local frameInfo = {
     player = {
         leftAngle = [[\]],
         rightAngle = [[\]],
@@ -133,7 +137,7 @@ local info = {
 local updateSafeZone = function(self)
     local sz = self.safeZone
     local width = self:GetWidth()
-    local _, _, _, ms = GetNetStats()
+    local _, _, _, ms = _G.GetNetStats()
 
     -- Guard against GetNetStats returning latencies of 0.
     if (ms ~= 0) then
@@ -186,7 +190,7 @@ local function PostCastInterrupted(self, unit, ...)
     if not self.flashAnim:IsPlaying() then
         CastBars:debug("PlayFlash")
         self.Time:SetText("")
-        self.Text:SetText(SPELL_FAILED_INTERRUPTED)
+        self.Text:SetText(_G.SPELL_FAILED_INTERRUPTED)
         self.Text:SetTextColor(1, 0, 0, 1)
         self:SetStatusBarColor(1, 0, 0, 1)
         self:Show()
@@ -334,13 +338,13 @@ local function OnUpdate(self, elapsed)
     end
 end
 
-function CastBars:CreateCastBars(self, unit)
+function CastBars:CreateCastBars(unitFrame, unit)
     CastBars:debug("CreateCastBars", unit)
-    local info, unitDB = info[unit], db[unit]
+    local info, unitDB = frameInfo[unit], db[unit]
     local size, color = db.size[layoutSize], db.colors[unit]
     local width, height = size[unit] and size[unit].width or size.width, size[unit] and size[unit].height or size.height
     if not unitDB.debug then info.debug = nil end
-    local Castbar = self:CreateAngleFrame("Status", width, height, self, info)
+    local Castbar = unitFrame:CreateAngleFrame("Status", width, height, unitFrame, info)
     Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
     if db.reverse[unit] then
         Castbar:SetReverseFill(true)
@@ -349,28 +353,29 @@ function CastBars:CreateCastBars(self, unit)
     local Icon = Castbar:CreateTexture(nil, "OVERLAY")
     Castbar.Icon = Icon
     Icon:SetSize(unitDB.icon, unitDB.icon)
-    Aurora[1].ReskinIcon(Icon)
+    _G.Aurora[1].ReskinIcon(Icon)
 
     local Text = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Text = Text
-    Text:SetFontObject(RealUIFont_Pixel)
+    Text:SetFontObject(_G.RealUIFont_Pixel)
 
     local Time = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Time = Time
-    Time:SetFontObject(RealUIFont_PixelNumbers)
+    Time:SetFontObject(_G.RealUIFont_PixelNumbers)
 
-    local safeZone, color = self:CreateAngleFrame("Bar", width, height, Castbar, info), db.colors.latency
+    color = db.colors.latency
+    local safeZone = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
     Castbar.safeZone = safeZone
     safeZone:SetValue(1, true)
     safeZone:SetStatusBarColor(color[1], color[2], color[3], color[4])
 
     if unit == "player" then
         CastBars:debug("Set positions", unit)
-        Castbar:SetPoint("TOPRIGHT", RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
+        Castbar:SetPoint("TOPRIGHT", _G.RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
 
         Castbar.tick = {}
         for i = 1, MaxTicks do
-            local tick = self:CreateAngleFrame("Bar", width, height, Castbar, info)
+            local tick = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
             tick:SetStatusBarColor(0, 0, 0, 0.5)
             tick:SetWidth(round(width * 0.08))
             tick:ClearAllPoints()
@@ -380,16 +385,16 @@ function CastBars:CreateCastBars(self, unit)
         Castbar.SetBarTicks = CastBars.SetBarTicks
     elseif unit == "target" then
         CastBars:debug("Set positions", unit)
-        Castbar:SetPoint("TOPLEFT", RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
+        Castbar:SetPoint("TOPLEFT", _G.RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
     elseif unit == "focus" then
         CastBars:debug("Set positions", unit)
-        Castbar:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 5, 1)
+        Castbar:SetPoint("BOTTOMRIGHT", unitFrame, "TOPRIGHT", 5, 1)
     end
     CastBars:SetAnchors(Castbar, unit)
 
     local flashAnim = Castbar:CreateAnimationGroup()
     Castbar.flashAnim = flashAnim
-    local function PostFlash(self, ...)
+    local function PostFlash(anim, ...)
         CastBars:debug("flashAnim:OnFinished", ...)
         Castbar:SetAlpha(1)
         Castbar.Text:SetTextColor(1, 1, 1, 1)
@@ -405,12 +410,12 @@ function CastBars:CreateCastBars(self, unit)
     flash:SetSmoothing("OUT")
 
     Castbar.PostCastStart = PostCastStart
-    Castbar.PostCastFailed = PostCastFailed
+    --Castbar.PostCastFailed = PostCastFailed
     Castbar.PostCastInterrupted = PostCastInterrupted
     Castbar.PostCastInterruptible = PostCastInterruptible
     Castbar.PostCastNotInterruptible = PostCastNotInterruptible
-    Castbar.PostCastDelayed = PostCastDelayed
-    Castbar.PostCastStop = PostCastStop
+    --Castbar.PostCastDelayed = PostCastDelayed
+    --Castbar.PostCastStop = PostCastStop
 
     Castbar.PostChannelStart = PostChannelStart
     --Castbar.PostChannelUpdate = PostChannelUpdate
@@ -421,21 +426,12 @@ function CastBars:CreateCastBars(self, unit)
 
     Castbar.OnUpdate = OnUpdate
 
-    self.Castbar = Castbar
+    unitFrame.Castbar = Castbar
     CastBars[unit] = Castbar
 end
 
-----------
-function CastBars:SetUpdateSpeed()
-    if ndb.settings.powerMode == 2 then -- Economy
-        UpdateSpeed = 1/40
-    else
-        UpdateSpeed = 1/60
-    end
-end
-
 function CastBars:ToggleConfigMode(isConfigMode)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == isConfigMode then return end
     CastBars:debug("ToggleConfigMode", isConfigMode)
     self.configMode = isConfigMode
@@ -448,12 +444,12 @@ function CastBars:ToggleConfigMode(isConfigMode)
             CastBars:debug("Setup bar", castbar.__owner.unit, castbar.config)
             castbar.duration, castbar.max = 0, 10
             castbar:SetMinMaxValues(castbar.duration, castbar.max)
-            castbar.Text:SetText(SPELL_CASTING)
+            castbar.Text:SetText(_G.SPELL_CASTING)
             castbar.Icon:SetTexture([[Interface\Icons\INV_Misc_Dice_02]])
             castbar.safeZone:Hide()
 
             -- We need to wait a bit for the game to register that we have a target and focus
-            C_Timer.After(0.2, function()
+            _G.C_Timer.After(0.2, function()
                 castbar:Show()
                 CastBars:debug("IsShown", unit, castbar:IsShown())
             end)
@@ -462,7 +458,7 @@ function CastBars:ToggleConfigMode(isConfigMode)
 end
 
 function CastBars:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             reverse = {
@@ -524,12 +520,12 @@ function CastBars:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
+    ndb = RealUI.db.profile
 
     layoutSize = ndb.settings.hudSize
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterConfigModeModule(self)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function CastBars:OnEnable()
@@ -538,6 +534,6 @@ end
 
 function CastBars:OnDisable()
     -- Enable default Cast Bars
-    CastingBarFrame:GetScript("OnLoad")(CastingBarFrame)
-    PetCastingBarFrame:GetScript("OnLoad")(PetCastingBarFrame)
+    _G.CastingBarFrame:GetScript("OnLoad")(_G.CastingBarFrame)
+    _G.PetCastingBarFrame:GetScript("OnLoad")(_G.PetCastingBarFrame)
 end

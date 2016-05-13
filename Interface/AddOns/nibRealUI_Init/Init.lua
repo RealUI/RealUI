@@ -7,13 +7,11 @@ local next, print, select = _G.next, _G.print, _G.select
 local tostring, date = _G.tostring, _G.date
 
 -- Libs --
-local LTD = LibStub("RealUI_LibTextDump-1.0")
+local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
 
 -- RealUI --
 _G.RealUI = RealUI
 
-local uiWidth, uiHeight = UIParent:GetSize()
-RealUI.EM = floor(uiHeight * 0.0125 + 0.5)
 
 RealUI.media = {
     window =        {0.03, 0.03, 0.03, 0.9},
@@ -65,7 +63,7 @@ local function CreateDebugFrame(mod)
     return debugger[mod]
 end
 
-local function debug(mod, ...)
+local function Debug(mod, ...)
     local modDebug = debugger[mod]
     if not modDebug then
         modDebug = CreateDebugFrame(mod)
@@ -87,11 +85,19 @@ local function debug(mod, ...)
         modDebug.prevLine = text
     end
 end
-RealUI.Debug = debug
+RealUI.Debug = Debug
+function RealUI.GetDebug(mod)
+    return function (...)
+        Debug(mod, ...)
+    end
+end
+local function debug(...)
+    Debug("Init", ...)
+end
 
 -- Slash Commands
 _G.SLASH_REALUIINIT1 = "/realdebug"
-function SlashCmdList.REALUIINIT(mod, editBox)
+function _G.SlashCmdList.REALUIINIT(mod, editBox)
     print("/realdebug", mod, editBox)
     if mod == "" then
         -- TODO: Make this show a frame w/ buttons to specific debugs
@@ -120,14 +126,28 @@ function SlashCmdList.REALUIINIT(mod, editBox)
     end
 end
 
-local f = CreateFrame("Frame")
+local f = _G.CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("UI_SCALE_CHANGED")
 f:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" then
         -- Do stuff at login
         f:UnregisterEvent("PLAYER_LOGIN")
         --f:UnregisterEvent("ADDON_LOADED")
+    elseif event == "UI_SCALE_CHANGED" then
+        local scrHeight = _G.GetScreenHeight()
+        scrHeight = floor(scrHeight + 0.5)
+        debug("scrHeight", scrHeight)
+        local EM = scrHeight * 0.0125
+        debug("EM", EM, RealUI.EM)
+
+        if not RealUI.EM then
+            debug("Set EM")
+            RealUI.EM = EM
+        elseif EM ~= RealUI.EM then
+            debug("Recalc EM")
+        end
     elseif event == "ADDON_LOADED" then
         if addon == NAME then
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
@@ -159,7 +179,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             for name, func in next, auroraStyle.functions do
                 if auroraStyle.copy[name] then
                     F[name] = func
-                else
+                --else
                     --F[name] = F.dummy
                 end
             end
@@ -173,69 +193,69 @@ f:SetScript("OnEvent", function(self, event, addon)
             end
 
             auroraStyle.initVars()
-        elseif addon == "nibRealUI" then
+        --elseif addon == "nibRealUI" then
         end
     end
 end)
 
 -- Modified from Blizzard's DrawRouteLine
-local lineFactor = TAXIROUTE_LINEFACTOR_2 --(32/20) / 2
+--local lineFactor = _G.TAXIROUTE_LINEFACTOR_2 --(32/20) / 2
 
 function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
-   if (not relPoint) then relPoint = "BOTTOMLEFT" end
+    if (not relPoint) then relPoint = "BOTTOMLEFT" end
 
-   T:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
+    T:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
 
-   -- Determine dimensions and center point of line
-   local dx, dy = ex - sx, ey - sy
-   --debug("Init", DrawLine: dx, ", dx, ", dy, ", dy)
-   local cx, cy = (sx + ex) / 2, (sy + ey) / 2
-   --debug("Init", "DrawLine: cx, ", cx, ", cy, ", cy)
+    -- Determine dimensions and center point of line
+    local dx, dy = ex - sx, ey - sy
+    --debug("Init", DrawLine: dx, ", dx, ", dy, ", dy)
+    local cx, cy = (sx + ex) / 2, (sy + ey) / 2
+    --debug("Init", "DrawLine: cx, ", cx, ", cy, ", cy)
 
-   -- Normalize direction if necessary
-   if (dx < 0) then
-      dx,dy = -dx,-dy
-   end
+    -- Normalize direction if necessary
+    if (dx < 0) then
+        dx,dy = -dx,-dy
+    end
 
-   -- Calculate actual length of line
-   local l = _G.sqrt((dx * dx) + (dy * dy))
+    -- Calculate actual length of line
+    local l = _G.sqrt((dx * dx) + (dy * dy))
 
-   -- Quick escape if it's zero length
-   if (l == 0) then
-      T:SetTexCoord(0,0,0,0,0,0,0,0)
-      T:SetPoint("BOTTOMLEFT", C, relPoint, cx,cy)
-      T:SetPoint("TOPRIGHT",   C, relPoint, cx,cy)
-      return
-   end
+    -- Quick escape if it's zero length
+    if (l == 0) then
+        T:SetTexCoord(0,0,0,0,0,0,0,0)
+        T:SetPoint("BOTTOMLEFT", C, relPoint, cx,cy)
+        T:SetPoint("TOPRIGHT",   C, relPoint, cx,cy)
+        return
+    end
 
-   -- Sin and Cosine of rotation, and combination (for later)
-   local s,c = -dy / l, dx / l
-   local sc = s * c
+    -- Sin and Cosine of rotation, and combination (for later)
+    local s,c = -dy / l, dx / l
+    local sc = s * c
 
-   -- Calculate bounding box size and texture coordinates
-   local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
-   if (dy >= 0) then
-      Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
-      Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
-      BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
-      BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx
-      TRy = BRx
-   else
-      Bwid = cx - sx --((l * c) + (w * s)) * lineFactor
-      Bhgt = -(cy - sy) --((w * c) + (l * s)) * lineFactor
-      BLx, BLy, BRx = s * s, -(l / w) * sc, 1 + (w / l) * sc
-      BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
-      TRx = TLy
-   end
-   --debug("Init", "DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
-   --debug("Init", "DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
-   --debug("Init", "DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
+    -- Calculate bounding box size and texture coordinates
+    local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
+    if (dy >= 0) then
+        Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
+        Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
+        BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
+        BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx
+        TRy = BRx
+    else
+        Bwid = cx - sx --((l * c) + (w * s)) * lineFactor
+        Bhgt = -(cy - sy) --((w * c) + (l * s)) * lineFactor
+        BLx, BLy, BRx = s * s, -(l / w) * sc, 1 + (w / l) * sc
+        BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
+        TRx = TLy
+    end
+    --debug("Init", "DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
+    --debug("Init", "DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
+    --debug("Init", "DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
 
-   -- Set texture coordinates and anchors
-   T:ClearAllPoints()
-   T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
-   T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt)
-   T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt)
+    -- Set texture coordinates and anchors
+    T:ClearAllPoints()
+    T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
+    T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt)
+    T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt)
 end
 
 -- Math

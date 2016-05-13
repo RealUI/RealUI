@@ -418,7 +418,7 @@ end
 --              currently available.
 function AceLibrary:IsNewVersion(major, minor)
 	argCheck(self, major, 2, "string")
-	TryToLoadStandalone(major)
+	--TryToLoadStandalone(major)
 
 	if type(minor) == "string" then
 		local m = svnRevisionToNumber(minor)
@@ -448,7 +448,7 @@ end
 function AceLibrary:HasInstance(major, minor)
 	argCheck(self, major, 2, "string")
 	if minor ~= false then
-		TryToLoadStandalone(major)
+		--TryToLoadStandalone(major)
 	end
 	
 	local lib, ver = LibStub:GetLibrary(major, true)
@@ -481,7 +481,7 @@ end
 function AceLibrary:GetInstance(major, minor)
 	argCheck(self, major, 2, "string")
 	if minor ~= false then
-		TryToLoadStandalone(major)
+		--TryToLoadStandalone(major)
 	end
 
 	local data, ver = LibStub:GetLibrary(major, true)

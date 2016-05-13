@@ -1,16 +1,18 @@
-local _G = _G
-local RealUI = _G.RealUI
-local IsAddOnLoaded = _G.IsAddOnLoaded
+local _, private = ...
 
-local function debug(...)
-    RealUI.Debug("MiniPatch", ...)
-end
+-- Lua Globals --
+local _G = _G
+local next, type = _G.next, _G.type
+
+-- RealUI --
+local RealUI = private.RealUI
+local debug = RealUI.GetDebug("MiniPatch")
 
 RealUI.minipatches = {
     [1] = function(ver)
         debug("r"..ver)
         _G.SetCVar("countdownForCooldowns", 0)
-        if IsAddOnLoaded("Aurora") then
+        if _G.IsAddOnLoaded("Aurora") then
             local AuroraConfig = _G.AuroraConfig
             if AuroraConfig then
                 AuroraConfig["useButtonGradientColour"] = false
@@ -23,7 +25,7 @@ RealUI.minipatches = {
                 AuroraConfig["buttonSolidColour"] = {0.09, 0.09, 0.09, 1}
             end
         end
-        if IsAddOnLoaded("DBM-StatusBarTimers") then
+        if _G.IsAddOnLoaded("DBM-StatusBarTimers") then
             local DBT_AllPersistentOptions = _G.DBT_AllPersistentOptions
             if DBT_AllPersistentOptions and DBT_AllPersistentOptions["DBM"] then
                 DBT_AllPersistentOptions["DBM"]["HugeTimerY"] = 300
@@ -40,7 +42,7 @@ RealUI.minipatches = {
                 DBT_AllPersistentOptions["DBM"]["BarXOffset"] = 0
             end
         end
-        if IsAddOnLoaded("BugSack") then
+        if _G.IsAddOnLoaded("BugSack") then
             if _G.BugSackLDBIconDB then
                 _G.BugSackLDBIconDB["hide"] = false
             end
@@ -49,7 +51,7 @@ RealUI.minipatches = {
     [8] = function(ver)
         debug("r"..ver)
         local Bartender4DB = _G.Bartender4DB
-        if IsAddOnLoaded("Bartender4") and Bartender4DB then
+        if _G.IsAddOnLoaded("Bartender4") and Bartender4DB then
             if Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] then
                 Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI-Healing"] = Bartender4DB["namespaces"]["PetBar"]["profiles"]["RealUI"]
             end
@@ -59,7 +61,7 @@ RealUI.minipatches = {
         debug("r"..ver)
         -- This was supposed to be r11... oops
         local Grid2DB = _G.Grid2DB
-        if IsAddOnLoaded("Grid2") and Grid2DB then
+        if _G.IsAddOnLoaded("Grid2") and Grid2DB then
             for i, key in next, {"RealUI-Healing", "RealUI"} do
                 local profile = Grid2DB["profiles"][key]
                 if profile then
@@ -76,14 +78,14 @@ RealUI.minipatches = {
             end
         end
         local AuroraConfig = _G.AuroraConfig
-        if IsAddOnLoaded("Aurora") and AuroraConfig then
+        if _G.IsAddOnLoaded("Aurora") and AuroraConfig then
             AuroraConfig["buttonSolidColour"] = {0.1, 0.1, 0.1, 1}
         end
 
         -- r12
         _G.SetCVar("useCompactPartyFrames", 1) -- Raid-style party frames
         local KuiNameplatesGDB = _G.KuiNameplatesGDB
-        if IsAddOnLoaded("Kui_Nameplates") and KuiNameplatesGDB then
+        if _G.IsAddOnLoaded("Kui_Nameplates") and KuiNameplatesGDB then
             KuiNameplatesGDB["profiles"]["RealUI"]["fonts"]["options"]["fontscale"] = 1
         end
     end,
@@ -100,12 +102,12 @@ RealUI.minipatches = {
         if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
             local defaultDB = defaults["**"].types["**"]
             local profile = nibRealUIDB["namespaces"]["PointTracking"]["profiles"]["RealUI"]
-            local function setSettings(classSV, classDB, defaultDB)
+            local function setSettings(classSV, classDB, fallbackDB)
                 for setting, value in next, classSV do
                     if type(value) == "table" then
-                        setSettings(value, classDB and classDB[setting] or nil, defaultDB[setting])
+                        setSettings(value, classDB and classDB[setting] or nil, fallbackDB[setting])
                     else
-                        classSV[setting] = classDB and classDB[setting] or defaultDB[setting]
+                        classSV[setting] = classDB and classDB[setting] or fallbackDB[setting]
                     end
                 end
             end
@@ -120,7 +122,7 @@ RealUI.minipatches = {
             end
         end
         local RavenDB = _G.RavenDB
-        if IsAddOnLoaded("Raven") and RavenDB then
+        if _G.IsAddOnLoaded("Raven") and RavenDB then
             if RavenDB["profiles"]["RealUI"] then
                 if RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"] then
                     RavenDB["profiles"]["RealUI"]["BarGroups"]["PlayerBuffs"]["checkDuration"] = false
@@ -128,6 +130,62 @@ RealUI.minipatches = {
                 if RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"] then
                     RavenDB["profiles"]["RealUI"]["BarGroups"]["Buffs"]["checkDuration"] = false
                 end
+            end
+        end
+    end,
+    [16] = function(ver)
+        debug("r"..ver)
+        local nibRealUIDB = _G.nibRealUIDB
+        if nibRealUIDB.namespaces.PointTracking.profiles then
+            local classDB = {}
+            local profile = nibRealUIDB.namespaces.PointTracking.profiles.RealUI
+            for class, classInfo in next, profile do
+                debug(class, classInfo)
+                if classInfo.types then
+                    classDB[class] = {}
+                    for typePower, typeInfo in next, classInfo.types do
+                        debug(typePower, typeInfo)
+                        if typeInfo.general then
+                            debug("hideempty", typeInfo.general.hideempty)
+                            classDB[class].hideempty = typeInfo.general.hideempty
+                            if typeInfo.general.direction then
+                                debug("reverse", typeInfo.general.direction.reverse)
+                                classDB[class].reverse = typeInfo.general.direction.reverse
+                            end
+                        end
+                    end
+                end
+            end
+            nibRealUIDB.namespaces.PointTracking.class = classDB
+            nibRealUIDB.namespaces.PointTracking.profiles = nil
+        end
+        if nibRealUIDB.namespaces.AuraTracking then
+            if nibRealUIDB.namespaces.AuraTracking.class.WARLOCK then
+                -- Remove Burning Embers tracker
+                nibRealUIDB.namespaces.AuraTracking.class.WARLOCK["9-a6a32ca3-1"] = nil
+            end
+        end
+
+        -- Remove some trash
+        for charName, charInfo in next, nibRealUIDB.char do
+            if charInfo.addonProfiles then
+                charInfo.addonProfiles = nil
+            end
+        end
+        local trash = {
+            "ActionBarDoodads",
+            "PetBattles",
+            "RaidDebuffs",
+            "RaidUtility",
+            "RavenBorders",
+            "RuneDisplay",
+            "SkinDBM",
+            "SkinDXE",
+            "StatDisplay",
+        }
+        for index, namespace in next, trash do
+            if nibRealUIDB.namespaces[namespace] then
+                nibRealUIDB.namespaces[namespace] = nil
             end
         end
     end,

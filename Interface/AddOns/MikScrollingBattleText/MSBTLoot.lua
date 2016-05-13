@@ -36,7 +36,7 @@ local SILVER = string_gsub(SILVER_AMOUNT, "%%d *", "")
 local COPPER = string_gsub(COPPER_AMOUNT, "%%d *", "")
 
 -- Localized name for item types.
-local ITEM_TYPE_QUEST = select(10, GetAuctionItemClasses())
+local ITEM_TYPE_QUEST = AUCTION_CATEGORY_QUEST_ITEMS or select(10, GetAuctionItemClasses())
 
 
 -------------------------------------------------------------------------------

@@ -1,5 +1,8 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+
 mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
     --print("HELLO EasyMail!!!", F, C)
     local r, g, b = C.r, C.g, C.b
@@ -17,37 +20,37 @@ mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
     end
 
     -- Inbox
-    F.Reskin(EasyMail_CheckAllButton)
-    SetTexture(EasyMail_CheckAllButton, "CheckAll")
+    F.Reskin(_G.EasyMail_CheckAllButton)
+    SetTexture(_G.EasyMail_CheckAllButton, "CheckAll")
 
-    F.Reskin(EasyMail_ClearAllButton)
-    SetTexture(EasyMail_ClearAllButton, "ClearAll")
+    F.Reskin(_G.EasyMail_ClearAllButton)
+    SetTexture(_G.EasyMail_ClearAllButton, "ClearAll")
 
-    F.Reskin(EasyMail_CheckPageButton)
-    SetTexture(EasyMail_CheckPageButton, "CheckPage")
+    F.Reskin(_G.EasyMail_CheckPageButton)
+    SetTexture(_G.EasyMail_CheckPageButton, "CheckPage")
 
-    F.Reskin(EasyMail_ClearPageButton)
-    SetTexture(EasyMail_ClearPageButton, "ClearPage")
+    F.Reskin(_G.EasyMail_ClearPageButton)
+    SetTexture(_G.EasyMail_ClearPageButton, "ClearPage")
 
-    F.Reskin(EasyMail_GetAllButton)
-    SetTexture(EasyMail_GetAllButton, "GetChecked")
-    local bag = EasyMail_GetAllButton:CreateTexture()
+    F.Reskin(_G.EasyMail_GetAllButton)
+    SetTexture(_G.EasyMail_GetAllButton, "GetChecked")
+    local bag = _G.EasyMail_GetAllButton:CreateTexture()
     bag:SetPoint("TOPRIGHT", -14, -7)
     bag:SetSize(20, 20)
     bag:SetTexture([[Interface\Icons\INV_Misc_Bag_08]])
     bag:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     bag:Show()
-    hooksecurefunc(EasyMail_GetAllButton, "Disable", function()
+    _G.hooksecurefunc(_G.EasyMail_GetAllButton, "Disable", function()
         --print("Disable", bag)
         bag:SetDesaturated(true)
     end)
-    hooksecurefunc(EasyMail_GetAllButton, "Enable", function()
+    _G.hooksecurefunc(_G.EasyMail_GetAllButton, "Enable", function()
         --print("Enable", bag)
         bag:SetDesaturated(false)
     end)
 
-    hooksecurefunc(EasyMail, "InboxUpdate", function()
-        for i = 1, INBOXITEMS_TO_DISPLAY do
+    _G.hooksecurefunc(_G.EasyMail, "InboxUpdate", function()
+        for i = 1, _G.INBOXITEMS_TO_DISPLAY do
             local check = _G["EasyMail_CheckButton"..i]
             if check and not check.skinned then
                 F.ReskinCheck(check)
@@ -57,23 +60,23 @@ mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
 
 
     -- Send
-    F.Reskin(EasyMail_MailButton, true)
-    EasyMail_MailButton:SetSize(20, 20)
-    EasyMail_MailButton:ClearAllPoints()
-    EasyMail_MailButton:SetPoint("TOPLEFT", SendMailNameEditBox, "TOPRIGHT", -1, 0)
+    F.Reskin(_G.EasyMail_MailButton, true)
+    _G.EasyMail_MailButton:SetSize(20, 20)
+    _G.EasyMail_MailButton:ClearAllPoints()
+    _G.EasyMail_MailButton:SetPoint("TOPLEFT", _G.SendMailNameEditBox, "TOPRIGHT", -1, 0)
 
-    local tex = EasyMail_MailButton:CreateTexture(nil, "ARTWORK")
+    local tex = _G.EasyMail_MailButton:CreateTexture(nil, "ARTWORK")
     tex:SetTexture(C.media.arrowDown)
     tex:SetSize(8, 8)
     tex:SetPoint("CENTER")
     tex:SetVertexColor(1, 1, 1)
-    EasyMail_MailButton.tex = tex
+    _G.EasyMail_MailButton.tex = tex
 
-    EasyMail_MailButton:HookScript("OnEnter", F.colourArrow)
-    EasyMail_MailButton:HookScript("OnLeave", F.clearArrow)
+    _G.EasyMail_MailButton:HookScript("OnEnter", F.colourArrow)
+    _G.EasyMail_MailButton:HookScript("OnLeave", F.clearArrow)
 
     -- Dropdown pullout
-    F.CreateBD(EasyMail_MailDropdownBackdrop)
+    F.CreateBD(_G.EasyMail_MailDropdownBackdrop)
     for i = 1, 15 do
         local highlight = _G["EasyMail_MailDropdownButton" .. i .. "Highlight"]
         highlight:SetTexture(r, g, b, .4)
@@ -83,6 +86,6 @@ mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
     end
 
     -- Open
-    F.Reskin(EasyMail_AttButton)
-    F.Reskin(EasyMail_ForwardButton)
+    F.Reskin(_G.EasyMail_AttButton)
+    F.Reskin(_G.EasyMail_ForwardButton)
 end

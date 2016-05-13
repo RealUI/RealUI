@@ -1,5 +1,8 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+
 mods["Blizzard_CompactRaidFrames"] = function(F, C)
     mods.debug("Blizzard_CompactRaidFrames", F, C)
 
@@ -28,10 +31,9 @@ mods["Blizzard_CompactRaidFrames"] = function(F, C)
             tex:SetPoint("TOPLEFT", 3, -height)
             tex:SetPoint("BOTTOMRIGHT", -2, 0)
         end
-        tinsert(toggleButton.tex, tex)
+        _G.tinsert(toggleButton.tex, tex)
     end
-    hooksecurefunc("CompactRaidFrameManager_Toggle", function(self)
-        local height = toggleButton:GetHeight()
+    _G.hooksecurefunc("CompactRaidFrameManager_Toggle", function(self)
         if self.collapsed then
             toggleButton.tex[1]:SetTexCoord(0, 1, 0, 0, 1, 1, 1, 0)
             toggleButton.tex[2]:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)

@@ -1,7 +1,13 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-nibRealUI.LoadAddOnData_Grid2 = function()
-	Grid2DB = {
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+
+RealUI.LoadAddOnData_Grid2 = function()
+	_G.Grid2DB = {
 		["namespaces"] = {
 			["Grid2Layout"] = {
 				["profiles"] = {

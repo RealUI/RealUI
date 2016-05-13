@@ -1,7 +1,10 @@
 local _, mods = ...
 
-tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    --print("HELLO nibRealUI!!!", F, C)
+-- Lua Globals --
+local _G = _G
+
+_G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
+    --print("HELLO RealUI!!!", F, C)
     --VideoOptions
-    F.Reskin(RealUIScaleBtn)
+    F.Reskin(_G.RealUIScaleBtn)
 end)

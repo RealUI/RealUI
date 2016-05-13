@@ -1,30 +1,38 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local F, C = Aurora[1], Aurora[2]
+local _, private = ...
 
-local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:GetModule(MODNAME)
-local db, ndb, ndbc
+-- Lua Globals --
+local _G = _G
+local floor = _G.math.floor
 
-local oUF = oUFembed
+-- Libs --
+local oUF = _G.oUFembed
+local F = _G.Aurora[1]
+
+-- RealUI --
+local RealUI = private.RealUI
+local db, ndb
+
+local UnitFrames = RealUI:GetModule("UnitFrames")
+
 local prepFrames = {}
 
 --[[ Utils ]]--
 local function TimeFormat(t)
-    local h, m, hplus, mplus, s, ts, f
+    local h, m, hplus, mplus, s, f
 
-    h = math.floor(t / 3600)
-    m = math.floor((t - (h * 3600)) / 60)
-    s = math.floor(t - (h * 3600) - (m * 60))
+    h = floor(t / 3600)
+    m = floor((t - (h * 3600)) / 60)
+    s = floor(t - (h * 3600) - (m * 60))
 
-    hplus = math.floor((t + 3599.99) / 3600)
-    mplus = math.floor((t - (h * 3600) + 59.99) / 60) -- provides compatibility with tooltips
+    hplus = floor((t + 3599.99) / 3600)
+    mplus = floor((t - (h * 3600) + 59.99) / 60) -- provides compatibility with tooltips
 
     if t >= 3600 then
-        f = string.format("%.0fh", hplus)
+        f = ("%.0fh"):format(hplus)
     elseif t >= 60 then
-        f = string.format("%.0fm", mplus)
+        f = ("%.0fm"):format(mplus)
     else
-        f = string.format("%.0fs", s)
+        f = ("%.0fs"):format(s)
     end
 
     return f
@@ -33,7 +41,7 @@ end
 local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
     --print(self.unit, event, unitID, spell, rank, lineID, spellID)
     if spellID == 59752 or spellID == 42292 then
-        local startTime, duration = GetSpellCooldown(spellID)
+        local startTime, duration = _G.GetSpellCooldown(spellID)
         self.Trinket.startTime = startTime
         self.Trinket.endTime = startTime + duration
         if db.arena.announceUse then
@@ -41,24 +49,24 @@ local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
             if chat == "GROUP" then
                 chat = "INSTANCE_CHAT"
             end
-            SendChatMessage("Trinket used by: "..GetUnitName(unitID, true), chat)
+            _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unitID, true), chat)
         end
     end
 end
 
 local function UpdatePrep(self, event, ...)
     UnitFrames:debug("Arena:----- UpdatePrep -----")
-    local notVisible = UnitAffectingCombat("player") and "SetAlpha" or "Hide"
+    local notVisible = _G.UnitAffectingCombat("player") and "SetAlpha" or "Hide"
     if event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS" then
         UnitFrames:debug(event)
-        local numOpps = GetNumArenaOpponentSpecs()
+        local numOpps = _G.GetNumArenaOpponentSpecs()
         for i = 1, 5 do
             local opp = prepFrames[i]
             if (i <= numOpps) then
-                local specID, gender = GetArenaOpponentSpec(i)
+                local specID, gender = _G.GetArenaOpponentSpec(i)
                 --print("Opponent", i, "specID:", specID, "gender:", gender)
                 if (specID > 0) then
-                    local _, _, _, specIcon, _, _, class = GetSpecializationInfoByID(specID, gender)
+                    local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID, gender)
                     opp.icon:SetTexture(specIcon)
                     opp:Show()
                 else
@@ -75,7 +83,7 @@ local function UpdatePrep(self, event, ...)
         unit = unit:match("arena(%d)")
         UnitFrames:debug(unit, prepFrames[unit])
         if unit then
-            local opp = prepFrames[tonumber(unit)]
+            local opp = prepFrames[_G.tonumber(unit)]
             if status == "seen" then
                 UnitFrames:debug("Arena Opp Seen", unit, opp)
                 opp:SetAlpha(1)
@@ -92,11 +100,12 @@ end
 
 --[[ Parts ]]--
 local function CreateHealthBar(parent)
-    parent.Health = CreateFrame("StatusBar", nil, parent)
+    parent.Health = _G.CreateFrame("StatusBar", nil, parent)
     parent.Health:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 3)
     parent.Health:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
-    parent.Health:SetStatusBarTexture(nibRealUI.media.textures.plain)
-    parent.Health:SetStatusBarColor(unpack(db.overlay.colors.health.normal))
+    parent.Health:SetStatusBarTexture(RealUI.media.textures.plain)
+    local color = db.overlay.colors.health.normal
+    parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
     if not(ndb.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
@@ -111,24 +120,24 @@ end
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.HealthValue:SetPoint("TOPLEFT", parent.Health, "TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFontObject(RealUIFont_Pixel)
+    parent.HealthValue:SetFontObject(_G.RealUIFont_Pixel)
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Name:SetPoint("TOPRIGHT", parent.Health, "TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFontObject(RealUIFont_Pixel)
+    parent.Name:SetFontObject(_G.RealUIFont_Pixel)
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
 end
 
 local function CreatePowerBar(parent)
-    parent.Power = CreateFrame("StatusBar", nil, parent)
+    parent.Power = _G.CreateFrame("StatusBar", nil, parent)
     parent.Power:SetFrameStrata("MEDIUM")
     parent.Power:SetFrameLevel(6)
     parent.Power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
     parent.Power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
-    parent.Power:SetStatusBarTexture(nibRealUI.media.textures.plain)
+    parent.Power:SetStatusBarTexture(RealUI.media.textures.plain)
     parent.Power:SetStatusBarColor(db.overlay.colors.power["MANA"][1], db.overlay.colors.power["MANA"][2], db.overlay.colors.power["MANA"][3])
     parent.Power.colorPower = true
     parent.Power.PostUpdate = function(bar, unit, min, max)
@@ -139,7 +148,7 @@ local function CreatePowerBar(parent)
 end
 
 local function CreateTrinket(parent)
-    local trinket = CreateFrame("Frame", nil, parent)
+    local trinket = _G.CreateFrame("Frame", nil, parent)
     trinket:SetSize(22, 22)
     trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -3, 0)
     trinket:SetScript("OnUpdate", function(self, elapsed)
@@ -153,9 +162,9 @@ local function CreateTrinket(parent)
                     self.timer:SetMinMaxValues(0, self.endTime - self.startTime)
                 end
 
-                local now = GetTime()
+                local now = _G.GetTime()
                 self.timer:SetValue(self.endTime - now)
-                self.text:SetText(TimeFormat(ceil(self.endTime - now)))
+                self.text:SetText(TimeFormat(_G.ceil(self.endTime - now)))
 
                 local per = (self.endTime - now) / (self.endTime - self.startTime)
                 if per > 0.5 then
@@ -179,9 +188,9 @@ local function CreateTrinket(parent)
     trinket.icon:SetTexCoord(.08, .92, .08, .92)
     F.ReskinIcon(trinket.icon)
 
-    trinket.timer = CreateFrame("StatusBar", nil, trinket)
+    trinket.timer = _G.CreateFrame("StatusBar", nil, trinket)
     trinket.timer:SetMinMaxValues(0, 1)
-    trinket.timer:SetStatusBarTexture(nibRealUI.media.textures.plain)
+    trinket.timer:SetStatusBarTexture(RealUI.media.textures.plain)
     trinket.timer:SetStatusBarColor(1,1,1,1)
 
     trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)
@@ -190,7 +199,7 @@ local function CreateTrinket(parent)
     F.CreateBDFrame(trinket.timer)
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
-    trinket.text:SetFontObject(RealUIFont_PixelSmall)
+    trinket.text:SetFontObject(_G.RealUIFont_PixelSmall)
     trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
     trinket.text:SetJustifyH("LEFT")
     parent.Trinket = trinket
@@ -210,14 +219,14 @@ local function CreateArena(self)
     self.RaidIcon:SetSize(21, 21)
     self.RaidIcon:SetPoint("CENTER", self)
 
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
+    self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
+    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
     self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UnitCastUpdate)
 end
 
 local function SetupPrepFrames(index)
     UnitFrames:debug("SetupPrepFrames")
-    local prep = CreateFrame("Frame", nil, UIParent)
+    local prep = _G.CreateFrame("Frame", nil, _G.UIParent)
     if (index == 1) then
         prep:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
     else
@@ -233,16 +242,15 @@ local function SetupPrepFrames(index)
 end
 
 -- Init
-tinsert(UnitFrames.units, function(...)
+_G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
     if not db.arena.enabled then return end
 
     oUF:RegisterStyle("RealUI:arena", CreateArena)
     oUF:SetActiveStyle("RealUI:arena")
     -- Bosses and arenas are mutually excusive, so we'll just use some boss stuff for both for now.
-    for i = 1, MAX_BOSS_FRAMES do
+    for i = 1, _G.MAX_BOSS_FRAMES do
         SetupPrepFrames(i)
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
         arena:SetPoint("RIGHT", prepFrames[i], "LEFT", -3, 0)

@@ -1,72 +1,73 @@
 local _, mods = ...
 
-mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, F, C)
-    --print("DBM-Core", F, C)
+-- Lua Globals --
+local _G = _G
+
+mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, Fu, Co)
+    --print("DBM-Core", Fu, C)
     local firstInfo = true
-    hooksecurefunc(DBM.InfoFrame, "Show", function()
+    _G.hooksecurefunc(_G.DBM.InfoFrame, "Show", function()
         if firstInfo then
-            DBMInfoFrame:SetBackdrop(nil)
-            local bd = CreateFrame("Frame", nil, DBMInfoFrame)
+            _G.DBMInfoFrame:SetBackdrop(nil)
+            local bd = _G.CreateFrame("Frame", nil, _G.DBMInfoFrame)
             bd:SetPoint("TOPLEFT")
             bd:SetPoint("BOTTOMRIGHT")
-            bd:SetFrameLevel(DBMInfoFrame:GetFrameLevel()-1)
-            F.CreateBD(bd)
+            bd:SetFrameLevel(_G.DBMInfoFrame:GetFrameLevel()-1)
+            Fu.CreateBD(bd)
 
             firstInfo = false
         end
     end)
 
     local firstRange = true
-    hooksecurefunc(DBM.RangeCheck, "Show", function()
+    _G.hooksecurefunc(_G.DBM.RangeCheck, "Show", function()
         if firstRange then
-            DBMRangeCheck:SetBackdrop(nil)
-            local bd = CreateFrame("Frame", nil, DBMRangeCheck)
+            _G.DBMRangeCheck:SetBackdrop(nil)
+            local bd = _G.CreateFrame("Frame", nil, _G.DBMRangeCheck)
             bd:SetPoint("TOPLEFT")
             bd:SetPoint("BOTTOMRIGHT")
-            bd:SetFrameLevel(DBMRangeCheck:GetFrameLevel()-1)
-            F.CreateBD(bd)
+            bd:SetFrameLevel(_G.DBMRangeCheck:GetFrameLevel()-1)
+            Fu.CreateBD(bd)
 
             firstRange = false
         end
     end)
 
-    local count = 1
+    local barCount = 1
 
     local styleBar = function()
-        local bar = _G["DBM_BossHealth_Bar_"..count]
+        local bar = _G["DBM_BossHealth_Bar_"..barCount]
 
         while bar do
             if not bar.styled then
                 local name = bar:GetName()
                 local sb = _G[name.."Bar"]
-                local text = _G[name.."BarName"]
-                local timer = _G[name.."BarTimer"]
 
                 _G[name.."BarBackground"]:Hide()
                 _G[name.."BarBorder"]:SetNormalTexture("")
 
-                sb:SetStatusBarTexture(C.media.backdrop)
+                sb:SetStatusBarTexture(Co.media.backdrop)
 
-                F.CreateBDFrame(sb)
+                Fu.CreateBDFrame(sb)
 
                 bar.styled = true
             end
 
-            count = count + 1
-            bar = _G["DBM_BossHealth_Bar_"..count]
+            barCount = barCount + 1
+            bar = _G["DBM_BossHealth_Bar_"..barCount]
         end
     end
 
-    hooksecurefunc(DBM.BossHealth, "AddBoss", styleBar)
-    hooksecurefunc(DBM.BossHealth, "UpdateSettings", styleBar)
+    _G.hooksecurefunc(_G.DBM.BossHealth, "AddBoss", styleBar)
+    _G.hooksecurefunc(_G.DBM.BossHealth, "UpdateSettings", styleBar)
 
     -- Place this inside Core to ensure it only gets created if we actually want DBM to be skinned.
     mods["DBM-GUI"] = function(F, C)
         --print("DBM-GUI", F, C)
-        DBM_GUI_OptionsFrameHeader:SetTexture(nil)
-        DBM_GUI_OptionsFramePanelContainer:SetBackdrop(nil)
-        DBM_GUI_OptionsFrameBossMods:DisableDrawLayer("BACKGROUND")
-        DBM_GUI_OptionsFrameDBMOptions:DisableDrawLayer("BACKGROUND")
+        _G.DBM_GUI_OptionsFrameHeader:SetTexture(nil)
+        _G.DBM_GUI_OptionsFramePanelContainer:SetBackdrop(nil)
+        _G.DBM_GUI_OptionsFrameBossMods:DisableDrawLayer("BACKGROUND")
+        _G.DBM_GUI_OptionsFrameDBMOptions:DisableDrawLayer("BACKGROUND")
 
         for i = 1, 2 do
             _G["DBM_GUI_OptionsFrameTab"..i.."Left"]:SetAlpha(0)
@@ -77,10 +78,10 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, F, C)
             _G["DBM_GUI_OptionsFrameTab"..i.."RightDisabled"]:SetAlpha(0)
         end
 
-        local count = 1
+        local optionCount = 1
 
         local function styleDBM()
-            local option = _G["DBM_GUI_Option_"..count]
+            local option = _G["DBM_GUI_Option_"..optionCount]
             while option do
                 local objType = option:GetObjectType()
                 if objType == "CheckButton" then
@@ -104,22 +105,22 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, F, C)
                     option:SetBackdrop(nil)
                 end
 
-                count = count + 1
-                option = _G["DBM_GUI_Option_"..count]
+                optionCount = optionCount + 1
+                option = _G["DBM_GUI_Option_"..optionCount]
                 if not option then
-                    option = _G["DBM_GUI_DropDown"..count]
+                    option = _G["DBM_GUI_DropDown"..optionCount]
                 end
             end
         end
 
-        DBM:RegisterOnGuiLoadCallback(function()
+        _G.DBM:RegisterOnGuiLoadCallback(function()
             --print("DBMSkin: RegisterOnGuiLoadCallback")
             styleDBM()
-            hooksecurefunc(DBM_GUI, "UpdateModList", styleDBM)
-            DBM_GUI_OptionsFrameBossMods:HookScript("OnShow", styleDBM)
+            _G.hooksecurefunc(_G.DBM_GUI, "UpdateModList", styleDBM)
+            _G.DBM_GUI_OptionsFrameBossMods:HookScript("OnShow", styleDBM)
         end)
 
-        hooksecurefunc(DBM_GUI_OptionsFrame, "DisplayButton", function(button, element)
+        _G.hooksecurefunc(_G.DBM_GUI_OptionsFrame, "DisplayButton", function(button, element)
             -- bit of a hack, can't get the API to work
             local pushed = element.toggle:GetPushedTexture():GetTexture()
 
@@ -134,37 +135,35 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, F, C)
         end)
 
         local MAX_BUTTONS = 10
-        hooksecurefunc(DBM_GUI_DropDown, "ShowMenu", function(self, values)
-            --print("DBMSkin: ShowMenu", self, values)
-            local button = self.buttons[1]
+        _G.hooksecurefunc(_G.DBM_GUI_DropDown, "ShowMenu", function(dropdown, values)
+            --print("DBMSkin: ShowMenu", dropdown, values)
+            local button = dropdown.buttons[1]
             local _, _, _, x = button:GetPoint()
             for i = 1, MAX_BUTTONS do
-                if i + self.offset <= #values then
-                    if values[i+self.offset].value == self.dropdown.value then
-                        local text = self.buttons[i]:GetText()
-                        local t, j = text:find("Check:0")
-                        text = text:sub(j+3)
-                        --print("Button "..i.."text:", text)
+                if i + dropdown.offset <= #values then
+                    if values[i+dropdown.offset].value == dropdown.dropdown.value then
+                        local text = dropdown.buttons[i]:GetText()
+                        local _, j = text:find("Check:0")
+                        _ = text:sub(j+3)
                     end
-                    --button = self.buttons[i]
 
-                    local highlight = _G[self.buttons[i]:GetName().."Highlight"]
+                    local highlight = _G[dropdown.buttons[i]:GetName().."Highlight"]
                     highlight:SetTexture(C.r, C.g, C.b, .2)
                     highlight:SetPoint("TOPLEFT", -x, 0)
-                    highlight:SetPoint("BOTTOMRIGHT", self:GetWidth() - button:GetWidth() - x - 1, 0)
+                    highlight:SetPoint("BOTTOMRIGHT", dropdown:GetWidth() - button:GetWidth() - x - 1, 0)
                 end
             end
 
-            if self.text:IsShown() then
-                self:SetHeight(self:GetHeight() + 5)
-                self.text:SetPoint("BOTTOM", self, "BOTTOM", 0, 3)
+            if dropdown.text:IsShown() then
+                dropdown:SetHeight(dropdown:GetHeight() + 5)
+                dropdown.text:SetPoint("BOTTOM", dropdown, "BOTTOM", 0, 3)
             end
         end)
 
-        F.CreateBD(DBM_GUI_DropDown)
-        F.CreateBD(DBM_GUI_OptionsFrame)
-        F.Reskin(DBM_GUI_OptionsFrameWebsiteButton)
-        F.Reskin(DBM_GUI_OptionsFrameOkay)
-        F.ReskinScroll(DBM_GUI_OptionsFramePanelContainerFOVScrollBar)
+        F.CreateBD(_G.DBM_GUI_DropDown)
+        F.CreateBD(_G.DBM_GUI_OptionsFrame)
+        F.Reskin(_G.DBM_GUI_OptionsFrameWebsiteButton)
+        F.Reskin(_G.DBM_GUI_OptionsFrameOkay)
+        F.ReskinScroll(_G.DBM_GUI_OptionsFramePanelContainerFOVScrollBar)
     end
 end

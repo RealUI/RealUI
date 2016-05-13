@@ -1,22 +1,22 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
 local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
 local tinsert, next, type = _G.table.insert, _G.next, _G.type
 
--- WoW Globals --
-local CreateFrame, UIParent = _G.CreateFrame, _G.UIParent
-
 -- Libs --
-local oUF = oUFembed
+local oUF = _G.oUFembed
 
 -- RealUI --
-local RealUI =  _G.RealUI
-local db, ndb, ndbc
-local isBeta = RealUI.isBeta
-local Lerp = RealUI.Lerp
+local RealUI = private.RealUI
+local ndb
 
 local MODNAME = "AngleStatusBar"
-local AngleStatusBar = RealUI:CreateModule(MODNAME)
+local AngleStatusBar = RealUI:NewModule(MODNAME)
+
+local isBeta = RealUI.isBeta
+local Lerp = RealUI.Lerp
 
 local bars = {}
 local dontSmooth, smooth
@@ -86,7 +86,7 @@ local function SetBarValue(self, value)
     end
 end
 
-local smoothUpdateFrame = CreateFrame("Frame")
+local smoothUpdateFrame = _G.CreateFrame("Frame")
 smoothUpdateFrame:SetScript("OnUpdate", function()
     local limit = 30 / _G.GetFramerate()
     for bar, per in next, smoothing do
@@ -119,7 +119,11 @@ function AngleStatusBar:SetBarColor(bar, r, g, b, a)
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
     for i = 1, #bar.row do
-        bar.row[i]:SetTexture(r, g, b, a or 1)
+        if isBeta then
+            bar.row[i]:SetColorTexture(r, g, b, a or 1)
+        else
+            bar.row[i]:SetTexture(r, g, b, a or 1)
+        end
     end
 end
 
@@ -140,9 +144,9 @@ function AngleStatusBar:SetReverseFill(bar, reverse)    -- Reverse fill style (r
     self:SetValue(bar, bar.value, true)
 end
 
-function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, direction, smooth)
-    local bar = CreateFrame("Frame", nil, parent)
-    bar.fullWidth, bar.typeStart, bar.typeEnd, bar.direction, bar.value, bar.smooth = width, typeStart, typeEnd, direction, 1, smooth, true
+function AngleStatusBar:NewBar(parent, x, y, width, height, typeStart, typeEnd, direction, smoothFill)
+    local bar = _G.CreateFrame("Frame", nil, parent)
+    bar.fullWidth, bar.typeStart, bar.typeEnd, bar.direction, bar.value, bar.smooth = width, typeStart, typeEnd, direction, 1, smoothFill or true
     bar.origDirection = bar.direction
 
     -- Growth direction of Bar Start and End
@@ -202,31 +206,11 @@ end
 
 --[[ Internal Functions ]]--
 local function GetOffSets(leftAngle, rightAngle, height)
-    local leftX, rightX = 0, 0
     -- These conditions keep the textures within the frame.
     -- Doing this removes the need to make a bunch of offsets elsewhere.
-    leftX = (leftAngle == [[/]]) and height - 1 or 0
-    rightX = (rightAngle == [[\]]) and -(height - 1) or 0
+    local leftX = (leftAngle == [[/]]) and height - 1 or 0
+    local rightX = (rightAngle == [[\]]) and -(height - 1) or 0
     return leftX, rightX
-end
-
-local function DrawLine(tex, anchor, x, ofs, leftX, rightX)
-    if leftX == 0 then
-        tex:SetVertexColor(1, 0, 0)
-        RealUI:DrawLine(tex, anchor, x, -1, ofs, -ofs, 16, "TOPLEFT")
-    else
-        tex:SetVertexColor(1, 1, 0)
-        RealUI:DrawLine(tex, anchor, x, 1, ofs, ofs, 16, "BOTTOMLEFT")
-    end
-    if rightX then
-        if rightX == 0 then
-            tex:SetVertexColor(0, 1, 0)
-            RealUI:DrawLine(tex, anchor, -x, -1, -ofs, -ofs, 16, "TOPRIGHT")
-        else
-            tex:SetVertexColor(0, 1, 1)
-            RealUI:DrawLine(tex, anchor, -x, 1, -ofs, ofs, 16, "BOTTOMRIGHT")
-        end
-    end
 end
 
 --[[ API Functions ]]--
@@ -321,7 +305,7 @@ end
 --[[ Frame Construction ]]--
 local function CreateAngleBG(width, height, parent, info)
     debug(info.debug, "CreateAngleBG", width, height, parent, info)
-    local bg = CreateFrame("Frame", nil, parent)
+    local bg = _G.CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
 
     --[[
@@ -494,7 +478,7 @@ local function CreateAngleBar(width, height, parent, info)
     info.startPoint = "TOPLEFT"
     info.endPoint = "TOPRIGHT"
 
-    local bar = CreateFrame("Frame", nil, parent)
+    local bar = _G.CreateFrame("Frame", nil, parent)
     debug(info.debug, "CreateBar", bar, parent)
     bar:SetPoint(info.startPoint, parent, 2, 0)
     bar:SetHeight(info.minWidth)
@@ -613,7 +597,7 @@ function RealUI:TestASB(reverseFill, reversePer)
     }
     for i = 1, #info do
         local barInfo = info[i]
-        local test = AngleStatusBar:CreateAngleFrame("Status", 200, 8, UIParent, barInfo)
+        local test = AngleStatusBar:CreateAngleFrame("Status", 200, 8, _G.UIParent, barInfo)
         test:SetMinMaxValues(0, 200)
         test:SetValue(10, true)
         test:SetStatusBarColor(1, 0, 0, 1)
@@ -623,7 +607,7 @@ function RealUI:TestASB(reverseFill, reversePer)
         if reversePer then
             test:SetReversePercent(true)
         end
-        test:SetPoint("TOP", UIParent, "CENTER", 0, -(10 * i))
+        test:SetPoint("TOP", _G.UIParent, "CENTER", 0, -(10 * i))
         tinsert(testBars, test)
         test:Show()
         test.bar:Show()
@@ -643,7 +627,6 @@ end
 -------------
 function AngleStatusBar:OnInitialize()
     ndb = RealUI.db.profile
-    ndbc = RealUI.db.char
 
     if ndb.settings.powerMode == 2 then -- Economy
         smooth = false

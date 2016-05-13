@@ -1,23 +1,22 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
-local LSM = LibStub("LibSharedMedia-3.0")
-local Tablet20 = LibStub("Tablet-2.0")
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next, ipairs = _G.next, _G.ipairs
+local tostring, select = _G.tostring, _G.select
+local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
+local tinsert = _G.table.insert
+
+-- Libs --
+local Tablet20 = _G.LibStub("Tablet-2.0")
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, dbc, dbg, ndb, ndbc
 
 local MODNAME = "InfoLine"
-local InfoLine = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
-
-local _
-local min = math.min
-local max = math.max
-local floor = math.floor
-local abs = math.abs
-local tonumber = tonumber
-local tostring = tostring
-local strform = string.format
-local gsub = gsub
-local strsub = strsub
-
-local db, dbc, dbg, ndb, ndbc, ndbg
+local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local LoggedIn
 local NeedSpecUpdate = false
@@ -71,16 +70,13 @@ local ElementHeight = {
 
 local TextPadding = 1
 
-local HighlightColor
 local HighlightColorVals
 
 local TextColorNormal
 local TextColorNormalVals
-local TextColorDisabledVals
 local TextColorWhite
 local TextColorTTHeader
 local TextColorOrange1
-local TextColorblue1
 local TextColorBlue1
 
 local CurrencyColors = {
@@ -92,24 +88,8 @@ local CurrencyColors = {
 local ClassLookup
 
 local PlayerStatusValToStr = {
-    [1] = CHAT_FLAG_AFK,
-    [2] = CHAT_FLAG_DND,
-}
-
-local Elements = {
-    start =         {L["Start"]},
-    mail =          {MAIL_LABEL},
-    guild =         {ACHIEVEMENTS_GUILD_TAB},
-    friends =       {QUICKBUTTON_NAME_FRIENDS},
-    durability =    {DURABILITY},
-    bag =           {INVTYPE_BAG},
-    currency =      {BONUS_ROLL_REWARD_CURRENCY},
-    xprep =         {L["XPRep"]},
-    clock =         {TIMEMANAGER_TITLE},
-    pc =            {L["Sys_SysInfo"]},
-    specchanger =   {L["Spec_SpecChanger"]},
-    layoutchanger = {L["Layout_LayoutChanger"]},
-    metertoggle =   {L["Meters_Header"]},
+    [1] = _G.CHAT_FLAG_AFK,
+    [2] = _G.CHAT_FLAG_DND,
 }
 
 local Tablets = {
@@ -121,24 +101,22 @@ local Tablets = {
     durability = Tablet20,
 }
 
-local HPName, CPName, JPName, VPName, BPCurr1Name, BPCurr2Name, BPCurr3Name, GoldName
-local CurrencyStartSet
+local CurrencyStartSet, GoldName
 
 local LootSpecIDs = {}
-local LootSpecClass
 
 
 ----------------
 -- Micro Menu --
 ----------------
-local ddMenuFrame = CreateFrame("Frame", "RealUIStartDropDown", UIParent, "UIDropDownMenuTemplate")
+local ddMenuFrame = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "UIDropDownMenuTemplate")
 local MicroMenu = {
     {text = "|cffffffffRealUI|r",
         isTitle = true,
         notCheckable = true
     },
     {text = L["Start_Config"],
-        func = function() nibRealUI:LoadConfig("HuD") end,
+        func = function() RealUI:LoadConfig("HuD") end,
         notCheckable = true
     },
     {text = L["Power_PowerMode"],
@@ -148,29 +126,29 @@ local MicroMenu = {
             {
                 text = L["Power_Eco"],
                 func = function()
-                    print(L["Power_EcoDesc"])
-                    nibRealUI:SetPowerMode(2)
-                    nibRealUI:ReloadUIDialog()
+                    _G.print(L["Power_EcoDesc"])
+                    RealUI:SetPowerMode(2)
+                    RealUI:ReloadUIDialog()
                 end,
-                checked = function() return nibRealUI.db.profile.settings.powerMode == 2 end,
+                checked = function() return RealUI.db.profile.settings.powerMode == 2 end,
             },
             {
                 text = L["Power_Normal"],
                 func = function()
-                    print(L["Power_NormalDesc"])
-                    nibRealUI:SetPowerMode(1)
-                    nibRealUI:ReloadUIDialog()
+                    _G.print(L["Power_NormalDesc"])
+                    RealUI:SetPowerMode(1)
+                    RealUI:ReloadUIDialog()
                 end,
-                checked = function() return nibRealUI.db.profile.settings.powerMode == 1 end,
+                checked = function() return RealUI.db.profile.settings.powerMode == 1 end,
             },
             {
                 text = L["Power_Turbo"],
                 func = function()
-                    print(L["Power_TurboDesc"])
-                    nibRealUI:SetPowerMode(3)
-                    nibRealUI:ReloadUIDialog()
+                    _G.print(L["Power_TurboDesc"])
+                    RealUI:SetPowerMode(3)
+                    RealUI:ReloadUIDialog()
                 end,
-                checked = function() return nibRealUI.db.profile.settings.powerMode == 3 end,
+                checked = function() return RealUI.db.profile.settings.powerMode == 3 end,
             },
         },
     },
@@ -178,520 +156,89 @@ local MicroMenu = {
         notCheckable = true,
         disabled = true
     },
-    {text = CHARACTER_BUTTON,
-        func = function() ToggleCharacter("PaperDollFrame") end,
+    {text = _G.CHARACTER_BUTTON,
+        func = function() _G.ToggleCharacter("PaperDollFrame") end,
         notCheckable = true
     },
-    {text = SPELLBOOK_ABILITIES_BUTTON,
-        func = function() ToggleSpellBook(BOOKTYPE_SPELL) end,
+    {text = _G.SPELLBOOK_ABILITIES_BUTTON,
+        func = function() _G.ToggleSpellBook(_G.BOOKTYPE_SPELL) end,
         notCheckable = true
     },
-    {text = TALENTS_BUTTON,
+    {text = _G.TALENTS_BUTTON,
         func = function()
-            if not PlayerTalentFrame then
-                TalentFrame_LoadUI()
+            if not _G.PlayerTalentFrame then
+                _G.TalentFrame_LoadUI()
             end
 
-            ShowUIPanel(PlayerTalentFrame)
+            _G.ShowUIPanel(_G.PlayerTalentFrame)
         end,
         notCheckable = true
     },
-    {text = ACHIEVEMENT_BUTTON,
-        func = function() ToggleAchievementFrame() end,
+    {text = _G.ACHIEVEMENT_BUTTON,
+        func = function() _G.ToggleAchievementFrame() end,
         notCheckable = true
     },
-    {text = QUESTLOG_BUTTON,
-        func = function() ToggleQuestLog() end,
+    {text = _G.QUESTLOG_BUTTON,
+        func = function() _G.ToggleQuestLog() end,
         notCheckable = true
     },
-    {text = COLLECTIONS,
-        func = function() ToggleCollectionsJournal() end,
+    {text = _G.COLLECTIONS,
+        func = function() _G.ToggleCollectionsJournal() end,
         notCheckable = true
     },
-    {text = SOCIAL_BUTTON,
-        func = function() ToggleFriendsFrame(1) end,
+    {text = _G.SOCIAL_BUTTON,
+        func = function() _G.ToggleFriendsFrame(1) end,
         notCheckable = true
     },
-    {text = COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVE,
-        func = function() PVEFrame_ToggleFrame() end,
+    {text = _G.COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVE,
+        func = function() _G.PVEFrame_ToggleFrame() end,
         notCheckable = true
     },
-    {text = COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVP,
-        func = function() TogglePVPUI() end,
+    {text = _G.COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVP,
+        func = function() _G.TogglePVPUI() end,
         notCheckable = true
     },
-    {text = ACHIEVEMENTS_GUILD_TAB,
+    {text = _G.ACHIEVEMENTS_GUILD_TAB,
         func = function()
-            if IsInGuild() then
-                if not GuildFrame then GuildFrame_LoadUI() end
-                GuildFrame_Toggle()
+            if _G.IsInGuild() then
+                if not _G.GuildFrame then _G.GuildFrame_LoadUI() end
+                _G.GuildFrame_Toggle()
             else
-                if not LookingForGuildFrame then LookingForGuildFrame_LoadUI() end
-                LookingForGuildFrame_Toggle()
+                if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end
+                _G.LookingForGuildFrame_Toggle()
             end
         end,
         notCheckable = true
     },
-    {text = RAID,
-        func = function() ToggleFriendsFrame(4) end,
+    {text = _G.RAID,
+        func = function() _G.ToggleFriendsFrame(4) end,
         notCheckable = true
     },
-    {text = HELP_BUTTON,
-        func = function() ToggleHelpFrame() end,
+    {text = _G.HELP_BUTTON,
+        func = function() _G.ToggleHelpFrame() end,
         notCheckable = true
     },
-    {text = ENCOUNTER_JOURNAL,
-        func = function() ToggleEncounterJournal() end,
+    {text = _G.ENCOUNTER_JOURNAL,
+        func = function() _G.ToggleEncounterJournal() end,
         notCheckable = true
     },
-    {text = LOOKING_FOR_RAID,
-        func = function() ToggleRaidBrowser() end,
+    {text = _G.LOOKING_FOR_RAID,
+        func = function() _G.ToggleRaidBrowser() end,
         notCheckable = true
     },
-    {text = BLIZZARD_STORE,
-        func = function() ToggleStoreUI() end,
+    {text = _G.BLIZZARD_STORE,
+        func = function() _G.ToggleStoreUI() end,
         notCheckable = true,
         -- disabled = IsTrialAccount() or C_StorePublic.IsDisabledByParentalControls()
     }
 }
 
--------------
--- Options --
--------------
-local table_Sides = {
-    "LEFT",
-    "RIGHT"
-}
-
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = L["InfoLine"],
-        desc = "Information / Button display.",
-        arg = MODNAME,
-        childGroups = "tab",
-        args = {
-            header = {
-                type = "header",
-                name = L["InfoLine"],
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Information / Button display.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Info Line module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value)
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                    nibRealUI:ReloadUIDialog()
-                end,
-                order = 30,
-            },
-            position = {
-                name = "Position/Size",
-                type = "group",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                order = 50,
-                args = {
-                    parent = {
-                        type = "group",
-                        name = "Parent",
-                        inline = true,
-                        order = 10,
-                        args = {
-                            xleft = {
-                                type = "input",
-                                name = "X Left",
-                                width = "half",
-                                order = 10,
-                                get = function(info) return tostring(db.position.xleft) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.position.xleft = value
-                                    InfoLine:UpdatePositions()
-                                end,
-                            },
-                            xright = {
-                                type = "input",
-                                name = "X Right",
-                                width = "half",
-                                order = 20,
-                                get = function(info) return tostring(db.position.xright) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.position.xright = value
-                                    InfoLine:UpdatePositions()
-                                end,
-                            },
-                            y = {
-                                type = "input",
-                                name = "Y",
-                                width = "half",
-                                order = 30,
-                                get = function(info) return tostring(db.position.y) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.position.y = value
-                                    InfoLine:UpdatePositions()
-                                    InfoLine:SetBackground()
-                                end,
-                            },
-                            xgap = {
-                                type = "input",
-                                name = "Padding",
-                                width = "half",
-                                order = 40,
-                                get = function(info) return tostring(db.position.xgap) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.position.xgap = value
-                                    InfoLine:UpdatePositions()
-                                end,
-                            },
-                        },
-                    },
-                    text = {
-                        type = "group",
-                        name = "Text",
-                        inline = true,
-                        order = 20,
-                        args = {
-                            yoffset = {
-                                type = "input",
-                                name = "Y Offset",
-                                width = "half",
-                                get = function(info) return tostring(db.text.yoffset) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.text.yoffset = value
-                                    InfoLine:UpdatePositions()
-                                end,
-                                order = 10,
-                            },
-                            tablets = {
-                                type = "group",
-                                inline = true,
-                                name = "Tablet Font Sizes",
-                                order = 20,
-                                args = {
-                                    headersize = {
-                                        type = "input",
-                                        name = "Header",
-                                        width = "half",
-                                        get = function(info) return tostring(db.text.tablets.headersize) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db.text.tablets.headersize = value
-                                            InfoLine:Refresh()
-                                        end,
-                                        order = 10,
-                                    },
-                                    columnsize = {
-                                        type = "input",
-                                        name = "Column Titles",
-                                        width = "half",
-                                        get = function(info) return tostring(db.text.tablets.columnsize) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db.text.tablets.columnsize = value
-                                            InfoLine:Refresh()
-                                        end,
-                                        order = 20,
-                                    },
-                                    normalsize = {
-                                        type = "input",
-                                        name = "Normal",
-                                        width = "half",
-                                        get = function(info) return tostring(db.text.tablets.normalsize) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db.text.tablets.normalsize = value
-                                            InfoLine:Refresh()
-                                        end,
-                                        order = 30,
-                                    },
-                                    hintsize = {
-                                        type = "input",
-                                        name = "Hint",
-                                        width = "half",
-                                        get = function(info) return tostring(db.text.tablets.hintsize) end,
-                                        set = function(info, value)
-                                            value = nibRealUI:ValidateOffset(value)
-                                            db.text.tablets.hintsize = value
-                                            InfoLine:Refresh()
-                                        end,
-                                        order = 40,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            colors = {
-                name = "Colors",
-                type = "group",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                order = 60,
-                args = {
-                    normal = {
-                        type = "color",
-                        name = "Normal",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return db.colors.normal[1], db.colors.normal[2], db.colors.normal[3]
-                        end,
-                        set = function(info,r,g,b)
-                            db.colors.normal[1] = r
-                            db.colors.normal[2] = g
-                            db.colors.normal[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 10,
-                    },
-                    sep1 = {
-                        type = "description",
-                        name = " ",
-                        order = 20,
-                    },
-                    highlight = {
-                        type = "color",
-                        name = "Highlight",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return db.colors.highlight[1], db.colors.highlight[2], db.colors.highlight[3]
-                        end,
-                        set = function(info,r,g,b)
-                            db.colors.highlight[1] = r
-                            db.colors.highlight[2] = g
-                            db.colors.highlight[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        disabled = function()
-                            if db.colors.classcolorhighlight then return true else return false end
-                        end,
-                        order = 30,
-                    },
-                    classcolorhighlight = {
-                        type = "toggle",
-                        name = "Class Color Highlight",
-                        desc = "Use your Class Color for the highlight.",
-                        get = function() return db.colors.classcolorhighlight end,
-                        set = function(info, value)
-                            db.colors.classcolorhighlight = value
-                            InfoLine:Refresh()
-                        end,
-                        order = 40,
-                    },
-                    sep2 = {
-                        type = "description",
-                        name = " ",
-                        order = 50,
-                    },
-                    disabled = {
-                        type = "color",
-                        name = "Disabled",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return db.colors.disabled[1], db.colors.disabled[2], db.colors.disabled[3]
-                        end,
-                        set = function(info,r,g,b)
-                            db.colors.disabled[1] = r
-                            db.colors.disabled[2] = g
-                            db.colors.disabled[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 60,
-                    },
-                    ttheader = {
-                        type = "color",
-                        name = "Tooltip Header 1",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return db.colors.ttheader[1], db.colors.ttheader[2], db.colors.ttheader[3]
-                        end,
-                        set = function(info,r,g,b)
-                            db.colors.ttheader[1] = r
-                            db.colors.ttheader[2] = g
-                            db.colors.ttheader[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 70,
-                    },
-                    orange1 = {
-                        type = "color",
-                        name = "Header 1",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return nibRealUI.media.colors.orange[1], nibRealUI.media.colors.orange[2], nibRealUI.media.colors.orange[3]
-                        end,
-                        set = function(info,r,g,b)
-                            nibRealUI.media.colors.orange[1] = r
-                            nibRealUI.media.colors.orange[2] = g
-                            nibRealUI.media.colors.orange[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 80,
-                    },
-                    blue1 = {
-                        type = "color",
-                        name = "Header 2",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return nibRealUI.media.colors.blue[1], nibRealUI.media.colors.blue[2], nibRealUI.media.colors.blue[3]
-                        end,
-                        set = function(info,r,g,b)
-                            nibRealUI.media.colors.blue[1] = r
-                            nibRealUI.media.colors.blue[2] = g
-                            nibRealUI.media.colors.blue[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 90,
-                    },
-                    blue2 = {
-                        type = "color",
-                        name = "Header 3",
-                        hasAlpha = false,
-                        get = function(info,r,g,b)
-                            return nibRealUI.media.colors.blue[1], nibRealUI.media.colors.blue[2], nibRealUI.media.colors.blue[3]
-                        end,
-                        set = function(info,r,g,b)
-                            nibRealUI.media.colors.blue[1] = r
-                            nibRealUI.media.colors.blue[2] = g
-                            nibRealUI.media.colors.blue[3] = b
-                            InfoLine:Refresh()
-                        end,
-                        order = 100,
-                    },
-                },
-            },
-            other = {
-                name = "Other",
-                type = "group",
-                disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                order = 70,
-                args = {
-                    icTips = {
-                        type = "toggle",
-                        name = "In Combat Tooltips",
-                        desc = "Show the tooltips in combat.",
-                        get = function() return db.other.icTips end,
-                        set = function(info, value)
-                            db.other.icTips = value
-                            nibRealUI.InfoLineICTips = value        -- Tablet-2.0 use
-                            InfoLine:Refresh()
-                        end,
-                        order = 10,
-                    },
-                    showBG = {
-                        type = "toggle",
-                        name = L["InfoLine_ShowBG"],
-                        get = function() return ndb.settings.infoLineBackground end,
-                        set = function(info, value)
-                            ndb.settings.infoLineBackground = value
-                            InfoLine:SetBackground()
-                        end,
-                        order = 10,
-                    },
-                    clock = {
-                        type = "group",
-                        name = "Clock",
-                        inline = true,
-                        order = 20,
-                        args = {
-                            clock24 = {
-                                type = "toggle",
-                                name = "24 hour clock",
-                                desc = "Show the time in 24 hour format.",
-                                get = function() return db.other.clock.hr24 end,
-                                set = function(info, value)
-                                    db.other.clock.hr24 = value
-                                    InfoLine:Refresh()
-                                end,
-                                order = 10,
-                            },
-                            clocklocal = {
-                                type = "toggle",
-                                name = "Use local time",
-                                desc = "Show the time at your home.",
-                                get = function() return db.other.clock.uselocal end,
-                                set = function(info, value)
-                                    db.other.clock.uselocal = value
-                                    InfoLine:Refresh()
-                                end,
-                                order = 20,
-                            },
-                        },
-                    },
-                    tablets = {
-                        type = "group",
-                        name = "Info Displays",
-                        inline = true,
-                        order = 30,
-                        args = {
-                            maxheight = {
-                                type = "input",
-                                name = "Max Height",
-                                desc = "Maximum height of the Info Displays. May require a UI reload (/rl) to take effect.",
-                                width = "half",
-                                get = function(info) return tostring(db.other.tablets.maxheight) end,
-                                set = function(info, value)
-                                    value = nibRealUI:ValidateOffset(value)
-                                    db.other.tablets.maxheight = value
-                                end,
-                                order = 10,
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    }
-    end
-
-    -- Create Elements options table
-    local elementopts = {
-        name = "Elements",
-        type = "group",
-        disabled = function() if nibRealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-        order = 40,
-        args = {},
-    }
-    local elementordercnt = 10
-    for k_e, v_e in pairs(Elements) do
-        -- Create base options for Elements
-        elementopts.args[k_e] = {
-            type = "toggle",
-            name = Elements[k_e][1],
-            desc = "Enable the "..Elements[k_e][1].." element.",
-            get = function() return db.elements[k_e] end,
-            set = function(info, value)
-                db.elements[k_e] = value
-                InfoLine:Refresh()
-            end,
-            order = elementordercnt,
-        }
-        elementordercnt = elementordercnt + 10
-    end
-    options.args.elements = elementopts
-
-    return options
-end
-----
-
 --------------------
 -- Misc Functions --
 --------------------
 -- Convert numbers into currency format (ie. 123456 = 123,456)
-function NumberToCurrencyFormat(val)
-    local left, num, right = string.match(val,'^([^%d]*%d)(%d*)(.-)$')
+local function NumberToCurrencyFormat(val)
+    local left, num, right = tostring(val):match('^([^%d]*%d)(%d*)(.-)$')
     return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
 end
 
@@ -699,8 +246,8 @@ end
 local CopyFrame
 
 local function CreateCopyFrame()
-    local frame = CreateFrame("Frame", "RealUICopyFrame", UIParent)
-    tinsert(UISpecialFrames, "RealUICopyFrame")
+    local frame = _G.CreateFrame("Frame", "RealUICopyFrame", _G.UIParent)
+    tinsert(_G.UISpecialFrames, "RealUICopyFrame")
 
     frame:SetBackdrop({
         bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
@@ -711,21 +258,21 @@ local function CreateCopyFrame()
     frame:SetBackdropColor(0,0,0,1)
     frame:SetWidth(400)
     frame:SetHeight(200)
-    frame:SetPoint("CENTER", UIParent, "CENTER")
+    frame:SetPoint("CENTER", _G.UIParent, "CENTER")
     frame:Hide()
     frame:SetFrameStrata("DIALOG")
     CopyFrame = frame
 
-    local scrollArea = CreateFrame("ScrollFrame", "RealUICopyScroll", frame, "UIPanelScrollFrameTemplate")
+    local scrollArea = _G.CreateFrame("ScrollFrame", "RealUICopyScroll", frame, "UIPanelScrollFrameTemplate")
     scrollArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -30)
     scrollArea:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -30, 8)
 
-    local editBox = CreateFrame("EditBox", nil, frame)
+    local editBox = _G.CreateFrame("EditBox", nil, frame)
     editBox:SetMultiLine(true)
     editBox:SetMaxLetters(99999)
     editBox:EnableMouse(true)
     editBox:SetAutoFocus(false)
-    editBox:SetFontObject(ChatFontNormal)
+    editBox:SetFontObject(_G.ChatFontNormal)
     editBox:SetWidth(350)
     editBox:SetHeight(170)
     editBox:SetScript("OnEscapePressed", function() frame:Hide() end)
@@ -733,19 +280,8 @@ local function CreateCopyFrame()
 
     scrollArea:SetScrollChild(editBox)
 
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    local close = _G.CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
-end
-
--- Sort by Realm
-local function RealmSort(a, b)
-    if a.name == nibRealUI.realm then
-        return true
-    elseif b.name == nibRealUI.realm then
-        return false
-    else
-        return a.name < b.name
-    end
 end
 
 -- Sort by Character
@@ -759,22 +295,22 @@ end
 -- Gold string
 local function convertMoney(money)
     money = money or 0
-    local gold, silver, copper = abs(money / 10000), abs(mod(money / 100, 100)), abs(mod(money, 100))
+    local gold, silver, copper = _G.abs(money / 10000), _G.abs((money / 100) % 100), _G.abs(money % 100)
     if floor(gold) > 0 then
-        return format("|cff%s%d|r", TextColorNormal, gold), "GOLD", gold, format("|cff%s%d|r", TextColorNormal, gold)
+        return ("|cff%s%d|r"):format(TextColorNormal, gold), "GOLD", gold, ("|cff%s%d|r"):format(TextColorNormal, gold)
     elseif floor(silver) > 0 then
-        return format("|cff%s%d|r", TextColorNormal, silver), "SILVER", silver, format("|cff%s%d|r|cffc7c7cfs|r", TextColorNormal, silver)
+        return ("|cff%s%d|r"):format(TextColorNormal, silver), "SILVER", silver, ("|cff%s%d|r|cffc7c7cfs|r"):format(TextColorNormal, silver)
     else
-        return format("|cff%s%d|r", TextColorNormal, copper), "COPPER", copper, format("|cff%s%d|r|cffeda55fc|r", TextColorNormal, copper)
+        return ("|cff%s%d|r"):format(TextColorNormal, copper), "COPPER", copper, ("|cff%s%d|r|cffeda55fc|r"):format(TextColorNormal, copper)
     end
 end
 
 -- Get Realm time
 local function RetrieveGameTime(...)
     local serTime, serAMPM
-    local hour, min = GetGameTime()
+    local hour, minutes = _G.GetGameTime()
 
-    if ( min < 10 ) then min = strform("%s%s", "0", min) end
+    if ( minutes < 10 ) then minutes = ("%s%s"):format("0", minutes) end
 
     if ... then
         -- 12 hour clock
@@ -787,10 +323,10 @@ local function RetrieveGameTime(...)
             serAMPM = "AM"
             if hour == 0 then hour = 12 end
         end
-        serTime = strform("%d:%s %s", hour, min, serAMPM)
+        serTime = ("%d:%s %s"):format(hour, minutes, serAMPM)
     else
         serAMPM = ""
-        serTime = strform("%d:%s", hour, min)
+        serTime = ("%d:%s"):format(hour, minutes)
     end
 
     return serTime, serAMPM
@@ -804,23 +340,23 @@ local function ConvertSecondstoTime(value)
     seconds = floor(value - ((hours * 3600) + (minutes * 60)))
 
     if ( hours > 0 ) then
-        return strform("%dh %dm", hours, minutes)
+        return ("%dh %dm"):format(hours, minutes)
     elseif ( minutes > 0 ) then
         if minutes >= 10 then
-            return strform("%dm", minutes)
+            return ("%dm"):format(minutes)
         else
-            return strform("%dm %ds", minutes, seconds)
+            return ("%dm %ds"):format(minutes, seconds)
         end
     else
-        return strform("%ds", seconds)
+        return ("%ds"):format(seconds)
     end
 end
 
 -- Text width
-local TestStr = CreateFrame("Frame", nil, UIParent)
+local TestStr = _G.CreateFrame("Frame", nil, _G.UIParent)
 TestStr.text = TestStr:CreateFontString()
 local function GetTextWidth(str, size)
-    TestStr.text:SetFont(RealUIFont_Normal:GetFont(), size)
+    TestStr.text:SetFont(_G.RealUIFont_Normal:GetFont(), size)
     TestStr.text:SetText(str)
     return TestStr.text:GetWidth() + 4
 end
@@ -837,8 +373,7 @@ end
 -- Construct standard Header for tablets
 local function MakeTabletHeader(col, size, indentation, justifyTable)
     local header = {}
-    local colors = {}
-    colors = nibRealUI.media.colors.orange
+    local colors = RealUI.media.colors.orange
 
     for i = 1, #col do
         if ( i == 1 ) then
@@ -874,9 +409,9 @@ local function UpdateElementWidth(e, ...)
         if e.type == 1 then
             e.curwidth = db.position.xgap + e.iconwidth + db.position.xgap
         elseif e.type == 2 then
-            e.curwidth = db.position.xgap + (ceil(e.text:GetWidth() / TextPadding) * TextPadding) + db.position.xgap
+            e.curwidth = db.position.xgap + (_G.ceil(e.text:GetWidth() / TextPadding) * TextPadding) + db.position.xgap
         elseif e.type == 3 then
-            e.curwidth = db.position.xgap + e.iconwidth + extraWidth + (ceil(e.text:GetWidth() / TextPadding) * TextPadding) + db.position.xgap
+            e.curwidth = db.position.xgap + e.iconwidth + extraWidth + (_G.ceil(e.text:GetWidth() / TextPadding) * TextPadding) + db.position.xgap
         elseif e.type == 4 then
             extraWidth = 4
             e.curwidth = db.position.xgap + e.text1:GetWidth()+ extraWidth  + e.iconwidth + extraWidth + e.text2:GetWidth() + db.position.xgap
@@ -920,11 +455,11 @@ local function CreateGraph(id, maxVal, numVals, parentFrame)
     if Graphs[id] then return end
 
     -- Create Graph frame
-    Graphs[id] = CreateFrame("Frame", nil, UIParent)
+    Graphs[id] = _G.CreateFrame("Frame", nil, _G.UIParent)
     Graphs[id].parentFrame = parentFrame
     Graphs[id]:SetHeight(GraphHeight + 1)
 
-    Graphs[id].gridBot = CreateFrame("Frame", nil, Graphs[id])
+    Graphs[id].gridBot = _G.CreateFrame("Frame", nil, Graphs[id])
     Graphs[id].gridBot:SetHeight(1)
     Graphs[id].gridBot:SetPoint("BOTTOMLEFT", Graphs[id], 0, 0)
     Graphs[id].gridBot:SetPoint("BOTTOMRIGHT", Graphs[id], 0, 0)
@@ -935,7 +470,7 @@ local function CreateGraph(id, maxVal, numVals, parentFrame)
     Graphs[id].topLines = {}
     Graphs[id].gapLines = {}
     for c = 1, numVals do
-        Graphs[id].topLines[c] = CreateFrame("Frame", nil, Graphs[id])
+        Graphs[id].topLines[c] = _G.CreateFrame("Frame", nil, Graphs[id])
         Graphs[id].topLines[c]:SetPoint("BOTTOMLEFT", Graphs[id], "BOTTOMLEFT", (c - 1) * GraphLineWidth, 0)
         Graphs[id].topLines[c]:SetHeight(GraphHeight - 1)
         Graphs[id].topLines[c]:SetWidth(GraphLineWidth - 1)
@@ -1021,7 +556,7 @@ end
 
 -- Hide non-parented Graphs
 local function HideOtherGraphs(parentFrame)
-    for k, v in pairs(Graphs) do
+    for k, v in next, Graphs do
         if (Graphs[k].parentFrame ~= parentFrame) and Graphs[k].shown then
             HideGraph(k)
         end
@@ -1032,149 +567,145 @@ end
 -- Text --
 ----------
 ---- XP/Rep
-local xp, lvl, xpmax, restxp
-local rep, replvlmax, repStandingID, repstatus, watchedFaction
-function InfoLine_XR_OnLeave(self)
-    if ( (repstatus == "---") and (UnitLevel("player") == MAX_PLAYER_LEVEL) ) then
-        -- Max Level and no Rep tracked, hide display
-        self:SetAlpha(0)
-    end
-    if GameTooltip:IsShown() then GameTooltip:Hide() end
-end
+local InfoLine_XR_OnEnter, InfoLine_XR_Update, InfoLine_XR_OnMouseDown
+do
+    local xp, lvl, xpmax, restxp
+    local rep, replvlmax, repStandingID, repstatus, watchedFaction
+    function InfoLine_XR_OnEnter(self)
+        self:SetAlpha(1)
+        local GameTooltip = _G.GameTooltip
 
-function InfoLine_XR_OnEnter(self)
-    self:SetAlpha(1)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
 
-    GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
+        if _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL then
+            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.XP.." / ".._G.REPUTATION))
+            GameTooltip:AddLine(" ")
 
-    if UnitLevel("player") < MAX_PLAYER_LEVEL then
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, XP.." / "..REPUTATION))
-        GameTooltip:AddLine(" ")
-
-        if IsXPUserDisabled() then
-            GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, COMBAT_XP_GAIN.." ("..VIDEO_OPTIONS_DISABLED..")"))
+            if _G.IsXPUserDisabled() then
+                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN.." (".._G.VIDEO_OPTIONS_DISABLED..")"))
+            else
+                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN))
+            end
+            GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            if not restxp then
+                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            else
+                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            end
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
         else
-            GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, COMBAT_XP_GAIN))
+            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
+            GameTooltip:AddLine(" ")
         end
-        GameTooltip:AddDoubleLine(L["XPRep_Current"], nibRealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        if not restxp then
-            GameTooltip:AddDoubleLine(TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        local repStandingColor = {0.9, 0.9, 0.9}
+        if (repstatus ~= "---") then
+            repStandingColor = {_G.FACTION_BAR_COLORS[repStandingID].r, _G.FACTION_BAR_COLORS[repStandingID].g, _G.FACTION_BAR_COLORS[repStandingID].b}
+        end
+        GameTooltip:AddDoubleLine(_G.FACTION, watchedFaction, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(_G.STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
+        GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+
+        -- Hint
+        if (_G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["XPRep_Toggle"]))
+        end
+
+        GameTooltip:Show()
+    end
+
+    function InfoLine_XR_Update(self)
+        -- XP Data
+        xp = _G.UnitXP("player")
+        lvl = _G.UnitLevel("player")
+        xpmax = _G.UnitXPMax("player")
+        if xpmax == 0 then return end
+        restxp = _G.GetXPExhaustion() or 0
+        local percentXP
+        if (xp <= 0) or (xpmax <= 0) then
+            percentXP = 0
         else
-            GameTooltip:AddDoubleLine(TUTORIAL_TITLE26, nibRealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            percentXP = (xp/xpmax)*100
         end
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, REPUTATION))
-    else
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorOrange1, REPUTATION))
-        GameTooltip:AddLine(" ")
-    end
-    local repStandingColor = {0.9, 0.9, 0.9}
-    if (repstatus ~= "---") then
-        repStandingColor = {FACTION_BAR_COLORS[repStandingID].r, FACTION_BAR_COLORS[repStandingID].g, FACTION_BAR_COLORS[repStandingID].b}
-    end
-    GameTooltip:AddDoubleLine(FACTION, watchedFaction, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
-    GameTooltip:AddDoubleLine(L["XPRep_Current"], nibRealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(L["XPRep_Remaining"], nibRealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        local percentXPStr = tostring(percentXP)
+        local percentRestXPStr = tostring(floor((restxp / xpmax) * 100))
 
-    -- Hint
-    if (UnitLevel("player") < MAX_PLAYER_LEVEL) and not(IsXPUserDisabled()) then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["XPRep_Toggle"]))
-    end
+        -- Currency
+        dbg.currency[RealUI.realm][RealUI.faction][RealUI.name].level = lvl
 
-    GameTooltip:Show()
-end
+        -- Rep Data
+        local CurWatchedFaction, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
+        watchedFaction = CurWatchedFaction
+        rep = repvalue - repmin
+        replvlmax = repmax - repmin
+        repstatus = _G["FACTION_STANDING_LABEL"..replvl]
+        repStandingID = replvl
 
-function InfoLine_XR_Update(self)
-    -- XP Data
-    xp = UnitXP("player")
-    lvl = UnitLevel("player")
-    xpmax = UnitXPMax("player")
-    if xpmax == 0 then return end
-    restxp = GetXPExhaustion() or 0
-    local percentXP = (xp/xpmax)*100
-    if (xp <= 0) or (xpmax <= 0) then
-        percentXP = 0
-    else
-        percentXP = (xp/xpmax)*100
-    end
-    local percentXPStr = tostring(percentXP)
-    local percentRestXPStr = tostring(floor((restxp / xpmax) * 100))
-
-    -- Currency
-    dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name].level = lvl
-
-    -- Rep Data
-    local CurWatchedFaction, replvl, repmin, repmax, repvalue = GetWatchedFactionInfo()
-    watchedFaction = CurWatchedFaction
-    rep = repvalue - repmin
-    replvlmax = repmax - repmin
-    repstatus = _G["FACTION_STANDING_LABEL"..replvl]
-    repStandingID = replvl
-
-    local percentRep
-    if (replvlmax <= 0) then
-        percentRep = 0
-    else
-        percentRep = (rep/(replvlmax))*100
-    end
-    local percentRepStr = tostring(percentRep)
-
-    if not watchedFaction then
-        watchedFaction = L["XPRep_NoFaction"]
-        repstatus = "---"
-        rep = 0
-        replvlmax = 0
-        percentRepStr = "---"
-    end
-
-    -- Set Info Text
-    local XRSuffix, XRStr, XRPer, XRLen, XRRested
-    local HideMe = false
-    if ( (dbc.xrstate == "x") and not(UnitLevel("player") == MAX_PLAYER_LEVEL) and not(IsXPUserDisabled()) ) then
-        XRSuffix, XRStr, XRPer = "XP:", percentXPStr, percentXP
-        if restxp > 0 then
-            XRRested = percentRestXPStr
+        local percentRep
+        if (replvlmax <= 0) then
+            percentRep = 0
         else
-            XRRested = ""
+            percentRep = (rep/(replvlmax))*100
         end
-    else
-        if ( (repstatus == "---") and (UnitLevel("player") == MAX_PLAYER_LEVEL) ) then
-            -- Max Level and no Rep tracked, hide display
-            HideMe = true
+        local percentRepStr = tostring(percentRep)
+
+        if not watchedFaction then
+            watchedFaction = L["XPRep_NoFaction"]
+            repstatus = "---"
+            rep = 0
+            replvlmax = 0
+            percentRepStr = "---"
         end
-        XRSuffix, XRStr, XRPer, XRRested = "Rep:", percentRepStr, percentRep, ""
-    end
-    if XRPer < 10 then XRLen = 3 else XRLen = 4 end
-    if XRSuffix == "XP:" then
-        if XRRested ~= "" then
-            self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, strsub(XRStr, 1, XRLen), TextColorblue1, XRRested)
+
+        -- Set Info Text
+        local XRSuffix, XRStr, XRPer, XRLen, XRRested
+        local HideMe = false
+        if ( (dbc.xrstate == "x") and not(_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) ) then
+            XRSuffix, XRStr, XRPer = "XP:", percentXPStr, percentXP
+            if restxp > 0 then
+                XRRested = percentRestXPStr
+            else
+                XRRested = ""
+            end
         else
-            self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, strsub(XRStr, 1, XRLen))
+            if ( (repstatus == "---") and (_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) ) then
+                -- Max Level and no Rep tracked, hide display
+                HideMe = true
+            end
+            XRSuffix, XRStr, XRPer, XRRested = "Rep:", percentRepStr, percentRep, ""
         end
-        self.icon:SetTexture(Icons[layoutSize].xp[1])
-    else
-        self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, strsub(XRStr, 1, XRLen))
-        self.icon:SetTexture(Icons[layoutSize].rep[1])
+        if XRPer < 10 then XRLen = 3 else XRLen = 4 end
+        if XRSuffix == "XP:" then
+            if XRRested ~= "" then
+                self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, XRStr:sub(1, XRLen), TextColorBlue1, XRRested)
+            else
+                self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
+            end
+            self.icon:SetTexture(Icons[layoutSize].xp[1])
+        else
+            self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
+            self.icon:SetTexture(Icons[layoutSize].rep[1])
+        end
+
+        self.hidden = HideMe
+        if HideMe then
+            self.text:SetText("")
+            UpdateElementWidth(self)
+        else
+            UpdateElementWidth(self)
+        end
     end
 
-    self.hidden = HideMe
-    if HideMe then
-        self.text:SetText("")
-        UpdateElementWidth(self)
-    else
-        UpdateElementWidth(self)
+    function InfoLine_XR_OnMouseDown(self)
+        dbc.xrstate = (dbc.xrstate == "x") and "r" or "x"
+        if _G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL and not _G.InCombatLockdown() then
+            _G.ToggleCharacter("ReputationFrame")
+        end
+        InfoLine_XR_Update(self)
     end
-end
-
-function InfoLine_XR_OnMouseDown(self)
-    dbc.xrstate = (dbc.xrstate == "x") and "r" or "x"
-    if UnitLevel("player") == MAX_PLAYER_LEVEL and not InCombatLockdown() then
-        ToggleCharacter("ReputationFrame")
-    end
-    InfoLine_XR_Update(self)
 end
 
 ---- Currency
@@ -1191,10 +722,10 @@ local function ShortenDynamicCurrencyName(name)
         zhCN = true,
         zhTW = true,
     }
-    if IgnoreLocales[nibRealUI.locale] then
+    if IgnoreLocales[RealUI.locale] then
         return name
     else
-        return name ~= nil and string.gsub(name, "%l*%s*%p*", "") or "-"
+        return name ~= nil and name:gsub("%l*%s*%p*", "") or "-"
     end
 end
 
@@ -1202,7 +733,7 @@ local function Currency_GetDifference(startVal, endVal, isGold)
     startVal = startVal or 0
     endVal = endVal or 0
     local newVal = endVal - startVal
-    local newPrefix, newSuffix = "", ""
+    local newPrefix, newSuffix
 
     if newVal > 0 then
         newPrefix = "|cff00c000+"
@@ -1213,7 +744,7 @@ local function Currency_GetDifference(startVal, endVal, isGold)
     end
 
     if isGold and newVal ~= 0 then
-        local gold, silver, copper = abs(newVal / 10000), abs(mod(newVal / 100, 100)), abs(mod(newVal, 100))
+        local gold, silver, copper = _G.abs(newVal / 10000), _G.abs((newVal / 100) % 100), _G.abs(newVal % 100)
         if floor(gold) > 0 then
             newVal = floor(gold)
             newSuffix = "|cffffd700g|r"
@@ -1228,13 +759,13 @@ local function Currency_GetDifference(startVal, endVal, isGold)
         newSuffix = "|r"
     end
 
-    return string.format(newPrefix.."%s"..newSuffix, newVal ~= 0 and abs(newVal) or "~")
+    return (newPrefix.."%s"..newSuffix):format(newVal ~= 0 and _G.abs(newVal) or "~")
 end
 
 local function Currency_TabletClickFunc(realm, faction, name)
     if not name then return end
-    if realm == nibRealUI.realm and faction == nibRealUI.faction and name == nibRealUI.name then return end
-    if IsAltKeyDown() then
+    if realm == RealUI.realm and faction == RealUI.faction and name == RealUI.name then return end
+    if _G.IsAltKeyDown() then
         dbg.currency[realm][faction][name] = nil
         ILFrames.currency.needrefreshed = true
         ILFrames.currency.elapsed = 1
@@ -1242,16 +773,15 @@ local function Currency_TabletClickFunc(realm, faction, name)
 end
 
 local RealmSection, MaxWidth = {}, {}
-local FactionList = {nibRealUI.faction, nibRealUI:OtherFaction(nibRealUI.faction)}
 local function Currency_UpdateTablet()
     if not CurrencyTabletData then return end
 
-    local FactionList = {nibRealUI.faction, nibRealUI:OtherFaction(nibRealUI.faction)}
+    local FactionList = {RealUI.faction, RealUI:OtherFaction(RealUI.faction)}
     local HasMaxLvl, OnlyMe = false, true
 
     -- Get max col widths
     MaxWidth = {[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0, [12] = 0}
-    for kr, vr in pairs(CurrencyTabletData) do
+    for kr, vr in next, CurrencyTabletData do
         local realm = kr
         if (CurrencyTabletData[realm]["Alliance"] and (#CurrencyTabletData[realm]["Alliance"] > 0)) or
             (CurrencyTabletData[realm]["Horde"] and (#CurrencyTabletData[realm]["Horde"] > 0)) then
@@ -1259,8 +789,8 @@ local function Currency_UpdateTablet()
             local TotalGold = 0
             for kf, vf in ipairs(FactionList) do
                 if CurrencyTabletData[realm][vf] and #CurrencyTabletData[realm][vf] > 0 then
-                    for kn, vn in pairs(CurrencyTabletData[realm][vf]) do
-                        if vn[2] == MAX_PLAYER_LEVEL then HasMaxLvl = true end
+                    for kn, vn in next, CurrencyTabletData[realm][vf] do
+                        if vn[2] == _G.MAX_PLAYER_LEVEL then HasMaxLvl = true end
                         TotalGold = TotalGold + vn[3]
                         MaxWidth[3] = max(MaxWidth[3], GetTextWidth(convertMoney(vn[3]), db.text.tablets.normalsize + ndb.media.font.sizeAdjust))
                         for i = 4, (NumCurrencies + 4) do
@@ -1274,7 +804,7 @@ local function Currency_UpdateTablet()
     end
     MaxWidth[2] = 20    -- Level
 
-    wipe(RealmSection)
+    _G.wipe(RealmSection)
     local line = {}
     for kr, vr in ipairs(CurrencyTabletDataRK) do
         local realm = CurrencyTabletDataRK[kr].name
@@ -1292,12 +822,12 @@ local function Currency_UpdateTablet()
 
             -- Characters
             local charCols = {
-                NAME,
-                LEVEL_ABBR,
+                _G.NAME,
+                _G.LEVEL_ABBR,
                 GoldName,
-                CURRENCY .. 1,
-                CURRENCY .. 2,
-                CURRENCY .. 3,
+                _G.CURRENCY .. 1,
+                _G.CURRENCY .. 2,
+                _G.CURRENCY .. 3,
                 L["Currency_UpdatedAbbr"]
             }
             RealmSection[realm].charCat = Tablets.currency:AddCategory("columns", #charCols)
@@ -1308,16 +838,16 @@ local function Currency_UpdateTablet()
             local TotalGold, TotalRealmChars = 0, 0
             for kf, vf in ipairs(FactionList) do
                 if CurrencyTabletData[realm][vf] and #CurrencyTabletData[realm][vf] > 0 then
-                    sort(CurrencyTabletData[realm][vf], CharSort)
-                    for kn, vn in pairs(CurrencyTabletData[realm][vf]) do
+                    _G.sort(CurrencyTabletData[realm][vf], CharSort)
+                    for kn, vn in next, CurrencyTabletData[realm][vf] do
                         TotalRealmChars = TotalRealmChars + 1
                         local currentName = vn[NumCurrencies + 4]
-                        local isPlayer = ((realm == nibRealUI.realm) and (vf == nibRealUI.faction) and (currentName == nibRealUI.name))
+                        local isPlayer = ((realm == RealUI.realm) and (vf == RealUI.faction) and (currentName == RealUI.name))
                         if not isPlayer then OnlyMe = false end
                         local NormColor = isPlayer and 1 or 0.7
                         local ZeroShade = isPlayer and 0.1 or 0.4
 
-                        wipe(line)
+                        _G.wipe(line)
                         for i = 1, #charCols do
                             if (i == 1) then
                                 line["indentation"] = 12.5
@@ -1375,8 +905,7 @@ local function Currency_UpdateTablet()
 
                         -- Start values
                         if isPlayer then
-                            NormColor = 0.5
-                            wipe(line)
+                            _G.wipe(line)
                             for i = 1, #charCols do
                                 if i == 1 then
                                     line["indentation"] = 12
@@ -1462,11 +991,11 @@ local function Currency_UpdateTablet()
 end
 
 local function Currency_ResetWeeklyValues()
-    for kr, vr in pairs(dbg.currency) do
+    for kr, vr in next, dbg.currency do
         if vr then
-            for kf, vf in pairs(dbg.currency[kr]) do
+            for kf, vf in next, dbg.currency[kr] do
                 if vf then
-                    for kn, vn in pairs(dbg.currency[kr][kf]) do
+                    for kn, vn in next, dbg.currency[kr][kf] do
                         if vn then
                             dbg.currency[kr][kf][kn].vpw = 0
                             dbg.currency[kr][kf][kn].cpw = 0
@@ -1478,34 +1007,11 @@ local function Currency_ResetWeeklyValues()
     end
 end
 
-local function Currency_GetWeeklyValues()
-    local Name, earnedTotal, earnedThisWeek, weeklyMax, IsDiscovered
-    local valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax = 0,0,0,0,0,0
-
-    -- Valor
-    Name, earnedTotal, _, earnedThisWeek, weeklyMax, _, IsDiscovered = GetCurrencyInfo(396)
-    if Name and IsDiscovered then
-        valorTotal = earnedTotal or 0
-        valorThisWeek = earnedThisWeek or 0
-        valorWeeklyMax = weeklyMax/100 or 0
-    end
-
-    -- Conquest
-    Name, earnedTotal, _, earnedThisWeek, weeklyMax, _, IsDiscovered = GetCurrencyInfo(390)
-    if Name and IsDiscovered then
-        conquestTotal = earnedTotal or 0
-        conquestThisWeek = earnedThisWeek or 0
-        conquestWeeklyMax = weeklyMax or 0
-    end
-
-    return valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax
-end
-
 local function Currency_GetVals()
     local curr = {}
     local idx = 1
-    for i = 1, GetCurrencyListSize() do
-        local name, isHeader, _, _, isWatched, count = GetCurrencyListInfo(i)
+    for i = 1, _G.GetCurrencyListSize() do
+        local name, _, _, _, isWatched, count = _G.GetCurrencyListInfo(i)
         if isWatched then
             curr[idx] = {
                 name = name,
@@ -1520,20 +1026,19 @@ local function Currency_GetVals()
 end
 
 local function Currency_Update(self)
-    local currDB = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name]
-    currDB.class = nibRealUI.class
+    local currDB = dbg.currency[RealUI.realm][RealUI.faction][RealUI.name]
+    currDB.class = RealUI.class
 
-    local money = GetMoney()
+    local money = _G.GetMoney()
     local currVals = Currency_GetVals()
-    local valorTotal, valorThisWeek, valorWeeklyMax, conquestTotal, conquestThisWeek, conquestWeeklyMax = Currency_GetWeeklyValues()
 
-    local curDate = date("%b %d") -- e.g. Sep 25
-    if strsub(curDate, 1, 1) == "0" then
-        curDate = strsub(curDate, 2)
+    local curDate = _G.date("%b %d") -- e.g. Sep 25
+    if curDate:sub(1, 1) == "0" then
+        curDate = curDate:sub(2)
     end
 
     currDB.gold = money or 0
-    for i = 1, MAX_WATCHED_TOKENS do
+    for i = 1, _G.MAX_WATCHED_TOKENS do
         currDB.bpCurrencies[i] = currVals[i] or {amnt = -1, name = "---"}
         --print(currDB.bpCurrencies[i].name, currDB.bpCurrencies[i].amnt)
     end
@@ -1565,23 +1070,23 @@ local function Currency_Update(self)
     end
 
     -- Fill out columns
-    wipe(CurrencyTabletData)
-    wipe(CurrencyTabletDataRK)
+    _G.wipe(CurrencyTabletData)
+    _G.wipe(CurrencyTabletDataRK)
     local rCnt = 0
-    for kr, vr in pairs(dbg.currency) do
+    for kr, vr in next, dbg.currency do
         rCnt = rCnt + 1
         CurrencyTabletData[kr] = {}
         CurrencyTabletDataRK[rCnt] = {name = kr}
 
         if vr then
-            for kf, vf in pairs(dbg.currency[kr]) do
+            for kf, vf in next, dbg.currency[kr] do
                 CurrencyTabletData[kr][kf] = {}
 
                 if vf then
-                    for kn, vn in pairs(dbg.currency[kr][kf]) do
+                    for kn, vn in next, dbg.currency[kr][kf] do
                         if vn then
-                            local classColor = nibRealUI:GetClassColor(dbg.currency[kr][kf][kn].class)
-                            local nameStr = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, kn)
+                            local classColor = RealUI:GetClassColor(dbg.currency[kr][kf][kn].class)
+                            local nameStr = ("|cff%02x%02x%02x%s|r"):format(classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, kn)
 
                             if not dbg.currency[kr][kf][kn].bpCurrencies then
                                 dbg.currency[kr][kf][kn].bpCurrencies = {
@@ -1611,7 +1116,7 @@ local function Currency_Update(self)
 
     -- Refresh tablet
     if Tablets.currency:IsRegistered(self) then
-        if Tablet20Frame:IsShown() then
+        if _G.Tablet20Frame:IsShown() then
             Tablets.currency:Refresh(self)
         end
     end
@@ -1621,17 +1126,17 @@ local function Currency_Update(self)
         return tostring(val or 0) .. " " .. abrv
     end
 
-    local CurText, curCurrency, rawValue
+    local CurText
     -- print("currencystate:", dbc.currencystate)
     if dbc.currencystate == 1 then
-        CurText, curCurrency, rawValue = convertMoney(money)
-        CurText = NumberToCurrencyFormat(nibRealUI.Round(rawValue))
+        local _, curCurrency, rawValue = convertMoney(money)
+        CurText = NumberToCurrencyFormat(RealUI.Round(rawValue))
 
         -- show C/S/G colored square
         self.icon:Show()
         self.icon:ClearAllPoints()
         self.icon:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", self.text:GetWidth() + 6, 6)
-        self.icon:SetVertexColor(unpack(CurrencyColors[curCurrency]))
+        self.icon:SetVertexColor(CurrencyColors[curCurrency][1], CurrencyColors[curCurrency][2], CurrencyColors[curCurrency][3])
     else
         -- print("currDB:", currDB, " - bpCurrencies:", currDB and currDB.bpCurrencies)
         CurText = CurrencyDisplayText(currDB.bpCurrencies[dbc.currencystate - 1].amnt, ShortenDynamicCurrencyName(currDB.bpCurrencies[dbc.currencystate - 1].name))
@@ -1663,8 +1168,8 @@ local function Currency_OnEnter(self)
 
     if Tablets.currency:IsRegistered(self) then
         -- Tablets.currency appearance
-        Tablets.currency:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
-        Tablets.currency:SetTransparency(self, nibRealUI.media.window[4])
+        Tablets.currency:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+        Tablets.currency:SetTransparency(self, RealUI.media.window[4])
         Tablets.currency:SetFontSizePercent(self, 1)
 
         -- Open
@@ -1677,37 +1182,37 @@ local function Currency_OnEnter(self)
     Currency_Update(self)
 end
 
-function Currency_OnMouseDown(self)
-    if IsShiftKeyDown() then
+local function Currency_OnMouseDown(self)
+    if _G.IsShiftKeyDown() then
         Currency_ResetWeeklyValues()
         Currency_Update(self)
-        print("|cff0099ffRealUI: |r|cffffffffWeekly caps have been reset.")
-    elseif IsAltKeyDown() then
-        print("|cff0099ffRealUI: |r|cffffffffTo erase character data, mouse-over their entry in the Currency display and then Alt+Click.")
+        _G.print("|cff0099ffRealUI: |r|cffffffffWeekly caps have been reset.")
+    elseif _G.IsAltKeyDown() then
+        _G.print("|cff0099ffRealUI: |r|cffffffffTo erase character data, mouse-over their entry in the Currency display and then Alt+Click.")
     else
-        local currDB = dbg.currency[nibRealUI.realm][nibRealUI.faction][nibRealUI.name]
+        local currDB = dbg.currency[RealUI.realm][RealUI.faction][RealUI.name]
         dbc.currencystate = (dbc.currencystate < NumCurrencies) and (dbc.currencystate + 1) or 1
-        for i = 1, MAX_WATCHED_TOKENS do
+        for i = 1, _G.MAX_WATCHED_TOKENS do
             if (dbc.currencystate == i + 1) and (currDB.bpCurrencies[i].amnt < 0) then
                 dbc.currencystate = (dbc.currencystate < NumCurrencies) and (dbc.currencystate + 1) or 1
             end
         end
-        if not InCombatLockdown() then
-            ToggleCharacter("CurrencyFrame")
+        if not _G.InCombatLockdown() then
+            _G.ToggleCharacter("CurrencyFrame")
         end
         Currency_Update(self)
     end
 end
 
 ---- Bag
-function InfoLine_Bag_Update(self)
+local function InfoLine_Bag_Update(self)
     local freeSlots, totalSlots = 0, 0
 
     -- Cycle through bags
     for i = 0, 4 do
-        local slots, slotsTotal = GetContainerNumFreeSlots(i), GetContainerNumSlots(i)
+        local slots, slotsTotal = _G.GetContainerNumFreeSlots(i), _G.GetContainerNumSlots(i)
         if ( i >= 1 ) then  -- Extra bag
-            local bagLink = GetInventoryItemLink("player", ContainerIDToInventoryID(i))
+            local bagLink = _G.GetInventoryItemLink("player", _G.ContainerIDToInventoryID(i))
             if bagLink then
                 freeSlots =  freeSlots + slots
                 totalSlots = totalSlots + slotsTotal
@@ -1723,13 +1228,13 @@ function InfoLine_Bag_Update(self)
     UpdateElementWidth(self)
 end
 
-function InfoLine_Bag_OnMouseDown(self)
-    if ContainerFrame1:IsShown() then
-        ToggleBackpack()
+local function InfoLine_Bag_OnMouseDown(self)
+    if _G.ContainerFrame1:IsShown() then
+        _G.ToggleBackpack()
     else
-        ToggleBackpack()
-        for i = 1, NUM_BAG_SLOTS do
-            ToggleBag(i)
+        _G.ToggleBackpack()
+        for i = 1, _G.NUM_BAG_SLOTS do
+            _G.ToggleBag(i)
         end
     end
 end
@@ -1752,7 +1257,7 @@ local DuraSlotInfo = { }
 local DurabilityAlert
 local function Durability_Low(self, dura)
     if not DurabilityAlert then
-        DurabilityAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+        DurabilityAlert = _G.CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
     end
     if not dura then
         DurabilityAlert:Hide()
@@ -1760,44 +1265,43 @@ local function Durability_Low(self, dura)
         DurabilityAlert:SetSize(125, DurabilityAlert.Text:GetHeight()+42)
         DurabilityAlert.Arrow:SetPoint("TOP", DurabilityAlert, "BOTTOM", 0, 4)
         DurabilityAlert:SetPoint("BOTTOM", self, "TOP", 0, 18)
-        DurabilityAlert.CloseButton:SetScript("OnClick", function(self)
+        DurabilityAlert.CloseButton:SetScript("OnClick", function(btn)
             DurabilityAlert:Hide()
             DurabilityAlert.isHidden = true
         end)
-        DurabilityAlert.Text:SetFormattedText("%s %d%%", DURABILITY, dura)
+        DurabilityAlert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, dura)
         DurabilityAlert.Text:SetWidth(100)
         DurabilityAlert:Show()
         DurabilityAlert.isHidden = false
     end
 end
 
-function InfoLine_Durability_OnEnter(self)
-    GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-    GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, DURABILITY))
-    GameTooltip:AddLine(" ")
+local function InfoLine_Durability_OnEnter(self)
+    _G.GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
+    _G.GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.DURABILITY))
+    _G.GameTooltip:AddLine(" ")
     for i = 1, 10 do
         local durastring
         if ( DuraSlotInfo[i].equip and DuraSlotInfo[i].max ~= nil ) then
-            local dColor = nibRealUI:ColorTableToStr({nibRealUI:GetDurabilityColor(DuraSlotInfo[i].perc / 100)})
-            durastring = strform("|cff%s%d%%|r", dColor, DuraSlotInfo[i].perc)
-            GameTooltip:AddDoubleLine(SlotNameTable[i].name, durastring, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            local dColor = RealUI:ColorTableToStr({RealUI:GetDurabilityColor(DuraSlotInfo[i].perc / 100)})
+            durastring = ("|cff%s%d%%|r"):format(dColor, DuraSlotInfo[i].perc)
+            _G.GameTooltip:AddDoubleLine(SlotNameTable[i].name, durastring, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         end
     end
-    GameTooltip:Show()
+    _G.GameTooltip:Show()
 end
 
-function InfoLine_Durability_Update(self)
-    local durability
+local function InfoLine_Durability_Update(self)
     local minVal = 100
 
     for i = 1, 10 do
-        if not DuraSlotInfo[i] then tinsert(DuraSlotInfo, i, {equip, value, max, perc}) end
-        local slotID = GetInventorySlotInfo(SlotNameTable[i].slot)
-        local itemLink = GetInventoryItemLink("player", slotID)
+        if not DuraSlotInfo[i] then DuraSlotInfo[i] = {} end
+        local slotID = _G.GetInventorySlotInfo(SlotNameTable[i].slot)
+        local itemLink = _G.GetInventoryItemLink("player", slotID)
         local value, maximum = 0, 0
         if itemLink ~= nil then
             DuraSlotInfo[i].equip = true
-            value, maximum = GetInventoryItemDurability(slotID)
+            value, maximum = _G.GetInventoryItemDurability(slotID)
         else
             DuraSlotInfo[i].equip = false
         end
@@ -1824,9 +1328,9 @@ function InfoLine_Durability_Update(self)
     return minVal, UpdateElementWidth(self)
 end
 
-function InfoLine_Durability_OnMouseDown(self)
-    if not InCombatLockdown() then
-        ToggleCharacter("PaperDollFrame")
+local function InfoLine_Durability_OnMouseDown(self)
+    if not _G.InCombatLockdown() then
+        _G.ToggleCharacter("PaperDollFrame")
     end
 end
 
@@ -1838,31 +1342,29 @@ local FriendsOnline = 0
 local function Friends_TabletClickFunc(name, iname, bnetIDAccount)
     --print("Name: "..name.." iName: "..iname.." bnetIDAccount: "..bnetIDAccount)
     if not name then return end
-    if IsAltKeyDown() then
+    if _G.IsAltKeyDown() then
         if iname == "" then
-            InviteUnit(name)
+            _G.InviteUnit(name)
         else
-            InviteUnit(iname)
+            _G.InviteUnit(iname)
         end
     elseif bnetIDAccount then
-        SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
+        _G.SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
     else
-        SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
+        _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
     end
 end
 
 local FriendsCat
 local function Friends_UpdateTablet()
     if ( FriendsOnline > 0 and FriendsTabletData ) then
-        local Cols, lineHeader
-
         -- Title
-        local Cols = {
-            NAME,
-            LEVEL_ABBR,
-            ZONE,
-            FACTION,
-            GAME
+        local Cols, lineHeader = {
+            _G.NAME,
+            _G.LEVEL_ABBR,
+            _G.ZONE,
+            _G.FACTION,
+            _G.GAME
         }
         FriendsCat = Tablets.friends:AddCategory("columns", #Cols)
         lineHeader = MakeTabletHeader(Cols, db.text.tablets.columnsize + ndb.media.font.sizeAdjust, 0, {"LEFT", "RIGHT", "LEFT", "LEFT", "LEFT"})
@@ -1881,7 +1383,7 @@ local function Friends_UpdateTablet()
                 elseif i == 2 then  -- Level
                     line["text"..i] = val[2]
                     line["justify"..i] = "RIGHT"
-                    local uLevelColor = GetQuestDifficultyColor(tonumber(val[2]) or 1)
+                    local uLevelColor = _G.GetQuestDifficultyColor(_G.tonumber(val[2]) or 1)
                     line["text"..i.."R"] = uLevelColor.r
                     line["text"..i.."G"] = uLevelColor.g
                     line["text"..i.."B"] = uLevelColor.b
@@ -1924,13 +1426,13 @@ local function Friends_OnEnter(self)
 
     if Tablets.friends:IsRegistered(self) then
         -- Tablets.friends appearance
-        Tablets.friends:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
-        Tablets.friends:SetTransparency(self, nibRealUI.media.window[4])
+        Tablets.friends:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+        Tablets.friends:SetTransparency(self, RealUI.media.window[4])
         Tablets.friends:SetFontSizePercent(self, 1)
 
         -- Open
         if ( FriendsOnline > 0 ) then
-            ShowFriends()
+            _G.ShowFriends()
         end
         Tablets.friends:Open(self)
 
@@ -1941,7 +1443,7 @@ end
 local BNetRequestAlert
 local function Friends_BNetRequest(self, event, ...)
     if not BNetRequestAlert then
-        BNetRequestAlert = CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
+        BNetRequestAlert = _G.CreateFrame("Frame", nil, self, "MicroButtonAlertTemplate")
     end
     if (event == "BN_FRIEND_INVITE_REMOVED") then
         BNetRequestAlert:Hide()
@@ -1949,11 +1451,11 @@ local function Friends_BNetRequest(self, event, ...)
         BNetRequestAlert:SetSize(177, BNetRequestAlert.Text:GetHeight()+42)
         BNetRequestAlert.Arrow:SetPoint("TOP", BNetRequestAlert, "BOTTOM", -30, 4)
         BNetRequestAlert:SetPoint("BOTTOM", self, "TOP", 30, 18)
-        BNetRequestAlert.CloseButton:SetScript("OnClick", function(self)
+        BNetRequestAlert.CloseButton:SetScript("OnClick", function(btn)
             BNetRequestAlert:Hide()
             BNetRequestAlert.isHidden = true
         end)
-        BNetRequestAlert.Text:SetText(BN_TOAST_NEW_INVITE)
+        BNetRequestAlert.Text:SetText(_G.BN_TOAST_NEW_INVITE)
         BNetRequestAlert.Text:SetWidth(145)
         BNetRequestAlert:Show()
         BNetRequestAlert.isHidden = false
@@ -1961,16 +1463,16 @@ local function Friends_BNetRequest(self, event, ...)
 end
 
 local clientString = {
-    [BNET_CLIENT_SC2] = "SC2",
-    [BNET_CLIENT_WTCG] = "HS",
-    [BNET_CLIENT_HEROES] = "HotS",
-    [BNET_CLIENT_OVERWATCH] = "OW",
+    [_G.BNET_CLIENT_SC2] = "SC2",
+    [_G.BNET_CLIENT_WTCG] = "HS",
+    [_G.BNET_CLIENT_HEROES] = "HotS",
+    [_G.BNET_CLIENT_OVERWATCH] = "OW",
 }
 
 local BNGetGameAccountInfo = _G.BNGetGameAccountInfo
 if not BNGetGameAccountInfo then
     BNGetGameAccountInfo = function(...)
-        return BNGetToonInfo(...)
+        return _G.BNGetToonInfo(...)
     end
 end
 
@@ -1980,8 +1482,8 @@ local function Friends_Update(self)
     local curFriendsOnline = 0
 
     -- Standard Friends
-    for i = 1, GetNumFriends() do
-        local name, lvl, class, area, isOnline, status, noteText = GetFriendInfo(i)
+    for i = 1, _G.GetNumFriends() do
+        local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
         if isOnline then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
@@ -1989,19 +1491,18 @@ local function Friends_Update(self)
             curFriendsOnline = curFriendsOnline + 1
 
             -- Class
-            local classColor = nibRealUI:GetClassColor(ClassLookup[class])
-            class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
+            local classColor = RealUI:GetClassColor(ClassLookup[class])
 
             -- Name
             local cname
             if ( status == "" and name ) then
-                cname = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
+                cname = ("|cff%02x%02x%02x%s|r"):format(classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             elseif ( name ) then
-                cname = strform("%s |cff%02x%02x%02x%s|r", status, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
+                cname = ("%s |cff%02x%02x%02x%s|r"):format(status, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             end
 
             -- Add Friend to list
-            tinsert(FriendsTabletData, { cname, lvl, area, nibRealUI.faction, "WoW", name, noteText, "" })
+            tinsert(FriendsTabletData, { cname, lvl, area, RealUI.faction, "WoW", name, noteText, "" })
             if name then
                 FriendsTabletDataNames[name] = true
             end
@@ -2009,39 +1510,37 @@ local function Friends_Update(self)
     end
 
     -- Battle.net Friends
-    for t = 1, BNGetNumFriends() do
-        local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, _, noteText = BNGetFriendInfo(t)
+    for t = 1, _G.BNGetNumFriends() do
+        local bnetIDAccount, accountName, battleTag, _, _, bnetIDGameAccount, client, isOnline, _, isAFK, isDND, _, noteText = _G.BNGetFriendInfo(t)
         -- WoW friends
-        if ( isOnline and client == BNET_CLIENT_WOW ) then
+        if ( isOnline and client == _G.BNET_CLIENT_WOW ) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
 
-            local _, characterName, _, realmName, _, faction, race, class, guild, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, _, faction, _, class, _, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
             curFriendsOnline = curFriendsOnline + 1
 
-            if (realmName == nibRealUI.realm) then
+            if (realmName == RealUI.realm) then
                 FriendsTabletDataNames[characterName] = true
             end
 
             -- Class
-            local classColor = nibRealUI:GetClassColor(ClassLookup[class])
+            local classColor = RealUI:GetClassColor(ClassLookup[class])
 
             -- Name
             local cname
-            if ( realmName == GetRealmName() ) then
+            if ( realmName == _G.GetRealmName() ) then
                 -- On My Realm
-                cname = strform(
-                    "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc)|r",
-                    FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
+                cname = ("|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc)|r"):format(
+                    _G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255,
                     accountName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
                     characterName
                 )
             else
                 -- On Another Realm
-                cname = strform(
-                    "|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc-%s)|r",
-                    FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
+                cname = ("|cff%02x%02x%02x%s|r |cffcccccc(|r|cff%02x%02x%02x%s|r|cffcccccc-%s)|r"):format(
+                    _G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255,
                     accountName,
                     classColor[1] * 255, classColor[2] * 255, classColor[3] * 255,
                     characterName,
@@ -2049,9 +1548,9 @@ local function Friends_Update(self)
                 )
             end
             if (isAFK and characterName ) then
-                cname = strform("%s %s", CHAT_FLAG_AFK, cname)
+                cname = ("%s %s"):format(_G.CHAT_FLAG_AFK, cname)
             elseif(isDND and characterName) then
-                cname = strform("%s %s", CHAT_FLAG_DND, cname)
+                cname = ("%s %s"):format(_G.CHAT_FLAG_DND, cname)
             end
 
             -- Add Friend to list
@@ -2062,22 +1561,21 @@ local function Friends_Update(self)
 
             local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
             InfoLine:debug("BNet: not in WoW", characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
-            characterName = BNet_GetValidatedCharacterName(characterName, battleTag, client)
+            characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
             client = clientString[client] or client
             curFriendsOnline = curFriendsOnline + 1
 
             -- Name
             local cname
-            cname = strform(
-                "|cff%02x%02x%02x%s|r |cffcccccc(%s)|r",
-                FRIENDS_BNET_NAME_COLOR.r * 255, FRIENDS_BNET_NAME_COLOR.g * 255, FRIENDS_BNET_NAME_COLOR.b * 255,
+            cname = ("|cff%02x%02x%02x%s|r |cffcccccc(%s)|r"):format(
+                _G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255,
                 accountName,
                 characterName
             )
             if ( isAFK and characterName ) then
-                cname = strform("%s %s", CHAT_FLAG_AFK, cname)
+                cname = ("%s %s"):format(_G.CHAT_FLAG_AFK, cname)
             elseif ( isDND and characterName ) then
-                cname = strform("%s %s", CHAT_FLAG_DND, cname)
+                cname = ("%s %s"):format(_G.CHAT_FLAG_DND, cname)
             end
 
             -- Add Friend to list
@@ -2095,7 +1593,7 @@ local function Friends_Update(self)
 
     -- Refresh tablet
     if Tablets.friends:IsRegistered(self) then
-        if Tablet20Frame:IsShown() then
+        if _G.Tablet20Frame:IsShown() then
             Tablets.friends:Refresh(self)
         end
     end
@@ -2105,9 +1603,9 @@ local function Friends_Update(self)
     UpdateElementWidth(self)
 end
 
-function Friends_OnMouseDown(self)
-    if not InCombatLockdown() then
-        ToggleFriendsFrame()
+local function Friends_OnMouseDown(self)
+    if not _G.InCombatLockdown() then
+        _G.ToggleFriendsFrame()
     end
 end
 
@@ -2123,31 +1621,30 @@ end
 
 local function Guild_TabletClickFunc(name)
     if not name then return end
-    if IsAltKeyDown() then
-        InviteUnit(name)
+    if _G.IsAltKeyDown() then
+        _G.InviteUnit(name)
     else
-        SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
+        _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
     end
 end
 
 local GuildSection = {}
 local function Guild_UpdateTablet()
-    if ( IsInGuild() and GuildOnline > 0 ) then
-        local Cols, lineHeader
-        wipe(GuildSection)
+    if ( _G.IsInGuild() and GuildOnline > 0 ) then
+        _G.wipe(GuildSection)
 
         -- Guild Name
-        local gname, _, _ = GetGuildInfo("player")
+        local gname, _, _ = _G.GetGuildInfo("player")
         GuildSection.headerCat = Tablets.guild:AddCategory()
         GuildSection.headerCat:AddLine("text", gname, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", db.colors.ttheader[1], "textG", db.colors.ttheader[2], "textB", db.colors.ttheader[3])
         GuildSection.headerCat:AddLine("isLine", true, "text", "")
 
         -- Reputation
-        GuildSection.headerCat:AddLine("text", GetText("FACTION_STANDING_LABEL"..GetGuildFactionInfo(), UnitSex("player")), "size", db.text.tablets.normalsize + ndb.media.font.sizeAdjust, "textR", 0.7, "textG", 0.7, "textB", 0.7)
+        GuildSection.headerCat:AddLine("text", _G.GetText("FACTION_STANDING_LABEL".._G.GetGuildFactionInfo(), _G.UnitSex("player")), "size", db.text.tablets.normalsize + ndb.media.font.sizeAdjust, "textR", 0.7, "textG", 0.7, "textB", 0.7)
         AddBlankTabLine(GuildSection.headerCat, 5)
 
         -- GMOTD
-        local gmotd = GetGuildRosterMOTD()
+        local gmotd = _G.GetGuildRosterMOTD()
         if gmotd ~= "" then
             GuildSection.headerCat:AddLine("text", gmotd, "wrap", true, "size", db.text.tablets.normalsize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1, "func", function() Guild_GMOTDClickFunc(gmotd) end)
             AddBlankTabLine(GuildSection.headerCat, 5)
@@ -2155,14 +1652,14 @@ local function Guild_UpdateTablet()
         AddBlankTabLine(GuildSection.headerCat)
 
         -- Titles
-        local Cols = {
-            NAME,
-            LEVEL_ABBR,
-            ZONE,
-            RANK,
-            LABEL_NOTE
+        local Cols, lineHeader = {
+            _G.NAME,
+            _G.LEVEL_ABBR,
+            _G.ZONE,
+            _G.RANK,
+            _G.LABEL_NOTE
         }
-        if CanViewOfficerNote() then
+        if _G.CanViewOfficerNote() then
             tinsert(Cols, "Officer Note")
         end
 
@@ -2172,20 +1669,19 @@ local function Guild_UpdateTablet()
         AddBlankTabLine(GuildSection.guildCat)
 
         -- Guild Members
-        local nameslot = #Cols + 1
         local isPlayer, isFriend, isGM, normColor
         local line = {}
         for _, val in ipairs(GuildTabletData) do
-            isPlayer = val[7] == nibRealUI.name
+            isPlayer = val[7] == RealUI.name
             if FriendsTabletDataNames then
                 isFriend = (not isPlayer) and FriendsTabletDataNames[val[7]] or false
             end
-            isGM = val[4] == GUILD_RANK0_DESC
+            isGM = val[4] == _G.GUILD_RANK0_DESC
             normColor =     isPlayer and {0.3, 1, 0.3} or
                             isFriend and {0, 0.8, 0.8} or
                             isGM and {1, 0.65, 0.2} or
                             {0.8, 0.8, 0.8}
-            wipe(line)
+            _G.wipe(line)
             for i = 1, #Cols do
                 if i == 1 then  -- Name
                     line["text"] = val[i]
@@ -2195,7 +1691,7 @@ local function Guild_UpdateTablet()
                 elseif i == 2 then  -- Level
                     line["text"..i] = val[i]
                     line["justify"..i] = "RIGHT"
-                    local uLevelColor = GetQuestDifficultyColor(val[2])
+                    local uLevelColor = _G.GetQuestDifficultyColor(val[2])
                     line["text"..i.."R"] = uLevelColor.r
                     line["text"..i.."G"] = uLevelColor.g
                     line["text"..i.."B"] = uLevelColor.b
@@ -2238,13 +1734,13 @@ local function Guild_OnEnter(self)
 
     if Tablets.guild:IsRegistered(self) then
         -- Tablets.guild appearance
-        Tablets.guild:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
-        Tablets.guild:SetTransparency(self, nibRealUI.media.window[4])
+        Tablets.guild:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+        Tablets.guild:SetTransparency(self, RealUI.media.window[4])
         Tablets.guild:SetFontSizePercent(self, 1)
 
         -- Open
-        if ( IsInGuild() and GuildOnline > 0 ) then
-            GuildRoster()
+        if ( _G.IsInGuild() and GuildOnline > 0 ) then
+            _G.GuildRoster()
         end
         Tablets.guild:Open(self)
 
@@ -2255,7 +1751,7 @@ end
 local function Guild_Update(self)
     -- If not in guild, set members to 0
     local guildonline = 0
-    if not IsInGuild() then
+    if not _G.IsInGuild() then
         self.hidden = true
         self.text:SetText("")
         UpdateElementWidth(self)
@@ -2264,33 +1760,32 @@ local function Guild_Update(self)
 
     GuildTabletData = nil
     -- Total Online Guildies
-    for i = 1, GetNumGuildMembers() do
+    for i = 1, _G.GetNumGuildMembers() do
         if ( not GuildTabletData or GuildTabletData == nil ) then GuildTabletData = {} end
         local gPrelist
-        local name, rank, _, lvl, _class, zone, note, offnote, isOnline, status, class, _, _, mobile = GetGuildRosterInfo(i)
+        local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, mobile = _G.GetGuildRosterInfo(i)
 
         if (isOnline or mobile) then
             -- Class Color
-            local classColor = nibRealUI:GetClassColor(class)
-            class = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, class)
+            local classColor = RealUI:GetClassColor(class)
 
             -- Player Name
             local cname
             if status == 0 then
-                cname = strform("|cff%02x%02x%02x%s|r", classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
+                cname = ("|cff%02x%02x%02x%s|r"):format(classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             else
                 local curStatus = PlayerStatusValToStr[status] or ""
-                cname = strform("%s |cff%02x%02x%02x%s|r", curStatus, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
+                cname = ("%s |cff%02x%02x%02x%s|r"):format(curStatus, classColor[1] * 255, classColor[2] * 255, classColor[3] * 255, name)
             end
 
             -- Mobile
             if mobile and (not isOnline) then
-                cname = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..cname
-                zone = REMOTE_CHAT
+                cname = _G.ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..cname
+                zone = _G.REMOTE_CHAT
             end
 
             -- Note
-            if CanViewOfficerNote() then
+            if _G.CanViewOfficerNote() then
                 gPrelist = { cname, lvl, zone, rank, note, offnote, name }
             else
                 gPrelist = { cname, lvl, zone, rank, note, " ", name }
@@ -2321,9 +1816,9 @@ local function Guild_Update(self)
     UpdateElementWidth(self)
 end
 
-function Guild_OnMouseDown(self)
-    if not InCombatLockdown() then
-        ToggleGuildFrame()
+local function Guild_OnMouseDown(self)
+    if not _G.InCombatLockdown() then
+        _G.ToggleGuildFrame()
     end
 end
 
@@ -2344,50 +1839,50 @@ local function Meter_Update(self)
                     -- we don't need the frame for skada
                 end,
                 toggle = function()
-                    Skada:ToggleWindow()
+                    _G.Skada:ToggleWindow()
                 end,
             },
             Recount = {
                 isVisible = function()
-                    return Recount.MainWindow:IsVisible()
+                    return _G.Recount.MainWindow:IsVisible()
                 end,
                 toggle = function(isVisible)
-                    local frame = Recount.MainWindow
+                    local frame = _G.Recount.MainWindow
                     if isVisible then
                         frame:Hide()
                     else
                         frame:Show()
-                        Recount:RefreshMainWindow()
+                        _G.Recount:RefreshMainWindow()
                     end
                 end,
             },
             Details = {
                 isVisible = function()
-                    return _detalhes:GetOpenedWindowsAmount() > 0
+                    return _G._detalhes:GetOpenedWindowsAmount() > 0
                 end,
                 toggle = function(isVisible)
                     if isVisible then
-                        _detalhes:ShutDownAllInstances()
+                        _G._detalhes:ShutDownAllInstances()
                     else
-                        _detalhes:ReabrirTodasInstancias()
+                        _G._detalhes:ReabrirTodasInstancias()
                     end
                 end,
             },
             alDamageMeter = {
                 isVisible = function()
-                    return alDamageMeterFrame:IsVisible()
+                    return _G.alDamageMeterFrame:IsVisible()
                 end,
                 toggle = function(isVisible)
                     if isVisible then
-                        alDamageMeterFrame:Hide()
+                        _G.alDamageMeterFrame:Hide()
                     else
-                        alDamageMeterFrame:Show()
+                        _G.alDamageMeterFrame:Show()
                     end
                 end,
             },
         }
         for name, addon in next, damageMeters do
-            if IsAddOnLoaded(name) and not self.meterLoaded then
+            if _G.IsAddOnLoaded(name) and not self.meterLoaded then
                 self.meterLoaded = name
             end
         end
@@ -2429,14 +1924,14 @@ local SpecEquipList = {}
 
 local function SpecChangeClickFunc(self, ...)
     if ... then
-        if GetActiveSpecGroup() == ... then return end
+        if _G.GetActiveSpecGroup() == ... then return end
     end
 
-    if GetNumSpecGroups() > 1 then
-        local NewTG = GetActiveSpecGroup() == 1 and 2 or 1
+    if _G.GetNumSpecGroups() > 1 then
+        local NewTG = _G.GetActiveSpecGroup() == 1 and 2 or 1
 
         -- Set Spec
-        SetActiveSpecGroup(NewTG)
+        _G.SetActiveSpecGroup(NewTG)
 
         -- Flag for changing Equip and Layout once Spec change completes
         NeedSpecUpdate = true
@@ -2446,49 +1941,49 @@ end
 local function SpecGearClickFunc(self, index, equipName)
     if not index then return end
 
-    if IsShiftKeyDown() then
+    if _G.IsShiftKeyDown() then
         if dbc.specgear.primary == index then
             dbc.specgear.primary = -1
         end
         if dbc.specgear.secondary == index then
             dbc.specgear.secondary = -1
         end
-    elseif IsAltKeyDown() then
+    elseif _G.IsAltKeyDown() then
         dbc.specgear.secondary = index
-    elseif IsControlKeyDown() then
+    elseif _G.IsControlKeyDown() then
         dbc.specgear.primary = index
     else
-        EquipmentManager_EquipSet(equipName)
+        _G.EquipmentManager_EquipSet(equipName)
     end
 
     Tablets.spec:Refresh(self)
 end
 
 local function SpecLootClickFunc(self, spec)
-    SetLootSpecialization(LootSpecIDs[spec])
+    _G.SetLootSpecialization(LootSpecIDs[spec])
 end
 
 local function SpecAddLootSpecToCat(self, cat)
-    local numSpecs = GetNumSpecializations()
+    local numSpecs = _G.GetNumSpecializations()
     local specNames = {}
     for i = 1, numSpecs do
-        local _, name = GetSpecializationInfo(i)
+        local _, name = _G.GetSpecializationInfo(i)
         specNames[i] = name
     end
 
-    local curLootSpecName = nibRealUI:GetCurrentLootSpecName()
+    local curLootSpecName = RealUI:GetCurrentLootSpecName()
 
     -- Specs
     local line = {}
     for i = 1, numSpecs do
-        wipe(line)
+        _G.wipe(line)
 
         line["text"] = specNames[i]
         line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
         line["justify"] = "LEFT"
-        line["textR"] = (curLootSpecName == specNames[i]) and nibRealUI.media.colors.blue[1] or db.colors.disabled[1]
-        line["textG"] = (curLootSpecName == specNames[i]) and nibRealUI.media.colors.blue[2] or db.colors.disabled[2]
-        line["textB"] = (curLootSpecName == specNames[i]) and nibRealUI.media.colors.blue[3] or db.colors.disabled[3]
+        line["textR"] = (curLootSpecName == specNames[i]) and RealUI.media.colors.blue[1] or db.colors.disabled[1]
+        line["textG"] = (curLootSpecName == specNames[i]) and RealUI.media.colors.blue[2] or db.colors.disabled[2]
+        line["textB"] = (curLootSpecName == specNames[i]) and RealUI.media.colors.blue[3] or db.colors.disabled[3]
         line["hasCheck"] = true
         line["isRadio"] = true
         line["checked"] = (curLootSpecName == specNames[i])
@@ -2500,18 +1995,18 @@ local function SpecAddLootSpecToCat(self, cat)
 end
 
 local function SpecAddEquipListToCat(self, cat)
-    local numSpecGroups = GetNumSpecGroups()
+    local numSpecGroups = _G.GetNumSpecGroups()
 
     -- Sets
     local line = {}
     if #SpecEquipList > 0 then
         for k, v in ipairs(SpecEquipList) do
-            local _, _, _, isEquipped = GetEquipmentSetInfo(k)
+            local _, _, _, isEquipped = _G.GetEquipmentSetInfo(k)
 
-            wipe(line)
+            _G.wipe(line)
             for i = 1, 4 do
                 if i == 1 then
-                    line["text"] = strform("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s", SpecEquipList[k].icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
+                    line["text"] = ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s"):format(SpecEquipList[k].icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
                     line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"] = "LEFT"
                     line["textR"] = 0.9
@@ -2523,19 +2018,19 @@ local function SpecAddEquipListToCat(self, cat)
                     line["func"] = function() SpecGearClickFunc(self, k, SpecEquipList[k].name) end
                     line["customwidth"] = 110
                 elseif i == 2 then
-                    line["text"..i] = PRIMARY
+                    line["text"..i] = _G.PRIMARY
                     line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.primary == k) and nibRealUI.media.colors.blue[3] or 0.3
+                    line["text"..i.."R"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[1] or 0.3
+                    line["text"..i.."G"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[2] or 0.3
+                    line["text"..i.."B"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[3] or 0.3
                 elseif (i == 3) and (numSpecGroups > 1) then
-                    line["text"..i] = SECONDARY
+                    line["text"..i] = _G.SECONDARY
                     line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                     line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.secondary == k) and nibRealUI.media.colors.blue[3] or 0.3
+                    line["text"..i.."R"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[1] or 0.3
+                    line["text"..i.."G"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[2] or 0.3
+                    line["text"..i.."B"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[3] or 0.3
                 end
             end
 
@@ -2547,14 +2042,12 @@ end
 local TalentInfo = {}
 local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
     local InactiveColor = db.colors.disabled
-    local ActiveGroupColor = nibRealUI.media.colors.blue
-    local ActiveSpecColor =  nibRealUI.media.colors.orange
+    local ActiveGroupColor = RealUI.media.colors.blue
+    local ActiveSpecColor =  RealUI.media.colors.orange
     local ActiveLayoutColor = db.colors.normal
 
-    local activeSpecGroup = GetActiveSpecGroup()
-    local activeSpec = GetSpecialization()
-    local id, name, description, icon, spec
-    local defaultSpecTexture = "Interface\\Icons\\Ability_Marksmanship"
+    local activeSpecGroup = _G.GetActiveSpecGroup()
+    local name, spec, _
     local line = {}
 
     for i = 1, 3 do
@@ -2562,7 +2055,7 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
         local SpecColor = (activeSpecGroup == talentGroup) and ActiveSpecColor or InactiveColor
         local LayoutColor = (activeSpecGroup == talentGroup) and ActiveLayoutColor or InactiveColor
         if i == 1 then
-            line["text"] = talentGroup == 1 and PRIMARY or SECONDARY
+            line["text"] = talentGroup == 1 and _G.PRIMARY or _G.SECONDARY
             line["justify"] = "LEFT"
             line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
             line["textR"] = GroupColor[1]
@@ -2581,13 +2074,13 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
             line["text"..i.."G"] = LayoutColor[2]
             line["text"..i.."B"] = LayoutColor[3]
         elseif i == 3 then
-            spec = GetSpecialization(false, false, talentGroup)
+            spec = _G.GetSpecialization(false, false, talentGroup)
             if spec then
-                id, name, description, icon = GetSpecializationInfo(spec)
+                _, name = _G.GetSpecializationInfo(spec)
             else
-                id, name, description, icon = nil, NONE, nil, defaultSpecTexture
+                name = _G.NONE
             end
-            -- line["text"..i] = strform("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0)
+            -- line["text"..i] = format("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0)
             line["text"..i] = name
             line["justify"..i] = "RIGHT"
             line["text"..i.."R"] = SpecColor[1]
@@ -2600,16 +2093,14 @@ end
 
 local SpecSection = {}
 local function Spec_UpdateTablet(self)
-    local Cols, lineHeader
+    local numSpecGroups = _G.GetNumSpecGroups()
 
-    local numSpecGroups = GetNumSpecGroups()
-
-    wipe(SpecSection)
+    _G.wipe(SpecSection)
 
     ---- Spec Category
     SpecSection["specs"] = {}
     SpecSection["specs"].cat = Tablets.spec:AddCategory()
-    SpecSection["specs"].cat:AddLine("text", SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SpecSection["specs"].cat:AddLine("text", _G.SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
 
     SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", 3)
     AddBlankTabLine(SpecSection["specs"].talentCat, 2)
@@ -2619,14 +2110,14 @@ local function Spec_UpdateTablet(self)
     end
 
     ---- Equipment
-    local numEquipSets = GetNumEquipmentSets()
+    local numEquipSets = _G.GetNumEquipmentSets()
     if numEquipSets > 0 then
         AddBlankTabLine(SpecSection["specs"].talentCat, 8)
 
         -- Equipment Category
         SpecSection["equipment"] = {}
         SpecSection["equipment"].cat = Tablets.spec:AddCategory()
-        SpecSection["equipment"].cat:AddLine("text", EQUIPMENT_MANAGER, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["equipment"].cat:AddLine("text", _G.EQUIPMENT_MANAGER, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["equipment"].cat, 2)
 
         -- Equipment Cat
@@ -2637,7 +2128,7 @@ local function Spec_UpdateTablet(self)
     end
 
     ---- Loot Specialization
-    if GetSpecialization() then
+    if _G.GetSpecialization() then
         if numEquipSets > 0 then
             AddBlankTabLine(SpecSection["equipment"].equipCat, 8)
         else
@@ -2645,7 +2136,7 @@ local function Spec_UpdateTablet(self)
         end
         SpecSection["loot"] = {}
         SpecSection["loot"].cat = Tablets.spec:AddCategory()
-        SpecSection["loot"].cat:AddLine("text", LOOT.." "..SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["loot"].cat:AddLine("text", _G.LOOT.." ".._G.SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["loot"].cat, 2)
         SpecAddLootSpecToCat(self, SpecSection["loot"].cat)
     end
@@ -2687,8 +2178,8 @@ local function Spec_OnEnter(self)
 
     if Tablets.spec:IsRegistered(self) then
         -- Tablets.spec appearance
-        Tablets.spec:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
-        Tablets.spec:SetTransparency(self, nibRealUI.media.window[4])
+        Tablets.spec:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+        Tablets.spec:SetTransparency(self, RealUI.media.window[4])
         Tablets.spec:SetFontSizePercent(self, 1)
 
         -- Open
@@ -2698,20 +2189,20 @@ local function Spec_OnEnter(self)
     end
 
     self.mouseover = true
-    self.text:SetTextColor(unpack(TextColorNormalVals))
+    self.text:SetTextColor(TextColorNormalVals[1], TextColorNormalVals[2], TextColorNormalVals[3])
 end
 
 local setEquipped = false
 function InfoLine:SpecUpdateEquip()
     self:debug("SpecUpdateEquip start")
     -- Update Equipment Set
-    local NewTG = GetActiveSpecGroup()
+    local NewTG = _G.GetActiveSpecGroup()
     if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
         self:debug("SpecUpdateEquip", NewTG)
-        EquipmentManager_EquipSet(GetEquipmentSetInfo(dbc.specgear.primary))
+        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.primary))
     elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
         self:debug("SpecUpdateEquip", NewTG)
-        EquipmentManager_EquipSet(GetEquipmentSetInfo(dbc.specgear.secondary))
+        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.secondary))
     end
     self:debug("SpecUpdateEquip end")
     setEquipped = true
@@ -2720,12 +2211,12 @@ end
 local function Spec_Update(self)
     InfoLine:debug("Spec_Update")
     -- Talent Info
-    wipe(TalentInfo)
-    local numSpecGroups = GetNumSpecGroups()
+    _G.wipe(TalentInfo)
+    local numSpecGroups = _G.GetNumSpecGroups()
     for i = 1, numSpecGroups do
         TalentInfo[i] = {}
         for t = 1, 3 do
-            local _, _, _, specIcon, pointsSpent = GetSpecializationInfo(t, false, false, i)
+            local _, _, _, specIcon, pointsSpent = _G.GetSpecializationInfo(t, false, false, i)
             TalentInfo[i][t] = {
                 points = pointsSpent,
                 icon = specIcon,
@@ -2734,11 +2225,11 @@ local function Spec_Update(self)
     end
 
     -- Gear sets
-    wipe(SpecEquipList)
-    local numEquipSets = GetNumEquipmentSets()
+    _G.wipe(SpecEquipList)
+    local numEquipSets = _G.GetNumEquipmentSets()
     if numEquipSets > 0 then
         for index = 1, numEquipSets do
-            local equipName, equipIcon = GetEquipmentSetInfo(index)
+            local equipName, equipIcon = _G.GetEquipmentSetInfo(index)
             SpecEquipList[index] = {
                 name = equipName,
                 icon = equipIcon,
@@ -2754,26 +2245,26 @@ local function Spec_Update(self)
 
     -- Info text
     -- Active talent tree
-    if GetActiveSpecGroup() == 1 then
-        self.text:SetText(PRIMARY)
+    if _G.GetActiveSpecGroup() == 1 then
+        self.text:SetText(_G.PRIMARY)
         UpdateElementWidth(self)
     else
-        self.text:SetText(SECONDARY)
+        self.text:SetText(_G.SECONDARY)
         UpdateElementWidth(self)
     end
 
     -- Refresh Tablet
     if Tablets.spec:IsRegistered(self) then
-        if Tablet20Frame:IsShown() then
+        if _G.Tablet20Frame:IsShown() then
             Tablets.spec:Refresh(self)
         end
     end
 
     if NeedSpecUpdate then
         InfoLine:debug("NeedSpecUpdate")
-        if UnitCastingInfo("player") then
+        if _G.UnitCastingInfo("player") then
             -- cant swap sets while casting
-            C_Timer.After(.25, function()
+            _G.C_Timer.After(.25, function()
                 InfoLine:SpecUpdateEquip()
             end)
         else
@@ -2781,14 +2272,14 @@ local function Spec_Update(self)
         end
 
         -- Update Layout
-        local NewTG = GetActiveSpecGroup()
+        local NewTG = _G.GetActiveSpecGroup()
         ndbc.layout.current = ndbc.layout.spec[NewTG]
         Layout_Update(ILFrames.layout)
-        nibRealUI:UpdateLayout()
+        RealUI:UpdateLayout()
 
         -- ActionBars
-        if nibRealUI:GetModuleEnabled("ActionBars") then
-            local ABD = nibRealUI:GetModule("ActionBars", true)
+        if RealUI:GetModuleEnabled("ActionBars") then
+            local ABD = RealUI:GetModule("ActionBars", true)
             if ABD then ABD:RefreshDoodads() end
         end
 
@@ -2811,12 +2302,12 @@ local SysStats = {
 local SysSection = {}
 local function PC_UpdateTablet()
     local Cols, lineHeader
-    wipe(SysSection)
+    _G.wipe(SysSection)
 
     -- Network Category
     SysSection["network"] = {}
     SysSection["network"].cat = Tablets.pc:AddCategory()
-    SysSection["network"].cat:AddLine("text", NETWORK_LABEL, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SysSection["network"].cat:AddLine("text", _G.NETWORK_LABEL, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
     AddBlankTabLine(SysSection["network"].cat, 2)
 
     -- Lines
@@ -2835,21 +2326,21 @@ local function PC_UpdateTablet()
     local NetworkLines = {
         [1] = {L["Sys_In"], L["Sys_kbps"], "%.2f", SysStats.bwIn},
         [2] = {L["Sys_Out"], L["Sys_kbps"], "%.2f", SysStats.bwOut},
-        [3] = {HOME , L["Sys_ms"], "%d", SysStats.lagHome},
-        [4] = {CHANNEL_CATEGORY_WORLD, L["Sys_ms"], "%d", SysStats.lagWorld},
+        [3] = {_G.HOME , L["Sys_ms"], "%d", SysStats.lagHome},
+        [4] = {_G.CHANNEL_CATEGORY_WORLD, L["Sys_ms"], "%d", SysStats.lagWorld},
     }
     local line = {}
     for l = 1, #NetworkLines do
-        wipe(line)
+        _G.wipe(line)
         for i = 1, #Cols do
             if i == 1 then
-                line["text"] = strform("|cffe5e5e5%s|r |cff808080(%s)|r", NetworkLines[l][1], NetworkLines[l][2])
+                line["text"] = ("|cffe5e5e5%s|r |cff808080(%s)|r"):format(NetworkLines[l][1], NetworkLines[l][2])
                 line["justify"] = "LEFT"
                 line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 line["indentation"] = 12.5
                 line["customwidth"] = 90
             elseif i == 2 then
-                line["text"..i] = strform(NetworkLines[l][3], NetworkLines[l][4].cur)
+                line["text"..i] = NetworkLines[l][3]:format(NetworkLines[l][4].cur)
                 line["justify"..i] = "RIGHT"
                 line["text"..i.."R"] = 0.9
                 line["text"..i.."G"] = 0.9
@@ -2857,7 +2348,7 @@ local function PC_UpdateTablet()
                 line["indentation"..i] = 12.5
                 line["customwidth"..i] = 30
             elseif i == 3 then
-                line["text"..i] = strform(NetworkLines[l][3], NetworkLines[l][4].max)
+                line["text"..i] = NetworkLines[l][3]:format(NetworkLines[l][4].max)
                 line["justify"..i] = "RIGHT"
                 line["text"..i.."R"] = 0.7
                 line["text"..i.."G"] = 0.7
@@ -2865,7 +2356,7 @@ local function PC_UpdateTablet()
                 line["indentation"..i] = 12.5
                 line["customwidth"..i] = 30
             elseif i == 4 then
-                line["text"..i] = strform(NetworkLines[l][3], NetworkLines[l][4].min)
+                line["text"..i] = NetworkLines[l][3]:format(NetworkLines[l][4].min)
                 line["justify"..i] = "RIGHT"
                 line["text"..i.."R"] = 0.7
                 line["text"..i.."G"] = 0.7
@@ -2873,7 +2364,7 @@ local function PC_UpdateTablet()
                 line["indentation"..i] = 12.5
                 line["customwidth"..i] = 30
             elseif i == 5 then
-                line["text"..i] = strform(NetworkLines[l][3], NetworkLines[l][4].avg)
+                line["text"..i] = NetworkLines[l][3]:format(NetworkLines[l][4].avg)
                 line["justify"..i] = "RIGHT"
                 line["text"..i.."R"] = 0.7
                 line["text"..i.."G"] = 0.7
@@ -2889,7 +2380,7 @@ local function PC_UpdateTablet()
     -- Computer Category
     SysSection["computer"] = {}
     SysSection["computer"].cat = Tablets.pc:AddCategory()
-    SysSection["computer"].cat:AddLine("text", SYSTEMOPTIONS_MENU, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+    SysSection["computer"].cat:AddLine("text", _G.SYSTEMOPTIONS_MENU, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
     AddBlankTabLine(SysSection["computer"].cat, 2)
 
     SysSection["computer"].lineCat = Tablets.pc:AddCategory("columns", #Cols)
@@ -2901,10 +2392,10 @@ local function PC_UpdateTablet()
         [1] = {L["Sys_FPS"], SysStats.fps},
     }
     for l = 1, #ComputerLines do
-        wipe(line)
+        _G.wipe(line)
         for i = 1, #Cols do
             if i == 1 then
-                line["text"] = strform("|cffe5e5e5%s|r", ComputerLines[l][1])
+                line["text"] = ("|cffe5e5e5%s|r"):format(ComputerLines[l][1])
                 line["justify"] = "LEFT"
                 line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
                 line["indentation"] = 12.5
@@ -2976,13 +2467,13 @@ local function PC_OnEnter(self)
 
     if Tablets.pc:IsRegistered(self) then
         -- Tablets.pc appearance
-        Tablets.pc:SetColor(self, nibRealUI.media.window[1], nibRealUI.media.window[2], nibRealUI.media.window[3])
-        Tablets.pc:SetTransparency(self, nibRealUI.media.window[4])
+        Tablets.pc:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+        Tablets.pc:SetTransparency(self, RealUI.media.window[4])
         Tablets.pc:SetFontSizePercent(self, 1)
 
         Tablets.pc:Open(self)
 
-        ShowGraph("fps", Tablet20Frame, "BOTTOMRIGHT", "BOTTOMRIGHT", -10, 10, self)
+        ShowGraph("fps", _G.Tablet20Frame, "BOTTOMRIGHT", "BOTTOMRIGHT", -10, 10, self)
         HideOtherGraphs(self)
     end
 end
@@ -2990,7 +2481,7 @@ end
 local function PC_Update(self, short)
     if short then
         -- FPS
-        SysStats.fps.cur = floor((GetFramerate() or 0) + 0.5)
+        SysStats.fps.cur = floor((_G.GetFramerate() or 0) + 0.5)
 
         -- Get last 60 second data
         if ( (SysStats.fps.cur > 0) and (SysStats.fps.cur < 120) ) then
@@ -3031,7 +2522,7 @@ local function PC_Update(self, short)
         end
     else
         -- Net
-        SysStats.bwIn.cur, SysStats.bwOut.cur, SysStats.lagHome.cur, SysStats.lagWorld.cur = GetNetStats()
+        SysStats.bwIn.cur, SysStats.bwOut.cur, SysStats.lagHome.cur, SysStats.lagWorld.cur = _G.GetNetStats()
         SysStats.bwIn.cur = floor(SysStats.bwIn.cur * 100 + 0.5 ) / 100
         SysStats.bwOut.cur = floor(SysStats.bwOut.cur * 100 + 0.5 ) / 100
 
@@ -3110,7 +2601,7 @@ local function PC_Update(self, short)
 
     -- Tablet
     if Tablets.pc:IsRegistered(self) then
-        if Tablet20Frame:IsShown() then
+        if _G.Tablet20Frame:IsShown() then
             Tablets.pc:Refresh(self)
         end
     end
@@ -3118,7 +2609,7 @@ end
 
 ---- Mail
 local function Mail_Update(self)
-    if HasNewMail() then
+    if _G.HasNewMail() then
         self.hasMail = true
         self.hidden = false
         UpdateElementWidth(self)
@@ -3134,9 +2625,9 @@ local function Clock_Update(self, ...)
     -- Time
     local newTime
     if db.other.clock.uselocal then
-        newTime = db.other.clock.hr24 and date("%H:%M") or date("%I:%M %p")
-        if strsub(newTime, 1, 1) == "0" then
-            newTime = strsub(newTime, 2)
+        newTime = db.other.clock.hr24 and _G.date("%H:%M") or _G.date("%I:%M %p")
+        if newTime:sub(1, 1) == "0" then
+            newTime = newTime:sub(2)
         end
     else
         newTime = db.other.clock.hr24 and RetrieveGameTime() or RetrieveGameTime(true)
@@ -3148,65 +2639,66 @@ local function Clock_Update(self, ...)
 end
 
 local function Clock_OnEnter(self)
-    local locTime = db.other.clock.hr24 and date("%H:%M") or strform("%d%s", strsub(date("%I:%M %p"), 1, 2), strsub(date("%I:%M %p"), 3))
+    local locTime = db.other.clock.hr24 and _G.date("%H:%M") or ("%d%s"):format(_G.date("%I:%M %p"):sub(1, 2), _G.date("%I:%M %p"):sub(3))
 
     local serTime = RetrieveGameTime(not db.other.clock.hr24)
-    local caltext = date("%b %d (%a)")
+    local caltext = _G.date("%b %d (%a)")
 
+    local GameTooltip = _G.GameTooltip
     GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-    GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, TIMEMANAGER_TOOLTIP_TITLE))
+    GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.TIMEMANAGER_TOOLTIP_TITLE))
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_REALMTIME), strform("%s", serTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, TIMEMANAGER_TOOLTIP_LOCALTIME), strform("%s", locTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-    GameTooltip:AddDoubleLine(strform("|cff%s%s:|r", TextColorblue1, L["Clock_Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, _G.TIMEMANAGER_TOOLTIP_REALMTIME), ("%s"):format(serTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, _G.TIMEMANAGER_TOOLTIP_LOCALTIME), ("%s"):format(locTime), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+    GameTooltip:AddDoubleLine(("|cff%s%s:|r"):format(TextColorBlue1, L["Clock_Date"]), caltext, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
 
     -- TB/WG
     GameTooltip:AddLine(" ")
-    local _, _, _, _, WGTime = GetWorldPVPAreaInfo(1)
-    local _, _, _, _, TBTime = GetWorldPVPAreaInfo(2)
+    local _, _, _, _, WGTime = _G.GetWorldPVPAreaInfo(1)
+    local _, _, _, _, TBTime = _G.GetWorldPVPAreaInfo(2)
     if ( WGTime ~= nil ) then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_WGTime"]), strform("%s", ConvertSecondstoTime(WGTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, L["Clock_WGTime"]), ("%s"):format(ConvertSecondstoTime(WGTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     else
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_NoWGTime"]))
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorBlue1, L["Clock_NoWGTime"]))
     end
     if ( TBTime ~= nil ) then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_TBTime"]), strform("%s", ConvertSecondstoTime(TBTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, L["Clock_TBTime"]), ("%s"):format(ConvertSecondstoTime(TBTime)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
     else
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_NoTBTime"]))
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorBlue1, L["Clock_NoTBTime"]))
     end
 
     -- Invites
     GameTooltip:AddLine(" ")
     if self.pendingCalendarInvites and self.pendingCalendarInvites > 0 then
-        GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, L["Clock_CalenderInvites"]), strform("%s", self.pendingCalendarInvites), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+        GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, L["Clock_CalenderInvites"]), ("%s"):format(self.pendingCalendarInvites), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         GameTooltip:AddLine(" ")
     end
 
     -- World Bosses
-    local numSavedBosses = GetNumSavedWorldBosses()
-    if (UnitLevel("player") >= 90) and (numSavedBosses > 0) then
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, WORLD .. LFG_LIST_BOSSES_DEFEATED))
+    local numSavedBosses = _G.GetNumSavedWorldBosses()
+    if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.WORLD .. _G.LFG_LIST_BOSSES_DEFEATED))
         for i = 1, numSavedBosses do
-            local bossName, bossID, bossReset = GetSavedWorldBossInfo(i)
-            GameTooltip:AddDoubleLine(strform("|cff%s%s|r", TextColorblue1, bossName), strform("%s", ConvertSecondstoTime(bossReset)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
+            GameTooltip:AddDoubleLine(("|cff%s%s|r"):format(TextColorBlue1, bossName), ("%s"):format(ConvertSecondstoTime(bossReset)), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
         end
         GameTooltip:AddLine(" ")
     end
 
     -- Hint
-    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Clock_ShowCalendar"]))
-    GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Clock_ShowTimer"]))
+    GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Clock_ShowCalendar"]))
+    GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Clock_ShowTimer"]))
     GameTooltip:Show()
 end
 
 local function Clock_OnMouseDown(self)
-    if IsShiftKeyDown() then
-        ToggleTimeManager()
+    if _G.IsShiftKeyDown() then
+        _G.ToggleTimeManager()
     else
-        if IsAddOnLoaded("GroupCalendar5") and SlashCmdList.CAL then
-            SlashCmdList.CAL("show")
+        if _G.IsAddOnLoaded("GroupCalendar5") and _G.SlashCmdList.CAL then
+            _G.SlashCmdList.CAL("show")
         else
-            ToggleCalendar()
+            _G.ToggleCalendar()
         end
     end
 end
@@ -3214,152 +2706,151 @@ end
 ---------------------
 -- Mouse functions --
 ---------------------
-function InfoLine:OnMouseDown(self)
-    if self.tag == "start" then
-        EasyMenu(MicroMenu, RealUIStartDropDown, self, 0, 0, "MENU", 2)
+function InfoLine:OnMouseDown(element)
+    if element.tag == "start" then
+        _G.EasyMenu(MicroMenu, ddMenuFrame, element, 0, 0, "MENU", 2)
 
-    elseif self.tag == "guild" then
-        Guild_OnMouseDown(self)
+    elseif element.tag == "guild" then
+        Guild_OnMouseDown(element)
 
-    elseif self.tag == "friends" then
-        Friends_OnMouseDown(self)
+    elseif element.tag == "friends" then
+        Friends_OnMouseDown(element)
 
-    elseif self.tag == "durability" then
-        InfoLine_Durability_OnMouseDown(self)
+    elseif element.tag == "durability" then
+        InfoLine_Durability_OnMouseDown(element)
 
-    elseif self.tag == "bag" then
-        InfoLine_Bag_OnMouseDown(self)
+    elseif element.tag == "bag" then
+        InfoLine_Bag_OnMouseDown(element)
 
-    elseif self.tag == "currency" then
-        Currency_OnMouseDown(self)
+    elseif element.tag == "currency" then
+        Currency_OnMouseDown(element)
 
-    elseif self.tag == "xprep" then
-        InfoLine_XR_OnMouseDown(self)
+    elseif element.tag == "xprep" then
+        InfoLine_XR_OnMouseDown(element)
 
-    elseif self.tag == "clock" then
-        Clock_OnMouseDown(self)
+    elseif element.tag == "clock" then
+        Clock_OnMouseDown(element)
 
-    elseif self.tag == "meters" then
-        Meter_Toggle(self)
+    elseif element.tag == "meters" then
+        Meter_Toggle(element)
 
-    elseif self.tag == "spec" then
-        SpecChangeClickFunc(self)
+    elseif element.tag == "spec" then
+        SpecChangeClickFunc(element)
 
-    elseif self.tag == "layout" then
+    elseif element.tag == "layout" then
         local NewLayout = ndbc.layout.current == 1 and 2 or 1
         ndbc.layout.current = NewLayout
-        ndbc.layout.spec[GetActiveSpecGroup()] = NewLayout
-        Layout_Update(self)
-        nibRealUI:UpdateLayout()
-        GameTooltip:Hide()
-        InfoLine:OnEnter(self)
+        ndbc.layout.spec[_G.GetActiveSpecGroup()] = NewLayout
+        Layout_Update(element)
+        RealUI:UpdateLayout()
+        _G.GameTooltip:Hide()
+        InfoLine:OnEnter(element)
     end
 end
 
-function InfoLine:OnLeave(self)
-    self.mouseover = false
+function InfoLine:OnLeave(element)
+    element.mouseover = false
     HighlightBar:Hide()
-    if GameTooltip:IsShown() then GameTooltip:Hide() end
-    if self.tag == "start" then
-        local color = nibRealUI.media.colors.blue
-        self.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
-        color = nibRealUI.media.colors.orange
-        self.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
-    elseif self.tag == "pc" then
-        PC_OnLeave(self)
+    if _G.GameTooltip:IsShown() then _G.GameTooltip:Hide() end
+    if element.tag == "start" then
+        local color = RealUI.media.colors.blue
+        element.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
+        color = RealUI.media.colors.orange
+        element.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
+    elseif element.tag == "pc" then
+        PC_OnLeave(element)
     end
 end
 
-function InfoLine:OnEnter(self)
+function InfoLine:OnEnter(element)
     -- Highlight
-    self.mouseover = true
-    if self.tag ~= "start" then
+    element.mouseover = true
+    if element.tag ~= "start" then
         HighlightBar:Show()
-        SetHighlightPosition(self)
+        SetHighlightPosition(element)
     end
 
-    if InCombatLockdown() and not db.other.icTips then return end
+    if _G.InCombatLockdown() and not db.other.icTips then return end
+    local GameTooltip = _G.GameTooltip
 
-    if self.tag == "start" then
-        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, MAINMENU_BUTTON))
+    if element.tag == "start" then
+        GameTooltip:SetOwner(element, "ANCHOR_TOP"..element.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.MAINMENU_BUTTON))
         GameTooltip:Show()
 
-        local color = nibRealUI.media.colors.blue
-        self.icon1:SetVertexColor(color[1], color[2], color[3])
-        color = nibRealUI.media.colors.orange
-        self.icon2:SetVertexColor(color[1], color[2], color[3])
-    elseif self.tag == "mail" and self.hasMail then
-        MinimapMailFrameUpdate()
+        local color = RealUI.media.colors.blue
+        element.icon1:SetVertexColor(color[1], color[2], color[3])
+        color = RealUI.media.colors.orange
+        element.icon2:SetVertexColor(color[1], color[2], color[3])
+    elseif element.tag == "mail" and element.hasMail then
+        _G.MinimapMailFrameUpdate()
 
-        local send1, send2, send3 = GetLatestThreeSenders()
-        local toolText
+        local send1, send2, send3 = _G.GetLatestThreeSenders()
 
-        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
+        GameTooltip:SetOwner(element, "ANCHOR_TOP"..element.side, 0, 1)
         if (send1 or send2 or send3) then
-            GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, HAVE_MAIL_FROM))
+            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.HAVE_MAIL_FROM))
         else
-            GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, HAVE_MAIL))
+            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.HAVE_MAIL))
         end
 
-        if send1 then GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, send1)) end
-        if send2 then GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, send2)) end
-        if send3 then GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, send3)) end
+        if send1 then GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorWhite, send1)) end
+        if send2 then GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorWhite, send2)) end
+        if send3 then GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorWhite, send3)) end
 
         GameTooltip:Show()
 
-    elseif self.tag == "guild" then
-        if self.hasguild then
-            Guild_OnEnter(self)
+    elseif element.tag == "guild" then
+        if element.hasguild then
+            Guild_OnEnter(element)
         end
 
-    elseif self.tag == "friends" then
-        if self.hasfriends then
-            Friends_OnEnter(self)
+    elseif element.tag == "friends" then
+        if element.hasfriends then
+            Friends_OnEnter(element)
         end
 
-    elseif self.tag == "durability" then
-        InfoLine_Durability_OnEnter(self)
+    elseif element.tag == "durability" then
+        InfoLine_Durability_OnEnter(element)
 
-    elseif self.tag == "bag" then
-        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, EMPTY .. " " .. BAGSLOTTEXT))
+    elseif element.tag == "bag" then
+        GameTooltip:SetOwner(element, "ANCHOR_TOP"..element.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.EMPTY .. " " .. _G.BAGSLOTTEXT))
         GameTooltip:Show()
 
-    elseif self.tag == "currency" then
-        Currency_OnEnter(self)
+    elseif element.tag == "currency" then
+        Currency_OnEnter(element)
 
-    elseif self.tag == "xprep" then
-        InfoLine_XR_OnEnter(self)
+    elseif element.tag == "xprep" then
+        InfoLine_XR_OnEnter(element)
 
-    elseif self.tag == "clock" then
-        Clock_OnEnter(self)
+    elseif element.tag == "clock" then
+        Clock_OnEnter(element)
 
-    elseif self.tag == "meters" then
-        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Meters_Header"]))
+    elseif element.tag == "meters" then
+        GameTooltip:SetOwner(element, "ANCHOR_TOP"..element.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, L["Meters_Header"]))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorblue1, L["Meters_Active"]))
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorWhite, self.meterLoaded))
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorBlue1, L["Meters_Active"]))
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorWhite, element.meterLoaded))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Meters_Toggle"]))
+        GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Meters_Toggle"]))
         GameTooltip:Show()
 
-    elseif self.tag == "pc" then
-        PC_OnEnter(self)
+    elseif element.tag == "pc" then
+        PC_OnEnter(element)
 
-    elseif self.tag == "spec" then
-        Spec_OnEnter(self)
+    elseif element.tag == "spec" then
+        Spec_OnEnter(element)
 
-    elseif self.tag == "layout" then
+    elseif element.tag == "layout" then
         local CurLayoutText = ndbc.layout.current == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
-        local CurResText = layoutSize == 1 and "Low" or "High"
-        GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
-        GameTooltip:AddLine(strform("|cff%s%s|r", TextColorTTHeader, L["Layout_LayoutChanger"]))
+        GameTooltip:SetOwner(element, "ANCHOR_TOP"..element.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, L["Layout_LayoutChanger"]))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff%s%s |r|cff%s%s|r", TextColorblue1, L["Layout_Current"], TextColorWhite, CurLayoutText))
+        GameTooltip:AddLine(("|cff%s%s |r|cff%s%s|r"):format(TextColorBlue1, L["Layout_Current"], TextColorWhite, CurLayoutText))
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(strform("|cff00ff00%s|r", L["Layout_Change"]))
+        GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Layout_Change"]))
         GameTooltip:Show()
     end
 end
@@ -3370,8 +2861,8 @@ end
 -- Background
 function InfoLine:SetBackground()
     if ndb.settings.infoLineBackground then
-        ILFrames.parent:SetBackdropColor(unpack(nibRealUI.media.window))
-        tinsert(REALUI_WINDOW_FRAMES, ILFrames.parent)
+        ILFrames.parent:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+        tinsert(_G.REALUI_WINDOW_FRAMES, ILFrames.parent)
         ILFrames.parent.backgroundTop:SetTexture(0, 0, 0, 1)
         if db.position.y > 0 then
             ILFrames.parent.backgroundBottom:SetTexture(0, 0, 0, 1)
@@ -3392,7 +2883,7 @@ function InfoLine:UpdateFonts()
     layoutSize = (ndb.settings.fontStyle == 3) and 2 or 1
 
     -- Set Icons
-    for i,v in pairs(TextureFrames) do
+    for i,v in next, TextureFrames do
         local element, texture, icon = v[1], v[2], v[3]
         if element.type and (element.type ~= 2) then
             texture:SetTexture(Icons[layoutSize][icon][1])
@@ -3401,7 +2892,7 @@ function InfoLine:UpdateFonts()
     end
 
     -- Update Element widths
-    for i,v in pairs(ILFrames) do
+    for i,v in next, ILFrames do
         if ILFrames[i].type and (ILFrames[i].type ~= 1) then
             UpdateElementWidth(ILFrames[i])
         end
@@ -3448,8 +2939,8 @@ function InfoLine:UpdatePositions()
 
     -- Parent
     ILFrames.parent:ClearAllPoints()
-    ILFrames.parent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT",  db.position.xleft, db.position.y)
-    ILFrames.parent:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT",  db.position.xright, db.position.y)
+    ILFrames.parent:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  db.position.xleft, db.position.y)
+    ILFrames.parent:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  db.position.xright, db.position.y)
     ILFrames.parent:SetHeight(EHeight)
 
     ---- Left
@@ -3491,7 +2982,7 @@ end
 local function CreateNewElement(name, side, type, iconInfo, ...)
     local extra = ...
     -- Types - 1 = Icon, 2 = Text, 3 = Icon + Text
-    local NewElement = CreateFrame("Frame", name, UIParent)
+    local NewElement = _G.CreateFrame("Frame", name, _G.UIParent)
     NewElement.side = side
     NewElement.type = type
 
@@ -3506,7 +2997,7 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
                 NewElement.icon1:SetHeight(16)
                 NewElement.icon1:SetWidth(16)
                 NewElement.icon1:SetTexture(Icons[layoutSize].start1[1])
-                local color = nibRealUI.media.colors.blue
+                local color = RealUI.media.colors.blue
                 NewElement.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
 
                 NewElement.icon2 = NewElement:CreateTexture(nil, "ARTWORK")
@@ -3514,7 +3005,7 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
                 NewElement.icon2:SetHeight(16)
                 NewElement.icon2:SetWidth(16)
                 NewElement.icon2:SetTexture(Icons[layoutSize].start2[1])
-                color = nibRealUI.media.colors.orange
+                color = RealUI.media.colors.orange
                 NewElement.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
             else
                 NewElement.icon = NewElement:CreateTexture(nil, "ARTWORK")
@@ -3531,7 +3022,7 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
 
         if (type == 2) or (type == 3) then
             NewElement.text = NewElement:CreateFontString(nil, "ARTWORK")
-            NewElement.text:SetFontObject(RealUIFont_Pixel)
+            NewElement.text:SetFontObject(_G.RealUIFont_Pixel)
             NewElement.text:SetJustifyH("LEFT")
             if type == 2 then
                 NewElement.text:SetPoint("BOTTOMLEFT", NewElement, "BOTTOMLEFT", db.position.xgap, db.position.yoff + db.text.yoffset + 0.5)
@@ -3542,7 +3033,7 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
         end
     else
         NewElement.text1 = NewElement:CreateFontString(nil, "ARTWORK")
-        NewElement.text1:SetFontObject(RealUIFont_Pixel)
+        NewElement.text1:SetFontObject(_G.RealUIFont_Pixel)
         NewElement.text1:SetJustifyH("LEFT")
 
         NewElement.icon = NewElement:CreateTexture(nil, "ARTWORK")
@@ -3552,8 +3043,8 @@ local function CreateNewElement(name, side, type, iconInfo, ...)
         NewElement.iconwidth = iconInfo[2]
 
         NewElement.text2 = NewElement:CreateFontString(nil, "ARTWORK")
-        NewElement.text2:SetFontObject(RealUIFont_Pixel)
-        NewElement.text2:SetTextColor(unpack(TextColorNormalVals))
+        NewElement.text2:SetFontObject(_G.RealUIFont_Pixel)
+        NewElement.text2:SetTextColor(TextColorNormalVals[1], TextColorNormalVals[2], TextColorNormalVals[3])
         NewElement.text2:SetJustifyH("LEFT")
 
         NewElement.curwidth = 100
@@ -3574,17 +3065,17 @@ function InfoLine:CreateFrames()
     ILFrames = {}
 
     -- Parent
-    ILFrames.parent = CreateFrame("Frame", "RealUI_InfoLine", UIParent)
-    ILFrames.parent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
+    ILFrames.parent = _G.CreateFrame("Frame", "RealUI_InfoLine", _G.UIParent)
+    ILFrames.parent:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT", 0, 0)
     ILFrames.parent:SetFrameStrata("LOW")
     ILFrames.parent:SetFrameLevel(0)
 
     -- Background
     ILFrames.parent:SetBackdrop({
-        bgFile = nibRealUI.media.textures.plain,
+        bgFile = RealUI.media.textures.plain,
         edgeFile = nil,
     })
-    ILFrames.parent.stripeTex = nibRealUI:AddStripeTex(ILFrames.parent)
+    ILFrames.parent.stripeTex = RealUI:AddStripeTex(ILFrames.parent)
     ILFrames.parent.backgroundTop = ILFrames.parent:CreateTexture(nil, "ARTWORK")
         ILFrames.parent.backgroundTop:SetPoint("TOPLEFT", ILFrames.parent, "TOPLEFT")
         ILFrames.parent.backgroundTop:SetPoint("BOTTOMRIGHT", ILFrames.parent, "TOPRIGHT", 0, -1)
@@ -3594,7 +3085,7 @@ function InfoLine:CreateFrames()
     self:SetBackground()
 
     -- Highlight Bar
-    HighlightBar = CreateFrame("Frame", nil, UIParent)
+    HighlightBar = _G.CreateFrame("Frame", nil, _G.UIParent)
     HighlightBar:Hide()
     HighlightBar:SetHeight(3)
     HighlightBar:SetFrameStrata("LOW")
@@ -3605,7 +3096,7 @@ function InfoLine:CreateFrames()
     HighlightBar.line = HighlightBar:CreateTexture(nil, "ARTWORK")
     HighlightBar.line:SetPoint("BOTTOMLEFT", HighlightBar, "BOTTOMLEFT", 1, 1)
     HighlightBar.line:SetPoint("TOPRIGHT", HighlightBar, "TOPRIGHT", -1, -1)
-    HighlightBar.line:SetTexture(unpack(HighlightColorVals))
+    HighlightBar.line:SetTexture(HighlightColorVals[1], HighlightColorVals[2], HighlightColorVals[3], HighlightColorVals[4])
 
     -------- LEFT
     -- -- Start Button
@@ -3624,21 +3115,21 @@ function InfoLine:CreateFrames()
     ILFrames.mail:RegisterEvent("MAIL_CLOSED")
     ILFrames.mail:RegisterEvent("MAIL_SHOW")
     ILFrames.mail:RegisterEvent("MAIL_INBOX_UPDATE")
-    ILFrames.mail:SetScript("OnEvent", function(self, event)
+    ILFrames.mail:SetScript("OnEvent", function(element, event)
         if not db.elements.mail then return end
         if event == "PLAYER_ENTERING_WORLD" then
-            self.needrefreshed = true
+            element.needrefreshed = true
         end
-        Mail_Update(self)
+        Mail_Update(element)
     end)
     ILFrames.mail.elapsed = 0
-    ILFrames.mail:SetScript("OnUpdate", function(self, elapsed)
-        if self.needrefreshed then
-            self.elapsed = self.elapsed + elapsed
-            if self.elapsed >= 5 then
-                self.needrefreshed = false
-                self.elapsed = 0
-                Mail_Update(self)
+    ILFrames.mail:SetScript("OnUpdate", function(element, elapsed)
+        if element.needrefreshed then
+            element.elapsed = element.elapsed + elapsed
+            if element.elapsed >= 5 then
+                element.needrefreshed = false
+                element.elapsed = 0
+                Mail_Update(element)
             end
         end
     end)
@@ -3651,26 +3142,26 @@ function InfoLine:CreateFrames()
     ILFrames.guild:RegisterEvent("GUILD_PERK_UPDATE")
     ILFrames.guild:RegisterEvent("GUILD_MOTD")
     ILFrames.guild:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.guild:SetScript("OnEvent", function(self, event)
+    ILFrames.guild:SetScript("OnEvent", function(element, event)
         if not db.elements.guild then return end
         if event == "GUILD_MOTD" then
-            if not self.hidden then return end
-            self.needrefreshed = true
-            self.elapsed = -2
+            if not element.hidden then return end
+            element.needrefreshed = true
+            element.elapsed = -2
         else
-            self.needrefreshed = true
-            self.elapsed = 0
+            element.needrefreshed = true
+            element.elapsed = 0
         end
     end)
     ILFrames.guild.elapsed = 2
-    ILFrames.guild:SetScript("OnUpdate", function(self, elapsed)
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= 2 then
-            if self.needrefreshed then
-                Guild_Update(self)
-                self.needrefreshed = false
+    ILFrames.guild:SetScript("OnUpdate", function(element, elapsed)
+        element.elapsed = element.elapsed + elapsed
+        if element.elapsed >= 2 then
+            if element.needrefreshed then
+                Guild_Update(element)
+                element.needrefreshed = false
             end
-            self.elapsed = 0
+            element.elapsed = 0
         end
     end)
 
@@ -3685,23 +3176,23 @@ function InfoLine:CreateFrames()
     ILFrames.friends:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
     ILFrames.friends:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
     ILFrames.friends:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.friends:SetScript("OnEvent", function(self, event, ...)
-        if (BNGetNumFriendInvites() > 0) or event == "BN_FRIEND_INVITE_REMOVED" then
-            Friends_BNetRequest(self, event, ...)
+    ILFrames.friends:SetScript("OnEvent", function(element, event, ...)
+        if (_G.BNGetNumFriendInvites() > 0) or event == "BN_FRIEND_INVITE_REMOVED" then
+            Friends_BNetRequest(element, event, ...)
         end
         if not db.elements.friends then return end
-        self.needrefreshed = true
-        self.elapsed = 0
+        element.needrefreshed = true
+        element.elapsed = 0
     end)
     ILFrames.friends.elapsed = 2
-    ILFrames.friends:SetScript("OnUpdate", function(self, elapsed)
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= 2 then
-            if self.needrefreshed then
-                Friends_Update(self)
-                self.needrefreshed = false
+    ILFrames.friends:SetScript("OnUpdate", function(element, elapsed)
+        element.elapsed = element.elapsed + elapsed
+        if element.elapsed >= 2 then
+            if element.needrefreshed then
+                Friends_Update(element)
+                element.needrefreshed = false
             end
-            self.elapsed = 0
+            element.elapsed = 0
         end
     end)
 
@@ -3711,13 +3202,13 @@ function InfoLine:CreateFrames()
     ILFrames.durability.tag = "durability"
     ILFrames.durability:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
     ILFrames.durability:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.durability:SetScript("OnEvent", function(self)
+    ILFrames.durability:SetScript("OnEvent", function(element)
         if not db.elements.durability then return end
-        local dura = InfoLine_Durability_Update(self)
+        local dura = InfoLine_Durability_Update(element)
         if (dura < 15) then
-            Durability_Low(self, dura)
+            Durability_Low(element, dura)
         else
-            Durability_Low(self, false)
+            Durability_Low(element, false)
         end
     end)
 
@@ -3729,9 +3220,9 @@ function InfoLine:CreateFrames()
     ILFrames.bag:RegisterEvent("UNIT_INVENTORY_CHANGED")
     ILFrames.bag:RegisterEvent("BAG_UPDATE")
     ILFrames.bag:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.bag:SetScript("OnEvent", function(self)
+    ILFrames.bag:SetScript("OnEvent", function(element)
         if not db.elements.bag then return end
-        InfoLine_Bag_Update(self)
+        InfoLine_Bag_Update(element)
     end)
 
     -- -- Currency
@@ -3764,42 +3255,42 @@ function InfoLine:CreateFrames()
         ["GOSSIP_SHOW"] = true,
         ["QUEST_COMPLETE"] = true,
     }
-    for k, v in pairs(MoneyPossibilityEvents) do
+    for k, v in next, MoneyPossibilityEvents do
         if v then
             ILFrames.currency:RegisterEvent(k)
         end
     end
     -- Events to know when to update Currencies
-    ILFrames.currency:SetScript("OnEvent", function(self, event)
+    ILFrames.currency:SetScript("OnEvent", function(element, event)
         if not db.elements.currency then return end
         if event == "UPDATE_PENDING_MAIL" then
-            self.ingame = true
-            self:UnregisterEvent("UPDATE_PENDING_MAIL")
+            element.ingame = true
+            element:UnregisterEvent("UPDATE_PENDING_MAIL")
         elseif MoneyPossibilityEvents[event] then
-            if self.ingame then
-                self.initialized = true
+            if element.ingame then
+                element.initialized = true
             end
             if MoneyPossibilityEvents[event] then
-                for k, v in pairs(MoneyPossibilityEvents) do
+                for k, v in next, MoneyPossibilityEvents do
                     if v then
                         ILFrames.currency:UnregisterEvent(k)
                     end
                 end
             end
         end
-        self.needrefreshed = true
-        self.elapsed = 0
+        element.needrefreshed = true
+        element.elapsed = 0
     end)
     -- Update on interval, avoids too many updates due to lots of events
     ILFrames.currency.elapsed = 1
-    ILFrames.currency:SetScript("OnUpdate", function(self, elapsed)
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= 1 then
-            if self.needrefreshed then
-                Currency_Update(self)
-                self.needrefreshed = false
+    ILFrames.currency:SetScript("OnUpdate", function(element, elapsed)
+        element.elapsed = element.elapsed + elapsed
+        if element.elapsed >= 1 then
+            if element.needrefreshed then
+                Currency_Update(element)
+                element.needrefreshed = false
             end
-            self.elapsed = 0
+            element.elapsed = 0
         end
     end)
 
@@ -3812,9 +3303,9 @@ function InfoLine:CreateFrames()
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.xprep:SetScript("OnEvent", function(self)
+    ILFrames.xprep:SetScript("OnEvent", function(element)
         if not db.elements.xprep then return end
-        InfoLine_XR_Update(self)
+        InfoLine_XR_Update(element)
     end)
 
 
@@ -3824,17 +3315,17 @@ function InfoLine:CreateFrames()
     ILFrames.clock.tag = "clock"
     ILFrames.clock.text:SetJustifyH("RIGHT")
     ILFrames.clock:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.clock:SetScript("OnEvent", function(self)
+    ILFrames.clock:SetScript("OnEvent", function(element)
         if not db.elements.clock then return end
-        Clock_Update(self, true)
+        Clock_Update(element, true)
     end)
     ILFrames.clock.elapsed = 1
-    ILFrames.clock:SetScript("OnUpdate", function(self, elapsed)
+    ILFrames.clock:SetScript("OnUpdate", function(element, elapsed)
         if not db.elements.clock then return end
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= 1 then
-            Clock_Update(self)
-            self.elapsed = 0
+        element.elapsed = element.elapsed + elapsed
+        if element.elapsed >= 1 then
+            Clock_Update(element)
+            element.elapsed = 0
         end
     end)
 
@@ -3843,17 +3334,17 @@ function InfoLine:CreateFrames()
     tinsert(TextureFrames, {ILFrames.meters, ILFrames.meters.icon, "meters"})
     ILFrames.meters.tag = "meters"
     ILFrames.meters:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.meters:SetScript("OnEvent", function(self)
+    ILFrames.meters:SetScript("OnEvent", function(element)
         if not db.elements.metertoggle then return end
-        Meter_Update(self)
+        Meter_Update(element)
     end)
     ILFrames.meters.elapsed = 2
-    ILFrames.meters:SetScript("OnUpdate", function(self, elapsed)
+    ILFrames.meters:SetScript("OnUpdate", function(element, elapsed)
         if not db.elements.metertoggle then return end
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= 2 then
-            Meter_Update(self)
-            self.elapsed = 0
+        element.elapsed = element.elapsed + elapsed
+        if element.elapsed >= 2 then
+            Meter_Update(element)
+            element.elapsed = 0
         end
     end)
 
@@ -3866,21 +3357,21 @@ function InfoLine:CreateFrames()
     ILFrames.spec:RegisterEvent("EQUIPMENT_SETS_CHANGED")
     ILFrames.spec:RegisterEvent("EQUIPMENT_SWAP_FINISHED")
     ILFrames.spec:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-    ILFrames.spec:SetScript("OnEvent", function(self, event)
+    ILFrames.spec:SetScript("OnEvent", function(element, event)
         InfoLine:debug("Spec OnEvent:", event)
         if not db.elements.specchanger then return end
         if event == "UPDATE_PENDING_MAIL" then
             ILFrames.spec:UnregisterEvent("UPDATE_PENDING_MAIL")
         elseif event == "PLAYER_EQUIPMENT_CHANGED" then
             if not setEquipped then
-                Spec_Update(self)
+                Spec_Update(element)
             end
         elseif event == "EQUIPMENT_SWAP_FINISHED" then
             InfoLine:debug("Spec EQUIPMENT_SWAPED", setEquipped)
             setEquipped = false
-            Spec_Update(self)
+            Spec_Update(element)
         else
-            Spec_Update(self)
+            Spec_Update(element)
         end
     end)
 
@@ -3888,9 +3379,9 @@ function InfoLine:CreateFrames()
     ILFrames.layout = CreateNewElement(nil, "RIGHT", 1, Icons[layoutSize].layout_dt, 32)
     ILFrames.layout.tag = "layout"
     ILFrames.layout:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.layout:SetScript("OnEvent", function(self)
+    ILFrames.layout:SetScript("OnEvent", function(element)
         if not db.elements.layoutchanger then return end
-        Layout_Update(self)
+        Layout_Update(element)
     end)
 
     -- -- PC
@@ -3899,7 +3390,7 @@ function InfoLine:CreateFrames()
     ILFrames.pc.tag = "pc"
     CreateGraph("fps", 60, 60, ILFrames.pc)
     ILFrames.pc:RegisterEvent("UPDATE_PENDING_MAIL")
-    ILFrames.pc:SetScript("OnEvent", function(self)
+    ILFrames.pc:SetScript("OnEvent", function(element)
         if not db.elements.pc then return end
         ILFrames.pc.ready = true
         Graphs["fps"].enabled = true
@@ -3908,19 +3399,19 @@ function InfoLine:CreateFrames()
     ILFrames.pc.elapsed1PowerModeTimes = {1, 2, 1}  -- Update FPS more or less frequently based on Power Mode setting {Normal, Economy, Turbo}
     ILFrames.pc.elapsed1 = 1
     ILFrames.pc.elapsed2 = 5
-    ILFrames.pc:SetScript("OnUpdate", function(self, elapsed)
+    ILFrames.pc:SetScript("OnUpdate", function(element, elapsed)
         if not db.elements.pc then return end
         if ILFrames.pc.ready then
-            self.elapsed1 = self.elapsed1 + elapsed
-            self.elapsed2 = self.elapsed2 + elapsed
-            if self.elapsed1 >= self.elapsed1PowerModeTimes[ndb.settings.powerMode] then
+            element.elapsed1 = element.elapsed1 + elapsed
+            element.elapsed2 = element.elapsed2 + elapsed
+            if element.elapsed1 >= element.elapsed1PowerModeTimes[ndb.settings.powerMode] then
                 -- FPS update
-                PC_Update(self, true)
-                self.elapsed1 = 0
+                PC_Update(element, true)
+                element.elapsed1 = 0
             end
-            if self.elapsed2 >= 5 then
-                PC_Update(self, false)
-                self.elapsed2 = 0
+            if element.elapsed2 >= 5 then
+                PC_Update(element, false)
+                element.elapsed2 = 0
             end
         end
     end)
@@ -3947,21 +3438,17 @@ end
 
 function InfoLine:Refresh()
     -- Get Colors
-    TextColorNormal = nibRealUI:ColorTableToStr(db.colors.normal)
+    TextColorNormal = RealUI:ColorTableToStr(db.colors.normal)
     TextColorNormalVals = db.colors.normal
     if db.colors.classcolorhighlight then
-        HighlightColor = nibRealUI:ColorTableToStr(nibRealUI.classColor)
-        HighlightColorVals = {nibRealUI.classColor[1], nibRealUI.classColor[2], nibRealUI.classColor[3]}
+        HighlightColorVals = {RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]}
     else
-        HighlightColor = nibRealUI:ColorTableToStr(db.colors.highlight)
         HighlightColorVals = db.colors.highlight
     end
-    TextColorDisabledVals = db.colors.disabled
-    TextColorWhite = nibRealUI:ColorTableToStr({1, 1, 1})
-    TextColorTTHeader = nibRealUI:ColorTableToStr(db.colors.ttheader)
-    TextColorOrange1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.orange)
-    TextColorblue1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
-    TextColorBlue1 = nibRealUI:ColorTableToStr(nibRealUI.media.colors.blue)
+    TextColorWhite = RealUI:ColorTableToStr({1, 1, 1})
+    TextColorTTHeader = RealUI:ColorTableToStr(db.colors.ttheader)
+    TextColorOrange1 = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+    TextColorBlue1 = RealUI:ColorTableToStr(RealUI.media.colors.blue)
 
     -- Create Frames if it has been delayed
     if not FramesCreated then
@@ -3972,9 +3459,9 @@ function InfoLine:Refresh()
     InfoLine:UpdateFonts()
     InfoLine:UpdatePositions()
 
-    local color = nibRealUI.media.colors.blue
+    local color = RealUI.media.colors.blue
     ILFrames.start.icon1:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
-    color = nibRealUI.media.colors.orange
+    color = RealUI.media.colors.orange
     ILFrames.start.icon2:SetVertexColor(color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4])
 
     -- InfoLine:UpdateAllInfo()
@@ -3985,7 +3472,7 @@ function InfoLine:UpdateGlobalColors()
 end
 
 local function ClassColorsUpdate()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     InfoLine:Refresh()
 end
 
@@ -3994,36 +3481,35 @@ function InfoLine:PLAYER_LOGIN()
 
     -- Class Name lookup table
     ClassLookup = {}
-    for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+    for k, v in next, _G.LOCALIZED_CLASS_NAMES_MALE do
         ClassLookup[v] = k
     end
-    for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do
+    for k, v in next, _G.LOCALIZED_CLASS_NAMES_FEMALE do
         ClassLookup[v] = k
     end
 
     -- Class Colors
-    if CUSTOM_CLASS_COLORS then
-        CUSTOM_CLASS_COLORS:RegisterCallback(ClassColorsUpdate)
+    if _G.CUSTOM_CLASS_COLORS then
+        _G.CUSTOM_CLASS_COLORS:RegisterCallback(ClassColorsUpdate)
     end
 
     -- Currency Names
-    GoldName = strtrim(strsub(strform(nibRealUI.goldstr or GOLD_AMOUNT, 0), 2))
+    GoldName = _G.strtrim((RealUI.goldstr or _G.GOLD_AMOUNT):format(0):sub(2))
 
     -- Loot Spec
-    LootSpecIDs, LootSpecClass = nibRealUI:GetLootSpecData()
+    LootSpecIDs = RealUI:GetLootSpecData(LootSpecIDs)
 
     -- Start title
-    MicroMenu[1].text = nibRealUI:GetVerString(true)
+    MicroMenu[1].text = RealUI:GetVerString(true)
 
     InfoLine:Refresh()
 end
 
 function InfoLine:RefreshMod()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
     db = self.db.profile
-    ndbc = nibRealUI.db.char
-    ndbg = nibRealUI.db.global
+    ndbc = RealUI.db.char
 
     InfoLine:Refresh()
 end
@@ -4032,8 +3518,8 @@ end
 -- Initialization --
 --------------------
 function InfoLine:OnInitialize()
-    local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    local otherFaction = RealUI:OtherFaction(RealUI.faction)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
             xrstate = "x",
@@ -4045,9 +3531,9 @@ function InfoLine:OnInitialize()
         },
         global = {
             currency = {
-                [nibRealUI.realm] = {
-                    [nibRealUI.faction] = {
-                        [nibRealUI.name] = {
+                [RealUI.realm] = {
+                    [RealUI.faction] = {
+                        [RealUI.name] = {
                             class = "",
                             level = 0,
                             gold = -1,
@@ -4120,14 +3606,12 @@ function InfoLine:OnInitialize()
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
-    ndbg = nibRealUI.db.global
+    ndb = RealUI.db.profile
+    ndbc = RealUI.db.char
 
-    nibRealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
+    RealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(true)
 end
 
 function InfoLine:OnEnable()

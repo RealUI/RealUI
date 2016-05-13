@@ -1,78 +1,80 @@
 local _, mods = ...
 
-tinsert(mods["nibRealUI"], function(F, C)
+-- Lua Globals --
+local _G = _G
+
+_G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
-        WorldMapPlayerUpper:EnableMouse(false)
-        WorldMapPlayerLower:EnableMouse(false)
+        _G.WorldMapPlayerUpper:EnableMouse(false)
+        _G.WorldMapPlayerLower:EnableMouse(false)
 
-        if not WorldMapFrame.skinned then
-            WorldMapFrame:SetUserPlaced(true)
-            local trackingBtn = WorldMapFrame.UIElementsFrame.TrackingOptionsButton
+        if not _G.WorldMapFrame.skinned then
+            _G.WorldMapFrame:SetUserPlaced(true)
+            local trackingBtn = _G.WorldMapFrame.UIElementsFrame.TrackingOptionsButton
 
             --Buttons
-            WorldMapLevelDropDown:ClearAllPoints()
-            WorldMapLevelDropDown:SetPoint("TOPLEFT", WorldMapFrame.UIElementsFrame, -15, 3)
+            _G.WorldMapLevelDropDown:ClearAllPoints()
+            _G.WorldMapLevelDropDown:SetPoint("TOPLEFT", _G.WorldMapFrame.UIElementsFrame, -15, 3)
             trackingBtn:ClearAllPoints()
-            trackingBtn:SetPoint("TOPRIGHT", WorldMapFrame.UIElementsFrame, 3, 3)
+            trackingBtn:SetPoint("TOPRIGHT", _G.WorldMapFrame.UIElementsFrame, 3, 3)
 
             --Foglight
-            if foglightmenu and Aurora then
-                local F = Aurora[1]
-                foglightmenu:ClearAllPoints()
-                foglightmenu:SetPoint("TOPRIGHT", trackingBtn, "TOPLEFT", 20, 0)
-                F.ReskinDropDown(foglightmenu)
+            if _G.foglightmenu and _G.Aurora then
+                _G.foglightmenu:ClearAllPoints()
+                _G.foglightmenu:SetPoint("TOPRIGHT", trackingBtn, "TOPLEFT", 20, 0)
+                F.ReskinDropDown(_G.foglightmenu)
             end
-            WorldMapFrame.skinned = true
+            _G.WorldMapFrame.skinned = true
         end
     end
 
     -- Coordinate Display --
-    local coords = CreateFrame("Frame", nil, WorldMapFrame)
-    WorldMapFrame.coords = coords
+    local coords = _G.CreateFrame("Frame", nil, _G.WorldMapFrame)
+    _G.WorldMapFrame.coords = coords
 
-    coords:SetFrameLevel(WorldMapDetailFrame:GetFrameLevel() + 1)
-    coords:SetFrameStrata(WorldMapDetailFrame:GetFrameStrata())
+    coords:SetFrameLevel(_G.WorldMapDetailFrame:GetFrameLevel() + 1)
+    coords:SetFrameStrata(_G.WorldMapDetailFrame:GetFrameStrata())
 
     coords.player = coords:CreateFontString(nil, "OVERLAY")
-    coords.player:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
-    coords.player:SetFontObject(RealUIFont_PixelSmall)
+    coords.player:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
+    coords.player:SetFontObject(_G.RealUIFont_PixelSmall)
     coords.player:SetText("")
 
     coords.mouse = coords:CreateFontString(nil, "OVERLAY")
-    coords.mouse:SetPoint("BOTTOMLEFT", WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
-    coords.mouse:SetFontObject(RealUIFont_PixelSmall)
+    coords.mouse:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
+    coords.mouse:SetFontObject(_G.RealUIFont_PixelSmall)
     coords.mouse:SetText("")
 
-    local round, classColorStr = RealUI.Round, RealUI:ColorTableToStr({C.r, C.g, C.b})
+    local round, classColorStr = _G.RealUI.Round, _G.RealUI:ColorTableToStr({C.r, C.g, C.b})
     local function updateCoords(self, elapsed)
         --print("UpdateCoords")
 
         -- Player
-        local x, y = GetPlayerMapPosition("player")
-        x = round(100 * x, 1)
-        y = round(100 * y, 1)
+        local playerX, playerY = _G.GetPlayerMapPosition("player")
+        playerX = round(100 * playerX, 1)
+        playerY = round(100 * playerY, 1)
 
-        if x ~= 0 and y ~= 0 then
-            coords.player:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, PLAYER, x, y))
+        if playerX ~= 0 and playerY ~= 0 then
+            coords.player:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.PLAYER, playerX, playerY))
         else
             coords.player:SetText("")
         end
 
         -- Mouse
-        local scale = WorldMapDetailFrame:GetEffectiveScale()
-        local width = WorldMapDetailFrame:GetWidth()
-        local height = WorldMapDetailFrame:GetHeight()
-        local centerX, centerY = WorldMapDetailFrame:GetCenter()
-        local x, y = GetCursorPosition()
-        local adjustedX = (x / scale - (centerX - (width/2))) / width
-        local adjustedY = (centerY + (height/2) - y / scale) / height
+        local scale = _G.WorldMapDetailFrame:GetEffectiveScale()
+        local width = _G.WorldMapDetailFrame:GetWidth()
+        local height = _G.WorldMapDetailFrame:GetHeight()
+        local centerX, centerY = _G.WorldMapDetailFrame:GetCenter()
+        local cursorX, cursorY = _G.GetCursorPosition()
+        local adjustedX = (cursorX / scale - (centerX - (width/2))) / width
+        local adjustedY = (centerY + (height/2) - cursorY / scale) / height
 
         if (adjustedX >= 0  and adjustedY >= 0 and adjustedX <= 1 and adjustedY <= 1) then
             adjustedX = round(100 * adjustedX, 1)
             adjustedY = round(100 * adjustedY, 1)
-            coords.mouse:SetText(string.format("|cff%s%s: |cffffffff%s, %s|r", classColorStr, MOUSE_LABEL, adjustedX, adjustedY))
+            coords.mouse:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.MOUSE_LABEL, adjustedX, adjustedY))
         else
             coords.mouse:SetText("")
         end
@@ -81,60 +83,60 @@ tinsert(mods["nibRealUI"], function(F, C)
     -- Size Adjust --
     local function SetLargeWorldMap()
         --print("SetLargeWorldMap")
-        if InCombatLockdown() then return end
+        if _G.InCombatLockdown() then return end
 
         -- reparent
-        WorldMapFrame:SetParent(UIParent)
-        WorldMapFrame:SetFrameStrata("HIGH")
-        WorldMapFrame:EnableKeyboard(true)
+        _G.WorldMapFrame:SetParent(_G.UIParent)
+        _G.WorldMapFrame:SetFrameStrata("HIGH")
+        _G.WorldMapFrame:EnableKeyboard(true)
 
         --reposition
-        WorldMapFrame:ClearAllPoints()
-        WorldMapFrame:SetPoint("CENTER", 0, 0)
-        SetUIPanelAttribute(WorldMapFrame, "area", "center")
-        SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
-        WorldMapFrame:SetSize(1022, 766)
+        _G.WorldMapFrame:ClearAllPoints()
+        _G.WorldMapFrame:SetPoint("CENTER", 0, 0)
+        _G.SetUIPanelAttribute(_G.WorldMapFrame, "area", "center")
+        _G.SetUIPanelAttribute(_G.WorldMapFrame, "allowOtherPanels", true)
+        _G.WorldMapFrame:SetSize(1022, 766)
     end
 
     local function SetQuestWorldMap()
-        if InCombatLockdown() or not IsAddOnLoaded("Aurora") then return end
+        if _G.InCombatLockdown() or not _G.IsAddOnLoaded("Aurora") then return end
 
-        WorldMapFrameNavBar:SetPoint("TOPLEFT", WorldMapFrame.BorderFrame, 3, -33)
-        WorldMapFrameNavBar:SetWidth(700)
+        _G.WorldMapFrameNavBar:SetPoint("TOPLEFT", _G.WorldMapFrame.BorderFrame, 3, -33)
+        _G.WorldMapFrameNavBar:SetWidth(700)
     end
 
-    if InCombatLockdown() then return end
+    if _G.InCombatLockdown() then return end
 
-    BlackoutWorld:SetTexture(nil)
+    _G.BlackoutWorld:SetTexture(nil)
 
-    QuestMapFrame_Hide()
-    if GetCVar("questLogOpen") == 1 then
-        QuestMapFrame_Show()
+    _G.QuestMapFrame_Hide()
+    if _G.GetCVar("questLogOpen") == 1 then
+        _G.QuestMapFrame_Show()
     end
 
-    hooksecurefunc("WorldMap_ToggleSizeUp", SetLargeWorldMap)
-    hooksecurefunc("WorldMap_ToggleSizeDown", SetQuestWorldMap)
+    _G.hooksecurefunc("WorldMap_ToggleSizeUp", SetLargeWorldMap)
+    _G.hooksecurefunc("WorldMap_ToggleSizeDown", SetQuestWorldMap)
 
-    if WORLDMAP_SETTINGS.size == WORLDMAP_FULLMAP_SIZE then
-        WorldMap_ToggleSizeUp()
-    elseif WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE then
-        WorldMap_ToggleSizeDown()
+    if _G.WORLDMAP_SETTINGS.size == _G.WORLDMAP_FULLMAP_SIZE then
+        _G.WorldMap_ToggleSizeUp()
+    elseif _G.WORLDMAP_SETTINGS.size == _G.WORLDMAP_WINDOWED_SIZE then
+        _G.WorldMap_ToggleSizeDown()
     end
 
     local ticker
-    WorldMapFrame:HookScript("OnShow", function()
+    _G.WorldMapFrame:HookScript("OnShow", function()
         --print("WMF:OnShow", WORLDMAP_SETTINGS.size, GetCVarBool("miniWorldMap"))
-        ticker = C_Timer.NewTicker(0.1, updateCoords)
-        skin(WORLDMAP_SETTINGS.size)
+        ticker = _G.C_Timer.NewTicker(0.1, updateCoords)
+        skin(_G.WORLDMAP_SETTINGS.size)
     end)
-    WorldMapFrame:HookScript("OnHide", function()
+    _G.WorldMapFrame:HookScript("OnHide", function()
         --print("WMF:OnHide")
         ticker:Cancel()
     end)
 
-    DropDownList1:HookScript("OnShow", function(self)
-        if DropDownList1:GetScale() ~= UIParent:GetScale() then
-            DropDownList1:SetScale(UIParent:GetScale())
+    _G.DropDownList1:HookScript("OnShow", function(self)
+        if _G.DropDownList1:GetScale() ~= _G.UIParent:GetScale() then
+            _G.DropDownList1:SetScale(_G.UIParent:GetScale())
         end
     end)
 end)

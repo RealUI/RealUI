@@ -1,24 +1,21 @@
+local _, private = ...
+
 -- Lua Globals --
 local _G = _G
 local next, random, type = _G.next, _G.math.random, _G.type
 local tinsert = _G.table.insert
-
--- WoW Globals --
-local UIParent = _G.UIParent
-local CreateFrame, UnitAura = _G.CreateFrame, _G.UnitAura
-local C_TimerAfter = _G.C_Timer.After
 
 -- Libs --
 local LibWin = _G.LibStub("LibWindow-1.1")
 local F = _G.Aurora[1]
 
 -- RealUI --
-local nibRealUI = _G.LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
+local RealUI = private.RealUI
+local L = RealUI.L
 local db, trackingData
 
 local MODNAME = "AuraTracking"
-local AuraTracking = nibRealUI:GetModule(MODNAME)
+local AuraTracking = RealUI:GetModule(MODNAME)
 
 local MAX_SLOTS, MAX_STATIC_SLOTS = 10, 6
 local activeTrackers = {left = 0, right = 0}
@@ -35,7 +32,7 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
     debug(isDebug, "FindSpellMatch", spell, unit, filter)
     local aura = {}
     for auraIndex = 1, 40 do
-        local name, _, texture, count, _, duration, endTime, _, _, _, ID = UnitAura(unit, auraIndex, filter)
+        local name, _, texture, count, _, duration, endTime, _, _, _, ID = _G.UnitAura(unit, auraIndex, filter)
         debug(isDebug, "Aura", auraIndex, name, ID)
         if spell == name or spell == ID then
             debug(isDebug, "Match found")
@@ -210,9 +207,9 @@ do -- AuraTracking:CreateNewTracker()
             end
         until not isDupe
 
-        local newTrackerID = _G.format("%d-%s", nibRealUI.classID, newID)
+        local newTrackerID = _G.format("%d-%s", RealUI.classID, newID)
         local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
-        tracker.classID = nibRealUI.classID
+        tracker.classID = RealUI.classID
         tracker.isDefault = false
         return tracker, trackingData[newTrackerID]
     end
@@ -249,16 +246,16 @@ function AuraTracking:Lock()
             parent.bg:Hide()
             for slotID = 1, MAX_STATIC_SLOTS do
                 local slot = self[side]["slot"..slotID]
-                slot:SetAlpha(nibRealUI.isInTestMode and 1 or 0)
+                slot:SetAlpha(RealUI.isInTestMode and 1 or 0)
             end
         end
     end
-    if not nibRealUI.isInTestMode then
+    if not RealUI.isInTestMode then
         self:ToggleConfigMode(false)
     end
 end
 function AuraTracking:Unlock()
-    if not nibRealUI.isInTestMode then
+    if not RealUI.isInTestMode then
         self:ToggleConfigMode(true)
     end
     if db.locked then
@@ -399,7 +396,7 @@ function AuraTracking:PLAYER_ENTERING_WORLD()
 
     self.targetHostile = false
 
-    C_TimerAfter(1, function()
+    _G.C_Timer.After(1, function()
         local instanceName, instanceType = _G.GetInstanceInfo()
         self:debug("UpdateLocation", instanceName, instanceType)
         self.inPvP, self.inPvE = false, false
@@ -510,7 +507,7 @@ end
 -- Init --
 function AuraTracking:Createslots()
     for i, side in next, {"left", "right"} do
-        local parent = CreateFrame("Frame", "AuraTracker"..side, UIParent)
+        local parent = _G.CreateFrame("Frame", "AuraTracker"..side, _G.UIParent)
         parent:SetSize(db.style.slotSize * MAX_STATIC_SLOTS, db.style.slotSize)
         self[side] = parent
 
@@ -537,7 +534,7 @@ function AuraTracking:Createslots()
         local xMod = side == "left" and -1 or 1
         local size = db.style.slotSize - 2
         for slotID = 1, MAX_SLOTS do
-            local slot = CreateFrame("Frame", nil, parent)
+            local slot = _G.CreateFrame("Frame", nil, parent)
             slot:SetSize(size, size)
             slot:SetID(slotID)
             if slotID == 1 then
@@ -563,7 +560,7 @@ function AuraTracking:Createslots()
 end
 
 function AuraTracking:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
     self.configMode = val
 
@@ -590,7 +587,7 @@ function AuraTracking:OnInitialize()
     self:debug("OnInitialize")
     local classTrackers = AuraTracking:SetupDefaultTracker()
 
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         class = classTrackers,
         profile = {
@@ -631,8 +628,8 @@ function AuraTracking:OnInitialize()
         db.tracking = nil
     end
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterConfigModeModule(self)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function AuraTracking:OnEnable()

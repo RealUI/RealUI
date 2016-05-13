@@ -1,13 +1,21 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
+local _, private = ...
 
-local UnitFrames = nibRealUI:GetModule("UnitFrames")
-local AngleStatusBar = nibRealUI:GetModule("AngleStatusBar")
-local CombatFader = nibRealUI:GetModule("CombatFader")
-local db, ndb, ndbc
+-- Lua Globals --
+local _G = _G
 
-local oUF = oUFembed
+-- Libs --
+local oUF = _G.oUFembed
 
-local round = nibRealUI.Round
+-- RealUI --
+local RealUI = private.RealUI
+local db, ndb
+
+local UnitFrames = RealUI:GetModule("UnitFrames")
+local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
+local CombatFader = RealUI:GetModule("CombatFader")
+
+
+local round = RealUI.Round
 UnitFrames.textures = {
     [1] = {
         F1 = { -- Player / Target Frames
@@ -207,17 +215,18 @@ UnitFrames.textures = {
     },
 }
 
-nibRealUI.ReversePowers = {
+RealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
     ["POWER_TYPE_SUN_POWER"] = true,
+    ["PAIN"] = true
 }
 
 function UnitFrames:PositionSteps(vert)
     UnitFrames:debug("PositionSteps")
     local width, height = self:GetSize()
     local point, relPoint = vert.."RIGHT", vert.."LEFT"
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
@@ -233,8 +242,8 @@ end
 function UnitFrames:UpdateSteps(unit, min, max)
     --min = max * .25
     --self:SetValue(min)
-    local percent = nibRealUI:GetSafeVals(min, max)
-    local stepPoints = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"]
+    local percent = RealUI:GetSafeVals(min, max)
+    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
         --print(percent, unit, min, max, self.colorClass)
         if self:GetReversePercent() then
@@ -260,9 +269,9 @@ function UnitFrames:UpdateSteps(unit, min, max)
 end
 
 local function updateSteps(unit, type, percent, frame)
-    local stepPoints, texture = db.misc.steppoints[nibRealUI.class] or db.misc.steppoints["default"], nil
+    local stepPoints, texture = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"], nil
     local isLargeFrame = false
-    if UnitInVehicle("player") then
+    if _G.UnitInVehicle("player") then
         if unit == "player" and type == "power" then
             return
         end
@@ -335,7 +344,7 @@ function UnitFrames:HealthOverride(event, unit)
     elseif event == "ReverseBars" then
         AngleStatusBar:SetReverseFill(health.bar, ndb.settings.reverseUnitFrameBars)
     end
-    local healthPer, healthCurr, healthMax = nibRealUI:GetSafeVals(UnitHealth(unit), UnitHealthMax(unit))
+    local healthPer, healthCurr, healthMax = RealUI:GetSafeVals(_G.UnitHealth(unit), _G.UnitHealthMax(unit))
     updateSteps(unit, "health", healthPer, health)
     if health.SetValue then
         health:SetMinMaxValues(0, healthMax)
@@ -353,15 +362,15 @@ function UnitFrames:PredictOverride(event, unit)
     local hp = self.HealPrediction
     local healthBar = self.Health
 
-    local myIncomingHeal = UnitGetIncomingHeals(unit, 'player') or 0
-    local allIncomingHeal = UnitGetIncomingHeals(unit) or 0
-    local totalAbsorb = UnitGetTotalAbsorbs(unit) or 0
-    local myCurrentHealAbsorb = UnitGetTotalHealAbsorbs(unit) or 0
-    local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
+    local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
+    local allIncomingHeal = _G.UnitGetIncomingHeals(unit) or 0
+    local totalAbsorb = _G.UnitGetTotalAbsorbs(unit) or 0
+    local myCurrentHealAbsorb = _G.UnitGetTotalHealAbsorbs(unit) or 0
+    local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
 
-    local overHealAbsorb = false
+    --local overHealAbsorb = false
     if (health < myCurrentHealAbsorb) then
-        overHealAbsorb = true
+        --overHealAbsorb = true
         myCurrentHealAbsorb = health
     end
 
@@ -376,7 +385,7 @@ function UnitFrames:PredictOverride(event, unit)
         otherIncomingHeal = allIncomingHeal - myIncomingHeal
     end
 
-    local overAbsorb = false
+    local overAbsorb, atMax = false
     if reverseUnitFrameBars then
         UnitFrames:debug("reverseUnitFrameBars")
         if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
@@ -386,9 +395,9 @@ function UnitFrames:PredictOverride(event, unit)
             end
 
             if (allIncomingHeal > myCurrentHealAbsorb) then
-                totalAbsorb = max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
+                totalAbsorb = _G.max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
             else
-                totalAbsorb = max(0, maxHealth - health)
+                totalAbsorb = _G.max(0, maxHealth - health)
             end
         end
     else
@@ -398,24 +407,18 @@ function UnitFrames:PredictOverride(event, unit)
             overAbsorb = true
 
             if (allIncomingHeal > myCurrentHealAbsorb) then
-                totalAbsorb = max(0, health - myCurrentHealAbsorb + allIncomingHeal)
+                totalAbsorb = _G.max(0, health - myCurrentHealAbsorb + allIncomingHeal)
             else
-                totalAbsorb = max(0, health)
+                totalAbsorb = _G.max(0, health)
             end
         end
+        atMax = health == maxHealth
     end
 
     if (myCurrentHealAbsorb > allIncomingHeal) then
         myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
     else
         myCurrentHealAbsorb = 0
-    end
-
-    local atMax
-    if reverseUnitFrameBars then
-        --atMax = false
-    else
-        atMax = health == maxHealth
     end
 
     if (hp.myBar) then
@@ -434,7 +437,7 @@ function UnitFrames:PredictOverride(event, unit)
             hp.absorbBar:SetMinMaxValues(0, maxHealth)
             hp.absorbBar:SetValue(totalAbsorb)
         else
-            AngleStatusBar:SetValue(hp.absorbBar, 1 - (min(totalAbsorb, health) / maxHealth), true)
+            AngleStatusBar:SetValue(hp.absorbBar, 1 - (_G.min(totalAbsorb, health) / maxHealth), true)
         end
         hp.absorbBar:ClearAllPoints()
         if unit == "player" then
@@ -445,7 +448,6 @@ function UnitFrames:PredictOverride(event, unit)
             end
             if overAbsorb then
                 hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, 0)
-            else
             end
         else
             if atMax then
@@ -470,7 +472,7 @@ function UnitFrames:PowerOverride(event, unit, powerType)
     UnitFrames:debug("Power Override", self, event, unit, powerType)
     --if not self.Power.enabled then return end
 
-    local powerPer, powerCurr, powerMax = nibRealUI:GetSafeVals(UnitPower(unit), UnitPowerMax(unit))
+    local powerPer, powerCurr, powerMax = RealUI:GetSafeVals(_G.UnitPower(unit), _G.UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
     if self.Power.SetValue then
         self.Power:SetMinMaxValues(0, powerMax)
@@ -481,11 +483,11 @@ function UnitFrames:PowerOverride(event, unit, powerType)
 end
 
 function UnitFrames:PvPOverride(event, unit)
-    UnitFrames:debug("PvP Override", self, event, unit, IsPVPTimerRunning())
-    local pvp, color = self.PvP, nibRealUI.media.background
+    UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
+    local pvp, color = self.PvP, RealUI.media.background
     local setColor = (pvp.row or pvp.col) and pvp.SetBackgroundColor or pvp.SetVertexColor
-    if UnitIsPVP(unit) then
-        if UnitIsFriend("player", unit) then
+    if _G.UnitIsPVP(unit) then
+        if _G.UnitIsFriend("player", unit) then
             --print("Friend")
             color = db.overlay.colors.status.pvpFriendly
             setColor(pvp, color[1], color[2], color[3], color[4])
@@ -500,24 +502,24 @@ function UnitFrames:PvPOverride(event, unit)
 end
 
 function UnitFrames:UpdateClassification(event)
-    UnitFrames:debug("Classification", self.unit, event, UnitClassification(self.unit))
-    local color = db.overlay.colors.status[UnitClassification(self.unit)] or nibRealUI.media.background
+    UnitFrames:debug("Classification", self.unit, event, _G.UnitClassification(self.unit))
+    local color = db.overlay.colors.status[_G.UnitClassification(self.unit)] or RealUI.media.background
     self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
 end
 
 function UnitFrames:UpdateStatus(event, ...)
     UnitFrames:debug("UpdateStatus", self, event, ...)
     local unit = self.unit
-    local color = nibRealUI.media.background
-    if UnitIsAFK(unit) then
+    local color = RealUI.media.background
+    if _G.UnitIsAFK(unit) then
         --print("AFK", self, event, unit)
         color = db.overlay.colors.status.afk
         self.Leader.status = "afk"
-    elseif not(UnitIsConnected(unit)) then
+    elseif not(_G.UnitIsConnected(unit)) then
         --print("Offline", self, event, unit)
         color = db.overlay.colors.status.offline
         self.Leader.status = "offline"
-    elseif UnitIsGroupLeader(unit) then
+    elseif _G.UnitIsGroupLeader(unit) then
         --print("Leader", self, event, unit)
         color = db.overlay.colors.status.leader
         self.Leader.status = "leader"
@@ -534,11 +536,11 @@ function UnitFrames:UpdateStatus(event, ...)
         self.AFK:Hide()
     end
 
-    if UnitAffectingCombat(unit) then
+    if _G.UnitAffectingCombat(unit) then
         --print("Combat", self, event, unit)
         color = db.overlay.colors.status.combat
         self.Combat.status = "combat"
-    elseif IsResting(unit) then
+    elseif _G.IsResting(unit) then
         --print("Resting", self, event, unit)
         color = db.overlay.colors.status.resting
         self.Combat.status = "resting"
@@ -547,7 +549,7 @@ function UnitFrames:UpdateStatus(event, ...)
         self.Combat.status = false
     end
     if self.Leader.status and not self.Combat.status then
-        self.Combat:SetVertexColor(nibRealUI.media.background[1], nibRealUI.media.background[2], nibRealUI.media.background[3], nibRealUI.media.background[4])
+        self.Combat:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
         self.Combat:Show()
         self.Resting:Show()
     elseif self.Combat.status then
@@ -561,26 +563,26 @@ function UnitFrames:UpdateStatus(event, ...)
 end
 
 local UnitIsTapDenied
-if nibRealUI.TOC < 70000 then
-    UnitIsTapDenied = function(unit)
-        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
-    end
-else
+if RealUI.isBeta then
     UnitIsTapDenied = _G.UnitIsTapDenied
+else
+    UnitIsTapDenied = function(unit)
+        return _G.UnitIsTapped(unit) and not _G.UnitIsTappedByPlayer(unit) and not _G.UnitIsTappedByAllThreatList(unit)
+    end
 end
 
 function UnitFrames:UpdateEndBox(...)
     UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
-    local unit, color = self.unit, nil
-    local _, class = UnitClass(unit)
-    if UnitIsPlayer(unit) then
-        color = nibRealUI:GetClassColor(class)
+    local unit, color = self.unit
+    local _, class = _G.UnitClass(unit)
+    if _G.UnitIsPlayer(unit) then
+        color = RealUI:GetClassColor(class)
     else
-        if ( not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
+        if ( not _G.UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
             color = db.overlay.colors.status.tapped
-        elseif UnitIsEnemy("player", unit) then
+        elseif _G.UnitIsEnemy("player", unit) then
             color = db.overlay.colors.status.hostile
-        elseif UnitCanAttack("player", unit) then
+        elseif _G.UnitCanAttack("player", unit) then
             color = db.overlay.colors.status.neutral
         else
             color = db.overlay.colors.status.friendly
@@ -590,83 +592,83 @@ function UnitFrames:UpdateEndBox(...)
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
 end
 
-function UnitFrames:SetHealthColor(self)
+function UnitFrames:SetHealthColor(unitFrame)
     local healthColor
-    if db.overlay.classColor and (self.unit ~= "player") and UnitIsPlayer(self.unit) then
-        local _, class = UnitClass(self.unit)
-        healthColor = nibRealUI:GetClassColor(class)
-        healthColor = nibRealUI:ColorDarken(0.15, healthColor)
-        healthColor = nibRealUI:ColorDesaturate(0.2, healthColor)
+    if db.overlay.classColor and (unitFrame.unit ~= "player") and _G.UnitIsPlayer(unitFrame.unit) then
+        local _, class = _G.UnitClass(unitFrame.unit)
+        healthColor = RealUI:GetClassColor(class)
+        healthColor = RealUI:ColorDarken(0.15, healthColor)
+        healthColor = RealUI:ColorDesaturate(0.2, healthColor)
     else
         healthColor = db.overlay.colors.health.normal
     end
-    AngleStatusBar:SetBarColor(self.Health.bar, healthColor)
+    AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
 end
 
 -- Dropdown Menu
-local dropdown = CreateFrame("Frame", "RealUIUnitFramesDropDown", UIParent, "UIDropDownMenuTemplate")
+local dropdown = _G.CreateFrame("Frame", "RealUIUnitFramesDropDown", _G.UIParent, "UIDropDownMenuTemplate")
 
-hooksecurefunc("UnitPopup_OnClick",function(self)
+_G.hooksecurefunc("UnitPopup_OnClick",function(self)
     local button = self.value
     if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
-        if StaticPopup1 then
-            StaticPopup1:Hide()
+        if _G.StaticPopup1 then
+            _G.StaticPopup1:Hide()
         end
         if db.misc.focusclick then
-            nibRealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+            RealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         end
     elseif button == "PET_DISMISS" then
-        if StaticPopup1 then
-            StaticPopup1:Hide()
+        if _G.StaticPopup1 then
+            _G.StaticPopup1:Hide()
         end
     end
 end)
 local function menu(self)
     dropdown:SetParent(self)
-    return ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
+    return _G.ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
 end
 local init = function(self)
     local unit = self:GetParent().unit
-    local menu, name, id
+    local menuType, name, id
 
     if (not unit) then
         return
     end
 
-    if (UnitIsUnit(unit, "player")) then
-        menu = "SELF"
-    elseif (UnitIsUnit(unit, "vehicle")) then
-        menu = "VEHICLE"
-    elseif (UnitIsUnit(unit, "pet")) then
-        menu = "PET"
-    elseif (UnitIsPlayer(unit)) then
-        id = UnitInRaid(unit)
+    if (_G.UnitIsUnit(unit, "player")) then
+        menuType = "SELF"
+    elseif (_G.UnitIsUnit(unit, "vehicle")) then
+        menuType = "VEHICLE"
+    elseif (_G.UnitIsUnit(unit, "pet")) then
+        menuType = "PET"
+    elseif (_G.UnitIsPlayer(unit)) then
+        id = _G.UnitInRaid(unit)
         if(id) then
-            menu = "RAID_PLAYER"
-            name = GetRaidRosterInfo(id)
-        elseif(UnitInParty(unit)) then
-            menu = "PARTY"
+            menuType = "RAID_PLAYER"
+            name = _G.GetRaidRosterInfo(id)
+        elseif(_G.UnitInParty(unit)) then
+            menuType = "PARTY"
         else
-            menu = "PLAYER"
+            menuType = "PLAYER"
         end
     else
-        menu = "TARGET"
-        name = RAID_TARGET_ICON
+        menuType = "TARGET"
+        name = _G.RAID_TARGET_ICON
     end
 
-    if (menu) then
-        UnitPopup_ShowMenu(self, menu, unit, name, id)
+    if (menuType) then
+        _G.UnitPopup_ShowMenu(self, menuType, unit, name, id)
     end
 end
-UIDropDownMenu_Initialize(dropdown, init, "MENU")
+_G.UIDropDownMenu_Initialize(dropdown, init, "MENU")
 
 -- Init
 local function Shared(self, unit)
-    --print("Shared", self, self.unit, unit)
+    UnitFrames:debug("Shared", self, self.unit, unit)
     self.menu = menu
 
-    self:SetScript("OnEnter", UnitFrame_OnEnter)
-    self:SetScript("OnLeave", UnitFrame_OnLeave)
+    self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
+    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
     self:RegisterForClicks("AnyUp")
 
     if db.misc.focusclick then
@@ -682,7 +684,7 @@ local function Shared(self, unit)
     end
 
     -- Create a proxy frame for the CombatFader to avoid taint city.
-    self.overlay = CreateFrame("Frame", nil, self)
+    self.overlay = _G.CreateFrame("Frame", nil, self)
     self.overlay:SetFrameStrata("BACKGROUND")
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
@@ -704,15 +706,25 @@ local function Shared(self, unit)
     -- This would be all unit specific stuff, eg. Totems, stats, threat
     UnitFrames[unit](self)
 
-    if nibRealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
-        nibRealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
+        RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    end
+    local PointTracking = RealUI:GetModule("PointTracking")
+    if PointTracking:IsEnabled() and unit == "player" then
+        if RealUI.class == "DEATHKNIGHT" then
+            PointTracking:CreateRunes(self, unit)
+        else
+            PointTracking:CreateClassIcons(self, unit)
+            if not RealUI.isBeta and RealUI.class == "WARLOCK" then
+                PointTracking:CreateBurningEmbers(self, unit)
+            end
+        end
     end
 end
 
 function UnitFrames:InitializeLayout()
     db = UnitFrames.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
+    ndb = RealUI.db.profile
 
     oUF:RegisterStyle("RealUI", Shared)
     oUF:SetActiveStyle("RealUI")

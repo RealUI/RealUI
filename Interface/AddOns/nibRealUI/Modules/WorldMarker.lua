@@ -1,9 +1,14 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local LSM = LibStub("LibSharedMedia-3.0")
-local db, ndbc
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
+local db
 
 local MODNAME = "WorldMarker"
-local WorldMarker = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local WorldMarker = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local LoggedIn = false
 
@@ -26,101 +31,6 @@ local MarkerColors = {
     {0.3,  0.3,  0.3,  0.8}, --Clear all
 }
 
--- Options
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "World Marker",
-        desc = "Quick access to World Markers.",
-        childGroups = "tab",
-        arg = MODNAME,
-        -- order = 2315,
-        args = {
-            header = {
-                type = "header",
-                name = "World Marker",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Quick access to World Markers.",
-                fontSize = "medium",
-                order = 20,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the WorldMarker module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    if not InCombatLockdown() then
-                        nibRealUI:SetModuleEnabled(MODNAME, value)
-                    else
-                        print("|cff0099ffRealUI: |r World Marker can't be enabled or disabled during combat.")
-                    end
-                end,
-                order = 30,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 31,
-            },
-            visibility = {
-                name = "Show the World Marker in..",
-                type = "group",
-                disabled = function() return not nibRealUI:GetModuleEnabled(MODNAME) end,
-                order = 40,
-                args = {
-                    arena = {
-                        type = "toggle",
-                        name = "Arenas",
-                        get = function(info) return db.visibility.arena end,
-                        set = function(info, value) 
-                            db.visibility.arena = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 10,
-                    },
-                    pvp = {
-                        type = "toggle",
-                        name = "Battlegrounds",
-                        get = function(info) return db.visibility.pvp end,
-                        set = function(info, value)
-                            db.visibility.pvp = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 20,
-                    },
-                    party = {
-                        type = "toggle",
-                        name = "5 Man Dungeons",
-                        get = function(info) return db.visibility.party end,
-                        set = function(info, value) 
-                            db.visibility.party = value
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 30,
-                    },
-                    raid = {
-                        type = "toggle",
-                        name = "Raid Dungeons",
-                        get = function(info) return db.visibility.raid end,
-                        set = function(info, value) 
-                            db.visibility.raid = value 
-                            WorldMarker:UpdateVisibility()
-                        end,
-                        order = 40,
-                    },
-                },
-            },
-        },
-    }
-    end
-    return options
-end
-
 -- OnLeave
 local function ButtonOnLeave(index)
     WMF.Buttons[index].mouseover = false
@@ -136,19 +46,19 @@ end
 -- Toggle visibility of World Marker frame
 function WorldMarker:UpdateVisibility()
     -- Refresh
-    if ( (NeedRefreshed or not FramesCreated) and (not InCombatLockdown()) ) then
+    if ( (NeedRefreshed or not FramesCreated) and (not _G.InCombatLockdown()) ) then
         -- Mod needs refreshing
         WorldMarker:RefreshMod()
         return
-    elseif InCombatLockdown() then
+    elseif _G.InCombatLockdown() then
         NeedRefreshed = true
         return
     end
 
     -- Should we hide the WM?
     local Hide = false
-    if not nibRealUI:GetModuleEnabled(MODNAME) then Hide = true end
-    local Inst, InstType = IsInInstance()
+    if not RealUI:GetModuleEnabled(MODNAME) then Hide = true end
+    local Inst, InstType = _G.IsInInstance()
     if Inst and not(Hide) then
         if (InstType == "pvp" and not(db.visibility.pvp)) then          -- Battlegrounds
             Hide = true
@@ -160,7 +70,7 @@ function WorldMarker:UpdateVisibility()
             Hide = true
         end
     end
-    if not(Hide) and not( (GetNumGroupMembers() > 0) and (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) ) then
+    if not(Hide) and not( (_G.GetNumGroupMembers() > 0) and (_G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player")) ) then
         Hide = true
     end
 
@@ -178,7 +88,7 @@ function WorldMarker:UpdateVisibility()
     end
 end
 
-function WorldMarker_oocUpdate()
+local function WorldMarker_oocUpdate()
     if NeedRefreshed then
         WorldMarker:RefreshMod()
     else
@@ -186,20 +96,20 @@ function WorldMarker_oocUpdate()
     end
 end
 function WorldMarker:UpdateLockdown(...)
-    nibRealUI:RegisterLockdownUpdate("WorldMarker_oocUpdate", function()
+    RealUI:RegisterLockdownUpdate("WorldMarker_oocUpdate", function()
         WorldMarker_oocUpdate()
     end)
 end
 
-function WorldMarker:HighlightUpdate(self)
-    self.bg:SetWidth(self.mouseover and ButtonWidthExpanded or ButtonWidthCollapsed)
+function WorldMarker:HighlightUpdate(btn)
+    btn.bg:SetWidth(btn.mouseover and ButtonWidthExpanded or ButtonWidthCollapsed)
 end
 
 -- Set World Marker Position
 function WorldMarker:UpdatePosition()
     if not FramesCreated then return end
 
-    local MMHeight = Minimap:GetHeight()
+    local MMHeight = _G.Minimap:GetHeight()
     
     -- Parent
     WMF.Parent:ClearAllPoints()
@@ -211,7 +121,7 @@ function WorldMarker:UpdatePosition()
     WMF.Parent:SetHeight(MMHeight)
     
     local numBtns = #MarkerColors
-    local totHeight, btnHeight = 0, floor(MMHeight / numBtns) + 2
+    local totHeight, btnHeight = 0, _G.floor(MMHeight / numBtns) + 2
     for i = 1, numBtns do
         WMF.Buttons[i]:ClearAllPoints()
         if i == numBtns then
@@ -230,26 +140,27 @@ end
 
 -----------------
 local function CreateButton(id)
-    local frame = CreateFrame("Button", "RealUI_WorldMarker_Button"..tostring(id), WMF.Parent, "SecureActionButtonTemplate")
+    local frame = _G.CreateFrame("Button", "RealUI_WorldMarker_Button".._G.tostring(id), WMF.Parent, "SecureActionButtonTemplate")
     
     frame:SetAttribute("type", "macro")
     frame:SetScript("OnEnter", function(self) ButtonOnEnter(id) end)
     frame:SetScript("OnLeave", function(self) ButtonOnLeave(id) end)
     
-    frame.bg = CreateFrame("Frame", nil, frame)
+    frame.bg = _G.CreateFrame("Frame", nil, frame)
     frame.bg:SetPoint("LEFT", frame, "LEFT", 0, 0)
     frame.bg:SetWidth(ButtonWidthCollapsed)
-    nibRealUI:CreateBD(frame.bg, 0.8)
-    frame.bg:SetBackdropColor(unpack(MarkerColors[id]))
+    RealUI:CreateBD(frame.bg, 0.8)
+    local color = MarkerColors[id]
+    frame.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
 
     return frame
 end
 
 local function CreateFrames()
-    if InCombatLockdown() or FramesCreated then return end
+    if _G.InCombatLockdown() or FramesCreated then return end
     
     -- Parent Frame
-    WMF.Parent = CreateFrame("Frame", "RealUI_WorldMarker", _G["Minimap"])
+    WMF.Parent = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G["Minimap"])
     
     -- Buttons
     local numBtns = #MarkerColors
@@ -261,7 +172,7 @@ local function CreateFrames()
             WMF.Buttons[i]:SetAttribute("macrotext", "/cwm all")
         else
             WMF.Buttons[i] = CreateButton(i)
-            WMF.Buttons[i]:SetAttribute("macrotext", "/wm "..WORLD_RAID_MARKER_ORDER[i])
+            WMF.Buttons[i]:SetAttribute("macrotext", "/wm ".._G.WORLD_RAID_MARKER_ORDER[i])
         end
     end
     
@@ -270,17 +181,17 @@ end
 
 ---------------
 function WorldMarker:RefreshMod()
-    if not nibRealUI:GetModuleEnabled(MODNAME) or not IsAddOnLoaded("Blizzard_CompactRaidFrames") then return end
+    if not RealUI:GetModuleEnabled(MODNAME) or not _G.IsAddOnLoaded("Blizzard_CompactRaidFrames") then return end
     
     db = self.db.profile
     
     -- Create Frames if it has been delayed
-    if not InCombatLockdown() and not FramesCreated then
+    if not _G.InCombatLockdown() and not FramesCreated then
         CreateFrames()
     end
     
     -- Refresh Mod
-    if InCombatLockdown() or not FramesCreated then
+    if _G.InCombatLockdown() or not FramesCreated then
         -- In combat or have no frames, set flag so we can refresh once combat ends
         NeedRefreshed = true
     else
@@ -296,15 +207,15 @@ function WorldMarker:PLAYER_LOGIN()
     LoggedIn = true
     
     WorldMarker:RefreshMod()
-    hooksecurefunc(Minimap, "SetSize", function() 
-        if not(InCombatLockdown()) then
+    _G.hooksecurefunc(_G.Minimap, "SetSize", function() 
+        if not(_G.InCombatLockdown()) then
             WorldMarker:UpdatePosition()
         end
     end)
 end
 
 function WorldMarker:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             visibility = {
@@ -317,8 +228,7 @@ function WorldMarker:OnInitialize()
     })
     db = self.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function WorldMarker:OnEnable()
@@ -343,9 +253,9 @@ function WorldMarker:OnDisable()
 
     NeedRefreshed = false
     
-    if InCombatLockdown() then
+    if _G.InCombatLockdown() then
         -- Trying to disable while in combat. Display message and block mouse input to World Markers.
-        print("|cff00ffffRealUI: |r World Marker can't fully disable during combat. Please wait until you leave combat, then reload the UI (type: /rl)")
+        _G.print("|cff00ffffRealUI: |r World Marker can't fully disable during combat. Please wait until you leave combat, then reload the UI (type: /rl)")
     else    
         WorldMarker:UpdateVisibility()
     end

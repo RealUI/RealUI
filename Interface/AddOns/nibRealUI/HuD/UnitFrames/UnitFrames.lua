@@ -1,12 +1,22 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local L = nibRealUI.L
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
+-- Libs --
+local oUF = _G.oUFembed
+
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+local db, ndb
+
+local CombatFader = RealUI:GetModule("CombatFader")
 
 local MODNAME = "UnitFrames"
-local UnitFrames = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
-local CombatFader = nibRealUI:GetModule("CombatFader")
-local db, ndb, ndbc
+local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local oUF = oUFembed
 UnitFrames.units = {}
 
 -- Abbreviated Name
@@ -28,9 +38,9 @@ function UnitFrames:AbrvName(name, unit)
     --end
 
     if (unit == "target") and (db.misc.alwaysDisplayFullHealth) then
-        return nibRealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] - 7)
+        return RealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] - 7)
     else
-        return nibRealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] or 12)
+        return RealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] or 12)
     end
 end
 
@@ -53,15 +63,15 @@ end
 function UnitFrames:SetoUFColors()
     local colors = db.overlay.colors
     for power, color in next, colors.power do
-        if (type(power) == "string") then
+        if (_G.type(power) == "string") then
             oUF.colors.power[power] = color
         end
     end
     oUF.colors.health = colors.health.normal
-    for eclass, _ in next, RAID_CLASS_COLORS do
-        local color = nibRealUI:GetClassColor(eclass)
-        color = nibRealUI:ColorDarken(0.15, color)
-        color = nibRealUI:ColorDesaturate(0.2, color)
+    for eclass, _ in next, _G.RAID_CLASS_COLORS do
+        local color = RealUI:GetClassColor(eclass)
+        color = RealUI:ColorDarken(0.15, color)
+        color = RealUI:ColorDesaturate(0.2, color)
         oUF.colors.class[eclass] = color
     end
 end
@@ -92,18 +102,18 @@ function UnitFrames:GetStatusColors()
 end
 
 -- Squelch taint popup
-hooksecurefunc("UnitPopup_OnClick",function(self)
+_G.hooksecurefunc("UnitPopup_OnClick",function(self)
     local button = self.value
     if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
-        if StaticPopup1 then
-            StaticPopup1:Hide()
+        if _G.StaticPopup1 then
+            _G.StaticPopup1:Hide()
         end
         if db.misc.focusclick then
-            nibRealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focusclick), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+            RealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focusclick), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         end
     elseif button == "PET_DISMISS" then
-        if StaticPopup1 then
-            StaticPopup1:Hide()
+        if _G.StaticPopup1 then
+            _G.StaticPopup1:Hide()
         end
     end
 end)
@@ -113,7 +123,7 @@ end)
 ----------------------------
 function UnitFrames:OnInitialize()
     ---[[
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             misc = {
@@ -238,23 +248,20 @@ function UnitFrames:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = nibRealUI.db.profile
-    ndbc = nibRealUI.db.char
-
-    local otherFaction = nibRealUI:OtherFaction(nibRealUI.faction)
+    ndb = RealUI.db.profile
 
     self.layoutSize = ndb.settings.hudSize
     --print("Layout", self.layoutSize)
 
 
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function UnitFrames:OnEnable()
     self:SetoUFColors()
     self.colorStrings = {
-        health = nibRealUI:ColorTableToStr(db.overlay.colors.health.normal),
-        mana = nibRealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
+        health = RealUI:ColorTableToStr(db.overlay.colors.health.normal),
+        mana = RealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
     }
 
     CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)

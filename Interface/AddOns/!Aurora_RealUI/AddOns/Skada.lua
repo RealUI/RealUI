@@ -1,28 +1,31 @@
 local _, mods = ...
 
+-- Lua Globals --
+local _G = _G
+
 mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
     --print("Skada", F, C)
     -- Short Numbers
-    local SkadaFormatValueText = Skada.FormatValueText
+    local SkadaFormatValueText = _G.Skada.FormatValueText
 
     local function FormatValues(value, enabled, ...)
         if value == nil then
             return
-        elseif ( type(value) == "number" or ( type(value) == "string" and value:match("^[-+]?[%d.,]+$") )) and tonumber(value) > 1000 then
-            value = Skada:FormatNumber(tonumber(value))
+        elseif ( _G.type(value) == "number" or ( _G.type(value) == "string" and value:match("^[-+]?[%d.,]+$") )) and _G.tonumber(value) > 1000 then
+            value = _G.Skada:FormatNumber(_G.tonumber(value))
         end
         return value, enabled, FormatValues(...)
     end
 
-    function Skada:FormatValueText(...)
-        return SkadaFormatValueText(self, FormatValues(...))
+    function _G.Skada.FormatValueText(Skada, ...)
+        return SkadaFormatValueText(Skada, FormatValues(...))
     end
 
     -- Background + Textures
-    local skadaBar = Skada.displays["bar"]
+    local skadaBar = _G.Skada.displays["bar"]
     skadaBar._ApplySettings = skadaBar.ApplySettings
-    skadaBar.ApplySettings = function(self, win)
-        skadaBar._ApplySettings(self, win)
+    skadaBar.ApplySettings = function(bar, win)
+        skadaBar._ApplySettings(bar, win)
         
         local skada = win.bargroup
         
@@ -31,7 +34,7 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
             F.CreateBDFrame(skada.button)
         end
 
-        skada:SetTexture(RealUI.media.textures.plain80)
+        skada:SetTexture(_G.RealUI.media.textures.plain80)
         skada:SetSpacing(0)
         skada:SetFrameLevel(5)
         
@@ -41,7 +44,7 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
         end
     end
 
-    for _, window in ipairs(Skada:GetWindows()) do
+    for _, window in _G.ipairs(_G.Skada:GetWindows()) do
         window:UpdateDisplay()
     end
 end

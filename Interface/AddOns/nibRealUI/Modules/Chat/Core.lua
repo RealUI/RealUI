@@ -1,106 +1,23 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-local LSM = LibStub("LibSharedMedia-3.0")
-local db, ndb
+local _, private = ...
+
+-- Lua Globals --
+local _G = _G
+
+-- RealUI --
+local RealUI = private.RealUI
 
 local MODNAME = "Chat"
-local Chat = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0")
-
-local options
-local function GetOptions()
-    if not options then options = {
-        type = "group",
-        name = "Chat Extras",
-        desc = "Extra modifications to the Chat window.",
-        arg = MODNAME,
-        -- order = 112,
-        args = {
-            header = {
-                type = "header",
-                name = "Chat Extras",
-                order = 10,
-            },
-            desc = {
-                type = "description",
-                name = "Extra modifications to the Chat window.",
-                fontSize = "medium",
-                order = 11,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enabled",
-                desc = "Enable/Disable the Chat Extras module.",
-                get = function() return nibRealUI:GetModuleEnabled(MODNAME) end,
-                set = function(info, value) 
-                    nibRealUI:SetModuleEnabled(MODNAME, value)
-                end,
-                order = 20,
-            },
-            desc3 = {
-                type = "description",
-                name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
-                order = 21,
-            },
-            gap1 = {
-                name = " ",
-                type = "description",
-                order = 22,
-            },
-            modules = {
-                type = "group",
-                name = "Modules",
-                inline = true,
-                disabled = function() return not(nibRealUI:GetModuleEnabled(MODNAME)) end,
-                order = 30,
-                args = {
-                    tabs = {
-                        type = "toggle",
-                        name = "Chat Tabs",
-                        desc = "Skins the Chat Tabs.",
-                        get = function() return db.modules.tabs.enabled end,
-                        set = function(info, value) 
-                            db.modules.tabs.enabled = value
-                        end,
-                        order = 10,
-                    },
-                    opacity = {
-                        type = "toggle",
-                        name = "Opacity",
-                        desc = "Adjusts the opacity of the Chat Frame, and controls how fast the frame and tabs fade in/out.",
-                        get = function() return db.modules.opacity.enabled end,
-                        set = function(info, value) 
-                            db.modules.opacity.enabled = value
-                        end,
-                        order = 20,
-                    },
-                    strings = {
-                        type = "toggle",
-                        name = "Strings",
-                        desc = "Shortens and modifies general chat messages.",
-                        get = function() return db.modules.strings.enabled end,
-                        set = function(info, value) 
-                            db.modules.strings.enabled = value
-                        end,
-                        order = 30,
-                    },
-                },
-            },
-        },
-    }
-    end
-    
-    return options
-end
-
+local Chat = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 function Chat:PLAYER_LOGIN()
     -- Hide IM selector if BCM is enabled
-    if IsAddOnLoaded("BasicChatMods") then
+    if _G.IsAddOnLoaded("BasicChatMods") then
         _G["InterfaceOptionsSocialPanelChatStyle"]:Hide()
     end
 end
 
 function Chat:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
             modules = {
@@ -118,26 +35,29 @@ function Chat:OnInitialize()
                 opacity = {},
                 strings = {},
                 history = {
-                    [nibRealUI.realm] = {history = {}},
+                    [RealUI.realm] = {history = {}},
                 },
             },
         },
     })
-    db = self.db.profile
-    ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled(MODNAME))
-    nibRealUI:RegisterModuleOptions(MODNAME, GetOptions)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function Chat:OnEnable()
     self:debug("OnEnable")
     self:RegisterEvent("PLAYER_LOGIN")
 
-    for i = 1, NUM_CHAT_WINDOWS do
+    local start, stop
+    if RealUI.isBeta then
+        start, stop = 3, 8
+    else
+        start, stop = 6, 11
+    end
+    for i = 1, _G.NUM_CHAT_WINDOWS do
         local editbox = _G["ChatFrame"..i.."EditBox"]
-        for k = 6, 11 do
-            local tex = select(k, editbox:GetRegions())
+        for k = start, stop do
+            local tex = _G.select(k, editbox:GetRegions())
             if tex:GetObjectType() == "Texture" then
                 tex:SetTexture("")
             end

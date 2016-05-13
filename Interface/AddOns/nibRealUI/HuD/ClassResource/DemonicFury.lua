@@ -1,14 +1,17 @@
-local nibRealUI = LibStub("AceAddon-3.0"):GetAddon("nibRealUI")
-if nibRealUI.isBeta then return end
+local _, private = ...
+if private.RealUI.isBeta then return end
 
-local L = nibRealUI.L
-local db, ndb
+-- Lua Globals --
+local _G = _G
 
-local _
+-- RealUI --
+local RealUI = private.RealUI
+local L = RealUI.L
+
 local MODNAME = "ClassResource_DemonicFury"
-local DemonicFury = nibRealUI:CreateModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
+local DemonicFury = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0")
 
-local ClassResourceBar = nibRealUI:GetModule("ClassResourceBar")
+local ClassResourceBar = RealUI:GetModule("ClassResourceBar")
 
 local MetamorphosisSpellID = 103958
 local MetamorphosisSpellName
@@ -18,8 +21,8 @@ local MetamorphosisSpellName
 ------------------------------
 function DemonicFury:OnUpdate()
     -- Power Text
-    local power = UnitPower("player", SPELL_POWER_DEMONIC_FURY)
-    local maxPower = UnitPowerMax("player", SPELL_POWER_DEMONIC_FURY)
+    local power = _G.UnitPower("player", _G.SPELL_POWER_DEMONIC_FURY)
+    local maxPower = _G.UnitPowerMax("player", _G.SPELL_POWER_DEMONIC_FURY)
     
     if maxPower <= 0 or power > maxPower then
         return
@@ -35,7 +38,7 @@ function DemonicFury:OnUpdate()
         self.dfBar:SetValue("left", 1)
     end
 
-    self.dfBar:SetText("middle", abs(power))
+    self.dfBar:SetText("middle", _G.abs(power))
 end
 
 function DemonicFury:UpdateShown(event, unit)
@@ -46,7 +49,7 @@ function DemonicFury:UpdateShown(event, unit)
         return
     end
 
-    if ( (GetSpecialization() == 2) and UnitExists("target") and UnitCanAttack("player", "target") and not(UnitIsDeadOrGhost("player")) and not(UnitIsDeadOrGhost("target")) and not(UnitInVehicle("player")) ) then
+    if ( (_G.GetSpecialization() == 2) and _G.UnitExists("target") and _G.UnitCanAttack("player", "target") and not(_G.UnitIsDeadOrGhost("player")) and not(_G.UnitIsDeadOrGhost("target")) and not(_G.UnitInVehicle("player")) ) then
         self.dfBar:Show()
     else
         self.dfBar:Hide()
@@ -57,10 +60,10 @@ function DemonicFury:UpdateAuras(units)
     if units and not(units.player) then return end
 
     -- Middle Arrow colors
-    if UnitBuff("player", MetamorphosisSpellName) then
-        self.dfBar:SetBoxColor("middle", nibRealUI.media.colors.orange)
+    if _G.UnitBuff("player", MetamorphosisSpellName) then
+        self.dfBar:SetBoxColor("middle", RealUI.media.colors.orange)
     else
-        self.dfBar:SetBoxColor("middle", nibRealUI.classColor)
+        self.dfBar:SetBoxColor("middle", RealUI.classColor)
     end
 end
 
@@ -73,16 +76,16 @@ end
 ---- Frame Updates ----
 -----------------------
 function DemonicFury:UpdateGlobalColors()
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-    self.dfBar:SetBarColor("left", nibRealUI.media.colors.purple)
-    self.dfBar:SetBarColor("right", nibRealUI.media.colors.purple)
+    self.dfBar:SetBarColor("left", RealUI.media.colors.purple)
+    self.dfBar:SetBarColor("right", RealUI.media.colors.purple)
     self:UpdateAuras()
 end
 
 ------------
 function DemonicFury:ToggleConfigMode(val)
-    if not nibRealUI:GetModuleEnabled(MODNAME) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     if self.configMode == val then return end
 
     self.configMode = val
@@ -90,35 +93,33 @@ function DemonicFury:ToggleConfigMode(val)
 end
 
 function DemonicFury:OnInitialize()
-    self.db = nibRealUI.db:RegisterNamespace(MODNAME)
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {},
     })
-    db = self.db.profile
-    ndb = nibRealUI.db.profile
     
-    self:SetEnabledState(nibRealUI:GetModuleEnabled("PointTracking") and nibRealUI:GetModuleEnabled(MODNAME) and nibRealUI.class == "WARLOCK")
-    nibRealUI:RegisterConfigModeModule(self)
+    self:SetEnabledState(RealUI:GetModuleEnabled("PointTracking") and RealUI:GetModuleEnabled(MODNAME) and RealUI.class == "WARLOCK")
+    RealUI:RegisterConfigModeModule(self)
 end
 
 function DemonicFury:OnEnable()
     self.configMode = false
 
-    MetamorphosisSpellName = GetSpellInfo(MetamorphosisSpellID)
+    MetamorphosisSpellName = _G.GetSpellInfo(MetamorphosisSpellID)
 
     if not self.dfBar then 
         self.dfBar = ClassResourceBar:New("short", L["Resource_DemonicFury"])
         self.dfBar:ReverseBar("left", true)
         self.dfBar:SetEndBoxShown("left", false)
         self.dfBar:SetEndBoxShown("right", false)
-        self.dfBar:SetBoxColor("middle", nibRealUI.classColor)
+        self.dfBar:SetBoxColor("middle", RealUI.classColor)
     end
     self:UpdateGlobalColors()
 
     local updateSpeed
-    if nibRealUI.db.profile.settings.powerMode == 1 then
+    if RealUI.db.profile.settings.powerMode == 1 then
         updateSpeed = 1/6
-    elseif nibRealUI.db.profile.settings.powerMode == 2 then
+    elseif RealUI.db.profile.settings.powerMode == 2 then
         updateSpeed = 1/4
     else
         updateSpeed = 1/8
