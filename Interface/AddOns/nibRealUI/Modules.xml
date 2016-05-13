@@ -32,7 +32,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Modules\ObjectivesAdv.lua"/>
     <Script file="Modules\Pitch.lua"/>
     <Script file="Modules\PlayerShields.lua"/>
-    <Script file="Modules\RuneDisplay.lua"/>
     <Script file="Modules\ScreenSaver.lua"/>
     <Script file="Modules\SpeechBubbles.lua"/>
     <Script file="Modules\SpellAlerts.lua"/>
