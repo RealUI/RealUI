@@ -84,9 +84,15 @@ function RealUI:ReloadUIDialog()
 end
 
 do -- Screen Height + Width
-    local screenRes = {_G.GetScreenResolutions()}
     function RealUI:GetResolutionVals(raw)
-        local resWidth, resHeight = screenRes[_G.GetCurrentResolution()]:match("(%d+)x(%d+)")
+        local resolution
+        if RealUI.isBeta then
+            local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
+            resolution = windowed ~= fullscreen and windowed or fullscreen
+        else
+            resolution = _G.GetCVar("gxResolution")
+        end
+        local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
         resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
 
         if raw then
