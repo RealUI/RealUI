@@ -7,7 +7,7 @@ local _, ns = ...
 local oUF = ns.oUF
 
 -- Holds the class specific stuff.
-local ClassPowerType = "BURNING_EMBERS"
+local ClassPowerType, RequireSpec = "BURNING_EMBERS", _G.SPEC_WARLOCK_DESTRUCTION
 local ClassPowerEnable, ClassPowerDisable
 
 local Update = function(self, event, unit, powerType)
@@ -17,13 +17,18 @@ local Update = function(self, event, unit, powerType)
 
 	local element = self.BurningEmbers
 
-	local total = _G.UnitPower('player', _G.SPELL_POWER_BURNING_EMBERS, true)
-	local max = _G.UnitPowerMax('player', _G.SPELL_POWER_BURNING_EMBERS, true) 
+	local curFull, curRaw
+	local maxFull, maxRaw
+	if(event ~= 'ClassPowerDisable') then
+		curRaw = _G.UnitPower('player', _G.SPELL_POWER_BURNING_EMBERS, true)
+		maxRaw = _G.UnitPowerMax('player', _G.SPELL_POWER_BURNING_EMBERS, true)
+		curFull, maxFull = _G.floor(curRaw/10), _G.floor(maxRaw/10)
 
-	local cur = total
-	for index = 1, 4 do
-		element[index]:SetValue(cur)
-		cur = cur - 10
+		local cur = curRaw
+		for index = 1, 4 do
+			element[index]:SetValue(cur)
+			cur = cur - 10
+		end
 	end
 
 	--[[ :PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
@@ -40,7 +45,7 @@ local Update = function(self, event, unit, powerType)
 	 event         - The event, which the update happened for
 	]]
 	if(element.PostUpdate) then
-		return element:PostUpdate(_G.floor(total/10), total, _G.floor(max/10), max, event)
+		return element:PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
 	end
 end
 
@@ -49,16 +54,14 @@ local Path = function(self, ...)
 end
 
 local function Visibility(self, event, unit)
+	_G.print("Visibility")
 	local element = self.BurningEmbers
 	local shouldEnable
 
 
 	if(not _G.UnitHasVehicleUI('player')) then
-		if(_G.IsPlayerSpell(_G.WARLOCK_BURNING_EMBERS)) then
-			self:UnregisterEvent('SPELLS_CHANGED', Visibility)
+		if(RequireSpec == _G.GetSpecialization()) then
 			shouldEnable = true
-		else
-			self:RegisterEvent('SPELLS_CHANGED', Visibility, true)
 		end
 	end
 
@@ -82,6 +85,7 @@ end
 
 do
 	ClassPowerEnable = function(self)
+		_G.print("ClassPowerEnable")
 		self:RegisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:RegisterEvent('UNIT_POWER_FREQUENT', Path)
 		Path(self, 'ClassPowerEnable', 'player', ClassPowerType)
@@ -89,6 +93,7 @@ do
 	end
 
 	ClassPowerDisable = function(self)
+		_G.print("ClassPowerDisable")
 		self:UnregisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:UnregisterEvent('UNIT_POWER_FREQUENT', Path)
 
@@ -103,6 +108,7 @@ do
 end
 
 local Enable = function(self, unit)
+	_G.print("Enable")
 	if(unit ~= 'player') then return end
 
 	local element = self.BurningEmbers
@@ -111,10 +117,12 @@ local Enable = function(self, unit)
 	element.__owner = self
 	element.ForceUpdate = ForceUpdate
 
+	self:RegisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath, true)
+
 	element.ClassPowerEnable = ClassPowerEnable
 	element.ClassPowerDisable = ClassPowerDisable
 
-	for index = 1, 4 do
+	for index = 1, #element do
 		element[index]:SetMinMaxValues(0, 10)
 	end
 
@@ -122,6 +130,7 @@ local Enable = function(self, unit)
 end
 
 local Disable = function(self)
+	_G.print("Disable")
 	local element = self.BurningEmbers
 	if(not element) then return end
 
