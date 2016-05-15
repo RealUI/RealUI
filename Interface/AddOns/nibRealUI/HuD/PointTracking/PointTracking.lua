@@ -445,7 +445,7 @@ function PointTracking:OnInitialize()
     db = self.db.class
 
     ClassPowerType = classPowers[PlayerClass]
-    ClassPowerID = _G["SPELL_POWER_"..ClassPowerType]
+    ClassPowerID = ClassPowerType and _G["SPELL_POWER_"..ClassPowerType]
     self:SetEnabledState(ClassPowerType and RealUI:GetModuleEnabled(MODNAME))
 end
 
