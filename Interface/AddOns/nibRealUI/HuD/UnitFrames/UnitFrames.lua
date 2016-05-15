@@ -2,7 +2,6 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
 
 -- Libs --
 local oUF = _G.oUFembed
@@ -58,47 +57,6 @@ function UnitFrames:RefreshUnits(event)
         local unit = _G["RealUI" .. units[i] .. "Frame"]
         unit:UpdateAllElements(event)
     end
-end
-
-function UnitFrames:SetoUFColors()
-    local colors = db.overlay.colors
-    for power, color in next, colors.power do
-        if (_G.type(power) == "string") then
-            oUF.colors.power[power] = color
-        end
-    end
-    oUF.colors.health = colors.health.normal
-    for eclass, _ in next, _G.RAID_CLASS_COLORS do
-        local color = RealUI:GetClassColor(eclass)
-        color = RealUI:ColorDarken(0.15, color)
-        color = RealUI:ColorDesaturate(0.2, color)
-        oUF.colors.class[eclass] = color
-    end
-end
-
--- Color Retrieval for Config Bar
-function UnitFrames:ToggleClassColoring(names)
-	if names then
-		db.overlay.classColorNames = not db.overlay.classColorNames
-	else
-		db.overlay.classColor = not db.overlay.classColor
-	end
-end
-
-function UnitFrames:GetoUFColors()
-    return oUF.colors
-end
-
-function UnitFrames:GetHealthColor()
-	return oUF.colors.health
-end
-
-function UnitFrames:GetPowerColors()
-	return oUF.colors.power
-end
-
-function UnitFrames:GetStatusColors()
-	return db.overlay.colors.status
 end
 
 -- Squelch taint popup
@@ -258,10 +216,9 @@ function UnitFrames:OnInitialize()
 end
 
 function UnitFrames:OnEnable()
-    self:SetoUFColors()
     self.colorStrings = {
-        health = RealUI:ColorTableToStr(db.overlay.colors.health.normal),
-        mana = RealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
+        health = RealUI:ColorTableToStr(oUF.colors.health),
+        mana = RealUI:ColorTableToStr(oUF.colors.power["MANA"]),
     }
 
     CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)

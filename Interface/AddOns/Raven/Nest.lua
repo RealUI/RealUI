@@ -1617,7 +1617,14 @@ function MOD.Nest_Initialize()
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
 	if GetCVar("useUiScale") == "1" then
-        pixelScale = 768 / ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+        local resolution
+        if RealUI.isBeta then
+            local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
+            resolution = windowed ~= fullscreen and windowed or fullscreen
+        else
+            resolution = _G.GetCVar("gxResolution")
+        end
+        pixelScale = 768 / resolution:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
 	else
 		pixelScale = 1
 	end

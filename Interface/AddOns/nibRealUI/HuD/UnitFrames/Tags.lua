@@ -89,7 +89,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
-    return ("%.1f|cff%s%%|r"):format(percent, RealUI:ColorTableToStr(UnitFrames.db.profile.overlay.colors.health.normal))
+    return ("%.1f|cff%s%%|r"):format(percent, RealUI:ColorTableToStr(oUF.colors.health))
 end
 tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
 

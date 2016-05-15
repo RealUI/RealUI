@@ -45,7 +45,7 @@ do
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
             path = LSM:Fetch("font", fontName)
-            --debug("Fonts |", fontName, "|", path, "|", fontPath)
+            debug("Fonts |", fontName, "|", path, "|", fontPath)
             if path == fontPath then
                 debug("Fonts Equal |", fontName, "|", fontSize, "|", fontArgs)
                 local tab = {

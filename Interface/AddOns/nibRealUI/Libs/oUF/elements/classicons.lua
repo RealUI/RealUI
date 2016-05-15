@@ -61,9 +61,13 @@ local isBetaClient = oUF.Private.isBetaClient
 
 local UpdateTexture = function(element)
 	local color = oUF.colors.power[ClassPowerType]
-	if not isBetaClient and ClassPowerType == "COMBO_POINTS" then
-		-- COMBO_POINTS don't have a color pre-Legion so we need to supply that color
-		color = {1.00, 0.96, 0.41}
+	if not isBetaClient then
+		-- COMBO_POINTS and SHADOW_ORBS don't have a color pre-Legion so we need to supply that color
+		if ClassPowerType == "COMBO_POINTS" then
+			color = {1.00, 0.96, 0.41}
+		elseif ClassPowerType == "SHADOW_ORBS" then
+			color = {0.40, 0.00, 0.80}
+		end
 	end
 
 	for i = 1, #element do

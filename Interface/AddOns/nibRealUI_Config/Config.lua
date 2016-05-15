@@ -21,8 +21,7 @@ local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
 local initialized = false
 local isHuDShown = false
 
-local screenResolutions = {_G.GetScreenResolutions()}
-local uiHieght = screenResolutions[_G.GetCurrentResolution()]:match("%d+x(%d+)")
+local _, uiHieght = RealUI:GetResolutionVals(true)
 local uiMod = (uiHieght / 768)
 local function ModValue(value)
     return _G.floor(value * uiMod + 0.5)
