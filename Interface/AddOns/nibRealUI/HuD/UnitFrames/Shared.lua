@@ -600,7 +600,7 @@ function UnitFrames:SetHealthColor(unitFrame)
         healthColor = RealUI:ColorDarken(0.15, healthColor)
         healthColor = RealUI:ColorDesaturate(0.2, healthColor)
     else
-        healthColor = db.overlay.colors.health.normal
+        healthColor = oUF.colors.health
     end
     AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
 end

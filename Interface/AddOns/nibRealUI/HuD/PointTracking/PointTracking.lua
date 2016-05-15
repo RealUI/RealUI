@@ -340,17 +340,19 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     function BurningEmbers:PostUpdate(curFull, curRaw, maxFull, maxRaw, event)
         PointTracking:debug("BurningEmbers:PostUpdate", curFull, curRaw, maxFull, maxRaw, event, db.hideempty, PointTracking.configMode)
         for i = 1, (maxFull or 0) do
-            local ember, showEmpty = self[i], not db.hideempty or (event == "ForceUpdate" and PointTracking.configMode)
+            local ember = self[i]
             local alpha = RealUI.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, self:GetAlpha())
             if i <= curFull then
                 ember:SetStatusBarColor(color[1] * 2, color[2] * 2, color[3] * 2)
                 ember:Show()
             elseif i == curFull+1 and curRaw % 10 > 0 then
-                ember:SetStatusBarColor(color[1], color[2], color[3], alpha * 2)
+                ember:SetStatusBarColor(color[1], color[2], color[3])
+                ember:SetAlpha(alpha * 2)
                 ember:Show()
-            else
-                ember:SetStatusBarColor(color[1], color[2], color[3], showEmpty and alpha)
-                ember:SetShown(showEmpty)
+            elseif not db.hideempty or (event == "ForceUpdate" or PointTracking.configMode) then
+                ember:SetStatusBarColor(color[1], color[2], color[3])
+                ember:SetAlpha(alpha)
+                ember:Show()
             end
         end
     end
@@ -443,12 +445,12 @@ function PointTracking:OnInitialize()
     db = self.db.class
 
     ClassPowerType = classPowers[PlayerClass]
+    ClassPowerID = _G["SPELL_POWER_"..ClassPowerType]
     self:SetEnabledState(ClassPowerType and RealUI:GetModuleEnabled(MODNAME))
 end
 
 function PointTracking:OnEnable()
     self:debug("OnEnable")
-    ClassPowerID = _G["SPELL_POWER_"..ClassPowerType]
 
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
     RealUI:RegisterConfigModeModule(self)
