@@ -484,81 +484,88 @@ end
 
 function UnitFrames:PvPOverride(event, unit)
     UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
-    local pvp, color = self.PvP, RealUI.media.background
+    local pvp, color = self.PvP
     local setColor = (pvp.row or pvp.col) and pvp.SetBackgroundColor or pvp.SetVertexColor
     if _G.UnitIsPVP(unit) then
-        if _G.UnitIsFriend("player", unit) then
-            --print("Friend")
-            color = db.overlay.colors.status.pvpFriendly
-            setColor(pvp, color[1], color[2], color[3], color[4])
-        else
-            --print("Enemy")
-            color = db.overlay.colors.status.pvpEnemy
-            setColor(pvp, color[1], color[2], color[3], color[4])
-        end
+        color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+        setColor(pvp, color[1], color[2], color[3], color[4])
     else
+        color = RealUI.media.background
         setColor(pvp, color[1], color[2], color[3], color[4])
     end
 end
 
-function UnitFrames:UpdateClassification(event)
-    UnitFrames:debug("Classification", self.unit, event, _G.UnitClassification(self.unit))
-    local color = db.overlay.colors.status[_G.UnitClassification(self.unit)] or RealUI.media.background
-    self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
+do
+    local classification = {
+        rareelite = {1, 0.5, 0},
+        elite = {1, 1, 0},
+        rare = {0.75, 0.75, 0.75},
+    }
+    function UnitFrames:UpdateClassification(event)
+        UnitFrames:debug("Classification", self.unit, event, _G.UnitClassification(self.unit))
+        local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
+        self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
+    end
 end
 
-function UnitFrames:UpdateStatus(event, ...)
-    UnitFrames:debug("UpdateStatus", self, event, ...)
-    local unit = self.unit
-    local color = RealUI.media.background
-    if _G.UnitIsAFK(unit) then
-        --print("AFK", self, event, unit)
-        color = db.overlay.colors.status.afk
-        self.Leader.status = "afk"
-    elseif not(_G.UnitIsConnected(unit)) then
-        --print("Offline", self, event, unit)
-        color = db.overlay.colors.status.offline
-        self.Leader.status = "offline"
-    elseif _G.UnitIsGroupLeader(unit) then
-        --print("Leader", self, event, unit)
-        color = db.overlay.colors.status.leader
-        self.Leader.status = "leader"
-    else
-        --print("Status2: None", self, event, unit)
-        self.Leader.status = false
-    end
-    if self.Leader.status then
-        self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
-        self.Leader:Show()
-        self.AFK:Show()
-    else
-        self.Leader:Hide()
-        self.AFK:Hide()
-    end
+do
+    local status = {
+        afk = {1, 1, 0},
+        offline = oUF.colors.disconnected,
+        leader = {0, 1, 1},
+        combat = {1, 0, 0},
+        resting = {0, 1, 0},
+    }
+    function UnitFrames:UpdateStatus(event, ...)
+        UnitFrames:debug("UpdateStatus", self, event, ...)
+        local unit, color = self.unit
+        if _G.UnitIsAFK(unit) then
+            UnitFrames:debug("AFK", self, event, unit)
+            self.Leader.status = "afk"
+        elseif not(_G.UnitIsConnected(unit)) then
+            UnitFrames:debug("Offline", self, event, unit)
+            self.Leader.status = "offline"
+        elseif _G.UnitIsGroupLeader(unit) then
+            UnitFrames:debug("Leader", self, event, unit)
+            self.Leader.status = "leader"
+        else
+            UnitFrames:debug("Status2: None", self, event, unit)
+            self.Leader.status = false
+        end
+        if self.Leader.status then
+            color = status[self.Leader.status]
+            self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
+            self.Leader:Show()
+            self.AFK:Show()
+        else
+            self.Leader:Hide()
+            self.AFK:Hide()
+        end
 
-    if _G.UnitAffectingCombat(unit) then
-        --print("Combat", self, event, unit)
-        color = db.overlay.colors.status.combat
-        self.Combat.status = "combat"
-    elseif _G.IsResting(unit) then
-        --print("Resting", self, event, unit)
-        color = db.overlay.colors.status.resting
-        self.Combat.status = "resting"
-    else
-        --print("Status1: None", self, event, unit)
-        self.Combat.status = false
-    end
-    if self.Leader.status and not self.Combat.status then
-        self.Combat:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
-        self.Combat:Show()
-        self.Resting:Show()
-    elseif self.Combat.status then
-        self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
-        self.Combat:Show()
-        self.Resting:Show()
-    else
-        self.Combat:Hide()
-        self.Resting:Hide()
+        if _G.UnitAffectingCombat(unit) then
+            UnitFrames:debug("Combat", self, event, unit)
+            self.Combat.status = "combat"
+        elseif _G.IsResting(unit) then
+            UnitFrames:debug("Resting", self, event, unit)
+            self.Combat.status = "resting"
+        else
+            UnitFrames:debug("Status1: None", self, event, unit)
+            self.Combat.status = false
+        end
+        if self.Leader.status and not self.Combat.status then
+            color = RealUI.media.background
+            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
+            self.Combat:Show()
+            self.Resting:Show()
+        elseif self.Combat.status then
+            color = status[self.Combat.status]
+            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
+            self.Combat:Show()
+            self.Resting:Show()
+        else
+            self.Combat:Hide()
+            self.Resting:Hide()
+        end
     end
 end
 
@@ -579,13 +586,9 @@ function UnitFrames:UpdateEndBox(...)
         color = RealUI:GetClassColor(class)
     else
         if ( not _G.UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
-            color = db.overlay.colors.status.tapped
-        elseif _G.UnitIsEnemy("player", unit) then
-            color = db.overlay.colors.status.hostile
-        elseif _G.UnitCanAttack("player", unit) then
-            color = db.overlay.colors.status.neutral
+            color = self.colors.tapped
         else
-            color = db.overlay.colors.status.friendly
+            color = self.colors.reaction[_G.UnitReaction(unit, "player")]
         end
     end
     self.endBox:Show()
@@ -600,7 +603,7 @@ function UnitFrames:SetHealthColor(unitFrame)
         healthColor = RealUI:ColorDarken(0.15, healthColor)
         healthColor = RealUI:ColorDesaturate(0.2, healthColor)
     else
-        healthColor = oUF.colors.health
+        healthColor = unitFrame.colors.health
     end
     AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
 end

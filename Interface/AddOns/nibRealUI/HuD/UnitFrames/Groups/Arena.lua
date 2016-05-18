@@ -104,7 +104,7 @@ local function CreateHealthBar(parent)
     parent.Health:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 3)
     parent.Health:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
     parent.Health:SetStatusBarTexture(RealUI.media.textures.plain)
-    local color = oUF.colors.health
+    local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
     if not(ndb.settings.reverseUnitFrameBars) then
@@ -138,7 +138,8 @@ local function CreatePowerBar(parent)
     parent.Power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
     parent.Power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
     parent.Power:SetStatusBarTexture(RealUI.media.textures.plain)
-    parent.Power:SetStatusBarColor(oUF.colors.power["MANA"][1], oUF.colors.power["MANA"][2], oUF.colors.power["MANA"][3])
+    local color = parent.colors.power["MANA"]
+    parent.Power:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Power.colorPower = true
     parent.Power.PostUpdate = function(bar, unit, min, max)
         bar:SetShown(max > 0)

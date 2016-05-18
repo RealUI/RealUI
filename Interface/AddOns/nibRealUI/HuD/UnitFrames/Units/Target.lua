@@ -421,7 +421,7 @@ UnitFrames["target"] = function(self)
         end
         local _, powerType = _G.UnitPowerType(frame.unit)
 
-        AngleStatusBar:SetBarColor(frame.Power.bar, oUF.colors.power[powerType])
+        AngleStatusBar:SetBarColor(frame.Power.bar, frame.colors.power[powerType])
 
         -- Reverse power
         local oldReverse, newReverse = frame.Power.bar.reverse
