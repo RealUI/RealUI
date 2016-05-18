@@ -521,21 +521,20 @@ do
         resting = {0, 1, 0},
     }
     function UnitFrames:UpdateStatus(event, ...)
-        UnitFrames:debug("UpdateStatus", self, event, ...)
+        UnitFrames:debug("UpdateStatus", self.unit, event, ...)
         local unit, color = self.unit
+        
         if _G.UnitIsAFK(unit) then
-            UnitFrames:debug("AFK", self, event, unit)
             self.Leader.status = "afk"
         elseif not(_G.UnitIsConnected(unit)) then
-            UnitFrames:debug("Offline", self, event, unit)
             self.Leader.status = "offline"
         elseif _G.UnitIsGroupLeader(unit) then
-            UnitFrames:debug("Leader", self, event, unit)
             self.Leader.status = "leader"
         else
-            UnitFrames:debug("Status2: None", self, event, unit)
             self.Leader.status = false
         end
+        UnitFrames:debug("Status2:", self.Leader.status)
+
         if self.Leader.status then
             color = status[self.Leader.status]
             self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
@@ -547,15 +546,14 @@ do
         end
 
         if _G.UnitAffectingCombat(unit) then
-            UnitFrames:debug("Combat", self, event, unit)
             self.Combat.status = "combat"
         elseif _G.IsResting(unit) then
-            UnitFrames:debug("Resting", self, event, unit)
             self.Combat.status = "resting"
         else
-            UnitFrames:debug("Status1: None", self, event, unit)
             self.Combat.status = false
         end
+        UnitFrames:debug("Status1:", self.Combat.status)
+
         if self.Leader.status and not self.Combat.status then
             color = RealUI.media.background
             self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
