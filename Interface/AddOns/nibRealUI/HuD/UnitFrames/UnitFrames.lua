@@ -209,17 +209,12 @@ function UnitFrames:OnInitialize()
     ndb = RealUI.db.profile
 
     self.layoutSize = ndb.settings.hudSize
-    --print("Layout", self.layoutSize)
-
-
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function UnitFrames:OnEnable()
-    self.colorStrings = {
-        health = RealUI:ColorTableToStr(oUF.colors.health),
-        mana = RealUI:ColorTableToStr(oUF.colors.power["MANA"]),
-    }
+    -- Override the green that oUF uses
+    oUF.colors.health = {0.66, 0.22, 0.22}
 
     CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()
