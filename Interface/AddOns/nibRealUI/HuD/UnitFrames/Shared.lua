@@ -219,7 +219,11 @@ RealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
     ["POWER_TYPE_SUN_POWER"] = true,
-    ["PAIN"] = true
+    ["LUNAR_POWER"] = true,
+    ["INSANITY"] = true,
+    ["MAELSTROM"] = true,
+    --["FURY"] = true,
+    ["PAIN"] = true,
 }
 
 function UnitFrames:PositionSteps(vert)
