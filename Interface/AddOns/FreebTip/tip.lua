@@ -170,13 +170,15 @@ local function getUnit(self)
 end
 
 local function formatLines(self)
+    ns.Debug("--- formatLines ---", self)
     for i=1, self:NumLines() do
         local tiptext = _G["GameTooltipTextLeft"..i]
         local point, relTo, relPoint, x, y = tiptext:GetPoint()
+        ns.Debug("Text", i, point, relTo, relPoint, x, y)
         tiptext:ClearAllPoints()
 
         if(i==1) then
-            tiptext:SetPoint("TOPLEFT", self, "TOPLEFT", x, y)
+            tiptext:SetPoint("TOPLEFT", self, "TOPLEFT", 10, y)
         else
             local key = i-1
 
@@ -189,6 +191,7 @@ local function formatLines(self)
                     break
                 end
             end
+            ns.Debug("key", key)
 
             tiptext:SetPoint("TOPLEFT", _G["GameTooltipTextLeft"..key], "BOTTOMLEFT", x, -2)
         end
