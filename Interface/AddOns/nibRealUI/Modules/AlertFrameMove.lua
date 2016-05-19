@@ -10,8 +10,6 @@ local RealUI = private.RealUI
 local MODNAME = "AlertFrameMove"
 local AlertFrameMove = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
-if RealUI.isBeta then return end
-
 local AlertFrameHolder = _G.CreateFrame("Frame", "AlertFrameHolder", _G.UIParent)
 AlertFrameHolder:SetWidth(180)
 AlertFrameHolder:SetHeight(20)
@@ -181,195 +179,271 @@ local ID = {
     item = 30234, -- Nordrassil Wrath-Kilt
     rollType = _G.LOOT_ROLL_TYPE_NEED,
     currency = 823, -- Apexis Crystals
+    recipe = 42141,
+    quest = 42114,
     archRace = 1, -- Dwarf
 }
-local alertTest = {
-    type = "group",
-    args = {
+local alertTest do
+    local achievementAlerts do
+        local achievementID = 6348
         achievementAlerts = {
             name = "Achievement Alerts",
             type = "group",
             args = {
                 achievementGet = {
                     name = "Achievement",
-                    desc = "AchievementAlertFrame_ShowAlert",
+                    desc = "AchievementAlertSystem",
                     type = "execute",
                     func = function()
                         if not _G.AchievementFrame then _G.UIParentLoadAddOn("Blizzard_AchievementUI") end
-                        _G.AchievementAlertFrame_ShowAlert(6348)
+                        _G.AchievementAlertSystem:AddAlert(achievementID)
                     end,
                 },
                 achievementCrit = {
                     name = "Achievement Criteria",
-                    desc = "CriteriaAlertFrame_ShowAlert",
+                    desc = "CriteriaAlertSystem",
                     type = "execute",
                     func = function()
                         if not _G.AchievementFrame then _G.UIParentLoadAddOn("Blizzard_AchievementUI") end
-                        _G.CriteriaAlertFrame_ShowAlert(6348, 1)
+                        local criteriaString = _G.GetAchievementCriteriaInfo(achievementID, 1)
+                        _G.CriteriaAlertSystem:AddAlert(achievementID, criteriaString)
                     end,
                 },
             },
-        },
+        }
+    end
+    local lfgAlerts do
         lfgAlerts = {
             name = "LFG Alerts",
             type = "group",
             args = {
                 scenario = {
                     name = "Scenario",
-                    desc = "ScenarioAlertFrame_ShowAlert",
+                    desc = "ScenarioAlertSystem",
                     disabled = not _G.GetLFGCompletionReward(),
                     type = "execute",
                     func = function()
-                        _G.ScenarioAlertFrame_ShowAlert()
+                        _G.ScenarioAlertSystem:AddAlert()
                     end,
                 },
                 dungeon = {
                     name = "Dungeon",
-                    desc = "DungeonCompletionAlertFrame_ShowAlert",
+                    desc = "DungeonCompletionAlertSystem",
                     disabled = not _G.GetLFGCompletionReward(),
                     type = "execute",
                     func = function()
-                        _G.DungeonCompletionAlertFrame_ShowAlert()
+                        _G.DungeonCompletionAlertSystem:AddAlert()
                     end,
                 },
                 guildDungeon = {
                     name = "Guild Dungeon",
-                    desc = "GuildChallengeAlertFrame_ShowAlert",
+                    desc = "GuildChallengeAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.GuildChallengeAlertFrame_ShowAlert(1, 2, 5)
+                        _G.GuildChallengeAlertSystem:AddAlert(1, 2, 5)
                     end,
                 },
             },
-        },
+        }
+    end
+    local lootAlerts do
+        local _, link = _G.GetItemInfo(ID.item)
+        -- _G.LootAlertSystem:AddAlert(itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded)
+        -- _G.LootUpgradeAlertSystem:AddAlert(itemLink, quantity, specID, baseQuality)
+        -- _G.MoneyWonAlertSystem:AddAlert(amount)
         lootAlerts = {
             name = "Loot Alerts",
             type = "group",
             args = {
                 lootWon = {
                     name = "Loot Roll Won",
-                    desc = "LootWonAlertFrame_ShowAlert",
+                    desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootWonAlertFrame_ShowAlert(ID.item, 1, ID.rollType, 98)
+                        _G.LootAlertSystem:AddAlert(link, 1, ID.rollType, 98, ID.spec)
+                    end,
+                },
+                lootWonUpgrade = {
+                    name = "Loot Roll Won (Upgrade)",
+                    desc = "LootAlertSystem",
+                    type = "execute",
+                    func = function()
+                        _G.LootAlertSystem:AddAlert(link, 1, ID.rollType, 98, ID.spec, nil, nil, nil, nil, true)
                     end,
                 },
                 lootGiven = {
                     name = "Loot Given",
-                    desc = "LootWonAlertFrame_ShowAlert",
+                    desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootWonAlertFrame_ShowAlert(ID.item, 1, nil, nil, ID.spec)
+                        _G.LootAlertSystem:AddAlert(link, 1, nil, nil, ID.spec, nil, nil, nil, true)
                     end,
                 },
                 lootMoney = {
                     name = "Loot Money",
-                    desc = "MoneyWonAlertFrame_ShowAlert",
+                    desc = "MoneyWonAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.MoneyWonAlertFrame_ShowAlert(ID.item)
+                        _G.MoneyWonAlertSystem:AddAlert(123456)
                     end,
                 },
                 lootCurrency = {
                     name = "Loot Currency",
-                    desc = "LootWonAlertFrame_ShowAlert",
+                    desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootWonAlertFrame_ShowAlert(ID.currency, 100, nil, nil, ID.spec, true, false, 2)
+                        _G.LootAlertSystem:AddAlert(ID.currency, 100, nil, nil, ID.spec, true)
                     end,
                 },
                 lootGarrisonCache = {
                     name = "Loot Garrison Cache",
-                    desc = "LootWonAlertFrame_ShowAlert",
+                    desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootWonAlertFrame_ShowAlert(137, 100, nil, nil, ID.spec, true, false, 10)
+                        _G.LootAlertSystem:AddAlert(824, 100, nil, nil, ID.spec, true, nil, 10)
                     end,
                 },
                 lootUpgrade = {
                     name = "Loot Upgrade",
-                    desc = "LootUpgradeFrame_ShowAlert",
+                    desc = "LootUpgradeAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootUpgradeFrame_ShowAlert(ID.item, 1, 2, 3)
+                        _G.LootUpgradeAlertSystem:AddAlert(link, 1, ID.spec, 3)
                     end,
                 },
             },
-        },
+        }
+    end
+    local garrisonAlerts do
         garrisonAlerts = {
             name = "Garrison Alerts",
             type = "group",
             args = {
                 building = {
                     name = "Garrison Building",
-                    desc = "GarrisonBuildingAlertFrame_ShowAlert",
+                    desc = "GarrisonBuildingAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.GarrisonBuildingAlertFrame_ShowAlert("Barn")
+                        _G.GarrisonBuildingAlertSystem:AddAlert("Barn")
                     end,
                 },
                 mission = {
                     name = "Garrison Mission",
-                    desc = "GarrisonMissionAlertFrame_ShowAlert",
+                    desc = "GarrisonMissionAlertSystem",
                     type = "execute",
                     func = function()
                         local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_6_0)[1]
-                        _G.GarrisonMissionAlertFrame_ShowAlert(mission.missionID)
+                        _G.GarrisonMissionAlertSystem:AddAlert(mission.missionID)
                     end,
                 },
                 follower = {
                     name = "Garrison Follower",
-                    desc = "GarrisonFollowerAlertFrame_ShowAlert",
+                    desc = "GarrisonFollowerAlertSystem",
                     type = "execute",
                     func = function()
                         local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_GARRISON_6_0)[1]
-                        _G.GarrisonFollowerAlertFrame_ShowAlert(follower.followerID, follower.name, follower.displayID, follower.level, follower.quality)
+                        _G.GarrisonFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.level, follower.quality)
                     end,
                 },
                 missionShip = {
                     name = "Garrison Ship Mission",
-                    desc = "GarrisonShipMissionAlertFrame_ShowAlert",
+                    desc = "GarrisonShipMissionAlertSystem",
                     type = "execute",
                     func = function()
                         local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1] 
-                        _G.GarrisonMissionAlertFrame_ShowAlert(mission.missionID)
+                        _G.GarrisonShipMissionAlertSystem:AddAlert(mission.missionID)
                     end,
                 },
                 followerShip = {
                     name = "Garrison Ship Follower",
-                    desc = "GarrisonShipFollowerAlertFrame_ShowAlert",
+                    desc = "GarrisonShipFollowerAlertSystem",
                     type = "execute",
                     func = function()
                         local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
-                        _G.GarrisonShipFollowerAlertFrame_ShowAlert(follower.followerID, follower.name, follower.className, follower.texPrefix, follower.level, follower.quality)
+                        _G.GarrisonShipFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.className, follower.texPrefix, follower.level, follower.quality)
+                    end,
+                },
+                missionRandom = {
+                    name = "Garrison Random Mission",
+                    desc = "GarrisonRandomMissionAlertSystem",
+                    type = "execute",
+                    func = function()
+                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1] 
+                        _G.GarrisonRandomMissionAlertSystem:AddAlert(mission.missionID)
+                    end,
+                },
+                talent = {
+                    name = "Garrison Talent",
+                    desc = "GarrisonTalentAlertSystem",
+                    type = "execute",
+                    func = function()
+                        _G.GarrisonTalentAlertSystem:AddAlert(_G.LE_GARRISON_TYPE_7_0)
                     end,
                 },
             },
-        },
+        }
+    end
+    local miscAlerts do
+        local name, link, _, _, _, _, _, _, _, icon = _G.GetItemInfo(ID.item)
         miscAlerts = {
             name = "Misc Alerts",
             type = "group",
             args = {
                 store = {
                     name = "Store Purchase",
-                    desc = "StorePurchaseAlertFrame_ShowAlert",
+                    desc = "StorePurchaseAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.StorePurchaseAlertFrame_ShowAlert([[Interface\Icons\inv_pants_mail_15]], "Nordrassil Wrath-Kilt", ID.item)
+                        _G.StorePurchaseAlertSystem:AddAlert(icon, name, ID.item)
                     end,
                 },
                 digsite = {
                     name = "Digsite Complete",
-                    desc = "DigsiteCompleteToastFrame_ShowAlert",
+                    desc = "DigsiteCompleteAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.DigsiteCompleteToastFrame_ShowAlert(ID.archRace)
+                        _G.DigsiteCompleteAlertSystem:AddAlert(ID.archRace)
+                    end,
+                },
+                newRecipe = {
+                    name = "New Recipe Learned",
+                    desc = "NewRecipeLearnedAlertSystem",
+                    type = "execute",
+                    func = function()
+                        _G.NewRecipeLearnedAlertSystem:AddAlert(ID.recipe)
+                    end,
+                },
+                worldQuest = {
+                    name = "World Quest Complete",
+                    desc = "WorldQuestCompleteAlertSystem",
+                    type = "execute",
+                    func = function()
+                        _G.WorldQuestCompleteAlertSystem:AddAlert(ID.quest)
+                    end,
+                },
+                legendary = {
+                    name = "Legion Legendary",
+                    desc = "LegendaryItemAlertSystem",
+                    type = "execute",
+                    func = function()
+                        _G.LegendaryItemAlertSystem:AddAlert(link)
                     end,
                 },
             },
-        },
-    },
-}
+        }
+    end
+
+    alertTest = {
+        type = "group",
+        args = {
+            achievementAlerts = achievementAlerts,
+            lfgAlerts = lfgAlerts,
+            lootAlerts = lootAlerts,
+            garrisonAlerts = garrisonAlerts,
+            miscAlerts = miscAlerts,
+        }
+    }
+end
 
 ----------
 function AlertFrameMove:OnInitialize()
@@ -380,5 +454,7 @@ function AlertFrameMove:OnInitialize()
 end
 
 function AlertFrameMove:OnEnable()
-    self:AlertMovers()
+    if not RealUI.isBeta then
+        self:AlertMovers()
+    end
 end
