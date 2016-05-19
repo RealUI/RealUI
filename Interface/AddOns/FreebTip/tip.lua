@@ -169,35 +169,6 @@ local function getUnit(self)
     return unit
 end
 
-local function formatLines(self)
-    ns.Debug("--- formatLines ---", self)
-    for i=1, self:NumLines() do
-        local tiptext = _G["GameTooltipTextLeft"..i]
-        local point, relTo, relPoint, x, y = tiptext:GetPoint()
-        ns.Debug("Text", i, point, relTo, relPoint, x, y)
-        tiptext:ClearAllPoints()
-
-        if(i==1) then
-            tiptext:SetPoint("TOPLEFT", self, "TOPLEFT", 10, y)
-        else
-            local key = i-1
-
-            while(true) do
-                local preTiptext = _G["GameTooltipTextLeft"..key]
-
-                if(preTiptext and not preTiptext:IsShown()) then
-                    key = key-1
-                else
-                    break
-                end
-            end
-            ns.Debug("key", key)
-
-            tiptext:SetPoint("TOPLEFT", _G["GameTooltipTextLeft"..key], "BOTTOMLEFT", x, -2)
-        end
-    end
-end
-
 local function hideLines(self)
     for i=3, self:NumLines() do
         local tiptext = _G["GameTooltipTextLeft"..i]
@@ -689,8 +660,6 @@ local function GT_OnUpdate(self, elapsed)
 
         self.freebHeightSet = numLines
     end
-
-    formatLines(self)
 end
 GameTooltip:HookScript("OnUpdate", GT_OnUpdate)
 
