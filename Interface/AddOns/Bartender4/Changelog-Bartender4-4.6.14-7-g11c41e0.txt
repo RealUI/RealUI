@@ -1,0 +1,8 @@
+Hendrik Leppkes:
+	- Disable stance options for classes which do no longer have any.
+	- Fix hook error with the RepBar in Legion
+	- Add AP Bar to the layout presets
+	- Add ArtifactWatchBar to the UI hider
+	- Fix typo
+	- Add a module for the artifact power bar
+	- Cleanup whitespace in blizzard art bar

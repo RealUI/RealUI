@@ -78,10 +78,12 @@ end
 
 local modifiers = { "ctrl", "alt", "shift" }
 
+local IsLegion = select(4, GetBuildInfo()) >= 70000
+
 -- specifiy the available stances for each class
 local DefaultStanceMap = setmetatable({}, { __index = function(t,k)
 	local newT = nil
-	if k == "WARRIOR" then
+	if k == "WARRIOR" and not IsLegion then
 		newT = {
 			{ id = "battle", name = GetSpellInfo(2457), index = 1 },
 			{ id = "def", name = GetSpellInfo(71), index = 2 },
@@ -96,21 +98,27 @@ local DefaultStanceMap = setmetatable({}, { __index = function(t,k)
 			{ id = "moonkin", name = GetSpellInfo(24858), index = 4 },
 		}
 	elseif k == "ROGUE" then
-		newT = {
-			-- shadowdance needs to be before stealth in the list, otherwise the condition is overwritten
-			{ id = "shadowdance", name = ("%s / %s"):format((GetSpellInfo(51713)), (GetSpellInfo(1856))), index = -1, type = "form" },
-			{ id = "stealth", name = GetSpellInfo(1784), index = 1 },
-		}
-	elseif k == "PRIEST" then
+		if IsLegion then
+			newT = {
+				{ id = "stealth", name = GetSpellInfo(1784), index = 1 },
+			}
+		else
+			newT = {
+				-- shadowdance needs to be before stealth in the list, otherwise the condition is overwritten
+				{ id = "shadowdance", name = ("%s / %s"):format((GetSpellInfo(51713)), (GetSpellInfo(1856))), index = -1, type = "form" },
+				{ id = "stealth", name = GetSpellInfo(1784), index = 1 },
+			}
+		end
+	elseif k == "PRIEST" and not IsLegion then
 		newT = {
 			{ id = "shadowform", name = GetSpellInfo(15473), index = 1 },
 		}
-	elseif k == "WARLOCK" then
+	elseif k == "WARLOCK" and not IsLegion then
 		newT = {
 			{ id = "metamorphosis", name = GetSpellInfo(103958), index = 1, type = "form"},
 			--{ id = "darkapotheosis", name = GetSpellInfo(114168), index = 2, type = "form"}, -- this should work, but for some reason it doesn't.
 		}
-	elseif k == "MONK" then
+	elseif k == "MONK" and not IsLegion then
 		newT = {
 			{ id = "tiger", name = GetSpellInfo(103985), index = 1, spec = 3 },
 			{ id = "crane", name = GetSpellInfo(154436), index = 1, spec = 2 },
