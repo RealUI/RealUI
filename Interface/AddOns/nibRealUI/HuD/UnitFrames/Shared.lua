@@ -489,7 +489,7 @@ end
 function UnitFrames:PvPOverride(event, unit)
     UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
     local pvp, color = self.PvP
-    local setColor = (pvp.row or pvp.col) and pvp.SetBackgroundColor or pvp.SetVertexColor
+    local setColor = pvp.lines and pvp.SetBackgroundColor or pvp.SetVertexColor
     if _G.UnitIsPVP(unit) then
         color = self.colors.reaction[_G.UnitReaction(unit, "player")]
         setColor(pvp, color[1], color[2], color[3], color[4])

@@ -233,15 +233,15 @@ function api:SetBackgroundColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
-    local tex = self.col or self.row
-    for i = 1, #tex do
-        if self.col then
-            tex[i]:SetVertexColor(r, g, b, a or 1)
+    local lines = self.lines
+    for i = 1, #lines do
+        if isBeta then
+            lines[i]:SetColorTexture(r, g, b, a or 1)
         else
-            if isBeta then
-                tex[i]:SetColorTexture(r, g, b, a or 1)
+            if lines.isCols then
+                lines[i]:SetVertexColor(r, g, b, a or 1)
             else
-                tex[i]:SetTexture(r, g, b, a or 1)
+                lines[i]:SetTexture(r, g, b, a or 1)
             end
         end
     end
@@ -337,11 +337,10 @@ local function CreateAngleBG(width, height, parent, info)
     bg.top = top
     ]=]
 
-    local maxRows = height - 2 --abs(leftX ~= 0 and leftX or rightX)
-    local maxCols = width - (height + 1) --width - maxRows
-    debug(info.debug, "CreateRows", maxRows, maxCols)
+    bg.lines = {}
+    local maxRows, maxCols = height - 2, width - (height + 1)
     if maxRows <= maxCols then
-        local row = {}
+        debug(info.debug, "CreateRows", maxRows, maxCols)
         for i = 1, maxRows do
             local tex = bg:CreateTexture(nil, "BACKGROUND")
             -- tex:SetTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
@@ -361,33 +360,42 @@ local function CreateAngleBG(width, height, parent, info)
             else
                 tex:SetPoint("TOPRIGHT", top, "TOPRIGHT", (i - 1), -i)
             end
-            _G.tinsert(row, tex)
+            _G.tinsert(bg.lines, tex)
         end
-        bg.row = row
     else
-        local col = {}
+        debug(info.debug, "CreateColumns", maxRows, maxCols)
+        bg.lines.isCols = true
         for i = 1, maxCols do
-            local ofs = maxRows + 1
-            local tex = bg:CreateTexture(nil, "BACKGROUND")
-            tex:SetVertexColor(bgColor[1], bgColor[2], bgColor[3])
-            --DrawLine(tex, bg, i + 1, ofs, leftX)
-            if leftX == 0 then
-                tex:SetVertexColor(1, 0, 0)
-                RealUI:DrawLine(tex, bg, i + 1, -1, (ofs + i), -ofs, 16, "TOPLEFT")
+            if isBeta then
+                local ofs = height * 0.64
+                local idx = i * 0.64
+                local tex = bg:CreateLine(nil, "BACKGROUND")
+                tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3])
+                tex:SetThickness(0.5)
+                if leftX == 0 then
+                    tex:SetColorTexture(1, 0, 0)
+                    tex:SetStartPoint("TOPLEFT", idx, 0)
+                    tex:SetEndPoint("BOTTOMLEFT", ofs + idx, 0)
+                else
+                    tex:SetColorTexture(1, 1, 0)
+                    tex:SetStartPoint("BOTTOMLEFT", idx, 0)
+                    tex:SetEndPoint("TOPLEFT", ofs + idx, 0)
+                end
+                _G.tinsert(bg.lines, tex)
             else
-                tex:SetVertexColor(1, 1, 0)
-                RealUI:DrawLine(tex, bg, -(i + 1), -1, -(ofs + i), -ofs, 16, "TOPRIGHT")
+                local ofs = maxRows + 1
+                local tex = bg:CreateTexture(nil, "BACKGROUND")
+                tex:SetVertexColor(bgColor[1], bgColor[2], bgColor[3])
+                if leftX == 0 then
+                    tex:SetVertexColor(1, 0, 0)
+                    RealUI:DrawLine(tex, bg, i + 1, -1, (ofs + i), -ofs, 16, "TOPLEFT")
+                else
+                    tex:SetVertexColor(1, 1, 0)
+                    RealUI:DrawLine(tex, bg, -(i + 1), -1, -(ofs + i), -ofs, 16, "TOPRIGHT")
+                end
+                _G.tinsert(bg.lines, tex)
             end
-            --[[if rightX == 0 then
-                tex:SetVertexColor(0, 1, 0)
-                RealUI:DrawLine(tex, bg, 0, 0, -ofs, -ofs, 16, "TOPRIGHT")
-            else
-                tex:SetVertexColor(0, 1, 1)
-                RealUI:DrawLine(tex, bg, 0, 0, -ofs, ofs, 16, "BOTTOMRIGHT")
-            end]]
-            _G.tinsert(col, tex)
         end
-        bg.col = col
     end
 
     local ofs = maxRows + 1
@@ -413,30 +421,31 @@ local function CreateAngleBG(width, height, parent, info)
     bg.bottom = bottom
 
     if isBeta then
+        ofs = ofs * 0.65
         local left = bg:CreateLine(nil, "BORDER")
         left:SetColorTexture(0, 0, 0)
-        left:SetThickness(16)
+        left:SetThickness(0.5)
         if leftX == 0 then
             --left:SetColorTexture(1, 0, 0)
-            left:SetStartPoint("TOPLEFT", 1, -1)
+            left:SetStartPoint("TOPLEFT", 0, 0)
             left:SetEndPoint("TOPLEFT", ofs, -ofs)
         else
             --left:SetColorTexture(1, 1, 0)
-            left:SetStartPoint("BOTTOMLEFT", 1, 1)
+            left:SetStartPoint("BOTTOMLEFT", 0, 0)
             left:SetEndPoint("BOTTOMLEFT", ofs, ofs)
         end
         left:Show()
 
         local right = bg:CreateLine(nil, "BORDER")
         right:SetColorTexture(0, 0, 0)
-        right:SetThickness(16)
+        right:SetThickness(0.5)
         if rightX == 0 then
             --right:SetColorTexture(0, 1, 0)
-            right:SetStartPoint("TOPRIGHT", -1, -1)
+            right:SetStartPoint("TOPRIGHT", 0, 0)
             right:SetEndPoint("TOPRIGHT", -ofs, -ofs)
         else
             --right:SetColorTexture(0, 1, 1)
-            right:SetStartPoint("BOTTOMRIGHT", -1, 1)
+            right:SetStartPoint("BOTTOMRIGHT", 0, 0)
             right:SetEndPoint("BOTTOMRIGHT", -ofs, ofs)
         end
         right:Show()
@@ -597,17 +606,21 @@ function RealUI:TestASB(reverseFill, reversePer)
     }
     for i = 1, #info do
         local barInfo = info[i]
-        local test = AngleStatusBar:CreateAngleFrame("Status", 200, 8, _G.UIParent, barInfo)
+        local test = AngleStatusBar:CreateAngleFrame("Status", 40, 80, _G.UIParent, barInfo)
         test:SetMinMaxValues(0, 200)
         test:SetValue(10, true)
-        test:SetStatusBarColor(1, 0, 0, 1)
+        --test:SetStatusBarColor(1, 0, 0, 1)
         if reverseFill then
             test:SetReverseFill(true)
         end
         if reversePer then
             test:SetReversePercent(true)
         end
-        test:SetPoint("TOP", _G.UIParent, "CENTER", 0, -(10 * i))
+        if i == 1 then
+            test:SetPoint("TOP", _G.UIParent, "CENTER", 0, 0)
+        else
+            test:SetPoint("TOP", testBars[i-1], "BOTTOM", 0, -10)
+        end
         tinsert(testBars, test)
         test:Show()
         test.bar:Show()

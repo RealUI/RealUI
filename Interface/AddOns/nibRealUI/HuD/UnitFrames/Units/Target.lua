@@ -420,6 +420,7 @@ UnitFrames["target"] = function(self)
             --return
         end
         local _, powerType = _G.UnitPowerType(frame.unit)
+        UnitFrames:debug("Target powerType", powerType)
 
         AngleStatusBar:SetBarColor(frame.Power.bar, frame.colors.power[powerType])
 
