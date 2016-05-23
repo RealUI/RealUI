@@ -9,7 +9,7 @@ Before you report a bug, [follow these steps](http://www.wowinterface.com/forums
 Explain the problem and include additional details to help maintainers reproduce the problem:
 
 * **Use a clear and descriptive title** for the issue to identify the problem.
-* **Describe the exact steps which reproduce the problem** in as many details as possible. For example, start by explaining how you started Atom, e.g. which command exactly you used in the terminal, or how you started Atom otherwise. When listing steps, **don't just say what you did, but explain how you did it**. For example, if you moved the cursor to the end of a line, explain if you used the mouse, or a keyboard shortcut or an Atom command, and if so which one?
+* **Describe the exact steps which reproduce the problem** in as many details as possible.
 * **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
 * **Explain which behavior you expected to see instead and why.**
 * **Include screenshots and animated GIFs** which show you following the described steps and clearly demonstrate the problem. You can use [this tool](http://www.cockos.com/licecap/) to record GIFs on OSX and Windows.
