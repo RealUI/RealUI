@@ -34,7 +34,7 @@ function Stagger:UpdateAuras(units)
     self.percent = self.curStagger / maxHealth
     self.staggerLevel = 1
 
-    local staggerPer = RealUI:Clamp(self.percent, 0, 1/5) * 5
+    local staggerPer = RealUI.Clamp(self.percent, 0, 1/5) * 5
     self.sBar:SetValue("left", staggerPer)
     self.sBar:SetText("left", RealUI:ReadableNumber(self.curStagger, 0))
 

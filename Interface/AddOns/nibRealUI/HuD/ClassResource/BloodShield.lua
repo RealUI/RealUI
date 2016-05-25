@@ -32,7 +32,7 @@ function BloodShield:UpdateAuras(event, units)
         self.curBloodAbsorb = 0
     end
 
-    local bloodPer = RealUI:Clamp(self.curBloodAbsorb / self.maxBlood, 0, 1)
+    local bloodPer = RealUI.Clamp(self.curBloodAbsorb / self.maxBlood, 0, 1)
     self.bsBar:SetValue("left", bloodPer)
     self.bsBar:SetText("left", RealUI:ReadableNumber(self.curBloodAbsorb, 0))
 

@@ -148,21 +148,27 @@ function RealUI:GetLootSpecData(LootSpecIDs)
 end
 
 -- Math
-function RealUI.Lerp(startValue, endValue, amount)
-    return (1 - amount) * startValue + amount * endValue;
-end
-
-function RealUI:Clamp(value, minVal, maxVal)
-    if value < minVal then
-        value = minVal
-    elseif value > maxVal then
-        value = maxVal
-    elseif value ~= value or not (value >= minVal and value <= maxVal) then -- check for nan...
-        value = minVal
+local Lerp, Clamp
+if RealUI.isBeta then
+    Lerp, Clamp = _G.Lerp, _G.Clamp
+else
+    function Lerp(startValue, endValue, amount)
+        return (1 - amount) * startValue + amount * endValue;
     end
 
-    return value
+    function Clamp(value, minVal, maxVal)
+        if value < minVal then
+            value = minVal
+        elseif value > maxVal then
+            value = maxVal
+        elseif value ~= value or not (value >= minVal and value <= maxVal) then -- check for nan...
+            value = minVal
+        end
+
+        return value
+    end
 end
+RealUI.Lerp, RealUI.Clamp = Lerp, Clamp
 
 -- Seconds to Time
 function RealUI:ConvertSecondstoTime(value, onlyOne)
@@ -668,7 +674,7 @@ end
 
 function RealUI:ColorLighten(delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB(h, s, self:Clamp(l + delta, 0, 1))
+    local r2, g2, b2 = self:HSLToRGB(h, s, Clamp(l + delta, 0, 1))
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
@@ -683,7 +689,7 @@ end
 
 function RealUI:ColorSaturate(delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB(h, self:Clamp(s + delta, 0, 1), l)
+    local r2, g2, b2 = self:HSLToRGB(h, Clamp(s + delta, 0, 1), l)
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
