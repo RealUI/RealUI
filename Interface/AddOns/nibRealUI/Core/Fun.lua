@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
+local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
 local next, type, select = _G.next, _G.type, _G.select
 local print, tonumber = _G.print, _G.tonumber
@@ -13,6 +13,7 @@ local F = _G.Aurora[1]
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
+local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
@@ -619,47 +620,70 @@ function RealUI:GetClassColor(class, ...)
     end
 end
 
-function RealUI:HSLToRGB(h, s, l, a)
-    if s<=0 then return l,l,l,a end
-    h, s, l = h*6, s, l
-    local c = (1-abs(2*l-1))*s
-    local x = (1-abs(h%2-1))*c
-    local m,r,g,b = (l-.5*c)
-    if h < 1     then r,g,b = c,x,0
-    elseif h < 2 then r,g,b = x,c,0
-    elseif h < 3 then r,g,b = 0,c,x
-    elseif h < 4 then r,g,b = 0,x,c
-    elseif h < 5 then r,g,b = x,0,c
-    else              r,g,b = c,0,x
-    end return (r+m),(g+m),(b+m),a
+
+--[[
+All color functions assume arguments are within the range 0.0 - 1.0
+]]
+do
+    local function HueToRBG(p, q, t)
+        if t < 0   then t = t + 1 end
+        if t > 1   then t = t - 1 end
+        if t < 1/6 then return p + (q - p) * 6 * t end
+        if t < 1/2 then return q end
+        if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
+        return p
+    end
+    function RealUI:HSLToRGB(h, s, l, a)
+        debug("HSLToRGB", h, s, l, a)
+        local r, g, b
+
+        if s <= 0 then
+            return l, l, l, a -- achromatic
+        else
+            local q
+            q = l < 0.5 and l * (1 + s) or l + s - l * s
+            local p = 2 * l - q
+
+            r = HueToRBG(p, q, h + 1/3)
+            g = HueToRBG(p, q, h)
+            b = HueToRBG(p, q, h - 1/3)
+        end
+
+        return r, g, b, a
+    end
 end
 
 function RealUI:RGBToHSL(r, g, b)
     if type(r) == "table" then
         r, g, b = r.r or r[1], r.g or r[2], r.b or r[3]
     end
+    debug("RGBToHSL", r, g, b)
     local minVal, maxVal = min(r, g, b), max(r, g, b)
-    local h, s, l = 0, 0, (maxVal + minVal) / 2
-    if maxVal ~= minVal then
+    local h, s, l
+
+    l = (maxVal + minVal) / 2
+    if maxVal == minVal then
+        h, s = 0, 0 -- achromatic
+    else
         local d = maxVal - minVal
         s = l > 0.5 and d / (2 - maxVal - minVal) or d / (maxVal + minVal)
         if maxVal == r then
-            local mod = 6
-            if g > b then mod = 0 end
-            h = (g - b) / d + mod
+            h = (g - b) / d
+            if g < b then h = h + 6 end
         elseif maxVal == g then
             h = (b - r) / d + 2
         else
             h = (r - g) / d + 4
         end
+        h = h / 6
     end
-    h = h / 6
     return h, s, l
 end
 
 function RealUI:ColorShift(delta, r, g, b)
+    debug("ColorShift", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB((((h + delta) * 255) % 255), s, l)
+    local r2, g2, b2 = self:HSLToRGB(Clamp(h + delta, 0, 1), s, l)
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
@@ -673,6 +697,7 @@ function RealUI:ColorShift(delta, r, g, b)
 end
 
 function RealUI:ColorLighten(delta, r, g, b)
+    debug("ColorLighten", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
     local r2, g2, b2 = self:HSLToRGB(h, s, Clamp(l + delta, 0, 1))
     if type(r) == "table" then
@@ -688,6 +713,7 @@ function RealUI:ColorLighten(delta, r, g, b)
 end
 
 function RealUI:ColorSaturate(delta, r, g, b)
+    debug("ColorSaturate", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
     local r2, g2, b2 = self:HSLToRGB(h, Clamp(s + delta, 0, 1), l)
     if type(r) == "table" then
@@ -703,9 +729,11 @@ function RealUI:ColorSaturate(delta, r, g, b)
 end
 
 function RealUI:ColorDarken(delta, r, g, b)
+    debug("ColorDarken", delta, r, g, b)
     return self:ColorLighten(-delta, r, g, b)
 end
 
 function RealUI:ColorDesaturate(delta, r, g, b)
+    debug("ColorDesaturate", delta, r, g, b)
     return self:ColorSaturate(-delta, r, g, b)
 end
