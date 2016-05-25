@@ -623,8 +623,11 @@ end
 
 --[[
 All color functions assume arguments are within the range 0.0 - 1.0
+
+Conversion functions based on code from
+https://github.com/EmmanuelOga/columns/blob/master/utils/color.lua
 ]]
-do
+do -- RealUI:HSLToRGB
     local function HueToRBG(p, q, t)
         if t < 0   then t = t + 1 end
         if t > 1   then t = t - 1 end
@@ -683,7 +686,7 @@ end
 function RealUI:ColorShift(delta, r, g, b)
     debug("ColorShift", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB(Clamp(h + delta, 0, 1), s, l)
+    local r2, g2, b2 = self:HSLToRGB(h + delta, s, l)
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
