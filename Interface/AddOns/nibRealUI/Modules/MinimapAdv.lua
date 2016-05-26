@@ -808,63 +808,65 @@ end
 
 function MinimapAdv:GetLFGList(event, arg)
     self:debug("GetLFGList", event, arg)
-    if not arg then
-        infoTexts.LFG.shown = false
-    else
-        local _, _, _, _, _, _, _, autoAccept = _G.C_LFGList.GetActiveEntryInfo()
+    local active, _, _, _, _, _, _, old_autoAccept, autoAccept = _G.C_LFGList.GetActiveEntryInfo()
+    if active then
         local status
-        if autoAccept then
+        if autoAccept or (_G.type(old_autoAccept) == "boolean" and old_autoAccept) then
             status = _G.LFG_LIST_AUTO_ACCEPT
         else
             local _, numActiveApplicants = _G.C_LFGList.GetNumApplicants()
             status = _G.LFG_LIST_PENDING_APPLICANTS:format(numActiveApplicants)
         end
         local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
-        MMFrames.info.LFG.text:SetText("|cff"..colorOrange.."LFG:|r "..status)
+        MMFrames.info.LFG.text:SetFormattedText("|cff%sLFG:|r %s", colorOrange, status)
         MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
+    else
+        infoTexts.LFG.shown = false
     end
     if not UpdateProcessing then
         self:UpdateInfoPosition()
     end
 end
 
+local queueFrames = {
+    [1] = "Queue",
+    [3] = "RFQueue",
+    [4] = "SQueue"
+}
 function MinimapAdv:GetLFGQueue(event, ...)
     self:debug("GetLFGQueue", event, ...)
-    -- Reset shown status
-    infoTexts.Queue.shown = false
-    infoTexts.RFQueue.shown = false
-    infoTexts.SQueue.shown = false
     for category = 1, _G.NUM_LE_LFG_CATEGORYS do
+        local infoText = infoTexts[queueFrames[category]]
+        local queueFrame = MMFrames.info[queueFrames[category]]
+        if not (infoText and queueFrame) then return end
+
         local mode = _G.GetLFGMode(category)
         self:debug("LFGQueue", category, mode)
         if mode and mode == "queued" then
-            local queueStr
             local hasData, _, _, _, _, _, _, _, _, _, _, _, _, _, _, myWait, queuedTime = _G.GetLFGQueueStats(category)
 
+            local queueStr
             if not hasData then
                 queueStr = _G.LESS_THAN_ONE_MINUTE
             else
-                local elapsedTime = _G.GetTime() - queuedTime
-                local tiqStr = ("%s"):format(ConvertSecondstoTime(elapsedTime))
-                local awtStr = ("%s"):format(myWait == -1 and _G.TIME_UNKNOWN or _G.SecondsToTime(myWait, false, false, 1))
-                queueStr = ("%s |cffc0c0c0(%s)|r"):format(tiqStr, awtStr)
+                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - queuedTime)
+                if myWait > 0 then
+                    local avgWait = _G.SecondsToTime(myWait, false, false, 1)
+                    queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
+                else
+                    queueStr = ("%s"):format(timeInQueue)
+                end
             end
 
             local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
-            if category == 1 then -- Dungeon Finder
-                MMFrames.info.Queue.text:SetFormattedText("|cff%sDF:|r ", colorOrange, queueStr)
-                MMFrames.info.Queue:SetHeight(MMFrames.info.Queue.text:GetStringHeight())
-                infoTexts.Queue.shown = true
-            elseif category == 3 then -- Raid Finder
-                MMFrames.info.RFQueue.text:SetFormattedText("|cff%sRF:|r ", colorOrange, queueStr)
-                MMFrames.info.RFQueue:SetHeight(MMFrames.info.RFQueue.text:GetStringHeight())
-                infoTexts.RFQueue.shown = true
-            elseif category == 4 then -- Scenarios
-                MMFrames.info.SQueue.text:SetFormattedText("|cff%sS:|r ", colorOrange, queueStr)
-                MMFrames.info.SQueue:SetHeight(MMFrames.info.SQueue.text:GetStringHeight())
-                infoTexts.SQueue.shown = true
-            end
+            queueFrame.text:SetFormattedText(infoText.format, colorOrange, queueStr)
+            queueFrame:SetHeight(queueFrame.text:GetStringHeight())
+            queueFrame.myWait = myWait
+            queueFrame.queuedTime = queuedTime
+            infoText.shown = true
+        else
+            infoText.shown = false
         end
     end
     if not UpdateProcessing then
@@ -1520,6 +1522,7 @@ function MinimapAdv:RegEvents()
     self:RegisterEvent("LFG_QUEUE_STATUS_UPDATE", "GetLFGQueue")
     self:RegisterEvent("LFG_LIST_APPLICANT_UPDATED", "GetLFGList")
     self:RegisterEvent("LFG_LIST_ACTIVE_ENTRY_UPDATE", "GetLFGList")
+    self:GetLFGList("OnEnable", true)
 
     -- POI
     self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
@@ -1547,8 +1550,9 @@ end
 --------------------------
 -- FRAME INITIALIZATION --
 --------------------------
+
 -- Frame Template
-local function NewInfoFrame(name, parent, size2)
+local function NewInfoFrame(name, parent, format, size2)
     local NewFrame = _G.CreateFrame("Frame", "MinimapAdv_"..name, parent)
     NewFrame:SetSize(_G.Minimap:GetWidth(), 12)
     NewFrame:SetFrameStrata("LOW")
@@ -1564,7 +1568,29 @@ local function NewInfoFrame(name, parent, size2)
     end
     NewFrame.text = text
 
-    infoTexts[name] = {type = name, shown = false}
+    if format then
+        NewFrame:SetScript("OnUpdate", function(self, elapsed)
+            if not self.queuedTime then return end
+            --Don't update every tick (can't do 1 second beause it might be 1.01 seconds and we'll miss a tick.
+            --Also can't do slightly less than 1 second (0.9) because we'll end up with some lingering numbers
+            self.updateThrottle = (self.updateThrottle or 0.1) - elapsed;
+            if ( self.updateThrottle <= 0 ) then
+                local queueStr
+                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - self.queuedTime)
+                if self.myWait > 0 then
+                    local avgWait = _G.SecondsToTime(self.myWait, false, false, 1)
+                    queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
+                else
+                    queueStr = ("%s"):format(timeInQueue)
+                end
+                local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+                self.text:SetFormattedText(format, colorOrange, queueStr)
+                self:SetHeight(self.text:GetStringHeight())
+                self.updateThrottle = 0.1;
+            end
+        end)
+    end
+    infoTexts[name] = {type = name, shown = false, format = format}
     _G.tinsert(infoTexts, infoTexts[name])
     return NewFrame
 end
@@ -1658,10 +1684,10 @@ local function CreateFrames()
     MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap, true)
     MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap, true)
     MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap, true)
-    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, true)
-    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, true)
-    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, true)
-    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, true)
+    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, nil, true)
+    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s", true)
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s", true)
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s", true)
 
     -- Zone Indicator
     MMFrames.info.zoneIndicator = _G.CreateFrame("Frame", "MinimapAdv_Zone", _G.Minimap)
