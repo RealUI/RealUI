@@ -2054,14 +2054,22 @@ local uiTweaks do
 
         local FrameList = FrameMover.FrameList
         local MoveFrameGroup = FrameMover.MoveFrameGroup
+        local isAddonControl = FrameMover.isAddonControl
         
+        local function GetEnabled(addonSlug, addonInfo)
+            if isAddonControl[addonSlug] then
+                return RealUI:DoesAddonMove(isAddonControl[addonSlug])
+            else
+                return addonInfo.move
+            end
+        end
         -- Create Addons options table
         local addonOpts do
             addonOpts = {
                 name = "Addons",
                 type = "group",
                 childGroups = "tab",
-                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                 order = 50,
                 args = {},
             }
@@ -2085,15 +2093,12 @@ local uiTweaks do
                             name = ("Move %s"):format(addon.name),
                             type = "toggle",
                             get = function(info)
-                                if addonSlug == "grid2" then
-                                    return RealUI:DoesAddonMove("Grid2")
-                                else
-                                    return addonInfo.move
-                                end
+                                return GetEnabled(addonSlug, addonInfo)
                             end,
                             set = function(info, value) 
-                                if addonSlug == "grid2" then
-                                    if RealUI:DoesAddonMove("Grid2") then
+                                if isAddonControl[addonSlug] then
+                                    RealUI:ToggleAddonPositionControl(isAddonControl[addonSlug], value)
+                                    if RealUI:DoesAddonMove(isAddonControl[addonSlug]) then
                                         FrameMover:MoveAddons()
                                     end
                                 else
@@ -2112,7 +2117,7 @@ local uiTweaks do
                 local normalFrameOpts = {
                     name = "Frames",
                     type = "group",
-                    disabled = function() if addonInfo.move then return false else return true end end,
+                    disabled = function() return not GetEnabled(addonSlug, addonInfo) end,
                     order = 10,
                     args = {},
                 }
@@ -2216,7 +2221,7 @@ local uiTweaks do
                     local normalHealingFrameOpts = {
                         name = "Healing Layout Frames",
                         type = "group",
-                        disabled = function() return not ( addonInfo.move and addonInfo.healing ) end,
+                        disabled = function() return not ( GetEnabled(addonSlug, addonInfo) and addonInfo.healing ) end,
                         order = 50,
                         args = {},
                     }
