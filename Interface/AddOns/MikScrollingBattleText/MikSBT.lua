@@ -31,6 +31,7 @@ mod.VERSION = tonumber(select(3, string_find(TOC_VERSION, "(%d+%.%d+)")))
 mod.VERSION_STRING = "v" .. TOC_VERSION
 mod.SVN_REVISION = tonumber(select(3, string_find(TOC_VERSION, "%d+%.%d+.(%d+)")))
 mod.CLIENT_VERSION = tonumber((select(4, GetBuildInfo())))
+mod.isBetaClient = mod.CLIENT_VERSION >= 70000
 
 mod.COMMAND = "/msbt"
 

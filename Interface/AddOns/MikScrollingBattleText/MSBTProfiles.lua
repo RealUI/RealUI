@@ -26,6 +26,7 @@ local SplitString = MikSBT.SplitString
 local Print = MikSBT.Print
 local GetSkillName = MikSBT.GetSkillName
 
+local isBetaClient = MikSBT.isBetaClient
 
 -------------------------------------------------------------------------------
 -- Private constants.
@@ -61,54 +62,54 @@ local SPELLID_SHADOW_ORB		= 77487
 
 -- Trigger spell names.
 local SPELL_BERSERK				= GetSkillName(SPELLID_BERSERK)
-local SPELL_BLINDSIDE				= GetSkillName(121153)
-local SPELL_BLOODSURGE				= GetSkillName(46916)
-local SPELL_BRAIN_FREEZE			= GetSkillName(44549)
-local SPELL_BF_FIREBALL			= GetSkillName(57761)
 local SPELL_CLEARCASTING			= GetSkillName(16870)
-local SPELL_DECIMATION				= GetSkillName(108869)
-local SPELL_ELUSIVE_BREW			= GetSkillName(128939)
 local SPELL_EXECUTE				= GetSkillName(SPELLID_EXECUTE)
 local SPELL_FINGERS_OF_FROST		= GetSkillName(112965)
 local SPELL_FREEZING_FOG			= GetSkillName(59052)
 local SPELL_HAMMER_OF_WRATH		= GetSkillName(SPELLID_HAMMER_OF_WRATH)
-local SPELL_KILL_SHOT				= GetSkillName(SPELLID_KILL_SHOT)
 local SPELL_KILLING_MACHINE		= GetSkillName(51124)
 local SPELL_LAVA_SURGE				= GetSkillName(SPELLID_LAVA_SURGE)
-local SPELL_LOCK_AND_LOAD			= GetSkillName(168980)
-local SPELL_MAELSTROM_WEAPON		= GetSkillName(53817)
-local SPELL_MANA_TEA				= GetSkillName(115867)
 local SPELL_MISSILE_BARRAGE		= GetSkillName(62401)
-local SPELL_MOLTEN_CORE			= GetSkillName(122351)
-local SPELL_NIGHTFALL				= GetSkillName(108558)
 local SPELL_PREDATORS_SWIFTNESS	= GetSkillName(69369)
 local SPELL_PVP_TRINKET			= GetSkillName(42292)
 local SPELL_REVENGE				= GetSkillName(SPELLID_REVENGE)
 local SPELL_RIME 					= GetSkillName(59057)
 local SPELL_SHADOW_TRANCE			= GetSkillName(17941)
 local SPELL_SHIELD_SLAM			= GetSkillName(23922)
-local SPELL_SHADOW_INFUSION		= GetSkillName(91342)
-local SPELL_SHADOW_ORB				= GetSkillName(SPELLID_SHADOW_ORB)
-local SPELL_SHOOTING_STARS			= GetSkillName(93400)
 local SPELL_SUDDEN_DEATH			= GetSkillName(52437)
 local SPELL_SUDDEN_DOOM			= GetSkillName(81340)	-- XXX: No trigger atm - DK
-local SPELL_SWORD_AND_BOARD		= GetSkillName(50227)
 local SPELL_TASTE_FOR_BLOOD		= GetSkillName(56636)
-local SPELL_THE_ART_OF_WAR			= GetSkillName(59578)
 local SPELL_TIDAL_WAVES			= GetSkillName(53390)
 local SPELL_ULTIMATUM			= GetSkillName(122510)
 local SPELL_VICTORY_RUSH			= GetSkillName(SPELLID_VICTORY_RUSH)  -- XXX: Update for buff
-local SPELL_VITAL_MISTS			= GetSkillName(122107)
 
 -- Throttle, suppression, and other spell names.
-local SPELL_BLOOD_PRESENCE			= GetSkillName(48266)
 local SPELL_DRAIN_LIFE				= GetSkillName(689)
 local SPELL_SHADOWMEND				= GetSkillName(39373)
-local SPELL_REFLECTIVE_SHIELD		= GetSkillName(58252)
 local SPELL_UNDYING_RESOLVE		= GetSkillName(51915)
 local SPELL_VAMPIRIC_EMBRACE		= GetSkillName(15286)
 local SPELL_VAMPIRIC_TOUCH			= GetSkillName(34914)
 
+local SPELL_BLINDSIDE         = isBetaClient and UNKNOWN or GetSkillName(121153) 
+local SPELL_BLOODSURGE        = isBetaClient and UNKNOWN or GetSkillName(46916) 
+local SPELL_BRAIN_FREEZE      = isBetaClient and UNKNOWN or GetSkillName(44549) 
+local SPELL_BF_FIREBALL       = isBetaClient and UNKNOWN or GetSkillName(57761) 
+local SPELL_DECIMATION        = isBetaClient and UNKNOWN or GetSkillName(108869) 
+local SPELL_ELUSIVE_BREW      = isBetaClient and UNKNOWN or GetSkillName(128939) 
+local SPELL_KILL_SHOT         = isBetaClient and UNKNOWN or GetSkillName(SPELLID_KILL_SHOT) 
+local SPELL_LOCK_AND_LOAD     = isBetaClient and UNKNOWN or GetSkillName(168980) 
+local SPELL_MAELSTROM_WEAPON  = isBetaClient and UNKNOWN or GetSkillName(53817) 
+local SPELL_MANA_TEA          = isBetaClient and UNKNOWN or GetSkillName(115867) 
+local SPELL_MOLTEN_CORE       = isBetaClient and UNKNOWN or GetSkillName(122351) 
+local SPELL_NIGHTFALL         = isBetaClient and UNKNOWN or GetSkillName(108558) 
+local SPELL_SHADOW_INFUSION   = isBetaClient and UNKNOWN or GetSkillName(91342) 
+local SPELL_SHADOW_ORB        = isBetaClient and UNKNOWN or GetSkillName(SPELLID_SHADOW_ORB) 
+local SPELL_SHOOTING_STARS    = isBetaClient and UNKNOWN or GetSkillName(93400) 
+local SPELL_SWORD_AND_BOARD   = isBetaClient and UNKNOWN or GetSkillName(50227) 
+local SPELL_THE_ART_OF_WAR    = isBetaClient and UNKNOWN or GetSkillName(59578) 
+local SPELL_VITAL_MISTS       = isBetaClient and UNKNOWN or GetSkillName(122107) 
+local SPELL_BLOOD_PRESENCE    = isBetaClient and UNKNOWN or GetSkillName(48266) 
+local SPELL_REFLECTIVE_SHIELD = isBetaClient and UNKNOWN or GetSkillName(58252) 
 
 
 -------------------------------------------------------------------------------
