@@ -220,6 +220,10 @@ addon.regclickqueue = {}
 -- register those frames. This is mainly due to integration with the
 -- Blizzard raid frames, which we cannot 'register' while in combat.
 function addon:RegisterFrame(button)
+    if not button.RegisterForClicks then
+        -- Clique is trying to register Nameplate frames, but they dont have RegisterForClicks
+        return
+    end
     if InCombatLockdown() then
         table.insert(self.regqueue, button)
         return
