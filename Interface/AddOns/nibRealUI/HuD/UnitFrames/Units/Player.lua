@@ -17,7 +17,6 @@ local frameInfo = {
     health = {
         leftAngle = [[/]],
         rightAngle = [[/]],
-        debug = true
     },
     predict = {
         leftAngle = [[/]],
