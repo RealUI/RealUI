@@ -1,0 +1,15 @@
+Hendrik Leppkes:
+	- Add instance override for the Karazhan Artifact Scenario
+	- Dalaran Underbelly has its own instance ID, apparently.
+	- Properly handle map levels in 7.0
+	GetNumDungeonMapLevels() now returns a list of available map levels instead of
+	a total count.
+	- Add instance override for the Temple of Elune Scenario in Val'sharah
+	- Add a fallback for GetNumDungeonMapLevels, which can return nil on the Legion Alpha.
+	Minor intentionally not bumped since this change is only needed on the alpha,
+	but would need a full data update to take effect, which would only add overhead on live.
+	
+	Reported by Gethe and MysticalOS on IRC, fix tested by MysticalOS.
+	- Add the confirmed Draenor zone finale scenarios to the instance overrides
+	- Add the proper Garrison Level 2 instance IDs
+	Fixes ticket 5.

@@ -62,6 +62,7 @@ local instanceIDOverrides = {
     -- Legion
     [1478] = 1220, -- Temple of Elune Scenario (Val'Sharah)
     [1502] = 1220, -- Dalaran Underbelly
+    [1533] = 0,    -- Karazhan Artifact Scenario
 }
 
 -- unregister and store all WORLD_MAP_UPDATE registrants, to avoid excess processing when

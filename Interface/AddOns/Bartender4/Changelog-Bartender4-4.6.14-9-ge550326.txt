@@ -1,4 +1,6 @@
 Hendrik Leppkes:
+	- Update for Cooldown changes in 7.0.3.21796
+	- Make slug autodetection a bit more robust in localcheck
 	- Disable stance options for classes which do no longer have any.
 	- Fix hook error with the RepBar in Legion
 	- Add AP Bar to the layout presets
