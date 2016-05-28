@@ -20,5 +20,3 @@ end
 function Private.error(...)
 	Private.print("|cffff0000Error:|r "..string.format(...))
 end
-
-Private.isBetaClient = select(4, GetBuildInfo()) >= 70000
