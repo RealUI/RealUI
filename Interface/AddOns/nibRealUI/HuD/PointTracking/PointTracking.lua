@@ -86,6 +86,7 @@ function PointTracking:Unlock()
 end
 
 local function PositionRune(rune, index)
+    PointTracking:debug("PositionRune", rune, index)
     local size = db.size
     local gap, middle, mod = size.gap + 2, (MAX_RUNES / 2) + 0.5
     if index < middle then
@@ -304,11 +305,20 @@ function PointTracking:CreateRunes(unitFrame, unit)
         PositionRune(Rune, index)
 
         local tex = Rune:CreateTexture(nil, "ARTWORK")
-        tex:SetTexture(0.8, 0.8, 0.8)
+        local color = unitFrame.colors.power.RUNES
+        if isBeta then
+            tex:SetColorTexture(color[1], color[2], color[3])
+        else
+            tex:SetTexture(color[1], color[2], color[3])
+        end
         Rune:SetStatusBarTexture(tex)
 
         local runeBG = Rune:CreateTexture(nil, "BACKGROUND")
-        runeBG:SetTexture(0, 0, 0)
+        if isBeta then
+            runeBG:SetColorTexture(0, 0, 0)
+        else
+            runeBG:SetTexture(0, 0, 0)
+        end
         runeBG:SetPoint("TOPLEFT", tex, -1, 1)
         runeBG:SetPoint("BOTTOMRIGHT", tex, 1, -1)
 
