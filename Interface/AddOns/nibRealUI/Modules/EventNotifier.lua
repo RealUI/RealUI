@@ -16,6 +16,7 @@ local EventNotifier = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 local VignetteExclusionMapIDs = {
     [971] = true, -- Lunarfall: Alliance garrison
     [976] = true, -- Frostwall: Horde garrison
+    [1021] = true -- Scenario: The Broken Shore
 }
 local SOUND_TIMEOUT = 20
 
