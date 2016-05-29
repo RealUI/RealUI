@@ -53,15 +53,16 @@ local function SetBarPosition(self, value)
         -- Take the value, and adjust it to within the bounds of the bar.
         if metadata.reverse then
             -- This makes `width` smaller when `value` gets larger and vice versa.
-            width = Lerp(metadata.maxWidth, metadata.minWidth, (value / metadata.maxVal))
+            width = metadata.maxVal == 0 and metadata.maxWidth or Lerp(metadata.maxWidth, metadata.minWidth, (value / metadata.maxVal))
         else
-            width = Lerp(metadata.minWidth, metadata.maxWidth, (value / metadata.maxVal))
+            width = metadata.maxVal == 0 and metadata.minWidth or Lerp(metadata.minWidth, metadata.maxWidth, (value / metadata.maxVal))
         end
         self.bar:SetWidth(width)
         debug(self.debug, "width", width, metadata.minWidth, metadata.maxWidth)
 
         --value = floor(value * metadata.maxVal) / metadata.maxVal
         --debug(self.debug, "Floored", value, metadata.reverse)
+        debug(self.debug, "show", metadata.reverse and value < metadata.maxVal or value > metadata.minVal)
         if metadata.reverse then
             self.bar:SetShown(value < metadata.maxVal)
         else
@@ -284,7 +285,7 @@ end
 
 -- Setting this to true will make the bars fill from right to left
 function api:SetReverseFill(val)
-    debug(self.debug, "SetReverseFill", self, self.bar, val)
+    debug(self.debug, "SetReverseFill", val)
     local metadata = bars[self]
     self.bar:ClearAllPoints()
     if val then
@@ -612,27 +613,53 @@ function RealUI:TestASB(reverseFill, reversePer)
             debug = "testRightRight"
         },
     }
+    local width, height = 100, 10
+    local val, minVal, maxVal = 10, 0, 250
     for i = 1, #info do
         local barInfo = info[i]
-        local test = AngleStatusBar:CreateAngleFrame("Status", 40, 80, _G.UIParent, barInfo)
-        test:SetMinMaxValues(0, 200)
-        test:SetValue(10, true)
-        --test:SetStatusBarColor(1, 0, 0, 1)
-        if reverseFill then
-            test:SetReverseFill(true)
-        end
-        if reversePer then
-            test:SetReversePercent(true)
-        end
+        local test = AngleStatusBar:CreateAngleFrame("Status", width, height, _G.UIParent, barInfo)
+        test:SetMinMaxValues(minVal, maxVal)
+        test:SetValue(val, true)
+        test:SetStatusBarColor(1, 0, 0, 1)
+        test:SetReverseFill(reverseFill)
+        test:SetReversePercent(reversePer)
         if i == 1 then
             test:SetPoint("TOP", _G.UIParent, "CENTER", 0, 0)
         else
             test:SetPoint("TOP", testBars[i-1], "BOTTOM", 0, -10)
         end
         tinsert(testBars, test)
-        test:Show()
-        test.bar:Show()
+        --test:Show()
+        --test.bar:Show()
     end
+
+    -- Normal status bar as a baseline
+    local status = _G.CreateFrame("StatusBar", "RealUITestStatus", _G.UIParent)
+    status:SetPoint("TOP", testBars[#info], "BOTTOM", 0, -10)
+    status:SetSize(width, height)
+
+    local bg = status:CreateTexture(nil, "BACKGROUND")
+    if isBeta then
+        bg:SetColorTexture(1, 1, 1, 0.5)
+    else
+        bg:SetTexture(1, 1, 1, 0.5)
+    end
+    bg:SetAllPoints(status)
+
+    local tex = status:CreateTexture(nil, "ARTWORK")
+    local color = {1,0,0}
+    if isBeta then
+        tex:SetColorTexture(color[1], color[2], color[3])
+    else
+        tex:SetTexture(color[1], color[2], color[3])
+    end
+    status:SetStatusBarTexture(tex)
+
+    status:SetMinMaxValues(minVal, maxVal)
+    status:SetValue(val)
+    status:SetReverseFill(reverseFill)
+
+    tinsert(testBars, status)
 end
 
 -- /run RealUI:TestASBSet("Value", 200)
