@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, ipairs = _G.next, _G.ipairs
 
 -- Libs --
 local HBD = _G.LibStub("HereBeDragons-1.0")
@@ -14,6 +14,8 @@ local db
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+
+local isBeta = RealUI.isBeta
 
 _G.RealUIMinimap = MinimapAdv
 _G.BINDING_HEADER_REALUIMINIMAP = "RealUI Minimap"
@@ -1320,59 +1322,66 @@ local function Farm_OnLeave()
     MinimapAdv:FadeButtons()
 end
 
---[[ Garrison
---The pulse anim that these function call will reset the alpha of the whole button each time it repeats.
---This was the only reliable way I could find to get this button back to full opacity.
-local oldGarrisonMinimapBuilding_ShowPulse = GarrisonMinimapBuilding_ShowPulse
-GarrisonMinimapBuilding_ShowPulse = function(self)
-    print("Pre-hook: Building")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapBuilding_ShowPulse(self)
-end
-local oldGarrisonMinimapMission_ShowPulse = GarrisonMinimapMission_ShowPulse
-GarrisonMinimapMission_ShowPulse = function(self)
-    print("Pre-hook: Mission")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapMission_ShowPulse(self)
-end
-local oldGarrisonMinimapInvasion_ShowPulse = GarrisonMinimapInvasion_ShowPulse
-GarrisonMinimapInvasion_ShowPulse = function(self)
-    print("Pre-hook: Invasion")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapInvasion_ShowPulse(self)
-end
-local oldGarrisonMinimapShipmentCreated_ShowPulse = GarrisonMinimapShipmentCreated_ShowPulse
-GarrisonMinimapShipmentCreated_ShowPulse = function(self)
-    print("Pre-hook: Shipment")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapShipmentCreated_ShowPulse(self)
-end
-
---GarrisonLandingPageTutorialBox:Show()
---GarrisonMinimapMission_ShowPulse(GarrisonLandingPageMinimapButton)
-
-local function hookfunc(self, lock, enabled)
-    print("hookfunc", self, lock, enabled)
-    if enabled then
-        self:SetAlpha(1)
-    else
-        self:SetAlpha(0)
+--[[ Garrison ]]--
+-- GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Play()
+-- ShowGarrisonPulse(GarrisonLandingPageMinimapButton)
+local function ShowGarrisonPulse(self)
+    local isPlaying = self.MinimapLoopPulseAnim:IsPlaying()
+    MinimapAdv:debug("ShowGarrisonPulse", isPlaying)
+    self.MinimapLoopPulseAnim:Stop()
+    self.shouldShow = true
+    fadeIn(self)
+    if isPlaying then
+        _G.C_Timer.After(1, function()
+            self.MinimapLoopPulseAnim:Play()
+        end)
     end
 end
 
-local function Garrison_OnLeave(self)
-    fadeOut(self)
+local isPulseEvent = {
+    GARRISON_BUILDING_ACTIVATABLE = true,
+    GARRISON_MISSION_FINISHED = true,
+    GARRISON_INVASION_AVAILABLE = true,
+    SHIPMENT_UPDATE = true,
+}
+
+local function Garrison_OnEvent(self, event, ...)
+    MinimapAdv:debug("Garrison_OnEvent", event, ...)
+    if event == "GARRISON_SHOW_LANDING_PAGE" then
+        local alpha = self:GetAlpha()
+        -- This fires quite often, so only react when the frame is actually shown.
+        if _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
+            fadeIn(self)
+        elseif not self.shouldShow and alpha > 0 then
+            fadeOut(self)
+        end
+    elseif isPulseEvent[event] then
+        ShowGarrisonPulse(self)
+    end
 end
-]]--
+local function Garrison_OnLeave(self)
+    MinimapAdv:debug("Garrison_OnLeave")
+    if not (self.MinimapLoopPulseAnim:IsPlaying() and _G.GarrisonLandingPage:IsShown()) then
+        self.shouldShow = false
+        fadeOut(self)
+    end
+end
 
 local function Garrison_OnEnter(self)
+    MinimapAdv:debug("Garrison_OnEnter")
     local isLeft = db.position.anchorto:find("LEFT")
-    --print("Garrison_OnEnter")
-    _G.GameTooltip:SetOwner(_G.GarrisonLandingPageMinimapButton, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"));
-    _G.GameTooltip:SetText(_G.GARRISON_LANDING_PAGE_TITLE, 1, 1, 1);
-    _G.GameTooltip:AddLine(_G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP, nil, nil, nil, true);
-    _G.GameTooltip:Show();
-    --fadeIn(self)
+    _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
+    _G.GameTooltip:SetText(self.title, 1, 1, 1)
+    _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
+    if isBeta and (_G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0) then
+        local categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+        for index, category in ipairs(categoryInfo) do
+            _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit))
+        end
+    end
+    _G.GameTooltip:Show()
+    self.shouldShow = true
+    fadeIn(self)
 end
 
 ---- Minimap
@@ -1475,6 +1484,27 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             _G.TimeManagerClockButton:Hide()
         end)
         _G.TimeManagerClockButton:Hide()
+    elseif addon == "Blizzard_GarrisonUI" then
+        _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
+        local GLPButton = _G.GarrisonLandingPageMinimapButton
+        GLPButton:SetParent(_G.Minimap)
+        GLPButton:SetAlpha(0)
+        GLPButton:ClearAllPoints()
+        GLPButton:SetPoint("TOPRIGHT", 2, 2)
+        GLPButton:SetSize(32, 32)
+        GLPButton:HookScript("OnEvent", Garrison_OnEvent)
+        GLPButton:HookScript("OnLeave", Garrison_OnLeave)
+        GLPButton:SetScript("OnEnter", Garrison_OnEnter)
+        GLPButton.shouldShow = false
+
+        if not isBeta then
+            GLPButton.title = _G.GARRISON_LANDING_PAGE_TITLE
+            GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
+        end
+    elseif addon == "Blizzard_OrderHallUI" then
+        _G.hooksecurefunc("OrderHall_CheckCommandBar", function()
+            _G.OrderHallCommandBar:Hide()
+        end)
     end
 end
 
@@ -1735,18 +1765,6 @@ local function SetUpMinimapFrame()
     _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
     _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
     _G.QueueStatusMinimapButtonBorder:Hide()
-
-    _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
-    --GarrisonLandingPageMinimapButton:SetAlpha(0)
-    _G.GarrisonLandingPageMinimapButton:SetParent(_G.Minimap)
-    _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-    _G.GarrisonLandingPageMinimapButton:SetPoint("TOPRIGHT", 2, 2)
-    _G.GarrisonLandingPageMinimapButton:SetSize(32, 32)
-    --GarrisonLandingPageMinimapButton:HookScript("OnEvent", Garrison_OnEvent)
-    --GarrisonLandingPageMinimapButton:HookScript("OnLeave", Garrison_OnLeave)
-    _G.GarrisonLandingPageMinimapButton:SetScript("OnEnter", Garrison_OnEnter)
-    --hooksecurefunc("GarrisonMinimap_SetPulseLock", hookfunc)
-
 
     _G.MinimapNorthTag:SetAlpha(0)
 
