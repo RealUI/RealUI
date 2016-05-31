@@ -1566,15 +1566,15 @@ function MinimapAdv:RegEvents()
     self.LastX = 0
     self.LastY = 0
     self.StationaryTime = 0
-    -- self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
     local function MovementTimerUpdate()
         MinimapAdv:MovementUpdate()
     end
-    self.CoordsTicker = _G.C_Timer.NewTicker(0.5, MovementTimerUpdate)
-    -- end)
-    -- self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
-        -- self.CoordsTicker:Cancel()
-    -- end)
+    self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
+        self.CoordsTicker = _G.C_Timer.NewTicker(0.5, MovementTimerUpdate)
+    end)
+    self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
+        self.CoordsTicker:Cancel()
+    end)
 end
 
 --------------------------
