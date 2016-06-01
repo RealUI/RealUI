@@ -99,7 +99,11 @@ function EventNotifier:VIGNETTE_ADDED(event, vigID)
         if (_G.GetTime() > self.lastMinimapRare.time + SOUND_TIMEOUT) then
             _G.PlaySoundFile([[Sound\Interface\RaidWarning.wav]])
         end
-        RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\ObjectIconsAtlas]], left, right, top, bottom)
+        if RealUI.isBeta then
+            RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\ObjectIconsAtlas]], left, right, top, bottom)
+        else
+            RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\OBJECTICONS]], left, right, top, bottom)
+        end
     end
 
     -- Set last Vignette data

@@ -1332,7 +1332,7 @@ local function ShowGarrisonPulse(self)
     self.shouldShow = true
     fadeIn(self)
     if isPlaying then
-        _G.C_Timer.After(1, function()
+        _G.C_Timer.After(0.2, function()
             self.MinimapLoopPulseAnim:Play()
         end)
     end
@@ -1502,6 +1502,7 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
         end
     elseif addon == "Blizzard_OrderHallUI" then
+        _G.OrderHallCommandBar:Hide()
         _G.hooksecurefunc("OrderHall_CheckCommandBar", function()
             _G.OrderHallCommandBar:Hide()
         end)

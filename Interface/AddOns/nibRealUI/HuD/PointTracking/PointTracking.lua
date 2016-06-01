@@ -292,7 +292,11 @@ function PointTracking:CreateRunes(unitFrame, unit)
     end)
 
     local bg = Runes:CreateTexture()
-    bg:SetTexture(1, 1, 1, 0.5)
+    if isBeta then
+        bg:SetColorTexture(1, 1, 1, 0.5)
+    else
+        bg:SetTexture(1, 1, 1, 0.5)
+    end
     bg:SetAllPoints(Runes)
     bg:Hide()
     Runes.bg = bg
