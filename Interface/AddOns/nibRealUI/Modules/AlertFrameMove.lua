@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, ipairs = _G.next, _G.ipairs
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -15,15 +15,15 @@ AlertFrameHolder:SetWidth(180)
 AlertFrameHolder:SetHeight(20)
 AlertFrameHolder:SetPoint("TOP", _G.UIParent, "TOP", 0, -18)
 
-local AFPosition, AFAnchor, AFYOffset = "TOP", "BOTTOM", -10
+local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
 local IsMoving = false;
 
 local function PostAlertMove(screenQuadrant)
     AlertFrameMove:debug("PostAlertMove", screenQuadrant)
-    AlertFrameMove:debug("Alert points", AFPosition, AFAnchor, AFYOffset)
-    AFPosition = "TOP"
-    AFAnchor = "BOTTOM"
-    AFYOffset = -10
+    AlertFrameMove:debug("Alert points", alertPoint, alertRelPoint, alertYofs)
+    alertPoint = "TOP"
+    alertRelPoint = "BOTTOM"
+    alertYofs = -10
     
     _G.AlertFrame:ClearAllPoints()
     _G.AlertFrame:SetAllPoints(AlertFrameHolder)
@@ -46,14 +46,14 @@ local hooks = {
     Loot = function(alertAnchor)
         if ( _G.MissingLootFrame:IsShown() ) then
             _G.MissingLootFrame:ClearAllPoints()
-            _G.MissingLootFrame:SetPoint(AFPosition, alertAnchor, AFAnchor)
+            _G.MissingLootFrame:SetPoint(alertPoint, alertAnchor, alertRelPoint)
             if ( _G.GroupLootContainer:IsShown() ) then
                 _G.GroupLootContainer:ClearAllPoints()
-                _G.GroupLootContainer:SetPoint(AFPosition, _G.MissingLootFrame, AFAnchor, 0, AFYOffset)
+                _G.GroupLootContainer:SetPoint(alertPoint, _G.MissingLootFrame, alertRelPoint, 0, alertYofs)
             end     
         elseif ( _G.GroupLootContainer:IsShown() or IsMoving) then
             _G.GroupLootContainer:ClearAllPoints()
-            _G.GroupLootContainer:SetPoint(AFPosition, alertAnchor, AFAnchor)  
+            _G.GroupLootContainer:SetPoint(alertPoint, alertAnchor, alertRelPoint)  
         end
     end,
     StorePurchase = _G.StorePurchaseAlertFrame,
@@ -62,7 +62,7 @@ local hooks = {
             local frame = _G.LOOT_WON_ALERT_FRAMES[i]
             if ( frame:IsShown() ) then
                 frame:ClearAllPoints()
-                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                 alertAnchor = frame
             end
         end
@@ -72,7 +72,7 @@ local hooks = {
             local frame = _G.LOOT_UPGRADE_ALERT_FRAMES[i]
             if ( frame:IsShown() ) then
                 frame:ClearAllPoints()
-                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                 alertAnchor = frame
             end
         end
@@ -82,7 +82,7 @@ local hooks = {
             local frame = _G.MONEY_WON_ALERT_FRAMES[i]
             if ( frame:IsShown() ) then
                 frame:ClearAllPoints()
-                frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                 alertAnchor = frame
             end
         end
@@ -93,7 +93,7 @@ local hooks = {
                 local frame = _G["AchievementAlertFrame"..i]
                 if ( frame and frame:IsShown() ) then
                     frame:ClearAllPoints()
-                    frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                     alertAnchor = frame
                 end
             end
@@ -105,7 +105,7 @@ local hooks = {
                 local frame = _G["CriteriaAlertFrame"..i]
                 if ( frame and frame:IsShown() ) then
                     frame:ClearAllPoints()
-                    frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                     alertAnchor = frame
                 end
             end
@@ -148,9 +148,9 @@ function AlertFrameMove:AlertMovers()
             local frame = func
             function func(alertAnchor)
                 if frame and frame:IsShown() then
-                    AlertFrameMove:debug(name..": IsShown", AFPosition, AFAnchor, AFYOffset)
+                    AlertFrameMove:debug(name..": IsShown", alertPoint, alertRelPoint, alertYofs)
                     frame:ClearAllPoints()
-                    frame:SetPoint(AFPosition, alertAnchor, AFAnchor, 0, AFYOffset)
+                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
                     alertAnchor = frame  -- luacheck: ignore
                 end
             end
@@ -170,6 +170,73 @@ function AlertFrameMove:AlertMovers()
     end)
 end
 
+--[[ Legion ]]--
+local function QueueAdjustAnchors(self, relativeAlert)
+    for alertFrame in self.alertFramePool:EnumerateActive() do
+        AlertFrameMove:debug("Queue", alertFrame, alertPoint, relativeAlert:GetName() or relativeAlert, alertRelPoint, alertYofs)
+        alertFrame:ClearAllPoints()
+        alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+        relativeAlert = alertFrame
+    end
+    return relativeAlert
+end
+local function SimpleAdjustAnchors(self, relativeAlert)
+    if self.alertFrame:IsShown() then
+        AlertFrameMove:debug("Simple", self.alertFrame:GetName(), alertPoint, relativeAlert:GetName(), alertRelPoint, alertYofs)
+        self.alertFrame:ClearAllPoints()
+        self.alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+        return self.alertFrame
+    end
+    return relativeAlert
+end
+local function AnchorAdjustAnchors(self, relativeAlert)
+    if self.anchorFrame:IsShown() then
+        AlertFrameMove:debug("Anchor:AdjustAnchors", relativeAlert:GetName())
+        return self.anchorFrame;
+    end
+    return relativeAlert
+end
+
+local function SetUpAlert()
+    AlertFrameMove:debug("SetUpAlert")
+    _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", function(self)
+        self:ClearAllPoints()
+        self:SetAllPoints(AlertFrameHolder)
+    end)
+    for i, alertFrameSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
+        if alertFrameSubSystem.QueueAlert then
+            local frame = alertFrameSubSystem.alertFramePool:GetNextActive()
+            AlertFrameMove:debug(i, "Queue system", frame and frame:GetName())
+            alertFrameSubSystem.AdjustAnchors = QueueAdjustAnchors
+            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", QueueAdjustAnchors)
+        elseif alertFrameSubSystem.AddAlert then
+            AlertFrameMove:debug(i, "Simple system", alertFrameSubSystem.alertFrame:GetName())
+            alertFrameSubSystem.AdjustAnchors = SimpleAdjustAnchors
+            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", SimpleAdjustAnchors)
+        else
+            AlertFrameMove:debug(i, "Anchor system")
+            alertFrameSubSystem.AdjustAnchors = AnchorAdjustAnchors
+            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", AnchorAdjustAnchors)
+        end
+    end
+end
+----------
+local alertTest
+function AlertFrameMove:OnInitialize()
+    self:SetEnabledState(true)
+
+    local AceConfig = _G.LibStub("AceConfig-3.0")
+    AceConfig:RegisterOptionsTable("alertTest", alertTest, "alertTest")
+end
+
+function AlertFrameMove:OnEnable()
+    if RealUI.isBeta then
+        SetUpAlert()
+    else
+        self:AlertMovers()
+    end
+end
+
 function RealUI:AlertFrameTest()
     _G.LibStub("AceConfigDialog-3.0"):Open("alertTest")
 end
@@ -183,7 +250,7 @@ local ID = {
     quest = 42114,
     archRace = 1, -- Dwarf
 }
-local alertTest do
+do
     local achievementAlerts do
         local achievementID = 6348
         achievementAlerts = {
@@ -332,7 +399,7 @@ local alertTest do
                     desc = "GarrisonMissionAlertSystem",
                     type = "execute",
                     func = function()
-                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_6_0)[1]
+                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
                         _G.GarrisonMissionAlertSystem:AddAlert(mission.missionID)
                     end,
                 },
@@ -341,13 +408,14 @@ local alertTest do
                     desc = "GarrisonFollowerAlertSystem",
                     type = "execute",
                     func = function()
-                        local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_GARRISON_6_0)[1]
+                        local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
                         _G.GarrisonFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.level, follower.quality)
                     end,
                 },
                 missionShip = {
                     name = "Garrison Ship Mission",
                     desc = "GarrisonShipMissionAlertSystem",
+                    disabled = _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0,
                     type = "execute",
                     func = function()
                         local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1] 
@@ -357,6 +425,7 @@ local alertTest do
                 followerShip = {
                     name = "Garrison Ship Follower",
                     desc = "GarrisonShipFollowerAlertSystem",
+                    disabled = _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0,
                     type = "execute",
                     func = function()
                         local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
@@ -443,18 +512,4 @@ local alertTest do
             miscAlerts = miscAlerts,
         }
     }
-end
-
-----------
-function AlertFrameMove:OnInitialize()
-    self:SetEnabledState(true)
-
-    local AceConfig = _G.LibStub("AceConfig-3.0")
-    AceConfig:RegisterOptionsTable("alertTest", alertTest, {"/alertTest"})
-end
-
-function AlertFrameMove:OnEnable()
-    if not RealUI.isBeta then
-        self:AlertMovers()
-    end
 end
