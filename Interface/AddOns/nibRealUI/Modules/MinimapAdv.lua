@@ -1355,7 +1355,7 @@ local function Garrison_OnEvent(self, event, ...)
     if event == "GARRISON_SHOW_LANDING_PAGE" then
         local alpha = self:GetAlpha()
         -- This fires quite often, so only react when the frame is actually shown.
-        if _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
+        if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
             fadeIn(self)
         elseif not self.shouldShow and alpha > 0 then
             fadeOut(self)
@@ -1371,7 +1371,6 @@ local function Garrison_OnLeave(self)
         fadeOut(self)
     end
 end
-
 local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
     local isLeft = db.position.anchorto:find("LEFT")
@@ -1467,10 +1466,6 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     _G.GameTimeFrame:Hide()
     _G.GameTimeFrame.Show = function() end
 
-    if isBeta and _G.OrderHallCommandBar then
-        _G.OrderHallCommandBar:Hide()
-    end
-
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update
     self:UpdateMinimapPosition()
@@ -1493,24 +1488,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             _G.TimeManagerClockButton:Hide()
         end)
         _G.TimeManagerClockButton:Hide()
-    elseif addon == "Blizzard_GarrisonUI" then
-        _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
-        local GLPButton = _G.GarrisonLandingPageMinimapButton
-        GLPButton:SetParent(_G.Minimap)
-        GLPButton:SetAlpha(0)
-        GLPButton:ClearAllPoints()
-        GLPButton:SetPoint("TOPRIGHT", 2, 2)
-        GLPButton:SetSize(32, 32)
-        GLPButton:HookScript("OnEvent", Garrison_OnEvent)
-        GLPButton:HookScript("OnLeave", Garrison_OnLeave)
-        GLPButton:SetScript("OnEnter", Garrison_OnEnter)
-        GLPButton.shouldShow = false
-
-        if not isBeta then
-            GLPButton.title = _G.GARRISON_LANDING_PAGE_TITLE
-            GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
-        end
     elseif addon == "Blizzard_OrderHallUI" then
+        _G.C_Timer.After(0.1, HideCommandBar)
         _G.OrderHallCommandBar.SetShown = HideCommandBar
         _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
@@ -1773,6 +1752,23 @@ local function SetUpMinimapFrame()
     _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
     _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
     _G.QueueStatusMinimapButtonBorder:Hide()
+
+    _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
+    local GLPButton = _G.GarrisonLandingPageMinimapButton
+    GLPButton:SetParent(_G.Minimap)
+    GLPButton:SetAlpha(0)
+    GLPButton:ClearAllPoints()
+    GLPButton:SetPoint("TOPRIGHT", 2, 2)
+    GLPButton:SetSize(32, 32)
+    GLPButton:HookScript("OnEvent", Garrison_OnEvent)
+    GLPButton:HookScript("OnLeave", Garrison_OnLeave)
+    GLPButton:SetScript("OnEnter", Garrison_OnEnter)
+    GLPButton.shouldShow = false
+
+    if not isBeta then
+        GLPButton.title = _G.GARRISON_LANDING_PAGE_TITLE
+        GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
+    end
 
     _G.MinimapNorthTag:SetAlpha(0)
 
