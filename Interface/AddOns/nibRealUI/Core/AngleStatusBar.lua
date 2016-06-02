@@ -33,12 +33,11 @@ if isBeta then
     FrameDeltaLerp = _G.FrameDeltaLerp
 else
     local function GetTickTime()
-        return RealUI.Round(1000 / _G.GetFramerate())
+        return RealUI.Round((1000 / _G.GetFramerate())) / 1000
     end
     local TARGET_FRAME_PER_SEC = 60.0
-    local TARGET_MS_PER_FRAME = TARGET_FRAME_PER_SEC / 1000
     function FrameDeltaLerp(startValue, endValue, amount)
-        return Lerp(startValue, endValue, RealUI.Clamp(amount * GetTickTime() * TARGET_MS_PER_FRAME, 0.0, 1.0))
+        return Lerp(startValue, endValue, RealUI.Clamp(amount * GetTickTime() * TARGET_FRAME_PER_SEC, 0.0, 1.0))
     end
 end
 
@@ -95,7 +94,7 @@ end
 local function ProcessSmoothStatusBars()
     for bar, targetValue in next, smoothBars do
         local newValue = FrameDeltaLerp(bar.value or bars[bar].value, targetValue, .25)
-        if abs(newValue, targetValue) < .005 then
+        if abs(newValue - targetValue) < .005 then
             smoothBars[bar] = nil
         end
 
