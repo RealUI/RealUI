@@ -1325,6 +1325,11 @@ end
 --[[ Garrison ]]--
 -- GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Play()
 -- ShowGarrisonPulse(GarrisonLandingPageMinimapButton)
+local function HideCommandBar(...)
+    MinimapAdv:debug("HideCommandBar", ...)
+    _G.OrderHallCommandBar:Hide()
+end
+
 local function ShowGarrisonPulse(self)
     local isPlaying = self.MinimapLoopPulseAnim:IsPlaying()
     MinimapAdv:debug("ShowGarrisonPulse", isPlaying)
@@ -1462,6 +1467,10 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     _G.GameTimeFrame:Hide()
     _G.GameTimeFrame.Show = function() end
 
+    if isBeta and _G.OrderHallCommandBar then
+        _G.OrderHallCommandBar:Hide()
+    end
+
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update
     self:UpdateMinimapPosition()
@@ -1502,10 +1511,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
         end
     elseif addon == "Blizzard_OrderHallUI" then
-        _G.OrderHallCommandBar:Hide()
-        _G.hooksecurefunc("OrderHall_CheckCommandBar", function()
-            _G.OrderHallCommandBar:Hide()
-        end)
+        _G.OrderHallCommandBar.SetShown = HideCommandBar
+        _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
 end
 
