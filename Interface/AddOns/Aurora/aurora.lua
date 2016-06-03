@@ -31,7 +31,7 @@ C.classcolours = {
 	["SHAMAN"] = { r = 0, g = 0.6, b = 0.6 };
 	["WARRIOR"] = { r = 0.9, g = 0.65, b = 0.45 },
 	["DEATHKNIGHT"] = { r = 0.77, g = 0.12 , b = 0.23 },
-    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
+	["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
 }
 
 C.media = {
@@ -161,7 +161,7 @@ F.Reskin = function(f, noHighlight)
 
 	if not noHighlight then
 		f:HookScript("OnEnter", colourButton)
- 		f:HookScript("OnLeave", clearButton)
+		f:HookScript("OnLeave", clearButton)
 	end
 end
 
@@ -314,22 +314,22 @@ end
 local function colourClose(f)
 	if f:IsEnabled() then
 		for _, pixel in pairs(f.pixels) do
-		    if C.isBetaClient then
-		        pixel:SetColorTexture(r, g, b)
-		    else
-		        pixel:SetVertexColor(r, g, b)
-		    end
+			if C.isBetaClient then
+				pixel:SetColorTexture(r, g, b)
+			else
+				pixel:SetVertexColor(r, g, b)
+			end
 		end
 	end
 end
 
 local function clearClose(f)
 	for _, pixel in pairs(f.pixels) do
-	    if C.isBetaClient then
-	        pixel:SetColorTexture(1, 1, 1)
-	    else
-	        pixel:SetVertexColor(1, 1, 1)
-	    end
+		if C.isBetaClient then
+			pixel:SetColorTexture(1, 1, 1)
+		else
+			pixel:SetVertexColor(1, 1, 1)
+		end
 	end
 end
 
@@ -366,13 +366,13 @@ F.ReskinClose = function(f, a1, p, a2, x, y)
 			local line = f:CreateLine()
 			line:SetColorTexture(1, 1, 1)
 			line:SetThickness(0.5)
-	        if i == 1 then
-	            line:SetStartPoint("TOPLEFT", lineOfs, -lineOfs)
-	            line:SetEndPoint("BOTTOMRIGHT", -lineOfs, lineOfs)
-	        else
-	            line:SetStartPoint("TOPRIGHT", -lineOfs, -lineOfs)
-	            line:SetEndPoint("BOTTOMLEFT", lineOfs, lineOfs)
-	        end
+			if i == 1 then
+				line:SetStartPoint("TOPLEFT", lineOfs, -lineOfs)
+				line:SetEndPoint("BOTTOMRIGHT", -lineOfs, lineOfs)
+			else
+				line:SetStartPoint("TOPRIGHT", -lineOfs, -lineOfs)
+				line:SetEndPoint("BOTTOMLEFT", lineOfs, lineOfs)
+			end
 			tinsert(f.pixels, line)
 		end
 	else
@@ -394,7 +394,7 @@ F.ReskinClose = function(f, a1, p, a2, x, y)
 	end
 
 	f:HookScript("OnEnter", colourClose)
- 	f:HookScript("OnLeave", clearClose)
+	f:HookScript("OnLeave", clearClose)
 end
 
 F.ReskinInput = function(f, height, width)
@@ -627,11 +627,11 @@ F.ReskinColourSwatch = function(f)
 	nt:SetPoint("TOPLEFT", 3, -3)
 	nt:SetPoint("BOTTOMRIGHT", -3, 3)
 
-    if C.isBetaClient then
-        bg:SetColorTexture(0, 0, 0)
-    else
-        bg:SetTexture(0, 0, 0)
-    end
+	if C.isBetaClient then
+		bg:SetColorTexture(0, 0, 0)
+	else
+		bg:SetTexture(0, 0, 0)
+	end
 	bg:SetPoint("TOPLEFT", 2, -2)
 	bg:SetPoint("BOTTOMRIGHT", -2, 2)
 end
@@ -683,11 +683,11 @@ F.ReskinGarrisonPortrait = function(portrait)
 	portrait.PortraitRing:Hide()
 	portrait.PortraitRingQuality:SetTexture("")
 
-    if C.isBetaClient then
-        portrait.LevelBorder:SetColorTexture(0, 0, 0, 0.5)
-    else
-        portrait.LevelBorder:SetTexture(0, 0, 0, 0.5)
-    end
+	if C.isBetaClient then
+		portrait.LevelBorder:SetColorTexture(0, 0, 0, 0.5)
+	else
+		portrait.LevelBorder:SetTexture(0, 0, 0, 0.5)
+	end
 	portrait.LevelBorder:SetSize(44, 11)
 	portrait.LevelBorder:ClearAllPoints()
 	portrait.LevelBorder:SetPoint("BOTTOM", 0, 12)
@@ -703,11 +703,11 @@ F.ReskinGarrisonPortrait = function(portrait)
 	portrait.squareBG = squareBG
 
 	if cover then
-	    if C.isBetaClient then
-	        cover:SetColorTexture(0, 0, 0)
-	    else
-	        cover:SetTexture(0, 0, 0)
-	    end
+		if C.isBetaClient then
+			cover:SetColorTexture(0, 0, 0)
+		else
+			cover:SetTexture(0, 0, 0)
+		end
 		cover:SetAllPoints(squareBG)
 	end
 end
@@ -892,7 +892,10 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- [[ Scroll bars ]]
 
-		local scrollbars = {"CharacterStatsPaneScrollBar", "LFDQueueFrameSpecificListScrollFrameScrollBar", "HelpFrameKnowledgebaseScrollFrameScrollBar", "HelpFrameReportBugScrollFrameScrollBar", "HelpFrameSubmitSuggestionScrollFrameScrollBar", "PaperDollTitlesPaneScrollBar", "PaperDollEquipmentManagerPaneScrollBar", "RaidInfoScrollFrameScrollBar", "FriendsFriendsScrollFrameScrollBar", "HelpFrameGM_ResponseScrollFrame1ScrollBar", "HelpFrameGM_ResponseScrollFrame2ScrollBar", "HelpFrameKnowledgebaseScrollFrame2ScrollBar", "WhoListScrollFrameScrollBar", "GearManagerDialogPopupScrollFrameScrollBar", "LFDQueueFrameRandomScrollFrameScrollBar", "ScrollOfResurrectionSelectionFrameListScrollFrameScrollBar", "ChannelRosterScrollFrameScrollBar"}
+		local scrollbars = {"LFDQueueFrameSpecificListScrollFrameScrollBar", "HelpFrameKnowledgebaseScrollFrameScrollBar", "HelpFrameReportBugScrollFrameScrollBar", "HelpFrameSubmitSuggestionScrollFrameScrollBar", "PaperDollTitlesPaneScrollBar", "PaperDollEquipmentManagerPaneScrollBar", "RaidInfoScrollFrameScrollBar", "FriendsFriendsScrollFrameScrollBar", "HelpFrameGM_ResponseScrollFrame1ScrollBar", "HelpFrameGM_ResponseScrollFrame2ScrollBar", "HelpFrameKnowledgebaseScrollFrame2ScrollBar", "WhoListScrollFrameScrollBar", "GearManagerDialogPopupScrollFrameScrollBar", "LFDQueueFrameRandomScrollFrameScrollBar", "ScrollOfResurrectionSelectionFrameListScrollFrameScrollBar", "ChannelRosterScrollFrameScrollBar"}
+		if not C.isBetaClient then
+			tinsert(scrollbars, "CharacterStatsPaneScrollBar")
+		end
 		for i = 1, #scrollbars do
 			local scrollbar = _G[scrollbars[i]]
 			if scrollbar then
@@ -963,55 +966,55 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		local createBackdrop = function(parent, texture)
 			local bg = parent:CreateTexture(nil, "BACKGROUND")
-		    if C.isBetaClient then
-		        bg:SetColorTexture(0, 0, 0, 0.5)
-		    else
-		        bg:SetTexture(0, 0, 0, 0.5)
-		    end
+			if C.isBetaClient then
+				bg:SetColorTexture(0, 0, 0, 0.5)
+			else
+				bg:SetTexture(0, 0, 0, 0.5)
+			end
 			bg:SetPoint("CENTER", texture)
 			bg:SetSize(12, 12)
 			parent.bg = bg
 
 			local left = parent:CreateTexture(nil, "BACKGROUND")
 			left:SetWidth(1)
-		    if C.isBetaClient then
-		        left:SetColorTexture(0, 0, 0)
-		    else
-		        left:SetTexture(0, 0, 0)
-		    end
+			if C.isBetaClient then
+				left:SetColorTexture(0, 0, 0)
+			else
+				left:SetTexture(0, 0, 0)
+			end
 			left:SetPoint("TOPLEFT", bg)
 			left:SetPoint("BOTTOMLEFT", bg)
 			parent.left = left
 
 			local right = parent:CreateTexture(nil, "BACKGROUND")
 			right:SetWidth(1)
-		    if C.isBetaClient then
-		        right:SetColorTexture(0, 0, 0)
-		    else
-		        right:SetTexture(0, 0, 0)
-		    end
+			if C.isBetaClient then
+				right:SetColorTexture(0, 0, 0)
+			else
+				right:SetTexture(0, 0, 0)
+			end
 			right:SetPoint("TOPRIGHT", bg)
 			right:SetPoint("BOTTOMRIGHT", bg)
 			parent.right = right
 
 			local top = parent:CreateTexture(nil, "BACKGROUND")
 			top:SetHeight(1)
-		    if C.isBetaClient then
-		        top:SetColorTexture(0, 0, 0)
-		    else
-		        top:SetTexture(0, 0, 0)
-		    end
+			if C.isBetaClient then
+				top:SetColorTexture(0, 0, 0)
+			else
+				top:SetTexture(0, 0, 0)
+			end
 			top:SetPoint("TOPLEFT", bg)
 			top:SetPoint("TOPRIGHT", bg)
 			parent.top = top
 
 			local bottom = parent:CreateTexture(nil, "BACKGROUND")
 			bottom:SetHeight(1)
-		    if C.isBetaClient then
-		        bottom:SetColorTexture(0, 0, 0)
-		    else
-		        bottom:SetTexture(0, 0, 0)
-		    end
+			if C.isBetaClient then
+				bottom:SetColorTexture(0, 0, 0)
+			else
+				bottom:SetTexture(0, 0, 0)
+			end
 			bottom:SetPoint("BOTTOMLEFT", bg)
 			bottom:SetPoint("BOTTOMRIGHT", bg)
 			parent.bottom = bottom
@@ -1099,11 +1102,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 					if not bu.bg then
 						createBackdrop(bu, check)
-					    if C.isBetaClient then
-					        hl:SetColorTexture(r, g, b, .2)
-					    else
-					        hl:SetTexture(r, g, b, .2)
-					    end
+						if C.isBetaClient then
+							hl:SetColorTexture(r, g, b, .2)
+						else
+							hl:SetTexture(r, g, b, .2)
+						end
 						_G["DropDownList"..level.."Button"..j.."UnCheck"]:SetTexture("")
 
 						local arrow = _G["DropDownList"..level.."Button"..j.."ExpandArrow"]
@@ -1139,11 +1142,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		hooksecurefunc("UIDropDownMenu_SetIconImage", function(icon, texture)
 			if texture:find("Divider") then
-			    if C.isBetaClient then
-			        icon:SetColorTexture(1, 1, 1, .2)
-			    else
-			        icon:SetTexture(1, 1, 1, .2)
-			    end
+				if C.isBetaClient then
+					icon:SetColorTexture(1, 1, 1, .2)
+				else
+					icon:SetTexture(1, 1, 1, .2)
+				end
 				icon:SetHeight(1)
 			end
 		end)
@@ -1251,11 +1254,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 					bu.highlight:SetPoint("TOPLEFT", 1, 0)
 					bu.highlight:SetPoint("BOTTOMRIGHT", -1, 0)
 					bu.highlight.SetPoint = F.dummy
-				    if C.isBetaClient then
-				        icon:SetColorTexture(r, g, b, .2)
-				    else
-				        icon:SetTexture(r, g, b, .2)
-				    end
+					if C.isBetaClient then
+						icon:SetColorTexture(r, g, b, .2)
+					else
+						icon:SetTexture(r, g, b, .2)
+					end
 					bu.highlight.SetTexture = F.dummy
 
 					bu.expandIcon:SetTexture("")
@@ -1595,17 +1598,17 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GossipGreetingText:SetTextColor(1, 1, 1)
 
 		NPCFriendshipStatusBar:GetRegions():Hide()
-	    if C.isBetaClient then
+		if C.isBetaClient then
 			NPCFriendshipStatusBarNotch1:SetColorTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch2:SetColorTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch3:SetColorTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch4:SetColorTexture(0, 0, 0)
-	    else
+		else
 			NPCFriendshipStatusBarNotch1:SetTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch2:SetTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch3:SetTexture(0, 0, 0)
 			NPCFriendshipStatusBarNotch4:SetTexture(0, 0, 0)
-	    end
+		end
 		NPCFriendshipStatusBarNotch1:SetSize(1, 16)
 		NPCFriendshipStatusBarNotch2:SetSize(1, 16)
 		NPCFriendshipStatusBarNotch3:SetSize(1, 16)
@@ -1638,11 +1641,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		local function styleTab(bu)
-		    if C.isBetaClient then
-		        bu.selected:SetColorTexture(r, g, b, .2)
-		    else
-		        bu.selected:SetTexture(r, g, b, .2)
-		    end
+			if C.isBetaClient then
+				bu.selected:SetColorTexture(r, g, b, .2)
+			else
+				bu.selected:SetTexture(r, g, b, .2)
+			end
 			bu.selected:SetDrawLayer("BACKGROUND")
 			bu.text:SetFont(C.media.font, 14)
 			F.Reskin(bu, true)
@@ -2090,11 +2093,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		local line = ChatConfigFrame:CreateTexture()
 		line:SetSize(1, 460)
 		line:SetPoint("TOPLEFT", ChatConfigCategoryFrame, "TOPRIGHT")
-	    if C.isBetaClient then
-	        line:SetColorTexture(1, 1, 1, .2)
-	    else
-	        line:SetTexture(1, 1, 1, .2)
-	    end
+		if C.isBetaClient then
+			line:SetColorTexture(1, 1, 1, .2)
+		else
+			line:SetTexture(1, 1, 1, .2)
+		end
 
 		ChatConfigCategoryFrame:SetBackdrop(nil)
 		ChatConfigBackgroundFrame:SetBackdrop(nil)
