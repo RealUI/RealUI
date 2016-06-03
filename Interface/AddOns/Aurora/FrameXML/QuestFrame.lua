@@ -36,7 +36,11 @@ tinsert(C.themes["Aurora"], function()
 	end)
 
 	local line = QuestFrameGreetingPanel:CreateTexture()
-	line:SetTexture(1, 1, 1, .2)
+	if C.isBetaClient then
+		line:SetColorTexture(1, 1, 1, .2)
+	else
+		line:SetTexture(1, 1, 1, .2)
+	end
 	line:SetSize(256, 1)
 	line:SetPoint("CENTER", QuestGreetingFrameHorizontalBreak)
 

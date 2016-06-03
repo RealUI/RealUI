@@ -23,7 +23,11 @@ tinsert(C.themes["Aurora"], function()
 		local line = VideoOptionsFrame:CreateTexture(nil, "ARTWORK")
 		line:SetSize(1, 512)
 		line:SetPoint("LEFT", 205, 30)
-		line:SetTexture(1, 1, 1, .2)
+		if C.isBetaClient then
+			line:SetColorTexture(1, 1, 1, .2)
+		else
+			line:SetTexture(1, 1, 1, .2)
+		end
 
 		Display_:SetBackdrop(nil)
 		Graphics_:SetBackdrop(nil)
@@ -35,7 +39,11 @@ tinsert(C.themes["Aurora"], function()
 		local hline = Display_:CreateTexture(nil, "ARTWORK")
 		hline:SetSize(580, 1)
 		hline:SetPoint("TOPLEFT", GraphicsButton, "BOTTOMLEFT", 14, -4)
-		hline:SetTexture(1, 1, 1, .2)
+		if C.isBetaClient then
+			hline:SetColorTexture(1, 1, 1, .2)
+		else
+			hline:SetTexture(1, 1, 1, .2)
+		end
 
 		F.CreateBD(AudioOptionsSoundPanelPlayback, .25)
 		F.CreateBD(AudioOptionsSoundPanelHardware, .25)

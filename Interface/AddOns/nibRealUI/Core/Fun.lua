@@ -506,7 +506,7 @@ end
 function RealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
-        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
         stripeTex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         stripeTex:SetHorizTile(true)
         stripeTex:SetVertTile(true)

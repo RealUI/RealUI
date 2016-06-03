@@ -48,7 +48,11 @@ C.themes["Blizzard_InspectUI"] = function()
 	for i = 1, 3 do
 		local div = InspectPVPFrame["Div"..i]
 
-		div:SetTexture(1, 1, 1, .2)
+		if C.isBetaClient then
+			div:SetColorTexture(1, 1, 1, .2)
+		else
+			div:SetTexture(1, 1, 1, .2)
+		end
 		div:SetHeight(1)
 	end
 
@@ -132,34 +136,36 @@ C.themes["Blizzard_InspectUI"] = function()
 		bottom:SetPoint("BOTTOMRIGHT", roleIcon, -2, 2)
 	end
 
-	local function updateGlyph(self, clear)
-		local id = self:GetID()
-		local talentGroup = PlayerTalentFrame and PlayerTalentFrame.talentGroup
-		local enabled, glyphType, glyphTooltipIndex, glyphSpell, iconFilename = GetGlyphSocketInfo(id, talentGroup, true, INSPECTED_UNIT);
+	if not C.isBetaClient then
+		local function updateGlyph(self, clear)
+			local id = self:GetID()
+			local talentGroup = PlayerTalentFrame and PlayerTalentFrame.talentGroup
+			local enabled, glyphType, glyphTooltipIndex, glyphSpell, iconFilename = GetGlyphSocketInfo(id, talentGroup, true, INSPECTED_UNIT);
 
-		if not glyphType then return end
+			if not glyphType then return end
 
-		if enabled and glyphSpell and not clear then
-			if iconFilename then
-				self.glyph:SetTexture(iconFilename)
-			else
-				self.glyph:SetTexture("Interface\\Spellbook\\UI-Glyph-Rune1")
+			if enabled and glyphSpell and not clear then
+				if iconFilename then
+					self.glyph:SetTexture(iconFilename)
+				else
+					self.glyph:SetTexture("Interface\\Spellbook\\UI-Glyph-Rune1")
+				end
 			end
 		end
-	end
 
-	hooksecurefunc("InspectGlyphFrameGlyph_UpdateSlot", updateGlyph)
+		hooksecurefunc("InspectGlyphFrameGlyph_UpdateSlot", updateGlyph)
 
-	for i = 1, 6 do
-		local glyph = InspectTalentFrame.InspectGlyphs["Glyph"..i]
+		for i = 1, 6 do
+			local glyph = InspectTalentFrame.InspectGlyphs["Glyph"..i]
 
-		glyph:HookScript("OnShow", updateGlyph)
+			glyph:HookScript("OnShow", updateGlyph)
 
-		glyph.ring:Hide()
+			glyph.ring:Hide()
 
-		glyph.glyph:SetDrawLayer("ARTWORK")
-		glyph.glyph:SetTexCoord(.08, .92, .08, .92)
-		F.CreateBDFrame(glyph.glyph, .25)
+			glyph.glyph:SetDrawLayer("ARTWORK")
+			glyph.glyph:SetTexCoord(.08, .92, .08, .92)
+			F.CreateBDFrame(glyph.glyph, .25)
+		end
 	end
 
 	for i = 1, 4 do

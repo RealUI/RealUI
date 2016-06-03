@@ -111,7 +111,11 @@ tinsert(C.themes["Aurora"], function()
 	F.Reskin(ReagentBankFrameUnlockInfoPurchaseButton)
 
 	-- make button more visible
-	ReagentBankFrameUnlockInfoBlackBG:SetTexture(.1, .1, .1)
+	if C.isBetaClient then
+		ReagentBankFrameUnlockInfoBlackBG:SetColorTexture(.1, .1, .1)
+	else
+		ReagentBankFrameUnlockInfoBlackBG:SetTexture(.1, .1, .1)
+	end
 
 	local reagentButtonsStyled = false
 	ReagentBankFrame:HookScript("OnShow", function()

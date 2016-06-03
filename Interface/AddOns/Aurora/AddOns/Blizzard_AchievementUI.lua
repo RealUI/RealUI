@@ -133,25 +133,41 @@ C.themes["Blizzard_AchievementUI"] = function()
 
 		local left = ch:CreateTexture(nil, "BACKGROUND")
 		left:SetWidth(1)
-		left:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			left:SetColorTexture(0, 0, 0)
+		else
+			left:SetTexture(0, 0, 0)
+		end
 		left:SetPoint("TOPLEFT", tex, -1, 1)
 		left:SetPoint("BOTTOMLEFT", tex, -1, -1)
 
 		local right = ch:CreateTexture(nil, "BACKGROUND")
 		right:SetWidth(1)
-		right:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			right:SetColorTexture(0, 0, 0)
+		else
+			right:SetTexture(0, 0, 0)
+		end
 		right:SetPoint("TOPRIGHT", tex, 1, 1)
 		right:SetPoint("BOTTOMRIGHT", tex, 1, -1)
 
 		local top = ch:CreateTexture(nil, "BACKGROUND")
 		top:SetHeight(1)
-		top:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			top:SetColorTexture(0, 0, 0)
+		else
+			top:SetTexture(0, 0, 0)
+		end
 		top:SetPoint("TOPLEFT", tex, -1, 1)
 		top:SetPoint("TOPRIGHT", tex, 1, -1)
 
 		local bottom = ch:CreateTexture(nil, "BACKGROUND")
 		bottom:SetHeight(1)
-		bottom:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			bottom:SetColorTexture(0, 0, 0)
+		else
+			bottom:SetTexture(0, 0, 0)
+		end
 		bottom:SetPoint("BOTTOMLEFT", tex, -1, -1)
 		bottom:SetPoint("BOTTOMRIGHT", tex, 1, -1)
 	end
@@ -194,7 +210,11 @@ C.themes["Blizzard_AchievementUI"] = function()
 		if not bar.reskinned then
 			bar:SetStatusBarTexture(C.media.backdrop)
 
-			_G["AchievementFrameProgressBar"..index.."BG"]:SetTexture(0, 0, 0, .25)
+			if C.isBetaClient then
+				_G["AchievementFrameProgressBar"..index.."BG"]:SetColorTexture(0, 0, 0, .25)
+			else
+				_G["AchievementFrameProgressBar"..index.."BG"]:SetTexture(0, 0, 0, .25)
+			end
 			_G["AchievementFrameProgressBar"..index.."BorderLeft"]:Hide()
 			_G["AchievementFrameProgressBar"..index.."BorderCenter"]:Hide()
 			_G["AchievementFrameProgressBar"..index.."BorderRight"]:Hide()

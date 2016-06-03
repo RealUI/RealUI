@@ -124,37 +124,71 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
 
             -- Selected aura border/sizer
             local moversizer = children[13+tutOfs]
-            moversizer.bl.l:SetTexture(r, g, b, .8)
-            moversizer.bl.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
-            moversizer.bl.b:SetTexture(r, g, b, .8)
+            if _G.RealUI.isBeta then
+                moversizer.bl.l:SetColorTexture(r, g, b, .8)
+                moversizer.bl.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.bl.b:SetColorTexture(r, g, b, .8)
 
-            moversizer.br.r:SetTexture(r, g, b, .8)
-            moversizer.br.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
-            moversizer.br.b:SetTexture(r, g, b, .8)
+                moversizer.br.r:SetColorTexture(r, g, b, .8)
+                moversizer.br.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
+                moversizer.br.b:SetColorTexture(r, g, b, .8)
 
-            moversizer.tl.l:SetTexture(r, g, b, .8)
-            moversizer.tl.l:SetPoint("TOPLEFT", moversizer.tl, "TOPLEFT", 1, -1)
-            moversizer.tl.t:SetTexture(r, g, b, .8)
+                moversizer.tl.l:SetColorTexture(r, g, b, .8)
+                moversizer.tl.l:SetPoint("TOPLEFT", moversizer.tl, "TOPLEFT", 1, -1)
+                moversizer.tl.t:SetColorTexture(r, g, b, .8)
 
-            moversizer.tr.r:SetTexture(r, g, b, .8)
-            moversizer.tr.r:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
-            moversizer.tr.t:SetTexture(r, g, b, .8)
+                moversizer.tr.r:SetColorTexture(r, g, b, .8)
+                moversizer.tr.r:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
+                moversizer.tr.t:SetColorTexture(r, g, b, .8)
 
-            moversizer.l.l:SetTexture(r, g, b, .8)
-            moversizer.l.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
-            moversizer.l.l:SetPoint("TOPRIGHT", moversizer.tl, "TOP", 0, -1)
+                moversizer.l.l:SetColorTexture(r, g, b, .8)
+                moversizer.l.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.l.l:SetPoint("TOPRIGHT", moversizer.tl, "TOP", 0, -1)
 
-            moversizer.b.b:SetTexture(r, g, b, .8)
-            moversizer.b.b:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
-            moversizer.b.b:SetPoint("TOPRIGHT", moversizer.br, "RIGHT", -1, 0)
+                moversizer.b.b:SetColorTexture(r, g, b, .8)
+                moversizer.b.b:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.b.b:SetPoint("TOPRIGHT", moversizer.br, "RIGHT", -1, 0)
 
-            moversizer.r.r:SetTexture(r, g, b, .8)
-            moversizer.r.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
-            moversizer.r.r:SetPoint("TOPLEFT", moversizer.tr, "TOP", 0, -1)
+                moversizer.r.r:SetColorTexture(r, g, b, .8)
+                moversizer.r.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
+                moversizer.r.r:SetPoint("TOPLEFT", moversizer.tr, "TOP", 0, -1)
 
-            moversizer.t.t:SetTexture(r, g, b, .8)
-            moversizer.t.t:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
-            moversizer.t.t:SetPoint("BOTTOMLEFT", moversizer.tl, "LEFT", 1, 0)
+                moversizer.t.t:SetColorTexture(r, g, b, .8)
+                moversizer.t.t:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
+                moversizer.t.t:SetPoint("BOTTOMLEFT", moversizer.tl, "LEFT", 1, 0)
+            else
+                moversizer.bl.l:SetTexture(r, g, b, .8)
+                moversizer.bl.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.bl.b:SetTexture(r, g, b, .8)
+
+                moversizer.br.r:SetTexture(r, g, b, .8)
+                moversizer.br.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
+                moversizer.br.b:SetTexture(r, g, b, .8)
+
+                moversizer.tl.l:SetTexture(r, g, b, .8)
+                moversizer.tl.l:SetPoint("TOPLEFT", moversizer.tl, "TOPLEFT", 1, -1)
+                moversizer.tl.t:SetTexture(r, g, b, .8)
+
+                moversizer.tr.r:SetTexture(r, g, b, .8)
+                moversizer.tr.r:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
+                moversizer.tr.t:SetTexture(r, g, b, .8)
+
+                moversizer.l.l:SetTexture(r, g, b, .8)
+                moversizer.l.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.l.l:SetPoint("TOPRIGHT", moversizer.tl, "TOP", 0, -1)
+
+                moversizer.b.b:SetTexture(r, g, b, .8)
+                moversizer.b.b:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
+                moversizer.b.b:SetPoint("TOPRIGHT", moversizer.br, "RIGHT", -1, 0)
+
+                moversizer.r.r:SetTexture(r, g, b, .8)
+                moversizer.r.r:SetPoint("BOTTOMRIGHT", moversizer.br, "BOTTOMRIGHT", -1, 1)
+                moversizer.r.r:SetPoint("TOPLEFT", moversizer.tr, "TOP", 0, -1)
+
+                moversizer.t.t:SetTexture(r, g, b, .8)
+                moversizer.t.t:SetPoint("TOPRIGHT", moversizer.tr, "TOPRIGHT", -1, -1)
+                moversizer.t.t:SetPoint("BOTTOMLEFT", moversizer.tl, "LEFT", 1, 0)
+            end
 
             F.CreateBD(moversizer, .01)
 

@@ -14,7 +14,9 @@ tinsert(C.themes["Aurora"], function()
 	QuestScrollFrame.Background:Hide()
 
 	F.CreateBD(QuestScrollFrame.StoryTooltip)
-	F.Reskin(QuestScrollFrame.ViewAll)
+	if not C.isBetaClient then
+		F.Reskin(QuestScrollFrame.ViewAll)
+	end
 	F.ReskinScroll(QuestScrollFrame.ScrollBar)
 
 	-- Story header
@@ -96,7 +98,9 @@ tinsert(C.themes["Aurora"], function()
 	local QuestLogPopupDetailFrame = QuestLogPopupDetailFrame
 
 	select(18, QuestLogPopupDetailFrame:GetRegions()):Hide()
-	QuestLogPopupDetailFramePageBg:Hide()
+	if not C.isBetaClient then
+		QuestLogPopupDetailFramePageBg:Hide()
+	end
 	QuestLogPopupDetailFrameScrollFrameTop:Hide()
 	QuestLogPopupDetailFrameScrollFrameBottom:Hide()
 	QuestLogPopupDetailFrameScrollFrameMiddle:Hide()

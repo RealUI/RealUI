@@ -65,6 +65,7 @@ C.defaults = {
 C.frames = {}
 
 C.TOC = select(4, GetBuildInfo())
+C.isBetaClient = C.TOC >= 70000
 
 -- [[ Cached variables ]]
 
@@ -313,14 +314,22 @@ end
 local function colourClose(f)
 	if f:IsEnabled() then
 		for _, pixel in pairs(f.pixels) do
-			pixel:SetVertexColor(r, g, b)
+		    if C.isBetaClient then
+		        pixel:SetColorTexture(r, g, b)
+		    else
+		        pixel:SetVertexColor(r, g, b)
+		    end
 		end
 	end
 end
 
 local function clearClose(f)
 	for _, pixel in pairs(f.pixels) do
-		pixel:SetVertexColor(1, 1, 1)
+	    if C.isBetaClient then
+	        pixel:SetColorTexture(1, 1, 1)
+	    else
+	        pixel:SetVertexColor(1, 1, 1)
+	    end
 	end
 end
 
@@ -351,20 +360,37 @@ F.ReskinClose = function(f, a1, p, a2, x, y)
 
 	f.pixels = {}
 
-	for i = 1, 9 do
-		local tex = f:CreateTexture()
-		tex:SetTexture(1, 1, 1)
-		tex:SetSize(1, 1)
-		tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
-		tinsert(f.pixels, tex)
-	end
+	if C.isBetaClient then
+		local lineOfs = 2.5
+		for i = 1, 2 do
+			local line = f:CreateLine()
+			line:SetColorTexture(1, 1, 1)
+			line:SetThickness(0.5)
+	        if i == 1 then
+	            line:SetStartPoint("TOPLEFT", lineOfs, -lineOfs)
+	            line:SetEndPoint("BOTTOMRIGHT", -lineOfs, lineOfs)
+	        else
+	            line:SetStartPoint("TOPRIGHT", -lineOfs, -lineOfs)
+	            line:SetEndPoint("BOTTOMLEFT", lineOfs, lineOfs)
+	        end
+			tinsert(f.pixels, line)
+		end
+	else
+		for i = 1, 9 do
+			local tex = f:CreateTexture()
+			tex:SetTexture(1, 1, 1)
+			tex:SetSize(1, 1)
+			tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
+			tinsert(f.pixels, tex)
+		end
 
-	for i = 1, 9 do
-		local tex = f:CreateTexture()
-		tex:SetTexture(1, 1, 1)
-		tex:SetSize(1, 1)
-		tex:SetPoint("TOPLEFT", 3+i, -3-i)
-		tinsert(f.pixels, tex)
+		for i = 1, 9 do
+			local tex = f:CreateTexture()
+			tex:SetTexture(1, 1, 1)
+			tex:SetSize(1, 1)
+			tex:SetPoint("TOPLEFT", 3+i, -3-i)
+			tinsert(f.pixels, tex)
+		end
 	end
 
 	f:HookScript("OnEnter", colourClose)
@@ -601,7 +627,11 @@ F.ReskinColourSwatch = function(f)
 	nt:SetPoint("TOPLEFT", 3, -3)
 	nt:SetPoint("BOTTOMRIGHT", -3, 3)
 
-	bg:SetTexture(0, 0, 0)
+    if C.isBetaClient then
+        bg:SetColorTexture(0, 0, 0)
+    else
+        bg:SetTexture(0, 0, 0)
+    end
 	bg:SetPoint("TOPLEFT", 2, -2)
 	bg:SetPoint("BOTTOMRIGHT", -2, 2)
 end
@@ -653,7 +683,11 @@ F.ReskinGarrisonPortrait = function(portrait)
 	portrait.PortraitRing:Hide()
 	portrait.PortraitRingQuality:SetTexture("")
 
-	portrait.LevelBorder:SetTexture(0, 0, 0, .5)
+    if C.isBetaClient then
+        portrait.LevelBorder:SetColorTexture(0, 0, 0, 0.5)
+    else
+        portrait.LevelBorder:SetTexture(0, 0, 0, 0.5)
+    end
 	portrait.LevelBorder:SetSize(44, 11)
 	portrait.LevelBorder:ClearAllPoints()
 	portrait.LevelBorder:SetPoint("BOTTOM", 0, 12)
@@ -669,7 +703,11 @@ F.ReskinGarrisonPortrait = function(portrait)
 	portrait.squareBG = squareBG
 
 	if cover then
-		cover:SetTexture(0, 0, 0)
+	    if C.isBetaClient then
+	        cover:SetColorTexture(0, 0, 0)
+	    else
+	        cover:SetTexture(0, 0, 0)
+	    end
 		cover:SetAllPoints(squareBG)
 	end
 end
@@ -843,9 +881,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		local lightbds = {"SecondaryProfession1", "SecondaryProfession2", "SecondaryProfession3", "SecondaryProfession4", "ChatConfigChatSettingsClassColorLegend", "ChatConfigChannelSettingsClassColorLegend", "FriendsFriendsList", "HelpFrameGM_ResponseScrollFrame1", "HelpFrameGM_ResponseScrollFrame2", "AddFriendNoteFrame", "ScrollOfResurrectionSelectionFrameList", "HelpFrameReportBugScrollFrame", "HelpFrameSubmitSuggestionScrollFrame", "ReportPlayerNameDialogCommentFrame", "ReportCheatingDialogCommentFrame"}
-		if FriendsFriendsNoteFrame then
-			tinsert(lightbds, "FriendsFriendsNoteFrame")
-		end
 		for i = 1, #lightbds do
 			local bd = _G[lightbds[i]]
 			if bd then
@@ -928,35 +963,55 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		local createBackdrop = function(parent, texture)
 			local bg = parent:CreateTexture(nil, "BACKGROUND")
-			bg:SetTexture(0, 0, 0, .5)
+		    if C.isBetaClient then
+		        bg:SetColorTexture(0, 0, 0, 0.5)
+		    else
+		        bg:SetTexture(0, 0, 0, 0.5)
+		    end
 			bg:SetPoint("CENTER", texture)
 			bg:SetSize(12, 12)
 			parent.bg = bg
 
 			local left = parent:CreateTexture(nil, "BACKGROUND")
 			left:SetWidth(1)
-			left:SetTexture(0, 0, 0)
+		    if C.isBetaClient then
+		        left:SetColorTexture(0, 0, 0)
+		    else
+		        left:SetTexture(0, 0, 0)
+		    end
 			left:SetPoint("TOPLEFT", bg)
 			left:SetPoint("BOTTOMLEFT", bg)
 			parent.left = left
 
 			local right = parent:CreateTexture(nil, "BACKGROUND")
 			right:SetWidth(1)
-			right:SetTexture(0, 0, 0)
+		    if C.isBetaClient then
+		        right:SetColorTexture(0, 0, 0)
+		    else
+		        right:SetTexture(0, 0, 0)
+		    end
 			right:SetPoint("TOPRIGHT", bg)
 			right:SetPoint("BOTTOMRIGHT", bg)
 			parent.right = right
 
 			local top = parent:CreateTexture(nil, "BACKGROUND")
 			top:SetHeight(1)
-			top:SetTexture(0, 0, 0)
+		    if C.isBetaClient then
+		        top:SetColorTexture(0, 0, 0)
+		    else
+		        top:SetTexture(0, 0, 0)
+		    end
 			top:SetPoint("TOPLEFT", bg)
 			top:SetPoint("TOPRIGHT", bg)
 			parent.top = top
 
 			local bottom = parent:CreateTexture(nil, "BACKGROUND")
 			bottom:SetHeight(1)
-			bottom:SetTexture(0, 0, 0)
+		    if C.isBetaClient then
+		        bottom:SetColorTexture(0, 0, 0)
+		    else
+		        bottom:SetTexture(0, 0, 0)
+		    end
 			bottom:SetPoint("BOTTOMLEFT", bg)
 			bottom:SetPoint("BOTTOMRIGHT", bg)
 			parent.bottom = bottom
@@ -1044,7 +1099,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 					if not bu.bg then
 						createBackdrop(bu, check)
-						hl:SetTexture(r, g, b, .2)
+					    if C.isBetaClient then
+					        hl:SetColorTexture(r, g, b, .2)
+					    else
+					        hl:SetTexture(r, g, b, .2)
+					    end
 						_G["DropDownList"..level.."Button"..j.."UnCheck"]:SetTexture("")
 
 						local arrow = _G["DropDownList"..level.."Button"..j.."ExpandArrow"]
@@ -1080,7 +1139,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		hooksecurefunc("UIDropDownMenu_SetIconImage", function(icon, texture)
 			if texture:find("Divider") then
-				icon:SetTexture(1, 1, 1, .2)
+			    if C.isBetaClient then
+			        icon:SetColorTexture(1, 1, 1, .2)
+			    else
+			        icon:SetTexture(1, 1, 1, .2)
+			    end
 				icon:SetHeight(1)
 			end
 		end)
@@ -1188,7 +1251,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 					bu.highlight:SetPoint("TOPLEFT", 1, 0)
 					bu.highlight:SetPoint("BOTTOMRIGHT", -1, 0)
 					bu.highlight.SetPoint = F.dummy
-					bu.highlight:SetTexture(r, g, b, .2)
+				    if C.isBetaClient then
+				        icon:SetColorTexture(r, g, b, .2)
+				    else
+				        icon:SetTexture(r, g, b, .2)
+				    end
 					bu.highlight.SetTexture = F.dummy
 
 					bu.expandIcon:SetTexture("")
@@ -1528,13 +1595,20 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GossipGreetingText:SetTextColor(1, 1, 1)
 
 		NPCFriendshipStatusBar:GetRegions():Hide()
-		NPCFriendshipStatusBarNotch1:SetTexture(0, 0, 0)
+	    if C.isBetaClient then
+			NPCFriendshipStatusBarNotch1:SetColorTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch2:SetColorTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch3:SetColorTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch4:SetColorTexture(0, 0, 0)
+	    else
+			NPCFriendshipStatusBarNotch1:SetTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch2:SetTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch3:SetTexture(0, 0, 0)
+			NPCFriendshipStatusBarNotch4:SetTexture(0, 0, 0)
+	    end
 		NPCFriendshipStatusBarNotch1:SetSize(1, 16)
-		NPCFriendshipStatusBarNotch2:SetTexture(0, 0, 0)
 		NPCFriendshipStatusBarNotch2:SetSize(1, 16)
-		NPCFriendshipStatusBarNotch3:SetTexture(0, 0, 0)
 		NPCFriendshipStatusBarNotch3:SetSize(1, 16)
-		NPCFriendshipStatusBarNotch4:SetTexture(0, 0, 0)
 		NPCFriendshipStatusBarNotch4:SetSize(1, 16)
 		select(7, NPCFriendshipStatusBar:GetRegions()):Hide()
 
@@ -1564,7 +1638,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		end
 
 		local function styleTab(bu)
-			bu.selected:SetTexture(r, g, b, .2)
+		    if C.isBetaClient then
+		        bu.selected:SetColorTexture(r, g, b, .2)
+		    else
+		        bu.selected:SetTexture(r, g, b, .2)
+		    end
 			bu.selected:SetDrawLayer("BACKGROUND")
 			bu.text:SetFont(C.media.font, 14)
 			F.Reskin(bu, true)
@@ -1768,40 +1846,26 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		-- Missing loot frame
 
-		MissingLootFrameCorner:Hide()
+		if not C.isBetaClient then
+			MissingLootFrameCorner:Hide()
 
-		hooksecurefunc("MissingLootFrame_Show", function()
-			for i = 1, GetNumMissingLootItems() do
-				local bu = _G["MissingLootFrameItem"..i]
+			hooksecurefunc("MissingLootFrame_Show", function()
+				for i = 1, GetNumMissingLootItems() do
+					local bu = _G["MissingLootFrameItem"..i]
 
-				if not bu.styled then
-					_G["MissingLootFrameItem"..i.."NameFrame"]:Hide()
+					if not bu.styled then
+						_G["MissingLootFrameItem"..i.."NameFrame"]:Hide()
 
-					bu.icon:SetTexCoord(.08, .92, .08, .92)
-					F.CreateBG(bu.icon)
+						bu.icon:SetTexCoord(.08, .92, .08, .92)
+						F.CreateBG(bu.icon)
 
-					bu.styled = true
+						bu.styled = true
+					end
 				end
-			end
-		end)
+			end)
 
-		F.CreateBD(MissingLootFrame)
-		F.ReskinClose(MissingLootFramePassButton)
-
-		-- BN conversation
-
-		if BNConversationInviteDialog then
-			BNConversationInviteDialogHeader:SetTexture("")
-
-			F.CreateBD(BNConversationInviteDialog)
-			F.CreateBD(BNConversationInviteDialogList, .25)
-
-			F.Reskin(BNConversationInviteDialogInviteButton)
-			F.Reskin(BNConversationInviteDialogCancelButton)
-			F.ReskinScroll(BNConversationInviteDialogListScrollFrameScrollBar)
-			for i = 1, BN_CONVERSATION_INVITE_NUM_DISPLAYED do
-				F.ReskinCheck(_G["BNConversationInviteDialogListFriend"..i].checkButton)
-			end
+			F.CreateBD(MissingLootFrame)
+			F.ReskinClose(MissingLootFramePassButton)
 		end
 
 		-- Tabard frame
@@ -1834,7 +1898,7 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		GuildRegistrarFrameBottom:Hide()
 		GuildRegistrarFrameMiddle:Hide()
 		select(19, GuildRegistrarFrame:GetRegions()):Hide()
-		if C.TOC < 70000 then
+		if not C.isBetaClient then
 			select(6, GuildRegistrarFrameEditBox:GetRegions()):Hide()
 			select(7, GuildRegistrarFrameEditBox:GetRegions()):Hide()
 		end
@@ -1851,9 +1915,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 
 		select(18, ItemTextFrame:GetRegions()):Hide()
 		InboxFrameBg:Hide()
-		ItemTextScrollFrameMiddle:SetAlpha(0)
-		ItemTextScrollFrameTop:SetAlpha(0)
-		ItemTextScrollFrameBottom:SetAlpha(0)
+		if not C.isBetaClient then
+			ItemTextScrollFrameMiddle:SetAlpha(0)
+			ItemTextScrollFrameTop:SetAlpha(0)
+			ItemTextScrollFrameBottom:SetAlpha(0)
+		end
 		ItemTextPrevPageButton:GetRegions():Hide()
 		ItemTextNextPageButton:GetRegions():Hide()
 		ItemTextMaterialTopLeft:SetAlpha(0)
@@ -2024,7 +2090,11 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		local line = ChatConfigFrame:CreateTexture()
 		line:SetSize(1, 460)
 		line:SetPoint("TOPLEFT", ChatConfigCategoryFrame, "TOPRIGHT")
-		line:SetTexture(1, 1, 1, .2)
+	    if C.isBetaClient then
+	        line:SetColorTexture(1, 1, 1, .2)
+	    else
+	        line:SetTexture(1, 1, 1, .2)
+	    end
 
 		ChatConfigCategoryFrame:SetBackdrop(nil)
 		ChatConfigBackgroundFrame:SetBackdrop(nil)
@@ -2182,9 +2252,6 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		RaidInfoDetailCorner:Hide()
 		RaidInfoFrameHeader:Hide()
 		for i = 1, 9 do
-			if FriendsFriendsNoteFrame then
-				select(i, FriendsFriendsNoteFrame:GetRegions()):Hide()
-			end
 			select(i, AddFriendNoteFrame:GetRegions()):Hide()
 			select(i, ReportPlayerNameDialogCommentFrame:GetRegions()):Hide()
 			select(i, ReportCheatingDialogCommentFrame:GetRegions()):Hide()
@@ -2222,16 +2289,18 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 		for i = 1, MAX_DISPLAY_CHANNEL_BUTTONS do
 			_G["ChannelButton"..i]:SetNormalTexture("")
 		end
-		CharacterStatsPaneTop:Hide()
-		CharacterStatsPaneBottom:Hide()
-		hooksecurefunc("PaperDollFrame_CollapseStatCategory", function(categoryFrame)
-			categoryFrame.BgMinimized:Hide()
-		end)
-		hooksecurefunc("PaperDollFrame_ExpandStatCategory", function(categoryFrame)
-			categoryFrame.BgTop:Hide()
-			categoryFrame.BgMiddle:Hide()
-			categoryFrame.BgBottom:Hide()
-		end)
+		if not C.isBetaClient then
+			CharacterStatsPaneTop:Hide()
+			CharacterStatsPaneBottom:Hide()
+			hooksecurefunc("PaperDollFrame_CollapseStatCategory", function(categoryFrame)
+				categoryFrame.BgMinimized:Hide()
+			end)
+			hooksecurefunc("PaperDollFrame_ExpandStatCategory", function(categoryFrame)
+				categoryFrame.BgTop:Hide()
+				categoryFrame.BgMiddle:Hide()
+				categoryFrame.BgBottom:Hide()
+			end)
+		end
 		local titles = false
 		hooksecurefunc("PaperDollTitlesPane_Update", function()
 			if titles == false then

@@ -13,19 +13,20 @@ tinsert(C.themes["Aurora"], function()
 	end
 
 	-- [[ Expand button ]]
+	if not C.isBetaClient then
+		CharacterFrameExpandButton:GetNormalTexture():SetAlpha(0)
+		CharacterFrameExpandButton:GetPushedTexture():SetAlpha(0)
 
-	CharacterFrameExpandButton:GetNormalTexture():SetAlpha(0)
-	CharacterFrameExpandButton:GetPushedTexture():SetAlpha(0)
+		F.ReskinArrow(CharacterFrameExpandButton, "left")
 
-	F.ReskinArrow(CharacterFrameExpandButton, "left")
+		CharacterFrameExpandButton:SetPoint("BOTTOMRIGHT", CharacterFrameInset, "BOTTOMRIGHT", -14, 6)
 
-	CharacterFrameExpandButton:SetPoint("BOTTOMRIGHT", CharacterFrameInset, "BOTTOMRIGHT", -14, 6)
+		hooksecurefunc("CharacterFrame_Expand", function()
+			CharacterFrameExpandButton.tex:SetTexture(C.media.arrowLeft)
+		end)
 
-	hooksecurefunc("CharacterFrame_Expand", function()
-		CharacterFrameExpandButton.tex:SetTexture(C.media.arrowLeft)
-	end)
-
-	hooksecurefunc("CharacterFrame_Collapse", function()
-		CharacterFrameExpandButton.tex:SetTexture(C.media.arrowRight)
-	end)
+		hooksecurefunc("CharacterFrame_Collapse", function()
+			CharacterFrameExpandButton.tex:SetTexture(C.media.arrowRight)
+		end)
+	end
 end)
