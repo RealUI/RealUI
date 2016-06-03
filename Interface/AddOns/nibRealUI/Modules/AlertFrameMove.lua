@@ -382,6 +382,9 @@ do
         }
     end
     local garrisonAlerts do
+        local function isDraenorGarrison()
+            return RealUI.isBeta and (_G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0) or true
+        end
         garrisonAlerts = {
             name = "Garrison Alerts",
             type = "group",
@@ -415,7 +418,7 @@ do
                 missionShip = {
                     name = "Garrison Ship Mission",
                     desc = "GarrisonShipMissionAlertSystem",
-                    disabled = _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0,
+                    disabled = not isDraenorGarrison(),
                     type = "execute",
                     func = function()
                         local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1] 
@@ -425,7 +428,7 @@ do
                 followerShip = {
                     name = "Garrison Ship Follower",
                     desc = "GarrisonShipFollowerAlertSystem",
-                    disabled = _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0,
+                    disabled = not isDraenorGarrison(),
                     type = "execute",
                     func = function()
                         local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
