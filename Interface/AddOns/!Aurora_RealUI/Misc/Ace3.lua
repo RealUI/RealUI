@@ -168,6 +168,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget["SetValue"] = function(self,value)
                     local check = self.check
                     self.checked = value
+                    check:SetDesaturated(true)
                     if value then
                         check:SetVertexColor(r, g, b)
                         check:Show()
@@ -200,7 +201,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         elseif TYPE == "ColorPicker" then
             if not widget.skinned then
-                F.CreateBDFrame(widget.colorSwatch)
+                F.CreateBDFrame(widget.colorSwatch, 0)
                 widget.colorSwatch:SetTexture(C.media.backdrop)
                 widget.colorSwatch:SetSize(14, 14)
                 local texture = select(2, widget.frame:GetRegions())
