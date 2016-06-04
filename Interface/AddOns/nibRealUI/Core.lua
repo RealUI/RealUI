@@ -715,7 +715,17 @@ function RealUI:OnInitialize()
         end
         self:FindSpellID(spellName, unit, auraType)
     end)
-    _G.GameMenuFrame:HookScript("OnShow", function() _G.GameMenuFrame:SetHeight(_G.GameMenuFrame:GetHeight() + 27) end)
+    do
+        local settingHeight, heightOfs = false, RealUI.isBeta and 47 or 27
+        _G.hooksecurefunc(_G.GameMenuFrame, "SetHeight", function(menuFrame, height)
+            debug("GameMenuFrame:SetHeight", height, settingHeight)
+            if not settingHeight then
+                settingHeight = true
+                menuFrame:SetHeight(height + heightOfs)
+                settingHeight = false
+            end
+        end)
+    end
 
     -- Synch user's settings
     if dbg.tags.firsttime then
