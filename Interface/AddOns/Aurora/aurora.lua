@@ -1210,18 +1210,20 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 				end
 			end
 
-			hooksecurefunc("PetPaperDollFrame_UpdateIsAvailable", function()
-				if not HasPetUI() then
-					CharacterFrameTab3:SetPoint("LEFT", CharacterFrameTab2, "LEFT", 0, 0)
-				else
-					CharacterFrameTab3:SetPoint("LEFT", CharacterFrameTab2, "RIGHT", -15, 0)
-				end
-			end)
+			if not C.isBetaClient then
+				hooksecurefunc("PetPaperDollFrame_UpdateIsAvailable", function()
+					if not HasPetUI() then
+						CharacterFrameTab3:SetPoint("LEFT", CharacterFrameTab2, "LEFT", 0, 0)
+					else
+						CharacterFrameTab3:SetPoint("LEFT", CharacterFrameTab2, "RIGHT", -15, 0)
+					end
+				end)
 
-			PetModelFrameRotateLeftButton:Hide()
-			PetModelFrameRotateRightButton:Hide()
-			PetModelFrameShadowOverlay:Hide()
-			PetPaperDollPetModelBg:SetAlpha(0)
+				PetModelFrameRotateLeftButton:Hide()
+				PetModelFrameRotateRightButton:Hide()
+				PetModelFrameShadowOverlay:Hide()
+				PetPaperDollPetModelBg:SetAlpha(0)
+			end
 		end
 
 		-- Ghost frame
@@ -1255,9 +1257,9 @@ Skin:SetScript("OnEvent", function(self, event, addon)
 					bu.highlight:SetPoint("BOTTOMRIGHT", -1, 0)
 					bu.highlight.SetPoint = F.dummy
 					if C.isBetaClient then
-						icon:SetColorTexture(r, g, b, .2)
+						bu.highlight:SetColorTexture(r, g, b, .2)
 					else
-						icon:SetTexture(r, g, b, .2)
+						bu.highlight:SetTexture(r, g, b, .2)
 					end
 					bu.highlight.SetTexture = F.dummy
 
