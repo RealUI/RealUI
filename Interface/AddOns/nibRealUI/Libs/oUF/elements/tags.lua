@@ -4,8 +4,7 @@
 
 local parent, ns = ...
 local oUF = ns.oUF
-
-local isBetaClient = oUF.Private.isBetaClient
+local isBetaClient = select(4, GetBuildInfo()) >= 70000
 
 local _PATTERN = '%[..-%]+'
 

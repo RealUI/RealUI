@@ -12,7 +12,7 @@ local round = RealUI.Round
 local db, ndb
 
 local MODNAME = "CooldownCount"
-local CooldownCount = RealUI:NewModule(MODNAME, "AceEvent-3.0")
+local CooldownCount = RealUI:NewModule(MODNAME, "AceTimer-3.0", "AceEvent-3.0")
 
 local Timer = {}
 CooldownCount.Timer = Timer
@@ -62,7 +62,7 @@ end
 ---------------------------
 ---- 4.3 Compatibility ----
 ---------------------------
-local active = {}
+--[[local active = {}
 
 local function cooldown_OnShow(self)
     active[self] = true
@@ -107,34 +107,35 @@ local function actionButton_Register(frame)
         cooldown:HookScript('OnHide', cooldown_OnHide)
         hooked[cooldown] = true
     end
-end
+end]]
 
 ---------------
 ---- Timer ----
 ---------------
-function Timer.SetNextUpdate(self, nextUpdate)
-    self.updater:GetAnimations():SetDuration(nextUpdate)
-    if self.updater:IsPlaying() then
-        self.updater:Stop()
+function Timer:SetNextUpdate(nextUpdate)
+    if self.updater and CooldownCount:TimeLeft(self.updater) > 0 then
+        CooldownCount:CancelTimer(self.updater)
     end
-    self.updater:Play()
+    self.updater = CooldownCount:ScheduleTimer(self.UpdateText, nextUpdate, self)
 end
 
 --stops the timer
-function Timer.Stop(self)
+function Timer:Stop()
     self.enabled = nil
-    if self.updater:IsPlaying() then
-        self.updater:Stop()
-    end
-    self:Hide()
+    self.start = nil
+    self.duration = nil
+    self.charges = nil
+    self.maxCharges = nil
+    CooldownCount:CancelTimer(self.updater)
+    return self:Hide()
 end
 
-function Timer.UpdateText(self)
-    local remain = self.duration - (_G.GetTime() - self.start)
+function Timer:UpdateText()
+    local remain = self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
     if round(remain) > 0 then
         if (self.fontScale * self:GetEffectiveScale() / _G.UIParent:GetScale()) < db.minScale then
             self.text:SetText("")
-            Timer.SetNextUpdate(self, 1)
+            return self:SetNextUpdate(1)
         else
             local formatStr, time, nextUpdate = getTimeText(remain)
             if (remain >= MINUTEISH * 10) and (ndb.media.font.pixel.cooldown[2] >= 16) then
@@ -144,22 +145,22 @@ function Timer.UpdateText(self)
                 self.text:SetFontObject(_G.RealUIFont_PixelCooldown)
             end
             self.text:SetFormattedText(formatStr, time)
-            Timer.SetNextUpdate(self, nextUpdate)
+            return self:SetNextUpdate(nextUpdate)
         end
     else
-        Timer.Stop(self)
+        return self:Stop()
     end
 end
 
 --forces the given timer to update on the next frame
-function Timer.ForceUpdate(self)
-    Timer.UpdateText(self)
+function Timer:ForceUpdate()
+    self:UpdateText()
     self:Show()
 end
 
 --adjust font size whenever the timer's parent size changes
 --hide if it gets too tiny
-function Timer.OnSizeChanged(self, width, height)
+function Timer:OnSizeChanged(width, height)
     local fontScale = round(width) / ICON_SIZE
     if fontScale == self.fontScale then
         return
@@ -171,13 +172,29 @@ function Timer.OnSizeChanged(self, width, height)
     else
         self.text:SetFontObject(_G.RealUIFont_PixelCooldown)
         if self.enabled then
-            Timer.ForceUpdate(self)
+            self:ForceUpdate()
         end
     end
 end
 
+function Timer:Start(start, duration, charges, maxCharges)
+    local remainingCharges = charges or 0
+
+    --start timer
+    if start > 0 and duration > db.minDuration and remainingCharges == 0 then
+        self.start = start
+        self.duration = duration
+        self.enabled = true
+        self:UpdateText()
+        if self.fontScale >= db.minScale then self:Show() end
+    --stop timer
+    else
+        self:Stop()
+    end
+end
+
 --returns a new timer object
-function Timer.Create(cd)
+local function CreateTimer(cd)
     --a frame to watch for OnSizeChanged events
     --needed since OnSizeChanged has funny triggering if the frame with the handler is not shown
     local scaler = _G.CreateFrame('Frame', nil, cd)
@@ -186,44 +203,23 @@ function Timer.Create(cd)
     local timer = _G.CreateFrame('Frame', nil, scaler); timer:Hide()
     timer:SetAllPoints(scaler)
 
-    local updater = timer:CreateAnimationGroup()
-    updater:SetLooping('NONE')
-    updater:SetScript('OnFinished', function(self) Timer.UpdateText(timer) end)
-
-    local a = updater:CreateAnimation('Animation'); a:SetOrder(1)
-    timer.updater = updater
-
     local text = timer:CreateFontString(nil, 'OVERLAY')
+    text:SetPoint(db.position.point, db.position.x, db.position.y)
+    text:SetJustifyH(db.position.justify)
+    text:SetFontObject(_G.RealUIFont_PixelCooldown)
     timer.text = text
-        text:SetPoint(db.position.point, db.position.x, db.position.y)
-        text:SetJustifyH(db.position.justify)
-        text:SetFontObject(_G.RealUIFont_PixelCooldown)
 
-    Timer.OnSizeChanged(timer, scaler:GetSize())
-    scaler:SetScript('OnSizeChanged', function(self, ...) Timer.OnSizeChanged(timer, ...) end)
+    for key, func in next, Timer do
+        timer[key] = func
+    end
+
+    timer:OnSizeChanged(scaler:GetSize())
+    scaler:SetScript("OnSizeChanged", function(self, ...)
+        timer:OnSizeChanged(...)
+    end)
 
     cd.timer = timer
     return timer
-end
-
-function Timer.Start(cd, start, duration, charges, maxCharges)
-    local remainingCharges = charges or 0
-
-    --start timer
-    if start > 0 and duration > db.minDuration and remainingCharges == 0 and (not cd.noCooldownCount) then
-        local timer = cd.timer or Timer.Create(cd)
-        timer.start = start
-        timer.duration = duration
-        timer.enabled = true
-        Timer.UpdateText(timer)
-        if timer.fontScale >= db.minScale then timer:Show() end
-    --stop timer
-    else
-        local timer = cd.timer
-        if timer then
-            Timer.Stop(timer)
-        end
-    end
 end
 
 ----------
@@ -258,21 +254,30 @@ end
 function CooldownCount:OnEnable()
     setTimeFormats()
 
-    _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", Timer.Start)
+    _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, ...)
+        if not cd.noCooldownCount then
+            if not cd.timer then
+                cd.timer = CreateTimer(cd)
+            end
+            cd.timer:Start(...)
+        end
+    end)
 
-    -- 4.3 compatibility
-    -- In WoW 4.3 and later, action buttons can completely bypass lua for updating cooldown timers
-    -- This set of code is there to check and force update timers on standard action buttons (henceforth defined as anything that reuses's blizzard's ActionButton.lua code)
+    --[[ 4.3 compatibility
+        In WoW 4.3 and later, action buttons can completely bypass lua for updating cooldown timers
+        This set of code is there to check and force update timers on standard action buttons (eg. anything that uses's ActionButton.lua)
     local ActionBarButtonEventsFrame = _G["ActionBarButtonEventsFrame"]
     if ActionBarButtonEventsFrame then
         if ActionBarButtonEventsFrame.frames then
             for i, frame in next, ActionBarButtonEventsFrame.frames do
-                actionButton_Register(frame)
+                SetupTimer(frame.cooldown)
+                --actionButton_Register(frame)
             end
         end
         _G.hooksecurefunc("ActionBarButtonEventsFrame_RegisterFrame", actionButton_Register)
         self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
     end
+    ]]
     _G.SetCVar("countdownForCooldowns", 0)
 end
 

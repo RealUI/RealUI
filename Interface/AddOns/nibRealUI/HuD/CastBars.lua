@@ -469,7 +469,7 @@ function CastBars:OnInitialize()
                 size = {x = 230, y = 28},
                 position = {x = 0, y = 0},
                 icon = 28,
-                debug = true
+                debug = false
             },
             target = {
                 size = {x = 230, y = 28},
@@ -481,7 +481,7 @@ function CastBars:OnInitialize()
                 size = {x = 146, y = 28},
                 position = {x = 0, y = 0},
                 icon = 16,
-                debug = true
+                debug = false
             },
             size = {
                 [1] = {

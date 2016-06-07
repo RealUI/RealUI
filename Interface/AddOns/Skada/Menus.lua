@@ -277,9 +277,9 @@ function Skada:OpenMenu(window)
 	            info.func = function() Skada.db.profile.report.channel = "Self"; Skada.db.profile.report.chantype = "self" end
 	            UIDropDownMenu_AddButton(info, level)
 
-				info.text = L["RealID"]
-				info.checked = (Skada.db.profile.report.chantype == "realid")
-				info.func = function() Skada.db.profile.report.channel = "RealID"; Skada.db.profile.report.chantype = "realid" end
+				info.text = BATTLENET_OPTIONS_LABEL
+				info.checked = (Skada.db.profile.report.chantype == "bnet")
+				info.func = function() Skada.db.profile.report.channel = "bnet"; Skada.db.profile.report.chantype = "bnet" end
 				UIDropDownMenu_AddButton(info, level)
 
 				local list = {GetChannelList()}
@@ -390,9 +390,16 @@ end
 
 local function destroywindow()
 	if Skada.ReportWindow then
-		Skada.ReportWindow:ReleaseChildren()
-		Skada.ReportWindow:Hide()
-		Skada.ReportWindow:Release()
+		-- remove AceGUI hacks before recycling the widget
+		local frame = Skada.ReportWindow
+		frame.LayoutFinished = frame.orig_LayoutFinished
+		frame.frame:SetScript("OnKeyDown", nil)
+		frame.frame:EnableKeyboard(false)
+		frame.frame:SetPropagateKeyboardInput(false)
+
+
+		frame:ReleaseChildren()
+		frame:Release()
 	end
 	Skada.ReportWindow = nil
 end
@@ -403,13 +410,23 @@ function Skada:CreateReportWindow(window)
 	local frame = self.ReportWindow
 	frame:EnableResize(false)
 	frame:SetWidth(250)
-	frame:SetLayout("Flow")
-	if window then
-		frame:SetHeight(220)
-	else
-		frame:SetHeight(310)
-	end
+	frame:SetLayout("List")
 	frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+	frame.frame:SetClampedToScreen(true)
+
+	-- slight AceGUI hack to auto-set height of Window widget:
+	frame.orig_LayoutFinished = frame.LayoutFinished
+	frame.LayoutFinished = function(self, _, height) frame:SetHeight(height + 57) end
+	-- another AceGUI hack to hide on Escape:
+  	frame.frame:SetScript("OnKeyDown", function(self,key)
+        	if GetBindingFromClick(key) == "TOGGLEGAMEMENU" then
+			destroywindow()
+		end
+	end)
+	frame.frame:EnableKeyboard(true)
+	frame.frame:SetPropagateKeyboardInput(true)
+
+
 	if window then
 		frame:SetTitle(L["Report"] .. (" - %s"):format(window.db.name))
 	else
@@ -445,7 +462,7 @@ function Skada:CreateReportWindow(window)
 	end
 
 	local channellist = {
-		whisper 	= { L["Whisper"], "whisper"},
+		whisper 	= { L["Whisper"], "whisper", true},
 		target		= { L["Whisper Target"], "whisper"},
 		say			= { L["Say"], "preset"},
 		raid 		= { L["Raid"], "preset"},
@@ -454,7 +471,7 @@ function Skada:CreateReportWindow(window)
 		guild 		= { L["Guild"], "preset"},
 		officer 	= { L["Officer"], "preset"},
 		self 		= { L["Self"], "self"},
-		realid	 	= { L["RealID"], "RealID"},
+		bnet	 	= { BATTLENET_OPTIONS_LABEL, "bnet", true},
 	}
 	local list = {GetChannelList()}
 	for i=1,#list/2 do
@@ -471,13 +488,19 @@ function Skada:CreateReportWindow(window)
 	for chan, kind in pairs(channellist) do
 		channelbox:AddItem(chan, kind[1])
 	end
-	channelbox:SetCallback("OnValueChanged",
-			function(f, e, value)
+	local origchan = Skada.db.profile.report.channel or "say"
+	channelbox:SetValue(origchan)
+	channelbox:SetCallback("OnValueChanged", function(f, e, value)
 				Skada.db.profile.report.channel = value
 				Skada.db.profile.report.chantype = channellist[value][2]
-			end
-		)
-	channelbox:SetValue(Skada.db.profile.report.channel or "say")
+				if channellist[origchan][3] ~= channellist[value][3] then
+					-- redraw in-place to add/remove whisper widget
+					local pos = { frame:GetPoint() }
+					destroywindow() 
+					Skada:CreateReportWindow(window)
+					Skada.ReportWindow:SetPoint(unpack(pos))
+				end
+	end)
 	frame:AddChild(channelbox)
 
 	local lines = AceGUI:Create("Slider")
@@ -488,12 +511,25 @@ function Skada:CreateReportWindow(window)
 	lines:SetFullWidth(true)
 	frame:AddChild(lines)
 
-	local whisperbox = AceGUI:Create("EditBox")
-	whisperbox:SetLabel(L["Whisper Target"])
-	whisperbox:SetText(Skada.db.profile.report.target)
-	whisperbox:SetCallback("OnEnterPressed", function(box, event, text) Skada.db.profile.report.target = text; frame.button.frame:Click() end)
-	whisperbox:SetCallback("OnTextChanged", function(box, event, text) Skada.db.profile.report.target = text end)
-	whisperbox:SetFullWidth(true)
+	if channellist[origchan][3] then
+		local whisperbox = AceGUI:Create("EditBox")
+		whisperbox:SetLabel(L["Whisper Target"])
+		whisperbox:SetText(Skada.db.profile.report.target or "")
+		whisperbox:SetCallback("OnEnterPressed", function(box, event, text) 
+			if strlenutf8(text) == #text then -- remove spaces which are always non-meaningful and can sometimes cause problems
+				local ntext = text:gsub("%s","")
+				if ntext ~= text then
+					text = ntext
+					whisperbox:SetText(text)
+				end
+			end
+			Skada.db.profile.report.target = text; 
+			frame.button.frame:Click() 
+		end)
+		whisperbox:SetCallback("OnTextChanged", function(box, event, text) Skada.db.profile.report.target = text end)
+		whisperbox:SetFullWidth(true)
+		frame:AddChild(whisperbox)
+	end
 
 	local report = AceGUI:Create("Button")
 	frame.button = report
@@ -503,11 +539,19 @@ function Skada:CreateReportWindow(window)
 
 		if channel == "whisper" then
 			channel = Skada.db.profile.report.target
-		elseif channel == "realid" then
-			channel = BNet_GetPresenceID(Skada.db.profile.report.target)
+			if channel and #strtrim(channel) == 0 then
+				channel = nil
+			end
+		elseif channel == "bnet" then
+			channel = BNet_GetBNetIDAccount(Skada.db.profile.report.target)
 		elseif channel == "target" then
 			if UnitExists("target") then
-				channel = UnitName("target")
+				local toon, realm = UnitName("target")
+				if realm and #realm > 0 then
+					channel = toon .. "-" .. realm
+				else
+					channel = toon
+				end
 			else
 				channel = nil
 			end
@@ -518,10 +562,10 @@ function Skada:CreateReportWindow(window)
 			Skada:Report(channel, chantype, mode, set, number, window)
 			frame:Hide()
 		else
-			Skada:Print("Error: No options selected")
+			Skada:Print("Error: Whisper target not found")
 		end
 
 	end)
 	report:SetFullWidth(true)
-	frame:AddChildren(whisperbox, report)
+	frame:AddChild(report)
 end

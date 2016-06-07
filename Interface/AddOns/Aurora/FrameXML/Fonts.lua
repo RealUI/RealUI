@@ -82,7 +82,9 @@ tinsert(C.themes["Aurora"], function()
 		SystemFont_Med3:SetShadowColor(0, 0, 0)
 		SystemFont_Med3:SetShadowOffset(1, -1)
 		SystemFont_OutlineThick_WTF:SetFont(font, 32, "THICKOUTLINE")
-		SystemFont_OutlineThick_WTF2:SetFont(font, 36)
+		if not C.isBetaClient then
+			SystemFont_OutlineThick_WTF2:SetFont(font, 36)
+		end
 		SystemFont_OutlineThick_Huge2:SetFont(font, 22, "THICKOUTLINE")
 		SystemFont_OutlineThick_Huge4:SetFont(font, 26, "THICKOUTLINE")
 		SystemFont_Outline_Small:SetFont(font, 10, "OUTLINE")

@@ -65,7 +65,7 @@ function Resolve:UpdateMax()
         self.max = self.max - 100
     end
 
-    self.percent = RealUI:Clamp(self.current / self.max, 0, 1)
+    self.percent = RealUI.Clamp(self.current / self.max, 0, 1)
     --print("Resolve:", self.percent, self.max)
 end
 

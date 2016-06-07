@@ -13,7 +13,11 @@ tinsert(C.themes["Aurora"], function()
 		icon:SetTexCoord(.08, .92, .08, .92)
 		icon:SetDrawLayer("OVERLAY")
 		count:SetDrawLayer("OVERLAY")
-		na:SetTexture(0, 0, 0, .25)
+		if C.isBetaClient then
+			na:SetColorTexture(0, 0, 0, .25)
+		else
+			na:SetTexture(0, 0, 0, .25)
+		end
 		na:SetSize(118, 39)
 
 		if cta then
@@ -114,7 +118,11 @@ tinsert(C.themes["Aurora"], function()
 
 			button.texture:SetTexCoord(.08, .92, .08, .92)
 
-			border:SetTexture(0, 0, 0)
+			if C.isBetaClient then
+				border:SetColorTexture(0, 0, 0)
+			else
+				border:SetTexture(0, 0, 0)
+			end
 			border:SetDrawLayer("BACKGROUND")
 			border:SetPoint("TOPLEFT", button.texture, -1, 1)
 			border:SetPoint("BOTTOMRIGHT", button.texture, 1, -1)
@@ -131,7 +139,11 @@ tinsert(C.themes["Aurora"], function()
 
 			button.texture:SetTexCoord(.08, .92, .08, .92)
 
-			border:SetTexture(0, 0, 0)
+			if C.isBetaClient then
+				border:SetColorTexture(0, 0, 0)
+			else
+				border:SetTexture(0, 0, 0)
+			end
 			border:SetDrawLayer("BACKGROUND")
 			border:SetPoint("TOPLEFT", button.texture, -1, 1)
 			border:SetPoint("BOTTOMRIGHT", button.texture, 1, -1)
@@ -221,7 +233,11 @@ tinsert(C.themes["Aurora"], function()
 
 			shortageBorder:SetTexture("")
 
-			icon.border:SetTexture(0, 0, 0)
+			if C.isBetaClient then
+				icon.border:SetColorTexture(0, 0, 0)
+			else
+				icon.border:SetTexture(0, 0, 0)
+			end
 			icon.border:SetDrawLayer("BACKGROUND")
 			icon.border:SetPoint("TOPLEFT", icon.texture, -1, 1)
 			icon.border:SetPoint("BOTTOMRIGHT", icon.texture, 1, -1)

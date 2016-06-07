@@ -1898,82 +1898,84 @@ local uiTweaks do
     end
     local errorHider do
         local MODNAME = "ErrorHider"
-        local ErrorHider = RealUI:GetModule(MODNAME)
-        local db = ErrorHider.db.profile
-        errorHider = {
-            name = "Error Hider",
-            desc = "Hide specific error messages.",
-            type = "group",
-            args = {
-                header = {
-                    name = "Error Hider",
-                    type = "header",
-                    order = 10,
+        local ErrorHider = RealUI:GetModule(MODNAME, true)
+        if ErrorHider then
+            local db = ErrorHider.db.profile
+            errorHider = {
+                name = "Error Hider",
+                desc = "Hide specific error messages.",
+                type = "group",
+                args = {
+                    header = {
+                        name = "Error Hider",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Hide specific error messages.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Error Hider module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value) 
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                        end,
+                        order = 30,
+                    },
+                    gap1 = {
+                        name = " ",
+                        type = "description",
+                        order = 31,
+                    },
                 },
-                desc = {
-                    name = "Hide specific error messages.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Error Hider module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-            },
-        }
-        -- Create Filter List options table
-        local filteropts = {
-            name = "Filter List",
-            type = "group",
-            inline = true,
-            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            order = 40,
-            args = {
-                hideall = {
-                    name = "Hide All",
-                    desc = "Hide all error messages.",
-                    type = "toggle",
-                    get = function() return db.hideall end,
-                    set = function(info, value) 
-                        db.hideall = value
-                    end,
-                    order = 20,
-                },
-                sep = {
-                    name = " ",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 30,
-                },
-            },
-        }
-        for errorText, isHidden in next, db.filterlist do
-            -- Create base options for Addons
-            filteropts.args[errorText] = {
-                name = errorText,
-                type = "toggle",
-                disabled = function() return db.hideall or (not RealUI:GetModuleEnabled(MODNAME)) end,
-                width = "full",
-                get = function(info) return db.filterlist[errorText] end,
-                set = function(info, value)
-                    db.filterlist[errorText] = value
-                end,
-                order = 40
             }
+            -- Create Filter List options table
+            local filteropts = {
+                name = "Filter List",
+                type = "group",
+                inline = true,
+                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                order = 40,
+                args = {
+                    hideall = {
+                        name = "Hide All",
+                        desc = "Hide all error messages.",
+                        type = "toggle",
+                        get = function() return db.hideall end,
+                        set = function(info, value) 
+                            db.hideall = value
+                        end,
+                        order = 20,
+                    },
+                    sep = {
+                        name = " ",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 30,
+                    },
+                },
+            }
+            for errorText, isHidden in next, db.filterlist do
+                -- Create base options for Addons
+                filteropts.args[errorText] = {
+                    name = errorText,
+                    type = "toggle",
+                    disabled = function() return db.hideall or (not RealUI:GetModuleEnabled(MODNAME)) end,
+                    width = "full",
+                    get = function(info) return db.filterlist[errorText] end,
+                    set = function(info, value)
+                        db.filterlist[errorText] = value
+                    end,
+                    order = 40
+                }
+            end
+            errorHider.args.filterlist = filteropts
         end
-        errorHider.args.filterlist = filteropts
     end
     local eventNotify do
         local MODNAME = "EventNotifier"
@@ -2052,14 +2054,22 @@ local uiTweaks do
 
         local FrameList = FrameMover.FrameList
         local MoveFrameGroup = FrameMover.MoveFrameGroup
+        local isAddonControl = FrameMover.isAddonControl
         
+        local function GetEnabled(addonSlug, addonInfo)
+            if isAddonControl[addonSlug] then
+                return RealUI:DoesAddonMove(isAddonControl[addonSlug])
+            else
+                return addonInfo.move
+            end
+        end
         -- Create Addons options table
         local addonOpts do
             addonOpts = {
                 name = "Addons",
                 type = "group",
                 childGroups = "tab",
-                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                 order = 50,
                 args = {},
             }
@@ -2083,15 +2093,12 @@ local uiTweaks do
                             name = ("Move %s"):format(addon.name),
                             type = "toggle",
                             get = function(info)
-                                if addonSlug == "grid2" then
-                                    return RealUI:DoesAddonMove("Grid2")
-                                else
-                                    return addonInfo.move
-                                end
+                                return GetEnabled(addonSlug, addonInfo)
                             end,
                             set = function(info, value) 
-                                if addonSlug == "grid2" then
-                                    if RealUI:DoesAddonMove("Grid2") then
+                                if isAddonControl[addonSlug] then
+                                    RealUI:ToggleAddonPositionControl(isAddonControl[addonSlug], value)
+                                    if RealUI:DoesAddonMove(isAddonControl[addonSlug]) then
                                         FrameMover:MoveAddons()
                                     end
                                 else
@@ -2110,7 +2117,7 @@ local uiTweaks do
                 local normalFrameOpts = {
                     name = "Frames",
                     type = "group",
-                    disabled = function() if addonInfo.move then return false else return true end end,
+                    disabled = function() return not GetEnabled(addonSlug, addonInfo) end,
                     order = 10,
                     args = {},
                 }
@@ -2214,7 +2221,7 @@ local uiTweaks do
                     local normalHealingFrameOpts = {
                         name = "Healing Layout Frames",
                         type = "group",
-                        disabled = function() return not ( addonInfo.move and addonInfo.healing ) end,
+                        disabled = function() return not ( GetEnabled(addonSlug, addonInfo) and addonInfo.healing ) end,
                         order = 50,
                         args = {},
                     }

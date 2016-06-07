@@ -10,7 +10,7 @@ local Bar = Bartender4.Bar.prototype
 
 local table_insert, setmetatable = table.insert, setmetatable
 
--- GLOBALS: ReputationWatchBar, MainMenuExpBar
+-- GLOBALS: ReputationWatchBar, MainMenuExpBar, ArtifactWatchBar
 
 local defaults = { profile = Bartender4:Merge({
 	enabled = false,
@@ -35,7 +35,12 @@ function RepBarMod:OnEnable()
 		self.bar.content:SetParent(self.bar)
 		self.bar.content:SetFrameLevel(self.bar:GetFrameLevel() + 1)
 	end
-	self:SecureHook("ReputationWatchBar_Update")
+	if ReputationWatchBar_Update then
+		self:SecureHook("ReputationWatchBar_Update", "UpdateLayout")
+	end
+	if MainMenuBar_UpdateExperienceBars then
+		self:SecureHook("MainMenuBar_UpdateExperienceBars", "UpdateLayout")
+	end
 	self.bar:Enable()
 	self:ToggleOptions()
 	self:ApplyConfig()
@@ -45,7 +50,7 @@ function RepBarMod:ApplyConfig()
 	self.bar:ApplyConfig(self.db.profile)
 end
 
-function RepBarMod:ReputationWatchBar_Update()
+function RepBarMod:UpdateLayout()
 	self.bar:PerformLayout()
 end
 
@@ -104,3 +109,46 @@ XPBar.ControlClickThrough = RepBar.ControlClickThrough
 XPBar.width = 1038
 XPBar.height = 21
 XPBar.offsetX = 8
+
+if ArtifactWatchBar then
+
+-- register module
+local APBarMod = Bartender4:NewModule("APBar", "AceHook-3.0")
+
+-- create prototype information
+local APBar = setmetatable({}, {__index = Bar})
+
+function APBarMod:OnInitialize()
+	self.db = Bartender4.db:RegisterNamespace("APBar", defaults)
+	self:SetEnabledState(self.db.profile.enabled)
+end
+
+function APBarMod:OnEnable()
+	if not self.bar then
+		self.bar = setmetatable(Bartender4.Bar:Create("AP", self.db.profile, L["Artifact Power Bar"]), {__index = APBar})
+		self.bar.content = ArtifactWatchBar
+
+		self.bar.content:SetParent(self.bar)
+		self.bar.content:SetFrameLevel(self.bar:GetFrameLevel() + 1)
+	end
+	self:SecureHook("MainMenuBar_UpdateExperienceBars", "UpdateLayout")
+	self.bar:Enable()
+	self:ToggleOptions()
+	self:ApplyConfig()
+end
+
+function APBarMod:UpdateLayout()
+	self.bar:PerformLayout()
+end
+
+APBarMod.ApplyConfig = RepBarMod.ApplyConfig
+APBar.ApplyConfig = RepBar.ApplyConfig
+APBar.PerformLayout = RepBar.PerformLayout
+
+APBar.ClickThroughSupport = true
+APBar.ControlClickThrough = RepBar.ControlClickThrough
+APBar.width = 1038
+APBar.height = 21
+APBar.offsetX = 8
+
+end

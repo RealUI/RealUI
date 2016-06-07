@@ -16,6 +16,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
     local r, g, b = C.r, C.g, C.b
     local alpha = 0.25
+    local isBeta = _G.RealUI.isBeta
 
     local function Kill(object)
         if object.UnregisterAllEvents then
@@ -89,7 +90,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
     local function skinWeakAuras(widget)
         local bg = widget.background or widget.frame.background -- adjust for BS
-        bg:SetTexture(1, 1, 1, 0.4)
+        if isBeta then
+            bg:SetColorTexture(1, 1, 1, 0.4)
+        else
+            bg:SetTexture(1, 1, 1, 0.4)
+        end
 
         widget.frame.highlight:SetTexture(C.media.backdrop)
         widget.frame.highlight:SetVertexColor(r, g, b, alpha)
@@ -163,6 +168,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget["SetValue"] = function(self,value)
                     local check = self.check
                     self.checked = value
+                    check:SetDesaturated(true)
                     if value then
                         check:SetVertexColor(r, g, b)
                         check:Show()
@@ -195,7 +201,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         elseif TYPE == "ColorPicker" then
             if not widget.skinned then
-                F.CreateBDFrame(widget.colorSwatch)
+                F.CreateBDFrame(widget.colorSwatch, 0)
                 widget.colorSwatch:SetTexture(C.media.backdrop)
                 widget.colorSwatch:SetSize(14, 14)
                 local texture = select(2, widget.frame:GetRegions())
@@ -234,14 +240,22 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE2 == "Item" then
             if not widget.skinned then
                 local highlight = widget.highlight
-                highlight:SetTexture(r, g, b, .2)
+                if isBeta then
+                    highlight:SetColorTexture(r, g, b, .2)
+                else
+                    highlight:SetTexture(r, g, b, .2)
+                end
                 highlight:ClearAllPoints()
                 highlight:SetPoint("LEFT", -6, 0)
                 highlight:SetPoint("RIGHT", 0, 0)
 
                 if TYPE3 == "Toggle" then
                     local check = widget.check
-                    check:SetTexture(r, g, b, .8)
+                    if isBeta then
+                        check:SetColorTexture(r, g, b, .8)
+                    else
+                        check:SetTexture(r, g, b, .8)
+                    end
                     check:SetSize(9, 9)
                     check:SetPoint("LEFT", 3, 0)
                     local bd = F.CreateBDFrame(check, 1)
@@ -265,11 +279,19 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 --
                 local left = widget.left
                 left:SetHeight(1)
-                left:SetTexture(r, g, b, .4)
+                if isBeta then
+                    left:SetColorTexture(r, g, b, .4)
+                else
+                    left:SetTexture(r, g, b, .4)
+                end
 
                 local right = widget.right
                 right:SetHeight(1)
-                right:SetTexture(r, g, b, .4)
+                if isBeta then
+                    right:SetColorTexture(r, g, b, .4)
+                else
+                    right:SetTexture(r, g, b, .4)
+                end
 
                 widget.skinned = true
             end
@@ -544,7 +566,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                         tex:SetWidth(1)
                         tex:SetPoint("TOP", self.treeframe, "TOPRIGHT", 1, -1)
                         tex:SetPoint("BOTTOM", self.treeframe, "BOTTOMRIGHT", 1, 1)
-                        tex:SetTexture(r, g, b, .4)
+                        if isBeta then
+                            tex:SetColorTexture(r, g, b, .4)
+                        else
+                            tex:SetTexture(r, g, b, .4)
+                        end
                         self.skinned = true
                     end
                 end)

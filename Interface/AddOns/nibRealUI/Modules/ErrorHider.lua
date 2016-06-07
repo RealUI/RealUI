@@ -7,13 +7,17 @@ local _G = _G
 local RealUI = private.RealUI
 local db
 
+if RealUI.isBeta then return end
+
 local MODNAME = "ErrorHider"
 local ErrorHider = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-function ErrorHider:UI_ERROR_MESSAGE(event, err)
-    if err == "" then return end
-    if not db.filterlist[err] and not db.hideall then
-        _G.UIErrorsFrame:AddMessage(err, 1, 0, 0)
+function ErrorHider:UI_ERROR_MESSAGE(event, messageType, message)
+    self:debug(event, messageType, message)
+    if message == "" then return end
+    self:debug("Hide", db.hideall, db.filterlist[message])
+    if not db.filterlist[message] and not db.hideall then
+        _G.UIErrorsFrame:AddMessage(message, 1, 0, 0)
     end
 end
 

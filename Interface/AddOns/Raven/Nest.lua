@@ -1618,7 +1618,7 @@ function MOD.Nest_Initialize()
 	end
 	if GetCVar("useUiScale") == "1" then
         local resolution
-        if RealUI.isBeta then
+        if MOD.isBeta then
             local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
             resolution = windowed ~= fullscreen and windowed or fullscreen
         else

@@ -94,14 +94,18 @@ end
 local ilvlTypes = {[L["Armor"]] = true, [L["Weapon"]] = true}
 local function ItemButton_Update(self, item)
 	if item.texture then
-		self.Icon:SetTexture(item.texture or ((cBnivCfg.CompressEmpty and self.bgTex) or unpack({1,1,1,0.1})))
+		self.Icon:SetTexture(item.texture)
 		self.Icon:SetTexCoord(.08, .92, .08, .92)
 	else
 		if cBnivCfg.CompressEmpty then
 			self.Icon:SetTexture(self.bgTex)
 			self.Icon:SetTexCoord(.08, .92, .08, .92)
 		else
-			self.Icon:SetTexture(1,1,1,0.1)
+			if RealUI.isBeta then
+				self.Icon:SetColorTexture(1,1,1,0.1)
+			else
+				self.Icon:SetTexture(1,1,1,0.1)
+			end
 		end
 	end
 	if(item.count and item.count > 1) then

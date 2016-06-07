@@ -41,6 +41,23 @@ style.classcolors = {
     ["WARRIOR"]     = { r = 0.78, g = 0.61, b = 0.43 },
 }
 
+local skinnedAtlas = {
+    ["token-info-background"] = [[Interface\AddOns\!Aurora_RealUI\Media\AuctionFrame\Token]],
+    ["splash-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash]],
+    ["splash-703-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
+    ["splash-703-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
+    ["splash-703-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
+    ["splash-704-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
+    ["splash-704-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
+    ["splash-704-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
+    ["splash-705-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
+    ["splash-705-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
+    ["splash-705-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
+    ["splash-boost-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
+    ["splash-boost-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
+    ["splash-boost-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
+}
+
 -- Save these functions so we dont have to duplicate just to place a border around an icon.
 style.copy = {
     CreateBD = true,
@@ -65,7 +82,7 @@ functions.CreateBD = function(f, a)
         --print("CreateSD")
         f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
         f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
-        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
         f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         f.tex:SetAllPoints()
         f.tex:SetHorizTile(true)
@@ -236,11 +253,16 @@ frame:SetScript("OnEvent", function(self, event, addon)
             end
 
             F.ReskinAtlas = function(f, atlas, is8Point)
-                --debug("ReskinAtlas")
-                if not atlas then atlas = f:GetAtlas() end
+                debug("ReskinAtlas", atlas, is8Point)
                 local file, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
-                file = file:sub(10) -- cut off "Interface"
-                f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
+                if RealUI.isBeta then
+                    -- file is an ID instead of a path now
+                    file = skinnedAtlas[atlas]
+                    f:SetTexture(file)
+                else
+                    file = file:sub(10) -- cut off "Interface"
+                    f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
+                end
                 if is8Point then
                     return left, right, top, bottom
                 else

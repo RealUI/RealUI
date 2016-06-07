@@ -15,16 +15,30 @@ C.themes["Blizzard_EncounterJournal"] = function()
 	EncounterJournalInsetBg:Hide()
 	EncounterJournalEncounterFrameInfoModelFrameShadow:Hide()
 	EncounterJournalEncounterFrameInfoModelFrame.dungeonBG:Hide()
-	EncounterJournalEncounterFrameInfoDifficultyUpLeft:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoDifficultyUpRIGHT:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoDifficultyDownLeft:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoDifficultyDownRIGHT:SetAlpha(0)
+	if C.isBetaClient then
+		EncounterJournal.encounter.info.difficulty.UpLeft:SetAlpha(0)
+		EncounterJournal.encounter.info.difficulty.UpRight:SetAlpha(0)
+		EncounterJournal.encounter.info.difficulty.DownLeft:SetAlpha(0)
+		EncounterJournal.encounter.info.difficulty.DownRight:SetAlpha(0)
+	else
+		EncounterJournalEncounterFrameInfoDifficultyUpLeft:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoDifficultyUpRIGHT:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoDifficultyDownLeft:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoDifficultyDownRIGHT:SetAlpha(0)
+	end
 	select(5, EncounterJournalEncounterFrameInfoDifficulty:GetRegions()):Hide()
 	select(6, EncounterJournalEncounterFrameInfoDifficulty:GetRegions()):Hide()
-	EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleUpLeft:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleUpRIGHT:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleDownLeft:SetAlpha(0)
-	EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleDownRIGHT:SetAlpha(0)
+	if C.isBetaClient then
+		EncounterJournal.encounter.info.lootScroll.filter.UpLeft:SetAlpha(0)
+		EncounterJournal.encounter.info.lootScroll.filter.UpRight:SetAlpha(0)
+		EncounterJournal.encounter.info.lootScroll.filter.DownLeft:SetAlpha(0)
+		EncounterJournal.encounter.info.lootScroll.filter.DownRight:SetAlpha(0)
+	else
+		EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleUpLeft:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleUpRIGHT:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleDownLeft:SetAlpha(0)
+		EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggleDownRIGHT:SetAlpha(0)
+	end
 	select(5, EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggle:GetRegions()):Hide()
 	select(6, EncounterJournalEncounterFrameInfoLootScrollFrameFilterToggle:GetRegions()):Hide()
 
@@ -159,7 +173,11 @@ C.themes["Blizzard_EncounterJournal"] = function()
 				bossButton.text.SetTextColor = F.dummy
 
 				local hl = bossButton:GetHighlightTexture()
-				hl:SetTexture(r, g, b, .2)
+				if C.isBetaClient then
+					hl:SetColorTexture(r, g, b, .2)
+				else
+					hl:SetTexture(r, g, b, .2)
+				end
 				hl:SetPoint("TOPLEFT", 2, -1)
 				hl:SetPoint("BOTTOMRIGHT", 0, 1)
 
@@ -194,7 +212,8 @@ C.themes["Blizzard_EncounterJournal"] = function()
 				header.button.expandedIcon:SetTextColor(1, 1, 1)
 				header.button.expandedIcon.SetTextColor = F.dummy
 
-				F.Reskin(header.button)
+				-- Blizzard already uses .tex for this frame, so we can't do highlights
+				F.Reskin(header.button, true)
 
 				header.button.abilityIcon:SetTexCoord(.08, .92, .08, .92)
 				header.button.bg = F.CreateBG(header.button.abilityIcon)
@@ -229,7 +248,8 @@ C.themes["Blizzard_EncounterJournal"] = function()
 			header.button.expandedIcon:SetTextColor(1, 1, 1)
 			header.button.expandedIcon.SetTextColor = F.dummy
 
-			F.Reskin(header.button)
+			-- Blizzard already uses .tex for this frame, so we can't do highlights
+			F.Reskin(header.button, true)
 
 			header.styled = true
 		end
@@ -283,11 +303,19 @@ C.themes["Blizzard_EncounterJournal"] = function()
 	F.CreateBD(EncounterJournalSearchResults)
 	EncounterJournalSearchResults:SetBackdropColor(.15, .15, .15, .9)
 
-	EncounterJournalSearchBoxSearchButton1BotLeftCorner:Hide()
-	EncounterJournalSearchBoxSearchButton1BotRightCorner:Hide()
-	EncounterJournalSearchBoxSearchButton1BottomBorder:Hide()
-	EncounterJournalSearchBoxSearchButton1LeftBorder:Hide()
-	EncounterJournalSearchBoxSearchButton1RightBorder:Hide()
+	if C.isBetaClient then
+		EncounterJournal.searchBox.searchPreviewContainer.botLeftCorner:Hide()
+		EncounterJournal.searchBox.searchPreviewContainer.botRightCorner:Hide()
+		EncounterJournal.searchBox.searchPreviewContainer.bottomBorder:Hide()
+		EncounterJournal.searchBox.searchPreviewContainer.leftBorder:Hide()
+		EncounterJournal.searchBox.searchPreviewContainer.rightBorder:Hide()
+	else
+		EncounterJournalSearchBoxSearchButton1BotLeftCorner:Hide()
+		EncounterJournalSearchBoxSearchButton1BotRightCorner:Hide()
+		EncounterJournalSearchBoxSearchButton1BottomBorder:Hide()
+		EncounterJournalSearchBoxSearchButton1LeftBorder:Hide()
+		EncounterJournalSearchBoxSearchButton1RightBorder:Hide()
+	end
 
 	local function resultOnEnter(self)
 		self.hl:Show()
@@ -426,7 +454,7 @@ C.themes["Blizzard_EncounterJournal"] = function()
 		end
 	end
 
-	-- Suggestion 1
+	--[[ Suggestion 1 ]]
 
 	local suggestion = suggestFrame.Suggestion1
 
@@ -496,7 +524,8 @@ C.themes["Blizzard_EncounterJournal"] = function()
 			suggestion.iconRing:Hide()
 
 			if data.iconPath then
-				suggestion.icon:SetMask(nil)
+				suggestion.icon:SetMask("")
+				suggestion.icon:SetTexture(data.iconPath)
 				suggestion.icon:SetTexCoord(.08, .92, .08, .92)
 			end
 		end
@@ -511,7 +540,8 @@ C.themes["Blizzard_EncounterJournal"] = function()
 				suggestion.iconRing:Hide()
 
 				if data.iconPath then
-					suggestion.icon:SetMask(nil)
+					suggestion.icon:SetMask("")
+					suggestion.icon:SetTexture(data.iconPath)
 					suggestion.icon:SetTexCoord(.08, .92, .08, .92)
 				end
 			end
@@ -519,8 +549,11 @@ C.themes["Blizzard_EncounterJournal"] = function()
 	end)
 
 	hooksecurefunc("EJSuggestFrame_UpdateRewards", function(suggestion)
-		if suggestion.reward.data then
-			suggestion.reward.icon:SetMask(nil)
+		local rewardData = suggestion.reward.data
+		if rewardData then
+			local texture = rewardData.itemIcon or rewardData.currencyIcon or [[Interface\Icons\achievement_guildperk_mobilebanking]]
+			suggestion.reward.icon:SetMask("")
+			suggestion.reward.icon:SetTexture(texture)
 			suggestion.reward.icon:SetTexCoord(.08, .92, .08, .92)
 		end
 	end)

@@ -78,7 +78,9 @@ tinsert(C.themes["Aurora"], function()
 
 	-- [[ Quest rewards ]]
 
-	restyleSpellButton(QuestInfoRewardSpell)
+	if not C.isBetaClient then
+		restyleSpellButton(QuestInfoRewardSpell)
+	end
 
 	local function restyleRewardButton(bu, isMapQuestInfo)
 		bu.NameFrame:Hide()
@@ -114,7 +116,9 @@ tinsert(C.themes["Aurora"], function()
 	end)
 
 	restyleRewardButton(QuestInfoSkillPointFrame)
-	restyleRewardButton(MapQuestInfoRewardsFrame.SpellFrame, true)
+	if not C.isBetaClient then
+		restyleRewardButton(MapQuestInfoRewardsFrame.SpellFrame, true)
+	end
 	restyleRewardButton(MapQuestInfoRewardsFrame.XPFrame, true)
 	restyleRewardButton(MapQuestInfoRewardsFrame.MoneyFrame, true)
 	restyleRewardButton(MapQuestInfoRewardsFrame.SkillPointFrame, true)
@@ -168,8 +172,10 @@ tinsert(C.themes["Aurora"], function()
 	QuestInfoRewardsFrame.ItemReceiveText:SetTextColor(1, 1, 1)
 	QuestInfoRewardsFrame.ItemReceiveText.SetTextColor = F.dummy
 
-	QuestInfoRewardsFrame.SpellLearnText:SetTextColor(1, 1, 1)
-	QuestInfoRewardsFrame.SpellLearnText.SetTextColor = F.dummy
+	if not C.isBetaClient then
+		QuestInfoRewardsFrame.SpellLearnText:SetTextColor(1, 1, 1)
+		QuestInfoRewardsFrame.SpellLearnText.SetTextColor = F.dummy
+	end
 
 	QuestInfoRewardsFrame.PlayerTitleText:SetTextColor(1, 1, 1)
 	QuestInfoRewardsFrame.PlayerTitleText.SetTextColor = F.dummy

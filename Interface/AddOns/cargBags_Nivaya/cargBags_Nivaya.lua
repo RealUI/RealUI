@@ -50,17 +50,29 @@ do	--Replacement for UIDropDownMenu
 		button:SetText("test")
 		
 		local ntex = button:CreateTexture()
-		ntex:SetTexture(1,1,1,0)
+		if RealUI.isBeta then
+			ntex:SetColorTexture(1,1,1,0)
+		else
+			ntex:SetTexture(1,1,1,0)
+		end
 		ntex:SetAllPoints()	
 		button:SetNormalTexture(ntex)
 		
 		local htex = button:CreateTexture()
-		htex:SetTexture(1,1,1,0.2)
+		if RealUI.isBeta then
+			htex:SetColorTexture(1,1,1,0.2)
+		else
+			htex:SetTexture(1,1,1,0.2)
+		end
 		htex:SetAllPoints()
 		button:SetHighlightTexture(htex)
 		
 		local ptex = button:CreateTexture()
-		ptex:SetTexture(1,1,1,0.4)
+		if RealUI.isBeta then
+			ptex:SetColorTexture(1,1,1,0.4)
+		else
+			ptex:SetTexture(1,1,1,0.4)
+		end
 		ptex:SetAllPoints()
 		button:SetPushedTexture(ptex)
 		

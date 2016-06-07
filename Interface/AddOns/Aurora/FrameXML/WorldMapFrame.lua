@@ -49,34 +49,60 @@ tinsert(C.themes["Aurora"], function()
 		local function colourArrow(f)
 			if f:IsEnabled() then
 				for _, pixel in pairs(f.pixels) do
-					pixel:SetVertexColor(r, g, b)
+					if C.isBetaClient then
+						pixel:SetColorTexture(r, g, b)
+					else
+						pixel:SetVertexColor(r, g, b)
+					end
 				end
 			end
 		end
 
 		local function clearArrow(f)
 			for _, pixel in pairs(f.pixels) do
-				pixel:SetVertexColor(1, 1, 1)
+				if C.isBetaClient then
+					pixel:SetColorTexture(1, 1, 1)
+				else
+					pixel:SetVertexColor(1, 1, 1)
+				end
 			end
 		end
 
 		button.pixels = {}
 
-		for i = 1, 8 do
-			local tex = button:CreateTexture()
-			tex:SetTexture(1, 1, 1)
-			tex:SetSize(1, 1)
-			tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
-			tinsert(button.pixels, tex)
+		if C.isBetaClient then
+			local lineOfs = 2.5
+			local line = button:CreateLine()
+			line:SetColorTexture(1, 1, 1)
+			line:SetThickness(0.5)
+			line:SetStartPoint("TOPRIGHT", -lineOfs, -lineOfs)
+			line:SetEndPoint("BOTTOMLEFT", lineOfs, lineOfs)
+			tinsert(button.pixels, line)
+		else
+			for i = 1, 8 do
+				local tex = button:CreateTexture()
+				tex:SetTexture(1, 1, 1)
+				tex:SetSize(1, 1)
+				tex:SetPoint("BOTTOMLEFT", 3+i, 3+i)
+				tinsert(button.pixels, tex)
+			end
 		end
 
 		local hline = button:CreateTexture()
-		hline:SetTexture(1, 1, 1)
+		if C.isBetaClient then
+			hline:SetColorTexture(1, 1, 1)
+		else
+			hline:SetTexture(1, 1, 1)
+		end
 		hline:SetSize(7, 1)
 		tinsert(button.pixels, hline)
 
 		local vline = button:CreateTexture()
-		vline:SetTexture(1, 1, 1)
+		if C.isBetaClient then
+			vline:SetColorTexture(1, 1, 1)
+		else
+			vline:SetTexture(1, 1, 1)
+		end
 		vline:SetSize(1, 7)
 		tinsert(button.pixels, vline)
 
@@ -84,8 +110,8 @@ tinsert(C.themes["Aurora"], function()
 			hline:SetPoint("TOP", 1, -4)
 			vline:SetPoint("RIGHT", -4, 1)
 		else
-			hline:SetPoint("BOTTOM", 1, 4)
-			vline:SetPoint("LEFT", 4, 1)
+			hline:SetPoint("BOTTOM", -1, 4)
+			vline:SetPoint("LEFT", 4, -1)
 		end
 
 		button:SetScript("OnEnter", colourArrow)
@@ -99,13 +125,21 @@ tinsert(C.themes["Aurora"], function()
 
 	do
 		local topLine = WorldMapFrame.UIElementsFrame:CreateTexture()
-		topLine:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			topLine:SetColorTexture(0, 0, 0)
+		else
+			topLine:SetTexture(0, 0, 0)
+		end
 		topLine:SetHeight(1)
 		topLine:SetPoint("TOPLEFT", 0, 1)
 		topLine:SetPoint("TOPRIGHT", 1, 1)
 
 		local rightLine = WorldMapFrame.UIElementsFrame:CreateTexture()
-		rightLine:SetTexture(0, 0, 0)
+		if C.isBetaClient then
+			rightLine:SetColorTexture(0, 0, 0)
+		else
+			rightLine:SetTexture(0, 0, 0)
+		end
 		rightLine:SetWidth(1)
 		rightLine:SetPoint("BOTTOMRIGHT", 1, 0)
 		rightLine:SetPoint("TOPRIGHT", 1, 1)

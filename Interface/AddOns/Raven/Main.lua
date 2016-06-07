@@ -40,6 +40,7 @@ MOD.updateDispels = true -- need to update dispel types
 MOD.knownGlyphs = {} -- cache of known glyphs
 MOD.activeGlyphs = {} -- cache of active glyphs
 MOD.TOC = select(4, GetBuildInfo())
+MOD.isBeta = MOD.TOC >= 70000
 
 local doUpdate = true -- set by any event that can change bars (used to throttle major updates)
 local forceUpdate = false -- set to cause immediate update (reserved for critical changes like to player's target or focus)
@@ -1225,7 +1226,7 @@ end
 local function CheckRunes()
 	local blood, frost, unholy, death = 0, 0, 0, 0
 	for i = 1, 6 do
-		local rune, rtype = MOD.runeSlots[i], GetRuneType(i)
+		local rune, rtype = MOD.runeSlots[i], MOD.isBeta and 4 or GetRuneType(i)
 		local start, duration, ready = GetRuneCooldown(i)
 		if not rune then
 			rune = { rtype = rtype, start = start, duration = duration, ready = ready }

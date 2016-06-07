@@ -94,10 +94,18 @@ tinsert(C.themes["Aurora"], function()
 			end
 		end
 
-		tab.Highlight:SetTexture(r, g, b, .2)
+		if C.isBetaClient then
+			tab.Highlight:SetColorTexture(r, g, b, .2)
+		else
+			tab.Highlight:SetTexture(r, g, b, .2)
+		end
 		tab.Highlight:SetPoint("TOPLEFT", 3, -4)
 		tab.Highlight:SetPoint("BOTTOMRIGHT", -1, 0)
-		tab.Hider:SetTexture(.3, .3, .3, .4)
+		if C.isBetaClient then
+			tab.Hider:SetColorTexture(.3, .3, .3, .4)
+		else
+			tab.Hider:SetTexture(.3, .3, .3, .4)
+		end
 		tab.TabBg:SetAlpha(0)
 
 		select(2, tab:GetRegions()):ClearAllPoints()
@@ -145,9 +153,14 @@ tinsert(C.themes["Aurora"], function()
 				_G["PaperDollEquipmentManagerPaneButton"..i.."BgMiddle"]:Hide()
 				_G["PaperDollEquipmentManagerPaneButton"..i.."BgBottom"]:SetAlpha(0)
 
-				bu.HighlightBar:SetTexture(r, g, b, .1)
+				if C.isBetaClient then
+					bu.HighlightBar:SetColorTexture(r, g, b, .1)
+					bu.SelectedBar:SetColorTexture(r, g, b, .2)
+				else
+					bu.HighlightBar:SetTexture(r, g, b, .1)
+					bu.SelectedBar:SetTexture(r, g, b, .2)
+				end
 				bu.HighlightBar:SetDrawLayer("BACKGROUND")
-				bu.SelectedBar:SetTexture(r, g, b, .2)
 				bu.SelectedBar:SetDrawLayer("BACKGROUND")
 
 				bd:Hide()

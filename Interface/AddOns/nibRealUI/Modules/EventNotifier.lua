@@ -16,7 +16,9 @@ local EventNotifier = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 local VignetteExclusionMapIDs = {
     [971] = true, -- Lunarfall: Alliance garrison
     [976] = true, -- Frostwall: Horde garrison
+    [1021] = true -- Scenario: The Broken Shore
 }
+local SOUND_TIMEOUT = 20
 
 
 -- Addon itself
@@ -83,18 +85,25 @@ function EventNotifier:CALENDAR_UPDATE_GUILD_EVENTS()
 end
 
 function EventNotifier:VIGNETTE_ADDED(event, vigID)
+    self:debug("VIGNETTE_ADDED", vigID)
     if not(db.checkMinimapRares) or VignetteExclusionMapIDs[_G.GetCurrentMapAreaID()] then return end
 
     if (vigID ~= self.lastMinimapRare.id) then
-        -- Vignette Info
+        -- Vignette Info C_Vignettes.GetVignetteInfoFromInstanceID(C_Vignettes.GetVignetteGUID(1))
         local _, _, name, objectIcon = _G.C_Vignettes.GetVignetteInfoFromInstanceID(vigID)
+        self:debug("info", name, objectIcon)
         local left, right, top, bottom = _G.GetObjectIconTextureCoords(objectIcon)
+        self:debug("points", left, right, top, bottom)
 
         -- Notify
-        if (_G.GetTime() > self.lastMinimapRare.time + 20) then
+        if (_G.GetTime() > self.lastMinimapRare.time + SOUND_TIMEOUT) then
             _G.PlaySoundFile([[Sound\Interface\RaidWarning.wav]])
         end
-        RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\OBJECTICONS]], left, right, top, bottom)
+        if RealUI.isBeta then
+            RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\ObjectIconsAtlas]], left, right, top, bottom)
+        else
+            RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\OBJECTICONS]], left, right, top, bottom)
+        end
     end
 
     -- Set last Vignette data

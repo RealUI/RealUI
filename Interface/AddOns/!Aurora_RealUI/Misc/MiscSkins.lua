@@ -55,7 +55,7 @@ _G.tinsert(mods["Aurora"], function(F, C)
     _G.hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
     _G.hooksecurefunc(_G.FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
 
-    -- Splash Frame
+    -- Splash Frame SplashFrame_Open("LEGION_PREPATCH")
     F.CreateBD(_G.SplashFrame, nil, true)
     _G.hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
         --print("SplashFrame", tag, showStartButton)

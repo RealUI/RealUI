@@ -84,3 +84,43 @@ function XPBarMod:SetupOptions()
 	end
 	self.options.args = self:IsEnabled() and self.optionobject.table or self.disabledoptions
 end
+
+local APBarMod = Bartender4:GetModule("APBar", true)
+if APBarMod then
+function APBarMod:SetupOptions()
+	if not self.options then
+		self.optionobject = Bar:GetOptionObject()
+		local enabled = {
+			type = "toggle",
+			order = 1,
+			name = L["Enabled"],
+			desc = L["Enable the Artifact Power Bar"],
+			get = function() return self.db.profile.enabled end,
+			set = "ToggleModule",
+			handler = self,
+		}
+		self.optionobject:AddElement("general", "enabled", enabled)
+
+		self.disabledoptions = {
+			general = {
+				type = "group",
+				name = L["General Settings"],
+				cmdInline = true,
+				order = 1,
+				args = {
+					enabled = enabled,
+				}
+			}
+		}
+		self.options = {
+			order = 101,
+			type = "group",
+			name = L["Artifact Power Bar"],
+			desc = L["Configure the Artifact Power Bar"],
+			childGroups = "tab",
+		}
+		Bartender4:RegisterBarOptions("AP", self.options)
+	end
+	self.options.args = self:IsEnabled() and self.optionobject.table or self.disabledoptions
+end
+end

@@ -14,6 +14,7 @@ local Tablet20 = _G.LibStub("Tablet-2.0")
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, dbc, dbg, ndb, ndbc
+local isBeta = RealUI.isBeta
 
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
@@ -191,11 +192,11 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = _G.COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVE,
-        func = function() _G.PVEFrame_ToggleFrame() end,
+        func = function() _G.PVEFrame_ToggleFrame("GroupFinderFrame") end,
         notCheckable = true
     },
     {text = _G.COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVP,
-        func = function() _G.TogglePVPUI() end,
+        func = function() _G.PVEFrame_ToggleFrame("PVPUIFrame") end,
         notCheckable = true
     },
     {text = _G.ACHIEVEMENTS_GUILD_TAB,
@@ -1922,19 +1923,27 @@ end
 ---- Spec Button
 local SpecEquipList = {}
 
-local function SpecChangeClickFunc(self, ...)
-    if ... then
-        if _G.GetActiveSpecGroup() == ... then return end
-    end
+local function SpecChangeClickFunc(self, spec)
+    if isBeta then
+        if _G.GetActiveSpecGroup() == spec then return end
 
-    if _G.GetNumSpecGroups() > 1 then
-        local NewTG = _G.GetActiveSpecGroup() == 1 and 2 or 1
+        if spec then
+            _G.SetSpecialization(spec)
+        else
+            _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
+        end
+    else
+        if _G.GetActiveSpecGroup() == spec then return end
 
-        -- Set Spec
-        _G.SetActiveSpecGroup(NewTG)
+        if _G.GetNumSpecGroups() > 1 then
+            local NewTG = _G.GetActiveSpecGroup() == 1 and 2 or 1
 
-        -- Flag for changing Equip and Layout once Spec change completes
-        NeedSpecUpdate = true
+            -- Set Spec
+            _G.SetActiveSpecGroup(NewTG)
+
+            -- Flag for changing Equip and Layout once Spec change completes
+            NeedSpecUpdate = true
+        end
     end
 end
 
@@ -2090,6 +2099,40 @@ local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
     end
     cat:AddLine(line)
 end
+local function SpecAddSpecLineToCat(self, cat, specIndex)
+    local InactiveColor = db.colors.disabled
+    local ActiveSpecColor =  RealUI.media.colors.orange
+    local ActiveLayoutColor = db.colors.normal
+
+    local activeSpec = _G.GetSpecialization()
+    local line = {}
+
+    for i = 1, 2 do
+        local SpecColor = (activeSpec == specIndex) and ActiveSpecColor or InactiveColor
+        local LayoutColor = (activeSpec == specIndex) and ActiveLayoutColor or InactiveColor
+        if i == 1 then
+            line["text"] = TalentInfo[specIndex].name
+            line["justify"] = "LEFT"
+            line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
+            line["textR"] = SpecColor[1]
+            line["textG"] = SpecColor[2]
+            line["textB"] = SpecColor[3]
+            line["hasCheck"] = true
+            line["checked"] = activeSpec == specIndex
+            line["isRadio"] = true
+            line["func"] = function() SpecChangeClickFunc(self, specIndex) end
+            line["customwidth"] = 110
+        elseif i == 2 then
+            line["text"..i] = ndbc.layout.spec[specIndex] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
+            line["justify"..i] = "LEFT"
+            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
+            line["text"..i.."R"] = LayoutColor[1]
+            line["text"..i.."G"] = LayoutColor[2]
+            line["text"..i.."B"] = LayoutColor[3]
+        end
+    end
+    cat:AddLine(line)
+end
 
 local SpecSection = {}
 local function Spec_UpdateTablet(self)
@@ -2102,11 +2145,17 @@ local function Spec_UpdateTablet(self)
     SpecSection["specs"].cat = Tablets.spec:AddCategory()
     SpecSection["specs"].cat:AddLine("text", _G.SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
 
-    SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", 3)
+    SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", (isBeta and 2 or 3))
     AddBlankTabLine(SpecSection["specs"].talentCat, 2)
-    SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 1)
-    if numSpecGroups > 1 then
-        SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 2)
+    if isBeta then
+        for specIndex = 1, _G.GetNumSpecializations() do
+            SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
+        end
+    else
+        SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 1)
+        if numSpecGroups > 1 then
+            SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 2)
+        end
     end
 
     ---- Equipment
@@ -2143,15 +2192,23 @@ local function Spec_UpdateTablet(self)
 
     -- Hint
     local hintStr = ""
-    if numSpecGroups > 1 then
+    if isBeta then
         hintStr = hintStr .. L["Spec_ChangeSpec"]
-    end
-    if numEquipSets > 0 then
-        if hintStr ~= "" then hintStr = hintStr .. "\n" end
-        if numSpecGroups > 1 then
+        if numEquipSets > 0 then
+            if hintStr ~= "" then hintStr = hintStr .. "\n" end
             hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
-        else
-            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
+        end
+    else
+        if numSpecGroups > 1 then
+            hintStr = hintStr .. L["Spec_ChangeSpec"]
+        end
+        if numEquipSets > 0 then
+            if hintStr ~= "" then hintStr = hintStr .. "\n" end
+            if numSpecGroups > 1 then
+                hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
+            else
+                hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
+            end
         end
     end
     Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
@@ -2212,16 +2269,12 @@ local function Spec_Update(self)
     InfoLine:debug("Spec_Update")
     -- Talent Info
     _G.wipe(TalentInfo)
-    local numSpecGroups = _G.GetNumSpecGroups()
-    for i = 1, numSpecGroups do
-        TalentInfo[i] = {}
-        for t = 1, 3 do
-            local _, _, _, specIcon, pointsSpent = _G.GetSpecializationInfo(t, false, false, i)
-            TalentInfo[i][t] = {
-                points = pointsSpent,
-                icon = specIcon,
-            }
-        end
+    for specIndex = 1, _G.GetNumSpecializations() do
+        local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
+        TalentInfo[specIndex] = {
+            name = name,
+            icon = specIcon,
+        }
     end
 
     -- Gear sets
@@ -2245,13 +2298,16 @@ local function Spec_Update(self)
 
     -- Info text
     -- Active talent tree
-    if _G.GetActiveSpecGroup() == 1 then
-        self.text:SetText(_G.PRIMARY)
-        UpdateElementWidth(self)
+    if isBeta then
+        self.text:SetText(TalentInfo[_G.GetSpecialization()].name)
     else
-        self.text:SetText(_G.SECONDARY)
-        UpdateElementWidth(self)
+        if _G.GetActiveSpecGroup() == 1 then
+            self.text:SetText(_G.PRIMARY)
+        else
+            self.text:SetText(_G.SECONDARY)
+        end
     end
+    UpdateElementWidth(self)
 
     -- Refresh Tablet
     if Tablets.spec:IsRegistered(self) then

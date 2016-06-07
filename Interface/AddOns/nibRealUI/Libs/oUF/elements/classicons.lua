@@ -10,9 +10,10 @@
 
  Notes
 
+ All     - Combo Points
+ Mage    - Arcane Charges
  Monk    - Chi Orbs
  Paladin - Holy Power
- Priest  - Shadow Orbs
  Warlock - Soul Shards
 
  Examples
@@ -49,6 +50,7 @@
 
 local parent, ns = ...
 local oUF = ns.oUF
+local isBetaClient = select(4, GetBuildInfo()) >= 70000
 
 local _, PlayerClass = UnitClass'player'
 
@@ -57,19 +59,8 @@ local ClassPowerID, ClassPowerType
 local ClassPowerEnable, ClassPowerDisable
 local RequireSpec, RequireSpell
 
-local isBetaClient = oUF.Private.isBetaClient
-
 local UpdateTexture = function(element)
 	local color = oUF.colors.power[ClassPowerType]
-	if not isBetaClient then
-		-- COMBO_POINTS and SHADOW_ORBS don't have a color pre-Legion so we need to supply that color
-		if ClassPowerType == "COMBO_POINTS" then
-			color = {1.00, 0.96, 0.41}
-		elseif ClassPowerType == "SHADOW_ORBS" then
-			color = {0.40, 0.00, 0.80}
-		end
-	end
-
 	for i = 1, #element do
 		local icon = element[i]
 		if(icon.SetDesaturated) then
@@ -81,7 +72,8 @@ local UpdateTexture = function(element)
 end
 
 local Update = function(self, event, unit, powerType)
-	if(unit ~= 'player' or powerType ~= ClassPowerType) then
+	if(not (unit == 'player' and powerType == ClassPowerType)
+		and not (unit == 'vehicle' and powerType == 'COMBO_POINTS')) then
 		return
 	end
 
@@ -102,8 +94,14 @@ local Update = function(self, event, unit, powerType)
 
 	local cur, max, oldMax
 	if(event ~= 'ClassPowerDisable') then
-		cur = UnitPower('player', ClassPowerID)
-		max = UnitPowerMax('player', ClassPowerID)
+		if(unit == 'vehicle') then
+			-- XXX: vehicles are bugged, returns 0 combo points through UnitPower
+			cur = GetComboPoints('vehicle', 'target')
+			max = MAX_COMBO_POINTS
+		else
+			cur = UnitPower('player', ClassPowerID)
+			max = UnitPowerMax('player', ClassPowerID)
+		end
 
 		for i = 1, max do
 			if(i <= cur) then
@@ -135,10 +133,11 @@ local Update = function(self, event, unit, powerType)
 	 max           - The maximum amount of power
 	 hasMaxChanged - Shows if the maximum amount has changed since the last
 	                 update
+	 powerType     - The type of power used
 	 event         - The event, which the update happened for
 	]]
 	if(element.PostUpdate) then
-		return element:PostUpdate(cur, max, oldMax ~= max, event)
+		return element:PostUpdate(cur, max, oldMax ~= max, powerType, event)
 	end
 end
 
@@ -150,7 +149,9 @@ local function Visibility(self, event, unit)
 	local element = self.ClassIcons
 	local shouldEnable
 
-	if(not UnitHasVehicleUI('player')) then
+	if(UnitHasVehicleUI('player')) then
+		shouldEnable = true
+	elseif(ClassPowerID) then
 		if(not RequireSpec or RequireSpec == GetSpecialization()) then
 			if(not RequireSpell or IsPlayerSpell(RequireSpell)) then
 				self:UnregisterEvent('SPELLS_CHANGED', Visibility)
@@ -183,7 +184,13 @@ do
 	ClassPowerEnable = function(self)
 		self:RegisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:RegisterEvent('UNIT_POWER_FREQUENT', Path)
-		Path(self, 'ClassPowerEnable', 'player', ClassPowerType)
+
+		if(UnitHasVehicleUI('player')) then
+			Path(self, 'ClassPowerEnable', 'vehicle', 'COMBO_POINTS')
+		else
+			Path(self, 'ClassPowerEnable', 'player', ClassPowerType)
+		end
+
 		self.ClassIcons.isEnabled = true
 	end
 
@@ -212,7 +219,7 @@ do
 		ClassPowerType = "HOLY_POWER"
 
 		if(isBetaClient) then
-			RequireSpec = SPEC_PALADIN_RETRIBUTION
+			RequireSpell = 85256 -- Templar's Verdict
 		else
 			RequireSpell = 85673 -- Word of Glory
 		end
@@ -231,16 +238,16 @@ do
 		end
 	elseif(PlayerClass == 'ROGUE' or PlayerClass == 'DRUID') then
 		ClassPowerID = SPELL_POWER_COMBO_POINTS
-		ClassPowerType = "COMBO_POINTS"
+		ClassPowerType = 'COMBO_POINTS'
 	elseif(isBetaClient and PlayerClass == 'MAGE') then
 		ClassPowerID = SPELL_POWER_ARCANE_CHARGES
-		ClassPowerType = "ARCANE_CHARGES"
+		ClassPowerType = 'ARCANE_CHARGES'
 		RequireSpec = SPEC_MAGE_ARCANE
 	end
 end
 
 local Enable = function(self, unit)
-	if(unit ~= 'player' or not ClassPowerID) then return end
+	if(unit ~= 'player') then return end
 
 	local element = self.ClassIcons
 	if(not element) then return end
@@ -256,15 +263,22 @@ local Enable = function(self, unit)
 	element.ClassPowerEnable = ClassPowerEnable
 	element.ClassPowerDisable = ClassPowerDisable
 
+	local isChildrenTextures
 	for i = 1, #element do
 		local icon = element[i]
-		if(icon:IsObjectType'Texture' and not icon:GetTexture()) then
-			icon:SetTexCoord(0.45703125, 0.60546875, 0.44531250, 0.73437500)
-			icon:SetTexture([[Interface\PlayerFrame\Priest-ShadowUI]])
+		if(icon:IsObjectType'Texture') then
+			if(not icon:GetTexture()) then
+				icon:SetTexCoord(0.45703125, 0.60546875, 0.44531250, 0.73437500)
+				icon:SetTexture([[Interface\PlayerFrame\Priest-ShadowUI]])
+			end
+
+			isChildrenTextures = true
 		end
 	end
 
-	(element.UpdateTexture or UpdateTexture) (element)
+	if(isChildrenTextures) then
+		(element.UpdateTexture or UpdateTexture) (element)
+	end
 
 	return true
 end

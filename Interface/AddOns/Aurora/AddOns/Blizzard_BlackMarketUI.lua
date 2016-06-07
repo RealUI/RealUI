@@ -61,7 +61,11 @@ C.themes["Blizzard_BlackMarketUI"] = function()
 				local tex = bu:CreateTexture(nil, "BACKGROUND")
 				tex:SetPoint("TOPLEFT")
 				tex:SetPoint("BOTTOMRIGHT", 0, 5)
-				tex:SetTexture(0, 0, 0, .25)
+				if C.isBetaClient then
+					tex:SetColorTexture(0, 0, 0, .25)
+				else
+					tex:SetTexture(0, 0, 0, .25)
+				end
 
 				bu:SetHighlightTexture(C.media.backdrop)
 				local hl = bu:GetHighlightTexture()

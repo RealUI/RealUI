@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next, type = _G.next, _G.type
+local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -96,29 +96,6 @@ RealUI.minipatches = {
             local profile = nibRealUIDB["namespaces"]["RuneDisplay"]["profiles"]["RealUI"]
             if profile then
                 profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
-            end
-        end
-        local defaults = RealUI:GetPointTrackingDefaults().profile
-        if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
-            local defaultDB = defaults["**"].types["**"]
-            local profile = nibRealUIDB["namespaces"]["PointTracking"]["profiles"]["RealUI"]
-            local function setSettings(classSV, classDB, fallbackDB)
-                for setting, value in next, classSV do
-                    if type(value) == "table" then
-                        setSettings(value, classDB and classDB[setting] or nil, fallbackDB[setting])
-                    else
-                        classSV[setting] = classDB and classDB[setting] or fallbackDB[setting]
-                    end
-                end
-            end
-            for class, classInfo in next, profile do
-                if type(classInfo) == "table" and classInfo.types then
-                    for pointType, pointInfo in next, classInfo.types do
-                        if pointInfo.bars then
-                            setSettings(pointInfo.bars, defaults[class].types[pointType].bars, defaultDB.bars)
-                        end
-                    end
-                end
             end
         end
         local RavenDB = _G.RavenDB

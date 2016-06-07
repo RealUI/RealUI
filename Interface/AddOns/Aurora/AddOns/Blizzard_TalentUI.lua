@@ -20,10 +20,16 @@ C.themes["Blizzard_TalentUI"] = function()
 		select(i, PlayerTalentFrameSpecializationSpellScrollFrameScrollChild:GetRegions()):Hide()
 	end
 
-	F.CreateBG(PlayerTalentFrameTalentsClearInfoFrame)
-	PlayerTalentFrameTalentsClearInfoFrameIcon:SetTexCoord(.08, .92, .08, .92)
+	if not C.isBetaClient then
+		F.CreateBG(PlayerTalentFrameTalentsClearInfoFrame)
+		PlayerTalentFrameTalentsClearInfoFrameIcon:SetTexCoord(.08, .92, .08, .92)
+	end
 
-	PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.Seperator:SetTexture(1, 1, 1)
+	if C.isBetaClient then
+		PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.Seperator:SetColorTexture(1, 1, 1)
+	else
+		PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.Seperator:SetTexture(1, 1, 1)
+	end
 	PlayerTalentFrameSpecializationSpellScrollFrameScrollChild.Seperator:SetAlpha(.2)
 
 	if select(2, UnitClass("player")) == "HUNTER" then
@@ -35,7 +41,11 @@ C.themes["Blizzard_TalentUI"] = function()
 			select(i, PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild:GetRegions()):Hide()
 		end
 
-		PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.Seperator:SetTexture(1, 1, 1)
+		if C.isBetaClient then
+			PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.Seperator:SetColorTexture(1, 1, 1)
+		else
+			PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.Seperator:SetTexture(1, 1, 1)
+		end
 		PlayerTalentFramePetSpecializationSpellScrollFrameScrollChild.Seperator:SetAlpha(.2)
 
 		for i = 1, GetNumSpecializations(false, true) do
@@ -149,8 +159,10 @@ C.themes["Blizzard_TalentUI"] = function()
 		PlayerTalentFrameSpecialization["specButton"..i].specIcon:SetTexture(icon)
 	end
 
-	PlayerTalentFrameSpecializationLearnButton.Flash:SetTexture("")
-	PlayerTalentFrameTalentsLearnButton.Flash:SetTexture("")
+	if not C.isBetaClient then
+		PlayerTalentFrameSpecializationLearnButton.Flash:SetTexture("")
+		PlayerTalentFrameTalentsLearnButton.Flash:SetTexture("")
+	end
 
 	local buttons = {"PlayerTalentFrameSpecializationSpecButton", "PlayerTalentFramePetSpecializationSpecButton"}
 
@@ -228,7 +240,9 @@ C.themes["Blizzard_TalentUI"] = function()
 			bu:SetHighlightTexture("")
 			bu.Slot:SetAlpha(0)
 			bu.knownSelection:SetAlpha(0)
-			bu.learnSelection:SetAlpha(0)
+			if not C.isBetaClient then
+				bu.learnSelection:SetAlpha(0)
+			end
 
 			ic:SetDrawLayer("ARTWORK")
 			ic:SetTexCoord(.08, .92, .08, .92)
@@ -251,7 +265,7 @@ C.themes["Blizzard_TalentUI"] = function()
 				else
 					bu.bg:SetBackdropColor(0, 0, 0, .25)
 				end
-				if bu.learnSelection:IsShown() then
+				if not C.isBetaClient and bu.learnSelection:IsShown() then
 					bu.bg:SetBackdropBorderColor(r, g, b)
 				else
 					bu.bg:SetBackdropBorderColor(0, 0, 0)
@@ -287,7 +301,9 @@ C.themes["Blizzard_TalentUI"] = function()
 
 	F.ReskinPortraitFrame(PlayerTalentFrame, true)
 	F.Reskin(PlayerTalentFrameSpecializationLearnButton)
-	F.Reskin(PlayerTalentFrameTalentsLearnButton)
+	if not C.isBetaClient then
+		F.Reskin(PlayerTalentFrameTalentsLearnButton)
+	end
 	F.Reskin(PlayerTalentFrameActivateButton)
 	F.Reskin(PlayerTalentFramePetSpecializationLearnButton)
 end

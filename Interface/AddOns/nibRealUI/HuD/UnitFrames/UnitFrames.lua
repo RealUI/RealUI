@@ -163,45 +163,6 @@ function UnitFrames:OnInitialize()
                 },
                 classColor = false,
                 classColorNames = true,
-                colors = {
-                    health = {
-                        normal = {0.66, 0.22, 0.22},
-                    },
-                    power = {
-                        ["MANA"] =        {0.00, 0.50, 0.94},
-                        ["RAGE"] =        {0.75, 0.12, 0.12},
-                        ["FOCUS"] =       {0.95, 0.50, 0.20},
-                        ["ENERGY"] =      {0.90, 0.80, 0.20},
-                        ["CHI"] =         {0.35, 0.80, 0.70},
-                        ["RUNES"] =       {0.50, 0.50, 0.50},
-                        ["RUNIC_POWER"] = {0.00, 0.65, 0.85},
-                        ["SOUL_SHARDS"] = {0.50, 0.32, 0.55},
-                        ["HOLY_POWER"] =  {0.90, 0.80, 0.50},
-                        ["AMMOSLOT"] =    {0.80, 0.60, 0.00},
-                        ["FUEL"] =        {0.00, 0.55, 0.50},
-                        ["ALTERNATE"] =   {0.00, 0.80, 0.80},
-                    },
-                    status = {
-                        hostile =      {0.81, 0.20, 0.15},
-                        neutral =      {0.90, 0.90, 0.20},
-                        friendly =     {0.28, 0.85, 0.28},
-                        damage =       {1, 0, 0},
-                        incomingHeal = {1, 1, 0},
-                        heal =         {0, 1, 0},
-                        resting =      {0, 1, 0},
-                        combat =       {1, 0, 0},
-                        afk =          {1, 1, 0},
-                        offline =      {0.6, 0.6, 0.6},
-                        leader =       {0, 1, 1},
-                        tapped =       {0.4, 0.4, 0.4},
-                        pvpEnemy =     {1, 0, 0},
-                        pvpFriendly =  {0, 1, 0},
-                        dead =         {0.2, 0.2, 0.2},
-                        rareelite =    {1, 0.5, 0},
-                        elite =        {1, 1, 0},
-                        rare =         {0.75, 0.75, 0.75},
-                    },
-                },
             },
         },
     })
@@ -209,17 +170,14 @@ function UnitFrames:OnInitialize()
     ndb = RealUI.db.profile
 
     self.layoutSize = ndb.settings.hudSize
-    --print("Layout", self.layoutSize)
-
-
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function UnitFrames:OnEnable()
-    self.colorStrings = {
-        health = RealUI:ColorTableToStr(oUF.colors.health),
-        mana = RealUI:ColorTableToStr(oUF.colors.power["MANA"]),
-    }
+    -- Override the green that oUF uses
+    oUF.colors.health = {0.66, 0.22, 0.22}
+    oUF.colors.power.MANA = RealUI:ColorDesaturate(0.1, oUF.colors.power.MANA)
+    oUF.colors.power.MANA = RealUI:ColorShift(-0.07, oUF.colors.power.MANA)
 
     CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()

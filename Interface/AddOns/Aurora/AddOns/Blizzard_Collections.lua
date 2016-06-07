@@ -457,7 +457,11 @@ C.themes["Blizzard_Collections"] = function()
 			button.level:SetPoint("BOTTOM", 0, 1)
 
 			local newLevelBg = button:CreateTexture(nil, "OVERLAY")
-			newLevelBg:SetTexture(0, 0, 0, .5)
+			if C.isBetaClient then
+				newLevelBg:SetColorTexture(0, 0, 0, .5)
+			else
+				newLevelBg:SetTexture(0, 0, 0, .5)
+			end
 			newLevelBg:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 4, 5)
 			newLevelBg:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -4, 5)
 			newLevelBg:SetHeight(11)
