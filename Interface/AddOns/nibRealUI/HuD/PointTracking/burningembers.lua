@@ -54,7 +54,6 @@ local Path = function(self, ...)
 end
 
 local function Visibility(self, event, unit)
-	_G.print("Visibility")
 	local element = self.BurningEmbers
 	local shouldEnable
 
