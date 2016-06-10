@@ -13,6 +13,7 @@ exclude_files = {
     "Interface/AddOns/nibRealUI_Init/libs/LibItemUpgradeInfo-1.0",
     "Interface/AddOns/nibRealUI_Init/libs/LibSharedMedia-3.0",
     "Interface/AddOns/nibRealUI_Init/libs/LibStub",
+    "Interface/AddOns/nibRealUI_Init/libs/UTF8",
     "**/*.blp",
     "**/*.BLP",
     "**/*.ttf",
