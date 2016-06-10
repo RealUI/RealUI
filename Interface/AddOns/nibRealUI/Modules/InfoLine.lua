@@ -3667,7 +3667,27 @@ function InfoLine:OnInitialize()
 
     RealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
 
-    self:SetEnabledState(true)
+    local hasLDBDisplay = false
+    do
+        local ldbDisplays = {
+            "Bazooka",
+            "ChocolateBar",
+            "DockingStation",
+            "Titan",
+        }
+        for i, display in next, ldbDisplays do
+            local _, _, _, loadable = _G.GetAddOnInfo(display)
+            if loadable then
+                hasLDBDisplay = true
+                break
+            end
+        end
+    end
+
+    self:SetEnabledState(not hasLDBDisplay)
+    if not RealUI:GetModuleEnabled(MODNAME) then
+        RealUI:SetModuleEnabled(MODNAME, true)
+    end
 end
 
 function InfoLine:OnEnable()

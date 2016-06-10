@@ -94,7 +94,6 @@ local core do
                 position = {
                     name = "Position/Size",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
                         parent = {
@@ -235,7 +234,6 @@ local core do
                 colors = {
                     name = "Colors",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
                         normal = {
@@ -365,7 +363,6 @@ local core do
                 other = {
                     name = "Other",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 70,
                     args = {
                         icTips = {
@@ -449,7 +446,6 @@ local core do
         local elementopts = {
             name = "Blocks",
             type = "group",
-            disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
             order = 40,
             args = {},
         }
