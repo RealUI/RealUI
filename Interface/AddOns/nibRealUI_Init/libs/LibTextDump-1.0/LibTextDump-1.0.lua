@@ -328,7 +328,7 @@ function prototype:String(separator)
 	end
 
 	separator = separator or "\n"
-	local buffer, frame, output = buffers[self], frames[self]
+	local buffer, frame = buffers[self], frames[self]
 	local line_dummy = frame.line_dummy
 	function buffer:UpdateWrappedLines()
 		local all_wrapped_lines = 0
@@ -360,26 +360,18 @@ function prototype:String(separator)
 		local text = table.concat(buffer, separator, start, stop)
 		frame.edit_box:SetText(text)
 	end
+	frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
+		--print("OnVerticalScroll", value)
+		local scrollbar = scroll_area.ScrollBar
+		local _, scroll_max = scrollbar:GetMinMaxValues()
+		--print("Min/Max", scroll_min, scroll_max)
+		local scroll_per = round(value / scroll_max, 2)
+		offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
 
-	if all_wrapped_lines <= max_display_lines then
-		--print("Simple", start, stop)
-		output = table.concat(buffer, separator)
-	else
-		--print("Overflow", start, stop)
-		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
-			--print("OnVerticalScroll", value)
-			local scrollbar = scroll_area.ScrollBar
-			local _, scroll_max = scrollbar:GetMinMaxValues()
-			--print("Min/Max", scroll_min, scroll_max)
-			local scroll_per = round(value / scroll_max, 2)
-			offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
+		--print("Current position", value, offset, scroll_per)
+		--print("Concat", start, stop)
+		frame:UpdateText(buffer:UpdateWrappedLines())
+	end)
 
-			--print("Current position", value, offset, scroll_per)
-			--print("Concat", start, stop)
-			frame:UpdateText(buffer:UpdateWrappedLines())
-		end)
-
-		output = table.concat(buffer, separator, start, stop)
-	end
-	return output
+	return table.concat(buffer, separator, start, stop)
 end
