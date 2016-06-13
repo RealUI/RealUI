@@ -499,11 +499,28 @@ local function CreateAngleBar(width, height, parent, info)
     debug(info.debug, "CreateBar", bar, parent)
     bar:SetPoint(info.startPoint, parent, 2, 0)
     bar:SetHeight(info.minWidth)
+    bar:SetScript("OnSizeChanged", function(self, barWidth, barHeight)
+        if self.isTrapezoid then
+            debug(info.debug, "OnSizeChanged", barWidth)
+            local row = self.row
+            local prevWidth = barWidth
+            for i = 1, #row do
+                local rowWidth = row[i]:GetWidth()
+                debug(info.debug, i, rowWidth, prevWidth, rowWidth > prevWidth)
+                if rowWidth > prevWidth then
+                    row[i]:Hide()
+                else
+                    row[i]:Show()
+                    prevWidth = rowWidth
+                end
+            end
+        end
+    end)
 
     --[[
     local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
     if isBeta then
-        test:SetColorTexture(1, 1, 1, 0.1)
+        test:SetColorTexture(1, 1, 1, 0.2)
     else
         test:SetTexture(1, 1, 1, 0.1)
     end
@@ -513,25 +530,38 @@ local function CreateAngleBar(width, height, parent, info)
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, info.minWidth)
 
     local row, prevRow = {}
+    bar.isTrapezoid = leftX == abs(rightX)
+    debug(info.debug, "isTrapezoid", bar.isTrapezoid, leftX, rightX)
     for i = 1, info.minWidth do
-        row[i] = bar:CreateTexture(nil, "ARTWORK")
-        row[i]:SetHeight(1)
-        if i == 1 then
-            row[i]:SetPoint("TOPLEFT", bar, leftX, -1)
-            row[i]:SetPoint("TOPRIGHT", bar, rightX, -1)
-        else
-            if leftX == 0 then
-                row[i]:SetPoint("TOPLEFT", prevRow, 1, -1) -- \
+        local tex = bar:CreateTexture(nil, "ARTWORK")
+        tex:SetHeight(1)
+        if bar.isTrapezoid and leftX > 0 then
+            if i == 1 then
+                tex:SetPoint("BOTTOMLEFT", bar, 0, -1)
+                tex:SetPoint("BOTTOMRIGHT", bar, 0, -1)
             else
-                row[i]:SetPoint("TOPLEFT", prevRow, -1, -1) -- /
+                tex:SetPoint("BOTTOMLEFT", prevRow, 1, 1) -- /
+                tex:SetPoint("BOTTOMRIGHT", prevRow, -1, 1) -- \
             end
-            if rightX == 0 then
-                row[i]:SetPoint("TOPRIGHT", prevRow, -1, -1) -- /
+        else
+            if i == 1 then
+                tex:SetPoint("TOPLEFT", bar, leftX, -1)
+                tex:SetPoint("TOPRIGHT", bar, rightX, -1)
             else
-                row[i]:SetPoint("TOPRIGHT", prevRow, 1, -1) -- \
+                if leftX == 0 then
+                    tex:SetPoint("TOPLEFT", prevRow, 1, -1) -- \
+                else
+                    tex:SetPoint("TOPLEFT", prevRow, -1, -1) -- /
+                end
+                if rightX == 0 then
+                    tex:SetPoint("TOPRIGHT", prevRow, -1, -1) -- /
+                else
+                    tex:SetPoint("TOPRIGHT", prevRow, 1, -1) -- \
+                end
             end
         end
-        prevRow = row[i]
+        prevRow = tex
+        row[i] = tex
     end
     bar.row = row
 
@@ -594,12 +624,12 @@ function RealUI:TestASB(reverseFill, reversePer)
         {
             leftAngle = [[\]],
             rightAngle = [[\]],
-            debug = "testLeftLeft"
+            --debug = "testLeftLeft"
         },
         {
             leftAngle = [[\]],
             rightAngle = [[/]],
-            debug = "testLeftRight"
+            --debug = "testLeftRight"
         },
         {
             leftAngle = [[/]],
@@ -609,7 +639,7 @@ function RealUI:TestASB(reverseFill, reversePer)
         {
             leftAngle = [[/]],
             rightAngle = [[/]],
-            debug = "testRightRight"
+            --debug = "testRightRight"
         },
     }
     local width, height = 100, 10
@@ -661,7 +691,7 @@ function RealUI:TestASB(reverseFill, reversePer)
     tinsert(testBars, status)
 end
 
--- /run RealUI:TestASBSet("Value", 200)
+-- /run RealUI:TestASBSet("Value", 50)
 -- /run RealUI:TestASBSet("ReverseFill", true)
 -- /run RealUI:TestASBSet("ReversePercent", true)
 function RealUI:TestASBSet(method, ...)
