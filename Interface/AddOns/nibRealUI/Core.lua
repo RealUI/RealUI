@@ -225,6 +225,20 @@ local defaults = {
         media = RealUI.media
     },
 }
+
+do
+    local spec
+    if RealUI.isBeta then
+        spec = {}
+        for specIndex = 1, _G.GetNumSpecializations() do
+            local _, _, _, _, _, role = _G.GetSpecializationInfo(specIndex)
+            spec[specIndex] = role == "HEALER" and 2 or 1
+        end
+    else
+        spec = {1, 1}
+    end
+    defaults.char.layout.spec = spec
+end
 --------------------------------------------------------
 
 -- Toggle Grid2's "Test Layout"

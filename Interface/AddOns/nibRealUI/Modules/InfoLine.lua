@@ -1470,13 +1470,6 @@ local clientString = {
     [_G.BNET_CLIENT_OVERWATCH] = "OW",
 }
 
-local BNGetGameAccountInfo = _G.BNGetGameAccountInfo
-if not BNGetGameAccountInfo then
-    BNGetGameAccountInfo = function(...)
-        return _G.BNGetToonInfo(...)
-    end
-end
-
 local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
@@ -1518,7 +1511,7 @@ local function Friends_Update(self)
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
 
-            local _, characterName, _, realmName, _, faction, _, class, _, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, _, faction, _, class, _, zoneName, level = _G.BNGetGameAccountInfo(bnetIDGameAccount)
             curFriendsOnline = curFriendsOnline + 1
 
             if (realmName == RealUI.realm) then
@@ -1560,7 +1553,7 @@ local function Friends_Update(self)
         elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 
-            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = _G.BNGetGameAccountInfo(bnetIDGameAccount)
             InfoLine:debug("BNet: not in WoW", characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
             characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
             client = clientString[client] or client
@@ -1925,7 +1918,7 @@ local SpecEquipList = {}
 
 local function SpecChangeClickFunc(self, spec)
     if isBeta then
-        if _G.GetActiveSpecGroup() == spec then return end
+        if _G.GetSpecialization() == spec then return end
 
         if spec then
             _G.SetSpecialization(spec)
@@ -2328,7 +2321,12 @@ local function Spec_Update(self)
         end
 
         -- Update Layout
-        local NewTG = _G.GetActiveSpecGroup()
+        local NewTG
+        if isBeta then
+            NewTG = _G.GetSpecialization()
+        else
+            NewTG = _G.GetActiveSpecGroup()
+        end
         ndbc.layout.current = ndbc.layout.spec[NewTG]
         Layout_Update(ILFrames.layout)
         RealUI:UpdateLayout()
@@ -2796,7 +2794,11 @@ function InfoLine:OnMouseDown(element)
     elseif element.tag == "layout" then
         local NewLayout = ndbc.layout.current == 1 and 2 or 1
         ndbc.layout.current = NewLayout
-        ndbc.layout.spec[_G.GetActiveSpecGroup()] = NewLayout
+        if isBeta then
+            ndbc.layout.spec[_G.GetSpecialization()] = NewLayout
+        else
+            ndbc.layout.spec[_G.GetActiveSpecGroup()] = NewLayout
+        end
         Layout_Update(element)
         RealUI:UpdateLayout()
         _G.GameTooltip:Hide()
