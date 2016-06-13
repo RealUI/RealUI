@@ -230,8 +230,9 @@ do
     local spec
     if RealUI.isBeta then
         spec = {}
-        for specIndex = 1, _G.GetNumSpecializations() do
-            local _, _, _, _, _, role = _G.GetSpecializationInfo(specIndex)
+        for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+            local _, _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+            debug("Spec info", specIndex, role)
             spec[specIndex] = role == "HEALER" and 2 or 1
         end
     else
