@@ -1914,6 +1914,7 @@ local function Layout_Update(self)
 end
 
 ---- Spec Button
+local TalentInfo = {}
 local SpecEquipList = {}
 
 local function SpecChangeClickFunc(self, spec)
@@ -1940,22 +1941,41 @@ local function SpecChangeClickFunc(self, spec)
     end
 end
 
-local function SpecGearClickFunc(self, index, equipName)
-    if not index then return end
+local function SpecGearClickFunc(self, equipIndex, equipName)
+    if not equipIndex then return end
 
-    if _G.IsShiftKeyDown() then
-        if dbc.specgear.primary == index then
-            dbc.specgear.primary = -1
+    if isBeta then
+        if _G.IsShiftKeyDown() then
+            for specIndex = 1, _G.GetNumSpecializations() do
+                if dbc.specgear[specIndex] == equipIndex then
+                    dbc.specgear[specIndex] = -1
+                end
+            end
+        elseif _G.IsAltKeyDown() then
+            local specIndex = _G.GetSpecialization()
+            if (dbc.specgear[specIndex] < 0) or (dbc.specgear[specIndex] == _G.GetNumEquipmentSets()) then
+                dbc.specgear[specIndex] = 1
+            else
+                dbc.specgear[specIndex] = dbc.specgear[specIndex] + 1
+            end
+        else
+            _G.EquipmentManager_EquipSet(equipName)
         end
-        if dbc.specgear.secondary == index then
-            dbc.specgear.secondary = -1
-        end
-    elseif _G.IsAltKeyDown() then
-        dbc.specgear.secondary = index
-    elseif _G.IsControlKeyDown() then
-        dbc.specgear.primary = index
     else
-        _G.EquipmentManager_EquipSet(equipName)
+        if _G.IsShiftKeyDown() then
+            if dbc.specgear.primary == equipIndex then
+                dbc.specgear.primary = -1
+            end
+            if dbc.specgear.secondary == equipIndex then
+                dbc.specgear.secondary = -1
+            end
+        elseif _G.IsAltKeyDown() then
+            dbc.specgear.secondary = equipIndex
+        elseif _G.IsControlKeyDown() then
+            dbc.specgear.primary = equipIndex
+        else
+            _G.EquipmentManager_EquipSet(equipName)
+        end
     end
 
     Tablets.spec:Refresh(self)
@@ -1993,7 +2013,6 @@ local function SpecAddLootSpecToCat(self, cat)
 
         cat:AddLine(line)
     end
-
 end
 
 local function SpecAddEquipListToCat(self, cat)
@@ -2002,37 +2021,67 @@ local function SpecAddEquipListToCat(self, cat)
     -- Sets
     local line = {}
     if #SpecEquipList > 0 then
-        for k, v in ipairs(SpecEquipList) do
-            local _, _, _, isEquipped = _G.GetEquipmentSetInfo(k)
+        for equipIndex, equipSet in ipairs(SpecEquipList) do
+            local _, _, _, isEquipped = _G.GetEquipmentSetInfo(equipIndex)
+            local size = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
 
             _G.wipe(line)
-            for i = 1, 4 do
-                if i == 1 then
-                    line["text"] = ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s"):format(SpecEquipList[k].icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
-                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"] = "LEFT"
-                    line["textR"] = 0.9
-                    line["textG"] = 0.9
-                    line["textB"] = 0.9
-                    line["hasCheck"] = true
-                    line["isRadio"] = true
-                    line["checked"] = isEquipped
-                    line["func"] = function() SpecGearClickFunc(self, k, SpecEquipList[k].name) end
-                    line["customwidth"] = 110
-                elseif i == 2 then
-                    line["text"..i] = _G.PRIMARY
-                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[3] or 0.3
-                elseif (i == 3) and (numSpecGroups > 1) then
-                    line["text"..i] = _G.SECONDARY
-                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[3] or 0.3
+            if isBeta then
+                local specIndex = _G.GetSpecialization()
+                for i = 1, 2 do
+                    if i == 1 then
+                        line["text"] = ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s"):format(equipSet.icon, size, size, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, equipSet.name)
+                        line["size"] = size
+                        line["justify"] = "LEFT"
+                        line["textR"] = 0.9
+                        line["textG"] = 0.9
+                        line["textB"] = 0.9
+                        line["hasCheck"] = true
+                        line["isRadio"] = true
+                        line["checked"] = isEquipped
+                        line["func"] = function() SpecGearClickFunc(self, equipIndex, equipSet.name) end
+                        line["customwidth"] = 110
+                    elseif i == 2 then
+                        local color = (dbc.specgear[specIndex] == equipIndex) and RealUI.media.colors.blue or {0.3, 0.3, 0.3}
+                        line["text"..i] = TalentInfo[specIndex].name
+                        line["size"..i] = size
+                        line["justify"..i] = "LEFT"
+                        line["text"..i.."R"] = color[1]
+                        line["text"..i.."G"] = color[2]
+                        line["text"..i.."B"] = color[3]
+                    end
+                end
+            else
+                for i = 1, 3 do
+                    if i == 1 then
+                        line["text"] = ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s"):format(equipSet.icon, size, size, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, equipSet.name)
+                        line["size"] = size
+                        line["justify"] = "LEFT"
+                        line["textR"] = 0.9
+                        line["textG"] = 0.9
+                        line["textB"] = 0.9
+                        line["hasCheck"] = true
+                        line["isRadio"] = true
+                        line["checked"] = isEquipped
+                        line["func"] = function() SpecGearClickFunc(self, equipIndex, equipSet.name) end
+                        line["customwidth"] = 110
+                    elseif i == 2 then
+                        local color = (dbc.specgear.primary == equipIndex) and RealUI.media.colors.blue or {0.3, 0.3, 0.3}
+                        line["text"..i] = _G.PRIMARY
+                        line["size"..i] = size
+                        line["justify"..i] = "LEFT"
+                        line["text"..i.."R"] = color[1]
+                        line["text"..i.."G"] = color[2]
+                        line["text"..i.."B"] = color[3]
+                    elseif (i == 3) and (numSpecGroups > 1) then
+                        local color = (dbc.specgear.secondary == equipIndex) and RealUI.media.colors.blue or {0.3, 0.3, 0.3}
+                        line["text"..i] = _G.SECONDARY
+                        line["size"..i] = size
+                        line["justify"..i] = "LEFT"
+                        line["text"..i.."R"] = color[1]
+                        line["text"..i.."G"] = color[2]
+                        line["text"..i.."B"] = color[3]
+                    end
                 end
             end
 
@@ -2041,7 +2090,6 @@ local function SpecAddEquipListToCat(self, cat)
     end
 end
 
-local TalentInfo = {}
 local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
     local InactiveColor = db.colors.disabled
     local ActiveGroupColor = RealUI.media.colors.blue
@@ -2189,7 +2237,7 @@ local function Spec_UpdateTablet(self)
         hintStr = hintStr .. L["Spec_ChangeSpec"]
         if numEquipSets > 0 then
             if hintStr ~= "" then hintStr = hintStr .. "\n" end
-            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
+            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipCycle"]..".\n"..L["Spec_EquipUnassign"]
         end
     else
         if numSpecGroups > 1 then
@@ -2246,13 +2294,24 @@ local setEquipped = false
 function InfoLine:SpecUpdateEquip()
     self:debug("SpecUpdateEquip start")
     -- Update Equipment Set
-    local NewTG = _G.GetActiveSpecGroup()
-    if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
-        self:debug("SpecUpdateEquip", NewTG)
-        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.primary))
-    elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
-        self:debug("SpecUpdateEquip", NewTG)
-        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.secondary))
+    if isBeta then
+        local NewTG = _G.GetSpecialization()
+        if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
+            self:debug("SpecUpdateEquip", NewTG)
+            _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.primary))
+        elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
+            self:debug("SpecUpdateEquip", NewTG)
+            _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.secondary))
+        end
+    else
+        local NewTG = _G.GetActiveSpecGroup()
+        if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
+            self:debug("SpecUpdateEquip", NewTG)
+            _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.primary))
+        elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
+            self:debug("SpecUpdateEquip", NewTG)
+            _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.secondary))
+        end
     end
     self:debug("SpecUpdateEquip end")
     setEquipped = true
@@ -2282,11 +2341,20 @@ local function Spec_Update(self)
             }
         end
     end
-    if dbc.specgear.primary > numEquipSets then
-        dbc.specgear.primary = -1
-    end
-    if dbc.specgear.secondary > numEquipSets then
-        dbc.specgear.secondary = -1
+    if isBeta then
+        for specIndex = 1, _G.GetNumSpecializations() do
+            InfoLine:debug("Reset spec equipment", dbc.specgear[specIndex], numEquipSets)
+            if dbc.specgear[specIndex] > numEquipSets then
+                dbc.specgear[specIndex] = -1
+            end
+        end
+    else
+        if dbc.specgear.primary > numEquipSets then
+            dbc.specgear.primary = -1
+        end
+        if dbc.specgear.secondary > numEquipSets then
+            dbc.specgear.secondary = -1
+        end
     end
 
     -- Info text
@@ -3576,16 +3644,25 @@ end
 -- Initialization --
 --------------------
 function InfoLine:OnInitialize()
+    local specgear
+    if isBeta then
+        specgear = {}
+        for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+            specgear[specIndex] = -1
+        end
+    else
+        specgear = {
+            primary = -1,
+            secondary = -1,
+        }
+    end
     local otherFaction = RealUI:OtherFaction(RealUI.faction)
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
             xrstate = "x",
             currencystate = 1,
-            specgear = {
-                primary = -1,
-                secondary = -1,
-            },
+            specgear = specgear,
         },
         global = {
             currency = {
