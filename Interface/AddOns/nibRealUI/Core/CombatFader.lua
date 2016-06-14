@@ -6,6 +6,7 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
+local L = RealUI.L
 
 local MODNAME = "CombatFader"
 local CombatFader = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -133,6 +134,86 @@ function CombatFader:RegisterFrameForFade(mod, frame)
     _G.assert(modules[mod], mod.." has not yet been registered.")
     _G.tinsert(modules[mod].frames, frame)
     CombatFader:RefreshMod()
+end
+
+function CombatFader:GetFadeConfig(mod)
+    local modDB = modules[mod].options
+    return {
+        header = {
+            name = L["CombatFade"],
+            type = "header",
+            order = 55,
+        },
+        enable = {
+            name = L["General_Enabled"],
+            desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
+            type = "toggle",
+            get = function(info) return modDB.enabled end,
+            set = function(info, value)
+                modDB.enabled = value
+                CombatFader:RefreshMod()
+            end,
+            order = 59,
+        },
+        config = {
+            name = "",
+            type = "group",
+            inline = true,
+            disabled = function() return not modDB.enabled end,
+            order = 60,
+            args = {
+                incombat = {
+                    name = L["CombatFade_InCombat"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return modDB.opacity.incombat end,
+                    set = function(info, value)
+                        modDB.opacity.incombat = value
+                        CombatFader:RefreshMod()
+                    end,
+                    order = 10,
+                },
+                hurt = {
+                    name = L["CombatFade_Hurt"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return modDB.opacity.hurt end,
+                    set = function(info, value)
+                        modDB.opacity.hurt = value
+                        CombatFader:RefreshMod()
+                    end,
+                    order = 20,
+                },
+                target = {
+                    name = L["CombatFade_Target"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return modDB.opacity.target end,
+                    set = function(info, value)
+                        modDB.opacity.target = value
+                        modDB.opacity.harmtarget = value
+                        CombatFader:RefreshMod()
+                    end,
+                    order = 30,
+                },
+                outofcombat = {
+                    name = L["CombatFade_NoCombat"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return modDB.opacity.outofcombat end,
+                    set = function(info, value)
+                        modDB.opacity.outofcombat = value
+                        CombatFader:RefreshMod()
+                    end,
+                    order = 40,
+                },
+            },
+        }
+    }
 end
 
 function CombatFader:OnInitialize()
