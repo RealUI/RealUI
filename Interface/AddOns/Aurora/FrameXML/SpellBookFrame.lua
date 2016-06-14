@@ -83,7 +83,9 @@ tinsert(C.themes["Aurora"], function()
 				F.CreateBG(tab)
 
 				local tex = tab:GetNormalTexture()
-				tex:SetTexCoord(.08, .92, .08, .92)
+				if tex then -- this is sometimes nil
+					tex:SetTexCoord(.08, .92, .08, .92)
+				end
 
 				tab.styled = true
 			end
