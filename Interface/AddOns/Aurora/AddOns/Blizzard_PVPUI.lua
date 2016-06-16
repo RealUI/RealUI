@@ -52,8 +52,8 @@ C.themes["Blizzard_PVPUI"] = function()
 	PVPQueueFrame.CategoryButton2.Icon:SetTexture("Interface\\Icons\\achievement_bg_killxenemies_generalsroom")
 	PVPQueueFrame.CategoryButton3.Icon:SetTexture("Interface\\Icons\\ability_warrior_offensivestance")
 
+	local englishFaction = UnitFactionGroup("player")
 	if not C.isBetaClient then
-		local englishFaction = UnitFactionGroup("player")
 		PVPQueueFrame.CategoryButton1.CurrencyDisplay.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Honor-"..englishFaction)
 		PVPQueueFrame.CategoryButton2.CurrencyDisplay.Icon:SetTexture("Interface\\Icons\\PVPCurrency-Conquest-"..englishFaction)
 	end
@@ -261,7 +261,7 @@ C.themes["Blizzard_PVPUI"] = function()
 
 	local ratedButtons = {ConquestFrame.Arena2v2, ConquestFrame.Arena3v3, ConquestFrame.RatedBG}
 	if not C.isBetaClient then
-		tinsert(ratedButtons, ConquestFrame.Arena5v5, 3)
+		tinsert(ratedButtons, 3, ConquestFrame.Arena5v5)
 	end
 	for _, bu in pairs(ratedButtons) do
 		F.Reskin(bu, true)
