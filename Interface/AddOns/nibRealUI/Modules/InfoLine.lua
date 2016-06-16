@@ -1918,6 +1918,7 @@ local TalentInfo = {}
 local equipSetsByIndex, equipSetsByID = {}, {}
 
 local function SpecChangeClickFunc(self, specIndex)
+    InfoLine:debug("SpecChangeClickFunc", specIndex)
     if specIndex then
         local numEquipSets = _G.GetNumEquipmentSets()
         if _G.IsModifierKeyDown() and numEquipSets > 0 then
@@ -1958,7 +1959,12 @@ local function SpecChangeClickFunc(self, specIndex)
             end
         end
     else
-        _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
+        if isBeta then
+            _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
+        else
+            local specGroup = _G.GetActiveSpecGroup()
+            _G.SetActiveSpecGroup(specGroup == 1 and 2 or 1)
+        end
     end
 end
 local function SpecLootClickFunc(self, spec)
@@ -2052,9 +2058,6 @@ end
 local SpecSection = {}
 local function Spec_UpdateTablet(self)
     _G.wipe(SpecSection)
-    self:SetScript("OnMouseDown", function(...)
-        InfoLine:debug("Spec:OnMouseDown", ...)
-    end)
 
     ---- Spec Category
     SpecSection["specs"] = {}
