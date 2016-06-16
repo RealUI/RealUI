@@ -40,6 +40,8 @@ local Icons = {
         bag =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Bags]],            10},
         xp =            {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP]],              11},
         rep =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep]],             11},
+        artifact =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP]],              11},
+        honor =         {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep]],             11},
         meters =        {[[Interface\AddOns\nibRealUI\Media\InfoLine\Meters]],          10},
         layout_dt =     {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_DT]],       21},
         layout_h =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_H]],        11},
@@ -56,6 +58,8 @@ local Icons = {
         bag =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Bags_HR]],         11},
         xp =            {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP_HR]],           12},
         rep =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep_HR]],          12},
+        artifact =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP_HR]],           12},
+        honor =         {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep_HR]],          12},
         meters =        {[[Interface\AddOns\nibRealUI\Media\InfoLine\Meters_HR]],       11},
         layout_dt =     {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_DT_HR]],    22},
         layout_h =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_H_HR]],     12},
@@ -77,7 +81,6 @@ local TextColorNormal
 local TextColorNormalVals
 local TextColorWhite
 local TextColorTTHeader
-local TextColorOrange1
 local TextColorBlue1
 
 local CurrencyColors = {
@@ -570,140 +573,230 @@ end
 ---- XP/Rep
 local InfoLine_XR_OnEnter, InfoLine_XR_Update, InfoLine_XR_OnMouseDown
 do
-    local xp, lvl, xpmax, restxp
-    local rep, replvlmax, repStandingID, repstatus, watchedFaction
+    local watchStates = {
+        "xp",
+        "rep",
+        "artifact",
+        "honor"
+    }
+    local minWatchState, maxWatchState
+    local showXP, showRep, showArtifact, showHonor
+
+    local lvl
+    local xp, xpMax, xpPer, restxp
+    local rep, replvlmax, repPer, repStandingID, repstatus, watchedFaction
+    local artName, artNumPoints, artXP, artNextPoint, artPer
+    local honor, honorMax, honorPer
     function InfoLine_XR_OnEnter(self)
         self:SetAlpha(1)
         local GameTooltip = _G.GameTooltip
 
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, L["Progress"]))
+        GameTooltip:AddLine(" ")
 
+        local statusFormat = "%s/%s (%d%%)"
+        local color, color2 = RealUI.media.colors.orange
         if _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL then
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.XP.." / ".._G.REPUTATION))
-            GameTooltip:AddLine(" ")
-
+            local xpStatus
             if _G.IsXPUserDisabled() then
-                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN.." (".._G.VIDEO_OPTIONS_DISABLED..")"))
+                color2 = {0.3, 0.3, 0.3}
+                GameTooltip:AddDoubleLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED, color[1], color[2], color[3], color2[1], color2[2], color2[3])
             else
-                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN))
-            end
-            GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            if not restxp then
-                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            else
-                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                xpStatus = statusFormat:format(RealUI:ReadableNumber(xp), RealUI:ReadableNumber(xpMax), xpPer)
+                color2 = {0.9, 0.9, 0.9}
+                GameTooltip:AddDoubleLine(_G.EXPERIENCE_COLON, xpStatus, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+                if not restxp then
+                    GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                else
+                    GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                end
             end
             GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
-        else
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
+        end
+
+        if showRep then
+            color2 = {_G.FACTION_BAR_COLORS[repStandingID].r, _G.FACTION_BAR_COLORS[repStandingID].g, _G.FACTION_BAR_COLORS[repStandingID].b}
+            local repStatus = statusFormat:format(RealUI:ReadableNumber(rep), RealUI:ReadableNumber(replvlmax), repPer)
+            GameTooltip:AddDoubleLine(_G.REPUTATION.._G.HEADER_COLON, watchedFaction, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+            GameTooltip:AddDoubleLine(repstatus, repStatus, color2[1], color2[2], color2[3], 0.9, 0.9, 0.9)
             GameTooltip:AddLine(" ")
         end
-        local repStandingColor = {0.9, 0.9, 0.9}
-        if (repstatus ~= "---") then
-            repStandingColor = {_G.FACTION_BAR_COLORS[repStandingID].r, _G.FACTION_BAR_COLORS[repStandingID].g, _G.FACTION_BAR_COLORS[repStandingID].b}
+
+        if showArtifact then
+            color = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+            local artStatus = statusFormat:format(RealUI:ReadableNumber(artXP), RealUI:ReadableNumber(artNextPoint), artPer)
+            GameTooltip:AddLine(("|cff%s%s|r"):format(color, artName))
+            GameTooltip:AddDoubleLine(artNumPoints, artStatus, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            GameTooltip:AddLine(" ")
         end
-        GameTooltip:AddDoubleLine(_G.FACTION, watchedFaction, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(_G.STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
-        GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+
+        if showHonor then
+            color = RealUI.media.colors.orange
+            color2 = {0.9, 0.9, 0.9}
+            local honorStatus
+            if _G.CanPrestige() then
+                honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
+            else
+                honorStatus = statusFormat:format(RealUI:ReadableNumber(honor), RealUI:ReadableNumber(honorMax), honorPer)
+            end
+            GameTooltip:AddDoubleLine(_G.HONOR.._G.HEADER_COLON, honorStatus, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+            GameTooltip:AddLine(" ")
+        end
 
         -- Hint
-        if (_G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) then
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["XPRep_Toggle"]))
+        if watchStates[dbc.xrstate] == "rep" then
+            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenRep"]))
+        elseif watchStates[dbc.xrstate] == "artifact" then
+            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenArt"]))
+        elseif watchStates[dbc.xrstate] == "honor" then
+            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenHonor"]))
+        end
+        if maxWatchState - minWatchState > 0 then
+            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_Cycle"]))
         end
 
         GameTooltip:Show()
     end
 
     function InfoLine_XR_Update(self)
-        -- XP Data
-        xp = _G.UnitXP("player")
+        InfoLine:debug("InfoLine_XR_Update", dbc.xrstate)
+        local repName, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
         lvl = _G.UnitLevel("player")
-        xpmax = _G.UnitXPMax("player")
-        if xpmax == 0 then return end
-        restxp = _G.GetXPExhaustion() or 0
-        local percentXP
-        if (xp <= 0) or (xpmax <= 0) then
-            percentXP = 0
-        else
-            percentXP = (xp/xpmax)*100
+
+        showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
+        showRep = repName
+        if isBeta then
+            showArtifact = _G.HasArtifactEquipped()
+            showHonor = lvl >= _G.MAX_PLAYER_LEVEL and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
-        local percentXPStr = tostring(percentXP)
-        local percentRestXPStr = tostring(floor((restxp / xpmax) * 100))
+        minWatchState, maxWatchState = 1, #watchStates
+
+        -- XP Data
+        if showXP then
+            xp = _G.UnitXP("player")
+            xpMax = _G.UnitXPMax("player")
+            restxp = _G.GetXPExhaustion() or 0
+            if (xp <= 0) or (xpMax <= 0) then
+                xpPer = 0
+            else
+                xpPer = (xp/xpMax)*100
+            end
+        else
+            minWatchState = minWatchState + 1
+        end
 
         -- Currency
         dbg.currency[RealUI.realm][RealUI.faction][RealUI.name].level = lvl
 
         -- Rep Data
-        local CurWatchedFaction, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
-        watchedFaction = CurWatchedFaction
-        rep = repvalue - repmin
-        replvlmax = repmax - repmin
-        repstatus = _G["FACTION_STANDING_LABEL"..replvl]
-        repStandingID = replvl
+        if showRep then
+            watchedFaction = repName
+            rep = repvalue - repmin
+            replvlmax = repmax - repmin
+            repstatus = _G["FACTION_STANDING_LABEL"..replvl]
+            repStandingID = replvl
 
-        local percentRep
-        if (replvlmax <= 0) then
-            percentRep = 0
+            if (replvlmax <= 0) then
+                repPer = 0
+            else
+                repPer = (rep/replvlmax)*100
+            end
         else
-            percentRep = (rep/(replvlmax))*100
+            minWatchState = minWatchState + 1
         end
-        local percentRepStr = tostring(percentRep)
 
-        if not watchedFaction then
-            watchedFaction = L["XPRep_NoFaction"]
-            repstatus = "---"
-            rep = 0
-            replvlmax = 0
-            percentRepStr = "---"
+        if showArtifact then
+            local _, _, name, _, totalXP, pointsSpent = _G.C_ArtifactUI.GetEquippedArtifactInfo()
+            artName = name
+            artNumPoints, artXP, artNextPoint = _G.MainMenuBar_GetNumArtifactTraitsPurchasableFromXP(pointsSpent, totalXP)
+            if (artNextPoint <= 0) then
+                artPer = 0
+            else
+                artPer = (artXP/artNextPoint)*100
+            end
+        else
+            maxWatchState = maxWatchState - 1
+        end
+
+        if showHonor then
+            honor = _G.UnitHonor("player")
+            honorMax = _G.UnitHonorMax("player")
+            if (honorMax <= 0) then
+                honorPer = 0
+            else
+                honorPer = (honor/honorMax)*100
+            end
+        else
+            maxWatchState = maxWatchState - 1
         end
 
         -- Set Info Text
-        local XRSuffix, XRStr, XRPer, XRLen, XRRested
-        local HideMe = false
-        if ( (dbc.xrstate == "x") and not(_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) ) then
-            XRSuffix, XRStr, XRPer = "XP:", percentXPStr, percentXP
-            if restxp > 0 then
-                XRRested = percentRestXPStr
-            else
-                XRRested = ""
+        InfoLine:debug("Watch state", dbc.xrstate, minWatchState, maxWatchState)
+        if dbc.xrstate > maxWatchState then dbc.xrstate = maxWatchState end
+        if dbc.xrstate < minWatchState then dbc.xrstate = minWatchState end
+        local XRStr, XRPer, XRLen, XRRested
+        if watchStates[dbc.xrstate] == "xp" then
+            InfoLine:debug("Set XP", showXP)
+            if showXP then
+                XRStr, XRPer = tostring(xpPer), xpPer
+                if restxp > 0 then
+                    XRRested = tostring(floor((restxp / xpMax) * 100))
+                else
+                    XRRested = ""
+                end
             end
-        else
-            if ( (repstatus == "---") and (_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) ) then
-                -- Max Level and no Rep tracked, hide display
-                HideMe = true
+        elseif watchStates[dbc.xrstate] == "rep" then
+            InfoLine:debug("Set Rep", showRep)
+            if showRep then
+                XRStr, XRPer, XRRested = tostring(repPer), repPer, ""
             end
-            XRSuffix, XRStr, XRPer, XRRested = "Rep:", percentRepStr, percentRep, ""
+        elseif watchStates[dbc.xrstate] == "artifact" then
+            InfoLine:debug("Set Artifact", showArtifact)
+            if showArtifact then
+                XRStr, XRPer, XRRested = tostring(artPer), artPer, tostring(artNumPoints)
+            end
+        elseif watchStates[dbc.xrstate] == "honor" then
+            InfoLine:debug("Set Honor", showHonor)
+            if showHonor then
+                XRStr, XRPer, XRRested = tostring(honorPer), honorPer, ""
+            end
         end
-        if XRPer < 10 then XRLen = 3 else XRLen = 4 end
-        if XRSuffix == "XP:" then
+
+        local showWatch = showXP or showRep or showArtifact or showHonor
+        self.hidden = not showWatch
+        if showWatch then
+            XRLen = XRPer < 10 and 3 or 4
             if XRRested ~= "" then
                 self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, XRStr:sub(1, XRLen), TextColorBlue1, XRRested)
             else
                 self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
             end
-            self.icon:SetTexture(Icons[layoutSize].xp[1])
-        else
             self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
-            self.icon:SetTexture(Icons[layoutSize].rep[1])
-        end
-
-        self.hidden = HideMe
-        if HideMe then
-            self.text:SetText("")
+            self.icon:SetTexture(Icons[layoutSize][watchStates[dbc.xrstate]][1])
             UpdateElementWidth(self)
         else
+            self.text:SetText("")
             UpdateElementWidth(self)
         end
     end
 
-    function InfoLine_XR_OnMouseDown(self)
-        dbc.xrstate = (dbc.xrstate == "x") and "r" or "x"
-        if _G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL and not _G.InCombatLockdown() then
-            _G.ToggleCharacter("ReputationFrame")
+    function InfoLine_XR_OnMouseDown(self, ...)
+        InfoLine:debug("InfoLine_XR_OnMouseDown", dbc.xrstate, ...)
+        if _G.IsAltKeyDown() then
+            if dbc.xrstate == maxWatchState then
+                dbc.xrstate = minWatchState
+            else
+                dbc.xrstate = dbc.xrstate + 1
+            end
+        else
+            if watchStates[dbc.xrstate] == "rep" then
+                _G.ToggleCharacter("ReputationFrame")
+            elseif watchStates[dbc.xrstate] == "artifact" then
+                _G.SocketInventoryItem(16)
+            elseif watchStates[dbc.xrstate] == "honor" then
+                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end
         end
         InfoLine_XR_Update(self)
     end
@@ -3224,6 +3317,7 @@ function InfoLine:CreateFrames()
     tinsert(TextureFrames, {ILFrames.xprep, ILFrames.xprep.icon, "xp"})
     ILFrames.xprep.tag = "xprep"
     ILFrames.xprep:RegisterEvent("PLAYER_XP_UPDATE")
+    ILFrames.xprep:RegisterEvent("HONOR_XP_UPDATE")
     ILFrames.xprep:RegisterEvent("UPDATE_FACTION")
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
@@ -3375,7 +3469,6 @@ function InfoLine:Refresh()
     end
     TextColorWhite = RealUI:ColorTableToStr({1, 1, 1})
     TextColorTTHeader = RealUI:ColorTableToStr(db.colors.ttheader)
-    TextColorOrange1 = RealUI:ColorTableToStr(RealUI.media.colors.orange)
     TextColorBlue1 = RealUI:ColorTableToStr(RealUI.media.colors.blue)
 
     -- Create Frames if it has been delayed
@@ -3454,7 +3547,7 @@ function InfoLine:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
-            xrstate = "x",
+            xrstate = 1,
             currencystate = 1,
             specgear = specgear,
         },

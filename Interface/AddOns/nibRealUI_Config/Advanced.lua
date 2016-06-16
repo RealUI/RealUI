@@ -63,7 +63,7 @@ local core do
             durability =    {_G.DURABILITY},
             bag =           {_G.INVTYPE_BAG},
             currency =      {_G.BONUS_ROLL_REWARD_CURRENCY},
-            xprep =         {L["XPRep"]},
+            xprep =         {L["Progress"]},
             clock =         {_G.TIMEMANAGER_TITLE},
             pc =            {L["Sys_SysInfo"]},
             specchanger =   {L["Spec_SpecChanger"]},
