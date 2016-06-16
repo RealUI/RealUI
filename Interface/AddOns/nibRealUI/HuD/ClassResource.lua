@@ -359,8 +359,6 @@ function ClassResource:OnInitialize()
 
             points.position.x = 0
             points.position.y = -110
-
-            points.combatfade.opacity.outofcombat = 0
         elseif playerClass == "PALADIN" then
             points.size.width = 64
             points.size.height = 64
@@ -397,7 +395,7 @@ function ClassResource:OnInitialize()
                     harmtarget = .8,
                     target = .8,
                     hurt = .5,
-                    outofcombat = .3,
+                    outofcombat = playerClass == "DEATHKNIGHT" and 0 or .3,
                 }
             }
         }

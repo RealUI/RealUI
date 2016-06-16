@@ -169,77 +169,71 @@ RealUI.hudSizeOffsets = {
 }
 
 -- Default Options
-local charInit = {
-    installStage = 0,
-    initialized = false,
-    needchatmoved = true,
-}
-local defaults = {
-    global = {
-        tutorial = {
-            stage = -1,
-        },
-        tags = {
-            firsttime = true,
-            retinaDisplay = {
-                checked = false,
-                set = false,
-            },
-            lowResOptimized = false,
-            slashRealUITyped = false,   -- To disable "Type /realui" message
-        },
-        messages = {
-            resetNew = false,
-            largeHuDOption = false,
-        },
-        verinfo = {},
-    },
-    char = {
-        init = charInit,
-        layout = {
-            current = 1,    -- 1 = DPS/Tank, 2 = Healing
-            needchanged = false,
-            spec = {1, 1},  -- Save layout for each spec
-        },
-    },
-    profile = {
-        modules = {
-            ['*'] = true,
-            ["AchievementScreenshots"] = false,
-        },
-        registeredChars = {},
-        -- HuD positions
-        positionsLink = true,
-        positions = RealUI.defaultPositions,
-        -- Action Bar settings
-        abSettingsLink = false,
-        -- Dynamic UI settings
-        settings = {
-            powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-            fontStyle = 2,
-            infoLineBackground = true,
-            stripeOpacity = 0.5,
-            hudSize = 1,
-            reverseUnitFrameBars = false,
-        },
-        media = RealUI.media
-    },
-}
-
-do
-    local spec
-    if RealUI.isBeta then
-        spec = {}
-        for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
-            local _, _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
-            debug("Spec info", specIndex, role)
-            spec[specIndex] = role == "HEALER" and 2 or 1
-        end
-    else
-        spec = {1, 1}
+local defaults, charInit do
+    charInit = {
+        installStage = 0,
+        initialized = false,
+        needchatmoved = true,
+    }
+    local spec = {}
+    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+        local _, _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+        debug("Spec info", specIndex, role)
+        spec[specIndex] = role == "HEALER" and 2 or 1
     end
-    defaults.char.layout.spec = spec
+    defaults = {
+        global = {
+            tutorial = {
+                stage = -1,
+            },
+            tags = {
+                firsttime = true,
+                retinaDisplay = {
+                    checked = false,
+                    set = false,
+                },
+                lowResOptimized = false,
+                slashRealUITyped = false,   -- To disable "Type /realui" message
+            },
+            messages = {
+                resetNew = false,
+                largeHuDOption = false,
+            },
+            verinfo = {},
+        },
+        char = {
+            init = charInit,
+            layout = {
+                current = 1,    -- 1 = DPS/Tank, 2 = Healing
+                needchanged = false,
+                spec = spec -- Save layout for each spec
+            },
+        },
+        profile = {
+            modules = {
+                ['*'] = true,
+                ["AchievementScreenshots"] = false,
+            },
+            registeredChars = {},
+            -- HuD positions
+            positionsLink = true,
+            positions = RealUI.defaultPositions,
+            -- Action Bar settings
+            abSettingsLink = false,
+            -- Dynamic UI settings
+            settings = {
+                powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
+                fontStyle = 2,
+                infoLineBackground = true,
+                stripeOpacity = 0.5,
+                hudSize = 1,
+                reverseUnitFrameBars = false,
+            },
+            media = RealUI.media
+        },
+    }
 end
+
 --------------------------------------------------------
 
 -- Toggle Grid2's "Test Layout"
