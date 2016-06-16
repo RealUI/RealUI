@@ -1,0 +1,12 @@
+tag Release-60204-20
+6d0c312ef4afba72b36f0e6135ca474b3ddab031
+Alar of Daggerspine <alar@aspide.it>
+2016-05-30 23:49:22 +0200
+
+Fixed Ticket #11
+
+--------------------
+
+Alar of Daggerspine:
+	- http://www.wowace.com/addons/libitemupgradeinfo-1-0/tickets/11-legion-error/
+	Forced tonumber to receive only one value

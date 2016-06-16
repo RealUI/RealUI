@@ -1,4 +1,9 @@
 Hendrik Leppkes:
+	- Re-use data tables for pins when an existing pin is re-added to move it.
+	This avoids excess table creation which bypassed the internal table cache.
+	- Protect against errors during loading when no unit position is available.
+	- Fix handling of micro dungeons on transformed continents
+	- Add feral druid artifact scenario override
 	- Add instance override for the Karazhan Artifact Scenario
 	- Dalaran Underbelly has its own instance ID, apparently.
 	- Properly handle map levels in 7.0
