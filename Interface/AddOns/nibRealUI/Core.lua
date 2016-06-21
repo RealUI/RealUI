@@ -200,6 +200,7 @@ local defaults, charInit do
                 largeHuDOption = false,
             },
             verinfo = {},
+            patchedTOC = 0
         },
         char = {
             init = charInit,

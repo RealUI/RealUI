@@ -166,6 +166,19 @@ RealUI.minipatches = {
             end
         end
     end,
+    [70000] = function(ver)
+        debug("r"..ver)
+        local AuraTracking = _G.nibRealUIDB.namespaces.AuraTracking
+        if AuraTracking then
+            -- Reset default trackers
+            for guid in next, AuraTracking.class do
+                local _, _, isDefault = _G.strsplit("-", guid)
+                if isDefault then
+                    AuraTracking.class[guid] = nil
+                end
+            end
+        end
+    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,
