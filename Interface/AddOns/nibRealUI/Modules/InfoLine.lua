@@ -735,44 +735,41 @@ do
         InfoLine:debug("Watch state", dbc.xrstate, minWatchState, maxWatchState)
         if dbc.xrstate > maxWatchState then dbc.xrstate = maxWatchState end
         if dbc.xrstate < minWatchState then dbc.xrstate = minWatchState end
-        local XRStr, XRPer, XRLen, XRRested
+        local watchText, watchText2 = 0
         if watchStates[dbc.xrstate] == "xp" then
             InfoLine:debug("Set XP", showXP)
             if showXP then
-                XRStr, XRPer = tostring(xpPer), xpPer
+                watchText = xpPer
                 if restxp > 0 then
-                    XRRested = tostring(floor((restxp / xpMax) * 100))
-                else
-                    XRRested = ""
+                    watchText2 = tostring(floor((restxp / xpMax) * 100))
                 end
             end
         elseif watchStates[dbc.xrstate] == "rep" then
             InfoLine:debug("Set Rep", showRep)
             if showRep then
-                XRStr, XRPer, XRRested = tostring(repPer), repPer, ""
+                watchText = repPer
             end
         elseif watchStates[dbc.xrstate] == "artifact" then
             InfoLine:debug("Set Artifact", showArtifact)
             if showArtifact then
-                XRStr, XRPer, XRRested = tostring(artPer), artPer, tostring(artNumPoints)
+                watchText, watchText2 = artPer, tostring(artNumPoints)
             end
         elseif watchStates[dbc.xrstate] == "honor" then
             InfoLine:debug("Set Honor", showHonor)
             if showHonor then
-                XRStr, XRPer, XRRested = tostring(honorPer), honorPer, ""
+                watchText = honorPer
             end
         end
 
         local showWatch = showXP or showRep or showArtifact or showHonor
         self.hidden = not showWatch
         if showWatch then
-            XRLen = XRPer < 10 and 3 or 4
-            if XRRested ~= "" then
-                self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, XRStr:sub(1, XRLen), TextColorBlue1, XRRested)
-            else
-                self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
+            InfoLine:debug("Watch text", watchText, watchText2)
+            local watchFormat = "|cff%s %.1f÷|r"
+            if watchText2 then
+                watchFormat = watchFormat .. "|cff%s[%.1f÷]|r"
             end
-            self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
+            self.text:SetFormattedText(watchFormat, TextColorNormal, watchText, TextColorBlue1, watchText2)
             self.icon:SetTexture(Icons[layoutSize][watchStates[dbc.xrstate]][1])
             UpdateElementWidth(self)
         else
