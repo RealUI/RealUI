@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibItemUpgradeInfo-1.0", 20
+local MAJOR, MINOR = "LibItemUpgradeInfo-1.0", 21
 local type,tonumber,select,strsplit,GetItemInfoFromHyperlink=type,tonumber,select,strsplit,GetItemInfoFromHyperlink
 local library,previous = _G.LibStub:NewLibrary(MAJOR, MINOR)
 local lib=library --#lib Needed to keep Eclipse LDT happy
@@ -61,6 +61,10 @@ local upgradeTable = {
 	[529] = { upgrade = 0, max = 2, ilevel = 0 },
 	[530] = { upgrade = 1, max = 2, ilevel = 5 },
 	[531] = { upgrade = 2, max = 2, ilevel = 10 },
+	[535] = { upgrade = 1, max = 3, ilevel = 15 },
+	[536] = { upgrade = 2, max = 3, ilevel = 30 },
+	[537] = { upgrade = 3, max = 3, ilevel = 45 },
+	[538] = { upgrade = 0, max = 3, ilevel = 0 },
 
 }
 do
@@ -494,7 +498,7 @@ do
 						pp("LibItemUpgradeInfo-1.0: |cff00ff00No changes|r")
 					else
 						pp("LibItemUpgradeInfo-1.0: |cffff0000New table:|r {")
-						ppDiffTable(upgradeTable, newTable)
+						printDiffTable(upgradeTable, newTable)
 						pp("}")
 					end
 				else
