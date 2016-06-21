@@ -725,12 +725,12 @@ function RealUI:OnInitialize()
         self:FindSpellID(spellName, unit, auraType)
     end)
     do
-        local settingHeight, heightOfs = false, RealUI.isBeta and 47 or 27
+        local settingHeight = false
         _G.hooksecurefunc(_G.GameMenuFrame, "SetHeight", function(menuFrame, height)
             debug("GameMenuFrame:SetHeight", height, settingHeight)
             if not settingHeight then
                 settingHeight = true
-                menuFrame:SetHeight(height + heightOfs)
+                menuFrame:SetHeight(height + (_G.C_StorePublic.IsEnabled() and 27 or 47))
                 settingHeight = false
             end
         end)
