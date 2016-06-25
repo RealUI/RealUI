@@ -52,52 +52,32 @@ tinsert(C.themes["Aurora"], function()
 		RaidButton:DisableDrawLayer("BACKGROUND")
 		F.ReskinCheck(Display_RaidSettingsEnabledCheckBox)
 
-		if not C.isBetaClient then
-			Graphics_RightQuality:SetBackdrop(nil)
-			RaidGraphics_RightQuality:SetBackdrop(nil)
-		end
-		-- Base Settings
-		Graphics_:SetBackdrop(nil)
-		dropdowns = {"Graphics_TextureResolutionDropDown", "Graphics_FilteringDropDown", "Graphics_ProjectedTexturesDropDown",
-					"Graphics_ShadowsDropDown", "Graphics_LiquidDetailDropDown", "Graphics_SunshaftsDropDown", "Graphics_ParticleDensityDropDown", "Graphics_SSAODropDown", "Graphics_DepthEffectsDropDown", "Graphics_LightingQualityDropDown", "Graphics_OutlineModeDropDown"}
-		if not C.isBetaClient then
-			tinsert(dropdowns, "Graphics_ViewDistanceDropDown")
-			tinsert(dropdowns, "Graphics_EnvironmentalDetailDropDown")
-			tinsert(dropdowns, "Graphics_GroundClutterDropDown")
-		end
-		for i = 1, #dropdowns do
-			F.ReskinDropDown(_G[dropdowns[i]])
-		end
-		sliders = {"Graphics_Quality"}
-		if C.isBetaClient then
-			tinsert(sliders, "Graphics_ViewDistanceSlider")
-			tinsert(sliders, "Graphics_EnvironmentalDetailSlider")
-			tinsert(sliders, "Graphics_GroundClutterSlider")
-		end
-		for i = 1, #sliders do
-			F.ReskinSlider(_G[sliders[i]])
-		end
+		-- Graphics Settings
+		for _, graphicsGroup in next, {"Graphics_", "RaidGraphics_"} do
+			_G[graphicsGroup]:SetBackdrop(nil)
+			if not C.isBetaClient then
+				_G[graphicsGroup.."RightQuality"]:SetBackdrop(nil)
+			end
 
-		-- Raid and Battleground
-		RaidGraphics_:SetBackdrop(nil)
-		dropdowns = {"RaidGraphics_TextureResolutionDropDown", "RaidGraphics_FilteringDropDown", "RaidGraphics_ProjectedTexturesDropDown",
-					"RaidGraphics_ShadowsDropDown", "RaidGraphics_LiquidDetailDropDown", "RaidGraphics_SunshaftsDropDown", "RaidGraphics_ParticleDensityDropDown", "RaidGraphics_SSAODropDown", "RaidGraphics_DepthEffectsDropDown", "RaidGraphics_LightingQualityDropDown", "RaidGraphics_OutlineModeDropDown"}
-		if not C.isBetaClient then
-			tinsert(dropdowns, "RaidGraphics_ViewDistanceDropDown")
-			tinsert(dropdowns, "RaidGraphics_EnvironmentalDetailDropDown")
-			tinsert(dropdowns, "RaidGraphics_GroundClutterDropDown")
-		end
-		for i = 1, #dropdowns do
-			F.ReskinDropDown(_G[dropdowns[i]])
-		end
-		sliders = {"RaidGraphics_Quality"}
-		if C.isBetaClient then
-			tinsert(sliders, "RaidGraphics_ViewDistanceSlider")
-			tinsert(sliders, "RaidGraphics_EnvironmentalDetailSlider")
-			tinsert(sliders, "RaidGraphics_GroundClutterSlider")
-		end
-		for i = 1, #sliders do
-			F.ReskinSlider(_G[sliders[i]])
+			dropdowns = {"TextureResolutionDropDown", "FilteringDropDown", "ProjectedTexturesDropDown",
+						"ShadowsDropDown", "LiquidDetailDropDown", "SunshaftsDropDown", "ParticleDensityDropDown", "SSAODropDown", "DepthEffectsDropDown", "LightingQualityDropDown", "OutlineModeDropDown"}
+			if not C.isBetaClient then
+				tinsert(dropdowns, "ViewDistanceDropDown")
+				tinsert(dropdowns, "EnvironmentalDetailDropDown")
+				tinsert(dropdowns, "GroundClutterDropDown")
+			end
+			for i = 1, #dropdowns do
+				F.ReskinDropDown(_G[graphicsGroup..dropdowns[i]])
+			end
+			sliders = {"Quality"}
+			if C.isBetaClient then
+				tinsert(sliders, "ViewDistanceSlider")
+				tinsert(sliders, "EnvironmentalDetailSlider")
+				tinsert(sliders, "GroundClutterSlider")
+			end
+			for i = 1, #sliders do
+				F.ReskinSlider(_G[graphicsGroup..sliders[i]])
+			end
 		end
 
 		--[[ Advanced ]]--

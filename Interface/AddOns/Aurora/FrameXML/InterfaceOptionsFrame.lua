@@ -43,14 +43,14 @@ tinsert(C.themes["Aurora"], function()
 		local checkboxes, dropdowns, sliders
 		if C.isBetaClient then
 			-- Controls
-			checkboxes = {"InterfaceOptionsControlsPanelStickyTargeting", "InterfaceOptionsControlsPanelAutoDismount", "InterfaceOptionsControlsPanelAutoClearAFK", "InterfaceOptionsControlsPanelAutoLootCorpse", "InterfaceOptionsControlsPanelInteractOnLeftClick"}
+			checkboxes = {"InterfaceOptionsControlsPanelStickyTargeting", "InterfaceOptionsControlsPanelAutoDismount", "InterfaceOptionsControlsPanelAutoClearAFK", "InterfaceOptionsControlsPanelAutoLootCorpse", "InterfaceOptionsControlsPanelInteractOnLeftClick", "InterfaceOptionsControlsPanelLootAtMouse"}
 			for i = 1, #checkboxes do
 				F.ReskinCheck(_G[checkboxes[i]])
 			end
 			F.ReskinDropDown(InterfaceOptionsControlsPanelAutoLootKeyDropDown)
 
 			-- Combat
-			checkboxes = {"InterfaceOptionsCombatPanelTargetOfTarget", "InterfaceOptionsCombatPanelFlashLowHealthWarning", "InterfaceOptionsCombatPanelLossOfControl", "InterfaceOptionsCombatPanelAutoSelfCast"}
+			checkboxes = {"InterfaceOptionsCombatPanelTargetOfTarget", "InterfaceOptionsCombatPanelFlashLowHealthWarning", "InterfaceOptionsCombatPanelLossOfControl", "InterfaceOptionsCombatPanelAutoSelfCast", "InterfaceOptionsCombatPanelEnableFloatingCombatText"}
 			for i = 1, #checkboxes do
 				F.ReskinCheck(_G[checkboxes[i]])
 			end
@@ -59,7 +59,7 @@ tinsert(C.themes["Aurora"], function()
 			F.ReskinSlider(InterfaceOptionsCombatPanelSpellAlertOpacitySlider)
 
 			-- Display
-			checkboxes = {"InterfaceOptionsDisplayPanelRotateMinimap", "InterfaceOptionsDisplayPanelAJAlerts", "InterfaceOptionsDisplayPanelShowTutorials", "InterfaceOptionsDisplayPanelEnableFloatingCombatText"}
+			checkboxes = {"InterfaceOptionsDisplayPanelRotateMinimap", "InterfaceOptionsDisplayPanelAJAlerts", "InterfaceOptionsDisplayPanelShowTutorials"}
 			for i = 1, #checkboxes do
 				F.ReskinCheck(_G[checkboxes[i]])
 			end
@@ -101,6 +101,7 @@ tinsert(C.themes["Aurora"], function()
 			F.ReskinCheck(InterfaceOptionsCameraPanelWaterCollision)
 			F.ReskinDropDown(InterfaceOptionsCameraPanelStyleDropDown)
 			F.ReskinSlider(InterfaceOptionsCameraPanelMaxDistanceSlider)
+			F.ReskinSlider(InterfaceOptionsCameraPanelFollowSpeedSlider)
 
 			-- Mouse
 			checkboxes = {"InterfaceOptionsMousePanelInvertMouse", "InterfaceOptionsMousePanelEnableMouseSpeed", "InterfaceOptionsMousePanelClickToMove"}
