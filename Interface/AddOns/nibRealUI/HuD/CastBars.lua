@@ -17,7 +17,7 @@ local layoutSize
 local MaxTicks = 10
 local ChannelingTicks = {
     -- Druid
-    [_G.GetSpellInfo(16914)] = 10, -- Hurricane
+    [_G.GetSpellInfo(16914) or "gone"] = 10, -- Hurricane
     [_G.GetSpellInfo(106996) or "gone"] = 10,-- Astral Storm
     [_G.GetSpellInfo(740)] = 4,    -- Tranquility
     -- Mage

@@ -12,7 +12,7 @@ local AchievementScreenshots = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 function AchievementScreenshots:ACHIEVEMENT_EARNED(event, achievementID, alreadyEarned)
     self:debug(achievementID, alreadyEarned)
     _G.C_Timer.After(1, function()
-        _G.RunBinding("SCREENSHOT")
+        _G.Screenshot()
     end)
 end
 
