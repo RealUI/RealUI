@@ -9,6 +9,7 @@ local tinsert = _G.table.insert
 
 -- Libs --
 local Tablet20 = _G.LibStub("Tablet-2.0")
+local artData = _G.LibStub("LibArtifactData-1.0")
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -585,7 +586,7 @@ do
     local lvl
     local xp, xpMax, xpPer, restxp
     local rep, replvlmax, repPer, repStandingID, repstatus, watchedFaction
-    local artName, artNumPoints, artXP, artNextPoint, artPer
+    local artifactID, artifact, artPer
     local honor, honorMax, honorPer
     function InfoLine_XR_OnEnter(self)
         self:SetAlpha(1)
@@ -625,9 +626,11 @@ do
 
         if showArtifact then
             color = RealUI:ColorTableToStr(RealUI.media.colors.orange)
-            local artStatus = statusFormat:format(RealUI:ReadableNumber(artXP), RealUI:ReadableNumber(artNextPoint), artPer)
-            GameTooltip:AddLine(("|cff%s%s|r"):format(color, artName))
-            GameTooltip:AddDoubleLine(artNumPoints, artStatus, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+            local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
+            local artStatus2 = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+            GameTooltip:AddLine(("|cff%s%s|r"):format(color, artifact.name))
+            GameTooltip:AddLine(artStatus, 0.9, 0.9, 0.9)
+            GameTooltip:AddLine(artStatus2, 0.7, 0.7, 0.7, true)
             GameTooltip:AddLine(" ")
         end
 
@@ -645,29 +648,37 @@ do
         end
 
         -- Hint
+        color = {0, 1, 0} 
         if watchStates[dbc.xrstate] == "rep" then
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenRep"]))
+            GameTooltip:AddLine(L["Progress_OpenRep"], color[1], color[2], color[3])
         elseif watchStates[dbc.xrstate] == "artifact" then
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenArt"]))
+            GameTooltip:AddLine(L["Progress_OpenArt"], color[1], color[2], color[3])
         elseif watchStates[dbc.xrstate] == "honor" then
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_OpenHonor"]))
+            GameTooltip:AddLine(L["Progress_OpenHonor"], color[1], color[2], color[3])
         end
         if maxWatchState - minWatchState > 0 then
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["Progress_Cycle"]))
+            GameTooltip:AddLine(L["Progress_Cycle"], color[1], color[2], color[3])
         end
 
         GameTooltip:Show()
     end
 
-    function InfoLine_XR_Update(self)
-        InfoLine:debug("InfoLine_XR_Update", dbc.xrstate)
+    function InfoLine_XR_Update(self, event, ...)
+        InfoLine:debug("InfoLine_XR_Update", dbc.xrstate, event, ...)
         local repName, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
         lvl = _G.UnitLevel("player")
 
         showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
         showRep = repName
         if isBeta then
-            showArtifact = _G.HasArtifactEquipped()
+            if event == "ARTIFACT_EQUIPPED_CHANGED" then
+                local _, newArtifact = ...
+                artifactID, artifact = artData:GetArtifactInfo(newArtifact)
+            else
+                artifactID, artifact = artData:GetArtifactInfo()
+            end
+            InfoLine:debug("GetArtifactInfo", artifactID, artifact, next(artifact))
+            showArtifact = artifactID and _G.HasArtifactEquipped()
             showHonor = lvl >= _G.MAX_PLAYER_LEVEL and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
         minWatchState, maxWatchState = 1, #watchStates
@@ -707,13 +718,10 @@ do
         end
 
         if showArtifact then
-            local _, _, name, _, totalXP, pointsSpent = _G.C_ArtifactUI.GetEquippedArtifactInfo()
-            artName = name
-            artNumPoints, artXP, artNextPoint = _G.MainMenuBar_GetNumArtifactTraitsPurchasableFromXP(pointsSpent, totalXP)
-            if (artNextPoint <= 0) then
+            if (artifact.maxPower <= 0) then
                 artPer = 0
             else
-                artPer = (artXP/artNextPoint)*100
+                artPer = (artifact.power/artifact.maxPower)*100
             end
         else
             maxWatchState = maxWatchState - 1
@@ -732,11 +740,12 @@ do
         end
 
         -- Set Info Text
+        local xrstate = dbc.xrstate
         InfoLine:debug("Watch state", dbc.xrstate, minWatchState, maxWatchState)
-        if dbc.xrstate > maxWatchState then dbc.xrstate = maxWatchState end
-        if dbc.xrstate < minWatchState then dbc.xrstate = minWatchState end
+        if xrstate > maxWatchState then xrstate = maxWatchState end
+        if xrstate < minWatchState then xrstate = minWatchState end
         local watchText, watchText2 = 0
-        if watchStates[dbc.xrstate] == "xp" then
+        if watchStates[xrstate] == "xp" then
             InfoLine:debug("Set XP", showXP)
             if showXP then
                 watchText = xpPer
@@ -744,17 +753,17 @@ do
                     watchText2 = tostring(floor((restxp / xpMax) * 100))
                 end
             end
-        elseif watchStates[dbc.xrstate] == "rep" then
+        elseif watchStates[xrstate] == "rep" then
             InfoLine:debug("Set Rep", showRep)
             if showRep then
                 watchText = repPer
             end
-        elseif watchStates[dbc.xrstate] == "artifact" then
+        elseif watchStates[xrstate] == "artifact" then
             InfoLine:debug("Set Artifact", showArtifact)
             if showArtifact then
-                watchText, watchText2 = artPer, tostring(artNumPoints)
+                watchText, watchText2 = artPer, tostring(artifact.numRanksPurchasable)
             end
-        elseif watchStates[dbc.xrstate] == "honor" then
+        elseif watchStates[xrstate] == "honor" then
             InfoLine:debug("Set Honor", showHonor)
             if showHonor then
                 watchText = honorPer
@@ -3319,10 +3328,14 @@ function InfoLine:CreateFrames()
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.xprep:SetScript("OnEvent", function(element)
+    local function XR_OnEvent(...)
+        InfoLine:debug("XR_OnEvent", ...)
         if not db.elements.xprep then return end
-        InfoLine_XR_Update(element)
-    end)
+        InfoLine_XR_Update(ILFrames.xprep, ...)
+    end
+    artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", XR_OnEvent)
+    artData:RegisterCallback("ARTIFACT_XP_UPDATED", XR_OnEvent)
+    ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 
 
     ------- RIGHT
