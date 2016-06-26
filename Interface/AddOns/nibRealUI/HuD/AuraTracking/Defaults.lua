@@ -364,9 +364,6 @@ bd56d2d6
 a5bdd6b2
 
 
--- Used
-a6a32ca3
-
 ]]
 
 classDefaults = {
@@ -2094,8 +2091,100 @@ else
 classDefaults = {
     ["DEATHKNIGHT"] = {
         -- Static Player Auras
+            ["6-987a58fe-1"] = {   -- Blood Shield (Blood)
+                spell = 77535,
+                minLevel = 80,
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["6-9eeb4ba5-1"] = {   -- Bone Shield (Blood)
+                spell = 195181,
+                minLevel = 55,
+                specs = {true, false, false},
+                order = 2,
+            },
+            ["6-ab29032c-1"] = {   -- Dark Transformation (Unholy)
+                spell = 63560,
+                minLevel = 74,
+                unit = "pet",
+                specs = {false, false, true},
+                order = 1,
+            },
         -- Static Target Auras
+            ["6-a4a87f4c-1"] = {   -- Blood Plague
+                spell = 55078,
+                minLevel = 55,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["6-ac6e45ce-1"] = {   -- Frost Fever
+                spell = 55095,
+                minLevel = 55,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["6-8621f38d-1"] = {   -- Festering Wound
+                spell = 194310,
+                minLevel = 55,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["6-a6a32ca3-1"] = {   -- Virulent Plague
+                spell = 191587,
+                minLevel = 55,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 2,
+            },
         -- Free Player Auras
+            ["6-986c8a80-1"] = {   -- Dancing Rune Weapon (Blood)
+                spell = 81256,
+                minLevel = 57,
+                specs = {true, false, false},
+            },
+            ["6-80713fed-1"] = {   -- Vampiric Blood (Blood)
+                spell = 55233,
+                minLevel = 57,
+                specs = {true, false, false},
+            },
+            ["6-8f813ae5-1"] = {   -- Crimson Scourge (Blood)
+                spell = 81141,
+                minLevel = 63,
+                specs = {true, false, false},
+            },
+            ["6-9dae73fe-1"] = {   -- Rime (Frost)
+                spell = 59052,
+                minLevel = 58,
+                specs = {false, true, false},
+            },
+            ["6-a27ed53e-1"] = {   -- Killing Machine (Frost)
+                spell = 51124,
+                minLevel = 63,
+                specs = {false, true, false},
+            },
+            ["6-9af9ad7e-1"] = {   -- Pillar of Frost (Frost)
+                spell = 51271,
+                minLevel = 68,
+                specs = {false, true, false},
+            },
+            ["6-9334862e-1"] = {   -- Icebound Fortitude (Frost, Unholy)
+                spell = 48792,
+                minLevel = 65,
+                specs = {false, true, true},
+            },
+            ["6-8ea694c4-1"] = {   -- Sudden Doom (Unholy)
+                spell = 81340,
+                minLevel = 64,
+                specs = {false, false, true},
+            },
+            ["6-a543932b-1"] = {spell = 48707},    -- Anti-Magic Shell
         -- Free Target Auras
     },
 
