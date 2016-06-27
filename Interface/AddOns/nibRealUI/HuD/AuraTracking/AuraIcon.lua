@@ -85,7 +85,7 @@ function AuraTracking:CreateAuraIcon(id, spellData)
     local bg = F.ReskinIcon(icon)
     tracker.bg = bg
 
-    local count = cd:CreateFontString()
+    local count = tracker:CreateFontString()
     count:SetFontObject(_G.RealUIFont_PixelCooldown)
     count:SetJustifyH("RIGHT")
     count:SetJustifyV("TOP")

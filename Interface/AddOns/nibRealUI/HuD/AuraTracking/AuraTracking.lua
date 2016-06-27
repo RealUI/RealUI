@@ -13,6 +13,7 @@ local F = _G.Aurora[1]
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, trackingData
+local isBeta = RealUI.isBeta
 
 local MODNAME = "AuraTracking"
 local AuraTracking = RealUI:GetModule(MODNAME)
@@ -48,6 +49,8 @@ local function FindSpellMatch(spell, unit, filter, isDebug)
         end
     end
 end
+
+local GetTalentTierInfo = isBeta and _G.GetTalentTierInfo or _G.GetTalentRowSelectionInfo
 local function GetShouldTrack(spellData)
     local isDebug = spellData.debug
     debug(isDebug, "shouldTrack", spellData.specs[playerSpec], spellData.minLevel, spellData.shouldLoad)
@@ -55,7 +58,7 @@ local function GetShouldTrack(spellData)
         local talent = spellData.talent
         debug(isDebug, "Check for talents", talent.mustHave)
         if talent.ID then
-            local _, selectedTalent = _G.GetTalentRowSelectionInfo(talent.tier)
+            local _, selectedTalent = GetTalentTierInfo(talent.tier)
             local trackerTalent = talent.ID
             if type(trackerTalent) == "table" then
                 trackerTalent = trackerTalent[playerSpec]
