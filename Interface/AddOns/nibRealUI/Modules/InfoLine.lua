@@ -9,7 +9,7 @@ local tinsert = _G.table.insert
 
 -- Libs --
 local Tablet20 = _G.LibStub("Tablet-2.0")
-local artData = _G.LibStub("LibArtifactData-1.0")
+local artData = _G.LibStub("LibArtifactData-1.0", true)
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -3333,8 +3333,10 @@ function InfoLine:CreateFrames()
         if not db.elements.xprep then return end
         InfoLine_XR_Update(ILFrames.xprep, ...)
     end
-    artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", XR_OnEvent)
-    artData:RegisterCallback("ARTIFACT_XP_UPDATED", XR_OnEvent)
+    if isBeta then
+        artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_XP_UPDATED", XR_OnEvent)
+    end
     ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 
 

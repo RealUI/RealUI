@@ -1,3 +1,5 @@
+if not RealUI.isBeta then return end
+
 local MAJOR, MINOR = "LibArtifactData-1.0", 1
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
