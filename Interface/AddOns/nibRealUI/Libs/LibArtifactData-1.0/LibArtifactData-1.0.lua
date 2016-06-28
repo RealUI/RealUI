@@ -6,16 +6,16 @@ if not lib then return end
 
 local callback = _G.LibStub("CallbackHandler-1.0"):New(lib)
 
-local Debug = function(...) print(...) end
+local Debug = function() end
 if _G.AdiDebug then
 	Debug = _G.AdiDebug:Embed({}, MAJOR)
 end
 
 -- local store
 local artifacts = {}
-local equippedID
-local knowledgeLevel = 0
-local knowledgeMultiplier = 1
+local equippedID, viewedID
+artifacts.knowledgeLevel = 0
+artifacts.knowledgeMultiplier = 1
 
 -- constants
 local _G                       = _G
@@ -35,6 +35,7 @@ local GetArtifactKnowledgeLevel      = aUI.GetArtifactKnowledgeLevel
 local GetArtifactKnowledgeMultiplier = aUI.GetArtifactKnowledgeMultiplier
 local GetContainerItemInfo           = _G.GetContainerItemInfo
 local GetContainerNumSlots           = _G.GetContainerNumSlots
+local GetCurrencyInfo                = _G.GetCurrencyInfo
 local GetEquippedArtifactInfo        = aUI.GetEquippedArtifactInfo
 local GetItemInfo                    = _G.GetItemInfo
 local GetNumObtainedArtifacts        = aUI.GetNumObtainedArtifacts
@@ -58,9 +59,8 @@ local strmatch = string.match
 local frame = _G.CreateFrame("Frame")
 frame:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:RegisterEvent("ARTIFACT_RESPEC_PROMPT")
+frame:RegisterEvent("ARTIFACT_CLOSE")
 frame:RegisterEvent("ARTIFACT_XP_UPDATE")
-frame:RegisterEvent("ADDON_LOADED")
 
 local function CopyTable(tbl)
 	if not tbl then return {} end
@@ -169,7 +169,6 @@ function frame:ScanTraits(artifactID)
 end
 
 function frame:ScanRelics(artifactID)
-	-- TODO: relics changes don't trigger ARTIFACT_XP_UPDATE; need to rescan traits
 	local relics = {}
 	for i = 1, GetNumRelicSlots() do
 		local slotType = GetRelicSlotType(i)
@@ -191,19 +190,20 @@ function frame:ScanRelics(artifactID)
 end
 
 function frame:GetArtifactKnowledge()
-	local kLvl = GetArtifactKnowledgeLevel() -- TODO: track chages without C_ArtifactUI -- GetCurrencyInfo(1171)
+	local lvl = GetArtifactKnowledgeLevel()
 	local mult = GetArtifactKnowledgeMultiplier()
-	if knowledgeMultiplier ~= mult or knowledgeLevel ~= kLvl then
-		knowledgeLevel = kLvl
-		knowledgeMultiplier = mult
-		Debug("ARTIFACT_KNOWLEDGE_CHANGED", knowledgeLevel, knowledgeMultiplier)
-		callback:Fire("ARTIFACT_KNOWLEDGE_CHANGED", knowledgeLevel, knowledgeMultiplier)
+	if artifacts.knowledgeMultiplier ~= mult or artifacts.knowledgeLevel ~= lvl then
+		artifacts.knowledgeLevel = lvl
+		artifacts.knowledgeMultiplier = mult
+		Debug("ARTIFACT_KNOWLEDGE_CHANGED", lvl, mult)
+		callback:Fire("ARTIFACT_KNOWLEDGE_CHANGED", lvl, mult)
 	end
 end
 
 function frame:GetViewedArtifactData()
 	self:GetArtifactKnowledge()
 	local itemID, _, name, icon, unspentPower, numRanksPurchased = GetArtifactInfo() -- TODO: appearance stuff needed? altItemID ?
+	viewedID = itemID
 	Debug("GetViewedArtifactData", name, itemID)
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower)
 	local traits = self:ScanTraits()
@@ -274,44 +274,43 @@ function frame:InitializeScan(event)
 		end
 		if numObtained > 0 then -- scan bank
 			self:RegisterEvent("BANKFRAME_OPENED")
-			Debug("ARTIFACT_DATA_MISSING", numObtained)
+			Debug("ARTIFACT_DATA_MISSING", "artifact", numObtained)
 			callback:Fire("ARTIFACT_DATA_MISSING", numObtained)
 		end
 		self:RestoreStateAfterScan()
 	end
 end
 
-function frame:ADDON_LOADED(_, name)
-	if (name ~= MAJOR) then return end
-
-	_G.ladDB = {}
-	local db = _G.ladDB
-
-	for funcName in pairs(aUI) do
-		db[#db + 1] = funcName
-	end
-
-	table.sort(db)
-
-	self:UnregisterEvent("ADDON_LOADED")
-end
-
 function frame:PLAYER_ENTERING_WORLD(event)
-	print("LAD:PLAYER_ENTERING_WORLD")
 	_G.C_Timer.After(5, function()
-		frame:InitializeScan(event)
-		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+		self:InitializeScan(event)
+		self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+		self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 	end)
 end
 
+function frame:ARTIFACT_CLOSE()
+	viewedID = nil
+end
+
 function frame:ARTIFACT_UPDATE(event, newItem)
-	-- register SPELLS_CHANGED to pick up traits changes
 	Debug(event, newItem)
 	if newItem then
 		self:GetViewedArtifactData()
 	else
-		-- traits or relics updated?
-		-- can only change traits and perks for equipped?
+		local newRelics = self:ScanRelics()
+		local oldRelics = artifacts[viewedID].relics
+
+		for i = 1, #newRelics do
+			local newRelic = newRelics[i]
+			-- TODO: test third slot unlock
+			if newRelic.isLocked ~= oldRelics[i].isLocked or newRelic.itemID ~= oldRelics[i].itemID then
+				oldRelics[i] = newRelic
+				Debug("ARTIFACT_RELIC_CHANGED", i, newRelic)
+				callback:Fire("ARTIFACT_RELIC_CHANGED", i, CopyTable(newRelic))
+				break
+			end
+		end
 	end
 end
 
@@ -326,7 +325,7 @@ function frame:ARTIFACT_XP_UPDATE(event)
 
 	if numRanksPurchased ~= artifact.numRanksPurchased then
 		-- both learning traits and artifact respec trigger ARTIFACT_XP_UPDATE
-		-- however respec has a positiv diff and learning traits has a negativ one
+		-- however respec has a positive diff and learning traits has a negative one
 		self:ScanTraits(itemID)
 		Debug("ARTIFACT_TRAITS_UPDATED", event, itemID, numRanksPurchased, CopyTable(artifacts[itemID].traits))
 		callback:Fire("ARTIFACT_TRAITS_UPDATED", itemID, numRanksPurchased, CopyTable(artifacts[itemID].traits))
@@ -351,21 +350,25 @@ function frame:BANKFRAME_OPENED()
 	end
 end
 
+function frame:CURRENCY_DISPLAY_UPDATE(event)
+	local _, lvl = GetCurrencyInfo(1171)
+	if lvl ~= artifacts.knowledgeLevel then
+		artifacts.knowledgeLevel = lvl
+		Debug("ARTIFACT_DATA_MISSING", event, lvl)
+		callback:Fire("ARTIFACT_DATA_MISSING", "knowledge", lvl)
+	end
+end
+
 function frame:PLAYER_EQUIPMENT_CHANGED(event, slot)
 	if slot == INVSLOT_MAINHAND then
 		local itemID = GetEquippedArtifactInfo()
 
 		if itemID and not artifacts[itemID] then
-			-- TODO: at this time on cold login GetNumObtainedArtifacts() returns 1 (only the equipped)
 			self:InitializeScan(event)
 		end
 
 		self:InformEquippedArtifactChanged(itemID)
 	end
-end
-
-function frame:ARTIFACT_RESPEC_PROMPT(event, ...)
-	Debug(event, ...)
 end
 
 function lib:GetArtifactInfo(artifactID)
@@ -414,7 +417,7 @@ function lib:GetArtifactPower(artifactID)
 end
 
 function lib:GetArtifactKnowledge()
-	return knowledgeLevel, knowledgeMultiplier
+	return artifacts.knowledgeLevel, artifacts.knowledgeMultiplier
 end
 
 function lib:ForceUpdate()
