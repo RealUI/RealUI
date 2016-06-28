@@ -57,9 +57,9 @@ local function GetShouldTrack(spellData)
     if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
         local talent = spellData.talent
         debug(isDebug, "Check for talents", talent.mustHave)
-        if talent.ID then
-            local _, selectedTalent = GetTalentTierInfo(talent.tier)
-            local trackerTalent = talent.ID
+        if talent.column or talent.ID then
+            local _, selectedTalent = GetTalentTierInfo(talent.tier, 1)
+            local trackerTalent = talent.column or talent.ID
             if type(trackerTalent) == "table" then
                 trackerTalent = trackerTalent[playerSpec]
             end
