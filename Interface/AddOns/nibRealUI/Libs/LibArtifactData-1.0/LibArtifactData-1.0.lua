@@ -1,4 +1,4 @@
-if not RealUI.isBeta then return end
+if _G.select(4, _G.GetBuildInfo()) < 70000 then return end
 
 local MAJOR, MINOR = "LibArtifactData-1.0", 1
 

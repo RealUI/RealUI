@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 19
+local MAJOR, MINOR = "HereBeDragons-1.0", 20
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -86,7 +86,7 @@ local function RestoreWMU()
 end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 18 then
+if not oldversion or oldversion < 20 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -207,6 +207,13 @@ if not oldversion or oldversion < 18 then
         local floors
         if IsLegion then
             floors = { GetNumDungeonMapLevels() }
+
+            -- offset floors for terrain map
+            if DungeonUsesTerrainMap() then
+                for i = 1, #floors do
+                    floors[i] = floors[i] + 1
+                end
+            end
         else
             floors = {}
             for f = 1, GetNumDungeonMapLevels() do
