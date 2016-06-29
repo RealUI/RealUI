@@ -84,29 +84,30 @@ function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
-do -- Screen Height + Width
-    function RealUI:GetResolutionVals(raw)
-        local resolution
-        if RealUI.isBeta then
-            local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
-            resolution = windowed ~= fullscreen and windowed or fullscreen
+function RealUI:GetResolutionVals(raw)
+    local resolution
+    if RealUI.isBeta then
+        if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
+            resolution = _G.GetCVar("gxwindowedresolution")
         else
-            resolution = _G.GetCVar("gxResolution")
+            resolution = _G.GetCVar("gxfullscreenresolution")
         end
-        local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
-        resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
+    else
+        resolution = _G.GetCVar("gxResolution")
+    end
+    local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
+    resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
 
-        if raw then
-            return resWidth, resHeight
-        end
-
-        if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
-            resHeight = resHeight / 2
-            resWidth = resWidth / 2
-        end
-
+    if raw then
         return resWidth, resHeight
     end
+
+    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+        resHeight = resHeight / 2
+        resWidth = resWidth / 2
+    end
+
+    return resWidth, resHeight
 end
 
 -- Deep Copy table
