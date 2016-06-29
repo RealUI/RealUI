@@ -679,7 +679,7 @@ do
             end
             InfoLine:debug("GetArtifactInfo", artifactID, artifact, next(artifact))
             showArtifact = artifactID and _G.HasArtifactEquipped()
-            showHonor = lvl >= _G.MAX_PLAYER_LEVEL and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
+            showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
         minWatchState, maxWatchState = 1, #watchStates
 
@@ -779,7 +779,7 @@ do
                 watchFormat = watchFormat .. "|cff%s[%.1f÷]|r"
             end
             self.text:SetFormattedText(watchFormat, TextColorNormal, watchText, TextColorBlue1, watchText2)
-            self.icon:SetTexture(Icons[layoutSize][watchStates[dbc.xrstate]][1])
+            self.icon:SetTexture(Icons[layoutSize][watchStates[xrstate]][1])
             UpdateElementWidth(self)
         else
             self.text:SetText("")
@@ -790,7 +790,7 @@ do
     function InfoLine_XR_OnMouseDown(self, ...)
         InfoLine:debug("InfoLine_XR_OnMouseDown", dbc.xrstate, ...)
         if _G.IsAltKeyDown() then
-            if dbc.xrstate == maxWatchState then
+            if dbc.xrstate >= maxWatchState then
                 dbc.xrstate = minWatchState
             else
                 dbc.xrstate = dbc.xrstate + 1
