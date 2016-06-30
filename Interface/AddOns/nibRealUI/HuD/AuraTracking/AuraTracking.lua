@@ -122,8 +122,8 @@ do
         activeTrackers[tracker.side] = activeTrackers[tracker.side] - 1
     end
 
-    function AuraTracking:AddTracker(tracker, slotID, enforceSlot)
-        self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
+    function AuraTracking:AddTracker(tracker, enforceSlot)
+        self:debug("AddTracker", tracker.id, tracker.slotID, tracker.slotIDMax)
         if tracker.slotID then
             if tracker.isStatic then
                 tracker.icon:SetDesaturated(false)
@@ -132,6 +132,7 @@ do
             end
         else
             local side, slot = self[tracker.side]
+            local slotID = tracker.isStatic and tracker.slotIDMax
             if enforceSlot then
                 self:debug("Place in slot", slotID)
                 AddTrackerToSlot(tracker, side["slot"..slotID])
@@ -140,9 +141,10 @@ do
                 self:debug("Find first empty slot until:", maxSlots)
                 for i = 1, maxSlots do
                     slot = side["slot"..i]
-                    self:debug("Slot:", i, slot.isActive, slot.tracker and slot.tracker.isStatic)
+                    self:debug("Slot:", i, slot.isActive)
                     if slot.isActive then
-                        if (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
+                        self:debug("Slot info:", slot.tracker.isStatic, slot.tracker.slotIDMax)
+                        if (slot.tracker.slotIDMax > maxSlots) or (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
                             -- Make sure static trackers have priority placement on earlier slots
                             self:ShiftTracker(slot.tracker, i, i + 1)
                         end

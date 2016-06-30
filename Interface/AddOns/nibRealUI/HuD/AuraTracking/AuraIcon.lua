@@ -18,9 +18,11 @@ local icons = {}
 --[[ API Functions ]]--
 local api = {}
 function api:UpdateSpellData()
+    AuraTracking:debug("Tracker:UpdateSpellData", self.id)
     local spellData = icons[self]
     self.isStatic = spellData.order > 0
     self.filter = (spellData.auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
+    self.slotIDMax = spellData.order
 end
 
 function api:Enable()
@@ -38,7 +40,7 @@ function api:Enable()
     end
     if self.isStatic then
         self.icon:SetDesaturated(true)
-        AuraTracking:AddTracker(self, spellData.order)
+        AuraTracking:AddTracker(self)
     end
 end
 function api:Disable()
