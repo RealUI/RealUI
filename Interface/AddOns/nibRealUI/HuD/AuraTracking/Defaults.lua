@@ -7,6 +7,7 @@ local _G = _G
 local RealUI = private.RealUI
 local L = RealUI.L
 local Lerp = RealUI.Lerp
+local isBeta = RealUI.isBeta
 
 local MODNAME = "AuraTracking"
 local AuraTracking = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
@@ -69,7 +70,11 @@ local function PredictDuration(gap, base, max)
 end
 
 if class == "DRUID" then
-    SavageRoar = PredictDuration(6, 18, 42)
+    if isBeta then
+        SavageRoar = PredictDuration(4, 8, 24)
+    else
+        SavageRoar = PredictDuration(6, 18, 42)
+    end
 elseif class == "MAGE" then
     do -- MirrorImage
         local hasAura = false
@@ -353,7 +358,7 @@ function AuraTracking:SetupDefaultTracker()
     return classTrackers
 end
 
-if not RealUI.isBeta then
+if not isBeta then
 
 --[[ Retired IDs
 9ab78043
@@ -363,6 +368,17 @@ bd56d2d6
 965917ad
 a5bdd6b2
 
+-- Retired in Legion
+b6cce35c
+8c2b1f08
+8281137d
+ac02f3e2
+86ed5897
+a18c4f9e
+a5b3eaa4
+9baa529a
+94516e94
+9924d77d
 
 ]]
 
@@ -2085,9 +2101,6 @@ classDefaults = {
 
 else
 
---[[ Retired IDs
-]]
-
 classDefaults = {
     ["DEATHKNIGHT"] = {
         -- Static Player Auras
@@ -2197,9 +2210,228 @@ classDefaults = {
 
     ["DRUID"] = {
         -- Static Player Auras
+            ["11-b0d10e92-1"] = {   -- Savage Roar (Feral)
+                spell = 52610,
+                minLevel = 75,
+                specs = {false, true, false, false},
+                order = 1,
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = SavageRoar
+                }
+            },
+            ["11-a774b290-1"] = {   -- Ironfur (Guardian)
+                spell = 192081,
+                minLevel = 44,
+                specs = {false, false, true, false},
+                order = 1,
+            },
+            ["11-b409da56-1"] = {   -- Abundance (Resto)
+                spell = 207640,
+                minLevel = 15,
+                specs = {false, false, false, true},
+                order = 1,
+                talent = {
+                    tier = 1,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
         -- Static Target Auras
+            ["11-b1a3a3b5-1"] = {   -- Moonfire (Balance)
+                spell = 164812,
+                minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false, false},
+                order = 1,
+            },
+            ["11-bbefa72d-1"] = {   -- Sunfire (Balance)
+                spell = 164815,
+                minLevel = 18,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false, false},
+                order = 2,
+            },
+            ["11-b5e260cc-1"] = {   -- Stellar Flare (Talent) (Balance)
+                spell = 202347,
+                minLevel = 75,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false, false},
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 3,
+            },
+            ["11-931a3a8f-1"] = {   -- Rake (Feral)
+                spell = 155722,
+                minLevel = 6,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false},
+                order = 1,
+            },
+            ["11-98b179f7-1"] = {   -- Rip (Feral)
+                spell = 1079,
+                minLevel = 20,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false},
+                order = 2,
+            },
+            ["11-ac72ea83-1"] = {   -- Lunar Inspiration (Talent) (Feral)
+                spell = 155625, -- Moonfire (Cat)
+                minLevel = 15,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false},
+                talent = {
+                    tier = 1,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 3,
+                customName = _G.GetSpellInfo(155580),
+            },
+            ["11-9d6059d3-1"] = {   -- Thrash (Guardian)
+                spell = 192090,
+                minLevel = 14,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true, false},
+                order = 1,
+            },
         -- Free Player Auras
+            ["11-a14ea115-1"] = {   -- Celestial Alignment (Balance)
+                spell = 194223,
+                minLevel = 64,
+                specs = {true, false, false, false},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = false,
+                },
+            },
+            ["11-bb1a6cfe-1"] = {   -- Tiger's Fury (Feral)
+                spell = 5217,
+                minLevel = 12,
+                specs = {false, true, false, false}
+            },
+            ["11-b0d536fe-1"] = {   -- Predatory Swiftness (Feral)
+                spell = 69369,
+                minLevel = 28,
+                specs = {false, true, false, false}
+            },
+            ["11-b2007cb7-1"] = {   -- Berserk (Feral)
+                spell = 106951,
+                minLevel = 48,
+                specs = {false, true, true, false}
+            },
+            ["11-942ab297-1"] = {   -- Survival Instincts (Feral, Guardian)
+                spell = 61336,
+                minLevel = 40,
+                specs = {false, true, true, false}
+            },
+            ["11-b3c84eed-1"] = {   -- Barkskin (Guardian)
+                spell = 22812,
+                minLevel = 36,
+                specs = {false, false, true, false}
+            },
+            ["11-9ee9dd75-1"] = {   -- Omen of Clarity (Feral, Resto)
+                spell = {135700, 16870},   -- Clearcasting (Feral, Resto)
+                minLevel = 38,
+                specs = {false, true, false, true},
+                customName = _G.GetSpellInfo(113043),
+            },
+            ["11-a9a4c453-1"] = {   -- Incarnation: Chosen of Elune (Talent) (Balance)
+                spell = 102560,
+                minLevel = 75,
+                specs = {true, false, false, false},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["11-87d1164a-1"] = {   -- Incarnation: King of the Jungle (Talent) (Feral)
+                spell = 102543,
+                minLevel = 75,
+                specs = {false, true, false, false},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["11-827cfea6-1"] = {   -- Bloodtalons (Talent) (Feral)
+                spell = 145152,
+                minLevel = 100,
+                specs = {false, true, false, false},
+                talent = {
+                    tier = 7,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["11-aa9fcbad-1"] = {   -- Incarnation: Son of Ursoc (Talent) (Guardian)
+                spell = 102558,
+                minLevel = 75,
+                specs = {false, false, true, false},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["11-bb237125-1"] = {   -- Pulverize (Talent) (Guardian)
+                spell = 158792,
+                minLevel = 100,
+                specs = {false, false, true, false},
+                talent = {
+                    tier = 7,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["11-bb4c75ca-1"] = {   -- Soul of the Forest (Talent) (Resto)
+                spell = 114108,
+                minLevel = 75,
+                specs = {false, false, false, true},
+                talent = {
+                    tier = 5,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["11-a121bb73-1"] = {   -- Incarnation: Tree of Life (Talent) (Resto)
+                spell = 117679,
+                minLevel = 75,
+                specs = {false, false, false, true},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(33891),
+            },
+            ["11-9a94211a-1"] = {spell = 1850},   -- Dash
         -- Free Target Auras
+            ["11-a6d635ba-1"] = {   -- Thrash (Feral)
+                spell = 106830,
+                minLevel = 14,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false, false}
+            },
     },
 
     ["HUNTER"] = {
