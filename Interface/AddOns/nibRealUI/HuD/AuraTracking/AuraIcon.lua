@@ -50,7 +50,7 @@ function api:Disable()
     if self.timer then
         AuraTracking:CancelTimer(self.timer)
     end
-    if self.slotID then
+    if self.slot then
         AuraTracking:RemoveTracker(self)
     end
 end

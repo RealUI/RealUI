@@ -79,9 +79,9 @@ elseif class == "MAGE" then
             debug(spellData.debug, "postUnitAura", hasAura)
             self.cd:SetCooldown(start, duration)
 
-            if hasAura and not self.slotID then
+            if hasAura and not self.slot then
                 AuraTracking:AddTracker(self)
-            elseif not hasAura and self.slotID then
+            elseif not hasAura and self.slot then
                 AuraTracking:RemoveTracker(self)
             end
         end
@@ -123,7 +123,7 @@ elseif class == "MAGE" then
                 self.status:SetPoint("TOPLEFT", self, xOfs, 0)
 
                 AuraTracking:AddTracker(self)
-            elseif self.slotID then
+            elseif self.slot then
                 self.auraIndex = nil
                 self.cd:SetCooldown(0, 0)
                 self.cd:Hide()
@@ -180,7 +180,7 @@ elseif class == "MONK" then
             if numNotUsed <= threshold then
                 self.auraIndex = aura.index
                 AuraTracking:AddTracker(self)
-            elseif numNotUsed > threshold and self.slotID then
+            elseif numNotUsed > threshold and self.slot then
                 -- Hide the tracker if the buff isn't used twice in a row
                 AuraTracking:RemoveTracker(self, self.isStatic)
             end
@@ -220,7 +220,7 @@ elseif class == "ROGUE" then
                 self.cd:SetCooldown(aura.endTime - aura.duration, aura.duration)
                 self.icon:SetTexture(aura.texture)
                 AuraTracking:AddTracker(self)
-            elseif hasAura ~= nil and self.slotID then
+            elseif hasAura ~= nil and self.slot then
                 self.auraIndex = nil
                 self.cd:SetCooldown(0, 0)
                 self.cd:Hide()
@@ -276,7 +276,7 @@ elseif class == "ROGUE" then
                 self.cd:Show()
                 self.icon:SetTexture(aura.texture)
                 AuraTracking:AddTracker(self)
-            elseif hasAura ~= nil and self.slotID then
+            elseif hasAura ~= nil and self.slot then
                 self.auraIndex = nil
                 self.cd:SetCooldown(0, 0)
                 self.cd:Hide()
