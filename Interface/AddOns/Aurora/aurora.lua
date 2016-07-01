@@ -287,12 +287,20 @@ F.ReskinDropDown = function(f)
 	if middle then middle:SetAlpha(0) end
 	if right then right:SetAlpha(0) end
 
-	local down = _G[frame.."Button"]
+	local bg = CreateFrame("Frame", nil, f)
+	bg:SetPoint("TOPLEFT", 10, -4)
+	bg:SetPoint("BOTTOMRIGHT", -12, 8)
+	bg:SetFrameLevel(f:GetFrameLevel()-1)
+	F.CreateBD(bg, 0)
 
+	local gradient = F.CreateGradient(f)
+	gradient:SetPoint("TOPLEFT", bg, 1, -1)
+	gradient:SetPoint("BOTTOMRIGHT", bg, -1, 1)
+
+	local down = _G[frame.."Button"]
 	down:SetSize(20, 20)
 	down:ClearAllPoints()
-	down:SetPoint("RIGHT", -18, 2)
-
+	down:SetPoint("TOPRIGHT", bg)
 	F.Reskin(down, true)
 
 	down:SetDisabledTexture(C.media.backdrop)
@@ -310,16 +318,6 @@ F.ReskinDropDown = function(f)
 
 	down:HookScript("OnEnter", colourArrow)
 	down:HookScript("OnLeave", clearArrow)
-
-	local bg = CreateFrame("Frame", nil, f)
-	bg:SetPoint("TOPLEFT", 16, -4)
-	bg:SetPoint("BOTTOMRIGHT", -18, 8)
-	bg:SetFrameLevel(f:GetFrameLevel()-1)
-	F.CreateBD(bg, 0)
-
-	local gradient = F.CreateGradient(f)
-	gradient:SetPoint("TOPLEFT", bg, 1, -1)
-	gradient:SetPoint("BOTTOMRIGHT", bg, -1, 1)
 end
 
 local function colourClose(f)
