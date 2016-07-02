@@ -627,7 +627,7 @@ do
     local lvl
     local xp, xpMax, xpPer, restxp
     local rep, replvlmax, repPer, repStandingID, repstatus, watchedFaction
-    local artifactID, artifact, artPer
+    local artifactID, artifacts, artPer
     local honor, honorMax, honorPer
     function InfoLine_XR_OnEnter(self)
         self:SetAlpha(1)
@@ -669,6 +669,7 @@ do
         end
 
         if showArtifact then
+            local artifact = artifacts[artifactID]
             GameTooltip:AddLine(artifact.name, color[1], color[2], color[3])
 
             local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
@@ -715,13 +716,15 @@ do
         showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
         showRep = repName
         if isBeta then
-            if event == "ARTIFACT_EQUIPPED_CHANGED" then
-                local _, newArtifact = ...
-                artifactID, artifact = artData:GetArtifactInfo(newArtifact)
-            else
-                artifactID, artifact = artData:GetArtifactInfo()
+            InfoLine:debug("Active artifact", artifactID)
+            local _
+            if event == "ARTIFACT_ACTIVE_CHANGED" then
+                _, artifactID = ...
+            elseif event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
+                artifactID = ...
+                artifacts = artData:GetAllArtifactsInfo(artifactID)
             end
-            InfoLine:debug("GetArtifactInfo", artifactID, artifact, next(artifact))
+            InfoLine:debug("GetArtifactInfo", artifactID, artifactID and next(artifacts[artifactID]))
             showArtifact = artifactID and _G.HasArtifactEquipped()
             showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
@@ -756,7 +759,9 @@ do
             end
         end
 
+        local artifact
         if showArtifact then
+            artifact = artifacts[artifactID]
             if (artifact.maxPower <= 0) then
                 artPer = 0
             else
@@ -3365,8 +3370,9 @@ function InfoLine:CreateFrames()
         InfoLine_XR_Update(ILFrames.xprep, ...)
     end
     if isBeta then
-        artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", XR_OnEvent)
-        artData:RegisterCallback("ARTIFACT_XP_UPDATED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent)
     end
     ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 

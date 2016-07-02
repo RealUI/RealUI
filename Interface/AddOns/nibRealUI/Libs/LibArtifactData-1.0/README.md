@@ -21,5 +21,5 @@ If you have problems using the library, run into any issues or have a feature re
 ## Further reading
   1. [How to use](https://github.com/Rainrider/LibArtifactData-1.0/wiki/How-to-use)  
   2. [API](https://github.com/Rainrider/LibArtifactData-1.0/wiki/API)  
-  3. [Messages](https://github.com/Rainrider/LibArtifactData-1.0/wiki/Messages)  
+  3. [Events](https://github.com/Rainrider/LibArtifactData-1.0/wiki/Events)  
   4. [Data structure](https://github.com/Rainrider/LibArtifactData-1.0/wiki/Data-structure)  
