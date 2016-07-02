@@ -1,0 +1,13 @@
+------------------------------------------------------------------------
+r339 | tomber | 2016-07-02 22:21:49 +0000 (Sat, 02 Jul 2016) | 2 lines
+Changed paths:
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Raven_Options.toc
+
+Fixes for Legion compatibility, tested on the PTR.
+Fix error in applying default background saturation and brightness.
+------------------------------------------------------------------------

@@ -1617,14 +1617,17 @@ function MOD.Nest_Initialize()
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
 	if GetCVar("useUiScale") == "1" then
-        local resolution
-        if MOD.isBeta then
-            local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
-            resolution = windowed ~= fullscreen and windowed or fullscreen
-        else
-            resolution = _G.GetCVar("gxResolution")
-        end
-        pixelScale = 768 / resolution:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+		local resolution
+		if MOD.isBeta then
+			if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
+				resolution = _G.GetCVar("gxwindowedresolution")
+			else
+				resolution = _G.GetCVar("gxfullscreenresolution")
+			end
+		else
+			resolution = _G.GetCVar("gxResolution")
+		end
+		pixelScale = 768 / resolution:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
 	else
 		pixelScale = 1
 	end
