@@ -574,14 +574,55 @@ end
 ---- XP/Rep
 local InfoLine_XR_OnEnter, InfoLine_XR_Update, InfoLine_XR_OnMouseDown
 do
-    local watchStates = {
-        "xp",
-        "rep",
-        "artifact",
-        "honor"
-    }
-    local minWatchState, maxWatchState
     local showXP, showRep, showArtifact, showHonor
+    local watchStates = {
+        { -- xp
+            GetNext = function()
+                return 2, showRep, "rep"
+            end,
+            GetActive = function()
+                return 1, showXP, "xp"
+            end,
+            OnClick = function()
+            end
+        },
+        { -- rep
+            hint = L["Progress_OpenRep"],
+            GetNext = function()
+                return 3, showArtifact, "artifact"
+            end,
+            GetActive = function()
+                return 2, showRep, "rep"
+            end,
+            OnClick = function()
+                _G.ToggleCharacter("ReputationFrame")
+            end
+        },
+        { -- artifact
+            hint = L["Progress_OpenArt"],
+            GetNext = function()
+                return 4, showHonor, "honor"
+            end,
+            GetActive = function()
+                return 3, showArtifact, "artifact"
+            end,
+            OnClick = function()
+                _G.SocketInventoryItem(16)
+            end
+        },
+        { -- honor
+            hint = L["Progress_OpenHonor"],
+            GetNext = function()
+                return 1, showXP, "xp"
+            end,
+            GetActive = function()
+                return 4, showHonor, "honor"
+            end,
+            OnClick = function()
+                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end
+        },
+    }
 
     local lvl
     local xp, xpMax, xpPer, restxp
@@ -596,6 +637,7 @@ do
         GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, L["Progress"]))
         GameTooltip:AddLine(" ")
 
+        local numActive = 0
         local statusFormat = "%s/%s (%d%%)"
         local color, color2 = RealUI.media.colors.orange
         if _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL then
@@ -614,28 +656,33 @@ do
                 end
             end
             GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
 
         if showRep then
-            color2 = {_G.FACTION_BAR_COLORS[repStandingID].r, _G.FACTION_BAR_COLORS[repStandingID].g, _G.FACTION_BAR_COLORS[repStandingID].b}
+            color2 = _G.FACTION_BAR_COLORS[repStandingID]
             local repStatus = statusFormat:format(RealUI:ReadableNumber(rep), RealUI:ReadableNumber(replvlmax), repPer)
             GameTooltip:AddDoubleLine(_G.REPUTATION.._G.HEADER_COLON, watchedFaction, color[1], color[2], color[3], color2[1], color2[2], color2[3])
-            GameTooltip:AddDoubleLine(repstatus, repStatus, color2[1], color2[2], color2[3], 0.9, 0.9, 0.9)
+            GameTooltip:AddDoubleLine(repstatus, repStatus, color2.r, color2.g, color2.b, 0.9, 0.9, 0.9)
             GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
 
         if showArtifact then
-            color = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+            GameTooltip:AddLine(artifact.name, color[1], color[2], color[3])
+
             local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
-            local artStatus2 = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
-            GameTooltip:AddLine(("|cff%s%s|r"):format(color, artifact.name))
             GameTooltip:AddLine(artStatus, 0.9, 0.9, 0.9)
-            GameTooltip:AddLine(artStatus2, 0.7, 0.7, 0.7, true)
+
+            if artifact.numRanksPurchasable > 0 then
+                local artStatus2 = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+                GameTooltip:AddLine(artStatus2, 0.7, 0.7, 0.7, true)
+            end
             GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
 
         if showHonor then
-            color = RealUI.media.colors.orange
             color2 = {0.9, 0.9, 0.9}
             local honorStatus
             if _G.CanPrestige() then
@@ -645,18 +692,15 @@ do
             end
             GameTooltip:AddDoubleLine(_G.HONOR.._G.HEADER_COLON, honorStatus, color[1], color[2], color[3], color2[1], color2[2], color2[3])
             GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
 
         -- Hint
         color = {0, 1, 0} 
-        if watchStates[dbc.xrstate] == "rep" then
-            GameTooltip:AddLine(L["Progress_OpenRep"], color[1], color[2], color[3])
-        elseif watchStates[dbc.xrstate] == "artifact" then
-            GameTooltip:AddLine(L["Progress_OpenArt"], color[1], color[2], color[3])
-        elseif watchStates[dbc.xrstate] == "honor" then
-            GameTooltip:AddLine(L["Progress_OpenHonor"], color[1], color[2], color[3])
+        if watchStates[dbc.xrstate].hint then
+            GameTooltip:AddLine(watchStates[dbc.xrstate].hint, color[1], color[2], color[3])
         end
-        if maxWatchState - minWatchState > 0 then
+        if numActive > 1 then
             GameTooltip:AddLine(L["Progress_Cycle"], color[1], color[2], color[3])
         end
 
@@ -681,7 +725,6 @@ do
             showArtifact = artifactID and _G.HasArtifactEquipped()
             showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
-        minWatchState, maxWatchState = 1, #watchStates
 
         -- XP Data
         if showXP then
@@ -693,8 +736,6 @@ do
             else
                 xpPer = (xp/xpMax)*100
             end
-        else
-            minWatchState = minWatchState + 1
         end
 
         -- Currency
@@ -713,8 +754,6 @@ do
             else
                 repPer = (rep/replvlmax)*100
             end
-        else
-            minWatchState = minWatchState + 1
         end
 
         if showArtifact then
@@ -723,8 +762,6 @@ do
             else
                 artPer = (artifact.power/artifact.maxPower)*100
             end
-        else
-            maxWatchState = maxWatchState - 1
         end
 
         if showHonor then
@@ -735,35 +772,35 @@ do
             else
                 honorPer = (honor/honorMax)*100
             end
-        else
-            maxWatchState = maxWatchState - 1
         end
 
         -- Set Info Text
-        local xrstate = dbc.xrstate
-        InfoLine:debug("Watch state", dbc.xrstate, minWatchState, maxWatchState)
-        if xrstate > maxWatchState then xrstate = maxWatchState end
-        if xrstate < minWatchState then xrstate = minWatchState end
-        local watchText, watchText2 = 0
-        if watchStates[xrstate] == "xp" then
+        local _, _, watchState = watchStates[dbc.xrstate]:GetActive()
+        local watchText, watchText2, watchFormat2 = 0
+        if watchState == "xp" then
             InfoLine:debug("Set XP", showXP)
             if showXP then
                 watchText = xpPer
                 if restxp > 0 then
-                    watchText2 = tostring(floor((restxp / xpMax) * 100))
+                    watchFormat2 = "|cff%s[%.1f÷]|r"
+                    watchText2 = (restxp / xpMax) * 100
                 end
             end
-        elseif watchStates[xrstate] == "rep" then
+        elseif watchState == "rep" then
             InfoLine:debug("Set Rep", showRep)
             if showRep then
                 watchText = repPer
             end
-        elseif watchStates[xrstate] == "artifact" then
+        elseif watchState == "artifact" then
             InfoLine:debug("Set Artifact", showArtifact)
             if showArtifact then
-                watchText, watchText2 = artPer, tostring(artifact.numRanksPurchasable)
+                watchText = artPer
+                if artifact.numRanksPurchasable > 0 then
+                    watchFormat2 = "|cff%s[+%d]|r"
+                    watchText2 = artifact.numRanksPurchasable
+                end
             end
-        elseif watchStates[xrstate] == "honor" then
+        elseif watchState == "honor" then
             InfoLine:debug("Set Honor", showHonor)
             if showHonor then
                 watchText = honorPer
@@ -776,10 +813,10 @@ do
             InfoLine:debug("Watch text", watchText, watchText2)
             local watchFormat = "|cff%s %.1f÷|r"
             if watchText2 then
-                watchFormat = watchFormat .. "|cff%s[%.1f÷]|r"
+                watchFormat = watchFormat .. watchFormat2
             end
             self.text:SetFormattedText(watchFormat, TextColorNormal, watchText, TextColorBlue1, watchText2)
-            self.icon:SetTexture(Icons[layoutSize][watchStates[xrstate]][1])
+            self.icon:SetTexture(Icons[layoutSize][watchState][1])
             UpdateElementWidth(self)
         else
             self.text:SetText("")
@@ -790,21 +827,15 @@ do
     function InfoLine_XR_OnMouseDown(self, ...)
         InfoLine:debug("InfoLine_XR_OnMouseDown", dbc.xrstate, ...)
         if _G.IsAltKeyDown() then
-            if dbc.xrstate >= maxWatchState then
-                dbc.xrstate = minWatchState
-            else
-                dbc.xrstate = dbc.xrstate + 1
-            end
+            repeat
+                local state, isActive = watchStates[dbc.xrstate]:GetNext()
+                InfoLine:debug("check state", dbc.xrstate, state)
+                dbc.xrstate = state
+            until isActive
+            InfoLine_XR_Update(self)
         else
-            if watchStates[dbc.xrstate] == "rep" then
-                _G.ToggleCharacter("ReputationFrame")
-            elseif watchStates[dbc.xrstate] == "artifact" then
-                _G.SocketInventoryItem(16)
-            elseif watchStates[dbc.xrstate] == "honor" then
-                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
-            end
+            watchStates[dbc.xrstate]:OnClick()
         end
-        InfoLine_XR_Update(self)
     end
 end
 
