@@ -26,7 +26,7 @@ local ChannelingTicks = {
     [_G.GetSpellInfo(12051)] = 3,  -- Evocation
     -- Monk
     [_G.GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
-    [_G.GetSpellInfo(115175)] = 8,  -- Soothing Mist
+    [_G.GetSpellInfo(191837)] = 2,  -- Essence Font
     [_G.GetSpellInfo(115294) or "gone"] = 6,  -- Mana Tea
     [_G.GetSpellInfo(113656)] = 4,  -- Fists of Fury
     -- Priest
@@ -157,6 +157,7 @@ local function PostCastStart(self, unit, ...)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
+    self:SetValue(0, true)
 
     if self.interrupt then
         local color = db.colors.uninterruptible
@@ -220,15 +221,15 @@ end
 
 local function PostChannelStart(self, unit, spellName)
     CastBars:debug("PostChannelStart", unit, spellName)
+    self:SetValue(self.duration, true)
+
     local sz = self.safeZone
     sz:ClearAllPoints()
-    local point, x
     if self:GetReverseFill() then
-        point, x = "TOPRIGHT", -1
+        sz:SetPoint("TOPRIGHT", self, -1, 0)
     else
-        point, x = "TOPLEFT", 1
+        sz:SetPoint("TOPLEFT", self, 1, 0)
     end
-    sz:SetPoint(point, self, x, 0)
     updateSafeZone(self)
 
     if self.SetBarTicks then
@@ -255,8 +256,8 @@ end
 
 local function OnUpdate(self, elapsed)
     CastBars:debug("OnUpdate", self.__owner.unit, elapsed)
+    CastBars:debug("Cast status", self.casting, self.channeling, self.config)
     if (self.casting or self.config) then
-        CastBars:debug("Casting", self.config)
         local duration = self.duration + elapsed
         if (duration >= self.max) then
             CastBars:debug("Duration", duration, self.max)
