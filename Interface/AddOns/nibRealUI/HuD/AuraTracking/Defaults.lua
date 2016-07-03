@@ -373,12 +373,6 @@ b6cce35c
 8c2b1f08
 8281137d
 ac02f3e2
-86ed5897
-a18c4f9e
-a5b3eaa4
-9baa529a
-94516e94
-9924d77d
 
 ]]
 
@@ -2436,9 +2430,184 @@ classDefaults = {
 
     ["HUNTER"] = {
         -- Static Player Auras
+            ["3-a08d9a86-1"] = {   -- Dire Beast (BM)
+                spell = 120694,
+                minLevel = 10,
+                specs = {true, false, false},
+                talent = {
+                    tier = 2,
+                    column = 2,
+                    mustHave = false,
+                },
+                order = 1,
+            },
+            ["3-9baa529a-1"] = {   -- Dire Frenzy (BM)
+                spell = 217200,
+                minLevel = 30,
+                unit = "pet",
+                specs = {true, false, false},
+                talent = {
+                    tier = 2,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["3-81e273d4-1"] = {   -- Marking Targets (MM)
+                spell = 223138,
+                minLevel = 18,
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["3-ad43391a-1"] = {   -- Steady Focus (MM) (Talent)
+                spell = 193534,
+                minLevel = 15,
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 2,
+            },
+            ["3-a5b3eaa4-1"] = {   -- Mongoose Fury (SV)
+                spell = 190931,
+                minLevel = 18,
+                specs = {false, false, true},
+                order = 1,
+            },
         -- Static Target Auras
+            ["3-9298993d-1"] = {   -- True Aim (MM) (Talent)
+                spell = 199803,
+                minLevel = 30,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 2,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["3-a18c4f9e-1"] = {   -- Lacerate (SV)
+                spell = 185855,
+                minLevel = 36,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["3-bb365636-1"] = {   -- Serpent Sting (SV) (Talent)
+                spell = 118253,
+                minLevel = 90,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                talent = {
+                    tier = 6,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 2,
+            },
         -- Free Player Auras
+            ["3-afe5d9ac-1"] = {   -- Wild Call (BM)
+                spell = 185791,
+                minLevel = 22,
+                specs = {true, false, false}
+            },
+            ["3-a280664b-1"] = {   -- Beast Cleave (BM)
+                spell = 118455,
+                minLevel = 29,
+                unit = "pet",
+                specs = {true, false, false}
+            },
+            ["3-9a8eacb4-1"] = {   -- Bestial Wrath (BM)
+                spell = 19574,
+                minLevel = 40,
+                specs = {true, false, false}
+            },
+            ["3-9bd8be3e-1"] = {   -- Aspect of the Wild (BM)
+                spell = 193530,
+                minLevel = 18,
+                specs = {true, false, false}
+            },
+            ["3-91db07fb-1"] = {   -- Trueshot (MM)
+                spell = 193526,
+                minLevel = 40,
+                specs = {false, true, false}
+            },
+            ["3-9924d77d-1"] = {   -- Bombardment (MM)
+                spell = 82921,
+                minLevel = 62,
+                specs = {false, true, false}
+            },
+            ["3-9e5da04c-1"] = {   -- Lock and Load (MM) (Talent)
+                spell = 194594,
+                minLevel = 30,
+                specs = {false, true, false},
+                talent = {
+                    tier = 2,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["3-94516e94-1"] = {   -- Trick Shot (MM) (Talent)
+                spell = 227272,
+                minLevel = 100,
+                specs = {false, true, false},
+                talent = {
+                    tier = 7,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["3-86ed5897-1"] = {   -- Aspect of the Eagle (SV)
+                spell = 186289,
+                minLevel = 44,
+                specs = {false, false, true}
+            },
+            ["3-9bca201a-1"] = {spell = 186265},   -- Aspect of the Turtle
         -- Free Target Auras
+            ["3-8998954e-1"] = {   -- Vulnerable (MM)
+                spell = 187131,
+                minLevel = 18,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false}
+            },
+            ["3-bc4972cd-1"] = {   -- Explosive Trap (SV)
+                spell = 13812,
+                minLevel = 48,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true}
+            },
+            ["3-a0d6a726-1"] = {   -- A Murder of Crows (BM, MM) (Talent)
+                spell = 131894,
+                minLevel = 90,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, true, false},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["3-ae78fcd9-1"] = {   -- Black Arrow (MM) (Talent)
+                spell = 194599,
+                minLevel = 30,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 2,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
     },
 
     ["MAGE"] = {
