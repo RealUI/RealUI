@@ -139,8 +139,8 @@ do
                 self:debug("Find first empty slot until:", maxSlots)
                 for i = 1, maxSlots do
                     slot = side["slot"..i]
-                    self:debug("Slot:", i, slot.isActive)
-                    if slot.isActive then
+                    self:debug("Slot:", i, slot.tracker)
+                    if slot.tracker then
                         self:debug("Slot info:", slot.tracker.isStatic, slot.tracker.slotIDMax)
                         if (slot.tracker.slotIDMax > maxSlots) or (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
                             -- Make sure static trackers have priority placement on earlier slots
@@ -148,7 +148,7 @@ do
                         end
                     end
 
-                    if not slot.isActive then
+                    if not slot.tracker then
                         self:debug("Found slot", i)
                         AddTrackerToSlot(tracker, slot)
                         break
