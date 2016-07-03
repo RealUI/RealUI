@@ -141,8 +141,12 @@ elseif class == "MAGE" then
         function IncantersFlow(self)
             self.postUnitAura = postUnitAura
 
-            local status = self:CreateTexture(nil, "BACKGROUND", nil, 0)
-            status:SetTexture(0, 0, 0, 0.9)
+            local status = self:CreateTexture(nil, "BORDER", nil, 0)
+            if isBeta then
+                status:SetColorTexture(0, 0, 0, 0.9)
+            else
+                status:SetTexture(0, 0, 0, 0.9)
+            end
             status:SetPoint("TOPLEFT")
             status:SetPoint("BOTTOMRIGHT")
             status:SetDesaturated(true)
@@ -373,6 +377,12 @@ b6cce35c
 8c2b1f08
 8281137d
 ac02f3e2
+aeb77dff
+83a223f0
+a34a80e5
+86dc5f08
+bf27cce4
+a297de89
 
 ]]
 
@@ -2612,9 +2622,157 @@ classDefaults = {
 
     ["MAGE"] = {
         -- Static Player Auras
+            ["8-860b9d97-1"] = {   -- Arcane Missiles! (Arcane)
+                spell = 79683,
+                minLevel = 24,
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["8-9f01a933-1"] = {   -- Fingers of Frost (Frost)
+                spell = 44544,
+                minLevel = 24,
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["8-8ab5ea50-1"] = {   -- Rune of Power (Talent)
+                spell = 116014,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 2,
+            },
         -- Static Target Auras
+            ["8-89b90044-1"] = {   -- Nether Tempest (Arcane) (Talent)
+                spell = 114923,
+                minLevel = 90,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["8-bc5837f7-1"] = {   -- Mastery: Ignite (Fire)
+                spell = 12654,
+                minLevel = 12,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["8-8864aa74-1"] = {   -- Living Bomb (Fire) (Talent)
+                spell = 217694,
+                minLevel = 75,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+                order = 2,
+            },
         -- Free Player Auras
+            ["8-95ae39d1-1"] = {   -- Presence of Mind (Arcane)
+                spell = 205025,
+                minLevel = 15,
+                specs = {true, false, false},
+                talent = {
+                    tier = 1,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["8-bf568893-1"] = {   -- Arcane Power (Arcane)
+                spell = 12042,
+                minLevel = 44,
+                specs = {true, false, false},
+            },
+            ["8-a3050e9c-1"] = {   -- Heating Up (Fire)
+                spell = 48107,
+                minLevel = 12,
+                specs = {false, true, false},
+            },
+            ["8-a0b8d817-1"] = {   -- Pyroblast! (Fire)
+                spell = 48108,
+                minLevel = 12,
+                specs = {false, true, false},
+                customIcon = [[Interface\Icons\Spell_Fire_Fireball02]]
+            },
+            ["8-84e5eb74-1"] = {   -- Brain Freeze (Frost)
+                spell = 190446,
+                minLevel = 28,
+                specs = {false, false, true},
+            },
+            ["8-be277caf-1"] = {   -- Icy Veins (Frost)
+                spell = 12472,
+                minLevel = 40,
+                specs = {false, false, true},
+            },
+            ["8-ba699a82-1"] = {   -- Ice Block
+                spell = 45438,
+                minLevel = 15,
+            },
+            ["8-93a9a908-1"] = {   -- Invisibility
+                spell = {32612, 113862},
+                minLevel = 50,
+            },
+            ["8-b1d9be24-1"] = {   -- Mirror Image (Talent)
+                spell = 55342,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    column = 1,
+                    mustHave = true,
+                },
+                eventUpdate = {
+                    event = "COMBAT_LOG_EVENT_UNFILTERED",
+                    func = MirrorImage
+                },
+            },
+            ["8-bcbae5c4-1"] = {   -- Incanter's Flow (Talent)
+                spell = {156150, 116267},
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    column = 3,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(116267),
+                eventUpdate = {
+                    event = "UNIT_AURA",
+                    func = IncantersFlow
+                },
+            },
+            ["8-817ae191-1"] = {   -- Ice Floes (Talent)
+                spell = 108839,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
+            ["8-a0ef0e74-1"] = {   -- Frost Bomb (Frost)
+                spell = 112948,
+                minLevel = 90,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
     },
 
     ["MONK"] = {
