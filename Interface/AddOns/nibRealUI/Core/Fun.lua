@@ -17,20 +17,27 @@ local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
-local spellFinder = _G.CreateFrame("FRAME")
+local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
     spellFinder:SetScript("OnEvent", function(frame, event, unit)
-        local spellID
-        if auraType == "debuff" then
-            spellID = select(11, _G.UnitDebuff(unit, spellName))
-        else
-            spellID = select(11, _G.UnitBuff(unit, spellName))
-        end
-        if spellID then
-            print(("The spellID for %s is %d"):format(spellName, spellID));
-            frame:UnregisterEvent("UNIT_AURA")
+        local filter = (auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
+        for auraIndex = 1, 40 do
+            local name, _, _, _, _, _, _, _, _, _, spellID = _G.UnitAura(unit, auraIndex, filter)
+            debug("FindSpellID", auraIndex, name, spellID)
+            if spellName == name then
+                print(("spellID for %s is %d"):format(spellName, spellID))
+                numRun = numRun + 1
+            end
+
+            if name == nil then
+                if numRun > 3 then
+                    numRun = 0
+                    frame:UnregisterEvent("UNIT_AURA")
+                end
+                break
+            end
         end
     end)
 end
