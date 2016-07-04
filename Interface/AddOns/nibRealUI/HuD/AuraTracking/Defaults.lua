@@ -24,7 +24,7 @@ AuraTracking.trackerDebug = debug
 local class, classID = RealUI.class, RealUI.classID
 local SavageRoar
 local MirrorImage, IncantersFlow
-local PowerStrikes
+local PowerStrikes--, GiftoftheOx
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
 local function PredictDuration(gap, base, max)
     local potential, color = "", {}
@@ -205,6 +205,104 @@ elseif class == "MONK" then
             tracker.postUnitAura = postUnitAura
         end
     end
+    --[[do -- GiftoftheOx
+        local timeNotUsed, threshold = 0, 60
+        local spawnCounter, orbCounter = 0, 0
+        local orbSummonID, orbSummonID2 = 124503, 124506
+        local orbBurstID, orbBurstID2 = 178173, 124507
+        local staggerDOT = 124255
+
+        local function updateTime(self, spellData, reset)
+            --debug(spellData.debug, "updateTime", spawnCounter, timeNotUsed)
+            timeNotUsed = timeNotUsed + 1
+        end
+
+        local function postUnitAura(self, spellData)
+            debug(spellData.debug, "postUnitAura", spawnCounter, orbCounter)
+
+            if not self.postUnitAura then
+                self.postUnitAura = postUnitAura
+                self.timer = AuraTracking:ScheduleRepeatingTimer(updateTime, 1, self, spellData)
+
+                local status = self:CreateTexture(nil, "BACKGROUND", nil, 0)
+                status:SetTexture(spellData.customIcon)
+                status:SetTexCoord(.08, .92, .08, .92)
+                status:SetPoint("TOPLEFT")
+                status:SetPoint("BOTTOMRIGHT")
+                self.status = status
+            end
+
+            if spawnCounter > 0 or orbCounter > 0 then
+                if spawnCounter > 0 then
+                    local spawnMod = spawnCounter % 1
+                    local right = Lerp(.08, .92, spawnMod) 
+                    debug(spellData.debug, "right", right) 
+                    self.status:SetTexCoord(.08, right, .08, .92) 
+
+                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, spawnMod) 
+                    debug(spellData.debug, "xOfs", xOfs) 
+                    self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
+                    if spawnCounter > 1 then
+                        spawnCounter = spawnCounter - 1
+                    end
+                end
+                
+                if orbCounter > 0 then
+                    self.count:SetText(_G.tostring(orbCounter))
+                    AuraTracking:AddTracker(self)
+                    self.icon:SetDesaturated(true)
+                else
+                    self.count:SetText("")
+                end
+            elseif timeNotUsed > threshold and self.slot then
+                AuraTracking:RemoveTracker(self, self.isStatic)
+            end
+        end
+
+        -- Shows progress until the next GotO orb.
+        function GiftoftheOx(self, spellData, _, subEvent, _, srcGUID, _,_,_, destGUID, _,_,_, ...)
+            local srcIsPlayer, destIsPlayer = srcGUID == AuraTracking.playerGUID, destGUID == AuraTracking.playerGUID
+            debug(spellData.debug, subEvent, srcIsPlayer, destIsPlayer)
+
+            if subEvent == "SPELL_CAST_SUCCESS" and srcIsPlayer then
+                local spellID, spellName = ...
+                debug(spellData.debug, "spellCast", spellID, spellName)
+                if spellID == orbSummonID or spellID == orbSummonID2 then
+                    orbCounter = orbCounter + 1
+                    postUnitAura(self, spellData)
+                end
+            elseif subEvent == "SPELL_HEAL" and (srcIsPlayer and destIsPlayer) then
+                local spellID, spellName = ...
+                debug(spellData.debug, "spellHeal", spellID, spellName)
+                if spellID == orbBurstID or spellID == orbBurstID2 then
+                    orbCounter = orbCounter - 1
+                    postUnitAura(self, spellData)
+                end
+            elseif subEvent:find("_DAMAGE") and destIsPlayer and not srcIsPlayer then
+                -- BaseOrbChance = (DamageTakenBeforeAbsorbsOrStagger / MaxHealth)
+                -- TalentedOrbChance = BaseOrbChance * (1 + 0.6 * (1 - (HealthBeforeDamage - DamageTakenBeforeAbsorbsOrStagger) / MaxHealth))
+                local prefix, mod = _G.strsplit("_", subEvent)
+                debug(spellData.debug, "prefix", prefix, mod)
+                local spellID, spellName, _, damage, absorbed
+                if prefix == "SWING" then
+                    damage, _,_,_,_, absorbed = ...
+                elseif prefix == "SPELL" or prefix == "RANGE" then
+                    spellID, spellName, _, damage, _,_,_,_, absorbed = ...
+                    debug(spellData.debug, "spellDamage", spellID, spellName)
+                    if spellID == staggerDOT then
+                        return
+                    end
+                else
+                    return
+                end
+                debug(spellData.debug, "damage", damage, absorbed)
+                local damagePreStagger = damage + absorbed
+                spawnCounter = spawnCounter + (damagePreStagger / _G.UnitHealthMax("player"))
+                timeNotUsed = 0
+                postUnitAura(self, spellData)
+            end
+        end
+    end]]
 elseif class == "ROGUE" then
     do -- BanditsGuile
         -- Shows how many Sinister Strikes hit since the last BG upgrade or reset.
@@ -382,7 +480,6 @@ aeb77dff
 a34a80e5
 86dc5f08
 bf27cce4
-a297de89
 
 ]]
 
@@ -2777,8 +2874,105 @@ classDefaults = {
 
     ["MONK"] = {
         -- Static Player Auras
+            ["10-a53c4a0d-1"] = {   -- Ironskin Brew (Brewmaster)
+                spell = {115308, 215479},
+                minLevel = 28,
+                specs = {true, false, false},
+                order = 1,
+            },
+            --[=[ ["10-b95a8d44-1"] = {   -- Gift of the Ox (Brewmaster)
+                spell = 124502,
+                minLevel = 40,
+                specs = {true, false, false},
+                order = 2,
+                eventUpdate = {
+                    event = "COMBAT_LOG_EVENT_UNFILTERED",
+                    func = GiftoftheOx
+                },
+                customIcon = [[Interface\Icons\Ability_Monk_HealthSphere]],
+                debug = "GiftoftheOx"
+            },]=]
+            ["10-8082e169-1"] = {   -- Power Strikes (Windwalker) (Talent)
+                spell = 129914,
+                minLevel = 45,
+                specs = {false, false, true},
+                talent = {
+                    tier = 3,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_AURA",
+                    func = PowerStrikes
+                },
+            },
+            ["10-a297de89-1"] = {   -- Hit Combo (Windwalker) (Talent)
+                spell = 196741,
+                minLevel = 90,
+                specs = {false, false, true},
+                talent = {
+                    tier = 6,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 2,
+            },
         -- Static Target Auras
+            ["10-83b91fd2-1"] = {   -- Mark of the Crane (Windwalker)
+                spell = 228287,
+                minLevel = 40,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+            },
         -- Free Player Auras
+            ["10-9cc09bbe-1"] = {   -- Guard (Brewmaster)
+                spell = 202162,
+                minLevel = 110,
+                specs = {true, false, false},
+                talentPVP = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["10-8cf143c1-1"] = {   -- Touch of Karma (Windwalker)
+                spell = 125174,
+                minLevel = 22,
+                specs = {false, false, true},
+            },
+
+            ["10-ab86d9e3-1"] = {   -- Serenity (Windwalker) (Talent)
+                spell = 152173,
+                minLevel = 100,
+                specs = {false, false, true},
+                talent = {
+                    tier = 7,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["10-9372460a-1"] = {   -- Diffuse Magic (Talent)
+                spell = 122783,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["10-871ccaed-1"] = {   -- Dampen Harm (Talent)
+                spell = 122278,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["10-a84fc108-1"] = {spell = 120954},   -- Fortifying Brew
         -- Free Target Auras
     },
 
