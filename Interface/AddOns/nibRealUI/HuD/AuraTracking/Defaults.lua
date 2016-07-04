@@ -480,6 +480,12 @@ aeb77dff
 a34a80e5
 86dc5f08
 bf27cce4
+aaddc099
+8f8a7deb
+96a15d91
+901cef84
+93d2a558
+b6ea7743
 
 ]]
 
@@ -2978,8 +2984,90 @@ classDefaults = {
 
     ["PALADIN"] = {
         -- Static Player Auras
+            ["2-b2420e4c-1"] = {   -- Shield of the Righteous (Prot)
+                spell = 132403,
+                minLevel = 38,
+                specs = {false, true, false},
+                order = 1,
+            },
         -- Static Target Auras
+            ["2-919f1d2c-1"] = {   -- Blade of Wrath (Ret) (Talent)
+                spell = 202270,
+                minLevel = 60,
+                auraType = "debuff",
+                unit = "target",
+                talent = {
+                    tier = 4,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 1,
+            },
         -- Free Player Auras
+            ["2-bc41e225-1"] = {   -- Infusion of Light (Holy)
+                spell = 54149,
+                minLevel = 50,
+                specs = {true, false, false},
+            },
+            ["2-a0c9223c-1"] = {   -- Avenging Wrath (Holy)
+                spell = 31842,
+                minLevel = 72,
+                specs = {true, false, false},
+            },
+            ["2-ab20fc1d-1"] = {   -- Divine Purpose (Holy) (Talent)
+                spell = {216411, 216413}, --Holy Shock, Light of Dawn
+                minLevel = 75,
+                specs = {true, false, false},
+                talent = {
+                    tier = 5,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["2-9434af38-1"] = {   -- Holy Avenger (Holy) (Talent)
+                spell = 105809,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["2-a73a3586-1"] = {   -- Ardent Defender (Prot)
+                spell = 31850,
+                minLevel = 65,
+                specs = {false, true, false},
+            },
+            ["2-be248ad3-1"] = {   -- Guardian of Ancient Kings (Prot)
+                spell = 86659,
+                minLevel = 72,
+                specs = {false, true, false},
+            },
+            ["2-bb656491-1"] = {   -- Seraphim (Prot) (Talent)
+                spell = 152262,
+                minLevel = 100,
+                specs = {false, true, false},
+                talent = {
+                    tier = 7,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["2-bdba8989-1"] = {   -- Avenging Wrath (Prot, Ret)
+                spell = 31884,
+                minLevel = 72,
+                specs = {false, true, true},
+            },
+            ["2-8942b773-1"] = {   -- Divine Purpose (Ret) (Talent)
+                spell = 223819,
+                minLevel = 100,
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+        ["2-bb2a51e1-1"] = {spell = 498},   -- Divine Protection
         -- Free Target Auras
     },
 
