@@ -70,12 +70,14 @@ function PhanxChat:HideButtons(frame)
 		if InterfaceOptionsSocialPanelChatStyle and not InterfaceOptionsSocialPanelChatStyle.orig_value then
 			InterfaceOptionsSocialPanelChatStyle.orig_value = GetCVar("chatMouseScroll")
 			InterfaceOptionsSocialPanelChatStyle.orig_tooltip = InterfaceOptionsSocialPanelChatStyle.tooltip
+			InterfaceOptionsSocialPanelChatStyle.tooltip = format(L.OptionLockedConditional, L.HideButtons)
+		end
 
+		if InterfaceOptionsSocialPanelChatMouseScroll then
 			SetCVar("chatMouseScroll", "1")
 			InterfaceOptionsSocialPanelChatMouseScroll_SetScrolling("1")
 			InterfaceOptionsSocialPanelChatMouseScroll:Disable()
 			InterfaceOptionsSocialPanelChatMouseScrollText:SetAlpha(0.5)
-			InterfaceOptionsSocialPanelChatStyle.tooltip = format(L.OptionLockedConditional, L.HideButtons)
 		end
 	else
 		buttonFrame.Show = nil
