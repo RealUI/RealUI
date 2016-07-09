@@ -330,7 +330,9 @@ function ClassResource:ToggleConfigMode(val)
     self.configMode = val
 
     self.ClassIcons:PostUpdate(3, 6, false, powerToken, "ForceUpdate")
-    self.resource:ForceUpdate()
+    if self.resource then
+        self.resource:ForceUpdate()
+    end
 end
 
 function ClassResource:OnInitialize()
