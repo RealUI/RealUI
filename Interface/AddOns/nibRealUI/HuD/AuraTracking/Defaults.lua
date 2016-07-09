@@ -485,7 +485,6 @@ aaddc099
 96a15d91
 901cef84
 93d2a558
-b6ea7743
 
 ]]
 
@@ -3074,8 +3073,168 @@ classDefaults = {
     ["PRIEST"] = {
         -- Static Player Auras
         -- Static Target Auras
+            ["5-b255a230-1"] = {   -- Shadow Word:Pain (Disc)
+                spell = 589,
+                minLevel = 3,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = false,
+                },
+                order = 1,
+            },
+            ["5-8636c202-1"] = {   -- Purge the Wicked (Disc) (Talent)
+                spell = 204213,
+                minLevel = 100,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["5-9ee1ee3e-1"] = {   -- Shadow Word:Pain (Shadow)
+                spell = 589,
+                minLevel = 3,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["5-a3ca1f76-1"] = {   -- Vampiric Touch (Shadow)
+                spell = 34914,
+                minLevel = 24,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 2,
+            },
         -- Free Player Auras
+            ["5-a4b0b5d4-1"] = {   -- Rapture (Disc)
+                spell = 47536,
+                minLevel = 50,
+                specs = {true, false, false},
+            },
+            ["5-90be0e2a-1"] = {   -- Power Infusion (Disc) (Talent)
+                spell = 10060,
+                minLevel = 75,
+                specs = {true, false, false},
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["5-86b717fe-1"] = {   -- Twist of Fate (Disc) (Talent)
+                spell = 123254,
+                minLevel = 75,
+                specs = {true, false, false},
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["5-b1df8034-1"] = {   -- Spirit of Redemption (Holy)
+                spell = 27827,
+                minLevel = 29,
+                specs = {false, true, false},
+            },
+            ["5-ab8e3ab7-1"] = {   -- Surge of Light (Holy) (Talent)
+                spell = 114255,
+                minLevel = 75,
+                specs = {false, true, false},
+                talent = {
+                    tier = 5,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["5-b917679d-1"] = {   -- Divinity (Holy) (Talent)
+                spell = 197030,
+                minLevel = 90,
+                specs = {false, true, false},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["5-80ee0623-1"] = {   -- Apotheosis (Holy) (Talent)
+                spell = 200183,
+                minLevel = 100,
+                specs = {false, true, false},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["5-9678bff1-1"] = {   -- Voidform (Shadow)
+                spell = 194249,
+                minLevel = 10,
+                specs = {false, false, true},
+            },
+            ["5-b6ea7743-1"] = {   -- Lingering Insanity (Shadow)
+                spell = 197937,
+                minLevel = 10,
+                specs = {false, false, true},
+            },
+            ["5-aaf9a60f-1"] = {   -- Dispersion (Shadow)
+                spell = 47585,
+                minLevel = 58,
+                specs = {false, false, true},
+            },
+            ["5-9e14c42b-1"] = {   -- Vampiric Embrace (Shadow)
+                spell = 15286,
+                minLevel = 65,
+                specs = {false, false, true},
+            },
+            ["5-817d87de-1"] = {   -- Shadowy Insight (Talent) (Shadow)
+                spell = 124430,
+                minLevel = 75,
+                specs = {false, false, true},
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["5-8ead482d-1"] = {   -- Power Infusion (Shadow) (Talent)
+                spell = 10060,
+                minLevel = 90,
+                specs = {false, false, true},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["5-9f2335ea-1"] = {   -- Dominant Mind (Disc, Shadow) (Talent)
+                spell = 205364, -- Mind Control
+                minLevel = 45,
+                auraType = "debuff",
+                unit = "pet",
+                specs = {true, false, false},
+                talent = {
+                    tier = 3,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
+            ["5-a88338ed-1"] = {   -- Holy Fire (Holy)
+                spell = 14914,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+            },
     },
 
     ["ROGUE"] = {
