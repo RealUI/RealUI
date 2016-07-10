@@ -22,12 +22,14 @@ end
 AuraTracking.trackerDebug = debug
 
 local class, classID = RealUI.class, RealUI.classID
+local maxComboPoints = 5
+
 local SavageRoar
 local MirrorImage, IncantersFlow
 local PowerStrikes--, GiftoftheOx
 local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
-local function PredictDuration(gap, base, max)
-    local potential, color = "", {}
+local function PredictDuration(gap, base)
+    local potential, color, max = "", {}
     local function postUnitAura(self, spellData, aura, hasAura)
         debug(spellData.debug, "postUnitAura", potential, color[1], hasAura)
         self.count:SetText(potential)
@@ -47,8 +49,8 @@ local function PredictDuration(gap, base, max)
     end
 
     -- Shows predicted debuff duration based on current CPs.
-    return function(self, spellData, unit, powerType)
-        debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType)
+    return function(self, spellData, unit, powerType, updateMax)
+        debug(spellData.debug, "UNIT_POWER_FREQUENT", unit, powerType, updateMax)
         if unit == "player" and powerType == "COMBO_POINTS" then
             debug(spellData.debug, "Main", unit, powerType)
             local comboPoints = _G.UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
@@ -65,6 +67,9 @@ local function PredictDuration(gap, base, max)
             if not self.postUnitAura then
                 self.postUnitAura = postUnitAura
             end
+        elseif updateMax then
+            debug(spellData.debug, "UpdateMax", base, maxComboPoints)
+            max = base + ((maxComboPoints - 1) * gap)
         end
     end
 end
@@ -75,6 +80,7 @@ if class == "DRUID" then
     else
         SavageRoar = PredictDuration(6, 18, 42)
     end
+    SavageRoar(nil, {debug="cpWatcher"}, nil, nil, true)
 elseif class == "MAGE" then
     do -- MirrorImage
         local hasAura = false
@@ -413,6 +419,30 @@ elseif class == "ROGUE" then
                 end
             end
         end
+    end
+    if isBeta then
+        -- This is to keep track of Deeper Stratagem, which allows 
+        -- finishers to use up to 6 combo points instead of 5
+        local cpWatcher = _G.CreateFrame("Frame", nil, _G.UIParent)
+        cpWatcher.debug = "cpWatcher"
+        cpWatcher:RegisterEvent("PLAYER_TALENT_UPDATE")
+        cpWatcher:SetScript("OnEvent", function(self, event, ...)
+            debug(self.debug, event, ...)
+            local oldMax = maxComboPoints
+            local _, selectedTalent = _G.GetTalentTierInfo(3, 1)
+            debug(self.debug, "selectedTalent", selectedTalent)
+            if selectedTalent == 1 then
+                maxComboPoints = 6
+            else
+                maxComboPoints = 5
+            end
+            debug(self.debug, "UpdateComboPoints", oldMax, maxComboPoints)
+            if oldMax ~= maxComboPoints then
+                Envenom(nil, self, nil, nil, true)
+                Rupture(nil, self, nil, nil, true)
+                SliceAndDice(nil, self, nil, nil, true)
+            end
+        end)
     end
 end
 
