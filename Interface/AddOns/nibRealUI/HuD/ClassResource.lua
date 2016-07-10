@@ -245,9 +245,8 @@ function ClassResource:CreateRunes(unitFrame, unit)
         PositionRune(Rune, index)
 
         local tex = Rune:CreateTexture(nil, "ARTWORK")
-        local color = unitFrame.colors.power.RUNES
-        tex:SetColorTexture(color[1], color[2], color[3])
         Rune:SetStatusBarTexture(tex)
+        Rune.tex = tex
 
         local runeBG = Rune:CreateTexture(nil, "BACKGROUND")
         runeBG:SetColorTexture(0, 0, 0)
@@ -257,6 +256,14 @@ function ClassResource:CreateRunes(unitFrame, unit)
         Runes[index] = Rune
     end
 
+    function Runes:PostUpdateRune(rune, rid, start, duration, runeReady)
+        local color = unitFrame.colors.power.RUNES
+        if runeReady then
+            rune.tex:SetColorTexture(color[1], color[2], color[3])
+        else
+            rune.tex:SetColorTexture(color[1], color[2], color[3], 0.4)
+        end
+    end
     unitFrame.Runes = Runes
     self.Runes = Runes
 end
