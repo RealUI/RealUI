@@ -70,7 +70,7 @@ RealUI.LoadAddOnData_Bartender4 = function()
 								["hidemacrotext"] = true,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
+									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]][overridebar][cursor]show;hide",
 								},
 							}, -- [1]
 							{
@@ -626,7 +626,7 @@ RealUI.LoadAddOnData_Bartender4 = function()
 								["padding"] = -9,
 								["visibility"] = {
 									["custom"] = true,
-									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
+									["customdata"] = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][overridebar][cursor]show;hide",
 								},
 							}, -- [1]
 							{

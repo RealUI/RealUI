@@ -178,6 +178,15 @@ RealUI.minipatches = {
                 end
             end
         end
+        local Bartender4DB = _G.Bartender4DB
+        if _G.IsAddOnLoaded("Bartender4") and Bartender4DB then
+            for _, profileName in next, {"RealUI-Healing", "RealUI"} do
+                local profile = Bartender4DB.namespaces.PetBar.profiles[profileName]
+                if profile then
+                    profile.actionbars[1].visibility.customdata = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][overridebar][cursor]show;hide"
+                end
+            end
+        end
     end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
