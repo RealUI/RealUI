@@ -1,6 +1,6 @@
 if _G.select(4, _G.GetBuildInfo()) < 70000 then return end
 
-local MAJOR, MINOR = "LibArtifactData-1.0", 3
+local MAJOR, MINOR = "LibArtifactData-1.0", 5
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -37,6 +37,7 @@ local GetArtifactKnowledgeLevel        = aUI.GetArtifactKnowledgeLevel
 local GetArtifactKnowledgeMultiplier   = aUI.GetArtifactKnowledgeMultiplier
 local GetContainerItemInfo             = _G.GetContainerItemInfo
 local GetContainerNumSlots             = _G.GetContainerNumSlots
+local GetCostForPointAtRank            = aUI.GetCostForPointAtRank
 local GetCurrencyInfo                  = _G.GetCurrencyInfo
 local GetEquippedArtifactInfo          = aUI.GetEquippedArtifactInfo
 local GetInventoryItemEquippedUnusable = _G.GetInventoryItemEquippedUnusable
@@ -111,8 +112,8 @@ end
 
 local function InformEquippedArtifactChanged(artifactID)
 	if artifactID ~= equippedID then
-		Debug("ARTIFACT_EQUIPPED_CHANGED", equippedID, artifactID)
-		lib.callbacks:Fire("ARTIFACT_EQUIPPED_CHANGED", equippedID, artifactID)
+		Debug("ARTIFACT_EQUIPPED_CHANGED", artifactID, equippedID)
+		lib.callbacks:Fire("ARTIFACT_EQUIPPED_CHANGED", artifactID, equippedID)
 		equippedID = artifactID
 	end
 end
@@ -125,8 +126,8 @@ local function InformActiveArtifactChanged(artifactID)
 		activeID = nil
 	end
 	if oldActiveID ~= activeID then
-		Debug("ARTIFACT_ACTIVE_CHANGED", oldActiveID, activeID)
-		lib.callbacks:Fire("ARTIFACT_ACTIVE_CHANGED", oldActiveID, activeID)
+		Debug("ARTIFACT_ACTIVE_CHANGED", activeID, oldActiveID)
+		lib.callbacks:Fire("ARTIFACT_ACTIVE_CHANGED", activeID, oldActiveID)
 	end
 end
 
@@ -409,20 +410,20 @@ function private.PLAYER_SPECIALIZATION_CHANGED(event)
 	InformActiveArtifactChanged(itemID)
 end
 
-function lib:GetActiveArtifactID()
+function lib.GetActiveArtifactID()
 	return activeID
 end
 
-function lib:GetArtifactInfo(artifactID)
+function lib.GetArtifactInfo(_, artifactID)
 	artifactID = artifactID or equippedID
 	return artifactID, CopyTable(artifacts[artifactID])
 end
 
-function lib:GetAllArtifactsInfo()
+function lib.GetAllArtifactsInfo()
 	return CopyTable(artifacts)
 end
 
-function lib:GetNumObtainedArtifacts()
+function lib.GetNumObtainedArtifacts()
 	local numArtifacts = 0
 	for artifact in pairs(artifacts) do
 		if tonumber(artifact) then
@@ -433,7 +434,7 @@ function lib:GetNumObtainedArtifacts()
 	return numArtifacts
 end
 
-function lib:GetArtifactTraits(artifactID)
+function lib.GetArtifactTraits(_, artifactID)
 	artifactID = artifactID or equippedID
 	for itemID, data in pairs(artifacts) do
 		if itemID == artifactID then
@@ -442,7 +443,7 @@ function lib:GetArtifactTraits(artifactID)
 	end
 end
 
-function lib:GetArtifactRelics(artifactID)
+function lib.GetArtifactRelics(_, artifactID)
 	artifactID = artifactID or equippedID
 	for itemID, data in pairs(artifacts) do
 		if itemID == artifactID then
@@ -451,7 +452,7 @@ function lib:GetArtifactRelics(artifactID)
 	end
 end
 
-function lib:GetArtifactPower(artifactID)
+function lib.GetArtifactPower(_, artifactID)
 	artifactID = artifactID or equippedID
 	for itemID, data in pairs(artifacts) do
 		if itemID == artifactID then
@@ -460,10 +461,39 @@ function lib:GetArtifactPower(artifactID)
 	end
 end
 
-function lib:GetArtifactKnowledge()
+function lib.GetArtifactKnowledge()
 	return artifacts.knowledgeLevel, artifacts.knowledgeMultiplier
 end
 
-function lib:ForceUpdate()
+function lib.GetAcquiredArtifactPower(_, artifactID)
+	local total = 0
+
+	if artifactID then
+		local data = artifacts[artifactID]
+		total = total + data.unspentPower
+		local rank = 1
+		while rank <= data.numRanksPurchased do
+			total = total + GetCostForPointAtRank(rank)
+			rank = rank + 1
+		end
+
+		return total
+	end
+
+	for itemID, data in pairs(artifacts) do
+		if tonumber(itemID) then
+			total = total + data.unspentPower
+			local rank = 1
+			while rank <= data.numRanksPurchased do
+				total = total + GetCostForPointAtRank(rank)
+				rank = rank + 1
+			end
+		end
+	end
+
+	return total
+end
+
+function lib.ForceUpdate()
 	InitializeScan("FORCE_UPDATE")
 end
