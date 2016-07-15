@@ -12,6 +12,7 @@ local RealUI = private.RealUI
 
 local MODNAME = "AuraTracking"
 local AuraTracking = RealUI:GetModule(MODNAME)
+local debug = AuraTracking.trackerDebug
 
 local icons = {}
 
@@ -34,6 +35,7 @@ function api:Enable()
         if eventUpdate.event == "UNIT_AURA" then
             eventUpdate.func(self, spellData)
         else
+            debug(spellData.debug, "RegisterEvent", eventUpdate.event, eventUpdate.func)
             self:RegisterEvent(eventUpdate.event)
             self[eventUpdate.event] = eventUpdate.func
         end

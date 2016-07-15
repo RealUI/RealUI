@@ -118,22 +118,22 @@ function RealUI:GetResolutionVals(raw)
 end
 
 -- Deep Copy table
-function RealUI:DeepCopy(object)
-    local lookup_table = {}
-    local function _copy(obj)
-        if type(obj) ~= "table" then
-            return obj
-        elseif lookup_table[obj] then
-            return lookup_table[obj]
-        end
-        local new_table = {}
-        lookup_table[obj] = new_table
-        for index, value in next, obj do
-            new_table[_copy(index)] = _copy(value)
-        end
-        return _G.setmetatable(new_table, _G.getmetatable(obj))
+function RealUI:DeepCopy(object, seen)
+    -- Handle non-tables and previously-seen tables.
+    if type(object) ~= "table" then
+        return object
+    elseif seen and seen[object] then
+        return seen[object]
     end
-    return _copy(object)
+
+    -- New table; mark it as having seen the copy, recursively.
+    local s = seen or {}
+    local copy = _G.setmetatable({}, _G.getmetatable(object))
+    s[object] = copy
+    for key, value in next, object do
+        copy[self:DeepCopy(key, s)] = self:DeepCopy(value, s)
+    end
+    return copy
 end
 
 -- Loot Spec

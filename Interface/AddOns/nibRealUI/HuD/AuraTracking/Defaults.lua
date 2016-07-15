@@ -2,6 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
+--local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -22,12 +23,12 @@ end
 AuraTracking.trackerDebug = debug
 
 local class, classID = RealUI.class, RealUI.classID
-local maxComboPoints = 5
+local maxComboPoints
 
 local SavageRoar
 local MirrorImage, IncantersFlow
 local PowerStrikes--, GiftoftheOx
-local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice
+local BanditsGuile, Envenom, Rupture, ShadowReflection, SliceAndDice, Nightblade, EnvelopingShadows--, RollTheBones
 local function PredictDuration(gap, base)
     local potential, color, max = "", {}
     local function postUnitAura(self, spellData, aura, hasAura)
@@ -44,7 +45,13 @@ local function PredictDuration(gap, base)
             self.auraIndex = nil
             self.cd:SetCooldown(0, 0)
             self.cd:Hide()
-            AuraTracking:RemoveTracker(self, self.isStatic)
+            if self.isTransient then
+                if self.slot then
+                    AuraTracking:RemoveTracker(self)
+                end
+            else
+                AuraTracking:RemoveTracker(self, self.isStatic)
+            end
         end
     end
 
@@ -54,6 +61,10 @@ local function PredictDuration(gap, base)
         if unit == "player" and powerType == "COMBO_POINTS" then
             debug(spellData.debug, "Main", unit, powerType)
             local comboPoints = _G.UnitPower("player", _G.SPELL_POWER_COMBO_POINTS)
+            if comboPoints > maxComboPoints then
+                -- If the player has Anticipation they can still only use 5 CPs at a time.
+                comboPoints = maxComboPoints
+            end
 
             potential, color[1], color[2], color[3] = "", 1, 1, 1
             if (comboPoints > 0) then
@@ -76,9 +87,9 @@ end
 
 if class == "DRUID" then
     if isBeta then
-        SavageRoar = PredictDuration(4, 8, 24)
+        SavageRoar = PredictDuration(4, 8)
     else
-        SavageRoar = PredictDuration(6, 18, 42)
+        SavageRoar = PredictDuration(6, 18)
     end
     SavageRoar(nil, {debug="cpWatcher"}, nil, nil, true)
 elseif class == "MAGE" then
@@ -369,9 +380,50 @@ elseif class == "ROGUE" then
             end
         end
     end
-    Envenom = PredictDuration(1, 2, 6)
-    Rupture = PredictDuration(4, 8, 24)
-    SliceAndDice = PredictDuration(6, 12, 36)
+    Envenom = PredictDuration(1, 2)
+    Rupture = PredictDuration(4, 8)
+    SliceAndDice = PredictDuration(6, 12)
+    Nightblade = PredictDuration(2, 8)
+    EnvelopingShadows = PredictDuration(6, 6)
+    --[[do RollTheBones
+        local buffFunction = PredictDuration(6, 12)
+
+        local function postUnitAura(self, spellData, aura, hasAura)
+            debug(spellData.debug, "postUnitAura", aura.name, hasAura)
+            if hasAura then
+                if self.slot then
+                    AuraTracking:RemoveTracker(self)
+                end
+            else
+                AuraTracking:AddTracker(self)
+                AuraTracking:RemoveTracker(self, self.isStatic)
+            end
+        end
+
+        -- Setup trackers for each buff gained from Roll the Bones
+        function RollTheBones(self, spellData, updateMax)
+            if updateMax then
+                buffFunction(nil, spellData, nil, nil, true)
+            elseif not self.postUnitAura then
+                debug("RollTheBones", "Init", _G.getmetatable(spellData))
+                for index, spellID in next, spellData.spell do
+                    local customSpellData = RealUI:DeepCopy(spellData)
+                    customSpellData.debug = spellData.debug..spellID
+                    customSpellData.order = index
+                    customSpellData.spell = spellID
+                    customSpellData.eventUpdate.event = "UNIT_POWER_FREQUENT"
+                    customSpellData.eventUpdate.func = buffFunction
+                    local newTracker = AuraTracking:CreateNewTracker(customSpellData)
+                    newTracker.isTransient = true
+                    newTracker:Enable()
+                    AuraTracking:RemoveTracker(newTracker)
+                end
+                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", spellData.unit)
+                self["UNIT_POWER_FREQUENT"] = buffFunction
+                self.postUnitAura = postUnitAura
+            end
+        end
+    end]]
     do -- ShadowReflection
         -- Modifies the tracker icon to show when the reflection is or isn't attaking.
         local isWatching = false
@@ -420,9 +472,9 @@ elseif class == "ROGUE" then
             end
         end
     end
-    if isBeta then
-        -- This is to keep track of Deeper Stratagem, which allows 
-        -- finishers to use up to 6 combo points instead of 5
+    if isBeta then -- Deeper Stratagem
+        -- This updates the max potential duration depending on if the player 
+        -- has Deerper Stratagem, which allows finishers to use up to 6 CPs
         local cpWatcher = _G.CreateFrame("Frame", nil, _G.UIParent)
         cpWatcher.debug = "cpWatcher"
         cpWatcher:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -441,8 +493,16 @@ elseif class == "ROGUE" then
                 Envenom(nil, self, nil, nil, true)
                 Rupture(nil, self, nil, nil, true)
                 SliceAndDice(nil, self, nil, nil, true)
+                Nightblade(nil, self, nil, nil, true)
+                EnvelopingShadows(nil, self, nil, nil, true)
+                --RollTheBones(nil, self, true)
             end
         end)
+    else
+        local self = {debug="cpWatcher"}
+        Envenom(nil, self, nil, nil, true)
+        Rupture(nil, self, nil, nil, true)
+        SliceAndDice(nil, self, nil, nil, true)
     end
 end
 
@@ -514,7 +574,6 @@ aaddc099
 8f8a7deb
 96a15d91
 901cef84
-93d2a558
 
 ]]
 
@@ -3269,9 +3328,221 @@ classDefaults = {
 
     ["ROGUE"] = {
         -- Static Player Auras
+            ["4-b590c8e6-1"] = {   -- Envenom (Sass)
+                spell = 32645,
+                minLevel = 3,
+                specs = {true, false, false},
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = Envenom
+                }
+            },
+            --[[["4-a758d1b3-1"] = {   -- Roll the Bones (Outlaw)
+                spell = {
+                    193356, -- Broadsides
+                    193357, -- Shark Infested Waters
+                    193358, -- Grand Melee
+                    193359, -- True Bearing
+                    199600, -- Buried Treasure
+                    199603, -- Jolly Roger
+                },
+                minLevel = 36,
+                specs = {false, true, false},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = false,
+                },
+                order = 1,
+                customName = _G.GetSpellInfo(193316),
+                eventUpdate = {
+                    event = "UNIT_AURA",
+                    func = RollTheBones
+                }
+            },]]
+            ["4-a4347749-1"] = {   -- Slice and Dice (Outlaw) (Talent)
+                spell = 5171,
+                minLevel = 100,
+                specs = {false, true, true},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = SliceAndDice
+                }
+            },
+            ["4-a5abd891-1"] = {   -- Shadow Dance (Sub)
+                spell = 185422,
+                minLevel = 36,
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["4-93d2a558-1"] = {   -- Enveloping Shadows (Sub) (Talent)
+                spell = 206237,
+                minLevel = 90,
+                specs = {false, false, true},
+                talent = {
+                    tier = 6,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = EnvelopingShadows
+                }
+            },
         -- Static Target Auras
+            ["4-b2b390d7-1"] = {   -- Rupture (Sass)
+                spell = 1943,
+                minLevel = 22,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = Rupture
+                }
+            },
+            ["4-b7bc86f8-1"] = {   -- Ghostly Strike (Outlaw) (Talent)
+                spell = 196937,
+                minLevel = 15,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["4-ac22ce84-1"] = {   -- Nightblade (Sub)
+                spell = 195452,
+                minLevel = 46,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+                eventUpdate = {
+                    event = "UNIT_POWER_FREQUENT",
+                    func = Nightblade
+                }
+            },
         -- Free Player Auras
+            ["4-bcbb4a21-1"] = {   -- Riposte (Outlaw)
+                spell = 199754,
+                minLevel = 10,
+                specs = {false, true, false},
+            },
+            ["4-9040a7b9-1"] = {   -- Blade Flurry (Outlaw)
+                spell = 13877,
+                minLevel = 48,
+                specs = {false, true, false},
+            },
+            ["4-bf8be102-1"] = {   -- Adrenaline Rush (Outlaw)
+                spell = {13750},
+                minLevel = 72,
+                specs = {false, true, false},
+            },
+            ["4-8301b93a-1"] = {   -- Symbols of Death (Sub)
+                spell = 212283,
+                minLevel = 34,
+                specs = {false, false, true},
+            },
+            ["4-b8faafc6-1"] = {   -- Shadow Blades (Sub)
+                spell = 121471,
+                minLevel = 72,
+                specs = {false, false, true},
+            },
+            ["4-9f580e91-1"] = {   -- Master of Subtlety (Sub)
+                spell = 31665,
+                minLevel = 15,
+                specs = {false, false, true},
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["4-9f332190-1"] = {   -- Evasion (Sass, Sub)
+                spell = 5277,
+                minLevel = 8,
+                specs = {true, false, true},
+            },
+            ["4-82cf4c29-1"] = {   -- Subterfuge (Sass, Sub) (Talent)
+                spell = 115192,
+                minLevel = 15,
+                specs = {true, false, true},
+                talent = {
+                    tier = 2,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["4-80b0f420-1"] = {   -- Vanish
+                spell = {11327,115193},
+                minLevel = 32,
+            },
+            ["4-a0c86712-1"] = {   -- Feint
+                spell = 1966,
+                minLevel = 44,
+            },
+            ["4-851514ee-1"] = {   -- Cloak of Shadows
+                spell = 31224,
+                minLevel = 58,
+            },
+            ["4-a758c6b8-1"] = {   -- Cheat Death (Talent)
+                spell = 45182,
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    column = 3,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(31230),
+            },
+            ["4-b697e402-1"] = {   -- Alacrity (Talent)
+                spell = 193538,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
+            ["4-8856069f-1"] = {   -- Garrote (Sass)
+                spell = 703,
+                minLevel = 48,
+                auraType = "debuff",
+                unit = "target",
+            },
+            ["4-8c6900cc-1"] = {   -- Vendetta (Sass)
+                spell = 79140,
+                minLevel = 72,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+            },
+            ["4-9b960b7a-1"] = {   -- Hemorrhage (Sass)
+                spell = 16511,
+                minLevel = 15,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 1,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
     },
 
     ["SHAMAN"] = {
