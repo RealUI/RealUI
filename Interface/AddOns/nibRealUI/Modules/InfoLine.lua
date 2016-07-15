@@ -717,11 +717,8 @@ do
         showRep = repName
         if isBeta then
             InfoLine:debug("Active artifact", artifactID)
-            local _
-            if event == "ARTIFACT_ACTIVE_CHANGED" then
-                _, artifactID = ...
-            elseif event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
-                artifactID = ...
+            artifactID = ...
+            if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
                 artifacts = artData:GetAllArtifactsInfo(artifactID)
             end
             InfoLine:debug("GetArtifactInfo", artifactID, artifactID and next(artifacts[artifactID]))
