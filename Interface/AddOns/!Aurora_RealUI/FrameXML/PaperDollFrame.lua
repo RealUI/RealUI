@@ -139,7 +139,10 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
 
     local ilvlLimits = 385
     local function GetILVLColor(lvl, ilvl)
-        if lvl > 90 then
+        -- ilvlLimits = (lvl - (maxLvL + 1)) * 9 + minQuestReward
+        if lvl > 100 then
+            ilvlLimits = (lvl - 101) * 9 + 685
+        elseif lvl > 90 then
             ilvlLimits = (lvl - 91) * 9 + 510
         end
         if ilvl >= ilvlLimits + 28 then

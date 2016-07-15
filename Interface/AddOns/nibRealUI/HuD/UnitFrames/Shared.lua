@@ -714,14 +714,16 @@ local function Shared(self, unit)
     if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
-    local PointTracking = RealUI:GetModule("PointTracking")
-    if PointTracking:IsEnabled() and unit == "player" then
-        if RealUI.class == "DEATHKNIGHT" then
-            PointTracking:CreateRunes(self, unit)
+    if unit == "player" then
+        if RealUI.isBeta then
+            local ClassResource = RealUI:GetModule("ClassResource")
+            if ClassResource:IsEnabled() then
+                ClassResource:Setup(self, unit)
+            end
         else
-            PointTracking:CreateClassIcons(self, unit)
-            if not RealUI.isBeta and RealUI.class == "WARLOCK" then
-                PointTracking:CreateBurningEmbers(self, unit)
+            local PointTracking = RealUI:GetModule("PointTracking")
+            if PointTracking:IsEnabled() then
+                PointTracking:Setup(self, unit)
             end
         end
     end

@@ -343,6 +343,7 @@ end
 local function MiniPatchInstallation()
     local curVer = RealUI.verinfo
     local oldVer = dbg.verinfo
+    local minipatches = RealUI.minipatches
 
     -- Find out which Mini Patches are needed
     local patches = {}
@@ -350,11 +351,20 @@ local function MiniPatchInstallation()
     if oldVer[3] then
         for i = oldVer[3] + 1, curVer[3] do
             debug("checking", i)
-            if RealUI.minipatches[i] then
+            if minipatches[i] then
                 -- This needs to be an array to ensure patches are applied sequentially.
-                _G.tinsert(patches, RealUI.minipatches[i])
+                _G.tinsert(patches, minipatches[i])
             end
         end
+    end
+
+    debug("TOC minipatch", dbg.patchedTOC, RealUI.TOC)
+    if dbg.patchedTOC ~= RealUI.TOC then
+        if minipatches[RealUI.TOC] then
+            -- Add minipatch for TOC change
+            _G.tinsert(patches, minipatches[RealUI.TOC])
+        end
+        dbg.patchedTOC = RealUI.TOC
     end
 
     debug("numPatches", #patches)

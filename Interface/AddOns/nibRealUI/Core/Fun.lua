@@ -17,20 +17,27 @@ local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
-local spellFinder = _G.CreateFrame("FRAME")
+local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
     spellFinder:SetScript("OnEvent", function(frame, event, unit)
-        local spellID
-        if auraType == "debuff" then
-            spellID = select(11, _G.UnitDebuff(unit, spellName))
-        else
-            spellID = select(11, _G.UnitBuff(unit, spellName))
-        end
-        if spellID then
-            print(("The spellID for %s is %d"):format(spellName, spellID));
-            frame:UnregisterEvent("UNIT_AURA")
+        local filter = (auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
+        for auraIndex = 1, 40 do
+            local name, _, _, _, _, _, _, _, _, _, spellID = _G.UnitAura(unit, auraIndex, filter)
+            debug("FindSpellID", auraIndex, name, spellID)
+            if spellName == name then
+                print(("spellID for %s is %d"):format(spellName, spellID))
+                numRun = numRun + 1
+            end
+
+            if name == nil then
+                if numRun > 3 then
+                    numRun = 0
+                    frame:UnregisterEvent("UNIT_AURA")
+                end
+                break
+            end
         end
     end)
 end
@@ -84,48 +91,49 @@ function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
-do -- Screen Height + Width
-    function RealUI:GetResolutionVals(raw)
-        local resolution
-        if RealUI.isBeta then
-            local windowed, fullscreen = _G.GetCVar("gxwindowedresolution"), _G.GetCVar("gxfullscreenresolution")
-            resolution = windowed ~= fullscreen and windowed or fullscreen
+function RealUI:GetResolutionVals(raw)
+    local resolution
+    if RealUI.isBeta then
+        if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
+            resolution = _G.GetCVar("gxwindowedresolution")
         else
-            resolution = _G.GetCVar("gxResolution")
+            resolution = _G.GetCVar("gxfullscreenresolution")
         end
-        local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
-        resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
+    else
+        resolution = _G.GetCVar("gxResolution")
+    end
+    local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
+    resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
 
-        if raw then
-            return resWidth, resHeight
-        end
-
-        if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
-            resHeight = resHeight / 2
-            resWidth = resWidth / 2
-        end
-
+    if raw then
         return resWidth, resHeight
     end
+
+    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+        resHeight = resHeight / 2
+        resWidth = resWidth / 2
+    end
+
+    return resWidth, resHeight
 end
 
 -- Deep Copy table
-function RealUI:DeepCopy(object)
-    local lookup_table = {}
-    local function _copy(obj)
-        if type(obj) ~= "table" then
-            return obj
-        elseif lookup_table[obj] then
-            return lookup_table[obj]
-        end
-        local new_table = {}
-        lookup_table[obj] = new_table
-        for index, value in next, obj do
-            new_table[_copy(index)] = _copy(value)
-        end
-        return _G.setmetatable(new_table, _G.getmetatable(obj))
+function RealUI:DeepCopy(object, seen)
+    -- Handle non-tables and previously-seen tables.
+    if type(object) ~= "table" then
+        return object
+    elseif seen and seen[object] then
+        return seen[object]
     end
-    return _copy(object)
+
+    -- New table; mark it as having seen the copy, recursively.
+    local s = seen or {}
+    local copy = _G.setmetatable({}, _G.getmetatable(object))
+    s[object] = copy
+    for key, value in next, object do
+        copy[self:DeepCopy(key, s)] = self:DeepCopy(value, s)
+    end
+    return copy
 end
 
 -- Loot Spec

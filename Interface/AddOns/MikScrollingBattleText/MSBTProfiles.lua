@@ -78,7 +78,6 @@ local SPELL_SHADOW_TRANCE			= GetSkillName(17941)
 local SPELL_SHIELD_SLAM			= GetSkillName(23922)
 local SPELL_SUDDEN_DEATH			= GetSkillName(52437)
 local SPELL_SUDDEN_DOOM			= GetSkillName(81340)	-- XXX: No trigger atm - DK
-local SPELL_TASTE_FOR_BLOOD		= GetSkillName(56636)
 local SPELL_TIDAL_WAVES			= GetSkillName(53390)
 local SPELL_ULTIMATUM			= GetSkillName(122510)
 local SPELL_VICTORY_RUSH			= GetSkillName(SPELLID_VICTORY_RUSH)  -- XXX: Update for buff
@@ -110,6 +109,7 @@ local SPELL_THE_ART_OF_WAR    = isBetaClient and UNKNOWN or GetSkillName(59578)
 local SPELL_VITAL_MISTS       = isBetaClient and UNKNOWN or GetSkillName(122107) 
 local SPELL_BLOOD_PRESENCE    = isBetaClient and UNKNOWN or GetSkillName(48266) 
 local SPELL_REFLECTIVE_SHIELD = isBetaClient and UNKNOWN or GetSkillName(58252) 
+local SPELL_TASTE_FOR_BLOOD   = isBetaClient and UNKNOWN or GetSkillName(56636)
 
 
 -------------------------------------------------------------------------------

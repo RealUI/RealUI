@@ -1,5 +1,5 @@
 local _, private = ...
-
+if private.RealUI.isBeta then return end
 
 -- Lua Globals --
 local _G = _G
@@ -13,7 +13,6 @@ function RealUI:GetResourceBar()
     return currentResource
 end
 
-if RealUI.isBeta then return end
 
 local MODNAME = "ClassResourceBar"
 local ClassResourceBar = RealUI:NewModule(MODNAME)

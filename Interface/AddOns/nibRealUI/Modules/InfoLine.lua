@@ -9,6 +9,7 @@ local tinsert = _G.table.insert
 
 -- Libs --
 local Tablet20 = _G.LibStub("Tablet-2.0")
+local artData = _G.LibStub("LibArtifactData-1.0", true)
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -40,6 +41,8 @@ local Icons = {
         bag =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Bags]],            10},
         xp =            {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP]],              11},
         rep =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep]],             11},
+        artifact =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\ArtXP]],           11},
+        honor =         {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep]],             11},
         meters =        {[[Interface\AddOns\nibRealUI\Media\InfoLine\Meters]],          10},
         layout_dt =     {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_DT]],       21},
         layout_h =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_H]],        11},
@@ -56,6 +59,8 @@ local Icons = {
         bag =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Bags_HR]],         11},
         xp =            {[[Interface\AddOns\nibRealUI\Media\InfoLine\XP_HR]],           12},
         rep =           {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep_HR]],          12},
+        artifact =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\ArtXP_HR]],        12},
+        honor =         {[[Interface\AddOns\nibRealUI\Media\InfoLine\Rep_HR]],          12},
         meters =        {[[Interface\AddOns\nibRealUI\Media\InfoLine\Meters_HR]],       11},
         layout_dt =     {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_DT_HR]],    22},
         layout_h =      {[[Interface\AddOns\nibRealUI\Media\InfoLine\Layout_H_HR]],     12},
@@ -77,7 +82,6 @@ local TextColorNormal
 local TextColorNormalVals
 local TextColorWhite
 local TextColorTTHeader
-local TextColorOrange1
 local TextColorBlue1
 
 local CurrencyColors = {
@@ -570,142 +574,270 @@ end
 ---- XP/Rep
 local InfoLine_XR_OnEnter, InfoLine_XR_Update, InfoLine_XR_OnMouseDown
 do
-    local xp, lvl, xpmax, restxp
-    local rep, replvlmax, repStandingID, repstatus, watchedFaction
+    local showXP, showRep, showArtifact, showHonor
+    local watchStates = {
+        { -- xp
+            GetNext = function()
+                return 2, showRep, "rep"
+            end,
+            GetActive = function()
+                return 1, showXP, "xp"
+            end,
+            OnClick = function()
+            end
+        },
+        { -- rep
+            hint = L["Progress_OpenRep"],
+            GetNext = function()
+                return 3, showArtifact, "artifact"
+            end,
+            GetActive = function()
+                return 2, showRep, "rep"
+            end,
+            OnClick = function()
+                _G.ToggleCharacter("ReputationFrame")
+            end
+        },
+        { -- artifact
+            hint = L["Progress_OpenArt"],
+            GetNext = function()
+                return 4, showHonor, "honor"
+            end,
+            GetActive = function()
+                return 3, showArtifact, "artifact"
+            end,
+            OnClick = function()
+                _G.SocketInventoryItem(16)
+            end
+        },
+        { -- honor
+            hint = L["Progress_OpenHonor"],
+            GetNext = function()
+                return 1, showXP, "xp"
+            end,
+            GetActive = function()
+                return 4, showHonor, "honor"
+            end,
+            OnClick = function()
+                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end
+        },
+    }
+
+    local lvl
+    local xp, xpMax, xpPer, restxp
+    local rep, replvlmax, repPer, repStandingID, repstatus, watchedFaction
+    local artifactID, artifacts, artPer
+    local honor, honorMax, honorPer
     function InfoLine_XR_OnEnter(self)
         self:SetAlpha(1)
         local GameTooltip = _G.GameTooltip
 
         GameTooltip:SetOwner(self, "ANCHOR_TOP"..self.side, 0, 1)
+        GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, L["Progress"]))
+        GameTooltip:AddLine(" ")
 
+        local numActive = 0
+        local statusFormat = "%s/%s (%d%%)"
+        local color, color2 = RealUI.media.colors.orange
         if _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL then
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorTTHeader, _G.XP.." / ".._G.REPUTATION))
-            GameTooltip:AddLine(" ")
-
+            local xpStatus
             if _G.IsXPUserDisabled() then
-                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN.." (".._G.VIDEO_OPTIONS_DISABLED..")"))
+                color2 = {0.3, 0.3, 0.3}
+                GameTooltip:AddDoubleLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED, color[1], color[2], color[3], color2[1], color2[2], color2[3])
             else
-                GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.COMBAT_XP_GAIN))
-            end
-            GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(xpmax - xp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            if not restxp then
-                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-            else
-                GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                xpStatus = statusFormat:format(RealUI:ReadableNumber(xp), RealUI:ReadableNumber(xpMax), xpPer)
+                color2 = {0.9, 0.9, 0.9}
+                GameTooltip:AddDoubleLine(_G.EXPERIENCE_COLON, xpStatus, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+                if not restxp then
+                    GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, "0", 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                else
+                    GameTooltip:AddDoubleLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restxp), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+                end
             end
             GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
-        else
-            GameTooltip:AddLine(("|cff%s%s|r"):format(TextColorOrange1, _G.REPUTATION))
+            numActive = numActive + 1
+        end
+
+        if showRep then
+            color2 = _G.FACTION_BAR_COLORS[repStandingID]
+            local repStatus = statusFormat:format(RealUI:ReadableNumber(rep), RealUI:ReadableNumber(replvlmax), repPer)
+            GameTooltip:AddDoubleLine(_G.REPUTATION.._G.HEADER_COLON, watchedFaction, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+            GameTooltip:AddDoubleLine(repstatus, repStatus, color2.r, color2.g, color2.b, 0.9, 0.9, 0.9)
             GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
-        local repStandingColor = {0.9, 0.9, 0.9}
-        if (repstatus ~= "---") then
-            repStandingColor = {_G.FACTION_BAR_COLORS[repStandingID].r, _G.FACTION_BAR_COLORS[repStandingID].g, _G.FACTION_BAR_COLORS[repStandingID].b}
+
+        if showArtifact then
+            local artifact = artifacts[artifactID]
+            GameTooltip:AddLine(artifact.name, color[1], color[2], color[3])
+
+            local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
+            GameTooltip:AddLine(artStatus, 0.9, 0.9, 0.9)
+
+            if artifact.numRanksPurchasable > 0 then
+                local artStatus2 = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+                GameTooltip:AddLine(artStatus2, 0.7, 0.7, 0.7, true)
+            end
+            GameTooltip:AddLine(" ")
+            numActive = numActive + 1
         end
-        GameTooltip:AddDoubleLine(_G.FACTION, watchedFaction, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(_G.STATUS, repstatus, 0.9, 0.9, 0.9, repStandingColor[1], repStandingColor[2], repStandingColor[3])
-        GameTooltip:AddDoubleLine(L["XPRep_Current"], RealUI:ReadableNumber(rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
-        GameTooltip:AddDoubleLine(L["XPRep_Remaining"], RealUI:ReadableNumber(replvlmax - rep), 0.9, 0.9, 0.9, 0.9, 0.9, 0.9)
+
+        if showHonor then
+            color2 = {0.9, 0.9, 0.9}
+            local honorStatus
+            if _G.CanPrestige() then
+                honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
+            else
+                honorStatus = statusFormat:format(RealUI:ReadableNumber(honor), RealUI:ReadableNumber(honorMax), honorPer)
+            end
+            GameTooltip:AddDoubleLine(_G.HONOR.._G.HEADER_COLON, honorStatus, color[1], color[2], color[3], color2[1], color2[2], color2[3])
+            GameTooltip:AddLine(" ")
+            numActive = numActive + 1
+        end
 
         -- Hint
-        if (_G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) then
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(("|cff00ff00%s|r"):format(L["XPRep_Toggle"]))
+        color = {0, 1, 0} 
+        if watchStates[dbc.xrstate].hint then
+            GameTooltip:AddLine(watchStates[dbc.xrstate].hint, color[1], color[2], color[3])
+        end
+        if numActive > 1 then
+            GameTooltip:AddLine(L["Progress_Cycle"], color[1], color[2], color[3])
         end
 
         GameTooltip:Show()
     end
 
-    function InfoLine_XR_Update(self)
-        -- XP Data
-        xp = _G.UnitXP("player")
+    function InfoLine_XR_Update(self, event, ...)
+        InfoLine:debug("InfoLine_XR_Update", dbc.xrstate, event, ...)
+        local repName, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
         lvl = _G.UnitLevel("player")
-        xpmax = _G.UnitXPMax("player")
-        if xpmax == 0 then return end
-        restxp = _G.GetXPExhaustion() or 0
-        local percentXP
-        if (xp <= 0) or (xpmax <= 0) then
-            percentXP = 0
-        else
-            percentXP = (xp/xpmax)*100
+
+        showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
+        showRep = repName
+        if isBeta then
+            InfoLine:debug("Active artifact", artifactID)
+            artifactID = ...
+            if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
+                artifacts = artData:GetAllArtifactsInfo(artifactID)
+            end
+            InfoLine:debug("GetArtifactInfo", artifactID, artifactID and next(artifacts[artifactID]))
+            showArtifact = artifactID and _G.HasArtifactEquipped()
+            showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end
-        local percentXPStr = tostring(percentXP)
-        local percentRestXPStr = tostring(floor((restxp / xpmax) * 100))
+
+        -- XP Data
+        if showXP then
+            xp = _G.UnitXP("player")
+            xpMax = _G.UnitXPMax("player")
+            restxp = _G.GetXPExhaustion() or 0
+            if (xp <= 0) or (xpMax <= 0) then
+                xpPer = 0
+            else
+                xpPer = (xp/xpMax)*100
+            end
+        end
 
         -- Currency
         dbg.currency[RealUI.realm][RealUI.faction][RealUI.name].level = lvl
 
         -- Rep Data
-        local CurWatchedFaction, replvl, repmin, repmax, repvalue = _G.GetWatchedFactionInfo()
-        watchedFaction = CurWatchedFaction
-        rep = repvalue - repmin
-        replvlmax = repmax - repmin
-        repstatus = _G["FACTION_STANDING_LABEL"..replvl]
-        repStandingID = replvl
+        if showRep then
+            watchedFaction = repName
+            rep = repvalue - repmin
+            replvlmax = repmax - repmin
+            repstatus = _G["FACTION_STANDING_LABEL"..replvl]
+            repStandingID = replvl
 
-        local percentRep
-        if (replvlmax <= 0) then
-            percentRep = 0
-        else
-            percentRep = (rep/(replvlmax))*100
+            if (replvlmax <= 0) then
+                repPer = 0
+            else
+                repPer = (rep/replvlmax)*100
+            end
         end
-        local percentRepStr = tostring(percentRep)
 
-        if not watchedFaction then
-            watchedFaction = L["XPRep_NoFaction"]
-            repstatus = "---"
-            rep = 0
-            replvlmax = 0
-            percentRepStr = "---"
+        local artifact
+        if showArtifact then
+            artifact = artifacts[artifactID]
+            if (artifact.maxPower <= 0) then
+                artPer = 0
+            else
+                artPer = (artifact.power/artifact.maxPower)*100
+            end
+        end
+
+        if showHonor then
+            honor = _G.UnitHonor("player")
+            honorMax = _G.UnitHonorMax("player")
+            if (honorMax <= 0) then
+                honorPer = 0
+            else
+                honorPer = (honor/honorMax)*100
+            end
         end
 
         -- Set Info Text
-        local XRSuffix, XRStr, XRPer, XRLen, XRRested
-        local HideMe = false
-        if ( (dbc.xrstate == "x") and not(_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) and not(_G.IsXPUserDisabled()) ) then
-            XRSuffix, XRStr, XRPer = "XP:", percentXPStr, percentXP
-            if restxp > 0 then
-                XRRested = percentRestXPStr
-            else
-                XRRested = ""
+        local _, _, watchState = watchStates[dbc.xrstate]:GetActive()
+        local watchText, watchText2, watchFormat2 = 0
+        if watchState == "xp" then
+            InfoLine:debug("Set XP", showXP)
+            if showXP then
+                watchText = xpPer
+                if restxp > 0 then
+                    watchFormat2 = "|cff%s[%.1f÷]|r"
+                    watchText2 = (restxp / xpMax) * 100
+                end
             end
-        else
-            if ( (repstatus == "---") and (_G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL) ) then
-                -- Max Level and no Rep tracked, hide display
-                HideMe = true
+        elseif watchState == "rep" then
+            InfoLine:debug("Set Rep", showRep)
+            if showRep then
+                watchText = repPer
             end
-            XRSuffix, XRStr, XRPer, XRRested = "Rep:", percentRepStr, percentRep, ""
-        end
-        if XRPer < 10 then XRLen = 3 else XRLen = 4 end
-        if XRSuffix == "XP:" then
-            if XRRested ~= "" then
-                self.text:SetFormattedText("|cff%s %s÷ |r|cff%s[%s÷]|r", TextColorNormal, XRStr:sub(1, XRLen), TextColorBlue1, XRRested)
-            else
-                self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
+        elseif watchState == "artifact" then
+            InfoLine:debug("Set Artifact", showArtifact)
+            if showArtifact then
+                watchText = artPer
+                if artifact.numRanksPurchasable > 0 then
+                    watchFormat2 = "|cff%s[+%d]|r"
+                    watchText2 = artifact.numRanksPurchasable
+                end
             end
-            self.icon:SetTexture(Icons[layoutSize].xp[1])
-        else
-            self.text:SetFormattedText("|cff%s %s÷|r", TextColorNormal, XRStr:sub(1, XRLen))
-            self.icon:SetTexture(Icons[layoutSize].rep[1])
+        elseif watchState == "honor" then
+            InfoLine:debug("Set Honor", showHonor)
+            if showHonor then
+                watchText = honorPer
+            end
         end
 
-        self.hidden = HideMe
-        if HideMe then
-            self.text:SetText("")
+        local showWatch = showXP or showRep or showArtifact or showHonor
+        self.hidden = not showWatch
+        if showWatch then
+            InfoLine:debug("Watch text", watchText, watchText2)
+            local watchFormat = "|cff%s %.1f÷|r"
+            if watchText2 then
+                watchFormat = watchFormat .. watchFormat2
+            end
+            self.text:SetFormattedText(watchFormat, TextColorNormal, watchText, TextColorBlue1, watchText2)
+            self.icon:SetTexture(Icons[layoutSize][watchState][1])
             UpdateElementWidth(self)
         else
+            self.text:SetText("")
             UpdateElementWidth(self)
         end
     end
 
-    function InfoLine_XR_OnMouseDown(self)
-        dbc.xrstate = (dbc.xrstate == "x") and "r" or "x"
-        if _G.UnitLevel("player") == _G.MAX_PLAYER_LEVEL and not _G.InCombatLockdown() then
-            _G.ToggleCharacter("ReputationFrame")
+    function InfoLine_XR_OnMouseDown(self, ...)
+        InfoLine:debug("InfoLine_XR_OnMouseDown", dbc.xrstate, ...)
+        if _G.IsAltKeyDown() then
+            repeat
+                local state, isActive = watchStates[dbc.xrstate]:GetNext()
+                InfoLine:debug("check state", dbc.xrstate, state)
+                dbc.xrstate = state
+            until isActive
+            InfoLine_XR_Update(self)
+        else
+            watchStates[dbc.xrstate]:OnClick()
         end
-        InfoLine_XR_Update(self)
     end
 end
 
@@ -1470,13 +1602,6 @@ local clientString = {
     [_G.BNET_CLIENT_OVERWATCH] = "OW",
 }
 
-local BNGetGameAccountInfo = _G.BNGetGameAccountInfo
-if not BNGetGameAccountInfo then
-    BNGetGameAccountInfo = function(...)
-        return _G.BNGetToonInfo(...)
-    end
-end
-
 local function Friends_Update(self)
     FriendsTabletData = nil
     FriendsTabletDataNames = nil
@@ -1518,7 +1643,7 @@ local function Friends_Update(self)
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
             if ( not FriendsTabletDataNames or FriendsTabletDataNames == nil ) then FriendsTabletDataNames = {} end
 
-            local _, characterName, _, realmName, _, faction, _, class, _, zoneName, level = BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, _, faction, _, class, _, zoneName, level = _G.BNGetGameAccountInfo(bnetIDGameAccount)
             curFriendsOnline = curFriendsOnline + 1
 
             if (realmName == RealUI.realm) then
@@ -1560,7 +1685,7 @@ local function Friends_Update(self)
         elseif (isOnline) then
             if ( not FriendsTabletData or FriendsTabletData == nil ) then FriendsTabletData = {} end
 
-            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
+            local _, characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = _G.BNGetGameAccountInfo(bnetIDGameAccount)
             InfoLine:debug("BNet: not in WoW", characterName, _, realmName, realmID, faction, race, class, guild, zoneName, level, gameText)
             characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
             client = clientString[client] or client
@@ -1921,61 +2046,121 @@ local function Layout_Update(self)
 end
 
 ---- Spec Button
-local SpecEquipList = {}
+local TalentInfo = {}
+local equipSetsByIndex, equipSetsByID = {}, {}
 
-local function SpecChangeClickFunc(self, spec)
-    if isBeta then
-        if _G.GetActiveSpecGroup() == spec then return end
-
-        if spec then
-            _G.SetSpecialization(spec)
+local function SpecChangeClickFunc(self, specIndex)
+    InfoLine:debug("SpecChangeClickFunc", specIndex)
+    if specIndex then
+        local numEquipSets = _G.GetNumEquipmentSets()
+        if _G.IsModifierKeyDown() and numEquipSets > 0 then
+            if _G.IsShiftKeyDown() then
+                dbc.specgear[specIndex] = -1
+            elseif _G.IsAltKeyDown() then
+                if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then 
+                    dbc.specgear[specIndex] = equipSetsByIndex[1].id
+                else 
+                    for equipIndex = equipSetsByID[dbc.specgear[specIndex]].index, numEquipSets do
+                        if dbc.specgear[specIndex] ~= equipSetsByIndex[equipIndex].id then
+                            dbc.specgear[specIndex] = equipSetsByIndex[equipIndex].id
+                            break
+                        end
+                    end
+                end
+            end
         else
+            if isBeta then
+                if _G.GetSpecialization() == specIndex then
+                    if dbc.specgear[specIndex] >= 0 then
+                        _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
+                    end
+                else
+                    _G.SetSpecialization(specIndex)
+                    NeedSpecUpdate = true
+                end
+            else
+                local specGroup = _G.GetActiveSpecGroup()
+                if _G.GetSpecialization(nil, nil, specGroup) == specIndex then
+                    if dbc.specgear[specIndex] >= 0 then
+                        _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
+                    end
+                else
+                    _G.SetActiveSpecGroup(specGroup == 1 and 2 or 1)
+                    NeedSpecUpdate = true
+                end
+            end
+        end
+    else
+        if isBeta then
             _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
-        end
-    else
-        if _G.GetActiveSpecGroup() == spec then return end
-
-        if _G.GetNumSpecGroups() > 1 then
-            local NewTG = _G.GetActiveSpecGroup() == 1 and 2 or 1
-
-            -- Set Spec
-            _G.SetActiveSpecGroup(NewTG)
-
-            -- Flag for changing Equip and Layout once Spec change completes
-            NeedSpecUpdate = true
+        else
+            local specGroup = _G.GetActiveSpecGroup()
+            _G.SetActiveSpecGroup(specGroup == 1 and 2 or 1)
         end
     end
 end
-
-local function SpecGearClickFunc(self, index, equipName)
-    if not index then return end
-
-    if _G.IsShiftKeyDown() then
-        if dbc.specgear.primary == index then
-            dbc.specgear.primary = -1
-        end
-        if dbc.specgear.secondary == index then
-            dbc.specgear.secondary = -1
-        end
-    elseif _G.IsAltKeyDown() then
-        dbc.specgear.secondary = index
-    elseif _G.IsControlKeyDown() then
-        dbc.specgear.primary = index
-    else
-        _G.EquipmentManager_EquipSet(equipName)
-    end
-
-    Tablets.spec:Refresh(self)
-end
-
 local function SpecLootClickFunc(self, spec)
     _G.SetLootSpecialization(LootSpecIDs[spec])
 end
 
+local function SpecAddSpecLineToCat(self, cat, specIndex)
+    InfoLine:debug("SpecAddSpecLineToCat", specIndex)
+    local InactiveColor = db.colors.disabled
+    local ActiveSpecColor =  RealUI.media.colors.orange
+    local ActiveLayoutColor = db.colors.normal
+
+    local activeSpec = _G.GetSpecialization()
+    local line = {}
+
+    local hasEquipSets = _G.GetNumEquipmentSets() > 0
+    local numCols = hasEquipSets and 3 or 2
+    InfoLine:debug("Stats", activeSpec, hasEquipSets, numCols)
+    for i = 1, numCols do
+        local color
+        if i == 1 then
+            InfoLine:debug("Spec", i)
+            color = (activeSpec == specIndex) and ActiveSpecColor or InactiveColor
+            line["text"] = TalentInfo[specIndex].name
+            line["justify"] = "LEFT"
+            line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
+            line["textR"] = color[1]
+            line["textG"] = color[2]
+            line["textB"] = color[3]
+            line["hasCheck"] = true
+            line["checked"] = activeSpec == specIndex
+            line["isRadio"] = true
+            line["func"] = function(...)
+                InfoLine:debug("SpecClick", _G.IsMouseButtonDown("RightButton"), ...)
+                SpecChangeClickFunc(self, specIndex)
+            end
+            --line["customwidth"] = 110
+        elseif i == 2 and hasEquipSets then
+            local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]].name or "---"
+            local _, _, isEquipped = _G.GetEquipmentSetInfoByName(equipSet)
+            color = isEquipped and ActiveLayoutColor or InactiveColor
+            InfoLine:debug("Set", i, dbc.specgear[specIndex], equipSet, isEquipped)
+            line["text"..i] = equipSet
+            line["justify"..i] = "LEFT"
+            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
+            line["text"..i.."R"] = color[1]
+            line["text"..i.."G"] = color[2]
+            line["text"..i.."B"] = color[3]
+        else
+            InfoLine:debug("Layout", i)
+            color = (activeSpec == specIndex) and ActiveLayoutColor or InactiveColor
+            line["text"..i] = ndbc.layout.spec[specIndex] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
+            line["justify"..i] = "LEFT"
+            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
+            line["text"..i.."R"] = color[1]
+            line["text"..i.."G"] = color[2]
+            line["text"..i.."B"] = color[3]
+        end
+    end
+    cat:AddLine(line)
+end
 local function SpecAddLootSpecToCat(self, cat)
-    local numSpecs = _G.GetNumSpecializations()
     local specNames = {}
-    for i = 1, numSpecs do
+    for i = 1, RealUI.numSpecs do
         local _, name = _G.GetSpecializationInfo(i)
         specNames[i] = name
     end
@@ -1984,7 +2169,7 @@ local function SpecAddLootSpecToCat(self, cat)
 
     -- Specs
     local line = {}
-    for i = 1, numSpecs do
+    for i = 1, RealUI.numSpecs do
         _G.wipe(line)
 
         line["text"] = specNames[i]
@@ -2000,144 +2185,10 @@ local function SpecAddLootSpecToCat(self, cat)
 
         cat:AddLine(line)
     end
-
-end
-
-local function SpecAddEquipListToCat(self, cat)
-    local numSpecGroups = _G.GetNumSpecGroups()
-
-    -- Sets
-    local line = {}
-    if #SpecEquipList > 0 then
-        for k, v in ipairs(SpecEquipList) do
-            local _, _, _, isEquipped = _G.GetEquipmentSetInfo(k)
-
-            _G.wipe(line)
-            for i = 1, 4 do
-                if i == 1 then
-                    line["text"] = ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t %s"):format(SpecEquipList[k].icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0, 64, 64, 0.1, 0.9, 0.1, 0.9, SpecEquipList[k].name)
-                    line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"] = "LEFT"
-                    line["textR"] = 0.9
-                    line["textG"] = 0.9
-                    line["textB"] = 0.9
-                    line["hasCheck"] = true
-                    line["isRadio"] = true
-                    line["checked"] = isEquipped
-                    line["func"] = function() SpecGearClickFunc(self, k, SpecEquipList[k].name) end
-                    line["customwidth"] = 110
-                elseif i == 2 then
-                    line["text"..i] = _G.PRIMARY
-                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.primary == k) and RealUI.media.colors.blue[3] or 0.3
-                elseif (i == 3) and (numSpecGroups > 1) then
-                    line["text"..i] = _G.SECONDARY
-                    line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-                    line["justify"..i] = "LEFT"
-                    line["text"..i.."R"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[1] or 0.3
-                    line["text"..i.."G"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[2] or 0.3
-                    line["text"..i.."B"] = (dbc.specgear.secondary == k) and RealUI.media.colors.blue[3] or 0.3
-                end
-            end
-
-            cat:AddLine(line)
-        end
-    end
-end
-
-local TalentInfo = {}
-local function SpecAddTalentGroupLineToCat(self, cat, talentGroup)
-    local InactiveColor = db.colors.disabled
-    local ActiveGroupColor = RealUI.media.colors.blue
-    local ActiveSpecColor =  RealUI.media.colors.orange
-    local ActiveLayoutColor = db.colors.normal
-
-    local activeSpecGroup = _G.GetActiveSpecGroup()
-    local name, spec, _
-    local line = {}
-
-    for i = 1, 3 do
-        local GroupColor = (activeSpecGroup == talentGroup) and ActiveGroupColor or InactiveColor
-        local SpecColor = (activeSpecGroup == talentGroup) and ActiveSpecColor or InactiveColor
-        local LayoutColor = (activeSpecGroup == talentGroup) and ActiveLayoutColor or InactiveColor
-        if i == 1 then
-            line["text"] = talentGroup == 1 and _G.PRIMARY or _G.SECONDARY
-            line["justify"] = "LEFT"
-            line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-            line["textR"] = GroupColor[1]
-            line["textG"] = GroupColor[2]
-            line["textB"] = GroupColor[3]
-            line["hasCheck"] = true
-            line["checked"] = activeSpecGroup == talentGroup
-            line["isRadio"] = true
-            line["func"] = function() SpecChangeClickFunc(self, talentGroup) end
-            line["customwidth"] = 110
-        elseif i == 2 then
-            line["text"..i] = ndbc.layout.spec[talentGroup] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
-            line["justify"..i] = "LEFT"
-            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-            line["text"..i.."R"] = LayoutColor[1]
-            line["text"..i.."G"] = LayoutColor[2]
-            line["text"..i.."B"] = LayoutColor[3]
-        elseif i == 3 then
-            spec = _G.GetSpecialization(false, false, talentGroup)
-            if spec then
-                _, name = _G.GetSpecializationInfo(spec)
-            else
-                name = _G.NONE
-            end
-            -- line["text"..i] = format("%s |T%s:%d:%d:%d:%d|t", name, icon, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, db.text.tablets.normalsize + ndb.media.font.sizeAdjust, 0, 0)
-            line["text"..i] = name
-            line["justify"..i] = "RIGHT"
-            line["text"..i.."R"] = SpecColor[1]
-            line["text"..i.."G"] = SpecColor[2]
-            line["text"..i.."B"] = SpecColor[3]
-        end
-    end
-    cat:AddLine(line)
-end
-local function SpecAddSpecLineToCat(self, cat, specIndex)
-    local InactiveColor = db.colors.disabled
-    local ActiveSpecColor =  RealUI.media.colors.orange
-    local ActiveLayoutColor = db.colors.normal
-
-    local activeSpec = _G.GetSpecialization()
-    local line = {}
-
-    for i = 1, 2 do
-        local SpecColor = (activeSpec == specIndex) and ActiveSpecColor or InactiveColor
-        local LayoutColor = (activeSpec == specIndex) and ActiveLayoutColor or InactiveColor
-        if i == 1 then
-            line["text"] = TalentInfo[specIndex].name
-            line["justify"] = "LEFT"
-            line["size"] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-            line["textR"] = SpecColor[1]
-            line["textG"] = SpecColor[2]
-            line["textB"] = SpecColor[3]
-            line["hasCheck"] = true
-            line["checked"] = activeSpec == specIndex
-            line["isRadio"] = true
-            line["func"] = function() SpecChangeClickFunc(self, specIndex) end
-            line["customwidth"] = 110
-        elseif i == 2 then
-            line["text"..i] = ndbc.layout.spec[specIndex] == 1 and L["Layout_DPSTank"] or L["Layout_Healing"]
-            line["justify"..i] = "LEFT"
-            line["size"..i] = db.text.tablets.normalsize + ndb.media.font.sizeAdjust
-            line["text"..i.."R"] = LayoutColor[1]
-            line["text"..i.."G"] = LayoutColor[2]
-            line["text"..i.."B"] = LayoutColor[3]
-        end
-    end
-    cat:AddLine(line)
 end
 
 local SpecSection = {}
 local function Spec_UpdateTablet(self)
-    local numSpecGroups = _G.GetNumSpecGroups()
-
     _G.wipe(SpecSection)
 
     ---- Spec Category
@@ -2145,71 +2196,35 @@ local function Spec_UpdateTablet(self)
     SpecSection["specs"].cat = Tablets.spec:AddCategory()
     SpecSection["specs"].cat:AddLine("text", _G.SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
 
-    SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", (isBeta and 2 or 3))
+    SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", 3)
     AddBlankTabLine(SpecSection["specs"].talentCat, 2)
     if isBeta then
-        for specIndex = 1, _G.GetNumSpecializations() do
+        for specIndex = 1, RealUI.numSpecs do
             SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
         end
     else
-        SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 1)
-        if numSpecGroups > 1 then
-            SpecAddTalentGroupLineToCat(self, SpecSection["specs"].talentCat, 2)
+        for specGroup = 1, _G.GetNumSpecGroups() do
+            local specIndex = _G.GetSpecialization(nil, nil, specGroup)
+            SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
         end
-    end
-
-    ---- Equipment
-    local numEquipSets = _G.GetNumEquipmentSets()
-    if numEquipSets > 0 then
-        AddBlankTabLine(SpecSection["specs"].talentCat, 8)
-
-        -- Equipment Category
-        SpecSection["equipment"] = {}
-        SpecSection["equipment"].cat = Tablets.spec:AddCategory()
-        SpecSection["equipment"].cat:AddLine("text", _G.EQUIPMENT_MANAGER, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
-        AddBlankTabLine(SpecSection["equipment"].cat, 2)
-
-        -- Equipment Cat
-        SpecSection["equipment"].equipCat = Tablets.spec:AddCategory("columns", 3)
-        AddBlankTabLine(SpecSection["equipment"].equipCat, 1)
-
-        SpecAddEquipListToCat(self, SpecSection["equipment"].equipCat)
     end
 
     ---- Loot Specialization
     if _G.GetSpecialization() then
-        if numEquipSets > 0 then
-            AddBlankTabLine(SpecSection["equipment"].equipCat, 8)
-        else
-            AddBlankTabLine(SpecSection["specs"].talentCat, 8)
-        end
+        AddBlankTabLine(SpecSection["specs"].talentCat, 8)
         SpecSection["loot"] = {}
         SpecSection["loot"].cat = Tablets.spec:AddCategory()
-        SpecSection["loot"].cat:AddLine("text", _G.LOOT.." ".._G.SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
+        SpecSection["loot"].cat:AddLine("text", _G.SELECT_LOOT_SPECIALIZATION, "size", db.text.tablets.headersize + ndb.media.font.sizeAdjust, "textR", 1, "textG", 1, "textB", 1)
         AddBlankTabLine(SpecSection["loot"].cat, 2)
         SpecAddLootSpecToCat(self, SpecSection["loot"].cat)
     end
 
     -- Hint
     local hintStr = ""
-    if isBeta then
-        hintStr = hintStr .. L["Spec_ChangeSpec"]
-        if numEquipSets > 0 then
-            if hintStr ~= "" then hintStr = hintStr .. "\n" end
-            hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
-        end
-    else
-        if numSpecGroups > 1 then
-            hintStr = hintStr .. L["Spec_ChangeSpec"]
-        end
-        if numEquipSets > 0 then
-            if hintStr ~= "" then hintStr = hintStr .. "\n" end
-            if numSpecGroups > 1 then
-                hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipAssignSecondary"]..".\n"..L["Spec_EquipUnassign"]
-            else
-                hintStr = hintStr .. L["Spec_Equip"].."\n"..L["Spec_EquipAssignPrimary"]..".\n"..L["Spec_EquipUnassign"]
-            end
-        end
+    hintStr = hintStr .. L["Spec_ChangeSpec"]
+    if _G.GetNumEquipmentSets() > 0 then
+        if hintStr ~= "" then hintStr = hintStr .. "\n" end
+        hintStr = hintStr .. L["Spec_EquipCycle"]..".\n"..L["Spec_EquipUnassign"]
     end
     Tablets.spec:SetHint(hintStr, db.text.tablets.hintsize + ndb.media.font.sizeAdjust)
 end
@@ -2233,17 +2248,15 @@ local function Spec_OnEnter(self)
         )
     end
 
-    if Tablets.spec:IsRegistered(self) then
-        -- Tablets.spec appearance
-        Tablets.spec:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
-        Tablets.spec:SetTransparency(self, RealUI.media.window[4])
-        Tablets.spec:SetFontSizePercent(self, 1)
+    -- Tablets.spec appearance
+    Tablets.spec:SetColor(self, RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3])
+    Tablets.spec:SetTransparency(self, RealUI.media.window[4])
+    Tablets.spec:SetFontSizePercent(self, 1)
 
-        -- Open
-        Tablets.spec:Open(self)
+    -- Open
+    Tablets.spec:Open(self)
 
-        HideOtherGraphs(self)
-    end
+    HideOtherGraphs(self)
 
     self.mouseover = true
     self.text:SetTextColor(TextColorNormalVals[1], TextColorNormalVals[2], TextColorNormalVals[3])
@@ -2253,23 +2266,20 @@ local setEquipped = false
 function InfoLine:SpecUpdateEquip()
     self:debug("SpecUpdateEquip start")
     -- Update Equipment Set
-    local NewTG = _G.GetActiveSpecGroup()
-    if ( (NewTG == 1) and (dbc.specgear.primary > 0) ) then
-        self:debug("SpecUpdateEquip", NewTG)
-        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.primary))
-    elseif ( (NewTG == 2) and (dbc.specgear.secondary > 0) ) then
-        self:debug("SpecUpdateEquip", NewTG)
-        _G.EquipmentManager_EquipSet(_G.GetEquipmentSetInfo(dbc.specgear.secondary))
+    for equipIndex = 1, _G.GetNumEquipmentSets() do
+        if dbc.specgear[_G.GetSpecialization()] == equipSetsByIndex[equipIndex].id then
+            _G.EquipmentManager_EquipSet(equipSetsByIndex[equipIndex].name)
+        end
     end
     self:debug("SpecUpdateEquip end")
     setEquipped = true
 end
 
 local function Spec_Update(self)
-    InfoLine:debug("Spec_Update")
+    InfoLine:debug("Spec_Update", NeedSpecUpdate)
     -- Talent Info
     _G.wipe(TalentInfo)
-    for specIndex = 1, _G.GetNumSpecializations() do
+    for specIndex = 1, RealUI.numSpecs do
         local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
         TalentInfo[specIndex] = {
             name = name,
@@ -2278,35 +2288,26 @@ local function Spec_Update(self)
     end
 
     -- Gear sets
-    _G.wipe(SpecEquipList)
+    _G.wipe(equipSetsByIndex)
+    _G.wipe(equipSetsByID)
     local numEquipSets = _G.GetNumEquipmentSets()
     if numEquipSets > 0 then
         for index = 1, numEquipSets do
-            local equipName, equipIcon = _G.GetEquipmentSetInfo(index)
-            SpecEquipList[index] = {
+            local equipName, _, equipID = _G.GetEquipmentSetInfo(index)
+            equipSetsByIndex[index] = {
                 name = equipName,
-                icon = equipIcon,
+                id = equipID
+            }
+            equipSetsByID[equipID] = {
+                name = equipName,
+                index = index
             }
         end
     end
-    if dbc.specgear.primary > numEquipSets then
-        dbc.specgear.primary = -1
-    end
-    if dbc.specgear.secondary > numEquipSets then
-        dbc.specgear.secondary = -1
-    end
 
     -- Info text
-    -- Active talent tree
-    if isBeta then
-        self.text:SetText(TalentInfo[_G.GetSpecialization()].name)
-    else
-        if _G.GetActiveSpecGroup() == 1 then
-            self.text:SetText(_G.PRIMARY)
-        else
-            self.text:SetText(_G.SECONDARY)
-        end
-    end
+    local specIndex = _G.GetSpecialization()
+    self.text:SetText(TalentInfo[specIndex].name)
     UpdateElementWidth(self)
 
     -- Refresh Tablet
@@ -2328,8 +2329,7 @@ local function Spec_Update(self)
         end
 
         -- Update Layout
-        local NewTG = _G.GetActiveSpecGroup()
-        ndbc.layout.current = ndbc.layout.spec[NewTG]
+        ndbc.layout.current = ndbc.layout.spec[specIndex]
         Layout_Update(ILFrames.layout)
         RealUI:UpdateLayout()
 
@@ -2762,7 +2762,8 @@ end
 ---------------------
 -- Mouse functions --
 ---------------------
-function InfoLine:OnMouseDown(element)
+function InfoLine:OnMouseDown(element, ...)
+    self:debug("InfoLine:OnMouseDown", element.tag, ...)
     if element.tag == "start" then
         _G.EasyMenu(MicroMenu, ddMenuFrame, element, 0, 0, "MENU", 2)
 
@@ -2796,7 +2797,7 @@ function InfoLine:OnMouseDown(element)
     elseif element.tag == "layout" then
         local NewLayout = ndbc.layout.current == 1 and 2 or 1
         ndbc.layout.current = NewLayout
-        ndbc.layout.spec[_G.GetActiveSpecGroup()] = NewLayout
+        ndbc.layout.spec[_G.GetSpecialization()] = NewLayout
         Layout_Update(element)
         RealUI:UpdateLayout()
         _G.GameTooltip:Hide()
@@ -3355,14 +3356,22 @@ function InfoLine:CreateFrames()
     tinsert(TextureFrames, {ILFrames.xprep, ILFrames.xprep.icon, "xp"})
     ILFrames.xprep.tag = "xprep"
     ILFrames.xprep:RegisterEvent("PLAYER_XP_UPDATE")
+    ILFrames.xprep:RegisterEvent("HONOR_XP_UPDATE")
     ILFrames.xprep:RegisterEvent("UPDATE_FACTION")
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("PLAYER_ENTERING_WORLD")
-    ILFrames.xprep:SetScript("OnEvent", function(element)
+    local function XR_OnEvent(...)
+        InfoLine:debug("XR_OnEvent", ...)
         if not db.elements.xprep then return end
-        InfoLine_XR_Update(element)
-    end)
+        InfoLine_XR_Update(ILFrames.xprep, ...)
+    end
+    if isBeta then
+        artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent)
+    end
+    ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 
 
     ------- RIGHT
@@ -3425,6 +3434,9 @@ function InfoLine:CreateFrames()
         elseif event == "EQUIPMENT_SWAP_FINISHED" then
             InfoLine:debug("Spec EQUIPMENT_SWAPED", setEquipped)
             setEquipped = false
+            Spec_Update(element)
+        elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
+            NeedSpecUpdate = true
             Spec_Update(element)
         else
             Spec_Update(element)
@@ -3503,7 +3515,6 @@ function InfoLine:Refresh()
     end
     TextColorWhite = RealUI:ColorTableToStr({1, 1, 1})
     TextColorTTHeader = RealUI:ColorTableToStr(db.colors.ttheader)
-    TextColorOrange1 = RealUI:ColorTableToStr(RealUI.media.colors.orange)
     TextColorBlue1 = RealUI:ColorTableToStr(RealUI.media.colors.blue)
 
     -- Create Frames if it has been delayed
@@ -3574,16 +3585,17 @@ end
 -- Initialization --
 --------------------
 function InfoLine:OnInitialize()
+    local specgear = {}
+    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+        specgear[specIndex] = -1
+    end
     local otherFaction = RealUI:OtherFaction(RealUI.faction)
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
-            xrstate = "x",
+            xrstate = 1,
             currencystate = 1,
-            specgear = {
-                primary = -1,
-                secondary = -1,
-            },
+            specgear = specgear,
         },
         global = {
             currency = {
@@ -3667,7 +3679,27 @@ function InfoLine:OnInitialize()
 
     RealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
 
-    self:SetEnabledState(true)
+    local hasLDBDisplay = false
+    do
+        local ldbDisplays = {
+            "Bazooka",
+            "ChocolateBar",
+            "DockingStation",
+            "Titan",
+        }
+        for i, display in next, ldbDisplays do
+            local _, _, _, loadable = _G.GetAddOnInfo(display)
+            if loadable then
+                hasLDBDisplay = true
+                break
+            end
+        end
+    end
+
+    self:SetEnabledState(not hasLDBDisplay)
+    if not RealUI:GetModuleEnabled(MODNAME) then
+        RealUI:SetModuleEnabled(MODNAME, true)
+    end
 end
 
 function InfoLine:OnEnable()

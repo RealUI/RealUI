@@ -7,7 +7,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local GarrisonBuildingFrame = GarrisonBuildingFrame
 
-	for i = 1, 18 do
+	for i = 1, (C.isBetaClient and 14 or 18) do
 		select(i, GarrisonBuildingFrame:GetRegions()):Hide()
 	end
 
@@ -392,7 +392,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local GarrisonMissionFrame = GarrisonMissionFrame
 
-	for i = 1, 18 do
+	for i = 1, (C.isBetaClient and 14 or 18) do
 		select(i, GarrisonMissionFrame:GetRegions()):Hide()
 	end
 
@@ -631,7 +631,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	-- Portraits
 
-	hooksecurefunc("GarrisonMissionFrame_SetFollowerPortrait", function(portraitFrame, followerInfo)
+	hooksecurefunc((C.isBetaClient and "GarrisonMissionPortrait_SetFollowerPortrait" or "GarrisonMissionFrame_SetFollowerPortrait"), function(portraitFrame, followerInfo)
 		if not portraitFrame.styled then
 			F.ReskinGarrisonPortrait(portraitFrame)
 			portraitFrame.styled = true
@@ -680,7 +680,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 
 	local GarrisonRecruitSelectFrame = GarrisonRecruitSelectFrame
 
-	for i = 1, 18 do
+	for i = 1, (C.isBetaClient and 14 or 18) do
 		select(i, GarrisonRecruitSelectFrame:GetRegions()):Hide()
 	end
 	GarrisonRecruitSelectFrame.TitleText:Show()
@@ -757,7 +757,12 @@ C.themes["Blizzard_GarrisonUI"] = function()
 		local numButtons = #buttons
 
 		for i = 1, #buttons do
-			local button = buttons[i]
+			local button
+			if C.isBetaClient then
+				button = buttons[i].Follower
+			else
+				button = buttons[i]
+			end
 			local portrait = button.PortraitFrame
 
 			if not button.restyled then

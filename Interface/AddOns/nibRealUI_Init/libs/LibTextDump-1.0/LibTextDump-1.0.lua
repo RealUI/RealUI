@@ -1,11 +1,10 @@
 -----------------------------------------------------------------------
 -- Upvalued Lua API.
 -----------------------------------------------------------------------
-local _G = getfenv(0)
+local _G = _G
 
 -- Functions
 local error = _G.error
-local pairs = _G.pairs
 local type = _G.type
 
 -- Libraries
@@ -21,7 +20,7 @@ local MAJOR = "RealUI_LibTextDump-1.0"
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
 local MINOR = 2 -- Should be manually increased
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
+local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR) -- luacheck: ignore
 
 if not lib then
 	return
@@ -57,6 +56,12 @@ local DEFAULT_FRAME_HEIGHT = 600
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
+local debug = false
+local function debugPrint(frame, ...)
+	if debug and frame:IsShown() then
+		_G.print(...)
+	end
+end
 local function round(number, places)
 	local mult = 10 ^ (places or 0)
 	return _G.floor(number * mult + 0.5) / mult
@@ -116,15 +121,13 @@ local function NewInstance(width, height)
 		scrollBar:SetStepsPerPage(linesToDisplay - 1)
 
 		if all_wrapped_lines and line_height then
-			--[[ This block should not be run OnVerticalScroll because posible variations in linesToDisplay from
-			scroll to scroll will affect the height of the scroll frame. This will then result in inconsistent 
-			scrolling behaviour. ]]
+			--[[ This block should only be run when the buffer is changed because posible variations in 
+			linesToDisplay from scroll to scroll will affect the height of the scroll frame. This will then 
+			result in inconsistent scrolling behaviour. ]]
 			local scrollChildFrame = _G[frameName .. "ScrollChildFrame"]
-			local scrollFrameHeight = 0
-			local scrollChildHeight = 0
 
-			scrollFrameHeight = (all_wrapped_lines - linesToDisplay) * line_height
-			scrollChildHeight = all_wrapped_lines * line_height
+			local scrollFrameHeight = (all_wrapped_lines - linesToDisplay) * line_height
+			local scrollChildHeight = all_wrapped_lines * line_height
 			if ( scrollFrameHeight < 0 ) then
 				scrollFrameHeight = 0
 			end
@@ -223,23 +226,16 @@ local function NewInstance(width, height)
 	return instance
 end
 
-local function GetDisplayLines(start, wrapped_lines, max_display_lines)
-	--print("GetDisplayLines", start, line_height, max_display_lines)
-	local i, lines = start - 1, 0
-	repeat
-		i = i + 1
-		lines = lines + (wrapped_lines[i] or 0)
-		--print("Line:", i, lines, wrapped_lines[i])
-	until lines > max_display_lines or not wrapped_lines[i]
-	local stop = i - 1
-	--print("repeat", start, stop, line_height, max_display_lines)
-	return start, stop, lines
-end
-
 
 -----------------------------------------------------------------------
 -- Library methods.
 -----------------------------------------------------------------------
+--- Create a new dump frame.
+-- @param frame_title The title text of the frame.
+-- @param width (optional) The width of the frame.
+-- @param height (optional) The height of the frame.
+-- @param save (optional) A function that will called when the copy button is clicked.
+-- @return A handle for the dump frame.
 function lib:New(frame_title, width, height, save)
 	local title_type = type(frame_title)
 
@@ -287,7 +283,6 @@ function prototype:Clear()
 	local wrapped_lines = buffers[self].wrapped_lines
 	table.wipe(buffers[self])
 	buffers[self].wrapped_lines = wrapped_lines
-	wrapped_lines = nil
 end
 
 
@@ -297,7 +292,7 @@ function prototype:Display(separator)
 	if display_text == "" then
 		error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
 	end
-	local buffer, frame = buffers[self], frames[self]
+	local frame = frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
 	frame:Show()
@@ -313,6 +308,10 @@ function prototype:InsertLine(position, text)
 		error(METHOD_USAGE_FORMAT:format("InsertLine", "text must be a non-empty string."), 2)
 	end
 	table.insert(buffers[self], position, text)
+	debugPrint(frames[self], "InsertLine", position, text)
+	if frames[self]:IsShown() then
+		frames[self]:UpdateText(buffers[self]:UpdateWrappedLines())
+	end
 end
 
 
@@ -329,45 +328,50 @@ function prototype:String(separator)
 	end
 
 	separator = separator or "\n"
-	local buffer, frame, output = buffers[self], frames[self]
-	local line_dummy, wrapped_lines = frame.line_dummy, buffer.wrapped_lines
+	local buffer, frame = buffers[self], frames[self]
+	local line_dummy = frame.line_dummy
+	function buffer:UpdateWrappedLines()
+		local all_wrapped_lines = 0
+		table.wipe(buffer.wrapped_lines)
+		for i = 1, #buffer do
+			line_dummy:SetText(buffer[i])
+			buffer.wrapped_lines[i] = line_dummy:GetNumLines()
+			all_wrapped_lines = all_wrapped_lines + buffer.wrapped_lines[i]
+		end
+		return all_wrapped_lines
+	end
 
 	local _, line_height = line_dummy:GetFont()
-	local max_display_lines, all_wrapped_lines = round(frame.edit_box:GetHeight() / line_height), 0
+	local max_display_lines = round(frame.edit_box:GetHeight() / line_height)
 	--print("Line stats", line_dummy:GetStringHeight(), line_height, max_display_lines)
-	table.wipe(wrapped_lines)
-	for i = 1, #buffer do
-		line_dummy:SetText(buffer[i])
-		wrapped_lines[i] = line_dummy:GetNumLines()
-		all_wrapped_lines = all_wrapped_lines + wrapped_lines[i]
+
+	local all_wrapped_lines, offset = buffer:UpdateWrappedLines(), 1
+	local start, stop = frame.scroll_area:Update(offset, buffer.wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+	function frame:UpdateText(newWrappedLines)
+		debugPrint(frame, "UpdateText", newWrappedLines > all_wrapped_lines)
+		if newWrappedLines > all_wrapped_lines then
+			all_wrapped_lines = newWrappedLines
+			start, stop = frame.scroll_area:Update(offset, buffer.wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+		else
+			start, stop = frame.scroll_area:Update(offset, buffer.wrapped_lines, max_display_lines)
+		end
+
+		debugPrint(frame, "Start/Stop", start, stop)
+		local text = table.concat(buffer, separator, start, stop)
+		frame.edit_box:SetText(text)
 	end
+	frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
+		--print("OnVerticalScroll", value)
+		local scrollbar = scroll_area.ScrollBar
+		local _, scroll_max = scrollbar:GetMinMaxValues()
+		--print("Min/Max", scroll_min, scroll_max)
+		local scroll_per = round(value / scroll_max, 2)
+		offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
 
-	local start, stop = frame.scroll_area:Update(1, wrapped_lines, max_display_lines, all_wrapped_lines, line_height)
+		--print("Current position", value, offset, scroll_per)
+		--print("Concat", start, stop)
+		frame:UpdateText(buffer:UpdateWrappedLines())
+	end)
 
-	if all_wrapped_lines <= max_display_lines then
-		--print("Simple", start, stop)
-		output = table.concat(buffer, separator)
-	else
-		--print("Overflow", start, stop)
-		frame.scroll_area:SetScript("OnVerticalScroll", function(scroll_area, value)
-			--print("OnVerticalScroll", value)
-			local scrollbar = scroll_area.ScrollBar
-			local scroll_min, scroll_max = scrollbar:GetMinMaxValues()
-			--print("Min/Max", scroll_min, scroll_max)
-			local scroll_per = round(value / scroll_max, 2)
-			local offset = round((1 - scroll_per) * 1 + scroll_per * #buffer)
-
-			--print("Current position", value, offset, scroll_per)
-
-			local start, stop = scroll_area:Update(offset, wrapped_lines, max_display_lines)
-
-			--print("Concat", start, stop)
-			local text = table.concat(buffer, separator, start, stop)
-			frame.edit_box:SetText(text)
-			frame.prev_stop = stop
-		end)
-
-		output = table.concat(buffer, separator, start, stop)
-	end
-	return output
+	return table.concat(buffer, separator, start, stop)
 end

@@ -63,7 +63,7 @@ local core do
             durability =    {_G.DURABILITY},
             bag =           {_G.INVTYPE_BAG},
             currency =      {_G.BONUS_ROLL_REWARD_CURRENCY},
-            xprep =         {L["XPRep"]},
+            xprep =         {L["Progress"]},
             clock =         {_G.TIMEMANAGER_TITLE},
             pc =            {L["Sys_SysInfo"]},
             specchanger =   {L["Spec_SpecChanger"]},
@@ -94,7 +94,6 @@ local core do
                 position = {
                     name = "Position/Size",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
                         parent = {
@@ -235,7 +234,6 @@ local core do
                 colors = {
                     name = "Colors",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
                         normal = {
@@ -365,7 +363,6 @@ local core do
                 other = {
                     name = "Other",
                     type = "group",
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 70,
                     args = {
                         icTips = {
@@ -449,7 +446,6 @@ local core do
         local elementopts = {
             name = "Blocks",
             type = "group",
-            disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
             order = 40,
             args = {},
         }

@@ -314,7 +314,7 @@ function MOD:CopyFontsAndTextures(s, d)
 		d.iconFont = s.iconFont; d.iconFSize = s.iconFSize; d.iconAlpha = s.iconAlpha; d.iconColor = MOD.CopyColor(s.iconColor)
 		d.iconOutline = s.iconOutline; d.iconShadow = s.iconShadow; d.iconThick = s.iconThick; d.iconMono = s.iconMono
 		d.texture = s.texture; d.bgtexture = s.bgtexture; d.alpha = s.alpha; d.combatAlpha = s.combatAlpha; d.fgAlpha = s.fgAlpha; d.bgAlpha = s.bgAlpha
-		d.fgSaturation = s.fgSaturation; d.fgBrightness = s.fgBrightness;
+		d.fgSaturation = s.fgSaturation; d.fgBrightness = s.fgBrightness; d.bgSaturation = s.bgSaturation; d.bgBrightness = s.bgBrightness;
 		d.backdropTexture = s.backdropTexture; d.backdropWidth = s.backdropWidth; d.backdropInset = s.backdropInset
 		d.backdropPadding = s.backdropPadding; d.backdropPanel = s.backdropPanel; d.backdropEnable = s.backdropEnable
 		d.backdropColor = MOD.CopyColor(s.backdropColor); d.backdropFill = MOD.CopyColor(s.backdropFill)

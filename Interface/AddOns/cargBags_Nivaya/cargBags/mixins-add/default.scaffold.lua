@@ -68,7 +68,8 @@ end
 
 local function ItemButton_Scaffold(self)
 	self:SetSize(37, 37)
-	local bordersize = 768/({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("(%d+)x(%d+)")/(GetCVar("uiScale")*cBnivCfg.scale)
+	local _, height = RealUI:GetResolutionVals(true)
+	local bordersize = 768 / height / (GetCVar("uiScale")*cBnivCfg.scale)
 	local name = self:GetName()
 	self.Icon = _G[name.."IconTexture"]
 	self.Count = _G[name.."Count"]

@@ -1352,13 +1352,19 @@ local isPulseEvent = {
 
 local function Garrison_OnEvent(self, event, ...)
     MinimapAdv:debug("Garrison_OnEvent", event, ...)
+    MinimapAdv:debug("button has pulse", self.MinimapLoopPulseAnim:IsPlaying())
     if event == "GARRISON_SHOW_LANDING_PAGE" then
         local alpha = self:GetAlpha()
         -- This fires quite often, so only react when the frame is actually shown.
         if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
+            MinimapAdv:debug("inLandingPage fadein")
             fadeIn(self)
         elseif not self.shouldShow and alpha > 0 then
+            MinimapAdv:debug("outLandingPage fadeout")
             fadeOut(self)
+        else
+            MinimapAdv:debug("notLandingPage")
+            self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
         end
     elseif isPulseEvent[event] then
         ShowGarrisonPulse(self)

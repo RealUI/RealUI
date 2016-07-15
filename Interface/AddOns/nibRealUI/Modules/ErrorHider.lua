@@ -12,8 +12,8 @@ if RealUI.isBeta then return end
 local MODNAME = "ErrorHider"
 local ErrorHider = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-function ErrorHider:UI_ERROR_MESSAGE(event, messageType, message)
-    self:debug(event, messageType, message)
+function ErrorHider:UI_ERROR_MESSAGE(event, message)
+    self:debug(event, message)
     if message == "" then return end
     self:debug("Hide", db.hideall, db.filterlist[message])
     if not db.filterlist[message] and not db.hideall then

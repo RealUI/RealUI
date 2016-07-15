@@ -426,11 +426,12 @@ UnitFrames["target"] = function(self)
 
         -- Reverse power
         local oldReverse, newReverse = frame.Power.bar.reverse
-        if ndb.settings.reverseUnitFrameBars then
-            newReverse = not RealUI.ReversePowers[powerType]
+        if ndb.settings.reverseUnitFrameBars then 
+            newReverse = not RealUI.ReversePowers[powerToken]
         else
-            newReverse = RealUI.ReversePowers[powerType]
+            newReverse = RealUI.ReversePowers[powerToken]
         end
+        UnitFrames:debug("Target reverse bars", ndb.settings.reverseUnitFrameBars, oldReverse, newReverse)
         AngleStatusBar:SetReverseFill(frame.Power.bar, newReverse)
 
         -- If reverse is different from old target to new target then do an instant SetValue on power bar

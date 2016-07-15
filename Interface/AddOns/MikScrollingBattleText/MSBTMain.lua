@@ -106,9 +106,9 @@ local SPELLID_AUTOSHOT = 75
 -- Spell names.
 local SPELL_BLINK					= GetSkillName(1953)
 local SPELL_BLOOD_STRIKE			= GetSkillName(60945)
-local SPELL_HURRICANE				= GetSkillName(16914)
 local SPELL_RAIN_OF_FIRE			= GetSkillName(5740)
 
+local SPELL_HURRICANE             = isBetaClient and UNKNOWN or GetSkillName(16914)
 local SPELL_BLIZZARD              = isBetaClient and UNKNOWN or GetSkillName(10)
 local SPELL_BLOOD_STRIKE_OFF_HAND = isBetaClient and UNKNOWN or GetSkillName(66215)
 local SPELL_HELLFIRE              = isBetaClient and UNKNOWN or GetSkillName(1949)

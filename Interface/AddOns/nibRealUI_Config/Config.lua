@@ -346,10 +346,6 @@ end
 
 function RealUI:ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
-    if _G.InCombatLockdown() then
-        RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
-        return
-    end
     if not initialized then InitializeOptions() end
     if app == "HuD" then
         if not isHuDShown then

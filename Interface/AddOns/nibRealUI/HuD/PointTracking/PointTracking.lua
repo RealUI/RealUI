@@ -1,9 +1,9 @@
 local _, private = ...
+if private.RealUI.isBeta then return end
 
 -- Lua Globals --
 local _G = _G
 local next = _G.next
---local tinsert = _G.table.insert
 
 -- Libs --
 local LibWin = _G.LibStub("LibWindow-1.1")
@@ -383,6 +383,17 @@ function PointTracking:CreateBurningEmbers(unitFrame, unit)
     end
     unitFrame.BurningEmbers = BurningEmbers
     self.BurningEmbers = BurningEmbers
+end
+
+function PointTracking:Setup(unitFrame, unit)
+    if PlayerClass == "DEATHKNIGHT" then
+        self:CreateRunes(unitFrame, unit)
+    else
+        self:CreateClassIcons(unitFrame, unit)
+        if not isBeta and PlayerClass == "WARLOCK" then
+            self:CreateBurningEmbers(unitFrame, unit)
+        end
+    end
 end
 
 function PointTracking:ForceUpdate()
