@@ -138,6 +138,7 @@ end
 function GridLayout:Grid2ChatCommand()
     if not(_G.Grid2 and _G.Grid2Layout and _G.Grid2Frame and _G.Grid2DB) then return end
     if not _G.InCombatLockdown() then
+        RealUI.Debug("Config", "/grid")
         RealUI:LoadConfig("HuD", "unitframes", "groups", "raid")
     end
 end

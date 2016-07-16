@@ -24,6 +24,7 @@ local isBeta = RealUI.isBeta
 local uiWidth, uiHeight = _G.UIParent:GetSize()
 
 local other do
+    debug("HuD Other")
     local ActionBars = RealUI:GetModule("ActionBars")
     local dbActionBars = ActionBars.db.profile
     other = {
@@ -37,6 +38,7 @@ local other do
                 name = _G.ADVANCED_OPTIONS,
                 type = "execute",
                 func = function(info, ...)
+                    RealUI.Debug("Config", "Config Bar")
                     RealUI:LoadConfig("RealUI")
                 end,
                 order = 0,
@@ -299,6 +301,7 @@ local other do
     }
 end
 local unitframes do
+    debug("HuD UnitFrames")
     local CombatFader = RealUI:GetModule("CombatFader")
     local UnitFrames = RealUI:GetModule("UnitFrames")
     local db = UnitFrames.db.profile
@@ -1029,6 +1032,7 @@ local unitframes do
     end
 end
 local castbars do
+    debug("HuD CastBars")
     local CastBars = RealUI:GetModule("CastBars")
     local db = CastBars.db.profile
     castbars = {
@@ -1196,6 +1200,7 @@ local castbars do
     }
 end
 local auratracker do
+    debug("HuD AuraTracking")
     local AuraTracking = RealUI:GetModule("AuraTracking")
     local db = AuraTracking.db.profile
     local trackingData = AuraTracking.db.class
@@ -1775,6 +1780,7 @@ local auratracker do
     end
 end
 local classresource do
+    debug("HuD ClassResource")
     local CombatFader = RealUI:GetModule("CombatFader")
     local PointTracking, pointDB
     local ClassResource, barDB
@@ -2166,6 +2172,8 @@ local classresource do
         end
     end
 end
+
+debug("HuD Options")
 options.HuD = {
     type = "group",
     args = {

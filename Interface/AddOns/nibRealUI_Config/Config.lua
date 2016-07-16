@@ -201,7 +201,11 @@ local hudConfig, hudToggle do
 end
 
 local function InitializeOptions()
-    debug("Init")
+    debug("InitializeOptions", options.RealUI, options.HuD)
+    if not (options.RealUI and options.HuD) then
+        -- Not sure how people are getting this....
+        return _G.print("Options initialization failed. Please notify the developer.")
+    end
     local slideAnim = hudConfig.slideAnim
     local highlight = hudConfig.highlight
     local hlAnim = highlight.hlAnim

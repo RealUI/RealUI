@@ -1,0 +1,12 @@
+tag Release-60204-22
+9ae718e784bf02b3ae1dde6621cfc3cd066db946
+Giovanni Gargani <giovanni.gargani@hexkeep.com>
+2016-07-16 15:04:50 +0200
+
+Fixed Ticket #12
+
+--------------------
+
+Giovanni Gargani:
+	- Version bump
+	- Fix for Legion
