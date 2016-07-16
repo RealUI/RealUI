@@ -343,6 +343,7 @@ function RealUI:HideTutorial()
     _G.RealUITutorialButtonClose:Hide()
     _G.UIFrameFadeOut(_G.RealUITutorialBG, 0.3, 0.5, 0)
     _G.RealUITutorialLogo:Hide()
+    RealUI.Debug("Config", "HideTutorial")
     RealUI:LoadConfig("HuD")
     RealUI.db.global.tutorial.stage = -1
 end
@@ -415,6 +416,7 @@ function RealUI:InitTutorial()
         btnOpen:Hide()
         btnSkip:Hide()
         tBG:Hide()
+        RealUI.Debug("Config", "SkipTutorial")
         RealUI:LoadConfig("HuD")
         RealUI.db.global.tutorial.stage = -1
     end)

@@ -1,6 +1,6 @@
 local _, private = ...
 local options = private.options
---local debug = private.debug
+local debug = private.debug
 
 -- Lua Globals --
 local _G = _G
@@ -54,6 +54,7 @@ local function CreateToggleOption(slug, name)
 end
 
 local core do
+    debug("Adv Core")
     local infoLine do
         local blocks = {
             start =         {L["Start"]},
@@ -1042,6 +1043,7 @@ local core do
     }
 end
 local skins do
+    debug("Adv Skins")
     order = order + 1
     local fonts do
         local LSM = _G.LibStub("LibSharedMedia-3.0")
@@ -1453,6 +1455,7 @@ local skins do
     end
 end
 local uiTweaks do
+    debug("Adv UITweaks")
     order = order + 1
     local altPowerBar do
         local MODNAME = "AltPowerBar"
@@ -3878,6 +3881,7 @@ local core do
 end
 ]]
 
+debug("Adv Options")
 options.RealUI = {
     name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
     type = "group",

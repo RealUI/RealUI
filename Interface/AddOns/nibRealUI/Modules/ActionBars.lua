@@ -515,6 +515,7 @@ end
 function ActionBars:BarChatCommand()
     if not (BT4) then return end
     if not _G.InCombatLockdown() then
+        RealUI.Debug("Config", "/bt")
         RealUI:LoadConfig("HuD", "other", "actionbars")
     end
 end

@@ -121,7 +121,10 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = L["Start_Config"],
-        func = function() RealUI:LoadConfig("HuD") end,
+        func = function()
+            RealUI.Debug("Config", "InfoLine")
+            RealUI:LoadConfig("HuD")
+        end,
         notCheckable = true
     },
     {text = L["Power_PowerMode"],
