@@ -2310,6 +2310,7 @@ local function Spec_Update(self)
 
     -- Info text
     local specIndex = _G.GetSpecialization()
+    if not specIndex then return end
     self.text:SetText(TalentInfo[specIndex].name)
     UpdateElementWidth(self)
 
