@@ -499,6 +499,7 @@ elseif class == "ROGUE" then
             end
         end)
     else
+        maxComboPoints = 5
         local self = {debug="cpWatcher"}
         Envenom(nil, self, nil, nil, true)
         Rupture(nil, self, nil, nil, true)

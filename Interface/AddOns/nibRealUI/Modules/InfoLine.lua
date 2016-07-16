@@ -121,7 +121,10 @@ local MicroMenu = {
         notCheckable = true
     },
     {text = L["Start_Config"],
-        func = function() RealUI:LoadConfig("HuD") end,
+        func = function()
+            RealUI.Debug("Config", "InfoLine")
+            RealUI:LoadConfig("HuD")
+        end,
         notCheckable = true
     },
     {text = L["Power_PowerMode"],
@@ -716,7 +719,7 @@ do
         showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
         showRep = repName
         if isBeta then
-            InfoLine:debug("Active artifact", artifactID)
+            InfoLine:debug("Active artifact", artifactID, ...)
             artifactID = ...
             if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
                 artifacts = artData:GetAllArtifactsInfo(artifactID)
@@ -2307,6 +2310,7 @@ local function Spec_Update(self)
 
     -- Info text
     local specIndex = _G.GetSpecialization()
+    if not specIndex then return end
     self.text:SetText(TalentInfo[specIndex].name)
     UpdateElementWidth(self)
 
@@ -3361,15 +3365,15 @@ function InfoLine:CreateFrames()
     ILFrames.xprep:RegisterEvent("DISABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("ENABLE_XP_GAIN")
     ILFrames.xprep:RegisterEvent("PLAYER_ENTERING_WORLD")
-    local function XR_OnEvent(...)
+    local function XR_OnEvent(element, ...)
         InfoLine:debug("XR_OnEvent", ...)
         if not db.elements.xprep then return end
-        InfoLine_XR_Update(ILFrames.xprep, ...)
+        InfoLine_XR_Update(element, ...)
     end
     if isBeta then
-        artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent)
-        artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent)
-        artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent)
+        artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent, ILFrames.xprep)
+        artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent, ILFrames.xprep)
+        artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent, ILFrames.xprep)
     end
     ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 

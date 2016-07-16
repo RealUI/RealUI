@@ -1190,6 +1190,7 @@ end
 
 ---- Config Button ----
 local function Config_OnMouseDown()
+    RealUI.Debug("Config", "Minimap")
     RealUI:LoadConfig("RealUI", "uiTweaks", "minimap")
 
     if _G.DropDownList1 then _G.DropDownList1:Hide() end

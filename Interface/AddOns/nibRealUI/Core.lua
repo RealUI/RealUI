@@ -503,7 +503,11 @@ function RealUI:PLAYER_ENTERING_WORLD()
     local ConfigStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
     _G.GameMenuFrame.realuiControl = RealUI:CreateTextButton(ConfigStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
     _G.GameMenuFrame.realuiControl:SetPoint("TOP", _G.GameMenuButtonContinue, "BOTTOM", 0, -16)
-    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() RealUI:LoadConfig("HuD"); _G.HideUIPanel(_G.GameMenuFrame) end)
+    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function()
+        RealUI.Debug("Config", "GameMenuFrame")
+        RealUI:LoadConfig("HuD")
+        _G.HideUIPanel(_G.GameMenuFrame)
+    end)
 
     -- Button Backgrounds
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
@@ -646,6 +650,7 @@ function RealUI:ADDON_LOADED(event, addon)
 end
 
 function RealUI:ChatCommand_Config()
+    RealUI.Debug("Config", "/real")
     dbg.tags.slashRealUITyped = true
     RealUI:LoadConfig("HuD")
 end
@@ -712,7 +717,10 @@ function RealUI:OnInitialize()
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function() RealUI:LoadConfig("RealUI") end)
+    self:RegisterChatCommand("realadv", function()
+        RealUI.Debug("Config", "/realadv")
+        RealUI:LoadConfig("RealUI")
+    end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", function() _G.ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
