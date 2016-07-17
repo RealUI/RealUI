@@ -2045,7 +2045,7 @@ local classresource do
                 },
             }
             classresource.args.points = points
-        else
+        elseif power then
             local fadeOptions = CombatFader:GetFadeConfig("PointTracking")
             power = power or {}
             for i = 1, #power do
