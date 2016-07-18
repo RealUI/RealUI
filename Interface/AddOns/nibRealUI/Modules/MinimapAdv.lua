@@ -1373,7 +1373,7 @@ local function Garrison_OnEvent(self, event, ...)
 end
 local function Garrison_OnLeave(self)
     MinimapAdv:debug("Garrison_OnLeave")
-    if not (self.MinimapLoopPulseAnim:IsPlaying() and _G.GarrisonLandingPage:IsShown()) then
+    if not (self.MinimapLoopPulseAnim:IsPlaying() and (_G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown())) then
         self.shouldShow = false
         fadeOut(self)
     end
