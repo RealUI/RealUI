@@ -157,33 +157,31 @@ local function CreatePowerBar(parent)
     parent.Power = power
 
     --[[ Druid Mana ]]--
-    if RealUI.class == "DRUID" then
-        local druidMana = _G.CreateFrame("StatusBar", nil, power)
-        druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
-        druidMana:SetStatusBarColor(0, 0, 0, 0.75)
-        druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
-        druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
-        druidMana:SetHeight(1)
+    local druidMana = _G.CreateFrame("StatusBar", nil, power)
+    druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+    druidMana:SetStatusBarColor(0, 0, 0, 0.75)
+    druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
+    druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
+    druidMana:SetHeight(1)
 
-        function druidMana:PostUpdate(unit, min, max)
-            if min == max then
-                self:Hide()
-            end
+    function druidMana:PostUpdate(unit, min, max)
+        if min == max then
+            self:Hide()
         end
-
-        --[[ test 
-        druidMana:SetMinMaxValues(0, 1)
-        druidMana:SetValue(0.75)
-        druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-        ]]
-        -- Add a background
-        local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
-        bg:SetAllPoints(druidMana)
-        bg:SetTexture(.2, .2, 1)
-
-        parent.DruidMana = druidMana
-        parent.DruidMana.bg = bg
     end
+
+    --[[ test 
+    druidMana:SetMinMaxValues(0, 1)
+    druidMana:SetValue(0.75)
+    druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+    ]]
+    -- Add a background
+    local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
+    bg:SetAllPoints(druidMana)
+    bg:SetTexture(.2, .2, 1)
+
+    parent.DruidMana = druidMana
+    parent.DruidMana.bg = bg
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
