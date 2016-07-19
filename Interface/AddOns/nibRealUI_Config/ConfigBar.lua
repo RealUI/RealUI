@@ -1796,6 +1796,7 @@ local classresource do
         power = PointTracking:GetResource()
         bars = RealUI:GetResourceBar()
     end
+    debug("power and bars", power, bars)
     if power or bars then
         classresource = {
             name = L["Resource"],
@@ -1810,7 +1811,11 @@ local classresource do
                     type = "toggle",
                     get = function(info) return isBeta and RealUI:GetModuleEnabled("ClassResource") or RealUI:GetModuleEnabled("PointTracking") end,
                     set = function(info, value)
-                        RealUI:SetModuleEnabled("PointTracking", value)
+                        if isBeta then
+                            RealUI:SetModuleEnabled("ClassResource", value)
+                        else
+                            RealUI:SetModuleEnabled("PointTracking", value)
+                        end
                         CloseHuDWindow()
                         RealUI:ReloadUIDialog()
                     end,
@@ -1926,7 +1931,6 @@ local classresource do
             }
         }
         if isBeta then
-            local fadeOptions = CombatFader:GetFadeConfig("ClassResource")
             local points = {
                 name = power.name,
                 type = "group",
@@ -1992,9 +1996,6 @@ local classresource do
                         end,
                         order = 25,
                     },
-                    headerFade = fadeOptions.header,
-                    enableFade = fadeOptions.enable,
-                    combatFade = fadeOptions.config,
                     headerPos = {
                         name = L["General_Position"],
                         type = "header",
@@ -2044,9 +2045,9 @@ local classresource do
                     },
                 },
             }
+            CombatFader:AddFadeConfig("ClassResource", points, 55)
             classresource.args.points = points
         elseif power then
-            local fadeOptions = CombatFader:GetFadeConfig("PointTracking")
             power = power or {}
             for i = 1, #power do
                 local pointName = _G.CombatLog_String_PowerType(power[i].id)
@@ -2115,9 +2116,6 @@ local classresource do
                             end,
                             order = 25,
                         },
-                        headerFade = fadeOptions.header,
-                        enableFade = fadeOptions.enable,
-                        combatFade = fadeOptions.config,
                         headerPos = {
                             name = L["General_Position"],
                             type = "header",
@@ -2167,6 +2165,7 @@ local classresource do
                         },
                     },
                 }
+                CombatFader:AddFadeConfig("PointTracking", points, 55)
                 classresource.args["point"..i] = points
             end
         end
