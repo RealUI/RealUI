@@ -4,6 +4,7 @@
 
 local parent, ns = ...
 local oUF = ns.oUF
+
 local isBetaClient = select(4, GetBuildInfo()) >= 70000
 
 local _PATTERN = '%[..-%]+'
@@ -16,7 +17,7 @@ local _ENV = {
 		return string.format("|cff%02x%02x%02x", r*255, g*255, b*255)
 	end,
 	ColorGradient = oUF.ColorGradient,
-	isBetaClient = isBetaClient
+	isBetaClient = isBetaClient,
 }
 local _PROXY = setmetatable(_ENV, {__index = _G})
 
@@ -124,6 +125,15 @@ local tagStrings = {
 		local _, x = UnitClass(u)
 		if(x) then
 			return Hex(_COLORS.class[x])
+		else
+			local id = u:match'arena(%d)$'
+			if(id) then
+				local specID = GetArenaOpponentSpec(tonumber(id))
+				if(specID and specID > 0) then
+					_, _, _, _, _, _, x = GetSpecializationInfoByID(specID)
+					return Hex(_COLORS.class[x])
+				end
+			end
 		end
 	end]],
 
@@ -285,15 +295,14 @@ local tagStrings = {
 	end]],
 
 	['holypower'] = [[function()
-		if(isBetaClient and GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION) then
+		if((isBetaClient and GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION))
+			or (not isBetaClient and IsPlayerSpell(85673)) then
 			return
 		end
 
-		if(IsPlayerSpell(85673)) then
-			local num = UnitPower('player', SPELL_POWER_HOLY_POWER)
-			if(num > 0) then
-				return num
-			end
+		local num = UnitPower('player', SPELL_POWER_HOLY_POWER)
+		if(num > 0) then
+			return num
 		end
 	end]],
 
@@ -314,6 +323,17 @@ local tagStrings = {
 			return 'Affix'
 		end
 	end]],
+
+	['arenaspec'] = [[function(u)
+		local id = u:match'arena(%d)$'
+		if(id) then
+			local specID = GetArenaOpponentSpec(tonumber(id))
+			if(specID and specID > 0) then
+				local _, specName = GetSpecializationInfoByID(specID)
+				return specName
+			end
+		end
+	end]],
 }
 
 if(isBetaClient) then
@@ -330,15 +350,6 @@ else
 			if(num > 0) then
 				return num
 			end
-		end
-	end]]
-
-	tagStrings['pereclipse'] = [[function(u)
-		local m = UnitPowerMax('player', SPELL_POWER_ECLIPSE)
-		if(m == 0) then
-			return 0
-		else
-			return math.abs(UnitPower('player', SPELL_POWER_ECLIPSE)/m*100)
 		end
 	end]]
 end
@@ -421,14 +432,16 @@ local tagEvents = {
 	['maxmana']             = 'UNIT_POWER UNIT_MAXPOWER',
 	['soulshards']          = 'UNIT_POWER SPELLS_CHANGED',
 	['holypower']           = 'UNIT_POWER SPELLS_CHANGED',
+	['arenaspec']           = 'ARENA_PREP_OPPONENT_SPECIALIZATIONS'
 }
 
 if(isBetaClient) then
 	tagEvents['arcanecharges'] = 'UNIT_POWER SPELLS_CHANGED'
+	tagEvents['soulshards'] = 'UNIT_POWER'
 	tagEvents['chi'] = 'UNIT_POWER SPELLS_CHANGED'
 else
-	tagEvents['pereclipse'] = 'UNIT_POWER'
 	tagEvents['shadoworbs'] = 'UNIT_POWER SPELLS_CHANGED'
+	tagEvents['soulshards'] = 'UNIT_POWER SPELLS_CHANGED'
 	tagEvents['chi'] = 'UNIT_POWER'
 end
 
@@ -441,7 +454,7 @@ local unitlessEvents = {
 
 	GROUP_ROSTER_UPDATE = true,
 
-	UNIT_COMBO_POINTS = true
+	ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 
 local events = {}

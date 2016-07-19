@@ -3681,6 +3681,13 @@ function InfoLine:OnInitialize()
     ndb = RealUI.db.profile
     ndbc = RealUI.db.char
 
+    if _G.type(dbc.xrstate) ~= "number" then
+        dbc.xrstate = nil
+    end
+    if dbc.specgear.primary then
+        dbc.specgear = nil
+    end
+
     RealUI.InfoLineICTips = db.other.icTips       -- Tablet-2.0 use
 
     local hasLDBDisplay = false
