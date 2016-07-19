@@ -316,10 +316,6 @@ local classPowers = {
 }
 function ClassResource:Setup(unitFrame, unit)
     -- Points
-    powerToken = classPowers[playerClass]
-    if powerToken then
-        self.points = {token = powerToken, name = _G[powerToken]}
-    end
     self:CreateClassIcons(unitFrame, unit)
     if playerClass == "DEATHKNIGHT" then
         self:CreateRunes(unitFrame, unit)
@@ -327,7 +323,6 @@ function ClassResource:Setup(unitFrame, unit)
 
     -- Bars
     if playerClass == "MONK" then
-        self.bar = _G.GetSpellInfo(124255) -- Stagger
         self:CreateStagger(unitFrame, unit)
     end
 end
@@ -411,6 +406,15 @@ function ClassResource:OnInitialize()
     })
     db = self.db.class
     pointDB, barDB = db.points, db.bar
+
+    -- Setup resources
+    powerToken = classPowers[playerClass]
+    if powerToken then
+        self.points = {token = powerToken, name = _G[powerToken]}
+    end
+    if playerClass == "MONK" then
+        self.bar = _G.GetSpellInfo(124255) -- Stagger
+    end
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
