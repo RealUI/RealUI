@@ -256,7 +256,7 @@ function ClassResource:CreateRunes(unitFrame, unit)
         Runes[index] = Rune
     end
 
-    function Runes:PostUpdateRune(rune, rid, start, duration, runeReady)
+    function Runes:PostUpdate(rune, rid, start, duration, runeReady)
         local color = unitFrame.colors.power.RUNES
         if runeReady then
             rune.tex:SetColorTexture(color[1], color[2], color[3])

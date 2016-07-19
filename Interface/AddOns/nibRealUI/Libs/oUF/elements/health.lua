@@ -56,12 +56,12 @@
    Health:SetPoint('TOP')
    Health:SetPoint('LEFT')
    Health:SetPoint('RIGHT')
-   
+
    -- Add a background
    local Background = Health:CreateTexture(nil, 'BACKGROUND')
    Background:SetAllPoints(Health)
    Background:SetTexture(1, 1, 1, .5)
-   
+
    -- Options
    Health.frequentUpdates = true
    Health.colorTapping = true
@@ -69,10 +69,10 @@
    Health.colorClass = true
    Health.colorReaction = true
    Health.colorHealth = true
-   
+
    -- Make the background darker.
    Background.multiplier = .5
-   
+
    -- Register it with oUF
    self.Health = Health
    self.Health.bg = Background
@@ -86,15 +86,24 @@
 local parent, ns = ...
 local oUF = ns.oUF
 
+local isBetaClient = select(4, GetBuildInfo()) >= 70000
+
 oUF.colors.health = {49/255, 207/255, 37/255}
 
 local Update = function(self, event, unit)
-	if(self.unit ~= unit) then return end
+	local arenaPrep = event == 'ArenaPreparation'
+	if(self.unit ~= unit and not arenaPrep) then return end
 	local health = self.Health
 
 	if(health.PreUpdate) then health:PreUpdate(unit) end
 
-	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+	local min, max
+	if(arenaPrep) then
+		min, max = 1, 1
+	else
+		min, max = UnitHealth(unit), UnitHealthMax(unit)
+	end
+
 	local disconnected = not UnitIsConnected(unit)
 	health:SetMinMaxValues(0, max)
 
@@ -107,9 +116,12 @@ local Update = function(self, event, unit)
 	health.disconnected = disconnected
 
 	local r, g, b, t
-	if(health.colorTapping and not UnitPlayerControlled(unit) and
-		UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not
-		UnitIsTappedByAllThreatList(unit)) then
+	if(health.colorClass and arenaPrep) then
+		local _, _, _, _, _, _, class = GetSpecializationInfoByID(GetArenaOpponentSpec(self.id))
+		t = self.colors.class[class]
+	elseif(health.colorTapping and not UnitPlayerControlled(unit) and
+		(isBetaClient and UnitIsTapDenied(unit) or not isBetaClient and UnitIsTapped(unit) and
+		not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit))) then
 		t = self.colors.tapped
 	elseif(health.colorDisconnected and not UnitIsConnected(unit)) then
 		t = self.colors.disconnected
