@@ -314,7 +314,8 @@ do
 				anim = frame:CreateAnimationGroup()
 				local alpha = anim:CreateAnimation("Alpha")
 				alpha:SetOrder(1)
-				alpha:SetChange(-0.9)
+				alpha:SetFromAlpha(1)
+				alpha:SetToAlpha(0.1)
 				anim:SetLooping("REPEAT")
 				anim.alpha = alpha
 				frame.blinkAnim = anim

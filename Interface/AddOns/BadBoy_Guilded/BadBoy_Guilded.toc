@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: BadBoy_Guilded
 ## Notes: Removes guild advertising from public channels.
 ## Notes-frFR: Enlève les publicités des guildes des canaux publiques.
@@ -11,7 +11,7 @@
 ## SavedVariablesPerCharacter: BADBOY_GWHISPER
 ## X-Category: Chat/Communication
 ## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r244-release
+## X-Curse-Packaged-Version: r247-release
 ## X-Curse-Project-Name: BadBoy_Guilded: Block Guild Advertising
 ## X-Curse-Project-ID: badboy_guilded
 ## X-Curse-Repository-ID: wow/badboy_guilded/mainline

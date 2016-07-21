@@ -1,10 +1,15 @@
-local MAJOR, MINOR = 'Kui-1.0', 13
+local MAJOR, MINOR = 'Kui-1.0', 18
 local kui = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not kui then
     -- already registered
     return
 end
+
+local TRILLION=1000000000000
+local BILLION=1000000000
+local MILLION=1000000
+local THOUSAND=1000
 --------------------------------------------------------------- media / files --
 local media = "Interface\\AddOns\\Kui_Media\\"
 kui.m = {
@@ -37,13 +42,39 @@ local ct = { -- classification table
     worldboss = { 'b',  'boss'       }
 }
 ------------------------------------------------------------------- functions --
-kui.print = function(...)
-    local vals = {...}
-    local msg = ''
-    for k,v in ipairs(vals) do
-        msg = tostring(v)..', '
+kui.table_to_string = function(tbl,depth)
+    if depth and depth >= 3 then
+        return '{ ... }'
     end
-    print(GetTime()..': '..msg:gsub(", $",""))
+    local str
+    for k,v in pairs(tbl) do
+        if type(v) ~= 'userdata' then
+            if type(v) == 'table' then
+                v = kui.table_to_string(v,(depth and depth+1 or 1))
+            elseif type(v) == 'function' then
+                v = 'function'
+            elseif type(v) == 'string' then
+                v = '"'..v..'"'
+            end
+
+            if type(k) == 'string' then
+                k = '"'..k..'"'
+            end
+
+            str = (str and str..'|cff999999,|r ' or '|cff999999{|r ')..'|cffffff99['..tostring(k)..']|r |cff999999=|r |cffffffff'..tostring(v)..'|r'
+        end
+    end
+    return (str or '{ ')..' }'
+end
+kui.print = function(...)
+    local msg
+    for k,v in ipairs({...}) do
+        if type(v) == 'table' then
+            v = kui.table_to_string(v)
+        end
+        msg = (msg and msg..', ' or '')..tostring(v)
+    end
+    print(GetTime()..': '..(msg or 'nil'))
 end
 kui.GetClassColour = function(class, str)
     if not class then
@@ -59,7 +90,9 @@ kui.GetClassColour = function(class, str)
         class = RAID_CLASS_COLORS[class]
     end
 
-    if str then
+    if str == 2 then
+        return class.r,class.g,class.b
+    elseif str then
         return string.format("%02x%02x%02x", class.r*255, class.g*255, class.b*255)
     else
         return class
@@ -71,26 +104,27 @@ end
 kui.GetUnitColour = function(unit, str)
     -- class colour for players or pets
     -- faction colour for NPCs
-    local ret, r, g, b
+    local r,g,b
 
-    if (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit))
-        or UnitIsDeadOrGhost(unit)
-        or not UnitIsConnected(unit)
+    if UnitIsTapDenied(unit) or
+       UnitIsDeadOrGhost(unit) or
+       not UnitIsConnected(unit)
     then
-        ret = { r = .5, g = .5, b = .5 }
+        r,g,b = .5,.5,.5
     else
         if UnitIsPlayer(unit) or kui.UnitIsPet(unit) then
             return kui.GetClassColour(unit, str)
         else
             r, g, b = UnitSelectionColor(unit)
-            ret = { r = r, g = g, b = b }
         end
     end
 
-    if str then
-        return string.format("%02x%02x%02x", ret.r*255, ret.g*255, ret.b*255)
+    if str == 2 then
+        return r,g,b
+    elseif str then
+        return string.format("%02x%02x%02x", r*255, g*255, b*255)
     else
-        return ret
+        return {r=r,g=g,b=b}
     end
 end
 kui.UnitLevel = function(unit, long)
@@ -157,12 +191,16 @@ kui.CreateFontString = function(parent, args)
 end
 -- Format numbers
 kui.num = function(num)
-    if num < 1000 then
+    if num < THOUSAND then
         return num
-    elseif num >= 1000000 then
-        return string.format('%.1fm', num/1000000)
-    elseif num >= 1000 then
-        return string.format('%.1fk', num/1000)
+    elseif num >= TRILLION then
+        return string.format('%.3ft', num/TRILLION)
+    elseif num >= BILLION then
+        return string.format('%.3fb', num/BILLION)
+    elseif num >= MILLION then
+        return string.format('%.2fm', num/MILLION)
+    elseif num >= THOUSAND then
+        return string.format('%.1fk', num/THOUSAND)
     end
 end
 -- Format times (given in seconds)

@@ -1546,6 +1546,7 @@ local masterProfile = {
  SHAMAN			= CreateClassSettingsTable("SHAMAN"),
  WARLOCK		= CreateClassSettingsTable("WARLOCK"),
  WARRIOR		= CreateClassSettingsTable("WARRIOR"),
+ DEMONHUNTER	= CreateClassSettingsTable("DEMONHUNTER"),
 
 
  -- Throttle settings.
@@ -1767,9 +1768,9 @@ end
 -- ****************************************************************************
 local function DisableBlizzardCombatText()
  -- Turn off Blizzard's default combat text.
- SetCVar("CombatDamage", 0)
- SetCVar("CombatHealing", 0)
- SetCVar("enableCombatText", 0)
+ SetCVar("enableFloatingCombatText", 0)
+ SetCVar("floatingCombatTextCombatHealing", 0)
+ SetCVar("floatingCombatTextCombatDamage", 0)
  SHOW_COMBAT_TEXT = "0"
  if (CombatText_UpdateDisplayedMessages) then CombatText_UpdateDisplayedMessages() end
 end
@@ -2183,7 +2184,10 @@ local function OnEvent(this, event, arg1)
   SetOptionUserDisabled(IsModDisabled())
   
   -- Disable Blizzard's combat text if it's the first load.
-  if (isFirstLoad) then DisableBlizzardCombatText() end
+  --if (isFirstLoad) then DisableBlizzardCombatText() end
+  if GetCVar("enableFloatingCombatText") ~= "0" or GetCVar("floatingCombatTextCombatHealing") ~= "0" or GetCVar("floatingCombatTextCombatDamage") ~= "0" then
+   DisableBlizzardCombatText()
+  end
 
   -- Support CUSTOM_CLASS_COLORS.
   if (CUSTOM_CLASS_COLORS) then
