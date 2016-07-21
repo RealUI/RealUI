@@ -86,10 +86,10 @@ local function PredictDuration(gap, base)
 end
 
 if class == "DRUID" then
+    maxComboPoints = 5
     if isBeta then
         SavageRoar = PredictDuration(4, 8)
     else
-        maxComboPoints = 5
         SavageRoar = PredictDuration(6, 18)
     end
     SavageRoar(nil, {debug="cpWatcher"}, nil, nil, true)
