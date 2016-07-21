@@ -1,8 +1,8 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Init
 ## Notes: Initialization for RealUI
 ## Author: Gethe
-## Version: 8.1 r17b
+## Version: 8.1 r17c
 ## SavedVariables: RealUI_InitDB
 ## SavedVariablesPerCharacter: RealUI_Debug
 
