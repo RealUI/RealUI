@@ -499,10 +499,6 @@ local function DeleteBar()
 end
 
 -- Default bar information tables
-local barSources = { "Death Knight", "Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman", "Warlock", "Warrior", "Monk", "Racial", "Spell" }
-local classIndex = { DEATHKNIGHT = 1, DRUID = 2, HUNTER = 3, MAGE = 4, PALADIN = 5, PRIEST = 6, ROGUE = 7, SHAMAN = 8, WARLOCK = 9, WARRIOR = 10, MONK = 11 }
-local classList = { "DEATHKNIGHT", "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR", "MONK" }
-local petClassList = { true, false, true, false, false, false, false, false, true, false, false }
 local unitList = { player = "Player", pet = "Pet", target = "Target", focus = "Focus",
 	mouseover = "Mouseover", pettarget = "Pet's Target", targettarget = "Target's Target", focustarget = "Focus's Target" }
 local castList = { player = "Player", pet = "Pet", other = "Other", anyone = "Anyone" }
@@ -1127,7 +1123,7 @@ local function SetTestFieldString(ttype, fname, s)
 	if whiteStart == 1 then s = string.sub(s, whiteEnd + 1) end
 	local str = string.reverse(s) -- get the string after white space, reverse again to restore original order
 	if str ~= "" then -- make sure not empty string
-		if fname ~= "item" and fname ~= "spec" and fname ~= "glyph" and fname ~= "stance" and fname ~= "family" and fname ~= "maxHealth" then str = ValidateSpellName(str, true) end
+		if fname ~= "item" and fname ~= "spec" and fname ~= "stance" and fname ~= "family" and fname ~= "maxHealth" then str = ValidateSpellName(str, true) end
 		SetTestField(ttype, fname, str)
 	else
 		SetTestField(ttype, fname, nil)
@@ -1201,7 +1197,8 @@ local function AddNewInternalCooldown(name)
 	local id = tonumber(name)
 	if not id then id = MOD:GetSpellID(name) end
 	if id then
-		local n, _, icon = GetSpellInfo(id) -- n must be valid
+		local n = GetSpellInfo(id) -- n must be valid
+		local icon = GetSpellTexture(id)
 		local ict = MOD.db.global.InternalCooldowns[n]
 		if not ict then
 			ict = { duration = 0; id = id; icon = icon }
@@ -1325,7 +1322,8 @@ local function AddNewSpellEffect(name)
 	local id = tonumber(name)
 	if not id then id = MOD:GetSpellID(name) end
 	if id then
-		local n, _, icon = GetSpellInfo(id) -- must be valid
+		local n = GetSpellInfo(id) -- must be valid
+		local icon = GetSpellTexture(id)
 		local ect = MOD.db.global.SpellEffects[n]
 		if not ect then
 			ect = { duration = 0; id = id; icon = icon }
@@ -1543,12 +1541,6 @@ MOD.OptionsTable = {
 							desc = L["If checked, Raven will hide the default user interface for buffs."],
 							get = function(info) return MOD.db.profile.hideBlizz end,
 							set = function(info, value) MOD.db.profile.hideBlizz = value end,
-						},
-						HideConsolidatedBuffsGroup = {
-							type = "toggle", order = 21, name = L["Hide Consolidated"],
-							desc = L["If checked, Raven will hide the default consolidated buffs. Note that you enable/disable consolidated buffs in the game's Interface options under Buffs and Debuffs."],
-							get = function(info) return MOD.db.profile.hideConsolidated end,
-							set = function(info, value) MOD.db.profile.hideConsolidated = value end,
 						},
 						HideBlizzRunesGroup = {
 							type = "toggle", order = 25, name = L["Hide Blizzard Runes"],
@@ -3585,6 +3577,14 @@ MOD.OptionsTable = {
 											set = function(info, value)
 												local t = GetBarGroupField("showClasses")
 												if not t then SetBarGroupField("showClasses", { DEATHKNIGHT = not value } ) else t.DEATHKNIGHT = not value end
+											end
+										},
+										DemonHunter = {
+											type = "toggle", order = 60, name = L["Demon Hunter"],
+											get = function(info) local t = GetBarGroupField("showClasses"); return not t or not t.DEMONHUNTER end,
+											set = function(info, value)
+												local t = GetBarGroupField("showClasses")
+												if not t then SetBarGroupField("showClasses", { DEMONHUNTER = not value } ) else t.DEMONHUNTER = not value end
 											end
 										},
 									},
@@ -7007,114 +7007,27 @@ MOD.OptionsTable = {
 										},
 									},
 								},
-								CheckBurningEmbersGroup = {
-									type = "group", order = 74, name = L["Burning Embers"], inline = true, 
+								CheckLunarPower = {
+									type = "group", order = 77, name = L["Lunar Power"], inline = true, 
 									args = {
-										CheckPowerEnable = {
+										CheckLunarEnable = {
 											type = "toggle", order = 1, name = L["Enable"], width = "half",
-											desc = L["If checked, test the player's burning embers segment count (there are 10 segments per ember)."],
-											get = function(info) return IsTestFieldOn("Player Status", "checkEmbers") end,
-											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkEmbers", v) end,
+											desc = L["If checked, test the player's lunar power. You can set power level and the comparison to use (either less or greater than the power level)."],
+											get = function(info) return IsTestFieldOn("Player Status", "checkLunarPower") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkLunarPower", v) end,
 										},
-										CheckPower = {
-											type = "toggle", order = 2, name = L["Minimum"],
-											desc = L["If checked, player must have at least this many burning embers, otherwise must be less."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEmbers") end,
-											get = function(info) return GetTestField("Player Status", "checkEmbers") == true end,
-											set = function(info, value) SetTestField("Player Status", "checkEmbers", value) end,
-										},
-										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 30, step = 1,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEmbers") end,
-											get = function(info) return GetTestField("Player Status", "minEmbers") end,
-											set = function(info, value) SetTestField("Player Status", "minEmbers", value) end,
-										},
-									},
-								},
-								CheckDemonicFuryGroup = {
-									type = "group", order = 76, name = L["Demonic Fury"], inline = true, 
-									args = {
-										CheckPowerEnable = {
-											type = "toggle", order = 1, name = L["Enable"], width = "half",
-											desc = L["If checked, test the player's demonic fury."],
-											get = function(info) return IsTestFieldOn("Player Status", "checkFury") end,
-											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkFury", v) end,
-										},
-										CheckPower = {
-											type = "toggle", order = 2, name = L["Minimum"],
-											desc = L["If checked, player must have at least this much demonic fury, otherwise must be less."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkFury") end,
-											get = function(info) return GetTestField("Player Status", "checkFury") == true end,
-											set = function(info, value) SetTestField("Player Status", "checkFury", value) end,
-										},
-										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 1000, step = 1,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkFury") end,
-											get = function(info) return GetTestField("Player Status", "minFury") end,
-											set = function(info, value) SetTestField("Player Status", "minFury", value) end,
-										},
-									},
-								},
-								CheckEclipsePower = {
-									type = "group", order = 77, name = L["Eclipse Power"], inline = true, 
-									args = {
-										CheckEclipseEnable = {
-											type = "toggle", order = 1, name = L["Enable"], width = "half",
-											desc = L["If checked, test the player's eclipse power. You can set power level (-100 to -1 for lunar power, 1 to 100 for solar power) and the comparison to use (either less or greater than the power level)."],
-											get = function(info) return IsTestFieldOn("Player Status", "checkEclipsePower") end,
-											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkEclipsePower", v) end,
-										},
-										CheckEclipse = {
+										CheckLunar = {
 											type = "toggle", order = 10, name = L["Minimum"],
-											desc = L["If checked, player's eclipse power must be at least this level, otherwise must be less."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipsePower") end,
-											get = function(info) return GetTestField("Player Status", "checkEclipsePower") == true end,
-											set = function(info, value) SetTestField("Player Status", "checkEclipsePower", value) end,
+											desc = L["If checked, player's lunar power must be at least this level, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Player Status", "checkLunarPower") end,
+											get = function(info) return GetTestField("Player Status", "checkLunarPower") == true end,
+											set = function(info, value) SetTestField("Player Status", "checkLunarPower", value) end,
 										},
-										EclipseRange = {
-											type = "range", order = 20, name = "", min = -100, max = 100, step = 1,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipsePower") end,
-											get = function(info) return GetTestField("Player Status", "minEclipsePower") end,
-											set = function(info, value) SetTestField("Player Status", "minEclipsePower", value) end,
-										},
-									},
-								},
-								CheckEclipseGroup = {
-									type = "group", order = 78, name = L["Eclipse State"], inline = true, 
-									args = {
-										CheckEclipseEnable = {
-											type = "toggle", order = 1, name = L["Enable"], width = "half",
-											desc = L["If checked, test the player's eclipse status. You can test current eclipse direction (toward sun or moon) and whether lunar or solar eclipse is active."],
-											get = function(info) return IsTestFieldOn("Player Status", "checkEclipse") end,
-											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkEclipse", v) end,
-										},
-										SolarEclipse = {
-											type = "toggle", order = 40, name = L["Solar"], width = "half",
-											desc = L["If checked, player must be in Solar Eclipse."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipse") end,
-											get = function(info) return GetTestField("Player Status", "checkSolar") end,
-											set = function(info, value) SetTestField("Player Status", "checkSolar", value) end,
-										},
-										LunarEclipse = {
-											type = "toggle", order = 50, name = L["Lunar"], width = "half",
-											desc = L["If checked, player must be in Lunar Eclipse."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipse") end,
-											get = function(info) return GetTestField("Player Status", "checkLunar") end,
-											set = function(info, value) SetTestField("Player Status", "checkLunar", value) end,
-										},
-										EclipseSun = {
-											type = "toggle", order = 60, name = L[">> Sun"], width = "half",
-											desc = L["If checked, eclipse direction must be going toward the sun."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipse") end,
-											get = function(info) return GetTestField("Player Status", "checkSun") end,
-											set = function(info, value) SetTestField("Player Status", "checkSun", value) end,
-										},
-										EclipseMoon = {
-											type = "toggle", order = 70, name = L[">> Moon"], width = "half",
-											desc = L["If checked, eclipse direction must be going toward the moon."],
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkEclipse") end,
-											get = function(info) return GetTestField("Player Status", "checkMoon") end,
-											set = function(info, value) SetTestField("Player Status", "checkMoon", value) end,
+										LunarRange = {
+											type = "range", order = 20, name = "", min = 1, max = 100, step = 1,
+											disabled = function(info) return IsTestFieldOff("Player Status", "checkLunarPower") end,
+											get = function(info) return GetTestField("Player Status", "minLunarPower") end,
+											set = function(info, value) SetTestField("Player Status", "minLunarPower", value) end,
 										},
 									},
 								},
@@ -7123,99 +7036,22 @@ MOD.OptionsTable = {
 									args = {
 										CheckRunes = {
 											type = "toggle", order = 10, name = L["Enable"], width = "half",
-											desc = L["If checked, test the player's rune status."],
+											desc = L["If checked, test how many available runes the player has."],
 											get = function(info) return IsTestFieldOn("Player Status", "checkRunes") end,
 											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkRunes", v) end,
 										},
-										CheckAvailableGroup = {
-											type = "group", order = 30, name = L["Available"], inline = true,
-											args = {
-												DoBlood = {
-													type = "toggle", order = 20, name = L["Blood"], width = "half",
-													desc = L["If checked, must have at least one blood rune available (or enough death runes)."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
-													get = function(info) return GetTestField("Player Status", "needBlood") == true end,
-													set = function(info, value) SetTestField("Player Status", "needBlood", value) end,
-												},
-												DoFrost = {
-													type = "toggle", order = 30, name = L["Frost"], width = "half",
-													desc = L["If checked, must have at least one frost rune available (or enough death runes)."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
-													get = function(info) return GetTestField("Player Status", "needFrost") == true end,
-													set = function(info, value) SetTestField("Player Status", "needFrost", value) end,
-												},
-												DoUnholy = {
-													type = "toggle", order = 40, name = L["Unholy"], width = "half",
-													desc = L["If checked, must have at least one unholy rune available (or enough death runes)."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
-													get = function(info) return GetTestField("Player Status", "needUnholy") == true end,
-													set = function(info, value) SetTestField("Player Status", "needUnholy", value) end,
-												},
-												DoAny = {
-													type = "toggle", order = 50, name = L["Any"], width = "half",
-													desc = L["If checked, at least one rune of any type must be available."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
-													get = function(info) return GetTestField("Player Status", "checkAnyRune") == true end,
-													set = function(info, value) SetTestField("Player Status", "checkAnyRune", value) end,
-												},
-												NoDeath = {
-													type = "toggle", order = 60, name = L["Ignore Death"],
-													desc = L["If checked, ignore death runes when checking rune availability."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") or
-														not ((GetTestField("Player Status", "checkAnyRune") == true) or
-														(GetTestField("Player Status", "needUnholy") == true) or
-														(GetTestField("Player Status", "needFrost") == true) or
-														(GetTestField("Player Status", "needBlood") == true))
-													end,
-													get = function(info) return GetTestField("Player Status", "checkDeath") == true end,
-													set = function(info, value) SetTestField("Player Status", "checkDeath", value) end,
-												},
-											},
-										},
-										CheckRechargeGroup = {
-											type = "group", order = 40, name = L["Recharging"], inline = true,
+										CheckMinimum = {
+											type = "toggle", order = 20, name = L["Minimum"],
+											desc = L["If checked, player must have at least this many available runes, otherwise must be fewer."],
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
-											args = {
-												CheckBlood = {
-													type = "toggle", order = 10, name = L["Blood"], width = "half",
-													desc = L["If checked, test blood runes."],
-													get = function(info) return GetTestField("Player Status", "checkBlood") end,
-													set = function(info, v) SetTestField("Player Status", "checkBlood", v) end,
-												},
-												BloodRecharge = {
-													type = "toggle", order = 15, name = L[">= 1"], width = "half",
-													desc = L["If checked, at least one blood rune must be recharging, otherwise none."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") or not GetTestField("Player Status", "checkBlood") end,
-													get = function(info) return GetTestField("Player Status", "chargeBlood") == true end,
-													set = function(info, value) SetTestField("Player Status", "chargeBlood", value) end,
-												},
-												CheckFrost = {
-													type = "toggle", order = 20, name = L["Frost"], width = "half",
-													desc = L["If checked, test frost runes."],
-													get = function(info) return GetTestField("Player Status", "checkFrost") end,
-													set = function(info, v) SetTestField("Player Status", "checkFrost", v) end,
-												},
-												FrostRecharge = {
-													type = "toggle", order = 25, name = L[">= 1"], width = "half",
-													desc = L["If checked, at least one frost rune must be recharging, otherwise none."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") or not GetTestField("Player Status", "checkFrost") end,
-													get = function(info) return GetTestField("Player Status", "chargeFrost") == true end,
-													set = function(info, value) SetTestField("Player Status", "chargeFrost", value) end,
-												},
-												CheckUnholy = {
-													type = "toggle", order = 30, name = L["Unholy"], width = "half",
-													desc = L["If checked, test unholy runes."],
-													get = function(info) return GetTestField("Player Status", "checkUnholy") end,
-													set = function(info, v) SetTestField("Player Status", "checkUnholy", v) end,
-												},
-												UnholyRecharge = {
-													type = "toggle", order = 35, name = L[">= 1"], width = "half",
-													desc = L["If checked, at least one unholy rune must be recharging, otherwise none."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") or not GetTestField("Player Status", "checkUnholy") end,
-													get = function(info) return GetTestField("Player Status", "chargeUnholy") == true end,
-													set = function(info, value) SetTestField("Player Status", "chargeUnholy", value) end,
-												},
-											},
+											get = function(info) return GetTestField("Player Status", "checkRunes") == true end,
+											set = function(info, value) SetTestField("Player Status", "checkRunes", value) end,
+										},
+										RuneCount = {
+											type = "range", order = 30, name = "", min = 1, max = 6, step = 1,
+											disabled = function(info) return IsTestFieldOff("Player Status", "checkRunes") end,
+											get = function(info) return GetTestField("Player Status", "minRunes") end,
+											set = function(info, value) SetTestField("Player Status", "minRunes", value) end,
 										},
 									},
 								},
@@ -7228,105 +7064,12 @@ MOD.OptionsTable = {
 											get = function(info) return IsTestFieldOn("Player Status", "checkTotems") end,
 											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkTotems", v) end,
 										},
-										CheckAirGroup = {
-											type = "group", order = 20, name = L["Air Totem"], inline = true,
+										TotemName = {
+											type = "input", order = 20, name = L["Totem Name"], width = "double",
+											desc = L["Enter name of specific totem to check is active."],
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") end,
-											args = {
-												Active = {
-													type = "toggle", order = 10, name = L["True"], width = "half",
-													desc = L["If checked, must have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "air") and GetTestField("Player Status", "air") end,
-													set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "air", v) end,
-												},
-												NotActive = {
-													type = "toggle", order = 15, name = L["False"], width = "half",
-													desc = L["If checked, must not have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "air") and not GetTestField("Player Status", "air") end,
-													set = function(info, value) local v = Off if value then v = false end SetTestField("Player Status", "air", v) end,
-												},
-												TotemName = {
-													type = "input", order = 20, name = L["Totem Name"], width = "double",
-													desc = L["Enter name of specific totem to check is active."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") or IsTestFieldOff("Player Status", "air") end,
-													get = function(info) return GetTestField("Player Status", "airTotem") end,
-													set = function(info, value) SetTestFieldString("Player Status", "airTotem", value) end,
-												},
-											},
-										},
-										CheckEarthGroup = {
-											type = "group", order = 30, name = L["Earth Totem"], inline = true,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") end,
-											args = {
-												Active = {
-													type = "toggle", order = 10, name = L["True"], width = "half",
-													desc = L["If checked, must have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "earth") and GetTestField("Player Status", "earth") end,
-													set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "earth", v) end,
-												},
-												NotActive = {
-													type = "toggle", order = 15, name = L["False"], width = "half",
-													desc = L["If checked, must not have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "earth") and not GetTestField("Player Status", "earth") end,
-													set = function(info, value) local v = Off if value then v = false end SetTestField("Player Status", "earth", v) end,
-												},
-												TotemName = {
-													type = "input", order = 20, name = L["Totem Name"], width = "double",
-													desc = L["Enter name of specific totem to check is active."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") or IsTestFieldOff("Player Status", "earth") end,
-													get = function(info) return GetTestField("Player Status", "earthTotem") end,
-													set = function(info, value) SetTestFieldString("Player Status", "earthTotem", value) end,
-												},
-											},
-										},
-										CheckFireGroup = {
-											type = "group", order = 40, name = L["Fire Totem"], inline = true,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") end,
-											args = {
-												Active = {
-													type = "toggle", order = 10, name = L["True"], width = "half",
-													desc = L["If checked, must have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "fire") and GetTestField("Player Status", "fire") end,
-													set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "fire", v) end,
-												},
-												NotActive = {
-													type = "toggle", order = 15, name = L["False"], width = "half",
-													desc = L["If checked, must not have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "fire") and not GetTestField("Player Status", "fire") end,
-													set = function(info, value) local v = Off if value then v = false end SetTestField("Player Status", "fire", v) end,
-												},
-												TotemName = {
-													type = "input", order = 20, name = L["Totem Name"], width = "double",
-													desc = L["Enter name of specific totem to check is active."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") or IsTestFieldOff("Player Status", "fire") end,
-													get = function(info) return GetTestField("Player Status", "fireTotem") end,
-													set = function(info, value) SetTestFieldString("Player Status", "fireTotem", value) end,
-												},
-											},
-										},
-										CheckWaterGroup = {
-											type = "group", order = 50, name = L["Water Totem"], inline = true,
-											disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") end,
-											args = {
-												Active = {
-													type = "toggle", order = 10, name = L["True"], width = "half",
-													desc = L["If checked, must have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "water") and GetTestField("Player Status", "water") end,
-													set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "water", v) end,
-												},
-												NotActive = {
-													type = "toggle", order = 15, name = L["False"], width = "half",
-													desc = L["If checked, must not have an active totem of this type (or specific totem if Totem Name is defined)."],
-													get = function(info) return IsTestFieldOn("Player Status", "water") and not GetTestField("Player Status", "water") end,
-													set = function(info, value) local v = Off if value then v = false end SetTestField("Player Status", "water", v) end,
-												},
-												TotemName = {
-													type = "input", order = 20, name = L["Totem Name"], width = "double",
-													desc = L["Enter name of specific totem to check is active."],
-													disabled = function(info) return IsTestFieldOff("Player Status", "checkTotems") or IsTestFieldOff("Player Status", "water") end,
-													get = function(info) return GetTestField("Player Status", "waterTotem") end,
-													set = function(info, value) SetTestFieldString("Player Status", "waterTotem", value) end,
-												},
-											},
+											get = function(info) return GetTestField("Player Status", "totem") end,
+											set = function(info, value) SetTestFieldString("Player Status", "totem", value) end,
 										},
 									},
 								},
@@ -7481,23 +7224,6 @@ MOD.OptionsTable = {
 											desc = L['Enter a spell name (or numeric identifier) to test is known in the spellbook.'],
 											get = function(info) return GetTestField("Player Status", "spell") end,
 											set = function(info, value) SetTestFieldString("Player Status", "spell", value) end,
-										},
-									},
-								},
-								CheckGlyphGroup = {
-									type = "group", order = 110, name = L["Glyph"], inline = true, 
-									args = {
-										CheckGlyphEnable = {
-											type = "toggle", order = 10, name = L["Enable"], width = "half",
-											desc = L["If checked, test if a glyph is active."],
-											get = function(info) return IsTestFieldOn("Player Status", "checkGlyph") end,
-											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkGlyph", v) end,
-										},
-										GlyphName = {
-											type = "input", order = 20, name = L["Glyph"],
-											desc = L['Enter short name for glyph (e.g., "Glyph of Overpower" is entered as "Overpower").'],
-											get = function(info) return GetTestField("Player Status", "glyph") end,
-											set = function(info, value) SetTestFieldString("Player Status", "glyph", value) end,
 										},
 									},
 								},

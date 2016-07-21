@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
 ## Notes: RealUI dev tweaks
 ## LoadWith: Blizzard_StoreUI

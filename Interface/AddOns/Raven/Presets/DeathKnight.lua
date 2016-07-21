@@ -1,34 +1,29 @@
 -- Death Knight
 
 Raven.runeSpells = {
-	["Army of the Dead"] = { blood = true, frost = true, unholy = true, id = 42650 },
-	["Chains of Ice"] = { frost = true, id = 45524 },
-	["Control Undead"] = { unholy = true, id = 111673 },
-	["Dark Transformation"] = { unholy = true, id = 63560 },
-	["Death and Decay"] = { unholy = true, id = 43265 },
-	["Death Gate"] = { unholy = true, id = 50977 },
-	["Death Strike"] = { frost = true, unholy = true, id = 49998 },
-	["Festering Strike"] = { blood = true, frost = true, id = 85948 },
-	["Heart Strike"] = { blood = true, id = 55050 },
-	["Howling Blast"] = { frost = true, id = 49184 },
-	["Icy Touch"] = { frost = true, id = 45477 },
-	["Obliterate"] = { frost = true, unholy = true, id = 49020 },
-	["Path of Frost"] = { frost = true, id = 3714 },
-	["Pestilence"] = { blood = true, id = 50842 },
-	["Pillar of Frost"] = { frost = true, id = 51271 },
-	["Plague Strike"] = { unholy = true, id = 45462 },
-	["Rune Tap"] = { blood = true, id = 48982 },
-	["Scourge Strike"] = { unholy = true, id = 55090 },
-	["Soul Reaper"] = { frost = true, id = 130735 },
-	["Strangulate"] = { blood = true, id = 47476 },
+	["Army of the Dead"] = { count = 3, id = 42650 },
+	["Blooddrinker"] = { count = 1, id = 206931 },
+	["Chains of Ice"] = { count = 1, id = 45524 },
+	["Clawing Shadows"] = { count = 1, id = 207311 },
+	["Control Undead"] = { count = 1, id = 111673 },
+	["Death and Decay"] = { count = 1, id = 43265 },
+	["Death Gate"] = { count = 1, id = 50977 },
+	["Death's Caress"] = { count = 1, id = 195292 },
+	["Defile"] = { count = 1, id = 152280 },
+	["Epidemic"] = { count = 1, id = 207317 },
+	["Festering Strike"] = { count = 2, id = 197147 },
+	["Frostscythe"] = { count = 1, id = 207230 },
+	["Glacial Advance"] = { count = 1, id = 194913 },
+	["Heart Strike"] = { count = 1, id = 206930 },
+	["Howling Blast"] = { count = 1, id = 49184 },
+	["Marrowrend"] = { count = 2, id = 195182 },
+	["Obliterate"] = { count = 2, id = 49020 },
+	["Path of Frost"] = { count = 1, id = 3714 },
+	["Remorseless Winter"] = { count = 1, id = 196770 },
+	["Rune Tap"] = { count = 1, id = 194679 },
+	["Scourge Strike"] = { count = 1, id = 55090 },
+	["Soul Reaper"] = { count = 1, id = 130736 },
 }
 
 Raven.classConditions.DEATHKNIGHT = {
-	["Presence Missing"] = {
-		tests = {
-			["Spell Ready"] = { enable = true, spell = 48266, }, -- "Frost Presence"
-			["Any Buffs"] = { enable = true, toggle = true, unit = "player",
-				auras = { 48266, 48263, 48265 }, }, --  "Frost Presence", "Blood Presence", "Unholy Presence"
-		},	
-	},
 }

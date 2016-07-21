@@ -1190,7 +1190,7 @@ local function CreateClassColors()
  local anchor = checkbox
  local globalStringSchoolIndex = 0
  local colorswatch, fontString
- for class in string.gmatch("DEATHKNIGHT DRUID HUNTER MAGE MONK PALADIN PRIEST ROGUE SHAMAN WARLOCK WARRIOR", "[^%s]+") do
+ for class in string.gmatch("DEATHKNIGHT DRUID HUNTER MAGE MONK PALADIN PRIEST ROGUE SHAMAN WARLOCK WARRIOR DEMONHUNTER", "[^%s]+") do
   colorswatch = MSBTControls.CreateColorswatch(frame)
   colorswatch:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", anchor == checkbox and 20 or 0, anchor == checkbox and -10 or -5)
   colorswatch:SetColorChangedHandler(
@@ -1237,7 +1237,7 @@ local function ShowClassColors(configTable)
  frame.colorCheckbox:SetChecked(not MSBTProfiles.currentProfile.classColoringDisabled)
 
  local profileEntry
- for class in string.gmatch("DEATHKNIGHT DRUID HUNTER MAGE MONK PALADIN PRIEST ROGUE SHAMAN WARLOCK WARRIOR", "[^%s]+") do
+ for class in string.gmatch("DEATHKNIGHT DRUID HUNTER MAGE MONK PALADIN PRIEST ROGUE SHAMAN WARLOCK WARRIOR DEMONHUNTER", "[^%s]+") do
   profileEntry = MSBTProfiles.currentProfile[class]
   frame[class .. "Colorswatch"]:SetColor(profileEntry.colorR, profileEntry.colorG, profileEntry.colorB)
   frame[class .. "Checkbox"]:SetChecked(not profileEntry.disabled)

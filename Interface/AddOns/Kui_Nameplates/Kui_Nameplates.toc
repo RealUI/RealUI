@@ -1,29 +1,34 @@
-## Interface: 60200
+## Interface: 70000
 ## Author: Kesava
-## Title: Kui |cff9966ffNameplates|r
-## Version: 260
-## Notes: Prettier nameplates.
-## SavedVariables: KuiNameplatesGDB
-## X-Curse-Packaged-Version: 260
+## Title: Kui |cff9966ffNameplates
+## Notes: Kesava's nameplate framework.|nRemember to enable Kui Nameplates Core (or a compatible layout), too!
+## X-Curse-Packaged-Version: 2-4
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline
 
 lib\embeds.xml
 
-core.lua
-config.lua
-create.lua
-layout.lua
+addon.lua
+messages.lua
+nameplate.lua
+hook.lua
 
-modules\arena.lua
-modules\castbar.lua
-modules\castwarnings.lua
-modules\classcolours.lua
-modules\combopoints.lua
-modules\tankmode.lua
-modules\targetarrows.lua
-modules\lowhealth.lua
-modules\nemesis.lua
-modules\healthpatch.lua
-modules\nameonly.lua
+elements/healthbar.lua
+elements/powerbar.lua
+elements/castbar.lua
+elements/highlight.lua
+elements/classpowers.lua
+elements/classification.lua
+elements/name.lua
+elements/level.lua
+elements/target.lua
+elements/threat.lua
+elements/auras.lua
+elements/raidicon.lua
+
+plugins/animation.lua
+plugins/fading.lua
+plugins/npctitle.lua
+plugins/tankmode.lua
+plugins/combattoggle.lua

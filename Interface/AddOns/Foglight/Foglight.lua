@@ -332,8 +332,8 @@ local function update_overlays()
 	
 	-- Draw terrain map
 	--local _, _, _, isMicroDungeon = GetMapInfo()
-	--if info and not isMicroDungeon then
-	if not (select(2, GetCurrentMapAreaID())) then
+	if info and not isMicroDungeon then
+	--if not (select(2, GetCurrentMapAreaID())) then
 		menu:Show()
 		local terrainMapID = GetAreaMapInfo(areaID) or -1
 		local _, TLx, TLy, BRx, BRy = GetCurrentMapZone()

@@ -2,6 +2,6 @@
 ## Title: Foglight
 ## Notes: Toggles visibility of unexplored areas on the world map.
 ## Author: Semlar
-## Version: 3.0.1b
+## Version: 3.0.2
 ## SavedVariables: FoglightMode
 Foglight.lua

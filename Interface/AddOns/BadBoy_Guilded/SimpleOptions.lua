@@ -1,6 +1,6 @@
 
 do
-	BadBoyGuildedConfigTitle:SetText("BadBoy_Guilded r244-release") --wowace magic, replaced with tag version
+	BadBoyGuildedConfigTitle:SetText("BadBoy_Guilded r247-release") --wowace magic, replaced with tag version
 
 	local guildedWhispers = CreateFrame("CheckButton", nil, BadBoyConfig, "OptionsBaseCheckButtonTemplate")
 	guildedWhispers:SetPoint("TOPLEFT", BadBoyConfigPopupButton, "BOTTOMLEFT", 0, -67)
@@ -49,10 +49,10 @@ do
 	guildedInvites:SetPoint("TOPLEFT", BadBoyConfigPopupButton, "BOTTOMLEFT", 0, -87)
 	guildedInvites:SetScript("OnClick", function(frame)
 		local tick = frame:GetChecked()
-		InterfaceOptionsControlsPanelBlockGuildInvites:SetValue(tick)
+		SetAutoDeclineGuildInvites(tick)
 	end)
 	guildedInvites:SetScript("OnShow", function(frame)
-		frame:SetChecked(InterfaceOptionsControlsPanelBlockGuildInvites:GetValue())
+		frame:SetChecked(GetAutoDeclineGuildInvites())
 	end)
 
 	local guildedInvitesText = guildedInvites:CreateFontString(nil, "ARTWORK", "GameFontHighlight")

@@ -162,6 +162,8 @@ function Bartender4:HideBlizzard()
 		ArtifactWatchBar:SetParent(UIHider)
 	end
 
+	HonorWatchBar:SetParent(UIHider)
+
 	StanceBarFrame:UnregisterAllEvents()
 	StanceBarFrame:Hide()
 	StanceBarFrame:SetParent(UIHider)

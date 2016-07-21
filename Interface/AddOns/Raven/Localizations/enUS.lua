@@ -16,14 +16,6 @@ L["Failed to load "] = true
 L["Not Tracking"] = true
 L["Potions"] = true
 L["Elixirs"] = true
-L["Fire Totem"] = BINDING_NAME_MULTICASTACTIONBUTTON2
-L["Water Totem"] = BINDING_NAME_MULTICASTACTIONBUTTON3
-L["Air Totem"] = BINDING_NAME_MULTICASTACTIONBUTTON4
-L["Earth Totem"] = BINDING_NAME_MULTICASTACTIONBUTTON5
-L["Blood Rune"] = COMBAT_TEXT_RUNE_BLOOD
-L["Unholy Rune"] = COMBAT_TEXT_RUNE_UNHOLY
-L["Frost Rune"] = COMBAT_TEXT_RUNE_FROST
-L["Death Rune"] = COMBAT_TEXT_RUNE_DEATH
 
 -- Profile.lua
 L["Frost School"] = true
@@ -119,24 +111,18 @@ L["Power String"] = function(x, minPower) return string.format("Power %s %d", x,
 L["Holy Power String"] = function(x, minPower) return string.format("Holy Power %s %d", x, minPower) end
 L["Shards String"] = function(x, minShards) return string.format("Shards %s %d", x, minShards) end
 L["Shadow Orbs String"] = function(x, minPower) return string.format("Shadow Orbs %s %d", x, minPower) end
-L["Embers String"] = function(x, minPower) return string.format("Burning Embers %s %d", x, minPower) end
-L["Fury String"] = function(x, minPower) return string.format("Demonic Fury %s %d", x, minPower) end
 L["Chi String"] = function(x, minPower) return string.format("Chi %s %d", x, minPower) end
-L["Eclipse String"] = function(x, power) return string.format("Eclipse Power %s %d", x, power) end
-L["Solar Eclipse"] = true
-L["Lunar Eclipse"] = true
+L["Lunar String"] = function(x, power) return string.format("Lunar Power %s %d", x, power) end
 L["Combo Pts String"] = function(x, minComboPoints) return string.format("Combo Pts %s %d", x, minComboPoints) end
+L["Runes String"] = function(x, minRunes) return string.format("Runes %s %d", x, minRunes) end
 L["Stance String"] = function(stance) return string.format("Stance = \"%s\"", stance) end
+L["Totem String"] = function(totem) return string.format("Totem = \"%s\"", totem) end
 L["Talent String"] = function(talent) return string.format("Talent = \"%s\"", talent) end
 L["Spec String"] = function(spec) return string.format("Specialization = \"%s\"", spec) end
 L["Spell String"] = function(spell) return string.format("Spell = \"%s\"", spell) end
-L["Glyph String"] = function(glyph) return string.format("Glyph = \"%s\"", glyph) end
 L["Max Health String"] = function(maxh) return string.format("Max Health >= \"%d\"", tonumber(maxh) or 0) end
 L["Pet Family String"] = function(family) return string.format("Family = \"%s\"", family) end
 L["Pet Spec String"] = function(spec) return string.format("Talent Tree = \"%s\"", spec) end
-L["Blood"] = true
-L["Frost"] = true
-L["Unholy"] = true
 L["Rune"] = true
 L["Runes"] = true
 L["Mainhand String"] = function(level) return string.format("Weapon Mainhand >= %d", level) end
@@ -246,8 +232,6 @@ L["Enable Raven"] = true
 L["If checked, Raven is enabled, otherwise all features are disabled."] = true
 L["Hide Blizzard Buffs"] = true
 L["If checked, Raven will hide the default user interface for buffs."] = true
-L["Hide Consolidated"] = true
-L["If checked, Raven will hide the default consolidated buffs. Note that you enable/disable consolidated buffs in the game's Interface options under Buffs and Debuffs."] = true
 L["Hide Blizzard Runes"] = true
 L["If checked, Raven will hide the default user interface for runes."] = true
 L["Mute Raven Sound"] = true
@@ -452,7 +436,7 @@ L["If checked, icon border color is applied to the border texture."] = true
 L["Sound Channel"] = true
 L["Master"] = MASTER
 L["If checked, sound is played in Master channel."] = true
-L["SFX"] = SOUND or VOICE_SOUND
+L["SFX"] = true -- LEGION BUG
 L["If checked, sound is played in Sound Effects channel."] = true
 L["Music"] = VOICE_MUSIC
 L["If checked, sound is played in Music channel."] = true
@@ -1200,40 +1184,15 @@ L["If checked, test the player's shadow orbs."] = true
 L["If checked, player must have at least this many shadow orbs, otherwise must be less."] = true
 L["If checked, test the player's chi."] = true
 L["If checked, player must have at least this much chi, otherwise must be less."] = true
-L["If checked, test the player's burning embers segment count (there are 10 segments per ember)."] = true
-L["If checked, player must have at least this many burning embers, otherwise must be less."] = true
-L["If checked, test the player's demonic fury."] = true
-L["If checked, player must have at least this much demonic fury, otherwise must be less."] = true
-L["If checked, test the player's eclipse power. You can set power level (-100 to -1 for lunar power, 1 to 100 for solar power) and the comparison to use (either less or greater than the power level)."] = true
-L["If checked, player's eclipse power must be at least this level, otherwise must be less."] = true
-L["If checked, test the player's eclipse status. You can test current eclipse direction (toward sun or moon) and whether lunar or solar eclipse is active."] = true
-L["If checked, player must be in Solar Eclipse."] = true
-L["If checked, player must be in Lunar Eclipse."] = true
-L["If checked, eclipse direction must be going toward the sun."] = true
-L["If checked, eclipse direction must be going toward the moon."] = true
+L["If checked, test the player's lunar power. You can set power level and the comparison to use (either less or greater than the power level)."] = true
+L["If checked, player's lunar power must be at least this level, otherwise must be less."] = true
 L["Available"] = true
-L["If checked, test the player's rune status."] = true
 L["Any"] = true
-L["Ignore Death"] = true
-L["If checked, at least one rune of any type must be available."] = true
-L["If checked, must have at least one blood rune available (or enough death runes)."] = true
-L["If checked, must have at least one frost rune available (or enough death runes)."] = true
-L["If checked, must have at least one unholy rune available (or enough death runes)."] = true
-L["If checked, ignore death runes when checking rune availability."] = true
-L["Recharging"] = true
-L["Not Recharging"] = true
-L[">= 1"] = true
-L["If checked, test blood runes."] = true
-L["If checked, at least one blood rune must be recharging, otherwise none."] = true
-L["If checked, test frost runes."] = true
-L["If checked, at least one frost rune must be recharging, otherwise none."] = true
-L["If checked, test unholy runes."] = true
-L["If checked, at least one unholy rune must be recharging, otherwise none."] = true
+L["If checked, test how many available runes the player has."] = true
+L["If checked, player must have at least this many available runes, otherwise must be fewer."] = true
 L["If checked, test how many combo points the player has on the target."] = true
 L["If checked, player must have at least this many combo points, otherwise must be fewer."] = true
 L["If checked, test the player's totem status."] = true
-L["If checked, must have an active totem of this type (or specific totem if Totem Name is defined)."] = true
-L["If checked, must not have an active totem of this type (or specific totem if Totem Name is defined)."] = true
 L["Totem Name"] = true
 L["Enter name of specific totem to check is active."] = true
 L["Health"] = HEALTH
@@ -1244,13 +1203,7 @@ L["Soul Shards"] = SOUL_SHARDS_POWER
 L["Shadow Orbs"] = SHADOW_ORBS
 L["Burning Embers"] = BURNING_EMBERS
 L["Demonic Fury"] = DEMONIC_FURY
-L["Eclipse Power"] = true
-L["Eclipse State"] = true
-L["Eclipse"] = true
-L["Solar"] = true
-L["Lunar"] = true
-L[">> Sun"] = true
-L[">> Moon"] = true
+L["Lunar Power"] = true
 L["Chi"] = CHI
 L["Combo Points"] = COMBO_POINTS
 L["If checked, test if the player has a mainhand weapon equipped with at least the specified item level."] = true
@@ -1269,9 +1222,6 @@ L["Stance"] = true
 L["Talent"] = TALENT
 L["Specialization"] = SPECIALIZATION
 L["Spellbook"] = SPELLBOOK
-L["Glyph"] = true
-L["If checked, test if a glyph is active."] = true
-L['Enter short name for glyph (e.g., "Glyph of Overpower" is entered as "Overpower").'] = true
 
 -- Conditions > Tests > Pet Status
 L["Pet Status"] = true
@@ -1700,6 +1650,8 @@ L["Warrior"] = true
 L["If checked, select warrior actions."] = true
 L["Death Knight"] = true
 L["If checked, select death knight actions."] = true
+L["Demon Hunter"] = true
+L["If checked, select demon hunter actions."] = true
 L["Conditions To Monitor"] = true
 L["Select all the conditions."] = true
 L["Deselect all the conditions."] = true

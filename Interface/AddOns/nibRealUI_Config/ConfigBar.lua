@@ -1226,6 +1226,7 @@ local auratracker do
             for i = 1, #spellData.spell do
                 debug("iter spell table", i)
                 local spellName, nextSpell = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
+                if not spellName then spellName = _G.UNKNOWN end
                 if spellName ~= nextSpell then
                     debug("These two are different", i, spellName)
                     -- Only add a spell if nextSpell is different.

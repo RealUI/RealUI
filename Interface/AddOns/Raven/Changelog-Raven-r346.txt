@@ -1,0 +1,103 @@
+------------------------------------------------------------------------
+r346 | tomber | 2016-07-16 14:57:23 +0000 (Sat, 16 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/Nest.lua
+
+Fix timeline bug resulting from alpha animation group replacement of SetChange function with SetFromAlpha and SetToAlpha functions.
+------------------------------------------------------------------------
+r345 | tomber | 2016-07-13 22:05:34 +0000 (Wed, 13 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/Conditions.lua
+
+Fix bug in conditions initialization which causes error when opening options panel when on a class that has no default conditions.
+------------------------------------------------------------------------
+r344 | tomber | 2016-07-12 14:36:55 +0000 (Tue, 12 Jul 2016) | 2 lines
+Changed paths:
+   M /trunk/Readme.txt
+
+Minor edit of Readme.txt.
+Raven has now had all planned updates for Legion so, in theory, this is the beta build and only bug fixes will be made between now and release.
+------------------------------------------------------------------------
+r343 | tomber | 2016-07-11 22:21:18 +0000 (Mon, 11 Jul 2016) | 4 lines
+Changed paths:
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+
+Updated spells used for range checks.
+Updated spells used for school lockout detection.
+Removed obsolete spell numbers from the default colors table.
+Fixed rune cooldown check (which was not working correctly on the PTR).
+------------------------------------------------------------------------
+r342 | tomber | 2016-07-10 05:33:31 +0000 (Sun, 10 Jul 2016) | 9 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/DeathKnight.lua
+   M /trunk/Presets/Druid.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Presets/Hunter.lua
+   M /trunk/Presets/Mage.lua
+   M /trunk/Presets/Monk.lua
+   M /trunk/Presets/Paladin.lua
+   M /trunk/Presets/Pets.lua
+   M /trunk/Presets/Priest.lua
+   M /trunk/Presets/Racials.lua
+   M /trunk/Presets/Rogue.lua
+   M /trunk/Presets/Shaman.lua
+   M /trunk/Presets/Warrior.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Reworked totem bars for shaman to remove the type-restricted slots.
+Reworked runes for death knights.
+Updated all class presets to remove conditions for removed buffs and other spells.
+Removed consolidated buffs toggle.
+Updated mushroom tracking and added lunar power for druids.
+Updated resource conditions for warlock.
+Automated figuring out the maximum spell id.
+Added hooks for demon hunter class.
+
+------------------------------------------------------------------------
+r341 | tomber | 2016-07-04 22:33:19 +0000 (Mon, 04 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Nest.lua
+   A /trunk/Presets/DemonHunter.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Fixed additional condition-related errors with new Demon Hunter class.
+Tweaked one of the timer formats.
+Removed some code that is no longer used.
+------------------------------------------------------------------------
+r340 | tomber | 2016-07-04 04:36:54 +0000 (Mon, 04 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Removed glyph-related code.
+Fixed errors related to Death Knight-related changes in Legion and modified rune bars.
+Changed looking up icons from using GetSpellInfo to GetSpellTexture.
+------------------------------------------------------------------------
+r339 | tomber | 2016-07-02 22:21:49 +0000 (Sat, 02 Jul 2016) | 2 lines
+Changed paths:
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Nest.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Raven_Options.toc
+
+Fixes for Legion compatibility, tested on the PTR.
+Fix error in applying default background saturation and brightness.
+------------------------------------------------------------------------
