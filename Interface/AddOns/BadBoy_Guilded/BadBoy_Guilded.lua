@@ -3,6 +3,7 @@ local strfind, Ambiguate = string.find, Ambiguate
 local prevLineId, result, triggers = 0, nil, {
 	"wowstead%.com",
 	"guildlaunch%.com",
+	"gamerlaunch%.com",
 	"corplaunch%.com",
 	"wowlaunch%.com",
 	"guildportal%.com",

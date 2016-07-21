@@ -143,7 +143,8 @@ local function enable(frame)
         end
     end
 
-    if frame then
+    -- don't try to register anything that isn't "buttonish"
+    if frame and frame.RegisterForClicks then
         ClickCastFrames[frame] = true
     end
 end

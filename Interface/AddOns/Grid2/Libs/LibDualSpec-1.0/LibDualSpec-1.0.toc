@@ -1,16 +1,15 @@
-## Interface: 60100
+## Interface: 70000
 ## LoadOnDemand: 1
 ## Title: Lib: DualSpec-1.0
-## Version: v1.91
-## X-Date: 2015-03-09T23:00:59Z
-## Notes: Adds dual spec support to individual AceDB-3.0 databases
+## Version: v1.10
+## X-Date: 2016-07-16T03:18:05Z
+## Notes: Adds spec switching support to individual AceDB-3.0 databases.
 ## Author: Adirelle
-## OptionalDeps: LibStub, Ace3
-## X-Curse-Packaged-Version: v1.91
+## OptionalDeps: Ace3
+## X-Curse-Packaged-Version: v1.10
 ## X-Curse-Project-Name: LibDualSpec-1.0
 ## X-Curse-Project-ID: libdualspec-1-0
 ## X-Curse-Repository-ID: wow/libdualspec-1-0/mainline
 
 LibStub.lua
 LibDualSpec-1.0.lua
-

@@ -1,0 +1,16 @@
+## Interface: 70000
+## Author: Kesava
+## Title: Kui |cff9966ffNameplates:|r |cffffffffCore|r
+## Notes: The official layout for Kui Nameplates.
+## Dependencies: Kui_Nameplates
+## SavedVariables: KuiNameplatesCoreSaved, KuiNameplatesCoreCharacterSaved
+## X-Curse-Packaged-Version: 2-4
+## X-Curse-Project-Name: KuiNameplates
+## X-Curse-Project-ID: kuinameplates
+## X-Curse-Repository-ID: wow/kuinameplates/mainline
+
+lib\embeds.xml
+
+hook.lua
+create.lua
+config.lua

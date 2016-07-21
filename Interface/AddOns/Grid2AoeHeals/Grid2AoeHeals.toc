@@ -1,12 +1,12 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: Grid2 |cd1ff7d0aAOE Heals|r
 ## Notes: Display best targets for AOE Heals
 ## Notes-esES: Muestra los mejores objetivos para las curas de area
 ## Author: Michael
 ## Dependencies: Grid2
 ## DefaultState: disabled
-## Version: r786
-## X-Curse-Packaged-Version: r786
+## Version: r789-release
+## X-Curse-Packaged-Version: r789-release
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline

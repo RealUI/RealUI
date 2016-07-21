@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: BadBoy_CCleaner
 ## Notes: Filter crap from your chat.
 ## Notes-frFR: Enlève toutes les saloperies de votre fenêtre de discussion.
@@ -11,7 +11,7 @@
 ## SavedVariables: BADBOY_CCLEANER, BADBOY_NOICONS
 ## X-Category: Chat/Communication
 ## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r97-release
+## X-Curse-Packaged-Version: r99-release
 ## X-Curse-Project-Name: BadBoy_CCleaner: Filter Crap From Chat
 ## X-Curse-Project-ID: badboy_ccleaner
 ## X-Curse-Repository-ID: wow/badboy_ccleaner/mainline

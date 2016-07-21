@@ -724,7 +724,7 @@ do
             if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
                 artifacts = artData:GetAllArtifactsInfo(artifactID)
             end
-            InfoLine:debug("GetArtifactInfo", artifactID, artifactID and next(artifacts[artifactID]))
+            InfoLine:debug("GetArtifactInfo", artifactID, artifacts and next(artifacts[artifactID]))
             showArtifact = artifactID and _G.HasArtifactEquipped()
             showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
         end

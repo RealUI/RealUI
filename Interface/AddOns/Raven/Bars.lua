@@ -11,7 +11,6 @@ local media = LibStub("LibSharedMedia-3.0")
 local rc = { r = 1, g = 0, b = 0, a = 1 }
 local vc = { r = 1, g = 0, b = 0, a = 0 }
 local gc = { r = 0.5, g = 0.5, b = 0.5, a = 0.5 }
-local fishSpell = GetSpellInfo(7620) -- must be valid
 local hidden = false
 local detectedBar = { enableBar = true, sorder = 0 }
 local headerBar = { enableBar = true, sorder = 0 }
@@ -28,9 +27,6 @@ local Off = 0 -- value used to designate an option is turned off
 local function IsOff(value) return value == nil or value == Off end -- return true if option is turned off
 local function IsOn(value) return value ~= nil and value ~= Off end -- return true if option is turned on
 
-local classNames = { DEATHKNIGHT = "Death Knight", DRUID = "Druid", HUNTER = "Hunter", MAGE = "Mage", PALADIN = "Paladin",
-	PRIEST = "Priest", ROGUE = "Rogue", SHAMAN = "Shaman", WARLOCK = "Warlock", WARRIOR = "Warrior", MONK = "Monk" }
-	
 local colorTemplate = { timeColor = 0, iconColor = 0, labelColor = 0, colorMSBT = 0, }
 local defaultWhite = { r = 1, g = 1, b = 1, a = 1 }
 local function DefaultColor(c) return not c or not next(c) or ((c.r == 1) and (c.g == 1) and (c.b == 1) and (c.a == 1)) end
@@ -1200,15 +1196,15 @@ local function CheckSharedCooldowns(n, b, bp)
 end
 
 -- Automatically generate rune cooldown bars for all six rune slots
-local runeSlotPrefix = { "(1)  ", "(2)  ", "(5)  ", "(6)  ",  "(3)  ", "(4)  " }
+local runeSlotPrefix = { "(1)  ", "(2)  ", "(3)  ", "(4)  ",  "(5)  ", "(6)  " }
 local function AutoRuneBars(bp, vbp, bg)
 	if MOD.myClass ~= "DEATHKNIGHT" then return end
 	for i = 1, 6 do
 		local rune = MOD.runeSlots[i]
-		local icon = MOD.runeIcons[rune.rtype]
 		local b = detectedBar
-		b.action = MOD.runeTypes[rune.rtype]; b.spellID = nil; b.barLabel = runeSlotPrefix[i] .. b.action
+		b.action = L["Rune"]; b.spellID = nil; b.barLabel = runeSlotPrefix[i] .. b.action
 		b.barType = "Cooldown"; b.uniqueID = "Cooldown"; b.group = nil
+		local icon = GetSpellTexture(207321) -- icon for Spell Eater
 		if rune.ready then -- generate ready bar with no duration
 			if CheckTimeAndDuration(bp, 0, 0) then
 				UpdateBar(bp, vbp, bg, b, icon, 0, 0, nil, nil, "text", b.action, nil, nil, true)
@@ -1222,13 +1218,11 @@ local function AutoRuneBars(bp, vbp, bg)
 	end
 end
 
-local totemSlotName = { [1] = L["Fire Totem"], [2] = L["Earth Totem"], [3] = L["Water Totem"], [4] = L["Air Totem"] }
--- Automatically generate totem bars for the four totem slots
+-- Automatically generate totem bars for the totem slots
 local function AutoTotemBars(bp, vbp, bg)
 	if MOD.myClass ~= "SHAMAN" then return end
 	local now = GetTime()
 	for i = 1, 4 do
-		local slotDone = false
 		local b = detectedBar
 		b.barType = "Cooldown"; b.uniqueID = "Totem" .. i; b.group = nil
 		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
@@ -1237,13 +1231,6 @@ local function AutoTotemBars(bp, vbp, bg)
 			if CheckTimeAndDuration(bp, timeLeft, duration) then
 				b.action = name; b.barLabel = MOD:GetLabel(name); b.spellID = nil
 				UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, nil, nil, "totem", i, "player", nil, true)
-				slotDone = true
-			end
-		end
-		if not slotDone then -- generate ready bar with no duration
-			if CheckTimeAndDuration(bp, 0, 0) then
-				b.action = totemSlotName[i]; b.barLabel = MOD:GetLabel(b.action); b.spellID = nil
-				UpdateBar(bp, vbp, bg, b, nil, 0, 0, nil, nil, "text", b.action, nil, nil, true)
 			end
 		end
 	end

@@ -1,0 +1,25 @@
+------------------------------------------------------------------------
+r627 | funkydude | 2016-07-21 02:14:11 +0000 (Thu, 21 Jul 2016) | 1 line
+Changed paths:
+   A /tags/1.4-34 (from /trunk:626)
+
+Tagging as 1.4-34
+------------------------------------------------------------------------
+r626 | stanzilla | 2016-07-19 18:31:17 +0000 (Tue, 19 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/Skada.toc
+
+TOC Bump for 7.0
+------------------------------------------------------------------------
+r625 | oscarucb | 2016-05-05 18:50:28 +0000 (Thu, 05 May 2016) | 6 lines
+Changed paths:
+   M /trunk/Menus.lua
+   M /trunk/Skada.lua
+
+GUI improvements to the report dialog window
+Clamp to screen, auto-compute the window height
+Only show the whisper target name editbox for relevant channels
+Auto-trim whitespace from whisper targets, and improve error reporting for invalid entries
+Add an escape handler (also to the reset dialog)
+
+------------------------------------------------------------------------

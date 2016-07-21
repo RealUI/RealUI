@@ -33,19 +33,13 @@ MOD.talents = {} -- table containing names and talent table location for each ta
 MOD.talentList = {} -- table with list of talent names
 MOD.talentSpec = nil -- currently active talent spec
 MOD.runeSlots = {} -- cache information about each rune slot for DKs
-MOD.runeTypes = {} -- cache types of runes
-MOD.runeIcons = {} -- cache icons for Death Knight runes
+MOD.runeCount = 0 -- current number of available runes
 MOD.updateActions = true -- action bar changed
 MOD.updateDispels = true -- need to update dispel types
-MOD.knownGlyphs = {} -- cache of known glyphs
-MOD.activeGlyphs = {} -- cache of active glyphs
-MOD.TOC = select(4, GetBuildInfo())
-MOD.isBeta = MOD.TOC >= 70000
 
 local doUpdate = true -- set by any event that can change bars (used to throttle major updates)
 local forceUpdate = false -- set to cause immediate update (reserved for critical changes like to player's target or focus)
 local updateCooldowns = false -- set when actionbar or inventory slot cooldown starts or stops
-local updateGlyphs = true -- set when need to update cache of glyph info
 local units = { "player", "pet", "target", "focus", "targettarget", "focustarget", "pettarget", "mouseover" } -- ordered list of units
 local eventUnits = { "targettarget", "focustarget", "pettarget", "mouseover" } -- can't count on events for these units
 local unitUpdate = {} -- boolean for each unit that indicates need to update auras
@@ -74,6 +68,7 @@ local ohLastBuff = nil -- saves name of most recent off hand weapon buff
 local iconGCD = nil -- icon for global cooldown
 local iconPotion = nil -- icon for shared potions cooldown
 local iconElixir = nil -- icon for shared elixirs cooldown
+local iconRune = nil -- icon for death knight runes
 local lastTotems = {} -- cache last totems in each slot to see if changed
 local lockouts = {} -- schools of magic that we are currently locked out of
 local lockstarts = {} -- start times for current school lockouts
@@ -120,7 +115,6 @@ end
 local function TriggerPlayerUpdate() unitUpdate.player = true; updateCooldowns = true; doUpdate = true end
 local function TriggerCooldownUpdate() updateCooldowns = true; doUpdate = true end
 local function TriggerActionsUpdate() MOD.updateActions = true; doUpdate = true end
-local function TriggerGlyphUpdate() updateGlyphs = true; doUpdate = true end
 function MOD:ForceUpdate() doUpdate = true; forceUpdate = true end
 
 -- Event called when the player changes talents or specialization
@@ -260,7 +254,6 @@ end
 -- Function called for combat log events to track hots and dots
 local function CombatLogTracker(event, timeStamp, e, hc, srcGUID, srcName, sf1, sf2, dstGUID, dstName, df1, df2, spellID, spellName, spellSchool, auraType)
 	if bit.band(sf1, COMBATLOG_OBJECT_AFFILIATION_MASK) == COMBATLOG_OBJECT_AFFILIATION_MINE then -- make sure event controlled by the player
-	-- MOD.Debug("CULE: ", e, dstGUID, dstName, spellName, string.format("%x", sf1), auraType)
 		doUpdate = true
 		local now = GetTime()
 		if e == "SPELL_CAST_SUCCESS" then -- check for special cases
@@ -392,8 +385,6 @@ function MOD:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START", CheckGCD)
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", CheckSpellCasts)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CombatLogTracker)
-	self:RegisterEvent("GLYPH_ADDED", TriggerGlyphUpdate)
-	self:RegisterEvent("GLYPH_UPDATED", TriggerGlyphUpdate)
 	MOD:InitializeBars() -- initialize routine that manages the bar library
 	MOD:InitializeMedia(media) -- add sounds to LibSharedMedia
 	MOD.LibBossIDs = LibStub("LibBossIDs-1.0", true)
@@ -403,23 +394,14 @@ end
 -- Event called when addon is disabled but this is probably never called
 function MOD:OnDisable() end
 
--- Initialize rune information for Death Knights
-local function InitializeRunes()
-	local r, t = MOD.runeIcons, MOD.runeTypes
-	r[1] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood" -- add DK rune info to cache
-	r[2] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy"
-	r[3] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost"
-	r[4] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Death"
-	t[1] = COMBAT_TEXT_RUNE_BLOOD; t[2] = COMBAT_TEXT_RUNE_UNHOLY; t[3] = COMBAT_TEXT_RUNE_FROST; t[4] = COMBAT_TEXT_RUNE_DEATH
-	for i = 1, 4 do MOD:SetIcon(t[i], r[i]) end
-end
-
 -- Cache icons for special purposes such as shared cooldowns
 local function InitializeIcons()
 	local _
-	_, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
+	iconGCD = GetSpellTexture(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
 	iconPotion = GetItemIcon(31677) -- icon for shared potions cooldown
 	iconElixir = GetItemIcon(28104) -- icon for shared elixirs cooldown
+	
+	MOD:SetIcon(L["Rune"], GetSpellTexture(48266)) -- cached for death knight runes (this is for Frost Presence)
 end
 
 -- Updates will be driven by the new timer function, compute elapsed time since last update
@@ -435,7 +417,6 @@ function MOD:PLAYER_ENTERING_WORLD()
 		updateCooldowns = true -- start tracking cooldowns
 		MOD:InitializeBuffTooltip() -- initialize tooltip used to monitor weapon buffs
 		MOD:InitializeConditions() -- initialize routine that shows cooldown overlays and cooldown bars	
-		InitializeRunes() -- death knight specific initialization
 		InitializeIcons() -- cache special purpose icons
 		MOD:InitializeOverlays() -- initialize overlays used to cancel player buffs
 		MOD:InitializeInCombatBar() -- initialize special bar for cancelling buffs in combat
@@ -515,24 +496,6 @@ local function InitializeTalents()
 	MOD.updateDispels = true
 end
 
--- Initialize cache of glyph info
-local function InitializeGlyphs()
-	if MOD.TOC >= 70000 then return end
-	table.wipe(MOD.knownGlyphs)
-	table.wipe(MOD.activeGlyphs)
-	local count = GetNumGlyphs()
-	for index = 1, count do
-		local name, _, isKnown, _, castSpell = GetGlyphInfo(index)
-		if isKnown then MOD.knownGlyphs[name] = castSpell end
-	end
-	for slot = 1, NUM_GLYPH_SLOTS do
-		local enabled, _, _, spell, _, glyphSpell = GetGlyphSocketInfo(slot)
-		if enabled and spell then
-			for name, castSpell in pairs(MOD.knownGlyphs) do if glyphSpell == castSpell then MOD.activeGlyphs[name] = slot break end end
-		end
-	end
-end
-
 -- Check if the options panel is loaded, if not then get it loaded and ask it to toggle open/close status
 function MOD:OptionsPanel()
     if not optionsLoaded then
@@ -565,7 +528,6 @@ function MOD:InitializeLDB()
 			if msg == "RightButton" then
 				if IsShiftKeyDown() then
 					MOD.db.profile.hideBlizz = not MOD.db.profile.hideBlizz
-					MOD.db.profile.hideConsolidated = MOD.db.profile.hideBlizz
 				else
 					MOD:ToggleBarGroupLocks()
 				end
@@ -599,24 +561,15 @@ local function CheckBlizzFrames()
 	else
 		if not visible then BuffFrame:Show(); TemporaryEnchantFrame:Show(); BuffFrame:RegisterEvent("UNIT_AURA") end
 	end
-	if MOD.TOC < 70000 then
-		visible = ConsolidatedBuffs:IsShown()
-		if MOD.db.profile.hideConsolidated or (GetNumGroupMembers() == 0) then -- make sure hide when solo
-			if visible then ConsolidatedBuffs:Hide() end
-	--	else
-	--		if not visible then if GetCVarBool("consolidateBuffs") then ConsolidatedBuffs:Show() end end
-		elseif GetCVarBool("consolidateBuffs") then
-			if not visible then ConsolidatedBuffs:Show() end
-			RaidBuffTray_Update()
-		end
-	end
 	visible = RuneFrame:IsShown()
 	if MOD.db.profile.hideRunes then
 		if visible then RuneFrame:UnregisterAllEvents(); RuneFrame:Hide() end
 	else
 		if not visible then 
-			if MOD.myClass == "DEATHKNIGHT" then RuneFrame:Show() end
-			RuneFrame:GetScript("OnLoad")(RuneFrame); RuneFrame:GetScript("OnEvent")(RuneFrame, "PLAYER_ENTERING_WORLD")
+			if MOD.myClass == "DEATHKNIGHT" then
+				RuneFrame:Show()
+				RuneFrame:GetScript("OnLoad")(RuneFrame); RuneFrame:GetScript("OnEvent")(RuneFrame, "PLAYER_ENTERING_WORLD")
+			end
 		end
 	end
 end
@@ -627,7 +580,7 @@ local function CheckTotemUpdates()
 	if cl == "SHAMAN" or cl == "DRUID" or cl == "MAGE" then
 		local changed = false
 		local now = GetTime()
-		for i = 1, 4 do
+		for i = 1, MAX_TOTEMS do
 			local haveTotem, name, startTime, duration = GetTotemInfo(i)
 			if haveTotem and name and name ~= "" and now <= (startTime + duration) then
 				if not lastTotems[i] or name ~= lastTotems[i] then changed = true end
@@ -650,7 +603,6 @@ end
 function MOD:Update(elapsed)
 	if MOD.db.profile.enabled then
 		elapsedTime = elapsedTime + elapsed; refreshTime = refreshTime + elapsed
-		if updateGlyphs then InitializeGlyphs(); updateGlyphs = false end
 		if forceUpdate or (elapsedTime >= throttleTime) then
 			forceUpdate = false; throttleCount = throttleCount + 1; if throttleCount == 5 then throttleCount = 0 end
 			if not talentsInitialized then InitializeTalents() end -- retry until talents initialized
@@ -1048,7 +1000,7 @@ local function GetPowerBuffs()
 	elseif MOD.myClass == "PRIEST" then power = UnitPower("player", SPELL_POWER_SHADOW_ORBS); id = 95740
 	elseif MOD.myClass == "MONK" then
 		local chi = UnitPower("player", SPELL_POWER_CHI)
-		local _, _, icon = GetSpellInfo(115460)
+		local icon = GetSpellTexture(115460)
 		local name = L["Chi"] or "Chi"
 		if chi and chi > 0 then
 			AddAura("player", name, true, nil, chi, "Power", 0, "player", nil, nil, nil, icon, nil, 0, "text", name)
@@ -1062,31 +1014,18 @@ local function GetPowerBuffs()
 			power = UnitPower("player", SPELL_POWER_DEMONIC_FURY); id = 104315
 		end
 	elseif MOD.myClass == "DRUID" then
-		if IsSpellKnown(145205) then -- restoration druid only has one mushroom
+		if IsSpellKnown(145205) then -- restoration druid has one mushroom linked to Efflorescence
 			local haveTotem, name, startTime, duration, icon = GetTotemInfo(1)
 			if haveTotem and name and name ~= "" and now <= (startTime + duration) then
 				local link = GetSpellLink(145205)
 				AddAura("player", name, true, 145205, 1, nil, duration or 0, "player", nil, nil, nil, icon, nil,
 					(startTime or 0) + (duration or 0), "spell link", link)
 			end
-		elseif IsSpellKnown(88747) then -- balance druid can have three mushrooms
-			local count, start, dur = 0, 0, 0
-			for i = 1, 3 do
-				local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
-				if haveTotem and name and name ~= "" and now <= (startTime + duration) then
-					count = count + 1
-					if startTime > start then start = startTime; dur = duration end
-				end
-			end
-			local name, _, icon = GetSpellInfo(88747)
-			if name and (name ~= "") and (count > 0) then
-				local link = GetSpellLink(88747)
-				AddAura("player", name, true, 88747, count, nil, dur, "player", nil, nil, nil, icon, nil, start + dur, "spell link", link)
-			end
 		end
 	end
 	if power and power > 0 then
-		local name, _, icon = GetSpellInfo(id)
+		local name = GetSpellInfo(id)
+		local icon = GetSpellTexture(id)
 		local link = GetSpellLink(id)
 		if name and (name ~= "") then
 			AddAura("player", name, true, id, power, "Power", 0, "player", nil, nil, nil, icon, nil, 0, "spell link", link)
@@ -1098,7 +1037,7 @@ end
 local function GetTotemBuffs()
 	if MOD.myClass ~= "SHAMAN" then return end
 	local now = GetTime()
-	for i = 1, 4 do
+	for i = 1, MAX_TOTEMS do
 		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
 		if haveTotem and name and name ~= "" and now <= (startTime + duration) then -- generate buff for an active totem in the slot
 			AddAura("player", name, true, nil, 1, "Totem", duration, "player", nil, nil, nil, icon, nil, startTime + duration, "totem", i)
@@ -1224,53 +1163,27 @@ end
 
 -- Update info about the rune slots and add rune cooldowns
 local function CheckRunes()
-	local blood, frost, unholy, death = 0, 0, 0, 0
+	local count = 0
 	for i = 1, 6 do
-		local rune, rtype = MOD.runeSlots[i], MOD.isBeta and 4 or GetRuneType(i)
+		local rune = MOD.runeSlots[i]
 		local start, duration, ready = GetRuneCooldown(i)
 		if not rune then
-			rune = { rtype = rtype, start = start, duration = duration, ready = ready }
+			rune = { start = start, duration = duration, ready = ready }
 			MOD.runeSlots[i] = rune
 		else
-			rune.rtype = rtype; rune.start = start; rune.duration = duration; rune.ready = ready
+			rune.start = start; rune.duration = duration; rune.ready = ready
 		end
+		if ready then count = count + 1 end
 	end
-end
-
--- Return true only if the specified runes are available, with death runes serving as wildcards
-function MOD:IsRuneSpellReady(blood, frost, unholy, any, exdeath)
-	local b, f, u, d = 0, 0, 0, 0
-	for i = 1, 6 do
-		if MOD.runeSlots[i].ready then
-			local t = MOD.runeSlots[i].rtype
-			if t == 1 then b = b + 1 elseif t == 2 then u = u + 1 elseif t == 3 then f = f + 1 elseif t == 4 then d = d + 1 end
-		end
-	end
-	if exdeath == true then d = 0 end -- option to completely ignore death runes
-	if any == true then if (b + f + u + d) == 0 then return false end end -- optional test to see if any runes are available at all
-	if blood and (b < 1) then if d < 1 then return false else d = d - 1 end end
-	if frost and (f < 1) then if d < 1 then return false else d = d - 1 end end
-	if unholy then if u < 1 and d < 1 then return false end end
-	return true
-end
-
--- Check each rune type and see if either rune is recharging
-function MOD:IsRuneRecharging(checkBlood, chargeBlood, checkFrost, chargeFrost, checkUnholy, chargeUnholy)
-	local b = not MOD.runeSlots[1].ready or not MOD.runeSlots[2].ready -- true if blood recharging
-	local f = not MOD.runeSlots[5].ready or not MOD.runeSlots[6].ready -- true if frost recharging
-	local u = not MOD.runeSlots[3].ready or not MOD.runeSlots[4].ready -- true if unholy recharging
-	if checkBlood and (not chargeBlood == b) then return false end
-	if checkFrost and (not chargeFrost == f) then return false end
-	if checkUnholy and (not chargeUnholy == u) then return false end
-	return true
+	MOD.runeCount = count
 end
 
 -- Check if the spell is on cooldown because a rune is not available, return true only if on real cooldown
 local function CheckRuneCooldown(name, duration)
 	local runes = MOD.runeSpells[name]
-	if runes then
-		if MOD:IsRuneSpellReady(runes.blood, runes.frost, runes.unholy, nil, nil) then return true end -- runes are available so real cooldown
-		if (duration >= 9) and (duration <= 10) then return false end -- right duration to be a rune cooldown
+	if runes and runes.count then
+		if MOD.runeCount >= runes.count then return true end -- runes are available so real cooldown
+		if duration <= 10 then return false end -- no spells that use runes have duration less than 10 seconds
 	end
 	return true
 end
@@ -1387,7 +1300,7 @@ function MOD:UpdateCooldowns()
 				local index = i + offset
 				local stype, id = GetSpellBookItemInfo(index, "spell")
 				if stype == "SPELL" then -- use spellbook index to check for cooldown
-					local name, _, icon = GetSpellInfo(index, "spell")
+					local name = GetSpellInfo(index, "spell")
 					if name and name ~= "" then
 						knownSpells[name] = id; foundSpells[name] = id -- cache of previously seen spell names (ids are not sufficient)
 						local start, duration, enable, count, charges
@@ -1400,6 +1313,7 @@ function MOD:UpdateCooldowns()
 									for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 								end
 								if not locked then
+									local icon = GetSpellTexture(id)
 									AddCooldown(name, id, icon, start, duration, "spell id", id, "player", count)
 								end
 							end
@@ -1410,7 +1324,7 @@ function MOD:UpdateCooldowns()
 					for slot = 1, numSlots do
 						local spellID = GetFlyoutSlotInfo(id, slot)
 						if spellID then
-							local name, _, icon = GetSpellInfo(spellID)
+							local name = GetSpellInfo(spellID)
 							if name and name ~= "" then -- make sure we have a valid spell name
 								knownSpells[name] = spellID; foundSpells[name] = spellID -- cache of previously seen spell names
 								local start, duration, enable = GetSpellCooldown(spellID)
@@ -1421,6 +1335,7 @@ function MOD:UpdateCooldowns()
 											for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 										end
 										if not locked then
+											local icon = GetSpellTexture(id)
 											AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player")
 										end
 									end
@@ -1442,8 +1357,9 @@ function MOD:UpdateCooldowns()
 							for ls, ld in pairs(lockouts) do if ld == duration and lockstarts[ls] == start then locked = true end end
 						end
 						if not locked then
-							local n, _, icon = GetSpellInfo(name)
+							local n = GetSpellInfo(name)
 							if n and n ~= "" then
+								local icon = GetSpellTexture(spellID)
 								AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player")
 							end
 						end
@@ -1463,8 +1379,9 @@ function MOD:UpdateCooldowns()
 					if stype == "SPELL" then -- use spellbook index to check for cooldown
 						local start, duration, enable = GetSpellCooldown(index, "spell")
 						if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
-							local name, _, icon = GetSpellInfo(index, "spell")
+							local name = GetSpellInfo(index, "spell")
 							if name and name ~= "" then -- make sure we have a valid spell name
+								local icon = GetSpellTexture(id)
 								AddCooldown(name, id, icon, start, duration, "spell id", id, "player")
 							end
 						end
@@ -1478,9 +1395,10 @@ function MOD:UpdateCooldowns()
 			for i = 1, numSpells do
 				local start, duration, enable = GetSpellCooldown(i, "pet")
 				if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
-					local name, _, icon = GetSpellInfo(i, "pet")
+					local name = GetSpellInfo(i, "pet")
 					if name and name ~= "" then
 						local _, spellID = GetSpellBookItemInfo(i, "pet")
+						local icon = GetSpellTexture(spellID)
 						AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "pet")
 					end
 				end
@@ -1495,8 +1413,11 @@ function MOD:UpdateCooldowns()
 				if actionType == "spell" then
 					local start, duration, enable = GetSpellCooldown(spellID)
 					if start and (start > 0) and (enable == 1) and (duration > 1.5) then -- don't include global cooldowns
-						local name, _, icon = GetSpellInfo(spellID)
-						if name and name ~= "" then AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player") end
+						local name = GetSpellInfo(spellID)
+						if name and name ~= "" then
+							local icon = GetSpellTexture(spellID)
+							AddCooldown(name, spellID, icon, start, duration, "spell id", spellID, "player")
+						end
 					end
 				end
 			end

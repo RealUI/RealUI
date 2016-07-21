@@ -1,0 +1,20 @@
+------------------------------------------------------------------------
+r247 | funkydude | 2016-07-20 11:15:48 +0000 (Wed, 20 Jul 2016) | 1 line
+Changed paths:
+   A /tags/r247-release (from /trunk:246)
+
+Tagging as r247-release
+------------------------------------------------------------------------
+r246 | funkydude | 2016-07-20 11:13:53 +0000 (Wed, 20 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.toc
+   M /trunk/SimpleOptions.lua
+
+Fix guild invite option
+------------------------------------------------------------------------
+r245 | funkydude | 2015-07-29 17:46:16 +0000 (Wed, 29 Jul 2015) | 1 line
+Changed paths:
+   M /trunk/BadBoy_Guilded.lua
+
+filter more ads
+------------------------------------------------------------------------

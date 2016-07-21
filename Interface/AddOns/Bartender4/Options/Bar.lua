@@ -217,7 +217,7 @@ function Bar:GetOptionObject()
 					name = L["Scale"],
 					desc = L["Configure the scale of the bar."],
 					type = "range",
-					min = 0, softMin = .1, softMax = 2, bigStep = 0.05,
+					min = 0.01, softMin = .1, softMax = 2, bigStep = 0.05,
 					get = optGetter,
 					set = optSetter,
 				},
