@@ -1810,7 +1810,13 @@ local classresource do
                     name = L["General_Enabled"],
                     desc = L["General_EnabledDesc"]:format(L["Resource"]),
                     type = "toggle",
-                    get = function(info) return isBeta and RealUI:GetModuleEnabled("ClassResource") or RealUI:GetModuleEnabled("PointTracking") end,
+                    get = function(info)
+                        if isBeta then
+                            return RealUI:GetModuleEnabled("ClassResource")
+                        else
+                            return RealUI:GetModuleEnabled("PointTracking")
+                        end
+                    end,
                     set = function(info, value)
                         if isBeta then
                             RealUI:SetModuleEnabled("ClassResource", value)

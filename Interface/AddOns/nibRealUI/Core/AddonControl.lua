@@ -33,6 +33,7 @@ local RealUIAddOnsOrder = {
     "mikScrollingBattleText",
     "Bartender4",
     "Grid2",
+    "Raven",
     "Skada",
 }
 
@@ -162,6 +163,7 @@ function AddonControl:CreateOptionsFrame()
         ["DBM"] = true,
         ["Bartender4"] = true,
         ["Grid2"] = true,
+        ["Raven"] = true,
         ["mikScrollingBattleText"] = true,
     }
     local altAddOnTable = {
