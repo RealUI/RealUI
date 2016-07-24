@@ -1564,6 +1564,7 @@ local auratracker do
             new = {
                 name = L["AuraTrack_Create"],
                 type = "execute",
+                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
                 func = function(info, ...)
                     debug("Create New", info[#info], info[#info-1], ...)
                     local tracker, spellData = AuraTracking:CreateNewTracker()
@@ -1588,6 +1589,7 @@ local auratracker do
                 name = L["General_Lock"],
                 desc = L["General_LockDesc"],
                 type = "toggle",
+                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
                 get = function(info) return db.locked end,
                 set = function(info, value)
                     AuraTracking[value and "Lock" or "Unlock"](AuraTracking)
@@ -1597,6 +1599,7 @@ local auratracker do
             options = {
                 name = L["AuraTrack_TrackerOptions"],
                 type = "group",
+                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
                 childGroups = "tab",
                 order = 40,
                 args = {
@@ -1716,6 +1719,7 @@ local auratracker do
             active = {
                 name = L["AuraTrack_ActiveTrackers"],
                 type = "group",
+                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
                 order = 50,
                 args = {
                 }
@@ -1723,6 +1727,7 @@ local auratracker do
             inactive = {
                 name = L["AuraTrack_InactiveTrackers"],
                 type = "group",
+                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
                 order = 50,
                 args = {
                 }
@@ -1832,7 +1837,13 @@ local classresource do
                     name = bars or "",
                     type = "group",
                     hidden = bars == nil,
-                    disabled = function() return not (isBeta and RealUI:GetModuleEnabled("ClassResource") or RealUI:GetModuleEnabled("PointTracking")) end,
+                    disabled = function()
+                        if isBeta then
+                            return not RealUI:GetModuleEnabled("ClassResource")
+                        else
+                            return not RealUI:GetModuleEnabled("PointTracking")
+                        end
+                    end,
                     order = 20,
                     args = isBeta and {
                         width = {
