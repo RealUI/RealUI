@@ -491,7 +491,12 @@ function UnitFrames:PvPOverride(event, unit)
     local pvp, color = self.PvP
     local setColor = pvp.lines and pvp.SetBackgroundColor or pvp.SetVertexColor
     if _G.UnitIsPVP(unit) then
-        color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+        local reaction = _G.UnitReaction(unit, "player")
+        if not reaction then
+            -- Can be nil if the target is out of range
+            reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
+        end
+        color = self.colors.reaction[reaction]
         setColor(pvp, color[1], color[2], color[3], color[4])
     else
         color = RealUI.media.background
