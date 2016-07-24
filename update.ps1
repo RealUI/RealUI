@@ -38,6 +38,7 @@ $readme.FileName = "LICENSE.txt"
 
 #Exclude files
 $remove = @(
+    ".git",
     "Interface/AddOns/nibRealUI_Dev"
 )
 # Collect entries to remove
