@@ -1007,6 +1007,7 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
+        self:debug("IsInInstance", RealUI:ColorTableToStr(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec.text:SetText("|cff"..RealUI:ColorTableToStr(RealUI.media.colors.blue).._G.LOOT..":|r "..RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true

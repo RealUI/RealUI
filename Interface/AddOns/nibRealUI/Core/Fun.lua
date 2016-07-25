@@ -139,12 +139,15 @@ end
 -- Loot Spec
 function RealUI:GetCurrentLootSpecName()
     local lsID = _G.GetLootSpecialization()
+    debug("GetCurrentLootSpecName", lsID)
 
     if (lsID == 0) then
         local _, specName = _G.GetSpecializationInfo(_G.GetSpecialization())
+        debug("GetSpecializationInfo", _, specName)
         return specName
     else
         local _, specName = _G.GetSpecializationInfoByID(lsID)
+        debug("GetSpecializationInfoByID", _, specName)
         return specName
     end
 end
