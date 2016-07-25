@@ -540,4 +540,15 @@ end
 
 function Loot:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
+
+    do -- This is to keep the alert frames sane since loot rolls will no longer show up there.
+        local settingHeight = false
+        _G.hooksecurefunc(_G.GroupLootContainer, "SetHeight", function(groupLoot)
+            if settingHeight then return end
+            Loot:debug("GroupLootContainer:SetHeight")
+            settingHeight = true
+            groupLoot:SetHeight(1)
+            settingHeight = false
+        end)
+    end
 end
