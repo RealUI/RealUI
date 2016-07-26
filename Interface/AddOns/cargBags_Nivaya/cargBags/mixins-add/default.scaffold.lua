@@ -131,12 +131,12 @@ local function ItemButton_Update(self, item)
 	-- Item Level
 	local _,_,_,_,_,_,itemLink = GetContainerItemInfo(item.bagID, item.slotID)
 	if itemLink then
-		local _,_,itemRarity,itemLevel,_,itemType = GetItemInfo(itemLink)
+		local _,_,itemRarity,itemLevel,_,_,_,_,itemEquipLoc = GetItemInfo(itemLink)
 		if LIU then
 			itemLevel = LIU:GetUpgradedItemLevel(itemLink)
 		end
 
-		if (itemType and ilvlTypes[itemType]) and (itemLevel and itemLevel > 0) then
+		if (itemEquipLoc ~= "") and (itemLevel and itemLevel > 0) then
 			self.BottomString:SetText(itemLevel)
 			self.BottomString:SetTextColor(GetItemQualityColor(itemRarity))
 		else
