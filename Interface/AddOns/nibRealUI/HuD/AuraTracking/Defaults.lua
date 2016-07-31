@@ -575,7 +575,6 @@ bf27cce4
 aaddc099
 8f8a7deb
 96a15d91
-901cef84
 
 ]]
 
@@ -3549,8 +3548,149 @@ classDefaults = {
 
     ["SHAMAN"] = {
         -- Static Player Auras
+            ["7-bd97988f-1"] = {   -- Boulderfist (Enh) (Talent)
+                spell = 218825,
+                minLevel = 15,
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["7-98774f14-1"] = {   -- Landslide (Enh) (Talent)
+                spell = 202004,
+                minLevel = 100,
+                specs = {false, true, false},
+                order = 2,
+                talent = {
+                    tier = 7,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["7-8065f89b-1"] = {   -- Frostbrand (Enh)
+                spell = 196834,
+                minLevel = 60,
+                specs = {false, true, false},
+                talent = { -- Hailstorm
+                    tier = 4,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 3,
+            },
+            ["7-9f7d9c17-1"] = {   -- Flametongue (Enh)
+                spell = 194084,
+                minLevel = 12,
+                specs = {false, true, false},
+                order = 4,
+            },
+            ["7-a7dc8a98-1"] = {   -- Tidal Waves (Resto)
+                spell = 53390,
+                minLevel = 50,
+                specs = {false, false, true},
+                order = 1,
+            },
         -- Static Target Auras
+            ["7-8ef35823-1"] = {   -- Flame Shock (Ele)
+                spell = 188389,
+                minLevel = 5,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 1,
+            },
         -- Free Player Auras
+            ["7-80da6a44-1"] = {   -- Ancestral Guidance (Ele) (Talent)
+                spell = 108281,
+                minLevel = 30,
+                specs = {true, false, false},
+                talent = {
+                    tier = 2,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["7-be08b458-1"] = {   -- Lava Surge (Ele) (Talent)
+                spell = 77762,
+                minLevel = 38,
+                specs = {true, false, false},
+            },
+            ["7-93c0c50d-1"] = {   -- Elemental Focus (Ele) (Talent)
+                spell = 16246,
+                minLevel = 38,
+                specs = {true, false, false},
+            },
+            ["7-b9209d3d-1"] = {   -- Elemental Blast (Ele) (Talent)
+                spell = {118522, 173183, 173184}, -- Crit, Haste, Mast
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    column = 1,
+                    mustHave = true,
+                },
+                customName = _G.GetSpellInfo(117014),
+            },
+            ["7-b5ebf41b-1"] = {   -- Elemental Mastery (Ele) (Talent)
+                spell = 16166,
+                minLevel = 90,
+                specs = {true, false, false},
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["7-80768995-1"] = {   -- Crash Lightning (Enh)
+                spell = 187878,
+                minLevel = 28,
+                specs = {false, true, false},
+            },
+            ["7-8ffd47c0-1"] = {   -- Stormbringer (Enh)
+                spell = 201846,
+                minLevel = 40,
+                specs = {false, true, false},
+            },
+            ["7-901cef84-1"] = {   -- Unleash Life (Resto) (Talent)
+                spell = 73685,
+                minLevel = 15,
+                specs = {false, false, true},
+                talent = {
+                    tier = 1,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["7-b7881104-1"] = {   -- Ancestral Guidance (Resto) (Talent)
+                spell = 108281,
+                minLevel = 60,
+                specs = {false, false, true},
+                talent = {
+                    tier = 4,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["7-9725fc0f-1"] = {   -- Spiritwalker's Grace (Resto)
+                spell = 79206,
+                minLevel = 72,
+                specs = {false, false, true},
+            },
+            ["7-b44b958f-1"] = {   -- Astral Shift
+                spell = 108271,
+                minLevel = 44,
+            },
+            ["7-b2a0a61d-1"] = {   -- Ascendance (Talent)
+                spell = {114050, 114051, 114052}, -- Ele, Enh, Resto
+                minLevel = 100,
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
     },
 
