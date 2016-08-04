@@ -360,7 +360,7 @@ local function MiniPatchInstallation()
 
     debug("TOC minipatch", dbg.patchedTOC, RealUI.TOC)
     if dbg.patchedTOC ~= RealUI.TOC then
-        if minipatches[RealUI.TOC] then
+        if dbg.patchedTOC > 0 and minipatches[RealUI.TOC] then
             -- Add minipatch for TOC change
             _G.tinsert(patches, minipatches[RealUI.TOC])
         end
