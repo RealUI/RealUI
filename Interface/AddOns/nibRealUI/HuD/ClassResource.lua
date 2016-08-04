@@ -199,19 +199,16 @@ function ClassResource:CreateClassIcons(unitFrame, unit)
         else
             PositionIcon(icon, index, ClassIcons[index-1])
 
+            local color = unitFrame.colors.power[powerToken or 'COMBO_POINTS']
             local coords = texture.coords
             iconBG:SetTexture(texture.bg)
             iconBG:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+            iconBG:SetVertexColor(color[1], color[2], color[3])
 
             local border = icon:CreateTexture(nil, "BORDER")
             border:SetAllPoints()
             border:SetTexture(texture.border)
             border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        end
-
-        function icon:SetVertexColor(r, g, b)
-            ClassResource:debug("icon:SetVertexColor", index, r, g, b)
-            iconBG:SetVertexColor(r, g, b)
         end
 
         ClassIcons[index] = icon
