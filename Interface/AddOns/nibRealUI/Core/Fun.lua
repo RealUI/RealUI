@@ -142,9 +142,13 @@ function RealUI:GetCurrentLootSpecName()
     debug("GetCurrentLootSpecName", lsID)
 
     if (lsID == 0) then
-        local _, specName = _G.GetSpecializationInfo(_G.GetSpecialization())
-        debug("GetSpecializationInfo", _, specName)
-        return specName
+        local specIndex = _G.GetSpecialization()
+        local _, specName = _G.GetSpecializationInfo(specIndex)
+        debug("GetSpecializationInfo", _, specName, specIndex)
+        if RealUI.isDev and not specName then
+            print("GetCurrentLootSpecName failed")
+        end
+        return specName or _G.UNKNOWN
     else
         local _, specName = _G.GetSpecializationInfoByID(lsID)
         debug("GetSpecializationInfoByID", _, specName)
