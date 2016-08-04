@@ -345,8 +345,8 @@ function AddonControl:OnInitialize()
                         layout =        {use = false,   key = "Healing"},
                     },
                     control = {
-                        position = false,
-                        style = true,
+                        position = true,
+                        style = false,
                     },
                 },
                 ["mikScrollingBattleText"] = {
