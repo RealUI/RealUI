@@ -2280,16 +2280,6 @@ end
 
 local function Spec_Update(self)
     InfoLine:debug("Spec_Update", NeedSpecUpdate)
-    -- Talent Info
-    _G.wipe(TalentInfo)
-    for specIndex = 1, RealUI.numSpecs do
-        local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
-        TalentInfo[specIndex] = {
-            name = name,
-            icon = specIcon,
-        }
-    end
-
     -- Gear sets
     _G.wipe(equipSetsByIndex)
     _G.wipe(equipSetsByID)
@@ -2305,6 +2295,21 @@ local function Spec_Update(self)
                 name = equipName,
                 index = index
             }
+        end
+    end
+
+    -- Talent Info
+    _G.wipe(TalentInfo)
+    for specIndex = 1, RealUI.numSpecs do
+        local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
+        TalentInfo[specIndex] = {
+            name = name,
+            icon = specIcon,
+        }
+
+        -- Reset equip set if the saved index doesn't exist
+        if not equipSetsByID[dbc.specgear[specIndex]] then
+            dbc.specgear[specIndex] = -1
         end
     end
 
