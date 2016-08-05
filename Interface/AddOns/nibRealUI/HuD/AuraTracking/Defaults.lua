@@ -575,6 +575,8 @@ bf27cce4
 aaddc099
 8f8a7deb
 96a15d91
+89e46112
+81347abb
 
 ]]
 
@@ -3696,9 +3698,173 @@ classDefaults = {
 
     ["WARLOCK"] = {
         -- Static Player Auras
+            ["9-bd74da2c-1"] = {   -- Mana Tap (Aff, Destro) (Talent)
+                spell = 196104,
+                minLevel = 30,
+                specs = {true, false, true},
+                talent = {
+                    tier = 2,
+                    column = 3,
+                    mustHave = true,
+                },
+                order = 1,
+            },
+            ["9-8ef292f7-1"] = {   -- Demonic Empowerment (Demo) (Talent)
+                spell = 193396,
+                minLevel = 12,
+                unit = "pet",
+                specs = {false, true, false},
+                -- TODO: track number of demons summoned, and w/ buff
+                order = 1,
+            },
         -- Static Target Auras
+            ["9-be413012-1"] = {   -- Corruption (Aff)
+                spell = 146739,
+                minLevel = 3,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 1,
+            },
+            ["9-9d46aea7-1"] = {   -- Agony (Aff)
+                spell = 980,
+                minLevel = 6,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 2,
+            },
+            ["9-bcf57e20-1"] = {   -- Unstable Affliction (Aff)
+                spell = 30108,
+                minLevel = 10,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                order = 3,
+            },
+            ["9-b2aa6f2d-1"] = {   -- Doom (Demo)
+                spell = 603,
+                minLevel = 26,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["9-bfee421b-1"] = {   -- Shadowflame (Demo) (Talent)
+                spell = 205181,
+                minLevel = 15,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 2,
+            },
+            ["9-be90eb3d-1"] = {   -- Immolate (Dest)
+                spell = 157736,
+                minLevel = 12,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                order = 1,
+            },
         -- Free Player Auras
+            ["9-82ad155e-1"] = {   -- Shadowy Inspiration (Demo) (Talent)
+                spell = 196606,
+                minLevel = 15,
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["9-9f916aed-1"] = {   -- Demonic Calling (Demo) (Talent)
+                spell = 205146,
+                minLevel = 15,
+                specs = {false, true, false},
+                talent = {
+                    tier = 1,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["9-a8874fa3-1"] = {   -- Grimoire of Synergy (Demo) (Talent)
+                spell = 171982, -- Demonic Synergy
+                minLevel = 90,
+                specs = {false, true, false},
+                talent = {
+                    tier = 6,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["9-bc1debbb-1"] = {   -- Backdraft (Destro) (Talent)
+                spell = 117828,
+                minLevel = 15,
+                specs = {false, false, true},
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["9-911df4e4-1"] = {   -- Soul Harvest (Talent)
+                spell = 196098,
+                minLevel = 60,
+                talent = {
+                    tier = 4,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
+            ["9-8072e1ae-1"] = {   -- Haunt (Aff) (Talent)
+                spell = 48181,
+                minLevel = 15,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["9-869d9949-1"] = {   -- Seed of Corruption (Aff)
+                spell = 27243,
+                minLevel = 21,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+            },
+            ["9-87bd1ea8-1"] = {   -- Phantom Singularity (Aff) (Talent)
+                spell = 205179,
+                minLevel = 100,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 7,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["9-858bed5f-1"] = {   -- Eradication (Destro) (Talent)
+                spell = 196414,
+                minLevel = 60,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+                talent = {
+                    tier = 4,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
     },
 
     ["WARRIOR"] = {
