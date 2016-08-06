@@ -561,25 +561,7 @@ if not isBeta then
 bd56d2d6
 965917ad
 a5bdd6b2
-
--- Retired in Legion
 b6cce35c
-8c2b1f08
-8281137d
-ac02f3e2
-aeb77dff
-83a223f0
-a34a80e5
-86dc5f08
-bf27cce4
-aaddc099
-8f8a7deb
-96a15d91
-89e46112
-81347abb
-95b80fdf
-9d8e1b35
-bf917422
 
 ]]
 
@@ -2404,9 +2386,143 @@ classDefaults = {
 
     ["DEMONHUNTER"] = {
         -- Static Player Auras
+            ["12-86dc5f08-1"] = {   -- Demon Spikes (Veng)
+                spell = 203819,
+                minLevel = 98,
+                specs = {false, true},
+                order = 1,
+            },
         -- Static Target Auras
         -- Free Player Auras
+            ["12-bf917422-1"] = {   -- Blur (Havok)
+                spell = 212800,
+                minLevel = 98,
+                specs = {true, false},
+                talent = {
+                    tier = 4,
+                    column = 1,
+                    mustHave = false,
+                },
+            },
+            ["12-96a15d91-1"] = {   -- Netherwalk (Havok) (Talent)
+                spell = 196555,
+                minLevel = 104,
+                specs = {true, false},
+                talent = {
+                    tier = 4,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["12-8f8a7deb-1"] = {   -- Momentum (Havok) (Talent)
+                spell = 208628,
+                minLevel = 106,
+                specs = {true, false},
+                talent = {
+                    tier = 5,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["12-bf27cce4-1"] = {   -- Chaos Blades (Havok) (Talent)
+                spell = 211048,
+                minLevel = 110,
+                specs = {true, false},
+                talent = {
+                    tier = 7,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["12-9d8e1b35-1"] = {   -- Immolation Aura (Veng)
+                spell = 178740,
+                minLevel = 98,
+                specs = {false, true},
+            },
+            ["12-a34a80e5-1"] = {   -- Empower Wards (Veng)
+                spell = 218256,
+                minLevel = 98,
+                specs = {false, true},
+            },
+            ["12-95b80fdf-1"] = {   -- Metamorphosis
+                spell = {162264, 187827}, -- Havok, Veng
+                minLevel = 98,
+            },
+            ["12-81347abb-1"] = {   -- Spectral Sight
+                spell = 188501,
+                minLevel = 98,
+            },
+            ["12-8281137d-1"] = {   -- Nether Bond (Veng) (Talent)
+                spell = 207810,
+                minLevel = 110,
+                specs = {false, true},
+                talent = {
+                    tier = 7,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["12-8c2b1f08-1"] = {   -- Soul Barrier (Veng) (Talent)
+                spell = 227225,
+                minLevel = 110,
+                specs = {false, true},
+                talent = {
+                    tier = 7,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
         -- Free Target Auras
+            ["12-89e46112-1"] = {   -- Bloodlet (Havok) (Talent)
+                spell = 207690,
+                minLevel = 102,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false},
+                talent = {
+                    tier = 3,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["12-aaddc099-1"] = {   -- Nemesis (Havok) (Talent)
+                spell = 206491,
+                minLevel = 106,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false},
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["12-aeb77dff-1"] = {   -- Fiery Brand (Veng)
+                spell = 207744,
+                minLevel = 98,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true},
+            },
+            ["12-83a223f0-1"] = {   -- Sigil of Flame (Veng)
+                spell = 204598,
+                minLevel = 98,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true},
+            },
+            ["12-ac02f3e2-1"] = {   -- Spirit Bomb (Veng) (Talent)
+                spell = 224509, -- Frailty
+                minLevel = 108,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, true},
+                talent = {
+                    tier = 6,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
     },
 
     ["DRUID"] = {
