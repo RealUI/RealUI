@@ -577,6 +577,9 @@ aaddc099
 96a15d91
 89e46112
 81347abb
+95b80fdf
+9d8e1b35
+bf917422
 
 ]]
 
@@ -3869,9 +3872,177 @@ classDefaults = {
 
     ["WARRIOR"] = {
         -- Static Player Auras
+            ["1-be149d0a-1"] = {   -- Enrage (Fury)
+                spell = 184362,
+                minLevel = 14,
+                specs = {false, true, false},
+                order = 1,
+            },
+            ["1-bb0caec6-1"] = {   -- Ignore Pain (Prot)
+                spell = 190456,
+                minLevel = 34,
+                specs = {false, false, true},
+                order = 1,
+            },
+            ["1-8d6897d2-1"] = {   -- Shield Block (Prot)
+                spell = 132404,
+                minLevel = 18,
+                specs = {false, false, true},
+                order = 2,
+            },
         -- Static Target Auras
+            ["1-9256f2b1-1"] = {   -- Rend (Arms)
+                spell = 772,
+                minLevel = 45,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+                talent = {
+                    tier = 3,
+                    column = 2,
+                    mustHave = true,
+                },
+                order = 1,
+            },
         -- Free Player Auras
+            ["1-9ca47424-1"] = {   -- Die by the Sword (Arms)
+                spell = 118038,
+                minLevel = 50,
+                specs = {true, false, false},
+            },
+            ["1-b9d2c83a-1"] = {   -- Focused Rage (Arms) (Talent)
+                spell = 207982,
+                minLevel = 75,
+                specs = {true, false, false},
+                talent = {
+                    tier = 5,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["1-88616b14-1"] = {   -- Furious Slash (Fury)
+                spell = 206333, -- Taste for Blood
+                minLevel = 10,
+                specs = {false, true, false},
+            },
+            ["1-849c1974-1"] = {   -- Enraged Regeneration (Fury)
+                spell = 184364,
+                minLevel = 12,
+                specs = {false, true, false},
+            },
+            ["1-8c2242a0-1"] = {   -- War Machine (Fury) (Talent)
+                spell = 215562,
+                minLevel = 15,
+                talent = {
+                    tier = 1,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["1-80e6917a-1"] = {   -- Frothing Berserker (Fury) (Talent)
+                spell = 215572,
+                minLevel = 75,
+                talent = {
+                    tier = 5,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["1-9b003d2d-1"] = {   -- Frenzy (Fury) (Talent)
+                spell = 202539,
+                minLevel = 90,
+                talent = {
+                    tier = 6,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["1-a216ed2a-1"] = {   -- Dragon Roar (Fury) (Talent)
+                spell = 118000,
+                minLevel = 100,
+                talent = {
+                    tier = 7,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["1-ae88cb34-1"] = {   -- Last Stand (Prot)
+                spell = 12975,
+                minLevel = 36,
+                specs = {false, false, true},
+            },
+            ["1-8ede1252-1"] = {   -- Ultimatum (Prot)
+                spell = 122510,
+                minLevel = 45,
+                specs = {false, false, true},
+                talent = {
+                    tier = 3,
+                    column = 2,
+                    mustHave = true,
+                },
+            },
+            ["1-bc105857-1"] = {   -- Shield Wall (Prot)
+                spell = 871,
+                minLevel = 48,
+                specs = {false, false, true},
+            },
+            ["1-b8a217f8-1"] = {   -- Focused Rage (Prot)
+                spell = 204488,
+                minLevel = 52,
+                specs = {false, false, true},
+            },
+            ["1-af01758e-1"] = {   -- Spell Reflection (Prot)
+                spell = 23920,
+                minLevel = 65,
+                specs = {false, false, true},
+            },
+            ["1-a17f11f4-1"] = {   -- Victory Rush (Arms, Prot)
+                spell = 32216, -- Victorious
+                minLevel = 10,
+                specs = {true, false, true},
+            },
+            ["1-bc751f32-1"] = {   -- Avatar (Talent)
+                spell = 107574,
+                minLevel = 45,
+                talent = {
+                    tier = 3,
+                    column = 3,
+                    mustHave = true,
+                },
+            },
+            ["1-bb6869cd-1"] = {   -- Berserker Rage
+                spell = 18499,
+                minLevel = 40,
+            },
+            ["1-803da340-1"] = {   -- Battle Cry
+                spell = 1719,
+                minLevel = 60,
+            },
         -- Free Target Auras
+            ["1-bbd999f7-1"] = {   -- Colossus Smash (Arms)
+                spell = 208086,
+                auraType = "debuff",
+                unit = "target",
+                specs = {true, false, false},
+            },
+            ["1-a26f3820-1"] = {   -- Bloodbath (Fury) (Talent)
+                spell = 113344,
+                minLevel = 90,
+                auraType = "debuff",
+                unit = "target",
+                talent = {
+                    tier = 6,
+                    column = 1,
+                    mustHave = true,
+                },
+            },
+            ["1-96c7609f-1"] = {   -- Demoralizing Shout (Prot)
+                spell = 1160,
+                minLevel = 50,
+                auraType = "debuff",
+                unit = "target",
+                specs = {false, false, true},
+            },
     },
 }
 
