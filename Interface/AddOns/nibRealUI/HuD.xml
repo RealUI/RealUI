@@ -2,8 +2,6 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <Include file="HuD\AuraTracking\AuraTracking.xml"/>
-    <Include file="HuD\PointTracking\PointTracking.xml"/>
-    <Include file="HuD\ClassResource\ClassResource.xml"/>
     <Script file="HuD\ClassResource.lua"/>
     <Script file="HuD\CastBars.lua"/>
     <Include file="HuD\UnitFrames\UnitFrames.xml"/>

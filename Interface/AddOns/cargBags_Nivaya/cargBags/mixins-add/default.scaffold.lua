@@ -102,11 +102,7 @@ local function ItemButton_Update(self, item)
 			self.Icon:SetTexture(self.bgTex)
 			self.Icon:SetTexCoord(.08, .92, .08, .92)
 		else
-			if RealUI.isBeta then
-				self.Icon:SetColorTexture(1,1,1,0.1)
-			else
-				self.Icon:SetTexture(1,1,1,0.1)
-			end
+			self.Icon:SetColorTexture(1,1,1,0.1)
 		end
 	end
 	if(item.count and item.count > 1) then

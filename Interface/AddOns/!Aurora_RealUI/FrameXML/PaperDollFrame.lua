@@ -46,11 +46,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             itemSlot.ilvl = iLvl
 
             local upgradeBG = itemSlot:CreateTexture(nil, "OVERLAY", -8)
-            if RealUI.isBeta then
-                upgradeBG:SetColorTexture(0, 0, 0, 1)
-            else
-                upgradeBG:SetTexture(0, 0, 0, 1)
-            end
+            upgradeBG:SetColorTexture(0, 0, 0, 1)
             if item.slot == "SecondaryHand" then
                 upgradeBG:SetPoint("TOPRIGHT", itemSlot, "TOPLEFT", 1, 0)
                 upgradeBG:SetPoint("BOTTOMLEFT", itemSlot, "BOTTOMLEFT", -1, 0)
@@ -102,40 +98,6 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     _G.PaperDollFrame.ilvl = _G.PaperDollFrame:CreateFontString("ARTWORK")
     _G.PaperDollFrame.ilvl:SetFontObject(_G.SystemFont_Small)
     _G.PaperDollFrame.ilvl:SetPoint("TOP", _G.PaperDollFrame, "TOP", 0, -20)
-
-    -- Toggle Helm and Cloak
-    if not RealUI.isBeta then
-        local helmcloak = {
-            Head = "Helm",
-            Back = "Cloak",
-        }
-        for slot, item in next, helmcloak do
-            local isShown = _G["Showing" .. item]
-            local itemSlot = _G["Character" .. slot .. "Slot"]
-            local check = _G.CreateFrame("CheckButton", "RealUI" .. item, itemSlot, "UICheckButtonTemplate")
-            check:SetSize(18, 18)
-            check:SetPoint("TOPLEFT", itemSlot, -4, 4)
-            F.ReskinCheck(check)
-
-            check:SetScript("OnShow", function(self) 
-                self:SetChecked(isShown())
-            end)
-
-            check:SetScript("OnClick", function() 
-                _G["Show" .. item](not isShown()) 
-            end)
-
-            check:SetScript("OnEnter", function(self) 
-                _G.GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 13, -10)
-                _G.GameTooltip:AddLine(_G["SHOW_" .. item:upper()])
-                _G.GameTooltip:Show()
-            end)
-
-            check:SetScript("OnLeave", function() 
-                _G.GameTooltip:Hide()
-            end)
-        end
-    end
 
     local ilvlLimits = 385
     local function GetILVLColor(lvl, ilvl)
@@ -191,11 +153,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                         itemSlot.upgradeBG:SetShown(cur and cur > 0)
                         for i, tex in next, itemSlot.upgrade do
                             if cur and i <= cur then
-                                if RealUI.isBeta then
-                                    tex:SetColorTexture(r, g, b)
-                                else
-                                    tex:SetTexture(r, g, b)
-                                end
+                                tex:SetColorTexture(r, g, b)
                                 tex:SetHeight((itemSlot:GetHeight() / max) - (i < max and 1 or 0))
                                 --tex:SetPoint("TOPLEFT", -1 + ((dotSize*.75)*(i-1)), 1)
                                 tex:Show()

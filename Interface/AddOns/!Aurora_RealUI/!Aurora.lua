@@ -254,15 +254,9 @@ frame:SetScript("OnEvent", function(self, event, addon)
 
             F.ReskinAtlas = function(f, atlas, is8Point)
                 debug("ReskinAtlas", atlas, is8Point)
-                local file, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
-                if RealUI.isBeta then
-                    -- file is an ID instead of a path now
-                    file = skinnedAtlas[atlas]
-                    f:SetTexture(file)
-                else
-                    file = file:sub(10) -- cut off "Interface"
-                    f:SetTexture([[Interface\AddOns\!Aurora_RealUI\Media]]..file)
-                end
+                local _, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
+                -- file is an ID instead of a path now
+                f:SetTexture(skinnedAtlas[atlas])
                 if is8Point then
                     return left, right, top, bottom
                 else

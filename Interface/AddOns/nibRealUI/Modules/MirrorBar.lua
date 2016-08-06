@@ -94,11 +94,11 @@ function MirrorBar:OnUpdate(bar, elapsed)
 
     -- Time remaining
     curTimer.timeRemaining = _G.floor(curTimer.value / 1000)
-    curTimer.timeRemaining = RealUI.Clamp(curTimer.timeRemaining, 0, curTimer.max / 1000)
+    curTimer.timeRemaining = _G.Clamp(curTimer.timeRemaining, 0, curTimer.max / 1000)
 
     -- Scale
     local scale = (curTimer.max ~= 0) and (curTimer.value / curTimer.max) or 0
-    scale = RealUI.Clamp(scale, 0, 1)
+    scale = _G.Clamp(scale, 0, 1)
 
     -- Update bar
     local _,_,_,_,_, label = _G.GetMirrorTimerInfo(self.currentTimer)

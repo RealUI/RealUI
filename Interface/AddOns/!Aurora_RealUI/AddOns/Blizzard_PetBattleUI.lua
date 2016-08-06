@@ -9,7 +9,6 @@ local next = _G.next
 _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
     mods.debug("Blizzard_PetBattleUI", F, C)
     local RealUI = _G.RealUI
-    local isBeta = RealUI.isBeta
     local r, g, b = C.r, C.g, C.b
 
     local frame = _G.PetBattleFrame
@@ -32,21 +31,12 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         f.bg = bg
     end
 
-    if isBeta then
-        _G.PetBattlePrimaryUnitTooltip.Delimiter:SetColorTexture(0, 0, 0)
-        _G.PetBattlePrimaryAbilityTooltip.Delimiter1:SetColorTexture(0, 0, 0)
-        _G.PetBattlePrimaryAbilityTooltip.Delimiter2:SetColorTexture(0, 0, 0)
-        _G.FloatingPetBattleAbilityTooltip.Delimiter1:SetColorTexture(0, 0, 0)
-        _G.FloatingPetBattleAbilityTooltip.Delimiter2:SetColorTexture(0, 0, 0)
-        _G.FloatingBattlePetTooltip.Delimiter:SetColorTexture(0, 0, 0)
-    else
-        _G.PetBattlePrimaryUnitTooltip.Delimiter:SetTexture(0, 0, 0)
-        _G.PetBattlePrimaryAbilityTooltip.Delimiter1:SetTexture(0, 0, 0)
-        _G.PetBattlePrimaryAbilityTooltip.Delimiter2:SetTexture(0, 0, 0)
-        _G.FloatingPetBattleAbilityTooltip.Delimiter1:SetTexture(0, 0, 0)
-        _G.FloatingPetBattleAbilityTooltip.Delimiter2:SetTexture(0, 0, 0)
-        _G.FloatingBattlePetTooltip.Delimiter:SetTexture(0, 0, 0)
-    end
+    _G.PetBattlePrimaryUnitTooltip.Delimiter:SetColorTexture(0, 0, 0)
+    _G.PetBattlePrimaryAbilityTooltip.Delimiter1:SetColorTexture(0, 0, 0)
+    _G.PetBattlePrimaryAbilityTooltip.Delimiter2:SetColorTexture(0, 0, 0)
+    _G.FloatingPetBattleAbilityTooltip.Delimiter1:SetColorTexture(0, 0, 0)
+    _G.FloatingPetBattleAbilityTooltip.Delimiter2:SetColorTexture(0, 0, 0)
+    _G.FloatingBattlePetTooltip.Delimiter:SetColorTexture(0, 0, 0)
     _G.PetBattlePrimaryUnitTooltip.Delimiter:SetHeight(1)
     _G.PetBattlePrimaryAbilityTooltip.Delimiter1:SetHeight(1)
     _G.PetBattlePrimaryAbilityTooltip.Delimiter2:SetHeight(1)
@@ -195,11 +185,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         unit.BorderDead:SetVertexColor(1, 0, 0)
 
         unit.HealthBorder = unit:CreateTexture()
-        if isBeta then
-            unit.HealthBorder:SetColorTexture(0, 0, 0)
-        else
-            unit.HealthBorder:SetTexture(0, 0, 0)
-        end
+        unit.HealthBorder:SetColorTexture(0, 0, 0)
         unit.HealthBorder:SetSize(36, 1)
         unit.HealthBorder:SetPoint("TOP", unit.ActualHealthBar, 0, 1)
 
@@ -244,11 +230,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         unit.bd = unit:CreateTexture()
         unit.bd:SetDrawLayer("BACKGROUND", 1)
-        if isBeta then
-            unit.bd:SetColorTexture(0, 0, 0, .5)
-        else
-            unit.bd:SetTexture(0, 0, 0, .5)
-        end
+        unit.bd:SetColorTexture(0, 0, 0, .5)
         unit.bd:SetAllPoints(unit.bg)
 
         unit.bg.SelectedTexture = unit:CreateTexture()
@@ -271,11 +253,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         unit.ActualHealthBar.bd = unit:CreateTexture()
         unit.ActualHealthBar.bd:SetDrawLayer("BACKGROUND", 3)
-        if isBeta then
-            unit.ActualHealthBar.bd:SetColorTexture(0, 0, 0, .25)
-        else
-            unit.ActualHealthBar.bd:SetTexture(0, 0, 0, .25)
-        end
+        unit.ActualHealthBar.bd:SetColorTexture(0, 0, 0, .25)
         unit.ActualHealthBar.bd:SetAllPoints(unit.ActualHealthBar.bg)
 
         unit:HookScript("OnEnter", petSelectOnEnter)
@@ -503,19 +481,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         bu.CooldownShadow:SetAllPoints()
         bu.CooldownFlash:SetAllPoints()
 
-        if isBeta then
-            pushed:SetColorTexture(r, g, b)
-        else
-            pushed:SetTexture(r, g, b)
-        end
+        pushed:SetColorTexture(r, g, b)
         pushed:SetDrawLayer("BACKGROUND")
         pushed:SetAllPoints()
 
-        if isBeta then
-            se:SetColorTexture(r, g, b, .2)
-        else
-            se:SetTexture(r, g, b, .2)
-        end
+        se:SetColorTexture(r, g, b, .2)
         se:SetAllPoints()
 
         ho:SetFontObject(_G.RealUIFont_PixelSmall)

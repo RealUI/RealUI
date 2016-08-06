@@ -576,15 +576,6 @@ do
     end
 end
 
-local UnitIsTapDenied
-if RealUI.isBeta then
-    UnitIsTapDenied = _G.UnitIsTapDenied
-else
-    UnitIsTapDenied = function(unit)
-        return _G.UnitIsTapped(unit) and not _G.UnitIsTappedByPlayer(unit) and not _G.UnitIsTappedByAllThreatList(unit)
-    end
-end
-
 function UnitFrames:UpdateEndBox(...)
     UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit
@@ -592,7 +583,7 @@ function UnitFrames:UpdateEndBox(...)
     if _G.UnitIsPlayer(unit) then
         color = RealUI:GetClassColor(class)
     else
-        if ( not _G.UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
+        if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
             color = self.colors.tapped
         else
             color = self.colors.reaction[_G.UnitReaction(unit, "player")]
@@ -720,16 +711,9 @@ local function Shared(self, unit)
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
     if unit == "player" then
-        if RealUI.isBeta then
-            local ClassResource = RealUI:GetModule("ClassResource")
-            if ClassResource:IsEnabled() then
-                ClassResource:Setup(self, unit)
-            end
-        else
-            local PointTracking = RealUI:GetModule("PointTracking")
-            if PointTracking:IsEnabled() then
-                PointTracking:Setup(self, unit)
-            end
+        local ClassResource = RealUI:GetModule("ClassResource")
+        if ClassResource:IsEnabled() then
+            ClassResource:Setup(self, unit)
         end
     end
 end

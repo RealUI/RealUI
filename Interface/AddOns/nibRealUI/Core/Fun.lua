@@ -6,6 +6,7 @@ local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
 local next, type, select = _G.next, _G.type, _G.select
 local print, tonumber = _G.print, _G.tonumber
+local Clamp = _G.Clamp
 
 -- Libs --
 local F = _G.Aurora[1]
@@ -93,14 +94,10 @@ end
 
 function RealUI:GetResolutionVals(raw)
     local resolution
-    if RealUI.isBeta then
-        if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
-            resolution = _G.GetCVar("gxwindowedresolution")
-        else
-            resolution = _G.GetCVar("gxfullscreenresolution")
-        end
+    if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
+        resolution = _G.GetCVar("gxwindowedresolution")
     else
-        resolution = _G.GetCVar("gxResolution")
+        resolution = _G.GetCVar("gxfullscreenresolution")
     end
     local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
     resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
@@ -162,29 +159,6 @@ function RealUI:GetLootSpecData(LootSpecIDs)
     end
     return LootSpecIDs
 end
-
--- Math
-local Lerp, Clamp
-if RealUI.isBeta then
-    Lerp, Clamp = _G.Lerp, _G.Clamp
-else
-    function Lerp(startValue, endValue, amount)
-        return (1 - amount) * startValue + amount * endValue;
-    end
-
-    function Clamp(value, minVal, maxVal)
-        if value < minVal then
-            value = minVal
-        elseif value > maxVal then
-            value = maxVal
-        elseif value ~= value or not (value >= minVal and value <= maxVal) then -- check for nan...
-            value = minVal
-        end
-
-        return value
-    end
-end
-RealUI.Lerp, RealUI.Clamp = Lerp, Clamp
 
 -- Seconds to Time
 function RealUI:ConvertSecondstoTime(value, onlyOne)

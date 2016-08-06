@@ -1,5 +1,4 @@
 local _, private = ...
-if not private.RealUI.isBeta then return end
 
 -- Lua Globals --
 local _G = _G
@@ -176,7 +175,7 @@ function ClassResource:CreateClassIcons(unitFrame, unit)
         if not pointDB.hideempty or (event == "ForceUpdate" or self.configMode) then
             for i = 1, max or 0 do -- max will be nil when the icon is disabled
                 local iconBG = element[i].bg
-                local alpha = RealUI.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, element:GetAlpha())
+                local alpha = _G.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, element:GetAlpha())
                 iconBG:SetDesaturated(i > cur)
                 iconBG:SetAlpha(iconBG:IsDesaturated() and alpha or 1)
                 element[i]:SetShown(self.configMode or not pointDB.hideempty)
