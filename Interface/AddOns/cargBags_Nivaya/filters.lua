@@ -58,8 +58,7 @@ function cbNivaya:ClassifyItem(item)
 	if tC then cB_ItemClass[item.id] = tC; return true end
 
 	-- junk
-	local _,_,tQ = GetItemInfo(item.link)
-	if (tQ == 0) then cB_ItemClass[item.id] = "Junk"; return true end
+	if (item.rarity == 0) then cB_ItemClass[item.id] = "Junk"; return true end
 
 	-- type based filters
 	if item.type then
