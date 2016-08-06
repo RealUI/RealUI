@@ -4,6 +4,7 @@ local cargBags = ns.cargBags
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
 function cbNivaya:UpdateBags()
+	cargBags.debug("filters cbNivaya:UpdateBags")
 	for i = -3, 11 do
 		cbNivaya:UpdateBag(i)
 	end

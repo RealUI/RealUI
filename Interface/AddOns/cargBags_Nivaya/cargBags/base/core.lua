@@ -26,6 +26,7 @@ local global = GetAddOnMetadata(parent, 'X-cargBags')
 --  This class provides the underlying fundamental functions, such as
 --  class-generation, helper-functions and the Blizzard-replacement
 local cargBags = CreateFrame("Button")
+cargBags.debug = RealUI.GetDebug("cargBags")
 
 ns.cargBags = cargBags
 if(global) then

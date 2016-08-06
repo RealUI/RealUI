@@ -156,6 +156,7 @@ end
 	@param filters <FilterTable> check against other filters [optional]
 ]]
 function Container:FilterForFunction(func, filters)
+	cargBags.debug("Container:FilterForFunction", func, filters)
 	filters = filters or self.filters
 
 	for i, button in pairs(self.buttons) do
