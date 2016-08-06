@@ -61,12 +61,12 @@ function cbNivaya:ClassifyItem(item)
 	if (item.rarity == 0) then cB_ItemClass[item.id] = "Junk"; return true end
 
 	-- type based filters
-	if item.type then
-		if		(item.type == L.Armor) or (item.type == L.Weapon)	then cB_ItemClass[item.id] = "Armor"; return true
-		elseif	(item.type == L.Quest)								then cB_ItemClass[item.id] = "Quest"; return true
-		elseif	(item.type == L.Trades)								then cB_ItemClass[item.id] = "TradeGoods"; return true
-		elseif	(item.type == L.Consumables)						then cB_ItemClass[item.id] = "Consumables"; return true
-		elseif	(item.type == L.BattlePet)							then cB_ItemClass[item.id] = "BattlePet"; return true
+	if item.typeID then
+		if		(item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON)	then cB_ItemClass[item.id] = "Armor"; return true
+		elseif	(item.typeID == _G.LE_ITEM_CLASS_QUESTITEM)							then cB_ItemClass[item.id] = "Quest"; return true
+		elseif	(item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS)						then cB_ItemClass[item.id] = "TradeGoods"; return true
+		elseif	(item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE)						then cB_ItemClass[item.id] = "Consumables"; return true
+		elseif	(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET)							then cB_ItemClass[item.id] = "BattlePet"; return true
 		end
 	end
 	
@@ -85,7 +85,7 @@ function cbNivaya:getItemCount(itemName)
 				local tLink = GetContainerItemLink(i,j)
 				local tName
 				if tLink then
-					if (strsub(tLink, 13, 21) == "battlepet") then
+					if tLink:find("battlepet") then
 						tName = select(2, strmatch(tLink, "|H(.-)|h(.-)|h"))
 					else
 						tName = GetItemInfo(tLink)
