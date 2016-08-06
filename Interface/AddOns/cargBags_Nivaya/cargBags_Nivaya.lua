@@ -697,21 +697,7 @@ local Event =  CreateFrame('Frame', nil)
 Event:RegisterEvent("PLAYER_ENTERING_WORLD")
 Event:SetScript('OnEvent', function(self, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
-		for bagID = -3, 11 do
-			local slots = GetContainerNumSlots(bagID)
-			for slotID=1,slots do
-				local button = cbNivaya.buttonClass:New(bagID, slotID)
-				buttonCollector[#buttonCollector+1] = button
-				cbNivaya:SetButton(bagID, slotID, nil)
-			end
-		end
-		for i,button in pairs(buttonCollector) do
-			if button.container then
-				button.container:RemoveButton(button)
-			end
-			button:Free()
-		end
-		cbNivaya:UpdateBags()
+		cargBags.debug("cbNivaya:OnEvent", event, ...)
 
 		if IsReagentBankUnlocked() then
 			NivayacBniv_Bank.reagentBtn:Show()
