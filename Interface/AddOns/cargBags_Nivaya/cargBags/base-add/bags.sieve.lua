@@ -35,6 +35,7 @@ local Implementation = cargBags.classes.Implementation
 	@returns container <Container>
 ]]
 function Implementation:GetContainerForItem(item)
+	cargBags.debug("bags Implementation:GetContainerForItem", item)
 	return (item.bagID and self.bagToContainer) and self.bagToContainer[item.bagID]
 end
 

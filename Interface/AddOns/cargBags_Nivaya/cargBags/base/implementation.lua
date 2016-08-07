@@ -377,6 +377,7 @@ function Implementation:UpdateSlot(bagID, slotID)
 	local button = self:GetButton(bagID, slotID)
 	local container = self:GetContainerForItem(item, button)
 
+	cargBags.debug("button, container", button, container)
 	if (container) then
 		if (button) then
 			if (container ~= button.container) then
