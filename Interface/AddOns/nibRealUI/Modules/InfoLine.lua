@@ -15,7 +15,6 @@ local artData = _G.LibStub("LibArtifactData-1.0", true)
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, dbc, dbg, ndb, ndbc
-local isBeta = RealUI.isBeta
 
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
@@ -718,16 +717,14 @@ do
 
         showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
         showRep = repName
-        if isBeta then
-            InfoLine:debug("Active artifact", artifactID, ...)
+        InfoLine:debug("Active artifact", artifactID, ...)
+        if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" or event == "ARTIFACT_ACTIVE_CHANGED" then
             artifactID = ...
-            if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" then
-                artifacts = artData:GetAllArtifactsInfo(artifactID)
-            end
-            InfoLine:debug("GetArtifactInfo", artifactID, artifacts and next(artifacts[artifactID]))
-            showArtifact = artifactID and _G.HasArtifactEquipped()
-            showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
+            artifacts = artData:GetAllArtifactsInfo(artifactID)
         end
+        InfoLine:debug("GetArtifactInfo", artifactID, artifacts and next(artifacts[artifactID]))
+        showArtifact = artifactID and _G.HasArtifactEquipped()
+        showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
 
         -- XP Data
         if showXP then
@@ -2072,34 +2069,17 @@ local function SpecChangeClickFunc(self, specIndex)
                 end
             end
         else
-            if isBeta then
-                if _G.GetSpecialization() == specIndex then
-                    if dbc.specgear[specIndex] >= 0 then
-                        _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
-                    end
-                else
-                    _G.SetSpecialization(specIndex)
-                    NeedSpecUpdate = true
+            if _G.GetSpecialization() == specIndex then
+                if dbc.specgear[specIndex] >= 0 then
+                    _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
                 end
             else
-                local specGroup = _G.GetActiveSpecGroup()
-                if _G.GetSpecialization(nil, nil, specGroup) == specIndex then
-                    if dbc.specgear[specIndex] >= 0 then
-                        _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
-                    end
-                else
-                    _G.SetActiveSpecGroup(specGroup == 1 and 2 or 1)
-                    NeedSpecUpdate = true
-                end
+                _G.SetSpecialization(specIndex)
+                NeedSpecUpdate = true
             end
         end
     else
-        if isBeta then
-            _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
-        else
-            local specGroup = _G.GetActiveSpecGroup()
-            _G.SetActiveSpecGroup(specGroup == 1 and 2 or 1)
-        end
+        _G.ToggleTalentFrame(_G.SPECIALIZATION_TAB)
     end
 end
 local function SpecLootClickFunc(self, spec)
@@ -2201,15 +2181,8 @@ local function Spec_UpdateTablet(self)
 
     SpecSection["specs"].talentCat = Tablets.spec:AddCategory("columns", 3)
     AddBlankTabLine(SpecSection["specs"].talentCat, 2)
-    if isBeta then
-        for specIndex = 1, RealUI.numSpecs do
-            SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
-        end
-    else
-        for specGroup = 1, _G.GetNumSpecGroups() do
-            local specIndex = _G.GetSpecialization(nil, nil, specGroup)
-            SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
-        end
+    for specIndex = 1, RealUI.numSpecs do
+        SpecAddSpecLineToCat(self, SpecSection["specs"].talentCat, specIndex)
     end
 
     ---- Loot Specialization
@@ -2280,16 +2253,6 @@ end
 
 local function Spec_Update(self)
     InfoLine:debug("Spec_Update", NeedSpecUpdate)
-    -- Talent Info
-    _G.wipe(TalentInfo)
-    for specIndex = 1, RealUI.numSpecs do
-        local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
-        TalentInfo[specIndex] = {
-            name = name,
-            icon = specIcon,
-        }
-    end
-
     -- Gear sets
     _G.wipe(equipSetsByIndex)
     _G.wipe(equipSetsByID)
@@ -2305,6 +2268,21 @@ local function Spec_Update(self)
                 name = equipName,
                 index = index
             }
+        end
+    end
+
+    -- Talent Info
+    _G.wipe(TalentInfo)
+    for specIndex = 1, RealUI.numSpecs do
+        local _, name, _, specIcon = _G.GetSpecializationInfo(specIndex)
+        TalentInfo[specIndex] = {
+            name = name,
+            icon = specIcon,
+        }
+
+        -- Reset equip set if the saved index doesn't exist
+        if not equipSetsByID[dbc.specgear[specIndex]] then
+            dbc.specgear[specIndex] = -1
         end
     end
 
@@ -3370,11 +3348,9 @@ function InfoLine:CreateFrames()
         if not db.elements.xprep then return end
         InfoLine_XR_Update(element, ...)
     end
-    if isBeta then
-        artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent, ILFrames.xprep)
-        artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent, ILFrames.xprep)
-        artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent, ILFrames.xprep)
-    end
+    artData:RegisterCallback("ARTIFACT_ADDED", XR_OnEvent, ILFrames.xprep)
+    artData:RegisterCallback("ARTIFACT_POWER_CHANGED", XR_OnEvent, ILFrames.xprep)
+    artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", XR_OnEvent, ILFrames.xprep)
     ILFrames.xprep:SetScript("OnEvent", XR_OnEvent)
 
 

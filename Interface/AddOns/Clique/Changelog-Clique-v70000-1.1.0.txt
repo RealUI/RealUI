@@ -1,0 +1,21 @@
+tag v70000-1.1.0
+13b8541502cc108fdbc9c4eae3c1fb02d214774f
+Jim Whitehead <jnwhiteh@gmail.com>
+2016-07-26 23:25:07 +0200
+
+Tagging v70000-1.1.0
+
+
+--------------------
+
+Jim Whitehead:
+	- Add support for automatically switching profiles on talent change
+	These different profiles can be configured on the general options
+	screen.
+	- Update localization
+	- Add support for new talent specializations
+	This new version works a bit differently than the old one in that the
+	same spell can be bound to multiple talent sets and it should work
+	correctly. Basically if a talent bind set is selected then the bind will
+	only be available when that spec is active, but it is no longer an ONLY
+	bind set.

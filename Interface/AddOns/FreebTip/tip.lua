@@ -125,14 +125,6 @@ local qqColor = { r=1, g=0, b=0 }
 local nilcolor = { r=1, g=1, b=1 }
 local tapped = { r=.6, g=.6, b=.6 }
 
-local UnitIsTapDenied
-if RealUI.isBeta then
-    UnitIsTapDenied = _G.UnitIsTapDenied
-else
-    UnitIsTapDenied = function(unit)
-        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
-    end
-end
 local function unitColor(unit)
     local color
 

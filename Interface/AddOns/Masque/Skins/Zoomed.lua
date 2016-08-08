@@ -3,8 +3,8 @@
 	please see the included License.txt file.
 
 	* File...: Skins\Zoomed.lua
-	* Date...: 2015-12-16T18:57:09Z
-	* Hash...: 8b83b42
+	* Date...: 2016-07-26T01:18:37Z
+	* Hash...: 5979f17
 	* Author.: StormFX, JJSheets
 
 ]]
@@ -13,7 +13,7 @@ local _, Core = ...
 
 Core:AddSkin("Zoomed", {
 	Author = "JJSheets, StormFX",
-	Version = "6.2.1",
+	Version = "7.0.1",
 	Masque_Version = 60201,
 	Shape = "Square",
 	Backdrop = {
@@ -81,18 +81,19 @@ Core:AddSkin("Zoomed", {
 	Name = {
 		Width = 36,
 		Height = 10,
-		OffsetY = 1,
+		OffsetY = 3,
 	},
 	Count = {
 		Width = 36,
 		Height = 10,
-		OffsetX = 1,
-		OffsetY = 1,
+		OffsetX = -2,
+		OffsetY = 4,
 	},
 	HotKey = {
 		Width = 36,
 		Height = 10,
-		OffsetY = -1,
+		OffsetX = -2,
+		OffsetY = -4,
 	},
 	Duration = {
 		Width = 36,

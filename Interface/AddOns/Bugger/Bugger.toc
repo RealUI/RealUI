@@ -1,6 +1,6 @@
-## Interface: 60100
-## Version: 6.1.0.8
-## X-Curse-Packaged-Version: 6.1.0.8
+## Interface: 70000
+## Version: 7.0.3.1
+## X-Curse-Packaged-Version: 7.0.3.1
 ## X-Curse-Project-Name: Bugger
 ## X-Curse-Project-ID: bugger
 ## X-Curse-Repository-ID: wow/bugger/mainline
@@ -18,7 +18,7 @@
 
 ## Author: Phanx
 ## X-Email: addons@phanx.net
-## X-Copyright: Copyright (c) 2015-2015 Phanx. All rights reserved.
+## X-Copyright: Copyright (c) 2015-2016 Phanx. All rights reserved.
 ## X-Website: https://github.com/Phanx/Bugger
 
 ## SavedVariables: BuggerDB

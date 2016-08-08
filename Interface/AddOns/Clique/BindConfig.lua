@@ -48,6 +48,12 @@ function CliqueConfig:OnHide()
 end
 
 function CliqueConfig:SetupGUI()
+    self.talents = {}
+    for i = 1, GetNumSpecializations() do
+        local id, name = GetSpecializationInfo(i)
+        self.talents[i] = name
+    end
+
     self.rows = {}
     for i = 1, MAX_ROWS do
         self.rows[i] = CreateFrame("Button", "CliqueRow" .. i, self.page1, "CliqueRowTemplate")
@@ -599,23 +605,18 @@ function CliqueConfig:Row_OnClick(frame, button)
         keepShownOnClick = true,
     })
 
-	table.insert(submenu.menuList, {
-        text = L["Primary talent spec (ONLY)"],
-        checked = function() return binding.sets["pritalent"] end,
-        func = toggleSet(binding, "pritalent"),
-        tooltipTitle = L["Clique: 'pritalent' binding-set"],
-        tooltipText = L["A binding that belongs to the 'pritalent' binding-set is only active when the player is currently using their primary talent spec, regardless of the other binding-sets that this binding belongs to."],
-        keepShownOnClick = true,
-    })
-
-	table.insert(submenu.menuList, {
-        text = L["Secondary talent spec (ONLY)"],
-        checked = function() return binding.sets["sectalent"] end,
-        func = toggleSet(binding, "sectalent"),
-        tooltipTitle = L["Clique: 'sectalent' binding-set"],
-        tooltipText = L["A binding that belongs to the 'sectalent' binding-set is only active when the player is currently using their secondary talent spec, regardless of the other binding-sets that this binding belongs to."],
-        keepShownOnClick = true,
-    })
+    -- Add some buttons for the talent specs
+    for i = 1, #self.talents do
+        local key = "spec" .. i
+        table.insert(submenu.menuList, {
+            text = L["Talents: %s"]:format(self.talents[i]),
+            checked = function() return binding.sets[key] end,
+            func = toggleSet(binding, key),
+            tooltipTitle = L["Clique: talent set %d binding-set"].format(i),
+            tooltipText = L["A binding that belongs to this binding-set is only active when the player has the given talent specialization active"],
+            keepShownOnClick = true,
+        })
+    end
 
     table.insert(submenu.menuList, {
         text = L["Hovercast bindings (target required)"],

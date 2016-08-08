@@ -33,12 +33,14 @@
         max = maximum number of auras to display
         rows = maximum number of rows
         row_growth = direction in which rows will grow ('UP' or 'DOWN')
-        sort = aura sorting function
+        sort = aura sorting function, or index in sort_lookup
         filter = filter used in UnitAura calls
         num_per_row = number of icons per row;
                       if left nil, calculates as max / rows
         whitelist = a table of spellids to to show in the aura frame
-        kui_whitelist = use the whitelist provided by KuiSpellList
+        kui_whitelist = initialise with whitelist from KuiSpellList
+        pulsate = whether or not to pulsate icons with low time remaining
+        timer_threshold = threshold below which to show timer text
     }
 
     Callbacks
@@ -59,6 +61,9 @@
     PostCreateAuraFrame(auraframe)
         Called after an aura frame is created.
 
+    PostUpdateAuraFrame(auraframe)
+        Called after a shown aura frame is updated (buttons arranged, etc).
+
     DisplayAura(name,spellid,duration)
         Can be used to arbitrarily filter auras.
 
@@ -68,10 +73,10 @@ local kui = LibStub('Kui-1.0')
 local ele = addon:NewElement('Auras')
 
 local FONT,FONT_SIZE_CD,FONT_SIZE_COUNT,FONT_FLAGS
+local spelllist,whitelist,class
 
-local spelllist,whitelist
-
-local class
+-- time below which to show decimal places
+local DECIMAL_THRESHOLD = 1
 -- row growth lookup table
 local row_growth_points = {
     UP = {'BOTTOM','TOP'},
@@ -109,6 +114,11 @@ local auras_sort = function(a,b)
     -- and call the frame's desired sort function
     return a.parent.sort(a,b)
 end
+
+local sort_lookup = {
+    index_sort,
+    time_sort,
+}
 -- aura button functions #######################################################
 local function button_OnUpdate(self,elapsed)
     self.cd_elap = (self.cd_elap or 0) - elapsed
@@ -135,7 +145,7 @@ local function button_OnUpdate(self,elapsed)
             return
         end
 
-        if remaining <= 2 then
+        if remaining <= DECIMAL_THRESHOLD+1 then
             -- faster updates in the last 2 seconds
             self.cd_elap = .05
         else
@@ -144,11 +154,13 @@ local function button_OnUpdate(self,elapsed)
 
         if remaining <= 5 then
             self.cd:SetTextColor(1,0,0)
-        else
+        elseif remaining <= 20 then
             self.cd:SetTextColor(1,1,0)
+        else
+            self.cd:SetTextColor(1,1,1)
         end
 
-        if remaining <= 1 then
+        if remaining <= DECIMAL_THRESHOLD then
             -- decimal places in the last second
             remaining = format("%.1f", remaining)
         else
@@ -254,11 +266,11 @@ local function CreateAuraButton(parent)
 
         local cd = button:CreateFontString(nil,'OVERLAY')
         cd:SetFont(FONT, FONT_SIZE_CD, FONT_FLAGS)
-        cd:SetPoint('CENTER')
+        cd:SetPoint('TOPLEFT',-2,2)
 
         local count = button:CreateFontString(nil,'OVERLAY')
         count:SetFont(FONT, FONT_SIZE_COUNT, FONT_FLAGS)
-        count:SetPoint('BOTTOMRIGHT', 2, -2)
+        count:SetPoint('BOTTOMRIGHT',4,-2)
         count:Hide()
 
         button.icon   = icon
@@ -278,7 +290,25 @@ local function CreateAuraButton(parent)
     return button
 end
 -- aura frame functions ########################################################
+local function AuraFrame_Enable(self,force_update)
+    if not self.__DISABLED then return end
+
+    self.__DISABLED = nil
+
+    if force_update or self.parent:IsShown() then
+        self:FactionUpdate()
+        self:Update()
+    end
+end
+local function AuraFrame_Disable(self)
+    if self.__DISABLED then return end
+
+    self:Hide()
+    self.__DISABLED = true
+end
 local function AuraFrame_Update(self)
+    if self.__DISABLED then return end
+
     self:GetAuras()
 
     for _,button in ipairs(self.buttons) do
@@ -293,8 +323,21 @@ local function AuraFrame_Update(self)
 
     if self.visible and self.visible > 0 then
         self:Show()
+        ele:RunCallback('PostUpdateAuraFrame',self)
     else
         self:Hide()
+    end
+end
+local function AuraFrame_FactionUpdate(self)
+    if self.__DISABLED then return end
+
+    if self.dynamic and self.parent.unit then
+        -- update filter on faction change if dynamic
+        if UnitIsFriend('player',self.parent.unit) then
+            self.filter = 'PLAYER HELPFUL'
+        else
+            self.filter = 'PLAYER HARMFUL'
+        end
     end
 end
 local function AuraFrame_GetAuras(self)
@@ -327,15 +370,10 @@ local function AuraFrame_GetButton(self,spellid)
     return button
 end
 local function AuraFrame_DisplayButton(self,name,icon,spellid,count,duration,expiration,index)
-    if  self.kui_whitelist and whitelist and
-        not whitelist[spellid] and not whitelist[strlower(name)]
+    if  self.whitelist and
+        not self.whitelist[spellid] and not self.whitelist[strlower(name)]
     then
-        -- not in kui whitelist
-        return
-    elseif self.whitelist and
-           not self.whitelist[spellid] and not self.whitelist[strlower(name)]
-    then
-        -- not in provided whitelist
+        -- not in whitelist
         return
     end
 
@@ -431,6 +469,63 @@ local function AuraFrame_ArrangeButtons(self)
         end
     end
 end
+local function AuraFrame_SetIconSize(self,size)
+    -- set icon size and related variables, update buttons
+    if not size then
+        size = 24
+    end
+
+    self.size = size
+    self.icon_height = floor(size * self.squareness)
+    self.icon_ratio = (1 - (self.icon_height / size)) / 2
+
+    if type(self.buttons) == 'table' then
+        -- update existing buttons
+        for k,button in ipairs(self.buttons) do
+            button:SetWidth(size)
+            button:SetHeight(self.icon_height)
+            button.icon:SetTexCoord(.1,.9,.1+self.icon_ratio,.9-self.icon_ratio)
+        end
+
+        if self.visible and self.visible > 0 then
+            -- re-arrange visible buttons
+            self:ArrangeButtons()
+        end
+    end
+end
+local function AuraFrame_SetSort(self,sort_f)
+    if type(sort_f) == 'number' then
+        -- get sorting function from index
+        if type(sort_lookup[sort_f]) == 'function' then
+            self.sort = sort_lookup[sort_f]
+        else
+            self.sort = nil
+        end
+    elseif type(sort_f) == 'function' then
+        self.sort = sort_f
+    end
+
+    if not self.sort then
+        -- or set default
+        self.sort = index_sort
+    end
+end
+local function AuraFrame_SetWhitelist(self,list,kui)
+    if kui then
+        if not whitelist then
+            -- initialise KuiSpellList whitelist
+            spelllist = LibStub('KuiSpellList-1.0')
+            spelllist.RegisterChanged(ele,'WhitelistChanged')
+            ele:WhitelistChanged()
+        end
+
+        self.whitelist = whitelist
+    elseif type(list) == 'table' then
+        self.whitelist = list
+    else
+        self.whitelist = nil
+    end
+end
 local function AuraFrame_OnHide(self)
     -- hide all buttons
     self:HideAllButtons()
@@ -438,21 +533,24 @@ end
 -- aura frame creation #########################################################
 -- aura frame metatable
 local aura_meta = {
-    size       = 24,
     squareness = .7,
     x_spacing  = 0,
     y_spacing  = 0,
-    sort       = time_sort,
     pulsate    = true,
-    timer_threshold = 20,
 
+    Enable         = AuraFrame_Enable,
+    Disable        = AuraFrame_Disable,
     Update         = AuraFrame_Update,
+    FactionUpdate  = AuraFrame_FactionUpdate,
     GetAuras       = AuraFrame_GetAuras,
     GetButton      = AuraFrame_GetButton,
     DisplayButton  = AuraFrame_DisplayButton,
     HideButton     = AuraFrame_HideButton,
     HideAllButtons = AuraFrame_HideAllButtons,
     ArrangeButtons = AuraFrame_ArrangeButtons,
+    SetIconSize    = AuraFrame_SetIconSize,
+    SetSort        = AuraFrame_SetSort,
+    SetWhitelist   = AuraFrame_SetWhitelist,
 }
 local function CreateAuraFrame(parent)
     local auraframe = CreateFrame('Frame',nil,parent)
@@ -469,6 +567,13 @@ local function CreateAuraFrame(parent)
     auraframe.spellids = {}
 
     ele:RunCallback('PostCreateAuraFrame',auraframe)
+
+    if addon.draw_frames then
+        auraframe:SetBackdrop({
+            bgFile='interface/buttons/white8x8'
+        })
+        auraframe:SetBackdropColor(1,1,1,.5)
+    end
 
     return auraframe
 end
@@ -503,16 +608,18 @@ function addon.Nameplate.CreateAuraFrame(f,frame_def)
         new_frame.row_growth = 'UP'
     end
 
+    if type(new_frame.sort) ~= 'function' then
+        new_frame:SetSort(new_frame.sort)
+    end
+
     new_frame.row_point = row_growth_points[new_frame.row_growth]
 
-    new_frame.icon_height = floor(new_frame.size * new_frame.squareness)
-    new_frame.icon_ratio = (1 - (new_frame.icon_height / new_frame.size)) / 2
+    new_frame:SetIconSize(new_frame.size)
 
-    if new_frame.kui_whitelist and not whitelist then
-        -- initialise KuiSpellList whitelist
-        spelllist = LibStub('KuiSpellList-1.0')
-        spelllist.RegisterChanged(ele,'WhitelistChanged')
-        ele:WhitelistChanged()
+    if new_frame.kui_whitelist then
+        new_frame:SetWhitelist(nil,true)
+    else
+        new_frame:SetWhitelist(new_frame.whitelist,nil)
     end
 
     -- insert into frame list
@@ -538,15 +645,7 @@ function ele:UNIT_FACTION(event,f)
     -- update each aura frame on this nameplate
     if not f.Auras then return end
     for _,auras_frame in ipairs(f.Auras.frames) do
-        if auras_frame.dynamic then
-            -- update filter on faction change if dynamic
-            if UnitIsFriend('player',f.unit) then
-                auras_frame.filter = 'PLAYER HELPFUL'
-            else
-                auras_frame.filter = 'PLAYER HARMFUL'
-            end
-        end
-
+        auras_frame:FactionUpdate()
         auras_frame:Update()
     end
 end
@@ -584,7 +683,6 @@ function ele:Initialise()
     self:RegisterCallback('CreateAuraButton',true)
     self:RegisterCallback('PostCreateAuraButton')
     self:RegisterCallback('PostCreateAuraFrame')
+    self:RegisterCallback('PostUpdateAuraFrame')
     self:RegisterCallback('DisplayAura',true)
-
-    self:RegisterMessage('Initialised')
 end

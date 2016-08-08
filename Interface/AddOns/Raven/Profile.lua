@@ -203,7 +203,7 @@ function MOD:SetSpellEffectDefaults()
 			local id, spell, talent = ec.id, nil, nil
 			if ec.spell then spell = GetSpellInfo(ec.spell); id = ec.spell end -- must be valid
 			if ec.talent then talent = GetSpellInfo(ec.talent) end -- must be valid
-			local t = { duration = ec.duration, icon = GetSpellTexture(id), spell = spell, id = id, renew = ec.renew, talent = talent }
+			local t = { duration = ec.duration, icon = GetSpellTexture(id), spell = spell, id = id, renew = ec.renew, talent = talent, kind = ec.kind }
 			ect[name] = t
 		end
 	end
@@ -341,6 +341,7 @@ function MOD:CopyStandardColors(s, d)
 		d.cooldownColor = MOD.CopyColor(s.cooldownColor); d.notificationColor = MOD.CopyColor(s.notificationColor)
 		d.poisonColor = MOD.CopyColor(s.poisonColor); d.curseColor = MOD.CopyColor(s.curseColor)
 		d.magicColor = MOD.CopyColor(s.magicColor); d.diseaseColor = MOD.CopyColor(s.diseaseColor)
+		d.stealColor = MOD.CopyColor(s.stealColor)
 	end
 end
 
@@ -540,10 +541,8 @@ function MOD:SetDispelDefaults()
 			dispelTypes.Poison = true; dispelTypes.Curse = true
 		end
 	elseif MOD.myClass == "MONK" then
-		if RavenCheckSpellKnown(115451) then -- Internal Medicine
+		if RavenCheckSpellKnown(115450) then -- Detox
 			dispelTypes.Poison = true; dispelTypes.Disease = true; dispelTypes.Magic = true
-		elseif RavenCheckSpellKnown(115450) then -- Detox
-			dispelTypes.Poison = true; dispelTypes.Disease = true
 		end
 	elseif MOD.myClass == "PRIEST" then
 		if RavenCheckSpellKnown(527) then
@@ -551,12 +550,9 @@ function MOD:SetDispelDefaults()
 		elseif RavenCheckSpellKnown(32375) then
 			dispelTypes.Magic = true -- Mass Dispel
 		end
-	elseif MOD.myClass == "MAGE" then
-		if RavenCheckSpellKnown(475) then dispelTypes.Curse = true end -- Remove Curse
 	elseif MOD.myClass == "PALADIN" then
 		if RavenCheckSpellKnown(4987) then -- Cleanse
-			dispelTypes.Poison = true; dispelTypes.Disease = true
-			if RavenCheckSpellKnown(53551) then dispelTypes.Magic = true end -- Sacred Cleansing
+			dispelTypes.Poison = true; dispelTypes.Disease = true; dispelTypes.Magic = true
 		end
 	elseif MOD.myClass == "SHAMAN" then
 		if RavenCheckSpellKnown(77130) then
@@ -737,6 +733,7 @@ MOD.DefaultProfile = {
 		DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"]),
 		DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"]),
 		DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"]),
+		DefaultStealColor = MOD.HexColor("ef2929"), -- Red1
 		ButtonFacadeIcons = true,		-- enable use of ButtonFacade for icons
 		ButtonFacadeNormal = true,		-- enable color of normal texture in ButtonFacade
 		ButtonFacadeBorder = false,		-- enable color of border texture in ButtonFacade

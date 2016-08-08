@@ -439,31 +439,6 @@ function RealUI:VARIABLES_LOADED()
             _G.CancelEmote()
         end
     end)
-
-    -- -- Temp solution for Blizzard's 5.4.1 craziness
-    -- UIParent:HookScript("OnEvent", function(self, event, a1, a2)
-    --  if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then
-    --      StaticPopup_Hide(event)
-    --  end
-    -- end)
-
-    -- Fix Regeant shift+clicking in TradeSkill window
-    if not RealUI.isBeta then
-    _G.LoadAddOn("Blizzard_TradeSkillUI")
-        local function TradeSkillReagent_OnClick(button)
-            local link = _G.GetTradeSkillReagentItemLink(_G.TradeSkillFrame.selectedSkill, button:GetID())
-            if not link then
-                local name = _G.GameTooltip:GetItem()
-                if name ~= button.name:GetText() then
-                    return
-                end
-            end
-            _G.HandleModifiedItemClick(link)
-        end
-        for i = 1, 8 do
-            _G["TradeSkillReagent"..i]:SetScript("OnClick", TradeSkillReagent_OnClick)
-        end
-    end
 end
 
 -- Delayed updates

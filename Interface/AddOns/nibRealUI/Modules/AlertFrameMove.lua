@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next, ipairs = _G.next, _G.ipairs
+local ipairs = _G.ipairs
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -16,161 +16,6 @@ AlertFrameHolder:SetHeight(20)
 AlertFrameHolder:SetPoint("TOP", _G.UIParent, "TOP", 0, -18)
 
 local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
-local IsMoving = false;
-
-local function PostAlertMove(screenQuadrant)
-    AlertFrameMove:debug("PostAlertMove", screenQuadrant)
-    AlertFrameMove:debug("Alert points", alertPoint, alertRelPoint, alertYofs)
-    alertPoint = "TOP"
-    alertRelPoint = "BOTTOM"
-    alertYofs = -10
-    
-    _G.AlertFrame:ClearAllPoints()
-    _G.AlertFrame:SetAllPoints(AlertFrameHolder)
-
-    if screenQuadrant then
-        AlertFrameMove:debug("Do move")
-        IsMoving = true
-        _G.AlertFrame_FixAnchors()
-        IsMoving = false
-    end
-    local height = _G.GroupLootContainer:GetHeight()
-    if (height > 10) then
-        AlertFrameMove:debug("Adjust loot", height)
-        -- This is to prevent the alert frames from creeping down the screen.
-        _G.GroupLootContainer:SetHeight(1)
-    end
-end
-
-local hooks = {
-    Loot = function(alertAnchor)
-        if ( _G.MissingLootFrame:IsShown() ) then
-            _G.MissingLootFrame:ClearAllPoints()
-            _G.MissingLootFrame:SetPoint(alertPoint, alertAnchor, alertRelPoint)
-            if ( _G.GroupLootContainer:IsShown() ) then
-                _G.GroupLootContainer:ClearAllPoints()
-                _G.GroupLootContainer:SetPoint(alertPoint, _G.MissingLootFrame, alertRelPoint, 0, alertYofs)
-            end     
-        elseif ( _G.GroupLootContainer:IsShown() or IsMoving) then
-            _G.GroupLootContainer:ClearAllPoints()
-            _G.GroupLootContainer:SetPoint(alertPoint, alertAnchor, alertRelPoint)  
-        end
-    end,
-    StorePurchase = _G.StorePurchaseAlertFrame,
-    LootWon = function(alertAnchor)
-        for i = 1, #_G.LOOT_WON_ALERT_FRAMES do
-            local frame = _G.LOOT_WON_ALERT_FRAMES[i]
-            if ( frame:IsShown() ) then
-                frame:ClearAllPoints()
-                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                alertAnchor = frame
-            end
-        end
-    end,
-    LootUpgradeFrame = function(alertAnchor)
-        for i=1, #_G.LOOT_UPGRADE_ALERT_FRAMES do
-            local frame = _G.LOOT_UPGRADE_ALERT_FRAMES[i]
-            if ( frame:IsShown() ) then
-                frame:ClearAllPoints()
-                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                alertAnchor = frame
-            end
-        end
-    end,
-    MoneyWon = function(alertAnchor)
-        for i = 1, #_G.MONEY_WON_ALERT_FRAMES do
-            local frame = _G.MONEY_WON_ALERT_FRAMES[i]
-            if ( frame:IsShown() ) then
-                frame:ClearAllPoints()
-                frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                alertAnchor = frame
-            end
-        end
-    end,
-    Achievement = function(alertAnchor)
-        if ( _G.AchievementAlertFrame1 ) then
-            for i = 1, _G.MAX_ACHIEVEMENT_ALERTS do
-                local frame = _G["AchievementAlertFrame"..i]
-                if ( frame and frame:IsShown() ) then
-                    frame:ClearAllPoints()
-                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                    alertAnchor = frame
-                end
-            end
-        end
-    end,
-    Criteria = function(alertAnchor)
-        if ( _G.CriteriaAlertFrame1 ) then
-            for i = 1, _G.MAX_ACHIEVEMENT_ALERTS do
-                local frame = _G["CriteriaAlertFrame"..i]
-                if ( frame and frame:IsShown() ) then
-                    frame:ClearAllPoints()
-                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                    alertAnchor = frame
-                end
-            end
-        end
-    end,
-    ChallengeMode = _G.ChallengeModeAlertFrame1,
-    DungeonCompletion = _G.DungeonCompletionAlertFrame1,
-    Scenario = _G.ScenarioAlertFrame1,
-    GuildChallenge = _G.GuildChallengeAlertFrame,
-    DigsiteCompleteToastFrame = _G.DigsiteCompleteToastFrame,
-    GarrisonBuildingAlertFrame = _G.GarrisonBuildingAlertFrame,
-    GarrisonMissionAlertFrame = _G.GarrisonMissionAlertFrame,
-    GarrisonShipMissionAlertFrame = _G.GarrisonShipMissionAlertFrame,
-    GarrisonFollowerAlertFrame = _G.GarrisonFollowerAlertFrame,
-    GarrisonShipFollowerAlertFrame = _G.GarrisonShipFollowerAlertFrame
-}
-
-local brfMoving = false
-local function BonusRollFrame_SetPoint()
-    if brfMoving then return end
-    brfMoving = true
-    _G.BonusRollFrame:ClearAllPoints()
-    _G.BonusRollFrame:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
-    brfMoving = false
-end
-
-local function BonusRollFrame_Show()
-    brfMoving = true
-    _G.BonusRollFrame:ClearAllPoints()
-    _G.BonusRollFrame:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
-    brfMoving = false
-end
-
-function AlertFrameMove:AlertMovers()
-    self:SecureHook('AlertFrame_FixAnchors', PostAlertMove)
-    for name, func in next, hooks do
-        local funcName = "AlertFrame_Set"..name.."Anchors"
-        AlertFrameMove:debug("Set hook", funcName)
-        if _G.type(func) ~= "function" then
-            local frame = func
-            function func(alertAnchor)
-                if frame and frame:IsShown() then
-                    AlertFrameMove:debug(name..": IsShown", alertPoint, alertRelPoint, alertYofs)
-                    frame:ClearAllPoints()
-                    frame:SetPoint(alertPoint, alertAnchor, alertRelPoint, 0, alertYofs)
-                    alertAnchor = frame  -- luacheck: ignore
-                end
-            end
-        end
-
-        self:SecureHook(funcName, func)
-    end
-    
-    _G.hooksecurefunc(_G.BonusRollFrame, 'SetPoint', BonusRollFrame_SetPoint)
-    _G.hooksecurefunc(_G.BonusRollFrame, 'Show', BonusRollFrame_Show)
-    
-    _G.UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
-
-    -- test
-    self:RegisterEvent("GARRISON_MISSION_FINISHED", function(...)
-        AlertFrameMove:debug("Event Test", ...)
-    end)
-end
-
---[[ Legion ]]--
 local function QueueAdjustAnchors(self, relativeAlert)
     for alertFrame in self.alertFramePool:EnumerateActive() do
         AlertFrameMove:debug("Queue", alertFrame, alertPoint, relativeAlert:GetName() or relativeAlert, alertRelPoint, alertYofs)
@@ -230,11 +75,7 @@ function AlertFrameMove:OnInitialize()
 end
 
 function AlertFrameMove:OnEnable()
-    if RealUI.isBeta then
-        SetUpAlert()
-    else
-        self:AlertMovers()
-    end
+    SetUpAlert()
 end
 
 function RealUI:AlertFrameTest()
@@ -383,7 +224,7 @@ do
     end
     local garrisonAlerts do
         local function isDraenorGarrison()
-            return RealUI.isBeta and (_G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_6_0) or true
+            return _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_6_0
         end
         garrisonAlerts = {
             name = "Garrison Alerts",

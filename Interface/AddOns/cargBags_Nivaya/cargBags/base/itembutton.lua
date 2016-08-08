@@ -104,11 +104,10 @@ end
 
 --[[!
 	Fetches the item-info of the button, just a small wrapper for comfort
-	@param item <table> [optional]
 	@return item <table>
 ]]
-function ItemButton:GetItemInfo(item)
+function ItemButton:GetItemInfo()
 	--print("ItemButton:GetItemInfo", bagID)
-	return self.implementation:GetItemInfo(self.bagID, self.slotID, item)
+	return self.implementation:GetItemInfo(self.bagID, self.slotID)
 end
 

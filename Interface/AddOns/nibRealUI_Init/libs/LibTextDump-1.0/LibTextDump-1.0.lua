@@ -263,6 +263,8 @@ function lib:New(frame_title, width, height, save)
 
 	if save then
 		frame:SetScript("OnEvent", function(event, ...)
+			buffers[instance].UpdateWrappedLines = nil
+			buffers[instance].wrapped_lines = nil
 			save(buffers[instance])
 		end)
 	end

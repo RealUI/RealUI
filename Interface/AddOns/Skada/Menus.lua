@@ -489,6 +489,7 @@ function Skada:CreateReportWindow(window)
 		channelbox:AddItem(chan, kind[1])
 	end
 	local origchan = Skada.db.profile.report.channel or "say"
+	if not channellist[origchan] then origchan = "say" end -- ticket 455: upgrading old settings
 	channelbox:SetValue(origchan)
 	channelbox:SetCallback("OnValueChanged", function(f, e, value)
 				Skada.db.profile.report.channel = value

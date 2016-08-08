@@ -59,30 +59,34 @@ function panel:CreateOptions()
     self.fastooc = make_checkbox("CliqueOptionsFastOoc", self)
     self.fastooc.text:SetText(L["Disable out of combat clicks when party members enter combat"])
 
+    -- Set up multiple talent profiles
+    self.talentProfiles = {}
     self.specswap = make_checkbox("CliqueOptionsSpecSwap", self)
     self.specswap.text:SetText(L["Swap profiles based on talent spec"])
     self.specswap.EnableDisable = function()
+        local toggleFunc
         if self.specswap:GetChecked() then
-            UIDropDownMenu_EnableDropDown(panel.prispec)
-            UIDropDownMenu_EnableDropDown(panel.secspec)
+            toggleFunc = UIDropDownMenu_EnableDropDown
         else
-            UIDropDownMenu_DisableDropDown(panel.prispec)
-            UIDropDownMenu_DisableDropDown(panel.secspec)
+            toggleFunc = UIDropDownMenu_DisableDropDown
+        end
+        for i = 1, #panel.talentProfiles do
+            toggleFunc(self.talentProfiles[i])
         end
     end
     self.specswap:SetScript("PostClick", self.specswap.EnableDisable)
 
-    self.prispeclabel = make_label("CliqueOptionsPriSpecLabel", self, "GameFontNormalSmall")
-    self.prispeclabel:SetText(L["Primary talent spec profile:"])
-    self.prispec = make_dropdown("CliqueOptionsPriSpec", self)
-    UIDropDownMenu_SetWidth(self.prispec, 200)
-    BlizzardOptionsPanel_SetupDependentControl(self.specswap, self.prispec)
-
-    self.secspeclabel = make_label("CliqueOptionsSecSpecLabel", self, "GameFontNormalSmall")
-    self.secspeclabel:SetText(L["Secondary talent spec profile:"])
-    self.secspec = make_dropdown("CliqueOptionsSecSpec", self)
-    UIDropDownMenu_SetWidth(self.secspec, 200)
-    BlizzardOptionsPanel_SetupDependentControl(self.specswap, self.secspec)
+    -- Generate the dropdowns for each spec
+    for i = 1, GetNumSpecializations() do
+        local _, specName = GetSpecializationInfo(i)
+        local name = "CliqueOptionsSpec" .. i
+        local label = make_label(name .. "Label", self, "GameFontNormalSmall")
+        label:SetText(L["Talent profile: %s"]:format(specName))
+        self.talentProfiles[i] = make_dropdown(name, self)
+        self.talentProfiles[i].profileLabel = label
+        UIDropDownMenu_SetWidth(self.talentProfiles[i], 200)
+        BlizzardOptionsPanel_SetupDependentControl(self.specswap, self.talentProfiles[i])
+    end
 
     self.profilelabel = make_label("CliqueOptionsProfileMgmtLabel", self, "GameFontNormalSmall")
     self.profilelabel:SetText(L["Profile Management:"])
@@ -92,16 +96,17 @@ function panel:CreateOptions()
 	self.stopcastingfix = make_checkbox("CliqueOptionsStopCastingFix", self)
     self.stopcastingfix.text:SetText(L["Attempt to fix the issue introduced in 4.3 with casting on dead targets"])
 
-
     -- Collect and anchor the bits together
     table.insert(bits, self.updown)
     table.insert(bits, self.fastooc)
 	table.insert(bits, self.stopcastingfix)
     table.insert(bits, self.specswap)
-    table.insert(bits, self.prispeclabel)
-    table.insert(bits, self.prispec)
-    table.insert(bits, self.secspeclabel)
-    table.insert(bits, self.secspec)
+
+    for i = 1, #self.talentProfiles do
+        table.insert(bits, self.talentProfiles[i].profileLabel)
+        table.insert(bits, self.talentProfiles[i])
+    end
+
     table.insert(bits, self.profilelabel)
     table.insert(bits, self.profiledd)
 
@@ -245,7 +250,7 @@ end
 
 local function mgmt_initialize(dropdown, level)
     local sort = getsorttbl()
-    local paged = (#sort >= 15)
+    local paged = (#sort >= 10)
     local currentProfile = addon.db:GetCurrentProfile()
 
     if not level or level == 1 then
@@ -364,13 +369,13 @@ function panel.refresh()
     local settings = addon.settings
     local currentProfile = addon.db:GetCurrentProfile()
 
-    UIDropDownMenu_Initialize(panel.prispec, spec_initialize)
-    UIDropDownMenu_SetSelectedValue(panel.prispec, settings.pri_profileKey or currentProfile)
-    UIDropDownMenu_SetText(panel.prispec, settings.pri_profileKey or currentProfile)
-
-    UIDropDownMenu_Initialize(panel.secspec, spec_initialize)
-    UIDropDownMenu_SetSelectedValue(panel.secspec, settings.sec_profileKey or currentProfile)
-    UIDropDownMenu_SetText(panel.secspec, settings.sec_profileKey or currentProfile)
+    for i = 1, #panel.talentProfiles do
+        local dbKey = string.format("spec%d_profileKey", i)
+        local dropdown = panel.talentProfiles[i]
+        UIDropDownMenu_Initialize(dropdown, spec_initialize)
+        UIDropDownMenu_SetSelectedValue(dropdown, settings[dbKey] or currentProfile)
+        UIDropDownMenu_SetText(dropdown, settings[dbKey] or currentProfile)
+    end
 
     UIDropDownMenu_Initialize(panel.profiledd, mgmt_initialize)
     UIDropDownMenu_SetSelectedValue(panel.profiledd, currentProfile)
@@ -394,8 +399,12 @@ function panel.okay()
 	settings.stopcastingfix = not not panel.stopcastingfix:GetChecked()
     settings.fastooc = not not panel.fastooc:GetChecked()
     settings.specswap = not not panel.specswap:GetChecked()
-    settings.pri_profileKey = UIDropDownMenu_GetSelectedValue(panel.prispec)
-    settings.sec_profileKey = UIDropDownMenu_GetSelectedValue(panel.secspec)
+
+    for i = 1, #panel.talentProfiles do
+        local settingsKey = string.format("spec%d_profileKey", i)
+        local dropdown = panel.talentProfiles[i]
+        settings[settingsKey] = UIDropDownMenu_GetSelectedValue(dropdown)
+    end
 
     if newProfile ~= currentProfile then
         addon.db:SetProfile(newProfile)

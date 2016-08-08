@@ -51,17 +51,15 @@
 local parent, ns = ...
 local oUF = ns.oUF
 
-local isBetaClient = select(4, GetBuildInfo()) >= 70000
-
 local _, PlayerClass = UnitClass'player'
 
 -- Holds the class specific stuff.
 local ClassPowerID, ClassPowerType
 local ClassPowerEnable, ClassPowerDisable
-local RequireSpec, RequireSpell, RequirePower
+local RequireSpec, RequireSpell, RequireForm
 
 local UpdateTexture = function(element)
-	local color = oUF.colors.power[ClassPowerType]
+	local color = oUF.colors.power[ClassPowerType or 'COMBO_POINTS']
 	for i = 1, #element do
 		local icon = element[i]
 		if(icon.SetDesaturated) then
@@ -151,11 +149,13 @@ local function Visibility(self, event, unit)
 	local shouldEnable
 
 	if(UnitHasVehicleUI('player')) then
-		shouldEnable = true
+	 	if(UnitPowerType('vehicle') == SPELL_POWER_ENERGY) then
+			shouldEnable = true
+		end
 	elseif(ClassPowerID) then
 		if(not RequireSpec or RequireSpec == GetSpecialization()) then
-			if(not RequireSpell or IsPlayerSpell(RequireSpell)) then
-				if(not RequirePower or RequirePower == UnitPowerType('player')) then
+			if(not RequireForm or RequireForm == GetShapeshiftFormID()) then
+				if(not RequireSpell or IsPlayerSpell(RequireSpell)) then
 					self:UnregisterEvent('SPELLS_CHANGED', Visibility)
 					shouldEnable = true
 				else
@@ -187,6 +187,7 @@ do
 	ClassPowerEnable = function(self)
 		self:RegisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
 		self:RegisterEvent('UNIT_POWER_FREQUENT', Path)
+		self:RegisterEvent('UNIT_MAXPOWER', Path)
 
 		if(UnitHasVehicleUI('player')) then
 			Path(self, 'ClassPowerEnable', 'vehicle', 'COMBO_POINTS')
@@ -199,6 +200,7 @@ do
 	ClassPowerDisable = function(self)
 		self:UnregisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
 		self:UnregisterEvent('UNIT_POWER_FREQUENT', Path)
+		self:UnregisterEvent('UNIT_MAXPOWER', Path)
 
 		local element = self.ClassIcons
 		for i = 1, #element do
@@ -212,40 +214,23 @@ do
 	if(PlayerClass == 'MONK') then
 		ClassPowerID = SPELL_POWER_CHI
 		ClassPowerType = "CHI"
-
-		if(isBetaClient) then
-			RequireSpec = SPEC_MONK_WINDWALKER
-		end
+		RequireSpec = SPEC_MONK_WINDWALKER
 	elseif(PlayerClass == 'PALADIN') then
 		ClassPowerID = SPELL_POWER_HOLY_POWER
 		ClassPowerType = "HOLY_POWER"
-
-		if(isBetaClient) then
-			RequireSpec = SPEC_PALADIN_RETRIBUTION
-		else
-			RequireSpell = 85673 -- Word of Glory
-		end
-	elseif(PlayerClass == 'PRIEST' and not isBetaClient) then
-		ClassPowerID = SPELL_POWER_SHADOW_ORBS
-		ClassPowerType = "SHADOW_ORBS"
-		RequireSpec = SPEC_PRIEST_SHADOW
-		RequireSpell = 95740 -- Shadow Orbs
+		RequireSpec = SPEC_PALADIN_RETRIBUTION
 	elseif(PlayerClass == 'WARLOCK') then
 		ClassPowerID = SPELL_POWER_SOUL_SHARDS
 		ClassPowerType = "SOUL_SHARDS"
-
-		if(not isBetaClient) then
-			RequireSpec = SPEC_WARLOCK_AFFLICTION
-			RequireSpell = WARLOCK_SOULBURN
-		end
 	elseif(PlayerClass == 'ROGUE' or PlayerClass == 'DRUID') then
 		ClassPowerID = SPELL_POWER_COMBO_POINTS
 		ClassPowerType = 'COMBO_POINTS'
 
-		if(isBetaClient and PlayerClass == 'DRUID') then
-			RequirePower = SPELL_POWER_ENERGY
+		if(PlayerClass == 'DRUID') then
+			RequireForm = CAT_FORM
+			RequireSpell = 5221 -- Shred
 		end
-	elseif(PlayerClass == 'MAGE' and isBetaClient) then
+	elseif(PlayerClass == 'MAGE') then
 		ClassPowerID = SPELL_POWER_ARCANE_CHARGES
 		ClassPowerType = 'ARCANE_CHARGES'
 		RequireSpec = SPEC_MAGE_ARCANE
@@ -262,8 +247,12 @@ local Enable = function(self, unit)
 	element.__max = #element
 	element.ForceUpdate = ForceUpdate
 
-	if(RequireSpec) then
+	if(RequireSpec or RequireSpell) then
 		self:RegisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath, true)
+	end
+
+	if(RequireForm) then
+		self:RegisterEvent('UPDATE_SHAPESHIFT_FORM', VisibilityPath, true)
 	end
 
 	element.ClassPowerEnable = ClassPowerEnable

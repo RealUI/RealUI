@@ -23,6 +23,7 @@ Skada.windowdefaults = {
 	classcolortext = false,
 	classicons = true,
 	roleicons = false,
+    showself = true,
 
 	buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 
@@ -448,6 +449,19 @@ Skada.options = {
 							get=function() return Skada.db.profile.autostop end,
 							set=function() Skada.db.profile.autostop = not Skada.db.profile.autostop end,
 					},
+                
+					showself = {
+							type="toggle",
+							name=L["Always show self"],
+							desc=L["Keeps the player shown last even if there is not enough space."],
+							order=11,
+							get=function() return Skada.db.profile.showself end,
+							set=function() 
+                                Skada.db.profile.showself = not Skada.db.profile.showself
+                                Skada:ApplySettings()
+                            end,
+					},
+                
                 
 				}
 			},

@@ -50,29 +50,17 @@ do	--Replacement for UIDropDownMenu
 		button:SetText("test")
 		
 		local ntex = button:CreateTexture()
-		if RealUI.isBeta then
-			ntex:SetColorTexture(1,1,1,0)
-		else
-			ntex:SetTexture(1,1,1,0)
-		end
+		ntex:SetColorTexture(1,1,1,0)
 		ntex:SetAllPoints()	
 		button:SetNormalTexture(ntex)
 		
 		local htex = button:CreateTexture()
-		if RealUI.isBeta then
-			htex:SetColorTexture(1,1,1,0.2)
-		else
-			htex:SetTexture(1,1,1,0.2)
-		end
+		htex:SetColorTexture(1,1,1,0.2)
 		htex:SetAllPoints()
 		button:SetHighlightTexture(htex)
 		
 		local ptex = button:CreateTexture()
-		if RealUI.isBeta then
-			ptex:SetColorTexture(1,1,1,0.4)
-		else
-			ptex:SetTexture(1,1,1,0.4)
-		end
+		ptex:SetColorTexture(1,1,1,0.4)
 		ptex:SetAllPoints()
 		button:SetPushedTexture(ptex)
 		
@@ -506,6 +494,7 @@ function cbNivaya:CatDropDownInit()
 	AddInfoItem("MarkAsKnown")
 	AddInfoItem("-------------")
 	AddInfoItem("Armor")
+	AddInfoItem("BattlePet")
 	AddInfoItem("Consumables")
 	AddInfoItem("Quest")
 	AddInfoItem("TradeGoods")
@@ -553,6 +542,7 @@ end
 
 local function HandleSlash(str)
 	local str, str2 = strsplit(" ", str, 2)
+	local updateBags
 	
 	if ((str == 'addbag') or (str == 'delbag') or (str == 'movebag') or (str == 'bagprio') or (str == 'orderup') or (str == 'orderdn')) and (not str2) then
 		StatusMsg('You have to specify a name, e.g. /cbniv '..str..' TestBag.', '', nil, true, false)
@@ -573,30 +563,37 @@ local function HandleSlash(str)
 	if str == 'new' then
 		cBnivCfg.NewItems = not cBnivCfg.NewItems
 		StatusMsg('The "New Items" filter is now ', '.', cBnivCfg.NewItems, true, false)
+		updateBags = true
 	elseif str == 'trade' then
 		cBnivCfg.TradeGoods = not cBnivCfg.TradeGoods
 		cB_filterEnabled["TradeGoods"] = cBnivCfg.TradeGoods
 		StatusMsg('The "Trade Goods" filter is now ', '.', cBnivCfg.TradeGoods, true, false)
+		updateBags = true
 	elseif str == 'armor' then
 		cBnivCfg.Armor = not cBnivCfg.Armor
 		cB_filterEnabled["Armor"] = cBnivCfg.Armor
 		StatusMsg('The "Armor and Weapons" filter is now ', '.', cBnivCfg.Armor, true, false)
+		updateBags = true
 	elseif str == 'junk' then
 		cBnivCfg.Junk = not cBnivCfg.Junk
 		cB_filterEnabled["Junk"] = cBnivCfg.Junk
 		StatusMsg('The "Junk" filter is now ', '.', cBnivCfg.Junk, true, false)
+		updateBags = true
 	elseif str == 'sets' then
 		cBnivCfg.ItemSets = not cBnivCfg.ItemSets
 		cB_filterEnabled["ItemSets"] = cBnivCfg.ItemSets
 		StatusMsg('The "ItemSets" filters are now ', '.', cBnivCfg.ItemSets, true, false)
+		updateBags = true
 	elseif str == 'consumables' then
 		cBnivCfg.Consumables = not cBnivCfg.Consumables
 		cB_filterEnabled["Consumables"] = cBnivCfg.Consumables
 		StatusMsg('The "Consumables" filters are now ', '.', cBnivCfg.Consumables, true, false)
+		updateBags = true
 	elseif str == 'quest' then
 		cBnivCfg.Quest = not cBnivCfg.Quest
 		cB_filterEnabled["Quest"] = cBnivCfg.Quest
 		StatusMsg('The "Quest" filters are now ', '.', cBnivCfg.Quest, true, false)
+		updateBags = true
 	elseif str == 'bankbg' then
 		cBnivCfg.BankBlack = not cBnivCfg.BankBlack
 		StatusMsg('Black background color for the bank is now ', '. Reload your UI for this change to take effect!', cBnivCfg.BankBlack, true, false)
@@ -617,11 +614,13 @@ local function HandleSlash(str)
 			cB_Bags.bank.EmptySlotCounter:Hide()
 		end
 		StatusMsg('Empty bagspace compression is now ', '.', cBnivCfg.CompressEmpty, true, false)
+		updateBags = true
 	elseif str == 'unlock' then
 		cBnivCfg.Unlocked = not cBnivCfg.Unlocked
 		SetFrameMovable(cB_Bags.main, cBnivCfg.Unlocked)
 		SetFrameMovable(cB_Bags.bank, cBnivCfg.Unlocked)
 		StatusMsg('Movable bags are now ', '.', cBnivCfg.Unlocked, true, false)
+		updateBags = true
 	elseif str == 'sortbags' then
 		cBnivCfg.SortBags = not cBnivCfg.SortBags
 		StatusMsg('Auto sorting bags is now ', '. Reload your UI for this change to take effect!', cBnivCfg.SortBags, true, false)
@@ -698,7 +697,10 @@ local function HandleSlash(str)
 		StatusMsg('', " |cFFFFFF00bagprio|r [name] - Changes the filter priority of a custom container. High priority prevents items from being classified as junk or new, low priority doesn't.")
 		StatusMsg('(', ') |cFFFFFF00bankbags|r - Show custom containers in the bank too.', cBnivCfg.BankCustomBags, false, true)
 	end
-	cbNivaya:UpdateBags()
+
+	if updateBags then
+		cbNivaya:UpdateBags()
+	end
 end
 
 SLASH_CBNIV1 = '/cbniv'

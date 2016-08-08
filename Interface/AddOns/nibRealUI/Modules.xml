@@ -21,7 +21,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Modules\AlertFrameMove.lua"/>
     <Script file="Modules\AltPowerBar.lua"/>
     <Script file="Modules\CooldownCount.lua"/>
-    <Script file="Modules\ErrorHider.lua"/>
     <Script file="Modules\EventNotifier.lua"/>
     <Script file="Modules\FrameMover.lua"/>
     <Script file="Modules\GridLayout.lua"/>

@@ -56,7 +56,7 @@ badboy:Hide()
 badboy.name = "BadBoy"
 local title = badboy:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", 16, -16)
-title:SetText("BadBoy v13.021") -- wowace magic, replaced with tag version
+title:SetText("BadBoy v13.025") -- wowace magic, replaced with tag version
 InterfaceOptions_AddCategory(badboy)
 
 --[[ No Report Chat Message Checkbox ]]--

@@ -15,8 +15,6 @@ local db
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
-local isBeta = RealUI.isBeta
-
 _G.RealUIMinimap = MinimapAdv
 _G.BINDING_HEADER_REALUIMINIMAP = "RealUI Minimap"
 _G.BINDING_NAME_REALUIMINIMAPTOGGLE = "Toggle Minimap"
@@ -1007,6 +1005,7 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
+        self:debug("IsInInstance", RealUI:ColorTableToStr(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec.text:SetText("|cff"..RealUI:ColorTableToStr(RealUI.media.colors.blue).._G.LOOT..":|r "..RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
@@ -1384,7 +1383,7 @@ local function Garrison_OnEnter(self)
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
-    if isBeta and (_G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0) then
+    if _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0 then
         local categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
         for index, category in ipairs(categoryInfo) do
             _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit))
@@ -1771,11 +1770,6 @@ local function SetUpMinimapFrame()
     GLPButton:HookScript("OnLeave", Garrison_OnLeave)
     GLPButton:SetScript("OnEnter", Garrison_OnEnter)
     GLPButton.shouldShow = false
-
-    if not isBeta then
-        GLPButton.title = _G.GARRISON_LANDING_PAGE_TITLE
-        GLPButton.description = _G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP
-    end
 
     _G.MinimapNorthTag:SetAlpha(0)
 

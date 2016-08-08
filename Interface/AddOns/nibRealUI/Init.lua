@@ -8,7 +8,6 @@ private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "Ace
 local RealUI = private.RealUI
 
 RealUI.TOC = _G.select(4, _G.GetBuildInfo())
-RealUI.isBeta = RealUI.TOC >= 70000
 RealUI.isDev = _G.IsAddOnLoaded("nibRealUI_Dev")
 
 RealUI.name = _G.UnitName("player")

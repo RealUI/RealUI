@@ -3,40 +3,16 @@ local _G = _G
 local select, tostring = _G.select, _G.tostring
 
 --_G.GAME_LOCALE ="deDE"
-local isInGlue = _G.InGlue()
 
-local debugFrame
-if isInGlue then
-    local width, hieght = _G.GlueParent:GetSize()
-    local UIParent = _G.CreateFrame("Frame", "UIParent", _G.GlueParent)
-    UIParent:SetWidth(width / 2.5)
-    UIParent:SetPoint("TOPLEFT")
-    UIParent:SetPoint("BOTTOMLEFT")
-
-    debugFrame = _G.LibStub("RealUI_LibTextDump-1.0"):New("Debug Output", width/3, hieght/1.5)
-end
-
-local debugStack, hasTimer = {}
+local debugStack = {}
 local function debug(...)
     local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
         text = text .. "     " .. tostring(arg)
     end
-    if isInGlue then
-        debugFrame:AddLine(text)
-        if not hasTimer then
-            hasTimer = true
-            _G.C_Timer.After(1, function()
-                debugFrame:Display()
-                hasTimer = false
-            end)
-        end
-    else
-        _G.tinsert(debugStack, text)
-    end
+    _G.tinsert(debugStack, text)
 end
-debug("InGlue", isInGlue)
 
 local BlizzAddons = {
     -- Not LoD, in order of load
@@ -65,12 +41,14 @@ local BlizzAddons = {
     "Blizzard_BoostTutorial",
     "Blizzard_Calendar",
     "Blizzard_ChallengesUI",
+    "Blizzard_ClassTrial",
     "Blizzard_Collections",
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
     "Blizzard_EncounterJournal",
+    "Blizzard_FlightMap",
     "Blizzard_GarrisonTemplates",
     "Blizzard_GarrisonUI",
     "Blizzard_GMChatUI",
@@ -109,7 +87,9 @@ for i = 1, #BlizzAddons do
     end
 end
 
-
+local eventWhitelist = {
+    BAG_UPDATE = true
+}
 local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
@@ -129,8 +109,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
     else
         debug(event, ...)
         debug("GetScreenHeight", _G.GetScreenHeight())
-        if not isInGlue then
-            debug("UIParent:GetSize", _G.UIParent:GetSize())
+        debug("UIParent:GetSize", _G.UIParent:GetSize())
+        if not eventWhitelist[event] then
             self:UnregisterEvent(event)
         end
     end

@@ -700,6 +700,20 @@ local function GeneralTab_Populate()
  local controls = tabFrames.general.controls
  
  controls.enableCheckbox:SetChecked(not MSBTProfiles.IsModDisabled())
+ if GetCVar("floatingCombatTextCombatDamage") == "0" then
+  controls.enableBlizzardDamage:SetChecked(false)
+  currentProfile.enableBlizzardDamage = false
+ else
+  controls.enableBlizzardDamage:SetChecked(true)
+  currentProfile.enableBlizzardDamage = true
+ end
+ if GetCVar("floatingCombatTextCombatHealing") == "0" then
+  controls.enableBlizzardHealing:SetChecked(false)
+  currentProfile.enableBlizzardHealing = false
+ else
+  controls.enableBlizzardHealing:SetChecked(true)
+  currentProfile.enableBlizzardHealing = true
+ end
  controls.stickyCritsCheckbox:SetChecked(not currentProfile.stickyCritsDisabled)
  controls.enableSoundsCheckbox:SetChecked(not currentProfile.soundsDisabled)
  controls.textShadowingCheckbox:SetChecked(not currentProfile.textShadowingDisabled)
@@ -806,12 +820,52 @@ local function GeneralTab_Create()
  )
  controls.enableCheckbox = checkbox
 
+  -- Enable Blizzard Damage.
+ checkbox = MSBTControls.CreateCheckbox(tabFrame)
+ objLocale = L.CHECKBOXES["enableBlizzardDamage"]
+ checkbox:Configure(28, objLocale.label, objLocale.tooltip)
+ checkbox:SetPoint("LEFT", controls.enableCheckbox, "RIGHT", 30, 0)
+ checkbox:SetClickHandler(
+   function (this, isChecked)
+    if InCombatLockdown() then
+      return
+    end
+    MSBTProfiles.SetOption(nil, "enableBlizzardDamage", not isChecked)
+    if isChecked then
+     SetCVar("floatingCombatTextCombatDamage", 1)
+    else
+      SetCVar("floatingCombatTextCombatDamage", 0)
+    end
+   end
+ )
+ controls.enableBlizzardDamage = checkbox
+
+  -- Enable Blizzard healing.
+ checkbox = MSBTControls.CreateCheckbox(tabFrame)
+ objLocale = L.CHECKBOXES["enableBlizzardHealing"]
+ checkbox:Configure(28, objLocale.label, objLocale.tooltip)
+ checkbox:SetPoint("TOPLEFT", controls.enableBlizzardDamage, "BOTTOMLEFT", 0, 0)
+ checkbox:SetClickHandler(
+   function (this, isChecked)
+    if InCombatLockdown() then
+      return
+    end
+    MSBTProfiles.SetOption(nil, "enableBlizzardHealing", not isChecked)
+    if isChecked then
+     SetCVar("floatingCombatTextCombatHealing", 1)
+    else
+      SetCVar("floatingCombatTextCombatHealing", 0)
+    end
+   end
+ )
+ controls.enableBlizzardHealing = checkbox
+
 
  -- Profile dropdown.
  local dropdown =  MSBTControls.CreateDropdown(tabFrame)
  objLocale = L.DROPDOWNS["profile"]
  dropdown:Configure(180, objLocale.label, objLocale.tooltip)
- dropdown:SetPoint("TOPLEFT", checkbox, "BOTTOMLEFT", 0, -30)
+ dropdown:SetPoint("TOPLEFT", controls.enableCheckbox, "BOTTOMLEFT", 0, -30)
  dropdown:SetChangeHandler(
   function (this, id)
    MSBTProfiles.SelectProfile(id)

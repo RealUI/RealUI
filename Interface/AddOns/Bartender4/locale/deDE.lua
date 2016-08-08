@@ -244,7 +244,7 @@ L["Who wrote this cool addon?"] = "Wer hat dieses coole Addon geschrieben?"
 L["X Offset"] = "X-Verschiebung"
 L["XP Bar"] = "Erfahrungsleiste"
 L["Y Offset"] = "Y-Verschiebung"
-L["You can either click the KeyBound button in the options, or use the |cffffff78/kb|r chat command to open the keyBound control. Alternatively, you can also use the Blizzard Keybinding Interface."] = "Du kannst entweder auf die Tastenzuweisungs-Schaltfläche in den Optionen klicken oder den Chatbefehl |cffffff78/kb|r benutzen, um die Tastenzuweisung einzustellen. Alternativ kannst du das Blizzard-Tastaturbelegungsmenü verwenden."
+L["You can either click the KeyBound button in the options, or use the |cffffff78/kb|r chat command to open the keyBound control. Alternatively, you can also use the Blizzard Keybinding Interface."] = "Du kannst entweder auf die Schaltfläche 'Tastenbelegung' in den Optionen klicken oder den Chatbefehl |cffffff78/kb|r benutzen, um die Tastenbelegungen einzustellen. Alternativ kannst du das Blizzard-Tastaturbelegungsmenü verwenden."
 L["You can report bugs or give suggestions at the discussion forums at |cffffff78http://forums.wowace.com/showthread.php?t=12513|r or check the project page at |cffffff78http://www.wowace.com/addons/bartender4/|r"] = "Im Diskussionsforum auf |cffffff78http://forums.wowace.com/showthread.php?t=12513|r kannst du Fehler melden und Vorschläge geben, oder besuche die Projektseite auf |cffffff78http://www.wowace.com/addons/bartender4/|r"
 L["You can set the bar to be always hidden, if you only wish to access it using key-bindings."] = "Diese Leiste dauerhaft verstecken, um sie nur über die Tastaturbelegung anzusteuern."
 L[ [=[You can use any macro conditionals in the custom string, using "show" and "hide" as values.

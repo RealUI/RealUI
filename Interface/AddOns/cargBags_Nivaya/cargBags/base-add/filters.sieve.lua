@@ -127,7 +127,9 @@ end
 	@return container <Container>
 ]]
 function Implementation:GetContainerForItem(item)
+	cargBags.debug("filter Implementation:GetContainerForItem", item)
 	for i, container in next, self.contByID do
+		cargBags.debug("filter container.filters", i, container.filters)
 		if (not container.filters or container.filters:Check(item)) then
 			return container
 		end
@@ -156,6 +158,7 @@ end
 	@param filters <FilterTable> check against other filters [optional]
 ]]
 function Container:FilterForFunction(func, filters)
+	cargBags.debug("Container:FilterForFunction", func, filters)
 	filters = filters or self.filters
 
 	for i, button in pairs(self.buttons) do

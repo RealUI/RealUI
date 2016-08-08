@@ -491,7 +491,12 @@ function UnitFrames:PvPOverride(event, unit)
     local pvp, color = self.PvP
     local setColor = pvp.lines and pvp.SetBackgroundColor or pvp.SetVertexColor
     if _G.UnitIsPVP(unit) then
-        color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+        local reaction = _G.UnitReaction(unit, "player")
+        if not reaction then
+            -- Can be nil if the target is out of range
+            reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
+        end
+        color = self.colors.reaction[reaction]
         setColor(pvp, color[1], color[2], color[3], color[4])
     else
         color = RealUI.media.background
@@ -571,15 +576,6 @@ do
     end
 end
 
-local UnitIsTapDenied
-if RealUI.isBeta then
-    UnitIsTapDenied = _G.UnitIsTapDenied
-else
-    UnitIsTapDenied = function(unit)
-        return _G.UnitIsTapped(unit) and not _G.UnitIsTappedByPlayer(unit) and not _G.UnitIsTappedByAllThreatList(unit)
-    end
-end
-
 function UnitFrames:UpdateEndBox(...)
     UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit
@@ -587,7 +583,7 @@ function UnitFrames:UpdateEndBox(...)
     if _G.UnitIsPlayer(unit) then
         color = RealUI:GetClassColor(class)
     else
-        if ( not _G.UnitPlayerControlled(unit) and UnitIsTapDenied(unit) ) then
+        if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
             color = self.colors.tapped
         else
             color = self.colors.reaction[_G.UnitReaction(unit, "player")]
@@ -715,16 +711,9 @@ local function Shared(self, unit)
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
     if unit == "player" then
-        if RealUI.isBeta then
-            local ClassResource = RealUI:GetModule("ClassResource")
-            if ClassResource:IsEnabled() then
-                ClassResource:Setup(self, unit)
-            end
-        else
-            local PointTracking = RealUI:GetModule("PointTracking")
-            if PointTracking:IsEnabled() then
-                PointTracking:Setup(self, unit)
-            end
+        local ClassResource = RealUI:GetModule("ClassResource")
+        if ClassResource:IsEnabled() then
+            ClassResource:Setup(self, unit)
         end
     end
 end

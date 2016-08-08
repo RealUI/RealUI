@@ -346,13 +346,22 @@ local function shouldApply(global, entry)
     end
 end
 
-local function correctSpec(entry, currentSpec)
-	if entry.sets.pritalent and currentSpec ~= 1 then
-		return false
-	elseif entry.sets.sectalent and currentSpec ~= 2 then
-		return false
-	end
-	return true
+local function correctSpec(entry)
+    -- Check to ensure we're on the right spec for this binding
+    local currentSpec = GetSpecialization()
+    if currentSpec and entry.sets["spec" .. tostring(currentSpec)] then
+        return true
+    end
+
+    -- Need to check the other spec sets to ensure this shouldn't be
+    -- deactivated
+    for i = 1, GetNumSpecializations() do
+        if entry.sets["spec" .. tostring(i)] then
+            return false
+        end
+    end
+
+    return true
 end
 
 local function getEntryString(entry)
@@ -418,7 +427,7 @@ function addon:GetClickAttributes(global)
         -- non-global bindings are only applied on non-global frames. handle
         -- this logic here.
 
-        if shouldApply(global, entry) and correctSpec(entry, GetActiveSpecGroup()) and entry.key then
+        if shouldApply(global, entry) and correctSpec(entry) and entry.key then
             -- Check to see if this is a 'friend' or an 'enemy' binding, and
             -- check if it would mask an 'ooc' binding with the same key. If
             -- so, we need to add code that prevents this from happening, by
@@ -604,7 +613,7 @@ function addon:GetBindingAttributes(global)
 
     for idx, entry in ipairs(self.bindings) do
 		if entry.key then
-			if shouldApply(global, entry) and correctSpec(entry, GetActiveSpecGroup()) then
+			if shouldApply(global, entry) and correctSpec(entry) then
 				if global then
 					-- Allow for the re-binding of clicks and keys, except for
 					-- unmodified left/right-click
@@ -783,13 +792,11 @@ function addon:TalentGroupChanged()
     local currentProfile = self.db:GetCurrentProfile()
     local newProfile
 
-	if self.settings.specswap then
-		self.talentGroup = GetActiveSpecGroup()
-        -- Determine which profile to set, based on talent group
-        if self.talentGroup == 1 and self.settings.pri_profileKey then
-            newProfile = self.settings.pri_profileKey
-        elseif self.talentGroup == 2 and self.settings.sec_profileKey then
-            newProfile = self.settings.sec_profileKey
+    local currentSpec = GetSpecialization()
+	if self.settings.specswap and currentSpec then
+        local settingsKey = string.format("spec%d_profileKey", currentSpec)
+        if self.settings[settingsKey] then
+            newProfile = self.settings[settingsKey]
         end
 
         if newProfile ~= currentProfile and type(newProfile) == "string" then
