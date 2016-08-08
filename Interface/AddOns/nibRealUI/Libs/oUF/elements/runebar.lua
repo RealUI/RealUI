@@ -118,10 +118,10 @@ local Enable = function(self, unit)
 		for i=1, 6 do
 			local rune = runes[i]
 
-			local colors = oUF.colors.power.RUNES
+			local r, g, b = unpack(self.colors.power.RUNES)
 			if(rune:IsObjectType'StatusBar' and not rune:GetStatusBarTexture()) then
 				rune:SetStatusBarTexture[[Interface\TargetingFrame\UI-StatusBar]]
-				rune:SetStatusBarColor(colors[1], colors[2], colors[3])
+				rune:SetStatusBarColor(r, g, b)
 			end
 
 			if(rune.bg) then

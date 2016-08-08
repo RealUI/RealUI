@@ -424,6 +424,8 @@ local unitlessEvents = {
 
 	GROUP_ROSTER_UPDATE = true,
 
+	UNIT_COMBO_POINTS = true,
+
 	ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 
