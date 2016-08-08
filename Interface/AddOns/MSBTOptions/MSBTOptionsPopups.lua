@@ -119,7 +119,8 @@ local function CreatePopup()
  frame:Hide()
  frame:SetMovable(true)
  frame:EnableMouse(true)
- frame:SetToplevel(true)
+ frame:SetFrameStrata("HIGH")
+ --frame:SetToplevel(true)
  frame:SetClampedToScreen(true)
  frame:SetBackdrop(popupBackdrop)
  frame:SetScript("OnHide", OnHidePopup)
@@ -143,6 +144,7 @@ local function ChangePopupParent(frame, parent)
  local oldHandler = frame.hideHandler
  frame.hideHandler = nil
  frame:SetParent(parent or UIParent)
+ frame:SetFrameStrata("HIGH")
  frame.hideHandler = oldHandler
 end
 
@@ -1530,7 +1532,8 @@ local function CreateScrollAreaMoverFrame(scrollArea)
   frame:Hide()
   frame:SetMovable(true)
   frame:EnableMouse(true)
-  frame:SetToplevel(true)
+  frame:SetFrameStrata("HIGH")
+  --frame:SetToplevel(true)
   frame:SetClampedToScreen(true)
   frame:SetBackdrop(moverBackdrop)
   frame:SetScript("OnMouseDown", MoverFrameOnMouseDown)

@@ -1399,8 +1399,8 @@ end
 -- ****************************************************************************
 -- Creates the listbox frame that dropdowns use.
 -- ****************************************************************************
-local function Dropdown_CreateListboxFrame()
- dropdownListboxFrame = CreateFrame("Frame", nil, UIParent);
+local function Dropdown_CreateListboxFrame(parent)
+ dropdownListboxFrame = CreateFrame("Frame", nil, parent);
  dropdownListboxFrame:EnableMouse(true);
  dropdownListboxFrame:SetToplevel(true);
  dropdownListboxFrame:SetFrameStrata("FULLSCREEN_DIALOG");
@@ -1413,6 +1413,7 @@ local function Dropdown_CreateListboxFrame()
 
  local listbox = CreateListbox(dropdownListboxFrame);
  listbox:SetToplevel(true);
+ listbox:SetFrameStrata("FULLSCREEN_DIALOG");
  listbox:SetCreateLineHandler(Dropdown_CreateLine);
  listbox:SetDisplayHandler(Dropdown_DisplayLine);
  listbox:SetClickHandler(Dropdown_OnClickLine);
@@ -1426,7 +1427,7 @@ end
 -- ****************************************************************************
 local function CreateDropdown(parent)
  -- Create dropdown listbox if it hasn't already been.
- if (not dropdownListboxFrame) then Dropdown_CreateListboxFrame(); end
+ if (not dropdownListboxFrame) then Dropdown_CreateListboxFrame(parent); end
  
 
  -- Create container frame.

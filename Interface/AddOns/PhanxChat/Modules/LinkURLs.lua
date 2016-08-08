@@ -1,7 +1,7 @@
 --[[--------------------------------------------------------------------
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
-	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2006-2016 Phanx <addons@phanx.net>. All rights reserved.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
 	https://github.com/Phanx/PhanxChat
@@ -49,13 +49,12 @@ end
 
 ------------------------------------------------------------------------
 
-function PhanxChat.ChatFrame_OnHyperlinkShow(frame, link, text, button)
+function PhanxChat.ItemRefTooltip_SetHyperlink(self, link, ...)
 	if strsub(link, 1, 4) == "url:" then -- ignore Blizzard urlIndex links
 		currentURL = strsub(link, 5)
-		StaticPopup_Show("URL_COPY_DIALOG")
-		return
+		return StaticPopup_Show("URL_COPY_DIALOG")
 	end
-	return PhanxChat.hooks.ChatFrame_OnHyperlinkShow(frame, link, text, button)
+	return PhanxChat.hooks.ItemRefTooltip_SetHyperlink(self, link, ...)
 end
 
 ------------------------------------------------------------------------
@@ -70,17 +69,17 @@ function PhanxChat:SetLinkURLs(v)
 		for i = 1, #URL_EVENTS do
 			ChatFrame_AddMessageEventFilter(URL_EVENTS[i], LinkURLs)
 		end
-		if not self.hooks.ChatFrame_OnHyperlinkShow then
-			self.hooks.ChatFrame_OnHyperlinkShow = ChatFrame_OnHyperlinkShow
-			ChatFrame_OnHyperlinkShow = self.ChatFrame_OnHyperlinkShow
+		if not self.hooks.ItemRefTooltip_SetHyperlink then
+			self.hooks.ItemRefTooltip_SetHyperlink = ItemRefTooltip.SetHyperlink
+			ItemRefTooltip.SetHyperlink = self.ItemRefTooltip_SetHyperlink
 		end
 	else
 		for i = 1, #URL_EVENTS do
 			ChatFrame_RemoveMessageEventFilter(URL_EVENTS[i], LinkURLs)
 		end
-		if self.hooks.ChatFrame_OnHyperlinkShow then
-			ChatFrame_OnHyperlinkShow = self.hooks.ChatFrame_OnHyperlinkShow
-			self.hooks.ChatFrame_OnHyperlinkShow = nil
+		if self.hooks.ItemRefTooltip_SetHyperlink then
+			ItemRefTooltip.SetHyperlink = self.hooks.ItemRefTooltip_SetHyperlink
+			self.hooks.ItemRefTooltip_SetHyperlink = nil
 		end
 	end
 

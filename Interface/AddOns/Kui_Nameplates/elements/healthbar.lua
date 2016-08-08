@@ -2,6 +2,13 @@
 local addon = KuiNameplates
 local kui = LibStub('Kui-1.0')
 local ele = addon:NewElement('HealthBar')
+
+local UnitIsTapDenied,UnitReaction,UnitIsPlayer,UnitIsUnit,UnitIsFriend,
+      UnitPlayerControlled =
+      UnitIsTapDenied,UnitReaction,UnitIsPlayer,UnitIsUnit,UnitIsFriend,
+      UnitPlayerControlled
+local unpack = unpack
+
 -- prototype additions #########################################################
 function addon.Nameplate.UpdateHealthColour(f,show)
     f = f.parent
@@ -12,20 +19,39 @@ function addon.Nameplate.UpdateHealthColour(f,show)
     if UnitIsTapDenied(f.unit) then
         r,g,b = unpack(ele.colours.tapped)
     elseif UnitIsPlayer(f.unit) then
-        if  not UnitIsUnit('player',f.unit) and
-            UnitIsFriend('player',f.unit)
-        then
+        if UnitIsUnit('player',f.unit) then
+            -- personal nameplate
+            if ele.colours.self then
+                r,g,b = unpack(ele.colours.self)
+            else
+                r,g,b = kui.GetClassColour(f.unit,2)
+            end
+        elseif UnitIsFriend('player',f.unit) then
+            -- friendly players
             r,g,b = unpack(ele.colours.player)
         else
-            r,g,b = kui.GetClassColour(f.unit,2)
+            -- hostile players
+            if ele.colours.enemy_player then
+                r,g,b = unpack(ele.colours.enemy_player)
+            else
+                r,g,b = kui.GetClassColour(f.unit,2)
+            end
         end
     else
         if react == 4 then
+            -- neutral NPCs
             r,g,b = unpack(ele.colours.neutral)
         elseif react > 4 then
+            -- friendly NPCs
             r,g,b = unpack(ele.colours.friendly)
         else
-            r,g,b = unpack(ele.colours.hated)
+            -- hostile NPCs
+            if UnitPlayerControlled(f.unit) and ele.colours.enemy_pet then
+                -- hostile player pet
+                r,g,b = unpack(ele.colours.enemy_pet)
+            else
+                r,g,b = unpack(ele.colours.hated)
+            end
         end
     end
 
@@ -43,9 +69,17 @@ end
 function addon.Nameplate.UpdateHealth(f,show)
     f = f.parent
 
+    f.state.health_cur = UnitHealth(f.unit)
+    f.state.health_max = UnitHealthMax(f.unit)
+    f.state.health_deficit = f.state.health_max - f.state.health_cur
+    f.state.health_per =
+        f.state.health_cur > 0 and f.state.health_max > 0 and
+        (f.state.health_cur / f.state.health_max) * 100 or
+        0
+
     if f.elements.HealthBar then
-        f.HealthBar:SetMinMaxValues(0,UnitHealthMax(f.unit))
-        f.HealthBar:SetValue(UnitHealth(f.unit))
+        f.HealthBar:SetMinMaxValues(0,f.state.health_max)
+        f.HealthBar:SetValue(f.state.health_cur)
     end
 
     if not show then

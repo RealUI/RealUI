@@ -1,7 +1,7 @@
 --[[--------------------------------------------------------------------
 	Bugger
 	Shows the errors captured by !BugGrabber.
-	Copyright (c) 2015-2015 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2015-2016 Phanx <addons@phanx.net>. All rights reserved.
 	http://www.wowinterface.com/downloads/info23144-Bugger.html
 	http://www.curse.com/addons/wow/bugger
 	https://github.com/Phanx/Bugger
@@ -352,101 +352,123 @@ end
 ------------------------------------------------------------------------
 
 function Bugger:SetupFrame()
-	if not IsAddOnLoaded("Blizzard_DebugTools") then
-		LoadAddOn("Blizzard_DebugTools")
-	end
+	local f = CreateFrame("Frame", "BuggerFrame", UIParent, "UIPanelDialogTemplate")
+	f:SetFrameStrata("TOOLTIP")
+	f:SetMovable(true)
+	f:SetClampedToScreen(true)
+	f:Hide()
+	f:SetToplevel(true)
+	f:SetSize(534, 310)
+	f:SetPoint("CENTER")
+	f:RegisterForDrag("LeftButton")
 
-	tinsert(UISpecialFrames, "ScriptErrorsFrame")
-	ScriptErrorsFrame_OnError = function() end
-	ScriptErrorsFrame_Update  = function() end
+	tinsert(UISpecialFrames, "BuggerFrame")
 
-	self.frame       = ScriptErrorsFrame
-	self.scrollFrame = ScriptErrorsFrameScrollFrame
-	self.editBox     = ScriptErrorsFrameScrollFrameText
-	self.title       = self.frame.title
-	self.indexLabel  = self.frame.indexLabel
-	self.reload      = self.frame.reload
-	self.previous    = self.frame.previous
-	self.next        = self.frame.next
-	self.clear       = self.frame.close
+	local scrollFrame = CreateFrame("ScrollFrame", "$parentScrollFrame", f, "UIPanelScrollFrameTemplate")
+	scrollFrame:SetSize(489, 240)
+	scrollFrame:SetPoint("TOPLEFT", 16, -32)
+	scrollFrame.ScrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 6, -13)
+	f.scrollFrame = scrollFrame
 
-	self.frame:SetParent(UIParent)
-	self.frame:SetScript("OnShow", nil)
+	local editBox = CreateFrame("EditBox", "$parentText", editBox)
+	editBox:SetMultiLine(true)
+	editBox:SetMaxLetters(4000)
+	editBox:SetAutoFocus(false)
+	editBox:SetSize(493, 240)
+	editBox:SetFontObject(GameFontHighlight)
+	editBox:SetTextColor(0.9, 0.9, 0.9)
+	f.editBox = editBox
 
-	self.editBox:SetFontObject(GameFontHighlight)
-	self.editBox:SetTextColor(0.9, 0.9, 0.9)
+	scrollFrame:SetScrollChild(editBox)
 
-	local addWidth = 150
-	self.frame:SetWidth(self.frame:GetWidth() + addWidth)
-	self.scrollFrame:SetWidth(self.scrollFrame:GetWidth() + addWidth - 4)
-	self.editBox:SetWidth(self.editBox:GetWidth() + addWidth)
+	editBox:SetScript("OnCursorChanged", ScrollingEdit_OnCursorChanged)
+	editBox:SetScript("OnEscapePressed", EditBox_ClearFocus)
+	editBox:SetScript("OnEditFocusGained", function(self)
+		self:HighlightText(0)
+	end)
+	editBox:SetScript("OnUpdate", function(self, elapsed)
+		ScrollingEdit_OnUpdate(self, elapsed, scrollFrame)
+	end)
 
-	local addHeight = 50
-	self.frame:SetHeight(self.frame:GetHeight() + addHeight)
-	self.scrollFrame:SetHeight(self.scrollFrame:GetHeight() + addHeight - 4)
+	local reload = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	reload:SetText(RELOADUI)
+	reload:SetSize(96, 24)
+	reload:SetPoint("BOTTOMLEFT", 12, 12)
+	reload:SetScript("OnClick", ReloadUI)
+	reload:SetWidth(reload:GetFontString():GetStringWidth() + 20)
+	f.reload = reload
 
-	self.scrollFrame:SetPoint("TOPLEFT", 16, -32)
-	self.scrollFrame.ScrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 6, -13)
+	local clear = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	clear:SetText(L["Clear All"])
+	clear:SetSize(96, 24)
+	clear:SetPoint("LEFT", reload, "RIGHT", 4, 0)
+	clear:SetWidth(clear:GetFontString():GetStringWidth() + 20)
+	f.clear = clear
 
-	self.clear:ClearAllPoints()
-	self.clear:SetPoint("BOTTOMLEFT", 12, 12)
-	self.clear:SetPoint("LEFT", self.reload, "RIGHT", 4, 0)
-	self.clear:SetText(CLEAR_ALL)
-	self.clear:SetWidth(self.clear:GetFontString():GetStringWidth() + 20)
-	self.clear:SetScript("OnClick", function()
+	clear:SetScript("OnClick", function(self)
 		BugGrabber:Reset()
-		self:ShowError()
+		Bugger:ShowError()
 	end)
 
-	self.next:ClearAllPoints()
-	self.next:SetPoint("BOTTOMRIGHT", -10, 12)
+	local showLocals = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	showLocals:SetText(L["Locals"])
+	showLocals:SetSize(96, 24)
+	showLocals:SetPoint("LEFT", clear, "RIGHT", 4, 0)
+	showLocals:SetWidth(showLocals:GetFontString():GetStringWidth() + 20)
+	f.showLocals = showLocals
 
-	self.previous:ClearAllPoints()
-	self.previous:SetPoint("RIGHT", self.next, "LEFT", -4, 0)
-
-	self.showLocals = CreateFrame("Button", nil, self.frame, "UIPanelButtonTemplate")
-	self.showLocals:SetPoint("RIGHT", self.previous, "LEFT", -4, 0)
-	self.showLocals:SetText(L["Locals"])
-	self.showLocals:SetHeight(self.previous:GetHeight())
-	self.showLocals:SetWidth(self.showLocals:GetFontString():GetStringWidth() + 20)
-	self.showLocals:SetScript("OnClick", function(this)
-		local showLocals = this:GetHighlightTexture():GetDrawLayer() == "HIGHLIGHT"
-		Bugger:ShowError(Bugger.error, showLocals)
+	showLocals:SetScript("OnClick", function(self)
+		Bugger:ShowError(Bugger.error, self:GetHighlightTexture():GetDrawLayer() == "HIGHLIGHT")
 	end)
 
-	self.indexLabel:ClearAllPoints()
-	self.indexLabel:SetPoint("LEFT", self.clear, "RIGHT", 4, 0)
-	self.indexLabel:SetPoint("RIGHT", self.showLocals, "LEFT", -4, 0)
-	self.indexLabel:SetJustifyH("CENTER")
+	local next = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	next:SetFormattedText("%s >", NEXT)
+	next:SetSize(96, 24)
+	next:SetPoint("BOTTOMRIGHT", -10, 12)
+	f.next = next
 
-	self.error = 0
-	self.session = "current"
-
-	self.previous:SetScript("OnClick", function()
+	next:SetScript("OnClick", function(self)
 		if IsShiftKeyDown() then
-			self:ShowError(self.first)
+			Bugger:ShowError(Bugger.last)
 		else
-			self:ShowError(self.error - 1)
+			Bugger:ShowError(Bugger.error + 1)
 		end
 	end)
 
-	self.next:SetScript("OnClick", function()
+	local previous = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	previous:SetFormattedText("< %s", PREV)
+	previous:SetSize(96, 24)
+	previous:SetPoint("RIGHT", next, "LEFT", -4, 0)
+	f.previous = previous
+
+	previous:SetScript("OnClick", function(self)
 		if IsShiftKeyDown() then
-			self:ShowError(self.last)
+			Bugger:ShowError(Bugger.first)
 		else
-			self:ShowError(self.error + 1)
+			Bugger:ShowError(Bugger.error - 1)
 		end
 	end)
 
-	local tabLevel = self.frame:GetFrameLevel()
-	local tabWidth = (self.frame:GetWidth() - 16) / 3
-	local function clickTab(tab)
-		Bugger:ShowSession(tab.session)
+	local npwidth = 20 + max(previous:GetFontString():GetStringWidth(), next:GetFontString():GetStringWidth())
+	previous:SetWidth(npwidth)
+	next:SetWidth(npwidth)
+
+	local indexLabel = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	indexLabel:SetPoint("LEFT", showLocals, "RIGHT", 4, 0)
+	indexLabel:SetPoint("RIGHT", previous, "LEFT", -4, 0)
+	indexLabel:SetJustifyH("CENTER")
+	f.indexLabel = indexLabel
+
+	local tabLevel = f:GetFrameLevel()
+	local tabWidth = (f:GetWidth() - 16) / 3
+	local function clickTab(self)
+		Bugger:ShowSession(self.session)
 	end
+	
 	self.tabs = {}
-	self.frame:SetFrameLevel(tabLevel + 1)
+	f:SetFrameLevel(tabLevel + 1)
 	for i = 1, 3 do
-		local tab = CreateFrame("Button", "$parentTab"..i, self.frame, "CharacterFrameTabButtonTemplate")
+		local tab = CreateFrame("Button", "$parentTab"..i, f, "CharacterFrameTabButtonTemplate")
 		tab:UnregisterAllEvents()
 		tab:SetScript("OnEvent", nil)
 		tab:SetScript("OnClick", clickTab)
@@ -460,7 +482,7 @@ function Bugger:SetupFrame()
 
 	self.tabs[1].session = "all"
 	self.tabs[1]:SetText(L["All Errors"])
-	self.tabs[1]:SetPoint("TOPLEFT", self.frame, "BOTTOMLEFT", 8, 7)
+	self.tabs[1]:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 8, 7)
 
 	self.tabs[2].session = "previous"
 	self.tabs[2]:SetText(L["Previous Session"])
@@ -470,40 +492,55 @@ function Bugger:SetupFrame()
 	self.tabs[3]:SetText(L["Current Session"])
 	self.tabs[3]:SetPoint("TOPLEFT", self.tabs[2], "TOPRIGHT")
 
-	self.frame:SetClampRectInsets(0, 0, 0, -self.tabs[3]:GetHeight())
+	f:SetClampRectInsets(0, 0, 0, -self.tabs[3]:GetHeight())
 
-	local optButton = CreateFrame("Button", nil, ScriptErrorsFrameTitleButton)
-	optButton:SetPoint("TOPRIGHT", ScriptErrorsFrameClose, "TOPLEFT", -2, -8)
-	optButton:SetSize(16, 16)
-	optButton:SetNormalTexture("Interface\\Buttons\\UI-OptionsButton")
-	optButton:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
-	optButton:RegisterForClicks("AnyUp")
-	optButton:SetScript("OnEnter", function(self)
+	local options = CreateFrame("Button", nil, f)
+	options:SetPoint("TOPRIGHT", "$parentClose", "TOPLEFT", -2, -8)
+	options:SetSize(16, 16)
+	options:SetNormalTexture("Interface\\Buttons\\UI-OptionsButton")
+	options:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+	options:RegisterForClicks("AnyUp")
+	options:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
 		GameTooltip:SetText(L["Right-click for options."])
 	end)
-	optButton:SetScript("OnLeave", GameTooltip_Hide)
-	optButton:SetScript("OnClick", function(self, button)
+	options:SetScript("OnLeave", GameTooltip_Hide)
+	options:SetScript("OnClick", function(self, button)
 		if button ~= "RightButton" then return end
 		ToggleDropDownMenu(nil, nil, Bugger.menu, self, 0, 0, nil, nil, 10)
 	end)
+	f.options = options
 
-	local reloadButton = CreateFrame("Button", nil, ScriptErrorsFrameTitleButton)
-	reloadButton:SetPoint("RIGHT", optButton, "LEFT", -2, -1)
-	reloadButton:SetSize(18, 18)
-	reloadButton:SetNormalTexture("Interface\\Buttons\\UI-RefreshButton")
-	reloadButton:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
-	reloadButton:RegisterForClicks("AnyUp")
-	reloadButton:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-		GameTooltip:SetText(L["Shift-click to reload the UI."])
+	local titleButton = CreateFrame("Frame", nil, f)
+	titleButton:SetHeight(17)
+	titleButton:SetPoint("TOPLEFT")
+	titleButton:SetPoint("RIGHT", options, "LEFT", -2, 0)
+	titleButton:EnableMouse(true)
+	titleButton:RegisterForDrag("LeftButton")
+	f.titleButton = titleButton
+
+	titleButton:SetScript("OnDragStart", function(self)
+		f.moving = true
+		f:StartMoving()
 	end)
-	reloadButton:SetScript("OnLeave", GameTooltip_Hide)
-	reloadButton:SetScript("OnClick", function(self, button)
-		if IsShiftKeyDown() then
-			ReloadUI()
-		end
+	titleButton:SetScript("OnDragStop", function(self)
+		f.moving = nil
+		f:StopMovingOrSizing()
 	end)
+
+	self.frame       = f
+	self.scrollFrame = f.scrollFrame
+	self.editBox     = f.editBox
+	self.title       = f.title
+	self.indexLabel  = f.indexLabel
+	self.previous    = f.previous
+	self.next        = f.next
+	self.clear       = f.clear
+	self.reload      = f.reload
+	self.showLocals  = f.showLocals
+	
+	self.error = 0
+	self.session = "current"
 end
 
 ------------------------------------------------------------------------

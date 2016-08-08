@@ -1,7 +1,7 @@
 --[[--------------------------------------------------------------------
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
-	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2006-2016 Phanx <addons@phanx.net>. All rights reserved.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
 	https://github.com/Phanx/PhanxChat
@@ -11,8 +11,8 @@ local _, PhanxChat = ...
 local C, S, L = {}, {}, {}
 PhanxChat.ChannelNames, PhanxChat.ShortStrings, PhanxChat.L = C, S, L
 
---	Channel Names
---	Must match the default channel names shown in your game client.
+-- Channel Names
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Conversation"
 C.General         = "General"
 C.LocalDefense    = "LocalDefense"
@@ -101,15 +101,15 @@ L.WhoStatus_Offline = "%s is currently offline."
 L.WhoStatus_PlayingOtherGame = "%s is currently playing %s."
 
 ------------------------------------------------------------------------
---	German
--- Contributors: ac3r, bigx2, staratnight, Tumbleweed_DSA
--- Last updated: 2015-01-05
+-- German
+-- Contributors: acer, bigx2, pas06, staratnight, Tumbleweed_DSA
+-- Last updated: 2015-12-09
 ------------------------------------------------------------------------
 
 if LOCALE == "deDE" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Chat"
 C.General         = "Allgemein"
 C.LocalDefense    = "LokaleVerteidigung"
@@ -148,48 +148,48 @@ S.PET_BATTLE_COMBAT_LOG = "Kampf"
 L.All = "Alle"
 L.Default = "Standard"
 L.EnableArrows = "Pfeiltasten aktivieren"
-L.EnableArrows_Desc = "Aktiviere die Pfeiltasten im Eingabefeld des Chats."
-L.EnableResizeEdges = "An alle Ecken veränderbar"
-L.EnableResizeEdges_Desc = "Aktivieren um die Größe des Chatfenster an allen Ecken zu verändern, anstatt nur in der unteren rechten Ecke."
+L.EnableArrows_Desc = "Aktiviert die Pfeiltasten im Eingabefeld des Chats."
+L.EnableResizeEdges = "An allen Ecken veränderbar aktivieren"
+L.EnableResizeEdges_Desc = "Aktivieren, um die Größe des Chatfenster an allen Ecken zu verändern, anstatt nur in der unteren rechten Ecke."
 L.EnableSticky = "Channel merken"
 L.EnableSticky_Desc = "Festlegen, welche Channels gemerkt werden sollen."
 L.FadeTime = "Ausblenden des Textes"
 L.FadeTime_Desc = "Zeit bis zum Ausblenden des Textes in Minuten (0 = deaktiviert)."
 L.FontSize = "Schriftgröße"
 L.FontSize_Desc = "Schriftgröße für alle Chatfenster festlegen."
-L.FontSize_Note = "Beachte, dass dies nur eine Kurzform zum Konfigurieren jedes einzelne Chatfenster durch die Blizzard Chatoptionen ist."
+L.FontSize_Note = "Beachte, dass dies nur eine Kurzform zum Konfigurieren jedes einzelnen Chatfensters durch die Blizzard-Chatoptionen ist."
 L.HideButtons = "Buttons verbergen"
-L.HideButtons_Desc = "Verstecke das Chat-Menü und die Scroll-Buttons."
+L.HideButtons_Desc = "Verbirgt das Chatfenstermenü und die Scroll-Buttons."
 L.HideFlash = "Blinken der Tabs verbergen"
-L.HideFlash_Desc = "Deaktiviere das Blinken der Chat Tabs, bei denen eine neue Nachricht erhalten wurde."
+L.HideFlash_Desc = "Deaktiviert das Blinken der Chat-Tabs, bei denen eine neue Nachricht erhalten wurde."
 L.HideNotices = "Meldungen verbergen"
-L.HideNotices_Desc = "Channel-Meldungen verbergen."
-L.HidePetCombatLog = "Haustierkampflog deactivieren"
-L.HidePetCombatLog_Desc = "Verhindere, dass ein neues Kampflog-Fenster für Haustierkämpfe geöffnet wird."
+L.HideNotices_Desc = "Channel-Meldungen verbergen"
+L.HidePetCombatLog = "Haustierkampflog deaktivieren"
+L.HidePetCombatLog_Desc = "Verhindert, dass ein neues Kampflogfenster für Haustierkämpfe geöffnet wird."
 L.HideRepeats = "Wiederholungen verbergen"
-L.HideRepeats_Desc = "Verberge Nachrichten, die in öffentlichen Channels wiederholt werden."
+L.HideRepeats_Desc = "Nachrichten, die in öffentlichen Channels wiederholt werden, verbergen."
 L.HideTextures = "Extra-Texturen verbergen"
-L.HideTextures_Desc = "Verberge die Extra-Texturen der Chat Tabs und dem Chat Eingabefeld, die in Patch 3.3.5 hinzugefügt wurden."
+L.HideTextures_Desc = "Verbirgt Extra-Texturen der Chat-Tabs und dem Chat-Eingabefeld, die in Patch 3.3.5 hinzugefügt wurden."
 L.LinkURLs = "URLs verlinken"
 L.LinkURLs_Desc = "URLs im Chat für einfaches Kopieren anklickbar machen."
 L.LockTabs = "Angedockte Tabs sperren"
-L.LockTabs_Desc = "Verhindert, dass fixierte Tabs verschoben werden. Zum Verschieben die ALT-Taste gedrückt halten."
+L.LockTabs_Desc = "Verhindert, dass angedockte Tabs verschoben werden. Zum Verschieben die ALT-Taste gedrückt halten."
 L.MoveEditBox = "Eingabefeld verschieben"
 L.MoveEditBox_Desc = "Das Eingabefeld über dem Chatfenster anzeigen."
 L.None = "Keine"
-L.OptionLocked = "Diese Option ist von PhanxChat gesperrt. Benutze stattdessen die %q-Option in PhanxChat."
-L.OptionLockedConditional = "Diese Option ist von PhanxChat gesperrt. Wenn du sie ändern möchtest, musst du zunächst die %q-Option in PhanxChat deaktivieren."
+L.OptionLocked = "Diese Option ist von PhanxChat gesperrt. Benutze stattdessen die %q Option in PhanxChat."
+L.OptionLockedConditional = "Diese Option ist von PhanxChat gesperrt. Wenn du sie ändern möchtest, musst du zunächst die Option %q in PhanxChat deaktivieren."
 L.RemoveRealmNames = "Servernamen entfernen"
-L.RemoveRealmNames_Desc = "Kürze die Spielernamen, indem der Servername entfernt werden."
+L.RemoveRealmNames_Desc = "Kürze die Spielernamen, indem der Servername entfernt wird."
 L.ReplaceRealNames = "Realnamen ersetzen"
 L.ReplaceRealNames_Desc = "Ersetzt, wenn möglich, die Real-ID-Namen und BattleTags mit den WoW-Charakternamen."
 L.ShortenChannelNames = "Channelnamen abkürzen"
 L.ShortenChannelNames_Desc = "Abkürzen der Channelnamen und Chat-Bezeichnungen."
-L.ShortenRealNames = "Realnamen abkürzen"
+L.ShortenRealNames = "Realnamen kürzen"
 L.ShortenRealNames_Desc = "Wähle, wie Real-ID-Namen gekürzt werden."
-L.ShortenRealNames_UseBattleTag = "Ersetzt mit dem BattleTag"
-L.ShortenRealNames_UseFirstName = "Anzeigt nur den Vornamen"
-L.ShortenRealNames_UseFullName = "Beibehaltet den vollständigen Namen"
+L.ShortenRealNames_UseBattleTag = "Mit dem BattleTag ersetzen"
+L.ShortenRealNames_UseFirstName = "Nur den Vornamen anzeigen"
+L.ShortenRealNames_UseFullName = "Den vollständigen Namen beibehalten"
 L.ShowClassColors = "Klassenfarben anzeigen"
 L.ShowClassColors_Desc = "Klassenfarben in allen Chatkanälen anzeigen."
 L.Whisper_BadTarget = "Du kannst dieses Ziel nicht anflüstern!"
@@ -201,14 +201,13 @@ L.WhoStatus_PlayingOtherGame = "%s spielt zur Zeit %s."
 return end
 
 ------------------------------------------------------------------------
---	Spanish
--- Contributors: Akkorian, Phanx
+-- Spanish
 ------------------------------------------------------------------------
 
 if LOCALE == "esES" or LOCALE == "esMX" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Conversación"
 C.General         = "General"
 C.LocalDefense    = "DefensaLocal"
@@ -300,14 +299,15 @@ L.WhoStatus_PlayingOtherGame = "%s está jugando a %s."
 return end
 
 ------------------------------------------------------------------------
---	French
--- Contributors: braincell, L0relei
+-- French
+-- Contributors: aktaurus, braincell, L0relei
+-- Last updated: 2015-04-08
 ------------------------------------------------------------------------
 
 if LOCALE == "frFR" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Conversation"
 C.General         = "Général"
 C.LocalDefense    = "DéfenseLocale"
@@ -315,11 +315,8 @@ C.LookingForGroup = "RechercheDeGroupe"
 C.Trade           = "Commerce"
 C.WorldDefense    = "DéfenseUniverselle"
 
-------------------------------------------------------------------------
---	Abbreviated Channel Names
---	These should be one- or two-character abbreviations.
-------------------------------------------------------------------------
-
+-- Abbreviated Channel Names
+-- These should be one- or two-character abbreviations.
 S.Conversation    = "C"
 S.General         = "G"
 S.LocalDefense    = "DL"
@@ -365,8 +362,8 @@ L.HideFlash = "Masquer le flash des onglets"
 L.HideFlash_Desc = "Désactiver l'effet de flash des onglets qui ont un nouveau message."
 L.HideNotices = "Masquer les avertissements"
 L.HideNotices_Desc = "Masquer les messages de notification de changement de canal."
---L.HidePetCombatLog = "Disable pet battle log"
---L.HidePetCombatLog_Desc = "Prevent the chat frame from opening a combat log for pet battles."
+L.HidePetCombatLog = "Désactiver le journal de combat des familiers"
+L.HidePetCombatLog_Desc = "Empêche la fenêtre de discussion d'ouvrir un journal de combat pour les combats de familiers."
 L.HideRepeats = "Masquer les spams"
 L.HideRepeats_Desc = "Masquer les message spammés sur les canaux publics."
 L.HideTextures = "Masquer les textures supplémentaires"
@@ -402,14 +399,15 @@ L.WhoStatus_PlayingOtherGame = "%s joue à %s."
 return end
 
 ------------------------------------------------------------------------
---	Italian
--- Contributors: Phanx
+-- Italian
+-- Contributors: alar
+-- Lad updated: 2015-03-17
 ------------------------------------------------------------------------
 
 if LOCALE == "itIT" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Conversazione"
 C.General         = "Generale"
 C.LocalDefense    = "DifesaLocale"
@@ -447,7 +445,7 @@ S.PET_BATTLE_COMBAT_LOG = "Scontro"
 -- Options Panel
 --L.All = "All"
 --L.Default = "Default"
---L.EnableArrows = "Enable arrow keys"
+L.EnableArrows = "Abilita Tasti Freccia"
 --L.EnableArrows_Desc = "Enable arrow keys in the chat edit box."
 --L.EnableResizeEdges = "Enable resize edges"
 --L.EnableResizeEdges_Desc = "Enable resize controls at all edges of chat frames, instead of only the bottom right corner."
@@ -501,8 +499,8 @@ S.PET_BATTLE_COMBAT_LOG = "Scontro"
 return end
 
 ------------------------------------------------------------------------
---	Portuguese
--- Contributors: mgaedke, Phanx, Tercioo
+-- Portuguese
+-- Contributors: AxellSlade, mgaedke, Tercioo
 ------------------------------------------------------------------------
 
 if LOCALE == "ptBR" then
@@ -561,8 +559,8 @@ L.HideFlash = "Ocultar clarão guia"
 L.HideFlash_Desc = "Não clarão das guias de bate-papo que receber novas mensagens."
 L.HideNotices = "Ocultar avisos"
 L.HideNotices_Desc = "Ocultar mensagens de notificação de canais de bate-papo."
---L.HidePetCombatLog = "Disable pet battle log"
---L.HidePetCombatLog_Desc = "Prevent the chat frame from opening a combat log for pet battles."
+L.HidePetCombatLog = "Desabilita registro de batalha de mascote"
+L.HidePetCombatLog_Desc = "Previne o quadro de chat de abrir o registro de combate das batalhas de mascote."
 L.HideRepeats = "Ocultar repetições"
 L.HideRepeats_Desc = "Ocultar mensagens repetidas nos canais públicos de bate-papo."
 L.HideTextures = "Ocultar texturas extras"
@@ -598,14 +596,14 @@ L.WhoStatus_PlayingOtherGame = "%s está jogando %s."
 return end
 
 ------------------------------------------------------------------------
---	Russian
+-- Russian
 -- Contributors: hungry2, Yafis
 ------------------------------------------------------------------------
 
 if LOCALE == "ruRU" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "Разговор"
 C.General         = "Общий"
 C.LocalDefense    = "ОборонаЛокальный"
@@ -697,14 +695,14 @@ L.WhoStatus_PlayingOtherGame = "%s в данный момент играет %s.
 return end
 
 ------------------------------------------------------------------------
---	Korean
+-- Korean
 -- Contributors: talkswind
 ------------------------------------------------------------------------
 
 if LOCALE == "koKR" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "대화"
 C.General         = "공개"
 C.LocalDefense    = "수비"
@@ -796,15 +794,15 @@ L.ShortenChannelNames_Desc = "채널 이름과 대화 구문열을 줄입니다.
 return end
 
 ------------------------------------------------------------------------
---	Simplified Chinese
--- Contributors: tss1398383123, bone_cures
+-- Simplified Chinese
+-- Contributors: bone_cures, tss1398383123
 -- Last updated: 2015-01-05
 ------------------------------------------------------------------------
 
 if LOCALE == "zhCN" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "对话"
 C.General         = "综合"
 C.LocalDefense    = "本地防务"
@@ -896,14 +894,14 @@ L.WhoStatus_PlayingOtherGame = "%s 在线 %s。"
 return end
 
 ------------------------------------------------------------------------
---	Traditional Chinese
+-- Traditional Chinese
 -- Contributors: BNSSNB, yunrong
 ------------------------------------------------------------------------
 
 if LOCALE == "zhTW" then
 
 -- Channel Names
---	Must match the default channel names shown in your game client.
+-- Must match the default channel names shown in your game client.
 C.Conversation    = "對話"
 C.General         = "綜合"
 C.LocalDefense    = "本地防務"

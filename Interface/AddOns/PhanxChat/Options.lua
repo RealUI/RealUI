@@ -227,6 +227,22 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 	end
 
 	--------------------------------------------------------------------
+	
+	local ScrollWheel = self:CreateCheckbox(CHAT_MOUSE_WHEEL_SCROLL, OPTION_TOOLTIP_CHAT_MOUSE_WHEEL_SCROLL)
+	ScrollWheel:SetPoint("TOPLEFT", FontSize, "BOTTOMLEFT", 0, -12)
+	function ScrollWheel:OnValueChanged(value)
+		if PhanxChat.debug then print("PhanxChat: chatMouseScroll", value) end
+		SetCVar("chatMouseScroll", value and "1" or "0")
+	end
+
+	local RemoveHoverDelay = self:CreateCheckbox(REMOVE_CHAT_DELAY_TEXT)
+	RemoveHoverDelay:SetPoint("TOPLEFT", ScrollWheel, "BOTTOMLEFT", 0, -8)
+	function RemoveHoverDelay:OnValueChanged(value)
+		if PhanxChat.debug then print("PhanxChat: removeChatDelay", value) end
+		SetCVar("removeChatDelay", value and "1" or "0")
+	end
+
+	--------------------------------------------------------------------
 
 	local bnetValues = {
 		BATTLETAG = L.ShortenRealNames_UseBattleTag,
@@ -260,12 +276,13 @@ PhanxChat.OptionsPanel = LibStub("PhanxConfig-OptionsPanel").CreateOptionsPanel(
 		EnableSticky:SetValue(db.EnableSticky, stickyValues[db.EnableSticky])
 		FadeTime:SetValue(db.FadeTime)
 		FontSize:SetValue(db.FontSize or floor(select(2, ChatFrame1:GetFont()) + 0.5))
+
+		ScrollWheel:SetChecked(GetCVarBool("chatMouseScroll"))
+		RemoveHoverDelay:SetChecked(GetCVarBool("removeChatDelay"))
 	end
 
 	self:refresh()
 end)
-
-PhanxChat.AboutPanel = LibStub("LibAboutPanel").new(PHANXCHAT, PHANXCHAT)
 
 ------------------------------------------------------------------------
 --	Slash command

@@ -4,7 +4,6 @@ local ele = addon:NewElement('PowerBar')
 -- prototype additions #########################################################
 function addon.Nameplate.UpdatePower(f,on_show)
     f = f.parent
-
     if f.elements.PowerBar then
         if f.state.power_type then
             local power_type = f.state.power_type
@@ -21,14 +20,15 @@ function addon.Nameplate.UpdatePower(f,on_show)
             f.PowerBar:SetStatusBarColor(0,0,0)
             f.PowerBar:SetValue(0)
         end
-    end
 
-    if not on_show then
-        addon:DispatchMessage('PowerUpdate', f)
+        if not on_show then
+            addon:DispatchMessage('PowerUpdate', f)
+        end
     end
 end
--- messages ####################################################################
-function ele:Show(f)
+function addon.Nameplate.UpdatePowerType(f,on_show)
+    f = f.parent
+
     -- get unit's primary power type
     local power_type = select(2,UnitPowerType(f.unit))
     local power_max = UnitPowerMax(f.unit,power_type)
@@ -39,12 +39,20 @@ function ele:Show(f)
 
     f.state.power_type = power_type
 
+    if not on_show then
+        addon:DispatchMessage('PowerTypeUpdate', f)
+    end
+
     -- and update display
-    f.handler:UpdatePower(true)
+    f.handler:UpdatePower(on_show)
+end
+-- messages ####################################################################
+function ele:Show(f)
+    f.handler:UpdatePowerType(true)
 end
 -- events ######################################################################
 function ele:PowerTypeEvent(event,f)
-    self:Show(f)
+    f.handler:UpdatePowerType()
 end
 function ele:PowerEvent(event,f)
     f.handler:UpdatePower()
@@ -52,10 +60,7 @@ end
 -- enable/disable per frame ####################################################
 function ele:EnableOnFrame(frame)
     frame.PowerBar:Show()
-
-    if frame:IsShown() then
-        self:Show(frame)
-    end
+    frame.handler:UpdatePower(true)
 end
 function ele:DisableOnFrame(frame)
     frame.PowerBar:Hide()

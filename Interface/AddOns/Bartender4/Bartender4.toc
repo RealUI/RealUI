@@ -1,5 +1,5 @@
 ## Interface: 70000
-## X-Curse-Packaged-Version: 4.7.1
+## X-Curse-Packaged-Version: 4.7.2
 ## X-Curse-Project-Name: Bartender4
 ## X-Curse-Project-ID: bartender4
 ## X-Curse-Repository-ID: wow/bartender4/mainline
@@ -7,7 +7,7 @@
 ## Title: Bartender4
 ## Notes: Simple and Advanced combined - Bartender4 ActionBar AddOn
 
-## Version: 4.7.1
+## Version: 4.7.2
 
 ## Author: Nevcairiel
 ## X-Email: h.leppkes at gmail dot com
