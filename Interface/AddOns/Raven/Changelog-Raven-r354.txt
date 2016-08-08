@@ -1,0 +1,172 @@
+------------------------------------------------------------------------
+r354 | tomber | 2016-08-06 21:38:31 +0000 (Sat, 06 Aug 2016) | 4 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+
+Adjust icon border color "Special" option to use the bar color swatches for generic buffs and debuffs. This matches the way the "Debuffs" option worked prior to being updated to include buffs and renamed to "Special".
+Update list of spells players use to dispel debuffs.
+Add a built-in spell effect that generates a 10-second cooldown called Rune Power whenever Rune of Power is successfully cast.
+
+------------------------------------------------------------------------
+r353 | tomber | 2016-08-02 04:51:07 +0000 (Tue, 02 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Raven_Options/Options.lua
+
+Change entry of specialization in both Show When and in condition test to accept a list of comma-separated specialization names and/or numbers.
+------------------------------------------------------------------------
+r352 | tomber | 2016-08-01 03:27:18 +0000 (Mon, 01 Aug 2016) | 5 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Buff and debuff tracker entries for warlock creatures should now go away when they despawn.
+Rune Power should now appear as a buff while Rune of Power is active.
+Changed icon border color option from "Debuffs" to "Special" and made it also color buffs that are stealable or magic.
+Added option to enable showing spell ID in tooltip when holding alt plus control.
+
+------------------------------------------------------------------------
+r351 | tomber | 2016-07-29 21:51:59 +0000 (Fri, 29 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add option to specify expire time (for triggering sound and color special effects) as either a time in seconds or as a percentage of the bar's duration. When both are specified then the longer of the two is used.
+Add option to apply uniform duration in timer options only to bars whose actual duration is greater than the specified uniform duration.
+
+------------------------------------------------------------------------
+r350 | tomber | 2016-07-29 13:48:02 +0000 (Fri, 29 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Main.lua
+   M /trunk/Raven_Options/Options.lua
+
+Update special support for mage Rune of Power to work in Legion.
+Only do collectgarbage when not in combat (this helps avoid "script ran too long" error when opening option panel, which has been observed on the Legion beta).
+
+------------------------------------------------------------------------
+r349 | tomber | 2016-07-28 18:10:22 +0000 (Thu, 28 Jul 2016) | 6 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Raven_Options/Options.lua
+
+Add option to include/exclude power type buffs (on buffs tab).
+Remove option to "show only tracking" since it doesn't interact well with the power bonus bars and can be done with the filter options instead.
+Add condition checking for insanity and maelstrom power.
+Rework bonus power bars for legion (adds astral power, fury, pain, arcane charges; restricts to appropriate specializations, updates to use legion spells).
+Fix icon bug for cooldowns that are on flyouts in the spell book (e.g., grimoire spells).
+Update descriptions of bar groups on Setup tab to be more clear which spells pertain to the player versus target/focus.
+------------------------------------------------------------------------
+r348 | tomber | 2016-07-24 21:01:46 +0000 (Sun, 24 Jul 2016) | 4 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Raven_Options/Options.lua
+
+Reworked spell school lockout code to work better in Legion (e.g., suppress extra cooldowns during rogue's Death from Above).
+Replaced Show When based on primary and secondary specs with support for multiple specs based on specialization number or name.
+Changed code that extracts numbers from tooltips to ignore commas.
+
+------------------------------------------------------------------------
+r347 | tomber | 2016-07-21 05:35:56 +0000 (Thu, 21 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Main.lua
+
+Fixed issues with resource tracking (e.g., Chi) plus related tooltip errors.
+Fixed debuff type detection in tracker code that caused problems with bar colors.
+Fixed stack count updates in tracker code that caused problems with the spell Agony.
+------------------------------------------------------------------------
+r346 | tomber | 2016-07-16 14:57:23 +0000 (Sat, 16 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/Nest.lua
+
+Fix timeline bug resulting from alpha animation group replacement of SetChange function with SetFromAlpha and SetToAlpha functions.
+------------------------------------------------------------------------
+r345 | tomber | 2016-07-13 22:05:34 +0000 (Wed, 13 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/Conditions.lua
+
+Fix bug in conditions initialization which causes error when opening options panel when on a class that has no default conditions.
+------------------------------------------------------------------------
+r344 | tomber | 2016-07-12 14:36:55 +0000 (Tue, 12 Jul 2016) | 2 lines
+Changed paths:
+   M /trunk/Readme.txt
+
+Minor edit of Readme.txt.
+Raven has now had all planned updates for Legion so, in theory, this is the beta build and only bug fixes will be made between now and release.
+------------------------------------------------------------------------
+r343 | tomber | 2016-07-11 22:21:18 +0000 (Mon, 11 Jul 2016) | 4 lines
+Changed paths:
+   M /trunk/Conditions.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Profile.lua
+
+Updated spells used for range checks.
+Updated spells used for school lockout detection.
+Removed obsolete spell numbers from the default colors table.
+Fixed rune cooldown check (which was not working correctly on the PTR).
+------------------------------------------------------------------------
+r342 | tomber | 2016-07-10 05:33:31 +0000 (Sun, 10 Jul 2016) | 9 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Presets/DeathKnight.lua
+   M /trunk/Presets/Druid.lua
+   M /trunk/Presets/General.lua
+   M /trunk/Presets/Hunter.lua
+   M /trunk/Presets/Mage.lua
+   M /trunk/Presets/Monk.lua
+   M /trunk/Presets/Paladin.lua
+   M /trunk/Presets/Pets.lua
+   M /trunk/Presets/Priest.lua
+   M /trunk/Presets/Racials.lua
+   M /trunk/Presets/Rogue.lua
+   M /trunk/Presets/Shaman.lua
+   M /trunk/Presets/Warrior.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Reworked totem bars for shaman to remove the type-restricted slots.
+Reworked runes for death knights.
+Updated all class presets to remove conditions for removed buffs and other spells.
+Removed consolidated buffs toggle.
+Updated mushroom tracking and added lunar power for druids.
+Updated resource conditions for warlock.
+Automated figuring out the maximum spell id.
+Added hooks for demon hunter class.
+
+------------------------------------------------------------------------
+r341 | tomber | 2016-07-04 22:33:19 +0000 (Mon, 04 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Conditions.lua
+   M /trunk/Nest.lua
+   A /trunk/Presets/DemonHunter.lua
+   M /trunk/Raven.toc
+   M /trunk/Raven_Options/Options.lua
+
+Fixed additional condition-related errors with new Demon Hunter class.
+Tweaked one of the timer formats.
+Removed some code that is no longer used.
+------------------------------------------------------------------------

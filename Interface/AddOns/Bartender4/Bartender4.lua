@@ -61,6 +61,9 @@ function Bartender4:OnInitialize()
 	self:HideBlizzard()
 	self:UpdateBlizzardVehicle()
 
+	-- fix the strata of the QueueStatusFrame, otherwise it overlaps our bars
+	QueueStatusFrame:SetParent(UIParent)
+
 	if LDB then
 		createLDBLauncher()
 	end

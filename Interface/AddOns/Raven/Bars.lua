@@ -35,8 +35,8 @@ function MOD:GetTimelineLabels() return defaultLabels end
 
 MOD.BarGroupTemplate = { -- default bar group settings
 	enabled = true, locked = true, merged = false, linkSettings = false, checkCondition = false, noMouse = false, iconMouse = true,
-	barColors = "Spell", bgColors = "Normal", iconColors = "None", combatTips = true, casterTips = true, anchorTips = "DEFAULT", strata = "MEDIUM",
-	useDefaultDimensions = true, useDefaultFontsAndTextures = true, useDefaultColors = true,
+	barColors = "Spell", bgColors = "Normal", iconColors = "None", combatTips = true, casterTips = true, spellTips = true, anchorTips = "DEFAULT",
+	useDefaultDimensions = true, useDefaultFontsAndTextures = true, useDefaultColors = true, strata = "MEDIUM",
 	sor = "A", reverseSort = false, timeSort = true, playerSort = false,
 	configuration = 1, anchor = false, anchorX = 0, anchorY = 0, anchorLastBar = false, anchorRow = false, anchorColumn = true, anchorEmpty = false,
 	growDirection = true, fillBars = false, wrap = 0, wrapDirection = false, snapCenter = false, maxBars = 0,
@@ -45,13 +45,13 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	soundSpellStart = false, soundSpellEnd = false, soundSpellExpire = false, soundAltStart = "None", soundAltEnd = "None", soundAltExpire = "None",
 	labelOffset = 0, labelInset = 0, labelWrap = false, labelCenter = false, labelAlign = "MIDDLE",
 	timeOffset = 0, timeInset = 0, timeAlign = "normal", timeIcon = false, iconOffset = 0, iconInset = 0, iconHide = false, iconAlign = "CENTER",
-	expireTime = 5, expireMinimum = 0, colorExpiring = false, expireMSBT = false, criticalMSBT = false, clockReverse = true, disableAlpha = false,
-	expireColor = false, expireLabelColor = false, expireTimeColor = false, desaturate = false, desaturateFriend = false,
+	expireTime = 5, expirePercentage = 0, expireMinimum = 0, colorExpiring = false, expireMSBT = false, criticalMSBT = false, clockReverse = true,
+	expireColor = false, expireLabelColor = false, expireTimeColor = false, desaturate = false, desaturateFriend = false, disableAlpha = false,
 	timelineWidth = 225, timelineHeight = 25, timelineDuration = 300, timelineExp = 3, timelineHide = false, timelineAlternate = true,
 	timelineSwitch = 2, timelineTexture = "Blizzard", timelineAlpha = 1, timelineColor = false, timelineLabels = false,
 	timelineSplash = true, timelineSplashX = 0, timelineSplashY = 0, timelinePercent = 50, timelineOffset = 0, timelineDelta = 0,
 	showSolo = true, showParty = true, showRaid = true, showCombat = true, showOOC = true, showFishing = true, showFocusTarget = true,
-	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showPrimary = true, showSecondary = true,
+	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showSpecialization = "",
 	showResting = true, showMounted = true, showVehicle = true, showFriendly = true, showEnemy = true, showBlizz = true, showNotBlizz = true,
 	detectBuffs = false, detectDebuffs = false, detectAllBuffs = false, detectAllDebuffs = false, detectDispellable = false, detectInflictable = false,
 	detectNPCDebuffs = false, detectVehicleDebuffs = false, detectBoss = false, includeTotems = false,
@@ -59,11 +59,11 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	detectCastable = false, detectStealable = false, detectMagicBuffs = false, detectEffectBuffs = false, detectWeaponBuffs = false,
 	detectNPCBuffs = false, detectVehicleBuffs = false, detectOtherBuffs = false, detectBossBuffs = false, detectEnrageBuffs = false,
 	detectCooldowns = false, detectBuffsMonitor = "player", detectBuffsCastBy = "player", detectDebuffsMonitor = "player",
-	detectDebuffsCastBy = "player", detectCooldownsBy = "player", detectTracking = false, detectOnlyTracking = false,
+	detectDebuffsCastBy = "player", detectCooldownsBy = "player", detectTracking = false, excludeResources = false,
 	detectSpellCooldowns = true, detectTrinketCooldowns = true, detectInternalCooldowns = true, detectSpellEffectCooldowns = true,
 	detectPotionCooldowns = true, detectOtherCooldowns = true, detectRuneCooldowns = false,
 	detectSharedStances = true, detectSharedShouts = true, detectSharedFrostTraps = true, detectSharedShocks = true, detectSharedCrusader = true,
-	setDuration = false, uniformDuration = 120, checkDuration = false, minimumDuration = true, filterDuration = 120,
+	setDuration = false, setOnlyLongDuration = false, uniformDuration = 120, checkDuration = false, minimumDuration = true, filterDuration = 120,
 	checkTimeLeft = false, minimumTimeLeft = true, filterTimeLeft = 120, showNoDuration = false, showOnlyNoDuration = false,
 	showNoDurationBackground = false, noDurationFirst = false, timeFormat = 6, timeSpaces = false, timeCase = false,
 	filterBuff = true, filterBuffLink = true, filterBuffSpells = false, filterBuffTable = nil,
@@ -426,24 +426,51 @@ local function GetColorForBar(bg, bar, btype)
 	return c
 end
 
--- Get the standard debuff color for the bar, return nil if not a standard type of debuff
-function MOD:GetDebuffColorForBar(bg, bar, btype)
+-- Get the special debuff color for the bar
+function MOD:GetSpecialColorForBar(bg, bar, btype)
 	local cc = not bg.useDefaultColors -- indicates the bar group has overrides for standard colors
-	local c = cc and bg.debuffColor or MOD.db.global.DefaultDebuffColor
+	local c = MOD.db.global.DefaultBorderColor -- no color applied if not a special type
 	if bar.barType == "Debuff" then
-		if btype then
-			if btype == "Poison" then c = cc and bg.poisonColor or MOD.db.global.DefaultPoisonColor end
-			if btype == "Curse" then c = cc and bg.curseColor or MOD.db.global.DefaultCurseColor end
-			if btype == "Magic" then c = cc and bg.magicColor or MOD.db.global.DefaultMagicColor end
-			if btype == "Disease" then c = cc and bg.diseaseColor or MOD.db.global.DefaultDiseaseColor end
+		if btype == "Poison" then
+			c = cc and bg.poisonColor or MOD.db.global.DefaultPoisonColor
+		elseif btype == "Curse" then
+			c = cc and bg.curseColor or MOD.db.global.DefaultCurseColor
+		elseif btype == "Magic" then
+			c = cc and bg.magicColor or MOD.db.global.DefaultMagicColor
+		elseif btype == "Disease" then
+			c = cc and bg.diseaseColor or MOD.db.global.DefaultDiseaseColor
+		else
+			c = cc and bg.debuffColor or MOD.db.global.DefaultDebuffColor
+		end
+	elseif bar.barType == "Buff" then
+		if bar.isStealable then
+			c = cc and bg.stealColor or MOD.db.global.DefaultStealColor
+		elseif bar.isMagic then
+			c = cc and bg.magicColor or MOD.db.global.DefaultMagicColor
+		else
+			c = cc and bg.buffColor or MOD.db.global.DefaultBuffColor
 		end
 	end
 	return c
 end
 
+-- Return a bar's expiration time and minimum duration based on settings for either bar or bar group
+local function GetExpireTime(bg, bar, duration, useBar, useBg)
+	local et, mt, pt = nil, nil, 0
+	if useBar then
+		et = bar.expireTime or 5; mt = bar.expireMinimum or 0
+		pt = (duration or 0) * (bar.expirePercentage or 0) / 100
+	elseif useBg then
+		et = bg.expireTime or 5; mt = bg.expireMinimum or 0
+		pt = (duration or 0) * (bg.expirePercentage or 0) / 100
+	end
+	if et and (pt > et) then et = pt end
+	return et, mt
+end
+
 -- Get the start, finish and expire sound files to play for a bar
-local function GetSoundsForBar(bg, bar)
-	local start, finish, expire, et, mt, replay, replayTime, sp = nil, nil, nil, nil, nil, nil, nil
+local function GetSoundsForBar(bg, bar, duration)
+	local start, finish, expire, replay, replayTime, sp = nil, nil, nil, nil, nil
 	if bg.soundSpellStart or bar.soundSpellStart then sp = MOD:GetAssociatedSpellForBar(bar); if sp then start = MOD:GetSound(sp, bar.spellID) end end
 	if not start and bar.soundAltStart ~= "None" then start = bar.soundAltStart end
 	if not start and bg.soundAltStart ~= "None" then start = bg.soundAltStart end
@@ -453,11 +480,10 @@ local function GetSoundsForBar(bg, bar)
 	if not finish and bar.soundAltEnd ~= "None" then finish = bar.soundAltEnd end
 	if not finish and bg.soundAltEnd ~= "None" then finish = bg.soundAltEnd end
 	if finish then finish = media:Fetch("sound", finish) end
-	if bar.soundSpellExpire then et = bar.expireTime or 5; mt = bar.expireMinimum or 0
-		elseif bg.soundSpellExpire then et = bg.expireTime or 5; mt = bg.expireMinimum or 0 end
+	local et, mt = GetExpireTime(bg, bar, duration, bar.soundSpellExpire, bg.soundSpellExpire)
 	if et then sp = MOD:GetAssociatedSpellForBar(bar); if sp then expire = MOD:GetSound(sp, bar.spellID) end end
-	if not expire and bar.soundAltExpire ~= "None" then expire = bar.soundAltExpire; et = bar.expireTime or 5; mt = bar.expireMinimum or 0 end
-	if not expire and bg.soundAltExpire ~= "None" then expire = bg.soundAltExpire; et = bg.expireTime or 5; mt = bg.expireMinimum or 0  end
+	if not expire and bar.soundAltExpire ~= "None" then expire = bar.soundAltExpire; et, mt = GetExpireTime(bg, bar, duration, true, false) end
+	if not expire and bg.soundAltExpire ~= "None" then expire = bg.soundAltExpire; et, mt = GetExpireTime(bg, bar, duration, false, true)  end
 	if expire then expire = media:Fetch("sound", expire) else et = nil; mt = nil end
 	return start, finish, expire, et, mt, replay, replayTime
 end
@@ -823,6 +849,7 @@ local function GetTooltipNumber(ttType, ttID, ttUnit, ttOffset)
 			if s then t = t .. s else break end
 		end
 		t = string.gsub(t, "|c........", ""); t = string.gsub(t, "|r", "") -- remove color escape sequences from the text
+		t = string.gsub(t, ",", "") -- remove all commas since they impact conversion of numbers over a thousand
 		return string.match(t, pattern) -- extract number from the tooltip, if one exists for the specified offset
 	end
 	return nil
@@ -841,7 +868,9 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 	if bp.detectTotems then barname = b.uniqueID .. b.barLabel end -- use slot order for auto-generated totem bars
 	
 	local maxTime = duration
-	if vbp.setDuration then maxTime = vbp.uniformDuration end -- override with uniform duration for all bars in group
+	if vbp.setDuration then -- override with uniform duration for all bars in group (optionally ignore shorter bars)
+		if not vbp.setOnlyLongDuration or (duration > vbp.uniformDuration) then maxTime = vbp.uniformDuration end
+	end
 
 	if b.labelNumber then -- optionally get a number found in the tooltip and add it to the label
 		local num = GetTooltipNumber(ttType, ttID, ttUnit, b.labelNumberOffset) -- returns number as a string
@@ -905,8 +934,8 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 			ibr, ibg, ibb, iba = c.r, c.g, c.b, c.a
 		elseif not isMine and (vbp.iconColors == "Player") then
 			ibr, ibg, ibb, iba = bc.r, bc.g, bc.b, bc.a
-		elseif (vbp.iconColors == "Debuffs") and (b.barType == "Debuff") then
-			local dc = MOD:GetDebuffColorForBar(vbp, b, btype)
+		elseif vbp.iconColors == "Debuffs" then -- special color for both buffs and debuffs
+			local dc = MOD:GetSpecialColorForBar(vbp, b, btype)
 			if dc then ibr, ibg, ibb, iba = dc.r, dc.g, dc.b, dc.a end
 		elseif (vbp.iconColors == "Custom") and ic then
 			ibr, ibg, ibb, iba = ic.r, ic.g, ic.b, ic.a
@@ -925,7 +954,7 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		bat.groupName = b.groupName -- optional group name
 		bat.header = (b.group and not b.groupName) -- special effect of hiding bar and icon
 		bat.tooltipType = ttType; bat.tooltipID = ttID; bat.tooltipUnit = ttUnit -- tooltip info passed from bar source
-		bat.tooltipSpell = b.spellID -- for optional spell id in tooltip when control and alt keys are both down
+		if vbp.spellTips then bat.tooltipSpell = b.spellID else bat.tooltipSpell = nil end  -- for spell id in tooltip when control and alt keys are both down
 		bat.listID = b.listID -- for tooltip to show if found in a spell list
 		if vbp.casterTips then bat.caster = ttCaster else bat.caster = nil end
 		bat.saveBar = b -- not valid in auto bar group since it then points to a local not a permanent table!
@@ -934,11 +963,11 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		if b.colorExpiring then -- set color to switch at expiration time, default is red
 			bat.expireColor = (b.expireColor or rc); bat.expireLabelColor = (b.expireLabelColor or vc)
 			bat.expireTimeColor = (b.expireTimeColor or vc)
-			bat.colorTime = (b.expireTime or 5); bat.colorMinimum = (b.expireMinimum or 0)
+			bat.colorTime, bat.colorMinimum = GetExpireTime(vbp, b, duration, true, false)
 		elseif vbp.colorExpiring then
 			bat.expireColor = (vbp.expireColor or rc); bat.expireLabelColor = (vbp.expireLabelColor or vc)
 			bat.expireTimeColor = (vbp.expireTimeColor or vc)
-			bat.colorTime = (vbp.expireTime or 5); bat.colorMinimum = (vbp.expireMinimum or 0)
+			bat.colorTime, bat.colorMinimum = GetExpireTime(vbp, b, duration, false, true)
 		else
 			bat.expireColor = nil; bat.expireLabelColor = nil; bat.expireTimeColor = nil; bat.colorTime = nil; bat.colorMinimum = nil
 		end
@@ -956,7 +985,7 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		if MOD.db.profile.muteSFX or b.startReady then -- don't play sounds if muted or ready bar
 			bat.soundStart = nil; bat.soundEnd = nil; bat.soundExpire = nil; bat.expireTime = nil
 		else
-			local start, finish, expire, expireTime, expireMinimum, replay, replayTime = GetSoundsForBar(vbp, b)
+			local start, finish, expire, expireTime, expireMinimum, replay, replayTime = GetSoundsForBar(vbp, b, duration)
 			bat.soundStart = start -- play sound at start
 			bat.soundEnd = finish -- play sound when finished
 			bat.soundExpire = expire -- play sound when expiring
@@ -1050,10 +1079,10 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	end
 	if bp.filterBuffBars and CheckFilterBarGroup(bp.filterBuffBarGroup, "Buff", n, bp.detectBuffsMonitor) then return end -- check if in filter bar group
 	local label = MOD:GetLabel(n, aura[14]) -- check if there is a cached label for this action or spellid
-	local checkTracking = not (bp.detectTracking and bp.detectOnlyTracking)
 	local tt, ta, tc, ttype = aura[11], aura[12], aura[6], aura[4]
-	if (ttype == "Tracking") then checkTracking = bp.detectTracking end -- check if including tracking
 	if (ttype == "Totem") and not bp.includeTotems then return end -- check if including totems
+	if (ttype == "Tracking") and not bp.detectTracking then return end -- check if including bonus tracking buffs
+	if (ttype == "Power") and bp.excludeResources then return end -- check if including bonus resource buffs
 	local isStealable = ((aura[7] == 1) or (aura[7] == true))
 	local isNPC = aura[18]
 	local isVehicle = aura[19]
@@ -1074,7 +1103,7 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 			and not (bp.noTargetBuffs and (id == UnitGUID("target"))) and not (bp.noFocusBuffs and (id == UnitGUID("focus")))) or
 			(not checkAll and not (bp.noPlayerBuffs and UnitIsUnit(unit, "player")) and not (bp.noPetBuffs and UnitIsUnit(unit, "pet"))
 			and not (bp.noTargetBuffs and UnitIsUnit(unit, "target")) and not (bp.noFocusBuffs and UnitIsUnit(unit, "focus")) and
-			MOD:CheckCastBy(aura[6], bp.detectBuffsCastBy))) and CheckTimeAndDuration(bp, aura[2], aura[5]) and checkTracking and checkTypes then
+			MOD:CheckCastBy(aura[6], bp.detectBuffsCastBy))) and CheckTimeAndDuration(bp, aura[2], aura[5]) and checkTypes then
 		local b, tag = detectedBar, "Buff"
 		b.action = n; b.spellID = aura[14]; b.barType = "Buff"
 		if tc then tag = tag .. tc else tc = "unknown" end -- include caster in unique tag
@@ -1091,7 +1120,7 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 		end
 		b.group = id -- if unit is "all" then this is GUID of unit with buff, otherwise it is nil
 		b.groupName = gname -- if unit is "all" then this is the name of the unit with buff, otherwise it is nil
-		b.uniqueID = tag; b.listID = listID; b.barLabel = label
+		b.uniqueID = tag; b.listID = listID; b.barLabel = label; b.isStealable = isStealable; b.isMagic = isMagic
 		UpdateBar(bp, vbp, bg, b, aura[8], aura[2], aura[5], aura[3], ttype, tt, ta, unit, aura[16], isMine)
 	end
 end
@@ -1267,8 +1296,9 @@ local function UpdateBarGroupBars(bp, vbp, bg)
 		(bp.showEnemy or not stat.targetEnemy) and (bp.showFriendly or not stat.targetFriend) and 
 		(not bp.checkCondition or IsOff(bp.condition) or MOD:CheckCondition(bp.condition)) and (bp.showBattleground or not stat.inBattleground) and
 		((bp.showInstance and stat.inInstance) or (bp.showNotInstance and not stat.inInstance)) and (bp.showArena or not stat.inArena) and
-		(bp.showPrimary or stat.talentGroup ~= 1) and (bp.showSecondary or stat.talentGroup ~= 2) and not InCinematic() and
+		(not bp.showSpecialization or (bp.showSpecialization == "") or MOD.CheckSpec(bp.showSpecialization, bp.specializationList)) and not InCinematic() and
 		(not bp.showClasses or not bp.showClasses[MOD.myClass]) and (not UnitIsUnit("focus", "target") or bp.showFocusTarget) and not C_PetBattles.IsInBattle()
+		
 	if show then
 		if bp.auto then -- if auto bar group then detect new auras and cooldowns
 			fixDups = 0 -- workaround to support multiple instances of same spell id for certain weapon enchants

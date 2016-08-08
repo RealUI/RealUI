@@ -3,11 +3,12 @@
 ## Title: Kui |cff9966ffNameplates:|r |cffffffffCore Config|r
 ## Notes: I just can't work out what this is
 ## Dependencies: Kui_Nameplates_Core
-## SavedVariables: KuiNameplatesCoreSaved, KuiNameplatesCoreCharacterSaved
+## SavedVariables: KuiNameplatesCoreSaved
+## SavedVariablesPerCharacter: KuiNameplatesCoreCharacterSaved
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /knp, /kuinameplates
 ## X-LoadOn-InterfaceOptions: Kui |cff9966ffNameplates Core
-## X-Curse-Packaged-Version: 2-4
+## X-Curse-Packaged-Version: 2-9
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline

@@ -14,38 +14,61 @@ Raven.generalSpells = {
 }
 
 Raven.lockSpells = { -- spells that normally do not have cooldowns and can be used to test school lockout
-	{ school = "Shadow", id = 196657 }, -- Shadow Bolt (warlock)
-	{ school = "Shadow", id = 605 },    -- Mind Control (priest)
-	{ school = "Shadow", id = 55078 },  -- Blood Plague (death knight)
-	{ school = "Holy", id = 585 },      -- Smite (priest)
-	{ school = "Holy", id = 2061 },     -- Flash Heal (priest - holy)
-	{ school = "Holy", id = 200829 },   -- Plea (priest - discipline)
-	{ school = "Holy", id = 19750 },    -- Flash of Light (paladin)	
-	{ school = "Nature", id = 339 },    -- Entangling Roots (druid)
-	{ school = "Nature", id = 982 },    -- Revive Pet (hunter)
-	{ school = "Nature", id = 115178 }, -- Resuscitate (monk)
-	{ school = "Nature", id = 116694 }, -- Effuse (monk)
-	{ school = "Nature", id = 222062 }, -- Kingsbane (rogue)
-	{ school = "Nature", id = 546 },    -- Water Walking (shaman)
-	{ school = "Nature", id = 370 },    -- Purge (shaman)
-	{ school = "Arcane", id = 8921 },   -- Moonfire (druid)
-	{ school = "Arcane", id = 118 },    -- Polymorph Sheep (mage)
-	{ school = "Arcane", id = 130 },    -- Slow Fall (mage)
-	{ school = "Arcane", id = 30451 },  -- Arcane Blast (mage - arcane)
-	{ school = "Arcane", id = 185358 }, -- Arcane Shot (hunter)
-	{ school = "Fire", id = 133 },      -- Fireball (mage - fire)
-	{ school = "Fire", id = 188838 },   -- Flame Shock (shaman - resto, elemental)
-	{ school = "Fire", id = 60103 },    -- Lava Lash (shaman - enhancement)
-	{ school = "Fire", id = 348 },      -- Immolate (warlock - destruction)
-	{ school = "Fire", id = 29722 },    -- Incinerate (warlock - destruction)
-	{ school = "Fire", id = 204197 },   -- Purge the Wicked (priest - discipline)
-	{ school = "Frost", id = 190780 },  -- Frost Breath (death knight)
-	{ school = "Frost", id = 45524 },   -- Chains of Ice (death knight - frost, unholy)
-	{ school = "Frost", id = 116 },     -- Frost Bolt (mage - frost)
-	{ school = "Frost", id = 196834 },  -- Frostbrand (shaman - enhancement)
+	{ school = "Shadow", id = 196657 },   -- Shadow Bolt (warlock)
+	{ school = "Shadow", id = 605 },      -- Mind Control (priest)
+	{ school = "Shadow", id = 55078 },    -- Blood Plague (death knight)
+	{ school = "Holy", id = 585 },        -- Smite (priest)
+	{ school = "Holy", id = 2061 },       -- Flash Heal (priest - holy)
+	{ school = "Holy", id = 200829 },     -- Plea (priest - discipline)
+	{ school = "Holy", id = 19750 },      -- Flash of Light (paladin)	
+	{ school = "Nature", id = 339 },      -- Entangling Roots (druid)
+	{ school = "Nature", id = 982 },      -- Revive Pet (hunter)
+	{ school = "Nature", id = 115178 },   -- Resuscitate (monk)
+	{ school = "Nature", id = 116694 },   -- Effuse (monk)
+	{ school = "Nature", id = 222062 },   -- Kingsbane (rogue)
+	{ school = "Nature", id = 546 },      -- Water Walking (shaman)
+	{ school = "Nature", id = 370 },      -- Purge (shaman)
+	{ school = "Arcane", id = 8921 },     -- Moonfire (druid)
+	{ school = "Arcane", id = 118 },      -- Polymorph Sheep (mage)
+	{ school = "Arcane", id = 130 },      -- Slow Fall (mage)
+	{ school = "Arcane", id = 30451 },    -- Arcane Blast (mage - arcane)
+	{ school = "Arcane", id = 185358 },   -- Arcane Shot (hunter)
+	{ school = "Fire", id = 133 },        -- Fireball (mage - fire)
+	{ school = "Fire", id = 188838 },     -- Flame Shock (shaman - resto, elemental)
+	{ school = "Fire", id = 60103 },      -- Lava Lash (shaman - enhancement)
+	{ school = "Fire", id = 348 },        -- Immolate (warlock - destruction)
+	{ school = "Fire", id = 29722 },      -- Incinerate (warlock - destruction)
+	{ school = "Fire", id = 204197 },     -- Purge the Wicked (priest - discipline)
+	{ school = "Frost", id = 190780 },    -- Frost Breath (death knight)
+	{ school = "Frost", id = 45524 },     -- Chains of Ice (death knight - frost, unholy)
+	{ school = "Frost", id = 116 },       -- Frost Bolt (mage - frost)
+	{ school = "Frost", id = 196834 },    -- Frostbrand (shaman - enhancement)
+	{ school = "Physical", id = 193315 }, -- Saber Slash (rogue - outlaw)
+	{ school = "Physical", id = 1329 },   -- Mutilate (rogue -  assassination)
+	{ school = "Physical", id = 114014 }, -- Shuriken Toss (rogue -  subtlety)
+}
+
+Raven.warlockCreatures = { -- table of spells used to summon warlock creatures along with expected lifetimes
+	[60478] = 25,        -- doomguard
+	[111685] = 25,       -- infernal
+	[104317] = 12,       -- hand of gul'dan (wild imps)
+	[205180] = 12,       -- darkglare
+	[193332] = 12,       -- dreadstalkers
+	[196273] = 12,       -- dreadstalkers
+	[193331] = 12,       -- dreadstalkers
+	[196274] = 12,       -- dreadstalkers
+	[196271] = 12,       -- impending doom (wild imp)
+	[111859] = 25,       -- grimoire: imp
+	[111898] = 25,       -- grimoire: felguard
+	[111897] = 25,       -- grimoire: felhunter
+	[111896] = 25,       -- grimoire: succubus
+	[111895] = 25,       -- grimoire: voidwalker
+	[205178] = 600,      -- soul effigy
 }
 
 Raven.defaultColors = { -- default spell colors extracted from original class files
+	[57496] = "5c3566",
+	[85247] = "ed3a00",
 	[108501] = "fcaf3e",
 	[81136] = "cc0000",
 	[1022] = "8ae234",
@@ -234,7 +257,6 @@ Raven.defaultColors = { -- default spell colors extracted from original class fi
 	[60103] = "cc0000",
 	[51723] = "ad7fa8",
 	[115356] = "5c3566",
-	[85247] = "4e9a06",
 	[15407] = "f57900",
 	[108968] = "ad7fa8",
 	[20271] = "ce5c00",
@@ -351,6 +373,7 @@ Raven.defaultColors = { -- default spell colors extracted from original class fi
 	[740] = "75507b",
 	[119975] = "8ae234",
 	[116011] = "3465a4",
+	[52623] = "3465a4",
 	[108978] = "3465a4",
 	[62124] = "ce5c00",
 	[115308] = "c4a000",
@@ -728,7 +751,7 @@ Raven.defaultColors = { -- default spell colors extracted from original class fi
 }
 
 Raven.spellEffects = {
-	{ id = 73920, duration = 10 }, -- Healing Rain
+	{ id = 116011, duration = 10, spell = 52623, kind = "cooldown", icon = "Interface\\Icons\\spell_mage_runeofpower" }, -- Rune of Power
 }
 
 Raven.internalCooldowns = {

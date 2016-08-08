@@ -20,7 +20,6 @@ local MSBTParser = MikSBT.Parser
 local MSBTTriggers = MikSBT.Triggers
 local MSBTProfiles = MikSBT.Profiles
 local L = MikSBT.translations
-local isBetaClient = MikSBT.isBetaClient
 
 -- Local references to various functions for faster access.
 local table_remove = table.remove
@@ -105,13 +104,13 @@ local SPELLID_AUTOSHOT = 75
 
 -- Spell names.
 local SPELL_BLINK					= GetSkillName(1953)
+--local SPELL_BLIZZARD				= GetSkillName(10)
 local SPELL_BLOOD_STRIKE			= GetSkillName(60945)
+--local SPELL_BLOOD_STRIKE_OFF_HAND	= GetSkillName(66215)
+--local SPELL_HELLFIRE				= GetSkillName(1949)
+--local SPELL_HURRICANE				= GetSkillName(16914)
 local SPELL_RAIN_OF_FIRE			= GetSkillName(5740)
 
-local SPELL_HURRICANE             = isBetaClient and UNKNOWN or GetSkillName(16914)
-local SPELL_BLIZZARD              = isBetaClient and UNKNOWN or GetSkillName(10)
-local SPELL_BLOOD_STRIKE_OFF_HAND = isBetaClient and UNKNOWN or GetSkillName(66215)
-local SPELL_HELLFIRE              = isBetaClient and UNKNOWN or GetSkillName(1949)
 
 -------------------------------------------------------------------------------
 -- Private variables.
@@ -513,29 +512,21 @@ local function DetectPowerGain(powerAmount, powerType)
  end
 end
 
-
 -- ****************************************************************************
 -- Handle combo point changes.
 -- ****************************************************************************
-local function HandleComboPoints(numCP)
+local function HandleComboPoints(PowerAmount, powerType)
  -- Get the correct event settings.
  local eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_CP_GAIN
- if (numCP == MAX_COMBO_POINTS) then
-  -- Prevent the full combo point event from showing more than once.
-  if (finisherShown) then return end
-  eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_CP_FULL
-  finisherShown = true
- else
-  finisherShown = false
- end
-
+ local maxCP = UnitPowerMax("player", powerType)
+ if (PowerAmount == maxCP) then eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_CP_FULL end
  -- Don't do anything if the event is disabled.
- if (eventSettings.disabled) then return end
-
+ if (eventSettings.disabled) then return end 
+  -- Don't do anything if 0 CP
+ if (PowerAmount == 0) then return end
  -- Display the event.
- DisplayEvent(eventSettings, FormatEvent(eventSettings.message, numCP))
+ DisplayEvent(eventSettings, FormatEvent(eventSettings.message, PowerAmount))
 end
-
 
 -- ****************************************************************************
 -- Handle light force changes.
@@ -1336,26 +1327,20 @@ function eventFrame:UNIT_POWER(unitID, powerToken)
   if (powerAmount ~= lastPowerAmount) then HandleHolyPower(powerAmount, powerType) end
   doFullDetect = false
 
- -- Handle shadow orbs uniquely.
- elseif (powerToken == "SHADOW_ORBS" and playerClass == "PRIEST") then
-  if (powerAmount ~= lastPowerAmount) then HandleShadowOrbs(powerAmount, powerType) end
+ -- Handle Combo Points uniquely.
+ elseif (powerToken == "COMBO_POINTS" and playerClass == "ROGUE") then
+  if (powerAmount ~= lastPowerAmount) then HandleComboPoints(powerAmount, powerType) end
   doFullDetect = false
+  
+ elseif (powerToken == "COMBO_POINTS" and playerClass == "DRUID") then
+  if (powerAmount ~= lastPowerAmount) then HandleComboPoints(powerAmount, powerType) end
+  doFullDetect = false
+  
  end
 
  -- Detect power gains if show all power gains is enabled.
  if (doFullDetect and MSBTProfiles.currentProfile.showAllPowerGains) then DetectPowerGain(powerAmount, powerType) end
  lastPowerAmounts[powerType] = powerAmount
-end
-
-
--- ****************************************************************************
--- Called when a unit's combo points change.
--- ****************************************************************************
-function eventFrame:UNIT_COMBO_POINTS(unitID)
- -- Ignore the event if it's not for the player.
- if (unitID ~= "player") then return end
- local numCP = GetComboPoints("player")
- if (numCP ~= 0) then HandleComboPoints(numCP) end
 end
 
 
@@ -1395,7 +1380,6 @@ end
 local function Enable()
  -- Register events to handle extra notifications.
  eventFrame:RegisterEvent("UNIT_POWER")
- eventFrame:RegisterEvent("UNIT_COMBO_POINTS")
  eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
  eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
  eventFrame:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
@@ -1459,9 +1443,7 @@ end
 -- Create map of power types that are handled uniquely.
 uniquePowerTypes[powerTypes["HOLY_POWER"]] = true
 uniquePowerTypes[powerTypes["CHI"]] = true
-if MikSBT.CLIENT_VERSION < 70000 then
-  uniquePowerTypes[powerTypes["SHADOW_ORBS"]] = true
-end
+uniquePowerTypes[powerTypes["COMBO_POINTS"]] = true
 
 -- Create damage type and damage color profile maps.
 CreateDamageMaps()
@@ -1471,18 +1453,15 @@ if (string_find(GetLocale(), "en..")) then isEnglish = true end
  
 -- Add auras to always ignore.
 ignoreAuras[SPELL_BLINK] = true
-ignoreAuras[SPELL_HURRICANE] = true
+--ignoreAuras[SPELL_BLIZZARD] = true
+--ignoreAuras[SPELL_HELLFIRE] = true
+--ignoreAuras[SPELL_HURRICANE] = true
 ignoreAuras[SPELL_RAIN_OF_FIRE] = true
-if MikSBT.CLIENT_VERSION < 70000 then
-  ignoreAuras[SPELL_HELLFIRE] = true
-  ignoreAuras[SPELL_BLIZZARD] = true
-end
-
 
 -- Get localized off-hand trailer and convert to a lua search pattern.
-if (SPELL_BLOOD_STRIKE ~= UNKNOWN and SPELL_BLOOD_STRIKE_OFF_HAND ~= UNKNOWN) then
- offHandTrailer = string_gsub(SPELL_BLOOD_STRIKE_OFF_HAND, SPELL_BLOOD_STRIKE, "")
- offHandPattern = string_gsub(offHandTrailer, "([%^%(%)%.%[%]%*%+%-%?])", "%%%1")
+if (SPELL_BLOOD_STRIKE ~= UNKNOWN) then
+ --offHandTrailer = string_gsub(SPELL_BLOOD_STRIKE_OFF_HAND, SPELL_BLOOD_STRIKE, "")
+ offHandPattern = string_gsub(SPELL_BLOOD_STRIKE, "([%^%(%)%.%[%]%*%+%-%?])", "%%%1")
 end
 
 

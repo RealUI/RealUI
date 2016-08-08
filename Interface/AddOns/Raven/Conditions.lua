@@ -412,13 +412,25 @@ local function CheckWeapon(slot, level)
 	return false
 end
 
--- Check current specialization
-local function CheckSpec(spec)
+-- Check current specialization against the first argument (or the optional second argument, which is a table of specialization names or numbers)
+function MOD.CheckSpec(spec, specList)
+	local stat = MOD.status
+	local currentSpec = stat.specialization
+	local currentName = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "none"
+	if specList then
+		for _, name in pairs(specList) do
+			local id = tonumber(name)
+			if id then
+				if currentSpec == id then return true end
+			else
+				if name == currentName then return true end
+			end
+		end
+		return false
+	end
 	if not spec then spec = "none" end
-	local currentSpec = GetSpecialization()
 	local id = tonumber(spec)
 	if id then return currentSpec == id end 
-	local currentName = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "none"
 	return spec == currentName
 end
 
@@ -465,7 +477,8 @@ local function CheckTestAND(ttype, t)
 		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (t.checkHealth ~= (stat.health >= t.minHealth)) then return false end
 		if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower ~= (stat.power >= t.minPower)) then return false end
 		if IsOn(t.checkHolyPower) and IsOn(t.minHolyPower) and (t.checkHolyPower ~= (stat.holyPower >= t.minHolyPower)) then return false end
-		if IsOn(t.checkShadowOrbs) and IsOn(t.minShadowOrbs) and (t.checkShadowOrbs ~= (stat.shadowOrbs >= t.minShadowOrbs)) then return false end
+		if IsOn(t.checkInsanity) and IsOn(t.minInsanity) and (t.checkInsanity ~= (stat.insanity >= t.minInsanity)) then return false end
+		if IsOn(t.checkMaelstrom) and IsOn(t.minMaelstrom) and (t.checkMaelstrom ~= (stat.maelstrom >= t.minMaelstrom)) then return false end
 		if IsOn(t.checkChi) and IsOn(t.minChi) and (t.checkChi ~= (stat.chi >= t.minChi)) then return false end
 		if IsOn(t.checkShards) and IsOn(t.minShards) and (t.checkShards ~= (stat.shards >= t.minShards)) then return false end
 		if IsOn(t.checkLunarPower) and (t.checkLunarPower ~= CheckLunarPower(t.minLunarPower)) then return false end
@@ -475,7 +488,7 @@ local function CheckTestAND(ttype, t)
 		if IsOn(t.checkRunes) and IsOn(t.minRunes) and (t.checkRunes ~= (MOD.runeCount >= t.minRunes)) then return false end
 		if IsOn(t.checkTotems) and not CheckTotem(t.totem) then return false end
 		if IsOn(t.checkTalent) and IsOn(t.talent) and not MOD.CheckTalent(t.talent) then return false end
-		if IsOn(t.checkSpec) and IsOn(t.spec) and not CheckSpec(t.spec) then return false end
+		if IsOn(t.checkSpec) and IsOn(t.spec) and not MOD.CheckSpec(t.spec, t.specList) then return false end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and not CheckSpellKnown(t.spell) then return false end
 		if IsOn(t.hasMainHand) and not CheckWeapon("MainHandSlot", t.levelMainHand) then return false end
 		if IsOn(t.hasOffHand) and not CheckWeapon("SecondaryHandSlot", t.levelOffHand) then return false end
@@ -591,7 +604,8 @@ local function CheckTestOR(ttype, t)
 		if IsOn(t.checkHealth) and IsOn(t.minHealth) and (t.checkHealth == (stat.health >= t.minHealth)) then return true end
 		if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower == (stat.power >= t.minPower)) then return true end
 		if IsOn(t.checkHolyPower) and IsOn(t.minHolyPower) and (t.checkHolyPower == (stat.holyPower >= t.minHolyPower)) then return true end
-		if IsOn(t.checkShadowOrbs) and IsOn(t.minShadowOrbs) and (t.checkShadowOrbs == (stat.shadowOrbs >= t.minShadowOrbs)) then return true end
+		if IsOn(t.checkInsanity) and IsOn(t.minInsanity) and (t.checkInsanity == (stat.insanity >= t.minInsanity)) then return true end
+		if IsOn(t.checkMaelstrom) and IsOn(t.minMaelstrom) and (t.checkMaelstrom == (stat.maelstrom >= t.minMaelstrom)) then return true end
 		if IsOn(t.checkChi) and IsOn(t.minChi) and (t.checkChi == (stat.chi >= t.minChi)) then return true end
 		if IsOn(t.checkShards) and IsOn(t.minShards) and (t.checkShards == (stat.shards >= t.minShards)) then return true end
 		if IsOn(t.checkLunarPower) and (t.checkLunarPower == CheckLunarPower(t.minLunarPower)) then return true end
@@ -601,7 +615,7 @@ local function CheckTestOR(ttype, t)
 		if IsOn(t.checkRunes) and IsOn(t.minRunes) and (t.checkRunes == (MOD.runeCount >= t.minRunes)) then return true end
 		if IsOn(t.checkTotems) and CheckTotem(t.totem) then return true end
 		if IsOn(t.checkTalent) and IsOn(t.talent) and MOD.CheckTalent(t.talent) then return true end
-		if IsOn(t.checkSpec) and IsOn(t.spec) and CheckSpec(t.spec) then return true end
+		if IsOn(t.checkSpec) and IsOn(t.spec) and MOD.CheckSpec(t.spec, t.specList) then return true end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and CheckSpellKnown(t.spell) then return true end
 		if IsOn(t.hasMainHand) and CheckWeapon("MainHandSlot", t.levelMainHand) then return true end
 		if IsOn(t.hasOffHand) and CheckWeapon("SecondaryHandSlot", t.levelOffHand) then return true end
@@ -705,17 +719,18 @@ function MOD:UpdateConditions()
 	stat.inVehicle = UnitHasVehicleUI("player")
 	stat.isPvP = UnitIsPVP("player")
 	stat.isStealthed = IsStealthed()
-	stat.talentGroup = GetActiveSpecGroup(false, false)
 	stat.level = UnitLevel("player")
 	local m = UnitHealthMax("player"); if m > 0 then stat.health = (100 * UnitHealth("player") / m) else stat.health = 0 end
 	m = UnitPowerMax("player"); if m > 0 then stat.power = (100 * UnitPower("player") / m) else stat.power = 0 end
 	if MOD.myClass == "PALADIN" then stat.holyPower = UnitPower("player", SPELL_POWER_HOLY_POWER) else stat.holyPower = 0 end
 	if MOD.myClass == "WARLOCK" then stat.shards = UnitPower("player", SPELL_POWER_SOUL_SHARDS) else stat.shards = 0 end
-	if MOD.myClass == "PRIEST" then stat.shadowOrbs = UnitPower("player", SPELL_POWER_SHADOW_ORBS) else stat.shadowOrbs = 0 end
+	if MOD.myClass == "PRIEST" then stat.insanity = UnitPower("player", SPELL_POWER_INSANITY) else stat.insanity = 0 end
 	if MOD.myClass == "MONK" then stat.chi = UnitPower("player", SPELL_POWER_CHI) else stat.chi = 0 end
 	if MOD.myClass == "WARLOCK" then stat.shards = UnitPower("player", SPELL_POWER_SOUL_SHARDS) else stat.shards = 0 end
+	if MOD.myClass == "SHAMAN" then stat.maelstrom = UnitPower("player", SPELL_POWER_MAELSTROM) else stat.maelstrom = 0 end
 	stat.combo = GetComboPoints("player")
 	stat.stance = GetStance()
+	stat.specialization = GetSpecialization()
 	stat.noPet = not UnitExists("pet")
 	if not stat.noPet then
 		stat.petCombat = UnitAffectingCombat("pet")
@@ -921,8 +936,10 @@ function MOD:GetConditionText(name)
 						a = a .. d .. L["Holy Power String"](x, t.minHolyPower); d = ", " end
 					if IsOn(t.checkShards) and t.minShards then local x = "<"; if t.checkShards then x = ">=" end;
 						a = a .. d .. L["Shards String"](x, t.minShards); d = ", " end
-					if IsOn(t.checkShadowOrbs) and t.minShadowOrbs then local x = "<"; if t.checkShadowOrbs then x = ">=" end;
-						a = a .. d .. L["Shadow Orbs String"](x, t.minShadowOrbs); d = ", " end
+					if IsOn(t.checkInsanity) and t.minInsanity then local x = "<"; if t.checkInsanity then x = ">=" end;
+						a = a .. d .. L["Insanity String"](x, t.minInsanity); d = ", " end
+					if IsOn(t.checkMaelstrom) and t.minMaelstrom then local x = "<"; if t.checkMaelstrom then x = ">=" end;
+						a = a .. d .. L["Maelstrom String"](x, t.minMaelstrom); d = ", " end
 					if IsOn(t.checkLunarPower) and t.minLunarPower then local x = "<"; if t.checkLunarPower then x = ">=" end;
 						a = a .. d .. L["Lunar String"](x, t.minLunarPower); d = ", " end
 					if IsOn(t.checkChi) and t.minChi then local x = "<"; if t.checkChi then x = ">=" end;

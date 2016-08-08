@@ -31,7 +31,6 @@ mod.VERSION = tonumber(select(3, string_find(TOC_VERSION, "(%d+%.%d+)")))
 mod.VERSION_STRING = "v" .. TOC_VERSION
 mod.SVN_REVISION = tonumber(select(3, string_find(TOC_VERSION, "%d+%.%d+.(%d+)")))
 mod.CLIENT_VERSION = tonumber((select(4, GetBuildInfo())))
-mod.isBetaClient = mod.CLIENT_VERSION >= 70000
 
 mod.COMMAND = "/msbt"
 
@@ -134,7 +133,9 @@ end
 -- ****************************************************************************
 local function GetSkillName(skillID)
  local skillName = GetSpellInfo(skillID)
- if (not skillName) then Print("Skill ID " .. tostring(skillID) .. " has been removed by Blizzard.") end
+ if (not skillName) then 
+  Print("Skill ID " .. tostring(skillID) .. " has been removed by Blizzard.")
+ end
  return skillName or UNKNOWN
 end
 

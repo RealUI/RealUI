@@ -9,6 +9,7 @@
 
     self.ClassPowers = {
         icon_size = size of class power icons
+        icon_spacing = space between icons
         icon_texture = texture of class power icons
         icon_glow_texture = texture of class power glow
         cd_texture = cooldown spiral texture
@@ -56,20 +57,18 @@
     PostRuneUpdate
         Called after updating rune icon cooldown frames for death knights.
 
-    PostPositionFrame
+    PostPositionFrame(cpf,parent)
         Called after positioning the icon container frame.
 
 ]]
--- TODO sometimes hides during combat (or just every so often)
 local addon = KuiNameplates
 local ele = addon:NewElement('ClassPowers')
-local class, power_type, power_type_tag, cpf
+local class, power_type, power_type_tag, cpf, initialised
 local on_target
+local orig_SetVertexColor
 -- power types by class/spec
--- TODO could probably just detect from UnitPowerType instead of this
 local powers = {
     DEATHKNIGHT = SPELL_POWER_RUNES,
-    -- TODO re:above obviously this is wrong, all druids can become kitties
     DRUID       = { [2] = SPELL_POWER_COMBO_POINTS },
     PALADIN     = { [3] = SPELL_POWER_HOLY_POWER },
     ROGUE       = SPELL_POWER_COMBO_POINTS,
@@ -95,13 +94,21 @@ local colours = {
     MAGE        = { .5, .5, 1 },
     MONK        = { .3, 1, .9 },
     WARLOCK     = { 1, .5, 1 },
+    overflow    = { 1, .3, .3 },
 }
+
 local ICON_SIZE
+local ICON_SPACING
 local ICON_TEXTURE
 local ICON_GLOW_TEXTURE
 local CD_TEXTURE
 local FRAME_POINT
+
+local ANTICIPATION_TALENT_ID=19240
 -- local functions #############################################################
+local function IsTalentKnown(id)
+    return select(10,GetTalentInfoByID(id))
+end
 local function PositionIcons()
     -- position icons in the powers container frame
     if ele:RunCallback('PositionIcons') then
@@ -109,7 +116,7 @@ local function PositionIcons()
     end
 
     local pv
-    local full_size = (ICON_SIZE * #cpf.icons) + (1 * (#cpf.icons - 1))
+    local full_size = (ICON_SIZE * #cpf.icons) + (ICON_SPACING * (#cpf.icons - 1))
     cpf:SetWidth(full_size)
 
     for i,icon in ipairs(cpf.icons) do
@@ -118,11 +125,16 @@ local function PositionIcons()
         if i == 1 then
             icon:SetPoint('LEFT')
         elseif i > 1 then
-            icon:SetPoint('LEFT',pv,'RIGHT',1,0)
+            icon:SetPoint('LEFT',pv,'RIGHT',ICON_SPACING,0)
         end
 
         pv = icon
     end
+end
+local function Icon_SetVertexColor(icon,...)
+    -- also set glow colour
+    icon.glow:SetVertexColor(...)
+    orig_SetVertexColor(icon,...)
 end
 local function CreateIcon()
     -- create individual icon
@@ -142,8 +154,12 @@ local function CreateIcon()
 
         icon.glow = ig
 
+        if not orig_SetVertexColor then
+            orig_SetVertexColor = icon.SetVertexColor
+        end
+        icon.SetVertexColor = Icon_SetVertexColor
+
         icon:SetVertexColor(unpack(colours[class]))
-        ig:SetVertexColor(unpack(colours[class]))
 
         if class == 'DEATHKNIGHT' then
             -- also create a cooldown frame for runes
@@ -155,12 +171,19 @@ local function CreateIcon()
             icon.cd = cd
         else
             icon.Active = function(self)
+                self:SetVertexColor(unpack(colours[class]))
                 self:SetAlpha(1)
                 self.glow:Show()
             end
             icon.Inactive = function(self)
+                self:SetVertexColor(unpack(colours[class]))
                 self:SetAlpha(.5)
                 self.glow:Hide()
+            end
+            icon.ActiveOverflow = function(self)
+                self:SetVertexColor(unpack(colours.overflow))
+                self:SetAlpha(1)
+                self.glow:Show()
             end
         end
     end
@@ -170,28 +193,34 @@ local function CreateIcon()
     return icon
 end
 local function CreateIcons()
-    -- create/destroy icons based on player_power_max
-    local powermax = UnitPowerMax('player',power_type)
+    -- create/destroy icons based on player power max
+    local power_max
+
+    if class == 'ROGUE' and IsTalentKnown(ANTICIPATION_TALENT_ID) then
+        power_max = 5
+    else
+        power_max = UnitPowerMax('player',power_type)
+    end
 
     if cpf.icons then
-        if #cpf.icons > powermax then
+        if #cpf.icons > power_max then
             -- destroy overflowing icons if powermax has decreased
             for i,icon in ipairs(cpf.icons) do
-                if i > powermax then
+                if i > power_max then
                     icon:Hide()
                     cpf.icons[i] = nil
                 end
             end
-        elseif #cpf.icons < powermax then
+        elseif #cpf.icons < power_max then
             -- create new icons
-            for i=#cpf.icons+1,powermax do
+            for i=#cpf.icons+1,power_max do
                 cpf.icons[i] = CreateIcon()
             end
         end
     else
         -- create initial icons
         cpf.icons = {}
-        for i=1,powermax do
+        for i=1,power_max do
             cpf.icons[i] = CreateIcon()
         end
     end
@@ -199,16 +228,28 @@ local function CreateIcons()
     PositionIcons()
 
     ele:RunCallback('PostIconsCreated')
-
 end
 local function PowerUpdate()
     -- toggle icons based on current power
     local cur = UnitPower('player',power_type)
-    for i,icon in ipairs(cpf.icons) do
-        if i <= cur then
-            icon:Active()
-        else
-            icon:Inactive()
+
+    if cur > #cpf.icons then
+        -- colour with overflow
+        cur = cur - #cpf.icons
+        for i,icon in ipairs(cpf.icons) do
+            if i <= cur then
+                icon:ActiveOverflow()
+            else
+                icon:Active()
+            end
+        end
+    else
+        for i,icon in ipairs(cpf.icons) do
+            if i <= cur then
+                icon:Active()
+            else
+                icon:Inactive()
+            end
         end
     end
 
@@ -255,7 +296,65 @@ local function PositionFrame()
         cpf:Hide()
     end
 
-    ele:RunCallback('PostPositionFrame')
+    ele:RunCallback('PostPositionFrame',cpf,frame)
+end
+-- mod functions ###############################################################
+function ele:UpdateConfig()
+    -- get config from layout
+    if not self.enabled then return end
+    if type(addon.layout.ClassPowers) ~= 'table' then
+        return
+    end
+
+    on_target         = addon.layout.ClassPowers.on_target
+    ICON_SIZE         = addon.layout.ClassPowers.icon_size or 10
+    ICON_SPACING      = addon.layout.ClassPowers.icon_spacing or 1
+    ICON_TEXTURE      = addon.layout.ClassPowers.icon_texture
+    ICON_GLOW_TEXTURE = addon.layout.ClassPowers.glow_texture
+    CD_TEXTURE        = addon.layout.ClassPowers.cd_texture
+    FRAME_POINT       = addon.layout.ClassPowers.point
+
+    if on_target then
+        self:RegisterMessage('GainedTarget','TargetUpdate')
+        self:RegisterMessage('LostTarget','TargetUpdate')
+    else
+        self:UnregisterMessage('GainedTarget')
+        self:UnregisterMessage('LostTarget')
+    end
+
+    if type(addon.layout.ClassPowers.colours) == 'table' then
+        if addon.layout.ClassPowers.colours[class] then
+            colours[class] = addon.layout.ClassPowers.colours[class]
+        end
+        if addon.layout.ClassPowers.colours.overflow then
+            colours.overflow = addon.layout.ClassPowers.colours.overflow
+        end
+    end
+
+    ICON_SIZE = ICON_SIZE * addon.uiscale
+
+    if cpf then
+        -- update existing frame
+        cpf:SetHeight(ICON_SIZE)
+
+        if cpf.icons then
+            -- update icons
+            for k,i in ipairs(cpf.icons) do
+                i:SetSize(ICON_SIZE,ICON_SIZE)
+                i:SetTexture(ICON_TEXTURE)
+
+                i.glow:SetSize(ICON_SIZE+10,ICON_SIZE+10)
+                i.glow:SetTexture(ICON_GLOW_TEXTURE)
+
+                if i.cd then
+                    i.cd:SetSwipeTexture(CD_TEXTURE)
+                end
+            end
+
+            PositionIcons()
+            PositionFrame()
+        end
+    end
 end
 -- messages ####################################################################
 function ele:TargetUpdate(f)
@@ -265,17 +364,6 @@ end
 function ele:PLAYER_ENTERING_WORLD()
     -- update icons upon zoning. just in case.
     PowerUpdate()
-end
-function ele:CVAR_UPDATE()
-    on_target = GetCVarBool('nameplateResourceOnTarget')
-
-    if on_target then
-        self:RegisterMessage('GainedTarget','TargetUpdate')
-        self:RegisterMessage('LostTarget','TargetUpdate')
-    else
-        self:UnregisterMessage('TargetGained')
-        self:UnregisterMessage('TargetLost')
-    end
 end
 function ele:PowerInit()
     -- get current power type, register events
@@ -300,22 +388,27 @@ function ele:PowerInit()
         self:RegisterMessage('Show','TargetUpdate')
         self:RegisterMessage('HealthColourChange','TargetUpdate')
 
-        -- for nameplateResourceOnTarget
-        self:RegisterEvent('CVAR_UPDATE')
-        self:CVAR_UPDATE()
-
         CreateIcons()
+
+        -- set initial state
+        if class ~= 'DEATHKNIGHT' then
+            PowerUpdate()
+        end
+
+        -- set initial position
+        PositionFrame()
     else
         self:UnregisterEvent('PLAYER_ENTERING_WORLD')
         self:UnregisterEvent('UNIT_MAXPOWER')
         self:UnregisterEvent('UNIT_POWER')
-        self:UnregisterEvent('CVAR_UPDATE')
         self:UnregisterEvent('RUNE_POWER_UPDATE')
 
         self:UnregisterMessage('Show')
-        self:UnregisterMessage('TargetGained')
-        self:UnregisterMessage('TargetLost')
+        self:UnregisterMessage('GainedTarget')
+        self:UnregisterMessage('LostTarget')
         self:UnregisterMessage('HealthColourChange')
+
+        cpf:Hide()
     end
 end
 function ele:RuneUpdate(event,rune_id,energise)
@@ -333,7 +426,7 @@ function ele:RuneUpdate(event,rune_id,energise)
         icon.glow:Hide()
     end
 
-    ele:RunCallback('PostRuneUpdate')
+    self:RunCallback('PostRuneUpdate')
 end
 function ele:PowerEvent(event,unit,power_type_rcv)
     -- validate power events + passthrough to PowerUpdate
@@ -347,42 +440,45 @@ function ele:PowerEvent(event,unit,power_type_rcv)
     PowerUpdate()
 end
 -- register ####################################################################
-function ele:Initialised()
-    if  not addon.layout.ClassPowers or
-        type(addon.layout.ClassPowers) ~= 'table'
-    then
+function ele:OnEnable()
+    if not initialised then return end
+    if not cpf then
         self:Disable()
         return
     end
 
+    self:UpdateConfig()
+    self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED','PowerInit')
+    self:PowerInit()
+end
+function ele:OnDisable()
+    if cpf then
+        cpf:Hide()
+    end
+end
+function ele:Initialised()
+    initialised = true
     class = select(2,UnitClass('player'))
-    if not powers[class] then return end
 
-    -- get config from layout
-    ICON_SIZE         = addon.layout.ClassPowers.icon_size
-    ICON_TEXTURE      = addon.layout.ClassPowers.icon_texture
-    ICON_GLOW_TEXTURE = addon.layout.ClassPowers.glow_texture
-    CD_TEXTURE        = addon.layout.ClassPowers.cd_texture
-    FRAME_POINT       = addon.layout.ClassPowers.point
-
-    if type(addon.layout.ClassPowers.colours) == 'table' and
-       addon.layout.ClassPowers.colours[class]
+    if  type(addon.layout.ClassPowers) ~= 'table' or
+        not powers[class]
     then
-        colours[class] = addon.layout.ClassPowers.colours[class]
+        -- layout didn't initialise us, or this class has no special power
+        self:Disable()
+        return
     end
 
-    ICON_SIZE = ICON_SIZE * addon.uiscale
-
-    -- icon frame container
+    -- create icon frame container
     cpf = CreateFrame('Frame')
-    cpf:SetHeight(ICON_SIZE)
     cpf:SetPoint('CENTER')
     cpf:Hide()
 
-    self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED','PowerInit')
-    self:PowerInit()
-
     addon.ClassPowersFrame = cpf
+
+    if self.enabled then
+        -- call this again since it's blocked until Initialised runs
+        self:OnEnable()
+    end
 end
 function ele:Initialise()
     -- register callbacks
@@ -393,6 +489,4 @@ function ele:Initialise()
     self:RegisterCallback('PostRuneUpdate')
     self:RegisterCallback('PostPowerUpdate')
     self:RegisterCallback('PostPositionFrame')
-
-    self:RegisterMessage('Initialised')
 end

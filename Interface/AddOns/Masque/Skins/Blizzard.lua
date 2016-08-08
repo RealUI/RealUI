@@ -3,8 +3,8 @@
 	please see the included License.txt file.
 
 	* File...: Skins\Blizzard.lua
-	* Date...: 2015-12-16T18:57:09Z
-	* Hash...: 8b83b42
+	* Date...: 2016-07-26T01:18:37Z
+	* Hash...: 5979f17
 	* Author.: StormFX, Maul, Blizzard Entertainment
 
 ]]
@@ -14,7 +14,7 @@ local _, Core = ...
 -- Improved Blizzard skin. Thanks to Maul for the reference!
 Core:AddSkin("Blizzard", {
 	Author = "Blizzard Entertainment",
-	Version = "6.2.1",
+	Version = "7.0.1",
 	Masque_Version = 60201,
 	Shape = "Square",
 	Backdrop = {
@@ -92,19 +92,19 @@ Core:AddSkin("Blizzard", {
 	Name = {
 		Width = 32,
 		Height = 10,
-		OffsetY = 4,
+		OffsetY = 6,
 	},
 	Count = {
 		Width = 32,
 		Height = 10,
-		OffsetX = -1,
-		OffsetY = 5,
+		OffsetX = -3,
+		OffsetY = 6,
 	},
 	HotKey = {
 		Width = 32,
 		Height = 10,
-		OffsetX = 3,
-		OffsetY = -4,
+		OffsetX = 1,
+		OffsetY = -6,
 	},
 	Duration = {
 		Width = 36,

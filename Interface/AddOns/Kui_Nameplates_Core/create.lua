@@ -4,20 +4,31 @@
 -- All rights reserved
 --------------------------------------------------------------------------------
 -- element create/update functions
--- layers ----------------------------------------------------------------------
+-- draw layers -----------------------------------------------------------------
 --
+-- HealthBar/CastBar ###########################################################
 -- ARTWORK
+-- castbar spark = 7
+-- raid icon (bar) = 6
+-- target arrows = 3
 -- spell shield = 2
--- healthbar highlight = 1
+-- health bar highlight = 1
 -- spell icon = 1
--- spell icon background = 0
-
+-- health bar = 0
+-- cast bar = 0
+--
+-- Frame #######################################################################
+-- ARTWORK
+-- raid icon (nameonly) = 1
+--
 -- BACKGROUND
 -- healthbar fill background = 2
--- healthbar background = 1
+-- frame background = 1
 -- castbar background = 1
+-- spell icon bg = 1
 -- threat brackets = 0
--- frame/target glow = -5
+-- frame glow = -5
+-- target glow = -5
 --
 --------------------------------------------------------------------------------
 local folder,ns=...
@@ -28,29 +39,39 @@ local core = KuiNameplatesCore
 
 -- frame fading plugin - called by some update functions
 local plugin_fading
+-- class powers plugin - called by NameOnlyUpdateFunctions
+local plugin_classpowers
 
-local MEDIA = 'interface/addons/kui_nameplates/media/'
+local MEDIA = 'interface/addons/kui_nameplates_core/media/'
 local CLASS_COLOURS = {
     DEATHKNIGHT = { .90, .22, .33 },
     DEMONHUNTER = { .74, .35, .95 },
     SHAMAN      = { .10, .54, .97 },
 }
 
+-- config locals
 local FRAME_WIDTH,FRAME_HEIGHT,FRAME_WIDTH_MINUS,FRAME_HEIGHT_MINUS
-local CASTBAR_HEIGHT,TARGET_GLOW_COLOUR
-local FONT,FONT_STYLE,FONT_SIZE_NORMAL,FONT_SIZE_SMALL
+local POWER_BAR_HEIGHT,CASTBAR_HEIGHT,TARGET_GLOW_COLOUR
+local FONT,FONT_STYLE,FONT_SHADOW,FONT_SIZE_NORMAL,FONT_SIZE_SMALL
 local TEXT_VERTICAL_OFFSET,NAME_VERTICAL_OFFSET,BOT_VERTICAL_OFFSET
 local BAR_TEXTURE,BAR_ANIMATION,SHOW_STATE_ICONS
-local NAMEONLY_NO_FONT_STYLE,FADE_AVOID_NAMEONLY,NAMEONLY_ENEMIES
-local NAMEONLY_DAMAGED_FRIENDS,FADE_AVOID_RAIDICON
+local FADE_AVOID_NAMEONLY,FADE_AVOID_RAIDICON,FADE_UNTRACKED
+local CASTBAR_COLOUR,CASTBAR_UNIN_COLOUR,CASTBAR_SHOW_NAME,CASTBAR_SHOW_ICON
+local SHOW_HEALTH_TEXT,SHOW_NAME_TEXT
+local AURAS_ON_PERSONAL
 
-local FRAME_GLOW_SIZE = 8
+local HEALTH_TEXT_FRIEND_MAX,HEALTH_TEXT_FRIEND_DMG
+local HEALTH_TEXT_HOSTILE_MAX,HEALTH_TEXT_HOSTILE_DMG
+
+local FRAME_GLOW_SIZE,FRAME_GLOW_TEXTURE_INSET
 
 -- common globals
 local UnitIsUnit,UnitIsFriend,UnitIsEnemy,UnitIsPlayer,UnitCanAttack,
-      UnitHealth,UnitHealthMax,strlen,pairs,ipairs,floor,unpack =
+      UnitHealth,UnitHealthMax,strlen,strformat,    pairs,ipairs,floor,
+      ceil,unpack =
       UnitIsUnit,UnitIsFriend,UnitIsEnemy,UnitIsPlayer,UnitCanAttack,
-      UnitHealth,UnitHealthMax,strlen,pairs,ipairs,floor,unpack
+      UnitHealth,UnitHealthMax,strlen,string.format,pairs,ipairs,floor,
+      ceil,unpack
 
 -- helper functions ############################################################
 local CreateStatusBar
@@ -107,6 +128,13 @@ local function UpdateFontObject(object)
         object.fontobject_small and FONT_SIZE_SMALL or FONT_SIZE_NORMAL,
         FONT_STYLE
     )
+
+    if FONT_SHADOW then
+        object:SetShadowColor(0,0,0,1)
+        object:SetShadowOffset(1,-1)
+    else
+        object:SetShadowColor(0,0,0,0)
+    end
 end
 local function CreateFontString(parent,small)
     local f = parent:CreateFontString(nil,'OVERLAY')
@@ -120,6 +148,8 @@ end
 -- config functions ############################################################
 do
     local FONT_STYLE_ASSOC = {
+        '',
+        'THINOUTLINE',
         '',
         'THINOUTLINE',
         'THINOUTLINE MONOCHROME'
@@ -138,7 +168,16 @@ do
         FRAME_HEIGHT = self.profile.frame_height
         FRAME_WIDTH_MINUS = self.profile.frame_width_minus
         FRAME_HEIGHT_MINUS = self.profile.frame_height_minus
+        POWER_BAR_HEIGHT = self.profile.powerbar_height
+
+        FRAME_GLOW_SIZE = self.profile.frame_glow_size
+        FRAME_GLOW_TEXTURE_INSET = .01 * (FRAME_GLOW_SIZE / 4)
+
         CASTBAR_HEIGHT = self.profile.castbar_height
+        CASTBAR_COLOUR = self.profile.castbar_colour
+        CASTBAR_UNIN_COLOUR = self.profile.castbar_unin_colour
+        CASTBAR_SHOW_ICON = self.profile.castbar_icon
+        CASTBAR_SHOW_NAME = self.profile.castbar_name
 
         TEXT_VERTICAL_OFFSET = self.profile.text_vertical_offset
         NAME_VERTICAL_OFFSET = TEXT_VERTICAL_OFFSET + self.profile.name_vertical_offset
@@ -146,17 +185,24 @@ do
 
         FONT = LSM:Fetch(LSM.MediaType.FONT,self.profile.font_face)
         FONT_STYLE = FONT_STYLE_ASSOC[self.profile.font_style]
+        FONT_SHADOW = self.profile.font_style == 3 or self.profile.font_style == 4
         FONT_SIZE_NORMAL = self.profile.font_size_normal
         FONT_SIZE_SMALL = self.profile.font_size_small
 
-        NAMEONLY_NO_FONT_STYLE = self.profile.nameonly_no_font_style
-        NAMEONLY_ENEMIES = self.profile.nameonly_enemies
-        NAMEONLY_DAMAGED_FRIENDS = self.profile.nameonly_damaged_friends
-
         FADE_AVOID_NAMEONLY = self.profile.fade_avoid_nameonly
         FADE_AVOID_RAIDICON = self.profile.fade_avoid_raidicon
+        FADE_UNTRACKED = self.profile.fade_untracked
 
         SHOW_STATE_ICONS = self.profile.state_icons
+
+        SHOW_HEALTH_TEXT = self.profile.health_text
+        SHOW_NAME_TEXT = self.profile.name_text
+        HEALTH_TEXT_FRIEND_MAX = self.profile.health_text_friend_max
+        HEALTH_TEXT_FRIEND_DMG = self.profile.health_text_friend_dmg
+        HEALTH_TEXT_HOSTILE_MAX = self.profile.health_text_hostile_max
+        HEALTH_TEXT_HOSTILE_DMG = self.profile.health_text_hostile_dmg
+
+        AURAS_ON_PERSONAL = self.profile.auras_on_personal
     end
 end
 function core:configChangedFrameSize()
@@ -178,6 +224,24 @@ function core:configChangedTextOffset()
             self.Auras_PostCreateAuraButton(button)
         end
     end
+end
+function core:configChangedTargetArrows()
+    for k,f in addon:Frames() do
+        if self.profile.target_arrows then
+            if f.TargetArrows then
+                f.TargetArrows:SetVertexColor(unpack(TARGET_GLOW_COLOUR))
+                f.TargetArrows:SetSize(self.profile.target_arrows_size)
+            else
+                self:CreateTargetArrows(f)
+            end
+        end
+    end
+end
+function core:configChangedCombatAction()
+    self.CombatToggle = {
+        hostile = self.profile.combat_hostile,
+        friendly = self.profile.combat_friendly
+    }
 end
 do
     function core.AurasButton_SetFont(button)
@@ -253,7 +317,7 @@ end
 function core:CreateBackground(f)
     local bg = f:CreateTexture(nil,'BACKGROUND',nil,1)
     bg:SetTexture(kui.m.t.solid)
-    bg:SetVertexColor(0,0,0,.8)
+    bg:SetVertexColor(0,0,0,.9)
 
     f.bg = bg
     f.UpdateFrameSize = UpdateFrameSize
@@ -276,8 +340,15 @@ do
         local hb_height = f.bg:GetHeight()-2
 
         if f.PowerBar:IsShown() then
-            hb_height = hb_height - 3
-            f.PowerBar:SetHeight(2)
+            local pb_height = POWER_BAR_HEIGHT
+
+            if pb_height >= (hb_height-1) then
+                -- reduce height so that healthbar is at least 1 pixel
+                pb_height = hb_height - 2
+            end
+
+            hb_height = (hb_height-pb_height)-1
+            f.PowerBar:SetHeight(pb_height)
         end
 
         f.HealthBar:SetHeight(hb_height)
@@ -326,11 +397,15 @@ end
 do
     local function UpdateNameText(f)
         if f.state.nameonly then
+            f.NameText:Show()
+
             if UnitIsPlayer(f.unit) then
                 -- player class colour
                 f.NameText:SetTextColor(GetClassColour(f))
             else
-                if f.state.reaction >= 4 then
+                if not UnitCanAttack('player',f.unit) and
+                   f.state.reaction >= 4
+                then
                     -- friendly colour
                     f.NameText:SetTextColor(.6,1,.6)
                     f.GuildText:SetTextColor(.8,.9,.8,.9)
@@ -342,7 +417,7 @@ do
 
             -- set name text colour to health
             core:NameOnlySetNameTextToHealth(f)
-        else
+        elseif SHOW_NAME_TEXT then
             if  not f.state.player and
                 UnitIsPlayer(f.unit) and
                 f.state.friend
@@ -359,6 +434,8 @@ do
             else
                 f.NameText:Show()
             end
+        else
+            f.NameText:Hide()
         end
     end
     local function UpdateNameTextPosition(f)
@@ -402,13 +479,47 @@ do
 end
 -- health text #################################################################
 do
+    local function GetHealthDisplay(f,key)
+        if type(key) ~= 'number' or key >= 5 or key <= 0 then return '' end
+
+        if key == 1 then
+            return kui.num(f.state.health_cur)
+        elseif key == 2 then
+            return kui.num(f.state.health_max)
+        elseif key == 3 then
+            local v = f.state.health_per
+            if v < 1 then
+                return strformat('%.1f', v)
+            else
+                return ceil(v)
+            end
+        else
+            return '-'..kui.num(f.state.health_deficit)
+        end
+    end
+
     local function UpdateHealthText(f)
         if f.state.nameonly then return end
-        if not core.profile.health_text or f.state.minus or f.state.player then
+        if not SHOW_HEALTH_TEXT or f.state.minus or f.state.player then
             f.HealthText:Hide()
         else
-            local cur,_,max = f.HealthBar:GetValue(),f.HealthBar:GetMinMaxValues()
-            f.HealthText:SetText(kui.num(cur))
+            local disp
+
+            if f.state.friend then
+                if f.state.health_cur ~= f.state.health_max then
+                    disp = GetHealthDisplay(f,HEALTH_TEXT_FRIEND_DMG)
+                else
+                    disp = GetHealthDisplay(f,HEALTH_TEXT_FRIEND_MAX)
+                end
+            else
+                if f.state.health_cur ~= f.state.health_max then
+                    disp = GetHealthDisplay(f,HEALTH_TEXT_HOSTILE_DMG)
+                else
+                    disp = GetHealthDisplay(f,HEALTH_TEXT_HOSTILE_MAX)
+                end
+            end
+
+            f.HealthText:SetText(disp)
             f.HealthText:ClearAllPoints()
 
             if f.state.no_name then
@@ -439,10 +550,10 @@ function core:CreateGuildText(f)
 end
 -- frame glow ##################################################################
 do
-    -- frame glow texture coords
+    -- frame glow texture coords (assuming a size of 0)
     local glow_coords = {
-        { .05, .95,  0,  .24 }, -- top
-        { .05, .95, .76,  1 },  -- bottom
+        { .03, .97,  0,  .24 }, -- top
+        { .03, .97, .76,  1 },  -- bottom
         {  0,  .04,  0,   1 },  -- left
         { .96,  1,   0,   1 }   -- right
     }
@@ -465,10 +576,20 @@ do
         end
     end
     function glow_prototype:SetSize(...)
+        local size = ...
+        if not tonumber(size) then return end
+
         for i,side in ipairs(self.sides) do
             if i > 2 then
+                side:SetTexCoord(unpack(glow_coords[i]))
                 side:SetWidth(...)
             else
+                side:SetTexCoord(
+                    glow_coords[i][1] + FRAME_GLOW_TEXTURE_INSET,
+                    glow_coords[i][2] - FRAME_GLOW_TEXTURE_INSET,
+                    glow_coords[i][3],
+                    glow_coords[i][4]
+                )
                 side:SetHeight(...)
             end
         end
@@ -478,7 +599,26 @@ do
         if f.state.nameonly then
             f.ThreatGlow:Hide()
             f.TargetGlow:Hide()
+
+            if f.NameOnlyGlow then
+                if f.state.target and core.profile.target_glow then
+                    f.NameOnlyGlow:SetVertexColor(unpack(TARGET_GLOW_COLOUR))
+                    f.NameOnlyGlow:SetAlpha(.8)
+                    f.NameOnlyGlow:Show()
+                elseif f.state.glowing then
+                    f.NameOnlyGlow:SetVertexColor(unpack(f.state.glow_colour))
+                    f.NameOnlyGlow:SetAlpha(.6)
+                    f.NameOnlyGlow:Show()
+                else
+                    f.NameOnlyGlow:Hide()
+                end
+            end
+
             return
+        end
+
+        if f.NameOnlyGlow then
+            f.NameOnlyGlow:Hide()
         end
 
         f.ThreatGlow:Show()
@@ -509,10 +649,10 @@ do
         local glow = { sides = {} }
         setmetatable(glow,glow_prototype)
 
-        for side,coords in ipairs(glow_coords) do
+        for i=1,4 do
             side = f:CreateTexture(nil,'BACKGROUND',nil,-5)
             side:SetTexture(MEDIA..'frameglow')
-            side:SetTexCoord(unpack(coords))
+            -- texcoord set by SetSize
 
             tinsert(glow.sides,side)
         end
@@ -540,7 +680,7 @@ end
 -- updated by UpdateFrameGlow
 function core:CreateTargetGlow(f)
     local targetglow = f:CreateTexture(nil,'BACKGROUND',nil,-5)
-    targetglow:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\target-glow')
+    targetglow:SetTexture(MEDIA..'target-glow')
     targetglow:SetTexCoord(0,.593,0,.875)
     targetglow:SetHeight(7)
     targetglow:SetPoint('TOPLEFT',f.bg,'BOTTOMLEFT',0,2)
@@ -550,14 +690,70 @@ function core:CreateTargetGlow(f)
 
     f.TargetGlow = targetglow
 end
+-- target arrows ###############################################################
+do
+    local function UpdateTargetArrows(f)
+        if f.state.nameonly or not core.profile.target_arrows then
+            f.TargetArrows:Hide()
+            return
+        end
+
+        if f.state.target then
+            f.TargetArrows:Show()
+        else
+            f.TargetArrows:Hide()
+        end
+    end
+    function core:CreateTargetArrows(f)
+        if not self.profile.target_arrows then
+            return
+        end
+
+        local arrows = {}
+        function arrows:Hide()
+            self.l:Hide()
+            self.r:Hide()
+        end
+        function arrows:Show()
+            self.l:Show()
+            self.r:Show()
+        end
+        function arrows:SetVertexColor(...)
+            self.l:SetVertexColor(...)
+            self.r:SetVertexColor(...)
+        end
+        function arrows:SetSize(size)
+            self.l:SetSize(size*.72,size)
+            self.l:SetPoint('RIGHT',f.bg,'LEFT',  3+(size*.12),-1)
+
+            self.r:SetSize(size*.72,size)
+            self.r:SetPoint('LEFT',f.bg,'RIGHT', -3-(size*.12),-1)
+        end
+
+        local left = f.HealthBar:CreateTexture(nil,'ARTWORK',nil,3)
+        left:SetTexture(MEDIA..'target-arrow')
+        left:SetTexCoord(0,.72,0,1)
+        arrows.l = left
+
+        local right = f.HealthBar:CreateTexture(nil,'ARTWORK',nil,3)
+        right:SetTexture(MEDIA..'target-arrow')
+        right:SetTexCoord(.72,0,0,1)
+        arrows.r = right
+
+        arrows:SetSize(core.profile.target_arrows_size)
+        arrows:SetVertexColor(unpack(TARGET_GLOW_COLOUR))
+
+        f.TargetArrows = arrows
+        f.UpdateTargetArrows = UpdateTargetArrows
+    end
+end
 -- castbar #####################################################################
 do
     local function SpellIconSetWidth(f)
         -- set spell icon width (based on height)
-        -- this seems to convice it to calculate the actual height
+        -- this seems to convince it to calculate the actual height
         f.SpellIcon.bg:SetHeight(1)
-        --f.SpellIcon.bg:SetHeight(f.bg:GetHeight()+f.CastBar.bg:GetHeight()+1)
-        f.SpellIcon.bg:SetWidth(floor(f.SpellIcon.bg:GetHeight()*1.5))
+        f.SpellIcon.bg:SetWidth(floor(f.SpellIcon.bg:GetHeight()*1.25))
     end
     local function ShowCastBar(f)
         if not f.elements.CastBar then
@@ -566,10 +762,22 @@ do
             return
         end
 
+        if f.cast_state.interruptible then
+            f.CastBar:SetStatusBarColor(unpack(CASTBAR_COLOUR))
+        else
+            f.CastBar:SetStatusBarColor(unpack(CASTBAR_UNIN_COLOUR))
+        end
+
         -- also show attached elements
         f.CastBar.bg:Show()
-        f.SpellIcon.bg:Show()
-        f.SpellName:Show()
+
+        if CASTBAR_SHOW_ICON then
+            f.SpellIcon.bg:Show()
+        end
+
+        if CASTBAR_SHOW_NAME then
+            f.SpellName:Show()
+        end
 
         f:SpellIconSetWidth()
     end
@@ -585,6 +793,12 @@ do
         if f.state.nameonly then
             f.handler:DisableElement('CastBar')
         else
+            if CASTBAR_SHOW_ICON then
+                f.SpellIcon:Show()
+            else
+                f.SpellIcon:Hide()
+            end
+
             if f.state.player then
                 if core.profile.castbar_showpersonal then
                     f.handler:EnableElement('CastBar')
@@ -630,7 +844,6 @@ do
         local castbar = CreateFrame('StatusBar', nil, f)
         castbar:SetFrameLevel(0)
         castbar:SetStatusBarTexture(BAR_TEXTURE)
-        castbar:SetStatusBarColor(.6, .6, .75)
         castbar:SetPoint('TOPLEFT', bg, 1, -1)
         castbar:SetPoint('BOTTOMRIGHT', bg, -1, 1)
 
@@ -638,28 +851,31 @@ do
         spellname:SetWordWrap()
 
         -- spell icon
-        local spelliconbg = f:CreateTexture(nil, 'ARTWORK', nil, 0)
+        local spelliconbg = f:CreateTexture(nil, 'BACKGROUND', nil, 1)
         spelliconbg:SetTexture(kui.m.t.solid)
         spelliconbg:SetVertexColor(0,0,0,.8)
         spelliconbg:SetPoint('BOTTOMRIGHT', bg, 'BOTTOMLEFT', -1, 0)
         spelliconbg:SetPoint('TOPRIGHT', f.bg, 'TOPLEFT', -1, 0)
 
         local spellicon = castbar:CreateTexture(nil, 'ARTWORK', nil, 1)
-        spellicon:SetTexCoord(.1, .9, .25, .75)
+        spellicon:SetTexCoord(.1, .9, .2, .8)
         spellicon:SetPoint('TOPLEFT', spelliconbg, 1, -1)
         spellicon:SetPoint('BOTTOMRIGHT', spelliconbg, -1, 1)
 
+        if not CASTBAR_SHOW_ICON then
+            spellicon:Hide()
+        end
+
         -- cast shield
         local spellshield = f.HealthBar:CreateTexture(nil, 'ARTWORK', nil, 2)
-        spellshield:SetTexture('Interface\\AddOns\\Kui_Nameplates\\media\\Shield')
+        spellshield:SetTexture(MEDIA..'Shield')
         spellshield:SetTexCoord(0, .84375, 0, 1)
         spellshield:SetSize(13.5, 16) -- 16 * .84375
         spellshield:SetPoint('LEFT', bg, -7, 0)
         spellshield:SetVertexColor(.5, .5, .7)
 
         -- spark
-        local spark = castbar:CreateTexture(nil, 'ARTWORK')
-        spark:SetDrawLayer('ARTWORK', 7)
+        local spark = castbar:CreateTexture(nil, 'ARTWORK', nil, 7)
         spark:SetVertexColor(1,1,.8)
         spark:SetTexture('Interface\\AddOns\\Kui_Media\\t\\spark')
         spark:SetPoint('CENTER', castbar:GetRegions(), 'RIGHT', 1, 0)
@@ -734,8 +950,12 @@ do
         f.RaidIcon:ClearAllPoints()
 
         if f.state.nameonly then
+            f.RaidIcon:SetParent(f)
+            f.RaidIcon:SetDrawLayer('ARTWORK',1)
             f.RaidIcon:SetPoint('LEFT',f.NameText,f.NameText:GetStringWidth()+2,0)
         else
+            f.RaidIcon:SetParent(f.HealthBar)
+            f.RaidIcon:SetDrawLayer('ARTWORK',6)
             f.RaidIcon:SetPoint('LEFT',f.HealthBar,'RIGHT',5,0)
         end
 
@@ -744,7 +964,7 @@ do
         end
     end
     function core:CreateRaidIcon(f)
-        local raidicon = f:CreateTexture(nil,'ARTWORK',nil,2)
+        local raidicon = f:CreateTexture()
         raidicon:SetTexture('interface/targetingframe/ui-raidtargetingicons')
         raidicon:SetSize(26,26)
 
@@ -759,16 +979,29 @@ do
     local AURAS_MINUS_SIZE
     local AURAS_MIN_LENGTH
     local AURAS_MAX_LENGTH
+    local AURAS_CENTRED
 
     local function AuraFrame_SetFrameWidth(self)
         self:SetWidth(self.__width)
         self:SetPoint(
             'BOTTOMLEFT',
-            self.parent.HealthBar,
+            self.parent.bg,
             'TOPLEFT',
             floor((self.parent.bg:GetWidth() - self.__width) / 2),
             15
         )
+    end
+    local function AuraFrame_SetDesiredWidth(self)
+        if AURAS_CENTRED and
+           self.visible and
+           self.visible < self.num_per_row
+        then
+            self.__width = (self.size * self.visible) + ((1 * self.visible) - 1)
+        else
+            self.__width = (self.size * self.num_per_row) + (self.num_per_row - 1)
+        end
+
+        AuraFrame_SetFrameWidth(self)
     end
     local function AuraFrame_SetIconSize(self,minus)
         local size = minus and AURAS_MINUS_SIZE or AURAS_NORMAL_SIZE
@@ -777,31 +1010,25 @@ do
             return
         end
 
-        -- re-set frame vars
         self.size = size
-        self.icon_height = floor(size * self.squareness)
-        self.icon_ratio = (1 - (self.icon_height / size)) / 2
         self.num_per_row = minus and 4 or 5
 
         -- re-set frame width
-        self.__width = (size * self.num_per_row) + (self.num_per_row - 1)
+        AuraFrame_SetDesiredWidth(self)
         AuraFrame_SetFrameWidth(self)
 
-        if not addon.BarAuras then
-            -- set buttons to new size
-            for k,button in ipairs(self.buttons) do
-                button:SetWidth(size)
-                button:SetHeight(self.icon_height)
-                button.icon:SetTexCoord(.1,.9,.1+self.icon_ratio,.9-self.icon_ratio)
-            end
-
-            if self.visible and self.visible > 0 then
-                self:ArrangeButtons()
-            end
-        end
+        -- resize & re-arrange buttons
+        self:SetIconSize(size)
     end
 
     local function UpdateAuras(f)
+        -- enable/disable on personal frame
+        if not AURAS_ON_PERSONAL and f.state.player then
+            f.Auras.frames[1]:Disable()
+        else
+            f.Auras.frames[1]:Enable(true)
+        end
+
         -- set auras to normal/minus sizes
         AuraFrame_SetIconSize(f.Auras.frames[1],f.state.minus)
     end
@@ -816,24 +1043,28 @@ do
             kui_whitelist = self.profile.auras_whitelist,
             pulsate = self.profile.auras_pulsate,
             timer_threshold = self.profile.auras_time_threshold > 0 and self.profile.auras_time_threshold or nil,
-            squareness = self.profile.auras_icon_squareness
+            squareness = self.profile.auras_icon_squareness,
+            sort = self.profile.auras_sort,
         })
         -- initial icon size set by AuraFrame_SetIconSize < UpdateAuras
+        -- frame width & point set by AuraFrame_SetFrameWidth < _SetIconSize
 
         auras:SetFrameLevel(0)
         auras:SetHeight(10)
 
         f.UpdateAuras = UpdateAuras
     end
+
+    -- calbacks
     function core.Auras_PostCreateAuraButton(button)
-        -- move text slightly for our font
+        -- move text to obey our settings
         button.cd:ClearAllPoints()
-        button.cd:SetPoint('CENTER',1,TEXT_VERTICAL_OFFSET)
+        button.cd:SetPoint('TOPLEFT',-2,2+TEXT_VERTICAL_OFFSET)
         button.cd:SetShadowOffset(1,-1)
         button.cd:SetShadowColor(0,0,0,1)
 
         button.count:ClearAllPoints()
-        button.count:SetPoint('BOTTOMRIGHT',3,-2+TEXT_VERTICAL_OFFSET)
+        button.count:SetPoint('BOTTOMRIGHT',4,-2+TEXT_VERTICAL_OFFSET)
         button.count:SetShadowOffset(1,-1)
         button.count:SetShadowColor(0,0,0,1)
 
@@ -843,17 +1074,31 @@ do
 
         core.AurasButton_SetFont(button)
     end
+    function core.Auras_PostUpdateAuraFrame(frame)
+        if AURAS_CENTRED then
+            -- with auras centred, we need to update the frame size each time a
+            -- new button is made visible
+            AuraFrame_SetDesiredWidth(frame)
+            AuraFrame_SetFrameWidth(frame)
+        end
+    end
     function core.Auras_DisplayAura(name,spellid,duration)
-        if AURAS_MIN_LENGTH and duration <= AURAS_MIN_LENGTH then
+        if  AURAS_MIN_LENGTH and
+            duration ~= 0 and duration <= AURAS_MIN_LENGTH
+        then
             return false
         end
-        if AURAS_MAX_LENGTH and duration > AURAS_MAX_LENGTH then
+
+        if  AURAS_MAX_LENGTH and
+            (duration == 0 or duration > AURAS_MAX_LENGTH)
+        then
             return false
         end
 
         return true
     end
 
+    -- config changed
     function core:SetAurasConfig()
         AURAS_MIN_LENGTH = self.profile.auras_minimum_length
         if AURAS_MIN_LENGTH == 0 then
@@ -867,6 +1112,7 @@ do
 
         AURAS_NORMAL_SIZE = self.profile.auras_icon_normal_size
         AURAS_MINUS_SIZE = self.profile.auras_icon_minus_size
+        AURAS_CENTRED = self.profile.auras_centre
 
         local timer_threshold = self.profile.auras_time_threshold
         if timer_threshold < 0 then
@@ -876,10 +1122,12 @@ do
         for k,f in addon:Frames() do
             if f.Auras and f.Auras.frames and f.Auras.frames[1] then
                 local af = f.Auras.frames[1]
-                af.kui_whitelist = self.profile.auras_whitelist
                 af.pulsate = self.profile.auras_pulsate
                 af.timer_threshold = timer_threshold
                 af.squareness = self.profile.auras_icon_squareness
+
+                af:SetSort(self.profile.auras_sort)
+                af:SetWhitelist(nil,self.profile.auras_whitelist)
 
                 -- force size update
                 af.__width = nil
@@ -888,23 +1136,26 @@ do
     end
 end
 -- class powers ################################################################
-function core.ClassPowers_PostPositionFrame()
-    if not addon.ClassPowersFrame:IsShown() then return end
-    if UnitIsUnit(addon.ClassPowersFrame:GetParent().unit,'player') then
-        -- change position when on the player's nameplate
-        addon.ClassPowersFrame:ClearAllPoints()
-        addon.ClassPowersFrame:SetPoint(
-            'CENTER',
-            addon.ClassPowersFrame:GetParent().HealthBar,
-            'TOP',
-            0,
-            1
-        )
+function core.ClassPowers_PostPositionFrame(cpf,parent)
+    if not parent or not cpf or not cpf:IsShown() then return end
+
+    -- change position in nameonly mode/on the player's nameplate
+    if parent.state.nameonly then
+        cpf:ClearAllPoints()
+
+        if parent.GuildText and parent.state.guild_text then
+            cpf:SetPoint('TOP',parent.GuildText,'BOTTOM',0,-3)
+        else
+            cpf:SetPoint('TOP',parent.NameText,'BOTTOM',0,-3)
+        end
+    elseif parent.state.player then
+        cpf:ClearAllPoints()
+        cpf:SetPoint('CENTER',parent.HealthBar,'TOP',0,1)
     end
 end
 -- threat brackets #############################################################
 do
-    local TB_TEXTURE = 'interface/addons/kui_nameplates/media/threat-bracket'
+    local TB_TEXTURE = MEDIA..'threat-bracket'
     local TB_PIXEL_LEFTMOST = .28125
     local TB_RATIO = 2
     local TB_HEIGHT = 18
@@ -977,9 +1228,9 @@ do
 end
 -- name show/hide ##############################################################
 function core:ShowNameUpdate(f)
-    if f.state.nameonly then return end
+    if not FADE_UNTRACKED and f.state.nameonly then return end
 
-    if f.state.player then
+    if f.state.player or not SHOW_NAME_TEXT then
         f.state.no_name = true
     elseif
         not core.profile.hide_names or
@@ -991,9 +1242,44 @@ function core:ShowNameUpdate(f)
     else
         f.state.no_name = true
     end
+
+    if FADE_UNTRACKED then
+        plugin_fading:UpdateFrame(f)
+    end
 end
 -- nameonly ####################################################################
 do
+    local NAMEONLY_NO_FONT_STYLE,NAMEONLY_ENEMIES,NAMEONLY_DAMAGED_FRIENDS,
+    NAMEONLY_ALL_ENEMIES,NAMEONLY_TARGET
+
+    function core:configChangedNameOnly()
+        NAMEONLY_NO_FONT_STYLE = self.profile.nameonly_no_font_style
+        NAMEONLY_DAMAGED_FRIENDS = self.profile.nameonly_damaged_friends
+        NAMEONLY_ALL_ENEMIES = self.profile.nameonly_all_enemies
+        NAMEONLY_ENEMIES = NAMEONLY_ALL_ENEMIES or self.profile.nameonly_enemies
+        NAMEONLY_TARGET = self.profile.nameonly_target
+
+        if NAMEONLY_ALL_ENEMIES or NAMEONLY_TARGET then
+            -- create target/threat glow
+            for k,f in addon:Frames() do
+                core:CreateNameOnlyGlow(f)
+            end
+        end
+    end
+
+    function core:CreateNameOnlyGlow(f)
+        if not NAMEONLY_ALL_ENEMIES and not NAMEONLY_TARGET then return end
+        if f.NameOnlyGlow then return end
+
+        local g = f:CreateTexture(nil,'BACKGROUND',nil,-5)
+        g:SetTexture('interface/addons/kui_media/t/spark')
+        g:SetPoint('TOPLEFT',f.NameText,-20,8)
+        g:SetPoint('BOTTOMRIGHT',f.NameText,20,-8)
+        g:Hide()
+
+        f.NameOnlyGlow = g
+    end
+
     function core:NameOnlyUpdateFunctions(f)
         -- update elements affected by nameonly
         f:UpdateNameText()
@@ -1002,6 +1288,16 @@ do
         f:UpdateStateIcon()
         f:UpdateRaidIcon()
         f:UpdateCastBar()
+
+        if f.TargetArrows then
+            -- show/hide arrows
+            f:UpdateTargetArrows()
+        end
+
+        if f.NameOnlyGlow and addon.ClassPowersFrame then
+            -- force-update classpowers position
+            plugin_classpowers:TargetUpdate(f)
+        end
     end
 
     local function NameOnlyEnable(f)
@@ -1016,13 +1312,15 @@ do
 
         f.NameText:SetShadowOffset(1,-1)
         f.NameText:SetShadowColor(0,0,0,1)
-
         f.NameText:ClearAllPoints()
         f.NameText:SetParent(f)
 
         if f.state.guild_text then
+            f.GuildText:SetShadowOffset(1,-1)
+            f.GuildText:SetShadowColor(0,0,0,1)
             f.GuildText:SetText(f.state.guild_text)
             f.GuildText:Show()
+
             f.NameText:SetPoint('CENTER',.5,6)
         else
             f.NameText:SetPoint('CENTER',.5,0)
@@ -1045,19 +1343,23 @@ do
         f.NameText:SetText(f.state.name)
         f.NameText:SetTextColor(1,1,1,1)
         f.NameText:SetShadowColor(0,0,0,0)
-
         f.NameText:ClearAllPoints()
         f.NameText:SetParent(f.HealthBar)
         f:UpdateNameTextPosition()
 
-        f.GuildText:Hide()
+        if f.GuildText:IsShown() then
+            f.GuildText:SetTextColor(1,1,1,1)
+            f.GuildText:SetShadowColor(0,0,0,0)
+            f.GuildText:Hide()
+        end
 
         f.bg:Show()
         f.HealthBar:Show()
         f.HealthBar.fill:Show()
 
-        if NAMEONLY_NO_FONT_STYLE then
+        if NAMEONLY_NO_FONT_STYLE or FONT_SHADOW then
             UpdateFontObject(f.NameText)
+            UpdateFontObject(f.GuildText)
         end
         if FADE_AVOID_NAMEONLY then
             plugin_fading:UpdateFrame(f)
@@ -1067,9 +1369,13 @@ do
         -- set name text colour to approximate health
         if not f.state.nameonly then return end
 
-        local cur,max = UnitHealth(f.unit),UnitHealthMax(f.unit)
-        if cur and cur > 0 and max and max > 0 then
-            local health_len = strlen(f.state.name) * (cur / max)
+        if f.state.health_cur and f.state.health_cur > 0 and
+           f.state.health_max and f.state.health_max > 0
+        then
+            local health_len =
+                strlen(f.state.name) *
+                (f.state.health_cur / f.state.health_max)
+
             f.NameText:SetText(
                 kui.utf8sub(f.state.name, 0, health_len)..
                 '|cff666666'..kui.utf8sub(f.state.name, health_len+1)
@@ -1086,23 +1392,17 @@ do
         end
     end
 
-    local function UnattackableEnemyPlayer(unit)
-        -- don't show on unattackable enemy players (ice block etc)
-        return UnitIsPlayer(unit) and UnitIsEnemy('player',unit)
+    local function UnattackableEnemyPlayer(f)
+        -- never activate for enemy players
+        return not NAMEONLY_ALL_ENEMIES and UnitIsPlayer(f.unit) and f.state.enemy
     end
-    local function EnemyAndDisabled(unit)
-        if  not NAMEONLY_ENEMIES and
-            UnitIsEnemy('player',unit)
-        then
-            -- don't show on unattackble enemies
-            return true
-        end
+    local function EnemyAndDisabled(f)
+        -- don't show on unattackble enemies
+        return not NAMEONLY_ENEMIES and f.state.enemy
     end
-    local function FriendAndDisabled(unit)
-        if  not NAMEONLY_DAMAGED_FRIENDS and
-            UnitIsFriend('player',unit)
-        then
-            if UnitHealth(unit) ~= UnitHealthMax(unit) then
+    local function FriendAndDisabled(f)
+        if not NAMEONLY_DAMAGED_FRIENDS and f.state.friend then
+            if f.state.health_deficit > 0 then
                 -- don't show on damaged friends
                 return true
             end
@@ -1113,13 +1413,13 @@ do
             -- don't show on player frame
             not f.state.player and
             -- don't show on target
-            not f.state.target and
+            (NAMEONLY_TARGET or not f.state.target) and
             -- don't show on attackable units
-            not UnitCanAttack('player',f.unit) and
+            (NAMEONLY_ALL_ENEMIES or not UnitCanAttack('player',f.unit)) and
             -- more complex filters;
-            not UnattackableEnemyPlayer(f.unit) and
-            not EnemyAndDisabled(f.unit) and
-            not FriendAndDisabled(f.unit)
+            not UnattackableEnemyPlayer(f) and
+            not EnemyAndDisabled(f) and
+            not FriendAndDisabled(f)
         then
             NameOnlyEnable(f)
         else
@@ -1130,17 +1430,19 @@ end
 -- init elements ###############################################################
 function core:InitialiseElements()
     plugin_fading = addon:GetPlugin('Fading')
+    plugin_classpowers = addon:GetPlugin('ClassPowers')
 
-    self.CombatToggle = {}
+    self:configChangedCombatAction()
 
     self.Auras = {}
 
     self.ClassPowers = {
-        icon_size = 10,
-        icon_texture = 'interface/addons/kui_nameplates/media/combopoint-round',
-        glow_texture = 'interface/addons/kui_nameplates/media/combopoint-glow',
+        on_target = self.profile.classpowers_on_target,
+        icon_size = self.profile.classpowers_size or 10,
+        icon_texture = MEDIA..'combopoint-round',
+        glow_texture = MEDIA..'combopoint-glow',
         cd_texture = 'interface/playerframe/classoverlay-runecooldown',
-        point = { 'TOP','bg','BOTTOM',0,4 }
+        point = { 'CENTER','bg','BOTTOM',0,1 }
     }
 
     local plugin_pb = addon:GetPlugin('PowerBar')

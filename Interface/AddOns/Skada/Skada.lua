@@ -2356,78 +2356,8 @@ function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 end
 
 do
-	--[[ XXX TEMP UPGRADE POPUP ]]
-	local tempPopup = function()
-		local tbl = {
-			SkadaCC = true,
-			SkadaDamage = true,
-			SkadaDamageTaken = true,
-			SkadaDeaths = true,
-			SkadaDebuffs = true,
-			SkadaDispels = true,
-			SkadaEnemies = true,
-			SkadaHealing = true,
-			SkadaPower = true,
-			SkadaThreat = true,
-		}
-
-		local create
-		local concat = "\n"
-		for i = 1, GetNumAddOns() do
-			local name = GetAddOnInfo(i)
-			if tbl[name] then
-				create = true
-				concat = concat .. name .. "\n"
-				DisableAddOn(i)
-			end
-		end
-
-		if create or not SkadaDB.hasUpgraded then
-			local frame = CreateFrame("Frame", "SkadaWarn", UIParent)
-
-			frame:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-				edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-				tile = true, tileSize = 16, edgeSize = 16,
-				insets = {left = 1, right = 1, top = 1, bottom = 1}}
-			)
-			frame:SetSize(550, 420)
-			frame:SetPoint("CENTER", UIParent, "CENTER")
-			frame:SetFrameStrata("DIALOG")
-			frame:Show()
-
-			local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
-			title:SetPoint("TOP", frame, "TOP", 0, -12)
-			title:SetText(L["Skada has changed!"])
-
-			local text = frame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-			text:SetPoint("CENTER", frame, "CENTER")
-			text:SetText(L["All Skada functionality is now in 1 addon folder."] .. (create and "\n\n" .. L["Skada will |cFFFF0000NOT|r function properly until you delete the following AddOns:"] ..concat or ""))
-
-			local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-			btn:SetWidth(110)
-			btn:SetHeight(20)
-			btn:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
-			btn:SetText(OKAY)
-			btn:SetScript("OnClick", function(f)
-				f:GetParent():Hide()
-				if not create then
-					InterfaceOptionsFrame_OpenToCategory(Skada.optionsFrame) InterfaceOptionsFrame_OpenToCategory(Skada.optionsFrame)
-				end
-			end)
-
-			local ending = frame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-			ending:SetPoint("TOP", btn, "TOP", 0, 30)
-			ending:SetText(create and "" or L["Click below and configure your '|cFFFF0000Disabled Modules|r'."])
-			if not create then
-				SkadaDB.hasUpgraded = true
-			end
-		end
-	end
 
 	function Skada:OnInitialize()
-		-- XXX temp
-		self:ScheduleTimer(tempPopup, 1)
-
 		-- Register some SharedMedia goodies.
 		media:Register("font", "Adventure",				[[Interface\Addons\Skada\fonts\Adventure.ttf]])
 		media:Register("font", "ABF",					[[Interface\Addons\Skada\fonts\ABF.ttf]])
@@ -2504,9 +2434,6 @@ do
 			self.db.profile.total = nil
 			self.db.profile.sets = nil
 		end
-
-		-- XXX temp
-		self.db.profile.modulesToSkip = nil
 	end
 end
 

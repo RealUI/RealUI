@@ -1,7 +1,7 @@
 --[[--------------------------------------------------------------------
 	PhanxChat
 	Reduces chat frame clutter and enhances chat frame functionality.
-	Copyright (c) 2006-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2006-2016 Phanx <addons@phanx.net>. All rights reserved.
 	http://www.wowinterface.com/downloads/info6323-PhanxChat.html
 	http://www.curse.com/addons/wow/phanxchat
 	https://github.com/Phanx/PhanxChat
@@ -11,14 +11,12 @@ local _, PhanxChat = ...
 local L = PhanxChat.L
 local hooks = PhanxChat.hooks
 
-if InterfaceOptionsSocialPanelChatStyle then
-	InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
-		if PhanxChat.db.MoveEditBox then
-			GameTooltip:AddLine(format(L.OptionLockedConditional, L.MoveEditBox), 1, 1, 1, true)
-			GameTooltip:Show()
-		end
-	end)
-end
+InterfaceOptionsSocialPanelChatStyle:HookScript("OnEnter", function(this)
+	if PhanxChat.db.MoveEditBox then
+		GameTooltip:AddLine(format(L.OptionLockedConditional, L.MoveEditBox), 1, 1, 1, true)
+		GameTooltip:Show()
+	end
+end)
 
 local function Insert(editBox, text)
 	-- Remove annoying prepended spaces on shift-clicked links
@@ -42,24 +40,20 @@ function PhanxChat:MoveEditBox(frame)
 		editBox:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", -5, 2)
 		editBox:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 5, 2)
 
-		if InterfaceOptionsSocialPanelChatStyle then
-			SetCVar("chatStyle", "classic")
-			InterfaceOptionsSocialPanelChatStyle_SetChatStyle("classic")
+		SetCVar("chatStyle", "classic")
+		InterfaceOptionsSocialPanelChatStyle_SetChatStyle("classic")
 
-			InterfaceOptionsSocialPanelChatStyleButton:Disable()
-			InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
-			InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
-		end
+		InterfaceOptionsSocialPanelChatStyleButton:Disable()
+		InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+		InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
 	else
 		editBox:ClearAllPoints()
 		editBox:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", -5, -2)
 		editBox:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 5, -2)
 
-		if InterfaceOptionsSocialPanelChatStyle then
-			InterfaceOptionsSocialPanelChatStyleButton:Enable()
-			InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-			InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
-		end
+		InterfaceOptionsSocialPanelChatStyleButton:Enable()
+		InterfaceOptionsSocialPanelChatStyleLabel:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+		InterfaceOptionsSocialPanelChatStyleText:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 	end
 end
 

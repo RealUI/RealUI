@@ -1,20 +1,16 @@
 --[[--------------------------------------------------------------------
 	PhanxConfig-Dropdown
 	Simple scrolling dropdown widget generator. Requires LibStub.
-	Based on tekKonfig-Dropdown by Tekkub and OmniCC_Options by Tuller.
 	https://github.com/Phanx/PhanxConfig-Dropdown
-
-	Copyright (c) 2009-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2009-2015 Phanx <addons@phanx.net>. All rights reserved.
 	Feel free to include copies of this file WITHOUT CHANGES inside World of
 	Warcraft addons that make use of it as a library, and feel free to use code
 	from this file in other projects as long as you DO NOT use my name or the
-	original name of this library anywhere in your project outside of an optional
-	credits line -- any modified versions must be renamed to avoid conflicts and
-	confusion. If you wish to do something else, or have questions about whether
-	you can do something, email me at the address listed above.
+	original name of this file anywhere in your project outside of an optional
+	credits line -- any modified versions must be renamed to avoid conflicts.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = 20141222
+local MINOR_VERSION = 20150128
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-Dropdown", MINOR_VERSION)
 if not lib then return end
@@ -100,7 +96,7 @@ local function ListButton_OnClick(self)
 
 	dropdown.valueText:SetText(self:GetText() or self.value)
 
-	local callback = dropdown.OnValueChanged
+	local callback = dropdown.OnValueChanged or dropdown.callback
 	if callback then
 		callback(dropdown, self.value, self:GetText())
 	end
@@ -318,6 +314,7 @@ local methods = {}
 function methods:GetValue()
 	return self.selected or self.valueText:GetText()
 end
+
 function methods:SetValue(value, text)
 	self.selected = value
 	if not text and self.items and type(self.items[1]) == "table" then
@@ -331,32 +328,13 @@ function methods:SetValue(value, text)
 	self.valueText:SetText(text or value)
 end
 
-function methods:GetLabel()
-	return self.labelText:GetText()
-end
-function methods:SetLabel(text)
-	if type(text) ~= "string" then text = nil end
-	self.labelText:SetText(text)
-end
-
-function methods:GetTooltip()
-	return self.tooltipText
-end
-function methods:SetTooltip(text)
-	if type(text) ~= "string" then text = nil end
-	self.tooltipText = text
-end
-
 function methods:GetList()
 	return self.items
 end
+
 function methods:SetList(list)
 	if type(list) ~= "table" then list = nil end
 	self.items = list
-end
-
-function methods:SetKeepShownOnClick(value)
-	self.keepShownOnClick = value
 end
 
 function methods:Enable()
@@ -364,6 +342,7 @@ function methods:Enable()
 	self.valueText:SetFontObject(GameFontHighlightSmall)
 	self.button:Enable()
 end
+
 function methods:Disable()
 	self.labelText:SetFontObject(GameFontDisable)
 	self.valueText:SetFontObject(GameFontDisableSmall)
@@ -376,7 +355,7 @@ function lib:New(parent, name, tooltipText, items, keepShownOnClick)
 	assert(type(parent) == "table" and type(rawget(parent, 0)) == "userdata", "PhanxConfig-Dropdown: parent must be a frame")
 
 	local dropdown = CreateFrame("Frame", nil, parent)
-	dropdown:SetSize(186, 42)
+	dropdown:SetSize(200, 48)
 	dropdown:EnableMouse(true)
 	dropdown:SetScript("OnEnter", Frame_OnEnter)
 	dropdown:SetScript("OnLeave", Frame_OnLeave)
@@ -384,17 +363,17 @@ function lib:New(parent, name, tooltipText, items, keepShownOnClick)
 --[[
 	dropdown.bg = dropdown:CreateTexture(nil, "BACKGROUND")
 	dropdown.bg:SetAllPoints(true)
-	dropdown.bg:SetTexture(0, 128, 0, 0.5)
+	dropdown.bg:SetTexture(0, 0.5, 0, 0.5)
 ]]
 	local left = dropdown:CreateTexture(nil, "BORDER")
-	left:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", -16, 45)
+	left:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", -16, 47)
 	left:SetSize(25, 64)
 	left:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
 	left:SetTexCoord(0, 0.1953125, 0, 1)
 	dropdown.bgLeft = left
 
 	local right = dropdown:CreateTexture(nil, "BORDER")
-	right:SetPoint("TOPRIGHT", dropdown, "BOTTOMRIGHT", 15, 45)
+	right:SetPoint("TOPRIGHT", dropdown, "BOTTOMRIGHT", 15, 47)
 	right:SetSize(25, 64)
 	right:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
 	right:SetTexCoord(0.8046875, 1, 0, 1)
@@ -420,32 +399,34 @@ function lib:New(parent, name, tooltipText, items, keepShownOnClick)
 	value:SetHeight(10)
 	dropdown.valueText = value
 
+	local BUTTONSIZE = 25
+
 	local button = CreateFrame("Button", nil, dropdown)
-	button:SetSize(24, 24)
-	button:SetPoint("TOPRIGHT", right, -16, -18)
+	button:SetSize(BUTTONSIZE, BUTTONSIZE)
 	button:SetPoint("TOPLEFT", left, 16, -18)
+	button:SetPoint("TOPRIGHT", right, -16, -18)
 
 	local normal = button:CreateTexture(nil, "ARTWORK")
 	normal:SetPoint("RIGHT")
-	normal:SetSize(24, 24)
+	normal:SetSize(BUTTONSIZE, BUTTONSIZE)
 	normal:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up")
 	button:SetNormalTexture(normal)
 
 	local pushed = button:CreateTexture(nil, "ARTWORK")
 	pushed:SetPoint("RIGHT")
-	pushed:SetSize(24, 24)
+	pushed:SetSize(BUTTONSIZE, BUTTONSIZE)
 	pushed:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Down")
 	button:SetPushedTexture(pushed)
 
 	local disabled = button:CreateTexture(nil, "ARTWORK")
 	disabled:SetPoint("RIGHT")
-	disabled:SetSize(24, 24)
+	disabled:SetSize(BUTTONSIZE, BUTTONSIZE)
 	disabled:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Disabled")
 	button:SetDisabledTexture(disabled)
 
 	local highlight = button:CreateTexture(nil, "HIGHLIGHT")
 	highlight:SetPoint("RIGHT")
-	highlight:SetSize(24, 24)
+	highlight:SetSize(BUTTONSIZE - 2, BUTTONSIZE - 2)
 	highlight:SetTexture("Interface\\Buttons\\UI-Common-MouseHilight")
 	highlight:SetBlendMode("ADD")
 	button:SetHighlightTexture(highlight)
@@ -459,9 +440,9 @@ function lib:New(parent, name, tooltipText, items, keepShownOnClick)
 		dropdown[name] = func
 	end
 
-	dropdown:SetLabel(name)
-	dropdown:SetTooltip(tooltipText)
-	dropdown:SetList(items)
+	dropdown.labelText:SetText(name)
+	dropdown.tooltipText = tooltipText
+	dropdown.items = items
 	dropdown.keepShownOnClick = keepShownOnClick
 
 	return dropdown

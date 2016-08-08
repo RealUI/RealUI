@@ -155,7 +155,7 @@ local function CreateMainFrame()
  mainFrame = CreateFrame("Frame", "MSBTMainOptionsFrame", UIParent);
  mainFrame:SetMovable(true);
  mainFrame:EnableMouse(true);
- mainFrame:SetToplevel(true);
+ --mainFrame:SetToplevel(true);
  mainFrame:SetClampedToScreen(true);
  mainFrame:SetWidth(608);
  mainFrame:SetHeight(440);

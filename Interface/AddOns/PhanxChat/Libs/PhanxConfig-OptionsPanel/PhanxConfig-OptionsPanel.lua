@@ -2,18 +2,15 @@
 	PhanxConfig-OptionsPanel
 	Simple options panel frame generator. Requires LibStub.
 	https://github.com/Phanx/PhanxConfig-OptionsPanel
-
-	Copyright (c) 2009-2014 Phanx <addons@phanx.net>. All rights reserved.
+	Copyright (c) 2009-2015 Phanx <addons@phanx.net>. All rights reserved.
 	Feel free to include copies of this file WITHOUT CHANGES inside World of
 	Warcraft addons that make use of it as a library, and feel free to use code
 	from this file in other projects as long as you DO NOT use my name or the
-	original name of this library anywhere in your project outside of an optional
-	credits line -- any modified versions must be renamed to avoid conflicts and
-	confusion. If you wish to do something else, or have questions about whether
-	you can do something, email me at the address listed above.
+	original name of this file anywhere in your project outside of an optional
+	credits line -- any modified versions must be renamed to avoid conflicts.
 ----------------------------------------------------------------------]]
 
-local MINOR_VERSION = 172
+local MINOR_VERSION = 20150112
 
 local lib, oldminor = LibStub:NewLibrary("PhanxConfig-OptionsPanel", MINOR_VERSION)
 if not lib then return end
@@ -82,6 +79,7 @@ local widgetTypes = {
 	"EditBox",
 	"Header",
 	"KeyBinding",
+	"MediaDropdown",
 	"Panel",
 	"Slider",
 }

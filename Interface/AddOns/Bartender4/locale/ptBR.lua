@@ -13,7 +13,7 @@ L["Always Hide"] = "Sempre ocultar"
 L["Anchor"] = "Ancorar"
 L["Apply Preset"] = "Aplicar preconfiguração"
 -- L["Artifact Power Bar"] = "Artifact Power Bar"
--- L["Auto-Assist Casting"] = "Auto-Assist Casting"
+L["Auto-Assist Casting"] = "Auto-Ajudar na Forma" -- Needs review
 L["Bag Bar"] = "Barra de bolsas"
 L["Bar Options"] = "Opções da barra"
 -- L["Bar Paging"] = "Bar Paging"
@@ -74,16 +74,16 @@ L["Create a copy of the auto-generated conditionals in the custom configuration 
 L["CTRL"] = "CTRL"
 L["Custom Conditionals"] = "Condicionais customizadas"
 L["Default Bar State"] = "Estado padrão da barra"
--- L["Direction of the button flyouts on this bar (eg. summon demon/pet)"] = "Direction of the button flyouts on this bar (eg. summon demon/pet)"
+L["Direction of the button flyouts on this bar (eg. summon demon/pet)"] = "Direção dos botões no submenu nesta barra (ex. invocar demônio/pet)"
 L["Disable any reaction to mouse events on this bar, making the bar click-through."] = "Desativa qualquer reação para eventos do mouse nessa barra, tornando possivel clicar através da barra."
 L["Disabled"] = "Desabilitado"
 L["Disabled in Combat"] = "Desabilitado em combate"
 L["Don't Page"] = "Não paginar"
 L["Down"] = "Para baixo"
 L["Empty button background"] = "Fundo do botão vazio"
---[==[ L[ [=[Enable Auto-Assist for this bar.
-Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Enable Auto-Assist for this bar.
-Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ]==]
+L[ [=[Enable Auto-Assist for this bar.
+Auto-Assist will automatically try to cast on your target's target if your target is no valid target for the selected spell.]=] ] = [=[Ativar Auto-Assistência para esta barra.
+O auto-assistente irá tentar converter no alvo de seu alvo caso seu alvo não for válido para o período selecionado.]=]
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[Ativar a mudança de barras baseado nos controles das barras de ação fornecidos pelo jogo.
 Veja as informações de associação de teclas da Blizzard - Geralmente Shift-Mouse Wheel e Shift+1 - Shift+6]=]
@@ -111,7 +111,7 @@ L["Fade Out"] = "Fade Out"
 L["Fade Out Alpha"] = "Alpha do Fade Out"
 L["Fade Out Delay"] = "Atraso do Fade Out"
 L["FAQ"] = "FAQ"
--- L["Flyout Direction"] = "Flyout Direction"
+L["Flyout Direction"] = "Direção do submenu"
 L["Focus-Cast by modifier"] = "Lançar no Foco"
 L["Focus-Cast Modifier"] = "Botão para lançar no Foco"
 L["Frequently Asked Questions"] = "Perguntas feitas frequentemente"
@@ -130,7 +130,7 @@ L["Hide the Hotkey on the buttons of this bar."] = "Ocultar a tecla nos botões 
 L["Hide the inner border indicating the equipped status on the buttons of this bar."] = "Oculte a barra inerente que indica o status do equipamento nos botões dessa barra"
 L["Hide the Macro Text on the buttons of this bar."] = "Ocultar o texto de macro dos botões dessa barra"
 L["Hide this bar in a specific Stance or Form."] = "Ocultar essa barra em uma postura ou forma especifica."
--- L["Hide this bar when a override bar is active."] = "Hide this bar when a override bar is active."
+L["Hide this bar when a override bar is active."] = "Oculta esta barra quando 'sobrepor barra' estiver ativo."
 L["Hide this bar when the game wants to show a vehicle UI."] = "Ocultar essa barra quando o jogo mostrar a interface de veiculo."
 L["Hide this bar when you are possessing a NPC."] = "Ocultar essa barra quando estiver no controle de um NPC"
 L["Hide this bar when you are riding on a vehicle."] = "Ocultar essa barra quando você estiver controlando um veículo."
@@ -138,7 +138,7 @@ L["Hide this bar when you have a pet."] = "Ocultar essa barra quando você tiver
 L["Hide this bar when you have no pet."] = "Ocultar essa barra quando você não tiver nenhum Ajudante"
 L["Hide when Possessing"] = "Ocultar quando estiver no controle"
 L["Hide without pet"] = "Ocultar sem o Ajudante."
--- L["Hide with Override Bar"] = "Hide with Override Bar"
+L["Hide with Override Bar"] = "Ocultar com 'Sobrepor barra'"
 L["Hide with pet"] = "Ocultar com o Ajudante"
 L["Hide with Vehicle UI"] = "Ocultar com a interface de veiculo"
 L["Horizontal Growth"] = "Crescimento horizontal"
@@ -158,16 +158,16 @@ L["Lock the buttons."] = "Travar os botões"
 L["Micro Menu"] = "Mini Menu"
 L["Minimap Icon"] = "Ícone do mini mapa"
 L["Modifier Based Switching"] = "Troca baseada em um modificador"
--- L["Mouse-Over Casting"] = "Mouse-Over Casting"
+L["Mouse-Over Casting"] = "Mouse sobre forma" -- Needs review
 -- L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."
--- L["Mouse-Over Casting Modifier"] = "Mouse-Over Casting Modifier"
+L["Mouse-Over Casting Modifier"] = "Modificador do 'Mouse sobre a forma'" -- Needs review
 L["No Display"] = "Não mostrar"
 L["None"] = "Nenhum"
---[==[ L[ [=["None" as modifier means its always active, and no modifier is required.
+L[ [=["None" as modifier means its always active, and no modifier is required.
 
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["None" as modifier means its always active, and no modifier is required.
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["Nenhum" como modificador significa que será sempre ativo, e nenhum modificador é necessário.
 
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ]==]
+Lembre de ativar 'Mouse sobre forma' para barras individuais, na guia "Configuração de Estado", se você quiser que isto fique ativo em uma barra específica.]=] -- Needs review
 L["No Stance/Form"] = "Nenhuma Postura/Forma"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "Nota: Ativando condicionais customizadas irá desabilitar todas as definições acima!"
 L["Number of buttons."] = "Número de botões"
@@ -194,7 +194,7 @@ L["Right-click Self-Cast"] = "Botão direito executa em si próprio"
 L["Right ending"] = "Finalizar a direita"
 L["Rows"] = "Linhas"
 L["Scale"] = "Escala"
--- L["Select a modifier for Mouse-Over Casting"] = "Select a modifier for Mouse-Over Casting"
+L["Select a modifier for Mouse-Over Casting"] = "Escolha um modificador para o 'Mouse sobre forma'" -- Needs review
 L["Select the Focus-Cast Modifier"] = "Selecione o modificador para lançar no Foco"
 L["Select the Self-Cast Modifier"] = "Selecione o modificador para lançar em si mesmo"
 L["Self-Cast by modifier"] = "Lançar em si mesmo por modificador"
@@ -204,7 +204,7 @@ L["Show a Icon to open the config at the Minimap"] = "Mostra um icone para abrir
 -- L["Show Artifact Power Bar"] = "Show Artifact Power Bar"
 L["Show Reputation Bar"] = "Mostrar barra de reputação"
 L["Show XP Bar"] = "Mostrar barra de experiencia"
--- L["Smart Target selection"] = "Smart Target selection"
+L["Smart Target selection"] = "Alvo Inteligente"
 L["Specify the Color of the Out of Mana Indicator"] = "Especificar a cor do indicador de sem mana"
 L["Specify the Color of the Out of Range Indicator"] = "Especificar a cor do indicador de fora de alcance"
 L["Stance Bar"] = "Barra de Postura"

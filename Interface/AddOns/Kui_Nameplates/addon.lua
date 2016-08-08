@@ -8,12 +8,17 @@
 -- initalise addon global
 KuiNameplates = CreateFrame('Frame')
 local addon = KuiNameplates
-addon.MAJOR,addon.MINOR=2,1
+addon.MAJOR=2
 
+--[===[@alpha@
 addon.debug = true
+--@end-alpha@]===]
+--[===[@debug@
+addon.debug_config = true
 --addon.debug_units = true
 --addon.debug_messages = true
 --addon.draw_frames = true
+--@end-debug@]===]
 
 -- kui nameplate container frame size
 addon.uiscale = .71 -- updated upon reload
@@ -92,11 +97,6 @@ local function OnEvent(self,event,...)
         return
     end
 
-    if not IsAddOnLoaded('Blizzard_Nameplates') then
-        EnableAddOn('Blizzard_Nameplates')
-        print('|cff9966ffKui Nameplates|r: You have disabled the built-in Blizzard_Nameplates addon which KNP requires. There will be errors. Reload the UI to re-enable it. If this message still appears, you may have another addon which is interfering.')
-    end
-
     if not self.layout then
         -- throw missing layout
         print('|cff9966ffKui Nameplates|r: A compatible layout was not loaded. You probably forgot to enable Kui Nameplates: Core in your addon list.')
@@ -117,11 +117,18 @@ local function OnEvent(self,event,...)
         end
     end
 
+    -- initialise the layout
     if type(self.layout.Initialise) == 'function' then
         self.layout:Initialise()
     end
 
-    addon:DispatchMessage('Initialised')
+    -- fire layout initialised to plugins
+    -- for plugins to fetch values from the layout, etc
+    for k,plugin in ipairs(self.plugins) do
+        if type(plugin.Initialised) == 'function' then
+            plugin:Initialised()
+        end
+    end
 end
 ------------------------------------------- initialise addon scripts & events --
 addon:SetScript('OnEvent',OnEvent)

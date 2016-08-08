@@ -422,3 +422,6 @@ L["Use role icons where applicable."] = true
 L["Overhealing spells"] = true
 
 L["Whisper Target"] = true
+
+L["Always show self"] = true
+L["Keeps the player shown last even if there is not enough space."] = true

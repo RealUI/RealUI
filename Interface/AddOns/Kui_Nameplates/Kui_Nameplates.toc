@@ -2,7 +2,7 @@
 ## Author: Kesava
 ## Title: Kui |cff9966ffNameplates
 ## Notes: Kesava's nameplate framework.|nRemember to enable Kui Nameplates Core (or a compatible layout), too!
-## X-Curse-Packaged-Version: 2-4
+## X-Curse-Packaged-Version: 2-9
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline
@@ -32,3 +32,4 @@ plugins/fading.lua
 plugins/npctitle.lua
 plugins/tankmode.lua
 plugins/combattoggle.lua
+plugins/execute.lua

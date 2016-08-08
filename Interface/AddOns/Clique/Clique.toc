@@ -1,10 +1,10 @@
 ## Interface: 70000
 ## Title: Clique
 ## Author: Cladhaire
-## Version: v70000-1.0.1
+## Version: v70000-1.1.0
 ## Notes: Simply powerful click-casting interface
 ## SavedVariables: CliqueDB, CliqueDB3
-## X-Curse-Packaged-Version: v70000-1.0.1
+## X-Curse-Packaged-Version: v70000-1.1.0
 ## X-Curse-Project-Name: Clique
 ## X-Curse-Project-ID: clique
 ## X-Curse-Repository-ID: wow/clique/mainline
