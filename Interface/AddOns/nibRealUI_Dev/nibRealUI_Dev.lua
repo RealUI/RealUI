@@ -87,7 +87,9 @@ for i = 1, #BlizzAddons do
     end
 end
 
-
+local eventWhitelist = {
+    BAG_UPDATE = true
+}
 local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
@@ -108,6 +110,8 @@ frame:SetScript("OnEvent", function(self, event, ...)
         debug(event, ...)
         debug("GetScreenHeight", _G.GetScreenHeight())
         debug("UIParent:GetSize", _G.UIParent:GetSize())
-        self:UnregisterEvent(event)
+        if not eventWhitelist[event] then
+            self:UnregisterEvent(event)
+        end
     end
 end)
