@@ -89,7 +89,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
     local function skinWeakAuras(widget)
         local bg = widget.background or widget.frame.background -- adjust for BS
-        bg:SetTexture(1, 1, 1, 0.4)
+        bg:SetColorTexture(1, 1, 1, 0.4)
 
         widget.frame.highlight:SetTexture(C.media.backdrop)
         widget.frame.highlight:SetVertexColor(r, g, b, alpha)
@@ -163,6 +163,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget["SetValue"] = function(self,value)
                     local check = self.check
                     self.checked = value
+                    check:SetDesaturated(true)
                     if value then
                         check:SetVertexColor(r, g, b)
                         check:Show()
@@ -195,7 +196,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
         elseif TYPE == "ColorPicker" then
             if not widget.skinned then
-                F.CreateBDFrame(widget.colorSwatch)
+                F.CreateBDFrame(widget.colorSwatch, 0)
                 widget.colorSwatch:SetTexture(C.media.backdrop)
                 widget.colorSwatch:SetSize(14, 14)
                 local texture = select(2, widget.frame:GetRegions())
@@ -234,14 +235,14 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         elseif TYPE2 == "Item" then
             if not widget.skinned then
                 local highlight = widget.highlight
-                highlight:SetTexture(r, g, b, .2)
+                highlight:SetColorTexture(r, g, b, .2)
                 highlight:ClearAllPoints()
                 highlight:SetPoint("LEFT", -6, 0)
                 highlight:SetPoint("RIGHT", 0, 0)
 
                 if TYPE3 == "Toggle" then
                     local check = widget.check
-                    check:SetTexture(r, g, b, .8)
+                    check:SetColorTexture(r, g, b, .8)
                     check:SetSize(9, 9)
                     check:SetPoint("LEFT", 3, 0)
                     local bd = F.CreateBDFrame(check, 1)
@@ -265,11 +266,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 --
                 local left = widget.left
                 left:SetHeight(1)
-                left:SetTexture(r, g, b, .4)
+                left:SetColorTexture(r, g, b, .4)
 
                 local right = widget.right
                 right:SetHeight(1)
-                right:SetTexture(r, g, b, .4)
+                right:SetColorTexture(r, g, b, .4)
 
                 widget.skinned = true
             end
@@ -544,7 +545,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                         tex:SetWidth(1)
                         tex:SetPoint("TOP", self.treeframe, "TOPRIGHT", 1, -1)
                         tex:SetPoint("BOTTOM", self.treeframe, "BOTTOMRIGHT", 1, 1)
-                        tex:SetTexture(r, g, b, .4)
+                        tex:SetColorTexture(r, g, b, .4)
                         self.skinned = true
                     end
                 end)

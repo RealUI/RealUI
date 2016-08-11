@@ -100,7 +100,11 @@ function StanceButtonPrototype:Update()
 		self.cooldown:Hide()
 	end
 	local start, duration, enable = GetShapeshiftFormCooldown(id)
-	CooldownFrame_SetTimer(self.cooldown, start, duration, enable)
+	if not CooldownFrame_SetTimer and CooldownFrame_Set then
+		CooldownFrame_Set(self.cooldown, start, duration, enable)
+	else
+		CooldownFrame_SetTimer(self.cooldown, start, duration, enable)
+	end
 
 	if isActive then
 		self:SetChecked(true)

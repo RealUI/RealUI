@@ -68,7 +68,7 @@ local function CreateHealthBar(parent)
     parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
     parent.Health:SetPoint("TOPRIGHT", -1, -1)
     parent.Health:SetStatusBarTexture(RealUI.media.textures.plain)
-    local color = db.overlay.colors.health.normal
+    local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
     if not(ndb.settings.reverseUnitFrameBars) then

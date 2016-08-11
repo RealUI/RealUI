@@ -1,0 +1,15 @@
+tag 4.7.2
+7f9589a7adef76c4e3992d592778657c5d22dc4a
+Hendrik Leppkes <h.leppkes@gmail.com>
+2016-08-01 10:39:06 +0200
+
+Tag as 4.7.2
+
+
+--------------------
+
+Hendrik Leppkes:
+	- Remove pre-legion state settings
+	- Slightly increase the default size of the config window
+	Apparently users didn't find the profile option because you had to scroll.
+	- Prevent the QueueStatusFrame from being obscured by Bartender4 bars

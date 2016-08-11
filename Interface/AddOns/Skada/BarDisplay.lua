@@ -341,6 +341,7 @@ function mod:Update(win)
 				bar = mod:CreateBar(win, barid, barlabel, data.value, win.metadata.maxvalue or 1, data.icon, false)
 				bar.id = barid
 				bar.text = barlabel
+                bar.fixed = false
 				if not data.ignore then
 
 					if data.icon then
@@ -416,9 +417,14 @@ function mod:Update(win)
 					bar.label:SetTextColor(1,1,1,1)
 					bar.timerLabel:SetTextColor(1,1,1,1)
 				end
+                
+                if Skada.db.profile.showself and data.id and data.id == UnitGUID("player") then
+                    -- Always show self
+                    bar.fixed = true
+                end
 			end
 
-			if win.metadata.ordersort then
+            if win.metadata.ordersort then
 				bar.order = i
 			end
 

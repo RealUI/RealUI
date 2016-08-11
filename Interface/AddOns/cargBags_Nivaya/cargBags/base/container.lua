@@ -40,6 +40,7 @@ end}
 	@callback container:OnCreate(name, ...)
 ]]
 function Container:New(name, ...)
+	cargBags.debug("Container:New", name, ...)
 	local implName = self.implementation.name
 	local container = setmetatable(CreateFrame("Button", implName..name), self.__index)
 
@@ -65,6 +66,7 @@ end
 	@callback OnButtonAdd(button)
 ]]
 function Container:AddButton(button)
+	cargBags.debug("Container:AddButton", button)
 	button.container = self
 	button:SetParent(self.bags[button.bagID])
 	self:ScheduleContentCallback()
@@ -80,6 +82,7 @@ end
 	@callback OnButtonRemove(button)
 ]]
 function Container:RemoveButton(button)
+	cargBags.debug("Container:RemoveButton", button)
 	for i, single in ipairs(self.buttons) do
 		if(button == single) then
 			self:ScheduleContentCallback()
@@ -108,6 +111,7 @@ end)
 	Schedules a Content-callback in the next update
 ]]
 function Container:ScheduleContentCallback()
+	cargBags.debug("Container:ScheduleContentCallback", button)
 	scheduled[self] = true
 	updater:Show()
 end
@@ -118,6 +122,7 @@ end
 	@param ... Arguments which are passed to the function
 ]]
 function Container:ApplyToButtons(func, ...)
+	cargBags.debug("Container:ApplyToButtons", button)
 	for i, button in pairs(self.buttons) do
 		func(button, ...)
 	end

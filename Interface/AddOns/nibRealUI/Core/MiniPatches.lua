@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next, type = _G.next, _G.type
+local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -98,29 +98,6 @@ RealUI.minipatches = {
                 profile["combatfader"]["opacity"]["runes"] = profile["combatfader"]["opacity"]["hurt"]
             end
         end
-        local defaults = RealUI:GetPointTrackingDefaults().profile
-        if nibRealUIDB["namespaces"]["PointTracking"]["profiles"] then
-            local defaultDB = defaults["**"].types["**"]
-            local profile = nibRealUIDB["namespaces"]["PointTracking"]["profiles"]["RealUI"]
-            local function setSettings(classSV, classDB, fallbackDB)
-                for setting, value in next, classSV do
-                    if type(value) == "table" then
-                        setSettings(value, classDB and classDB[setting] or nil, fallbackDB[setting])
-                    else
-                        classSV[setting] = classDB and classDB[setting] or fallbackDB[setting]
-                    end
-                end
-            end
-            for class, classInfo in next, profile do
-                if type(classInfo) == "table" and classInfo.types then
-                    for pointType, pointInfo in next, classInfo.types do
-                        if pointInfo.bars then
-                            setSettings(pointInfo.bars, defaults[class].types[pointType].bars, defaultDB.bars)
-                        end
-                    end
-                end
-            end
-        end
         local RavenDB = _G.RavenDB
         if _G.IsAddOnLoaded("Raven") and RavenDB then
             if RavenDB["profiles"]["RealUI"] then
@@ -186,6 +163,28 @@ RealUI.minipatches = {
         for index, namespace in next, trash do
             if nibRealUIDB.namespaces[namespace] then
                 nibRealUIDB.namespaces[namespace] = nil
+            end
+        end
+    end,
+    [70000] = function(ver)
+        debug("r"..ver)
+        local AuraTracking = _G.nibRealUIDB.namespaces.AuraTracking
+        if AuraTracking then
+            -- Reset default trackers
+            for guid in next, AuraTracking.class do
+                local _, _, isDefault = _G.strsplit("-", guid)
+                if isDefault then
+                    AuraTracking.class[guid] = nil
+                end
+            end
+        end
+        local Bartender4DB = _G.Bartender4DB
+        if _G.IsAddOnLoaded("Bartender4") and Bartender4DB then
+            for _, profileName in next, {"RealUI-Healing", "RealUI"} do
+                local profile = Bartender4DB.namespaces.PetBar.profiles[profileName]
+                if profile then
+                    profile.actionbars[1].visibility.customdata = "[mod:ctrl][target=focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][overridebar][cursor]show;hide"
+                end
             end
         end
     end,

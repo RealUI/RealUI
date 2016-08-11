@@ -2,7 +2,6 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
 
 -- Libs --
 local oUF = _G.oUFembed
@@ -58,47 +57,6 @@ function UnitFrames:RefreshUnits(event)
         local unit = _G["RealUI" .. units[i] .. "Frame"]
         unit:UpdateAllElements(event)
     end
-end
-
-function UnitFrames:SetoUFColors()
-    local colors = db.overlay.colors
-    for power, color in next, colors.power do
-        if (_G.type(power) == "string") then
-            oUF.colors.power[power] = color
-        end
-    end
-    oUF.colors.health = colors.health.normal
-    for eclass, _ in next, _G.RAID_CLASS_COLORS do
-        local color = RealUI:GetClassColor(eclass)
-        color = RealUI:ColorDarken(0.15, color)
-        color = RealUI:ColorDesaturate(0.2, color)
-        oUF.colors.class[eclass] = color
-    end
-end
-
--- Color Retrieval for Config Bar
-function UnitFrames:ToggleClassColoring(names)
-	if names then
-		db.overlay.classColorNames = not db.overlay.classColorNames
-	else
-		db.overlay.classColor = not db.overlay.classColor
-	end
-end
-
-function UnitFrames:GetoUFColors()
-    return oUF.colors
-end
-
-function UnitFrames:GetHealthColor()
-	return oUF.colors.health
-end
-
-function UnitFrames:GetPowerColors()
-	return oUF.colors.power
-end
-
-function UnitFrames:GetStatusColors()
-	return db.overlay.colors.status
 end
 
 -- Squelch taint popup
@@ -205,45 +163,6 @@ function UnitFrames:OnInitialize()
                 },
                 classColor = false,
                 classColorNames = true,
-                colors = {
-                    health = {
-                        normal = {0.66, 0.22, 0.22},
-                    },
-                    power = {
-                        ["MANA"] =        {0.00, 0.50, 0.94},
-                        ["RAGE"] =        {0.75, 0.12, 0.12},
-                        ["FOCUS"] =       {0.95, 0.50, 0.20},
-                        ["ENERGY"] =      {0.90, 0.80, 0.20},
-                        ["CHI"] =         {0.35, 0.80, 0.70},
-                        ["RUNES"] =       {0.50, 0.50, 0.50},
-                        ["RUNIC_POWER"] = {0.00, 0.65, 0.85},
-                        ["SOUL_SHARDS"] = {0.50, 0.32, 0.55},
-                        ["HOLY_POWER"] =  {0.90, 0.80, 0.50},
-                        ["AMMOSLOT"] =    {0.80, 0.60, 0.00},
-                        ["FUEL"] =        {0.00, 0.55, 0.50},
-                        ["ALTERNATE"] =   {0.00, 0.80, 0.80},
-                    },
-                    status = {
-                        hostile =      {0.81, 0.20, 0.15},
-                        neutral =      {0.90, 0.90, 0.20},
-                        friendly =     {0.28, 0.85, 0.28},
-                        damage =       {1, 0, 0},
-                        incomingHeal = {1, 1, 0},
-                        heal =         {0, 1, 0},
-                        resting =      {0, 1, 0},
-                        combat =       {1, 0, 0},
-                        afk =          {1, 1, 0},
-                        offline =      {0.6, 0.6, 0.6},
-                        leader =       {0, 1, 1},
-                        tapped =       {0.4, 0.4, 0.4},
-                        pvpEnemy =     {1, 0, 0},
-                        pvpFriendly =  {0, 1, 0},
-                        dead =         {0.2, 0.2, 0.2},
-                        rareelite =    {1, 0.5, 0},
-                        elite =        {1, 1, 0},
-                        rare =         {0.75, 0.75, 0.75},
-                    },
-                },
             },
         },
     })
@@ -251,18 +170,14 @@ function UnitFrames:OnInitialize()
     ndb = RealUI.db.profile
 
     self.layoutSize = ndb.settings.hudSize
-    --print("Layout", self.layoutSize)
-
-
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function UnitFrames:OnEnable()
-    self:SetoUFColors()
-    self.colorStrings = {
-        health = RealUI:ColorTableToStr(db.overlay.colors.health.normal),
-        mana = RealUI:ColorTableToStr(db.overlay.colors.power["MANA"]),
-    }
+    -- Override the green that oUF uses
+    oUF.colors.health = {0.66, 0.22, 0.22}
+    oUF.colors.power.MANA = RealUI:ColorDesaturate(0.1, oUF.colors.power.MANA)
+    oUF.colors.power.MANA = RealUI:ColorShift(-0.07, oUF.colors.power.MANA)
 
     CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()

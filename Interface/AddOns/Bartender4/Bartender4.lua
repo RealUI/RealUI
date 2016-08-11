@@ -61,6 +61,9 @@ function Bartender4:OnInitialize()
 	self:HideBlizzard()
 	self:UpdateBlizzardVehicle()
 
+	-- fix the strata of the QueueStatusFrame, otherwise it overlaps our bars
+	QueueStatusFrame:SetParent(UIParent)
+
 	if LDB then
 		createLDBLauncher()
 	end
@@ -157,6 +160,12 @@ function Bartender4:HideBlizzard()
 	--ReputationWatchBar:UnregisterAllEvents()
 	--ReputationWatchBar:Hide()
 	ReputationWatchBar:SetParent(UIHider)
+
+	if ArtifactWatchBar then
+		ArtifactWatchBar:SetParent(UIHider)
+	end
+
+	HonorWatchBar:SetParent(UIHider)
 
 	StanceBarFrame:UnregisterAllEvents()
 	StanceBarFrame:Hide()

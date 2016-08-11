@@ -1,4 +1,4 @@
-﻿## Interface: 60200
+﻿## Interface: 70000
 ## Title: Grid2
 ## Notes: A modular, lightweight and screen-estate saving grid of party/raid unit frames
 ## Notes-esES: Marcos de unidades de raid compactos y ligeros.
@@ -6,7 +6,7 @@
 ## Notes-zhCN: 小巧的轻量级模块化队伍框架
 ## Notes-zhTW: 精簡的團隊框架功能
 ## Author: Pastamancer & Maia, Jerry, Toadkiller
-## X-Curse-Packaged-Version: r786
+## X-Curse-Packaged-Version: r789-release
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
@@ -16,8 +16,8 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 
-## Version: r786
-## X-ReleaseDate: "$Date: 2015-06-24 15:48:49 +0000 (Wed, 24 Jun 2015) $"
+## Version: r789-release
+## X-ReleaseDate: "$Date: 2016-07-19 06:44:23 +0000 (Tue, 19 Jul 2016) $"
 ## X-Category: UnitFrame
 
 # Ace Libraries

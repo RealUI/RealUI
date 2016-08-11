@@ -12,6 +12,7 @@ L["Alternatively, you can also find us on |cffffff78irc://irc.freenode.org/wowac
 L["Always Hide"] = "Всегда скрывать"
 L["Anchor"] = "Якорь"
 L["Apply Preset"] = "Применить предустановку"
+-- L["Artifact Power Bar"] = "Artifact Power Bar"
 -- L["Auto-Assist Casting"] = "Auto-Assist Casting"
 L["Bag Bar"] = "Панель сумок"
 L["Bar Options"] = "Опции панели"
@@ -53,6 +54,7 @@ L["Configure all of Bartender to preset defaults"] = "Сбросить в Barten
 L["Configure Bar %s"] = "Настройка панели %s"
 L["Configure how the Out of Range Indicator should display on the buttons."] = "Выбрать способ отображения недостижимости цели на кнопках."
 L["Configure the alpha of the bar."] = "Настройка прозрачности панели."
+-- L["Configure the Artifact Power Bar"] = "Configure the Artifact Power Bar"
 L["Configure the Bag Bar"] = "Настройка панели сумок"
 L["Configure the Blizzard Art Bar"] = "Настроить панели Blizzard Арт"
 L["Configure the Button Tooltip."] = "Настройка всплывающих подсказок для кнопок."
@@ -91,6 +93,7 @@ L["Enable/Disable the bar."] = "Включить/Отключить панель
 Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[Enable Mouse-Over Casting for this bar.
 Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ]==]
 L["Enable State-based Button Swaping"] = "Разрешить переключение панелей"
+-- L["Enable the Artifact Power Bar"] = "Enable the Artifact Power Bar"
 L["Enable the Bag Bar"] = "Включить панель сумок"
 L["Enable the Blizzard Art Bar"] = "Разрешить панели Blizzard Арт"
 L["Enable the Extra Action Bar"] = "Включить Extra Action Bar"
@@ -198,6 +201,7 @@ L["Self-Cast by modifier"] = "Чтение на себя по модификат
 L["Self-Cast Modifier"] = "Модификатор заклинания на себя"
 L["SHIFT"] = "Shift"
 L["Show a Icon to open the config at the Minimap"] = "Отображать иконку у мини-карты для открытия настроек"
+-- L["Show Artifact Power Bar"] = "Show Artifact Power Bar"
 L["Show Reputation Bar"] = "Отобразить панель репутации"
 L["Show XP Bar"] = "Отобразить панель опыта"
 -- L["Smart Target selection"] = "Smart Target selection"

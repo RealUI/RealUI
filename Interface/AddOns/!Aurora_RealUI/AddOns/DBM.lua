@@ -148,7 +148,7 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, Fu, Co)
                     end
 
                     local highlight = _G[dropdown.buttons[i]:GetName().."Highlight"]
-                    highlight:SetTexture(C.r, C.g, C.b, .2)
+                    highlight:SetColorTexture(C.r, C.g, C.b, .2)
                     highlight:SetPoint("TOPLEFT", -x, 0)
                     highlight:SetPoint("BOTTOMRIGHT", dropdown:GetWidth() - button:GetWidth() - x - 1, 0)
                 end

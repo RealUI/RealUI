@@ -15,33 +15,40 @@ local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 local layoutSize
 
 local MaxTicks = 10
-local ChannelingTicks = {
+local ChannelingTicks = {}
+do
+    local function RegisterSpellName(spellID, numticks)
+        local name = _G.GetSpellInfo(spellID)
+        if name then
+            ChannelingTicks[name] = numticks
+        else
+            _G.print("The spell for ID", spellID, "no longer exists.")
+        end
+    end
+
     -- Druid
-    [_G.GetSpellInfo(16914)] = 10, -- Hurricane
-    [_G.GetSpellInfo(106996) or "gone"] = 10,-- Astral Storm
-    [_G.GetSpellInfo(740)] = 4,    -- Tranquility
+    RegisterSpellName(740, 4) -- Tranquility
+
     -- Mage
-    [_G.GetSpellInfo(5143)] = 5,   -- Arcane Missiles
-    [_G.GetSpellInfo(10) or "gone"] = 8,     -- Blizzard
-    [_G.GetSpellInfo(12051)] = 3,  -- Evocation
+    RegisterSpellName(5143, 5)  -- Arcane Missiles
+    RegisterSpellName(12051, 3) -- Evocation
+
     -- Monk
-    [_G.GetSpellInfo(117952)] = 4,  -- Crackling Jade Lightning
-    [_G.GetSpellInfo(115175)] = 8,  -- Soothing Mist
-    [_G.GetSpellInfo(115294) or "gone"] = 6,  -- Mana Tea
-    [_G.GetSpellInfo(113656)] = 4,  -- Fists of Fury
+    RegisterSpellName(117952, 4) -- Crackling Jade Lightning
+    RegisterSpellName(191837, 2)  -- Essence Font
+    RegisterSpellName(113656, 4) -- Fists of Fury
+
     -- Priest
-    [_G.GetSpellInfo(64843)] = 4,  -- Divine Hymn
-    [_G.GetSpellInfo(15407)] = 3,  -- Mind Flay
-    [_G.GetSpellInfo(129197) or "gone"] = 3, -- Mind Flay (Insanity)
-    [_G.GetSpellInfo(48045)] = 5,  -- Mind Sear
-    [_G.GetSpellInfo(47540)] = 2,  -- Penance
+    RegisterSpellName(64843, 4) -- Divine Hymn
+    RegisterSpellName(15407, 3) -- Mind Flay
+    RegisterSpellName(48045, 5) -- Mind Sear
+    RegisterSpellName(47540, 2) -- Penance
+
     -- Warlock
-    [_G.GetSpellInfo(689)] = 6,    -- Drain Life
-    [_G.GetSpellInfo(755)] = 6,    -- Health Funnel
-    [_G.GetSpellInfo(4629)] = 6,   -- Rain of Fire
-    [_G.GetSpellInfo(103103) or "gone"] = 6, -- Drain Soul
-    [_G.GetSpellInfo(108371) or "gone"] = 6, -- Harvest Life
-}
+    RegisterSpellName(689, 6)  -- Drain Life
+    RegisterSpellName(755, 6)  -- Health Funnel
+    RegisterSpellName(4629, 6) -- Rain of Fire
+end
 
 -- Chanelling Ticks
 function CastBars:ClearTicks()
@@ -157,6 +164,7 @@ local function PostCastStart(self, unit, ...)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
+    self:SetValue(0, true)
 
     if self.interrupt then
         local color = db.colors.uninterruptible
@@ -220,15 +228,15 @@ end
 
 local function PostChannelStart(self, unit, spellName)
     CastBars:debug("PostChannelStart", unit, spellName)
+    self:SetValue(self.duration, true)
+
     local sz = self.safeZone
     sz:ClearAllPoints()
-    local point, x
     if self:GetReverseFill() then
-        point, x = "TOPRIGHT", -1
+        sz:SetPoint("TOPRIGHT", self, -1, 0)
     else
-        point, x = "TOPLEFT", 1
+        sz:SetPoint("TOPLEFT", self, 1, 0)
     end
-    sz:SetPoint(point, self, x, 0)
     updateSafeZone(self)
 
     if self.SetBarTicks then
@@ -255,8 +263,8 @@ end
 
 local function OnUpdate(self, elapsed)
     CastBars:debug("OnUpdate", self.__owner.unit, elapsed)
+    CastBars:debug("Cast status", self.casting, self.channeling, self.config)
     if (self.casting or self.config) then
-        CastBars:debug("Casting", self.config)
         local duration = self.duration + elapsed
         if (duration >= self.max) then
             CastBars:debug("Duration", duration, self.max)
@@ -469,7 +477,7 @@ function CastBars:OnInitialize()
                 size = {x = 230, y = 28},
                 position = {x = 0, y = 0},
                 icon = 28,
-                debug = true
+                debug = false
             },
             target = {
                 size = {x = 230, y = 28},
@@ -481,7 +489,7 @@ function CastBars:OnInitialize()
                 size = {x = 146, y = 28},
                 position = {x = 0, y = 0},
                 icon = 16,
-                debug = true
+                debug = false
             },
             size = {
                 [1] = {

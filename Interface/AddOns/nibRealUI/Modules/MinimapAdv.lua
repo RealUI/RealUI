@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
+local next, ipairs = _G.next, _G.ipairs
 
 -- Libs --
 local HBD = _G.LibStub("HereBeDragons-1.0")
@@ -808,63 +808,65 @@ end
 
 function MinimapAdv:GetLFGList(event, arg)
     self:debug("GetLFGList", event, arg)
-    if not arg then
-        infoTexts.LFG.shown = false
-    else
-        local _, _, _, _, _, _, _, autoAccept = _G.C_LFGList.GetActiveEntryInfo()
+    local active, _, _, _, _, _, _, old_autoAccept, autoAccept = _G.C_LFGList.GetActiveEntryInfo()
+    if active then
         local status
-        if autoAccept then
+        if autoAccept or (_G.type(old_autoAccept) == "boolean" and old_autoAccept) then
             status = _G.LFG_LIST_AUTO_ACCEPT
         else
             local _, numActiveApplicants = _G.C_LFGList.GetNumApplicants()
             status = _G.LFG_LIST_PENDING_APPLICANTS:format(numActiveApplicants)
         end
         local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
-        MMFrames.info.LFG.text:SetText("|cff"..colorOrange.."LFG:|r "..status)
+        MMFrames.info.LFG.text:SetFormattedText("|cff%sLFG:|r %s", colorOrange, status)
         MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
+    else
+        infoTexts.LFG.shown = false
     end
     if not UpdateProcessing then
         self:UpdateInfoPosition()
     end
 end
 
+local queueFrames = {
+    [1] = "Queue",
+    [3] = "RFQueue",
+    [4] = "SQueue"
+}
 function MinimapAdv:GetLFGQueue(event, ...)
     self:debug("GetLFGQueue", event, ...)
-    -- Reset shown status
-    infoTexts.Queue.shown = false
-    infoTexts.RFQueue.shown = false
-    infoTexts.SQueue.shown = false
     for category = 1, _G.NUM_LE_LFG_CATEGORYS do
+        local infoText = infoTexts[queueFrames[category]]
+        local queueFrame = MMFrames.info[queueFrames[category]]
+        if not (infoText and queueFrame) then return end
+
         local mode = _G.GetLFGMode(category)
         self:debug("LFGQueue", category, mode)
         if mode and mode == "queued" then
-            local queueStr
             local hasData, _, _, _, _, _, _, _, _, _, _, _, _, _, _, myWait, queuedTime = _G.GetLFGQueueStats(category)
 
+            local queueStr
             if not hasData then
                 queueStr = _G.LESS_THAN_ONE_MINUTE
             else
-                local elapsedTime = _G.GetTime() - queuedTime
-                local tiqStr = ("%s"):format(ConvertSecondstoTime(elapsedTime))
-                local awtStr = ("%s"):format(myWait == -1 and _G.TIME_UNKNOWN or _G.SecondsToTime(myWait, false, false, 1))
-                queueStr = ("%s |cffc0c0c0(%s)|r"):format(tiqStr, awtStr)
+                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - queuedTime)
+                if myWait > 0 then
+                    local avgWait = _G.SecondsToTime(myWait, false, false, 1)
+                    queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
+                else
+                    queueStr = ("%s"):format(timeInQueue)
+                end
             end
 
             local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
-            if category == 1 then -- Dungeon Finder
-                MMFrames.info.Queue.text:SetFormattedText("|cff%sDF:|r ", colorOrange, queueStr)
-                MMFrames.info.Queue:SetHeight(MMFrames.info.Queue.text:GetStringHeight())
-                infoTexts.Queue.shown = true
-            elseif category == 3 then -- Raid Finder
-                MMFrames.info.RFQueue.text:SetFormattedText("|cff%sRF:|r ", colorOrange, queueStr)
-                MMFrames.info.RFQueue:SetHeight(MMFrames.info.RFQueue.text:GetStringHeight())
-                infoTexts.RFQueue.shown = true
-            elseif category == 4 then -- Scenarios
-                MMFrames.info.SQueue.text:SetFormattedText("|cff%sS:|r ", colorOrange, queueStr)
-                MMFrames.info.SQueue:SetHeight(MMFrames.info.SQueue.text:GetStringHeight())
-                infoTexts.SQueue.shown = true
-            end
+            queueFrame.text:SetFormattedText(infoText.format, colorOrange, queueStr)
+            queueFrame:SetHeight(queueFrame.text:GetStringHeight())
+            queueFrame.myWait = myWait
+            queueFrame.queuedTime = queuedTime
+            infoText.shown = true
+        else
+            infoText.shown = false
         end
     end
     if not UpdateProcessing then
@@ -1003,6 +1005,7 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
+        self:debug("IsInInstance", RealUI:ColorTableToStr(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec.text:SetText("|cff"..RealUI:ColorTableToStr(RealUI.media.colors.blue).._G.LOOT..":|r "..RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
@@ -1186,7 +1189,8 @@ end
 
 ---- Config Button ----
 local function Config_OnMouseDown()
-    RealUI:LoadConfig("RealUI", "modules", "MinimapAdv")
+    RealUI.Debug("Config", "Minimap")
+    RealUI:LoadConfig("RealUI", "uiTweaks", "minimap")
 
     if _G.DropDownList1 then _G.DropDownList1:Hide() end
     if _G.DropDownList2 then _G.DropDownList2:Hide() end
@@ -1318,59 +1322,76 @@ local function Farm_OnLeave()
     MinimapAdv:FadeButtons()
 end
 
---[[ Garrison
---The pulse anim that these function call will reset the alpha of the whole button each time it repeats.
---This was the only reliable way I could find to get this button back to full opacity.
-local oldGarrisonMinimapBuilding_ShowPulse = GarrisonMinimapBuilding_ShowPulse
-GarrisonMinimapBuilding_ShowPulse = function(self)
-    print("Pre-hook: Building")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapBuilding_ShowPulse(self)
-end
-local oldGarrisonMinimapMission_ShowPulse = GarrisonMinimapMission_ShowPulse
-GarrisonMinimapMission_ShowPulse = function(self)
-    print("Pre-hook: Mission")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapMission_ShowPulse(self)
-end
-local oldGarrisonMinimapInvasion_ShowPulse = GarrisonMinimapInvasion_ShowPulse
-GarrisonMinimapInvasion_ShowPulse = function(self)
-    print("Pre-hook: Invasion")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapInvasion_ShowPulse(self)
-end
-local oldGarrisonMinimapShipmentCreated_ShowPulse = GarrisonMinimapShipmentCreated_ShowPulse
-GarrisonMinimapShipmentCreated_ShowPulse = function(self)
-    print("Pre-hook: Shipment")
-    self:SetAlpha(1)
-    return oldGarrisonMinimapShipmentCreated_ShowPulse(self)
+--[[ Garrison ]]--
+-- GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Play()
+-- ShowGarrisonPulse(GarrisonLandingPageMinimapButton)
+local function HideCommandBar(...)
+    MinimapAdv:debug("HideCommandBar", ...)
+    _G.OrderHallCommandBar:Hide()
 end
 
---GarrisonLandingPageTutorialBox:Show()
---GarrisonMinimapMission_ShowPulse(GarrisonLandingPageMinimapButton)
-
-local function hookfunc(self, lock, enabled)
-    print("hookfunc", self, lock, enabled)
-    if enabled then
-        self:SetAlpha(1)
-    else
-        self:SetAlpha(0)
+local function ShowGarrisonPulse(self)
+    local isPlaying = self.MinimapLoopPulseAnim:IsPlaying()
+    MinimapAdv:debug("ShowGarrisonPulse", isPlaying)
+    self.MinimapLoopPulseAnim:Stop()
+    self.shouldShow = true
+    fadeIn(self)
+    if isPlaying then
+        _G.C_Timer.After(0.2, function()
+            self.MinimapLoopPulseAnim:Play()
+        end)
     end
 end
 
-local function Garrison_OnLeave(self)
-    fadeOut(self)
-end
-]]--
+local isPulseEvent = {
+    GARRISON_BUILDING_ACTIVATABLE = true,
+    GARRISON_MISSION_FINISHED = true,
+    GARRISON_INVASION_AVAILABLE = true,
+    SHIPMENT_UPDATE = true,
+}
 
+local function Garrison_OnEvent(self, event, ...)
+    MinimapAdv:debug("Garrison_OnEvent", event, ...)
+    MinimapAdv:debug("button has pulse", self.MinimapLoopPulseAnim:IsPlaying())
+    if event == "GARRISON_SHOW_LANDING_PAGE" then
+        local alpha = self:GetAlpha()
+        -- This fires quite often, so only react when the frame is actually shown.
+        if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
+            MinimapAdv:debug("inLandingPage fadein")
+            fadeIn(self)
+        elseif not self.shouldShow and alpha > 0 then
+            MinimapAdv:debug("outLandingPage fadeout")
+            fadeOut(self)
+        else
+            MinimapAdv:debug("notLandingPage")
+            self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
+        end
+    elseif isPulseEvent[event] then
+        ShowGarrisonPulse(self)
+    end
+end
+local function Garrison_OnLeave(self)
+    MinimapAdv:debug("Garrison_OnLeave")
+    if not (self.MinimapLoopPulseAnim:IsPlaying() and (_G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown())) then
+        self.shouldShow = false
+        fadeOut(self)
+    end
+end
 local function Garrison_OnEnter(self)
+    MinimapAdv:debug("Garrison_OnEnter")
     local isLeft = db.position.anchorto:find("LEFT")
-    --print("Garrison_OnEnter")
-    _G.GameTooltip:SetOwner(_G.GarrisonLandingPageMinimapButton, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"));
-    _G.GameTooltip:SetText(_G.GARRISON_LANDING_PAGE_TITLE, 1, 1, 1);
-    _G.GameTooltip:AddLine(_G.MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP, nil, nil, nil, true);
-    _G.GameTooltip:Show();
-    --fadeIn(self)
+    _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
+    _G.GameTooltip:SetText(self.title, 1, 1, 1)
+    _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
+    if _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0 then
+        local categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+        for index, category in ipairs(categoryInfo) do
+            _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit))
+        end
+    end
+    _G.GameTooltip:Show()
+    self.shouldShow = true
+    fadeIn(self)
 end
 
 ---- Minimap
@@ -1473,6 +1494,10 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             _G.TimeManagerClockButton:Hide()
         end)
         _G.TimeManagerClockButton:Hide()
+    elseif addon == "Blizzard_OrderHallUI" then
+        _G.C_Timer.After(0.1, HideCommandBar)
+        _G.OrderHallCommandBar.SetShown = HideCommandBar
+        _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
 end
 
@@ -1520,6 +1545,7 @@ function MinimapAdv:RegEvents()
     self:RegisterEvent("LFG_QUEUE_STATUS_UPDATE", "GetLFGQueue")
     self:RegisterEvent("LFG_LIST_APPLICANT_UPDATED", "GetLFGList")
     self:RegisterEvent("LFG_LIST_ACTIVE_ENTRY_UPDATE", "GetLFGList")
+    self:GetLFGList("OnEnable", true)
 
     -- POI
     self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
@@ -1533,22 +1559,23 @@ function MinimapAdv:RegEvents()
     self.LastX = 0
     self.LastY = 0
     self.StationaryTime = 0
-    -- self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
     local function MovementTimerUpdate()
         MinimapAdv:MovementUpdate()
     end
-    self.CoordsTicker = _G.C_Timer.NewTicker(0.5, MovementTimerUpdate)
-    -- end)
-    -- self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
-        -- self.CoordsTicker:Cancel()
-    -- end)
+    self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
+        self.CoordsTicker = _G.C_Timer.NewTicker(0.5, MovementTimerUpdate)
+    end)
+    self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
+        self.CoordsTicker:Cancel()
+    end)
 end
 
 --------------------------
 -- FRAME INITIALIZATION --
 --------------------------
+
 -- Frame Template
-local function NewInfoFrame(name, parent, size2)
+local function NewInfoFrame(name, parent, format, size2)
     local NewFrame = _G.CreateFrame("Frame", "MinimapAdv_"..name, parent)
     NewFrame:SetSize(_G.Minimap:GetWidth(), 12)
     NewFrame:SetFrameStrata("LOW")
@@ -1564,7 +1591,29 @@ local function NewInfoFrame(name, parent, size2)
     end
     NewFrame.text = text
 
-    infoTexts[name] = {type = name, shown = false}
+    if format then
+        NewFrame:SetScript("OnUpdate", function(self, elapsed)
+            if not self.queuedTime then return end
+            --Don't update every tick (can't do 1 second beause it might be 1.01 seconds and we'll miss a tick.
+            --Also can't do slightly less than 1 second (0.9) because we'll end up with some lingering numbers
+            self.updateThrottle = (self.updateThrottle or 0.1) - elapsed;
+            if ( self.updateThrottle <= 0 ) then
+                local queueStr
+                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - self.queuedTime)
+                if self.myWait > 0 then
+                    local avgWait = _G.SecondsToTime(self.myWait, false, false, 1)
+                    queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
+                else
+                    queueStr = ("%s"):format(timeInQueue)
+                end
+                local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+                self.text:SetFormattedText(format, colorOrange, queueStr)
+                self:SetHeight(self.text:GetStringHeight())
+                self.updateThrottle = 0.1;
+            end
+        end)
+    end
+    infoTexts[name] = {type = name, shown = false, format = format}
     _G.tinsert(infoTexts, infoTexts[name])
     return NewFrame
 end
@@ -1658,10 +1707,10 @@ local function CreateFrames()
     MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap, true)
     MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap, true)
     MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap, true)
-    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, true)
-    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, true)
-    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, true)
-    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, true)
+    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, nil, true)
+    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s", true)
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s", true)
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s", true)
 
     -- Zone Indicator
     MMFrames.info.zoneIndicator = _G.CreateFrame("Frame", "MinimapAdv_Zone", _G.Minimap)
@@ -1711,16 +1760,16 @@ local function SetUpMinimapFrame()
     _G.QueueStatusMinimapButtonBorder:Hide()
 
     _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
-    --GarrisonLandingPageMinimapButton:SetAlpha(0)
-    _G.GarrisonLandingPageMinimapButton:SetParent(_G.Minimap)
-    _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-    _G.GarrisonLandingPageMinimapButton:SetPoint("TOPRIGHT", 2, 2)
-    _G.GarrisonLandingPageMinimapButton:SetSize(32, 32)
-    --GarrisonLandingPageMinimapButton:HookScript("OnEvent", Garrison_OnEvent)
-    --GarrisonLandingPageMinimapButton:HookScript("OnLeave", Garrison_OnLeave)
-    _G.GarrisonLandingPageMinimapButton:SetScript("OnEnter", Garrison_OnEnter)
-    --hooksecurefunc("GarrisonMinimap_SetPulseLock", hookfunc)
-
+    local GLPButton = _G.GarrisonLandingPageMinimapButton
+    GLPButton:SetParent(_G.Minimap)
+    GLPButton:SetAlpha(0)
+    GLPButton:ClearAllPoints()
+    GLPButton:SetPoint("TOPRIGHT", 2, 2)
+    GLPButton:SetSize(32, 32)
+    GLPButton:HookScript("OnEvent", Garrison_OnEvent)
+    GLPButton:HookScript("OnLeave", Garrison_OnLeave)
+    GLPButton:SetScript("OnEnter", Garrison_OnEnter)
+    GLPButton.shouldShow = false
 
     _G.MinimapNorthTag:SetAlpha(0)
 

@@ -7,24 +7,29 @@ if (GetLocale() ~= "deDE") then
 	return
 end
 
-local REVISION = 90000 + tonumber(("$Revision: 92 $"):match("%d+"))
+local REVISION = 90000 + tonumber(("$Revision: 108 $"):match("%d+"))
 if (LibKeyBoundLocale10 and REVISION <= LibKeyBoundLocale10.REVISION) then
 	return
 end
 
+
 LibKeyBoundLocale10 = {
 	REVISION = REVISION;
-	Enabled = "Tastenzuweisung Modus aktiviert";
-	Disabled = "Tastenzuweisung Modus deaktiviert";
-	ClearTip = format("Drücke %s um alle Tastenzuweisungen zu löschen", GetBindingText("ESCAPE", "KEY_"));
+
+
+
+	BindingMode = "Tastenbelegungsmodus";
+	Enabled = "Tastenbelegungsmodus aktiviert";
+	Disabled = "Tastenbelegungsmodus deaktiviert";
+	ClearTip = format("Drücke %s, um alle Tastenbelegungen zu löschen", GetBindingText("ESCAPE", "KEY_"));
 	NoKeysBoundTip = "Keine Tasten zugewiesen";
-	ClearedBindings = "Entferne alle Zuweisungen von %s";
-	BoundKey = "Setze %s zu %s";
-	UnboundKey = "Entferne %s von %s";
-	CannotBindInCombat = "Kann Tasten nicht im Kampf zuweisen";
-	CombatBindingsEnabled = "Verlasse Kampf, Tastenzuweisung Modus aktiviert";
-	CombatBindingsDisabled = "Beginne Kampf, Tastenzuweisung Modus deaktiviert";
-	BindingsHelp = "Schwebe mit der Maus über einem Schalter. Drück dann eine Taste um sie zuzuweisen. Um die Belegung der Taste wieder zu löschen drück %s.";
+	ClearedBindings = "Alle Belegungen von %s wurden entfernt";
+	BoundKey = "%s wurde %s zugewiesen";
+	UnboundKey = "%s wurde von %s entfernt";
+	CannotBindInCombat = "Tasten können nicht im Kampf belegt werden";
+	CombatBindingsEnabled = "Verlasse Kampf, Tastenbelegungsmodus aktiviert";
+	CombatBindingsDisabled = "Beginne Kampf, Tastenbelegungsmodus deaktiviert";
+	BindingsHelp = "Schwebe mit der Maus über eine Schaltfläche. Drücke dann eine Taste, um sie dieser Schaltfläche zuzuweisen. Um alle Tastenbelegungen der Schaltfläche wieder zu löschen, drücke %s.";
 
 	-- This is the short display version you see on the Button
 	["Alt"] = "A",

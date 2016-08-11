@@ -78,6 +78,7 @@ do
 end
 
 function MyContainer:OnContentsChanged()
+	cargBags.debug("style MyContainer:OnContentsChanged", self.name)
 
 	local col, row = 0, 0
 	local yPosOffs = self.Caption and 20 or 0
@@ -171,6 +172,7 @@ local JS = CreateFrame("Frame")
 JS:RegisterEvent("MERCHANT_SHOW")
 local function SellJunk()
 	if not(cBnivCfg.SellJunk) or (UnitLevel("player") < 5) then return end
+	cargBags.debug("style SellJunk")
 	
 	local Profit, SoldCount = 0, 0
 	local item
@@ -209,6 +211,7 @@ end
 
 -- Reset New
 local resetNewItems = function(self)
+	cargBags.debug("style resetNewItems")
 	cB_KnownItems = cB_KnownItems or {}
 	for bag = 0, 4 do
 		local tNumSlots = GetContainerNumSlots(bag)

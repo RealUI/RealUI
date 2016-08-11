@@ -47,13 +47,13 @@ function BlizzardArtMod:OnEnable()
 		self.bar.rightCap:ClearAllPoints()
 		self.bar.rightCap:SetHeight(128)
 		self.bar.rightCap:SetWidth(128)
-		self.bar.rightCap:SetTexCoord(1.0,0.0,0.0,1.0) -- Horizontal mirror
+		self.bar.rightCap:SetTexCoord(1.0, 0.0, 0.0, 1.0) -- Horizontal mirror
 		self.bar.barTex0 = self.bar:CreateTexture("BlizzardArtTex0", "ARTWORK")
 		self.bar.barTex0:ClearAllPoints()
 		self.bar.barTex0:SetHeight(43)
 		self.bar.barTex0:SetWidth(256)
 		self.bar.barTex0:SetPoint("BOTTOMLEFT", self.bar, "TOPLEFT", 0, -48)
-		self.bar.barTex0:SetTexCoord(0.0,1.0,0.83203125,1.0) -- Left quarter of the classic bar
+		self.bar.barTex0:SetTexCoord(0.0, 1.0, 0.83203125, 1.0) -- Left quarter of the classic bar
 		self.bar.barTex1 = self.bar:CreateTexture("BlizzardArtTex1", "ARTWORK")
 		self.bar.barTex1:ClearAllPoints()
 		self.bar.barTex1:SetHeight(43)
@@ -66,7 +66,7 @@ function BlizzardArtMod:OnEnable()
 		self.bar.barTex1b:SetWidth(9)
 		self.bar.barTex1b:SetPoint("BOTTOMLEFT", self.bar, "TOPLEFT", 503, -48)
 		self.bar.barTex1b:SetTexture("Interface\\MainMenuBar\\UI-MainMenuBar-Dwarf")
-		self.bar.barTex1b:SetTexCoord(0.9609375,0.99609375,0.08203125,0.25) -- 9 pixels wide, pixels 246 to 254 of 256, inclusive, to be exact
+		self.bar.barTex1b:SetTexCoord(0.9609375, 0.99609375, 0.08203125, 0.25) -- 9 pixels wide, pixels 246 to 254 of 256, inclusive, to be exact
 		self.bar.barTex2 = self.bar:CreateTexture("BlizzardArtTex2", "ARTWORK")
 		self.bar.barTex2:ClearAllPoints()
 		self.bar.barTex2:SetHeight(43)
@@ -83,7 +83,7 @@ function BlizzardArtMod:OnEnable()
 		self.bar.barTex3b:SetWidth(9)
 		self.bar.barTex3b:SetPoint("BOTTOMLEFT", self.bar, "TOPLEFT", 1015, -48)
 		self.bar.barTex3b:SetTexture("Interface\\MainMenuBar\\UI-MainMenuBar-Dwarf")
-		self.bar.barTex3b:SetTexCoord(0.9609375,0.99609375,0.08203125,0.25) -- 9 pixels wide, pixels 246 to 254 of 256, inclusive, to be exact 
+		self.bar.barTex3b:SetTexCoord(0.9609375, 0.99609375, 0.08203125, 0.25) -- 9 pixels wide, pixels 246 to 254 of 256, inclusive, to be exact
 	end
 	self.bar:Enable()
 	self:ToggleOptions()
@@ -140,33 +140,33 @@ function BlizzardArt:ApplyConfig()
 	end
 
 	if config.artLayout == "CLASSIC" then -- Classical layout: one bar, micro menu and bags
-		self:SetSize(1024,53)
+		self:SetSize(1024, 53)
 		self.barTex1:SetWidth(256)
-		self.barTex1:SetTexCoord(0.0,1.0,0.58203125,0.75) -- Second quarter of classic bar
+		self.barTex1:SetTexCoord(0.0, 1.0, 0.58203125, 0.75) -- Second quarter of classic bar
 		self.barTex1b:Hide()
 		self.barTex2:Show()
-		self.barTex2:SetTexCoord(0.0,1.0,0.33203125,0.5) -- Third quarter of classic bar
+		self.barTex2:SetTexCoord(0.0, 1.0, 0.33203125, 0.5) -- Third quarter of classic bar
 		self.barTex3:Show()
 		self.barTex3:SetWidth(256)
-		self.barTex3:SetTexCoord(0.0,1.0,0.08203125,0.25) -- Last quarter of classic bar
+		self.barTex3:SetTexCoord(0.0, 1.0, 0.08203125, 0.25) -- Last quarter of classic bar
 		self.barTex3b:Hide()
 		self.rightCap:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 992, -48)
 	elseif config.artLayout == "TWOBAR" then -- Two bars next to each other
-		self:SetSize(1024,53)
+		self:SetSize(1024, 53)
 		self.barTex1:SetWidth(247) -- Tex1b will complement the other 9 pixels
-		self.barTex1:SetTexCoord(0.0,0.96484375,0.58203125,0.75) -- First 247 pixels of second quarter of classic bar
+		self.barTex1:SetTexCoord(0.0, 0.96484375, 0.58203125, 0.75) -- First 247 pixels of second quarter of classic bar
 		self.barTex1b:Show() -- Tex1b is used here
 		self.barTex2:Show()
-		self.barTex2:SetTexCoord(0.0,1.0,0.83203125,1.0) -- First quarter of classic bar, or: repeat of Tex0
+		self.barTex2:SetTexCoord(0.0, 1.0, 0.83203125, 1.0) -- First quarter of classic bar, or: repeat of Tex0
 		self.barTex3:Show()
 		self.barTex3:SetWidth(247) -- Tex3 will complement the other 9 pixels
-		self.barTex3:SetTexCoord(0.0,0.96484375,0.58203125,0.75) -- First 247 pixels of second quarter of classic bar, or: repeat of Tex1
+		self.barTex3:SetTexCoord(0.0, 0.96484375,  0.58203125, 0.75) -- First 247 pixels of second quarter of classic bar, or: repeat of Tex1
 		self.barTex3b:Show() -- Tex3b is used here
 		self.rightCap:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 992, -48)
 	else -- Only one bar
-		self:SetSize(512,53) -- Half size, since it's only one bar wide
+		self:SetSize(512, 53) -- Half size, since it's only one bar wide
 		self.barTex1:SetWidth(247) -- Tex1b will complement the other 9 pixels
-		self.barTex1:SetTexCoord(0.0,0.96484375,0.58203125,0.75) -- First 247 pixels of second quarter of classic bar
+		self.barTex1:SetTexCoord(0.0, 0.96484375, 0.58203125, 0.75) -- First 247 pixels of second quarter of classic bar
 		self.barTex1b:Show() -- Tex1b is used here
 		self.barTex2:Hide() -- Hide second half
 		self.barTex3:Hide()

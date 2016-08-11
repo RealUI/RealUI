@@ -55,7 +55,7 @@ end
 local function CreateCopyButton(self)
     self.Copy = _G.CreateFrame('Button', nil, _G[self:GetName()])
     self.Copy:SetSize(16, 16)
-    self.Copy:SetPoint('TOPRIGHT', self, -10, 18)
+    self.Copy:SetPoint('TOPRIGHT', self, -5, -5)
     
     self.Copy:SetNormalTexture('Interface\\AddOns\\nibRealUI\\Media\\Chat\\CopyPaste')
     self.Copy:GetNormalTexture():SetSize(16, 16)

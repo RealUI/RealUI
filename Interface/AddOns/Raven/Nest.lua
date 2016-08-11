@@ -134,7 +134,8 @@ local function BarAnimation(bar, anchor1, frame, anchor2, xoffset, yoffset)
 		local scale = b.anim:CreateAnimation("Scale")
 		scale:SetScale(3, 3); scale:SetOrigin('CENTER', 0, 0); scale:SetDuration(0.65); scale:SetOrder(1)
 		local alpha = b.anim:CreateAnimation("Alpha")
-		alpha:SetChange(-1); alpha:SetDuration(0.65); alpha:SetSmoothing("IN"); alpha:SetEndDelay(5); alpha:SetOrder(1)
+		alpha:SetFromAlpha(1); alpha:SetToAlpha(0) -- LEGION change
+		alpha:SetDuration(0.65); alpha:SetSmoothing("IN"); alpha:SetEndDelay(5); alpha:SetOrder(1)
 		b.scale = scale; b.alpha = alpha
 	end
 	local w, h = bar.icon:GetSize()
@@ -1134,7 +1135,7 @@ MOD.Nest_TimeFormatOptions = {
 	{ 2, 3, 3, 3, 4 }, { 2, 3, 3, 3, 5 }, { 3, 3, 3, 2, 3 }, { 3, 3, 3, 3, 5 }, -- 24
 	{ 4, 3, 1, 2, 3 }, { 4, 3, 1, 2, 2 }, { 4, 3, 1, 3, 4 }, { 4, 3, 1, 3, 5 }, -- 28
 	{ 5, 1, 1, 2, 3 }, { 5, 1, 1, 2, 2 }, { 5, 1, 1, 3, 4 }, { 5, 1, 1, 3, 5 }, -- 32
-	{ 3, 3, 3, 2, 2 }, { 3, 3, 3, 2, 4 }, -- 34
+	{ 3, 3, 3, 2, 2 }, { 3, 3, 3, 3, 4 }, -- 34
 }
 
 function MOD.Nest_FormatTime(t, timeFormat, timeSpaces, timeCase)
@@ -1617,7 +1618,9 @@ function MOD.Nest_Initialize()
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
 	if GetCVar("useUiScale") == "1" then
-        pixelScale = 768 / ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()]:match("%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+		local resolution = GetCVar("gxFullscreenResolution") -- LEGION FIX [note: gxResolution was removed]
+		if GetCVar("gxWindow") == "1" then resolution = GetCVar("gxWindowedResolution") end
+		pixelScale = 768 / string.match(resolution, "%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
 	else
 		pixelScale = 1
 	end

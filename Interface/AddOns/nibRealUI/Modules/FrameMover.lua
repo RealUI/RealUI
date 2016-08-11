@@ -80,6 +80,12 @@ local FrameList = {
 }
 FrameMover.FrameList = FrameList
 
+local isAddonControl = {
+    raven = "Raven",
+    grid2 = "Grid2"
+}
+FrameMover.isAddonControl = isAddonControl
+
 -- Hide a Frame 
 local function HideFrameGroup(FramesTable)
     for _, info in next, FramesTable do
@@ -121,9 +127,10 @@ function FrameMover:MoveAddons(addonName)
     FrameMover:debug("MoveAddons", addonName)
     for addonSlug, addon in next, FrameList.addons do
         local addonInfo = db.addons[addonSlug]
-        --print("MoveAddons", addonSlug, addon, addonName)
+        FrameMover:debug("Move Addon", addonSlug, addon, addonName)
         if (addonName and addonSlug == addonName) or (addonName == nil) then
-            if ((addonSlug ~= "grid2") and addonInfo.move) or ((addonSlug == "grid2") and RealUI:DoesAddonMove("Grid2")) then
+            if (not isAddonControl[addonSlug] and addonInfo.move) or
+              (isAddonControl[addonSlug] and RealUI:DoesAddonMove(isAddonControl[addonSlug])) then
                 local IsHealing = ( addon.hashealing and addonInfo.healing and RealUI.cLayout == 2 )
                 FrameMover:debug("IsHealing", IsHealing)
                 
@@ -177,6 +184,7 @@ local function Hook_Raven()
     t:Hide()
     t.e = 0
     t:SetScript("OnUpdate", function(s, e)
+        FrameMover:debug("Move Raven")
         t.e = t.e + e
         if t.e >= 0.5 then
             MoveFrameGroup(FrameList.addons.raven.frames, db.addons.raven.frames)
@@ -186,7 +194,8 @@ local function Hook_Raven()
     end) 
     
     _G.hooksecurefunc(_G.Raven, "Nest_SetAnchorPoint", function()
-        t:Show()
+        FrameMover:debug("Nest_SetAnchorPoint")
+        t:SetShown(RealUI:DoesAddonMove("Raven"))
     end)
 
     if _G.RavenBarGroupBuffs then _G.RavenBarGroupBuffs:SetClampedToScreen(false) end

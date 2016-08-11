@@ -45,7 +45,7 @@ do
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
             path = LSM:Fetch("font", fontName)
-            --debug("Fonts |", fontName, "|", path, "|", fontPath)
+            debug("Fonts |", fontName, "|", path, "|", fontPath)
             if path == fontPath then
                 debug("Fonts Equal |", fontName, "|", fontSize, "|", fontArgs)
                 local tab = {
@@ -169,62 +169,72 @@ RealUI.hudSizeOffsets = {
 }
 
 -- Default Options
-local charInit = {
-    installStage = 0,
-    initialized = false,
-    needchatmoved = true,
-}
-local defaults = {
-    global = {
-        tutorial = {
-            stage = -1,
-        },
-        tags = {
-            firsttime = true,
-            retinaDisplay = {
-                checked = false,
-                set = false,
+local defaults, charInit do
+    charInit = {
+        installStage = 0,
+        initialized = false,
+        needchatmoved = true,
+    }
+    local spec = {}
+    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+        local _, _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+        debug("Spec info", specIndex, role)
+        spec[specIndex] = role == "HEALER" and 2 or 1
+    end
+    defaults = {
+        global = {
+            tutorial = {
+                stage = -1,
             },
-            lowResOptimized = false,
-            slashRealUITyped = false,   -- To disable "Type /realui" message
+            tags = {
+                firsttime = true,
+                retinaDisplay = {
+                    checked = false,
+                    set = false,
+                },
+                lowResOptimized = false,
+                slashRealUITyped = false,   -- To disable "Type /realui" message
+            },
+            messages = {
+                resetNew = false,
+                largeHuDOption = false,
+            },
+            verinfo = {},
+            patchedTOC = 0
         },
-        messages = {
-            resetNew = false,
-            largeHuDOption = false,
+        char = {
+            init = charInit,
+            layout = {
+                current = 1,    -- 1 = DPS/Tank, 2 = Healing
+                needchanged = false,
+                spec = spec -- Save layout for each spec
+            },
         },
-        verinfo = {},
-    },
-    char = {
-        init = charInit,
-        layout = {
-            current = 1,    -- 1 = DPS/Tank, 2 = Healing
-            needchanged = false,
-            spec = {1, 1},  -- Save layout for each spec
+        profile = {
+            modules = {
+                ['*'] = true,
+                ["AchievementScreenshots"] = false,
+            },
+            registeredChars = {},
+            -- HuD positions
+            positionsLink = true,
+            positions = RealUI.defaultPositions,
+            -- Action Bar settings
+            abSettingsLink = false,
+            -- Dynamic UI settings
+            settings = {
+                powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
+                fontStyle = 2,
+                infoLineBackground = true,
+                stripeOpacity = 0.5,
+                hudSize = 1,
+                reverseUnitFrameBars = false,
+            },
+            media = RealUI.media
         },
-    },
-    profile = {
-        modules = {
-            ['*'] = true,
-            ["AchievementScreenshots"] = false,
-        },
-        registeredChars = {},
-        -- HuD positions
-        positionsLink = true,
-        positions = RealUI.defaultPositions,
-        -- Action Bar settings
-        abSettingsLink = false,
-        -- Dynamic UI settings
-        settings = {
-            powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-            fontStyle = 2,
-            infoLineBackground = true,
-            stripeOpacity = 0.5,
-            hudSize = 1,
-            reverseUnitFrameBars = false,
-        },
-        media = RealUI.media
-    },
-}
+    }
+end
+
 --------------------------------------------------------
 
 -- Toggle Grid2's "Test Layout"
@@ -429,31 +439,6 @@ function RealUI:VARIABLES_LOADED()
             _G.CancelEmote()
         end
     end)
-
-    -- -- Temp solution for Blizzard's 5.4.1 craziness
-    -- UIParent:HookScript("OnEvent", function(self, event, a1, a2)
-    --  if event:find("ACTION_FORBIDDEN") and ((a1 or "")..(a2 or "")):find("IsDisabledByParentalControls") then
-    --      StaticPopup_Hide(event)
-    --  end
-    -- end)
-
-    -- Fix Regeant shift+clicking in TradeSkill window
-    if not RealUI.isBeta then
-    _G.LoadAddOn("Blizzard_TradeSkillUI")
-        local function TradeSkillReagent_OnClick(button)
-            local link = _G.GetTradeSkillReagentItemLink(_G.TradeSkillFrame.selectedSkill, button:GetID())
-            if not link then
-                local name = _G.GameTooltip:GetItem()
-                if name ~= button.name:GetText() then
-                    return
-                end
-            end
-            _G.HandleModifiedItemClick(link)
-        end
-        for i = 1, 8 do
-            _G["TradeSkillReagent"..i]:SetScript("OnClick", TradeSkillReagent_OnClick)
-        end
-    end
 end
 
 -- Delayed updates
@@ -493,15 +478,34 @@ function RealUI:PLAYER_ENTERING_WORLD()
     local ConfigStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
     _G.GameMenuFrame.realuiControl = RealUI:CreateTextButton(ConfigStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
     _G.GameMenuFrame.realuiControl:SetPoint("TOP", _G.GameMenuButtonContinue, "BOTTOM", 0, -16)
-    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function() RealUI:LoadConfig("HuD"); _G.HideUIPanel(_G.GameMenuFrame) end)
+    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function()
+        RealUI.Debug("Config", "GameMenuFrame")
+        RealUI:LoadConfig("HuD")
+        _G.HideUIPanel(_G.GameMenuFrame)
+    end)
 
     -- Button Backgrounds
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
+    local helpNewBG = RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonOptions, _G.GameMenuButtonAddons)
 
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonLogout, _G.GameMenuButtonQuit)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonContinue, _G.GameMenuButtonContinue)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuFrame.realuiControl, _G.GameMenuFrame.realuiControl)
+
+    _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
+        debug("GameMenuFrame_UpdateVisibleButtons")
+        local height = 359
+
+        if _G.SplashFrameCanBeShown() then
+            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonWhatsNew, "BOTTOMRIGHT", 2, -2)
+        else
+            height = height - 20
+            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonHelp, "BOTTOMRIGHT", 2, -2)
+        end
+
+        debug("menuFrame:SetHeight", height)
+        menuFrame:SetHeight(height)
+    end)
 
     -- >= 10 minute garbage collection
     self:ScheduleTimer(function()
@@ -636,16 +640,20 @@ function RealUI:ADDON_LOADED(event, addon)
 end
 
 function RealUI:ChatCommand_Config()
+    RealUI.Debug("Config", "/real")
     dbg.tags.slashRealUITyped = true
     RealUI:LoadConfig("HuD")
 end
 
 local configLoaded, configFailed = false, false
 function RealUI:LoadConfig(app, section, ...)
+    if _G.InCombatLockdown() then
+        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+    end
     if not configLoaded then
-        configLoaded = true
-        local loaded, reason = _G.LoadAddOn("nibRealUI_Config")
-        if not loaded then
+        local reason
+        configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
+        if not configLoaded then
             _G.print("Failed to load nibRealUI_Config:", reason)
             configFailed = true
         end
@@ -699,7 +707,10 @@ function RealUI:OnInitialize()
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function() RealUI:LoadConfig("RealUI") end)
+    self:RegisterChatCommand("realadv", function()
+        RealUI.Debug("Config", "/realadv")
+        RealUI:LoadConfig("RealUI")
+    end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", function() _G.ReloadUI() end)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
@@ -715,7 +726,6 @@ function RealUI:OnInitialize()
         end
         self:FindSpellID(spellName, unit, auraType)
     end)
-    _G.GameMenuFrame:HookScript("OnShow", function() _G.GameMenuFrame:SetHeight(_G.GameMenuFrame:GetHeight() + 27) end)
 
     -- Synch user's settings
     if dbg.tags.firsttime then

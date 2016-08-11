@@ -1,2 +1,2 @@
 ﻿-- Racial abilities
--- Intentionally left blank for WoD
+-- Intentionally left blank for WoD and beyond

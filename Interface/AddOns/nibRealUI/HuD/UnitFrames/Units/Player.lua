@@ -47,6 +47,7 @@ local frameInfo = {
 local function CreateHealthBar(parent)
     local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHeight)
     local info = frameInfo.health
+    info.debug = info.debug and "playerHealth"
     local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     health:SetPoint("TOPRIGHT", parent, 0, 0)
     health:SetMinMaxValues(0, 1)
@@ -62,9 +63,12 @@ local function CreateHealthBar(parent)
     health.step = {}
     health.warn = {}
     for i = 1, 2 do
+        info.debug = info.debug and "playerHealthStep" .. i
         health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
-        health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
         health.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+
+        info.debug = info.debug and "playerHealthWarn" .. i
+        health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
         health.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
     end
 
@@ -80,6 +84,7 @@ end
 local function CreatePredictBar(parent)
     local width, height = parent.Health:GetSize()
     local info = frameInfo.predict
+    info.debug = info.debug and "playerPredict"
     local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
     absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
 
@@ -94,6 +99,7 @@ end
 local function CreatePvPStatus(parent)
     local _, height = parent.Health:GetSize()
     local info = frameInfo.health
+    info.debug = info.debug and "playerPvP"
 
     height = _G.ceil(height * 0.65)
     local pvp = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
@@ -113,6 +119,7 @@ end
 local function CreatePowerBar(parent)
     local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHeight))
     local info = frameInfo.power
+    info.debug = info.debug and "playerPower"
     local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
     local _, powerType = _G.UnitPowerType(parent.unit)
     power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
@@ -133,9 +140,12 @@ local function CreatePowerBar(parent)
     power.step = {}
     power.warn = {}
     for i = 1, 2 do
+        info.debug = info.debug and "playerPowerStep" .. i
         power.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, power, info)
-        power.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, power, info)
         power.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+
+        info.debug = info.debug and "playerPowerWarn" .. i
+        power.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, power, info)
         power.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
     end
 
@@ -147,33 +157,39 @@ local function CreatePowerBar(parent)
     parent.Power = power
 
     --[[ Druid Mana ]]--
-    if RealUI.class == "DRUID" then
-        local druidMana = _G.CreateFrame("StatusBar", nil, power)
-        druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
-        druidMana:SetStatusBarColor(0, 0, 0, 0.75)
-        druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
-        druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
-        druidMana:SetHeight(1)
+    local druidMana = _G.CreateFrame("StatusBar", nil, power)
+    druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+    druidMana:SetStatusBarColor(0, 0, 0, 0.75)
+    druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
+    druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
+    druidMana:SetHeight(1)
 
-        function druidMana:PostUpdate(unit, min, max)
-            if min == max then
+    function druidMana:PostUpdate(unit, min, max)
+        if min == max then
+            if self:IsVisible() then
                 self:Hide()
             end
+        else
+            if not self:IsVisible() then
+                self:Show()
+            end
         end
-
-        --[[ test 
-        druidMana:SetMinMaxValues(0, 1)
-        druidMana:SetValue(0.75)
-        druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-        ]]
-        -- Add a background
-        local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
-        bg:SetAllPoints(druidMana)
-        bg:SetTexture(.2, .2, 1)
-
-        parent.DruidMana = druidMana
-        parent.DruidMana.bg = bg
     end
+
+    ---[[ test 
+    druidMana:SetMinMaxValues(0, 1)
+    druidMana:SetValue(0.75)
+    druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+    --]]
+    --[[ Add a background]]
+    local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
+    bg:SetAllPoints(druidMana)
+    bg:SetColorTexture(.2, .2, 1)
+
+    druidMana.colorPower = true
+
+    parent.DruidMana = druidMana
+    parent.DruidMana.bg = bg
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.

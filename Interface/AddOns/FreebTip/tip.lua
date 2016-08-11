@@ -125,14 +125,6 @@ local qqColor = { r=1, g=0, b=0 }
 local nilcolor = { r=1, g=1, b=1 }
 local tapped = { r=.6, g=.6, b=.6 }
 
-local UnitIsTapDenied
-if RealUI.isBeta then
-    UnitIsTapDenied = _G.UnitIsTapDenied
-else
-    UnitIsTapDenied = function(unit)
-        return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit)
-    end
-end
 local function unitColor(unit)
     local color
 
@@ -167,32 +159,6 @@ local function getUnit(self)
     end
 
     return unit
-end
-
-local function formatLines(self)
-    for i=1, self:NumLines() do
-        local tiptext = _G["GameTooltipTextLeft"..i]
-        local point, relTo, relPoint, x, y = tiptext:GetPoint()
-        tiptext:ClearAllPoints()
-
-        if(i==1) then
-            tiptext:SetPoint("TOPLEFT", self, "TOPLEFT", x, y)
-        else
-            local key = i-1
-
-            while(true) do
-                local preTiptext = _G["GameTooltipTextLeft"..key]
-
-                if(preTiptext and not preTiptext:IsShown()) then
-                    key = key-1
-                else
-                    break
-                end
-            end
-
-            tiptext:SetPoint("TOPLEFT", _G["GameTooltipTextLeft"..key], "BOTTOMLEFT", x, -2)
-        end
-    end
 end
 
 local function hideLines(self)
@@ -686,8 +652,6 @@ local function GT_OnUpdate(self, elapsed)
 
         self.freebHeightSet = numLines
     end
-
-    formatLines(self)
 end
 GameTooltip:HookScript("OnUpdate", GT_OnUpdate)
 

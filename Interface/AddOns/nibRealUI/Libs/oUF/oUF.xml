@@ -7,6 +7,7 @@
 	<Script file='blizzard.lua' />
 	<Script file='units.lua' />
 	<Script file='colors.lua' />
+	<Script file='finalize.lua' />
 
 	<Script file='elements\power.lua' />
 	<Script file='elements\aura.lua' />
@@ -27,10 +28,10 @@
 	<Script file='elements\runebar.lua' />
 	<Script file='elements\lfdrole.lua' />
 	<Script file='elements\healprediction.lua' />
+	<Script file='elements\powerprediction.lua' />
 	<Script file='elements\picon.lua' />
 	<Script file='elements\readycheck.lua' />
 	<Script file='elements\qicon.lua' />
-	<Script file='elements\eclipsebar.lua' />
 	<Script file='elements\altpowerbar.lua' />
 	<Script file='elements\totems.lua' />
 	<Script file='elements\resurrect.lua' />
@@ -38,8 +39,6 @@
 	<Script file='elements\classicons.lua' />
 	<Script file='elements\stagger.lua' />
 
-	<Script file='finalize.lua' />
-	
 	<!-- Clique support -->
 	<Button name="oUF_ClickCastUnitTemplate" virtual="true" inherits="SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate">
 		<Attributes>

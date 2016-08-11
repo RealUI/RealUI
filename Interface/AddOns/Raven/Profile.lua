@@ -26,6 +26,7 @@ local LSPELL = MOD.LocalSpellNames
 
 local dispelTypes = {} -- table of debuff types that the character can dispel
 local spellColors = {} -- table of default spell colors
+local maxSpellID = 300000 -- set to maximum actual spell id during initialization
 
 -- Saved variables don't handle being set to nil properly so need to use alternate value to indicate an option has been turned off
 local Off = 0 -- value used to designate an option is turned off
@@ -104,13 +105,21 @@ function MOD:InitializeProfile()
 	-- Get profile from database, providing default profile for initialization
 	MOD.db = LibStub("AceDB-3.0"):New("RavenDB", MOD.DefaultProfile)
 	MOD.db.RegisterCallback(MOD, "OnDatabaseShutdown", OnProfileShutDown)
-	
+
 	MOD:InitializeSettings() -- Initialize bar group settings with default values
 end
 
 -- Initialize spells for class auras and cooldowns, also scan other classes for group buffs and cooldowns
 -- Buffs, debuffs and cooldowns are tracked in tables containing name, color, class, race
 function MOD:SetSpellDefaults()
+	local id = maxSpellID
+	while id > 1 do -- find the highest actual spell id by scanning down from a really big number
+		id = id - 1
+		local n = GetSpellInfo(id)
+		if n then break end
+	end
+	maxSpellID = id + 1
+
 	for id, hex in pairs(MOD.defaultColors) do -- add spell colors with localized names to the profile
 		local c = MOD.HexColor(hex) -- convert from hex coded string
 		local name = GetSpellInfo(id) -- get localized name from the spell id
@@ -171,9 +180,9 @@ end
 function MOD:SetInternalCooldownDefaults()
 	local ict = MOD.DefaultProfile.global.InternalCooldowns
 	for _, cd in pairs(MOD.internalCooldowns) do
-		local name, _, icon = GetSpellInfo(cd.id)
+		local name = GetSpellInfo(cd.id)
 		if name and (name ~= "") and (not ict[name] or not cd.item or IsUsableItem(cd.item)) then 
-			local t = { id = cd.id, duration = cd.duration, icon = icon, item = cd.item, class = cd.class }
+			local t = { id = cd.id, duration = cd.duration, icon = GetSpellTexture(cd.id), item = cd.item, class = cd.class }
 			if cd.cancel then
 				t.cancel = {}
 				for k, c in pairs(cd.cancel) do local n = GetSpellInfo(c); if n and n ~= "" then t.cancel[k] = n end end
@@ -189,12 +198,12 @@ end
 function MOD:SetSpellEffectDefaults()
 	local ect = MOD.DefaultProfile.global.SpellEffects
 	for _, ec in pairs(MOD.spellEffects) do
-		local name, _, icon = GetSpellInfo(ec.id)
+		local name = GetSpellInfo(ec.id)
 		if name and name ~= "" then
 			local id, spell, talent = ec.id, nil, nil
-			if ec.spell then spell, _, icon = GetSpellInfo(ec.spell); id = ec.spell end -- must be valid
+			if ec.spell then spell = GetSpellInfo(ec.spell); id = ec.spell end -- must be valid
 			if ec.talent then talent = GetSpellInfo(ec.talent) end -- must be valid
-			local t = { duration = ec.duration, icon = icon, spell = spell, id = id, renew = ec.renew, talent = talent }
+			local t = { duration = ec.duration, icon = GetSpellTexture(id), spell = spell, id = id, renew = ec.renew, talent = talent, kind = ec.kind }
 			ect[name] = t
 		end
 	end
@@ -244,22 +253,22 @@ function MOD:SetIconDefaults()
 			local index = i + offset
 			local stype, id = GetSpellBookItemInfo(index, "spell")
 			if stype == "SPELL" then -- use spellbook index to check for cooldown
-				local name, _, icon = GetSpellInfo(index, "spell")
-				if name and name ~= "" then iconCache[name] = icon end
+				local name = GetSpellInfo(index, "spell")
+				if name and name ~= "" then iconCache[name] = GetSpellTexture(id) end
 			elseif stype == "FLYOUT" then -- use spell id to check for cooldown
 				local _, _, numSlots = GetFlyoutInfo(id)
 				for slot = 1, numSlots do
 					local spellID = GetFlyoutSlotInfo(id, slot)
 					if spellID then
-						local name, _, icon = GetSpellInfo(spellID)
-						if name and name ~= "" then iconCache[name] = icon end
+						local name = GetSpellInfo(spellID)
+						if name and name ~= "" then iconCache[name] = GetSpellTexture(spellID) end
 					end
 				end
 			end
 		end
 	end
-	local _, _, iconGCD = GetSpellInfo(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
-	iconCache[L["GCD"]] = iconGCD
+
+	iconCache[L["GCD"]] = GetSpellTexture(28730) -- cached for global cooldown (using same icon as Arcane Torrent, must be valid)
 end
 
 -- Initialize dimension defaults
@@ -314,7 +323,7 @@ function MOD:CopyFontsAndTextures(s, d)
 		d.iconFont = s.iconFont; d.iconFSize = s.iconFSize; d.iconAlpha = s.iconAlpha; d.iconColor = MOD.CopyColor(s.iconColor)
 		d.iconOutline = s.iconOutline; d.iconShadow = s.iconShadow; d.iconThick = s.iconThick; d.iconMono = s.iconMono
 		d.texture = s.texture; d.bgtexture = s.bgtexture; d.alpha = s.alpha; d.combatAlpha = s.combatAlpha; d.fgAlpha = s.fgAlpha; d.bgAlpha = s.bgAlpha
-		d.fgSaturation = s.fgSaturation; d.fgBrightness = s.fgBrightness;
+		d.fgSaturation = s.fgSaturation; d.fgBrightness = s.fgBrightness; d.bgSaturation = s.bgSaturation; d.bgBrightness = s.bgBrightness;
 		d.backdropTexture = s.backdropTexture; d.backdropWidth = s.backdropWidth; d.backdropInset = s.backdropInset
 		d.backdropPadding = s.backdropPadding; d.backdropPanel = s.backdropPanel; d.backdropEnable = s.backdropEnable
 		d.backdropColor = MOD.CopyColor(s.backdropColor); d.backdropFill = MOD.CopyColor(s.backdropFill)
@@ -332,6 +341,7 @@ function MOD:CopyStandardColors(s, d)
 		d.cooldownColor = MOD.CopyColor(s.cooldownColor); d.notificationColor = MOD.CopyColor(s.notificationColor)
 		d.poisonColor = MOD.CopyColor(s.poisonColor); d.curseColor = MOD.CopyColor(s.curseColor)
 		d.magicColor = MOD.CopyColor(s.magicColor); d.diseaseColor = MOD.CopyColor(s.diseaseColor)
+		d.stealColor = MOD.CopyColor(s.stealColor)
 	end
 end
 
@@ -346,7 +356,7 @@ function MOD:GetSpellID(name)
 
 	if not id and not InCombatLockdown() then -- disallow the search when in combat due to script time limit (MoP)
 		id = 0
-		while id < 200000 do -- increased for 6.0, with a bit of headroom for good measure
+		while id < maxSpellID do -- determined during initialization
 			id = id + 1
 			local n = GetSpellInfo(id)
 			if n == name then
@@ -373,19 +383,21 @@ function MOD:GetIcon(name, spellID)
 	local override = MOD.db.global.SpellIcons[name] -- check the spell icon override cache for an overriding spell name or numeric id
 	if override and (override ~= "none") and (override ~= "") then name = override end -- make sure it is valid too
 	
-	local n, _, tex
 	local id = nil -- next check if the name is a numeric spell id (with or without preceding # sign)
 	if string.find(name, "^#%d+") then id = tonumber(string.sub(name, 2)) else id = tonumber(name) end
-	if id then n, _, tex = GetSpellInfo(id); if n and n ~= "" then return tex else return nil end end -- return icon looked up by spell id (note: no valid name so return nil if not found)
+	if id then -- found what is supposed to be a spell id number
+		local n = GetSpellInfo(id)
+		if n and n ~= "" then return GetSpellTexture(id) else return nil end -- return icon looked up by spell id (note: no valid name so return nil if not found)
+	end
 	
-	tex = iconCache[name] -- check the in-memory icon cache which is initialized from player's spell book
+	local tex = iconCache[name] -- check the in-memory icon cache which is initialized from player's spell book
 	if not tex then -- if not found then try to look it up through spell API
-		n, _, tex = GetSpellInfo(name) -- first try to find it based on the name
-		if n and n ~= "" and tex and tex ~= "" then
+		tex = GetSpellTexture(name)
+		if tex and tex ~= "" then
 			iconCache[name] = tex -- only cache textures found by looking up the name
 		else
 			id = spellID or MOD:GetSpellID(name)
-			if id then _, _, tex = GetSpellInfo(id); if tex == "" then tex = nil end end -- then try based on id
+			if id then tex = GetSpellTexture(id); if tex == "" then tex = nil end end -- then try based on id
 		end
 	end
 	return tex
@@ -503,8 +515,6 @@ function MOD:SetSpellNameDefaults()
 	LSPELL["Frostbrand Weapon"] = GetSpellInfo(8033)
 	LSPELL["Rockbiter Weapon"] = GetSpellInfo(8017)
 	LSPELL["Windfury Weapon"] = GetSpellInfo(8232)
-	LSPELL["Eclipse (Solar)"] = GetSpellInfo(48517)
-	LSPELL["Eclipse (Lunar)"] = GetSpellInfo(48518)
 	LSPELL["Crusader Strike"] = GetSpellInfo(35395)
 	LSPELL["Hammer of the Righteous"] = GetSpellInfo(53595)
 	LSPELL["Combustion"] = GetSpellInfo(83853)
@@ -531,10 +541,8 @@ function MOD:SetDispelDefaults()
 			dispelTypes.Poison = true; dispelTypes.Curse = true
 		end
 	elseif MOD.myClass == "MONK" then
-		if RavenCheckSpellKnown(115451) then -- Internal Medicine
+		if RavenCheckSpellKnown(115450) then -- Detox
 			dispelTypes.Poison = true; dispelTypes.Disease = true; dispelTypes.Magic = true
-		elseif RavenCheckSpellKnown(115450) then -- Detox
-			dispelTypes.Poison = true; dispelTypes.Disease = true
 		end
 	elseif MOD.myClass == "PRIEST" then
 		if RavenCheckSpellKnown(527) then
@@ -542,12 +550,9 @@ function MOD:SetDispelDefaults()
 		elseif RavenCheckSpellKnown(32375) then
 			dispelTypes.Magic = true -- Mass Dispel
 		end
-	elseif MOD.myClass == "MAGE" then
-		if RavenCheckSpellKnown(475) then dispelTypes.Curse = true end -- Remove Curse
 	elseif MOD.myClass == "PALADIN" then
 		if RavenCheckSpellKnown(4987) then -- Cleanse
-			dispelTypes.Poison = true; dispelTypes.Disease = true
-			if RavenCheckSpellKnown(53551) then dispelTypes.Magic = true end -- Sacred Cleansing
+			dispelTypes.Poison = true; dispelTypes.Disease = true; dispelTypes.Magic = true
 		end
 	elseif MOD.myClass == "SHAMAN" then
 		if RavenCheckSpellKnown(77130) then
@@ -728,6 +733,7 @@ MOD.DefaultProfile = {
 		DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"]),
 		DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"]),
 		DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"]),
+		DefaultStealColor = MOD.HexColor("ef2929"), -- Red1
 		ButtonFacadeIcons = true,		-- enable use of ButtonFacade for icons
 		ButtonFacadeNormal = true,		-- enable color of normal texture in ButtonFacade
 		ButtonFacadeBorder = false,		-- enable color of border texture in ButtonFacade
@@ -746,7 +752,6 @@ MOD.DefaultProfile = {
 	profile = {
 		enabled = true,					-- enable Raven
 		hideBlizz = true,				-- enable hiding the Blizzard buff and temp enchant frames
-		hideConsolidated = true,		-- enable hiding the Blizzard consolidated buffs frame
 		hideRunes = true,				-- enable hiding the Blizzard runes frame
 		muteSFX = false,				-- enable muting of Raven's sound effects
 		Durations = {},					-- spell durations (use profile instead of global for better per-character info)
@@ -755,6 +760,6 @@ MOD.DefaultProfile = {
 		ButtonFacadeSkin = {},			-- skin settings from ButtonFacade
 		InCombatBar = {},				-- settings for the in-combat bar used to cancel buffs in combat
 		InCombatBuffs = {},				-- list of buffs that can be cancelled in-combat
-		WeaponBuffDurations = {},				-- cache of buff durations used for weapon buffs
+		WeaponBuffDurations = {},		-- cache of buff durations used for weapon buffs
 	},
 }

@@ -81,13 +81,7 @@ local modifiers = { "ctrl", "alt", "shift" }
 -- specifiy the available stances for each class
 local DefaultStanceMap = setmetatable({}, { __index = function(t,k)
 	local newT = nil
-	if k == "WARRIOR" then
-		newT = {
-			{ id = "battle", name = GetSpellInfo(2457), index = 1 },
-			{ id = "def", name = GetSpellInfo(71), index = 2 },
-			{ id = "gladiator", name = GetSpellInfo(156291), index = 3 },
-		}
-	elseif k == "DRUID" then
+	if k == "DRUID" then
 		newT = {
 			{ id = "bear", name = GetSpellInfo(5487), index = 3 },
 			{ id = "cat", name = GetSpellInfo(768), index = 1 },
@@ -97,25 +91,7 @@ local DefaultStanceMap = setmetatable({}, { __index = function(t,k)
 		}
 	elseif k == "ROGUE" then
 		newT = {
-			-- shadowdance needs to be before stealth in the list, otherwise the condition is overwritten
-			{ id = "shadowdance", name = ("%s / %s"):format((GetSpellInfo(51713)), (GetSpellInfo(1856))), index = -1, type = "form" },
 			{ id = "stealth", name = GetSpellInfo(1784), index = 1 },
-		}
-	elseif k == "PRIEST" then
-		newT = {
-			{ id = "shadowform", name = GetSpellInfo(15473), index = 1 },
-		}
-	elseif k == "WARLOCK" then
-		newT = {
-			{ id = "metamorphosis", name = GetSpellInfo(103958), index = 1, type = "form"},
-			--{ id = "darkapotheosis", name = GetSpellInfo(114168), index = 2, type = "form"}, -- this should work, but for some reason it doesn't.
-		}
-	elseif k == "MONK" then
-		newT = {
-			{ id = "tiger", name = GetSpellInfo(103985), index = 1, spec = 3 },
-			{ id = "crane", name = GetSpellInfo(154436), index = 1, spec = 2 },
-			{ id = "ox", name = GetSpellInfo(115069), index = 2, spec = 1 },
-			{ id = "serpent", name = GetSpellInfo(115070), index = 3, spec = 2 },
 		}
 	end
 	rawset(t, k, newT)
@@ -173,10 +149,6 @@ function StateBar:UpdateStates(returnOnly)
 							if prowl and prowl ~= 0 then
 								table_insert(statedriver, fmt("[bonusbar:%s,stealth:1]%s", v.index, prowl))
 							end
-						end
-					elseif playerclass == "ROGUE" then
-						if v.id == "shadowdance" then
-							v.index = GetNumShapeshiftForms() + 1
 						end
 					end
 					table_insert(statedriver, fmt("[%s:%s]%s", v.type or "bonusbar", v.index, state))

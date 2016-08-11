@@ -47,6 +47,14 @@ do
 	popup:SetFrameStrata("DIALOG")
 	popup:Hide()
 
+	popup:EnableKeyboard(true)
+	popup:SetScript("OnKeyDown", function(self,key)
+		if GetBindingFromClick(key) == "TOGGLEGAMEMENU" then
+			popup:SetPropagateKeyboardInput(false) -- swallow escape
+			popup:Hide()
+                end
+        end)
+
 	local text = popup:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
 	text:SetPoint("TOP", popup, "TOP", 0, -10)
 	text:SetText(L["Do you want to reset Skada?"])
@@ -65,6 +73,7 @@ do
 	close:SetPoint("BOTTOM", popup, "BOTTOM", 50, 0)
 	close:SetScript("OnClick", function(f) f:GetParent():Hide() end)
 	function Skada:ShowPopup()
+		popup:SetPropagateKeyboardInput(true)
 		popup:Show()
 	end
 end
@@ -765,7 +774,7 @@ local function sendchat(msg, chan, chantype)
 	elseif chantype == "whisper" then
 		-- To player.
 		SendChatMessage(msg, "WHISPER", nil, chan)
-	elseif chantype == "RealID" then
+	elseif chantype == "bnet" then
 		BNSendWhisper(chan,msg)
 	end
 end
@@ -942,7 +951,7 @@ function Skada:ZoneCheck()
 	local isinpvp = IsInPVP()
 
 	-- If we are entering an instance, and we were not previously in an instance, and we got this event before... and we have some data...
-	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self.total ~= nil then
+	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and Skada:CanReset() then
 		if self.db.profile.reset.instance == 3 then
 			Skada:ShowPopup()
 		else
@@ -996,9 +1005,9 @@ local function check_for_join_and_leave()
 	if not IsInGroup() and wasinparty then
 		-- We left a party.
 
-		if Skada.db.profile.reset.leave == 3 then
+		if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
 			Skada:ShowPopup()
-		elseif Skada.db.profile.reset.leave == 2 then
+		elseif Skada.db.profile.reset.leave == 2 and Skada:CanReset() then
 			Skada:Reset()
 		end
 
@@ -1011,9 +1020,9 @@ local function check_for_join_and_leave()
 	if IsInGroup() and wasinparty == false then -- if nil this is first check after reload/relog
 		-- We joined a raid.
 
-		if Skada.db.profile.reset.join == 3 then
+		if Skada.db.profile.reset.join == 3 and Skada:CanReset() then
 			Skada:ShowPopup()
-		elseif Skada.db.profile.reset.join == 2 then
+		elseif Skada.db.profile.reset.join == 2 and Skada:CanReset() then
 			Skada:Reset()
 		end
 
@@ -1078,6 +1087,21 @@ local function createSet(setname)
 	for i, mode in ipairs(modes) do verify_set(mode, set) end
 
 	return set
+end
+
+function Skada:CanReset() -- returns true if we have actual data that can be cleared via :Reset()
+	local totalplayers = self.total and self.total.players
+	if totalplayers and next(totalplayers) then -- Total set contains data
+		return true
+	end
+	
+	for _,set in ipairs(self.char.sets) do
+		if not set.keep then -- have a non-persistent set (possibly un-kept since last reset)
+			return true
+		end
+	end
+
+	return false
 end
 
 function Skada:Reset()
@@ -2332,78 +2356,8 @@ function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 end
 
 do
-	--[[ XXX TEMP UPGRADE POPUP ]]
-	local tempPopup = function()
-		local tbl = {
-			SkadaCC = true,
-			SkadaDamage = true,
-			SkadaDamageTaken = true,
-			SkadaDeaths = true,
-			SkadaDebuffs = true,
-			SkadaDispels = true,
-			SkadaEnemies = true,
-			SkadaHealing = true,
-			SkadaPower = true,
-			SkadaThreat = true,
-		}
-
-		local create
-		local concat = "\n"
-		for i = 1, GetNumAddOns() do
-			local name = GetAddOnInfo(i)
-			if tbl[name] then
-				create = true
-				concat = concat .. name .. "\n"
-				DisableAddOn(i)
-			end
-		end
-
-		if create or not SkadaDB.hasUpgraded then
-			local frame = CreateFrame("Frame", "SkadaWarn", UIParent)
-
-			frame:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-				edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-				tile = true, tileSize = 16, edgeSize = 16,
-				insets = {left = 1, right = 1, top = 1, bottom = 1}}
-			)
-			frame:SetSize(550, 420)
-			frame:SetPoint("CENTER", UIParent, "CENTER")
-			frame:SetFrameStrata("DIALOG")
-			frame:Show()
-
-			local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalHuge")
-			title:SetPoint("TOP", frame, "TOP", 0, -12)
-			title:SetText(L["Skada has changed!"])
-
-			local text = frame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-			text:SetPoint("CENTER", frame, "CENTER")
-			text:SetText(L["All Skada functionality is now in 1 addon folder."] .. (create and "\n\n" .. L["Skada will |cFFFF0000NOT|r function properly until you delete the following AddOns:"] ..concat or ""))
-
-			local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-			btn:SetWidth(110)
-			btn:SetHeight(20)
-			btn:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
-			btn:SetText(OKAY)
-			btn:SetScript("OnClick", function(f)
-				f:GetParent():Hide()
-				if not create then
-					InterfaceOptionsFrame_OpenToCategory(Skada.optionsFrame) InterfaceOptionsFrame_OpenToCategory(Skada.optionsFrame)
-				end
-			end)
-
-			local ending = frame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-			ending:SetPoint("TOP", btn, "TOP", 0, 30)
-			ending:SetText(create and "" or L["Click below and configure your '|cFFFF0000Disabled Modules|r'."])
-			if not create then
-				SkadaDB.hasUpgraded = true
-			end
-		end
-	end
 
 	function Skada:OnInitialize()
-		-- XXX temp
-		self:ScheduleTimer(tempPopup, 1)
-
 		-- Register some SharedMedia goodies.
 		media:Register("font", "Adventure",				[[Interface\Addons\Skada\fonts\Adventure.ttf]])
 		media:Register("font", "ABF",					[[Interface\Addons\Skada\fonts\ABF.ttf]])
@@ -2480,9 +2434,6 @@ do
 			self.db.profile.total = nil
 			self.db.profile.sets = nil
 		end
-
-		-- XXX temp
-		self.db.profile.modulesToSkip = nil
 	end
 end
 

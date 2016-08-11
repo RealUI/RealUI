@@ -79,7 +79,7 @@ mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
     F.CreateBD(_G.EasyMail_MailDropdownBackdrop)
     for i = 1, 15 do
         local highlight = _G["EasyMail_MailDropdownButton" .. i .. "Highlight"]
-        highlight:SetTexture(r, g, b, .4)
+        highlight:SetColorTexture(r, g, b, .4)
         highlight:ClearAllPoints()
         highlight:SetPoint("TOPLEFT", -11, 0)
         highlight:SetPoint("BOTTOMRIGHT", 12, 0)

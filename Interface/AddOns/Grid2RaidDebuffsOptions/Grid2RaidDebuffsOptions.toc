@@ -1,10 +1,10 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: Grid2 |cd2ff7d0aRaidDebuffs Options|r
 ## Title-esES: Grid2 |cd2ff7d0aRaidDebuffs Opciones|r
 ## Notes: Load on demand Options for Grid2RaidDebuffs.
 ## Notes-esES: Opciones de configuracion para el modulo Grid2RaidDebuffs.
 ## Author: Michael
-## X-Curse-Packaged-Version: r786
+## X-Curse-Packaged-Version: r789-release
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline
@@ -12,7 +12,7 @@
 ## Dependencies: Grid2, Grid2RaidDebuffs
 ## LoadOnDemand: 1
 
-## Version: r786
+## Version: r789-release
 
 #@no-lib-strip@
 #Libs\LibBabble-Boss-3.0\lib.xml

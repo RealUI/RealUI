@@ -419,17 +419,19 @@ UnitFrames["target"] = function(self)
             end
             --return
         end
-        local _, powerType = _G.UnitPowerType(frame.unit)
+        local powerType, powerToken = _G.UnitPowerType(frame.unit)
+        UnitFrames:debug("Target powerType", powerType, powerToken)
 
-        AngleStatusBar:SetBarColor(frame.Power.bar, oUF.colors.power[powerType])
+        AngleStatusBar:SetBarColor(frame.Power.bar, frame.colors.power[powerToken] or frame.colors.power[powerType])
 
         -- Reverse power
         local oldReverse, newReverse = frame.Power.bar.reverse
-        if ndb.settings.reverseUnitFrameBars then
-            newReverse = not RealUI.ReversePowers[powerType]
+        if ndb.settings.reverseUnitFrameBars then 
+            newReverse = not RealUI.ReversePowers[powerToken]
         else
-            newReverse = RealUI.ReversePowers[powerType]
+            newReverse = RealUI.ReversePowers[powerToken]
         end
+        UnitFrames:debug("Target reverse bars", ndb.settings.reverseUnitFrameBars, oldReverse, newReverse)
         AngleStatusBar:SetReverseFill(frame.Power.bar, newReverse)
 
         -- If reverse is different from old target to new target then do an instant SetValue on power bar

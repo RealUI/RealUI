@@ -2,10 +2,11 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local min, max, abs, floor = _G.math.min, _G.math.max, _G.math.abs, _G.math.floor
+local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
 local next, type, select = _G.next, _G.type, _G.select
 local print, tonumber = _G.print, _G.tonumber
+local Clamp = _G.Clamp
 
 -- Libs --
 local F = _G.Aurora[1]
@@ -13,23 +14,31 @@ local F = _G.Aurora[1]
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
+local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
-local spellFinder = _G.CreateFrame("FRAME")
+local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
     spellFinder:SetScript("OnEvent", function(frame, event, unit)
-        local spellID
-        if auraType == "debuff" then
-            spellID = select(11, _G.UnitDebuff(unit, spellName))
-        else
-            spellID = select(11, _G.UnitBuff(unit, spellName))
-        end
-        if spellID then
-            print(("The spellID for %s is %d"):format(spellName, spellID));
-            frame:UnregisterEvent("UNIT_AURA")
+        local filter = (auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
+        for auraIndex = 1, 40 do
+            local name, _, _, _, _, _, _, _, _, _, spellID = _G.UnitAura(unit, auraIndex, filter)
+            debug("FindSpellID", auraIndex, name, spellID)
+            if spellName == name then
+                print(("spellID for %s is %d"):format(spellName, spellID))
+                numRun = numRun + 1
+            end
+
+            if name == nil then
+                if numRun > 3 then
+                    numRun = 0
+                    frame:UnregisterEvent("UNIT_AURA")
+                end
+                break
+            end
         end
     end)
 end
@@ -83,53 +92,63 @@ function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
-do -- Screen Height + Width
-    local screenRes = {_G.GetScreenResolutions()}
-    function RealUI:GetResolutionVals(raw)
-        local resWidth, resHeight = screenRes[_G.GetCurrentResolution()]:match("(%d+)x(%d+)")
-        resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
+function RealUI:GetResolutionVals(raw)
+    local resolution
+    if _G.GetCVarBool("gxWindow") and not _G.GetCVarBool("gxMaximize") then
+        resolution = _G.GetCVar("gxwindowedresolution")
+    else
+        resolution = _G.GetCVar("gxfullscreenresolution")
+    end
+    local resWidth, resHeight = resolution:match("(%d+)x(%d+)")
+    resWidth, resHeight = tonumber(resWidth), tonumber(resHeight)
 
-        if raw then
-            return resWidth, resHeight
-        end
-
-        if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
-            resHeight = resHeight / 2
-            resWidth = resWidth / 2
-        end
-
+    if raw then
         return resWidth, resHeight
     end
+
+    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+        resHeight = resHeight / 2
+        resWidth = resWidth / 2
+    end
+
+    return resWidth, resHeight
 end
 
 -- Deep Copy table
-function RealUI:DeepCopy(object)
-    local lookup_table = {}
-    local function _copy(obj)
-        if type(obj) ~= "table" then
-            return obj
-        elseif lookup_table[obj] then
-            return lookup_table[obj]
-        end
-        local new_table = {}
-        lookup_table[obj] = new_table
-        for index, value in next, obj do
-            new_table[_copy(index)] = _copy(value)
-        end
-        return _G.setmetatable(new_table, _G.getmetatable(obj))
+function RealUI:DeepCopy(object, seen)
+    -- Handle non-tables and previously-seen tables.
+    if type(object) ~= "table" then
+        return object
+    elseif seen and seen[object] then
+        return seen[object]
     end
-    return _copy(object)
+
+    -- New table; mark it as having seen the copy, recursively.
+    local s = seen or {}
+    local copy = _G.setmetatable({}, _G.getmetatable(object))
+    s[object] = copy
+    for key, value in next, object do
+        copy[self:DeepCopy(key, s)] = self:DeepCopy(value, s)
+    end
+    return copy
 end
 
 -- Loot Spec
 function RealUI:GetCurrentLootSpecName()
     local lsID = _G.GetLootSpecialization()
+    debug("GetCurrentLootSpecName", lsID)
 
     if (lsID == 0) then
-        local _, specName = _G.GetSpecializationInfo(_G.GetSpecialization())
-        return specName
+        local specIndex = _G.GetSpecialization()
+        local _, specName = _G.GetSpecializationInfo(specIndex)
+        debug("GetSpecializationInfo", _, specName, specIndex)
+        if RealUI.isDev and not specName then
+            print("GetCurrentLootSpecName failed")
+        end
+        return specName or _G.UNKNOWN
     else
         local _, specName = _G.GetSpecializationInfoByID(lsID)
+        debug("GetSpecializationInfoByID", _, specName)
         return specName
     end
 end
@@ -139,23 +158,6 @@ function RealUI:GetLootSpecData(LootSpecIDs)
         LootSpecIDs[i] = _G.GetSpecializationInfo(i)
     end
     return LootSpecIDs
-end
-
--- Math
-function RealUI.Lerp(startValue, endValue, amount)
-    return (1 - amount) * startValue + amount * endValue;
-end
-
-function RealUI:Clamp(value, minVal, maxVal)
-    if value < minVal then
-        value = minVal
-    elseif value > maxVal then
-        value = maxVal
-    elseif value ~= value or not (value >= minVal and value <= maxVal) then -- check for nan...
-        value = minVal
-    end
-
-    return value
 end
 
 -- Seconds to Time
@@ -493,7 +495,7 @@ end
 function RealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
-        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true)
+        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
         stripeTex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         stripeTex:SetHorizTile(true)
         stripeTex:SetVertTile(true)
@@ -609,47 +611,73 @@ function RealUI:GetClassColor(class, kind)
     end
 end
 
-function RealUI:HSLToRGB(h, s, l, a)
-    if s<=0 then return l,l,l,a end
-    h, s, l = h*6, s, l
-    local c = (1-abs(2*l-1))*s
-    local x = (1-abs(h%2-1))*c
-    local m,r,g,b = (l-.5*c)
-    if h < 1     then r,g,b = c,x,0
-    elseif h < 2 then r,g,b = x,c,0
-    elseif h < 3 then r,g,b = 0,c,x
-    elseif h < 4 then r,g,b = 0,x,c
-    elseif h < 5 then r,g,b = x,0,c
-    else              r,g,b = c,0,x
-    end return (r+m),(g+m),(b+m),a
+
+--[[
+All color functions assume arguments are within the range 0.0 - 1.0
+
+Conversion functions based on code from
+https://github.com/EmmanuelOga/columns/blob/master/utils/color.lua
+]]
+do -- RealUI:HSLToRGB
+    local function HueToRBG(p, q, t)
+        if t < 0   then t = t + 1 end
+        if t > 1   then t = t - 1 end
+        if t < 1/6 then return p + (q - p) * 6 * t end
+        if t < 1/2 then return q end
+        if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
+        return p
+    end
+    function RealUI:HSLToRGB(h, s, l, a)
+        debug("HSLToRGB", h, s, l, a)
+        local r, g, b
+
+        if s <= 0 then
+            return l, l, l, a -- achromatic
+        else
+            local q
+            q = l < 0.5 and l * (1 + s) or l + s - l * s
+            local p = 2 * l - q
+
+            r = HueToRBG(p, q, h + 1/3)
+            g = HueToRBG(p, q, h)
+            b = HueToRBG(p, q, h - 1/3)
+        end
+
+        return r, g, b, a
+    end
 end
 
 function RealUI:RGBToHSL(r, g, b)
     if type(r) == "table" then
         r, g, b = r.r or r[1], r.g or r[2], r.b or r[3]
     end
+    debug("RGBToHSL", r, g, b)
     local minVal, maxVal = min(r, g, b), max(r, g, b)
-    local h, s, l = 0, 0, (maxVal + minVal) / 2
-    if maxVal ~= minVal then
+    local h, s, l
+
+    l = (maxVal + minVal) / 2
+    if maxVal == minVal then
+        h, s = 0, 0 -- achromatic
+    else
         local d = maxVal - minVal
         s = l > 0.5 and d / (2 - maxVal - minVal) or d / (maxVal + minVal)
         if maxVal == r then
-            local mod = 6
-            if g > b then mod = 0 end
-            h = (g - b) / d + mod
+            h = (g - b) / d
+            if g < b then h = h + 6 end
         elseif maxVal == g then
             h = (b - r) / d + 2
         else
             h = (r - g) / d + 4
         end
+        h = h / 6
     end
-    h = h / 6
     return h, s, l
 end
 
 function RealUI:ColorShift(delta, r, g, b)
+    debug("ColorShift", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB((((h + delta) * 255) % 255), s, l)
+    local r2, g2, b2 = self:HSLToRGB(h + delta, s, l)
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
@@ -663,8 +691,9 @@ function RealUI:ColorShift(delta, r, g, b)
 end
 
 function RealUI:ColorLighten(delta, r, g, b)
+    debug("ColorLighten", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB(h, s, self:Clamp(l + delta, 0, 1))
+    local r2, g2, b2 = self:HSLToRGB(h, s, Clamp(l + delta, 0, 1))
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
@@ -678,8 +707,9 @@ function RealUI:ColorLighten(delta, r, g, b)
 end
 
 function RealUI:ColorSaturate(delta, r, g, b)
+    debug("ColorSaturate", delta, r, g, b)
     local h, s, l = self:RGBToHSL(r, g, b)
-    local r2, g2, b2 = self:HSLToRGB(h, self:Clamp(s + delta, 0, 1), l)
+    local r2, g2, b2 = self:HSLToRGB(h, Clamp(s + delta, 0, 1), l)
     if type(r) == "table" then
         if r.r then
             r.r, r.g, r.b = r2, g2, b2
@@ -693,9 +723,11 @@ function RealUI:ColorSaturate(delta, r, g, b)
 end
 
 function RealUI:ColorDarken(delta, r, g, b)
+    debug("ColorDarken", delta, r, g, b)
     return self:ColorLighten(-delta, r, g, b)
 end
 
 function RealUI:ColorDesaturate(delta, r, g, b)
+    debug("ColorDesaturate", delta, r, g, b)
     return self:ColorSaturate(-delta, r, g, b)
 end

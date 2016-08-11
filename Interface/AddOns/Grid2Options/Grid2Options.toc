@@ -1,12 +1,12 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: Grid2 |cd0ff7d0aOptions|r
 ## Title-esES: Grid2 |cd0ff7d0aOpciones|r
 ## Notes: Configuration module for Grid2
 ## Notes-esES: Modulo de configuracion del Grid2
 ## LoadOnDemand: 1
 ## Dependencies: Grid2
-## Version: r786
-## X-Curse-Packaged-Version: r786
+## Version: r789-release
+## X-Curse-Packaged-Version: r789-release
 ## X-Curse-Project-Name: Grid2
 ## X-Curse-Project-ID: grid2
 ## X-Curse-Repository-ID: wow/grid2/mainline

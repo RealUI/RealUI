@@ -36,6 +36,9 @@ local function BuildSingleProfile()
 	if not PresetsMod.showXPBar then
 		dy = dy - 6
 	end
+	if not PresetsMod.showAPBar then
+		dy = dy - 5
+	end
 	-- -8
 
 	Bartender4.db.profile.blizzardVehicle = false
@@ -81,6 +84,14 @@ local function BuildSingleProfile()
 		SetBarLocation( config, "BOTTOM", -252.85, 52 )
 	end
 
+	if PresetsMod.showAPBar and Bartender4:GetModule("APBar", true) then
+		config = Bartender4.db:GetNamespace("RepBar").profile
+		config.enabled = true
+		config.position.scale = 0.44 -- Note: actually not possible via interface!
+		Bartender4:GetModule("RepBar"):Enable()
+		SetBarLocation( config, "BOTTOM", -227, 57 + 5 + dy )
+	end
+
 	config = Bartender4.db:GetNamespace("BlizzardArt").profile
 	config.enabled = true
 	config.artLayout = "ONEBAR"
@@ -99,6 +110,9 @@ local function BuildDoubleProfile()
 	end
 	if not PresetsMod.showXPBar then
 		dy = dy - 11
+	end
+	if not PresetsMod.showAPBar then
+		dy = dy - 8
 	end
 
 	Bartender4.db.profile.blizzardVehicle = true
@@ -143,6 +157,13 @@ local function BuildDoubleProfile()
 		SetBarLocation( config, "BOTTOM", -516, 57 )
 	end
 
+	if PresetsMod.showAPBar and Bartender4:GetModule("APBar", true) then
+		config = Bartender4.db:GetNamespace("APBar").profile
+		config.enabled = true
+		Bartender4:GetModule("APBar"):Enable()
+		SetBarLocation( config, "BOTTOM", -516, 65 + 8 + dy )
+	end
+
 	config = Bartender4.db:GetNamespace("BlizzardArt").profile
 	config.enabled = true
 	config.artLayout = "TWOBAR"
@@ -169,6 +190,9 @@ local function BuildBlizzardProfile()
 	if not PresetsMod.showXPBar then
 		dy = dy - 11
 	end
+	if not PresetsMod.showAPBar then
+		dy = dy - 8
+	end
 
 	Bartender4.db.profile.blizzardVehicle = true
 	Bartender4.db.profile.outofrange = "hotkey"
@@ -185,9 +209,9 @@ local function BuildBlizzardProfile()
 	config.actionbars[4].rows = 12
 	SetBarLocation( config.actionbars[4], "BOTTOMRIGHT", -42, 610 )
 	config.actionbars[5].padding = 6
-	SetBarLocation( config.actionbars[5], "BOTTOM", 3, 102 + dy )
+	SetBarLocation( config.actionbars[5], "BOTTOM", 3, 110 + dy )
 	config.actionbars[6].padding = 6
-	SetBarLocation( config.actionbars[6], "BOTTOM", -510, 102 + dy )
+	SetBarLocation( config.actionbars[6], "BOTTOM", -510, 110 + dy )
 
 	config = Bartender4.db:GetNamespace("BagBar").profile
 	config.onebag = false
@@ -212,6 +236,13 @@ local function BuildBlizzardProfile()
 		SetBarLocation( config, "BOTTOM", -516, 57 )
 	end
 
+	if PresetsMod.showAPBar and Bartender4:GetModule("APBar", true) then
+		config = Bartender4.db:GetNamespace("APBar").profile
+		config.enabled = true
+		Bartender4:GetModule("APBar"):Enable()
+		SetBarLocation( config, "BOTTOM", -516, 65 + 8 + dy )
+	end
+
 	config = Bartender4.db:GetNamespace("BlizzardArt").profile
 	config.enabled = true
 	Bartender4:GetModule("BlizzardArt"):Enable()
@@ -219,12 +250,12 @@ local function BuildBlizzardProfile()
 
 	config = Bartender4.db:GetNamespace("PetBar").profile
 	if GetNumShapeshiftForms() > 0 then
-		SetBarLocation( config, "BOTTOM", -120, 135 + dy )
+		SetBarLocation( config, "BOTTOM", -120, 143 + dy )
 		config = Bartender4.db:GetNamespace("StanceBar").profile
 		config.position.scale = 1.0
-		SetBarLocation( config, "BOTTOM", -460, 135 + dy )
+		SetBarLocation( config, "BOTTOM", -460, 143 + dy )
 	else
-		SetBarLocation( config, "BOTTOM", -460, 135 + dy )
+		SetBarLocation( config, "BOTTOM", -460, 143 + dy )
 	end
 end
 
@@ -254,6 +285,7 @@ function PresetsMod:SetupOptions()
 		PresetsMod.defaultType = "BLIZZARD"
 		self.showXPBar = true
 		self.showRepBar = true
+		self.showAPBar = Bartender4:GetModule("APBar", true) ~= nil
 		local otbl = {
 			message1 = {
 				order = 1,
@@ -301,6 +333,20 @@ function PresetsMod:SetupOptions()
 			},
 			nl3 = {
 				order = 31,
+				type = "description",
+				name = ""
+			},
+			apbar = {
+				order = 35,
+				type = "toggle",
+				name = L["Show Artifact Power Bar"],
+				get = function() return PresetsMod.showAPBar end,
+				set = function(info, val) PresetsMod.showAPBar = val end,
+				disabled = function() return PresetsMod.defaultType == "RESET" end,
+				hidden = (Bartender4:GetModule("APBar", true) == nil),
+			},
+			nl4 = {
+				order = 36,
 				type = "description",
 				name = ""
 			},

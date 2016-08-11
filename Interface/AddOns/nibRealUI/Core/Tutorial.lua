@@ -327,9 +327,21 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
         button.toolTipText = self[i].ToolTipText
         button.viewed = false
         button:Show()
-        button.BigI:Show()
-        button.Ring:Show()
+        button.HelpI:Show()
         button.Pulse:Play()
+
+        -- We need to override this function because Blizzards' indexes a local var that will be nil
+        local onLeave = button:GetScript("OnLeave")
+        button:SetScript("OnLeave", function(btn)
+            if _G.RealUITutorialBG:IsShown() then
+                _G.HelpPlate_TooltipHide();
+                self.box.BG:Show();
+                self.boxHighlight:Hide();
+                self.viewed = true;
+            else
+                onLeave(btn)
+            end
+        end)
     end
     _G.HelpPlate:SetPoint("CENTER", parent, "CENTER", 0, 0 )
     _G.HelpPlate:SetSize(_G.UIParent:GetWidth(), _G.UIParent:GetHeight() )
@@ -343,6 +355,7 @@ function RealUI:HideTutorial()
     _G.RealUITutorialButtonClose:Hide()
     _G.UIFrameFadeOut(_G.RealUITutorialBG, 0.3, 0.5, 0)
     _G.RealUITutorialLogo:Hide()
+    RealUI.Debug("Config", "HideTutorial")
     RealUI:LoadConfig("HuD")
     RealUI.db.global.tutorial.stage = -1
 end
@@ -365,6 +378,20 @@ local function createTextButton(name, parent)
     btn:SetSize(110, 50)
     return btn
 end
+
+local macroOpen = [[
+/tar %s
+/focus
+/run RealUI:ShowTutorial_Stage1()
+/run RealUITutorialButtonOpen:Hide()
+/run RealUITutorialButtonSkip:Hide()
+/run RealUITutorialButtonClose:Show()
+]]
+local macroClose = [[
+/clearfocus
+/cleartarget
+/run RealUI:HideTutorial()
+]]
 
 function RealUI:InitTutorial()
     -- MainHelpPlateButton
@@ -395,14 +422,7 @@ function RealUI:InitTutorial()
     btnOpen:SetPoint("CENTER")
     btnOpen:SetText(ButtonTexts.tutorial)
     btnOpen:SetAttribute("type", "macro")
-    btnOpen:SetAttribute("macrotext", [[
-        /tar "..RealUI.name.."
-        /focus
-        /run RealUI:ShowTutorial_Stage1()
-        /run RealUITutorialButtonClose:Show()
-        /run RealUITutorialButtonOpen:Hide()
-        /run RealUITutorialButtonSkip:Hide()
-    ]])
+    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.name))
     RealUI:AddButtonHighlight(btnOpen)
     
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)
@@ -415,6 +435,7 @@ function RealUI:InitTutorial()
         btnOpen:Hide()
         btnSkip:Hide()
         tBG:Hide()
+        RealUI.Debug("Config", "SkipTutorial")
         RealUI:LoadConfig("HuD")
         RealUI.db.global.tutorial.stage = -1
     end)
@@ -424,11 +445,7 @@ function RealUI:InitTutorial()
     btnClose:SetPoint("CENTER")
     btnClose:SetText(ButtonTexts.finished)
     btnClose:SetAttribute("type", "macro")
-    btnClose:SetAttribute("macrotext", [[
-        /clearfocus
-        /cleartarget
-        /run RealUI:HideTutorial()
-    ]])
+    btnClose:SetAttribute("macrotext", macroClose)
     btnClose:Hide()
     RealUI:AddButtonHighlight(btnClose)
     

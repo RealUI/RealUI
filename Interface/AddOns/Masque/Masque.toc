@@ -1,11 +1,16 @@
-﻿## Interface: 60200
+## Interface: 70000
 ## Title: Masque
-## Version: 6.2.1
+## Version: 7.0.1
 ## Author: StormFX, JJSheets
 ## Notes: A dynamic button skinning engine.
+## Notes-deDE: Ein dynamisches Button-Skin-Addon.
+## Notes-esES: Cambiar dinamicamente la aparencia de botones.
+## Notes-esMX: Cambiar dinamicamente la aparencia de botones.
 ## Notes-frFR: Un add-on de skinnage dynamique des boutons.
+## Notes-itIT: Un'add-on per lo skinning dinamico dei pulsanti.
 ## Notes-koKR: 동적인 버튼 스킨 입히기 애드온 입니다.
 ## Notes-ptBR: Um add-on de skin dinâmico de botões.
+## Notes-ruRU: Аддон для добавления скинов к панелям команд.
 ## Notes-zhCN: 一个动态按钮皮肤插件。
 ## Notes-zhTW: 動態套用按鈕佈景主題的插件。
 ## X-Website: http://www.wowace.com/projects/masque/
@@ -13,7 +18,7 @@
 ## X-WoWI-ID: 12097
 ## OptionalDeps: Ace3
 ## SavedVariables: MasqueDB
-## X-Curse-Packaged-Version: 6.2.1
+## X-Curse-Packaged-Version: 7.0.1
 ## X-Curse-Project-Name: Masque
 ## X-Curse-Project-ID: masque
 ## X-Curse-Repository-ID: wow/masque/mainline

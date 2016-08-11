@@ -28,35 +28,45 @@ local isValidUnit = {
 
 local debug = AuraTracking.trackerDebug
 
-local function FindSpellMatch(spell, unit, filter, isDebug)
-    debug(isDebug, "FindSpellMatch", spell, unit, filter)
+local function FindSpellMatch(spellNameOrID, unit, filter, isDebug)
+    debug(isDebug, "FindSpellMatch", spellNameOrID, unit, filter)
     local aura = {}
     for auraIndex = 1, 40 do
         local name, _, texture, count, _, duration, endTime, _, _, _, ID = _G.UnitAura(unit, auraIndex, filter)
         debug(isDebug, "Aura", auraIndex, name, ID)
-        if spell == name or spell == ID then
+        local spell
+        if type(spellNameOrID) == "table" then
+            for index = 1, #spellNameOrID do
+                spell = spellNameOrID[index]
+                if spell == name or spell == ID then break end
+            end
+        else
+            spell = spellNameOrID
+        end
+
+
+        if name == nil then
+            aura.index = auraIndex
+            return false, aura
+        elseif (spell == name or spell == ID) then
             debug(isDebug, "Match found")
             aura.texture, aura.duration, aura.endTime, aura.index = texture, duration, endTime, auraIndex
             aura.name, aura.ID = name, ID
             aura.count = count > 0 and count or ""
             return true, aura
         end
-
-        if name == nil then
-            aura.index = auraIndex
-            return false, aura
-        end
     end
 end
+
 local function GetShouldTrack(spellData)
     local isDebug = spellData.debug
     debug(isDebug, "shouldTrack", spellData.specs[playerSpec], spellData.minLevel, spellData.shouldLoad)
     if spellData.specs[playerSpec] and spellData.minLevel <= playerLevel and spellData.shouldLoad then
         local talent = spellData.talent
         debug(isDebug, "Check for talents", talent.mustHave)
-        if talent.ID then
-            local _, selectedTalent = _G.GetTalentRowSelectionInfo(talent.tier)
-            local trackerTalent = talent.ID
+        if talent.column or talent.ID then
+            local _, selectedTalent = _G.GetTalentTierInfo(talent.tier, 1)
+            local trackerTalent = talent.column or talent.ID
             if type(trackerTalent) == "table" then
                 trackerTalent = trackerTalent[playerSpec]
             end
@@ -101,34 +111,33 @@ do
     local function AddTrackerToSlot(tracker, slot)
         AuraTracking:debug("AddTrackerToSlot", tracker.id, slot:GetID())
         slot.tracker = tracker
-        slot.isActive = true
+        slot:SetActive(true)
 
-        tracker.slotID = slot:GetID()
+        tracker.slot = slot
         tracker:SetAllPoints(slot)
         tracker:Show()
-        activeTrackers[tracker.side] = activeTrackers[tracker.side] + 1
     end
     local function RemoveTrackerFromSlot(tracker, slot)
         AuraTracking:debug("RemoveTrackerFromSlot", tracker.id, slot:GetID())
         slot.tracker = nil
-        slot.isActive = false
+        slot:SetActive(false)
 
-        tracker.slotID = nil
+        tracker.slot = nil
         tracker:ClearAllPoints()
         tracker:Hide()
-        activeTrackers[tracker.side] = activeTrackers[tracker.side] - 1
     end
 
-    function AuraTracking:AddTracker(tracker, slotID, enforceSlot)
-        self:debug("AddTracker", tracker.id, tracker.slotID, slotID)
-        if tracker.slotID then
-            if tracker.isStatic then
+    function AuraTracking:AddTracker(tracker, enforceSlot)
+        self:debug("AddTracker", tracker.id, tracker.slot and tracker.slot:GetID(), tracker.slotIDMax)
+        if tracker.slot then
+            if tracker.isStatic and not tracker.slot.isActive then
                 tracker.icon:SetDesaturated(false)
                 tracker:SetAlpha(1)
-                activeTrackers[tracker.side] = activeTrackers[tracker.side] + 1
+                tracker.slot:SetActive(true)
             end
         else
             local side, slot = self[tracker.side]
+            local slotID = tracker.isStatic and tracker.slotIDMax
             if enforceSlot then
                 self:debug("Place in slot", slotID)
                 AddTrackerToSlot(tracker, side["slot"..slotID])
@@ -137,15 +146,16 @@ do
                 self:debug("Find first empty slot until:", maxSlots)
                 for i = 1, maxSlots do
                     slot = side["slot"..i]
-                    self:debug("Slot:", i, slot.isActive, slot.tracker and slot.tracker.isStatic)
-                    if slot.isActive then
-                        if (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
+                    self:debug("Slot:", i, slot.tracker and slot.tracker.id)
+                    if slot.tracker then
+                        self:debug("Slot info:", slot.tracker.isStatic, slot.tracker.slotIDMax)
+                        if (slot.tracker.slotIDMax > maxSlots) or (tracker.isStatic and not slot.tracker.isStatic) or (i == maxSlots and i < MAX_SLOTS) then
                             -- Make sure static trackers have priority placement on earlier slots
                             self:ShiftTracker(slot.tracker, i, i + 1)
                         end
                     end
 
-                    if not slot.isActive then
+                    if not slot.tracker then
                         self:debug("Found slot", i)
                         AddTrackerToSlot(tracker, slot)
                         break
@@ -153,22 +163,34 @@ do
                 end
             end
         end
+        if activeTrackers[tracker.side] > 0 then
+            self:UpdateVisibility()
+        end
     end
     function AuraTracking:RemoveTracker(tracker, isStatic)
         self:debug("RemoveTracker", tracker.id, isStatic)
         if isStatic then
-            tracker.icon:SetDesaturated(true)
-            tracker:SetAlpha(db.indicators.fadeOpacity)
-            activeTrackers[tracker.side] = activeTrackers[tracker.side] - 1
+            if tracker.slot.isActive then
+                tracker.icon:SetDesaturated(true)
+                tracker:SetAlpha(db.indicators.fadeOpacity)
+                tracker.slot:SetActive(false)
+            end
         else
-            local side, emptySlot = self[tracker.side], tracker.slotID
-            RemoveTrackerFromSlot(tracker, side["slot"..emptySlot])
+            local side, emptySlot = self[tracker.side], tracker.slot:GetID()
+            RemoveTrackerFromSlot(tracker, tracker.slot)
 
             if iterUnits then return end
-            local nextSlot = side["slot"..emptySlot+1]
-            if nextSlot.isActive then
-                self:ShiftTracker(nextSlot.tracker, emptySlot + 1, emptySlot)
-            end
+            repeat
+                emptySlot = emptySlot + 1
+                local nextSlot = side["slot"..emptySlot]
+                self:debug("Next Slot:", emptySlot, nextSlot.tracker)
+                if nextSlot.tracker then
+                    self:ShiftTracker(nextSlot.tracker, emptySlot, emptySlot - 1)
+                end
+            until not nextSlot.tracker
+        end
+        if activeTrackers[tracker.side] <= 0 then
+            self:UpdateVisibility()
         end
     end
     function AuraTracking:ShiftTracker(tracker, fromSlotID, toSlotID)
@@ -193,7 +215,7 @@ do -- AuraTracking:CreateNewTracker()
             return _G.format("%x", v)
         end)
     end
-    function AuraTracking:CreateNewTracker()
+    function AuraTracking:CreateNewTracker(customSpellData)
         local newID
         repeat
             newID = generateGUID()
@@ -206,12 +228,17 @@ do -- AuraTracking:CreateNewTracker()
                 end
             end
         until not isDupe
+        self:debug("CreateNewTracker", newID, customSpellData)
 
         local newTrackerID = _G.format("%d-%s", RealUI.classID, newID)
-        local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
-        tracker.classID = RealUI.classID
-        tracker.isDefault = false
-        return tracker, trackingData[newTrackerID]
+        if customSpellData then
+            return self:CreateAuraIcon(newID, customSpellData)
+        else
+            local tracker = self:CreateAuraIcon(newID, trackingData[newTrackerID])
+            tracker.classID = RealUI.classID
+            tracker.isDefault = false
+            return tracker, trackingData[newTrackerID]
+        end
     end
 end
 
@@ -320,17 +347,10 @@ function AuraTracking:UNIT_AURA(event, unit)
 
     for tracker, spellData in self:IterateTrackers() do
         if spellData.unit == unit and tracker.isEnabled then
-            local spell, hasAura, aura = spellData.spell, false, {}
+            local spell, hasAura, aura = spellData.spell
             debug(spellData.debug, "IterateTrackers", tracker.id, spell)
 
-            if type(spell) == "table" then
-                for index = 1, #spell do
-                    hasAura, aura = FindSpellMatch(spell[index], spellData.unit, tracker.filter, spellData.debug)
-                    if hasAura then break end
-                end
-            else
-                hasAura, aura = FindSpellMatch(spell, spellData.unit, tracker.filter, spellData.debug)
-            end
+            hasAura, aura = FindSpellMatch(spell, spellData.unit, tracker.filter, spellData.debug)
 
             debug(spellData.debug, "do postUnitAura", tracker.postUnitAura)
             if tracker.postUnitAura then
@@ -345,7 +365,7 @@ function AuraTracking:UNIT_AURA(event, unit)
                     tracker.count:SetText(aura.count)
                 end
                 self:AddTracker(tracker)
-            elseif tracker.slotID then
+            elseif tracker.slot then
                 tracker.auraIndex = nil
                 tracker.cd:SetCooldown(0, 0)
                 tracker.cd:Hide()
@@ -545,6 +565,7 @@ function AuraTracking:Createslots()
             parent["slot"..slotID] = slot
 
             F.CreateBG(slot)
+            slot:SetAlpha(0)
 
             local count = slot:CreateFontString()
             count:SetFontObject(_G.RealUIFont_PixelCooldown)
@@ -554,7 +575,17 @@ function AuraTracking:Createslots()
             count:SetText(slotID)
             slot.count = count
 
-            slot:SetAlpha(0)
+            function slot.SetActive(s, isActive)
+                if s.isActive ~= isActive then
+                    s.isActive = isActive
+                    if isActive then
+                        activeTrackers[side] = activeTrackers[side] + 1
+                    else
+                        activeTrackers[side] = activeTrackers[side] - 1
+                    end
+                end
+                self:debug("activeTrackers", side, activeTrackers[side])
+            end
         end
     end
 end

@@ -7,6 +7,10 @@ mods["Blizzard_DebugTools"] = function(F, C)
     mods.debug("Blizzard_DebugTools", F, C)
 
     -- Fix ErrorFrame
+    _G.ScriptErrorsFrameTitleButton:ClearAllPoints()
+    _G.ScriptErrorsFrameTitleButton:SetPoint("TOPLEFT")
+    _G.ScriptErrorsFrameTitleButton:SetPoint("BOTTOMRIGHT", _G.ScriptErrorsFrame, "TOPRIGHT", 0, -24)
+
     _G.ScriptErrorsFrame:HookScript("OnShow", function()
         _G.ScriptErrorsFrame:SetScale(_G.tonumber(_G.GetCVar("uiScale")))
         _G.ScriptErrorsFrame:SetSize(384, 260)

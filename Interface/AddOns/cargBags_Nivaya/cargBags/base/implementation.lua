@@ -30,6 +30,7 @@ Implementation.instances = {}
 Implementation.itemKeys = {}
 
 local toBagSlot = cargBags.ToBagSlot
+local ItemInfo = {}
 local L
 
 --[[!
@@ -299,44 +300,71 @@ local defaultItem = cargBags:NewItemTable()
 	@param i <table> [optional]
 	@return i <table>
 ]]
-function Implementation:GetItemInfo(bagID, slotID, i)
-	--print("GetItemInfo", bagID)
-	i = i or defaultItem
-	for k in pairs(i) do i[k] = nil end
+do
+	local function GatherItemInfo(bagID, slotID, i)
+		cargBags.debug("GatherItemInfo", bagID, slotID, i)
+		for k in pairs(i) do i[k] = nil end
 
-	i.bagID = bagID
-	i.slotID = slotID
+		i.bagID = bagID
+		i.slotID = slotID
 
-	local clink = GetContainerItemLink(bagID, slotID)
-
-	if (clink) then
+		local clink = GetContainerItemLink(bagID, slotID)
 		i.texture, i.count, i.locked, i.quality, i.readable = GetContainerItemInfo(bagID, slotID)
 		i.cdStart, i.cdFinish, i.cdEnable = GetContainerItemCooldown(bagID, slotID)
-		i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
-		i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
 
-		-- *edits by Lars "Goldpaw" Norberg for WoW 5.0.4 (MoP)
-		-- last return value here, "texture", doesn't show for battle pets
-		local texture
-		i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice  = GetItemInfo(clink)
-		i.texture = i.texture or texture
-		-- battle pet info must be extracted from the itemlink
-		if (clink:find("battlepet")) then
-			if not(L) then
-				L = cargBags:GetLocalizedTypes()
+		if (clink) then
+			local texture
+
+			-- /dump GetContainerItemLink(0, 1):match("H(%w+):([%-?%d:]+)")
+			local linkType, itemString = clink:match("H(%w+):([%-?%d:]+)")
+			if linkType == "battlepet" then
+				if not(L) then
+					L = cargBags:GetLocalizedTypes()
+				end
+				local itemType, petType = L[LE_ITEM_CLASS_BATTLEPET]
+				local speciesID, level, breedQuality, _, _, _, battlePetID = strsplit(":", itemString)
+				i.name, texture, petType, i.creatureID, _, _, i.isWild, i.canBattle, i.isTradeable, i.isUnique, i.isObtainable, i.displayID = C_PetJournal.GetPetInfoBySpeciesID(speciesID)
+				i.link = clink
+				i.rarity = tonumber(breedQuality) or 0
+				i.minLevel = tonumber(level) or 0
+				i.type = itemType.name
+				i.subType = itemType[petType-1]
+				i.texture = i.texture or texture
+				i.typeID = LE_ITEM_CLASS_BATTLEPET
+				i.subTypeID = petType
+				i.id = battlePetID
+
+				i.speciesID = tonumber(speciesID) or 0
+			else
+				local itemID = strsplit(":", itemString)
+				i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID  = GetItemInfo(clink)
+				i.texture = i.texture or texture
+				i.id = tonumber(itemID) or 0
+
+				i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
+				i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
 			end
-			local data, name = strmatch(clink, "|H(.-)|h(.-)|h")
-			local  _, _, level, rarity, _, _, _, id = strmatch(data, "(%w+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
-			i.type = L["Battle Pets"]
-			i.rarity = tonumber(rarity) or 0
-			i.id = tonumber(id) or 0
-			i.name = name
-			i.minLevel = level
-			i.link = clink
+			cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
 		end
-		--print("GetItemInfo:", i.setName, i.name)
+
+		ItemInfo[bagID][slotID] = i
+		return i
 	end
-	return i
+
+	function Implementation:GetItemInfo(bagID, slotID, reset)
+		cargBags.debug("GetItemInfo", bagID, slotID, reset)
+		if not ItemInfo[bagID] then
+			cargBags.debug("ItemInfo bag", bagID)
+			ItemInfo[bagID] = {}
+		end
+
+		if reset or (ItemInfo[bagID][slotID] and not ItemInfo[bagID][slotID].typeID) or (not ItemInfo[bagID][slotID]) then
+			return GatherItemInfo(bagID, slotID, ItemInfo[bagID][slotID] or {})
+		else
+			cargBags.debug("ItemInfo cached", slotID, ItemInfo[bagID][slotID].name)
+			return ItemInfo[bagID][slotID]
+		end
+	end
 end
 
 --[[!
@@ -345,10 +373,12 @@ end
 	@param slotID <number>
 ]]
 function Implementation:UpdateSlot(bagID, slotID)
-	local item = self:GetItemInfo(bagID, slotID)
+	cargBags.debug("Implementation:UpdateSlot", bagID, slotID)
+	local item = self:GetItemInfo(bagID, slotID, true)
 	local button = self:GetButton(bagID, slotID)
 	local container = self:GetContainerForItem(item, button)
 
+	cargBags.debug("button, container", button, container)
 	if (container) then
 		if (button) then
 			if (container ~= button.container) then
@@ -376,6 +406,7 @@ local closed
 	@param bagID <number>
 ]]
 function Implementation:UpdateBag(bagID)
+	cargBags.debug("Implementation:UpdateBag", bagID)
 	local numSlots
 	if (closed) then
 		numSlots, closed = 0
@@ -405,7 +436,7 @@ end
 	@callback Container:OnBagUpdate(bagID, slotID)
 ]]
 function Implementation:BAG_UPDATE(event, bagID, slotID)
-	--print("BAG_UPDATE")
+	cargBags.debug("Implementation:BAG_UPDATE", event, bagID, slotID)
 	if (bagID and slotID) then
 		self:UpdateSlot(bagID, slotID)
 	elseif (bagID) then
@@ -422,6 +453,7 @@ end
 	@param bagID <number>
 ]]
 function Implementation:BAG_CLOSED(event, bagID)
+	cargBags.debug("Implementation:BAG_CLOSED", event, bagID)
 	closed = bagID
 	self:BAG_UPDATE(event, bagID)
 end
@@ -431,15 +463,17 @@ end
 	@param bagID <number> [optional]
 ]]
 function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
-	--print("BAG_UPDATE_COOLDOWN", bagID)
+	cargBags.debug("Implementation:BAG_UPDATE_COOLDOWN", event, bagID)
 	if (bagID) then
 		for slotID = 1, GetContainerNumSlots(bagID) do
 			local button = self:GetButton(bagID, slotID)
 			if (button) then
-				local item = self:GetItemInfo(bagID, slotID)
+				local item = self:GetItemInfo(bagID, slotID, true)
 				button:UpdateCooldown(item)
 			end
 		end
+	else
+		--self:BAG_UPDATE(event)
 	end
 end
 
@@ -449,12 +483,12 @@ end
 	@param slotID <number> [optional]
 ]]
 function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
-	--print("ITEM_LOCK_CHANGED", bagID)
+	cargBags.debug("Implementation:ITEM_LOCK_CHANGED", event, bagID, slotID)
 	if(not slotID) then return end
 
 	local button = self:GetButton(bagID, slotID)
 	if(button) then
-		local item = self:GetItemInfo(bagID, slotID)
+		local item = self:GetItemInfo(bagID, slotID, true)
 		button:UpdateLock(item)
 	end
 end
@@ -465,6 +499,7 @@ end
 	@param slotID <number> [optional]
 ]]
 function Implementation:PLAYERBANKSLOTS_CHANGED(event, bagID, slotID)
+	cargBags.debug("Implementation:PLAYERBANKSLOTS_CHANGED", event, bagID, slotID)
 	if(bagID <= NUM_BANKGENERIC_SLOTS) then
 		slotID = bagID
 		bagID = -1
@@ -481,6 +516,7 @@ end
 	@param slotID <number> [optional]
 ]]
 function Implementation:PLAYERREAGENTBANKSLOTS_CHANGED(event, slotID)
+	cargBags.debug("Implementation:PLAYERREAGENTBANKSLOTS_CHANGED", event, slotID)
 	local bagID = -3
 
 	self:BAG_UPDATE(event, bagID, slotID)
@@ -490,7 +526,7 @@ end
 	Fired when the quest log of a unit changes
 ]]
 function Implementation:UNIT_QUEST_LOG_CHANGED(event)
-	--print("UNIT_QUEST_LOG_CHANGED", bagID)
+	cargBags.debug("Implementation:UNIT_QUEST_LOG_CHANGED", event)
 	for id, container in pairs(self.contByID) do
 		for i, button in pairs(container.buttons) do
 			local item = self:GetItemInfo(button.bagID, button.slotID)

@@ -23,19 +23,4 @@ Raven.classConditions.PALADIN = {
 		},	
 		associatedSpell = 4987, -- "Cleanse"
 	},
-	["Blessing Missing"] = {
-		tests = {
-			["Player Status"] = { enable = true, isResting = false, isMounted = false, },
-			["Spell Ready"] = { enable = true, spell = 19740 }, -- "Blessing of Might"
-			["Any Buffs"] = { enable = true, toggle = true, unit = "player",
-				auras = { 19740, 20217 }, }, -- "Blessing of Might", "Blessing of Kings"
-		},	
-	},
-	["Seal Missing"] = {
-		tests = {
-			["Player Status"] = { enable = true, isResting = false, isMounted = false, checkLevel = true, level = 3 },
-			["Any Buffs"] = { enable = true, toggle = true, unit = "player",
-				auras = { 105361, 20165, 20164, 20154, 31801 }, }, -- "Seal of Command", "Seal of Insight", "Seal of Righteousness", "Seal of Truth"
-		},	
-	},
 }
