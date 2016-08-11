@@ -5,7 +5,7 @@ local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
 function cbNivaya:UpdateBags()
 	cargBags.debug("filters cbNivaya:UpdateBags")
-	for i = -3, 11 do
+	for i = -1, 11 do
 		cbNivaya:UpdateBag(i)
 	end
 end
@@ -51,39 +51,51 @@ cB_Filters.fItemClass = function(item, container)
 	return bag == container
 end
 
-function cbNivaya:ClassifyItem(item)
-	cargBags.debug("filters cbNivaya:ClassifyItem", item.name, item.id)
+do
+	local itemUpdater, last = CreateFrame("Frame"), 0
+	itemUpdater:SetScript("OnUpdate", function(self, elapsed)
+	    last = last + elapsed
+	    if last > 1 and #itemUpdater > 0 then
+	    	local item = table.remove(itemUpdater)
+	    	cbNivaya:GetItemInfo(item.bagID, item.slotID, true)
+	    	last = 0
+	    end
+	end)
+	function cbNivaya:ClassifyItem(item)
+		cargBags.debug("filters cbNivaya:ClassifyItem", item.name, item.id)
 
-	if item.bagID == -2 then
-		-- keyring
-		cB_ItemClass[item.id] = "Keyring"
-	elseif cBniv_CatInfo[item.id] then
-		-- user assigned containers
-		cB_ItemClass[item.id] = cBniv_CatInfo[item.id]
-	elseif (item.rarity == 0) then
-		-- junk
-		cB_ItemClass[item.id] = "Junk"
-	elseif item.typeID then
-		-- type based filters
-		cargBags.debug("typeID", item.typeID)
-		if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON)	then
-			cB_ItemClass[item.id] = "Armor"
-		elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
-			cB_ItemClass[item.id] = "Quest"
-		elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
-			cB_ItemClass[item.id] = "TradeGoods"
-		elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
-			cB_ItemClass[item.id] = "Consumables"
-		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
-			cB_ItemClass[item.id] = "BattlePet"
+		if item.bagID == -2 then
+			-- keyring
+			cB_ItemClass[item.id] = "Keyring"
+		elseif cBniv_CatInfo[item.id] then
+			-- user assigned containers
+			cB_ItemClass[item.id] = cBniv_CatInfo[item.id]
+		elseif (item.rarity == 0) then
+			-- junk
+			cB_ItemClass[item.id] = "Junk"
+		elseif item.typeID then
+			-- type based filters
+			cargBags.debug("typeID", item.typeID)
+			if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON)	then
+				cB_ItemClass[item.id] = "Armor"
+			elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
+				cB_ItemClass[item.id] = "Quest"
+			elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
+				cB_ItemClass[item.id] = "TradeGoods"
+			elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
+				cB_ItemClass[item.id] = "Consumables"
+			elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
+				cB_ItemClass[item.id] = "BattlePet"
+			end
 		end
-	end
 
-	if not cB_ItemClass[item.id] then
-		cB_ItemClass[item.id] = "NoClass"
+		if not cB_ItemClass[item.id] then
+			table.insert(itemUpdater, item)
+			cB_ItemClass[item.id] = "NoClass"
+		end
+		
+		cargBags.debug("Classified", cB_ItemClass[item.id])
 	end
-	
-	cargBags.debug("Classified", cB_ItemClass[item.id])
 end
 
 ------------------------------------------
