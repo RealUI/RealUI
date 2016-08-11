@@ -11,8 +11,11 @@ local MODNAME = "UIScaler"
 local UIScaler = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 function RealUI:PrintScreenSize()
-    _G.print("The current screen resolution is", ({_G.GetScreenResolutions()})[_G.GetCurrentResolution()])
-    _G.print("The current screen size is", _G.floor(_G.GetScreenWidth()+0.5), "x", _G.floor(_G.GetScreenHeight()+0.5))
+    _G.print(("The current screen resolution is %dx%d"):format(RealUI:GetResolutionVals(true)))
+    _G.print(("The current screen size is %dx%d"):format(_G.floor(_G.GetScreenWidth()+0.5), _G.floor(_G.GetScreenHeight()+0.5)))
+end
+function RealUI:GetUIScale()
+    return db.customScale
 end
 
 -- UI Scaler

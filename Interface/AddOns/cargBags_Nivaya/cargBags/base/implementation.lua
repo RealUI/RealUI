@@ -344,6 +344,7 @@ do
 				i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
 				i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
 			end
+			cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
 		end
 
 		ItemInfo[bagID][slotID] = i
@@ -357,7 +358,7 @@ do
 			ItemInfo[bagID] = {}
 		end
 
-		if reset or not ItemInfo[bagID][slotID] then
+		if reset or (ItemInfo[bagID][slotID] and not ItemInfo[bagID][slotID].typeID) or (not ItemInfo[bagID][slotID]) then
 			return GatherItemInfo(bagID, slotID, ItemInfo[bagID][slotID] or {})
 		else
 			cargBags.debug("ItemInfo cached", slotID, ItemInfo[bagID][slotID].name)

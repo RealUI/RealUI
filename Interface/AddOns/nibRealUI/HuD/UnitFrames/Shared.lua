@@ -222,7 +222,7 @@ RealUI.ReversePowers = {
     ["LUNAR_POWER"] = true,
     ["INSANITY"] = true,
     ["MAELSTROM"] = true,
-    --["FURY"] = true,
+    ["FURY"] = true,
     ["PAIN"] = true,
 }
 
