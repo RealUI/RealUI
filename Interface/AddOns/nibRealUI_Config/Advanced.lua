@@ -56,22 +56,6 @@ end
 local core do
     debug("Adv Core")
     local infoLine do
-        local blocks = {
-            start =         {L["Start"]},
-            mail =          {_G.MAIL_LABEL},
-            guild =         {_G.ACHIEVEMENTS_GUILD_TAB},
-            friends =       {_G.QUICKBUTTON_NAME_FRIENDS},
-            durability =    {_G.DURABILITY},
-            bag =           {_G.INVTYPE_BAG},
-            currency =      {_G.BONUS_ROLL_REWARD_CURRENCY},
-            xprep =         {L["Progress"]},
-            clock =         {_G.TIMEMANAGER_TITLE},
-            pc =            {L["Sys_SysInfo"]},
-            specchanger =   {L["Spec_SpecChanger"]},
-            layoutchanger = {L["Layout_LayoutChanger"]},
-            metertoggle =   {L["Meters_Header"]},
-        }
-
         local MODNAME = "InfoLine"
         local InfoLine = RealUI:GetModule(MODNAME)
         local db = InfoLine.db.profile
@@ -92,347 +76,61 @@ local core do
                     fontSize = "medium",
                     order = 20,
                 },
-                position = {
-                    name = "Position/Size",
+                blocks = {
+                    name = "Blocks",
                     type = "group",
                     order = 50,
                     args = {
-                        parent = {
-                            name = "Parent",
+                        general = {
+                            name = "General",
                             type = "group",
-                            inline = true,
                             order = 10,
                             args = {
-                                xleft = {
-                                    name = "X Left",
+                                gap = {
+                                    name = "Block Gap",
+                                    desc = "The ammount of space between each block.",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return tostring(db.position.xleft) end,
+                                    get = function(info) return _G.tostring(db.text.gap) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
-                                        db.position.xleft = value
+                                        db.text.gap = value
                                         InfoLine:UpdatePositions()
                                     end,
                                     order = 10,
                                 },
-                                xright = {
-                                    name = "X Right",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.xright) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.xright = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 20,
-                                },
-                                y = {
-                                    name = "Y",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.y) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.y = value
-                                        InfoLine:UpdatePositions()
-                                        InfoLine:SetBackground()
-                                    end,
-                                    order = 30,
-                                },
-                                xgap = {
+                                padding = {
                                     name = "Padding",
+                                    desc = "Additional space between the icon and the text",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return tostring(db.position.xgap) end,
+                                    get = function(info) return _G.tostring(db.text.padding) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
-                                        db.position.xgap = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 40,
-                                },
-                            },
-                        },
-                        text = {
-                            name = "Text",
-                            type = "group",
-                            inline = true,
-                            order = 20,
-                            args = {
-                                yoffset = {
-                                    name = "Y Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.text.yoffset) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.text.yoffset = value
+                                        db.text.padding = value
                                         InfoLine:UpdatePositions()
                                     end,
                                     order = 10,
                                 },
-                                tablets = {
-                                    name = "Tablet Font Sizes",
-                                    type = "group",
-                                    inline = true,
-                                    order = 20,
-                                    args = {
-                                        headersize = {
-                                            name = "Header",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.headersize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.headersize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 10,
-                                        },
-                                        columnsize = {
-                                            name = "Column Titles",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.columnsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.columnsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 20,
-                                        },
-                                        normalsize = {
-                                            name = "Normal",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.normalsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.normalsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 30,
-                                        },
-                                        hintsize = {
-                                            name = "Hint",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.hintsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.hintsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 40,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                colors = {
-                    name = "Colors",
-                    type = "group",
-                    order = 60,
-                    args = {
-                        normal = {
-                            name = "Normal",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.normal[1], db.colors.normal[2], db.colors.normal[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.normal[1] = r
-                                db.colors.normal[2] = g
-                                db.colors.normal[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 10,
-                        },
-                        sep1 = {
-                            name = " ",
-                            type = "description",
-                            order = 20,
-                        },
-                        highlight = {
-                            name = "Highlight",
-                            type = "color",
-                            disabled = function()
-                                if db.colors.classcolorhighlight then return true else return false end
-                            end,
-                            get = function(info,r,g,b)
-                                return db.colors.highlight[1], db.colors.highlight[2], db.colors.highlight[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.highlight[1] = r
-                                db.colors.highlight[2] = g
-                                db.colors.highlight[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 30,
-                        },
-                        classcolorhighlight = {
-                            name = "Class Color Highlight",
-                            desc = "Use your Class Color for the highlight.",
-                            type = "toggle",
-                            get = function() return db.colors.classcolorhighlight end,
-                            set = function(info, value)
-                                db.colors.classcolorhighlight = value
-                                InfoLine:Refresh()
-                            end,
-                            order = 40,
-                        },
-                        sep2 = {
-                            name = " ",
-                            type = "description",
-                            order = 50,
-                        },
-                        disabled = {
-                            name = "Disabled",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.disabled[1], db.colors.disabled[2], db.colors.disabled[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.disabled[1] = r
-                                db.colors.disabled[2] = g
-                                db.colors.disabled[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 60,
-                        },
-                        ttheader = {
-                            name = "Tooltip Header 1",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.ttheader[1], db.colors.ttheader[2], db.colors.ttheader[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.ttheader[1] = r
-                                db.colors.ttheader[2] = g
-                                db.colors.ttheader[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 70,
-                        },
-                        orange1 = {
-                            name = "Header 1",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.orange[1], RealUI.media.colors.orange[2], RealUI.media.colors.orange[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.orange[1] = r
-                                RealUI.media.colors.orange[2] = g
-                                RealUI.media.colors.orange[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 80,
-                        },
-                        blue1 = {
-                            name = "Header 2",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.blue[1] = r
-                                RealUI.media.colors.blue[2] = g
-                                RealUI.media.colors.blue[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 90,
-                        },
-                        blue2 = {
-                            name = "Header 3",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.blue[1] = r
-                                RealUI.media.colors.blue[2] = g
-                                RealUI.media.colors.blue[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 100,
-                        },
-                    },
-                },
-                other = {
-                    name = "Other",
-                    type = "group",
-                    order = 70,
-                    args = {
-                        icTips = {
-                            name = "In Combat Tooltips",
-                            desc = "Show the tooltips in combat.",
-                            type = "toggle",
-                            get = function() return db.other.icTips end,
-                            set = function(info, value)
-                                db.other.icTips = value
-                                RealUI.InfoLineICTips = value        -- Tablet-2.0 use
-                                InfoLine:Refresh()
-                            end,
-                            order = 10,
-                        },
-                        showBG = {
-                            name = L["InfoLine_ShowBG"],
-                            type = "toggle",
-                            get = function() return ndb.settings.infoLineBackground end,
-                            set = function(info, value)
-                                ndb.settings.infoLineBackground = value
-                                InfoLine:SetBackground()
-                            end,
-                            order = 10,
-                        },
-                        clock = {
-                            name = "Clock",
-                            type = "group",
-                            inline = true,
-                            order = 20,
-                            args = {
-                                clock24 = {
-                                    name = "24 hour clock",
-                                    desc = "Show the time in 24 hour format.",
+                                inCombat = {
+                                    name = "In Combat Tooltips",
+                                    desc = "Show tooltips in combat.",
                                     type = "toggle",
-                                    get = function() return db.other.clock.hr24 end,
-                                    set = function(info, value)
-                                        db.other.clock.hr24 = value
-                                        InfoLine:Refresh()
+                                    get = function() return db.other.icTips end,
+                                    set = function(info, value) 
+                                        db.other.icTips = value
                                     end,
                                     order = 10,
                                 },
-                                clocklocal = {
-                                    name = "Use local time",
-                                    desc = "Show the time at your home.",
-                                    type = "toggle",
-                                    get = function() return db.other.clock.uselocal end,
-                                    set = function(info, value)
-                                        db.other.clock.uselocal = value
-                                        InfoLine:Refresh()
-                                    end,
-                                    order = 20,
-                                },
-                            },
-                        },
-                        tablets = {
-                            name = "Info Displays",
-                            type = "group",
-                            inline = true,
-                            order = 30,
-                            args = {
-                                maxheight = {
+                                maxHeight = {
                                     name = "Max Height",
-                                    desc = "Maximum height of the Info Displays. May require a UI reload (/rl) to take effect.",
+                                    desc = "Maximum height of the Info Displays.",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return tostring(db.other.tablets.maxheight) end,
+                                    get = function(info) return _G.tostring(db.other.maxheight) end,
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
-                                        db.other.tablets.maxheight = value
+                                        db.other.maxheight = value
                                     end,
                                     order = 10,
                                 },
@@ -442,31 +140,60 @@ local core do
                 },
             },
         }
-
-        -- Create blocks options table
-        local elementopts = {
-            name = "Blocks",
+    
+        local blocksOrder = 10
+        local realui = {
+            name = "RealUI",
             type = "group",
-            order = 40,
+            order = 20,
+            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
             args = {},
         }
-        local elementordercnt = 10
-        for k_e, v_e in next, blocks do
-            -- Create base options for blocks
-            elementopts.args[k_e] = {
-                name = blocks[k_e][1],
-                desc = "Enable the "..blocks[k_e][1].." block.",
+        for name, blockInfo in next, db.blocks.realui do
+            -- Create base options for RealUI
+            realui.args[name] = {
+                name = name,
+                desc = "Enable the " .. name .. " block.",
                 type = "toggle",
-                get = function() return db.elements[k_e] end,
-                set = function(info, value)
-                    db.elements[k_e] = value
-                    InfoLine:Refresh()
+                get = function() return blockInfo.enabled end,
+                set = function(data, value) 
+                    blockInfo.enabled = value
+                    InfoLine:RemoveBlock(blockInfo)
                 end,
-                order = elementordercnt,
+                order = blocksOrder,
             }
-            elementordercnt = elementordercnt + 10
+            blocksOrder = blocksOrder + 10
         end
-        infoLine.args.elements = elementopts
+        infoLine.args.blocks.args.realui = realui
+
+        blocksOrder = 10
+        local others = {
+            name = "Others",
+            type = "group",
+            order = 30,
+            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+            args = {},
+        }
+        for name, blockInfo in next, db.blocks.others do
+            -- Create base options for others
+            others.args[name] = {
+                name = name,
+                desc = "Enable " .. name,
+                type = "toggle",
+                get = function() return blockInfo.enabled end,
+                set = function(data, value) 
+                    blockInfo.enabled = value
+                    if value then
+                        InfoLine:AddBlock(name, InfoLine.LDB:GetDataObjectByName(name), blockInfo)
+                    else
+                        InfoLine:RemoveBlock(name, blockInfo)
+                    end
+                end,
+                order = blocksOrder,
+            }
+            blocksOrder = blocksOrder + 10
+        end
+        infoLine.args.blocks.args.others = others
     end
     local pitch do
         local MODNAME = "Pitch"

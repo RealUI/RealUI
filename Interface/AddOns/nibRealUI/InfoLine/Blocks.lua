@@ -175,7 +175,7 @@ function InfoLine:CreateBlocks()
                     end
                 end,
                 notCheckable = true,
-                disabled = _G.IsTrialAccount(),
+                disabled = _G.IsTrialAccount() or (_G.IsVeteranTrialAccount() and not _G.IsInGuild()),
             },
             {text = _G.SOCIAL_BUTTON,
                 func = function() _G.ToggleFriendsFrame(1) end,
@@ -192,7 +192,6 @@ function InfoLine:CreateBlocks()
             },
             {text = _G.ADVENTURE_JOURNAL,
                 func = function() _G.ToggleEncounterJournal() end,
-                disabled = _G.UnitLevel("player") < _G.SHOW_EJ_LEVEL,
                 notCheckable = true,
             },  
             {text = _G.BLIZZARD_STORE,
@@ -252,9 +251,9 @@ function InfoLine:CreateBlocks()
             
             function NameSort(Val1, Val2)
                 InfoLine:debug("NameSort", _G.strsplit("|", Val1))
-                InfoLine:debug("match", Val1:match(nameMatch))
                 Val1 = Val1:match(nameMatch)
                 Val2 = Val2:match(nameMatch)
+                InfoLine:debug("match", Val1, Val2)
                 if Val1 ~= Val2 then
                     return Val1 < Val2
                 end
