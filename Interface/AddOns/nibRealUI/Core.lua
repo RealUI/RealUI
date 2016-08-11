@@ -485,12 +485,27 @@ function RealUI:PLAYER_ENTERING_WORLD()
     end)
 
     -- Button Backgrounds
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
+    local helpNewBG = RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonOptions, _G.GameMenuButtonAddons)
 
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonLogout, _G.GameMenuButtonQuit)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonContinue, _G.GameMenuButtonContinue)
     RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuFrame.realuiControl, _G.GameMenuFrame.realuiControl)
+
+    _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
+        debug("GameMenuFrame_UpdateVisibleButtons")
+        local height = 359
+
+        if _G.SplashFrameCanBeShown() then
+            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonWhatsNew, "BOTTOMRIGHT", 2, -2)
+        else
+            height = height - 20
+            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonHelp, "BOTTOMRIGHT", 2, -2)
+        end
+
+        debug("menuFrame:SetHeight", height)
+        menuFrame:SetHeight(height)
+    end)
 
     -- >= 10 minute garbage collection
     self:ScheduleTimer(function()
@@ -711,17 +726,6 @@ function RealUI:OnInitialize()
         end
         self:FindSpellID(spellName, unit, auraType)
     end)
-    do
-        local settingHeight = false
-        _G.hooksecurefunc(_G.GameMenuFrame, "SetHeight", function(menuFrame, height)
-            debug("GameMenuFrame:SetHeight", height, settingHeight)
-            if not settingHeight then
-                settingHeight = true
-                menuFrame:SetHeight(height + (_G.C_StorePublic.IsEnabled() and 27 or 47))
-                settingHeight = false
-            end
-        end)
-    end
 
     -- Synch user's settings
     if dbg.tags.firsttime then

@@ -15,6 +15,7 @@ local ndb
 
 local MODNAME = "AngleStatusBar"
 local AngleStatusBar = RealUI:NewModule(MODNAME)
+local uiScale
 
 local bars = {}
 local dontSmooth, smooth
@@ -320,13 +321,17 @@ local function CreateAngleBG(width, height, parent, info)
             tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
             tex:SetHeight(1)
             if leftX == 0 then
+                --tex:SetColorTexture(1, 0, 0)
                 tex:SetPoint("TOPLEFT", top, "TOPLEFT", (i + 1), -i)
             else
+                --tex:SetColorTexture(1, 1, 0)
                 tex:SetPoint("TOPLEFT", top, "TOPLEFT", -(i - 1), -i)
             end
             if rightX == 0 then
+                --tex:SetColorTexture(0, 1, 0)
                 tex:SetPoint("TOPRIGHT", top, "TOPRIGHT", -(i + 1), -i)
             else
+                --tex:SetColorTexture(0, 1, 1)
                 tex:SetPoint("TOPRIGHT", top, "TOPRIGHT", (i - 1), -i)
             end
             _G.tinsert(bg.lines, tex)
@@ -335,8 +340,8 @@ local function CreateAngleBG(width, height, parent, info)
         debug(info.debug, "CreateColumns", maxRows, maxCols)
         bg.lines.isCols = true
         for i = 1, maxCols do
-            local ofs = height * 0.64
-            local idx = i * 0.64
+            local ofs = height * uiScale
+            local idx = i * uiScale
             local tex = bg:CreateLine(nil, "BACKGROUND")
             tex:SetColorTexture(bgColor[1], bgColor[2], bgColor[3])
             tex:SetThickness(0.5)
@@ -371,7 +376,7 @@ local function CreateAngleBG(width, height, parent, info)
     end
     bg.bottom = bottom
 
-    ofs = ofs * 0.65
+    ofs = ofs * uiScale
     local left = bg:CreateLine(nil, "BORDER")
     left:SetColorTexture(0, 0, 0)
     left:SetThickness(0.5)
@@ -608,6 +613,7 @@ end
 -------------
 function AngleStatusBar:OnInitialize()
     ndb = RealUI.db.profile
+    uiScale = RealUI:GetUIScale()
 
     if ndb.settings.powerMode == 2 then -- Economy
         smooth = false
