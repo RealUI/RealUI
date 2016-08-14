@@ -541,6 +541,7 @@ end
 function Loot:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
 
+    --[[
     do -- This is to keep the alert frames sane since loot rolls will no longer show up there.
         local adjustingSize = false
         _G.GroupLootContainer:SetScript("OnSizeChanged", function(groupLoot, width, height)
@@ -552,5 +553,5 @@ function Loot:OnEnable()
                 adjustingSize = false
             end
         end)
-    end
+    end]]
 end

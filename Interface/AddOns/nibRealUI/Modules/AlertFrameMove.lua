@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local ipairs = _G.ipairs
+local next, ipairs = _G.next, _G.ipairs
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -15,54 +15,98 @@ AlertFrameHolder:SetWidth(180)
 AlertFrameHolder:SetHeight(20)
 AlertFrameHolder:SetPoint("TOP", _G.UIParent, "TOP", 0, -18)
 
-local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
-local function QueueAdjustAnchors(self, relativeAlert)
-    for alertFrame in self.alertFramePool:EnumerateActive() do
-        AlertFrameMove:debug("Queue", alertFrame, alertPoint, relativeAlert:GetName() or relativeAlert, alertRelPoint, alertYofs)
-        alertFrame:ClearAllPoints()
-        alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
-        relativeAlert = alertFrame
+local alertBlacklist
+local ReplaceAnchors do
+    local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
+    local function QueueAdjustAnchors(self, relativeAlert)
+        for alertFrame in self.alertFramePool:EnumerateActive() do
+            AlertFrameMove:debug("Queue", alertFrame, alertPoint, relativeAlert:GetName() or relativeAlert, alertRelPoint, alertYofs)
+            alertFrame:ClearAllPoints()
+            alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+            relativeAlert = alertFrame
+        end
+        return relativeAlert
     end
-    return relativeAlert
-end
-local function SimpleAdjustAnchors(self, relativeAlert)
-    if self.alertFrame:IsShown() then
-        AlertFrameMove:debug("Simple", self.alertFrame:GetName(), alertPoint, relativeAlert:GetName(), alertRelPoint, alertYofs)
-        self.alertFrame:ClearAllPoints()
-        self.alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
-        return self.alertFrame
+    local function SimpleAdjustAnchors(self, relativeAlert)
+        if self.alertFrame:IsShown() then
+            AlertFrameMove:debug("Simple", self.alertFrame:GetName(), alertPoint, relativeAlert:GetName(), alertRelPoint, alertYofs)
+            self.alertFrame:ClearAllPoints()
+            self.alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+            return self.alertFrame
+        end
+        return relativeAlert
     end
-    return relativeAlert
-end
-local function AnchorAdjustAnchors(self, relativeAlert)
-    if self.anchorFrame:IsShown() then
-        AlertFrameMove:debug("Anchor:AdjustAnchors", relativeAlert:GetName())
-        return self.anchorFrame;
+    local function AnchorAdjustAnchors(self, relativeAlert)
+        if self.anchorFrame:IsShown() then
+            AlertFrameMove:debug("Anchor:AdjustAnchors", relativeAlert:GetName())
+            return self.anchorFrame;
+        end
+        return relativeAlert
     end
-    return relativeAlert
+
+    function ReplaceAnchors(alertFrameSubSystem)
+        if alertFrameSubSystem.alertFramePool then
+            local frame = alertFrameSubSystem.alertFramePool:GetNextActive()
+            AlertFrameMove:debug("Queue system", frame and frame:GetName())
+            if alertBlacklist[alertFrameSubSystem.alertFramePool.frameTemplate] then
+                return alertFrameSubSystem.alertFramePool.frameTemplate, true
+            else
+                alertFrameSubSystem.AdjustAnchors = QueueAdjustAnchors
+            end
+        elseif alertFrameSubSystem.alertFrame then
+            local frame = alertFrameSubSystem.alertFrame
+            AlertFrameMove:debug("Simple system", frame:GetName())
+            if alertBlacklist[frame:GetName()] then
+                return frame:GetName(), true
+            else
+                alertFrameSubSystem.AdjustAnchors = SimpleAdjustAnchors
+            end
+        elseif alertFrameSubSystem.anchorFrame then
+            local frame = alertFrameSubSystem.anchorFrame
+            AlertFrameMove:debug("Anchor system", frame:GetName())
+            if alertBlacklist[frame:GetName()] then
+                return frame:GetName(), true
+            else
+                alertFrameSubSystem.AdjustAnchors = AnchorAdjustAnchors
+            end
+        end
+    end
 end
 
 local function SetUpAlert()
     AlertFrameMove:debug("SetUpAlert")
     _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", function(self)
+        AlertFrameMove:debug("UpdateAnchors")
         self:ClearAllPoints()
         self:SetAllPoints(AlertFrameHolder)
     end)
-    for i, alertFrameSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
-        if alertFrameSubSystem.QueueAlert then
-            local frame = alertFrameSubSystem.alertFramePool:GetNextActive()
-            AlertFrameMove:debug(i, "Queue system", frame and frame:GetName())
-            alertFrameSubSystem.AdjustAnchors = QueueAdjustAnchors
-            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", QueueAdjustAnchors)
-        elseif alertFrameSubSystem.AddAlert then
-            AlertFrameMove:debug(i, "Simple system", alertFrameSubSystem.alertFrame:GetName())
-            alertFrameSubSystem.AdjustAnchors = SimpleAdjustAnchors
-            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", SimpleAdjustAnchors)
-        else
-            AlertFrameMove:debug(i, "Anchor system")
-            alertFrameSubSystem.AdjustAnchors = AnchorAdjustAnchors
-            --_G.hooksecurefunc(alertFrameSubSystem, "AdjustAnchors", AnchorAdjustAnchors)
+    _G.hooksecurefunc(_G.AlertFrame, "AddAlertFrameSubSystem", function(self, alertFrameSubSystem)
+        AlertFrameMove:debug("AddAlertFrameSubSystem")
+        local _, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
+
+        if isBlacklisted then
+            for i, alertSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
+                AlertFrameMove:debug("iterate SubSystems", i)
+                if alertFrameSubSystem == alertSubSystem then
+                    return _G.table.remove(_G.AlertFrame.alertFrameSubSystems, i)
+                end
+            end
         end
+    end)
+
+    local remove = {}
+    for i, alertFrameSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
+        AlertFrameMove:debug("iterate SubSystems", i)
+        local name, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
+
+        if isBlacklisted then
+            remove[i] = name
+        end
+    end
+
+    for i, name in next, remove do
+        AlertFrameMove:debug("iterate remove", i, name)
+        _G.table.remove(_G.AlertFrame.alertFrameSubSystems, i)
     end
 end
 ----------
@@ -75,6 +119,11 @@ function AlertFrameMove:OnInitialize()
 end
 
 function AlertFrameMove:OnEnable()
+    alertBlacklist = {
+        GroupLootContainer = RealUI:GetModuleEnabled("Loot"),
+        TalkingHeadFrame = true,
+    }
+
     SetUpAlert()
 end
 
@@ -137,9 +186,12 @@ do
                 dungeon = {
                     name = "Dungeon",
                     desc = "DungeonCompletionAlertSystem",
-                    disabled = not _G.GetLFGCompletionReward(),
+                    --disabled = not _G.GetLFGCompletionReward(),
                     type = "execute",
                     func = function()
+                        _G.GetLFGCompletionReward = function()
+                            return "Test", nil, 2, "Dungeon", 10, 2, 10, 3, 4, 3
+                        end
                         _G.DungeonCompletionAlertSystem:AddAlert()
                     end,
                 },
@@ -155,7 +207,6 @@ do
         }
     end
     local lootAlerts do
-        local _, link = _G.GetItemInfo(ID.item)
         -- _G.LootAlertSystem:AddAlert(itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded)
         -- _G.LootUpgradeAlertSystem:AddAlert(itemLink, quantity, specID, baseQuality)
         -- _G.MoneyWonAlertSystem:AddAlert(amount)
@@ -168,7 +219,8 @@ do
                     desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootAlertSystem:AddAlert(link, 1, ID.rollType, 98, ID.spec)
+                        _G.GetItemInfo(ID.item)
+                        _G.LootAlertSystem:AddAlert(ID.item, 1, ID.rollType, 98, ID.spec)
                     end,
                 },
                 lootWonUpgrade = {
@@ -176,7 +228,8 @@ do
                     desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootAlertSystem:AddAlert(link, 1, ID.rollType, 98, ID.spec, nil, nil, nil, nil, true)
+                        _G.GetItemInfo(ID.item)
+                        _G.LootAlertSystem:AddAlert(ID.item, 1, ID.rollType, 98, ID.spec, nil, nil, nil, nil, true)
                     end,
                 },
                 lootGiven = {
@@ -184,7 +237,8 @@ do
                     desc = "LootAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootAlertSystem:AddAlert(link, 1, nil, nil, ID.spec, nil, nil, nil, true)
+                        _G.GetItemInfo(ID.item)
+                        _G.LootAlertSystem:AddAlert(ID.item, 1, nil, nil, ID.spec, nil, nil, nil, true)
                     end,
                 },
                 lootMoney = {
@@ -192,6 +246,7 @@ do
                     desc = "MoneyWonAlertSystem",
                     type = "execute",
                     func = function()
+                        _G.GetItemInfo(ID.item)
                         _G.MoneyWonAlertSystem:AddAlert(123456)
                     end,
                 },
@@ -216,7 +271,8 @@ do
                     desc = "LootUpgradeAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LootUpgradeAlertSystem:AddAlert(link, 1, ID.spec, 3)
+                        _G.GetItemInfo(ID.item)
+                        _G.LootUpgradeAlertSystem:AddAlert(ID.item, 1, ID.spec, 3)
                     end,
                 },
             },
@@ -228,6 +284,7 @@ do
         end
         garrisonAlerts = {
             name = "Garrison Alerts",
+            disabled = _G.C_Garrison.GetLandingPageGarrisonType() == 0,
             type = "group",
             args = {
                 building = {
@@ -297,7 +354,6 @@ do
         }
     end
     local miscAlerts do
-        local name, link, _, _, _, _, _, _, _, icon = _G.GetItemInfo(ID.item)
         miscAlerts = {
             name = "Misc Alerts",
             type = "group",
@@ -307,6 +363,7 @@ do
                     desc = "StorePurchaseAlertSystem",
                     type = "execute",
                     func = function()
+                        local name, _, _, _, _, _, _, _, _, icon = _G.GetItemInfo(ID.item)
                         _G.StorePurchaseAlertSystem:AddAlert(icon, name, ID.item)
                     end,
                 },
@@ -339,7 +396,7 @@ do
                     desc = "LegendaryItemAlertSystem",
                     type = "execute",
                     func = function()
-                        _G.LegendaryItemAlertSystem:AddAlert(link)
+                        _G.LegendaryItemAlertSystem:AddAlert(ID.item)
                     end,
                 },
             },
