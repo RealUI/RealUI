@@ -511,7 +511,11 @@ local function style(frame)
 
     if(not frame.freebtipBD) then
 		-- xRUI
-		Aurora[1].CreateBD(frame)
+        if frame.BackdropFrame then
+            Aurora[1].CreateBD(frame.BackdropFrame)
+        else
+            Aurora[1].CreateBD(frame)
+        end
         frame.freebtipBD = true
     end
 	frame:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
