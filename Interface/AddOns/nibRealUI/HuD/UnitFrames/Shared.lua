@@ -8,6 +8,7 @@ local oUF = _G.oUFembed
 
 -- RealUI --
 local RealUI = private.RealUI
+local L = RealUI.L
 local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
@@ -616,7 +617,7 @@ _G.hooksecurefunc("UnitPopup_OnClick",function(self)
             _G.StaticPopup1:Hide()
         end
         if db.misc.focusclick then
-            RealUI:Notification("RealUI", true, "Use "..db.misc.focuskey.."+click to set Focus.", nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+            RealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focuskey), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
         end
     elseif button == "PET_DISMISS" then
         if _G.StaticPopup1 then
