@@ -1,3 +1,9 @@
+local loaded, finished = _G.IsAddOnLoaded("nibRealUI_Dev")
+if loaded and finished then
+    _G.print("RealUI_Init loaded via Dev")
+    return
+end
+
 local NAME, RealUI = ...
 
 -- Lua Globals --
