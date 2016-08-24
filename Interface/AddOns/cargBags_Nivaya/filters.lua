@@ -58,6 +58,13 @@ do
 	    if last > 1 and #itemUpdater > 0 then
 	    	local item = table.remove(itemUpdater)
 	    	cbNivaya:GetItemInfo(item.bagID, item.slotID, true)
+	    	if item.id then
+		    	C_Timer.After(0.1, function()
+		    		cbNivaya:ClassifyItem(item)
+		    	end)
+		    else
+		    	table.insert(itemUpdater, item)
+		    end
 	    	last = 0
 	    end
 	end)

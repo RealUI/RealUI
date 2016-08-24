@@ -68,15 +68,6 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
             close:SetParent(frame)
             F.ReskinClose(close)
 
-            -- Minimize button
-            children[5]:Hide()
-            local minimize = children[5]:GetChildren()
-            F.ReskinArrow(minimize, "up")
-            minimize:SetParent(frame)
-            minimize:SetSize(17, 17)
-            minimize:ClearAllPoints()
-            minimize:SetPoint("TOPRIGHT", close, "TOPLEFT", -5, 0)
-            
             -- Disable import check
             children[2]:Hide()
             local import = children[2]:GetChildren()
@@ -84,7 +75,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
             import:SetParent(frame)
             import:SetSize(25, 25)
             import:ClearAllPoints()
-            import:SetPoint("TOPRIGHT", minimize, "TOPLEFT", -1, 4)
+            import:SetPoint("TOPRIGHT", close, "TOPLEFT", -24, 4)
 
             -- Title
             --children[3]
@@ -107,10 +98,19 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
             sizer[2]:SetPoint("BOTTOMLEFT", sizer[1], "TOPLEFT", 0, 4)
             sizer[3]:SetPoint("BOTTOMLEFT", sizer[1], "BOTTOMRIGHT", 4, 0)
 
+            -- Minimize button
+            children[5]:Hide()
+            local minimize = children[5]:GetChildren()
+            F.ReskinArrow(minimize, "up")
+            minimize:SetParent(frame)
+            minimize:SetSize(17, 17)
+            minimize:ClearAllPoints()
+            minimize:SetPoint("TOPRIGHT", close, "TOPLEFT", -5, 0)
+            
             -- Tutorial
             --children[6]
-            local _, _, _, enabled = _G.GetAddOnInfo("WeakAurasTutorials")
-            local tutOfs = enabled and 1 or 0
+            local _, _, _, enabled, loadable = _G.GetAddOnInfo("WeakAurasTutorials")
+            local tutOfs = (enabled and loadable) and 1 or 0
 
             --[[ Ace groups
                 children[6+tutOfs] container
@@ -119,11 +119,12 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
                 children[9+tutOfs] modelPick
                 children[10+tutOfs] importexport
                 children[11+tutOfs] texteditor
-                children[12+tutOfs] buttonsContainer
+                children[12+tutOfs] codereview
+                children[13+tutOfs] buttonsContainer
             ]]
 
             -- Selected aura border/sizer
-            local moversizer = children[13+tutOfs]
+            local moversizer = children[14+tutOfs]
             moversizer.bl.l:SetColorTexture(r, g, b, .8)
             moversizer.bl.l:SetPoint("BOTTOMLEFT", moversizer.bl, "BOTTOMLEFT", 1, 1)
             moversizer.bl.b:SetColorTexture(r, g, b, .8)

@@ -664,12 +664,12 @@ local unitframes do
                         name = _G.RAID,
                         type = "group",
                         childGroups = "tab",
-                        disabled = not _G.Grid2,
                         order = 30,
                         args = {
                             advanced = {
                                 name = "Grid 2",
                                 type = "execute",
+                                disabled = not _G.Grid2,
                                 func = function(info, ...)
                                     _G.Grid2:OnChatCommand("")
                                 end,
@@ -679,6 +679,7 @@ local unitframes do
                                 name = L["Control_Layout"],
                                 desc = L["Control_LayoutDesc"]:format("Grid2"),
                                 type = "toggle",
+                                disabled = not _G.Grid2,
                                 get = function() return RealUI:GetModuleEnabled("GridLayout") end,
                                 set = function(info, value)
                                     RealUI:SetModuleEnabled("GridLayout", value)
@@ -689,6 +690,7 @@ local unitframes do
                                 name = L["Control_Position"],
                                 desc = L["Control_PositionDesc"]:format("Grid2"),
                                 type = "toggle",
+                                disabled = not _G.Grid2,
                                 get = function() return RealUI:DoesAddonMove("Grid2") end,
                                 set = function(info, value)
                                     RealUI:ToggleAddonPositionControl("Grid2", value)
@@ -698,12 +700,14 @@ local unitframes do
                             dps = {
                                 name = L["Layout_DPSTank"],
                                 type = "group",
+                                disabled = not _G.Grid2,
                                 order = 30,
                                 args = {}
                             },
                             healing = {
                                 name = L["Layout_Healing"],
                                 type = "group",
+                                disabled = not _G.Grid2,
                                 order = 40,
                                 args = {}
                             },
