@@ -142,11 +142,22 @@ local ID = {
 }
 do
     local achievementAlerts do
-        local achievementID = 6348
+        local guild, toon = 4989, 6348
+        local achievementID, isGuild = toon, false
         achievementAlerts = {
             name = "Achievement Alerts",
             type = "group",
             args = {
+                isGuild = {
+                    name = "Guild Achievement",
+                    type = "toggle",
+                    get = function() return isGuild end,
+                    set = function(info, value)
+                        isGuild = value
+                        achievementID = isGuild and guild or toon
+                    end,
+                    order = 10,
+                },
                 achievementGet = {
                     name = "Achievement",
                     desc = "AchievementAlertSystem",
