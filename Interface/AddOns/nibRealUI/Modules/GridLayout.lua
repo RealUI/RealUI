@@ -131,7 +131,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
 end
 
 function GridLayout:SettingsUpdate(event)
-    if not self:GetEnabledState() then return end
+    if not self:IsEnabled() then return end
     self:Update(event or "SettingsUpdate", groupType, instType, instMaxPlayers)
     _G.Grid2Layout:ReloadLayout(true)
 end
