@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: RealUI Core
 ## Author: Nibelheim, Gethe
-## Version: 8.1 r18b
+## Version: 8.1 r18c
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## RequiredDeps: !Aurora_RealUI
