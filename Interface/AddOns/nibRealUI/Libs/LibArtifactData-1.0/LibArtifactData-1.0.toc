@@ -6,7 +6,7 @@
 ## Version: 1.0
 ## LoadOnDemand: 1
 ## OptionalDeps: AdiDebug
-## X-Curse-Packaged-Version: beta-1-4-g40bb2af
+## X-Curse-Packaged-Version: 1.0
 ## X-Curse-Project-Name: LibArtifactData-1.0
 ## X-Curse-Project-ID: libartifactdata-1-0
 ## X-Curse-Repository-ID: wow/libartifactdata-1-0/mainline

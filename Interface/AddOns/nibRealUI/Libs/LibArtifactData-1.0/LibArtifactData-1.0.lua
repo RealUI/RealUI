@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 5
+local MAJOR, MINOR = "LibArtifactData-1.0", 6
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -313,6 +313,7 @@ function private.PLAYER_ENTERING_WORLD(event)
 		InitializeScan(event)
 		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 		frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+		frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end)
 end
 
