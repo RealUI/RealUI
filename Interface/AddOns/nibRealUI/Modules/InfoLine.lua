@@ -718,11 +718,17 @@ do
         showXP = lvl < _G.MAX_PLAYER_LEVEL and not _G.IsXPUserDisabled()
         showRep = repName
         InfoLine:debug("Active artifact", artifactID, ...)
+        -- /run LibStub("LibArtifactData-1.0", true):ForceUpdate()
+        -- /dump ArtifactFrame:IsEventRegistered("ARTIFACT_UPDATE")
+        local arg1, arg2
         if event == "ARTIFACT_ADDED" or event == "ARTIFACT_POWER_CHANGED" or event == "ARTIFACT_ACTIVE_CHANGED" then
             artifactID = ...
             artifacts = artData:GetAllArtifactsInfo(artifactID)
+            if artifacts and artifacts[artifactID] then
+                arg1, arg2 = next(artifacts[artifactID])
+            end
         end
-        InfoLine:debug("GetArtifactInfo", artifactID, artifacts and next(artifacts[artifactID]))
+        InfoLine:debug("GetArtifactInfo", artifactID, arg1, arg2)
         showArtifact = artifactID and _G.HasArtifactEquipped()
         showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
 
