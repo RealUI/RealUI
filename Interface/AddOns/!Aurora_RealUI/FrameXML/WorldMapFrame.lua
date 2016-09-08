@@ -15,8 +15,6 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             local trackingBtn = _G.WorldMapFrame.UIElementsFrame.TrackingOptionsButton
 
             --Buttons
-            _G.WorldMapLevelDropDown:ClearAllPoints()
-            _G.WorldMapLevelDropDown:SetPoint("TOPLEFT", _G.WorldMapFrame.UIElementsFrame, -15, 3)
             trackingBtn:ClearAllPoints()
             trackingBtn:SetPoint("TOPRIGHT", _G.WorldMapFrame.UIElementsFrame, 3, 3)
 
