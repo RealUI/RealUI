@@ -27,6 +27,7 @@ function UIScaler:UpdateUIScale()
     local scale
     if db.pixelPerfect then
         local _, height = RealUI:GetResolutionVals(true)
+        UIScaler:debug("raw size", _, height)
         scale = 768 / height
         db.customScale = scale
     else
@@ -35,7 +36,7 @@ function UIScaler:UpdateUIScale()
     if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
     -- Set Scale (WoW CVar can't go below .64)
-    UIScaler:debug("UpdateUIScale", scale, _G.GetCVar("uiScale"))
+    UIScaler:debug("UpdateUIScale", scale, _G.GetCVar("uiScale"), ndbg.tags.retinaDisplay.set)
     if scale < .64 then
         _G.UIParent:SetScale(scale)
     elseif scale ~= _G.tonumber(_G.GetCVar("uiScale")) then

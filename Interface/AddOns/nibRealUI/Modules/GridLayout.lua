@@ -131,12 +131,12 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
 end
 
 function GridLayout:SettingsUpdate(event)
+    if not self:IsEnabled() then return end
     self:Update(event or "SettingsUpdate", groupType, instType, instMaxPlayers)
     _G.Grid2Layout:ReloadLayout(true)
 end
 
 function GridLayout:Grid2ChatCommand()
-    if not(_G.Grid2 and _G.Grid2Layout and _G.Grid2Frame and _G.Grid2DB) then return end
     if not _G.InCombatLockdown() then
         RealUI.Debug("Config", "/grid")
         RealUI:LoadConfig("HuD", "unitframes", "groups", "raid")
@@ -164,12 +164,15 @@ function GridLayout:OnInitialize()
     db = self.db.profile
 
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    if _G.Grid2 and _G.Grid2Layout and _G.Grid2Frame then
+        self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    else
+        self:SetEnabledState(false)
+    end
 end
 
 function GridLayout:OnEnable()
     self:debug("OnEnable")
-    if not (_G.Grid2 and _G.Grid2Layout and _G.Grid2Frame) then return end
 
     local Grid2LayoutGroupChanged = _G.Grid2Layout.Grid_GroupTypeChanged
     function _G.Grid2Layout:Grid_GroupTypeChanged(...)
@@ -187,10 +190,11 @@ end
 
 function GridLayout:OnDisable()
     self:debug("OnDisable")
+    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
     self:UnregisterChatCommand("grid")
     self:UnregisterChatCommand("grid2")
-    _G.Grid2:RegisterChatCommand("grid2", "OnChatCommand")
 
-    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    if not (_G.Grid2 and _G.Grid2Layout and _G.Grid2Frame) then return end
+    _G.Grid2:RegisterChatCommand("grid2", "OnChatCommand")
 end

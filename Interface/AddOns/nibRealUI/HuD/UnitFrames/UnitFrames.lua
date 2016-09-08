@@ -8,7 +8,6 @@ local oUF = _G.oUFembed
 
 -- RealUI --
 local RealUI = private.RealUI
-local L = RealUI.L
 local db, ndb
 
 local CombatFader = RealUI:GetModule("CombatFader")
@@ -58,23 +57,6 @@ function UnitFrames:RefreshUnits(event)
         unit:UpdateAllElements(event)
     end
 end
-
--- Squelch taint popup
-_G.hooksecurefunc("UnitPopup_OnClick",function(self)
-    local button = self.value
-    if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
-        if _G.StaticPopup1 then
-            _G.StaticPopup1:Hide()
-        end
-        if db.misc.focusclick then
-            RealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focusclick), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
-        end
-    elseif button == "PET_DISMISS" then
-        if _G.StaticPopup1 then
-            _G.StaticPopup1:Hide()
-        end
-    end
-end)
 
 ----------------------------
 ------ Initialization ------

@@ -1,19 +1,10 @@
 -- Lua Globals --
 local _G = _G
-local select, tostring = _G.select, _G.tostring
+
+-- RealUI --
+local debug = _G.RealUI.GetDebug("Dev")
 
 --_G.GAME_LOCALE ="deDE"
-
-local debugStack = {}
-local function debug(...)
-    local text = ""
-    for i = 1, select("#", ...) do
-        local arg = select(i, ...)
-        text = text .. "     " .. tostring(arg)
-    end
-    _G.tinsert(debugStack, text)
-end
-
 local BlizzAddons = {
     -- Not LoD, in order of load
     "Blizzard_CompactRaidFrames",
@@ -97,14 +88,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local addonName = ...
         if addonName:match("Blizzard") or addonName:match("RealUI") then
             debug("Loaded:", addonName)
-        end
-        if addonName == "nibRealUI" then
-            debug = _G.RealUI.GetDebug("Dev")
-            for i = 1, #debugStack do
-                debug(debugStack[i])
-            end
-            _G.wipe(debugStack)
-            self:UnregisterEvent("ADDON_LOADED")
         end
     else
         debug(event, ...)

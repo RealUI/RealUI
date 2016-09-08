@@ -3,4 +3,8 @@
 ## Notes: RealUI dev tweaks
 ## LoadWith: Blizzard_CompactRaidFrames
 
+..\nibRealUI_Init\libs\LibStub\LibStub.lua
+..\nibRealUI_Init\libs\LibTextDump-1.0\Lib.xml
+..\nibRealUI_Init\Init.lua
+
 nibRealUI_Dev.lua

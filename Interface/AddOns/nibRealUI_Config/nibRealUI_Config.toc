@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Config
 ## Notes: RealUI Configuration
 ## Author: Gethe
-## Version: 8.1 r18a
+## Version: 8.1 r18d
 ## Dependencies: nibRealUI
 ## LoadOnDemand: 1
 

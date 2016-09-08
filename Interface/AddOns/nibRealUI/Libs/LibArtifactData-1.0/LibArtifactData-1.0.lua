@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 5
+local MAJOR, MINOR = "LibArtifactData-1.0", 6
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -85,26 +85,22 @@ end
 
 local function PrepareForScan()
 	frame:UnregisterEvent("ARTIFACT_UPDATE")
-	local ArtifactFrame = _G.ArtifactFrame
+	_G.UIParent:UnregisterEvent("ARTIFACT_UPDATE")
 
-	if not ArtifactFrame or not ArtifactFrame:IsShown() then
-		_G.UIParent:UnregisterEvent("ARTIFACT_UPDATE")
-		if ArtifactFrame then
-			ArtifactFrame:UnregisterEvent("ARTIFACT_UPDATE")
-		end
+	local ArtifactFrame = _G.ArtifactFrame
+	if ArtifactFrame and not ArtifactFrame:IsShown() then
+		ArtifactFrame:UnregisterEvent("ARTIFACT_UPDATE")
 	end
 end
 
 local function RestoreStateAfterScan()
 	frame:RegisterEvent("ARTIFACT_UPDATE")
-	local ArtifactFrame = _G.ArtifactFrame
+	_G.UIParent:RegisterEvent("ARTIFACT_UPDATE")
 
-	if not ArtifactFrame or not ArtifactFrame:IsShown() then
+	local ArtifactFrame = _G.ArtifactFrame
+	if ArtifactFrame and not ArtifactFrame:IsShown() then
 		Clear()
-		if ArtifactFrame then
-			ArtifactFrame:RegisterEvent("ARTIFACT_UPDATE")
-		end
-		_G.UIParent:RegisterEvent("ARTIFACT_UPDATE")
+		ArtifactFrame:RegisterEvent("ARTIFACT_UPDATE")
 	end
 end
 
@@ -313,6 +309,7 @@ function private.PLAYER_ENTERING_WORLD(event)
 		InitializeScan(event)
 		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 		frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+		frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end)
 end
 
