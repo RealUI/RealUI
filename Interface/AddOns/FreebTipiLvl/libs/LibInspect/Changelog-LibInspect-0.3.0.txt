@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r41 | scotepi | 2016-07-25 00:48:19 +0000 (Mon, 25 Jul 2016) | 1 line
+Changed paths:
+   A /tags/0.3.0 (from /trunk:40)
+
+Tagging as 0.3.0
+------------------------------------------------------------------------
+r39 | scotepi | 2016-07-23 01:07:47 +0000 (Sat, 23 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/LibInspect.lua
+   M /trunk/LibInspect.toc
+
+TOC Update for 7.0
+Added a check for specID
+Disabled checking for Glyphs but will still return an empty table
+------------------------------------------------------------------------

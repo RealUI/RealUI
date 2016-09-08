@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 6
+local MAJOR, MINOR = "LibArtifactData-1.0", 8
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -22,6 +22,7 @@ local _G                       = _G
 local BACKPACK_CONTAINER       = _G.BACKPACK_CONTAINER
 local BANK_CONTAINER           = _G.BANK_CONTAINER
 local INVSLOT_MAINHAND         = _G.INVSLOT_MAINHAND
+local LE_ITEM_CLASS_ARMOR      = _G.LE_ITEM_CLASS_ARMOR
 local LE_ITEM_CLASS_WEAPON     = _G.LE_ITEM_CLASS_WEAPON
 local LE_ITEM_QUALITY_ARTIFACT = _G.LE_ITEM_QUALITY_ARTIFACT
 local NUM_BAG_SLOTS            = _G.NUM_BAG_SLOTS
@@ -225,6 +226,10 @@ end
 local function GetViewedArtifactData()
 	GetArtifactKnowledge()
 	local itemID, _, name, icon, unspentPower, numRanksPurchased = GetArtifactInfo() -- TODO: appearance stuff needed? altItemID ?
+	if not itemID then
+		Debug("|cffff0000ERROR:|r", "GetArtifactInfo() returned nil.")
+		return
+	end
 	viewedID = itemID
 	Debug("GetViewedArtifactData", name, itemID)
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower)
@@ -243,7 +248,7 @@ local function ScanContainer(container, numObtained)
 		local _, _, _, quality, _, _, _, _, _, itemID = GetContainerItemInfo(container, slot)
 		if quality == LE_ITEM_QUALITY_ARTIFACT then
 			local classID = select(12, GetItemInfo(itemID))
-			if classID == LE_ITEM_CLASS_WEAPON then
+			if classID == LE_ITEM_CLASS_WEAPON or classID == LE_ITEM_CLASS_ARMOR then
 				Debug("ARTIFACT_FOUND", "in", container, slot)
 				SocketContainerItem(container, slot)
 				GetViewedArtifactData()
@@ -305,11 +310,11 @@ local function InitializeScan(event)
 end
 
 function private.PLAYER_ENTERING_WORLD(event)
+	frame:UnregisterEvent(event)
 	_G.C_Timer.After(5, function()
 		InitializeScan(event)
 		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 		frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
-		frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end)
 end
 
@@ -348,6 +353,10 @@ function private.ARTIFACT_XP_UPDATE(event)
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower)
 
 	local artifact = artifacts[itemID]
+	if not artifact then
+		Debug("|cffff0000ERROR:|r", "artifact", itemID, "not found.")
+		return
+	end
 	local diff = unspentPower - artifact.unspentPower
 
 	if numRanksPurchased ~= artifact.numRanksPurchased then
