@@ -181,6 +181,7 @@ local function CreateNewBlock(name, dataObj)
     end
     block.text = text
     width = width + text:GetStringWidth() + space
+    InfoLine:debug("text", width)
 
 
     if dataObj.icon then
@@ -196,6 +197,7 @@ local function CreateNewBlock(name, dataObj)
         end
         block.icon = icon
         width = width + size + space
+        InfoLine:debug("icon", width)
     end
 
     if dataObj.label then
@@ -212,8 +214,13 @@ local function CreateNewBlock(name, dataObj)
             label:SetPoint("LEFT", space, 0)
         end
         label:SetText(dataObj.label)
+
+        local labelWidth = label:GetStringWidth()
+        label.checkWidth = labelWidth < 1
+
         block.label = label
-        width = width + label:GetStringWidth() + space
+        width = width + labelWidth + space
+        InfoLine:debug("label", dataObj.label, width)
     end
 
     local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
@@ -241,6 +248,7 @@ local function CreateNewBlock(name, dataObj)
         block:SetScript("OnUpdate", OnUpdate)
     end
     
+    InfoLine:debug("SetSize", width, barHeight)
     block:SetSize(width, barHeight)
     return block
 end
@@ -353,6 +361,14 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
                 block.text:SetText(dataObj.value or dataObj.text)
             end
             local newStringWidth = block.text:GetStringWidth()
+
+            if block.label and block.label.checkWidth then
+                local labelWidth = block.label:GetStringWidth()
+                block.label.checkWidth = labelWidth < 1
+
+                newStringWidth = newStringWidth + labelWidth
+            end
+
             block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
         end
         if attr:find("icon") then
