@@ -272,6 +272,7 @@ function InfoLine:CreateBlocks()
             end
         end
 
+        local time = _G.GetTime()
         LDB:NewDataObject(_G.GUILD, {
             type = "RealUI",
             label = octicons["organization"],
@@ -375,16 +376,24 @@ function InfoLine:CreateBlocks()
                 block.tooltip = tooltip
             end,
             OnEvent = function(block, event, ...)
-                --InfoLine:debug("Guild: OnEvent", event, ...)
-                local _, online, onlineAndMobile = _G.GetNumGuildMembers()
-                block.dataObj.value = online
-                if online == onlineAndMobile then
-                    block.dataObj.suffix = ""
+                InfoLine:debug("Guild: OnEvent", event, ...)
+                local now = _G.GetTime()
+                InfoLine:debug("Guild: time", now - time)
+                if now - time > 10 then
+                    _G.GuildRoster()
+                    time = now
                 else
-                    block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
+                    local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                    block.dataObj.value = online
+                    if online == onlineAndMobile then
+                        block.dataObj.suffix = ""
+                    else
+                        block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
+                    end
                 end
             end,
             events = {
+                "PLAYER_GUILD_UPDATE",
                 "GUILD_ROSTER_UPDATE",
                 "GUILD_MOTD",
             },
