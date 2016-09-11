@@ -271,6 +271,21 @@ function InfoLine:CreateBlocks()
                 end
             end
         end
+        local NoteSort do
+            function NoteSort(Val1, Val2)
+                if Val1 and Val2 then
+                    if Val1 ~= Val2 then
+                        return Val1 < Val2
+                    end
+                else
+                    if Val1 and not Val2 then
+                        return true
+                    elseif not Val1 and Val2 then
+                        return false
+                    end
+                end
+            end
+        end
 
         local time = _G.GetTime()
         LDB:NewDataObject(_G.GUILD, {
@@ -311,7 +326,7 @@ function InfoLine:CreateBlocks()
                 guildData[1] = {type = "header",
                     r = color[1], g = color[2], b = color[3],
                     sort = {
-                        NameSort, true, true, RankSort, true, true
+                        NameSort, true, true, RankSort, NoteSort, NoteSort
                     },
                     info = {
                         _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
