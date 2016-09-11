@@ -448,7 +448,7 @@ function InfoLine:CreateBlocks()
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
                     if item.hasDura and item.dura then
-                        tooltip:AddLine(item.slot, round(item.dura * 100) .. "%")
+                        tooltip:AddLine(item.slot, round(item.dura * 100, 1) .. "%")
                     end
                 end
 
@@ -491,7 +491,7 @@ function InfoLine:CreateBlocks()
                         alert:Hide()
                         alert.isHidden = true
                     end);
-                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, lowest)
+                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowest * 100))
                     alert.Text:SetWidth(145);
                     alert:Show();
                     alert.isHidden = false
