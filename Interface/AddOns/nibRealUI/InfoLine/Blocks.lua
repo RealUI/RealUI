@@ -7,7 +7,6 @@ local ipairs = _G.ipairs
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
-local LTT = _G.LibStub("LibTextTable-1.1")
 local LIF = _G.LibStub("LibIconFonts-1.0")
 local octicons = LIF:GetIconFont("octicons", "v2.x")
 octicons.path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local.ttf]]
@@ -21,51 +20,138 @@ local ndb
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:GetModule(MODNAME)
 
-local MAX_ROWS = 11
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
-function TextTableCellPrototype:InitializeCell()
-    InfoLine:debug("CellProto:InitializeCell")
+do
+    local TABLE_WIDTH = 500
+    local MAX_ROWS = 10
+    local ROW_HEIGHT = 10
 
-    if not self.textTable then
-        local textTable = LTT.New(nil, self, "RealUIFont_Crit", "RealUIFont_Normal")
-        textTable:SetPoint("TOPLEFT", self, "TOPLEFT")
-        textTable:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
+    function TextTableCellPrototype:InitializeCell()
+        InfoLine:debug("CellProto:InitializeCell")
 
-        self.textTable = textTable
-    end
-end
+        if not self.textTable then
+            local textTable = _G.CreateFrame("Frame", nil, self)
+            textTable:SetPoint("TOPLEFT")
+            textTable:SetPoint("BOTTOMRIGHT")
 
-function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
-    InfoLine:debug("CellProto:SetupCell")
-    local textTable = self.textTable
-    for rowIndex, rowData in ipairs(data) do
-        InfoLine:debug(rowIndex, rowData.type, _G.unpack(rowData.info))
-        if rowData.type == "header" then
-            textTable:SetHeader(_G.unpack(rowData.info))
-            textTable:SetSortHandlers(_G.unpack(rowData.sort))
-            textTable:SetSortColumn(1)
-        else
-            textTable:AddRow(nil, _G.unpack(rowData.info))
+            --[[ Test BG ]]
+            local test = textTable:CreateTexture(nil, "BACKGROUND")
+            test:SetColorTexture(1, 1, 1, 0.5)
+            test:SetAllPoints(textTable)
+
+            local header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+            header:SetPoint("TOPLEFT")
+            header:SetPoint("RIGHT")
+            header:SetHeight(ROW_HEIGHT)
+            textTable.header = header
+
+            local line = textTable:CreateTexture(nil, "BACKGROUND")
+            line:SetColorTexture(1, 1, 1)
+            line:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+            line:SetPoint("RIGHT")
+            line:SetHeight(1)
+
+            local scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
+            scrollArea:SetPoint("TOPLEFT", line, 0, -5)
+            scrollArea:SetPoint("BOTTOMRIGHT")
+
+            local prev = scrollArea
+            textTable.rows = {}
+            for index = 1, MAX_ROWS do
+                local row = _G.CreateFrame("Frame", "$parentRow"..index, textTable)
+                if index == 1 then -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
+                    row:SetPoint("TOPLEFT", prev)
+                else
+                    row:SetPoint("TOPLEFT", prev, "BOTTOMLEFT")
+                end
+                row:SetPoint("RIGHT")
+                row:SetHeight(ROW_HEIGHT)
+                textTable.rows[index] = row
+                prev = row
+            end
+
+
+            self.textTable = textTable
         end
     end
-    textTable:Resize()
-    textTable:Show()
 
-    local heightMod = #data <= MAX_ROWS and #data or MAX_ROWS
-    return 200, textTable.Header:GetHeight() * heightMod + 4
-end
+    function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
+        InfoLine:debug("CellProto:SetupCell")
+        local textTable = self.textTable
+        local width = TABLE_WIDTH
 
-function TextTableCellPrototype:ReleaseCell()
-    InfoLine:debug("CellProto:ReleaseCell")
-    if self.textTable then
-        self.textTable:Clear()
-        self.textTable:Hide()
+        local flex, filler = {}
+        local header, headerData = textTable.header, data.header
+        for col = 1, #headerData.info do
+            local text = header[col]
+            if not text then
+                text = header:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+                text:SetPoint("TOP", 0, -4)
+                text:SetPoint("BOTTOM")
+                if col == 1 then
+                    text:SetPoint("LEFT")
+                else
+                    text:SetPoint("LEFT", header[col-1], "RIGHT", 2, 0)
+                end
+
+                header[col] = text
+            end
+            text:SetText(headerData.info[col])
+            text:SetJustifyH(headerData.justify[col])
+
+            local size = headerData.size[col]
+            if size == "FIT" then
+                width = width - text:GetWidth()
+            elseif size == "FILL" then
+                filler = text
+            else
+                _G.tinsert(flex, {text = text, size = size})
+            end
+            InfoLine:debug("Width", col, width)
+        end
+        local remainingWidth = width
+        for index, col in ipairs(flex) do
+            local headerWidth = _G.max(width * col.size, col.text:GetStringWidth())
+            remainingWidth = remainingWidth - headerWidth
+            col.text:SetWidth(headerWidth)
+            InfoLine:debug("Width", index, headerWidth, remainingWidth)
+        end
+        filler:SetWidth(_G.max(remainingWidth, filler:GetStringWidth()))
+
+        for index, row in ipairs(textTable.rows) do
+            InfoLine:debug("row", index)
+            for col = 1, #header do
+                local text = row[col]
+                if not text then
+                    text = row:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
+                    text:SetPoint("TOP")
+                    text:SetPoint("BOTTOM")
+                    text:SetPoint("LEFT", header[col])
+                    text:SetPoint("RIGHT", header[col])
+
+                    row[col] = text
+                end
+                local rowData = data[index]
+                text:SetText(rowData.info[col])
+                text:SetJustifyH(headerData.justify[col])
+            end
+        end
+        textTable:Show()
+
+        return TABLE_WIDTH, ROW_HEIGHT * (MAX_ROWS + 1) + 11
     end
-end
 
-function TextTableCellPrototype:getContentHeight()
-    InfoLine:debug("CellProto:getContentHeight")
-    return self.textTable:GetHeight()
+    function TextTableCellPrototype:ReleaseCell()
+        InfoLine:debug("CellProto:ReleaseCell")
+        if self.textTable then
+            self.textTable:Hide()
+        end
+    end
+
+    function TextTableCellPrototype:getContentHeight()
+        InfoLine:debug("CellProto:getContentHeight")
+        return self.textTable:GetHeight()
+    end
 end
 
 
@@ -247,14 +333,24 @@ function InfoLine:CreateBlocks()
         }
 
         local NameSort do
-            local nameMatch = [[.*[|t]*|cff%x%x%x%x%x%x(.*)]]
+            local nameMatch = [=[[|T]*(.*)[|t]*|cff%x%x%x%x%x%x(.*)]=]
             
             function NameSort(Val1, Val2)
+                local icon1, icon2
                 InfoLine:debug("NameSort", _G.strsplit("|", Val1))
-                Val1 = Val1:match(nameMatch)
-                Val2 = Val2:match(nameMatch)
-                InfoLine:debug("match", Val1, Val2)
-                if Val1 ~= Val2 then
+                icon1, Val1 = Val1:match(nameMatch)
+                icon2, Val2 = Val2:match(nameMatch)
+                InfoLine:debug("Player1", icon1, Val1)
+                InfoLine:debug("Player2", icon2, Val2)
+
+                icon1, icon2 = (icon1:find("ArmoryChat")), (icon2:find("ArmoryChat"))
+                if icon1 ~= icon2 then
+                    if icon1 and not icon2 then
+                        return true
+                    elseif not icon1 and icon2 then
+                        return false
+                    end
+                elseif Val1 ~= Val2 then
                     return Val1 < Val2
                 end
             end
@@ -323,16 +419,21 @@ function InfoLine:CreateBlocks()
 
                 local color = RealUI.media.colors.orange
                 local guildData = {}
-                guildData[1] = {type = "header",
+                guildData.header = {
                     r = color[1], g = color[2], b = color[3],
                     sort = {
                         NameSort, true, true, RankSort, NoteSort, NoteSort
                     },
                     info = {
                         _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
+                    },
+                    justify = {
+                        "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
+                    },
+                    size = {
+                        "FILL", "FIT", 0.2, "FIT", 0.2, 0.3
                     }
                 }
-                self:debug(guildData[1].info[1], guildData[1].info[2], guildData[1].info[3], guildData[1].info[4])
                 
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
@@ -369,7 +470,7 @@ function InfoLine:CreateBlocks()
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
 
-                        _G.tinsert(guildData, {type = "row",
+                        _G.tinsert(guildData, {
                             r = color[1], g = color[2], b = color[3],
                             info = {
                                 name, lvl, zone, rank, note, offnote

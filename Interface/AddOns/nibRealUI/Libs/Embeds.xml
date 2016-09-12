@@ -23,7 +23,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
     <Include file="LibIconFonts-1.0\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
-    <Include file="LibTextTable-1.1\Lib.xml" />
     <Include file="oUF\oUF.xml"/>
 
     <!-- Fixes -->
