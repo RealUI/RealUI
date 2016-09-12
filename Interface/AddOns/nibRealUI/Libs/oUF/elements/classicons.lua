@@ -56,7 +56,7 @@ local _, PlayerClass = UnitClass'player'
 -- Holds the class specific stuff.
 local ClassPowerID, ClassPowerType
 local ClassPowerEnable, ClassPowerDisable
-local RequireSpec, RequireSpell, RequireForm
+local RequireSpec, RequireSpell
 
 local UpdateTexture = function(element)
 	local color = oUF.colors.power[ClassPowerType or 'COMBO_POINTS']
@@ -149,18 +149,14 @@ local function Visibility(self, event, unit)
 	local shouldEnable
 
 	if(UnitHasVehicleUI('player')) then
-	 	if(UnitPowerType('vehicle') == SPELL_POWER_ENERGY) then
-			shouldEnable = true
-		end
+		shouldEnable = true
 	elseif(ClassPowerID) then
 		if(not RequireSpec or RequireSpec == GetSpecialization()) then
-			if(not RequireForm or RequireForm == GetShapeshiftFormID()) then
-				if(not RequireSpell or IsPlayerSpell(RequireSpell)) then
-					self:UnregisterEvent('SPELLS_CHANGED', Visibility)
-					shouldEnable = true
-				else
-					self:RegisterEvent('SPELLS_CHANGED', Visibility, true)
-				end
+			if(not RequireSpell or IsPlayerSpell(RequireSpell)) then
+				self:UnregisterEvent('SPELLS_CHANGED', Visibility)
+				shouldEnable = true
+			else
+				self:RegisterEvent('SPELLS_CHANGED', Visibility, true)
 			end
 		end
 	end
@@ -185,7 +181,7 @@ end
 
 do
 	ClassPowerEnable = function(self)
-		self:RegisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
+		self:RegisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:RegisterEvent('UNIT_POWER_FREQUENT', Path)
 		self:RegisterEvent('UNIT_MAXPOWER', Path)
 
@@ -198,7 +194,7 @@ do
 	end
 
 	ClassPowerDisable = function(self)
-		self:UnregisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
+		self:UnregisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:UnregisterEvent('UNIT_POWER_FREQUENT', Path)
 		self:UnregisterEvent('UNIT_MAXPOWER', Path)
 
@@ -227,7 +223,6 @@ do
 		ClassPowerType = 'COMBO_POINTS'
 
 		if(PlayerClass == 'DRUID') then
-			RequireForm = CAT_FORM
 			RequireSpell = 5221 -- Shred
 		end
 	elseif(PlayerClass == 'MAGE') then
@@ -249,10 +244,6 @@ local Enable = function(self, unit)
 
 	if(RequireSpec or RequireSpell) then
 		self:RegisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath, true)
-	end
-
-	if(RequireForm) then
-		self:RegisterEvent('UPDATE_SHAPESHIFT_FORM', VisibilityPath, true)
 	end
 
 	element.ClassPowerEnable = ClassPowerEnable

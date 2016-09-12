@@ -139,8 +139,7 @@ local GetDisplayPower = function(unit)
 end
 
 local Update = function(self, event, unit)
-	local arenaPrep = event == 'ArenaPreparation'
-	if(self.unit ~= unit and not arenaPrep) then return end
+	if(self.unit ~= unit) then return end
 	local power = self.Power
 
 	if(power.PreUpdate) then power:PreUpdate(unit) end
@@ -149,14 +148,7 @@ local Update = function(self, event, unit)
 	if power.displayAltPower then
 		displayType, min = GetDisplayPower(unit)
 	end
-
-	local cur, max
-	if(arenaPrep) then
-		cur, max = 1, 1
-	else
-		cur, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
-	end
-
+	local cur, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
 	local disconnected = not UnitIsConnected(unit)
 	power:SetMinMaxValues(min or 0, max)
 
@@ -169,10 +161,8 @@ local Update = function(self, event, unit)
 	power.disconnected = disconnected
 
 	local r, g, b, t
-	if(power.colorClass and arenaPrep) then
-		local _, _, _, _, _, _, class = GetSpecializationInfoByID(GetArenaOpponentSpec(self.id))
-		t = self.colors.class[class]
-	elseif(power.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+
+	if(power.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		t = self.colors.tapped
 	elseif(power.colorDisconnected and disconnected) then
 		t = self.colors.disconnected
@@ -186,7 +176,12 @@ local Update = function(self, event, unit)
 			if(power.GetAlternativeColor) then
 				r, g, b = power:GetAlternativeColor(unit, ptype, ptoken, altR, altG, altB)
 			elseif(altR) then
-				r, g, b = altR, altG, altB
+				-- As of 7.0.3, altR, altG, altB may be in 0-1 or 0-255 range.
+				if(altR > 1) or (altG > 1) or (altB > 1) then
+					r, g, b = altR / 255, altG / 255, altB / 255
+				else
+					r, g, b = altR, altG, altB
+				end
 			else
 				t = self.colors.power[ptype]
 			end

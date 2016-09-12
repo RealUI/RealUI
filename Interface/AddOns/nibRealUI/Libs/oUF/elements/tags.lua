@@ -122,15 +122,6 @@ local tagStrings = {
 		local _, x = UnitClass(u)
 		if(x) then
 			return Hex(_COLORS.class[x])
-		else
-			local id = u:match'arena(%d)$'
-			if(id) then
-				local specID = GetArenaOpponentSpec(tonumber(id))
-				if(specID and specID > 0) then
-					_, _, _, _, _, _, x = GetSpecializationInfoByID(specID)
-					return Hex(_COLORS.class[x])
-				end
-			end
 		end
 	end]],
 
@@ -320,17 +311,6 @@ local tagStrings = {
 			return 'Affix'
 		end
 	end]],
-
-	['arenaspec'] = [[function(u)
-		local id = u:match'arena(%d)$'
-		if(id) then
-			local specID = GetArenaOpponentSpec(tonumber(id))
-			if(specID and specID > 0) then
-				local _, specName = GetSpecializationInfoByID(specID)
-				return specName
-			end
-		end
-	end]],
 }
 
 local tags = setmetatable(
@@ -423,10 +403,6 @@ local unitlessEvents = {
 	PARTY_LEADER_CHANGED = true,
 
 	GROUP_ROSTER_UPDATE = true,
-
-	UNIT_COMBO_POINTS = true,
-
-	ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 
 local events = {}
