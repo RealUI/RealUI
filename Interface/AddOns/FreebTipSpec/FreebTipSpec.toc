@@ -3,6 +3,7 @@
 ## Notes: Specialization Info for the GameTooltip
 ## Version: 2.8
 ## Author: Freebaser
+## RequiredDeps: FreebTip
 
 libs\LibInspect\LibStub\LibStub.lua
 libs\LibInspect\LibInspect.lua

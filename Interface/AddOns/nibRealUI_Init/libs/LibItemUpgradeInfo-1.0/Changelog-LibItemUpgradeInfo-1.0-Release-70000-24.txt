@@ -1,0 +1,11 @@
+tag Release-70000-24
+dbef8efe41f323a616703a29ac9eda38feb0c182
+Giovanni Gargani <giovanni.gargani@hexkeep.com>
+2016-07-20 09:39:39 +0200
+
+GetUpgradeID was crashing on bad input
+
+--------------------
+
+Giovanni Gargani:
+	- GetUpgradeID(itemString) is now better protected against bad input

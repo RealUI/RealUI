@@ -7,11 +7,13 @@ local GameTooltip = GameTooltip
 local GetTime = GetTime
 local UnitGUID = UnitGUID
 
-local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
+local ItemUpgradeInfo = LibStub("RealUI_LibItemUpgradeInfo-1.0")
 local LibInspect = LibStub("LibInspect")
 
 local maxage = 1800 --number of secs to cache each player
 LibInspect:SetMaxAge(maxage)
+
+ns.Debug = RealUI.GetDebug(ADDON_NAME)
 
 local cache = {}
 local ilvlText = "|cffFFFFFF%d|r"
@@ -47,45 +49,143 @@ iLvlUpdate:SetScript("OnUpdate", function(self, elapsed)
 	self:Hide()
 end)
 
-local slots = { "Back", "Chest", "Feet", "Finger0", "Finger1", "Hands", "Head", "Legs",
-"MainHand", "Neck", "SecondaryHand", "Shoulder", "Trinket0", "Trinket1", "Waist", "Wrist" }
+local slots = {
+	"Head",
+	"Neck",
+	"Shoulder",
+	"Shirt",
+	"Chest",
+	"Waist",
+	"Legs",
+	"Feet",
+	"Wrist",
+	"Hands",
+	"Finger0",
+	"Finger1",
+	"Trinket0",
+	"Trinket1",
+	"Back",
+	"MainHand",
+	"SecondaryHand",
+}
 
-local slotIDs = {}
-for i, slot in next, slots do
-	local slotName = slot.."Slot"
-	local id = GetInventorySlotInfo(slotName)
+local TwoHanders = {
+	[LE_ITEM_WEAPON_AXE2H] = true,
+	[LE_ITEM_WEAPON_MACE2H] = true,
+	[LE_ITEM_WEAPON_SWORD2H] = true,
 
-	if(id) then
-		slotIDs[i] = id
-	end
-end
+	[LE_ITEM_WEAPON_POLEARM] = true,
+	[LE_ITEM_WEAPON_STAFF] = true,
 
+	[LE_ITEM_WEAPON_BOWS] = true,
+	[LE_ITEM_WEAPON_CROSSBOW] = true,
+	[LE_ITEM_WEAPON_GUNS] = true,
+}
+local DualWield = {
+	[LE_ITEM_WEAPON_AXE1H] = true,
+	[LE_ITEM_WEAPON_MACE1H] = true,
+	[LE_ITEM_WEAPON_SWORD1H] = true,
+
+	[LE_ITEM_WEAPON_WARGLAIVE] = true,
+	[LE_ITEM_WEAPON_DAGGER] = true,
+
+	[LE_ITEM_WEAPON_GENERIC] = true,
+	[LE_ITEM_ARMOR_SHIELD] = true,
+}
+
+local artifactcolor
 local function getItems(guid, data, age)
-	if((not guid) or (data and type(data.items) ~= "table")) then return end
+	if not artifactcolor then artifactcolor =_G.ITEM_QUALITY_COLORS[_G.LE_ITEM_QUALITY_ARTIFACT].hex end
+	if ((not guid) or (data and type(data.items) ~= "table")) then return end
 
 	local cacheGUID = cache[guid]
-	if(cacheGUID and cacheGUID.time > (GetTime()-maxage)) then
+	if (cacheGUID and (cacheGUID.time > (GetTime()-maxage)) and not cacheGUID.doRefresh) then
 		return iLvlUpdate:Show()
 	end
 
-	local numItems = 0
-	local itemsTotal = 0
+	local totalILvl, doRefresh = 0, false
+	local hasTwoHander, isDualWield
+	local artifactILvl, mainArtifact, offArtifact
 
-	for i, id in next, slotIDs do
-		local link = data.items[id]
+	for id, slot in next, slots do
+		if slot ~= "Shirt" then
+			local link = data.items[id]
+			ns.Debug(id, slot)
 
-		if(link) then
-			local ilvl = ItemUpgradeInfo:GetUpgradedItemLevel(link)
+			if (link) then
+				local ilvl = ItemUpgradeInfo:GetUpgradedItemLevel(link)
+				ns.Debug(ilvl, _G.strsplit("|", link))
+				if not ilvl then
+					return ns.Debug("No ilvl data for", slot)
+				end
 
-			numItems = numItems + 1
-			itemsTotal = itemsTotal + ilvl
+				if slot == "MainHand" or slot == "SecondaryHand" then
+					if link:find(artifactcolor) then
+						if slot == "MainHand" then
+							mainArtifact = ilvl
+						elseif slot == "SecondaryHand" then
+							offArtifact = ilvl
+						end
+					else
+						totalILvl = totalILvl + ilvl
+					end
+
+					local itemSubClassID = select(13, GetItemInfo(link))
+					ns.Debug("itemClass", itemSubClassID)
+
+					if itemSubClassID then
+						if slot == "MainHand" then
+							hasTwoHander = TwoHanders[itemSubClassID] and ilvl
+						elseif slot == "SecondaryHand" then
+							if hasTwoHander then
+								isDualWield = TwoHanders[itemSubClassID] -- Titan's Grip
+							else
+								isDualWield = DualWield[itemSubClassID]
+							end
+						end
+					end
+				else
+					totalILvl = totalILvl + ilvl
+				end
+			else
+				doRefresh = true
+			end
 		end
 	end
 
-	if(numItems > 0) then
-		local score = itemsTotal / numItems
-		cache[guid] = { score = score, time = GetTime() }
-		iLvlUpdate:Show()
+	-- Artifacts are counted as one item
+	if mainArtifact or offArtifact then
+		ns.Debug("Artifacts", mainArtifact, offArtifact)
+		artifactILvl = max(mainArtifact, offArtifact or 0)
+		totalILvl = totalILvl + artifactILvl
+
+		if offArtifact then
+			totalILvl = totalILvl + artifactILvl
+		end
+
+		if not doRefresh then
+			doRefresh = artifactILvl <= 750
+		end
+	end
+
+	local numItems = 15
+	if hasTwoHander or isDualWield then
+		numItems = 16
+	end
+
+	if hasTwoHander and not isDualWield then
+		-- Two handers are counted twice
+		totalILvl = totalILvl + hasTwoHander
+	end
+	--print("numItems", numItems)
+
+	if (totalILvl > 0) then
+		ns.Debug(totalILvl, numItems)
+		local score = totalILvl / numItems
+		cache[guid] = { score = score, time = GetTime(), doRefresh = doRefresh }
+		if not doRefresh then
+			iLvlUpdate:Show()
+		end
 	end
 end
 LibInspect:AddHook(ADDON_NAME, "items", function(...) getItems(...) end)
