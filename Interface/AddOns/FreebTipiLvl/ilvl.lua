@@ -80,6 +80,8 @@ local TwoHanders = {
 	[LE_ITEM_WEAPON_BOWS] = true,
 	[LE_ITEM_WEAPON_CROSSBOW] = true,
 	[LE_ITEM_WEAPON_GUNS] = true,
+
+	[LE_ITEM_WEAPON_FISHINGPOLE] = true
 }
 local DualWield = {
 	[LE_ITEM_WEAPON_AXE1H] = true,
