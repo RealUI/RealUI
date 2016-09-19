@@ -7,8 +7,10 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
-        _G.WorldMapPlayerUpper:EnableMouse(false)
-        _G.WorldMapPlayerLower:EnableMouse(false)
+        if not _G.RealUI.is71 then
+            _G.WorldMapPlayerUpper:EnableMouse(false)
+            _G.WorldMapPlayerLower:EnableMouse(false)
+        end
 
         if not _G.WorldMapFrame.skinned then
             _G.WorldMapFrame:SetUserPlaced(true)
