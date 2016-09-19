@@ -262,17 +262,21 @@ end
 -- Returns:
 --   Number - The true item level of the item, or nil if the input is invalid
 function lib:GetUpgradedItemLevel(itemString)
-	-- check for heirlooms first
-	local ilvl, isTrue = self:GetHeirloomTrueLevel(itemString)
-	if isTrue then
+	if GetDetailedItemLevelInfo then -- For 7.1
+		return GetDetailedItemLevelInfo(itemString)
+	else
+		-- check for heirlooms first
+		local ilvl, isTrue = self:GetHeirloomTrueLevel(itemString)
+		if isTrue then
+			return ilvl
+		end
+		-- not an heirloom? fall back to the regular item logic
+		local id = self:GetUpgradeID(itemString)
+		if ilvl and id then
+			ilvl = ilvl + self:GetItemLevelUpgrade(id)
+		end
 		return ilvl
 	end
-	-- not an heirloom? fall back to the regular item logic
-	local id = self:GetUpgradeID(itemString)
-	if ilvl and id then
-		ilvl = ilvl + self:GetItemLevelUpgrade(id)
-	end
-	return ilvl
 end
 
 -- IsBop(itemString)
