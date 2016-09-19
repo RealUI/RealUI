@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 8
+local MAJOR, MINOR = "LibArtifactData-1.0", 9
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -327,6 +327,10 @@ function private.ARTIFACT_UPDATE(event, newItem)
 	if newItem then
 		GetViewedArtifactData()
 	else
+		if not GetNumRelicSlots() then
+			Debug("|cffff0000ERROR:|r", "artifact data unobtainable.")
+			return
+		end
 		local newRelics = ScanRelics()
 		local oldRelics = artifacts[viewedID].relics
 
