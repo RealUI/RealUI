@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibItemUpgradeInfo-1.0", 22
+local MAJOR, MINOR = "RealUI_LibItemUpgradeInfo-1.0", 24
 local type,tonumber,select,strsplit,GetItemInfoFromHyperlink=type,tonumber,select,strsplit,GetItemInfoFromHyperlink
 local library,previous = _G.LibStub:NewLibrary(MAJOR, MINOR)
 local lib=library --#lib Needed to keep Eclipse LDT happy
@@ -80,13 +80,15 @@ local boePattern=_G.ITEM_BIND_ON_EQUIP
 local bopPattern=_G.ITEM_BIND_ON_PICKUP
 local boaPattern1=_G.ITEM_BIND_TO_BNETACCOUNT
 local boaPattern2=_G.ITEM_BNETACCOUNTBOUND
+local BASE_ARTIFACT_ILVL = 750
 
 local scanningTooltip
 local itemCache = setmetatable({},{__index=function(table,key) return {} end})
-local heirloomcolor
+local heirloomcolor, artifactcolor
 local emptytable={}
 local function ScanTip(itemLink,itemLevel)
 	if not heirloomcolor then heirloomcolor =_G.ITEM_QUALITY_COLORS[_G.LE_ITEM_QUALITY_HEIRLOOM].hex end
+	if not artifactcolor then artifactcolor =_G.ITEM_QUALITY_COLORS[_G.LE_ITEM_QUALITY_ARTIFACT].hex end
 	if type(itemLink)=="number" then
 		itemLink=select(2,GetItemInfo(itemLink))
 		if not itemLink then return emptytable end
@@ -117,10 +119,16 @@ local function ScanTip(itemLink,itemLevel)
 				if boa==nil then boa = text:find(boaPattern2) end
 			end
 		end
+		ilevel = ilevel or itemLevel
+
 		if (itemLink:find(heirloomcolor)) then
 			heirloom=true
 		end
-		itemCache[itemLink]={ilevel=ilevel or itemLevel,soulbound=soulbound,bop=bop,boe=boe,heirloom=heirloom}
+		if (itemLink:find(artifactcolor)) and ilevel <= BASE_ARTIFACT_ILVL then
+			return {ilevel=ilevel,soulbound=soulbound,bop=bop,boe=boe,heirloom=heirloom}
+		else
+			itemCache[itemLink]={ilevel=ilevel,soulbound=soulbound,bop=bop,boe=boe,heirloom=heirloom}
+		end
 	end
 	return itemCache[itemLink]
 end
@@ -135,8 +143,7 @@ end
 --   Number - The upgrade ID (possibly 0), or nil if the input is invalid or
 --            does not contain upgrade info
 function lib:GetUpgradeID(itemString)
-	--local instaid,upgradeid =itemString:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%-?%d+:%-?%d+:%d+:(%d+):%d:%d:(%d)")
-	--local instaid,upgradeid =itemString:match("item:%d+:%d+:%d+:%d+:%d+:%d+:%-?%d+:%-?%d+:%d+:%d+:(%d+):%d+:%d+:(%d+)")
+	if type(itemString)~="string" then return end
 	local itemString = itemString:match("item[%-?%d:]+") or ""-- Standardize itemlink to itemstring
 	local instaid, _, numBonuses, affixes = select(12, strsplit(":", itemString, 15))
 	instaid=tonumber(instaid) or 7
@@ -255,17 +262,21 @@ end
 -- Returns:
 --   Number - The true item level of the item, or nil if the input is invalid
 function lib:GetUpgradedItemLevel(itemString)
-	-- check for heirlooms first
-	local ilvl, isTrue = self:GetHeirloomTrueLevel(itemString)
-	if isTrue then
+	if GetDetailedItemLevelInfo then -- For 7.1
+		return GetDetailedItemLevelInfo(itemString)
+	else
+		-- check for heirlooms first
+		local ilvl, isTrue = self:GetHeirloomTrueLevel(itemString)
+		if isTrue then
+			return ilvl
+		end
+		-- not an heirloom? fall back to the regular item logic
+		local id = self:GetUpgradeID(itemString)
+		if ilvl and id then
+			ilvl = ilvl + self:GetItemLevelUpgrade(id)
+		end
 		return ilvl
 	end
-	-- not an heirloom? fall back to the regular item logic
-	local id = self:GetUpgradeID(itemString)
-	if ilvl and id then
-		ilvl = ilvl + self:GetItemLevelUpgrade(id)
-	end
-	return ilvl
 end
 
 -- IsBop(itemString)

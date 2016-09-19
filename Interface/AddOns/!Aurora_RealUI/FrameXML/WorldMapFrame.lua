@@ -7,16 +7,16 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
-        _G.WorldMapPlayerUpper:EnableMouse(false)
-        _G.WorldMapPlayerLower:EnableMouse(false)
+        if not _G.RealUI.is71 then
+            _G.WorldMapPlayerUpper:EnableMouse(false)
+            _G.WorldMapPlayerLower:EnableMouse(false)
+        end
 
         if not _G.WorldMapFrame.skinned then
             _G.WorldMapFrame:SetUserPlaced(true)
             local trackingBtn = _G.WorldMapFrame.UIElementsFrame.TrackingOptionsButton
 
             --Buttons
-            _G.WorldMapLevelDropDown:ClearAllPoints()
-            _G.WorldMapLevelDropDown:SetPoint("TOPLEFT", _G.WorldMapFrame.UIElementsFrame, -15, 3)
             trackingBtn:ClearAllPoints()
             trackingBtn:SetPoint("TOPRIGHT", _G.WorldMapFrame.UIElementsFrame, 3, 3)
 
