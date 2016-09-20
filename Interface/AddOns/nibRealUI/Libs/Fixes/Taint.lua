@@ -2,14 +2,6 @@ local ADDON_NAME, private = ...
 
 -- Lua Globals --
 local _G = _G
-local next = _G.next
-
--- Libs --
-local LCS = LibStub("LibCoolStuff")
-
--- RealUI --
-local RealUI = private.RealUI
-local L = RealUI.L
 
 do --[[ World Map ]]--
     -- original code by ls- (lightspark)
