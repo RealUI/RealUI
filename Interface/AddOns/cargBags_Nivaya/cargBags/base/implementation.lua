@@ -301,6 +301,19 @@ local defaultItem = cargBags:NewItemTable()
 	@return i <table>
 ]]
 do
+	local infoGather = CreateFrame("Frame")
+	infoGather:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+	infoGather:SetScript("OnEvent", function(self, event, itemID)
+		cargBags.debug(event, itemID)
+		local item = infoGather[itemID]
+		if item then
+			for i = 1, #item do
+				Implementation:GetItemInfo(item[i].bagID, item[i].slotID, true)
+				item[i].wait = nil
+			end
+			infoGather[itemID] = nil
+		end
+	end)
 	local function GatherItemInfo(bagID, slotID, i)
 		cargBags.debug("GatherItemInfo", bagID, slotID, i)
 		for k in pairs(i) do i[k] = nil end
@@ -337,12 +350,20 @@ do
 				i.speciesID = tonumber(speciesID) or 0
 			else
 				local itemID = strsplit(":", itemString)
-				i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID  = GetItemInfo(clink)
-				i.texture = i.texture or texture
 				i.id = tonumber(itemID) or 0
 
 				i.isQuestItem, i.questID, i.questActive = GetContainerItemQuestInfo(bagID, slotID)
 				i.isInSet, i.setName = GetContainerItemEquipmentSetInfo(bagID, slotID)
+
+				i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID  = GetItemInfo(clink)
+				i.texture = i.texture or texture
+				if not i.name then
+					if not infoGather[i.id] then infoGather[i.id] = {} end
+					if not i.wait then
+						tinsert(infoGather[i.id], i)
+						i.wait = true
+					end
+				end
 			end
 			cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
 		end

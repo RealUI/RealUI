@@ -79,7 +79,8 @@ for i = 1, #BlizzAddons do
 end
 
 local eventWhitelist = {
-    BAG_UPDATE = true
+    BAG_UPDATE = true,
+    GET_ITEM_INFO_RECEIVED = true,
 }
 local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
