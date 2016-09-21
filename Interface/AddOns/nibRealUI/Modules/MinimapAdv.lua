@@ -1891,4 +1891,9 @@ function MinimapAdv:OnEnable()
     SetUpMinimapFrame()
     CreateFrames()
     self:RegEvents()
+
+    -- Community defined API
+    function _G.GetMinimapShape()
+        return "SQUARE"
+    end
 end
