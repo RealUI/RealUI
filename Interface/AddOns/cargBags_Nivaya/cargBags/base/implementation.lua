@@ -257,6 +257,7 @@ function Implementation:Init()
 	self:RegisterEvent("BAG_UPDATE", self, self.BAG_UPDATE)
 	self:RegisterEvent("BAG_UPDATE_COOLDOWN", self, self.BAG_UPDATE_COOLDOWN)
 	self:RegisterEvent("ITEM_LOCK_CHANGED", self, self.ITEM_LOCK_CHANGED)
+	self:RegisterEvent("GET_ITEM_INFO_RECEIVED", self, self.GET_ITEM_INFO_RECEIVED)
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", self, self.PLAYERBANKSLOTS_CHANGED)
 	self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
@@ -300,20 +301,8 @@ local defaultItem = cargBags:NewItemTable()
 	@param i <table> [optional]
 	@return i <table>
 ]]
+local infoGather = {}
 do
-	local infoGather = CreateFrame("Frame")
-	infoGather:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-	infoGather:SetScript("OnEvent", function(self, event, itemID)
-		cargBags.debug(event, itemID)
-		local item = infoGather[itemID]
-		if item then
-			for i = 1, #item do
-				Implementation:GetItemInfo(item[i].bagID, item[i].slotID, true)
-				item[i].wait = nil
-			end
-			infoGather[itemID] = nil
-		end
-	end)
 	local function GatherItemInfo(bagID, slotID, i)
 		cargBags.debug("GatherItemInfo", bagID, slotID, i)
 		for k in pairs(i) do i[k] = nil end
@@ -511,6 +500,22 @@ function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 	if(button) then
 		local item = self:GetItemInfo(bagID, slotID, true)
 		button:UpdateLock(item)
+	end
+end
+
+--[[!
+	Fired when item information is recived from the server after a GetItemInfo call
+	@param itemID <number>
+]]
+function Implementation:GET_ITEM_INFO_RECEIVED(self, event, itemID)
+	cargBags.debug("Implementation:GET_ITEM_INFO_RECEIVED", event, itemID)
+	local item = infoGather[itemID]
+	if item then
+		for i = 1, #item do
+			self:BAG_UPDATE(event, item[i].bagID, item[i].slotID)
+			item[i].wait = nil
+		end
+		infoGather[itemID] = nil
 	end
 end
 
