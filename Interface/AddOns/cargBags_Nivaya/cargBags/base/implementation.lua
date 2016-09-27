@@ -507,7 +507,7 @@ end
 	Fired when item information is recived from the server after a GetItemInfo call
 	@param itemID <number>
 ]]
-function Implementation:GET_ITEM_INFO_RECEIVED(self, event, itemID)
+function Implementation:GET_ITEM_INFO_RECEIVED(event, itemID)
 	cargBags.debug("Implementation:GET_ITEM_INFO_RECEIVED", event, itemID)
 	local item = infoGather[itemID]
 	if item then
