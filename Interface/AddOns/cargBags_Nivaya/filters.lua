@@ -143,7 +143,7 @@ cB_Filters.fItemSets = function(item)
 	local _,_,itemStr = string.find(item.link, "^|c%x+|H(.+)|h%[.*%]")
 	if item2setOF[itemStr] then return true end
 	-- Check Equipment Manager sets:
-	if cargBags.itemKeys["setID"](item) then return true end
+	if item.isInSet then return true end
    return false
 end
 
