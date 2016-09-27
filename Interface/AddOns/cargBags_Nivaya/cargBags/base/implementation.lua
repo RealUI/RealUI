@@ -334,7 +334,7 @@ do
 				i.texture = i.texture or texture
 				i.typeID = LE_ITEM_CLASS_BATTLEPET
 				i.subTypeID = petType
-				i.id = battlePetID
+				i.id = tonumber(battlePetID)
 
 				i.speciesID = tonumber(speciesID) or 0
 			else
