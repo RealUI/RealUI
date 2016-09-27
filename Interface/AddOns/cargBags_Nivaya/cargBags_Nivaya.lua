@@ -516,7 +516,7 @@ function cbNivaya:CatDropDownOnClick(self, type)
 	local itemID = cbNivCatDropDown.itemID
 
 	if (type == "MarkAsNew") then
-		table.remove(cB_KnownItems, itemID)
+		cB_KnownItems[itemID] = nil
 	elseif (type == "MarkAsKnown") then
 		cB_KnownItems[itemID] = cbNivaya:getItemCount(itemName)
 	else
