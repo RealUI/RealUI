@@ -213,17 +213,26 @@ end
 local resetNewItems = function(self)
 	cargBags.debug("style resetNewItems")
 	cB_KnownItems = cB_KnownItems or {}
+	if not cBniv.clean then
+		for item, numItem in next, cB_KnownItems do
+			if type(item) == "string" then
+				cB_KnownItems[item] = nil
+			end
+		end
+		cBniv.clean = true
+	end
 	for bag = 0, 4 do
 		local tNumSlots = GetContainerNumSlots(bag)
 		if tNumSlots > 0 then
 			for slot = 1, tNumSlots do
 				local item = cbNivaya:GetItemInfo(bag, slot)
 				--print("resetNewItems", item.id)
-				item.id = item.id or 0
-				if cB_KnownItems[item.id] then
-					cB_KnownItems[item.id] = cB_KnownItems[item.id] + (item.stackCount and item.stackCount or 0)
-				else
-					cB_KnownItems[item.id] = item.stackCount and item.stackCount or 0
+				if item.id then
+					if cB_KnownItems[item.id] then
+						cB_KnownItems[item.id] = cB_KnownItems[item.id] + (item.stackCount and item.stackCount or 0)
+					else
+						cB_KnownItems[item.id] = item.stackCount and item.stackCount or 0
+					end
 				end
 			end 
 		end
