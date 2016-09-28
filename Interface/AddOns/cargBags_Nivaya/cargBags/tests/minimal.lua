@@ -14,9 +14,9 @@
 local Implementation = cargBags:NewImplementation("Minimal")
 
 function Implementation:OnOpen()
-	print("Implementation was opened")
+    print("Implementation was opened")
 end
 
 function Implementation:OnClose()
-	print("Implementation was closed")
+    print("Implementation was closed")
 end

@@ -510,7 +510,7 @@ local function style(frame)
     local frameName = frame:GetName()
 
     if(not frame.freebtipBD) then
-		-- xRUI
+        -- xRUI
         frame:SetBackdrop(nil)
 
         local bg
