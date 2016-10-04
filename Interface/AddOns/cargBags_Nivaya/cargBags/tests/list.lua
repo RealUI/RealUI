@@ -2,7 +2,7 @@
 -- All item buttons are rows in a scrollable list
 -- Think of a very simple Baud Manifest
 
-local ListExample = cargBags:NewImplementation("ListExample")
+local ListExample = _G.cargBags:NewImplementation("ListExample")
 local ScrollContainer = ListExample:GetContainerClass()
 local ListButton = ListExample:GetItemButtonClass()
 
@@ -46,7 +46,7 @@ local function onMouseWheel(self, delta)
     local scroll = self.container.scroll
 
     local offset = scroll:GetVerticalScroll() - delta * 69 * 3
-    offset = math.max(math.min(offset, scroll:GetVerticalScrollRange()), 0)
+    offset = _G.max(_G.min(offset, scroll:GetVerticalScrollRange()), 0)
     scroll:SetVerticalScroll(offset)
 end
 
@@ -62,11 +62,11 @@ function ScrollContainer:OnCreate(name, settings)
     -- The mainFrame takes the role of the container: plugins, layout and size
     -- 'scroll' is a scrollFrame and provides the inner dimensions for the real container with the items
 
-    local mainFrame = CreateFrame("Button", nil, self.implementation)
-    local scroll = CreateFrame("ScrollFrame", nil, mainFrame)
+    local mainFrame = _G.CreateFrame("Button", nil, self.implementation)
+    local scroll = _G.CreateFrame("ScrollFrame", nil, mainFrame)
     self.mainFrame, self.scroll = mainFrame, scroll
 
-    self:SetParent(parent)
+    self:SetParent(mainFrame)
     scroll:SetScrollChild(self)
 
     mainFrame:SetBackdrop{
@@ -88,13 +88,13 @@ function ScrollContainer:OnCreate(name, settings)
     scroll:SetPoint("TOPLEFT", 10, -36)
     scroll:SetPoint("BOTTOMRIGHT", -10, 10)
 
-    local infoFrame = CreateFrame("Button", nil, mainFrame)
+    local infoFrame = _G.CreateFrame("Button", nil, mainFrame)
     infoFrame:SetPoint("TOPLEFT", 10, -3)
     infoFrame:SetPoint("TOPRIGHT", -10, -3)
     infoFrame:SetHeight(32)
 
     local space = self:SpawnPlugin("TagDisplay", "[space:free/max]", infoFrame)
-    space.bags = cargBags:ParseBags(settings.Bags)
+    space.bags = _G.cargBags:ParseBags(settings.Bags)
     space:SetPoint("LEFT")
 
     self:SpawnPlugin("TagDisplay", "[money]", infoFrame):SetPoint("RIGHT", -10, 0)

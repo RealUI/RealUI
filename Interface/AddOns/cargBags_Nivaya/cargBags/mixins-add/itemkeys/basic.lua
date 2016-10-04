@@ -21,27 +21,30 @@ LICENSE
 DESCRIPTION:
     A few simple item keys, mostly ones resulting through pattern matching
 ]]
-local parent, ns = ...
+local _, ns = ...
 local cargBags = ns.cargBags
+
+-- Lua Globals --
+local _G = _G
 
 -- Returns the numeric item id (12345)
 cargBags.itemKeys["id"] = function(i)
-    return i.link and tonumber(i.link:match("item:(%d+)"))
+    return i.link and _G.tonumber(i.link:match("item:(%d+)"))
 end
 
 --  Returns the type of the parent bag
 cargBags.itemKeys["bagType"] = function(i)
-    return select(2, GetContainerNumFreeSlots(i.bagID))
+    return _G.select(2, _G.GetContainerNumFreeSlots(i.bagID))
 end
 
--- Returns the item string (12345:0:0:0)
+-- Returns the item string
 cargBags.itemKeys["string"] = function(i)
-    return i.link and i.link:match("item:(%d+:%d+:%d+:%d+)")
+    return i.link and i.link:match("item[%-?%d:]+")
 end
 
 cargBags.itemKeys["stats"] = function(i)
-    if(not i.link or not GetItemStats) then return end
-    local stats = GetItemStats(i.link)
+    if(not i.link or not _G.GetItemStats) then return end
+    local stats = _G.GetItemStats(i.link)
     i.stats = stats
     return stats
 end

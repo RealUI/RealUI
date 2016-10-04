@@ -24,17 +24,19 @@ DESCRIPTION
 DEPENDENCIES
     mixins/api-common.lua
 ]]
-local addon, ns = ...
+local _, ns = ...
 local cargBags = ns.cargBags
 
-local function noop() end
+-- Lua Globals --
+local _G = _G
+local select = _G.select
 
 -- Upgrade Level retrieval
-local LIU = LibStub("RealUI_LibItemUpgradeInfo-1.0")
+local LIU = _G.LibStub("RealUI_LibItemUpgradeInfo-1.0")
 
 local function Round(num, idp)
     local mult = 10^(idp or 0)
-    return math.floor(num * mult + 0.5) / mult
+    return _G.floor(num * mult + 0.5) / mult
 end
 
 local function ItemColorGradient(perc, ...)
@@ -45,7 +47,7 @@ local function ItemColorGradient(perc, ...)
     end
 
     local num = select('#', ...) / 3
-    local segment, relperc = math.modf(perc*(num-1))
+    local segment, relperc = _G.math.modf(perc*(num-1))
     local r1, g1, b1, r2, g2, b2 = select((segment*3)+1, ...)
 
     return r1 + (r2-r1)*relperc, g1 + (g2-g1)*relperc, b1 + (b2-b1)*relperc
@@ -60,21 +62,21 @@ local function CreateInfoString(button, position)
         str:SetJustifyH("RIGHT")
         str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
     end 
-    str:SetFontObject(RealUIFont_PixelSmall)
+    str:SetFontObject(_G.RealUIFont_PixelSmall)
 
     return str
 end
 
 local function ItemButton_Scaffold(self)
     self:SetSize(37, 37)
-    local _, height = RealUI:GetResolutionVals(true)
-    local bordersize = 768 / height / (GetCVar("uiScale")*cBnivCfg.scale)
+    local _, height = _G.RealUI:GetResolutionVals(true)
+    local bordersize = 768 / height / (_G.GetCVar("uiScale") * _G.cBnivCfg.scale)
     local name = self:GetName()
     self.Icon = _G[name.."IconTexture"]
     self.Count = _G[name.."Count"]
     self.Cooldown = _G[name.."Cooldown"]
     self.Quest = _G[name.."IconQuestTexture"]
-    self.Border = CreateFrame("Frame", nil, self)
+    self.Border = _G.CreateFrame("Frame", nil, self)
     self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
     self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
     self.Border:SetBackdrop({
@@ -96,14 +98,14 @@ local function ItemButton_Update(self, item)
         self.Icon:SetTexture(item.texture)
         self.Icon:SetTexCoord(.08, .92, .08, .92)
     else
-        if cBnivCfg.CompressEmpty then
+        if _G.cBnivCfg.CompressEmpty then
             self.Icon:SetTexture(self.bgTex)
             self.Icon:SetTexCoord(.08, .92, .08, .92)
         else
             self.Icon:SetColorTexture(1,1,1,0.1)
         end
     end
-    if(item.count and item.count > 1) then
+    if item.count and item.count > 1 then
         self.Count:SetText(item.count >= 1e3 and "*" or item.count)
         self.Count:Show()
     else
@@ -112,7 +114,7 @@ local function ItemButton_Update(self, item)
     self.count = item.count -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
 
     -- Durability
-    local dCur, dMax = GetContainerItemDurability(item.bagID, item.slotID)
+    local dCur, dMax = _G.GetContainerItemDurability(item.bagID, item.slotID)
     if dMax and (dMax > 0) and (dCur < dMax) then
         local dPer = (dCur / dMax * 100)
         local r, g, b = ItemColorGradient((dCur/dMax), 1, 0, 0, 1, 1, 0, 0, 1, 0)
@@ -130,7 +132,7 @@ local function ItemButton_Update(self, item)
 
         if (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)
-            self.BottomString:SetTextColor(GetItemQualityColor(item.rarity))
+            self.BottomString:SetTextColor(_G.GetItemQualityColor(item.rarity))
         else
             self.BottomString:SetText("")
         end
@@ -142,7 +144,7 @@ local function ItemButton_Update(self, item)
     self:UpdateLock(item)
     self:UpdateQuest(item)
 
-    if(self.OnUpdate) then self:OnUpdate(item) end
+    if self.OnUpdate then self:OnUpdate(item) end
 end
 
 --[[!
@@ -151,14 +153,14 @@ end
     @callback OnUpdateCooldown(item)
 ]]
 local function ItemButton_UpdateCooldown(self, item)
-    if(item.cdEnable == 1 and item.cdStart and item.cdStart > 0) then
+    if item.cdEnable == 1 and item.cdStart and item.cdStart > 0 then
         self.Cooldown:SetCooldown(item.cdStart, item.cdFinish)
         self.Cooldown:Show()
     else
         self.Cooldown:Hide()
     end
 
-    if(self.OnUpdateCooldown) then self:OnUpdateCooldown(item) end
+    if self.OnUpdateCooldown then self:OnUpdateCooldown(item) end
 end
 
 --[[!
@@ -169,7 +171,7 @@ end
 local function ItemButton_UpdateLock(self, item)
     self.Icon:SetDesaturated(item.locked)
 
-    if(self.OnUpdateLock) then self:OnUpdateLock(item) end
+    if self.OnUpdateLock then self:OnUpdateLock(item) end
 end
 
 --[[!
@@ -181,12 +183,12 @@ local function ItemButton_UpdateQuest(self, item)
     if item.questID or item.isQuestItem then
         self.Border:SetBackdropBorderColor(1, 1, 0, 1)
     elseif item.rarity and item.rarity > 1 then
-        local r, g, b = GetItemQualityColor(item.rarity)
+        local r, g, b = _G.GetItemQualityColor(item.rarity)
         self.Border:SetBackdropBorderColor(r, g, b, 1)
     else
         self.Border:SetBackdropBorderColor(0, 0, 0, 1)
     end
-    if(self.OnUpdateQuest) then self:OnUpdateQuest(item) end
+    if self.OnUpdateQuest then self:OnUpdateQuest(item) end
 end
 
 cargBags:RegisterScaffold("Default", function(self)
@@ -196,7 +198,7 @@ cargBags:RegisterScaffold("Default", function(self)
     self.glowCoords = { 14/64, 50/64, 14/64, 50/64 } --! @property glowCoords <table> Indexed table of texCoords for the glow texture
     self.bgTex = nil --! @property bgTex <string> Texture used as a background if no item is in the slot
 
-    self.CreateFrame = ItemButton_CreateFrame
+    --self.CreateFrame = ItemButton_CreateFrame
     self.Scaffold = ItemButton_Scaffold
 
     self.Update = ItemButton_Update
@@ -204,6 +206,6 @@ cargBags:RegisterScaffold("Default", function(self)
     self.UpdateLock = ItemButton_UpdateLock
     self.UpdateQuest = ItemButton_UpdateQuest
 
-    self.OnEnter = ItemButton_OnEnter
-    self.OnLeave = ItemButton_OnLeave
+    --self.OnEnter = ItemButton_OnEnter
+    --self.OnLeave = ItemButton_OnLeave
 end)

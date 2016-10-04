@@ -31,8 +31,8 @@ DESCRIPTION
 local _, ns = ...
 local cargBags = ns.cargBags
 
-local Implementation = cargBags.classes.Implementation
-local Container = cargBags.classes.Container
+-- Lua Globals --
+local _G = _G
 
 local bagStrings = {
     ["backpack"]        = { 0 },
@@ -53,19 +53,22 @@ cargBags.BagStrings = bagStrings
 ]]
 function cargBags:ParseBags(bags)
     --print("ParseBags", bags)
-    if(type(bags) == "table") then return bags end
-    if(bagStrings[bags]) then return bagStrings[bags] end
-    local min, max = bags and bags:match("(%d+)-(%d+)")
-    if(min) then
-        local t = {}
-        for i=min, max do
-            t[#t+1] = i
+    if _G.type(bags) == "table" then return bags end
+    if bagStrings[bags] then return bagStrings[bags] end
+
+    if bags then
+        local min, max = bags:match("(%d+)-(%d+)")
+        if min then
+            local t = {}
+            for i = min, max do
+                t[#t + 1] = i
+            end
+            bagStrings[bags] = t
+            return t
+        elseif _G.tonumber(bags) then
+            local t = {_G.tonumber(bags)}
+            bagStrings[bags] = t
+            return t
         end
-        bagStrings[bags] = t
-        return t
-    elseif(tonumber(bags)) then
-        local t = {tonumber(bags)}
-        bagStrings[bags] = t
-        return t
     end
 end

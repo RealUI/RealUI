@@ -31,9 +31,13 @@ DEPENDENCIES
 CALLBACKS
     BagButton:OnCreate(bagID)
 ]]
-
 local addon, ns = ...
 local cargBags = ns.cargBags
+
+-- Lua Globals --
+local _G = _G
+local next = _G.next
+
 local Implementation = cargBags.classes.Implementation
 
 function Implementation:GetBagButtonClass()
@@ -49,24 +53,24 @@ BagButton.itemFadeAlpha = 0.2
 
 local buttonNum = 0
 function BagButton:Create(bagID)
-    buttonNum = buttonNum+1
-    local name = addon.."BagButton"..buttonNum
+    buttonNum = buttonNum + 1
+    local name = addon .. "BagButton" .. buttonNum
 
-    local button = setmetatable(CreateFrame("CheckButton", name, nil, "ItemButtonTemplate"), self.__index)
+    local button = _G.setmetatable(_G.CreateFrame("CheckButton", name, nil, "ItemButtonTemplate"), self.__index)
 
-    local invID = ContainerIDToInventoryID(bagID)
+    local invID = _G.ContainerIDToInventoryID(bagID)
     button.invID = invID
     button.bagID = bagID
     button.isBag = 1
     if button.bagID <= 4 then
         -- Inventory
         button:SetID(invID)
-        button.UpdateTooltip = BagSlotButton_OnEnter
+        button.UpdateTooltip = _G.BagSlotButton_OnEnter
     elseif button.bagID >= 5 then
         -- Bank
         button:SetID(invID - 67) -- bank IDs don't use the actual invID
-        button.GetInventorySlot = ButtonInventorySlot
-        button.UpdateTooltip = BankFrameItemButton_OnEnter
+        button.GetInventorySlot = _G.ButtonInventorySlot
+        button.UpdateTooltip = _G.BankFrameItemButton_OnEnter
     end
 
     button:RegisterForDrag("LeftButton", "RightButton")
@@ -81,7 +85,7 @@ function BagButton:Create(bagID)
     button.Quest =      _G[name.."IconQuestTexture"]
     button.Border =     _G[name.."NormalTexture"]
     
-    button.bg = CreateFrame("Frame", nil, button)
+    button.bg = _G.CreateFrame("Frame", nil, button)
     button.bg:SetAllPoints(button)
     button.bg:SetBackdrop({
         bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -97,31 +101,31 @@ function BagButton:Create(bagID)
 
     cargBags.SetScriptHandlers(button, "OnClick", "OnReceiveDrag", "OnEnter", "OnLeave", "OnDragStart")
 
-    if(button.OnCreate) then button:OnCreate(bagID) end
+    if button.OnCreate then button:OnCreate(bagID) end
 
     return button
 end
 
 function BagButton:Update()
-    local icon = GetInventoryItemTexture("player", self.invID)
+    local icon = _G.GetInventoryItemTexture("player", self.invID)
     self.Icon:SetTexture(icon or self.bgTex)
-    self.Icon:SetDesaturated(IsInventoryItemLocked(self.invID))
+    self.Icon:SetDesaturated(_G.IsInventoryItemLocked(self.invID))
 
-    if(self.bagID > NUM_BAG_SLOTS) then
-        if(self.bagID-NUM_BAG_SLOTS <= GetNumBankSlots()) then
+    if self.bagID > _G.NUM_BAG_SLOTS then
+        if self.bagID - _G.NUM_BAG_SLOTS <= _G.GetNumBankSlots() then
             self.Icon:SetVertexColor(1, 1, 1)
-            self.tooltipText = BANK_BAG
+            self.tooltipText = _G.BANK_BAG
             self.notBought = nil
         else
             self.Icon:SetVertexColor(1, 0, 0)
-            self.tooltipText = BANK_BAG_PURCHASE
+            self.tooltipText = _G.BANK_BAG_PURCHASE
             self.notBought = true
         end
     end
 
     self:SetChecked(not self.hidden and not self.notBought)
 
-    if(self.OnUpdate) then self:OnUpdate() end
+    if self.OnUpdate then self:OnUpdate() end
 end
 
 local function highlight(button, func, bagID)
@@ -131,9 +135,9 @@ end
 function BagButton:OnEnter()
     local hlFunction = self.bar.highlightFunction
 
-    if(hlFunction) then
-        if(self.bar.isGlobal) then
-            for i, container in pairs(self.implementation.contByID) do
+    if hlFunction then
+        if self.bar.isGlobal then
+            for i, container in next, self.implementation.contByID do
                 container:ApplyToButtons(highlight, hlFunction, self.bagID)
             end
         else
@@ -147,9 +151,9 @@ end
 function BagButton:OnLeave()
     local hlFunction = self.bar.highlightFunction
 
-    if(hlFunction) then
-        if(self.bar.isGlobal) then
-            for i, container in pairs(self.implementation.contByID) do
+    if hlFunction then
+        if self.bar.isGlobal then
+            for i, container in next, self.implementation.contByID do
                 container:ApplyToButtons(highlight, hlFunction)
             end
         else
@@ -157,31 +161,31 @@ function BagButton:OnLeave()
         end
     end
 
-    GameTooltip:Hide()
+    _G.GameTooltip:Hide()
 end
 
 function BagButton:OnClick()
-    if(self.notBought) then
+    if self.notBought then
         self:SetChecked(nil)
-        BankFrame.nextSlotCost = GetBankSlotCost(GetNumBankSlots())
-        return StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
+        _G.BankFrame.nextSlotCost = _G.GetBankSlotCost(_G.GetNumBankSlots())
+        return _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
     end
 
-    if(PutItemInBag(self.invID)) then return end
+    if _G.PutItemInBag(self.invID) then return end
 
     -- Somehow we need to disconnect this from the filter-sieve
     local container = self.bar.container
-    if(container and container.SetFilter) then
-        if(not self.filter) then
+    if container and container.SetFilter then
+        if not self.filter then
             local bagID = self.bagID
             self.filter = function(i) return i.bagID ~= bagID end
         end
         self.hidden = not self.hidden
 
-        if(self.bar.isGlobal) then
-            for i, container in pairs(container.implementation.contByID) do
-                container:SetFilter(self.filter, self.hidden)
-                container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+        if self.bar.isGlobal then
+            for i, cont in next, container.implementation.contByID do
+                cont:SetFilter(self.filter, self.hidden)
+                cont.implementation:OnEvent("BAG_UPDATE", self.bagID)
             end
         else
             container:SetFilter(self.filter, self.hidden)
@@ -192,25 +196,25 @@ end
 BagButton.OnReceiveDrag = BagButton.OnClick
 
 function BagButton:OnDragStart()
-    PickupBagFromSlot(self.invID)
+    _G.PickupBagFromSlot(self.invID)
 end
 
 -- Updating the icons
 local function updater(self, event)
-    for i, button in pairs(self.buttons) do
+    for i, button in next, self.buttons do
         button:Update()
     end
 end
 
 local function onLock(self, event, bagID, slotID)
-    if(bagID == -1 and slotID > NUM_BANKGENERIC_SLOTS) then
-        bagID, slotID = ContainerIDToInventoryID(slotID-NUM_BANKGENERIC_SLOTS+NUM_BAG_SLOTS)
+    if (bagID == -1) and (slotID > _G.NUM_BANKGENERIC_SLOTS) then
+        bagID, slotID = _G.ContainerIDToInventoryID(slotID - _G.NUM_BANKGENERIC_SLOTS + _G.NUM_BAG_SLOTS)
     end
     
-    if(slotID) then return end
+    if slotID then return end
 
-    for i, button in pairs(self.buttons) do
-        if(button.invID == bagID) then
+    for i, button in next, self.buttons do
+        if button.invID == bagID then
             return button:Update()
         end
     end
@@ -224,11 +228,11 @@ local disabled = {
 
 -- Register the plugin
 cargBags:RegisterPlugin("BagBar", function(self, bags)
-    if(cargBags.ParseBags) then
+    if cargBags.ParseBags then
         bags = cargBags:ParseBags(bags)
     end
 
-    local bar = CreateFrame("Frame",  nil, self)
+    local bar = _G.CreateFrame("Frame",  nil, self)
     bar.container = self
 
     bar.layouts = cargBags.classes.Container.layouts
@@ -236,12 +240,12 @@ cargBags:RegisterPlugin("BagBar", function(self, bags)
 
     local buttonClass = self.implementation:GetBagButtonClass()
     bar.buttons = {}
-    for i=1, #bags do
-        if(not disabled[bags[i]]) then -- Temporary until I include fake buttons for backpack, bankframe and keyring
+    for i = 1, #bags do
+        if not disabled[bags[i]] then -- Temporary until I include fake buttons for backpack, bankframe and keyring
             local button = buttonClass:Create(bags[i])
             button:SetParent(bar)
             button.bar = bar
-            table.insert(bar.buttons, button)
+            _G.tinsert(bar.buttons, button)
         end
     end
 

@@ -21,37 +21,35 @@ LICENSE
 DESCRIPTION:
     Item keys which require tooltip parsing to work
 ]]
-local parent, ns = ...
+local ADDON_NAME, ns = ...
 local cargBags = ns.cargBags
 
-local tipName = parent.."Tooltip"
+-- Lua Globals --
+local _G = _G
+
+local tipName = ADDON_NAME.."Tooltip"
 local tooltip
 
-local function generateTooltip()
-    tooltip = CreateFrame("GameTooltip", tipName)
-    tooltip:SetOwner(WorldFrame, "ANCHOR_NONE") 
-    tooltip:AddFontStrings( 
-        tooltip:CreateFontString("$parentTextLeft1", nil, "GameTooltipText"), 
-        tooltip:CreateFontString("$parentTextRight1", nil, "GameTooltipText")
-    )
-end
-
 cargBags.itemKeys["bindOn"] = function(i)
-    if(not i.link) then return end
+    if not i.link then return end
 
-    if(not tooltip) then generateTooltip() end
+    if not tooltip then
+        tooltip = _G.CreateFrame("GameTooltip", tipName)
+        tooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE") 
+    end
+
     tooltip:ClearLines()
     tooltip:SetBagItem(i.bagID, i.slotID)
     local bound = _G[tipName.."TextLeft2"] and _G[tipName.."TextLeft2"]:GetText()
-    if(not bound) then return end
+    if not bound then return end
 
     local bindOn
-    if(bound:match(ITEM_BIND_ON_EQUIP)) then bindOn = "equip"
-    elseif(bound:match(ITEM_SOULBOUND)) then bindOn = "soul"
-    elseif(bound:match(ITEM_BIND_QUEST)) then bindOn = "quest"
-    elseif(bound:match(ITEM_BIND_TO_ACCOUNT)) then bindOn = "account"
-    elseif(bound:match(ITEM_BIND_ON_PICKUP)) then bindOn = "pickup"
-    elseif(bound:match(ITEM_BIND_ON_USE)) then bindOn = "use" end
+    if bound:match(_G.ITEM_BIND_ON_EQUIP) then bindOn = "equip"
+    elseif bound:match(_G.ITEM_SOULBOUND) then bindOn = "soul"
+    elseif bound:match(_G.ITEM_BIND_QUEST) then bindOn = "quest"
+    elseif bound:match(_G.ITEM_BIND_TO_ACCOUNT) then bindOn = "account"
+    elseif bound:match(_G.ITEM_BIND_ON_PICKUP) then bindOn = "pickup"
+    elseif bound:match(_G.ITEM_BIND_ON_USE) then bindOn = "use" end
 
     i.bindOn = bindOn
     return bindOn

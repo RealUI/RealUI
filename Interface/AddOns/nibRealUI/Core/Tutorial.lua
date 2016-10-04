@@ -349,7 +349,6 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
     _G.HelpPlate:Show()
 end
 
--- This is used in a macro, but luacheck doesn't pick that up.
 function RealUI:HideTutorial()
     RealUITutorial_HelpPlate_AnimateOut()
     _G.RealUITutorialButtonClose:Hide()

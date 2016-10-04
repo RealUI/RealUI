@@ -25,18 +25,34 @@ DESCRIPTION
 DEPENDENCIES:
     base-add/filters.sieve.lua
 ]]
-local addon, ns = ...
+local _, ns = ...
+
+-- Lua Globals --
+local _G = _G
+
 local cargBags = ns.cargBags
 local Container = cargBags.classes.Container
 local Implementation = cargBags.classes.Implementation
 
 local defaultFilters = {
-    n = function(i, arg) return i.name and i.name:lower():match(arg) end,
-    t = function(i, arg) return (i.type and i.type:lower():match(arg)) or (i.subType and i.subType:lower():match(arg)) or (i.equipLoc and i.equipLoc:lower():match(arg)) end,
-    b = function(i, arg) return i.bindOn and i.bindOn:match(arg) end,
-    q = function(i, arg) return i.rarity == tonumber(arg) end,
-    bag = function(i, arg) return i.bagID == tonumber(arg) end,
-    quest = function(i, arg) return i.isQuestItem end,
+    n = function(i, arg)
+        return i.name and i.name:lower():match(arg)
+    end,
+    t = function(i, arg)
+        return (i.type and i.type:lower():match(arg)) or (i.subType and i.subType:lower():match(arg)) or (i.equipLoc and i.equipLoc:lower():match(arg))
+    end,
+    b = function(i, arg)
+        return i.bindOn and i.bindOn:match(arg)
+    end,
+    q = function(i, arg)
+        return i.rarity == _G.tonumber(arg)
+    end,
+    bag = function(i, arg)
+        return i.bagID == _G.tonumber(arg)
+    end,
+    quest = function(i, arg)
+        return i.isQuestItem
+    end,
 
     _default = "n",
 }
@@ -55,10 +71,10 @@ function Implementation:ParseTextFilter(text, filters, textFilters)
 
     for match in text:gmatch("[^,;&]+") do
         local mod, type, value = match:trim():match("^(!?)(.-)[:=]?([^:=]*)$")
-        mod = (mod == "!" and -1) or true
-        if(value and type ~= "" and textFilters[type]) then
+        mod = mod == "!" and -1 or true
+        if value and type ~= "" and textFilters[type] then
             filters:SetExtended(textFilters[type], value:lower(), mod)
-        elseif(value and type == "" and textFilters._default) then
+        elseif value and type == "" and textFilters._default then
             local name = textFilters._default
             filters:SetExtended(textFilters[name], value:lower(), mod)
         end

@@ -22,8 +22,12 @@ DESCRIPTION
     They are only used in the layout and more experienced user
     may replace the functions with their own in their implementation.
 ]]
-local addon, ns = ...
+local _, ns = ...
 local cargBags = ns.cargBags
+
+-- Lua Globals --
+local _G = _G
+
 local Implementation = cargBags.classes.Implementation
 local Container = cargBags.classes.Container
 local ItemButton = cargBags.classes.ItemButton
@@ -71,7 +75,7 @@ end
 Container.sorts = {}
 
 function Container:SortButtons(arg1)
-    table.sort(self.buttons, self.sorts[arg1] or arg1)
+    _G.table.sort(self.buttons, self.sorts[arg1] or arg1)
 end
 
 --[[################################
