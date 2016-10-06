@@ -21,6 +21,7 @@ exclude_files = {
     "**/*.toc",
     "**/*.txt",
     "**/*.xml",
+    "**/*.md",
 }
 
 self = false
