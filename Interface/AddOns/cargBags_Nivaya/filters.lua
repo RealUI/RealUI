@@ -138,7 +138,7 @@ cB_Filters.fNewItems = function(item)
 	if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
 	if not item.link then return false end
 	if not cB_KnownItems[item.id] then return true end
-	local t = cbNivaya:getItemCount(item.id)
+	local t = cbNivaya:getItemCount(item.name)
 	return (t > cB_KnownItems[item.id]) and true or false
 end
 

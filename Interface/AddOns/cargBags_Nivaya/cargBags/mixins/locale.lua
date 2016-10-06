@@ -31,8 +31,6 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 local L
-do
-end
 
 --[[!
 	Fetches/creates a table of localized type names

@@ -511,15 +511,22 @@ local function style(frame)
 
     if(not frame.freebtipBD) then
 		-- xRUI
+        frame:SetBackdrop(nil)
+
+        local bg
         if frame.BackdropFrame then
-            Aurora[1].CreateBD(frame.BackdropFrame)
+            bg = frame.BackdropFrame
         else
-            Aurora[1].CreateBD(frame)
+            bg = _G.CreateFrame("Frame", nil, frame)
+            bg:SetFrameLevel(frame:GetFrameLevel()-1)
         end
+        Aurora[1].CreateBD(bg)
+        bg:SetPoint("TOPLEFT")
+        bg:SetPoint("BOTTOMRIGHT")
+        bg:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
+        bg:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
         frame.freebtipBD = true
     end
-	frame:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
-    frame:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
     frame:SetScale(cfg.scale)
 
     if(cfg.colorborderItem and frame.GetItem) then
