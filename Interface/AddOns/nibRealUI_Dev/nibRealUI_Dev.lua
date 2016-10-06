@@ -90,9 +90,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
             debug("Loaded:", addonName)
         end
     else
-        debug(event, ...)
-        debug("GetScreenHeight", _G.GetScreenHeight())
-        debug("UIParent:GetSize", _G.UIParent:GetSize())
+        debug(event)
+        if ... then
+            debug("", ...)
+        end
+        --debug("GetScreenHeight", _G.GetScreenHeight())
+        --debug("UIParent:GetSize", _G.UIParent:GetSize())
         if not eventWhitelist[event] then
             self:UnregisterEvent(event)
         end
