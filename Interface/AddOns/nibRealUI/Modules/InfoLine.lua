@@ -730,7 +730,7 @@ do
         end
         InfoLine:debug("GetArtifactInfo", artifactID, arg1, arg2)
         showArtifact = artifactID and _G.HasArtifactEquipped()
-        showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield())
+        showHonor = lvl >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT] and (_G.IsWatchingHonorAsXP() or _G.InActiveBattlefield() or _G.IsInActiveWorldPVP())
 
         -- XP Data
         if showXP then
