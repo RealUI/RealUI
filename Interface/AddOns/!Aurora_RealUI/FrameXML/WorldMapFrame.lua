@@ -38,13 +38,15 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     coords:SetFrameStrata(_G.WorldMapDetailFrame:GetFrameStrata())
 
     coords.player = coords:CreateFontString(nil, "OVERLAY")
-    coords.player:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
+    coords.player:SetPoint("TOPLEFT", _G.WorldMapFrame, 40.5, -10.5)
     coords.player:SetFontObject(_G.RealUIFont_PixelSmall)
+    coords.player:SetJustifyH("LEFT")
     coords.player:SetText("")
 
     coords.mouse = coords:CreateFontString(nil, "OVERLAY")
-    coords.mouse:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
+    coords.mouse:SetPoint("TOPLEFT", _G.WorldMapFrame, 160.5, -10.5)
     coords.mouse:SetFontObject(_G.RealUIFont_PixelSmall)
+    coords.mouse:SetJustifyH("LEFT")
     coords.mouse:SetText("")
 
     local round, classColorStr = _G.RealUI.Round, _G.RealUI:ColorTableToStr({C.r, C.g, C.b})
