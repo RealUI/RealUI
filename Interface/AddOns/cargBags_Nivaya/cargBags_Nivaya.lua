@@ -514,10 +514,21 @@ function cbNivaya:CatDropDownInit()
     AddInfoItem("Stuff")
     AddInfoItem("Junk")
     AddInfoItem("Bag")
-    for _,v in ipairs(_G.cB_CustomBags) do
-        if v.active then AddInfoItem(v.name) end
-    end
     AddInfoItem("-------------")
+
+    local numActive = 0
+    _G.table.sort(_G.cB_CustomBags, function(a, b)
+        return a.name < b.name
+    end)
+    for _, bag in ipairs(_G.cB_CustomBags) do
+        if bag.active then
+            numActive = numActive + 1
+            AddInfoItem(bag.name)
+        end
+    end
+    if numActive > 0 then
+        AddInfoItem("-------------")
+    end
     AddInfoItem(_G.CANCEL)
     
     _G.hooksecurefunc(bags.main, "Hide", function() cbNivDropdown:Hide() end)
