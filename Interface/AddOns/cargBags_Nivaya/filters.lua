@@ -35,7 +35,7 @@ filters.fHideEmpty = function(item) if _G.cBnivCfg.CompressEmpty then return ite
 filters.fItemClass = function(item, container)
     cargBags.debug("filters filters.fItemClass", item.name, item.id, container)
     if not item.id then return false end
-    if not itemClass[item.id] then
+    if not itemClass[item.id] or itemClass[item.id] == "ReClass" then
         cbNivaya:ClassifyItem(item)
     end
     
@@ -80,7 +80,9 @@ function cbNivaya:ClassifyItem(item)
         end
     end
 
-    if not itemClass[item.id] then
+    if not item.typeID then
+        itemClass[item.id] = "ReClass"
+    elseif not itemClass[item.id] then
         itemClass[item.id] = "NoClass"
     end
     
