@@ -66,6 +66,7 @@ do
         INVTYPE_SHOULDER    = 3,
         INVTYPE_CLOAK       = 4,
         INVTYPE_CHEST       = 5,
+        INVTYPE_ROBE        = 5, -- Holiday chest
         INVTYPE_BODY        = 6, -- Shirt
         INVTYPE_TABARD      = 7,
         INVTYPE_WRIST       = 8,
@@ -820,7 +821,7 @@ MyButton:Scaffold("Default")
 
 function MyButton:OnAdd()
     self:SetScript("OnMouseUp", function(btn, mouseButton)
-        if (mouseButton == "RightButton") and (_G.IsAltKeyDown()) and (_G.IsControlKeyDown()) then
+        if mouseButton == "RightButton" and (_G.IsAltKeyDown()) and (_G.IsControlKeyDown()) then
             local item = cbNivaya:GetItemInfo(btn.bagID, btn.slotID)
             if item.name and item.id then 
                 ns.cbNivDropdown.itemName = item.name
