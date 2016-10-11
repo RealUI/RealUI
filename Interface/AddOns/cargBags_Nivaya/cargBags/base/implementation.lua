@@ -304,8 +304,9 @@ local defaultItem = cargBags:NewItemTable()
 local infoGather = {}
 do
     local function GatherItemInfo(bagID, slotID, i)
-        cargBags.debug("GatherItemInfo", bagID, slotID, i)
+        cargBags.debug("GatherItemInfo", bagID, slotID, i, i.wait)
         i = i or defaultItem
+        if i.wait then return i end
         _G.wipe(i)
 
         i.bagID = bagID
@@ -349,10 +350,11 @@ do
                 i.texture = i.texture or texture
                 if not i.name then
                     if not infoGather[i.id] then infoGather[i.id] = {} end
-                    if not i.wait then
-                        _G.tinsert(infoGather[i.id], i)
-                        i.wait = true
+                    if not infoGather[i.id][i.bagID] then infoGather[i.id][i.bagID] = {} end
+                    if not infoGather[i.id][i.bagID][i.slotID] then
+                        infoGather[i.id][i.bagID][i.slotID] = i
                     end
+                    i.wait = true
                 end
             end
             cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
@@ -515,11 +517,14 @@ end
 ]]
 function Implementation:GET_ITEM_INFO_RECEIVED(event, itemID)
     cargBags.debug("Implementation:GET_ITEM_INFO_RECEIVED", event, itemID)
-    local item = infoGather[itemID]
-    if item then
-        for i = 1, #item do
-            self:BAG_UPDATE(event, item[i].bagID, item[i].slotID)
-            item[i].wait = nil
+    local itemInfo = infoGather[itemID]
+    if itemInfo then
+        for bagID, bag in next, itemInfo do
+            for slotID, item in next, bag do
+                cargBags.debug("Update item info", event, item.wait, bagID, slotID)
+                item.wait = nil
+                self:BAG_UPDATE(event, bagID, slotID)
+            end
         end
         infoGather[itemID] = nil
     end
