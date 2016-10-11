@@ -85,7 +85,7 @@ function Implementation:OnShow()
     end
 
     if self.OnOpen then self:OnOpen() end
-    self:OnEvent("BAG_UPDATE")
+    self:UpdateAll()
 end
 
 --[[!
@@ -293,6 +293,23 @@ function Implementation:SetButton(bagID, slotID, button)
 end
 
 local defaultItem = cargBags:NewItemTable()
+
+--[[!
+    Fires a complete BAG_UPDATE on the next update
+]]
+do
+    local scheduled = false
+    local function scheduler()
+        scheduled:OnEvent("BAG_UPDATE")
+        scheduled = false
+    end
+    function Implementation:UpdateAll()
+        if not scheduled then
+            scheduled = self
+            _G.C_Timer.After(0, scheduler)
+        end
+    end
+end
 
 --[[!
     Fetches the itemInfo of the item in bagID/slotID into the table

@@ -32,7 +32,7 @@ local _G = _G
 
 local cargBags = ns.cargBags
 local Container = cargBags.classes.Container
-local Implementation = cargBags.classes.Implementation
+local FilterSet = cargBags.classes.FilterSet
 
 local defaultFilters = {
     n = function(i, arg)
@@ -58,32 +58,26 @@ local defaultFilters = {
 }
 
 --[[
-    Parses a text for filters and stores them in a filterTable
+    Parses a text for filters and stores them in the FilterSet
     @param text <string> the text filter
-    @param filters <FilterSet> table to store resulting filters in [optional]
     @param textFilters <table> table of text filters to parse from [optional]
 
-    @note Basically works like this: text ----textFilters----> filters,filterInfo   
+    @note Basically works like this: text ----textFilters----> FilterSet  
 ]]
-function Implementation:ParseTextFilter(text, filters, textFilters)
-    filters = filters or cargBags.classes.FilterSet:New()
+function FilterSet:SetTextFilter(text, filters, textFilters)
     textFilters = textFilters or defaultFilters
 
     for match in text:gmatch("[^,;&]+") do
         local mod, type, value = match:trim():match("^(!?)(.-)[:=]?([^:=]*)$")
         mod = mod == "!" and -1 or true
         if value and type ~= "" and textFilters[type] then
-            filters:SetExtended(textFilters[type], value:lower(), mod)
+            self:SetExtended(textFilters[type], value:lower(), mod)
         elseif value and type == "" and textFilters._default then
             local name = textFilters._default
-            filters:SetExtended(textFilters[name], value:lower(), mod)
+            self:SetExtended(textFilters[name], value:lower(), mod)
         end
     end
-
-    return filters
 end
-
-Container.ParseTextFilter = Implementation.ParseTextFilter
 
 --[[!
     Applies a text filter to the container, for convenience
@@ -91,7 +85,8 @@ Container.ParseTextFilter = Implementation.ParseTextFilter
     @param textFilters <table> a table of textFilters to parse from [optional]
 ]]
 function Container:SetTextFilter(text, textFilters)
-    self.filters = self:ParseTextFilter(text, self.filters, textFilters)
+    self.filters = self.filters or FilterSet:New()
+    self.filters:SetTextFilter(text, textFilters)
 end
 
 cargBags.textFilters = defaultFilters

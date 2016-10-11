@@ -139,7 +139,7 @@ cargBags:SetScript("OnEvent", function(self, event)
         self.atBank = true
 
         if impl:IsShown() then
-            impl:OnEvent("BAG_UPDATE")
+            impl:UpdateAll()
         else
             impl:Show()
         end
