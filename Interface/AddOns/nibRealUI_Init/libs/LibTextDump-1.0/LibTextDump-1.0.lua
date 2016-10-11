@@ -105,7 +105,7 @@ local function NewInstance(width, height)
 	scrollArea:SetPoint("TOPLEFT", copyFrame.Inset, 5, -5)
 	scrollArea:SetPoint("BOTTOMRIGHT", copyFrame.Inset, -27, 6)
 
-	function scrollArea:Update(start, wrappedLines, maxDisplayLines, allWrappedLines, lineHeight)
+	function scrollArea:Update(start, wrappedLines, maxDisplayLines, lineHeight)
 		--print("Scroll:Update", start, lineHeight, maxDisplayLines)
 		local i, linesToDisplay = start - 1, 0
 		repeat
@@ -121,14 +121,14 @@ local function NewInstance(width, height)
 		local scrollBar = _G[name .. "ScrollBar"]
 		scrollBar:SetStepsPerPage(linesToDisplay - 1)
 
-		if allWrappedLines and lineHeight then
+		if lineHeight then
 			--[[ This block should only be run when the buffer is changed because posible variations in 
 			linesToDisplay from scroll to scroll will affect the height of the scroll frame. This will then 
 			result in inconsistent scrolling behaviour. ]]
 			local scrollChildFrame = _G[name .. "ScrollChildFrame"]
 
-			local scrollFrameHeight = (allWrappedLines - linesToDisplay) * lineHeight
-			local scrollChildHeight = allWrappedLines * lineHeight
+			local scrollFrameHeight = (wrappedLines.all - linesToDisplay) * lineHeight
+			local scrollChildHeight = wrappedLines.all * lineHeight
 			if ( scrollFrameHeight < 0 ) then
 				scrollFrameHeight = 0
 			end
@@ -315,11 +315,16 @@ function prototype:InsertLine(position, text, dateFormat)
 		error(METHOD_USAGE_FORMAT:format("InsertLine", "text must be a non-empty string."), 2)
 	end
 
+	local buffer = buffers[self]
 	if dateFormat and dateFormat ~= "" then
-		table.insert(buffers[self], position, ("[%s] %s"):format(date(dateFormat), text))
+		table.insert(buffer, position, ("[%s] %s"):format(date(dateFormat), text))
 	else
-		table.insert(buffers[self], position, text)
+		table.insert(buffer, position, text)
 	end
+
+	frames[self].lineDummy:SetText(buffer[position])
+	table.insert(buffer.wrappedLines, position, frames[self].lineDummy:GetNumLines())
+	buffer.wrappedLines.all = (buffer.wrappedLines.all or 0) + buffer.wrappedLines[position]
 end
 
 
@@ -338,29 +343,18 @@ function prototype:String(separator)
 	separator = separator or "\n"
 	local buffer, frame = buffers[self], frames[self]
 	local lineDummy = frame.lineDummy
-	local function UpdateWrappedLines()
-		local allWrappedLines = 0
-		table.wipe(buffer.wrappedLines)
-		for i = 1, #buffer do
-			lineDummy:SetText(buffer[i])
-			buffer.wrappedLines[i] = lineDummy:GetNumLines()
-			allWrappedLines = allWrappedLines + buffer.wrappedLines[i]
-		end
-		return allWrappedLines
-	end
-
 	local _, lineHeight = lineDummy:GetFont()
 	local maxDisplayLines = round(frame.edit_box:GetHeight() / lineHeight)
 	--print("Line stats", lineDummy:GetStringHeight(), lineHeight, maxDisplayLines)
 
-	local allWrappedLines, offset = UpdateWrappedLines(), 1
-	local start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, allWrappedLines, lineHeight)
+	local allWrappedLines, offset = buffer.wrappedLines.all, 1
+	local start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
 	function frame:UpdateText()
-		local newWrappedLines = UpdateWrappedLines()
+		local newWrappedLines = buffer.wrappedLines.all
 		debugPrint(frame, "UpdateText", newWrappedLines > allWrappedLines)
 		if newWrappedLines > allWrappedLines then
 			allWrappedLines = newWrappedLines
-			start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, allWrappedLines, lineHeight)
+			start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
 		else
 			start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines)
 		end
@@ -379,7 +373,7 @@ function prototype:String(separator)
 
 		--print("Current position", value, offset, scrollPer)
 		--print("Concat", start, stop)
-		frame:UpdateText(UpdateWrappedLines())
+		frame:UpdateText()
 	end)
 
 	return table.concat(buffer, separator, start, stop)
