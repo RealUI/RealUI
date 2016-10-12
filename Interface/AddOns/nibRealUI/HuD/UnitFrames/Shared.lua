@@ -244,13 +244,14 @@ function UnitFrames:PositionSteps(vert)
         end
     end
 end
-function UnitFrames:UpdateSteps(unit, min, max)
-    --min = max * .25
-    --self:SetValue(min)
-    local percent = RealUI:GetSafeVals(min, max)
+function UnitFrames:UpdateSteps(unit, cur, max)
+    UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
+    --cur = max * .25
+    --self:SetValue(cur)
+    local percent = RealUI:GetSafeVals(cur, max)
     local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
-        --print(percent, unit, min, max, self.colorClass)
+        --print(percent, unit, cur, max, self.colorClass)
         if self:GetReversePercent() then
             --print("step reverse")
             if percent > stepPoints[i] then
@@ -473,9 +474,19 @@ function UnitFrames:PredictOverride(event, unit)
 end
 
 
-function UnitFrames:PowerOverride(event, unit, powerType)
-    UnitFrames:debug("Power Override", self, event, unit, powerType)
+function UnitFrames:PowerOverride(event, unit)
+    UnitFrames:debug("Power Override", self, event, unit)
     --if not self.Power.enabled then return end
+
+    local powerType, powerToken = _G.UnitPowerType(self.unit)
+    UnitFrames:debug("Target powerType", powerType, powerToken)
+    AngleStatusBar:SetBarColor(self.Power.bar, self.colors.power[powerToken] or self.colors.power[powerType])
+
+    if ndb.settings.reverseUnitFrameBars then
+        AngleStatusBar:SetReverseFill(self.Power.bar, not RealUI.ReversePowers[powerToken])
+    else
+        AngleStatusBar:SetReverseFill(self.Power.bar, RealUI.ReversePowers[powerToken])
+    end
 
     local powerPer, powerCurr, powerMax = RealUI:GetSafeVals(_G.UnitPower(unit), _G.UnitPowerMax(unit))
     updateSteps(unit, "power", powerPer, self.Power)
