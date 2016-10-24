@@ -10,7 +10,7 @@ local NAME, RealUI = ...
 local _G = _G
 local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
 local next, print, select = _G.next, _G.print, _G.select
-local tostring, date = _G.tostring, _G.date
+local tostring = _G.tostring
 
 -- Libs --
 local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
@@ -74,10 +74,10 @@ local function Debug(mod, ...)
     if not modDebug then
         modDebug = CreateDebugFrame(mod)
     end
-    local text = mod
+    local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        text = text .. "     " .. tostring(arg)
+        text = text .. tostring(arg) .. "     "
     end
     if modDebug.prevLine == text then
         modDebug.numDuped = modDebug.numDuped + 1
@@ -86,8 +86,7 @@ local function Debug(mod, ...)
             modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
             modDebug.numDuped = 1
         end
-        local time = date("%H:%M:%S")
-        modDebug:AddLine(("[%s] %s"):format(time, text))
+        modDebug:AddLine(text, "%H:%M:%S")
         modDebug.prevLine = text
     end
 end

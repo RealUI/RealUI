@@ -454,7 +454,6 @@ function RealUI:UPDATE_PENDING_MAIL()
     end
 end
 
-local lastGarbageCollection = 0
 function RealUI:PLAYER_ENTERING_WORLD()
     self:LockdownUpdates()
 
@@ -506,15 +505,6 @@ function RealUI:PLAYER_ENTERING_WORLD()
         debug("menuFrame:SetHeight", height)
         menuFrame:SetHeight(height)
     end)
-
-    -- >= 10 minute garbage collection
-    self:ScheduleTimer(function()
-        local now = _G.GetTime()
-        if now >= lastGarbageCollection + 600 then
-             _G.collectgarbage("collect")
-            lastGarbageCollection = now
-        end
-    end, 1)
 
     -- Position Chat Frame
     if dbc.init.needchatmoved then

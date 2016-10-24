@@ -286,6 +286,7 @@ local function CreateAngleBG(width, height, parent, info)
     debug(info.debug, "CreateAngleBG", width, height, parent, info)
     local bg = _G.CreateFrame("Frame", nil, parent)
     bg:SetSize(width, height)
+    --bg:SetClipsChildren(true)
 
     --[[
     local test = bg:CreateTexture(nil, "BACKGROUND", nil, -8)
