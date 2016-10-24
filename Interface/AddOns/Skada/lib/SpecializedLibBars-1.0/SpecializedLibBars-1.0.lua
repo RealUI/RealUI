@@ -329,7 +329,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	btn:Show()
 
 	-- Add to our list of buttons.
-	table.insert(self.buttons, btn)
+	tinsert(self.buttons, btn)
 
 	self:AdjustButtons()
 end
@@ -821,15 +821,8 @@ end
 function barListPrototype:UpdateOrientationLayout()
 	local length, thickness = self.length, self.thickness
 	barListPrototype.super.SetWidth(self, length)
---		barListPrototype.super.SetHeight(self, thickness)
 	self.button:SetWidth(length)
---	self.button:SetHeight(thickness)
-
---	self.button:SetText(self.name)
 	self:ReverseGrowth(self.growup)
-	-- self.button:SetWidth(vertical and 15 or length)
-	-- self.button:SetHeight(vertical and length or 15)
-	-- self:SortBars()
 end
 
 function barListPrototype:SetLength(length)
@@ -921,11 +914,16 @@ do
 	function barListPrototype:SortBars()
 		local lastBar = self
 		local ct = 0
+        local has_fixed = false
+        
 		if not bars[self] then return end
 		for k, v in pairs(bars[self]) do
 			ct = ct + 1
 			values[ct] = v
 			v:Hide()
+            if v.fixed then
+                has_fixed = true
+            end
 		end
 		for i = ct + 1, #values do
 			values[i] = nil
@@ -960,10 +958,10 @@ do
 		end
         
         -- Fixed bar replaces the last bar
-        if stop < #values then
+        if has_fixed and stop < #values then
             for i = stop + 1, #values, 1 do
                 if values[i].fixed then
-                    table.insert(values, stop, values[i])
+                    tinsert(values, stop, values[i])
                     break
                 end
             end
@@ -989,7 +987,11 @@ do
 
 			-- Silly hack to fix icon positions. I should just rewrite the whole thing, really. WTB energy.
 			if showIcon and lastBar == self then
-				x1 = thickness
+                if orientation == 1 then
+                    x1 = thickness
+                else
+                    x2 = -thickness
+                end
 			end
 
 			if shown <= maxbars then

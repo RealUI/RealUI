@@ -1,5 +1,4 @@
-
-Skada:AddLoadableModule("Enemies", function(Skada, L)
+Skada:AddLoadableModule("Enemies", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Enemies then return end
 
 	local done = Skada:NewModule(L["Enemy damage done"])
@@ -335,7 +334,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 		Skada:RegisterForCL(SpellDamageDone, 'RANGE_DAMAGE', {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SwingDamageDone, 'SWING_DAMAGE', {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
-		Skada:AddMode(self)
+		Skada:AddMode(self, L["Damage"])
 	end
 
 	function done:OnDisable()
@@ -343,7 +342,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 	end
 
 	function taken:OnEnable()
-		Skada:AddMode(self)
+		Skada:AddMode(self, L["Damage"])
 	end
 
 	function taken:OnDisable()
@@ -360,7 +359,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 		Skada:RegisterForCL(Healing, 'SPELL_PERIODIC_HEAL', {dst_is_not_interesting = true})
 		Skada:RegisterForCL(Healing, 'SPELL_BUILDING_HEAL', {dst_is_not_interesting = true})
 
-		Skada:AddMode(self)
+		Skada:AddMode(self, L["Healing"])
 	end
 
 	function hdone:OnDisable()
@@ -368,7 +367,7 @@ Skada:AddLoadableModule("Enemies", function(Skada, L)
 	end
 
 	function htaken:OnEnable()
-		Skada:AddMode(self)
+		Skada:AddMode(self, L["Healing"])
 	end
 
 	function htaken:OnDisable()

@@ -6,18 +6,9 @@ function addon.Nameplate.UpdatePower(f,on_show)
     f = f.parent
     if f.elements.PowerBar then
         if f.state.power_type then
-            local power_type = f.state.power_type
-
-            f.PowerBar:SetMinMaxValues(0,UnitPowerMax(f.unit,power_type))
-            f.PowerBar:SetValue(UnitPower(f.unit,power_type))
-
-            if ele.colours[power_type] then
-                f.PowerBar:SetStatusBarColor(unpack(ele.colours[power_type]))
-            else
-                f.PowerBar:SetStatusBarColor(unpack(ele.colours['MANA']))
-            end
+            f.PowerBar:SetMinMaxValues(0,UnitPowerMax(f.unit,f.state.power_type))
+            f.PowerBar:SetValue(UnitPower(f.unit,f.state.power_type))
         else
-            f.PowerBar:SetStatusBarColor(0,0,0)
             f.PowerBar:SetValue(0)
         end
 
@@ -39,11 +30,22 @@ function addon.Nameplate.UpdatePowerType(f,on_show)
 
     f.state.power_type = power_type
 
+    if f.elements.PowerBar then
+        -- update bar colour
+        if power_type then
+            local colour = ele.colours[power_type] or ele.colours['MANA']
+            f.PowerBar:SetStatusBarColor(unpack(colour))
+        else
+            f.PowerBar:SetStatusBarColor(0,0,0)
+            f.PowerBar:SetValue(0)
+        end
+    end
+
     if not on_show then
         addon:DispatchMessage('PowerTypeUpdate', f)
     end
 
-    -- and update display
+    -- and bar values
     f.handler:UpdatePower(on_show)
 end
 -- messages ####################################################################
@@ -60,7 +62,7 @@ end
 -- enable/disable per frame ####################################################
 function ele:EnableOnFrame(frame)
     frame.PowerBar:Show()
-    frame.handler:UpdatePower(true)
+    frame.handler:UpdatePowerType(true)
 end
 function ele:DisableOnFrame(frame)
     frame.PowerBar:Hide()

@@ -1,5 +1,5 @@
 
-Skada:AddLoadableModule("CC", function(Skada, L)
+Skada:AddLoadableModule("CC", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.CC then return end
 
 	local mod = Skada:NewModule(L["CC breakers"])

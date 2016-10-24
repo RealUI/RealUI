@@ -1,5 +1,4 @@
-
-Skada:AddLoadableModule("DamageTaken", function(Skada, L)
+Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.DamageTaken then return end
 
 	local mod = Skada:NewModule(L["Damage taken"])
@@ -16,7 +15,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 
 			-- Add spell to player if it does not exist.
 			if not player.damagetakenspells[dmg.spellname] or not player.damagetakenspells[dmg.spellname]['absorbed'] then
-				player.damagetakenspells[dmg.spellname] = {id = dmg.spellid, name = dmg.spellname, damage = 0, totalhits = 0, min = nil, max = nil, crushing = 0, glancing = 0, resisted = 0, critical = 0, absorbed = 0, blocked = 0, multistrike = 0}
+				player.damagetakenspells[dmg.spellname] = {id = dmg.spellid, name = dmg.spellname, damage = 0, totalhits = 0, min = nil, max = nil, crushing = 0, glancing = 0, resisted = 0, critical = 0, absorbed = 0, blocked = 0}
 			end
 
 			-- Add to player total damage.
@@ -29,10 +28,6 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 
 			if spell.max == nil or dmg.amount > spell.max then
 				spell.max = dmg.amount
-			end
-
-			if dmg.multistrike then
-				spell.multistrike = (spell.multistrike or 0) + 1
 			end
 
 			if dmg.crushing then
@@ -70,7 +65,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellId, spellName, spellSchool, samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing, soffhand, smultistrike = ...
+		local spellId, spellName, spellSchool, samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing, soffhand, _ = ...
 
 		dmg.playerid = dstGUID
 		dmg.playername = dstName
@@ -84,7 +79,6 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 		dmg.glancing = sglancing
 		dmg.crushing = scrushing
 		dmg.offhand = soffhand
-		dmg.multistrike = smultistrike
 
 		log_damage_taken(Skada.current, dmg)
 		log_damage_taken(Skada.total, dmg)
@@ -92,7 +86,7 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- White melee.
-		local samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing, soffhand, smultistrike = ...
+		local samount, soverkill, sschool, sresisted, sblocked, sabsorbed, scritical, sglancing, scrushing, soffhand, _ = ...
 
 		dmg.playerid = dstGUID
 		dmg.playername = dstName
@@ -106,7 +100,6 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 		dmg.glancing = sglancing
 		dmg.crushing = scrushing
 		dmg.offhand = soffhand
-		dmg.multistrike = smultistrike
 
 		log_damage_taken(Skada.current, dmg)
 		log_damage_taken(Skada.total, dmg)
@@ -262,9 +255,6 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 				if spell.critical > 0 then
 					tooltip:AddDoubleLine(L["Critical"]..":", spell.critical, 255,255,255,255,255,255)
 				end
-				if spell.multistrike > 0 then
-					tooltip:AddDoubleLine(L["Multistrike"]..":", spell.multistrike, 255,255,255,255,255,255)
-				end
 				if spell.glancing > 0 then
 					tooltip:AddDoubleLine(L["Glancing"]..":", spell.glancing, 255,255,255,255,255,255)
 				end
@@ -302,8 +292,8 @@ Skada:AddLoadableModule("DamageTaken", function(Skada, L)
 
 		Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {dst_is_interesting_nopets = true})
 
-		Skada:AddMode(self)
-		Skada:AddMode(spelloverview)
+		Skada:AddMode(self, L["Damage"])
+		Skada:AddMode(spelloverview, L["Damage"])
 	end
 
 	function mod:OnDisable()

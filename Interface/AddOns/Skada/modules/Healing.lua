@@ -1,5 +1,4 @@
-
-Skada:AddLoadableModule("Healing", function(Skada, L)
+Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Healing then return end
 
 	local mod = Skada:NewModule(L["Healing"])
@@ -483,8 +482,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		Skada:RegisterForCL(AuraRefresh, 'SPELL_AURA_REFRESH', {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(AuraRemoved, 'SPELL_AURA_REMOVED', {src_is_interesting_nopets = true})
 
-		Skada:AddMode(self)
-		Skada:AddMode(healingtaken)
+		Skada:AddMode(self, L["Healing"])
+		Skada:AddMode(healingtaken, L["Healing"])
 	end
 
 	function mod:OnDisable()

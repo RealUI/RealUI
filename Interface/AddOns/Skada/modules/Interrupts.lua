@@ -1,5 +1,4 @@
-
-Skada:AddLoadableModule("Interrupts", function(Skada, L)
+Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Interrupts then return end
 
 	local mod = Skada:NewModule(L["Interrupts"])

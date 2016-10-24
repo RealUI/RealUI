@@ -1,5 +1,4 @@
-
-Skada:AddLoadableModule("Deaths", function(Skada, L)
+Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Deaths then return end
 
 	local mod = Skada:NewModule(L["Deaths"], "AceTimer-3.0")
@@ -12,24 +11,26 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local function log_deathlog(set, playerid, playername, srcname, spellid, spellname, amount, absorb, timestamp, logoverride, healthoverride)
 		local player = Skada:get_player(set, playerid, playername)
 		local log = logoverride or player.deathlog
-		local pos = log.pos or 1
+        if log then
+            local pos = log.pos or 1
 
-		local entry = log[pos] 
-		if not entry then
-		  entry = {}
-		  log[pos] = entry
-		end
-		entry.srcname =   srcname
-		entry.spellid =   spellid
-		entry.spellname = spellname
-		entry.amount =	  amount
-		entry.absorb =	  absorb
-		entry.ts = 	  timestamp
-		entry.hp = 	  healthoverride or UnitHealth(playername)
+            local entry = log[pos] 
+            if not entry then
+              entry = {}
+              log[pos] = entry
+            end
+            entry.srcname =   srcname
+            entry.spellid =   spellid
+            entry.spellname = spellname
+            entry.amount =	  amount
+            entry.absorb =	  absorb
+            entry.ts = 	  timestamp
+            entry.hp = 	  healthoverride or UnitHealth(playername)
 
-		pos = pos + 1
-		if pos > 15 then pos = 1 end
-		log.pos = pos
+            pos = pos + 1
+            if pos > 15 then pos = 1 end
+            log.pos = pos
+        end
 	end
 
 	local function log_death(set, playerid, playername, timestamp)
@@ -43,23 +44,25 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			log_deathlog(set, playerid, playername, nil, spellid, spellname, nil, nil, timestamp, nil, 0)
 			local deathlog = player.deathlog
 
-			for i,entry in ipairs(deathlog) do
-				-- sometimes multiple close events arrive with the same timestamp
-				-- add a small bias to ensure we preserve the order in which we recorded them
-				-- this ensures sort stability (to prevent oscillation on :Update())
-				-- and makes it more likely the health bar progression is correct
-				entry.ts = entry.ts + i*0.00001 + (i < (deathlog.pos or 1) and 0.001 or 0)
-				if entry.spellid == death_spell then deathts = entry.ts end
-			end
+            if deathlog then
+                for i,entry in ipairs(deathlog) do
+                    -- sometimes multiple close events arrive with the same timestamp
+                    -- add a small bias to ensure we preserve the order in which we recorded them
+                    -- this ensures sort stability (to prevent oscillation on :Update())
+                    -- and makes it more likely the health bar progression is correct
+                    entry.ts = entry.ts + i*0.00001 + (i < (deathlog.pos or 1) and 0.001 or 0)
+                    if entry.spellid == death_spell then deathts = entry.ts end
+                end
 
-			-- Change to a new deathlog.
-			player.deathlog = {}
+                -- Change to a new deathlog.
+                player.deathlog = {}
 
-			-- Do our best to determine maxhp for the segment where death occurred
-			local cplayer = Skada:get_player(Skada.current, playerid, playername)
-			local maxhp = (cplayer and cplayer.maxhp) or player.maxhp
+                -- Do our best to determine maxhp for the segment where death occurred
+                local cplayer = Skada:get_player(Skada.current, playerid, playername)
+                local maxhp = (cplayer and cplayer.maxhp) or player.maxhp
 
-			return deathts, deathlog, maxhp
+                return deathts, deathlog, maxhp
+            end
 		end
 	end
 

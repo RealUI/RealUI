@@ -1,6 +1,6 @@
 -- Status: Aoe-Heals
 
-local AOEM = Grid2:GetModule("Grid2AoeHeals")
+local AOEM = Grid2:NewModule( "Grid2AoeHeals", "AceEvent-3.0")
 
 local Grid2 = Grid2
 local next = next

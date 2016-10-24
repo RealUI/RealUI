@@ -1,5 +1,8 @@
+local ADDON_NAME = ...
+
 -- Lua Globals --
 local _G = _G
+local next = _G.next
 
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
@@ -78,26 +81,62 @@ for i = 1, #BlizzAddons do
     end
 end
 
+local function profileTest(skip)
+    if skip then return end
+    local start, _ = _G.debugprofilestop()
+    for i = 1, 1000000 do
+        _ = "text" .. "concat" .. i
+    end
+    _G.print("concat", _, _G.debugprofilestop() - start)
+
+    start = _G.debugprofilestop()
+    for i = 1, 1000000 do
+        _ = ("%s%s%d"):format("text", "concat", i)
+    end
+    _G.print("format", _, _G.debugprofilestop() - start)
+end
+
+local taintCheck = {
+    WorldMap_UpdateQuestBonusObjectives = false,
+    WorldMapFrame = false,
+}
+local seenEvent, lastEvent = {}
 local eventWhitelist = {
     BAG_UPDATE = true
 }
 local frame = _G.CreateFrame("Frame")
+frame:SetScript("OnUpdate", function(self, elapsed)
+    for varName, isTainted in next, taintCheck do
+        if not isTainted and not _G.issecurevariable(varName) then
+            _G.print(varName, "is tainted", lastEvent)
+            debug(varName, "is tainted", lastEvent)
+            debug(_G.debugstack())
+            taintCheck[varName] = true
+        end
+    end
+end)
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
+    lastEvent = event
     if event == "ADDON_LOADED" then
         local addonName = ...
+        if addonName == ADDON_NAME then
+            profileTest(true)
+        end
+
         if addonName:match("Blizzard") or addonName:match("RealUI") then
             debug("Loaded:", addonName)
         end
-    else
+    elseif not seenEvent[event] then
         debug(event)
         if ... then
             debug("", ...)
         end
+
         --debug("GetScreenHeight", _G.GetScreenHeight())
         --debug("UIParent:GetSize", _G.UIParent:GetSize())
         if not eventWhitelist[event] then
-            self:UnregisterEvent(event)
+            seenEvent[event] = true
         end
     end
 end)

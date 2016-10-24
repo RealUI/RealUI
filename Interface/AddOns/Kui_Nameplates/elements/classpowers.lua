@@ -11,8 +11,10 @@
         icon_size = size of class power icons
         icon_spacing = space between icons
         icon_texture = texture of class power icons
-        icon_glow_texture = texture of class power glow
         cd_texture = cooldown spiral texture
+        bar_texture = texture of class power bar
+        bar_width = width of class power bar
+        bar_height = height of class power bar
         frame_point = {
             position of the class powers container frame
             1 = point
@@ -51,10 +53,17 @@
     PostIconsCreated
         Called after icons are created.
 
+    CreateBar
+        Can be used to replace the built in function which creates a status bar
+        for bar-style power types, such as stagger.
+
+    PostCreateBar
+        Called after the power bar is created.
+
     PostPowerUpdate
         Called after icons are set to active or inactive.
 
-    PostRuneUpdate
+    PostRuneUpdate(icon,rune_id)
         Called after updating rune icon cooldown frames for death knights.
 
     PostPositionFrame(cpf,parent)
@@ -73,8 +82,9 @@ local powers = {
     PALADIN     = { [3] = SPELL_POWER_HOLY_POWER },
     ROGUE       = SPELL_POWER_COMBO_POINTS,
     MAGE        = { [1] = SPELL_POWER_ARCANE_CHARGES },
-    MONK        = { [3] = SPELL_POWER_CHI },
+    MONK        = { [1] = 'stagger', [3] = SPELL_POWER_CHI },
     WARLOCK     = SPELL_POWER_SOUL_SHARDS,
+    --PRIEST      = SPELL_POWER_MANA,
 }
 -- tags returned by the UNIT_POWER and UNIT_MAXPOWER events
 local power_tags = {
@@ -83,10 +93,17 @@ local power_tags = {
     [SPELL_POWER_HOLY_POWER]     = 'HOLY_POWER',
     [SPELL_POWER_ARCANE_CHARGES] = 'ARCANE_CHARGES',
     [SPELL_POWER_CHI]            = 'CHI',
-    [SPELL_POWER_SOUL_SHARDS]    = 'SOUL_SHARDS'
+    [SPELL_POWER_SOUL_SHARDS]    = 'SOUL_SHARDS',
+    --[SPELL_POWER_MANA]           = 'MANA',
+}
+-- power types which render as a bar
+local bar_powers = {
+    ['stagger'] = true,
+    --[SPELL_POWER_MANA] = true
 }
 -- icon config
 local colours = {
+    --PRIEST      = { 0,0,1 },
     DEATHKNIGHT = { 1, .2, .3 },
     DRUID       = { 1, 1, .1 },
     PALADIN     = { 1, 1, .1 },
@@ -95,16 +112,25 @@ local colours = {
     MONK        = { .3, 1, .9 },
     WARLOCK     = { 1, .5, 1 },
     overflow    = { 1, .3, .3 },
+    inactive    = { .5, .5, .5, .5 }
 }
+
+-- stagger colours
+local STAGGER_GREEN = { .52, 1, .52 }
+local STAGGER_YELLOW = { 1, .98, .72 }
+local STAGGER_RED = { 1, .42, .42 }
 
 local ICON_SIZE
 local ICON_SPACING
 local ICON_TEXTURE
-local ICON_GLOW_TEXTURE
 local CD_TEXTURE
+local BAR_TEXTURE,BAR_WIDTH,BAR_HEIGHT
 local FRAME_POINT
 
 local ANTICIPATION_TALENT_ID=19240
+local BALANCE_FERAL_AFFINITY_TALENT_ID=22155
+local GUARDIAN_FERAL_AFFINITY_TALENT_ID=22156
+local RESTO_FERAL_AFFINITY_TALENT_ID=22367
 -- local functions #############################################################
 local function IsTalentKnown(id)
     return select(10,GetTalentInfoByID(id))
@@ -131,11 +157,6 @@ local function PositionIcons()
         pv = icon
     end
 end
-local function Icon_SetVertexColor(icon,...)
-    -- also set glow colour
-    icon.glow:SetVertexColor(...)
-    orig_SetVertexColor(icon,...)
-end
 local function CreateIcon()
     -- create individual icon
     local icon = ele:RunCallback('CreateIcon')
@@ -144,21 +165,6 @@ local function CreateIcon()
         icon = cpf:CreateTexture(nil,'ARTWORK',nil,1)
         icon:SetTexture(ICON_TEXTURE)
         icon:SetSize(ICON_SIZE,ICON_SIZE)
-
-        -- TODO glow should probably just be a layout thing
-        local ig = cpf:CreateTexture(nil,'ARTWORK',nil,0)
-        ig:SetTexture(ICON_GLOW_TEXTURE)
-        ig:SetSize(ICON_SIZE+10,ICON_SIZE+10)
-        ig:SetPoint('CENTER',icon)
-        ig:SetAlpha(.8)
-
-        icon.glow = ig
-
-        if not orig_SetVertexColor then
-            orig_SetVertexColor = icon.SetVertexColor
-        end
-        icon.SetVertexColor = Icon_SetVertexColor
-
         icon:SetVertexColor(unpack(colours[class]))
 
         if class == 'DEATHKNIGHT' then
@@ -167,23 +173,20 @@ local function CreateIcon()
             cd:SetSwipeTexture(CD_TEXTURE)
             cd:SetAllPoints(icon)
             cd:SetDrawEdge(false)
+            cd:SetDrawBling(false)
             cd:SetHideCountdownNumbers(true)
             icon.cd = cd
         else
             icon.Active = function(self)
                 self:SetVertexColor(unpack(colours[class]))
                 self:SetAlpha(1)
-                self.glow:Show()
             end
             icon.Inactive = function(self)
-                self:SetVertexColor(unpack(colours[class]))
-                self:SetAlpha(.5)
-                self.glow:Hide()
+                self:SetVertexColor(unpack(colours.inactive))
             end
             icon.ActiveOverflow = function(self)
                 self:SetVertexColor(unpack(colours.overflow))
                 self:SetAlpha(1)
-                self.glow:Show()
             end
         end
     end
@@ -192,48 +195,96 @@ local function CreateIcon()
 
     return icon
 end
-local function CreateIcons()
+local function CreateBar()
+    local bar = ele:RunCallback('CreateBar')
+
+    if not bar then
+        bar = CreateFrame('StatusBar',nil,cpf)
+        bar:SetStatusBarTexture(BAR_TEXTURE)
+        bar:SetSize(BAR_WIDTH,BAR_HEIGHT)
+
+        bar:SetBackdrop({
+            bgFile='interface/buttons/white8x8',
+            insets={top=-1,right=-1,bottom=-1,left=-1}
+        })
+        bar:SetBackdropColor(0,0,0,.8)
+
+        bar:SetPoint('CENTER',0,-1)
+    end
+
+    ele:RunCallback('PostCreateBar',bar)
+
+    return bar
+end
+local function UpdateIcons()
     -- create/destroy icons based on player power max
     local power_max
-
     if class == 'ROGUE' and IsTalentKnown(ANTICIPATION_TALENT_ID) then
         power_max = 5
     else
         power_max = UnitPowerMax('player',power_type)
     end
 
-    if cpf.icons then
-        if #cpf.icons > power_max then
-            -- destroy overflowing icons if powermax has decreased
+    if bar_powers[power_type] then
+        -- create/update power bar
+        if cpf.icons then
+            -- destroy existing icons
             for i,icon in ipairs(cpf.icons) do
-                if i > power_max then
-                    icon:Hide()
-                    cpf.icons[i] = nil
+                icon:Hide()
+                cpf.icons[i] = nil
+            end
+        end
+
+        if not cpf.bar then
+            cpf.bar = CreateBar()
+        end
+
+        cpf.bar:SetMinMaxValues(0,power_max)
+
+        return
+    else
+        -- create/update power icons
+        if cpf.bar then
+            -- destroy power bar
+            cpf.bar:Hide()
+            cpf.bar = nil
+        end
+
+        if cpf.icons then
+            if #cpf.icons > power_max then
+                -- destroy overflowing icons if powermax has decreased
+                for i,icon in ipairs(cpf.icons) do
+                    if i > power_max then
+                        icon:Hide()
+                        cpf.icons[i] = nil
+                    end
+                end
+            elseif #cpf.icons < power_max then
+                -- create new icons
+                for i=#cpf.icons+1,power_max do
+                    cpf.icons[i] = CreateIcon()
                 end
             end
-        elseif #cpf.icons < power_max then
-            -- create new icons
-            for i=#cpf.icons+1,power_max do
+        else
+            -- create initial icons
+            cpf.icons = {}
+            for i=1,power_max do
                 cpf.icons[i] = CreateIcon()
             end
         end
-    else
-        -- create initial icons
-        cpf.icons = {}
-        for i=1,power_max do
-            cpf.icons[i] = CreateIcon()
-        end
+
+        PositionIcons()
+
+        ele:RunCallback('PostIconsCreated')
     end
-
-    PositionIcons()
-
-    ele:RunCallback('PostIconsCreated')
 end
 local function PowerUpdate()
     -- toggle icons based on current power
     local cur = UnitPower('player',power_type)
 
-    if cur > #cpf.icons then
+    if cpf.bar then
+        cpf.bar:SetValue(cur)
+    elseif cur > #cpf.icons then
         -- colour with overflow
         cur = cur - #cpf.icons
         for i,icon in ipairs(cpf.icons) do
@@ -256,6 +307,11 @@ local function PowerUpdate()
     ele:RunCallback('PostPowerUpdate')
 end
 local function PositionFrame()
+    if not power_type then
+        cpf:Hide()
+        return
+    end
+
     local frame
 
     if on_target then
@@ -273,7 +329,7 @@ local function PositionFrame()
         frame = frame and frame.kui or nil
     end
 
-    if not frame then
+    if not FRAME_POINT or not frame then
         cpf:Hide()
         return
     end
@@ -310,8 +366,10 @@ function ele:UpdateConfig()
     ICON_SIZE         = addon.layout.ClassPowers.icon_size or 10
     ICON_SPACING      = addon.layout.ClassPowers.icon_spacing or 1
     ICON_TEXTURE      = addon.layout.ClassPowers.icon_texture
-    ICON_GLOW_TEXTURE = addon.layout.ClassPowers.glow_texture
     CD_TEXTURE        = addon.layout.ClassPowers.cd_texture
+    BAR_TEXTURE       = addon.layout.ClassPowers.bar_texture
+    BAR_WIDTH         = addon.layout.ClassPowers.bar_width or 50
+    BAR_HEIGHT        = addon.layout.ClassPowers.bar_height or 3
     FRAME_POINT       = addon.layout.ClassPowers.point
 
     if on_target then
@@ -329,6 +387,9 @@ function ele:UpdateConfig()
         if addon.layout.ClassPowers.colours.overflow then
             colours.overflow = addon.layout.ClassPowers.colours.overflow
         end
+        if addon.layout.ClassPowers.colours.inactive then
+            colours.inactive = addon.layout.ClassPowers.colours.inactive
+        end
     end
 
     ICON_SIZE = ICON_SIZE * addon.uiscale
@@ -343,9 +404,6 @@ function ele:UpdateConfig()
                 i:SetSize(ICON_SIZE,ICON_SIZE)
                 i:SetTexture(ICON_TEXTURE)
 
-                i.glow:SetSize(ICON_SIZE+10,ICON_SIZE+10)
-                i.glow:SetTexture(ICON_GLOW_TEXTURE)
-
                 if i.cd then
                     i.cd:SetSwipeTexture(CD_TEXTURE)
                 end
@@ -353,6 +411,12 @@ function ele:UpdateConfig()
 
             PositionIcons()
             PositionFrame()
+        end
+
+        if cpf.bar then
+            -- update bar
+            cpf.bar:SetStatusBarTexture(BAR_TEXTURE)
+            cpf.bar:SetSize(BAR_WIDTH,BAR_HEIGHT)
         end
     end
 end
@@ -367,19 +431,45 @@ function ele:PLAYER_ENTERING_WORLD()
 end
 function ele:PowerInit()
     -- get current power type, register events
+    power_type_tag = nil
+
     if type(powers[class]) == 'table' then
         local spec = GetSpecialization()
         power_type = powers[class][spec]
+
+        if class == 'DRUID' and (
+           (spec == 1 and IsTalentKnown(BALANCE_FERAL_AFFINITY_TALENT_ID)) or
+           (spec == 3 and IsTalentKnown(GUARDIAN_FERAL_AFFINITY_TALENT_ID)) or
+           (spec == 4 and IsTalentKnown(RESTO_FERAL_AFFINITY_TALENT_ID))
+           )
+        then
+            self:RegisterEvent('UPDATE_SHAPESHIFT_FORM')
+
+            local form = GetShapeshiftForm()
+            if form and form == 2 then
+                power_type = SPELL_POWER_COMBO_POINTS
+            end
+        else
+            self:UnregisterEvent('UPDATE_SHAPESHIFT_FORM')
+        end
     else
         power_type = powers[class]
     end
 
-    if power_type then
-        power_type_tag = power_tags[power_type]
+    if class == 'MONK' and (not power_type or power_type ~= 'stagger') then
+        self:UnregisterEvent('UNIT_ABSORB_AMOUNT_CHANGED')
+        self:UnregisterEvent('UNIT_MAXHEALTH')
+    end
 
+    if power_type then
         if class == 'DEATHKNIGHT' then
             self:RegisterEvent('RUNE_POWER_UPDATE','RuneUpdate')
+        elseif power_type == 'stagger' then
+            self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED','StaggerUpdate')
+            self:RegisterEvent('UNIT_MAXHEALTH','StaggerUpdate')
         else
+            power_type_tag = power_tags[power_type]
+
             self:RegisterEvent('PLAYER_ENTERING_WORLD')
             self:RegisterEvent('UNIT_MAXPOWER','PowerEvent')
             self:RegisterEvent('UNIT_POWER','PowerEvent')
@@ -388,10 +478,17 @@ function ele:PowerInit()
         self:RegisterMessage('Show','TargetUpdate')
         self:RegisterMessage('HealthColourChange','TargetUpdate')
 
-        CreateIcons()
+        UpdateIcons()
 
         -- set initial state
-        if class ~= 'DEATHKNIGHT' then
+        if power_type == 'stagger' then
+            self:StaggerUpdate()
+        elseif class == 'DEATHKNIGHT' then
+            for i=1,6 do
+                self:RuneUpdate(nil,i)
+            end
+        else
+            -- icon/generic bar powers
             PowerUpdate()
         end
 
@@ -404,8 +501,6 @@ function ele:PowerInit()
         self:UnregisterEvent('RUNE_POWER_UPDATE')
 
         self:UnregisterMessage('Show')
-        self:UnregisterMessage('GainedTarget')
-        self:UnregisterMessage('LostTarget')
         self:UnregisterMessage('HealthColourChange')
 
         cpf:Hide()
@@ -418,15 +513,43 @@ function ele:RuneUpdate(event,rune_id,energise)
     if not icon then return end
 
     if charged or energise then
+        icon:SetVertexColor(unpack(colours.DEATHKNIGHT))
+        icon:SetAlpha(1)
+
         icon.cd:Hide()
-        icon.glow:Show()
     else
+        icon:SetVertexColor(unpack(colours.inactive))
+        icon:SetAlpha(1)
+
         icon.cd:SetCooldown(startTime, duration)
         icon.cd:Show()
-        icon.glow:Hide()
     end
 
-    self:RunCallback('PostRuneUpdate')
+    self:RunCallback('PostRuneUpdate',icon,rune_id)
+end
+function ele:StaggerUpdate()
+    if not cpf.bar then return end
+
+    local max = UnitHealthMax('player')
+    local cur = UnitStagger('player')
+    local per = (max == 0 or cur == 0 and 0) or (cur / max)
+
+    if per == 0 then
+        cpf.bar:Hide()
+    else
+        cpf.bar:SetMinMaxValues(0,max)
+        cpf.bar:SetValue(cur)
+
+        if per > STAGGER_RED_TRANSITION then
+            cpf.bar:SetStatusBarColor(unpack(STAGGER_RED))
+        elseif per > STAGGER_YELLOW_TRANSITION then
+            cpf.bar:SetStatusBarColor(unpack(STAGGER_YELLOW))
+        else
+            cpf.bar:SetStatusBarColor(unpack(STAGGER_GREEN))
+        end
+
+        cpf.bar:Show()
+    end
 end
 function ele:PowerEvent(event,unit,power_type_rcv)
     -- validate power events + passthrough to PowerUpdate
@@ -434,10 +557,13 @@ function ele:PowerEvent(event,unit,power_type_rcv)
     if power_type_rcv ~= power_type_tag then return end
 
     if event == 'UNIT_MAXPOWER' then
-        CreateIcons()
+        UpdateIcons()
     end
 
     PowerUpdate()
+end
+function ele:UPDATE_SHAPESHIFT_FORM()
+    self:PowerInit()
 end
 -- register ####################################################################
 function ele:OnEnable()
@@ -470,6 +596,7 @@ function ele:Initialised()
 
     -- create icon frame container
     cpf = CreateFrame('Frame')
+    cpf:SetSize(2,2)
     cpf:SetPoint('CENTER')
     cpf:Hide()
 
@@ -485,6 +612,8 @@ function ele:Initialise()
     self:RegisterCallback('PositionIcons')
     self:RegisterCallback('CreateIcon',true)
     self:RegisterCallback('PostCreateIcon')
+    self:RegisterCallback('CreateBar',true)
+    self:RegisterCallback('PostCreateBar')
     self:RegisterCallback('PostIconsCreated')
     self:RegisterCallback('PostRuneUpdate')
     self:RegisterCallback('PostPowerUpdate')

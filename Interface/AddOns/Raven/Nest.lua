@@ -20,6 +20,7 @@ MOD.Nest_SupportedConfigurations = { -- table of configurations can be used in d
 	[12] = { name = L["Icons in columns, left-to-right mini-bars"], iconOnly = true, bars = "l2r", orientation = "vertical" },
 	[13] = { name = L["Icons on horizontal timeline, no mini-bars"], iconOnly = true, bars = "timeline", orientation = "horizontal" },
 	[14] = { name = L["Icons on vertical timeline, no mini-bars"], iconOnly = true, bars = "timeline", orientation = "vertical" },
+	[15] = { name = L["Icons with variable width on horizontal stripe"], iconOnly = true, bars = "stripe", orientation = "horizontal" },
 }
 MOD.Nest_MaxBarConfiguration = 8
 
@@ -35,8 +36,12 @@ local displayWidth, displayHeight = UIParent:GetWidth(), UIParent:GetHeight()
 local defaultBackdropColor = { r = 1, g = 1, b = 1, a = 1 }
 local pixelScale = 1 -- adjusted by screen resolution and uiScale
 local pixelPerfect -- global setting to enable pixel perfect size and position
+local pixelWidth, pixelHeight = 0, 0 -- actual screen resolution
 local rectIcons = false -- allow rectangular icons
 local inPetBattle = nil
+local alignLeft = {} -- table of icons to be aligned left
+local alignRight = {} -- table of icons to be aligned right
+local alignCenter = {} -- table of icons to be aligned center
 
 local MSQ = nil -- Masque support
 local MSQ_ButtonData = nil
@@ -62,12 +67,15 @@ local bgTemplate = { -- these fields are cleared when a bar group is deleted
 	backdropTexture = 0, backdropWidth = 0, backdropInset = 0, backdropPadding = 0, backdropColor = 0, backdropFill = 0,
 	backdropOffsetX = 0, backdropOffsetY = 0, backdropPadW = 0, backdropPadH = 0,
 	tlWidth = 0, tlHeight = 0, tlDuration = 0, tlScale = 0, tlHide = 0, tlAlternate = 0, tlSwitch = 0,
-	tlTexture = 0, tlAlpha = 0, tlColor = 0, tlLabels = 0
+	tlTexture = 0, tlAlpha = 0, tlColor = 0, tlLabels = 0,
+	stWidth = 0, stHeight = 0, stInset = 0, stOffset = 0, stBarInset = 0, stBarOffset = 0, stTexture = 0, stColor = 0,
+	stBorderTexture = 0, stBorderWidth = 0, stBorderOffset = 0, stBorderColor = 0,
 }
 
 local barTemplate = { -- these fields are cleared with a bar is deleted
 	startTime = 0, offsetTime = 0, timeLeft = 0, duration = 0, maxTime = 0, alpha = 0, flash = 0, label = 0, iconCount = 0, tooltipAnchor = 0,
-	soundDone = 0, expireDone = 0, cr = 0, cg = 0, cb = 0, ca = 0, br = 0, bg = 0, bb = 0, ba = 0, ibr = 0, ibg = 0, ibb = 0, iba = 0
+	soundDone = 0, expireDone = 0, cr = 0, cg = 0, cb = 0, ca = 0, br = 0, bg = 0, bb = 0, ba = 0, ibr = 0, ibg = 0, ibb = 0, iba = 0,
+	value = 0, maxValue = 0, valueText = 0,
 }
 
 -- Check if using Tukui skin for icon and bar borders (which may require a reloadui)
@@ -176,12 +184,12 @@ local function ShowTimeline(bg)
 	end
 end
 
--- Hide the timeline specific frames for a bar group
+-- Hide the timeline specific frames for a bar group (also works for horizontal stripe)
 local function HideTimeline(bg)
 	local back = bg.background
 	if back then
 		back:Hide(); back.bar:Hide(); back.backdrop:Hide()
-		for _, v in pairs(back.labels) do v:Hide() end
+		if back.labels then for _, v in pairs(back.labels) do v:Hide() end end
 	end
 end
 
@@ -406,7 +414,7 @@ function MOD.Nest_SetBarGroupBarLayout(bg, barWidth, barHeight, iconSize, scale,
 	bg.fillBars = fillBars; bg.maxBars = maxBars; bg.strata = strata
 	bg.spacingX = PS(spacingX or 0); bg.spacingY = PS(spacingY or 0); bg.iconOffsetX = (iconOffsetX or 0); bg.iconOffsetY = PS(iconOffsetY or 0)
 	bg.labelOffset = PS(labelOffset or 0); bg.labelInset = PS(labelInset or 0); bg.labelWrap = labelWrap;
-	bg.labelCenter = labelCenter; bg.labelAlign = labelAlign or "MIDDLE"
+	bg.labelCenter = labelCenter; bg.labelAlign = labelAlign or "MIDDLE";
 	bg.timeOffset = PS(timeOffset or 0); bg.timeInset = PS(timeInset or 0); bg.timeAlign = timeAlign or "normal"; bg.timeIcon = timeIcon
 	bg.iconOffset = PS(iconOffset or 0); bg.iconInset = PS(iconInset or 0); bg.iconHide = iconHide; bg.iconAlign = iconAlign or "CENTER"
 	bg.configuration = configuration or 1; bg.reverse = reverse; bg.wrap = wrap or 0; bg.wrapDirection = wrapDirection; bg.snapCenter = snapCenter
@@ -492,6 +500,14 @@ function MOD.Nest_SetBarGroupTimeline(bg, w, h, duration, scale, hide, alternate
 	bg.update = true
 end
 
+-- Set parameters related to horizontal stripe configurations
+function MOD.Nest_SetBarGroupStripe(bg, fullWidth, w, h, inset, offset, barInset, barOffset, texture, color, btex, bw, bo, bc)
+	if fullWidth then bg.stWidth = GetScreenWidth() else bg.stWidth = PS(w) end
+	bg.stHeight = PS(h); bg.stInset = inset; bg.stOffset = offset; bg.stBarInset = barInset; bg.stBarOffset = barOffset; bg.stTexture = texture; bg.stColor = color
+	bg.stBorderTexture = btex; bg.stBorderWidth = bw; bg.stBorderOffset = bo; bg.stBorderColor = bc; bg.stFullWidth = fullWidth
+	bg.update = true
+end
+			
 -- Sort the bars in a bar group using the designated sort method and direction (default is sort by name alphabetically)
 function MOD.Nest_BarGroupSortFunction(bg, sortMethod, sortDirection, sortTime, sortPlayer)
 	if sortMethod == "time" then -- sort by time left on the bar
@@ -625,7 +641,7 @@ function MOD.Nest_CreateBar(bg, name)
 	else
 		local bname = GetButtonName()
 		bar = {}
-		bar.frame = CreateFrame("Frame", bname .. "Frame", bg.frame)
+		bar.frame = CreateFrame("Button", bname .. "Frame", bg.frame)
 		bar.container = CreateFrame("Frame", bname .. "Container", bar.frame)
 		bar.fgTexture = bar.container:CreateTexture(nil, "BACKGROUND", nil, 2)	
 		bar.bgTexture = bar.container:CreateTexture(nil, "BACKGROUND", nil, 1)
@@ -675,12 +691,13 @@ function MOD.Nest_CreateBar(bg, name)
 	bar.frame:SetFrameLevel(bg.frame:GetFrameLevel() + 5)
 	bar.frame.name = name
 	bar.frame.bgName = bg.name
-	bar.frame:SetScript("OnMouseUp", Bar_OnClick)
+	bar.frame:SetScript("OnClick", Bar_OnClick)
 	bar.frame:SetScript("OnEnter", Bar_OnEnter)
 	bar.frame:SetScript("OnLeave", Bar_OnLeave)
+	bar.frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	bar.icon.name = name
 	bar.icon.bgName = bg.name
-	bar.icon:SetScript("OnMouseUp", Bar_OnClick)
+	bar.icon:SetScript("OnClick", Bar_OnClick)
 	bar.icon:SetScript("OnEnter", Bar_OnEnter)
 	bar.icon:SetScript("OnLeave", Bar_OnLeave)
 	bar.icon:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -688,6 +705,7 @@ function MOD.Nest_CreateBar(bg, name)
 	bar.startTime = GetTime()
 	bar.name = name
 	bar.update = true
+	bar.includeBar = true; bar.includeOffset = 0
 	bg.bars[name] = bar
 	bg.count = bg.count + 1
 	bg.sorter[bg.count] = { name = name }
@@ -730,6 +748,7 @@ function MOD.Nest_DeleteBar(bg, bar)
 	bar.backdrop:ClearAllPoints(); bar.fgTexture:ClearAllPoints(); bar.bgTexture:ClearAllPoints(); bar.spark:ClearAllPoints()
 	bar.icon:ClearAllPoints(); bar.cooldown:ClearAllPoints(); bar.iconText:ClearAllPoints()
 	bar.labelText:ClearAllPoints(); bar.timeText:ClearAllPoints(); bar.iconBorder:ClearAllPoints()
+	bar.frame:SetHitRectInsets(0, 0, 0, 0) -- used by stripe bar group
 	if callbacks.release then callbacks.release(bar) end
 	
 	if UseTukui() then bar.frame:Hide(); bar.container:Hide() end -- no need to reset default border colors since won't change once set
@@ -785,8 +804,11 @@ function MOD.Nest_SetFlash(bar, flash) bar.flash = flash end
 -- Set the label text for a bar
 function MOD.Nest_SetLabel(bar, label) bar.label = label end
 
--- Set the value and maximum value for a non-timer bar
-function MOD.Nest_SetValue(bar, value, maxValue) bar.value = value; bar.maxValue = maxValue end
+-- Set the value, maximum value, and an optional text for the value of a non-timer bar
+function MOD.Nest_SetValue(bar, value, maxValue, valueText, include, offset)
+	bar.value = value; bar.maxValue = maxValue; bar.valueText = valueText
+	bar.includeBar = include; bar.includeOffset = offset or 0
+end
 
 -- Set the icon texture for a bar
 function MOD.Nest_SetIcon(bar, icon) bar.iconPath = icon end
@@ -882,9 +904,36 @@ local function BarGroup_UpdateAnchor(bg, config)
 	if not bg.locked and not inPetBattle then bg.anchor:Show() else bg.anchor:Hide() end
 end
 
--- Update a bar group's background image, currently only required for timeline configuration
+-- Update a bar group's background image, currently only required for timeline and stripe backdrops
 local function BarGroup_UpdateBackground(bg, config)
-	if config.bars == "timeline" then
+	if config.bars == "stripe" then -- check if drawing a horizontal stripe for icons
+		local back = bg.background -- share background frame with timeline
+		if not back then -- need to create the background frame
+			back = CreateFrame("Frame", nil, bg.frame)
+			back:SetFrameLevel(bg.frame:GetFrameLevel() + 2) -- higher than bar group's backdrop
+			back.bar = back:CreateTexture(nil, "BACKGROUND")
+			back.backdrop = CreateFrame("Frame", nil, back)
+			bg.stBorderTable = { tile = false, insets = { left = 2, right = 2, top = 2, bottom = 2 }}
+			bg.background = back
+		end
+		local w, h = bg.stWidth, bg.stHeight
+		PSetSize(back, w, h); PSetSize(back.bar, w, h); 
+		back:Show(); back.bar:ClearAllPoints(); back.bar:SetAllPoints(back); back.bar:Show()
+		back.anchorPoint = bg.reverse and "BOTTOM" or "TOP"
+		if bg.stTexture then back.bar:SetTexture(bg.stTexture) end
+		local t = bg.stColor; if t then back.bar:SetVertexColor(t.r, t.g, t.b, t.a) end
+		if bg.stBorderTexture then
+			local offset, edgeSize = bg.stBorderOffset, bg.stBorderWidth; if (edgeSize < 0.1) then edgeSize = 0.1 end
+			bg.stBorderTable.edgeFile = bg.stBorderTexture; bg.stBorderTable.edgeSize = edgeSize
+			back.backdrop:SetBackdrop(bg.stBorderTable)
+			local t = bg.stBorderColor; back.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
+			PSetSize(back.backdrop, w + offset, h + offset)
+			PCSetPoint(back.backdrop, "CENTER", back, "CENTER", 0, 0)
+			back.backdrop:Show()
+		else
+			back.backdrop:Hide()
+		end
+	elseif config.bars == "timeline" then -- check if drawing the timeine backdrop with panel and numbers
 		local back, dir = bg.background, 1
 		if not back then -- need to create the background frame
 			back = CreateFrame("Frame", nil, bg.frame)
@@ -970,13 +1019,15 @@ local function Bar_UpdateLayout(bg, bar, config)
 	local iconWidth = (config.iconOnly and rectIcons) and bg.barWidth or bg.iconSize
 	PSetSize(bar.icon, iconWidth or bg.iconSize, bg.iconSize)
 	local w, h = bg.width, bg.height
+	local isStripe = false
+	if config.bars == "stripe" then isStripe = true end
 	if config.iconOnly then -- icon only layouts
 		PSetPoint(bar.icon, "TOPLEFT", bar.frame, "TOPLEFT", 0, 0)
 		if (bg.barHeight > 0) and (bg.barWidth > 0) and config.bars ~= "timeline" then
 			local offset = (w - bg.barWidth) / 2 -- how far bars start from edge of frame
-			if config.bars == "r2l" then 
-				PSetPoint(bar.fgTexture, "TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
-				PSetPoint(bar.bgTexture, "TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
+			if config.bars == "r2l" or isStripe then 
+				PSetPoint(bar.fgTexture, "TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset + bar.includeOffset, -bg.iconOffsetY)
+				PSetPoint(bar.bgTexture, "TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset + bar.includeOffset, -bg.iconOffsetY)
 			elseif config.bars == "l2r" then
 				PSetPoint(bar.fgTexture, "TOPRIGHT", bar.icon, "BOTTOMRIGHT", bg.iconOffsetX - offset, -bg.iconOffsetY)
 				PSetPoint(bar.bgTexture, "TOPLEFT", bar.icon, "BOTTOMLEFT", bg.iconOffsetX + offset, -bg.iconOffsetY)
@@ -988,9 +1039,12 @@ local function Bar_UpdateLayout(bg, bar, config)
 		PSetPoint(bar.timeText, "RIGHT", bar.icon, "RIGHT", bg.timeInset + 12, bg.timeOffset) -- pad right to center time text better
 		if bg.timeAlign == "normal" then bar.timeText:SetJustifyH("CENTER") else bar.timeText:SetJustifyH(bg.timeAlign) end
 		bar.timeText:SetJustifyV("MIDDLE")
-		PSetPoint(bar.labelText, "LEFT", bar.icon, "LEFT", bg.labelInset, bg.labelOffset)
+		if not isStripe then
+			PSetPoint(bar.labelText, "LEFT", bar.icon, "LEFT", bg.labelInset, bg.labelOffset)
+			bar.labelText:SetJustifyH("CENTER")
+		end
 		PSetPoint(bar.labelText, "RIGHT", bar.icon, "RIGHT", bg.labelInset + abs(bg.barWidth), bg.labelOffset)
-		bar.labelText:SetJustifyH("CENTER"); bar.labelText:SetJustifyV(bg.labelAlign)
+		bar.labelText:SetJustifyV(bg.labelAlign)
 	else -- bar layouts
 		local offsetLeft, offsetRight, fudge, ti = 0, 0, 0, bg.timeIcon and bg.showIcon
 		if bg.timeAlign == "normal" then fudge = 4 end
@@ -1049,7 +1103,7 @@ local function Bar_UpdateLayout(bg, bar, config)
 		bar.timeText:SetJustifyV("MIDDLE"); bar.labelText:SetJustifyV(bg.labelAlign)
 	end
 
-	if config.bars == "r2l" then
+	if config.bars == "r2l" or isStripe then
 		PSetPoint(bar.spark, "TOP", bar.fgTexture, "TOPRIGHT", 0, 4)
 		PSetPoint(bar.spark, "BOTTOM", bar.fgTexture, "BOTTOMRIGHT", 0, -4)
 	elseif config.bars == "l2r" then
@@ -1107,12 +1161,12 @@ local function Bar_UpdateLayout(bg, bar, config)
 				end
 				PSetSize(bar.iconTexture, iconWidth, bg.iconSize)
 				PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
-				bar.iconBorder:SetTexture(0, 0, 0, 0)
+				bar.iconBorder:SetColorTexture(0, 0, 0, 0)
 			end
 		end
-	end	
+	end
 	PSetSize(bar.frame, w, h); PSetSize(bar.container, w, h); bar.container:SetAllPoints()
-	if bg.showBar and bg.borderTexture and not bar.attributes.header then
+	if bg.showBar and bg.borderTexture and not bar.attributes.header and bar.includeBar then
 		local offset, edgeSize = bg.borderOffset / pixelScale, bg.borderWidth / pixelScale; if (edgeSize < 0.1) then edgeSize = 0.1 end
 		bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = PS(edgeSize)
 		bar.backdrop:SetBackdrop(bg.borderTable)
@@ -1185,14 +1239,14 @@ function MOD.Nest_RegisterTimeFormat(func)
 end
 
 -- Update labels and colors plus for timer bars adjust bar length and formatted time text
--- This function is called on every update and the settings in it do not need to invoke other updates
 local function Bar_UpdateSettings(bg, bar, config)
+	local bat, bag = bar.attributes, bg.attributes
 	local fill, sparky, offsetX, showBorder = 1, false, 0, false -- fill is fraction of the bar to display, default to full bar
 	local timeText, bt, bl, bi, bf, bb, ba, bx = "", bar.timeText, bar.labelText, bar.iconText, bar.fgTexture, bar.bgTexture, bar.icon.anim, bar.iconBorder
-	local isHeader = bar.attributes.header
+	local isHeader = bat.header
 	if bar.timeLeft and bar.duration and bar.maxTime and bar.offsetTime then -- only update if key parameters are set
 		local remaining = bar.duration - (GetTime() - bar.startTime + bar.offsetTime) -- remaining time in seconds
-		if (remaining < 0) or bar.attributes.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
+		if (remaining < 0) or bat.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
 		if remaining > bar.duration then remaining = bar.duration end -- and no inaccurate durations!
 		bar.timeLeft = remaining -- update saved value
 		if remaining < bar.maxTime then fill = remaining / bar.maxTime end -- calculate fraction of time remaining
@@ -1202,13 +1256,13 @@ local function Bar_UpdateSettings(bg, bar, config)
 		if bar.value < 0 then bar.value = 0 end -- no negative values
 		if bar.value < bar.maxValue then fill = bar.value / bar.maxValue end -- adjust foreground bar width based on values
 		if bg.fillBars then fill = 1 - fill end -- optionally fill instead of empty bars
-		timeText = string.format("%d", bar.value) -- set time text to integer part of value
+		if bar.valueText then timeText = bar.valueText end -- set time text if a value text is provided
 	end
 	if bg.showIcon and not isHeader then
 		offsetX = bg.iconSize
 		if bar.iconPath then bar.icon:Show(); bar.iconTexture:SetTexture(bar.iconPath) else bar.icon:Hide() end
-		bar.iconTexture:SetDesaturated(bar.attributes.desaturate) -- optionally desaturate the bar's icon
-		local pulseStart, pulseEnd = (bg.attributes.pulseStart or bar.attributes.pulseStart), (bg.attributes.pulseEnd or bar.attributes.pulseEnd)
+		bar.iconTexture:SetDesaturated(bat.desaturate) -- optionally desaturate the bar's icon
+		local pulseStart, pulseEnd = (bag.pulseStart or bat.pulseStart), (bag.pulseEnd or bat.pulseEnd)
 		if pulseStart and bar.timeLeft and ((bar.duration - bar.timeLeft) < 0.25) and not ba:IsPlaying() then ba:Play() end
 		if pulseEnd and bar.timeLeft and (bar.timeLeft < 0.45) and (bar.timeLeft > 0.1) and not ba:IsPlaying() then ba:Play() end
 		if MSQ and Raven.db.global.ButtonFacadeIcons then -- icon border coloring
@@ -1221,7 +1275,7 @@ local function Bar_UpdateSettings(bg, bar, config)
 			if UseTukui() then
 				local bdrop = bar.frame.backdrop or bar.frame.Backdrop
 				if bdrop then
-					if bar.attributes.iconColors == "None" then
+					if bat.iconColors == "None" then
 						bdrop:SetBackdropBorderColor(bar.tukcolor_r, bar.tukcolor_g, bar.tukcolor_b, bar.tukcolor_a)
 					else
 						bdrop:SetBackdropBorderColor(bar.ibr, bar.ibg, bar.ibb, bar.iba)
@@ -1237,52 +1291,53 @@ local function Bar_UpdateSettings(bg, bar, config)
 	if showBorder and bar.iconPath then bx:Show() else bx:Hide() end
 	if bg.showIcon and not bg.iconHide and not isHeader and bar.iconCount then bi:SetText(tostring(bar.iconCount)); bi:Show() else bi:Hide() end
 	if bg.showIcon and not isHeader and bg.showCooldown and config.bars ~= "timeline" and bar.timeLeft and (bar.timeLeft >= 0) and not ba:IsPlaying() then
-		bar.cooldown:SetReverse(bg.attributes.clockReverse)
+		bar.cooldown:SetReverse(bag.clockReverse)
 		bar.cooldown:SetCooldown(bar.startTime - bar.offsetTime, bar.duration); bar.cooldown:Show()
 	else
 		bar.cooldown:Hide()
 	end
-	local ct, cm, expiring, ea, ec = bar.attributes.colorTime, bar.attributes.colorMinimum, false, bg.bgAlpha, nil
+	local ct, cm, expiring, ea, ec = bat.colorTime, bat.colorMinimum, false, bg.bgAlpha, nil
 	if bar.timeLeft and ct and cm and ct >= bar.timeLeft and bar.duration >= cm then
-		ec = bar.attributes.expireLabelColor; if ec and ec.a > 0 then bl:SetTextColor(ec.r, ec.g, ec.b, ec.a) end
-		ec = bar.attributes.expireTimeColor; if ec and ec.a > 0 then bt:SetTextColor(ec.r, ec.g, ec.b, ec.a) end
+		ec = bat.expireLabelColor; if ec and ec.a > 0 then bl:SetTextColor(ec.r, ec.g, ec.b, ec.a) end
+		ec = bat.expireTimeColor; if ec and ec.a > 0 then bt:SetTextColor(ec.r, ec.g, ec.b, ec.a) end
 		expiring = true
 	end
 	if expiring and config.iconOnly and ea == 0 then ea = 1 end -- make icon-only bar visible as expire reminder
 	if bg.showTimeText then bt:SetText(timeText); bt:Show() else bt:Hide() end
 	if (bg.showLabelText or isHeader) and bar.label then bl:SetText(bar.label); bl:Show() else bl:Hide() end
 	local w, h = bg.width - offsetX, bg.height; if config.iconOnly then w = bg.barWidth; h = bg.barHeight end
-	if bg.showBar and config.bars ~= "timeline" and (w > 0) and (h > 0) then -- non-zero dimensions to fix the zombie bar bug
+	if bg.showBar and config.bars ~= "timeline" and (w > 0) and (h > 0) and bar.includeBar then -- non-zero dimensions to fix the zombie bar bug
 		local ar, ag, ab = MOD.Nest_AdjustColor(bar.br, bar.bg, bar.bb, bg.bgSaturation or 0, bg.bgBrightness or 0)
-		if expiring then ec = bar.attributes.expireColor; if ec and ec.a > 0 then ar = ec.r; ag = ec.g; ab = ec.b end end
+		if expiring and not bat.customBackground then ec = bat.expireColor; if ec and ec.a > 0 then ar = ec.r; ag = ec.g; ab = ec.b end end
 		bb:SetVertexColor(ar, ag, ab, 1); bb:SetTexture(bg.bgTexture); bb:SetAlpha(bg.bgAlpha)
 		PSetWidth(bb, w); bb:SetTexCoord(0, 1, 0, 1); bb:Show()
 		local fillw = w * fill
 		if (fillw > 0) and (bg.fgNotTimer or bar.timeLeft) then
-			if not expiring then ar, ag, ab = MOD.Nest_AdjustColor(bar.cr, bar.cg, bar.cb, bg.fgSaturation or 0, bg.fgBrightness or 0) end
+			ar, ag, ab = MOD.Nest_AdjustColor(bar.cr, bar.cg, bar.cb, bg.fgSaturation or 0, bg.fgBrightness or 0)
+			if expiring then ec = bat.expireColor; if ec and ec.a > 0 then ar = ec.r; ag = ec.g; ab = ec.b end end
 			bf:SetVertexColor(ar, ag, ab, 1); bf:SetTexture(bg.fgTexture); bf:SetAlpha(bg.fgAlpha)
 			if fillw > 0 then bf:SetWidth(fillw) end -- doesn't get pixel perfect treatment
 			if bg.showSpark and fill < 1 and fillw > 1 then sparky = true end
-			if config.bars == "r2l" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
+			if config.bars == "r2l" or config.bars == "stripe" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
 			bf:Show()
 		else bf:Hide() end
 	else bf:Hide(); bb:Hide() end
 	if sparky then bar.spark:Show() else bar.spark:Hide() end
 	local alpha = bar.alpha or 1 -- adjust by bar alpha
 	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
-	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
+	if bat.header and bag.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
 	bar.cooldown:SetSwipeColor(0, 0, 0, 0.8 * bar.icon:GetEffectiveAlpha()) -- hack to fix cooldown alpha not tracking rest of bar
-	if not isHeader and (bg.attributes.noMouse or (bg.attributes.iconMouse and not bg.showIcon)) then -- non-interactive or "only icon" but icon disabled
+	if not isHeader and (bag.noMouse or (bag.iconMouse and not bg.showIcon)) then -- non-interactive or "only icon" but icon disabled
 		bar.icon:EnableMouse(false); bar.frame:EnableMouse(false); if callbacks.deactivate then callbacks.deactivate(bar.overlay) end
-	elseif not isHeader and bg.attributes.iconMouse then -- only icon is interactive
+	elseif not isHeader and bag.iconMouse then -- only icon is interactive
 		bar.icon:EnableMouse(true); bar.frame:EnableMouse(false); if callbacks.activate then callbacks.activate(bar, bar.icon) end
 	else -- entire bar is interactive
 		bar.icon:EnableMouse(false); bar.frame:EnableMouse(true); if callbacks.activate then callbacks.activate(bar, bar.frame) end
 	end
-	if bar.attributes.header and not bg.attributes.headerGaps then
+	if bat.header and not bag.headerGaps then
 		bf:SetAlpha(0); bb:SetAlpha(0)
-		local id, tag = bar.attributes.tooltipUnit, ""
+		local id, tag = bat.tooltipUnit, ""
 		if id == UnitGUID("mouseover") then tag = "|cFF73d216@|r" end
 		if id == UnitGUID("target") then tag = tag .. " |cFFedd400target|r" end
 		if id == UnitGUID("focus") then tag = tag .. " |cFFf57900focus|r" end
@@ -1292,27 +1347,28 @@ end
 
 -- Update the lengths of timer bars, spark positions, and alphas of flashing bars
 local function Bar_RefreshAnimations(bg, bar, config)
+	local bat, bag = bar.attributes, bg.attributes
 	local fill, sparky, offsetX, now = 1, false, 0, GetTime()
 	if bar.timeLeft and bar.duration and bar.maxTime and bar.offsetTime then -- only update if key parameters are set
 		local remaining = bar.duration - (now - bar.startTime + bar.offsetTime) -- remaining time in seconds
-		if (remaining < 0) or bar.attributes.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
+		if (remaining < 0) or bat.ghostTime then remaining = 0 end -- make sure no rounding funnies and make sure ghost bars show 0 time
 		if remaining > bar.duration then remaining = bar.duration end -- and no inaccurate durations!
 		bar.timeLeft = remaining -- update saved value
 		if remaining < bar.maxTime then fill = remaining / bar.maxTime end -- calculate fraction of time remaining
 		if bg.fillBars then fill = 1 - fill end -- optionally fill instead of empty bars
 		local timeText = MOD.Nest_FormatTime(remaining, bg.timeFormat, bg.timeSpaces, bg.timeCase) -- get formatted timer text
 		if bg.showTimeText then bar.timeText:SetText(timeText) end
-		local expireTime, expireMinimum = bar.attributes.expireTime, bar.attributes.expireMinimum
+		local expireTime, expireMinimum = bat.expireTime, bat.expireMinimum
 		if expireTime and not bar.expireDone and expireTime >= remaining and (expireTime - remaining) < 1 then
-			if expireMinimum and bar.duration >= bar.attributes.expireMinimum then
-				PlaySoundFile(bar.attributes.soundExpire, Raven.db.global.SoundChannel); bar.expireDone = true
+			if expireMinimum and bar.duration >= bat.expireMinimum then
+				PlaySoundFile(bat.soundExpire, Raven.db.global.SoundChannel); bar.expireDone = true
 			end
 		end
-		local colorTime = bar.attributes.colorTime -- if need to change color then force update to re-color the bar
+		local colorTime = bat.colorTime -- if need to change color then force update to re-color the bar
 		if colorTime and colorTime >= remaining and (colorTime - remaining) < 0.25 then Raven:ForceUpdate() end
-		if bar.attributes.expireMSBT and bar.attributes.minimumMSBT and not bar.warningDone and bar.duration >= bar.attributes.minimumMSBT
-			and bar.attributes.expireMSBT >= remaining and (bar.attributes.expireMSBT - remaining) < 1 then
-			local ec, crit, icon = bar.attributes.colorMSBT, bar.attributes.criticalMSBT, bar.iconTexture:GetTexture()
+		if bat.expireMSBT and bat.minimumMSBT and not bar.warningDone and bar.duration >= bat.minimumMSBT
+			and bat.expireMSBT >= remaining and (bat.expireMSBT - remaining) < 1 then
+			local ec, crit, icon = bat.colorMSBT, bat.criticalMSBT, bar.iconTexture:GetTexture()
 			local t = string.format("%s [%s] %s", bar.label, bg.name, L["expiring"])
 			if MikSBT then
 				MikSBT.DisplayMessage(t, MikSBT.DISPLAYTYPE_NOTIFICATION, crit, ec.r * 255, ec.g * 255, ec.b * 255, nil, nil, nil, icon)
@@ -1327,30 +1383,32 @@ local function Bar_RefreshAnimations(bg, bar, config)
 			bar.warningDone = true
 		end
 	end
-	if bg.showIcon and not bar.attributes.header then
+	if bg.showIcon and not bat.header then
 		offsetX = bg.iconSize
-		local pulseEnd = (bg.attributes.pulseEnd or bar.attributes.pulseEnd)
+		local pulseEnd = (bag.pulseEnd or bat.pulseEnd)
 		local ba = bar.icon.anim
 		if ba:IsPlaying() then bar.cooldown:Hide() elseif pulseEnd and bar.timeLeft and (bar.timeLeft < 0.45) and (bar.timeLeft > 0.1) then ba:Play() end
 	end
-	if bg.showBar and config.bars ~= "timeline" and (fill > 0) and (bg.fgNotTimer or bar.timeLeft) then
-		local bf, w, h = bar.fgTexture, bg.width - offsetX, bg.height; if config.iconOnly then w = bg.barWidth; h = bg.barHeight end
-		if (w > 0) and (h > 0) then
-			local fillw = w * fill
-			if fillw > 0 then bf:SetWidth(fillw) end -- doesn't get pixel perfect treatment
-			if bg.showSpark and fill < 1 and fillw > 1 then sparky = true end
-			if config.bars == "r2l" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
-			bf:Show()
-		else bf:Hide() end
+	if not bar.value then -- don't refresh value bars
+		if bg.showBar and config.bars ~= "timeline" and (fill > 0) and (bg.fgNotTimer or bar.timeLeft) and bar.includeBar then
+			local bf, w, h = bar.fgTexture, bg.width - offsetX, bg.height; if config.iconOnly then w = bg.barWidth; h = bg.barHeight end
+			if (w > 0) and (h > 0) then
+				local fillw = w * fill
+				if fillw > 0 then bf:SetWidth(fillw) end -- doesn't get pixel perfect treatment
+				if bg.showSpark and fill < 1 and fillw > 1 then sparky = true end
+				if config.bars == "r2l" or config.bars == "stripe" then bf:SetTexCoord(0, 0, 0, 1, fill, 0, fill, 1) else bf:SetTexCoord(fill, 0, fill, 1, 0, 0, 0, 1) end
+				bf:Show()
+			else bf:Hide() end
+		end
+		if sparky then bar.spark:Show() else bar.spark:Hide() end
 	end
-	if sparky then bar.spark:Show() else bar.spark:Hide() end
 	local alpha = bar.alpha or 1 -- adjust by bar alpha
 	if bar.flash then alpha = MOD.Nest_FlashAlpha(alpha, 1) end -- adjust alpha if flashing
-	if bar.attributes.header and bg.attributes.headerGaps then alpha = 0 end
+	if bat.header and bag.headerGaps then alpha = 0 end
 	bar.frame:SetAlpha(alpha) -- final alpha adjustment
 	bar.cooldown:SetSwipeColor(0, 0, 0, 0.8 * bar.icon:GetEffectiveAlpha()) -- hack to fix cooldown alpha not tracking rest of bar
-	if bar.attributes.soundStart and (not bar.soundDone or (bar.attributes.replay and (now > (bar.soundDone + bar.attributes.replayTime)))) then
-		PlaySoundFile(bar.attributes.soundStart, Raven.db.global.SoundChannel); bar.soundDone = now
+	if bat.soundStart and (not bar.soundDone or (bat.replay and (now > (bar.soundDone + bat.replayTime)))) then
+		PlaySoundFile(bat.soundStart, Raven.db.global.SoundChannel); bar.soundDone = now
 	end
 end
 
@@ -1402,6 +1460,86 @@ local function BarGroup_RefreshTimeline(bg, config)
 	end
 end
 
+-- Refresh all the icons on the stripe, aligning left or middle or right, placing them side-by-side, with width
+-- determined by whether or not icon is included and the width of the label with potential variable width override.
+-- This is designed for brokers but should also work with other icons (default right alignment)
+local function BarGroup_RefreshStripe(bg)
+	local back = bg.background
+	local bag = bg.attributes
+	local leftWidth, centerWidth, rightWidth = 0, 0, 0
+	local iw, tw, hw
+	local sx, inset, offset, bw = bg.spacingX, bg.labelInset, bg.labelOffset, bg.width
+
+	for i = 1, bg.count do -- build tables of icons for each alignment, preserving sort order and computing widths
+		local bar = bg.bars[bg.sorter[i].name]
+		local bat = bar.attributes
+		local bl = bar.labelText
+		local isCenter = false
+		
+		if bar.icon:IsShown() then iw = bar.icon:GetWidth() else iw = 0 end
+		tw = bl:GetStringWidth() -- actual string width currently being displayed as text, will be 0 if not showing text
+		if bat.minimumWidth and bat.maximumWidth then
+			if tw < bat.minimumWidth then tw = bat.minimumWidth end
+			if bat.maximumWidth > 0 and tw > bat.maximumWidth then tw = bat.maximumWidth end -- ignore max = 0
+		end
+		if tw > 0 then -- restructure the icon's parts depending on what is being shown
+			if iw > 0 then -- anchor text and bar on right side of the icon with appropriate inset/offset
+				PSetPoint(bar.labelText, "LEFT", bar.icon, "RIGHT", inset, bg.offset)
+				PSetPoint(bar.labelText, "RIGHT", bar.icon, "RIGHT", inset + tw, bg.offset)
+			else -- anchor text and bar on left side of the icon (which is not being shown) with appropriate inset/offset
+				PSetPoint(bar.labelText, "LEFT", bar.icon, "LEFT", inset, bg.offset)
+				PSetPoint(bar.labelText, "RIGHT", bar.icon, "LEFT", inset + tw, bg.offset)
+			end
+			bar.labelText:SetJustifyH("LEFT")
+		end
+		tw = tw + (inset > 0 and inset or 0)
+		hw = tw; if iw == 0 and bw < tw then hw = hw - bw end -- compute interactive area width
+		if not bag.noMouse and not bag.iconMouse then bar.frame:SetHitRectInsets(0, -hw, 0, 0) end
+		tw = tw + iw -- width of icon plus text plus extra space
+		if bat.horizontalAlign == "left" then
+			table.insert(alignLeft, bar); leftWidth = leftWidth + tw
+		elseif bat.horizontalAlign == "center" then
+			table.insert(alignCenter, bar); centerWidth = centerWidth + tw
+		else -- must be default right alignment
+			table.insert(alignRight, bar); rightWidth = rightWidth + tw
+		end
+		bar.adjustedWidth = tw -- needed in later passes for each alignment
+	end
+
+	if #alignLeft > 1 then leftWidth = leftWidth + (sx * (#alignLeft - 1)) end -- include spacing between icons
+	if #alignCenter > 1 then centerWidth = centerWidth + (sx * (#alignCenter - 1)) end
+	if #alignRight > 1 then rightWidth = rightWidth + (sx * (#alignRight - 1)) end
+
+	local x = bg.stBarInset -- horizontal offset for first left-aligned icon
+	for _, bar in pairs(alignLeft) do -- position each icon within its alignment group
+		bar.frame:ClearAllPoints()
+		PSetPoint(bar.frame, "LEFT", back, "LEFT", x, bg.stBarOffset)
+		bar.frame:Show()
+		x = x + bar.adjustedWidth + sx
+		bar.adjustedWidth = nil -- remove temporary width variable from the bar
+	end
+
+	x = -bg.stBarInset - rightWidth -- position them from left to right
+	for _, bar in pairs(alignRight) do -- arrange all the right alignment icons
+		bar.frame:ClearAllPoints()
+		PSetPoint(bar.frame, "LEFT", back, "RIGHT", x, bg.stBarOffset)
+		bar.frame:Show()
+		x = x + bar.adjustedWidth + sx
+		bar.adjustedWidth = nil -- remove temporary width variable from the bar
+	end
+	
+	x = -centerWidth / 2 -- position them from left to right
+	for _, bar in pairs(alignCenter) do -- arrange all the center alignment icons
+		bar.frame:ClearAllPoints()
+		PSetPoint(bar.frame, "LEFT", back, "CENTER", x, bg.stBarOffset)
+		bar.frame:Show()
+		x = x + bar.adjustedWidth + sx
+		bar.adjustedWidth = nil -- remove temporary width variable from the bar
+	end
+	
+	table.wipe(alignLeft); table.wipe(alignRight); table.wipe(alignCenter) -- clear the temporary tables
+end
+
 -- Update bar order and calculate offsets within the bar stack plus overall width and height of the frame
 local function BarGroup_SortBars(bg, config)
 	local tid = UnitGUID("target")
@@ -1419,8 +1557,9 @@ local function BarGroup_SortBars(bg, config)
 		s.group = id or ""; s.gname = bar.attributes.groupName or (bg.reverse and "zzzzzzzzzzzz" or "")
 		s.isMine = bar.attributes.isMine; s.class = bar.attributes.class or ""; s.sortPlayer = bg.sortPlayer; s.sortTime = bg.sortTime
 	end
-	local isTimeline = false
+	local isTimeline, isStripe = false, false
 	if config.bars == "timeline" then bg.sortFunction = SortTimeUp; isTimeline = true end
+	if config.bars == "stripe" then isStripe = true end
 	table.sort(bg.sorter, bg.sortFunction)
 	local wrap = 0 -- indicates default of not wrapping
 	local dir = bg.reverse and 1 or -1 -- plus or minus depending on direction
@@ -1431,7 +1570,7 @@ local function BarGroup_SortBars(bg, config)
 	local xoffset, yoffset, xdir, ydir, wadjust = 0, 0, 1, dir, 0 -- position adjustments for backdrop
 	local count, maxBars, cdir = bg.count, bg.maxBars, 0
 	if not maxBars or (maxBars == 0) then maxBars = count end
-	if count > maxBars then count = maxBars end
+	if not isStripe and count > maxBars then count = maxBars end
 	local ac = count -- actual count before wrap adjustment
 	if bg.wrap and not isTimeline then wrap = bg.wrap; if (wrap > 0) and (count > wrap) then count = wrap end end
 	local anchorPoint = "BOTTOMLEFT"
@@ -1481,6 +1620,8 @@ local function BarGroup_SortBars(bg, config)
 	count = bg.count
 	if isTimeline then
 		BarGroup_RefreshTimeline(bg, config)
+	elseif isStripe then
+		BarGroup_RefreshStripe(bg)
 	else	
 		for i = 1, count do
 			local bar = bg.bars[bg.sorter[i].name]
@@ -1502,6 +1643,12 @@ local function BarGroup_SortBars(bg, config)
 		if isTimeline and (not bg.tlHide or (count > 0)) and not inPetBattle then
 			PCSetPoint(back, back.anchorPoint, bg.frame, back.anchorPoint, x0, y0)
 			ShowTimeline(bg)
+			count = 1 -- trigger drawing backdrop
+		elseif isStripe then
+			local a = (back.anchorPoint == "TOP") and "BOTTOM" or "TOP"
+			local x = bg.stInset
+			if bg.stFullWidth then x = bg.frame:GetCenter(); x = (GetScreenWidth() / 2) - x end -- keep full width bars centered
+			PCSetPoint(back, back.anchorPoint, bg.frame, a, x, bg.stOffset)
 			count = 1 -- trigger drawing backdrop
 		else HideTimeline(bg) end
 	end
@@ -1610,6 +1757,17 @@ end
 -- Force a global update.
 function MOD.Nest_TriggerUpdate() update = true end
 
+-- Validate a resolution string with format "w x h" as used by the system menu for selecting display settings
+local function ValidResolution(res)
+	if type(res) == "string" then
+		local w, h = DecodeResolution(res)
+		if w and h and type(w) == "number" and type(h) == "number" then
+			if w > 0 and h > 0 then return true end
+		end
+	end
+	return false
+end
+
 -- Initialize the module
 function MOD.Nest_Initialize()
 	if Raven.MSQ then
@@ -1617,15 +1775,41 @@ function MOD.Nest_Initialize()
 		MSQ_ButtonData = { AutoCast = false, AutoCastable = false, Border = false, Checked = false, Cooldown = false, Count = false, Duration = false,
 			Disabled = false, Flash = false, Highlight = false, HotKey = false, Icon = false, Name = false, Normal = false, Pushed = false }
 	end
-	if GetCVar("useUiScale") == "1" then
-		local resolution = GetCVar("gxFullscreenResolution") -- LEGION FIX [note: gxResolution was removed]
-		if GetCVar("gxWindow") == "1" then resolution = GetCVar("gxWindowedResolution") end
-		pixelScale = 768 / string.match(resolution, "%d+x(%d+)") / GetCVar("uiScale") -- used for pixel perfect size and position
+
+	local monitorIndex = Display_PrimaryMonitorDropDown:GetValue() -- get current monitor index (should be same as the cvar "gxMonitor")
+	local isWindowed = Display_DisplayModeDropDown:windowedmode() -- test if in windowed mode (used to fallback to cvar value for resolution)
+	local isFullscreen = Display_DisplayModeDropDown:fullscreenmode() -- test if in fullscreen mode (used to fallback to cvar value for resolution)
+	local resolutionIndex = GetCurrentResolution(monitorIndex) -- get index for current resolution in list of screen resolutions
+	if not resolutionIndex then resolutionIndex = 0 end -- make sure valid number for next test...
+	local resolution = resolutionIndex > 0 and select(resolutionIndex, GetScreenResolutions(monitorIndex)) or nil -- best case scenario for accurate resolution
+	-- MOD.Debug("Raven standard resolution", monitorIndex, resolutionIndex, resolution)
+	if not ValidResolution(resolution) then resolution = isFullscreen and GetCVar("gxFullscreenResolution") or GetCVar("gxWindowedResolution") end
+	-- MOD.Debug("Raven checked resolution", resolution, ValidResolution(resolution), GetCVar("gxWindowedResolution"), GetCVar("gxFullscreenResolution"))
+	if ValidResolution(resolution) then -- should have valid resolution at this point, either from screen resolutions or appropriate cvar
+		pixelWidth, pixelHeight = DecodeResolution(resolution) -- use Blizzard's utility function to decode the resolution width and height
+		pixelScale = GetScreenHeight() / pixelHeight -- figure out how big virtual pixels are versus screen pixels
 	else
-		pixelScale = 1
+		pixelWidth = GetScreenWidth(); pixelHeight = GetScreenHeight() -- ultimate fallback safe values for width and height
+		pixelScale = 1 -- and safe value for pixel perfect calculations
 	end
+	-- MOD.Debug("Raven result resolution", resolution, pixelScale, pixelWidth, pixelHeight, GetCVar("uiScale"), GetScreenWidth(), GetScreenHeight())
 	pixelPerfect = (not Raven.db.global.TukuiSkin and Raven.db.global.PixelPerfect) or (Raven.db.global.TukuiSkin and Raven.db.global.TukuiScale)
 	rectIcons = (Raven.db.global.RectIcons == true)
+end
+
+-- Return the pixel perfect scaling factor
+function MOD.Nest_PixelScale() return pixelScale end
+
+-- Return the actual screen resolution expressed in pixels
+function MOD.Nest_ScreenResolution() return pixelWidth, pixelHeight end
+
+-- Adjust bar group's alpha after checking mouseover
+local function BarGroup_Alpha(bg)
+	local drop, back = bg.backdrop, bg.background
+	local mouse = drop:IsShown() and drop:IsMouseOver(2, -2, -2, 2)
+	if back and back:IsShown() then mouse = back:IsMouseOver(2, -2, -2, 2) end
+	local alpha = mouse and bg.mouseAlpha or bg.alpha
+	if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
 end
 
 -- Update routine does all the actual work of setting up and displaying bar groups.
@@ -1635,13 +1819,11 @@ function MOD.Nest_Update()
 	else
 		if inPetBattle then inPetBattle = false; update = true end
 	end
+	pixelScale = GetScreenHeight() / pixelHeight -- quicker to just update than to track uiScale changes
 	for _, bg in pairs(barGroups) do
 		if bg.configuration then -- make sure configuration is valid
 			local config = MOD.Nest_SupportedConfigurations[bg.configuration]
-			if not bg.disableAlpha then
-				local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
-				if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
-			end
+			if not bg.disableAlpha then BarGroup_Alpha(bg) end
 			if not bg.moving then bg.frame:SetFrameStrata(bg.strata or "MEDIUM") end
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
 			if update or bg.update then BarGroup_UpdateAnchor(bg, config); BarGroup_UpdateBackground(bg, config) end
@@ -1669,10 +1851,7 @@ function MOD.Nest_Refresh()
 			SetBarGroupEffectiveDimensions(bg, config) -- stored in bg.width and bg.height
 			for _, bar in pairs(bg.bars) do if not bar.update then Bar_RefreshAnimations(bg, bar, config) end end
 			if config.bars == "timeline" then BarGroup_RefreshTimeline(bg, config) end
-			if not bg.disableAlpha then
-				local alpha = (bg.backdrop:IsShown() and bg.backdrop:IsMouseOver(2, -2, -2, 2)) and bg.mouseAlpha or bg.alpha
-				if not alpha or (alpha < 0) or (alpha > 1) then alpha = 1 end; bg.frame:SetAlpha(alpha)
-			end
+			if not bg.disableAlpha then BarGroup_Alpha(bg) end
 		end
 	end
 	UpdateAnimations() -- check for completed animations
