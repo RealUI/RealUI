@@ -12,14 +12,17 @@ local kui = LibStub('Kui-1.0')
 KuiNameplatesCore = addon:Layout()
 local core = KuiNameplatesCore
 
--- positioned and "shown" on the player's frame when/if it is shown
-local anchor = CreateFrame('Frame','KuiNameplatesPlayerAnchor')
-anchor:Hide()
-
 if not core then
     -- another layout is already loaded
     return
 end
+
+-- positioned and "shown" on the player's frame when/if it is shown
+local anchor = CreateFrame('Frame','KuiNameplatesPlayerAnchor')
+anchor:Hide()
+
+local plugin_fading
+local plugin_classpowers
 -- messages ####################################################################
 function core:Create(f)
     self:CreateBackground(f)
@@ -44,11 +47,6 @@ function core:Show(f)
     f.state.player = UnitIsUnit(f.unit,'player')
     f.state.friend = UnitIsFriend('player',f.unit)
     f.state.enemy = UnitIsEnemy('player',f.unit)
-
-    if f.state.player then
-        anchor:SetAllPoints(f)
-        anchor:Show()
-    end
 
     -- go into nameonly mode if desired
     self:NameOnlyUpdate(f)
@@ -77,10 +75,23 @@ function core:Show(f)
     f:UpdateCastBar()
     -- enable/disable auras
     f:UpdateAuras()
+    -- set guild text
+    f:UpdateGuildText()
 
     if f.TargetArrows then
         -- show/hide target arrows
         f:UpdateTargetArrows()
+    end
+
+    if f.state.player then
+        anchor:SetAllPoints(f)
+        anchor:Show()
+
+        if addon.ClassPowersFrame then
+            -- force class powers position update
+            -- as our post function uses state.player
+            plugin_classpowers:TargetUpdate()
+        end
     end
 end
 function core:Hide(f)
@@ -146,7 +157,11 @@ function core:ClassificationChanged(f)
 end
 function core:RaidIconUpdate(f)
     -- registered by configChanged, fade_avoid_raidicon
-    f:UpdateRaidIcon()
+    plugin_fading:UpdateFrame(f)
+end
+function core:ExecuteUpdate(f)
+    -- registered by configChanged, fade_avoid_execute_friend/hostile
+    plugin_fading:UpdateFrame(f)
 end
 -- events ######################################################################
 function core:QUESTLINE_UPDATE()
@@ -203,10 +218,16 @@ function core:Initialise()
     self:AddCallback('Auras','PostUpdateAuraFrame',self.Auras_PostUpdateAuraFrame)
     self:AddCallback('Auras','DisplayAura',self.Auras_DisplayAura)
     self:AddCallback('ClassPowers','PostPositionFrame',self.ClassPowers_PostPositionFrame)
+    self:AddCallback('ClassPowers','CreateBar',self.ClassPowers_CreateBar)
+    self:AddCallback('ClassPowers','PostCreateIcon',self.ClassPowers_PostCreateIcon)
+    self:AddCallback('ClassPowers','PostRuneUpdate',self.ClassPowers_PostRuneUpdate)
 
     -- update layout's locals with configuration
     self:SetLocals()
 
     -- set element configuration tables
     self:InitialiseElements()
+
+    plugin_fading = addon:GetPlugin('Fading')
+    plugin_classpowers = addon:GetPlugin('ClassPowers')
 end

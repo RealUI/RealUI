@@ -1,4 +1,5 @@
 ## Interface: 70000
+## Version: v7.0.2
 ## Title: BadBoy_Guilded
 ## Notes: Removes guild advertising from public channels.
 ## Notes-frFR: Enlève les publicités des guildes des canaux publiques.
@@ -6,15 +7,19 @@
 ## Notes-ptBR: Remove publicidade de guilda de canais públicos.
 ## Notes-ruRU: Удаляет рекламу гильдий из публичных каналов чата.
 ## Notes-zhCN: 从公共频道移除公会广告。
+## Notes-zhTW: Removes guild advertising from public channels.
+## Notes-koKR: Removes guild advertising from public channels.
+## Notes-esES: Removes guild advertising from public channels.
+## Notes-esMX: Removes guild advertising from public channels.
+## Notes-itIT: Removes guild advertising from public channels.
+
 ## Author: Funkydude
 ## Dependencies: BadBoy
 ## SavedVariablesPerCharacter: BADBOY_GWHISPER
 ## X-Category: Chat/Communication
-## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r247-release
-## X-Curse-Project-Name: BadBoy_Guilded: Block Guild Advertising
+## X-License: All Rights Reserved: You are free to fork and modify on GitHub, please ask us about anything else.
 ## X-Curse-Project-ID: badboy_guilded
-## X-Curse-Repository-ID: wow/badboy_guilded/mainline
+## X-WoWI-ID: 16951
 
 SimpleOptions.lua
 BadBoy_Guilded.lua

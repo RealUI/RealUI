@@ -8,7 +8,7 @@
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /knp, /kuinameplates
 ## X-LoadOn-InterfaceOptions: Kui |cff9966ffNameplates Core
-## X-Curse-Packaged-Version: 2-9
+## X-Curse-Packaged-Version: 2-13-2
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline

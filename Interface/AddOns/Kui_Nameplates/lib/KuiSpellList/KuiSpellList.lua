@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 24
+local MAJOR, MINOR = 'KuiSpellList-1.0', 26
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
 local _
 
@@ -22,6 +22,7 @@ local auras = {
             [61336] = true, -- survival instincts
             [22812] = true, -- barkskin
             [192083] = true, -- mark of ursol
+            [213680] = true, -- guardian of elune
         },
         HELPFUL = {
             [774] = true, -- rejuvenation
@@ -40,6 +41,7 @@ local auras = {
             [1822] = true, -- rake
             [155722] = true, -- rake 6.0
             [8921] = true, -- moonfire
+            [155625] = true, -- moonfire cat
             [164812] = true, -- moonfire
             [77758] = true, -- bear thrash
             [192090] = true, -- bear thrash 7.0
@@ -166,9 +168,27 @@ local auras = {
         }
     },
     WARRIOR = {
+        SELF = {
+            [871] = true,    -- shield wall
+            [1719] = true,   -- battle cry
+            [12975] = true,  -- last stand
+            [18499] = true,  -- berserker rage
+            [23920] = true,  -- spell reflection
+            [107574] = true, -- avatar
+            [114030] = true, -- vigilance
+            [132404] = true, -- shield block
+            [184362] = true, -- enrage
+            [184364] = true, -- enraged regeneration
+            [190456] = true, -- ignore pain
+            [202539] = true, -- frenzy
+            [202602] = true, -- into the fray
+            [206333] = true, -- taste for blood
+            [227744] = true, -- ravager
+        },
         HELPFUL = {
             [3411] = true,   -- intervene
-            [114030] = true, -- vigilance
+            [97463] = true,  -- commanding shout
+            [223658] = true, -- safeguard
         },
         HARMFUL = {
             [167105] = true, -- colossus smash again

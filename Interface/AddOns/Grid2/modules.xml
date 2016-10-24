@@ -25,15 +25,16 @@
 <Script file="modules\StatusRaidIcon.lua"/>
 <Script file="modules\StatusAFK.lua"/>
 <Script file="modules\StatusBanzai.lua"/>
-<Script file="modules\StatusDirection.lua"/>
 <Script file="modules\StatusRes.lua"/>
 <Script file="modules\StatusShields.lua"/>
 <Script file="modules\StatusHealAbsorbs.lua"/>
+<Script file="modules\StatusHealsAoe.lua"/>
 <Script file="modules\StatusSelf.lua"/>
 <Script file="modules\StatusAuras.lua"/>
 <Script file="modules\StatusAurasBuffs.lua"/>
 <Script file="modules\StatusAurasDebuffs.lua"/>
 <Script file="modules\StatusAurasBuffDebuff.lua"/>
 <Script file="modules\StatusAurasDebuffType.lua"/>
+<Script file="modules\StatusDirection.lua"/>
 
 </Ui>

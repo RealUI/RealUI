@@ -79,11 +79,9 @@ do
 		wipe(health_cache)
 	end
 	local function HealthChangedEvent(unit)
-		if strlen(unit)<8 then  -- Ignore Pets
-			local h = UnitHealthOriginal(unit)
-			if h==health_cache[unit] then return end
-			health_cache[unit] = h
-		end	
+		local h = UnitHealthOriginal(unit)
+		if h==health_cache[unit] then return end
+		health_cache[unit] = h
 		UpdateIndicators(unit)
 	end 
 	local function CombatLogEvent(...)

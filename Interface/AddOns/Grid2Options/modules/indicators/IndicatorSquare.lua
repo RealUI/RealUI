@@ -20,7 +20,7 @@ function Grid2Options:MakeIndicatorSquareSizeOptions(indicator, options)
 		name = L["Size"],
 		desc = L["Adjust the size of the indicator."],
 		min = 0,
-		max = 50,
+		softMax = 50,
 		step = 1,
 		get = function () return indicator.dbx.size	end,
 		set = function (_, v)
@@ -35,7 +35,7 @@ function Grid2Options:MakeIndicatorSquareSizeOptions(indicator, options)
 		name = L["Width"],
 		desc = L["Adjust the width of the indicator."],
 		min = 0,
-		max = 50,
+		softMax = 50,		
 		step = 1,
 		get = function () return indicator.dbx.width end,
 		set = function (_, v)
@@ -50,7 +50,7 @@ function Grid2Options:MakeIndicatorSquareSizeOptions(indicator, options)
 		name = L["Height"],
 		desc = L["Adjust the height of the indicator."],
 		min = 0,
-		max = 50,
+		softMax = 50,
 		step = 1,
 		get = function () return indicator.dbx.height end,
 		set = function (_, v)

@@ -1,5 +1,5 @@
 ## Interface: 70000
-## Version: 13.025
+## Version: v7.0.14
 ## Title: BadBoy
 ## Notes: A simple spam blocker & reporter.
 ## Notes-deDE: Ein einfacher Spam-Blocker & Melder.
@@ -10,17 +10,16 @@
 ## Notes-frFR: Un simple bloqueur et rapporteur de spam.
 ## Notes-esES: Un bloqueador y un informador para spam.
 ## Notes-esMX: Un bloqueador y un informador para spam.
-## Notes-ptBR: A simple spam blocker & reporter.
+## Notes-ptBR: Um simples bloqueador de spams.
 ## Notes-itIT: Un semplice blocco spam che segnala le spam alla Blizzard.
 ## Author: Funkydude
 ## SavedVariables: BADBOY_POPUP, BADBOY_NOLINK, BADBOY_BLACKLIST
+
 ## X-Credits: Shadowed(API hunting), Ellipsis(remembering odd things), Anea(original SpamSentry blacklist in BadBoy v1), WoW Community(for reporting spam)
 ## X-Category: Chat/Communication
-## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: v13.025
-## X-Curse-Project-Name: BadBoy: Spam Blocker & Reporter
+## X-License: All Rights Reserved: You are free to fork and modify on GitHub, please ask us about anything else.
 ## X-Curse-Project-ID: bad-boy
-## X-Curse-Repository-ID: wow/bad-boy/mainline
+## X-WoWI-ID: 8736
 
 ## OptionalDeps: LibChatAnims
 ## X-Embeds: LibChatAnims

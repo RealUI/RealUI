@@ -13,6 +13,7 @@ L["A damage meter."] = true
 L["Skada summary"] = true
 
 L["opens the configuration window"] = true
+L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true
 L["resets all data"] = true
 
 L["Current"] = "Current fight"
@@ -400,11 +401,6 @@ L["Instance"] = "Instance"
 L["Enemy healing done"] = "Enemy healing done"
 L["Enemy healing taken"] = "Enemy healing taken"
 
-L["Skada has changed!"] = true
-L["All Skada functionality is now in 1 addon folder."] = true
-L["Skada will |cFFFF0000NOT|r function properly until you delete the following AddOns:"] = true
-L["Click below and configure your '|cFFFF0000Disabled Modules|r'."] = true
-
 L["Stop"] = "Stop/Resume"
 L["Autostop"] = "Stop early on wipe"
 L["Autostop description"] = "Automatically stops the current segment after a certain amount of raid members have died."
@@ -425,3 +421,68 @@ L["Whisper Target"] = true
 
 L["Always show self"] = true
 L["Keeps the player shown last even if there is not enough space."] = true
+
+L["Strata"] = true
+L["This determines what other frames will be in front of the frame."] = true
+
+L["Fixed bar width"] = true
+L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."] = true
+
+L["Text color"] = true
+L["Choose the default color."] = true
+L["Hint: Left-Click to set active mode."] = true
+L["Right-click to set active set."] = true
+L["Shift + Left-Click to open menu."] = true
+L["Title color"] = true
+L["The text color of the title."] = true
+L["Border color"] = true
+L["The color used for the border."] = true
+
+L["Tweaks"] = true
+L["Inline bar display"] = true
+L["Data text"] = true
+L["Width"] = true
+L["Height"] = true
+L["Tile"] = true
+L["Tile the background texture."] = true
+L["Tile size"] = true
+L["The size of the texture pattern."] = true
+L["Border"] = true
+L["General"] = true
+L["Inline display is a horizontal window style."] = true
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = true
+L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = true
+
+L["Theme applied!"] = true
+L["Themes"] = true
+L["Theme"] = true
+L["Apply theme"] = true
+L["Save theme"] = true
+L["Name of your new theme."] = true
+L["Name"] = true
+L["Save"] = true
+L["Apply"] = true
+L["Delete"] = true
+L["Delete theme"] = true
+L["Various tweaks to get around deficiences and problems in the game's combat logs. Carries a small performance penalty."] = true
+L["Adds a set of standard themes to Skada. Custom themes can also be used."] = true
+L["Smart"] = true
+L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true
+
+L["Other"] = true
+
+L["Energy gained"] = true
+L["Rage gained"] = true
+L["Runic power gained"] = true
+L["Holy power gained"] = true
+L["Energy gain sources"] = true
+L["Rage gain sources"] = true
+L["Holy power gain sources"] = true
+L["Runic power gain sources"] = true
+L["Power gains"] = true
+L["Focus gained"] = true
+L["Focus gain sources"] = true
+
+L["Minimum"] = true
+L["Maximum"] = true
+L["Average"] = true

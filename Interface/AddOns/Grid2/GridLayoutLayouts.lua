@@ -361,3 +361,24 @@ Grid2Layout:AddLayout("By Group | 4x10 w/Pets", {
 		groupingOrder = DEFAULT_PET_ORDER,
     },
 })
+
+Grid2Layout:AddLayout("By Role 10x", {
+	meta = {
+		raid  = true,
+		party = true,
+		arena = true,
+	},
+	defaults = {
+		showPlayer = true,
+		showParty = true,
+		showRaid = true,
+        allowVehicleTarget = true,
+		unitsPerColumn = 10,
+		maxColumns = 8
+	},
+	[1] = {
+		groupFilter = "auto",
+		groupBy = "ASSIGNEDROLE",
+		groupingOrder = "TANK,HEALER,DAMAGER,NONE",
+	},
+})

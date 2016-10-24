@@ -4,9 +4,9 @@ local kui = LibStub('Kui-1.0')
 local mod = addon:NewPlugin('TankMode')
 
 local GetNumGroupMembers,UnitIsUnit,UnitIsFriend,UnitExists,UnitInParty,
-      UnitInRaid,UnitGroupRolesAssigned =
+      UnitInRaid,UnitGroupRolesAssigned,UnitIsPlayer,UnitPlayerControlled =
       GetNumGroupMembers,UnitIsUnit,UnitIsFriend,UnitExists,UnitInParty,
-      UnitInRaid,UnitGroupRolesAssigned
+      UnitInRaid,UnitGroupRolesAssigned,UnitIsPlayer,UnitPlayerControlled
 
 local force_enable,spec_enabled,offtank_enable
 -- local functions #############################################################
@@ -27,6 +27,35 @@ local function CanOverwriteHealthColor(f)
     return not f.state.health_colour_priority or
            f.state.health_colour_priority <= mod.priority
 end
+local function ColourHealthBar(f)
+    if CanOverwriteHealthColor(f) then
+        f.state.tank_mode_coloured = true
+        f.state.health_colour_priority = mod.priority
+
+        if f.elements.HealthBar then
+            if f.state.threat and f.state.threat > 0 then
+                f.HealthBar:SetStatusBarColor(unpack(mod.colours[f.state.threat]))
+            elseif f.state.tank_mode_offtank then
+                f.HealthBar:SetStatusBarColor(unpack(mod.colours[3]))
+            end
+        end
+    end
+end
+local function UncolourHealthBar(f)
+    if not f.state.tank_mode_coloured then return end
+    f.state.tank_mode_coloured = nil
+
+    if CanOverwriteHealthColor(f) then
+        -- return to colour provided by HealthBar element
+        f.state.health_colour_priority = nil
+
+        if f.elements.HealthBar then
+            f.HealthBar:SetStatusBarColor(unpack(f.state.healthColour))
+        end
+
+        addon:DispatchMessage('HealthColourChange', f, mod)
+    end
+end
 -- mod functions ###############################################################
 function mod:SetForceEnable(b)
     force_enable = b == true
@@ -34,45 +63,30 @@ function mod:SetForceEnable(b)
 end
 -- messages ####################################################################
 function mod:Show(f)
-    self:UNIT_THREAT_LIST_UPDATE(nil,f,f.unit)
+    if not UnitIsPlayer(f.unit) and not UnitPlayerControlled(f.unit) then
+        self:UNIT_THREAT_LIST_UPDATE(nil,f,f.unit)
+    end
 end
 function mod:HealthColourChange(f,caller)
     if caller and caller == self then return end
     self:GlowColourChange(f)
 end
 function mod:GlowColourChange(f)
+    if UnitIsPlayer(f.unit) or UnitPlayerControlled(f.unit) then
+        UncolourHealthBar(f)
+        return
+    end
+
     -- tank mode health bar colours
     if self.enabled and spec_enabled and
         ((f.state.threat and f.state.threat > 0) or
         f.state.tank_mode_offtank)
     then
         -- mod is enabled and frame has an active threat state
-        if CanOverwriteHealthColor(f) then
-            f.state.tank_mode_coloured = true
-            f.state.health_colour_priority = self.priority
-
-            if f.elements.HealthBar then
-                if f.state.threat and f.state.threat > 0 then
-                    f.HealthBar:SetStatusBarColor(unpack(self.colours[f.state.threat]))
-                elseif f.state.tank_mode_offtank then
-                    f.HealthBar:SetStatusBarColor(unpack(self.colours[3]))
-                end
-            end
-        end
-    elseif f.state.tank_mode_coloured then
+        ColourHealthBar(f)
+    else
         -- mod is disabled or frame no longer has a coloured threat state
-        f.state.tank_mode_coloured = nil
-
-        if CanOverwriteHealthColor(f) then
-            -- return to colour provided by HealthBar element
-            f.state.health_colour_priority = nil
-
-            if f.elements.HealthBar then
-                f.HealthBar:SetStatusBarColor(unpack(f.state.healthColour))
-            end
-
-            addon:DispatchMessage('HealthColourChange', f, mod)
-        end
+        UncolourHealthBar(f)
     end
 end
 -- events ######################################################################

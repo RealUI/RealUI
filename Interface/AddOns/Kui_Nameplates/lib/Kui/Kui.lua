@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'Kui-1.0', 19
+local MAJOR, MINOR = 'Kui-1.0', 22
 local kui = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not kui then
@@ -32,6 +32,7 @@ kui.m = {
     f = {
         yanone   = media..'f\\yanone.ttf',
         francois = media..'f\\francois.ttf',
+        roboto   = media..'f\\roboto.ttf',
     },
 }
 ------------------------------------------------------------------ var tables --
@@ -128,9 +129,9 @@ kui.GetUnitColour = function(unit, str)
         return {r=r,g=g,b=b}
     end
 end
-kui.UnitLevel = function(unit, long)
-    local level, classification =
-        UnitLevel(unit), UnitClassification(unit)
+kui.UnitLevel = function(unit, long, real)
+    local level = real and UnitLevel(unit) or UnitEffectiveLevel(unit)
+    local classification = UnitClassification(unit)
     local diff = GetQuestDifficultyColor(level <= 0 and 999 or level)
 
     if ct[classification] then
@@ -192,6 +193,7 @@ kui.CreateFontString = function(parent, args)
 end
 -- Format numbers
 kui.num = function(num)
+    if not num then return end
     if num < THOUSAND then
         return floor(num)
     elseif num >= TRILLION then

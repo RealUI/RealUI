@@ -14,6 +14,11 @@ local popup, cleuFrame
 local deathcounter = 0
 local startingmembers = 0
 
+-- Aliases
+local table_sort, tinsert, tremove, table_maxn = _G.table.sort, tinsert, tremove, _G.table.maxn
+local next, pairs, ipairs, type = next, pairs, ipairs, type
+
+
 -- Returns the group type (i.e., "party" or "raid") and the size of the group.
 function Skada:GetGroupTypeAndCount()
 	local type
@@ -42,7 +47,7 @@ do
 		tile = true, tileSize = 16, edgeSize = 16,
 		insets = {left = 1, right = 1, top = 1, bottom = 1}}
 	)
-	popup:SetSize(250, 70)
+	popup:SetSize(250, 100)
 	popup:SetPoint("CENTER", UIParent, "CENTER")
 	popup:SetFrameStrata("DIALOG")
 	popup:Hide()
@@ -52,25 +57,25 @@ do
 		if GetBindingFromClick(key) == "TOGGLEGAMEMENU" then
 			popup:SetPropagateKeyboardInput(false) -- swallow escape
 			popup:Hide()
-                end
-        end)
+		end
+	end)
 
 	local text = popup:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-	text:SetPoint("TOP", popup, "TOP", 0, -10)
+	text:SetPoint("TOP", popup, "TOP", 0, -15)
 	text:SetText(L["Do you want to reset Skada?"])
 
 	local accept = CreateFrame("Button", nil, popup)
 	accept:SetNormalTexture("Interface\\Buttons\\UI-CheckBox-Check")
 	accept:SetHighlightTexture("Interface\\Buttons\\UI-CheckBox-Highlight", "ADD")
 	accept:SetSize(50, 50)
-	accept:SetPoint("BOTTOM", popup, "BOTTOM", -50, 0)
+	accept:SetPoint("BOTTOM", popup, "BOTTOM", -50, 5)
 	accept:SetScript("OnClick", function(f) Skada:Reset() f:GetParent():Hide() end)
 
 	local close = CreateFrame("Button", nil, popup)
 	close:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
 	close:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
 	close:SetSize(50, 50)
-	close:SetPoint("BOTTOM", popup, "BOTTOM", 50, 0)
+	close:SetPoint("BOTTOM", popup, "BOTTOM", 50, 5)
 	close:SetScript("OnClick", function(f) f:GetParent():Hide() end)
 	function Skada:ShowPopup()
 		popup:SetPropagateKeyboardInput(true)
@@ -198,7 +203,7 @@ function Window:AddOptions()
 							Skada.options.args.windows.args[val] = Skada.options.args.windows.args[oldname]
 							Skada.options.args.windows.args[oldname] = nil
 						end
-					    end,
+					end,
 					order=1,
 				},
 
@@ -570,6 +575,7 @@ function Window:DisplaySets()
 	self.selectedset = nil
 
 	self.metadata.title = L["Skada: Fights"]
+	self.display:SetTitle(self, self.metadata.title)
 
 	self.metadata.click = click_on_set
 	self.metadata.maxvalue = 1
@@ -600,22 +606,31 @@ function Window:RightClick(group, button)
 	end
 end
 
-function Skada:tcopy(to, from)
+function Skada:tcopy(to, from, ...)
 	for k,v in pairs(from) do
-	if(type(v)=="table") then
-		to[k] = {}
-		Skada:tcopy(to[k], v);
-	else
-		to[k] = v;
-	end
+
+		local skip = false
+		if ... then
+			for i, j in ipairs(...) do if j == k then skip = true end end
+		end
+		if not skip then
+			if(type(v)=="table") then
+				to[k] = {}
+				Skada:tcopy(to[k], v, ...);
+			else
+				to[k] = v;
+			end
+		end
 	end
 end
 
 function Skada:CreateWindow(name, db, display)
+	local isnew = false
 	if not db then
+		isnew = true
 		db = {}
 		self:tcopy(db, Skada.windowdefaults)
-		table.insert(self.db.profile.windows, db)
+		tinsert(self.db.profile.windows, db)
 	end
 	if display then
 		db.display = display
@@ -632,11 +647,11 @@ function Skada:CreateWindow(name, db, display)
 		db.scale = 1
 	end
 
-    if not db.version then
-        -- On changes that needs updates to window data structure, increment version in defaults and handle it after this bit.
-        db.version = 1
-        db.buttons.stop = true
-    end
+	if not db.version then
+		-- On changes that needs updates to window data structure, increment version in defaults and handle it after this bit.
+		db.version = 1
+		db.buttons.stop = true
+	end
 
 	local window = Window:new()
 	window.db = db
@@ -646,17 +661,19 @@ function Skada:CreateWindow(name, db, display)
 		-- Set the window's display and call it's Create function.
 		window:SetDisplay(window.db.display or "bar")
 
-		window.display:Create(window)
+		window.display:Create(window, isnew)
 
-		table.insert(windows, window)
+		tinsert(windows, window)
 
-		if window.db.set or window.db.mode then
+		-- Set initial view, set list.
+		window:DisplaySets()
+
+		if isnew and find_mode(L["Damage"]) then
+			-- Default mode for new windows - will not fail if mode is disabled.
+			self:RestoreView(window, "current", L["Damage"])
+		elseif window.db.set or window.db.mode then
 			-- Restore view.
-			window:DisplaySets()
 			self:RestoreView(window, window.db.set, window.db.mode)
-		else
-			-- Set initial view, set list.
-			window:DisplaySets()
 		end
 	else
 		-- This window's display is missing.
@@ -672,12 +689,12 @@ function Skada:DeleteWindow(name)
 	for i, win in ipairs(windows) do
 		if win.db.name == name then
 			win:destroy()
-			wipe(table.remove(windows, i))
+			wipe(tremove(windows, i))
 		end
 	end
 	for i, win in ipairs(self.db.profile.windows) do
 		if win.name == name then
-			table.remove(self.db.profile.windows, i)
+			tremove(self.db.profile.windows, i)
 		end
 	end
 end
@@ -703,6 +720,23 @@ local function slashHandler(param)
 	local reportusage = "/skada report [raid|party|instance|guild|officer|say] [current||total|set_num] [mode] [max_lines]"
 	if param == "pets" then
 		Skada:PetDebug()
+	elseif param == "cpu" then
+		local funcs = {}
+		UpdateAddOnCPUUsage()
+		for k, v in pairs(Skada) do
+			if type(v) == "function" then
+				local usage, calls = GetFunctionCPUUsage(v, true)
+				--local info = debug.getinfo(v, "n")
+				tinsert(funcs, {["name"] = k, ["usage"] = usage, ["calls"] = calls})
+			end
+		end
+		table_sort(funcs, function(a, b) return a.usage > b.usage end)
+		for i, func in ipairs(funcs) do
+			print(func.name..'\t'..func.usage..' ('..func.calls..')')
+			if i > 10 then
+				break
+			end
+		end
 	elseif param == "test" then
 		Skada:OpenMenu()
 	elseif param == "reset" then
@@ -818,12 +852,11 @@ function Skada:Report(channel, chantype, report_mode_name, report_set_name, max,
 
 	-- Sort our temporary table according to value unless ordersort is set.
 	if not report_table.metadata.ordersort then
-		table.sort(report_table.dataset, Skada.valueid_sort)
+		table_sort(report_table.dataset, Skada.valueid_sort)
 	end
 
 	-- Title
-	sendchat(string.format(L["Skada: %s for %s:"], report_mode.title or report_mode:GetName(), Skada:GetSetLabel(report_set)),
-	         channel, chantype)
+	sendchat(string.format(L["Skada: %s for %s:"], report_mode.title or report_mode:GetName(), Skada:GetSetLabel(report_set)), channel, chantype)
 
 	-- For each item in dataset, print label and valuetext.
 	local nr = 1
@@ -1094,7 +1127,7 @@ function Skada:CanReset() -- returns true if we have actual data that can be cle
 	if totalplayers and next(totalplayers) then -- Total set contains data
 		return true
 	end
-	
+
 	for _,set in ipairs(self.char.sets) do
 		if not set.keep then -- have a non-persistent set (possibly un-kept since last reset)
 			return true
@@ -1122,9 +1155,9 @@ function Skada:Reset()
 	self.last = nil
 
 	-- Delete sets that are not marked as persistent.
-	for i=table.maxn(self.char.sets), 1, -1 do
+	for i=table_maxn(self.char.sets), 1, -1 do
 		if not self.char.sets[i].keep then
-			wipe(table.remove(self.char.sets, i))
+			wipe(tremove(self.char.sets, i))
 		end
 	end
 
@@ -1150,7 +1183,7 @@ function Skada:DeleteSet(set)
 
 	for i, s in ipairs(self.char.sets) do
 		if s == set then
-			wipe(table.remove(self.char.sets, i))
+			wipe(tremove(self.char.sets, i))
 
 			if set == self.last then
 				self.last = nil
@@ -1169,6 +1202,7 @@ function Skada:DeleteSet(set)
 			break
 		end
 	end
+
 	self:Wipe()
 	self:UpdateDisplay(true)
 end
@@ -1293,38 +1327,38 @@ end
 -- To not complicate things, this only stops processing of CLEU events and sets the segment end time.
 -- A stopped segment can be resumed.
 function Skada:StopSegment()
-    if self.current then
-        self.current.stopped = true
+	if self.current then
+		self.current.stopped = true
 		self.current.endtime = time()
 		self.current.time = self.current.endtime - self.current.starttime
-    end
+	end
 end
 
 -- Resumes a stopped segment.
 function Skada:ResumeSegment()
-    if self.current and self.current.stopped then
-       self.current.stopped = nil
-	   self.current.endtime = nil
-        self.current.time = nil
-    end
+	if self.current and self.current.stopped then
+		self.current.stopped = nil
+		self.current.endtime = nil
+		self.current.time = nil
+	end
 end
 
 function Skada:EndSegment()
-    if not self.current then
-        return
-    end
-    
+	if not self.current then
+		return
+	end
+
 	-- Save current set unless this a trivial set, or if we have the Only keep boss fights options on, and no boss in fight.
 	-- A set is trivial if we have no mob name saved, or if total time for set is not more than 5 seconds.
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
 		if self.current.mobname ~= nil and time() - self.current.starttime > 5 then
 			-- End current set.
-            if not self.current.endtime then
-                self.current.endtime = time()
-            end
+			if not self.current.endtime then
+				self.current.endtime = time()
+			end
 			self.current.time = self.current.endtime - self.current.starttime
 			setPlayerActiveTimes(self.current)
-            self.current.stopped = nil
+			self.current.stopped = nil
 
 			-- compute a count suffix for the set name
 			local setname = self.current.mobname
@@ -1352,7 +1386,7 @@ function Skada:EndSegment()
 			end
 
 			-- Add set to sets.
-			table.insert(self.char.sets, 1, self.current)
+			tinsert(self.char.sets, 1, self.current)
 		end
 	end
 
@@ -1379,9 +1413,9 @@ function Skada:EndSegment()
 	for i, set in ipairs(self.char.sets) do if not set.keep then numsets = numsets + 1 end end
 
 	-- Trim segments; don't touch persistent sets.
-	for i=table.maxn(self.char.sets), 1, -1 do
+	for i=table_maxn(self.char.sets), 1, -1 do
 		if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
-			table.remove(self.char.sets, i)
+			tremove(self.char.sets, i)
 			numsets = numsets - 1
 		end
 	end
@@ -1435,12 +1469,12 @@ local tentative = nil
 local tentativehandle= nil
 
 function Skada:StartCombat()
-    -- Reset automatic stop on wipe variables
-    deathcounter = 0
-    local _, members = self:GetGroupTypeAndCount()
-    
-    startingmembers = members
-    
+	-- Reset automatic stop on wipe variables
+	deathcounter = 0
+	local _, members = self:GetGroupTypeAndCount()
+
+	startingmembers = members
+
 	-- Cancel cancelling combat if needed.
 	if tentativehandle ~= nil then
 		self:CancelTimer(tentativehandle)
@@ -1461,7 +1495,7 @@ function Skada:StartCombat()
 	end
 
 	if self.encounterName and
-	   GetTime() < (self.encounterTime or 0) + 15 then -- a recent ENCOUNTER_START named our segment
+		GetTime() < (self.encounterTime or 0) + 15 then -- a recent ENCOUNTER_START named our segment
 		self:Debug("StartCombat setting encounterName from ENCOUNTER_START",self.encounterName)
 		self.current.mobname = self.encounterName
 		self.current.gotboss = true
@@ -1529,7 +1563,7 @@ function Skada:RestoreView(win, theset, themode)
 	-- Set the... set. If no such set exists, set to current.
 	if theset and type(theset) == "string" and (theset == "current" or theset == "total" or theset == "last") then
 		win.selectedset = theset
-	elseif theset and type(theset) == "number" and theset <= table.maxn(self.char.sets) then
+	elseif theset and type(theset) == "number" and theset <= table_maxn(self.char.sets) then
 		win.selectedset = theset
 	else
 		win.selectedset = "current"
@@ -1616,7 +1650,7 @@ function Skada:get_player(set, playerid, playername)
 		end
 
 		local _, playerClass = UnitClass(playername)
-        local playerRole = UnitGroupRolesAssigned(playername)
+		local playerRole = UnitGroupRolesAssigned(playername)
 		player = {id = playerid, class = playerClass, role = playerRole, name = playername, first = time(), ["time"] = 0}
 
 		-- Tell each mode to apply its needed attributes.
@@ -1631,16 +1665,16 @@ function Skada:get_player(set, playerid, playername)
 		local player_name, realm = string.split("-", playername, 2)
 		player.name = player_name or playername
 
-		table.insert(set.players, player)
+		tinsert(set.players, player)
 	end
 
 	if player.name == UNKNOWN and playername ~= UNKNOWN then -- fixup players created before we had their info
 		local player_name, realm = string.split("-", playername, 2)
 		player.name = player_name or playername
 		local _, playerClass = UnitClass(playername)
-        local playerRole = UnitGroupRolesAssigned(playername)
+		local playerRole = UnitGroupRolesAssigned(playername)
 		player.class = playerClass
-        player.role = playerRole
+		player.role = playerRole
 	end
 
 
@@ -1672,10 +1706,12 @@ local RAID_FLAGS = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_A
 -- The flags are checked, and the flag value (say, that the SRC must be interesting, ie, one of the raid) is only checked once, regardless
 -- of how many modules are interested in the event. The check is also only done on the first flag that requires it.
 cleuFrame = CreateFrame("Frame") -- Dedicated event handler for a small performance improvement.
+Skada.cleuFrame = cleuFrame -- For tweaks
+
 cleuFrame:SetScript("OnEvent", function(frame, event, timestamp, eventtype, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstGUID, dstName, dstFlags, dstRaidFlags, ...)
 	local src_is_interesting = nil
 	local dst_is_interesting = nil
-        
+
 	-- Optional tentative combat detection.
 	-- Instead of simply checking when we enter combat, combat start is also detected based on needing a certain
 	-- amount of interesting (as defined by our modules) CL events.
@@ -1708,30 +1744,30 @@ cleuFrame:SetScript("OnEvent", function(frame, event, timestamp, eventtype, hide
 			--self:Print("tentative combat start INIT!")
 		end
 	end
-        
-    -- Stop automatically on wipe to discount meaningless data.
-    if Skada.current and Skada.db.profile.autostop then
-        -- Add to death counter when a player dies.
-        if Skada.current and eventtype == 'UNIT_DIED' and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
-            deathcounter = deathcounter + 1
-            -- If we reached the treshold for stopping the segment, do so.
-            if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not Skada.current.stopped then
-                Skada:Print('Stopping for wipe.')
-                Skada:StopSegment()
-            end
-        end
-        -- Subtract from death counter when a player is ressurected.
-        if Skada.current and eventtype == 'SPELL_RESURRECT' and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
-            deathcounter = deathcounter - 1
-        end
-    end
+
+	-- Stop automatically on wipe to discount meaningless data.
+	if Skada.current and Skada.db.profile.autostop then
+		-- Add to death counter when a player dies.
+		if Skada.current and eventtype == 'UNIT_DIED' and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+			deathcounter = deathcounter + 1
+			-- If we reached the treshold for stopping the segment, do so.
+			if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not Skada.current.stopped then
+				Skada:Print('Stopping for wipe.')
+				Skada:StopSegment()
+			end
+		end
+		-- Subtract from death counter when a player is ressurected.
+		if Skada.current and eventtype == 'SPELL_RESURRECT' and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+			deathcounter = deathcounter - 1
+		end
+	end
 
 	if Skada.current and combatlogevents[eventtype] then
-        -- If segment is stopped, stop processing here.
-        if Skada.current.stopped then
-            return
-        end
-            
+		-- If segment is stopped, stop processing here.
+		if Skada.current.stopped then
+			return
+		end
+
 		for i, mod in ipairs(combatlogevents[eventtype]) do
 			local fail = false
 
@@ -1960,7 +1996,7 @@ function Skada:UpdateDisplay(force)
 						d.id = "total"
 						d.ignore = true
 						if not existing then
-							table.insert(win.dataset, 1, d)
+							tinsert(win.dataset, 1, d)
 						end
 					end
 
@@ -1974,7 +2010,6 @@ function Skada:UpdateDisplay(force)
 
 				-- View available modes.
 				for i, mode in ipairs(modes) do
-
 					local d = win.dataset[i] or {}
 					win.dataset[i] = d
 
@@ -2046,15 +2081,17 @@ function Skada:GetSets()
 	return self.char.sets
 end
 
-function Skada:GetModes()
-	return modes
+function Skada:GetModes(sortfunc)
+    return modes
 end
 
 -- Formats a number into human readable form.
 function Skada:FormatNumber(number)
 	if number then
 		if self.db.profile.numberformat == 1 then
-			if number > 1000000 then
+            if number > 1000000000 then
+                return ("%02.3fB"):format(number / 1000000000)
+            elseif number > 1000000 then
 				return ("%02.2fM"):format(number / 1000000)
 			else
 				return ("%02.1fK"):format(number / 1000)
@@ -2090,8 +2127,22 @@ local function scan_for_columns(mode)
 	end
 end
 
+-- Register a display system
+local numorder = 5
+function Skada:AddDisplaySystem(key, mod)
+	self.displays[key] = mod
+	if mod.description then
+		Skada.options.args.windows.args[key.."desc"] = {
+			type = "description",
+			name = mod.description,
+			order = numorder
+		}
+		numorder = numorder + 1
+	end
+end
+
 -- Register a mode.
-function Skada:AddMode(mode)
+function Skada:AddMode(mode, category)
 	-- Ask mode to verify our sets.
 	-- Needed in case we enable a mode and we have old data.
 	if self.total then
@@ -2104,7 +2155,11 @@ function Skada:AddMode(mode)
 		verify_set(mode, set)
 	end
 
-	table.insert(modes, mode)
+    -- Set mode category (used for menus)
+    mode.category = category or L['Other']
+    
+    -- Add to mode list
+	tinsert(modes, mode)
 
 	-- Set this mode as the active mode if it matches the saved one.
 	-- Bit of a hack.
@@ -2130,7 +2185,7 @@ function Skada:AddMode(mode)
 	end
 
 	-- Sort modes.
-	table.sort(modes, function(a, b) return a.name < b.name end)
+	table_sort(modes, function(a, b) return a:GetName() < b:GetName() end)
 
 	-- Remove all bars and start over to get ordering right.
 	-- Yes, this all sucks - the problem with this and the above is that I don't know when
@@ -2143,7 +2198,7 @@ end
 
 -- Unregister a mode.
 function Skada:RemoveMode(mode)
-	table.remove(modes, mode)
+	tremove(modes, mode)
 end
 
 function Skada:GetFeeds()
@@ -2159,7 +2214,7 @@ end
 function Skada:RemoveFeed(name, func)
 	for i, feed in ipairs(feeds) do
 		if feed.name == name then
-			table.remove(feeds, i)
+			tremove(feeds, i)
 		end
 	end
 end
@@ -2174,7 +2229,7 @@ function Skada:GetSetTime(set)
 	if set.time then
 		return set.time
 	else
-        return (time() - set.starttime)
+		return (time() - set.starttime)
 	end
 end
 
@@ -2247,6 +2302,15 @@ function Skada:SetTooltipPosition(tooltip, frame)
 	elseif p == "topright" then
 		tooltip:SetOwner(frame, "ANCHOR_NONE")
 		tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
+	elseif p == "smart" and frame then
+		-- Choose anchor point depending on frame position
+		if frame:GetLeft() < (GetScreenWidth() / 2) then
+			tooltip:SetOwner(frame, "ANCHOR_NONE")
+			tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 10, 0)
+		else
+			tooltip:SetOwner(frame, "ANCHOR_NONE")
+			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
+		end
 	end
 end
 
@@ -2320,7 +2384,7 @@ function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 
 	-- Sort dataset unless we are using ordersort.
 	if not mode.metadata or not mode.metadata.ordersort then
-		table.sort(ttwin.dataset, value_sort)
+		table_sort(ttwin.dataset, value_sort)
 	end
 
 	-- Show title and data if we have data.
@@ -2355,46 +2419,324 @@ function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 	end
 end
 
+-- Generic tooltip function for displays
+function Skada:ShowTooltip(win, id, label)
+	local t = GameTooltip
+	if Skada.db.profile.tooltips and (win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip) then
+		t:ClearLines()
+
+		local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3
+
+		-- Current mode's own tooltips.
+		if win.metadata.tooltip then
+			local numLines = t:NumLines()
+			win.metadata.tooltip(win, id, label, t)
+
+			-- Spacer
+			if t:NumLines() ~= numLines and hasClick then
+				t:AddLine(" ")
+			end
+		end
+
+		-- Generic informative tooltips.
+		if Skada.db.profile.informativetooltips then
+			if win.metadata.click1 then
+				Skada:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
+			end
+			if win.metadata.click2 then
+				Skada:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
+			end
+			if win.metadata.click3 then
+				Skada:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
+			end
+		end
+
+		-- Current mode's own post-tooltips.
+		if win.metadata.post_tooltip then
+			local numLines = t:NumLines()
+			win.metadata.post_tooltip(win, id, label, t)
+
+			-- Spacer
+			if t:NumLines() ~= numLines and hasClick then
+				t:AddLine(" ")
+			end
+		end
+
+		-- Click directions.
+		if win.metadata.click1 then
+			t:AddLine(L["Click for"].." "..win.metadata.click1:GetName()..".", 0.2, 1, 0.2)
+		end
+		if win.metadata.click2 then
+			t:AddLine(L["Shift-Click for"].." "..win.metadata.click2:GetName()..".", 0.2, 1, 0.2)
+		end
+		if win.metadata.click3 then
+			t:AddLine(L["Control-Click for"].." "..win.metadata.click3:GetName()..".", 0.2, 1, 0.2)
+		end
+
+		t:Show()
+	end
+end
+
+-- Generic border
+function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
+	local borderbackdrop = {}
+	if not frame.borderFrame then
+		frame.borderFrame = CreateFrame("Frame", nil, frame)
+		frame.borderFrame:SetFrameLevel(0)
+	end
+	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
+	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
+	if texture and thickness > 0 then
+		borderbackdrop.edgeFile = media:Fetch("border", texture)
+	else
+		borderbackdrop.edgeFile = nil
+	end
+	borderbackdrop.edgeSize = thickness
+	frame.borderFrame:SetBackdrop(borderbackdrop)
+	if color then
+		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+	end
+end
+
+-- Generic frame settings
+function Skada:FrameSettings(db, include_dimensions)
+	local obj = {
+		type = "group",
+		name = L["Window"],
+		order=2,
+		args = {
+
+			bgheader = {
+				type = "header",
+				name = L["Background"],
+				order=1
+			},
+
+			texture = {
+				 type = 'select',
+				 dialogControl = 'LSM30_Background',
+				 name = L["Background texture"],
+				 desc = L["The texture used as the background."],
+				 values = AceGUIWidgetLSMlists.background,
+				 get = function() return db.background.texture end,
+				 set = function(win,key)
+			 				db.background.texture = key
+				 			Skada:ApplySettings()
+						end,
+				width="double",
+				order=1.1
+			},
+
+			tile = {
+				type = 'toggle',
+				name = L["Tile"],
+				desc = L["Tile the background texture."],
+				get = function() return db.background.tile end,
+				set = function(win,key)
+					db.background.tile = key
+					Skada:ApplySettings()
+				end,
+				order=1.2
+			},
+
+			tilesize = {
+				type="range",
+				name=L["Tile size"],
+				desc=L["The size of the texture pattern."],
+				min=0,
+				max=math.floor(GetScreenWidth()),
+				step=1.0,
+				get=function() return db.background.tilesize end,
+				set=function(win, val)
+					db.background.tilesize = val
+					Skada:ApplySettings()
+				end,
+				order=1.3
+			},
+
+
+			color = {
+				type="color",
+				name=L["Background color"],
+				desc=L["The color of the background."],
+				hasAlpha=true,
+				get=function(i)
+						local c = db.background.color
+						return c.r, c.g, c.b, c.a
+					end,
+				set=function(i, r,g,b,a)
+						db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+						Skada:ApplySettings()
+					end,
+				order=1.4
+			},
+
+			borderheader = {
+				type = "header",
+				name = L["Border"],
+				order=2
+			},
+
+			bordertexture = {
+				 type = 'select',
+				 dialogControl = 'LSM30_Border',
+				 name = L["Border texture"],
+				 desc = L["The texture used for the borders."],
+				 values = AceGUIWidgetLSMlists.border,
+				 get = function() return db.background.bordertexture end,
+				 set = function(win,key)
+			 				db.background.bordertexture = key
+				 			Skada:ApplySettings()
+						end,
+				width="double",
+				order=2.1
+			},
+
+			bordercolor = {
+				 type = 'color',
+				 order=5,
+				 name = L["Border color"],
+				 desc = L["The color used for the border."],
+				hasAlpha=true,
+				get=function(i)
+						local c = db.background.bordercolor or {r=0,g=0,b=0,a=1}
+						return c.r, c.g, c.b, c.a
+					end,
+				set=function(i, r,g,b,a)
+						db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+						Skada:ApplySettings()
+					end,
+				order=2.2
+			},
+
+			thickness = {
+				type="range",
+				name=L["Border thickness"],
+				desc=L["The thickness of the borders."],
+				min=0,
+				max=50,
+				step=0.5,
+				get=function() return db.background.borderthickness end,
+				set=function(win, val)
+							db.background.borderthickness = val
+				 			Skada:ApplySettings()
+						end,
+				order=2.3
+			},
+
+			optionheader = {
+				type = "header",
+				name = L["General"],
+				order=4
+			},
+
+			scale = {
+				type="range",
+				name=L["Scale"],
+				desc=L["Sets the scale of the window."],
+				min=0.1,
+				max=3,
+				step=0.01,
+				get=function() return db.scale end,
+				set=function(win, val)
+							db.scale = val
+				 			Skada:ApplySettings()
+						end,
+				order=4.1
+			},
+
+			strata = {
+				type="select",
+				name=L["Strata"],
+				desc=L["This determines what other frames will be in front of the frame."],
+				values = {["BACKGROUND"]="BACKGROUND", ["LOW"]="LOW", ["MEDIUM"]="MEDIUM", ["HIGH"]="HIGH", ["DIALOG"]="DIALOG", ["FULLSCREEN"]="FULLSCREEN", ["FULLSCREEN_DIALOG"]="FULLSCREEN_DIALOG"},
+				get=function() return db.strata end,
+				set=function(win, val)
+					db.strata = val
+					Skada:ApplySettings()
+				end,
+				order=4.2
+			},
+
+
+		}
+	}
+
+	if include_dimensions then
+		obj.args.width = {
+			type = 'range',
+			name = L["Width"],
+			min=100,
+			max=GetScreenWidth(),
+			step=1.0,
+			get = function() return db.width end,
+			set = function(win,key)
+				db.width = key
+				Skada:ApplySettings()
+			end,
+			order=4.3
+		}
+
+		obj.args.height = {
+			type = 'range',
+			name = L["Height"],
+			min=16,
+			max=400,
+			step=1.0,
+			get = function() return db.height end,
+			set = function(win,key)
+				db.height = key
+				Skada:ApplySettings()
+			end,
+			order=4.4
+		}
+	end
+	return obj
+end
+
 do
 
 	function Skada:OnInitialize()
 		-- Register some SharedMedia goodies.
-		media:Register("font", "Adventure",				[[Interface\Addons\Skada\fonts\Adventure.ttf]])
-		media:Register("font", "ABF",					[[Interface\Addons\Skada\fonts\ABF.ttf]])
-		media:Register("font", "Vera Serif",			[[Interface\Addons\Skada\fonts\VeraSe.ttf]])
-		media:Register("font", "Diablo",				[[Interface\Addons\Skada\fonts\Avqest.ttf]])
-		media:Register("font", "Accidental Presidency",	[[Interface\Addons\Skada\fonts\Accidental Presidency.ttf]])
-		media:Register("statusbar", "Aluminium",		[[Interface\Addons\Skada\statusbar\Aluminium]])
-		media:Register("statusbar", "Armory",			[[Interface\Addons\Skada\statusbar\Armory]])
-		media:Register("statusbar", "BantoBar",			[[Interface\Addons\Skada\statusbar\BantoBar]])
-		media:Register("statusbar", "Glaze2",			[[Interface\Addons\Skada\statusbar\Glaze2]])
-		media:Register("statusbar", "Gloss",			[[Interface\Addons\Skada\statusbar\Gloss]])
-		media:Register("statusbar", "Graphite",			[[Interface\Addons\Skada\statusbar\Graphite]])
-		media:Register("statusbar", "Grid",				[[Interface\Addons\Skada\statusbar\Grid]])
-		media:Register("statusbar", "Healbot",			[[Interface\Addons\Skada\statusbar\Healbot]])
-		media:Register("statusbar", "LiteStep",			[[Interface\Addons\Skada\statusbar\LiteStep]])
-		media:Register("statusbar", "Minimalist",		[[Interface\Addons\Skada\statusbar\Minimalist]])
-		media:Register("statusbar", "Otravi",			[[Interface\Addons\Skada\statusbar\Otravi]])
-		media:Register("statusbar", "Outline",			[[Interface\Addons\Skada\statusbar\Outline]])
-		media:Register("statusbar", "Perl",				[[Interface\Addons\Skada\statusbar\Perl]])
-		media:Register("statusbar", "Smooth",			[[Interface\Addons\Skada\statusbar\Smooth]])
-		media:Register("statusbar", "Round",			[[Interface\Addons\Skada\statusbar\Round]])
-		media:Register("statusbar", "TukTex",			[[Interface\Addons\Skada\statusbar\normTex]])
+		media:Register("font", "Adventure",				[[Interface\Addons\Skada\media\fonts\Adventure.ttf]])
+		media:Register("font", "ABF",					[[Interface\Addons\Skada\media\fonts\ABF.ttf]])
+		media:Register("font", "Vera Serif",			[[Interface\Addons\Skada\media\fonts\VeraSe.ttf]])
+		media:Register("font", "Diablo",				[[Interface\Addons\Skada\media\fonts\Avqest.ttf]])
+		media:Register("font", "Accidental Presidency",	[[Interface\Addons\Skada\media\fonts\Accidental Presidency.ttf]])
+		media:Register("statusbar", "Aluminium",      [[Interface\Addons\Skada\media\statusbar\Aluminium]])
+		media:Register("statusbar", "Armory",         [[Interface\Addons\Skada\media\statusbar\Armory]])
+		media:Register("statusbar", "BantoBar",       [[Interface\Addons\Skada\media\statusbar\BantoBar]])
+		media:Register("statusbar", "Glaze2",         [[Interface\Addons\Skada\media\statusbar\Glaze2]])
+		media:Register("statusbar", "Gloss",          [[Interface\Addons\Skada\media\statusbar\Gloss]])
+		media:Register("statusbar", "Graphite",       [[Interface\Addons\Skada\media\statusbar\Graphite]])
+		media:Register("statusbar", "Grid",           [[Interface\Addons\Skada\media\statusbar\Grid]])
+		media:Register("statusbar", "Healbot",        [[Interface\Addons\Skada\media\statusbar\Healbot]])
+		media:Register("statusbar", "LiteStep",       [[Interface\Addons\Skada\media\statusbar\LiteStep]])
+		media:Register("statusbar", "Minimalist",     [[Interface\Addons\Skada\media\statusbar\Minimalist]])
+		media:Register("statusbar", "Otravi",         [[Interface\Addons\Skada\media\statusbar\Otravi]])
+		media:Register("statusbar", "Outline",        [[Interface\Addons\Skada\media\statusbar\Outline]])
+		media:Register("statusbar", "Perl",           [[Interface\Addons\Skada\media\statusbar\Perl]])
+		media:Register("statusbar", "Smooth",         [[Interface\Addons\Skada\media\statusbar\Smooth]])
+		media:Register("statusbar", "Round",          [[Interface\Addons\Skada\media\statusbar\Round]])
+		media:Register("statusbar", "TukTex",         [[Interface\Addons\Skada\media\statusbar\normTex]])
+		media:Register("border", "Glow",              [[Interface\Addons\Skada\media\border\glowTex]])
+		media:Register("border", "Roth",              [[Interface\Addons\Skada\media\border\roth]])
+		media:Register("background", "Copper",        [[Interface\Addons\Skada\media\background\copper]])
 
 		-- Some sounds (copied from Omen).
-		media:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.ogg]])
-		media:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.ogg]])
-		media:Register("sound", "Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.ogg]])
-		media:Register("sound", "Shing!", [[Sound\Doodad\PortcullisActive_Closed.ogg]])
-		media:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.ogg]])
-		media:Register("sound", "Simon Chime", [[Sound\Doodad\SimonGame_LargeBlueTree.ogg]])
-		media:Register("sound", "War Drums", [[Sound\Event Sounds\Event_wardrum_ogre.ogg]])
-		media:Register("sound", "Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.ogg]])
-		media:Register("sound", "Humm", [[Sound\Spells\SimonGame_Visual_GameStart.ogg]])
-		media:Register("sound", "Short Circuit", [[Sound\Spells\SimonGame_Visual_BadPress.ogg]])
-		media:Register("sound", "Fel Portal", [[Sound\Spells\Sunwell_Fel_PortalStand.ogg]])
-		media:Register("sound", "Fel Nova", [[Sound\Spells\SeepingGaseous_Fel_Nova.ogg]])
-		media:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.ogg]])
+		media:Register("sound", "Rubber Ducky",       [[Sound\Doodad\Goblin_Lottery_Open01.ogg]])
+		media:Register("sound", "Cartoon FX",         [[Sound\Doodad\Goblin_Lottery_Open03.ogg]])
+		media:Register("sound", "Explosion",          [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.ogg]])
+		media:Register("sound", "Shing!",             [[Sound\Doodad\PortcullisActive_Closed.ogg]])
+		media:Register("sound", "Wham!",              [[Sound\Doodad\PVP_Lordaeron_Door_Open.ogg]])
+		media:Register("sound", "Simon Chime",        [[Sound\Doodad\SimonGame_LargeBlueTree.ogg]])
+		media:Register("sound", "War Drums",          [[Sound\Event Sounds\Event_wardrum_ogre.ogg]])
+		media:Register("sound", "Cheer",              [[Sound\Event Sounds\OgreEventCheerUnique.ogg]])
+		media:Register("sound", "Humm",               [[Sound\Spells\SimonGame_Visual_GameStart.ogg]])
+		media:Register("sound", "Short Circuit",      [[Sound\Spells\SimonGame_Visual_BadPress.ogg]])
+		media:Register("sound", "Fel Portal",         [[Sound\Spells\Sunwell_Fel_PortalStand.ogg]])
+		media:Register("sound", "Fel Nova",           [[Sound\Spells\SeepingGaseous_Fel_Nova.ogg]])
+		media:Register("sound", "You Will Die!",      [[Sound\Creature\CThun\CThunYouWillDie.ogg]])
 
 		-- DB
 		self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
@@ -2468,12 +2810,23 @@ function Skada:OnEnable()
 	-- Instead of listening for callbacks on SharedMedia we simply wait a few seconds and then re-apply settings
 	-- to catch any missing media. Lame? Yes.
 	self:ScheduleTimer("ApplySettings", 2)
+
+	-- Memory usage warning
+	self:ScheduleTimer("MemoryCheck", 3)
 end
 
-function Skada:AddLoadableModule(name, func)
+function Skada:MemoryCheck()
+	UpdateAddOnMemoryUsage()
+	local mem = GetAddOnMemoryUsage("Skada")
+	if mem > 30000 then
+		self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
+	end
+end
+
+function Skada:AddLoadableModule(name, description, func)
 	if not self.moduleList then self.moduleList = {} end
 	self.moduleList[#self.moduleList+1] = func
-	self:AddLoadableModuleCheckbox(name, L[name])
+	self:AddLoadableModuleCheckbox(name, L[name], description and L[description])
 end
 
 

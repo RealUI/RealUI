@@ -31,21 +31,19 @@ MOD.conditionTests = {
 		hasMainHand = nil, levelMainHand = 1, hasOffHand = nil, levelOffHand = 1, checkSpec = nil, spec = nil, checkSpell = nil, spell = nil,
 		checkTalent = nil, talent = nil, checkLevel = nil, level = 85, checkStance = nil, stance = nil,
 		checkHealth = nil, minHealth = 100, checkPower = nil, minPower = 100, checkHolyPower = nil, minHolyPower = 1,
-		checkShadowOrbs = nil, minShadowOrbs = 1, checkShards = nil, minShards = 1, checkChi = nil, minChi = 1,
-		checkLunarPower = nil, minLunarPower = 0, checkLunar = nil, checkSolar = nil, checkLunar = nil, checkSun = nil, checkMoon = nil,
-		checkComboPoints = nil, minComboPoints = 5, checkRunes = nil, checkAnyRune = nil, checkDeath = nil, needBlood = nil, needFrost = nil, needUnholy = nil,
-		checkTotems = nil, air = nil, airTotem = nil, water = nil, waterTotem = nil, earth = nil, earthTotem = nil, fire = nil, fireTotem = nil,
-		checkBlood = nil, chargeBlood = nil, checkFrost = nil, chargeFrost = nil, checkUnholy = nil, chargeUnholy = nil },
+		checkShards = nil, minShards = 1, checkChi = nil, minChi = 1, checkLunarPower = nil, minLunarPower = 1,
+		checkInsanity = nil, minInsanity = 100, checkMaelstrom = nil, minMaelstrom = 150, checkArcane = nil, minArcane = 1,
+		checkComboPoints = nil, minComboPoints = 5, checkRunes = nil, minRunes = 1, checkTotems = nil, totem = nil },
 	["Pet Status"] = { enable = false, exists = nil, inCombat = nil, checkTarget = nil,
 		checkHealth = nil, minHealth = 100, checkPower = nil, minPower = 100, checkFamily = nil, family = nil, checkSpec = nil, spec = nil },
-	["Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
-		checkPower = nil, minPower = 100, classification = "normal" },
-	["Target's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
-		checkPower = nil, minPower = 100, classification = "normal" },
-	["Focus Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
-		checkPower = nil, minPower = 100, classification = "normal" },
-	["Focus's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, checkHealth = nil, minHealth = 100,
-		checkPower = nil, minPower = 100, classification = "normal" },
+	["Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, isSteal = nil, isDead = nil,
+		checkHealth = nil, minHealth = 100, checkMaxHealth = nil, maxHealth = nil, checkPower = nil, minPower = 100, classify = nil, classification = "normal" },
+	["Target's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, isSteal = nil, isDead = nil,
+		checkHealth = nil, minHealth = 100, checkMaxHealth = nil, maxHealth = nil, checkPower = nil, minPower = 100, classify = nil, classification = "normal" },
+	["Focus Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, isSteal = nil, isDead = nil,
+		checkHealth = nil, minHealth = 100, checkPower = nil, minPower = 100, classify = nil, classification = "normal" },
+	["Focus's Target Status"] = { enable = false, exists = nil, isPlayer = nil, isEnemy = nil, isFriend = nil, inRange = nil, isSteal = nil, isDead = nil,
+		checkHealth = nil, minHealth = 100, checkPower = nil, minPower = 100, classify = nil, classification = "normal" },
 	["All Buffs"] = { enable = false, unit = "player", auras = nil, isMine = nil, toggle = false },
 	["Any Buffs"] = { enable = false, unit = "player", auras = nil, isMine = nil, toggle = false },
 	["Buff Time Left"] = { enable = false, unit = "player", aura = nil, timeLeft = 10, isMine = nil, toggle = false },
@@ -56,7 +54,7 @@ MOD.conditionTests = {
 	["Debuff Time Left"] = { enable = false, unit = "target", aura = nil, timeLeft = 10, isMine = nil, toggle = false },
 	["Debuff Count"] = { enable = false, unit = "player", aura = nil, count = 1, isMine = nil, toggle = false },
 	["Debuff Type"] = { enable = false, hasDebuff = nil, toggle = false },
-	["All Cooldowns"] = { enable = false, notUsable = false, spells = nil, timeLeft = 10 },
+	["All Cooldowns"] = { enable = false, notUsable = false, spells = nil, timeLeft = 10, toggle = Off },
 	["Spell Ready"] = { enable = false, spell = nil, inRange = nil, notUsable = false, checkCharges = nil, charges = 1 },
 	["Spell Casting"] = { enable = false, spell = nil, unit = "player" },
 	["Item Ready"] = { enable = false, item = nil, toggle = nil, checkCount = nil, count = 1, checkCharges = nil, charges = 1 },
@@ -227,6 +225,7 @@ local function CheckSpellReady(spell, unit, rangeCheck, usable, checkCharges, ch
 	if IsOn(checkCharges) then -- optionally check for remaining spell charges (can't count on the value of cd if not on cooldown)
 		local n = GetSpellCharges(spell) -- this has to be done separate from cooldown check in order to correctly handle the check for "less than"
 		if not n then n = 0 end
+		if not charges then charges = 1 end -- set to default value used in options panel
 		if checkCharges == true then if n >= charges then return false end else if n < charges then return false end end
 	else
 		local cd = MOD:CheckCooldown(spell) -- checks if spell is on cooldown (note this should correctly ignore DK rune cooldowns)
@@ -264,11 +263,13 @@ local function CheckItemReady(item, ready, checkCount, count, checkCharges, char
 	if IsOn(checkCount) then
 		n = GetItemCount(item, false, false)
 		if not n then n = 0 end
+		if not count then count = 1 end -- set to default value used in options panel
 		if checkCount == true then if n >= count then return false end else if n < count then return false end end
 	end
 	if IsOn(checkCharges) then
 		n = GetItemCount(item, false, true)
 		if not n then n = 0 end
+		if not charges then charges = 1 end -- set to default value used in options panel
 		if checkCharges == true then if n >= charges then return false end else if n < charges then return false end end
 	end
 	return true
@@ -320,12 +321,13 @@ end
 -- as long as it is in the spell book (always return false if the player does not know the spell).
 -- If a spell is not ready for some other reason (e.g., too much target HP ala Kill Shot) then consider it on long cooldown.
 local function CheckAllCooldowns(spells, ready, timeLeft, toggle)
+	if not timeLeft then timeLeft = 10 end
 	for _, spell in pairs(spells) do -- look for each spell and check if on cooldown
 		local cdt = 0
 		if ready and not IsUsableSpell(spell) then if not CheckSpellKnown(spell) then return false end cdt = 3600 end
 		local cd = MOD:CheckCooldown(spell) -- look up in the active cooldowns table
 		if cd and (cd[1] ~= nil) and ((cd[4] ~= nil) and (not cd[9] or cd[9] == 0)) then cdt = cd[1]; if timeLeft < cdt then AddTimeEvent(spell, cdt - timeLeft) end end
-		if toggle then
+		if toggle == true then
 			if cdt >= timeLeft then return false end
 		else
 			if cdt < timeLeft then return false end
@@ -405,7 +407,7 @@ end
 local function CheckWeapon(slot, level)
 	local islot = GetInventorySlotInfo(slot)
 	local id = GetInventoryItemLink("player", islot)
-	if id then
+	if id and level then
 		local iname, _, _, ilevel = GetItemInfo(id)
 		if iname and (ilevel >= level) then return true end
 	end
@@ -482,11 +484,12 @@ local function CheckTestAND(ttype, t)
 		if IsOn(t.checkChi) and IsOn(t.minChi) and (t.checkChi ~= (stat.chi >= t.minChi)) then return false end
 		if IsOn(t.checkShards) and IsOn(t.minShards) and (t.checkShards ~= (stat.shards >= t.minShards)) then return false end
 		if IsOn(t.checkLunarPower) and (t.checkLunarPower ~= CheckLunarPower(t.minLunarPower)) then return false end
+		if IsOn(t.checkArcane) and IsOn(t.minArcane) and (t.checkArcane ~= (stat.arcane >= t.minArcane)) then return false end
 		if IsOn(t.checkComboPoints) and IsOn(t.minComboPoints) and (t.checkComboPoints ~= (stat.combo >= t.minComboPoints)) then return false end
 		if IsOn(t.hasPet) and (t.hasPet ~= HasPetUI()) then return false end
 		if IsOn(t.checkStance) and IsOn(t.stance) and (t.stance ~= stat.stance) then return false end
 		if IsOn(t.checkRunes) and IsOn(t.minRunes) and (t.checkRunes ~= (MOD.runeCount >= t.minRunes)) then return false end
-		if IsOn(t.checkTotems) and not CheckTotem(t.totem) then return false end
+		if IsOn(t.checkTotems) and IsOn(t.totem) and not CheckTotem(t.totem) then return false end
 		if IsOn(t.checkTalent) and IsOn(t.talent) and not MOD.CheckTalent(t.talent) then return false end
 		if IsOn(t.checkSpec) and IsOn(t.spec) and not MOD.CheckSpec(t.spec, t.specList) then return false end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and not CheckSpellKnown(t.spell) then return false end
@@ -608,12 +611,13 @@ local function CheckTestOR(ttype, t)
 		if IsOn(t.checkMaelstrom) and IsOn(t.minMaelstrom) and (t.checkMaelstrom == (stat.maelstrom >= t.minMaelstrom)) then return true end
 		if IsOn(t.checkChi) and IsOn(t.minChi) and (t.checkChi == (stat.chi >= t.minChi)) then return true end
 		if IsOn(t.checkShards) and IsOn(t.minShards) and (t.checkShards == (stat.shards >= t.minShards)) then return true end
+		if IsOn(t.checkArcane) and IsOn(t.minArcane) and (t.checkArcane == (stat.arcane >= t.minArcane)) then return true end
 		if IsOn(t.checkLunarPower) and (t.checkLunarPower == CheckLunarPower(t.minLunarPower)) then return true end
 		if IsOn(t.checkComboPoints) and IsOn(t.minComboPoints) and (t.checkComboPoints == (stat.combo >= t.minComboPoints)) then return true end
 		if IsOn(t.hasPet) and (t.hasPet == HasPetUI()) then return true end
 		if IsOn(t.checkStance) and IsOn(t.stance) and (t.stance == stat.stance) then return true end
 		if IsOn(t.checkRunes) and IsOn(t.minRunes) and (t.checkRunes == (MOD.runeCount >= t.minRunes)) then return true end
-		if IsOn(t.checkTotems) and CheckTotem(t.totem) then return true end
+		if IsOn(t.checkTotems) and IsOn(t.totem) and CheckTotem(t.totem) then return true end
 		if IsOn(t.checkTalent) and IsOn(t.talent) and MOD.CheckTalent(t.talent) then return true end
 		if IsOn(t.checkSpec) and IsOn(t.spec) and MOD.CheckSpec(t.spec, t.specList) then return true end
 		if IsOn(t.checkSpell) and IsOn(t.spell) and CheckSpellKnown(t.spell) then return true end
@@ -642,6 +646,21 @@ local function CheckTestOR(ttype, t)
 			if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower == (stat.targetPower >= t.minPower)) then return true end
 			if IsOn(t.inRange) and (t.inRange == stat.targetInRange) then return true end
 		end
+	elseif ttype == "Target's Target Status" then -- target's target must exist for these tests to be true
+		if IsOn(t.exists) and (t.exists ~= stat.noTargetTarget) then return true end
+		if not stat.noTargetTarget then
+			if IsOn(t.isPlayer) and (t.isPlayer == stat.targetTargetPlayer) then return true end
+			if IsOn(t.isEnemy) and (t.isEnemy == stat.targetTargetEnemy) then return true end
+			if IsOn(t.isFriend) and (t.isFriend == stat.targetTargetFriend) then return true end
+			if IsOn(t.isDead) and (t.isDead == stat.targetTargetDead) then return true end
+			if IsOn(t.isSteal) and (t.isSteal == MOD:UnitHasBuff("targettarget", "Steal")) then return true end
+			if t.classify and t.classification and (t.classification ~= "") and
+				(t.classify == CheckClassification(stat.targetTargetClassification, t.classification)) then return true end
+			if t.checkMaxHealth and (t.maxHealth and not stat.noTargetTarget and (tonumber(t.maxHealth) or 0) <= stat.targetTargetMaxHealth) then return true end
+			if IsOn(t.checkHealth) and IsOn(t.minHealth) and (t.checkHealth == (stat.targetTargetHealth >= t.minHealth)) then return true end
+			if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower == (stat.targetTargetPower >= t.minPower)) then return true end
+			if IsOn(t.inRange) and (t.inRange == stat.targetTargetInRange) then return true end
+		end
 	elseif ttype == "Focus Status" then -- focus must exist for these tests to be true
 		if IsOn(t.exists) and (t.exists ~= stat.noFocus) then return true end
 		if not stat.noFocus then
@@ -655,6 +674,20 @@ local function CheckTestOR(ttype, t)
 			if IsOn(t.checkHealth) and IsOn(t.minHealth) and (t.checkHealth == (stat.focusHealth >= t.minHealth)) then return true end
 			if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower == (stat.focusPower >= t.minPower)) then return true end
 			if IsOn(t.inRange) and (t.inRange == stat.focusInRange) then return true end
+		end
+	elseif ttype == "Focus's Target Status" then -- focus's target must exist for these tests to be true
+		if IsOn(t.exists) and (t.exists ~= stat.noFocusTarget) then return true end
+		if not stat.noFocusTarget then
+			if IsOn(t.isPlayer) and (t.isPlayer == stat.focusTargetPlayer) then return true end
+			if IsOn(t.isEnemy) and (t.isEnemy == stat.focusTargetEnemy) then return true end
+			if IsOn(t.isFriend) and (t.isFriend == stat.focusTargetFriend) then return true end
+			if IsOn(t.isDead) and (t.isDead == stat.focusTargetDead) then return true end
+			if IsOn(t.isSteal) and (t.isSteal == MOD:UnitHasBuff("focustarget", "Steal")) then return true end
+			if t.classify and t.classification and (t.classification ~= "") and
+				(t.classify == CheckClassification(stat.focusTargetClassification, t.classification)) then return true end
+			if IsOn(t.checkHealth) and IsOn(t.minHealth) and (t.checkHealth == (stat.focusTargetHealth >= t.minHealth)) then return true end
+			if IsOn(t.checkPower) and IsOn(t.minPower) and (t.checkPower == (stat.focusTargetPower >= t.minPower)) then return true end
+			if IsOn(t.inRange) and (t.inRange == stat.focusTargetInRange) then return true end
 		end
 	elseif ttype == "All Buffs" then
 		if HasTable(t.auras) and CheckAuras(t.unit, t.auras, true, t.isMine, true, toggle) then return true end
@@ -726,9 +759,9 @@ function MOD:UpdateConditions()
 	if MOD.myClass == "WARLOCK" then stat.shards = UnitPower("player", SPELL_POWER_SOUL_SHARDS) else stat.shards = 0 end
 	if MOD.myClass == "PRIEST" then stat.insanity = UnitPower("player", SPELL_POWER_INSANITY) else stat.insanity = 0 end
 	if MOD.myClass == "MONK" then stat.chi = UnitPower("player", SPELL_POWER_CHI) else stat.chi = 0 end
-	if MOD.myClass == "WARLOCK" then stat.shards = UnitPower("player", SPELL_POWER_SOUL_SHARDS) else stat.shards = 0 end
 	if MOD.myClass == "SHAMAN" then stat.maelstrom = UnitPower("player", SPELL_POWER_MAELSTROM) else stat.maelstrom = 0 end
-	stat.combo = GetComboPoints("player")
+	if MOD.myClass == "MAGE" then stat.arcane = UnitPower("player", SPELL_POWER_ARCANE_CHARGES) else stat.arcane = 0 end
+	stat.combo = UnitPower("player", SPELL_POWER_COMBO_POINTS) or 0 -- replaces GetComboPoints call
 	stat.stance = GetStance()
 	stat.specialization = GetSpecialization()
 	stat.noPet = not UnitExists("pet")
@@ -899,7 +932,7 @@ end
 
 -- Return a text description of the current condition
 function MOD:GetConditionText(name)
-	local description, testString, depString, resultString, logicString = "", "", "", "", ""
+	local description, testString, depString, resultString, logicString, valueString = "", "", "", "", "", ""
 	description = L["Condition Name"](name)
 	local etext = ""
 	local ct, c = MOD.db.profile.Conditions[MOD.myClass], nil
@@ -936,6 +969,8 @@ function MOD:GetConditionText(name)
 						a = a .. d .. L["Holy Power String"](x, t.minHolyPower); d = ", " end
 					if IsOn(t.checkShards) and t.minShards then local x = "<"; if t.checkShards then x = ">=" end;
 						a = a .. d .. L["Shards String"](x, t.minShards); d = ", " end
+					if IsOn(t.checkArcane) and t.minArcane then local x = "<"; if t.checkArcane then x = ">=" end;
+						a = a .. d .. L["Arcane Charges String"](x, t.minArcane); d = ", " end
 					if IsOn(t.checkInsanity) and t.minInsanity then local x = "<"; if t.checkInsanity then x = ">=" end;
 						a = a .. d .. L["Insanity String"](x, t.minInsanity); d = ", " end
 					if IsOn(t.checkMaelstrom) and t.minMaelstrom then local x = "<"; if t.checkMaelstrom then x = ">=" end;
@@ -1096,5 +1131,7 @@ function MOD:GetConditionText(name)
 	if c.testLogic then logicString = string.format(L["Logic OR String"]) else logicString = string.format(L["Logic AND String"]) end
 	if c.toggleResult then resultString = string.format(L["Toggle String"]) else resultString = string.format(L["No Toggle String"]) end
 	if IsOn(c.setResult) then logicString = "" if c.setResult then resultString = L["Set Result True"] else resultString = L["Set Result False"] end end
-	return description .. testString .. depString .. logicString .. resultString
+	local value = MOD:CheckCondition(name)
+	if value ~= nil then valueString = L["Current Value String"] .. (value and L["True"] or L["False"]) end
+	return description .. testString .. depString .. logicString .. resultString .. valueString
 end

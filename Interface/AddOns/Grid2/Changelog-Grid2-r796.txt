@@ -1,0 +1,65 @@
+------------------------------------------------------------------------
+r796 | michaelspain | 2016-09-07 15:43:36 +0000 (Wed, 07 Sep 2016) | 1 line
+Changed paths:
+   A /trunk/modules/StatusDirection.lua
+   M /trunk/modules.xml
+
+Added direction arrows status.
+------------------------------------------------------------------------
+r795 | michaelspain | 2016-08-28 16:19:57 +0000 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/GridFrame.lua
+   M /trunk/Options/locales/esES.lua
+   M /trunk/Options/modules/general/GridLayout.lua
+
+Added an option to disable Right-Click Menu. Ticket #464
+------------------------------------------------------------------------
+r794 | michaelspain | 2016-08-28 15:26:15 +0000 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/Options/modules/statuses/StatusRange.lua
+   M /trunk/modules/StatusRange.lua
+
+Fixing ticket #477. Changed range heal spell for priests to "Leap of Faith", thanks to Xerxes13.
+------------------------------------------------------------------------
+r793 | michaelspain | 2016-08-28 15:09:12 +0000 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/modules/StatusHealth.lua
+
+Fixed ticket #461 (health instant updates doesn't update on pet resummons)
+------------------------------------------------------------------------
+r792 | michaelspain | 2016-08-28 02:29:26 +0000 (Sun, 28 Aug 2016) | 2 lines
+Changed paths:
+   M /trunk/RaidDebuffsOptions/Grid2RaidDebuffsOptions.toc
+   A /trunk/RaidDebuffsOptions/RaidDebuffsLegion.lua
+
+RaidDebuffs: Added Legion raiddebuffs for raids, world bosses and 5man instances. 
+The Legion module must be enabled in raiddebuffs configuration options.
+------------------------------------------------------------------------
+r791 | michaelspain | 2016-08-27 16:28:40 +0000 (Sat, 27 Aug 2016) | 5 lines
+Changed paths:
+   M /trunk/.pkgmeta
+   D /trunk/AoeHeals
+   A /trunk/Options/modules/statuses/StatusHealsAoe.lua
+   M /trunk/Options/modules/statuses/StatusRange.lua
+   M /trunk/Options/modules.xml
+   D /trunk/modules/StatusDirection.lua
+   A /trunk/modules/StatusHealsAoe.lua
+   M /trunk/modules/StatusRange.lua
+   M /trunk/modules.xml
+
+-Moved Healing spells tracking status from AOE-Heals module to Grid2 Core.
+-Removed AOE-Heals module (motive: Blizzard disabled unit position tracking in Legion)
+-Removed Direction Status (motive: Blizzard disabled unit position tracking in Legion)
+-Range Status:  Added a new option in configuration to track units checking a healing spell range, this must fix range issues for some healing clases (goto Statuses>Target&Distances>Range to select the new option)
+
+------------------------------------------------------------------------
+r790 | michaelspain | 2016-07-20 18:51:09 +0000 (Wed, 20 Jul 2016) | 3 lines
+Changed paths:
+   M /trunk/AoeHeals/AoeHeals.lua
+   M /trunk/GridLayoutLayouts.lua
+   M /trunk/Options/modules/indicators/IndicatorSquare.lua
+
+- Fixed AoeHeals crash
+- Added a new by role x10 layout.
+- Minor changes in configuration options.
+------------------------------------------------------------------------

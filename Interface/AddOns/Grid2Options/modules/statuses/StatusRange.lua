@@ -3,7 +3,7 @@ local L = Grid2Options.L
 Grid2Options:RegisterStatusOptions("range", "target", function(self, status, options, optionParams)
 	local rangeList = {}
 	for range in pairs(status.GetRanges()) do
-		rangeList[range] = L["%d yards"]:format(tonumber(range))
+		rangeList[range] = tonumber(range) and L["%d yards"]:format(tonumber(range)) or L['Heal Range']
 	end
 	options.default = {
 		type = "range",

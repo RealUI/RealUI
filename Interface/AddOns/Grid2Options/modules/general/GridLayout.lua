@@ -42,6 +42,17 @@ Grid2Options:AddGeneralOptions( "General" , "Layout Settings", { horizontal = {
 			Grid2Layout.frame:EnableMouse(not v)
 		end,
 		disabled = function () return not Grid2Layout.db.profile.FrameLock end,
+}, rightClickMenu = {
+		type = "toggle",
+		name = L["Right Click Menu"],
+		desc = L["Display the standard unit menu when right clicking on a frame."],
+		order = order_layout + 8,
+		get = function () return not Grid2Frame.db.profile.menuDisabled	end,
+		set = function (_, v)
+			Grid2Frame.db.profile.menuDisabled = (not v) or nil
+			Grid2Frame:UpdateMenu()
+			Grid2Frame:WithAllFrames( function(f) f.menu = Grid2Frame.RightClickUnitMenu end )
+		end,
 }, displayheader = {
 		type = "header",
 		order = order_display,

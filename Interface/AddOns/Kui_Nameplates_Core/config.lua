@@ -14,6 +14,7 @@ local cc = CreateFrame('Frame')
 -- add media to LSM ############################################################
 LSM:Register(LSM.MediaType.FONT,'Yanone Kaffesatz Bold',kui.m.f.yanone)
 LSM:Register(LSM.MediaType.FONT,'FrancoisOne',kui.m.f.francois)
+LSM:Register(LSM.MediaType.FONT,'Roboto Condensed Bold',kui.m.f.roboto)
 
 LSM:Register(LSM.MediaType.STATUSBAR, 'Kui status bar', kui.m.t.bar)
 LSM:Register(LSM.MediaType.STATUSBAR, 'Kui shaded bar', kui.m.t.oldbar)
@@ -29,6 +30,7 @@ local default_config = {
     bar_animation = 3,
     combat_hostile = 1,
     combat_friendly = 1,
+    ignore_uiscale = false,
     glow_as_shadow = true,
     state_icons = true,
     target_glow = true,
@@ -42,7 +44,9 @@ local default_config = {
     nameonly_damaged_friends = true,
     nameonly_enemies = true,
     nameonly_all_enemies = false,
-    nameonly_target = false,
+    nameonly_target = true,
+    guild_text_players = false,
+    title_text_players = false,
 
     fade_all = false,
     fade_alpha = .5,
@@ -52,6 +56,8 @@ local default_config = {
     fade_untracked = false,
     fade_avoid_nameonly = true,
     fade_avoid_raidicon = true,
+    fade_avoid_execute_friend = false,
+    fade_avoid_execute_hostile = false,
 
     font_face = DEFAULT_FONT,
     font_style = 2,
@@ -90,6 +96,8 @@ local default_config = {
     frame_height = 13,
     frame_width_minus = 72,
     frame_height_minus = 9,
+    frame_width_personal = 132,
+    frame_height_personal = 13,
     castbar_height = 5,
     powerbar_height = 3,
 
@@ -97,7 +105,7 @@ local default_config = {
     auras_on_personal = true,
     auras_whitelist = false,
     auras_pulsate = true,
-    auras_centre = false,
+    auras_centre = true,
     auras_sort = 2,
     auras_time_threshold = 60,
     auras_minimum_length = 0,
@@ -125,7 +133,19 @@ local default_config = {
 
     classpowers_enable = true,
     classpowers_on_target = true,
-    classpowers_size = 10,
+    classpowers_size = 11,
+    classpowers_bar_width = 50,
+    classpowers_bar_height = 3,
+
+    classpowers_colour_deathknight = {1,.2,.3},
+    classpowers_colour_druid       = {1,1,.1},
+    classpowers_colour_paladin     = {1,1,.1},
+    classpowers_colour_rogue       = {1,1,.1},
+    classpowers_colour_mage        = {.5,.5,1},
+    classpowers_colour_monk        = {.3,1,.9},
+    classpowers_colour_warlock     = {1,.5,1},
+    classpowers_colour_overflow    = {1,.3,.3},
+    classpowers_colour_inactive    = {.5,.5,.5,.5},
 }
 -- local functions #############################################################
 local function UpdateClickboxSize()
@@ -205,14 +225,14 @@ local function configChangedFadeRule(v,on_load)
 
     if core.profile.fade_avoid_nameonly then
         plugin:AddFadeRule(function(f)
-            return f.state.nameonly and 1
-        end)
+            return f.IN_NAMEONLY and 1
+        end,30)
     end
 
     if core.profile.fade_avoid_raidicon then
         plugin:AddFadeRule(function(f)
             return f.RaidIcon:IsShown() and 1
-        end,3)
+        end,1)
 
         -- force an alpha update whenever a raid icon is added/removed
         core:RegisterMessage('RaidIconUpdate')
@@ -220,11 +240,34 @@ local function configChangedFadeRule(v,on_load)
         core:UnregisterMessage('RaidIconUpdate')
     end
 
+    if  core.profile.fade_avoid_execute_friend or
+        core.profile.fade_avoid_execute_hostile
+    then
+        if core.profile.fade_avoid_execute_friend then
+            plugin:AddFadeRule(function(f)
+                return f.state.friend and
+                       f.state.in_execute_range and 1
+            end,21)
+        end
+
+        if core.profile.fade_avoid_execute_hostile then
+            plugin:AddFadeRule(function(f)
+                return not f.state.friend and
+                       f.state.in_execute_range and 1
+            end,21)
+        end
+
+        -- force alpha update when entering/leaving execute range
+        core:RegisterMessage('ExecuteUpdate')
+    else
+        core:UnregisterMessage('ExecuteUpdate')
+    end
+
     if core.profile.fade_neutral_enemy then
         plugin:AddFadeRule(function(f)
             return f.state.reaction == 4 and
                    UnitCanAttack('player',f.unit) and -1
-       end, core.profile.fade_avoid_raidicon and 4 or 3)
+       end,25)
     end
 
     if core.profile.fade_friendly_npc then
@@ -232,13 +275,13 @@ local function configChangedFadeRule(v,on_load)
             return f.state.reaction >= 4 and
                    not UnitIsPlayer(f.unit) and
                    not UnitCanAttack('player',f.unit) and -1
-        end, core.profile.fade_avoid_raidicon and 4 or 3)
+        end,25)
     end
 
     if core.profile.fade_untracked then
         plugin:AddFadeRule(function(f)
-            return f.state.no_name and -1
-        end, core.profile.fade_avoid_raidicon and 4 or 3)
+            return not f.state.tracked and -1
+        end,25)
     end
 end
 configChanged.fade_all = configChangedFadeRule
@@ -247,6 +290,8 @@ configChanged.fade_neutral_enemy = configChangedFadeRule
 configChanged.fade_untracked = configChangedFadeRule
 configChanged.fade_avoid_nameonly = configChangedFadeRule
 configChanged.fade_avoid_raidicon = configChangedFadeRule
+configChanged.fade_avoid_execute_friend = configChangedFadeRule
+configChanged.fade_avoid_execute_hostile = configChangedFadeRule
 
 local function configChangedTextOffset()
     core:configChangedTextOffset()
@@ -357,24 +402,48 @@ function configChanged.classpowers_enable(v)
         addon:GetPlugin('ClassPowers'):Disable()
     end
 end
-function configChanged.classpowers_size(v)
-    core.ClassPowers.icon_size = v
+local function configChangedClassPowers()
+    core.ClassPowers.on_target = core.profile.classpowers_on_target
+    core.ClassPowers.icon_size = core.profile.classpowers_size
+    core.ClassPowers.bar_width = core.profile.classpowers_bar_width
+    core.ClassPowers.bar_height = core.profile.classpowers_bar_height
 
     if addon:GetPlugin('ClassPowers').enabled then
         addon:GetPlugin('ClassPowers'):UpdateConfig()
     end
 end
-function configChanged.classpowers_on_target(v)
-    core.ClassPowers.on_target = v
+configChanged.classpowers_size = configChangedClassPowers
+configChanged.classpowers_on_target = configChangedClassPowers
+configChanged.classpowers_bar_width = configChangedClassPowers
+configChanged.classpowers_bar_height = configChangedClassPowers
+
+local function configChangedClassPowersColour()
+    local class = select(2,UnitClass('player'))
+    if core.profile['classpowers_colour_'..strlower(class)] then
+        core.ClassPowers.colours[class] =  core.profile['classpowers_colour_'..strlower(class)]
+    end
+
+    core.ClassPowers.colours.overflow = core.profile.classpowers_colour_overflow
+    core.ClassPowers.colours.inactive = core.profile.classpowers_colour_inactive
 
     if addon:GetPlugin('ClassPowers').enabled then
         addon:GetPlugin('ClassPowers'):UpdateConfig()
     end
 end
+configChanged.classpowers_colour_deathknight = configChangedClassPowersColour
+configChanged.classpowers_colour_druid = configChangedClassPowersColour
+configChanged.classpowers_colour_paladin = configChangedClassPowersColour
+configChanged.classpowers_colour_rogue = configChangedClassPowersColour
+configChanged.classpowers_colour_mage = configChangedClassPowersColour
+configChanged.classpowers_colour_monk = configChangedClassPowersColour
+configChanged.classpowers_colour_warlock = configChangedClassPowersColour
+configChanged.classpowers_colour_overflow = configChangedClassPowersColour
+configChanged.classpowers_colour_inactive = configChangedClassPowersColour
 
 function configChanged.execute_enabled(v)
     if v then
         addon:GetPlugin('Execute'):Enable()
+        configChanged.execute_percent()
     else
         addon:GetPlugin('Execute'):Disable()
     end
@@ -403,7 +472,16 @@ function configChanged.frame_glow_size(v)
         if f.ThreatGlow then
             f.ThreatGlow:SetSize(v)
         end
+        if f.UpdateNameOnlyGlowSize then
+            f:UpdateNameOnlyGlowSize()
+        end
     end
+end
+
+function configChanged.ignore_uiscale(v)
+    addon.IGNORE_UISCALE = v
+    addon:UI_SCALE_CHANGED()
+    QueueClickboxUpdate()
 end
 
 -- config loaded functions #####################################################
@@ -441,6 +519,11 @@ configLoaded.fade_all = configLoadedFadeRule
 configLoaded.execute_enabled = configChanged.execute_enabled
 configLoaded.execute_colour = configChanged.execute_colour
 configLoaded.execute_percent = configChanged.execute_percent
+
+function configLoaded.ignore_uiscale(v)
+    addon.IGNORE_UISCALE = v
+    addon:UI_SCALE_CHANGED()
+end
 
 -- init config #################################################################
 function core:InitialiseConfig()

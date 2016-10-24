@@ -1,9 +1,14 @@
-
-Skada:AddLoadableModule("Power", function(Skada, L)
+Skada:AddLoadableModule("Power", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Power then return end
 
-	local mod = Skada:NewModule(L["Mana gained"])
-	local playermod = Skada:NewModule(L["Mana gain spell list"])
+	local mod = Skada:NewModule("power gains")
+        
+	local MANA      = 0
+	local ENERGY    = 3
+	local FOCUS     = 2
+    local RAGE      = 1
+    local RUNIC     = 6
+    local HOLY      = 9
 
 	local function log_gain(set, gain)
 		-- Get the player from set.
@@ -34,8 +39,6 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 		end
 	end
 
-	local MANA = 0
-
 	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -53,26 +56,63 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 		log_gain(Skada.current, gain)
 		log_gain(Skada.total, gain)
 	end
-
-	function mod:Update(win, set)
+        
+    -- Prototypes for the modes
+    local basemod = {}
+    local basemod_mt = { __index = basemod }
+        
+    local playermod = {}
+    local playermod_mt = { __index = playermod }
+        
+    function basemod:Create(power, modename, playermodename)
+        local pmode = {
+            metadata = {},
+            name = playermodename
+        }
+        setmetatable(pmode, playermod_mt)
+            
+        local instance = {
+            playermod = pmode,
+            metadata = {
+                showspots = true,
+                click1 = pmode
+            },
+            name = modename
+        }
+        instance.power = power
+        pmode.power = power
+            
+        setmetatable(instance, basemod_mt)
+        return instance
+    end
+        
+    function basemod:GetName()
+        return self.name
+    end
+        
+    function basemod:Update(win, set)
 		local nr = 1
 		local max = 0
-
+            
 		for i, player in ipairs(set.players) do
-			if player.power[MANA] then
+			if player.power[self.power] then
 
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
 				d.id = player.id
 				d.label = player.name
-				d.value = player.power[MANA].amount
-				d.valuetext = Skada:FormatNumber(player.power[MANA].amount)
+				d.value = player.power[self.power].amount
+                if self.power == MANA then
+                    d.valuetext = Skada:FormatNumber(player.power[self.power].amount)
+                else
+                    d.valuetext = player.power[self.power].amount
+                end
 				d.class = player.class
 				d.role = player.role
 
-				if player.power[MANA].amount > max then
-					max = player.power[MANA].amount
+				if player.power[self.power].amount > max then
+					max = player.power[self.power].amount
 				end
 
 				nr = nr + 1
@@ -81,14 +121,27 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 
 		win.metadata.maxvalue = max
 	end
-
-	function playermod:Enter(win, id, label)
-		playermod.playerid = id
-		playermod.title = label
+        
+	function basemod:AddToTooltip(set, tooltip)
 	end
 
+	function basemod:GetSetSummary(set)
+        return Skada:FormatNumber(set.power[self.power] or 0)
+	end
+        
+    function playermod:GetName()
+        return self.name
+    end
+        
+	function playermod:Enter(win, id, label)
+		self.playerid = id
+		self.title = label
+	end
+        
 	-- Detail view of a player.
 	function playermod:Update(win, set)
+		-- View spells for this player.
+
 		-- View spells for this player.
 
 		local player = Skada:find_player(set, self.playerid)
@@ -97,7 +150,7 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 
 		if player then
 
-			for spellid, amount in pairs(player.power[MANA].spells) do
+			for spellid, amount in pairs(player.power[self.power].spells) do
 
 				local name, rank, icon, cost, isFunnel, powerType, castTime, minRange, maxRange = GetSpellInfo(spellid)
 
@@ -107,7 +160,11 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 				d.id = spellid
 				d.label = name
 				d.value = amount
-				d.valuetext = Skada:FormatNumber(amount)..(" (%02.1f%%)"):format(amount / player.power[MANA].amount * 100)
+                if self.power == MANA then
+                    d.valuetext = Skada:FormatNumber(amount)..(" (%02.1f%%)"):format(amount / player.power[self.power].amount * 100)
+                else
+                    d.valuetext = amount..(" (%02.1f%%)"):format(amount / player.power[self.power].amount * 100)
+                end
 				d.icon = icon
 				d.spellid = spellid
 
@@ -122,40 +179,45 @@ Skada:AddLoadableModule("Power", function(Skada, L)
 		win.metadata.hasicon = true
 		win.metadata.maxvalue = max
 	end
+    
+    local manamod = basemod:Create(MANA, L["Mana gained"], L["Mana gain spell list"])
+    local energymod = basemod:Create(ENERGY, L["Energy gained"], L["Energy gain sources"])
+    local runicmod = basemod:Create(RUNIC, L["Runic power gained"], L["Runic power gain sources"])
+    local ragemod = basemod:Create(RAGE, L["Rage gained"], L["Rage gain sources"])
+    local holymod = basemod:Create(HOLY, L["Holy power gained"], L["Holy power gain sources"])
+    local focusmod = basemod:Create(FOCUS, L["Focus gained"], L["Focus gain sources"])
 
 	function mod:OnEnable()
-		mod.metadata		= {showspots = true, click1 = playermod}
-		playermod.metadata	= {}
-
 		Skada:RegisterForCL(SpellEnergize, 'SPELL_ENERGIZE', {src_is_interesting = true})
 		Skada:RegisterForCL(SpellEnergize, 'SPELL_PERIODIC_ENERGIZE', {src_is_interesting = true})
 
-		Skada:AddMode(self)
+		Skada:AddMode(manamod, L["Power gains"])
+		Skada:AddMode(energymod, L["Power gains"])
+		Skada:AddMode(ragemod, L["Power gains"])
+		Skada:AddMode(runicmod, L["Power gains"])
+		Skada:AddMode(holymod, L["Power gains"])
+		Skada:AddMode(focusmod, L["Power gains"])
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self)
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-	end
-
-	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.power[MANA] or 0)
+		Skada:RemoveMode(manamod)
+		Skada:RemoveMode(energymod)
+		Skada:RemoveMode(ragemod)
+		Skada:RemoveMode(runicmod)
+		Skada:RemoveMode(holymod)
 	end
 
 	-- Called by Skada when a new player is added to a set.
-	function mod:AddPlayerAttributes(player)
+	function manamod:AddPlayerAttributes(player)
 		if not player.power then
 			player.power = {}
 		end
 	end
 
 	-- Called by Skada when a new set is created.
-	function mod:AddSetAttributes(set)
+	function manamod:AddSetAttributes(set)
 		if not set.power then
 			set.power = {}
 		end
 	end
 end)
-
