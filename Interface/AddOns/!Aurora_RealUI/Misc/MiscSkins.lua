@@ -9,53 +9,6 @@ _G.tinsert(mods["Aurora"], function(F, C)
     mods.debug("MiscSkins", F, C)
     local r, g, b = C.r, C.g, C.b
 
-    -- Re-add Travel Pass
-    if _G.tonumber(_G.GetAddOnMetadata("Aurora", "Version"):match("%d%.%d%.(%d)")) < 7 then
-        _G.FriendsFrame:HookScript("OnShow", function()
-            if not _G.FriendsFrame.skinned then
-                for i = 1, _G.FRIENDS_TO_DISPLAY do
-                    local btn = _G["FriendsFrameFriendsScrollFrameButton"..i]
-
-                    --local frame = CreateFrame("frame", nil, btn)
-                    --frame:SetSize(60, 32)
-
-                    F.Reskin(btn.travelPassButton)
-                    btn.travelPassButton:SetAlpha(1)
-                    btn.travelPassButton:EnableMouse(true)
-                    btn.travelPassButton:SetSize(20, 32)
-
-                    btn.bg:SetSize(btn.gameIcon:GetWidth()+2, btn.gameIcon:GetHeight()+2)
-                    btn.bg:ClearAllPoints()
-                    btn.bg:SetPoint("TOPLEFT", btn.gameIcon, -1, 1)
-                    btn.gameIcon:SetParent(btn.bg)
-                    btn.gameIcon:SetPoint("TOPRIGHT", btn.travelPassButton, "TOPLEFT", -2, -5)
-                    btn.gameIcon.SetPoint = function() end
-
-                    btn.inv = btn.travelPassButton:CreateTexture(nil, "OVERLAY", nil, 7)
-                    btn.inv:SetTexture([[Interface\FriendsFrame\PlusManz-PlusManz]])
-                    btn.inv:SetPoint("TOPRIGHT", 1, -4)
-                    btn.inv:SetSize(22, 22)
-                end
-                _G.FriendsFrame.skinned = true
-            end
-        end)
-
-        local function UpdateScroll()
-            for i = 1, _G.FRIENDS_TO_DISPLAY do
-                local btn = _G["FriendsFrameFriendsScrollFrameButton"..i]
-                local isEnabled = btn.travelPassButton:IsEnabled()
-                --print("UpdateScroll", i, isEnabled)
-
-                if btn.inv then
-                    btn.inv:SetAlpha(isEnabled and 0.7 or 0.3)
-                    btn.bg:SetShown(btn.gameIcon:IsShown())
-                end
-            end
-        end
-        _G.hooksecurefunc("FriendsFrame_UpdateFriends", UpdateScroll)
-        _G.hooksecurefunc(_G.FriendsFrameFriendsScrollFrame, "update", UpdateScroll)
-    end
-
     -- Splash Frame SplashFrame_Open("LEGION_PREPATCH")
     F.CreateBD(_G.SplashFrame, nil, true)
     _G.hooksecurefunc("SplashFrame_Display", function(tag, showStartButton)
