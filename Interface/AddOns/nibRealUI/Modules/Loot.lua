@@ -467,12 +467,12 @@ end
 
 function Loot:OPEN_MASTER_LOOT_LIST()
     --print("OPEN_MASTER_LOOT_LIST: ")--..tostring(GetLootSlotType(slot)))
-    _G.ToggleDropDownMenu(1, nil, _G.GroupLootDropDown, RealUILootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
+    _G.Lib_ToggleDropDownMenu(1, nil, _G.GroupLootDropDown, RealUILootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
 end
 
 function Loot:UPDATE_MASTER_LOOT_LIST()
     --print("UPDATE_MASTER_LOOT_LIST: ")
-    _G.UIDropDownMenu_Refresh(_G.GroupLootDropDown)
+    _G.Lib_UIDropDownMenu_Refresh(_G.GroupLootDropDown)
 end
 
 function Loot:InitializeLoot()

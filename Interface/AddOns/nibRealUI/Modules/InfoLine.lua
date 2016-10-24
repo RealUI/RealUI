@@ -113,7 +113,7 @@ local LootSpecIDs = {}
 ----------------
 -- Micro Menu --
 ----------------
-local ddMenuFrame = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "UIDropDownMenuTemplate")
+local ddMenuFrame = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
 local MicroMenu = {
     {text = "|cffffffffRealUI|r",
         isTitle = true,
@@ -2753,7 +2753,7 @@ end
 function InfoLine:OnMouseDown(element, ...)
     self:debug("InfoLine:OnMouseDown", element.tag, ...)
     if element.tag == "start" then
-        _G.EasyMenu(MicroMenu, ddMenuFrame, element, 0, 0, "MENU", 2)
+        _G.Lib_EasyMenu(MicroMenu, ddMenuFrame, element, 0, 0, "MENU", 2)
 
     elseif element.tag == "guild" then
         Guild_OnMouseDown(element)

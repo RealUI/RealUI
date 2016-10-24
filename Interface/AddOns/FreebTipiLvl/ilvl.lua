@@ -158,7 +158,7 @@ local function getItems(guid, data, age)
     -- Artifacts are counted as one item
     if mainArtifact or offArtifact then
         ns.Debug("Artifacts", mainArtifact, offArtifact)
-        artifactILvl = max(mainArtifact, offArtifact or 0)
+        artifactILvl = max(mainArtifact or 0, offArtifact or 0)
         totalILvl = totalILvl + artifactILvl
 
         if offArtifact then

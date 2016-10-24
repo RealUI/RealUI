@@ -5,10 +5,22 @@ local mod = addon:NewPlugin('Execute',4)
 
 local class,execute_range
 
+local specs = {
+    ['DRUID'] = {
+        [2] = 25 -- ferocious bite
+    }
+}
+
 local talents = {
     ['PRIEST'] = {
         [22317] = 35
-    }
+    },
+    ['DRUID'] = {
+        [21714] = -1, -- sabertooth
+        [22155] = 25, -- feral affinity -> ferocious bite (balance)
+        [22156] = 25, -- (guardian)
+        [22367] = 25, -- (resto)
+    },
 }
 local pvp_talents = {
     ['WARRIOR'] = {
@@ -23,11 +35,18 @@ local function IsTalentKnown(id,pvp)
 end
 local function GetExecuteRange()
     -- return execute range depending on class/spec/talents
-    local r = 20
+    local r
+
+    if specs[class] then
+        local spec = GetSpecialization()
+        if spec and spec > 0 and specs[class][spec] then
+            r = specs[class][spec]
+        end
+    end
 
     if talents[class] then
         for id,v in pairs(talents[class]) do
-            if v > r and IsTalentKnown(id) then
+            if IsTalentKnown(id) then
                 r = v
             end
         end
@@ -35,13 +54,13 @@ local function GetExecuteRange()
 
     if pvp_talents[class] then
         for id,v in pairs(pvp_talents[class]) do
-            if v > r and IsTalentKnown(id,true) then
+            if IsTalentKnown(id,true) then
                 r = v
             end
         end
     end
 
-    return r
+    return (not r or r < 0) and 20 or r
 end
 local function CanOverwriteHealthColor(f)
     return not f.state.health_colour_priority or
@@ -61,7 +80,10 @@ end
 function mod:HealthColourChange(f,caller)
     if caller and caller == self then return end
 
-    if f.state.health_cur > 0 and f.state.health_per <= execute_range then
+    if not UnitIsTapDenied(f.unit) and
+       f.state.health_cur > 0 and
+       f.state.health_per <= execute_range
+    then
         if CanOverwriteHealthColor(f) then
             f.state.execute_range_coloured = true
             f.state.health_colour_priority = self.priority
@@ -70,8 +92,15 @@ function mod:HealthColourChange(f,caller)
                 f.HealthBar:SetStatusBarColor(unpack(self.colour))
             end
         end
-    elseif f.state.execute_range_coloured then
+
+        if not f.state.in_execute_range then
+            f.state.in_execute_range = true
+            addon:DispatchMessage('ExecuteUpdate',f,true)
+        end
+
+    elseif f.state.in_execute_range then
         f.state.execute_range_coloured = nil
+        f.state.in_execute_range = nil
 
         if CanOverwriteHealthColor(f) then
             f.state.health_colour_priority = nil
@@ -82,6 +111,8 @@ function mod:HealthColourChange(f,caller)
 
             addon:DispatchMessage('HealthColourChange', f, mod)
         end
+
+        addon:DispatchMessage('ExecuteUpdate',f,false)
     end
 end
 -- events ######################################################################

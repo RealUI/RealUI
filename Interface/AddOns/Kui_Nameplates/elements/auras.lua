@@ -21,6 +21,7 @@
 
     frame_def is a table which may contain the following values:
     frame_def = {
+        id = key for this frame in the [nameplate].Auras.frames table
         size = icon size
         squareness = icon width/height ratio
         point = {
@@ -73,7 +74,7 @@ local kui = LibStub('Kui-1.0')
 local ele = addon:NewElement('Auras')
 
 local FONT,FONT_SIZE_CD,FONT_SIZE_COUNT,FONT_FLAGS
-local spelllist,whitelist,class
+local spelllist,kui_whitelist,class
 
 -- time below which to show decimal places
 local DECIMAL_THRESHOLD = 1
@@ -339,6 +340,10 @@ local function AuraFrame_FactionUpdate(self)
             self.filter = 'PLAYER HARMFUL'
         end
     end
+
+    if addon.debug then
+        assert(self.filter ~= nil)
+    end
 end
 local function AuraFrame_GetAuras(self)
     for i=1,40 do
@@ -347,7 +352,9 @@ local function AuraFrame_GetAuras(self)
 --            'test',nil,'interface/icons/inv_dhmount',0,0,100,GetTime()+100,nil,nil,nil,math.random(1,100000)
         if not name then break end
 
-        self:DisplayButton(name,icon,spellid,count,duration,expiration,i)
+        if self:SpellIsInWhitelist(spellid,name) then
+            self:DisplayButton(spellid,name,icon,count,duration,expiration,i)
+        end
     end
 end
 local function AuraFrame_GetButton(self,spellid)
@@ -369,14 +376,16 @@ local function AuraFrame_GetButton(self,spellid)
     tinsert(self.buttons, button)
     return button
 end
-local function AuraFrame_DisplayButton(self,name,icon,spellid,count,duration,expiration,index)
-    if  self.whitelist and
-        not self.whitelist[spellid] and not self.whitelist[strlower(name)]
-    then
-        -- not in whitelist
-        return
+local function AuraFrame_SpellIsInWhitelist(self,spellid,name)
+    if self.kui_whitelist then
+        return kui_whitelist[spellid] or kui_whitelist[strlower(name)]
+    elseif self.whitelist then
+        return self.whitelist[spellid] or self.whitelist[strlower(name)]
+    else
+        return true
     end
-
+end
+local function AuraFrame_DisplayButton(self,spellid,name,icon,count,duration,expiration,index)
     if ele:RunCallback('DisplayAura',name,spellid,duration) == false then
         -- blocked by callback
         return
@@ -472,7 +481,7 @@ end
 local function AuraFrame_SetIconSize(self,size)
     -- set icon size and related variables, update buttons
     if not size then
-        size = 24
+        size = self.size or 24
     end
 
     self.size = size
@@ -512,17 +521,20 @@ local function AuraFrame_SetSort(self,sort_f)
 end
 local function AuraFrame_SetWhitelist(self,list,kui)
     if kui then
-        if not whitelist then
+        if not kui_whitelist then
             -- initialise KuiSpellList whitelist
             spelllist = LibStub('KuiSpellList-1.0')
             spelllist.RegisterChanged(ele,'WhitelistChanged')
             ele:WhitelistChanged()
         end
 
-        self.whitelist = whitelist
+        self.kui_whitelist = true
+        self.whitelist = nil
     elseif type(list) == 'table' then
+        self.kui_whitelist = nil
         self.whitelist = list
     else
+        self.kui_whitelist = nil
         self.whitelist = nil
     end
 end
@@ -551,6 +563,7 @@ local aura_meta = {
     SetIconSize    = AuraFrame_SetIconSize,
     SetSort        = AuraFrame_SetSort,
     SetWhitelist   = AuraFrame_SetWhitelist,
+    SpellIsInWhitelist = AuraFrame_SpellIsInWhitelist,
 }
 local function CreateAuraFrame(parent)
     local auraframe = CreateFrame('Frame',nil,parent)
@@ -566,8 +579,6 @@ local function CreateAuraFrame(parent)
     auraframe.buttons = {}
     auraframe.spellids = {}
 
-    ele:RunCallback('PostCreateAuraFrame',auraframe)
-
     if addon.draw_frames then
         auraframe:SetBackdrop({
             bgFile='interface/buttons/white8x8'
@@ -579,7 +590,7 @@ local function CreateAuraFrame(parent)
 end
 -- whitelist ###################################################################
 function ele:WhitelistChanged()
-    whitelist = spelllist.GetImportantSpells(class)
+    kui_whitelist = spelllist.GetImportantSpells(class)
 end
 -- prototype additions #########################################################
 function addon.Nameplate.CreateAuraFrame(f,frame_def)
@@ -614,7 +625,7 @@ function addon.Nameplate.CreateAuraFrame(f,frame_def)
 
     new_frame.row_point = row_growth_points[new_frame.row_growth]
 
-    new_frame:SetIconSize(new_frame.size)
+    new_frame:SetIconSize()
 
     if new_frame.kui_whitelist then
         new_frame:SetWhitelist(nil,true)
@@ -626,7 +637,11 @@ function addon.Nameplate.CreateAuraFrame(f,frame_def)
     if not f.Auras or not f.Auras.frames then
         f.Auras = { frames = {} }
     end
-    tinsert(f.Auras.frames,new_frame)
+
+    new_frame.id = new_frame.id or #f.Auras.frames+1
+    f.Auras.frames[new_frame.id] = new_frame
+
+    ele:RunCallback('PostCreateAuraFrame',new_frame)
 
     return new_frame
 end
@@ -636,7 +651,7 @@ function ele:Show(f)
 end
 function ele:Hide(f)
     if not f.Auras then return end
-    for i,frame in ipairs(f.Auras.frames) do
+    for i,frame in pairs(f.Auras.frames) do
         frame:Hide()
     end
 end
@@ -644,7 +659,7 @@ end
 function ele:UNIT_FACTION(event,f)
     -- update each aura frame on this nameplate
     if not f.Auras then return end
-    for _,auras_frame in ipairs(f.Auras.frames) do
+    for _,auras_frame in pairs(f.Auras.frames) do
         auras_frame:FactionUpdate()
         auras_frame:Update()
     end
@@ -652,7 +667,7 @@ end
 function ele:UNIT_AURA(event,f)
     -- update each aura frame on this nameplate
     if not f.Auras then return end
-    for _,auras_frame in ipairs(f.Auras.frames) do
+    for _,auras_frame in pairs(f.Auras.frames) do
         auras_frame:Update()
     end
 end

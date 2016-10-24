@@ -111,7 +111,7 @@ local function GridFrame_Init(frame, width, height)
 		frame:SetAttribute("initial-width", width)
 		frame:SetAttribute("initial-height", height)
 	end
-	frame.menu = ToggleUnitMenu
+	frame.menu = Grid2Frame.RightClickUnitMenu
 	frame.container = frame:CreateTexture()
 	frame:CreateIndicators()
 	frame:Layout()
@@ -205,6 +205,7 @@ function Grid2Frame:OnModuleEnable()
 	self:RegisterEvent("UNIT_ENTERED_VEHICLE")
 	self:RegisterEvent("UNIT_EXITED_VEHICLE")
 	self:RegisterMessage("Grid_UnitUpdate")
+	self:UpdateMenu()	
 	self:UpdateBlink()
 	self:UpdateBackdrop()
 	self:UpdateFrameUnits()
@@ -333,6 +334,11 @@ do
 		indicator.Update = self.db.profile.blinkType~="None" and indicator.UpdateBlink or indicator.UpdateNoBlink
 		blinkDuration = 1/self.db.profile.blinkFrequency
 	end
+end
+
+-- Right Click Menu
+function Grid2Frame:UpdateMenu()
+	self.RightClickUnitMenu = not self.db.profile.menuDisabled and ToggleUnitMenu or nil
 end
 
 -- Event handlers

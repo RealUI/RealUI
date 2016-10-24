@@ -18,6 +18,7 @@ local groupIDs = {}
 local settingsTemplate = {} -- settings are initialized from default bar group template
 local activeSpells = {} -- temporary table used for finding ghost bars
 local defaultNotificationIcon = "Interface\\Icons\\Spell_Nature_WispSplode"
+local defaultBrokerIcon = "Interface\\Icons\\Inv_Misc_Book_03"
 local prefixRaidTargetIcon = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"
 local testColors = { "Blue1", "Cyan", "Green1", "Yellow1", "Orange1", "Red1", "Pink", "Purple1", "Brown1", "Gray" }
 local units = { player = true, target = true, focus = true, pet = true, targettarget = true, focustarget = true, pettarget = true, mouseover = true }
@@ -34,7 +35,7 @@ local defaultLabels = { 0, 1, 10, 30, "1m", "2m", "5m" }
 function MOD:GetTimelineLabels() return defaultLabels end
 
 MOD.BarGroupTemplate = { -- default bar group settings
-	enabled = true, locked = true, merged = false, linkSettings = false, checkCondition = false, noMouse = false, iconMouse = true,
+	enabled = true, locked = true, merged = false, linkSettings = false, linkBars = false, checkCondition = false, noMouse = false, iconMouse = true,
 	barColors = "Spell", bgColors = "Normal", iconColors = "None", combatTips = true, casterTips = true, spellTips = true, anchorTips = "DEFAULT",
 	useDefaultDimensions = true, useDefaultFontsAndTextures = true, useDefaultColors = true, strata = "MEDIUM",
 	sor = "A", reverseSort = false, timeSort = true, playerSort = false,
@@ -50,19 +51,22 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	timelineWidth = 225, timelineHeight = 25, timelineDuration = 300, timelineExp = 3, timelineHide = false, timelineAlternate = true,
 	timelineSwitch = 2, timelineTexture = "Blizzard", timelineAlpha = 1, timelineColor = false, timelineLabels = false,
 	timelineSplash = true, timelineSplashX = 0, timelineSplashY = 0, timelinePercent = 50, timelineOffset = 0, timelineDelta = 0,
-	showSolo = true, showParty = true, showRaid = true, showCombat = true, showOOC = true, showFishing = true, showFocusTarget = true,
+	stripeFullWidth = false, stripeWidth = 500, stripeHeight = 30, stripeInset = 0, stripeOffset = 0, stripeTexture = "Blizzard",
+	stripeBarInset = 4, stripeBarOffset = 0, stripeColor = false, stripeAltColor = false, stripeCheckCondition = false, stripeCondition = false,
+	stripeBorderTexture = "None", stripeBorderWidth = 4, stripeBorderOffset = 1, stripeBorderColor = false,
+	showSolo = true, showParty = true, showRaid = true, showCombat = true, showOOC = true, showStealth = true, showFocusTarget = true,
 	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showSpecialization = "",
-	showResting = true, showMounted = true, showVehicle = true, showFriendly = true, showEnemy = true, showBlizz = true, showNotBlizz = true,
+	showResting = true, showMounted = true, showVehicle = true, showFriend = true, showEnemy = true, showBlizz = true, showNotBlizz = true,
 	detectBuffs = false, detectDebuffs = false, detectAllBuffs = false, detectAllDebuffs = false, detectDispellable = false, detectInflictable = false,
 	detectNPCDebuffs = false, detectVehicleDebuffs = false, detectBoss = false, includeTotems = false,
 	noHeaders = false, noTargets = false, noLabels = false, headerGaps = false, targetFirst = false, targetAlpha = 1, replay = false, replayTime = 5,
 	detectCastable = false, detectStealable = false, detectMagicBuffs = false, detectEffectBuffs = false, detectWeaponBuffs = false,
 	detectNPCBuffs = false, detectVehicleBuffs = false, detectOtherBuffs = false, detectBossBuffs = false, detectEnrageBuffs = false,
-	detectCooldowns = false, detectBuffsMonitor = "player", detectBuffsCastBy = "player", detectDebuffsMonitor = "player",
-	detectDebuffsCastBy = "player", detectCooldownsBy = "player", detectTracking = false, excludeResources = false,
+	detectCooldowns = false, detectBuffsMonitor = "player", detectBuffsCastBy = "player", detectDebuffsMonitor = "player", detectTrackingBuffs = false,
+	detectDebuffsCastBy = "player", detectCooldownsBy = "player", detectTracking = false, excludeResources = false, detectResourceBuffs = false,
 	detectSpellCooldowns = true, detectTrinketCooldowns = true, detectInternalCooldowns = true, detectSpellEffectCooldowns = true,
 	detectPotionCooldowns = true, detectOtherCooldowns = true, detectRuneCooldowns = false,
-	detectSharedStances = true, detectSharedShouts = true, detectSharedFrostTraps = true, detectSharedShocks = true, detectSharedCrusader = true,
+	detectSharedGrimoires = true, detectSharedInfernals = true,
 	setDuration = false, setOnlyLongDuration = false, uniformDuration = 120, checkDuration = false, minimumDuration = true, filterDuration = 120,
 	checkTimeLeft = false, minimumTimeLeft = true, filterTimeLeft = 120, showNoDuration = false, showOnlyNoDuration = false,
 	showNoDurationBackground = false, noDurationFirst = false, timeFormat = 6, timeSpaces = false, timeCase = false,
@@ -77,7 +81,13 @@ MOD.BarGroupLayoutTemplate = { -- all the bar group settings involved in layout 
 	useDefaultDimensions = 0, configuration = 0, growDirection = 0, wrap = 0, wrapDirection = 0, snapCenter = 0, fillBars = 0, maxBars = 0,
 	labelOffset = 0, labelInset = 0, labelWrap = 0, labelCenter = 0, labelAlign = 0, timeOffset = 0, timeInset = 0, timeAlign = 0, timeIcon = 0,
 	iconOffset = 0, iconInset = 0, iconHide = 0, iconAlign = 0,
-	hideIcon = 0, hideClock = 0, hideBar = 0, hideSpark = 0, hideValue = 0, hideLabel = 0, hideCount = 0, showTooltips = 0
+	hideIcon = 0, hideClock = 0, hideBar = 0, hideSpark = 0, hideValue = 0, hideLabel = 0, hideCount = 0, showTooltips = 0,
+	timelineWidth = 0, timelineHeight = 0, timelineDuration = 0, timelineExp = 0, timelineHide = 0, timelineAlternate = 0,
+	timelineSwitch = 0, timelineTexture = 0, timelineAlpha = 0, timelineColor = 0, timelineLabels = 0,
+	timelineSplash = 0, timelineSplashX = 0, timelineSplashY = 0, timelinePercent = 0, timelineOffset = 0, timelineDelta = 0,
+	stripeFullWidth = 0, stripeWidth = 0, stripeHeight = 0, stripeInset = 0, stripeOffset = 0, stripeTexture = 0,
+	stripeBarInset = 0, stripeBarOffset = 0, stripeColor = 0, stripeAltColor = 0, stripeCheckCondition = 0, stripeCondition = 0,
+	stripeBorderTexture = 0, stripeBorderWidth = 0, stripeBorderOffset = 0, stripeBorderColor = 0,
 }
 
 -- Check for active tooltip for a bar and update once per second
@@ -118,14 +128,6 @@ function MOD:FinalizeBars()
 	end
 end
 
--- Remove default values from bar group settings
-function MOD:FinalizeSettings()
-	for _, settings in pairs(MOD.db.global.Settings) do
-		for n, k in pairs(settingsTemplate) do if settings[n] == k then settings[n] = nil end end -- remove values still set to defaults
-		for n in pairs(colorTemplate) do if DefaultColor(settings[n]) then settings[n] = nil end end -- detect basic colors set to defaults
-	end
-end
-
 -- Raven is disabled so hide all features
 function MOD:HideBars()
 	if not hidden then
@@ -140,10 +142,18 @@ end
 function MOD:InitializeSettings()
 	for n, k in pairs(MOD.BarGroupTemplate) do settingsTemplate[n] = k end -- initialize the settings template from bar group defaults
 	for n, k in pairs(MOD.db.global.Defaults) do settingsTemplate[n] = k end -- add default settings for layout-fonts-textures
-	settingsTemplate.enabled = nil; settingsTemplate.locked = nil; settingsTemplate.merged = nil; settingsTemplate.linkSettings = nil	
+	settingsTemplate.enabled = nil; settingsTemplate.locked = nil; settingsTemplate.merged = nil; settingsTemplate.linkSettings = nil; settingsTemplate.linkBars = nil
 	for _, settings in pairs(MOD.db.global.Settings) do
 		for n, k in pairs(settingsTemplate) do if settings[n] == nil then settings[n] = k end end -- add missing defaults from settings template
 		for n in pairs(colorTemplate) do if settings[n] == nil then settings[n] = MOD.CopyColor(defaultWhite) end end -- default basic colors
+	end
+end
+
+-- Remove default values from bar group settings
+function MOD:FinalizeSettings()
+	for _, settings in pairs(MOD.db.global.Settings) do
+		for n, k in pairs(settingsTemplate) do if settings[n] == k then settings[n] = nil end end -- remove values still set to defaults
+		for n in pairs(colorTemplate) do if DefaultColor(settings[n]) then settings[n] = nil end end -- detect basic colors set to defaults
 	end
 end
 
@@ -309,13 +319,27 @@ local function UpdateLinkedSettings(bp, dir)
 		settings = {}
 		MOD.db.global.Settings[bp.name] = settings
 	end
-
 	local p, q = settings, bp
-	if dir then p = bp; q = settings end
-
+	if dir then p = q; q = settings end
 	for n in pairs(settingsTemplate) do q[n] = p[n] end -- copy every setting in the template
 	q.pointX = p.pointX; q.pointXR = p.pointXR; q.pointY = p.pointY; q.pointYT = p.pointYT -- always copy the location
 	q.pointW = p.pointW; q.pointH = p.pointH
+end
+
+-- Update linked custom bars. If dir is true then update the shared bars, otherwise update the ones in the bar group.
+-- Also, if dir is true, create a linked custom bars table if one doesn't yet exist.
+local function UpdateLinkedBars(bp, dir)
+	if bp.auto then return end -- only applies to custom bar groups
+	local customBars = MOD.db.global.CustomBars[bp.name]
+	if not customBars then
+		if not dir then return end
+		customBars = {}
+		MOD.db.global.CustomBars[bp.name] = customBars
+	end
+	local p, q = customBars, bp.bars
+	if dir then p = q; q = customBars end
+	table.wipe(q) -- remove old bars from destination
+	for k, b in pairs(p) do q[k] = MOD.CopyTable(b) end -- deep copy each bar in the source
 end
 
 -- Update a linked filter list. If dir is true then update the shared list, otherwise update the bar group's list.
@@ -421,6 +445,7 @@ local function GetColorForBar(bg, bar, btype)
 		end
 		if bt == "Cooldown" then c = cc and bg.cooldownColor or MOD.db.global.DefaultCooldownColor end
 		if bt == "Notification" then c = cc and bg.notificationColor or MOD.db.global.DefaultNotificationColor end
+		if bt == "Broker" then c = cc and bg.brokerColor or MOD.db.global.DefaultBrokerColor end
 	end
 	c.a = 1 -- always set alpha to 1 for bar colors
 	return c
@@ -493,6 +518,7 @@ function MOD:InitializeBarGroup(bp, offsetX, offsetY)
 	local bg = MOD.Nest_GetBarGroup(bp.name)
 	if not bg then bg = MOD.Nest_CreateBarGroup(bp.name) end
 	if bp.linkSettings then UpdateLinkedSettings(bp, false) end
+	if bp.linkBars then UpdateLinkedBars(bp, false) end
 	if bp.sor == "C" then bp.sor = "A" end -- fix out-dated sort setting
 	if bp.auto then -- initialize the auto bar group filter lists
 		if (bp.filterBuff or bp.showBuff) and bp.filterBuffLink then UpdateLinkedFilter(bp, false, "Buff") end -- shared settings for buffs
@@ -510,12 +536,22 @@ end
 function MOD:InitializeBarGroupSettings(bp)
 	if bp and bp.enabled then
 		if bp.linkSettings then UpdateLinkedSettings(bp, false) end
+		if bp.linkBars then UpdateLinkedBars(bp, false) end
 		MOD:SetBarGroupPosition(bp)
 	end
 end
 
+-- Load bar group settings from the linked settings.
+function MOD:LoadBarGroupSettings(bp) UpdateLinkedSettings(bp, false) end
+
 -- Save bar group settings into the linked settings.
 function MOD:SaveBarGroupSettings(bp) UpdateLinkedSettings(bp, true) end
+
+-- Load bar group settings from the linked settings.
+function MOD:LoadCustomBars(bp) UpdateLinkedBars(bp, false) end
+
+-- Save bar group settings into the linked settings.
+function MOD:SaveCustomBars(bp) UpdateLinkedBars(bp, true) end
 
 -- Validate and update a bar group's display position. If linked, also update the position in the linked settings.
 function MOD:SetBarGroupPosition(bp)
@@ -560,6 +596,7 @@ end
 function MOD:UpdateBarGroup(bp)
 	if bp.enabled then
 		if bp.linkSettings then UpdateLinkedSettings(bp, true) end -- update shared settings in a linked bar group
+		if bp.linkBars then UpdateLinkedBars(bp, true) end -- update shared settings in a linked bar group
 		if bp.auto then -- update auto bar group filter lists
 			if (bp.filterBuff or bp.showBuff) and bp.filterBuffLink then UpdateLinkedFilter(bp, true, "Buff") end -- shared settings for buffs
 			if (bp.filterDebuff or bp.showDebuff) and bp.filterDebuffLink then UpdateLinkedFilter(bp, true, "Debuff") end -- shared settings for debuffs
@@ -574,6 +611,8 @@ function MOD:UpdateBarGroup(bp)
 					SetCache(bp, t, b.action, b.monitor)
 				elseif t == "Cooldown" then
 					SetCache(bp, t, b.action, true)
+				elseif t == "Broker" then
+					MOD:ActivateDataBroker(b.action)
 				end
 			end
 		end
@@ -631,6 +670,16 @@ function MOD:UpdateBarGroup(bp)
 	end
 end
 
+-- Setup graphics library to show a horizontal stripe
+local function ShowStripe(bp, bg)
+	if bp.stripeTexture then bgtexture = media:Fetch("statusbar", bp.stripeTexture) else bgtexture = nil end
+	local sc = bp.stripeColor or gc
+	if bp.stripeCheckCondition and bp.stripeCondition and MOD:CheckCondition(bp.stripeCondition) then sc = bp.stripeAltColor end
+	local borderTexture = (bp.stripeBorderTexture ~= "None") and media:Fetch("border", bp.stripeBorderTexture) or nil
+	MOD.Nest_SetBarGroupStripe(bg, bp.stripeFullWidth, bp.stripeWidth, bp.stripeHeight, bp.stripeInset, bp.stripeOffset,
+		bp.stripeBarInset, bp.stripeBarOffset, bgtexture, sc, borderTexture, bp.stripeBorderWidth, bp.stripeBorderOffset, bp.stripeBorderColor or gc)
+end
+
 -- Update the positions of all anchored bar groups plus make sure valid positions in all bar groups
 function MOD:UpdatePositions()
 	for _, bp in pairs(MOD.db.profile.BarGroups) do -- update bar group positions including relative ones if anchored
@@ -659,6 +708,7 @@ end
 
 -- Update all the bar groups, this is necessary when changing stuff that can affect bars in multiple groups (e.g., buff colors and labels)
 function MOD:UpdateAllBarGroups()
+	MOD:UpdateConditions() -- update in case these affect any bar groups and also to update option panel correctly when changing condition settings
 	for _, bp in pairs(MOD.db.profile.BarGroups) do -- update for changed bar group settings
 		if IsOn(bp) then MOD:UpdateBarGroup(bp) end
 	end
@@ -751,18 +801,53 @@ local function Bar_OnUpdate(bar)
 end
 MOD.Bar_OnUpdate = Bar_OnUpdate -- saved for tooltip updating
 
--- Show tooltip when entering a bar
-local function Bar_OnEnter(frame, bgName, barName, ttanchor)
-	if (ttanchor == "DEFAULT") and (GetCVar("UberTooltips") == "1") then
-		GameTooltip_SetDefaultAnchor(GameTooltip, frame)
+-- Anchor the tooltip appropriately
+local function Bar_AnchorTooltip(frame, tooltip, ttanchor)
+	if not ttanchor then
+		tooltip:ClearAllPoints()
+		if type(tooltip.SetOwner) == "function" then tooltip:SetOwner(frame, "ANCHOR_NONE") end
+		local _, fy = frame:GetCenter()
+		local _, sy = UIParent:GetCenter()
+		local frameAnchor, tooltipAnchor
+		if sy > fy then frameAnchor = "TOP"; tooltipAnchor = "BOTTOM" else frameAnchor = "BOTTOM"; tooltipAnchor = "TOP" end
+		tooltip:SetPoint(tooltipAnchor, frame, frameAnchor)
+	elseif (ttanchor == "DEFAULT") and (GetCVar("UberTooltips") == "1") then
+		GameTooltip_SetDefaultAnchor(tooltip, frame)
 	else
 		if not ttanchor or (ttanchor == "DEFAULT") then ttanchor = "ANCHOR_BOTTOMLEFT" else ttanchor = "ANCHOR_" .. ttanchor end
-		GameTooltip:SetOwner(frame, ttanchor)
-	end
+		tooltip:SetOwner(frame, ttanchor)
+	end	
+end
+
+-- Show tooltip when entering a bar
+local function Bar_OnEnter(frame, bgName, barName, ttanchor)
 	local bg = MOD.Nest_GetBarGroup(bgName)
 	if not bg then return end
 	local bar = MOD.Nest_GetBar(bg, barName)
-	if bar then
+	if not bar then return end
+	local bat = bar.attributes
+	local tt = bat.tooltipType
+	local db = bat.tooltipID
+	if tt == "broker" then
+		if type(db) == "table" then
+			if db.tooltip and type(db.tooltip) == "table" and type(db.tooltip.SetText) == "function" and type(dp.tooltip.Show) == "function" then
+				Bar_AnchorTooltip(frame, db.tooltip)
+				if db.tooltiptext then db.tooltip:SetText(db.tooltiptext) end
+				db.tooltip:Show()
+			elseif type(db.OnTooltipShow) == "function" then
+				Bar_AnchorTooltip(frame, GameTooltip)
+				db.OnTooltipShow(GameTooltip)
+				GameTooltip:Show()
+			elseif db.tooltiptext then
+				Bar_AnchorTooltip(frame, GameTooltip)
+				GameTooltip:SetText(db.tooltiptext)
+				GameTooltip:Show()
+			elseif type(db.OnEnter) == "function" then
+				db.OnEnter(frame)
+			end
+		end
+	else
+		Bar_AnchorTooltip(frame, GameTooltip, ttanchor)
 		MOD.tooltipBar = bar
 		Bar_OnUpdate(bar)
 	end
@@ -770,7 +855,27 @@ end
 
 -- Hide tooltip when leaving a bar
 local function Bar_OnLeave(frame, bgName, barName, ttanchor)
-	MOD.tooltipBar = nil; GameTooltip:Hide()
+	local bg = MOD.Nest_GetBarGroup(bgName)
+	if not bg then return end
+	local bar = MOD.Nest_GetBar(bg, barName)
+	if not bar then return end
+	local bat = bar.attributes
+	local tt = bat.tooltipType
+	local db = bat.tooltipID
+	if tt == "broker" then
+		if type(db) == "table" then
+			if type(db.OnTooltipShow) == "function" then GameTooltip:Hide() end
+			if type(db.OnLeave) == "function" then
+				db.OnLeave(frame)
+			elseif db.tooltip and type(db.tooltip) == "table" and type(dp.tooltip.Hide) == "function" then
+				db.tooltip:Hide()
+			else
+				GameTooltip:Hide()
+			end
+		end
+	else
+		MOD.tooltipBar = nil; GameTooltip:Hide()
+	end
 end
 
 -- Handle clicking on a bar for various purposes
@@ -778,18 +883,18 @@ local function Bar_OnClick(frame, bgName, barName, button)
 	local bg = MOD.Nest_GetBarGroup(bgName)
 	if not bg then return end
 	local bar = MOD.Nest_GetBar(bg, barName)
-	if not bar then return end	
+	if not bar then return end
 	local bat = bar.attributes
 	local tt = bat.tooltipType
---	local id = bat.tooltipID -- unused since totem destroy was blocked in 5.1
+	local db = bat.tooltipID
 	local unit = bat.tooltipUnit
-	if (button == "LeftButton") and (unit == "player") and (tt == "tracking") then
+	if (tt == "tracking") and (button == "LeftButton") and (unit == "player") then
 		if GameTooltip:GetOwner() == frame then GameTooltip:Hide() end
 		ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, frame, 0, 0)
-	elseif (button == "RightButton") and (tt == "totem") then
---		DestroyTotem(id) -- destroy the selected totem (this call is now blocked in 5.1)
-	elseif (button == "RightButton") and (tt == "header") then
+	elseif (tt == "header") and (button == "RightButton") then
 		MOD:RemoveTrackers(unit)
+	elseif (tt == "broker") then
+		if type(db) == "table" and type(db.OnClick) == "function" then db.OnClick(frame, button) end
 	end
 end
 
@@ -824,6 +929,12 @@ local numberPatterns = { -- patterns for extracting up to 10 numbers from a stri
 	"%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+%d+%.?%d*%D+(%d+%.?%d*)",
 }
 
+-- Remove color escape sequences from a string
+local function uncolor(s)
+	local t = string.gsub(s, "|c........", ""); t = string.gsub(t, "|r", "") -- remove color escape sequences from the text
+	return t
+end
+
 -- Return a number found in a tooltip for auras and cooldowns
 local function GetTooltipNumber(ttType, ttID, ttUnit, ttOffset)
 	if not ttOffset or ttOffset > #numberPatterns then ttOffset = 1 end -- determine offset into numberPatterns
@@ -848,8 +959,7 @@ local function GetTooltipNumber(ttType, ttID, ttUnit, ttOffset)
 			local s = tt.tooltiplines[i]:GetText()
 			if s then t = t .. s else break end
 		end
-		t = string.gsub(t, "|c........", ""); t = string.gsub(t, "|r", "") -- remove color escape sequences from the text
-		t = string.gsub(t, ",", "") -- remove all commas since they impact conversion of numbers over a thousand
+		t = string.gsub(uncolor(t), ",", "") -- remove escape sequences and commas since they impact conversion of numbers
 		return string.match(t, pattern) -- extract number from the tooltip, if one exists for the specified offset
 	end
 	return nil
@@ -893,10 +1003,14 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 	
 	local iconCount = nil
 	if count then
-		count = math.floor(count + 0.001)
-		if b.barType == "Cooldown" or (count > 1) then
-			if not vbp.hideCount then label = string.format("%s (%d)", label, count) end
-			if not vbp.hideIcon then iconCount = count end
+		if type(count) ~= "number" then
+			if not vbp.hideIcon and count ~= "" then iconCount = count end
+		else
+			count = math.floor(count + 0.001)
+			if b.barType == "Cooldown" or (count > 1) then
+				if not vbp.hideCount then label = string.format("%s (%d)", label, count) end
+				if not vbp.hideIcon then iconCount = count end
+			end
 		end
 	end
 	
@@ -912,7 +1026,7 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 			bar = MOD.Nest_CreateBar(bg, barname)
 			if bar then MOD.Nest_StartTimer(bar, timeLeft, duration, maxTime); if b.ghost then bar.attributes.ghostDuration = b.delayTime or 5 end end
 		end
-	elseif bp.showNoDuration or (b.barType == "Notification") or b.enableReady then -- bars without duration
+	elseif bp.showNoDuration or (b.barType == "Notification") or (b.barType == "Broker") or b.enableReady then -- bars without duration
 		if bar and MOD.Nest_IsTimer(bar) then MOD.Nest_DeleteBar(bg, bar); bar = nil end
 		if not bar then
 			bar = MOD.Nest_CreateBar(bg, barname)
@@ -923,11 +1037,12 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 		local bat = bar.attributes -- optimization to address overhead from setting a large number of bar attributes
 		bat.updated = true -- for mark/sweep bar deletion
 		bat.ghostTime = nil -- delete in case was previously a ghost bar
-		MOD.Nest_SetLabel(bar, label)
+		MOD.Nest_SetLabel(bar, b.barText or label)
 		local tex = nil
 		if b.action and MOD.db.global.SpellIcons[b.action] then tex = MOD:GetIcon(b.action) end -- check for override of the icon
 		if tex then MOD.Nest_SetIcon(bar, tex) else MOD.Nest_SetIcon(bar, icon) end
-		local bc = (vbp.bgColors == "Custom") and vbp.bgColor or c
+		bat.customBackground = (vbp.bgColors == "Custom") -- check if using a custom background color
+		local bc = bat.customBackground and vbp.bgColor or c
 		local ibr, ibg, ibb, iba = 1, 1, 1, 1
 		local ic = vbp.iconBorderColor
 		if vbp.iconColors == "Normal" or (isMine and (vbp.iconColors == "Player")) then
@@ -995,10 +1110,17 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 			bat.replayTime = replayTime -- how often to replay start sound
 		end
 		
-		if b.barType ~= "Notification" then
+		if b.barType ~= "Notification" and b.barType ~= "Broker" then
 			bat.saveBarGroup = vbp; bat.saveBarType = b.barType; bat.saveBarAction = b.action
 		else
 			bat.saveBarGroup = nil; bat.saveBarType = nil; bat.saveBarAction = nil
+			if b.brokerVariable then -- support variable width brokers
+				bat.minimumWidth = b.brokerMinimumWidth or 0; bat.maximumWidth = b.brokerMaximumWidth or 1000
+			else
+				bat.minimumWidth = nil; bat.maximumWidth = nil
+			end
+			bat.horizontalAlign = b.brokerAlign -- optional alignment on a horizontal bar
+			MOD.Nest_SetValue(bar, b.value, b.maxValue, b.valueText, b.includeBar, b.includeOffset) -- currently used by brokers
 		end
 		
 		local click, onEnter, onLeave = Bar_OnClick, nil, nil
@@ -1091,14 +1213,18 @@ local function DetectNewBuffs(unit, n, aura, isBuff, bp, vbp, bg)
 	local isMagic = (ttype == "Magic") and not isStealable
 	local isEffect = (tt == "effect")
 	local isWeapon = (tt == "weapon")
+	local isTracking = (tt == "tracking")
+	local isResource = (ttype == "Power")
 	local isCastable = aura[17] and not isWeapon
-	local isOther = not isStealable and not isCastable and not isNPC and not isVehicle and not isMagic and not isEffect and not isWeapon and not isBoss and not isEnrage
+	local isOther = not isStealable and not isCastable and not isNPC and not isVehicle and not isMagic and not isEffect and
+		not isWeapon and not isBoss and not isEnrage and not isTracking and not isResource
 	local isMine = (aura[6] == "player")
 	local id, gname = aura[20], aura[21] -- these fields are only valid if unit == "all"
 	local checkAll = (unit == "all")
 	local checkTypes = not bp.filterBuffTypes or (bp.detectStealable and isStealable) or (bp.detectCastable and isCastable)
 		or (bp.detectNPCBuffs and isNPC) or (bp.detectVehicleBuffs and isVehicle) or (bp.detectBossBuffs and isBoss) or (bp.detectEnrageBuffs and isEnrage)
-		or (bp.detectMagicBuffs and isMagic) or (bp.detectEffectBuffs and isEffect) or (bp.detectWeaponBuffs and isWeapon) or (bp.detectOtherBuffs and isOther)
+		or (bp.detectMagicBuffs and isMagic) or (bp.detectEffectBuffs and isEffect) or (bp.detectWeaponBuffs and isWeapon)
+		or (bp.detectTrackingBuffs and isTracking)or (bp.detectResourceBuffs and isResource) or (bp.detectOtherBuffs and isOther)
 	if ((checkAll and not (bp.noPlayerBuffs and (id == UnitGUID("player"))) and not (bp.noPetBuffs and (id == UnitGUID("pet")))
 			and not (bp.noTargetBuffs and (id == UnitGUID("target"))) and not (bp.noFocusBuffs and (id == UnitGUID("focus")))) or
 			(not checkAll and not (bp.noPlayerBuffs and UnitIsUnit(unit, "player")) and not (bp.noPetBuffs and UnitIsUnit(unit, "pet"))
@@ -1200,26 +1326,17 @@ local function CheckCooldownType(cd, bp)
 end
 
 -- Return true if cooldown is not one of the special case shared ones
-local function CheckSharedCooldowns(n, b, bp)
-	if bp.detectSharedFrostTraps then
-		if n == LSPELL["Freezing Trap"] then return false end
-		if n == LSPELL["Ice Trap"] then b.barLabel = L["Frost Traps"] end
-	end
-	if bp.detectSharedShocks then
-		if (n == LSPELL["Frost Shock"]) or (n == LSPELL["Flame Shock"]) then return false end
-		if n == LSPELL["Earth Shock"] then b.barLabel = L["Shocks"] end
-	end
-	if bp.detectSharedStances then
-		if (n == LSPELL["Defensive Stance"]) or (n == LSPELL["Berserker Stance"]) then return false end
-		if n == LSPELL["Battle Stance"] then b.barLabel = L["Stances"] end
-	end
-	if bp.detectSharedShouts then
-		if (n == LSPELL["Commanding Shout"]) then return false end
-		if n == LSPELL["Battle Shout"] then b.barLabel = L["Shouts"] end
-	end
-	if bp.detectSharedCrusader then
-		if n == LSPELL["Hammer of the Righteous"] then return false end
-		if n == LSPELL["Crusader Strike"] then b.barLabel = L["Crusader/Hammer"] end
+local function CheckSharedCooldowns(b, bp)
+	local id = b.spellID
+	if MOD.myClass == "WARLOCK" then
+		if bp.detectSharedGrimoires then
+			if id == 111895 or id == 111896 or id == 111897 or id == 111898 then return false end
+			if id == 111859 then b.barLabel = GetSpellInfo(216187); return true end
+		end
+		if bp.detectSharedInfernals then
+			if id == 18540 then return false end
+			if id == 1122 then b.barLabel = L["Summon Infernal/Doomguard"]; return true end
+		end
 	end
 	return true
 end
@@ -1279,27 +1396,36 @@ local function DetectNewCooldowns(n, cd, bp, vbp, bg)
 	if MOD:CheckCastBy(cd[7], bp.detectCooldownsBy) and CheckCooldownType(cd, bp) and CheckTimeAndDuration(bp, cd[1], cd[4]) then
 		local b = detectedBar
 		b.action = n; b.spellID = cd[8]; b.barType = "Cooldown"; b.barLabel = label; b.uniqueID = "Cooldown"; b.listID = listID; b.group = nil
-		if CheckSharedCooldowns(n, b, bp) then
+		if CheckSharedCooldowns(b, bp) then
 			UpdateBar(bp, vbp, bg, b, cd[2], cd[1], cd[4], cd[9], nil, cd[5], cd[6], nil, nil, true)
 		end
 	end
 end
 
+-- Check the "show when" conditions specified for a bar group
+-- Each condition (e.g., "in combat") is checked and if true then that condition must be enabled for the bar group
+local function CheckShow(bp)
+	local pst, stat = PartyInfo(), MOD.status
+	if InCinematic() or C_PetBattles.IsInBattle() or
+	(pst == "solo" and not bp.showSolo) or (pst == "party" and not bp.showParty) or (pst == "raid" and not bp.showRaid) or
+	(stat.inCombat and not bp.showCombat) or (not stat.inCombat and not bp.showOOC) or
+	(not MOD.db.profile.hideBlizz and not bp.showBlizz) or (MOD.db.profile.hideBlizz and not bp.showNotBlizz) or
+	(stat.isResting and not bp.showResting) or (stat.isStealthed and not bp.showStealth) or
+	(stat.isMounted and not bp.showMounted) or (stat.inVehicle and not bp.showVehicle) or
+	(stat.targetEnemy and not bp.showEnemy) or (stat.targetFriend and not bp.showFriend) or
+	(stat.inInstance and not bp.showInstance) or (not stat.inInstance and not bp.showNotInstance) or
+	(stat.inArena and not bp.showArena) or (stat.inBattleground and not bp.showBattleground) or
+	(UnitIsUnit("focus", "target") and not bp.showFocusTarget) or
+	(bp.showClasses and bp.showClasses[MOD.myClass]) or
+	(bp.showSpecialization and bp.showSpecialization ~= "" and not MOD.CheckSpec(bp.showSpecialization, bp.specializationList)) or
+	(bp.checkCondition and IsOn(bp.condition) and not MOD:CheckCondition(bp.condition)) then return false end
+	return true
+end
+
 -- Update all bars in bar group (bp), causing them to appear in display bar group (bg) using appearance options (vbp)
 -- The show/hide conditions are tested in this function so they are depending on the updating bar group
 local function UpdateBarGroupBars(bp, vbp, bg)
-	local pst, stat = PartyInfo(), MOD.status
-	local show = (((pst == "solo") and bp.showSolo) or ((pst == "party") and bp.showParty) or ((pst == "raid") and bp.showRaid)) and
-		((bp.showCombat and stat.inCombat) or (bp.showOOC and not stat.inCombat)) and (not stat.isResting or bp.showResting) and
-		((bp.showBlizz and not MOD.db.profile.hideBlizz) or (bp.showNotBlizz and MOD.db.profile.hideBlizz)) and
-		(bp.showFishing or not stat.isFishing) and (bp.showMounted or not stat.isMounted) and (bp.showVehicle or not stat.inVehicle) and 
-		(bp.showEnemy or not stat.targetEnemy) and (bp.showFriendly or not stat.targetFriend) and 
-		(not bp.checkCondition or IsOff(bp.condition) or MOD:CheckCondition(bp.condition)) and (bp.showBattleground or not stat.inBattleground) and
-		((bp.showInstance and stat.inInstance) or (bp.showNotInstance and not stat.inInstance)) and (bp.showArena or not stat.inArena) and
-		(not bp.showSpecialization or (bp.showSpecialization == "") or MOD.CheckSpec(bp.showSpecialization, bp.specializationList)) and not InCinematic() and
-		(not bp.showClasses or not bp.showClasses[MOD.myClass]) and (not UnitIsUnit("focus", "target") or bp.showFocusTarget) and not C_PetBattles.IsInBattle()
-		
-	if show then
+	if CheckShow(bp) then
 		if bp.auto then -- if auto bar group then detect new auras and cooldowns
 			fixDups = 0 -- workaround to support multiple instances of same spell id for certain weapon enchants
 			if bp.detectBuffs then MOD:IterateAuras(bp.detectAllBuffs and "all" or bp.detectBuffsMonitor, DetectNewBuffs, true, bp, vbp, bg) end
@@ -1382,10 +1508,64 @@ local function UpdateBarGroupBars(bp, vbp, bg)
 						end
 					elseif t == "Notification" then
 						if MOD:CheckCondition(bar.action) then
-							bar.spellID = nil
+							bar.spellID = nil; bar.includeBar = true
 							local icon = MOD:GetIconForBar(bar)
 							if not icon then icon = defaultNotificationIcon end
 							UpdateBar(bp, vbp, bg, bar, icon, 0, 0, nil, nil, "notification", bar.barLabel, bar.action, nil, true)
+						end
+					elseif t == "Broker" then
+						local db = MOD.knownBrokers[bar.action] -- check in the registered brokers table
+						if db then
+							bar.spellID = nil
+							local icon = nil
+							if not bar.hideIcon then
+								icon = db.icon
+								if not icon then icon = defaultBrokerIcon end
+							end
+							bar.value = nil; bar.maxValue = nil; bar.valueText = nil
+							local count = nil
+							local s = db.text
+							if bar.hideText or not s then
+								if bar.brokerLabel then
+									s = db.label
+									if not s then s = MOD.LibLDB:GetNameByDataObject(db) end
+									if bar.recolorText then s = uncolor(s) end
+								else
+									s = ""
+								end
+								bar.barText = s
+							else
+								if bar.recolorText then s = uncolor(s) end
+								bar.barText = s
+								if bar.brokerLabel then
+									s = db.label
+									if not s then s = MOD.LibLDB:GetNameByDataObject(db) end
+									if bar.recolorText then s = uncolor(s) end
+									if bar.barText == "" then bar.barText = s else bar.barText = s .. ": " .. bar.barText end
+								end
+							end
+							local s = db.value or db.text
+							if s then
+								local n = string.gsub(uncolor(s), ",", "") -- remove escape sequences and commas
+								n = string.match(n, "(%d+%.?%d*)") -- extract number from the string, if any
+								if bar.brokerValue then
+									if bar.brokerNumber then count = n else count = s end
+								end
+								if n then
+									if bar.brokerPercentage then
+										local pct = (tonumber(n) or 0) / 100
+										bar.value = pct; bar.maxValue = 1
+									elseif bar.brokerMaximum and bar.brokerMaxValue then
+										local m = tonumber(bar.brokerMaxValue) or 0
+										if m > 0 then
+											bar.value = tonumber(n) or 0
+											bar.maxValue = m
+											bar.valueText = (bar.recolorText and "Max: " or "|cFF7adbf2Max:|r ") .. tostring(bar.maxValue)
+										end
+									end
+								end
+							end
+							UpdateBar(bp, vbp, bg, bar, icon, 0, 0, count, nil, "broker", db, nil, nil, true)
 						end
 					end
 				end
@@ -1450,6 +1630,7 @@ function MOD:UpdateBars()
 							end
 						end
 						MOD.Nest_SetBarGroupAlpha(bg, MOD.status.inCombat and bp.bgCombatAlpha or bp.bgNormalAlpha, bp.mouseAlpha, bp.disableAlpha)
+						ShowStripe(bp, bg) -- deferred to make sure condition is valid
 					end				
 					UpdateGhostBars(bp, bg) -- create and/or update ghost bars in this bar group
 					UpdateTestBars(bp, bg) -- update any unexpired test bars in this bar group

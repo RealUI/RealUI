@@ -9,6 +9,8 @@ local acereg = LibStub("AceConfigRegistry-3.0")
 local acedia = LibStub("AceConfigDialog-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Raven")
 local initialized = false -- set when options are first accessed
+local changedSpells = {} -- table of spells with overrides on Spells tab
+local temp = {} -- temporary table that can be reused in any function
 
 local standard = { -- standard bar groups for "getting started"
 	PlayerBuffs = false, PlayerDebuffs = false, Cooldowns = false, Target = false, Focus = false, Totems = false,
@@ -32,7 +34,7 @@ local bars = { -- settings used to enter bars and bar groups
 	enter = false, toggle = false, auto = false, mode = false, template = nil, save = nil, config = nil,
 }
 
-local conditions = { -- settings used to enter conditions
+local conditions = { -- settings used to enter conditions and other list-based selections
 	select = nil, enter = false, toggle = false, dependency = nil, profiles = {}, name = nil, buff = nil
 }
 
@@ -571,6 +573,16 @@ local function EnterNewBar(state)
 					end
 				end
 			end
+		elseif bars.template.barType == "Broker" then -- data broker
+			if conditions.select then
+				local bname = MOD.brokerList[conditions.select]
+				MOD:ActivateDataBroker(bname) -- start getting updates for this broker
+				local label = MOD:GetLabel(bname)
+				local bar = {
+					action = bname, enableBar = true, barLabel = label, barType = bars.template.barType,
+				}
+				if AddBarToGroup(bg, bar) then if not sel then sel = bar.barLabel end end
+			end
 		elseif ValidateSpellName(conditions.name) then
 			local bname = conditions.name
 			local label = MOD:GetLabel(bname)
@@ -600,6 +612,13 @@ local function GetBarDescription(info)
 			a = L["Type and condition string"](n.barType, n.action)
 			local spell = MOD:GetAssociatedSpellForBar(n)
 			if spell then a = a .. L["Associated spell string"](spell) end
+		elseif n.barType == "Broker" then
+			a = L["Broker string"](n.barType, n.action)
+			local db = MOD.knownBrokers[n.action] -- check in the registered brokers table
+			if db then
+				if db.type == "data source" then a = a .. L["Broker data source string"] end
+				if db.type == "launcher" then a = a .. L["Broker launcher string"] end
+			end
 		elseif n.barType == "Buff" or n.barType == "Debuff" or n.barType == "Cooldown" then
 			if n.action then
 				a = L["Type action string"](n.action, n.barType)
@@ -653,6 +672,11 @@ end
 -- Get the icon associated with the current bar
 local function GetBarIcon(info)
 	local b = GetBarEntry(info)
+	if b.barType == "Broker" then
+		local db = MOD.knownBrokers[b.action] -- check in the registered brokers table
+		if db and db.icon then return db.icon end
+		return defaultBrokerIcon
+	end
 	return MOD:GetIconForBar(b)
 end
 
@@ -711,6 +735,18 @@ local function GetSelectConditionList()
 	end
 	table.sort(t)
 	return t, i
+end
+
+-- Generate a list of changed spells to select from
+local function GetChangedSpellsList()
+	table.wipe(temp) -- clear table used to prevent duplicate names
+	table.wipe(changedSpells) -- clear table that will be sorted with changed spell names
+	for k, v in pairs(MOD.db.global.Labels) do if not temp[k] then temp[k] = true; table.insert(changedSpells, k) end end
+	for k, v in pairs(MOD.db.global.Sounds) do if not temp[k] then temp[k] = true; table.insert(changedSpells, k) end end
+	for k, v in pairs(MOD.db.global.SpellColors) do if not temp[k] and not MOD:CheckColorDefault(k) then temp[k] = true; table.insert(changedSpells, k) end end
+	for k, v in pairs(MOD.db.global.SpellIcons) do if not temp[k] then temp[k] = true; table.insert(changedSpells, k) end end
+	table.sort(changedSpells)
+	return changedSpells
 end
 
 -- Get the, potentially cached, list of conditions to select from
@@ -808,6 +844,17 @@ local function GetBarGroupSelectedCondition(list)
 	if bp and bp.checkCondition and bp.condition then
 		for j, c in pairs(list) do
 			if c == bp.condition then return j end
+		end
+	end
+	return nil
+end
+
+-- Return the alt color condition associated with a bar group
+local function GetBarGroupAltCondition(list)
+	local bp = GetBarGroupEntry()
+	if bp and bp.stripeCheckCondition and bp.stripeCondition then
+		for j, c in pairs(list) do
+			if c == bp.stripeCondition then return j end
 		end
 	end
 	return nil
@@ -1513,6 +1560,72 @@ local function GetTimeFormatList(s, c)
 	return menu
 end
 
+-- Display an alignment grid overlay
+-- Switch to +/- gridScale/2
+-- Make number of lines and colors configurable in Defaults tab
+local gridFrame = nil
+local gridAllocated = 0 -- number of allocated textures
+local gridCount = 0 -- number of used textures
+local gridTextures = {} -- table of allocated textures
+local gridScale = 1 -- scale of each pixel
+local function GPP(x) return gridScale * math.floor((x / gridScale) + 0.5) end -- compute pixel perfect position
+			
+local function DrawHorizontalLine(pos, c, alpha, w, h) -- draw a horizontal line
+	gridCount = gridCount + 1
+	while gridCount > gridAllocated do gridAllocated = gridAllocated + 1; gridTextures[gridAllocated] = gridFrame:CreateTexture(nil, 'BACKGROUND') end
+	local t = gridTextures[gridCount]
+	t:ClearAllPoints()
+	local top = GPP(pos + (h / 2))
+	t:SetPoint('TOPLEFT', gridFrame, 'BOTTOMLEFT', 0, top)
+	t:SetPoint('BOTTOMRIGHT', gridFrame, 'BOTTOMLEFT', w, top - gridScale)
+	t:SetColorTexture(c.r, c.g, c.b, alpha); t:Show()
+end
+
+local function DrawVerticalLine(pos, c, alpha, w, h) -- draw a vertical line
+	gridCount = gridCount + 1
+	while gridCount > gridAllocated do gridAllocated = gridAllocated + 1; gridTextures[gridAllocated] = gridFrame:CreateTexture(nil, 'BACKGROUND') end
+	local t = gridTextures[gridCount]
+	t:ClearAllPoints()
+	local left = GPP(pos + (w / 2))
+	t:SetPoint('TOPLEFT', gridFrame, 'BOTTOMLEFT', left, h)
+	t:SetPoint('BOTTOMRIGHT', gridFrame, 'BOTTOMLEFT', left + gridScale, 0)
+	t:SetColorTexture(c.r, c.g, c.b, alpha); t:Show()
+end
+
+local function DisplayGridPattern(toggle)
+	if not gridFrame then -- if first time then create the frame and figure out the scale for pixels
+		gridFrame = CreateFrame('Frame', nil, UIParent) 
+		gridFrame:SetAllPoints(UIParent); gridFrame:Hide()
+	end
+	
+	local w, h = GetScreenWidth(), GetScreenHeight()
+	gridScale = MOD.Nest_PixelScale() -- factor that relates size of virtual pixels to screen pixels
+	local spacing = GPP(h / MOD.db.global.GridLines) -- distance between lines
+	gridCount = 0 -- current texture index
+	local alpha = MOD.db.global.GridAlpha
+	local c = MOD.db.global.GridCenterColor
+
+	if gridFrame:IsShown() and toggle then
+		gridFrame:Hide() -- if toggling it off then just hide the frame to remove all the lines
+	elseif gridFrame:IsShown() or toggle then				
+		DrawHorizontalLine(0, c, alpha, w, h); DrawVerticalLine(0, c, alpha, w, h) -- draw center horizontal and vertical lines	
+		c = MOD.db.global.GridLineColor -- switch to line color
+		
+		for k = 1, h / (2 * spacing) do -- figure out how many pairs of horizontal lines to draw
+			local offset = k * spacing
+			DrawHorizontalLine(-offset, c, alpha, w, h) -- draw horizontal line above center
+			DrawHorizontalLine(offset, c, alpha, w, h) -- draw horizontal line below center
+		end
+		for k = 1, w / (2 * spacing) do -- figure out how many pairs of vertical lines to draw
+			local offset = k * spacing
+			DrawVerticalLine(-offset, c, alpha, w, h) -- draw vertical line left of center
+			DrawVerticalLine(offset, c, alpha, w, h) -- draw vertical line right of center
+		end
+		gridFrame:Show() -- turn on the grid overlay
+	end
+	while gridCount < gridAllocated do gridCount = gridCount + 1; t = gridTextures[gridCount]; t:Hide() end -- hide any extra textures
+end
+
 -- Create a mini-options table to be inserted at top level in the Bliz interface
 -- L["Top Options"] = "This addon lets you monitor buffs and debuffs for player, target and focus. Monitored buffs and debuffs can trigger helpful notifications."
 -- For some reason cannot localize the strings in this table!
@@ -1552,7 +1665,7 @@ MOD.OptionsTable = {
 						},
 						HideBlizzRunesGroup = {
 							type = "toggle", order = 25, name = L["Hide Blizzard Runes"],
-							desc = L["If checked, Raven will hide the default user interface for runes."],
+							desc = L["Hide runes string"],
 							get = function(info) return MOD.db.profile.hideRunes end,
 							set = function(info, value) MOD.db.profile.hideRunes = value end,
 						},
@@ -1726,7 +1839,7 @@ MOD.OptionsTable = {
 						},
 						LinkSettings = {
 							type = "execute", order = 97, name = L["Link"], width = "half",
-							desc = L["Link settings string"],
+							desc = L["Link standard group string"],
 							disabled = function(info) return not AnySelectedStandardBarGroups(true) end,
 							func = function(info) LinkStandardBarGroups() end,
 						},
@@ -1760,6 +1873,11 @@ MOD.OptionsTable = {
 							type = "execute", order = 13, name = L["Toggle Test Mode"],
 							desc = L["Toggle test mode for all bar groups."],
 							func = function(info) MOD:TestBarGroups() end,
+						},
+						AlignGrid = {
+							type = "execute", order = 14, name = L["Toggle Overlay"],
+							desc = L["Toggle overlay grid for aligning UI elements (see Defaults tab for options)."],
+							func = function(info) DisplayGridPattern(true) end,
 						},
 					},
 				},
@@ -2432,8 +2550,17 @@ MOD.OptionsTable = {
 								MOD:UpdateAllBarGroups()
 							end,
 						},
+						BrokerColor = {
+							type = "color", order = 11, name = L["Broker"], hasAlpha = false, width = "half",
+							get = function(info) local t = MOD.db.global.DefaultBrokerColor; return t.r, t.g, t.b, t.a end,
+							set = function(info, r, g, b, a)
+								local t = MOD.db.global.DefaultBrokerColor
+								t.r = r; t.g = g; t.b = b; t.a = a
+								MOD:UpdateAllBarGroups()
+							end,
+						},
 						BuffColor = {
-							type = "color", order = 11, name = L["Buff"], hasAlpha = false, width = "half",
+							type = "color", order = 12, name = L["Buff"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultBuffColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultBuffColor
@@ -2442,7 +2569,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						DebuffColor = {
-							type = "color", order = 12, name = L["Debuff"], hasAlpha = false, width = "half",
+							type = "color", order = 13, name = L["Debuff"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultDebuffColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultDebuffColor
@@ -2451,7 +2578,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						CooldownColor = {
-							type = "color", order = 13, name = L["Cooldown"], hasAlpha = false,
+							type = "color", order = 14, name = L["Cooldown"], hasAlpha = false,
 							get = function(info) local t = MOD.db.global.DefaultCooldownColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultCooldownColor
@@ -2459,10 +2586,10 @@ MOD.OptionsTable = {
 								MOD:UpdateAllBarGroups()
 							end,
 						},
-						Space0 = { type = "description", name = "", order = 14 },
-						DebuffText = { type = "description", name = L["Special Colors:"], order = 15, width = "half" },
+						Space0 = { type = "description", name = "", order = 15 },
+						DebuffText = { type = "description", name = L["Special Colors:"], order = 16, width = "half" },
 						PoisonColor = {
-							type = "color", order = 16, name = L["Poison"], hasAlpha = false, width = "half",
+							type = "color", order = 17, name = L["Poison"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultPoisonColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultPoisonColor
@@ -2471,7 +2598,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						CurseColor = {
-							type = "color", order = 17, name = L["Curse"], hasAlpha = false, width = "half",
+							type = "color", order = 18, name = L["Curse"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultCurseColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultCurseColor
@@ -2480,7 +2607,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						MagicColor = {
-							type = "color", order = 18, name = L["Magic"], hasAlpha = false, width = "half",
+							type = "color", order = 19, name = L["Magic"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultMagicColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultMagicColor
@@ -2489,7 +2616,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						DiseaseColor = {
-							type = "color", order = 19, name = L["Disease"], hasAlpha = false, width = "half",
+							type = "color", order = 20, name = L["Disease"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultDiseaseColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultDiseaseColor
@@ -2498,7 +2625,7 @@ MOD.OptionsTable = {
 							end,
 						},
 						StealColor = {
-							type = "color", order = 20, name = L["Stealable"], hasAlpha = false, width = "half",
+							type = "color", order = 21, name = L["Stealable"], hasAlpha = false, width = "half",
 							get = function(info) local t = MOD.db.global.DefaultStealColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultStealColor
@@ -2516,6 +2643,7 @@ MOD.OptionsTable = {
 								MOD.db.global.DefaultDebuffColor = MOD.HexColor("fcaf3e") -- Orange1
 								MOD.db.global.DefaultCooldownColor = MOD.HexColor("fce94f") -- Yellow1
 								MOD.db.global.DefaultNotificationColor = MOD.HexColor("729fcf") -- Blue1								
+								MOD.db.global.DefaultBrokerColor = MOD.HexColor("888a85") -- Gray
 							end,
 						},
 						ResetDebuffColors = {
@@ -2527,6 +2655,7 @@ MOD.OptionsTable = {
 								MOD.db.global.DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"])
 								MOD.db.global.DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"])
 								MOD.db.global.DefaultDiseaseColor = MOD.CopyColor(DebuffTypeColor["Disease"])						
+								MOD.db.global.DefaultStealColor = MOD.HexColor("ef2929") -- Red1						
 							end,
 						},
 					},
@@ -2639,6 +2768,48 @@ MOD.OptionsTable = {
 						},
 					},
 				},
+				OverlayGroup = {
+					type = "group", order = 75, name = L["Overlay Options"], inline = true,
+					args = {
+						LineCount = {
+							type = "range", order = 10, name = L["Lines"], min = 10, max = 100, step = 1,
+							desc = L["Adjust number of lines displayed for the overlay."],
+							get = function(info) return MOD.db.global.GridLines end,
+							set = function(info, value) MOD.db.global.GridLines = value; DisplayGridPattern(false) end,
+						},
+						Alpha = {
+							type = "range", order = 20, name = L["Opacity"], min = 0, max = 1, step = 0.05,
+							desc = L["Set opacity for the overlay."],
+							get = function(info) return MOD.db.global.GridAlpha end,
+							set = function(info, value) MOD.db.global.GridAlpha = value; DisplayGridPattern(false) end,
+						},
+						CenterColor = {
+							type = "color", order = 30, name = L["Center Line"], hasAlpha = false, width = "half",
+							desc = L["Set color for the overlay's center horizontal and vertical lines."],
+							get = function(info) local t = MOD.db.global.GridCenterColor; return t.r, t.g, t.b, t.a end,
+							set = function(info, r, g, b, a)
+								local t = MOD.db.global.GridCenterColor
+								t.r = r; t.g = g; t.b = b; t.a = a
+								DisplayGridPattern(false)
+							end,
+						},
+						LineColor = {
+							type = "color", order = 40, name = L["Other Lines"], hasAlpha = false, width = "half",
+							desc = L["Set color for the other overlay lines."],
+							get = function(info) local t = MOD.db.global.GridLineColor; return t.r, t.g, t.b, t.a end,
+							set = function(info, r, g, b, a)
+								local t = MOD.db.global.GridLineColor
+								t.r = r; t.g = g; t.b = b; t.a = a
+								DisplayGridPattern(false)
+							end,
+						},
+						AlignGrid = {
+							type = "execute", order = 50, name = L["Toggle Overlay"],
+							desc = L["Toggle overlay grid for aligning UI elements."],
+							func = function(info) DisplayGridPattern(true) end,
+						},
+					},
+				},
 				SoundGroup = {
 					type = "group", order = 80, name = L["Sound Channel"], inline = true,
 					args = {
@@ -2668,6 +2839,46 @@ MOD.OptionsTable = {
 						},
 					},
 				},
+				UnitsGroup = {
+					type = "group", order = 85, name = L["Optional Units For Auto Groups"], inline = true,
+					args = {
+						PartyUnits = {
+							type = "toggle", order = 10, name = L["Party 1-4"],
+							desc = L["If checked, party units may be tracked in auto groups (requires /reload)."],
+							get = function(info) return MOD.db.global.IncludePartyUnits end,
+							set = function(info, value) MOD.db.global.IncludePartyUnits = value; MOD:UpdateAllBarGroups() end,
+						},
+						BossUnits = {
+							type = "toggle", order = 20, name = L["Boss 1-5"],
+							desc = L["If checked, boss units may be tracked in auto groups (requires /reload)."],
+							get = function(info) return MOD.db.global.IncludeBossUnits end,
+							set = function(info, value) MOD.db.global.IncludeBossUnits = value; MOD:UpdateAllBarGroups() end,
+						},
+						ArenaUnits = {
+							type = "toggle", order = 30, name = L["Arena 1-5"],
+							desc = L["If checked, arena units may be tracked in auto groups (requires /reload)."],
+							get = function(info) return MOD.db.global.IncludeArenaUnits end,
+							set = function(info, value) MOD.db.global.IncludeArenaUnits = value; MOD:UpdateAllBarGroups() end,
+						},
+					},
+				},
+				PerformanceGroup = {
+					type = "group", order = 90, name = L["Graphics Performance"], inline = true,
+					args = {
+						UpdateRate = {
+							type = "range", order = 10, name = L["Update Rate"], min = 3, max = 10, step = 1,
+							desc = L["Update string"],
+							get = function(info) return math.floor((1 / (MOD.db.global.UpdateRate or 0.2)) + 0.5) end,
+							set = function(info, value) MOD.db.global.UpdateRate = 1.0 / value; MOD:UpdateAllBarGroups() end,
+						},
+						AnimationRate = {
+							type = "range", order = 20, name = L["Animation Rate"], min = 15, max = 60, step = 1,
+							desc = L["Animation string"],
+							get = function(info) return math.floor((1 / (MOD.db.global.AnimationRate or 0.03)) + 0.5) end,
+							set = function(info, value) MOD.db.global.AnimationRate = 1.0 / value; MOD:UpdateAllBarGroups() end,
+						},
+					},
+				},
 			},
 		},
 		Spells = {
@@ -2686,6 +2897,14 @@ MOD.OptionsTable = {
 							desc = L["Enter a spell name (or numeric identifier, optionally preceded by # for a specific spell id)."],
 							get = function(info) return conditions.name end,
 							set = function(info, n) n = ValidateSpellName(n, true); conditions.name = n end,
+						},
+						ChangedSpellList = {
+							type = "select", order = 35, name = L["Changed Spells"],
+							desc = L["Select from list of spells with changed color, label, icon or sound."],
+							get = function(info) return nil end,
+							set = function(info, value) conditions.name = changedSpells[value] end,
+							values = function(info) return GetChangedSpellsList() end,
+							style = "dropdown",
 						},
 						StandardColors = {
 							type = "select", order = 40, name = L["Color"], width = "half",
@@ -2723,7 +2942,7 @@ MOD.OptionsTable = {
 						SpellIcon = {
 							type = "description", order = 51, name = "", width = "half", 
 							disabled = function(info) return not conditions.name or (conditions.name == "") end,
-							image = function(info) return MOD:GetIcon(conditions.name) end,
+							image = function(info) local t = MOD:GetIcon(conditions.name); return t end,
 							imageWidth = 24, imageHeight = 24,
 						},
 						Space1 = { type = "description", name = "", order = 52 },
@@ -2783,6 +3002,7 @@ MOD.OptionsTable = {
 									MOD:ResetColorDefault(conditions.name)
 									MOD:SetLabel(conditions.name, conditions.name)
 									MOD:SetSound(conditions.name, nil)
+									MOD.db.global.SpellIcons[conditions.name] = nil
 									MOD:UpdateAllBarGroups()
 								end
 							end,
@@ -2863,7 +3083,7 @@ MOD.OptionsTable = {
 								SpellIcon = {
 									type = "description", order = 50, name = "", width = "half", 
 									hidden = function(info) return lists.enter or not lists.select or not lists.list end,
-									image = function(info) return MOD:GetIcon(lists.spell) end,
+									image = function(info) local t = MOD:GetIcon(lists.spell); return t end,
 									imageWidth = 24, imageHeight = 24,
 								},
 								SpellLabel = {
@@ -2946,7 +3166,7 @@ MOD.OptionsTable = {
 								},
 								SpellIcon = {
 									type = "description", order = 20, name = "", width = "half", 
-									image = function(info) return MOD:GetIcon(cooldowns.select) end,
+									image = function(info) local t = MOD:GetIcon(cooldowns.select); return t end,
 									imageWidth = 24, imageHeight = 24,
 								},
 								SpellList = {
@@ -3059,7 +3279,7 @@ MOD.OptionsTable = {
 								},
 								SpellIcon = {
 									type = "description", order = 25, name = "", width = "half", 
-									image = function(info) return MOD:GetIcon(effects.spell or effects.select) end,
+									image = function(info) local t = MOD:GetIcon(effects.spell or effects.select); return t end,
 									imageWidth = 24, imageHeight = 24,
 								},
 								BuffEffect = {
@@ -3253,25 +3473,13 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("enabled") end,
 									set = function(info, value) SetBarGroupField("enabled", value) end,
 								},
-								LinkSettings = {
-									type = "toggle", order = 30, name = L["Link Settings"],
-									desc = L["Link settings string"],
-									get = function(info) return GetBarGroupField("linkSettings") end,
-									set = function(info, value) SetBarGroupField("linkSettings", value) end,
-								},
-								SaveSettings = {
-									type = "execute", order = 40, name = L["Save Settings"],
-									hidden = function(info) return GetBarGroupField("linkSettings") end,
-									desc = L["Click to save current settings to linked settings."],
-									func = function(info) MOD:SaveBarGroupSettings(GetBarGroupEntry()) end,
-								},
-								LockBars = {
-									type = "execute", order = 50, name = L["Lock"], width = "half",
+								LockAnchor = {
+									type = "execute", order = 50, name = L["Lock Anchor"],
 									desc = L["Lock and hide the anchor for the bar group."],
 									func = function(info) SetBarGroupField("locked", true) end,
 								},
-								UnlockBars = {
-									type = "execute", order = 55, name = L["Unlock"], width = "half",
+								UnlockAnchor = {
+									type = "execute", order = 55, name = L["Unlock Anchor"],
 									desc = L["Unlock and show the anchor for the bar group."],
 									func = function(info) SetBarGroupField("locked", false) end,
 								},
@@ -3307,6 +3515,81 @@ MOD.OptionsTable = {
 									set = function(info, value) SetMergeBarGroup(value) end,
 									values = function(info) return GetBarGroupList() end,
 									style = "dropdown",
+								},
+							},
+						},
+						SharingGroup = {
+							type = "group", order = 5, name = L["Sharing"], inline = true,
+							args = {
+								LinkSettings = {
+									type = "toggle", order = 10, name = L["Link Settings"],
+									desc = L["Link settings string"],
+									get = function(info) return GetBarGroupField("linkSettings") end,
+									set = function(info, value)
+										if value then MOD:LoadBarGroupSettings(GetBarGroupEntry()) end -- if enabling link then get shared settings
+										SetBarGroupField("linkSettings", value)
+									end,
+									confirm = function(info)
+										local n = GetBarGroupField("name")
+										if GetBarGroupField("linkSettings") then return L["Confirm unlink string"] end
+										if MOD.db.global.Settings[n] then return L["Confirm link string"] end
+										return false
+									end
+								},
+								LoadSettings = {
+									type = "execute", order = 15, name = L["Load Settings"],
+									desc = L["Click to load the shared settings used by bar groups with same name in other profiles."],
+									disabled = function(info) return GetBarGroupField("linkSettings") end,
+									func = function(info) MOD:LoadBarGroupSettings(GetBarGroupEntry()) end,
+									confirm = function(info)
+										local n = GetBarGroupField("name")
+										if MOD.db.global.Settings[n] then return L["Confirm load string"] end
+										return L["No linked settings string"]
+									end
+								},
+								SaveSettings = {
+									type = "execute", order = 20, name = L["Save Settings"],
+									desc = L["Click to save to the shared settings used by bar groups with same name in other profiles."],
+									disabled = function(info) return GetBarGroupField("linkSettings") end,
+									func = function(info) MOD:SaveBarGroupSettings(GetBarGroupEntry()) end,
+									confirm = function(info) return L["Confirm save string"] end,
+								},
+								Space1 = { type = "description", name = "", order = 25 },
+								LinkBars = {
+									type = "toggle", order = 30, name = L["Link Custom Bars"],
+									desc = L["Link bars string"],
+									hidden = function(info) return GetBarGroupField("auto") end,
+									get = function(info) return GetBarGroupField("linkBars") end,
+									set = function(info, value)
+										if value then MOD:LoadCustomBars(GetBarGroupEntry()) end -- if enabling link then get shared bars
+										SetBarGroupField("linkBars", value)
+									end,
+									confirm = function(info)
+										local n = GetBarGroupField("name")
+										if GetBarGroupField("linkBars") then return L["Confirm unlink bars string"] end
+										if MOD.db.global.CustomBars[n] then return L["Confirm link bars string"] end
+										return false
+									end
+								},
+								LoadBars = {
+									type = "execute", order = 35, name = L["Load Custom Bars"],
+									hidden = function(info) return GetBarGroupField("auto") end,
+									disabled = function(info) return GetBarGroupField("linkBars") end,
+									desc = L["Click to load the shared custom bars used by bar groups with same name in other profiles."],
+									func = function(info) MOD:LoadCustomBars(GetBarGroupEntry()) end,
+									confirm = function(info)
+										local n = GetBarGroupField("name")
+										if MOD.db.global.CustomBars[n] then return L["Confirm load bars string"] end
+										return L["No linked bars string"]
+									end
+								},
+								SaveBars = {
+									type = "execute", order = 40, name = L["Save Custom Bars"],
+									hidden = function(info) return GetBarGroupField("auto") end,
+									disabled = function(info) return GetBarGroupField("linkBars") end,
+									desc = L["Click to save to the shared custom bars used by bar groups with same name in other profiles."],
+									func = function(info) MOD:SaveCustomBars(GetBarGroupEntry()) end,
+									confirm = function(info) return L["Confirm save bars string"] end,
 								},
 							},
 						},
@@ -3387,11 +3670,11 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("showResting") end,
 									set = function(info, value) SetBarGroupField("showResting", value) end,
 								},
-								FishingGroup = {
-									type = "toggle", order = 13, name = L["Fishing"],
-									desc = L["If checked, bar group is shown when the player is ready to fish (i.e., trained with fishing pole equipped)."],
-									get = function(info) return GetBarGroupField("showFishing") end,
-									set = function(info, value) SetBarGroupField("showFishing", value) end,
+								StealthGroup = {
+									type = "toggle", order = 13, name = L["Stealthed"],
+									desc = L["If checked, bar group is shown when the player is stealthed."],
+									get = function(info) return GetBarGroupField("showStealth") end,
+									set = function(info, value) SetBarGroupField("showStealth", value) end,
 								},
 								MountedGroup = {
 									type = "toggle", order = 20, name = L["Mounted"],
@@ -3414,8 +3697,8 @@ MOD.OptionsTable = {
 								FriendGroup = {
 									type = "toggle", order = 23, name = L["Friendly"],
 									desc = L["If checked, bar group is shown when the target is friendly."],
-									get = function(info) return GetBarGroupField("showFriendly") end,
-									set = function(info, value) SetBarGroupField("showFriendly", value) end,
+									get = function(info) return GetBarGroupField("showFriend") end,
+									set = function(info, value) SetBarGroupField("showFriend", value) end,
 								},
 								SoloGroup = {
 									type = "toggle", order = 30, name = L["Solo"],
@@ -4073,6 +4356,107 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "focustarget" end,
 									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "focustarget") end,
 								},
+								Space2 = { type = "description", name = "", order = 65, hidden = function(info) return not MOD.db.global.IncludePartyUnits end },
+								Party1Buff = {
+									type = "toggle", order = 66, name = L["Party1"],
+									desc = L["If checked, only add bars for buffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "party1" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "party1") end,
+								},
+								Party2Buff = {
+									type = "toggle", order = 67, name = L["Party2"],
+									desc = L["If checked, only add bars for buffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "party2" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "party2") end,
+								},
+								Party3Buff = {
+									type = "toggle", order = 68, name = L["Party3"],
+									desc = L["If checked, only add bars for buffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "party3" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "party3") end,
+								},
+								Party4Buff = {
+									type = "toggle", order = 69, name = L["Party4"],
+									desc = L["If checked, only add bars for buffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "party4" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "party4") end,
+								},
+								Space3 = { type = "description", name = "", order = 70, hidden = function(info) return not MOD.db.global.IncludeBossUnits end },
+								Boss1Buff = {
+									type = "toggle", order = 71, name = L["Boss1"],
+									desc = L["If checked, only add bars for buffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "boss1" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "boss1") end,
+								},
+								Boss2Buff = {
+									type = "toggle", order = 72, name = L["Boss2"],
+									desc = L["If checked, only add bars for buffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "boss2" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "boss2") end,
+								},
+								Boss3Buff = {
+									type = "toggle", order = 73, name = L["Boss3"],
+									desc = L["If checked, only add bars for buffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "boss3" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "boss3") end,
+								},
+								Boss4Buff = {
+									type = "toggle", order = 74, name = L["Boss4"],
+									desc = L["If checked, only add bars for buffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "boss4" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "boss4") end,
+								},
+								Boss5Buff = {
+									type = "toggle", order = 75, name = L["Boss5"], width = "half",
+									desc = L["If checked, only add bars for buffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "boss5" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "boss5") end,
+								},
+								Space4 = { type = "description", name = "", order = 80, hidden = function(info) return not MOD.db.global.IncludeArenaUnits end },
+								Arena1Buff = {
+									type = "toggle", order = 81, name = L["Arena1"],
+									desc = L["If checked, only add bars for buffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "arena1" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "arena1") end,
+								},
+								Arena2Buff = {
+									type = "toggle", order = 82, name = L["Arena2"],
+									desc = L["If checked, only add bars for buffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "arena2" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "arena2") end,
+								},
+								Arena3Buff = {
+									type = "toggle", order = 83, name = L["Arena3"],
+									desc = L["If checked, only add bars for buffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "arena3" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "arena3") end,
+								},
+								Arena4Buff = {
+									type = "toggle", order = 84, name = L["Arena4"],
+									desc = L["If checked, only add bars for buffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "arena4" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "arena4") end,
+								},
+								Arena5Buff = {
+									type = "toggle", order = 85, name = L["Arena5"], width = "half",
+									desc = L["If checked, only add bars for buffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectBuffsMonitor") == "arena5" end,
+									set = function(info, value) SetBarGroupField("detectBuffsMonitor", "arena5") end,
+								},
 							},
 						},
 						ExcludeUnitGroup = {
@@ -4246,6 +4630,20 @@ MOD.OptionsTable = {
 									desc = L["If checked, include bars for weapon buffs."],
 									get = function(info) return GetBarGroupField("detectWeaponBuffs") end,
 									set = function(info, value) SetBarGroupField("detectWeaponBuffs", value) end,
+								},
+								Tracking = {
+									type = "toggle", order = 55, name = L["Tracking"],
+									disabled = function(info) return not GetBarGroupField("filterBuffTypes") or not GetBarGroupField("detectBuffs") end,
+									desc = L["If checked, include bars for tracking buffs."],
+									get = function(info) return GetBarGroupField("detectTrackingBuffs") end,
+									set = function(info, value) SetBarGroupField("detectTrackingBuffs", value) end,
+								},
+								Resources = {
+									type = "toggle", order = 56, name = L["Resources"],
+									disabled = function(info) return not GetBarGroupField("filterBuffTypes") or not GetBarGroupField("detectBuffs") end,
+									desc = L["If checked, include bars for resource buffs (e.g., monk's Chi)."],
+									get = function(info) return GetBarGroupField("detectResourceBuffs") end,
+									set = function(info, value) SetBarGroupField("detectResourceBuffs", value) end,
 								},
 								Other = {
 									type = "toggle", order = 60, name = L["Other"],
@@ -4427,6 +4825,107 @@ MOD.OptionsTable = {
 									desc = L["If checked, only add bars for debuffs if they are on the focus's target."],
 									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "focustarget" end,
 									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "focustarget") end,
+								},
+								Space2 = { type = "description", name = "", order = 65, hidden = function(info) return not MOD.db.global.IncludePartyUnits end },
+								Party1Buff = {
+									type = "toggle", order = 66, name = L["Party1"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "party1" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "party1") end,
+								},
+								Party2Buff = {
+									type = "toggle", order = 67, name = L["Party2"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "party2" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "party2") end,
+								},
+								Party3Buff = {
+									type = "toggle", order = 68, name = L["Party3"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "party3" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "party3") end,
+								},
+								Party4Buff = {
+									type = "toggle", order = 69, name = L["Party4"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified party unit."],
+									hidden = function(info) return not MOD.db.global.IncludePartyUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "party4" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "party4") end,
+								},
+								Space3 = { type = "description", name = "", order = 70, hidden = function(info) return not MOD.db.global.IncludeBossUnits end },
+								Boss1Buff = {
+									type = "toggle", order = 71, name = L["Boss1"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "boss1" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "boss1") end,
+								},
+								Boss2Buff = {
+									type = "toggle", order = 72, name = L["Boss2"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "boss2" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "boss2") end,
+								},
+								Boss3Buff = {
+									type = "toggle", order = 73, name = L["Boss3"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "boss3" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "boss3") end,
+								},
+								Boss4Buff = {
+									type = "toggle", order = 74, name = L["Boss4"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "boss4" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "boss4") end,
+								},
+								Boss5Buff = {
+									type = "toggle", order = 75, name = L["Boss5"], width = "half",
+									desc = L["If checked, only add bars for debuffs if they are on the specified boss unit."],
+									hidden = function(info) return not MOD.db.global.IncludeBossUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "boss5" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "boss5") end,
+								},
+								Space4 = { type = "description", name = "", order = 80, hidden = function(info) return not MOD.db.global.IncludeArenaUnits end },
+								Arena1Buff = {
+									type = "toggle", order = 81, name = L["Arena1"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "arena1" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "arena1") end,
+								},
+								Arena2Buff = {
+									type = "toggle", order = 82, name = L["Arena2"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "arena2" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "arena2") end,
+								},
+								Arena3Buff = {
+									type = "toggle", order = 83, name = L["Arena3"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "arena3" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "arena3") end,
+								},
+								Arena4Buff = {
+									type = "toggle", order = 84, name = L["Arena4"],
+									desc = L["If checked, only add bars for debuffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "arena4" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "arena4") end,
+								},
+								Arena5Buff = {
+									type = "toggle", order = 85, name = L["Arena5"], width = "half",
+									desc = L["If checked, only add bars for debuffs if they are on the specified arena unit."],
+									hidden = function(info) return not MOD.db.global.IncludeArenaUnits end,
+									get = function(info) return GetBarGroupField("detectDebuffsMonitor") == "arena5" end,
+									set = function(info, value) SetBarGroupField("detectDebuffsMonitor", "arena5") end,
 								},
 							},
 						},
@@ -4781,35 +5280,17 @@ MOD.OptionsTable = {
 							type = "group", order = 30, name = L["Shared Cooldowns"], inline = true,
 							disabled = function(info) return not GetBarGroupField("detectCooldowns") end,
 							args = {
-								FrostTrapsCooldowns = {
-									type = "toggle", order = 10, name = L["Frost Traps"],
-									desc = L["If checked, only show one cooldown for hunter Frost Traps."],
-									get = function(info) return GetBarGroupField("detectSharedFrostTraps") end,
-									set = function(info, value) SetBarGroupField("detectSharedFrostTraps", value) end,
+								GrimoireCooldowns = {
+									type = "toggle", order = 10, name = L["Grimoire of Service"],
+									desc = L["If checked, only show one cooldown for warlock Grimoire of Service."],
+									get = function(info) return GetBarGroupField("detectSharedGrimoires") end,
+									set = function(info, value) SetBarGroupField("detectSharedGrimoires", value) end,
 								},
-								ShockCooldowns = {
-									type = "toggle", order = 20, name = L["Shocks"],
-									desc = L["If checked, only show one cooldown for shaman Shocks."],
-									get = function(info) return GetBarGroupField("detectSharedShocks") end,
-									set = function(info, value) SetBarGroupField("detectSharedShocks", value) end,
-								},
-								StanceCooldowns = {
-									type = "toggle", order = 20, name = L["Stances"],
-									desc = L["If checked, only show one cooldown for warrior Stances."],
-									get = function(info) return GetBarGroupField("detectSharedStances") end,
-									set = function(info, value) SetBarGroupField("detectSharedStances", value) end,
-								},
-								ShoutCooldowns = {
-									type = "toggle", order = 20, name = L["Shouts"],
-									desc = L["If checked, only show one cooldown for warrior Shouts."],
-									get = function(info) return GetBarGroupField("detectSharedShouts") end,
-									set = function(info, value) SetBarGroupField("detectSharedShouts", value) end,
-								},
-								PallyCooldowns = {
-									type = "toggle", order = 25, name = L["Crusader/Hammer"],
-									desc = L["If checked, only show one cooldown for paladin Crusader Strike and Hammer of the Righteous."],
-									get = function(info) return GetBarGroupField("detectSharedCrusader") end,
-									set = function(info, value) SetBarGroupField("detectSharedCrusader", value) end,
+								InfernalCooldowns = {
+									type = "toggle", order = 20, name = L["Summon Infernals"],
+									desc = L["If checked, only show one cooldown for warlock infernal and doomguard."],
+									get = function(info) return GetBarGroupField("detectSharedInfernals") end,
+									set = function(info, value) SetBarGroupField("detectSharedInfernals", value) end,
 								},
 							},
 						},
@@ -4953,14 +5434,18 @@ MOD.OptionsTable = {
 								},
 								ReverseGrowthGroup = {
 									type = "toggle", order = 25, name = L["Direction"], width = "half",
-									desc = L["If checked, grow up or to the right, otherwise grow down or to the left."],
+									desc = function()
+										local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]
+										if t.bars == "stripe" then return L["If checked, stripe is above the anchor, otherwise it is below the anchor."] end
+										return L["If checked, grow up or to the right, otherwise grow down or to the left."]
+									end,
 									get = function(info) return GetBarGroupField("growDirection") end,
 									set = function(info, value) SetBarGroupField("growDirection", value) end,
 								},
 								SnapCenter = {
 									type = "toggle", order = 30, name = L["Center"], width = "half",
-									desc = L["If checked and the icon configuration bar group is locked, snap to center at the anchor position."],
-									disabled = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return not t.iconOnly end,
+									desc = L["If checked and the bar group is locked, snap to center at the anchor position."],
+									hidden = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return not t.iconOnly or t.bars == "stripe" end,
 									get = function(info) return GetBarGroupField("snapCenter") end,
 									set = function(info, value) SetBarGroupField("snapCenter", value) end,
 								},
@@ -4974,18 +5459,21 @@ MOD.OptionsTable = {
 								MaxBars = {
 									type = "range", order = 40, name = L["Bar/Icon Limit"], min = 0, max = 100, step = 1,
 									desc = L["Set the maximum number of bars/icons to display (the ones that sort closest to the anchor have priority). If this is set to 0 then the number is not limited."],
+									disabled = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars == "stripe" end,
 									get = function(info) return GetBarGroupField("maxBars") end,
 									set = function(info, value) SetBarGroupField("maxBars", value) end,
 								},
 								Wrap = {
 									type = "range", order = 50, name = L["Wrap"], min = 0, max = 50, step = 1,
 									desc = L["Set how many bars/icons to display before wrapping to next row or column. If this is set to 0 then wrapping is disabled."],
+									disabled = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars == "stripe" end,
 									get = function(info) return GetBarGroupField("wrap") end,
 									set = function(info, value) SetBarGroupField("wrap", value) end,
 								},
 								WrapDirection = {
 									type = "toggle", order = 55, name = L["Wrap Direction"],
 									desc = L["If checked, wrap up when arranged in rows or to the right when arranged in columns, otherwise wrap down or to the left."],
+									disabled = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars == "stripe" end,
 									get = function(info) return GetBarGroupField("wrapDirection") end,
 									set = function(info, value) SetBarGroupField("wrapDirection", value) end,
 								},
@@ -5030,14 +5518,14 @@ MOD.OptionsTable = {
 									hidden = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars ~= "timeline" end,
 									args = {
 										BarWidth = {
-											type = "range", order = 1, name = L["Width"], min = 5, max = 2000, step = 1,
-											desc = L["Set width of timeline."],
+											type = "range", order = 1, name = L["Width"], min = 5, max = 4000, step = 1,
+											desc = L["Set width of the timeline."],
 											get = function(info) return GetBarGroupField("timelineWidth") end,
 											set = function(info, value) SetBarGroupField("timelineWidth", value) end,
 										},
 										BarHeight = {
 											type = "range", order = 5, name = L["Height"], min = 5, max = 200, step = 1,
-											desc = L["Set height of timeline."],
+											desc = L["Set height of the timeline."],
 											get = function(info) return GetBarGroupField("timelineHeight") end,
 											set = function(info, value) SetBarGroupField("timelineHeight", value) end,
 										},
@@ -5055,7 +5543,7 @@ MOD.OptionsTable = {
 										},
 										Texture = {
 											type = "select", order = 20, name = L["Texture"], 
-											desc = L["Select texture for timeline."],
+											desc = L["Select texture for the timeline."],
 											dialogControl = 'LSM30_Statusbar',
 											values = AceGUIWidgetLSMlists.statusbar,
 											get = function(info) return GetBarGroupField("timelineTexture") end,
@@ -5063,13 +5551,13 @@ MOD.OptionsTable = {
 										},
 										Alpha = {
 											type = "range", order = 25, name = L["Opacity"], min = 0, max = 1, step = 0.05,
-											desc = L["Set opacity for timeline."],
+											desc = L["Set opacity for the timeline."],
 											get = function(info) return GetBarGroupField("timelineAlpha") end,
 											set = function(info, value) SetBarGroupField("timelineAlpha", value) end,
 										},
 										Color = {
 											type = "color", order = 27, name = L["Timeline Color"], hasAlpha = true,
-											desc = L["Set color for timeline background."],
+											desc = L["Set color for the timeline."],
 											get = function(info)
 												local t = GetBarGroupField("timelineColor"); if t then return t.r, t.g, t.b, t.a else return 0.5, 0.5, 0.5, 0.5 end
 											end,
@@ -5081,7 +5569,7 @@ MOD.OptionsTable = {
 										},
 										HideEmpty = {
 											type = "toggle", order = 28, name = L["Hide Empty"],
-											desc = L["If checked, hide the timeline background when there are no active icons."],
+											desc = L["If checked, hide the timeline when there are no active icons."],
 											get = function(info) return GetBarGroupField("timelineHide") end,
 											set = function(info, value) SetBarGroupField("timelineHide", value) end,
 										},
@@ -5143,6 +5631,140 @@ MOD.OptionsTable = {
 											desc = L['Enter comma-separated list of times to show as labels on the timeline (times are in seconds unless you include "m", which is included in the label, or "M", which is hidden, for minutes).'],
 											get = function(info) return GetListString(GetBarGroupField("timelineLabels") or MOD:GetTimelineLabels()) end,
 											set = function(info, v) SetBarGroupField("timelineLabels", GetListTable(v, "strings")) end,
+										},
+									},
+								},
+								StripeGroup = {
+									type = "group", order = 110, name = L["Horizontal Stripe"], inline = true,
+									hidden = function() local t = MOD.Nest_SupportedConfigurations[GetBarGroupField("configuration")]; return t.bars ~= "stripe" end,
+									args = {
+										FullWidth = {
+											type = "toggle", order = 5, name = L["Full Width"], width = "half",
+											desc = L["If checked, horizontal stripe will be the full width of the display and will automatically adjust to fit."],
+											get = function(info) return GetBarGroupField("stripeFullWidth") end,
+											set = function(info, value) SetBarGroupField("stripeFullWidth", value) end,
+										},
+										BarWidth = {
+											type = "range", order = 10, name = L["Width"], min = 5, max = 4000, step = 1,
+											desc = L["Set width of the stripe."],
+											disabled = function(info) return GetBarGroupField("stripeFullWidth") end,
+											get = function(info) return GetBarGroupField("stripeWidth") end,
+											set = function(info, value) SetBarGroupField("stripeWidth", value) end,
+										},
+										BarHeight = {
+											type = "range", order = 15, name = L["Height"], min = 5, max = 200, step = 1,
+											desc = L["Set height of the stripe."],
+											get = function(info) return GetBarGroupField("stripeHeight") end,
+											set = function(info, value) SetBarGroupField("stripeHeight", value) end,
+										},
+										Space1 = { type = "description", name = "", order = 16 },
+										StripeInset = {
+											type = "range", order = 20, name = L["Stripe Inset"], min = -1000, max = 1000, step = 1,
+											desc = L["Set horizontal offset from anchor for the stripe."],
+											disabled = function(info) return GetBarGroupField("stripeFullWidth") end,
+											get = function(info) return GetBarGroupField("stripeInset") end,
+											set = function(info, value) SetBarGroupField("stripeInset", value) end,
+										},
+										StripeOffset = {
+											type = "range", order = 25, name = L["Stripe Offset"], min = -1000, max = 1000, step = 1,
+											desc = L["Set vertical offset from anchor for the stripe."],
+											get = function(info) return GetBarGroupField("stripeOffset") end,
+											set = function(info, value) SetBarGroupField("stripeOffset", value) end,
+										},
+										BarInset = {
+											type = "range", order = 30, name = L["Bar Inset"], min = 0, max = 100, step = 1,
+											desc = L["Set horizontal offset from ends of stripe for bars."],
+											get = function(info) return GetBarGroupField("stripeBarInset") end,
+											set = function(info, value) SetBarGroupField("stripeBarInset", value) end,
+										},
+										BarOffset = {
+											type = "range", order = 35, name = L["Bar Offset"], min = -100, max = 100, step = 1,
+											desc = L["Set vertical offset from center of stripe for bars."],
+											get = function(info) return GetBarGroupField("stripeBarOffset") end,
+											set = function(info, value) SetBarGroupField("stripeBarOffset", value) end,
+										},
+										Space2 = { type = "description", name = "", order = 40 },
+										Texture = {
+											type = "select", order = 45, name = L["Texture"], 
+											desc = L["Select texture for the stripe."],
+											dialogControl = 'LSM30_Statusbar',
+											values = AceGUIWidgetLSMlists.statusbar,
+											get = function(info) return GetBarGroupField("stripeTexture") end,
+											set = function(info, value) SetBarGroupField("stripeTexture", value) end,
+										},
+										Color = {
+											type = "color", order = 50, name = L["Color"], hasAlpha = true, width = "half",
+											desc = L["Color for the stripe."],
+											get = function(info)
+												local t = GetBarGroupField("stripeColor"); if t then return t.r, t.g, t.b, t.a else return 0.5, 0.5, 0.5, 0.5 end
+											end,
+											set = function(info, r, g, b, a)
+												local t = GetBarGroupField("stripeColor"); if t then t.r = r; t.g = g; t.b = b; t.a = a else
+													t = { r = r, g = g, b = b, a = a }; SetBarGroupField("stripeColor", t) end
+												MOD:UpdateAllBarGroups()
+											end,
+										},
+										AltColor = {
+											type = "color", order = 55, name = L["Alt Color"], hasAlpha = true, width = "half",
+											desc = L["Alternative color for the stripe that is used if color condition is true."],
+											get = function(info)
+												local t = GetBarGroupField("stripeAltColor"); if t then return t.r, t.g, t.b, t.a else return 0.5, 0.5, 0.5, 0.5 end
+											end,
+											set = function(info, r, g, b, a)
+												local t = GetBarGroupField("stripeAltColor"); if t then t.r = r; t.g = g; t.b = b; t.a = a else
+													t = { r = r, g = g, b = b, a = a }; SetBarGroupField("stripeAltColor", t) end
+												MOD:UpdateAllBarGroups()
+											end,
+										},
+										AltCheckCondition = {
+											type = "toggle", order = 60, name = L["Condition Is True"],
+											desc = L["If checked, alternative color is used when the selected condition is true."],
+											get = function(info) return GetBarGroupField("stripeCheckCondition") end,
+											set = function(info, value) SetBarGroupField("stripeCheckCondition", value) end,
+										},
+										AltCondition = {
+											type = "select", order = 65, name = L["Color Condition"],
+											desc = L["Condition tested for alternative color."],
+											disabled = function(info) return not GetBarGroupField("stripeCheckCondition") end,
+											get = function(info) return GetBarGroupAltCondition(GetSelectConditionList()) end,
+											set = function(info, value) SetBarGroupField("stripeCondition", GetSelectConditionList()[value]) end,
+											values = function(info) return GetSelectConditionList() end,
+											style = "dropdown",
+										},
+										Space3 = { type = "description", name = "", order = 66 },
+										BorderTexture = {
+											type = "select", order = 70, name = L["Stripe Border"], 
+											desc = L["Select border for the stripe (select None to disable border)."],
+											dialogControl = 'LSM30_Border',
+											values = AceGUIWidgetLSMlists.border,
+											get = function(info) return GetBarGroupField("stripeBorderTexture") end,
+											set = function(info, value) SetBarGroupField("stripeBorderTexture", value) end,
+										},
+										BorderWidth = {
+											type = "range", order = 75, name = L["Edge Size"], min = 0, max = 32, step = 0.01,
+											desc = L["Adjust size of the border's edge."],
+											get = function(info) return GetBarGroupField("stripeBorderWidth") end,
+											set = function(info, value) SetBarGroupField("stripeBorderWidth", value) end,
+										},
+										BorderOffset = {
+											type = "range", order = 80, name = L["Offset"], min = -16, max = 16, step = 0.01,
+											desc = L["Adjust offset to the border from the bar."],
+											get = function(info) return GetBarGroupField("stripeBorderOffset") end,
+											set = function(info, value) SetBarGroupField("stripeBorderOffset", value) end,
+										},
+										BorderColor = {
+											type = "color", order = 85, name = L["Border Color"], hasAlpha = true,
+											desc = L["Set color for the border."],
+											get = function(info)
+												local t = GetBarGroupField("stripeBorderColor")
+												if t then return t.r, t.g, t.b, t.a else return 0, 0, 0, 1 end
+											end,
+											set = function(info, r, g, b, a)
+												local t = GetBarGroupField("stripeBorderColor")
+												if t then t.r = r; t.g = g; t.b = b; t.a = a else
+													t = { r = r, g = g, b = b, a = a }; SetBarGroupField("stripeBorderColor", t) end
+												MOD:UpdateAllBarGroups()
+											end,
 										},
 									},
 								},
@@ -5771,6 +6393,7 @@ MOD.OptionsTable = {
 										EnablePanel = {
 											type = "toggle", order = 10, name = L["Background Panel"],
 											desc = L["Enable display of a background panel behind bar group."],
+											disabled = function(info) return GetBarGroupField("useDefaultFontsAndTextures") end,
 											get = function(info) return GetBarGroupField("backdropEnable") end,
 											set = function(info, value) SetBarGroupField("backdropEnable", value) end,
 										},
@@ -6021,7 +6644,7 @@ MOD.OptionsTable = {
 									desc = L["Reset standard colors for this bar group back to the current defaults."],
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									func = function(info) local bg = GetBarGroupEntry()
-										bg.buffColor = nil; bg.debuffColor = nil; bg.cooldownColor = nil; bg.notificationColor = nil
+										bg.buffColor = nil; bg.debuffColor = nil; bg.cooldownColor = nil; bg.notificationColor = nil; bg.brokerColor = nil
 										bg.poisonColor = nil; bg.curseColor = nil; bg.magicColor = nil; bg.diseaseColor = nil; bg.stealColor = nil
 										MOD:UpdateAllBarGroups()
 									end,
@@ -6049,8 +6672,20 @@ MOD.OptionsTable = {
 										MOD:UpdateAllBarGroups()
 									end,
 								},
+								BrokerColor = {
+									type = "color", order = 11, name = L["Broker"], hasAlpha = false, width = "half",
+									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
+									get = function(info) local t = GetBarGroupField("brokerColor") or MOD.db.global.DefaultBrokerColor
+										return t.r, t.g, t.b, t.a end,
+									set = function(info, r, g, b, a)
+										local t = GetBarGroupField("brokerColor")
+										if t then t.r = r; t.g = g; t.b = b; t.a = a else
+											t = { r = r, g = g, b = b, a = a }; SetBarGroupField("brokerColor", t) end
+										MOD:UpdateAllBarGroups()
+									end,
+								},
 								BuffColor = {
-									type = "color", order = 11, name = L["Buff"], hasAlpha = false, width = "half",
+									type = "color", order = 12, name = L["Buff"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("buffColor") or MOD.db.global.DefaultBuffColor
 										return t.r, t.g, t.b, t.a end,
@@ -6062,7 +6697,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								DebuffColor = {
-									type = "color", order = 12, name = L["Debuff"], hasAlpha = false, width = "half",
+									type = "color", order = 13, name = L["Debuff"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("debuffColor") or MOD.db.global.DefaultDebuffColor
 										return t.r, t.g, t.b, t.a end,
@@ -6074,7 +6709,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								CooldownColor = {
-									type = "color", order = 13, name = L["Cooldown"], hasAlpha = false,
+									type = "color", order = 14, name = L["Cooldown"], hasAlpha = false,
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("cooldownColor") or MOD.db.global.DefaultCooldownColor
 										return t.r, t.g, t.b, t.a end,
@@ -6085,10 +6720,10 @@ MOD.OptionsTable = {
 										MOD:UpdateAllBarGroups()
 									end,
 								},
-								Space1 = { type = "description", name = "", order = 14 },
-								DebuffText = { type = "description", name = L["Special Colors:"], order = 15, width = "half" },
+								Space1 = { type = "description", name = "", order = 20 },
+								DebuffText = { type = "description", name = L["Special Colors:"], order = 25, width = "half" },
 								PoisonColor = {
-									type = "color", order = 16, name = L["Poison"], hasAlpha = false, width = "half",
+									type = "color", order = 30, name = L["Poison"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("poisonColor") or MOD.db.global.DefaultPoisonColor
 										return t.r, t.g, t.b, t.a end,
@@ -6100,7 +6735,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								CurseColor = {
-									type = "color", order = 17, name = L["Curse"], hasAlpha = false, width = "half",
+									type = "color", order = 31, name = L["Curse"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("curseColor") or MOD.db.global.DefaultCurseColor
 										return t.r, t.g, t.b, t.a end,
@@ -6112,7 +6747,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								MagicColor = {
-									type = "color", order = 18, name = L["Magic"], hasAlpha = false, width = "half",
+									type = "color", order = 32, name = L["Magic"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("magicColor") or MOD.db.global.DefaultMagicColor
 										return t.r, t.g, t.b, t.a end,
@@ -6124,7 +6759,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								DiseaseColor = {
-									type = "color", order = 19, name = L["Disease"], hasAlpha = false, width = "half",
+									type = "color", order = 33, name = L["Disease"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("diseaseColor") or MOD.db.global.DefaultDiseaseColor
 										return t.r, t.g, t.b, t.a end,
@@ -6136,7 +6771,7 @@ MOD.OptionsTable = {
 									end,
 								},
 								StealColor = {
-									type = "color", order = 20, name = L["Stealable"], hasAlpha = false, width = "half",
+									type = "color", order = 34, name = L["Stealable"], hasAlpha = false, width = "half",
 									disabled = function(info) return GetBarGroupField("useDefaultColors") end,
 									get = function(info) local t = GetBarGroupField("stealColor") or MOD.db.global.DefaultStealColor
 										return t.r, t.g, t.b, t.a end,
@@ -6593,6 +7228,12 @@ MOD.OptionsTable = {
 								ConditionDescription = {
 									type = "description", order = 1, name = function(info) return GetConditionDescription() end,
 								},
+								Space1 = { type = "description", name = "", order = 2, width = "normal" },
+								RefreshValue = {
+									type = "execute", order = 20, name = L["Refresh Value"],
+									desc = L["Refresh current value in condition's summary."],
+									func = function(info) MOD:UpdateAllBarGroups() end,
+								},
 							},
 						},
 						PlayerStatusGroup = {
@@ -6926,7 +7567,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Player Status", "checkLevel", value) end,
 										},
 										LevelRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 110, step = 1,
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkLevel") end,
 											get = function(info) return GetTestField("Player Status", "level") end,
 											set = function(info, value) SetTestField("Player Status", "level", value) end,
@@ -6974,7 +7615,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Player Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkPower") end,
 											get = function(info) return GetTestField("Player Status", "minPower") end,
 											set = function(info, value) SetTestField("Player Status", "minPower", value) end,
@@ -7030,7 +7671,7 @@ MOD.OptionsTable = {
 									},
 								},
 								CheckMaelstromGroup = {
-									type = "group", order = 72, name = L["Maelstrom"], inline = true, 
+									type = "group", order = 74, name = L["Maelstrom"], inline = true, 
 									args = {
 										CheckPowerEnable = {
 											type = "toggle", order = 1, name = L["Enable"], width = "half",
@@ -7054,7 +7695,7 @@ MOD.OptionsTable = {
 									},
 								},
 								CheckShardsGroup = {
-									type = "group", order = 73, name = L["Soul Shards"], inline = true, 
+									type = "group", order = 75, name = L["Soul Shards"], inline = true, 
 									args = {
 										CheckShardsEnable = {
 											type = "toggle", order = 1, name = L["Enable"], width = "half",
@@ -7070,10 +7711,34 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Player Status", "checkShards", value) end,
 										},
 										ShardsRange = {
-											type = "range", order = 3, name = "", min = 1, max = 4, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 5, step = 1,
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkShards") end,
 											get = function(info) return GetTestField("Player Status", "minShards") end,
 											set = function(info, value) SetTestField("Player Status", "minShards", value) end,
+										},
+									},
+								},
+								CheckArcaneGroup = {
+									type = "group", order = 76, name = L["Arcane Charges"], inline = true, 
+									args = {
+										CheckPowerEnable = {
+											type = "toggle", order = 1, name = L["Enable"], width = "half",
+											desc = L["If checked, test the player's arcane charges."],
+											get = function(info) return IsTestFieldOn("Player Status", "checkArcane") end,
+											set = function(info, value) local v = Off if value then v = true end SetTestField("Player Status", "checkArcane", v) end,
+										},
+										CheckPower = {
+											type = "toggle", order = 2, name = L["Minimum"],
+											desc = L["If checked, player must have at least this many arcane charges, otherwise must be less."],
+											disabled = function(info) return IsTestFieldOff("Player Status", "checkArcane") end,
+											get = function(info) return GetTestField("Player Status", "checkArcane") == true end,
+											set = function(info, value) SetTestField("Player Status", "checkArcane", value) end,
+										},
+										PowerRange = {
+											type = "range", order = 3, name = "", min = 1, max = 4, step = 1,
+											disabled = function(info) return IsTestFieldOff("Player Status", "checkArcane") end,
+											get = function(info) return GetTestField("Player Status", "minArcane") end,
+											set = function(info, value) SetTestField("Player Status", "minArcane", value) end,
 										},
 									},
 								},
@@ -7184,7 +7849,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Player Status", "checkComboPoints", value) end,
 										},
 										ComboPointsRange = {
-											type = "range", order = 3, name = "", min = 1, max = 5, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 8, step = 1,
 											disabled = function(info) return IsTestFieldOff("Player Status", "checkComboPoints") end,
 											get = function(info) return GetTestField("Player Status", "minComboPoints") end,
 											set = function(info, value) SetTestField("Player Status", "minComboPoints", value) end,
@@ -7438,7 +8103,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Pet Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Pet Status", "checkPower") end,
 											get = function(info) return GetTestField("Pet Status", "minPower") end,
 											set = function(info, value) SetTestField("Pet Status", "minPower", value) end,
@@ -7775,7 +8440,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Target Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Target Status", "checkPower") end,
 											get = function(info) return GetTestField("Target Status", "minPower") end,
 											set = function(info, value) SetTestField("Target Status", "minPower", value) end,
@@ -8078,7 +8743,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Target's Target Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Target's Target Status", "checkPower") end,
 											get = function(info) return GetTestField("Target's Target Status", "minPower") end,
 											set = function(info, value) SetTestField("Target's Target Status", "minPower", value) end,
@@ -8364,7 +9029,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Focus Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Focus Status", "checkPower") end,
 											get = function(info) return GetTestField("Focus Status", "minPower") end,
 											set = function(info, value) SetTestField("Focus Status", "minPower", value) end,
@@ -8650,7 +9315,7 @@ MOD.OptionsTable = {
 											set = function(info, value) SetTestField("Focus's Target Status", "checkPower", value) end,
 										},
 										PowerRange = {
-											type = "range", order = 3, name = "", min = 1, max = 100, step = 1,
+											type = "range", order = 3, name = "", min = 1, max = 200, step = 1,
 											disabled = function(info) return IsTestFieldOff("Focus's Target Status", "checkPower") end,
 											get = function(info) return GetTestField("Focus's Target Status", "minPower") end,
 											set = function(info, value) SetTestField("Focus's Target Status", "minPower", value) end,
@@ -8990,7 +9655,7 @@ MOD.OptionsTable = {
 											type = "range", order = 1, name = L["Count"], min = 1, max = 100, step = 1,
 											desc = L["Enter value to compare with the buff stack count."],
 											get = function(info) local d = GetTestField("Buff Count", "count"); if d then return d else return 1 end end,
-											set = function(info, value) local d = GetTestField("Buff Count", "count"); if not d then d = 1 end; SetTestField("Buff Count", "count", value) end,
+											set = function(info, value) SetTestField("Buff Count", "count", value) end,
 										},
 										CountMinMax = {
 											type = "select", order = 6, name = L["Comparison"],
@@ -9445,7 +10110,7 @@ MOD.OptionsTable = {
 											type = "range", order = 1, name = L["Count"], min = 1, max = 100, step = 1,
 											desc = L["Enter value to compare with the debuff stack count."],
 											get = function(info) local d = GetTestField("Debuff Count", "count"); if d then return d else return 1 end end,
-											set = function(info, value) local d = GetTestField("Debuff Count", "count"); if not d then d = 1 end; SetTestField("Debuff Count", "count", value) end,
+											set = function(info, value) SetTestField("Debuff Count", "count", value) end,
 										},
 										CountMinMax = {
 											type = "select", order = 6, name = L["Comparison"],
@@ -9704,7 +10369,7 @@ MOD.OptionsTable = {
 											desc = L["Enter value to compare with the number of charges."],
 											disabled = function(info) return IsTestFieldOff("Spell Ready", "checkCharges") end,
 											get = function(info) local d = GetTestField("Spell Ready", "charges"); if d then return d else return 1 end end,
-											set = function(info, value) local d = GetTestField("Spell Ready", "charges"); if not d then d = 1 end; SetTestField("Spell Ready", "charges", value) end,
+											set = function(info, value) SetTestField("Spell Ready", "charges", value) end,
 										},
 										CountMinMax = {
 											type = "select", order = 20, name = L["Comparison"],
@@ -9836,7 +10501,7 @@ MOD.OptionsTable = {
 											desc = L["Enter value to compare with item count."],
 											disabled = function(info) return IsTestFieldOff("Item Ready", "checkCount") end,
 											get = function(info) local d = GetTestField("Item Ready", "count"); if d then return d else return 1 end end,
-											set = function(info, value) local d = GetTestField("Item Ready", "count"); if not d then d = 1 end; SetTestField("Item Ready", "count", value) end,
+											set = function(info, value) SetTestField("Item Ready", "count", value) end,
 										},
 										CountMinMax = {
 											type = "select", order = 20, name = L["Comparison"],
@@ -9866,7 +10531,7 @@ MOD.OptionsTable = {
 											desc = L["Enter value to compare with the number of charges."],
 											disabled = function(info) return IsTestFieldOff("Item Ready", "checkCharges") end,
 											get = function(info) local d = GetTestField("Item Ready", "charges"); if d then return d else return 1 end end,
-											set = function(info, value) local d = GetTestField("Item Ready", "charges"); if not d then d = 1 end; SetTestField("Item Ready", "charges", value) end,
+											set = function(info, value) SetTestField("Item Ready", "charges", value) end,
 										},
 										CountMinMax = {
 											type = "select", order = 20, name = L["Comparison"],
@@ -10264,12 +10929,12 @@ MOD.barOptions = {
 			PromoteBar = {
 				type = "execute", order = 60, name = L["Move Up"],
 				desc = L["Move the bar up, overriding sort order."],
-				func = function(info) MoveBarInList(info, "up") end,
+				func = function(info) MoveBarInList(info, "up"); MOD:UpdateAllBarGroups() end,
 			},
 			DemoteBar = {
 				type = "execute", order = 70, name = L["Move Down"],
 				desc = L["Move the bar down, overriding sort order."],
-				func = function(info) MoveBarInList(info, "down") end,
+				func = function(info) MoveBarInList(info, "down"); MOD:UpdateAllBarGroups() end,
 			},
 		},
 	},
@@ -10292,7 +10957,7 @@ MOD.barOptions = {
 			LabelLink = {
 				type = "toggle", order = 30, name = L["Link"], width = "half",
 				desc = L["If checked, label is linked to the associated spell and changing it here will change it for all bars linked to the same spell."],
-				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return (t == "Notification") or (t == "Broker") end,
 				get = function(info) return not GetBarField(info, "labelLink") end,
 				set = function(info, value)
 					if value then
@@ -10308,14 +10973,14 @@ MOD.barOptions = {
 			LabelNumber = {
 				type = "toggle", order = 40, name = L["Add Tooltip Number"],
 				desc = L["If checked, a number found in the tooltip is added to the label. If label contains the string TT# then the number replaces the label."],
-				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return (t == "Notification") or (t == "Broker") end,
 				get = function(info) return GetBarField(info, "labelNumber") end,
 				set = function(info, value) SetBarField(info, "labelNumber", value); MOD:UpdateAllBarGroups() end,
 			},
 			LabelNumberOffset = {
 				type = "range", order = 45, name = L["Number Position"], min = 1, max = 10, step = 1,
 				desc = L["Set which number in tooltip to add to label. Supports decimals although can affect position."],
-				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return (t == "Notification") or (t == "Broker") end,
 				disabled = function(info) return not GetBarField(info, "labelNumber") end,
 				get = function(info) return GetBarField(info, "labelNumberOffset") or 1 end,
 				set = function(info, value) SetBarField(info, "labelNumberOffset", value) end,
@@ -10331,7 +10996,7 @@ MOD.barOptions = {
 			EnableAuraReadyBar = {
 				type = "toggle", order = 65, name = L["Show Not Active"],
 				desc = L["If checked, show ready bar when action is not active."],
-				hidden = function(info) local bt = GetBarField(info, "barType"); return (bt ~= "Buff") and (bt ~= "Debuff") end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return (t ~= "Buff") and (t ~= "Debuff") end,
 				get = function(info) return GetBarField(info, "enableReady") end,
 				set = function(info, value) SetBarField(info, "enableReady", value); MOD:UpdateAllBarGroups() end,
 			},
@@ -10354,10 +11019,135 @@ MOD.barOptions = {
 			ShowTime = {
 				type = "range", order = 75, name = L["Show Time"], min = 0, max = 60, step = 1,
 				desc = L["Set number of seconds to show the ready bar (0 for unlimited time)."],
-				hidden = function(info) return GetBarField(info, "barType") == "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return (t == "Notification") or (t == "Broker") end,
 				disabled = function(info) return not GetBarField(info, "enableReady") end,
 				get = function(info) return GetBarField(info, "readyTime") or 0 end,
 				set = function(info, value) SetBarField(info, "readyTime", value) end,
+			},
+			BrokerIcon = {
+				type = "toggle", order = 80, name = L["Show Icon"], width = "half",
+				desc = L["If checked, show the data broker's icon."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return not GetBarField(info, "hideIcon") end,
+				set = function(info, value) SetBarField(info, "hideIcon", not value); MOD:UpdateAllBarGroups() end,
+			},
+			BrokerText = {
+				type = "toggle", order = 81, name = L["Show Text"], width = "half",
+				desc = L["If checked, show the data broker's text."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return not GetBarField(info, "hideText") end,
+				set = function(info, value) SetBarField(info, "hideText", not value); MOD:UpdateAllBarGroups() end,
+			},
+			LabelText = {
+				type = "toggle", order = 82, name = L["Show Label"], width = "half",
+				desc = L["If checked, add data broker's label to its text or, if Icon Text is also enabled, use it as label."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerLabel") end,
+				set = function(info, value) SetBarField(info, "brokerLabel", value); MOD:UpdateAllBarGroups() end,
+			},
+			ShowBar = {
+				type = "toggle", order = 83, name = L["Show Bar"], width = "half",
+				desc = L["If checked, show a bar for the data broker."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "includeBar") end,
+				set = function(info, value) SetBarField(info, "includeBar", value); MOD:UpdateAllBarGroups() end,
+			},
+			SpecialBarInset = {
+				type = "range", order = 84, name = L["Bar Inset"], min = -200, max = 200, step = 1,
+				desc = L["If showing a bar, set a horizontal inset from icon."],
+				disabled = function(info) return not GetBarField(info, "includeBar") end,
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "includeOffset") or 0 end,
+				set = function(info, value) SetBarField(info, "includeOffset", value); MOD:UpdateAllBarGroups() end,
+			},
+			spacerb0 = { type = "description", name = "", order = 85, },
+			IconText = {
+				type = "toggle", order = 86, name = L["Use Value"], width = "half",
+				desc = L["If checked, use data broker's value (or text if no value provided) as bar's icon text."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerValue") end,
+				set = function(info, value) SetBarField(info, "brokerValue", value); MOD:UpdateAllBarGroups() end,
+			},
+			Numeric = {
+				type = "toggle", order = 87, name = L["Numeric"], width = "half",
+				desc = L["If checked, use the first number found within the text."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerNumber") end,
+				set = function(info, value) SetBarField(info, "brokerNumber", value); MOD:UpdateAllBarGroups() end,
+			},
+			RecolorText = {
+				type = "toggle", order = 88, name = L["Recolor"], width = "half",
+				desc = L["If checked, remove embedded colors from the data broker's text and label."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "recolorText") end,
+				set = function(info, value) SetBarField(info, "recolorText", value); MOD:UpdateAllBarGroups() end,
+			},
+			spacerb1 = { type = "description", name = "", order = 89, },
+			ValuePercentage = {
+				type = "toggle", order = 90, name = L["Value: Percentage"],
+				desc = L["If checked, bar shows numeric value as a percentage."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerPercentage") end,
+				set = function(info, v) SetBarField(info, "brokerPercentage", v); if v then SetBarField(info, "brokerMaximum", false) end; MOD:UpdateAllBarGroups() end,
+			},
+			ValueCalculate = {
+				type = "toggle", order = 95, name = L["Value: Maximum"],
+				desc = L["If checked, bar shows numeric value as fraction of specified maximum."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerMaximum") end,
+				set = function(info, v) SetBarField(info, "brokerMaximum", v); if v then SetBarField(info, "brokerPercentage", false) end; MOD:UpdateAllBarGroups() end,
+			},
+			ValueMaximum = {
+				type = "input", order = 96, name = L["Enter Maximum Value"],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerMaxValue") or "" end,
+				set = function(info, value) SetBarField(info, "brokerMaxValue", value); MOD:UpdateAllBarGroups() end,
+			},
+			spacerb2 = { type = "description", name = "", order = 100, },
+			VariableWidth = {
+				type = "toggle", order = 105, name = L["Variable Width"],
+				desc = L["If checked (and the bar group's layout supports it), bar width varies depending on the length of the broker's text."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerVariable") end,
+				set = function(info, value) SetBarField(info, "brokerVariable", value); MOD:UpdateAllBarGroups() end,
+			},
+			MinimumWidth = {
+				type = "range", order = 110, name = L["Minimum Width"], min = 0, max = 1000, step = 1,
+				desc = L["Set minimum text width."],
+				disabled = function(info) return not GetBarField(info, "brokerVariable") end,
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerMinimumWidth") or 0 end,
+				set = function(info, value) SetBarField(info, "brokerMinimumWidth", value) end,
+			},
+			MaximumWidth = {
+				type = "range", order = 115, name = L["Maximum Width"], min = 0, max = 1000, step = 1,
+				desc = L["Set maximum text width for this broker (ignored if set to 0)."],
+				disabled = function(info) return not GetBarField(info, "brokerVariable") end,
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerMaximumWidth") or 1000 end,
+				set = function(info, value) SetBarField(info, "brokerMaximumWidth", value) end,
+			},
+			spacerb2 = { type = "description", name = "", order = 120, },
+			AlignLeft = {
+				type = "toggle", order = 125, name = L["Align: Left"],
+				desc = L["If checked (and the bar group's layout supports it), align the bar to the left."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerAlign") == "left" end,
+				set = function(info, v) if v then SetBarField(info, "brokerAlign", "left") end end,
+			},
+			AlignCenter = {
+				type = "toggle", order = 130, name = L["Align: Center"],
+				desc = L["If checked (and the bar group's layout supports it), align the bar in the center."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return GetBarField(info, "brokerAlign") == "center" end,
+				set = function(info, v) if v then SetBarField(info, "brokerAlign", "center") end end,
+			},
+			AlignRight = {
+				type = "toggle", order = 135, name = L["Align: Right"],
+				desc = L["If checked (and the bar group's layout supports it), align the bar to the right."],
+				hidden = function(info) return GetBarField(info, "barType") ~= "Broker" end,
+				get = function(info) return not GetBarField(info, "brokerAlign") end,
+				set = function(info, v) if v then SetBarField(info, "brokerAlign", nil) end end,
 			},
 		},
 	},
@@ -10368,7 +11158,7 @@ MOD.barOptions = {
 			UseColor = {
 				type = "toggle", order = 10, name = L["Use Spell Color"], 
 				desc = L["If checked, use color from associated spell."],
-				hidden = function(info) return GetBarField(info, "barType") ~= "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return t ~= "Notification" end,
 				disabled = function(info)
 					local bar = GetBarEntry(info)
 					return bar.barType == "Notification" and not MOD:GetAssociatedSpellForBar(bar)
@@ -10383,7 +11173,7 @@ MOD.barOptions = {
 			UseIcon = {
 				type = "toggle", order = 10, name = L["Use Spell Icon"], 
 				desc = L["If checked, use icon from associated spell."],
-				hidden = function(info) return GetBarField(info, "barType") ~= "Notification" end,
+				hidden = function(info) local t = GetBarField(info, "barType"); return t ~= "Notification" end,
 				disabled = function(info)
 					local bar = GetBarEntry(info)
 					return bar.barType == "Notification" and not MOD:GetAssociatedSpellForBar(bar)
@@ -10422,6 +11212,7 @@ MOD.barOptions = {
 			ColorLink = {
 				type = "toggle", order = 50, name = L["Color Link"],
 				desc = L["If checked, the color is linked to the associated spell and changing it here will change it for all bars linked to the same spell."],
+				hidden = function(info) local t = GetBarField(info, "barType"); return t == "Broker" end,
 				disabled = function(info)
 					local bar = GetBarEntry(info)
 					return bar.barType == "Notification" and not MOD:GetAssociatedSpellForBar(bar)
@@ -10437,7 +11228,7 @@ MOD.barOptions = {
 			BarIcon = {
 				type = "description", order = 60, name = "", width = "half", 
 				hidden = function(info) return not GetBarIcon(info) end,
-				image = function(info) return GetBarIcon(info) end,
+				image = function(info) local t = GetBarIcon(info); return t end,
 				imageWidth = 24, imageHeight = 24,
 			},
 		},
@@ -10842,26 +11633,32 @@ MOD.barOptions = {
 			SelectBarType = {
 				type = "group", order = 1, name = L["Type"], inline = true,
 				args = {
+					NotificationBar = {
+						type = "toggle", order = 10, name = L["Notify"], width = "half",
+						desc = L["If checked, this is a notify bar."],
+						get = function(info) return bars.template.barType == "Notification" end,
+						set = function(info, value) SetSelectedBarType("Notification") end,
+					},
+					BrokerBar = {
+						type = "toggle", order = 20, name = L["Broker"], width = "half",
+						desc = L["If checked, this is a data broker bar."],
+						get = function(info) return bars.template.barType == "Broker" end,
+						set = function(info, value) SetSelectedBarType("Broker") end,
+					},
 					BuffBar = {
-						type = "toggle", order = 10, name = L["Buff"], width = "half",
+						type = "toggle", order = 30, name = L["Buff"], width = "half",
 						desc = L["If checked, this is a buff bar."],
 						get = function(info) return bars.template.barType == "Buff" end,
 						set = function(info, value) SetSelectedBarType("Buff") end,
 					},
 					DebuffBar = {
-						type = "toggle", order = 20, name = L["Debuff"], width = "half",
+						type = "toggle", order = 40, name = L["Debuff"], width = "half",
 						desc = L["If checked, this is a debuff bar."],
 						get = function(info) return bars.template.barType == "Debuff" end,
 						set = function(info, value) SetSelectedBarType("Debuff") end,
 					},
-					NotificationBar = {
-						type = "toggle", order = 30, name = L["Notify"], width = "half",
-						desc = L["If checked, this is a notify bar."],
-						get = function(info) return bars.template.barType == "Notification" end,
-						set = function(info, value) SetSelectedBarType("Notification") end,
-					},
 					CooldownBar = {
-						type = "toggle", order = 40, name = L["Cooldown"],
+						type = "toggle", order = 50, name = L["Cooldown"],
 						desc = L["If checked, this is a cooldown bar."],
 						get = function(info) return bars.template.barType == "Cooldown" end,
 						set = function(info, value) SetSelectedBarType("Cooldown") end,
@@ -10890,9 +11687,23 @@ MOD.barOptions = {
 					},
 				},
 			},
+			SelectBrokerGroup = {
+				type = "group", order = 30, name = L["Broker To Monitor"], inline = true,
+				hidden = function(info) return (bars.template.barType ~= "Broker") end,
+				args = {
+					SelectBroker = {
+						type = "select", order = 10, name = L["Brokers"],
+						desc = L["Broker select string"],
+						get = function(info) return conditions.select end,
+						set = function(info, value) conditions.select = value end,
+						values = function(info) return MOD.brokerList end,
+						style = "dropdown",
+					},
+				},
+			},
 			EnterSpellNameGroup = {
 				type = "group", order = 40, name = L["Action"], inline = true,
-				hidden = function(info) return bars.template.barType == "Notification" end,
+				hidden = function(info) return bars.template.barType == "Notification" or bars.template.barType == "Broker" end,
 				args = {
 					SpellName = {
 						type = "input", order = 10, name = L["Enter Spell Name or Identifier"],

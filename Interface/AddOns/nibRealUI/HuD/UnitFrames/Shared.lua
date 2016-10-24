@@ -619,7 +619,7 @@ function UnitFrames:SetHealthColor(unitFrame)
 end
 
 -- Dropdown Menu
-local dropdown = _G.CreateFrame("Frame", "RealUIUnitFramesDropDown", _G.UIParent, "UIDropDownMenuTemplate")
+local dropdown = _G.CreateFrame("Frame", "RealUIUnitFramesDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
 
 _G.hooksecurefunc("UnitPopup_OnClick",function(self)
     local button = self.value
@@ -638,7 +638,7 @@ _G.hooksecurefunc("UnitPopup_OnClick",function(self)
 end)
 local function menu(self)
     dropdown:SetParent(self)
-    return _G.ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
+    return _G.Lib_ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
 end
 local init = function(self)
     local unit = self:GetParent().unit
@@ -673,7 +673,7 @@ local init = function(self)
         _G.UnitPopup_ShowMenu(self, menuType, unit, name, id)
     end
 end
-_G.UIDropDownMenu_Initialize(dropdown, init, "MENU")
+_G.Lib_UIDropDownMenu_Initialize(dropdown, init, "MENU")
 
 -- Init
 local function Shared(self, unit)

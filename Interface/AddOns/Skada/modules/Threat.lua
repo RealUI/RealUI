@@ -1,5 +1,5 @@
 
-Skada:AddLoadableModule("Threat", function(Skada, L)
+Skada:AddLoadableModule("Threat", nil, function(Skada, L)
 	if Skada.db.profile.modulesBlocked.Threat then return end
 
 	local media = LibStub("LibSharedMedia-3.0")

@@ -1,6 +1,7 @@
 
-local strfind, Ambiguate = string.find, Ambiguate
+local strfind, lower, Ambiguate = string.find, string.lower, Ambiguate
 local prevLineId, result, triggers = 0, nil, {
+	-- Links
 	"wowstead%.com",
 	"guildlaunch%.com",
 	"gamerlaunch%.com",
@@ -13,14 +14,9 @@ local prevLineId, result, triggers = 0, nil, {
 	"guildomatic%.com",
 	"guildwork.com",
 	"guildhosting.org",
+
 	"re[cq]rui?t",
-	"^wt[bs] guild",
-	"wt[bs] %d+%+? guild",
-	"wt[bs] %d+%+? le?ve?l guild",
-	"wt[bs] le?ve?l %d+%+? guild",
-	"selling le?ve?l ?%d+ ?guild", --selling lvl25guild 100k
-	"^wtb a guild", --WTB a guild around lvl 15, make me an offer!
-	"^wtb low le?ve?l guild", --wtb low lvl guild for cheap money, any lvl will do
+	"recuiting",
 	"looking for.*join [ou][us]r?",--<> is Looking for Dedicated and skilled DPS and Healer classes to join us in the current 10 man  raids and expand to 25 man raids. Raids on mon,wed,thurs,sunday 21.00-24.00 18+
 	"www.*apply", --pls go to www.*.com to apply or wisp me for extra info.
 	"looking.*members", -- <<>> is a social levelling looking for all members no lvl requirement, Once we have more members were looking to do Raids and PvP premades, /w if you would like to join please or  /w me for info.
@@ -70,7 +66,6 @@ local prevLineId, result, triggers = 0, nil, {
 	"new guild.*join", --New guild formed : * : is a new harcore pvp guild req to join is 2400 exp in arena or rbg , doing rbg every week so be active
 	"lv%d+.*guild.*need.*wh?isp", --{rt1}{rt3} * LV25 guild. Is LF heals for rbg team. we need a extra shamen, holy and disc. do you have gear/skills wisp me {rt3}{rt1}
 	"<.*>.*looking.*%d/%d", --<*> Currently looking for Healers with atleast 6/6 experiance, prefer Druids/Paladin & Warlock/DK Dps  we currently have 6/6 down in MsV10 & 2/6 HoF! Whisper me for more information!
-	"[12][05]m.*progress", --{rt3} * {rt3} (10man) (6/6 MSV)(2/6 HoF). Our core is in need of tank (dk,druid) and 1 ranged dps (hunter,druid). If you are skilled and want to progress in new raids, feel free to whisper (18+). Raid days / time: Wed, Thur, Sun / 20:00-23:00
 	"looking for experienced raiders", --<*> is looking for experienced raiders! What we need 1tank:Druid,DK,War / 1heal: Shaman,Druid (with good dps os) / some dps: Mage, Shaman(elemental with good heal os), Moonkin(with good heal os), Rogue / We raid 3-4times a week 19:30-22:00
 	"social.*guild.*join", --* lvl 1 asocial guild open for members. Join us if you want a guild tag and a tabard.
 	"%d+m.*looking.*raiders.*need", --<*> 25man 16/16N  66/16H Looking for Solid raiders. Ranged DPS needed. (SP / Mage / Lock / Boomkin / Ele Sham. www.*.com RAID TIME MTW 10:30pm-1:30am Server
@@ -104,11 +99,21 @@ local prevLineId, result, triggers = 0, nil, {
 	"looking.*team.*info", --* is looking for more strong DPS and a strong healer for our main team. For our second team, DPS and healing spots are open, Our main team is 7/10 HC, our second team 8/10 N and 3/10 HC. If you are interested please /w me for more info
 	"searching.*raid.*info", --<*>  (6/7M HM) (6/10 BRF M) We are Searching For an Exceptional Tank + Mage/Ele/Rogue/Moonkin! We raid wed,thurs,sun (19:30-23:00) Head over to [http://www.*.com/] or wisp me for info!
 
+	-- 2016 English
+	"looking.*raider.*team", --"**" 7/7 N, Looking for raiders to fill our raid team for HC and Mythic. Raiding days will be at (Thursday, Saturday.) (7:30pm-10:30pm server time). We need a healer and some dps. We'll be using discord for raiding!
+	"newl?y? formed guild", --''**''[7/7 normal 7/7 heroic] is a newly formed guild with previous mythic raiders currently in need of Healer and Rdps  We Raid 2 days a week Wed/sun 20:00-00:00 /w me for more info
+	"guild.*need.*more.*info", --<**> Guild made by weaboos for weaboos, We are now in the need of more brothers. Brothers willing to lay down their lives to save waifus. We'll clear their dungeons, raid their sacred sanctuary and save our beloved. /w for more info
+	"guild.*building.*team", --<**> We are a large friendly guild that is also building up a raiding team so if you're interested in raiding or just being a social member we are the guild for you.
+	"fill.*roster.*progress", --˜<**> (7/7HC) LFM exceptional DPS to fill our Raiding Roster for Mythic Progression. We Raid 2 Days per week , Mon/Wed 18:00-22:00ST.  /w for more info & get a Voice Application Chat.
+	"looking.*progress.*clear", --<> - 1/7M - Looking for some sick, big dick Ranged/Melee DPS + Healers for Mythic Progress - In particular: hPally, hPriest, UH DK/MM Hunter/Rogues/Shadow Priests. - Enter the dream; enjoying your real life while clearing content at a good pace.
+	"roster.*looking.*player", --<**> 7/7 HC 1/7M is LF Mage  one Hpally and one SPriest to complete our mythic raid roster. We raid 4 days/week from 19 to 22 ST. We are of course always looking for exceptionnal players.
+	"raider.*available.*night", --<**> LF Heroic raiders who are available for Wed & Thurs nights from 20:30pm Realm time. 850+ ilvl. Teamspeak req.
+
 	--Dutch
 	"guild.*zoek naar.*social", -- [25] Nederlands sprekende Guild <*> zijn op zoek naar Tanks: Geen / Melee dps: Warrior / Ranger dps: warlock, Mage / Healers: Paladin / raid tijden ma, di ,do van 20:00ST tot 23:00ST, social invite is ook mogelijk whisper voor meer info.
 	"recruut.*guild.*welkom", --<*> recruut momenteel 1 Boomkin en 1 frost mage voor ons RBG team. Cleanse is een Nederlands talige pvp guild. Alle nederlandstalige spelers zijn welkom om te joinen. Onze we spelen op donderdagen en zondagen om 20:00. Whisp voor meer info
 	"guild.*gezellige", --<*> is een nederlandstalige casual/raiding guild. We zijn op zoek naar casual mensen die onze gezellige guild willen joinen. /w mij of * voor meer info
-	"guild.*op zoek", --<*> HM (7/7 heroic) en BRF (3/10 HC) is een nederlandstalige casual/raiding guild. We zijn op zoek naar mensen met raid experience voor ons mythic team. We raiden 3 dagen per week /w me voor meer info
+	"guild.*op *zoek", --<*> HM (7/7 heroic) en BRF (3/10 HC) is een nederlandstalige casual/raiding guild. We zijn op zoek naar mensen met raid experience voor ons mythic team. We raiden 3 dagen per week /w me voor meer info
 
 	--Swedish
 	"rekryt", --<*> rekryterar. Vi söker aktiva spelare från Sverige och Norge. Vi är i behov av DPS (SPriest, Boomkin, DK) och en tank (warr, DK) med dps OS. Progress: 3/8 HC, raidar onsd, sön & mån 20-23. Socials är alltid välkomna!. /w för mer info
@@ -124,6 +129,8 @@ local prevLineId, result, triggers = 0, nil, {
 	"gille.*söker", --<<<<*>>>> Vi är ett 10 manna gille som söker fler spelare till våran core grupp.Vihar 1/6 Hc MSV 6/6 HOF 3/4 ToES vi söker 1 Healer 1 Meele  ilvl 480+ 18+ om du är inresserad hör av dig för mer info...
 	"letar.*raid.*social", --<*>(25) letar efter erfarna  rutinerad Warlock, Spriest & Reserver med healing os med sinne för humor till vårt core team för raids i MsV/HoF och annat kul, Raidtider Ons och Mån/Tis 19-23 /w för mer info (socials är välkommn
 	"söker.*spelare.*classer", --{rt1}*{rt1} Söker seriösa spelare som är intresserade av PVP och vill joina ett nytt RBG-team. Vi söker just nu alla classer!!! Du behöver 1,9k rating i RBG eller 1750 i arena. Finns några Reqs men whispra mig så tar vi dom.
+	"letar.*dedikerade.*spelare", --<**> Letar efter fler dedikerade spelare till Heroic progression 6/7. I första hand söker vi warlock och healers. Släng iväg ett whisper om det lockar!
+	"söker.*spelare.*bygga", --nystartade  <**>  Söker just nu Aktiva spelare till Raid, Söker just nu allt för att bygga upp ett Stabilt raiding lag. kommer att köra två ggr i veckan onsdag och måndag 19.30 till 22.00 /w för mer info
 
 	--Norwegian
 	"søker.*medlemmer", --"*" Søker flere norske medlemmer. Vi er nyoppstarta og begynner med DS10 + noen HC i denne uka. /w for mer info. Social er også velkomne
@@ -135,6 +142,7 @@ local prevLineId, result, triggers = 0, nil, {
 	"leder efter.*members.*social", --* er lvl3 atm leder efter flere members til raid mangler healers tanks og ranged dps alle er velkommen selv om i vil raid eller være sociale bare kom med det gode humør du skal være dansk for at join eller kunne snakke det nogen lunde rent.
 	"guild.*søger", --<*> Dansk guild, søger holy/disc priest til at begynde raid. holdet består af 9/10 irl venner indtil videre.
 	"spillere.*søger.*class", --* står overfor en fornyelse. Vi er en håndfuld spillere der, efter længere tids fravær, har besluttet os at starte igen. Vi søger derfor folk til at starte fra bunden af det nuværende Tier. Alle classes og specs vil blive overvejet.
+	"søger.*spillere.*velkommen", --** - 7/7N 4/7HC. Søger Aktive spillere! R-DPS (S-Priest/Hunters/Mage/Warlocks/EleShaman ) Raid dage Mandag & Torsdag 19:30-22:30 Reqs ilvl 850+ Socials er også velkommen /w mig for mere info
 
 	--Finnish
 	"kilta.*etsii", --*, Suomalainen PvE-kilta joka etsii vain pelaajia jotka osaavat liikkua tulesta ja joita kiinnostaisi raidata 10man DS normaalia ja heroiccia jatkossa, tähtäämme parempaan tasoon kuin suurin osa servun suomikilloista! /w jos kysyttävää
@@ -178,7 +186,8 @@ local prevLineId, result, triggers = 0, nil, {
 
 	--Croatian
 	"le?ve?l.*primamo.*igrace", -- * (lvl25) za sve one koji ovo razumeju. Primamo sve zainteresovane igrace 85lvl koji igru pre svega shvataju kao zabavu a ne obavezu. Za vise informacija/w
-	"guild.*trazimo ljude", --* je balkanski guild lvl25 i trazimo ljude za pvp a i ostali clanovi su dobrodosli, trenutni fokus je na rbg i arenama, a i pravit ce se tim za pve progress,Clanova: 104 atm Svi  su dobrodosli{rt8}
+	"gu?ild.*trazi.*dobrodosli", --Balkanski gild <**> trazi igrace za Legion,social member su takodje dobrodosli Za vise informacija /w me
+	"gu?ild.*regrutuje", --BALKANSKI GUILD** ** *** Regrutuje aktivne PVP i PVE  igrace za svakodnevno igranje i druzenje u nastavku Legiona!!!
 
 	--Hungarian
 	"guild.*játékos.*keres", --* Guild játékosokat keres.Létszámtól függően Old Dungeon,RBG,Content Raid szervezése.Fejlödö szintü karaktereket is várunk.
@@ -223,10 +232,11 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,
 		if chanId == 0 or chanId == 25 then return end --Don't scan custom channels or GuildRecruitment channel
 		local trimmedPlayer = Ambiguate(player, "none")
 		if not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) then return end --Don't filter ourself/friends
-		msg = msg:lower() --Lower all text, remove capitals
+		local rawMsg = msg
+		msg = lower(msg) --Lower all text, remove capitals
 		for i = 1, #triggers do
 			if strfind(msg, triggers[i]) then --Found a match
-				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, msg) end
+				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, rawMsg) end
 				result = true
 				return true --found a trigger, filter
 			end
@@ -375,11 +385,12 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_,event,msg,player,
 		whispPrevLineId, whispResult = lineId, nil
 		local trimmedPlayer = Ambiguate(player, "none")
 		if not BADBOY_GWHISPER or tbl[trimmedPlayer] or not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) or UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer) or flag == "GM" or flag == "DEV" then return end
-		msg = msg:lower() --Lower all text, remove capitals
+		local rawMsg = msg
+		msg = lower(msg) --Lower all text, remove capitals
 		for i = 1, #whispers do
 			if strfind(msg, whispers[i]) then --Found a match
 				--print(whispers[i])
-				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, msg) end
+				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, rawMsg) end
 				whispResult = true
 				return true --found a trigger, filter
 			end
