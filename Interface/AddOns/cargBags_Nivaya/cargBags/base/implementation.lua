@@ -321,9 +321,8 @@ end
 local infoGather = {}
 do
     local function GatherItemInfo(bagID, slotID, i)
-        cargBags.debug("GatherItemInfo", bagID, slotID, i, i.wait)
+        cargBags.debug("GatherItemInfo", bagID, slotID, i)
         i = i or defaultItem
-        if i.wait then return i end
         _G.wipe(i)
 
         i.bagID = bagID
@@ -364,15 +363,15 @@ do
                 i.isInSet, i.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
 
                 i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID = _G.GetItemInfo(clink)
-                i.texture = i.texture or texture
                 if not i.name then
+                    i.id, i.type, i.subType, i.equipLoc, texture, i.typeID, i.subTypeID = _G.GetItemInfoInstant(clink)
                     if not infoGather[i.id] then infoGather[i.id] = {} end
                     if not infoGather[i.id][i.bagID] then infoGather[i.id][i.bagID] = {} end
                     if not infoGather[i.id][i.bagID][i.slotID] then
                         infoGather[i.id][i.bagID][i.slotID] = i
                     end
-                    i.wait = true
                 end
+                i.texture = i.texture or texture
             end
             cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
         end
@@ -538,8 +537,7 @@ function Implementation:GET_ITEM_INFO_RECEIVED(event, itemID)
     if itemInfo then
         for bagID, bag in next, itemInfo do
             for slotID, item in next, bag do
-                cargBags.debug("Update item info", event, item.wait, bagID, slotID)
-                item.wait = nil
+                cargBags.debug("Update item info", event, bagID, slotID)
                 self:BAG_UPDATE(event, bagID, slotID)
             end
         end
