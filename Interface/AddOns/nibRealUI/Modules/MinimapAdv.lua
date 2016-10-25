@@ -1227,7 +1227,7 @@ end
 
 ---- Tracking Button ----
 local function Tracking_OnMouseDown()
-    _G.Lib_ToggleDropDownMenu(1, nil, _G.MiniMapTrackingDropDown, "MinimapAdv_Tracking", 0, 0)
+    _G.ToggleDropDownMenu(1, nil, _G.MiniMapTrackingDropDown, "MinimapAdv_Tracking", 0, 0)
 end
 
 local function Tracking_OnEnter()
