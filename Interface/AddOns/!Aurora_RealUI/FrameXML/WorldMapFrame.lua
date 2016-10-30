@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 _G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("WorldMapFrame", F, C)
     local function skin()
@@ -55,13 +52,13 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
 
         -- Player
         local playerX, playerY = _G.GetPlayerMapPosition("player")
-        playerX = round(100 * playerX, 1)
-        playerY = round(100 * playerY, 1)
+        if (playerX and playerX > 0) and (playerY and playerY > 0) then
+            playerX = round(100 * playerX, 1)
+            playerY = round(100 * playerY, 1)
 
-        if playerX ~= 0 and playerY ~= 0 then
             coords.player:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.PLAYER, playerX, playerY))
         else
-            coords.player:SetText("")
+            coords.player:SetText(("|cff%s%s: |cffffffff%s|r"):format(classColorStr, _G.PLAYER, _G.UNAVAILABLE))
         end
 
         -- Mouse
