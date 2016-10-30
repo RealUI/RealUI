@@ -17,8 +17,12 @@ local specText = "|cffFFFFFF%s|r"
 
 local function getUnit()
     local mFocus = GetMouseFocus()
-    local unit = mFocus and (mFocus.unit or mFocus:GetAttribute("unit")) or "mouseover"
-    return unit
+    if mFocus then
+        -- mFocus might somehow be a FontString, which doesn't have GetAttribute
+        unit = mFocus.unit or (mFocus.GetAttribute and mFocus:GetAttribute("unit"))
+    end
+
+    return unit or "mouseover"
 end
 
 local function ShowSpec(spec)

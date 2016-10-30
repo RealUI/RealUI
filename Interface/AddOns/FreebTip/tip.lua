@@ -152,13 +152,17 @@ local function GameTooltip_UnitColor(unit)
 end
 
 local function getUnit(self)
+    ns.Debug("getUnit", self and self:GetName())
     local _, unit = self and self:GetUnit()
-    if(not unit) then
+    if not unit then
         local mFocus = GetMouseFocus()
-        unit = mFocus and (mFocus.unit or mFocus:GetAttribute("unit"))    or "mouseover"
+        if mFocus then
+            -- mFocus might somehow be a FontString, which doesn't have GetAttribute
+            unit = mFocus.unit or (mFocus.GetAttribute and mFocus:GetAttribute("unit"))
+        end
     end
 
-    return unit
+    return unit or "mouseover"
 end
 
 local function hideLines(self)

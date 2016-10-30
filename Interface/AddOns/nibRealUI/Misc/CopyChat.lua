@@ -24,26 +24,15 @@ function CopyChat:CreateFrames()
     --dump:Hide()
 end
 
-local function GetChatLines(...)
-    dump:Clear()
-    for i = _G.select('#', ...), 1, -1 do
-        local region = _G.select(i, ...)
-        if (region:GetObjectType() == 'FontString') then
-            CopyChat:debug("GetChatLines", i, region:GetText())
-            dump:AddLine(region:GetText())
-        end
-    end
-    
-    return dump:Lines()
-end
-
 local function copyChat(self)
     local chat = _G[self:GetName()]
-    local _, fontSize = chat:GetFont()
-    
-    _G.FCF_SetChatWindowFontSize(self, chat, 0.1)
-    local lineCount = GetChatLines(chat:GetRegions())
-    _G.FCF_SetChatWindowFontSize(self, chat, fontSize)
+    local lineCount = chat:GetNumMessages()
+
+    dump:Clear()
+    for i = 1, lineCount do
+        local msg = chat:GetMessageInfo(i)
+        dump:AddLine(msg)
+    end
     
     if (lineCount > 0) then
         dump.frame.TitleText:SetText(chat:GetName() .. " Copy Frame")
