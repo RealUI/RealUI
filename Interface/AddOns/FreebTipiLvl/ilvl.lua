@@ -7,7 +7,7 @@ local GameTooltip = GameTooltip
 local GetTime = GetTime
 local UnitGUID = UnitGUID
 
-local ItemUpgradeInfo = LibStub("RealUI_LibItemUpgradeInfo-1.0")
+local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
 local LibInspect = LibStub("LibInspect")
 
 local maxage = 1800 --number of secs to cache each player

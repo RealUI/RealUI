@@ -32,7 +32,7 @@ local _G = _G
 local select = _G.select
 
 -- Upgrade Level retrieval
-local LIU = _G.LibStub("RealUI_LibItemUpgradeInfo-1.0")
+local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 
 local function Round(num, idp)
     local mult = 10^(idp or 0)
