@@ -68,7 +68,7 @@ local function round(number, places)
 	return _G.floor(number * mult + 0.5) / mult
 end
 
-local function NewInstance(width, height)
+local function NewInstance(width, height, useFauxScroll)
 	lib.num_frames = lib.num_frames + 1
 
 	local frameName = ("%s_CopyFrame%d"):format(MAJOR, lib.num_frames)
@@ -100,62 +100,87 @@ local function NewInstance(width, height)
 		copyFrame:StopMovingOrSizing()
 	end)
 
+	local scrollArea
+	if useFauxScroll then
+		scrollArea = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frameName), copyFrame, "FauxScrollFrameTemplate")
 
-	local scrollArea = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frameName), copyFrame, "FauxScrollFrameTemplate")
+		function scrollArea:Update(start, wrappedLines, maxDisplayLines, lineHeight)
+			--print("Scroll:Update", start, lineHeight, maxDisplayLines)
+			local i, linesToDisplay = start - 1, 0
+			repeat
+				i = i + 1
+				linesToDisplay = linesToDisplay + (wrappedLines[i] or 0)
+				--print("Line:", i, linesToDisplay, wrappedLines[i])
+			until linesToDisplay > maxDisplayLines or not wrappedLines[i]
+			local stop = i - 1
+			--print("repeat", start, stop, lineHeight, maxDisplayLines)
+
+			self:Show()
+			local name = self:GetName()
+			local scrollBar = _G[name .. "ScrollBar"]
+			scrollBar:SetStepsPerPage(linesToDisplay - 1)
+
+			if lineHeight then
+				--[[ This block should only be run when the buffer is changed. Possible variations in 
+					linesToDisplay from scroll to scroll will affect the height of the scroll frame. This
+					will then result in inconsistent scrolling behaviour.
+				]]
+				local scrollChildFrame = _G[name .. "ScrollChildFrame"]
+
+				local scrollFrameHeight = (wrappedLines.all - linesToDisplay) * lineHeight
+				local scrollChildHeight = wrappedLines.all * lineHeight
+				if ( scrollFrameHeight < 0 ) then
+					scrollFrameHeight = 0
+				end
+				self.height = scrollFrameHeight
+				scrollChildFrame:Show()
+				scrollChildFrame:SetHeight(scrollChildHeight)
+
+				scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
+				scrollBar:SetValueStep(lineHeight)
+			end
+			
+			-- Arrow button handling
+			local scrollUpButton = _G[name .. "ScrollBarScrollUpButton"]
+			local scrollDownButton = _G[name .. "ScrollBarScrollDownButton"]
+
+			if ( scrollBar:GetValue() == 0 ) then
+				scrollUpButton:Disable()
+			else
+				scrollUpButton:Enable()
+			end
+			if ((scrollBar:GetValue() - self.height) == 0) then
+				scrollDownButton:Disable()
+			else
+				scrollDownButton:Enable()
+			end
+			return start, stop
+		end
+
+		--[[ lineDummy is used to get the height of a line *after* word wrap to
+			calculate the proper scroll position of the FauxScrollFrame.
+		]]
+		local lineDummy = copyFrame:CreateFontString()
+		lineDummy:SetJustifyH("LEFT")
+		lineDummy:SetNonSpaceWrap(true)
+		lineDummy:SetFontObject("SystemFont_Small")
+		lineDummy:SetPoint("TOPLEFT", 5, 100)
+		lineDummy:SetPoint("BOTTOMRIGHT", copyFrame, "TOPRIGHT", -28, 0)
+		lineDummy:Hide()
+		copyFrame.lineDummy = lineDummy
+	else
+		scrollArea = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frameName), copyFrame, "UIPanelScrollFrameTemplate")
+
+		scrollArea:SetScript("OnMouseWheel", function(self, delta)
+			_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self.ScrollBar)
+		end)
+
+		scrollArea.ScrollBar:SetScript("OnMouseWheel", function(self, delta)
+			_G.ScrollFrameTemplate_OnMouseWheel(self, delta, self)
+		end)
+	end
 	scrollArea:SetPoint("TOPLEFT", copyFrame.Inset, 5, -5)
 	scrollArea:SetPoint("BOTTOMRIGHT", copyFrame.Inset, -27, 6)
-
-	function scrollArea:Update(start, wrappedLines, maxDisplayLines, lineHeight)
-		--print("Scroll:Update", start, lineHeight, maxDisplayLines)
-		local i, linesToDisplay = start - 1, 0
-		repeat
-			i = i + 1
-			linesToDisplay = linesToDisplay + (wrappedLines[i] or 0)
-			--print("Line:", i, linesToDisplay, wrappedLines[i])
-		until linesToDisplay > maxDisplayLines or not wrappedLines[i]
-		local stop = i - 1
-		--print("repeat", start, stop, lineHeight, maxDisplayLines)
-
-		self:Show()
-		local name = self:GetName()
-		local scrollBar = _G[name .. "ScrollBar"]
-		scrollBar:SetStepsPerPage(linesToDisplay - 1)
-
-		if lineHeight then
-			--[[ This block should only be run when the buffer is changed because posible variations in 
-			linesToDisplay from scroll to scroll will affect the height of the scroll frame. This will then 
-			result in inconsistent scrolling behaviour. ]]
-			local scrollChildFrame = _G[name .. "ScrollChildFrame"]
-
-			local scrollFrameHeight = (wrappedLines.all - linesToDisplay) * lineHeight
-			local scrollChildHeight = wrappedLines.all * lineHeight
-			if ( scrollFrameHeight < 0 ) then
-				scrollFrameHeight = 0
-			end
-			self.height = scrollFrameHeight
-			scrollChildFrame:Show()
-			scrollChildFrame:SetHeight(scrollChildHeight)
-
-			scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
-			scrollBar:SetValueStep(lineHeight)
-		end
-		
-		-- Arrow button handling
-		local scrollUpButton = _G[name .. "ScrollBarScrollUpButton"]
-		local scrollDownButton = _G[name .. "ScrollBarScrollDownButton"]
-
-		if ( scrollBar:GetValue() == 0 ) then
-			scrollUpButton:Disable()
-		else
-			scrollUpButton:Enable()
-		end
-		if ((scrollBar:GetValue() - self.height) == 0) then
-			scrollDownButton:Disable()
-		else
-			scrollDownButton:Enable()
-		end
-		return start, stop
-	end
 
 	copyFrame.scrollArea = scrollArea
 
@@ -166,23 +191,21 @@ local function NewInstance(width, height)
 	editBox:EnableMouse(true)
 	editBox:SetAutoFocus(false)
 	editBox:SetFontObject("SystemFont_Small")
-	editBox:SetAllPoints(scrollArea)
 
 	editBox:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copyFrame)
 	end)
 
 	copyFrame.edit_box = editBox
-
-	local lineDummy = copyFrame:CreateFontString()
-	lineDummy:SetJustifyH("LEFT")
-	lineDummy:SetNonSpaceWrap(true)
-	lineDummy:SetFontObject("SystemFont_Small")
-	lineDummy:SetPoint("TOPLEFT", 5, 100)
-	lineDummy:SetPoint("BOTTOMRIGHT", copyFrame, "TOPRIGHT", -28, 0)
-	lineDummy:Hide()
-	copyFrame.lineDummy = lineDummy
-
+	--[[ While using a standard scroll frame, the edit box will be positioned automatcialy
+		when set as its scrollChild. With the faux scroll, we have to position it ourself.
+	]]
+	if useFauxScroll then
+		editBox:SetAllPoints(scrollArea)
+	else
+		editBox:SetSize(scrollArea:GetSize())
+		scrollArea:SetScrollChild(editBox)
+	end
 
 	local highlightButton = _G.CreateFrame("Button", nil, copyFrame)
 	highlightButton:SetSize(16, 16)
@@ -259,7 +282,7 @@ function lib:New(frameTitle, width, height, save)
 		error(METHOD_USAGE_FORMAT:format("New", "save must be nil or a function."))
 	end
 
-	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT)
+	local instance = NewInstance(width or DEFAULT_FRAME_WIDTH, height or DEFAULT_FRAME_HEIGHT, not not save)
 	local frame = frames[instance]
 	frame.TitleText:SetText(frameTitle)
 
@@ -280,16 +303,16 @@ end
 function prototype:AddLine(text, dateFormat)
 	self:InsertLine(#buffers[self] + 1, text, dateFormat)
 
-	if frames[self]:IsVisible() then
-		frames[self]:UpdateText()
+	local frame = frames[self]
+	if frame:IsVisible() then
+		return frame.UpdateText and frame:UpdateText() or self:Display()
 	end
 end
 
 
 function prototype:Clear()
-	local wrappedLines = buffers[self].wrappedLines
 	table.wipe(buffers[self])
-	buffers[self].wrappedLines = wrappedLines
+	buffers[self].wrappedLines = {}
 end
 
 
@@ -322,9 +345,12 @@ function prototype:InsertLine(position, text, dateFormat)
 		table.insert(buffer, position, text)
 	end
 
-	frames[self].lineDummy:SetText(buffer[position])
-	table.insert(buffer.wrappedLines, position, frames[self].lineDummy:GetNumLines())
-	buffer.wrappedLines.all = (buffer.wrappedLines.all or 0) + buffer.wrappedLines[position]
+	local lineDummy = frames[self].lineDummy
+	if lineDummy then
+		lineDummy:SetText(buffer[position])
+		table.insert(buffer.wrappedLines, position, lineDummy:GetNumLines())
+		buffer.wrappedLines.all = (buffer.wrappedLines.all or 0) + buffer.wrappedLines[position]
+	end
 end
 
 
@@ -343,38 +369,43 @@ function prototype:String(separator)
 	separator = separator or "\n"
 	local buffer, frame = buffers[self], frames[self]
 	local lineDummy = frame.lineDummy
-	local _, lineHeight = lineDummy:GetFont()
-	local maxDisplayLines = round(frame.edit_box:GetHeight() / lineHeight)
-	--print("Line stats", lineDummy:GetStringHeight(), lineHeight, maxDisplayLines)
 
-	local allWrappedLines, offset = buffer.wrappedLines.all, 1
-	local start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
-	function frame:UpdateText()
-		local newWrappedLines = buffer.wrappedLines.all
-		debugPrint(frame, "UpdateText", newWrappedLines > allWrappedLines)
-		if newWrappedLines > allWrappedLines then
-			allWrappedLines = newWrappedLines
-			start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
-		else
-			start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines)
+	if lineDummy then
+		local _, lineHeight = lineDummy:GetFont()
+		local maxDisplayLines = round(frame.edit_box:GetHeight() / lineHeight)
+		--print("Line stats", lineDummy:GetStringHeight(), lineHeight, maxDisplayLines)
+
+		local allWrappedLines, offset = buffer.wrappedLines.all, 1
+		local start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
+		function frame:UpdateText()
+			local newWrappedLines = buffer.wrappedLines.all
+			debugPrint(frame, "UpdateText", newWrappedLines > allWrappedLines)
+			if newWrappedLines > allWrappedLines then
+				allWrappedLines = newWrappedLines
+				start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
+			else
+				start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines)
+			end
+
+			debugPrint(frame, "Start/Stop", start, stop)
+			local text = table.concat(buffer, separator, start, stop)
+			frame.edit_box:SetText(text)
 		end
+		frame.scrollArea:SetScript("OnVerticalScroll", function(scrollArea, value)
+			--print("OnVerticalScroll", value)
+			local scrollbar = scrollArea.ScrollBar
+			local _, scrollMax = scrollbar:GetMinMaxValues()
+			--print("Min/Max", scroll_min, scrollMax)
+			local scrollPer = round(value / scrollMax, 2)
+			offset = round((1 - scrollPer) * 1 + scrollPer * #buffer)
 
-		debugPrint(frame, "Start/Stop", start, stop)
-		local text = table.concat(buffer, separator, start, stop)
-		frame.edit_box:SetText(text)
+			--print("Current position", value, offset, scrollPer)
+			--print("Concat", start, stop)
+			frame:UpdateText()
+		end)
+
+		return table.concat(buffer, separator, start, stop)
+	else
+		return table.concat(buffer, separator)
 	end
-	frame.scrollArea:SetScript("OnVerticalScroll", function(scrollArea, value)
-		--print("OnVerticalScroll", value)
-		local scrollbar = scrollArea.ScrollBar
-		local _, scrollMax = scrollbar:GetMinMaxValues()
-		--print("Min/Max", scroll_min, scrollMax)
-		local scrollPer = round(value / scrollMax, 2)
-		offset = round((1 - scrollPer) * 1 + scrollPer * #buffer)
-
-		--print("Current position", value, offset, scrollPer)
-		--print("Concat", start, stop)
-		frame:UpdateText()
-	end)
-
-	return table.concat(buffer, separator, start, stop)
 end
