@@ -1,32 +1,30 @@
 -----------------------------------------------------------------------
 -- Upvalued Lua API.
 -----------------------------------------------------------------------
-local _G = _G
+local _G = getfenv(0)
 
 -- Functions
+local date = _G.date
 local error = _G.error
 local type = _G.type
-local date = _G.date
 
 -- Libraries
 local table = _G.table
-
 
 -----------------------------------------------------------------------
 -- Library namespace.
 -----------------------------------------------------------------------
 local LibStub = _G.LibStub
-local MAJOR = "RealUI_LibTextDump-1.0"
+local MAJOR = "LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
 local MINOR = 2 -- Should be manually increased
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR) -- luacheck: ignore
+local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then
 	return
 end -- No upgrade needed
-
 
 -----------------------------------------------------------------------
 -- Migrations.
@@ -38,7 +36,6 @@ lib.buffers = lib.buffers or {}
 lib.frames = lib.frames or {}
 
 lib.num_frames = lib.num_frames or 0
-
 
 -----------------------------------------------------------------------
 -- Constants and upvalues.
@@ -83,10 +80,14 @@ local function NewInstance(width, height, useFauxScroll)
 	copyFrame:SetMovable(true)
 	copyFrame:SetToplevel(true)
 
-	copyFrame:Hide()
+	table.insert(_G.UISpecialFrames, frameName)
+	_G.HideUIPanel(copyFrame)
 
 
 	local titleBackground = _G[frameName.."TitleBg"]
+
+	copyFrame.title = copyFrame.TitleText
+
 	local dragFrame = _G.CreateFrame("Frame", nil, copyFrame)
 	dragFrame:SetPoint("TOPLEFT", titleBackground, 16, 0)
 	dragFrame:SetPoint("BOTTOMRIGHT", titleBackground)
@@ -163,7 +164,7 @@ local function NewInstance(width, height, useFauxScroll)
 		local lineDummy = copyFrame:CreateFontString()
 		lineDummy:SetJustifyH("LEFT")
 		lineDummy:SetNonSpaceWrap(true)
-		lineDummy:SetFontObject("SystemFont_Small")
+		lineDummy:SetFontObject("ChatFontNormal")
 		lineDummy:SetPoint("TOPLEFT", 5, 100)
 		lineDummy:SetPoint("BOTTOMRIGHT", copyFrame, "TOPRIGHT", -28, 0)
 		lineDummy:Hide()
@@ -185,12 +186,12 @@ local function NewInstance(width, height, useFauxScroll)
 	copyFrame.scrollArea = scrollArea
 
 
-	local editBox = _G.CreateFrame("EditBox", ("%sScrollChildFrame"):format(frameName), copyFrame)
+	local editBox = _G.CreateFrame("EditBox", nil, copyFrame)
 	editBox:SetMultiLine(true)
 	editBox:SetMaxLetters(0)
 	editBox:EnableMouse(true)
 	editBox:SetAutoFocus(false)
-	editBox:SetFontObject("SystemFont_Small")
+	editBox:SetFontObject("ChatFontNormal")
 
 	editBox:SetScript("OnEscapePressed", function()
 		_G.HideUIPanel(copyFrame)
@@ -234,12 +235,10 @@ local function NewInstance(width, height, useFauxScroll)
 		self.texture:SetVertexColor(1, 1, 1)
 	end)
 
-
 	local highlightIcon = highlightButton:CreateTexture()
 	highlightIcon:SetAllPoints()
 	highlightIcon:SetTexture([[Interface\BUTTONS\UI-GuildButton-PublicNote-Up]])
 	highlightButton.texture = highlightIcon
-
 
 	local instance = _G.setmetatable({}, metatable)
 	frames[instance] = copyFrame
@@ -266,16 +265,19 @@ function lib:New(frameTitle, width, height, save)
 	if titleType ~= "nil" and titleType ~= "string" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame title must be nil or a string."), 2)
 	end
+
 	local widthType = type(width)
 
 	if widthType ~= "nil" and widthType ~= "number" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame width must be nil or a number."))
 	end
+
 	local heightType = type(height)
 
 	if heightType ~= "nil" and heightType ~= "number" then
 		error(METHOD_USAGE_FORMAT:format("New", "frame height must be nil or a number."))
 	end
+
 	local saveType = type(save)
 
 	if saveType ~= "nil" and saveType ~= "function" then
@@ -309,12 +311,10 @@ function prototype:AddLine(text, dateFormat)
 	end
 end
 
-
 function prototype:Clear()
 	table.wipe(buffers[self])
 	buffers[self].wrappedLines = {}
 end
-
 
 function prototype:Display(separator)
 	local display_text = self:String(separator)
@@ -325,9 +325,8 @@ function prototype:Display(separator)
 	local frame = frames[self]
 	frame.edit_box:SetText(display_text)
 	frame.edit_box:SetCursorPosition(0)
-	frame:Show()
+	_G.ShowUIPanel(frame)
 end
-
 
 function prototype:InsertLine(position, text, dateFormat)
 	if type(position) ~= "number" then
@@ -353,11 +352,9 @@ function prototype:InsertLine(position, text, dateFormat)
 	end
 end
 
-
 function prototype:Lines()
 	return #buffers[self]
 end
-
 
 function prototype:String(separator)
 	local sep_type = type(separator)
