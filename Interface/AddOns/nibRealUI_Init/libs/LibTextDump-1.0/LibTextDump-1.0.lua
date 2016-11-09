@@ -54,12 +54,6 @@ local DEFAULT_FRAME_HEIGHT = 600
 -----------------------------------------------------------------------
 -- Helper functions.
 -----------------------------------------------------------------------
-local debug = false
-local function debugPrint(frame, ...)
-	if debug and frame:IsShown() then
-		_G.print(...)
-	end
-end
 local function round(number, places)
 	local mult = 10 ^ (places or 0)
 	return _G.floor(number * mult + 0.5) / mult
@@ -106,15 +100,12 @@ local function NewInstance(width, height, useFauxScroll)
 		scrollArea = _G.CreateFrame("ScrollFrame", ("%sScroll"):format(frameName), copyFrame, "FauxScrollFrameTemplate")
 
 		function scrollArea:Update(start, wrappedLines, maxDisplayLines, lineHeight)
-			--print("Scroll:Update", start, lineHeight, maxDisplayLines)
 			local i, linesToDisplay = start - 1, 0
 			repeat
 				i = i + 1
 				linesToDisplay = linesToDisplay + (wrappedLines[i] or 0)
-				--print("Line:", i, linesToDisplay, wrappedLines[i])
 			until linesToDisplay > maxDisplayLines or not wrappedLines[i]
 			local stop = i - 1
-			--print("repeat", start, stop, lineHeight, maxDisplayLines)
 
 			self:Show()
 			local name = self:GetName()
@@ -370,13 +361,11 @@ function prototype:String(separator)
 	if lineDummy then
 		local _, lineHeight = lineDummy:GetFont()
 		local maxDisplayLines = round(frame.edit_box:GetHeight() / lineHeight)
-		--print("Line stats", lineDummy:GetStringHeight(), lineHeight, maxDisplayLines)
 
 		local allWrappedLines, offset = buffer.wrappedLines.all, 1
 		local start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
 		function frame:UpdateText()
 			local newWrappedLines = buffer.wrappedLines.all
-			debugPrint(frame, "UpdateText", newWrappedLines > allWrappedLines)
 			if newWrappedLines > allWrappedLines then
 				allWrappedLines = newWrappedLines
 				start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines, lineHeight)
@@ -384,20 +373,15 @@ function prototype:String(separator)
 				start, stop = frame.scrollArea:Update(offset, buffer.wrappedLines, maxDisplayLines)
 			end
 
-			debugPrint(frame, "Start/Stop", start, stop)
 			local text = table.concat(buffer, separator, start, stop)
 			frame.edit_box:SetText(text)
 		end
 		frame.scrollArea:SetScript("OnVerticalScroll", function(scrollArea, value)
-			--print("OnVerticalScroll", value)
 			local scrollbar = scrollArea.ScrollBar
 			local _, scrollMax = scrollbar:GetMinMaxValues()
-			--print("Min/Max", scroll_min, scrollMax)
 			local scrollPer = round(value / scrollMax, 2)
 			offset = round((1 - scrollPer) * 1 + scrollPer * #buffer)
 
-			--print("Current position", value, offset, scrollPer)
-			--print("Concat", start, stop)
 			frame:UpdateText()
 		end)
 
