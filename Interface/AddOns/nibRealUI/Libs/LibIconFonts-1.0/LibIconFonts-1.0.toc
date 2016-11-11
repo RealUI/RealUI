@@ -5,3 +5,4 @@
 
 LibStub\LibStub.lua
 lib.xml
+tests.lua

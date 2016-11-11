@@ -8,8 +8,8 @@ local ipairs = _G.ipairs
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 local LIF = _G.LibStub("LibIconFonts-1.0")
-local octicons = LIF:GetIconFont("octicons", "v2.x")
-octicons.path = [[Interface\AddOns\nibRealUI\Fonts\Octicons\octicons-local.ttf]]
+local fa = LIF:GetIconFont("FontAwesome")
+fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -386,8 +386,8 @@ function InfoLine:CreateBlocks()
         local time = _G.GetTime()
         LDB:NewDataObject(_G.GUILD, {
             type = "RealUI",
-            label = octicons["organization"],
-            labelFont = {octicons.path, InfoLine.barHeight * .6, "OUTLINE"},
+            label = fa["group"],
+            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
             text = 1,
             value = 1,
             suffix = "",
