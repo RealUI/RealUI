@@ -244,7 +244,7 @@ function cargBags_Nivaya:ADDON_LOADED(event, addon)
     bags.bankQuest       = C:New("cBniv_BankQuest")
     bags.bankTrade       = C:New("cBniv_BankTrade")
     bags.bankReagent     = C:New("cBniv_BankReagent")
-    bags.bank            = C:New("cBniv_Bank")
+    bags.bank            = C:New("cBniv_Bank") -- NivayacBniv_Bank
 
     bags.bankSets        :SetMultipleFilters(true, filters.fBank, filters.fBankFilter, filters.fItemSets)
     bags.bankArmor       :SetExtendedFilter(filters.fItemClass, "BankArmor")
@@ -286,7 +286,7 @@ function cargBags_Nivaya:ADDON_LOADED(event, addon)
     bags.consumables = C:New("cBniv_Consumables")
     bags.battlepet   = C:New("cBniv_BattlePet")
     bags.tradegoods  = C:New("cBniv_TradeGoods")
-    bags.main        = C:New("cBniv_Bag")
+    bags.main        = C:New("cBniv_Bag") -- NivayacBniv_Bag
 
     bags.key         :SetExtendedFilter(filters.fItemClass, "Keyring")
     bags.bagItemSets :SetFilter(filters.fItemSets, true)

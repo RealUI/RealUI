@@ -93,20 +93,21 @@ end
 -- New Items filter and related functions
 ------------------------------------------
 function cbNivaya:getItemCount(itemName)
-    local itemCount, _ = 0
+    local totalCount = 0
     for bagID = 0, 4 do
         local tNumSlots = _G.GetContainerNumSlots(bagID)
         if tNumSlots > 0 then
             for slotID = 1, tNumSlots do
                 local item = self:GetItemInfo(bagID, slotID)
                 if item.name == itemName then
-                    _, item.count, item.locked, item.quality, item.readable = _G.GetContainerItemInfo(bagID, slotID)
-                    itemCount = itemCount + item.count
+                    local _, count = _G.GetContainerItemInfo(bagID, slotID)
+                    item.count = count or 0
+                    totalCount = totalCount + item.count
                 end
             end
         end
     end
-    return itemCount
+    return totalCount
 end
 
 filters.fNewItems = function(item)

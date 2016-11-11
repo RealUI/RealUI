@@ -105,13 +105,16 @@ local function ItemButton_Update(self, item)
             self.Icon:SetColorTexture(1,1,1,0.1)
         end
     end
-    if item.count and item.count > 1 then
-        self.Count:SetText(item.count >= 1e3 and "*" or item.count)
+
+    -- Count
+    local _, itemCount = _G.GetContainerItemInfo(item.bagID, item.slotID)
+    if itemCount and itemCount > 1 then
+        self.Count:SetText(itemCount >= 1e3 and "*" or itemCount)
         self.Count:Show()
     else
         self.Count:Hide()
     end
-    self.count = item.count -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
+    self.count = itemCount -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
 
     -- Durability
     local dCur, dMax = _G.GetContainerItemDurability(item.bagID, item.slotID)
@@ -153,14 +156,15 @@ end
     @callback OnUpdateCooldown(item)
 ]]
 local function ItemButton_UpdateCooldown(self, item)
-    if item.cdEnable == 1 and item.cdStart and item.cdStart > 0 then
-        self.Cooldown:SetCooldown(item.cdStart, item.cdFinish)
+    local startTime, duration, isEnabled = _G.GetContainerItemCooldown(item.bagID, item.slotID)
+    if isEnabled == 1 and startTime and startTime > 0 then
+        self.Cooldown:SetCooldown(startTime, duration)
         self.Cooldown:Show()
     else
         self.Cooldown:Hide()
     end
 
-    if self.OnUpdateCooldown then self:OnUpdateCooldown(item) end
+    if self.OnUpdateCooldown then self:OnUpdateCooldown(item, startTime, duration, isEnabled) end
 end
 
 --[[!
@@ -169,9 +173,10 @@ end
     @callback OnUpdateLock(item)
 ]]
 local function ItemButton_UpdateLock(self, item)
-    self.Icon:SetDesaturated(item.locked)
+    local _, _, isLocked = _G.GetContainerItemInfo(item.bagID, item.slotID)
+    self.Icon:SetDesaturated(isLocked)
 
-    if self.OnUpdateLock then self:OnUpdateLock(item) end
+    if self.OnUpdateLock then self:OnUpdateLock(item, isLocked) end
 end
 
 --[[!

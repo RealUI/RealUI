@@ -329,9 +329,7 @@ do
         i.slotID = slotID
 
         local clink = _G.GetContainerItemLink(bagID, slotID)
-        i.texture, i.count, i.locked, i.quality, i.readable = _G.GetContainerItemInfo(bagID, slotID)
-        i.cdStart, i.cdFinish, i.cdEnable = _G.GetContainerItemCooldown(bagID, slotID)
-
+        i.texture, i.count = _G.GetContainerItemInfo(bagID, slotID)
         if clink then
             local texture
 
@@ -497,15 +495,13 @@ function Implementation:BAG_UPDATE_COOLDOWN(event, bagID)
         for slotID = 1, _G.GetContainerNumSlots(bagID) do
             local button = self:GetButton(bagID, slotID)
             if button then
-                local item = self:GetItemInfo(bagID, slotID, true)
-                button:UpdateCooldown(item)
+                button:UpdateCooldown(self:GetItemInfo(bagID, slotID))
             end
         end
     else
         for id, container in next, self.contByID do
             for i, button in next, container.buttons do
-                local item = self:GetItemInfo(button.bagID, button.slotID)
-                button:UpdateCooldown(item)
+                button:UpdateCooldown(self:GetItemInfo(button.bagID, button.slotID))
             end
         end
     end
@@ -522,7 +518,7 @@ function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 
     local button = self:GetButton(bagID, slotID)
     if button then
-        local item = self:GetItemInfo(bagID, slotID, true)
+        local item = self:GetItemInfo(bagID, slotID)
         button:UpdateLock(item)
     end
 end
