@@ -1,6 +1,3 @@
--- Lua Globals --
-local _G = _G
-
 ----------------------------------------------------------------------------------------
 --  Force readycheck warning
 ----------------------------------------------------------------------------------------
@@ -43,7 +40,9 @@ end)
 _G.StaticPopupDialogs.RESURRECT.hideOnEscape = nil
 _G.StaticPopupDialogs.AREA_SPIRIT_HEAL.hideOnEscape = nil
 _G.StaticPopupDialogs.PARTY_INVITE.hideOnEscape = nil
-_G.StaticPopupDialogs.PARTY_INVITE_XREALM.hideOnEscape = nil
+if not _G.RealUI.is71 then
+    _G.StaticPopupDialogs.PARTY_INVITE_XREALM.hideOnEscape = nil
+end
 _G.StaticPopupDialogs.CONFIRM_SUMMON.hideOnEscape = nil
 _G.StaticPopupDialogs.ADDON_ACTION_FORBIDDEN.button1 = nil
 _G.StaticPopupDialogs.TOO_MANY_LUA_ERRORS.button1 = nil

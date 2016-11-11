@@ -11,12 +11,12 @@
 -- :RegisterBlizzard() is not called, so you have to toggle the implementation
 -- via cargBags:GetImplementation("Minimal"):Toggle()
 
-local Implementation = cargBags:NewImplementation("Minimal")
+local Implementation = _G.cargBags:NewImplementation("Minimal")
 
 function Implementation:OnOpen()
-	print("Implementation was opened")
+    _G.print("Implementation was opened")
 end
 
 function Implementation:OnClose()
-	print("Implementation was closed")
+    _G.print("Implementation was closed")
 end

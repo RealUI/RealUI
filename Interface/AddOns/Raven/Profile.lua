@@ -135,7 +135,7 @@ function MOD:SetSpellDefaults()
 	MOD.defaultColors = nil -- not used again after initialization so okay to delete
 	MOD.generalSpells = nil
 	
-	spellColors = MOD.DefaultProfile.global.SpellColors -- save for restoring defaults later
+	spellColors = MOD.CopyTable(MOD.DefaultProfile.global.SpellColors) -- save for restoring defaults later
 	
 	if MOD.myClass == "DEATHKNIGHT" then -- localize rune spell names
 		local t = {}
@@ -208,6 +208,16 @@ function MOD:SetSpellEffectDefaults()
 		end
 	end
 	MOD.spellEffects = nil -- release the preset table memory
+end
+
+-- Check if a spell color has changed from its default
+function MOD:CheckColorDefault(name)
+	if name then
+		local t = spellColors[name]
+		local s = MOD.db.global.SpellColors[name]
+		if s and t then if t.r == s.r and t.g == s.g and t.b == s.b and t.a == s.a then return true end end
+	end
+	return false
 end
 
 -- Reset a particular spell color to its default value
@@ -341,7 +351,7 @@ function MOD:CopyStandardColors(s, d)
 		d.cooldownColor = MOD.CopyColor(s.cooldownColor); d.notificationColor = MOD.CopyColor(s.notificationColor)
 		d.poisonColor = MOD.CopyColor(s.poisonColor); d.curseColor = MOD.CopyColor(s.curseColor)
 		d.magicColor = MOD.CopyColor(s.magicColor); d.diseaseColor = MOD.CopyColor(s.diseaseColor)
-		d.stealColor = MOD.CopyColor(s.stealColor)
+		d.stealColor = MOD.CopyColor(s.stealColor); d.brokerColor = MOD.CopyColor(s.brokerColor)
 	end
 end
 
@@ -385,10 +395,7 @@ function MOD:GetIcon(name, spellID)
 	
 	local id = nil -- next check if the name is a numeric spell id (with or without preceding # sign)
 	if string.find(name, "^#%d+") then id = tonumber(string.sub(name, 2)) else id = tonumber(name) end
-	if id then -- found what is supposed to be a spell id number
-		local n = GetSpellInfo(id)
-		if n and n ~= "" then return GetSpellTexture(id) else return nil end -- return icon looked up by spell id (note: no valid name so return nil if not found)
-	end
+	if id then return GetSpellTexture(id) end -- found what is supposed to be a spell id number
 	
 	local tex = iconCache[name] -- check the in-memory icon cache which is initialized from player's spell book
 	if not tex then -- if not found then try to look it up through spell API
@@ -714,6 +721,7 @@ MOD.DefaultProfile = {
 		SpellIcons = {},				-- cache of spell icons that override default icons
 		SpellIDs = {},					-- cache of spell ids that had to be looked up
 		Settings = {},					-- settings table indexed by bar group names
+		CustomBars = {},				-- custom bar table indexed by bar group names
 		Defaults = {},					-- default settings for bar group layout, fonts and textures
 		FilterBuff = {},				-- shared table of buff filters
 		FilterDebuff = {},				-- shared table of debuff filters
@@ -729,6 +737,7 @@ MOD.DefaultProfile = {
 		DefaultDebuffColor = MOD.HexColor("fcaf3e"), -- Orange1
 		DefaultCooldownColor = MOD.HexColor("fce94f"), -- Yellow1
 		DefaultNotificationColor = MOD.HexColor("729fcf"), -- Blue1
+		DefaultBrokerColor = MOD.HexColor("888a85"), -- Gray
 		DefaultPoisonColor = MOD.CopyColor(DebuffTypeColor["Poison"]),
 		DefaultCurseColor = MOD.CopyColor(DebuffTypeColor["Curse"]),
 		DefaultMagicColor = MOD.CopyColor(DebuffTypeColor["Magic"]),
@@ -745,6 +754,15 @@ MOD.DefaultProfile = {
 		TukuiScale = true,				-- skin Tukui with pixel perfect size and position
 		PixelPerfect = false,			-- enable pixel perfect size and position
 		RectIcons = false,				-- enable rectangular icons
+		GridLines = 40,					-- number of lines in overlay grid
+		GridCenterColor = MOD.HexColor("ff0000"), -- color of center lines in overlay grid
+		GridLineColor = MOD.HexColor("00ff00"), -- color of other lines in overlay grid
+		GridAlpha = 0.5,				-- transparency of overlay grid
+		IncludePartyUnits = false,		-- track party units for buffs and debuffs
+		IncludeBossUnits = false,		-- track boss units for buffs and debuffs
+		IncludeArenaUnits = false,		-- track arena units for buffs and debuffs
+		UpdateRate = 0.2,				-- 1 / target number of bar group updates per second
+		AnimationRate = 0.03,			-- 1 / target number of animation refresh cycles per second
 		DefaultBorderColor = MOD.HexColor("ffffff"), -- icon border color when "None" is selected
 		Minimap = { hide = false, minimapPos = 180, radius = 80, }, -- saved DBIcon minimap settings
 		InCombatBar = {},				-- shared settings for the in-combat bar
@@ -752,7 +770,7 @@ MOD.DefaultProfile = {
 	profile = {
 		enabled = true,					-- enable Raven
 		hideBlizz = true,				-- enable hiding the Blizzard buff and temp enchant frames
-		hideRunes = true,				-- enable hiding the Blizzard runes frame
+		hideRunes = false,				-- enable hiding the Blizzard runes frame
 		muteSFX = false,				-- enable muting of Raven's sound effects
 		Durations = {},					-- spell durations (use profile instead of global for better per-character info)
 		BarGroups = {},					-- bar group options to be filled in and saved between sessions

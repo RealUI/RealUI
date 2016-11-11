@@ -25,6 +25,7 @@ local frameInfo = {
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
+        debug = true,
     },
     [1] = {
         x = 222,
@@ -153,7 +154,18 @@ local function CreatePowerBar(parent)
     power.frequentUpdates = true
 
     power.PositionSteps = UnitFrames.PositionSteps
-    power.PostUpdate = UnitFrames.UpdateSteps
+    function power:PostUpdate(unit, cur, max, min)
+        UnitFrames.UpdateSteps(self, unit, cur, max)
+        local _, pType = _G.UnitPowerType(parent.unit)
+        if pType ~= powerType then
+            powerType = pType
+            if ndb.settings.reverseUnitFrameBars then
+                power:SetReversePercent(RealUI.ReversePowers[powerType])
+            else
+                power:SetReversePercent(not RealUI.ReversePowers[powerType])
+            end
+        end
+    end
     parent.Power = power
 
     --[[ Druid Mana ]]--
@@ -282,6 +294,7 @@ UnitFrames["player"] = function(self)
     self.RaidIcon:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
 
     function self.PreUpdate(frame, event)
+        UnitFrames:debug("Player:PreUpdate", event)
         if event == "ClassColorBars" then
             frame.Health.colorClass = db.overlay.classColor
         elseif event == "ReverseBars" then

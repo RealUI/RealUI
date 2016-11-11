@@ -1350,6 +1350,27 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
+local currencyId = _G.C_Garrison.GetCurrencyTypes(_G.LE_GARRISON_TYPE_7_0)
+local categoryInfo = {}
+do -- by nebula
+    local frame = _G.CreateFrame("Frame")
+    frame:SetScript("OnEvent", function(self, event)
+        if _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_7_0 then return end
+
+        if event == "GARRISON_FOLLOWER_CATEGORIES_UPDATED" then
+            categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+        else
+            _G.C_Garrison.RequestClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+        end
+    end)
+    frame:RegisterEvent("GARRISON_FOLLOWER_CATEGORIES_UPDATED")
+    frame:RegisterEvent("GARRISON_FOLLOWER_ADDED")
+    frame:RegisterEvent("GARRISON_FOLLOWER_REMOVED")
+    frame:RegisterEvent("GARRISON_TALENT_COMPLETE")
+    frame:RegisterEvent("GARRISON_TALENT_UPDATE")
+    frame:RegisterEvent("GARRISON_SHOW_LANDING_PAGE")
+end
+
 local function Garrison_OnEvent(self, event, ...)
     MinimapAdv:debug("Garrison_OnEvent", event, ...)
     MinimapAdv:debug("button has pulse", self.MinimapLoopPulseAnim:IsPlaying())
@@ -1384,9 +1405,16 @@ local function Garrison_OnEnter(self)
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
     if _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0 then
-        local categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
-        for index, category in ipairs(categoryInfo) do
-            _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit))
+        _G.GameTooltip:AddLine(" ")
+
+        local currency, amount = _G.GetCurrencyInfo(currencyId)
+        _G.GameTooltip:AddDoubleLine(currency, _G.BreakUpLargeNumbers(amount), 1, 1, 1, 1, 1, 1)
+
+        if #categoryInfo > 0 then
+            _G.GameTooltip:AddLine(" ")
+            for index, category in ipairs(categoryInfo) do
+                _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit), 1, 1, 1, 1, 1, 1)
+            end
         end
     end
     _G.GameTooltip:Show()
@@ -1863,4 +1891,9 @@ function MinimapAdv:OnEnable()
     SetUpMinimapFrame()
     CreateFrames()
     self:RegEvents()
+
+    -- Community defined API
+    function _G.GetMinimapShape()
+        return "SQUARE"
+    end
 end

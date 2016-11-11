@@ -5,7 +5,7 @@
 ## Dependencies: Kui_Nameplates
 ## SavedVariables: KuiNameplatesCoreSaved
 ## SavedVariablesPerCharacter: KuiNameplatesCoreCharacterSaved
-## X-Curse-Packaged-Version: 2-9
+## X-Curse-Packaged-Version: 2-13-2
 ## X-Curse-Project-Name: KuiNameplates
 ## X-Curse-Project-ID: kuinameplates
 ## X-Curse-Repository-ID: wow/kuinameplates/mainline

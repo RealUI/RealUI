@@ -8,7 +8,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     local r, g, b = C.r, C.g, C.b
 
     -- Lua Globals --
-    local next, floor = _G.next, _G.floor
+    local next = _G.next
 
     -- Libs --
     local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
@@ -99,25 +99,6 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     _G.PaperDollFrame.ilvl:SetFontObject(_G.SystemFont_Small)
     _G.PaperDollFrame.ilvl:SetPoint("TOP", _G.PaperDollFrame, "TOP", 0, -20)
 
-    local ilvlLimits = 385
-    local function GetILVLColor(lvl, ilvl)
-        -- ilvlLimits = (lvl - (maxLvL + 1)) * 9 + minQuestReward
-        if lvl > 100 then
-            ilvlLimits = (lvl - 101) * 9 + 685
-        elseif lvl > 90 then
-            ilvlLimits = (lvl - 91) * 9 + 510
-        end
-        if ilvl >= ilvlLimits + 28 then
-            return _G.ITEM_QUALITY_COLORS[4] -- epic
-        elseif ilvl >= ilvlLimits + 14 then
-            return _G.ITEM_QUALITY_COLORS[3] -- rare
-        elseif ilvl >= ilvlLimits then
-            return _G.ITEM_QUALITY_COLORS[2] -- uncommon
-        else
-            return _G.ITEM_QUALITY_COLORS[1] -- common
-        end
-    end
-
     local function HideItemLevelInfo(itemSlot)
         itemSlot.ilvl:SetText("")
         itemSlot.upgradeBG:Hide()
@@ -181,14 +162,14 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             end
         end
 
-        local avgItemLevel, avgItemLevelEquipped = _G.GetAverageItemLevel()
-        local aILColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevel)["hex"]
-        local aILEColor = GetILVLColor(_G.UnitLevel("player"), avgItemLevelEquipped)["hex"]
-        avgItemLevel = floor(avgItemLevel)
-        avgItemLevelEquipped = floor(avgItemLevelEquipped)
-        _G.PaperDollFrame.ilvl:SetText(" "..aILEColor..avgItemLevelEquipped.."|r |cffffffff/|r "..aILColor..avgItemLevel)
         timer = false
     end
+
+    _G.hooksecurefunc("PaperDollFrame_SetItemLevel", function(statFrame, unit)
+        if ( unit ~= "player" ) then return end
+        local avgItemLevel, avgItemLevelEquipped = _G.GetAverageItemLevel()
+        statFrame.Value:SetFormattedText("%d (%d)", avgItemLevel, avgItemLevelEquipped)
+    end)
 
     f:SetScript("OnEvent", function(self, event, ...)
         if not timer then

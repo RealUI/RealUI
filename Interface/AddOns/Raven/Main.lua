@@ -25,6 +25,7 @@ MOD.frame = nil
 MOD.db = nil
 MOD.ldb = nil
 MOD.ldbi = nil -- set when using DBIcon library
+MOD.LibLDB = nil
 MOD.myClass = nil; MOD.localClass = nil
 MOD.myRace = nil; MOD.localRace = nil
 MOD.lockoutSpells = {} -- spells for testing lock out of each school of magic for current player
@@ -35,11 +36,17 @@ MOD.runeSlots = {} -- cache information about each rune slot for DKs
 MOD.runeCount = 0 -- current number of available runes
 MOD.updateActions = true -- action bar changed
 MOD.updateDispels = true -- need to update dispel types
+MOD.knownBrokers = {} -- table of registered data brokers
+MOD.brokerList = {} -- table of brokers suitable for a selection list
 
 local doUpdate = true -- set by any event that can change bars (used to throttle major updates)
 local forceUpdate = false -- set to cause immediate update (reserved for critical changes like to player's target or focus)
 local updateCooldowns = false -- set when actionbar or inventory slot cooldown starts or stops
-local units = { "player", "pet", "target", "focus", "targettarget", "focustarget", "pettarget", "mouseover" } -- ordered list of units
+local units = {} -- list of units to track
+local mainUnits = { "player", "pet", "target", "focus", "targettarget", "focustarget", "pettarget", "mouseover" } -- ordered list of main units
+local partyUnits = { "party1", "party2", "party3", "party4" } -- optional party units
+local bossUnits = { "boss1", "boss2", "boss3", "boss4", "boss5" } -- optional boss units
+local arenaUnits = { "arena1", "arena2", "arena3", "arena4", "arena5" } -- optional arena units
 local eventUnits = { "targettarget", "focustarget", "pettarget", "mouseover" } -- can't count on events for these units
 local unitUpdate = {} -- boolean for each unit that indicates need to update auras
 local unitStatus = {} -- status of each unit set on every update (0 = no unit, 1 = unit exists, "unit" = unit is other unit)
@@ -56,11 +63,13 @@ local activeCooldowns = {} -- spells/items that are currently on cooldown
 local internalCooldowns = {} -- tracking entries for internal cooldowns
 local spellEffects = {} -- tracking entries for spell effects
 local lastTime = 0 -- time when last update happened
+local lastTrackers = 0 -- time when last looked at trackers on major units
+local lastWeapons = 0 -- time when last looked at weapon buffs
 local elapsedTime = 0 -- time in seconds since last update
+local updateCounter = 0 -- update counter included for testing
 local refreshTime = 0 -- time since last animation refresh
-local refreshThrottle = 0.04 -- max of around 25 times per second
-local throttleTime = 0.2 -- minimum time in seconds between updates
-local throttleCount = 0 -- secondary throttle incremented at each update, resets at 5
+local refreshCounter = 0 -- refresh counter included for testing
+local throttleTime = 0 -- secondary throttle that resets once per second
 local bufftooltip = nil -- used to store tooltip for scanning weapon buffs
 local mhLastBuff = nil -- saves name of most recent main hand weapon buff
 local ohLastBuff = nil -- saves name of most recent off hand weapon buff
@@ -85,6 +94,8 @@ local foundSpells = {} -- temporary table for checking known spells
 local summonedCreatures = {} -- table of guids to expire time pairs used for tracking warlock creatures so they despawn properly
 local soulEffigy = nil -- set to guid of warlock's soul effigy to handle special case when it despawns early
 local ignoreGUID = nil -- set when need to start ignoring trackers from a unit that we know is no longer valid (e.g., soul effigy)
+local activeBrokers = {} -- table of brokers that trigger update events
+local hidingRunes = false -- used to prevent trying to show runes if didn't hide them
 
 -- This table is used to fix the "not cast by player" bug for Jade Spirit, River's Song, and Dancing Steel introduced in 5.1
 -- and the legendary meta gem procs Tempus Repit, Fortitude, Capacitance, and Lucidity added in 5.2
@@ -366,6 +377,7 @@ function MOD:OnEnable()
 	MOD:InitializeLDB() -- initialize the data broker
 	MOD:RegisterChatCommand("raven", function() MOD:OptionsPanel() end)
 	MOD.Nest_Initialize() -- initialize the graphics module
+	MOD:InitializeConditions() -- initialize condition evaluation module
 
 	-- Create a frame so that updates can be registered
 	MOD.frame = CreateFrame('Frame')
@@ -421,23 +433,36 @@ end
 
 -- Updates will be driven by the new timer function, compute elapsed time since last update
 local function UpdateHandler()
-	local now = GetTime(); local elapsed = now - lastTime; lastTime = now
+	local now = GetTime()
+	local elapsed = now - lastTime -- seconds since last call to update
+	if elapsed > 1.0 then elapsed = 1.0 end -- should only happen during initialization
 	MOD:Update(elapsed)
+	lastTime = now
+	C_Timer.After(0.001, UpdateHandler) -- register to be called for next frame
+end
+
+-- Initialize list of units that are tracked
+function MOD:InitializeUnits()
+	table.wipe(units)
+	for i, k in pairs(mainUnits) do units[i] = k end
+	if MOD.db.global.IncludePartyUnits then for _, k in pairs(partyUnits) do table.insert(units, k) end end
+	if MOD.db.global.IncludeBossUnits then for _, k in pairs(bossUnits) do table.insert(units, k) end end
+	if MOD.db.global.IncludeArenaUnits then for _, k in pairs(arenaUnits) do table.insert(units, k) end end
 end
 
 -- Initialize when play starts, deferred to allow system initialization to complete
 function MOD:PLAYER_ENTERING_WORLD()
 	if not enteredWorld then
+		MOD:InitializeUnits() -- initialize list of units to track (this requires /reload to update)
 		for _, k in pairs(units) do unitUpdate[k] = true; activeBuffs[k] = {}; activeDebuffs[k] = {}; cacheBuffs[k] = {}; cacheDebuffs[k] = {}  end -- track auras
 		updateCooldowns = true -- start tracking cooldowns
 		MOD:InitializeBuffTooltip() -- initialize tooltip used to monitor weapon buffs
-		MOD:InitializeConditions() -- initialize routine that shows cooldown overlays and cooldown bars	
 		InitializeIcons() -- cache special purpose icons
 		MOD:InitializeOverlays() -- initialize overlays used to cancel player buffs
 		MOD:InitializeInCombatBar() -- initialize special bar for cancelling buffs in combat
 		MOD:UpdateAllBarGroups() -- final update before starting event-based updates
 		enteredWorld = true; doUpdate = true
-		UpdateHandler(); C_Timer.NewTicker(0.0333, UpdateHandler)
+		UpdateHandler() -- register for calls on every frame
 	end
 	if not InCombatLockdown() then collectgarbage("collect") end -- recover deleted preset data but not if in combat
 end
@@ -529,11 +554,38 @@ function MOD:UpdateOptionsPanel()
 	doUpdate = true
 end
 
+-- Add a registered data broker
+local function RegisterDataBroker(event, name, broker)
+	-- MOD.Debug("ldb_register", event, name, key, value)
+	MOD.knownBrokers[name] = broker
+
+	table.wipe(MOD.brokerList) -- recreate the broker list table
+	local i = 1
+	for k, v in pairs(MOD.knownBrokers) do MOD.brokerList[i] = k; i = i + 1 end
+	table.sort(MOD.brokerList)
+end
+
+-- Update event handler for an activated data broker
+local function UpdateDataBroker(event, name, key, value, dataobj)
+	-- MOD.Debug("ldb_update", event, name, key, value)
+	doUpdate = true
+end
+
+-- Activate a registered data broker when creating a custom bar reference (no need to deactivate since only used for updates)
+function MOD:ActivateDataBroker(name)
+	if not activeBrokers[name] then -- first time reference
+		-- MOD.Debug("ldb_activate", name)
+		activeBrokers[name] = true
+		MOD.LibLDB.RegisterCallback("MyAnonCallback", "LibDataBroker_AttributeChanged_" .. name, UpdateDataBroker)
+		doUpdate = true
+	end
+end
+
 -- Tie into LibDataBroker
 function MOD:InitializeLDB()
-	local LDB = LibStub("LibDataBroker-1.1", true)
-	if not LDB then return end
-	MOD.ldb = LDB:NewDataObject("Raven", {
+	MOD.LibLDB = LibStub("LibDataBroker-1.1", true)
+	if not MOD.LibLDB then return end
+	MOD.ldb = MOD.LibLDB:NewDataObject("Raven", {
 		type = "launcher",
 		text = "Raven",
 		icon = "Interface\\Icons\\Spell_Nature_RavenForm",
@@ -565,6 +617,9 @@ function MOD:InitializeLDB()
 	})
 	MOD.ldbi = LibStub("LibDBIcon-1.0", true)
 	if MOD.ldbi then MOD.ldbi:Register("Raven", MOD.ldb, MOD.db.global.Minimap) end
+	
+	for name, broker in MOD.LibLDB:DataObjectIterator() do RegisterDataBroker("register", name, broker) end
+	MOD.LibLDB.RegisterCallback("MyAnonCallback", "LibDataBroker_DataObjectCreated", RegisterDataBroker)
 end
 
 -- Show or hide the blizzard buff frames, called during update so synched with other changes
@@ -575,14 +630,15 @@ local function CheckBlizzFrames()
 	else
 		if not visible then BuffFrame:Show(); TemporaryEnchantFrame:Show(); BuffFrame:RegisterEvent("UNIT_AURA") end
 	end
-	visible = RuneFrame:IsShown()
-	if MOD.db.profile.hideRunes then
-		if visible then RuneFrame:UnregisterAllEvents(); RuneFrame:Hide() end
-	else
-		if not visible then 
-			if MOD.myClass == "DEATHKNIGHT" then
+	if MOD.myClass == "DEATHKNIGHT" then -- only change rune frame if on deathknight currently
+		visible = RuneFrame:IsShown()
+		if MOD.db.profile.hideRunes then
+			if visible then RuneFrame:UnregisterAllEvents(); RuneFrame:Hide(); hidingRunes = true end
+		else
+			if hidingRunes and not visible then 
 				RuneFrame:Show()
 				RuneFrame:GetScript("OnLoad")(RuneFrame); RuneFrame:GetScript("OnEvent")(RuneFrame, "PLAYER_ENTERING_WORLD")
+				hidingRunes = false -- don't want to keep trying if other addon keeps hiding them
 			end
 		end
 	end
@@ -615,17 +671,21 @@ end
 
 -- Update routine called before each frame is displayed, throttled to minimize CPU usage
 function MOD:Update(elapsed)
+	local elapsedTarget = MOD.db.global.UpdateRate or 0.2
+	local refreshTarget = MOD.db.global.AnimationRate or 0.03
+	if elapsedTime < 0 then elapsedTime = elapsed else elapsedTime = elapsedTime + elapsed end -- timer for update cycles
+	if refreshTime < 0 then refreshTime = elapsed else refreshTime = refreshTime + elapsed end -- timer for refresh cycles
+	throttleTime = throttleTime + elapsed -- timer for things that need to happen about once per second
+	if throttleTime >= 1.0 then throttleTime = 0; doUpdate = true end -- equal to zero once per second
 	if MOD.db.profile.enabled then
-		elapsedTime = elapsedTime + elapsed; refreshTime = refreshTime + elapsed
-		if forceUpdate or (elapsedTime >= throttleTime) then
-			forceUpdate = false; throttleCount = throttleCount + 1; if throttleCount == 5 then throttleCount = 0 end
+		if forceUpdate or (elapsedTime >= elapsedTarget) then -- limit update rate
+			forceUpdate = false; updateCounter = updateCounter + 1; refreshCounter = refreshCounter + 1
 			if not talentsInitialized then InitializeTalents() end -- retry until talents initialized
 			CheckTotemUpdates() -- check if totems have changed since last update
 			CheckMiscellaneousUpdates() -- check for update requirements that don't have events
 			MOD:UpdateInternalCooldowns() -- check for expiring internal cooldowns
 			MOD:UpdateCooldownTimes() -- check for expiring normal cooldowns
-			if doUpdate or throttleCount == 0 or MOD:CheckTimeEvents() then -- only do major updates when events warrant it (or about once a second)
-				CheckBlizzFrames() -- make sure blizzard frames are visible or not
+			if doUpdate or MOD:CheckTimeEvents() then -- only do major updates when events warrant it (but at least once a second)
 				MOD:UpdateSpellEffects() -- update spell effect timers
 				MOD:UpdateAuras() -- update table containing current auras (actual processing is deferred until needed)
 				MOD:UpdateTrackers() -- update aura trackers for multiple targets
@@ -639,21 +699,26 @@ function MOD:Update(elapsed)
 				MOD:RefreshInCombatBar() -- update in-combat bar animations only
 				MOD.Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
 			end
-			elapsedTime = 0; refreshTime = 0; doUpdate = false
-			if (throttleCount == 0) and MOD.updateOptions then MOD:UpdateOptionsPanel() end -- update option panel once per second, if requested	
-		elseif refreshTime >= refreshThrottle then -- limit animation refesh to about 30 times per second
-			MOD:RefreshInCombatBar() -- update in-combat bar animations only
-			MOD.Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
-			refreshTime = 0
+			elapsedTime = elapsedTime - elapsedTarget; refreshTime = refreshTime - refreshTarget; doUpdate = false
+		else
+			if refreshTime >= refreshTarget then -- limit animation refesh rate
+				MOD:RefreshInCombatBar() -- update in-combat bar animations only
+				MOD.Nest_Refresh() -- refresh bars in the Nest graphics package (helps smooth animations)
+				refreshTime = refreshTime - refreshTarget; refreshCounter = refreshCounter + 1
+			end
 		end
 	else
-		elapsedTime = elapsedTime + elapsed
-		if elapsedTime >= 1 then -- check occasionally to make sure everything is in the right state
-			elapsedTime = 0
-			CheckBlizzFrames() -- make sure blizzard frames are visible or not
+		if throttleTime == 0 then -- check occasionally to make sure everything is in the right state
+			elapsedTime = 0; refreshTime = 0 -- reset these counters once per second as well
 			MOD:HideBars()
 			MOD:HideInCombatBar()
 		end
+	end
+	if throttleTime == 0 then
+		-- if IsAltKeyDown() then MOD.Debug("update", updateCounter, "refresh", refreshCounter) end
+		updateCounter = 0; refreshCounter = 0 -- these counters are only used for testing purposes
+		CheckBlizzFrames() -- need to check blizz settings occasionally
+		if MOD.updateOptions then MOD:UpdateOptionsPanel() end -- update option panel once per second, if requested
 	end
 end
 
@@ -963,9 +1028,13 @@ function MOD:DetectSpellEffect(name, caster)
 	local ect = MOD.db.global.SpellEffects[name] -- check for new spell effect triggered by this spell	
 	if ect and not ect.disable and MOD:CheckCastBy(caster, ect.caster or "player") then
 		local duration = ect.duration
+		if not duration then return end -- safety check
 		if ect.talent and not MOD.CheckTalent(ect.talent) then return end -- check required talent
 		if ect.buff then local auraList = MOD:CheckAura("player", ect.buff, true); if #auraList == 0 then return end end -- check required buff
-		if ect.optbuff then local auraList = MOD:CheckAura("player", ect.optbuff, true); if #auraList > 0 then duration = ect.optduration end end -- check optional buff
+		if ect.optbuff and ect.optduration then -- check optional buff and test safety for the duration
+			local auraList = MOD:CheckAura("player", ect.optbuff, true)
+			if #auraList > 0 then duration = ect.optduration end
+		end
 		if ect.condition and not MOD:CheckCondition(ect.condition) then return end -- check required condition
 		local ec = spellEffects[name]
 		if ec and ect.renew then spellEffects[name] = ReleaseTable(ec); ec = nil end -- check if already active spell effect and optionally renew
@@ -1126,8 +1195,9 @@ function MOD:UpdateTrackers()
 			end
 		end
 	end
-	
-	if throttleCount == 0 then -- things to do every second...
+
+	if (lastTrackers == 0) or ((now - lastTrackers) > 0.5) then -- things to do every half second...
+		lastTrackers = now
 		ValidateUnitIDs()
 		table.wipe(refreshUnits) -- table of guids to prevent refreshing multiple times
 		MOD:AddTrackers("player"); MOD:AddTrackers("target");  MOD:AddTrackers("focus")
@@ -1152,10 +1222,12 @@ end
 
 -- Update aura table with current player, target and focus auras and debuffs, include player weapon buffs
 function MOD:UpdateAuras()
+	local now = GetTime()
 	for _, k in pairs(units) do unitStatus[k] = MOD:ValidateUnit(k)	end	 -- set current unit status, defer actual update until referenced
 	for _, k in pairs(eventUnits) do unitUpdate[k] = (unitStatus[k] == 1) end -- can't count on events for these units
-	if throttleCount == 0 then -- things to do every second...
-		GetWeaponBuffs() -- get current weapon buffs, if any (less useful in WoD since no longer track shaman weapon enchants or rogue poisons)
+	if (lastWeapons == 0) or ((now - lastWeapons) > 1.0) then -- things to do every second...
+		lastWeapons = now
+		GetWeaponBuffs() -- get current weapon buffs, if any (less useful since WoD since no longer track shaman weapon enchants or rogue poisons)
 	end
 end
 
@@ -1453,7 +1525,7 @@ function MOD:UpdateCooldowns()
 				end
 			end
 		end
-		
+
 		for bag = 0, NUM_BAG_SLOTS do
 			local numSlots = GetContainerNumSlots(bag)
 			for i = 1, numSlots do

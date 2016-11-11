@@ -3,6 +3,7 @@
 ## Notes: Equipped iLevel for the GameTooltip
 ## Version: 2.8
 ## Author: Freebaser
+## RequiredDeps: FreebTip
 
 libs\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml
 libs\LibInspect\LibInspect.lua

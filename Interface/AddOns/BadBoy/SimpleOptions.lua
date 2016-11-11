@@ -17,7 +17,7 @@ do
 		locManualReport = "Afficher un popup de signalement du joueur au lieu de l'indiquer dans la fenêtre de chat"
 	elseif L == "deDE" then
 		locNoReportMsg = "Verstecke die 'Spam geblockt' Meldung, die dich bittet, den Spam zu melden"
-		locNoReportDesc = "Bitte NICHT nutzen. Spam zu melden hilft die Anzahl der gehackten Accounts, die Spammer nutzen, zu reduzieren und säubert die Server. Wenn viele Leute einen Spammer melden, verlieren diese die Möglichkeit den Chat zu nutzen. Davon profitieren alle, vor allem Leute die BadBoy nicht nutzen."
+		locNoReportDesc = "Bitte NICHT nutzen. Spam zu melden hilft die Anzahl der gehackten Accounts, die Spammer nutzen, zu reduzieren und säubert die Server. Wenn viele Leute einen Spammer melden, verlieren diese die Möglichkeit den Chat zu nutzen. Davon profitieren alle, vor allem Leute, die BadBoy nicht nutzen."
 		locManualReport = "Zeige ein PopUp (zeigt den Spam) anstatt es im Chatfenster anzuzeigen"
 	elseif L == "zhTW" then
 		locNoReportMsg = "隱藏要你舉報的 '垃圾阻擋' 訊息"
@@ -42,7 +42,9 @@ do
 	elseif L == "koKR" then
 
 	elseif L == "ptBR" then
-
+		locNoReportMsg = "Ocultar a mensagem 'Spam Bloqueado' pedindo para você denunciar"
+		locNoReportDesc = "Favor NÃO use esta opção. Denunciar é o que faz os spammers serem banidos e mantêm o reino limpo. Além disso, se muitos relatarem, o usuário em questão perde a capacidade de conversar e não poderá mais enviar spam, beneficiando à todos, principalmente jogadores que não usam o BadBoy."
+		locManualReport = "Exibir uma janela (mostrando o spam) ao invés de imprimir no chat"
 	elseif L == "itIT" then
 		locNoReportMsg = "Nascondi il messaggio 'Spam bloccata' che ti chiede di riportare"
 		locNoReportDesc = "Prego NON usare questo. Riportare le spam è ciò che permette di bloccare account rubati usati dagli spammers. Inoltre se tanti riportano uno spammer, questi non può più scrivere nella chat e ciò va a vantaggio di tutti, anche di coloro che non usano questo addon."
@@ -56,7 +58,7 @@ badboy:Hide()
 badboy.name = "BadBoy"
 local title = badboy:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", 16, -16)
-title:SetText("BadBoy v13.025") -- wowace magic, replaced with tag version
+title:SetText("BadBoy v7.0.14") -- packager magic, replaced with tag version
 InterfaceOptions_AddCategory(badboy)
 
 --[[ No Report Chat Message Checkbox ]]--

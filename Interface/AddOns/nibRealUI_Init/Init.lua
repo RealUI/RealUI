@@ -4,16 +4,16 @@ if loaded and finished then
     return
 end
 
-local NAME, RealUI = ...
+local _, RealUI = ...
 
 -- Lua Globals --
 local _G = _G
 local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
 local next, print, select = _G.next, _G.print, _G.select
-local tostring, date = _G.tostring, _G.date
+local tostring = _G.tostring
 
 -- Libs --
-local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
+local LTD = _G.LibStub("LibTextDump-1.0")
 
 -- RealUI --
 _G.RealUI = RealUI
@@ -74,10 +74,10 @@ local function Debug(mod, ...)
     if not modDebug then
         modDebug = CreateDebugFrame(mod)
     end
-    local text = mod
+    local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        text = text .. "     " .. tostring(arg)
+        text = text .. tostring(arg) .. "     "
     end
     if modDebug.prevLine == text then
         modDebug.numDuped = modDebug.numDuped + 1
@@ -86,8 +86,7 @@ local function Debug(mod, ...)
             modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
             modDebug.numDuped = 1
         end
-        local time = date("%H:%M:%S")
-        modDebug:AddLine(("[%s] %s"):format(time, text))
+        modDebug:AddLine(text, "%H:%M:%S")
         modDebug.prevLine = text
     end
 end
@@ -145,6 +144,10 @@ f:SetScript("OnEvent", function(self, event, addon)
         local scrHeight = _G.GetScreenHeight()
         scrHeight = floor(scrHeight + 0.5)
         debug("scrHeight", scrHeight)
+
+        local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+        debug("physical size", pysWidth, pysHeight)
+
         local EM = scrHeight * 0.0125
         debug("EM", EM, RealUI.EM)
 
@@ -155,7 +158,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             debug("Recalc EM")
         end
     elseif event == "ADDON_LOADED" then
-        if addon == NAME then
+        if addon == "nibRealUI_Init" then
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
             _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then

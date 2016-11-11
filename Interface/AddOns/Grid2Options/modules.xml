@@ -35,6 +35,7 @@
 <Script file="modules\statuses\StatusRole.lua"/>
 <Script file="modules\statuses\StatusShields.lua"/>
 <Script file="modules\statuses\StatusHealAbsorbs.lua"/>
+<Script file="modules\statuses\StatusHealsAoe.lua"/>
 <Script file="modules\statuses\StatusThreat.lua"/>
 <Script file="modules\statuses\StatusMisc.lua"/>
 

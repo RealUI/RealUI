@@ -28,4 +28,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <!-- Fixes -->
     <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\BlizzBugsSuck.lua"/>
+    <Script file="Fixes\Taint.lua"/>
+    <Script file="Fixes\DropdownMenu\EasyMenu.lua"/>
+    <Include file="Fixes\DropdownMenu\UIDropDownMenu.xml"/>
 </Ui>

@@ -24,6 +24,9 @@ L["Sets the background color of each unit frame"] = "Elige el color de fondo de 
 L["Mouseover Highlight"] = "Resaltar celda del ratón"
 L["Toggle mouseover highlight."] = "Activa esta opción para que la celda bajo el ratón sea resaltada."
 
+L["Right Click Menu"] = "Menu en Click Derecho"
+L["Display the standard unit menu when right clicking on a frame."] = "Mostrar el menu estandard cuando se hace click sobre una celda."
+
 L["Show Tooltip"] = "Mostrar Tooltips"
 L["Show unit tooltip.  Choose 'Always', 'Never', or 'OOC'."] = "Cuando mostrar los Tooltips de las unidades.  Elige 'Siempre', 'Nunca', o 'Fuera de combate'."
 L["Always"] = "Siempre"

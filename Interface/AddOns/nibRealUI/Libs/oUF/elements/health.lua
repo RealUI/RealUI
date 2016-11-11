@@ -89,19 +89,12 @@ local oUF = ns.oUF
 oUF.colors.health = {49/255, 207/255, 37/255}
 
 local Update = function(self, event, unit)
-	local arenaPrep = event == 'ArenaPreparation'
-	if(self.unit ~= unit and not arenaPrep) then return end
+	if(self.unit ~= unit) then return end
 	local health = self.Health
 
 	if(health.PreUpdate) then health:PreUpdate(unit) end
 
-	local min, max
-	if(arenaPrep) then
-		min, max = 1, 1
-	else
-		min, max = UnitHealth(unit), UnitHealthMax(unit)
-	end
-
+	local min, max = UnitHealth(unit), UnitHealthMax(unit)
 	local disconnected = not UnitIsConnected(unit)
 	health:SetMinMaxValues(0, max)
 
@@ -114,10 +107,7 @@ local Update = function(self, event, unit)
 	health.disconnected = disconnected
 
 	local r, g, b, t
-	if(health.colorClass and arenaPrep) then
-		local _, _, _, _, _, _, class = GetSpecializationInfoByID(GetArenaOpponentSpec(self.id))
-		t = self.colors.class[class]
-	elseif(health.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+	if(health.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		t = self.colors.tapped
 	elseif(health.colorDisconnected and not UnitIsConnected(unit)) then
 		t = self.colors.disconnected

@@ -1,14 +1,13 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 _G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("WorldMapFrame", F, C)
     local function skin()
         --print("Map:Skin")
-        _G.WorldMapPlayerUpper:EnableMouse(false)
-        _G.WorldMapPlayerLower:EnableMouse(false)
+        if not _G.RealUI.is71 then
+            _G.WorldMapPlayerUpper:EnableMouse(false)
+            _G.WorldMapPlayerLower:EnableMouse(false)
+        end
 
         if not _G.WorldMapFrame.skinned then
             _G.WorldMapFrame:SetUserPlaced(true)
@@ -36,13 +35,15 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     coords:SetFrameStrata(_G.WorldMapDetailFrame:GetFrameStrata())
 
     coords.player = coords:CreateFontString(nil, "OVERLAY")
-    coords.player:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 4.5, 4.5)
+    coords.player:SetPoint("TOPLEFT", _G.WorldMapFrame, 40.5, -10.5)
     coords.player:SetFontObject(_G.RealUIFont_PixelSmall)
+    coords.player:SetJustifyH("LEFT")
     coords.player:SetText("")
 
     coords.mouse = coords:CreateFontString(nil, "OVERLAY")
-    coords.mouse:SetPoint("BOTTOMLEFT", _G.WorldMapFrame.UIElementsFrame, "BOTTOMLEFT", 120.5, 4.5)
+    coords.mouse:SetPoint("TOPLEFT", _G.WorldMapFrame, 160.5, -10.5)
     coords.mouse:SetFontObject(_G.RealUIFont_PixelSmall)
+    coords.mouse:SetJustifyH("LEFT")
     coords.mouse:SetText("")
 
     local round, classColorStr = _G.RealUI.Round, _G.RealUI:ColorTableToStr({C.r, C.g, C.b})
@@ -51,13 +52,13 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
 
         -- Player
         local playerX, playerY = _G.GetPlayerMapPosition("player")
-        playerX = round(100 * playerX, 1)
-        playerY = round(100 * playerY, 1)
+        if (playerX and playerX > 0) and (playerY and playerY > 0) then
+            playerX = round(100 * playerX, 1)
+            playerY = round(100 * playerY, 1)
 
-        if playerX ~= 0 and playerY ~= 0 then
             coords.player:SetText(("|cff%s%s: |cffffffff%s, %s|r"):format(classColorStr, _G.PLAYER, playerX, playerY))
         else
-            coords.player:SetText("")
+            coords.player:SetText(("|cff%s%s: |cffffffff%s|r"):format(classColorStr, _G.PLAYER, _G.UNAVAILABLE))
         end
 
         -- Mouse
@@ -86,7 +87,9 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
         -- reparent
         _G.WorldMapFrame:SetParent(_G.UIParent)
         _G.WorldMapFrame:SetFrameStrata("HIGH")
-        _G.WorldMapFrame:EnableKeyboard(true)
+        _G.WorldMapTooltip:SetFrameStrata("TOOLTIP");
+        _G.WorldMapCompareTooltip1:SetFrameStrata("TOOLTIP");
+        _G.WorldMapCompareTooltip2:SetFrameStrata("TOOLTIP");
 
         --reposition
         _G.WorldMapFrame:ClearAllPoints()

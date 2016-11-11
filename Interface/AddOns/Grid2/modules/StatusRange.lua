@@ -23,7 +23,15 @@ local Ranges= {
 local UnitRangeCheck
 local UnitIsInRange
 
-local rezSpell = ({DRUID=20484,PRIEST=2006,PALADIN=7328,SHAMAN=2008,MONK=115178,DEATHKNIGHT=61999,WARLOCK=20707})[select(2, UnitClass("player"))]
+local playerClass = select(2, UnitClass("player"))
+ 
+local rangeSpell = ({PALADIN=19750,SHAMAN=77472,DRUID=774,PRIEST=73325,MONK=115450})[playerClass]
+if rangeSpell then
+	rangeSpell = GetSpellInfo(rangeSpell)
+	Ranges[ rangeSpell ] = function(unit) return IsSpellInRange(rangeSpell, unit) == 1 end
+end
+
+local rezSpell = ({DRUID=20484,PRIEST=2006,PALADIN=7328,SHAMAN=2008,MONK=115178,DEATHKNIGHT=61999,WARLOCK=20707})[playerClass]
 if rezSpell then
 	rezSpell = GetSpellInfo(rezSpell)
 	UnitIsInRange = function(unit)

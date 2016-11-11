@@ -58,14 +58,21 @@ function addon:Initialize()
 
 	-- This snippet will clear any dangling bindings that might have occurred
 	-- as a result of frames being shown/hidden.
-    self.header:SetAttribute("_onattributechanged", [[
-        if name == "hasunit" then
-            if value == "false" and danglingButton then
+    local oacScript = [[
+        if name == "hasunit" and value == "false" and danglingButton then
+            -- Check if we should clear the bindings
+            if not danglingButton:IsUnderMouse() or not danglingButton:IsVisible() then
+                if {{debug}} then print("Clique: clearing bindings, unit lost") end
                 self:RunFor(danglingButton, self:GetAttribute("setup_onleave"))
                 danglingButton = nil
+            else
+                if {{debug}} then print("Clique: ignoring unit loss, frame still here") end
             end
         end
-    ]])
+    ]]
+    oacScript = oacScript:gsub("{{debug}}", self.settings.debugUnitIssue and "true" or "false")
+
+    self.header:SetAttribute("_onattributechanged", oacScript)
     RegisterAttributeDriver(self.header, "hasunit", "[@mouseover, exists] true; false")
 
 	-- Create a secure action button that's sole purpose is to cancel a
@@ -195,6 +202,7 @@ function addon:Initialize()
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "EnteringCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "LeavingCombat")
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "TalentGroupChanged")
+    self:RegisterEvent("PLAYER_ENTERING_WORLD", "PlayerEnteringWorld")
 
     -- Register for Clique-based messages for settings updates, etc.
     self:RegisterMessage("BINDINGS_CHANGED")
@@ -806,6 +814,14 @@ function addon:TalentGroupChanged()
 
     self:FireMessage("BINDINGS_CHANGED")
 end
+
+-- Ensure we trigger a bindings change the first time the player enters the
+-- world.
+function addon:PlayerEnteringWorld()
+    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+    self:FireMessage("BINDINGS_CHANGED")
+end
+
 
 function addon:UpdateCombatWatch()
     if self.settings.fastooc then
