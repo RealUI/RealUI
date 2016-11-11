@@ -4,7 +4,7 @@ if loaded and finished then
     return
 end
 
-local NAME, RealUI = ...
+local _, RealUI = ...
 
 -- Lua Globals --
 local _G = _G
@@ -144,6 +144,10 @@ f:SetScript("OnEvent", function(self, event, addon)
         local scrHeight = _G.GetScreenHeight()
         scrHeight = floor(scrHeight + 0.5)
         debug("scrHeight", scrHeight)
+
+        local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+        debug("physical size", pysWidth, pysHeight)
+
         local EM = scrHeight * 0.0125
         debug("EM", EM, RealUI.EM)
 
@@ -154,7 +158,7 @@ f:SetScript("OnEvent", function(self, event, addon)
             debug("Recalc EM")
         end
     elseif event == "ADDON_LOADED" then
-        if addon == NAME then
+        if addon == "nibRealUI_Init" then
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
             _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
