@@ -308,14 +308,14 @@ function InfoLine:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
-                _G.EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 2)
+                _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 2)
             end,
             OnLeave = function(block, ...)
                 InfoLine:debug("Start: OnLeave", block.side, ...)
                 --CloseDropDownMenus()
             end,
         })
-        _G.UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
+        _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
     end
 
     -- Mail
