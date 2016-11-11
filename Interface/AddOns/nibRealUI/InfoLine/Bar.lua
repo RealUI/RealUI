@@ -283,6 +283,7 @@ do
         local point, relativeTo, relativePoint, xOfs, yOfs
         if nextBlock then
             point, relativeTo, relativePoint, xOfs, yOfs = nextBlock:GetPoint()
+            nextBlock:ClearAllPoints()
             if point == relativePoint then
                 local relPoint = relativePoint:find("LEFT") and "BOTTOMRIGHT" or "BOTTOMLEFT"
                 nextBlock:SetPoint(point, newBlock, relPoint, xOfs, yOfs)
