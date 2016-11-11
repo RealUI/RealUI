@@ -31,3 +31,30 @@ do --[[ World Map ]]--
     _G.WorldMapFrame.questLogMode = true
     _G.QuestMapFrame_Open(true)
 end
+
+
+do --[[ Artifact Frame ]]--
+    -- by Gnarfoz
+    --C_ArtifactUI.GetTotalPurchasedRanks() shenanigans
+    local orig_show
+    local new_show
+    local counter = 0
+
+    local function new_show(self)
+        if C_ArtifactUI.GetTotalPurchasedRanks() then 
+            orig_show(self)
+        else
+            ArtifactFrame:Hide()
+            counter = counter + 1
+            print("GTPR is nil, count: " ..counter)
+        end
+    end
+
+    local function hook_artifact_show()
+        if not orig_show then
+            orig_show = ArtifactFrame:GetScript("OnShow")
+            ArtifactFrame:SetScript("OnShow", new_show)
+        end
+    end
+    hooksecurefunc("ArtifactFrame_LoadUI", hook_artifact_show)
+end
