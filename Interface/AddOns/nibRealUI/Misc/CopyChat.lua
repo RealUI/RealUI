@@ -5,7 +5,7 @@ local _G = _G
 local next = _G.next
 
 -- Libs --
-local textDump = _G.LibStub("RealUI_LibTextDump-1.0")
+local textDump = _G.LibStub("LibTextDump-1.0")
 
 -- RealUI --
 local RealUI = private.RealUI

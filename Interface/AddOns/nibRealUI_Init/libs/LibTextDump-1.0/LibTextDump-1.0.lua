@@ -19,7 +19,7 @@ local MAJOR = "LibTextDump-1.0"
 
 _G.assert(LibStub, MAJOR .. " requires LibStub")
 
-local MINOR = 2 -- Should be manually increased
+local MINOR = 3 -- Should be manually increased
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then

@@ -13,7 +13,7 @@ local next, print, select = _G.next, _G.print, _G.select
 local tostring = _G.tostring
 
 -- Libs --
-local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
+local LTD = _G.LibStub("LibTextDump-1.0")
 
 -- RealUI --
 _G.RealUI = RealUI
