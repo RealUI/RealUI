@@ -141,7 +141,6 @@ local core do
             },
         }
     
-        local blocksOrder = 10
         local realui = {
             name = "RealUI",
             type = "group",
@@ -149,24 +148,6 @@ local core do
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
             args = {},
         }
-        for name, blockInfo in next, db.blocks.realui do
-            -- Create base options for RealUI
-            realui.args[name] = {
-                name = name,
-                desc = "Enable the " .. name .. " block.",
-                type = "toggle",
-                get = function() return blockInfo.enabled end,
-                set = function(data, value) 
-                    blockInfo.enabled = value
-                    InfoLine:RemoveBlock(blockInfo)
-                end,
-                order = blocksOrder,
-            }
-            blocksOrder = blocksOrder + 10
-        end
-        infoLine.args.blocks.args.realui = realui
-
-        blocksOrder = 10
         local others = {
             name = "Others",
             type = "group",
@@ -174,26 +155,41 @@ local core do
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
             args = {},
         }
-        for name, blockInfo in next, db.blocks.others do
-            -- Create base options for others
-            others.args[name] = {
-                name = name,
-                desc = "Enable " .. name,
-                type = "toggle",
-                get = function() return blockInfo.enabled end,
-                set = function(data, value) 
-                    blockInfo.enabled = value
-                    if value then
-                        InfoLine:AddBlock(name, InfoLine.LDB:GetDataObjectByName(name), blockInfo)
-                    else
-                        InfoLine:RemoveBlock(name, blockInfo)
-                    end
-                end,
-                order = blocksOrder,
-            }
-            blocksOrder = blocksOrder + 10
+        for name, dataObj in InfoLine.LDB:DataObjectIterator() do
+            if dataObj.type == "RealUI" then
+                local block = db.blocks.realui[name]
+                -- Create base options for RealUI
+                realui.args[name] = {
+                    name = name,
+                    desc = "Enable the " .. name .. " block.",
+                    type = "toggle",
+                    get = function() return block.enabled end,
+                    set = function(data, value) 
+                        block.enabled = value
+                        InfoLine:RemoveBlock(block)
+                    end,
+                }
+                infoLine.args.blocks.args.realui = realui
+            elseif dataObj.type == "data source" then
+                local block = db.blocks.others[name]
+                -- Create base options for others
+                others.args[name] = {
+                    name = name,
+                    desc = "Enable" .. name,
+                    type = "toggle",
+                    get = function() return block.enabled end,
+                    set = function(data, value) 
+                        block.enabled = value
+                        if value then
+                            InfoLine:AddBlock(name, dataObj, block)
+                        else
+                            InfoLine:RemoveBlock(name, block)
+                        end
+                    end,
+                }
+                infoLine.args.blocks.args.others = others
+            end
         end
-        infoLine.args.blocks.args.others = others
     end
     local playerShields do
         local MODNAME = "PlayerShields"
