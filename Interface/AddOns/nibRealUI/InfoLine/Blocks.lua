@@ -303,16 +303,9 @@ function InfoLine:CreateBlocks()
             text = L["Start"],
             side = "left",
             index = 1,
-            OnClick = function(block, ...)
-                InfoLine:debug("Start: OnClick", block.side, ...)
-            end,
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
-                _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 2)
-            end,
-            OnLeave = function(block, ...)
-                InfoLine:debug("Start: OnLeave", block.side, ...)
-                --CloseDropDownMenus()
+                _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
             end,
         })
         _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
