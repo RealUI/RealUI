@@ -413,8 +413,7 @@ function InfoLine:CreateBlocks()
 
                 local gmotd = _G.GetGuildRosterMOTD()
                 if gmotd ~= "" then
-                    lineNum, colNum = tooltip:AddLine(gmotd)
-                    tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                    tooltip:AddLine(gmotd)
                 end
 
                 local color = RealUI.media.colors.orange
@@ -482,8 +481,8 @@ function InfoLine:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
 
-                lineNum, colNum = tooltip:AddLine(L["Guild_WhisperInvite"])
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                lineNum = tooltip:AddLine(L["Guild_WhisperInvite"])
+                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
 
                 tooltip:SmartAnchorTo(block)
                 tooltip:SetAutoHideDelay(0.10, block)
