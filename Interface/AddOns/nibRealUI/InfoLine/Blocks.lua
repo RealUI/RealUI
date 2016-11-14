@@ -25,37 +25,98 @@ do
     local TABLE_WIDTH = 500
     local MAX_ROWS = 10
     local ROW_HEIGHT = 10
+    local numTables = 0
+
+    local function UpdateScroll(self)
+        InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
+        local offset = _G.FauxScrollFrame_GetOffset(self) or 0
+        local data = self.textTable.data
+        InfoLine:debug("offset", offset)
+        for i = 1, MAX_ROWS do
+            local index = offset + i
+            local row = self.textTable.rows[i]
+            InfoLine:debug("row", i, index)
+            for col = 1, #self.textTable.header do
+                local text = row[col]
+                if not text then
+                    text = row:CreateFontString("$parentText", "ARTWORK", "RealUIFont_Normal")
+                    text:SetPoint("TOP")
+                    text:SetPoint("BOTTOM")
+                    text:SetPoint("LEFT", self.textTable.header[col])
+                    text:SetPoint("RIGHT", self.textTable.header[col])
+
+                    row[col] = text
+                end
+                local rowData = data[index]
+                if rowData then
+                    text:SetText(rowData.info[col])
+                    text:SetJustifyH(data.header.justify[col])
+                end
+            end
+        end
+
+        self:Show()
+        local scrollFrameHeight = (#data - MAX_ROWS) * ROW_HEIGHT
+        if ( scrollFrameHeight < 0 ) then
+            scrollFrameHeight = 0
+        end
+
+        local scrollBar = self.ScrollBar
+        scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
+        scrollBar:SetValueStep(ROW_HEIGHT)
+        scrollBar:SetStepsPerPage(MAX_ROWS - 1)
+        
+        -- Arrow button handling
+        local scrollUpButton = scrollBar.ScrollUpButton
+        local scrollDownButton = scrollBar.ScrollDownButton
+
+        if ( scrollBar:GetValue() == 0 ) then
+            scrollUpButton:Disable()
+        else
+            scrollUpButton:Enable()
+        end
+        if ((scrollBar:GetValue() - scrollFrameHeight) == 0) then
+            scrollDownButton:Disable()
+        else
+            scrollDownButton:Enable()
+        end
+    end
 
     function TextTableCellPrototype:InitializeCell()
         InfoLine:debug("CellProto:InitializeCell")
 
         if not self.textTable then
-            local textTable = _G.CreateFrame("Frame", nil, self)
+            numTables = numTables + 1
+            local textTable = _G.CreateFrame("Frame", "IL_TextTable"..numTables, self)
             textTable:SetPoint("TOPLEFT")
             textTable:SetPoint("BOTTOMRIGHT")
+            textTable:EnableMouse(true)
 
-            --[[ Test BG ]]
+            --[[ Test BG 
             local test = textTable:CreateTexture(nil, "BACKGROUND")
             test:SetColorTexture(1, 1, 1, 0.5)
-            test:SetAllPoints(textTable)
+            test:SetAllPoints(textTable)]]
 
-            local header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
-            header:SetPoint("TOPLEFT")
-            header:SetPoint("RIGHT")
-            header:SetHeight(ROW_HEIGHT)
-            textTable.header = header
+            textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+            textTable.header:SetPoint("TOPLEFT")
+            textTable.header:SetPoint("RIGHT")
+            textTable.header:SetHeight(ROW_HEIGHT)
 
             local line = textTable:CreateTexture(nil, "BACKGROUND")
             line:SetColorTexture(1, 1, 1)
-            line:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+            line:SetPoint("TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
             line:SetPoint("RIGHT")
             line:SetHeight(1)
 
-            local scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
-            scrollArea:SetPoint("TOPLEFT", line, 0, -5)
-            scrollArea:SetPoint("BOTTOMRIGHT")
+            textTable.scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
+            textTable.scrollArea:SetPoint("TOPLEFT", line, 0, -5)
+            textTable.scrollArea:SetPoint("BOTTOMRIGHT")
+            textTable.scrollArea:SetScript("OnVerticalScroll", function(scroll, offset)
+                _G.FauxScrollFrame_OnVerticalScroll(scroll, offset, ROW_HEIGHT, UpdateScroll)
+            end)
+            textTable.scrollArea.textTable = textTable
 
-            local prev = scrollArea
+            local prev = textTable.scrollArea
             textTable.rows = {}
             for index = 1, MAX_ROWS do
                 local row = _G.CreateFrame("Frame", "$parentRow"..index, textTable)
@@ -79,6 +140,7 @@ do
         InfoLine:debug("CellProto:SetupCell")
         local textTable = self.textTable
         local width = TABLE_WIDTH
+        textTable.data = data
 
         local flex, filler = {}
         local header, headerData = textTable.header, data.header
@@ -118,24 +180,7 @@ do
         end
         filler:SetWidth(_G.max(remainingWidth, filler:GetStringWidth()))
 
-        for index, row in ipairs(textTable.rows) do
-            InfoLine:debug("row", index)
-            for col = 1, #header do
-                local text = row[col]
-                if not text then
-                    text = row:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
-                    text:SetPoint("TOP")
-                    text:SetPoint("BOTTOM")
-                    text:SetPoint("LEFT", header[col])
-                    text:SetPoint("RIGHT", header[col])
-
-                    row[col] = text
-                end
-                local rowData = data[index]
-                text:SetText(rowData.info[col])
-                text:SetJustifyH(headerData.justify[col])
-            end
-        end
+        UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
         return TABLE_WIDTH, ROW_HEIGHT * (MAX_ROWS + 1) + 11
