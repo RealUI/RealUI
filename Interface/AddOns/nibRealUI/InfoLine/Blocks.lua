@@ -384,6 +384,7 @@ function InfoLine:CreateBlocks()
         end
 
         local time = _G.GetTime()
+        local guildData = {}
         LDB:NewDataObject(_G.GUILD, {
             type = "RealUI",
             label = fa["group"],
@@ -411,13 +412,14 @@ function InfoLine:CreateBlocks()
                 local gname = _G.GetGuildInfo("player")
                 tooltip:AddHeader(gname)
 
+
                 local gmotd = _G.GetGuildRosterMOTD()
                 if gmotd ~= "" then
                     tooltip:AddLine(gmotd)
                 end
 
                 local color = RealUI.media.colors.orange
-                local guildData = {}
+                _G.table.wipe(guildData)
                 guildData.header = {
                     r = color[1], g = color[2], b = color[3],
                     sort = {
