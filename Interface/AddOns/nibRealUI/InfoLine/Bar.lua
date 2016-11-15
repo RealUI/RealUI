@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local ipairs = _G.ipairs
+local next, ipairs = _G.next, _G.ipairs
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -16,54 +16,15 @@ local MODNAME = "InfoLine"
 local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 InfoLine.LDB = LDB
 
+local MOVING_BLOCK
 local textColor = {}
-local inactiveBlocks = {
-    left = {},
-    right = {},
-}
-
---------------------
--- Frame Creation --
---------------------
+local blocksByData = {}
 local barHeight
-function InfoLine:CreateBar()
-    local frame = _G.CreateFrame("Frame", "RealUI_InfoLine", _G.UIParent)
-    frame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
-    frame:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
-    frame:SetHeight(barHeight)
-    frame:SetFrameStrata("LOW")
-    frame:SetFrameLevel(0)
-
-    frame.left = {}
-    frame.right = {}
-
-    -- Background
-    frame:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    frame:SetBackdropBorderColor(0, 0, 0)
-    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
-
-    -- Stripes
-    local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
-    tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-    tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-    tex:SetAllPoints()
-    tex:SetHorizTile(true)
-    tex:SetVertTile(true)
-    tex:SetBlendMode("ADD")
-    _G.tinsert(_G.REALUI_WINDOW_FRAMES, frame)
-    _G.tinsert(_G.REALUI_STRIPE_TEXTURES, tex)
-
-    self.frame = frame
-end
 
 
--------------------
--- LDB Functions --
--------------------
+----------------------
+-- Block Management --
+----------------------
 local function PrepareTooltip(tooltip, block)
     InfoLine:debug("PrepareTooltip", tooltip, block and block.name)
     if tooltip and block then
@@ -77,11 +38,12 @@ local function PrepareTooltip(tooltip, block)
     end
 end
 
-local function OnEnter(self)
+local BlockMixin = {}
+function BlockMixin:OnEnter()
     InfoLine:debug("OnEnter", self.name)
     --self.highlight:Show()
 
-    if (not db.other.icTips and _G.UnitAffectingCombat("player")) then return end
+    if (not db.other.icTips and _G.InCombatLockdown()) then return end
     local dataObj  = self.dataObj
     
     if dataObj.tooltip then
@@ -106,7 +68,7 @@ local function OnEnter(self)
     end
 end
 
-local function OnLeave(self)
+function BlockMixin:OnLeave()
     InfoLine:debug("OnLeave", self.name)
     --self.highlight:Hide()
 
@@ -126,41 +88,131 @@ local function OnLeave(self)
     end
 end
 
-local function OnClick(self, ...)
+function BlockMixin:OnClick(...)
     InfoLine:debug("OnClick", self.name, ...)
-    if (_G.UnitAffectingCombat("player")) then return end
-    if self.dataObj.OnClick then
+    if self.dataObj.OnClick and not _G.InCombatLockdown() then
         InfoLine:debug("Send OnClick")
         self.dataObj.OnClick(self, ...)
     end
 end
 
-local function OnEvent(self, event, ...)
+function BlockMixin:OnDragStart(button)
+    InfoLine:debug("OnDragStart", self.name, button)
+    if self:IsMovable() then
+        --local cursorX, cursorY = GetCursorPosition();
+        --local uiScale = _G.UIParent:GetScale();
+        self:StartMoving();
+        --self:ClearAllPoints();
+        --self:SetPoint("CENTER", _G.UIParent, "BOTTOMLEFT", cursorX / uiScale, cursorY / uiScale);
+        MOVING_BLOCK = self;
+    end
+end
+
+function BlockMixin:OnDragStop(button)
+    InfoLine:debug("OnDragStart", self.name, button)
+    self:StopMovingOrSizing()
+
+    local dock = InfoLine.frame[self.side]
+    dock:HideInsertHighlight()
+
+    if ( dock:IsMouseOver(10, -10, 0, 0) ) then
+        local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition();
+        mouseX, mouseY = mouseX / scale, mouseY / scale;
+
+        -- DockFrame
+        dock:AddChatFrame(self, dock:GetInsertIndex(self, mouseX, mouseY))
+        dock:UpdateTabs(true)
+    else
+        self:RestorePosition()
+    end
+
+    self:SavePosition();
+
+    MOVING_BLOCK = nil
+end
+
+function BlockMixin:OnEvent(event, ...)
     InfoLine:debug("OnEvent", self.name, event, ...)
     self.dataObj.OnEvent(self, event, ...)
 
     -- Update the tooltip
     if qTip:IsAcquired(self) then
         qTip:Release(self.tooltip)
-        OnEnter(self)
+        self:OnEnter()
     end
 end
 
-local function OnUpdate(self, ...)
-    self.dataObj.OnUpdate(self, ...)
-
-    -- Update the tooltip
-    if qTip:IsAcquired(self) then
-        qTip:Release(self.tooltip)
-        OnEnter(self)
+function BlockMixin:OnUpdate(elapsed)
+    if self.dataObj.OnUpdate then
+        self.dataObj.OnUpdate(self, elapsed)
     end
+
+    if self == MOVING_BLOCK then
+        local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition();
+        cursorX, cursorY = cursorX / scale, cursorY / scale;
+        local dock = InfoLine.frame[self.side]
+        if self ~= dock.primary and dock:IsMouseOver(10, -10, 0, 10) then
+            dock:PlaceInsertHighlight(self, cursorX, cursorY);
+        else
+            dock:HideInsertHighlight();
+        end
+
+        self:UpdateButtonSide();
+        if self == dock.primary then
+            for _, frame in next, dock:GetChatFrames() do
+                frame:SetButtonSide(self:GetButtonSide(dock.primary));
+            end
+        end
+
+        if not _G.IsMouseButtonDown(self.dragButton) then
+            self:OnDragStop(self.dragButton)
+            self.dragButton = nil;
+            MOVING_BLOCK = nil
+        end
+    elseif self:IsMouseOver() then
+        -- Update the tooltip
+        qTip:Release(self.tooltip)
+        self:OnEnter()
+    end
+end
+
+function BlockMixin:UpdateButtonSide()
+    local leftDist =  self:GetLeft();
+    local rightDist = _G.GetScreenWidth() - self:GetRight();
+    local changed = nil;
+    if (leftDist > 0 and leftDist <= rightDist) or rightDist < 0 then
+        if self.side ~= "left" then
+            self.side = "left"
+            changed = 1;
+        end
+    else
+        if self.side ~= "right" or leftDist < 0 then
+            self.side = "right"
+            changed = 1;
+        end
+    end
+    return changed;
+end
+
+function BlockMixin:SavePosition()
+    local blockInfo = InfoLine:GetBlockInfo(self.name, self.dataObj)
+
+    blockInfo.side = self.side
+    blockInfo.index = self.index
+end
+
+function BlockMixin:RestorePosition()
+    local blockInfo = InfoLine:GetBlockInfo(self.name, self.dataObj)
+
+    local dock = InfoLine.frame[blockInfo.side]
+    dock:AddChatFrame(self, blockInfo.index)
 end
 
 local function CreateNewBlock(name, dataObj)
     InfoLine:debug("CreateNewBlock", name, dataObj)
-    local block = _G.CreateFrame("Button", "InfoLine_" .. name, InfoLine.frame)
+    local block = _G.Mixin(_G.CreateFrame("Button", nil, InfoLine.frame), BlockMixin)
+    blocksByData[dataObj] = block
     block.dataObj = dataObj
-    dataObj.block = block
     block.name = name
     local width, space = 0, 4
     
@@ -233,125 +285,46 @@ local function CreateNewBlock(name, dataObj)
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
     
-    block:SetScript("OnEnter", OnEnter)
-    block:SetScript("OnLeave", OnLeave)
+    block:SetScript("OnEnter", block.OnEnter)
+    block:SetScript("OnLeave", block.OnLeave)
 
     block:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    block:SetScript("OnClick", OnClick)
+    block:SetScript("OnClick", block.OnClick)
     if dataObj.events then
-        block:SetScript("OnEvent", OnEvent)
+        block:SetScript("OnEvent", block.OnEvent)
         for i = 1, #dataObj.events do
             block:RegisterEvent(dataObj.events[i])
         end
     end
-    if dataObj.OnUpdate then
-        block:SetScript("OnUpdate", OnUpdate)
-    end
-    
+    block:SetScript("OnUpdate", block.OnUpdate)
+
     InfoLine:debug("SetSize", width, barHeight)
     block:SetSize(width, barHeight)
+    block:SetClampedToScreen(true)
     return block
-end
-
-do
-    --[[local function InsertBlock(newBlock, nextBlock)
-        InfoLine:debug("InsertBlock", newBlock.name)
-    end
-    local function WithdrawBlock(block, blockInfo)
-        InfoLine:debug("WithdrawBlock", block.name)
-    end]]
-
-    function InfoLine:AddBlock(name, dataObj, blockInfo)
-        self:debug("AddBlock:", blockInfo.index, blockInfo.side)
-        local inactive = inactiveBlocks[blockInfo.side]
-        local newBlock = inactive[blockInfo.index]
-        if not newBlock then
-            newBlock = CreateNewBlock(name, dataObj)
-        end
-
-        local active, nextBlock = self.frame[blockInfo.side]
-        self:debug("Find next:", #active)
-        for index, block in ipairs(active) do
-            if blockInfo.index and block.index > blockInfo.index then
-                self:debug("Found next", index)
-                nextBlock = block
-                _G.tinsert(active, index, newBlock)
-                break
-            end
-        end
-
-        local point, relativeTo, relativePoint, xOfs, yOfs
-        if nextBlock then
-            point, relativeTo, relativePoint, xOfs, yOfs = nextBlock:GetPoint()
-            nextBlock:ClearAllPoints()
-            if point == relativePoint then
-                local relPoint = relativePoint:find("LEFT") and "BOTTOMRIGHT" or "BOTTOMLEFT"
-                nextBlock:SetPoint(point, newBlock, relPoint, xOfs, yOfs)
-            else
-                nextBlock:SetPoint(point, newBlock, relativePoint, xOfs, yOfs)
-            end
-        else
-            _G.tinsert(active, newBlock)
-            local isFirst = #active == 1
-            point = "BOTTOM"..blockInfo.side:upper()
-            relativeTo = isFirst and self.frame or active[#active - 1]
-            relativePoint = isFirst and point or "BOTTOM"..(blockInfo.side == "left" and "RIGHT" or "LEFT")
-            xOfs = db.text.gap
-            yOfs = 0
-        end
-        if not blockInfo.index then
-            blockInfo.index = #active
-        end
-        newBlock.index = blockInfo.index
-        self:debug("Point:", point, relativeTo.name, relativePoint, xOfs, yOfs)
-        newBlock:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
-        newBlock:Show()
-    end
-
-    function InfoLine:RemoveBlock(name, blockInfo)
-        self:debug("RemoveBlock:", name, blockInfo.index, blockInfo.side)
-        local active, nextBlock, oldBlock = self.frame[blockInfo.side]
-        for index, block in ipairs(active) do
-            if name == block.name then
-                self:debug("Found block", index)
-                oldBlock = _G.tremove(active, index)
-                inactiveBlocks[blockInfo.side][blockInfo.index] = oldBlock
-                nextBlock = active[index]
-                break
-            end
-        end
-        
-        if nextBlock then
-            local point, relativeTo, relativePoint, xOfs, yOfs = oldBlock:GetPoint()
-            nextBlock:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
-        end
-        oldBlock:Hide()
-    end
 end
 
 function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
     self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
-    local blockInfo
-    if dataObj.type == "RealUI" then
-        blockInfo = db.blocks.realui[name]
-        self:debug("RealUI object", blockInfo.enabled)
-        if blockInfo.enabled then
-            InfoLine:AddBlock(name, dataObj, blockInfo)
+    local blockInfo = self:GetBlockInfo(name, dataObj)
+    if blockInfo and blockInfo.enabled then
+        if blocksByData[dataObj] then
+            return
         end
-    elseif dataObj.type == "data source" then
-        blockInfo = db.blocks.others[name]
-        self:debug("Other object", blockInfo.enabled)
-        for k, v in LDB:pairs(dataObj) do
-            self:debug(k, v)
-        end
-        if blockInfo.enabled then
-            InfoLine:AddBlock(name, dataObj, blockInfo)
+
+        local block = CreateNewBlock(name, dataObj)
+        local dock = self.frame[blockInfo.side]
+        self:debug("AddChatFrame", blockInfo.side, blockInfo.index)
+        if blockInfo.index == 1 then
+            dock:SetPrimary(block)
+        else
+            dock:AddChatFrame(block, blockInfo.index)
         end
     end
 end
 function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
     self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
-    local block = dataObj.block
+    local block = blocksByData[dataObj]
     if block then
         if attr == "value" or attr == "suffix" or attr == "text" then
             local blockWidth = block:GetWidth()
@@ -381,6 +354,259 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
                 block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
             end
         end
+    end
+end
+
+
+---------------------
+-- Dock Management --
+---------------------
+local DockMixin = {}
+function DockMixin:OnLoad()
+    self:SetHeight(barHeight)
+    self:SetPoint("BOTTOM" .. self.side:upper())
+    self:SetPoint("BOTTOM" .. self.alt:upper(), InfoLine.frame, "BOTTOM")
+
+    self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
+    self.insertHighlight:SetSize(1, barHeight)
+    self.insertHighlight:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+
+    self.DOCKED_CHAT_FRAMES = {};
+    self.isDirty = true;    --You dirty, dirty frame
+end
+
+function DockMixin:GetChatFrames()
+    return self.DOCKED_CHAT_FRAMES;
+end
+
+function DockMixin:SetPrimary(chatFrame)
+    self.primary = chatFrame;
+
+    if ( not self:GetSelectedWindow() ) then
+        self:SelectWindow(chatFrame);
+    end
+
+    self:AddChatFrame(chatFrame, 1);
+end
+
+function DockMixin:OnUpdate()
+    --These may fail if we're resizing the WoW client
+    if self:UpdateTabs() then
+        self.leftTab = nil;
+        self:SetScript("OnUpdate", nil);
+    end
+end
+
+function DockMixin:AddChatFrame(chatFrame, position)
+    if ( not self.primary ) then
+        _G.error("Need a primary window before another can be added.");
+    end
+
+    if ( self:HasDockedChatFrame(chatFrame) ) then
+        return; --We're already docked...
+    end
+
+    self.isDirty = true;
+    chatFrame.isDocked = 1;
+
+    if ( position and position <= #self.DOCKED_CHAT_FRAMES + 1 ) then
+        _G.assert(position ~= 1 or chatFrame == self.primary);
+        _G.tinsert(self.DOCKED_CHAT_FRAMES, position, chatFrame);
+    else
+        _G.tinsert(self.DOCKED_CHAT_FRAMES, chatFrame);
+    end
+
+    self:HideInsertHighlight();
+
+    if ( self.primary ~= chatFrame ) then
+        chatFrame:ClearAllPoints();
+        chatFrame:SetMovable(false);
+        chatFrame:SetResizable(false);
+    end
+
+    self:UpdateTabs();
+end
+
+function DockMixin:RemoveChatFrame(chatFrame)
+    _G.assert(chatFrame ~= self.primary or #self.DOCKED_CHAT_FRAMES == 1);
+    self.isDirty = true;
+    _G.tDeleteItem(self.DOCKED_CHAT_FRAMES, chatFrame);
+    chatFrame.isDocked = nil;
+    chatFrame:SetMovable(true);
+    if ( self:GetSelectedWindow() == chatFrame ) then
+        self:SelectWindow(self.DOCKED_CHAT_FRAMES[1]);
+    end
+
+    chatFrame:Show();
+    self:UpdateTabs();
+end
+
+function DockMixin:HasDockedChatFrame(chatFrame)
+    return _G.tContains(self.DOCKED_CHAT_FRAMES, chatFrame);
+end
+
+function DockMixin:SelectWindow(chatFrame)
+    _G.assert(chatFrame)
+    self.isDirty = true;
+    self.selected = chatFrame;
+    self:UpdateTabs();
+end
+
+function DockMixin:GetSelectedWindow()
+    return self.selected;
+end
+
+function DockMixin:UpdateTabs(forceUpdate)
+    if ( not self.isDirty and not forceUpdate ) then
+        --No changes have been made since the last update.
+        return;
+    end
+
+    local lastBlock = nil;
+
+    for index, chatFrame in ipairs(self.DOCKED_CHAT_FRAMES) do
+        chatFrame:Show();
+
+        if ( lastBlock ) then
+            chatFrame:SetPoint("BOTTOM" .. self.side:upper(), lastBlock, "BOTTOM" .. self.alt:upper(), db.text.gap, 0);
+        else
+            chatFrame:SetPoint("BOTTOM" .. self.side:upper());
+        end
+        lastBlock = chatFrame
+    end
+
+    self.isDirty = false;
+
+    return true
+end
+
+function DockMixin:GetInsertIndex(chatFrame, mouseX, mouseY)
+    local maxPosition = 0;
+    for index, value in ipairs(self.DOCKED_CHAT_FRAMES) do
+        if ( value.isStaticDocked ) then
+            local tab = _G[value:GetName().."Tab"];
+            if ( mouseX < (tab:GetLeft() + tab:GetRight()) / 2 and  --Find the first tab we're on the left of. (Being on top of the tab, but left of the center counts)
+                tab:GetID() ~= self.primary:GetID()) then   --We never count as being to the left of the primary tab.
+                return index;
+            end
+            maxPosition = index;
+        end
+    end
+    --We aren't to the left of anything, so we're going into the far-right position.
+    return maxPosition + 1;
+end
+
+function DockMixin:PlaceInsertHighlight(chatFrame, mouseX, mouseY)
+    local insert = self:GetInsertIndex(chatFrame, mouseX, mouseY);
+
+    local attachFrame = self.primary;
+
+    for index, value in ipairs(self.DOCKED_CHAT_FRAMES) do
+        if ( index < insert ) then
+            attachFrame = value;
+        end
+    end
+
+    self.insertHighlight:ClearAllPoints();
+    self.insertHighlight:SetPoint("BOTTOMLEFT", attachFrame, "BOTTOMRIGHT", -15, -4);
+    self.insertHighlight:Show();
+end
+
+function DockMixin:HideInsertHighlight()
+    self.insertHighlight:Hide();
+end
+
+--------------------
+-- Bar Management --
+--------------------
+function InfoLine:CreateBar()
+    local frame = _G.CreateFrame("Frame", "RealUI_InfoLine", _G.UIParent)
+    frame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
+    frame:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
+    frame:SetHeight(barHeight)
+    frame:SetFrameStrata("LOW")
+    frame:SetFrameLevel(0)
+
+    frame.left = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
+    frame.left.side = "left"
+    frame.left.alt = "right"
+    frame.left:OnLoad()
+
+    frame.right = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
+    frame.right.side = "right"
+    frame.right.alt = "left"
+    frame.right:OnLoad()
+
+    -- Background
+    frame:SetBackdrop({
+        bgFile = RealUI.media.textures.plain,
+        edgeFile = RealUI.media.textures.plain,
+        edgeSize = 1,
+    })
+    frame:SetBackdropBorderColor(0, 0, 0)
+    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+
+    -- Stripes
+    local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+    tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+    tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+    tex:SetAllPoints()
+    tex:SetHorizTile(true)
+    tex:SetVertTile(true)
+    tex:SetBlendMode("ADD")
+    _G.tinsert(_G.REALUI_WINDOW_FRAMES, frame)
+    _G.tinsert(_G.REALUI_STRIPE_TEXTURES, tex)
+
+    self.frame = frame
+end
+
+function InfoLine:Unlock()
+    for side, dock in next, self.frame do
+        InfoLine:debug("Unlock", side)
+        --[[for i, block in next, dock.DOCKED_CHAT_FRAMES do
+            block:SetScript("OnDragStart", block.OnDragStart)
+        end]]
+    end
+
+    local left = self.frame.left
+    for i, block in next, left.DOCKED_CHAT_FRAMES do
+        block:SetScript("OnDragStart", block.OnDragStart)
+    end
+
+    local right = self.frame.right
+    for i, block in next, right.DOCKED_CHAT_FRAMES do
+        block:SetScript("OnDragStart", block.OnDragStart)
+    end
+end
+function InfoLine:Lock()
+    local left = self.frame.left
+    for i, block in next, left.DOCKED_CHAT_FRAMES do
+        block:SetScript("OnDragStart", nil)
+    end
+
+    local right = self.frame.right
+    for i, block in next, right.DOCKED_CHAT_FRAMES do
+        block:SetScript("OnDragStart", nil)
+    end
+end
+
+function InfoLine:GetBlockInfo(name, dataObj)
+    if not name and dataObj then
+        name = LDB:GetNameByDataObject(dataObj)
+    elseif name and not dataObj then
+        dataObj = LDB:GetDataObjectByName(name)
+    end
+    _G.assert(_G.type(name) == "string" and _G.type(dataObj) == "table", "Usage: InfoLine:GetBlockInfo(\"dataobjectname\")")
+
+    if dataObj.type == "RealUI" then
+        self:debug("RealUI object")
+        return db.blocks.realui[name]
+    elseif dataObj.type == "data source" then
+        self:debug("Other object")
+        for k, v in LDB:pairs(dataObj) do
+            self:debug(k, v)
+        end
+        return db.blocks.others[name]
     end
 end
 --------------------
@@ -445,15 +671,35 @@ function InfoLine:OnInitialize()
                 others = {
                     ['*'] = {
                         side = "left",
+                        index = 10,
                         enabled = false,
                         showText = true,
                         showIcon = true,
                     },
                 },
                 realui = {
-                    ['*'] = {
+                    -- Left
+                    start = {
                         side = "left",
-                        enabled = true,
+                        index = 1,
+                        enabled = true
+                    },
+                    guild = {
+                        side = "left",
+                        index = 2,
+                        enabled = true
+                    },
+                    durability = {
+                        side = "left",
+                        index = 3,
+                        enabled = true
+                    },
+
+                    -- Right
+                    clock = {
+                        side = "right",
+                        index = 1,
+                        enabled = true
                     },
                 },
             },
@@ -487,12 +733,13 @@ function InfoLine:OnEnable()
     textColor.orange = RealUI.media.colors.orange
     textColor.blue = RealUI.media.colors.blue
 
+    LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
+    LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
+
     self:CreateBar()
+    self:CreateBlocks()
+
     for name, dataObj in LDB:DataObjectIterator() do
         self:LibDataBroker_DataObjectCreated("OnEnable", name, dataObj, true)
     end
-
-    LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
-    LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
-    self:CreateBlocks()
 end

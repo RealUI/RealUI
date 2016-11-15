@@ -160,8 +160,8 @@ local core do
                 local block = db.blocks.realui[name]
                 -- Create base options for RealUI
                 realui.args[name] = {
-                    name = name,
-                    desc = "Enable the " .. name .. " block.",
+                    name = dataObj.name,
+                    desc = L["General_EnabledDesc"]:format(dataObj.name),
                     type = "toggle",
                     get = function() return block.enabled end,
                     set = function(data, value) 
@@ -175,7 +175,7 @@ local core do
                 -- Create base options for others
                 others.args[name] = {
                     name = name,
-                    desc = "Enable" .. name,
+                    desc = L["General_EnabledDesc"]:format(name),
                     type = "toggle",
                     get = function() return block.enabled end,
                     set = function(data, value) 

@@ -343,11 +343,10 @@ function InfoLine:CreateBlocks()
             },
         }
 
-        LDB:NewDataObject(L["Start"], {
+        LDB:NewDataObject("start", {
+            name = L["Start"],
             type = "RealUI",
             text = L["Start"],
-            side = "left",
-            index = 1,
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -423,15 +422,14 @@ function InfoLine:CreateBlocks()
 
         local time = _G.GetTime()
         local guildData = {}
-        LDB:NewDataObject(_G.GUILD, {
+        LDB:NewDataObject("guild", {
+            name = _G.GUILD,
             type = "RealUI",
             label = fa["group"],
             labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
             text = 1,
             value = 1,
             suffix = "",
-            side = "left",
-            index = 2,
             OnClick = function(block, ...)
                 --InfoLine:debug("Guild: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
@@ -578,11 +576,10 @@ function InfoLine:CreateBlocks()
             {slot = "SecondaryHand", hasDura = true},
         }
 
-        LDB:NewDataObject(_G.DURABILITY, {
+        LDB:NewDataObject("durability", {
+            name = _G.DURABILITY,
             type = "RealUI",
             text = 1,
-            side = "left",
-            index = 3,
             OnClick = function(block, ...)
                 InfoLine:debug("Durability: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
@@ -701,13 +698,12 @@ function InfoLine:CreateBlocks()
             block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
         end
 
-        LDB:NewDataObject(_G.TIMEMANAGER_TITLE, {
+        LDB:NewDataObject("clock", {
+            name = _G.TIMEMANAGER_TITLE,
             type = "RealUI",
             text = 1,
             value = 1,
             suffix = "",
-            side = "right",
-            index = 1,
             OnClick = function(block, ...)
                 --InfoLine:debug("Clock: OnClick", block.side, ...)
                 if _G.IsShiftKeyDown() then
