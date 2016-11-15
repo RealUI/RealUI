@@ -744,22 +744,6 @@ function InfoLine:CreateBlocks()
                 tooltip:SetCell(lineNum, 1, L["Clock_Date"])
                 tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
 
-                -- PvP zones
-                if _G.UnitLevel("player") >= 90 then
-                    tooltip:AddLine(" ")
-                    for i = 1, 2 do -- 1 == Wintergrasp, 2 == Tol Barad, 3 == Ashran
-                        local _, zone, _, _, startTime = _G.GetWorldPVPAreaInfo(i)
-                        if startTime then
-                            lineNum = tooltip:AddLine()
-                            tooltip:SetCell(lineNum, 1, L["Clock_PvPTime"]:format(zone))
-                            tooltip:SetCell(lineNum, 2, _G.format(_G.SecondsToTimeAbbrev(startTime)), "RIGHT", 2)
-                        else
-                            lineNum = tooltip:AddLine()
-                            tooltip:SetCell(lineNum, 1, L["Clock_NoPvPTime"]:format(zone), "LEFT", 2)
-                        end
-                    end
-                end
-
                 -- Invites
                 if block.invites and block.invites > 0 then
                     tooltip:AddLine(" ")

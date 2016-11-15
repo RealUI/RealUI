@@ -226,10 +226,8 @@ L["UnitFrames_Units"] = "Units"
 -- InfoLine
 L["Clock_CalenderInvites"] = "Pending Invites:"
 L["Clock_Date"] = "Date"
-L["Clock_NoPvPTime"] = "No %s Time Available"
 L["Clock_ShowCalendar"] = "<Click> to show calendar."
 L["Clock_ShowTimer"] = "<Shift+Click> to show timer."
-L["Clock_PvPTime"] = "%s Time Left:"
 L["Currency_Cycle"] = "<Click> to cycle the currency displayed."
 L["Currency_EraseData"] = "<Alt+Click> to erase highlighted character data."
 L["Currency_NoteWeeklyReset"] = [=[Note: Weekly caps will reset upon loading currency data
