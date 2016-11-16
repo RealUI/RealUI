@@ -216,7 +216,7 @@ end
 function InfoLine:CreateBlocks()
     --[[ Static Blocks ]]--
     do  -- Start
-        local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "UIDropDownMenuTemplate")
+        local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
         local menuList = {
             {text = L["Start_Config"],
                 func = function() RealUI:LoadConfig("HuD") end,
