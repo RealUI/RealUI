@@ -304,7 +304,7 @@ do
         scheduled = false
     end
     function Implementation:UpdateAll()
-        if not scheduled then
+        if not scheduled and not _G.InCombatLockdown() then
             scheduled = self
             _G.C_Timer.After(0, scheduler)
         end
