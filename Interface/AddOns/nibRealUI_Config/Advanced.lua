@@ -76,67 +76,60 @@ local core do
                     fontSize = "medium",
                     order = 20,
                 },
-                blocks = {
-                    name = "Blocks",
-                    type = "group",
+                enabled = {
+                    name = L["General_Lock"],
+                    desc = L["General_LockDesc"],
+                    type = "toggle",
+                    get = function() return InfoLine.locked end,
+                    set = function(info, value)
+                        if value then
+                            InfoLine:Lock()
+                        else
+                            InfoLine:Unlock()
+                        end
+                    end,
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                blockGap = {
+                    name = "Block Gap",
+                    desc = "The ammount of space between each block.",
+                    type = "input",
+                    width = "half",
+                    get = function(info) return _G.tostring(db.text.gap) end,
+                    set = function(info, value)
+                        value = RealUI:ValidateOffset(value)
+                        db.text.gap = value
+                        InfoLine:UpdatePositions()
+                    end,
+                    order = 40,
+                },
+                padding = {
+                    name = "Padding",
+                    desc = "Additional space between the icon and the text",
+                    type = "input",
+                    width = "half",
+                    get = function(info) return _G.tostring(db.text.padding) end,
+                    set = function(info, value)
+                        value = RealUI:ValidateOffset(value)
+                        db.text.padding = value
+                        InfoLine:UpdatePositions()
+                    end,
                     order = 50,
-                    args = {
-                        general = {
-                            name = "General",
-                            type = "group",
-                            order = 10,
-                            args = {
-                                gap = {
-                                    name = "Block Gap",
-                                    desc = "The ammount of space between each block.",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(db.text.gap) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.text.gap = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 10,
-                                },
-                                padding = {
-                                    name = "Padding",
-                                    desc = "Additional space between the icon and the text",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(db.text.padding) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.text.padding = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 10,
-                                },
-                                inCombat = {
-                                    name = "In Combat Tooltips",
-                                    desc = "Show tooltips in combat.",
-                                    type = "toggle",
-                                    get = function() return db.other.icTips end,
-                                    set = function(info, value) 
-                                        db.other.icTips = value
-                                    end,
-                                    order = 10,
-                                },
-                                maxHeight = {
-                                    name = "Max Height",
-                                    desc = "Maximum height of the Info Displays.",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(db.other.maxheight) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.other.maxheight = value
-                                    end,
-                                    order = 10,
-                                },
-                            },
-                        },
-                    },
+                },
+                inCombat = {
+                    name = "In Combat Tooltips",
+                    desc = "Show tooltips in combat.",
+                    type = "toggle",
+                    get = function() return db.other.icTips end,
+                    set = function(info, value) 
+                        db.other.icTips = value
+                    end,
+                    order = 60,
                 },
             },
         }
@@ -144,16 +137,38 @@ local core do
         local realui = {
             name = "RealUI",
             type = "group",
-            order = 20,
+            order = 100,
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            args = {},
+            args = {
+                gap1 = {
+                    name = L["InfoLine_Left"],
+                    type = "header",
+                    order = 0,
+                },
+                gap2 = {
+                    name = L["InfoLine_Right"],
+                    type = "header",
+                    order = 50,
+                },
+            },
         }
         local others = {
             name = "Others",
             type = "group",
-            order = 30,
+            order = 200,
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            args = {},
+            args = {
+                gap1 = {
+                    name = L["InfoLine_Left"],
+                    type = "header",
+                    order = 0,
+                },
+                gap2 = {
+                    name = L["InfoLine_Right"],
+                    type = "header",
+                    order = 50,
+                },
+            },
         }
         for name, dataObj in InfoLine.LDB:DataObjectIterator() do
             if dataObj.type == "RealUI" then
@@ -168,8 +183,9 @@ local core do
                         block.enabled = value
                         InfoLine:RemoveBlock(block)
                     end,
+                    order = block.side == "left" and block.index or block.index + 50,
                 }
-                infoLine.args.blocks.args.realui = realui
+                infoLine.args.realui = realui
             elseif dataObj.type == "data source" then
                 local block = db.blocks.others[name]
                 -- Create base options for others
@@ -186,8 +202,9 @@ local core do
                             InfoLine:RemoveBlock(name, block)
                         end
                     end,
+                    order = block.side == "left" and block.index or block.index + 50,
                 }
-                infoLine.args.blocks.args.others = others
+                infoLine.args.others = others
             end
         end
     end

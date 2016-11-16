@@ -15,6 +15,7 @@ local db
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 InfoLine.LDB = LDB
+InfoLine.locked = true
 
 local MOVING_BLOCK
 local textColor = {}
@@ -216,10 +217,11 @@ local function CreateNewBlock(name, dataObj)
     block.name = name
     local width, space = 0, 4
     
-    --[[ Test BG ]]
-    local test = block:CreateTexture(nil, "BACKGROUND")
-    test:SetColorTexture(1, 1, 1, 0.5)
-    test:SetAllPoints(block)
+    local bg = block:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(1, 1, 1, 0.5)
+    bg:SetAllPoints(block)
+    bg:Hide()
+    block.bg = bg
 
     local text = block:CreateFontString(nil, "ARTWORK")
     text:SetFontObject(_G.RealUIFont_Chat)
@@ -571,23 +573,31 @@ function InfoLine:Unlock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_CHAT_FRAMES do
         block:SetScript("OnDragStart", block.OnDragStart)
+        block.bg:Show()
     end
 
     local right = self.frame.right
     for i, block in next, right.DOCKED_CHAT_FRAMES do
         block:SetScript("OnDragStart", block.OnDragStart)
+        block.bg:Show()
     end
+
+    self.locked = false
 end
 function InfoLine:Lock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_CHAT_FRAMES do
         block:SetScript("OnDragStart", nil)
+        block.bg:Hide()
     end
 
     local right = self.frame.right
     for i, block in next, right.DOCKED_CHAT_FRAMES do
         block:SetScript("OnDragStart", nil)
+        block.bg:Hide()
     end
+
+    self.locked = true
 end
 
 function InfoLine:GetBlockInfo(name, dataObj)
@@ -663,9 +673,6 @@ function InfoLine:OnInitialize()
             },
             other = {
                 icTips = false,
-                wgalert = false,
-                tbalert = true,
-                maxheight = 500,
             },
             blocks = {
                 others = {
@@ -682,7 +689,7 @@ function InfoLine:OnInitialize()
                     start = {
                         side = "left",
                         index = 1,
-                        enabled = true
+                        enabled = -1
                     },
                     guild = {
                         side = "left",
@@ -699,7 +706,7 @@ function InfoLine:OnInitialize()
                     clock = {
                         side = "right",
                         index = 1,
-                        enabled = true
+                        enabled = -1
                     },
                 },
             },
