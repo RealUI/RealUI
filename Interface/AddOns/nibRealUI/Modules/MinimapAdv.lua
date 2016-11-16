@@ -1227,7 +1227,7 @@ end
 
 ---- Tracking Button ----
 local function Tracking_OnMouseDown()
-    _G.Lib_ToggleDropDownMenu(1, nil, _G.MiniMapTrackingDropDown, "MinimapAdv_Tracking", 0, 0)
+    _G.Lib_ToggleDropDownMenu(1, nil, MMFrames.tracking.dropdown, "MinimapAdv_Tracking", 0, 0)
 end
 
 local function Tracking_OnEnter()
@@ -1722,6 +1722,87 @@ local function CreateFrames()
     MMFrames.tracking:SetScript("OnEnter", Tracking_OnEnter)
     MMFrames.tracking:SetScript("OnLeave", Tracking_OnLeave)
     MMFrames.tracking:SetScript("OnMouseDown", Tracking_OnMouseDown)
+
+    local dropdown = _G.CreateFrame("Frame", "MMAdvTrackingDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
+    _G.Lib_UIDropDownMenu_Initialize(dropdown, function(self, level)
+        local name, texture, category, nested, numTracking;
+        local count = _G.GetNumTrackingTypes();
+        local info;
+        local _, class = _G.UnitClass("player");
+        
+        if (level == 1) then 
+            info = _G.Lib_UIDropDownMenu_CreateInfo();
+            info.text = _G.MINIMAP_TRACKING_NONE;
+            info.checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive;
+            info.func = _G.ClearAllTracking;
+            info.icon = nil;
+            info.arg1 = nil;
+            info.isNotRadio = true;
+            info.keepShownOnClick = true;
+            _G.Lib_UIDropDownMenu_AddButton(info, level);
+            
+            if (class == "HUNTER") then --only show hunter dropdown for hunters
+                numTracking = 0;
+                -- make sure there are at least two options in dropdown
+                for id = 1, count do
+                    _, _, _, category, nested = _G.GetTrackingInfo(id);
+                    if (nested == _G.HUNTER_TRACKING and category == "spell") then
+                        numTracking = numTracking + 1;
+                    end
+                end
+                if (numTracking > 1) then 
+                    info.text = _G.HUNTER_TRACKING_TEXT;
+                    info.func =  nil;
+                    info.notCheckable = true;
+                    info.keepShownOnClick = false;
+                    info.hasArrow = true;
+                    info.value = _G.HUNTER_TRACKING;
+                    _G.Lib_UIDropDownMenu_AddButton(info, level)
+                end
+            end
+            
+            info.text = _G.TOWNSFOLK_TRACKING_TEXT;
+            info.func =  nil;
+            info.notCheckable = true;
+            info.keepShownOnClick = false;
+            info.hasArrow = true;
+            info.value = _G.TOWNSFOLK;
+            _G.Lib_UIDropDownMenu_AddButton(info, level)
+        end
+
+        for id=1, count do
+            name, texture, _, category, nested  = _G.GetTrackingInfo(id);
+            info = _G.Lib_UIDropDownMenu_CreateInfo();
+            info.text = name;
+            info.checked = _G.MiniMapTrackingDropDownButton_IsActive;
+            info.func = _G.MiniMapTracking_SetTracking;
+            info.icon = texture;
+            info.arg1 = id;
+            info.isNotRadio = true;
+            info.keepShownOnClick = true;
+            if ( category == "spell" ) then
+                info.tCoordLeft = 0.0625;
+                info.tCoordRight = 0.9;
+                info.tCoordTop = 0.0625;
+                info.tCoordBottom = 0.9;
+            else
+                info.tCoordLeft = 0;
+                info.tCoordRight = 1;
+                info.tCoordTop = 0;
+                info.tCoordBottom = 1;
+            end
+            if (level == 1 and 
+                (nested < 0 or -- this tracking shouldn't be nested
+                (nested == _G.HUNTER_TRACKING and class ~= "HUNTER") or 
+                (numTracking == 1 and category == "spell"))) then -- this is a hunter tracking ability, but you only have one
+                _G.Lib_UIDropDownMenu_AddButton(info, level);
+            elseif (level == 2 and (nested == _G.TOWNSFOLK or (nested == _G.HUNTER_TRACKING and class == "HUNTER")) and nested == _G.LIB_UIDROPDOWNMENU_MENU_VALUE) then
+                _G.Lib_UIDropDownMenu_AddButton(info, level);
+            end
+        end
+        
+    end, "MENU")
+    MMFrames.tracking.dropdown = dropdown
 
     -- Farm Button
     MMFrames.farm = CreateButton("MinimapAdv_Farm", Textures.Expand, 4)
