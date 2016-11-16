@@ -41,7 +41,7 @@ end
 
 local BlockMixin = {}
 function BlockMixin:OnEnter()
-    InfoLine:debug("OnEnter", self.name)
+    --InfoLine:debug("OnEnter", self.name)
     --self.highlight:Show()
 
     if (not db.other.icTips and _G.InCombatLockdown()) then return end
@@ -99,14 +99,16 @@ end
 
 function BlockMixin:OnDragStart(button)
     InfoLine:debug("OnDragStart", self.name, button)
-    if self:IsMovable() then
-        --local cursorX, cursorY = GetCursorPosition();
-        --local uiScale = _G.UIParent:GetScale();
-        self:StartMoving();
-        --self:ClearAllPoints();
-        --self:SetPoint("CENTER", _G.UIParent, "BOTTOMLEFT", cursorX / uiScale, cursorY / uiScale);
-        MOVING_BLOCK = self;
-    end
+    local dock = InfoLine.frame[self.side]
+    dock:RemoveChatFrame(self)
+
+    local x, y = self:GetCenter();
+    x = x - (self:GetWidth()/2);
+    y = y - (self:GetHeight()/2);
+    self:ClearAllPoints();
+    self:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
+    self:StartMoving();
+    MOVING_BLOCK = self;
 end
 
 function BlockMixin:OnDragStop(button)
@@ -116,7 +118,7 @@ function BlockMixin:OnDragStop(button)
     local dock = InfoLine.frame[self.side]
     dock:HideInsertHighlight()
 
-    if ( dock:IsMouseOver(10, -10, 0, 0) ) then
+    if ( dock:IsMouseOver(barHeight, 0, 0, 0) ) then
         local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition();
         mouseX, mouseY = mouseX / scale, mouseY / scale;
 
@@ -152,18 +154,12 @@ function BlockMixin:OnUpdate(elapsed)
         local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition();
         cursorX, cursorY = cursorX / scale, cursorY / scale;
         local dock = InfoLine.frame[self.side]
-        if self ~= dock.primary and dock:IsMouseOver(10, -10, 0, 10) then
+        if dock:IsMouseOver(barHeight, 0, 0, 0) then
             dock:PlaceInsertHighlight(self, cursorX, cursorY);
         else
             dock:HideInsertHighlight();
         end
-
         self:UpdateButtonSide();
-        if self == dock.primary then
-            for _, frame in next, dock:GetChatFrames() do
-                frame:SetButtonSide(self:GetButtonSide(dock.primary));
-            end
-        end
 
         if not _G.IsMouseButtonDown(self.dragButton) then
             self:OnDragStop(self.dragButton)
@@ -178,16 +174,16 @@ function BlockMixin:OnUpdate(elapsed)
 end
 
 function BlockMixin:UpdateButtonSide()
-    local leftDist =  self:GetLeft();
-    local rightDist = _G.GetScreenWidth() - self:GetRight();
+    local xOfs =  self:GetCenter();
+    local uiCenter = _G.UIParent:GetWidth() / 2
     local changed = nil;
-    if (leftDist > 0 and leftDist <= rightDist) or rightDist < 0 then
+    if xOfs < uiCenter then
         if self.side ~= "left" then
             self.side = "left"
             changed = 1;
         end
     else
-        if self.side ~= "right" or leftDist < 0 then
+        if self.side ~= "right" then
             self.side = "right"
             changed = 1;
         end
@@ -292,6 +288,8 @@ local function CreateNewBlock(name, dataObj)
 
     block:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     block:SetScript("OnClick", block.OnClick)
+    block:SetScript("OnDragStart", block.OnDragStart)
+
     if dataObj.events then
         block:SetScript("OnEvent", block.OnEvent)
         for i = 1, #dataObj.events do
@@ -315,6 +313,8 @@ function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate
         end
 
         local block = CreateNewBlock(name, dataObj)
+        block.side = blockInfo.side
+
         local dock = self.frame[blockInfo.side]
         self:debug("AddChatFrame", blockInfo.side, blockInfo.index)
         if blockInfo.index == 1 then
@@ -366,8 +366,10 @@ end
 local DockMixin = {}
 function DockMixin:OnLoad()
     self:SetHeight(barHeight)
-    self:SetPoint("BOTTOM" .. self.side:upper())
-    self:SetPoint("BOTTOM" .. self.alt:upper(), InfoLine.frame, "BOTTOM")
+    self.anchor = "BOTTOM" .. self.side:upper()
+    self.anchorAlt = "BOTTOM" .. self.alt:upper()
+    self:SetPoint(self.anchor)
+    self:SetPoint(self.anchorAlt, InfoLine.frame, "BOTTOM")
 
     self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
     self.insertHighlight:SetSize(1, barHeight)
@@ -412,7 +414,7 @@ function DockMixin:AddChatFrame(chatFrame, position)
     chatFrame.isDocked = 1;
 
     if ( position and position <= #self.DOCKED_CHAT_FRAMES + 1 ) then
-        _G.assert(position ~= 1 or chatFrame == self.primary);
+        _G.assert(position ~= 1 or chatFrame == self.primary, position);
         _G.tinsert(self.DOCKED_CHAT_FRAMES, position, chatFrame);
     else
         _G.tinsert(self.DOCKED_CHAT_FRAMES, chatFrame);
@@ -470,9 +472,10 @@ function DockMixin:UpdateTabs(forceUpdate)
         chatFrame:Show();
 
         if ( lastBlock ) then
-            chatFrame:SetPoint("BOTTOM" .. self.side:upper(), lastBlock, "BOTTOM" .. self.alt:upper(), db.text.gap, 0);
+            local xOfs = self.side == "left" and db.text.gap or -db.text.gap
+            chatFrame:SetPoint(self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
         else
-            chatFrame:SetPoint("BOTTOM" .. self.side:upper());
+            chatFrame:SetPoint(self.anchor);
         end
         lastBlock = chatFrame
     end
@@ -485,14 +488,18 @@ end
 function DockMixin:GetInsertIndex(chatFrame, mouseX, mouseY)
     local maxPosition = 0;
     for index, value in ipairs(self.DOCKED_CHAT_FRAMES) do
-        if ( value.isStaticDocked ) then
-            local tab = _G[value:GetName().."Tab"];
-            if ( mouseX < (tab:GetLeft() + tab:GetRight()) / 2 and  --Find the first tab we're on the left of. (Being on top of the tab, but left of the center counts)
-                tab:GetID() ~= self.primary:GetID()) then   --We never count as being to the left of the primary tab.
+        if self.side == "left" then
+            if mouseX < (value:GetLeft() + value:GetRight()) / 2 and  --Find the first tab we're on the left of. (Being on top of the tab, but left of the center counts)
+                value ~= self.primary then   --We never count as being to the left of the primary tab.
                 return index;
             end
-            maxPosition = index;
+        elseif self.side == "right" then
+            if mouseX > (value:GetLeft() + value:GetRight()) / 2 and
+                value ~= self.primary then
+                return index;
+            end
         end
+        maxPosition = index;
     end
     --We aren't to the left of anything, so we're going into the far-right position.
     return maxPosition + 1;
@@ -510,7 +517,7 @@ function DockMixin:PlaceInsertHighlight(chatFrame, mouseX, mouseY)
     end
 
     self.insertHighlight:ClearAllPoints();
-    self.insertHighlight:SetPoint("BOTTOMLEFT", attachFrame, "BOTTOMRIGHT", -15, -4);
+    self.insertHighlight:SetPoint(self.anchor, attachFrame, self.anchorAlt, 0, 0);
     self.insertHighlight:Show();
 end
 
@@ -563,23 +570,20 @@ function InfoLine:CreateBar()
 end
 
 function InfoLine:Unlock()
-    for side, dock in next, self.frame do
-        InfoLine:debug("Unlock", side)
-        --[[for i, block in next, dock.DOCKED_CHAT_FRAMES do
-            block:SetScript("OnDragStart", block.OnDragStart)
-        end]]
-    end
-
     local left = self.frame.left
     for i, block in next, left.DOCKED_CHAT_FRAMES do
-        block:SetScript("OnDragStart", block.OnDragStart)
-        block.bg:Show()
+        if i > 1 then
+            block:RegisterForDrag("LeftButton")
+            block.bg:Show()
+        end
     end
 
     local right = self.frame.right
     for i, block in next, right.DOCKED_CHAT_FRAMES do
-        block:SetScript("OnDragStart", block.OnDragStart)
-        block.bg:Show()
+        if i > 1 then
+            block:RegisterForDrag("LeftButton")
+            block.bg:Show()
+        end
     end
 
     self.locked = false
@@ -587,13 +591,13 @@ end
 function InfoLine:Lock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_CHAT_FRAMES do
-        block:SetScript("OnDragStart", nil)
+        block:RegisterForDrag()
         block.bg:Hide()
     end
 
     local right = self.frame.right
     for i, block in next, right.DOCKED_CHAT_FRAMES do
-        block:SetScript("OnDragStart", nil)
+        block:RegisterForDrag()
         block.bg:Hide()
     end
 

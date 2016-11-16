@@ -15,7 +15,6 @@ fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf
 local RealUI = private.RealUI
 local round = RealUI.Round
 local L = RealUI.L
-local ndb
 
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:GetModule(MODNAME)
@@ -215,9 +214,7 @@ end
 
 --[=[]=]
 function InfoLine:CreateBlocks()
-    ndb = RealUI.db.profile
-
-    --[[ Left ]]--
+    --[[ Static Blocks ]]--
     do  -- Start
         local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "UIDropDownMenuTemplate")
         local menuList = {
@@ -225,44 +222,15 @@ function InfoLine:CreateBlocks()
                 func = function() RealUI:LoadConfig("HuD") end,
                 notCheckable = true,
             },
-            {text = L["Power_PowerMode"],
-                notCheckable = true,
-                hasArrow = true,
-                menuList = {
-                    {
-                        text = L["Power_Eco"],
-                        tooltipTitle = L["Power_Eco"],
-                        tooltipText = L["Power_EcoDesc"],
-                        tooltipOnButton = 1,
-                        func = function() 
-                            RealUI:SetPowerMode(2)
-                            RealUI:ReloadUIDialog()
-                        end,
-                        checked = function() return ndb.settings.powerMode == 2 end,
-                    },
-                    {
-                        text = L["Power_Normal"],
-                        tooltipTitle = L["Power_Normal"],
-                        tooltipText = L["Power_NormalDesc"],
-                        tooltipOnButton = 1,
-                        func = function()
-                            RealUI:SetPowerMode(1)
-                            RealUI:ReloadUIDialog()
-                        end,
-                        checked = function() return ndb.settings.powerMode == 1 end,
-                    },
-                    {
-                        text = L["Power_Turbo"],
-                        tooltipTitle = L["Power_Turbo"],
-                        tooltipText = L["Power_TurboDesc"],
-                        tooltipOnButton = 1,
-                        func = function()
-                            RealUI:SetPowerMode(3)
-                            RealUI:ReloadUIDialog()
-                        end,
-                        checked = function() return ndb.settings.powerMode == 3 end,
-                    },
-                },
+            {text = L["General_Lock"],
+                func = function() 
+                    if InfoLine.locked then
+                        InfoLine:Unlock()
+                    else
+                        InfoLine:Lock()
+                    end
+                end,
+                checked = function() return InfoLine.locked end,
             },
             {text = "",
                 notCheckable = true,
@@ -346,7 +314,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("start", {
             name = L["Start"],
             type = "RealUI",
-            text = L["Start"],
+            label = fa["bars"],
+            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -355,7 +324,158 @@ function InfoLine:CreateBlocks()
         _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
     end
 
-    -- Mail
+    do  -- Clock
+        local function RetrieveTime(isMilitary, isLocal)
+            local timeFormat, hour, min, suffix
+            if isLocal then
+                hour, min = _G.tonumber(_G.date("%H")), _G.tonumber(_G.date("%M"))
+            else
+                hour, min = _G.GetGameTime()
+            end
+            if isMilitary then
+                timeFormat = _G.TIMEMANAGER_TICKER_24HOUR
+                suffix = ""
+            else
+                timeFormat = _G.TIMEMANAGER_TICKER_12HOUR
+                if hour >= 12 then 
+                    suffix = _G.TIMEMANAGER_PM
+                    if hour > 12 then
+                        hour = hour - 12
+                    end
+                else
+                    suffix = _G.TIMEMANAGER_AM
+                    if hour == 0 then
+                        hour = 12
+                    end
+                end
+            end
+            return timeFormat, hour, min, suffix
+        end
+        local function setTimeOptions(block)
+            block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
+            block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
+        end
+
+        LDB:NewDataObject("clock", {
+            name = _G.TIMEMANAGER_TITLE,
+            type = "RealUI",
+            text = 1,
+            value = 1,
+            suffix = "",
+            OnClick = function(block, ...)
+                InfoLine:debug("Clock: OnClick", block.side, ...)
+                if _G.IsShiftKeyDown() then
+                    _G.ToggleTimeManager()
+                else
+                    if _G.IsAddOnLoaded("GroupCalendar5") then
+                        if _G.GroupCalendar.UI.Window:IsShown() then
+                            _G.HideUIPanel(_G.GroupCalendar.UI.Window)
+                        else
+                            _G.ShowUIPanel(_G.GroupCalendar.UI.Window)
+                        end
+                    else
+                        _G.ToggleCalendar()
+                    end
+                end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("Clock: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
+                block.tooltip = tooltip
+                local lineNum, colNum
+
+                tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
+                --tooltip:SetCell(lineNum, colNum, , nil, 2)
+
+                -- Realm time
+                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+
+                -- Local time
+                timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+
+                -- Date
+                lineNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
+                tooltip:SetCell(lineNum, 1, L["Clock_Date"])
+                tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
+
+                -- Invites
+                if block.invites and block.invites > 0 then
+                    tooltip:AddLine(" ")
+                    lineNum, colNum = tooltip:AddLine()
+                    tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], block.invites, 2)
+                end
+
+                -- World Bosses
+                local numSavedBosses = _G.GetNumSavedWorldBosses()
+                if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
+                    tooltip:AddLine(" ")
+                    lineNum, colNum = tooltip:AddHeader()
+                    tooltip:SetCell(lineNum, colNum, _G.LFG_LIST_BOSSES_DEFEATED, nil, 2)
+                    for i = 1, numSavedBosses do
+                        local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
+                        tooltip:AddLine(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
+                    end
+                end
+
+                tooltip:AddLine(" ")
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                --InfoLine:debug("Clock: OnEvent", event, ...)
+                if event then
+                    if event == "PLAYER_ENTERING_WORLD" then
+                        block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                        InfoLine:ScheduleRepeatingTimer(block.dataObj.OnEvent, 1, block)
+                        _G.hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
+                        _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
+                        setTimeOptions(block)
+                    end
+                    local alert = block.alert
+                    block.invites = _G.CalendarGetNumPendingInvites()
+                    if block.invites > 0 and not alert.isHidden then
+                        alert:SetSize(177, alert.Text:GetHeight() + 42);
+                        alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
+                        alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                        alert.CloseButton:SetScript("OnClick", function(btn)
+                            alert:Hide()
+                            alert.isHidden = true
+                        end)
+                        alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
+                        alert.Text:SetWidth(145)
+                        alert:Show()
+                        alert.isHidden = false
+                    else
+                        alert:Hide()
+                    end
+                end
+                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
+                block.dataObj.value = timeFormat:format(hour, min)
+                block.dataObj.suffix = suffix
+            end,
+            events = {
+                "CALENDAR_UPDATE_EVENT_LIST",
+                "PLAYER_ENTERING_WORLD",
+            },
+        })
+    end
+
+    --[[ Left ]]--
 
     do  -- Guild Roster
         local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]];
@@ -431,7 +551,7 @@ function InfoLine:CreateBlocks()
             value = 1,
             suffix = "",
             OnClick = function(block, ...)
-                --InfoLine:debug("Guild: OnClick", block.side, ...)
+                InfoLine:debug("Guild: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
                     _G.ToggleGuildFrame()
                 end
@@ -579,6 +699,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("durability", {
             name = _G.DURABILITY,
             type = "RealUI",
+            label = fa["heartbeat"],
+            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
             text = 1,
             OnClick = function(block, ...)
                 InfoLine:debug("Durability: OnClick", block.side, ...)
@@ -588,7 +710,7 @@ function InfoLine:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                InfoLine:debug("Durability: OnEnter", block.side, ...)
+                --InfoLine:debug("Durability: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 block.tooltip = tooltip
@@ -666,158 +788,7 @@ function InfoLine:CreateBlocks()
 
 
     --[[ Right ]]--
-    do  -- Clock
-        local function RetrieveTime(isMilitary, isLocal)
-            local timeFormat, hour, min, suffix
-            if isLocal then
-                hour, min = _G.tonumber(_G.date("%H")), _G.tonumber(_G.date("%M"))
-            else
-                hour, min = _G.GetGameTime()
-            end
-            if isMilitary then
-                timeFormat = _G.TIMEMANAGER_TICKER_24HOUR
-                suffix = ""
-            else
-                timeFormat = _G.TIMEMANAGER_TICKER_12HOUR
-                if hour >= 12 then 
-                    suffix = _G.TIMEMANAGER_PM
-                    if hour > 12 then
-                        hour = hour - 12
-                    end
-                else
-                    suffix = _G.TIMEMANAGER_AM
-                    if hour == 0 then
-                        hour = 12
-                    end
-                end
-            end
-            return timeFormat, hour, min, suffix
-        end
-        local function setTimeOptions(block)
-            block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
-            block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
-        end
-
-        LDB:NewDataObject("clock", {
-            name = _G.TIMEMANAGER_TITLE,
-            type = "RealUI",
-            text = 1,
-            value = 1,
-            suffix = "",
-            OnClick = function(block, ...)
-                --InfoLine:debug("Clock: OnClick", block.side, ...)
-                if _G.IsShiftKeyDown() then
-                    _G.ToggleTimeManager()
-                else
-                    if _G.IsAddOnLoaded("GroupCalendar5") then
-                        if _G.GroupCalendar.UI.Window:IsShown() then
-                            _G.HideUIPanel(_G.GroupCalendar.UI.Window)
-                        else
-                            _G.ShowUIPanel(_G.GroupCalendar.UI.Window)
-                        end
-                    else
-                        _G.ToggleCalendar()
-                    end
-                end
-            end,
-            OnEnter = function(block, ...)
-                if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Clock: OnEnter", block.side, ...)
-
-                local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
-                block.tooltip = tooltip
-                local lineNum, colNum
-
-                tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
-                --tooltip:SetCell(lineNum, colNum, , nil, 2)
-
-                -- Realm time
-                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
-
-                -- Local time
-                timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
-
-                -- Date
-                lineNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
-                tooltip:SetCell(lineNum, 1, L["Clock_Date"])
-                tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
-
-                -- Invites
-                if block.invites and block.invites > 0 then
-                    tooltip:AddLine(" ")
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], block.invites, 2)
-                end
-
-                -- World Bosses
-                local numSavedBosses = _G.GetNumSavedWorldBosses()
-                if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
-                    tooltip:AddLine(" ")
-                    lineNum, colNum = tooltip:AddHeader()
-                    tooltip:SetCell(lineNum, colNum, _G.LFG_LIST_BOSSES_DEFEATED, nil, 2)
-                    for i = 1, numSavedBosses do
-                        local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
-                        tooltip:AddLine(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
-                    end
-                end
-
-                tooltip:AddLine(" ")
-
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
-
-                tooltip:Show()
-            end,
-            OnEvent = function(block, event, ...)
-                --InfoLine:debug("Clock: OnEvent", event, ...)
-                if event then
-                    if event == "PLAYER_ENTERING_WORLD" then
-                        block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                        InfoLine:ScheduleRepeatingTimer(block.dataObj.OnEvent, 1, block)
-                        _G.hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
-                        _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
-                        setTimeOptions(block)
-                    end
-                    local alert = block.alert
-                    block.invites = _G.CalendarGetNumPendingInvites()
-                    if block.invites > 0 and not alert.isHidden then
-                        alert:SetSize(177, alert.Text:GetHeight() + 42);
-                        alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                        alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
-                        alert.CloseButton:SetScript("OnClick", function(btn)
-                            alert:Hide()
-                            alert.isHidden = true
-                        end)
-                        alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                        alert.Text:SetWidth(145)
-                        alert:Show()
-                        alert.isHidden = false
-                    else
-                        alert:Hide()
-                    end
-                end
-                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
-                block.dataObj.value = timeFormat:format(hour, min)
-                block.dataObj.suffix = suffix
-            end,
-            events = {
-                "CALENDAR_UPDATE_EVENT_LIST",
-                "PLAYER_ENTERING_WORLD",
-            },
-        })
-    end
-
-    -- Meters
+    -- Mail
 
     -- Layout
 
