@@ -40,7 +40,7 @@ function Chat:OnInitialize()
             },
         },
     })
-    
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 

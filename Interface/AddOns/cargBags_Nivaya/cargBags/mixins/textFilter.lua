@@ -62,7 +62,7 @@ local defaultFilters = {
     @param text <string> the text filter
     @param textFilters <table> table of text filters to parse from [optional]
 
-    @note Basically works like this: text ----textFilters----> FilterSet  
+    @note Basically works like this: text ----textFilters----> FilterSet
 ]]
 function FilterSet:SetTextFilter(text, filters, textFilters)
     textFilters = textFilters or defaultFilters

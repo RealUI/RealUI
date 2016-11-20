@@ -69,9 +69,9 @@ function ItemButton:New(bagID, slotID)
     button.bagID = bagID
     button.slotID = slotID
     button:SetID(slotID)
-    
+
     button:Show()
-    
+
     return button
 end
 
@@ -97,7 +97,7 @@ function ItemButton:Create(tpl, parent)
     if btnNT then btnNT:SetTexture("") end
     if btnNIT then btnNIT:SetTexture("") end
     if btnBIT then btnBIT:SetTexture("") end
-    
+
     button:SetSize(ns.options.itemSlotSize, ns.options.itemSlotSize)
     bFS = _G[button:GetName().."Count"]
     bFS:ClearAllPoints()

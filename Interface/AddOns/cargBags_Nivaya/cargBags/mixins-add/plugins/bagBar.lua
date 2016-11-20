@@ -84,7 +84,7 @@ function BagButton:Create(bagID)
     button.Cooldown =   _G[name.."Cooldown"]
     button.Quest =      _G[name.."IconQuestTexture"]
     button.Border =     _G[name.."NormalTexture"]
-    
+
     button.bg = _G.CreateFrame("Frame", nil, button)
     button.bg:SetAllPoints(button)
     button.bg:SetBackdrop({
@@ -94,7 +94,7 @@ function BagButton:Create(bagID)
     })
     button.bg:SetBackdropColor(1, 1, 1, 0)
     button.bg:SetBackdropBorderColor(0, 0, 0, 1)
-    
+
     button.Icon:SetTexCoord(.08, .92, .08, .92)
     button.Icon:SetVertexColor(0.8, 0.8, 0.8)
     button.Border:SetAlpha(0)
@@ -210,7 +210,7 @@ local function onLock(self, event, bagID, slotID)
     if (bagID == -1) and (slotID > _G.NUM_BANKGENERIC_SLOTS) then
         bagID, slotID = _G.ContainerIDToInventoryID(slotID - _G.NUM_BANKGENERIC_SLOTS + _G.NUM_BAG_SLOTS)
     end
-    
+
     if slotID then return end
 
     for i, button in next, self.buttons do

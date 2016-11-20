@@ -699,7 +699,7 @@ do
         end
 
         -- Hint
-        color = {0, 1, 0} 
+        color = {0, 1, 0}
         if watchStates[dbc.xrstate].hint then
             GameTooltip:AddLine(watchStates[dbc.xrstate].hint, color[1], color[2], color[3])
         end
@@ -2063,9 +2063,9 @@ local function SpecChangeClickFunc(self, specIndex)
             if _G.IsShiftKeyDown() then
                 dbc.specgear[specIndex] = -1
             elseif _G.IsAltKeyDown() then
-                if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then 
+                if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then
                     dbc.specgear[specIndex] = equipSetsByIndex[1].id
-                else 
+                else
                     for equipIndex = equipSetsByID[dbc.specgear[specIndex]].index, numEquipSets do
                         if dbc.specgear[specIndex] ~= equipSetsByIndex[equipIndex].id then
                             dbc.specgear[specIndex] = equipSetsByIndex[equipIndex].id

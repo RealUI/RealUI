@@ -35,7 +35,7 @@ cargBags.itemKeys["bindOn"] = function(i)
 
     if not tooltip then
         tooltip = _G.CreateFrame("GameTooltip", tipName)
-        tooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE") 
+        tooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
     end
 
     tooltip:ClearLines()

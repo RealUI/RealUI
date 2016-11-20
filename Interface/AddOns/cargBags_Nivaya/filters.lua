@@ -38,7 +38,7 @@ filters.fItemClass = function(item, container)
     if not itemClass[item.id] or itemClass[item.id] == "ReClass" then
         cbNivaya:ClassifyItem(item)
     end
-    
+
     local t, bag = itemClass[item.id]
 
     local isBankBag = item.bagID == -1 or (item.bagID >= 5 and item.bagID <= 11)
@@ -85,7 +85,7 @@ function cbNivaya:ClassifyItem(item)
     elseif not itemClass[item.id] then
         itemClass[item.id] = "NoClass"
     end
-    
+
     cargBags.debug("Classified", itemClass[item.id])
 end
 
@@ -149,7 +149,7 @@ if IR then
         _G.wipe(item2setIR)
         local IRsets = _G.ItemRackUser.Sets
         for i in next, IRsets do
-            if not i:find("^~") then 
+            if not i:find("^~") then
                 for _, item in next, IRsets[i].equip do
                     if item then item2setIR[item] = true end
                 end

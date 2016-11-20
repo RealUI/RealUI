@@ -80,14 +80,14 @@ end
 -- Determine if message is spam
 function StopAddonSpam:IsMessageSpam(msg, id, frame)
     local ruleset = self.ruleset
-    
+
     if not msg then return end
-    
+
     for i, name in ipairs(ruleset.order) do
         local rule = ruleset.rules[name]
         -- If the rule tests true then there is a match. The absence of a test implies a positive match.
         local match = not rule.test or rule.test(msg, id, frame)
-        
+
         -- The rule matches but it may not actually be spam.
         if match then
             -- Update the expiration count and handle expired rules if necessary.
@@ -98,7 +98,7 @@ function StopAddonSpam:IsMessageSpam(msg, id, frame)
                     rule.expire = rule.expire - 1
                 end
             end
-            
+
             -- If this is a deny rule, then this message is spam.
             return rule.action == DENY
         -- If the rule returned nil, then it is invalid.
@@ -121,7 +121,7 @@ end
 
 -- Basic Filter
 local function ChatFilter(self, event, arg1)
-    if arg1:find(_G.ERR_SPELL_UNLEARNED_S:sub(1, _G.ERR_SPELL_UNLEARNED_S:len() - 3)) or 
+    if arg1:find(_G.ERR_SPELL_UNLEARNED_S:sub(1, _G.ERR_SPELL_UNLEARNED_S:len() - 3)) or
       arg1:find(_G.ERR_LEARN_SPELL_S:sub(1, _G.ERR_LEARN_SPELL_S:len() - 3)) or
       arg1:find(_G.ERR_LEARN_ABILITY_S:sub(1, _G.ERR_LEARN_ABILITY_S:len() - 3)) or
       arg1:find(_G.ERR_PET_SPELL_UNLEARNED_S:sub(1, _G.ERR_PET_SPELL_UNLEARNED_S:len() - 3)) then
@@ -133,13 +133,13 @@ end
 function StopAddonSpam:Start()
     -- Hook the default chat frame's AddMessage method.
     self:RawHook(_G.ChatFrame1, "AddMessage", true)
-    
+
     -- Hook the combat log frame's AddMessage method to catch Gatherer.
     self:RawHook(_G.ChatFrame2, "AddMessage", true)
-    
+
     -- Register for a late-firing event that happens on startup or reload.
     self:RegisterEvent("UPDATE_PENDING_MAIL", "End")
-    
+
     -- Set up basic chat filter
     _G.ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilter)
 end

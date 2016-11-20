@@ -19,6 +19,6 @@ ns.options = {
             columnsSmall = 12,
             columnsLarge = 14,
             largeItemCount = 96,    -- Switch to columnsLarge when >= this number of items in the bank
-        },  
+        },
     },
 }

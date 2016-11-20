@@ -31,7 +31,7 @@ L.bagCaptions = {
     ["cBniv_BattlePet"]     = _G.AUCTION_CATEGORY_BATTLE_PETS,
     ["cBniv_Bag"]           = _G.INVENTORY_TOOLTIP,
     ["cBniv_Keyring"]       = _G.KEYRING,
-}   
+}
 
 if gl == "deDE" then
     L.MarkAsNew = "Als neu markieren"

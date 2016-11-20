@@ -68,7 +68,7 @@ if loc == "deDE" then   -- Deutsch
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 -- elseif loc == "itIT" then    -- Italiano
-    
+
 elseif loc == "frFR" then   -- French
     ButtonTexts = {
         tutorial = "Tutoriel",
@@ -270,7 +270,7 @@ local function SkinHelpPlateFrames()
                 region:SetTexture(nil)
             end
         end
-        
+
         _G.Aurora[1].SetBD(_G.HelpPlateTooltip)
     end
 end
@@ -294,7 +294,7 @@ local function RealUITutorial_HelpPlate_AnimateOut()
                     -- Hide everything
                     button.box:Hide()
                     button.boxHighlight:Hide()
-                    
+
                     HP_CP = nil
                     _G.HelpPlate:Hide()
                     RealUI.db.global.tutorial.stage = -1
@@ -316,7 +316,7 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
             RealUI_HelpPlate[i].ButtonPos.y = RealUI_HelpPlate[i].ButtonPos.y + 33
         end
     end
-    
+
     HP_CP = self
     HP_CP.mainHelpButton = mainHelpButton
     for i = 1, #self do
@@ -364,7 +364,7 @@ function RealUI:ShowTutorial_Stage1()
     if ( helpPlate and not _G.HelpPlate_IsShowing(helpPlate) ) then
         RealUITutorial_HelpPlate_Show( helpPlate, _G.UIParent, rTB )
     end
-    
+
     _G.HelpPlate:EnableMouse(false)
     SkinHelpPlateFrames()
 end
@@ -397,7 +397,7 @@ function RealUI:InitTutorial()
     rTB = _G.CreateFrame("Button", "RealUITutorialButton", _G.UIParent, "MainHelpPlateButton")
     rTB:SetPoint("CENTER", _G.UIParent, "CENTER", 0, -38)
     rTB:Hide()
-    
+
     -- Dark BG
     local tBG = _G.CreateFrame("Frame", "RealUITutorialBG", _G.UIParent)
     tBG:SetPoint("CENTER")
@@ -409,13 +409,13 @@ function RealUI:InitTutorial()
         bgFile = [[Interface\AddOns\nibRealUI\Media\Plain]],
     })
     tBG:SetBackdropColor(0, 0, 0, 0.4)
-    
+
     -- Logo
     local rLogo = _G.UIParent:CreateTexture("RealUITutorialLogo", "ARTWORK")
     rLogo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
     rLogo:SetSize(64, 64)
     rLogo:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 65)
-    
+
     -- Buttons
     local btnOpen = createTextButton("RealUITutorialButtonOpen", _G.UIParent)
     btnOpen:SetPoint("CENTER")
@@ -423,7 +423,7 @@ function RealUI:InitTutorial()
     btnOpen:SetAttribute("type", "macro")
     btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.name))
     RealUI:AddButtonHighlight(btnOpen)
-    
+
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)
     btnSkip:SetPoint("CENTER", 0, -54)
     btnSkip:SetText(ButtonTexts.skip)
@@ -439,7 +439,7 @@ function RealUI:InitTutorial()
         RealUI.db.global.tutorial.stage = -1
     end)
     RealUI:AddButtonHighlight(btnSkip)
-    
+
     local btnClose = createTextButton("RealUITutorialButtonClose", _G.HelpPlate)
     btnClose:SetPoint("CENTER")
     btnClose:SetText(ButtonTexts.finished)
@@ -447,7 +447,7 @@ function RealUI:InitTutorial()
     btnClose:SetAttribute("macrotext", macroClose)
     btnClose:Hide()
     RealUI:AddButtonHighlight(btnClose)
-    
+
     -- Skin Buttons
     local F = _G.Aurora[1]
     if F then

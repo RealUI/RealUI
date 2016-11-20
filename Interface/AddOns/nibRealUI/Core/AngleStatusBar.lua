@@ -243,7 +243,7 @@ function api:SetValue(value, ignoreSmooth)
     debug(self.debug, "SetValue", value, ignoreSmooth)
     local metadata = bars[self]
     if value == metadata.value then return end
-    
+
     if not metadata.minVal then self:SetMinMaxValues(0, value) end
     if value > metadata.maxVal then value = metadata.maxVal end
     if metadata.smooth and not(ignoreSmooth) then
@@ -444,7 +444,7 @@ local function CreateAngleBar(width, height, parent, info)
     test:SetColorTexture(1, 1, 1, 0.2)
     test:SetAllPoints(bar)
     --]]
- 
+
     local leftX, rightX = GetOffSets(info.leftAngle, info.rightAngle, info.minWidth)
 
     local row, prevRow = {}

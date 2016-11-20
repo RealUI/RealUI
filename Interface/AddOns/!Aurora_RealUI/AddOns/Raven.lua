@@ -24,7 +24,7 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
 
     local function AttachBarBackground(bg, bar)
         -- Create or show Background
-        if not bar.frame.bd then 
+        if not bar.frame.bd then
             bar.frame.bd = F.CreateBDFrame(bar.frame, 0.5)
             bar.frame.bd.lastGroup = ""
 
@@ -41,7 +41,7 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
         else
             bar.frame.bd:Show()
         end
-        
+
         -- Position for specific bar groups
         if (bar.frame.bd.lastGroup ~= bg.name) then
             bar.frame.bd:ClearAllPoints()
@@ -71,10 +71,10 @@ mods["PLAYER_LOGIN"]["Raven"] = function(self, F, C)
             if bar.frame.ssID then SpiralBorder:RemoveSpiral(bar, bar.frame.ssID, true) end
             if bar.frame.bd then bar.frame.bd:Hide() end
         end
-        
+
         return bar
     end
-    
+
     local Nest_DeleteBar_ = _G.Raven.Nest_DeleteBar
     _G.Raven.Nest_DeleteBar = function(bg, bar)
         -- Would be nice to keep them attached, but Raven recycles frames for Icons AND Bars and intermixes them

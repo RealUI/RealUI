@@ -34,7 +34,7 @@ function SpiralBorder:SetSpiralValue(spiral, per)
         remPer = (per - 0.875) / 0.125
         spiral.sect[5]:SetValue(remPer)
         spiral.sect[5].curVal = remPer
-    
+
     elseif per > 0.625 then
         if spiral.sect[1].curVal ~= 1 then spiral.sect[1]:SetValue(1) spiral.sect[1].curVal = 1 end
         if spiral.sect[2].curVal ~= 1 then spiral.sect[2]:SetValue(1) spiral.sect[2].curVal = 1 end
@@ -87,7 +87,7 @@ end
 
 function SpiralBorder:AttachSpiral(bar, inset, hasFrame)
     local barFrame
-    if hasFrame then 
+    if hasFrame then
         barFrame = bar.frame
     else
         barFrame = bar
@@ -124,9 +124,9 @@ function SpiralBorder:AttachSpiral(bar, inset, hasFrame)
         Spirals[newID] = _G.CreateFrame("Frame", nil, barFrame)
         Spirals[newID]:SetFrameLevel(0)
             Spirals[newID]:SetBackdrop({
-                bgFile = RealUI.media.textures.plain, 
-                edgeFile = RealUI.media.textures.plain, 
-                edgeSize = 1, 
+                bgFile = RealUI.media.textures.plain,
+                edgeFile = RealUI.media.textures.plain,
+                edgeSize = 1,
             })
             Spirals[newID]:SetBackdropColor(0.1, 0.1, 0.1, 0.9)
             Spirals[newID]:SetBackdropBorderColor(0, 0, 0)
@@ -203,7 +203,7 @@ end
 function SpiralBorder:RemoveSpiral(bar, id, hasFrame)
     local barFrame
     if hasFrame then barFrame = bar.frame else barFrame = bar end
-    
+
     if id and activeSpirals[id] then
         barFrame.ssID = nil
         Spirals[id]:Hide()
@@ -215,6 +215,6 @@ end
 -------------
 function SpiralBorder:OnInitialize()
     ndb = RealUI.db.profile
-    
+
     self:SetEnabledState(true)
 end

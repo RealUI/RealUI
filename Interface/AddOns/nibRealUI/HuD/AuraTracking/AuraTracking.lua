@@ -107,7 +107,7 @@ local function RegisterSpellList(unitExclusions, spellList)
     end
 end
 
-do 
+do
     local function AddTrackerToSlot(tracker, slot)
         AuraTracking:debug("AddTrackerToSlot", tracker.id, slot:GetID())
         slot.tracker = tracker

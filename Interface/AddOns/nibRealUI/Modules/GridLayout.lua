@@ -47,18 +47,17 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
     local NewLayout, isHoriz, layoutSize
     local Grid2DB = _G.Grid2Layout.db.profile
     self:debug("groupType:", groupType, _G.Grid2Layout)
-    
-   
+
     -- Which RealUI Layout we're working on
     local LayoutDB = (RealUI.cLayout == 1) and db.dps or db.healing
-    
+
     -- Find new Grid Layout
     -- Solo - Adjust w/pets
     if groupType == "solo" then
         isHoriz = LayoutDB.hGroups.normal
         if LayoutDB.showSolo then
             self:debug("Show frames")
-            if _G.UnitExists("pet") and LayoutDB.showPet then 
+            if _G.UnitExists("pet") and LayoutDB.showPet then
                 self:debug("with pets")
                 NewLayout = "Solo w/Pets"
             else
@@ -72,7 +71,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
     elseif (groupType == "arena") or (groupType == "party") then
         isHoriz = LayoutDB.hGroups.normal
         local HasPet = _G.UnitExists("pet") or _G.UnitExists("partypet1") or _G.UnitExists("partypet2") or _G.UnitExists("partypet3") or _G.UnitExists("partypet4")
-        if HasPet and LayoutDB.showPet then 
+        if HasPet and LayoutDB.showPet then
             self:debug("Show pets")
             NewLayout = "Party w/Pets"
         else
@@ -87,7 +86,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
         for k,v in next, raidGroupInUse do
             raidGroupInUse[k] = false
         end
-        
+
         -- find what groups are in use
         for i = 1, _G.MAX_RAID_MEMBERS do
             local name, _, subGroup = _G.GetRaidRosterInfo(i)
@@ -107,7 +106,7 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
             layoutSize = "normal"
         end
     end
-    
+
     -- Change Grid Layout
     self:debug("Check horizontal:", isHoriz, Grid2DB.horizontal)
     if isHoriz ~= nil and (isHoriz ~= Grid2DB.horizontal) then
@@ -180,7 +179,7 @@ function GridLayout:OnEnable()
         GridLayout:Update(...)
         Grid2LayoutGroupChanged(self, ...)
     end
-    
+
     _G.Grid2:UnregisterChatCommand("grid2")
     self:RegisterChatCommand("grid", "Grid2ChatCommand")
     self:RegisterChatCommand("grid2", "Grid2ChatCommand")

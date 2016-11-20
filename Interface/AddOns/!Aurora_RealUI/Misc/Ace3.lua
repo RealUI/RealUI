@@ -224,11 +224,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
                 local scrollFrame = widget.scrollFrame
                 scrollFrame:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 1, -12)
-        		scrollFrame:SetPoint("BOTTOMRIGHT", widget.frame, "BOTTOMRIGHT", -1, 12)
+                scrollFrame:SetPoint("BOTTOMRIGHT", widget.frame, "BOTTOMRIGHT", -1, 12)
 
                 local itemFrame = widget.itemFrame
                 itemFrame:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT", 6, 0)
-        		itemFrame:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
+                itemFrame:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
                 widget.skinned = true
             end
 
@@ -559,7 +559,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 F.ReskinScroll(widget.scrollbar)
             end
 
-        
+
         --[[elseif TYPE == "SimpleGroup" then
             if not widget.skinned then
                 --

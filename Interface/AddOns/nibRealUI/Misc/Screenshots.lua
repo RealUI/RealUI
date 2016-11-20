@@ -22,7 +22,7 @@ function AchievementScreenshots:OnInitialize()
         profile = {
         },
     })
-    
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
