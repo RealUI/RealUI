@@ -1,0 +1,12 @@
+tag Release-70100-28
+f110bd56282bee9f5e5e645049fcb92031306efe
+Alar of Runetotem <alar@aspide.it>
+2016-11-07 12:55:22 +0100
+
+Accounts for delay in relic loading in artifact scan
+
+
+--------------------
+
+Alar of Runetotem:
+	- Accounts for dealy in relic loading (artifacts)

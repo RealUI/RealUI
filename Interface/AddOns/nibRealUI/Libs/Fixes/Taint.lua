@@ -34,27 +34,24 @@ end
 
 
 do --[[ Artifact Frame ]]--
-    -- by Gnarfoz
+    -- original code by Gnarfoz
     --C_ArtifactUI.GetTotalPurchasedRanks() shenanigans
-    local orig_show
-    local new_show
-    local counter = 0
+    local oldOnShow
+    local newOnShow
 
-    local function new_show(self)
+    local function newOnShow(self)
         if C_ArtifactUI.GetTotalPurchasedRanks() then 
-            orig_show(self)
+            oldOnShow(self)
         else
             ArtifactFrame:Hide()
-            counter = counter + 1
-            print("GTPR is nil, count: " ..counter)
         end
     end
 
-    local function hook_artifact_show()
-        if not orig_show then
-            orig_show = ArtifactFrame:GetScript("OnShow")
-            ArtifactFrame:SetScript("OnShow", new_show)
+    local function artifactHook()
+        if not oldOnShow then
+            oldOnShow = ArtifactFrame:GetScript("OnShow")
+            ArtifactFrame:SetScript("OnShow", newOnShow)
         end
     end
-    hooksecurefunc("ArtifactFrame_LoadUI", hook_artifact_show)
+    hooksecurefunc("ArtifactFrame_LoadUI", artifactHook)
 end
