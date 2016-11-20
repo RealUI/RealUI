@@ -32,7 +32,7 @@ local function PrepareTooltip(tooltip, block)
         tooltip:ClearAllPoints()
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
-        end 
+        end
         local anchor = block.side == "left" and "LEFT" or "RIGHT"
         InfoLine:debug("SetPoint", anchor)
         tooltip:SetPoint(("BOTTOM"..anchor), block, ("TOP"..anchor))
@@ -46,14 +46,14 @@ function BlockMixin:OnEnter()
 
     if (not db.other.icTips and _G.InCombatLockdown()) then return end
     local dataObj  = self.dataObj
-    
+
     if dataObj.tooltip then
         PrepareTooltip(dataObj.tooltip, self)
         if dataObj.tooltiptext then
             dataObj.tooltip:SetText(dataObj.tooltiptext)
         end
         dataObj.tooltip:Show()
-    
+
     elseif dataObj.OnEnter then
         dataObj.OnEnter(self)
 
@@ -61,11 +61,11 @@ function BlockMixin:OnEnter()
         PrepareTooltip(_G.GameTooltip, self)
         dataObj.OnTooltipShow(_G.GameTooltip)
         _G.GameTooltip:Show()
-    
+
     elseif dataObj.tooltiptext then
         PrepareTooltip(_G.GameTooltip, self)
         _G.GameTooltip:SetText(dataObj.tooltiptext)
-        _G.GameTooltip:Show()      
+        _G.GameTooltip:Show()
     end
 end
 
@@ -75,11 +75,11 @@ function BlockMixin:OnLeave()
 
     if (not db.other.icTips and _G.UnitAffectingCombat("player")) then return end
     local dataObj  = self.dataObj
-    
+
     if dataObj.OnTooltipShow then
         _G.GameTooltip:Hide()
     end
-    
+
     if dataObj.OnLeave then
         dataObj.OnLeave(self)
     elseif dataObj.tooltip then
@@ -212,7 +212,7 @@ local function CreateNewBlock(name, dataObj)
     block.dataObj = dataObj
     block.name = name
     local width, space = 0, 4
-    
+
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.5)
     bg:SetAllPoints(block)
@@ -282,7 +282,7 @@ local function CreateNewBlock(name, dataObj)
     highlight:Hide()
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
-    
+
     block:SetScript("OnEnter", block.OnEnter)
     block:SetScript("OnLeave", block.OnLeave)
 

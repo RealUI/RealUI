@@ -61,10 +61,10 @@ do
         end
 
         local scrollBar = self.ScrollBar
-        scrollBar:SetMinMaxValues(0, scrollFrameHeight) 
+        scrollBar:SetMinMaxValues(0, scrollFrameHeight)
         scrollBar:SetValueStep(ROW_HEIGHT)
         scrollBar:SetStepsPerPage(MAX_ROWS - 1)
-        
+
         -- Arrow button handling
         local scrollUpButton = scrollBar.ScrollUpButton
         local scrollDownButton = scrollBar.ScrollDownButton
@@ -91,7 +91,7 @@ do
             textTable:SetPoint("BOTTOMRIGHT")
             textTable:EnableMouse(true)
 
-            --[[ Test BG 
+            --[[ Test BG
             local test = textTable:CreateTexture(nil, "BACKGROUND")
             test:SetColorTexture(1, 1, 1, 0.5)
             test:SetAllPoints(textTable)]]
@@ -199,8 +199,8 @@ do
 end
 
 
---[[ 
-do -- template 
+--[[
+do -- template
     blocks["test"] = {
         type = "RealUI",
         text = "TEST 1 test",
@@ -223,7 +223,7 @@ function InfoLine:CreateBlocks()
                 notCheckable = true,
             },
             {text = L["General_Lock"],
-                func = function() 
+                func = function()
                     if InfoLine.locked then
                         InfoLine:Unlock()
                     else
@@ -245,10 +245,10 @@ function InfoLine:CreateBlocks()
                 notCheckable = true,
             },
             {text = _G.TALENTS_BUTTON,
-                func = function() 
-                    if not _G.PlayerTalentFrame then 
+                func = function()
+                    if not _G.PlayerTalentFrame then
                         _G.TalentFrame_LoadUI()
-                    end 
+                    end
 
                     _G.ShowUIPanel(_G.PlayerTalentFrame)
                 end,
@@ -264,13 +264,13 @@ function InfoLine:CreateBlocks()
                 notCheckable = true,
             },
             {text = _G.IsInGuild() and _G.GUILD or _G.LOOKINGFORGUILD,
-                func = function() 
-                    if _G.IsInGuild() then 
-                        if not _G.GuildFrame then _G.GuildFrame_LoadUI() end 
-                        _G.GuildFrame_Toggle() 
-                    else 
-                        if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end 
-                        _G.LookingForGuildFrame_Toggle() 
+                func = function()
+                    if _G.IsInGuild() then
+                        if not _G.GuildFrame then _G.GuildFrame_LoadUI() end
+                        _G.GuildFrame_Toggle()
+                    else
+                        if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end
+                        _G.LookingForGuildFrame_Toggle()
                     end
                 end,
                 notCheckable = true,
@@ -292,7 +292,7 @@ function InfoLine:CreateBlocks()
             {text = _G.ADVENTURE_JOURNAL,
                 func = function() _G.ToggleEncounterJournal() end,
                 notCheckable = true,
-            },  
+            },
             {text = _G.BLIZZARD_STORE,
                 func = function() _G.ToggleStoreUI() end,
                 notCheckable = true,
@@ -300,7 +300,7 @@ function InfoLine:CreateBlocks()
             {text = _G.HELP_BUTTON,
                 func = function() _G.ToggleHelpFrame() end,
                 notCheckable = true,
-            },  
+            },
             {text = "",
                 notCheckable = true,
                 disabled = true,
@@ -337,7 +337,7 @@ function InfoLine:CreateBlocks()
                 suffix = ""
             else
                 timeFormat = _G.TIMEMANAGER_TICKER_12HOUR
-                if hour >= 12 then 
+                if hour >= 12 then
                     suffix = _G.TIMEMANAGER_PM
                     if hour > 12 then
                         hour = hour - 12
@@ -491,7 +491,7 @@ function InfoLine:CreateBlocks()
 
         local NameSort do
             local nameMatch = [=[[|T]*(.*)[|t]*|cff%x%x%x%x%x%x(.*)]=]
-            
+
             function NameSort(Val1, Val2)
                 local icon1, icon2
                 InfoLine:debug("NameSort", _G.strsplit("|", Val1))
@@ -591,7 +591,7 @@ function InfoLine:CreateBlocks()
                         "FILL", "FIT", 0.2, "FIT", 0.2, 0.3
                     }
                 }
-                
+
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then

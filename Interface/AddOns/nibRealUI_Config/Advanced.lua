@@ -126,14 +126,14 @@ local core do
                     desc = "Show tooltips in combat.",
                     type = "toggle",
                     get = function() return db.other.icTips end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         db.other.icTips = value
                     end,
                     order = 60,
                 },
             },
         }
-    
+
         local realui = {
             name = "RealUI",
             type = "group",
@@ -179,7 +179,7 @@ local core do
                     desc = L["General_EnabledDesc"]:format(dataObj.name),
                     type = "toggle",
                     get = function() return block.enabled end,
-                    set = function(data, value) 
+                    set = function(data, value)
                         block.enabled = value
                         InfoLine:RemoveBlock(block)
                     end,
@@ -194,7 +194,7 @@ local core do
                     desc = L["General_EnabledDesc"]:format(name),
                     type = "toggle",
                     get = function() return block.enabled end,
-                    set = function(data, value) 
+                    set = function(data, value)
                         block.enabled = value
                         if value then
                             InfoLine:AddBlock(name, dataObj, block)
