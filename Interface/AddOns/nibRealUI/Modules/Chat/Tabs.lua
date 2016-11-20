@@ -73,7 +73,7 @@ function Chat_Tabs:UpdateTab(chatName, chatTabText)
         -- Hook Tab
         tab:SetScript("OnEnter", ChatTab_OnEnter)
         tab:SetScript("OnLeave", ChatTab_OnLeave)
-        
+
         if chatTabText then
             _G.FCF_SetWindowName(chat, chatTabText)
         end

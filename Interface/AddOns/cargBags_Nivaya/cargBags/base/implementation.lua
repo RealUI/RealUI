@@ -64,7 +64,7 @@ function Implementation:New(name)
     impl.events = {} -- @property events <table> Holds all event callbacks
     impl.notInited = true -- @property notInited <bool>
 
-    _G.tinsert(_G.UISpecialFrames, name) 
+    _G.tinsert(_G.UISpecialFrames, name)
 
     self.instances[name] = impl
 
@@ -203,7 +203,7 @@ local _isEventRegistered = _G.UIParent.IsEventRegistered
 ]]
 function Implementation:RegisterEvent(event, key, func)
     local events = self.events
-    
+
     if not events[event] then
         events[event] = {}
     end
@@ -240,12 +240,12 @@ end
 ]]
 function Implementation:Init()
     if not self.notInited then return end
-    
+
      -- initialization of bags in combat taints the itembuttons within - Lars Norberg
     if _G.InCombatLockdown() then
         return
     end
-    
+
     self.notInited = nil
 
     if self.OnInit then self:OnInit() end

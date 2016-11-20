@@ -516,7 +516,7 @@ local core do
                     desc = "Enable/Disable the WorldMarker module.",
                     type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         if not _G.InCombatLockdown() then
                             RealUI:SetModuleEnabled(MODNAME, value)
                         else
@@ -540,7 +540,7 @@ local core do
                             name = "Arenas",
                             type = "toggle",
                             get = function(info) return db.visibility.arena end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.visibility.arena = value
                                 WorldMarker:UpdateVisibility()
                             end,
@@ -560,7 +560,7 @@ local core do
                             name = "5 Man Dungeons",
                             type = "toggle",
                             get = function(info) return db.visibility.party end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.visibility.party = value
                                 WorldMarker:UpdateVisibility()
                             end,
@@ -570,8 +570,8 @@ local core do
                             name = "Raid Dungeons",
                             type = "toggle",
                             get = function(info) return db.visibility.raid end,
-                            set = function(info, value) 
-                                db.visibility.raid = value 
+                            set = function(info, value)
+                                db.visibility.raid = value
                                 WorldMarker:UpdateVisibility()
                             end,
                             order = 40,
@@ -962,7 +962,7 @@ local skins do
             desc = "Warning: Only activate if on a really high-resolution display (such as a Retina display).\n\nDouble UI scaling so that UI elements are easier to see.",
             type = "toggle",
             get = function() return ndbg.tags.retinaDisplay.set end,
-            set = function(info, value) 
+            set = function(info, value)
                 ndbg.tags.retinaDisplay.set = value
                 RealUI:ReloadUIDialog()
             end,
@@ -973,7 +973,7 @@ local skins do
             desc = "Recommended: Automatically sets the scale of the UI so that UI elements appear pixel-perfect.",
             type = "toggle",
             get = function() return db.pixelPerfect end,
-            set = function(info, value) 
+            set = function(info, value)
                 db.pixelPerfect = value
                 UIScaler:UpdateUIScale()
             end,
@@ -985,7 +985,7 @@ local skins do
             type = "input",
             disabled = function() return db.pixelPerfect end,
             get = function() return tostring(db.customScale) end,
-            set = function(info, value) 
+            set = function(info, value)
                 db.customScale = RealUI:ValidateOffset(_G.tonumber(value), 0.48, 1)
                 UIScaler:UpdateUIScale()
             end,
@@ -1181,7 +1181,7 @@ local uiTweaks do
                     desc = "Enable/Disable the Chat Extras module.",
                     type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         RealUI:SetModuleEnabled(MODNAME, value)
                     end,
                     order = 20,
@@ -1208,7 +1208,7 @@ local uiTweaks do
                             desc = "Skins the Chat Tabs.",
                             type = "toggle",
                             get = function() return db.modules.tabs.enabled end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.modules.tabs.enabled = value
                             end,
                             order = 10,
@@ -1218,7 +1218,7 @@ local uiTweaks do
                             desc = "Adjusts the opacity of the Chat Frame, and controls how fast the frame and tabs fade in/out.",
                             type = "toggle",
                             get = function() return db.modules.opacity.enabled end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.modules.opacity.enabled = value
                             end,
                             order = 20,
@@ -1473,7 +1473,7 @@ local uiTweaks do
                         desc = "Enable/Disable the Error Hider module.",
                         type = "toggle",
                         get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             RealUI:SetModuleEnabled(MODNAME, value)
                         end,
                         order = 30,
@@ -1498,7 +1498,7 @@ local uiTweaks do
                         desc = "Hide all error messages.",
                         type = "toggle",
                         get = function() return db.hideall end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             db.hideall = value
                         end,
                         order = 20,
@@ -1554,7 +1554,7 @@ local uiTweaks do
                     desc = "Enable/Disable the Event Notifier module.",
                     type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         RealUI:SetModuleEnabled(MODNAME, value)
                         RealUI:ReloadUIDialog()
                     end,
@@ -1570,7 +1570,7 @@ local uiTweaks do
                             name = "Calender Invites",
                             type = "toggle",
                             get = function() return db.checkEvents end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.checkEvents = value
                             end,
                             order = 10,
@@ -1579,7 +1579,7 @@ local uiTweaks do
                             name = "Guild Events",
                             type = "toggle",
                             get = function() return db.checkGuildEvents end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.checkGuildEvents = value
                             end,
                             order = 20,
@@ -1588,7 +1588,7 @@ local uiTweaks do
                             name = _G.MINIMAP_LABEL.." ".._G.ITEM_QUALITY3_DESC,
                             type = "toggle",
                             get = function() return db.checkMinimapRares end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.checkMinimapRares = value
                             end,
                             order = 30,
@@ -1606,7 +1606,7 @@ local uiTweaks do
         local FrameList = FrameMover.FrameList
         local MoveFrameGroup = FrameMover.MoveFrameGroup
         local isAddonControl = FrameMover.isAddonControl
-        
+
         local function GetEnabled(addonSlug, addonInfo)
             if isAddonControl[addonSlug] then
                 return RealUI:DoesAddonMove(isAddonControl[addonSlug])
@@ -1646,7 +1646,7 @@ local uiTweaks do
                             get = function(info)
                                 return GetEnabled(addonSlug, addonInfo)
                             end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 if isAddonControl[addonSlug] then
                                     RealUI:ToggleAddonPositionControl(isAddonControl[addonSlug], value)
                                     if RealUI:DoesAddonMove(isAddonControl[addonSlug]) then
@@ -1663,7 +1663,7 @@ local uiTweaks do
                         },
                     },
                 }
-                
+
                 -- Create options table for Frames
                 local normalFrameOpts = {
                     name = "Frames",
@@ -1708,7 +1708,7 @@ local uiTweaks do
                                 name = "Anchor To",
                                 type = "select",
                                 values = RealUI.globals.anchorPoints,
-                                get = function(info) 
+                                get = function(info)
                                     for idx, point in next, RealUI.globals.anchorPoints do
                                         if point == addonInfo.frames[i].rpoint then return idx end
                                     end
@@ -1723,7 +1723,7 @@ local uiTweaks do
                                 name = "Anchor From",
                                 type = "select",
                                 values = RealUI.globals.anchorPoints,
-                                get = function(info) 
+                                get = function(info)
                                     for idx, point in next, RealUI.globals.anchorPoints do
                                         if point == addonInfo.frames[i].point then return idx end
                                     end
@@ -1752,15 +1752,15 @@ local uiTweaks do
                     normalFrameOrderCnt = normalFrameOrderCnt + 10
                 end
                 addonOpts.args[addonSlug].args.frames = normalFrameOpts
-                
+
                 if addon.hashealing then
                     -- Healing Enable option
                     addonOpts.args[addonSlug].args.healingenabled = {
                         name = "Enable Healing Layout",
                         type = "toggle",
                         get = function(info) return addonInfo.healing end,
-                        set = function(info, value) 
-                            addonInfo.healing = value 
+                        set = function(info, value)
+                            addonInfo.healing = value
                             if addonInfo.move then
                                 FrameMover:MoveAddons()
                             end
@@ -1776,7 +1776,7 @@ local uiTweaks do
                         order = 50,
                         args = {},
                     }
-                    local normalHealingFrameOrderCnt = 10       
+                    local normalHealingFrameOrderCnt = 10
                     for i = 1, #addon.frameshealing do
                         normalHealingFrameOpts.args[tostring(i)] = {
                             name = addon.frameshealing[i].name,
@@ -1812,7 +1812,7 @@ local uiTweaks do
                                     name = "Anchor To",
                                     type = "select",
                                     values = RealUI.globals.anchorPoints,
-                                    get = function(info) 
+                                    get = function(info)
                                         for idx, point in next, RealUI.globals.anchorPoints do
                                             if point == addonInfo.frameshealing[i].rpoint then return idx end
                                         end
@@ -1827,7 +1827,7 @@ local uiTweaks do
                                     name = "Anchor From",
                                     type = "select",
                                     values = RealUI.globals.anchorPoints,
-                                    get = function(info) 
+                                    get = function(info)
                                         for idx, point in next, RealUI.globals.anchorPoints do
                                             if point == addonInfo.frameshealing[i].point then return idx end
                                         end
@@ -1857,11 +1857,11 @@ local uiTweaks do
                     end
                     addonOpts.args[addonSlug].args.healingframes = normalHealingFrameOpts
                 end
-                
-                addonOrderCnt = addonOrderCnt + 10  
+
+                addonOrderCnt = addonOrderCnt + 10
             end
         end
-        
+
         -- Create UIFrames options table
         local uiFramesOpts do
             uiFramesOpts = {
@@ -1871,7 +1871,7 @@ local uiTweaks do
                 order = 60,
                 args = {},
             }
-            local uiFramesOrderCnt = 10 
+            local uiFramesOrderCnt = 10
             for uiSlug, ui in next, FrameList.uiframes do
                 local uiInfo = db.uiframes[uiSlug]
                 -- Create base options for UIFrames
@@ -1889,15 +1889,15 @@ local uiTweaks do
                             type = "toggle",
                             name = ("Move %s"):format(ui.name),
                             get = function(info) return uiInfo.move end,
-                            set = function(info, value) 
-                                uiInfo.move = value 
+                            set = function(info, value)
+                                uiInfo.move = value
                                 if uiInfo.move and ui.frames then MoveFrameGroup(ui.frames, uiInfo.frames) end
                             end,
                             order = 20,
                         },
                     },
                 }
-                
+
                 -- Create options table for Frames
                 if ui.frames then
                     local frameopts = {
@@ -1943,7 +1943,7 @@ local uiTweaks do
                                 anchorto = {
                                     type = "select",
                                     name = "Anchor To",
-                                    get = function(info) 
+                                    get = function(info)
                                         for idx, point in next, RealUI.globals.anchorPoints do
                                             if point == uiInfo.frames[i].rpoint then return idx end
                                         end
@@ -1959,7 +1959,7 @@ local uiTweaks do
                                 anchorfrom = {
                                     type = "select",
                                     name = "Anchor From",
-                                    get = function(info) 
+                                    get = function(info)
                                         for idx, point in next, RealUI.globals.anchorPoints do
                                             if point == uiInfo.frames[i].point then return idx end
                                         end
@@ -1976,14 +1976,14 @@ local uiTweaks do
                         }
                         FrameOrderCnt = FrameOrderCnt + 10
                     end
-                    
+
                     -- Add Frames to UI Frames options
                     uiFramesOpts.args[uiSlug].args.frames = frameopts
                     uiFramesOrderCnt = uiFramesOrderCnt + 10
                 end
             end
         end
-        
+
         -- Create Hide options table
         local hideOpts do
             hideOpts = {
@@ -2017,7 +2017,7 @@ local uiTweaks do
                 },
             }
             -- Add all frames to Hide Frames options
-            local hideOrderCnt = 10 
+            local hideOrderCnt = 10
             for hideSlug, hide in next, FrameList.hide do
                 local hideInfo = db.hide [hideSlug]
                 -- Create base options for Hide
@@ -2025,8 +2025,8 @@ local uiTweaks do
                     type = "toggle",
                     name = hide.name,
                     get = function(info) return hideInfo.hide end,
-                    set = function(info, value) 
-                        hideInfo.hide = value 
+                    set = function(info, value)
+                        hideInfo.hide = value
                         if hideInfo.hide then
                             FrameMover:HideFrames()
                         else
@@ -2036,7 +2036,7 @@ local uiTweaks do
                     order = hideOrderCnt,
                 }
 
-                hideOrderCnt = hideOrderCnt + 10        
+                hideOrderCnt = hideOrderCnt + 10
             end
         end
 
@@ -2089,7 +2089,7 @@ local uiTweaks do
                     desc = "Enable/Disable the Loot module.",
                     type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         RealUI:SetModuleEnabled(MODNAME, value)
                         RealUI:ReloadUIDialog()
                     end,
@@ -2112,7 +2112,7 @@ local uiTweaks do
                             desc = "Skins the Loot window.",
                             type = "toggle",
                             get = function() return db.loot.enabled end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.loot.enabled = value
                                 RealUI:ReloadUIDialog()
                             end,
@@ -2128,7 +2128,7 @@ local uiTweaks do
                                     name = "Position at Cursor",
                                     type = "toggle",
                                     get = function() return db.loot.cursor end,
-                                    set = function(info, value) 
+                                    set = function(info, value)
                                         db.loot.cursor = value
                                         Loot:UpdateLootPosition()
                                     end,
@@ -2170,7 +2170,7 @@ local uiTweaks do
                                             type = "select",
                                             style = "dropdown",
                                             values = RealUI.globals.anchorPoints,
-                                            get = function(info) 
+                                            get = function(info)
                                                 for k,v in next, RealUI.globals.anchorPoints do
                                                     if v == db.loot.static.anchor then return k end
                                                 end
@@ -2205,7 +2205,7 @@ local uiTweaks do
                             type = "toggle",
                             width = "full",
                             get = function() return db.roll.enabled end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 db.roll.enabled = value
                                 RealUI:ReloadUIDialog()
                             end,

@@ -426,7 +426,7 @@ UnitFrames["target"] = function(self)
 
         -- Reverse power
         local oldReverse, newReverse = frame.Power.bar.reverse
-        if ndb.settings.reverseUnitFrameBars then 
+        if ndb.settings.reverseUnitFrameBars then
             newReverse = not RealUI.ReversePowers[powerToken]
         else
             newReverse = RealUI.ReversePowers[powerToken]

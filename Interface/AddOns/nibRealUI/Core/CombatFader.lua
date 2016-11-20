@@ -81,7 +81,7 @@ function CombatFader:UpdateStatus(force)
     else
         status = "outofcombat"          -- OutOfCombat - Priority 5
     end
-    if force or status ~= OldStatus then self:FadeFrames() end  
+    if force or status ~= OldStatus then self:FadeFrames() end
 end
 
 function CombatFader:HurtEvent(units)
@@ -229,7 +229,7 @@ function CombatFader:OnEnable()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateCombatState")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateCombatState")
     self:UpdateCombatState()
-    
+
     if LoggedIn then self:RefreshMod() end
 end
 

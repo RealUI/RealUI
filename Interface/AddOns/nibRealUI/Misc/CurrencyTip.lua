@@ -152,9 +152,9 @@ function CurrencyTip:SetUpChar()
     end
     _G.sort(playerList)
     _G.tinsert(playerList, 1, player)
-    
+
     self:SetUpHooks()
-    
+
     UpdateData()
 end
 

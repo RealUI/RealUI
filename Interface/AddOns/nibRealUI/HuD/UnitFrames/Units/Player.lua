@@ -188,7 +188,7 @@ local function CreatePowerBar(parent)
         end
     end
 
-    ---[[ test 
+    ---[[ test
     druidMana:SetMinMaxValues(0, 1)
     druidMana:SetValue(0.75)
     druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)

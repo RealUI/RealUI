@@ -60,7 +60,7 @@ local other do
                         desc = L["Layout_LinkDesc"],
                         type = "toggle",
                         get = function() return ndb.positionsLink end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             ndb.positionsLink = value
 
                             RealUI.cLayout = ndbc.layout.current
@@ -77,7 +77,7 @@ local other do
                         desc = L["HuD_UseLargeDesc"],
                         type = "toggle",
                         get = function() return ndb.settings.hudSize == 2 end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             ndb.settings.hudSize = value and 2 or 1
                             _G.StaticPopup_Show("RUI_ChangeHuDSize")
                         end,
@@ -111,7 +111,7 @@ local other do
                         desc = L["General_EnabledDesc"]:format(_G.COMBAT_TEXT_SHOW_REACTIVES_TEXT),
                         type = "toggle",
                         get = function() return RealUI:GetModuleEnabled("SpellAlerts") end,
-                        set = function(info, value) 
+                        set = function(info, value)
                             RealUI:SetModuleEnabled("SpellAlerts", value)
                             RealUI:ReloadUIDialog()
                         end,
@@ -1323,7 +1323,7 @@ local auratracker do
                                 spellData.spell = {}
                             end
                             _G.wipe(spellData.spell)
-                            value = { _G.strsplit(",", value) } 
+                            value = { _G.strsplit(",", value) }
                             for i = 1, #value do
                                 local spell = _G.strtrim(value[i])
                                 tinsert(spellData.spell, tonumber(spell) or spell)
@@ -1831,7 +1831,7 @@ local classresource do
                             name = L["HuD_Width"],
                             type = "input",
                             get = function(info) return tostring(barDB.size.width) end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 barDB.size.width = value
                                 ClassResource:SettingsUpdate("bar", "size")
                             end,
@@ -1841,7 +1841,7 @@ local classresource do
                             name = L["HuD_Height"],
                             type = "input",
                             get = function(info) return tostring(barDB.size.height) end,
-                            set = function(info, value) 
+                            set = function(info, value)
                                 barDB.size.height = value
                                 ClassResource:SettingsUpdate("bar", "size")
                             end,
@@ -1910,7 +1910,7 @@ local classresource do
                     type = "toggle",
                     hidden = RealUI.class == "DEATHKNIGHT",
                     get = function(info) return pointDB.hideempty end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         pointDB.hideempty = value
                         ClassResource:ForceUpdate()
                     end,
@@ -1922,7 +1922,7 @@ local classresource do
                     type = "toggle",
                     hidden = power.token ~= "COMBO_POINTS",
                     get = function(info) return pointDB.reverse end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         pointDB.reverse = value
                         ClassResource:SettingsUpdate("points", "gap")
                     end,
@@ -1933,7 +1933,7 @@ local classresource do
                     type = "input",
                     hidden = RealUI.class ~= "DEATHKNIGHT",
                     get = function(info) return tostring(pointDB.size.width) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         pointDB.size.width = value
                         ClassResource:SettingsUpdate("points", "size")
                     end,
@@ -1944,7 +1944,7 @@ local classresource do
                     type = "input",
                     hidden = RealUI.class ~= "DEATHKNIGHT",
                     get = function(info) return tostring(pointDB.size.height) end,
-                    set = function(info, value) 
+                    set = function(info, value)
                         pointDB.size.height = value
                         ClassResource:SettingsUpdate("points", "size")
                     end,

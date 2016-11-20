@@ -34,22 +34,22 @@ local function canMod(frame)
     if frameBlacklist[frame] then
         return false
     end
-    
+
     local name = frame:GetName()
-    
+
     if not name then
         -- As a rule of thumb, Blizzard doesn't create anonymous frames
         -- so it should always be safe to modify them.
         return true
     end
-    
+
     local isSecure = _G.issecurevariable(name)
-    
+
     if isSecure then
         frameBlacklist[frame] = true
         return false
     end
-    
+
     return true
 end
 
@@ -108,7 +108,7 @@ f:SetScript("OnEvent", function(self, gameEvent)
     if gameEvent == "PLAYER_ENTERING_WORLD" then
         if not enteredOnce then
             f:RegisterEvent("PLAYER_LEAVING_WORLD")
-            
+
             _G.hooksecurefunc(_G.getmetatable(f).__index, "UnregisterEvent", function(frame, event)
                 if listenForUnreg then
                     local frames = events[event]

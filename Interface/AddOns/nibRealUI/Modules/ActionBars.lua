@@ -374,7 +374,7 @@ function ActionBars:UpdateStanceBar()
     -- Color
     -- Doodads.stance.sides:SetVertexColor(unpack(RealUI.classColor))
     Doodads.stance.sides:SetVertexColor(0.5, 0.5, 0.5)
-    
+
     -- Size/Position
     local NumStances = _G.GetNumShapeshiftForms()
     local sbP = 1--db[RealUI.cLayout].stanceBar.padding
@@ -396,7 +396,7 @@ end
 function ActionBars:TogglePetBar()
     if not Doodads.pet then return end
     ActionBars:debug("TogglePetBar")
-    
+
     if ( RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet and db.showDoodads and (_G.UnitExists("pet") and not _G.UnitInVehicle("player")) ) then
         Doodads.pet:Show()
     else
@@ -408,10 +408,10 @@ function ActionBars:UpdatePetBar()
     ActionBars:debug("UpdatePetBar Check", Doodads.pet, RealUI:DoesAddonMove("Bartender4"), db[RealUI.cLayout].moveBars.pet)
     if not (Doodads.pet and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet) then return end
     ActionBars:debug("UpdatePetBar")
-    
+
     -- Color
     Doodads.pet.sides:SetVertexColor(_G.unpack(RealUI.classColor))
-    
+
     -- Size/Position
     local pbX = BT4DB["namespaces"]["PetBar"]["profiles"][BT4Profile]["position"]["x"]
     local pbA = BT4DB["namespaces"]["PetBar"]["profiles"][BT4Profile]["position"]["point"]
@@ -435,16 +435,16 @@ function ActionBars:CreateDoodads()
     -- PetBar
     Doodads.pet = _G.CreateFrame("Frame", "RealUIActionBarDoodadsPet", _G.UIParent)
     local dP = Doodads.pet
-    
+
     dP:SetFrameStrata("BACKGROUND")
     dP:SetFrameLevel(1)
     dP:SetHeight(32)
     dP:SetWidth(32)
-    
+
     dP.sides = dP:CreateTexture(nil, "ARTWORK")
     dP.sides:SetAllPoints(dP)
     dP.sides:SetTexture(Textures.petBar.sides)
-    
+
     dP.center = dP:CreateTexture(nil, "ARTWORK")
     dP.center:SetAllPoints(dP)
     dP.center:SetTexture(Textures.petBar.center)
@@ -454,16 +454,16 @@ function ActionBars:CreateDoodads()
     -- Stance Bar
     Doodads.stance = _G.CreateFrame("Frame", "RealUIActionBarDoodadsStance", _G.UIParent)
     local dS = Doodads.stance
-    
+
     dS:SetFrameStrata("LOW")
     dS:SetFrameLevel(2)
     dS:SetHeight(32)
     dS:SetWidth(32)
-    
+
     dS.sides = dS:CreateTexture(nil, "ARTWORK")
     dS.sides:SetAllPoints(dS)
     dS.sides:SetTexture(Textures.stanceBar.sides)
-    
+
     dS.center = dS:CreateTexture(nil, "ARTWORK")
     dS.center:SetAllPoints(dS)
     dS.center:SetTexture(Textures.stanceBar.center)
@@ -474,7 +474,7 @@ function ActionBars:RefreshDoodads()
     if not (RealUI:GetModuleEnabled(MODNAME) and BT4) then return end
     ActionBars:debug("RefreshDoodads")
     db = self.db.profile
-    
+
     if not Doodads.pet then self:CreateDoodads() end
 
     self:UpdatePetBar()
@@ -487,17 +487,17 @@ end
 function ActionBars:PLAYER_ENTERING_WORLD()
     self:debug("PLAYER_ENTERING_WORLD")
     if not BT4 then return end
-    
+
     self:TogglePetBar()
     self:ToggleStanceBar()
     self:ApplyABSettings()
-    
+
     if EnteredWorld then return end
-    
+
     self:RegisterEvent("UNIT_PET")
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
     self:RefreshDoodads()
-    
+
     ---[[
     BT4AB_EnableBar = function(BT4AB, id)
         self:debug("BT4AB_EnableBar", id)
@@ -508,7 +508,7 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     end
     --_G.hooksecurefunc(BT4ActionBars, "EnableBar", BT4AB_EnableBar)
     --]]
-    
+
     EnteredWorld = true
 end
 
@@ -590,7 +590,7 @@ function ActionBars:OnEnable()
         BT4ActionBars = BT4:GetModule("ActionBars", true)
 
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
-        
+
         BT4:UnregisterChatCommand("bar")
         BT4:UnregisterChatCommand("bt")
         BT4:UnregisterChatCommand("bt4")
