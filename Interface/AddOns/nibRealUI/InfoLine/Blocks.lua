@@ -583,9 +583,10 @@ function InfoLine:CreateBlocks()
                 tooltip:AddHeader(gname)
 
 
-                local gmotd = _G.GetGuildRosterMOTD()
-                if gmotd ~= "" then
-                    tooltip:AddLine(gmotd)
+                local motd = _G.GetGuildRosterMOTD()
+                if motd ~= "" then
+                    lineNum, colNum = tooltip:AddLine()
+                    tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, TABLE_WIDTH)
                 end
 
                 local color = RealUI.media.colors.orange
