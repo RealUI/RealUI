@@ -19,9 +19,9 @@ local L = RealUI.L
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:GetModule(MODNAME)
 
+local TABLE_WIDTH = 500
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 do
-    local TABLE_WIDTH = 500
     local MAX_ROWS = 10
     local ROW_HEIGHT = 10
     local numTables = 0
@@ -50,12 +50,15 @@ do
                 if rowData then
                     text:SetText(rowData.info[col])
                     text:SetJustifyH(data.header.justify[col])
+                else
+                    text:SetText("")
                 end
             end
         end
 
         self:Show()
-        local scrollFrameHeight = (#data - MAX_ROWS) * ROW_HEIGHT
+        local numToDisplay = _G.min(MAX_ROWS, #data)
+        local scrollFrameHeight = (#data - numToDisplay) * ROW_HEIGHT
         if ( scrollFrameHeight < 0 ) then
             scrollFrameHeight = 0
         end
@@ -63,7 +66,7 @@ do
         local scrollBar = self.ScrollBar
         scrollBar:SetMinMaxValues(0, scrollFrameHeight)
         scrollBar:SetValueStep(ROW_HEIGHT)
-        scrollBar:SetStepsPerPage(MAX_ROWS - 1)
+        scrollBar:SetStepsPerPage(numToDisplay - 1)
 
         -- Arrow button handling
         local scrollUpButton = scrollBar.ScrollUpButton
@@ -79,6 +82,8 @@ do
         else
             scrollDownButton:Enable()
         end
+
+        return (numToDisplay + 1) * ROW_HEIGHT
     end
 
     function TextTableCellPrototype:InitializeCell()
@@ -179,10 +184,10 @@ do
         end
         filler:SetWidth(_G.max(remainingWidth, filler:GetStringWidth()))
 
-        UpdateScroll(textTable.scrollArea)
+        local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
-        return TABLE_WIDTH, ROW_HEIGHT * (MAX_ROWS + 1) + 11
+        return TABLE_WIDTH, cellHeight + 11
     end
 
     function TextTableCellPrototype:ReleaseCell()
