@@ -10,8 +10,9 @@ local qTip = _G.LibStub("LibQTip-1.0")
 local qTipAquire = qTip.Acquire
 function qTip:Acquire(...)
     local tooltip = qTipAquire(self, ...)
-    if _G.Aurora then
+    if _G.Aurora and not tooltip._skinned then
         _G.Aurora[1].CreateBD(tooltip)
+        tooltip._skinned = true
     end
     return tooltip
 end
@@ -34,6 +35,11 @@ do
     local MAX_ROWS = 10
     local ROW_HEIGHT = 10
     local numTables = 0
+
+    local testCell = _G.UIParent:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
+    testCell:SetPoint("CENTER")
+    testCell:SetSize(TABLE_WIDTH, 20)
+    testCell:Hide()
 
     local function UpdateScroll(self)
         InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
@@ -177,7 +183,14 @@ do
 
             local size = headerData.size[col]
             if size == "FIT" then
-                width = width - text:GetWidth()
+                local cellWidth = text:GetStringWidth()
+                for i = 1, #data do
+                    testCell:SetText(data[i].info[col])
+                    local newWidth = testCell:GetStringWidth()
+                    if newWidth > cellWidth then cellWidth = newWidth end
+                end
+                text:SetWidth(cellWidth)
+                width = width - cellWidth
             elseif size == "FILL" then
                 filler = text
             else
