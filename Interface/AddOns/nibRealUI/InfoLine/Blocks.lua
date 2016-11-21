@@ -7,6 +7,15 @@ local ipairs = _G.ipairs
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
+local qTipAquire = qTip.Acquire
+function qTip:Acquire(...)
+    local tooltip = qTipAquire(self, ...)
+    if _G.Aurora then
+        _G.Aurora[1].CreateBD(tooltip)
+    end
+    return tooltip
+end
+
 local LIF = _G.LibStub("LibIconFonts-1.0")
 local fa = LIF:GetIconFont("FontAwesome")
 fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
