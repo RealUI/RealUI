@@ -39,19 +39,20 @@ do
         InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
         local offset = _G.FauxScrollFrame_GetOffset(self) or 0
         local data = self.textTable.data
+        local header = self.textTable.header
         InfoLine:debug("offset", offset)
         for i = 1, MAX_ROWS do
             local index = offset + i
             local row = self.textTable.rows[i]
             InfoLine:debug("row", i, index)
-            for col = 1, #self.textTable.header do
+            for col = 1, #header do
                 local text = row[col]
                 if not text then
                     text = row:CreateFontString("$parentText", "ARTWORK", "RealUIFont_Normal")
                     text:SetPoint("TOP")
                     text:SetPoint("BOTTOM")
-                    text:SetPoint("LEFT", self.textTable.header[col])
-                    text:SetPoint("RIGHT", self.textTable.header[col])
+                    text:SetPoint("LEFT", header[col])
+                    text:SetPoint("RIGHT", header[col])
 
                     row[col] = text
                 end
@@ -215,19 +216,20 @@ end
 
 --[[
 do -- template
-    blocks["test"] = {
+    LDB:NewDataObject("test", {
+        name = "Test",
         type = "RealUI",
+        label = fa["group"],
+        labelFont = {fa.path, labelHeight, "OUTLINE"},
         text = "TEST 1 test",
         value = 1,
         suffix = "test",
-        label = "TEST"
-        icon = Icons[layoutSize].guild
-    }
+    })
 end
-]]
+--]]
 
---[=[]=]
 function InfoLine:CreateBlocks()
+    local labelHeight = InfoLine.barHeight * .6
     --[[ Static Blocks ]]--
     do  -- Start
         local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
@@ -329,7 +331,7 @@ function InfoLine:CreateBlocks()
             name = L["Start"],
             type = "RealUI",
             label = fa["bars"],
-            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
+            labelFont = {fa.path, labelHeight, "OUTLINE"},
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -560,7 +562,7 @@ function InfoLine:CreateBlocks()
             name = _G.GUILD,
             type = "RealUI",
             label = fa["group"],
-            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
+            labelFont = {fa.path, labelHeight, "OUTLINE"},
             text = 1,
             value = 1,
             suffix = "",
@@ -715,7 +717,7 @@ function InfoLine:CreateBlocks()
             name = _G.DURABILITY,
             type = "RealUI",
             label = fa["heartbeat"],
-            labelFont = {fa.path, InfoLine.barHeight * .6, "OUTLINE"},
+            labelFont = {fa.path, labelHeight, "OUTLINE"},
             text = 1,
             OnClick = function(block, ...)
                 InfoLine:debug("Durability: OnClick", block.side, ...)
