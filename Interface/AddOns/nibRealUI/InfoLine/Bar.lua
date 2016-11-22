@@ -146,8 +146,18 @@ function BlockMixin:OnEvent(event, ...)
 end
 
 function BlockMixin:OnUpdate(elapsed)
+    --InfoLine:debug("OnUpdate", self.name, elapsed)
     if self.dataObj.OnUpdate then
         self.dataObj.OnUpdate(self, elapsed)
+    end
+
+    if self.checkWidth then
+        local labelWidth = self.label:GetStringWidth()
+        InfoLine:debug(self.name, "OnUpdate", labelWidth)
+        if labelWidth > 1 then
+            self:SetWidth(self:GetWidth() + labelWidth)
+            self.checkWidth = nil
+        end
     end
 
     if self == MOVING_BLOCK then
@@ -266,7 +276,8 @@ local function CreateNewBlock(name, dataObj)
         label:SetText(dataObj.label)
 
         local labelWidth = label:GetStringWidth()
-        label.checkWidth = labelWidth < 1
+        block.checkWidth = labelWidth < 1
+        InfoLine:debug(block.name, "labelWidth", labelWidth)
 
         block.label = label
         width = width + labelWidth + space
@@ -341,13 +352,6 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
                 block.text:SetText(dataObj.value or dataObj.text)
             end
             local newStringWidth = block.text:GetStringWidth()
-
-            if block.label and block.label.checkWidth then
-                local labelWidth = block.label:GetStringWidth()
-                block.label.checkWidth = labelWidth < 1
-
-                newStringWidth = newStringWidth + labelWidth
-            end
 
             block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
         end
