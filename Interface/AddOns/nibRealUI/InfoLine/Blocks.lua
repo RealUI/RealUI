@@ -932,7 +932,13 @@ function InfoLine:CreateBlocks()
                     return .901, .8, .601
                 end,
                 IsValid = function(Rep)
-                    return _G.HasArtifactEquipped()
+                    local activeArtifact = artData:GetActiveArtifactID()
+                    -- After a spec switch, the active artifact could be invalid
+                    if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
+                        -- async timer to prevent stack overflow
+                        _G.C_Timer.After(2, artData.ForceUpdate)
+                    end
+                    return not not activeArtifact
                 end,
                 SetTooltip = function(Art, tooltip)
                     local hasArtifact, artifact = artData:GetArtifactInfo()
@@ -1059,9 +1065,9 @@ function InfoLine:CreateBlocks()
                     UpdateState(block)
                 end
 
-                artData:RegisterCallback("ARTIFACT_ADDED", block.OnEvent, block)
                 artData:RegisterCallback("ARTIFACT_POWER_CHANGED", block.OnEvent, block)
                 artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", block.OnEvent, block)
+                artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", block.OnEvent, block)
                 UpdateProgress(block)
             end,
             OnClick = function(block, ...)
