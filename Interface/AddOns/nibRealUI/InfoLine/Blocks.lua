@@ -987,21 +987,17 @@ function InfoLine:CreateBlocks()
             watch.main:Show()
 
             local nextState = watchStates[dbc.progressState]:GetNext()
-            curValue, maxValue = watchStates[nextState]:GetStats()
-            InfoLine:debug("progress:1", nextState, curValue, maxValue)
-            watch[1]:SetStatusBarColor(watchStates[nextState]:GetColor())
-            watch[1]:SetMinMaxValues(0, maxValue)
-            watch[1]:SetValue(curValue)
-            watch[1]:Show()
+            for i = 1, 2 do
+                if nextState ~= dbc.progressState then
+                    curValue, maxValue = watchStates[nextState]:GetStats()
+                    InfoLine:debug("progress:"..i, nextState, curValue, maxValue)
 
-            nextState = watchStates[nextState]:GetNext()
-            curValue, maxValue = watchStates[nextState]:GetStats()
-            InfoLine:debug("progress:2", nextState, curValue, maxValue)
-            if nextState ~= dbc.progressState then
-                watch[2]:SetStatusBarColor(watchStates[nextState]:GetColor())
-                watch[2]:SetMinMaxValues(0, maxValue)
-                watch[2]:SetValue(curValue)
-                watch[2]:Show()
+                    watch[i]:SetStatusBarColor(watchStates[nextState]:GetColor())
+                    watch[i]:SetMinMaxValues(0, maxValue)
+                    watch[i]:SetValue(curValue)
+                    watch[i]:Show()
+                end
+                nextState = watchStates[nextState]:GetNext()
             end
         end
 
@@ -1047,11 +1043,11 @@ function InfoLine:CreateBlocks()
                 watchStates[dbc.progressState]:SetTooltip(tooltip)
 
                 local nextState = watchStates[dbc.progressState]:GetNext()
-                watchStates[nextState]:SetTooltip(tooltip)
-
-                nextState = watchStates[nextState]:GetNext()
-                if nextState ~= dbc.progressState then
-                    watchStates[nextState]:SetTooltip(tooltip)
+                for i = 1, 2 do
+                    if nextState ~= dbc.progressState then
+                        watchStates[nextState]:SetTooltip(tooltip)
+                    end
+                    nextState = watchStates[nextState]:GetNext()
                 end
 
                 tooltip:SmartAnchorTo(block)
