@@ -816,10 +816,21 @@ function InfoLine:CreateBlocks()
     end
 
     do -- Progress Watch
-        local watchStates = {
+        local watchStates
+        watchStates = {
             { -- xp
                 GetNext = function(XP)
-                    return 2, "rep"
+                    if watchStates[2]:IsValid() then
+                        return 2, "rep"
+                    elseif watchStates[3]:IsValid() then
+                        return 3, "artifact"
+                    elseif watchStates[4]:IsValid() then
+                        return 4, "honor"
+                    elseif watchStates[1]:IsValid() then
+                        return 1, "xp"
+                    else
+                        return nil
+                    end
                 end,
                 GetStats = function(XP)
                     return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion() or 0
@@ -830,6 +841,9 @@ function InfoLine:CreateBlocks()
                     else
                         return 0.58, 0.0, 0.5
                     end
+                end,
+                IsValid = function(XP)
+                    return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL_TABLE[_G.GetExpansionLevel()]
                 end,
                 SetTooltip = function(XP, tooltip)
                     local curXP, maxXP, restXP = XP:GetStats()
@@ -854,10 +868,16 @@ function InfoLine:CreateBlocks()
             { -- rep
                 hint = L["Progress_OpenRep"],
                 GetNext = function(Rep)
-                    if _G.HasArtifactEquipped() then
+                    if watchStates[3]:IsValid() then
                         return 3, "artifact"
-                    else
+                    elseif watchStates[4]:IsValid() then
+                        return 4, "honor"
+                    elseif watchStates[1]:IsValid() then
                         return 1, "xp"
+                    elseif watchStates[2]:IsValid() then
+                        return 2, "rep"
+                    else
+                        return nil
                     end
                 end,
                 GetStats = function(Rep)
@@ -868,6 +888,9 @@ function InfoLine:CreateBlocks()
                     local _, reaction = _G.GetWatchedFactionInfo()
                     local color = _G.FACTION_BAR_COLORS[reaction];
                     return color.r, color.g, color.b, reaction
+                end,
+                IsValid = function(Rep)
+                    return not not _G.GetWatchedFactionInfo()
                 end,
                 SetTooltip = function(Rep, tooltip)
                     local minRep, maxRep, name = Rep:GetStats()
@@ -891,7 +914,7 @@ function InfoLine:CreateBlocks()
             { -- artifact
                 hint = L["Progress_OpenArt"],
                 GetNext = function(Art)
-                    if _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
+                    if watchStates[4]:IsValid() then
                         return 4, "honor"
                     else
                         return 1, "xp"
@@ -907,6 +930,9 @@ function InfoLine:CreateBlocks()
                 end,
                 GetColor = function(Art)
                     return .901, .8, .601
+                end,
+                IsValid = function(Rep)
+                    return _G.HasArtifactEquipped()
                 end,
                 SetTooltip = function(Art, tooltip)
                     local hasArtifact, artifact = artData:GetArtifactInfo()
@@ -940,7 +966,15 @@ function InfoLine:CreateBlocks()
             { -- honor
                 hint = L["Progress_OpenHonor"],
                 GetNext = function(Honor)
-                    return 2, "rep"
+                    if watchStates[2]:IsValid() then
+                        return 2, "rep"
+                    elseif watchStates[3]:IsValid() then
+                        return 3, "artifact"
+                    elseif watchStates[4]:IsValid() then
+                        return 4, "honor"
+                    else
+                        return nil
+                    end
                 end,
                 GetStats = function(Honor)
                     return _G.UnitHonor("player"), _G.UnitHonorMax("player")
@@ -951,6 +985,9 @@ function InfoLine:CreateBlocks()
                     else
                         return 1.0, 0.24, 0
                     end
+                end,
+                IsValid = function(Rep)
+                    return _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT]
                 end,
                 SetTooltip = function(Honor, tooltip)
                     local minHonor, maxHonor = Honor:GetStats()
@@ -1001,14 +1038,25 @@ function InfoLine:CreateBlocks()
             end
         end
 
+        local function UpdateState(block)
+            local state = watchStates[dbc.progressState]:GetNext()
+            if state then
+                InfoLine:debug("check state", dbc.progressState, state)
+                dbc.progressState = state
+                UpdateProgress(block)
+            else
+                InfoLine:RemoveBlock(block.name, block.dataObj, block)
+            end
+        end
+
         LDB:NewDataObject("progress", {
             name = L["Progress"],
             type = "RealUI",
             text = "XP",
-            OnLoad = function(block)
-                InfoLine:debug("progress: OnLoad", block.side)
-                if dbc.progressState == 1 and _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
-                    dbc.progressState = 2
+            OnEnable = function(block)
+                InfoLine:debug("progress: OnEnable", block.side)
+                if not watchStates[dbc.progressState]:IsValid() then
+                    UpdateState(block)
                 end
 
                 artData:RegisterCallback("ARTIFACT_ADDED", block.OnEvent, block)
@@ -1019,12 +1067,7 @@ function InfoLine:CreateBlocks()
             OnClick = function(block, ...)
                 InfoLine:debug("progress: OnClick", block.side, ...)
                 if _G.IsAltKeyDown() then
-                    repeat
-                        local state, isActive = watchStates[dbc.progressState]:GetNext()
-                        InfoLine:debug("check state", dbc.progressState, state)
-                        dbc.progressState = state
-                    until isActive
-                    UpdateProgress(block)
+                    UpdateState(block)
                 else
                     watchStates[dbc.progressState]:OnClick()
                 end

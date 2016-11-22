@@ -309,27 +309,24 @@ local function CreateNewBlock(name, dataObj)
     end
     block:SetScript("OnUpdate", block.OnUpdate)
 
-    if dataObj.OnLoad then
-        dataObj.OnLoad(block)
-    end
-
     InfoLine:debug("SetSize", width, barHeight)
     block:SetSize(width, barHeight)
     block:SetClampedToScreen(true)
     return block
 end
 
-function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
-    self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
-    local blockInfo = self:GetBlockInfo(name, dataObj)
-    if blockInfo and blockInfo.enabled then
-        if blocksByData[dataObj] then
-            return
-        end
+function InfoLine:AddBlock(name, dataObj, blockInfo)
+    local block = blocksByData[dataObj]
+    if not block then
+        block = CreateNewBlock(name, dataObj)
+    end
 
-        local block = CreateNewBlock(name, dataObj)
-        block.side = blockInfo.side
+    block.side = blockInfo.side
+    if dataObj.OnEnable then
+        dataObj.OnEnable(block)
+    end
 
+    if blockInfo.side then
         local dock = self.frame[blockInfo.side]
         self:debug("AddChatFrame", blockInfo.side, blockInfo.index)
         if blockInfo.index == 1 then
@@ -337,6 +334,27 @@ function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate
         else
             dock:AddChatFrame(block, blockInfo.index)
         end
+    end
+end
+
+function InfoLine:RemoveBlock(name, dataObj, blockInfo)
+    local block = blocksByData[dataObj]
+    if blockInfo.side then
+        local dock = InfoLine.frame[self.side]
+        dock:RemoveChatFrame(self)
+    end
+
+    if dataObj.OnDisable then
+        dataObj.OnDisable(block)
+    end
+    block:Hide()
+end
+
+function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
+    self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
+    local blockInfo = self:GetBlockInfo(name, dataObj)
+    if blockInfo and blockInfo.enabled then
+        self:AddBlock(name, dataObj, blockInfo)
     end
 end
 function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)

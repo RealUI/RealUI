@@ -172,37 +172,41 @@ local core do
         }
         for name, dataObj in InfoLine.LDB:DataObjectIterator() do
             if dataObj.type == "RealUI" then
-                local block = db.blocks.realui[name]
+                local blockInfo = db.blocks.realui[name]
                 -- Create base options for RealUI
                 realui.args[name] = {
                     name = dataObj.name,
                     desc = L["General_EnabledDesc"]:format(dataObj.name),
                     type = "toggle",
-                    get = function() return block.enabled end,
+                    get = function() return blockInfo.enabled end,
                     set = function(data, value)
-                        block.enabled = value
-                        InfoLine:RemoveBlock(block)
+                        blockInfo.enabled = value
+                        if value then
+                            InfoLine:AddBlock(name, dataObj, blockInfo)
+                        else
+                            InfoLine:RemoveBlock(name, dataObj, blockInfo)
+                        end
                     end,
-                    order = block.side == "left" and block.index or block.index + 50,
+                    order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
                 }
                 infoLine.args.realui = realui
             elseif dataObj.type == "data source" then
-                local block = db.blocks.others[name]
+                local blockInfo = db.blocks.others[name]
                 -- Create base options for others
                 others.args[name] = {
                     name = name,
                     desc = L["General_EnabledDesc"]:format(name),
                     type = "toggle",
-                    get = function() return block.enabled end,
+                    get = function() return blockInfo.enabled end,
                     set = function(data, value)
-                        block.enabled = value
+                        blockInfo.enabled = value
                         if value then
-                            InfoLine:AddBlock(name, dataObj, block)
+                            InfoLine:AddBlock(name, dataObj, blockInfo)
                         else
-                            InfoLine:RemoveBlock(name, block)
+                            InfoLine:RemoveBlock(name, dataObj, blockInfo)
                         end
                     end,
-                    order = block.side == "left" and block.index or block.index + 50,
+                    order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
                 }
                 infoLine.args.others = others
             end
