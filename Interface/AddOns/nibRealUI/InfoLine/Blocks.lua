@@ -17,6 +17,7 @@ function qTip:Acquire(...)
     return tooltip
 end
 
+local artData = _G.LibStub("LibArtifactData-1.0", true)
 local LIF = _G.LibStub("LibIconFonts-1.0")
 local fa = LIF:GetIconFont("FontAwesome")
 fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
@@ -242,7 +243,9 @@ end
 --]]
 
 function InfoLine:CreateBlocks()
+    local dbc = InfoLine.db.char
     local labelHeight = InfoLine.barHeight * .6
+
     --[[ Static Blocks ]]--
     do  -- Start
         local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
@@ -812,13 +815,280 @@ function InfoLine:CreateBlocks()
         })
     end
 
-    -- Bag space
+    do -- Progress Watch
+        local watchStates = {
+            { -- xp
+                GetNext = function(XP)
+                    return 2, "rep"
+                end,
+                GetStats = function(XP)
+                    return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion() or 0
+                end,
+                GetColor = function(XP)
+                    if _G.GetRestState() == 1 then
+                        return 0.0, 0.39, 0.88
+                    else
+                        return 0.58, 0.0, 0.5
+                    end
+                end,
+                SetTooltip = function(XP, tooltip)
+                    local curXP, maxXP, restXP = XP:GetStats()
+                    if _G.IsXPUserDisabled() then
+                        local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
+                        tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                        tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
+                    else
+                        local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                        local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
+                        tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                        tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                        if restXP then
+                            lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
+                            tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
+                        end
+                    end
+
+                    tooltip:AddLine(" ")
+                end,
+                OnClick = function(XP)
+                end
+            },
+            { -- rep
+                hint = L["Progress_OpenRep"],
+                GetNext = function(Rep)
+                    if _G.HasArtifactEquipped() then
+                        return 3, "artifact"
+                    else
+                        return 1, "xp"
+                    end
+                end,
+                GetStats = function(Rep)
+                    local name, _, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
+                    return curRep - minRep, maxRep - minRep, name
+                end,
+                GetColor = function(Rep)
+                    local _, reaction = _G.GetWatchedFactionInfo()
+                    local color = _G.FACTION_BAR_COLORS[reaction];
+                    return color.r, color.g, color.b, reaction
+                end,
+                SetTooltip = function(Rep, tooltip)
+                    local minRep, maxRep, name = Rep:GetStats()
+                    local r, g, b, reaction = Rep:GetColor()
+
+                    local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
+                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                    tooltip:SetCellTextColor(lineNum, 2, r, g, b)
+
+                    local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minRep), RealUI:ReadableNumber(maxRep), (minRep/maxRep)*100)
+                    lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
+                    tooltip:SetCellTextColor(lineNum, 1, r, g, b)
+                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+
+                    tooltip:AddLine(" ")
+                end,
+                OnClick = function(Rep)
+                    _G.ToggleCharacter("ReputationFrame")
+                end
+            },
+            { -- artifact
+                hint = L["Progress_OpenArt"],
+                GetNext = function(Art)
+                    if _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
+                        return 4, "honor"
+                    else
+                        return 1, "xp"
+                    end
+                end,
+                GetStats = function(Art)
+                    local hasArtifact, _, power, maxPower = artData:GetArtifactPower()
+                    if hasArtifact then
+                        return power, maxPower
+                    else
+                        return 0, 100
+                    end
+                end,
+                GetColor = function(Art)
+                    return .901, .8, .601
+                end,
+                SetTooltip = function(Art, tooltip)
+                    local hasArtifact, artifact = artData:GetArtifactInfo()
+
+                    if hasArtifact then
+                        local maxWidth = 200
+                        local lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2)
+                        tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
+
+                        local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
+                        lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                        tooltip:SetCellTextColor(lineNum, colNum, 0.9, 0.9, 0.9)
+
+                        if artifact.numRanksPurchasable > 0 then
+                            artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+                            lineNum, colNum = tooltip:AddLine()
+                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                            tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
+                        end
+                    else
+                        tooltip:AddLine(_G.SPELL_FAILED_NO_ARTIFACT_EQUIPPED)
+                    end
+                    tooltip:AddLine(" ")
+                end,
+                OnClick = function(Art)
+                    _G.SocketInventoryItem(16)
+                end
+            },
+            { -- honor
+                hint = L["Progress_OpenHonor"],
+                GetNext = function(Honor)
+                    return 2, "rep"
+                end,
+                GetStats = function(Honor)
+                    return _G.UnitHonor("player"), _G.UnitHonorMax("player")
+                end,
+                GetColor = function(Honor)
+                    if _G.GetHonorRestState() == 1 then
+                        return 1.0, 0.71, 0
+                    else
+                        return 1.0, 0.24, 0
+                    end
+                end,
+                SetTooltip = function(Honor, tooltip)
+                    local minHonor, maxHonor = Honor:GetStats()
+
+                    local honorStatus
+                    if _G.CanPrestige() then
+                        honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
+                    else
+                        honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                    end
+
+                    local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, honorStatus)
+                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+
+                    tooltip:AddLine(" ")
+                end,
+                OnClick = function(Honor)
+                    _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+                end
+            },
+        }
+
+        local function UpdateProgress(block)
+            local curValue, maxValue = watchStates[dbc.progressState]:GetStats()
+            block.dataObj.text = round(curValue / maxValue, 3) * 100 .. "%"
+
+            local watch = InfoLine.frame.watch
+            InfoLine:debug("progress:main", dbc.progressState, curValue, maxValue)
+            local r, g, b = watchStates[dbc.progressState]:GetColor()
+            watch.main:SetStatusBarColor(r, g, b, 0.5)
+            watch.main:SetMinMaxValues(0, maxValue)
+            watch.main:SetValue(curValue)
+            watch.main:Show()
+
+            local nextState = watchStates[dbc.progressState]:GetNext()
+            curValue, maxValue = watchStates[nextState]:GetStats()
+            InfoLine:debug("progress:1", nextState, curValue, maxValue)
+            watch[1]:SetStatusBarColor(watchStates[nextState]:GetColor())
+            watch[1]:SetMinMaxValues(0, maxValue)
+            watch[1]:SetValue(curValue)
+            watch[1]:Show()
+
+            nextState = watchStates[nextState]:GetNext()
+            curValue, maxValue = watchStates[nextState]:GetStats()
+            InfoLine:debug("progress:2", nextState, curValue, maxValue)
+            if nextState ~= dbc.progressState then
+                watch[2]:SetStatusBarColor(watchStates[nextState]:GetColor())
+                watch[2]:SetMinMaxValues(0, maxValue)
+                watch[2]:SetValue(curValue)
+                watch[2]:Show()
+            end
+        end
+
+        LDB:NewDataObject("progress", {
+            name = L["Progress"],
+            type = "RealUI",
+            text = "XP",
+            OnLoad = function(block)
+                InfoLine:debug("progress: OnLoad", block.side)
+                if dbc.progressState == 1 and _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
+                    dbc.progressState = 2
+                end
+
+                artData:RegisterCallback("ARTIFACT_ADDED", block.OnEvent, block)
+                artData:RegisterCallback("ARTIFACT_POWER_CHANGED", block.OnEvent, block)
+                artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", block.OnEvent, block)
+                UpdateProgress(block)
+            end,
+            OnClick = function(block, ...)
+                InfoLine:debug("progress: OnClick", block.side, ...)
+                if _G.IsAltKeyDown() then
+                    repeat
+                        local state, isActive = watchStates[dbc.progressState]:GetNext()
+                        InfoLine:debug("check state", dbc.progressState, state)
+                        dbc.progressState = state
+                    until isActive
+                    UpdateProgress(block)
+                else
+                    watchStates[dbc.progressState]:OnClick()
+                end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("progress: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
+                block.tooltip = tooltip
+                local lineNum, colNum
+
+                lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetCell(lineNum, colNum, L["Progress"], nil, nil, 2)
+
+                watchStates[dbc.progressState]:SetTooltip(tooltip)
+
+                local nextState = watchStates[dbc.progressState]:GetNext()
+                watchStates[nextState]:SetTooltip(tooltip)
+
+                nextState = watchStates[nextState]:GetNext()
+                if nextState ~= dbc.progressState then
+                    watchStates[nextState]:SetTooltip(tooltip)
+                end
+
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, ...)
+                InfoLine:debug("progress: OnEvent", block.side, ...)
+                UpdateProgress(block)
+            end,
+            events = {
+                "PLAYER_LEVEL_UP",
+                "UPDATE_EXHAUSTION",
+
+                "PLAYER_XP_UPDATE",
+                "PLAYER_UPDATE_RESTING",
+                "DISABLE_XP_GAIN",
+                "ENABLE_XP_GAIN",
+
+                "UPDATE_FACTION",
+
+                "HONOR_XP_UPDATE",
+                "HONOR_LEVEL_UPDATE",
+            },
+        })
+    end
 
     -- Currency
 
 
     --[[ Right ]]--
     -- Mail
+
+    -- Bag space
 
     -- Layout
 

@@ -298,6 +298,10 @@ local function CreateNewBlock(name, dataObj)
     end
     block:SetScript("OnUpdate", block.OnUpdate)
 
+    if dataObj.OnLoad then
+        dataObj.OnLoad(block)
+    end
+
     InfoLine:debug("SetSize", width, barHeight)
     block:SetSize(width, barHeight)
     block:SetClampedToScreen(true)
@@ -536,16 +540,6 @@ function InfoLine:CreateBar()
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
 
-    frame.left = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
-    frame.left.side = "left"
-    frame.left.alt = "right"
-    frame.left:OnLoad()
-
-    frame.right = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
-    frame.right.side = "right"
-    frame.right.alt = "left"
-    frame.right:OnLoad()
-
     -- Background
     frame:SetBackdrop({
         bgFile = RealUI.media.textures.plain,
@@ -565,6 +559,45 @@ function InfoLine:CreateBar()
     tex:SetBlendMode("ADD")
     _G.tinsert(_G.REALUI_WINDOW_FRAMES, frame)
     _G.tinsert(_G.REALUI_STRIPE_TEXTURES, tex)
+
+    -- Watch bars
+    local watch = {}
+    watch.main = _G.CreateFrame("StatusBar", nil, frame)
+    watch.main:SetStatusBarTexture(RealUI.media.textures.plain)
+    watch.main:SetAllPoints()
+    watch.main:Hide()
+    for i = 1, 2 do
+        local bar = _G.CreateFrame("StatusBar", nil, frame)
+        bar:SetStatusBarTexture(RealUI.media.textures.plain)
+        bar:SetHeight(1)
+        bar:SetFrameLevel(watch.main:GetFrameLevel() + 1)
+        bar:Hide()
+
+        local bg = bar:CreateTexture(nil, "BACKGROUND")
+        bg:SetColorTexture(0, 0, 0)
+        bg:SetPoint("TOPLEFT", bar, -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", bar, 1, -1)
+
+        watch[i] = bar
+    end
+    watch[1]:SetPoint("BOTTOMLEFT", watch.main, "TOPLEFT", 0, -1)
+    watch[1]:SetPoint("BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, -1)
+
+    watch[2]:SetPoint("BOTTOMLEFT", watch.main, "TOPLEFT", 0, 1)
+    watch[2]:SetPoint("BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, 1)
+
+    frame.watch = watch
+
+    -- Docks
+    frame.left = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
+    frame.left.side = "left"
+    frame.left.alt = "right"
+    frame.left:OnLoad()
+
+    frame.right = _G.Mixin(_G.CreateFrame("Frame", nil, frame), DockMixin)
+    frame.right.side = "right"
+    frame.right.alt = "left"
+    frame.right:OnLoad()
 
     self.frame = frame
 end
@@ -627,16 +660,17 @@ end
 -- Initialization --
 --------------------
 function InfoLine:OnInitialize()
+    local specgear = {}
+    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+        specgear[specIndex] = -1
+    end
     local otherFaction = RealUI:OtherFaction(RealUI.faction)
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
-            xrstate = "x",
-            currencystate = 1,
-            specgear = {
-                primary = -1,
-                secondary = -1,
-            },
+            progressState = 1,
+            currencyState = 1,
+            specgear = specgear,
         },
         global = {
             currency = {
@@ -703,6 +737,11 @@ function InfoLine:OnInitialize()
                     durability = {
                         side = "left",
                         index = 3,
+                        enabled = true
+                    },
+                    progress = {
+                        side = "left",
+                        index = 4,
                         enabled = true
                     },
 
