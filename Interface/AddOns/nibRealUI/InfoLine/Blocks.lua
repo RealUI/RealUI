@@ -833,19 +833,17 @@ function InfoLine:CreateBlocks()
                 end,
                 SetTooltip = function(XP, tooltip)
                     local curXP, maxXP, restXP = XP:GetStats()
+                    local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                    local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
+                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
                     if _G.IsXPUserDisabled() then
-                        local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
+                        lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
                         tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                         tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
-                    else
-                        local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
-                        local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
-                        tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                        tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
-                        if restXP then
-                            lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
-                            tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
-                        end
+                    elseif restXP then
+                        lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
+                        tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
                     end
 
                     tooltip:AddLine(" ")
