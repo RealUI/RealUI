@@ -301,12 +301,6 @@ local function CreateNewBlock(name, dataObj)
     block:SetScript("OnClick", block.OnClick)
     block:SetScript("OnDragStart", block.OnDragStart)
 
-    if dataObj.events then
-        block:SetScript("OnEvent", block.OnEvent)
-        for i = 1, #dataObj.events do
-            block:RegisterEvent(dataObj.events[i])
-        end
-    end
     block:SetScript("OnUpdate", block.OnUpdate)
 
     InfoLine:debug("SetSize", width, barHeight)
@@ -321,12 +315,19 @@ function InfoLine:AddBlock(name, dataObj, blockInfo)
         block = CreateNewBlock(name, dataObj)
     end
 
-    block.side = blockInfo.side
+    if dataObj.events then
+        block:SetScript("OnEvent", block.OnEvent)
+        for i = 1, #dataObj.events do
+            block:RegisterEvent(dataObj.events[i])
+        end
+    end
+
     if dataObj.OnEnable then
         dataObj.OnEnable(block)
     end
 
     if blockInfo.side then
+        block.side = blockInfo.side
         local dock = self.frame[blockInfo.side]
         self:debug("AddChatFrame", blockInfo.side, blockInfo.index)
         if blockInfo.index == 1 then
