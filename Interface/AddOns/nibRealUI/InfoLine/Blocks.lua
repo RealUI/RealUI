@@ -29,6 +29,10 @@ local L = RealUI.L
 
 local MODNAME = "InfoLine"
 local InfoLine = RealUI:GetModule(MODNAME)
+local testCell = _G.UIParent:CreateFontString()
+testCell:SetPoint("CENTER")
+testCell:SetSize(500, 20)
+testCell:Hide()
 
 local TABLE_WIDTH = 500
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
@@ -37,10 +41,6 @@ do
     local ROW_HEIGHT = 10
     local numTables = 0
 
-    local testCell = _G.UIParent:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
-    testCell:SetPoint("CENTER")
-    testCell:SetSize(TABLE_WIDTH, 20)
-    testCell:Hide()
 
     local function UpdateScroll(self)
         InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
@@ -185,6 +185,7 @@ do
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = text:GetStringWidth()
+                testCell:SetFontObject("RealUIFont_Normal")
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
@@ -941,23 +942,27 @@ function InfoLine:CreateBlocks()
                     return not not activeArtifact
                 end,
                 SetTooltip = function(Art, tooltip)
+                    --local maxWidth, minWidth
                     local hasArtifact, artifact = artData:GetArtifactInfo()
 
                     if hasArtifact then
-                        local maxWidth = 200
+                        testCell:SetFontObject("GameTooltipText")
+                        --minWidth = testCell:GetStringWidth() + 200
+                        --maxWidth = minWidth
+
                         local lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2)
+                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
                         tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
                         local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
                         lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
                         tooltip:SetCellTextColor(lineNum, colNum, 0.9, 0.9, 0.9)
 
                         if artifact.numRanksPurchasable > 0 then
                             artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
                             lineNum, colNum = tooltip:AddLine()
-                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
                             tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
                         end
                     else
