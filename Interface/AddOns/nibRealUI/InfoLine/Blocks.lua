@@ -1031,14 +1031,17 @@ function InfoLine:CreateBlocks()
 
             local nextState = watchStates[dbc.progressState]:GetNext()
             for i = 1, 2 do
+                local bar = watch[i]
                 if nextState ~= dbc.progressState then
                     curValue, maxValue = watchStates[nextState]:GetStats()
                     InfoLine:debug("progress:"..i, nextState, curValue, maxValue)
 
-                    watch[i]:SetStatusBarColor(watchStates[nextState]:GetColor())
-                    watch[i]:SetMinMaxValues(0, maxValue)
-                    watch[i]:SetValue(curValue)
-                    watch[i]:Show()
+                    bar:SetStatusBarColor(watchStates[nextState]:GetColor())
+                    bar:SetMinMaxValues(0, maxValue)
+                    bar:SetValue(curValue)
+                    bar:Show()
+                else
+                    bar:Hide()
                 end
                 nextState = watchStates[nextState]:GetNext()
             end
