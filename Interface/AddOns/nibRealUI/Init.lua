@@ -9,7 +9,6 @@ local RealUI = private.RealUI
 
 RealUI.TOC = _G.select(4, _G.GetBuildInfo())
 RealUI.isDev = _G.IsAddOnLoaded("nibRealUI_Dev")
-RealUI.is71 = _G.GetBuildInfo() == "7.1.0"
 
 RealUI.name = _G.UnitName("player")
 RealUI.realm = _G.GetRealmName()
