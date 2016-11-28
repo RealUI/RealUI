@@ -8,7 +8,6 @@ local oUF = _G.oUFembed
 
 -- RealUI --
 local RealUI = private.RealUI
-local L = RealUI.L
 local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
@@ -618,67 +617,9 @@ function UnitFrames:SetHealthColor(unitFrame)
     AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
 end
 
--- Dropdown Menu
-local dropdown = _G.CreateFrame("Frame", "RealUIUnitFramesDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
-
-_G.hooksecurefunc("UnitPopup_OnClick",function(self)
-    local button = self.value
-    if button == "SET_FOCUS" or button == "CLEAR_FOCUS" then
-        if _G.StaticPopup1 then
-            _G.StaticPopup1:Hide()
-        end
-        if db.misc.focusclick then
-            RealUI:Notification("RealUI", true, L["Alert_UseClickToSetFocus"]:format(db.misc.focuskey), nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
-        end
-    elseif button == "PET_DISMISS" then
-        if _G.StaticPopup1 then
-            _G.StaticPopup1:Hide()
-        end
-    end
-end)
-local function menu(self)
-    dropdown:SetParent(self)
-    return _G.Lib_ToggleDropDownMenu(1, nil, dropdown, "cursor", 0, 0)
-end
-local init = function(self)
-    local unit = self:GetParent().unit
-    local menuType, name, id
-
-    if (not unit) then
-        return
-    end
-
-    if (_G.UnitIsUnit(unit, "player")) then
-        menuType = "SELF"
-    elseif (_G.UnitIsUnit(unit, "vehicle")) then
-        menuType = "VEHICLE"
-    elseif (_G.UnitIsUnit(unit, "pet")) then
-        menuType = "PET"
-    elseif (_G.UnitIsPlayer(unit)) then
-        id = _G.UnitInRaid(unit)
-        if(id) then
-            menuType = "RAID_PLAYER"
-            name = _G.GetRaidRosterInfo(id)
-        elseif(_G.UnitInParty(unit)) then
-            menuType = "PARTY"
-        else
-            menuType = "PLAYER"
-        end
-    else
-        menuType = "TARGET"
-        name = _G.RAID_TARGET_ICON
-    end
-
-    if (menuType) then
-        _G.UnitPopup_ShowMenu(self, menuType, unit, name, id)
-    end
-end
-_G.Lib_UIDropDownMenu_Initialize(dropdown, init, "MENU")
-
 -- Init
 local function Shared(self, unit)
     UnitFrames:debug("Shared", self, self.unit, unit)
-    self.menu = menu
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
