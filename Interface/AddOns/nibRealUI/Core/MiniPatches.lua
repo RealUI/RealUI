@@ -188,6 +188,22 @@ RealUI.minipatches = {
             end
         end
     end,
+    [19] = function(ver)
+        debug("r"..ver)
+        -- Clean out unused namespaces
+        _G.nibRealUIDB.namespaces.AuraTracking = nil
+        _G.nibRealUIDB.namespaces.ClassResource_BloodShield = nil
+        _G.nibRealUIDB.namespaces.ClassResource_Vengeance = nil
+        _G.nibRealUIDB.namespaces.ClassResource_EclipseBar = nil
+        _G.nibRealUIDB.namespaces.ClassResource_ResolveBar = nil
+        _G.nibRealUIDB.namespaces.ClassResource_DemonicFury = nil
+        _G.nibRealUIDB.namespaces.ClassResource_Stagger = nil
+        _G.nibRealUIDB.namespaces.Pitch = nil
+
+        -- Transfer to _G.nibRealUIDB.global
+        _G.nibRealUIDB.namespaces.CurrencyTip.global = nil
+        _G.nibRealUIDB.namespaces.InfoLine.global = nil
+    end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
     end,
