@@ -318,6 +318,7 @@ end
     @param i <table> [optional]
     @return i <table>
 ]]
+local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 local infoGather = {}
 do
     local function GatherItemInfo(bagID, slotID, i)
@@ -354,13 +355,13 @@ do
 
                 i.speciesID = tonumber(speciesID) or 0
             else
-                local itemID = strsplit(":", itemString)
+                local itemID, _ = strsplit(":", itemString)
                 i.id = tonumber(itemID) or 0
 
                 i.isQuestItem, i.questID, i.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
                 i.isInSet, i.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
 
-                i.name, i.link, i.rarity, i.level, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID = _G.GetItemInfo(clink)
+                i.name, i.link, i.rarity, _, i.minLevel, i.type, i.subType, i.stackCount, i.equipLoc, texture, i.sellPrice, i.typeID, i.subTypeID = _G.GetItemInfo(clink)
                 if not i.name then
                     i.id, i.type, i.subType, i.equipLoc, texture, i.typeID, i.subTypeID = _G.GetItemInfoInstant(clink)
                     if not infoGather[i.id] then infoGather[i.id] = {} end
@@ -369,6 +370,7 @@ do
                         infoGather[i.id][i.bagID][i.slotID] = i
                     end
                 end
+                i.level = LIU:GetUpgradedItemLevel(i.link)
                 i.texture = i.texture or texture
             end
             cargBags.debug("ItemInfo", i.name, i.id, i.type, i.typeID)
