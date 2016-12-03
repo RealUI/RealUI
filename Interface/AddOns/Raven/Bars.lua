@@ -40,7 +40,7 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	useDefaultDimensions = true, useDefaultFontsAndTextures = true, useDefaultColors = true, strata = "MEDIUM",
 	sor = "A", reverseSort = false, timeSort = true, playerSort = false,
 	configuration = 1, anchor = false, anchorX = 0, anchorY = 0, anchorLastBar = false, anchorRow = false, anchorColumn = true, anchorEmpty = false,
-	growDirection = true, fillBars = false, wrap = 0, wrapDirection = false, snapCenter = false, maxBars = 0,
+	growDirection = true, fillBars = false, wrap = 0, wrapDirection = false, snapCenter = false, maxBars = 0, desaturateReadyIcon = false,
 	pulseStart = false, pulseEnd = false, flashExpiring = false, flashTime = 5, hide = false, fade = false, ghost = false, delayTime = 5,
 	bgNormalAlpha = 1, bgCombatAlpha = 1, mouseAlpha = 1, fadeAlpha = 1, testTimers = 10, testStatic = 0, testLoop = false,
 	soundSpellStart = false, soundSpellEnd = false, soundSpellExpire = false, soundAltStart = "None", soundAltEnd = "None", soundAltExpire = "None",
@@ -55,7 +55,7 @@ MOD.BarGroupTemplate = { -- default bar group settings
 	stripeBarInset = 4, stripeBarOffset = 0, stripeColor = false, stripeAltColor = false, stripeCheckCondition = false, stripeCondition = false,
 	stripeBorderTexture = "None", stripeBorderWidth = 4, stripeBorderOffset = 1, stripeBorderColor = false,
 	showSolo = true, showParty = true, showRaid = true, showCombat = true, showOOC = true, showStealth = true, showFocusTarget = true,
-	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showSpecialization = "",
+	showInstance = true, showNotInstance = true, showArena = true, showBattleground = true, showPetBattle = false, showSpecialization = "",
 	showResting = true, showMounted = true, showVehicle = true, showFriend = true, showEnemy = true, showBlizz = true, showNotBlizz = true,
 	detectBuffs = false, detectDebuffs = false, detectAllBuffs = false, detectAllDebuffs = false, detectDispellable = false, detectInflictable = false,
 	detectNPCDebuffs = false, detectVehicleDebuffs = false, detectBoss = false, includeTotems = false,
@@ -1147,7 +1147,9 @@ local function UpdateBar(bp, vbp, bg, b, icon, timeLeft, duration, count, btype,
 			MOD.Nest_SetFlash(bar, false)
 		end
 		if not faded then -- fading is highest priority
-			if b.startReady or (b.enableReady and b.readyCharges and count and (count >= 1)) then if b.readyAlpha then alpha = alpha * b.readyAlpha end
+			if b.startReady or (b.enableReady and b.readyCharges and count and (count >= 1)) then
+				if b.readyAlpha then alpha = alpha * b.readyAlpha end -- adjust alpha for ready bars
+				if b.desaturateReadyIcon then bat.desaturate = true end -- optionally desaturate icons for ready bars
 			elseif b.normalAlpha then alpha = alpha * b.normalAlpha end
 		end
 		MOD.Nest_SetAlpha(bar, alpha)
@@ -1406,7 +1408,7 @@ end
 -- Each condition (e.g., "in combat") is checked and if true then that condition must be enabled for the bar group
 local function CheckShow(bp)
 	local pst, stat = PartyInfo(), MOD.status
-	if InCinematic() or C_PetBattles.IsInBattle() or
+	if InCinematic() or (C_PetBattles.IsInBattle() and not bp.showPetBattle) or
 	(pst == "solo" and not bp.showSolo) or (pst == "party" and not bp.showParty) or (pst == "raid" and not bp.showRaid) or
 	(stat.inCombat and not bp.showCombat) or (not stat.inCombat and not bp.showOOC) or
 	(not MOD.db.profile.hideBlizz and not bp.showBlizz) or (MOD.db.profile.hideBlizz and not bp.showNotBlizz) or

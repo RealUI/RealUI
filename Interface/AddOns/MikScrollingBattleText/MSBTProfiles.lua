@@ -1148,6 +1148,11 @@ local masterProfile = {
    message		= "+%a %e (%t)",
    scrollArea	= "Static",
   },
+  NOTIFICATION_CURRENCY = {
+   colorB		= 0,
+   message		= "+%a %e (%t)",
+   scrollArea	= "Static",
+  },
  }, -- End events
 
  

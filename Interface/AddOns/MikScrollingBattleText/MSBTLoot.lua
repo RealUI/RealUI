@@ -75,6 +75,39 @@ end
 
 
 -- ****************************************************************************
+-- Handles looted currency.
+-- ****************************************************************************
+local function HandleCurrency(parserEvent)
+ -- Get information about the looted currency.
+ local itemLink = parserEvent.itemLink
+ local itemName, numAmount, itemTexture, _, _, totalMax, _, itemQuality = GetCurrencyInfo(itemLink)
+
+ -- Determine whether to show the event and ignore it if necessary.
+ local currentProfile = MSBTProfiles.currentProfile
+ local showEvent = true
+ if (currentProfile.itemExclusions[itemName]) then showEvent = false end
+ if (currentProfile.itemsAllowed[itemName]) then showEvent = true end
+ if (not showEvent) then return end
+
+ -- Format the item name according to its quality.
+ local qualityColor = ITEM_QUALITY_COLORS[itemQuality]
+ if (qualityPatterns[itemQuality]) then itemName = string_format (qualityPatterns[itemQuality], itemName) end
+
+ local numLooted = parserEvent.amount or 1
+
+ -- Format the event and display it.
+ local eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_CURRENCY
+ if (eventSettings and not eventSettings.disabled) then
+  local message = eventSettings.message
+   message = string_gsub (message, "%%e", itemName)
+   message = string_gsub (message, "%%a", numLooted)
+   message = string_gsub (message, "%%t", numAmount)
+   DisplayEvent(eventSettings, message, itemTexture)
+  end
+end
+
+
+-- ****************************************************************************
 -- Handles looted items.
 -- ****************************************************************************
 local function HandleItems(parserEvent)
@@ -124,7 +157,7 @@ local function ParserEventsHandler(parserEvent)
  if (parserEvent.recipientUnit ~= "player" or parserEvent.eventType ~= "loot") then return end
 
  -- Call the correct handler for the loot type.
- if (parserEvent.isMoney) then HandleMoney(parserEvent) elseif (parserEvent.itemLink) then HandleItems(parserEvent) end
+ if (parserEvent.isMoney) then HandleMoney(parserEvent) elseif (parserEvent.isCurrency) then HandleCurrency(parserEvent) elseif (parserEvent.itemLink) then HandleItems(parserEvent) end
 end
 
 

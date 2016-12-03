@@ -1,3 +1,9 @@
+### 7.1.0 ###
+
+**General**
+
+  - ToC to 70100.
+
 ### 7.0.1 ###
 
 **General**
@@ -274,3 +280,4 @@
   - The /bf and /buttonfacade chat commands now open the options window.
   - Updated locales.
   - Code clean-up.
+

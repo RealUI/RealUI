@@ -815,10 +815,7 @@ function addon:TalentGroupChanged()
     self:FireMessage("BINDINGS_CHANGED")
 end
 
--- Ensure we trigger a bindings change the first time the player enters the
--- world.
 function addon:PlayerEnteringWorld()
-    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     self:FireMessage("BINDINGS_CHANGED")
 end
 

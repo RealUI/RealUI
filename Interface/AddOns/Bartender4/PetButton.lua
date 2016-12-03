@@ -18,7 +18,7 @@ local _G = _G
 local format, select, setmetatable = string.format, select, setmetatable
 
 -- GLOBALS: InCombatLockdown, CreateFrame, SetDesaturation, IsModifiedClick, GetBindingKey, GetBindingText, SetBinding
--- GLOBALS: AutoCastShine_AutoCastStop, AutoCastShine_AutoCastStart, CooldownFrame_SetTimer
+-- GLOBALS: AutoCastShine_AutoCastStop, AutoCastShine_AutoCastStart, CooldownFrame_Set
 -- GLOBALS: PickupPetAction, , GetPetActionInfo, GetPetActionsUsable, GetPetActionCooldown
 
 local function onEnter(self, ...)
@@ -230,11 +230,7 @@ end
 
 function PetButtonPrototype:UpdateCooldown()
 	local start, duration, enable = GetPetActionCooldown(self.id)
-	if not CooldownFrame_SetTimer and CooldownFrame_Set then
-		CooldownFrame_Set(self.cooldown, start, duration, enable)
-	else
-		CooldownFrame_SetTimer(self.cooldown, start, duration, enable)
-	end
+	CooldownFrame_Set(self.cooldown, start, duration, enable)
 end
 
 function PetButtonPrototype:GetHotkey()

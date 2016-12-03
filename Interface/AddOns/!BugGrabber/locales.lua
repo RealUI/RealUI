@@ -79,13 +79,15 @@ L["USAGE"] = "|cffffff00用法：/buggrabber <1-%d>。|r"
 	elseif locale == "ruRU" then
 L["ADDON_CALL_PROTECTED"] = "[%s] Аддон '%s' пытался вызвать защищенную функцию '%s'."
 L["ADDON_CALL_PROTECTED_MATCH"] = "^%[(.*)%] (Аддон '.*' пытался вызвать защищенную функцию '.*'.)$"
-L["ADDON_DISABLED"] = "|cffffff7fBugGrabber|r и |cffffff7f%s|r не могут работать вместе. Поэтому |cffffff7f%s|r был отключен. Если хотите, можете выйти из игрового мира,отключить |cffffff7fBugGrabber|r и включить |cffffff7f%s|r." -- Needs review
-L["BUGGRABBER_STOPPED"] = "|cffffff7fBugGrabber|r прекратил захватывать ошибки, так как захватил более %d ошибок  в секунду. Захват возобновится через %d секунд." -- Needs review
-L["NO_DISPLAY_1"] = "|cffff4411Кажется, !BugGrabber запущен без поддержки аддона для отображения информации. Хотя !BugGrabber предоставляет слеш-команды для доступа к внутриигровым ошибкам, визуализирующий аддон может показать их в более удобной форме.|r" -- Needs review
-L["NO_DISPLAY_2"] = "|cffff4411Стандартный аддон для отображения информации от !BugGrabber называется |r|cff44ff44BugSack|r|cffff4411, и может быть найден там же, где вы нашли !BugGrabber.|r" -- Needs review
-L["NO_DISPLAY_STOP"] = "|cffff4411Если вам не нравятся напоминания об этом, наберите |cff44ff44/stopnag|r|cffff4411.|r" -- Needs review
-L["STOP_NAG"] = "|cffff4411!BugGrabber больше не будет напоминать об отсутствующем |r|cff44ff44BugSack|r|cffff4411 до следующего патча.|r" -- Needs review
-L["USAGE"] = "Использование: /buggrabber <1-%d>." -- Needs review
+L["ADDON_DISABLED"] = "|cffffff00!BugGrabber и %s не могут работать вместе. Поэтому %s был отключен. Если хотите, то можете выйти из игрового мира, и отключить !BugGrabber и включить %s.|r"
+L["BUGGRABBER_STOPPED"] = "|cffffff00Слишком много ошибок в вашем UI(пользовательском интерфейсе). В результате чего может снизиться играбельность. Отключите или обновите аддоны вызывающие сбои, если не хотите видеть данное сообщение снова.|r"
+L["ERROR_DETECTED"] = "%s |cffffff00перехвачен, кликните по ссылке для получения дополнительной информации.|r"
+L["ERROR_UNABLE"] = "|cffffff00!BugGrabber не может получить ошибки от других игроков самостоятельно. Пожалуйста, установите BugSack или аналогичные аддоны для отображения, которые могли бы дать вам эту функциональность.|r"
+L["NO_DISPLAY_1"] = "|cffffff00Кажется, !BugGrabber запущен без поддержки аддона для отображения информации. Хотя !BugGrabber предоставляет слеш-команды для доступа к внутриигровым ошибкам, визуализирующий аддон может показать их в более удобной форме.|r"
+L["NO_DISPLAY_2"] = "|cffffff00Стандартный аддон для вывода информации называется BugSack, и может быть найден там же, где вы нашли !BugGrabber.|r"
+L["NO_DISPLAY_STOP"] = "|cffffff00Если вам не нравятся напоминания об этом, наберите /stopnag.|r"
+L["STOP_NAG"] = "|cffffff00!BugGrabber больше не будет напоминать об отсутствующем аддоне выводящем информацию до следующего патча.|r"
+L["USAGE"] = "|cffffff00Использование: /buggrabber <1-%d>.|r"
 
 	elseif locale == "frFR" then
 L["ADDON_CALL_PROTECTED"] = "[%s] L'AddOn '%s' a tenté d'appeler la fonction protégée '%s'."

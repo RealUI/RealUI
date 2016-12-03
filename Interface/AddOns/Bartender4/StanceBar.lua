@@ -14,7 +14,7 @@ local _G = _G
 local format, setmetatable, min, select = string.format, setmetatable, min, select
 
 -- GLOBALS: CreateFrame, InCombatLockdown, ClearOverrideBindings, GetBindingKey, GetBindingText, SetOverrideBindingClick, SetBinding
--- GLOBALS: GetNumShapeshiftForms, GetShapeshiftFormInfo, GetShapeshiftFormCooldown, CooldownFrame_SetTimer
+-- GLOBALS: GetNumShapeshiftForms, GetShapeshiftFormInfo, GetShapeshiftFormCooldown, CooldownFrame_Set
 
 -- create prototype information
 local StanceBar = setmetatable({}, {__index = ButtonBar})
@@ -100,11 +100,7 @@ function StanceButtonPrototype:Update()
 		self.cooldown:Hide()
 	end
 	local start, duration, enable = GetShapeshiftFormCooldown(id)
-	if not CooldownFrame_SetTimer and CooldownFrame_Set then
-		CooldownFrame_Set(self.cooldown, start, duration, enable)
-	else
-		CooldownFrame_SetTimer(self.cooldown, start, duration, enable)
-	end
+	CooldownFrame_Set(self.cooldown, start, duration, enable)
 
 	if isActive then
 		self:SetChecked(true)

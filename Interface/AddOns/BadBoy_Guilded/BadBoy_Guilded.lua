@@ -224,14 +224,15 @@ local prevLineId, result, triggers = 0, nil, {
 	"набира.*членове.*нуждаем", --* набира нови членове от всички класове и специализации за прогрес на BRF Mythic,най-вече се нуждаем от Танк (Warrior, Paladin, Monk).
 }
 
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,_,_,_,_,chanId,_,_,_,lineId)
+local BadBoyIsFriendly = BadBoyIsFriendly
+ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", function(_,event,msg,player,_,_,_,flag,chanId,_,_,_,lineId,guid)
 	if lineId == prevLineId then
 		return result
 	else
 		prevLineId, result = lineId, nil
 		if chanId == 0 or chanId == 25 then return end --Don't scan custom channels or GuildRecruitment channel
 		local trimmedPlayer = Ambiguate(player, "none")
-		if not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) then return end --Don't filter ourself/friends
+		if BadBoyIsFriendly(trimmedPlayer, flag, lineId, guid) then return end
 		local rawMsg = msg
 		msg = lower(msg) --Lower all text, remove capitals
 		for i = 1, #triggers do
@@ -378,18 +379,17 @@ local whispers = {
 }
 
 local tbl, whispPrevLineId, whispResult = {}, 0, nil
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_,event,msg,player,_,_,_,flag,_,_,_,_,lineId)
+ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_,event,msg,player,_,_,_,flag,_,_,_,_,lineId,guid)
 	if lineId == whispPrevLineId then
 		return whispResult
 	else
 		whispPrevLineId, whispResult = lineId, nil
 		local trimmedPlayer = Ambiguate(player, "none")
-		if not BADBOY_GWHISPER or tbl[trimmedPlayer] or not CanComplainChat(lineId) or UnitIsInMyGuild(trimmedPlayer) or UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer) or flag == "GM" or flag == "DEV" then return end
+		if not BADBOY_GWHISPER or tbl[trimmedPlayer] or BadBoyIsFriendly(trimmedPlayer, flag, lineId, guid) then return end
 		local rawMsg = msg
 		msg = lower(msg) --Lower all text, remove capitals
 		for i = 1, #whispers do
 			if strfind(msg, whispers[i]) then --Found a match
-				--print(whispers[i])
 				if BadBoyLog then BadBoyLog("Guilded", event, trimmedPlayer, rawMsg) end
 				whispResult = true
 				return true --found a trigger, filter

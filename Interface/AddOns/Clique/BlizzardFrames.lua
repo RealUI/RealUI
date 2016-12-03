@@ -144,9 +144,16 @@ local function enable(frame)
     end
 
     -- don't try to register anything that isn't "buttonish"
-    if frame and frame.RegisterForClicks then
-        ClickCastFrames[frame] = true
+    if frame and not frame.RegisterForClicks then
+        return
     end
+
+    -- skip the nameplates, they're TEHBROKEN
+    if frame and frame.GetName and frame:GetName():match("^NamePlate") then
+        return
+    end
+
+    ClickCastFrames[frame] = true
 end
 
 function addon:Enable_BlizzCompactUnitFrames()

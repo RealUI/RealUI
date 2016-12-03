@@ -319,8 +319,8 @@ Skada:AddLoadableModule("Enemies", nil, function(Skada, L)
 	function done:OnEnable()
 		takenplayers.metadata 	= {showspots = true}
 		doneplayers.metadata 	= {showspots = true}
-		done.metadata 			= {click1 = doneplayers}
-		taken.metadata 			= {click1 = takenplayers}
+		done.metadata 			= {click1 = doneplayers, icon = "Interface\\Icons\\Inv_misc_monsterclaw_01"}
+		taken.metadata 			= {click1 = takenplayers, icon = "Interface\\Icons\\Inv_shield_08"}
 
 		Skada:RegisterForCL(SpellDamageTaken, 'SPELL_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamageTaken, 'SPELL_PERIODIC_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
@@ -352,8 +352,8 @@ Skada:AddLoadableModule("Enemies", nil, function(Skada, L)
 	function hdone:OnEnable()
 		hdonespells.metadata 	= {showspots = true, tooltip = spell_tooltip}
 		htakenspells.metadata 	= {showspots = true, tooltip = spell_tooltip}
-		hdone.metadata		= {click1 = hdonespells}
-		htaken.metadata		= {click1 = htakenspells}
+		hdone.metadata		= {click1 = hdonespells, icon = "Interface\\Icons\\Inv_misc_bandage_12"}
+		htaken.metadata		= {click1 = htakenspells, icon = "Interface\\Icons\\Spell_misc_emotionhappy"}
 
 		Skada:RegisterForCL(Healing, 'SPELL_HEAL', {dst_is_not_interesting = true})
 		Skada:RegisterForCL(Healing, 'SPELL_PERIODIC_HEAL', {dst_is_not_interesting = true})

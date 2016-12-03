@@ -141,6 +141,7 @@ obj["enablePetCooldowns"]		= { label="Pet Cooldowns", tooltip="Display notificat
 obj["enableItemCooldowns"]		= { label="Item Cooldowns", tooltip="Display notifications when item cooldowns complete."}
 obj["lootedItems"]				= { label="Looted Items", tooltip="Display notifications when items are looted."}
 obj["moneyGains"]				= { label="Money Gains", tooltip="Enable money you gain."}
+obj["currencyGains"]			= { label="Currency Gains", tooltip="Display notifications for gained currency."}
 obj["alwaysShowQuestItems"]		= { label="Always show quest items", tooltip="Always show quest items regardless of quality selections."}
 obj["enableIcons"]				= { label="Enable Skill Icons", tooltip="Displays icons for events that have a skill when possible."}
 obj["exclusiveSkills"]			= { label="Exclusive Skill Names", tooltip="Only show skill names when an icon is not available."}

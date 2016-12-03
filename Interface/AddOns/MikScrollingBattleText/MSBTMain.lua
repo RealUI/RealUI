@@ -522,7 +522,7 @@ local function HandleComboPoints(PowerAmount, powerType)
  if (PowerAmount == maxCP) then eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_CP_FULL end
  -- Don't do anything if the event is disabled.
  if (eventSettings.disabled) then return end 
-  -- Don't do anything if 0 CP
+ -- Don't do anything if 0 CP
  if (PowerAmount == 0) then return end
  -- Display the event.
  DisplayEvent(eventSettings, FormatEvent(eventSettings.message, PowerAmount))
@@ -553,31 +553,13 @@ local function HandleHolyPower(numHolyPower, powerType)
  local eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_HOLY_POWER_CHANGE
  local maxHolyPower = UnitPowerMax("player", powerType)
  if (numHolyPower == maxHolyPower) then eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_HOLY_POWER_FULL end
-
  -- Don't do anything if the event is disabled.
  if (eventSettings.disabled) then return end
-
+ -- Don't do anything if 0 Holy Power
+ if (numHolyPower == 0) then return end
  -- Display the event.
  DisplayEvent(eventSettings, FormatEvent(eventSettings.message, numHolyPower))
 end
-
-
--- ****************************************************************************
--- Handle shadow orb changes.
--- ****************************************************************************
-local function HandleShadowOrbs(numOrbs, powerType)
- -- Get the correct event settings.
- local eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_SHADOW_ORBS_CHANGE
- local maxOrbs = UnitPowerMax("player", powerType)
- if (numOrbs == maxOrbs) then eventSettings = MSBTProfiles.currentProfile.events.NOTIFICATION_SHADOW_ORBS_FULL end
-
- -- Don't do anything if the event is disabled.
- if (eventSettings.disabled) then return end
-
- -- Display the event.
- DisplayEvent(eventSettings, FormatEvent(eventSettings.message, numOrbs))
-end
-
 
 -- ****************************************************************************
 -- Handle monster emotes.
