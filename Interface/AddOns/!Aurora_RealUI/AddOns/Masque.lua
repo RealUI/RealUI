@@ -39,9 +39,9 @@ mods["Masque"] = function(F, C)
                 Height = 26,
             },
             ChargeCooldown = {
-                Width = 26, 
-                Height = 26, 
-            }, 
+                Width = 26,
+                Height = 26,
+            },
             Pushed = {
                 Width = 32,
                 Height = 32,

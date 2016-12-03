@@ -86,14 +86,14 @@ local isAddonControl = {
 }
 FrameMover.isAddonControl = isAddonControl
 
--- Hide a Frame 
+-- Hide a Frame
 local function HideFrameGroup(FramesTable)
     for _, info in next, FramesTable do
         local frame = _G[info.name]
         if not frame then return end
-        
+
         frame:UnregisterAllEvents()
-        frame:Hide()    
+        frame:Hide()
         frame:SetScript("OnShow", function(self) self:Hide() end)
     end
 end
@@ -107,7 +107,7 @@ local function MoveFrameGroup(FramesTable, DBTable)
 
         local frame = _G[FramesTable[idx].name]
         if not frame then return end
-        
+
         FrameDB = DBTable[idx]
         frame:ClearAllPoints()
         if _G[FrameDB.parent] then
@@ -115,7 +115,7 @@ local function MoveFrameGroup(FramesTable, DBTable)
         else
             _G.print(L["General_InvalidParent"]:format(FramesTable[idx].name, MODNAME, "Addons -> Raven"))
         end
-        
+
         if FrameDB.scale then frame:SetScale(FrameDB.scale) end
         FramesMoving = false
     end
@@ -133,7 +133,7 @@ function FrameMover:MoveAddons(addonName)
               (isAddonControl[addonSlug] and RealUI:DoesAddonMove(isAddonControl[addonSlug])) then
                 local IsHealing = ( addon.hashealing and addonInfo.healing and RealUI.cLayout == 2 )
                 FrameMover:debug("IsHealing", IsHealing)
-                
+
                 if IsHealing then
                     -- Healing Layout
                     MoveFrameGroup(addon.frameshealing, addonInfo.frameshealing)
@@ -179,7 +179,7 @@ end
 -- Raven - To stop bars repositioning themselves
 local function Hook_Raven()
     if not _G.IsAddOnLoaded("Raven") then return end
-    
+
     local t = _G.CreateFrame("Frame")
     t:Hide()
     t.e = 0
@@ -191,8 +191,8 @@ local function Hook_Raven()
             t.e = 0
             t:Hide()
         end
-    end) 
-    
+    end)
+
     _G.hooksecurefunc(_G.Raven, "Nest_SetAnchorPoint", function()
         FrameMover:debug("Nest_SetAnchorPoint")
         t:SetShown(RealUI:DoesAddonMove("Raven"))
@@ -220,12 +220,12 @@ end
 
 function FrameMover:PLAYER_ENTERING_WORLD()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
-    
+
     if not EnteredWorld then
         Hook_Grid2()
         Hook_Raven()
         Hook_VSI()
-        
+
         self:MoveUIFrames()
         self:MoveAddons()
         self:HideFrames()
@@ -317,7 +317,7 @@ function FrameMover:OnInitialize()
         },
     })
     db = self.db.profile
-    
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 

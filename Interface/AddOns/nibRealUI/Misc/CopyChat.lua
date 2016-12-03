@@ -33,10 +33,10 @@ local function copyChat(self)
         local msg = chat:GetMessageInfo(i)
         dump:AddLine(msg)
     end
-    
+
     if (lineCount > 0) then
         dump.frame.TitleText:SetText(chat:GetName() .. " Copy Frame")
-        
+
         dump:Display()
     end
 end
@@ -45,27 +45,27 @@ local function CreateCopyButton(self)
     self.Copy = _G.CreateFrame('Button', nil, _G[self:GetName()])
     self.Copy:SetSize(16, 16)
     self.Copy:SetPoint('TOPRIGHT', self, -5, -5)
-    
+
     self.Copy:SetNormalTexture('Interface\\AddOns\\nibRealUI\\Media\\Chat\\CopyPaste')
     self.Copy:GetNormalTexture():SetSize(16, 16)
-    
+
     self.Copy:SetHighlightTexture('Interface\\AddOns\\nibRealUI\\Media\\Chat\\CopyPaste')
     self.Copy:GetHighlightTexture():SetAllPoints(self.Copy:GetNormalTexture())
-    
+
     local tab = _G[self:GetName()..'Tab']
     _G.hooksecurefunc(tab, 'SetAlpha', function()
         self.Copy:SetAlpha(tab:GetAlpha()*0.55)
     end)
-    
+
     self.Copy:SetScript('OnMouseDown', function(button)
         button:GetNormalTexture():ClearAllPoints()
         button:GetNormalTexture():SetPoint('CENTER', 1, -1)
     end)
-    
+
     self.Copy:SetScript('OnMouseUp', function(button)
         button:GetNormalTexture():ClearAllPoints()
         button:GetNormalTexture():SetPoint('CENTER')
-        
+
         if (button:IsMouseOver()) then
             copyChat(self)
         end
@@ -87,7 +87,7 @@ end
 
 function CopyChat:OnEnable()
     self:CreateFrames()
-    
+
     _G.hooksecurefunc('FCF_OpenTemporaryWindow', EnableCopyButton)
     EnableCopyButton()
 end

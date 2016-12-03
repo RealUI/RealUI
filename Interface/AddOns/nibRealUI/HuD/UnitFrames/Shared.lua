@@ -363,7 +363,7 @@ end
 function UnitFrames:PredictOverride(event, unit)
     if(self.unit ~= unit) then return end
     UnitFrames:debug("PredictOverride", self, event, unit)
-    
+
     local reverseUnitFrameBars = ndb.settings.reverseUnitFrameBars
     local hp = self.HealPrediction
     local healthBar = self.Health
@@ -540,7 +540,7 @@ do
     function UnitFrames:UpdateStatus(event, ...)
         UnitFrames:debug("UpdateStatus", self.unit, event, ...)
         local unit, color = self.unit
-        
+
         if _G.UnitIsAFK(unit) then
             self.Leader.status = "afk"
         elseif not(_G.UnitIsConnected(unit)) then

@@ -74,7 +74,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
             end
             if item.hasDura then
                 local dura = _G.CreateFrame("StatusBar", nil, itemSlot)
-                
+
                 if item.slot == "SecondaryHand" then
                     dura:SetPoint("TOPLEFT", itemSlot, "TOPRIGHT", 2, 0)
                     dura:SetPoint("BOTTOMRIGHT", itemSlot, "BOTTOMRIGHT", 3, 0)
@@ -82,12 +82,12 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                     dura:SetPoint("TOPRIGHT", itemSlot, "TOPLEFT", -2, 0)
                     dura:SetPoint("BOTTOMLEFT", itemSlot, "BOTTOMLEFT", -3, 0)
                 end
-                
+
                 dura:SetStatusBarTexture(RealUI.media.textures.plain)
                 dura:SetOrientation("VERTICAL")
                 dura:SetMinMaxValues(0, 1)
                 dura:SetValue(0)
-                
+
                 F.CreateBDFrame(dura)
                 dura:SetFrameLevel(itemSlot:GetFrameLevel() + 4)
                 itemSlot.dura = dura
@@ -111,7 +111,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     local f, timer = _G.CreateFrame("Frame")
     local function UpdateItems()
         if not _G.CharacterFrame:IsVisible() then return end
-        
+
         for slotID = 1, #itemSlots do
             local item = itemSlots[slotID]
             if item.slot then

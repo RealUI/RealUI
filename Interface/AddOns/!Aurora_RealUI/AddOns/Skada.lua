@@ -26,9 +26,9 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
     skadaBar._ApplySettings = skadaBar.ApplySettings
     skadaBar.ApplySettings = function(bar, win)
         skadaBar._ApplySettings(bar, win)
-        
+
         local skada = win.bargroup
-        
+
         if win.db.enabletitle and not skada.button.skinned then
             skada.button.skinned = true
             F.CreateBDFrame(skada.button)
@@ -37,7 +37,7 @@ mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
         skada:SetTexture(_G.RealUI.media.textures.plain80)
         skada:SetSpacing(0)
         skada:SetFrameLevel(5)
-        
+
         skada:SetBackdrop(nil)
         if not skada.backdrop then
             skada.backdrop = F.CreateBDFrame(skada)

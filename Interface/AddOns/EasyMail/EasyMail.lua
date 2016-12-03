@@ -9,7 +9,7 @@ get all attachments from all selected mails.
 ]]
 
 ---------------------------------------------------
--- Global vars
+-- Global vars 
 ---------------------------------------------------
 EasyMail = {};
 

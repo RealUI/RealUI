@@ -141,7 +141,7 @@ function EventNotifier:OnInitialize()
         },
     })
     db = self.db.profile
-    
+
     self.lastMinimapRare = {time = 0, id = nil}
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end

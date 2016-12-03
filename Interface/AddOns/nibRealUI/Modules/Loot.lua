@@ -138,7 +138,7 @@ function Loot:UpdateGroupLoot()
             frame.pass:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Down")
             frame.pass:SetPoint("RIGHT", 0, 1)
             frame.pass:SetScript("OnClick", GroupLootButtonOnClick)
-            
+
             frame.greed = _G.CreateFrame("Button", nil, frame)
             frame.greed.type = 2
             frame.greed.roll = "greed"
@@ -149,7 +149,7 @@ function Loot:UpdateGroupLoot()
             frame.greed:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Coin-Highlight")
             frame.greed:SetPoint("RIGHT", frame.pass, "LEFT", -1, -4)
             frame.greed:SetScript("OnClick", GroupLootButtonOnClick)
-            
+
             frame.disenchant = _G.CreateFrame("Button", nil, frame)
             frame.disenchant.type = 3
             frame.disenchant.roll = "disenchant"
@@ -171,7 +171,7 @@ function Loot:UpdateGroupLoot()
             frame.need:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Dice-Highlight")
             frame.need:SetPoint("RIGHT", frame.disenchant, "LEFT", -1, 0)
             frame.need:SetScript("OnClick", GroupLootButtonOnClick)
-            
+
             frame.text = RealUI:CreateFS(frame, "LEFT")
             frame.text:SetPoint("LEFT", 2, 0)
             frame.text:SetPoint("RIGHT", frame.need, "LEFT")
@@ -205,7 +205,7 @@ function Loot:UpdateGroupLoot()
 
         frame.text:SetText(_G.ITEM_QUALITY_COLORS[quality].hex..name)
 
-        frame.icon:SetTexture(texture) 
+        frame.icon:SetTexture(texture)
 
         frame.rollId = value.rollId
         frame.rollLink = _G.GetLootRollItemLink(value.rollId)
@@ -227,7 +227,7 @@ function Loot:InitializeGroupLoot()
     RealUIGroupLootFrame:SetWidth(db.grouplootwidth)
     RealUIGroupLootFrame:SetHeight(24)
     self:GroupLootPosition()
-    
+
     for i = 1,4 do
         local glf = _G["GroupLootFrame"..i]
         glf:UnregisterAllEvents()
@@ -282,7 +282,7 @@ local LootOnClick = function(self)
         _G.LootFrame.selectedQuality = self.quality
         _G.LootFrame.selectedItemName = self.name:GetText()
         _G.LootFrame.selectedTexture = self.icon:GetTexture()
-        
+
         _G.LootSlot(self:GetID())
     end
 end
@@ -312,7 +312,7 @@ local createSlot = function(id)
     bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
     bg:SetFrameLevel(frame:GetFrameLevel()-1)
     RealUI:CreateBD(bg)
-    
+
     frame.bg = bg
 
     frame:SetScript("OnClick", LootOnClick)
@@ -369,7 +369,7 @@ function Loot:UpdateLootPosition()
     local x, y = _G.GetCursorPosition()
     x = x / RealUILootFrame:GetEffectiveScale()
     y = y / RealUILootFrame:GetEffectiveScale()
-    
+
     RealUILootFrame:ClearAllPoints()
     if db.loot.cursor then
         RealUILootFrame:SetPoint("TOPLEFT", nil, "BOTTOMLEFT", x-40, y+20)
@@ -391,7 +391,7 @@ function Loot:LOOT_READY(event, autoLoot)
     --print("Loot:", event, autoLoot)
     RealUILootFrame:Show()
     RealUILootFrame:SetWidth(db.lootwidth)
-    
+
     --print("Loot:", not RealUILootFrame:IsShown(), autoLoot == 0)
     if (not RealUILootFrame:IsShown()) then
         --print("Loot:", "Close?")
@@ -483,7 +483,7 @@ function Loot:InitializeLoot()
         _G.GiveMasterLoot(_G.MasterLooterFrame.slot, _G.MasterLooterFrame.candidateId)
         _G.MasterLooterFrame:Hide();
     end
-    
+
     self:RegisterEvent("LOOT_READY")
     self:RegisterEvent("LOOT_SLOT_CLEARED")
     self:RegisterEvent("LOOT_CLOSED")
@@ -494,7 +494,7 @@ end
 -----------------------
 function Loot:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
-    
+
     if db.loot.enabled then
         self:InitializeLoot()
     end
@@ -534,7 +534,7 @@ function Loot:OnInitialize()
         },
     })
     db = self.db.profile
-    
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 

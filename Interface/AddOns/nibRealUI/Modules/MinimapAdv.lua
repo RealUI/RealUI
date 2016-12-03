@@ -250,7 +250,7 @@ function MinimapAdv:UpdateInfoPosition()
                         CRFM.displayFrame.hiddenModeToggle:Hide()
 
                         _G.FlowContainer_ResumeUpdates(container);
-                        
+
                         local _, usedY = _G.FlowContainer_GetUsedBounds(container);
                         CRFM:SetHeight(usedY + 40);
                     end)
@@ -1729,8 +1729,8 @@ local function CreateFrames()
         local count = _G.GetNumTrackingTypes();
         local info;
         local _, class = _G.UnitClass("player");
-        
-        if (level == 1) then 
+
+        if (level == 1) then
             info = _G.Lib_UIDropDownMenu_CreateInfo();
             info.text = _G.MINIMAP_TRACKING_NONE;
             info.checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive;
@@ -1740,7 +1740,7 @@ local function CreateFrames()
             info.isNotRadio = true;
             info.keepShownOnClick = true;
             _G.Lib_UIDropDownMenu_AddButton(info, level);
-            
+
             if (class == "HUNTER") then --only show hunter dropdown for hunters
                 numTracking = 0;
                 -- make sure there are at least two options in dropdown
@@ -1750,7 +1750,7 @@ local function CreateFrames()
                         numTracking = numTracking + 1;
                     end
                 end
-                if (numTracking > 1) then 
+                if (numTracking > 1) then
                     info.text = _G.HUNTER_TRACKING_TEXT;
                     info.func =  nil;
                     info.notCheckable = true;
@@ -1760,7 +1760,7 @@ local function CreateFrames()
                     _G.Lib_UIDropDownMenu_AddButton(info, level)
                 end
             end
-            
+
             info.text = _G.TOWNSFOLK_TRACKING_TEXT;
             info.func =  nil;
             info.notCheckable = true;
@@ -1791,16 +1791,15 @@ local function CreateFrames()
                 info.tCoordTop = 0;
                 info.tCoordBottom = 1;
             end
-            if (level == 1 and 
+            if (level == 1 and
                 (nested < 0 or -- this tracking shouldn't be nested
-                (nested == _G.HUNTER_TRACKING and class ~= "HUNTER") or 
+                (nested == _G.HUNTER_TRACKING and class ~= "HUNTER") or
                 (numTracking == 1 and category == "spell"))) then -- this is a hunter tracking ability, but you only have one
                 _G.Lib_UIDropDownMenu_AddButton(info, level);
             elseif (level == 2 and (nested == _G.TOWNSFOLK or (nested == _G.HUNTER_TRACKING and class == "HUNTER")) and nested == _G.LIB_UIDROPDOWNMENU_MENU_VALUE) then
                 _G.Lib_UIDropDownMenu_AddButton(info, level);
             end
         end
-        
     end, "MENU")
     MMFrames.tracking.dropdown = dropdown
 
