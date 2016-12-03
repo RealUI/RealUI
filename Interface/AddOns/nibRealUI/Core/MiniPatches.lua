@@ -201,9 +201,50 @@ RealUI.minipatches = {
         RealUINamespace.ClassResource_Stagger = nil
         RealUINamespace.Pitch = nil
 
-        -- Transfer to _G.nibRealUIDB.global
-        RealUINamespace.CurrencyTip.global = nil
+        -- Reset to default
+        for key, char in next, RealUINamespace.InfoLine.char do
+            char.xrstate = nil
+            if char.specgear.primary then
+                char.specgear = nil
+            end
+        end
+
+        -- Consolidate currency DBs
+        local currency = RealUINamespace.CurrencyTip.global.currency
+        for realmName, realm in next, RealUINamespace.InfoLine.global.currency do
+            if not currency[realmName] then currency[realmName] = {} end
+            for factionName, faction in next, realm do
+                if not currency[realmName][factionName] then currency[realmName][factionName] = {} end
+                for charName, char in next, faction do
+                    if not currency[realmName][factionName][charName] then currency[realmName][factionName][charName] = {} end
+                    currency[realmName][factionName][charName].gold = char.gold
+                end
+            end
+        end
+        RealUINamespace.CurrencyTip = nil
         RealUINamespace.InfoLine.global = nil
+
+        -- Clean and transfer currency DB to _G.nibRealUIDB.global
+        for realmName, realm in next, currency do
+            local numFactions = 0
+            for factionName, faction in next, realm do
+                local numChars = 0
+                for charName, char in next, faction do
+                    if (char.gold and char.gold == 0) or not (char.gold and char.lastSeen) then
+                        currency[realmName][factionName][charName] = nil
+                    else
+                        numChars = numChars + 1
+                    end
+                end
+                if numChars == 0 then
+                    currency[realmName][factionName] = nil
+                else
+                    numFactions = numFactions + 1
+                end
+            end
+            if numFactions == 0 then currency[realmName] = nil end
+        end
+        _G.nibRealUIDB.global.currency = currency
 
         -- Remove RealUI defined spellLists in Raven
         _G.RavenDB.global.SpellLists.PlayerExclusions = nil
