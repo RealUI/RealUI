@@ -374,6 +374,12 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
 
             block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
         end
+        if attr:find("label") then
+            block.label:SetText(dataObj.label)
+            if dataObj.labelR then
+                block.label:SetTextColor(dataObj.labelR, dataObj.labelG, dataObj.labelB)
+            end
+        end
         if attr:find("icon") then
             block.icon:SetTexture(dataObj.icon)
             if dataObj.iconR then

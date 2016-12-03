@@ -756,7 +756,12 @@ function InfoLine:CreateBlocks()
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
                     if item.hasDura and item.dura then
-                        tooltip:AddLine(item.slot, round(item.dura * 100, 1) .. "%")
+                        lineNum = tooltip:AddLine(item.slot, round(item.dura * 100, 1) .. "%")
+                        if slotID == itemSlots.lowSlot then
+                            tooltip:SetLineTextColor(lineNum, RealUI.GetDurabilityColor(item.min, item.max))
+                        else
+                            tooltip:SetCellTextColor(lineNum, 2, RealUI.GetDurabilityColor(item.min, item.max))
+                        end
                     end
                 end
 
@@ -766,32 +771,29 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("Durability1: OnEvent", event, block.timer, ...)
-                if event == "UPDATE_INVENTORY_DURABILITY" then
-                    if block.timer then return end
-                    InfoLine:debug("Make timer")
-                    block.timer = InfoLine:ScheduleTimer(block.dataObj.OnEvent, 1, block)
-                    return
-                end
-                InfoLine:debug("Durability2: OnEvent", event, block.timer, ...)
-                local lowest = 1
+                InfoLine:debug("Durability1: OnEvent", event, ...)
+                local lowDur, lowMin, lowMax, lowSlot = 1, 1, 1
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
                     if item.hasDura then
                         local min, max = _G.GetInventoryItemDurability(slotID)
                         if max then
-                            local per = RealUI:GetSafeVals(min, max)
-                            item.dura = per
-                            lowest = per < lowest and per or lowest
-                            InfoLine:debug(slotID, item.slot, round(per, 3), round(lowest, 3))
+                            item.dura = RealUI:GetSafeVals(min, max)
+                            item.min, item.max = min, max
+                            if lowDur > item.dura then
+                                lowDur, lowSlot = item.dura, slotID
+                                lowMin, lowMax = min, max
+                            end
+                            InfoLine:debug(slotID, item.slot, round(item.dura, 3), min, lowMin)
                         end
                     end
                 end
+                itemSlots.lowSlot = lowSlot
                 if not block.alert then
                     block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
                 end
                 local alert = block.alert
-                if lowest < 0.1 and not alert.isHidden then
+                if lowDur < 0.1 and not alert.isHidden then
                     alert:SetSize(177, alert.Text:GetHeight() + 42);
                     alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
                     alert:SetPoint("BOTTOM", block, "TOP", 30, 18)
@@ -799,18 +801,20 @@ function InfoLine:CreateBlocks()
                         alert:Hide()
                         alert.isHidden = true
                     end);
-                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowest * 100))
+                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
                     alert.Text:SetWidth(145);
                     alert:Show();
                     alert.isHidden = false
                 else
                     alert:Hide()
                 end
-                block.dataObj.text = round(lowest * 100) .. "%"
+                block.dataObj.text = round(lowDur * 100) .. "%"
+                block.dataObj.labelR, block.dataObj.labelG, block.dataObj.labelB = RealUI.GetDurabilityColor(lowMin, lowMax)
                 block.timer = false
             end,
             events = {
                 "UPDATE_INVENTORY_DURABILITY",
+                "PLAYER_EQUIPMENT_CHANGED",
                 "PLAYER_ENTERING_WORLD",
             },
         })

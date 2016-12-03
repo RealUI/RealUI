@@ -7,7 +7,6 @@ end
 local _, RealUI = ...
 
 -- Lua Globals --
-local _G = _G
 local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
 local next, print, select = _G.next, _G.print, _G.select
 local tostring = _G.tostring
@@ -296,14 +295,20 @@ function RealUI:ColorTableToStr(vals)
     return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
 end
 
-function RealUI:GetDurabilityColor(percent)
-    if percent < 0 then
-        return 1, 0, 0
-    elseif percent <= 0.5 then
-        return 1, percent * 2, 0
-    elseif percent >= 1 then
-        return 0, 1, 0
+function RealUI.GetDurabilityColor(a, b)
+    if a and b then
+        debug("RGBColorGradient", a, b)
+        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
     else
-        return 2 - percent * 2, 1, 0
+        debug("GetDurabilityColor", a)
+        if a < 0 then
+            return 1, 0, 0
+        elseif a <= 0.5 then
+            return 1, a * 2, 0
+        elseif a >= 1 then
+            return 0, 1, 0
+        else
+            return 2 - a * 2, 1, 0
+        end
     end
 end

@@ -151,9 +151,8 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                 if item.hasDura then
                     local min, max = _G.GetInventoryItemDurability(slotID)
                     if max then
-                        local percent = RealUI:GetSafeVals(min, max)
-                        itemSlot.dura:SetValue(percent)
-                        itemSlot.dura:SetStatusBarColor(RealUI:GetDurabilityColor(percent))
+                        itemSlot.dura:SetValue(RealUI:GetSafeVals(min, max))
+                        itemSlot.dura:SetStatusBarColor(RealUI.GetDurabilityColor(min, max))
                         itemSlot.dura:Show()
                     else
                         itemSlot.dura:Hide()
