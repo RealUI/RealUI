@@ -144,7 +144,7 @@ Skada:AddLoadableModule("TotalHealing", nil, function(Skada, L)
 	end        
 
 	function mod:OnEnable()
-		mod.metadata = {click1 = thspellsmod, showspots = true, columns = {Healing = true, Total = true, Percent = false}}
+		mod.metadata = {click1 = thspellsmod, showspots = true, columns = {Healing = true, Total = true, Percent = false}, icon = "Interface\\Icons\\Ability_priest_angelicbulwark"}
 		thspellsmod.metadata = {tooltip = thspell_tooltip, columns = {Healing = true, Percent = true}}
 
 		Skada:AddMode(self, L["Healing"])

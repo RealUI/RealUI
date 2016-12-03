@@ -97,7 +97,7 @@ Skada:AddLoadableModule("CC", nil, function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata = {showspots = true}
+		mod.metadata = {showspots = true, icon = "Interface\\Icons\\Spell_magic_polymorphrabbit"}
 
 		Skada:RegisterForCL(SpellAuraBroken, 'SPELL_AURA_BROKEN', {src_is_interesting = true})
 		Skada:RegisterForCL(SpellAuraBroken, 'SPELL_AURA_BROKEN_SPELL', {src_is_interesting = true})

@@ -1093,11 +1093,13 @@ end
 
 function Skada:PET_BATTLE_CLOSE()
 	-- Restore after pet battles
-	for i, win in ipairs(windows) do
-		if not win.db.hidden and not win:IsShown() then
-			win:Show()
-		end
-	end
+    if not Skada.db.profile.hidesolo or IsInGroup() then
+        for i, win in ipairs(windows) do
+            if not win.db.hidden and not win:IsShown() then
+                win:Show()
+            end
+        end
+    end
 end
 
 -- Toggles all windows.
@@ -1440,7 +1442,7 @@ function Skada:EndSegment()
 		end
 
 		-- Hide in combat option.
-		if not win.db.hidden and self.db.profile.hidecombat then
+        if not win.db.hidden and self.db.profile.hidecombat and (not self.db.profile.hidesolo or IsInGroup()) then
 			win:Show()
 		end
 	end
@@ -2019,6 +2021,9 @@ function Skada:UpdateDisplay(force)
 					if set and mode.GetSetSummary ~= nil then
 						d.valuetext = mode:GetSetSummary(set)
 					end
+                    if mode.metadata and mode.metadata.icon then
+                        d.icon = mode.metadata.icon
+                    end
 				end
 
 				-- Tell window to sort by our data order. Our modes are in alphabetical order already.
@@ -2055,6 +2060,11 @@ function Skada:UpdateDisplay(force)
 					if set.keep then
 						d.emphathize = true
 					end
+                    if set.gotboss then
+                        d.icon = "Interface\\Icons\\Achievment_boss_ultraxion"
+                    else
+                        d.icon = "Interface\\Icons\\Achievement_boss_mutanus_the_devourer"
+                    end
 				end
 
 				win.metadata.ordersort = true

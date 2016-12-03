@@ -62,8 +62,6 @@ function BT4ActionBars:OnInitialize()
 	self.db = Bartender4.db:RegisterNamespace("ActionBars", defaults)
 end
 
-local LBF = LibStub("LibButtonFacade", true)
-
 -- setup the 10 actionbars
 local first = true
 function BT4ActionBars:OnEnable()

@@ -2749,16 +2749,32 @@ MOD.OptionsTable = {
 							get = function(info) return MOD.db.global.PixelPerfect end,
 							set = function(info, value) MOD.db.global.PixelPerfect = value; MOD:UpdateAllBarGroups() end,
 						},
+						PixelBorder = {
+							type = "toggle", order = 32, name = L["Pixel Icon Border"],
+							disabled = function(info) return (MOD.MSQ and MOD.db.global.ButtonFacadeIcons) or (Raven.frame.SetTemplate and MOD.db.global.TukuiSkin) or
+								not MOD.db.global.PixelPerfect or not MOD.db.global.HideBorder end,
+							desc = L["If checked, icon will be displayed with a border one pixel wide (requires /reload)."],
+							get = function(info) return MOD.db.global.PixelIconBorder end,
+							set = function(info, value) MOD.db.global.PixelIconBorder = value; MOD:UpdateAllBarGroups() end,
+						},
+						Space1 = { type = "description", name = "", order = 39 },
 						Rect = {
 							type = "toggle", order = 40, name = L["Rectangular Icons"],
 							desc = L["If checked, allow rectangular icons in icon-oriented configurations, using bar width to set icon's width (requires /reload)."],
 							get = function(info) return MOD.db.global.RectIcons end,
 							set = function(info, value) MOD.db.global.RectIcons = value; MOD:UpdateAllBarGroups() end,
 						},
+						Zoom = {
+							type = "toggle", order = 40, name = L["Zoom Icons"],
+							disabled = function(info) return not MOD.db.global.RectIcons end,
+							desc = L["If checked, rectangular icons are zoomed, rather than stretched (requires /reload)."],
+							get = function(info) return MOD.db.global.ZoomIcons end,
+							set = function(info, value) MOD.db.global.ZoomIcons = value; MOD:UpdateAllBarGroups() end,
+						},
 						DefaultBorderColor = {
 							type = "color", order = 50, name = L["Default Border Color"], hasAlpha = false,
 							disabled = function(info) return (Raven.frame.SetTemplate and MOD.db.global.TukuiSkin) end,
-							desc = L["Set default color for icon borders."],
+							desc = L["Set default color for icon borders (displayed if None selected in Bar Color Scheme for Icon Border)."],
 							get = function(info) local t = MOD.db.global.DefaultBorderColor; return t.r, t.g, t.b, t.a end,
 							set = function(info, r, g, b, a)
 								local t = MOD.db.global.DefaultBorderColor
@@ -3748,7 +3764,6 @@ MOD.OptionsTable = {
 									get = function(info) return GetBarGroupField("showBattleground") end,
 									set = function(info, value) SetBarGroupField("showBattleground", value) end,
 								},
-								spacer0 = { type = "description", name = "", order = 40, },
 								ShowIfBlizzard = {
 									type = "toggle", order = 45, name = L["Blizzard Buffs Enabled"],
 									desc = L["If checked, the bar group is shown if the default user interface for buffs is enabled."],
@@ -3760,6 +3775,12 @@ MOD.OptionsTable = {
 									desc = L["If checked, the bar group is shown if the default user interface for buffs is disabled."],
 									get = function(info) return GetBarGroupField("showNotBlizz") end,
 									set = function(info, value) SetBarGroupField("showNotBlizz", value) end,
+								},
+								PetBattleGroup = {
+									type = "toggle", order = 48, name = L["In Pet Battle"],
+									desc = L["If checked, bar group is shown when the player is in a pet battle."],
+									get = function(info) return GetBarGroupField("showPetBattle") end,
+									set = function(info, value) SetBarGroupField("showPetBattle", value) end,
 								},
 								SelectClass = {
 									type = "group", order = 75, name = L["Player Class"], inline = true,
@@ -11248,6 +11269,13 @@ MOD.barOptions = {
 				desc = L["Enable icon pulse when bar is expiring."],
 				get = function(info) return GetBarField(info, "pulseEnd") end,
 				set = function(info, value) SetBarField(info, "pulseEnd", value) end,
+			},
+			DesaturateReady = {
+				type = "toggle", order = 17, name = L["Desaturate Icon When Ready"],
+				desc = L["Desaturate the bar's icon when ready."],
+				disabled = function(info) return not GetBarField(info, "enableReady") end,
+				get = function(info) return GetBarField(info, "desaturateReadyIcon") end,
+				set = function(info, value) SetBarField(info, "desaturateReadyIcon", value) end,
 			},
 			space1 = { type = "description", name = "", order = 20 },
 			FlashExpiring = {

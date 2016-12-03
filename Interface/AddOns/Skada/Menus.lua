@@ -51,6 +51,24 @@ local function _modeMenu(window, level)
     end    
 end
 
+local function getDropdownPoint()
+	local x,y = GetCursorPosition(UIParent);
+	x = x / UIParent:GetEffectiveScale();
+	y = y / UIParent:GetEffectiveScale();
+	local point
+	if x > GetScreenWidth() / 2 then
+	  point = "RIGHT"
+	else
+	  point = "LEFT"
+	end
+	if y > GetScreenHeight() / 2 then
+	  point = "TOP"..point
+	else
+	  point = "BOTTOM"..point
+	end
+	return point, x, y
+end
+
 -- Configuration menu.
 function Skada:OpenMenu(window)
 	if not self.skadamenu then
@@ -348,8 +366,9 @@ function Skada:OpenMenu(window)
 	    end
 	end
 
-	local x,y = GetCursorPosition(UIParent);
-	ToggleDropDownMenu(1, nil, skadamenu, "UIParent", x / UIParent:GetEffectiveScale() , y / UIParent:GetEffectiveScale())
+	local x,y;
+	skadamenu.point, x, y = getDropdownPoint()
+	ToggleDropDownMenu(1, nil, skadamenu, "UIParent", x, y)
 end
 
 function Skada:SegmentMenu(window)
@@ -399,8 +418,9 @@ function Skada:SegmentMenu(window)
 			UIDropDownMenu_AddButton(info, level)
 		end
 	end
-	local x,y = GetCursorPosition(UIParent);
-	ToggleDropDownMenu(1, nil, segmentsmenu, "UIParent", x / UIParent:GetEffectiveScale() , y / UIParent:GetEffectiveScale())
+	local x,y;
+	segmentsmenu.point, x, y = getDropdownPoint()
+	ToggleDropDownMenu(1, nil, segmentsmenu, "UIParent", x, y)
 end
 
 function Skada:ModeMenu(window)
@@ -416,8 +436,9 @@ function Skada:ModeMenu(window)
 
         _modeMenu(window, level)
 	end
-	local x,y = GetCursorPosition(UIParent);
-	ToggleDropDownMenu(1, nil, modesmenu, "UIParent", x / UIParent:GetEffectiveScale() , y / UIParent:GetEffectiveScale())
+	local x,y;
+	modesmenu.point, x, y = getDropdownPoint()
+	ToggleDropDownMenu(1, nil, modesmenu, "UIParent", x, y)
 end
 
 function Skada:OpenReportWindow(window)

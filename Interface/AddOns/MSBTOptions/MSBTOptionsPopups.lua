@@ -107,6 +107,7 @@ end
 -- Called when a popup is hidden.
 -- ****************************************************************************
 local function OnHidePopup(this)
+ PlaySound("gsTitleOptionExit")
  if (this.hideHandler) then this.hideHandler() end
 end
 
@@ -117,17 +118,28 @@ end
 local function CreatePopup()
  local frame = CreateFrame("Frame", nil, UIParent)
  frame:Hide()
- frame:SetMovable(true)
  frame:EnableMouse(true)
+ frame:SetMovable(true)
+ frame:RegisterForDrag("LeftButton")
  frame:SetFrameStrata("HIGH")
  --frame:SetToplevel(true)
  frame:SetClampedToScreen(true)
  frame:SetBackdrop(popupBackdrop)
  frame:SetScript("OnHide", OnHidePopup)
 
+ frame:SetScript("OnShow", function(self)
+  PlaySound("igMainMenuOption")
+ end)
+ frame:SetScript("OnDragStart", function(self)
+  self:StartMoving()
+ end)
+ frame:SetScript("OnDragStop", function(self)
+  self:StopMovingOrSizing()
+ end)
+
  -- Title region.
- local titleRegion = frame:CreateTitleRegion()
- titleRegion:SetAllPoints(frame)
+ --local titleRegion = frame:CreateTitleRegion()
+ --titleRegion:SetAllPoints(frame)
 
  -- Register the frame with the main module.
  MSBTOptions.Main.RegisterPopupFrame(frame)

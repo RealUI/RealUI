@@ -1,0 +1,68 @@
+------------------------------------------------------------------------
+r702 | zarnivoop | 2016-11-06 20:04:18 +0000 (Sun, 06 Nov 2016) | 1 line
+Changed paths:
+   A /tags/1.5-14 (from /trunk:701)
+
+Tagging as 1.5-14
+------------------------------------------------------------------------
+r701 | zarnivoop | 2016-11-06 16:31:49 +0000 (Sun, 06 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+   M /trunk/modules/CC.lua
+   M /trunk/modules/Damage.lua
+   M /trunk/modules/DamageTaken.lua
+   M /trunk/modules/Deaths.lua
+   M /trunk/modules/Debuffs.lua
+   M /trunk/modules/Dispels.lua
+   M /trunk/modules/Enemies.lua
+   M /trunk/modules/Healing.lua
+   M /trunk/modules/Interrupts.lua
+   M /trunk/modules/Overhealing.lua
+   M /trunk/modules/Power.lua
+   M /trunk/modules/Threat.lua
+   M /trunk/modules/TotalHealing.lua
+
+added icons for mode and segment lists
+------------------------------------------------------------------------
+r700 | oscarucb | 2016-10-30 10:39:13 +0000 (Sun, 30 Oct 2016) | 5 lines
+Changed paths:
+   M /trunk/Menus.lua
+
+Improve dropdown menu positioning
+
+Work harder to ensure the level 1 menus are positioned well (ie not off-screen), especially with a long segment menu.
+
+
+------------------------------------------------------------------------
+r699 | zarnivoop | 2016-10-29 14:01:53 +0000 (Sat, 29 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+
+fix for Hide in Han Solo option
+------------------------------------------------------------------------
+r697 | zarnivoop | 2016-10-26 17:22:49 +0000 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/Skada.toc
+
+toc update
+------------------------------------------------------------------------
+r695 | zarnivoop | 2016-10-18 21:24:12 +0000 (Tue, 18 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/modules/Debuffs.lua
+
+yet another debuffs fix
+------------------------------------------------------------------------
+r694 | zarnivoop | 2016-10-17 19:32:33 +0000 (Mon, 17 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/Skada.lua
+
+fixed a billion issues
+------------------------------------------------------------------------
+r693 | zarnivoop | 2016-10-15 13:19:42 +0000 (Sat, 15 Oct 2016) | 2 lines
+Changed paths:
+   M /trunk/Skada.lua
+   M /trunk/modules/Debuffs.lua
+
+fix for faulty debuff/buff uptimes
+inmprovement to the display of very large numbers
+------------------------------------------------------------------------

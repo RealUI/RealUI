@@ -3272,6 +3272,7 @@ local function LootAlertsTab_SaveEventSettings(settings, eventType)
 
  local fontString = tabFrames.lootAlerts.lootedItemsFontString
  if (eventType == "NOTIFICATION_MONEY") then fontString = tabFrames.lootAlerts.moneyGainsFontString end
+ if (eventType == "NOTIFICATION_CURRENCY") then fontString = tabFrames.lootAlerts.currencyGainsFontString end
  fontString:SetText(settings.message) 
 end
 
@@ -3458,13 +3459,13 @@ local function LootAlertsTab_Create()
     MSBTPopups.ShowEvent(configTable)
    end
  )
- controls[#controls+1] = button
+ controls.moneyGainsEventSettingButton = button
 
  -- Money gains font settings button. 
  button = MSBTControls.CreateIconButton(tabFrame, "FontSettings")
  objLocale = L.BUTTONS["eventFontSettings"]
  button:SetTooltip(objLocale.tooltip)
- button:SetPoint("RIGHT", controls[#controls], "LEFT", 0, 0)
+ button:SetPoint("RIGHT", controls.moneyGainsEventSettingButton, "LEFT", 0, 0)
  button:SetClickHandler(
    function (this)
     local eventType = "NOTIFICATION_MONEY"
@@ -3512,9 +3513,118 @@ local function LootAlertsTab_Create()
  fontString:SetJustifyH("LEFT")
  tabFrame.moneyGainsFontString = fontString
 
+
+ -- Currency colorswatch.
+ local colorswatch = MSBTControls.CreateColorswatch(tabFrame)
+ colorswatch:SetPoint("TOPLEFT", controls.moneyGainsColorSwatch, "BOTTOMLEFT", 0, -10)
+ colorswatch:SetColorChangedHandler(
+   function (this)
+    local eventType = "NOTIFICATION_CURRENCY"
+    MSBTProfiles.SetOption("events." .. eventType, "colorR", this.r, 1)
+    MSBTProfiles.SetOption("events." .. eventType, "colorG", this.g, 1)
+    MSBTProfiles.SetOption("events." .. eventType, "colorB", this.b, 1)
+   end
+ )
+ controls.currencyGainsColorSwatch = colorswatch
+
+ -- Currency gained enable checkbox.
+ local checkbox = MSBTControls.CreateCheckbox(tabFrame)
+ local objLocale = L.CHECKBOXES["currencyGains"]
+ checkbox:Configure(24, objLocale.label, objLocale.tooltip)
+ checkbox:SetPoint("LEFT", colorswatch, "RIGHT", 5, 0)
+ checkbox:SetPoint("RIGHT", tabFrame, "TOPLEFT", 190, -10)
+ checkbox:SetClickHandler(
+   function (this, isChecked)
+    MSBTProfiles.SetOption("events.NOTIFICATION_CURRENCY", "disabled", not isChecked)
+   end
+ )
+ controls.currencyGainsEnableCheckbox = checkbox
+
+ -- Currency alerts event settings button.
+ local button = MSBTControls.CreateIconButton(tabFrame, "Configure")
+ objLocale = L.BUTTONS["eventSettings"]
+ button:SetTooltip(objLocale.tooltip)
+ button:SetPoint("TOPRIGHT", controls.moneyGainsEventSettingButton, "BOTTOMRIGHT", 0, -5)
+ button:SetClickHandler(
+   function (this)
+    local eventType = "NOTIFICATION_CURRENCY"
+    local eventSettings = MSBTProfiles.currentProfile.events[eventType]
+
+    EraseTable(configTable)
+    configTable.title = L.CHECKBOXES.currencyGains.label
+    configTable.message = eventSettings.message
+    configTable.codes = L.EVENT_CODES["ITEM_AMOUNT"] .. L.EVENT_CODES["ITEM_NAME"] .. L.EVENT_CODES["TOTAL_ITEMS"]
+    configTable.scrollArea = eventSettings.scrollArea or DEFAULT_SCROLL_AREA
+    configTable.alwaysSticky = eventSettings.alwaysSticky
+    configTable.soundFile = eventSettings.soundFile
+    configTable.parentFrame = tabFrame
+    configTable.anchorFrame = tabFrame
+    configTable.anchorPoint = "TOPRIGHT"
+    configTable.relativePoint = "TOPRIGHT"
+    configTable.saveArg1 = eventType
+    configTable.saveHandler = LootAlertsTab_SaveEventSettings
+    configTable.hideHandler = LootAlertsTab_EnableControls
+    DisableControls(controls)
+    MSBTPopups.ShowEvent(configTable)
+   end
+ )
+ controls.currencyGainsEventSettingButton = button
+
+ -- Currency alerts font settings button.
+ button = MSBTControls.CreateIconButton(tabFrame, "FontSettings")
+ objLocale = L.BUTTONS["eventFontSettings"]
+ button:SetTooltip(objLocale.tooltip)
+ button:SetPoint("RIGHT", controls.currencyGainsEventSettingButton, "LEFT", 0, 0)
+ button:SetClickHandler(
+   function (this)
+    local eventType = "NOTIFICATION_CURRENCY"
+    local eventSettings = MSBTProfiles.currentProfile.events[eventType]
+    local saSettings = MSBTProfiles.currentProfile.scrollAreas[eventSettings.scrollArea]
+    if (not saSettings) then saSettings = MSBTProfiles.currentProfile.scrollAreas[DEFAULT_SCROLL_AREA] end
+
+    EraseTable(configTable)
+    configTable.title = L.CHECKBOXES.currencyGains.label
+
+    -- Inherit from the correct scroll area.
+    local fontName = saSettings.normalFontName
+    if (not fonts[fontName]) then fontName = MSBTProfiles.currentProfile.normalFontName end
+    if (not fonts[fontName]) then fontName = DEFAULT_FONT_NAME end
+    configTable.inheritedNormalFontName = fontName
+    configTable.inheritedNormalOutlineIndex = saSettings.normalOutlineIndex or MSBTProfiles.currentProfile.normalOutlineIndex
+    configTable.inheritedNormalFontSize = saSettings.normalFontSize or MSBTProfiles.currentProfile.normalFontSize
+    configTable.inheritedNormalFontAlpha = saSettings.normalFontAlpha or MSBTProfiles.currentProfile.normalFontAlpha
+
+    fontName = eventSettings.fontName
+    if (not fonts[fontName]) then fontName = nil end
+    configTable.normalFontName = fontName
+    configTable.normalOutlineIndex = eventSettings.outlineIndex
+    configTable.normalFontSize = eventSettings.fontSize
+    configTable.normalFontAlpha = eventSettings.fontAlpha
+
+    configTable.hideCrit = true
+    configTable.parentFrame = tabFrames.lootAlerts
+    configTable.anchorFrame = tabFrames.lootAlerts
+    configTable.anchorPoint = "BOTTOM"
+    configTable.relativePoint = "BOTTOM"
+	configTable.saveArg1 = eventType
+    configTable.saveHandler = LootAlertsTab_SaveFontSettings
+    configTable.hideHandler = LootAlertsTab_EnableControls
+    DisableControls(controls)
+    MSBTPopups.ShowFont(configTable)
+   end
+ )
+ controls[#controls+1] = button
+
+ -- Currency alerts message font string.
+ local fontString = tabFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+ fontString:SetPoint("LEFT", checkbox, "RIGHT", 10, 0)
+ fontString:SetPoint("RIGHT", button, "LEFT", -10, 0)
+ fontString:SetJustifyH("LEFT")
+ tabFrame.currencyGainsFontString = fontString
+
  -- Item qualities font string.
  local fontString = tabFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
- fontString:SetPoint("TOPLEFT", controls.moneyGainsColorSwatch, "BOTTOMLEFT", 0, -30)
+ fontString:SetPoint("TOPLEFT", controls.currencyGainsColorSwatch, "BOTTOMLEFT", 0, -30)
  fontString:SetJustifyH("LEFT")
  fontString:SetText(L.MSG_ITEM_QUALITIES .. ":")
 
@@ -3623,6 +3733,13 @@ local function LootAlertsTab_OnShow()
  controls.moneyGainsColorSwatch:SetColor(eventSettings.colorR or 1, eventSettings.colorG or 1, eventSettings.colorB or 1)
  controls.moneyGainsEnableCheckbox:SetChecked(not eventSettings.disabled)
  tabFrame.moneyGainsFontString:SetText(eventSettings.message)
+
+ -- Currency gains.
+ local eventSettings = currentProfile.events["NOTIFICATION_CURRENCY"]
+ controls.currencyGainsColorSwatch:SetColor(eventSettings.colorR or 1, eventSettings.colorG or 1, eventSettings.colorB or 1)
+ controls.currencyGainsEnableCheckbox:SetChecked(not eventSettings.disabled)
+ tabFrame.currencyGainsFontString:SetText(eventSettings.message)
+
 
  -- Item qualities.
  for quality = LE_ITEM_QUALITY_POOR, LE_ITEM_QUALITY_EPIC do

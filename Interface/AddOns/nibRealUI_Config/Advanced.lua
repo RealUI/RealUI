@@ -1285,7 +1285,7 @@ local uiTweaks do
                     name = "Min Duration",
                     desc = "The minimum number of seconds a cooldown's duration must be to display text.",
                     type = "range",
-                    min = 0, max = 30, step = 1,
+                    min = 0, max = 30, step = 0.1, bigStep = 1,
                     disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
                     get = function(info) return db.minDuration end,
                     set = function(info, value)

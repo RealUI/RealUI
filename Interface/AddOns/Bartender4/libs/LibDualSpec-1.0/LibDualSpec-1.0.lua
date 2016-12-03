@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDualSpec-1.0", 15
+local MAJOR, MINOR = "LibDualSpec-1.0", 17
 assert(LibStub, MAJOR.." requires LibStub")
 local lib, minor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -96,17 +96,17 @@ do
 		-- L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
 		-- L_CURRENT = "%s (Current)"
 	elseif locale == "ruRU" then
-		-- L_ENABLED = "Enable spec profiles"
-		-- L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
-		-- L_CURRENT = "%s (Current)"
+		L_ENABLED = "Включить профили специализации"
+		L_ENABLED_DESC = "Если включено, ваш профиль будет зависеть от выбранной специализации."
+		L_CURRENT = "%s (Текущий)"
 	elseif locale == "zhCN" then
-		-- L_ENABLED = "Enable spec profiles"
-		-- L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
-		-- L_CURRENT = "%s (Current)"
+		L_ENABLED = "启用专精配置文件"
+		L_ENABLED_DESC = "当启用后，当切换专精时配置文件将设置为专精配置文件。"
+		L_CURRENT = "%s（当前）"
 	elseif locale == "zhTW" then
-		-- L_ENABLED = "Enable spec profiles"
-		-- L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
-		-- L_CURRENT = "%s (Current)"
+		L_ENABLED = "啟用專精設定檔"
+		L_ENABLED_DESC = "當啟用後，當你切換專精時設定檔會設定為專精設定檔。"
+		L_CURRENT = "%s (目前) "
 	elseif locale == "esES" or locale == "esMX" then
 		-- L_ENABLED = "Enable spec profiles"
 		-- L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
@@ -402,7 +402,7 @@ local function eventHandler(self, event)
 
 	if event == "PLAYER_LOGIN" then
 		self:UnregisterEvent(event)
-		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+		self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 	end
 
 	if lib.currentSpec > 0 and next(upgrades) then
@@ -434,4 +434,29 @@ else
 	lib.eventFrame:RegisterEvent("PLAYER_LOGIN")
 end
 
-
+--@do-not-package@
+if not lib.testdb then
+	local AC = LibStub("AceConfig-3.0", true)
+	local ACD = LibStub("AceConfigDialog-3.0", true)
+	local ADO = LibStub("AceDBOptions-3.0", true)
+	if AC and ACD and ADO then
+		local key = format("%s-%d test", MAJOR, MINOR)
+		local testdb = LibStub('AceDB-3.0'):New(key)
+		lib.testdb = testdb
+		testdb:RegisterCallback("OnNewProfile", print)
+		testdb:RegisterCallback("OnProfileChanged", print)
+		testdb:RegisterCallback("OnProfileShutdown", print)
+		testdb:RegisterCallback("OnProfileCopied", print)
+		testdb:RegisterCallback("OnProfileDeleted", print)
+		testdb:RegisterCallback("OnProfileReset", print)
+		testdb:RegisterCallback("OnDatabaseReset", print)
+		testdb:RegisterCallback("OnDatabaseShutdown", print)
+		lib:EnhanceDatabase(testdb, key)
+		local options = ADO:GetOptionsTable(testdb)
+		lib:EnhanceOptions(options, testdb)
+		AC:RegisterOptionsTable(key, options)
+		SlashCmdList["SPECPROFILES"] = function() ACD:Open(key) end
+		SLASH_SPECPROFILES1 = "/testdb"
+	end
+end
+--@end-do-not-package@

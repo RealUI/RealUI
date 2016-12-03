@@ -282,8 +282,8 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 
 	function mod:OnEnable()
 		playermod.metadata 		= {tooltip = playerspell_tooltip}
-		mod.metadata 			= {click1 = playermod, showspots = true, columns = {Damage = true, DTPS = true, Percent = true}}
-		spelloverview.metadata	= {click1 = spellplayers, showspots = true}
+		mod.metadata 			= {click1 = playermod, showspots = true, columns = {Damage = true, DTPS = true, Percent = true}, icon = "Interface\\Icons\\Inv_shield_06"}
+		spelloverview.metadata	= {click1 = spellplayers, showspots = true, icon = "Interface\\Icons\\Inv_shield_07"}
 
 		Skada:RegisterForCL(SpellDamage, 'SPELL_DAMAGE', {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, 'SPELL_PERIODIC_DAMAGE', {dst_is_interesting_nopets = true})

@@ -383,7 +383,7 @@ Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata 		= {ordersort = true, click1 = deathlog, columns = {Deaths = true, Timestamp = true}}
+		mod.metadata 		= {ordersort = true, click1 = deathlog, columns = {Deaths = true, Timestamp = true}, icon = "Interface\\Icons\\Ability_warlock_cremation"}
 		deathlog.metadata 	= {ordersort = true, columns = {Change = true, Health = false, Percent = true, Absorb = true}}
 
 		Skada:RegisterForCL(UnitDied, 'UNIT_DIED', {dst_is_interesting_nopets = true})

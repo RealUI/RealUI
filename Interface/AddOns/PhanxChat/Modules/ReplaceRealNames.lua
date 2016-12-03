@@ -12,11 +12,12 @@ local L = PhanxChat.L
 
 local BNET_CLIENT_TEXT = {
 	-- ["App"] = "Battle.net Desktop App",
-	[BNET_CLIENT_D3]   = "Diablo III",
-	[BNET_CLIENT_WTCG] = "Hearthstone",
-	[BNET_CLIENT_SC2]  = "StarCraft II",
-	[BNET_CLIENT_WOW]  = "World of Warcraft",
-	--[BNET_CLIENT_PRO]  = "Overwatch",
+	[BNET_CLIENT_D3]        = "Diablo III",
+	[BNET_CLIENT_HEROES]    = "Heroes of the Storm",
+	[BNET_CLIENT_WTCG]      = "Hearthstone",
+	[BNET_CLIENT_OVERWATCH] = "Overwatch",
+	[BNET_CLIENT_SC2]       = "StarCraft II",
+	[BNET_CLIENT_WOW]       = "World of Warcraft",
 }
 
 ------------------------------------------------------------------------
@@ -29,7 +30,7 @@ for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do classTokens[v] = k end
 
 local bnetNames = setmetatable({}, { __index = function(bnetNames, bnetIDAccount)
 	-- bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isRIDFriend, messageTime, canSoR, isReferAFriend, canSummonFriend
-	local _, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, _, _, _, _, _, isRIDFriend = BNGetFriendInfo(bnetIDAccount)
+	local _, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, _, _, _, _, _, isRIDFriend = BNGetFriendInfoByID(bnetIDAccount)
 	if not accountName then return end -- not initialized yet
 	-- print(bnetIDAccount, accountName, isRIDFriend, battleTag, isBattleTag, isOnline, client, bnetIDGameAccount, characterName)
 
@@ -50,12 +51,13 @@ local bnetNames = setmetatable({}, { __index = function(bnetNames, bnetIDAccount
 		accountName = characterName
 	elseif isRIDFriend and PhanxChatDB.ShortenRealNames == "FIRSTNAME" then
 		-- This works because the game ignores extra placeholders:
+		-- Kf = full name, Kg = given/first name, Ks = last/surname
 		accountName = gsub(accountName, "|Kf", "|Kg")
 		-- print("Using first name:", accountName)
 	elseif PhanxChatDB.ShortenRealNames == "BATTLETAG" then
 		accountName = strsplit("#", battleTag, 2)
 		-- print("Using BattleTag:", accountName)
-	else
+	--else
 		-- Fall back to full name
 		-- print("Using full name:", accountName)
 	end
@@ -117,67 +119,56 @@ local BN_WHO_LIST_GUILD_FORMAT = gsub(WHO_LIST_GUILD_FORMAT, "|Hplayer:", "|H")
 local BN_WHO_LIST_REALM_FORMAT = BN_WHO_LIST_FORMAT .. " (%s)"
 local BN_WHO_LIST_GUILD_REALM_FORMAT = BN_WHO_LIST_GUILD_FORMAT .. " (%s)"
 
-local dialogs = {
-	"ADD_FRIEND",
-	"ADD_GUILDMEMBER",
-	"ADD_IGNORE",
-	"ADD_MUTE",
-	"ADD_RAIDMEMBER",
-	"ADD_TEAMMEMBER",
-	"CHANNEL_INVITE",
-}
-
 hooksecurefunc("ChatFrame_OnHyperlinkShow", function(frame, link, text, button)
 	if strsub(link, 1, 8) == "BNplayer" then
-		local linkID = tonumber(strmatch(link, "|Kf(%d+)"))
-		if not linkID or not IsModifiedClick("CHATLINK") or ChatEdit_GetActiveWindow() or HelpFrameOpenTicketEditBox:IsVisible() then
+		local _, bnetIDAccount = strsplit(":", strsub(link, 10))
+		if not bnetIDAccount or BNIsSelf(bnetIDAccount) or not IsModifiedClick("CHATLINK") or ChatEdit_GetActiveWindow() then
 			return
 		end
-		for _, dialog in ipairs(dialogs) do
-			if StaticPopup_Visible(dialog) then
+		for i = 1, 4 do
+			if _G["StaticPopup"..i.."EditBox"]:HasFocus() then
 				return
 			end
 		end
-		for i = 1, BNGetNumFriends() do
-			local pID, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, _, _, _, _, note, isRIDFriend = BNGetFriendInfoByID(i)
-			if pID == linkID then
-				local color = ChatTypeInfo.SYSTEM
-				if bnetIDGameAccount then
-					local hasFocus, characterName, _, realmName, _, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
-					if client ~= BNET_CLIENT_WOW then
-						gameText = BNET_CLIENT_TEXT[client]
-						if gameText then
-							return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_PlayingOtherGame, accountName, gameText),
-								color.r, color.g, color.b)
-						else
-							return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_Battlenet, accountName),
-								color.r, color.g, color.b)
-						end
-					elseif realm == GetRealmName() then -- #TODO: Check in the future if Blizz fixes zone being nil
-						if guild and guild ~= "" then
-							return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_GUILD_FORMAT,
-								link, characterName, level, race, class, guild, zoneName or ""), "  ", " "),
-								color.r, color.g, color.b)
-						else
-							return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_FORMAT,
-								link, characterName, level, race, class, zoneName or ""), "  ", " "),
-								color.r, color.g, color.b)
-						end
-					elseif guild and guild ~= "" then
-						return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_GUILD_REALM_FORMAT,
-							link, characterName, level, race, class, guild, zoneName or "", realmName), "  ", " "),
-							color.r, color.g, color.b)
-					else
-						return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_REALM_FORMAT,
-							link, characterName, level, race, class, zoneName or "", realmName), "  ", " "),
-							color.r, color.g, color.b)
-					end
-				else
-					return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_Offline,
-						accountName),
-						color.r, color.g, color.b)
-				end
+
+		local _, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, _, _, _, _, note, isRIDFriend = BNGetFriendInfoByID(bnetIDAccount)
+		if not accountName then return end
+
+		local color = ChatTypeInfo.SYSTEM
+		if not bnetIDGameAccount then
+			return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_Offline,
+				accountName),
+				color.r, color.g, color.b)
+		end
+
+		local hasFocus, characterName, _, realmName, _, faction, race, class, guild, zoneName, level, gameText = BNGetGameAccountInfo(bnetIDGameAccount)
+		if client ~= BNET_CLIENT_WOW then
+			gameText = BNET_CLIENT_TEXT[client]
+			if gameText then
+				return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_PlayingOtherGame, accountName, gameText),
+					color.r, color.g, color.b)
+			else
+				return DEFAULT_CHAT_FRAME:AddMessage(format(L.WhoStatus_Battlenet, accountName),
+					color.r, color.g, color.b)
 			end
+		elseif realm == GetRealmName() then -- #TODO: Check in the future if Blizz fixes zone being nil
+			if guild and guild ~= "" then
+				return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_GUILD_FORMAT,
+					link, characterName, level, race, class, guild, zoneName or ""), "  ", " "),
+					color.r, color.g, color.b)
+			else
+				return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_FORMAT,
+					link, characterName, level, race, class, zoneName or ""), "  ", " "),
+					color.r, color.g, color.b)
+			end
+		elseif guild and guild ~= "" then
+			return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_GUILD_REALM_FORMAT,
+				link, characterName, level, race, class, guild, zoneName or "", realmName), "  ", " "),
+				color.r, color.g, color.b)
+		else
+			return DEFAULT_CHAT_FRAME:AddMessage(gsub(format(BN_WHO_LIST_REALM_FORMAT,
+				link, characterName, level, race, class, zoneName or "", realmName), "  ", " "),
+				color.r, color.g, color.b)
 		end
 	end
 end)

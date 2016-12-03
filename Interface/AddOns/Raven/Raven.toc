@@ -1,15 +1,10 @@
-## Interface: 70000
+## Interface: 70100
 ## Title: Raven
 ## Notes: Monitors buffs, debuffs and cooldowns and provides timer bars and icons plus helpful notifications
 ## Author: Tomber
 ## DefaultState: enabled
 ## OptionalDependencies: Masque
 ## SavedVariables: RavenDB
-## Version: r376
-## X-Curse-Packaged-Version: r376
-## X-Curse-Project-Name: Raven
-## X-Curse-Project-ID: raven
-## X-Curse-Repository-ID: wow/raven/mainline
 
 #@no-lib-strip@
 embeds.xml

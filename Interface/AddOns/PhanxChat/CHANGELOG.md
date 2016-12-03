@@ -1,3 +1,14 @@
+### Version 7.1.0.1
+
+* Fixed removing brackets from Battle.net player names
+* Fixed an error when shift-clicking Battle.net player names in chat (ticket #13)
+* Added intelligent downgrading of group channels (/i is automatically converted to /ra or /p if you're not in an instance group, and /ra and /rw are converted to /i or /p if you're not in a raid group) (ticket #9)
+
+### Version 7.1.0.0
+
+* Updated for WoW 7.1
+* Fixed an error caused by Blizzard renaming the chat frame friends button
+
 ### Version 7.0.3.0
 
 * Updated for WoW 7.0.3
@@ -111,7 +122,7 @@
 
 ### Version 5.1.0.187
 
-* Added [LibChatAnims](http://www.wowace.com/addons/libchatanims/) to work around public chat API functions tainting the talent frame due to Blizzard's stupidity
+* Added [LibChatAnims](https://www.wowace.com/addons/libchatanims/) to work around public chat API functions tainting the talent frame due to Blizzard's stupidity
 
 ### Version 5.1.0.186
 

@@ -177,11 +177,10 @@ function Timer:OnSizeChanged(width, height)
     end
 end
 
-function Timer:Start(start, duration, charges, maxCharges)
-    local remainingCharges = charges or 0
+function Timer:Start(start, duration, modRate)
 
     --start timer
-    if start > 0 and duration > db.minDuration and remainingCharges == 0 then
+    if start > 0 and duration > db.minDuration then
         self.start = start
         self.duration = duration
         self.enabled = true
@@ -254,30 +253,17 @@ end
 function CooldownCount:OnEnable()
     setTimeFormats()
 
-    _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, ...)
+    _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if not cd.noCooldownCount then
+            if start > 0 then
+                CooldownCount:debug("CDF_Set", cd:GetDebugName(), start, duration, modRate)
+            end
             if not cd.timer then
                 cd.timer = CreateTimer(cd)
             end
-            cd.timer:Start(...)
+            cd.timer:Start(start, duration, modRate)
         end
     end)
-
-    --[[ 4.3 compatibility
-        In WoW 4.3 and later, action buttons can completely bypass lua for updating cooldown timers
-        This set of code is there to check and force update timers on standard action buttons (eg. anything that uses's ActionButton.lua)
-    local ActionBarButtonEventsFrame = _G["ActionBarButtonEventsFrame"]
-    if ActionBarButtonEventsFrame then
-        if ActionBarButtonEventsFrame.frames then
-            for i, frame in next, ActionBarButtonEventsFrame.frames do
-                SetupTimer(frame.cooldown)
-                --actionButton_Register(frame)
-            end
-        end
-        _G.hooksecurefunc("ActionBarButtonEventsFrame_RegisterFrame", actionButton_Register)
-        self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
-    end
-    ]]
     _G.SetCVar("countdownForCooldowns", 0)
 end
 

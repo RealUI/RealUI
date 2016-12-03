@@ -5,6 +5,14 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Bartender4", "zhCN")
 if not L then return end
 
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["无" 表示总是激活且不需要辅助键.
+
+如果你想激活一个特定动作条,记得在单个动作条的"状态配置"标签里启用鼠标指向施法.]=]
+L["|cffff0000WARNING|cffffffff: Pressing the button will reset your complete profile! If you're not sure about this, create a new profile and use that to experiment."] = "|cffff0000警告|cffffffff：按下按钮将会重置你的全部配置文件！你如果不确定这些，创建一个新的配置文件并使用它来实验。"
+L["|cffffff00Click|r to toggle bar lock"] = "|cffffff00单击|r切换动作条锁定"
+L["|cffffff00Right-click|r to open the options menu"] = "|cffffff00右击|r打开选项菜单"
 L["ActionBar Paging"] = "动作条翻页"
 L["Alpha"] = "透明度"
 L["ALT"] = "ALT"
@@ -15,12 +23,12 @@ L["Apply Preset"] = "套用预设"
 L["Artifact Power Bar"] = "神器能量条"
 L["Auto-Assist Casting"] = "自动辅助施法"
 L["Bag Bar"] = "背包栏"
+L["Bar %s"] = "动作条%s"
 L["Bar Options"] = "动作条选项"
 L["Bar Paging"] = "动作条切换"
-L["Bars"] = "动作条"
-L["Bar %s"] = "动作条%s"
 L["Bar Snapping"] = "动作条粘附"
 L["Bar Style & Layout"] = "动作条风格与布局"
+L["Bars"] = "动作条"
 L["Bars unlocked. Move them now and click Lock when you are done."] = "动作条已解锁。现在可以移动，完成后点击锁定。"
 L["Bartender4"] = "Bartender4"
 L["Bartender4 only converts the bindings of Bar1 to be directly usable, all other Bars will have to be re-bound to the Bartender4 keys. A direct indicator if your key-bindings are setup correctly is the hotkey display on the buttons. If the key-bindings shows correctly on your button, everything should work fine as well."] = "Bartender4 只覆盖动作条1的直接使用按键绑定，所有其它动作条需重新绑定 Bartender4 按键。如果你的一个直接指示按键绑定在正确设置热键按钮上显示。如果按键绑定正确显示你的按钮，那么一切都应该工作正常。"
@@ -28,20 +36,17 @@ L["Bartender4 was written by Nevcairiel of EU-Antonidas. He will accept cookies 
 L["Blizzard Art"] = "暴雪风格"
 L["Blizzard Art Bar"] = "暴雪风格动作条"
 L["Blizzard interface"] = "暴雪界面"
+L["Button %s"] = "按钮%s"
 L["Button Grid"] = "空按钮"
 L["Button Lock"] = "按钮锁定"
 L["Button Look"] = "按钮外观"
-L["Buttons"] = "按钮"
-L["Button %s"] = "按钮%s"
 L["Button Tooltip"] = "按钮提示"
+L["Buttons"] = "按钮"
 L["Cannot access options during combat."] = "战斗中无法更改选项。"
 L["Center Horizontally"] = "中心水平"
+L["Center Vertically"] = "中心垂直"
 L["Centers the bar horizontally on screen."] = "将动作条水平置于屏幕中心。"
 L["Centers the bar vertically on screen."] = "将动作条垂直置于屏幕中心。"
-L["Center Vertically"] = "中心垂直"
-L["|cffff0000WARNING|cffffffff: Pressing the button will reset your complete profile! If you're not sure about this, create a new profile and use that to experiment."] = "|cffff0000警告|cffffffff：按下按钮将会重置你的全部配置文件！你如果不确定这些，创建一个新的配置文件并使用它来实验。"
-L["|cffffff00Click|r to toggle bar lock"] = "|cffffff00单击|r切换动作条锁定"
-L["|cffffff00Right-click|r to open the options menu"] = "|cffffff00右击|r打开选项菜单"
 L["Change the current anchor point of the bar."] = "改变当前动作条锚点。"
 L["Choose between the classic WoW layout and two variations"] = "在魔兽世界经典布局和2个其它变化中选择"
 L["Choose the ending to the left"] = "选择左侧的结束"
@@ -49,6 +54,7 @@ L["Choose the ending to the right"] = "选择右侧的结束"
 L["Classic"] = "经典"
 L["Click-Through"] = "点击穿越"
 L["Colors"] = "颜色"
+L["Configure  the Stance Bar"] = "配置姿态栏"
 L["Configure actionbar paging when the %s key is down."] = "配置当按下%s键时动作条的翻页。"
 L["Configure all of Bartender to preset defaults"] = "配置所有 Bartender 重置为默认"
 L["Configure Bar %s"] = "配置动作条%s"
@@ -66,9 +72,9 @@ L["Configure the padding of the buttons."] = "配置按钮间距。"
 L["Configure the Pet Bar"] = "配置宠物栏"
 L["Configure the Reputation Bar"] = "配置声望条"
 L["Configure the scale of the bar."] = "配置动作条缩放。"
-L["Configure  the Stance Bar"] = "配置姿态栏"
 L["Configure the VehicleBar"] = "配置载具动作条"
 L["Configure the XP Bar"] = "配置经验条"
+L["Configure the Zone Ability Bar"] = "配置区域技能条"
 L["Copy Conditionals"] = "条件复制"
 L["Create a copy of the auto-generated conditionals in the custom configuration as a base template."] = "在自定义配置中复制一个条件作为模板。"
 L["CTRL"] = "CTRL"
@@ -87,8 +93,6 @@ Auto-Assist will automatically try to cast on your target's target if your targe
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[启用游戏内置动作条切换控制。
 具体查看暴雪按键绑定设置 - 通常是 Shift-鼠标滚轮和 Shift+1 至 Shift+6。]=]
-L["Enabled"] = "已启用"
-L["Enable/Disable the bar."] = "启用或禁用该动作条。"
 L[ [=[Enable Mouse-Over Casting for this bar.
 Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[为此动作条启用鼠标指向施法.
 如果可能,鼠标指向施法会自动对当前鼠标所指的目标施法,不会改变当前目标.]=]
@@ -106,6 +110,9 @@ L["Enable the use of a custom condition, disabling all of the above."] = "启用
 L["Enable the use of the Blizzard Vehicle UI, hiding any Bartender4 bars in the meantime."] = "启用暴雪载具用户界面，同时隐藏所有 Bartender4 动作条。"
 L["Enable the Vehicle Bar"] = "启用载具控制条"
 L["Enable the XP Bar"] = "启用经验条"
+L["Enable the Zone Ability Bar"] = "启用区域技能条"
+L["Enable/Disable the bar."] = "启用或禁用该动作条。"
+L["Enabled"] = "已启用"
 L["Extra Action Bar"] = "附加动作条"
 L["Fade Out"] = "淡出"
 L["Fade Out Alpha"] = "淡出透明度"
@@ -137,10 +144,10 @@ L["Hide this bar when you are riding on a vehicle."] = "使用载具时隐藏此
 L["Hide this bar when you have a pet."] = "有宠物时隐藏。"
 L["Hide this bar when you have no pet."] = "没有宠物时隐藏。"
 L["Hide when Possessing"] = "控制时隐藏"
-L["Hide without pet"] = "无宠物时隐藏"
 L["Hide with Override Bar"] = "覆盖动作条时隐藏"
 L["Hide with pet"] = "有宠物时隐藏"
 L["Hide with Vehicle UI"] = "使用载具用户界面时隐藏"
+L["Hide without pet"] = "无宠物时隐藏"
 L["Horizontal Growth"] = "水平增长"
 L["Horizontal growth direction for this bar."] = "这个动作条向水平方向增长。"
 L["Hotkey Mode"] = "快捷键模式"
@@ -162,13 +169,8 @@ L["Mouse-Over Casting"] = "鼠标指向施法"
 L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "鼠标指向施法仅限于在有辅助键被按下时才会激活. 你能在全局选项中设置辅助键."
 L["Mouse-Over Casting Modifier"] = "鼠标指向施法辅助键"
 L["No Display"] = "不显示"
-L["None"] = "无"
-L[ [=["None" as modifier means its always active, and no modifier is required.
-
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["无" 表示总是激活且不需要辅助键.
-
-如果你想激活一个特定动作条,记得在单个动作条的"状态配置"标签里启用鼠标指向施法.]=]
 L["No Stance/Form"] = "没有姿态或变形"
+L["None"] = "无"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "注意：启用自定义条件将禁用以上所有设置！"
 L["Number of buttons."] = "按钮数量。"
 L["Number of rows."] = "行数。"
@@ -190,8 +192,8 @@ L["Reputation Bar"] = "声望条"
 L["Reset Position"] = "重置位置"
 L["Reset the position of this bar completly if it ended up off-screen and you cannot reach it anymore."] = "当动作条移动到屏幕外不能被定位时重置动作条位置。"
 L["Right"] = "右"
-L["Right-click Self-Cast"] = "右键自我施法"
 L["Right ending"] = "右侧结束"
+L["Right-click Self-Cast"] = "右键自我施法"
 L["Rows"] = "行"
 L["Scale"] = "缩放"
 L["Select a modifier for Mouse-Over Casting"] = "为鼠标指向施法选择一个辅助键"
@@ -224,18 +226,18 @@ L["Toggle actions on key press instead of release"] = "按下按键而不是释�
 L[ [=[Toggle Button Zoom
 For more style options you need to install ButtonFacade]=] ] = [=[切换按钮缩放
 如需更多风格选项，你需要安装 ButtonFacade]=]
-L["Toggles actions immediately when you press the key, and not only on release. Note that draging actions will cause them to be cast in this mode."] = "按下按键立刻切换动作，而不是释放。请注意，拖延动作会导致他们在此模式下施放。"
 L["Toggle the button grid."] = "切换空按钮。"
 L["Toggle the use of the modifier-based focus-cast functionality."] = "切换焦点施法功能。"
 L["Toggle the use of the modifier-based self-cast functionality."] = "切换自我施法功能。"
 L["Toggle the use of the right-click self-cast functionality."] = "切换右键自己施法功能。"
+L["Toggles actions immediately when you press the key, and not only on release. Note that draging actions will cause them to be cast in this mode."] = "按下按键立刻切换动作，而不是释放。请注意，拖延动作会导致他们在此模式下施放。"
 L["Two action bars"] = "两个动作条"
 L["Two bars wide"] = "两个动作条宽度"
 L["Up"] = "上"
 L["Use Blizzard Vehicle UI"] = "使用暴雪载具用户界面"
 L["Use Custom Condition"] = "使用自定义条件"
-L["VehicleBar"] = "载具控制条"
 L["Vehicle Bar"] = "载具控制条"
+L["VehicleBar"] = "载具控制条"
 L["Vertical Growth"] = "垂直增长"
 L["Vertical growth direction for this bar."] = "这个动作条向垂直方向增长。"
 L["Visibility"] = "可见性"
@@ -257,5 +259,5 @@ Example: [form:1]9;0]=] ] = [=[你可以在自定义字符串里使用任意宏�
 例如：[form:1]9;0]=]
 L["You can use the preset defaults as a starting point for setting up your interface. Just choose your preferences here and click the button below to reset your profile to the preset default. Note that not all defaults show all bars."] = "你可以用它作为你的界面设置开始预设的默认值。只要你的喜好选择在这里，点击下面的按钮来重置你的配置文件到预设默认。请注意，并非所有默认显示所有动作条。"
 L["You have to exit the vehicle in order to be able to change the Vehicle UI settings."] = "你已经离开载具并可以改变载具用户界面设置。"
+L["Zone Ability Bar"] = "区域技能条"
 L["Zoom"] = "缩放"
-
