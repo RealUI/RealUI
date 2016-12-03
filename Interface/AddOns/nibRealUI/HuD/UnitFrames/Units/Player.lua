@@ -25,7 +25,6 @@ local frameInfo = {
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        debug = true,
     },
     [1] = {
         x = 222,
@@ -188,7 +187,7 @@ local function CreatePowerBar(parent)
         end
     end
 
-    ---[[ test 
+    ---[[ test
     druidMana:SetMinMaxValues(0, 1)
     druidMana:SetValue(0.75)
     druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)

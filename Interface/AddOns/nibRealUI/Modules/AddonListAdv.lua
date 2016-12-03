@@ -88,7 +88,7 @@ function AddonListAdv:SaveSet(name, newName)
     end
 
     --print("SaveSet2", set, set.name)
-    
+
     for i = 1, #set do
         --print("SaveSet3", i, set[i])
         table.remove(set, i)
@@ -181,7 +181,7 @@ function AddonListAdv:SetsOnClick(btn)
     _G.Lib_ToggleDropDownMenu(1, nil, _G.AddonList.setsDD, _G.AddonList.sets, 0, 0)
 end
 function AddonListAdv:Skin()
-    if not _G.AddonList.sets then 
+    if not _G.AddonList.sets then
         _G.AddonList.sets = RealUI:CreateTextButton("Sets", _G.AddonList, 100, 22)
         _G.AddonList.sets:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
         _G.AddonList.sets:SetScript("OnClick", self.SetsOnClick)

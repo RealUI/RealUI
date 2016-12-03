@@ -244,18 +244,18 @@ elseif class == "MONK" then
             if spawnCounter > 0 or orbCounter > 0 then
                 if spawnCounter > 0 then
                     local spawnMod = spawnCounter % 1
-                    local right = Lerp(.08, .92, spawnMod) 
-                    debug(spellData.debug, "right", right) 
-                    self.status:SetTexCoord(.08, right, .08, .92) 
+                    local right = Lerp(.08, .92, spawnMod)
+                    debug(spellData.debug, "right", right)
+                    self.status:SetTexCoord(.08, right, .08, .92)
 
-                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, spawnMod) 
-                    debug(spellData.debug, "xOfs", xOfs) 
+                    local xOfs = Lerp(-(self.icon:GetWidth()), 0, spawnMod)
+                    debug(spellData.debug, "xOfs", xOfs)
                     self.status:SetPoint("BOTTOMRIGHT", self, xOfs, 0)
                     if spawnCounter > 1 then
                         spawnCounter = spawnCounter - 1
                     end
                 end
-                
+
                 if orbCounter > 0 then
                     self.count:SetText(_G.tostring(orbCounter))
                     AuraTracking:AddTracker(self)
@@ -358,7 +358,7 @@ elseif class == "ROGUE" then
         end
     end]]
     do -- Deeper Stratagem
-        -- This updates the max potential duration depending on if the player 
+        -- This updates the max potential duration depending on if the player
         -- has Deerper Stratagem, which allows finishers to use up to 6 CPs
         local cpWatcher = _G.CreateFrame("Frame", nil, _G.UIParent)
         cpWatcher.debug = "cpWatcher"
@@ -410,7 +410,7 @@ function AuraTracking:SetupDefaultTracker()
         --[[ Possible Spec specific settings
         specs = {
             ["**"] = defaultSpec,
-            [1] = {   
+            [1] = {
                 talent = {},
                 order = 0,
             },

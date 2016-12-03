@@ -153,6 +153,7 @@ function Bartender4:HideBlizzard()
 	--MainMenuExpBar:UnregisterAllEvents()
 	--MainMenuExpBar:Hide()
 	MainMenuExpBar:SetParent(UIHider)
+	MainMenuExpBar:SetDeferAnimationCallback(nil)
 
 	MainMenuBarMaxLevelBar:Hide()
 	MainMenuBarMaxLevelBar:SetParent(UIHider)
@@ -161,11 +162,11 @@ function Bartender4:HideBlizzard()
 	--ReputationWatchBar:Hide()
 	ReputationWatchBar:SetParent(UIHider)
 
-	if ArtifactWatchBar then
-		ArtifactWatchBar:SetParent(UIHider)
-	end
+	ArtifactWatchBar:SetParent(UIHider)
+	ArtifactWatchBar.StatusBar:SetDeferAnimationCallback(nil)
 
 	HonorWatchBar:SetParent(UIHider)
+	HonorWatchBar.StatusBar:SetDeferAnimationCallback(nil)
 
 	StanceBarFrame:UnregisterAllEvents()
 	StanceBarFrame:Hide()
@@ -331,6 +332,7 @@ function Bartender4:ShowUnlockDialog()
 		f:SetFrameStrata("DIALOG")
 		f:SetToplevel(true)
 		f:EnableMouse(true)
+		f:SetMovable(true)
 		f:SetClampedToScreen(true)
 		f:SetWidth(360)
 		f:SetHeight(110)
@@ -347,8 +349,9 @@ function Bartender4:ShowUnlockDialog()
 		f:SetScript("OnShow", function() PlaySound("igMainMenuOption") end)
 		f:SetScript("OnHide", function() PlaySound("gsTitleOptionExit") end)
 
-		local tr = f:CreateTitleRegion()
-		tr:SetAllPoints(f)
+		f:RegisterForDrag('LeftButton')
+		f:SetScript('OnDragStart', function(f) f:StartMoving() end)
+		f:SetScript('OnDragStop', function(f) f:StopMovingOrSizing() end)
 
 		local header = f:CreateTexture(nil, "ARTWORK")
 		header:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")

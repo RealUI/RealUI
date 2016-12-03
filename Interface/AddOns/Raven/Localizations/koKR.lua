@@ -1,4 +1,4 @@
-﻿-- 한글화 작업 : 달라란@삼이공
+-- 한글화 작업 : 달라란@삼이공
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 local L = AceLocale:NewLocale("Raven", "koKR")
 if not L then return end

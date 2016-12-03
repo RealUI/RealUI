@@ -330,7 +330,7 @@ do
                     disabled = not isDraenorGarrison(),
                     type = "execute",
                     func = function()
-                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1] 
+                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
                         _G.GarrisonShipMissionAlertSystem:AddAlert(mission.missionID)
                     end,
                 },
@@ -349,7 +349,7 @@ do
                     desc = "GarrisonRandomMissionAlertSystem",
                     type = "execute",
                     func = function()
-                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1] 
+                        local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
                         _G.GarrisonRandomMissionAlertSystem:AddAlert(mission.missionID)
                     end,
                 },

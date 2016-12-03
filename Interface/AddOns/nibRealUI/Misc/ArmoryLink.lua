@@ -19,7 +19,7 @@ local function urlencode(str)
         end)
         str = str:gsub(" ", "+")
     end
-    return str    
+    return str
 end
 
 -- Find the Realm and Region
@@ -58,7 +58,7 @@ _G.hooksecurefunc("UnitPopup_OnClick", function(self)
         server = server:gsub("'", ""):lower()
         server = server:gsub(" ", "-")
     end
-    
+
     if name and self.value == "ARMORYLINK" then
         local inputBox = _G.StaticPopup_Show("LINK_COPY_DIALOG")
         if region == "us" or region == "eu" or region == "tw" or region == "kr" then
@@ -75,7 +75,7 @@ _G.hooksecurefunc("UnitPopup_OnClick", function(self)
             local n, r = name:match("(.*)-(.*)")
             n = n or name
             r = r or RealUI.realm
-            
+
             linkurl = "http://www.battlenet.com.cn/wow/zh/character/"..urlencode(r).."/"..urlencode(n).."/advanced"
             inputBox.editBox:SetText(linkurl)
             inputBox.editBox:HighlightText()

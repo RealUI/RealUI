@@ -9,7 +9,6 @@ local ExtraActionBarMod = Bartender4:NewModule("ExtraActionBar", "AceHook-3.0")
 
 -- fetch upvalues
 local Bar = Bartender4.Bar.prototype
-local LBF = LibStub("LibButtonFacade", true)
 
 local setmetatable, table_insert = setmetatable, table.insert
 

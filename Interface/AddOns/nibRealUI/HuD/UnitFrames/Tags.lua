@@ -31,7 +31,7 @@ tags.Methods["realui:name"] = function(unit)
     local nameColor = "ffffff"
     if isDead then
         nameColor = "3f3f3f"
-    elseif UnitFrames.db.profile.overlay.classColorNames then 
+    elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
         nameColor = RealUI:ColorTableToStr(RealUI:GetClassColor(class))

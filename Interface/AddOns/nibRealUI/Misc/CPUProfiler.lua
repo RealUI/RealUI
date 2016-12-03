@@ -55,7 +55,7 @@ function CPUProfiler:Start()
                 tag:SetPoint('RIGHT', graphFrame, 'BOTTOMLEFT', -1, (t / 100) ^ 0.28 * graphHeight)
                 tag:SetText(_G.tostring(t) .. ' -')
         end
-        
+
         local disableNote = graphFrame:CreateFontString(nil, 'OVERLAY', 'NumberFont_Outline_Med')
             disableNote:SetPoint('RIGHT', graphFrame, 'BOTTOMRIGHT', -2, 6)
             disableNote:SetText("|cffff0000To disable, type |r|cffffffff/cpuProfiling|r")

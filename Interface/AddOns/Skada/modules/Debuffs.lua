@@ -228,9 +228,9 @@ Skada:AddLoadableModule("Debuffs", nil, function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata 		= {showspots = 1, click1 = auramod, click2 = buffspells}
+		mod.metadata 		= {showspots = 1, click1 = auramod, click2 = buffspells, icon = "Interface\\Icons\\Ability_creature_disease_02"}
 		auramod.metadata 	= {}
-		buffs.metadata 		= {showspots = 1, click1 = buffspells, click2 = auramod}
+		buffs.metadata 		= {showspots = 1, click1 = buffspells, click2 = auramod, icon = "Interface\\Icons\\Spell_misc_drink"}
 		buffspells.metadata = {}
 
 		Skada:RegisterForCL(AuraApplied, 'SPELL_AURA_APPLIED', {src_is_interesting = true})

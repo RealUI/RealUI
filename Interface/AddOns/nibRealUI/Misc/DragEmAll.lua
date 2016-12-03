@@ -146,7 +146,7 @@ function DragEmAll:HookFrame(name, moveParent)
     if frame == _G then
         frame = nil
     end
-    
+
     local parent
     if frame and not hooked[name] then
         if moveParent then

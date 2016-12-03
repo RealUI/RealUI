@@ -49,7 +49,7 @@ CPFCopyButton:SetPoint("TOP", CPFSwatchBG, "BOTTOM", 0, -5)
 CPFCopyButton:SetScript("OnClick", function()
     red, green, blue = CPF:GetColorRGB()
     opacity = OSF:GetValue()
-    
+
     CPFCopyButton:SetText(("|cff%02x%02x%02xCopy"):format(red * 255, green * 255, blue * 255))
 end)
 
@@ -93,7 +93,7 @@ local CPFEditBoxes = {
 
 local UpdateCPFRGB = function(editbox)
     local r, g, b
-    if #editbox:GetText() == 6 then 
+    if #editbox:GetText() == 6 then
         local rgb = editbox:GetText()
         r, g, b = _G.tonumber("0x"..rgb:sub(0, 2)), _G.tonumber("0x"..rgb:sub(3, 4)), _G.tonumber("0x"..rgb:sub(5, 6))
     else
@@ -120,7 +120,7 @@ local UpdateRGBA = function()
     local _, s = CPF:GetColorHSV()
     CPFSaturation:SetValue(s)
     --print("UpdateRGBA", r, b, g, 1 - a)
-    
+
     CPFEditBoxes.Red:SetText(r * 255)
     CPFEditBoxes.Green:SetText(g * 255)
     CPFEditBoxes.Blue:SetText(b * 255)
@@ -137,20 +137,20 @@ for type, offsetFactor in next, CPFEditBoxes do
     editbox:SetHeight(15)
     editbox:SetWidth(50)
     editbox:SetPoint("BOTTOMLEFT", _G.ColorPickerOkayButton, "TOPLEFT", ((70 * offsetFactor) + 10), 5)
-    
+
     editbox:SetBackdrop({
-        bgFile = [[Interface\ChatFrame\ChatFrameBackground]], 
+        bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
     })
     editbox:SetBackdropColor(0, 0, 0, .5)
-    
+
     editbox:SetFontObject(_G.ChatFontNormal)
     editbox:SetAutoFocus(false)
     editbox:SetJustifyH("CENTER")
-    
+
     editbox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-    editbox:SetScript("OnEnterPressed", function(self) 
+    editbox:SetScript("OnEnterPressed", function(self)
         UpdateCPFRGB(self)
-        self:ClearFocus() 
+        self:ClearFocus()
     end)
     editbox:SetScript("OnEditFocusGained", function(self)
         self:HighlightText(0, self:GetNumLetters())
@@ -158,7 +158,7 @@ for type, offsetFactor in next, CPFEditBoxes do
     editbox:SetScript("OnEditFocusLost", function(self)
         self:HighlightText(self:GetNumLetters())
     end)
-    
+
     local title = editbox:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     title:SetPoint("RIGHT", editbox, "LEFT", 0, 0)
     if type == "Hex" then
@@ -168,7 +168,7 @@ for type, offsetFactor in next, CPFEditBoxes do
         editbox:SetMaxLetters(3)
         title:SetText(type:match("^%S"))
     end
-    
+
     CPFEditBoxes[type] = editbox
 end
 

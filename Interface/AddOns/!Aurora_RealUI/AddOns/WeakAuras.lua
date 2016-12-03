@@ -14,7 +14,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
     local function CreateAura(parent, data)
         local region = WeakAuras.regionTypes.icon._create(parent, data)
         SkinAura(region)
-        
+
         return region
     end
 
@@ -26,10 +26,10 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
 
     WeakAuras.regionTypes.icon._create = WeakAuras.regionTypes.icon.create
     WeakAuras.regionTypes.icon.create = CreateAura
-    
+
     WeakAuras.regionTypes.icon._modify = WeakAuras.regionTypes.icon.modify
     WeakAuras.regionTypes.icon.modify = ModifyAura
-    
+
     for wa, _ in next, WeakAuras.regions do
         --print("regions", wa, _)
         if WeakAuras.regions[wa].regionType == "icon" then
@@ -106,7 +106,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
             minimize:SetSize(17, 17)
             minimize:ClearAllPoints()
             minimize:SetPoint("TOPRIGHT", close, "TOPLEFT", -5, 0)
-            
+
             -- Tutorial
             --children[6]
             local _, _, _, enabled, loadable = _G.GetAddOnInfo("WeakAurasTutorials")

@@ -1,20 +1,24 @@
-## Interface: 70000
+## Interface: 70100
+## Version: v7.1.1
 ## Title: BadBoy_CCleaner
 ## Notes: Filter crap from your chat.
 ## Notes-frFR: Enlève toutes les saloperies de votre fenêtre de discussion.
+## Notes-deDE: Unsinniges aus Deinem Chat herausfiltern.
+## Notes-ptBR: Filtrar lixo do seu chat.
+## Notes-ruRU: Очищает чат от "мусора"
 ## Notes-zhCN: 过滤聊天窗口的广告
 ## Notes-zhTW: 過濾聊天窗口的廢話....
-## Notes-deDE: Unsinniges aus Deinem Chat herausfiltern.
-## Notes-ruRU: Очищает чат от "мусора"
+## Notes-koKR: Filter crap from your chat.
+## Notes-esES: Filter crap from your chat.
+## Notes-esMX: Filter crap from your chat.
+## Notes-itIT: Filter crap from your chat.
 ## Author: Funkydude
 ## Dependencies: BadBoy
-## SavedVariables: BADBOY_CCLEANER, BADBOY_NOICONS
+## SavedVariables: BADBOY_CCLEANER
 ## X-Category: Chat/Communication
-## X-License: All Rights Reserved
-## X-Curse-Packaged-Version: r99-release
-## X-Curse-Project-Name: BadBoy_CCleaner: Filter Crap From Chat
+## X-License: All Rights Reserved: You are free to fork and modify on GitHub, please ask us about anything else.
 ## X-Curse-Project-ID: badboy_ccleaner
-## X-Curse-Repository-ID: wow/badboy_ccleaner/mainline
+## X-WoWI-ID: 13526
 
 SimpleOptions.lua
 BadBoy_CCleaner.lua

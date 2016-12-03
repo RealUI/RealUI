@@ -41,7 +41,7 @@ local _, playerclass = UnitClass("player")
 function Bartender4.StateBar:Create(id, config, name)
 	local bar = setmetatable(Bartender4.ButtonBar:Create(id, config, name), StateBar_MT)
 
-	if playerclass == "DRUID" or playerclass == "ROGUE" then
+	if playerclass == "DRUID" then
 		bar:RegisterEvent("PLAYER_TALENT_UPDATE")
 		bar:RegisterEvent("PLAYER_REGEN_ENABLED")
 		bar:RegisterEvent("GLYPH_UPDATED")

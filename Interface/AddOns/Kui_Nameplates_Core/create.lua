@@ -58,11 +58,12 @@ local POWER_BAR_HEIGHT,CASTBAR_HEIGHT,TARGET_GLOW_COLOUR
 local FONT,FONT_STYLE,FONT_SHADOW,FONT_SIZE_NORMAL,FONT_SIZE_SMALL
 local TEXT_VERTICAL_OFFSET,NAME_VERTICAL_OFFSET,BOT_VERTICAL_OFFSET
 local BAR_TEXTURE,BAR_ANIMATION,SHOW_STATE_ICONS
-local FADE_AVOID_NAMEONLY,FADE_UNTRACKED
+local FADE_AVOID_NAMEONLY,FADE_UNTRACKED,FADE_AVOID_TRACKED
 local CASTBAR_COLOUR,CASTBAR_UNIN_COLOUR,CASTBAR_SHOW_NAME,CASTBAR_SHOW_ICON
 local SHOW_HEALTH_TEXT,SHOW_NAME_TEXT
 local AURAS_ON_PERSONAL
-local GUILD_TEXT_PLAYERS,TITLE_TEXT_PLAYERS
+local GUILD_TEXT_NPCS,GUILD_TEXT_PLAYERS,TITLE_TEXT_PLAYERS
+local CLASS_COLOUR_FRIENDLY_NAMES,CLASS_COLOUR_ENEMY_NAMES
 
 local HEALTH_TEXT_FRIEND_MAX,HEALTH_TEXT_FRIEND_DMG
 local HEALTH_TEXT_HOSTILE_MAX,HEALTH_TEXT_HOSTILE_DMG
@@ -237,11 +238,14 @@ do
 
         FADE_AVOID_NAMEONLY = self.profile.fade_avoid_nameonly
         FADE_UNTRACKED = self.profile.fade_untracked
+        FADE_AVOID_TRACKED = self.profile.fade_avoid_tracked
 
         SHOW_STATE_ICONS = self.profile.state_icons
 
         SHOW_HEALTH_TEXT = self.profile.health_text
         SHOW_NAME_TEXT = self.profile.name_text
+        CLASS_COLOUR_FRIENDLY_NAMES = self.profile.class_colour_friendly_names
+        CLASS_COLOUR_ENEMY_NAMES = self.profile.class_colour_enemy_names
         HEALTH_TEXT_FRIEND_MAX = self.profile.health_text_friend_max
         HEALTH_TEXT_FRIEND_DMG = self.profile.health_text_friend_dmg
         HEALTH_TEXT_HOSTILE_MAX = self.profile.health_text_hostile_max
@@ -249,6 +253,7 @@ do
 
         AURAS_ON_PERSONAL = self.profile.auras_on_personal
 
+        GUILD_TEXT_NPCS = self.profile.guild_text_npcs
         GUILD_TEXT_PLAYERS = self.profile.guild_text_players
         TITLE_TEXT_PLAYERS = self.profile.title_text_players
     end
@@ -488,15 +493,17 @@ do
                 f.handler:UpdateName()
             end
 
-            if  not f.state.player and
-                UnitIsPlayer(f.unit) and
-                f.state.friend
-            then
-                -- friendly player class colour
-                f.NameText:SetTextColor(GetClassColour(f))
-            else
-                -- white by default
-                f.NameText:SetTextColor(1,1,1,1)
+            -- white name text by default
+            f.NameText:SetTextColor(1,1,1,1)
+
+            if not f.state.player and UnitIsPlayer(f.unit) then
+                if f.state.friend then
+                    if CLASS_COLOUR_FRIENDLY_NAMES then
+                        f.NameText:SetTextColor(GetClassColour(f))
+                    end
+                elseif CLASS_COLOUR_ENEMY_NAMES then
+                    f.NameText:SetTextColor(GetClassColour(f))
+                end
             end
 
             if f.state.no_name then
@@ -612,7 +619,8 @@ end
 do
     local function UpdateGuildText(f)
         if not f.IN_NAMEONLY or not f.state.guild_text or
-           (UnitIsPlayer(f.unit) and not GUILD_TEXT_PLAYERS)
+           (not GUILD_TEXT_PLAYERS and UnitIsPlayer(f.unit)) or
+           (not GUILD_TEXT_NPCS and not UnitIsPlayer(f.unit))
         then
             f.GuildText:Hide()
         else
@@ -680,6 +688,12 @@ do
             end
         end
     end
+    function glow_prototype:SetAlpha(...)
+        for _,side in ipairs(self.sides) do
+            side:SetAlpha(...)
+        end
+    end
+
     -- update
     local function UpdateFrameGlow(f)
         if f.IN_NAMEONLY then
@@ -711,12 +725,15 @@ do
 
         if f.state.target and core.profile.target_glow then
             -- target glow colour
+            f.ThreatGlow:SetAlpha(1)
             f.ThreatGlow:SetVertexColor(unpack(TARGET_GLOW_COLOUR))
+
             f.TargetGlow:SetVertexColor(unpack(TARGET_GLOW_COLOUR))
             f.TargetGlow:Show()
         else
             if f.state.glowing then
                 -- threat glow colour
+                f.ThreatGlow:SetAlpha(1)
                 f.ThreatGlow:SetVertexColor(unpack(f.state.glow_colour))
             else
                 if core.profile.glow_as_shadow then
@@ -1123,6 +1140,7 @@ do
             y_spacing = 1,
             rows = 2,
 
+            vanilla_filter = self.profile.auras_vanilla_filter,
             kui_whitelist = self.profile.auras_whitelist,
             pulsate = self.profile.auras_pulsate,
             timer_threshold = self.profile.auras_time_threshold > 0 and self.profile.auras_time_threshold or nil,
@@ -1206,6 +1224,7 @@ do
                     af.pulsate = self.profile.auras_pulsate
                     af.timer_threshold = timer_threshold
                     af.squareness = self.profile.auras_icon_squareness
+                    af.vanilla_filter = self.profile.auras_vanilla_filter
 
                     af:SetSort(self.profile.auras_sort)
                     af:SetWhitelist(nil,self.profile.auras_whitelist)
@@ -1389,7 +1408,12 @@ do
 end
 -- name show/hide ##############################################################
 function core:ShowNameUpdate(f)
-    if not FADE_UNTRACKED and f.IN_NAMEONLY then return end
+    if  not FADE_UNTRACKED and
+        not FADE_AVOID_TRACKED and
+        f.IN_NAMEONLY
+    then
+        return
+    end
 
     if f.state.target or
        f.state.threat or
@@ -1412,7 +1436,7 @@ function core:ShowNameUpdate(f)
         f.state.no_name = true
     end
 
-    if FADE_UNTRACKED then
+    if FADE_UNTRACKED or FADE_AVOID_TRACKED then
         plugin_fading:UpdateFrame(f)
     end
 end

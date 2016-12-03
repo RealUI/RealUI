@@ -46,47 +46,6 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         --f:SetBackdropBorderColor(0.05, 0.05, 0.05)
     end
 
-    local function skinLSM30(frame)
-        frame.DLeft:SetAlpha(0)
-        frame.DMiddle:SetAlpha(0)
-        frame.DRight:SetAlpha(0)
-
-        local bg = _G.CreateFrame("Frame", nil, frame)
-        bg:SetPoint("TOPLEFT", 0, -18)
-        bg:SetPoint("BOTTOMRIGHT", 0, 6)
-        bg:SetFrameLevel(frame:GetFrameLevel()-1)
-        F.CreateBD(bg, 0)
-        F.CreateGradient(bg)
-        frame.bg = bg
-
-        frame.dropButton:SetParent(frame.bg)
-        frame.dropButton:SetSize(20, 20)
-        frame.dropButton:ClearAllPoints()
-        frame.dropButton:SetPoint("BOTTOMRIGHT", frame.bg, 0, 0)
-
-        F.Reskin(frame.dropButton, true)
-
-        frame.dropButton:SetDisabledTexture(C.media.backdrop)
-        local dis = frame.dropButton:GetDisabledTexture()
-        dis:SetVertexColor(0, 0, 0, .4)
-        dis:SetDrawLayer("OVERLAY")
-        dis:SetAllPoints()
-
-        local tex = frame.dropButton:CreateTexture(nil, "ARTWORK")
-        tex:SetTexture(C.media.arrowDown)
-        tex:SetSize(8, 8)
-        tex:SetPoint("CENTER")
-        tex:SetVertexColor(1, 1, 1)
-        frame.dropButton.tex = tex
-
-        frame.dropButton:HookScript("OnEnter", F.colourArrow)
-        frame.dropButton:HookScript("OnLeave", F.clearArrow)
-
-        frame.text:ClearAllPoints()
-        frame.text:SetPoint("LEFT", frame.bg, 0, 0)
-        frame.text:SetPoint("RIGHT", frame.bg, -25, 0)
-    end
-
     local function skinWeakAuras(widget)
         local bg = widget.background or widget.frame.background -- adjust for BS
         bg:SetColorTexture(1, 1, 1, 0.4)
@@ -213,8 +172,8 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 widget.button:ClearAllPoints()
                 widget.button:SetPoint("TOPRIGHT", widget.dropdown, 1, -4)
                 widget.text:ClearAllPoints()
-                widget.text:SetPoint("LEFT", widget.dropdown, 0, 0)
-                widget.text:SetPoint("RIGHT", widget.dropdown, -20, 0)
+                widget.text:SetPoint("LEFT", widget.dropdown, 0, 2)
+                widget.text:SetPoint("RIGHT", widget.dropdown, -21, 2)
                 widget.skinned = true
             end
 
@@ -224,11 +183,11 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
 
                 local scrollFrame = widget.scrollFrame
                 scrollFrame:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 1, -12)
-        		scrollFrame:SetPoint("BOTTOMRIGHT", widget.frame, "BOTTOMRIGHT", -1, 12)
+                scrollFrame:SetPoint("BOTTOMRIGHT", widget.frame, "BOTTOMRIGHT", -1, 12)
 
                 local itemFrame = widget.itemFrame
                 itemFrame:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT", 6, 0)
-        		itemFrame:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
+                itemFrame:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
                 widget.skinned = true
             end
 
@@ -372,29 +331,69 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
         -- LibSharedMedia Widgets
         elseif MODULE == "LSM30" then
             if not widget.skinned then
-                skinLSM30(widget.frame)
+                local frame = widget.frame
+
+                frame.DLeft:SetAlpha(0)
+                frame.DMiddle:SetAlpha(0)
+                frame.DRight:SetAlpha(0)
+
+                local bg = _G.CreateFrame("Frame", nil, frame)
+                F.CreateBD(bg, 0)
+                if frame.displayButton then
+                    bg:SetPoint("TOPRIGHT", -4, -24)
+                    bg:SetPoint("BOTTOMLEFT", frame.displayButton, "BOTTOMRIGHT", 2, 0)
+                else
+                    bg:SetPoint("TOPLEFT", 5, -18)
+                    bg:SetPoint("BOTTOMRIGHT", -1, 6)
+                end
+
+                local gradient = F.CreateGradient(frame)
+                gradient:SetPoint("TOPLEFT", bg, 1, -1)
+                gradient:SetPoint("BOTTOMRIGHT", bg, -1, 1)
+
+                frame.text:ClearAllPoints()
+                frame.text:SetPoint("LEFT", bg, 0, 0)
+                frame.text:SetPoint("RIGHT", bg, -25, 0)
+
+                frame.dropButton:SetSize(20, 20)
+                frame.dropButton:ClearAllPoints()
+                frame.dropButton:SetPoint("TOPRIGHT", bg)
+                F.Reskin(frame.dropButton, true)
+
+                frame.dropButton:SetDisabledTexture(C.media.backdrop)
+                local dis = frame.dropButton:GetDisabledTexture()
+                dis:SetVertexColor(0, 0, 0, .4)
+                dis:SetDrawLayer("OVERLAY")
+                dis:SetAllPoints()
+
+                local tex = frame.dropButton:CreateTexture(nil, "ARTWORK")
+                tex:SetTexture(C.media.arrowDown)
+                tex:SetSize(8, 8)
+                tex:SetPoint("CENTER")
+                tex:SetVertexColor(1, 1, 1)
+                frame.dropButton.tex = tex
+
+                frame.dropButton:HookScript("OnEnter", F.colourArrow)
+                frame.dropButton:HookScript("OnLeave", F.clearArrow)
 
                 if MODULETYPE == "Statusbar" then
+                    widget.alignoffset = 26
                     widget.bar:ClearAllPoints()
-                    widget.bar:SetPoint("TOPLEFT", widget.frame.bg, 2, -2)
-                    widget.bar:SetPoint("BOTTOMRIGHT", widget.frame.bg, -21, 2)
+                    widget.bar:SetPoint("TOPLEFT", bg, 2, -2)
+                    widget.bar:SetPoint("BOTTOMRIGHT", bg, -21, 2)
 
-                elseif MODULETYPE == "Background" then
-                    widget.frame.bg:ClearAllPoints()
-                    widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
-                    widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
+                --elseif MODULETYPE == "Background" then
+                    --
 
-                elseif MODULETYPE == "Border" then
-                    widget.frame.bg:ClearAllPoints()
-                    widget.frame.bg:SetPoint("BOTTOMLEFT", widget.frame.displayButton, "BOTTOMRIGHT", 2, 0)
-                    widget.frame.bg:SetPoint("TOPRIGHT", -4, -24)
+                --elseif MODULETYPE == "Border" then
+                    --
 
                 --elseif MODULETYPE == "Font" then
                     --
 
                 elseif MODULETYPE == "Sound" then
                     widget.soundbutton:ClearAllPoints()
-                    widget.soundbutton:SetPoint("TOPLEFT", widget.frame.bg, 4, -2)
+                    widget.soundbutton:SetPoint("TOPLEFT", bg, 4, -2)
                 end
                 widget.skinned = true
             end
@@ -559,7 +558,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                 F.ReskinScroll(widget.scrollbar)
             end
 
-        
+
         --[[elseif TYPE == "SimpleGroup" then
             if not widget.skinned then
                 --

@@ -1,9 +1,5 @@
-## Interface: 70000
-## Version: 7.0.3.1
-## X-Curse-Packaged-Version: 7.0.3.1
-## X-Curse-Project-Name: Bugger
-## X-Curse-Project-ID: bugger
-## X-Curse-Repository-ID: wow/bugger/mainline
+## Interface: 70100
+## Version: 7.1.0.0
 
 ## Title: Bugger
 ## Notes: Shows the errors captured by !BugGrabber.

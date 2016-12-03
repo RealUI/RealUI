@@ -28,6 +28,7 @@ opt.tooltips = {
     nameonly_enemies = 'Use name-only mode on unattackable enemies (not including enemy players under effects such as Ice Block)',
     nameonly_target = 'Also use name-only mode on your target',
     nameonly_all_enemies = 'Use name-only mode on all enemies',
+    guild_text_npcs = 'Show NPCs titles, such as Quartermaster, etc.',
     guild_text_players = 'Show guilds on players in name-only mode',
     title_text_players = 'Show players\' titles in name-only mode',
 
@@ -41,9 +42,10 @@ opt.tooltips = {
     fade_avoid_raidicon = 'Don\'t fade nameplates which have a raid icon visible',
     fade_friendly_npc = 'Fade friendly NPC nameplates by default (including those in name-only mode)',
     fade_neutral_enemy = 'Fade attackable neutral nameplates by default (including those in name-only mode)',
-    fade_untracked = 'Fade non-tracked nameplates by default (including those in name-only mode). Whether or not a unit is tracked can by set by changing the "NPC Names" dropdown and other checkboxes in the default interface options under Esc > Interface > Names',
+    fade_untracked = 'Fade non-tracked nameplates by default (including those in name-only mode).|nWhether or not a unit is tracked can by set by changing the "NPC Names" dropdown and other checkboxes in the default interface options under Esc > Interface > Names',
     fade_avoid_execute_friend = 'Don\'t fade friendly nameplates in execute range (set in the "Health bars" page)',
     fade_avoid_execute_hostile = 'Don\'t fade hostile nameplates in execute range (set in the "Health bars" page)',
+    fade_avoid_tracked = 'Don\'t fade tracked nameplates, or nameplates which are affecting combat with you.|nWhether or not a unit is tracked can by set by changing the "NPC Names" dropdown and other checkboxes in the default interface options under Esc > Interface > Names',
 
     colour_self_class = 'Use your class colour on your personal nameplate',
     colour_self = 'The health bar colour of your personal nameplate',
@@ -60,6 +62,8 @@ opt.tooltips = {
     text_vertical_offset = 'Vertical offset applied to all strings. Used as some fonts render at odd vertical positions in WoW. Note that this value ends in .5 by default as this helps to reduce vertical jittering when frames are moving',
     name_vertical_offset = 'Vertical offset of the name text',
     bot_vertical_offset = 'Vertical offset of the level and health text strings',
+    class_colour_friendly_names = 'Colour the names of friendly players by their class.|n|nThis does not affect name-only mode.',
+    class_colour_enemy_names = 'Colour the names of enemy players by their class.|n|nThis does not affect name-only mode.',
 
     health_text_friend_max = 'Health text format used on friendly units at full health',
     health_text_friend_dmg = 'Health text format used on damaged friendly units',
@@ -76,6 +80,7 @@ opt.tooltips = {
 
     auras_enabled = 'Show auras that you cast on nameplates - buffs on friends, debuffs on enemies',
     auras_on_personal = 'Show auras on your character\'s nameplate if it is enabled',
+    auras_vanilla_filter = 'Use the default UI\'s filter for auras on enemy nameplates, showing things such as other players\' stuns, silences, etc., along with certain important player casts.|n|nNote that the KSLC whitelist is ignored for enemies when this is enabled.',
     auras_whitelist = 'Use KuiSpellList to filter spells. You can use the extra addon KuiSpellListConfig from Curse to customise this list',
     auras_pulsate = 'Pulsate icons when they are about to expire',
     auras_centre = 'Align icons to horizontal centre relative to the frame, rather than left',
@@ -132,6 +137,7 @@ opt.titles = {
     nameonly_enemies = 'On unattackable enemies',
     nameonly_target = 'On target',
     nameonly_all_enemies = 'On enemies',
+    guild_text_npcs = 'Show NPC titles',
     guild_text_players = 'Show player guilds',
     title_text_players = 'Show player titles',
 
@@ -154,6 +160,7 @@ opt.titles = {
     fade_avoid_raidicon = 'Avoid raid icon',
     fade_avoid_execute_friend = 'Avoid low health friends',
     fade_avoid_execute_hostile = 'Avoid low health enemies',
+    fade_avoid_tracked = 'Avoid tracked or in combat',
 
     reaction_colour_sep = 'Colours',
     colour_hated = 'Hated',
@@ -181,6 +188,8 @@ opt.titles = {
     hide_names = 'Hide non-tracked names',
     level_text = 'Show level text',
     health_text = 'Show health text',
+    class_colour_friendly_names = 'Class colour friendly names',
+    class_colour_enemy_names = 'Class colour enemy names',
     text_vertical_offset = 'Text v.offset',
     name_vertical_offset = 'Name v.offset',
     bot_vertical_offset = 'Level/health v.offset',
@@ -202,6 +211,7 @@ opt.titles = {
 
     auras_enabled = 'Show own auras',
     auras_on_personal = 'Show on personal frame',
+    auras_vanilla_filter = 'Use default UI filter',
     auras_whitelist = 'Use whitelist',
     auras_pulsate = 'Pulsate icons',
     auras_centre = 'Centre align icons',

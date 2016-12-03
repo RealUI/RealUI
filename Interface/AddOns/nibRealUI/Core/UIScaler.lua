@@ -66,7 +66,7 @@ function UIScaler:OnInitialize()
     })
     db = self.db.profile
     ndbg = RealUI.db.global
-    
+
     -- Keep WoW UI Scale slider hidden and replace with RealUI button
     _G["Advanced_UseUIScale"]:Hide()
     _G["Advanced_UIScaleSlider"]:Hide()

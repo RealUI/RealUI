@@ -9,7 +9,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     local function SkinBar(bar)
         bar:SetHeight(12)
         bar:SetWidth(195)
-        
+
         for i = 1, bar:GetNumRegions() do
             local region = _G.select(i, bar:GetRegions())
             if region:GetObjectType() == "Texture" then
@@ -19,10 +19,10 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                 region:SetShadowColor(0, 0, 0, 0)
             end
         end
-        
+
         bar:SetStatusBarTexture(_G.RealUI.media.textures.plain)
         bar:SetStatusBarColor(0.35, 0, 0)
-        
+
         local background = bar:CreateTexture(bar:GetName().."Background", "BACKGROUND")
         background:SetTexture(TimerTexture)
         background:SetPoint("CENTER", 0, 0)

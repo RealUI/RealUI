@@ -22,9 +22,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 			if is_absorb then
 				player.shielding = player.shielding + amount
 			end
-			if heal.multistrike then
-				player.multistrikes = player.multistrikes + 1
-			end
 
 			-- Also add to set total damage.
 			set.healing = set.healing + amount
@@ -32,9 +29,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 			set.healingabsorbed = set.healingabsorbed + heal.absorbed
 			if is_absorb then
 				set.shielding = set.shielding + amount
-			end
-			if heal.multistrike then
-				set.multistrikes = set.multistrikes + 1
 			end
 
 			-- Add to recipient healing.
@@ -63,7 +57,7 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 
 				-- Create spell if it does not exist.
 				if not spell then
-					spell = {id = heal.spellid, name = heal.spellname, hits = 0, healing = 0, overhealing = 0, absorbed = 0, shielding = 0, critical = 0, multistrike = 0, min = nil, max = 0}
+					spell = {id = heal.spellid, name = heal.spellname, hits = 0, healing = 0, overhealing = 0, absorbed = 0, shielding = 0, critical = 0, min = nil, max = 0}
 					player.healingspells[heal.spellname] = spell
 				end
 
@@ -75,9 +69,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 				spell.absorbed = spell.absorbed + heal.absorbed
 				if is_absorb then
 					spell.shielding = spell.shielding + amount
-				end
-				if heal.multistrike then
-					spell.multistrike = spell.multistrike + 1
 				end
 
 				spell.hits = (spell.hits or 0) + 1
@@ -96,7 +87,7 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- Healing
-		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical, smultistrike = ...
+		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical, _ = ...
 
 		-- We want to avoid "heals" that are really drains from mobs
 		-- So check if a) the source is player-controlled
@@ -113,7 +104,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 			heal.amount = samount
 			heal.overhealing = soverhealing
 			heal.critical = scritical
-			heal.multistrike = smultistrike
 			heal.absorbed = absorbed
 
 			Skada:FixPets(heal)
@@ -123,7 +113,7 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 	end
 
     local function log_absorb(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical, smultistrike = ...
+		local spellId, spellName, spellSchool, samount, soverhealing, absorbed, scritical, _ = ...
 
 		if bit.band(srcFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) ~= 0 and bit.band(srcFlags, dstFlags, COMBATLOG_OBJECT_REACTION_MASK) ~= 0 then
             -- Spirit of Redemption - discount absorbs on priest.
@@ -141,7 +131,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
             heal.amount = samount
             heal.overhealing = soverhealing
             heal.critical = scritical
-            heal.multistrike = smultistrike
             heal.absorbed = absorbed
 
             Skada:FixPets(heal)
@@ -218,7 +207,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
                 heal.amount = 0
                 heal.overhealing = prev
                 heal.critical = nil
-                heal.multistrike = nil
                 heal.absorbed = 0
 
                 Skada:FixPets(heal)
@@ -248,7 +236,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 					heal.amount = 0                -- The actual healing is now accounted for by SPELL_ABSORBED.
 					heal.overhealing = amount      -- The overheal is what remains on the shield when it expires. This should be identical to our stored shield value, prev.
 					heal.critical = nil
-					heal.multistrike = nil
 					heal.absorbed = 0
 
 					Skada:FixPets(heal)
@@ -372,9 +359,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 				if spell.hits then
 					tooltip:AddDoubleLine(L["Critical"]..":", ("%02.1f%%"):format(spell.critical / spell.hits * 100), 255,255,255,255,255,255)
 				end
-				if spell.hits and spell.multistrike then
-					tooltip:AddDoubleLine(L["Multistrike"]..":", ("%02.1f%%"):format(spell.multistrike / spell.hits * 100), 255,255,255,255,255,255)
-				end
 				if spell.hits then
 					tooltip:AddDoubleLine(L["Overhealing"]..":", ("%02.1f%%"):format(spell.overhealing / (spell.overhealing + spell.healing) * 100), 255,255,255,255,255,255)
 				end
@@ -467,10 +451,10 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata		= {showspots = true, click1 = spellsmod, click2 = healedmod, columns = {Healing = true, HPS = true, Percent = true}}
+		mod.metadata		= {showspots = true, click1 = spellsmod, click2 = healedmod, columns = {Healing = true, HPS = true, Percent = true}, icon = "Interface\\Icons\\Ability_priest_flashoflight"}
 		spellsmod.metadata	= {tooltip = spell_tooltip, columns = {Healing = true, Percent = true}}
 		healedmod.metadata 	= {showspots = true, columns = {Healing = true, Percent = true}}
-		healingtaken.metadata = {showspots = true, columns = {Healing = true, HPS = true, Percent = true}}
+		healingtaken.metadata = {showspots = true, columns = {Healing = true, HPS = true, Percent = true}, icon = "Interface\\Icons\\Ability_priest_cascade"}
 
 		-- handlers for Healing spells
 		Skada:RegisterForCL(SpellHeal, 'SPELL_HEAL', {src_is_interesting = true})
@@ -515,13 +499,11 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 		player.healingspells = player.healingspells or {}		-- Healing spells
 		player.overhealing = player.overhealing or 0			-- Overheal total
 		player.healingabsorbed = player.healingabsorbed or 0	-- Absorbed total
-		player.multistrikes = player.multistrikes or 0			-- Multistrike total
 
 		-- update any pre-existing healingspells for new properties
 		for _, heal in pairs(player.healingspells) do
 			heal.absorbed = heal.absorbed or 0					-- Amount of healing that was absorbed
 			heal.shielding = heal.shielding or 0				-- Amount of healing that was due to shields
-			heal.multistrikes = heal.multistrikes or 0			-- Amount of healing that was due to multistrike
 		end
 
 		-- update any pre-existing healed players for new properties
@@ -536,7 +518,6 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 		set.shielding = set.shielding or 0
 		set.overhealing = set.overhealing or 0
 		set.healingabsorbed = set.healingabsorbed or 0
-		set.multistrikes = set.multistrikes or 0
 		--wipe(shields)
 	end
 end)

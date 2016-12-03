@@ -38,6 +38,7 @@ local pixelScale = 1 -- adjusted by screen resolution and uiScale
 local pixelPerfect -- global setting to enable pixel perfect size and position
 local pixelWidth, pixelHeight = 0, 0 -- actual screen resolution
 local rectIcons = false -- allow rectangular icons
+local zoomIcons = false -- zoom rectangular icons
 local inPetBattle = nil
 local alignLeft = {} -- table of icons to be aligned left
 local alignRight = {} -- table of icons to be aligned right
@@ -49,6 +50,11 @@ local MSQ_ButtonData = nil
 local anchorDefaults = { -- backdrop initialization for bar group anchors
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 8, edgeSize = 8, insets = { left = 2, right = 2, top = 2, bottom = 2 }
+}
+
+local iconBackdrop = { -- backdrop initialization for icons when using optional border customization
+	bgFile = [[Interface\Addons\Raven\Statusbars\White.tga]],
+	edgeFile = [[Interface\BUTTONS\WHITE8X8.blp]], edgeSize = 1, insets = { left = 0, right = 0, top = 0, bottom = 0 }
 }
 
 local bgTemplate = { -- these fields are cleared when a bar group is deleted
@@ -1004,11 +1010,29 @@ local function SetBarFrameLevel(bar, level, isIcon)
 	else
 		SetFrameLevel(bar.container, level + 1)
 		SetFrameLevel(bar.backdrop, level + 2)
-		SetFrameLevel(bar.textFrame, level + 6)
-		SetFrameLevel(bar.icon, level + 3)
-		SetFrameLevel(bar.cooldown, level + 4)
-		SetFrameLevel(bar.iconTextFrame, level + 5)
+		SetFrameLevel(bar.textFrame, level + 8)
+		SetFrameLevel(bar.icon, level + 5)
+		SetFrameLevel(bar.cooldown, level + 6)
+		SetFrameLevel(bar.iconTextFrame, level + 7)
 	end
+end
+
+-- Trim and scale icon, including for optional rectangular dimensions
+local function IconTextureTrim(tex, icon, trim, w, h)
+	local left, right, top, bottom = 0, 1, 0, 1 -- default without trim
+	if trim then left = 0.07; right = 0.93; top = 0.07; bottom = 0.93 end -- trim removes 7% of edges
+	if zoomIcons then -- only true if both rectangular and zoom icons enabled
+		if w > h then -- rectangular with width greater than height
+			local crop = (bottom - top) * (w - h)/ w / 2 -- aspect ratio to reduce height by
+			top = top + crop; bottom = bottom - crop
+		elseif h > w then -- rectangular with height greater than width
+			local crop = (right - left) * (h - w)/ h / 2 -- aspect ratio to reduce height by
+			left = left + crop; right = right - crop
+		end
+	end
+	tex:SetTexCoord(left, right, top, bottom) -- set the corner coordinates
+	PSetSize(tex, w, h)
+	PSetPoint(tex, "CENTER", icon, "CENTER") -- texture is always positioned in center of icon's frame
 end
 
 -- Update a bar's layout based on the bar group configuration and dimension settings
@@ -1130,9 +1154,8 @@ local function Bar_UpdateLayout(bg, bar, config)
 		if MSQ and bg.MSQ_Group and Raven.db.global.ButtonFacadeIcons then -- if using Masque, set custom fields in button data table and add to skinnning group
 			PSetSize(bar.cooldown, iconWidth, bg.iconSize)
 			PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
-			bar.iconTexture:SetTexCoord(0, 1, 0, 1)
-			PSetSize(bar.iconTexture, iconWidth, bg.iconSize)
-			PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
+			IconTextureTrim(bar.iconTexture, bar.icon, false, iconWidth, bg.iconSize) -- trim and zoom with support for rectangular icons
+			local ulx, uly, llx, lly, urx, ury, lrx, lry = bar.iconTexture:GetTexCoord() -- save the tex coords because need to restore after masque does its thing
 			bg.MSQ_Group:RemoveButton(bar.icon, true) -- needed so size changes work when icon is reused
 			local bdata = bar.buttonData
 			bdata.Icon = bar.iconTexture
@@ -1140,27 +1163,31 @@ local function Bar_UpdateLayout(bg, bar, config)
 			bdata.Cooldown = bar.cooldown
 			bdata.Border = bar.iconBorder
 			bg.MSQ_Group:AddButton(bar.icon, bdata)
+			if zoomIcons then -- only need to do this for rectangular icons with zoom enabled
+				bar.iconTexture:SetTexCoord(ulx, uly, llx, lly, urx, ury, lrx, lry) -- set to the saved tex coords since overwritten when masque adds the button
+			end
 		else -- if not then use a default button arrangment
 			if bg.MSQ_Group then bg.MSQ_Group:RemoveButton(bar.icon) end -- remove skin, if any
 			if not (UseTukui() or Raven.db.global.HideBorder) then
-				local trim, crop, sliceWidth, sliceHeight = 0.06, 0.94, 0.88 * iconWidth, 0.88 * bg.iconSize
+				local sliceWidth, sliceHeight = 0.88 * iconWidth, 0.88 * bg.iconSize
 				PSetSize(bar.cooldown, sliceWidth, sliceHeight)
 				PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
-				bar.iconTexture:SetTexCoord(trim, crop, trim, crop)
-				PSetSize(bar.iconTexture, sliceWidth, sliceHeight)
-				PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
+				IconTextureTrim(bar.iconTexture, bar.icon, true, sliceWidth, sliceHeight)
 				bar.iconBorder:SetTexture("Interface\\AddOns\\Raven\\Borders\\IconDefault")
-			else
+				bar.icon:SetBackdrop(nil)
+			elseif Raven.db.global.PixelIconBorder then -- optional custom pixel perfect border
 				PSetSize(bar.cooldown, iconWidth, bg.iconSize)
 				PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
-				if UseTukui() or Raven.db.global.TrimIcon then
-					local trim, crop = 0.06, 0.94
-					bar.iconTexture:SetTexCoord(trim, crop, trim, crop)
-				else
-					bar.iconTexture:SetTexCoord(0, 1, 0, 1)
-				end
-				PSetSize(bar.iconTexture, iconWidth, bg.iconSize)
-				PSetPoint(bar.iconTexture, "CENTER", bar.icon, "CENTER")
+				IconTextureTrim(bar.iconTexture, bar.icon, Raven.db.global.TrimIcon, iconWidth - 2, bg.iconSize - 2)
+				iconBackdrop.edgeSize = 1 / pixelScale -- required because pixel perfect is enabled
+				bar.icon:SetBackdrop(iconBackdrop)
+				bar.icon:SetBackdropColor(0.25, 0.25, 0.25, 1) -- backdrop is set to gray
+				bar.iconBorder:SetColorTexture(0, 0, 0, 0)
+			else
+				bar.icon:SetBackdrop(nil)
+				PSetSize(bar.cooldown, iconWidth, bg.iconSize)
+				PSetPoint(bar.cooldown, "CENTER", bar.icon, "CENTER")
+				IconTextureTrim(bar.iconTexture, bar.icon, (UseTukui() or Raven.db.global.TrimIcon), iconWidth, bg.iconSize)
 				bar.iconBorder:SetColorTexture(0, 0, 0, 0)
 			end
 		end
@@ -1169,10 +1196,10 @@ local function Bar_UpdateLayout(bg, bar, config)
 	if bg.showBar and bg.borderTexture and not bar.attributes.header and bar.includeBar then
 		local offset, edgeSize = bg.borderOffset / pixelScale, bg.borderWidth / pixelScale; if (edgeSize < 0.1) then edgeSize = 0.1 end
 		bg.borderTable.edgeFile = bg.borderTexture; bg.borderTable.edgeSize = PS(edgeSize)
-		bar.backdrop:SetBackdrop(bg.borderTable)
-		t = bg.borderColor; bar.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
 		PSetSize(bar.backdrop, bg.barWidth + offset, bg.barHeight + offset)
 		PSetPoint(bar.backdrop, "CENTER", bar.bgTexture, "CENTER")
+		bar.backdrop:SetBackdrop(bg.borderTable)
+		t = bg.borderColor; bar.backdrop:SetBackdropBorderColor(t.r, t.g, t.b, t.a)
 		bar.backdrop:Show()
 	else
 		bar.backdrop:SetBackdrop(nil); bar.backdrop:Hide()
@@ -1283,7 +1310,12 @@ local function Bar_UpdateSettings(bg, bar, config)
 				end
 			elseif not Raven.db.global.HideBorder then
 				bx:SetAllPoints(bar.icon); bx:SetVertexColor(bar.ibr, bar.ibg, bar.ibb, bar.iba); showBorder = true
-			else showBorder = false end
+			else
+				if Raven.db.global.PixelIconBorder then -- optional custom pixel perfect border
+					bar.icon:SetBackdropBorderColor(bar.ibr, bar.ibg, bar.ibb, bar.iba)
+				end
+				showBorder = false
+			end
 		end
 	else
 		bar.icon:Hide()
@@ -1795,6 +1827,7 @@ function MOD.Nest_Initialize()
 	-- MOD.Debug("Raven result resolution", resolution, pixelScale, pixelWidth, pixelHeight, GetCVar("uiScale"), GetScreenWidth(), GetScreenHeight())
 	pixelPerfect = (not Raven.db.global.TukuiSkin and Raven.db.global.PixelPerfect) or (Raven.db.global.TukuiSkin and Raven.db.global.TukuiScale)
 	rectIcons = (Raven.db.global.RectIcons == true)
+	zoomIcons = rectIcons and (Raven.db.global.ZoomIcons == true)
 end
 
 -- Return the pixel perfect scaling factor
