@@ -109,28 +109,21 @@ end
 -- New Items filter and related functions
 ------------------------------------------
 function cbNivaya:getItemCount(itemName)
-	local tItemCount = 0
-	for i = 0,4 do
-		local tNumSlots = GetContainerNumSlots(i)
+	local totalCount = 0
+	for bagID = 0, 4 do
+		local tNumSlots = GetContainerNumSlots(bagID)
 		if tNumSlots > 0 then
-			for j = 1,tNumSlots do
-				local tLink = GetContainerItemLink(i,j)
-				local tName
-				if tLink then
-					if tLink:find("battlepet") then
-						tName = select(2, strmatch(tLink, "|H(.-)|h(.-)|h"))
-					else
-						tName = GetItemInfo(tLink)
-					end
-				end
-				if tName == itemName then
-					local _,tStackCount = GetContainerItemInfo(i,j)
-					tItemCount = tItemCount + tStackCount
+			for slotID = 1, tNumSlots do
+				local item = self:GetItemInfo(bagID, slotID)
+				if item.name == itemName then
+					local _, count = GetContainerItemInfo(bagID,slotID)
+					item.count = count or 0
+					totalCount = totalCount + count
 				end
 			end
 		end
 	end
-	return tItemCount
+	return totalCount
 end
 
 cB_Filters.fNewItems = function(item)
