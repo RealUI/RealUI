@@ -157,9 +157,9 @@ end
 ]]
 local function ItemButton_UpdateCooldown(self, item)
     local start, duration, enable = _G.GetContainerItemCooldown(item.bagID, item.slotID)
-    CooldownFrame_Set(self.Cooldown, start, duration, enable)
+    _G.CooldownFrame_Set(self.Cooldown, start, duration, enable)
 
-    if self.OnUpdateCooldown then self:OnUpdateCooldown(item, startTime, duration, enable) end
+    if self.OnUpdateCooldown then self:OnUpdateCooldown(item, start, duration, enable) end
 end
 
 --[[!
