@@ -23,7 +23,7 @@ local function debug(isDebug, ...)
     if isDebug then
         -- isDebug should be a string describing what the bar is.
         -- eg. "playerHealth", "targetAbsorbs", etc
-        AngleStatusBar:debug(isDebug, ...)
+        return AngleStatusBar:debug(isDebug, ...)
     end
 end
 

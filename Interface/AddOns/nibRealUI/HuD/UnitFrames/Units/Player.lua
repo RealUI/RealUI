@@ -25,7 +25,6 @@ local frameInfo = {
     power = {
         leftAngle = [[\]],
         rightAngle = [[\]],
-        debug = true,
     },
     [1] = {
         x = 222,
