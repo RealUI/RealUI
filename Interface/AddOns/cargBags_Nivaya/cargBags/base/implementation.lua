@@ -331,6 +331,7 @@ do
 
         local clink = _G.GetContainerItemLink(bagID, slotID)
         i.texture, i.count = _G.GetContainerItemInfo(bagID, slotID)
+
         if clink then
             local texture
 
@@ -520,8 +521,7 @@ function Implementation:ITEM_LOCK_CHANGED(event, bagID, slotID)
 
     local button = self:GetButton(bagID, slotID)
     if button then
-        local item = self:GetItemInfo(bagID, slotID)
-        button:UpdateLock(item)
+        button:UpdateLock(self:GetItemInfo(bagID, slotID))
     end
 end
 

@@ -156,15 +156,10 @@ end
     @callback OnUpdateCooldown(item)
 ]]
 local function ItemButton_UpdateCooldown(self, item)
-    local startTime, duration, isEnabled = _G.GetContainerItemCooldown(item.bagID, item.slotID)
-    if isEnabled == 1 and startTime and startTime > 0 then
-        self.Cooldown:SetCooldown(startTime, duration)
-        self.Cooldown:Show()
-    else
-        self.Cooldown:Hide()
-    end
+    local start, duration, enable = _G.GetContainerItemCooldown(item.bagID, item.slotID)
+    CooldownFrame_Set(self.Cooldown, start, duration, enable)
 
-    if self.OnUpdateCooldown then self:OnUpdateCooldown(item, startTime, duration, isEnabled) end
+    if self.OnUpdateCooldown then self:OnUpdateCooldown(item, startTime, duration, enable) end
 end
 
 --[[!

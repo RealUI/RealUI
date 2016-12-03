@@ -177,10 +177,10 @@ function Timer:OnSizeChanged(width, height)
     end
 end
 
-function Timer:Start(start, duration, enable)
+function Timer:Start(start, duration, modRate)
 
     --start timer
-    if enable and enable ~= 0 and start > 0 and duration > 0 then
+    if start > 0 and duration > db.minDuration then
         self.start = start
         self.duration = duration
         self.enabled = true
@@ -253,17 +253,15 @@ end
 function CooldownCount:OnEnable()
     setTimeFormats()
 
-    _G.hooksecurefunc("CooldownFrame_Set", function(cd, start, duration, enable, forceShowDrawEdge, modRate)
-        if duration < db.minDuration then return end
-
+    _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if not cd.noCooldownCount then
             if start > 0 then
-                CooldownCount:debug("CDF_Set", cd:GetDebugName(), start, duration, enable, forceShowDrawEdge, modRate)
+                CooldownCount:debug("CDF_Set", cd:GetDebugName(), start, duration, modRate)
             end
             if not cd.timer then
                 cd.timer = CreateTimer(cd)
             end
-            cd.timer:Start(start, duration, enable)
+            cd.timer:Start(start, duration, modRate)
         end
     end)
     _G.SetCVar("countdownForCooldowns", 0)
