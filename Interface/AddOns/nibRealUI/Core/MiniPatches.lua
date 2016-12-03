@@ -190,19 +190,25 @@ RealUI.minipatches = {
     end,
     [19] = function(ver)
         debug("r"..ver)
+        local RealUINamespace = _G.nibRealUIDB.namespaces
         -- Clean out unused namespaces
-        _G.nibRealUIDB.namespaces.AuraTracking = nil
-        _G.nibRealUIDB.namespaces.ClassResource_BloodShield = nil
-        _G.nibRealUIDB.namespaces.ClassResource_Vengeance = nil
-        _G.nibRealUIDB.namespaces.ClassResource_EclipseBar = nil
-        _G.nibRealUIDB.namespaces.ClassResource_ResolveBar = nil
-        _G.nibRealUIDB.namespaces.ClassResource_DemonicFury = nil
-        _G.nibRealUIDB.namespaces.ClassResource_Stagger = nil
-        _G.nibRealUIDB.namespaces.Pitch = nil
+        RealUINamespace.AuraTracking = nil
+        RealUINamespace.ClassResource_BloodShield = nil
+        RealUINamespace.ClassResource_Vengeance = nil
+        RealUINamespace.ClassResource_EclipseBar = nil
+        RealUINamespace.ClassResource_ResolveBar = nil
+        RealUINamespace.ClassResource_DemonicFury = nil
+        RealUINamespace.ClassResource_Stagger = nil
+        RealUINamespace.Pitch = nil
 
         -- Transfer to _G.nibRealUIDB.global
-        _G.nibRealUIDB.namespaces.CurrencyTip.global = nil
-        _G.nibRealUIDB.namespaces.InfoLine.global = nil
+        RealUINamespace.CurrencyTip.global = nil
+        RealUINamespace.InfoLine.global = nil
+
+        -- Remove RealUI defined spellLists in Raven
+        _G.RavenDB.global.SpellLists.PlayerExclusions = nil
+        _G.RavenDB.global.SpellLists.PlayerDebuffExclusions = nil
+        _G.RavenDB.global.SpellLists.TargetExclusions = nil
     end,
     [99] = function(ver) -- test patch
         debug("r"..ver)
