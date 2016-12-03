@@ -1,0 +1,38 @@
+tag 2a9797a38b8fa650b5535cccb994077b315c57ee 4.7.5
+Author:	Hendrik Leppkes <h.leppkes@gmail.com>
+Date:	Fri Dec 2 12:17:22 2016 +0100
+
+Tag as 4.7.5
+
+commit f2362767b38b7138a655f4b13316bc1af1a76551
+Author: Hendrik Leppkes <h.leppkes@gmail.com>
+Date:   Fri Dec 2 12:09:06 2016 +0100
+
+    Remove rogue load condition, the stance that needed this has been removed
+
+commit 75bbd944e97fe344e46ed49e5431a4590d853323
+Author: Hendrik Leppkes <h.leppkes@gmail.com>
+Date:   Thu Nov 24 14:36:05 2016 +0100
+
+    Remove some more pre-legion compat
+
+commit dae91eaf8e14b872daf0a84a13e74c8a1f7e7d85
+Author: Hendrik Leppkes <h.leppkes@gmail.com>
+Date:   Sun Nov 20 10:54:28 2016 +0100
+
+    Remove more pre-legion things
+
+commit cbc6023b9f1d2e2cc68c9275c541c92ade25598f
+Author: Hendrik Leppkes <h.leppkes@gmail.com>
+Date:   Sun Nov 20 01:30:48 2016 +0100
+
+    Remove unused references to LibButtonFacade
+
+commit e05c1c42d59d8c5dd5bb56a0511872b52bd088ae
+Author: Hendrik Leppkes <h.leppkes@gmail.com>
+Date:   Sat Nov 19 16:10:11 2016 +0100
+
+    Add a Zone Ability Bar
+    
+    Based on patch from Ticket #1277
+

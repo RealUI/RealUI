@@ -33,7 +33,8 @@ local function UpdateDirections()
 		local update, direction, distance
 		if not UnitIsUnit(unit, "player") and UnitCheck(unit, mouseover) then
 			local x2,y2, _, map2 = UnitPosition(unit)
-			if (map1 == map2) then
+			if not x2 then return end
+			if map1 == map2 then
 				local dx, dy = x2 - x1, y2 - y1
 				direction = floor((atan2(dy,dx)-facing) / PI2 * 32 + 0.5) % 32
 				if distances then distance = floor( ((dx*dx+dy*dy)^0.5)/10 ) + 1 end	

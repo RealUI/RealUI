@@ -1,0 +1,22 @@
+tag v70100-1.0.0
+cf7cc26fdd3fe6cddf512109f96bf4e161146088
+Jim Whitehead <jnwhiteh@gmail.com>
+2016-10-26 21:31:26 +0200
+
+Tagging v70100-1.0.0
+
+
+--------------------
+
+Jim Whitehead:
+	- Ensure we don't try to register nameplates
+	- Update for 7.1
+	- Fire bindings changed on player entering world
+	Some spec-based bindings are being lost in between instances, this
+	should help to mitigate that. It's difficult to reproduce without the
+	right character/instance which I'm not able to reproduce but this should
+	fix some of those issues.
+	
+	It will cause Clique to do a slight bit more work when zoning between
+	instances, but I don't think there are any crucial points where that
+	happens.

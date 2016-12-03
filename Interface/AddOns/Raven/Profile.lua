@@ -486,18 +486,29 @@ function MOD:ResetSoundDefaults() table.wipe(MOD.db.global.Sounds) end
 
 -- Add a spell duration to the per-profile cache, always save latest value since could change with haste
 -- When the spell id is known, save duration indexed by spell id; otherwise save indexed by name
-function MOD:SetDuration(name, spellID, duration)
+function MOD.SetDuration(name, spellID, duration)
 	if duration == 0 then duration = nil end -- remove cache entry if duration is 0
 	if spellID then MOD.db.profile.Durations[spellID] = duration else MOD.db.profile.Durations[name] = duration end
 end
 
 -- Get a duration from the cache, but if not in the cache then return 0
-function MOD:GetDuration(name, spellID)
+function MOD.GetDuration(name, spellID)
 	local duration = 0
 	if spellID then duration = MOD.db.profile.Durations[spellID] end -- first look for durations indexed by spell id
 	if not duration then duration = MOD.db.profile.Durations[name] end -- second look at durations indexed by just name
 	if not duration then duration = 0 end
 	return duration
+end
+
+-- Get a spell type from the cache, but if not in the cache then return nil
+function MOD.GetSpellType(id)
+	if id then return MOD.db.global.SpellTypes[id] end
+	return nil
+end
+
+-- Add a spell type to the cache
+function MOD.SetSpellType(id, btype)
+	if id then MOD.db.global.SpellTypes[id] = btype end
 end
 
 -- Get localized names for all spells used internally or in built-in conditions, spell ids must be valid
@@ -720,6 +731,7 @@ MOD.DefaultProfile = {
 		SpellColors = {},				-- cache of colors for actions and spells
 		SpellIcons = {},				-- cache of spell icons that override default icons
 		SpellIDs = {},					-- cache of spell ids that had to be looked up
+		SpellTypes = {},				-- cache of spell types (indexed by spell id)
 		Settings = {},					-- settings table indexed by bar group names
 		CustomBars = {},				-- custom bar table indexed by bar group names
 		Defaults = {},					-- default settings for bar group layout, fonts and textures
@@ -753,7 +765,9 @@ MOD.DefaultProfile = {
 		TukuiFont = true,				-- skin with Tukui fonts
 		TukuiScale = true,				-- skin Tukui with pixel perfect size and position
 		PixelPerfect = false,			-- enable pixel perfect size and position
+		PixelIconBorder = false,		-- enable a single pixel color border for icons
 		RectIcons = false,				-- enable rectangular icons
+		ZoomIcons = false,				-- enable zoomed rectangular icons
 		GridLines = 40,					-- number of lines in overlay grid
 		GridCenterColor = MOD.HexColor("ff0000"), -- color of center lines in overlay grid
 		GridLineColor = MOD.HexColor("00ff00"), -- color of other lines in overlay grid

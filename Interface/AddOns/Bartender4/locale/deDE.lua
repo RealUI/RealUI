@@ -5,6 +5,14 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Bartender4", "deDE")
 if not L then return end
 
+L[ [=["None" as modifier means its always active, and no modifier is required.
+
+Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["Keine" als Modifikator bedeutet, es ist immer aktiv und benötigt keinen Modifikator.
+
+Denk daran, das Mauszeiger-Zaubern für einzelne Leisten auf der Registerkarte "Status konfigurieren" zu aktivieren, wenn es für eine bestimmte Leiste aktiviert werden soll.]=]
+L["|cffff0000WARNING|cffffffff: Pressing the button will reset your complete profile! If you're not sure about this, create a new profile and use that to experiment."] = "|cffff0000WARNUNG|cffffffff: Das Anklicken der Schaltfläche setzt dein komplettes Profil zurück! Falls Du Dir hierüber nicht sicher sein solltest, erstelle ein neues Profil, und benutze dieses zum Experimentieren."
+L["|cffffff00Click|r to toggle bar lock"] = "|cffffff00Klicken|r, um die Fixierung der Leisten ein-/auszuschalten."
+L["|cffffff00Right-click|r to open the options menu"] = "|cffffff00Rechtsklicken|r, um die Optionen zu öffnen."
 L["ActionBar Paging"] = "Aktionsleisten Seitenwechsel"
 L["Alpha"] = "Transparenz"
 L["ALT"] = "ALT"
@@ -15,12 +23,12 @@ L["Apply Preset"] = "Vorlage speichern."
 L["Artifact Power Bar"] = "Artefaktmachtleiste"
 L["Auto-Assist Casting"] = "Automatisches Unterstützen"
 L["Bag Bar"] = "Taschenleiste"
+L["Bar %s"] = "Leiste %s"
 L["Bar Options"] = "Leistenoptionen"
 L["Bar Paging"] = "Leistenwechsel"
-L["Bars"] = "Leisten"
-L["Bar %s"] = "Leiste %s"
 L["Bar Snapping"] = "An Leisten ausrichten"
 L["Bar Style & Layout"] = "Leistenform & Anordnung"
+L["Bars"] = "Leisten"
 L["Bars unlocked. Move them now and click Lock when you are done."] = "Die Aktionsleisten lassen sich jetzt per Drag and Drop verschieben. Fixieren Sie anschließend die Leisten."
 L["Bartender4"] = "Bartender4"
 L["Bartender4 only converts the bindings of Bar1 to be directly usable, all other Bars will have to be re-bound to the Bartender4 keys. A direct indicator if your key-bindings are setup correctly is the hotkey display on the buttons. If the key-bindings shows correctly on your button, everything should work fine as well."] = "Bartender4 wandelt nur die Tastenbelegungen der Leiste 1 um, alle anderen Leisten müssen als Bartender4-Tasten neu belegt werden (Tastaturbelegung). Du kannst alles auf seine Richtigkeit überprüfen, indem du die Tastenbelegungen auf den Tasten überprüfst. Werden die richtigen Hotkeys auf den entsprechenden Tasten angezeigt, hat alles geklappt."
@@ -28,20 +36,17 @@ L["Bartender4 was written by Nevcairiel of EU-Antonidas. He will accept cookies 
 L["Blizzard Art"] = "Blizzard-Kunst"
 L["Blizzard Art Bar"] = "Blizzard-Kunst-Leiste"
 L["Blizzard interface"] = "Blizzard-Interface"
+L["Button %s"] = "Schaltfläche %s"
 L["Button Grid"] = "Schaltflächengitternetz"
 L["Button Lock"] = "Schaltflächen fixieren"
 L["Button Look"] = "Aussehen der Schaltflächen"
-L["Buttons"] = "Schaltflächen"
-L["Button %s"] = "Schaltfläche %s"
 L["Button Tooltip"] = "Schaltflächen-Tooltip"
+L["Buttons"] = "Schaltflächen"
 L["Cannot access options during combat."] = "Während des Kampfes ist kein Zugriff auf die Optionen möglich."
 L["Center Horizontally"] = "Horizontal zentrieren"
+L["Center Vertically"] = "Vertikal zentrieren"
 L["Centers the bar horizontally on screen."] = "Zentriert die Leiste horizontal auf dem Bildschirm."
 L["Centers the bar vertically on screen."] = "Zentriert die Leiste vertikal auf dem Bildschirm."
-L["Center Vertically"] = "Vertikal zentrieren"
-L["|cffff0000WARNING|cffffffff: Pressing the button will reset your complete profile! If you're not sure about this, create a new profile and use that to experiment."] = "|cffff0000WARNUNG|cffffffff: Das Anklicken der Schaltfläche setzt dein komplettes Profil zurück! Falls Du Dir hierüber nicht sicher sein solltest, erstelle ein neues Profil, und benutze dieses zum Experimentieren."
-L["|cffffff00Click|r to toggle bar lock"] = "|cffffff00Klicken|r, um die Fixierung der Leisten ein-/auszuschalten."
-L["|cffffff00Right-click|r to open the options menu"] = "|cffffff00Rechtsklicken|r, um die Optionen zu öffnen."
 L["Change the current anchor point of the bar."] = "Den aktuellen Ankerpunkt der Leiste ändern."
 L["Choose between the classic WoW layout and two variations"] = "Wähle zwischen dem klassischen WoW-Layout und zwei Abwandlungen"
 L["Choose the ending to the left"] = "Wähle den Abschluß zur Linken"
@@ -49,6 +54,7 @@ L["Choose the ending to the right"] = "Wähle den Abschluß zur Rechten"
 L["Classic"] = "Klassisch"
 L["Click-Through"] = "Hindurch klicken"
 L["Colors"] = "Farben"
+L["Configure  the Stance Bar"] = "Die Haltungsleiste konfigurieren"
 L["Configure actionbar paging when the %s key is down."] = "Konfiguriere Aktionsleistenwechsel bei gedrückter %s-Taste."
 L["Configure all of Bartender to preset defaults"] = "Bartender komplett für die standardmäßigen Voreinstellungen konfigurieren"
 L["Configure Bar %s"] = "Leiste %s konfigurieren"
@@ -66,9 +72,9 @@ L["Configure the padding of the buttons."] = "Den Abstand der Schaltflächen kon
 L["Configure the Pet Bar"] = "Die Begleiterleiste konfigurieren"
 L["Configure the Reputation Bar"] = "Die Rufleiste konfigurieren"
 L["Configure the scale of the bar."] = "Die Skalierung der Leiste konfigurieren"
-L["Configure  the Stance Bar"] = "Die Haltungsleiste konfigurieren"
 L["Configure the VehicleBar"] = "Die Fahrzeugleiste konfigurieren"
 L["Configure the XP Bar"] = "Die Erfahrungsleiste konfigurieren"
+L["Configure the Zone Ability Bar"] = "Die Gebietsfähigkeitsleiste konfigurieren"
 L["Copy Conditionals"] = "Bedingungen kopieren"
 L["Create a copy of the auto-generated conditionals in the custom configuration as a base template."] = "Eine Kopie der automatisch generierten Bedingungen in der eigenen Konfiguration als Basisvorlage erzeugen."
 L["CTRL"] = "STRG"
@@ -87,8 +93,6 @@ Falls der gewählte Zauber nicht auf das Ziel anwendbar ist, wird Automatisches 
 L[ [=[Enable Bar Switching based on the actionbar controls provided by the game. 
 See Blizzard Key Bindings for assignments - Usually Shift-Mouse Wheel and Shift+1 - Shift+6.]=] ] = [=[Leistenwechsel aktivieren, basierend auf der vom Spiel vorgesehenen Steuerung der Aktionsleisten.
 Für die Zuweisungen, sieh dir die Tastenbelegungen von Blizzard an - meist SHIFT-Mausrad und SHIFT-1 bis SHIFT-6]=]
-L["Enabled"] = "Aktiviert"
-L["Enable/Disable the bar."] = "Die Leiste aktivieren/deaktivieren."
 L[ [=[Enable Mouse-Over Casting for this bar.
 Mouse-Over Casting will automatically cast onto the unit under your mouse without targeting it, if possible.]=] ] = [=[Aktiviert Mauszeiger-Zaubern für diese Leiste.
 Wenn möglich, wird Mauszeiger-Zaubern automatisch auf die Einheit unter dem Mauszeiger wirken, ohne sie anzuvisieren.]=]
@@ -106,6 +110,9 @@ L["Enable the use of a custom condition, disabling all of the above."] = "Die Be
 L["Enable the use of the Blizzard Vehicle UI, hiding any Bartender4 bars in the meantime."] = "Die Verwendung des Blizzard-Fahrzeug-UIs aktivieren (versteckt alle Bartender4-Leisten in der Zwischenzeit)."
 L["Enable the Vehicle Bar"] = "Fahrzeugleiste aktivieren"
 L["Enable the XP Bar"] = "Erfahrungsleiste aktivieren"
+L["Enable the Zone Ability Bar"] = "Gebietsfähigkeitsleiste"
+L["Enable/Disable the bar."] = "Die Leiste aktivieren/deaktivieren."
+L["Enabled"] = "Aktiviert"
 L["Extra Action Bar"] = "Extra-Aktionsleiste"
 L["Fade Out"] = "Ausblenden"
 L["Fade Out Alpha"] = "Transparenz beim Ausblenden"
@@ -137,10 +144,10 @@ L["Hide this bar when you are riding on a vehicle."] = "Diese Leiste verstecken,
 L["Hide this bar when you have a pet."] = "Diese Leiste verstecken, wenn man einen Begleiter hat."
 L["Hide this bar when you have no pet."] = "Diese Leiste verstecken, wenn man keinen Begleiter hat."
 L["Hide when Possessing"] = "Beim Übernehmen verstecken"
-L["Hide without pet"] = "Ohne Begleiter verstecken"
 L["Hide with Override Bar"] = "Mit spezieller Aktionsleiste verstecken"
 L["Hide with pet"] = "Mit Begleiter verstecken"
 L["Hide with Vehicle UI"] = "Mit Fahrzeug-UI verstecken"
+L["Hide without pet"] = "Ohne Begleiter verstecken"
 L["Horizontal Growth"] = "Horizontale Ausweitung"
 L["Horizontal growth direction for this bar."] = "Horizontale Ausweitungsrichtung für diese Leiste."
 L["Hotkey Mode"] = "Hotkey-Modus"
@@ -162,13 +169,8 @@ L["Mouse-Over Casting"] = "Mauszeiger-Zaubern"
 L["Mouse-Over casting can be limited to be only active when a modifier key is being held down. You can configure the modifier in the global \"Bar\" Options."] = "Mauszeiger-Zaubern kann darauf beschränkt werden nur aktiv zu sein, wenn ein Modifikator gedrückt wird. Du kannst den Modifikator in den Leistenoptionen konfigurieren."
 L["Mouse-Over Casting Modifier"] = "Mauszeiger-Zaubern-Modifikator"
 L["No Display"] = "Keine Anzeige"
-L["None"] = "Keine"
-L[ [=["None" as modifier means its always active, and no modifier is required.
-
-Remember to enable Mouse-Over Casting for the individual bars, on the "State Configuration" tab, if you want it to be active for a specific bar.]=] ] = [=["Keine" als Modifikator bedeutet, es ist immer aktiv und benötigt keinen Modifikator.
-
-Denk daran, das Mauszeiger-Zaubern für einzelne Leisten auf der Registerkarte "Status konfigurieren" zu aktivieren, wenn es für eine bestimmte Leiste aktiviert werden soll.]=]
 L["No Stance/Form"] = "Keine Haltung/Form"
+L["None"] = "Keine"
 L["Note: Enabling Custom Conditionals will disable all of the above settings!"] = "Hinweis: Das Aktivieren von eigenen Bedingungen wird alle obigen Einstellungen deaktivieren."
 L["Number of buttons."] = "Anzahl der Schaltflächen."
 L["Number of rows."] = "Anzahl der Reihen."
@@ -190,8 +192,8 @@ L["Reputation Bar"] = "Rufleiste"
 L["Reset Position"] = "Position zurücksetzen"
 L["Reset the position of this bar completly if it ended up off-screen and you cannot reach it anymore."] = "Die Position dieser Leiste komplett zurücksetzen, falls sie außerhalb des Bildschirms gelandet ist und du sie nicht mehr erreichen kannst."
 L["Right"] = "Rechts"
-L["Right-click Self-Cast"] = "Bei Rechtsklick auf sich selbst wirken"
 L["Right ending"] = "Rechter Abschluß"
+L["Right-click Self-Cast"] = "Bei Rechtsklick auf sich selbst wirken"
 L["Rows"] = "Reihen"
 L["Scale"] = "Skalierung"
 L["Select a modifier for Mouse-Over Casting"] = "Einen Modifikator für Mauszeiger-Zaubern auswählen"
@@ -224,18 +226,18 @@ L["Toggle actions on key press instead of release"] = "Aktionen beim Betätigen 
 L[ [=[Toggle Button Zoom
 For more style options you need to install ButtonFacade]=] ] = [=[Schaltflächenzoom umschalten
 Für weitere Stiloptionen muss ButtonFacade installiert werden.]=]
-L["Toggles actions immediately when you press the key, and not only on release. Note that draging actions will cause them to be cast in this mode."] = "Löst Aktionen sofortig beim Drücken der Taste und nicht erst beim Loslassen aus. Beim Verschieben einer Aktion kann sie ebenfalls ausgelöst werden, wenn diese Option aktiviert ist."
 L["Toggle the button grid."] = "Das Schaltflächengitternetz ein-/ausschalten."
 L["Toggle the use of the modifier-based focus-cast functionality."] = "Die Verwendung der Modifikatorbasierten-Fokuszauber-Funktionalität ein-/ausschalten."
 L["Toggle the use of the modifier-based self-cast functionality."] = "Die Verwendung der Modifikatorbasierten-Selbstzauber-Funktionalität ein-/ausschalten."
 L["Toggle the use of the right-click self-cast functionality."] = "Die Verwendung der Rechtsklick-Selbstzauber-Funktionalität ein-/ausschalten."
+L["Toggles actions immediately when you press the key, and not only on release. Note that draging actions will cause them to be cast in this mode."] = "Löst Aktionen sofortig beim Drücken der Taste und nicht erst beim Loslassen aus. Beim Verschieben einer Aktion kann sie ebenfalls ausgelöst werden, wenn diese Option aktiviert ist."
 L["Two action bars"] = "Zwei Aktionsleisten"
 L["Two bars wide"] = "Doppelte Leistenbreite"
 L["Up"] = "Hoch"
 L["Use Blizzard Vehicle UI"] = "Blizzard-Fahrzeug-UI verwenden"
 L["Use Custom Condition"] = "Eigene Bedingungen benutzen"
-L["VehicleBar"] = "Fahrzeugleiste"
 L["Vehicle Bar"] = "Fahrzeugleiste"
+L["VehicleBar"] = "Fahrzeugleiste"
 L["Vertical Growth"] = "Vertikale Ausweitung"
 L["Vertical growth direction for this bar."] = "Vertikale Ausweitungsrichtung für diese Leiste."
 L["Visibility"] = "Sichtbarkeit"
@@ -257,5 +259,5 @@ Example: [form:1]9;0]=] ] = [=[Man kann alle Makrobedingungen in der eigenen Zei
 Beispiel: [form:1]9;0]=]
 L["You can use the preset defaults as a starting point for setting up your interface. Just choose your preferences here and click the button below to reset your profile to the preset default. Note that not all defaults show all bars."] = "Du kannst die voreingestellten Standards als Ausgangspunkt zur Erstellung deines Interfaces benutzen. Wähle einfach Deine Präferenzen hier und klicke die Schaltfläche unten, um Dein Profil auf den voreingestellten Standard zurückzusetzen. Beachte, dass nicht alle Standardwerte auch alle Leisten anzeigen."
 L["You have to exit the vehicle in order to be able to change the Vehicle UI settings."] = "Du musst das Fahrzeug verlassen, um Änderungen am Fahrzeug-UI vornehmen zu können."
+L["Zone Ability Bar"] = "Gebietsfähigkeitsleiste"
 L["Zoom"] = "Zoom"
-

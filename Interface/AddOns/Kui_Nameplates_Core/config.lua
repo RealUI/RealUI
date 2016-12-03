@@ -45,6 +45,7 @@ local default_config = {
     nameonly_enemies = true,
     nameonly_all_enemies = false,
     nameonly_target = true,
+    guild_text_npcs = true,
     guild_text_players = false,
     title_text_players = false,
 
@@ -58,6 +59,7 @@ local default_config = {
     fade_avoid_raidicon = true,
     fade_avoid_execute_friend = false,
     fade_avoid_execute_hostile = false,
+    fade_avoid_tracked = false,
 
     font_face = DEFAULT_FONT,
     font_style = 2,
@@ -70,6 +72,8 @@ local default_config = {
     text_vertical_offset = -1.5,
     name_vertical_offset = -2,
     bot_vertical_offset = -3,
+    class_colour_friendly_names = true,
+    class_colour_enemy_names = false,
 
     health_text_friend_max = 5,
     health_text_friend_dmg = 4,
@@ -103,6 +107,7 @@ local default_config = {
 
     auras_enabled = true,
     auras_on_personal = true,
+    auras_vanilla_filter = true,
     auras_whitelist = false,
     auras_pulsate = true,
     auras_centre = true,
@@ -153,7 +158,13 @@ local function UpdateClickboxSize()
         (core.profile.frame_width * addon.uiscale)+10,
         (core.profile.frame_height * addon.uiscale)+20
 
-    C_NamePlate.SetNamePlateOtherSize(width,height)
+    if C_NamePlate.SetNamePlateOtherSize then
+        C_NamePlate.SetNamePlateOtherSize(width,height)
+    else
+        C_NamePlate.SetNamePlateFriendlySize(width,height)
+        C_NamePlate.SetNamePlateEnemySize(width,height)
+    end
+
     C_NamePlate.SetNamePlateSelfSize(width,height)
 end
 local function QueueClickboxUpdate()
@@ -263,6 +274,12 @@ local function configChangedFadeRule(v,on_load)
         core:UnregisterMessage('ExecuteUpdate')
     end
 
+    if core.profile.fade_avoid_tracked then
+        plugin:AddFadeRule(function(f)
+            return f.state.tracked and 1
+        end,22)
+    end
+
     if core.profile.fade_neutral_enemy then
         plugin:AddFadeRule(function(f)
             return f.state.reaction == 4 and
@@ -292,6 +309,7 @@ configChanged.fade_avoid_nameonly = configChangedFadeRule
 configChanged.fade_avoid_raidicon = configChangedFadeRule
 configChanged.fade_avoid_execute_friend = configChangedFadeRule
 configChanged.fade_avoid_execute_hostile = configChangedFadeRule
+configChanged.fade_avoid_tracked = configChangedFadeRule
 
 local function configChangedTextOffset()
     core:configChangedTextOffset()
@@ -384,6 +402,7 @@ end
 local function configChangedAuras()
     core:SetAurasConfig()
 end
+configChanged.auras_vanilla_filter = configChangedAuras
 configChanged.auras_whitelist = configChangedAuras
 configChanged.auras_pulsate = configChangedAuras
 configChanged.auras_centre = configChangedAuras

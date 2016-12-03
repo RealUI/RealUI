@@ -7,7 +7,7 @@ version:SetAlpha(.7)
 version:SetPoint('TOPRIGHT',-12,-12)
 version:SetText(string.format(
     opt.titles.version,
-    'KuiNameplates','Kesava','2-13-2'
+    'KuiNameplates','Kesava','2-14-2'
 ))
 
 opt:Initialise()
@@ -67,6 +67,7 @@ local fade_avoid_nameonly = general:CreateCheckBox('fade_avoid_nameonly')
 local fade_avoid_raidicon = general:CreateCheckBox('fade_avoid_raidicon')
 local fade_avoid_execute_friend = general:CreateCheckBox('fade_avoid_execute_friend')
 local fade_avoid_execute_hostile = general:CreateCheckBox('fade_avoid_execute_hostile')
+local fade_avoid_tracked = general:CreateCheckBox('fade_avoid_tracked')
 
 fade_alpha:SetValueStep(.05)
 fade_speed:SetValueStep(.05)
@@ -84,6 +85,7 @@ fade_avoid_nameonly:SetPoint('TOPLEFT',fade_neutral_enemy,'BOTTOMLEFT',0,-20)
 fade_avoid_raidicon:SetPoint('LEFT',fade_avoid_nameonly,'RIGHT',190,0)
 fade_avoid_execute_friend:SetPoint('TOPLEFT',fade_avoid_nameonly,'BOTTOMLEFT')
 fade_avoid_execute_hostile:SetPoint('LEFT',fade_avoid_execute_friend,'RIGHT',190,0)
+fade_avoid_tracked:SetPoint('TOPLEFT',fade_avoid_execute_friend,'BOTTOMLEFT')
 
 target_glow_colour.enabled = function(p) return p.target_glow end
 
@@ -148,6 +150,8 @@ local font_size_normal = text:CreateSlider('font_size_normal',1,20)
 local font_size_small = text:CreateSlider('font_size_small',1,20)
 local name_text = text:CreateCheckBox('name_text')
 local hidenamesCheck = text:CreateCheckBox('hide_names')
+local class_colour_friendly_names = text:CreateCheckBox('class_colour_friendly_names')
+local class_colour_enemy_names = text:CreateCheckBox('class_colour_enemy_names')
 local level_text = text:CreateCheckBox('level_text')
 local health_text = text:CreateCheckBox('health_text')
 local text_vertical_offset = text:CreateSlider('text_vertical_offset',-20,20)
@@ -177,7 +181,11 @@ bot_vertical_offset:SetPoint('LEFT',name_vertical_offset,'RIGHT',20,0)
 
 name_text:SetPoint('TOPLEFT',text_vertical_offset,'BOTTOMLEFT',0,-20)
 hidenamesCheck:SetPoint('LEFT',name_text,'RIGHT',190,0)
-level_text:SetPoint('TOPLEFT',name_text,'BOTTOMLEFT')
+
+class_colour_friendly_names:SetPoint('TOPLEFT',name_text,'BOTTOMLEFT')
+class_colour_enemy_names:SetPoint('LEFT',class_colour_friendly_names,'RIGHT',190,0)
+
+level_text:SetPoint('TOPLEFT',class_colour_friendly_names,'BOTTOMLEFT')
 health_text:SetPoint('TOPLEFT',level_text,'BOTTOMLEFT')
 
 hidenamesCheck.enabled = function(p) return p.name_text end
@@ -201,8 +209,8 @@ health_text_friend_dmg.SelectTable = health_text_SelectTable
 health_text_hostile_max.SelectTable = health_text_SelectTable
 health_text_hostile_dmg.SelectTable = health_text_SelectTable
 
-health_text_sep:SetPoint('TOP',0,-250)
-health_text_friend_max:SetPoint('TOPLEFT',10,-270)
+health_text_sep:SetPoint('TOP',0,-270)
+health_text_friend_max:SetPoint('TOPLEFT',10,-290)
 health_text_friend_dmg:SetPoint('LEFT',health_text_friend_max,'RIGHT',10,0)
 health_text_hostile_max:SetPoint('TOPLEFT',health_text_friend_max,'BOTTOMLEFT',0,0)
 health_text_hostile_dmg:SetPoint('LEFT',health_text_hostile_max,'RIGHT',10,0)
@@ -219,6 +227,7 @@ local nameonly_damaged_friends = nameonly:CreateCheckBox('nameonly_damaged_frien
 local nameonly_enemies = nameonly:CreateCheckBox('nameonly_enemies')
 local nameonly_all_enemies = nameonly:CreateCheckBox('nameonly_all_enemies')
 local nameonly_target = nameonly:CreateCheckBox('nameonly_target')
+local guild_text_npcs = nameonly:CreateCheckBox('guild_text_npcs')
 local guild_text_players = nameonly:CreateCheckBox('guild_text_players')
 local title_text_players = nameonly:CreateCheckBox('title_text_players')
 
@@ -227,6 +236,7 @@ nameonly_enemies.enabled = function(p) return p.nameonly and not p.nameonly_all_
 nameonly_damaged_friends.enabled = nameonly_no_font_style.enabled
 nameonly_all_enemies.enabled = nameonly_no_font_style.enabled
 nameonly_target.enabled = nameonly_no_font_style.enabled
+guild_text_npcs.enabled = nameonly_no_font_style.enabled
 guild_text_players.enabled = nameonly_no_font_style.enabled
 title_text_players.enabled = nameonly_no_font_style.enabled
 
@@ -238,7 +248,8 @@ nameonly_all_enemies:SetPoint('TOPLEFT',nameonly_target,'BOTTOMLEFT')
 nameonly_enemies:SetPoint('LEFT',nameonly_all_enemies,'RIGHT',190,0)
 nameonly_damaged_friends:SetPoint('TOPLEFT',nameonly_all_enemies,'BOTTOMLEFT')
 
-guild_text_players:SetPoint('TOPLEFT',nameonly_damaged_friends,'BOTTOMLEFT',0,-20)
+guild_text_npcs:SetPoint('TOPLEFT',nameonly_damaged_friends,'BOTTOMLEFT',0,-20)
+guild_text_players:SetPoint('TOPLEFT',guild_text_npcs,'BOTTOMLEFT')
 title_text_players:SetPoint('LEFT',guild_text_players,'RIGHT',190,0)
 
 -- frame sizes #################################################################
@@ -264,6 +275,7 @@ powerbar_height:SetPoint('LEFT',castbar_height,'RIGHT',20,0)
 local auras_enabled = auras:CreateCheckBox('auras_enabled')
 local auras_on_personal = auras:CreateCheckBox('auras_on_personal')
 local auras_sort = auras:CreateDropDown('auras_sort')
+local auras_vanilla_filter = auras:CreateCheckBox('auras_vanilla_filter')
 local auras_whitelist = auras:CreateCheckBox('auras_whitelist')
 local auras_pulsate = auras:CreateCheckBox('auras_pulsate')
 local auras_centre = auras:CreateCheckBox('auras_centre')
@@ -284,18 +296,19 @@ auras_icon_squareness:SetValueStep(.1)
 
 auras_enabled:SetPoint('TOPLEFT',10,-17)
 auras_on_personal:SetPoint('TOPLEFT',auras_enabled,'BOTTOMLEFT')
-auras_whitelist:SetPoint('TOPLEFT',auras_on_personal,'BOTTOMLEFT')
+auras_vanilla_filter:SetPoint('TOPLEFT',auras_on_personal,'BOTTOMLEFT')
+auras_whitelist:SetPoint('TOPLEFT',auras_vanilla_filter,'BOTTOMLEFT')
 auras_pulsate:SetPoint('TOPLEFT',auras_whitelist,'BOTTOMLEFT')
 auras_centre:SetPoint('TOPLEFT',auras_pulsate,'BOTTOMLEFT')
 auras_sort:SetPoint('LEFT',auras_enabled,'RIGHT',184,0)
 auras_time_threshold:SetPoint('LEFT',auras_whitelist,'RIGHT',184,5)
 
-auras_filtering_sep:SetPoint('TOP',0,-170)
-auras_minimum_length:SetPoint('TOPLEFT',10,-200)
+auras_filtering_sep:SetPoint('TOP',0,-190)
+auras_minimum_length:SetPoint('TOPLEFT',10,-220)
 auras_maximum_length:SetPoint('LEFT',auras_minimum_length,'RIGHT',20,0)
 
-auras_icons_sep:SetPoint('TOP',0,-250)
-auras_icon_normal_size:SetPoint('TOPLEFT',10,-280)
+auras_icons_sep:SetPoint('TOP',0,-270)
+auras_icon_normal_size:SetPoint('TOPLEFT',10,-300)
 auras_icon_minus_size:SetPoint('LEFT',auras_icon_normal_size,'RIGHT',20,0)
 auras_icon_squareness:SetPoint('TOPLEFT',auras_icon_normal_size,'BOTTOMLEFT',0,-30)
 

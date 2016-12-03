@@ -3,7 +3,7 @@
 	Shows the errors captured by !BugGrabber.
 	Copyright (c) 2015-2016 Phanx <addons@phanx.net>. All rights reserved.
 	http://www.wowinterface.com/downloads/info23144-Bugger.html
-	http://www.curse.com/addons/wow/bugger
+	https://mods.curse.com/addons/wow/bugger
 	https://github.com/Phanx/Bugger
 ----------------------------------------------------------------------]]
 

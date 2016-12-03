@@ -299,7 +299,7 @@ local function Display(message, saSettings, isSticky, colorR, colorG, colorB, fo
  local fontOutline = OUTLINE_MAP[outlineIndex] or DEFAULT_OUTLINE
  if (not fontPath) then fontPath = DEFAULT_FONT_PATH end
  fontString:ClearAllPoints()
- if (fontPath ~= DEFAULT_FONT_PATH) then fontString:SetFont(DEFAULT_FONT_PATH, fontSize, fontOutline) end
+ if (fontPath == DEFAULT_FONT_PATH) then fontString:SetFont(DEFAULT_FONT_PATH, fontSize, fontOutline) end
  fontString:SetFont(fontPath, fontSize, fontOutline)
  fontString:SetTextColor(colorR, colorG, colorB)
  fontString:SetDrawLayer(isSticky and "OVERLAY" or "ARTWORK")

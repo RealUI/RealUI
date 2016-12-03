@@ -1,13 +1,9 @@
-## Interface: 70000
+## Interface: 70100
 ## Title: Raven Options
 ## Notes: Load on demand options panel for Raven
 ## Author: Tomber
 ## Dependencies: Raven
 ## LoadOnDemand: 1
-## X-Curse-Packaged-Version: r376
-## X-Curse-Project-Name: Raven
-## X-Curse-Project-ID: raven
-## X-Curse-Repository-ID: wow/raven/mainline
 
 #@no-lib-strip@
 embeds.xml

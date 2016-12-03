@@ -1,5 +1,5 @@
-## Interface: 70000
-## Version: 7.0.3.0
+## Interface: 70100
+## Version: 7.1.0.1
 
 ## Title: PhanxChat
 ## Notes: Removes chat frame clutter and adds some functionality.
@@ -16,6 +16,8 @@
 ## X-Email: addons@phanx.net
 ## X-Copyright: Copyright (c) 2006-2016 Phanx. All rights reserved.
 ## X-Website: https://github.com/Phanx/PhanxChat
+## X-Curse-Project-ID: phanxchat
+## X-WoWI-ID: 6323
 
 ## OptionalDependencies: PhanxConfigWidgets, LibChatAnims
 ## SavedVariables: PhanxChatDB

@@ -29,9 +29,11 @@ local UnitHealthMax = Grid2.Globals.UnitHealthMax
 local statuses = {} 
 
 local function UpdateIndicators(unit)
-	for status in next, statuses do
-		status:UpdateIndicators(unit)
-	end
+	if unit then
+		for status in next, statuses do
+			status:UpdateIndicators(unit)
+		end
+	end	
 end
 
 -- Events management
@@ -79,10 +81,12 @@ do
 		wipe(health_cache)
 	end
 	local function HealthChangedEvent(unit)
-		local h = UnitHealthOriginal(unit)
-		if h==health_cache[unit] then return end
-		health_cache[unit] = h
-		UpdateIndicators(unit)
+		if unit then
+			local h = UnitHealthOriginal(unit)
+			if h==health_cache[unit] then return end
+			health_cache[unit] = h
+			UpdateIndicators(unit)
+		end	
 	end 
 	local function CombatLogEvent(...)
 		local sign = HealthEvents[select(2,...)] 
@@ -471,22 +475,24 @@ local dead_cache = {}
 Death.GetColor = Grid2.statusLibrary.GetColor
 
 local function DeathUpdateUnit(_, unit, noUpdate)
-	local new = UnitIsDeadOrGhost(unit) and (UnitIsGhost(unit) and textGhost or textDeath) or false
-	if new ~= dead_cache[unit] then
-		dead_cache[unit] = new
-		if not noUpdate then 
-			if new then
-				if heals_cache[unit]~=0 then
-					heals_cache[unit] = 0
-					Heals:UpdateIndicators(unit)
-				end	
-				if HealthCurrent.enabled then
-					HealthCurrent:UpdateIndicators(unit)
+	if unit then
+		local new = UnitIsDeadOrGhost(unit) and (UnitIsGhost(unit) and textGhost or textDeath) or false
+		if new ~= dead_cache[unit] then
+			dead_cache[unit] = new
+			if not noUpdate then 
+				if new then
+					if heals_cache[unit]~=0 then
+						heals_cache[unit] = 0
+						Heals:UpdateIndicators(unit)
+					end	
+					if HealthCurrent.enabled then
+						HealthCurrent:UpdateIndicators(unit)
+					end
 				end
+				Death:UpdateIndicators(unit) 
 			end
-			Death:UpdateIndicators(unit) 
 		end
-	end
+	end	
 end
 
 function Death:Grid_UnitUpdated(_, unit)
