@@ -30,7 +30,7 @@ local cargBags = ns.cargBags
 local function noop() end
 
 -- Upgrade Level retrieval
-local LIU = LibStub("RealUI_LibItemUpgradeInfo-1.0")
+local LIU = LibStub("LibItemUpgradeInfo-1.0")
 
 local function Round(num, idp)
 	local mult = 10^(idp or 0)

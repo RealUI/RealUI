@@ -11,7 +11,7 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
     local next = _G.next
 
     -- Libs --
-    local LIU = _G.LibStub("RealUI_LibItemUpgradeInfo-1.0")
+    local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 
     local RealUI = _G.RealUI
     local maxUpgrades = 6
