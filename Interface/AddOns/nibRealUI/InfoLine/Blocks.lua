@@ -104,7 +104,7 @@ do
         return (numToDisplay + 1) * ROW_HEIGHT
     end
 
-    do
+    do --[[ Sort ]]--
         -- Default sort handler for columns.
         -- Uses Lua's less-than operator.  Nil values are sorted as empty strings.
         -- @param Val1  Element value for row 1.
@@ -180,6 +180,13 @@ do
         end
     end
 
+    function TextTableCellPrototype:SetRowOnClick(func)
+        for index = 1, MAX_ROWS do
+            local row = self.textTable.rows[index]
+            row:SetScript("OnClick", func)
+        end
+    end
+
     function TextTableCellPrototype:InitializeCell()
         InfoLine:debug("CellProto:InitializeCell")
 
@@ -217,7 +224,7 @@ do
             local prev = textTable.scrollArea
             textTable.rows = {}
             for index = 1, MAX_ROWS do
-                local row = _G.CreateFrame("Frame", "$parentRow"..index, textTable)
+                local row = _G.CreateFrame("Button", "$parentRow"..index, textTable)
                 if index == 1 then -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
                     row:SetPoint("TOPLEFT", prev)
                 else
@@ -228,7 +235,6 @@ do
                 textTable.rows[index] = row
                 prev = row
             end
-
 
             self.textTable = textTable
         end
@@ -299,6 +305,10 @@ do
         InfoLine:debug("Sort", textTable.sortColumn, textTable.sortInverted)
         if textTable.sortColumn then
             self:SetSort(textTable.sortColumn, textTable.sortInverted)
+        end
+
+        if data.rowOnClick then
+            self:SetRowOnClick(data.rowOnClick)
         end
 
         local cellHeight = UpdateScroll(textTable.scrollArea)
@@ -614,8 +624,8 @@ function InfoLine:CreateBlocks()
             [2] = inlineTexture:format(_G.FRIENDS_TEXTURE_DND),
         }
 
+        local nameMatch = [=[[|T]*(.*)[|t]*|cff%x%x%x%x%x%x(.*)|r]=]
         local NameSort do
-            local nameMatch = [=[[|T]*(.*)[|t]*|cff%x%x%x%x%x%x(.*)]=]
 
             function NameSort(Val1, Val2)
                 local icon1, icon2
@@ -663,6 +673,17 @@ function InfoLine:CreateBlocks()
                         return false
                     end
                 end
+            end
+        end
+
+        local function Guild_OnClick(row, ...)
+            local _, name = row[1]:GetText():match(nameMatch)
+            if not name then return end
+
+            if _G.IsAltKeyDown() then
+                _G.InviteUnit(name)
+            else
+                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
             end
         end
 
@@ -718,6 +739,7 @@ function InfoLine:CreateBlocks()
 
                 _G.table.wipe(guildData)
                 guildData.header = headerData
+                guildData.rowOnClick = Guild_OnClick
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then
