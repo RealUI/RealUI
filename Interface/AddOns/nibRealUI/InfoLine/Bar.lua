@@ -176,10 +176,6 @@ function BlockMixin:OnUpdate(elapsed)
             self.dragButton = nil;
             MOVING_BLOCK = nil
         end
-    elseif self:IsMouseOver() then
-        -- Update the tooltip
-        qTip:Release(self.tooltip)
-        self:OnEnter()
     end
 end
 
