@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local _G = _G
-local ipairs = _G.ipairs
+local next = _G.next
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -65,6 +65,7 @@ do
                 end
                 local rowData = data[index]
                 if rowData then
+                    rowData.id = i
                     text:SetText(rowData.info[col])
                     text:SetJustifyH(data.header.justify[col])
                 else
@@ -101,6 +102,84 @@ do
         end
 
         return (numToDisplay + 1) * ROW_HEIGHT
+    end
+
+    do
+        -- Default sort handler for columns.
+        -- Uses Lua's less-than operator.  Nil values are sorted as empty strings.
+        -- @param Val1  Element value for row 1.
+        -- @param Val2  Element value for row 2.
+        -- @param Row1..Row2  Row tables being compared.
+        -- @return True/false if Val1 is less/greater than Val2, or nil if they are equal.
+        local function SortSimple(Val1, Val2 --[[, Row1, Row2]])
+            if Val1 ~= Val2 then
+                return Val1 < Val2
+            end
+        end
+
+
+        local Handler, Column, Inverted
+        -- Compare function for table.sort that supports inversion and custom sort handlers.
+        local function Compare(Row1, Row2)
+            InfoLine:debug("Compare1", Row1.info[Column])
+            InfoLine:debug("Compare2", Row2.info[Column])
+            local Result
+
+            InfoLine:debug("Inverted", Inverted)
+            if Inverted then -- Flip the handler's args
+                Result = Handler(Row2.info[Column], Row1.info[Column], Row2, Row1)
+            else
+                Result = Handler(Row1.info[Column], Row2.info[Column], Row1, Row2)
+            end
+
+            if Result ~= nil then -- Not equal
+                return Result
+            else -- Equal
+                return Row1.id < Row2.id -- Fall back on previous row order
+            end
+        end
+
+        local function OnUpdate(self, ...)
+            InfoLine:debug("textTable:OnUpdate", ...)
+            self:SetScript("OnUpdate", nil)
+            local data = self.data
+
+            if self.sortColumn and #data > 0 then
+                Column = self.sortColumn:GetID()
+                InfoLine:debug("Header_OnClick", Column, ...)
+
+
+                Inverted = self.sortInverted
+                Handler = data.header.sort[Column]
+                if Handler == true then
+                    Handler = SortSimple -- Less-than operator
+                end
+
+                _G.sort(data, Compare)
+                UpdateScroll(self.scrollArea)
+            end
+        end
+
+        function TextTableCellPrototype:SetSort(header, inverted)
+            InfoLine:debug("CellProto:SetSort", header:GetID(), inverted)
+            local textTable = self.textTable
+            if textTable.sortColumn ~= header then
+                textTable.sortColumn, textTable.sortInverted = header, inverted or false
+
+                if header then
+                    textTable:SetScript("OnUpdate", OnUpdate)
+                end
+            elseif header then -- Selected same sort column
+                if inverted == nil then -- Unspecified Flip inverted status
+                    inverted = not textTable.sortInverted
+                end
+
+                if textTable.sortInverted ~= inverted then
+                    textTable.sortInverted = inverted
+                    textTable:SetScript("OnUpdate", OnUpdate)
+                end
+            end
+        end
     end
 
     function TextTableCellPrototype:InitializeCell()
@@ -164,50 +243,65 @@ do
         textTable.data = data
 
         local flex, filler = {}
-        local header, headerData = textTable.header, data.header
+        local headerRow, headerData = textTable.header, data.header
         for col = 1, #headerData.info do
-            local text = header[col]
-            if not text then
-                text = header:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
-                text:SetPoint("TOP", 0, -4)
-                text:SetPoint("BOTTOM")
+            local header = headerRow[col]
+            if not header then
+                header = _G.CreateFrame("Button", nil, headerRow)
+                header:SetID(col)
+                header:SetPoint("TOP", 0, -4)
+                header:SetPoint("BOTTOM")
                 if col == 1 then
-                    text:SetPoint("LEFT")
+                    header:SetPoint("LEFT")
                 else
-                    text:SetPoint("LEFT", header[col-1], "RIGHT", 2, 0)
+                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
                 end
 
-                header[col] = text
+                header.text = header:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+                header.text:SetAllPoints()
+
+                header:SetScript("OnClick", function(btn)
+                    _G.PlaySound("igMainMenuOptionCheckBoxOn")
+                    self:SetSort(btn)
+                end)
+
+                header.textTable = textTable
+                headerRow[col] = header
             end
-            text:SetText(headerData.info[col])
-            text:SetJustifyH(headerData.justify[col])
+            header.text:SetText(headerData.info[col])
+            header.text:SetJustifyH(headerData.justify[col])
 
             local size = headerData.size[col]
             if size == "FIT" then
-                local cellWidth = text:GetStringWidth()
+                local cellWidth = header.text:GetStringWidth()
                 testCell:SetFontObject("RealUIFont_Normal")
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
                     if newWidth > cellWidth then cellWidth = newWidth end
                 end
-                text:SetWidth(cellWidth)
+                header:SetWidth(cellWidth)
                 width = width - cellWidth
             elseif size == "FILL" then
-                filler = text
+                filler = header
             else
-                _G.tinsert(flex, {text = text, size = size})
+                flex[header] = size
             end
             InfoLine:debug("Width", col, width)
         end
         local remainingWidth = width
-        for index, col in ipairs(flex) do
-            local headerWidth = _G.max(width * col.size, col.text:GetStringWidth())
+        for header, size in next, flex do
+            local headerWidth = _G.max(width * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
-            col.text:SetWidth(headerWidth)
-            InfoLine:debug("Width", index, headerWidth, remainingWidth)
+            header:SetWidth(headerWidth)
+            InfoLine:debug("Width", headerWidth, remainingWidth)
         end
-        filler:SetWidth(_G.max(remainingWidth, filler:GetStringWidth()))
+        filler:SetWidth(_G.max(remainingWidth, filler.text:GetStringWidth()))
+
+        InfoLine:debug("Sort", textTable.sortColumn, textTable.sortInverted)
+        if textTable.sortColumn then
+            self:SetSort(textTable.sortColumn, textTable.sortInverted)
+        end
 
         local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
@@ -533,7 +627,8 @@ function InfoLine:CreateBlocks()
                 InfoLine:debug("Player1", icon1, Val1)
                 InfoLine:debug("Player2", icon2, Val2)
 
-                icon1, icon2 = (icon1:find("ArmoryChat")), (icon2:find("ArmoryChat"))
+                icon1 = (icon1:find("ArmoryChat") or icon1:find("StatusIcon"))
+                icon2 = (icon2:find("ArmoryChat") or icon2:find("StatusIcon"))
                 if icon1 ~= icon2 then
                     if icon1 and not icon2 then
                         return true
@@ -575,6 +670,21 @@ function InfoLine:CreateBlocks()
 
         local time = _G.GetTime()
         local guildData = {}
+        local headerData = {
+            sort = {
+                NameSort, true, true, RankSort, NoteSort, NoteSort
+            },
+            info = {
+                _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
+            },
+            justify = {
+                "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
+            },
+            size = {
+                "FILL", "FIT", 0.2, "FIT", 0.2, 0.3
+            }
+        }
+
         LDB:NewDataObject("guild", {
             name = _G.GUILD,
             type = "RealUI",
@@ -608,24 +718,8 @@ function InfoLine:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, TABLE_WIDTH)
                 end
 
-                local color = RealUI.media.colors.orange
                 _G.table.wipe(guildData)
-                guildData.header = {
-                    r = color[1], g = color[2], b = color[3],
-                    sort = {
-                        NameSort, true, true, RankSort, NoteSort, NoteSort
-                    },
-                    info = {
-                        _G.NAME, _G.LEVEL_ABBR, _G.ZONE, _G.RANK, _G.LABEL_NOTE, _G.OFFICER_NOTE_COLON
-                    },
-                    justify = {
-                        "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
-                    },
-                    size = {
-                        "FILL", "FIT", 0.2, "FIT", 0.2, 0.3
-                    }
-                }
-
+                guildData.header = headerData
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then
@@ -633,7 +727,7 @@ function InfoLine:CreateBlocks()
                         name = _G.Ambiguate(name, "guild")
 
                         -- Class color names
-                        color = RealUI:GetClassColor(class, "hex")
+                        local color = RealUI:GetClassColor(class, "hex")
                         name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
 
                         -- Tags
@@ -662,7 +756,7 @@ function InfoLine:CreateBlocks()
                         if offnote == "" then offnote = nil end
 
                         _G.tinsert(guildData, {
-                            r = color[1], g = color[2], b = color[3],
+                            id = i,
                             info = {
                                 name, lvl, zone, rank, note, offnote
                             }
