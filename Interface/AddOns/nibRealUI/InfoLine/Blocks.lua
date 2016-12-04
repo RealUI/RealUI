@@ -170,14 +170,12 @@ do
                     textTable:SetScript("OnUpdate", OnUpdate)
                 end
             elseif header then -- Selected same sort column
-                if inverted == nil then -- Unspecified Flip inverted status
+                if inverted == nil then -- Unspecified, flip inverted status
                     inverted = not textTable.sortInverted
                 end
 
-                if textTable.sortInverted ~= inverted then
-                    textTable.sortInverted = inverted
-                    textTable:SetScript("OnUpdate", OnUpdate)
-                end
+                textTable.sortInverted = inverted
+                textTable:SetScript("OnUpdate", OnUpdate)
             end
         end
     end
