@@ -1122,6 +1122,13 @@ function InfoLine:CreateBlocks()
                     nextState = watchStates[nextState]:GetNext()
                 end
 
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, watchStates[dbc.progressState].hint, nil, nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, L["Progress_Cycle"], nil, nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+
                 tooltip:SmartAnchorTo(block)
                 tooltip:SetAutoHideDelay(0.10, block)
 
