@@ -946,27 +946,26 @@ function InfoLine:CreateBlocks()
                     return not not activeArtifact
                 end,
                 SetTooltip = function(Art, tooltip)
-                    --local maxWidth, minWidth
                     local hasArtifact, artifact = artData:GetArtifactInfo()
 
                     if hasArtifact then
                         testCell:SetFontObject("GameTooltipText")
-                        --minWidth = testCell:GetStringWidth() + 200
-                        --maxWidth = minWidth
+                        testCell:SetText(artifact.name)
+                        local maxWidth = testCell:GetStringWidth()
 
                         local lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
+                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
                         tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
-                        local artStatus = _G.ARTIFACT_POWER_TOOLTIP_TITLE:format(artifact.unspentPower, artifact.power, artifact.maxPower)
-                        lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
-                        tooltip:SetCellTextColor(lineNum, colNum, 0.9, 0.9, 0.9)
+                        local minAP, maxAP = artifact.power, artifact.maxPower
+                        local artStatus = ("%s/%s (%d%%)"):format(_G.FormatLargeNumber(minAP), _G.FormatLargeNumber(maxAP), (minAP/maxAP)*100)
+                        lineNum = tooltip:AddLine(_G.FormatLargeNumber(artifact.unspentPower), artStatus)
+                        tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
 
                         if artifact.numRanksPurchasable > 0 then
                             artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
                             lineNum, colNum = tooltip:AddLine()
-                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2) --, nil, nil, nil, maxWidth, minWidth)
+                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
                             tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
                         end
                     else
