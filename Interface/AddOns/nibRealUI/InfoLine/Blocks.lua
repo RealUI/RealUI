@@ -486,10 +486,6 @@ function InfoLine:CreateBlocks()
             end
             return timeFormat, hour, min, suffix
         end
-        local function setTimeOptions(block)
-            block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
-            block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
-        end
 
         LDB:NewDataObject("clock", {
             name = _G.TIMEMANAGER_TITLE,
@@ -497,6 +493,34 @@ function InfoLine:CreateBlocks()
             text = 1,
             value = 1,
             suffix = "",
+            OnEnable = function(block)
+                InfoLine:debug("clock: OnEnable", block.side)
+                local function setTimeOptions()
+                    block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
+                    block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
+                end
+                _G.hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
+                _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
+                setTimeOptions(block)
+
+                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                alert:SetSize(177, alert.Text:GetHeight() + 42);
+                alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
+                alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                alert.CloseButton:SetScript("OnClick", function(btn)
+                    alert:Hide()
+                    alert.isHidden = true
+                end)
+                alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
+                alert.Text:SetWidth(145)
+                block.alert = alert
+
+                InfoLine:ScheduleRepeatingTimer(function()
+                    local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
+                    block.dataObj.value = timeFormat:format(hour, min)
+                    block.dataObj.suffix = suffix
+                end, 1)
+            end,
             OnClick = function(block, ...)
                 InfoLine:debug("Clock: OnClick", block.side, ...)
                 if _G.IsShiftKeyDown() then
@@ -573,35 +597,14 @@ function InfoLine:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 --InfoLine:debug("Clock: OnEvent", event, ...)
-                if event then
-                    if event == "PLAYER_ENTERING_WORLD" then
-                        block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                        InfoLine:ScheduleRepeatingTimer(block.dataObj.OnEvent, 1, block)
-                        _G.hooksecurefunc("TimeManager_ToggleTimeFormat", setTimeOptions)
-                        _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
-                        setTimeOptions(block)
-                    end
-                    local alert = block.alert
-                    block.invites = _G.CalendarGetNumPendingInvites()
-                    if block.invites > 0 and not alert.isHidden then
-                        alert:SetSize(177, alert.Text:GetHeight() + 42);
-                        alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                        alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
-                        alert.CloseButton:SetScript("OnClick", function(btn)
-                            alert:Hide()
-                            alert.isHidden = true
-                        end)
-                        alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                        alert.Text:SetWidth(145)
-                        alert:Show()
-                        alert.isHidden = false
-                    else
-                        alert:Hide()
-                    end
+                local alert = block.alert
+                block.invites = _G.CalendarGetNumPendingInvites()
+                if block.invites > 0 and not alert.isHidden then
+                    alert:Show()
+                    alert.isHidden = false
+                else
+                    alert:Hide()
                 end
-                local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
-                block.dataObj.value = timeFormat:format(hour, min)
-                block.dataObj.suffix = suffix
             end,
             events = {
                 "CALENDAR_UPDATE_EVENT_LIST",
