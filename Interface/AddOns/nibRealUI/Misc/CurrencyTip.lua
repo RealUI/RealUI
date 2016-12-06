@@ -162,26 +162,7 @@ end
 -- Initialization --
 --------------------
 function CurrencyTip:OnInitialize()
-    local otherFaction = RealUI:OtherFaction(RealUI.faction)
-    self.db = RealUI.db:RegisterNamespace(MODNAME)
-    self.db:RegisterDefaults({
-        global = {
-            currency = {
-                [RealUI.realm] = {
-                    [RealUI.faction] = {
-                        [RealUI.name] = {
-                            class = "",
-                            lastSeen = nil,
-                        },
-                    },
-                    [otherFaction] = {},
-                },
-            },
-        },
-    })
-    DB = self.db.global.currency
-    charDB = self.db.global.currency[RealUI.realm][RealUI.faction][RealUI.name]
-    realmDB = self.db.global.currency[RealUI.realm]
+    DB = RealUI.db.global.currency
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
