@@ -689,33 +689,12 @@ function InfoLine:OnInitialize()
     for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
         specgear[specIndex] = -1
     end
-    local otherFaction = RealUI:OtherFaction(RealUI.faction)
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
             progressState = 1,
             currencyState = 1,
             specgear = specgear,
-        },
-        global = {
-            currency = {
-                [RealUI.realm] = {
-                    [RealUI.faction] = {
-                        [RealUI.name] = {
-                            class = "",
-                            level = 0,
-                            gold = -1,
-                            bpCurrencies = {
-                                [1] = {amnt = -1, name = nil},
-                                [2] = {amnt = -1, name = nil},
-                                [3] = {amnt = -1, name = nil},
-                            },
-                            updated = "",
-                        },
-                    },
-                    [otherFaction] = {},
-                },
-            },
         },
         profile = {
             text = {

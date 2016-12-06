@@ -200,7 +200,16 @@ local defaults, charInit do
                 largeHuDOption = false,
             },
             verinfo = {},
-            patchedTOC = 0
+            patchedTOC = 0,
+            currency = {
+                [RealUI.realm] = {
+                    [RealUI.faction] = {
+                        [RealUI.name] = {
+                            class = RealUI.class
+                        }
+                    }
+                }
+            },
         },
         char = {
             init = charInit,
