@@ -193,6 +193,7 @@ RealUI.minipatches = {
         local RealUINamespace = _G.nibRealUIDB.namespaces
         -- Clean out unused namespaces
         RealUINamespace.AuraTracking = nil
+        RealUINamespace.PointTracking = nil
         RealUINamespace.ClassResource_BloodShield = nil
         RealUINamespace.ClassResource_Vengeance = nil
         RealUINamespace.ClassResource_EclipseBar = nil
