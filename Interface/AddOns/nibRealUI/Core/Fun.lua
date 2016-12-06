@@ -563,11 +563,14 @@ function RealUI:ReadableNumber(num, places)
 end
 
 -- Opposite Faction
-function RealUI:OtherFaction(f)
-    if (f == "Horde") then
+function RealUI:OtherFaction(faction)
+    if faction == "Horde" then
         return "Alliance"
-    else
+    elseif faction == "Alliance" then
         return "Horde"
+    else
+        -- "Neutral" low level pandaren
+        return
     end
 end
 
