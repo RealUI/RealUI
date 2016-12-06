@@ -43,7 +43,7 @@ do --[[ Artifact Frame ]]--
         if C_ArtifactUI.GetTotalPurchasedRanks() then 
             oldOnShow(self)
         else
-            ArtifactFrame:Hide()
+            HideUIPanel(ArtifactFrame)
         end
     end
 
