@@ -939,207 +939,205 @@ function InfoLine:CreateBlocks()
 
     do -- Progress Watch
         local watchStates = {}
-        watchStates = {
-            { -- xp
-                GetNext = function(XP)
-                    if watchStates[2]:IsValid() then
-                        return 2, "rep"
-                    elseif watchStates[3]:IsValid() then
-                        return 3, "artifact"
-                    elseif watchStates[4]:IsValid() then
-                        return 4, "honor"
-                    elseif watchStates[1]:IsValid() then
-                        return 1, "xp"
-                    else
-                        return nil
-                    end
-                end,
-                GetStats = function(XP)
-                    return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion() or 0
-                end,
-                GetColor = function(XP)
-                    if _G.GetRestState() == 1 then
-                        return 0.0, 0.39, 0.88
-                    else
-                        return 0.58, 0.0, 0.5
-                    end
-                end,
-                IsValid = function(XP)
-                    return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL_TABLE[_G.GetExpansionLevel()]
-                end,
-                SetTooltip = function(XP, tooltip)
-                    local curXP, maxXP, restXP = XP:GetStats()
-                    local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
-                    local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
+        watchStates["xp"] = {
+            GetNext = function(XP)
+                if watchStates["rep"]:IsValid() then
+                    return "rep"
+                elseif watchStates["artifact"]:IsValid() then
+                    return "artifact"
+                elseif watchStates["honor"]:IsValid() then
+                    return "honor"
+                elseif watchStates["xp"]:IsValid() then
+                    return "xp"
+                else
+                    return nil
+                end
+            end,
+            GetStats = function(XP)
+                return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion() or 0
+            end,
+            GetColor = function(XP)
+                if _G.GetRestState() == 1 then
+                    return 0.0, 0.39, 0.88
+                else
+                    return 0.58, 0.0, 0.5
+                end
+            end,
+            IsValid = function(XP)
+                return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL_TABLE[_G.GetExpansionLevel()]
+            end,
+            SetTooltip = function(XP, tooltip)
+                local curXP, maxXP, restXP = XP:GetStats()
+                local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
+                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                if _G.IsXPUserDisabled() then
+                    lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
                     tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
-                    if _G.IsXPUserDisabled() then
-                        lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
-                        tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                        tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
-                    elseif restXP then
-                        lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
-                        tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
-                    end
-
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(XP)
+                    tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
+                elseif restXP then
+                    lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
+                    tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
                 end
-            },
-            { -- rep
-                hint = L["Progress_OpenRep"],
-                GetNext = function(Rep)
-                    if watchStates[3]:IsValid() then
-                        return 3, "artifact"
-                    elseif watchStates[4]:IsValid() then
-                        return 4, "honor"
-                    elseif watchStates[1]:IsValid() then
-                        return 1, "xp"
-                    elseif watchStates[2]:IsValid() then
-                        return 2, "rep"
-                    else
-                        return nil
-                    end
-                end,
-                GetStats = function(Rep)
-                    local name, _, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
-                    return curRep - minRep, maxRep - minRep, name
-                end,
-                GetColor = function(Rep)
-                    local _, reaction = _G.GetWatchedFactionInfo()
-                    local color = _G.FACTION_BAR_COLORS[reaction];
-                    return color.r, color.g, color.b, reaction
-                end,
-                IsValid = function(Rep)
-                    return not not _G.GetWatchedFactionInfo()
-                end,
-                SetTooltip = function(Rep, tooltip)
-                    local minRep, maxRep, name = Rep:GetStats()
-                    local r, g, b, reaction = Rep:GetColor()
 
-                    local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
-                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                    tooltip:SetCellTextColor(lineNum, 2, r, g, b)
-
-                    local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minRep), RealUI:ReadableNumber(maxRep), (minRep/maxRep)*100)
-                    lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
-                    tooltip:SetCellTextColor(lineNum, 1, r, g, b)
-                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
-
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(Rep)
-                    _G.ToggleCharacter("ReputationFrame")
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(XP)
+            end
+        }
+        watchStates["rep"] = {
+            hint = L["Progress_OpenRep"],
+            GetNext = function(Rep)
+                if watchStates["artifact"]:IsValid() then
+                    return "artifact"
+                elseif watchStates["honor"]:IsValid() then
+                    return "honor"
+                elseif watchStates["xp"]:IsValid() then
+                    return "xp"
+                elseif watchStates["rep"]:IsValid() then
+                    return "rep"
+                else
+                    return nil
                 end
-            },
-            { -- artifact
-                hint = L["Progress_OpenArt"],
-                GetNext = function(Art)
-                    if watchStates[4]:IsValid() then
-                        return 4, "honor"
-                    else
-                        return 1, "xp"
-                    end
-                end,
-                GetStats = function(Art)
-                    local hasArtifact, _, power, maxPower = artData:GetArtifactPower()
-                    if hasArtifact then
-                        return power, maxPower
-                    else
-                        return 0, 100
-                    end
-                end,
-                GetColor = function(Art)
-                    return .901, .8, .601
-                end,
-                IsValid = function(Rep)
-                    local activeArtifact = artData:GetActiveArtifactID()
-                    -- After a spec switch, the active artifact could be invalid
-                    if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
-                        -- async timer to prevent stack overflow
-                        _G.C_Timer.After(2, artData.ForceUpdate)
-                    end
-                    return not not activeArtifact
-                end,
-                SetTooltip = function(Art, tooltip)
-                    local hasArtifact, artifact = artData:GetArtifactInfo()
+            end,
+            GetStats = function(Rep)
+                local name, _, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
+                return curRep - minRep, maxRep - minRep, name
+            end,
+            GetColor = function(Rep)
+                local _, reaction = _G.GetWatchedFactionInfo()
+                local color = _G.FACTION_BAR_COLORS[reaction];
+                return color.r, color.g, color.b, reaction
+            end,
+            IsValid = function(Rep)
+                return not not _G.GetWatchedFactionInfo()
+            end,
+            SetTooltip = function(Rep, tooltip)
+                local minRep, maxRep, name = Rep:GetStats()
+                local r, g, b, reaction = Rep:GetColor()
 
-                    if hasArtifact then
-                        testCell:SetFontObject("GameTooltipText")
-                        testCell:SetText(artifact.name)
-                        local maxWidth = testCell:GetStringWidth()
+                local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
+                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                        local lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
-                        tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
+                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minRep), RealUI:ReadableNumber(maxRep), (minRep/maxRep)*100)
+                lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
+                tooltip:SetCellTextColor(lineNum, 1, r, g, b)
+                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
 
-                        local minAP, maxAP = artifact.power, artifact.maxPower
-                        local artStatus = ("%s/%s (%d%%)"):format(_G.FormatLargeNumber(minAP), _G.FormatLargeNumber(maxAP), (minAP/maxAP)*100)
-                        lineNum = tooltip:AddLine(_G.FormatLargeNumber(artifact.unspentPower), artStatus)
-                        tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
-
-                        if artifact.numRanksPurchasable > 0 then
-                            artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
-                            lineNum, colNum = tooltip:AddLine()
-                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
-                            tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
-                        end
-                    else
-                        tooltip:AddLine(_G.SPELL_FAILED_NO_ARTIFACT_EQUIPPED)
-                    end
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(Art)
-                    _G.SocketInventoryItem(16)
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(Rep)
+                _G.ToggleCharacter("ReputationFrame")
+            end
+        }
+        watchStates["artifact"] = {
+            hint = L["Progress_OpenArt"],
+            GetNext = function(Art)
+                if watchStates["honor"]:IsValid() then
+                    return "honor"
+                else
+                    return "xp"
                 end
-            },
-            { -- honor
-                hint = L["Progress_OpenHonor"],
-                GetNext = function(Honor)
-                    if watchStates[2]:IsValid() then
-                        return 2, "rep"
-                    elseif watchStates[3]:IsValid() then
-                        return 3, "artifact"
-                    elseif watchStates[4]:IsValid() then
-                        return 4, "honor"
-                    else
-                        return nil
-                    end
-                end,
-                GetStats = function(Honor)
-                    return _G.UnitHonor("player"), _G.UnitHonorMax("player")
-                end,
-                GetColor = function(Honor)
-                    if _G.GetHonorRestState() == 1 then
-                        return 1.0, 0.71, 0
-                    else
-                        return 1.0, 0.24, 0
-                    end
-                end,
-                IsValid = function(Rep)
-                    return _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT]
-                end,
-                SetTooltip = function(Honor, tooltip)
-                    local minHonor, maxHonor = Honor:GetStats()
-
-                    local honorStatus
-                    if _G.CanPrestige() then
-                        honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
-                    else
-                        honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
-                    end
-
-                    local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, honorStatus)
-                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                    tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
-
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(Honor)
-                    _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end,
+            GetStats = function(Art)
+                local hasArtifact, _, power, maxPower = artData:GetArtifactPower()
+                if hasArtifact then
+                    return power, maxPower
+                else
+                    return 0, 100
                 end
-            },
+            end,
+            GetColor = function(Art)
+                return .901, .8, .601
+            end,
+            IsValid = function(Rep)
+                local activeArtifact = artData:GetActiveArtifactID()
+                -- After a spec switch, the active artifact could be invalid
+                if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
+                    -- async timer to prevent stack overflow
+                    _G.C_Timer.After(2, artData.ForceUpdate)
+                end
+                return not not activeArtifact
+            end,
+            SetTooltip = function(Art, tooltip)
+                local hasArtifact, artifact = artData:GetArtifactInfo()
+
+                if hasArtifact then
+                    testCell:SetFontObject("GameTooltipText")
+                    testCell:SetText(artifact.name)
+                    local maxWidth = testCell:GetStringWidth()
+
+                    local lineNum, colNum = tooltip:AddLine()
+                    tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
+                    tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
+
+                    local minAP, maxAP = artifact.power, artifact.maxPower
+                    local artStatus = ("%s/%s (%d%%)"):format(_G.FormatLargeNumber(minAP), _G.FormatLargeNumber(maxAP), (minAP/maxAP)*100)
+                    lineNum = tooltip:AddLine(_G.FormatLargeNumber(artifact.unspentPower), artStatus)
+                    tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
+
+                    if artifact.numRanksPurchasable > 0 then
+                        artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+                        lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                        tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
+                    end
+                else
+                    tooltip:AddLine(_G.SPELL_FAILED_NO_ARTIFACT_EQUIPPED)
+                end
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(Art)
+                _G.SocketInventoryItem(16)
+            end
+        }
+        watchStates["honor"] = {
+            hint = L["Progress_OpenHonor"],
+            GetNext = function(Honor)
+                if watchStates["rep"]:IsValid() then
+                    return "rep"
+                elseif watchStates["artifact"]:IsValid() then
+                    return "artifact"
+                elseif watchStates["honor"]:IsValid() then
+                    return "honor"
+                else
+                    return nil
+                end
+            end,
+            GetStats = function(Honor)
+                return _G.UnitHonor("player"), _G.UnitHonorMax("player")
+            end,
+            GetColor = function(Honor)
+                if _G.GetHonorRestState() == 1 then
+                    return 1.0, 0.71, 0
+                else
+                    return 1.0, 0.24, 0
+                end
+            end,
+            IsValid = function(Rep)
+                return _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT]
+            end,
+            SetTooltip = function(Honor, tooltip)
+                local minHonor, maxHonor = Honor:GetStats()
+
+                local honorStatus
+                if _G.CanPrestige() then
+                    honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
+                else
+                    honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                end
+
+                local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, honorStatus)
+                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(Honor)
+                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end
         }
 
         local function UpdateProgress(block)
@@ -1189,6 +1187,10 @@ function InfoLine:CreateBlocks()
             text = "XP",
             OnEnable = function(block)
                 InfoLine:debug("progress: OnEnable", block.side)
+                if not watchStates[dbc.progressState] then
+                    dbc.progressState = "xp"
+                end
+
                 if not watchStates[dbc.progressState]:IsValid() then
                     UpdateState(block)
                 end
