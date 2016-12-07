@@ -774,7 +774,7 @@ end
 do
     local prototype = {
         debug = function(self, ...)
-            RealUI.Debug(self.moduleName, ...)
+            return RealUI.Debug(self.moduleName, ...)
         end,
     }
     RealUI:SetDefaultModulePrototype(prototype)
