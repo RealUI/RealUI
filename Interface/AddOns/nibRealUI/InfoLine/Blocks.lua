@@ -1053,7 +1053,7 @@ function InfoLine:CreateBlocks()
                 return .901, .8, .601
             end,
             IsValid = function(Rep)
-                local activeArtifact = artData:GetActiveArtifactID()
+                local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
                 -- After a spec switch, the active artifact could be invalid
                 if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
                     -- async timer to prevent stack overflow
