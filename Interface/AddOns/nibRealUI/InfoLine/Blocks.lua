@@ -504,7 +504,7 @@ function InfoLine:CreateBlocks()
                 setTimeOptions(block)
 
                 local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                alert:SetSize(177, alert.Text:GetHeight() + 42);
+                alert:SetSize(177, alert.Text:GetHeight() + 42)
                 alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
                 alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
                 alert.CloseButton:SetScript("OnClick", function(btn)
@@ -616,7 +616,7 @@ function InfoLine:CreateBlocks()
     --[[ Left ]]--
 
     do  -- Guild Roster
-        local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]];
+        local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]]
         local RemoteChatStatus = {
             [0] = [[|TInterface\ChatFrame\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:74:176:74|t]],
             [1] = inlineTexture:format([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-AwayMobile]]),
@@ -911,16 +911,16 @@ function InfoLine:CreateBlocks()
                 end
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    alert:SetSize(177, alert.Text:GetHeight() + 42);
+                    alert:SetSize(177, alert.Text:GetHeight() + 42)
                     alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
                     alert:SetPoint("BOTTOM", block, "TOP", 30, 18)
                     alert.CloseButton:SetScript("OnClick", function(btn)
                         alert:Hide()
                         alert.isHidden = true
-                    end);
+                    end)
                     alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    alert.Text:SetWidth(145);
-                    alert:Show();
+                    alert.Text:SetWidth(145)
+                    alert:Show()
                     alert.isHidden = false
                 else
                     alert:Hide()
@@ -1007,7 +1007,7 @@ function InfoLine:CreateBlocks()
             end,
             GetColor = function(Rep)
                 local _, reaction = _G.GetWatchedFactionInfo()
-                local color = _G.FACTION_BAR_COLORS[reaction];
+                local color = _G.FACTION_BAR_COLORS[reaction]
                 return color.r, color.g, color.b, reaction
             end,
             IsValid = function(Rep)
