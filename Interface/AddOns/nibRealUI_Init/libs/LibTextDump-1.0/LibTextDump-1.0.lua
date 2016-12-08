@@ -296,9 +296,8 @@ end
 function prototype:AddLine(text, dateFormat)
 	self:InsertLine(#buffers[self] + 1, text, dateFormat)
 
-	local frame = frames[self]
-	if frame:IsVisible() then
-		return frame.UpdateText and frame:UpdateText() or self:Display()
+	if lib.frames[self]:IsVisible() then
+		return self:Display()
 	end
 end
 
@@ -308,14 +307,18 @@ function prototype:Clear()
 end
 
 function prototype:Display(separator)
-	local display_text = self:String(separator)
-
-	if display_text == "" then
-		error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
-	end
 	local frame = frames[self]
-	frame.edit_box:SetText(display_text)
-	frame.edit_box:SetCursorPosition(0)
+	if frame.UpdateText then
+		return frame:UpdateText("Display")
+	else
+		local display_text = self:String(separator)
+
+		if display_text == "" then
+			error(METHOD_USAGE_FORMAT:format("Display", "buffer must be non-empty"), 2)
+		end
+		frame.edit_box:SetText(display_text)
+		frame.edit_box:SetCursorPosition(0)
+	end
 	_G.ShowUIPanel(frame)
 end
 
