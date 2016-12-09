@@ -971,8 +971,8 @@ function InfoLine:CreateBlocks()
             GetStats = function(XP)
                 return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion()
             end,
-            GetColor = function(XP)
-                if _G.GetRestState() == 1 then
+            GetColor = function(XP, isRested)
+                if isRested then
                     return 0.0, 0.39, 0.88
                 else
                     return 0.58, 0.0, 0.5
@@ -1128,10 +1128,10 @@ function InfoLine:CreateBlocks()
                 end
             end,
             GetStats = function(Honor)
-                return _G.UnitHonor("player"), _G.UnitHonorMax("player")
+                return _G.UnitHonor("player"), _G.UnitHonorMax("player"), _G.GetHonorExhaustion()
             end,
-            GetColor = function(Honor)
-                if _G.GetHonorRestState() == 1 then
+            GetColor = function(Honor, isRested)
+                if isRested then
                     return 1.0, 0.71, 0
                 else
                     return 1.0, 0.24, 0
@@ -1162,16 +1162,26 @@ function InfoLine:CreateBlocks()
         }
 
         local function UpdateProgress(block)
-            local curValue, maxValue = watchStates[dbc.progressState]:GetStats()
+            local curValue, maxValue, otherValue = watchStates[dbc.progressState]:GetStats()
             block.dataObj.text = round(curValue / maxValue, 3) * 100 .. "%"
 
             local watch = InfoLine.frame.watch
             InfoLine:debug("progress:main", dbc.progressState, curValue, maxValue)
+
+            local main = watch.main
             local r, g, b = watchStates[dbc.progressState]:GetColor()
-            watch.main:SetStatusBarColor(r, g, b, 0.5)
-            watch.main:SetMinMaxValues(0, maxValue)
-            watch.main:SetValue(curValue)
-            watch.main:Show()
+            main:SetStatusBarColor(r, g, b, 0.5)
+            main:SetMinMaxValues(0, maxValue)
+            main:SetValue(curValue)
+            main:Show()
+
+            if _G.type(otherValue) == "number" then
+                local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
+                r, g, b = watchStates[dbc.progressState]:GetColor(true)
+                main.rested:SetColorTexture(r, g, b, 0.5)
+                main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                main.rested:Show()
+            end
 
             local nextState = watchStates[dbc.progressState]:GetNext()
             for i = 1, 2 do
@@ -1196,6 +1206,7 @@ function InfoLine:CreateBlocks()
             if state then
                 InfoLine:debug("check state", dbc.progressState, state)
                 dbc.progressState = state
+                InfoLine.frame.watch.main.rested:Hide()
                 UpdateProgress(block)
             else
                 InfoLine:RemoveBlock(block.name, block.dataObj, block)

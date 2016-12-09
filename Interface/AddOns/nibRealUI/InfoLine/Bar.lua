@@ -593,6 +593,11 @@ function InfoLine:CreateBar()
     watch.main:SetStatusBarTexture(RealUI.media.textures.plain)
     watch.main:SetAllPoints()
     watch.main:Hide()
+
+    local mainBar = watch.main:GetStatusBarTexture()
+    watch.main.rested = watch.main:CreateTexture(nil, "ARTWORK")
+    watch.main.rested:SetPoint("TOPLEFT", mainBar, "TOPRIGHT")
+    watch.main.rested:Hide()
     for i = 1, 2 do
         local bar = _G.CreateFrame("StatusBar", nil, frame)
         bar:SetStatusBarTexture(RealUI.media.textures.plain)
