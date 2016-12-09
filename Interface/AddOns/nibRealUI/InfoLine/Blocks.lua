@@ -954,7 +954,7 @@ function InfoLine:CreateBlocks()
                 end
             end,
             GetStats = function(XP)
-                return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion() or 0
+                return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion()
             end,
             GetColor = function(XP)
                 if _G.GetRestState() == 1 then
@@ -1277,6 +1277,7 @@ function InfoLine:CreateBlocks()
                 UpdateProgress(block)
             end,
             events = {
+                "PLAYER_ENTERING_WORLD",
                 "PLAYER_LEVEL_UP",
                 "UPDATE_EXHAUSTION",
 
