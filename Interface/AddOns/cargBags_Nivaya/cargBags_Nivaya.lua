@@ -399,6 +399,10 @@ function cbNivaya:UpdateAnchors(bag)
 end
 
 function cbNivaya:OnOpen()
+    if not bags.main:GetPoint() then
+        bags.main:SetPoint("BOTTOMRIGHT", -99, 26)
+    end
+
     bags.main:Show()
     cbNivaya:ShowBags(bags.armor, bags.bagNew, bags.bagItemSets, bags.quest, bags.consumables, bags.battlepet,
                       bags.tradegoods, bags.bagStuff, bags.bagJunk)
@@ -416,6 +420,10 @@ function cbNivaya:OnClose()
 end
 
 function cbNivaya:OnBankOpened()
+    if not bags.bank:GetPoint() then
+        bags.bank:SetPoint("TOPLEFT", 20, -20)
+    end
+
     bags.bank:Show()
     cbNivaya:ShowBags(bags.bankSets, bags.bankReagent, bags.bankArmor, bags.bankQuest, bags.bankTrade, bags.bankConsumables, bags.bankBattlePet)
     if _G.cBniv.BankCustomBags then
