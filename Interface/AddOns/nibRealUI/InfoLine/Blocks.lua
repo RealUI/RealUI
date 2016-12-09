@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 -- Libs --
@@ -715,6 +714,13 @@ function InfoLine:CreateBlocks()
             text = 1,
             value = 1,
             suffix = "",
+            OnEnable = function(block, ...)
+                InfoLine:debug("Guild: OnEnable", block.side, ...)
+                if not _G.IsInGuild() then
+                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
+                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                end
+            end,
             OnClick = function(block, ...)
                 InfoLine:debug("Guild: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
@@ -801,6 +807,15 @@ function InfoLine:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 InfoLine:debug("Guild: OnEvent", event, ...)
+                local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
+                if isVisible and not isInGuild then
+                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
+                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                elseif not isVisible and isInGuild then
+                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
+                    InfoLine:AddBlock(block.name, block.dataObj, info)
+                end
+
                 local now = _G.GetTime()
                 InfoLine:debug("Guild: time", now - time)
                 if now - time > 10 then

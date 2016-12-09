@@ -306,6 +306,7 @@ local function CreateNewBlock(name, dataObj)
 end
 
 function InfoLine:AddBlock(name, dataObj, blockInfo)
+    self:debug("InfoLine:AddBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if not block then
         block = CreateNewBlock(name, dataObj)
@@ -318,10 +319,6 @@ function InfoLine:AddBlock(name, dataObj, blockInfo)
         end
     end
 
-    if dataObj.OnEnable then
-        dataObj.OnEnable(block)
-    end
-
     if blockInfo.side then
         block.side = blockInfo.side
         local dock = self.frame[blockInfo.side]
@@ -332,19 +329,24 @@ function InfoLine:AddBlock(name, dataObj, blockInfo)
             dock:AddChatFrame(block, blockInfo.index)
         end
     end
+
+    if dataObj.OnEnable then
+        dataObj.OnEnable(block)
+    end
 end
 
 function InfoLine:RemoveBlock(name, dataObj, blockInfo)
+    self:debug("InfoLine:RemoveBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if blockInfo.side then
-        local dock = InfoLine.frame[self.side]
-        dock:RemoveChatFrame(self)
+        local dock = InfoLine.frame[blockInfo.side]
+        dock:RemoveChatFrame(block)
     end
 
+    block:Hide()
     if dataObj.OnDisable then
         dataObj.OnDisable(block)
     end
-    block:Hide()
 end
 
 function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
