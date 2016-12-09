@@ -938,7 +938,7 @@ function InfoLine:CreateBlocks()
     end
 
     do -- Progress Watch
-        local watchStates = {}
+        local watchStates, artifactInit = {}
         watchStates["xp"] = {
             GetNext = function(XP)
                 if watchStates["rep"]:IsValid() then
@@ -1054,12 +1054,18 @@ function InfoLine:CreateBlocks()
             end,
             IsValid = function(Rep)
                 local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
-                -- After a spec switch, the active artifact could be invalid
-                if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
-                    -- async timer to prevent stack overflow
-                    _G.C_Timer.After(2, artData.ForceUpdate)
+                InfoLine:debug("artifact:IsValid", activeArtifact, artifactInit)
+                if activeArtifact or artifactInit then
+                    -- After a spec switch, the active artifact could be invalid
+                    if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
+                        -- async timer to prevent stack overflow
+                        _G.C_Timer.After(2, artData.ForceUpdate)
+                    end
+                    return not not activeArtifact
+                else
+                    -- Artifact info is not available until the first ARTIFACT_UPDATE, just fake it until then
+                    return true
                 end
-                return not not activeArtifact
             end,
             SetTooltip = function(Art, tooltip)
                 local hasArtifact, artifact = artData:GetArtifactInfo()
@@ -1191,6 +1197,12 @@ function InfoLine:CreateBlocks()
                     dbc.progressState = "xp"
                 end
 
+                if _G.UnitLevel("player") > 100 then
+                    block:RegisterEvent("ARTIFACT_UPDATE")
+                else
+                    artifactInit = true
+                end
+
                 if not watchStates[dbc.progressState]:IsValid() then
                     UpdateState(block)
                 end
@@ -1252,8 +1264,16 @@ function InfoLine:CreateBlocks()
 
                 tooltip:Show()
             end,
-            OnEvent = function(block, ...)
-                InfoLine:debug("progress: OnEvent", block.side, ...)
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("progress: OnEvent", block.side, event, ...)
+                if event == "ARTIFACT_UPDATE" then
+                    artifactInit = true
+                    if not watchStates["artifact"]:IsValid() then
+                        UpdateState(block)
+                    end
+                    block:UnregisterEvent(event)
+                end
+
                 UpdateProgress(block)
             end,
             events = {
