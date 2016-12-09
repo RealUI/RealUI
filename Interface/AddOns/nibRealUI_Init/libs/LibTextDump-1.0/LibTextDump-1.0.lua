@@ -309,7 +309,7 @@ end
 function prototype:Display(separator)
 	local frame = frames[self]
 	if frame.UpdateText then
-		return frame:UpdateText("Display")
+		frame:UpdateText("Display")
 	else
 		local display_text = self:String(separator)
 
