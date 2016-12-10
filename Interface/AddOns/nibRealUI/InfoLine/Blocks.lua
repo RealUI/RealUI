@@ -1332,5 +1332,109 @@ function InfoLine:CreateBlocks()
 
     -- Specialization
 
-    -- FPS/Ping
+    do -- FPS/Ping
+        -- Global Upvalues
+        local GetFramerate, GetNetStats = _G.GetFramerate, _G.GetNetStats
+        local tinsert, tremove = _G.tinsert, _G.tremove
+
+        local blockText = "%d |cff%s|||r %d"
+        local lagFormat = "    %s |cff808080(%s)|r"
+        local indent = "    "
+
+        local period = 5
+        local fpsElapsed, fpsCount = 0, 0
+        local fps = {cur = 0, avg = 0, set = {}}
+
+        local lagElapsed, lagCount = 0, 0
+        local home = {cur = 0, avg = 0, set = {}}
+        local world = {cur = 0, avg = 0, set = {}}
+
+        local function UpdateStat(stat)
+            local set = stat.set
+            tinsert(set, stat.cur)
+            if #set > period then
+                tremove(set, 1)
+            end
+
+            local sum = 0
+            for i = 1, #set do
+                local part = set[i]
+                sum = sum + part
+            end
+            stat.avg = sum / #set
+        end
+        LDB:NewDataObject("netstats", {
+            name = L["Sys_SysInfo"],
+            type = "RealUI",
+            text = "FPS",
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("progress: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT", "RIGHT")
+                block.tooltip = tooltip
+                local lineNum--, colNum
+
+                tooltip:AddHeader(_G.NETWORK_LABEL)
+
+                local color = RealUI.media.colors.orange
+                lineNum = tooltip:AddLine(indent..L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:AddLine(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
+                tooltip:AddLine(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
+
+                tooltip:AddLine(" ")
+
+                tooltip:AddHeader(_G.SYSTEMOPTIONS_MENU)
+                lineNum = tooltip:AddLine(indent..L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:AddLine(indent.._G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
+
+                tooltip:SmartAnchorTo(block)
+                tooltip:SetAutoHideDelay(0.10, block)
+
+                tooltip:Show()
+            end,
+            OnUpdate = function(block, elapsed)
+                fpsElapsed = fpsElapsed + elapsed
+                if fpsElapsed > .2 then
+                    fps.cur = GetFramerate()
+                    fpsCount = fpsCount + 1
+                    fpsElapsed = 0
+                end
+
+                if fpsCount == period then
+                    UpdateStat(fps)
+                    fpsCount = 0
+                end
+
+                lagElapsed = lagElapsed + elapsed
+                if lagElapsed > 6 then
+                    local _, _, latencyHome, latencyWorld = GetNetStats()
+                    home.cur = latencyHome
+                    world.cur = latencyWorld
+                    lagCount = lagCount + 1
+                    lagElapsed = 0
+                end
+
+                if lagCount == period then
+                    UpdateStat(home)
+                    UpdateStat(world)
+                    lagCount = 0
+                end
+
+                local latency = home.cur > world.cur and home.cur or world.cur
+                local color
+                if latency > _G.PERFORMANCEBAR_MEDIUM_LATENCY then
+                    color = "FF0000"
+                elseif latency > _G.PERFORMANCEBAR_LOW_LATENCY then
+                    color = "FFFF00"
+                else
+                    color = "00FF00"
+                end
+
+                block.dataObj.text = blockText:format(fps.cur, color, latency)
+            end,
+        })
+    end
 end

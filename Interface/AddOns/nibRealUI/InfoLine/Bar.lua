@@ -762,6 +762,11 @@ function InfoLine:OnInitialize()
                         index = 1,
                         enabled = -1
                     },
+                    netstats = {
+                        side = "right",
+                        index = 2,
+                        enabled = true
+                    },
                 },
             },
         },
