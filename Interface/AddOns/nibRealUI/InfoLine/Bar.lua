@@ -20,7 +20,7 @@ InfoLine.locked = true
 local MOVING_BLOCK
 local textColor = {}
 local blocksByData = {}
-local barHeight
+local BAR_HEIGHT = RealUI.ModValue(16)
 
 
 ----------------------
@@ -118,7 +118,7 @@ function BlockMixin:OnDragStop(button)
     local dock = InfoLine.frame[self.side]
     dock:HideInsertHighlight()
 
-    if ( dock:IsMouseOver(barHeight, 0, 0, 0) ) then
+    if ( dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) ) then
         local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition();
         mouseX, mouseY = mouseX / scale, mouseY / scale;
 
@@ -164,7 +164,7 @@ function BlockMixin:OnUpdate(elapsed)
         local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition();
         cursorX, cursorY = cursorX / scale, cursorY / scale;
         local dock = InfoLine.frame[self.side]
-        if dock:IsMouseOver(barHeight, 0, 0, 0) then
+        if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
             dock:PlaceInsertHighlight(self, cursorX, cursorY);
         else
             dock:HideInsertHighlight();
@@ -217,7 +217,7 @@ local function CreateNewBlock(name, dataObj)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
-    local width, space = 0, 4
+    local width, space = 0, RealUI.ModValue(2)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.5)
@@ -225,8 +225,9 @@ local function CreateNewBlock(name, dataObj)
     bg:Hide()
     block.bg = bg
 
+    local font, _, outline = _G.RealUIFont_Chat:GetFont()
     local text = block:CreateFontString(nil, "ARTWORK")
-    text:SetFontObject(_G.RealUIFont_Chat)
+    text:SetFont(font, RealUI.ModValue(10), outline)
     text:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
     text:SetPoint("RIGHT", 0, 0)
     text:SetText(dataObj.text)
@@ -241,7 +242,7 @@ local function CreateNewBlock(name, dataObj)
 
 
     if dataObj.icon then
-        local icon, size = block:CreateTexture(nil, "ARTWORK"), _G.floor(barHeight * 0.9)
+        local icon, size = block:CreateTexture(nil, "ARTWORK"), _G.floor(BAR_HEIGHT * 0.9)
         icon:SetTexture(dataObj.icon)
         icon:SetSize(size, size)
         icon:SetPoint("LEFT", space, 0)
@@ -261,7 +262,10 @@ local function CreateNewBlock(name, dataObj)
         if dataObj.labelFont then
             label:SetFont(dataObj.labelFont[1], dataObj.labelFont[2], dataObj.labelFont[3])
         else
-            label:SetFontObject(_G.RealUIFont_Chat)
+            label:SetFontObject(font, RealUI.ModValue(10), outline)
+        end
+        if dataObj.iconR then
+            label:SetVertexColor(dataObj.labelR, dataObj.labelG, dataObj.labelB)
         end
         label:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
         if dataObj.icon then
@@ -299,8 +303,8 @@ local function CreateNewBlock(name, dataObj)
 
     block:SetScript("OnUpdate", block.OnUpdate)
 
-    InfoLine:debug("SetSize", width, barHeight)
-    block:SetSize(width, barHeight)
+    InfoLine:debug("SetSize", width, BAR_HEIGHT)
+    block:SetSize(width, BAR_HEIGHT)
     block:SetClampedToScreen(true)
     return block
 end
@@ -396,14 +400,14 @@ end
 ---------------------
 local DockMixin = {}
 function DockMixin:OnLoad()
-    self:SetHeight(barHeight)
+    self:SetHeight(BAR_HEIGHT)
     self.anchor = "BOTTOM" .. self.side:upper()
     self.anchorAlt = "BOTTOM" .. self.alt:upper()
     self:SetPoint(self.anchor)
     self:SetPoint(self.anchorAlt, InfoLine.frame, "BOTTOM")
 
     self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
-    self.insertHighlight:SetSize(1, barHeight)
+    self.insertHighlight:SetSize(1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
 
     self.DOCKED_CHAT_FRAMES = {};
@@ -563,7 +567,7 @@ function InfoLine:CreateBar()
     local frame = _G.CreateFrame("Frame", "RealUI_InfoLine", _G.UIParent)
     frame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
     frame:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
-    frame:SetHeight(barHeight)
+    frame:SetHeight(BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
 
@@ -784,9 +788,6 @@ function InfoLine:OnInitialize()
 end
 
 function InfoLine:OnEnable()
-    barHeight = _G.floor(_G.GetScreenHeight() * 0.02)
-    self.barHeight = barHeight
-
     textColor.normal = db.colors.normal
     if db.colors.classcolorhighlight then
         textColor.highlight = RealUI.classColor

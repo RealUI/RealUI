@@ -15,17 +15,12 @@ local r, g, b = C.r, C.g, C.b
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
+local ModValue = RealUI.ModValue
 --local round = RealUI.Round
 
 local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
 local initialized = false
 local isHuDShown = false
-
-local _, uiHieght = RealUI:GetResolutionVals(true)
-local uiMod = (uiHieght / 768)
-local function ModValue(value)
-    return _G.floor(value * uiMod + 0.5)
-end
 
 local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug

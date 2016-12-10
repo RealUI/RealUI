@@ -346,7 +346,7 @@ end
 
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
-    local labelHeight = InfoLine.barHeight * .6
+    local labelHeight = RealUI.ModValue(10)
 
     --[[ Static Blocks ]]--
     do  -- Start

@@ -99,6 +99,12 @@ local function debug(...)
     return Debug("Init", ...)
 end
 
+local _, uiHieght = _G.GetPhysicalScreenSize()
+local uiMod = uiHieght / 768
+function RealUI.ModValue(value)
+    return _G.floor(value * uiMod + 0.5)
+end
+
 -- Slash Commands
 _G.SLASH_REALUIINIT1 = "/realdebug"
 function _G.SlashCmdList.REALUIINIT(mod, editBox)
@@ -147,17 +153,11 @@ f:SetScript("OnEvent", function(self, event, addon)
         local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
         debug("physical size", pysWidth, pysHeight)
 
-        local EM = scrHeight * 0.0125
-        debug("EM", EM, RealUI.EM)
-
-        if not RealUI.EM then
-            debug("Set EM")
-            RealUI.EM = EM
-        elseif EM ~= RealUI.EM then
-            debug("Recalc EM")
-        end
+        uiMod = pysHeight / 768
+        debug("uiMod", uiMod)
     elseif event == "ADDON_LOADED" then
         if addon == "nibRealUI_Init" then
+            debug("nibRealUI_Init: loaded", uiMod)
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
             _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
