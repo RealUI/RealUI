@@ -107,7 +107,7 @@ function BagButton:Create(bagID)
 end
 
 function BagButton:Update()
-    local icon = _G.GetInventoryItemTexture("player", self.invID)
+    local icon = _G.GetInventoryItemTexture("player", self.GetInventorySlot and self:GetInventorySlot() or self.invID)
     self.Icon:SetTexture(icon or self.bgTex)
     self.Icon:SetDesaturated(_G.IsInventoryItemLocked(self.invID))
 

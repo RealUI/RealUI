@@ -53,7 +53,7 @@ filters.fItemClass = function(item, container)
 end
 
 function cbNivaya:ClassifyItem(item)
-    cargBags.debug("filters cbNivaya:ClassifyItem", item.name, item.id)
+    cargBags.debug("filters cbNivaya:ClassifyItem", item.name, item.id, item.rarity)
 
     if item.bagID == -2 then
         -- keyring
@@ -80,7 +80,7 @@ function cbNivaya:ClassifyItem(item)
         end
     end
 
-    if not (item.typeID or item.rarity) then
+    if not item.typeID or not item.rarity then
         itemClass[item.id] = "ReClass"
     elseif not itemClass[item.id] then
         itemClass[item.id] = "NoClass"
