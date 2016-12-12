@@ -540,6 +540,7 @@ function cbNivaya:CatDropDownOnClick(dropdown, type)
 
     if (type == "MarkAsNew") then
         _G.cB_KnownItems[itemID] = nil
+        _G.cBniv_CatInfo[itemID] = nil
     elseif (type == "MarkAsKnown") then
         _G.cB_KnownItems[itemID] = cbNivaya:getItemCount(itemName)
     else
