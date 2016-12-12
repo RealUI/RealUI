@@ -587,7 +587,7 @@ local function POI_OnEnter(self)
     if mm_anchor == "TOPLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
     elseif mm_anchor == "BOTTOMLEFT" then
-        POITooltip:SetOwner(self, "ANCHOR_TOPMRIGHT", 5, 5)
+        POITooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 5, 5)
     end
 
     -- Add Hyperlink
