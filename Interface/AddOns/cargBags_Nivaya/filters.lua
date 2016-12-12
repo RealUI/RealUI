@@ -61,7 +61,7 @@ function cbNivaya:ClassifyItem(item)
     elseif _G.cBniv_CatInfo[item.id] then
         -- user assigned containers
         itemClass[item.id] = _G.cBniv_CatInfo[item.id]
-    elseif (item.rarity == 0) then
+    elseif item.rarity == 0 then
         -- junk
         itemClass[item.id] = "Junk"
     elseif item.typeID then
@@ -80,7 +80,7 @@ function cbNivaya:ClassifyItem(item)
         end
     end
 
-    if not item.typeID then
+    if not (item.typeID or item.rarity) then
         itemClass[item.id] = "ReClass"
     elseif not itemClass[item.id] then
         itemClass[item.id] = "NoClass"
