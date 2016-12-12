@@ -237,50 +237,59 @@ local function CreateNewBlock(name, dataObj)
         text:SetText(dataObj.value or dataObj.text)
     end
     block.text = text
-    width = width + text:GetStringWidth() + space
+    width = width + text:GetStringWidth()-- + space
     InfoLine:debug("text", width)
 
 
     if dataObj.icon then
-        local icon, size = block:CreateTexture(nil, "ARTWORK"), _G.floor(BAR_HEIGHT * 0.9)
-        icon:SetTexture(dataObj.icon)
-        icon:SetSize(size, size)
+        local icon, iconWidth
+        if dataObj.iconFont then
+            icon = block:CreateFontString(nil, "ARTWORK")
+            icon:SetFont(dataObj.iconFont[1], dataObj.iconFont[2], dataObj.iconFont[3])
+            icon:SetText(dataObj.icon)
+            if dataObj.iconR then
+                icon:SetTextColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
+            end
+            iconWidth = icon:GetStringWidth()
+            icon.isFont = true
+       else
+            local size = RealUI.ModValue(10)
+            icon = block:CreateTexture(nil, "ARTWORK")
+            icon:SetTexture(dataObj.icon)
+            icon:SetSize(size, size)
+            if dataObj.iconR then
+                icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
+            end
+            if dataObj.iconCoords then
+                icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+            end
+            iconWidth = size
+        end
         icon:SetPoint("LEFT", space, 0)
-        if dataObj.iconR then
-            icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
-        end
-        if dataObj.iconCoords then
-            icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
-        end
+        block.checkWidth = iconWidth < 1
+
         block.icon = icon
-        width = width + size + space
+        width = width + iconWidth-- + space
         InfoLine:debug("icon", width)
     end
 
     if dataObj.label then
         local label = block:CreateFontString(nil, "ARTWORK")
-        if dataObj.labelFont then
-            label:SetFont(dataObj.labelFont[1], dataObj.labelFont[2], dataObj.labelFont[3])
-        else
-            label:SetFontObject(font, RealUI.ModValue(10), outline)
-        end
-        if dataObj.iconR then
-            label:SetVertexColor(dataObj.labelR, dataObj.labelG, dataObj.labelB)
-        end
+        label:SetFont(font, RealUI.ModValue(10), outline)
         label:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
+        label:SetText(dataObj.label)
         if dataObj.icon then
             label:SetPoint("LEFT", block.icon, "RIGHT", space, 0)
         else
             label:SetPoint("LEFT", space, 0)
         end
-        label:SetText(dataObj.label)
 
         local labelWidth = label:GetStringWidth()
         block.checkWidth = labelWidth < 1
         InfoLine:debug(block.name, "labelWidth", labelWidth)
 
         block.label = label
-        width = width + labelWidth + space
+        width = width + labelWidth-- + space
         InfoLine:debug("label", dataObj.label, width)
     end
 
@@ -304,7 +313,7 @@ local function CreateNewBlock(name, dataObj)
     block:SetScript("OnUpdate", block.OnUpdate)
 
     InfoLine:debug("SetSize", width, BAR_HEIGHT)
-    block:SetSize(width, BAR_HEIGHT)
+    block:SetSize(width + space, BAR_HEIGHT)
     block:SetClampedToScreen(true)
     return block
 end
@@ -383,12 +392,20 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
             end
         end
         if attr:find("icon") then
-            block.icon:SetTexture(dataObj.icon)
-            if dataObj.iconR then
-                block.icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
-            end
-            if dataObj.iconCoords then
-                block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+            local icon = block.icon
+            if icon.isFont then
+                icon:SetText(dataObj.icon)
+                if dataObj.iconR then
+                    icon:SetTextColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
+                end
+            else
+                block.icon:SetTexture(dataObj.icon)
+                if dataObj.iconR then
+                    block.icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
+                end
+                if dataObj.iconCoords then
+                    block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+                end
             end
         end
     end

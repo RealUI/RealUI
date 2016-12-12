@@ -335,8 +335,8 @@ do -- template
     LDB:NewDataObject("test", {
         name = "Test",
         type = "RealUI",
-        label = fa["group"],
-        labelFont = {fa.path, labelHeight, "OUTLINE"},
+        icon = fa["group"],
+        iconFont = {fa.path, iconHeight, "OUTLINE"},
         text = "TEST 1 test",
         value = 1,
         suffix = "test",
@@ -346,7 +346,7 @@ end
 
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
-    local labelHeight = RealUI.ModValue(10)
+    local iconHeight = RealUI.ModValue(10)
 
     --[[ Static Blocks ]]--
     do  -- Start
@@ -448,8 +448,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("start", {
             name = L["Start"],
             type = "RealUI",
-            label = fa["bars"],
-            labelFont = {fa.path, labelHeight, "OUTLINE"},
+            icon = fa["bars"],
+            iconFont = {fa.path, iconHeight, "OUTLINE"},
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -709,8 +709,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("guild", {
             name = _G.GUILD,
             type = "RealUI",
-            label = fa["group"],
-            labelFont = {fa.path, labelHeight, "OUTLINE"},
+            icon = fa["group"],
+            iconFont = {fa.path, iconHeight, "OUTLINE"},
             text = 1,
             value = 1,
             suffix = "",
@@ -865,8 +865,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("durability", {
             name = _G.DURABILITY,
             type = "RealUI",
-            label = fa["heartbeat"],
-            labelFont = {fa.path, labelHeight, "OUTLINE"},
+            icon = fa["heartbeat"],
+            iconFont = {fa.path, iconHeight, "OUTLINE"},
             text = 1,
             OnClick = function(block, ...)
                 InfoLine:debug("Durability: OnClick", block.side, ...)
@@ -941,7 +941,7 @@ function InfoLine:CreateBlocks()
                     alert:Hide()
                 end
                 block.dataObj.text = round(lowDur * 100) .. "%"
-                block.dataObj.labelR, block.dataObj.labelG, block.dataObj.labelB = RealUI.GetDurabilityColor(lowMin, lowMax)
+                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax)
                 block.timer = false
             end,
             events = {
@@ -1328,8 +1328,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("mail", {
             name = _G.MAIL_LABEL,
             type = "RealUI",
-            label = fa["envelope"],
-            labelFont = {fa.path, labelHeight, "OUTLINE"},
+            icon = fa["envelope"],
+            iconFont = {fa.path, iconHeight, "OUTLINE"},
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
                 --InfoLine:debug("Mail: OnEnter", block.side, ...)
