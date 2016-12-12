@@ -766,9 +766,14 @@ function InfoLine:OnInitialize()
                         index = 1,
                         enabled = -1
                     },
-                    netstats = {
+                    mail = {
                         side = "right",
                         index = 2,
+                        enabled = true
+                    },
+                    netstats = {
+                        side = "right",
+                        index = 3,
                         enabled = true
                     },
                 },
