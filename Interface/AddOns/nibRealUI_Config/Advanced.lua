@@ -178,23 +178,25 @@ local core do
         for name, dataObj in InfoLine.LDB:DataObjectIterator() do
             if dataObj.type == "RealUI" then
                 local blockInfo = db.blocks.realui[name]
-                -- Create base options for RealUI
-                realui.args[name] = {
-                    name = dataObj.name,
-                    desc = L["General_EnabledDesc"]:format(dataObj.name),
-                    type = "toggle",
-                    get = function() return blockInfo.enabled end,
-                    set = function(data, value)
-                        blockInfo.enabled = value
-                        if value then
-                            InfoLine:AddBlock(name, dataObj, blockInfo)
-                        else
-                            InfoLine:RemoveBlock(name, dataObj, blockInfo)
-                        end
-                    end,
-                    order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
-                }
-                infoLine.args.realui = realui
+                if blockInfo.enabled ~= -1 then
+                    -- Create base options for RealUI
+                    realui.args[name] = {
+                        name = dataObj.name,
+                        desc = L["General_EnabledDesc"]:format(dataObj.name),
+                        type = "toggle",
+                        get = function() return blockInfo.enabled end,
+                        set = function(data, value)
+                            if value then
+                                InfoLine:AddBlock(name, dataObj, blockInfo)
+                            else
+                                InfoLine:RemoveBlock(name, dataObj, blockInfo)
+                            end
+                            blockInfo.enabled = value
+                        end,
+                        order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
+                    }
+                    infoLine.args.realui = realui
+                end
             elseif dataObj.type == "data source" then
                 local blockInfo = db.blocks.others[name]
                 -- Create base options for others
@@ -204,12 +206,12 @@ local core do
                     type = "toggle",
                     get = function() return blockInfo.enabled end,
                     set = function(data, value)
-                        blockInfo.enabled = value
                         if value then
                             InfoLine:AddBlock(name, dataObj, blockInfo)
                         else
                             InfoLine:RemoveBlock(name, dataObj, blockInfo)
                         end
+                        blockInfo.enabled = value
                     end,
                     order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
                 }
