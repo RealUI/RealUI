@@ -18,7 +18,6 @@ InfoLine.LDB = LDB
 InfoLine.locked = true
 
 local MOVING_BLOCK
-local textColor = {}
 local blocksByData = {}
 local BAR_HEIGHT = RealUI.ModValue(16)
 
@@ -44,7 +43,7 @@ function BlockMixin:OnEnter()
     --InfoLine:debug("OnEnter", self.name)
     --self.highlight:Show()
 
-    if (not db.other.icTips and _G.InCombatLockdown()) then return end
+    if (not db.combatTips and _G.InCombatLockdown()) then return end
     local dataObj  = self.dataObj
 
     if dataObj.tooltip then
@@ -73,7 +72,7 @@ function BlockMixin:OnLeave()
     InfoLine:debug("OnLeave", self.name)
     --self.highlight:Hide()
 
-    if (not db.other.icTips and _G.UnitAffectingCombat("player")) then return end
+    if (not db.combatTips and _G.UnitAffectingCombat("player")) then return end
     local dataObj  = self.dataObj
 
     if dataObj.OnTooltipShow then
@@ -228,7 +227,7 @@ local function CreateNewBlock(name, dataObj)
     local font, _, outline = _G.RealUIFont_Chat:GetFont()
     local text = block:CreateFontString(nil, "ARTWORK")
     text:SetFont(font, RealUI.ModValue(10), outline)
-    text:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
+    text:SetTextColor(1, 1, 1)
     text:SetPoint("RIGHT", 0, 0)
     text:SetText(dataObj.text)
     if dataObj.suffix and dataObj.suffix ~= "" then
@@ -241,7 +240,7 @@ local function CreateNewBlock(name, dataObj)
     InfoLine:debug("text", width)
 
 
-    if dataObj.icon then
+    if db.showIcon and dataObj.icon then
         local icon, iconWidth
         if dataObj.iconFont then
             icon = block:CreateFontString(nil, "ARTWORK")
@@ -273,11 +272,11 @@ local function CreateNewBlock(name, dataObj)
         InfoLine:debug("icon", width)
     end
 
-    if dataObj.label then
+    if db.showLabel then
         local label = block:CreateFontString(nil, "ARTWORK")
         label:SetFont(font, RealUI.ModValue(10), outline)
-        label:SetTextColor(textColor.normal[1], textColor.normal[2], textColor.normal[3])
-        label:SetText(dataObj.label)
+        label:SetTextColor(1, 1, 1)
+        label:SetText(dataObj.label or dataObj.name)
         if dataObj.icon then
             label:SetPoint("LEFT", block.icon, "RIGHT", space, 0)
         else
@@ -385,13 +384,13 @@ function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataO
 
             block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
         end
-        if attr:find("label") then
+        if db.showLabel and attr:find("label") then
             block.label:SetText(dataObj.label)
             if dataObj.labelR then
                 block.label:SetTextColor(dataObj.labelR, dataObj.labelG, dataObj.labelB)
             end
         end
-        if attr:find("icon") then
+        if db.showIcon and attr:find("icon") then
             local icon = block.icon
             if icon.isFont then
                 icon:SetText(dataObj.icon)
@@ -524,7 +523,7 @@ function DockMixin:UpdateTabs(forceUpdate)
         chatFrame:Show();
 
         if ( lastBlock ) then
-            local xOfs = self.side == "left" and db.text.gap or -db.text.gap
+            local xOfs = self.side == "left" and db.blockGap or -db.blockGap
             chatFrame:SetPoint(self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
         else
             chatFrame:SetPoint(self.anchor);
@@ -725,33 +724,16 @@ function InfoLine:OnInitialize()
             specgear = specgear,
         },
         profile = {
-            text = {
-                gap = 1,
-                padding = 5,
-                headersize = 13,
-                columnsize = 10,
-                normalsize = 11,
-                hintsize = 11,
-            },
-            colors = {
-                normal = {1, 1, 1},
-                highlight = {1, 1, 1},
-                classcolorhighlight = true,
-                disabled = {0.5, 0.5, 0.5},
-                ttheader = {1, 1, 1},
-                hint = {0, 0.6, 1},
-            },
-            other = {
-                icTips = false,
-            },
+            combatTips = false,
+            blockGap = 1,
+            showLabel = false,
+            showIcon = true,
             blocks = {
                 others = {
                     ['*'] = {
                         side = "left",
                         index = 10,
                         enabled = false,
-                        showText = true,
-                        showIcon = true,
                     },
                 },
                 realui = {
@@ -810,18 +792,6 @@ function InfoLine:OnInitialize()
 end
 
 function InfoLine:OnEnable()
-    textColor.normal = db.colors.normal
-    if db.colors.classcolorhighlight then
-        textColor.highlight = RealUI.classColor
-    else
-        textColor.highlight = db.colors.highlight
-    end
-    textColor.disabled = db.colors.disabled
-    textColor.white = {1, 1, 1}
-    textColor.header = db.colors.ttheader
-    textColor.orange = RealUI.media.colors.orange
-    textColor.blue = RealUI.media.colors.blue
-
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
 

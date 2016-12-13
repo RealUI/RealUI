@@ -95,41 +95,46 @@ local core do
                     type = "description",
                     order = 31,
                 },
+                inCombat = {
+                    name = "In Combat Tooltips",
+                    desc = "Show tooltips in combat.",
+                    type = "toggle",
+                    get = function() return db.combatTips end,
+                    set = function(info, value)
+                        db.combatTips = value
+                    end,
+                    order = 40,
+                },
+                showLabel = {
+                    name = "Show block label",
+                    type = "toggle",
+                    get = function() return db.showLabel end,
+                    set = function(info, value)
+                        db.showLabel = value
+                    end,
+                    order = 50,
+                },
+                showIcon = {
+                    name = "Show block icon",
+                    type = "toggle",
+                    get = function() return db.showIcon end,
+                    set = function(info, value)
+                        db.showIcon = value
+                    end,
+                    order = 60,
+                },
                 blockGap = {
                     name = "Block Gap",
                     desc = "The ammount of space between each block.",
                     type = "input",
                     width = "half",
-                    get = function(info) return _G.tostring(db.text.gap) end,
+                    get = function(info) return _G.tostring(db.blockGap) end,
                     set = function(info, value)
                         value = RealUI:ValidateOffset(value)
-                        db.text.gap = value
+                        db.blockGap = value
                         InfoLine:UpdatePositions()
                     end,
-                    order = 40,
-                },
-                padding = {
-                    name = "Padding",
-                    desc = "Additional space between the icon and the text",
-                    type = "input",
-                    width = "half",
-                    get = function(info) return _G.tostring(db.text.padding) end,
-                    set = function(info, value)
-                        value = RealUI:ValidateOffset(value)
-                        db.text.padding = value
-                        InfoLine:UpdatePositions()
-                    end,
-                    order = 50,
-                },
-                inCombat = {
-                    name = "In Combat Tooltips",
-                    desc = "Show tooltips in combat.",
-                    type = "toggle",
-                    get = function() return db.other.icTips end,
-                    set = function(info, value)
-                        db.other.icTips = value
-                    end,
-                    order = 60,
+                    order = 70,
                 },
             },
         }
