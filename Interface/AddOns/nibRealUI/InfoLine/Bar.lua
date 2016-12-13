@@ -213,6 +213,7 @@ end
 local function CreateNewBlock(name, dataObj)
     InfoLine:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, InfoLine.frame), BlockMixin)
+    block:SetFrameLevel(InfoLine.frame:GetFrameLevel() + 2)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
