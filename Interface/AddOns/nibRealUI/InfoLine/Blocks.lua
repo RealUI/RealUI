@@ -17,8 +17,7 @@ function qTip:Acquire(...)
 end
 
 local artData = _G.LibStub("LibArtifactData-1.0", true)
-local LIF = _G.LibStub("LibIconFonts-1.0")
-local fa = LIF:GetIconFont("FontAwesome")
+local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome")
 fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
 
 -- RealUI --
@@ -33,11 +32,43 @@ testCell:SetPoint("CENTER")
 testCell:SetSize(500, 20)
 testCell:Hide()
 
+local headerFont, textFont, iconFont
+do
+    local size = RealUI.ModValue(12)
+    local font, _, outline = _G.RealUIFont_Normal:GetFont()
+    local header = _G.CreateFont("RealUI_TooltipHeader")
+    header:SetFont(font, size, outline)
+    headerFont = {
+        font = font,
+        size = size,
+        outline = outline,
+        object = header
+    }
+
+    size = RealUI.ModValue(8)
+    font, _, outline = _G.RealUIFont_Chat:GetFont()
+    local text = _G.CreateFont("RealUI_TooltipText")
+    text:SetFont(font, size, outline)
+    textFont = {
+        font = font,
+        size = size,
+        outline = outline,
+        object = text
+    }
+
+    size = RealUI.ModValue(10)
+    iconFont = {
+        font = fa.path,
+        size = size,
+        outline = "OUTLINE"
+    }
+end
+
 local TABLE_WIDTH = 500
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 do
     local MAX_ROWS = 10
-    local ROW_HEIGHT = 10
+    local ROW_HEIGHT = textFont.size
     local numTables = 0
 
 
@@ -57,7 +88,8 @@ do
                 for col = 1, #header do
                     local text = row[col]
                     if not text then
-                        text = row:CreateFontString("$parentText", "ARTWORK", "RealUIFont_Normal")
+                        text = row:CreateFontString("$parentText", "ARTWORK")
+                        text:SetFont(textFont.font, textFont.size, textFont.outline)
                         text:SetPoint("TOP")
                         text:SetPoint("BOTTOM")
                         text:SetPoint("LEFT", header[col])
@@ -272,7 +304,9 @@ do
                     header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
                 end
 
-                header.text = header:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+                header.text = header:CreateFontString(nil, "ARTWORK")
+                header.text:SetFont(textFont.font, textFont.size, textFont.outline)
+                header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
                 local highlight = header:CreateTexture(nil, "ARTWORK")
@@ -297,7 +331,7 @@ do
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
-                testCell:SetFontObject("RealUIFont_Normal")
+                testCell:SetFont(textFont.font, textFont.size, textFont.outline)
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
@@ -349,6 +383,13 @@ do
     end
 end
 
+local function SetupTooltip(tooltip, block)
+    tooltip:SetHeaderFont(headerFont.object)
+    tooltip:SetFont(textFont.object)
+    tooltip:SmartAnchorTo(block)
+    tooltip:SetAutoHideDelay(0.10, block)
+    block.tooltip = tooltip
+end
 
 --[[
 do -- template
@@ -356,17 +397,29 @@ do -- template
         name = "Test",
         type = "RealUI",
         icon = fa["group"],
-        iconFont = {fa.path, iconHeight, "OUTLINE"},
+        iconFont = iconFont,
         text = "TEST 1 test",
         value = 1,
         suffix = "test",
+        OnEnter = function(block, ...)
+            if qTip:IsAcquired(block) then return end
+            --InfoLine:debug("Test: OnEnter", block.side, ...)
+
+            local tooltip = qTip:Acquire(block, 2, "LEFT", RIGHT")
+            SetupTooltip(tooltip, block)
+            local lineNum, colNum
+
+            tooltip:AddHeader("Header")
+            tooltip:AddLine("Left", "Right")
+
+            tooltip:Show()
+        end,
     })
 end
 --]]
 
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
-    local iconHeight = RealUI.ModValue(10)
 
     --[[ Static Blocks ]]--
     do  -- Start
@@ -469,7 +522,7 @@ function InfoLine:CreateBlocks()
             name = L["Start"],
             type = "RealUI",
             icon = fa["bars"],
-            iconFont = {fa.path, iconHeight, "OUTLINE"},
+            iconFont = iconFont,
             OnEnter = function(block, ...)
                 InfoLine:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -561,7 +614,7 @@ function InfoLine:CreateBlocks()
                 --InfoLine:debug("Clock: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
-                block.tooltip = tooltip
+                SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
@@ -608,9 +661,6 @@ function InfoLine:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
                 tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
 
                 tooltip:Show()
             end,
@@ -729,7 +779,7 @@ function InfoLine:CreateBlocks()
             name = _G.GUILD,
             type = "RealUI",
             icon = fa["group"],
-            iconFont = {fa.path, iconHeight, "OUTLINE"},
+            iconFont = iconFont,
             text = 1,
             value = 1,
             suffix = "",
@@ -751,13 +801,11 @@ function InfoLine:CreateBlocks()
                 --InfoLine:debug("Guild: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
-                local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
-                tooltip:SetHighlightTexture(r, g, b, 0.2)
+                SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 local gname = _G.GetGuildInfo("player")
                 tooltip:AddHeader(gname)
-
 
                 local motd = _G.GetGuildRosterMOTD()
                 if motd ~= "" then
@@ -818,11 +866,7 @@ function InfoLine:CreateBlocks()
                 lineNum = tooltip:AddLine(L["Guild_WhisperInvite"])
                 tooltip:SetLineTextColor(lineNum, 0, 1, 0)
 
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
-
                 tooltip:Show()
-                block.tooltip = tooltip
             end,
             OnEvent = function(block, event, ...)
                 InfoLine:debug("Guild: OnEvent", event, ...)
@@ -885,7 +929,7 @@ function InfoLine:CreateBlocks()
             name = _G.DURABILITY,
             type = "RealUI",
             icon = fa["heartbeat"],
-            iconFont = {fa.path, iconHeight, "OUTLINE"},
+            iconFont = iconFont,
             text = 1,
             OnClick = function(block, ...)
                 InfoLine:debug("Durability: OnClick", block.side, ...)
@@ -898,10 +942,12 @@ function InfoLine:CreateBlocks()
                 --InfoLine:debug("Durability: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
-                block.tooltip = tooltip
+                SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetHeaderFont(headerFont.object)
+                tooltip:SetFont(textFont.object)
                 tooltip:SetCell(lineNum, colNum, _G.DURABILITY, nil, 2)
 
                 for slotID = 1, #itemSlots do
@@ -915,9 +961,6 @@ function InfoLine:CreateBlocks()
                         end
                     end
                 end
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
 
                 tooltip:Show()
             end,
@@ -1238,7 +1281,7 @@ function InfoLine:CreateBlocks()
             name = L["Progress"],
             type = "RealUI",
             icon = fa["thermometer"],
-            iconFont = {fa.path, iconHeight, "OUTLINE"},
+            iconFont = iconFont,
             text = "XP",
             OnEnable = function(block)
                 InfoLine:debug("progress: OnEnable", block.side)
@@ -1285,10 +1328,12 @@ function InfoLine:CreateBlocks()
                 --InfoLine:debug("progress: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
-                block.tooltip = tooltip
+                SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetHeaderFont(headerFont.object)
+                tooltip:SetFont(textFont.object)
                 tooltip:SetCell(lineNum, colNum, L["Progress"], nil, nil, 2)
 
                 watchStates[dbc.progressState]:SetTooltip(tooltip)
@@ -1307,9 +1352,6 @@ function InfoLine:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Progress_Cycle"], nil, nil, 2)
                 tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
 
                 tooltip:Show()
             end,
@@ -1352,14 +1394,16 @@ function InfoLine:CreateBlocks()
             name = _G.MAIL_LABEL,
             type = "RealUI",
             icon = fa["envelope"],
-            iconFont = {fa.path, iconHeight, "OUTLINE"},
+            iconFont = iconFont,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
                 --InfoLine:debug("Mail: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
-                block.tooltip = tooltip
+                SetupTooltip(tooltip, block)
 
+                tooltip:SetHeaderFont(headerFont.object)
+                tooltip:SetFont(textFont.object)
                 local send1, send2, send3 = _G.GetLatestThreeSenders()
                 if (send1 or send2 or send3) then
                     tooltip:AddHeader(_G.HAVE_MAIL_FROM)
@@ -1370,9 +1414,6 @@ function InfoLine:CreateBlocks()
                 if send1 then tooltip:AddLine(send1) end
                 if send2 then tooltip:AddLine(send2) end
                 if send3 then tooltip:AddLine(send3) end
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
 
                 tooltip:Show()
             end,
@@ -1441,9 +1482,11 @@ function InfoLine:CreateBlocks()
                 --InfoLine:debug("progress: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT", "RIGHT")
-                block.tooltip = tooltip
+                SetupTooltip(tooltip, block)
                 local lineNum--, colNum
 
+                tooltip:SetHeaderFont(headerFont.object)
+                tooltip:SetFont(textFont.object)
                 tooltip:AddHeader(_G.NETWORK_LABEL)
 
                 local color = RealUI.media.colors.orange
@@ -1458,9 +1501,6 @@ function InfoLine:CreateBlocks()
                 lineNum = tooltip:AddLine(indent..L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
                 tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
                 tooltip:AddLine(indent.._G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
-
-                tooltip:SmartAnchorTo(block)
-                tooltip:SetAutoHideDelay(0.10, block)
 
                 tooltip:Show()
             end,

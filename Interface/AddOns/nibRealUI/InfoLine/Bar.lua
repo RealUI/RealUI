@@ -21,6 +21,14 @@ local MOVING_BLOCK
 local blocksByData = {}
 local BAR_HEIGHT = RealUI.ModValue(16)
 
+local blockFont do
+    local font, _, outline = _G.RealUIFont_Normal:GetFont()
+    blockFont = {
+        font = font,
+        size = RealUI.ModValue(10),
+        outline = outline
+    }
+end
 
 ----------------------
 -- Block Management --
@@ -225,8 +233,7 @@ local function CreateNewBlock(name, dataObj)
     bg:Hide()
     block.bg = bg
 
-    local size = RealUI.ModValue(10)
-    local font, _, outline = _G.RealUIFont_Chat:GetFont()
+    local font, size, outline = blockFont.font, blockFont.size, blockFont.outline
     local text = block:CreateFontString(nil, "ARTWORK")
     text:SetFont(font, size, outline)
     text:SetTextColor(1, 1, 1)
@@ -246,7 +253,7 @@ local function CreateNewBlock(name, dataObj)
         local icon, iconWidth
         if dataObj.iconFont then
             icon = block:CreateFontString(nil, "ARTWORK")
-            icon:SetFont(dataObj.iconFont[1], dataObj.iconFont[2], dataObj.iconFont[3])
+            icon:SetFont(dataObj.iconFont.font, dataObj.iconFont.size, dataObj.iconFont.outline)
             icon:SetText(dataObj.icon)
             if dataObj.iconR then
                 icon:SetTextColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
