@@ -32,7 +32,7 @@ local function PrepareTooltip(tooltip, block)
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
         end
-        local anchor = block.side == "left" and "LEFT" or "RIGHT"
+        local anchor = block.side:upper()
         InfoLine:debug("SetPoint", anchor)
         tooltip:SetPoint(("BOTTOM"..anchor), block, ("TOP"..anchor))
     end
@@ -150,11 +150,11 @@ function BlockMixin:OnUpdate(elapsed)
         self.dataObj.OnUpdate(self, elapsed)
     end
 
-    if self.checkWidth then
-        local labelWidth = self.label:GetStringWidth()
-        InfoLine:debug(self.name, "OnUpdate", labelWidth)
-        if labelWidth > 1 then
-            self:SetWidth(self:GetWidth() + labelWidth)
+    if self.checkWidth and self.icon.isFont then
+        local width = self.icon:GetStringWidth()
+        InfoLine:debug(self.name, "OnUpdate", width)
+        if width > 1 then
+            self:SetWidth(self:GetWidth() + width)
             self.checkWidth = nil
         end
     end
@@ -225,9 +225,10 @@ local function CreateNewBlock(name, dataObj)
     bg:Hide()
     block.bg = bg
 
+    local size = RealUI.ModValue(10)
     local font, _, outline = _G.RealUIFont_Chat:GetFont()
     local text = block:CreateFontString(nil, "ARTWORK")
-    text:SetFont(font, RealUI.ModValue(10), outline)
+    text:SetFont(font, size, outline)
     text:SetTextColor(1, 1, 1)
     text:SetPoint("RIGHT", 0, 0)
     text:SetText(dataObj.text)
@@ -237,7 +238,7 @@ local function CreateNewBlock(name, dataObj)
         text:SetText(dataObj.value or dataObj.text)
     end
     block.text = text
-    width = width + text:GetStringWidth()-- + space
+    width = width + text:GetStringWidth()
     InfoLine:debug("text", width)
 
 
@@ -253,7 +254,6 @@ local function CreateNewBlock(name, dataObj)
             iconWidth = icon:GetStringWidth()
             icon.isFont = true
        else
-            local size = RealUI.ModValue(10)
             icon = block:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(dataObj.icon)
             icon:SetSize(size, size)
@@ -269,27 +269,23 @@ local function CreateNewBlock(name, dataObj)
         block.checkWidth = iconWidth < 1
 
         block.icon = icon
-        width = width + iconWidth-- + space
+        width = width + iconWidth
         InfoLine:debug("icon", width)
     end
 
     if db.showLabel then
         local label = block:CreateFontString(nil, "ARTWORK")
-        label:SetFont(font, RealUI.ModValue(10), outline)
+        label:SetFont(font, size, outline)
         label:SetTextColor(1, 1, 1)
         label:SetText(dataObj.label or dataObj.name)
-        if dataObj.icon then
-            label:SetPoint("LEFT", block.icon, "RIGHT", space, 0)
+        if db.showIcon and dataObj.icon then
+            label:SetPoint("LEFT", block.icon, "RIGHT", 0, 0)
         else
             label:SetPoint("LEFT", space, 0)
         end
 
-        local labelWidth = label:GetStringWidth()
-        block.checkWidth = labelWidth < 1
-        InfoLine:debug(block.name, "labelWidth", labelWidth)
-
         block.label = label
-        width = width + labelWidth-- + space
+        width = width + label:GetStringWidth()
         InfoLine:debug("label", dataObj.label, width)
     end
 
@@ -363,14 +359,14 @@ function InfoLine:RemoveBlock(name, dataObj, blockInfo)
 end
 
 function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
-    self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
+    --self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
     local blockInfo = self:GetBlockInfo(name, dataObj)
     if blockInfo and blockInfo.enabled then
         self:AddBlock(name, dataObj, blockInfo)
     end
 end
 function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
-    self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
+    --self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
     local block = blocksByData[dataObj]
     if block then
         if attr == "value" or attr == "suffix" or attr == "text" then
