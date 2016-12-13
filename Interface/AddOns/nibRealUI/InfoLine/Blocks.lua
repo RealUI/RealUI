@@ -51,25 +51,30 @@ do
             local index = offset + i
             local row = self.textTable.rows[i]
             InfoLine:debug("row", i, index)
-            for col = 1, #header do
-                local text = row[col]
-                if not text then
-                    text = row:CreateFontString("$parentText", "ARTWORK", "RealUIFont_Normal")
-                    text:SetPoint("TOP")
-                    text:SetPoint("BOTTOM")
-                    text:SetPoint("LEFT", header[col])
-                    text:SetPoint("RIGHT", header[col])
+            if i > #data then
+                row:Hide()
+            else
+                for col = 1, #header do
+                    local text = row[col]
+                    if not text then
+                        text = row:CreateFontString("$parentText", "ARTWORK", "RealUIFont_Normal")
+                        text:SetPoint("TOP")
+                        text:SetPoint("BOTTOM")
+                        text:SetPoint("LEFT", header[col])
+                        text:SetPoint("RIGHT", header[col])
 
-                    row[col] = text
+                        row[col] = text
+                    end
+                    local rowData = data[index]
+                    if rowData then
+                        rowData.id = i
+                        text:SetText(rowData.info[col])
+                        text:SetJustifyH(data.header.justify[col])
+                    else
+                        text:SetText("")
+                    end
                 end
-                local rowData = data[index]
-                if rowData then
-                    rowData.id = i
-                    text:SetText(rowData.info[col])
-                    text:SetJustifyH(data.header.justify[col])
-                else
-                    text:SetText("")
-                end
+                row:Show()
             end
         end
 
@@ -231,6 +236,13 @@ do
                 end
                 row:SetPoint("RIGHT")
                 row:SetHeight(ROW_HEIGHT)
+
+                local highlight = row:CreateTexture(nil, "BACKGROUND")
+                local r, g, b = _G.unpack(RealUI.classColor)
+                highlight:SetColorTexture(r, g, b, 0.25)
+                highlight:SetAllPoints()
+                row:SetHighlightTexture(highlight)
+
                 textTable.rows[index] = row
                 prev = row
             end
@@ -262,6 +274,14 @@ do
 
                 header.text = header:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
                 header.text:SetAllPoints()
+
+                local highlight = header:CreateTexture(nil, "ARTWORK")
+                local hR, hG, hB = _G.unpack(RealUI.classColor)
+                highlight:SetColorTexture(hR, hG, hB)
+                highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+                highlight:SetPoint("RIGHT")
+                highlight:SetHeight(3)
+                header:SetHighlightTexture(highlight)
 
                 header:SetScript("OnClick", function(btn)
                     _G.PlaySound("igMainMenuOptionCheckBoxOn")
@@ -613,7 +633,6 @@ function InfoLine:CreateBlocks()
     end
 
     --[[ Left ]]--
-
     do  -- Guild Roster
         local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]]
         local RemoteChatStatus = {
