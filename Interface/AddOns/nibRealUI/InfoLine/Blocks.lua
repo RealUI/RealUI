@@ -1163,7 +1163,9 @@ function InfoLine:CreateBlocks()
 
         local function UpdateProgress(block)
             local curValue, maxValue, otherValue = watchStates[dbc.progressState]:GetStats()
-            block.dataObj.text = round(curValue / maxValue, 3) * 100 .. "%"
+            local value = curValue / maxValue
+            block.dataObj.icon = fa["thermometer-"..round(value * 4)]
+            block.dataObj.text = round(value, 3) * 100 .. "%"
 
             local watch = InfoLine.frame.watch
             InfoLine:debug("progress:main", dbc.progressState, curValue, maxValue)
@@ -1216,6 +1218,8 @@ function InfoLine:CreateBlocks()
         LDB:NewDataObject("progress", {
             name = L["Progress"],
             type = "RealUI",
+            icon = fa["thermometer"],
+            iconFont = {fa.path, iconHeight, "OUTLINE"},
             text = "XP",
             OnEnable = function(block)
                 InfoLine:debug("progress: OnEnable", block.side)
