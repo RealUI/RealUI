@@ -1215,7 +1215,7 @@ local classresource do
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
             type = "group",
             childGroups = "tab",
-            order = 5,
+            order = 4,
             args = {
                 enable = {
                     name = L["General_Enabled"],

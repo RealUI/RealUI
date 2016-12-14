@@ -216,6 +216,7 @@ local function InitializeOptions()
     -- Buttons
     local tabs = {}
     for slug, tab in next, options.HuD.args do
+        debug("init tabs", slug, tab.order)
         _G.tinsert(tabs, tab.order + 2, {
             slug = slug,
             name = tab.name,
