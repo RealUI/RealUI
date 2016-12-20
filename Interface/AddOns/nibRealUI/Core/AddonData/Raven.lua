@@ -6,7 +6,7 @@ local _G = _G
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Raven = function()
+RealUI.AddOns.Raven = function()
 	_G.RavenDB = {
 		["profileKeys"] = {
 			["Real - Zul'jin"] = "RealUI",

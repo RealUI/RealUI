@@ -6,7 +6,7 @@ local _G = _G
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_BugGrabber = function()
+RealUI.AddOns.BugGrabber = function()
 	_G.BugGrabberDB = {
 		["stopnag"] = 50001,
 		["throttle"] = true,

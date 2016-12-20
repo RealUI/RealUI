@@ -6,7 +6,7 @@ local _G = _G
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI["LoadAddOnData_DBM-StatusBarTimers"] = function()
+RealUI.AddOns["DBM-StatusBarTimers"] = function()
     _G.DBT_AllPersistentOptions = {
         ["Default"] = {
             ["DBM"] = {

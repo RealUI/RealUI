@@ -6,7 +6,7 @@ local _G = _G
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Skada = function()
+RealUI.AddOns.Skada = function()
 	_G.SkadaDB = {
 		["namespaces"] = {
 			["LibDualSpec-1.0"] = {

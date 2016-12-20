@@ -6,7 +6,7 @@ local _G = _G
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_BugSack = function()
+RealUI.AddOns.BugSack = function()
 	_G.BugSackDB = {
 		["fontSize"] = "GameFontHighlight",
 		["auto"] = false,
