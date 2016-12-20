@@ -421,7 +421,7 @@ function RealUI:InitTutorial()
     btnOpen:SetPoint("CENTER")
     btnOpen:SetText(ButtonTexts.tutorial)
     btnOpen:SetAttribute("type", "macro")
-    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.name))
+    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.charName))
     RealUI:AddButtonHighlight(btnOpen)
 
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)

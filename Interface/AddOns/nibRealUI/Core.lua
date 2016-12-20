@@ -166,7 +166,7 @@ local defaults, charInit do
             currency = {
                 [RealUI.realm] = {
                     [RealUI.faction] = {
-                        [RealUI.name] = {
+                        [RealUI.charName] = {
                             class = RealUI.class
                         }
                     }
@@ -632,7 +632,7 @@ function RealUI:OnInitialize()
 
     -- Vars
     self.classColor = RealUI:GetClassColor(self.class)
-    self.key = ("%s - %s"):format(self.name, self.realm)
+    self.key = ("%s - %s"):format(self.charName, self.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 

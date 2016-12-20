@@ -125,7 +125,7 @@ end
 function CurrencyTip:SetUpChar()
     local realm   = RealUI.realm
     local faction = RealUI.faction
-    local player  = RealUI.name
+    local player  = RealUI.charName
 
     for k,v in next, DB[realm] do
         if k ~= "Alliance" and k ~= "Horde" then
