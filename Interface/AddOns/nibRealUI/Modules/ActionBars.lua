@@ -165,12 +165,13 @@ function ActionBars:ApplyABSettings(tag)
                 ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
+                local bottomYOfs = RealUI.ModValue(40)
                 ActionBars:debug(id, "Y Offset", HuDY, ABY)
                 if barPlace == 1 then
                     if isTopBar then
                         y = HuDY + ABY
                     else
-                        y = 37
+                        y = bottomYOfs
                     end
                 elseif barPlace == 2 then
                     if isTopBar then
@@ -178,14 +179,14 @@ function ActionBars:ApplyABSettings(tag)
                         y = -(buttonSizes.bars + pad) + HuDY + ABY
                     else
                         local pad = math.ceil(centerPadding + centerPadding)
-                        y = buttonSizes.bars + pad + 37
+                        y = buttonSizes.bars + pad + bottomYOfs
                     end
                 else
                     local pad = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
                         y = -((buttonSizes.bars * 2) + pad) + HuDY + ABY
                     else
-                        y = (buttonSizes.bars * 2) + pad + 37
+                        y = (buttonSizes.bars * 2) + pad + bottomYOfs
                     end
                 end
 
