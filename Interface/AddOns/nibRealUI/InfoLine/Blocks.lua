@@ -71,6 +71,22 @@ do
     local ROW_HEIGHT = textFont.size
     local numTables = 0
 
+    local GTT_FrameLevel
+    local function Cell_OnEnter(self)
+        if self:GetTextWidth() > self:GetWidth() then
+            GTT_FrameLevel = _G.GameTooltip:GetFrameLevel()
+            _G.GameTooltip:SetFrameLevel(1000)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            _G.GameTooltip:SetText(self:GetText())
+            _G.GameTooltip:Show()
+        end
+    end
+    local function Cell_OnLeave(self)
+        if GTT_FrameLevel and _G.GameTooltip:IsShown() then
+            _G.GameTooltip:SetFrameLevel(GTT_FrameLevel)
+            _G.GameTooltip:Hide()
+        end
+    end
 
     local function UpdateScroll(self)
         InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
@@ -86,24 +102,31 @@ do
                 row:Hide()
             else
                 for col = 1, #header do
-                    local text = row[col]
-                    if not text then
-                        text = row:CreateFontString("$parentText", "ARTWORK")
-                        text:SetFont(textFont.font, textFont.size, textFont.outline)
-                        text:SetPoint("TOP")
-                        text:SetPoint("BOTTOM")
-                        text:SetPoint("LEFT", header[col])
-                        text:SetPoint("RIGHT", header[col])
+                    local cell = row[col]
+                    if not cell then
+                        cell = _G.CreateFrame("Button", "parentCell", row)
+                        cell:SetPoint("TOP")
+                        cell:SetPoint("BOTTOM")
+                        cell:SetPoint("LEFT", header[col])
+                        cell:SetPoint("RIGHT", header[col])
+                        row[col] = cell
 
-                        row[col] = text
+                        local text = cell:CreateFontString(nil, "ARTWORK")
+                        text:SetFont(textFont.font, textFont.size, textFont.outline)
+                        text:SetJustifyH(data.header.justify[col])
+                        text:SetAllPoints()
+                        cell:SetFontString(text)
                     end
                     local rowData = data[index]
                     if rowData then
                         rowData.id = i
-                        text:SetText(rowData.info[col])
-                        text:SetJustifyH(data.header.justify[col])
+                        cell:SetText(rowData.info[col])
+                        cell:SetScript("OnEnter", Cell_OnEnter)
+                        cell:SetScript("OnLeave", Cell_OnLeave)
                     else
-                        text:SetText("")
+                        cell:SetText("")
+                        cell:SetScript("OnEnter", nil)
+                        cell:SetScript("OnLeave", nil)
                     end
                 end
                 row:Show()
