@@ -73,6 +73,7 @@ do
 
     local GTT_FrameLevel
     local function Cell_OnEnter(self)
+        self.row:GetScript("OnEnter")(self.row)
         if self:GetTextWidth() > self:GetWidth() then
             GTT_FrameLevel = _G.GameTooltip:GetFrameLevel()
             _G.GameTooltip:SetFrameLevel(1000)
@@ -82,6 +83,7 @@ do
         end
     end
     local function Cell_OnLeave(self)
+        self.row:GetScript("OnLeave")(self.row)
         if GTT_FrameLevel and _G.GameTooltip:IsShown() then
             _G.GameTooltip:SetFrameLevel(GTT_FrameLevel)
             _G.GameTooltip:Hide()
@@ -104,11 +106,12 @@ do
                 for col = 1, #header do
                     local cell = row[col]
                     if not cell then
-                        cell = _G.CreateFrame("Button", "parentCell", row)
+                        cell = _G.CreateFrame("Button", "$parentCell"..col, row)
                         cell:SetPoint("TOP")
                         cell:SetPoint("BOTTOM")
                         cell:SetPoint("LEFT", header[col])
                         cell:SetPoint("RIGHT", header[col])
+                        cell.row = row
                         row[col] = cell
 
                         local text = cell:CreateFontString(nil, "ARTWORK")
@@ -116,6 +119,11 @@ do
                         text:SetJustifyH(data.header.justify[col])
                         text:SetAllPoints()
                         cell:SetFontString(text)
+                        cell:SetPushedTextOffset(0, 0)
+
+                        cell:SetScript("OnClick", function(c)
+                            c.row:GetScript("OnClick")(c.row)
+                        end)
                     end
                     local rowData = data[index]
                     if rowData then
@@ -291,12 +299,19 @@ do
                 end
                 row:SetPoint("RIGHT")
                 row:SetHeight(ROW_HEIGHT)
+                row:SetScript("OnEnter", function(r)
+                    r.highlight:Show()
+                end)
+                row:SetScript("OnLeave", function(r)
+                    r.highlight:Hide()
+                end)
 
                 local highlight = row:CreateTexture(nil, "BACKGROUND")
                 local r, g, b = _G.unpack(RealUI.classColor)
                 highlight:SetColorTexture(r, g, b, 0.25)
                 highlight:SetAllPoints()
-                row:SetHighlightTexture(highlight)
+                highlight:Hide()
+                row.highlight = highlight
 
                 textTable.rows[index] = row
                 prev = row
