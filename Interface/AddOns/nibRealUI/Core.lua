@@ -166,9 +166,7 @@ local defaults, charInit do
             currency = {
                 [RealUI.realm] = {
                     [RealUI.faction] = {
-                        [RealUI.charName] = {
-                            class = RealUI.class
-                        }
+                        [RealUI.charName] = {}
                     }
                 }
             },

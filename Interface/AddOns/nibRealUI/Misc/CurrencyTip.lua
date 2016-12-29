@@ -11,14 +11,14 @@ local DB, realmDB, charDB
 local MODNAME = "CurrencyTip"
 local CurrencyTip = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-
+local THIRTY_DAYS = 60 * 60 * 24 * 30
 local playerList = {}
 local nameToID = {} -- maps localized currency names to IDs
 
 ------------------------------------------------------------------------
 
 local collapsed, scanning = {}
-local function UpdateData()
+local function UpdateCurrency()
     if scanning then return end
     scanning = true
     local i, limit = 1, _G.GetCurrencyListSize()
@@ -53,6 +53,10 @@ local function UpdateData()
     scanning = nil
 end
 
+local function UpdateMoney()
+    charDB.money = _G.GetMoney() or 0
+end
+
 ------------------------------------------------------------------------
 
 local classColor
@@ -85,39 +89,49 @@ end
 ------------------------------------------------------------------------
 
 function CurrencyTip:SetUpHooks()
-    _G.hooksecurefunc("BackpackTokenFrame_Update", UpdateData)
-    _G.hooksecurefunc("TokenFrame_Update", UpdateData)
-
     _G.hooksecurefunc(_G.GameTooltip, "SetCurrencyByID", function(tooltip, id)
-        --print("SetCurrencyByID", id)
+        self:debug("SetCurrencyByID", id)
         AddTooltipInfo(tooltip, id, not _G.MerchantMoneyInset:IsMouseOver())
     end)
-
     _G.hooksecurefunc(_G.GameTooltip, "SetCurrencyToken", function(tooltip, i)
-        --print("SetCurrencyToken", i)
         local name = _G.GetCurrencyListInfo(i)
+        self:debug("SetCurrencyToken", i, nameToID[name])
         AddTooltipInfo(_G.GameTooltip, nameToID[name], not _G.TokenFrame:IsMouseOver())
+    end)
+    _G.hooksecurefunc(_G.GameTooltip, "SetCurrencyTokenByID", function(tooltip, id)
+        self:debug("SetCurrencyTokenByID", id)
+        AddTooltipInfo(_G.GameTooltip, id, not _G.TokenFrame:IsMouseOver())
+    end)
+
+    _G.hooksecurefunc(_G.GameTooltip, "SetLFGDungeonReward", function(tooltip, dungeonID, lootIndex)
+        local name = _G.GetLFGDungeonRewardInfo(dungeonID, lootIndex)
+        self:debug("SetLFGDungeonReward", dungeonID, lootIndex, nameToID[name])
+        AddTooltipInfo(_G.GameTooltip, nameToID[name], true)
+    end)
+    _G.hooksecurefunc(_G.GameTooltip, "SetLFGDungeonShortageReward", function(tooltip, dungeonID, shortageSeverity, lootIndex)
+        local name = _G.GetLFGDungeonShortageRewardInfo(dungeonID, shortageSeverity, lootIndex)
+        self:debug("SetLFGDungeonShortageReward", dungeonID, shortageSeverity, lootIndex, nameToID[name])
+        AddTooltipInfo(_G.GameTooltip, nameToID[name], true)
     end)
 
     _G.hooksecurefunc(_G.GameTooltip, "SetHyperlink", function(tooltip, link)
-        --print("SetHyperlink", link)
         local id = link:match("currency:(%d+)")
+        self:debug("SetHyperlink", link, id)
         if id then
             AddTooltipInfo(tooltip, _G.tonumber(id), true)
         end
     end)
-
     _G.hooksecurefunc(_G.ItemRefTooltip, "SetHyperlink", function(tooltip, link)
-        --print("SetHyperlink", link)
         local id = link:match("currency:(%d+)")
+        self:debug("SetHyperlink", link, id)
         if id then
             AddTooltipInfo(tooltip, _G.tonumber(id), true)
         end
     end)
 
     _G.hooksecurefunc(_G.GameTooltip, "SetMerchantCostItem", function(tooltip, item, currency)
-        --print("SetMerchantCostItem", item, currency)
         local _, _, _, name = _G.GetMerchantItemCostItem(item, currency)
+        self:debug("SetMerchantCostItem", item, currency, nameToID[name])
         AddTooltipInfo(tooltip, nameToID[name], true)
     end)
 end
@@ -127,6 +141,7 @@ function CurrencyTip:SetUpChar()
     local faction = RealUI.faction
     local player  = RealUI.charName
 
+    self:debug("Check faction")
     for k,v in next, DB[realm] do
         if k ~= "Alliance" and k ~= "Horde" then
             DB[realm][k] = nil
@@ -135,6 +150,7 @@ function CurrencyTip:SetUpChar()
 
     realmDB = DB[realm][faction]
     if not realmDB then return end -- probably low level Pandaren
+    self:debug("SetUpChar")
 
     charDB = realmDB[player]
 
@@ -142,7 +158,7 @@ function CurrencyTip:SetUpChar()
     charDB.class = RealUI.class
     charDB.lastSeen = now
 
-    local cutoff = now - (60 * 60 * 24 * 30)
+    local cutoff = now - THIRTY_DAYS
     for name, data in next, realmDB do
         if data.lastSeen and data.lastSeen < cutoff then
             realmDB[name] = nil
@@ -155,7 +171,17 @@ function CurrencyTip:SetUpChar()
 
     self:SetUpHooks()
 
-    UpdateData()
+    UpdateCurrency()
+    UpdateMoney()
+end
+
+function CurrencyTip:CURRENCY_DISPLAY_UPDATE(...)
+    self:debug("CURRENCY_DISPLAY_UPDATE", ...)
+    UpdateCurrency()
+end
+function CurrencyTip:PLAYER_MONEY(...)
+    self:debug("PLAYER_MONEY", ...)
+    UpdateMoney()
 end
 
 --------------------
@@ -167,6 +193,7 @@ function CurrencyTip:OnInitialize()
 end
 
 function CurrencyTip:OnEnable()
+    self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+    self:RegisterEvent("PLAYER_MONEY")
     self:SetUpChar()
-    --self:RegisterEvent("PLAYER_LOGIN")
 end
