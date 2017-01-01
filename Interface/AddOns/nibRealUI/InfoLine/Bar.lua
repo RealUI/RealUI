@@ -779,6 +779,11 @@ function InfoLine:OnInitialize()
                         index = 3,
                         enabled = true
                     },
+                    currency = {
+                        side = "right",
+                        index = 4,
+                        enabled = true
+                    },
                 },
             },
         },

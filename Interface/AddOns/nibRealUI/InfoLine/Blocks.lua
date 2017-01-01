@@ -74,11 +74,12 @@ do
     local GTT_FrameLevel
     local function Cell_OnEnter(self)
         self.row:GetScript("OnEnter")(self.row)
-        if self:GetTextWidth() > self:GetWidth() then
+        local text = self:ShowTooltip()
+        if text then
             GTT_FrameLevel = _G.GameTooltip:GetFrameLevel()
             _G.GameTooltip:SetFrameLevel(1000)
             _G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
-            _G.GameTooltip:SetText(self:GetText())
+            _G.GameTooltip:SetText(text)
             _G.GameTooltip:Show()
         end
     end
@@ -107,6 +108,7 @@ do
                     local cell = row[col]
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
+                        cell:SetID(col)
                         cell:SetPoint("TOP")
                         cell:SetPoint("BOTTOM")
                         cell:SetPoint("LEFT", header[col])
@@ -126,8 +128,10 @@ do
                         end)
                     end
                     local rowData = data[index]
+                    row.meta = rowData.meta
                     if rowData then
                         rowData.id = i
+                        cell.ShowTooltip = data.cellShowTooltip
                         cell:SetText(rowData.info[col])
                         cell:SetScript("OnEnter", Cell_OnEnter)
                         cell:SetScript("OnLeave", Cell_OnLeave)
@@ -355,10 +359,12 @@ do
                 highlight:SetHeight(3)
                 header:SetHighlightTexture(highlight)
 
-                header:SetScript("OnClick", function(btn)
-                    _G.PlaySound("igMainMenuOptionCheckBoxOn")
-                    self:SetSort(btn)
-                end)
+                if headerData.sort then
+                    header:SetScript("OnClick", function(btn)
+                        _G.PlaySound("igMainMenuOptionCheckBoxOn")
+                        self:SetSort(btn)
+                    end)
+                end
 
                 header.textTable = textTable
                 headerRow[col] = header
@@ -443,7 +449,7 @@ do -- template
             if qTip:IsAcquired(block) then return end
             --InfoLine:debug("Test: OnEnter", block.side, ...)
 
-            local tooltip = qTip:Acquire(block, 2, "LEFT", RIGHT")
+            local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
             SetupTooltip(tooltip, block)
             local lineNum, colNum
 
@@ -795,6 +801,13 @@ function InfoLine:CreateBlocks()
                 _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
             end
         end
+        local function Guild_ShowTooltip(cell)
+            InfoLine:debug("Guild_ShowTooltip")
+            if cell:GetTextWidth() > cell:GetWidth() then
+                InfoLine:debug("Guild_ShowTooltip true")
+                return cell:GetText()
+            end
+        end
 
         local time = _G.GetTime()
         local guildData = {}
@@ -854,6 +867,7 @@ function InfoLine:CreateBlocks()
                 _G.table.wipe(guildData)
                 guildData.header = headerData
                 guildData.rowOnClick = Guild_OnClick
+                guildData.cellShowTooltip = Guild_ShowTooltip
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then
@@ -1423,7 +1437,283 @@ function InfoLine:CreateBlocks()
         })
     end
 
-    -- Currency
+    do -- Currency
+        local GOLD_AMOUNT_STRING = "%s|cfffff226%s|r"
+        local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
+        local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
+        local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
+        local charName = "|c%s%s|r"
+
+        local currencyDB, charDB
+        local ignore = _G.LOCALE_koKR or _G.LOCALE_zhCN or _G.LOCALE_zhTW
+        local function ShortenCurrencyName(name)
+            if ignore then
+                return name
+            else
+                return name ~= nil and name:gsub("%l*%s*%p*", "") or "-"
+            end
+        end
+        local function SplitMoney(money)
+            if not money then return 0,0,0 end
+            local gold = _G.floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
+            local silver = _G.floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
+            local copper = money % _G.COPPER_PER_SILVER
+            return gold, silver, copper
+        end
+        local function GetMoneyString(money, useFirst)
+            local goldString, silverString, copperString
+            local gold, silver, copper = SplitMoney(money)
+
+            goldString = GOLD_AMOUNT_STRING:format(_G.FormatLargeNumber(gold), _G.GOLD_AMOUNT_SYMBOL)
+            silverString = SILVER_AMOUNT_STRING:format(silver, _G.SILVER_AMOUNT_SYMBOL)
+            copperString = COPPER_AMOUNT_STRING:format(copper, _G.COPPER_AMOUNT_SYMBOL)
+
+            local moneyString = ""
+            local separator = ""
+            if gold > 0 then
+                moneyString = goldString
+                if useFirst then
+                    return moneyString
+                else
+                    separator = " "
+                end
+            end
+            if silver > 0 then
+                moneyString = moneyString..separator..silverString
+                if useFirst then
+                    return moneyString
+                else
+                    separator = " "
+                end
+            end
+            if copper > 0 or moneyString == "" then
+                moneyString = moneyString..separator..copperString
+            end
+
+            return moneyString
+        end
+
+        local currencyStates = {}
+        currencyStates["money"] = {
+            GetNext = function(Money)
+                if currencyStates["token1"]:IsValid() then
+                    return "token1"
+                elseif currencyStates["token2"]:IsValid() then
+                    return "token2"
+                elseif currencyStates["token3"]:IsValid() then
+                    return "token3"
+                elseif currencyStates["money"]:IsValid() then
+                    return "money"
+                else
+                    return nil
+                end
+            end,
+            GetText = function(Money)
+                return GetMoneyString(charDB.money)
+            end,
+            GetIcon = function(Money)
+                local gold, silver = SplitMoney(charDB.money)
+                if gold > 0 then
+                    return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
+                elseif silver > 0 then
+                    return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
+                else
+                    return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
+                end
+            end,
+            IsValid = function(Money)
+                return true
+            end,
+            OnClick = function(Money)
+            end
+        }
+        for i = 1, _G.MAX_WATCHED_TOKENS do
+            currencyStates["token"..i] = {
+                index = i,
+                GetNext = function(token)
+                    if i == 3 then
+                        return "money"
+                    else
+                        if currencyStates["token"..i+1]:IsValid() then
+                            return "token"..i+1
+                        else
+                            return "money"
+                        end
+                    end
+                end,
+                GetText = function(token)
+                    if token.id then
+                        return charDB[token.id] or 0
+                    else
+                        return false
+                    end
+                end,
+                GetIcon = function(token)
+                    return token.icon, ShortenCurrencyName(token.name)
+                end,
+                IsValid = function(token)
+                    return not not token.id
+                end,
+                OnClick = function(token)
+                end
+            }
+        end
+
+        local function UpdateTrackedCurrency(block)
+            for i = 1, _G.MAX_WATCHED_TOKENS do
+                local token = currencyStates["token"..i]
+                local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
+                token.name = name
+                token.icon = icon
+                token.id = currencyID
+
+                charDB["token"..i] = currencyID
+            end
+        end
+
+        local function UpdateBlock(block)
+            local icon, label = currencyStates[dbc.currencyState]:GetIcon()
+            block.dataObj.icon = icon
+            block.dataObj.label = label
+
+            block.dataObj.text = currencyStates[dbc.currencyState]:GetText()
+        end
+
+        local function UpdateState(block)
+            UpdateTrackedCurrency(block)
+            local state = currencyStates[dbc.currencyState]:GetNext()
+            InfoLine:debug("check state", dbc.currencyState, state)
+            dbc.currencyState = state
+
+            UpdateBlock(block)
+        end
+
+        local nameMatch = [=[|cff%x%x%x%x%x%x(.*)|r]=]
+        local function Currency_OnClick(row, ...)
+            local _, name = row[1]:GetText():match(nameMatch)
+            if not name then return end
+
+            if _G.IsAltKeyDown() then
+                return --currencyDB[realm][faction][name] = nil
+            end
+        end
+        local function Currency_ShowTooltip(cell)
+            InfoLine:debug("Currency_ShowTooltip")
+            local name = cell.row.meta[cell:GetID()]
+            if name then
+                InfoLine:debug("Currency_ShowTooltip", name)
+                return name
+            end
+        end
+
+        local tokens = {}
+        local currencyData = {}
+        local headerData = {
+            info = {
+                _G.NAME, _G.MONEY, _G.CURRENCY.." 1", _G.CURRENCY.." 2", _G.CURRENCY.." 3", L["Currency_UpdatedAbbr"]
+            },
+            justify = {
+                "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
+            },
+            size = {
+                "FILL", "FIT", "FIT", "FIT", "FIT", 0.2
+            }
+        }
+
+        LDB:NewDataObject("currency", {
+            name = "Currency",
+            type = "RealUI",
+            icon = [[Interface\MoneyFrame\UI-GoldIcon]],
+            iconCoords = {.08, .92, .08, .92},
+            text = "Currency",
+            OnEnable = function(block)
+                InfoLine:debug("currency: OnEnable", block.side)
+                currencyDB = RealUI.db.global.currency
+                charDB = currencyDB[RealUI.realm][RealUI.faction][RealUI.charName]
+                if not currencyStates[dbc.currencyState] then
+                    dbc.currencyState = "money"
+                end
+
+                UpdateTrackedCurrency(block)
+
+                if not currencyStates[dbc.currencyState]:IsValid() then
+                    UpdateState(block)
+                end
+            end,
+            OnClick = function(block, ...)
+                InfoLine:debug("currency: OnClick", block.side, ...)
+                if _G.IsAltKeyDown() then
+                    UpdateState(block)
+                else
+                    if not _G.InCombatLockdown() then
+                        _G.ToggleCharacter("TokenFrame")
+                    end
+                end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("currency: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
+                SetupTooltip(tooltip, block)
+                local lineNum, colNum
+
+                tooltip:AddHeader(_G.CURRENCY)
+
+                _G.table.wipe(currencyData)
+                currencyData.header = headerData
+                currencyData.rowOnClick = Currency_OnClick
+                currencyData.cellShowTooltip = Currency_ShowTooltip
+
+                local faction = currencyDB[RealUI.realm][RealUI.faction]
+                for name, data in next, faction do
+                    local classColor = RealUI:GetClassColor(data.class, "hex")
+                    name = charName:format(classColor, name)
+                    local money = GetMoneyString(data.money, true)
+
+                    _G.table.wipe(tokens)
+                    for i = 1, _G.MAX_WATCHED_TOKENS do
+                        if data["token"..i] then
+                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                            local amount = data[data["token"..i]] or 0
+                            tokens[i] = TOKEN_STRING:format(texture, amount)
+                            tokens[i+3] = tokenName
+                        else
+                            tokens[i] = "---"
+                        end
+                    end
+
+                    _G.tinsert(currencyData, {
+                        id = #currencyData + 1,
+                        info = {
+                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                        },
+                        meta = {
+                            "", "", tokens[4], tokens[5], tokens[6], ""
+                        }
+                    })
+                end
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
+
+                lineNum = tooltip:AddLine(L["Guild_WhisperInvite"])
+                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("currency: OnEvent", block.side, event, ...)
+                UpdateBlock(block)
+            end,
+            events = {
+                "PLAYER_ENTERING_WORLD",
+
+                "CURRENCY_DISPLAY_UPDATE",
+                "PLAYER_MONEY",
+            },
+        })
+    end
 
 
     --[[ Right ]]--
