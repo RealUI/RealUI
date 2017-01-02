@@ -602,11 +602,11 @@ function RealUI:GetILVLColor(lvl, ilvl)
     end
 end
 
+local default = {r = 1, g = 1, b = 1, colorStr = "ffffffff"}
 function RealUI:GetClassColor(class, kind)
-    if not _G.RAID_CLASS_COLORS[class] then return {1, 1, 1} end
-    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class]
+    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class] or default
     if kind == "key" then
-        return {r = classColors.r, g = classColors.g, b = classColors.b}
+        return classColors
     elseif kind == "hex" then
         return classColors.colorStr
     else
