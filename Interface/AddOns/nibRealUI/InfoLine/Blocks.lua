@@ -74,7 +74,7 @@ do
     local GTT_FrameLevel
     local function Cell_OnEnter(self)
         self.row:GetScript("OnEnter")(self.row)
-        local text = self:ShowTooltip()
+        local text = self:GetTooltipText()
         if text then
             GTT_FrameLevel = _G.GameTooltip:GetFrameLevel()
             _G.GameTooltip:SetFrameLevel(1000)
@@ -131,7 +131,7 @@ do
                     row.meta = rowData.meta
                     if rowData then
                         rowData.id = i
-                        cell.ShowTooltip = data.cellShowTooltip
+                        cell.GetTooltipText = data.cellGetTooltipText
                         cell:SetText(rowData.info[col])
                         cell:SetScript("OnEnter", Cell_OnEnter)
                         cell:SetScript("OnLeave", Cell_OnLeave)
@@ -801,10 +801,10 @@ function InfoLine:CreateBlocks()
                 _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
             end
         end
-        local function Guild_ShowTooltip(cell)
-            InfoLine:debug("Guild_ShowTooltip")
+        local function Guild_GetTooltipText(cell)
+            InfoLine:debug("Guild_GetTooltipText")
             if cell:GetTextWidth() > cell:GetWidth() then
-                InfoLine:debug("Guild_ShowTooltip true")
+                InfoLine:debug("Guild_GetTooltipText true")
                 return cell:GetText()
             end
         end
@@ -867,7 +867,7 @@ function InfoLine:CreateBlocks()
                 _G.table.wipe(guildData)
                 guildData.header = headerData
                 guildData.rowOnClick = Guild_OnClick
-                guildData.cellShowTooltip = Guild_ShowTooltip
+                guildData.cellGetTooltipText = Guild_GetTooltipText
                 for i = 1, _G.GetNumGuildMembers() do
                     local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then
@@ -1597,11 +1597,11 @@ function InfoLine:CreateBlocks()
                 return --currencyDB[realm][faction][name] = nil
             end
         end
-        local function Currency_ShowTooltip(cell)
-            InfoLine:debug("Currency_ShowTooltip")
+        local function Currency_GetTooltipText(cell)
+            InfoLine:debug("Currency_GetTooltipText")
             local name = cell.row.meta[cell:GetID()]
             if name then
-                InfoLine:debug("Currency_ShowTooltip", name)
+                InfoLine:debug("Currency_GetTooltipText", name)
                 return name
             end
         end
@@ -1663,7 +1663,7 @@ function InfoLine:CreateBlocks()
                 _G.table.wipe(currencyData)
                 currencyData.header = headerData
                 currencyData.rowOnClick = Currency_OnClick
-                currencyData.cellShowTooltip = Currency_ShowTooltip
+                currencyData.cellGetTooltipText = Currency_GetTooltipText
 
                 local faction = currencyDB[RealUI.realm][RealUI.faction]
                 for name, data in next, faction do
