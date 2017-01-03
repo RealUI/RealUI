@@ -237,7 +237,7 @@ local function CreateNewBlock(name, dataObj)
     local text = block:CreateFontString(nil, "ARTWORK")
     text:SetFont(font, size, outline)
     text:SetTextColor(1, 1, 1)
-    text:SetPoint("RIGHT", 0, 0)
+    text:SetPoint("RIGHT", -space, 0)
     text:SetText(dataObj.text)
     if dataObj.suffix and dataObj.suffix ~= "" then
         text:SetText(dataObj.value .. " " .. dataObj.suffix)
@@ -260,7 +260,7 @@ local function CreateNewBlock(name, dataObj)
             end
             iconWidth = icon:GetStringWidth()
             icon.isFont = true
-       else
+        else
             icon = block:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(dataObj.icon)
             icon:SetSize(size, size)
@@ -315,8 +315,15 @@ local function CreateNewBlock(name, dataObj)
 
     block:SetScript("OnUpdate", block.OnUpdate)
 
+    if db.showIcon or db.showLabel then
+        width = width + space
+    end
+    if dataObj.text then
+        width = width + space
+    end
+
     InfoLine:debug("SetSize", width, BAR_HEIGHT)
-    block:SetSize(width + space, BAR_HEIGHT)
+    block:SetSize(width, BAR_HEIGHT)
     block:SetClampedToScreen(true)
     return block
 end
@@ -723,8 +730,8 @@ function InfoLine:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         char = {
-            progressState = 1,
-            currencyState = 1,
+            progressState = "xp",
+            currencyState = "gold",
             specgear = specgear,
         },
         profile = {
