@@ -218,7 +218,7 @@ RealUI.minipatches = {
                 if not currency[realmName][factionName] then currency[realmName][factionName] = {} end
                 for charName, char in next, faction do
                     if not currency[realmName][factionName][charName] then currency[realmName][factionName][charName] = {} end
-                    currency[realmName][factionName][charName].gold = char.gold
+                    currency[realmName][factionName][charName].money = char.gold
                 end
             end
         end
@@ -231,7 +231,7 @@ RealUI.minipatches = {
             for factionName, faction in next, realm do
                 local numChars = 0
                 for charName, char in next, faction do
-                    if (char.gold and char.gold == 0) or not (char.gold and char.lastSeen) then
+                    if (char.money and char.money == 0) or not (char.money and char.lastSeen) then
                         currency[realmName][factionName][charName] = nil
                     else
                         numChars = numChars + 1
