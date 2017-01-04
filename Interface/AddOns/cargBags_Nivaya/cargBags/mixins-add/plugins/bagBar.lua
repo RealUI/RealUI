@@ -185,11 +185,11 @@ function BagButton:OnClick()
         if self.bar.isGlobal then
             for i, cont in next, container.implementation.contByID do
                 cont:SetFilter(self.filter, self.hidden)
-                cont.implementation:OnEvent("BAG_UPDATE", self.bagID)
+                cont.implementation:UpdateBag(self.bagID)
             end
         else
             container:SetFilter(self.filter, self.hidden)
-            container.implementation:OnEvent("BAG_UPDATE", self.bagID)
+            container.implementation:UpdateBag(self.bagID)
         end
     end
 end

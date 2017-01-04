@@ -145,7 +145,7 @@ function MyContainer:OnContentsChanged()
 
     local buttonIDs = {}
     for i, button in next, self.buttons do
-        local item = cbNivaya:GetItemInfo(button.bagID, button.slotID)
+        local item = cbNivaya:GetItem(button.bagID, button.slotID)
         if item.link then
             if item.equipLoc ~= "" and not invTypes[item.equipLoc] then
                 _G.print(item.link, item.equipLoc)
@@ -236,7 +236,7 @@ local function SellJunk()
 
     for BagID = 0, 4 do
         for BagSlot = 1, _G.GetContainerNumSlots(BagID) do
-            item = cbNivaya:GetItemInfo(BagID, BagSlot)
+            item = cbNivaya:GetItem(BagID, BagSlot)
             if item then
                 if item.rarity == 0 and item.sellPrice ~= 0 then
                     profit = profit + (item.sellPrice * item.count)
@@ -281,19 +281,15 @@ local resetNewItems = function(self)
         local tNumSlots = _G.GetContainerNumSlots(bag)
         if tNumSlots > 0 then
             for slot = 1, tNumSlots do
-                local item = cbNivaya:GetItemInfo(bag, slot)
+                local item = cbNivaya:GetItem(bag, slot)
                 --print("resetNewItems", item.id)
                 if item.id then
-                    if _G.cB_KnownItems[item.id] then
-                        _G.cB_KnownItems[item.id] = _G.cB_KnownItems[item.id] + (item.stackCount and item.stackCount or 0)
-                    else
-                        _G.cB_KnownItems[item.id] = item.stackCount and item.stackCount or 0
-                    end
+                    _G.cB_KnownItemscB_KnownItems[item.id] = true
                 end
             end
         end
     end
-    cbNivaya:UpdateBags()
+    cbNivaya:UpdateAll()
 end
 
 local UpdateDimensions = function(self)
@@ -822,7 +818,7 @@ MyButton:Scaffold("Default")
 function MyButton:OnAdd()
     self:SetScript("OnMouseUp", function(btn, mouseButton)
         if mouseButton == "RightButton" and (_G.IsAltKeyDown()) and (_G.IsControlKeyDown()) then
-            local item = cbNivaya:GetItemInfo(btn.bagID, btn.slotID)
+            local item = cbNivaya:GetItem(btn.bagID, btn.slotID)
             if item.name and item.id then
                 ns.cbNivDropdown.itemName = item.name
                 ns.cbNivDropdown.itemID = item.id

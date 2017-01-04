@@ -7,13 +7,6 @@ local next, ipairs = _G.next, _G.ipairs
 
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
-function cbNivaya:UpdateBags()
-    cargBags.debug("filters cbNivaya:UpdateBags")
-    for i = -1, 11 do
-        cbNivaya:UpdateBag(i)
-    end
-end
-
 local filters = ns.filters
 local itemClass = ns.itemClass
 
@@ -23,9 +16,9 @@ ns.filterEnabled = { Armor = true, Quest = true, TradeGoods = true, Consumables 
 --------------------
 --Basic filters
 --------------------
-filters.fBags = function(item) return item.bagID >= 0 and item.bagID <= 4 end
-filters.fBank = function(item) return item.bagID == -1 or item.bagID >= 5 and item.bagID <= 11 end
-filters.fBankReagent = function(item) return item.bagID == -3 end
+filters.fBags = function(item) return item.bagID >= _G.BACKPACK_CONTAINER and item.bagID <= _G.NUM_BAG_SLOTS end
+filters.fBank = function(item) return item.bagID == _G.BANK_CONTAINER or item.bagID >= _G.NUM_BAG_SLOTS + 1 and item.bagID <= _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS end
+filters.fBankReagent = function(item) return item.bagID == _G.REAGENTBANK_CONTAINER end
 filters.fBankFilter = function() return _G.cBnivCfg.FilterBank end
 filters.fHideEmpty = function(item) if _G.cBnivCfg.CompressEmpty then return item.link ~= nil else return true end end
 
@@ -33,7 +26,6 @@ filters.fHideEmpty = function(item) if _G.cBnivCfg.CompressEmpty then return ite
 -- General Classification (cached)
 ------------------------------------
 filters.fItemClass = function(item, container)
-    cargBags.debug("filters filters.fItemClass", item.name, item.id, container)
     if not item.id then return false end
     if not itemClass[item.id] or itemClass[item.id] == "ReClass" then
         cbNivaya:ClassifyItem(item)
@@ -48,13 +40,10 @@ filters.fItemClass = function(item, container)
         bag = (t ~= "NoClass" and ns.filterEnabled[t]) and t or "Bag"
     end
 
-    cargBags.debug("bag", bag)
     return bag == container
 end
 
 function cbNivaya:ClassifyItem(item)
-    cargBags.debug("filters cbNivaya:ClassifyItem", item.name, item.id, item.rarity)
-
     if item.bagID == -2 then
         -- keyring
         itemClass[item.id] = "Keyring"
@@ -66,7 +55,6 @@ function cbNivaya:ClassifyItem(item)
         itemClass[item.id] = "Junk"
     elseif item.typeID then
         -- type based filters
-        cargBags.debug("typeID", item.typeID)
         if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON)  then
             itemClass[item.id] = "Armor"
         elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
@@ -85,38 +73,17 @@ function cbNivaya:ClassifyItem(item)
     elseif not itemClass[item.id] then
         itemClass[item.id] = "NoClass"
     end
-
-    cargBags.debug("Classified", itemClass[item.id])
 end
 
 ------------------------------------------
 -- New Items filter and related functions
 ------------------------------------------
-function cbNivaya:getItemCount(itemName)
-    local totalCount = 0
-    for bagID = 0, 4 do
-        local tNumSlots = _G.GetContainerNumSlots(bagID)
-        if tNumSlots > 0 then
-            for slotID = 1, tNumSlots do
-                local item = self:GetItemInfo(bagID, slotID)
-                if item.name == itemName then
-                    local _, count = _G.GetContainerItemInfo(bagID, slotID)
-                    item.count = count or 0
-                    totalCount = totalCount + item.count
-                end
-            end
-        end
-    end
-    return totalCount
-end
-
 filters.fNewItems = function(item)
     if not _G.cBnivCfg.NewItems then return false end
     if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
     if not item.link then return false end
     if not _G.cB_KnownItems[item.id] then return true end
-    local t = cbNivaya:getItemCount(item.name)
-    return (t > _G.cB_KnownItems[item.id]) and true or false
+    return false
 end
 
 -----------------------------------------
@@ -155,7 +122,7 @@ if IR then
                 end
             end
         end
-        cbNivaya:UpdateBags()
+        cbNivaya:UpdateAll()
     end
 
     cacheSetsIR()
@@ -185,7 +152,7 @@ if OF then
                 end
             end
         end
-        cbNivaya:UpdateBags()
+        cbNivaya:UpdateAll()
     end
 
 

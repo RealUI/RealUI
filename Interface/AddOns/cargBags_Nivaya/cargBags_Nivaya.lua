@@ -535,19 +535,18 @@ end
 
 function cbNivaya:CatDropDownOnClick(dropdown, type)
     local value = dropdown.value
-    local itemName = cbNivDropdown.itemName
     local itemID = cbNivDropdown.itemID
 
     if (type == "MarkAsNew") then
         _G.cB_KnownItems[itemID] = nil
         _G.cBniv_CatInfo[itemID] = nil
     elseif (type == "MarkAsKnown") then
-        _G.cB_KnownItems[itemID] = cbNivaya:getItemCount(itemName)
+        _G.cB_KnownItems[itemID] = true
     else
         _G.cBniv_CatInfo[itemID] = value
         if itemID ~= nil then itemClass[itemID] = nil end
     end
-    cbNivaya:UpdateBags()
+    cbNivaya:UpdateAll()
 end
 
 local function StatusMsg(str1, str2, data, name, short)
@@ -722,7 +721,7 @@ local function HandleSlash(msg)
     end
 
     if updateBags then
-        cbNivaya:UpdateBags()
+        cbNivaya:UpdateAll()
     end
 end
 
@@ -734,7 +733,7 @@ local Event =  _G.CreateFrame('Frame', nil)
 Event:RegisterEvent("PLAYER_ENTERING_WORLD")
 Event:SetScript('OnEvent', function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
-        for bagID = -3, 11 do
+        for bagID = _G.REAGENTBANK_CONTAINER, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
             local slots = _G.GetContainerNumSlots(bagID)
             for slotID = 1, slots do
                 local button = cbNivaya.buttonClass:New(bagID, slotID)
@@ -748,7 +747,7 @@ Event:SetScript('OnEvent', function(self, event, ...)
             end
             button:Free()
         end
-        cbNivaya:UpdateBags()
+        cbNivaya:UpdateAll()
 
         if _G.IsReagentBankUnlocked() then
             bags.bank.reagentBtn:Show()
