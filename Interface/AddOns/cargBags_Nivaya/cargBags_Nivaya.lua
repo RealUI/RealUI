@@ -197,7 +197,9 @@ function cargBags_Nivaya:ADDON_LOADED(event, addon)
     end
 
     -- Character saved vars
-    _G.cB_KnownItems = _G.cB_KnownItems or {}
+    if _G.cB_KnownItems then
+        _G.cB_KnownItems = nil
+    end
     _G.cBniv = _G.cBniv or {}
     for k, v in next, defaults do
         if _G.type(_G.cBniv[k]) == "nil" then _G.cBniv[k] = v end
@@ -502,8 +504,7 @@ function cbNivaya:CatDropDownInit()
         cbNivDropdown:AddButton(info.text, type, info.func)
     end
 
-    AddInfoItem("MarkAsNew")
-    AddInfoItem("MarkAsKnown")
+    AddInfoItem("ResetCategory")
     AddInfoItem("-------------")
     AddInfoItem("Armor")
     AddInfoItem("BattlePet")
@@ -537,11 +538,8 @@ function cbNivaya:CatDropDownOnClick(dropdown, type)
     local value = dropdown.value
     local itemID = cbNivDropdown.itemID
 
-    if (type == "MarkAsNew") then
-        _G.cB_KnownItems[itemID] = nil
+    if (type == "ResetCategory") then
         _G.cBniv_CatInfo[itemID] = nil
-    elseif (type == "MarkAsKnown") then
-        _G.cB_KnownItems[itemID] = true
     else
         _G.cBniv_CatInfo[itemID] = value
         if itemID ~= nil then itemClass[itemID] = nil end

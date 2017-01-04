@@ -82,7 +82,7 @@ filters.fNewItems = function(item)
     if not _G.cBnivCfg.NewItems then return false end
     if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
     if not item.link then return false end
-    if not _G.cB_KnownItems[item.id] then return true end
+    if _G.C_NewItems.IsNewItem(item.bagID, item.slotID) then return true end
     return false
 end
 

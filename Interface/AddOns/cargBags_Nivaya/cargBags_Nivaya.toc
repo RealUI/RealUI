@@ -4,7 +4,7 @@
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: ItemRack, Outfitter
 ## SavedVariables: cB_CustomBags, cBniv_CatInfo, cBnivCfg
-## SavedVariablesPerCharacter: cB_KnownItems, cBniv
+## SavedVariablesPerCharacter: cBniv
 
 init.lua
 

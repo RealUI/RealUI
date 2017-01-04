@@ -34,43 +34,35 @@ L.bagCaptions = {
 }
 
 if gl == "deDE" then
-    L.MarkAsNew = "Als neu markieren"
-    L.MarkAsKnown = "Als bekannt markieren"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cooles Zeugs"
     L.bagCaptions.cBniv_NewItems = "Neue Items"
 elseif gl == "ruRU" then
-    L.MarkAsNew = "Перенести в Новые предметы"
-    L.MarkAsKnown = "Перенести в Известные предметы"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Разное"
     L.bagCaptions.cBniv_NewItems = "Новые предметы"
 elseif gl == "zhTW" then
-    L.MarkAsNew = "Mark as New"
-    L.MarkAsKnown = "Mark as Known"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "施法材料"
     L.bagCaptions.cBniv_NewItems = "新增"
 elseif gl == "zhCN" then
-    L.MarkAsNew = "Mark as New"
-    L.MarkAsKnown = "Mark as Known"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "施法材料"
     L.bagCaptions.cBniv_NewItems = "新增"
 elseif gl == "koKR" then
-    L.MarkAsNew = "Mark as New"
-    L.MarkAsKnown = "Mark as Known"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "지정"
     L.bagCaptions.cBniv_NewItems = "신규"
 elseif gl == "frFR" then
-    L.MarkAsNew = "Marquer comme Neuf"
-    L.MarkAsKnown = "Marquer comme Connu"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Divers"
     L.bagCaptions.cBniv_NewItems = "Nouveaux Objets"
 elseif gl == "itIT" then
-    L.MarkAsNew = "Segna come Nuovo"
-    L.MarkAsKnown = "Segna come Conosciuto"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cose Interessanti"
     L.bagCaptions.cBniv_NewItems = "Oggetti Nuovi"
 else
-    L.MarkAsNew = "Mark as New"
-    L.MarkAsKnown = "Mark as Known"
+    L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cool Stuff"
     L.bagCaptions.cBniv_NewItems = "New Items"
 end
