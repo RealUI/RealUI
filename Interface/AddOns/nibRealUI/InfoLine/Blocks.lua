@@ -1202,7 +1202,7 @@ function InfoLine:CreateBlocks()
                 if hasArtifact then
                     testCell:SetFontObject("GameTooltipText")
                     testCell:SetText(artifact.name)
-                    local maxWidth = testCell:GetStringWidth()
+                    local maxWidth = _G.max(testCell:GetStringWidth(), 200)
 
                     local lineNum, colNum = tooltip:AddLine()
                     tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
