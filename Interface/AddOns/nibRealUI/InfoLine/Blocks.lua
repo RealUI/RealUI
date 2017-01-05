@@ -64,7 +64,6 @@ do
     }
 end
 
-local TABLE_WIDTH = 500
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 do
     local MAX_ROWS = 10
@@ -328,10 +327,11 @@ do
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         InfoLine:debug("CellProto:SetupCell")
         local textTable = self.textTable
-        local width = TABLE_WIDTH
+        local width = data.width or 500
         textTable.data = data
 
         local flex, filler = {}
+        local remainingWidth = width
         local headerRow, headerData = textTable.header, data.header
         for col = 1, #headerData.info do
             local header = headerRow[col]
@@ -382,17 +382,16 @@ do
                     if newWidth > cellWidth then cellWidth = newWidth end
                 end
                 header:SetWidth(cellWidth)
-                width = width - cellWidth
+                remainingWidth = remainingWidth - cellWidth
             elseif size == "FILL" then
                 filler = header
             else
                 flex[header] = size
             end
-            InfoLine:debug("Width", col, width)
+            InfoLine:debug("Width", col, remainingWidth)
         end
-        local remainingWidth = width
         for header, size in next, flex do
-            local headerWidth = _G.max(width * size, header.text:GetStringWidth())
+            local headerWidth = _G.max(remainingWidth * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
             header:SetWidth(headerWidth)
             InfoLine:debug("Width", headerWidth, remainingWidth)
@@ -411,7 +410,7 @@ do
         local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
-        return TABLE_WIDTH, cellHeight + 11
+        return width, cellHeight + 11
     end
 
     function TextTableCellPrototype:ReleaseCell()
@@ -809,7 +808,7 @@ function InfoLine:CreateBlocks()
             end
         end
 
-        local time = _G.GetTime()
+        local time, tableWidth = _G.GetTime(), 500
         local guildData = {}
         local headerData = {
             sort = {
@@ -861,10 +860,11 @@ function InfoLine:CreateBlocks()
                 local motd = _G.GetGuildRosterMOTD()
                 if motd ~= "" then
                     lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, TABLE_WIDTH)
+                    tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, tableWidth)
                 end
 
                 _G.table.wipe(guildData)
+                guildData.width = tableWidth
                 guildData.header = headerData
                 guildData.rowOnClick = Guild_OnClick
                 guildData.cellGetTooltipText = Guild_GetTooltipText
@@ -1611,7 +1611,7 @@ function InfoLine:CreateBlocks()
             end
         end
 
-        local tokens = {}
+        local tokens, tableWidth = {}, 400
         local currencyData = {}
         local headerData = {
             info = {
@@ -1621,7 +1621,7 @@ function InfoLine:CreateBlocks()
                 "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
             },
             size = {
-                "FILL", "FIT", "FIT", "FIT", "FIT", 0.2
+                "FILL", "FIT", "FIT", "FIT", "FIT", 0.35
             }
         }
 
@@ -1689,6 +1689,7 @@ function InfoLine:CreateBlocks()
                 tooltip:AddHeader(_G.CURRENCY)
 
                 _G.table.wipe(currencyData)
+                currencyData.width = tableWidth
                 currencyData.header = headerData
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
