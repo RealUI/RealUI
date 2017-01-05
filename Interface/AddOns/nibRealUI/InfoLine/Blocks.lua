@@ -128,9 +128,9 @@ do
                         end)
                     end
                     local rowData = data[index]
-                    row.meta = rowData.meta
                     if rowData then
                         rowData.id = i
+                        row.meta = rowData.meta
                         cell.GetTooltipText = data.cellGetTooltipText
                         cell:SetText(rowData.info[col])
                         cell:SetScript("OnEnter", Cell_OnEnter)
@@ -1560,15 +1560,20 @@ function InfoLine:CreateBlocks()
         end
 
         local function UpdateTrackedCurrency(block)
+            local changeIndex
             for i = 1, _G.MAX_WATCHED_TOKENS do
                 local token = currencyStates["token"..i]
                 local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
+                if token.id ~= currencyID and not changeIndex then
+                    changeIndex = i
+                end
+
                 token.name = name
                 token.icon = icon
                 token.id = currencyID
-
                 charDB["token"..i] = currencyID
             end
+            return changeIndex
         end
 
         local function UpdateBlock(block)
@@ -1634,8 +1639,31 @@ function InfoLine:CreateBlocks()
                     dbc.currencyState = "money"
                 end
 
-                UpdateTrackedCurrency(block)
+                _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
+                    local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
+                    local changeIndex = UpdateTrackedCurrency(block)
+                    if changeIndex and trackedIndex then
+                        if changeIndex < trackedIndex then
+                            if flag == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
+                                dbc.currencyState = "token"..trackedIndex-1
+                            end
+                        elseif changeIndex == trackedIndex then
+                            if flag == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
+                                dbc.currencyState = "token"..trackedIndex+1
+                            end
+                        end
 
+                        if currencyStates[dbc.currencyState].index >= changeIndex then
+                            UpdateBlock(block)
+
+                            if not currencyStates[dbc.currencyState]:IsValid() then
+                                UpdateState(block)
+                            end
+                        end
+                    end
+                end)
+
+                UpdateTrackedCurrency(block)
                 if not currencyStates[dbc.currencyState]:IsValid() then
                     UpdateState(block)
                 end
