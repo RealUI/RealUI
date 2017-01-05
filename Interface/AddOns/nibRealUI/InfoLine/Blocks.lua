@@ -1718,7 +1718,7 @@ function InfoLine:CreateBlocks()
                             name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
                         },
                         meta = {
-                            "", "", tokens[4], tokens[5], tokens[6], ""
+                            "", GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
                         }
                     })
                 end
