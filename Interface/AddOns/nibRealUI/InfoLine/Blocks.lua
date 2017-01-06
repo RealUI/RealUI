@@ -220,9 +220,13 @@ do
 
 
                 Inverted = self.sortInverted
-                Handler = data.header.sort[Column]
-                if Handler == true then
-                    Handler = SortSimple -- Less-than operator
+                if data.header.sort then
+                    Handler = data.header.sort[Column]
+                    if Handler == true then
+                        Handler = SortSimple -- Less-than operator
+                    end
+                else
+                    Handler = SortSimple
                 end
 
                 _G.sort(data, Compare)
@@ -401,6 +405,8 @@ do
         InfoLine:debug("Sort", textTable.sortColumn, textTable.sortInverted)
         if textTable.sortColumn then
             self:SetSort(textTable.sortColumn, textTable.sortInverted)
+        elseif data.defaultSort then
+            self:SetSort(headerRow[data.defaultSort])
         end
 
         if data.rowOnClick then
@@ -866,6 +872,7 @@ function InfoLine:CreateBlocks()
                 _G.table.wipe(guildData)
                 guildData.width = tableWidth
                 guildData.header = headerData
+                guildData.defaultSort = 4
                 guildData.rowOnClick = Guild_OnClick
                 guildData.cellGetTooltipText = Guild_GetTooltipText
                 for i = 1, _G.GetNumGuildMembers() do
@@ -1691,6 +1698,7 @@ function InfoLine:CreateBlocks()
                 _G.table.wipe(currencyData)
                 currencyData.width = tableWidth
                 currencyData.header = headerData
+                currencyData.defaultSort = 1
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
