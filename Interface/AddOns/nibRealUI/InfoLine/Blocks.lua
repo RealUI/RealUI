@@ -395,7 +395,7 @@ do
             InfoLine:debug("Width", col, remainingWidth)
         end
         for header, size in next, flex do
-            local headerWidth = _G.max(remainingWidth * size, header.text:GetStringWidth())
+            local headerWidth = _G.max(width * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
             header:SetWidth(headerWidth)
             InfoLine:debug("Width", headerWidth, remainingWidth)
@@ -827,7 +827,7 @@ function InfoLine:CreateBlocks()
                 "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
             },
             size = {
-                "FILL", "FIT", 0.2, "FIT", 0.2, 0.3
+                "FILL", "FIT", 0.2, "FIT", 0.2, 0.2
             }
         }
 
@@ -1628,7 +1628,7 @@ function InfoLine:CreateBlocks()
                 "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
             },
             size = {
-                "FILL", "FIT", "FIT", "FIT", "FIT", 0.35
+                "FILL", "FIT", "FIT", "FIT", "FIT", 0.15
             }
         }
 
