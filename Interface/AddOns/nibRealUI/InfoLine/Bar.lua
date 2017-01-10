@@ -781,12 +781,12 @@ function InfoLine:OnInitialize()
                         index = 2,
                         enabled = true
                     },
-                    netstats = {
+                    currency = {
                         side = "right",
                         index = 3,
                         enabled = true
                     },
-                    currency = {
+                    netstats = {
                         side = "right",
                         index = 4,
                         enabled = true

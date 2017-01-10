@@ -1445,6 +1445,59 @@ function InfoLine:CreateBlocks()
         })
     end
 
+
+    --[[ Right ]]--
+    do -- Mail
+        LDB:NewDataObject("mail", {
+            name = _G.MAIL_LABEL,
+            type = "RealUI",
+            icon = fa["envelope"],
+            iconFont = iconFont,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("Mail: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 1, "LEFT")
+                SetupTooltip(tooltip, block)
+
+                tooltip:SetHeaderFont(headerFont.object)
+                tooltip:SetFont(textFont.object)
+                local send1, send2, send3 = _G.GetLatestThreeSenders()
+                if (send1 or send2 or send3) then
+                    tooltip:AddHeader(_G.HAVE_MAIL_FROM)
+                else
+                    tooltip:AddHeader(_G.HAVE_MAIL)
+                end
+
+                if send1 then tooltip:AddLine(send1) end
+                if send2 then tooltip:AddLine(send2) end
+                if send3 then tooltip:AddLine(send3) end
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("Mail1: OnEvent", event, ...)
+                local isVisible, hasNewMail = block:IsVisible(), _G.HasNewMail()
+                if not isVisible and hasNewMail then
+                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
+                    InfoLine:AddBlock(block.name, block.dataObj, info)
+                elseif isVisible and not hasNewMail then
+                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
+                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                end
+            end,
+            events = {
+                "PLAYER_ENTERING_WORLD",
+                "UPDATE_PENDING_MAIL",
+                "MAIL_INBOX_UPDATE",
+            },
+        })
+    end
+
+    -- Bag space
+
+    -- Specialization
+
     do -- Currency
         local GOLD_AMOUNT_STRING = "%s|cfffff226%s|r"
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
@@ -1751,61 +1804,6 @@ function InfoLine:CreateBlocks()
             },
         })
     end
-
-
-    --[[ Right ]]--
-    do -- Mail
-        LDB:NewDataObject("mail", {
-            name = _G.MAIL_LABEL,
-            type = "RealUI",
-            icon = fa["envelope"],
-            iconFont = iconFont,
-            OnEnter = function(block, ...)
-                if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Mail: OnEnter", block.side, ...)
-
-                local tooltip = qTip:Acquire(block, 1, "LEFT")
-                SetupTooltip(tooltip, block)
-
-                tooltip:SetHeaderFont(headerFont.object)
-                tooltip:SetFont(textFont.object)
-                local send1, send2, send3 = _G.GetLatestThreeSenders()
-                if (send1 or send2 or send3) then
-                    tooltip:AddHeader(_G.HAVE_MAIL_FROM)
-                else
-                    tooltip:AddHeader(_G.HAVE_MAIL)
-                end
-
-                if send1 then tooltip:AddLine(send1) end
-                if send2 then tooltip:AddLine(send2) end
-                if send3 then tooltip:AddLine(send3) end
-
-                tooltip:Show()
-            end,
-            OnEvent = function(block, event, ...)
-                InfoLine:debug("Mail1: OnEvent", event, ...)
-                local isVisible, hasNewMail = block:IsVisible(), _G.HasNewMail()
-                if not isVisible and hasNewMail then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:AddBlock(block.name, block.dataObj, info)
-                elseif isVisible and not hasNewMail then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
-                end
-            end,
-            events = {
-                "PLAYER_ENTERING_WORLD",
-                "UPDATE_PENDING_MAIL",
-                "MAIL_INBOX_UPDATE",
-            },
-        })
-    end
-
-    -- Bag space
-
-    -- Layout
-
-    -- Specialization
 
     do -- FPS/Ping
         -- Global Upvalues
