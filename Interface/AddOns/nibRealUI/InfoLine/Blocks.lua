@@ -189,22 +189,22 @@ do
         end
 
 
-        local Handler, Column, Inverted
+        local sortHandler, sortColumn, sortInverted
         -- Compare function for table.sort that supports inversion and custom sort handlers.
         local function Compare(row1, row2)
-            InfoLine:debug("Compare1", row1.info[Column])
-            InfoLine:debug("Compare2", row2.info[Column])
-            local Result
+            InfoLine:debug("Compare1", row1.info[sortColumn])
+            InfoLine:debug("Compare2", row2.info[sortColumn])
+            local result
 
-            InfoLine:debug("Inverted", Inverted)
-            if Inverted then -- Flip the handler's args
-                Result = Handler(row2.info[Column], row1.info[Column], row2, row1)
+            InfoLine:debug("sortInverted", sortInverted)
+            if sortInverted then -- Flip the sorthandler's args
+                result = sortHandler(row2.info[sortColumn], row1.info[sortColumn], row2, row1)
             else
-                Result = Handler(row1.info[Column], row2.info[Column], row1, row2)
+                result = sortHandler(row1.info[sortColumn], row2.info[sortColumn], row1, row2)
             end
 
-            if Result ~= nil then -- Not equal
-                return Result
+            if result ~= nil then -- Not equal
+                return result
             else -- Equal
                 return row1.id < row2.id -- Fall back on previous row order
             end
@@ -216,18 +216,18 @@ do
             local data = self.data
 
             if extData[data].sortColumn and #data > 0 then
-                Column = extData[data].sortColumn:GetID()
-                InfoLine:debug("Header_OnClick", Column, ...)
+                sortColumn = extData[data].sortColumn:GetID()
+                InfoLine:debug("Header_OnClick", sortColumn, ...)
 
 
-                Inverted = extData[data].sortInverted
+                sortInverted = extData[data].sortInverted
                 if data.header.sort then
-                    Handler = data.header.sort[Column]
-                    if Handler == true then
-                        Handler = SortSimple -- Less-than operator
+                    sortHandler = data.header.sort[sortColumn]
+                    if sortHandler == true then
+                        sortHandler = SortSimple -- Less-than operator
                     end
                 else
-                    Handler = SortSimple
+                    sortHandler = SortSimple
                 end
 
                 _G.sort(data, Compare)
