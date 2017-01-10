@@ -439,7 +439,6 @@ do
                 for col = 1, #headerRow do
                     local cell = row[col]
                     if cell then
-                        cell:SetScript("OnClick", nil)
                         cell:SetScript("OnEnter", nil)
                         cell:SetScript("OnLeave", nil)
                     end
