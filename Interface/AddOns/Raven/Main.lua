@@ -1,4 +1,6 @@
 -- Raven is an addon to monitor auras and cooldowns, providing timer bars and icons plus helpful notifications.
+-- Author: Tomber
+-- Copyright 2010-2016, All Rights Reserved
 
 -- Main.lua contains initialization and update routines supporting Raven's core capability of tracking active auras and cooldowns.
 -- It includes special cases for weapon buffs, stances, and trinkets.
@@ -17,8 +19,10 @@ local media = LibStub("LibSharedMedia-3.0")
 local MOD = Raven
 local MOD_Options = "Raven_Options"
 local _
+local addonInitialized = false -- set when the addon is initialized
+local addonEnabled = false -- set when the addon is enabled
 local optionsLoaded = false -- set when the load-on-demand options panel module has been loaded
-local optionsFailed = false -- set if loading the option panel module failed
+local optionsFailed = false -- set if loading the option panel module t
 MOD.updateOptions = false -- set this to cause the options panel to update (checked every half second)
 MOD.LocalSpellNames = {} -- must be defined in first module loaded
 local LSPELL = MOD.LocalSpellNames
@@ -107,6 +111,9 @@ local fixEnchants = { [104993] = true, [120032] = true, [118334] = true, [118335
 
 -- Initialization called when addon is loaded
 function MOD:OnInitialize()
+	if addonInitialized then return end -- only run this code once
+	addonInitialized = true
+	
 	MOD.localClass, MOD.myClass = UnitClass("player") -- cache the player's class
 	MOD.localRace, MOD.myRace = UnitRace("player") -- cache the player's race
 	LoadAddOn("LibDataBroker-1.1")
@@ -189,6 +196,28 @@ function MOD:RemoveTrackers(dstGUID, tag)
 	if tracker then
 		for id, t in pairs(tracker) do if not tag or t[22] ~= tag then tracker[id] = ReleaseTable(t) end end
 		if not next(tracker) then unitDebuffs[dstGUID] = ReleaseTable(tracker) end -- release the table associated with the GUID
+	end
+end
+
+-- Remove trackers for all units that match the name of the designated unit
+function MOD:RemoveMatchingTrackers(dstGUID)
+	local name = nil
+	local tracker = unitBuffs[dstGUID] -- find name by looking at active trackers
+	if tracker then for id, t in pairs(tracker) do name = t[21]; if name then break end end end
+	if not name then
+		tracker = unitDebuffs[dstGUID]
+		if tracker then for id, t in pairs(tracker) do name = t[21]; if name then break end end end
+	end
+	MOD:RemoveTrackers(dstGUID) -- start by removing the trackers for the unit passed in
+	if name then
+		local guids = {} -- build list of guids to remove
+		for id, tracker in pairs(unitBuffs) do
+			if tracker then for _, t in pairs(tracker) do if t[21] == name then guids[id] = true break end end end
+		end
+		for id, tracker in pairs(unitDebuffs) do
+			if tracker then for _, t in pairs(tracker) do if t[21] == name then guids[id] = true break end end end
+		end
+		for id in pairs(guids) do MOD:RemoveTrackers(id) end
 	end
 end
 
@@ -399,6 +428,9 @@ function MOD:GetRaidTarget(id) for k, v in pairs(raidTargets) do if v == id then
 
 -- Event called when addon is enabled
 function MOD:OnEnable()
+	if addonEnabled then return end -- only run this code once
+	addonEnabled = true
+	
 	MOD:InitializeProfile() -- initialize the profile database
 	MOD:InitializeLDB() -- initialize the data broker
 	MOD:RegisterChatCommand("raven", function() MOD:OptionsPanel() end)
@@ -1215,9 +1247,10 @@ function MOD:UpdateTrackers()
 				summonedCreatures[guid] = nil
 			end
 		end
-		if not InCombatLockdown() then -- if out of combat then release trackers for Corruption (needed for Absolute Corruption talent)
+		if not InCombatLockdown() then -- if out of combat then release unlimited duration trackers for Corruption (needed for Absolute Corruption talent)
+			local corruption = GetSpellInfo(172) -- use localized string for Corruption instead of spell id, in case multiple ids are involved
 			for _, tracker in pairs(unitDebuffs) do
-				for k, t in pairs(tracker) do if (t[14] == 146739) and (t[5] == 0) then tracker[k] = ReleaseTable(t) end end
+				for k, t in pairs(tracker) do if (t[13] == corruption) and (t[5] == 0) then tracker[k] = ReleaseTable(t) end end
 			end
 		end
 	end

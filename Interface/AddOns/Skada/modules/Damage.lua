@@ -6,7 +6,10 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 	local playermod = Skada:NewModule(L["Damage spell list"])
 	local spellmod = Skada:NewModule(L["Damage spell details"])
 	local damagedmod = Skada:NewModule(L["Damaged mobs"])
-
+        
+    local pairs = pairs
+    local ipairs = ipairs
+        
 	local function getDPS(set, player)
 		local totaltime = Skada:PlayerActiveTime(set, player)
 
@@ -41,7 +44,7 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 
 			-- Add spell to player if it does not exist.
 			if not player.damagespells[dmg.spellname] then
-				player.damagespells[dmg.spellname] = {id = dmg.spellid, totalhits = 0, damage = 0}
+				player.damagespells[dmg.spellname] = {id = dmg.spellid, totalhits = 0, damage = 0, school = dmg.school}
 			end
 
 			-- Add to player total damage.
@@ -132,6 +135,7 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 			dmg.crushing = scrushing
 			dmg.offhand = soffhand
 			dmg.missed = nil
+            dmg.school = spellSchool
 
 			Skada:FixPets(dmg)
 			log_damage(Skada.current, dmg)
@@ -158,6 +162,7 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 			dmg.crushing = scrushing
 			dmg.offhand = soffhand
 			dmg.missed = nil
+            dmg.school = 0x01
 
 			Skada:FixPets(dmg)
 			log_damage(Skada.current, dmg)
@@ -288,8 +293,7 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 		local set = win:get_selected_set()
 		local player = Skada:find_player(set, id)
 		if player then
-
-			local activetime = Skada:PlayerActiveTime(set, player)
+            local activetime = Skada:PlayerActiveTime(set, player)
 			local totaltime = Skada:GetSetTime(set)
 			tooltip:AddLine(player.name.." - "..L["DPS"])
 			tooltip:AddDoubleLine(L["Segment time"], totaltime.."s", 255,255,255,255,255,255)
@@ -306,7 +310,13 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 		if player then
 			local spell = player.damagespells[label]
 			if spell then
-				tooltip:AddLine(player.name.." - "..label)
+                tooltip:AddLine(player.name.." - "..label)
+                if spell.school then
+                    local c = _G.CombatLog_Color_ColorArrayBySchool(spell.school)
+                    if c then
+                        tooltip:AddLine(GetSchoolString(spell.school), c.r, c.g, c.b)
+                    end
+                end
 				if spell.max and spell.min then
 					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 255,255,255,255,255,255)
 					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 255,255,255,255,255,255)
@@ -359,6 +369,10 @@ Skada:AddLoadableModule("Damage", nil, function(Skada, L)
 					d.icon = icon
 					d.spellid = spell.id
 					d.value = spell.damage
+                    if spell.school then
+                        d.spellschool = spell.school
+                    end
+                        
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.damage), self.metadata.columns.Damage,
 						string.format("%02.1f%%", spell.damage / player.damage * 100), self.metadata.columns.Percent

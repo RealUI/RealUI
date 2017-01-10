@@ -487,7 +487,7 @@ Skada:AddLoadableModule("Healing", nil, function(Skada, L)
 	function mod:GetSetSummary(set)
 		return Skada:FormatValueText(
 			Skada:FormatNumber(set.healing), self.metadata.columns.Healing,
-			("%02.1f"):format(getRaidHPS(set)), self.metadata.columns.HPS
+			Skada:FormatNumber(getRaidHPS(set)), self.metadata.columns.HPS
 		)
 	end
 

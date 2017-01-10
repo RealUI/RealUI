@@ -19,6 +19,7 @@ Skada.windowdefaults = {
 	barslocked=false,
 	clickthrough=false,
 
+    spellschoolcolors=true,
 	classcolorbars = true,
 	classcolortext = false,
 	classicons = true,
@@ -33,7 +34,7 @@ Skada.windowdefaults = {
         texture="Solid",
         bordercolor = {r=0,g=0,b=0,a=1}, 
         bordertexture="Blizzard Party", 
-        borderthickness=2, 
+        borderthickness=1,
         color = {r=0,g=0,b=0,a=0.4}, 
         tile = false, 
         tilesize = 0, 
@@ -58,6 +59,7 @@ Skada.windowdefaults = {
 	snapto = true,
 	scale = 1,
     version = 1,
+    smoothing = false,
     
     -- Inline exclusive
     isonnewline = false,
@@ -101,6 +103,7 @@ Skada.defaults = {
 		feed = "",
 		showtotals = false,
         autostop = false,
+        sortmodesbyusage = true,
 
 		modules = {},
 		columns = {},
@@ -108,7 +111,7 @@ Skada.defaults = {
 		modulesBlocked = {
 		},
 
-		windows = {windefaultscopy},
+		windows = {windefaultscopy}
 	}
 }
 
@@ -163,6 +166,7 @@ end
 
 local deletewindow = nil
 local newdisplay = "bar"
+
 Skada.options = {
 	type="group",
 	name="Skada",
@@ -386,15 +390,18 @@ Skada.options = {
 										Skada:ApplySettings()
 									end,
 					},
-
-					numberformat = {
-						type="select",
-						name=L["Number format"],
-						desc=L["Controls the way large numbers are displayed."],
-						values=	function() return {[1] = L["Condensed"], [2] = L["Detailed"]} end,
-						get=function() return Skada.db.profile.numberformat end,
-						set=function(self, opt) Skada.db.profile.numberformat = opt end,
-						order=11,
+                
+					sortmodesbyusage = {
+							type="toggle",
+							name=L["Sort modes by usage"],
+							desc=L["The mode list will be sorted to reflect usage instead of alphabetically."],
+							order=12,
+                            width = "full",
+							get=function() return Skada.db.profile.sortmodesbyusage end,
+							set=function()
+										Skada.db.profile.sortmodesbyusage = not Skada.db.profile.sortmodesbyusage
+										Skada:ApplySettings()
+									end,
 					},
 
 					showranks = {
@@ -408,58 +415,8 @@ Skada.options = {
 										Skada:ApplySettings()
 									end,
 					},
-
-					datafeed = {
-						type="select",
-						name=L["Data feed"],
-						desc=L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-						values=	function()
-									local feeds = {}
-									feeds[""] = L["None"]
-									for name, func in pairs(Skada:GetFeeds()) do feeds[name] = name end
-									return feeds
-								end,
-						get=function() return Skada.db.profile.feed end,
-						set=function(self, feed)
-									Skada.db.profile.feed = feed
-									if feed ~= "" then Skada:SetFeed(Skada:GetFeeds()[feed]) end
-								end,
-						order=12,
-					},
-
-					setstokeep = {
-						type="range",
-						name=L["Data segments to keep"],
-						desc=L["The number of fight segments to keep. Persistent segments are not included in this."],
-						min=0,
-						max=99,
-						step=1,
-						get=function() return Skada.db.profile.setstokeep end,
-						set=function(self, val) Skada.db.profile.setstokeep = val end,
-						order=13,
-					},
-
-					setnumber = {
-							type="toggle",
-							name=L["Number set duplicates"],
-							desc=L["Append a count to set names with duplicate mob names."],
-							order=13.5,
-							get=function() return Skada.db.profile.setnumber end,
-							set=function() Skada.db.profile.setnumber = not Skada.db.profile.setnumber end,
-					},
-
-					setformat = {
-						type="select",
-						name=L["Set format"],
-						desc=L["Controls the way set names are displayed."],
-						values=	Skada:SetLabelFormats(),
-						get=function() return Skada.db.profile.setformat end,
-						set=function(self, opt) Skada.db.profile.setformat = opt; Skada:ApplySettings(); end,
-						order=14,
-						width="double",
-					},
-
-					tenativecombatstart = {
+                
+					tentativecombatstart = {
 							type="toggle",
 							name=L["Aggressive combat detection"],
 							desc=L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
@@ -488,7 +445,66 @@ Skada.options = {
                                 Skada:ApplySettings()
                             end,
 					},
+
+					numberformat = {
+						type="select",
+						name=L["Number format"],
+						desc=L["Controls the way large numbers are displayed."],
+						values=	function() return {[1] = L["Condensed"], [2] = L["Detailed"]} end,
+						get=function() return Skada.db.profile.numberformat end,
+						set=function(self, opt) Skada.db.profile.numberformat = opt end,
+						order=13,
+					},
                 
+                datafeed = {
+						type="select",
+						name=L["Data feed"],
+						desc=L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
+						values=	function()
+									local feeds = {}
+									feeds[""] = L["None"]
+									for name, func in pairs(Skada:GetFeeds()) do feeds[name] = name end
+									return feeds
+								end,
+						get=function() return Skada.db.profile.feed end,
+						set=function(self, feed)
+									Skada.db.profile.feed = feed
+									if feed ~= "" then Skada:SetFeed(Skada:GetFeeds()[feed]) end
+								end,
+						order=14,
+					},
+
+					setstokeep = {
+						type="range",
+						name=L["Data segments to keep"],
+						desc=L["The number of fight segments to keep. Persistent segments are not included in this."],
+						min=0,
+						max=99,
+						step=1,
+						get=function() return Skada.db.profile.setstokeep end,
+						set=function(self, val) Skada.db.profile.setstokeep = val end,
+						order=15,
+					},
+
+					setnumber = {
+							type="toggle",
+							name=L["Number set duplicates"],
+							desc=L["Append a count to set names with duplicate mob names."],
+							order=16,
+							get=function() return Skada.db.profile.setnumber end,
+							set=function() Skada.db.profile.setnumber = not Skada.db.profile.setnumber end,
+					},
+
+					setformat = {
+						type="select",
+						name=L["Set format"],
+						desc=L["Controls the way set names are displayed."],
+						values=	Skada:SetLabelFormats(),
+						get=function() return Skada.db.profile.setformat end,
+						set=function(self, opt) Skada.db.profile.setformat = opt; Skada:ApplySettings(); end,
+						order=17,
+						width="double",
+					},
                 
 				}
 			},

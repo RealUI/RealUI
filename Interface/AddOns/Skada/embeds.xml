@@ -19,7 +19,7 @@
 <Script file="lib\LibDBIcon-1.0\LibDBIcon-1.0.lua"/>
 <Script file="lib\LibWindow-1.1\LibWindow-1.1.lua"/>
 <Include file="lib\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
-<Include file="lib\LibBossIDs-1.0\lib.xml"/>
+<Include file="lib\LibBossIDs-1.0.lua"/>
 <!--@end-no-lib-strip@-->
 
 </Ui>

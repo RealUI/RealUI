@@ -15,7 +15,7 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 
 			-- Add spell to player if it does not exist.
 			if not player.damagetakenspells[dmg.spellname] or not player.damagetakenspells[dmg.spellname]['absorbed'] then
-				player.damagetakenspells[dmg.spellname] = {id = dmg.spellid, name = dmg.spellname, damage = 0, totalhits = 0, min = nil, max = nil, crushing = 0, glancing = 0, resisted = 0, critical = 0, absorbed = 0, blocked = 0}
+				player.damagetakenspells[dmg.spellname] = {id = dmg.spellid, name = dmg.spellname, damage = 0, totalhits = 0, min = nil, max = nil, crushing = 0, glancing = 0, resisted = 0, critical = 0, absorbed = 0, blocked = 0, school = dmg.school}
 			end
 
 			-- Add to player total damage.
@@ -79,6 +79,7 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 		dmg.glancing = sglancing
 		dmg.crushing = scrushing
 		dmg.offhand = soffhand
+        dmg.school = sschool
 
 		log_damage_taken(Skada.current, dmg)
 		log_damage_taken(Skada.total, dmg)
@@ -100,6 +101,7 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 		dmg.glancing = sglancing
 		dmg.crushing = scrushing
 		dmg.offhand = soffhand
+        dmg.school = 0x01
 
 		log_damage_taken(Skada.current, dmg)
 		log_damage_taken(Skada.total, dmg)
@@ -114,7 +116,7 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 			if player.damagetaken > 0 then
 				for name, spell in pairs(player.damagetakenspells) do
 					if not tmp[name] then
-						tmp[name] = {id = spell.id, damage = spell.damage}
+						tmp[name] = {id = spell.id, damage = spell.damage, school = spell.school}
 					else
 						tmp[name].damage = tmp[name].damage + spell.damage
 					end
@@ -133,6 +135,10 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 			d.id = name
 			local _, _, icon = GetSpellInfo(spell.id)
 			d.icon = icon
+            if spell.school then
+                d.spellschool = spell.school
+            end
+                
 			d.spellid = spell.id
 
 			if spell.damage > max then
@@ -234,6 +240,9 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 				d.id = spellname
 				d.spellid = spell.id
 				d.valuetext = Skada:FormatNumber(spell.damage)..(" (%02.1f%%)"):format(spell.damage / player.damagetaken * 100)
+                if spell.school then
+                    d.spellschool = spell.school
+                end
 
 				max = math.max(max, spell.damage)
 				nr = nr + 1
@@ -251,6 +260,13 @@ Skada:AddLoadableModule("DamageTaken", nil, function(Skada, L)
 			local spell = player.damagetakenspells[label]
 			if spell then
 				tooltip:AddLine(player.name.." - "..label)
+                if spell.school then
+                    local c = _G.CombatLog_Color_ColorArrayBySchool(spell.school)
+                    if c then
+                        tooltip:AddLine(GetSchoolString(spell.school), c.r, c.g, c.b)
+                    end
+                end
+                    
 				tooltip:AddDoubleLine(L["Hit"]..":", spell.totalhits, 255,255,255,255,255,255)
 				if spell.critical > 0 then
 					tooltip:AddDoubleLine(L["Critical"]..":", spell.critical, 255,255,255,255,255,255)

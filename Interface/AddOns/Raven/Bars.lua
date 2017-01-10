@@ -791,6 +791,7 @@ local function Bar_OnUpdate(bar)
 	elseif tt == "header" then
 		GameTooltip:AddLine(id)
 		GameTooltip:AddLine(L["Header click"], 1, 1, 1, true)
+		GameTooltip:AddLine(L["Header shift click"], 1, 1, 1, true)
 	end
 	if IsAltKeyDown() and IsControlKeyDown() then
 		if spell then GameTooltip:AddLine("<Spell #" .. tonumber(spell) .. ">", 0, 1, 0.2, false) end
@@ -892,7 +893,7 @@ local function Bar_OnClick(frame, bgName, barName, button)
 		if GameTooltip:GetOwner() == frame then GameTooltip:Hide() end
 		ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, frame, 0, 0)
 	elseif (tt == "header") and (button == "RightButton") then
-		MOD:RemoveTrackers(unit)
+		if IsShiftKeyDown() then MOD:RemoveMatchingTrackers(unit) else MOD:RemoveTrackers(unit) end
 	elseif (tt == "broker") then
 		if type(db) == "table" and type(db.OnClick) == "function" then db.OnClick(frame, button) end
 	end
