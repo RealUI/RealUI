@@ -1,4 +1,23 @@
 ------------------------------------------------------------------------
+r386 | Tomber | 2016-12-08 12:50:40 -0600 (Thu, 08 Dec 2016) | 1 line
+Changed paths:
+   A /trunk/tags
+
+
+------------------------------------------------------------------------
+r385 | Tomber | 2016-12-06 17:18:00 -0600 (Tue, 06 Dec 2016) | 4 lines
+Changed paths:
+   M /trunk/Bars.lua
+   M /trunk/Localizations/enUS.lua
+   M /trunk/Main.lua
+   M /trunk/Profile.lua
+   M /trunk/Raven_Options/Options.lua
+
+Shift right click on headers within Buff Tracker and Debuff Tracker bar groups will remove all headers for units with same name as the selected unit (this is intended to help warlocks that have Absolute Corruption talent deal with bars that don't go away automatically).
+Suppress invalid spell warning for obsolete spell id 202270.
+Add coordinates display in the alignment grid overlay.
+
+------------------------------------------------------------------------
 r384 | Tomber | 2016-11-21 21:02:58 -0600 (Mon, 21 Nov 2016) | 1 line
 Changed paths:
    M /trunk/Nest.lua

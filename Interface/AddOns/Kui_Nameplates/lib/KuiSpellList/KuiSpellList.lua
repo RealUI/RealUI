@@ -1,4 +1,4 @@
-local MAJOR, MINOR = 'KuiSpellList-1.0', 26
+local MAJOR, MINOR = 'KuiSpellList-1.0', 27
 local KuiSpellList = LibStub:NewLibrary(MAJOR, MINOR)
 local _
 
@@ -274,6 +274,7 @@ local auras = {
         HARMFUL = {
             [17364] = true,  -- stormstrike
             [61882] = true,  -- earthquake
+            [188389] = true, -- flame shock
         },
         CONTROL = {
             [3600] = true,   -- earthbind totem slow

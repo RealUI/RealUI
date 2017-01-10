@@ -58,6 +58,16 @@ function mod:Create(window)
 	window.bargroup:EnableMouse(true)
 	window.bargroup:SetScript("OnMouseDown", function(win, button) if IsShiftKeyDown() then Skada:OpenMenu(window) elseif button == "RightButton" then window:RightClick() end end)
 	window.bargroup.button:SetScript("OnClick", function(win, button) if IsShiftKeyDown() then Skada:OpenMenu(window) elseif button == "RightButton" then window:RightClick() end end)
+    
+	window.bargroup.button:SetScript("OnEnter", function(win, button)
+        window.bargroup:SetButtonsOpacity(1.0)
+    end)
+	window.bargroup.button:SetScript("OnLeave", function(win, button)
+        if not window.bargroup.button:IsMouseOver() then
+            window.bargroup:SetButtonsOpacity(0.25)
+        end
+    end)
+    
 	window.bargroup:HideIcon()
 
     window.bargroup.button:GetFontString():SetWordWrap(false);
@@ -345,6 +355,12 @@ function mod:Update(win)
 				if data.color then
 					-- Explicit color from dataset.
 					bar:SetColorAt(0, data.color.r, data.color.g, data.color.b, data.color.a or 1)
+                elseif data.spellschool and win.db.spellschoolcolors then
+                    local colorfunc = _G.CombatLog_Color_ColorArrayBySchool
+                    if colorfunc then
+                       local color = colorfunc(data.spellschool)
+					   bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
+                    end
 				elseif data.class and win.db.classcolorbars then
 					-- Class color.
 					local color = Skada.classcolors[data.class]
@@ -595,6 +611,9 @@ function mod:ApplySettings(win)
 
 	-- Scale
 	g:SetScale(p.scale)
+    
+    -- Smoothing
+    g:SetSmoothing(p.smoothing)
 
 	libwindow.SavePosition(g)
 
@@ -798,6 +817,18 @@ function mod:AddDisplayOptions(win, options)
 		         			Skada:ApplySettings()
 			        	end,
 			},
+            
+			spellschoolcolors = {
+			        type="toggle",
+			        name=L["Spell school colors"],
+			        desc=L["Use spell school colors where applicable."],
+			        order=33,
+			        get=function() return db.spellschoolcolors end,
+			        set=function()
+			        		db.spellschoolcolors = not db.spellschoolcolors
+		         			Skada:ApplySettings()
+			        	end,
+			},
                 
 			clickthrough = {
 			        type="toggle",
@@ -807,6 +838,18 @@ function mod:AddDisplayOptions(win, options)
 			        get=function() return db.clickthrough end,
 			        set=function()
 			        		db.clickthrough = not db.clickthrough
+		         			Skada:ApplySettings()
+			        	end,
+			},
+            
+			smoothing = {
+			        type="toggle",
+			        name=L["Smooth bars"],
+			        desc=L["Animate bar changes smoothly rather than immediately."],
+			        order=34,
+			        get=function() return db.smoothing end,
+			        set=function()
+			        		db.smoothing = not db.smoothing
 		         			Skada:ApplySettings()
 			        	end,
 			},

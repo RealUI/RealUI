@@ -1,5 +1,5 @@
 ## Interface: 70100
-## Version: v7.1.24
+## Version: v7.1.78
 ## Title: BadBoy
 ## Notes: A simple spam blocker & reporter.
 ## Notes-deDE: Ein einfacher Spam-Blocker & Melder.
@@ -28,5 +28,6 @@ embeds.xml
 
 Locale.lua
 SimpleOptions.lua
+Generate.lua
 BadBoy.lua
 

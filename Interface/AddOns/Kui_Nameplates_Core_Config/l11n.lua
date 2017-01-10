@@ -24,6 +24,7 @@ opt.tooltips = {
 
     nameonly = 'Hide the healthbars of friendly or unattackable units. While in name-only mode, name text is coloured as a percentage of health',
     nameonly_no_font_style = 'Hide text outline when in name-only mode (by setting the font style to nil)',
+    nameonly_health_colour = 'Partially colour text to represent health percentage',
     nameonly_damaged_friends = 'Use name-only mode even on damaged friendly frames',
     nameonly_enemies = 'Use name-only mode on unattackable enemies (not including enemy players under effects such as Ice Block)',
     nameonly_target = 'Also use name-only mode on your target',
@@ -55,15 +56,15 @@ opt.tooltips = {
     execute_colour = 'Colour to use within execute range',
     execute_percent = 'Manually set execute range',
 
-    hide_names = 'Whether or not a unit is tracked can be set by changing the "NPC Names" dropdown and other checkboxes in the default interface options under Esc > Interface > Names. Note that this does not affect name-only mode',
+    hide_names = 'Whether or not a unit is tracked can be set by changing the "NPC Names" dropdown and other checkboxes in the default interface options under Esc > Interface > Names.|n|nThis does not affect name-only mode.',
     font_face = 'The font used for all strings on nameplates (provided by LibSharedMedia)',
     font_size_normal = 'Standard font size (name, etc)',
     font_size_small = 'Smaller font size (vendor, spell name, etc)',
     text_vertical_offset = 'Vertical offset applied to all strings. Used as some fonts render at odd vertical positions in WoW. Note that this value ends in .5 by default as this helps to reduce vertical jittering when frames are moving',
     name_vertical_offset = 'Vertical offset of the name text',
     bot_vertical_offset = 'Vertical offset of the level and health text strings',
-    class_colour_friendly_names = 'Colour the names of friendly players by their class.|n|nThis does not affect name-only mode.',
-    class_colour_enemy_names = 'Colour the names of enemy players by their class.|n|nThis does not affect name-only mode.',
+    class_colour_friendly_names = 'Colour the names of friendly players by their class.',
+    class_colour_enemy_names = 'Colour the names of enemy players by their class.',
 
     health_text_friend_max = 'Health text format used on friendly units at full health',
     health_text_friend_dmg = 'Health text format used on damaged friendly units',
@@ -133,6 +134,7 @@ opt.titles = {
 
     nameonly = 'Use name-only mode',
     nameonly_no_font_style = 'No text outline',
+    nameonly_health_colour = 'Health colour',
     nameonly_damaged_friends = 'On damaged friends',
     nameonly_enemies = 'On unattackable enemies',
     nameonly_target = 'On target',
