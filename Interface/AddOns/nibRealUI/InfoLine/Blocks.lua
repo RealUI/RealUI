@@ -177,35 +177,35 @@ do
     do --[[ Sort ]]--
         -- Default sort handler for columns.
         -- Uses Lua's less-than operator.  Nil values are sorted as empty strings.
-        -- @param Val1  Element value for row 1.
-        -- @param Val2  Element value for row 2.
-        -- @param Row1..Row2  Row tables being compared.
-        -- @return True/false if Val1 is less/greater than Val2, or nil if they are equal.
-        local function SortSimple(Val1, Val2 --[[, Row1, Row2]])
-            if Val1 ~= Val2 then
-                return Val1 < Val2
+        -- @param val1  Element value for row 1.
+        -- @param val2  Element value for row 2.
+        -- @param row1..row2  Row tables being compared.
+        -- @return True/false if val1 is less/greater than val2, or nil if they are equal.
+        local function SortSimple(val1, val2 --[[, row1, row2]])
+            if val1 ~= val2 then
+                return val1 < val2
             end
         end
 
 
         local Handler, Column, Inverted
         -- Compare function for table.sort that supports inversion and custom sort handlers.
-        local function Compare(Row1, Row2)
-            InfoLine:debug("Compare1", Row1.info[Column])
-            InfoLine:debug("Compare2", Row2.info[Column])
+        local function Compare(row1, row2)
+            InfoLine:debug("Compare1", row1.info[Column])
+            InfoLine:debug("Compare2", row2.info[Column])
             local Result
 
             InfoLine:debug("Inverted", Inverted)
             if Inverted then -- Flip the handler's args
-                Result = Handler(Row2.info[Column], Row1.info[Column], Row2, Row1)
+                Result = Handler(row2.info[Column], row1.info[Column], row2, row1)
             else
-                Result = Handler(Row1.info[Column], Row2.info[Column], Row1, Row2)
+                Result = Handler(row1.info[Column], row2.info[Column], row1, row2)
             end
 
             if Result ~= nil then -- Not equal
                 return Result
             else -- Equal
-                return Row1.id < Row2.id -- Fall back on previous row order
+                return row1.id < row2.id -- Fall back on previous row order
             end
         end
 
@@ -467,6 +467,7 @@ do -- template
 end
 --]]
 
+local nameMatch = [=[|cff%x%x%x%x%x%x(.*)|r]=]
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
 
@@ -744,27 +745,24 @@ function InfoLine:CreateBlocks()
             [2] = inlineTexture:format(_G.FRIENDS_TEXTURE_DND),
         }
 
-        local nameMatch = [=[[|T]*(.*)[|t]*|cff%x%x%x%x%x%x(.*)|r]=]
         local NameSort do
+            function NameSort(val1, val2, row1, row2)
+                InfoLine:debug("NameSort", _G.strsplit("|", val1))
+                val1 = val1:match(nameMatch)
+                val2 = val2:match(nameMatch)
+                InfoLine:debug("Player1", val1)
+                InfoLine:debug("Player2", val2)
 
-            function NameSort(Val1, Val2)
-                local icon1, icon2
-                InfoLine:debug("NameSort", _G.strsplit("|", Val1))
-                icon1, Val1 = Val1:match(nameMatch)
-                icon2, Val2 = Val2:match(nameMatch)
-                InfoLine:debug("Player1", icon1, Val1)
-                InfoLine:debug("Player2", icon2, Val2)
-
-                icon1 = (icon1:find("ArmoryChat") or icon1:find("StatusIcon"))
-                icon2 = (icon2:find("ArmoryChat") or icon2:find("StatusIcon"))
-                if icon1 ~= icon2 then
-                    if icon1 and not icon2 then
-                        return true
-                    elseif not icon1 and icon2 then
+                local isMobile1 = row1.meta[1]
+                local isMobile2 = row2.meta[1]
+                if isMobile1 ~= isMobile2 then
+                    if isMobile1 and not isMobile2 then
                         return false
+                    elseif not isMobile1 and isMobile2 then
+                        return true
                     end
-                elseif Val1 ~= Val2 then
-                    return Val1 < Val2
+                elseif val1 ~= val2 then
+                    return val1 < val2
                 end
             end
         end
@@ -774,22 +772,22 @@ function InfoLine:CreateBlocks()
                 rankTable[_G.GuildControlGetRankName(i)] = i
             end
 
-            function RankSort(Val1, Val2)
-                if Val1 ~= Val2 then
-                    return rankTable[Val1] < rankTable[Val2]
+            function RankSort(val1, val2)
+                if val1 ~= val2 then
+                    return rankTable[val1] < rankTable[val2]
                 end
             end
         end
         local NoteSort do
-            function NoteSort(Val1, Val2)
-                if Val1 and Val2 then
-                    if Val1 ~= Val2 then
-                        return Val1 < Val2
+            function NoteSort(val1, val2)
+                if val1 and val2 then
+                    if val1 ~= val2 then
+                        return val1 < val2
                     end
                 else
-                    if Val1 and not Val2 then
+                    if val1 and not val2 then
                         return true
-                    elseif not Val1 and Val2 then
+                    elseif not val1 and val2 then
                         return false
                     end
                 end
@@ -797,7 +795,7 @@ function InfoLine:CreateBlocks()
         end
 
         local function Guild_OnClick(row, ...)
-            local _, name = row[1]:GetText():match(nameMatch)
+            local name = row[1]:GetText():match(nameMatch)
             if not name then return end
 
             if _G.IsAltKeyDown() then
@@ -914,6 +912,9 @@ function InfoLine:CreateBlocks()
                             id = i,
                             info = {
                                 name, lvl, zone, rank, note, offnote
+                            },
+                            meta = {
+                                isMobile
                             }
                         })
                     end
@@ -1600,9 +1601,8 @@ function InfoLine:CreateBlocks()
             UpdateBlock(block)
         end
 
-        local nameMatch = [=[|cff%x%x%x%x%x%x(.*)|r]=]
         local function Currency_OnClick(row, ...)
-            local _, name = row[1]:GetText():match(nameMatch)
+            local name = row[1]:GetText():match(nameMatch)
             if not name then return end
 
             if _G.IsAltKeyDown() then
