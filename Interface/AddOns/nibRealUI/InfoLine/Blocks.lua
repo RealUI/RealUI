@@ -69,6 +69,7 @@ do
     local MAX_ROWS = 10
     local ROW_HEIGHT = textFont.size
     local numTables = 0
+    local extData = {}
 
     local GTT_FrameLevel
     local function Cell_OnEnter(self)
@@ -214,12 +215,12 @@ do
             self:SetScript("OnUpdate", nil)
             local data = self.data
 
-            if self.sortColumn and #data > 0 then
-                Column = self.sortColumn:GetID()
+            if extData[data].sortColumn and #data > 0 then
+                Column = extData[data].sortColumn:GetID()
                 InfoLine:debug("Header_OnClick", Column, ...)
 
 
-                Inverted = self.sortInverted
+                Inverted = extData[data].sortInverted
                 if data.header.sort then
                     Handler = data.header.sort[Column]
                     if Handler == true then
@@ -237,18 +238,19 @@ do
         function TextTableCellPrototype:SetSort(header, inverted)
             InfoLine:debug("CellProto:SetSort", header:GetID(), inverted)
             local textTable = self.textTable
-            if textTable.sortColumn ~= header then
-                textTable.sortColumn, textTable.sortInverted = header, inverted or false
+            local data = textTable.data
+            if extData[data].sortColumn ~= header then
+                extData[data].sortColumn, extData[data].sortInverted = header, inverted or false
 
                 if header then
                     textTable:SetScript("OnUpdate", OnUpdate)
                 end
             elseif header then -- Selected same sort column
                 if inverted == nil then -- Unspecified, flip inverted status
-                    inverted = not textTable.sortInverted
+                    inverted = not extData[data].sortInverted
                 end
 
-                textTable.sortInverted = inverted
+                extData[data].sortInverted = inverted
                 textTable:SetScript("OnUpdate", OnUpdate)
             end
         end
@@ -332,6 +334,7 @@ do
         InfoLine:debug("CellProto:SetupCell")
         local textTable = self.textTable
         local width = data.width or 500
+        extData[data] = extData[data] or {}
         textTable.data = data
 
         local flex, filler = {}
@@ -355,23 +358,26 @@ do
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
-                local highlight = header:CreateTexture(nil, "ARTWORK")
                 local hR, hG, hB = _G.unpack(RealUI.classColor)
+                local highlight = header:CreateTexture(nil, "ARTWORK")
                 highlight:SetColorTexture(hR, hG, hB)
                 highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
                 highlight:SetPoint("RIGHT")
                 highlight:SetHeight(3)
                 header:SetHighlightTexture(highlight)
-
-                if headerData.sort then
-                    header:SetScript("OnClick", function(btn)
-                        _G.PlaySound("igMainMenuOptionCheckBoxOn")
-                        self:SetSort(btn)
-                    end)
-                end
+                header.hl = highlight
 
                 header.textTable = textTable
                 headerRow[col] = header
+            end
+            if headerData.sort then
+                header.hl:Show()
+                header:SetScript("OnClick", function(btn)
+                    _G.PlaySound("igMainMenuOptionCheckBoxOn")
+                    self:SetSort(btn)
+                end)
+            else
+                header.hl:Hide()
             end
             header.text:SetText(headerData.info[col])
             header.text:SetJustifyH(headerData.justify[col])
@@ -402,9 +408,9 @@ do
         end
         filler:SetWidth(_G.max(remainingWidth, filler.text:GetStringWidth()))
 
-        InfoLine:debug("Sort", textTable.sortColumn, textTable.sortInverted)
-        if textTable.sortColumn then
-            self:SetSort(textTable.sortColumn, textTable.sortInverted)
+        InfoLine:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
+        if extData[data].sortColumn then
+            self:SetSort(extData[data].sortColumn, extData[data].sortInverted)
         elseif data.defaultSort then
             self:SetSort(headerRow[data.defaultSort])
         end
@@ -422,6 +428,23 @@ do
     function TextTableCellPrototype:ReleaseCell()
         InfoLine:debug("CellProto:ReleaseCell")
         if self.textTable then
+            local headerRow = self.textTable.header
+            for col = 1, #headerRow do
+                headerRow[col]:SetScript("OnClick", nil)
+            end
+
+            for index = 1, MAX_ROWS do
+                local row = self.textTable.rows[index]
+                row:SetScript("OnClick", nil)
+                for col = 1, #headerRow do
+                    local cell = row[col]
+                    if cell then
+                        cell:SetScript("OnClick", nil)
+                        cell:SetScript("OnEnter", nil)
+                        cell:SetScript("OnLeave", nil)
+                    end
+                end
+            end
             self.textTable:Hide()
         end
     end
