@@ -1679,9 +1679,10 @@ function InfoLine:CreateBlocks()
         local function Currency_OnClick(row, ...)
             local name = row[1]:GetText():match(nameMatch)
             if not name then return end
+            local realm, faction = _G.strsplit("-", row.meta[1])
 
             if _G.IsAltKeyDown() then
-                return --currencyDB[realm][faction][name] = nil
+                currencyDB[realm][faction][name] = nil
             end
         end
         local function Currency_GetTooltipText(cell)
@@ -1777,8 +1778,10 @@ function InfoLine:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                local faction = currencyDB[RealUI.realm][RealUI.faction]
-                for name, data in next, faction do
+                local realm, faction = RealUI.realm, RealUI.faction
+                local realm_faction = realm.."-"..faction
+                local factionDB = currencyDB[realm][faction]
+                for name, data in next, factionDB do
                     local classColor = RealUI:GetClassColor(data.class, "hex")
                     name = charName:format(classColor, name)
                     local money = GetMoneyString(data.money, true)
@@ -1801,7 +1804,7 @@ function InfoLine:CreateBlocks()
                             name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
                         },
                         meta = {
-                            "", GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
                         }
                     })
                 end
