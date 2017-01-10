@@ -1694,6 +1694,15 @@ function InfoLine:CreateBlocks()
             end
         end
 
+        local hintLine
+        local function Currency_TooltipOnUpdate(tooltip)
+            if tooltip:IsMouseOver() then
+                tooltip:SetCell(hintLine, 1, L["Currency_EraseData"])
+            else
+                tooltip:SetCell(hintLine, 1, L["Currency_Cycle"])
+            end
+        end
+
         local tokens, tableWidth = {}, 400
         local currencyData = {}
         local headerData = {
@@ -1767,6 +1776,7 @@ function InfoLine:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
+                tooltip:SetScript("OnUpdate", Currency_TooltipOnUpdate)
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.CURRENCY)
@@ -1812,8 +1822,10 @@ function InfoLine:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
 
-                lineNum = tooltip:AddLine(L["Guild_WhisperInvite"])
-                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+                tooltip:AddLine(" ")
+
+                hintLine = tooltip:AddLine(L["Currency_Cycle"])
+                tooltip:SetLineTextColor(hintLine, 0, 1, 0)
 
                 tooltip:Show()
             end,
