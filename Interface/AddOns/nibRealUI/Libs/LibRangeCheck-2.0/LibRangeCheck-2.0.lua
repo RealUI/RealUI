@@ -1,6 +1,6 @@
 --[[
 Name: LibRangeCheck-2.0
-Revision: $Revision: 170 $
+Revision: $Revision: 174 $
 Author(s): mitch0
 Website: http://www.wowace.com/projects/librangecheck-2-0/
 Description: A range checking library based on interact distances and spell ranges
@@ -41,7 +41,7 @@ License: Public Domain
 -- @class file
 -- @name LibRangeCheck-2.0
 local MAJOR_VERSION = "LibRangeCheck-2.0"
-local MINOR_VERSION = tonumber(("$Revision: 170 $"):match("%d+")) + 100000
+local MINOR_VERSION = tonumber(("$Revision: 174 $"):match("%d+")) + 100000
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -82,10 +82,8 @@ local FriendSpells = {}
 local HarmSpells = {}
 
 FriendSpells["DEATHKNIGHT"] = {
-    47541, -- ["Death Coil"], -- 40
 }
 HarmSpells["DEATHKNIGHT"] = {
-    47541, -- ["Death Coil"], -- 40
     49576, -- ["Death Grip"], -- 30
 }
 
@@ -640,7 +638,6 @@ lib.failedItemRequests = {}
 
 -- << Public API
 
- 
 
 --- The callback name that is fired when checkers are changed.
 -- @field
@@ -995,7 +992,6 @@ function lib:scheduleAuraCheck()
     self.frame:Show()
 end
 
- 
 
 -- << load-time initialization 
 

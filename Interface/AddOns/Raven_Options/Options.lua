@@ -63,7 +63,7 @@ end
 -- Check if spell name is valid and display a warning if it is not, convert ids and spell hyperlinks, return validated spell name or nil
 -- Optionally support the #12345 spell id format for spell lists
 local function ValidateSpellName(name, allowPlusIDs)
-	if not name or (name == "") then return nil end
+	if not name or (name == "") or (name == 202270) or (name == "202270") then return nil end
 	if allowPlusIDs then
 		if string.find(name, "^#%d+") then local id = tonumber(string.sub(name, 2)); if id and GetSpellInfo(id) ~= "" then return name end return nil end
 	end
@@ -75,7 +75,7 @@ local function ValidateSpellName(name, allowPlusIDs)
 		local found, _, idString = string.find(name, "^|c%x+|Hspell:(.+)|h%[.*%]")
 		if found then local id = tonumber(idString); if id then name = GetSpellInfo(id); if name == "" then name = nil end end end -- convert hyperlink
 	end
-	if not MOD:GetIcon(name) then
+	if name and not MOD:GetIcon(name) then
 		print(L["Not valid string"](name))
 		return nil
 	end
@@ -1596,6 +1596,19 @@ local function DisplayGridPattern(toggle)
 	if not gridFrame then -- if first time then create the frame and figure out the scale for pixels
 		gridFrame = CreateFrame('Frame', nil, UIParent) 
 		gridFrame:SetAllPoints(UIParent); gridFrame:Hide()
+		local fs = gridFrame:CreateFontString(nil, "OVERLAY") -- create font string for coordinates
+		fs:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -10) -- will show in upper corner
+		fs:SetFontObject(ChatFontNormal); fs:SetTextColor(1, 1, 0, 1); fs:Hide()
+		gridFrame._coordinates = fs
+		gridFrame:SetScript("OnUpdate", function(frame)
+			local cx, cy = GetCursorPosition() -- display cursor coordinates
+			local cw, ch = WorldFrame:GetSize() -- coordinates are with respect to WorldFrame
+			local scale = GetScreenHeight() / ch -- transform to coordinates for UIParent
+			local x, y = math.floor(cx * scale + 0.5), math.floor(cy  * scale + 0.5) -- round to nearest whole number
+			cx = math.floor(1000 * cx / cw + 0.5) / 10; cy = math.floor(1000 * cy / ch + 0.5) / 10
+			frame._coordinates:SetText("Cursor: "..x..", "..y.." |cff00ffff("..cx.."%, "..cy.."%)|r")		
+			frame._coordinates:Show() -- turn on the coordinates display
+		end )
 	end
 	
 	local w, h = GetScreenWidth(), GetScreenHeight()
@@ -1606,6 +1619,8 @@ local function DisplayGridPattern(toggle)
 	local c = MOD.db.global.GridCenterColor
 
 	if gridFrame:IsShown() and toggle then
+		gridFrame:UnregisterEvent("OnUpdate") -- stop tracking the cursor
+		gridFrame._coordinates:Hide() -- turn on the coordinates display
 		gridFrame:Hide() -- if toggling it off then just hide the frame to remove all the lines
 	elseif gridFrame:IsShown() or toggle then				
 		DrawHorizontalLine(0, c, alpha, w, h); DrawVerticalLine(0, c, alpha, w, h) -- draw center horizontal and vertical lines	
@@ -1621,7 +1636,8 @@ local function DisplayGridPattern(toggle)
 			DrawVerticalLine(-offset, c, alpha, w, h) -- draw vertical line left of center
 			DrawVerticalLine(offset, c, alpha, w, h) -- draw vertical line right of center
 		end
-		gridFrame:Show() -- turn on the grid overlay
+		gridFrame:RegisterEvent("OnUpdate") -- track cursor and display coordinates
+		gridFrame:Show()
 	end
 	while gridCount < gridAllocated do gridCount = gridCount + 1; t = gridTextures[gridCount]; t:Hide() end -- hide any extra textures
 end

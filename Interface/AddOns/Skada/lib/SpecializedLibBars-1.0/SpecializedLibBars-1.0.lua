@@ -1,6 +1,6 @@
 -- LibBars-1.0 by Antiarc, all glory to him, ripped into pieces for Skada.
 local MAJOR = "SpecializedLibBars-1.0"
-local MINOR = 90000 + tonumber(("$Revision: 1 $"):match("%d+"))
+local MINOR = 900000 + tonumber(("$Revision: 1 $"):match("%d+"))
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
@@ -315,7 +315,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	btn:SetWidth(12)
 	btn:SetNormalTexture(normaltex)
 	btn:SetHighlightTexture(highlighttex, 1.0)
-	btn:SetAlpha(0.5)
+	btn:SetAlpha(0.25)
 	btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	btn:SetScript("OnClick", clickfunc)
 	btn:SetScript("OnEnter",
@@ -334,6 +334,45 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	self:AdjustButtons()
 end
 
+function barListPrototype:SetSmoothing(smoothing)
+    self.smoothing = smoothing
+    
+    if smoothing then
+        self:SetScript("OnUpdate", function()
+        
+            if bars[self] then
+                for k, v in pairs(bars[self]) do
+                    if v.targetamount then
+                        
+                        local amt
+                        if v.targetamount > v.lastamount then
+                            amt = min(((v.targetamount - v.lastamount) / 10) + v.lastamount, v.targetamount)
+                        else
+                            amt = max(v.lastamount - ((v.lastamount - v.targetamount) / 10), v.targetamount)
+                        end
+                        v.lastamount = amt
+                        if amt == v.targetamount then
+                            v.targetamount = nil
+                        end
+                        v:SetTextureValue(amt, v.targetdist)
+                        
+                    end
+                end
+            end
+
+        end)
+        
+    else
+        self:SetScript("OnUpdate", nil)
+    end
+end
+
+function barListPrototype:SetButtonsOpacity(alpha)
+	for i, btn in ipairs(self.buttons) do
+        btn:SetAlpha(alpha)
+	end
+end
+
 function barListPrototype:AdjustButtons()
 	local nr = 0
 	local lastbtn = nil
@@ -342,7 +381,7 @@ function barListPrototype:AdjustButtons()
 
 		if btn:IsShown() then
 			if nr == 0 then
-				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (math.max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
+				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
 			else
 				btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", 0, 0)
 			end
@@ -940,20 +979,20 @@ do
 		local thickness, showIcon = self.thickness, self.showIcon
 		local offset = self.offset
 		local x1, y1, x2, y2 = 0, 0, 0, 0
-		local maxbars = math.min(#values, math.floor(self:GetHeight() / (thickness + spacing)))
+		local maxbars = min(#values, floor(self:GetHeight() / (thickness + spacing)))
 
 		local start, stop, step
 		if growup then
 			from = "BOTTOM"
 			to = "TOP"
-			start = math.min(#values, maxbars + offset)
-			stop = math.min(#values, 1 + offset)
+			start = min(#values, maxbars + offset)
+			stop = min(#values, 1 + offset)
 			step = -1
 		else
 			from = "TOP"
 			to = "BOTTOM"
-			start = math.min(1 + offset, #values)
-			stop = math.min(maxbars + offset, #values)
+			start = min(1 + offset, #values)
+			stop = min(maxbars + offset, #values)
 			step = 1
 		end
         
@@ -1014,8 +1053,6 @@ do
 		self.lastBar = lastBar
 	end
 end
-
-
 
 --[[
 ****************************************************************
@@ -1080,12 +1117,6 @@ do
 
 		self:SetScale(1)
 		self:SetAlpha(1)
-		--[[
-		self.texture:SetAlpha(1)
-		self.bgtexture:SetAlpha(0.6)
-		self.icon:SetAlpha(1)
-		]]--
-
 
 		self.length = length or 200
 		self.thickness = thickness or 15
@@ -1471,8 +1502,20 @@ function barPrototype:SetValue(val)
 	end
 	local amt = min(1, val / max(displayMax, 0.000001))
 	local dist = (ownerGroup and ownerGroup:GetLength()) or self.length
-	self:SetTextureValue(max(amt, 0.000001), dist)
+    amt = max(amt, 0.000001)
+    
+    if ownerGroup and ownerGroup.smoothing and self.lastamount then
+        self:SetTextureTarget(amt, dist)
+    else
+        self.lastamount = amt
+        self:SetTextureValue(amt, dist)
+    end
 	self:UpdateColor()
+end
+
+function barPrototype:SetTextureTarget(amt, dist)
+    self.targetamount = amt
+    self.targetdist = dist
 end
 
 function barPrototype:SetTextureValue(amt, dist)

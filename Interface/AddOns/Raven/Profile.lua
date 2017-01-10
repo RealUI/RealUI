@@ -660,7 +660,12 @@ function MOD:RegisterSpellList(name, spellList, reset)
 				id = MOD:GetSpellID(n)
 			end
 		end
-		if n and id then if not slt[n] then count = count + 1 end slt[n] = id else print(L["Not valid string"](spell)) end -- only spells with valid name and id
+		if n and id then -- only spells with valid name and id
+			if not slt[n] then count = count + 1 end
+			slt[n] = id
+		else
+			if spell and (spell ~= 202270) and (spell ~= "202270") then print(L["Not valid string"](spell)) end
+		end
 	end
 	return count
 end

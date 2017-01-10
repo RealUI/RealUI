@@ -47,7 +47,8 @@ L["Anchor shift right click"] = "|cffffff00Shift-right-click|r to toggle directi
 L["Anchor alt left click"] = "|cffffff00Alt-left-click|r to open/close options menu"
 L["Anchor alt right click"] = "|cffffff00Alt-right-click|r to cycle through configurations"
 L["Add filter"] = function(a, b, n) return string.format("Raven: \"%s\" added to %s filter list for bar group \"%s\"", a, b, n) end
-L["Header click"] = "|cffffff00Right-click|r to hide this unit until re-targeted or next buff or debuff is applied by player"
+L["Header click"] = "|cffffff00Right-click|r to hide unit until re-targeted or next spell tick or spell is reapplied"
+L["Header shift click"] = "|cffffff00Shift-right-click|r to hide all units with same name"
 L["<Applied by "] = true
 
 -- Conditions.lua
