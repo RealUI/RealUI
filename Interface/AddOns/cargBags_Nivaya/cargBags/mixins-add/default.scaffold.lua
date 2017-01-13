@@ -114,6 +114,7 @@ local function ItemButton_Update(self, item)
     else
         self.Count:Hide()
     end
+    item.count = itemCount
     self.count = itemCount -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
 
     -- Durability
