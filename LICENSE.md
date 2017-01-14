@@ -1,4 +1,4 @@
-﻿Copyright © 2010-2016 [The RealUI Team](http://www.wowinterface.com/downloads/fileinfo.php?id=16068)
+﻿Copyright © 2010-2017 [The RealUI Team](http://www.wowinterface.com/downloads/fileinfo.php?id=16068)
 
 The contents of this addon, excluding third-party resources, are
 copyrighted to its authors with all rights reserved.
