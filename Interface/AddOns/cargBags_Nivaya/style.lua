@@ -252,10 +252,10 @@ local function SellJunk()
         _G.print("Vendor trash sold from", soldCount, "items: |cff00a956+|r"..money)
     end
 end
-JS:SetScript("OnEvent", function() SellJunk() end)
+JS:SetScript("OnEvent", SellJunk)
 
 -- Restack Items
-local restackItems = function(self)
+local function restackItems(self)
     local tBag, tBank = (self.name == "cBniv_Bag"), (self.name == "cBniv_Bank")
     --local loc = tBank and "bank" or "bags"
     if tBank then
@@ -267,13 +267,13 @@ local restackItems = function(self)
 end
 
 -- Reset New
-local resetNewItems = function(self)
+local function resetNewItems(self)
     cargBags.debug("style resetNewItems")
     _G.C_NewItems.ClearAll()
     cbNivaya:UpdateAll()
 end
 
-local UpdateDimensions = function(self)
+local function UpdateDimensions(self)
     local height = 0            -- Normal margin space
     if self.BagBar and self.BagBar:IsShown() then
         height = height + 40    -- Bag button space
@@ -292,7 +292,7 @@ local UpdateDimensions = function(self)
     self:SetHeight(self.ContainerHeight + height)
 end
 
-local SetFrameMovable = function(f, v)
+local function SetFrameMovable(f, v)
     f:SetMovable(true)
     f:SetUserPlaced(true)
     f:RegisterForClicks("LeftButton", "RightButton")

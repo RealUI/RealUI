@@ -112,7 +112,7 @@ function AddonControl:CreateOptionsFrame()
 
     acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
-        acO.reloadui:SetScript("OnClick", function() _G.ReloadUI() end)
+        acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
     RealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
 
