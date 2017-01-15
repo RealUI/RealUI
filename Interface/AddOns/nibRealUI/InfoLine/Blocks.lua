@@ -974,7 +974,242 @@ function InfoLine:CreateBlocks()
         })
     end
 
-    -- Friends
+    do  -- Friends
+        --CreateTextureMarkup(file, fileWidth, fileHeight, width, height, left, right, top, bottom)
+        local PlayerStatus = {
+            [1] = _G.CreateTextureMarkup(_G.FRIENDS_TEXTURE_AFK, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
+            [2] = _G.CreateTextureMarkup(_G.FRIENDS_TEXTURE_DND, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
+        }
+
+        local nameFormat = "|cff%s%s|r |c%s(%s)|r"
+        local bnetFriendColor = ("%.2x%.2x%.2x"):format(_G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255)
+        local NameSort do
+            function NameSort(val1, val2, row1, row2)
+                InfoLine:debug("NameSort", _G.strsplit("|", val1))
+                val1 = val1:match(nameMatch)
+                val2 = val2:match(nameMatch)
+                InfoLine:debug("Player1", val1)
+                InfoLine:debug("Player2", val2)
+
+                local isMobile1 = row1.meta[1]
+                local isMobile2 = row2.meta[1]
+                if isMobile1 ~= isMobile2 then
+                    if isMobile1 and not isMobile2 then
+                        return false
+                    elseif not isMobile1 and isMobile2 then
+                        return true
+                    end
+                elseif val1 ~= val2 then
+                    return val1 < val2
+                end
+            end
+        end
+        local NoteSort do
+            function NoteSort(val1, val2)
+                if val1 and val2 then
+                    if val1 ~= val2 then
+                        return val1 < val2
+                    end
+                else
+                    if val1 and not val2 then
+                        return true
+                    elseif not val1 and val2 then
+                        return false
+                    end
+                end
+            end
+        end
+
+        local function Friends_OnClick(row, ...)
+            local name = row[1]:GetText():match(nameMatch)
+            if not name then return end
+
+            if _G.IsAltKeyDown() then
+                _G.InviteUnit(name)
+            else
+                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
+            end
+        end
+        local function Friends_GetTooltipText(cell)
+            InfoLine:debug("Friends_GetTooltipText")
+            if cell:GetTextWidth() > cell:GetWidth() then
+                InfoLine:debug("Friends_GetTooltipText true")
+                return cell:GetText()
+            end
+        end
+
+        local ClassLookup, tableWidth = {}, 500
+        local friendsData = {}
+        local headerData = {
+            sort = {
+                NameSort, true, true, NoteSort, true
+            },
+            info = {
+                _G.NAME, _G.LEVEL_ABBR, _G.STATUS, _G.LABEL_NOTE, _G.GAME
+            },
+            justify = {
+                "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT"
+            },
+            size = {
+                "FILL", "FIT", 0.2, 0.2, "FIT"
+            }
+        }
+
+        LDB:NewDataObject("friends", {
+            name = _G.FRIENDS,
+            type = "RealUI",
+            icon = fa["address-book"],
+            iconFont = iconFont,
+            value = 1,
+            OnEnable = function(block)
+                -- Class Name lookup table
+                for k, v in next, _G.LOCALIZED_CLASS_NAMES_MALE do
+                    ClassLookup[v] = k
+                end
+                for k, v in next, _G.LOCALIZED_CLASS_NAMES_FEMALE do
+                    ClassLookup[v] = k
+                end
+            end,
+            OnClick = function(block, ...)
+                InfoLine:debug("Friends: OnClick", block.side, ...)
+                if not _G.InCombatLockdown() then
+                    _G.ToggleFriendsFrame()
+                end
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("Friends: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 1, "LEFT")
+                SetupTooltip(tooltip, block)
+                local lineNum, colNum
+
+                tooltip:AddHeader(_G.FRIENDS)
+
+                _G.table.wipe(friendsData)
+                friendsData.width = tableWidth
+                friendsData.header = headerData
+                friendsData.defaultSort = 1
+                friendsData.rowOnClick = Friends_OnClick
+                friendsData.cellGetTooltipText = Friends_GetTooltipText
+
+                -- WoW Friends
+                for i = 1, _G.GetNumFriends() do
+                    local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
+                    if isOnline then
+                        -- Class color names
+                        local color = RealUI:GetClassColor(class, "hex")
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+
+                        if status > 0 then
+                            name = PlayerStatus[status] .. name
+                        end
+
+                        -- Add Friend to list
+                        _G.tinsert(friendsData, {
+                            id = i,
+                            info = {
+                                name, lvl, area, noteText
+                            },
+                            meta = {
+                                name
+                            }
+                        })
+                    end
+                end
+
+                -- Battle.net Friends
+                for i = 1, _G.BNGetNumFriends() do
+                    local _, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
+                    -- WoW friends
+                    if isOnline then
+                        local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
+
+                        local name
+                        if accountName then
+                            name = accountName
+                            characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
+                        else
+                            name = _G.UNKNOWN
+                        end
+
+                        if characterName then
+                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
+                                name = nameFormat:format(bnetFriendColor, name, RealUI:GetClassColor(ClassLookup[class], "hex"), characterName)
+                            else
+                                if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
+                                    characterName = characterName.._G.CANNOT_COOPERATE_LABEL;
+                                end
+                                name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
+                            end
+                        end
+
+                        if isBnetAFK or isGameAFK then
+                            name = PlayerStatus[1] .. name
+                        elseif isBnetDND or isGameDND then
+                            name = PlayerStatus[2] .. name
+                        end
+
+                        -- Difficulty color levels
+                        level = _G.tonumber(level)
+                        if level then
+                            local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
+                            level = ("%s%d|r"):format(color, level)
+                        end
+
+                        local status
+                        if client == _G.BNET_CLIENT_WOW then
+                            if ( not zoneName or zoneName == "" ) then
+                                status = _G.UNKNOWN;
+                            else
+                                status = zoneName;
+                            end
+                        else
+                            status = gameText;
+                        end
+
+                        if noteText == "" then noteText = nil end
+
+                        local gameIcon = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, -1)
+
+                        _G.tinsert(friendsData, {
+                            id = i,
+                            info = {
+                                name, level, status, noteText, gameIcon
+                            },
+                            meta = {
+                                name, "", "", "", client
+                            }
+                        })
+                    end
+                end
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, friendsData, TextTableCellProvider)
+
+                lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
+                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("Friend: OnEvent", event, ...)
+
+                local _, numBNetOnline = _G.BNGetNumFriends()
+                local _, numWoWOnline = _G.GetNumFriends()
+
+                block.dataObj.value = numBNetOnline + numWoWOnline
+            end,
+            events = {
+                "FRIENDLIST_UPDATE",
+                "BN_FRIEND_INVITE_ADDED",
+                "BN_FRIEND_INVITE_LIST_INITIALIZED",
+                "BN_FRIEND_INVITE_REMOVED",
+                "BN_FRIEND_ACCOUNT_ONLINE",
+                "BN_FRIEND_ACCOUNT_OFFLINE",
+            },
+        })
+    end
 
     do  -- Durability
         local itemSlots = {

@@ -759,14 +759,19 @@ function InfoLine:OnInitialize()
                         index = 2,
                         enabled = true
                     },
-                    durability = {
+                    friends = {
                         side = "left",
                         index = 3,
                         enabled = true
                     },
-                    progress = {
+                    durability = {
                         side = "left",
                         index = 4,
+                        enabled = true
+                    },
+                    progress = {
+                        side = "left",
+                        index = 5,
                         enabled = true
                     },
 
