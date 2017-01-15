@@ -667,7 +667,7 @@ function InfoLine:CreateBlocks()
             end,
             OnClick = function(block, ...)
                 InfoLine:debug("Clock: OnClick", block.side, ...)
-                if _G.IsShiftKeyDown() then
+                if _G.IsAltKeyDown() then
                     _G.ToggleTimeManager()
                 else
                     if _G.IsAddOnLoaded("GroupCalendar5") then
@@ -917,16 +917,6 @@ function InfoLine:CreateBlocks()
                         color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl))
                         lvl = ("%s%d|r"):format(color, lvl)
 
-                        --[[ Mouse functions
-                        tooltip:SetLineScript(lineNum, "OnMouseDown", function(...)
-                            InfoLine:debug("Guild: OnMouseDown", self.side, ...)
-                            if not name then return end
-                            if IsAltKeyDown() then
-                                InviteUnit(name)
-                            else
-                                SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
-                            end
-                        end)]]
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
 
@@ -945,7 +935,7 @@ function InfoLine:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
 
-                lineNum = tooltip:AddLine(L["Guild_WhisperInvite"])
+                lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
                 tooltip:SetLineTextColor(lineNum, 0, 1, 0)
 
                 tooltip:Show()
