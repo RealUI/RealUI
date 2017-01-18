@@ -490,6 +490,39 @@ end
 --]]
 
 local nameMatch = [=[|cff%x%x%x%x%x%x(.*)|r]=]
+local CreateTextureMarkup do
+    local textureEscape = "|T%s:%d:%d:0:0:%d:%d:%d:%d:%d:%d|t"
+    local textureEscapeColor = "|T%s:%d:%d:0:0:%d:%d:%d:%d:%d:%d:%d:%d:%d|t"
+    function CreateTextureMarkup(file, fileWidth, fileHeight, width, height, left, right, top, bottom, r, g, b)
+        if r and g and b then
+            return textureEscapeColor:format(
+                file,
+                height,
+                width,
+                fileWidth,
+                fileHeight,
+                left * fileWidth,
+                right * fileWidth,
+                top * fileHeight,
+                bottom * fileHeight,
+                r, g, b
+            )
+        else
+            return textureEscape:format(
+                file,
+                height,
+                width,
+                fileWidth,
+                fileHeight,
+                left * fileWidth,
+                right * fileWidth,
+                top * fileHeight,
+                bottom * fileHeight
+            )
+        end
+    end
+end
+
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
 
@@ -755,16 +788,16 @@ function InfoLine:CreateBlocks()
     end
 
     --[[ Left ]]--
+    local PlayerStatus = {
+        [1] = CreateTextureMarkup(_G.FRIENDS_TEXTURE_AFK, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
+        [2] = CreateTextureMarkup(_G.FRIENDS_TEXTURE_DND, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
+    }
+
     do  -- Guild Roster
-        local inlineTexture = [[|T%s:14:14:0:0:16:16:0:16:0:16|t]]
         local RemoteChatStatus = {
-            [0] = [[|TInterface\ChatFrame\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:74:176:74|t]],
-            [1] = inlineTexture:format([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-AwayMobile]]),
-            [2] = inlineTexture:format([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-BusyMobile]]),
-        }
-        local PlayerStatus = {
-            [1] = inlineTexture:format(_G.FRIENDS_TEXTURE_AFK),
-            [2] = inlineTexture:format(_G.FRIENDS_TEXTURE_DND),
+            [0] = CreateTextureMarkup([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat]], 16, 16, 15, 15, 0, 1, 0, 1, 73, 177, 73),
+            [1] = CreateTextureMarkup([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-AwayMobile]], 16, 16, 15, 15, 0, 1, 0, 1),
+            [2] = CreateTextureMarkup([[Interface\ChatFrame\UI-ChatIcon-ArmoryChat-BusyMobile]], 16, 16, 15, 15, 0, 1, 0, 1),
         }
 
         local NameSort do
@@ -975,12 +1008,6 @@ function InfoLine:CreateBlocks()
     end
 
     do  -- Friends
-        --CreateTextureMarkup(file, fileWidth, fileHeight, width, height, left, right, top, bottom)
-        local PlayerStatus = {
-            [1] = _G.CreateTextureMarkup(_G.FRIENDS_TEXTURE_AFK, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
-            [2] = _G.CreateTextureMarkup(_G.FRIENDS_TEXTURE_DND, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
-        }
-
         local nameFormat = "|cff%s%s|r |c%s(%s)|r"
         local bnetFriendColor = ("%.2x%.2x%.2x"):format(_G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255)
         local NameSort do
