@@ -1775,7 +1775,46 @@ function InfoLine:CreateBlocks()
         })
     end
 
-    -- Bag space
+    do -- Bag space
+        LDB:NewDataObject("bags", {
+            name = _G.BAGSLOTTEXT,
+            type = "RealUI",
+            icon = fa["shopping-bag"],
+            iconFont = iconFont,
+            value = 1,
+            tooltiptext = "",
+            OnClick = function(block, ...)
+                InfoLine:debug("Friends: OnClick", block.side, ...)
+                _G.ToggleAllBags()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("currency: OnEvent", block.side, event, ...)
+                local freeSlots, totalSlots = 0, 0
+
+                -- Cycle through bags
+                for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
+                    local slots, slotsTotal = _G.GetContainerNumFreeSlots(bagID), _G.GetContainerNumSlots(bagID)
+                    if ( bagID >= 1 ) then  -- Extra bag
+                        local bagLink = _G.GetInventoryItemLink("player", _G.ContainerIDToInventoryID(bagID))
+                        if bagLink then
+                            freeSlots = freeSlots + slots
+                            totalSlots = totalSlots + slotsTotal
+                        end
+                    else -- Backpack, we count slots
+                        freeSlots = freeSlots + slots
+                        totalSlots = totalSlots + slotsTotal
+                    end
+                end
+
+                block.dataObj.value = freeSlots
+                block.dataObj.tooltiptext = _G.NUM_FREE_SLOTS:format(freeSlots)
+            end,
+            events = {
+                "UNIT_INVENTORY_CHANGED",
+                "BAG_UPDATE_DELAYED",
+            },
+        })
+    end
 
     -- Specialization
 

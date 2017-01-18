@@ -786,14 +786,19 @@ function InfoLine:OnInitialize()
                         index = 2,
                         enabled = true
                     },
-                    currency = {
+                    bags = {
                         side = "right",
                         index = 3,
                         enabled = true
                     },
-                    netstats = {
+                    currency = {
                         side = "right",
                         index = 4,
+                        enabled = true
+                    },
+                    netstats = {
+                        side = "right",
+                        index = 5,
                         enabled = true
                     },
                 },
