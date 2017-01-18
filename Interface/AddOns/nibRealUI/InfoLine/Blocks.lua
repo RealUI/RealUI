@@ -1012,31 +1012,32 @@ function InfoLine:CreateBlocks()
         local bnetFriendColor = ("%.2x%.2x%.2x"):format(_G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255)
         local NameSort do
             function NameSort(val1, val2, row1, row2)
-                InfoLine:debug("NameSort", _G.strsplit("|", val1))
-                val1 = val1:match(nameMatch)
-                val2 = val2:match(nameMatch)
-                InfoLine:debug("Player1", val1)
-                InfoLine:debug("Player2", val2)
-
-                local isMobile1 = row1.meta[1]
-                local isMobile2 = row2.meta[1]
-                if isMobile1 ~= isMobile2 then
-                    if isMobile1 and not isMobile2 then
-                        return false
-                    elseif not isMobile1 and isMobile2 then
+                local index1 = row1.meta[1]
+                local index2 = row2.meta[1]
+                if index1 ~= index2 then
+                    return index1 < index2
+                end
+            end
+        end
+        local LevelSort do
+            function LevelSort(val1, val2, row1, row2)
+                local lvl1 = row1.meta[2]
+                local lvl2 = row2.meta[2]
+                if lvl1 and lvl2 then
+                    return lvl1 < lvl2
+                else
+                    if lvl1 and not lvl2 then
                         return true
+                    elseif not lvl1 and lvl2 then
+                        return false
                     end
-                elseif val1 ~= val2 then
-                    return val1 < val2
                 end
             end
         end
         local NoteSort do
             function NoteSort(val1, val2)
                 if val1 and val2 then
-                    if val1 ~= val2 then
-                        return val1 < val2
-                    end
+                    return val1 < val2
                 else
                     if val1 and not val2 then
                         return true
@@ -1069,7 +1070,7 @@ function InfoLine:CreateBlocks()
         local friendsData = {}
         local headerData = {
             sort = {
-                NameSort, true, true, NoteSort, true
+                NameSort, LevelSort, true, NoteSort, true
             },
             info = {
                 _G.NAME, _G.LEVEL_ABBR, _G.STATUS, _G.LABEL_NOTE, _G.GAME
@@ -1152,8 +1153,8 @@ function InfoLine:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        level = _G.tonumber(level)
-                        if level then
+                        local lvl = _G.tonumber(level)
+                        if lvl then
                             local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
                             level = ("%s%d|r"):format(color, level)
                         end
@@ -1179,7 +1180,7 @@ function InfoLine:CreateBlocks()
                                 name, level, status, noteText, gameIcon
                             },
                             meta = {
-                                name, "", "", "", client
+                                i, lvl, "", "", client
                             }
                         })
                     end
@@ -1187,7 +1188,7 @@ function InfoLine:CreateBlocks()
 
                 -- WoW Friends
                 for i = 1, _G.GetNumFriends() do
-                    local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
+                    local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
                     if isOnline then
                         -- Class color names
                         name = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
@@ -1198,14 +1199,20 @@ function InfoLine:CreateBlocks()
                             name = PlayerStatus[2] .. name
                         end
 
+                        -- Difficulty color levels
+                        local lvl = _G.tonumber(level)
+                        if lvl then
+                            level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
+                        end
+
                         -- Add Friend to list
                         _G.tinsert(friendsData, {
                             id = #friendsData + i,
                             info = {
-                                name, lvl, area, noteText
+                                name, level, area, noteText
                             },
                             meta = {
-                                name
+                                #friendsData + i, lvl, "", ""
                             }
                         })
                     end
