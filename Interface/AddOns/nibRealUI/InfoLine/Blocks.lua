@@ -1070,16 +1070,16 @@ function InfoLine:CreateBlocks()
         local friendsData = {}
         local headerData = {
             sort = {
-                NameSort, LevelSort, true, NoteSort, true
+                NameSort, LevelSort, true, NoteSort
             },
             info = {
-                _G.NAME, _G.LEVEL_ABBR, _G.STATUS, _G.LABEL_NOTE, _G.GAME
+                _G.NAME, _G.LEVEL_ABBR, _G.STATUS, _G.LABEL_NOTE
             },
             justify = {
-                "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT"
+                "LEFT", "RIGHT", "LEFT", "LEFT"
             },
             size = {
-                "FILL", "FIT", 0.2, 0.2, "FIT"
+                "FILL", "FIT", 0.2, 0.2
             }
         }
 
@@ -1151,6 +1151,7 @@ function InfoLine:CreateBlocks()
                         elseif isBnetDND or isGameDND then
                             name = PlayerStatus[2] .. name
                         end
+                        name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
 
                         -- Difficulty color levels
                         local lvl = _G.tonumber(level)
@@ -1172,15 +1173,14 @@ function InfoLine:CreateBlocks()
 
                         if noteText == "" then noteText = nil end
 
-                        local gameIcon = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, -1)
 
                         _G.tinsert(friendsData, {
                             id = i,
                             info = {
-                                name, level, status, noteText, gameIcon
+                                name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, "", "", client
+                                i, lvl, "", ""
                             }
                         })
                     end
