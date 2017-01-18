@@ -104,7 +104,7 @@ do
             if i > #data then
                 row:Hide()
             else
-                for col = 1, #header do
+                for col = 1, #data.header.justify do
                     local cell = row[col]
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
