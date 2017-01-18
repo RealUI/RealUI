@@ -1190,16 +1190,17 @@ function InfoLine:CreateBlocks()
                     local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
                     if isOnline then
                         -- Class color names
-                        local color = RealUI:GetClassColor(class, "hex")
-                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
 
-                        if status > 0 then
-                            name = PlayerStatus[status] .. name
+                        if status == _G.CHAT_FLAG_AFK then
+                            name = PlayerStatus[1] .. name
+                        elseif status == _G.CHAT_FLAG_DND then
+                            name = PlayerStatus[2] .. name
                         end
 
                         -- Add Friend to list
                         _G.tinsert(friendsData, {
-                            id = i,
+                            id = #friendsData + i,
                             info = {
                                 name, lvl, area, noteText
                             },
