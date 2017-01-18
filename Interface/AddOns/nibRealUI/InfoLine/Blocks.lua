@@ -1066,7 +1066,7 @@ function InfoLine:CreateBlocks()
             end
         end
 
-        local ClassLookup, tableWidth = {}, 500
+        local ClassLookup, tableWidth = {}, 450
         local friendsData = {}
         local headerData = {
             sort = {
