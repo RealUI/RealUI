@@ -1120,35 +1120,9 @@ function InfoLine:CreateBlocks()
                 friendsData.rowOnClick = Friends_OnClick
                 friendsData.cellGetTooltipText = Friends_GetTooltipText
 
-                -- WoW Friends
-                for i = 1, _G.GetNumFriends() do
-                    local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
-                    if isOnline then
-                        -- Class color names
-                        local color = RealUI:GetClassColor(class, "hex")
-                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
-
-                        if status > 0 then
-                            name = PlayerStatus[status] .. name
-                        end
-
-                        -- Add Friend to list
-                        _G.tinsert(friendsData, {
-                            id = i,
-                            info = {
-                                name, lvl, area, noteText
-                            },
-                            meta = {
-                                name
-                            }
-                        })
-                    end
-                end
-
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
                     local _, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
-                    -- WoW friends
                     if isOnline then
                         local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
 
@@ -1206,6 +1180,31 @@ function InfoLine:CreateBlocks()
                             },
                             meta = {
                                 name, "", "", "", client
+                            }
+                        })
+                    end
+                end
+
+                -- WoW Friends
+                for i = 1, _G.GetNumFriends() do
+                    local name, lvl, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
+                    if isOnline then
+                        -- Class color names
+                        local color = RealUI:GetClassColor(class, "hex")
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+
+                        if status > 0 then
+                            name = PlayerStatus[status] .. name
+                        end
+
+                        -- Add Friend to list
+                        _G.tinsert(friendsData, {
+                            id = i,
+                            info = {
+                                name, lvl, area, noteText
+                            },
+                            meta = {
+                                name
                             }
                         })
                     end
