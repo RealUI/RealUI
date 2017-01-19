@@ -509,72 +509,92 @@ gtSB:SetScript("OnValueChanged", gtSBValChange)
 
 local itemTips = {}
 
-local function style(frame)
-    if(not frame) then return end
-    local frameName = frame:GetName()
-
-    if(not frame.freebtipBD) then
-        -- xRUI
-        frame:SetBackdrop(nil)
-
-        local bg
-        if frame.BackdropFrame then
-            bg = frame.BackdropFrame
-        else
-            bg = _G.CreateFrame("Frame", nil, frame)
-            bg:SetFrameLevel(frame:GetFrameLevel()-1)
-        end
-        Aurora[1].CreateBD(bg)
-        bg:SetPoint("TOPLEFT")
-        bg:SetPoint("BOTTOMRIGHT")
-        bg:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
-        bg:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
-        frame.freebtipBD = true
+local style do
+    local backdrop
+    local getBackdrop = function()
+        return backdrop
     end
-    frame:SetScale(cfg.scale)
 
-    if(cfg.colorborderItem and frame.GetItem) then
-        frame.freebtipItem = false
-        local _, item = frame:GetItem()
-        if(item) then
-            local quality = select(3, GetItemInfo(item))
-            if(quality) then
-                local r, g, b = GetItemQualityColor(quality)
-                frame:SetBackdropBorderColor(r, g, b)
-                itemTips[frameName] = nil
-                frame.freebtipItem = true
+    local getBackdropColor = function()
+        return cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t
+    end
+
+    local getBackdropBorderColor = function()
+        return cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b
+    end
+
+    function style(frame)
+        if(not frame) then return end
+        local frameName = frame:GetName()
+
+        if(not frame._bg) then
+            -- xRUI
+            frame:SetBackdrop(nil)
+
+            local bg
+            if frame.BackdropFrame then
+                bg = frame.BackdropFrame
             else
-                itemTips[frameName] = true
+                bg = _G.CreateFrame("Frame", nil, frame)
+                bg:SetFrameLevel(frame:GetFrameLevel()-1)
+            end
+            bg:SetPoint("TOPLEFT")
+            bg:SetPoint("BOTTOMRIGHT")
+            Aurora[1].CreateBD(bg)
+            backdrop = bg:GetBackdrop()
+            bg:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
+            bg:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
+            frame._bg = bg
+
+            frame.GetBackdrop = getBackdrop
+            frame.GetBackdropColor = getBackdropColor
+            frame.GetBackdropBorderColor = getBackdropBorderColor
+        end
+        frame:SetScale(cfg.scale)
+
+        if(cfg.colorborderItem and frame.GetItem) then
+            frame.freebtipItem = false
+            local _, item = frame:GetItem()
+            if(item) then
+                local quality = select(3, GetItemInfo(item))
+                if(quality) then
+                    local r, g, b = GetItemQualityColor(quality)
+                    frame:SetBackdropBorderColor(r, g, b)
+                    itemTips[frameName] = nil
+                    frame.freebtipItem = true
+                else
+                    itemTips[frameName] = true
+                end
             end
         end
-    end
 
-    if(not frameName) then return end
-    if(frameName ~= "GameTooltip" and frame.NumLines) then
-        for index=1, frame:NumLines() do
-            if(index==1) then
-                _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipHeaderText)
-            else
-                _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipText)
+        if(not frameName) then return end
+        if(frameName ~= "GameTooltip" and frame.NumLines) then
+            for index=1, frame:NumLines() do
+                if(index==1) then
+                    _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipHeaderText)
+                else
+                    _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipText)
+                end
+                _G[frameName..'TextRight'..index]:SetFontObject(GameTooltipText)
             end
-            _G[frameName..'TextRight'..index]:SetFontObject(GameTooltipText)
         end
-    end
 
-    if(_G[frameName.."MoneyFrame1"]) then
-        _G[frameName.."MoneyFrame1PrefixText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame1SuffixText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame1GoldButtonText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame1SilverButtonText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame1CopperButtonText"]:SetFontObject(GameTooltipText)
-    end
+        if(_G[frameName.."MoneyFrame1"]) then
+            _G[frameName.."MoneyFrame1PrefixText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame1SuffixText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame1GoldButtonText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame1SilverButtonText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame1CopperButtonText"]:SetFontObject(GameTooltipText)
+        end
 
-    if(_G[frameName.."MoneyFrame2"]) then
-        _G[frameName.."MoneyFrame2PrefixText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame2SuffixText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame2GoldButtonText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame2SilverButtonText"]:SetFontObject(GameTooltipText)
-        _G[frameName.."MoneyFrame2CopperButtonText"]:SetFontObject(GameTooltipText)
+        if(_G[frameName.."MoneyFrame2"]) then
+            _G[frameName.."MoneyFrame2PrefixText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame2SuffixText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame2GoldButtonText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame2SilverButtonText"]:SetFontObject(GameTooltipText)
+            _G[frameName.."MoneyFrame2CopperButtonText"]:SetFontObject(GameTooltipText)
+        end
     end
 end
 
@@ -614,10 +634,10 @@ local tooltips = {
     "DropDownList3MenuBackdrop",
 }
 
-local frameload = CreateFrame"Frame"
-frameload:RegisterEvent"PLAYER_LOGIN"
+local frameload = CreateFrame("Frame")
+frameload:RegisterEvent("PLAYER_ENTERING_WORLD")
 frameload:SetScript("OnEvent", function(self)
-    self:UnregisterEvent"PLAYER_LOGIN"
+    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
     for i, tip in ipairs(tooltips) do
         frame = _G[tip]
@@ -632,6 +652,8 @@ frameload:SetScript("OnEvent", function(self)
             end)
         end
     end
+
+    style(GameTooltip)
 end)
 
 local timer = 0.1
