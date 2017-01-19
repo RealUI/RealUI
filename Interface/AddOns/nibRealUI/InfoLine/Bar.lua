@@ -107,7 +107,7 @@ end
 function BlockMixin:OnDragStart(button)
     InfoLine:debug("OnDragStart", self.name, button)
     local dock = InfoLine.frame[self.side]
-    dock:RemoveChatFrame(self)
+    dock:RemoveBlock(self)
 
     local x, y = self:GetCenter();
     x = x - (self:GetWidth()/2);
@@ -130,8 +130,8 @@ function BlockMixin:OnDragStop(button)
         mouseX, mouseY = mouseX / scale, mouseY / scale;
 
         -- DockFrame
-        dock:AddChatFrame(self, dock:GetInsertIndex(self, mouseX, mouseY))
-        dock:UpdateTabs(true)
+        dock:AddBlock(self, dock:GetInsertIndex(self, mouseX, mouseY))
+        dock:UpdateBlocks(true)
     else
         self:RestorePosition()
     end
@@ -215,7 +215,7 @@ function BlockMixin:RestorePosition()
     local blockInfo = InfoLine:GetBlockInfo(self.name, self.dataObj)
 
     local dock = InfoLine.frame[blockInfo.side]
-    dock:AddChatFrame(self, blockInfo.index)
+    dock:AddBlock(self, blockInfo.index)
 end
 
 local function CreateNewBlock(name, dataObj)
@@ -345,11 +345,11 @@ function InfoLine:AddBlock(name, dataObj, blockInfo)
     if blockInfo.side then
         block.side = blockInfo.side
         local dock = self.frame[blockInfo.side]
-        self:debug("AddChatFrame", blockInfo.side, blockInfo.index)
+        self:debug("AddBlock", blockInfo.side, blockInfo.index)
         if blockInfo.index == 1 then
             dock:SetPrimary(block)
         else
-            dock:AddChatFrame(block, blockInfo.index)
+            dock:AddBlock(block, blockInfo.index)
         end
     end
 
@@ -363,7 +363,7 @@ function InfoLine:RemoveBlock(name, dataObj, blockInfo)
     local block = blocksByData[dataObj]
     if blockInfo.side then
         local dock = InfoLine.frame[blockInfo.side]
-        dock:RemoveChatFrame(block)
+        dock:RemoveBlock(block)
     end
 
     block:Hide()
@@ -437,92 +437,92 @@ function DockMixin:OnLoad()
     self.insertHighlight:SetSize(1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
-    self.DOCKED_CHAT_FRAMES = {};
+    self.DOCKED_BLOCKS = {};
     self.isDirty = true;    --You dirty, dirty frame
 end
 
-function DockMixin:GetChatFrames()
-    return self.DOCKED_CHAT_FRAMES;
+function DockMixin:GetBlocks()
+    return self.DOCKED_BLOCKS;
 end
 
-function DockMixin:SetPrimary(chatFrame)
-    self.primary = chatFrame;
+function DockMixin:SetPrimary(block)
+    self.primary = block;
 
-    if ( not self:GetSelectedWindow() ) then
-        self:SelectWindow(chatFrame);
+    if ( not self:GetSelectedBlock() ) then
+        self:SelectBlock(block);
     end
 
-    self:AddChatFrame(chatFrame, 1);
+    self:AddBlock(block, 1);
 end
 
 function DockMixin:OnUpdate()
     --These may fail if we're resizing the WoW client
-    if self:UpdateTabs() then
+    if self:UpdateBlocks() then
         self.leftTab = nil;
         self:SetScript("OnUpdate", nil);
     end
 end
 
-function DockMixin:AddChatFrame(chatFrame, position)
+function DockMixin:AddBlock(block, position)
     if ( not self.primary ) then
         _G.error("Need a primary window before another can be added.");
     end
 
-    if ( self:HasDockedChatFrame(chatFrame) ) then
+    if ( self:HasDockedBlock(block) ) then
         return; --We're already docked...
     end
 
     self.isDirty = true;
-    chatFrame.isDocked = 1;
+    block.isDocked = 1;
 
-    if ( position and position <= #self.DOCKED_CHAT_FRAMES + 1 ) then
-        _G.assert(position ~= 1 or chatFrame == self.primary, position);
-        _G.tinsert(self.DOCKED_CHAT_FRAMES, position, chatFrame);
+    if ( position and position <= #self.DOCKED_BLOCKS + 1 ) then
+        _G.assert(position ~= 1 or block == self.primary, position);
+        _G.tinsert(self.DOCKED_BLOCKS, position, block);
     else
-        _G.tinsert(self.DOCKED_CHAT_FRAMES, chatFrame);
+        _G.tinsert(self.DOCKED_BLOCKS, block);
     end
 
     self:HideInsertHighlight();
 
-    if ( self.primary ~= chatFrame ) then
-        chatFrame:ClearAllPoints();
-        chatFrame:SetMovable(false);
-        chatFrame:SetResizable(false);
+    if ( self.primary ~= block ) then
+        block:ClearAllPoints();
+        block:SetMovable(false);
+        block:SetResizable(false);
     end
 
-    self:UpdateTabs();
+    self:UpdateBlocks();
 end
 
-function DockMixin:RemoveChatFrame(chatFrame)
-    _G.assert(chatFrame ~= self.primary or #self.DOCKED_CHAT_FRAMES == 1);
+function DockMixin:RemoveBlock(block)
+    _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1);
     self.isDirty = true;
-    _G.tDeleteItem(self.DOCKED_CHAT_FRAMES, chatFrame);
-    chatFrame.isDocked = nil;
-    chatFrame:SetMovable(true);
-    if ( self:GetSelectedWindow() == chatFrame ) then
-        self:SelectWindow(self.DOCKED_CHAT_FRAMES[1]);
+    _G.tDeleteItem(self.DOCKED_BLOCKS, block);
+    block.isDocked = nil;
+    block:SetMovable(true);
+    if ( self:GetSelectedBlock() == block ) then
+        self:SelectBlock(self.DOCKED_BLOCKS[1]);
     end
 
-    chatFrame:Show();
-    self:UpdateTabs();
+    block:Show();
+    self:UpdateBlocks();
 end
 
-function DockMixin:HasDockedChatFrame(chatFrame)
-    return _G.tContains(self.DOCKED_CHAT_FRAMES, chatFrame);
+function DockMixin:HasDockedBlock(block)
+    return _G.tContains(self.DOCKED_BLOCKS, block);
 end
 
-function DockMixin:SelectWindow(chatFrame)
-    _G.assert(chatFrame)
+function DockMixin:SelectBlock(block)
+    _G.assert(block)
     self.isDirty = true;
-    self.selected = chatFrame;
-    self:UpdateTabs();
+    self.selected = block;
+    self:UpdateBlocks();
 end
 
-function DockMixin:GetSelectedWindow()
+function DockMixin:GetSelectedBlock()
     return self.selected;
 end
 
-function DockMixin:UpdateTabs(forceUpdate)
+function DockMixin:UpdateBlocks(forceUpdate)
     if ( not self.isDirty and not forceUpdate ) then
         --No changes have been made since the last update.
         return;
@@ -530,16 +530,16 @@ function DockMixin:UpdateTabs(forceUpdate)
 
     local lastBlock = nil;
 
-    for index, chatFrame in ipairs(self.DOCKED_CHAT_FRAMES) do
-        chatFrame:Show();
+    for index, block in ipairs(self.DOCKED_BLOCKS) do
+        block:Show();
 
         if ( lastBlock ) then
             local xOfs = self.side == "left" and db.blockGap or -db.blockGap
-            chatFrame:SetPoint(self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
+            block:SetPoint(self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
         else
-            chatFrame:SetPoint(self.anchor);
+            block:SetPoint(self.anchor);
         end
-        lastBlock = chatFrame
+        lastBlock = block
     end
 
     self.isDirty = false;
@@ -547,9 +547,9 @@ function DockMixin:UpdateTabs(forceUpdate)
     return true
 end
 
-function DockMixin:GetInsertIndex(chatFrame, mouseX, mouseY)
+function DockMixin:GetInsertIndex(block, mouseX, mouseY)
     local maxPosition = 0;
-    for index, value in ipairs(self.DOCKED_CHAT_FRAMES) do
+    for index, value in ipairs(self.DOCKED_BLOCKS) do
         if self.side == "left" then
             if mouseX < (value:GetLeft() + value:GetRight()) / 2 and  --Find the first tab we're on the left of. (Being on top of the tab, but left of the center counts)
                 value ~= self.primary then   --We never count as being to the left of the primary tab.
@@ -567,12 +567,12 @@ function DockMixin:GetInsertIndex(chatFrame, mouseX, mouseY)
     return maxPosition + 1;
 end
 
-function DockMixin:PlaceInsertHighlight(chatFrame, mouseX, mouseY)
-    local insert = self:GetInsertIndex(chatFrame, mouseX, mouseY);
+function DockMixin:PlaceInsertHighlight(block, mouseX, mouseY)
+    local insert = self:GetInsertIndex(block, mouseX, mouseY);
 
     local attachFrame = self.primary;
 
-    for index, value in ipairs(self.DOCKED_CHAT_FRAMES) do
+    for index, value in ipairs(self.DOCKED_BLOCKS) do
         if ( index < insert ) then
             attachFrame = value;
         end
@@ -667,7 +667,7 @@ end
 
 function InfoLine:Unlock()
     local left = self.frame.left
-    for i, block in next, left.DOCKED_CHAT_FRAMES do
+    for i, block in next, left.DOCKED_BLOCKS do
         if i > 1 then
             block:RegisterForDrag("LeftButton")
             block.bg:Show()
@@ -675,7 +675,7 @@ function InfoLine:Unlock()
     end
 
     local right = self.frame.right
-    for i, block in next, right.DOCKED_CHAT_FRAMES do
+    for i, block in next, right.DOCKED_BLOCKS do
         if i > 1 then
             block:RegisterForDrag("LeftButton")
             block.bg:Show()
@@ -686,13 +686,13 @@ function InfoLine:Unlock()
 end
 function InfoLine:Lock()
     local left = self.frame.left
-    for i, block in next, left.DOCKED_CHAT_FRAMES do
+    for i, block in next, left.DOCKED_BLOCKS do
         block:RegisterForDrag()
         block.bg:Hide()
     end
 
     local right = self.frame.right
-    for i, block in next, right.DOCKED_CHAT_FRAMES do
+    for i, block in next, right.DOCKED_BLOCKS do
         block:RegisterForDrag()
         block.bg:Hide()
     end
@@ -700,8 +700,8 @@ function InfoLine:Lock()
     self.locked = true
 end
 function InfoLine:UpdatePositions()
-    self.frame.left:UpdateTabs(true)
-    self.frame.right:UpdateTabs(true)
+    self.frame.left:UpdateBlocks(true)
+    self.frame.right:UpdateBlocks(true)
 end
 
 function InfoLine:GetBlockInfo(name, dataObj)
