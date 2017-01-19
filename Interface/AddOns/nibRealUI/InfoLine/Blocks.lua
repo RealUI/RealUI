@@ -1287,8 +1287,6 @@ function InfoLine:CreateBlocks()
                 local lineNum, colNum
 
                 lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetHeaderFont(headerFont.object)
-                tooltip:SetFont(textFont.object)
                 tooltip:SetCell(lineNum, colNum, _G.DURABILITY, nil, 2)
 
                 for slotID = 1, #itemSlots do
@@ -1673,8 +1671,6 @@ function InfoLine:CreateBlocks()
                 local lineNum, colNum
 
                 lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetHeaderFont(headerFont.object)
-                tooltip:SetFont(textFont.object)
                 tooltip:SetCell(lineNum, colNum, L["Progress"], nil, nil, 2)
 
                 watchStates[dbc.progressState]:SetTooltip(tooltip)
@@ -1741,8 +1737,6 @@ function InfoLine:CreateBlocks()
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
 
-                tooltip:SetHeaderFont(headerFont.object)
-                tooltip:SetFont(textFont.object)
                 local send1, send2, send3 = _G.GetLatestThreeSenders()
                 if (send1 or send2 or send3) then
                     tooltip:AddHeader(_G.HAVE_MAIL_FROM)
@@ -2146,8 +2140,7 @@ function InfoLine:CreateBlocks()
         local tinsert, tremove = _G.tinsert, _G.tremove
 
         local blockText = "%d |cff%s|||r %d"
-        local lagFormat = "    %s |cff808080(%s)|r"
-        local indent = "    "
+        local lagFormat = "%s |cff808080(%s)|r"
 
         local period = 5
         local fpsElapsed, fpsCount = 0, 0
@@ -2183,12 +2176,10 @@ function InfoLine:CreateBlocks()
                 SetupTooltip(tooltip, block)
                 local lineNum--, colNum
 
-                tooltip:SetHeaderFont(headerFont.object)
-                tooltip:SetFont(textFont.object)
                 tooltip:AddHeader(_G.NETWORK_LABEL)
 
                 local color = RealUI.media.colors.orange
-                lineNum = tooltip:AddLine(indent..L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
                 tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
                 tooltip:AddLine(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
                 tooltip:AddLine(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
@@ -2196,9 +2187,9 @@ function InfoLine:CreateBlocks()
                 tooltip:AddLine(" ")
 
                 tooltip:AddHeader(_G.SYSTEMOPTIONS_MENU)
-                lineNum = tooltip:AddLine(indent..L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
                 tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
-                tooltip:AddLine(indent.._G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
+                tooltip:AddLine(_G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
 
                 tooltip:Show()
             end,
