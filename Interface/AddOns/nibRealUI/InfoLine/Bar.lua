@@ -228,7 +228,7 @@ local function CreateNewBlock(name, dataObj)
     local width, space = 0, RealUI.ModValue(2)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
-    bg:SetColorTexture(1, 1, 1, 0.5)
+    bg:SetColorTexture(1, 1, 1, 0.25)
     bg:SetAllPoints(block)
     bg:Hide()
     block.bg = bg
@@ -435,7 +435,7 @@ function DockMixin:OnLoad()
 
     self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
     self.insertHighlight:SetSize(1, BAR_HEIGHT)
-    self.insertHighlight:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    self.insertHighlight:SetColorTexture(1, 1, 1)
 
     self.DOCKED_CHAT_FRAMES = {};
     self.isDirty = true;    --You dirty, dirty frame
