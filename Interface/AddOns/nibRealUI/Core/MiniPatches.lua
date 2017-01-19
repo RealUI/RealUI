@@ -205,7 +205,7 @@ RealUI.minipatches = {
         -- Reset to default
         for key, char in next, RealUINamespace.InfoLine.char do
             char.xrstate = nil
-            if char.specgear.primary then
+            if char.specgear and char.specgear.primary then
                 char.specgear = nil
             end
         end
