@@ -1,3 +1,9 @@
+Invoke-Expression -Command "luacheck Interface"
+Write-Host "Exit code: $LASTEXITCODE"
+if (!!$LASTEXITCODE) {
+    exit $LASTEXITCODE
+}
+
 $oldVersion = Get-Content "./version.txt"
 $newVersion = Read-Host "Enter new version, or leave blank to use current version."
 $addons = @(
