@@ -724,7 +724,7 @@ end
 --------------------
 function InfoLine:OnInitialize()
     local specgear = {}
-    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+    for specIndex = 1, RealUI.numSpecs do
         specgear[specIndex] = -1
     end
     self.db = RealUI.db:RegisterNamespace(MODNAME)
@@ -791,14 +791,19 @@ function InfoLine:OnInitialize()
                         index = 3,
                         enabled = true
                     },
-                    currency = {
+                    spec = {
                         side = "right",
                         index = 4,
                         enabled = true
                     },
-                    netstats = {
+                    currency = {
                         side = "right",
                         index = 5,
+                        enabled = true
+                    },
+                    netstats = {
+                        side = "right",
+                        index = 6,
                         enabled = true
                     },
                 },

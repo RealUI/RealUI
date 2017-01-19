@@ -525,6 +525,7 @@ end
 
 function InfoLine:CreateBlocks()
     local dbc = InfoLine.db.char
+    local ndbc = RealUI.db.char
 
     --[[ Static Blocks ]]--
     do  -- Start
@@ -1810,7 +1811,141 @@ function InfoLine:CreateBlocks()
         })
     end
 
-    -- Specialization
+    do -- Specialization
+        local specInfo, currentSpecIndex = {}
+        for specIndex = 1, RealUI.numSpecs do
+            local _, name, _, icon = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+            specInfo[specIndex] = {
+                name = name,
+                icon = icon,
+            }
+        end
+        local equipSetsByIndex, equipSetsByID = {}, {}
+        local layout = {
+            L["Layout_DPSTank"],
+            L["Layout_Healing"]
+        }
+
+        local equipmentNeedsUpdate = false
+        local function Line_OnMouseUp(line, specIndex, button)
+            if button == "LeftButton" then
+                if not _G.InCombatLockdown() then
+                    if specIndex == currentSpecIndex then
+                        if dbc.specgear[specIndex] >= 0 then
+                            _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
+                        end
+                    else
+                        _G.SetSpecialization(specIndex)
+                        equipmentNeedsUpdate = equipSetsByID[dbc.specgear[specIndex]].name
+                    end
+                end
+            elseif button == "RightButton" then
+                local tooltip = line:GetParent():GetParent():GetParent()
+                if _G.IsAltKeyDown() then
+                    dbc.specgear[specIndex] = -1
+                    tooltip:SetCell(specInfo[specIndex].line, 2, "---")
+                else
+                    local numEquipSets = _G.GetNumEquipmentSets()
+                    if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then
+                        dbc.specgear[specIndex] = equipSetsByIndex[1].id
+                    else
+                        for equipIndex = equipSetsByID[dbc.specgear[specIndex]].index, numEquipSets do
+                            if dbc.specgear[specIndex] ~= equipSetsByIndex[equipIndex].id then
+                                dbc.specgear[specIndex] = equipSetsByIndex[equipIndex].id
+                                break
+                            end
+                        end
+                    end
+                    tooltip:SetCell(specInfo[specIndex].line, 2, equipSetsByID[dbc.specgear[specIndex]].name)
+                end
+            end
+        end
+
+        local function UpdateGearSets()
+            _G.wipe(equipSetsByIndex)
+            _G.wipe(equipSetsByID)
+            local numEquipSets = _G.GetNumEquipmentSets()
+            if numEquipSets > 0 then
+                for index = 1, numEquipSets do
+                    local equipName, _, equipID = _G.GetEquipmentSetInfo(index)
+                    equipSetsByIndex[index] = {
+                        name = equipName,
+                        id = equipID
+                    }
+                    equipSetsByID[equipID] = {
+                        name = equipName,
+                        index = index
+                    }
+                end
+            end
+        end
+        local function UpdateBlock(block)
+            currentSpecIndex = _G.GetSpecialization()
+            block.dataObj.icon = specInfo[currentSpecIndex].icon
+            block.dataObj.text = specInfo[currentSpecIndex].name
+        end
+
+        LDB:NewDataObject("spec", {
+            name = _G.SPECIALIZATION,
+            type = "RealUI",
+            icon = specInfo[1].icon,
+            iconCoords = {.08, .92, .08, .92},
+            text = "",
+            OnEnable = function(block)
+                InfoLine:debug("spec: OnEnable", block.side)
+                UpdateGearSets()
+                UpdateBlock(block)
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                --InfoLine:debug("spec: OnEnter", block.side, ...)
+
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "LEFT", "LEFT")
+                SetupTooltip(tooltip, block)
+                local lineNum, colNum
+
+                lineNum, colNum = tooltip:AddHeader()
+                tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
+                for specIndex = 1, RealUI.numSpecs do
+                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]].name or "---"
+                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet, layout[ndbc.layout.spec[specIndex]])
+                    tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
+                    specInfo[specIndex].line = lineNum
+                    if specIndex == currentSpecIndex then
+                        tooltip:SetLineTextColor(lineNum, _G.unpack(RealUI.media.colors.orange))
+                    end
+                end
+
+                tooltip:AddLine(" ")
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, 3)
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, L["Spec_ChangeSpec"], nil, 3)
+                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                InfoLine:debug("spec: OnEvent", block.side, event, ...)
+                if event == "EQUIPMENT_SETS_CHANGED" then
+                    UpdateGearSets()
+                elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
+                    UpdateBlock(block)
+                    if equipmentNeedsUpdate then
+                        _G.EquipmentManager_EquipSet(equipmentNeedsUpdate)
+                        equipmentNeedsUpdate = false
+                    end
+                end
+            end,
+            events = {
+                "ACTIVE_TALENT_GROUP_CHANGED",
+                "EQUIPMENT_SETS_CHANGED",
+                "EQUIPMENT_SWAP_FINISHED",
+                "PLAYER_EQUIPMENT_CHANGED",
+            },
+        })
+    end
 
     do -- Currency
         local GOLD_AMOUNT_STRING = "%s|cfffff226%s|r"
