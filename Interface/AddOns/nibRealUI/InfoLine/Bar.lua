@@ -699,6 +699,10 @@ function InfoLine:Lock()
 
     self.locked = true
 end
+function InfoLine:UpdatePositions()
+    self.frame.left:UpdateTabs(true)
+    self.frame.right:UpdateTabs(true)
+end
 
 function InfoLine:GetBlockInfo(name, dataObj)
     if not name and dataObj then
