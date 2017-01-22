@@ -238,9 +238,13 @@ local function SellJunk()
             item = cbNivaya:GetItem(BagID, BagSlot)
             if item then
                 if item.rarity == 0 and item.sellPrice ~= 0 then
-                    profit = profit + (item.sellPrice * item.count)
-                    soldCount = soldCount + 1
-                    _G.UseContainerItem(BagID, BagSlot)
+                    if not item.count then
+                        _G.print("Item has no count", item.name, item.id)
+                    else
+                        profit = profit + (item.sellPrice * item.count)
+                        soldCount = soldCount + 1
+                        _G.UseContainerItem(BagID, BagSlot)
+                    end
                 end
             end
         end
