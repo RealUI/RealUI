@@ -212,14 +212,13 @@ function RealUI:ToggleGridTestMode(show)
     if show then
         if _G.RealUIGridConfiguring then return end
         if not _G.Grid2Options then _G.Grid2:LoadGrid2Options() end
-        _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group 20")
-        _G.RealUIGridConfiguring = true
+        _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group", nil, nil, 20)
     else
-        _G.RealUIGridConfiguring = false
         if _G.Grid2Options then
-            _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
+            _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
         end
     end
+    return _G.RealUIGridConfiguring
 end
 
 -- Move HuD Up if using a Low Resolution display

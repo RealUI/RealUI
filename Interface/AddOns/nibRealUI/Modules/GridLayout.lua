@@ -73,10 +73,10 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
         local HasPet = _G.UnitExists("pet") or _G.UnitExists("partypet1") or _G.UnitExists("partypet2") or _G.UnitExists("partypet3") or _G.UnitExists("partypet4")
         if HasPet and LayoutDB.showPet then
             self:debug("Show pets")
-            NewLayout = "Party w/Pets"
+            NewLayout = "By Group w/Pets"
         else
             self:debug("Don't show pets")
-            NewLayout = "Party"
+            NewLayout = "By Group"
         end
     -- Raid
     elseif (groupType == "raid") then
