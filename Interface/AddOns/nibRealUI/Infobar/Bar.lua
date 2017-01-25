@@ -337,6 +337,7 @@ function Infobar:AddBlock(name, dataObj, blockInfo)
 
     if dataObj.events then
         block:SetScript("OnEvent", block.OnEvent)
+        block:RegisterEvent("PLAYER_ENTERING_WORLD")
         for i = 1, #dataObj.events do
             block:RegisterEvent(dataObj.events[i])
         end

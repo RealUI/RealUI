@@ -783,7 +783,6 @@ function Infobar:CreateBlocks()
             end,
             events = {
                 "CALENDAR_UPDATE_EVENT_LIST",
-                "PLAYER_ENTERING_WORLD",
             },
         })
     end
@@ -1352,7 +1351,6 @@ function Infobar:CreateBlocks()
             events = {
                 "UPDATE_INVENTORY_DURABILITY",
                 "PLAYER_EQUIPMENT_CHANGED",
-                "PLAYER_ENTERING_WORLD",
             },
         })
     end
@@ -1709,7 +1707,6 @@ function Infobar:CreateBlocks()
                 UpdateProgress(block)
             end,
             events = {
-                "PLAYER_ENTERING_WORLD",
                 "PLAYER_LEVEL_UP",
                 "UPDATE_EXHAUSTION",
 
@@ -1766,7 +1763,6 @@ function Infobar:CreateBlocks()
                 end
             end,
             events = {
-                "PLAYER_ENTERING_WORLD",
                 "UPDATE_PENDING_MAIL",
                 "MAIL_INBOX_UPDATE",
             },
@@ -2264,8 +2260,6 @@ function Infobar:CreateBlocks()
                 UpdateBlock(block)
             end,
             events = {
-                "PLAYER_ENTERING_WORLD",
-
                 "CURRENCY_DISPLAY_UPDATE",
                 "PLAYER_MONEY",
             },
