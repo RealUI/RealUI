@@ -20,10 +20,13 @@ local BlizzAddons = {
     "Blizzard_ObjectiveTracker",
     "Blizzard_WowTokenUI",
     "Blizzard_NamePlates",
+    "Blizzard_SecureTransferUI",
+    "Blizzard_Deprecated",
 
     -- LoD
     "Blizzard_AchievementUI",
     "Blizzard_AdventureMap",
+    "Blizzard_APIDocumentation",
     "Blizzard_ArchaeologyUI",
     "Blizzard_ArenaUI",
     "Blizzard_ArtifactUI",
@@ -39,6 +42,7 @@ local BlizzAddons = {
     "Blizzard_Collections",
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
+    "Blizzard_Contribution",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
     "Blizzard_EncounterJournal",
@@ -96,6 +100,8 @@ local function profileTest(skip)
     _G.print("format", _, _G.debugprofilestop() - start)
 end
 
+local oldIsTestBuild = _G.IsTestBuild
+local function newIsTestBuild() return false end
 local taintCheck = {
     WorldMap_UpdateQuestBonusObjectives = false,
     WorldMapFrame = false,
@@ -127,6 +133,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
 
         if addonName:match("Blizzard") or addonName:match("RealUI") then
             debug("Loaded:", addonName)
+        end
+
+        if addonName == "Blizzard_SecureTransferUI" then
+            _G.IsTestBuild = newIsTestBuild
+        elseif _G.IsTestBuild == newIsTestBuild then
+            _G.IsTestBuild = oldIsTestBuild
         end
     elseif not seenEvent[event] then
         debug(event)
