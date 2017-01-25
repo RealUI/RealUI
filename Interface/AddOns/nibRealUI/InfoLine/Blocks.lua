@@ -1639,9 +1639,9 @@ function InfoLine:CreateBlocks()
                     UpdateState(block)
                 end
 
-                artData:RegisterCallback("ARTIFACT_POWER_CHANGED", block.OnEvent, block)
-                artData:RegisterCallback("ARTIFACT_ACTIVE_CHANGED", block.OnEvent, block)
-                artData:RegisterCallback("ARTIFACT_EQUIPPED_CHANGED", block.OnEvent, block)
+                artData.RegisterCallback(block, "ARTIFACT_POWER_CHANGED", block.OnEvent)
+                artData.RegisterCallback(block, "ARTIFACT_ACTIVE_CHANGED", block.OnEvent)
+                artData.RegisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED", block.OnEvent)
             end,
             OnDisable = function(block)
                 InfoLine:debug("progress: OnDisable", block.side)
@@ -1651,9 +1651,9 @@ function InfoLine:CreateBlocks()
                 watch[2]:Hide()
 
                 block:UnregisterAllEvents()
-                artData:UnregisterCallback("ARTIFACT_POWER_CHANGED")
-                artData:UnregisterCallback("ARTIFACT_ACTIVE_CHANGED")
-                artData:UnregisterCallback("ARTIFACT_EQUIPPED_CHANGED")
+                artData.UnregisterCallback(block, "ARTIFACT_POWER_CHANGED")
+                artData.UnregisterCallback(block, "ARTIFACT_ACTIVE_CHANGED")
+                artData.UnregisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED")
             end,
             OnClick = function(block, ...)
                 InfoLine:debug("progress: OnClick", block.side, ...)
