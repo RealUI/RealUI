@@ -15,8 +15,8 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Misc\StopAddonSpam.lua"/>
 
     <!-- Modules -->
-    <Script file="InfoLine\Bar.lua"/>
-    <Script file="InfoLine\Blocks.lua"/>
+    <Script file="Infobar\Bar.lua"/>
+    <Script file="Infobar\Blocks.lua"/>
     <Script file="Modules\ActionBars.lua"/>
     <Script file="Modules\AddonListAdv.lua"/>
     <Script file="Modules\AlertFrameMove.lua"/>

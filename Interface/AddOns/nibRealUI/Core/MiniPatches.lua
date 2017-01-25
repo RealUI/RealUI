@@ -202,14 +202,6 @@ RealUI.minipatches = {
         RealUINamespace.ClassResource_Stagger = nil
         RealUINamespace.Pitch = nil
 
-        -- Reset to default
-        for key, char in next, RealUINamespace.InfoLine.char do
-            char.xrstate = nil
-            if char.specgear and char.specgear.primary then
-                char.specgear = nil
-            end
-        end
-
         -- Consolidate currency DBs
         local currency = RealUINamespace.CurrencyTip.global.currency
         for realmName, realm in next, RealUINamespace.InfoLine.global.currency do
@@ -223,7 +215,7 @@ RealUI.minipatches = {
             end
         end
         RealUINamespace.CurrencyTip = nil
-        RealUINamespace.InfoLine.global = nil
+        RealUINamespace.InfoLine = nil
 
         -- Clean and transfer currency DB to _G.nibRealUIDB.global
         for realmName, realm in next, currency do

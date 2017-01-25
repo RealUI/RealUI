@@ -12,10 +12,10 @@ local qTip = _G.LibStub("LibQTip-1.0")
 local RealUI = private.RealUI
 local db
 
-local MODNAME = "InfoLine"
-local InfoLine = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
-InfoLine.LDB = LDB
-InfoLine.locked = true
+local MODNAME = "Infobar"
+local Infobar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+Infobar.LDB = LDB
+Infobar.locked = true
 
 local MOVING_BLOCK
 local blocksByData = {}
@@ -34,21 +34,21 @@ end
 -- Block Management --
 ----------------------
 local function PrepareTooltip(tooltip, block)
-    InfoLine:debug("PrepareTooltip", tooltip, block and block.name)
+    Infobar:debug("PrepareTooltip", tooltip, block and block.name)
     if tooltip and block then
         tooltip:ClearAllPoints()
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
         end
         local anchor = block.side:upper()
-        InfoLine:debug("SetPoint", anchor)
+        Infobar:debug("SetPoint", anchor)
         tooltip:SetPoint(("BOTTOM"..anchor), block, ("TOP"..anchor))
     end
 end
 
 local BlockMixin = {}
 function BlockMixin:OnEnter()
-    --InfoLine:debug("OnEnter", self.name)
+    --Infobar:debug("OnEnter", self.name)
     --self.highlight:Show()
 
     if (not db.combatTips and _G.InCombatLockdown()) then return end
@@ -77,7 +77,7 @@ function BlockMixin:OnEnter()
 end
 
 function BlockMixin:OnLeave()
-    InfoLine:debug("OnLeave", self.name)
+    Infobar:debug("OnLeave", self.name)
     --self.highlight:Hide()
 
     if (not db.combatTips and _G.UnitAffectingCombat("player")) then return end
@@ -97,16 +97,16 @@ function BlockMixin:OnLeave()
 end
 
 function BlockMixin:OnClick(...)
-    InfoLine:debug("OnClick", self.name, ...)
+    Infobar:debug("OnClick", self.name, ...)
     if self.dataObj.OnClick and not _G.InCombatLockdown() then
-        InfoLine:debug("Send OnClick")
+        Infobar:debug("Send OnClick")
         self.dataObj.OnClick(self, ...)
     end
 end
 
 function BlockMixin:OnDragStart(button)
-    InfoLine:debug("OnDragStart", self.name, button)
-    local dock = InfoLine.frame[self.side]
+    Infobar:debug("OnDragStart", self.name, button)
+    local dock = Infobar.frame[self.side]
     dock:RemoveBlock(self)
 
     local x, y = self:GetCenter();
@@ -119,10 +119,10 @@ function BlockMixin:OnDragStart(button)
 end
 
 function BlockMixin:OnDragStop(button)
-    InfoLine:debug("OnDragStart", self.name, button)
+    Infobar:debug("OnDragStart", self.name, button)
     self:StopMovingOrSizing()
 
-    local dock = InfoLine.frame[self.side]
+    local dock = Infobar.frame[self.side]
     dock:HideInsertHighlight()
 
     if ( dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) ) then
@@ -142,7 +142,7 @@ function BlockMixin:OnDragStop(button)
 end
 
 function BlockMixin:OnEvent(event, ...)
-    InfoLine:debug("OnEvent", self.name, event, ...)
+    Infobar:debug("OnEvent", self.name, event, ...)
     self.dataObj.OnEvent(self, event, ...)
 
     -- Update the tooltip
@@ -153,14 +153,14 @@ function BlockMixin:OnEvent(event, ...)
 end
 
 function BlockMixin:OnUpdate(elapsed)
-    --InfoLine:debug("OnUpdate", self.name, elapsed)
+    --Infobar:debug("OnUpdate", self.name, elapsed)
     if self.dataObj.OnUpdate then
         self.dataObj.OnUpdate(self, elapsed)
     end
 
     if self.checkWidth and self.icon.isFont then
         local width = self.icon:GetStringWidth()
-        InfoLine:debug(self.name, "OnUpdate", width)
+        Infobar:debug(self.name, "OnUpdate", width)
         if width > 1 then
             self:SetWidth(self:GetWidth() + width)
             self.checkWidth = nil
@@ -170,7 +170,7 @@ function BlockMixin:OnUpdate(elapsed)
     if self == MOVING_BLOCK then
         local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition();
         cursorX, cursorY = cursorX / scale, cursorY / scale;
-        local dock = InfoLine.frame[self.side]
+        local dock = Infobar.frame[self.side]
         if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
             dock:PlaceInsertHighlight(self, cursorX, cursorY);
         else
@@ -205,23 +205,23 @@ function BlockMixin:UpdateButtonSide()
 end
 
 function BlockMixin:SavePosition()
-    local blockInfo = InfoLine:GetBlockInfo(self.name, self.dataObj)
+    local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
     blockInfo.side = self.side
     blockInfo.index = self.index
 end
 
 function BlockMixin:RestorePosition()
-    local blockInfo = InfoLine:GetBlockInfo(self.name, self.dataObj)
+    local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
-    local dock = InfoLine.frame[blockInfo.side]
+    local dock = Infobar.frame[blockInfo.side]
     dock:AddBlock(self, blockInfo.index)
 end
 
 local function CreateNewBlock(name, dataObj)
-    InfoLine:debug("CreateNewBlock", name, dataObj)
-    local block = _G.Mixin(_G.CreateFrame("Button", nil, InfoLine.frame), BlockMixin)
-    block:SetFrameLevel(InfoLine.frame:GetFrameLevel() + 2)
+    Infobar:debug("CreateNewBlock", name, dataObj)
+    local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
+    block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
@@ -246,7 +246,7 @@ local function CreateNewBlock(name, dataObj)
     end
     block.text = text
     width = width + text:GetStringWidth()
-    InfoLine:debug("text", width)
+    Infobar:debug("text", width)
 
 
     if db.showIcon and dataObj.icon then
@@ -277,7 +277,7 @@ local function CreateNewBlock(name, dataObj)
 
         block.icon = icon
         width = width + iconWidth
-        InfoLine:debug("icon", width)
+        Infobar:debug("icon", width)
     end
 
     if db.showLabel then
@@ -293,7 +293,7 @@ local function CreateNewBlock(name, dataObj)
 
         block.label = label
         width = width + label:GetStringWidth()
-        InfoLine:debug("label", dataObj.label, width)
+        Infobar:debug("label", dataObj.label, width)
     end
 
     local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
@@ -322,14 +322,14 @@ local function CreateNewBlock(name, dataObj)
         width = width + space
     end
 
-    InfoLine:debug("SetSize", width, BAR_HEIGHT)
+    Infobar:debug("SetSize", width, BAR_HEIGHT)
     block:SetSize(width, BAR_HEIGHT)
     block:SetClampedToScreen(true)
     return block
 end
 
-function InfoLine:AddBlock(name, dataObj, blockInfo)
-    self:debug("InfoLine:AddBlock", name, blockInfo.side, blockInfo.index)
+function Infobar:AddBlock(name, dataObj, blockInfo)
+    self:debug("Infobar:AddBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if not block then
         block = CreateNewBlock(name, dataObj)
@@ -358,11 +358,11 @@ function InfoLine:AddBlock(name, dataObj, blockInfo)
     end
 end
 
-function InfoLine:RemoveBlock(name, dataObj, blockInfo)
-    self:debug("InfoLine:RemoveBlock", name, blockInfo.side, blockInfo.index)
+function Infobar:RemoveBlock(name, dataObj, blockInfo)
+    self:debug("Infobar:RemoveBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if blockInfo.side then
-        local dock = InfoLine.frame[blockInfo.side]
+        local dock = Infobar.frame[blockInfo.side]
         dock:RemoveBlock(block)
     end
 
@@ -372,14 +372,14 @@ function InfoLine:RemoveBlock(name, dataObj, blockInfo)
     end
 end
 
-function InfoLine:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
+function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
     --self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
     local blockInfo = self:GetBlockInfo(name, dataObj)
     if blockInfo and blockInfo.enabled then
         self:AddBlock(name, dataObj, blockInfo)
     end
 end
-function InfoLine:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
+function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
     --self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
     local block = blocksByData[dataObj]
     if block then
@@ -431,7 +431,7 @@ function DockMixin:OnLoad()
     self.anchor = "BOTTOM" .. self.side:upper()
     self.anchorAlt = "BOTTOM" .. self.alt:upper()
     self:SetPoint(self.anchor)
-    self:SetPoint(self.anchorAlt, InfoLine.frame, "BOTTOM")
+    self:SetPoint(self.anchorAlt, Infobar.frame, "BOTTOM")
 
     self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
     self.insertHighlight:SetSize(1, BAR_HEIGHT)
@@ -590,8 +590,8 @@ end
 --------------------
 -- Bar Management --
 --------------------
-function InfoLine:CreateBar()
-    local frame = _G.CreateFrame("Frame", "RealUI_InfoLine", _G.UIParent)
+function Infobar:CreateBar()
+    local frame = _G.CreateFrame("Frame", "RealUI_Infobar", _G.UIParent)
     frame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
     frame:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
     frame:SetHeight(BAR_HEIGHT)
@@ -665,7 +665,7 @@ function InfoLine:CreateBar()
     self.frame = frame
 end
 
-function InfoLine:Unlock()
+function Infobar:Unlock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_BLOCKS do
         if i > 1 then
@@ -684,7 +684,7 @@ function InfoLine:Unlock()
 
     self.locked = false
 end
-function InfoLine:Lock()
+function Infobar:Lock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_BLOCKS do
         block:RegisterForDrag()
@@ -699,18 +699,18 @@ function InfoLine:Lock()
 
     self.locked = true
 end
-function InfoLine:UpdatePositions()
+function Infobar:UpdatePositions()
     self.frame.left:UpdateBlocks(true)
     self.frame.right:UpdateBlocks(true)
 end
 
-function InfoLine:GetBlockInfo(name, dataObj)
+function Infobar:GetBlockInfo(name, dataObj)
     if not name and dataObj then
         name = LDB:GetNameByDataObject(dataObj)
     elseif name and not dataObj then
         dataObj = LDB:GetDataObjectByName(name)
     end
-    _G.assert(_G.type(name) == "string" and _G.type(dataObj) == "table", "Usage: InfoLine:GetBlockInfo(\"dataobjectname\")")
+    _G.assert(_G.type(name) == "string" and _G.type(dataObj) == "table", "Usage: Infobar:GetBlockInfo(\"dataobjectname\")")
 
     if dataObj.type == "RealUI" then
         self:debug("RealUI object")
@@ -726,7 +726,7 @@ end
 --------------------
 -- Initialization --
 --------------------
-function InfoLine:OnInitialize()
+function Infobar:OnInitialize()
     local specgear = {}
     for specIndex = 1, RealUI.numSpecs do
         specgear[specIndex] = -1
@@ -826,7 +826,7 @@ function InfoLine:OnInitialize()
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
-function InfoLine:OnEnable()
+function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
 

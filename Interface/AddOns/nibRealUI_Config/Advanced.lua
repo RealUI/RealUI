@@ -56,17 +56,17 @@ end
 local core do
     debug("Adv Core")
     local infoLine do
-        local MODNAME = "InfoLine"
-        local InfoLine = RealUI:GetModule(MODNAME)
-        local db = InfoLine.db.profile
+        local MODNAME = "Infobar"
+        local Infobar = RealUI:GetModule(MODNAME)
+        local db = Infobar.db.profile
         infoLine = {
-            name = L["InfoLine"],
+            name = L["Infobar"],
             desc = "Information / Button display.",
             type = "group",
             childGroups = "tab",
             args = {
                 header = {
-                    name = L["InfoLine"],
+                    name = L["Infobar"],
                     type = "header",
                     order = 10,
                 },
@@ -80,12 +80,12 @@ local core do
                     name = L["General_Lock"],
                     desc = L["General_LockDesc"],
                     type = "toggle",
-                    get = function() return InfoLine.locked end,
+                    get = function() return Infobar.locked end,
                     set = function(info, value)
                         if value then
-                            InfoLine:Lock()
+                            Infobar:Lock()
                         else
-                            InfoLine:Unlock()
+                            Infobar:Unlock()
                         end
                     end,
                     order = 30,
@@ -132,7 +132,7 @@ local core do
                     set = function(info, value)
                         value = RealUI:ValidateOffset(value)
                         db.blockGap = value
-                        InfoLine:UpdatePositions()
+                        Infobar:UpdatePositions()
                     end,
                     order = 70,
                 },
@@ -146,12 +146,12 @@ local core do
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
             args = {
                 gap1 = {
-                    name = L["InfoLine_Left"],
+                    name = L["Infobar_Left"],
                     type = "header",
                     order = 0,
                 },
                 gap2 = {
-                    name = L["InfoLine_Right"],
+                    name = L["Infobar_Right"],
                     type = "header",
                     order = 50,
                 },
@@ -164,18 +164,18 @@ local core do
             disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
             args = {
                 gap1 = {
-                    name = L["InfoLine_Left"],
+                    name = L["Infobar_Left"],
                     type = "header",
                     order = 0,
                 },
                 gap2 = {
-                    name = L["InfoLine_Right"],
+                    name = L["Infobar_Right"],
                     type = "header",
                     order = 50,
                 },
             },
         }
-        for name, dataObj in InfoLine.LDB:DataObjectIterator() do
+        for name, dataObj in Infobar.LDB:DataObjectIterator() do
             if dataObj.type == "RealUI" then
                 local blockInfo = db.blocks.realui[name]
                 if blockInfo.enabled ~= -1 then
@@ -187,9 +187,9 @@ local core do
                         get = function() return blockInfo.enabled end,
                         set = function(data, value)
                             if value then
-                                InfoLine:AddBlock(name, dataObj, blockInfo)
+                                Infobar:AddBlock(name, dataObj, blockInfo)
                             else
-                                InfoLine:RemoveBlock(name, dataObj, blockInfo)
+                                Infobar:RemoveBlock(name, dataObj, blockInfo)
                             end
                             blockInfo.enabled = value
                         end,
@@ -207,9 +207,9 @@ local core do
                     get = function() return blockInfo.enabled end,
                     set = function(data, value)
                         if value then
-                            InfoLine:AddBlock(name, dataObj, blockInfo)
+                            Infobar:AddBlock(name, dataObj, blockInfo)
                         else
-                            InfoLine:RemoveBlock(name, dataObj, blockInfo)
+                            Infobar:RemoveBlock(name, dataObj, blockInfo)
                         end
                         blockInfo.enabled = value
                     end,
@@ -649,7 +649,7 @@ local skins do
                             get = function() return db.standard.changeYellow end,
                             set = function(info, value)
                                 db.standard.changeYellow = value
-                                --InfoLine:Refresh()
+                                --Infobar:Refresh()
                             end,
                             order = 20,
                         },

@@ -222,7 +222,7 @@ L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
 
 
--- InfoLine
+-- Infobar
 L["Clock_CalenderInvites"] = "Pending Invites:"
 L["Clock_Date"] = "Date"
 L["Clock_ShowCalendar"] = "<Click> Open calendar"
@@ -231,10 +231,10 @@ L["Currency_Cycle"] = "<Click> Open currency list, <Alt+Click> Cycle displayed c
 L["Currency_EraseData"] = "<Alt+Click> Erase highlighted character data"
 L["Currency_UpdatedAbbr"] = "Upd."
 L["GuildFriend_WhisperInvite"] = "<Click> Send whisper, <Alt+Click> %s"
-L["InfoLine"] = "Info Line"
-L["InfoLine_Left"] = "Left"
-L["InfoLine_Right"] = "Right"
-L["InfoLine_ShowBG"] = "Show Background"
+L["Infobar"] = "Info Line"
+L["Infobar_Left"] = "Left"
+L["Infobar_Right"] = "Right"
+L["Infobar_ShowBG"] = "Show Background"
 L["Progress"] = "Progress Watch"
 L["Progress_Cycle"] = "<Alt+Click> Cycle display"
 L["Progress_OpenArt"] = "<Click> Open equipped artifact"

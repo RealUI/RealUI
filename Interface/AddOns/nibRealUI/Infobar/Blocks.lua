@@ -25,8 +25,8 @@ local RealUI = private.RealUI
 local round = RealUI.Round
 local L = RealUI.L
 
-local MODNAME = "InfoLine"
-local InfoLine = RealUI:GetModule(MODNAME)
+local MODNAME = "Infobar"
+local Infobar = RealUI:GetModule(MODNAME)
 local testCell = _G.UIParent:CreateFontString()
 testCell:SetPoint("CENTER")
 testCell:SetSize(500, 20)
@@ -92,15 +92,15 @@ do
     end
 
     local function UpdateScroll(self)
-        InfoLine:debug("UpdateScroll", self:GetDebugName(), self:GetName())
+        Infobar:debug("UpdateScroll", self:GetDebugName(), self:GetName())
         local offset = _G.FauxScrollFrame_GetOffset(self) or 0
         local data = self.textTable.data
         local header = self.textTable.header
-        InfoLine:debug("offset", offset)
+        Infobar:debug("offset", offset)
         for i = 1, MAX_ROWS do
             local index = offset + i
             local row = self.textTable.rows[i]
-            InfoLine:debug("row", i, index)
+            Infobar:debug("row", i, index)
             if i > #data then
                 row:Hide()
             else
@@ -192,11 +192,11 @@ do
         local sortHandler, sortColumn, sortInverted
         -- Compare function for table.sort that supports inversion and custom sort handlers.
         local function Compare(row1, row2)
-            InfoLine:debug("Compare1", row1.info[sortColumn])
-            InfoLine:debug("Compare2", row2.info[sortColumn])
+            Infobar:debug("Compare1", row1.info[sortColumn])
+            Infobar:debug("Compare2", row2.info[sortColumn])
             local result
 
-            InfoLine:debug("sortInverted", sortInverted)
+            Infobar:debug("sortInverted", sortInverted)
             if sortInverted then -- Flip the sorthandler's args
                 result = sortHandler(row2.info[sortColumn], row1.info[sortColumn], row2, row1)
             else
@@ -211,13 +211,13 @@ do
         end
 
         local function OnUpdate(self, ...)
-            InfoLine:debug("textTable:OnUpdate", ...)
+            Infobar:debug("textTable:OnUpdate", ...)
             self:SetScript("OnUpdate", nil)
             local data = self.data
 
             if extData[data].sortColumn and #data > 0 then
                 sortColumn = extData[data].sortColumn:GetID()
-                InfoLine:debug("Header_OnClick", sortColumn, ...)
+                Infobar:debug("Header_OnClick", sortColumn, ...)
 
 
                 sortInverted = extData[data].sortInverted
@@ -236,7 +236,7 @@ do
         end
 
         function TextTableCellPrototype:SetSort(header, inverted)
-            InfoLine:debug("CellProto:SetSort", header:GetID(), inverted)
+            Infobar:debug("CellProto:SetSort", header:GetID(), inverted)
             local textTable = self.textTable
             local data = textTable.data
             if extData[data].sortColumn ~= header then
@@ -264,7 +264,7 @@ do
     end
 
     function TextTableCellPrototype:InitializeCell()
-        InfoLine:debug("CellProto:InitializeCell")
+        Infobar:debug("CellProto:InitializeCell")
 
         if not self.textTable then
             numTables = numTables + 1
@@ -331,7 +331,7 @@ do
     end
 
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
-        InfoLine:debug("CellProto:SetupCell")
+        Infobar:debug("CellProto:SetupCell")
         local textTable = self.textTable
         local width = data.width or 500
         extData[data] = extData[data] or {}
@@ -398,17 +398,17 @@ do
             else
                 flex[header] = size
             end
-            InfoLine:debug("Width", col, remainingWidth)
+            Infobar:debug("Width", col, remainingWidth)
         end
         for header, size in next, flex do
             local headerWidth = _G.max(width * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
             header:SetWidth(headerWidth)
-            InfoLine:debug("Width", headerWidth, remainingWidth)
+            Infobar:debug("Width", headerWidth, remainingWidth)
         end
         filler:SetWidth(_G.max(remainingWidth, filler.text:GetStringWidth()))
 
-        InfoLine:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
+        Infobar:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
         if extData[data].sortColumn then
             self:SetSort(extData[data].sortColumn, extData[data].sortInverted)
         elseif data.defaultSort then
@@ -426,7 +426,7 @@ do
     end
 
     function TextTableCellPrototype:ReleaseCell()
-        InfoLine:debug("CellProto:ReleaseCell")
+        Infobar:debug("CellProto:ReleaseCell")
         if self.textTable then
             local headerRow = self.textTable.header
             for col = 1, #headerRow do
@@ -449,7 +449,7 @@ do
     end
 
     function TextTableCellPrototype:getContentHeight()
-        InfoLine:debug("CellProto:getContentHeight")
+        Infobar:debug("CellProto:getContentHeight")
         return self.textTable:GetHeight()
     end
 end
@@ -474,7 +474,7 @@ do -- template
         suffix = "test",
         OnEnter = function(block, ...)
             if qTip:IsAcquired(block) then return end
-            --InfoLine:debug("Test: OnEnter", block.side, ...)
+            --Infobar:debug("Test: OnEnter", block.side, ...)
 
             local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
             SetupTooltip(tooltip, block)
@@ -523,8 +523,8 @@ local CreateTextureMarkup do
     end
 end
 
-function InfoLine:CreateBlocks()
-    local dbc = InfoLine.db.char
+function Infobar:CreateBlocks()
+    local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
 
     --[[ Static Blocks ]]--
@@ -537,13 +537,13 @@ function InfoLine:CreateBlocks()
             },
             {text = L["General_Lock"],
                 func = function()
-                    if InfoLine.locked then
-                        InfoLine:Unlock()
+                    if Infobar.locked then
+                        Infobar:Unlock()
                     else
-                        InfoLine:Lock()
+                        Infobar:Lock()
                     end
                 end,
-                checked = function() return InfoLine.locked end,
+                checked = function() return Infobar.locked end,
             },
             {text = "",
                 notCheckable = true,
@@ -630,11 +630,11 @@ function InfoLine:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnter = function(block, ...)
-                InfoLine:debug("Start: OnEnter", block.side, ...)
+                Infobar:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
             end,
         })
-        _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", InfoLine.frame, "TOPLEFT")
+        _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", Infobar.frame, "TOPLEFT")
     end
 
     do  -- Clock
@@ -672,7 +672,7 @@ function InfoLine:CreateBlocks()
             value = 1,
             suffix = "",
             OnEnable = function(block)
-                InfoLine:debug("clock: OnEnable", block.side)
+                Infobar:debug("clock: OnEnable", block.side)
                 local function setTimeOptions()
                     block.isMilitary = _G.GetCVar("timeMgrUseMilitaryTime") == "1"
                     block.isLocal = _G.GetCVar("timeMgrUseLocalTime") == "1"
@@ -693,14 +693,14 @@ function InfoLine:CreateBlocks()
                 alert.Text:SetWidth(145)
                 block.alert = alert
 
-                InfoLine:ScheduleRepeatingTimer(function()
+                Infobar:ScheduleRepeatingTimer(function()
                     local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
                     block.dataObj.value = timeFormat:format(hour, min)
                     block.dataObj.suffix = suffix
                 end, 1)
             end,
             OnClick = function(block, ...)
-                InfoLine:debug("Clock: OnClick", block.side, ...)
+                Infobar:debug("Clock: OnClick", block.side, ...)
                 if _G.IsAltKeyDown() then
                     _G.ToggleTimeManager()
                 else
@@ -717,7 +717,7 @@ function InfoLine:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Clock: OnEnter", block.side, ...)
+                --Infobar:debug("Clock: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
                 SetupTooltip(tooltip, block)
@@ -771,7 +771,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                --InfoLine:debug("Clock: OnEvent", event, ...)
+                --Infobar:debug("Clock: OnEvent", event, ...)
                 local alert = block.alert
                 block.invites = _G.CalendarGetNumPendingInvites()
                 if block.invites > 0 and not alert.isHidden then
@@ -803,11 +803,11 @@ function InfoLine:CreateBlocks()
 
         local NameSort do
             function NameSort(val1, val2, row1, row2)
-                InfoLine:debug("NameSort", _G.strsplit("|", val1))
+                Infobar:debug("NameSort", _G.strsplit("|", val1))
                 val1 = val1:match(nameMatch)
                 val2 = val2:match(nameMatch)
-                InfoLine:debug("Player1", val1)
-                InfoLine:debug("Player2", val2)
+                Infobar:debug("Player1", val1)
+                Infobar:debug("Player2", val2)
 
                 local isMobile1 = row1.meta[1]
                 local isMobile2 = row2.meta[1]
@@ -861,9 +861,9 @@ function InfoLine:CreateBlocks()
             end
         end
         local function Guild_GetTooltipText(cell)
-            InfoLine:debug("Guild_GetTooltipText")
+            Infobar:debug("Guild_GetTooltipText")
             if cell:GetTextWidth() > cell:GetWidth() then
-                InfoLine:debug("Guild_GetTooltipText true")
+                Infobar:debug("Guild_GetTooltipText true")
                 return cell:GetText()
             end
         end
@@ -894,21 +894,21 @@ function InfoLine:CreateBlocks()
             value = 1,
             suffix = "",
             OnEnable = function(block, ...)
-                InfoLine:debug("Guild: OnEnable", block.side, ...)
+                Infobar:debug("Guild: OnEnable", block.side, ...)
                 if not _G.IsInGuild() then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                    Infobar:RemoveBlock(block.name, block.dataObj, info)
                 end
             end,
             OnClick = function(block, ...)
-                InfoLine:debug("Guild: OnClick", block.side, ...)
+                Infobar:debug("Guild: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
                     _G.ToggleGuildFrame()
                 end
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Guild: OnEnter", block.side, ...)
+                --Infobar:debug("Guild: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
@@ -975,18 +975,18 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("Guild: OnEvent", event, ...)
+                Infobar:debug("Guild: OnEvent", event, ...)
                 local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
                 if isVisible and not isInGuild then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                    Infobar:RemoveBlock(block.name, block.dataObj, info)
                 elseif not isVisible and isInGuild then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:AddBlock(block.name, block.dataObj, info)
+                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                    Infobar:AddBlock(block.name, block.dataObj, info)
                 end
 
                 local now = _G.GetTime()
-                InfoLine:debug("Guild: time", now - time)
+                Infobar:debug("Guild: time", now - time)
                 if now - time > 10 then
                     _G.GuildRoster()
                     time = now
@@ -1060,9 +1060,9 @@ function InfoLine:CreateBlocks()
             end
         end
         local function Friends_GetTooltipText(cell)
-            InfoLine:debug("Friends_GetTooltipText")
+            Infobar:debug("Friends_GetTooltipText")
             if cell:GetTextWidth() > cell:GetWidth() then
-                InfoLine:debug("Friends_GetTooltipText true")
+                Infobar:debug("Friends_GetTooltipText true")
                 return cell:GetText()
             end
         end
@@ -1100,14 +1100,14 @@ function InfoLine:CreateBlocks()
                 end
             end,
             OnClick = function(block, ...)
-                InfoLine:debug("Friends: OnClick", block.side, ...)
+                Infobar:debug("Friends: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
                     _G.ToggleFriendsFrame()
                 end
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Friends: OnEnter", block.side, ...)
+                --Infobar:debug("Friends: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
@@ -1228,7 +1228,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("Friend: OnEvent", event, ...)
+                Infobar:debug("Friend: OnEvent", event, ...)
 
                 local _, numBNetOnline = _G.BNGetNumFriends()
                 local _, numWoWOnline = _G.GetNumFriends()
@@ -1274,14 +1274,14 @@ function InfoLine:CreateBlocks()
             iconFont = iconFont,
             text = 1,
             OnClick = function(block, ...)
-                InfoLine:debug("Durability: OnClick", block.side, ...)
+                Infobar:debug("Durability: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
                     _G.ToggleCharacter("PaperDollFrame")
                 end
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Durability: OnEnter", block.side, ...)
+                --Infobar:debug("Durability: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
@@ -1305,7 +1305,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("Durability1: OnEvent", event, ...)
+                Infobar:debug("Durability1: OnEvent", event, ...)
                 local lowDur, lowMin, lowMax, lowSlot = 1, 1, 1
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
@@ -1318,7 +1318,7 @@ function InfoLine:CreateBlocks()
                                 lowDur, lowSlot = item.dura, slotID
                                 lowMin, lowMax = min, max
                             end
-                            InfoLine:debug(slotID, item.slot, round(item.dura, 3), min, lowMin)
+                            Infobar:debug(slotID, item.slot, round(item.dura, 3), min, lowMin)
                         end
                     end
                 end
@@ -1471,7 +1471,7 @@ function InfoLine:CreateBlocks()
             end,
             IsValid = function(Rep)
                 local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
-                InfoLine:debug("artifact:IsValid", activeArtifact, artifactInit)
+                Infobar:debug("artifact:IsValid", activeArtifact, artifactInit)
                 if activeArtifact or artifactInit then
                     -- After a spec switch, the active artifact could be invalid
                     if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
@@ -1569,8 +1569,8 @@ function InfoLine:CreateBlocks()
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
-            local watch = InfoLine.frame.watch
-            InfoLine:debug("progress:main", dbc.progressState, curValue, maxValue)
+            local watch = Infobar.frame.watch
+            Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
             local main = watch.main
             local r, g, b = watchStates[dbc.progressState]:GetColor()
@@ -1592,7 +1592,7 @@ function InfoLine:CreateBlocks()
                 local bar = watch[i]
                 if nextState ~= dbc.progressState then
                     curValue, maxValue = watchStates[nextState]:GetStats()
-                    InfoLine:debug("progress:"..i, nextState, curValue, maxValue)
+                    Infobar:debug("progress:"..i, nextState, curValue, maxValue)
 
                     bar:SetStatusBarColor(watchStates[nextState]:GetColor())
                     bar:SetMinMaxValues(0, maxValue)
@@ -1608,12 +1608,12 @@ function InfoLine:CreateBlocks()
         local function UpdateState(block)
             local state = watchStates[dbc.progressState]:GetNext()
             if state then
-                InfoLine:debug("check state", dbc.progressState, state)
+                Infobar:debug("check state", dbc.progressState, state)
                 dbc.progressState = state
-                InfoLine.frame.watch.main.rested:Hide()
+                Infobar.frame.watch.main.rested:Hide()
                 UpdateProgress(block)
             else
-                InfoLine:RemoveBlock(block.name, block.dataObj, block)
+                Infobar:RemoveBlock(block.name, block.dataObj, block)
             end
         end
 
@@ -1624,7 +1624,7 @@ function InfoLine:CreateBlocks()
             iconFont = iconFont,
             text = "XP",
             OnEnable = function(block)
-                InfoLine:debug("progress: OnEnable", block.side)
+                Infobar:debug("progress: OnEnable", block.side)
                 if not watchStates[dbc.progressState] then
                     dbc.progressState = "xp"
                 end
@@ -1644,8 +1644,8 @@ function InfoLine:CreateBlocks()
                 artData.RegisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED", "OnEvent")
             end,
             OnDisable = function(block)
-                InfoLine:debug("progress: OnDisable", block.side)
-                local watch = InfoLine.frame.watch
+                Infobar:debug("progress: OnDisable", block.side)
+                local watch = Infobar.frame.watch
                 watch.main:Hide()
                 watch[1]:Hide()
                 watch[2]:Hide()
@@ -1656,7 +1656,7 @@ function InfoLine:CreateBlocks()
                 artData.UnregisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED")
             end,
             OnClick = function(block, ...)
-                InfoLine:debug("progress: OnClick", block.side, ...)
+                Infobar:debug("progress: OnClick", block.side, ...)
                 if _G.IsAltKeyDown() then
                     UpdateState(block)
                 else
@@ -1665,7 +1665,7 @@ function InfoLine:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("progress: OnEnter", block.side, ...)
+                --Infobar:debug("progress: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
@@ -1694,7 +1694,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("progress: OnEvent", block.side, event, ...)
+                Infobar:debug("progress: OnEvent", block.side, event, ...)
                 if event == "ARTIFACT_UPDATE" then
                     artifactInit = true
                     if not watchStates["artifact"]:IsValid() then
@@ -1733,7 +1733,7 @@ function InfoLine:CreateBlocks()
             iconFont = iconFont,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("Mail: OnEnter", block.side, ...)
+                --Infobar:debug("Mail: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
@@ -1752,14 +1752,14 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("Mail1: OnEvent", event, ...)
+                Infobar:debug("Mail1: OnEvent", event, ...)
                 local isVisible, hasNewMail = block:IsVisible(), _G.HasNewMail()
                 if not isVisible and hasNewMail then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:AddBlock(block.name, block.dataObj, info)
+                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                    Infobar:AddBlock(block.name, block.dataObj, info)
                 elseif isVisible and not hasNewMail then
-                    local info = InfoLine:GetBlockInfo(block.name, block.dataObj)
-                    InfoLine:RemoveBlock(block.name, block.dataObj, info)
+                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                    Infobar:RemoveBlock(block.name, block.dataObj, info)
                 end
             end,
             events = {
@@ -1779,11 +1779,11 @@ function InfoLine:CreateBlocks()
             value = 1,
             tooltiptext = "",
             OnClick = function(block, ...)
-                InfoLine:debug("Friends: OnClick", block.side, ...)
+                Infobar:debug("Friends: OnClick", block.side, ...)
                 _G.ToggleAllBags()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("currency: OnEvent", block.side, event, ...)
+                Infobar:debug("currency: OnEvent", block.side, event, ...)
                 local freeSlots, totalSlots = 0, 0
 
                 -- Cycle through bags
@@ -1892,13 +1892,13 @@ function InfoLine:CreateBlocks()
             iconCoords = {.08, .92, .08, .92},
             text = "",
             OnEnable = function(block)
-                InfoLine:debug("spec: OnEnable", block.side)
+                Infobar:debug("spec: OnEnable", block.side)
                 UpdateGearSets()
                 UpdateBlock(block)
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("spec: OnEnter", block.side, ...)
+                --Infobar:debug("spec: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "LEFT", "LEFT")
                 SetupTooltip(tooltip, block)
@@ -1927,7 +1927,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("spec: OnEvent", block.side, event, ...)
+                Infobar:debug("spec: OnEvent", block.side, event, ...)
                 if event == "EQUIPMENT_SETS_CHANGED" then
                     UpdateGearSets()
                 elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
@@ -2097,7 +2097,7 @@ function InfoLine:CreateBlocks()
         local function UpdateState(block)
             UpdateTrackedCurrency(block)
             local state = currencyStates[dbc.currencyState]:GetNext()
-            InfoLine:debug("check state", dbc.currencyState, state)
+            Infobar:debug("check state", dbc.currencyState, state)
             dbc.currencyState = state
 
             UpdateBlock(block)
@@ -2113,10 +2113,10 @@ function InfoLine:CreateBlocks()
             end
         end
         local function Currency_GetTooltipText(cell)
-            InfoLine:debug("Currency_GetTooltipText")
+            Infobar:debug("Currency_GetTooltipText")
             local name = cell.row.meta[cell:GetID()]
             if name then
-                InfoLine:debug("Currency_GetTooltipText", name)
+                Infobar:debug("Currency_GetTooltipText", name)
                 return name
             end
         end
@@ -2151,7 +2151,7 @@ function InfoLine:CreateBlocks()
             iconCoords = {.08, .92, .08, .92},
             text = "Currency",
             OnEnable = function(block)
-                InfoLine:debug("currency: OnEnable", block.side)
+                Infobar:debug("currency: OnEnable", block.side)
                 currencyDB = RealUI.db.global.currency
                 charDB = currencyDB[RealUI.realm][RealUI.faction][RealUI.charName]
                 if not currencyStates[dbc.currencyState] then
@@ -2188,7 +2188,7 @@ function InfoLine:CreateBlocks()
                 end
             end,
             OnClick = function(block, ...)
-                InfoLine:debug("currency: OnClick", block.side, ...)
+                Infobar:debug("currency: OnClick", block.side, ...)
                 if _G.IsAltKeyDown() then
                     UpdateState(block)
                 else
@@ -2199,7 +2199,7 @@ function InfoLine:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("currency: OnEnter", block.side, ...)
+                --Infobar:debug("currency: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
@@ -2257,7 +2257,7 @@ function InfoLine:CreateBlocks()
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
-                InfoLine:debug("currency: OnEvent", block.side, event, ...)
+                Infobar:debug("currency: OnEvent", block.side, event, ...)
                 UpdateBlock(block)
             end,
             events = {
@@ -2305,7 +2305,7 @@ function InfoLine:CreateBlocks()
             text = "FPS",
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
-                --InfoLine:debug("progress: OnEnter", block.side, ...)
+                --Infobar:debug("progress: OnEnter", block.side, ...)
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT", "RIGHT")
                 SetupTooltip(tooltip, block)
