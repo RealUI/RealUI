@@ -1050,13 +1050,16 @@ function Infobar:CreateBlocks()
         end
 
         local function Friends_OnClick(row, ...)
-            local name = row[1]:GetText():match(nameMatch)
+            local name = row.meta[3]
+            local bnetIDAccount = row.meta[4]
             if not name then return end
 
             if _G.IsAltKeyDown() then
                 _G.InviteUnit(name)
+            elseif bnetIDAccount then
+                _G.SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
             else
-                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
+                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
             end
         end
         local function Friends_GetTooltipText(cell)
@@ -1124,7 +1127,7 @@ function Infobar:CreateBlocks()
 
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
-                    local _, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
+                    local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
                     if isOnline then
                         local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
 
@@ -1181,7 +1184,7 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, "", ""
+                                i, lvl, accountName, bnetIDAccount
                             }
                         })
                     end
@@ -1192,12 +1195,12 @@ function Infobar:CreateBlocks()
                     local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
                     if isOnline then
                         -- Class color names
-                        name = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
+                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
 
                         if status == _G.CHAT_FLAG_AFK then
-                            name = PlayerStatus[1] .. name
+                            cName = PlayerStatus[1] .. cName
                         elseif status == _G.CHAT_FLAG_DND then
-                            name = PlayerStatus[2] .. name
+                            cName = PlayerStatus[2] .. cName
                         end
 
                         -- Difficulty color levels
@@ -1210,10 +1213,10 @@ function Infobar:CreateBlocks()
                         _G.tinsert(friendsData, {
                             id = #friendsData + i,
                             info = {
-                                name, level, area, noteText
+                                cName, level, area, noteText
                             },
                             meta = {
-                                #friendsData + i, lvl, "", ""
+                                #friendsData + i, lvl, name
                             }
                         })
                     end
