@@ -1639,9 +1639,9 @@ function InfoLine:CreateBlocks()
                     UpdateState(block)
                 end
 
-                artData.RegisterCallback(block, "ARTIFACT_POWER_CHANGED", block.OnEvent)
-                artData.RegisterCallback(block, "ARTIFACT_ACTIVE_CHANGED", block.OnEvent)
-                artData.RegisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED", block.OnEvent)
+                artData.RegisterCallback(block, "ARTIFACT_POWER_CHANGED", "OnEvent")
+                artData.RegisterCallback(block, "ARTIFACT_ACTIVE_CHANGED", "OnEvent")
+                artData.RegisterCallback(block, "ARTIFACT_EQUIPPED_CHANGED", "OnEvent")
             end,
             OnDisable = function(block)
                 InfoLine:debug("progress: OnDisable", block.side)
