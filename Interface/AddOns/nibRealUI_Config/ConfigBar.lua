@@ -253,6 +253,7 @@ local other do
                                 set = function(info, value)
                                     dbActionBars[RealUI.cLayout].centerPositions = value
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 20,
                             },
@@ -273,6 +274,7 @@ local other do
                                 set = function(info, value)
                                     dbActionBars[RealUI.cLayout].sidePositions = value
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 30,
                             },
@@ -287,8 +289,8 @@ local other do
                                 get = function(info) return ndb.positions[RealUI.cLayout]["ActionBarsY"] end,
                                 set = function(info, value)
                                     ndb.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
-                                    RealUI:UpdatePositioners()
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                             }
                         }

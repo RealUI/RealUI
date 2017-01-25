@@ -109,7 +109,7 @@ function Positioners:OnInitialize()
                 ["CastBarTarget"] =     {"TOP",     "UIParent", "CENTER",   2, -130, 2, 2,  {"HuDX", "CastBarTargetX"}, {"HuDY", "CastBarTargetY"}},
                 ["UnitFrames"] =        {"CENTER",  "UIParent", "CENTER",   0, 0, 80, 2,    {"HuDX"},                   {"HuDY"},                   {"UFHorizontal"}},
                 ["BossFrames"] =        {"RIGHT",   "UIParent", "RIGHT",    0, 0, 2, 2,     {"BossX"},                  {"HuDY", "BossY"}},
-                ["GridBottom"] =        {"BOTTOM",  "UIParent", "BOTTOM",   0, 0, 2, 2,     {"HuDX", "GridBottomX"},    {"GridBottomY"}},
+                ["GridBottom"] =        {"BOTTOM",  "UIParent", "BOTTOM",   0, 0, 2, 2,     {"HuDX", "GridBottomX"},    {"ActionBarsBotY", "GridBottomY"}},
                 ["GridTop"] =           {"CENTER",  "UIParent", "CENTER",   0, 0, 2, 2,     {"HuDX", "GridTopX"},       {"HuDY", "GridTopY"}},
             },
         }

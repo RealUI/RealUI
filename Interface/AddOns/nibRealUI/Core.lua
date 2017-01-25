@@ -78,11 +78,12 @@ RealUI.defaultPositions = {
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 316,
-        ["ActionBarsY"] = -161.5,
+        ["ActionBarsY"] = -RealUI.ModValue(116),
+        ["ActionBarsBotY"] = RealUI.ModValue(40),
         ["GridTopX"] = 0,
-        ["GridTopY"] = -197.5,
+        ["GridTopY"] = -RealUI.ModValue(139),
         ["GridBottomX"] = 0,
-        ["GridBottomY"] = RealUI.ModValue(41),
+        ["GridBottomY"] = RealUI.ModValue(14),
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
@@ -95,11 +96,12 @@ RealUI.defaultPositions = {
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 316,
-        ["ActionBarsY"] = -161.5,
+        ["ActionBarsY"] = -RealUI.ModValue(116),
+        ["ActionBarsBotY"] = RealUI.ModValue(40),
         ["GridTopX"] = 0,
-        ["GridTopY"] = -197.5,
+        ["GridTopY"] = -RealUI.ModValue(139),
         ["GridBottomX"] = 0,
-        ["GridBottomY"] = RealUI.ModValue(41),
+        ["GridBottomY"] = RealUI.ModValue(14),
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
@@ -115,16 +117,12 @@ RealUI.hudSizeOffsets = {
     [1] = {
         ["UFHorizontal"] = 0,
         ["SpellAlertWidth"] = 0,
-        ["ActionBarsY"] = 0,
-        ["GridTopY"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetY"] = 0,
     },
     [2] = {
         ["UFHorizontal"] = 50,
         ["SpellAlertWidth"] = 50,
-        ["ActionBarsY"] = -20,
-        ["GridTopY"] = -20,
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetY"] = -20,
     },
@@ -324,12 +322,6 @@ function RealUI:SetLayout()
     if self:GetModuleEnabled("GridLayout") then
         local GL = self:GetModule("GridLayout", true)
         if GL then GL:SettingsUpdate("RealUI:SetLayout") end
-    end
-
-    -- Layout Button (For Installation)
-    if self:GetModuleEnabled("InfoLine") then
-        local IL = self:GetModule("InfoLine", true)
-        if IL then IL:Refresh() end
     end
 
     -- FrameMover

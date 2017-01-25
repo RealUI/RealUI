@@ -40,7 +40,7 @@ local fixedSettings = {
     buttons = 12
 }
 local function IsOdd(val)
-    return val % 2 == 1 and true or false
+    return val % 2 == 1
 end
 function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
@@ -50,22 +50,15 @@ function ActionBars:ApplyABSettings(tag)
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
     local barSettings = db[RealUI.cLayout]
+    local numTopBars = barSettings.centerPositions - 1
+    local numBotBars = 3 - numTopBars
 
-    local topBars, numTopBars, sidePositions
-    -- Convert settings to tables
-    if barSettings.centerPositions == 1 then
-        topBars = {false, false, false}
-        numTopBars = 0
-    elseif barSettings.centerPositions == 2 then
-        topBars = {true, false, false}
-        numTopBars = 1
-    elseif barSettings.centerPositions == 3 then
-        topBars = {true, true, false}
-        numTopBars = 2
-    else
-        topBars = {true, true, true}
-        numTopBars = 3
+    -- update grid position
+    if RealUI:DoesAddonMove("Grid2") then
+        ndb.positions[RealUI.cLayout]["GridBottomY"] = RealUI.ModValue(-21.5 + 17.2 * numBotBars)
     end
+
+    local sidePositions
     if barSettings.sidePositions == 1 then
         sidePositions = {[4] = "RIGHT", [5] = "RIGHT"}
     elseif barSettings.sidePositions == 2 then
@@ -91,7 +84,7 @@ function ActionBars:ApplyABSettings(tag)
             local isVertBar = id > 3
             local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
             local isLeftBar = isVertBar and not(isRightBar)
-            local isTopBar = not(isVertBar) and topBars[id] == true
+            local isTopBar = not(isVertBar) and id <= numTopBars
             local isBottomBar = not(isVertBar) and not(isTopBar)
             ActionBars:debug(id, "Stats", isTopBar, isBottomBar, isLeftBar, isRightBar)
 
@@ -165,7 +158,7 @@ function ActionBars:ApplyABSettings(tag)
                 ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
-                local bottomYOfs = RealUI.ModValue(40)
+                local bottomYOfs = ndb.positions[RealUI.cLayout]["ActionBarsBotY"]
                 ActionBars:debug(id, "Y Offset", HuDY, ABY)
                 if barPlace == 1 then
                     if isTopBar then
@@ -288,17 +281,9 @@ function ActionBars:ApplyABSettings(tag)
     if barSettings.moveBars.eab and BarSizes[2] and BarSizes[3] then
         local eabX, eabY
 
-        -- Calculate Y
-        eabY = 61
-
-        -- Calculate X
-        if numTopBars == 3 then
-            eabX = -32
-        elseif numTopBars == 2 then
-            eabX = BarSizes[3] / 2 - 4
-        else
-            eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-        end
+        -- Calculate X, Y
+        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
+        eabY = RealUI.ModValue(55.5)
 
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
