@@ -1835,7 +1835,9 @@ function Infobar:CreateBlocks()
                         end
                     else
                         _G.SetSpecialization(specIndex)
-                        equipmentNeedsUpdate = equipSetsByID[dbc.specgear[specIndex]].name
+                        if dbc.specgear[specIndex] >= 0 then
+                            equipmentNeedsUpdate = equipSetsByID[dbc.specgear[specIndex]].name
+                        end
                     end
                 end
             elseif button == "RightButton" then
