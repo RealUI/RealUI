@@ -192,7 +192,6 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                infoLineBackground = true,
                 stripeOpacity = 0.5,
                 hudSize = 1,
                 reverseUnitFrameBars = false,

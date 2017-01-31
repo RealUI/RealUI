@@ -55,11 +55,11 @@ end
 
 local core do
     debug("Adv Core")
-    local infoLine do
+    local infobar do
         local MODNAME = "Infobar"
         local Infobar = RealUI:GetModule(MODNAME)
         local db = Infobar.db.profile
-        infoLine = {
+        infobar = {
             name = L["Infobar"],
             desc = "Information / Button display.",
             type = "group",
@@ -195,7 +195,7 @@ local core do
                         end,
                         order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
                     }
-                    infoLine.args.realui = realui
+                    infobar.args.realui = realui
                 end
             elseif dataObj.type == "data source" then
                 local blockInfo = db.blocks.others[name]
@@ -215,7 +215,7 @@ local core do
                     end,
                     order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
                 }
-                infoLine.args.others = others
+                infobar.args.others = others
             end
         end
     end
@@ -598,7 +598,7 @@ local core do
         type = "group",
         order = 0,
         args = {
-            infoLine = infoLine,
+            infobar = infobar,
             playerShields = playerShields,
             screenSaver = screenSaver,
             worldMarker = worldMarker,

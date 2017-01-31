@@ -63,8 +63,8 @@ if loc == "deDE" then   -- Deutsch
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Sekundäre Aktionsleisten|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Leisten:|r\n"..ToolTipColors[3].."Leiste 4, 5|r",
-        infolineright =     ToolTipColors[1].."Info Line - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
-        infolineleft =      ToolTipColors[1].."Info Line - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 -- elseif loc == "itIT" then    -- Italiano
@@ -100,8 +100,8 @@ elseif loc == "frFR" then   -- French
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Barres d'actions secondaires|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Barres:|r\n"..ToolTipColors[3].."Barre 4, 5|r",
-        infolineright =     ToolTipColors[1].."Info Line - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
-        infolineleft =      ToolTipColors[1].."Info Line - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 else    -- Default
@@ -135,8 +135,8 @@ else    -- Default
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Secondary Action Bars|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Bars:|r\n"..ToolTipColors[3].."Bar 4, 5|r",
-        infolineright =     ToolTipColors[1].."Info Line - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
-        infolineleft =      ToolTipColors[1].."Info Line - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 end
@@ -223,17 +223,17 @@ local RealUI_HelpPlate = {
         ToolTipDir = "UP",
         ToolTipText = ToolTipTexts.actionbars,
     },
-    [14] = {    --infoline right
+    [14] = {    --infobar right
         ButtonAnchor = "BOTTOMRIGHT",
         ButtonPos = { x = -110, y = 12 },
         ToolTipDir = "UP",
-        ToolTipText = ToolTipTexts.infolineright,
+        ToolTipText = ToolTipTexts.infobarright,
     },
-    [15] = {    --infoline left
+    [15] = {    --infobar left
         ButtonAnchor = "BOTTOMLEFT",
         ButtonPos = { x = 110, y = 12 },
         ToolTipDir = "UP",
-        ToolTipText = ToolTipTexts.infolineleft,
+        ToolTipText = ToolTipTexts.infobarleft,
     },
     [16] = {    -- secondary action bars
         ButtonAnchor = "RIGHT",
