@@ -130,7 +130,7 @@ function BlockMixin:OnDragStop(button)
         mouseX, mouseY = mouseX / scale, mouseY / scale;
 
         -- DockFrame
-        dock:AddBlock(self, dock:GetInsertIndex(self, mouseX, mouseY))
+        dock:AddBlock(self, dock:GetInsertIndex(mouseX, mouseY))
         dock:UpdateBlocks(true)
     else
         self:RestorePosition()
@@ -172,7 +172,7 @@ function BlockMixin:OnUpdate(elapsed)
         cursorX, cursorY = cursorX / scale, cursorY / scale;
         local dock = Infobar.frame[self.side]
         if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
-            dock:PlaceInsertHighlight(self, cursorX, cursorY);
+            dock:PlaceInsertHighlight(cursorX, cursorY);
         else
             dock:HideInsertHighlight();
         end
@@ -442,31 +442,14 @@ function DockMixin:OnLoad()
     self.isDirty = true;    --You dirty, dirty frame
 end
 
-function DockMixin:GetBlocks()
-    return self.DOCKED_BLOCKS;
-end
-
 function DockMixin:SetPrimary(block)
     self.primary = block;
-
-    if ( not self:GetSelectedBlock() ) then
-        self:SelectBlock(block);
-    end
-
     self:AddBlock(block, 1);
-end
-
-function DockMixin:OnUpdate()
-    --These may fail if we're resizing the WoW client
-    if self:UpdateBlocks() then
-        self.leftTab = nil;
-        self:SetScript("OnUpdate", nil);
-    end
 end
 
 function DockMixin:AddBlock(block, position)
     if ( not self.primary ) then
-        _G.error("Need a primary window before another can be added.");
+        _G.error("Need a primary block before another can be added.");
     end
 
     if ( self:HasDockedBlock(block) ) then
@@ -500,9 +483,6 @@ function DockMixin:RemoveBlock(block)
     _G.tDeleteItem(self.DOCKED_BLOCKS, block);
     block.isDocked = nil;
     block:SetMovable(true);
-    if ( self:GetSelectedBlock() == block ) then
-        self:SelectBlock(self.DOCKED_BLOCKS[1]);
-    end
 
     block:Show();
     self:UpdateBlocks();
@@ -510,17 +490,6 @@ end
 
 function DockMixin:HasDockedBlock(block)
     return _G.tContains(self.DOCKED_BLOCKS, block);
-end
-
-function DockMixin:SelectBlock(block)
-    _G.assert(block)
-    self.isDirty = true;
-    self.selected = block;
-    self:UpdateBlocks();
-end
-
-function DockMixin:GetSelectedBlock()
-    return self.selected;
 end
 
 function DockMixin:UpdateBlocks(forceUpdate)
@@ -548,17 +517,17 @@ function DockMixin:UpdateBlocks(forceUpdate)
     return true
 end
 
-function DockMixin:GetInsertIndex(block, mouseX, mouseY)
+function DockMixin:GetInsertIndex(mouseX, mouseY)
     local maxPosition = 0;
-    for index, value in ipairs(self.DOCKED_BLOCKS) do
+    for index, block in ipairs(self.DOCKED_BLOCKS) do
         if self.side == "left" then
-            if mouseX < (value:GetLeft() + value:GetRight()) / 2 and  --Find the first tab we're on the left of. (Being on top of the tab, but left of the center counts)
-                value ~= self.primary then   --We never count as being to the left of the primary tab.
+            if mouseX < (block:GetLeft() + block:GetRight()) / 2 and  --Find the first block we're on the left of. (Being on top of the block, but left of the center counts)
+                block ~= self.primary then   --We never count as being to the left of the primary block.
                 return index;
             end
         elseif self.side == "right" then
-            if mouseX > (value:GetLeft() + value:GetRight()) / 2 and
-                value ~= self.primary then
+            if mouseX > (block:GetLeft() + block:GetRight()) / 2 and
+                block ~= self.primary then
                 return index;
             end
         end
@@ -568,14 +537,14 @@ function DockMixin:GetInsertIndex(block, mouseX, mouseY)
     return maxPosition + 1;
 end
 
-function DockMixin:PlaceInsertHighlight(block, mouseX, mouseY)
-    local insert = self:GetInsertIndex(block, mouseX, mouseY);
+function DockMixin:PlaceInsertHighlight(mouseX, mouseY)
+    local insert = self:GetInsertIndex(mouseX, mouseY);
 
     local attachFrame = self.primary;
 
-    for index, value in ipairs(self.DOCKED_BLOCKS) do
+    for index, block in ipairs(self.DOCKED_BLOCKS) do
         if ( index < insert ) then
-            attachFrame = value;
+            attachFrame = block;
         end
     end
 
