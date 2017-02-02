@@ -808,8 +808,8 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Player1", val1)
                 Infobar:debug("Player2", val2)
 
-                local isMobile1 = row1.meta[1]
-                local isMobile2 = row2.meta[1]
+                local isMobile1 = row1.meta[2]
+                local isMobile2 = row2.meta[2]
                 if isMobile1 ~= isMobile2 then
                     if isMobile1 and not isMobile2 then
                         return false
@@ -850,11 +850,11 @@ function Infobar:CreateBlocks()
         end
 
         local function Guild_OnClick(row, ...)
-            local name = row[1]:GetText():match(nameMatch)
+            local name = row.meta[1]
             if not name then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteUnit(name)
+                _G.InviteToGroup(name)
             else
                 _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
             end
@@ -929,10 +929,10 @@ function Infobar:CreateBlocks()
                 guildData.rowOnClick = Guild_OnClick
                 guildData.cellGetTooltipText = Guild_GetTooltipText
                 for i = 1, _G.GetNumGuildMembers() do
-                    local name, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
+                    local fullName, rank, _, lvl, _, zone, note, offnote, isOnline, status, class, _, _, isMobile = _G.GetGuildRosterInfo(i)
                     if isOnline or isMobile then
                         -- Remove server from name
-                        name = _G.Ambiguate(name, "guild")
+                        local name = _G.Ambiguate(fullName, "guild")
 
                         -- Class color names
                         local color = RealUI:GetClassColor(class, "hex")
@@ -959,7 +959,7 @@ function Infobar:CreateBlocks()
                                 name, lvl, zone, rank, note, offnote
                             },
                             meta = {
-                                isMobile
+                                fullName, isMobile
                             }
                         })
                     end
@@ -1054,7 +1054,7 @@ function Infobar:CreateBlocks()
             if not name then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteUnit(name)
+                _G.InviteToGroup(name)
             elseif bnetIDAccount then
                 _G.SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
             else
