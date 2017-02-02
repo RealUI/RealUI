@@ -101,8 +101,8 @@ end
 
 local _, uiHieght = _G.GetPhysicalScreenSize()
 local uiMod = uiHieght / 768
-function RealUI.ModValue(value)
-    return _G.floor(value * uiMod + 0.5)
+function RealUI.ModValue(value, getFloat)
+    return RealUI.Round(value * uiMod, getFloat and 2 or 0)
 end
 
 -- Slash Commands
@@ -205,66 +205,6 @@ f:SetScript("OnEvent", function(self, event, addon)
         end
     end
 end)
-
--- Modified from Blizzard's DrawRouteLine
---local lineFactor = _G.TAXIROUTE_LINEFACTOR_2 --(32/20) / 2
-
-function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
-    if (not relPoint) then relPoint = "BOTTOMLEFT" end
-
-    T:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-
-    -- Determine dimensions and center point of line
-    local dx, dy = ex - sx, ey - sy
-    --debug("Init", DrawLine: dx, ", dx, ", dy, ", dy)
-    local cx, cy = (sx + ex) / 2, (sy + ey) / 2
-    --debug("Init", "DrawLine: cx, ", cx, ", cy, ", cy)
-
-    -- Normalize direction if necessary
-    if (dx < 0) then
-        dx,dy = -dx,-dy
-    end
-
-    -- Calculate actual length of line
-    local l = _G.sqrt((dx * dx) + (dy * dy))
-
-    -- Quick escape if it's zero length
-    if (l == 0) then
-        T:SetTexCoord(0,0,0,0,0,0,0,0)
-        T:SetPoint("BOTTOMLEFT", C, relPoint, cx,cy)
-        T:SetPoint("TOPRIGHT",   C, relPoint, cx,cy)
-        return
-    end
-
-    -- Sin and Cosine of rotation, and combination (for later)
-    local s,c = -dy / l, dx / l
-    local sc = s * c
-
-    -- Calculate bounding box size and texture coordinates
-    local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
-    if (dy >= 0) then
-        Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
-        Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
-        BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
-        BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx
-        TRy = BRx
-    else
-        Bwid = cx - sx --((l * c) + (w * s)) * lineFactor
-        Bhgt = -(cy - sy) --((w * c) + (l * s)) * lineFactor
-        BLx, BLy, BRx = s * s, -(l / w) * sc, 1 + (w / l) * sc
-        BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
-        TRx = TLy
-    end
-    --debug("Init", "DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
-    --debug("Init", "DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
-    --debug("Init", "DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
-
-    -- Set texture coordinates and anchors
-    T:ClearAllPoints()
-    T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
-    T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt)
-    T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt)
-end
 
 -- Math
 RealUI.Round = function(value, places)
