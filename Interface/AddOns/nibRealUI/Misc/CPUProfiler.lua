@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local ipairs = _G.ipairs
 
 -- RealUI --

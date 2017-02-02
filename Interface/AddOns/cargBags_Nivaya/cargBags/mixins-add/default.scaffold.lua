@@ -28,7 +28,6 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local _G = _G
 local select = _G.select
 
 -- Upgrade Level retrieval

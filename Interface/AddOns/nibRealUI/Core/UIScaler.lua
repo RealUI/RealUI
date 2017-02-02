@@ -1,8 +1,5 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 local db, ndbg

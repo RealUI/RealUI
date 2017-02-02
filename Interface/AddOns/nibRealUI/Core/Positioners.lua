@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, floor = _G.next, _G.math.floor
 
 -- RealUI --

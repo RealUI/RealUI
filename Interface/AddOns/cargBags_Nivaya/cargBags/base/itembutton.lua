@@ -20,9 +20,6 @@
 local _, ns = ...
 local cargBags = ns.cargBags
 
--- Lua Globals --
-local _G = _G
-
 --[[!
     @class ItemButton
         This class serves as the basis for all itemSlots in a container

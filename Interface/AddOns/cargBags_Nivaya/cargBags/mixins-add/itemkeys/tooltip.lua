@@ -24,9 +24,6 @@ DESCRIPTION:
 local ADDON_NAME, ns = ...
 local cargBags = ns.cargBags
 
--- Lua Globals --
-local _G = _G
-
 local tipName = ADDON_NAME.."Tooltip"
 local tooltip
 

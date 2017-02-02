@@ -1,7 +1,6 @@
 local ADDON_NAME = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 -- RealUI --

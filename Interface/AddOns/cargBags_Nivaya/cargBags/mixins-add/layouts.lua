@@ -26,7 +26,6 @@ DEPENDENCIES
 local _, ns = ...
 
 -- Lua Globals --
-local _G = _G
 local ipairs = _G.ipairs
 
 local layouts = ns.cargBags.classes.Container.layouts

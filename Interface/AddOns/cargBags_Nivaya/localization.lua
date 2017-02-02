@@ -1,8 +1,5 @@
 ﻿local _, ns = ...
 
--- Lua Globals --
-local _G = _G
-
 local L = {}
 local gl = _G.GetLocale()
 

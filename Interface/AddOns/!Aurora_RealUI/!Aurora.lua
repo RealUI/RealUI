@@ -4,7 +4,6 @@ mods["nibRealUI"] = {}
 mods["PLAYER_LOGIN"] = {}
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 local tinsert = _G.table.insert
 

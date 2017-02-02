@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, ipairs = _G.next, _G.ipairs
 
 -- Libs --

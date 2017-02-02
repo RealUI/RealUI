@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local floor = _G.math.floor
 
 -- Libs --

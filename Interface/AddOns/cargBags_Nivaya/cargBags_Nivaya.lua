@@ -2,7 +2,6 @@ local ADDON_NAME, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local _G = _G
 local next, ipairs = _G.next, _G.ipairs
 
 local cargBags_Nivaya = _G.CreateFrame("Frame", ADDON_NAME, _G.UIParent)

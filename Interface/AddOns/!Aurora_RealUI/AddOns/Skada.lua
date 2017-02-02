@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["PLAYER_LOGIN"]["Skada"] = function(self, F, C)
     --print("Skada", F, C)
     -- Short Numbers

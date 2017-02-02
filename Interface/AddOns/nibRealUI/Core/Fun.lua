@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
 local next, type, select = _G.next, _G.type, _G.select

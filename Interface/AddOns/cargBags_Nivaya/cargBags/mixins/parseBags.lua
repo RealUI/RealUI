@@ -31,9 +31,6 @@ DESCRIPTION
 local _, ns = ...
 local cargBags = ns.cargBags
 
--- Lua Globals --
-local _G = _G
-
 local bagStrings = {
     ["backpack"]        = { 0 },
     ["bags"]            = { 1, 2, 3, 4 },

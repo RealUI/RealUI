@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["PLAYER_LOGIN"]["Bugger"] = function(self, F, C)
     _G.hooksecurefunc(_G.Bugger, "SetupFrame", function()
         local BuggerFrame = _G.BuggerFrame

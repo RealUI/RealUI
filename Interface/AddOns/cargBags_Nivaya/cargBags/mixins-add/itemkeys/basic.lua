@@ -24,9 +24,6 @@ DESCRIPTION:
 local _, ns = ...
 local cargBags = ns.cargBags
 
--- Lua Globals --
-local _G = _G
-
 -- Returns the numeric item id (12345)
 cargBags.itemKeys["id"] = function(i)
     return i.link and _G.tonumber(i.link:match("item:(%d+)"))

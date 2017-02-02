@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 _G.tinsert(mods["nibRealUI"], function(F, C)
     --print("HELLO WORLD!!!", F, C)
     local TimerTexture = [[Interface\AddOns\nibRealUI\Media\Skins\TimerTracker]]

@@ -1,8 +1,5 @@
 local ADDON_NAME, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI

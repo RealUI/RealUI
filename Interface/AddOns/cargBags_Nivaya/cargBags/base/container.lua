@@ -21,7 +21,6 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local _G = _G
 local next, ipairs = _G.next, _G.ipairs
 
 --[[!

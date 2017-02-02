@@ -27,9 +27,6 @@ DEPENDENCIES:
 ]]
 local _, ns = ...
 
--- Lua Globals --
-local _G = _G
-
 local cargBags = ns.cargBags
 local Container = cargBags.classes.Container
 local FilterSet = cargBags.classes.FilterSet

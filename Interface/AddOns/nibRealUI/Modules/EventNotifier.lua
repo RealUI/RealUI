@@ -2,9 +2,6 @@
 -- http://www.wowinterface.com/downloads/info21370-EventNotifier.html
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 local db

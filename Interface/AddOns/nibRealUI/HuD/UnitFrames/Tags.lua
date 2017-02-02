@@ -1,8 +1,5 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- Libs --
 local oUF = _G.oUFembed
 local tags = oUF.Tags

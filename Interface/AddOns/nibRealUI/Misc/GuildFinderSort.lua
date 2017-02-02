@@ -1,9 +1,6 @@
 ----------------------------------------------------------------------------------------
 --  Sorts the guild finder list(GuildFinderSorter by Tekkub)
 ----------------------------------------------------------------------------------------
--- Lua Globals --
-local _G = _G
-
 if _G.IsInGuild() then return end
 local indexmap
 

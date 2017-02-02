@@ -25,9 +25,6 @@ DESCRIPTION
 local _, ns = ...
 local cargBags = ns.cargBags
 
--- Lua Globals --
-local _G = _G
-
 local Implementation = cargBags.classes.Implementation
 local Container = cargBags.classes.Container
 local ItemButton = cargBags.classes.ItemButton

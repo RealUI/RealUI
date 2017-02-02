@@ -3,7 +3,6 @@ local options = private.options
 local debug = private.debug
 
 -- Lua Globals --
-local _G = _G
 local next, tostring = _G.next, _G.tostring
 
 -- Libs --

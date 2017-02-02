@@ -1,7 +1,6 @@
 local ADDON_NAME, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, type = _G.next, _G.type
 
 -- Libs --

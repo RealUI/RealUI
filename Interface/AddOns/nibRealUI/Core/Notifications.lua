@@ -2,9 +2,6 @@
 -- http://www.wowinterface.com/downloads/info21365-Notifications.html
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 

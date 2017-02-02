@@ -21,7 +21,6 @@
 local ADDON_NAME, ns = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 --- @class table

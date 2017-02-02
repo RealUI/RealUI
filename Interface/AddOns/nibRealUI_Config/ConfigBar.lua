@@ -4,7 +4,6 @@ local CloseHuDWindow = private.CloseHuDWindow
 local debug = private.debug
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 local tostring, tonumber = _G.tostring, _G.tonumber
 

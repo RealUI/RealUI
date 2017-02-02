@@ -3,7 +3,6 @@
 local _, mods = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)

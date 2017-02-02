@@ -27,7 +27,6 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 local Implementation = cargBags.classes.Implementation

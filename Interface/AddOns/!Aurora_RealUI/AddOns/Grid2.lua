@@ -1,7 +1,6 @@
 local _, mods = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 mods["PLAYER_LOGIN"]["Grid2"] = function(self, F, C)
