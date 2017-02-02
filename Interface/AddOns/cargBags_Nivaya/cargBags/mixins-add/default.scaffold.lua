@@ -134,12 +134,14 @@ local function ItemButton_Update(self, item)
             item.level = LIU:GetUpgradedItemLevel(item.link)
         end
 
-        if (item.equipLoc ~= "") and (item.level and item.level > 0) then
+        if _G.IsArtifactRelicItem(item.link) then
+            self.BottomString:SetFormattedText("+%d", _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(item.link) or 0)
+        elseif (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)
-            self.BottomString:SetTextColor(_G.GetItemQualityColor(item.rarity))
         else
             self.BottomString:SetText("")
         end
+        self.BottomString:SetTextColor(_G.GetItemQualityColor(item.rarity))
     else
         self.BottomString:SetText("")
     end

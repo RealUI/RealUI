@@ -55,7 +55,7 @@ function cbNivaya:ClassifyItem(item)
         itemClass[item.id] = "Junk"
     elseif item.typeID then
         -- type based filters
-        if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON)  then
+        if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON) or _G.IsArtifactRelicItem(item.link or item.id) then
             itemClass[item.id] = "Armor"
         elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
             itemClass[item.id] = "Quest"
