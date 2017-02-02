@@ -788,7 +788,6 @@ function Infobar:OnInitialize()
     --[[
     dbc = self.db.char
     dbg = self.db.global
-    ndb = RealUI.db.profile
     ndbc = RealUI.db.char
     ndbg = RealUI.db.global
     ]]
@@ -806,4 +805,8 @@ function Infobar:OnEnable()
     for name, dataObj in LDB:DataObjectIterator() do
         self:LibDataBroker_DataObjectCreated("OnEnable", name, dataObj, true)
     end
+
+    -- Adjust ActionBar positions
+    local ndb = RealUI.db.profile
+    ndb.positions[RealUI.cLayout]["ActionBarsBotY"] = BAR_HEIGHT -- self.frame:GetTop()
 end

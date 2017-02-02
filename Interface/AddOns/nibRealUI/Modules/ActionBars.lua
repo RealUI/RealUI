@@ -36,7 +36,8 @@ local buttonSizes = {
     stanceBar = 22,
 }
 local fixedSettings = {
-    padding = 1,
+    bt4Padding = 11,
+    buttonPadding = 1,
     buttons = 12
 }
 local function IsOdd(val)
@@ -52,10 +53,11 @@ function ActionBars:ApplyABSettings(tag)
     local barSettings = db[RealUI.cLayout]
     local numTopBars = barSettings.centerPositions - 1
     local numBotBars = 3 - numTopBars
+    local padding = fixedSettings.buttonPadding
 
     -- update grid position
     if RealUI:DoesAddonMove("Grid2") then
-        ndb.positions[RealUI.cLayout]["GridBottomY"] = RealUI.ModValue(-21.5 + 17.2 * numBotBars)
+        ndb.positions[RealUI.cLayout]["GridBottomY"] = (buttonSizes.bars + padding) * numBotBars + 3
     end
 
     local sidePositions
@@ -67,11 +69,8 @@ function ActionBars:ApplyABSettings(tag)
         sidePositions = {[4] = "LEFT", [5] = "LEFT"}
     end
 
-    local HuDY = ndb.positions[RealUI.cLayout]["HuDY"]
-    local ABY = ndb.positions[RealUI.cLayout]["ActionBarsY"] + (RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
     local BarSizes = {}
-    local padding = fixedSettings.padding
     local centerPadding = padding / 2
     local BarPadding = {top = {}, bottom = {}, sides = {}}
     for id = 1, 5 do
@@ -158,26 +157,26 @@ function ActionBars:ApplyABSettings(tag)
                 ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
-                local bottomYOfs = ndb.positions[RealUI.cLayout]["ActionBarsBotY"]
-                ActionBars:debug(id, "Y Offset", HuDY, ABY)
+                local topYOfs = ndb.positions[RealUI.cLayout]["HuDY"] + ndb.positions[RealUI.cLayout]["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
+                local bottomYOfs = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + buttonSizes.bars + fixedSettings.bt4Padding
+                ActionBars:debug(id, "Y Offset", topYOfs, bottomYOfs)
                 if barPlace == 1 then
                     if isTopBar then
-                        y = HuDY + ABY
+                        y = topYOfs
                     else
                         y = bottomYOfs
                     end
                 elseif barPlace == 2 then
+                        local pad = math.ceil(centerPadding + centerPadding)
                     if isTopBar then
-                        local pad = math.ceil(centerPadding + centerPadding)
-                        y = -(buttonSizes.bars + pad) + HuDY + ABY
+                        y = -(buttonSizes.bars + pad) + topYOfs
                     else
-                        local pad = math.ceil(centerPadding + centerPadding)
                         y = buttonSizes.bars + pad + bottomYOfs
                     end
                 else
                     local pad = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
-                        y = -((buttonSizes.bars * 2) + pad) + HuDY + ABY
+                        y = -((buttonSizes.bars * 2) + pad) + topYOfs
                     else
                         y = (buttonSizes.bars * 2) + pad + bottomYOfs
                     end
@@ -203,7 +202,7 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-            bar["padding"] = fixedSettings.padding - 10
+            bar["padding"] = fixedSettings.buttonPadding - 10
 
             if id < 4 then
                 bar["flyoutDirection"] = sidePositions[id] == "UP"
@@ -242,7 +241,7 @@ function ActionBars:ApplyABSettings(tag)
         -- if RealUI.cLayout == 1 then
             local numPetBarButtons = 10
             local pbX, pbY
-            local pbP = fixedSettings.padding
+            local pbP = fixedSettings.buttonPadding
             local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
 
             -- Calculate X
@@ -283,7 +282,7 @@ function ActionBars:ApplyABSettings(tag)
 
         -- Calculate X, Y
         eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-        eabY = RealUI.ModValue(55.5)
+        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 61
 
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
