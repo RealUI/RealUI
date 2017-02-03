@@ -62,7 +62,6 @@ local core do
             name = L["Infobar"],
             desc = "Information / Button display.",
             type = "group",
-            childGroups = "tab",
             args = {
                 header = {
                     name = L["Infobar"],
@@ -95,8 +94,8 @@ local core do
                     order = 31,
                 },
                 inCombat = {
-                    name = "In Combat Tooltips",
-                    desc = "Show tooltips in combat.",
+                    name = L["Infobar_CombatTooltips"],
+                    desc = L["Infobar_CombatTooltipsDesc"],
                     type = "toggle",
                     get = function() return db.combatTips end,
                     set = function(info, value)
@@ -111,7 +110,7 @@ local core do
                     set = function(info, value)
                         db.showLabel = value
                     end,
-                    order = 50,
+                    order = 42,
                 },
                 showIcon = {
                     name = "Show block icon",
@@ -120,11 +119,12 @@ local core do
                     set = function(info, value)
                         db.showIcon = value
                     end,
-                    order = 60,
+                    order = 44,
+                },
                 },
                 blockGap = {
-                    name = "Block Gap",
-                    desc = "The ammount of space between each block.",
+                    name = L["Infobar_BlockGap"],
+                    desc = L["Infobar_BlockGapDesc"],
                     type = "input",
                     width = "half",
                     get = function(info) return _G.tostring(db.blockGap) end,
@@ -133,75 +133,44 @@ local core do
                         db.blockGap = value
                         Infobar:UpdatePositions()
                     end,
-                    order = 70,
+                    order = 52,
+            },
+                blocks = {
+                    name = "Blocks",
+            type = "group",
+                    inline = true,
+                    order = 60,
+            args = {
+                        realui = {
+                            name = "RealUI Blocks",
+                    type = "header",
+                    order = 0,
                 },
+                        other = {
+                            name = "3rd Party Blocks",
+                    type = "header",
+                            order = 10,
+            },
+        }
+                }
             },
         }
 
-        local realui = {
-            name = "RealUI",
-            type = "group",
-            order = 100,
-            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            args = {
-                gap1 = {
-                    name = L["Infobar_Left"],
-                    type = "header",
-                    order = 0,
-                },
-                gap2 = {
-                    name = L["Infobar_Right"],
-                    type = "header",
-                    order = 50,
-                },
-            },
-        }
-        local others = {
-            name = "Others",
-            type = "group",
-            order = 200,
-            disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-            args = {
-                gap1 = {
-                    name = L["Infobar_Left"],
-                    type = "header",
-                    order = 0,
-                },
-                gap2 = {
-                    name = L["Infobar_Right"],
-                    type = "header",
-                    order = 50,
-                },
-            },
-        }
         for name, dataObj in Infobar.LDB:DataObjectIterator() do
+            if dataObj.type == "data source" or dataObj.type == "RealUI" then
+                local blockInfo, blockOrder
+                local displayName = dataObj.name or name
             if dataObj.type == "RealUI" then
-                local blockInfo = db.blocks.realui[name]
-                if blockInfo.enabled ~= -1 then
-                    -- Create base options for RealUI
-                    realui.args[name] = {
-                        name = dataObj.name,
-                        desc = L["General_EnabledDesc"]:format(dataObj.name),
-                        type = "toggle",
-                        get = function() return blockInfo.enabled end,
-                        set = function(data, value)
-                            if value then
-                                Infobar:AddBlock(name, dataObj, blockInfo)
+                    blockInfo = db.blocks.realui[name]
+                    blockOrder = 1
                             else
-                                Infobar:RemoveBlock(name, dataObj, blockInfo)
+                    blockInfo = db.blocks.others[name]
+                    blockOrder = 11
                             end
-                            blockInfo.enabled = value
-                        end,
-                        order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
-                    }
-                    infobar.args.realui = realui
-                end
-            elseif dataObj.type == "data source" then
-                local blockInfo = db.blocks.others[name]
-                -- Create base options for others
-                others.args[name] = {
-                    name = name,
-                    desc = L["General_EnabledDesc"]:format(name),
+                if blockInfo.enabled ~= -1 then
+                    infobar.args.blocks.args[name] = {
+                        name = displayName,
+                        desc = L["General_EnabledDesc"]:format(displayName),
                     type = "toggle",
                     get = function() return blockInfo.enabled end,
                     set = function(data, value)
@@ -212,9 +181,9 @@ local core do
                         end
                         blockInfo.enabled = value
                     end,
-                    order = blockInfo.side == "left" and blockInfo.index or blockInfo.index + 50,
+                        order = blockOrder,
                 }
-                infobar.args.others = others
+                end
             end
         end
     end

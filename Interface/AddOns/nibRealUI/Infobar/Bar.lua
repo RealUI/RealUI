@@ -217,7 +217,7 @@ function BlockMixin:RestorePosition()
     dock:AddBlock(self, blockInfo.index)
 end
 
-local function CreateNewBlock(name, dataObj)
+local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
     block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
@@ -248,7 +248,7 @@ local function CreateNewBlock(name, dataObj)
     Infobar:debug("text", width)
 
 
-    if db.showIcon and dataObj.icon then
+    if dataObj.icon then
         local icon, iconWidth
         if dataObj.iconFont then
             icon = block:CreateFontString(nil, "ARTWORK")
@@ -271,20 +271,23 @@ local function CreateNewBlock(name, dataObj)
             end
             iconWidth = size
         end
+        block.icon = icon
+
+        if db.showIcon then
         icon:SetPoint("LEFT", space, 0)
         block.checkWidth = iconWidth < 1
 
-        block.icon = icon
         width = width + iconWidth
         Infobar:debug("icon", width)
     end
+    end
 
-    if db.showLabel then
         local label = block:CreateFontString(nil, "ARTWORK")
         label:SetFont(font, size, outline)
         label:SetTextColor(1, 1, 1)
         label:SetText(dataObj.label or dataObj.name)
-        if db.showIcon and dataObj.icon then
+    if db.showLabel then
+        if db.showIcon then
             label:SetPoint("LEFT", block.icon, "RIGHT", 0, 0)
         else
             label:SetPoint("LEFT", space, 0)
@@ -331,7 +334,7 @@ function Infobar:AddBlock(name, dataObj, blockInfo)
     self:debug("Infobar:AddBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if not block then
-        block = CreateNewBlock(name, dataObj)
+        block = CreateNewBlock(name, dataObj, blockInfo)
     end
 
     if dataObj.events then
@@ -708,19 +711,24 @@ function Infobar:OnInitialize()
             specgear = specgear,
         },
         profile = {
-            combatTips = false,
-            blockGap = 1,
             showLabel = false,
             showIcon = true,
+            combatTips = false,
+            blockGap = 1,
             blocks = {
                 others = {
-                    ['*'] = {
+                    ["*"] = {
+                        enabled = false,
                         side = "left",
                         index = 10,
-                        enabled = false,
                     },
                 },
                 realui = {
+                    ["**"] = {
+                        enabled = true,
+                        side = "left",
+                        index = 10,
+                    },
                     -- Left
                     start = {
                         side = "left",
@@ -730,22 +738,18 @@ function Infobar:OnInitialize()
                     guild = {
                         side = "left",
                         index = 2,
-                        enabled = true
                     },
                     friends = {
                         side = "left",
                         index = 3,
-                        enabled = true
                     },
                     durability = {
                         side = "left",
                         index = 4,
-                        enabled = true
                     },
                     progress = {
                         side = "left",
                         index = 5,
-                        enabled = true
                     },
 
                     -- Right
@@ -757,27 +761,22 @@ function Infobar:OnInitialize()
                     mail = {
                         side = "right",
                         index = 2,
-                        enabled = true
                     },
                     bags = {
                         side = "right",
                         index = 3,
-                        enabled = true
                     },
                     spec = {
                         side = "right",
                         index = 4,
-                        enabled = true
                     },
                     currency = {
                         side = "right",
                         index = 5,
-                        enabled = true
                     },
                     netstats = {
                         side = "right",
                         index = 6,
-                        enabled = true
                     },
                 },
             },
