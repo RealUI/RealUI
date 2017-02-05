@@ -687,16 +687,12 @@ function Infobar:Lock()
     self.locked = true
 end
 function Infobar:SettingsUpdate(setting, dataObj)
-    print("SettingsUpdate", setting)
     if setting == "statusBar" then
         local watch = self.frame.watch
         watch.main:SetShown(db.showBars)
         for i = 1, 2 do
             watch[i]:SetShown(db.showBars)
         end
-    elseif dataObj then
-        local block = blocksByData[dataObj]
-        block:AdjustElements()
     else
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
