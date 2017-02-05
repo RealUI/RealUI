@@ -217,13 +217,13 @@ function BlockMixin:RestorePosition()
     dock:AddBlock(self, blockInfo.index)
 end
 
-function BlockMixin:AdjustElements()
+function BlockMixin:AdjustElements(blockInfo)
     local space = RealUI.ModValue(2)
     local width = self.text:GetStringWidth() + space
     self.text:SetPoint("RIGHT", -space, 0)
 
     if self.icon then
-        if db.showIcon then
+        if blockInfo.showIcon then
             self.icon:SetPoint("LEFT", space, 0)
             self.icon:Show()
             local iconWidth = (self.icon.isFont and self.icon:GetStringWidth() or self.icon:GetWidth())
@@ -236,8 +236,8 @@ function BlockMixin:AdjustElements()
         end
     end
 
-    if db.showLabel then
-        if self.icon and db.showIcon then
+    if blockInfo.showLabel then
+        if self.icon and blockInfo.showIcon then
             self.label:SetPoint("LEFT", self.icon, "RIGHT", 0, 0)
         else
             self.label:SetPoint("LEFT", space, 0)
@@ -329,7 +329,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
 
     Infobar:debug("SetHeight", BAR_HEIGHT)
     block:SetHeight(BAR_HEIGHT)
-    block:AdjustElements()
+    block:AdjustElements(blockInfo)
     block:SetClampedToScreen(true)
     return block
 end
@@ -337,7 +337,7 @@ end
 function Infobar:AddBlock(name, dataObj, blockInfo)
     self:debug("Infobar:AddBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
-    if not block then
+    if not block or block.isFake then
         block = CreateNewBlock(name, dataObj, blockInfo)
     end
 
@@ -362,6 +362,8 @@ function Infobar:AddBlock(name, dataObj, blockInfo)
     if dataObj.OnEnable then
         dataObj.OnEnable(block)
     end
+
+    return block
 end
 
 function Infobar:RemoveBlock(name, dataObj, blockInfo)
@@ -380,15 +382,23 @@ end
 
 function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
     --self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
-    local blockInfo = self:GetBlockInfo(name, dataObj)
-    if blockInfo and blockInfo.enabled then
-        self:AddBlock(name, dataObj, blockInfo)
+    if dataObj.type == "data source" or dataObj.type == "RealUI" then
+        local blockInfo = self:GetBlockInfo(name, dataObj)
+        if blockInfo and blockInfo.enabled then
+            self:AddBlock(name, dataObj, blockInfo)
+        else
+            blocksByData[dataObj] = {
+                name = name,
+                isFake = true
+            }
+        end
     end
 end
 function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataObj)
     --self:debug("AttributeChanged:", event, name, attr, value, dataObj.type)
     local block = blocksByData[dataObj]
-    if block then
+    if block and not block.isFake then
+        local blockInfo = self:GetBlockInfo(name, dataObj)
         if attr == "value" or attr == "suffix" or attr == "text" then
             if dataObj.suffix and dataObj.suffix ~= "" then
                 block.text:SetText(dataObj.value .. " " .. dataObj.suffix)
@@ -396,13 +406,13 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
                 block.text:SetText(dataObj.value or dataObj.text)
             end
         end
-        if db.showLabel and attr:find("label") then
+        if blockInfo.showLabel and attr:find("label") then
             block.label:SetText(dataObj.label)
             if dataObj.labelR then
                 block.label:SetTextColor(dataObj.labelR, dataObj.labelG, dataObj.labelB)
             end
         end
-        if db.showIcon and attr:find("icon") then
+        if blockInfo.showIcon and attr:find("icon") then
             local icon = block.icon
             if icon.isFont then
                 icon:SetText(dataObj.icon)
@@ -419,10 +429,13 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
                 end
             end
         end
-        block:AdjustElements()
+        block:AdjustElements(blockInfo)
     end
 end
 
+function Infobar:IterateBlocks()
+    return next, blocksByData
+end
 
 ---------------------
 -- Dock Management --
@@ -673,13 +686,17 @@ function Infobar:Lock()
 
     self.locked = true
 end
-function Infobar:SettingsUpdate(setting)
+function Infobar:SettingsUpdate(setting, dataObj)
+    print("SettingsUpdate", setting)
     if setting == "statusBar" then
         local watch = self.frame.watch
         watch.main:SetShown(db.showBars)
         for i = 1, 2 do
             watch[i]:SetShown(db.showBars)
         end
+    elseif dataObj then
+        local block = blocksByData[dataObj]
+        block:AdjustElements()
     else
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
@@ -722,14 +739,14 @@ function Infobar:OnInitialize()
         },
         profile = {
             showBars = true,
-            showLabel = false,
-            showIcon = true,
             combatTips = false,
             blockGap = 1,
             blocks = {
                 others = {
                     ["*"] = {
                         enabled = false,
+                        showLabel = false,
+                        showIcon = true,
                         side = "left",
                         index = 10,
                     },
@@ -737,6 +754,8 @@ function Infobar:OnInitialize()
                 realui = {
                     ["**"] = {
                         enabled = true,
+                        showLabel = false,
+                        showIcon = true,
                         side = "left",
                         index = 10,
                     },
@@ -786,6 +805,7 @@ function Infobar:OnInitialize()
                         index = 5,
                     },
                     netstats = {
+                        showIcon = false,
                         side = "right",
                         index = 6,
                     },

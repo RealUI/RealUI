@@ -58,6 +58,7 @@ local core do
         local MODNAME = "Infobar"
         local Infobar = RealUI:GetModule(MODNAME)
         local db = Infobar.db.profile
+        local allEnabled, allLabeled, allIcons
         infobar = {
             name = L["Infobar"],
             desc = "Information / Button display.",
@@ -103,26 +104,6 @@ local core do
                     end,
                     order = 40,
                 },
-                showLabel = {
-                    name = "Show block label",
-                    type = "toggle",
-                    get = function() return db.showLabel end,
-                    set = function(info, value)
-                        db.showLabel = value
-                        Infobar:SettingsUpdate(info[#info])
-                    end,
-                    order = 42,
-                },
-                showIcon = {
-                    name = "Show block icon",
-                    type = "toggle",
-                    get = function() return db.showIcon end,
-                    set = function(info, value)
-                        db.showIcon = value
-                        Infobar:SettingsUpdate(info[#info])
-                    end,
-                    order = 44,
-                },
                 statusBar = {
                     name = L["Infobar_ShowStatusBar"],
                     desc = L["Infobar_ShowStatusBarDesc"],
@@ -154,50 +135,167 @@ local core do
                     inline = true,
                     order = 60,
                     args = {
+                        enableAll = {
+                            name = L["Infobar_AllBlocks"],
+                            desc = L["General_EnabledDesc"]:format(L["Infobar_AllBlocks"]),
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allEnabled end,
+                            set = function(data, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        if value then
+                                            Infobar:AddBlock(block.name, dataObj, blockInfo)
+                                        else
+                                            Infobar:RemoveBlock(block.name, dataObj, blockInfo)
+                                        end
+                                        blockInfo.enabled = not not value
+                                    end
+                                end
+                                allEnabled = not not value
+                            end,
+                            order = 1,
+                        },
+                        showLabel = {
+                            name = L["Infobar_ShowLabel"],
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allLabeled end,
+                            set = function(info, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        blockInfo.showLabel = not not value
+                                        block:AdjustElements(blockInfo)
+                                    end
+                                end
+                                allLabeled = not not value
+                            end,
+                            order = 2,
+                        },
+                        showIcon = {
+                            name = L["Infobar_ShowIcon"],
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allIcons end,
+                            set = function(info, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        blockInfo.showIcon = not not value
+                                        block:AdjustElements(blockInfo)
+                                    end
+                                end
+                                allIcons = not not value
+                            end,
+                            order = 3,
+                        },
                         realui = {
                             name = "RealUI Blocks",
                             type = "header",
-                            order = 0,
+                            order = 10,
                         },
                         other = {
                             name = "3rd Party Blocks",
                             type = "header",
-                            order = 10,
+                            order = 110,
                         },
                     }
                 }
             },
         }
 
-        for name, dataObj in Infobar.LDB:DataObjectIterator() do
-            if dataObj.type == "data source" or dataObj.type == "RealUI" then
-                local blockInfo, blockOrder
+        local realuiOrder, otherOrder = 11, 111
+        local numBlocks, numEnabled, numLabeled, numIcons = 0, 0, 0, 0
+        for dataObj, block in Infobar:IterateBlocks() do
+            local name = block.name
+            local blockInfo = Infobar:GetBlockInfo(name, dataObj)
+            if blockInfo.enabled ~= -1 then
+                numBlocks = numBlocks + 1
                 local displayName = dataObj.name or name
+                local blockOrder = dataObj.type == "RealUI" and realuiOrder or otherOrder
+                infobar.args.blocks.args[name.."Toggle"] = {
+                    name = displayName,
+                    desc = L["General_EnabledDesc"]:format(displayName),
+                    type = "toggle",
+                    get = function() return blockInfo.enabled end,
+                    set = function(data, value)
+                        if value then
+                            block = Infobar:AddBlock(name, dataObj, blockInfo)
+                        else
+                            Infobar:RemoveBlock(name, dataObj, blockInfo)
+                        end
+                        allEnabled = nil
+                        blockInfo.enabled = value
+                    end,
+                    order = blockOrder,
+                }
+                infobar.args.blocks.args[name.."Label"] = {
+                    name = L["Infobar_ShowLabel"],
+                    type = "toggle",
+                    disabled = function() return not blockInfo.enabled end,
+                    get = function() return blockInfo.showLabel end,
+                    set = function(data, value)
+                        allLabeled = nil
+                        blockInfo.showLabel = value
+                        block:AdjustElements(blockInfo)
+                    end,
+                    order = blockOrder + 1,
+                }
+                infobar.args.blocks.args[name.."Icon"] = {
+                    name = L["Infobar_ShowIcon"],
+                    type = "toggle",
+                    disabled = function() return not blockInfo.enabled end,
+                    get = function() return blockInfo.showIcon end,
+                    set = function(data, value)
+                        allIcons = nil
+                        blockInfo.showIcon = value
+                        block:AdjustElements(blockInfo)
+                    end,
+                    order = blockOrder + 2,
+                }
                 if dataObj.type == "RealUI" then
-                    blockInfo = db.blocks.realui[name]
-                    blockOrder = 1
+                    realuiOrder = realuiOrder + 5
                 else
-                    blockInfo = db.blocks.others[name]
-                    blockOrder = 11
+                    otherOrder = otherOrder + 5
                 end
-                if blockInfo.enabled ~= -1 then
-                    infobar.args.blocks.args[name] = {
-                        name = displayName,
-                        desc = L["General_EnabledDesc"]:format(displayName),
-                        type = "toggle",
-                        get = function() return blockInfo.enabled end,
-                        set = function(data, value)
-                            if value then
-                                Infobar:AddBlock(name, dataObj, blockInfo)
-                            else
-                                Infobar:RemoveBlock(name, dataObj, blockInfo)
-                            end
-                            blockInfo.enabled = value
-                        end,
-                        order = blockOrder,
-                    }
+
+                if blockInfo.enabled then
+                    numEnabled = numEnabled + 1
+                end
+
+                if  blockInfo.showLabel then
+                    numLabeled = numLabeled + 1
+                end
+
+                if blockInfo.showIcon then
+                    numIcons = numIcons + 1
                 end
             end
+        end
+        if numEnabled == 0 then
+            allEnabled = false
+        elseif numEnabled == numBlocks then
+            allEnabled = true
+        else
+            allEnabled = nil
+        end
+
+        if numLabeled == 0 then
+            allLabeled = false
+        elseif numLabeled == numBlocks then
+            allLabeled = true
+        else
+            allLabeled = nil
+        end
+
+        if numIcons == 0 then
+            allIcons = false
+        elseif numIcons == numBlocks then
+            allIcons = true
+        else
+            allIcons = nil
         end
     end
     local playerShields do
