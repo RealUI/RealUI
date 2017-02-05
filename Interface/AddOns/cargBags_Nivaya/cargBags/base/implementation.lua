@@ -289,7 +289,7 @@ end
 ]]
 function Implementation:SetButton(bagID, slotID, button)
     self.buttons[toBagSlot(bagID, slotID)] = button
-    if not button then
+    if ItemInfo[bagID] and not button then
         ItemInfo[bagID][slotID] = nil
     end
 end
