@@ -217,6 +217,42 @@ function BlockMixin:RestorePosition()
     dock:AddBlock(self, blockInfo.index)
 end
 
+function BlockMixin:AdjustElements()
+    local space = RealUI.ModValue(2)
+    local width = self.text:GetStringWidth() + space
+    self.text:SetPoint("RIGHT", -space, 0)
+
+    if self.icon then
+        if db.showIcon then
+            self.icon:SetPoint("LEFT", space, 0)
+            self.icon:Show()
+            local iconWidth = (self.icon.isFont and self.icon:GetStringWidth() or self.icon:GetWidth())
+
+            self.checkWidth = iconWidth < 1
+            width = width + space + iconWidth
+            Infobar:debug("icon", width)
+        else
+            self.icon:Hide()
+        end
+    end
+
+    if db.showLabel then
+        if self.icon and db.showIcon then
+            self.label:SetPoint("LEFT", self.icon, "RIGHT", 0, 0)
+        else
+            self.label:SetPoint("LEFT", space, 0)
+        end
+
+        self.label:Show()
+        width = width + space + self.label:GetStringWidth()
+        Infobar:debug("label", self.dataObj.label, width)
+    else
+        self.label:Hide()
+    end
+
+    self:SetWidth(width)
+end
+
 local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
@@ -224,7 +260,6 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
-    local width, space = 0, RealUI.ModValue(2)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.25)
@@ -236,20 +271,15 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     local text = block:CreateFontString(nil, "ARTWORK")
     text:SetFont(font, size, outline)
     text:SetTextColor(1, 1, 1)
-    text:SetPoint("RIGHT", -space, 0)
-    text:SetText(dataObj.text)
     if dataObj.suffix and dataObj.suffix ~= "" then
         text:SetText(dataObj.value .. " " .. dataObj.suffix)
     else
         text:SetText(dataObj.value or dataObj.text)
     end
     block.text = text
-    width = width + text:GetStringWidth()
-    Infobar:debug("text", width)
-
 
     if dataObj.icon then
-        local icon, iconWidth
+        local icon
         if dataObj.iconFont then
             icon = block:CreateFontString(nil, "ARTWORK")
             icon:SetFont(dataObj.iconFont.font, dataObj.iconFont.size, dataObj.iconFont.outline)
@@ -257,7 +287,6 @@ local function CreateNewBlock(name, dataObj, blockInfo)
             if dataObj.iconR then
                 icon:SetTextColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
             end
-            iconWidth = icon:GetStringWidth()
             icon.isFont = true
         else
             icon = block:CreateTexture(nil, "ARTWORK")
@@ -269,34 +298,15 @@ local function CreateNewBlock(name, dataObj, blockInfo)
             if dataObj.iconCoords then
                 icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
             end
-            iconWidth = size
         end
         block.icon = icon
-
-        if db.showIcon then
-        icon:SetPoint("LEFT", space, 0)
-        block.checkWidth = iconWidth < 1
-
-        width = width + iconWidth
-        Infobar:debug("icon", width)
-    end
     end
 
         local label = block:CreateFontString(nil, "ARTWORK")
         label:SetFont(font, size, outline)
         label:SetTextColor(1, 1, 1)
         label:SetText(dataObj.label or dataObj.name)
-    if db.showLabel then
-        if db.showIcon then
-            label:SetPoint("LEFT", block.icon, "RIGHT", 0, 0)
-        else
-            label:SetPoint("LEFT", space, 0)
-        end
-
         block.label = label
-        width = width + label:GetStringWidth()
-        Infobar:debug("label", dataObj.label, width)
-    end
 
     local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
     local highlight = block:CreateTexture(nil, "ARTWORK")
@@ -317,15 +327,9 @@ local function CreateNewBlock(name, dataObj, blockInfo)
 
     block:SetScript("OnUpdate", block.OnUpdate)
 
-    if db.showIcon or db.showLabel then
-        width = width + space
-    end
-    if dataObj.text then
-        width = width + space
-    end
-
-    Infobar:debug("SetSize", width, BAR_HEIGHT)
-    block:SetSize(width, BAR_HEIGHT)
+    Infobar:debug("SetHeight", BAR_HEIGHT)
+    block:SetHeight(BAR_HEIGHT)
+    block:AdjustElements()
     block:SetClampedToScreen(true)
     return block
 end
@@ -348,7 +352,6 @@ function Infobar:AddBlock(name, dataObj, blockInfo)
     if blockInfo.side then
         block.side = blockInfo.side
         local dock = self.frame[blockInfo.side]
-        self:debug("AddBlock", blockInfo.side, blockInfo.index)
         if blockInfo.index == 1 then
             dock:SetPrimary(block)
         else
@@ -387,16 +390,11 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
     local block = blocksByData[dataObj]
     if block then
         if attr == "value" or attr == "suffix" or attr == "text" then
-            local blockWidth = block:GetWidth()
-            local oldStringWidth = block.text:GetStringWidth()
             if dataObj.suffix and dataObj.suffix ~= "" then
                 block.text:SetText(dataObj.value .. " " .. dataObj.suffix)
             else
                 block.text:SetText(dataObj.value or dataObj.text)
             end
-            local newStringWidth = block.text:GetStringWidth()
-
-            block:SetWidth((blockWidth - oldStringWidth) + newStringWidth)
         end
         if db.showLabel and attr:find("label") then
             block.label:SetText(dataObj.label)
@@ -421,6 +419,7 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
                 end
             end
         end
+        block:AdjustElements()
     end
 end
 
@@ -503,6 +502,9 @@ function DockMixin:UpdateBlocks(forceUpdate)
     local lastBlock = nil;
 
     for index, block in ipairs(self.DOCKED_BLOCKS) do
+        if forceUpdate then
+            block:AdjustElements()
+        end
         block:Show();
 
         if ( lastBlock ) then
@@ -671,7 +673,7 @@ function Infobar:Lock()
 
     self.locked = true
 end
-function Infobar:UpdatePositions()
+function Infobar:SettingsUpdate(setting)
     self.frame.left:UpdateBlocks(true)
     self.frame.right:UpdateBlocks(true)
 end

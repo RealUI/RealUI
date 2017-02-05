@@ -109,6 +109,7 @@ local core do
                     get = function() return db.showLabel end,
                     set = function(info, value)
                         db.showLabel = value
+                        Infobar:SettingsUpdate(info[#info])
                     end,
                     order = 42,
                 },
@@ -118,6 +119,7 @@ local core do
                     get = function() return db.showIcon end,
                     set = function(info, value)
                         db.showIcon = value
+                        Infobar:SettingsUpdate(info[#info])
                     end,
                     order = 44,
                 },
@@ -131,7 +133,7 @@ local core do
                     set = function(info, value)
                         value = RealUI:ValidateOffset(value)
                         db.blockGap = value
-                        Infobar:UpdatePositions()
+                        Infobar:SettingsUpdate(info[#info])
                     end,
                     order = 52,
             },

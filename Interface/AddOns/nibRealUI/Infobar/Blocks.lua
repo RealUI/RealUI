@@ -668,7 +668,6 @@ function Infobar:CreateBlocks()
         LDB:NewDataObject("clock", {
             name = _G.TIMEMANAGER_TITLE,
             type = "RealUI",
-            text = 1,
             value = 1,
             suffix = "",
             OnEnable = function(block)
@@ -2146,7 +2145,7 @@ function Infobar:CreateBlocks()
         }
 
         LDB:NewDataObject("currency", {
-            name = "Currency",
+            name = _G.CURRENCY,
             type = "RealUI",
             icon = [[Interface\MoneyFrame\UI-GoldIcon]],
             iconCoords = {.08, .92, .08, .92},
@@ -2301,7 +2300,10 @@ function Infobar:CreateBlocks()
         LDB:NewDataObject("netstats", {
             name = L["Sys_SysInfo"],
             type = "RealUI",
-            text = "FPS",
+            icon = fa["microchip"],
+            iconFont = iconFont,
+            label = "FPS/Ping",
+            text = "FPS/Ping",
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
                 --Infobar:debug("progress: OnEnter", block.side, ...)
