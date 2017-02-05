@@ -302,11 +302,11 @@ local function CreateNewBlock(name, dataObj, blockInfo)
         block.icon = icon
     end
 
-        local label = block:CreateFontString(nil, "ARTWORK")
-        label:SetFont(font, size, outline)
-        label:SetTextColor(1, 1, 1)
-        label:SetText(dataObj.label or dataObj.name)
-        block.label = label
+    local label = block:CreateFontString(nil, "ARTWORK")
+    label:SetFont(font, size, outline)
+    label:SetTextColor(1, 1, 1)
+    label:SetText(dataObj.label or dataObj.name)
+    block.label = label
 
     local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
     local highlight = block:CreateTexture(nil, "ARTWORK")
@@ -674,8 +674,16 @@ function Infobar:Lock()
     self.locked = true
 end
 function Infobar:SettingsUpdate(setting)
-    self.frame.left:UpdateBlocks(true)
-    self.frame.right:UpdateBlocks(true)
+    if setting == "statusBar" then
+        local watch = self.frame.watch
+        watch.main:SetShown(db.showBars)
+        for i = 1, 2 do
+            watch[i]:SetShown(db.showBars)
+        end
+    else
+        self.frame.left:UpdateBlocks(true)
+        self.frame.right:UpdateBlocks(true)
+    end
 end
 
 function Infobar:GetBlockInfo(name, dataObj)
@@ -713,6 +721,7 @@ function Infobar:OnInitialize()
             specgear = specgear,
         },
         profile = {
+            showBars = true,
             showLabel = false,
             showIcon = true,
             combatTips = false,

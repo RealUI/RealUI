@@ -524,6 +524,7 @@ local CreateTextureMarkup do
 end
 
 function Infobar:CreateBlocks()
+    local db = Infobar.db.profile
     local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
 
@@ -1569,39 +1570,41 @@ function Infobar:CreateBlocks()
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
-            local watch = Infobar.frame.watch
-            Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
+            if db.showBars then
+                local watch = Infobar.frame.watch
+                Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
-            local main = watch.main
-            local r, g, b = watchStates[dbc.progressState]:GetColor()
-            main:SetStatusBarColor(r, g, b, 0.5)
-            main:SetMinMaxValues(0, maxValue)
-            main:SetValue(curValue)
-            main:Show()
+                local main = watch.main
+                local r, g, b = watchStates[dbc.progressState]:GetColor()
+                main:SetStatusBarColor(r, g, b, 0.5)
+                main:SetMinMaxValues(0, maxValue)
+                main:SetValue(curValue)
+                main:Show()
 
-            if _G.type(otherValue) == "number" then
-                local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                r, g, b = watchStates[dbc.progressState]:GetColor(true)
-                main.rested:SetColorTexture(r, g, b, 0.5)
-                main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
-                main.rested:Show()
-            end
-
-            local nextState = watchStates[dbc.progressState]:GetNext()
-            for i = 1, 2 do
-                local bar = watch[i]
-                if nextState ~= dbc.progressState then
-                    curValue, maxValue = watchStates[nextState]:GetStats()
-                    Infobar:debug("progress:"..i, nextState, curValue, maxValue)
-
-                    bar:SetStatusBarColor(watchStates[nextState]:GetColor())
-                    bar:SetMinMaxValues(0, maxValue)
-                    bar:SetValue(curValue)
-                    bar:Show()
-                else
-                    bar:Hide()
+                if _G.type(otherValue) == "number" then
+                    local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
+                    r, g, b = watchStates[dbc.progressState]:GetColor(true)
+                    main.rested:SetColorTexture(r, g, b, 0.5)
+                    main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                    main.rested:Show()
                 end
-                nextState = watchStates[nextState]:GetNext()
+
+                local nextState = watchStates[dbc.progressState]:GetNext()
+                for i = 1, 2 do
+                    local bar = watch[i]
+                    if nextState ~= dbc.progressState then
+                        curValue, maxValue = watchStates[nextState]:GetStats()
+                        Infobar:debug("progress:"..i, nextState, curValue, maxValue)
+
+                        bar:SetStatusBarColor(watchStates[nextState]:GetColor())
+                        bar:SetMinMaxValues(0, maxValue)
+                        bar:SetValue(curValue)
+                        bar:Show()
+                    else
+                        bar:Hide()
+                    end
+                    nextState = watchStates[nextState]:GetNext()
+                end
             end
         end
 
@@ -1638,6 +1641,7 @@ function Infobar:CreateBlocks()
                 if not watchStates[dbc.progressState]:IsValid() then
                     UpdateState(block)
                 end
+                UpdateProgress(block)
 
                 artData.RegisterCallback(block, "ARTIFACT_POWER_CHANGED", "OnEvent")
                 artData.RegisterCallback(block, "ARTIFACT_ACTIVE_CHANGED", "OnEvent")

@@ -123,6 +123,17 @@ local core do
                     end,
                     order = 44,
                 },
+                statusBar = {
+                    name = L["Infobar_ShowStatusBar"],
+                    desc = L["Infobar_ShowStatusBarDesc"],
+                    type = "toggle",
+                    disabled = function() return not db.blocks.realui.progress.enabled end,
+                    get = function() return db.showBars end,
+                    set = function(info, value)
+                        db.showBars = value
+                        Infobar:SettingsUpdate(info[#info])
+                    end,
+                    order = 50,
                 },
                 blockGap = {
                     name = L["Infobar_BlockGap"],
@@ -136,24 +147,24 @@ local core do
                         Infobar:SettingsUpdate(info[#info])
                     end,
                     order = 52,
-            },
+                },
                 blocks = {
                     name = "Blocks",
-            type = "group",
+                    type = "group",
                     inline = true,
                     order = 60,
-            args = {
+                    args = {
                         realui = {
                             name = "RealUI Blocks",
-                    type = "header",
-                    order = 0,
-                },
+                            type = "header",
+                            order = 0,
+                        },
                         other = {
                             name = "3rd Party Blocks",
-                    type = "header",
+                            type = "header",
                             order = 10,
-            },
-        }
+                        },
+                    }
                 }
             },
         }
@@ -162,29 +173,29 @@ local core do
             if dataObj.type == "data source" or dataObj.type == "RealUI" then
                 local blockInfo, blockOrder
                 local displayName = dataObj.name or name
-            if dataObj.type == "RealUI" then
+                if dataObj.type == "RealUI" then
                     blockInfo = db.blocks.realui[name]
                     blockOrder = 1
-                            else
+                else
                     blockInfo = db.blocks.others[name]
                     blockOrder = 11
-                            end
+                end
                 if blockInfo.enabled ~= -1 then
                     infobar.args.blocks.args[name] = {
                         name = displayName,
                         desc = L["General_EnabledDesc"]:format(displayName),
-                    type = "toggle",
-                    get = function() return blockInfo.enabled end,
-                    set = function(data, value)
-                        if value then
-                            Infobar:AddBlock(name, dataObj, blockInfo)
-                        else
-                            Infobar:RemoveBlock(name, dataObj, blockInfo)
-                        end
-                        blockInfo.enabled = value
-                    end,
+                        type = "toggle",
+                        get = function() return blockInfo.enabled end,
+                        set = function(data, value)
+                            if value then
+                                Infobar:AddBlock(name, dataObj, blockInfo)
+                            else
+                                Infobar:RemoveBlock(name, dataObj, blockInfo)
+                            end
+                            blockInfo.enabled = value
+                        end,
                         order = blockOrder,
-                }
+                    }
                 end
             end
         end
