@@ -368,7 +368,7 @@ function Implementation:GetItemInfo(bagID, slotID)
 
             item.speciesID = tonumber(speciesID) or 0
         else
-            item.name, item.link, item.rarity, _, item.minLevel, item.type, item.subType, item.stackCount, item.equipLoc, texture, item.sellPrice, item.typeID, item.subTypeID = _G.GetItemInfo(clink)
+            item.name, item.link, item.rarity, item.level, item.minLevel, item.type, item.subType, item.stackCount, item.equipLoc, texture, item.sellPrice, item.typeID, item.subTypeID = _G.GetItemInfo(clink)
             if not item.name then
                 item.id, item.type, item.subType, item.equipLoc, texture, item.typeID, item.subTypeID = _G.GetItemInfoInstant(clink)
                 if not infoGather[item.id] then infoGather[item.id] = {} end
@@ -381,8 +381,10 @@ function Implementation:GetItemInfo(bagID, slotID)
             if item.typeID == _G.LE_ITEM_CLASS_QUESTITEM then
                 item.isQuestItem, item.questID, item.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
             end
+            if item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
+                item.level = LIU:GetUpgradedItemLevel(item.link)
+            end
             item.isInSet, item.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
-            item.level = LIU:GetUpgradedItemLevel(item.link)
             item.texture = item.texture or texture
         end
     end

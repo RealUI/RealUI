@@ -129,7 +129,7 @@ local function ItemButton_Update(self, item)
 
     -- Item Level
     if item.link then
-        if LIU then
+        if LIU and item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
             item.level = LIU:GetUpgradedItemLevel(item.link)
         end
 
