@@ -202,7 +202,7 @@ RealUI.minipatches = {
         RealUINamespace.Pitch = nil
 
         -- Consolidate currency DBs
-        local currency = RealUINamespace.CurrencyTip.global.currency
+        local currency = RealUINamespace.CurrencyTip and RealUINamespace.CurrencyTip.global.currency or {}
         for realmName, realm in next, RealUINamespace.InfoLine.global.currency do
             if not currency[realmName] then currency[realmName] = {} end
             for factionName, faction in next, realm do
