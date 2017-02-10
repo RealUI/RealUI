@@ -53,6 +53,24 @@ local other do
                 type = "group",
                 order = 10,
                 args = {
+                    layout = {
+                        name = L["Layout_Layout"],
+                        type = "select",
+                        values = function()
+                            return {
+                                L["Layout_DPSTank"],
+                                L["Layout_Healing"],
+                            }
+                        end,
+                        get = function(info)
+                            return ndbc.layout.current
+                        end,
+                        set = function(info, value)
+                            ndbc.layout.current = value
+                            RealUI:UpdateLayout()
+                        end,
+                        order = 10,
+                    },
                     linkLayout = {
                         name = L["Layout_Link"],
                         desc = L["Layout_LinkDesc"],
@@ -68,7 +86,7 @@ local other do
                                 ndb.positions[RealUI.ncLayout] = RealUI:DeepCopy(ndb.positions[RealUI.cLayout])
                             end
                         end,
-                        order = 30,
+                        order = 20,
                     },
                     useLarge = {
                         name = L["HuD_UseLarge"],
@@ -90,7 +108,7 @@ local other do
                         max = round(uiHeight * 0.3),
                         step = 1,
                         bigStep = 4,
-                        order = 30,
+                        order = 40,
                         get = function(info) return ndb.positions[RealUI.cLayout]["HuDY"] end,
                         set = function(info, value)
                             ndb.positions[RealUI.cLayout]["HuDY"] = value
