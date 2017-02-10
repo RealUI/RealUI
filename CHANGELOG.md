@@ -1,7 +1,10 @@
-Version 8.1 r19
----------------
+# Change Log #
+All notable changes to this project will be documented in this file.
 
-**Modified AddOns:**
+The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [8.1 r19] - 2017-02-10 ##
+### Modified AddOns ###
 
   * !Aurora_RealUI
   * cargBags_Nivaya
@@ -10,19 +13,24 @@ Version 8.1 r19
   * FreebTip
   * FreebTipiLvl
 
-**Enhancements:**
+### Changed ###
 
-  * Completly rewritten Infobar with support for LDB feeds.
+  * Completely rewritten Infobar with support for LDB feeds.
   * Significant improvements to cargBags_Nivaya for better performance and reliability.
-  * If they are controlled by RealUI, the position of Grid will be automaticly adjusted for the position of the action bars.
+  * If they are controlled by RealUI, the position of Grid will be automatically adjusted for the position of the action bars.
   * Artifact relics are now sorted with gear and will show the item level increase they provide to an artifact.
   * Currency rewards from dungeons will now show your totals on other toons in the tooltip.
 
-**Removals:**
+### Removed ###
 
   * The AuraTracker has been completely removed. [See the announcement post](http://www.wowinterface.com/forums/showthread.php?t=54839) for more information.
 
-**Fixes:**
+### Fixed ###
 
   * A proper layout will now be set when entering an arena.
-  
+  * Character tooltips should now have much more accurate iLvls.
+  * The arena prep frames will now show opponent specs more reliably.
+
+[Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19]: https://github.com/RealUI/RealUI/compare/8.1_r18l...8.1_r19
+
