@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, floor = _G.next, _G.math.floor
 
 -- RealUI --
@@ -104,19 +103,13 @@ function Positioners:OnInitialize()
                 --                      {point,     parent,     rpoint,     x, y, w, h,     xKeyTable,                  yKeyTable,                  widthKeyTable,                      heightKeyTable},
                 ["Center"] =            {"CENTER",  "UIParent", "CENTER",   0, 0, 2, 2,     nil,                        {"HuDY"}},
                 ["Buffs"] =             {"TOPRIGHT","UIParent", "TOPRIGHT", -1, -1, 2, 2},
-                ["HuD"] =               {"CENTER",  "UIParent", "CENTER",   0, 0, 0, 2,     {"HuDX"},                   {"HuDY"}},
                 ["SpellAlerts"] =       {"CENTER",  "UIParent", "CENTER",   0, 0, 0, 140,   {"HuDX"},                   {"HuDY"},                   {"SpellAlertWidth"}},
-                ["CTAurasLeft"] =   {"BOTTOMRIGHT", "UIParent", "CENTER",   -4, -128, 2, 2, {"HuDX", "CTAurasLeftX"},   {"HuDY", "CTAurasLeftY"}},
-                ["CTAurasRight"] =  {"BOTTOMLEFT",  "UIParent", "CENTER",   3, -128, 2, 2,  {"HuDX", "CTAurasRightX"},  {"HuDY", "CTAurasRightY"}},
-                ["CTPoints"] =          {"CENTER",  "UIParent", "CENTER",   0, 0, -216, 0,  {"HuDX"},                   {"HuDY"},                   {"CTPointsWidth", "UFHorizontal"},  {"CTPointsHeight"}},
                 ["CastBarPlayer"] =     {"TOP",     "UIParent", "CENTER",   -2, -130, 2, 2, {"HuDX", "CastBarPlayerX"}, {"HuDY", "CastBarPlayerY"}},
                 ["CastBarTarget"] =     {"TOP",     "UIParent", "CENTER",   2, -130, 2, 2,  {"HuDX", "CastBarTargetX"}, {"HuDY", "CastBarTargetY"}},
                 ["UnitFrames"] =        {"CENTER",  "UIParent", "CENTER",   0, 0, 80, 2,    {"HuDX"},                   {"HuDY"},                   {"UFHorizontal"}},
                 ["BossFrames"] =        {"RIGHT",   "UIParent", "RIGHT",    0, 0, 2, 2,     {"BossX"},                  {"HuDY", "BossY"}},
-                ["GridBottom"] =        {"BOTTOM",  "UIParent", "BOTTOM",   0, 0, 2, 2,     {"HuDX", "GridBottomX"},    {"GridBottomY"}},
+                ["GridBottom"] =        {"BOTTOM",  "UIParent", "BOTTOM",   0, 0, 2, 2,     {"HuDX", "GridBottomX"},    {"ActionBarsBotY", "GridBottomY"}},
                 ["GridTop"] =           {"CENTER",  "UIParent", "CENTER",   0, 0, 2, 2,     {"HuDX", "GridTopX"},       {"HuDY", "GridTopY"}},
-                ["ClassResource"] =     {"CENTER",  "UIParent", "CENTER",   0, -93, 2, 2,   {"HuDX", "ClassResourceX"}, {"HuDY", "ClassResourceY"}},
-                ["Runes"] =             {"CENTER",  "UIParent", "CENTER",   0, -88, 2, 2,   {"HuDX", "RunesX"},         {"HuDY", "RunesY"}},
             },
         }
     })

@@ -3,7 +3,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <FontFamily  name="RealUIFont_Normal" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="10"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf" height="10"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf" height="10"/>
@@ -15,12 +15,12 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf" height="9"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="9"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf" height="9"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_Chat" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\RobotoCondensed-Regular.ttf" height="10" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf" height="10" outline="NORMAL"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf" height="10" outline="NORMAL"/>
@@ -32,12 +32,12 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Light.otf" height="9" outline="NORMAL"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\RobotoCondensed-Regular.ttf" height="9" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf" height="9" outline="NORMAL"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_Crit" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-BoldItalic.ttf" height="10"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf" height="10"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Bold.otf" height="10"/>
@@ -49,12 +49,12 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Bold.otf" height="9"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-BoldItalic.ttf" height="9"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf" height="9"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_Header" virtual="true">
         <Member alphabet="roman">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\RobotoSlab-Regular.ttf" height="16"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf" height="16"/>
         </Member>
         <Member alphabet="korean">
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf" height="17"/>
@@ -66,7 +66,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf" height="16"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\RobotoSlab-Regular.ttf" height="16"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf" height="16"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_Pixel" virtual="true">
@@ -83,7 +83,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf" height="10" outline="NORMAL"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="10" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf" height="10" outline="NORMAL"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_PixelSmall" virtual="true">
@@ -100,7 +100,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf" height="10" outline="NORMAL"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="10" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf" height="10" outline="NORMAL"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_PixelLarge" virtual="true">
@@ -117,7 +117,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             <Font font="Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf" height="11" outline="NORMAL"/>
         </Member>
         <Member alphabet="russian">
-            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto-Regular.ttf" height="11" outline="NORMAL"/>
+            <Font font="Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf" height="11" outline="NORMAL"/>
         </Member>
     </FontFamily>
     <FontFamily  name="RealUIFont_PixelNumbers" virtual="true">

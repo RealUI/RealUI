@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 _G.tinsert(mods["nibRealUI"], function(F, C)
     mods.debug("PaperDollFrame", F, C)
     local r, g, b = C.r, C.g, C.b
@@ -151,9 +148,8 @@ _G.tinsert(mods["nibRealUI"], function(F, C)
                 if item.hasDura then
                     local min, max = _G.GetInventoryItemDurability(slotID)
                     if max then
-                        local percent = RealUI:GetSafeVals(min, max)
-                        itemSlot.dura:SetValue(percent)
-                        itemSlot.dura:SetStatusBarColor(RealUI:GetDurabilityColor(percent))
+                        itemSlot.dura:SetValue(RealUI:GetSafeVals(min, max))
+                        itemSlot.dura:SetStatusBarColor(RealUI.GetDurabilityColor(min, max))
                         itemSlot.dura:Show()
                     else
                         itemSlot.dura:Hide()

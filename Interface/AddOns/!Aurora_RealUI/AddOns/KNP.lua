@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["PLAYER_LOGIN"]["Kui_Nameplates"] = function(self, F, C)
     mods.debug("Kui_Nameplates", F, C)
     local kuiNP = _G.LibStub("AceAddon-3.0"):GetAddon("KuiNameplates", true)

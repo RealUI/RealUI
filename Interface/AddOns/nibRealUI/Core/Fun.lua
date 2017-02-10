@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
 local next, type, select = _G.next, _G.type, _G.select
@@ -563,11 +562,14 @@ function RealUI:ReadableNumber(num, places)
 end
 
 -- Opposite Faction
-function RealUI:OtherFaction(f)
-    if (f == "Horde") then
+function RealUI:OtherFaction(faction)
+    if faction == "Horde" then
         return "Alliance"
-    else
+    elseif faction == "Alliance" then
         return "Horde"
+    else
+        -- "Neutral" low level pandaren
+        return
     end
 end
 
@@ -599,11 +601,13 @@ function RealUI:GetILVLColor(lvl, ilvl)
     end
 end
 
-function RealUI:GetClassColor(class, ...)
-    if not _G.RAID_CLASS_COLORS[class] then return {1, 1, 1} end
-    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class]
-    if ... then
-        return {r = classColors.r, g = classColors.g, b = classColors.b}
+local default = {r = 1, g = 1, b = 1, colorStr = "ffffffff"}
+function RealUI:GetClassColor(class, kind)
+    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class] or default
+    if kind == "key" then
+        return classColors
+    elseif kind == "hex" then
+        return classColors.colorStr
     else
         return {classColors.r, classColors.g, classColors.b}
     end

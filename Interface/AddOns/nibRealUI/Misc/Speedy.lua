@@ -1,5 +1,4 @@
 ﻿-- Lua Globals --
-local _G = _G
 local next, ipairs = _G.next, _G.ipairs
 
 if _G.IsAddOnLoaded("Speedyload") then return end

@@ -3,7 +3,6 @@ local options = private.options
 local debug = private.debug
 
 -- Lua Globals --
-local _G = _G
 local next, tostring = _G.next, _G.tostring
 
 -- Libs --
@@ -55,34 +54,18 @@ end
 
 local core do
     debug("Adv Core")
-    local infoLine do
-        local blocks = {
-            start =         {L["Start"]},
-            mail =          {_G.MAIL_LABEL},
-            guild =         {_G.ACHIEVEMENTS_GUILD_TAB},
-            friends =       {_G.QUICKBUTTON_NAME_FRIENDS},
-            durability =    {_G.DURABILITY},
-            bag =           {_G.INVTYPE_BAG},
-            currency =      {_G.BONUS_ROLL_REWARD_CURRENCY},
-            xprep =         {L["Progress"]},
-            clock =         {_G.TIMEMANAGER_TITLE},
-            pc =            {L["Sys_SysInfo"]},
-            specchanger =   {L["Spec_SpecChanger"]},
-            layoutchanger = {L["Layout_LayoutChanger"]},
-            metertoggle =   {L["Meters_Header"]},
-        }
-
-        local MODNAME = "InfoLine"
-        local InfoLine = RealUI:GetModule(MODNAME)
-        local db = InfoLine.db.profile
-        infoLine = {
-            name = L["InfoLine"],
+    local infobar do
+        local MODNAME = "Infobar"
+        local Infobar = RealUI:GetModule(MODNAME)
+        local db = Infobar.db.profile
+        local allEnabled, allLabeled, allIcons
+        infobar = {
+            name = L["Infobar"],
             desc = "Information / Button display.",
             type = "group",
-            childGroups = "tab",
             args = {
                 header = {
-                    name = L["InfoLine"],
+                    name = L["Infobar"],
                     type = "header",
                     order = 10,
                 },
@@ -92,381 +75,228 @@ local core do
                     fontSize = "medium",
                     order = 20,
                 },
-                position = {
-                    name = "Position/Size",
-                    type = "group",
-                    order = 50,
-                    args = {
-                        parent = {
-                            name = "Parent",
-                            type = "group",
-                            inline = true,
-                            order = 10,
-                            args = {
-                                xleft = {
-                                    name = "X Left",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.xleft) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.xleft = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 10,
-                                },
-                                xright = {
-                                    name = "X Right",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.xright) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.xright = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 20,
-                                },
-                                y = {
-                                    name = "Y",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.y) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.y = value
-                                        InfoLine:UpdatePositions()
-                                        InfoLine:SetBackground()
-                                    end,
-                                    order = 30,
-                                },
-                                xgap = {
-                                    name = "Padding",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.position.xgap) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.position.xgap = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 40,
-                                },
-                            },
-                        },
-                        text = {
-                            name = "Text",
-                            type = "group",
-                            inline = true,
-                            order = 20,
-                            args = {
-                                yoffset = {
-                                    name = "Y Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.text.yoffset) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.text.yoffset = value
-                                        InfoLine:UpdatePositions()
-                                    end,
-                                    order = 10,
-                                },
-                                tablets = {
-                                    name = "Tablet Font Sizes",
-                                    type = "group",
-                                    inline = true,
-                                    order = 20,
-                                    args = {
-                                        headersize = {
-                                            name = "Header",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.headersize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.headersize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 10,
-                                        },
-                                        columnsize = {
-                                            name = "Column Titles",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.columnsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.columnsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 20,
-                                        },
-                                        normalsize = {
-                                            name = "Normal",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.normalsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.normalsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 30,
-                                        },
-                                        hintsize = {
-                                            name = "Hint",
-                                            type = "input",
-                                            width = "half",
-                                            get = function(info) return tostring(db.text.tablets.hintsize) end,
-                                            set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
-                                                db.text.tablets.hintsize = value
-                                                InfoLine:Refresh()
-                                            end,
-                                            order = 40,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
+                enabled = {
+                    name = L["General_Lock"],
+                    desc = L["General_LockDesc"],
+                    type = "toggle",
+                    get = function() return Infobar.locked end,
+                    set = function(info, value)
+                        if value then
+                            Infobar:Lock()
+                        else
+                            Infobar:Unlock()
+                        end
+                    end,
+                    order = 30,
                 },
-                colors = {
-                    name = "Colors",
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 31,
+                },
+                inCombat = {
+                    name = L["Infobar_CombatTooltips"],
+                    desc = L["Infobar_CombatTooltipsDesc"],
+                    type = "toggle",
+                    get = function() return db.combatTips end,
+                    set = function(info, value)
+                        db.combatTips = value
+                    end,
+                    order = 40,
+                },
+                statusBar = {
+                    name = L["Infobar_ShowStatusBar"],
+                    desc = L["Infobar_ShowStatusBarDesc"],
+                    type = "toggle",
+                    disabled = function() return not db.blocks.realui.progress.enabled end,
+                    get = function() return db.showBars end,
+                    set = function(info, value)
+                        db.showBars = value
+                        Infobar:SettingsUpdate(info[#info])
+                    end,
+                    order = 50,
+                },
+                blockGap = {
+                    name = L["Infobar_BlockGap"],
+                    desc = L["Infobar_BlockGapDesc"],
+                    type = "input",
+                    width = "half",
+                    get = function(info) return _G.tostring(db.blockGap) end,
+                    set = function(info, value)
+                        value = RealUI:ValidateOffset(value)
+                        db.blockGap = value
+                        Infobar:SettingsUpdate(info[#info])
+                    end,
+                    order = 52,
+                },
+                blocks = {
+                    name = "Blocks",
                     type = "group",
+                    inline = true,
                     order = 60,
                     args = {
-                        normal = {
-                            name = "Normal",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.normal[1], db.colors.normal[2], db.colors.normal[3]
+                        enableAll = {
+                            name = L["Infobar_AllBlocks"],
+                            desc = L["General_EnabledDesc"]:format(L["Infobar_AllBlocks"]),
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allEnabled end,
+                            set = function(data, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        if value then
+                                            Infobar:AddBlock(block.name, dataObj, blockInfo)
+                                        else
+                                            Infobar:RemoveBlock(block.name, dataObj, blockInfo)
+                                        end
+                                        blockInfo.enabled = not not value
+                                    end
+                                end
+                                allEnabled = not not value
                             end,
-                            set = function(info,r,g,b)
-                                db.colors.normal[1] = r
-                                db.colors.normal[2] = g
-                                db.colors.normal[3] = b
-                                InfoLine:Refresh()
+                            order = 1,
+                        },
+                        showLabel = {
+                            name = L["Infobar_ShowLabel"],
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allLabeled end,
+                            set = function(info, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        blockInfo.showLabel = not not value
+                                        block:AdjustElements(blockInfo)
+                                    end
+                                end
+                                allLabeled = not not value
                             end,
+                            order = 2,
+                        },
+                        showIcon = {
+                            name = L["Infobar_ShowIcon"],
+                            type = "toggle",
+                            tristate = true,
+                            get = function() return allIcons end,
+                            set = function(info, value)
+                                for dataObj, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                    if blockInfo.enabled ~= -1 then
+                                        blockInfo.showIcon = not not value
+                                        block:AdjustElements(blockInfo)
+                                    end
+                                end
+                                allIcons = not not value
+                            end,
+                            order = 3,
+                        },
+                        realui = {
+                            name = "RealUI Blocks",
+                            type = "header",
                             order = 10,
                         },
-                        sep1 = {
-                            name = " ",
-                            type = "description",
-                            order = 20,
+                        other = {
+                            name = "3rd Party Blocks",
+                            type = "header",
+                            order = 110,
                         },
-                        highlight = {
-                            name = "Highlight",
-                            type = "color",
-                            disabled = function()
-                                if db.colors.classcolorhighlight then return true else return false end
-                            end,
-                            get = function(info,r,g,b)
-                                return db.colors.highlight[1], db.colors.highlight[2], db.colors.highlight[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.highlight[1] = r
-                                db.colors.highlight[2] = g
-                                db.colors.highlight[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 30,
-                        },
-                        classcolorhighlight = {
-                            name = "Class Color Highlight",
-                            desc = "Use your Class Color for the highlight.",
-                            type = "toggle",
-                            get = function() return db.colors.classcolorhighlight end,
-                            set = function(info, value)
-                                db.colors.classcolorhighlight = value
-                                InfoLine:Refresh()
-                            end,
-                            order = 40,
-                        },
-                        sep2 = {
-                            name = " ",
-                            type = "description",
-                            order = 50,
-                        },
-                        disabled = {
-                            name = "Disabled",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.disabled[1], db.colors.disabled[2], db.colors.disabled[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.disabled[1] = r
-                                db.colors.disabled[2] = g
-                                db.colors.disabled[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 60,
-                        },
-                        ttheader = {
-                            name = "Tooltip Header 1",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return db.colors.ttheader[1], db.colors.ttheader[2], db.colors.ttheader[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.colors.ttheader[1] = r
-                                db.colors.ttheader[2] = g
-                                db.colors.ttheader[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 70,
-                        },
-                        orange1 = {
-                            name = "Header 1",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.orange[1], RealUI.media.colors.orange[2], RealUI.media.colors.orange[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.orange[1] = r
-                                RealUI.media.colors.orange[2] = g
-                                RealUI.media.colors.orange[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 80,
-                        },
-                        blue1 = {
-                            name = "Header 2",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.blue[1] = r
-                                RealUI.media.colors.blue[2] = g
-                                RealUI.media.colors.blue[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 90,
-                        },
-                        blue2 = {
-                            name = "Header 3",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return RealUI.media.colors.blue[1], RealUI.media.colors.blue[2], RealUI.media.colors.blue[3]
-                            end,
-                            set = function(info,r,g,b)
-                                RealUI.media.colors.blue[1] = r
-                                RealUI.media.colors.blue[2] = g
-                                RealUI.media.colors.blue[3] = b
-                                InfoLine:Refresh()
-                            end,
-                            order = 100,
-                        },
-                    },
-                },
-                other = {
-                    name = "Other",
-                    type = "group",
-                    order = 70,
-                    args = {
-                        icTips = {
-                            name = "In Combat Tooltips",
-                            desc = "Show the tooltips in combat.",
-                            type = "toggle",
-                            get = function() return db.other.icTips end,
-                            set = function(info, value)
-                                db.other.icTips = value
-                                RealUI.InfoLineICTips = value        -- Tablet-2.0 use
-                                InfoLine:Refresh()
-                            end,
-                            order = 10,
-                        },
-                        showBG = {
-                            name = L["InfoLine_ShowBG"],
-                            type = "toggle",
-                            get = function() return ndb.settings.infoLineBackground end,
-                            set = function(info, value)
-                                ndb.settings.infoLineBackground = value
-                                InfoLine:SetBackground()
-                            end,
-                            order = 10,
-                        },
-                        clock = {
-                            name = "Clock",
-                            type = "group",
-                            inline = true,
-                            order = 20,
-                            args = {
-                                clock24 = {
-                                    name = "24 hour clock",
-                                    desc = "Show the time in 24 hour format.",
-                                    type = "toggle",
-                                    get = function() return db.other.clock.hr24 end,
-                                    set = function(info, value)
-                                        db.other.clock.hr24 = value
-                                        InfoLine:Refresh()
-                                    end,
-                                    order = 10,
-                                },
-                                clocklocal = {
-                                    name = "Use local time",
-                                    desc = "Show the time at your home.",
-                                    type = "toggle",
-                                    get = function() return db.other.clock.uselocal end,
-                                    set = function(info, value)
-                                        db.other.clock.uselocal = value
-                                        InfoLine:Refresh()
-                                    end,
-                                    order = 20,
-                                },
-                            },
-                        },
-                        tablets = {
-                            name = "Info Displays",
-                            type = "group",
-                            inline = true,
-                            order = 30,
-                            args = {
-                                maxheight = {
-                                    name = "Max Height",
-                                    desc = "Maximum height of the Info Displays. May require a UI reload (/rl) to take effect.",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(db.other.tablets.maxheight) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        db.other.tablets.maxheight = value
-                                    end,
-                                    order = 10,
-                                },
-                            },
-                        },
-                    },
-                },
+                    }
+                }
             },
         }
 
-        -- Create blocks options table
-        local elementopts = {
-            name = "Blocks",
-            type = "group",
-            order = 40,
-            args = {},
-        }
-        local elementordercnt = 10
-        for k_e, v_e in next, blocks do
-            -- Create base options for blocks
-            elementopts.args[k_e] = {
-                name = blocks[k_e][1],
-                desc = "Enable the "..blocks[k_e][1].." block.",
-                type = "toggle",
-                get = function() return db.elements[k_e] end,
-                set = function(info, value)
-                    db.elements[k_e] = value
-                    InfoLine:Refresh()
-                end,
-                order = elementordercnt,
-            }
-            elementordercnt = elementordercnt + 10
+        local realuiOrder, otherOrder = 11, 111
+        local numBlocks, numEnabled, numLabeled, numIcons = 0, 0, 0, 0
+        for dataObj, block in Infobar:IterateBlocks() do
+            local name = block.name
+            local blockInfo = Infobar:GetBlockInfo(name, dataObj)
+            if blockInfo.enabled ~= -1 then
+                numBlocks = numBlocks + 1
+                local displayName = dataObj.name or name
+                local blockOrder = dataObj.type == "RealUI" and realuiOrder or otherOrder
+                infobar.args.blocks.args[name.."Toggle"] = {
+                    name = displayName,
+                    desc = L["General_EnabledDesc"]:format(displayName),
+                    type = "toggle",
+                    get = function() return blockInfo.enabled end,
+                    set = function(data, value)
+                        if value then
+                            block = Infobar:AddBlock(name, dataObj, blockInfo)
+                        else
+                            Infobar:RemoveBlock(name, dataObj, blockInfo)
+                        end
+                        allEnabled = nil
+                        blockInfo.enabled = value
+                    end,
+                    order = blockOrder,
+                }
+                infobar.args.blocks.args[name.."Label"] = {
+                    name = L["Infobar_ShowLabel"],
+                    type = "toggle",
+                    disabled = function() return not blockInfo.enabled end,
+                    get = function() return blockInfo.showLabel end,
+                    set = function(data, value)
+                        allLabeled = nil
+                        blockInfo.showLabel = value
+                        block:AdjustElements(blockInfo)
+                    end,
+                    order = blockOrder + 1,
+                }
+                infobar.args.blocks.args[name.."Icon"] = {
+                    name = L["Infobar_ShowIcon"],
+                    type = "toggle",
+                    disabled = function() return not blockInfo.enabled end,
+                    get = function() return blockInfo.showIcon end,
+                    set = function(data, value)
+                        allIcons = nil
+                        blockInfo.showIcon = value
+                        block:AdjustElements(blockInfo)
+                    end,
+                    order = blockOrder + 2,
+                }
+                if dataObj.type == "RealUI" then
+                    realuiOrder = realuiOrder + 5
+                else
+                    otherOrder = otherOrder + 5
+                end
+
+                if blockInfo.enabled then
+                    numEnabled = numEnabled + 1
+                end
+
+                if  blockInfo.showLabel then
+                    numLabeled = numLabeled + 1
+                end
+
+                if blockInfo.showIcon then
+                    numIcons = numIcons + 1
+                end
+            end
         end
-        infoLine.args.elements = elementopts
+        if numEnabled == 0 then
+            allEnabled = false
+        elseif numEnabled == numBlocks then
+            allEnabled = true
+        else
+            allEnabled = nil
+        end
+
+        if numLabeled == 0 then
+            allLabeled = false
+        elseif numLabeled == numBlocks then
+            allLabeled = true
+        else
+            allLabeled = nil
+        end
+
+        if numIcons == 0 then
+            allIcons = false
+        elseif numIcons == numBlocks then
+            allIcons = true
+        else
+            allIcons = nil
+        end
     end
     local playerShields do
         local MODNAME = "PlayerShields"
@@ -847,7 +677,7 @@ local core do
         type = "group",
         order = 0,
         args = {
-            infoLine = infoLine,
+            infobar = infobar,
             playerShields = playerShields,
             screenSaver = screenSaver,
             worldMarker = worldMarker,
@@ -898,7 +728,7 @@ local skins do
                             get = function() return db.standard.changeYellow end,
                             set = function(info, value)
                                 db.standard.changeYellow = value
-                                --InfoLine:Refresh()
+                                --Infobar:Refresh()
                             end,
                             order = 20,
                         },

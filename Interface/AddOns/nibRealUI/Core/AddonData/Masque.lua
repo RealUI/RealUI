@@ -1,12 +1,9 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Masque = function()
+RealUI.AddOns.Masque = function()
 	_G.MasqueDB = {
 		["namespaces"] = {
 			["LibDualSpec-1.0"] = {

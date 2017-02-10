@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
     --print("WeakAuras", F, C)
     --[[ Skin regions

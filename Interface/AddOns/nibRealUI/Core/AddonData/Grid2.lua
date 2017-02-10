@@ -1,12 +1,9 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Grid2 = function()
+RealUI.AddOns.Grid2 = function()
 	_G.Grid2DB = {
 		["namespaces"] = {
 			["Grid2Layout"] = {

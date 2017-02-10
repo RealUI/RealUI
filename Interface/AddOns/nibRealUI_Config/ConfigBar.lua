@@ -4,10 +4,8 @@ local CloseHuDWindow = private.CloseHuDWindow
 local debug = private.debug
 
 -- Lua Globals --
-local _G = _G
-local next, type = _G.next, _G.type
+local next = _G.next
 local tostring, tonumber = _G.tostring, _G.tonumber
-local tinsert = _G.table.insert
 
 -- Libs --
 local ACD = _G.LibStub("AceConfigDialog-3.0")
@@ -55,6 +53,24 @@ local other do
                 type = "group",
                 order = 10,
                 args = {
+                    layout = {
+                        name = L["Layout_Layout"],
+                        type = "select",
+                        values = function()
+                            return {
+                                L["Layout_DPSTank"],
+                                L["Layout_Healing"],
+                            }
+                        end,
+                        get = function(info)
+                            return ndbc.layout.current
+                        end,
+                        set = function(info, value)
+                            ndbc.layout.current = value
+                            RealUI:UpdateLayout()
+                        end,
+                        order = 10,
+                    },
                     linkLayout = {
                         name = L["Layout_Link"],
                         desc = L["Layout_LinkDesc"],
@@ -70,7 +86,7 @@ local other do
                                 ndb.positions[RealUI.ncLayout] = RealUI:DeepCopy(ndb.positions[RealUI.cLayout])
                             end
                         end,
-                        order = 30,
+                        order = 20,
                     },
                     useLarge = {
                         name = L["HuD_UseLarge"],
@@ -92,7 +108,7 @@ local other do
                         max = round(uiHeight * 0.3),
                         step = 1,
                         bigStep = 4,
-                        order = 30,
+                        order = 40,
                         get = function(info) return ndb.positions[RealUI.cLayout]["HuDY"] end,
                         set = function(info, value)
                             ndb.positions[RealUI.cLayout]["HuDY"] = value
@@ -254,6 +270,7 @@ local other do
                                 set = function(info, value)
                                     dbActionBars[RealUI.cLayout].centerPositions = value
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 20,
                             },
@@ -274,6 +291,7 @@ local other do
                                 set = function(info, value)
                                     dbActionBars[RealUI.cLayout].sidePositions = value
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                                 order = 30,
                             },
@@ -288,8 +306,8 @@ local other do
                                 get = function(info) return ndb.positions[RealUI.cLayout]["ActionBarsY"] end,
                                 set = function(info, value)
                                     ndb.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
-                                    RealUI:UpdatePositioners()
                                     ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
                                 end,
                             }
                         }
@@ -1202,592 +1220,6 @@ local castbars do
         }
     }
 end
-local auratracker do
-    debug("HuD AuraTracking")
-    local AuraTracking = RealUI:GetModule("AuraTracking")
-    local db = AuraTracking.db.profile
-    local trackingData = AuraTracking.db.class
-    local function SwapParentGroup(tracker, info)
-        AuraTracking:CharacterUpdate({}, true)
-        local parent, key = info[#info-2], info[#info-1]
-        local spellOptions = auratracker.args[parent].args[key]
-        auratracker.args[parent].args[key] = nil
-        if tracker.shouldTrack then
-            debug("Set to active")
-            auratracker.args.active.args[key] = spellOptions
-        else
-            debug("Set to inactive")
-            auratracker.args.inactive.args[key] = spellOptions
-        end
-    end
-    local function GetNameOrder(spellData)
-        local order, pos, name, color = 1, "", ""
-
-        if spellData.customName then
-            name = spellData.customName
-        elseif type(spellData.spell) == "table" then
-            for i = 1, #spellData.spell do
-                debug("iter spell table", i)
-                local spellName, nextSpell = _G.GetSpellInfo(spellData.spell[i]), _G.GetSpellInfo(spellData.spell[i+1])
-                if not spellName then spellName = _G.UNKNOWN end
-                if spellName ~= nextSpell then
-                    debug("These two are different", i, spellName)
-                    -- Only add a spell if nextSpell is different.
-                    name = name..spellName..(nextSpell and ", " or "")
-                end
-            end
-        else
-            name = _G.GetSpellInfo(spellData.spell) or L["AuraTrack_SpellNameID"]
-        end
-        debug("Name:", name, spellData.spell)
-
-        if spellData.unit == "target" then
-            order = order + 1
-            color = "ff0000"
-        else
-            color = "00ff00"
-        end
-        if spellData.order and spellData.order > 0 then
-            order = order * 10 + spellData.order
-            pos = spellData.order.." "
-        else
-            order = 69 + order
-        end
-
-        name = (pos.."|cff%s%s|r"):format(color, name)
-        return name, order
-    end
-    local function CreateTrackerSettings(tracker, spellData)
-        local name, order = GetNameOrder(spellData)
-        local specCache, useSpec = {}
-        do
-            local numSpecs = 0
-            for i = 1, #spellData.specs do
-                specCache[i] = spellData.specs[i]
-                if spellData.specs[i] then
-                    numSpecs = numSpecs + 1
-                end
-            end
-            if numSpecs == #spellData.specs then
-                useSpec = false
-            elseif numSpecs == 1 then
-                useSpec = true
-            end
-        end
-
-        return {
-            name = name,
-            type = "group",
-            order = order,
-            args = {
-                name = {
-                    name = L["AuraTrack_SpellNameID"],
-                    desc = L["AuraTrack_NoteSpellID"],
-                    type = "input",
-                    validate = function(info, value) --,158300
-                        debug("Validate Spellname", info[#info-1], value)
-                        local isSpell
-                        if value:find(",") then
-                            debug("Multi-spell")
-                            value = {_G.strsplit(",", value)}
-                            for i = 1, #value do
-                                local spell = _G.strtrim(value[i])
-                                isSpell = _G.GetSpellInfo(spell) and true or false
-                                debug("Value "..i, spell, isSpell)
-                                if not isSpell then
-                                    return L["AuraTrack_InvalidName"]:format(spell)
-                                end
-                            end
-                        else
-                            isSpell = _G.GetSpellInfo(value) and true or false
-                            debug("One spell", isSpell)
-                        end
-                        return isSpell or L["AuraTrack_InvalidName"]:format(value)
-                    end,
-                    get = function(info)
-                        local value = ""
-                        if type(spellData.spell) == "table" then
-                            for i = 1, #spellData.spell do
-                                value = value..(i==1 and "" or ",")..spellData.spell[i]
-                            end
-                        else
-                            value = tostring(spellData.spell)
-                        end
-                        return value
-                    end,
-                    set = function(info, value)
-                        debug("Set Spellname", info[#info-2], info[#info-1], value)
-                        if value:find(",") then
-                            debug("Multi-spell")
-                            if type(spellData.spell) ~= "table" then
-                                spellData.spell = {}
-                            end
-                            _G.wipe(spellData.spell)
-                            value = { _G.strsplit(",", value) }
-                            for i = 1, #value do
-                                local spell = _G.strtrim(value[i])
-                                tinsert(spellData.spell, tonumber(spell) or spell)
-                            end
-                        else
-                            spellData.spell = tonumber(value) or value
-                        end
-
-                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
-                    end,
-                    order = 10,
-                },
-                enable = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L["AuraTrack_Selected"]),
-                    type = "toggle",
-                    get = function(info)
-                        return spellData.shouldLoad
-                    end,
-                    set = function(info, value)
-                        debug("Set Enable", info[#info-2], info[#info-1], value)
-                        if value then
-                            tracker:Enable()
-                        else
-                            tracker:Disable()
-                        end
-                        spellData.shouldLoad = value
-
-                        SwapParentGroup(tracker, info)
-                    end,
-                    order = 20,
-                },
-                type = {
-                    name = L["AuraTrack_Type"],
-                    desc = L["AuraTrack_TypeDesc"],
-                    type = "select",
-                    style = "radio",
-                    values = function()
-                        return {
-                            buff = L["AuraTrack_Buff"],
-                            debuff = L["AuraTrack_Debuff"],
-                        }
-                    end,
-                    get = function(info)
-                        return spellData.auraType or "buff"
-                    end,
-                    set = function(info, value)
-                        spellData.auraType = value
-
-                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
-                    end,
-                    order = 30,
-                },
-                position = {
-                    name = L["General_Position"],
-                    desc = L["AuraTrack_StaticDesc"],
-                    type = "range",
-                    min = 0, max = 6, step = 1,
-                    get = function(info) return spellData.order or 0 end,
-                    set = function(info, value)
-                        spellData.order = value
-
-                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]]
-                        spellOptions.name, spellOptions.order = GetNameOrder(spellData)
-                    end,
-                    order = 40,
-                },
-                unit = {
-                    name = L["AuraTrack_Unit"],
-                    type = "select",
-                    values = function()
-                        return {
-                            player = _G.PLAYER,
-                            target = _G.TARGET,
-                            pet = _G.PET,
-                        }
-                    end,
-                    get = function(info) return spellData.unit end,
-                    set = function(info, value)
-                        spellData.unit = value
-                    end,
-                    order = 50,
-                },
-                useSpec = {
-                    name = _G.SPECIALIZATION,
-                    desc = L["General_Tristate"..tostring(useSpec)].."\n"..
-                        L["AuraTrack_TristateSpec"..tostring(useSpec)],
-                    type = "toggle",
-                    tristate = true,
-                    get = function(info) return useSpec end,
-                    set = function(info, value)
-                        debug("useSpec set", value)
-                        local spellOptions = auratracker.args[info[#info-2]].args[info[#info-1]].args
-                        if value == false then
-                            spellOptions.spec.type = "select"
-                            spellOptions.spec.disabled = true
-                            for i = 1, #spellData.specs do
-                                spellData.specs[i] = true
-                            end
-                        elseif value == true then
-                            spellOptions.spec.disabled = false
-                            for i = 1, #spellData.specs do
-                                spellData.specs[i] = specCache[i]
-                            end
-                        else
-                            spellOptions.spec.type = "multiselect"
-                        end
-                        spellOptions.useSpec.desc = L["General_Tristate"..tostring(value)].."\n"..
-                            L["AuraTrack_TristateSpec"..tostring(value)]
-                        useSpec = value
-                    end,
-                    order = 60,
-                },
-                spec = {
-                    name = "",
-                    type = (useSpec == nil) and "multiselect" or "select",
-                    disabled = function() return useSpec == false end,
-                    values = function()
-                        local table = {}
-                        for i = 1, _G.GetNumSpecializations() do
-                            local _, specName, _, specIcon = _G.GetSpecializationInfo(i)
-                            table[i] = "|T"..specIcon..":0:0:0:0:64:64:4:60:4:60|t "..specName
-                        end
-                        return table
-                    end,
-                    get = function(info, key)
-                        debug("Spec get", key)
-                        if key then
-                            return spellData.specs[key]
-                        else
-                            for i = 1, #spellData.specs do
-                                debug("Check", i, spellData.specs[i])
-                                if spellData.specs[i] then
-                                    return i
-                                end
-                            end
-                        end
-                    end,
-                    set = function(info, key, value)
-                        local specs = spellData.specs
-                        debug("Spec set", key, value, specs[key])
-                        if value == nil then
-                            for i = 1, #specs do
-                                debug("Apply", i, i == key)
-                                specs[i] = (i == key)
-                                specCache[i] = specs[i]
-                            end
-                        else
-                            specs[key] = value
-                            specCache[key] = value
-                        end
-                        SwapParentGroup(tracker, info)
-                    end,
-                    order = 70,
-                },
-                minLvl = {
-                    name = L["AuraTrack_MinLevel"],
-                    desc = L["AuraTrack_MinLevelDesc"],
-                    type = "input",
-                    validate = function(info, value)
-                        debug("Validate minLvl", info[#info-1], value)
-                        value = _G.tonumber(value)
-                        return value >= 0 and value <= _G.MAX_PLAYER_LEVEL
-                    end,
-                    get = function(info) return _G.tostring(spellData.minLevel or 0) end,
-                    set = function(info, value)
-                        spellData.minLevel = _G.tonumber(value)
-                    end,
-                    order = 80,
-                },
-                visibility = {
-                    name = L["AuraTrack_Visibility"],
-                    type = "group",
-                    inline = true,
-                    order = 90,
-                    args = {
-                        hideStacks = {
-                            name = L["AuraTrack_HideStack"],
-                            desc = L["AuraTrack_HideStackDesc"],
-                            type = "toggle",
-                            get = function(info) return spellData.hideStacks end,
-                            set = function(info, value)
-                                spellData.hideStacks = value
-                            end,
-                            order = 10,
-                        },
-                        noExclude = {
-                            name = L["AuraTrack_NoExclude"],
-                            desc = L["AuraTrack_NoExcludeDesc"],
-                            type = "toggle",
-                            hidden = not _G.Raven,
-                            get = function(info) return spellData.noExclude end,
-                            set = function(info, value)
-                                spellData.noExclude = value
-                            end,
-                            order = 20,
-                        },
-                    }
-                },
-                debug = {
-                    name = L["General_Debug"],
-                    desc = L["General_DebugDesc"],
-                    type = "toggle",
-                    get = function(info)
-                        return spellData.debug
-                    end,
-                    set = function(info, value)
-                        if value then
-                            spellData.debug = auratracker.args[info[#info-2]].args[info[#info-1]].name
-                        else
-                            spellData.debug = false
-                        end
-                    end,
-                    order = 100,
-                },
-                remove = {
-                    name = L["AuraTrack_Remove"],
-                    type = "execute",
-                    disabled = tracker.isDefault,
-                    confirm = true,
-                    confirmText = L["AuraTrack_RemoveConfirm"],
-                    func = function(info, ...)
-                        debug("Remove", info[#info-2], info[#info-1], ...)
-                        debug("Removed ID", tracker.id, spellData.spell)
-                        trackingData[tracker.classID.."-"..tracker.id] = nil
-                        auratracker.args[info[#info-2]].args[info[#info-1]] = nil
-                    end,
-                    order = -1,
-                },
-            }
-        }
-    end
-    auratracker = {
-        name = L["AuraTrack"],
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\Auras]],
-        type = "group",
-        order = 4,
-        args = {
-            new = {
-                name = L["AuraTrack_Create"],
-                type = "execute",
-                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
-                func = function(info, ...)
-                    debug("Create New", info[#info], info[#info-1], ...)
-                    local tracker, spellData = AuraTracking:CreateNewTracker()
-                    debug("New trackerID:", tracker.id)
-                    auratracker.args.active.args[tracker.id] = CreateTrackerSettings(tracker, spellData)
-                end,
-                order = 10,
-            },
-            enable = {
-                name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format(L["AuraTrack"]),
-                type = "toggle",
-                get = function(info) return RealUI:GetModuleEnabled("AuraTracking") end,
-                set = function(info, value)
-                    RealUI:SetModuleEnabled("AuraTracking", value)
-                    CloseHuDWindow()
-                    RealUI:ReloadUIDialog()
-                end,
-                order = 20,
-            },
-            lock = {
-                name = L["General_Lock"],
-                desc = L["General_LockDesc"],
-                type = "toggle",
-                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
-                get = function(info) return db.locked end,
-                set = function(info, value)
-                    AuraTracking[value and "Lock" or "Unlock"](AuraTracking)
-                end,
-                order = 30,
-            },
-            options = {
-                name = L["AuraTrack_TrackerOptions"],
-                type = "group",
-                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
-                childGroups = "tab",
-                order = 40,
-                args = {
-                    size = {
-                        name = L["AuraTrack_Size"],
-                        type = "range",
-                        min = 24, max = 64, step = 1,
-                        get = function(info) return db.style.slotSize end,
-                        set = function(info, value)
-                            db.style.slotSize = value
-                            AuraTracking:SettingsUpdate("slotSize")
-                        end,
-                        order = 10,
-                    },
-                    padding = {
-                        name = L["AuraTrack_Padding"],
-                        type = "range",
-                        min = 0, max = 32, step = 1,
-                        get = function(info) return db.style.padding end,
-                        set = function(info, value)
-                            db.style.padding = value
-                            AuraTracking:SettingsUpdate("padding")
-                        end,
-                        order = 20,
-                    },
-                    inactiveOpacity = {
-                        name = L["AuraTrack_InactiveOpacity"],
-                        type = "range",
-                        isPercent = true,
-                        min = 0, max = 1, step = 0.05,
-                        get = function(info) return db.indicators.fadeOpacity end,
-                        set = function(info, value)
-                            db.indicators.fadeOpacity = value
-                            AuraTracking:SettingsUpdate("fadeOpacity")
-                        end,
-                        order = 30,
-                    },
-                    visibility = {
-                        name = L["AuraTrack_Visibility"],
-                        type = "group",
-                        inline = true,
-                        order = 40,
-                        args = {
-                            showCombat = {
-                                name = L["AuraTrack_ShowInCombat"],
-                                desc = L["AuraTrack_ShowInCombatDesc"],
-                                type = "toggle",
-                                get = function(info) return db.visibility.showCombat end,
-                                set = function(info, value)
-                                    db.visibility.showCombat = value
-                                end,
-                                order = 10,
-                            },
-                            showHostile = {
-                                name = L["AuraTrack_ShowHostile"],
-                                desc = L["AuraTrack_ShowHostileDesc"],
-                                type = "toggle",
-                                get = function(info) return db.visibility.showHostile end,
-                                set = function(info, value)
-                                    db.visibility.showHostile = value
-                                end,
-                                order = 20,
-                            },
-                            showPvE = {
-                                name = L["AuraTrack_ShowInPvE"],
-                                desc = L["AuraTrack_ShowInPvEDesc"],
-                                type = "toggle",
-                                get = function(info) return db.visibility.showPvE end,
-                                set = function(info, value)
-                                    db.visibility.showPvE = value
-                                end,
-                                order = 30,
-                            },
-                            showPvP = {
-                                name = L["AuraTrack_ShowInPvP"],
-                                desc = L["AuraTrack_ShowInPvPDesc"],
-                                type = "toggle",
-                                get = function(info) return db.visibility.showPvP end,
-                                set = function(info, value)
-                                    db.visibility.showPvP = value
-                                end,
-                                order = 40,
-                            },
-                        }
-                    },
-                    reset = {
-                        name = L["AuraTrack_ResetTrackers"],
-                        desc = L["AuraTrack_ResetTrackersDesc"]:format(RealUI.classLocale),
-                        type = "execute",
-                        confirmText = L["AuraTrack_ResetConfirm"]:format(RealUI.classLocale),
-                        func = function(info, ...)
-                            _G.nibRealUIDB.namespaces.AuraTracking.class[RealUI.class] = nil
-                            CloseHuDWindow()
-                            RealUI:ReloadUIDialog()
-                        end,
-                        order = 45,
-                    },
-                    position = {
-                        name = L["General_Position"],
-                        type = "header",
-                        order = 49,
-                    },
-                    left = {
-                        name = _G.PLAYER,
-                        type = "group",
-                        order = 50,
-                        args = {}
-                    },
-                    right = {
-                        name = _G.TARGET,
-                        type = "group",
-                        order = 55,
-                        args = {}
-                    },
-                }
-            },
-            active = {
-                name = L["AuraTrack_ActiveTrackers"],
-                type = "group",
-                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
-                order = 50,
-                args = {
-                }
-            },
-            inactive = {
-                name = L["AuraTrack_InactiveTrackers"],
-                type = "group",
-                disabled = function() return not RealUI:GetModuleEnabled("AuraTracking") end,
-                order = 50,
-                args = {
-                }
-            }
-        }
-    }
-    for _, side in next, {"left", "right"} do
-        local settings = auratracker.args.options.args[side]
-        local position = db.position[side]
-        --[[
-        settings.args.point = {
-            order = 10,
-            type = "select",
-            name = L["Anchor"],
-            desc = L["Change the current anchor point of the bar."],
-            values = validAnchors,
-            get = function(info) return position.point end,
-            set = function(info, value)
-                position.point = value
-                AuraTracking:SettingsUpdate("position")
-            end,
-        }
-        ]]
-        settings.args.x = {
-            name = L["General_XOffset"],
-            desc = L["General_XOffsetDesc"],
-            type = "input",
-            dialogControl = "NumberEditBox",
-            get = function(info) return tostring(position.x) end,
-            set = function(info, value)
-                position.x = round(tonumber(value))
-                AuraTracking:SettingsUpdate("position")
-            end,
-            order = 20,
-        }
-        settings.args.y = {
-            name = L["General_YOffset"],
-            desc = L["General_YOffsetDesc"],
-            type = "input",
-            dialogControl = "NumberEditBox",
-            get = function(info) return tostring(position.y) end,
-            set = function(info, value)
-                position.y = round(tonumber(value))
-                AuraTracking:SettingsUpdate("position")
-            end,
-            order = 30,
-        }
-    end
-    for tracker, spellData in AuraTracking:IterateTrackers() do
-        local settings = CreateTrackerSettings(tracker, spellData)
-        if tracker.shouldTrack then
-            auratracker.args.active.args[tracker.id] = settings
-        else
-            auratracker.args.inactive.args[tracker.id] = settings
-        end
-    end
-end
 local classresource do
     debug("HuD ClassResource")
     local CombatFader = RealUI:GetModule("CombatFader")
@@ -1802,7 +1234,7 @@ local classresource do
             icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
             type = "group",
             childGroups = "tab",
-            order = 5,
+            order = 4,
             args = {
                 enable = {
                     name = L["General_Enabled"],
@@ -2031,7 +1463,6 @@ options.HuD = {
         other = other,
         unitframes = unitframes,
         castbars = castbars,
-        auratracker = auratracker,
         classresource = classresource,
         close = { -- This is for button creation
             name = _G.CLOSE,

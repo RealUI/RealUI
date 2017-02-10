@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["Blizzard_CompactRaidFrames"] = function(F, C)
     mods.debug("Blizzard_CompactRaidFrames", F, C)
 

@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["Masque"] = function(F, C)
     --print("Masque", F, C)
     local Button = _G.ExtraActionButton1

@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 11
+local MAJOR, MINOR = "LibArtifactData-1.0", 12
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -164,7 +164,7 @@ local function ScanTraits(artifactID)
 	for i = 1, #powers do
 		local traitID = powers[i]
 		local spellID, _, currentRank, maxRank, bonusRanks, _, _, _, isStart, isGold, isFinal = GetPowerInfo(traitID)
-		if currentRank > 0 then
+		if (currentRank or spellID.currentRank) > 0 then -- NOTE: patch 7.2 compat
 			local name, _, icon = GetSpellInfo(spellID)
 			traits[#traits + 1] = {
 				traitID = traitID,

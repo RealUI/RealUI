@@ -1,13 +1,12 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 local math = _G.math
 
 -- Libs --
 local BT4, BT4DB, BT4Profile
-local BT4ActionBars, BT4AB_EnableBar, BT4Stance
+local BT4ActionBars, BT4AB_EnableBar, BT4Stance, BT4Pet
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -36,11 +35,13 @@ local buttonSizes = {
     stanceBar = 22,
 }
 local fixedSettings = {
-    padding = 1,
-    buttons = 12
+    bt4Padding = 11,
+    buttonPadding = 1,
+    buttons = 12,
+    petButtons = 10
 }
 local function IsOdd(val)
-    return val % 2 == 1 and true or false
+    return val % 2 == 1
 end
 function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
@@ -50,22 +51,16 @@ function ActionBars:ApplyABSettings(tag)
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
     local barSettings = db[RealUI.cLayout]
+    local numTopBars = barSettings.centerPositions - 1
+    local numBotBars = 3 - numTopBars
+    local padding = fixedSettings.buttonPadding
 
-    local topBars, numTopBars, sidePositions
-    -- Convert settings to tables
-    if barSettings.centerPositions == 1 then
-        topBars = {false, false, false}
-        numTopBars = 0
-    elseif barSettings.centerPositions == 2 then
-        topBars = {true, false, false}
-        numTopBars = 1
-    elseif barSettings.centerPositions == 3 then
-        topBars = {true, true, false}
-        numTopBars = 2
-    else
-        topBars = {true, true, true}
-        numTopBars = 3
+    -- update grid position
+    if RealUI:DoesAddonMove("Grid2") then
+        ndb.positions[RealUI.cLayout]["GridBottomY"] = (buttonSizes.bars + padding) * numBotBars + 3
     end
+
+    local sidePositions
     if barSettings.sidePositions == 1 then
         sidePositions = {[4] = "RIGHT", [5] = "RIGHT"}
     elseif barSettings.sidePositions == 2 then
@@ -74,11 +69,8 @@ function ActionBars:ApplyABSettings(tag)
         sidePositions = {[4] = "LEFT", [5] = "LEFT"}
     end
 
-    local HuDY = ndb.positions[RealUI.cLayout]["HuDY"]
-    local ABY = ndb.positions[RealUI.cLayout]["ActionBarsY"] + (RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"] or 0)
 
     local BarSizes = {}
-    local padding = fixedSettings.padding
     local centerPadding = padding / 2
     local BarPadding = {top = {}, bottom = {}, sides = {}}
     for id = 1, 5 do
@@ -91,7 +83,7 @@ function ActionBars:ApplyABSettings(tag)
             local isVertBar = id > 3
             local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
             local isLeftBar = isVertBar and not(isRightBar)
-            local isTopBar = not(isVertBar) and topBars[id] == true
+            local isTopBar = not(isVertBar) and id <= numTopBars
             local isBottomBar = not(isVertBar) and not(isTopBar)
             ActionBars:debug(id, "Stats", isTopBar, isBottomBar, isLeftBar, isRightBar)
 
@@ -165,27 +157,28 @@ function ActionBars:ApplyABSettings(tag)
                 ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
-                ActionBars:debug(id, "Y Offset", HuDY, ABY)
+                local topYOfs = ndb.positions[RealUI.cLayout]["HuDY"] + ndb.positions[RealUI.cLayout]["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
+                local bottomYOfs = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + buttonSizes.bars + fixedSettings.bt4Padding
+                ActionBars:debug(id, "Y Offset", topYOfs, bottomYOfs)
                 if barPlace == 1 then
                     if isTopBar then
-                        y = HuDY + ABY
+                        y = topYOfs
                     else
-                        y = 37
+                        y = bottomYOfs
                     end
                 elseif barPlace == 2 then
+                        local pad = math.ceil(centerPadding + centerPadding)
                     if isTopBar then
-                        local pad = math.ceil(centerPadding + centerPadding)
-                        y = -(buttonSizes.bars + pad) + HuDY + ABY
+                        y = -(buttonSizes.bars + pad) + topYOfs
                     else
-                        local pad = math.ceil(centerPadding + centerPadding)
-                        y = buttonSizes.bars + pad + 37
+                        y = buttonSizes.bars + pad + bottomYOfs
                     end
                 else
                     local pad = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
-                        y = -((buttonSizes.bars * 2) + pad) + HuDY + ABY
+                        y = -((buttonSizes.bars * 2) + pad) + topYOfs
                     else
-                        y = (buttonSizes.bars * 2) + pad + 37
+                        y = (buttonSizes.bars * 2) + pad + bottomYOfs
                     end
                 end
 
@@ -209,7 +202,7 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-            bar["padding"] = fixedSettings.padding - 10
+            bar["padding"] = fixedSettings.buttonPadding - 10
 
             if id < 4 then
                 bar["flyoutDirection"] = sidePositions[id] == "UP"
@@ -248,7 +241,7 @@ function ActionBars:ApplyABSettings(tag)
         -- if RealUI.cLayout == 1 then
             local numPetBarButtons = 10
             local pbX, pbY
-            local pbP = fixedSettings.padding
+            local pbP = fixedSettings.buttonPadding
             local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
 
             -- Calculate X
@@ -287,17 +280,9 @@ function ActionBars:ApplyABSettings(tag)
     if barSettings.moveBars.eab and BarSizes[2] and BarSizes[3] then
         local eabX, eabY
 
-        -- Calculate Y
-        eabY = 61
-
-        -- Calculate X
-        if numTopBars == 3 then
-            eabX = -32
-        elseif numTopBars == 2 then
-            eabX = BarSizes[3] / 2 - 4
-        else
-            eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-        end
+        -- Calculate X, Y
+        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
+        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 61
 
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
@@ -320,15 +305,8 @@ function ActionBars:ApplyABSettings(tag)
         if NumStances > 0 then
             if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
 
-            local sbX, sbY
-
-            if ndb.settings.fontStyle == 3 then
-                sbX = -286
-                sbY = 28
-            else
-                sbX = -264
-                sbY = 27
-            end
+            local sbX = -(_G.max(BarSizes[2], BarSizes[3]) / 2 - 4)
+            local sbY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + buttonSizes.stanceBar + fixedSettings.bt4Padding
 
             -- Set Position
             local profileStanceBar = BT4DB["namespaces"]["StanceBar"]["profiles"][prof]
@@ -336,10 +314,10 @@ function ActionBars:ApplyABSettings(tag)
                 profileStanceBar["position"] = {
                     ["x"] = sbX,
                     ["y"] = sbY,
+                    ["point"] = "BOTTOM",
                     ["scale"] = 1,
                     ["growHorizontal"] = "LEFT",
-                    ["growVertical"] = "DOWN",
-                    ["point"] = "BOTTOMRIGHT"
+                    ["growVertical"] = "DOWN"
                 }
             end
             if BT4Stance then BT4Stance:ApplyConfig() end
@@ -353,150 +331,122 @@ function ActionBars:ApplyABSettings(tag)
 end
 
 ----
--- StanceBar functions
+-- Doodad functions
 ----
-function ActionBars:ToggleStanceBar()
-    if not Doodads.stance then return end
-    ActionBars:debug("ToggleStanceBar")
+local function CreateDoodad(doodad, parent)
+    ActionBars:debug("CreateDoodad", doodad)
+    local bar = _G.CreateFrame("Frame", "RealUIActionBarDoodads"..doodad, _G.UIParent)
+    Doodads[doodad] = bar
 
-    if ( BT4Stance and BT4Stance:IsEnabled() and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.stance and db.showDoodads and not _G.UnitInVehicle("player")) then
-        Doodads.stance:Show()
+    bar:SetFrameStrata("LOW")
+    bar:SetHeight(32)
+    bar:SetWidth(32)
+
+    bar.texture = bar:CreateTexture(nil, "ARTWORK")
+    bar.texture:SetAllPoints(bar)
+    bar.texture:SetTexture(Textures.stanceBar.center)
+
+    bar.parent = parent
+
+    bar:Hide()
+end
+
+function ActionBars:UpdateDoodadVisibility(doodadType)
+    if not Doodads[doodadType] then return end
+    ActionBars:debug("UpdateDoodadVisibility", doodadType)
+
+    local doodad = Doodads[doodadType]
+    if db.showDoodads and doodad:ShouldShow() then
+        ActionBars:debug("Show doodad")
+        doodad:Show()
     else
-        Doodads.stance:Hide()
+        ActionBars:debug("Hide doodad")
+        doodad:Hide()
     end
 end
 
-function ActionBars:UpdateStanceBar()
-    ActionBars:debug("UpdatePetBar Check", Doodads.pet, RealUI:DoesAddonMove("Bartender4"), db[RealUI.cLayout].moveBars.pet)
-    if not (Doodads.stance and BT4Stance and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.stance) then return end
-    ActionBars:debug("UpdateStanceBar")
+function ActionBars:UpdateDoodadPosition(doodadType)
+    if not db.showDoodads then return end
+    ActionBars:debug("UpdateDoodadPosition", doodadType)
 
-    -- Color
-    -- Doodads.stance.sides:SetVertexColor(unpack(RealUI.classColor))
-    Doodads.stance.sides:SetVertexColor(0.5, 0.5, 0.5)
-
-    -- Size/Position
-    local NumStances = _G.GetNumShapeshiftForms()
-    local sbP = 1--db[RealUI.cLayout].stanceBar.padding
-    local sbW = (NumStances * 22) + ((NumStances - 1) * sbP)
-    local sbX = BT4DB["namespaces"]["StanceBar"]["profiles"][BT4Profile]["position"]["x"] - math.floor((sbW / 2)) + 11.5
-
-    Doodads.stance:ClearAllPoints()
-    Doodads.stance:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", math.floor(sbX) - 2, -6)
-end
-
-function ActionBars:UPDATE_SHAPESHIFT_FORMS()
-    self:UpdateStanceBar()
-    self:ToggleStanceBar()
-end
-
-----
--- PetBar functions
-----
-function ActionBars:TogglePetBar()
-    if not Doodads.pet then return end
-    ActionBars:debug("TogglePetBar")
-
-    if ( RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet and db.showDoodads and (_G.UnitExists("pet") and not _G.UnitInVehicle("player")) ) then
-        Doodads.pet:Show()
-    else
-        Doodads.pet:Hide()
+    local barName = doodadType.."Bar"
+    local bar = _G["BT4Bar"..barName]
+    local numbuttons = #bar.buttons
+    local numRows = bar:GetRows()
+    local buttonsPerRow = math.ceil(numbuttons / numRows) -- just a precaution
+    numRows = math.ceil(numbuttons / buttonsPerRow)
+    if numRows > numbuttons then
+        numRows = numbuttons
+        buttonsPerRow = 1
     end
-end
 
-function ActionBars:UpdatePetBar()
-    ActionBars:debug("UpdatePetBar Check", Doodads.pet, RealUI:DoesAddonMove("Bartender4"), db[RealUI.cLayout].moveBars.pet)
-    if not (Doodads.pet and RealUI:DoesAddonMove("Bartender4") and db[RealUI.cLayout].moveBars.pet) then return end
-    ActionBars:debug("UpdatePetBar")
+    local barWidth = buttonsPerRow * buttonSizes.petBar + (buttonsPerRow - 1)
+    local barHeight = numRows * buttonSizes.petBar + (numRows - 1)
+    local barX = RealUI.Round((barWidth + fixedSettings.bt4Padding) / 2) - 0.5
+    local barY = RealUI.Round((barHeight + fixedSettings.bt4Padding) / 2) - 0.5
 
-    -- Color
-    Doodads.pet.sides:SetVertexColor(_G.unpack(RealUI.classColor))
+    local growH = BT4DB.namespaces[barName].profiles[BT4Profile].position.growHorizontal
+    if growH == "LEFT" then
+        barX = -barX
+    end
 
-    -- Size/Position
-    local pbX = BT4DB["namespaces"]["PetBar"]["profiles"][BT4Profile]["position"]["x"]
-    local pbA = BT4DB["namespaces"]["PetBar"]["profiles"][BT4Profile]["position"]["point"]
-    Doodads.pet:ClearAllPoints()
-    Doodads.pet:SetPoint(pbA, "UIParent", pbA, math.floor(pbX) + 3, 3)
+    local growV = BT4DB.namespaces[barName].profiles[BT4Profile].position.growVertical
+    if growV == "DOWN" then
+        barY = -barY
+    end
 
-    Doodads.pet:Show()
-end
-
-function ActionBars:UNIT_PET()
-    self:UpdatePetBar()
-    self:TogglePetBar()
+    local doodad = Doodads[doodadType]
+    doodad:ClearAllPoints()
+    doodad:SetPoint("CENTER", doodad.parent, barX, barY)
 end
 
 ----
 -- Frame Creation
 ----
-function ActionBars:CreateDoodads()
-    ActionBars:debug("CreateDoodads")
-
-    -- PetBar
-    Doodads.pet = _G.CreateFrame("Frame", "RealUIActionBarDoodadsPet", _G.UIParent)
-    local dP = Doodads.pet
-
-    dP:SetFrameStrata("BACKGROUND")
-    dP:SetFrameLevel(1)
-    dP:SetHeight(32)
-    dP:SetWidth(32)
-
-    dP.sides = dP:CreateTexture(nil, "ARTWORK")
-    dP.sides:SetAllPoints(dP)
-    dP.sides:SetTexture(Textures.petBar.sides)
-
-    dP.center = dP:CreateTexture(nil, "ARTWORK")
-    dP.center:SetAllPoints(dP)
-    dP.center:SetTexture(Textures.petBar.center)
-
-    dP:Hide()
-
-    -- Stance Bar
-    Doodads.stance = _G.CreateFrame("Frame", "RealUIActionBarDoodadsStance", _G.UIParent)
-    local dS = Doodads.stance
-
-    dS:SetFrameStrata("LOW")
-    dS:SetFrameLevel(2)
-    dS:SetHeight(32)
-    dS:SetWidth(32)
-
-    dS.sides = dS:CreateTexture(nil, "ARTWORK")
-    dS.sides:SetAllPoints(dS)
-    dS.sides:SetTexture(Textures.stanceBar.sides)
-
-    dS.center = dS:CreateTexture(nil, "ARTWORK")
-    dS.center:SetAllPoints(dS)
-    dS.center:SetTexture(Textures.stanceBar.center)
-end
-
-----
-function ActionBars:RefreshDoodads()
+function ActionBars:RefreshDoodads(doodadType)
     if not (RealUI:GetModuleEnabled(MODNAME) and BT4) then return end
-    ActionBars:debug("RefreshDoodads")
+    ActionBars:debug("RefreshDoodads", doodadType)
     db = self.db.profile
 
-    if not Doodads.pet then self:CreateDoodads() end
+    if (BT4Pet and BT4Pet:IsEnabled()) or doodadType == "Pet" then
+        ActionBars:debug("RefreshPet")
+        if not Doodads.Pet then
+            CreateDoodad("Pet", _G.BT4BarPetBar)
+            function Doodads.Pet:ShouldShow()
+                return _G.UnitExists("pet") and not _G.UnitInVehicle("player")
+            end
+        end
+        self:UpdateDoodadPosition("Pet")
+        self:UpdateDoodadVisibility("Pet")
+    end
 
-    self:UpdatePetBar()
-    self:TogglePetBar()
-
-    self:UpdateStanceBar()
-    self:ToggleStanceBar()
+    if (BT4Stance and BT4Stance:IsEnabled()) or doodadType == "Stance" then
+        ActionBars:debug("RefreshStance")
+        if not Doodads.Stance then
+            CreateDoodad("Stance", _G.BT4BarStanceBar)
+            function Doodads.Stance:ShouldShow()
+                return not _G.UnitInVehicle("player")
+            end
+        end
+        self:UpdateDoodadPosition("Stance")
+        self:UpdateDoodadVisibility("Stance")
+    end
 end
 
 function ActionBars:PLAYER_ENTERING_WORLD()
     self:debug("PLAYER_ENTERING_WORLD")
     if not BT4 then return end
 
-    self:TogglePetBar()
-    self:ToggleStanceBar()
     self:ApplyABSettings()
 
     if EnteredWorld then return end
 
-    self:RegisterEvent("UNIT_PET")
-    self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
-    self:RefreshDoodads()
+    self:RegisterEvent("UNIT_PET", function()
+        self:RefreshDoodads("Pet")
+    end)
+    self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", function()
+        self:RefreshDoodads("Stance")
+    end)
 
     ---[[
     BT4AB_EnableBar = function(BT4AB, id)
@@ -508,6 +458,12 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     end
     --_G.hooksecurefunc(BT4ActionBars, "EnableBar", BT4AB_EnableBar)
     --]]
+    _G.hooksecurefunc(_G.BT4BarStanceBar, "UpdateButtonLayout", function()
+        self:UpdateDoodadVisibility("Stance")
+    end)
+    _G.hooksecurefunc(_G.BT4BarPetBar, "UpdateButtonLayout", function()
+        self:UpdateDoodadVisibility("Pet")
+    end)
 
     EnteredWorld = true
 end
@@ -587,6 +543,7 @@ function ActionBars:OnEnable()
         BT4Profile = BT4DB["profileKeys"][RealUI.key]
 
         BT4Stance = BT4:GetModule("StanceBar", true)
+        BT4Pet = BT4:GetModule("PetBar", true)
         BT4ActionBars = BT4:GetModule("ActionBars", true)
 
         self:RegisterEvent("PLAYER_ENTERING_WORLD")

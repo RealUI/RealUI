@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local abs, floor = _G.math.abs, _G.math.floor
 local tinsert, next, type = _G.table.insert, _G.next, _G.type
 local Lerp = _G.Lerp

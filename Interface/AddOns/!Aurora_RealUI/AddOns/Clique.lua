@@ -1,8 +1,5 @@
 local _, mods = ...
 
--- Lua Globals --
-local _G = _G
-
 mods["PLAYER_LOGIN"]["Clique"] = function(self, F, C)
     --print("HELLO Clique!!!", F, C)
     local tab = _G.CliqueSpellTab

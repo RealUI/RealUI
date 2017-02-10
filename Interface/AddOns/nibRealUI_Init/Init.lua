@@ -4,16 +4,15 @@ if loaded and finished then
     return
 end
 
-local NAME, RealUI = ...
+local _, RealUI = ...
 
 -- Lua Globals --
-local _G = _G
 local max, abs, floor = _G.math.max, _G.math.abs, _G.math.floor
 local next, print, select = _G.next, _G.print, _G.select
 local tostring = _G.tostring
 
 -- Libs --
-local LTD = _G.LibStub("RealUI_LibTextDump-1.0")
+local LTD = _G.LibStub("LibTextDump-1.0")
 
 -- RealUI --
 _G.RealUI = RealUI
@@ -93,11 +92,17 @@ end
 RealUI.Debug = Debug
 function RealUI.GetDebug(mod)
     return function (...)
-        Debug(mod, ...)
+        return Debug(mod, ...)
     end
 end
 local function debug(...)
-    Debug("Init", ...)
+    return Debug("Init", ...)
+end
+
+local _, uiHieght = _G.GetPhysicalScreenSize()
+local uiMod = uiHieght / 768
+function RealUI.ModValue(value, getFloat)
+    return RealUI.Round(value * uiMod, getFloat and 2 or 0)
 end
 
 -- Slash Commands
@@ -144,17 +149,15 @@ f:SetScript("OnEvent", function(self, event, addon)
         local scrHeight = _G.GetScreenHeight()
         scrHeight = floor(scrHeight + 0.5)
         debug("scrHeight", scrHeight)
-        local EM = scrHeight * 0.0125
-        debug("EM", EM, RealUI.EM)
 
-        if not RealUI.EM then
-            debug("Set EM")
-            RealUI.EM = EM
-        elseif EM ~= RealUI.EM then
-            debug("Recalc EM")
-        end
+        local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+        debug("physical size", pysWidth, pysHeight)
+
+        uiMod = pysHeight / 768
+        debug("uiMod", uiMod)
     elseif event == "ADDON_LOADED" then
-        if addon == NAME then
+        if addon == "nibRealUI_Init" then
+            debug("nibRealUI_Init: loaded", uiMod)
             _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
             _G.RealUI_Debug = {}
         elseif addon == "!Aurora_RealUI" then
@@ -203,66 +206,6 @@ f:SetScript("OnEvent", function(self, event, addon)
     end
 end)
 
--- Modified from Blizzard's DrawRouteLine
---local lineFactor = _G.TAXIROUTE_LINEFACTOR_2 --(32/20) / 2
-
-function RealUI:DrawLine(T, C, sx, sy, ex, ey, w, relPoint)
-    if (not relPoint) then relPoint = "BOTTOMLEFT" end
-
-    T:SetTexture([[Interface\AddOns\nibRealUI_Init\textures\line]])
-
-    -- Determine dimensions and center point of line
-    local dx, dy = ex - sx, ey - sy
-    --debug("Init", DrawLine: dx, ", dx, ", dy, ", dy)
-    local cx, cy = (sx + ex) / 2, (sy + ey) / 2
-    --debug("Init", "DrawLine: cx, ", cx, ", cy, ", cy)
-
-    -- Normalize direction if necessary
-    if (dx < 0) then
-        dx,dy = -dx,-dy
-    end
-
-    -- Calculate actual length of line
-    local l = _G.sqrt((dx * dx) + (dy * dy))
-
-    -- Quick escape if it's zero length
-    if (l == 0) then
-        T:SetTexCoord(0,0,0,0,0,0,0,0)
-        T:SetPoint("BOTTOMLEFT", C, relPoint, cx,cy)
-        T:SetPoint("TOPRIGHT",   C, relPoint, cx,cy)
-        return
-    end
-
-    -- Sin and Cosine of rotation, and combination (for later)
-    local s,c = -dy / l, dx / l
-    local sc = s * c
-
-    -- Calculate bounding box size and texture coordinates
-    local Bwid, Bhgt, BLx, BLy, TLx, TLy, TRx, TRy, BRx, BRy
-    if (dy >= 0) then
-        Bwid = cx - sx --((l * c) - (w * s)) * lineFactor
-        Bhgt = cy - sy --((w * c) - (l * s)) * lineFactor
-        BLx, BLy, BRy = (w / l) * sc, s * s, (l / w) * sc
-        BRx, TLx, TLy, TRx = 1 - BLy, BLy, 1 - BRy, 1 - BLx
-        TRy = BRx
-    else
-        Bwid = cx - sx --((l * c) + (w * s)) * lineFactor
-        Bhgt = -(cy - sy) --((w * c) + (l * s)) * lineFactor
-        BLx, BLy, BRx = s * s, -(l / w) * sc, 1 + (w / l) * sc
-        BRy, TLx, TLy, TRy = BLx, 1 - BRx, 1 - BLx, 1 - BLy
-        TRx = TLy
-    end
-    --debug("Init", "DrawLine: Bwid, ", Bwid, ", Bhgt, ", Bhgt)
-    --debug("Init", "DrawLine: TOPRIGHT", cx + Bwid, cy + Bhgt)
-    --debug("Init", "DrawLine: BOTTOMLEFT", cx - Bwid, cy - Bhgt)
-
-    -- Set texture coordinates and anchors
-    T:ClearAllPoints()
-    T:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
-    T:SetPoint("TOPRIGHT",   C, relPoint, cx + Bwid, cy + Bhgt)
-    T:SetPoint("BOTTOMLEFT", C, relPoint, cx - Bwid, cy - Bhgt)
-end
-
 -- Math
 RealUI.Round = function(value, places)
     local mult = 10 ^ (places or 0)
@@ -292,14 +235,20 @@ function RealUI:ColorTableToStr(vals)
     return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
 end
 
-function RealUI:GetDurabilityColor(percent)
-    if percent < 0 then
-        return 1, 0, 0
-    elseif percent <= 0.5 then
-        return 1, percent * 2, 0
-    elseif percent >= 1 then
-        return 0, 1, 0
+function RealUI.GetDurabilityColor(a, b)
+    if a and b then
+        debug("RGBColorGradient", a, b)
+        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
     else
-        return 2 - percent * 2, 1, 0
+        debug("GetDurabilityColor", a)
+        if a < 0 then
+            return 1, 0, 0
+        elseif a <= 0.5 then
+            return 1, a * 2, 0
+        elseif a >= 1 then
+            return 0, 1, 0
+        else
+            return 2 - a * 2, 1, 0
+        end
     end
 end

@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next = _G.next
 
 -- RealUI --
@@ -67,8 +66,8 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
             self:debug("Don't show frames")
             NewLayout = "None"
         end
-    -- Party / Arena - Adjust w/pets
-    elseif (groupType == "arena") or (groupType == "party") then
+    -- Party - Adjust w/pets
+    elseif (groupType == "party") then
         isHoriz = LayoutDB.hGroups.normal
         local HasPet = _G.UnitExists("pet") or _G.UnitExists("partypet1") or _G.UnitExists("partypet2") or _G.UnitExists("partypet3") or _G.UnitExists("partypet4")
         if HasPet and LayoutDB.showPet then
@@ -78,32 +77,44 @@ function GridLayout:Update(_, newGroupType, newInstType, maxPlayers)
             self:debug("Don't show pets")
             NewLayout = "Party"
         end
-    -- Raid
-    elseif (groupType == "raid") then
-        isHoriz = LayoutDB.hGroups.raid
-
-        -- reset the table
-        for k,v in next, raidGroupInUse do
-            raidGroupInUse[k] = false
-        end
-
-        -- find what groups are in use
-        for i = 1, _G.MAX_RAID_MEMBERS do
-            local name, _, subGroup = _G.GetRaidRosterInfo(i)
-            if name and subGroup then
-                raidGroupInUse["group"..subGroup] = true
-            end
-        end
-
-        if (raidGroupInUse.group7 or raidGroupInUse.group8) then
-            self:debug("Group 7 and/or 8 in use")
-            layoutSize = 40
-        elseif raidGroupInUse.group6 then
-            self:debug("Group 6 in use")
-            layoutSize = 30
+    -- Raid / Arena
+    elseif (groupType == "raid") or (groupType == "arena") then
+        if (groupType == "arena") and LayoutDB.showPet then
+            self:debug("Show pets")
+            NewLayout = "By Group w/Pets"
         else
-            self:debug("Group 1 - 5 in use")
-            layoutSize = "normal"
+            self:debug("Don't show pets")
+            NewLayout = "By Group"
+        end
+
+        if (groupType == "raid") then
+            isHoriz = LayoutDB.hGroups.raid
+
+            -- reset the table
+            for k,v in next, raidGroupInUse do
+                raidGroupInUse[k] = false
+            end
+
+            -- find what groups are in use
+            for i = 1, _G.MAX_RAID_MEMBERS do
+                local name, _, subGroup = _G.GetRaidRosterInfo(i)
+                if name and subGroup then
+                    raidGroupInUse["group"..subGroup] = true
+                end
+            end
+
+            if (raidGroupInUse.group7 or raidGroupInUse.group8) then
+                self:debug("Group 7 and/or 8 in use")
+                layoutSize = 40
+            elseif raidGroupInUse.group6 then
+                self:debug("Group 6 in use")
+                layoutSize = 30
+            else
+                self:debug("Group 1 - 5 in use")
+                layoutSize = "normal"
+            end
+        else
+            isHoriz = LayoutDB.hGroups.normal
         end
     end
 

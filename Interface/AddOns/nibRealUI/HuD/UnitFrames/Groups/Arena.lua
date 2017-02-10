@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local floor = _G.math.floor
 
 -- Libs --
@@ -54,10 +53,10 @@ local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
     end
 end
 
-local function UpdatePrep(self, event, ...)
+local function UpdatePrep(self, event, unit, status)
     UnitFrames:debug("Arena:----- UpdatePrep -----")
     local notVisible = _G.UnitAffectingCombat("player") and "SetAlpha" or "Hide"
-    if event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS" then
+    if not unit then
         UnitFrames:debug(event)
         local numOpps = _G.GetNumArenaOpponentSpecs()
         for i = 1, 5 do
@@ -77,13 +76,12 @@ local function UpdatePrep(self, event, ...)
             end
         end
     else
-        UnitFrames:debug(event, ...)
-        local unit, status = ...
+        UnitFrames:debug(event, unit, status)
         -- filter arenapet*
-        unit = unit:match("arena(%d)")
+        unit = _G.tonumber(unit:match("arena(%d)"))
         UnitFrames:debug(unit, prepFrames[unit])
         if unit then
-            local opp = prepFrames[_G.tonumber(unit)]
+            local opp = prepFrames[unit]
             if status == "seen" then
                 UnitFrames:debug("Arena Opp Seen", unit, opp)
                 opp:SetAlpha(1)
@@ -258,5 +256,6 @@ _G.tinsert(UnitFrames.units, function(...)
     end
     prepFrames[1]:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
     prepFrames[1]:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    prepFrames[1]:RegisterEvent("PLAYER_ENTERING_WORLD")
     prepFrames[1]:SetScript("OnEvent", UpdatePrep)
 end)

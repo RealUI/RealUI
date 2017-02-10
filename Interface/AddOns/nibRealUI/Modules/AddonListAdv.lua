@@ -2,7 +2,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, table = _G.next, _G.table
 
 -- RealUI --

@@ -1,7 +1,6 @@
 local ADDON_NAME, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, type = _G.next, _G.type
 
 -- Libs --
@@ -75,60 +74,38 @@ end
 
 RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
-        ["Nothing"] = 0,
         ["HuDX"] = 0,
         ["HuDY"] = -38,
-        ["UFHorizontal"] = 316,
+        ["UFHorizontal"] = 200,
         ["ActionBarsY"] = -161.5,
+        ["ActionBarsBotY"] = 16,
         ["GridTopX"] = 0,
         ["GridTopY"] = -197.5,
         ["GridBottomX"] = 0,
         ["GridBottomY"] = 58,
-        ["CTAurasLeftX"] = 0,
-        ["CTAurasLeftY"] = 0,
-        ["CTAurasRightX"] = 0,
-        ["CTAurasRightY"] = 0,
-        ["CTPointsWidth"] = 184,
-        ["CTPointsHeight"] = 148,
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = 0,
-        ["SpellAlertWidth"] = 200,
-        ["ClassAuraWidth"] = 80,
-        ["ClassResourceX"] = 0,
-        ["ClassResourceY"] = 0,
-        ["RunesX"] = 0,
-        ["RunesY"] = 0,
+        ["SpellAlertWidth"] = 150,
         ["BossX"] = -32,        -- Boss anchored to RIGHT
         ["BossY"] = 314,
     },
     [2] = {     -- Healing
-        ["Nothing"] = 0,
         ["HuDX"] = 0,
         ["HuDY"] = -38,
-        ["UFHorizontal"] = 316,
-        ["ActionBarsY"] = -161.5,
+        ["UFHorizontal"] = 200,
+        ["ActionBarsY"] = -116,
+        ["ActionBarsBotY"] = 16,
         ["GridTopX"] = 0,
         ["GridTopY"] = -197.5,
         ["GridBottomX"] = 0,
         ["GridBottomY"] = 58,
-        ["CTAurasLeftX"] = 0,
-        ["CTAurasLeftY"] = 0,
-        ["CTAurasRightX"] = 0,
-        ["CTAurasRightY"] = 0,
-        ["CTPointsWidth"] = 184,
-        ["CTPointsHeight"] = 148,
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = 0,
-        ["SpellAlertWidth"] = 200,
-        ["ClassAuraWidth"] = 80,
-        ["ClassResourceX"] = 0,
-        ["ClassResourceY"] = 0,
-        ["RunesX"] = 0,
-        ["RunesY"] = 0,
+        ["SpellAlertWidth"] = 150,
         ["BossX"] = -32,        -- Boss anchored to RIGHT
         ["BossY"] = 314,
     },
@@ -143,28 +120,14 @@ RealUI.hudSizeOffsets = {
         ["GridTopY"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetY"] = 0,
-        ["ClassResourceY"] = 0,
-        ["CTPointsHeight"] = 0,
-        ["CTAurasLeftX"] = 0,
-        ["CTAurasLeftY"] = 0,
-        ["CTAurasRightX"] = 0,
-        ["CTAurasRightY"] = 0,
-        ["RunesY"] = 0,
     },
     [2] = {
-        ["UFHorizontal"] = 50,
-        ["SpellAlertWidth"] = 50,
+        ["UFHorizontal"] = 100,
+        ["SpellAlertWidth"] = 100,
         ["ActionBarsY"] = -20,
         ["GridTopY"] = -20,
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetY"] = -20,
-        ["ClassResourceY"] = -20,
-        ["CTPointsHeight"] = 40,
-        ["CTAurasLeftX"] = -1,
-        ["CTAurasLeftY"] = -20,
-        ["CTAurasRightX"] = 1,
-        ["CTAurasRightY"] = -20,
-        ["RunesY"] = -20,
     },
 }
 
@@ -176,7 +139,7 @@ local defaults, charInit do
         needchatmoved = true,
     }
     local spec = {}
-    for specIndex = 1, _G.GetNumSpecializationsForClassID(RealUI.classID) do
+    for specIndex = 1, RealUI.numSpecs do
         local _, _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
         debug("Spec info", specIndex, role)
         spec[specIndex] = role == "HEALER" and 2 or 1
@@ -200,7 +163,14 @@ local defaults, charInit do
                 largeHuDOption = false,
             },
             verinfo = {},
-            patchedTOC = 0
+            patchedTOC = 0,
+            currency = {
+                [RealUI.realm] = {
+                    [RealUI.faction] = {
+                        [RealUI.charName] = {}
+                    }
+                }
+            },
         },
         char = {
             init = charInit,
@@ -225,7 +195,6 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                infoLineBackground = true,
                 stripeOpacity = 0.5,
                 hudSize = 1,
                 reverseUnitFrameBars = false,
@@ -243,14 +212,13 @@ function RealUI:ToggleGridTestMode(show)
     if show then
         if _G.RealUIGridConfiguring then return end
         if not _G.Grid2Options then _G.Grid2:LoadGrid2Options() end
-        _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group 20")
-        _G.RealUIGridConfiguring = true
+        _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group", nil, nil, 20)
     else
-        _G.RealUIGridConfiguring = false
         if _G.Grid2Options then
-            _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
+            _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
         end
     end
+    return _G.RealUIGridConfiguring
 end
 
 -- Move HuD Up if using a Low Resolution display
@@ -356,12 +324,6 @@ function RealUI:SetLayout()
     if self:GetModuleEnabled("GridLayout") then
         local GL = self:GetModule("GridLayout", true)
         if GL then GL:SettingsUpdate("RealUI:SetLayout") end
-    end
-
-    -- Layout Button (For Installation)
-    if self:GetModuleEnabled("InfoLine") then
-        local IL = self:GetModule("InfoLine", true)
-        if IL then IL:Refresh() end
     end
 
     -- FrameMover
@@ -661,7 +623,7 @@ function RealUI:OnInitialize()
 
     -- Vars
     self.classColor = RealUI:GetClassColor(self.class)
-    self.key = ("%s - %s"):format(self.name, self.realm)
+    self.key = ("%s - %s"):format(self.charName, self.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
@@ -702,7 +664,7 @@ function RealUI:OnInitialize()
         RealUI:LoadConfig("RealUI")
     end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
-    self:RegisterChatCommand("rl", function() _G.ReloadUI() end)
+    self:RegisterChatCommand("rl", _G.ReloadUI)
     self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
@@ -765,7 +727,7 @@ end
 do
     local prototype = {
         debug = function(self, ...)
-            RealUI.Debug(self.moduleName, ...)
+            return RealUI.Debug(self.moduleName, ...)
         end,
     }
     RealUI:SetDefaultModulePrototype(prototype)

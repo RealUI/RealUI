@@ -1,5 +1,6 @@
 include_files = {
     "Interface/AddOns/!Aurora_RealUI",
+    "Interface/AddOns/cargBags_Nivaya",
     "Interface/AddOns/nibRealUI",
     "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Config",
@@ -16,6 +17,7 @@ exclude_files = {
     "**/*.toc",
     "**/*.txt",
     "**/*.xml",
+    "**/*.md",
 }
 
 self = false

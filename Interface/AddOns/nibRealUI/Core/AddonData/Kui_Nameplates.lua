@@ -1,12 +1,9 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Kui_Nameplates = function()
+RealUI.AddOns.Kui_Nameplates = function()
 	_G.KuiNameplatesGDB = {
 		["namespaces"] = {
 			["CastBar"] = {

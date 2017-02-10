@@ -1,12 +1,9 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.LoadAddOnData_Aurora = function()
+RealUI.AddOns.Aurora = function()
     _G.AuroraConfig = {
         ["useButtonGradientColour"] = false,
         ["chatBubbles"] = false,

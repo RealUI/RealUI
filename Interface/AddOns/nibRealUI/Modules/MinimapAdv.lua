@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, ipairs = _G.next, _G.ipairs
 
 -- Libs --
@@ -587,7 +586,7 @@ local function POI_OnEnter(self)
     if mm_anchor == "TOPLEFT" then
         POITooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
     elseif mm_anchor == "BOTTOMLEFT" then
-        POITooltip:SetOwner(self, "ANCHOR_TOPMRIGHT", 5, 5)
+        POITooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 5, 5)
     end
 
     -- Add Hyperlink
@@ -1971,4 +1970,9 @@ function MinimapAdv:OnEnable()
     SetUpMinimapFrame()
     CreateFrames()
     self:RegEvents()
+
+    -- Community defined API
+    function _G.GetMinimapShape()
+        return "SQUARE"
+    end
 end

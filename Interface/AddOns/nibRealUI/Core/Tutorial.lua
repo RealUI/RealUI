@@ -1,8 +1,5 @@
 ﻿local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 local loc = RealUI.locale
@@ -63,8 +60,8 @@ if loc == "deDE" then   -- Deutsch
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Sekundäre Aktionsleisten|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Leisten:|r\n"..ToolTipColors[3].."Leiste 4, 5|r",
-        infolineright =     ToolTipColors[1].."Infozeile - Rechts|r\n\n"..ToolTipColors[2].."Elemente:|r\n"..ToolTipColors[3].."Uhr\nSchalter für Damage-Meter\nLayout-Wechsler|r\n|cff909090(DPS/Tank, Heilung, Niedr./Hohe Auflösung)|r\n"..ToolTipColors[3].."Spec-Wechsler, Ausrüst.-Manager\nFPS und Latenz|r",
-        infolineleft =      ToolTipColors[1].."Infozeile - Links|r\n\n"..ToolTipColors[2].."Elemente:|r\n"..ToolTipColors[3].."Optionsbutton / Mikromenü\nNeue Mail-Anzeige\nGilde\nFreunde\nHaltbarkeit |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Leere Inventarplätze\nWährung\nXP / Ruf|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 -- elseif loc == "itIT" then    -- Italiano
@@ -100,8 +97,8 @@ elseif loc == "frFR" then   -- French
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Barres d'actions secondaires|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Barres:|r\n"..ToolTipColors[3].."Barre 4, 5|r",
-        infolineright =     ToolTipColors[1].."Ligne d'information - Droite|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Horloge\nSelecteur de compteur de degats\nSelecteur de disposition|r\n|cff909090(DPS/Tank, Soigneur, Basse/Haute Resolution)|r\n"..ToolTipColors[3].."Selecteur de Spec, Gestionnaire d'equipement\nIPS et Latence|r",
-        infolineleft =      ToolTipColors[1].."Ligne d'information - Gauche|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Boutons d'Options / Micromenu\nIndicateur de nouveaux messages\nGuilde\nAmis\nDurabilite |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Sacs : Emplacements libres\nDevise\nXP / Reputation|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 else    -- Default
@@ -135,8 +132,8 @@ else    -- Default
         petbar =            ToolTipColors[1].."Pet Action Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         stancebar =         ToolTipColors[1].."Stance Bar|r\n\n"..ToolTipColors[2].."Visibility Conditions:|r\n"..ToolTipColors[3].."Mouse-over\nCtrl key pressed\n\n"..ToolTipStrings.abconfig,
         moactionbars2 =     ToolTipColors[1].."Secondary Action Bars|r\n"..ToolTipStrings.mouseover.."\n\n"..ToolTipColors[2].."Bars:|r\n"..ToolTipColors[3].."Bar 4, 5|r",
-        infolineright =     ToolTipColors[1].."Info Line - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nDamage Meter Toggle\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nFPS and Latency|r",
-        infolineleft =      ToolTipColors[1].."Info Line - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nNew Mail Indicator\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Empty Bag Slots\nCurrency\nXP / Reputation|r",
+        infobarright =     ToolTipColors[1].."Infobar - Right|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Clock\nNew Mail Indicator\nEmpty Bag Slots\nLayout Changer|r\n|cff909090(DPS/Tank, Healing, Low/High Resolution)|r\n"..ToolTipColors[3].."Spec Changer, Equip Manager\nCurrency\nFPS and Latency|r",
+        infobarleft =      ToolTipColors[1].."Infobar - Left|r\n\n"..ToolTipColors[2].."Elements:|r\n"..ToolTipColors[3].."Options Button / Micromenu\nGuild\nFriends\nDurability |r"..ToolTipColors[4].."(< 95%)|r\n"..ToolTipColors[3].."Progress Watch|r",
         watchFrame =        ToolTipColors[1].."Watch Frame|r\n\n"..ToolTipColors[2].."Right Click:|r\n"..ToolTipColors[3].."Track quest on World Map|r\n\n"..ToolTipColors[2].."Shift + Right Click:|r\n"..ToolTipColors[3].."Show DropDown menu|r\n\n"..ToolTipColors[2].."Shift + Left Click:|r\n"..ToolTipColors[3].."Stop tracking quest|r",
     }
 end
@@ -223,17 +220,17 @@ local RealUI_HelpPlate = {
         ToolTipDir = "UP",
         ToolTipText = ToolTipTexts.actionbars,
     },
-    [14] = {    --infoline right
+    [14] = {    --infobar right
         ButtonAnchor = "BOTTOMRIGHT",
         ButtonPos = { x = -110, y = 12 },
         ToolTipDir = "UP",
-        ToolTipText = ToolTipTexts.infolineright,
+        ToolTipText = ToolTipTexts.infobarright,
     },
-    [15] = {    --infoline left
+    [15] = {    --infobar left
         ButtonAnchor = "BOTTOMLEFT",
         ButtonPos = { x = 110, y = 12 },
         ToolTipDir = "UP",
-        ToolTipText = ToolTipTexts.infolineleft,
+        ToolTipText = ToolTipTexts.infobarleft,
     },
     [16] = {    -- secondary action bars
         ButtonAnchor = "RIGHT",
@@ -335,9 +332,9 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
         button:SetScript("OnLeave", function(btn)
             if _G.RealUITutorialBG:IsShown() then
                 _G.HelpPlate_TooltipHide();
-                self.box.BG:Show();
-                self.boxHighlight:Hide();
-                self.viewed = true;
+                btn.box.BG:Show();
+                btn.boxHighlight:Hide();
+                btn.viewed = true;
             else
                 onLeave(btn)
             end
@@ -349,7 +346,6 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
     _G.HelpPlate:Show()
 end
 
--- This is used in a macro, but luacheck doesn't pick that up.
 function RealUI:HideTutorial()
     RealUITutorial_HelpPlate_AnimateOut()
     _G.RealUITutorialButtonClose:Hide()
@@ -422,7 +418,7 @@ function RealUI:InitTutorial()
     btnOpen:SetPoint("CENTER")
     btnOpen:SetText(ButtonTexts.tutorial)
     btnOpen:SetAttribute("type", "macro")
-    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.name))
+    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.charName))
     RealUI:AddButtonHighlight(btnOpen)
 
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)

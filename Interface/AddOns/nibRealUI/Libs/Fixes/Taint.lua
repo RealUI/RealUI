@@ -1,8 +1,5 @@
 local ADDON_NAME, private = ...
 
--- Lua Globals --
-local _G = _G
-
 do --[[ World Map ]]--
     -- original code by ls- (lightspark)
     local old_ResetZoom = _G.WorldMapScrollFrame_ResetZoom
@@ -43,7 +40,7 @@ do --[[ Artifact Frame ]]--
         if C_ArtifactUI.GetTotalPurchasedRanks() then 
             oldOnShow(self)
         else
-            ArtifactFrame:Hide()
+            HideUIPanel(ArtifactFrame)
         end
     end
 

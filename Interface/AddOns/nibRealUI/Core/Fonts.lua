@@ -1,7 +1,6 @@
 local _, private = ...
 
 -- Lua Globals --
-local _G = _G
 local next, type = _G.next, _G.type
 
 -- Libs --
@@ -68,7 +67,6 @@ function Fonts:UpdateUIFonts()
 
     -- Base fonts, everything inhierits from these fonts.
     -- FrameXML\Fonts.xml
-    SetFont("SystemFont_Small",               NORMAL, 10)
     SetFont("SystemFont_Outline_Small",       NORMAL, 10, "OUTLINE")
     SetFont("SystemFont_Outline",             NORMAL, 13, "OUTLINE")
     SetFont("SystemFont_InverseShadow_Small", NORMAL, 10, nil, nil, {0.4, 0.4, 0.4, 0.75}, 1, -1)
@@ -90,21 +88,34 @@ function Fonts:UpdateUIFonts()
     SetFont("NumberFont_Outline_Large",           CHAT, 16, "OUTLINE")
     SetFont("NumberFont_Outline_Huge",            CRIT, 30, "OUTLINE")
 
+    SetFont("Fancy22Font",                  HEADER, 22)
     SetFont("QuestFont_Huge",               HEADER, 18)
     SetFont("QuestFont_Outline_Huge",       HEADER, 18, "OUTLINE")
     SetFont("QuestFont_Super_Huge",         HEADER, 24, nil, {1, 0.82, 0})
     SetFont("QuestFont_Super_Huge_Outline", HEADER, 24, "OUTLINE", {1, 0.82, 0})
     SetFont("SplashHeaderFont",             HEADER, 24, nil, {1, 0.82, 0}, {0, 0, 0}, 1, -2)
 
+    SetFont("Game11Font", NORMAL, 11)
+    SetFont("Game12Font", NORMAL, 12)
+    SetFont("Game13Font", NORMAL, 13)
+    SetFont("Game13FontShadow", NORMAL, 13, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont("Game15Font", NORMAL, 15)
     SetFont("Game18Font", NORMAL, 18)
+    SetFont("Game20Font", NORMAL, 20)
     SetFont("Game24Font", NORMAL, 24)
     SetFont("Game27Font", NORMAL, 27)
     SetFont("Game30Font", NORMAL, 30)
     SetFont("Game32Font", NORMAL, 32)
     SetFont("Game36Font", NORMAL, 36)
     SetFont("Game48Font", NORMAL, 48)
+    SetFont("Game48FontShadow", NORMAL, 48, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("Game60Font", NORMAL, 60)
     SetFont("Game72Font", NORMAL, 72)
+
+    SetFont("Game11Font_ol", NORMAL, 11, "OUTLINE")
+    SetFont("Game12Font_ol", NORMAL, 12, "OUTLINE")
+    SetFont("Game13Font_ol", NORMAL, 13, "OUTLINE")
+    SetFont("Game15Font_ol", NORMAL, 15, "OUTLINE")
 
     SetFont("QuestFont_Enormous",     HEADER, 30, nil, {1, 0.82, 0})
     SetFont("DestinyFontLarge",       HEADER, 18, nil, {0.1, 0.1, 0.1})
@@ -129,11 +140,23 @@ function Fonts:UpdateUIFonts()
 
     SetFont("ChatBubbleFont", NORMAL, 13)
     SetFont("Fancy16Font",    HEADER, 16)
+    SetFont("Fancy18Font",    HEADER, 18)
+    SetFont("Fancy24Font",    HEADER, 24)
+    SetFont("Fancy27Font",    HEADER, 27)
+    SetFont("Fancy30Font",    HEADER, 30)
+    SetFont("Fancy32Font",    HEADER, 32)
+    SetFont("Fancy48Font",    HEADER, 48)
 
+    SetFont("SystemFont_NamePlateFixed",      NORMAL, 14)
+    SetFont("SystemFont_LargeNamePlateFixed", NORMAL, 20)
+    SetFont("SystemFont_NamePlate",           NORMAL, 9)
+    SetFont("SystemFont_LargeNamePlate",      NORMAL, 12)
+    SetFont("SystemFont_NamePlateCastBar",    NORMAL, 10)
 
     -- SharedXML\SharedFonts.xml
     SetFont("SystemFont_Tiny",                 NORMAL, 9)
     SetFont("SystemFont_Shadow_Small",         NORMAL, 10, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont("SystemFont_Small",                NORMAL, 10)
     SetFont("SystemFont_Small2",               NORMAL, 11)
     SetFont("SystemFont_Shadow_Small2",        NORMAL, 11, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Shadow_Med1_Outline",  NORMAL, 12, "OUTLINE", nil, {0, 0, 0}, 1, -1)
@@ -145,12 +168,18 @@ function Fonts:UpdateUIFonts()
     SetFont("SystemFont_Shadow_Large",         NORMAL, 16, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Shadow_Large2",        NORMAL, 18, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Shadow_Huge1",         NORMAL, 20, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont("SystemFont_Huge2",                NORMAL, 24)
     SetFont("SystemFont_Shadow_Huge2",         NORMAL, 24, "OUTLINE", nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Shadow_Huge3",         NORMAL, 25, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont("SystemFont_Shadow_Outline_Huge3", NORMAL, 25, "OUTLINE", nil, {0, 0, 0}, 1, -1)
+    SetFont("SystemFont_World",                NORMAL, 64, nil, nil, {0, 0, 0}, 1, -1)
+    SetFont("SystemFont_World_ThickOutline",   NORMAL, 64, "THICKOUTLINE", nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Shadow_Outline_Huge2", NORMAL, 22, "OUTLINE", nil, {0, 0, 0}, 2, -2)
     SetFont("SystemFont_Med1",                 NORMAL, 12)
-    SetFont("SystemFont_OutlineThick_WTF2",    NORMAL, 36)
+    SetFont("SystemFont_WTF2",                 NORMAL, 36)
+    SetFont("SystemFont_Outline_WTF2",         NORMAL, 36, "OUTLINE")
     SetFont("GameTooltipHeader",               NORMAL, 14)
+    SetFont("System_IME",                      NORMAL, 16)
 
     if db.standard.changeYellow then
         local yellowFonts = {
