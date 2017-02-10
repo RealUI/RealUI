@@ -59,7 +59,7 @@ local function UpdatePrep(self, event, unit, status)
     if not unit then
         UnitFrames:debug(event)
         local numOpps = _G.GetNumArenaOpponentSpecs()
-        for i = 1, _G.MAX_ARENA_ENEMIES do
+        for i = 1, 5 do
             local opp = prepFrames[i]
             if (i <= numOpps) then
                 local specID, gender = _G.GetArenaOpponentSpec(i)
