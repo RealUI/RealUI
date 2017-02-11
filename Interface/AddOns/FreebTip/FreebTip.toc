@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 70100
 ## Title: FreebTip
 ## Notes: Custom GameTooltip
 ## Version: 2.8
