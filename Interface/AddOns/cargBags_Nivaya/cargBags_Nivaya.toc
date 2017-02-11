@@ -1,4 +1,4 @@
-## Interface: 70000
+## Interface: 70100
 ## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
 ## Author: Luzzifus (Modified by Nibelheim and Gethe)
 ## RequiredDeps: nibRealUI

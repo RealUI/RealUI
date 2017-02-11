@@ -1,4 +1,4 @@
-## Interface: 60000
+## Interface: 70100
 ## Title: FreebTipiLvl
 ## Notes: Equipped iLevel for the GameTooltip
 ## Version: 2.8
