@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [8.1 r19a] - 2017-02-10 ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Fixed ###
+
+  * Moving a block on the Infobar could produce an error.
+
+
+
+
 ## [8.1 r19] - 2017-02-10 ##
 ### Modified AddOns ###
 
@@ -10,6 +22,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * cargBags_Nivaya
   * nibRealUI
   * nibRealUI_Config
+  * nibRealUI_Init
   * FreebTip
   * FreebTipiLvl
 
@@ -32,5 +45,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a
 [8.1 r19]: https://github.com/RealUI/RealUI/compare/8.1_r18l...8.1_r19
 
