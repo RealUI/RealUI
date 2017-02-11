@@ -516,7 +516,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
 
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if forceUpdate then
-            block:AdjustElements()
+            block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
         block:Show();
 
