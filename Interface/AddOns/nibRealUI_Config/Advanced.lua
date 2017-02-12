@@ -210,15 +210,15 @@ local core do
             },
         }
 
-        local realuiOrder, otherOrder = 11, 111
+        local realuiOrder, otherOrder = 10, 110
         local numBlocks, numEnabled, numLabeled, numIcons = 0, 0, 0, 0
-        for dataObj, block in Infobar:IterateBlocks() do
+        for index, block in Infobar:IterateBlocks() do
             local name = block.name
-            local blockInfo = Infobar:GetBlockInfo(name, dataObj)
+            local blockInfo = Infobar:GetBlockInfo(name, block.dataObj)
             if blockInfo.enabled ~= -1 then
                 numBlocks = numBlocks + 1
-                local displayName = dataObj.name or name
-                local blockOrder = dataObj.type == "RealUI" and realuiOrder or otherOrder
+                local displayName = block.dataObj.name or name
+                local blockOrder = (block.dataObj.type == "RealUI" and realuiOrder or otherOrder) + index
                 infobar.args.blocks.args[name.."Toggle"] = {
                     name = displayName,
                     desc = L["General_EnabledDesc"]:format(displayName),

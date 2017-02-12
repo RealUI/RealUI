@@ -18,6 +18,7 @@ Infobar.locked = true
 
 local MOVING_BLOCK
 local blocksByData = {}
+local orderedBlocks = {}
 local BAR_HEIGHT = RealUI.ModValue(16)
 
 local blockFont do
@@ -253,6 +254,11 @@ function BlockMixin:AdjustElements(blockInfo)
     self:SetWidth(width)
 end
 
+local function SortBlocks(block1, block2)
+    local name1 = block1.dataObj.name or block1.name
+    local name2 = block2.dataObj.name or block2.name
+    return name1 < name2
+end
 local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
@@ -260,6 +266,8 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
+    _G.tinsert(orderedBlocks, block)
+    _G.sort(orderedBlocks, SortBlocks)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.25)
@@ -434,7 +442,7 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
 end
 
 function Infobar:IterateBlocks()
-    return next, blocksByData
+    return next, orderedBlocks
 end
 
 ---------------------
