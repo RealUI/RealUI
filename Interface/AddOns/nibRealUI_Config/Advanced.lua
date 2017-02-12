@@ -147,7 +147,7 @@ local core do
                                     if blockInfo.enabled ~= -1 then
                                         if value then
                                             Infobar:AddBlock(block.name, dataObj, blockInfo)
-                                        else
+                                        elseif blockInfo.enabled then
                                             Infobar:RemoveBlock(block.name, dataObj, blockInfo)
                                         end
                                         blockInfo.enabled = not not value
@@ -167,7 +167,9 @@ local core do
                                     local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showLabel = not not value
-                                        block:AdjustElements(blockInfo)
+                                        if blockInfo.enabled then
+                                            block:AdjustElements(blockInfo)
+                                        end
                                     end
                                 end
                                 allLabeled = not not value
@@ -184,7 +186,9 @@ local core do
                                     local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showIcon = not not value
-                                        block:AdjustElements(blockInfo)
+                                        if blockInfo.enabled then
+                                            block:AdjustElements(blockInfo)
+                                        end
                                     end
                                 end
                                 allIcons = not not value
@@ -222,9 +226,9 @@ local core do
                     get = function() return blockInfo.enabled end,
                     set = function(data, value)
                         if value then
-                            block = Infobar:AddBlock(name, dataObj, blockInfo)
+                            block = Infobar:AddBlock(name, block.dataObj, blockInfo)
                         else
-                            Infobar:RemoveBlock(name, dataObj, blockInfo)
+                            Infobar:RemoveBlock(name, block.dataObj, blockInfo)
                         end
                         allEnabled = nil
                         blockInfo.enabled = value
@@ -255,7 +259,7 @@ local core do
                     end,
                     order = blockOrder + 2,
                 }
-                if dataObj.type == "RealUI" then
+                if block.dataObj.type == "RealUI" then
                     realuiOrder = realuiOrder + 5
                 else
                     otherOrder = otherOrder + 5
