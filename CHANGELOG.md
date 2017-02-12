@@ -3,6 +3,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [8.1 r19b] - 2017-02-12 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+
+### Changed ###
+
+  * The list of blocks will now always be in alphabetical order.
+
+### Fixed ###
+
+  * An error would occur when toggling an option on the "All Blocks" row.
+  * The font used for blocks would not respect font settings.
+  * Block positions would sometimes not be preserved between sessions.
+
+
+
+
 ## [8.1 r19a] - 2017-02-10 ##
 ### Modified AddOns ###
 
@@ -45,6 +64,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
 [8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a
 [8.1 r19]: https://github.com/RealUI/RealUI/compare/8.1_r18l...8.1_r19
 
