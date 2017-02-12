@@ -335,7 +335,6 @@ local function CreateNewBlock(name, dataObj, blockInfo)
 end
 
 function Infobar:AddBlock(name, dataObj, blockInfo)
-    self:debug("Infobar:AddBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
     if not block or block.isFake then
         block = CreateNewBlock(name, dataObj, blockInfo)
@@ -381,7 +380,6 @@ function Infobar:RemoveBlock(name, dataObj, blockInfo)
 end
 
 function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
-    --self:debug("DataObjectCreated:", event, name, dataObj.type, noupdate)
     if dataObj.type == "data source" or dataObj.type == "RealUI" then
         local blockInfo = self:GetBlockInfo(name, dataObj)
         if blockInfo and blockInfo.enabled then
@@ -453,6 +451,7 @@ function DockMixin:OnLoad()
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
     self.DOCKED_BLOCKS = {};
+    self.UNORDERED_BLOCKS = {}
     self.isDirty = true;    --You dirty, dirty frame
 end
 
@@ -471,13 +470,36 @@ function DockMixin:AddBlock(block, position)
     end
 
     self.isDirty = true;
-    block.isDocked = 1;
+    block.isDocked = true;
 
-    if ( position and position <= #self.DOCKED_BLOCKS + 1 ) then
-        _G.assert(position ~= 1 or block == self.primary, position);
-        _G.tinsert(self.DOCKED_BLOCKS, position, block);
+    local insertIndex = position
+    for i = 1, #self.UNORDERED_BLOCKS do
+        if insertIndex < self.UNORDERED_BLOCKS[i].index then
+            insertIndex = self.UNORDERED_BLOCKS[i].position
+            break
+        end
+    end
+
+    if ( insertIndex and insertIndex <= #self.DOCKED_BLOCKS + 1 ) then
+        _G.assert(insertIndex ~= 1 or block == self.primary, insertIndex);
+        _G.tinsert(self.DOCKED_BLOCKS, insertIndex, block);
     else
         _G.tinsert(self.DOCKED_BLOCKS, block);
+    end
+
+    if position > #self.DOCKED_BLOCKS or insertIndex ~= position then
+        local index = 1
+        while index <= #self.UNORDERED_BLOCKS do
+            if position < self.UNORDERED_BLOCKS[index].index then
+                break
+            end
+            index = index + 1
+        end
+        _G.tinsert(self.UNORDERED_BLOCKS, index, {
+            position = #self.DOCKED_BLOCKS,
+            index = position,
+            block = block
+        })
     end
 
     self:HideInsertHighlight();
@@ -495,7 +517,7 @@ function DockMixin:RemoveBlock(block)
     _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1);
     self.isDirty = true;
     _G.tDeleteItem(self.DOCKED_BLOCKS, block);
-    block.isDocked = nil;
+    block.isDocked = false;
     block:SetMovable(true);
 
     block:Show();
@@ -506,6 +528,7 @@ function DockMixin:HasDockedBlock(block)
     return _G.tContains(self.DOCKED_BLOCKS, block);
 end
 
+local toBeRemoved = {}
 function DockMixin:UpdateBlocks(forceUpdate)
     if ( not self.isDirty and not forceUpdate ) then
         --No changes have been made since the last update.
@@ -518,6 +541,22 @@ function DockMixin:UpdateBlocks(forceUpdate)
         if forceUpdate then
             block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
+
+        _G.wipe(toBeRemoved)
+        for i = 1, #self.UNORDERED_BLOCKS do
+            if block == self.UNORDERED_BLOCKS[i].block then
+                if index == self.UNORDERED_BLOCKS[i].index then
+                    _G.tinsert(toBeRemoved, i)
+                else
+                    self.UNORDERED_BLOCKS[i].position = index
+                end
+            end
+        end
+        for i = 1, #toBeRemoved do
+            _G.tremove(self.UNORDERED_BLOCKS, toBeRemoved[i])
+        end
+        block.index = index
+        block:SavePosition()
         block:Show();
 
         if ( lastBlock ) then
@@ -834,7 +873,9 @@ function Infobar:OnEnable()
     self:CreateBlocks()
 
     for name, dataObj in LDB:DataObjectIterator() do
-        self:LibDataBroker_DataObjectCreated("OnEnable", name, dataObj, true)
+        if dataObj.type == "data source" then
+            self:LibDataBroker_DataObjectCreated("OnEnable", name, dataObj, true)
+        end
     end
 
     -- Adjust ActionBar positions
