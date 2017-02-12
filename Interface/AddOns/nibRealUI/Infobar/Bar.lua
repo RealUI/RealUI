@@ -20,15 +20,7 @@ local MOVING_BLOCK
 local blocksByData = {}
 local orderedBlocks = {}
 local BAR_HEIGHT = RealUI.ModValue(16)
-
-local blockFont do
-    local font, _, outline = _G.RealUIFont_Normal:GetFont()
-    blockFont = {
-        font = font,
-        size = RealUI.ModValue(10),
-        outline = outline
-    }
-end
+local blockFont
 
 ----------------------
 -- Block Management --
@@ -825,6 +817,12 @@ function Infobar:OnInitialize()
     ndbg = RealUI.db.global
     ]]
 
+    local font = RealUI.db.profile.media.font.standard
+    blockFont = {
+        font = font[4],
+        size = RealUI.ModValue(10),
+        outline = font[3]
+    }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
