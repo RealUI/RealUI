@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+
+### Fixed ###
+
+  * The Infobar would be oversized when Retina scale is enabled.
+
+
+
+
 ## [8.1 r19b] - 2017-02-12 ##
 ### Modified AddOns ###
 

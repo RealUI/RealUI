@@ -28,6 +28,7 @@ local blockFont
 local function PrepareTooltip(tooltip, block)
     Infobar:debug("PrepareTooltip", tooltip, block and block.name)
     if tooltip and block then
+        RealUI.ResetScale(tooltip)
         tooltip:ClearAllPoints()
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
@@ -623,6 +624,7 @@ function Infobar:CreateBar()
     frame:SetHeight(BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
+    RealUI.ResetScale(frame)
 
     -- Background
     frame:SetBackdrop({

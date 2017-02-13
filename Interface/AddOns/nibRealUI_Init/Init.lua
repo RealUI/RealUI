@@ -105,6 +105,13 @@ function RealUI.ModValue(value, getFloat)
     return RealUI.Round(value * uiMod, getFloat and 2 or 0)
 end
 
+function RealUI.ResetScale(frame)
+    -- Frames that are sized via ModValue become HUGE with retina scale.
+    if RealUI.db.global.tags.retinaDisplay.set then
+        return frame:SetScale(RealUI:GetUIScale())
+    end
+end
+
 -- Slash Commands
 _G.SLASH_REALUIINIT1 = "/realdebug"
 function _G.SlashCmdList.REALUIINIT(mod, editBox)

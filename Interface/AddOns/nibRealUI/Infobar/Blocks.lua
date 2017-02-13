@@ -6,15 +6,6 @@ local next = _G.next
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
-local qTipAquire = qTip.Acquire
-function qTip:Acquire(...)
-    local tooltip = qTipAquire(self, ...)
-    if _G.Aurora and not tooltip._skinned then
-        _G.Aurora[1].CreateBD(tooltip)
-        tooltip._skinned = true
-    end
-    return tooltip
-end
 
 local artData = _G.LibStub("LibArtifactData-1.0", true)
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome")
@@ -31,6 +22,17 @@ local testCell = _G.UIParent:CreateFontString()
 testCell:SetPoint("CENTER")
 testCell:SetSize(500, 20)
 testCell:Hide()
+
+local qTipAquire = qTip.Acquire
+function qTip:Acquire(...)
+    local tooltip = qTipAquire(self, ...)
+    RealUI.ResetScale(tooltip)
+    if _G.Aurora and not tooltip._skinned then
+        _G.Aurora[1].CreateBD(tooltip)
+        tooltip._skinned = true
+    end
+    return tooltip
+end
 
 local headerFont, textFont, iconFont
 do
