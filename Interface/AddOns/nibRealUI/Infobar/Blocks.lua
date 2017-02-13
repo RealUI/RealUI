@@ -1185,7 +1185,7 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, accountName, bnetIDAccount
+                                i, lvl, characterName, bnetIDAccount
                             }
                         })
                     end
