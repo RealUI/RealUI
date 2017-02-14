@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * The Infobar would be oversized when Retina scale is enabled.
   * Alt-clicking a friend would not send a group invite.
+  * Options for Master Loot would not appear when clicking an item.
 
 
 

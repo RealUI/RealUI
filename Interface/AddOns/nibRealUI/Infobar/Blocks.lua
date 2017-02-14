@@ -622,7 +622,7 @@ function Infobar:CreateBlocks()
                 disabled = true,
             },
             {text = _G.CANCEL,
-                func = function() _G.CloseDropDownMenus() end,
+                func = function() _G.Lib_CloseDropDownMenus() end,
                 notCheckable = true,
             },
         }

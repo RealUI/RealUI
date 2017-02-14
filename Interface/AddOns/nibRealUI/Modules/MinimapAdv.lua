@@ -1154,8 +1154,7 @@ local function Toggle_OnMouseDown()
         _G.PlaySound("igMiniMapOpen")
         MinimapAdv:Toggle(true)
     end
-    if _G.DropDownList1 then _G.DropDownList1:Hide() end
-    if _G.DropDownList2 then _G.DropDownList2:Hide() end
+    _G.Lib_CloseDropDownMenus()
 end
 
 function MinimapAdv:ToggleBind()
@@ -1190,9 +1189,7 @@ end
 local function Config_OnMouseDown()
     RealUI.Debug("Config", "Minimap")
     RealUI:LoadConfig("RealUI", "uiTweaks", "minimap")
-
-    if _G.DropDownList1 then _G.DropDownList1:Hide() end
-    if _G.DropDownList2 then _G.DropDownList2:Hide() end
+    _G.Lib_CloseDropDownMenus()
 end
 
 local function Config_OnEnter()
@@ -1281,8 +1278,7 @@ local function Farm_OnMouseDown()
         _G.PlaySound("igMiniMapClose")
         button:Show()
     end
-    if _G.DropDownList1 then _G.DropDownList1:Hide() end
-    if _G.DropDownList2 then _G.DropDownList2:Hide() end
+    _G.Lib_CloseDropDownMenus()
 
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
