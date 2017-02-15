@@ -1938,6 +1938,11 @@ function Infobar:CreateBlocks()
                     UpdateGearSets()
                 elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
                     UpdateBlock(block)
+                    if ndbc.layout.spec[currentSpecIndex] ~= ndbc.layout.current then
+                        ndbc.layout.current = ndbc.layout.spec[currentSpecIndex]
+                        RealUI:UpdateLayout()
+                    end
+
                     if equipmentNeedsUpdate then
                         _G.EquipmentManager_EquipSet(equipmentNeedsUpdate)
                         equipmentNeedsUpdate = false
