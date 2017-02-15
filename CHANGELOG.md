@@ -3,6 +3,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [8.1 r19c] - 2017-02-15 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+
+### Fixed ###
+
+  * The Infobar would be oversized if the UI scale is larger than pixel perfect.
+  * Alt-clicking a friend would not send a group invite.
+  * Options for Master Loot would not appear when clicking an item.
+  * Nothing would happen when clicking on a block while in combat even even with in combat tooltips enabled.
+  * The layout would not change when switching between specs with different layouts.
+
+
+
+
 ## [8.1 r19b] - 2017-02-12 ##
 ### Modified AddOns ###
 
@@ -64,6 +82,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c
 [8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
 [8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a
 [8.1 r19]: https://github.com/RealUI/RealUI/compare/8.1_r18l...8.1_r19

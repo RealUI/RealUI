@@ -100,9 +100,20 @@ local function debug(...)
 end
 
 local _, uiHieght = _G.GetPhysicalScreenSize()
+local pixelScale = 768 / uiHieght
 local uiMod = uiHieght / 768
 function RealUI.ModValue(value, getFloat)
     return RealUI.Round(value * uiMod, getFloat and 2 or 0)
+end
+
+function RealUI.ResetScale(frame)
+    -- Frames that are sized via ModValue become HUGE with retina scale.
+    local customScale = RealUI:GetUIScale()
+    if RealUI.db.global.tags.retinaDisplay.set then
+        return frame:SetScale(customScale)
+    elseif customScale ~= pixelScale then
+        return frame:SetScale(pixelScale)
+    end
 end
 
 -- Slash Commands
