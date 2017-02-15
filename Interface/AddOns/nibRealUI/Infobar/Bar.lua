@@ -22,6 +22,10 @@ local orderedBlocks = {}
 local BAR_HEIGHT = RealUI.ModValue(16)
 local blockFont
 
+local function IsCombatBlocked()
+    return _G.InCombatLockdown() and not db.combatTips
+end
+
 ----------------------
 -- Block Management --
 ----------------------
@@ -44,7 +48,7 @@ function BlockMixin:OnEnter()
     --Infobar:debug("OnEnter", self.name)
     --self.highlight:Show()
 
-    if (not db.combatTips and _G.InCombatLockdown()) then return end
+    if IsCombatBlocked() then return end
     local dataObj  = self.dataObj
 
     if dataObj.tooltip then
@@ -73,7 +77,7 @@ function BlockMixin:OnLeave()
     Infobar:debug("OnLeave", self.name)
     --self.highlight:Hide()
 
-    if (not db.combatTips and _G.UnitAffectingCombat("player")) then return end
+    if IsCombatBlocked() then return end
     local dataObj  = self.dataObj
 
     if dataObj.OnTooltipShow then
@@ -91,7 +95,8 @@ end
 
 function BlockMixin:OnClick(...)
     Infobar:debug("OnClick", self.name, ...)
-    if self.dataObj.OnClick and not _G.InCombatLockdown() then
+    if IsCombatBlocked() then return end
+    if self.dataObj.OnClick then
         Infobar:debug("Send OnClick")
         self.dataObj.OnClick(self, ...)
     end
