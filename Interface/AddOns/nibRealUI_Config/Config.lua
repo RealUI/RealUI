@@ -115,6 +115,7 @@ local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
     hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 0)
+    RealUI.ResetScale(hudConfig)
     _G.RealUIUINotifications:SetPoint("TOP", hudConfig, "BOTTOM")
     F.CreateBD(hudConfig)
     hudConfig:SetScript("OnEvent", function(self, event, ...)

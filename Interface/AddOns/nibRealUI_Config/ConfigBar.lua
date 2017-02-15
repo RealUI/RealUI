@@ -67,6 +67,7 @@ local other do
                         end,
                         set = function(info, value)
                             ndbc.layout.current = value
+                            ndbc.layout.spec[_G.GetSpecialization()] = value
                             RealUI:UpdateLayout()
                         end,
                         order = 10,
