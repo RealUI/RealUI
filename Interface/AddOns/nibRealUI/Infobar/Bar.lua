@@ -391,10 +391,14 @@ function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
         if blockInfo and blockInfo.enabled then
             self:AddBlock(name, dataObj, blockInfo)
         else
-            blocksByData[dataObj] = {
+            local block = {
+                dataObj = dataObj,
                 name = name,
                 isFake = true
             }
+            blocksByData[dataObj] = block
+            _G.tinsert(orderedBlocks, block)
+            _G.sort(orderedBlocks, SortBlocks)
         end
     end
 end
