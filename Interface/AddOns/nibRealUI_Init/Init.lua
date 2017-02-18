@@ -111,7 +111,7 @@ function RealUI.ResetScale(frame)
     local customScale = RealUI:GetUIScale()
     if RealUI.db.global.tags.retinaDisplay.set then
         return frame:SetScale(customScale)
-    elseif customScale ~= pixelScale then
+    elseif customScale > pixelScale then
         return frame:SetScale(pixelScale)
     end
 end
