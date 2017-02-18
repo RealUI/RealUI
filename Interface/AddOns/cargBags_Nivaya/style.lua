@@ -272,6 +272,7 @@ end
 -- Reset New
 local function resetNewItems(self)
     cargBags.debug("style resetNewItems")
+    _G.wipe(ns.newItems)
     _G.C_NewItems.ClearAll()
     cbNivaya:UpdateAll()
 end

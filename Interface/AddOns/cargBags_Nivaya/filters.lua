@@ -77,12 +77,22 @@ end
 ------------------------------------------
 -- New Items filter and related functions
 ------------------------------------------
+local function IsItemNew(item)
+    if ns.newItems[item.link] then
+        return true
+    elseif _G.C_NewItems.IsNewItem(item.bagID, item.slotID) then
+        ns.newItems[item.link] = true
+        return true
+    end
+    return false
+end
+
 filters.fNewItems = function(item)
     if not _G.cBnivCfg.NewItems then return false end
     if not ((item.bagID >= 0) and (item.bagID <= 4)) then return false end
     if not item.link then return false end
-    if _G.C_NewItems.IsNewItem(item.bagID, item.slotID) then return true end
-    return false
+
+    return IsItemNew(item)
 end
 
 -----------------------------------------
