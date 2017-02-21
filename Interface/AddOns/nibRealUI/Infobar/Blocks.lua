@@ -721,31 +721,27 @@ function Infobar:CreateBlocks()
                 if qTip:IsAcquired(block) then return end
                 --Infobar:debug("Clock: OnEnter", block.side, ...)
 
-                local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
-                --tooltip:SetCell(lineNum, colNum, , nil, 2)
 
                 -- Realm time
                 local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Local time
                 timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Date
-                lineNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
-                tooltip:SetCell(lineNum, 1, L["Clock_Date"])
-                tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
+                tooltip:AddLine(L["Clock_Date"], _G.date("%b %d (%a)"))
 
                 -- Invites
                 if block.invites and block.invites > 0 then
                     tooltip:AddLine(" ")
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], block.invites, 2)
+                    tooltip:AddLine(L["Clock_CalenderInvites"], block.invites)
                 end
 
                 -- World Bosses
