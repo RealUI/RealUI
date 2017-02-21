@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+
+### Changed ###
+
+  * New items will no longer passively reset as they are viewed.
+
+### Fixed ###
+
+  * Some 3rd-party blocks would not show in the config.
+  * Progress Watch status bars would not be properly updated when being toggled from disabled to enabled.
+
+
+
+
 ## [8.1 r19c] - 2017-02-15 ##
 ### Modified AddOns ###
 
