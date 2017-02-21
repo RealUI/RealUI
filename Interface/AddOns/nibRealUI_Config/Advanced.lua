@@ -95,15 +95,17 @@ local core do
                     type = "description",
                     order = 31,
                 },
-                inCombat = {
-                    name = L["Infobar_CombatTooltips"],
-                    desc = L["Infobar_CombatTooltipsDesc"],
-                    type = "toggle",
-                    get = function() return db.combatTips end,
+                bgAlpha = {
+                    name = L["Appearance_WinOpacity"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return db.bgAlpha end,
                     set = function(info, value)
-                        db.combatTips = value
+                        db.bgAlpha = value
+                        Infobar:SettingsUpdate(info[#info])
                     end,
-                    order = 40,
+                    order = 34,
                 },
                 statusBar = {
                     name = L["Infobar_ShowStatusBar"],
@@ -114,6 +116,21 @@ local core do
                     set = function(info, value)
                         db.showBars = value
                         Infobar:SettingsUpdate(info[#info], progress)
+                    end,
+                    order = 40,
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                inCombat = {
+                    name = L["Infobar_CombatTooltips"],
+                    desc = L["Infobar_CombatTooltipsDesc"],
+                    type = "toggle",
+                    get = function() return db.combatTips end,
+                    set = function(info, value)
+                        db.combatTips = value
                     end,
                     order = 50,
                 },

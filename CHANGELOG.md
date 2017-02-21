@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * nibRealUI_Config
   * nibRealUI_Init
 
+### Added ###
+
+  * The opacity of the Infobar can now be adjusted from fully transparent to fully opaque.
+
 ### Changed ###
 
   * New items will no longer passively reset as they are viewed.

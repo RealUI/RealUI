@@ -641,19 +641,18 @@ function Infobar:CreateBar()
         edgeFile = RealUI.media.textures.plain,
         edgeSize = 1,
     })
-    frame:SetBackdropBorderColor(0, 0, 0)
-    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+    frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
+    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
 
     -- Stripes
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-    tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+    tex:SetAlpha(db.bgAlpha * 0.6)
     tex:SetAllPoints()
     tex:SetHorizTile(true)
     tex:SetVertTile(true)
     tex:SetBlendMode("ADD")
-    _G.tinsert(_G.REALUI_WINDOW_FRAMES, frame)
-    _G.tinsert(_G.REALUI_STRIPE_TEXTURES, tex)
+    frame.tex = tex
 
     -- Watch bars
     local watch = {}
@@ -677,6 +676,7 @@ function Infobar:CreateBar()
         bg:SetColorTexture(0, 0, 0)
         bg:SetPoint("TOPLEFT", bar, -1, 1)
         bg:SetPoint("BOTTOMRIGHT", bar, 1, -1)
+        bar.bg = bg
 
         watch[i] = bar
     end
@@ -744,6 +744,12 @@ function Infobar:SettingsUpdate(setting, block)
             watch[i]:SetShown(db.showBars)
         end
         block:OnEvent("SettingsUpdate")
+    elseif setting == "bgAlpha" then
+        self.frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
+        self.frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
+        self.frame.tex:SetAlpha(db.bgAlpha * 0.55)
+
+        self.frame.watch:UpdateColors()
     else
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
@@ -785,6 +791,7 @@ function Infobar:OnInitialize()
             specgear = specgear,
         },
         profile = {
+            bgAlpha = 0.5,
             showBars = true,
             combatTips = false,
             blockGap = 1,

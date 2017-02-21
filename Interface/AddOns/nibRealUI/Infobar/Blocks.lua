@@ -1566,6 +1566,28 @@ function Infobar:CreateBlocks()
             end
         }
 
+        function Infobar.frame.watch:UpdateColors()
+            local alpha = _G.Lerp(0.4, 0.5, (db.bgAlpha / 1))
+
+            local main = self.main
+            local r, g, b = watchStates[dbc.progressState]:GetColor()
+            main:SetStatusBarColor(r, g, b, alpha)
+
+            r, g, b = watchStates[dbc.progressState]:GetColor(true)
+            main.rested:SetColorTexture(r, g, b, alpha)
+
+            local nextState = watchStates[dbc.progressState]:GetNext()
+            for i = 1, 2 do
+                local bar = self[i]
+                if nextState ~= dbc.progressState then
+                    r, g, b = watchStates[nextState]:GetColor()
+                    bar:SetStatusBarColor(r, g, b, alpha * 1.5)
+                    bar.bg:SetColorTexture(0, 0, 0, alpha)
+                end
+                nextState = watchStates[nextState]:GetNext()
+            end
+        end
+
         local function UpdateProgress(block)
             local curValue, maxValue, otherValue = watchStates[dbc.progressState]:GetStats()
             local value = curValue / maxValue
@@ -1577,16 +1599,12 @@ function Infobar:CreateBlocks()
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
                 local main = watch.main
-                local r, g, b = watchStates[dbc.progressState]:GetColor()
-                main:SetStatusBarColor(r, g, b, 0.5)
                 main:SetMinMaxValues(0, maxValue)
                 main:SetValue(curValue)
                 main:Show()
 
                 if _G.type(otherValue) == "number" then
                     local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    r, g, b = watchStates[dbc.progressState]:GetColor(true)
-                    main.rested:SetColorTexture(r, g, b, 0.5)
                     main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
@@ -1598,7 +1616,6 @@ function Infobar:CreateBlocks()
                         curValue, maxValue = watchStates[nextState]:GetStats()
                         Infobar:debug("progress:"..i, nextState, curValue, maxValue)
 
-                        bar:SetStatusBarColor(watchStates[nextState]:GetColor())
                         bar:SetMinMaxValues(0, maxValue)
                         bar:SetValue(curValue)
                         bar:Show()
@@ -1607,6 +1624,8 @@ function Infobar:CreateBlocks()
                     end
                     nextState = watchStates[nextState]:GetNext()
                 end
+
+                watch:UpdateColors()
             end
         end
 
