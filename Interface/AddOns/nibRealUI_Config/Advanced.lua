@@ -59,6 +59,7 @@ local core do
         local Infobar = RealUI:GetModule(MODNAME)
         local db = Infobar.db.profile
         local allEnabled, allLabeled, allIcons
+        local progress
         infobar = {
             name = L["Infobar"],
             desc = "Information / Button display.",
@@ -112,7 +113,7 @@ local core do
                     get = function() return db.showBars end,
                     set = function(info, value)
                         db.showBars = value
-                        Infobar:SettingsUpdate(info[#info])
+                        Infobar:SettingsUpdate(info[#info], progress)
                     end,
                     order = 50,
                 },
@@ -214,6 +215,9 @@ local core do
         local numBlocks, numEnabled, numLabeled, numIcons = 0, 0, 0, 0
         for index, block in Infobar:IterateBlocks() do
             local name = block.name
+            if name == "progress" then
+                progress = block
+            end
             local blockInfo = Infobar:GetBlockInfo(name, block.dataObj)
             if blockInfo.enabled ~= -1 then
                 numBlocks = numBlocks + 1
