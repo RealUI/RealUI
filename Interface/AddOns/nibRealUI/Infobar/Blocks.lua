@@ -1048,15 +1048,14 @@ function Infobar:CreateBlocks()
 
         local function Friends_OnClick(row, ...)
             local name = row.meta[3]
-            local bnetIDAccount = row.meta[4]
-            if not name then return end
+            if not name[1] then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteToGroup(name)
-            elseif bnetIDAccount then
-                _G.SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
+                _G.InviteToGroup(name[1])
+            elseif name[3] then
+                _G.SetItemRef("BNplayer:"..name[2]..":"..name[3], "|HBNplayer:"..name[2].."|h["..name[2].."|h", "LeftButton")
             else
-                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
+                _G.SetItemRef("player:"..name[1], "|Hplayer:"..name[1].."|h["..name[1].."]|h", "LeftButton")
             end
         end
         local function Friends_GetTooltipText(cell)
@@ -1141,9 +1140,10 @@ function Infobar:CreateBlocks()
                                 name = nameFormat:format(bnetFriendColor, name, RealUI:GetClassColor(ClassLookup[class], "hex"), characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
-                                    characterName = characterName.._G.CANNOT_COOPERATE_LABEL;
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
+                                else
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
                                 end
-                                name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
                             end
                         end
 
@@ -1181,7 +1181,7 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, characterName, bnetIDAccount
+                                i, lvl, {characterName, accountName, bnetIDAccount}
                             }
                         })
                     end
@@ -1213,7 +1213,7 @@ function Infobar:CreateBlocks()
                                 cName, level, area, noteText
                             },
                             meta = {
-                                #friendsData + i, lvl, name
+                                #friendsData + i, lvl, {name}
                             }
                         })
                     end
