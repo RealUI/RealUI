@@ -59,6 +59,7 @@ local core do
         local Infobar = RealUI:GetModule(MODNAME)
         local db = Infobar.db.profile
         local allEnabled, allLabeled, allIcons
+        local progress
         infobar = {
             name = L["Infobar"],
             desc = "Information / Button display.",
@@ -94,15 +95,17 @@ local core do
                     type = "description",
                     order = 31,
                 },
-                inCombat = {
-                    name = L["Infobar_CombatTooltips"],
-                    desc = L["Infobar_CombatTooltipsDesc"],
-                    type = "toggle",
-                    get = function() return db.combatTips end,
+                bgAlpha = {
+                    name = L["Appearance_WinOpacity"],
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function(info) return db.bgAlpha end,
                     set = function(info, value)
-                        db.combatTips = value
+                        db.bgAlpha = value
+                        Infobar:SettingsUpdate(info[#info])
                     end,
-                    order = 40,
+                    order = 34,
                 },
                 statusBar = {
                     name = L["Infobar_ShowStatusBar"],
@@ -112,7 +115,22 @@ local core do
                     get = function() return db.showBars end,
                     set = function(info, value)
                         db.showBars = value
-                        Infobar:SettingsUpdate(info[#info])
+                        Infobar:SettingsUpdate(info[#info], progress)
+                    end,
+                    order = 40,
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 41,
+                },
+                inCombat = {
+                    name = L["Infobar_CombatTooltips"],
+                    desc = L["Infobar_CombatTooltipsDesc"],
+                    type = "toggle",
+                    get = function() return db.combatTips end,
+                    set = function(info, value)
+                        db.combatTips = value
                     end,
                     order = 50,
                 },
@@ -214,6 +232,9 @@ local core do
         local numBlocks, numEnabled, numLabeled, numIcons = 0, 0, 0, 0
         for index, block in Infobar:IterateBlocks() do
             local name = block.name
+            if name == "progress" then
+                progress = block
+            end
             local blockInfo = Infobar:GetBlockInfo(name, block.dataObj)
             if blockInfo.enabled ~= -1 then
                 numBlocks = numBlocks + 1

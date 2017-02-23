@@ -3,6 +3,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased] ##
+
+
+
+
+## [8.1 r19d] - 2017-02-23 ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+
+### Added ###
+
+  * The opacity of the Infobar can now be adjusted from fully transparent to fully opaque.
+  * The total amount of money on a realm is shown in the Currency tooltip.
+
+### Changed ###
+
+  * New items will no longer passively reset as they are viewed.
+  * The Currency block tooltip now also includes Connected Realms.
+  * Class Resource updated to support up to 10 points.
+  * Updated Russian locale.
+
+### Fixed ###
+
+  * Some 3rd-party blocks would not show in the config.
+  * Progress Watch status bars would not be properly updated when being toggled from disabled to enabled.
+
+
+
+
 ## [8.1 r19c] - 2017-02-15 ##
 ### Modified AddOns ###
 
@@ -82,6 +115,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19d]: https://github.com/RealUI/RealUI/compare/8.1_r19c...8.1_r19d
 [8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c
 [8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
 [8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a

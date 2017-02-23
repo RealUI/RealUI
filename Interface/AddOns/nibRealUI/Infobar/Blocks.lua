@@ -68,7 +68,7 @@ end
 
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 do
-    local MAX_ROWS = 10
+    local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
     local numTables = 0
     local extData = {}
@@ -721,31 +721,27 @@ function Infobar:CreateBlocks()
                 if qTip:IsAcquired(block) then return end
                 --Infobar:debug("Clock: OnEnter", block.side, ...)
 
-                local tooltip = qTip:Acquire(block, 3, "LEFT", "CENTER", "RIGHT")
+                local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
-                --tooltip:SetCell(lineNum, colNum, , nil, 2)
 
                 -- Realm time
                 local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Local time
                 timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, " ", timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Date
-                lineNum = tooltip:AddLine() --L["Clock_Date"], date("%b %d (%a)"))
-                tooltip:SetCell(lineNum, 1, L["Clock_Date"])
-                tooltip:SetCell(lineNum, 2, _G.date("%b %d (%a)"), "RIGHT", 2)
+                tooltip:AddLine(L["Clock_Date"], _G.date("%b %d (%a)"))
 
                 -- Invites
                 if block.invites and block.invites > 0 then
                     tooltip:AddLine(" ")
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, L["Clock_CalenderInvites"], block.invites, 2)
+                    tooltip:AddLine(L["Clock_CalenderInvites"], block.invites)
                 end
 
                 -- World Bosses
@@ -1052,15 +1048,14 @@ function Infobar:CreateBlocks()
 
         local function Friends_OnClick(row, ...)
             local name = row.meta[3]
-            local bnetIDAccount = row.meta[4]
-            if not name then return end
+            if not name[1] then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteToGroup(name)
-            elseif bnetIDAccount then
-                _G.SetItemRef("BNplayer:"..name..":"..bnetIDAccount, "|HBNplayer:"..name.."|h["..name.."|h", "LeftButton")
+                _G.InviteToGroup(name[1])
+            elseif name[3] then
+                _G.SetItemRef("BNplayer:"..name[2]..":"..name[3], "|HBNplayer:"..name[2].."|h["..name[2].."|h", "LeftButton")
             else
-                _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."]|h", "LeftButton")
+                _G.SetItemRef("player:"..name[1], "|Hplayer:"..name[1].."|h["..name[1].."]|h", "LeftButton")
             end
         end
         local function Friends_GetTooltipText(cell)
@@ -1145,9 +1140,10 @@ function Infobar:CreateBlocks()
                                 name = nameFormat:format(bnetFriendColor, name, RealUI:GetClassColor(ClassLookup[class], "hex"), characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
-                                    characterName = characterName.._G.CANNOT_COOPERATE_LABEL;
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
+                                else
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
                                 end
-                                name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
                             end
                         end
 
@@ -1185,7 +1181,7 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, characterName, bnetIDAccount
+                                i, lvl, {characterName, accountName, bnetIDAccount}
                             }
                         })
                     end
@@ -1217,7 +1213,7 @@ function Infobar:CreateBlocks()
                                 cName, level, area, noteText
                             },
                             meta = {
-                                #friendsData + i, lvl, name
+                                #friendsData + i, lvl, {name}
                             }
                         })
                     end
@@ -1566,6 +1562,28 @@ function Infobar:CreateBlocks()
             end
         }
 
+        function Infobar.frame.watch:UpdateColors()
+            local alpha = _G.Lerp(0.4, 0.5, (db.bgAlpha / 1))
+
+            local main = self.main
+            local r, g, b = watchStates[dbc.progressState]:GetColor()
+            main:SetStatusBarColor(r, g, b, alpha)
+
+            r, g, b = watchStates[dbc.progressState]:GetColor(true)
+            main.rested:SetColorTexture(r, g, b, alpha)
+
+            local nextState = watchStates[dbc.progressState]:GetNext()
+            for i = 1, 2 do
+                local bar = self[i]
+                if nextState ~= dbc.progressState then
+                    r, g, b = watchStates[nextState]:GetColor()
+                    bar:SetStatusBarColor(r, g, b, alpha * 1.5)
+                    bar.bg:SetColorTexture(0, 0, 0, alpha)
+                end
+                nextState = watchStates[nextState]:GetNext()
+            end
+        end
+
         local function UpdateProgress(block)
             local curValue, maxValue, otherValue = watchStates[dbc.progressState]:GetStats()
             local value = curValue / maxValue
@@ -1577,16 +1595,12 @@ function Infobar:CreateBlocks()
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
                 local main = watch.main
-                local r, g, b = watchStates[dbc.progressState]:GetColor()
-                main:SetStatusBarColor(r, g, b, 0.5)
                 main:SetMinMaxValues(0, maxValue)
                 main:SetValue(curValue)
                 main:Show()
 
                 if _G.type(otherValue) == "number" then
                     local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    r, g, b = watchStates[dbc.progressState]:GetColor(true)
-                    main.rested:SetColorTexture(r, g, b, 0.5)
                     main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
@@ -1598,7 +1612,6 @@ function Infobar:CreateBlocks()
                         curValue, maxValue = watchStates[nextState]:GetStats()
                         Infobar:debug("progress:"..i, nextState, curValue, maxValue)
 
-                        bar:SetStatusBarColor(watchStates[nextState]:GetColor())
                         bar:SetMinMaxValues(0, maxValue)
                         bar:SetValue(curValue)
                         bar:Show()
@@ -1607,6 +1620,8 @@ function Infobar:CreateBlocks()
                     end
                     nextState = watchStates[nextState]:GetNext()
                 end
+
+                watch:UpdateColors()
             end
         end
 
@@ -2141,6 +2156,11 @@ function Infobar:CreateBlocks()
             end
         end
 
+        local connectedRealms = _G.GetAutoCompleteRealms()
+        if not connectedRealms[1] then
+            -- if there are no connected realms, the return is just an empty table.
+            connectedRealms[1] = RealUI.realmNormalized
+        end
         local tokens, tableWidth = {}, 400
         local currencyData = {}
         local headerData = {
@@ -2164,7 +2184,7 @@ function Infobar:CreateBlocks()
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
                 currencyDB = RealUI.db.global.currency
-                charDB = currencyDB[RealUI.realm][RealUI.faction][RealUI.charName]
+                charDB = currencyDB[RealUI.realmNormalized][RealUI.faction][RealUI.charName]
                 if not currencyStates[dbc.currencyState] then
                     dbc.currencyState = "money"
                 end
@@ -2226,40 +2246,45 @@ function Infobar:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                local realm, faction = RealUI.realm, RealUI.faction
-                local realm_faction = realm.."-"..faction
-                local factionDB = currencyDB[realm][faction]
-                for name, data in next, factionDB do
-                    local classColor = RealUI:GetClassColor(data.class, "hex")
-                    name = charName:format(classColor, name)
-                    local money = GetMoneyString(data.money, true)
+                local realmMoneyTotal, faction = 0, RealUI.faction
+                for index = 1, #connectedRealms do
+                    local realm = connectedRealms[index]
+                    local realm_faction = realm.."-"..faction
+                    local factionDB = currencyDB[realm][faction]
+                    for name, data in next, factionDB do
+                        local classColor = RealUI:GetClassColor(data.class, "hex")
+                        name = charName:format(classColor, name)
+                        local money = GetMoneyString(data.money, true)
+                        realmMoneyTotal = realmMoneyTotal + data.money
 
-                    _G.table.wipe(tokens)
-                    for i = 1, _G.MAX_WATCHED_TOKENS do
-                        if data["token"..i] then
-                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                            local amount = data[data["token"..i]] or 0
-                            tokens[i] = TOKEN_STRING:format(texture, amount)
-                            tokens[i+3] = tokenName
-                        else
-                            tokens[i] = "---"
+                        _G.table.wipe(tokens)
+                        for i = 1, _G.MAX_WATCHED_TOKENS do
+                            if data["token"..i] then
+                                local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                local amount = data[data["token"..i]] or 0
+                                tokens[i] = TOKEN_STRING:format(texture, amount)
+                                tokens[i+3] = tokenName
+                            else
+                                tokens[i] = "---"
+                            end
                         end
-                    end
 
-                    _G.tinsert(currencyData, {
-                        id = #currencyData + 1,
-                        info = {
-                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                        },
-                        meta = {
-                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                        }
-                    })
+                        _G.tinsert(currencyData, {
+                            id = #currencyData + 1,
+                            info = {
+                                name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                            },
+                            meta = {
+                                realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                            }
+                        })
+                    end
                 end
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
 
+                tooltip:AddLine(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
                 tooltip:AddLine(" ")
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])

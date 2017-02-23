@@ -63,7 +63,7 @@ local function CreateDebugFrame(mod)
         _G.RealUI_Debug[mod] = buffer
     end
     debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
-    debugger[mod].numDuped = 1
+    debugger[mod].numDuped = 0
     debugger[mod].prevLine = ""
     return debugger[mod]
 end
@@ -81,9 +81,9 @@ local function Debug(mod, ...)
     if modDebug.prevLine == text then
         modDebug.numDuped = modDebug.numDuped + 1
     else
-        if modDebug.numDuped > 1 then
+        if modDebug.numDuped > 0 then
             modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
-            modDebug.numDuped = 1
+            modDebug.numDuped = 0
         end
         modDebug:AddLine(text, "%H:%M:%S")
         modDebug.prevLine = text
@@ -111,7 +111,7 @@ function RealUI.ResetScale(frame)
     local customScale = RealUI:GetUIScale()
     if RealUI.db.global.tags.retinaDisplay.set then
         return frame:SetScale(customScale)
-    elseif customScale ~= pixelScale then
+    elseif customScale > pixelScale then
         return frame:SetScale(pixelScale)
     end
 end

@@ -39,7 +39,7 @@ local powerTextures = {
 }
 
 local MAX_RUNES = 6
-local MAX_POINTS = 8
+local MAX_POINTS = 10
 
 function ClassResource:GetResources()
     return self.points, self.bar
