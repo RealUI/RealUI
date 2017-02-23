@@ -36,7 +36,6 @@ do
     local function findFont(font, backup)
         local fontPath, fontSize, fontArgs = font:GetFont()
         if not fontPath then
-            debug("Font not loaded, set backup")
             fontPath, fontSize, fontArgs = backup:GetFont()
             font:SetFont(fontPath, fontSize, fontArgs)
         end
@@ -44,9 +43,7 @@ do
         for i = 1, #lsmFonts do
             fontName = lsmFonts[i]
             path = LSM:Fetch("font", fontName)
-            debug("Fonts |", fontName, "|", path, "|", fontPath)
             if path == fontPath then
-                debug("Fonts Equal |", fontName, "|", fontSize, "|", fontArgs)
                 local tab = {
                     fontName,
                     fontSize,
@@ -164,13 +161,7 @@ local defaults, charInit do
             },
             verinfo = {},
             patchedTOC = 0,
-            currency = {
-                [RealUI.realm] = {
-                    [RealUI.faction] = {
-                        [RealUI.charName] = {}
-                    }
-                }
-            },
+            currency = {},
         },
         char = {
             init = charInit,

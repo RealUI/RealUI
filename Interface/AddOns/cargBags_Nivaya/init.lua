@@ -6,6 +6,7 @@ ns.itemClass = {}
 ns.bags = {}
 ns.bagsHidden = {}
 ns.bagsCustom = {}
+ns.newItems = {}
 
 ns.options = {
     itemSlotSize = 32,  -- Size of item slots
