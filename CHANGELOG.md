@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * New items will no longer passively reset as they are viewed.
   * The Currency block tooltip now also includes Connected Realms.
+  * Updated Russian locale.
 
 ### Fixed ###
 
