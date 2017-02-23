@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+
+
+
+
+## [8.1 r19d] - 2017-02-23 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya
@@ -110,6 +115,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19d]: https://github.com/RealUI/RealUI/compare/8.1_r19c...8.1_r19d
 [8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c
 [8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
 [8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a
