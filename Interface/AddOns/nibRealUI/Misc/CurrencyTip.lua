@@ -136,15 +136,10 @@ function CurrencyTip:SetUpHooks()
 end
 
 function CurrencyTip:SetUpChar()
+    self:debug("SetUpChar GetNormalizedRealmName", _G.GetNormalizedRealmName())
     local realm   = RealUI.realmNormalized
     local faction = RealUI.faction
     local player  = RealUI.charName
-
-    -- transfer info from realm to normalized realm
-    if realm ~= RealUI.realm and DB[RealUI.realm] then
-        DB[realm] = RealUI:DeepCopy(DB[RealUI.realm])
-        RealUI.db.global.currency[RealUI.realm] = nil
-    end
 
     self:debug("Check faction")
     for k,v in next, DB[realm] do
@@ -200,5 +195,27 @@ end
 function CurrencyTip:OnEnable()
     self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
     self:RegisterEvent("PLAYER_MONEY")
+
+    if not RealUI.realmNormalized then
+        -- On first login GetNormalizedRealmName() returns nil until now
+        RealUI.realmNormalized = _G.GetNormalizedRealmName()
+    end
+
+    -- transfer info from realm to normalized realm
+    if RealUI.realmNormalized ~= RealUI.realm and DB[RealUI.realm] then
+        DB[RealUI.realmNormalized] = RealUI:DeepCopy(DB[RealUI.realm])
+        RealUI.db.global.currency[RealUI.realm] = nil
+    end
+
+    if not DB[RealUI.realmNormalized] then
+        DB[RealUI.realmNormalized] = {}
+    end
+    if not DB[RealUI.realmNormalized][RealUI.faction] then
+        DB[RealUI.realmNormalized][RealUI.faction] = {}
+    end
+    if not DB[RealUI.realmNormalized][RealUI.faction][RealUI.charName] then
+        DB[RealUI.realmNormalized][RealUI.faction][RealUI.charName] = {}
+    end
+
     self:SetUpChar()
 end

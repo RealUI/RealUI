@@ -68,7 +68,7 @@ end
 
 local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 do
-    local MAX_ROWS = 10
+    local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
     local numTables = 0
     local extData = {}

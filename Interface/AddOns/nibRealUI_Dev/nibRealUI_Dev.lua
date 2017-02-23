@@ -145,7 +145,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             debug("", ...)
         end
 
-        --debug("GetScreenHeight", _G.GetScreenHeight())
+        debug("GetNormalizedRealmName", _G.GetNormalizedRealmName())
         --debug("UIParent:GetSize", _G.UIParent:GetSize())
         if not eventWhitelist[event] then
             seenEvent[event] = true
