@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * New items will no longer passively reset as they are viewed.
   * The Currency block tooltip now also includes Connected Realms.
+  * Class Resource updated to support up to 10 points.
   * Updated Russian locale.
 
 ### Fixed ###
