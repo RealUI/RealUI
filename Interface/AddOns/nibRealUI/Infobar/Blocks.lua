@@ -2156,6 +2156,11 @@ function Infobar:CreateBlocks()
             end
         end
 
+        local connectedRealms = _G.GetAutoCompleteRealms()
+        if not connectedRealms[1] then
+            -- if there are no connected realms, the return is just an empty table.
+            connectedRealms[1] = RealUI.realmNormalized
+        end
         local tokens, tableWidth = {}, 400
         local currencyData = {}
         local headerData = {
@@ -2179,7 +2184,7 @@ function Infobar:CreateBlocks()
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
                 currencyDB = RealUI.db.global.currency
-                charDB = currencyDB[RealUI.realm][RealUI.faction][RealUI.charName]
+                charDB = currencyDB[RealUI.realmNormalized][RealUI.faction][RealUI.charName]
                 if not currencyStates[dbc.currencyState] then
                     dbc.currencyState = "money"
                 end
@@ -2241,40 +2246,45 @@ function Infobar:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                local realm, faction = RealUI.realm, RealUI.faction
-                local realm_faction = realm.."-"..faction
-                local factionDB = currencyDB[realm][faction]
-                for name, data in next, factionDB do
-                    local classColor = RealUI:GetClassColor(data.class, "hex")
-                    name = charName:format(classColor, name)
-                    local money = GetMoneyString(data.money, true)
+                local realmMoneyTotal, faction = 0, RealUI.faction
+                for index = 1, #connectedRealms do
+                    local realm = connectedRealms[index]
+                    local realm_faction = realm.."-"..faction
+                    local factionDB = currencyDB[realm][faction]
+                    for name, data in next, factionDB do
+                        local classColor = RealUI:GetClassColor(data.class, "hex")
+                        name = charName:format(classColor, name)
+                        local money = GetMoneyString(data.money, true)
+                        realmMoneyTotal = realmMoneyTotal + data.money
 
-                    _G.table.wipe(tokens)
-                    for i = 1, _G.MAX_WATCHED_TOKENS do
-                        if data["token"..i] then
-                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                            local amount = data[data["token"..i]] or 0
-                            tokens[i] = TOKEN_STRING:format(texture, amount)
-                            tokens[i+3] = tokenName
-                        else
-                            tokens[i] = "---"
+                        _G.table.wipe(tokens)
+                        for i = 1, _G.MAX_WATCHED_TOKENS do
+                            if data["token"..i] then
+                                local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                local amount = data[data["token"..i]] or 0
+                                tokens[i] = TOKEN_STRING:format(texture, amount)
+                                tokens[i+3] = tokenName
+                            else
+                                tokens[i] = "---"
+                            end
                         end
-                    end
 
-                    _G.tinsert(currencyData, {
-                        id = #currencyData + 1,
-                        info = {
-                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                        },
-                        meta = {
-                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                        }
-                    })
+                        _G.tinsert(currencyData, {
+                            id = #currencyData + 1,
+                            info = {
+                                name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                            },
+                            meta = {
+                                realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                            }
+                        })
+                    end
                 end
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
 
+                tooltip:AddLine(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
                 tooltip:AddLine(" ")
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])

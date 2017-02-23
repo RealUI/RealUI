@@ -136,9 +136,15 @@ function CurrencyTip:SetUpHooks()
 end
 
 function CurrencyTip:SetUpChar()
-    local realm   = RealUI.realm
+    local realm   = RealUI.realmNormalized
     local faction = RealUI.faction
     local player  = RealUI.charName
+
+    -- transfer info from realm to normalized realm
+    if realm ~= RealUI.realm and DB[RealUI.realm] then
+        DB[realm] = RealUI:DeepCopy(DB[RealUI.realm])
+        RealUI.db.global.currency[RealUI.realm] = nil
+    end
 
     self:debug("Check faction")
     for k,v in next, DB[realm] do

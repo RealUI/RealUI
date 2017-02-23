@@ -165,7 +165,7 @@ local defaults, charInit do
             verinfo = {},
             patchedTOC = 0,
             currency = {
-                [RealUI.realm] = {
+                [RealUI.realmNormalized] = {
                     [RealUI.faction] = {
                         [RealUI.charName] = {}
                     }

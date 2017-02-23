@@ -9,6 +9,7 @@ RealUI.isDev = _G.IsAddOnLoaded("nibRealUI_Dev")
 
 RealUI.charName = _G.UnitName("player")
 RealUI.realm = _G.GetRealmName()
+RealUI.realmNormalized = _G.GetNormalizedRealmName()
 RealUI.faction = _G.UnitFactionGroup("player")
 RealUI.classLocale, RealUI.class, RealUI.classID = _G.UnitClass("player")
 RealUI.numSpecs = _G.GetNumSpecializationsForClassID(RealUI.classID)

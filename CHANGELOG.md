@@ -14,10 +14,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added ###
 
   * The opacity of the Infobar can now be adjusted from fully transparent to fully opaque.
+  * The total amount of money on a realm is shown in the Currency tooltip.
 
 ### Changed ###
 
   * New items will no longer passively reset as they are viewed.
+  * The Currency block tooltip now also includes Connected Realms.
 
 ### Fixed ###
 
