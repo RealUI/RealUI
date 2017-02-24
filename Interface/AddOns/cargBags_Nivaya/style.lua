@@ -720,8 +720,8 @@ function MyContainer:OnCreate(name, settings)
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 
-        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self)
-        self.DropTarget.bg:SetAllPoints(self.DropTarget)
+        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
+        self.DropTarget.bg:SetAllPoints()
         self.DropTarget.bg:SetBackdrop({
             bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
