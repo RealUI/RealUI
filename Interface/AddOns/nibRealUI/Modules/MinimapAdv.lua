@@ -1682,7 +1682,7 @@ local function CreateFrames()
     RealUI:CreateBD(MMFrames.buttonframe, nil, true, true)
 
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
-    MMFrames.buttonframe.edge:SetTexture(1, 1, 1, 1)
+    MMFrames.buttonframe.edge:SetColorTexture(1, 1, 1, 1)
     MMFrames.buttonframe.edge:SetPoint("LEFT", MMFrames.buttonframe, "LEFT", 1, 0)
     MMFrames.buttonframe.edge:SetSize(4, 15)
 
