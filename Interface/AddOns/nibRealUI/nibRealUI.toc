@@ -1,6 +1,6 @@
 ## Interface: 70100
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
-## Notes: RealUI Core
+## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
 ## Version: 8.1 r19d
 ## SavedVariables: nibRealUIDB
@@ -9,6 +9,7 @@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, Bartender4, Grid2, Raven, SharedMedia
 ## X-oUF: oUFembed
 ## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
+## Globe-Pre: !Aurora_RealUI, nibRealUI_Init
 
 Libs\Embeds.xml
 
