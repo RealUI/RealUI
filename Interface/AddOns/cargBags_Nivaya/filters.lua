@@ -19,7 +19,13 @@ filters.fBags = function(item) return item.bagID >= _G.BACKPACK_CONTAINER and it
 filters.fBank = function(item) return item.bagID == _G.BANK_CONTAINER or item.bagID >= _G.NUM_BAG_SLOTS + 1 and item.bagID <= _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS end
 filters.fBankReagent = function(item) return item.bagID == _G.REAGENTBANK_CONTAINER end
 filters.fBankFilter = function() return _G.cBnivCfg.FilterBank end
-filters.fHideEmpty = function(item) if _G.cBnivCfg.CompressEmpty then return item.link ~= nil else return true end end
+filters.fHideEmpty = function(item)
+    if _G.cBnivCfg.CompressEmpty then
+        return item.link ~= nil
+    else
+        return true
+    end
+end
 
 ------------------------------------
 -- General Classification (cached)
