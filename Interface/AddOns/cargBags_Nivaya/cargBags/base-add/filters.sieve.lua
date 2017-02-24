@@ -132,7 +132,7 @@ end
 ]]
 function Implementation:GetContainerForItem(item)
     cargBags.debug("filter Implementation:GetContainerForItem", item.id)
-    if not item.id then return false end
+    if _G.cBnivCfg.CompressEmpty and not item.id then return false end
     for i, container in next, self.contByID do
         cargBags.debug("filter container.filters", i, container.filters)
         if not container.filters or container.filters:Check(item) then
