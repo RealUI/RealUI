@@ -30,7 +30,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed ###
 
-  * Some 3rd-party blocks would not show in the config.
+  * Blocks would not show in the config if they were previously disabled.
   * Progress Watch status bars would not be properly updated when being toggled from disabled to enabled.
 
 
