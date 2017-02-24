@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 
 
+## [8.1 r19e] - 2017-02-24 ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * nibRealUI
+
+### Fixed ###
+
+  * Empty bag slots would not be shown even with the compress option disabled.
+  * An error may occur for those on Connected Realms.
+
+
+
+
 ## [8.1 r19d] - 2017-02-23 ##
 ### Modified AddOns ###
 
@@ -115,6 +129,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19e]: https://github.com/RealUI/RealUI/compare/8.1_r19d...8.1_r19e
 [8.1 r19d]: https://github.com/RealUI/RealUI/compare/8.1_r19c...8.1_r19d
 [8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c
 [8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
