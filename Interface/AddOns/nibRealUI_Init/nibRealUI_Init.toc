@@ -3,10 +3,11 @@
 ## Notes: Primary initialization for RealUI
 ## Author: Gethe
 ## Version: 8.1 r19e
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
 ## SavedVariables: RealUI_InitDB
 ## SavedVariablesPerCharacter: RealUI_Debug
 
-libs\libs.xml
+Libs\libs.xml
 Fonts.xml
 
 SharedMedia.lua

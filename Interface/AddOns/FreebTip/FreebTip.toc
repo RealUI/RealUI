@@ -4,9 +4,14 @@
 ## Version: 2.8
 ## Author: Freebaser
 ## RequiredDeps: nibRealUI
-## OptionalDeps: IDCard, freebDebug
+## OptionalDeps: LibInspect
 ## SavedVariables: FreebTipDB
+
+LibInspect\LibInspect.lua
 
 tip.lua
 anchor.lua
 FreebTip_Multi.xml
+
+ilvl.lua
+spec.lua

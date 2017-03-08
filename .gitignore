@@ -1,3 +1,5 @@
+.release
+
 ## IntelliJ ##
 *.iws
 *.ipr
@@ -6,8 +8,3 @@
 
 ## Sublime Text ##
 *.sublime-workspace
-
-## AddOns ##
-DBM-*/
-DBM-*
-Blizzard_*/

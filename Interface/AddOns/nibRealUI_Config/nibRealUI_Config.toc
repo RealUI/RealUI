@@ -3,7 +3,8 @@
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
 ## Version: 8.1 r19e
-## Dependencies: nibRealUI
+## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
+## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1
 
 embeds.xml

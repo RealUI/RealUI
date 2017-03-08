@@ -1,0 +1,91 @@
+package-as: RealUI
+
+ignore:
+    - utils
+    - CONTRIBUTING.md
+    - *.sublime*
+    - package.bat
+    - Interface/AddOns/nibRealUI_Dev
+
+manual-changelog:
+    filename: CHANGELOG.md
+    markup-type: markdown
+
+wowi-create-changelog: yes
+
+externals:
+    Interface/AddOns/FreebTip/LibInspect:
+        url: https://repos.wowace.com/wow/libinspect/trunk
+        tag: latest
+
+    Interface/AddOns/nibRealUI/Libs/AceAddon-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceAddon-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceBucket-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceConsole-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceConsole-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceDB-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceEvent-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceHook-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/AceTimer-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/HereBeDragons-1.0:
+        url: https://repos.wowace.com/wow/herebedragons
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibArtifactData-1.0:
+        url: https://github.com/Rainrider/LibArtifactData-1.0.git
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibChatAnims:
+        url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibQTip-1.0:
+        url: https://repos.wowace.com/wow/libqtip-1-0/trunk
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibRangeCheck-2.0:
+        url: https://repos.wowace.com/wow/librangecheck-2-0/trunk/LibRangeCheck-2.0
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibStrataFix:
+        url: https://repos.wowace.com/wow/libstratafix/trunk
+        tag: latest
+    Interface/AddOns/nibRealUI/Libs/LibWindow-1.1:
+        url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
+        tag: latest
+
+    Interface/AddOns/nibRealUI_Config/Libs/AceConfig-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI_Config/Libs/AceDBOptions-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI_Config/Libs/AceGUI-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceGUI-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI_Config/Libs/AceGUI-3.0-SharedMediaWidgets:
+        url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
+        tag: latest
+
+    Interface/AddOns/nibRealUI_Init/Libs/CallbackHandler-1.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
+        tag: latest
+    Interface/AddOns/nibRealUI_Init/Libs/LibItemUpgradeInfo-1.0:
+        url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
+        tag: latest
+    Interface/AddOns/nibRealUI_Init/Libs/LibSharedMedia-3.0:
+        url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
+        tag: latest
+    Interface/AddOns/nibRealUI_Init/Libs/LibStub:
+        url: https://repos.wowace.com/wow/ace3/trunk/LibStub
+        tag: latest
+    Interface/AddOns/nibRealUI_Init/Libs/UTF8:
+        url: https://repos.wowace.com/wow/utf8/trunk
+        tag: latest
