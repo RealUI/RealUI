@@ -20,6 +20,7 @@ exclude_files = {
     "**/*.md",
 }
 
+max_line_length = false
 self = false
 unused_args = false
 std = "none"
