@@ -61,6 +61,11 @@ site_url="https://wow.curseforge.com https://www.wowace.com"
 game_version=
 game_version_id=
 
+# Load secrets from local file if available
+if [ -f "./utils/auth.sh" ]; then
+	. "./utils/auth.sh"
+fi
+
 # Secrets for uploading
 cf_token=$CF_API_KEY
 github_token=$GITHUB_OAUTH
