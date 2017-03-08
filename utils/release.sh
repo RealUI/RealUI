@@ -80,6 +80,7 @@ overwrite=
 nolib=
 line_ending=dos
 skip_copying=
+skip_addons=
 skip_externals=
 skip_localization=
 skip_zipfile=
@@ -87,7 +88,8 @@ skip_upload=
 
 # Process command-line options
 usage() {
-	echo "Usage: release.sh [-cdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]" >&2
+	echo "Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]" >&2
+	echo "  -a               Skip third party addons." >&2
 	echo "  -c               Skip copying files into the package directory." >&2
 	echo "  -d               Skip uploading." >&2
 	echo "  -e               Skip checkout of external repositories." >&2
@@ -103,11 +105,15 @@ usage() {
 }
 
 OPTIND=1
-while getopts ":celzusop:dw:r:t:" opt; do
+while getopts ":caelzusop:dw:r:t:" opt; do
 	case $opt in
 	c)
 		# Skip copying files into the package directory.
 		skip_copying=true
+		;;
+	a)
+		# Skip third party addons.
+		skip_addons=true
 		;;
 	e)
 		# Skip checkout of external repositories.
@@ -1555,6 +1561,37 @@ if [ ! -f "$topdir/$changelog" -a ! -f "$topdir/CHANGELOG.txt" -a ! -f "$topdir/
 	echo
 	cat "$pkgdir/$changelog"
 	echo
+fi
+
+###
+### Download external addons
+###
+if [ -z "$skip_addons" ]; then
+	declare -A extAddOns
+	extAddOns=(
+		["BugGrabber"]="https://www.wowace.com/projects/bug-grabber/files/latest"
+		["BadBoy"]="https://wow.curseforge.com/projects/bad-boy/files/latest"
+		["BadBoy_CCleaner"]="https://wow.curseforge.com/projects/badboy_ccleaner/files/latest"
+		["BadBoy_Guilded"]="https://wow.curseforge.com/projects/badboy_guilded/files/latest"
+		["Bartender4"]="https://www.wowace.com/projects/bartender4/files/latest"
+		["Bugger"]="https://wow.curseforge.com/projects/bugger/files/latest"
+		["Clique"]="https://wow.curseforge.com/projects/clique/files/latest"
+		["Foglight"]="https://wow.curseforge.com/projects/foglight/files/latest"
+		["Grid2"]="https://www.wowace.com/projects/grid2/files/latest"
+		["KNP"]="https://wow.curseforge.com/projects/kuinameplates/files/latest"
+		["Masque"]="https://www.wowace.com/projects/masque/files/latest"
+		["MSBT"]="https://wow.curseforge.com/projects/mik-scrolling-battle-text/files/latest"
+		["PhanxChat"]="https://wow.curseforge.com/projects/phanxchat/files/latest"
+		["Raven"]="https://wow.curseforge.com/projects/raven/files/latest"
+		["Skada"]="https://www.wowace.com/projects/skada/files/latest"
+	)
+
+	for addon in "${!extAddOns[@]}"; do
+		echo "$addon - ${extAddOns[$addon]}";
+		wget -q -O "$releasedir/$addon.zip" ${extAddOns[$addon]}
+		unzip "$releasedir/$addon.zip" -d "$releasedir/RealUI/Interface/AddOns"
+		rm "$releasedir/$addon.zip"
+	done
 fi
 
 ###

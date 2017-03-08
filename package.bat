@@ -2,7 +2,8 @@
 powershell ".\utils\update.ps1"
 
 :: Run packager
-:: Usage: release.sh [-cdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]
+:: Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]
+::   -a               Skip third party addons.
 ::   -c               Skip copying files into the package directory.
 ::   -d               Skip uploading.
 ::   -e               Skip checkout of external repositories.
@@ -15,5 +16,5 @@ powershell ".\utils\update.ps1"
 ::   -r releasedir    Set directory containing the package directory. Defaults to $topdir/.release.
 ::   -p curse-id      Set the project id used on CurseForge for localization and uploading.
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
-utils\release.sh -delz
+utils\release.sh -adelz
 bash -c "./utils/release.sh -clo -w 16068"

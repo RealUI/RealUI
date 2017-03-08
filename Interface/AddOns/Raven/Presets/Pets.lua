@@ -1,2 +1,0 @@
--- Pet
--- Intentionally left blank for WoD and beyond
