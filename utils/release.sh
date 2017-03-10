@@ -865,6 +865,10 @@ do_not_package_filter() {
 		_dnpf_start_token="<!--@$_dnpf_string@-->"
 		_dnpf_end_token="<!--@end-$_dnpf_string@-->"
 		;;
+	wowi)
+		_dnpf_start_token="# Change Log #"
+		_dnpf_end_token="## \[Unreleased\] ##"
+		;;
 	esac
 	if [ -z "$_dnpf_start_token" -o -z "$_dnpf_end_token" ]; then
 		cat
@@ -1390,13 +1394,19 @@ if [ -z "$changelog" ]; then
 	changelog_markup="markdown"
 fi
 if [[ -n "$manual_changelog" && -f "$topdir/$changelog" && "$changelog_markup" == "markdown" ]]; then
+	# Copy changelog and remove header
+	wowi_changelog_md="$releasedir/WOWI-$changelog"
+	cat "$topdir/$changelog" \
+		| do_not_package_filter wowi \
+		| line_ending_filter \
+		> $wowi_changelog_md
 	# Convert Markdown to BBCode (with HTML as an intermediary) for sending to WoWInterface
 	# Requires either cmark (https://github.com/jgm/cmark) or pandoc (http://pandoc.org/)
 	_html_changelog=
 	if cmark --version &>/dev/null; then
-		_html_changelog=$( cmark -t html --nobreaks "$topdir/$changelog" )
+		_html_changelog=$( cmark -t html --nobreaks "$wowi_changelog_md" )
 	elif pandoc --version &>/dev/null; then
-		_html_changelog=$( pandoc -t html "$topdir/$changelog" )
+		_html_changelog=$( pandoc -t html "$wowi_changelog_md" )
 	fi
 	if [ -n "$_html_changelog" ]; then
 		wowi_changelog="$releasedir/WOWI-$project_version-CHANGELOG.txt"
@@ -1409,7 +1419,8 @@ if [[ -n "$manual_changelog" && -f "$topdir/$changelog" && "$changelog_markup" =
 			-e 's/<li>/[*]/g' -e 's/<\/li>//g' -e '/^\s*$/d' \
 			-e 's/<h1[^>]*>/[size="6"]/g' -e 's/<h2[^>]*>/[size="5"]/g' -e 's/<h3[^>]*>/[size="4"]/g' \
 			-e 's/<h4[^>]*>/[size="3"]/g' -e 's/<h5[^>]*>/[size="3"]/g' -e 's/<h6[^>]*>/[size="3"]/g' \
-			-e 's/<\/h[1-6]>/[\/size]\n/g' \
+			-e 's/<\/h[1-2]>/[\/size]\n[img]http:\/\/i.imgur.com\/CjLx8aR.png[\/img]/g' \
+			-e 's/<\/h[3-6]>/[\/size]\n/g' \
 			-e 's/<a href=\"\([^"]\+\)\"[^>]*>/[url="\1"]/g' -e 's/<\/a>/\[\/url]/g' \
 			-e 's/<img src=\"\([^"]\+\)\"[^>]*>/[img]\1[\/img]/g' \
 			-e 's/<\(\/\)\?blockquote>/[\1quote]\n/g' \
