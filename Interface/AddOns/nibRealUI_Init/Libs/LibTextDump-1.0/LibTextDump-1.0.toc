@@ -1,0 +1,12 @@
+## Interface: 70000
+## Title: Lib: TextDump-1.0
+## Notes: Provides one or many frames for dumping text into.
+## Author: Torhal
+## Version: @project-version@
+## LoadOnDemand: 1
+## X-Date: @project-date-iso@
+## X-Category: Libraries
+## X-License: All Rights Reserved
+
+LibStub\LibStub.lua
+lib.xml
