@@ -1,4 +1,4 @@
-local _, mods = ...
+local ADDON_NAME, mods = ...
 mods["Aurora"] = {}
 mods["nibRealUI"] = {}
 mods["PLAYER_LOGIN"] = {}
@@ -194,7 +194,6 @@ functions.ReskinFilterButton = function(f, noArrow)
 end
 
 functions.ReskinIcon = function(icon)
-    debug("ReskinIcon", F, C, icon)
     icon:SetTexCoord(.08, .92, .08, .92)
     return F.CreateBG(icon)
 end
@@ -267,6 +266,17 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 F.AddPlugin(function()
                     moduleFunc(F, C)
                 end)
+            end
+        elseif addon == ADDON_NAME then
+            -- These addons are loaded before !Aurora_RealUI.
+            local addons = {
+                Blizzard_CompactRaidFrames = true,
+                Masque = true
+            }
+
+            for preload in next, addons do
+                mods.debug(preload, F, C)
+                mods[preload](F, C)
             end
         elseif addon == "nibRealUI" then
             for _, moduleFunc in next, addonModule do

@@ -4,7 +4,7 @@
 ## Author: Gethe
 ## Version: 8.1 r19e
 ## RequiredDeps: nibRealUI_Init
-## OptionalDeps: !BugGrabber
+## OptionalDeps: !BugGrabber, Masque
 
 !Aurora.lua
 
