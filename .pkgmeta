@@ -11,8 +11,6 @@ manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown
 
-wowi-create-changelog: yes
-
 externals:
     Interface/AddOns/FreebTip/LibInspect:
         url: https://repos.wowace.com/wow/libinspect/trunk
