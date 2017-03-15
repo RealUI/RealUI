@@ -819,7 +819,7 @@ function Infobar:OnInitialize()
             bgAlpha = 0.5,
             showBars = true,
             combatTips = false,
-            blockGap = 1,
+            blockGap = 3,
             blocks = {
                 others = {
                     ["*"] = {
