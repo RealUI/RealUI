@@ -35,26 +35,26 @@ function qTip:Acquire(...)
 end
 
 local headerFont, textFont, iconFont
-do
+local function SetupFonts()
     local size = RealUI.ModValue(12)
-    local font, _, outline = _G.RealUIFont_Normal:GetFont()
+    local font = RealUI.db.profile.media.font.standard
     local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(font, size, outline)
+    header:SetFont(font[4], size, font[3])
     headerFont = {
-        font = font,
+        font = font[4],
         size = size,
-        outline = outline,
+        outline = font[3],
         object = header
     }
 
     size = RealUI.ModValue(8)
-    font, _, outline = _G.RealUIFont_Chat:GetFont()
+    font = RealUI.db.profile.media.font.chat
     local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(font, size, outline)
+    text:SetFont(font[4], size, font[3])
     textFont = {
-        font = font,
+        font = font[4],
         size = size,
-        outline = outline,
+        outline = font[3],
         object = text
     }
 
@@ -66,8 +66,10 @@ do
     }
 end
 
-local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
-do
+local TextTableCellProvider, TextTableCellPrototype
+local function SetupTextTable()
+    TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
+
     local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
     local numTables = 0
@@ -529,6 +531,11 @@ function Infobar:CreateBlocks()
     local db = Infobar.db.profile
     local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
+
+    if not TextTableCellPrototype then
+        SetupFonts()
+        SetupTextTable()
+    end
 
     --[[ Static Blocks ]]--
     do  -- Start
