@@ -53,6 +53,12 @@ fi
 
 # Script return code
 exit_code=0
+exit_prompt() {
+	echo "$1"
+	echo "Hit return to continue"
+	read dummy_variable
+	exit $exit_code
+}
 
 # Site URLs, used to find the localization web app.
 site_url="https://wow.curseforge.com https://www.wowace.com"
@@ -2043,7 +2049,4 @@ fi
 
 # All done.
 
-echo "Packaging complete."
-echo
-
-exit $exit_code
+exit_prompt "Packaging complete."
