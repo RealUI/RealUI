@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * nibRealUI
 
+### Changed ###
+
+  * Infobar fonts will only have an outline when the background has a low opacity.
+
 ### Fixed ###
 
   * The font used for block tooltips would not respect font settings.

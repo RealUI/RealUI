@@ -39,22 +39,20 @@ local function SetupFonts()
     local size = RealUI.ModValue(12)
     local font = RealUI.db.profile.media.font.standard
     local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(font[4], size, font[3])
+    header:SetFont(font[4], size)
     headerFont = {
         font = font[4],
         size = size,
-        outline = font[3],
         object = header
     }
 
     size = RealUI.ModValue(8)
     font = RealUI.db.profile.media.font.chat
     local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(font[4], size, font[3])
+    text:SetFont(font[4], size)
     textFont = {
         font = font[4],
         size = size,
-        outline = font[3],
         object = text
     }
 
@@ -62,7 +60,7 @@ local function SetupFonts()
     iconFont = {
         font = fa.path,
         size = size,
-        outline = "OUTLINE"
+        outline = Infobar:GetFontOutline()
     }
 end
 
@@ -121,7 +119,7 @@ local function SetupTextTable()
                         row[col] = cell
 
                         local text = cell:CreateFontString(nil, "ARTWORK")
-                        text:SetFont(textFont.font, textFont.size, textFont.outline)
+                        text:SetFont(textFont.font, textFont.size)
                         text:SetJustifyH(data.header.justify[col])
                         text:SetAllPoints()
                         cell:SetFontString(text)
@@ -358,7 +356,7 @@ local function SetupTextTable()
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
-                header.text:SetFont(textFont.font, textFont.size, textFont.outline)
+                header.text:SetFont(textFont.font, textFont.size)
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
@@ -389,7 +387,7 @@ local function SetupTextTable()
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
-                testCell:SetFont(textFont.font, textFont.size, textFont.outline)
+                testCell:SetFont(textFont.font, textFont.size)
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
