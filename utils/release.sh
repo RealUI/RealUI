@@ -1615,63 +1615,65 @@ fi
 ### Process .pkgmeta to perform move-folders actions.
 ###
 
-if [ -f "$topdir/.pkgmeta" ]; then
-	yaml_eof=
-	while [ -z "$yaml_eof" ]; do
-		IFS='' read -r yaml_line || yaml_eof=true
-		# Strip any trailing CR character.
-		yaml_line=${yaml_line%$carriage_return}
-		case $yaml_line in
-		[!\ ]*:*)
-			# Split $yaml_line into a $yaml_key, $yaml_value pair.
-			yaml_keyvalue "$yaml_line"
-			# Set the $pkgmeta_phase for stateful processing.
-			pkgmeta_phase=$yaml_key
-			;;
-		" "*)
-			yaml_line=${yaml_line#"${yaml_line%%[! ]*}"} # trim leading whitespace
+if [ -z "$skip_addons" ] && [ -z "$skip_externals"]; then
+	if [ -f "$topdir/.pkgmeta" ]; then
+		yaml_eof=
+		while [ -z "$yaml_eof" ]; do
+			IFS='' read -r yaml_line || yaml_eof=true
+			# Strip any trailing CR character.
+			yaml_line=${yaml_line%$carriage_return}
 			case $yaml_line in
-			"- "*)
-				;;
-			*:*)
+			[!\ ]*:*)
 				# Split $yaml_line into a $yaml_key, $yaml_value pair.
 				yaml_keyvalue "$yaml_line"
-				case $pkgmeta_phase in
-				move-folders)
-					srcdir="$releasedir/$yaml_key"
-					destdir="$releasedir/$yaml_value"
-					if [ -d "$destdir" -a -z "$overwrite" ]; then
-						rm -fr "$destdir"
-					fi
-					if [ -d "$srcdir" ]; then
-						if [ ! -d "$destdir" ]; then
-							mkdir -p "$destdir"
+				# Set the $pkgmeta_phase for stateful processing.
+				pkgmeta_phase=$yaml_key
+				;;
+			" "*)
+				yaml_line=${yaml_line#"${yaml_line%%[! ]*}"} # trim leading whitespace
+				case $yaml_line in
+				"- "*)
+					;;
+				*:*)
+					# Split $yaml_line into a $yaml_key, $yaml_value pair.
+					yaml_keyvalue "$yaml_line"
+					case $pkgmeta_phase in
+					move-folders)
+						srcdir="$releasedir/$yaml_key"
+						destdir="$releasedir/$yaml_value"
+						if [ -d "$destdir" -a -z "$overwrite" ]; then
+							rm -fr "$destdir"
 						fi
-						echo "Moving $yaml_key to $yaml_value"
-						mv -f "$srcdir"/* "$destdir" && rm -fr "$srcdir"
-						contents="$contents $yaml_value"
-						# Copy the license into $destdir if one doesn't already exist.
-						if [ -n "$license" -a -f "$pkgdir/$license" -a ! -f "$destdir/$license" ]; then
-							cp -f "$pkgdir/$license" "$destdir/$license"
+						if [ -d "$srcdir" ]; then
+							if [ ! -d "$destdir" ]; then
+								mkdir -p "$destdir"
+							fi
+							echo "Moving $yaml_key to $yaml_value"
+							mv -f "$srcdir"/* "$destdir" && rm -fr "$srcdir"
+							contents="$contents $yaml_value"
+							# Copy the license into $destdir if one doesn't already exist.
+							if [ -n "$license" -a -f "$pkgdir/$license" -a ! -f "$destdir/$license" ]; then
+								cp -f "$pkgdir/$license" "$destdir/$license"
+							fi
+							# Check to see if the base source directory is empty
+							_mf_basedir=${srcdir%$(basename "$yaml_key")}
+							if [ ! "$(ls -A $_mf_basedir )" ]; then
+								echo "Removing empty directory ${_mf_basedir#$releasedir/}"
+								rm -fr "$_mf_basedir"
+							fi
 						fi
-						# Check to see if the base source directory is empty
-						_mf_basedir=${srcdir%$(basename "$yaml_key")}
-						if [ ! "$(ls -A $_mf_basedir )" ]; then
-							echo "Removing empty directory ${_mf_basedir#$releasedir/}"
-							rm -fr "$_mf_basedir"
-						fi
-					fi
-					# update external dir
-					nolib_exclude=${nolib_exclude//$srcdir/$destdir}
+						# update external dir
+						nolib_exclude=${nolib_exclude//$srcdir/$destdir}
+						;;
+					esac
 					;;
 				esac
 				;;
 			esac
-			;;
-		esac
-	done < "$topdir/.pkgmeta"
-	if [ -n "$srcdir" ]; then
-		echo
+		done < "$topdir/.pkgmeta"
+		if [ -n "$srcdir" ]; then
+			echo
+		fi
 	fi
 fi
 
