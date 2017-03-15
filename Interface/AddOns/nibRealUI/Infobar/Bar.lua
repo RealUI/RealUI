@@ -909,10 +909,10 @@ function Infobar:OnInitialize()
         end
     end
 
-    local font = RealUI.db.profile.media.font.standard
+    local font = RealUI.db.profile.media.font.chat
     blockFont = {
         font = font[4],
-        size = RealUI.ModValue(10),
+        size = RealUI.ModValue(9),
         outline = self:GetFontOutline()
     }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))

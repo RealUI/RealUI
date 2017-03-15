@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * Infobar fonts will only have an outline when the background has a low opacity.
   * The default block gap has been increased.
+  * Infobar font sizes have been adjusted.
+  * Infobar blocks now inherit the chat font instead of normal.
 
 ### Fixed ###
 

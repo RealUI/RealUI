@@ -36,7 +36,7 @@ end
 
 local headerFont, textFont, iconFont
 local function SetupFonts()
-    local size = RealUI.ModValue(12)
+    local size = RealUI.ModValue(10)
     local font = RealUI.db.profile.media.font.standard
     local header = _G.CreateFont("RealUI_TooltipHeader")
     header:SetFont(font[4], size)
@@ -46,7 +46,7 @@ local function SetupFonts()
         object = header
     }
 
-    size = RealUI.ModValue(8)
+    size = RealUI.ModValue(9)
     font = RealUI.db.profile.media.font.chat
     local text = _G.CreateFont("RealUI_TooltipText")
     text:SetFont(font[4], size)
@@ -56,7 +56,7 @@ local function SetupFonts()
         object = text
     }
 
-    size = RealUI.ModValue(10)
+    size = RealUI.ModValue(9)
     iconFont = {
         font = fa.path,
         size = size,
