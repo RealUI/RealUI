@@ -26,10 +26,33 @@ Provide more context by answering these questions:
 
 ## Pull Requests ##
 
-* Include screenshots and animated GIFs in your pull request whenever possible.
-* Follow the [Lua](#lua-styleguide) and [Git](#git-commit-messages) styleguides.
-* Modifying non-RealUI addons is considered as a last resort; however, if it is necessary all modifications should be clearly marked.
-* Pull requests must pass luacheck in order to be considered for acceptance.
+If you would like to contribute code, a [pull request](https://help.github.com/articles/about-pull-requests/) is the best way to do so. When submitting a pull request, please adhere to the following guildlines.
+
+  * Make a short but descriptive name.
+  * Have a detailed description of what your PR provides and/or what it's trying to solve.
+  * Include screenshots and animated GIFs in your pull request whenever applicable.
+  * Code and commits must follow the [Lua](#lua-styleguide) and [Git](#git-commit-messages) styleguides respectively.
+  * Pull requests must pass luacheck in order to be considered for acceptance.
+
+### Getting Started ###
+
+Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file path to suit your own install directories. The script was written in Powershell, but it should be fairly simple to convert into another language if desired.
+
+Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly. All of these are available via Curse.
+  
+  * [Ace3](https://mods.curse.com/addons/wow/ace3)
+  * [AceGUI-3.0-SharedMediaWidets](https://mods.curse.com/addons/wow/ace-gui-3-0-shared-media-widgets)
+  * [HereBeDragons-1.0](https://mods.curse.com/addons/wow/herebedragons)
+  * [LibArtifactData-1.0](https://mods.curse.com/addons/wow/libartifactdata-1-0)
+  * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
+  * [LibInspect](https://mods.curse.com/addons/wow/libinspect)
+  * [LibItemUpgradeInfo-1.0](https://mods.curse.com/addons/wow/libitemupgradeinfo-1-0)
+  * [LibQTip-1.0](https://mods.curse.com/addons/wow/libqtip-1-0)
+  * [LibRangeCheck-2.0](https://mods.curse.com/addons/wow/librangecheck-2-0)
+  * [LibSharedMedia-3.0](https://mods.curse.com/addons/wow/libsharedmedia-3-0)
+  * [LibStrataFix](https://mods.curse.com/addons/wow/libstratafix)
+  * [LibWindow-1.1](https://mods.curse.com/addons/wow/libwindow-1-1)
+  * [UTF8](https://mods.curse.com/addons/wow/utf8)
 
 ## Styleguides ##
 
