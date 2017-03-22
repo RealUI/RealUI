@@ -5,16 +5,16 @@ if (!!$LASTEXITCODE) {
 }
 Write-Host ""
 
-$oldVersion = Get-Content "./utils/version.txt"
+$oldVersion = Get-Content "./version.txt"
 Write-Host "Current version: $oldVersion"
 
 $newVersion = Read-Host "Enter a new version, or press enter to skip"
 $addons = @(
-    "./utils/version.txt",
-    "./Interface/AddOns/!Aurora_RealUI/!Aurora_RealUI.toc",
-    "./Interface/AddOns/nibRealUI/nibRealUI.toc",
-    "./Interface/AddOns/nibRealUI_Config/nibRealUI_Config.toc",
-    "./Interface/AddOns/nibRealUI_Init/nibRealUI_Init.toc"
+    "./version.txt",
+    "../Interface/AddOns/!Aurora_RealUI/!Aurora_RealUI.toc",
+    "../Interface/AddOns/nibRealUI/nibRealUI.toc",
+    "../Interface/AddOns/nibRealUI_Config/nibRealUI_Config.toc",
+    "../Interface/AddOns/nibRealUI_Init/nibRealUI_Init.toc"
 )
 
 # replace version strings
