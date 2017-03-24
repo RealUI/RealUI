@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased] ##
 ### Modified AddOns ###
 
+  * EasyMail
+  * FreebTip
   * nibRealUI
+
+### Removed AddOns ###
+
+  * FreebTipSpec
+  * FreebTipiLvl
 
 ### Changed ###
 
@@ -14,10 +21,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The default block gap has been increased.
   * Infobar font sizes have been adjusted.
   * Infobar blocks now inherit the chat font instead of normal.
+  * The Spec and iLvl modules of FreebTip have been integrated into the main FreebTip addon
 
 ### Fixed ###
 
   * The font used for block tooltips would not respect font settings.
+  * The Color Picker swatch would not display the correct color.
+  * Various errors for patch 7.2
 
 
 
