@@ -205,6 +205,10 @@ local SendingMail = false;
 ---------------------------------------------------
 function EasyMail.OnLoad(self)
     -- Register event that fires when the player logs in
+    if _G.OpenAllMail then -- is72
+        _G.OpenAllMail:Hide()
+    end
+
     self:RegisterEvent("PLAYER_LOGIN");
 end
 
