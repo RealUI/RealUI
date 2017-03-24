@@ -181,7 +181,6 @@ end
 _G.hooksecurefunc(CPF, "SetColorRGB", function(self, r, g, b)
     -- This hook is for updating the frame with out it being hidden first.
     -- eg. Clicking on multiple swatches in the chat config without closing closing the frame.
-    print("SetColorRGB", r, g, b, updateRGB)
     if not updateRGB then
         UpdateColors(self.hasOpacity, self:GetColorRGB())
     end
@@ -201,7 +200,6 @@ CPF:HookScript("OnShow", function(self)
 
         CPF.moved = true
     end
-    print("OnShow")
     UpdateColors(self.hasOpacity, self:GetColorRGB())
 end)
 CPF:HookScript("OnColorSelect", UpdateRGBA)
