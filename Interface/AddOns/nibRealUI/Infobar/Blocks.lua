@@ -1850,18 +1850,28 @@ function Infobar:CreateBlocks()
             L["Layout_Healing"]
         }
 
+        local function EquipmentManager_EquipSet(setID) -- is72
+            local name = equipSetsByID[setID].name
+            if ( _G.EquipmentSetContainsLockedItems(name) or _G.UnitCastingInfo("player") ) then
+                _G.UIErrorsFrame:AddMessage(_G.ERR_CLIENT_LOCKED_OUT, 1.0, 0.1, 0.1, 1.0);
+                return;
+            end
+
+            _G.UseEquipmentSet(name)
+        end
+
         local equipmentNeedsUpdate = false
         local function Line_OnMouseUp(line, specIndex, button)
             if button == "LeftButton" then
                 if not _G.InCombatLockdown() then
                     if specIndex == currentSpecIndex then
                         if dbc.specgear[specIndex] >= 0 then
-                            _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
+                            EquipmentManager_EquipSet(dbc.specgear[specIndex])
                         end
                     else
                         _G.SetSpecialization(specIndex)
                         if dbc.specgear[specIndex] >= 0 then
-                            equipmentNeedsUpdate = equipSetsByID[dbc.specgear[specIndex]].name
+                            equipmentNeedsUpdate = dbc.specgear[specIndex]
                         end
                     end
                 end
@@ -1933,8 +1943,8 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
                 for specIndex = 1, RealUI.numSpecs do
-                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]].name or "---"
-                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet, layout[ndbc.layout.spec[specIndex]])
+                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]]
+                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specInfo[specIndex].line = lineNum
                     if specIndex == currentSpecIndex then
