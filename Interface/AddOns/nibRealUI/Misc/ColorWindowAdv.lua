@@ -19,15 +19,15 @@ CPFMover:SetScript("OnMouseUp", function() CPF:StopMovingOrSizing() end)
 CPF:SetUserPlaced(true)
 CPF:EnableKeyboard(false)
 
-CPF.swatchBG = CPF:CreateTexture(nil, "ARTWORK", nil, -8)
-CPF.swatchBG:SetTexture([[Tileset\Generic\Checkers]])
-CPF.swatchBG:SetTexCoord(0.03125, 0.21875, 0.28125, 0.46875)
+CPF.swatchBG = CPF:CreateTexture(nil, "BORDER", nil, -8)
+CPF.swatchBG:SetTexture([[Interface\InventoryItems\NOART]])
+CPF.swatchBG:SetTexCoord(0, 0.03125, 0, 0.03125)
 CPF.swatchBG:SetSize(48, 48)
 CPF.swatchBG:SetPoint("TOPLEFT", _G.ColorPickerWheel, "TOPRIGHT", 87, 0)
 CPF.swatchBG:SetHorizTile(true)
 CPF.swatchBG:SetVertTile(true)
 
-CPF.prevSwatch = CPF:CreateTexture(nil, "ARTWORK", nil, 7)
+CPF.prevSwatch = CPF:CreateTexture(nil, "ARTWORK", nil, -3)
 CPF.prevSwatch:SetSize(32, 32)
 CPF.prevSwatch:SetPoint("TOPRIGHT", CPF.swatchBG, "TOPRIGHT", 0, 0)
 
@@ -54,7 +54,6 @@ end)
 local UpdateCPFHSV = function(self)
     local s = self:GetValue()
     local h, _, v = CPF:GetColorHSV()
-    --print("UpdateCPFHSV", h, s, v)
     CPF:SetColorHSV(h, s, v)
 end
 
@@ -80,7 +79,9 @@ local CPFEditBoxes = {
     Alpha = 4,
 }
 
+local updateRGB = false
 local UpdateCPFRGB = function(editbox)
+    updateRGB = true
     local r, g, b
     if #editbox:GetText() == 6 then
         local rgb = editbox:GetText()
@@ -101,6 +102,7 @@ local UpdateCPFRGB = function(editbox)
     end
 
     OSF:SetValue(1 - (a / 100))
+    updateRGB = false
 end
 
 local UpdateRGBA = function()
@@ -116,8 +118,13 @@ local UpdateRGBA = function()
     CPFEditBoxes.Hex:SetText(("%02x%02x%02x"):format(r * 255, g * 255, b * 255))
 
     if CPF.hasOpacity then
+        _G.ColorSwatch:SetColorTexture(r, g, b, 1 - OSF:GetValue())
         CPFEditBoxes.Alpha:SetText(("%d"):format((1 - a) * 100))
-        _G.ColorSwatch:SetTexture(r, g, b, 1 - a)
+        CPFEditBoxes.Alpha:Show()
+        CPF:SetWidth(350)
+    else
+        CPFEditBoxes.Alpha:Hide()
+        CPF:SetWidth(280)
     end
 end
 
@@ -125,7 +132,7 @@ for type, offsetFactor in next, CPFEditBoxes do
     local editbox = _G.CreateFrame("EditBox", nil, CPF)
     editbox:SetHeight(15)
     editbox:SetWidth(50)
-    editbox:SetPoint("BOTTOMLEFT", _G.ColorPickerOkayButton, "TOPLEFT", ((70 * offsetFactor) + 10), 5)
+    editbox:SetPoint("BOTTOMLEFT", (70 * offsetFactor) + 13, 34)
 
     editbox:SetBackdrop({
         bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
@@ -161,35 +168,41 @@ for type, offsetFactor in next, CPFEditBoxes do
     CPFEditBoxes[type] = editbox
 end
 
--- Move widgets --
-
 -- Script Hooks --
+local function UpdateColors(hasOpacity, r, g, b)
+    if hasOpacity then
+        CPF.prevSwatch:SetColorTexture(r, g, b, 1 - OSF:GetValue())
+    else
+        CPF.prevSwatch:SetColorTexture(r, g, b, 1)
+    end
+    UpdateRGBA()
+end
+
+_G.hooksecurefunc(CPF, "SetColorRGB", function(self, r, g, b)
+    -- This hook is for updating the frame with out it being hidden first.
+    -- eg. Clicking on multiple swatches in the chat config without closing closing the frame.
+    print("SetColorRGB", r, g, b, updateRGB)
+    if not updateRGB then
+        UpdateColors(self.hasOpacity, self:GetColorRGB())
+    end
+end)
 CPF:HookScript("OnShow", function(self)
     --print("CPF:OnShow")
-    if _G.Aurora then
-        local F = _G.Aurora[1]
-        F.Reskin(CPFCopyButton)
-        F.Reskin(CPFPasteButton)
-        F.ReskinSlider(CPFSaturation, true)
-    end
     if not CPF.moved then
+        if _G.Aurora then
+            local F = _G.Aurora[1]
+            F.Reskin(CPFCopyButton)
+            F.Reskin(CPFPasteButton)
+            F.ReskinSlider(CPFSaturation, true)
+        end
         _G.ColorSwatch:ClearAllPoints()
         _G.ColorSwatch:SetPoint("BOTTOMLEFT", CPF.swatchBG, "BOTTOMLEFT", 0, 0)
+        CPF:SetHeight(210)
 
         CPF.moved = true
     end
-    local r, g, b = self:GetColorRGB()
-    if self.hasOpacity then
-        CPF.prevSwatch:SetTexture(r, g, b, 1 - OSF:GetValue())
-        CPFEditBoxes.Alpha:Show()
-        self:SetSize(350, 210)
-    else
-        CPF.prevSwatch:SetTexture(r, g, b, 1)
-        CPFEditBoxes.Alpha:Hide()
-        self:SetSize(280, 210)
-    end
-
-    UpdateRGBA()
+    print("OnShow")
+    UpdateColors(self.hasOpacity, self:GetColorRGB())
 end)
 CPF:HookScript("OnColorSelect", UpdateRGBA)
 OSF:HookScript("OnShow", UpdateRGBA)
