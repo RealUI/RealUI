@@ -1067,6 +1067,7 @@ local skins do
     do --[[ UI Scale ]]--
         local UIScaler = RealUI:GetModule("UIScaler")
         local db = UIScaler.db.profile
+        local minScale, maxScale = 0.48, 1
         skins.args.uiScale = {
             name = _G.UI_SCALE,
             type = "header",
@@ -1096,12 +1097,24 @@ local skins do
         }
         skins.args.customScale = {
             name = "Custom ".._G.UI_SCALE,
-            desc = "Set a custom UI scale (0.48 to 1.00). Note: UI elements may lose their sharp appearance.",
+            desc = ("Set a custom UI scale (%.2f to %.2f). Note: UI elements may lose their sharp appearance."):format(minScale, maxScale),
             type = "input",
             disabled = function() return db.pixelPerfect end,
+            validate = function(info, value)
+                value = _G.tonumber(value)
+                if value then
+                    if value > minScale and value < maxScale then
+                        return true
+                    else
+                        return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
+                    end
+                else
+                    return "Value must be a number"
+                end
+            end,
             get = function() return tostring(db.customScale) end,
             set = function(info, value)
-                db.customScale = RealUI:ValidateOffset(_G.tonumber(value), 0.48, 1)
+                db.customScale = _G.tonumber(value)
                 UIScaler:UpdateUIScale()
             end,
             order = 50,
