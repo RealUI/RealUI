@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
-## Version: 8.1 r19e
+## Version: 8.1 r19f
 ## OptionalDeps: HereBeDragons-1.0, LibArtifactData-1.0, LibChatAnims, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, LibStrataFix, Bartender4, Grid2, Raven
 ## RequiredDeps: !Aurora_RealUI
 ## SavedVariables: nibRealUIDB
