@@ -42,7 +42,6 @@ externals:
         tag: latest
     Interface/AddOns/nibRealUI/Libs/LibArtifactData-1.0:
         url: https://github.com/Rainrider/LibArtifactData-1.0.git
-        tag: latest
     Interface/AddOns/nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
