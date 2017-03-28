@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r19f] - 2017-03-27 ##
 ### Modified AddOns ###
 
   * EasyMail
@@ -153,6 +154,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19f]: https://github.com/RealUI/RealUI/compare/8.1_r19e...8.1_r19f
 [8.1 r19e]: https://github.com/RealUI/RealUI/compare/8.1_r19d...8.1_r19e
 [8.1 r19d]: https://github.com/RealUI/RealUI/compare/8.1_r19c...8.1_r19d
 [8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c
