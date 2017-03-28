@@ -77,17 +77,6 @@ _G.tinsert(mods["Aurora"], function(F, C)
     _G.WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
 end)
 
-_G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
-    mods.debug("PLAYER_LOGIN - Misc", F, C)
-    -- These addons are loaded before !Aurora_RealUI.
-
-    --mods["Blizzard_PetBattleUI"](F, C)
-    if _G.IsAddOnLoaded("Blizzard_CompactRaidFrames") then
-        mods["Blizzard_CompactRaidFrames"](F, C)
-    end
-
-end)
-
 mods["Blizzard_AuctionUI"] = function(F, C)
     mods.debug("Blizzard_AuctionUI", F, C)
 

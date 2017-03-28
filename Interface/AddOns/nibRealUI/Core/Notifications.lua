@@ -200,7 +200,7 @@ function RealUI:InitNotifications()
     sep = f:CreateTexture(nil, "BACKGROUND")
     sep:SetSize(1, 50)
     sep:SetPoint("LEFT", icon, "RIGHT", 9, 0)
-    sep:SetTexture(0, 0, 0)
+    sep:SetColorTexture(0, 0, 0)
 
     title = f:CreateFontString(nil, "OVERLAY")
     title:SetFont(_G.RealUIFont_Normal:GetFont(), 14)

@@ -35,9 +35,11 @@ function UIScaler:UpdateUIScale()
     -- Set Scale (WoW CVar can't go below .64)
     UIScaler:debug("UpdateUIScale", scale, _G.GetCVar("uiScale"), ndbg.tags.retinaDisplay.set)
     if scale < .64 then
+        _G.SetCVar("uiScale", 1)
         _G.UIParent:SetScale(scale)
-    elseif scale ~= _G.tonumber(_G.GetCVar("uiScale")) then
+    else
         UIScaler:debug("SetCVar", scale)
+        _G.UIParent:SetScale(1)
         _G.SetCVar("useUiScale", 1)
         _G.SetCVar("uiScale", scale)
     end

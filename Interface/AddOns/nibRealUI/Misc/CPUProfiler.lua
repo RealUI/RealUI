@@ -25,9 +25,9 @@ local function GraphUpdate(f, elap)
 
     for i = #(values), 1, -1 do
         if (values[i] > 10) then -- bad usage if more than 10ms a frame (imho)
-            bars[i]:SetTexture(1, 0, 0, 1)
+            bars[i]:SetColorTexture(1, 0, 0, 1)
         else
-            bars[i]:SetTexture(1, 1, 1, 0.5)
+            bars[i]:SetColorTexture(1, 1, 1, 0.5)
         end
 
         bars[i]:SetHeight(_G.max((values[i] / 100) ^ 0.28 * graphHeight, 1))
@@ -43,7 +43,7 @@ function CPUProfiler:Start()
 
         for x = 1, 400 do
             bars[x] = graphFrame:CreateTexture(nil, 'OVERLAY')
-                bars[x]:SetTexture(1, 1, 1, 0.5)
+                bars[x]:SetColorTexture(1, 1, 1, 0.5)
                 bars[x]:SetWidth(1)
                 bars[x]:SetHeight(1)
                 bars[x]:SetPoint('BOTTOMLEFT', x - 1, -1)

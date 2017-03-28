@@ -10,7 +10,7 @@ include_files = {
 exclude_files = {
     "Interface/AddOns/nibRealUI/Libs/**",
     "Interface/AddOns/nibRealUI_Config/Libs/**",
-    "Interface/AddOns/nibRealUI_Init/libs/**",
+    "Interface/AddOns/nibRealUI_Init/Libs/**",
     "**/*.blp",
     "**/*.BLP",
     "**/*.ttf",
@@ -20,6 +20,7 @@ exclude_files = {
     "**/*.md",
 }
 
+max_line_length = false
 self = false
 unused_args = false
 std = "none"

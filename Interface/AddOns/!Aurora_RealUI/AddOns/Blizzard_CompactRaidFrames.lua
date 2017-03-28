@@ -1,8 +1,6 @@
 local _, mods = ...
 
 mods["Blizzard_CompactRaidFrames"] = function(F, C)
-    mods.debug("Blizzard_CompactRaidFrames", F, C)
-
     local CompactRaidFrameManager = _G.CompactRaidFrameManager
     CompactRaidFrameManager:DisableDrawLayer("ARTWORK")
     F.CreateBD(CompactRaidFrameManager)

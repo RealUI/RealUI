@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r19f] - 2017-03-27 ##
+### Modified AddOns ###
+
+  * EasyMail
+  * FreebTip
+  * nibRealUI
+
+### Removed AddOns ###
+
+  * FreebTipSpec
+  * FreebTipiLvl
+
+### Changed ###
+
+  * Infobar fonts will only have an outline when the background has a low opacity.
+  * The default block gap has been increased.
+  * Infobar font sizes have been adjusted.
+  * Infobar blocks now inherit the chat font instead of normal.
+  * The Spec and iLvl modules of FreebTip have been integrated into the main FreebTip addon
+
+### Fixed ###
+
+  * The font used for block tooltips would not respect font settings.
+  * The Color Picker swatch would not display the correct color.
+  * Various errors for patch 7.2
 
 
 
@@ -129,6 +154,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r19f]: https://github.com/RealUI/RealUI/compare/8.1_r19e...8.1_r19f
 [8.1 r19e]: https://github.com/RealUI/RealUI/compare/8.1_r19d...8.1_r19e
 [8.1 r19d]: https://github.com/RealUI/RealUI/compare/8.1_r19c...8.1_r19d
 [8.1 r19c]: https://github.com/RealUI/RealUI/compare/8.1_r19b...8.1_r19c

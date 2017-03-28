@@ -205,7 +205,7 @@ local function CreateInstallWindow()
     local line = IWF:CreateTexture(nil, "ARTWORK")
     line:SetPoint("TOPLEFT", IWF, "LEFT", 0, 0)
     line:SetPoint("BOTTOMRIGHT", IWF, "RIGHT", 0, -1)
-    line:SetTexture(1, 1, 1, 0.2)
+    line:SetColorTexture(1, 1, 1, 0.2)
     line.squareTravelLength = _G.UIParent:GetWidth() + moverLength * 2
 
     -- Moving Line Squares
@@ -217,7 +217,7 @@ local function CreateInstallWindow()
         lS:SetSize(moverLength, 1)
         lS.bg = lS:CreateTexture()
             lS.bg:SetAllPoints()
-            lS.bg:SetTexture(1, 1, 1, 0.3)
+            lS.bg:SetColorTexture(1, 1, 1, 0.3)
 
         lS.curX = _G.random(0, line.squareTravelLength) - (line.squareTravelLength / 2)
         lS.direction = i > (numMovers / 2) and -1 or 1

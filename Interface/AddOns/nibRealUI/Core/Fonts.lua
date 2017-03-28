@@ -64,6 +64,7 @@ function Fonts:UpdateUIFonts()
     _G.RealUIFont_PixelNumbers:SetFont( font.pixel.numbers[4], font.pixel.numbers[2], font.pixel.numbers[3])
     _G.RealUIFont_PixelCooldown:SetFont(font.pixel.cooldown[4], font.pixel.cooldown[2], font.pixel.cooldown[3])
 
+    local yellowColor = db.standard.yellowColor
 
     -- Base fonts, everything inhierits from these fonts.
     -- FrameXML\Fonts.xml
@@ -91,9 +92,9 @@ function Fonts:UpdateUIFonts()
     SetFont("Fancy22Font",                  HEADER, 22)
     SetFont("QuestFont_Huge",               HEADER, 18)
     SetFont("QuestFont_Outline_Huge",       HEADER, 18, "OUTLINE")
-    SetFont("QuestFont_Super_Huge",         HEADER, 24, nil, {1, 0.82, 0})
-    SetFont("QuestFont_Super_Huge_Outline", HEADER, 24, "OUTLINE", {1, 0.82, 0})
-    SetFont("SplashHeaderFont",             HEADER, 24, nil, {1, 0.82, 0}, {0, 0, 0}, 1, -2)
+    SetFont("QuestFont_Super_Huge",         HEADER, 24, nil, yellowColor)
+    SetFont("QuestFont_Super_Huge_Outline", HEADER, 24, "OUTLINE", yellowColor)
+    SetFont("SplashHeaderFont",             HEADER, 24, nil, yellowColor, {0, 0, 0}, 1, -2)
 
     SetFont("Game11Font", NORMAL, 11)
     SetFont("Game12Font", NORMAL, 12)
@@ -117,7 +118,7 @@ function Fonts:UpdateUIFonts()
     SetFont("Game13Font_ol", NORMAL, 13, "OUTLINE")
     SetFont("Game15Font_ol", NORMAL, 15, "OUTLINE")
 
-    SetFont("QuestFont_Enormous",     HEADER, 30, nil, {1, 0.82, 0})
+    SetFont("QuestFont_Enormous",     HEADER, 30, nil, yellowColor)
     SetFont("DestinyFontLarge",       HEADER, 18, nil, {0.1, 0.1, 0.1})
     SetFont("CoreAbilityFont",        HEADER, 32, nil, {0.1, 0.1, 0.1})
     SetFont("DestinyFontHuge",        HEADER, 32, nil, {0.1, 0.1, 0.1})
@@ -136,11 +137,12 @@ function Fonts:UpdateUIFonts()
     SetFont("FriendsFont_Small",     NORMAL, 10, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("FriendsFont_Large",     NORMAL, 14, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("FriendsFont_UserText",  NORMAL, 11, nil, nil, {0, 0, 0}, 1, -1)
-    SetFont("GameFont_Gigantic",     NORMAL, 32, nil, {1, 0.82, 0}, {0, 0, 0}, 1, -1)
+    SetFont("GameFont_Gigantic",     NORMAL, 32, nil, yellowColor, {0, 0, 0}, 1, -1)
 
     SetFont("ChatBubbleFont", NORMAL, 13)
     SetFont("Fancy16Font",    HEADER, 16)
     SetFont("Fancy18Font",    HEADER, 18)
+    SetFont("Fancy20Font",    HEADER, 20)
     SetFont("Fancy24Font",    HEADER, 24)
     SetFont("Fancy27Font",    HEADER, 27)
     SetFont("Fancy30Font",    HEADER, 30)
@@ -154,6 +156,7 @@ function Fonts:UpdateUIFonts()
     SetFont("SystemFont_NamePlateCastBar",    NORMAL, 10)
 
     -- SharedXML\SharedFonts.xml
+    SetFont("SystemFont_Tiny2",                NORMAL, 8)
     SetFont("SystemFont_Tiny",                 NORMAL, 9)
     SetFont("SystemFont_Shadow_Small",         NORMAL, 10, nil, nil, {0, 0, 0}, 1, -1)
     SetFont("SystemFont_Small",                NORMAL, 10)
@@ -181,6 +184,9 @@ function Fonts:UpdateUIFonts()
     SetFont("GameTooltipHeader",               NORMAL, 14)
     SetFont("System_IME",                      NORMAL, 16)
 
+    -- This uses GameFontNormal, which inherits from SystemFont_Shadow_Med1,
+    -- but for some reason the above changes do not propagate to it.
+    SetFont(_G.WorldMapFrame.NavBar.home.text, NORMAL, 12, nil, yellowColor, {0, 0, 0}, 1, -1)
     if db.standard.changeYellow then
         local yellowFonts = {
             "GameFontNormal",

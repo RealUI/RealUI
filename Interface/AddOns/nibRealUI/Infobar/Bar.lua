@@ -217,15 +217,31 @@ function BlockMixin:RestorePosition()
 end
 
 function BlockMixin:AdjustElements(blockInfo)
+    local font, size, outline = blockFont.font, blockFont.size, blockFont.outline
     local space = RealUI.ModValue(2)
-    local width = self.text:GetStringWidth() + space
+    local width = space
+
     self.text:SetPoint("RIGHT", -space, 0)
+    self.text:SetFont(font, size, outline)
+    width = width + space + self.text:GetStringWidth()
 
     if self.icon then
         if blockInfo.showIcon then
             self.icon:SetPoint("LEFT", space, 0)
             self.icon:Show()
-            local iconWidth = (self.icon.isFont and self.icon:GetStringWidth() or self.icon:GetWidth())
+            local iconWidth
+            if self.icon.isFont then
+                local iconFont = self.dataObj.iconFont
+                self.icon:SetFont(iconFont.font, iconFont.size, outline)
+                if outline == "OUTLINE" then
+                    -- Outlined font icons are too wide for their visual
+                    iconWidth = self.icon:GetStringWidth() - space
+                else
+                    iconWidth = self.icon:GetStringWidth()
+                end
+            else
+                iconWidth = self.icon:GetWidth()
+            end
 
             self.checkWidth = iconWidth < 1
             width = width + space + iconWidth
@@ -242,6 +258,7 @@ function BlockMixin:AdjustElements(blockInfo)
             self.label:SetPoint("LEFT", space, 0)
         end
 
+        self.label:SetFont(font, size, outline)
         self.label:Show()
         width = width + space + self.label:GetStringWidth()
         Infobar:debug("label", self.dataObj.label, width)
@@ -736,6 +753,7 @@ function Infobar:Lock()
 
     self.locked = true
 end
+
 function Infobar:SettingsUpdate(setting, block)
     if setting == "statusBar" then
         local watch = self.frame.watch
@@ -750,6 +768,13 @@ function Infobar:SettingsUpdate(setting, block)
         self.frame.tex:SetAlpha(db.bgAlpha * 0.55)
 
         self.frame.watch:UpdateColors()
+
+        local outline = self:GetFontOutline()
+        if blockFont.outline ~= outline then
+            blockFont.outline = outline
+            self.frame.left:UpdateBlocks(true)
+            self.frame.right:UpdateBlocks(true)
+        end
     else
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
@@ -794,7 +819,7 @@ function Infobar:OnInitialize()
             bgAlpha = 0.5,
             showBars = true,
             combatTips = false,
-            blockGap = 1,
+            blockGap = 3,
             blocks = {
                 others = {
                     ["*"] = {
@@ -875,11 +900,20 @@ function Infobar:OnInitialize()
     ndbg = RealUI.db.global
     ]]
 
-    local font = RealUI.db.profile.media.font.standard
+    function self:GetFontOutline(alpha)
+        alpha = alpha or db.bgAlpha
+        if alpha > 0.2 then
+            return ""
+        else
+            return "OUTLINE"
+        end
+    end
+
+    local font = RealUI.db.profile.media.font.chat
     blockFont = {
         font = font[4],
-        size = RealUI.ModValue(10),
-        outline = font[3]
+        size = RealUI.ModValue(9),
+        outline = self:GetFontOutline()
     }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end

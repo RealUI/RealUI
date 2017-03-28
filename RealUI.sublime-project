@@ -14,12 +14,6 @@
 			"path": "Interface\\AddOns\\FreebTip"
 		},
 		{
-			"path": "Interface\\AddOns\\FreebTipiLvl"
-		},
-		{
-			"path": "Interface\\AddOns\\FreebTipSpec"
-		},
-		{
 			"path": "Interface\\AddOns\\nibRealUI"
 		},
 		{
@@ -40,7 +34,6 @@
 			[
 				".idea",
 				"Interface",
-				"utils"
 			],
 			"name": "Docs",
 			"path": "."

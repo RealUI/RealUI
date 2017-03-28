@@ -35,39 +35,39 @@ function qTip:Acquire(...)
 end
 
 local headerFont, textFont, iconFont
-do
-    local size = RealUI.ModValue(12)
-    local font, _, outline = _G.RealUIFont_Normal:GetFont()
+local function SetupFonts()
+    local size = RealUI.ModValue(10)
+    local font = RealUI.db.profile.media.font.standard
     local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(font, size, outline)
+    header:SetFont(font[4], size)
     headerFont = {
-        font = font,
+        font = font[4],
         size = size,
-        outline = outline,
         object = header
     }
 
-    size = RealUI.ModValue(8)
-    font, _, outline = _G.RealUIFont_Chat:GetFont()
+    size = RealUI.ModValue(9)
+    font = RealUI.db.profile.media.font.chat
     local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(font, size, outline)
+    text:SetFont(font[4], size)
     textFont = {
-        font = font,
+        font = font[4],
         size = size,
-        outline = outline,
         object = text
     }
 
-    size = RealUI.ModValue(10)
+    size = RealUI.ModValue(9)
     iconFont = {
         font = fa.path,
         size = size,
-        outline = "OUTLINE"
+        outline = Infobar:GetFontOutline()
     }
 end
 
-local TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
-do
+local TextTableCellProvider, TextTableCellPrototype
+local function SetupTextTable()
+    TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
+
     local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
     local numTables = 0
@@ -119,7 +119,7 @@ do
                         row[col] = cell
 
                         local text = cell:CreateFontString(nil, "ARTWORK")
-                        text:SetFont(textFont.font, textFont.size, textFont.outline)
+                        text:SetFont(textFont.font, textFont.size)
                         text:SetJustifyH(data.header.justify[col])
                         text:SetAllPoints()
                         cell:SetFontString(text)
@@ -356,7 +356,7 @@ do
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
-                header.text:SetFont(textFont.font, textFont.size, textFont.outline)
+                header.text:SetFont(textFont.font, textFont.size)
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
@@ -387,7 +387,7 @@ do
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
-                testCell:SetFont(textFont.font, textFont.size, textFont.outline)
+                testCell:SetFont(textFont.font, textFont.size)
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
@@ -529,6 +529,11 @@ function Infobar:CreateBlocks()
     local db = Infobar.db.profile
     local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
+
+    if not TextTableCellPrototype then
+        SetupFonts()
+        SetupTextTable()
+    end
 
     --[[ Static Blocks ]]--
     do  -- Start
@@ -1845,18 +1850,28 @@ function Infobar:CreateBlocks()
             L["Layout_Healing"]
         }
 
+        local function EquipmentManager_EquipSet(setID) -- is72
+            local name = equipSetsByID[setID].name
+            if ( _G.EquipmentSetContainsLockedItems(name) or _G.UnitCastingInfo("player") ) then
+                _G.UIErrorsFrame:AddMessage(_G.ERR_CLIENT_LOCKED_OUT, 1.0, 0.1, 0.1, 1.0);
+                return;
+            end
+
+            _G.UseEquipmentSet(name)
+        end
+
         local equipmentNeedsUpdate = false
         local function Line_OnMouseUp(line, specIndex, button)
             if button == "LeftButton" then
                 if not _G.InCombatLockdown() then
                     if specIndex == currentSpecIndex then
                         if dbc.specgear[specIndex] >= 0 then
-                            _G.EquipmentManager_EquipSet(equipSetsByID[dbc.specgear[specIndex]].name)
+                            EquipmentManager_EquipSet(dbc.specgear[specIndex])
                         end
                     else
                         _G.SetSpecialization(specIndex)
                         if dbc.specgear[specIndex] >= 0 then
-                            equipmentNeedsUpdate = equipSetsByID[dbc.specgear[specIndex]].name
+                            equipmentNeedsUpdate = dbc.specgear[specIndex]
                         end
                     end
                 end
@@ -1928,8 +1943,8 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
                 for specIndex = 1, RealUI.numSpecs do
-                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]].name or "---"
-                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet, layout[ndbc.layout.spec[specIndex]])
+                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]]
+                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specInfo[specIndex].line = lineNum
                     if specIndex == currentSpecIndex then
