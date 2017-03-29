@@ -1,16 +1,11 @@
-language: python
 sudo: false
+language: c
 
-env:
-  - LUA="lua=5.1"
+addons:
+  apt:
+    packages:
+    - luarocks
 
-before_install:
-  - pip install hererocks
-  - hererocks lua_install -r^ --$LUA
-  - export PATH=$PATH:$PWD/lua_install/bin
+before_install: luarocks install --local luacheck
 
-install:
-  - luarocks install luacheck
-
-script:
-  - luacheck Interface
+script: /home/travis/.luarocks/bin/luacheck Interface
