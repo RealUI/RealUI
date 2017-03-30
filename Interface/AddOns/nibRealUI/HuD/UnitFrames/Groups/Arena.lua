@@ -77,11 +77,9 @@ local function UpdatePrep(self, event, unit, status)
         end
     else
         UnitFrames:debug(event, unit, status)
-        -- filter arenapet*
-        unit = _G.tonumber(unit:match("arena(%d)"))
-        UnitFrames:debug(unit, prepFrames[unit])
-        if unit then
-            local opp = prepFrames[unit]
+        unit = _G.tonumber(unit:match("arena(%d+)")) -- filter arenapet*
+        local opp = prepFrames[unit or 0]
+        if opp then
             if status == "seen" then
                 UnitFrames:debug("Arena Opp Seen", unit, opp)
                 opp:SetAlpha(1)
