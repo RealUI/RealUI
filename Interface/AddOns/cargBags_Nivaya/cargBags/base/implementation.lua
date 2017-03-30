@@ -334,70 +334,124 @@ end
 local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 local infoGather = {}
 function Implementation:GetItemInfo(bagID, slotID)
-    local item = self:GetItem(bagID, slotID)
+    local item = self:GetItem(bagID, slotID, true)
     item = item or {}
+    _G.wipe(item)
 
     item.bagID = bagID
     item.slotID = slotID
 
-    item.id = _G.GetContainerItemID(bagID, slotID)
-    item.texture, item.count = _G.GetContainerItemInfo(bagID, slotID)
+    local mustGather = false
+    local id = _G.GetContainerItemID(bagID, slotID)
+    local texture, count = _G.GetContainerItemInfo(bagID, slotID)
+    local name, rarity, level, minLevel, type, subType, typeID, subTypeID
+    local link = _G.GetContainerItemLink(bagID, slotID)
 
-    local clink = _G.GetContainerItemLink(bagID, slotID)
-    if clink then
-        local texture
-
+    if link then
         -- /dump GetContainerItemLink(0, 1):match("H(%w+):([%-?%d:]+)")
-        local linkType, itemString = clink:match("H(%w+):([%-?%d:]+)")
+        local linkType, itemString = link:match("H(%w+):([%-?%d:]+)")
         if linkType == "battlepet" then
             if not(L) then
                 L = cargBags:GetLocalizedTypes()
             end
-            local itemType, petType = L[_G.LE_ITEM_CLASS_BATTLEPET]
-            local speciesID, level, breedQuality, _, _, _, battlePetID = strsplit(":", itemString)
-            item.name, texture, petType, item.creatureID, _, _, item.isWild, item.canBattle, item.isTradeable, item.isUnique, item.isObtainable, item.displayID = _G.C_PetJournal.GetPetInfoBySpeciesID(speciesID)
-            item.link = clink
-            item.rarity = tonumber(breedQuality) or 0
-            item.minLevel = tonumber(level) or 0
-            item.type = itemType.name
-            item.subType = itemType[petType-1]
-            item.texture = item.texture or texture
-            item.typeID = _G.LE_ITEM_CLASS_BATTLEPET
-            item.subTypeID = petType
-            item.id = tonumber(battlePetID)
+            local itemType, speciesID, breedQuality, battlePetID, _ = L[_G.LE_ITEM_CLASS_BATTLEPET]
+            local petTexture, petType, creatureID, isWild, canBattle, isTradeable, isUnique, isObtainable, displayID
+
+            speciesID, level, breedQuality, _, _, _, battlePetID = strsplit(":", itemString)
+            name, petTexture, petType, creatureID, _, _, isWild, canBattle, isTradeable, isUnique, isObtainable, displayID = _G.C_PetJournal.GetPetInfoBySpeciesID(speciesID)
+
+            id = tonumber(battlePetID)
+            texture = texture or petTexture
+            rarity = tonumber(breedQuality) or 0
+            level = tonumber(level) or 0
+            minLevel = level
+            type = itemType.name
+            subType = itemType[petType-1]
+            typeID = _G.LE_ITEM_CLASS_BATTLEPET
+            subTypeID = petType
 
             item.speciesID = tonumber(speciesID) or 0
+            item.creatureID = creatureID
+            item.isWild = isWild
+            item.canBattle = canBattle
+            item.isTradeable = isTradeable
+            item.isUnique = isUnique
+            item.isObtainable = isObtainable
+            item.displayID = displayID
+        elseif linkType == "keystone" then
+            local challengeMapID, isActive, affix1, affix2, affix3
+            challengeMapID, level, isActive, affix1, affix2, affix3 = strsplit(":", itemString)
+            name, _, rarity, _, _, type, subType, _, _, _, _, typeID, subTypeID = _G.GetItemInfo(id)
+
+            level = tonumber(level) or 0
+
+            item.challengeMapID = tonumber(challengeMapID) -- Used in C_ChallengeMode APIs
+            item.isActive = not not tonumber(isActive)
+            item.affix1 = tonumber(affix1)
+            item.affix2 = tonumber(affix2)
+            item.affix3 = tonumber(affix3)
         else
-            item.name, item.link, item.rarity, item.level, item.minLevel, item.type, item.subType, item.stackCount, item.equipLoc, texture, item.sellPrice, item.typeID, item.subTypeID = _G.GetItemInfo(clink)
-            if not item.name then
-                item.id, item.type, item.subType, item.equipLoc, texture, item.typeID, item.subTypeID = _G.GetItemInfoInstant(clink)
-                if not infoGather[item.id] then infoGather[item.id] = {} end
-                if not infoGather[item.id][item.bagID] then infoGather[item.id][item.bagID] = {} end
-                if not infoGather[item.id][item.bagID][item.slotID] then
-                    infoGather[item.id][item.bagID][item.slotID] = item
-                end
+            local itemID, itemTexture, stackCount, equipLoc, sellPrice, _
+            name, _, rarity, level, minLevel, type, subType, stackCount, equipLoc, itemTexture, sellPrice, typeID, subTypeID = _G.GetItemInfo(link)
+            if name then
+                item.stackCount = stackCount
+                item.sellPrice = sellPrice
+            else
+                itemID, type, subType, equipLoc, itemTexture, typeID, subTypeID = _G.GetItemInfoInstant(link)
+                mustGather = true
             end
 
-            if item.typeID == _G.LE_ITEM_CLASS_QUESTITEM then
+            if typeID == _G.LE_ITEM_CLASS_QUESTITEM then
                 item.isQuestItem, item.questID, item.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
             end
-            if item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-                item.level = LIU:GetUpgradedItemLevel(item.link)
+            if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
+                level = LIU:GetUpgradedItemLevel(link)
             end
+
+            id = id or itemID
+            texture = texture or itemTexture
+
+            item.equipLoc = equipLoc
             item.isInSet, item.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
-            item.texture = item.texture or texture
         end
     end
+
+    item.link = link
+    item.id = id
+    item.type = type
+    item.subType = subType
+    item.typeID = typeID
+    item.subTypeID = subTypeID
+
+    if mustGather then
+        if not infoGather[id] then infoGather[id] = {} end
+        if not infoGather[id][bagID] then infoGather[id][bagID] = {} end
+        if not infoGather[id][bagID][slotID] then
+            infoGather[id][bagID][slotID] = item
+            return item
+        end
+    end
+
+    item.level = level
+    item.minLevel = minLevel
+    item.texture = texture
+    item.count = count
+    item.name = name
+    item.rarity = rarity
 
     ItemInfo[bagID][slotID] = item
     return item
 end
 
-function Implementation:GetItem(bagID, slotID)
+function Implementation:GetItem(bagID, slotID, getCache)
     if not ItemInfo[bagID] then
         ItemInfo[bagID] = {}
     end
-    return ItemInfo[bagID][slotID]
+    if getCache then
+        return ItemInfo[bagID][slotID]
+    else
+        return self:GetItemInfo(bagID, slotID)
+    end
 end
 
 --[[!
