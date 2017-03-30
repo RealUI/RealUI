@@ -8,4 +8,5 @@ addons:
 
 before_install: luarocks install --local luacheck
 
-script: /home/travis/.luarocks/bin/luacheck Interface
+before_script: /home/travis/.luarocks/bin/luacheck Interface -q
+script: utils/release.sh -l -w 16068
