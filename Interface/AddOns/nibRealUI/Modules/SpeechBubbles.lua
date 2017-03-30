@@ -89,6 +89,7 @@ end
 local function FindFrame(msg)
     for idx = 1, _G.WorldFrame:GetNumChildren() do
         local frame = _G.select(idx, _G.WorldFrame:GetChildren())
+        if frame:IsForbidden() then return end
         if not frame:GetName() and not frame.inUse then
             for i = 1, _G.select("#", frame:GetRegions()) do
                 local region = _G.select(i, frame:GetRegions())
