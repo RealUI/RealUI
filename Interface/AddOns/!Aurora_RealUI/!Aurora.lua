@@ -20,7 +20,7 @@ mods.debug = debug
 local F, C
 local r, g, b
 local style = {}
-style.apiVersion = "6.0"
+style.apiVersion = "7.0"
 
 style.defaults = {
     acknowledgedSplashScreen = true,

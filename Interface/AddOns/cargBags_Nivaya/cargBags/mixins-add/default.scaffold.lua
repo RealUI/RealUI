@@ -32,6 +32,39 @@ local select = _G.select
 
 -- Upgrade Level retrieval
 local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
+local GetItemLevelBonusFromRelic do
+    local cache, scanTip = {}
+    local relicBoostPattern = _G.RELIC_TOOLTIP_ILVL_INCREASE:gsub("%%d", "(%%d+)")
+    function GetItemLevelBonusFromRelic(itemLink)
+        if cache[itemLink] then
+            return cache[itemLink]
+        end
+
+        local iLvl = _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(itemLink)
+        if not iLvl then
+            if not scanTip then
+                scanTip = _G.CreateFrame("GameTooltip", "cBTooltip", _G.UIParent, "GameTooltipTemplate")
+            end
+
+            scanTip:SetOwner(_G.UIParent, "ANCHOR_NONE")
+            local success = _G.pcall(scanTip.SetHyperlink, scanTip, itemLink)
+            if not success then
+                return 0
+            end
+
+            for i = 5 , 6 do
+                local text = _G["cBTooltipTextLeft"..i]:GetText()
+                iLvl = _G.tonumber(text:match(relicBoostPattern))
+                if iLvl then break end
+            end
+
+            scanTip:Hide()
+        end
+
+        cache[itemLink] = iLvl
+        return iLvl
+    end
+end
 
 local function Round(num, idp)
     local mult = 10^(idp or 0)
@@ -134,13 +167,17 @@ local function ItemButton_Update(self, item)
         end
 
         if _G.IsArtifactRelicItem(item.link) then
-            self.BottomString:SetFormattedText("+%d", _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(item.link) or 0)
+            local iLvlBonus = _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(item.link)
+            if not iLvlBonus then
+                iLvlBonus = GetItemLevelBonusFromRelic(item.link)
+            end
+            self.BottomString:SetFormattedText("+%d", iLvlBonus)
         elseif (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)
         else
             self.BottomString:SetText("")
         end
-        self.BottomString:SetTextColor(_G.GetItemQualityColor(item.rarity))
+        self.BottomString:SetTextColor(_G.GetItemQualityColor(item.rarity or 1))
     else
         self.BottomString:SetText("")
     end
