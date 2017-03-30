@@ -110,7 +110,7 @@ local IR = _G.IsAddOnLoaded('ItemRack')
 local OF = _G.IsAddOnLoaded('Outfitter')
 
 filters.fItemSets = function(item)
-    --print("fItemSets", item, item.isInSet)
+    --print("fItemSets", item, item.link, item.isInSet)
     if not ns.filterEnabled["ItemSets"] then return false end
     if not item.link then return false end
     local tC = _G.cBniv_CatInfo[item.id]

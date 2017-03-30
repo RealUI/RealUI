@@ -113,7 +113,7 @@ do
         -- group equipment types
         if (item1.equipLoc ~= "" and item2.equipLoc ~= "") and (item1.equipLoc ~= item2.equipLoc) then
             if not invTypes[item1.equipLoc] or not invTypes[item2.equipLoc] then
-                _G.print(item1.link, item1.equipLoc, item2.link, item2.equipLoc)
+                _G.print("Compairing unknown slot", item1.link, item1.equipLoc, item2.link, item2.equipLoc)
             else
                 return invTypes[item1.equipLoc] < invTypes[item2.equipLoc]
             end
@@ -146,8 +146,8 @@ function MyContainer:OnContentsChanged()
     for i, button in next, self.buttons do
         local item = cbNivaya:GetItem(button.bagID, button.slotID)
         if item.link then
-            if item.equipLoc ~= "" and not invTypes[item.equipLoc] then
-                _G.print(item.link, item.equipLoc)
+            if (item.equipLoc and item.equipLoc ~= "") and not invTypes[item.equipLoc] then
+                _G.print("Unknown slot", item.link, item.equipLoc)
             end
             buttonIDs[i] = { item, button }
         else

@@ -1,8 +1,8 @@
-## Interface: 70100
+## Interface: 70200
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Init
 ## Notes: Primary initialization for RealUI
 ## Author: Gethe
-## Version: 8.1 r19f
+## Version: 8.1 r19g
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
 ## SavedVariables: RealUI_InitDB
 ## SavedVariablesPerCharacter: RealUI_Debug
