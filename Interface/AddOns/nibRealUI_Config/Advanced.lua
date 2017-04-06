@@ -1360,7 +1360,12 @@ local uiTweaks do
         local MODNAME = "CooldownCount"
         local CooldownCount = RealUI:GetModule(MODNAME)
         local db = CooldownCount.db.profile
-        local table_Justify = {"LEFT", "CENTER", "RIGHT"}
+        local anchors = {
+            "TOPLEFT",
+            "TOPRIGHT",
+            "BOTTOMLEFT",
+            "BOTTOMRIGHT",
+        }
         cooldown = {
             name = L["Tweaks_CooldownCount"],
             desc = L["Tweaks_CooldownCountDesc"],
@@ -1392,19 +1397,6 @@ local uiTweaks do
                     type = "description",
                     order = 41,
                 },
-                minScale = {
-                    name = "Min Scale",
-                    desc = "The minimum scale we want to show cooldown counts at, anything below this will be hidden.",
-                    type = "range",
-                    isPercent = true,
-                    min = 0, max = 1, step = 0.05,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
-                    get = function(info) return db.minScale end,
-                    set = function(info, value)
-                        db.minScale = value
-                    end,
-                    order = 60,
-                },
                 minDuration = {
                     name = "Min Duration",
                     desc = "The minimum number of seconds a cooldown's duration must be to display text.",
@@ -1429,17 +1421,31 @@ local uiTweaks do
                     end,
                     order = 80,
                 },
+                point = {
+                    name = "Anchor",
+                    type = "select",
+                    values = anchors,
+                    get = function(info)
+                        for k,v in next, anchors do
+                            if v == db.point then return k end
+                        end
+                    end,
+                    set = function(info, value)
+                        db.point = anchors[value]
+                    end,
+                    order = 90,
+                },
                 gap2 = {
                     name = " ",
                     type = "description",
-                    order = 81,
+                    order = 91,
                 },
                 colors = {
                     name = "Colors",
                     type = "group",
                     inline = true,
                     disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 90,
+                    order = 100,
                     args = {
                         expiring = {
                             name = "Expiring",
@@ -1505,70 +1511,6 @@ local uiTweaks do
                                 db.colors.days[3] = b
                             end,
                             order = 50,
-                        },
-                    },
-                },
-                gap3 = {
-                    name = " ",
-                    type = "description",
-                    order = 91,
-                },
-                position = {
-                    name = "Position",
-                    type = "group",
-                    inline = true,
-                    disabled = function(info) if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 100,
-                    args = {
-                        point = {
-                            name = "Anchor",
-                            type = "select",
-                            values = RealUI.globals.anchorPoints,
-                            get = function(info)
-                                for k,v in next, RealUI.globals.anchorPoints do
-                                    if v == db.position.point then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.point = RealUI.globals.anchorPoints[value]
-                            end,
-                            order = 10,
-                        },
-                        x = {
-                            name = "X",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(db.position.x) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.x = value
-                            end,
-                            order = 20,
-                        },
-                        y = {
-                            name = "Y",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(db.position.y) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.y = value
-                            end,
-                            order = 30,
-                        },
-                        justify = {
-                            name = "Text Justification",
-                            type = "select",
-                            values = table_Justify,
-                            get = function(info)
-                                for k,v in next, table_Justify do
-                                    if v == db.position.justify then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.justify = table_Justify[value]
-                            end,
-                            order = 40,
                         },
                     },
                 },
