@@ -3322,144 +3322,146 @@ local uiTweaks do
     end
     local speechBubbles do
         local MODNAME = "SpeechBubbles"
-        local SpeechBubbles = RealUI:GetModule(MODNAME)
-        local db = SpeechBubbles.db.profile
-        speechBubbles = {
-            name = "Speech Bubbles",
-            desc = "Skins the speech bubbles.",
-            type = "group",
-            args = {
-                header = {
-                    name = "Speech Bubbles",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Skins the speech bubbles.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Speech Bubbles module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                        RealUI:ReloadUIDialog()
-                    end,
-                    order = 30,
-                },
-                desc2 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                desc3 = {
-                    name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
-                    type = "description",
-                    order = 32,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 33,
-                },
-                general = {
-                    name = "General",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 40,
-                    args = {
-                        sendersize = {
-                            name = "Sender Name Size",
-                            type = "range",
-                            min = 6, max = 32, step = 1,
-                            get = function(info) return db.sendersize end,
-                            set = function(info, value)
-                                db.sendersize = value
-                            end,
-                            order = 10,
+        local SpeechBubbles = RealUI:GetModule(MODNAME, true)
+        if SpeechBubbles then
+            local db = SpeechBubbles.db.profile
+            speechBubbles = {
+                name = "Speech Bubbles",
+                desc = "Skins the speech bubbles.",
+                type = "group",
+                args = {
+                    header = {
+                        name = "Speech Bubbles",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Skins the speech bubbles.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Speech Bubbles module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value)
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        order = 30,
+                    },
+                    desc2 = {
+                        name = " ",
+                        type = "description",
+                        order = 31,
+                    },
+                    desc3 = {
+                        name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                        type = "description",
+                        order = 32,
+                    },
+                    gap1 = {
+                        name = " ",
+                        type = "description",
+                        order = 33,
+                    },
+                    general = {
+                        name = "General",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 40,
+                        args = {
+                            sendersize = {
+                                name = "Sender Name Size",
+                                type = "range",
+                                min = 6, max = 32, step = 1,
+                                get = function(info) return db.sendersize end,
+                                set = function(info, value)
+                                    db.sendersize = value
+                                end,
+                                order = 10,
+                            },
+                            hideSender = {
+                                name = "Hide Sender Name",
+                                type = "toggle",
+                                get = function() return db.hideSender end,
+                                set = function(info, value)
+                                    db.hideSender = value
+                                end,
+                                order = 11,
+                            },
+                            messagesize = {
+                                name = "Message Size",
+                                type = "range",
+                                min = 6, max = 32, step = 1,
+                                get = function(info) return db.messagesize end,
+                                set = function(info, value)
+                                    db.messagesize = value
+                                end,
+                                order = 20,
+                            },
+                            edgesize = {
+                                name = "Edge Size",
+                                type = "range",
+                                min = 0, max = 20, step = 1,
+                                get = function(info) return db.edgesize end,
+                                set = function(info, value)
+                                    db.edgesize = value
+                                end,
+                                order = 30,
+                            },
                         },
-                        hideSender = {
-                            name = "Hide Sender Name",
-                            type = "toggle",
-                            get = function() return db.hideSender end,
-                            set = function(info, value)
-                                db.hideSender = value
-                            end,
-                            order = 11,
-                        },
-                        messagesize = {
-                            name = "Message Size",
-                            type = "range",
-                            min = 6, max = 32, step = 1,
-                            get = function(info) return db.messagesize end,
-                            set = function(info, value)
-                                db.messagesize = value
-                            end,
-                            order = 20,
-                        },
-                        edgesize = {
-                            name = "Edge Size",
-                            type = "range",
-                            min = 0, max = 20, step = 1,
-                            get = function(info) return db.edgesize end,
-                            set = function(info, value)
-                                db.edgesize = value
-                            end,
-                            order = 30,
+                    },
+                    gap2 = {
+                        name = " ",
+                        type = "description",
+                        order = 41,
+                    },
+                    colors = {
+                        name = "Colors",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 50,
+                        args = {
+                            background = {
+                                name = "Background",
+                                type = "color",
+                                hasAlpha = true,
+                                get = function(info,r,g,b,a)
+                                    return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
+                                end,
+                                set = function(info,r,g,b,a)
+                                    db.colors.bg[1] = r
+                                    db.colors.bg[2] = g
+                                    db.colors.bg[3] = b
+                                    db.colors.bg[4] = a
+                                end,
+                                order = 10,
+                            },
+                            border = {
+                                name = "Border",
+                                type = "color",
+                                hasAlpha = true,
+                                get = function(info,r,g,b,a)
+                                    return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
+                                end,
+                                set = function(info,r,g,b,a)
+                                    db.colors.border[1] = r
+                                    db.colors.border[2] = g
+                                    db.colors.border[3] = b
+                                    db.colors.border[4] = a
+                                end,
+                                order = 10,
+                            },
                         },
                     },
                 },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 41,
-                },
-                colors = {
-                    name = "Colors",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 50,
-                    args = {
-                        background = {
-                            name = "Background",
-                            type = "color",
-                            hasAlpha = true,
-                            get = function(info,r,g,b,a)
-                                return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
-                            end,
-                            set = function(info,r,g,b,a)
-                                db.colors.bg[1] = r
-                                db.colors.bg[2] = g
-                                db.colors.bg[3] = b
-                                db.colors.bg[4] = a
-                            end,
-                            order = 10,
-                        },
-                        border = {
-                            name = "Border",
-                            type = "color",
-                            hasAlpha = true,
-                            get = function(info,r,g,b,a)
-                                return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
-                            end,
-                            set = function(info,r,g,b,a)
-                                db.colors.border[1] = r
-                                db.colors.border[2] = g
-                                db.colors.border[3] = b
-                                db.colors.border[4] = a
-                            end,
-                            order = 10,
-                        },
-                    },
-                },
-            },
-        }
+            }
+        end
     end
 
     uiTweaks = {
