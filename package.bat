@@ -16,5 +16,4 @@ powershell ".\utils\update.ps1"
 ::   -r releasedir    Set directory containing the package directory. Defaults to $topdir/.release.
 ::   -p curse-id      Set the project id used on CurseForge for localization and uploading.
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
-utils\release.sh -adelz
 bash -c "./utils/release.sh -clo -w 16068"

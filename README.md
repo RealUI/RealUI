@@ -11,7 +11,6 @@ The following addons have been modified to suit RealUI and should not be updated
   - cargBags_Nivaya
   - EasyMail
   - FreebTip
-  - SharedMedia + SharedMedia_MyMedia
 
 
 

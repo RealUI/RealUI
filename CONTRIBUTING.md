@@ -54,6 +54,19 @@ Most of the libraries used are not included in the repo since they will get brou
   * [LibWindow-1.1](https://mods.curse.com/addons/wow/libwindow-1-1)
   * [UTF8](https://mods.curse.com/addons/wow/utf8)
 
+
+## Packaging ##
+
+RealUI uses a [customized fork of the BigWigsMods packager.](https://github.com/RealUI/packager/tree/RealUI_edits) This is a shell script that can be run on Windows 10 if [WSL is installed](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), in addition to Linux or Mac. In order for this script to run properly you must have the following commands available:
+
+  * [git](http://packages.ubuntu.com/xenial/git) and [svn](http://packages.ubuntu.com/xenial/subversion) - to retreive externals
+  * [pandoc](http://packages.ubuntu.com/xenial/pandoc) - to create a bbcode changelog for WoWI
+  * [zip and unzip](http://packages.ubuntu.com/xenial/zip) - to unpack externals and create final package
+  * [jq](http://packages.ubuntu.com/xenial/jq) - to upload the package to WoWI and create a GitHub release
+
+**Note:** Some of these may already be installed.
+
+
 ## Styleguides ##
 
 ### Git Commit Messages ###
