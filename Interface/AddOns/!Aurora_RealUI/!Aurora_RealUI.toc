@@ -10,7 +10,6 @@
 
 AddOns\Bartender4.lua
 AddOns\Blizzard_CompactRaidFrames.lua
-AddOns\Blizzard_DebugTools.lua
 AddOns\Blizzard_PetBattleUI.lua
 AddOns\Bugger.lua
 AddOns\Clique.lua
