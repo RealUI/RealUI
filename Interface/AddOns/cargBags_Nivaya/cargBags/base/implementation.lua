@@ -382,6 +382,10 @@ function Implementation:GetItemInfo(bagID, slotID)
             local challengeMapID, isActive, affix1, affix2, affix3
             challengeMapID, level, isActive, affix1, affix2, affix3 = strsplit(":", itemString)
             name, _, rarity, _, _, type, subType, _, _, _, _, typeID, subTypeID = _G.GetItemInfo(id)
+            if not name then
+                _, type, subType, _, _, typeID, subTypeID = _G.GetItemInfoInstant(id)
+                mustGather = true
+            end
 
             level = tonumber(level) or 0
 
