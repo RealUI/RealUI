@@ -5,7 +5,6 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
-local round = RealUI.Round
 local db, ndb
 
 local MODNAME = "CastBars"
@@ -13,56 +12,83 @@ local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local layoutSize
 
-local MaxTicks = 10
 local ChannelingTicks = {}
 do
-    local function RegisterSpellName(spellID, numticks)
+    local function RegisterSpellName(spellID, numticks, isInstant)
         local name = _G.GetSpellInfo(spellID)
         if name then
-            ChannelingTicks[name] = numticks
+            ChannelingTicks[name] = {
+                id = spellID,
+                ticks = numticks,
+                isInstant = isInstant
+            }
         else
             _G.print("The spell for ID", spellID, "no longer exists.")
         end
     end
 
+    -- RegisterSpellName(spellID, (duration / interval), isInstant)
+
+    -- Death Knight
+    RegisterSpellName(206931, 3 / 1, true) -- Blooddrinker
+
+    -- Demon Hunter
+    RegisterSpellName(198013, 2 / 2, true)    -- Eye Beam
+    RegisterSpellName(211053, 2 / 0.25, true) -- Fel Barrage
+    RegisterSpellName(212084, 2 / 0.2, true)  -- Fel Devastation
+
     -- Druid
-    RegisterSpellName(740, 4) -- Tranquility
+    RegisterSpellName(740, 8 / 2, true) -- Tranquility
+
+    -- Hunter
+    RegisterSpellName(120360, 3 / 0.2, true) -- Barrage
+    RegisterSpellName(212640, 6 / 1, false)  -- Mending Bandage
 
     -- Mage
-    RegisterSpellName(5143, 5)  -- Arcane Missiles
-    RegisterSpellName(12051, 3) -- Evocation
+    RegisterSpellName(5143, 2 / 0.4, false)  -- Arcane Missiles
+    RegisterSpellName(12051, 6 / 2, true)    -- Evocation
+    RegisterSpellName(205021, 10 / 1, false) -- Ray of Frost
 
     -- Monk
-    RegisterSpellName(117952, 4) -- Crackling Jade Lightning
-    RegisterSpellName(191837, 2)  -- Essence Font
-    RegisterSpellName(113656, 4) -- Fists of Fury
+    RegisterSpellName(117952, 4 / 1, false)     -- Crackling Jade Lightning
+    RegisterSpellName(191837, 3 / 1.002, false) -- Essence Font
+    RegisterSpellName(113656, 4 / 1, true)      -- Fists of Fury
+    RegisterSpellName(115175, 20 / 0.5, false)  -- Soothing Mist
+    RegisterSpellName(101546, 1.5 / 0.5, true)  -- Spinning Crane Kick
 
     -- Priest
-    RegisterSpellName(64843, 4) -- Divine Hymn
-    RegisterSpellName(15407, 3) -- Mind Flay
-    RegisterSpellName(48045, 5) -- Mind Sear
-    RegisterSpellName(47540, 2) -- Penance
+    RegisterSpellName(64843, 4 / 2, true)     -- Divine Hymn
+    RegisterSpellName(15407, 3 / 0.75, false) -- Mind Flay
+    RegisterSpellName(47540, 2 / 1, true)     -- Penance
+
+    -- Shaman
+    RegisterSpellName(204437, 6 / 1, false) -- Lightning Lasso
 
     -- Warlock
-    RegisterSpellName(689, 6)  -- Drain Life
-    RegisterSpellName(755, 6)  -- Health Funnel
-    RegisterSpellName(4629, 6) -- Rain of Fire
+    RegisterSpellName(193440, 3 / 0.2, false) -- Demonfire
+    RegisterSpellName(193440, 3 / 1, false)   -- Demonwrath
+    RegisterSpellName(234153, 6 / 1, false)   -- Drain Life
+    RegisterSpellName(198590, 6 / 1, false)   -- Drain Soul
+    RegisterSpellName(755, 6 / 1, false)      -- Health Funnel
 end
 
--- Chanelling Ticks
-function CastBars:ClearTicks()
-    CastBars:debug("ClearTicks")
-    for i = 1, MaxTicks do
-        self.tick[i]:Hide()
-    end
-end
+function CastBars:SetBarTicks(tickInfo)
+    CastBars:debug("SetBarTicks", tickInfo)
+    if not tickInfo then return end
 
-function CastBars:SetBarTicks(numTicks)
-    CastBars:debug("SetBarTicks", numTicks)
-    if not numTicks then return end
+    local numTicks = tickInfo.ticks
+    local haste = _G.UnitSpellHaste("player") / 100 + 1
+    numTicks = _G.floor(numTicks * haste + 0.5)
     for i = 1, numTicks do
-        self.tick[i]:SetPoint("TOPRIGHT", -(_G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
-        self.tick[i]:Show()
+        local xOfs
+        if i == 1 and tickInfo.isInstant then
+            xOfs = 0
+        else
+            xOfs = _G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))
+        end
+        local tick = self.tickPool:Acquire()
+        tick:SetPoint("TOPRIGHT", -xOfs, 0)
+        tick:Show()
     end
 end
 
@@ -182,8 +208,8 @@ local function PostCastStart(self, unit, ...)
     end
     updateSafeZone(self)
 
-    if self.ClearTicks then
-        self:ClearTicks()
+    if self.tickPool then
+        self.tickPool:ReleaseAll()
     end
 end
 --[==[
@@ -239,6 +265,7 @@ local function PostChannelStart(self, unit, spellName)
     updateSafeZone(self)
 
     if self.SetBarTicks then
+        self.tickPool:ReleaseAll()
         self:SetBarTicks(ChannelingTicks[spellName])
     end
 end
@@ -380,15 +407,15 @@ function CastBars:CreateCastBars(unitFrame, unit)
         CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPRIGHT", _G.RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
 
-        Castbar.tick = {}
-        for i = 1, MaxTicks do
-            local tick = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
+        Castbar.tickPool = _G.CreateObjectPool(function(pool)
+            local tick = unitFrame:CreateAngleFrame("Bar", 5, height, Castbar, info)
             tick:SetStatusBarColor(0, 0, 0, 0.5)
-            tick:SetWidth(round(width * 0.08))
+            tick:SetValue(1, true)
+            return tick
+        end, function(pool, tick)
             tick:ClearAllPoints()
-            Castbar.tick[i] = tick
-        end
-        Castbar.ClearTicks = CastBars.ClearTicks
+            tick:Hide()
+        end)
         Castbar.SetBarTicks = CastBars.SetBarTicks
     elseif unit == "target" then
         CastBars:debug("Set positions", unit)
