@@ -11,30 +11,6 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 
 local F2
 
-local function CreateHealthStatus(parent) -- PvP/Classification
-    local texture = F2.healthBox
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetAllPoints(status.bg)
-
-        if i == 1 then
-            status.bg:SetPoint("TOPRIGHT", parent.Health, -8, -1)
-            parent.PvP = status.bg
-            parent.PvP.Override = UnitFrames.PvPOverride
-        else
-            status.bg:SetPoint("TOPRIGHT", parent.Health, -16, -1)
-            parent.Class = status.bg
-            parent.Class.Update = UnitFrames.UpdateClassification
-        end
-    end
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = F2.statusBox
     local status = {}
@@ -78,7 +54,6 @@ end
 
 UnitFrames.focus = {
     create = function(self)
-        CreateHealthStatus(self)
         CreatePowerStatus(self)
         CreateEndBox(self)
 
@@ -89,8 +64,8 @@ UnitFrames.focus = {
 
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "RIGHT")
+            frame.Classification.Update(frame, event)
             frame.Combat.Override(frame, event)
-            frame.Class.Update(frame, event)
             frame.endBox.Update(frame, event)
         end
     end,
@@ -109,5 +84,4 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local focus = oUF:Spawn("focus", "RealUIFocusFrame")
     focus:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
-    focus:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", focus.Class.Update)
 end)

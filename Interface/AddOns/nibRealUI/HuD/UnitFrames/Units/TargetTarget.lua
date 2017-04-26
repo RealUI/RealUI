@@ -21,33 +21,6 @@ local texCoords = {
     },
 }
 
-local function CreateHealthStatus(parent) -- PvP/Classification
-    local texture = F2.healthBox
-    local coords = texCoords[UnitFrames.layoutSize].status
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status.border:SetAllPoints(status.bg)
-
-        if i == 1 then
-            status.bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
-            parent.PvP = status.bg
-            parent.PvP.Override = UnitFrames.PvPOverride
-        else
-            status.bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
-            parent.Class = status.bg
-            parent.Class.Update = UnitFrames.UpdateClassification
-        end
-    end
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = F2.statusBox
     local coords = texCoords[UnitFrames.layoutSize].status
@@ -97,7 +70,6 @@ end
 
 UnitFrames.targettarget = {
     create = function(self)
-        CreateHealthStatus(self)
         CreatePowerStatus(self)
         CreateEndBox(self)
 
@@ -108,7 +80,7 @@ UnitFrames.targettarget = {
 
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "LEFT")
-            frame.Class.Update(frame, event)
+            frame.Classification.Update(frame, event)
             frame.endBox.Update(frame, event)
         end
     end,
@@ -126,5 +98,4 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local targettarget = oUF:Spawn("targettarget", "RealUITargetTargetFrame")
     targettarget:SetPoint("BOTTOMRIGHT", "RealUITargetFrame", db.positions[UnitFrames.layoutSize].targettarget.x, db.positions[UnitFrames.layoutSize].targettarget.y)
-    targettarget:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", targettarget.Class.Update)
 end)

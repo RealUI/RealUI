@@ -55,26 +55,6 @@ local function CreatePredictBar(parent)
     }
 end
 
-local function CreatePvPStatus(parent)
-    local _, height = parent.Health:GetSize()
-    local info = frameInfo.health
-    info.debug = info.debug and "playerPvP"
-
-    height = _G.ceil(height * 0.65)
-    local pvp = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
-    pvp:SetPoint("TOPRIGHT", parent.Health, -8, 0)
-
-    pvp.text = pvp:CreateFontString(nil, "OVERLAY")
-    pvp.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 15, 2)
-    pvp.text:SetFontObject(_G.RealUIFont_Pixel)
-    pvp.text:SetJustifyH("LEFT")
-    pvp.text.frequentUpdates = 1
-    parent:Tag(pvp.text, "[realui:pvptimer]")
-
-    pvp.Override = UnitFrames.PvPOverride
-    parent.PvP = pvp
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
     local status = {}
@@ -152,7 +132,6 @@ end
 UnitFrames.player = {
     create = function(self)
         CreatePredictBar(self)
-        CreatePvPStatus(self)
         CreatePowerStatus(self)
         CreateEndBox(self)
         CreateTotems(self)
@@ -185,6 +164,15 @@ UnitFrames.player = {
 
         self.DruidMana = druidMana
         self.DruidMana.bg = bg
+
+        --[[ PvP Timer ]]--
+        local pvp = self.PvP
+        pvp.text = pvp:CreateFontString(nil, "OVERLAY")
+        pvp.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
+        pvp.text:SetFontObject(_G.RealUIFont_Pixel)
+        pvp.text:SetJustifyH("LEFT")
+        pvp.text.frequentUpdates = 1
+        self:Tag(pvp.text, "[realui:pvptimer]")
 
         --[[ Raid Icon ]]--
         self.RaidIcon = self:CreateTexture(nil, "OVERLAY")

@@ -11,20 +11,6 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 
 local F3
 
-local function CreatePvPStatus(parent)
-    local texture = F3.healthBox
-    parent.PvP = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-    parent.PvP:SetTexture(texture.bar)
-    parent.PvP:SetSize(texture.width, texture.height)
-    parent.PvP:SetPoint("BOTTOMRIGHT", parent, -8, 0)
-
-    local border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetAllPoints(parent.PvP)
-
-    parent.PvP.Override = UnitFrames.PvPOverride
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F2.statusBox
     local status = {}
@@ -68,7 +54,6 @@ end
 
 UnitFrames.pet = {
     create = function(self)
-        CreatePvPStatus(self)
         CreatePowerStatus(self)
         CreateEndBox(self)
 

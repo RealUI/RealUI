@@ -81,34 +81,6 @@ local function CreatePredictBar(parent)
     }
 end
 
-local function CreateHealthStatus(parent) -- PvP/Classification
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.healthBox
-    local coords = positions[UnitFrames.layoutSize].healthBox
-    local status = {}
-    for i = 1, 2 do
-        status[i] = {}
-        status[i].bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-        status[i].bg:SetTexture(texture.bar)
-        status[i].bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].bg:SetSize(texture.width, texture.height)
-
-        status[i].border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status[i].border:SetTexture(texture.border)
-        status[i].border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status[i].border:SetAllPoints(status[i].bg)
-
-        if i == 1 then
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, 8, -1)
-            parent.PvP = status[i].bg
-            parent.PvP.Override = UnitFrames.PvPOverride
-        else
-            status[i].bg:SetPoint("TOPLEFT", parent.Health, 16, -1)
-            parent.Class = status[i].bg
-            parent.Class.Update = UnitFrames.UpdateClassification
-        end
-    end
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
     local coords = positions[UnitFrames.layoutSize].healthBox
@@ -282,7 +254,6 @@ end
 UnitFrames.target = {
     create = function(self)
         CreatePredictBar(self)
-        CreateHealthStatus(self)
         CreateRange(self)
         CreateThreat(self)
         CreateEndBox(self)
@@ -299,7 +270,6 @@ UnitFrames.target = {
 
         function self.PreUpdate(frame, event)
             --frame.Combat.Override(frame, event)
-            frame.Class.Update(frame, event)
             frame.endBox.Update(frame, event)
             frame.Threat.Override(frame, event, frame.unit)
             frame.Range.Override(frame)
@@ -313,6 +283,7 @@ UnitFrames.target = {
         end
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "LEFT")
+            frame.Classification.Update(frame, event)
             frame.Power:PositionSteps("BOTTOM", "LEFT")
             --frame.endBox.Update(frame, event)
         end
@@ -338,5 +309,4 @@ _G.tinsert(UnitFrames.units, function(...)
     local target = oUF:Spawn("target", "RealUITargetFrame")
     target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT", db.positions[UnitFrames.layoutSize].target.x, db.positions[UnitFrames.layoutSize].target.y)
     target:RegisterEvent("UNIT_THREAT_LIST_UPDATE", target.Threat.Override)
-    target:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", target.Class.Update)
 end)

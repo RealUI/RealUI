@@ -384,37 +384,6 @@ function UnitFrames:PredictOverride(event, unit)
     end
 end
 
-function UnitFrames:PvPOverride(event, unit)
-    UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
-    local pvp, color = self.PvP
-    local setColor = pvp.lines and pvp.SetBackgroundColor or pvp.SetVertexColor
-    if _G.UnitIsPVP(unit) then
-        local reaction = _G.UnitReaction(unit, "player")
-        if not reaction then
-            -- Can be nil if the target is out of range
-            reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
-        end
-        color = self.colors.reaction[reaction]
-        setColor(pvp, color[1], color[2], color[3], color[4])
-    else
-        color = RealUI.media.background
-        setColor(pvp, color[1], color[2], color[3], color[4])
-    end
-end
-
-do -- UnitFrames:UpdateClassification
-    local classification = {
-        rareelite = {1, 0.5, 0},
-        elite = {1, 1, 0},
-        rare = {0.75, 0.75, 0.75},
-    }
-    function UnitFrames:UpdateClassification(event)
-        UnitFrames:debug("Classification", self.unit, event, _G.UnitClassification(self.unit))
-        local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
-        self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
-    end
-end
-
 do -- UnitFrames:UpdateStatus
     local status = {
         afk = {1, 1, 0},
@@ -529,6 +498,51 @@ local function CreateHealthBar(parent, unit, info)
     health.PostUpdate = UnitFrames.UpdateSteps
     parent.Health = health
 end
+local CreateHealthStatus do
+    local classification = {
+        rareelite = {1, 0.5, 0},
+        elite = {1, 1, 0},
+        rare = {0.75, 0.75, 0.75},
+    }
+
+    local function UpdatePvP(self, event, unit)
+        local pvp, color = self.PvP
+        if _G.UnitIsPVP(unit) then
+            local reaction = _G.UnitReaction(unit, "player")
+            if not reaction then
+                -- Can be nil if the target is out of range
+                reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
+            end
+            color = self.colors.reaction[reaction]
+            pvp:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        else
+            color = RealUI.media.background
+            pvp:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        end
+    end
+    local function UpdateClassification(self, event)
+        local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
+        self.Classification:SetBackgroundColor(color[1], color[2], color[3], color[4])
+    end
+
+    function CreateHealthStatus(parent, unit, info)
+        local height = _G.ceil(parent.Health:GetHeight() * 0.65)
+        local pvp = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
+        pvp:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
+
+        pvp.Override = UpdatePvP
+        parent.PvP = pvp
+
+        if not (unit == "player" or unit == "pet") then
+            local class = parent:CreateAngleFrame("Frame", height + 4, height, parent.Health, info)
+            class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
+
+            class.Update = UpdateClassification
+            parent.Classification = class
+            parent:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", UpdateClassification)
+        end
+    end
+end
 
 local function CreatePowerBar(parent, unit, info)
     local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
@@ -608,6 +622,7 @@ local function Shared(self, unit)
     local unitDB = db.units[unit]
     self:SetSize(unitDB.size.x, unitDB.size.y)
     CreateHealthBar(self, unit, unitData.health)
+    CreateHealthStatus(self, unit, unitData.health)
     if unitData.power then
         CreatePowerBar(self, unit, unitData.power)
     end

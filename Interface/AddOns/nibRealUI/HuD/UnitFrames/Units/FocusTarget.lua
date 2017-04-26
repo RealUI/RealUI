@@ -11,30 +11,6 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 
 local F3
 
-local function CreateHealthStatus(parent) -- PvP/Classification
-    local texture = F3.healthBox
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Health:CreateTexture(nil, "OVERLAY", nil, 1)
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetAllPoints(status.bg)
-
-        if i == 1 then
-            status.bg:SetPoint("BOTTOMRIGHT", parent.Health, -8, 0)
-            parent.PvP = status.bg
-            parent.PvP.Override = UnitFrames.PvPOverride
-        else
-            status.bg:SetPoint("BOTTOMRIGHT", parent.Health, -16, 0)
-            parent.Class = status.bg
-            parent.Class.Update = UnitFrames.UpdateClassification
-        end
-    end
-end
-
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F2.statusBox
     local status = {}
@@ -78,7 +54,6 @@ end
 
 UnitFrames.focustarget = {
     create = function(self)
-        CreateHealthStatus(self)
         CreatePowerStatus(self)
         CreateEndBox(self)
 
@@ -89,8 +64,8 @@ UnitFrames.focustarget = {
 
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("BOTTOM", "RIGHT")
+            frame.Classification.Update(frame, event)
             frame.Combat.Override(frame, event)
-            frame.Class.Update(frame, event)
             frame.endBox.Update(frame, event)
         end
     end,
@@ -108,5 +83,4 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local focustarget = oUF:Spawn("focustarget", "RealUIFocusTargetFrame")
     focustarget:SetPoint("TOPLEFT", "RealUIFocusFrame", "BOTTOMLEFT", db.positions[UnitFrames.layoutSize].focustarget.x, db.positions[UnitFrames.layoutSize].focustarget.y)
-    focustarget:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", focustarget.Class.Update)
 end)
