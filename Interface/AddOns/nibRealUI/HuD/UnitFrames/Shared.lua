@@ -228,7 +228,7 @@ function UnitFrames:PositionSteps(vert, horiz)
     UnitFrames:debug("PositionSteps")
     local width, height = self:GetSize()
     local point, relPoint = vert..horiz, vert..(horiz == "LEFT" and "RIGHT" or "LEFT")
-    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
@@ -246,7 +246,7 @@ function UnitFrames:UpdateSteps(unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
     local percent = RealUI:GetSafeVals(cur, max)
-    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
     for i = 1, 2 do
         --print(percent, unit, cur, max, self.colorClass)
         if self:GetReversePercent() then
@@ -520,6 +520,7 @@ local function CreateHealthBar(parent, unit, info)
         health.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
     end
 
+    health.barType = "health"
     health.colorClass = db.overlay.classColor
     health.colorHealth = true
     health.frequentUpdates = true
@@ -558,6 +559,7 @@ local function CreatePowerBar(parent, unit, info)
         power.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
     end
 
+    power.barType = "power"
     power.colorPower = true
     power.frequentUpdates = true
 

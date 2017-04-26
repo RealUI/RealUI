@@ -55,6 +55,19 @@ function UnitFrames:RefreshUnits(event)
     end
 end
 
+UnitFrames.steppoints = {
+    default = {0.35, 0.25},
+    health = {
+        HUNTER  = {0.8, 0.2},
+        PALADIN = {0.4, 0.2},
+        WARRIOR = {0.35, 0.2},
+    },
+    power = {
+        MAGE    = {0.7, 0.25},
+        WARLOCK = {0.6, 0.4},
+    },
+}
+
 ----------------------------
 ------ Initialization ------
 ----------------------------
@@ -68,14 +81,6 @@ function UnitFrames:OnInitialize()
                 focuskey = "shift",
                 statusText = "smart",
                 alwaysDisplayFullHealth = true,
-                steppoints = {
-                    ["default"] = {0.35, 0.25},
-                    ["MAGE"]    = {0.9, 0.5},
-                    ["HUNTER"]  = {0.8, 0.2},
-                    ["PALADIN"] = {0.35, 0.2},
-                    ["WARLOCK"] = {0.35, 0.2},
-                    ["WARRIOR"] = {0.35, 0.2},
-                },
                 combatfade = {
                     enabled = true,
                     opacity = {
