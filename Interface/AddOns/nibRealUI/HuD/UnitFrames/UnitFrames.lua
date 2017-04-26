@@ -99,6 +99,22 @@ function UnitFrames:OnInitialize()
                     position = {x = 0, y = 0},
                     healthHeight = 0.6, --percentage of the unit height used by the healthbar
                 },
+                targettarget = {
+                    size = {x = 138, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                focus = {
+                    size = {x = 138, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                focustarget = {
+                    size = {x = 126, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                pet = {
+                    size = {x = 126, y = 10},
+                    position = {x = 0, y = 0},
+                },
             },
             arena = {
                 enabled = true,

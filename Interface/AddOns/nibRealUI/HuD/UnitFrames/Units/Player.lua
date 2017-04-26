@@ -5,7 +5,6 @@ local oUF = _G.oUFembed
 
 -- RealUI --
 local RealUI = private.RealUI
-local round = RealUI.Round
 local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
@@ -41,43 +40,6 @@ local frameInfo = {
     },
 }
 
-local function CreateHealthBar(parent)
-    local width, height = parent:GetWidth(), round((parent:GetHeight() - 3) * db.units.player.healthHeight)
-    local info = frameInfo.health
-    info.debug = info.debug and "playerHealth"
-    local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
-    health:SetPoint("TOPRIGHT", parent, 0, 0)
-    health:SetMinMaxValues(0, 1)
-    health:SetReverseFill(true)
-    health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
-
-    health.text = health:CreateFontString(nil, "OVERLAY")
-    health.text:SetPoint("BOTTOMRIGHT", health, "TOPRIGHT", 2, 2)
-    health.text:SetFontObject(_G.RealUIFont_Pixel)
-    parent:Tag(health.text, "[realui:health]")
-
-    local stepHeight = round(height / 2)
-    health.step = {}
-    health.warn = {}
-    for i = 1, 2 do
-        info.debug = info.debug and "playerHealthStep" .. i
-        health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
-        health.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
-
-        info.debug = info.debug and "playerHealthWarn" .. i
-        health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
-        health.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
-    end
-
-    health.colorClass = db.overlay.classColor
-    health.colorHealth = true
-    health.frequentUpdates = true
-
-    health.PositionSteps = UnitFrames.PositionSteps
-    health.PostUpdate = UnitFrames.UpdateSteps
-    parent.Health = health
-end
-
 local function CreatePredictBar(parent)
     local width, height = parent.Health:GetSize()
     local info = frameInfo.predict
@@ -111,93 +73,6 @@ local function CreatePvPStatus(parent)
 
     pvp.Override = UnitFrames.PvPOverride
     parent.PvP = pvp
-end
-
-local function CreatePowerBar(parent)
-    local width, height = round(parent:GetWidth() * 0.89), round((parent:GetHeight() - 3) * (1 - db.units.player.healthHeight))
-    local info = frameInfo.power
-    info.debug = info.debug and "playerPower"
-    local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
-    local _, powerType = _G.UnitPowerType(parent.unit)
-    power:SetPoint("BOTTOMRIGHT", parent, -5, 0)
-    power:SetMinMaxValues(0, 1)
-    power:SetReverseFill(true)
-    if ndb.settings.reverseUnitFrameBars then
-        power:SetReversePercent(RealUI.ReversePowers[powerType])
-    else
-        power:SetReversePercent(not RealUI.ReversePowers[powerType])
-    end
-
-    power.text = power:CreateFontString(nil, "OVERLAY")
-    power.text:SetPoint("TOPRIGHT", power, "BOTTOMRIGHT", 2, -3)
-    power.text:SetFontObject(_G.RealUIFont_Pixel)
-    parent:Tag(power.text, "[realui:power]")
-
-    local stepHeight = round(height * .6)
-    power.step = {}
-    power.warn = {}
-    for i = 1, 2 do
-        info.debug = info.debug and "playerPowerStep" .. i
-        power.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, power, info)
-        power.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
-
-        info.debug = info.debug and "playerPowerWarn" .. i
-        power.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, power, info)
-        power.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
-    end
-
-    power.colorPower = true
-    power.frequentUpdates = true
-
-    power.PositionSteps = UnitFrames.PositionSteps
-    function power:PostUpdate(unit, cur, max, min)
-        UnitFrames.UpdateSteps(self, unit, cur, max)
-        local _, pType = _G.UnitPowerType(parent.unit)
-        if pType ~= powerType then
-            powerType = pType
-            if ndb.settings.reverseUnitFrameBars then
-                power:SetReversePercent(RealUI.ReversePowers[powerType])
-            else
-                power:SetReversePercent(not RealUI.ReversePowers[powerType])
-            end
-        end
-    end
-    parent.Power = power
-
-    --[[ Druid Mana ]]--
-    local druidMana = _G.CreateFrame("StatusBar", nil, power)
-    druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
-    druidMana:SetStatusBarColor(0, 0, 0, 0.75)
-    druidMana:SetPoint("BOTTOMLEFT", power, "TOPLEFT", 0, 0)
-    druidMana:SetPoint("BOTTOMRIGHT", power, "TOPRIGHT", -height, 0)
-    druidMana:SetHeight(1)
-
-    function druidMana:PostUpdate(unit, min, max)
-        if min == max then
-            if self:IsVisible() then
-                self:Hide()
-            end
-        else
-            if not self:IsVisible() then
-                self:Show()
-            end
-        end
-    end
-
-    ---[[ test
-    druidMana:SetMinMaxValues(0, 1)
-    druidMana:SetValue(0.75)
-    druidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-    --]]
-    --[[ Add a background]]
-    local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
-    bg:SetAllPoints(druidMana)
-    bg:SetColorTexture(.2, .2, 1)
-
-    druidMana.colorPower = true
-
-    parent.DruidMana = druidMana
-    parent.DruidMana.bg = bg
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
@@ -274,40 +149,86 @@ local function CreateTotems(parent)
     end
 end
 
-UnitFrames["player"] = function(self)
-    self:SetSize(frameInfo[UnitFrames.layoutSize].x, frameInfo[UnitFrames.layoutSize].y)
+UnitFrames.player = {
+    create = function(self)
+        CreatePredictBar(self)
+        CreatePvPStatus(self)
+        CreatePowerStatus(self)
+        CreateEndBox(self)
+        CreateTotems(self)
 
-    CreateHealthBar(self)
-    CreatePredictBar(self)
-    CreatePvPStatus(self)
-    CreatePowerBar(self)
-    CreatePowerStatus(self)
-    CreateEndBox(self)
-    CreateTotems(self)
+        --[[ Druid Mana ]]--
+        local druidMana = _G.CreateFrame("StatusBar", nil, self.Power)
+        druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+        druidMana:SetStatusBarColor(0, 0, 0, 0.75)
+        druidMana:SetPoint("BOTTOMLEFT", self.Power, "TOPLEFT", 0, 0)
+        druidMana:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -self.Power:GetHeight(), 0)
+        druidMana:SetHeight(1)
 
-    self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
-    self.RaidIcon:SetSize(20, 20)
-    self.RaidIcon:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
+        local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
+        bg:SetAllPoints(druidMana)
+        bg:SetColorTexture(.2, .2, 1)
 
-    function self.PreUpdate(frame, event)
-        UnitFrames:debug("Player:PreUpdate", event)
-        if event == "ClassColorBars" then
-            frame.Health.colorClass = db.overlay.classColor
-        elseif event == "ReverseBars" then
-            frame.Health:SetReversePercent(not frame.Health:GetReversePercent())
-            frame.Power:SetReversePercent(not frame.Power:GetReversePercent())
-            if frame.DruidMana then
-                frame.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+        function druidMana.PostUpdate(this, unit, min, max)
+            if min == max then
+                if this:IsVisible() then
+                    this:Hide()
+                end
+            else
+                if not this:IsVisible() then
+                    this:Show()
+                end
             end
         end
-    end
 
-    function self.PostUpdate(frame, event)
-        frame.endBox.Update(frame, event)
-        frame.Health:PositionSteps("TOP")
-        frame.Power:PositionSteps("BOTTOM")
-    end
-end
+        druidMana.colorPower = true
+
+        self.DruidMana = druidMana
+        self.DruidMana.bg = bg
+
+        --[[ Raid Icon ]]--
+        self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
+        self.RaidIcon:SetSize(20, 20)
+        self.RaidIcon:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
+
+        --[[ Class Resource ]]--
+        local ClassResource = RealUI:GetModule("ClassResource")
+        if ClassResource:IsEnabled() then
+            ClassResource:Setup(self, self.unit)
+        end
+
+        function self.PreUpdate(frame, event)
+            UnitFrames:debug("Player:PreUpdate", event)
+            if event == "ClassColorBars" then
+                frame.Health.colorClass = db.overlay.classColor
+            elseif event == "ReverseBars" then
+                frame.Health:SetReversePercent(not frame.Health:GetReversePercent())
+                frame.Power:SetReversePercent(not frame.Power:GetReversePercent())
+                if frame.DruidMana then
+                    frame.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+                end
+            end
+        end
+
+        function self.PostUpdate(frame, event)
+            frame.Health:PositionSteps("TOP", "RIGHT")
+            frame.Power:PositionSteps("BOTTOM", "RIGHT")
+            frame.endBox.Update(frame, event)
+        end
+    end,
+    health = {
+        leftAngle = [[/]],
+        rightAngle = [[/]],
+        point = "RIGHT",
+        text = true,
+    },
+    power = {
+        leftAngle = [[\]],
+        rightAngle = [[\]],
+        point = "RIGHT",
+    },
+    hasCastBars = true,
+}
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)

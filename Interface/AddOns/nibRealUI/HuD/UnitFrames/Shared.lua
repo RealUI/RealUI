@@ -212,6 +212,7 @@ UnitFrames.textures = {
     },
 }
 
+-- Power types where the default state is empty
 RealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
@@ -223,15 +224,15 @@ RealUI.ReversePowers = {
     ["PAIN"] = true,
 }
 
-function UnitFrames:PositionSteps(vert)
+function UnitFrames:PositionSteps(vert, horiz)
     UnitFrames:debug("PositionSteps")
     local width, height = self:GetSize()
-    local point, relPoint = vert.."RIGHT", vert.."LEFT"
+    local point, relPoint = vert..horiz, vert..(horiz == "LEFT" and "RIGHT" or "LEFT")
     local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
-            xOfs = xOfs + height
+            xOfs = (xOfs + height) * (horiz == "RIGHT" and 1 or -1)
             self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
             self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
         else
@@ -267,92 +268,6 @@ function UnitFrames:UpdateSteps(unit, cur, max)
                 self.warn[i]:SetAlpha(0)
             end
         end
-    end
-end
-
-local function updateSteps(unit, type, percent, frame)
-    local stepPoints, texture = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"], nil
-    local isLargeFrame = false
-    if _G.UnitInVehicle("player") then
-        if unit == "player" and type == "power" then
-            return
-        end
-        if unit == "vehicle" or unit == "target" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
-            isLargeFrame = true
-        elseif unit == "focus" or unit == "targettarget" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
-        elseif unit == "focustarget" or unit == "pet" or unit == "player" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
-        end
-    else
-        if unit == "player" or unit == "target" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
-            isLargeFrame = true
-        elseif unit == "focus" or unit == "targettarget" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
-        elseif unit == "focustarget" or unit == "pet" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
-        end
-    end
-    for i = 1, 2 do
-        if frame.step then
-            --print(percent, unit, type, frame:GetParent().unit)
-            if frame.bar.reverse then
-                --print("step reverse")
-                if percent > stepPoints[i] and isLargeFrame then
-                    frame.step[i]:SetAlpha(type == "power" and 0 or 1)
-                    frame.warn[i]:SetAlpha(type == "power" and 1 or 0)
-                else
-                    frame.step[i]:SetAlpha(type == "power" and 1 or 0)
-                    frame.warn[i]:SetAlpha(type == "power" and 0 or 1)
-                end
-            else
-                --print("step normal")
-                if percent < stepPoints[i] and isLargeFrame then
-                    frame.step[i]:SetAlpha(0)
-                    frame.warn[i]:SetAlpha(1)
-                else
-                    frame.step[i]:SetAlpha(1)
-                    frame.warn[i]:SetAlpha(0)
-                end
-            end
-        else
-            --print(percent, unit, type, frame:GetParent().unit)
-            if frame.bar.reverse then
-                --print("step reverse")
-                if percent > stepPoints[i] and isLargeFrame then
-                    frame.steps[i]:SetTexture(type == "power" and texture.warn or texture.step)
-                else
-                    frame.steps[i]:SetTexture(type == "power" and texture.step or texture.warn)
-                end
-            else
-                --print("step normal")
-                if percent < stepPoints[i] and isLargeFrame then
-                    frame.steps[i]:SetTexture(texture.warn)
-                else
-                    frame.steps[i]:SetTexture(texture.step)
-                end
-            end
-        end
-    end
-end
-
-function UnitFrames:HealthOverride(event, unit)
-    UnitFrames:debug("Health Override", self, event, unit)
-    local health = self.Health
-    if event == "ClassColorBars" then
-        UnitFrames:SetHealthColor(self)
-    elseif event == "ReverseBars" then
-        AngleStatusBar:SetReverseFill(health.bar, ndb.settings.reverseUnitFrameBars)
-    end
-    local healthPer, healthCurr, healthMax = RealUI:GetSafeVals(_G.UnitHealth(unit), _G.UnitHealthMax(unit))
-    updateSteps(unit, "health", healthPer, health)
-    if health.SetValue then
-        health:SetMinMaxValues(0, healthMax)
-        health:SetValue(healthCurr)
-    else
-        AngleStatusBar:SetValue(health.bar, healthPer)
     end
 end
 
@@ -469,31 +384,6 @@ function UnitFrames:PredictOverride(event, unit)
     end
 end
 
-
-function UnitFrames:PowerOverride(event, unit)
-    UnitFrames:debug("Power Override", self, event, unit)
-    --if not self.Power.enabled then return end
-
-    local powerType, powerToken = _G.UnitPowerType(self.unit)
-    UnitFrames:debug("Target powerType", powerType, powerToken)
-    AngleStatusBar:SetBarColor(self.Power.bar, self.colors.power[powerToken] or self.colors.power[powerType])
-
-    if ndb.settings.reverseUnitFrameBars then
-        AngleStatusBar:SetReverseFill(self.Power.bar, not RealUI.ReversePowers[powerToken])
-    else
-        AngleStatusBar:SetReverseFill(self.Power.bar, RealUI.ReversePowers[powerToken])
-    end
-
-    local powerPer, powerCurr, powerMax = RealUI:GetSafeVals(_G.UnitPower(unit), _G.UnitPowerMax(unit))
-    updateSteps(unit, "power", powerPer, self.Power)
-    if self.Power.SetValue then
-        self.Power:SetMinMaxValues(0, powerMax)
-        self.Power:SetValue(powerCurr)
-    else
-        AngleStatusBar:SetValue(self.Power.bar, powerPer)
-    end
-end
-
 function UnitFrames:PvPOverride(event, unit)
     UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
     local pvp, color = self.PvP
@@ -512,7 +402,7 @@ function UnitFrames:PvPOverride(event, unit)
     end
 end
 
-do
+do -- UnitFrames:UpdateClassification
     local classification = {
         rareelite = {1, 0.5, 0},
         elite = {1, 1, 0},
@@ -525,7 +415,7 @@ do
     end
 end
 
-do
+do -- UnitFrames:UpdateStatus
     local status = {
         afk = {1, 1, 0},
         offline = oUF.colors.disconnected,
@@ -601,17 +491,90 @@ function UnitFrames:UpdateEndBox(...)
     self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
 end
 
-function UnitFrames:SetHealthColor(unitFrame)
-    local healthColor
-    if db.overlay.classColor and (unitFrame.unit ~= "player") and _G.UnitIsPlayer(unitFrame.unit) then
-        local _, class = _G.UnitClass(unitFrame.unit)
-        healthColor = RealUI:GetClassColor(class)
-        healthColor = RealUI:ColorDarken(0.15, healthColor)
-        healthColor = RealUI:ColorDesaturate(0.2, healthColor)
-    else
-        healthColor = unitFrame.colors.health
+local function CreateHealthBar(parent, unit, info)
+    local width, height = parent:GetWidth(), parent:GetHeight()
+    if db.units[unit].healthHeight then
+        height = round((height - 3) * db.units[unit].healthHeight)
     end
-    AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
+    local health = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
+    health:SetPoint("TOP"..info.point, parent, 0, 0)
+    health:SetMinMaxValues(0, 1)
+    health:SetReverseFill(info.point == "RIGHT")
+    health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+
+    if info.text then
+        health.text = health:CreateFontString(nil, "OVERLAY")
+        health.text:SetPoint("BOTTOM"..info.point, health, "TOP"..info.point, 2, 2)
+        health.text:SetFontObject(_G.RealUIFont_Pixel)
+        parent:Tag(health.text, "[realui:health]")
+    end
+
+    local stepHeight = round(height / 2)
+    health.step = {}
+    health.warn = {}
+    for i = 1, 2 do
+        health.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, health, info)
+        health.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+
+        health.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, health, info)
+        health.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+    end
+
+    health.colorClass = db.overlay.classColor
+    health.colorHealth = true
+    health.frequentUpdates = true
+
+    health.PositionSteps = UnitFrames.PositionSteps
+    health.PostUpdate = UnitFrames.UpdateSteps
+    parent.Health = health
+end
+
+local function CreatePowerBar(parent, unit, info)
+    local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
+    local power = parent:CreateAngleFrame("Status", width, height, parent.overlay, info)
+    local _, powerType = _G.UnitPowerType(parent.unit)
+    power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
+    power:SetMinMaxValues(0, 1)
+    power:SetReverseFill(info.point == "RIGHT")
+    if ndb.settings.reverseUnitFrameBars then
+        power:SetReversePercent(RealUI.ReversePowers[powerType])
+    else
+        power:SetReversePercent(not RealUI.ReversePowers[powerType])
+    end
+
+    power.text = power:CreateFontString(nil, "OVERLAY")
+    power.text:SetPoint("TOP"..info.point, power, "BOTTOM"..info.point, 2, -3)
+    power.text:SetFontObject(_G.RealUIFont_Pixel)
+    parent:Tag(power.text, "[realui:power]")
+
+    local stepHeight = round(height * .6)
+    power.step = {}
+    power.warn = {}
+    for i = 1, 2 do
+        power.step[i] = parent:CreateAngleFrame("Frame", stepHeight + 2, stepHeight, power, info)
+        power.step[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+
+        power.warn[i] = parent:CreateAngleFrame("Frame", height + 2, height, power, info)
+        power.warn[i]:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+    end
+
+    power.colorPower = true
+    power.frequentUpdates = true
+
+    power.PositionSteps = UnitFrames.PositionSteps
+    function power:PostUpdate(unitToken, cur, max, min)
+        UnitFrames.UpdateSteps(self, unitToken, cur, max)
+        local _, pType = _G.UnitPowerType(parent.unit)
+        if pType ~= powerType then
+            powerType = pType
+            if ndb.settings.reverseUnitFrameBars then
+                power:SetReversePercent(RealUI.ReversePowers[powerType])
+            else
+                power:SetReversePercent(not RealUI.ReversePowers[powerType])
+            end
+        end
+    end
+    parent.Power = power
 end
 
 -- Init
@@ -639,32 +602,18 @@ local function Shared(self, unit)
     self.overlay:SetFrameStrata("BACKGROUND")
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
-    -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
-    --[[ Idea:
-        local info = info[unit]
-        CreateHealthBar(self, info.health)
-        CreatePvPStatus(self, info.health)
-        if info.predict then
-            CreatePredictBar(self, info.health)
-        end
-        if info.power then
-            CreatePowerBar(self, info.power)
-        end
-        CreatePowerStatus(self, info.power or info.health)
-        CreateEndBox(self, info.health)
-    ]]
-
-    -- This would be all unit specific stuff, eg. Totems, stats, threat
-    UnitFrames[unit](self)
-
-    if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
-        RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    local unitData = UnitFrames[unit]
+    local unitDB = db.units[unit]
+    self:SetSize(unitDB.size.x, unitDB.size.y)
+    CreateHealthBar(self, unit, unitData.health)
+    if unitData.power then
+        CreatePowerBar(self, unit, unitData.power)
     end
-    if unit == "player" then
-        local ClassResource = RealUI:GetModule("ClassResource")
-        if ClassResource:IsEnabled() then
-            ClassResource:Setup(self, unit)
-        end
+
+    unitData.create(self)
+
+    if unitData.hasCastBars and RealUI:GetModuleEnabled("CastBars") then
+        RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
     end
 end
 

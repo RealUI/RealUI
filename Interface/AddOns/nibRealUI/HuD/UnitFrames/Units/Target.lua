@@ -6,7 +6,7 @@ local RC = _G.LibStub("LibRangeCheck-2.0")
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
+local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
@@ -68,53 +68,6 @@ local positions = {
     },
 }
 
-local function CreateHealthBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local pos = positions[UnitFrames.layoutSize].health
-    parent.Health = _G.CreateFrame("Frame", nil, parent.overlay)
-    parent.Health:SetPoint("TOPLEFT", parent, 0, 0)
-    parent.Health:SetSize(texture.width, texture.height)
-
-    parent.Health.bar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
-    if ndb.settings.reverseUnitFrameBars then
-        AngleStatusBar:SetReverseFill(parent.Health.bar, true)
-    end
-    UnitFrames:SetHealthColor(parent)
-
-    parent.Health.bg = parent.Health:CreateTexture(nil, "BACKGROUND")
-    parent.Health.bg:SetTexture(texture.bar)
-    parent.Health.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Health.bg:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
-    parent.Health.bg:SetAllPoints(parent.Health)
-
-    parent.Health.border = parent.Health:CreateTexture(nil, "BORDER")
-    parent.Health.border:SetTexture(texture.border)
-    parent.Health.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Health.border:SetAllPoints(parent.Health)
-
-    parent.Health.text = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Health.text:SetPoint("BOTTOMLEFT", parent.Health, "TOPLEFT", 0, 2)
-    parent.Health.text:SetFontObject(_G.RealUIFont_Pixel)
-    parent.Health.text:SetJustifyH("LEFT")
-    parent:Tag(parent.Health.text, "[realui:health]")
-
-    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
-    parent.Health.steps = {}
-    for i = 1, 2 do
-        parent.Health.steps[i] = parent.Health:CreateTexture(nil, "OVERLAY")
-        parent.Health.steps[i]:SetTexCoord(1, 0, 0, 1)
-        parent.Health.steps[i]:SetSize(16, 16)
-        if not parent.Health.bar.reverse then
-        parent.Health.steps[i]:SetPoint("TOPRIGHT", parent.Health, -(_G.floor(stepPoints[i] * texture.width) - 6), 0)
-        else
-            parent.Health.steps[i]:SetPoint("TOPLEFT", parent.Health, _G.floor(stepPoints[i] * texture.width) - 6, 0)
-        end
-    end
-
-    parent.Health.frequentUpdates = true
-    parent.Health.Override = UnitFrames.HealthOverride
-end
-
 local function CreatePredictBar(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
     local pos = positions[UnitFrames.layoutSize].health
@@ -154,46 +107,6 @@ local function CreateHealthStatus(parent) -- PvP/Classification
             parent.Class.Update = UnitFrames.UpdateClassification
         end
     end
-end
-
-local function CreatePowerBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
-    local pos = positions[UnitFrames.layoutSize].power
-    parent.Power = _G.CreateFrame("Frame", nil, parent.overlay)
-    parent.Power:SetPoint("BOTTOMLEFT", parent, 5, 0)
-    parent.Power:SetSize(texture.width, texture.height)
-
-    parent.Power.bar = AngleStatusBar:NewBar(parent.Power, pos.x, -1, texture.width - pos.widthOfs, texture.height - 2, "LEFT", "LEFT", "RIGHT", true)
-
-    ---[[
-    parent.Power.bg = parent.Power:CreateTexture(nil, "BACKGROUND")
-    parent.Power.bg:SetTexture(texture.bar)
-    parent.Power.bg:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Power.bg:SetVertexColor(RealUI.media.background[1], RealUI.media.background[2], RealUI.media.background[3], RealUI.media.background[4])
-    parent.Power.bg:SetAllPoints(parent.Power)
-    ---]]
-
-    parent.Power.border = parent.Power:CreateTexture(nil, "BORDER")
-    parent.Power.border:SetTexture(texture.border)
-    parent.Power.border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.Power.border:SetAllPoints(parent.Power)
-
-    parent.Power.text = parent.Power:CreateFontString(nil, "OVERLAY")
-    parent.Power.text:SetPoint("TOPLEFT", parent.Power, "BOTTOMLEFT", 0, -3)
-    parent.Power.text:SetFontObject(_G.RealUIFont_Pixel)
-    parent:Tag(parent.Power.text, "[realui:power]")
-
-    parent.Power.steps = {}
-    for i = 1, 2 do
-        parent.Power.steps[i] = parent.Power:CreateTexture(nil, "OVERLAY")
-        parent.Power.steps[i]:SetTexture(texture.warn)
-        parent.Power.steps[i]:SetTexCoord(1, 0, 0, 1)
-        parent.Power.steps[i]:SetSize(16, 16)
-        --power.steps[i]:SetPoint("BOTTOMRIGHT", power, -(floor(stepPoints[i] * texture.width) - 6), 0)
-    end
-
-    parent.Power.frequentUpdates = true
-    parent.Power.Override = UnitFrames.PowerOverride
 end
 
 local function CreatePowerStatus(parent) -- Combat, AFK, etc.
@@ -366,98 +279,61 @@ local function CreateEndBox(parent)
     parent.endBox.Update = UnitFrames.UpdateEndBox
 end
 
-UnitFrames["target"] = function(self)
-    CreateHealthBar(self)
-    CreatePredictBar(self)
-    CreateHealthStatus(self)
-    CreatePowerBar(self)
-    CreateRange(self)
-    CreateThreat(self)
-    CreateEndBox(self)
-    CreatePowerStatus(self)
+UnitFrames.target = {
+    create = function(self)
+        CreatePredictBar(self)
+        CreateHealthStatus(self)
+        CreateRange(self)
+        CreateThreat(self)
+        CreateEndBox(self)
+        CreatePowerStatus(self)
 
-    self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
-    self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
-    self.Name:SetFontObject(_G.RealUIFont_Pixel)
-    self:Tag(self.Name, "[realui:level] [realui:name]")
+        self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
+        self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
+        self.Name:SetFontObject(_G.RealUIFont_Pixel)
+        self:Tag(self.Name, "[realui:level] [realui:name]")
 
-    self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
-    self.RaidIcon:SetSize(20, 20)
-    self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
+        self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
+        self.RaidIcon:SetSize(20, 20)
+        self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
 
-    self:SetSize(self.Health:GetWidth(), self.Health:GetHeight() + self.Power:GetHeight() + 3)
+        function self.PreUpdate(frame, event)
+            --frame.Combat.Override(frame, event)
+            frame.Class.Update(frame, event)
+            frame.endBox.Update(frame, event)
+            frame.Threat.Override(frame, event, frame.unit)
+            frame.Range.Override(frame)
 
-    function self.PreUpdate(frame, event)
-        --frame.Combat.Override(frame, event)
-        frame.Class.Update(frame, event)
-        frame.endBox.Update(frame, event)
-        frame.Threat.Override(frame, event, frame.unit)
-        frame.Range.Override(frame)
-        UnitFrames:SetHealthColor(frame)
-
-        if _G.UnitPowerMax(frame.unit) > 0 then
-            --print("Has power")
-            if not frame.Power.enabled then
-                --print("Enable power")
-                frame.Power.enabled = true
-                --frame.Power.bar:Show()
-                frame.Power.text:Show()
-                for i = 1, 2 do
-                    frame.Power.steps[i]:Show()
-                end
-            end
-        else
-            --print("Disable power")
-            frame.Power.enabled = false
-            --frame.Power.bar:Hide()
-            frame.Power.text:Hide()
-            for i = 1, 2 do
-                frame.Power.steps[i]:Hide()
-            end
-            --return
-        end
-        local powerType, powerToken = _G.UnitPowerType(frame.unit)
-        UnitFrames:debug("Target powerType", powerType, powerToken)
-
-        AngleStatusBar:SetBarColor(frame.Power.bar, frame.colors.power[powerToken] or frame.colors.power[powerType])
-
-        -- Reverse power
-        local oldReverse, newReverse = frame.Power.bar.reverse
-        if ndb.settings.reverseUnitFrameBars then
-            newReverse = not RealUI.ReversePowers[powerToken]
-        else
-            newReverse = RealUI.ReversePowers[powerToken]
-        end
-        UnitFrames:debug("Target reverse bars", ndb.settings.reverseUnitFrameBars, oldReverse, newReverse)
-        AngleStatusBar:SetReverseFill(frame.Power.bar, newReverse)
-
-        -- If reverse is different from old target to new target then do an instant SetValue on power bar
-        -- (stops power bar appearing unneccesarily when changing from, for example, a DK at no power (no bar shown) to a Mage at full power (no bar shown))
-        if oldReverse ~= newReverse then
-            local powerPer = RealUI:GetSafeVals(_G.UnitPower(frame.unit), _G.UnitPowerMax(frame.unit))
-            AngleStatusBar:SetValue(frame.Power.bar, powerPer, true)
-        end
-
-        local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.power
-        local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
-        if frame.Power.bar.reverse then
-            for i = 1, 2 do
-                frame.Power.steps[i]:ClearAllPoints()
-                frame.Power.steps[i]:SetPoint("BOTTOMLEFT", frame.Power, _G.floor(stepPoints[i] * texture.width) - 6, 0)
-            end
-        else
-            for i = 1, 2 do
-                frame.Power.steps[i]:ClearAllPoints()
-                frame.Power.steps[i]:SetPoint("BOTTOMRIGHT", frame.Power, -(_G.floor(stepPoints[i] * texture.width) - 6), 0)
+            if event == "ClassColorBars" then
+                frame.Health.colorClass = db.overlay.classColor
+            elseif event == "ReverseBars" then
+                frame.Health:SetReversePercent(not frame.Health:GetReversePercent())
+                frame.Power:SetReversePercent(not frame.Power:GetReversePercent())
             end
         end
-    end
-end
+        function self.PostUpdate(frame, event)
+            frame.Health:PositionSteps("TOP", "LEFT")
+            frame.Power:PositionSteps("BOTTOM", "LEFT")
+            --frame.endBox.Update(frame, event)
+        end
+    end,
+    health = {
+        leftAngle = [[\]],
+        rightAngle = [[\]],
+        point = "LEFT",
+        text = true,
+    },
+    power = {
+        leftAngle = [[/]],
+        rightAngle = [[/]],
+        point = "LEFT",
+    },
+    hasCastBars = true,
+}
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
-    ndb = RealUI.db.profile
 
     local target = oUF:Spawn("target", "RealUITargetFrame")
     target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT", db.positions[UnitFrames.layoutSize].target.x, db.positions[UnitFrames.layoutSize].target.y)
