@@ -583,6 +583,7 @@ local function CreatePowerBar(parent, unit, info)
         local _, pType = _G.UnitPowerType(parent.unit)
         if pType ~= powerType then
             powerType = pType
+            power:SetValue(cur, true)
             if ndb.settings.reverseUnitFrameBars then
                 power:SetReversePercent(RealUI.ReversePowers[powerType])
             else
