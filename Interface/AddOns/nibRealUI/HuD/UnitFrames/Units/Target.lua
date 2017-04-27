@@ -189,28 +189,10 @@ local function CreateThreat(parent)
     end
 end
 
-local function CreateEndBox(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
-    local pos = positions[UnitFrames.layoutSize].endBox
-    parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
-    parent.endBox:SetTexture(texture.bar)
-    parent.endBox:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    parent.endBox:SetSize(texture.width, texture.height)
-    parent.endBox:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", pos.x, pos.y)
-
-    local border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetTexCoord(pos.coords[1], pos.coords[2], pos.coords[3], pos.coords[4])
-    border:SetAllPoints(parent.endBox)
-
-    parent.endBox.Update = UnitFrames.UpdateEndBox
-end
-
 UnitFrames.target = {
     create = function(self)
         CreateRange(self)
         CreateThreat(self)
-        CreateEndBox(self)
 
         self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
         self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
@@ -223,7 +205,6 @@ UnitFrames.target = {
 
         function self.PreUpdate(frame, event)
             --frame.Combat.Override(frame, event)
-            frame.endBox.Update(frame, event)
             frame.Threat.Override(frame, event, frame.unit)
             frame.Range.Override(frame)
         end
@@ -231,7 +212,7 @@ UnitFrames.target = {
             frame.Health:PositionSteps("TOP", "LEFT")
             frame.Classification.Update(frame, event)
             frame.Power:PositionSteps("BOTTOM", "LEFT")
-            --frame.endBox.Update(frame, event)
+            frame.EndBox.Update(frame, event)
         end
     end,
     health = {

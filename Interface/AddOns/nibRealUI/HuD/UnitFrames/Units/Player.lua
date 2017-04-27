@@ -9,52 +9,6 @@ local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
-local frameInfo = {
-    health = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
-    },
-    predict = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
-    },
-    power = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
-    },
-    [1] = {
-        x = 222,
-        y = 24,
-        endBox = {
-            x = -10,
-            y = -4,
-        },
-    },
-    [2] = {
-        x = 259,
-        y = 28,
-        endBox = {
-            x = -11,
-            y = -2,
-        },
-    },
-}
-
-local function CreateEndBox(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
-    local pos = frameInfo[UnitFrames.layoutSize].endBox
-    parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
-    parent.endBox:SetTexture(texture.bar)
-    parent.endBox:SetSize(texture.width, texture.height)
-    parent.endBox:SetPoint("BOTTOMLEFT", parent, "BOTTOMRIGHT", pos.x, pos.y)
-
-    local border = parent.overlay:CreateTexture(nil, "OVERLAY", nil, 3)
-    border:SetTexture(texture.border)
-    border:SetAllPoints(parent.endBox)
-
-    parent.endBox.Update = UnitFrames.UpdateEndBox
-end
-
 local function CreateTotems(parent)
     -- DestroyTotem is protected, so we hack the default
     local totemBar = _G["TotemFrame"]
@@ -89,7 +43,6 @@ end
 
 UnitFrames.player = {
     create = function(self)
-        CreateEndBox(self)
         CreateTotems(self)
 
         --[[ Druid Mana ]]--
@@ -144,7 +97,7 @@ UnitFrames.player = {
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "RIGHT")
             frame.Power:PositionSteps("BOTTOM", "RIGHT")
-            frame.endBox.Update(frame, event)
+            frame.EndBox.Update(frame, event)
         end
     end,
     health = {

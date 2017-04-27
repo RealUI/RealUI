@@ -268,23 +268,6 @@ function UnitFrames:UpdateSteps(unit, cur, max)
     end
 end
 
-function UnitFrames:UpdateEndBox(...)
-    UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
-    local unit, color = self.unit
-    local _, class = _G.UnitClass(unit)
-    if _G.UnitIsPlayer(unit) then
-        color = RealUI:GetClassColor(class)
-    else
-        if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
-            color = self.colors.tapped
-        else
-            color = self.colors.reaction[_G.UnitReaction(unit, "player")]
-        end
-    end
-    self.endBox:Show()
-    self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
-end
-
 local function CreateHealthBar(parent, unit, info)
     local width, height = parent:GetWidth(), parent:GetHeight()
     if db.units[unit].healthHeight then
@@ -618,6 +601,60 @@ local CreatePowerStatus do
     end
 end
 
+local CreateEndBox do
+    local function UpdateEndBox(self, ...)
+        local unit, color = self.unit
+        local _, class = _G.UnitClass(unit)
+        if _G.UnitIsPlayer(unit) then
+            color = self.colors.class[class] --RealUI:GetClassColor(class)
+        else
+            if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
+                color = self.colors.tapped
+            else
+                color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+            end
+        end
+        for i = 1, #self.EndBox do
+            self.EndBox[i]:SetBackgroundColor(color[1], color[2], color[3], 1)
+        end
+    end
+    function CreateEndBox(parent, unit, data)
+        local height = parent.Health:GetHeight()
+        local boxHeight = height + (data.isBig and 2 or 0)
+        local boxWidth = boxHeight + (data.isBig and 6 or 4)
+        local point, relPoint, x
+        if data.health.point == "RIGHT" then
+            point, relPoint, x = "TOPLEFT", "TOPRIGHT", -(height - 2)
+        else
+            point, relPoint, x = "TOPRIGHT", "TOPLEFT", (height - 2)
+        end
+        parent.EndBox = {
+            Update = UpdateEndBox
+        }
+
+        local healthBox = parent:CreateAngleFrame("Frame", boxWidth, boxHeight, parent.Health, data.health)
+        healthBox:SetPoint(point, parent.Health, relPoint, x, 0)
+        parent.EndBox[1] = healthBox
+
+        if data.isBig then
+            height = parent.Power:GetHeight()
+            boxHeight = height + 2
+            boxWidth = boxHeight + (data.isBig and 6 or 4)
+            if data.health.point == "RIGHT" then
+                point, relPoint, x = "BOTTOMLEFT", "BOTTOMRIGHT", -(height - 2)
+            else
+                point, relPoint, x = "BOTTOMRIGHT", "BOTTOMLEFT", (height - 2)
+            end
+            local powerBox = parent:CreateAngleFrame("Frame", boxWidth, boxHeight, parent.Power, data.power)
+            powerBox:SetPoint(point, parent.Power, relPoint, x, 0)
+            parent.EndBox[2] = powerBox
+
+            -- hide the line between the two boxes
+            healthBox.bottom:Hide()
+            powerBox.top:Hide()
+        end
+    end
+end
 
 -- Init
 local function Shared(self, unit)
@@ -654,6 +691,7 @@ local function Shared(self, unit)
         CreatePowerBar(self, unit, unitData.power)
     end
     CreatePowerStatus(self, unit, unitData)
+    CreateEndBox(self, unit, unitData)
 
     unitData.create(self)
 
