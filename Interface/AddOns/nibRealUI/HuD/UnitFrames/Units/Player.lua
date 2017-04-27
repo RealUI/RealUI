@@ -5,7 +5,7 @@ local oUF = _G.oUFembed
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
+local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
@@ -141,19 +141,6 @@ UnitFrames.player = {
             ClassResource:Setup(self, self.unit)
         end
 
-        function self.PreUpdate(frame, event)
-            UnitFrames:debug("Player:PreUpdate", event)
-            if event == "ClassColorBars" then
-                frame.Health.colorClass = db.overlay.classColor
-            elseif event == "ReverseBars" then
-                frame.Health:SetReversePercent(not frame.Health:GetReversePercent())
-                frame.Power:SetReversePercent(not frame.Power:GetReversePercent())
-                if frame.DruidMana then
-                    frame.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-                end
-            end
-        end
-
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "RIGHT")
             frame.Power:PositionSteps("BOTTOM", "RIGHT")
@@ -178,7 +165,6 @@ UnitFrames.player = {
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
-    ndb = RealUI.db.profile
 
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)

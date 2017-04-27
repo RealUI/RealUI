@@ -51,6 +51,17 @@ local units = {
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
         local unit = _G["RealUI" .. units[i] .. "Frame"]
+        if event == "ClassColorBars" then
+            unit.Health.colorClass = db.overlay.classColor
+        elseif event == "ReverseBars" then
+            unit.Health:SetReversePercent(not unit.Health:GetReversePercent())
+            if unit.Power then
+                unit.Power:UpdateReverse()
+            end
+            if unit.DruidMana then
+                unit.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+            end
+        end
         unit:UpdateAllElements(event)
     end
 end

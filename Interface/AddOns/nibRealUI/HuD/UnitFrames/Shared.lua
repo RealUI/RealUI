@@ -520,17 +520,20 @@ local function CreatePowerBar(parent, unit, info)
     power.frequentUpdates = true
 
     power.PositionSteps = UnitFrames.PositionSteps
-    function power:PostUpdate(unitToken, cur, max, min)
-        UnitFrames.UpdateSteps(self, unitToken, cur, max)
-        local _, pType = _G.UnitPowerType(parent.unit)
-        if pType ~= powerType then
-            powerType = pType
-            power:SetValue(cur, true)
+    function power:UpdateReverse()
             if ndb.settings.reverseUnitFrameBars then
                 power:SetReversePercent(RealUI.ReversePowers[powerType])
             else
                 power:SetReversePercent(not RealUI.ReversePowers[powerType])
             end
+        end
+    function power:PostUpdate(unitToken, cur, max, min)
+        UpdateSteps(self, unitToken, cur, max)
+        local _, pType = _G.UnitPowerType(parent.unit)
+        if pType ~= powerType then
+            powerType = pType
+            power:SetValue(cur, true)
+            power:UpdateReverse()
         end
     end
     parent.Power = power

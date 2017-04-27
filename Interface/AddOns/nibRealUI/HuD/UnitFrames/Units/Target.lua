@@ -226,13 +226,6 @@ UnitFrames.target = {
             frame.endBox.Update(frame, event)
             frame.Threat.Override(frame, event, frame.unit)
             frame.Range.Override(frame)
-
-            if event == "ClassColorBars" then
-                frame.Health.colorClass = db.overlay.classColor
-            elseif event == "ReverseBars" then
-                frame.Health:SetReversePercent(not frame.Health:GetReversePercent())
-                frame.Power:SetReversePercent(not frame.Power:GetReversePercent())
-            end
         end
         function self.PostUpdate(frame, event)
             frame.Health:PositionSteps("TOP", "LEFT")
