@@ -40,21 +40,6 @@ local frameInfo = {
     },
 }
 
-local function CreatePredictBar(parent)
-    local width, height = parent.Health:GetSize()
-    local info = frameInfo.predict
-    info.debug = info.debug and "playerPredict"
-    local absorbBar = parent:CreateAngleFrame("Bar", width, height, parent.Health, info)
-    absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-
-    parent.HealPrediction = {
-        frequentUpdates = true,
-        maxOverflow = 1,
-        absorbBar = absorbBar,
-        Override = UnitFrames.PredictOverride,
-    }
-end
-
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = frameInfo[UnitFrames.layoutSize].endBox
@@ -104,7 +89,6 @@ end
 
 UnitFrames.player = {
     create = function(self)
-        CreatePredictBar(self)
         CreateEndBox(self)
         CreateTotems(self)
 
@@ -187,6 +171,7 @@ UnitFrames.player = {
         rightAngle = [[\]],
         point = "RIGHT",
     },
+    isBig = true,
     hasCastBars = true,
 }
 

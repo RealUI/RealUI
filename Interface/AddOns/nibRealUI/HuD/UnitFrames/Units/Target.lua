@@ -9,8 +9,6 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
-local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
-
 local positions = {
     [1] = {
         health = {
@@ -67,19 +65,6 @@ local positions = {
         }
     },
 }
-
-local function CreatePredictBar(parent)
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.health
-    local pos = positions[UnitFrames.layoutSize].health
-    local absorbBar = AngleStatusBar:NewBar(parent.Health, pos.x, -1, texture.width - pos.widthOfs - 2, texture.height - 2, "RIGHT", "RIGHT", "RIGHT", true)
-    AngleStatusBar:SetBarColor(absorbBar, 1, 1, 1, db.overlay.bar.opacity.absorb)
-
-    parent.HealPrediction = {
-        absorbBar = absorbBar,
-        frequentUpdates = true,
-        Override = UnitFrames.PredictOverride,
-    }
-end
 
 local function CreateRange(parent)
     local RangeColors = {
@@ -223,7 +208,6 @@ end
 
 UnitFrames.target = {
     create = function(self)
-        CreatePredictBar(self)
         CreateRange(self)
         CreateThreat(self)
         CreateEndBox(self)
@@ -268,6 +252,7 @@ UnitFrames.target = {
         rightAngle = [[/]],
         point = "LEFT",
     },
+    isBig = true,
     hasCastBars = true,
 }
 
