@@ -11,33 +11,6 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 
 local F2
 
-local function CreatePowerStatus(parent) -- Combat, AFK, etc.
-    local texture = F2.statusBox
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Health:CreateTexture(nil, "BORDER")
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Health:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetAllPoints(status.bg)
-
-        status.bg.Override = UnitFrames.UpdateStatus
-        status.border.Override = UnitFrames.UpdateStatus
-
-        if i == 1 then
-            status.bg:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", 6 + UnitFrames.layoutSize, 0)
-            parent.Combat = status.bg
-            parent.Resting = status.border
-        else
-            status.bg:SetPoint("TOPRIGHT", parent.Health, "TOPLEFT", UnitFrames.layoutSize, 0)
-            parent.Leader = status.bg
-            parent.AFK = status.border
-        end
-    end
-end
-
 local function CreateEndBox(parent)
     local texture = F2.endBox
     parent.endBox = parent.overlay:CreateTexture(nil, "BORDER")
@@ -54,7 +27,6 @@ end
 
 UnitFrames.focus = {
     create = function(self)
-        CreatePowerStatus(self)
         CreateEndBox(self)
 
         self.Name = self.overlay:CreateFontString(nil, "OVERLAY")

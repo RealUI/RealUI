@@ -384,65 +384,6 @@ function UnitFrames:PredictOverride(event, unit)
     end
 end
 
-do -- UnitFrames:UpdateStatus
-    local status = {
-        afk = {1, 1, 0},
-        offline = oUF.colors.disconnected,
-        leader = {0, 1, 1},
-        combat = {1, 0, 0},
-        resting = {0, 1, 0},
-    }
-    function UnitFrames:UpdateStatus(event, ...)
-        UnitFrames:debug("UpdateStatus", self.unit, event, ...)
-        local unit, color = self.unit
-
-        if _G.UnitIsAFK(unit) then
-            self.Leader.status = "afk"
-        elseif not(_G.UnitIsConnected(unit)) then
-            self.Leader.status = "offline"
-        elseif _G.UnitIsGroupLeader(unit) then
-            self.Leader.status = "leader"
-        else
-            self.Leader.status = false
-        end
-        UnitFrames:debug("Status2:", self.Leader.status)
-
-        if self.Leader.status then
-            color = status[self.Leader.status]
-            self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Leader:Show()
-            self.AFK:Show()
-        else
-            self.Leader:Hide()
-            self.AFK:Hide()
-        end
-
-        if _G.UnitAffectingCombat(unit) then
-            self.Combat.status = "combat"
-        elseif _G.IsResting(unit) then
-            self.Combat.status = "resting"
-        else
-            self.Combat.status = false
-        end
-        UnitFrames:debug("Status1:", self.Combat.status)
-
-        if self.Leader.status and not self.Combat.status then
-            color = RealUI.media.background
-            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
-            self.Resting:Show()
-        elseif self.Combat.status then
-            color = status[self.Combat.status]
-            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
-            self.Resting:Show()
-        else
-            self.Combat:Hide()
-            self.Resting:Hide()
-        end
-    end
-end
-
 function UnitFrames:UpdateEndBox(...)
     UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
     local unit, color = self.unit
@@ -593,6 +534,86 @@ local function CreatePowerBar(parent, unit, info)
     end
     parent.Power = power
 end
+local CreatePowerStatus do
+    local status = {
+        afk = {1, 1, 0},
+        offline = oUF.colors.disconnected,
+        leader = {0, 1, 1},
+        combat = {1, 0, 0},
+        resting = {0, 1, 0},
+    }
+    local function UpdateStatus(self, event, ...)
+        local unit, color = self.unit
+
+        if _G.UnitIsAFK(unit) then
+            self.Leader.status = "afk"
+        elseif not(_G.UnitIsConnected(unit)) then
+            self.Leader.status = "offline"
+        elseif _G.UnitIsGroupLeader(unit) then
+            self.Leader.status = "leader"
+        else
+            self.Leader.status = false
+        end
+
+        if self.Leader.status then
+            color = status[self.Leader.status]
+            self.Leader:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.Leader:Show()
+        else
+            self.Leader:Hide()
+        end
+
+        if _G.UnitAffectingCombat(unit) then
+            self.Combat.status = "combat"
+        elseif _G.IsResting(unit) then
+            self.Combat.status = "resting"
+        else
+            self.Combat.status = false
+        end
+
+        if self.Leader.status and not self.Combat.status then
+            color = RealUI.media.background
+            self.Combat:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.Combat:Show()
+        elseif self.Combat.status then
+            color = status[self.Combat.status]
+            self.Combat:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.Combat:Show()
+        else
+            self.Combat:Hide()
+        end
+    end
+
+    function CreatePowerStatus(parent, unit, data)
+        local info, height
+        local point, anchor, relPoint, x
+        if data.power then
+            info, anchor = data.power, parent.Power
+        else
+            info, anchor = data.health, parent.Health
+        end
+        if info.point == "LEFT" then
+            point, relPoint, x = "TOPLEFT", "TOPRIGHT", -8
+        else
+            point, relPoint, x = "TOPRIGHT", "TOPLEFT", 8
+        end
+        height = anchor:GetHeight()
+
+
+        local CombatRest = parent:CreateAngleFrame("Frame", height + 4, height, anchor, info)
+        CombatRest:SetPoint(point, anchor, relPoint, x, 0)
+        CombatRest.Override = UpdateStatus
+        parent.Combat = CombatRest
+        parent.Rest = CombatRest
+
+        local LeaderAFK = parent:CreateAngleFrame("Frame", height + 4, height, anchor, info)
+        LeaderAFK:SetPoint(point, CombatRest, relPoint, x, 0)
+        LeaderAFK.Override = UpdateStatus
+        parent.Leader = LeaderAFK
+        parent.AFK = LeaderAFK
+    end
+end
+
 
 -- Init
 local function Shared(self, unit)
@@ -627,6 +648,7 @@ local function Shared(self, unit)
     if unitData.power then
         CreatePowerBar(self, unit, unitData.power)
     end
+    CreatePowerStatus(self, unit, unitData)
 
     unitData.create(self)
 

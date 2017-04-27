@@ -81,36 +81,6 @@ local function CreatePredictBar(parent)
     }
 end
 
-local function CreatePowerStatus(parent) -- Combat, AFK, etc.
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
-    local coords = positions[UnitFrames.layoutSize].healthBox
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Power:CreateTexture(nil, "BORDER")
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Power:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-        status.border:SetAllPoints(status.bg)
-
-        status.bg.Override = UnitFrames.UpdateStatus
-        status.border.Override = UnitFrames.UpdateStatus
-
-        if i == 1 then
-            status.bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -8, 0)
-            parent.Combat = status.bg
-            parent.Resting = status.border
-        else
-            status.bg:SetPoint("TOPLEFT", parent.Power, "TOPRIGHT", -2, 0)
-            parent.Leader = status.bg
-            parent.AFK = status.border
-        end
-    end
-end
-
 local function CreateRange(parent)
     local RangeColors = {
         [5] = RealUI.media.colors.green,
@@ -257,7 +227,6 @@ UnitFrames.target = {
         CreateRange(self)
         CreateThreat(self)
         CreateEndBox(self)
-        CreatePowerStatus(self)
 
         self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
         self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)

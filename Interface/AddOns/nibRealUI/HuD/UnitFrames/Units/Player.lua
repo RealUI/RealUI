@@ -55,33 +55,6 @@ local function CreatePredictBar(parent)
     }
 end
 
-local function CreatePowerStatus(parent) -- Combat, AFK, etc.
-    local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.statusBox
-    local status = {}
-    for i = 1, 2 do
-        status.bg = parent.Power:CreateTexture(nil, "BORDER")
-        status.bg:SetTexture(texture.bar)
-        status.bg:SetSize(texture.width, texture.height)
-
-        status.border = parent.Power:CreateTexture(nil, "OVERLAY", nil, 3)
-        status.border:SetTexture(texture.border)
-        status.border:SetAllPoints(status.bg)
-
-        status.bg.Override = UnitFrames.UpdateStatus
-        status.border.Override = UnitFrames.UpdateStatus
-
-        if i == 1 then
-            status.bg:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", 8, 0)
-            parent.Combat = status.bg
-            parent.Resting = status.border
-        else
-            status.bg:SetPoint("TOPRIGHT", parent.Power, "TOPLEFT", 2, 0)
-            parent.Leader = status.bg
-            parent.AFK = status.border
-        end
-    end
-end
-
 local function CreateEndBox(parent)
     local texture = UnitFrames.textures[UnitFrames.layoutSize].F1.endBox
     local pos = frameInfo[UnitFrames.layoutSize].endBox
@@ -132,7 +105,6 @@ end
 UnitFrames.player = {
     create = function(self)
         CreatePredictBar(self)
-        CreatePowerStatus(self)
         CreateEndBox(self)
         CreateTotems(self)
 
@@ -225,6 +197,6 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)
-    player:RegisterEvent("PLAYER_FLAGS_CHANGED", UnitFrames.UpdateStatus)
+    player:RegisterEvent("PLAYER_FLAGS_CHANGED", player.AFK.Override)
     player:RegisterEvent("UPDATE_SHAPESHIFT_FORM", player.PostUpdate)
 end)
