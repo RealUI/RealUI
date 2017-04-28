@@ -516,7 +516,6 @@ local function CreatePowerBar(parent, unit, info)
         local _, pType = _G.UnitPowerType(parent.unit)
         if pType ~= powerType then
             powerType = pType
-            power:SetValue(cur, true)
             power:UpdateReverse()
         end
     end
@@ -698,6 +697,33 @@ local function Shared(self, unit)
 
     if unitData.hasCastBars and RealUI:GetModuleEnabled("CastBars") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    end
+
+
+    function self.PreUpdate(frame, event)
+        frame.Health:SetSmooth(false)
+        if frame.Power then
+            frame.Power:SetSmooth(false)
+        end
+        if unitData.PreUpdate then
+            unitData.PreUpdate(frame, event)
+        end
+    end
+
+    function self.PostUpdate(frame, event)
+        frame.Health:SetSmooth(true)
+        frame.Health:PositionSteps(unitData.issmall and "BOTTOM" or "TOP")
+        if frame.Power then
+            frame.Power:SetSmooth(true)
+            frame.Power:PositionSteps("BOTTOM")
+        end
+        if frame.Classification then
+            frame.Classification.Update(frame, event)
+        end
+        frame.EndBox.Update(frame, event)
+        if unitData.PostUpdate then
+            unitData.PostUpdate(frame, event)
+        end
     end
 end
 

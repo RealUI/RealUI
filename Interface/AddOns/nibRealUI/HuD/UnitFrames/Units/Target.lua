@@ -202,18 +202,6 @@ UnitFrames.target = {
         self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
         self.RaidIcon:SetSize(20, 20)
         self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
-
-        function self.PreUpdate(frame, event)
-            --frame.Combat.Override(frame, event)
-            frame.Threat.Override(frame, event, frame.unit)
-            frame.Range.Override(frame)
-        end
-        function self.PostUpdate(frame, event)
-            frame.Health:PositionSteps("TOP")
-            frame.Classification.Update(frame, event)
-            frame.Power:PositionSteps("BOTTOM")
-            frame.EndBox.Update(frame, event)
-        end
     end,
     health = {
         leftAngle = [[\]],
@@ -228,6 +216,10 @@ UnitFrames.target = {
     },
     isBig = true,
     hasCastBars = true,
+    PostUpdate = function(self, event)
+        self.Threat.Override(self, event, self.unit)
+        self.Range.Override(self)
+    end
 }
 
 -- Init

@@ -252,6 +252,13 @@ function api:SetValue(value, ignoreSmooth)
     end
 end
 
+function api:SetSmooth(isSmooth)
+    bars[self].smooth = isSmooth
+end
+function api:GetSmooth()
+    return bars[self].smooth
+end
+
 -- Setting this to true will make the bars fill from right to left
 function api:SetReverseFill(val)
     debug(self.debug, "SetReverseFill", val)

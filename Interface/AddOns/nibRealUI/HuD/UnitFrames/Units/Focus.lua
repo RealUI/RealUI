@@ -14,13 +14,6 @@ UnitFrames.focus = {
         self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
         self.Name:SetFontObject(_G.RealUIFont_Pixel)
         self:Tag(self.Name, "[realui:name]")
-
-        function self.PostUpdate(frame, event)
-            frame.Health:PositionSteps("TOP")
-            frame.Classification.Update(frame, event)
-            frame.Combat.Override(frame, event)
-            frame.EndBox.Update(frame, event)
-        end
     end,
     health = {
         leftAngle = [[\]],
