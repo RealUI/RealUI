@@ -209,9 +209,9 @@ UnitFrames.target = {
             frame.Range.Override(frame)
         end
         function self.PostUpdate(frame, event)
-            frame.Health:PositionSteps("TOP", "LEFT")
+            frame.Health:PositionSteps("TOP")
             frame.Classification.Update(frame, event)
-            frame.Power:PositionSteps("BOTTOM", "LEFT")
+            frame.Power:PositionSteps("BOTTOM")
             frame.EndBox.Update(frame, event)
         end
     end,

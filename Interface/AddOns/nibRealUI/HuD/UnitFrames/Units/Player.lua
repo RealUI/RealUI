@@ -95,8 +95,8 @@ UnitFrames.player = {
         end
 
         function self.PostUpdate(frame, event)
-            frame.Health:PositionSteps("TOP", "RIGHT")
-            frame.Power:PositionSteps("BOTTOM", "RIGHT")
+            frame.Health:PositionSteps("TOP")
+            frame.Power:PositionSteps("BOTTOM")
             frame.EndBox.Update(frame, event)
         end
     end,

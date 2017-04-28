@@ -16,7 +16,7 @@ UnitFrames.focus = {
         self:Tag(self.Name, "[realui:name]")
 
         function self.PostUpdate(frame, event)
-            frame.Health:PositionSteps("TOP", "RIGHT")
+            frame.Health:PositionSteps("TOP")
             frame.Classification.Update(frame, event)
             frame.Combat.Override(frame, event)
             frame.EndBox.Update(frame, event)

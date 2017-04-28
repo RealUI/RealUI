@@ -221,24 +221,25 @@ RealUI.ReversePowers = {
     ["PAIN"] = true,
 }
 
-function UnitFrames:PositionSteps(vert, horiz)
-    UnitFrames:debug("PositionSteps")
+local function PositionSteps(self, vert)
     local width, height = self:GetSize()
-    local point, relPoint = vert..horiz, vert..(horiz == "LEFT" and "RIGHT" or "LEFT")
+    local isRight = self:GetReverseFill()
+    local point, relPoint = vert..(isRight and "RIGHT" or "LEFT"), vert..(isRight and "LEFT" or "RIGHT")
     local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
-            xOfs = (xOfs + height) * (horiz == "RIGHT" and 1 or -1)
+            xOfs = (xOfs + height) * (isRight and 1 or -1)
             self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
             self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
         else
-            self.step[i]:SetPoint(point, self, -xOfs, 0)
-            self.warn[i]:SetPoint(point, self, -xOfs, 0)
+            xOfs = xOfs * (isRight and -1 or 1)
+            self.step[i]:SetPoint(point, self, xOfs, 0)
+            self.warn[i]:SetPoint(point, self, xOfs, 0)
         end
     end
 end
-function UnitFrames:UpdateSteps(unit, cur, max)
+local function UpdateSteps(self, unit, cur, max)
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
@@ -302,8 +303,8 @@ local function CreateHealthBar(parent, unit, info)
     health.colorHealth = true
     health.frequentUpdates = true
 
-    health.PositionSteps = UnitFrames.PositionSteps
-    health.PostUpdate = UnitFrames.UpdateSteps
+    health.PositionSteps = PositionSteps
+    health.PostUpdate = UpdateSteps
     parent.Health = health
 end
 local CreateHealthStatus do
@@ -502,14 +503,14 @@ local function CreatePowerBar(parent, unit, info)
     power.colorPower = true
     power.frequentUpdates = true
 
-    power.PositionSteps = UnitFrames.PositionSteps
     function power:UpdateReverse()
-            if ndb.settings.reverseUnitFrameBars then
-                power:SetReversePercent(RealUI.ReversePowers[powerType])
-            else
-                power:SetReversePercent(not RealUI.ReversePowers[powerType])
-            end
+        if ndb.settings.reverseUnitFrameBars then
+            power:SetReversePercent(RealUI.ReversePowers[powerType])
+        else
+            power:SetReversePercent(not RealUI.ReversePowers[powerType])
         end
+    end
+    power.PositionSteps = PositionSteps
     function power:PostUpdate(unitToken, cur, max, min)
         UpdateSteps(self, unitToken, cur, max)
         local _, pType = _G.UnitPowerType(parent.unit)
