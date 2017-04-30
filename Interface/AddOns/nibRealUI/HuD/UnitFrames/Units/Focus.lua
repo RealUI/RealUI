@@ -16,8 +16,8 @@ UnitFrames.focus = {
         self:Tag(self.Name, "[realui:name]")
     end,
     health = {
-        leftAngle = [[\]],
-        rightAngle = [[/]],
+        leftVertex = 2,
+        rightVertex = 4,
         point = "RIGHT"
     },
     hasCastBars = true,

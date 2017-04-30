@@ -16,8 +16,8 @@ UnitFrames.pet = {
         self:Tag(self.Name, "[realui:name]")
     end,
     health = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
+        leftVertex = 2,
+        rightVertex = 3,
         point = "RIGHT"
     },
     isSmall = true

@@ -95,14 +95,14 @@ UnitFrames.player = {
         end
     end,
     health = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
+        leftVertex = 1,
+        rightVertex = 4,
         point = "RIGHT",
         text = true,
     },
     power = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
+        leftVertex = 2,
+        rightVertex = 3,
         point = "RIGHT",
     },
     isBig = true,

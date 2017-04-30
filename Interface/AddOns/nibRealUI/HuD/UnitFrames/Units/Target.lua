@@ -204,14 +204,14 @@ UnitFrames.target = {
         self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
     end,
     health = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
+        leftVertex = 2,
+        rightVertex = 3,
         point = "LEFT",
         text = true,
     },
     power = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
+        leftVertex = 1,
+        rightVertex = 4,
         point = "LEFT",
     },
     isBig = true,

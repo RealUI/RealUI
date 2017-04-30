@@ -147,49 +147,11 @@ function CastBars:UpdateAnchors()
     end
 end
 
-local frameInfo = {
-    player = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
-        smooth = false,
-    },
-    target = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
-        smooth = false,
-    },
-    focus = {
-        leftAngle = [[\]],
-        rightAngle = [[/]],
-        smooth = false,
-    },
-}
-
--- From oUF castbar
-local updateSafeZone = function(self)
-    local sz = self.safeZone
-    local width = self:GetWidth()
-    local _, _, _, ms = _G.GetNetStats()
-
-    -- Guard against GetNetStats returning latencies of 0.
-    if (ms ~= 0) then
-        -- MADNESS!
-        local safeZonePercent = (width / self.max) * (ms / 1e5)
-        CastBars:debug("updateSafeZone", safeZonePercent, ms)
-        if (safeZonePercent > 1) then safeZonePercent = 1 end
-        sz:SetWidth(width * safeZonePercent)
-        sz:Show()
-    else
-        sz:Hide()
-    end
-end
-
 local function PostCastStart(self, unit, ...)
     CastBars:debug("PostCastStart", unit, ...)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
-    self:SetValue(0, true)
 
     if self.interrupt then
         local color = db.colors.uninterruptible
@@ -198,15 +160,6 @@ local function PostCastStart(self, unit, ...)
         local color = db.colors[unit]
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     end
-
-    local sz = self.safeZone
-    sz:ClearAllPoints()
-    if self:GetReverseFill() then
-        sz:SetPoint("TOPLEFT", self, 2, 0)
-    else
-        sz:SetPoint("TOPRIGHT", self, -2, 0)
-    end
-    updateSafeZone(self)
 
     if self.tickPool then
         self.tickPool:ReleaseAll()
@@ -253,17 +206,6 @@ end
 
 local function PostChannelStart(self, unit, spellName)
     CastBars:debug("PostChannelStart", unit, spellName)
-    self:SetValue(self.duration, true)
-
-    local sz = self.safeZone
-    sz:ClearAllPoints()
-    if self:GetReverseFill() then
-        sz:SetPoint("TOPRIGHT", self, -1, 0)
-    else
-        sz:SetPoint("TOPLEFT", self, 1, 0)
-    end
-    updateSafeZone(self)
-
     if self.SetBarTicks then
         self.tickPool:ReleaseAll()
         self:SetBarTicks(ChannelingTicks[spellName])
@@ -372,14 +314,15 @@ local function OnUpdate(self, elapsed)
     end
 end
 
-function CastBars:CreateCastBars(unitFrame, unit)
+function CastBars:CreateCastBars(unitFrame, unit, unitData)
     CastBars:debug("CreateCastBars", unit)
-    local info, unitDB = frameInfo[unit], db[unit]
-    local size, color = db.size[layoutSize], db.colors[unit]
-    local width, height = size[unit] and size[unit].width or size.width, size[unit] and size[unit].height or size.height
-    if not unitDB.debug then info.debug = nil end
-    local Castbar = unitFrame:CreateAngleFrame("Status", width, height, unitFrame, info)
+    local info, unitDB = unitData.power or unitData.health, db[unit]
+    local size, color = unitDB.size, db.colors[unit]
+    local Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    Castbar:SetSize(size.x, size.y)
+    Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    Castbar:SetSmooth(false)
     if db.reverse[unit] then
         Castbar:SetReverseFill(true)
     end
@@ -398,19 +341,17 @@ function CastBars:CreateCastBars(unitFrame, unit)
     Time:SetFontObject(_G.RealUIFont_PixelNumbers)
 
     color = db.colors.latency
-    local safeZone = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
-    Castbar.safeZone = safeZone
-    safeZone:SetValue(1, true)
-    safeZone:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
+    SafeZone:SetColorTexture(color[1], color[2], color[3], color[4])
+    SafeZone:SetSize(10, 10)
+    Castbar.SafeZone = SafeZone
 
     if unit == "player" then
-        CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPRIGHT", _G.RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
-
         Castbar.tickPool = _G.CreateObjectPool(function(pool)
-            local tick = unitFrame:CreateAngleFrame("Bar", 5, height, Castbar, info)
-            tick:SetStatusBarColor(0, 0, 0, 0.5)
-            tick:SetValue(1, true)
+            local tick = unitFrame:CreateAngle("Texture", nil, Castbar)
+            tick:SetColorTexture(1, 1, 1, 0.5)
+            tick:SetSize(2, size.y)
             return tick
         end, function(pool, tick)
             tick:ClearAllPoints()
@@ -480,7 +421,7 @@ function CastBars:ToggleConfigMode(isConfigMode)
             castbar:SetMinMaxValues(castbar.duration, castbar.max)
             castbar.Text:SetText(_G.SPELL_CASTING)
             castbar.Icon:SetTexture([[Interface\Icons\INV_Misc_Dice_02]])
-            castbar.safeZone:Hide()
+            castbar.SafeZone:Hide()
 
             -- We need to wait a bit for the game to register that we have a target and focus
             _G.C_Timer.After(0.2, function()
@@ -500,19 +441,19 @@ function CastBars:OnInitialize()
                 target = false,
             },
             player = {
-                size = {x = 230, y = 28},
+                size = {x = 230, y = 8},
                 position = {x = 0, y = 0},
                 icon = 28,
                 debug = false
             },
             target = {
-                size = {x = 230, y = 28},
+                size = {x = 230, y = 8},
                 position = {x = 0, y = 0},
                 icon = 28,
                 debug = false
             },
             focus = {
-                size = {x = 146, y = 28},
+                size = {x = 146, y = 5},
                 position = {x = 0, y = 0},
                 icon = 16,
                 debug = false

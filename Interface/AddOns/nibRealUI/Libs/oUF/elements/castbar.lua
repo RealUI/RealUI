@@ -139,7 +139,7 @@ local UNIT_SPELLCAST_START = function(self, event, unit, spell)
 	local sf = castbar.SafeZone
 	if(sf) then
 		sf:ClearAllPoints()
-		sf:SetPoint'RIGHT'
+		sf:SetPoint(castbar:GetReverseFill() and 'LEFT' or 'RIGHT')
 		sf:SetPoint'TOP'
 		sf:SetPoint'BOTTOM'
 		updateSafeZone(castbar)
@@ -296,7 +296,7 @@ local UNIT_SPELLCAST_CHANNEL_START = function(self, event, unit, spellname)
 	local sf = castbar.SafeZone
 	if(sf) then
 		sf:ClearAllPoints()
-		sf:SetPoint'LEFT'
+		sf:SetPoint(castbar:GetReverseFill() and 'RIGHT' or 'LEFT')
 		sf:SetPoint'TOP'
 		sf:SetPoint'BOTTOM'
 		updateSafeZone(castbar)

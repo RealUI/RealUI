@@ -264,14 +264,10 @@ function ClassResource:CreateRunes(unitFrame, unit)
 end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
-    local info = {
-        leftAngle = [[/]],
-        rightAngle = [[\]],
-        smooth = false,
-    }
-
     local size = barDB.size
-    local stagger = unitFrame:CreateAngleFrame("Status", size.width, size.height, _G.UIParent, info)
+    local stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
+    stagger:SetSize(size.width, size.height)
+    stagger:SetAngleVertex(1, 3)
 
     LibWin:Embed(stagger)
     stagger:RegisterConfig(barDB.position)
