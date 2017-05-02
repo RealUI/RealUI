@@ -147,8 +147,8 @@ function CastBars:UpdateAnchors()
     end
 end
 
-local function PostCastStart(self, unit, ...)
-    CastBars:debug("PostCastStart", unit, ...)
+local function PostCastStart(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastStart", unit, name, castID, spellID)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
@@ -166,12 +166,12 @@ local function PostCastStart(self, unit, ...)
     end
 end
 --[==[
-local function PostCastFailed(self, unit, ...)
-    CastBars:debug("PostCastFailed", unit, ...)
+local function PostCastFailed(self, unit, castID, spellID)
+    CastBars:debug("PostCastFailed", unit, castID, spellID)
 end
 ]==]
-local function PostCastInterrupted(self, unit, ...)
-    CastBars:debug("PostCastInterrupted", unit, ...)
+local function PostCastInterrupted(self, unit, castID, spellID)
+    CastBars:debug("PostCastInterrupted", unit, castID, spellID)
     self.castid = nil
     if not self.flashAnim:IsPlaying() then
         CastBars:debug("PlayFlash")
@@ -185,47 +185,47 @@ local function PostCastInterrupted(self, unit, ...)
         self.flashAnim:Play()
     end
 end
-local function PostCastInterruptible(self, unit, ...)
-    CastBars:debug("PostCastInterruptible", unit, ...)
+local function PostCastInterruptible(self, unit)
+    CastBars:debug("PostCastInterruptible", unit)
     local color = db.colors[unit]
     self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
-local function PostCastNotInterruptible(self, unit, ...)
-    CastBars:debug("PostCastNotInterruptible", unit, ...)
+local function PostCastNotInterruptible(self, unit)
+    CastBars:debug("PostCastNotInterruptible", unit)
     local color = db.colors.uninterruptible
     self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
 --[==[
-local function PostCastDelayed(self, unit, ...)
-    CastBars:debug("PostCastDelayed", unit, ...)
+local function PostCastDelayed(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastDelayed", unit, name, castID, spellID)
 end
-local function PostCastStop(self, unit, ...)
-    CastBars:debug("PostCastStop", unit, ...)
+local function PostCastStop(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastStop", unit, name, castID, spellID)
 end
 ]==]
 
-local function PostChannelStart(self, unit, spellName)
-    CastBars:debug("PostChannelStart", unit, spellName)
+local function PostChannelStart(self, unit, name, spellID)
+    CastBars:debug("PostChannelStart", unit, name, spellID)
     if self.SetBarTicks then
         self.tickPool:ReleaseAll()
-        self:SetBarTicks(ChannelingTicks[spellName])
+        self:SetBarTicks(ChannelingTicks[name])
     end
 end
 --[==[
-local function PostChannelUpdate(self, unit, ...)
-    CastBars:debug("PostChannelUpdate", unit, ...)
+local function PostChannelUpdate(self, unit, name, spellID)
+    CastBars:debug("PostChannelUpdate", unit, name, spellID)
 end
-local function PostChannelStop(self, unit, ...)
-    CastBars:debug("PostChannelStop", unit, ...)
+local function PostChannelStop(self, unit, name, spellID)
+    CastBars:debug("PostChannelStop", unit, name, spellID)
 end
 ]==]
 
-local function CustomDelayText(self, duration, ...)
-    CastBars:debug("CustomDelayText", duration, ...)
+local function CustomDelayText(self, duration)
+    CastBars:debug("CustomDelayText", duration)
     self.Time:SetFormattedText("%.1f", duration)
 end
-local function CustomTimeText(self, duration, ...)
-    CastBars:debug("CustomTimeText", duration, ...)
+local function CustomTimeText(self, duration)
+    CastBars:debug("CustomTimeText", duration)
     self.Time:SetFormattedText("%.1f", duration)
 end
 

@@ -19,16 +19,8 @@ local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local playerClass = RealUI.class
 local powerToken
 local powerTextures = {
-    circle = {
-        coords = {0.125, 0.9375, 0.0625, 0.875},
-        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_BG]],
-        border = [[Interface\Addons\nibRealUI\Media\PointTracking\Round_Large_Surround]]
-    },
-    SOUL_SHARDS = {
-        coords = {0.0625, 0.8125, 0.0625, 0.875},
-        bg = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_BG]],
-        border = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard_Surround]]
-    },
+    circle = [[Interface\Addons\nibRealUI\Media\PointTracking\Point]],
+    SOUL_SHARDS = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard]],
     HOLY_POWER = {
         [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
         [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
@@ -47,7 +39,14 @@ end
 
 local dragBG
 local function GetFrame(kind)
-    return kind == "points" and (ClassResource.Runes or ClassResource.ClassIcons) or ClassResource.resource
+    return kind == "points" and (ClassResource.Runes or ClassResource.ClassPower) or ClassResource.resource
+end
+
+function ClassResource:ForceUpdate()
+    (ClassResource.Runes or ClassResource.ClassPower):ForceUpdate()
+    if ClassResource.resource then
+        ClassResource.resource:ForceUpdate()
+    end
 end
 
 function ClassResource:Lock(kind)
@@ -103,28 +102,21 @@ function ClassResource:SettingsUpdate(kind, event)
     local settings = db[kind]
     if kind == "points" then
         if event == "gap" then
-            local size = settings.size
-            for _, element in next, {"Runes", "BurningEmbers", "ClassIcons"} do
+            for _, element in next, {"Runes", "ClassPower"} do
                 local frame = self[element]
                 self:debug("element", element, #frame)
                 for i = 1, #frame do
                     local icon = frame[i]
                     if element == "Runes" then
                         PositionRune(frame[i], i)
-                    elseif element == "BurningEmbers" then
-                        if i == 1 then
-                            icon:SetPoint("LEFT")
-                        else
-                            icon:SetPoint("LEFT", frame[i-1], "RIGHT", size.gap, 0)
-                        end
-                    elseif element == "ClassIcons" then
+                    elseif element == "ClassPower" then
                         icon:ClearAllPoints()
                         PositionIcon(icon, i, frame[i-1])
                     end
                 end
             end
         elseif event == "size" then
-            for _, element in next, {"Runes", "BurningEmbers", "ClassIcons"} do
+            for _, element in next, {"Runes", "ClassPower"} do
                 local frame = self[element]
                 for i = 1, #frame do
                     local icon = frame[i]
@@ -135,7 +127,7 @@ function ClassResource:SettingsUpdate(kind, event)
                 end
             end
         elseif event == "position" then
-            local frame = self.Runes or self.ClassIcons
+            local frame = self.Runes or self.ClassPower
             frame:RestorePosition()
         end
     elseif kind == "bar" then
@@ -147,72 +139,76 @@ function ClassResource:SettingsUpdate(kind, event)
     end
 end
 
-function ClassResource:CreateClassIcons(unitFrame, unit)
-    self:debug("CreateClassIcons", unit)
-    local ClassIcons = _G.CreateFrame("Frame", nil, _G.UIParent)
-    CombatFader:RegisterFrameForFade(MODNAME, ClassIcons)
-    ClassIcons:SetSize(16, 16)
+function ClassResource:CreateClassPower(unitFrame, unit)
+    self:debug("CreateClassPower", unit)
+    local ClassPower = _G.CreateFrame("Frame", nil, _G.UIParent)
+    CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
+    ClassPower:SetSize(16, 16)
 
-    LibWin:Embed(ClassIcons)
-    ClassIcons:RegisterConfig(pointDB.position)
-    ClassIcons:RestorePosition()
-    ClassIcons:SetMovable(true)
-    ClassIcons:RegisterForDrag("LeftButton")
-    ClassIcons:SetScript("OnDragStart", function(...)
+    LibWin:Embed(ClassPower)
+    ClassPower:RegisterConfig(pointDB.position)
+    ClassPower:RestorePosition()
+    ClassPower:SetMovable(true)
+    ClassPower:RegisterForDrag("LeftButton")
+    ClassPower:SetScript("OnDragStart", function(...)
         LibWin.OnDragStart(...)
     end)
-    ClassIcons:SetScript("OnDragStop", function(...)
+    ClassPower:SetScript("OnDragStop", function(...)
         LibWin.OnDragStop(...)
     end)
 
-    dragBG = ClassIcons:CreateTexture()
+    dragBG = ClassPower:CreateTexture()
     dragBG:SetColorTexture(1, 1, 1, 0.5)
     dragBG:Hide()
 
-    function ClassIcons.PostUpdate(element, cur, max, hasMaxChanged, power, event)
-        self:debug("ClassIcons:PostUpdate", cur, max, hasMaxChanged, power, event, pointDB.hideempty, self.configMode)
-        if not pointDB.hideempty or (event == "ForceUpdate" or self.configMode) then
-            for i = 1, max or 0 do -- max will be nil when the icon is disabled
-                local iconBG = element[i].bg
-                local alpha = _G.Lerp(db.combatfade.opacity.incombat, db.combatfade.opacity.outofcombat, element:GetAlpha())
-                iconBG:SetDesaturated(i > cur)
-                iconBG:SetAlpha(iconBG:IsDesaturated() and alpha or 1)
-                element[i]:SetShown(self.configMode or not pointDB.hideempty)
+    function ClassPower.PostUpdate(element, cur, max, mod, hasMaxChanged, powerType)
+        self:debug("ClassPower:PostUpdate", cur, max, mod, hasMaxChanged, powerType)
+        for i = 1, max or 0 do -- max is nil for classes without a secondary power
+            local icon, isUnused = element[i], i > _G.ceil(cur / mod)
+            if isUnused then
+                if not pointDB.hideempty or self.configMode then
+                    icon:Show()
+                else
+                    icon:Hide()
+                end
             end
         end
     end
 
     local texture, size = powerTextures[powerToken] or powerTextures.circle, pointDB.size
     for index = 1, MAX_POINTS do
-        local icon = _G.CreateFrame("Frame", "ClassIcon"..index, ClassIcons)
-        icon:SetSize(size.width, size.height)
-
-        local iconBG = icon:CreateTexture(nil, "BACKGROUND")
-        iconBG:SetAllPoints()
-        icon.bg = iconBG
-
-        if playerClass == "PALADIN" then
-            icon:SetPoint("CENTER")
-            iconBG:SetTexture(texture[index])
+        local name, icon = "ClassPower"..index
+        if playerClass == "WARLOCK" then
+            icon = unitFrame:CreateAngle("StatusBar", name, ClassPower)
+            icon:SetSize(size.width, size.height)
+            icon:SetAngleVertex(2, 3)
+            icon:SetMinMaxValues(0, 1)
         else
-            PositionIcon(icon, index, ClassIcons[index-1])
+            icon = _G.CreateFrame("StatusBar", name, ClassPower)
+            icon:SetSize(size.width, size.height)
 
-            local color = unitFrame.colors.power[powerToken or 'COMBO_POINTS']
-            local coords = texture.coords
-            iconBG:SetTexture(texture.bg)
-            iconBG:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-            iconBG:SetVertexColor(color[1], color[2], color[3])
-
-            local border = icon:CreateTexture(nil, "BORDER")
-            border:SetAllPoints()
-            border:SetTexture(texture.border)
-            border:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+            local bg = icon:CreateTexture(nil, "BACKGROUND")
+            bg:SetAllPoints()
+            icon.bg = bg
         end
 
-        ClassIcons[index] = icon
+        local tex
+        if playerClass == "PALADIN" then
+            icon:SetPoint("CENTER")
+            tex = texture[index]
+        else
+            PositionIcon(icon, index, ClassPower[index-1])
+            tex = texture
+        end
+
+        icon:SetStatusBarTexture(tex)
+        icon.bg:SetTexture(tex)
+        icon.bg.multiplier = 0.5
+
+        ClassPower[index] = icon
     end
-    unitFrame.ClassIcons = ClassIcons
-    ClassResource.ClassIcons = ClassIcons
+    unitFrame.ClassPower = ClassPower
+    ClassResource.ClassPower = ClassPower
 end
 function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
@@ -251,9 +247,9 @@ function ClassResource:CreateRunes(unitFrame, unit)
         Runes[index] = Rune
     end
 
-    function Runes:PostUpdate(rune, rid, start, duration, runeReady)
+    function Runes.PostUpdate(element, rune, runeID, start, duration, isReady)
         local color = unitFrame.colors.power.RUNES
-        if runeReady then
+        if isReady then
             rune.tex:SetColorTexture(color[1], color[2], color[3])
         else
             rune.tex:SetColorTexture(color[1], color[2], color[3], 0.4)
@@ -265,35 +261,35 @@ end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
     local size = barDB.size
-    local stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
-    stagger:SetSize(size.width, size.height)
-    stagger:SetAngleVertex(1, 3)
+    local Stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
+    Stagger:SetSize(size.width, size.height)
+    Stagger:SetAngleVertex(1, 3)
 
-    LibWin:Embed(stagger)
-    stagger:RegisterConfig(barDB.position)
-    stagger:RestorePosition()
-    stagger:SetMovable(true)
-    stagger:RegisterForDrag("LeftButton")
-    stagger:SetScript("OnDragStart", function(...)
+    LibWin:Embed(Stagger)
+    Stagger:RegisterConfig(barDB.position)
+    Stagger:RestorePosition()
+    Stagger:SetMovable(true)
+    Stagger:RegisterForDrag("LeftButton")
+    Stagger:SetScript("OnDragStart", function(...)
         LibWin.OnDragStart(...)
     end)
-    stagger:SetScript("OnDragStop", function(...)
+    Stagger:SetScript("OnDragStop", function(...)
         LibWin.OnDragStop(...)
     end)
 
-    function stagger.PostUpdate(element, maxHealth, curStagger, perStagger, r, g, b)
+    function Stagger.PostUpdate(element, cur, max, r, g, b)
         if self.configMode then
-            curStagger = maxHealth * 0.3
-            element:SetValue(curStagger)
+            cur = max * 0.3
+            element:SetValue(cur)
             local color = unitFrame.colors.power[_G.BREWMASTER_POWER_BAR_NAME][2]
             r, g, b = color[1], color[2], color[3]
         end
-        element:SetShown(curStagger > 0)
+        element:SetShown(cur > 0)
         element:SetStatusBarColor(RealUI:ColorDarken(0.5, r, g, b))
     end
 
-    unitFrame.Stagger = stagger
-    self.resource = stagger
+    unitFrame.Stagger = Stagger
+    self.resource = Stagger
 end
 
 local classPowers = {
@@ -307,7 +303,7 @@ local classPowers = {
 }
 function ClassResource:Setup(unitFrame, unit)
     -- Points
-    self:CreateClassIcons(unitFrame, unit)
+    self:CreateClassPower(unitFrame, unit)
     if playerClass == "DEATHKNIGHT" then
         self:CreateRunes(unitFrame, unit)
     end
@@ -322,7 +318,7 @@ function ClassResource:ToggleConfigMode(val)
     if self.configMode == val then return end
     self.configMode = val
 
-    self.ClassIcons:PostUpdate(3, 6, false, powerToken, "ForceUpdate")
+    self.ClassPower:PostUpdate(3, 6, 1, false, powerToken, "ForceUpdate")
     if self.resource then
         self.resource:ForceUpdate()
     end
@@ -361,7 +357,7 @@ function ClassResource:OnInitialize()
             points.position.x = 0
             points.position.y = -110
         elseif playerClass == "WARLOCK" then
-            points.size.width = 24
+            points.size.width = 22
             points.size.height = 13
             points.size.gap = -5
         end

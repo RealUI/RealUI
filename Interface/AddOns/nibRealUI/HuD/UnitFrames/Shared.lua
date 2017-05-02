@@ -306,29 +306,29 @@ local function CreateHealthBar(parent, unit, info)
     if db.units[unit].healthHeight then
         height = round((height - 3) * db.units[unit].healthHeight)
     end
-    local health = parent:CreateAngle("StatusBar", nil, parent.overlay)
-    health:SetSize(width, height)
-    health:SetPoint("TOP"..info.point, parent)
-    health:SetReverseFill(info.point == "RIGHT")
-    health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
-    health:SetAngleVertex(info.leftVertex, info.rightVertex)
+    local Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
+    Health:SetSize(width, height)
+    Health:SetPoint("TOP"..info.point, parent)
+    Health:SetReverseFill(info.point == "RIGHT")
+    Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+    Health:SetAngleVertex(info.leftVertex, info.rightVertex)
 
     if info.text then
-        health.text = health:CreateFontString(nil, "OVERLAY")
-        health.text:SetPoint("BOTTOM"..info.point, health, "TOP"..info.point, 2, 2)
-        health.text:SetFontObject(_G.RealUIFont_Pixel)
-        parent:Tag(health.text, "[realui:health]")
+        Health.text = Health:CreateFontString(nil, "OVERLAY")
+        Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
+        Health.text:SetFontObject(_G.RealUIFont_Pixel)
+        parent:Tag(Health.text, "[realui:health]")
     end
 
-    health.step, health.warn = CreateSteps(parent, height, info)
-    health.barType = "health"
-    health.colorClass = db.overlay.classColor
-    health.colorHealth = true
-    health.frequentUpdates = true
+    Health.step, Health.warn = CreateSteps(parent, height, info)
+    Health.barType = "health"
+    Health.colorClass = db.overlay.classColor
+    Health.colorHealth = true
+    Health.frequentUpdates = true
 
-    health.PositionSteps = PositionSteps
-    health.PostUpdate = UpdateSteps
-    parent.Health = health
+    Health.PositionSteps = PositionSteps
+    Health.PostUpdate = UpdateSteps
+    parent.Health = Health
 end
 local CreateHealthStatus do
     local classification = {
@@ -338,7 +338,7 @@ local CreateHealthStatus do
     }
 
     local function UpdatePvP(self, event, unit)
-        local pvp, color = self.PvP
+        local PvPIndicator, color = self.PvPIndicator
         if _G.UnitIsPVP(unit) then
             local reaction = _G.UnitReaction(unit, "player")
             if not reaction then
@@ -346,10 +346,10 @@ local CreateHealthStatus do
                 reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
             end
             color = self.colors.reaction[reaction]
-            pvp:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
             color = RealUI.media.background
-            pvp:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         end
     end
     local function UpdateClassification(self, event)
@@ -360,13 +360,13 @@ local CreateHealthStatus do
     function CreateHealthStatus(parent, unit, info)
         local leftVertex, rightVertex = GetVertices(info)
         local width, height = 4, _G.ceil(parent.Health:GetHeight() * 0.65)
-        local pvp = parent:CreateAngle("Frame", nil, parent.Health)
-        pvp:SetSize(width, height)
-        pvp:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
-        pvp:SetAngleVertex(leftVertex, rightVertex)
+        local PvPIndicator = parent:CreateAngle("Frame", nil, parent.Health)
+        PvPIndicator:SetSize(width, height)
+        PvPIndicator:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
+        PvPIndicator:SetAngleVertex(leftVertex, rightVertex)
 
-        pvp.Override = UpdatePvP
-        parent.PvP = pvp
+        PvPIndicator.Override = UpdatePvP
+        parent.PvP = PvPIndicator
 
         if not (unit == "player" or unit == "pet") then
             local class = parent:CreateAngle("Frame", nil, parent.Health)
@@ -385,7 +385,7 @@ local CreateHealthPredictBar do
     local function PredictOverride(self, event, unit)
         if(self.unit ~= unit) then return end
 
-        local hp = self.HealPrediction
+        local hp = self.HealthPrediction
         local healthBar = self.Health
 
         local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
@@ -495,10 +495,9 @@ local CreateHealthPredictBar do
         absorbBar:SetReverseFill(parent.Health:GetReverseFill())
         absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
 
-        parent.HealPrediction = {
-            frequentUpdates = true,
-            maxOverflow = 1,
+        parent.HealthPrediction = {
             absorbBar = absorbBar,
+            frequentUpdates = true,
             Override = PredictOverride,
         }
     end
@@ -506,40 +505,40 @@ end
 
 local function CreatePowerBar(parent, unit, info)
     local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
-    local power = parent:CreateAngle("StatusBar", nil, parent.overlay)
-    power:SetSize(width, height)
-    power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
-    power:SetAngleVertex(info.leftVertex, info.rightVertex)
-    power:SetReverseFill(info.point == "RIGHT")
+    local Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
+    Power:SetSize(width, height)
+    Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
+    Power:SetAngleVertex(info.leftVertex, info.rightVertex)
+    Power:SetReverseFill(info.point == "RIGHT")
 
-    power.text = power:CreateFontString(nil, "OVERLAY")
-    power.text:SetPoint("TOP"..info.point, power, "BOTTOM"..info.point, 2, -3)
-    power.text:SetFontObject(_G.RealUIFont_Pixel)
-    parent:Tag(power.text, "[realui:power]")
+    Power.text = Power:CreateFontString(nil, "OVERLAY")
+    Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
+    Power.text:SetFontObject(_G.RealUIFont_Pixel)
+    parent:Tag(Power.text, "[realui:power]")
 
-    power.step, power.warn = CreateSteps(parent, height, info)
-    power.barType = "power"
-    power.colorPower = true
-    power.frequentUpdates = true
+    Power.step, Power.warn = CreateSteps(parent, height, info)
+    Power.barType = "power"
+    Power.colorPower = true
+    Power.frequentUpdates = true
 
     local powerType
-    function power:UpdateReverse()
+    function Power:UpdateReverse()
         if ndb.settings.reverseUnitFrameBars then
-            power:SetReversePercent(RealUI.ReversePowers[powerType])
+            Power:SetReversePercent(RealUI.ReversePowers[powerType])
         else
-            power:SetReversePercent(not RealUI.ReversePowers[powerType])
+            Power:SetReversePercent(not RealUI.ReversePowers[powerType])
         end
     end
-    power.PositionSteps = PositionSteps
-    function power:PostUpdate(unitToken, cur, max, min)
-        UpdateSteps(self, unitToken, cur, max)
+    Power.PositionSteps = PositionSteps
+    function Power:PostUpdate(unit, cur, min, max)
+        UpdateSteps(self, unit, cur, max)
         local _, pType = _G.UnitPowerType(parent.unit)
         if pType ~= powerType then
             powerType = pType
-            power:UpdateReverse()
+            Power:UpdateReverse()
         end
     end
-    parent.Power = power
+    parent.Power = Power
 end
 local CreatePowerStatus do
     local status = {
@@ -549,45 +548,45 @@ local CreatePowerStatus do
         combat = {1, 0, 0},
         resting = {0, 1, 0},
     }
-    local function UpdateStatus(self, event, ...)
+    local function UpdateStatus(self, event)
         local unit, color = self.unit
 
         if _G.UnitIsAFK(unit) then
-            self.Leader.status = "afk"
+            self.LeaderIndicator.status = "afk"
         elseif not(_G.UnitIsConnected(unit)) then
-            self.Leader.status = "offline"
+            self.LeaderIndicator.status = "offline"
         elseif _G.UnitIsGroupLeader(unit) then
-            self.Leader.status = "leader"
+            self.LeaderIndicator.status = "leader"
         else
-            self.Leader.status = false
+            self.LeaderIndicator.status = false
         end
 
-        if self.Leader.status then
-            color = status[self.Leader.status]
-            self.Leader:SetBackgroundColor(color[1], color[2], color[3], color[4])
-            self.Leader:Show()
+        if self.LeaderIndicator.status then
+            color = status[self.LeaderIndicator.status]
+            self.LeaderIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.LeaderIndicator:Show()
         else
-            self.Leader:Hide()
+            self.LeaderIndicator:Hide()
         end
 
         if _G.UnitAffectingCombat(unit) then
-            self.Combat.status = "combat"
+            self.CombatIndicator.status = "combat"
         elseif _G.IsResting(unit) then
-            self.Combat.status = "resting"
+            self.CombatIndicator.status = "resting"
         else
-            self.Combat.status = false
+            self.CombatIndicator.status = false
         end
 
-        if self.Leader.status and not self.Combat.status then
+        if self.LeaderIndicator.status and not self.CombatIndicator.status then
             color = RealUI.media.background
-            self.Combat:SetBackgroundColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
-        elseif self.Combat.status then
-            color = status[self.Combat.status]
-            self.Combat:SetBackgroundColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
+            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:Show()
+        elseif self.CombatIndicator.status then
+            color = status[self.CombatIndicator.status]
+            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:Show()
         else
-            self.Combat:Hide()
+            self.CombatIndicator:Hide()
         end
     end
 
@@ -612,16 +611,16 @@ local CreatePowerStatus do
         CombatRest:SetPoint(point, anchor, relPoint, x, 0)
         CombatRest:SetAngleVertex(leftVertex, rightVertex)
         CombatRest.Override = UpdateStatus
-        parent.Combat = CombatRest
-        parent.Rest = CombatRest
+        parent.CombatIndicator = CombatRest
+        parent.RestingIndicator = CombatRest
 
         local LeaderAFK = parent:CreateAngle("Frame", nil, anchor)
         LeaderAFK:SetSize(width, height)
         LeaderAFK:SetPoint(point, CombatRest, relPoint, x, 0)
         LeaderAFK:SetAngleVertex(leftVertex, rightVertex)
         LeaderAFK.Override = UpdateStatus
-        parent.Leader = LeaderAFK
-        parent.AFK = LeaderAFK
+        parent.LeaderIndicator = LeaderAFK
+        parent.AwayIndicator = LeaderAFK
     end
 end
 

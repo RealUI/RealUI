@@ -248,6 +248,7 @@ function AngleStatusBarMixin:GetStatusBarColor()
 end
 
 function AngleStatusBarMixin:SetStatusBarTexture(texture, layer)
+    if not texture then return end
     local texType = type(texture)
     if texType == "string" or texType == "number" then
         bars[self].texture = texture

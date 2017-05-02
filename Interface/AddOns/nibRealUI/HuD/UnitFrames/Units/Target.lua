@@ -199,9 +199,9 @@ UnitFrames.target = {
         self.Name:SetFontObject(_G.RealUIFont_Pixel)
         self:Tag(self.Name, "[realui:level] [realui:name]")
 
-        self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
-        self.RaidIcon:SetSize(20, 20)
-        self.RaidIcon:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
+        self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY")
+        self.RaidTargetIndicator:SetSize(20, 20)
+        self.RaidTargetIndicator:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
     end,
     health = {
         leftVertex = 2,

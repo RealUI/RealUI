@@ -45,20 +45,20 @@ UnitFrames.player = {
     create = function(self)
         CreateTotems(self)
 
-        --[[ Druid Mana ]]--
-        local druidMana = _G.CreateFrame("StatusBar", nil, self.Power)
-        druidMana:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
-        druidMana:SetStatusBarColor(0, 0, 0, 0.75)
-        druidMana:SetPoint("BOTTOMLEFT", self.Power, "TOPLEFT", 0, 0)
-        druidMana:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -self.Power:GetHeight(), 0)
-        druidMana:SetHeight(1)
+        --[[ Additional Power ]]--
+        local AdditionalPower = _G.CreateFrame("StatusBar", nil, self.Power)
+        AdditionalPower:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+        AdditionalPower:SetStatusBarColor(0, 0, 0, 0.75)
+        AdditionalPower:SetPoint("BOTTOMLEFT", self.Power, "TOPLEFT", 0, 0)
+        AdditionalPower:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -self.Power:GetHeight(), 0)
+        AdditionalPower:SetHeight(1)
 
-        local bg = druidMana:CreateTexture(nil, 'BACKGROUND')
-        bg:SetAllPoints(druidMana)
+        local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
+        bg:SetAllPoints(AdditionalPower)
         bg:SetColorTexture(.2, .2, 1)
 
-        function druidMana.PostUpdate(this, unit, min, max)
-            if min == max then
+        function AdditionalPower.PostUpdate(this, unit, cur, max)
+            if cur == max then
                 if this:IsVisible() then
                     this:Hide()
                 end
@@ -69,10 +69,10 @@ UnitFrames.player = {
             end
         end
 
-        druidMana.colorPower = true
+        AdditionalPower.colorPower = true
 
-        self.DruidMana = druidMana
-        self.DruidMana.bg = bg
+        self.AdditionalPower = AdditionalPower
+        self.AdditionalPower.bg = bg
 
         --[[ PvP Timer ]]--
         local pvp = self.PvP
@@ -84,9 +84,9 @@ UnitFrames.player = {
         self:Tag(pvp.text, "[realui:pvptimer]")
 
         --[[ Raid Icon ]]--
-        self.RaidIcon = self:CreateTexture(nil, "OVERLAY")
-        self.RaidIcon:SetSize(20, 20)
-        self.RaidIcon:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
+        self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY")
+        self.RaidTargetIndicator:SetSize(20, 20)
+        self.RaidTargetIndicator:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
 
         --[[ Class Resource ]]--
         local ClassResource = RealUI:GetModule("ClassResource")
@@ -115,6 +115,6 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local player = oUF:Spawn("player", "RealUIPlayerFrame")
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)
-    player:RegisterEvent("PLAYER_FLAGS_CHANGED", player.AFK.Override)
+    player:RegisterEvent("PLAYER_FLAGS_CHANGED", player.AwayIndicator.Override)
     player:RegisterEvent("UPDATE_SHAPESHIFT_FORM", player.PostUpdate)
 end)
