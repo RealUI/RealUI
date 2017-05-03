@@ -1423,8 +1423,26 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local name, _, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
-                return curRep - minRep, maxRep - minRep, name
+                local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
+                if _G.C_Reputation.IsFactionParagon(factionID) then
+                    local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
+                    maxRep = threshold
+                    curRep = currentValue % threshold
+                    if hasRewardPending then
+                        curRep = curRep + threshold
+                    end
+                    return curRep, maxRep, name, hasRewardPending
+                else
+                    if reaction == _G.MAX_REPUTATION_REACTION then
+                        -- We're exalted
+                        minRep = 0
+                    end
+                end
+
+                -- Normalize values
+                maxRep = maxRep - minRep
+                curRep = curRep - minRep
+                return curRep, maxRep, name
             end,
             GetColor = function(Rep)
                 local _, reaction = _G.GetWatchedFactionInfo()
@@ -1435,17 +1453,22 @@ function Infobar:CreateBlocks()
                 return not not _G.GetWatchedFactionInfo()
             end,
             SetTooltip = function(Rep, tooltip)
-                local minRep, maxRep, name = Rep:GetStats()
+                local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
                 local r, g, b, reaction = Rep:GetColor()
 
                 local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minRep), RealUI:ReadableNumber(maxRep), (minRep/maxRep)*100)
+                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+
+                if hasRewardPending then
+                    lineNum = tooltip:AddLine(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
+                    tooltip:SetLineTextColor(lineNum, 0.7, 0.7, 0.7)
+                end
 
                 tooltip:AddLine(" ")
             end,
@@ -1727,6 +1750,10 @@ function Infobar:CreateBlocks()
                         UpdateState(block)
                     end
                     block:UnregisterEvent(event)
+                elseif event == "UPDATE_FACTION" then
+                    if not watchStates[dbc.progressState]:IsValid() then
+                        UpdateState(block)
+                    end
                 end
 
                 UpdateProgress(block)
