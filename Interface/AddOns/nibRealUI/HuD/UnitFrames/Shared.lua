@@ -10,204 +10,6 @@ local db, ndb
 local UnitFrames = RealUI:GetModule("UnitFrames")
 local CombatFader = RealUI:GetModule("CombatFader")
 local round = RealUI.Round
-UnitFrames.textures = {
-    [1] = {
-        F1 = { -- Player / Target Frames
-            health = {
-                width = 222,
-                height = 13,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Warning]=],
-            },
-            power = {
-                width = 197,
-                height = 8,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Warning]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Surround]=],
-            },
-            tanking = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Tanking_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Tanking_Surround]=],
-            },
-            range = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Range_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Range_Surround]=],
-            },
-        },
-        F2 = { -- Focus / Target Target
-            health = {
-                width = 116,
-                height = 9,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Surround]=],
-            },
-        },
-        F3 = { -- Focus Target / Pet
-            health = {
-                width = 105,
-                height = 9,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Surround]=],
-            },
-        },
-    },
-    [2] = {
-        F1 = { -- Player / Target Frames
-            health = {
-                width = 259,
-                height = 15,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Warning]=],
-            },
-            power = {
-                width = 230,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Surround]=],
-            },
-            tanking = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Tanking_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Tanking_Surround]=],
-            },
-            range = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Range_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Range_Surround]=],
-            },
-        },
-        F2 = { -- Focus / Target Target
-            health = {
-                width = 138,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Surround]=],
-            },
-        },
-        F3 = { -- Focus Target / Pet
-            health = {
-                width = 126,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Surround]=],
-            },
-        },
-    },
-}
 
 -- Power types where the default state is empty
 RealUI.ReversePowers = {
@@ -301,10 +103,10 @@ local function UpdateSteps(self, unit, cur, max)
     end
 end
 
-local function CreateHealthBar(parent, unit, info)
+local function CreateHealthBar(parent, info)
     local width, height = parent:GetWidth(), parent:GetHeight()
-    if db.units[unit].healthHeight then
-        height = round((height - 3) * db.units[unit].healthHeight)
+    if db.units[parent.unit].healthHeight then
+        height = round((height - 3) * db.units[parent.unit].healthHeight)
     end
     local Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
     Health:SetSize(width, height)
@@ -357,7 +159,7 @@ local CreateHealthStatus do
         self.Classification:SetBackgroundColor(color[1], color[2], color[3], color[4])
     end
 
-    function CreateHealthStatus(parent, unit, info)
+    function CreateHealthStatus(parent, info)
         local leftVertex, rightVertex = GetVertices(info)
         local width, height = 4, _G.ceil(parent.Health:GetHeight() * 0.65)
         local PvPIndicator = parent:CreateAngle("Frame", nil, parent.Health)
@@ -368,7 +170,7 @@ local CreateHealthStatus do
         PvPIndicator.Override = UpdatePvP
         parent.PvP = PvPIndicator
 
-        if not (unit == "player" or unit == "pet") then
+        if not (parent.unit == "player" or parent.unit == "pet") then
             local class = parent:CreateAngle("Frame", nil, parent.Health)
             class:SetSize(width, height)
             class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
@@ -484,7 +286,7 @@ local CreateHealthPredictBar do
             hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
         end
     end
-    function CreateHealthPredictBar(parent, unit, info)
+    function CreateHealthPredictBar(parent, info)
         local width, height = parent.Health:GetSize()
         local absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
         absorbBar:SetSize(width, height)
@@ -503,8 +305,8 @@ local CreateHealthPredictBar do
     end
 end
 
-local function CreatePowerBar(parent, unit, info)
-    local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
+local function CreatePowerBar(parent, info)
+    local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
     local Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
     Power:SetSize(width, height)
     Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
@@ -590,7 +392,7 @@ local CreatePowerStatus do
         end
     end
 
-    function CreatePowerStatus(parent, unit, data)
+    function CreatePowerStatus(parent, data)
         local point, anchor, relPoint, x, info
         if data.power then
             info, anchor = data.power, parent.Power
@@ -641,7 +443,7 @@ local CreateEndBox do
             self.EndBox[i]:SetBackgroundColor(color[1], color[2], color[3], 1)
         end
     end
-    function CreateEndBox(parent, unit, data)
+    function CreateEndBox(parent, data)
         local height = parent.Health:GetHeight()
         local boxHeight = height + (data.isBig and 2 or 0)
         local boxWidth = data.isBig and 6 or 4
@@ -711,14 +513,14 @@ local function Shared(self, unit)
     local unitData = UnitFrames[unit]
     local unitDB = db.units[unit]
     self:SetSize(unitDB.size.x, unitDB.size.y)
-    CreateHealthBar(self, unit, unitData.health)
-    CreateHealthStatus(self, unit, unitData.health)
+    CreateHealthBar(self, unitData.health)
+    CreateHealthStatus(self, unitData.health)
     if unitData.isBig then
-        CreateHealthPredictBar(self, unit, unitData.health)
-        CreatePowerBar(self, unit, unitData.power)
+        CreateHealthPredictBar(self, unitData.health)
+        CreatePowerBar(self, unitData.power)
     end
-    CreatePowerStatus(self, unit, unitData)
-    CreateEndBox(self, unit, unitData)
+    CreatePowerStatus(self, unitData)
+    CreateEndBox(self, unitData)
 
     unitData.create(self)
 
