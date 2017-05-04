@@ -70,6 +70,7 @@ local function SetupTextTable()
 
     local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
+    local TABLE_WIDTH = RealUI.ModValue(320)
     local numTables = 0
     local extData = {}
 
@@ -335,7 +336,7 @@ local function SetupTextTable()
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
         local textTable = self.textTable
-        local width = data.width or 500
+        local width = data.width or TABLE_WIDTH
         extData[data] = extData[data] or {}
         textTable.data = data
 
@@ -424,7 +425,7 @@ local function SetupTextTable()
         local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
-        return width, cellHeight + 11
+        return width, cellHeight + (MAX_ROWS + 1)
     end
 
     function TextTableCellPrototype:ReleaseCell()
@@ -870,7 +871,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), 500
+        local time, tableWidth = _G.GetTime(), RealUI.ModValue(320)
         local guildData = {}
         local headerData = {
             sort = {
@@ -1071,7 +1072,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local ClassLookup, tableWidth = {}, 450
+        local ClassLookup, tableWidth = {}, RealUI.ModValue(300)
         local friendsData = {}
         local headerData = {
             sort = {
@@ -2203,7 +2204,7 @@ function Infobar:CreateBlocks()
             -- if there are no connected realms, the return is just an empty table.
             connectedRealms[1] = RealUI.realmNormalized
         end
-        local tokens, tableWidth = {}, 400
+        local tokens, tableWidth = {}, RealUI.ModValue(250)
         local currencyData = {}
         local headerData = {
             info = {
