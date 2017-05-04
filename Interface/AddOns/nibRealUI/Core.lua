@@ -683,6 +683,8 @@ function RealUI:OnInitialize()
         db.settings.stripeOpacity = nil
     end
 
+    _G.SetCVar("useCompactPartyFrames", 1)
+
     -- Remove Interface Options cancel button because it = taint
     --InterfaceOptionsFrameCancel:Hide()
     --InterfaceOptionsFrameOkay:SetAllPoints(InterfaceOptionsFrameCancel)
