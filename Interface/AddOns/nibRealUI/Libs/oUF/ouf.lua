@@ -63,6 +63,26 @@ local function updateActiveUnit(self, event, unit)
 	end
 end
 
+local function updateArenaPreparation(self, event)
+	if(event == 'ARENA_OPPONENT_UPDATE' and not self:IsEnabled()) then
+		self:Enable()
+		self:UnregisterEvent(event, updateArenaPreparation)
+	elseif(event == 'PLAYER_ENTERING_WORLD' and not UnitExists(self.unit)) then
+		updateArenaPreparation(self, 'ARENA_PREP_OPPONENT_SPECIALIZATIONS')
+	elseif(event == 'ARENA_PREP_OPPONENT_SPECIALIZATIONS') then
+		local specID = GetArenaOpponentSpec(self.id)
+		if(specID) then
+			if(self:IsEnabled()) then
+				self:Disable()
+				self:RegisterEvent('ARENA_OPPONENT_UPDATE', updateArenaPreparation)
+			end
+
+			self:Show()
+			self:ForceUpdateAllElements('ArenaPreparation')
+		end
+	end
+end
+
 local function iterateChildren(...)
 	for i = 1, select('#', ...) do
 		local obj = select(i, ...)
@@ -94,9 +114,9 @@ for k, v in next, {
 	--[[ frame:EnableElement(name, unit)
 	Used to activate an element for the given unit frame.
 
-	* self - unit frame for that the element should be enabled
-	* name - name of the element to be enabled
-	* unit - unit to be passed to the element's Enable function. Defaults to the frame's unit
+	* self - unit frame for which the element should be enabled
+	* name - name of the element to be enabled (string)
+	* unit - unit to be passed to the element's Enable function. Defaults to the frame's unit (string?)
 	--]]
 	EnableElement = function(self, name, unit)
 		argcheck(name, 2, 'string')
@@ -117,8 +137,8 @@ for k, v in next, {
 	--[[ frame:DisableElement(name)
 	Used to deactivate an element for the given unit frame.
 
-	* self - unit frame for that the element should be disabled
-	* name - name of the element to be disabled
+	* self - unit frame for which the element should be disabled
+	* name - name of the element to be disabled (string)
 	--]]
 	DisableElement = function(self, name)
 		argcheck(name, 2, 'string')
@@ -149,7 +169,7 @@ for k, v in next, {
 	Used to check if an element is enabled on the given frame.
 
 	* self - unit frame
-	* name - name of the element
+	* name - name of the element (string)
 	--]]
 	IsElementEnabled = function(self, name)
 		argcheck(name, 2, 'string')
@@ -161,13 +181,20 @@ for k, v in next, {
 		return active and active[name]
 	end,
 
+	--[[ frame:IsEnabled()
+	Used to check if the visibility of a unit frame is based on the existence of its unit. This is a reference to
+	`UnitWatchRegistered`.
+
+	* self - unit frame
+	--]]
+	IsEnabled = UnitWatchRegistered,
 	--[[ frame:Enable(asState)
 	Used to toggle the visibility of a unit frame based on the existence of its unit. This is a reference to
 	`RegisterUnitWatch`.
 
 	* self    - unit frame
 	* asState - if true, the frame's "state-unitexists" attribute will be set to a boolean value denoting whether the
-	            unit exists; if false, the frame will be shown if its unit exists, and hidden if it does not
+	            unit exists; if false, the frame will be shown if its unit exists, and hidden if it does not (boolean)
 	--]]
 	Enable = RegisterUnitWatch,
 	--[[ frame:Disable()
@@ -180,28 +207,32 @@ for k, v in next, {
 		self:Hide()
 	end,
 
-	--[[ frame:UpdateAllElements(event)
-	Used to update all enabled elements on the given frame.
-
-	* self  - unit frame
-	* event - event name to pass to the elements' update functions
-	--]]
-	UpdateAllElements = function(self, event)
-		local unit = self.unit
-		if(not UnitExists(unit)) then return end
-
+	ForceUpdateAllElements = function(self, event)
 		assert(type(event) == 'string', "Invalid argument 'event' in UpdateAllElements.")
 
 		if(self.PreUpdate) then
 			self:PreUpdate(event)
 		end
 
+		local unit = self.unit
 		for _, func in next, self.__elements do
 			func(self, event, unit)
 		end
 
 		if(self.PostUpdate) then
 			self:PostUpdate(event)
+		end
+	end,
+
+	--[[ frame:UpdateAllElements(event)
+	Used to update all enabled elements on the given frame.
+
+	* self  - unit frame
+	* event - event name to pass to the elements' update functions (string)
+	--]]
+	UpdateAllElements = function(self, event)
+		if(UnitExists(self.unit)) then
+			self:ForceUpdateAllElements(event)
 		end
 	end,
 } do
@@ -315,6 +346,12 @@ local function initObject(unit, style, styleFunc, header, ...)
 			func(object)
 		end
 
+		-- Arena preparation fluff
+		if(unit and unit:match'(arena)%d?$' == 'arena') then
+			object:RegisterEvent('ARENA_PREP_OPPONENT_SPECIALIZATIONS', updateArenaPreparation, true)
+			object:HookScript('OnEvent', updateArenaPreparation)
+		end
+
 		-- Make Clique kinda happy
 		if not object.isNamePlate then
 			_G.ClickCastFrames = ClickCastFrames or {}
@@ -354,8 +391,8 @@ end
 Used to make a (table of) function(s) available to all unit frames.
 
 * self - the global oUF object
-* name - unique name of the function
-* func - function or a table of functions
+* name - unique name of the function (string)
+* func - function or a table of functions (function or table)
 --]]
 function oUF:RegisterMetaFunction(name, func)
 	argcheck(name, 2, 'string')
@@ -373,7 +410,7 @@ Used to register a style with oUF. This will also set the active style if it has
 
 * self - the global oUF object
 * name - name of the style
-* func - (table of) function(s) defining the style
+* func - function(s) defining the style (function or table)
 --]]
 function oUF:RegisterStyle(name, func)
 	argcheck(name, 2, 'string')
@@ -389,7 +426,7 @@ end
 Used to set the active style.
 
 * self - the global oUF object
-* name - name of the style
+* name - name of the style (string)
 --]]
 function oUF:SetActiveStyle(name)
 	argcheck(name, 2, 'string')
@@ -573,16 +610,19 @@ do
 
 	* self         - the global oUF object
 	* overrideName - unique global name to be used for the header. Defaults to an auto-generated name based on the name
-	                 of the active style and other arguments passed to `:SpawnHeader`
+	                 of the active style and other arguments passed to `:SpawnHeader` (string?)
 	* template     - name of a template to be used for creating the header. Defaults to `'SecureGroupHeaderTemplate'`
+	                 (string?)
 	* visibility   - macro conditional(s) which define when to display the header (string).
-	* ...          - further argument pairs. Consult [Group Headers](http://wowprogramming.com/docs/secure_template/Group_Headers) for possible values.
+	* ...          - further argument pairs. Consult [Group Headers](http://wowprogramming.com/docs/secure_template/Group_Headers)
+	                 for possible values.
 
-	In addition to the standard group headers, oUF implements some of its own attributes.
-	These can be supplied by the layout, but are optional.
+	In addition to the standard group headers, oUF implements some of its own attributes. These can be supplied by the
+	layout, but are optional.
 
-	* oUF-initialConfigFunction - Can contain code that will be securely run at the end of the initial secure configuration (string).
-	* oUF-onlyProcessChildren   - Can be used to force headers to only process children (boolean).
+	* oUF-initialConfigFunction - can contain code that will be securely run at the end of the initial secure
+	                              configuration (string?)
+	* oUF-onlyProcessChildren   - can be used to force headers to only process children (boolean?)
 	--]]
 	function oUF:SpawnHeader(overrideName, template, visibility, ...)
 		if(not style) then return error('Unable to create frame. No styles have been registered.') end
@@ -639,8 +679,9 @@ end
 Used to create a single unit frame and apply the currently active style to it.
 
 * self         - the global oUF object
-* unit         - the frame's unit
+* unit         - the frame's unit (string)
 * overrideName - unique global name to use for the unit frame. Defaults to an auto-generated name based on the unit
+                 (string?)
 --]]
 function oUF:Spawn(unit, overrideName)
 	argcheck(unit, 2, 'string')
@@ -665,11 +706,10 @@ end
 Used to create nameplates and apply the currently active style to them.
 
 * self      - the global oUF object
-* prefix    - prefix for the global name of the nameplate. Defaults to an auto-generated prefix
-* callback  - function to be called after a nameplate unit or the player's target has changed.
-              The arguments passed to the callback are the updated nameplate,
-              the event that triggered the update and the new unit.
-* variables - table of console variable-value pairs to be set when the player logs in
+* prefix    - prefix for the global name of the nameplate. Defaults to an auto-generated prefix (string?)
+* callback  - function to be called after a nameplate unit or the player's target has changed. The arguments passed to
+              the callback are the updated nameplate, the event that triggered the update and the new unit (function?)
+* variables - list of console variable-value pairs to be set when the player logs in (table?)
 --]]
 function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 	argcheck(nameplateCallback, 3, 'function', 'nil')
@@ -750,10 +790,10 @@ end
 Used to register an element with oUF.
 
 * self    - the global oUF object
-* name    - unique name of the element
-* update  - function used to update the element
-* enable  - function used to enable the element for a given unit frame and unit
-* disable - function used to disable the element for a given unit frame
+* name    - unique name of the element (string)
+* update  - used to update the element (function?)
+* enable  - used to enable the element for a given unit frame and unit (function?)
+* disable - used to disable the element for a given unit frame (function?)
 --]]
 function oUF:AddElement(name, update, enable, disable)
 	argcheck(name, 2, 'string')

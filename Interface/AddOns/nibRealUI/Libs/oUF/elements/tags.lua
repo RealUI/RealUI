@@ -5,36 +5,32 @@
 Provides a system for text-based display of information by binding a tag string to a font string widget which in turn is
 tied to a unit frame.
 
-## Tag
+## Widget
 
-A Lua string consisting of a function name surrounded by square brackets. The tag will be replaced by the
+A FontString to hold a tag string. Unlike other elements, this widget must not have a preset name.
+
+## Notes
+
+A `Tag` is a Lua string consisting of a function name surrounded by square brackets. The tag will be replaced by the
 output of the function and displayed as text on the font string widget with that the tag has been registered. Literals
 can be pre- or appended by separating them with a `>` before or `<` after the function name. The literals will be only
 displayed when the function returns a non-nil value. I.e. `"[perhp<%]"` will display the current health as a percentage
 of the maximum health followed by the % sign.
 
-## Tag string
+A `Tag String` is a Lua string consisting of one or multiple tags with optional literals between them. Each tag will be
+updated individually and the output will follow the tags order. Literals will be displayed in the output string
+regardless of whether the surrounding tag functions return a value. I.e. `"[curhp]/[maxhp]"` will resolve to something
+like `2453/5000`.
 
-A Lua string consisting of one or multiple tags with optional literals between them. Each tag will be updated
-individually and the output will follow the tags order. Literals will be displayed in the output string regardless of
-whether the surrounding tag functions return a value. I.e. `"[curhp]/[maxhp]"` will resolve to something like
-`2453/5000`.
-
-## Tag function
-
-Used to replace a single tag in a tag string by its output. A tag function receives only two arguments - the unit and
-the realUnit of the unit frame used to register the tag (see Options for further details). The tag function is called
-when the unit frame is shown or when a specified event has fired. It the tag is registered on an eventless frame (i.e.
-one holding the unit "targettarget"), then the tag function is called in a set time interval.
+A `Tag Function` is used to replace a single tag in a tag string by its output. A tag function receives only two
+arguments - the unit and the realUnit of the unit frame used to register the tag (see Options for further details). The
+tag function is called when the unit frame is shown or when a specified event has fired. It the tag is registered on an
+eventless frame (i.e. one holding the unit "targettarget"), then the tag function is called in a set time interval.
 
 A number of built-in tag functions exist. The layout can also define its own tag functions by adding them to the
 `oUF.Tags.Methods` table. The events upon which the function will be called are specified in a white-space separated
 list added to the `oUF.Tags.Events` table. Should an event fire without unit information, then it should also be listed
 in the `oUF.Tags.SharedEvents` table as follows: `oUF.Tags.SharedEvents.EVENT_NAME = true`.
-
-## Widget
-
-A FontString to hold a tag string. Unlike other elements, this widget must not have a preset name.
 
 ## Options
 
@@ -194,6 +190,15 @@ local tagStrings = {
 		local _, x = UnitClass(u)
 		if(x) then
 			return Hex(_COLORS.class[x])
+		else
+			local id = u:match'arena(%d)$'
+			if(id) then
+				local specID = GetArenaOpponentSpec(tonumber(id))
+				if(specID and specID > 0) then
+					_, _, _, _, _, _, x = GetSpecializationInfoByID(specID)
+					return Hex(_COLORS.class[x])
+				end
+			end
 		end
 	end]],
 
@@ -402,6 +407,17 @@ local tagStrings = {
 
 		return Hex(t)
 	end]],
+
+	['arenaspec'] = [[function(u)
+		local id = u:match'arena(%d)$'
+		if(id) then
+			local specID = GetArenaOpponentSpec(tonumber(id))
+			if(specID and specID > 0) then
+				local _, specName = GetSpecializationInfoByID(specID)
+				return specName
+			end
+		end
+	end]],
 }
 
 local tags = setmetatable(
@@ -484,6 +500,7 @@ local tagEvents = {
 	['chi']                 = 'UNIT_POWER SPELLS_CHANGED',
 	['arcanecharges']       = 'UNIT_POWER SPELLS_CHANGED',
 	['powercolor']          = 'UNIT_DISPLAYPOWER',
+	['arenaspec']           = 'ARENA_PREP_OPPONENT_SPECIALIZATIONS'
 }
 
 local unitlessEvents = {
@@ -492,6 +509,7 @@ local unitlessEvents = {
 	PLAYER_TARGET_CHANGED = true,
 	PARTY_LEADER_CHANGED = true,
 	GROUP_ROSTER_UPDATE = true,
+	ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 
 local events = {}
@@ -587,12 +605,12 @@ local tagPool = {}
 local funcPool = {}
 local tmp = {}
 
---[[ frame:Tag(fs, tagstr)
+--[[ Tags: frame:Tag(fs, tagstr)
 Used to register a tag on a unit frame.
 
-* self   - the unit frame to register the tag on
+* self   - the unit frame on which to register the tag
 * fs     - the font string to display the tag (FontString)
-* tagstr - the tag string
+* tagstr - the tag string (string)
 --]]
 local function Tag(self, fs, tagstr)
 	if(not fs or not tagstr) then return end
@@ -760,10 +778,10 @@ local function Tag(self, fs, tagstr)
 	table.insert(self.__tags, fs)
 end
 
---[[ frame:Untag(fs)
+--[[ Tags: frame:Untag(fs)
 Used to unregister a tag from a unit frame.
 
-* self - the unit frame from that to unregister the tag
+* self - the unit frame from which to unregister the tag
 * fs   - the font string holding the tag (FontString)
 --]]
 local function Untag(self, fs)
