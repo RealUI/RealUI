@@ -247,6 +247,7 @@ function ClassResource:CreateRunes(unitFrame, unit)
         Runes[index] = Rune
     end
 
+    Runes.colorSpec = true
     function Runes.PostUpdate(element, rune, runeID, start, duration, isReady)
         local color = unitFrame.colors.power.RUNES
         if isReady then
