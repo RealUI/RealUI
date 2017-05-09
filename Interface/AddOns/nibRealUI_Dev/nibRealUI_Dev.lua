@@ -107,8 +107,7 @@ local taintCheck = {
 }
 local seenEvent, lastEvent = {}
 local eventWhitelist = {
-    BAG_UPDATE = true,
-    GET_ITEM_INFO_RECEIVED = true,
+    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true
 }
 local frame = _G.CreateFrame("Frame")
 frame:SetScript("OnUpdate", function(self, elapsed)
@@ -147,7 +146,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
 
         debug("GetNormalizedRealmName", _G.GetNormalizedRealmName())
         --debug("UIParent:GetSize", _G.UIParent:GetSize())
-        if not eventWhitelist[event] then
+        if eventWhitelist[event] then
+            _G.print("Dev", event, ...)
+        else
             seenEvent[event] = true
         end
     end
