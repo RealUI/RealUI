@@ -900,7 +900,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Guild: OnEnable", block.side, ...)
                 if not _G.IsInGuild() then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 end
             end,
             OnClick = function(block, ...)
@@ -982,10 +982,10 @@ function Infobar:CreateBlocks()
                 local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
                 if isVisible and not isInGuild then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 elseif not isVisible and isInGuild then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:AddBlock(block.name, block.dataObj, info)
+                    Infobar:ShowBlock(block.name, block.dataObj, info)
                 end
 
                 local now = _G.GetTime()
@@ -1662,7 +1662,7 @@ function Infobar:CreateBlocks()
                 Infobar.frame.watch.main.rested:Hide()
                 UpdateProgress(block)
             else
-                Infobar:RemoveBlock(block.name, block.dataObj, block)
+                Infobar:HideBlock(block.name, block.dataObj, block)
             end
         end
 
@@ -1806,13 +1806,12 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("Mail1: OnEvent", event, ...)
+                local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                 local isVisible, hasNewMail = block:IsVisible(), _G.HasNewMail()
                 if not isVisible and hasNewMail then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:AddBlock(block.name, block.dataObj, info)
+                    Infobar:ShowBlock(block.name, block.dataObj, info)
                 elseif isVisible and not hasNewMail then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 end
             end,
             events = {

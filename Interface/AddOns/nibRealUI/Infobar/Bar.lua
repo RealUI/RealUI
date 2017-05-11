@@ -402,6 +402,47 @@ function Infobar:RemoveBlock(name, dataObj, blockInfo)
     end
 end
 
+function Infobar:ShowBlock(name, dataObj, blockInfo)
+    self:debug("Infobar:HideBlock", name, blockInfo.side, blockInfo.index)
+    local block, dock = blocksByData[dataObj], Infobar.frame[blockInfo.side]
+    for i = 1, #dock.ADJUSTED_BLOCKS do
+        if block == dock.ADJUSTED_BLOCKS[i].block then
+            dock.ADJUSTED_BLOCKS[i].isHidden = false
+            break
+        end
+    end
+
+    self:AddBlock(name, dataObj, blockInfo)
+end
+function Infobar:HideBlock(name, dataObj, blockInfo)
+    local block, position = blocksByData[dataObj], blockInfo.index
+    local dock, found = Infobar.frame[blockInfo.side]
+    for i = 1, #dock.ADJUSTED_BLOCKS do
+        if block == dock.ADJUSTED_BLOCKS[i].block then
+            dock.ADJUSTED_BLOCKS[i].isHidden = true
+            found = true
+            break
+        end
+    end
+
+    if not found then
+        local i = 1
+        while i <= #dock.ADJUSTED_BLOCKS do
+            if position < dock.ADJUSTED_BLOCKS[i].position then
+                break
+            end
+            i = i + 1
+        end
+        _G.tinsert(dock.ADJUSTED_BLOCKS, i, {
+            position = position, -- where the block should be
+            index = #dock.DOCKED_BLOCKS, -- where the block is
+            isHidden = true,
+            block = block
+        })
+    end
+    self:RemoveBlock(name, dataObj, blockInfo)
+end
+
 function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
     if dataObj.type == "data source" or dataObj.type == "RealUI" then
         local blockInfo = self:GetBlockInfo(name, dataObj)
@@ -563,15 +604,19 @@ function DockMixin:UpdateBlocks(forceUpdate)
         return;
     end
 
-    local lastBlock = nil;
-
+    local lastBlock
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if forceUpdate then
             block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
 
         _G.wipe(toBeRemoved)
+        local indexAdjust = 0
         for i = 1, #self.ADJUSTED_BLOCKS do
+            if self.ADJUSTED_BLOCKS[i].isHidden and index >= self.ADJUSTED_BLOCKS[i].position then
+                indexAdjust = indexAdjust + 1
+            end
+
             if block == self.ADJUSTED_BLOCKS[i].block then
                 if index == self.ADJUSTED_BLOCKS[i].position then
                     -- the block is now where is should be, remove it
@@ -585,7 +630,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
         for i = 1, #toBeRemoved do
             _G.tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
         end
-        block.index = index
+        block.index = index + indexAdjust
         block:SavePosition()
         block:Show();
 
