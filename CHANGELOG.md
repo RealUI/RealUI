@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * cargBags_Nivaya
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+
+### Changed ###
+
+  * Channeled spells have been updated for new and more recent tick info.
+  * Added support for paragon reputations.
+  * Death Knight Runes are now colored based on spec.
+
+### Fixed ###
+
+  * Cooldown count should no longer become unreadably small is some situations.
+  * An error would sometimes occur when opening the bank or inventory if the bag bar was visible.
+  * The reputation tracker no longer throws an error when displaying a faction at exalted.
+  * Certain Infobar blocks should no longer shift positions between sessions.
+
+
+
+
 ## [8.1 r19g] - 2017-03-30 ##
 ### Modified AddOns ###
 
@@ -12,7 +36,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed ###
 
-  * An arena error would occur somtimes after a load screen.
+  * An arena error would occur sometimes after a load screen.
   * Mythic Keystones were not visible in bags.
   * Artifact Relics in bags would not show the proper item level bonus they provide.
   * Skinning the chat bubbles would cause an error while in a dungeon.
