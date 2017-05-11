@@ -2288,12 +2288,12 @@ function Infobar:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                local realmMoneyTotal, faction = 0, RealUI.faction
+                local realmMoneyTotal = 0
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local realm_faction = realm.."-"..faction
-                        local factionDB = currencyDB[realm][faction]
+                        local realm_faction = realm.."-"..RealUI.faction
+                        local factionDB = currencyDB[realm][RealUI.faction]
                         for name, data in next, factionDB do
                             local classColor = RealUI:GetClassColor(data.class, "hex")
                             name = charName:format(classColor, name)

@@ -370,6 +370,52 @@ function RealUI:RegisterLockdownUpdate(id, fun, ...)
     end
 end
 
+local THIRTY_DAYS = 60 * 60 * 24 * 30
+function RealUI:InitCurrencyDB()
+    if not RealUI.realmNormalized then
+        local DB = RealUI.db.global.currency
+
+        RealUI.realmNormalized = _G.GetNormalizedRealmName()
+        local realm   = RealUI.realmNormalized
+        local faction = RealUI.faction
+        local player  = RealUI.charName
+
+        if not DB[realm] then
+            DB[realm] = {}
+        end
+
+        for k, v in next, DB[realm] do
+            if k ~= "Alliance" and k ~= "Horde" then
+                DB[realm][k] = nil
+            end
+        end
+
+        if faction and faction ~= "Neutral" then
+            if not DB[realm][faction] then
+                DB[realm][faction] = {}
+            end
+            if not DB[realm][faction][player] then
+                DB[realm][faction][player] = {}
+            end
+
+            local now = _G.time()
+            local realmDB = DB[realm][faction]
+            local cutoff = now - THIRTY_DAYS
+            for name, data in next, realmDB do
+                if data.lastSeen and data.lastSeen < cutoff then
+                    realmDB[name] = nil
+                end
+            end
+
+            local charDB = realmDB[player]
+            charDB.class = RealUI.class
+            charDB.lastSeen = now
+        else
+            DB[realm][faction] = nil
+        end
+    end
+end
+
 -- Version info retrieval
 function RealUI:GetVerString(returnLong)
     local verinfo = RealUI.verinfo
@@ -480,6 +526,8 @@ function RealUI:PLAYER_LOGIN()
         return
     end
 
+    RealUI:InitCurrencyDB()
+
     -- Low Res optimization check
     if (dbc.init.installStage == -1) then
         self:LowResOptimizationCheck()
@@ -518,29 +566,6 @@ function RealUI:PLAYER_LOGIN()
         if not _G.LOCALE_enUS then
              _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
         end
-    end
-
-    if not RealUI.db.global.messages.AuraTrackerReset and RealUI.verinfo[3] <= 14 then
-        _G.StaticPopupDialogs["RUI_AURATRACKER_RESET"] = {
-            text = "In the next revision update (r15), Aura Tracker settings will be reset. See this thread for details.",
-            button1 = _G.OKAY,
-            OnAccept = function()
-                RealUI.db.global.messages.AuraTrackerReset = true
-            end,
-            whileDead = true,
-            hideOnEscape = true,
-            hasEditBox = true,
-            OnShow = function(frame)
-                frame.editBox:SetFocus()
-                frame.editBox:SetText("http://www.wowinterface.com/forums/showthread.php?t=52754")
-                frame.editBox:HighlightText()
-            end,
-            EditBoxOnEscapePressed = function(button)
-                button:GetParent():Hide()
-                _G.ClearCursor()
-            end
-        }
-        _G.StaticPopup_Show("RUI_AURATRACKER_RESET")
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
