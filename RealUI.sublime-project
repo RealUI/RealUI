@@ -17,13 +17,16 @@
 			"path": "Interface\\AddOns\\nibRealUI"
 		},
 		{
-			"path": "Interface\\AddOns\\nibRealUI_Dev"
-		},
-		{
 			"path": "Interface\\AddOns\\nibRealUI_Config"
 		},
 		{
+			"path": "Interface\\AddOns\\nibRealUI_Dev"
+		},
+		{
 			"path": "Interface\\AddOns\\nibRealUI_Init"
+		},
+		{
+			"path": "Interface\\AddOns\\RealUI_Bugs"
 		},
 		{
 			"file_exclude_patterns":

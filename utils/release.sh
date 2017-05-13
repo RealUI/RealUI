@@ -1586,12 +1586,10 @@ fi
 if [ -z "$skip_addons" ]; then
 	declare -A extAddOns
 	extAddOns=(
-		["BugGrabber"]="https://www.wowace.com/projects/bug-grabber/files/latest"
 		["BadBoy"]="https://wow.curseforge.com/projects/bad-boy/files/latest"
 		["BadBoy_CCleaner"]="https://wow.curseforge.com/projects/badboy_ccleaner/files/latest"
 		["BadBoy_Guilded"]="https://wow.curseforge.com/projects/badboy_guilded/files/latest"
 		["Bartender4"]="https://www.wowace.com/projects/bartender4/files/latest"
-		["Bugger"]="https://wow.curseforge.com/projects/bugger/files/latest"
 		["Clique"]="https://wow.curseforge.com/projects/clique/files/latest"
 		["Foglight"]="https://wow.curseforge.com/projects/foglight/files/latest"
 		["Grid2"]="https://www.wowace.com/projects/grid2/files/latest"

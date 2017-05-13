@@ -2,9 +2,10 @@ include_files = {
     "Interface/AddOns/!Aurora_RealUI",
     "Interface/AddOns/cargBags_Nivaya",
     "Interface/AddOns/nibRealUI",
-    "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Config",
+    "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Init",
+    "Interface/AddOns/RealUI_Bugs",
 }
 
 exclude_files = {
