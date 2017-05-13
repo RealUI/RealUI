@@ -126,15 +126,16 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 local autorunScripts = {
-    alert = true
+    alert = false
 }
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event
     if event == "PLAYER_ENTERING_WORLD" then
-        for k in next, autorunScripts do
-            print("Run", k, ns.commands[k])
-            ns.commands[k](ns.commands)
+        for command, run in next, autorunScripts do
+            if run then
+                ns.commands[command](ns.commands)
+            end
         end
     end
 
