@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Removed AddOns ###
+
+  * !BugGrabber
+  * Bugger
+
+### New AddOns ###
+
+  * RealUI_Bugs
+
 ### Modified AddOns ###
 
   * !Aurora_RealUI
@@ -17,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * Channeled spells have been updated for new and more recent tick info.
   * Added support for paragon reputations.
   * Death Knight Runes are now colored based on spec.
+  * !BugGrabber and Bugger have been replaced with the new addon, RealUI_Bugs.
 
 ### Fixed ###
 
@@ -24,6 +34,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * An error would sometimes occur when opening the bank or inventory if the bag bar was visible.
   * The reputation tracker no longer throws an error when displaying a faction at exalted.
   * Certain Infobar blocks should no longer shift positions between sessions.
+  * Currency DB initialization is now more reliable.
 
 
 
