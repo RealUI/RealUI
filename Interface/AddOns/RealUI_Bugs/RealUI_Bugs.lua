@@ -285,7 +285,7 @@ function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
         time = date("%Y/%m/%d %H:%M:%S"),
         counter = 1,
     }]]
-    print(errorObject.message)
+    --print(errorObject.message)
     local errorID = _G.BugGrabber:GetErrorID(errorObject)
     _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
 end
