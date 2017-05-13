@@ -1,16 +1,3 @@
-local hasBugDisplay
-for i = 1, _G.GetNumAddOns() do
-    local meta = _G.GetAddOnMetadata(i, "X-BugGrabber-Display")
-    if meta then
-        local _, _, _, enabled = _G.GetAddOnInfo(i)
-        if enabled then
-            hasBugDisplay = meta
-            break
-        end
-    end
-end
-
-if hasBugDisplay then _G.print("Another display found, RealUI_Error is disabled."); return end
 -- Lua Globals --
 --local next = _G.next
 

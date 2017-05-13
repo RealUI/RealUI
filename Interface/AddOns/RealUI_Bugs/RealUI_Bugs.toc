@@ -6,6 +6,7 @@
 ## LoadWith: Blizzard_CompactRaidFrames
 ## OptionalDeps: Ace3
 
+Init.lua
 CallbackHandler-1.0\CallbackHandler-1.0.lua
 !BugGrabber\load.xml
 RealUI_Bugs.lua
