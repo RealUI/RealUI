@@ -15,6 +15,8 @@ local errorFrame do
     errorFrame:SetToplevel(true)
     errorFrame:Hide()
 
+    errorFrame.Close = _G.RealUI_ErrorFrameClose
+
     -- errorFrame.Title:SetText(_G.LUA_ERROR) -- is725
     errorFrame.title:SetText(_G.LUA_ERROR)
 
@@ -26,7 +28,7 @@ local errorFrame do
     ]]
     local dragArea = _G.CreateFrame("Frame", nil, errorFrame)
     dragArea:SetPoint("TOPLEFT")
-    dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", -26, -26)
+    dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", 0, -26)
     dragArea:EnableMouse(true)
     dragArea:RegisterForDrag("LeftButton")
     dragArea:SetScript("OnDragStart", function(self)
@@ -68,6 +70,13 @@ local errorFrame do
     ScrollingEdit_OnLoad(text)
     scrollFrame.Text = text
 
+    local reload = _G.CreateFrame("Button", nil, errorFrame, "UIPanelButtonTemplate")
+    reload:SetSize(96, 24)
+    reload:SetText(_G.RELOADUI)
+    reload:SetPoint("BOTTOMLEFT", 10, 12)
+    reload:SetScript("OnClick", _G.ReloadUI)
+    errorFrame.Reload = reload
+
     local prevError = _G.CreateFrame("Button", nil, errorFrame)
     prevError:SetSize(32, 32)
     prevError:SetPoint("RIGHT", index, "LEFT")
@@ -102,67 +111,26 @@ local ERROR_FORMAT = [[|cffffd200Message:|r|cffffffff %s|r
 |cffffd200Locals:|r
 |cffffffff%s|r]]
 
---[[local FormatStack do
-    local FILE_TEMPLATE   = c.GRAY .. "%1%2\\|r%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
-    local STRING_TEMPLATE = c.GRAY .. "%1[string |r\"" .. c.BLUE .. "%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
-    local NAME_TEMPLATE   = c.BLUE .. "'%1'|r"
-    local IN_C = c.GOLD .. "[C]|r" .. c.GRAY .. ":|r"
-
-    function FormatStack(stack)
-        stack = stack and tostring(stack)
-        if not stack then return "" end
-        stack = gsub(stack, "Interface\\", "")
-        stack = gsub(stack, "AddOns\\", "")
-        stack = gsub(stack, "%[C%]", IN_C)
-        stack = gsub(stack, "(<?)([%a!_]+)\\(.-%.[lx][um][al]):(%d+)(>?)(:?)", FILE_TEMPLATE)
-        stack = gsub(stack, "(<?)%[string \"(.-)\"]:(%d+)(>?)(:?)", STRING_TEMPLATE)
-        stack = gsub(stack, "['`]([^`']+)'", NAME_TEMPLATE)
-        return stack
-    end
-end
-
-local FormatLocals do
-    local FILE_TEMPLATE   = c.GRAY .. "%1\\|r%2:" .. c.GREEN .. "%3|r"
-    local GRAY    = c.GRAY .. "%1|r"
-    local EQUALS  = c.GRAY .. " = |r"
-    local BOOLEAN = EQUALS .. c.PURPLE .. "%1|r"
-    local NUMBER  = EQUALS .. c.ORANGE .. "%1|r"
-    local STRING  = EQUALS .. c.BLUE .. "\"%1\"|r"
-    local IN_C = c.GOLD .. " [C]|r" .. c.GRAY .. "|r"
-
-    function FormatLocals(locals)
-        locals = locals and _G.tostring(locals)
-        if not locals then return "" end
-        locals = gsub(locals, "> {\n%s*}", ">")
-        locals = gsub(locals, "\n%s", "\n    ")
-        locals = gsub(locals, "%(%*temporary%)", GRAY)
-        locals = gsub(locals, "(<[a-z]+>)", GRAY)
-        locals = gsub(locals, "%[C%]:%-%d", IN_C)
-        locals = gsub(locals, " = ([ftn][ari][lu]s?e?)", BOOLEAN)
-        locals = gsub(locals, " = ([0-9%.%-]+)", NUMBER)
-        locals = gsub(locals, " = \"([^\"]+)\"", STRING)
-        locals = gsub(locals, "Interface\\A?d?d?[Oo]?n?s?\\?([%a!_]+)\\(.-%.[lx][um][al]):([0-9]+)", FILE_TEMPLATE)
-        return locals
-    end
-end]]
-
 local FormatError do
     local c = {
         BLUE   = _G.BATTLENET_FONT_COLOR_CODE,
         GOLD   = _G.NORMAL_FONT_COLOR_CODE,
-        GRAY   = "|cff9f9f9f",
-        GREEN  = "|cff7fff7f",
-        ORANGE = "|cffff9f7f",
-        PURPLE = "|cff9f7fff",
+        GRAY   = "|cFF808080",
+        PINK   = "|cFFFFC0CB",
+        GREEN  = "|cFF98FF98",
+        ORANGE = "|cFFFF681F",
+        PURPLE = "|cFF9F7FFF",
     }
 
-    local FILE_TEMPLATE   = c.GRAY .. "%1%2\\|r%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
     local GRAY    = c.GRAY .. "%1|r"
+    local IN_C = c.GOLD .. "[C]|r" .. c.GRAY .. "|r"
     local EQUALS  = c.GRAY .. " = |r"
-    local BOOLEAN = EQUALS .. c.PURPLE .. "%1|r"
-    local NUMBER  = EQUALS .. c.ORANGE .. "%1|r"
-    local STRING  = EQUALS .. c.BLUE .. "\"%1\"|r"
-    local IN_C = c.GOLD .. " [C]|r" .. c.GRAY .. "|r"
+    local TYPE_BOOLEAN = EQUALS .. c.PURPLE .. "%1|r"
+    local TYPE_NUMBER  = EQUALS .. c.ORANGE .. "%1|r"
+    local TYPE_STRING  = EQUALS .. c.BLUE .. "\"%1\"|r"
+    local FILE_TEMPLATE   = c.GRAY .. "%1%2\\|r%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
+    local STRING_TEMPLATE = c.GRAY .. "%1[string |r" .. c.BLUE .. "\"%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
+    local NAME_TEMPLATE   = c.PINK .. "'%1'|r"
 
     function FormatError(msg, stack, locals)
         msg = msg and _G.tostring(msg)
@@ -173,11 +141,13 @@ local FormatError do
         msg = msg:gsub("\n%s", "\n    ")
         msg = msg:gsub("%(%*temporary%)", GRAY)
         msg = msg:gsub("(<[a-z]+>)", GRAY)
-        msg = msg:gsub("%[C%]:%-%d", IN_C)
-        msg = msg:gsub(" = ([ftn][ari][lu]s?e?)", BOOLEAN)
-        msg = msg:gsub(" = ([0-9%.%-]+)", NUMBER)
-        msg = msg:gsub(" = \"([^\"]+)\"", STRING)
+        msg = msg:gsub("%[C%]:%-?%d?", IN_C)
+        msg = msg:gsub(" = ([ftn][ari][lu]s?e?)", TYPE_BOOLEAN)
+        msg = msg:gsub(" = ([0-9%.%-]+)", TYPE_NUMBER)
+        msg = msg:gsub(" = \"([^\"]+)\"", TYPE_STRING)
         msg = msg:gsub("(<?)([%a!_]+)\\(.-%.[lx][um][al]):(%d+)(>?)(:?)", FILE_TEMPLATE)
+        msg = msg:gsub("(<?)%[string \"(.-)\"]:(%d+)(>?)(:?)", STRING_TEMPLATE)
+        msg = msg:gsub("[`]([^`]+)'", NAME_TEMPLATE)
         return msg
     end
 end
@@ -256,10 +226,6 @@ function errorFrame:Update()
         end
         editbox:HighlightText(0, 0)
         editbox:SetCursorPosition(0)
-
-        if not self:IsShown() then
-            self:Show()
-        end
     end
 end
 
@@ -275,6 +241,9 @@ function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
     --print(errorObject.message)
     local errorID = _G.BugGrabber:GetErrorID(errorObject)
     _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
+    if self:IsShown() then
+        self:Update()
+    end
 end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
