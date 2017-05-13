@@ -189,6 +189,9 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
 
+            F.AddPlugin(function()
+                mods["RealUI_Bugs"](F, C)
+            end)
             for _, moduleFunc in next, addonModule do
                 F.AddPlugin(function()
                     moduleFunc(F, C)

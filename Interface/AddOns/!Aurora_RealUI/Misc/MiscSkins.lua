@@ -87,3 +87,19 @@ mods["Blizzard_AuctionUI"] = function(F, C)
         _G.WowTokenGameTimeTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
     end
 end
+
+mods["RealUI_Bugs"] = function(F, C)
+    mods.debug("RealUI_Bugs", F, C)
+
+    local RealUI_ErrorFrame = _G.RealUI_ErrorFrame
+    for i = 1, 10 do
+        -- Remove borders and backgrounds
+        _G.select(i, RealUI_ErrorFrame:GetRegions()):Hide()
+    end
+    F.CreateBD(RealUI_ErrorFrame)
+    F.ReskinClose(RealUI_ErrorFrame.Close)
+    F.Reskin(RealUI_ErrorFrame.Reload)
+    F.ReskinArrow(RealUI_ErrorFrame.PreviousError, "Left")
+    F.ReskinArrow(RealUI_ErrorFrame.NextError, "Right")
+    F.ReskinScroll(RealUI_ErrorFrame.ScrollFrame.ScrollBar)
+end
