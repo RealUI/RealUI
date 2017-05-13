@@ -3,7 +3,7 @@
 ## Notes: A custom Aurora skin for RealUI
 ## Author: Gethe
 ## Version: 8.1 r19g
-## RequiredDeps: nibRealUI_Init
+## RequiredDeps: RealUI_Bugs, nibRealUI_Init
 ## OptionalDeps: !BugGrabber, Masque
 
 !Aurora.lua
