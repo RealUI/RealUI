@@ -1,10 +1,3 @@
-Invoke-Expression -Command "luacheck Interface"
-Write-Host "Exit code: $LASTEXITCODE"
-if (!!$LASTEXITCODE) {
-    exit $LASTEXITCODE
-}
-Write-Host ""
-
 $oldVersion = Get-Content "./utils/version.txt"
 Write-Host "Current version: $oldVersion"
 

@@ -1,5 +1,8 @@
-:: Run luacheck and increment version
-powershell ".\utils\update.ps1"
+:: Run luacheck
+call luacheck Interface || pause && EXIT
+
+:: Increment version
+powershell .\utils\update.ps1
 
 :: Run packager
 :: Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]
@@ -16,4 +19,4 @@ powershell ".\utils\update.ps1"
 ::   -r releasedir    Set directory containing the package directory. Defaults to $topdir/.release.
 ::   -p curse-id      Set the project id used on CurseForge for localization and uploading.
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
-bash -c "./utils/release.sh -clo -w 16068"
+bash -c "./utils/release.sh -l -w 16068"
