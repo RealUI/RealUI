@@ -18,6 +18,7 @@ local errorFrame do
     errorFrame.Close = _G.RealUI_ErrorFrameClose
 
     -- errorFrame.Title:SetText(_G.LUA_ERROR) -- is725
+    errorFrame.title = errorFrame.title or errorFrame.Title
     errorFrame.title:SetText(_G.LUA_ERROR)
 
     --[[ -- is725
@@ -219,7 +220,7 @@ function errorFrame:Update()
         local err = errors[self.index]
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
-        if err.message:find("RealUI") then
+        if err.message:find("RealUI") or (err.message:find("Nivaya") and _G.RealUI.hasCargBags) then
             editbox:SetText(REALUI_ERROR_FORMAT:format(msg, stack, err.time, err.counter, _G.RealUI:GetVerString(true), locals))
         else
             editbox:SetText(ERROR_FORMAT:format(msg, stack, err.time, err.counter, locals))
