@@ -114,17 +114,17 @@ local ERROR_FORMAT = [[|cffffd200Message:|r|cffffffff %s|r
 
 local FormatError do
     local c = {
-        BLUE   = _G.BATTLENET_FONT_COLOR_CODE,
-        GOLD   = _G.NORMAL_FONT_COLOR_CODE,
-        GRAY   = "|cFF808080",
-        PINK   = "|cFFFFC0CB",
-        GREEN  = "|cFF98FF98",
-        ORANGE = "|cFFFF681F",
-        PURPLE = "|cFF9F7FFF",
+        ORANGE = "|c".._G.RAID_CLASS_COLORS.DRUID.colorStr,
+        GREEN  = "|c".._G.RAID_CLASS_COLORS.HUNTER.colorStr,
+        BLUE   = "|c".._G.RAID_CLASS_COLORS.MAGE.colorStr,
+        PINK   = "|c".._G.RAID_CLASS_COLORS.PALADIN.colorStr,
+        PURPLE = "|c".._G.RAID_CLASS_COLORS.WARLOCK.colorStr,
+        TAN    = "|c".._G.RAID_CLASS_COLORS.WARRIOR.colorStr,
+        GRAY   = _G.GRAY_FONT_COLOR_CODE,
     }
 
     local GRAY    = c.GRAY .. "%1|r"
-    local IN_C = c.GOLD .. "[C]|r" .. c.GRAY .. "|r"
+    local IN_C = c.TAN .. "[C]|r" .. c.GRAY .. "|r"
     local EQUALS  = c.GRAY .. " = |r"
     local TYPE_BOOLEAN = EQUALS .. c.PURPLE .. "%1|r"
     local TYPE_NUMBER  = EQUALS .. c.ORANGE .. "%1|r"
