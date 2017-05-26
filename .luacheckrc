@@ -9,10 +9,7 @@ include_files = {
 }
 
 exclude_files = {
-    "Interface/AddOns/nibRealUI/Libs/**",
-    "Interface/AddOns/nibRealUI_Config/Libs/**",
-    "Interface/AddOns/nibRealUI_Init/Libs/**",
-    "Interface/AddOns/RealUI_Bugs/!BugGrabber/**",
+    "Interface/AddOns/**/Libs/**",
     "**/*.blp",
     "**/*.BLP",
     "**/*.ttf",

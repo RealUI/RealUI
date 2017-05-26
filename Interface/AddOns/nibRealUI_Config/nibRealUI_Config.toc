@@ -7,7 +7,7 @@
 ## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1
 
-embeds.xml
+Libs\Libs.xml
 
 Config.lua
 ConfigBar.lua

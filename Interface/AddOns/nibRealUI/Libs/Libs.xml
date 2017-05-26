@@ -2,11 +2,8 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!-- Libs -->
-    <Script file="LibStub\LibStub.lua"/>
     <Script file="LibChatAnims\LibChatAnims.lua"/>
     <Script file="LibStrataFix\LibStrataFix.lua"/>
-    <Script file="CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
-    <Script file="LibSharedMedia-3.0\LibSharedMedia-3.0.lua"/>
     <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
     <Script file="AceConsole-3.0\AceConsole-3.0.lua"/>
     <Script file="AceDB-3.0\AceDB-3.0.lua"/>

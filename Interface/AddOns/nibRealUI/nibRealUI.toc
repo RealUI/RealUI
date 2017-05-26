@@ -11,7 +11,7 @@
 ## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
 ## Globe-Pre: !Aurora_RealUI, nibRealUI_Init
 
-Libs\Embeds.xml
+Libs\Libs.xml
 
 Init.lua
 

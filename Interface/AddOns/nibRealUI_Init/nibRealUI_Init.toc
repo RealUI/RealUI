@@ -4,11 +4,11 @@
 ## Author: Gethe
 ## Version: 8.1 r19g
 ## RequiredDeps: RealUI_Bugs
-## OptionalDeps: Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
+## OptionalDeps: nibRealUI_Dev, Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
 ## SavedVariables: RealUI_InitDB
 ## SavedVariablesPerCharacter: RealUI_Debug
 
-Libs\libs.xml
+Libs\Libs.xml
 Fonts.xml
 
 SharedMedia.lua
