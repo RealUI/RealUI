@@ -20,9 +20,7 @@ local function debug(isDebug, ...) -- luacheck: ignore
     end
 end
 
-local FrameDeltaLerp, Lerp = _G.FrameDeltaLerp, _G.Lerp
-local smoothBars = {}
-
+local Lerp = _G.Lerp
 local function SetBarPosition(self, value)
     local meta = bars[self]
     meta.value = value
@@ -82,17 +80,34 @@ local function SetBarPosition(self, value)
         self.fill:SetShown(value > meta.minVal)
     end
 end
-local function ProcessSmoothStatusBars()
-    for bar, targetValue in next, smoothBars do
-        local newValue = FrameDeltaLerp(bar.value or bars[bar].value, targetValue, .25)
-        if abs(newValue - targetValue) < .005 then
-            smoothBars[bar] = nil
+
+local smoothBars do
+    local FrameDeltaLerp, Clamp = _G.FrameDeltaLerp, _G.Clamp
+    smoothBars = {}
+
+    local function IsCloseEnough(bar, newValue, targetValue)
+        local min, max = bar:GetMinMaxValues()
+        local range = max - min
+        if range > 0.0 then
+            return abs((newValue - targetValue) / range) < .00001
         end
 
-        SetBarPosition(bar, newValue)
+        return true
     end
+
+    local function ProcessSmoothStatusBars()
+        for bar, targetValue in next, smoothBars do
+            local effectiveTargetValue = Clamp(targetValue, bar:GetMinMaxValues())
+            local newValue = FrameDeltaLerp(bar:GetValue(), effectiveTargetValue, .25)
+            if IsCloseEnough(bar, newValue, effectiveTargetValue) then
+                smoothBars[bar] = nil
+            end
+
+            SetBarPosition(bar, newValue)
+        end
+    end
+    _G.C_Timer.NewTicker(0, ProcessSmoothStatusBars)
 end
-_G.C_Timer.NewTicker(0, ProcessSmoothStatusBars)
 
 local UpdateAngle do
     local function SetVertexOffset(tex, meta)
@@ -273,7 +288,7 @@ function AngleStatusBarMixin:SetMinMaxValues(minVal, maxVal)
     if targetValue then
         local ratio = 1
         if maxVal ~= 0 and meta.maxVal and meta.maxVal ~= 0 then
-            ratio = maxVal / (meta.maxVal or maxVal)
+            ratio = maxVal / meta.maxVal
         end
 
         smoothBars[self] = targetValue * ratio
