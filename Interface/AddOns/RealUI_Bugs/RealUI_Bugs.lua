@@ -99,18 +99,19 @@ local errorFrame do
     errorFrame.NextError = nextError
 end
 
-local CHAT_ERROR_FORMAT = [=[|cffff3333|Herror:%s|h[%s: %s]|h|r]=]
-local REALUI_ERROR_FORMAT = [[|cffffd200Message:|r|cffffffff %s|r
-|cffffd200Stack:|r|cffffffff %s|r
-|cffffd200Time:|r|cffffffff %s|r |cffffd200Count:|r|cffffffff %s|r
-|cffffd200Version:|r %s
-|cffffd200Locals:|r
-|cffffffff%s|r]]
-local ERROR_FORMAT = [[|cffffd200Message:|r|cffffffff %s|r
-|cffffd200Stack:|r|cffffffff %s|r
-|cffffd200Time:|r|cffffffff %s|r |cffffd200Count:|r|cffffffff %s|r
-|cffffd200Locals:|r
-|cffffffff%s|r]]
+
+local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Herror:%s|h[%s: %s]|h|r]=]
+local REALUI_ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+|cFFFFD200Stack:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Version:|r %s
+|cFFFFD200Locals:|r
+|cFFFFFFFF%s|r]]
+local ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+|cFFFFD200Stack:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Locals:|r
+|cFFFFFFFF%s|r]]
 
 local FormatError do
     local c = {
