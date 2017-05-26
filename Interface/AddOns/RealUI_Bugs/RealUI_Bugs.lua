@@ -138,7 +138,7 @@ local FormatError do
         if not msg then return "" end
         msg = msg:gsub("Interface\\", "")
         msg = msg:gsub("AddOns\\", "")
-        msg = msg:gsub("> {\n%s*}", ">")
+        msg = msg:gsub("{\n%s*}", "{}")
         msg = msg:gsub("\n%s", "\n    ")
         msg = msg:gsub("%(%*temporary%)", GRAY)
         msg = msg:gsub("(<[a-z]+>)", GRAY)
