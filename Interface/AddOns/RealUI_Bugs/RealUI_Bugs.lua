@@ -126,10 +126,9 @@ local FormatError do
 
     local GRAY    = c.GRAY .. "%1|r"
     local IN_C = c.TAN .. "[C]|r" .. c.GRAY .. "|r"
-    local EQUALS  = c.GRAY .. " = |r"
-    local TYPE_BOOLEAN = EQUALS .. c.PURPLE .. "%1|r"
-    local TYPE_NUMBER  = EQUALS .. c.ORANGE .. "%1|r"
-    local TYPE_STRING  = EQUALS .. c.BLUE .. "\"%1\"|r"
+    local TYPE_BOOLEAN = " = " .. c.PURPLE .. "%1|r"
+    local TYPE_NUMBER  = " = " .. c.ORANGE .. "%1|r"
+    local TYPE_STRING  = " = " .. c.BLUE .. "\"%1\"|r"
     local FILE_TEMPLATE   = c.GRAY .. "%1%2\\|r%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
     local STRING_TEMPLATE = c.GRAY .. "%1[string |r" .. c.BLUE .. "\"%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
     local NAME_TEMPLATE   = c.PINK .. "'%1'|r"
