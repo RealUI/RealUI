@@ -21,7 +21,7 @@ local function debug(isDebug, ...) -- luacheck: ignore
 end
 
 local Lerp = _G.Lerp
-local function SetBarPosition(self, value)
+local function SetBarValue(self, value)
     local meta = bars[self]
     meta.value = value
     local isMaxed, isReversePerc, isReverseFill = meta.maxVal == 0, self:GetReversePercent(), self:GetReverseFill()
@@ -103,7 +103,7 @@ local smoothBars do
                 smoothBars[bar] = nil
             end
 
-            SetBarPosition(bar, newValue)
+            SetBarValue(bar, newValue)
         end
     end
     _G.C_Timer.NewTicker(0, ProcessSmoothStatusBars)
@@ -175,7 +175,7 @@ local UpdateAngle do
         end
 
         if meta.value then
-            SetBarPosition(self, meta.value)
+            SetBarValue(self, meta.value)
         end
     end
 end
@@ -309,7 +309,7 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
     if meta.smooth and not ignoreSmooth then
         smoothBars[self] = value
     else
-        SetBarPosition(self, value)
+        SetBarValue(self, value)
     end
 end
 function AngleStatusBarMixin:GetValue()
@@ -343,7 +343,7 @@ end
 function AngleStatusBarMixin:SetReversePercent(isReversePerc)
     local meta = bars[self]
     meta.isReversePerc = isReversePerc
-    SetBarPosition(self, meta.value)
+    SetBarValue(self, meta.value)
 end
 function AngleStatusBarMixin:GetReversePercent()
     return bars[self].isReversePerc
