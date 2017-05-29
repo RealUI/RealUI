@@ -36,7 +36,7 @@ if [ -n "$TRAVIS" ]; then
 	fi
 	# only want to package master and tags
 	if [ "$TRAVIS_BRANCH" != "master" -a -z "$TRAVIS_TAG" ]; then
-		echo "Not packaging \`\`${TRAVIS_BRANCH}''."
+		echo "Not packaging \"${TRAVIS_BRANCH}\"."
 		exit 0
 	fi
 	# don't need to run the packager if there is a tag pending (or already built)
@@ -94,24 +94,25 @@ skip_upload=
 
 # Process command-line options
 usage() {
-	echo "Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]" >&2
+	echo "Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-p curse-id] [-w wowi-id] [-g game-version]" >&2
 	echo "  -a               Skip third party addons." >&2
 	echo "  -c               Skip copying files into the package directory." >&2
 	echo "  -d               Skip uploading." >&2
 	echo "  -e               Skip checkout of external repositories." >&2
 	echo "  -l               Skip @localization@ keyword replacement." >&2
 	echo "  -o               Keep existing package directory, overwriting its contents." >&2
-	echo "  -s               Create a stripped-down \`\`nolib'' package." >&2
+	echo "  -s               Create a stripped-down \"nolib\" package." >&2
 	echo "  -u               Use Unix line-endings." >&2
 	echo "  -z               Skip zipfile creation." >&2
 	echo "  -t topdir        Set top-level directory of checkout." >&2
-	echo "  -r releasedir    Set directory containing the package directory. Defaults to \`\`\$topdir/.release''." >&2
+	echo "  -r releasedir    Set directory containing the package directory. Defaults to \"\$topdir/.release\"." >&2
 	echo "  -p curse-id      Set the project id used on CurseForge for localization and uploading." >&2
 	echo "  -w wowi-id       Set the addon id used on WoWInterface for uploading." >&2
+	echo "  -g game-version  Set the game version to use for CurseForge and WoWInterface uploading." >&2
 }
 
 OPTIND=1
-while getopts ":caelzusop:dw:r:t:" opt; do
+while getopts ":caelzusop:dw:r:t:g:" opt; do
 	case $opt in
 	c)
 		# Skip copying files into the package directory.
@@ -164,14 +165,24 @@ while getopts ":caelzusop:dw:r:t:" opt; do
 		# Skip generating the zipfile.
 		skip_zipfile=true
 		;;
+	g)
+		# Set version (x.y.z)
+		if [[ "$OPTARG" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-z]?$ ]]; then
+			game_version="$OPTARG"
+		else
+			echo "Invalid argument for option \"-g\" ($OPTARG)" >&2
+			usage
+			exit 1
+		fi
+		;;
 	:)
-		echo "Option \`\`-$OPTARG'' requires an argument." >&2
+		echo "Option \"-$OPTARG\" requires an argument." >&2
 		usage
 		exit 1
 		;;
 	\?)
 		if [ "$OPTARG" != "?" -a "$OPTARG" != "h" ]; then
-			echo "Unknown option \`\`-$OPTARG''." >&2
+			echo "Unknown option \"-$OPTARG\"." >&2
 		fi
 		usage
 		exit 1
@@ -225,7 +236,7 @@ if [ -d "$topdir/.git" ]; then
 elif [ -d "$topdir/.svn" ]; then
 	repository_type=svn
 else
-	echo "No Git or SVN checkout found in \`\`$topdir''." >&2
+	echo "No Git or SVN checkout found in \"$topdir\"." >&2
 	exit 1
 fi
 
@@ -234,7 +245,7 @@ case $releasedir in
 /*)			;;
 $topdir/*)	;;
 *)
-	echo "The release directory \`\`$releasedir'' must be an absolute path or inside \`\`$topdir''." >&2
+	echo "The release directory \"$releasedir\" must be an absolute path or inside \"$topdir\"." >&2
 	exit 1
 	;;
 esac
@@ -630,10 +641,13 @@ if [ -n "$previous_version" ]; then
 	echo "Previous version: $previous_version"
 fi
 if [ -n "$slug" ]; then
-	echo "CurseForge ID: $slug"
+	echo "CurseForge ID: $slug${cf_token:+ [token set]}"
 fi
 if [ -n "$addonid" ]; then
-	echo "WoWInterface ID: $addonid"
+	echo "WoWInterface ID: $addonid${wowi_token:+ [token set]}"
+fi
+if [ -n "$project_github_slug" ]; then
+	echo "GitHub: $project_github_slug${github_token:+ [token set]}"
 fi
 echo
 echo "Checkout directory: $topdir"
@@ -677,39 +691,27 @@ simple_filter() {
 		-e "s/@file-timestamp@/$si_file_timestamp/g"
 }
 
-# Find URL of localization app.
-localization_url=
-cache_localization_url() {
+# Find URL of localization api.
+set_localization_url() {
 	localization_url=
-	if [ -n "$slug" ]; then
-		for _ul_site_url in $site_url; do
-			_localization_url="${_ul_site_url}/addons/$slug/localization"
-			if curl -s -I "$_localization_url/" | grep -q "200 OK"; then
-				localization_url=$_localization_url
-			fi
-		done
+	if [ -n "$slug" -a -n "$cf_token" ] && [[ "$slug" =~ ^[0-9]+$ ]]; then
+		# There is no good way of differentiating between sites short of using different TOC fields for CF and WowAce
+		# Curse does redirect to the proper site when using the project id, so we'll use that to get the API url
+		_ul_test_url="https://wow.curseforge.com/projects/$slug"
+		_ul_test_url_result=$( curl -s -L -w "%{url_effective}" -o /dev/null $_ul_test_url )
+		if [ "$_ul_test_url" != "$_ul_test_url_result" ]; then
+			localization_url="${_ul_test_url_result%%/project*}/api/projects/$slug/localization/export"
+		fi
+	fi
+	if [ -z "$localization_url" ]; then
+		echo "Skipping localization! Missing CurseForge API token and/or project id is invalid."
+		echo
 	fi
 }
 
-# Filter to print an error for unhandled @localization@ repository keyword replacement.
-localization_unset_filter() {
-	_ul_eof=
-	while [ -z "$_ul_eof" ]; do
-		IFS='' read -r _ul_line || _ul_eof=true
-		case $_ul_line in
-		*@localization\(*\)@*)
-			echo "    Found @localization@ with no localization url set for \`\`$slug''" >&2
-			;;
-		esac
-		if [ -n "$_ul_eof" ]; then
-			echo -n "$_ul_line"
-		else
-			echo "$_ul_line"
-		fi
-	done
-}
-
 # Filter to handle @localization@ repository keyword replacement.
+# https://www.curseforge.com/knowledge-base/world-of-warcraft/531-localization-substitutions
+declare -A unlocalized_values=( ["english"]="ShowPrimary" ["comment"]="ShowPrimaryAsComment" ["blank"]="ShowBlankAsComment" ["ignore"]="Ignore" )
 localization_filter() {
 	_ul_eof=
 	while [ -z "$_ul_eof" ]; do
@@ -720,6 +722,8 @@ localization_filter() {
 		*@localization\(*\)@*)
 			_ul_lang=
 			_ul_namespace=
+			_ul_singlekey=
+			_ul_tablename="L"
 			# Get the prefix of the line before the comment.
 			_ul_prefix=${_ul_line%%@localization(*}
 			_ul_prefix=${_ul_prefix%%--*}
@@ -729,72 +733,121 @@ localization_filter() {
 			# Sanitize the params a bit. (namespaces are restricted to [a-zA-Z0-9_], separated by [./:])
 			_ul_params=${_ul_params// /}
 			_ul_params=${_ul_params//,/, }
-			# Generate a URL parameter string from the localization parameters.
+			# Pull the locale language first (mainly for warnings).
+			_ul_lang="enUS"
+			if [[ $_ul_params == *"locale=\""* ]]; then
+				_ul_lang=${_ul_params##*locale=\"}
+				_ul_lang=${_ul_lang:0:4}
+				_ul_lang=${_ul_lang%%\"*}
+			else
+				echo "    Warning! No locale set, using enUS." >&2
+			fi
+			# Generate a URL parameter string from the localization parameters. https://www.curseforge.com/docs/api
+			_ul_url_params=""
 			set -- ${_ul_params}
-			_ul_url_params=
-			_ul_skip_fetch=
 			for _ul_param; do
 				_ul_key=${_ul_param%%=*}
-				_ul_value=${_ul_param#*=\"}
+				_ul_value=${_ul_param#*=}
+				_ul_value=${_ul_value%,*}
+				_ul_value=${_ul_value#*\"}
 				_ul_value=${_ul_value%\"*}
 				case ${_ul_key} in
 					escape-non-ascii)
-						if [ "$_ul_param" = "true" ]; then
-							_ul_url_params="${_ul_url_params}&escape_non_ascii=y"
+						if [ "$_ul_value" = "true" ]; then
+							_ul_url_params="${_ul_url_params}&escape-non-ascii-characters=true"
 						fi
 						;;
 					format)
-						_ul_url_params="${_ul_url_params}&format=${_ul_value}"
+						if [ "$_ul_value" = "lua_table" ]; then
+							_ul_url_params="${_ul_url_params}&export-type=Table"
+						fi
 						;;
 					handle-unlocalized)
-						_ul_url_params="${_ul_url_params}&handle_unlocalized=${_ul_value}"
+						if [ "$_ul_value" != "english" -a -n "${unlocalized_values[$_ul_value]}" ]; then
+							_ul_url_params="${_ul_url_params}&unlocalized=${unlocalized_values[$_ul_value]}"
+						fi
 						;;
 					handle-subnamespaces)
-						_ul_url_params="${_ul_url_params}&handle_subnamespaces=${_ul_value}"
+						if [ "$_ul_value" = "concat" ]; then # concat with /
+							_ul_url_params="${_ul_url_params}&concatenante-subnamespaces=true"
+						elif [ "$_ul_value" = "subtable" ]; then
+							echo "    ($_ul_lang) Warning! ${_ul_key}=\"${_ul_value}\" is not supported. Include each full subnamespace, comma delimited." >&2
+						fi
+						;;
+					key)
+						# _ul_params was stripped of spaces, so reparse the line for the key
+						_ul_singlekey=${_ul_line#*@localization(}
+						_ul_singlekey=${_ul_singlekey#*key=\"}
+						_ul_singlekey=${_ul_singlekey%%\",*}
+						_ul_singlekey=${_ul_singlekey%%\")@*}
 						;;
 					locale)
-						_ul_url_params="${_ul_url_params}&language=${_ul_value}"
 						_ul_lang=$_ul_value
 						;;
 					namespace)
-						# Verify that the localization namespace is valid.  The CF packager will silently allow
-						# and remove @localization@ calls with invalid namespaces.
-						_ul_namespace_url=$( echo "${localization_url}/namespaces/${_ul_value}" | tr '[:upper:]' '[:lower:]' )
-						if curl -s -I "$_ul_namespace_url/" | grep -q "200 OK"; then
-							_ul_namespace=$_ul_value
-						else
-							echo "    ($_ul_lang) Warning! Invalid localization namespace \`\`$_ul_value''." >&2
-							_ul_skip_fetch=true
-						fi
-						_ul_url_params="${_ul_url_params}&namespace=${_ul_value}"
+						# reparse to get all namespaces if multiple
+						_ul_namespace=${_ul_params##*namespace=\"}
+						_ul_namespace=${_ul_namespace%%\"*}
+						_ul_namespace=${_ul_namespace//, /,}
+						_ul_url_params="${_ul_url_params}&namespaces=${_ul_namespace}"
+						_ul_namespace="/${_ul_namespace}"
 						;;
-					key)
-						# Curse API can't do this, which means we'd have to pull the locale
-						# and parse it for the one entry specified. I've only seen this with
-						# ckk projects for localizing TOC entries, but warn anyway.
-						# _ul_url_params="${_ul_url_params}&format=lua_additive_table"
-						# _ul_singlekey=$_ul_value
-						echo "    ($_ul_lang) Warning! Fetching a single key is not supported." >&2
-						_ul_skip_fetch=true
+					namespace-delimiter)
+						if [ "$_ul_value" != "/" ]; then
+							echo "    ($_ul_lang) Warning! ${_ul_key}=\"${_ul_value}\" is not supported." >&2
+						fi
+						;;
+					prefix-values)
+						echo "    ($_ul_lang) Warning! \"${_ul_key}\" is not supported." >&2
+						;;
+					same-key-is-true)
+						if [ "$_ul_value" = "true" ]; then
+							_ul_url_params="${_ul_url_params}&true-if-value-equals-key=true"
+						fi
+						;;
+					table-name)
+						if [ "$_ul_value" != "L" ]; then
+							_ul_tablename="$_ul_value"
+							_ul_url_params="${_ul_url_params}&table-name=${_ul_value}"
+						fi
 						;;
 				esac
 			done
-			# Strip any leading or trailing ampersands.
-			_ul_url_params=${_ul_url_params#&}
-			_ul_url_params=${_ul_url_params%&}
-			echo -n "$_ul_prefix"
-			if [ -z "$_ul_skip_fetch" ]; then
-				if [ -n "$_ul_namespace" ]; then
-					echo "    Adding $_ul_lang/$_ul_namespace" >&2
-				else
-					echo "    Adding $_ul_lang" >&2
+
+			if [ -z "$_cdt_localization" -o -z "$localization_url" ]; then
+				echo "    Skipping localization (${_ul_lang}${_ul_namespace})" >&2
+
+				# If the line isn't a TOC entry, print anything before the keyword.
+				if [[ $_ul_line != "## "* ]]; then
+					if [ -n "$_ul_eof" ]; then
+						echo -n "$_ul_prefix"
+					else
+						echo "$_ul_prefix"
+					fi
 				fi
-				# Fetch the localization data, but don't output anything if the namespace was not valid.
-				curl -s "${localization_url}/export.txt?${_ul_url_params}" | awk '/u'\''Not a valid choice'\''/ { o="    Error! "$0; print o >"/dev/stderr"; skip = 1; next } skip == 1 { next } { print }'
-			fi
-			# Insert a trailing blank line to match CF packager.
-			if [ -z "$_ul_eof" ]; then
-				echo ""
+			else
+				_ul_url="${localization_url}?lang=${_ul_lang}${_ul_url_params}"
+				echo "    Adding ${_ul_lang}${_ul_namespace}" >&2
+
+				if [ -z "$_ul_singlekey" ]; then
+					# Write text that preceded the substitution.
+					echo -n "$_ul_prefix"
+
+					# Fetch the localization data, but don't output anything if there is an error.
+					curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    Error! "$0"\n           "url; print o >"/dev/stderr"; exit 1 } /<!DOCTYPE/ { print "    Error! Invalid output\n           "url >"/dev/stderr"; exit 1 } /^'"$_ul_tablename"' = '"$_ul_tablename"' or \{\}/ { next } { print }'
+
+					# Insert a trailing blank line to match CF packager.
+					if [ -z "$_ul_eof" ]; then
+						echo ""
+					fi
+				else
+					# Parse out a single phrase. This is kind of expensive, but caching would be way too much effort to optimize for what is basically an edge case.
+					_ul_value=$( curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    Error! "$0"\n           "url; print o >"/dev/stderr"; exit 1 } /<!DOCTYPE/ { print "    Error! Invalid output\n           "url >"/dev/stderr"; exit 1 } { print }' | sed -n '/L\["'"$_ul_singlekey"'"\]/p' | sed 's/^.* = "\(.*\)"/\1/' )
+					if [ -n "$_ul_value" -a "$_ul_value" != "$_ul_singlekey" ]; then
+						# The result is different from the base value so print out the line.
+						echo "${_ul_prefix}${_ul_value}${_ul_line##*)@}"
+					fi
+				fi
 			fi
 			;;
 		*)
@@ -958,7 +1011,7 @@ copy_directory_tree() {
 		d)	_cdt_debug=true ;;
 		i)	_cdt_ignored_patterns=$OPTARG ;;
 		l)	_cdt_localization=true
-			cache_localization_url
+			set_localization_url
 			;;
 		n)	_cdt_nolib=true ;;
 		p)	_cdt_do_not_package=true ;;
@@ -1020,11 +1073,7 @@ copy_directory_tree() {
 					# Set the filter for @localization@ replacement.
 					_cdt_localization_filter=cat
 					if [ -n "$_cdt_localization" ]; then
-						if [ -n "$localization_url" ]; then
-							_cdt_localization_filter=localization_filter
-						else
-							_cdt_localization_filter=localization_unset_filter
-						fi
+						_cdt_localization_filter=localization_filter
 					fi
 					# Set the alpha, debug, and nolib filters for replacement based on file extension.
 					_cdt_alpha_filter=cat
@@ -1127,7 +1176,7 @@ checkout_external() {
 			git clone -q --depth 1 "$_external_uri" "$_cqe_checkout_dir"
 			if [ $? -ne 0 ]; then return 1; fi
 		elif [ "$_external_tag" != "latest" ]; then
-			echo "Fetching tag \`\`$_external_tag'' from external $_external_uri"
+			echo "Fetching tag \"$_external_tag\" from external $_external_uri"
 			git clone -q --depth 1 --branch "$_external_tag" "$_external_uri" "$_cqe_checkout_dir"
 			if [ $? -ne 0 ]; then return 1; fi
 		else # [ "$_external_tag" = "latest" ]; then
@@ -1135,7 +1184,7 @@ checkout_external() {
 			if [ $? -ne 0 ]; then return 1; fi
 			_external_tag=$( git -C "$_cqe_checkout_dir" for-each-ref refs/tags --sort=-taggerdate --format=%\(refname:short\) --count=1 )
 			if [ -n "$_external_tag" ]; then
-				echo "Fetching tag \`\`$_external_tag'' from external $_external_uri"
+				echo "Fetching tag \"$_external_tag\" from external $_external_uri"
 				git -C "$_cqe_checkout_dir" checkout -q "$_external_tag"
 			else
 				echo "Fetching latest version of external $_external_uri"
@@ -1176,7 +1225,7 @@ checkout_external() {
 				if [ -n "$_cqe_svn_subdir" ]; then
 					_cqe_external_uri="${_cqe_external_uri}/$_cqe_svn_subdir"
 				fi
-				echo "Fetching tag \`\`$_external_tag'' from external $_cqe_external_uri"
+				echo "Fetching tag \"$_external_tag\" from external $_cqe_external_uri"
 				svn checkout -q "$_cqe_external_uri" "$_cqe_checkout_dir"
 				if [ $? -ne 0 ]; then return 1; fi
 			fi
@@ -1236,7 +1285,7 @@ checkout_external() {
 				esac
 			done < "$_cqe_checkout_dir/.pkgmeta"
 		fi
-		copy_directory_tree -dlnp -i "$ignore" "$_cqe_checkout_dir" "$pkgdir/$_external_dir"
+		copy_directory_tree -dnp -i "$ignore" "$_cqe_checkout_dir" "$pkgdir/$_external_dir"
 	)
 	# Remove the ".checkout" subdirectory containing the full checkout.
 	if [ -d "$_cqe_checkout_dir" ]; then
@@ -1290,7 +1339,7 @@ process_external() {
 			checkout_external "$external_dir" "$external_uri" "$external_tag" "$external_type" &> "$output_file"
 			status=$?
 			cat "$output_file" 2>/dev/null
-			rm "$output_file" 2>/dev/null
+			rm -f "$output_file" 2>/dev/null
 			exit $status
 		) &
 		external_pids+=($!)
@@ -1407,11 +1456,9 @@ if [[ -n "$manual_changelog" && -f "$topdir/$changelog" && "$changelog_markup" =
 		| line_ending_filter \
 		> $wowi_changelog_md
 	# Convert Markdown to BBCode (with HTML as an intermediary) for sending to WoWInterface
-	# Requires either cmark (https://github.com/jgm/cmark) or pandoc (http://pandoc.org/)
+	# Requires pandoc (http://pandoc.org/)
 	_html_changelog=
-	if cmark --version &>/dev/null; then
-		_html_changelog=$( cmark -t html --nobreaks "$wowi_changelog_md" )
-	elif pandoc --version &>/dev/null; then
+	if which pandoc &>/dev/null; then
 		_html_changelog=$( pandoc -t html "$wowi_changelog_md" )
 	fi
 	if [ -n "$_html_changelog" ]; then
@@ -1440,6 +1487,13 @@ if [[ -n "$manual_changelog" && -f "$topdir/$changelog" && "$changelog_markup" =
 			-e 's/&gt;/>/g' \
 			-e "s/&#39;/'/g" \
 			| line_ending_filter > "$wowi_changelog"
+
+			# extra conversion for discount markdown
+			# -e 's/&\(ld\|rd\)quo;/"/g' \
+			# -e "s/&\(ls\|rs\)quo;/'/g" \
+			# -e 's/&ndash;/--/g' \
+			# -e 's/&hellip;/.../g' \
+			# -e 's/^[ \t]*//g' \
 	fi
 fi
 if [ ! -f "$topdir/$changelog" -a ! -f "$topdir/CHANGELOG.txt" -a ! -f "$topdir/CHANGELOG.md" ]; then
@@ -1498,7 +1552,7 @@ if [ ! -f "$topdir/$changelog" -a ! -f "$topdir/CHANGELOG.txt" -a ! -f "$topdir/
 		cat <<- EOF | line_ending_filter > "$pkgdir/$changelog"
 		# $project
 
-		## $changelog_version ($changelog_date) [](#top)
+		## $changelog_version ($changelog_date)
 		$changelog_url
 
 		EOF
@@ -1613,65 +1667,63 @@ fi
 ### Process .pkgmeta to perform move-folders actions.
 ###
 
-if [ -z "$skip_addons" ] && [ -z "$skip_externals"]; then
-	if [ -f "$topdir/.pkgmeta" ]; then
-		yaml_eof=
-		while [ -z "$yaml_eof" ]; do
-			IFS='' read -r yaml_line || yaml_eof=true
-			# Strip any trailing CR character.
-			yaml_line=${yaml_line%$carriage_return}
+if [ -f "$topdir/.pkgmeta" ]; then
+	yaml_eof=
+	while [ -z "$yaml_eof" ]; do
+		IFS='' read -r yaml_line || yaml_eof=true
+		# Strip any trailing CR character.
+		yaml_line=${yaml_line%$carriage_return}
+		case $yaml_line in
+		[!\ ]*:*)
+			# Split $yaml_line into a $yaml_key, $yaml_value pair.
+			yaml_keyvalue "$yaml_line"
+			# Set the $pkgmeta_phase for stateful processing.
+			pkgmeta_phase=$yaml_key
+			;;
+		" "*)
+			yaml_line=${yaml_line#"${yaml_line%%[! ]*}"} # trim leading whitespace
 			case $yaml_line in
-			[!\ ]*:*)
+			"- "*)
+				;;
+			*:*)
 				# Split $yaml_line into a $yaml_key, $yaml_value pair.
 				yaml_keyvalue "$yaml_line"
-				# Set the $pkgmeta_phase for stateful processing.
-				pkgmeta_phase=$yaml_key
-				;;
-			" "*)
-				yaml_line=${yaml_line#"${yaml_line%%[! ]*}"} # trim leading whitespace
-				case $yaml_line in
-				"- "*)
-					;;
-				*:*)
-					# Split $yaml_line into a $yaml_key, $yaml_value pair.
-					yaml_keyvalue "$yaml_line"
-					case $pkgmeta_phase in
-					move-folders)
-						srcdir="$releasedir/$yaml_key"
-						destdir="$releasedir/$yaml_value"
-						if [ -d "$destdir" -a -z "$overwrite" ]; then
-							rm -fr "$destdir"
+				case $pkgmeta_phase in
+				move-folders)
+					srcdir="$releasedir/$yaml_key"
+					destdir="$releasedir/$yaml_value"
+					if [ -d "$destdir" -a -z "$overwrite" ]; then
+						rm -fr "$destdir"
+					fi
+					if [ -d "$srcdir" ]; then
+						if [ ! -d "$destdir" ]; then
+							mkdir -p "$destdir"
 						fi
-						if [ -d "$srcdir" ]; then
-							if [ ! -d "$destdir" ]; then
-								mkdir -p "$destdir"
-							fi
-							echo "Moving $yaml_key to $yaml_value"
-							mv -f "$srcdir"/* "$destdir" && rm -fr "$srcdir"
-							contents="$contents $yaml_value"
-							# Copy the license into $destdir if one doesn't already exist.
-							if [ -n "$license" -a -f "$pkgdir/$license" -a ! -f "$destdir/$license" ]; then
-								cp -f "$pkgdir/$license" "$destdir/$license"
-							fi
-							# Check to see if the base source directory is empty
-							_mf_basedir=${srcdir%$(basename "$yaml_key")}
-							if [ ! "$(ls -A $_mf_basedir )" ]; then
-								echo "Removing empty directory ${_mf_basedir#$releasedir/}"
-								rm -fr "$_mf_basedir"
-							fi
+						echo "Moving $yaml_key to $yaml_value"
+						mv -f "$srcdir"/* "$destdir" && rm -fr "$srcdir"
+						contents="$contents $yaml_value"
+						# Copy the license into $destdir if one doesn't already exist.
+						if [ -n "$license" -a -f "$pkgdir/$license" -a ! -f "$destdir/$license" ]; then
+							cp -f "$pkgdir/$license" "$destdir/$license"
 						fi
-						# update external dir
-						nolib_exclude=${nolib_exclude//$srcdir/$destdir}
-						;;
-					esac
+						# Check to see if the base source directory is empty
+						_mf_basedir=${srcdir%$(basename "$yaml_key")}
+						if [ ! "$(ls -A $_mf_basedir )" ]; then
+							echo "Removing empty directory ${_mf_basedir#$releasedir/}"
+							rm -fr "$_mf_basedir"
+						fi
+					fi
+					# update external dir
+					nolib_exclude=${nolib_exclude//$srcdir/$destdir}
 					;;
 				esac
 				;;
 			esac
-		done < "$topdir/.pkgmeta"
-		if [ -n "$srcdir" ]; then
-			echo
-		fi
+			;;
+		esac
+	done < "$topdir/.pkgmeta"
+	if [ -n "$srcdir" ]; then
+		echo
 	fi
 fi
 
@@ -1745,30 +1797,23 @@ if [ -z "$skip_zipfile" ]; then
 	upload_wowinterface=$( test -z "$skip_upload" -a -n "$tag" -a -n "$addonid" -a -n "$wowi_token" && echo true )
 	upload_github=$( test -z "$skip_upload" -a -n "$tag" -a -n "$project_github_slug" -a -n "$github_token" && echo true )
 
-	# Warn about bailing because of not having jq
-	if [ -n "$upload_curseforge" -o -n "$upload_wowinterface" -o -n "$upload_github" ] && ! jq --version &>/dev/null; then
-		if [ -n "$upload_curseforge" -a -z "$game_version_id" ]; then
-			echo "Skipping upload to CurseForge. Install \`\`jq'' to allow fetching the latest version id from Curse."
-			echo
-			upload_curseforge=
-			exit_code=1
-		fi
-		if [ -n "$upload_wowinterface" -a -z "$game_version" ]; then
-			echo "Skipping upload to WoWInterface. Install \`\`jq'' to allow fetching the default version from WoWInterface."
-			echo
-			upload_wowinterface=
-			exit_code=1
-		fi
-		if [ -n "$upload_github" ]; then
-			echo "Skipping release to GitHub. Install \`\`jq'' to allow parsing responses. I'm pretty lazy." # and escaping the changelog
-			echo
-			upload_github=
-			exit_code=1
-		fi
+	if [ -n "$upload_curseforge" -o -n "$upload_wowinterface" -o -n "$upload_github" ] && ! which jq &>/dev/null; then
+		echo "Skipping upload because \"jq\" was not found."
+		echo
+		upload_curseforge=
+		upload_wowinterface=
+		upload_github=
+		exit_code=1
 	fi
 
-	if [ -n "$upload_curseforge" -a -z "$game_version_id" ]; then
-		game_version_id=$( curl -s -H "x-api-token: $cf_token" https://wow.curseforge.com/api/game/versions | jq -r 'max_by(.id) | .id' 2>/dev/null )
+	if [ -n "$upload_curseforge" ]; then
+		if [ -n "$game_version" ]; then
+			game_version_id=$( curl -s -H "x-api-token: $cf_token" https://wow.curseforge.com/api/game/versions | jq -r '.[] | select(.name == "'$game_version'") | .id' 2>/dev/null )
+		fi
+		if [ -z "$game_version_id" ]; then
+			game_version_id=$( curl -s -H "x-api-token: $cf_token" https://wow.curseforge.com/api/game/versions | jq -r 'max_by(.id) | .id' 2>/dev/null )
+			game_version=$( curl -s -H "x-api-token: $cf_token" https://wow.curseforge.com/api/game/versions | jq -r 'max_by(.id) | .name' 2>/dev/null )
+		fi
 		if [ -z "$game_version_id" ]; then
 			echo "Error fetching game version info from https://wow.curseforge.com/api/game/versions"
 			echo
@@ -1779,8 +1824,13 @@ if [ -z "$skip_zipfile" ]; then
 		fi
 	fi
 
-	if [ -n "$upload_wowinterface" -a -z "$game_version" ]; then
-		game_version=$( curl -s -H "x-api-token: $wowi_token" https://api.wowinterface.com/addons/compatible.json | jq -r '.[] | select(.default == true) | .id' 2>/dev/null )
+	if [ -n "$upload_wowinterface" ]; then
+		if [ -n "$game_version" ]; then
+			game_version=$( curl -s -H "x-api-token: $wowi_token" https://api.wowinterface.com/addons/compatible.json | jq -r '.[] | select(.id == "'$game_version'") | .id' 2>/dev/null )
+		fi
+		if [ -z "$game_version" ]; then
+			game_version=$( curl -s -H "x-api-token: $wowi_token" https://api.wowinterface.com/addons/compatible.json | jq -r '.[] | select(.default == true) | .id' 2>/dev/null )
+		fi
 		if [ -z "$game_version" ]; then
 			echo "Error fetching game version info from https://api.wowinterface.com/addons/compatible.json"
 			echo
@@ -1807,69 +1857,51 @@ if [ -z "$skip_zipfile" ]; then
 			fi
 		fi
 
-		upload_to_curseforge() {
-			cat <<- EOF > "$releasedir/cf_upload.json"
-			{
-			  "displayName": "$project_version",
-			  "gameVersions": [$game_version_id],
-			  "releaseType": "$file_type",
-			  "changelog": $( cat "$pkgdir/$changelog" | jq --slurp --raw-input '.' ),
-			  "changelogType": "markdown"
-			}
-			EOF
-
-			echo "Uploading $archive_name ($file_type/$game_version_id) to https://wow.curseforge.com/addons/$slug"
-			resultfile="$releasedir/cf_result.json"
-			result=$( curl -s \
-					-w "%{http_code}" -o "$resultfile" \
-					-H "x-api-token: $cf_token" \
-					-A "GitHub Curseforge Packager/1.1" \
-					-F "metadata=<$releasedir/cf_upload.json" \
-					-F "file=@$archive" \
-					"https://wow.curseforge.com/api/projects/$slug/upload-file" )
-			status=$?
-			if [ $status -ne 0 ]; then
-				result=$status
-			fi
-
-			case $result in
-			200) echo "Success!" ;;
-			302)
-				echo "Error!"
-				exit_code=1
-				;;
-			404)
-				echo "Error! No project for \`\`$slug'' found."
-				exit_code=1
-				;;
-			*)
-				echo "Error! ($result)"
-				if [ -s "$resultfile" ]; then
-					echo "$(<"$resultfile")"
-				fi
-				exit_code=1
-				;;
-			esac
-
-			rm "$releasedir/cf_upload.json" 2>/dev/null
-			rm "$resultfile" 2>/dev/null
-
-			return $status
+		_cf_payload=$( cat <<-EOF
+		{
+		  "displayName": "$project_version",
+		  "gameVersions": [$game_version_id],
+		  "releaseType": "$file_type",
+		  "changelog": $( cat "$pkgdir/$changelog" | jq --slurp --raw-input '.' ),
+		  "changelogType": "markdown"
 		}
+		EOF
+		)
 
-		upload_to_curseforge
-		ul_result=$?
-		for i in {1..3}; do
-			[ $ul_result -eq 0 ] && break
-			echo "Retrying in 3 seconds... "
-			sleep 3
-			upload_to_curseforge
-			ul_result=$?
-		done
-		if [ $ul_result -ne 0 ]; then
+		echo "Uploading $archive_name ($game_version $file_type) to https://wow.curseforge.com/addons/$slug"
+		resultfile="$releasedir/cf_result.json"
+		result=$( curl -sS --retry 3 --retry-delay 10 \
+				-w "%{http_code}" -o "$resultfile" \
+				-H "x-api-token: $cf_token" \
+				-F "metadata=$_cf_payload" \
+				-F "file=@$archive" \
+				"https://wow.curseforge.com/api/projects/$slug/upload-file" )
+		if [ $? -eq 0 ]; then
+			case $result in
+				200) echo "Success!" ;;
+				302)
+					echo "Error! ($result)"
+					# don't need to ouput the redirect page
+					exit_code=1
+					;;
+				404)
+					echo "Error! No project for \"$slug\" found."
+					exit_code=1
+					;;
+				*)
+					echo "Error! ($result)"
+					if [ -s "$resultfile" ]; then
+						echo "$(<"$resultfile")"
+					fi
+					exit_code=1
+					;;
+			esac
+		else
 			exit_code=1
 		fi
 		echo
+
+		rm -f "$resultfile" 2>/dev/null
 	fi
 
 	# Upload tags to WoWInterface.
@@ -1884,68 +1916,86 @@ if [ -z "$skip_zipfile" ]; then
 			_wowi_args+=("-F archive=No")
 		fi
 
-		upload_to_wowinterface() {
-			echo "Uploading $archive_name ($game_version) to https://www.wowinterface.com/downloads/info$addonid"
-			resultfile="$releasedir/wi_result.json"
-			result=$( curl -s \
-				  -w "%{http_code}" -o "$resultfile" \
-				  -H "x-api-token: $wowi_token" \
-				  -F "id=$addonid" \
-				  -F "version=$archive_version" \
-				  -F "compatible=$game_version" \
-				  "${_wowi_args[@]}" \
-				  -F "updatefile=@$archive" \
-				  "https://api.wowinterface.com/addons/update" )
-			status=$?
-			if [ $status -ne 0 ]; then
-				result=$status
-			fi
-
+		echo "Uploading $archive_name ($game_version) to https://www.wowinterface.com/downloads/info$addonid"
+		resultfile="$releasedir/wi_result.json"
+		result=$( curl -sS --retry 3 --retry-delay 10 \
+			  -w "%{http_code}" -o "$resultfile" \
+			  -H "x-api-token: $wowi_token" \
+			  -F "id=$addonid" \
+			  -F "version=$archive_version" \
+			  -F "compatible=$game_version" \
+			  "${_wowi_args[@]}" \
+			  -F "updatefile=@$archive" \
+			  "https://api.wowinterface.com/addons/update" )
+		if [ $? -eq 0 ]; then
 			case $result in
-			202)
-				echo "Success!"
-				rm "$wowi_changelog" 2>/dev/null
-				;;
-			401)
-				echo "Error! No addon for id \`\`$addonid'' found or you do not have permission to upload files."
-				exit_code=1
-				;;
-			403)
-				echo "Error! Incorrect api key or you do not have permission to upload files."
-				exit_code=1
-				;;
-			*)
-				echo "Error! ($result)"
-				if [ -s "$resultfile" ]; then
-					echo "$(<"$resultfile")"
-				fi
-				exit_code=1
-				;;
+				202)
+					echo "Success!"
+					rm -f "$wowi_changelog" 2>/dev/null
+					;;
+				401)
+					echo "Error! No addon for id \"$addonid\" found or you do not have permission to upload files."
+					exit_code=1
+					;;
+				403)
+					echo "Error! Incorrect api key or you do not have permission to upload files."
+					exit_code=1
+					;;
+				*)
+					echo "Error! ($result)"
+					if [ -s "$resultfile" ]; then
+						echo "$(<"$resultfile")"
+					fi
+					exit_code=1
+					;;
 			esac
-
-			rm "$resultfile" 2>/dev/null
-
-			return $status
-		}
-
-		upload_to_wowinterface
-		ul_result=$?
-		for i in {1..3}; do
-			[ $ul_result -eq 0 ] && break
-			echo "Retrying in 3 seconds... "
-			sleep 3
-			upload_to_wowinterface
-			ul_result=$?
-		done
-		if [ $ul_result -ne 0 ]; then
+		else
 			exit_code=1
 		fi
 		echo
+
+		rm -f "$resultfile" 2>/dev/null
 	fi
 
 	# Create a GitHub Release for tags and upload the zipfile as an asset.
 	if [ -n "$upload_github" ]; then
-		cat <<- EOF > "$releasedir/gh_upload.json"
+		upload_github_asset() {
+			_ghf_release_id=$1
+			_ghf_file_name=$2
+			_ghf_file_path=$3
+			_ghf_resultfile="$releasedir/gh_asset_result.json"
+			echo -n "Uploading $_ghf_file_name... "
+			result=$( curl -sS --retry 3 --retry-delay 10 \
+					-w "%{http_code}" -o "$_ghf_resultfile" \
+					-H "Authorization: token $github_token" \
+					-H "Content-Type: application/zip" \
+					--data-binary "@$_ghf_file_path" \
+					"https://uploads.github.com/repos/$project_github_slug/releases/$_ghf_release_id/assets?name=$_ghf_file_name" )
+			if [ $? -eq 0 ]; then
+				if [ "$result" -eq "201" ]; then
+					echo "Success!"
+				else
+					echo "Error ($result)"
+					if [ -s "$_ghf_resultfile" ]; then
+						echo "$(<"$_ghf_resultfile")"
+					fi
+					exit_code=1
+				fi
+			else
+				exit_code=1
+			fi
+
+			rm -f "$_ghf_resultfile" 2>/dev/null
+		}
+
+		# check if a release exists and delete it
+		release_id=$( curl -sS "https://api.github.com/repos/$project_github_slug/releases/tags/$tag" | jq '.id | select(. != null)' )
+		if [ -n "$release_id" ]; then
+			curl -s -H "Authorization: token $github_token" -X DELETE "https://api.github.com/repos/$project_github_slug/releases/$release_id" &>/dev/null
+			release_id=
+		fi
+
+		_gh_payload=$( cat <<-EOF
 		{
 		  "tag_name": "$tag",
 		  "target_commitish": "master",
@@ -1955,66 +2005,21 @@ if [ -z "$skip_zipfile" ]; then
 		  "prerelease": false
 		}
 		EOF
+		)
 
-		upload_github_asset() {
-			_ghf_release_id=$1
-			_ghf_file_path=$2
-			_ghf_file_name=$(basename "$_ghf_file_path")
-			_ghf_resultfile="$releasedir/gh_asset_result.json"
-			echo -n "Uploading $_ghf_file_name... "
-			result=$( curl -s \
-					-w "%{http_code}" -o "$_ghf_resultfile" \
-					-H "Authorization: token $github_token" \
-					-H "Content-Type: application/zip" \
-					--data-binary "@$_ghf_file_path" \
-					"https://uploads.github.com/repos/$project_github_slug/releases/$_ghf_release_id/assets?name=$_ghf_file_name" )
-			status=$?
-			if [ $status -ne 0 ]; then
-				result=$status
-			fi
-			if [ "$result" -eq "201" ]; then
-				echo "Success!"
-			else
-				echo "Error ($result)"
-				if [ -s "$_ghf_resultfile" ]; then
-					echo "$(<"$_ghf_resultfile")"
-				fi
-				exit_code=1
-			fi
-
-			rm "$_ghf_resultfile" 2>/dev/null
-
-			return $status
-		}
-
-		upload_to_github() {
-			resultfile="$releasedir/gh_result.json"
-			# check if a release exists and delete it
-			release_id=$( curl -s "https://api.github.com/repos/$project_github_slug/releases/tags/$tag" | jq '.id | select(. != null)' )
-			if [ -n "$release_id" ]; then
-				curl -s -H "Authorization: token $github_token" -X DELETE "https://api.github.com/repos/$project_github_slug/releases/$release_id" &>/dev/null
-				# possible responses: 204 = success, 401 = bad token, 404 = no token or invalid id (wtf)
-				# whatever, we'll display token errors when creating
-				release_id=
-			fi
-
-			echo "Creating GitHub release: https://github.com/$project_github_slug/releases/tag/$tag"
-			result=$( curl -s \
-				  -w "%{http_code}" -o "$resultfile" \
-				  -H "Authorization: token $github_token" \
-				  -d "@$releasedir/gh_upload.json" \
-				  "https://api.github.com/repos/$project_github_slug/releases" )
-			status=$?
-			if [ $status -ne 0 ]; then
-				result=$status
-			fi
-			if [ "$result" -eq "201" ]; then
+		echo "Creating GitHub release: https://github.com/$project_github_slug/releases/tag/$tag"
+		resultfile="$releasedir/gh_result.json"
+		result=$( curl -sS --retry 3 --retry-delay 10 \
+				-w "%{http_code}" -o "$resultfile" \
+				-H "Authorization: token $github_token" \
+				-d "$_gh_payload" \
+				"https://api.github.com/repos/$project_github_slug/releases" )
+		if [ $? -eq 0 ]; then
+			if [ "$result" = "201" ]; then
 				release_id=$( cat "$resultfile" | jq '.id' )
-				upload_github_asset $release_id "$archive"
-				result=$?
+				upload_github_asset "$release_id" "$archive_name" "$archive"
 				if [ -f "$nolib_archive" ]; then
-					upload_github_asset $release_id "$nolib_archive"
-					result=$?
+					upload_github_asset "$release_id" "$nolib_archive_name" "$nolib_archive"
 				fi
 			else
 				echo "Error! ($result)"
@@ -2023,27 +2028,12 @@ if [ -z "$skip_zipfile" ]; then
 				fi
 				exit_code=1
 			fi
-
-			rm "$resultfile" 2>/dev/null
-
-			return $status
-		}
-
-		upload_to_github
-		ul_result=$?
-		for i in {1..3}; do
-			[ $ul_result -eq 0 ] && break
-			echo "Retrying in 3 seconds... "
-			sleep 3
-			upload_to_github
-			ul_result=$?
-		done
-		if [ $ul_result -ne 0 ]; then
+		else
 			exit_code=1
 		fi
 		echo
 
-		rm "$releasedir/gh_upload.json" 2>/dev/null
+		rm -f "$resultfile" 2>/dev/null
 	fi
 fi
 
