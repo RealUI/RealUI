@@ -1793,7 +1793,8 @@ if [ -z "$skip_zipfile" ]; then
 	### Deploy the zipfile.
 	###
 
-	upload_curseforge=$( test -z "$skip_upload" -a -n "$slug" -a -n "$cf_token" && echo true )
+	upload_curseforge=
+	#$( test -z "$skip_upload" -a -n "$slug" -a -n "$cf_token" && echo true )
 	upload_wowinterface=$( test -z "$skip_upload" -a -n "$tag" -a -n "$addonid" -a -n "$wowi_token" && echo true )
 	upload_github=$( test -z "$skip_upload" -a -n "$tag" -a -n "$project_github_slug" -a -n "$github_token" && echo true )
 
