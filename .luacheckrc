@@ -10,6 +10,7 @@ include_files = {
 
 exclude_files = {
     "Interface/AddOns/**/Libs/**",
+    "Interface/AddOns/**/Locale/**",
     "**/*.blp",
     "**/*.BLP",
     "**/*.ttf",

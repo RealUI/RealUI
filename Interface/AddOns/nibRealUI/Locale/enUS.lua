@@ -1,8 +1,5 @@
 local _, private = ...
 
--- Lua Globals --
-local _G = _G
-
 -- RealUI --
 local RealUI = private.RealUI
 local L = {}
@@ -186,4 +183,5 @@ L["UnitFrames_SetFocus"] = "Click to set Focus"
 L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
 L["Version"] = "Version"
+
 RealUI.L = L

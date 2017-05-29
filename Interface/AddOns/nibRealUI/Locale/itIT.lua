@@ -6,6 +6,5 @@ local L = RealUI.L
 
 if RealUI.locale == "itIT" then
 
-L["Appearance_WinOpacity"] = "Opacità"
-L["Version"] = "Versione"
+--@localization(locale="itIT", format="lua_additive_table", handle-unlocalized="comment")@
 end

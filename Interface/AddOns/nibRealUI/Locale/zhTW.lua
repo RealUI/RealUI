@@ -6,5 +6,5 @@ local L = RealUI.L
 
 if RealUI.locale == "zhTW" then
 
-L["Version"] = "版"
+--@localization(locale="zhTW", format="lua_additive_table", handle-unlocalized="comment")@
 end
