@@ -161,10 +161,11 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     dragBG:SetColorTexture(1, 1, 1, 0.5)
     dragBG:Hide()
 
-    function ClassPower.PostUpdate(element, cur, max, mod, hasMaxChanged, powerType)
-        self:debug("ClassPower:PostUpdate", cur, max, mod, hasMaxChanged, powerType)
+    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
+        self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
         for i = 1, max or 0 do -- max is nil for classes without a secondary power
-            local icon, isUnused = element[i], i > _G.ceil(cur / mod)
+            local icon, isUnused = element[i], i > cur
+            self:debug("Icon", i, isUnused)
             if isUnused then
                 if not pointDB.hideempty or self.configMode then
                     icon:Show()
@@ -278,7 +279,9 @@ function ClassResource:CreateStagger(unitFrame, unit)
         LibWin.OnDragStop(...)
     end)
 
-    function Stagger.PostUpdate(element, cur, max, r, g, b)
+    function Stagger.PostUpdate(element, cur, max)
+        local r, g, b = element:GetStatusBarColor()
+        self:debug("Stagger:PostUpdate", cur, max, r, g, b)
         if self.configMode then
             cur = max * 0.3
             element:SetValue(cur)

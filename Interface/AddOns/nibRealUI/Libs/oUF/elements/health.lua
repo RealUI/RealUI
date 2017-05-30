@@ -213,6 +213,8 @@ local function Enable(self, unit)
 			element.UpdateColor = UpdateColor
 		end
 
+		element:Show()
+
 		return true
 	end
 end
