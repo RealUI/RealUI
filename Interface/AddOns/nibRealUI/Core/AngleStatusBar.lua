@@ -228,6 +228,8 @@ function AngleFrameMixin:SetBackgroundColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
+    local color = bars[self].bgColor
+    color.r, color.g, color.b, color.a = r, g, b, a
     self.bg:SetColorTexture(r, g, b, a)
 end
 function AngleFrameMixin:GetBackgroundColor()
@@ -237,13 +239,16 @@ function AngleFrameMixin:SetBackgroundBorderColor(r, g, b, a)
     if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
+    local color = bars[self].borderColor
+    color.r, color.g, color.b, color.a = r, g, b, a
     self.top:SetColorTexture(r, g, b, a)
     self.bottom:SetColorTexture(r, g, b, a)
     self.left:SetColorTexture(r, g, b, a)
     self.right:SetColorTexture(r, g, b, a)
 end
 function AngleFrameMixin:GetBackgroundBorderColor()
-    return self.top:GetColorTexture()
+    local color = bars[self].bgColor
+    return color.r, color.g, color.b, color.a
 end
 
 local AngleStatusBarMixin = _G.Mixin({}, BaseAngleMixin)
@@ -252,14 +257,18 @@ function AngleStatusBarMixin:SetStatusBarColor(r, g, b, a)
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
 
-    if not bars[self].texture or bars[self].texture == "" then
+    local meta = bars[self]
+    local color = meta.fillColor
+    color.r, color.g, color.b, color.a = r, g, b, a
+    if not meta.texture or meta.texture == "" then
         self.fill:SetColorTexture(r, g, b, a)
     else
         self.fill:SetVertexColor(r, g, b, a)
     end
 end
 function AngleStatusBarMixin:GetStatusBarColor()
-    return self.fill:GetColorTexture()
+    local color = bars[self].fillColor
+    return color.r, color.g, color.b, color.a
 end
 
 function AngleStatusBarMixin:SetStatusBarTexture(texture, layer)
@@ -447,6 +456,8 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
         bars[frame] = {
             regions = {},
             children = {},
+            bgColor = {},
+            borderColor = {},
             minWidth = 0,
             maxWidth = 0,
             leftVertex = 1,
@@ -469,6 +480,9 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
         bars[bar] = {
             regions = {},
             children = {},
+            fillColor = {},
+            bgColor = {},
+            borderColor = {},
             minWidth = 0,
             maxWidth = 0,
             leftVertex = 1,
