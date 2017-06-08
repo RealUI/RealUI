@@ -157,7 +157,7 @@ local function PostCastStart(self, unit, name, castID, spellID)
         local color = db.colors.uninterruptible
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     else
-        local color = db.colors[unit]
+        local color = db.colors[unit] or db.colors.player -- unit could be a vehicle
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     end
 
