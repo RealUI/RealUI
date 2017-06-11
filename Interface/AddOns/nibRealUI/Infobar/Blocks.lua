@@ -633,11 +633,45 @@ function Infobar:CreateBlocks()
             },
         }
 
+        local errors
+        function startMenu:BugGrabber_BugGrabbed(callback, errorObject)
+            --[[errorObject = {
+                message = sanitizedMessage,
+                stack = table.concat(tmp, "\n"),
+                locals = inCombat and "" or debuglocals(3),
+                session = addon:GetSessionId(),
+                time = date("%Y/%m/%d %H:%M:%S"),
+                counter = 1,
+            }]]
+
+            if not self.dataObj.value then
+                _G.tinsert(menuList, 3, {
+                    text = _G.SHOW_LUA_ERRORS,
+                    func = function() _G.RealUI_ErrorFrame:ShowError() end,
+                    notCheckable = true,
+                })
+                self.dataObj.icon = fa["bug"]
+                self.dataObj.iconR, self.dataObj.iconG, self.dataObj.iconB = 0.75, 0.15, 0.15
+            end
+
+            self.dataObj.value = #errors
+        end
+        _G.BugGrabber.RegisterCallback(startMenu, "BugGrabber_BugGrabbed")
+
         LDB:NewDataObject("start", {
             name = L["Start"],
             type = "RealUI",
             icon = fa["bars"],
             iconFont = iconFont,
+            OnEnable = function(block)
+                startMenu.block = block
+                startMenu.dataObj = block.dataObj
+
+                errors = _G.BugGrabber:GetDB()
+                if #errors > 0 then
+                    startMenu:BugGrabber_BugGrabbed("OnEnable", errors[#errors])
+                end
+            end,
             OnEnter = function(block, ...)
                 Infobar:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
