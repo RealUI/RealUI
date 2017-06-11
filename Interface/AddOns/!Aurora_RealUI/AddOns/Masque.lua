@@ -1,15 +1,15 @@
 local _, mods = ...
 
 mods["Masque"] = function(F, C)
-    local Button = _G.ExtraActionButton1
-    Button:SetNormalTexture("")
+    local EAB = _G.ExtraActionButton1
+    EAB:SetNormalTexture("")
 
     local MSQ = _G.LibStub("Masque")
     MSQ:AddSkin("RealUI", {
         Author = "Nibelheim",
-        Version = "8.1",
+        Version = "8.1 r20",
         Shape = "Square",
-        Masque_Version = 60201,
+        Masque_Version = 70200,
         Backdrop = {
             Width = 32,
             Height = 32,
@@ -18,7 +18,7 @@ mods["Masque"] = function(F, C)
         Icon = {
             Width = 26,
             Height = 26,
-            TexCoords = {0.1, 0.9, 0.1, 0.9},
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
         },
         Flash = {
             Width = 32,
@@ -82,28 +82,28 @@ mods["Masque"] = function(F, C)
             Texture = [[Interface\AddOns\nibRealUI\Media\Masque\Highlight]],
         },
         Name = {
-            Width = 32,
+            Width = 26,
             Height = 10,
             OffsetX = 5.5,
             OffsetY = 4.5,
             JustifyH = "LEFT",
         },
         Count = {
-            Width = 32,
+            Width = 26,
             Height = 10,
             JustifyH = "RIGHT",
             OffsetX = -3.5,
             OffsetY = 5.5,
         },
         HotKey = {
-            Width = 32,
+            Width = 26,
             Height = 10,
             OffsetX = 6.5,
             OffsetY = -5.5,
             JustifyH = "LEFT",
         },
         Duration = {
-            Width = 32,
+            Width = 26,
             Height = 10,
             OffsetY = -2,
         },
